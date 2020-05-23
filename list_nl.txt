@@ -1,0 +1,3 @@
+kamer_te_huur=Kamer te huur
+ken_ik_jou=Ken ik jou
+kun_je_praten=Kun je praten

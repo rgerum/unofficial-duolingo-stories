@@ -1,0 +1,79 @@
+title=Kun je praten
+language=nl
+
+> Verteller: Fenne rust uit op de bank, terwijl haar hondje Pompey slaapt.
+
+> Verteller: Fenne is moe want ze heeft de hele dag naar de problemen van haar cliënten geluisterd.
+
+> Fenne: Pompey, het is fijn om thuis te zijn.
+
+[finish] Pompey: Ja, we moeten * praten.
+Choose the best option.
+- ooit
++ eens
+- zachtjes
+
+> Fenne: Waarover?
+
+> Fenne: Wacht, kun je praten?!
+
+[finish] Verteller: Fenne kan niet geloven dat *
+- Pompey haar eten brengt.
+- Pompey de radio aanzet.
++ Pompey kan praten.
+
+> Pompey: Er moeten wat dingen veranderen hier.
+
+> Fenne: Wat?
+
+> Pompey: Als eerste, laten we het over het eten hebben.
+
+> Fenne: Over het eten?
+
+> Pompey: Ik ben het hondenvoer zat. Ik heb liever biefstuk!
+
+[choice] What does ‘Ik ben het zat’ mean?
+- He doesn’t like that Fenne makes him sit down to eat.
++ He is fed up with it and wants to eat something else.
+- He always eats enough of it to feel full.
+
+> Pompey: Ja! Je moet meer biefstuk kopen.
+
+> Fenne: Pompey, waar heb je het over?
+
+> Pompey: Dank je wel voor mijn nieuwe (honden)mand.
+
+> Pompey: Maar ik wil ook af en toe op jouw bed slapen!
+
+[choice] Pompey wants to always sleep on Fenne’s bed
+- Yes, that’s true.
++ No, that’s not true.
+
+> Pompey: Doordeweeks slaap ik op jouw bed.
+
+> Pompey: En aan het einde van de week wisselen we.
+
+> Fenne: Ik wil niet in jouw (honden)mand slapen!
+
+[order] Pompey:
+Put the words in the right order:
+Slaap/je/liever/buiten
+
+> Fenne: Wat?
+
+> Verteller: Fenne wordt bezorgd wakker, maar Pompey ligt te slapen op de vloer. Ze glimlacht.
+
+> Fenne: Blijkbaar heb ik vreemde dromen door mijn werk.
+
+[choice] Why did Fenne smile?
+- Because Pompey sits down and waits for his food.
+- Because Pompey has changed her interior.
++ Because she realized it was just a dream.
+
+[pairs] Put the right words together:
+smiles - glimlacht
+about what - waarover
+because - want
+dog bed - (honden)mand
+during the week - doordeweeks
+is sleeping - ligt te slapen

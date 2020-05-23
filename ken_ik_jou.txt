@@ -1,0 +1,92 @@
+title=Ken ik jou
+language=nl
+
+> Verteller: Stefan komt terug van school met de bus.
+
+> Verteller: Een meisje dat hij niet kent, komt naast hem zitten.
+
+> Lieke: Hoi Stefan!
+
+[finish] Stefan: Eeuuh … * mijn naam?
+Select the missing sentence
+- Hoe herken je
+- Hoe luister je naar
++ Hoe weet je
+
+> Lieke: Ik heet Lieke.
+
+> Lieke: En ik weet veel dingen.
+
+> Lieke: Ik weet bijvoorbeeld dat je lievelingskleur blauw is.
+
+> Stefan: Hoe weet je dat?
+
+[order] Lieke:
+Put the words in the right order:
+En/je/houdt/van/actiefilms
+
+> Stefan: Ja, maar…
+
+> Lieke: Hoe gaat het met Milou?
+
+> Stefan: Wie heeft je gezegd Hoe mijn hond heet?
+
+[finish] Lieke: Je lievelingsgerecht is *
+Choose the fitting word(s):
+- Your friend (je vriend)
+- Books (boeken)
++ Beef with fries (Biefstuk met friet)
+
+> Stefan: Hoe weet je dit allemaal?
+
+> Stefan: En waarom beantwoord je mijn vragen niet?
+
+> Lieke: Dat is moeilijk om uit te leggen.
+
+> Lieke: Ah, hier is je bushalte.
+
+[choice] What is the meaning of “bushalte”?:
+- A place on the bus (Een plek in de bus)
+- A parking spot in the city (Een parkeerplaats in de stad)
++ A place where you get off the bus (Een plaats waar je van de bus stapt)
+
+> Lieke: Je moeder wacht op je.
+
+> Lieke: Zie je later!
+
+> Verteller: Stefan stapt uit de bus en praat met zijn moeder over het meisje.
+
+[finish] Mama: Lieke is de naam van je denkbeeldige vriend *
+Which suits the gap best?:
+- When you’re older (Toen je ouder was)
++ When you were little (Toen je klein was)
+- When you were adult (Toen je volwassen was)
+
+> Mama: Ze heeft nooit bestaan…
+
+> Stefan: Jawel, die meid bestaat!
+
+> Stefan: Ze zat naast me!
+
+[choice] Select the option that means the opposite of standing:
+- Ze
++ Zat
+- Naast
+- Me
+
+> Mama: Ik heb je zien zitten in de bus.
+
+> Mama: Er zat helemaal niemand naast je.
+
+[choice] Why didn’t Stefan’s mother see Lily?
++ Because Lily isn’t a real person (Omdat Lily geen echte persoon is)
+- Because she needs glasses (Omdat ze een bril nodig heeft)
+- Because Lily is famous (Omdat Lily beroemd is)
+
+[pairs] Put the right words together by connecting the right numbers:
+city - stad
+glasses - bril
+from - van
+nobody - niemand
+much - veel
+adult - volwassen
