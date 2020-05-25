@@ -24,11 +24,11 @@ language=nl
 
 > Aafke: Heb je een nieuwe vriend?
 
-[finish] Lonneke: Ja, *
+[fill] Lonneke: Ja, *.
 Choose the best answer:
-- sinds twee maand.
-- vanaf een maand.
-+ sinds een maand.
+- sinds twee maand
+- vanaf een maand
++ sinds een maand
 
 
 > Aafke: Wat fijn voor je!

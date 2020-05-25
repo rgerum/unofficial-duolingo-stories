@@ -10,7 +10,9 @@
 
     <link rel="stylesheet" href="css/story.css"></link>
 
-    <script src="https://pagecdn.io/lib/ace/1.4.5/ace.js" integrity="sha256-5Xkhn3k/1rbXB+Q/DX/2RuAtaB4dRRyQvMs83prFjpM=" crossorigin="anonymous"></script>
+    <script src="https://ajaxorg.github.io/ace-builds/src/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://ajaxorg.github.io/ace-builds/src/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/custom_mode.js" type="text/javascript" charset="utf-8"></script>
 
     <style type="text/css" media="screen">
         #editor {
@@ -20,34 +22,19 @@
             bottom: 0;
             left: 0;
         }
+        body {
+            padding: 0;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
-<div style="display: grid; grid-template-columns: auto auto;">
-    <div style="width: 50%">
+<div style="display: grid; grid-template-columns: 50% 50%;">
+    <div>
     <div id="editor" contenteditable="" style="width: 50%" >
-title=Kamer te huur
-language=nl
-
-> Verteller: Aafke huurt dit weekend een kamer bij Lonneke. Ze klopt op de deur.
-
-> Aafke: Hallo, ik ben Aafke.
-
-> Lonneke: Ik ben Lonneke. Kom binnen.
-
-[choice] Aafke is in Lonnekes huis om…/Aafke is at Lonneke’s house to…
-+ rent a room for the weekend.
-- sell a painting of a room.
-- tell Lonneke she had to knock on the door because the doorbell isn’t working.
-
-> Aafke: Oh, dit is een heel mooie kamer!
-
-> Lonneke: Bedankt. Ik verhuur hem vaak.
-
-> Lonneke: Maar goed, dat kan veranderen.
     </div>
     </div>
-    <div style="background: white">
+    <div style="background: white; height: 100vh; overflow: scroll;">
     <div id="header" style="display: none">
         <div id="progress"><span id="progress_inside"></span></div>
     </div>
@@ -57,16 +44,37 @@ language=nl
 
         </div>
     </div>
-    <div id="footer" style="display: none">
-        <div id="button_next" class="button" onclick="addNext();">continue</div>
+    <div id="footer" style="left: 50vw; right: 0px; width: 50%">
+        <div id="button_next" style="display: none" class="button" onclick="addNext();">continue</div>
+        <div id="button_reload" class="button" onclick="updateStoryDisplay();">update</div>
     </div>
     </div>
 </div>
+
 <script>
-let editorE = document.getElementById("editor");
-var editor = ace.edit("editor");
-editor.setTheme("ace/theme/monokai");
-editor.session.setMode("ace/mode/javascript");
+    var langTools = ace.require("ace/ext/language_tools");
+    var editor = ace.edit("editor");
+
+    editor.session.setMode("ace/mode/javascript-custom");
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true
+    });
+    editor.setTheme("ace/theme/dracula");
+
+    var myCompleter = {
+        getCompletions: function(editor, session, pos, prefix, callback) {
+            var wordList = ["gh"];
+            callback(null, wordList.map(function(word) {
+                return {
+                    caption: word,
+                    value: word
+                };
+            }));
+        }
+    };
+    langTools.addCompleter(myCompleter);
+
 editor.session.setUseWrapMode(true);
 editor.resize();
 
@@ -78,6 +86,14 @@ editor.commands.addCommand({
     },
     readOnly: true // false if this command should not apply in readOnly mode
 });
+
+async function loadStory(name) {
+    let response = await fetch(name+".txt");
+    let story = await response.text();
+    editor.setValue(story);
+    updateStoryDisplay();
+}
+loadStory("kamer_te_huur")
 
 
 let story = undefined;

@@ -3,11 +3,14 @@ language=nl
 
 > Verteller: Stefan komt terug van school met de bus.
 
+[click] Select the option that means the opposite of standing:
+Stefan: [Ze] [+zat] [naast] [me]!
+
 > Verteller: Een meisje dat hij niet kent, komt naast hem zitten.
 
 > Lieke: Hoi Stefan!
 
-[finish] Stefan: Eeuuh … * mijn naam?
+[fill] Stefan: Eeuuh … * mijn naam?
 Select the missing sentence
 - Hoe herken je
 - Hoe luister je naar
@@ -31,7 +34,7 @@ En/je/houdt/van/actiefilms
 
 > Stefan: Wie heeft je gezegd Hoe mijn hond heet?
 
-[finish] Lieke: Je lievelingsgerecht is *
+[fill] Lieke: Je lievelingsgerecht is *
 Choose the fitting word(s):
 - Your friend (je vriend)
 - Books (boeken)
@@ -56,7 +59,7 @@ Choose the fitting word(s):
 
 > Verteller: Stefan stapt uit de bus en praat met zijn moeder over het meisje.
 
-[finish] Mama: Lieke is de naam van je denkbeeldige vriend *
+[fill] Mama: Lieke is de naam van je denkbeeldige vriend *
 Which suits the gap best?:
 - When you’re older (Toen je ouder was)
 + When you were little (Toen je klein was)
@@ -68,7 +71,8 @@ Which suits the gap best?:
 
 > Stefan: Ze zat naast me!
 
-[choice] Select the option that means the opposite of standing:
+[click] Select the option that means the opposite of standing:
+Stefan: [Ze] [+zat] [naast] [me]!
 - Ze
 + Zat
 - Naast

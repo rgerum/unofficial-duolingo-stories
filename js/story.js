@@ -33,7 +33,7 @@ function processStoryFile() {
             if (line[0] == "choice") {
                 phrases.push({tag: line[0], question: line[1], answers: [], solution: 0});
             }
-            if (line[0] == "finish") {
+            if (line[0] == "fill") {
                 let line2 = line[1].split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
                 phrases.push({tag: line[0], question: "", speaker: line2[0], text: line2[1], answers: [], solution: 0});
             }
@@ -57,7 +57,7 @@ function processStoryFile() {
                 phrases[phrases.length - 1].answers.push(line[2]);
                 continue;
             }
-            if (phrases[phrases.length - 1].tag === "finish") {
+            if (phrases[phrases.length - 1].tag === "fill") {
                 line = line.split(/\s*([+-])\s*(.+)\s*/);
                 if (line.length == 1)
                     phrases[phrases.length - 1].question = line[0];
@@ -327,7 +327,7 @@ function addNext() {
         addSpeach(phrases[index]);
     if(phrases[index].tag === "choice")
         addMultipleChoice(phrases[index]);
-    if(phrases[index].tag === "finish")
+    if(phrases[index].tag === "fill")
         addFinishMultipleChoice(phrases[index]);
     if(phrases[index].tag === "order")
         addOrder(phrases[index]);
