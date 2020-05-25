@@ -25,7 +25,9 @@
 </div>
 <script>
 
-
+const urlParams = new URLSearchParams(window.location.search);
+const myParam = urlParams.get('myParam');
+loadStory(urlParams.get('story'))
 </script>
 </body>
 </html>

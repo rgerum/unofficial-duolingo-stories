@@ -7,18 +7,16 @@ async function loadStory(name) {
     addTitle();
 //    addNext();
 }
-const urlParams = new URLSearchParams(window.location.search);
-const myParam = urlParams.get('myParam');
-loadStory(urlParams.get('story'))
-
 
 function setProgress(i) {
     document.getElementById("progress_inside").style.width = i+"%";
 }
 
-let phrases = [];
-let story_properties = {title: "", language: ""}
+let phrases = undefined;
+let story_properties = undefined;
 function processStoryFile() {
+    phrases = [];
+    story_properties = {title: "", language: ""}
     for (let line of story.split("\n")) {
         line = line.trim();
         if (line.length == 0)
