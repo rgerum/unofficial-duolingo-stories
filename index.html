@@ -36,6 +36,7 @@
             background: #0071c8;
             color: white;
             border-radius: 15px;
+            border: 1px solid #005fa7;
             box-shadow: #005fa7 0 6px;
             cursor: pointer;
             box-sizing: border-box;
@@ -258,31 +259,25 @@
 </div>
 <script>
 list = [];
-async function loadStory(name) {
-    let response = await fetch(name+".txt");
+async function loadStory(lang, lang_base) {
+    let response = await fetch(`http://www.renderclonks.de/files/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
     if(response.status != 200)
         return
-    let data = await response.text();
-    for(let line of data.split("\n")) {
-        line = line.trim();
-        if(line === "")
-            continue;
-        list.push(line.split("="));
-    }
-    d3.select("#list").selectAll("div").data(list).enter().append("div")
+    let data = await response.json();
+    d3.select("#list").selectAll("div").data(data).enter().append("div")
         .style("width", "150px")
         .each(function (d) {
             d3.select(this).append("a")
                 .attr("class", "button_story")
-                .attr("href", "story.html?story="+d[0]);
+                .attr("href", "story.html?story="+d.id);
             d3.select(this).append("div")
                 .attr("class", "story_title")
-                .text(d[1])
+                .text(d.name_base)
         })
 
 }
 const urlParams = new URLSearchParams(window.location.search);
-loadStory("list_"+urlParams.get('lang'));
+loadStory(urlParams.get('lang'), urlParams.get('lang_base') || "en");
 </script>
 </body>
 </html>

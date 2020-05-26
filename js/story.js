@@ -1,7 +1,9 @@
 story = undefined;
 async function loadStory(name) {
-    let response = await fetch(name+".txt");
-    story = await response.text();
+    //let response = await fetch(name+".txt");
+    let response = await fetch(`http://www.renderclonks.de/files/stories/backend/stories/get_story.php?id=${name}`);
+    let data = await response.json();
+    story = data[0]["text"];
     document.getElementById("button_next").dataset.status = "active";
     processStoryFile();
     addTitle();
