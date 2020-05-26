@@ -3,8 +3,8 @@ language=nl
 
 > Verteller: Stefan komt terug van school met de bus.
 
-[click] Select the option that means the opposite of standing:
-Stefan: [Ze] [+zat] [naast] [me]!
+#[click] Select the option that means the opposite of standing:
+#Stefan: [Ze] [+zat] [naast] [me]!
 
 > Verteller: Een meisje dat hij niet kent, komt naast hem zitten.
 
@@ -71,8 +71,7 @@ Which suits the gap best?:
 
 > Stefan: Ze zat naast me!
 
-[click] Select the option that means the opposite of standing:
-Stefan: [Ze] [+zat] [naast] [me]!
+[choce] Select the option that means the opposite of standing:
 - Ze
 + Zat
 - Naast

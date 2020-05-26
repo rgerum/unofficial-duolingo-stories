@@ -19,7 +19,7 @@ function processStoryFile() {
     story_properties = {title: "", language: ""}
     for (let line of story.split("\n")) {
         line = line.trim();
-        if (line.length == 0)
+        if (line.length == 0 || line.substr(0, 1) == "#")
             continue;
         if (line.substr(0, 1) == ">") {
             line = line.substr(1);

@@ -29,6 +29,32 @@
             font-weight: bold;
             font-size: 1.2em;
         }
+        .button_story {
+            width: 100px;
+            height: 100px;
+            display: inline-block;
+            background: #0071c8;
+            color: white;
+            border-radius: 15px;
+            box-shadow: #005fa7 0 6px;
+            cursor: pointer;
+            box-sizing: border-box;
+            margin: 0 25px;
+        }
+        .button_story:hover {
+            filter: brightness(1.2);
+            /*transform: translate(0, 5px);
+            box-shadow: #58a700 0 0px;*/
+        }
+        .story_title {
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            width: 150px;
+            font-size: 1.2em;
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
         .button {
             text-transform: uppercase;
             padding: 12px 30px;
@@ -223,6 +249,9 @@
 
 <div id="main">
     <h1>Stories</h1>
+    <div id="list" style="display: grid; grid-template-columns: auto auto auto;">
+
+    </div>
     <ul>
 
     </ul>
@@ -240,9 +269,15 @@ async function loadStory(name) {
             continue;
         list.push(line.split("="));
     }
-    d3.select("#main ul").selectAll("li").data(list).enter().append("li")
+    d3.select("#list").selectAll("div").data(list).enter().append("div")
+        .style("width", "150px")
         .each(function (d) {
-            d3.select(this).append("a").text(d[1]).attr("href", "story.html?story="+d[0]);
+            d3.select(this).append("a")
+                .attr("class", "button_story")
+                .attr("href", "story.html?story="+d[0]);
+            d3.select(this).append("div")
+                .attr("class", "story_title")
+                .text(d[1])
         })
 
 }
