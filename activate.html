@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Duolingo - Unofficial stories</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="js/login.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            position: relative;
+        }
+        #main {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .speaker {
+            font-weight: bold;
+        }
+        .speaker::after {
+            content: ": ";
+        }
+        .text {
+
+        }
+        .title {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .button_story {
+            width: 100px;
+            height: 100px;
+            display: inline-block;
+            background: #0071c8;
+            color: white;
+            border-radius: 15px;
+            border: 1px solid #005fa7;
+            box-shadow: #005fa7 0 6px;
+            cursor: pointer;
+            box-sizing: border-box;
+            margin: 0 25px;
+        }
+        .button_story:hover {
+            filter: brightness(1.2);
+            /*transform: translate(0, 5px);
+            box-shadow: #58a700 0 0px;*/
+        }
+        .story_title {
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            width: 150px;
+            font-size: 1.2em;
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
+        .button {
+            text-transform: uppercase;
+            padding: 12px 30px;
+            float: right;
+            display: inline-block;
+            background: #78c800;
+            color: white;
+            border-radius: 15px;
+            box-shadow: #58a700 0 5px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+        }
+        .button:hover[data-status="active"] {
+            filter: brightness(1.2);
+            /*transform: translate(0, 5px);
+            box-shadow: #58a700 0 0px;*/
+        }
+        .button[data-status="inactive"] {
+            background: #a3a3a3;
+            transform: translate(0, 5px);
+            box-shadow: #575757 0 0px;
+            color: #575757;
+            cursor: default;
+        }
+        #progress {
+            z-index: 5;
+            background: lightgray;
+            border-radius: 5px;
+            width: 100%;
+            height: 10px;
+            padding: 0;
+        }
+        #progress span {
+            display: block;
+            width: 0%;
+            height: 100%;
+            background: #78c800;;
+            border-radius: 5px;
+        }
+
+        .question {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .answer {
+            position: relative;
+            cursor: pointer;
+        }
+        .checkbox {
+            display: inline-block;
+            border-radius: 5px;
+            width: 30px;
+            height: 30px;
+            border: 1px solid lightgray;
+            box-shadow: 0 3px lightgray;
+            font-size: 1.2em;
+            text-align: center;
+            font-weight: bold;
+        }
+        .checkbox[data-status="right"] {
+            background: #d7feb9;
+            border-color: #ade756;
+            box-shadow: 0 3px #ade756;
+            color: #7da13c;
+        }
+        .checkbox[data-status="false"] {
+            background: #feb9b9;
+            border-color: #e7565b;
+            box-shadow: 0 3px #e75662;
+            color: #a13c3c;
+        }
+        .answer_text {
+            display: inline-block;
+            width: calc(100% - 50px);
+            padding: 5px;
+        }
+        .clickword {
+            background: #fff;
+            display: inline-block;
+            border-radius: 10px;
+            border: 1px solid lightgray;
+            box-shadow: 0 3px lightgray;
+            text-align: center;
+            padding: 8px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .clickword[data-status="empty"] {
+            background: lightgray;
+            color: lightgray;
+            cursor: default;
+        }
+        .clickword[data-status="selected"] {
+            background: #ddf4ff;
+            border-color: #84d8ff;
+            color: #1cb0f6;
+            box-shadow: 0 3px #84d8ff;
+        }
+        .clickword:hover[data-status="unselected"] {
+            filter:brightness(0.9);
+        }
+        .clickword:hover[data-status="selected"] {
+            background: #a4dffb;
+            border-color: #3ebbf6;
+            color: #00aff9;
+            box-shadow: 0 3px #3ebbf6;
+        }
+        .clickword[data-status="inactive"] {
+            opacity: 0.5;
+        }
+        #header {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 30px;
+            background: white;
+            padding: 30px 30px;
+            box-sizing: border-box;
+        }
+        #story {
+            padding-top: 40px;
+            padding-bottom: 100px;
+        }
+        #footer {
+            border-top: 1px solid gray;
+            position: fixed;
+            background: white;
+            z-index: 10;
+            bottom: 0px;
+            left: 0;
+            height: 100px;
+            padding: 30px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Tooltip container */
+        .tooltip {
+            position: relative;
+            border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+        }
+        .word::after {
+            content: " ";
+            border-bottom: none;
+        }
+
+        /* Tooltip text */
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            padding: 5px 0;
+            border-radius: 6px;
+
+            /* Position the tooltip text */
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+
+            /* Fade in tooltip */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Tooltip arrow */
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+        /* Show the tooltip text when you mouse over the tooltip container */
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div id="main">
+    <h1>Activate account</h1>
+    <div id="status">activating account</div>
+
+    <div id="login_form" style="display: none;">
+    <h1>Login</h1>
+    <div id="login_status"></div>
+    <input id=username type="text" value="" placeholder="username">
+    <input id=password type="password" value="" placeholder="password">
+    <div class="button" onclick="login_button();">Login</div>
+    </div>
+</div>
+<script>
+
+async function do_activate() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let success = await activate({username: urlParams.get("username"), activation_link: urlParams.get("activation_link")});
+    if(success == false) {
+        document.getElementById("status").innerText = "activation not successful";
+    }
+    else {
+        document.getElementById("status").innerText = "activation successful";
+        document.getElementById("login_form").style.display = "block";
+    }
+}
+do_activate();
+
+async function login_button() {
+    let success = await login(inputs_to_dict({username: "#username", password: "#password"}));
+    if(success == false) {
+        document.getElementById("login_status").innerText = "Error: username or password is wrong.";
+    }
+    else {
+        document.getElementById("login_status").innerHTML = "Successfully logged in. Go to the <a href='index.html'>overview</a>.";
+    }
+}
+
+</script>
+</body>
+</html>

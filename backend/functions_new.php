@@ -1,4 +1,10 @@
 <?php
+header('Access-Control-Allow-Origin: *');
+
+header('Access-Control-Allow-Methods: GET, POST');
+
+header("Access-Control-Allow-Headers: X-Requested-With");
+
 function database() {
 	$db = mysqli_connect("localhost", "duo", "SiMurAyHobtoph}", "stories");
 	$db->set_charset("utf8");
@@ -116,10 +122,20 @@ function getYear()
 function checkAdmin() {
     // check whether the user is logged in
     session_start();
-    if(!isset($_SESSION["user"]) || $_SESSION["user"]["user_type"] == 0) {
+    if(!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 1) {
         http_response_code(403);
         die();
     }
+}
+
+function generateRandomString($length = 10) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
 }
 
 function getQuery($query, $just_one=false) {
