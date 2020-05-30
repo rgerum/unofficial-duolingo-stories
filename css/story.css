@@ -31,11 +31,20 @@ body {
     cursor: pointer;
     font-weight: bold;
     text-align: center;
+    border: 0;
+    font-size: 16px;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    transition: 0.1s box-shadow, 0.1s transform;
 }
 .button:hover[data-status="active"] {
     filter: brightness(1.2);
     /*transform: translate(0, 5px);
     box-shadow: #58a700 0 0px;*/
+}
+.button:active {
+    transform: translate(0, 5px);
+    box-shadow: #58a700 0 0px;
+    transition: 0.1s box-shadow, 0.1s transform;
 }
 .button[data-status="inactive"] {
     background: #a3a3a3;
@@ -68,6 +77,9 @@ body {
 .answer {
     position: relative;
     cursor: pointer;
+    display: grid;
+    grid-template-columns: 40px auto;
+    margin-bottom: 14px;
 }
 .checkbox {
     display: inline-block;
@@ -108,12 +120,22 @@ body {
     padding: 8px;
     margin: 5px;
     cursor: pointer;
-    transition: background 0.8s, border-color 0.8s, color 0.8s, box-shadow 0.8s;
+    transition: background 0.1s, border-color 0.1s, color 0.1s, box-shadow 0.1s, transform 0.1s;
+
+    font-size: 16px;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+}
+.clickword:active {
+    transform: translate(0, 5px);
+    box-shadow: lightgray 0 0px;
+    transition: 0.1s box-shadow, 0.1s transform;
 }
 .clickword[data-status="empty"] {
     background: lightgray;
     color: lightgray;
     cursor: default;
+    transform: translate(0, 5px);
+    box-shadow: lightgray 0 0px;
 }
 .clickword[data-status="selected"] {
     background: #ddf4ff;
@@ -201,7 +223,7 @@ body {
     padding-bottom: 5px;
 }
 
-.tooltip:hover {
+.tooltip:not([data-hidden]):hover {
     background-image: linear-gradient(to right, #7b7b7b 60%, rgba(255, 255, 255, 0) 0%);
 }
 
@@ -248,6 +270,15 @@ body {
 //    background-color: red;
 //    border-left: 2px solid #e5e5e5;
 }
+span[data-hidden=true] {
+    color:white;
+    background-image: linear-gradient(to right, #e5e5e5 60%, #e5e5e5 60%) !important;
+    line-height: 2em;
+    background-position: 0% 100%;
+    background-repeat: repeat-x;
+    background-size: 5px 2px;
+    padding-bottom: 5px;
+}
 
 .tooltiptext {
     visibility: hidden;
@@ -278,7 +309,7 @@ body {
 
 
 /* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover .tooltiptext {
+.tooltip:hover:not([data-hidden]) .tooltiptext {
     visibility: visible;
     opacity: 1;
 }

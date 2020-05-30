@@ -84,7 +84,7 @@ function processStoryFile() {
             }
             if (line[0] === "order") {
                 let line2 = line[1].split(/\s*([^:]+)\s*:\s*(.*)\s*/).splice(1, 2);
-                phrases.push({tag: line[0], question: "", speaker: line2[0], text: "", words: []});
+                phrases.push({tag: line[0], question: "", speaker: line2[0], text: line2[1], translation: "", words: []});
             }
             if (line[0] === "pairs") {
                 phrases.push({tag: line[0], question: line[1], words: [], solution: 0});
@@ -189,16 +189,56 @@ function addTitle() {
     phrase.append("span").attr("class", "title").text(story_properties.title);
     document.getElementById("button_next").dataset.status = "active";
 }
-function addTextWithTranslation(target, words, translation) {
-    if(translation === undefined || translation === "") {
-        target.text(words.replace(/~/g, " "));
-        return;
-    }
+function addTextWithTranslation(target, words, translation, words_fill, translation_fill) {
     if(typeof words === "string")
         words = words.split(/\s+/);
     if(typeof translation === "string")
         translation = translation.split(/\s+/);
+    if(translation === undefined)
+        translation = [];
+    if(typeof words_fill === "string")
+        words_fill = words_fill.split(/\s+/);
+    if(typeof translation_fill === "string")
+        translation_fill = translation_fill.split(/\s+/);
 
+    function addWord(words, translation) {
+        let w = words.split(/([^.,!?:]*)([.,!?:]*)/);
+        let span = target;
+        let word = span.append("span").attr("class", "word").text(w[1].replace(/~/g, " "))
+        if(translation !== undefined && translation !== "" && translation !== "~" && translation !== "~." && translation !== "~," && translation !== "~!" && translation !== "~?" && translation !== "~:") {
+            let t = translation.split(/([^.,!?:]*)([.,!?:]*)/);
+            word.attr("class", "word tooltip")
+            word.append("span").attr("class", "tooltiptext").text(t[1].replace(/~/g, " "));
+        }
+        let space = span.append("span").text(w[2]+" ");
+        return [word, space];
+    }
+
+    let inserted = undefined;
+    for(let i in words) {
+        if(words[i][0] === "*" && words_fill !== undefined) {
+            inserted = []
+            let data = []
+            let added_element;
+            for(let j in words_fill) {
+                for (added_element of addWord(words_fill[j], translation_fill[j])) {
+                    inserted.push(added_element.node());
+                    data.push(j);
+                }
+            }
+            if(words[i].substr(1) !== "") {
+                d3.select(inserted.pop()).remove()
+                data.pop();
+                addWord(words[i].substr(1), translation[i].substr(1));
+            }
+            inserted = d3.selectAll(inserted);
+            inserted.data(data).attr("data-hidden", true);
+        }
+        else
+            addWord(words[i], translation[i]);
+    }
+    return inserted;
+/*
     target.selectAll("span").data(words).enter().append("span")
         .each(function(d, i) {
             let word = d3.select(this).append("span").attr("class", "word").text(d.replace(/~/g, " "))
@@ -208,7 +248,7 @@ function addTextWithTranslation(target, words, translation) {
                 word.append("span").attr("class", "tooltiptext").text(translation[i].replace(/~/g, " "));
             }
             d3.select(this).append("span").text(" ");
-        })
+        })*/
 }
 
 function addSpeach(data) {
@@ -264,7 +304,11 @@ function addFinishMultipleChoice(data) {
     let phrase = story.append("p");
     phrase.append("span").attr("class", "speaker").text(data.speaker);
     //phrase.append("span").attr("class", "text").text(data.text.replace("*", "______"));
-    addTextWithTranslation(phrase.append("span").attr("class", "text"), data.text.replace("*", "______"), data.translation.replace("*", "~"));
+    let base_lang = 0;
+    if(data.answers[data.solution][2] !== undefined)
+        base_lang = 1;
+    let inserted = addTextWithTranslation(phrase.append("span").attr("class", "text"),
+        data.text, data.translation, data.answers[data.solution][0+base_lang*2], data.answers[data.solution][1+base_lang*2]);
 
     let question = story.append("p");
     question.append("span").attr("class", "question").text(data.question);
@@ -276,11 +320,14 @@ function addFinishMultipleChoice(data) {
                 checkbox.dataset.status = "right";
                 checkbox.innerText = "✓";
                 //phrase.select(".text").text(data.text.replace("*", data.answers[i][0]));
-                phrase.select(".text").selectAll("span").remove();
+                //phrase.select(".text").selectAll("span").remove();
+                inserted.attr("data-hidden", undefined);
+                /*
                 if(data.answers[i][2] !== undefined)
                     addTextWithTranslation(phrase.select(".text"), data.text.replace("*", data.answers[i][2]), data.translation.replace("*", data.answers[i][3]));
                 else
                     addTextWithTranslation(phrase.select(".text"), data.text.replace("*", data.answers[i][0]), data.translation.replace("*", data.answers[i][1]));
+                 */
                 document.getElementById("button_next").onclick = function () {
                     document.getElementById("button_next").onclick = addNext;
                     question.style("overflow", "hidden").transition().style("height", "0px").remove();
@@ -323,7 +370,9 @@ function addOrder(data) {
     let story = d3.select("#story");
     let phrase = story.append("p");
     phrase.append("span").attr("class", "speaker").text(data.speaker);
-    phrase.append("span").attr("class", "text").text(getEmptyLength());
+    let inserted = addTextWithTranslation(phrase.append("span").attr("class", "text"),
+        data.text, data.translation, data.words, data.translations);
+    //phrase.append("span").attr("class", "text").text(getEmptyLength());
     let text = "";
 
     let sort = [];
@@ -337,18 +386,14 @@ function addOrder(data) {
     let question = story.append("p");
     question.append("span").attr("class", "question").text(data.question);
     question.append("p").selectAll("div").data(sort).enter()
-        .append("div").attr("class", "clickword")        .attr("data-status", "unselected")
+        .append("button").attr("class", "clickword")        .attr("data-status", "unselected")
         .text(d => data.words[d].replace(/~/g, " "))
         .on("click", function(d, i) {
-            if(d == index) {
+            if(d === index) {
                 this.dataset.status = "empty";
-                selected_words.push(data.words[d]);
-                selected_translations.push(data.translations[d]);
+                inserted.attr("data-hidden", d => (d<=index) ? undefined : true);
                 index += 1;
-                phrase.select(".text").selectAll("span").remove();
-                phrase.select(".text").text("");
-                addTextWithTranslation(phrase.select(".text"), selected_words.concat(getEmptyLength()), selected_translations.concat("~"));
-                if(index == data.words.length) {
+                if(index === data.words.length) {
                     document.getElementById("button_next").onclick = function () {
                         document.getElementById("button_next").onclick = addNext;
                         question.style("overflow", "hidden").transition().style("height", "0px").remove();
@@ -378,7 +423,7 @@ function addPairs(data) {
     let question = story.append("p");
     question.append("span").attr("class", "question").text(data.question);
     question.append("p").selectAll("div").data(sort).enter()
-        .append("div").attr("class", "clickword").text(d => data.words[d]).attr("data-status", "unselected")
+        .append("button").attr("class", "clickword").text(d => data.words[d]).attr("data-status", "unselected")
         .on("click", function(d, i) {
             if(this.dataset.status == "inactive")
                 return
