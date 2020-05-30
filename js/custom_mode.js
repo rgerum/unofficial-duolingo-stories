@@ -27,9 +27,10 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
 
         this.$rules = {
             "start" : [
+                {token : ["comment"], regex : /(#.*$)/},
                 {token : ["keyword", "text"], regex : /(^.*)(=)/, next  : "value"},
                 {token : ["keyword", "string", "text"], regex : /(^>)(.*:)(.*$)/},
-                {token : ["keyword", "string", "text"], regex : /(^~)(.*:)(.*$)/},
+                {token : ["keyword", "string", "variable.parameter"], regex : /(^~)(.*:)(.*$)/},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(choice)(\])/, next  : "choice"},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(order)(\])/, next  : "order"},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(fill)(\])/, next  : "fill"},
@@ -49,15 +50,19 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
             "choice" : [
                 {token : ["keyword", "entity.name.function"], regex : /^(\+)(.*$)/},
                 {token : "keyword", regex : /^\-/},
-                {token : "keyword", regex : /^~/},
-                {token : "string", regex : /^\s*$/, next  : "start"},
+                {token : ["keyword", "variable.parameter"], regex : /(^~)(.*$)/},
+                //{token : "string", regex : /^\s*$/, next  : "start"},
+                {token : "string", regex : /(?=^>)/, next  : "start"},
+                {token : "string", regex : /(?=^\[)/, next  : "start"},
                 {defaultToken : "text"}
             ],
             "click" : [
                 {token : ["string"], regex : /^(.*:)/ },
                 {token : ["keyword", "string", "keyword"], regex : /(\[)([^\[\]+-]*)(\])/ },
                 {token : ["keyword", "entity.name.function", "keyword"], regex : /(\[)(\+[^\[\]+-]*)(\])/ },
-                {token : "string", regex : /^\s*$/, next  : "start"},
+                //{token : "string", regex : /^\s*$/, next  : "start"},
+                {token : "string", regex : /(?=^>)/, next  : "start"},
+                {token : "string", regex : /(?=^\[)/, next  : "start"},
                 {defaultToken : "text"}
             ],
             "order" : [
@@ -70,7 +75,12 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
             ],
             "order3" : [
                 {token : ["word", "keyword"], regex : /([^\/]+)(\/)/, next:"order3"},
-                {token : "word", regex : /[^\\]+$/, next:"start"},
+                {token : "word", regex : /[^\\]+$/, next:"order4"},
+                {defaultToken : "invalid"}
+            ],
+            "order4" : [
+                {token : ["variable.parameter", "keyword"], regex : /([^\/]+)(\/)/, next:"order4"},
+                {token : "variable.parameter", regex : /[^\\]+$/, next:"start"},
                 {defaultToken : "invalid"}
             ],
 
@@ -79,14 +89,17 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
                 {defaultToken : "invalid"}
             ],
             "fill2" : [
+                {token : ["string", "variable.parameter", "keyword", "variable.parameter"], regex : /(~.*:)([^\*]*)(\*?)(.*$)/, next:"fill2"},
                 {token : "text", regex : /(.*$)/, next:"fill3"},
                 {defaultToken : "invalid"}
             ],
             "fill3" : [
                 {token : ["keyword", "entity.name.function"], regex : /(^\+)(.*)/},
                 {token : ["keyword", "text"], regex : /(^\-)(.*)/},
-                {token : ["keyword", "text"], regex : /(^~)(.*)/},
-                {token : "string", regex : /^\s*$/, next  : "start"},
+                {token : ["keyword", "variable.parameter"], regex : /(^~)(.*)/},
+                //{token : "string", regex : /^\s*$/, next  : "start"},
+                {token : "string", regex : /(?=^>)/, next  : "start"},
+                {token : "string", regex : /(?=^\[)/, next  : "start"},
                 {defaultToken : "invalid"}
             ],
 
@@ -96,7 +109,9 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
             ],
             "pairs2" : [
                 {token : ["string", "keyword", "text"], regex : /(.*)( - )(.*$)/, next:"pairs2"},
-                {token : "string", regex : /^\s*$/, next  : "start"},
+                //{token : "string", regex : /^\s*$/, next  : "start"},
+                {token : "string", regex : /(?=^>)/, next  : "start"},
+                {token : "string", regex : /(?=^\[)/, next  : "start"},
                 {defaultToken : "invalid"}
             ],
         };
