@@ -49,6 +49,7 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
             "choice" : [
                 {token : ["keyword", "entity.name.function"], regex : /^(\+)(.*$)/},
                 {token : "keyword", regex : /^\-/},
+                {token : "keyword", regex : /^~/},
                 {token : "string", regex : /^\s*$/, next  : "start"},
                 {defaultToken : "text"}
             ],
@@ -84,6 +85,7 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
             "fill3" : [
                 {token : ["keyword", "entity.name.function"], regex : /(^\+)(.*)/},
                 {token : ["keyword", "text"], regex : /(^\-)(.*)/},
+                {token : ["keyword", "text"], regex : /(^~)(.*)/},
                 {token : "string", regex : /^\s*$/, next  : "start"},
                 {defaultToken : "invalid"}
             ],
