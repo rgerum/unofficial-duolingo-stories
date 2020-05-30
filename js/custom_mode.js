@@ -29,6 +29,7 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
             "start" : [
                 {token : ["keyword", "text"], regex : /(^.*)(=)/, next  : "value"},
                 {token : ["keyword", "string", "text"], regex : /(^>)(.*:)(.*$)/},
+                {token : ["keyword", "string", "text"], regex : /(^~)(.*:)(.*$)/},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(choice)(\])/, next  : "choice"},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(order)(\])/, next  : "order"},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(fill)(\])/, next  : "fill"},

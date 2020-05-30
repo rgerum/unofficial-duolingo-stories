@@ -1,13 +1,55 @@
+backend = "http://www.renderclonks.de/files/stories/backend/stories/"
+
+Date.prototype.now = function () {
+    var day = ((this.getDate() < 10)?"0":"") + this.getDate();
+    var month = (((this.getMonth()+1) < 10)?"0":"") + (this.getMonth()+1);
+    var year = this.getFullYear();
+    var hours = ((this.getHours() < 10)?"0":"") + this.getHours();
+    var minutes = ((this.getMinutes() < 10)?"0":"") + this.getMinutes();
+    var seconds = ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
+
+    return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+};
+
+function fetch_post(url, data) {
+    var fd = new FormData();
+    //very simply, doesn't handle complete objects
+    for(var i in data){
+        fd.append(i,data[i]);
+    }
+    var req = new Request(url,{
+        method:"POST",
+        body:fd,
+        mode:"cors"
+    });
+    return fetch(req);
+}
+
+
 story = undefined;
+story_id = undefined;
 async function loadStory(name) {
     //let response = await fetch(name+".txt");
-    let response = await fetch(`http://www.renderclonks.de/files/stories/backend/stories/get_story.php?id=${name}`);
+    let response = await fetch(`${backend}get_story.php?id=${name}`);
     let data = await response.json();
+    story_id = data[0]["id"];
     story = data[0]["text"];
     document.getElementById("button_next").dataset.status = "active";
     processStoryFile();
     addTitle();
 //    addNext();
+}
+async function getLanguages() {
+    let response = await fetch(`${backend}get_languages.php`);
+    let data = await response.json();
+    let languages_ids = {}
+    for(let lang of data)
+        languages_ids[lang.short] = lang.id;
+    return languages_ids;
+}
+async function setStoryDone(id) {
+    let response = await fetch(`${backend}set_story_done.php?id=${id}`);
+    console.log("response", response);
 }
 
 function setProgress(i) {
@@ -27,6 +69,13 @@ function processStoryFile() {
             line = line.substr(1);
             line = line.split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
             phrases.push({tag: "phrase", speaker: line[0], text: line[1]});
+            continue;
+        }
+        if (line.substr(0, 1) == "~") {
+            line = line.substr(1);
+            line = line.split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
+            phrases[phrases.length - 1].translation = line[1];
+            phrases[phrases.length - 1].translation_speaker = line[0];
             continue;
         }
         if (line.substr(0, 1) == "[") {
@@ -111,7 +160,23 @@ function addSpeach(data) {
     let story = d3.select("#story");
     let phrase = story.append("p");
     phrase.append("span").attr("class", "speaker").text(data.speaker);
-    phrase.append("span").attr("class", "text").text(data.text).each(addTextWithHints);
+    if(data.translation == undefined)
+        phrase.append("span").attr("class", "text").text(data.text);//.each(addTextWithHints);
+    else {
+        let words = data.text.split(/\s+/);
+        let translation = data.translation.split(/\s+/);
+        console.log("translation", translation);
+        phrase.append("span").selectAll("span").data(words).enter().append("span")
+            .each(function(d, i) {
+                let word = d3.select(this).append("span").attr("class", "word").text(d.replace(/~/g, " "))
+                console.log(d, i, translation[i], words[i]);
+                if(translation[i] !== "~" && translation[i] !== "~." && translation[i] !== "~," && translation[i] !== "~!" && translation[i] !== "~?" && translation[i] !== "~:") {
+                    word.attr("class", "word tooltip")
+                    word.append("span").attr("class", "tooltiptext").text(translation[i].replace(/~/g, " "));
+                }
+                d3.select(this).append("span").text(" ");
+            })
+    }
 
     document.getElementById("button_next").dataset.status = "active";
 }
@@ -319,9 +384,10 @@ function addNext() {
     document.getElementById("button_next").dataset.status = "inactive";
     setProgress(index*100/phrases.length);
     if(index == phrases.length) {
+        setStoryDone(story_id);
         document.getElementById("button_next").dataset.status = "active";
         document.getElementById("button_next").innerText = "finished";
-        document.getElementById("button_next").onclick = function() { window.location.href = 'index.html?lang='+story_properties["language"]};
+        document.getElementById("button_next").onclick = function() { window.location.href = 'index.html?lang='+story_properties["lang"]+"&lang_base="+story_properties["lang_base"]};
 
         return;
     }
@@ -350,8 +416,8 @@ async function hoverWord(element) {
         return;
     if(this.dataset.has_translation === undefined) {
         this.dataset.has_translation = null;
-        console.log("https://linguee-api.herokuapp.com/api?q=" + this.innerText + "&src="+story_properties.language+"&dst=en")
-        let test = await fetch("https://linguee-api.herokuapp.com/api?q=" + this.innerText + "&src="+story_properties.language+"&dst=en")
+        console.log("https://linguee-api.herokuapp.com/api?q=" + this.innerText + "&src="+story_properties.lang+"&dst=en")
+        let test = await fetch("https://linguee-api.herokuapp.com/api?q=" + this.innerText + "&src="+story_properties.lang+"&dst=en")
         json = await test.json();
         if (json.exact_matches && json.exact_matches[0].translations) {
             let trans = json.exact_matches[0].translations[0].text
