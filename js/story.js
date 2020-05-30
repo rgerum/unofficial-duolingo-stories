@@ -104,37 +104,46 @@ function processStoryFile() {
             }
 
             if (phrases[phrases.length - 1].tag === "choice") {
-                line = line.split(/\s*([+-~])\s*(.+)\s*/);
+                line = line.split(/\s*([~+-])\s*(.+)\s*/);
                 console.log("[choice]", line);
                 if (line[1] === "+")
                     phrases[phrases.length - 1].solution = phrases[phrases.length - 1].answers.length;
-                if (line[1] === "+" || line[1] === "-")
-                    phrases[phrases.length - 1].answers.push([line[2], ""]);
+                if (line[1] === "+" || line[1] === "-") {
+                    let splited = line[2].split("/");
+                    phrases[phrases.length - 1].answers.push([splited[0], "", splited[1]]);
+                }
                 if (line[1] === "~") {
+                    let splited = line[2].split("/");
                     let anwers = phrases[phrases.length - 1].answers;
-                    anwers[anwers.length-1][1] = line[2];
+                    anwers[anwers.length-1][1] = splited[0];
+                    anwers[anwers.length-1][3] = splited[1];
                 }
                 continue;
             }
             if (phrases[phrases.length - 1].tag === "fill") {
-                line = line.split(/\s*([+-~])\s*(.+)\s*/);
-                console.log("FILL", line, line[1])
-                if (line.length === 1) {
+                line = line.split(/\s*([~+-])\s*(.+)\s*/);
+                console.log("FILL", line, line[1], line.length)
+                if (line.length === 1 && phrases[phrases.length - 1].question === "") {
                     phrases[phrases.length - 1].question = line[0];
                 }
                 else {
                     if (line[1] === "+")
                         phrases[phrases.length - 1].solution = phrases[phrases.length - 1].answers.length;
-                    if (line[1] === "+" || line[1] === "-")
-                        phrases[phrases.length - 1].answers.push([line[2], ""]);
+                    if (line[1] === "+" || line[1] === "-") {
+                        let splited = line[2].split("/");
+                        phrases[phrases.length - 1].answers.push([splited[0], "", splited[1]]);
+                    }
                     if (line[1] === "~") {
                         let anwers = phrases[phrases.length - 1].answers;
                         if(anwers.length === 0) {
                             line = line[2].split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
                             phrases[phrases.length - 1].translation = line[1];
                         }
-                        else
-                            anwers[anwers.length-1][1] = line[2];
+                        else {
+                            let splited = line[2].split("/");
+                            anwers[anwers.length-1][1] = splited[0];
+                            anwers[anwers.length-1][3] = splited[1];
+                        }
                     }
                 }
                 continue;
@@ -194,7 +203,7 @@ function addTextWithTranslation(target, words, translation) {
         .each(function(d, i) {
             let word = d3.select(this).append("span").attr("class", "word").text(d.replace(/~/g, " "))
             console.log(d, i, translation[i], words[i]);
-            if(translation[i] !== undefined && translation[i] !== "~" && translation[i] !== "~." && translation[i] !== "~," && translation[i] !== "~!" && translation[i] !== "~?" && translation[i] !== "~:") {
+            if(translation[i] !== undefined && translation[i] !== "" && translation[i] !== "~" && translation[i] !== "~." && translation[i] !== "~," && translation[i] !== "~!" && translation[i] !== "~?" && translation[i] !== "~:") {
                 word.attr("class", "word tooltip")
                 word.append("span").attr("class", "tooltiptext").text(translation[i].replace(/~/g, " "));
             }
@@ -268,7 +277,10 @@ function addFinishMultipleChoice(data) {
                 checkbox.innerText = "✓";
                 //phrase.select(".text").text(data.text.replace("*", data.answers[i][0]));
                 phrase.select(".text").selectAll("span").remove();
-                addTextWithTranslation(phrase.select(".text"), data.text.replace("*", data.answers[i][0]), data.translation.replace("*", data.answers[i][1]));
+                if(data.answers[i][2] !== undefined)
+                    addTextWithTranslation(phrase.select(".text"), data.text.replace("*", data.answers[i][2]), data.translation.replace("*", data.answers[i][3]));
+                else
+                    addTextWithTranslation(phrase.select(".text"), data.text.replace("*", data.answers[i][0]), data.translation.replace("*", data.answers[i][1]));
                 document.getElementById("button_next").onclick = function () {
                     document.getElementById("button_next").onclick = addNext;
                     question.style("overflow", "hidden").transition().style("height", "0px").remove();
