@@ -170,6 +170,7 @@ body {
     background: white;
     padding: 30px 30px;
     box-sizing: border-box;
+    z-index: 10;
 }
 #story {
     padding-top: 40px;
@@ -192,10 +193,6 @@ body {
 .tooltip {
     position: relative;
     border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-}
-.word::after {
-    content: " ";
-    border-bottom: none;
 }
 
 /* Tooltip text */

@@ -1,5 +1,7 @@
-title=Kun je praten
-language=nl
+ttitle=Kun je praten
+title_base=Can you speak?
+lang=nl
+lang_base=en
 
 > Verteller: Fenne rust uit op de bank, terwijl haar hondje Pompey slaapt.
 

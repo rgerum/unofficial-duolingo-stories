@@ -249,4 +249,7 @@ function updateDatabase($keys, $table, $data, $id_key="id") {
     // close the query and the database
     //$result->close();
     //$db->close();
+    if(isset($data[$id_key]))
+        return $data[$id_key];
+    return $db->insert_id;
 }

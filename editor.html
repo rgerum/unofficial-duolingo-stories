@@ -26,6 +26,7 @@
             padding: 0;
             margin: 0;
         }
+
     </style>
 </head>
 <body>
@@ -46,6 +47,7 @@
     </div>
     <div id="footer" style="left: 50vw; right: 0px; width: 50%">
         <div id="button_next" style="display: none" class="button" onclick="addNext();">continue</div>
+        <div id="button_save" class="button" onclick="saveStory();" style="float:left"><img style="display: none" src="Spinner-1s-40px.svg" height="15px">save</div>
         <div id="button_reload" class="button" onclick="updateStoryDisplay();">update</div>
     </div>
     </div>
@@ -87,16 +89,31 @@ editor.commands.addCommand({
     readOnly: true // false if this command should not apply in readOnly mode
 });
 
+let story = undefined;
+let story_id = undefined;
+let languages_ids = undefined;
 async function loadStory(name) {
-    let response = await fetch(name+".txt");
-    let story = await response.text();
+    languages_ids = await getLanguages();
+    if(name===null) {
+        story = `title=...
+tile_base=...
+lang=nl
+lang_base=en
+`;
+    }
+    else {
+        //let response = await fetch(name+".txt");
+        let response = await fetch(`${backend}get_story.php?id=${name}`);
+        let data = await response.json();
+        story_id = data[0]["id"];
+        story = data[0]["text"];
+    }
     editor.setValue(story);
     updateStoryDisplay();
 }
-loadStory("kamer_te_huur")
+const urlParams = new URLSearchParams(window.location.search);
+loadStory(urlParams.get('story'))
 
-
-let story = undefined;
 function updateStoryDisplay() {
     story = editor.getValue();
     processStoryFile();
@@ -110,6 +127,20 @@ function updateStoryDisplay() {
 }
 updateStoryDisplay();
 
+async function saveStory() {
+    updateStoryDisplay();
+    document.getElementById("button_save").getElementsByTagName("img")[0].style.display = "inline-block";
+    let data = {"name": story_properties["title"], "name_base": story_properties["title_base"], "lang": languages_ids[story_properties["lang"]], "lang_base": languages_ids[story_properties["lang_base"]], "text": editor.getValue(), "change_date": new Date().now()};
+    if(story_id !== undefined)
+        data.id = story_id;
+    console.log("save", data);
+    let x = await fetch_post(backend+"set_story.php", data);
+    x = await x.json();
+    x = x[0];
+    console.log("saved", x);
+    story_id = x.id;
+    document.getElementById("button_save").getElementsByTagName("img")[0].style.display = "none";
+}
 
 </script>
 </body>

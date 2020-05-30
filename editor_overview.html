@@ -266,6 +266,9 @@
 <body>
 
 <div id="header">
+    <div id="header_left" style="display: inline-block">
+        <div class="button" onclick="location.href = 'editor.html';" style="float: none">New Story</div>
+    </div>
     <div id="login_form" style="display: none; float: right">
         <div id="login_status"></div>
         <input id=username type="text" value="" placeholder="username">
@@ -275,12 +278,12 @@
     </div>
     <div id="loggedin" style="display: none; float: right">
         <span id="display_username" style="font-size: 1.2em; padding-right: 14px; display: inline-block;"></span>
-        <div id="button_editor" class="button" onclick="location.href = 'editor_overview.html'+window.location.search;" style="display:none; float: none">Editor</div>
+        <div id="button_editor" class="button" onclick="location.href = 'index.html'+window.location.search;" style="display:none; float: none">Home</div>
         <div class="button" onclick="button_logout();" style="float: none">Logout</div>
     </div>
 </div>
 <div id="main">
-    <h1>Stories</h1>
+    <h1>Editor - Stories</h1>
     <div id="list" style="display: grid; grid-template-columns: auto auto auto;">
 
     </div>
@@ -336,7 +339,7 @@ async function loadStory(lang, lang_base) {
         .each(function (d) {
             d3.select(this).append("a")
                 .attr("class", "button_story")
-                .attr("href", "story.html?story="+d.id)
+                .attr("href", "editor.html?story="+d.id)
                 .attr("data-done", d=>d.time != null)
             d3.select(this).append("div")
                 .attr("class", "story_title")

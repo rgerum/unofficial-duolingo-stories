@@ -250,14 +250,11 @@
 <body>
 
 <div id="main">
-    <h1>Login</h1>
-    <div id="login_status"></div>
-    <input id=username type="text" value="" placeholder="username">
-    <input id=password type="password" value="" placeholder="password">
-    <div class="button" onclick="login_button();">Login</div>
-
-    <h1>Register Login</h1>
-    <div id="reg_status"></div>
+    <h1>Register</h1>
+    <p>
+    If you register you can keep track of the stories you have already finished.
+    Registration is optional, stories can be accessed even without login.</p>
+    <p id="reg_status"></p>
     <input id=reg_username type="text" value="" placeholder="username">
     <input id=reg_password type="password" value="" placeholder="password">
     <input id=reg_email type="email" value="" placeholder="email">
@@ -265,23 +262,13 @@
 </div>
 <script>
 
-async function login_button() {
-    let success = await login(inputs_to_dict({username: "#username", password: "#password"}));
-    if(success == false) {
-        document.getElementById("login_status").innerText = "Error: username or password is wrong.";
-    }
-    else {
-        document.getElementById("login_status").innerHTML = "Successfully logged in. Go to the <a href='index.html'>overview</a>.";
-    }
-}
-
 async function register_button() {
     let [success, msg] = await register(inputs_to_dict({username: "#reg_username", password: "#reg_password", email: "#reg_email"}));
     if(success === false) {
         document.getElementById("reg_status").innerText = msg;
     }
     else
-        document.getElementById("reg_status").innerText = "Your account has been registered. An email with an activation link has been sent to you.";
+        document.getElementById("reg_status").innerText = "Your account has been registered. An e-mail with an activation link has been sent to you. Please click on the link in the e-mail to proceed.";
 }
 
 </script>
