@@ -1,6 +1,18 @@
+@font-face {
+    font-family: nunito;
+    src: url(nunito/Nunito-Regular.ttf);
+}
+@font-face {
+    font-family: nunito;
+    src: url(nunito/Nunito-Bold.ttf);
+    font-weight: bold;
+}
+
 body {
-    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+//    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    font-family: nunito;
     position: relative;
+    font-size: 19px;
 }
 #main {
     max-width: 500px;
@@ -17,7 +29,8 @@ body {
 }
 .title {
     font-weight: bold;
-    font-size: 1.2em;
+    font-size: 25px;
+    line-height: 34px;
 }
 .button {
     text-transform: uppercase;
@@ -79,6 +92,7 @@ body {
     cursor: pointer;
     display: grid;
     grid-template-columns: 40px auto;
+    align-items: center;
     margin-bottom: 14px;
 }
 .checkbox {
@@ -196,7 +210,7 @@ body {
 }
 #story {
     padding-top: 40px;
-    padding-bottom: 100px;
+    padding-bottom: 50vh;
 }
 #footer {
     border-top: 1px solid gray;
