@@ -1,4 +1,4 @@
-backend = "http://www.renderclonks.de/files/stories/backend/stories/"
+backend = "https://carex.uber.space/stories/backend/stories/"
 
 Date.prototype.now = function () {
     var day = ((this.getDate() < 10)?"0":"") + this.getDate();
@@ -190,18 +190,20 @@ function addTitle() {
     document.getElementById("button_next").dataset.status = "active";
 }
 function addTextWithTranslation(target, words, translation, words_fill, translation_fill) {
+    console.log("addTextWithTranslation", target, words, translation, words_fill, translation_fill);
     if(typeof words === "string")
-        words = words.split(/\s+/);
+        words = words.trim().split(/\s+/);
     if(typeof translation === "string")
-        translation = translation.split(/\s+/);
+        translation = translation.trim().split(/\s+/);
     if(translation === undefined)
         translation = [];
     if(typeof words_fill === "string")
-        words_fill = words_fill.split(/\s+/);
+        words_fill = words_fill.trim().split(/\s+/);
     if(typeof translation_fill === "string")
-        translation_fill = translation_fill.split(/\s+/);
+        translation_fill = translation_fill.trim().split(/\s+/);
 
     function addWord(words, translation) {
+        console.log("addWord", words, translation);
         let w = words.split(/([^.,!?:]*)([.,!?:]*)/);
         let span = target;
         let word = span.append("span").attr("class", "word").text(w[1].replace(/~/g, " "))
@@ -216,6 +218,8 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
 
     let inserted = undefined;
     for(let i in words) {
+        if(words[i] === "")
+            continue;
         if(words[i][0] === "*" && words_fill !== undefined) {
             inserted = []
             let data = []
@@ -229,7 +233,7 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
             if(words[i].substr(1) !== "") {
                 d3.select(inserted.pop()).remove()
                 data.pop();
-                addWord(words[i].substr(1), translation[i].substr(1));
+                addWord(words[i].substr(1), (translation[i]||"").substr(1));
             }
             inserted = d3.selectAll(inserted);
             inserted.data(data).attr("data-hidden", true);
@@ -251,6 +255,11 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
         })*/
 }
 
+function fadeIn(element){
+    element.style("opacity", 0).style("overflow", "hidden").style("height", "0px")
+        .transition(1).style("opacity", 1).style("height", "auto");
+}
+
 function addSpeach(data) {
     let story = d3.select("#story");
     let phrase = story.append("p");
@@ -260,6 +269,7 @@ function addSpeach(data) {
     else {
         addTextWithTranslation(phrase.append("span"), data.text, data.translation);
     }
+    fadeIn(phrase);
 
     document.getElementById("button_next").dataset.status = "active";
 }
@@ -298,6 +308,8 @@ function addMultipleChoice(data) {
             p.append("div").attr("class", "checkbox").text(" ")
             addTextWithTranslation(p.append("div").attr("class", "answer_text"), d[0], d[1]);
         })
+
+    fadeIn(question);
 }
 function addFinishMultipleChoice(data) {
     let story = d3.select("#story");
@@ -319,18 +331,10 @@ function addFinishMultipleChoice(data) {
             if(i == data.solution) {
                 checkbox.dataset.status = "right";
                 checkbox.innerText = "✓";
-                //phrase.select(".text").text(data.text.replace("*", data.answers[i][0]));
-                //phrase.select(".text").selectAll("span").remove();
                 inserted.attr("data-hidden", undefined);
-                /*
-                if(data.answers[i][2] !== undefined)
-                    addTextWithTranslation(phrase.select(".text"), data.text.replace("*", data.answers[i][2]), data.translation.replace("*", data.answers[i][3]));
-                else
-                    addTextWithTranslation(phrase.select(".text"), data.text.replace("*", data.answers[i][0]), data.translation.replace("*", data.answers[i][1]));
-                 */
                 document.getElementById("button_next").onclick = function () {
                     document.getElementById("button_next").onclick = addNext;
-                    question.style("overflow", "hidden").transition().style("height", "0px").remove();
+                    question.style("overflow", "hidden").style("opacity", 1).transition().duration(750).style("height", "0px").style("opacity", 0).remove();
                     addNext();
                 }
                 document.getElementById("button_next").dataset.status = "active";
@@ -345,6 +349,9 @@ function addFinishMultipleChoice(data) {
             p.append("div").attr("class", "checkbox").text(" ")
             addTextWithTranslation(p.append("div").attr("class", "answer_text"), d[0], d[1]);
         })
+
+
+    fadeIn(question);
 }
 /**
  * Shuffles array in place. ES6 version
@@ -407,6 +414,8 @@ function addOrder(data) {
                     d3.select(this).attr("data-status", "wrong_shake").transition().delay(820).attr("data-status", "unselected")
             }
         })
+
+    fadeIn(question);
 }
 function addPairs(data) {
     let count = 0;
@@ -477,6 +486,8 @@ function addPairs(data) {
                 }
             }
         })
+
+    fadeIn(question);
 }
 function addNext() {
     if(document.getElementById("button_next").dataset.status == "inactive")

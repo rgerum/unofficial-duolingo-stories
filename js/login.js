@@ -1,4 +1,5 @@
-let backend = 'http://www.renderclonks.de/files/stories/backend/user/';
+let backend = 'https://carex.uber.space/stories/backend/user/';
+
 function inputs_to_dict(inputs) {
     let result = {}
     for(let name in inputs) {
