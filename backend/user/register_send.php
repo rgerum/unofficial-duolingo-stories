@@ -37,7 +37,7 @@ if($result) {
     
     // Set the From address with an associative array
     //->setFrom(array($email => "$user_firstname $user_surname"))
-    $message->setFrom(array("no-replay@renderclonks.de" => "Unofficial Duolingo Stories"));
+    $message->setFrom(array("stories@carex.uberspace.de" => "Unofficial Duolingo Stories"));
     
     // Set the To addresses with an associative array
     $message->setTo($_POST['email']);
@@ -46,7 +46,7 @@ if($result) {
     $message->setBody("Hey $username,<br/>
         You have registered on 'Unofficial Duolingo Stories'.<br/>
         To complete your registration click on the following link.<br/>
-        <a href='http://www.renderclonks.de/files/stories/activate.html?username=$_POST[username]&activation_link=$activation_link'>Activate account</a>
+        <a href='https://carex.uber.space/stories/activate.html?username=$_POST[username]&activation_link=$activation_link'>Activate account</a>
         <br/><br/>
         Happy learning.
         ", 'text/html')

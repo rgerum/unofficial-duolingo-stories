@@ -6,7 +6,7 @@ header('Access-Control-Allow-Methods: GET, POST');
 header("Access-Control-Allow-Headers: X-Requested-With");
 
 function database() {
-	$db = mysqli_connect("localhost", "duo", "SiMurAyHobtoph}", "stories");
+	$db = mysqli_connect("localhost", "carex", "5hfW-18MSXgYvjrewhbP", "carex_stories");
 	$db->set_charset("utf8");
 	return $db;
 }

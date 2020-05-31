@@ -328,7 +328,7 @@ check_login();
 
 list = [];
 async function loadStory(lang, lang_base) {
-    let response = await fetch(`http://www.renderclonks.de/files/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
+    let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
     if(response.status != 200)
         return
     let data = await response.json();
