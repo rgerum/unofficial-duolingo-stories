@@ -278,7 +278,7 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
 
 function fadeIn(element) {
     element.style("opacity", 0).style("overflow", "hidden").style("height", "0px")
-        .transition(1).style("opacity", 1).style("height", "auto");
+        .transition(1).style("opacity", 1).style("height", "auto").style("overflow", "");
 }
 function fadeOut(element) {
     element.style("overflow", "hidden").transition().style("height", "0px").remove();
