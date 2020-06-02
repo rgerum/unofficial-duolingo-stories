@@ -90,7 +90,7 @@ function processStoryFile() {
                 phrases.push({tag: line[0], question: line[1], words: [], solution: 0});
             }
             if (line[0] === "click") {
-                phrases.push({tag: line[0], question: line[1], answers: [], solution: 0});
+                phrases.push({tag: line[0], question: line[1], speaker: "", text: "", solution: 0});
             }
             continue;
         }
@@ -158,12 +158,17 @@ function processStoryFile() {
                 continue;
             }
             if (phrases[phrases.length - 1].tag === "click") {
-                if (phrases[phrases.length - 1].question === "")
-                    phrases[phrases.length - 1].question = line;
-                else if(phrases[phrases.length - 1].words.length === 0)
-                    phrases[phrases.length - 1].words = line.split("/");
-                else
-                    phrases[phrases.length - 1].translations = line.split("/");
+                if(line[0] === "~") {
+                    line = line.substr(1);
+                    line = line.split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
+                    phrases[phrases.length - 1].translation = line[1];
+                    phrases[phrases.length - 1].translation_speaker = line[0];
+                }
+                else {
+                    line = line.split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
+                    phrases[phrases.length - 1].text = line[1];
+                    phrases[phrases.length - 1].speaker = line[0];
+                }
                 continue;
             }
             if (phrases[phrases.length - 1].tag === "pairs") {
@@ -189,7 +194,7 @@ function addTitle() {
     phrase.append("span").attr("class", "title").text(story_properties.title);
     document.getElementById("button_next").dataset.status = "active";
 }
-function addTextWithTranslation(target, words, translation, words_fill, translation_fill) {
+function addTextWithTranslation(target, words, translation, words_fill, translation_fill, click_words=true) {
     console.log("addTextWithTranslation", target, words, translation, words_fill, translation_fill);
     if(typeof words === "string")
         words = words.trim().split(/\s+/);
@@ -217,9 +222,23 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
     }
 
     let inserted = undefined;
+    let click_words_list = [];
+    let click_words_solition = 0;
     for(let i in words) {
         if(words[i] === "")
             continue;
+        if(words[i][0] === "[") {
+            let parts = words[i].split(/(\[)(\+?)(.*)(\])/);
+            words[i] = parts[3];
+            if(click_words === true) {
+                let newword = target.append("button").attr("class", "clickword")        .attr("data-status", "unselected")
+                    .text(d => words[i].replace(/~/g, " "))
+                click_words_list.push(newword);
+                if(parts[2] === "+")
+                    click_words_solition = click_words_list.length-1;
+                continue
+            }
+        }
         if(words[i][0] === "*" && words_fill !== undefined) {
             inserted = []
             let data = []
@@ -241,6 +260,8 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
         else
             addWord(words[i], translation[i]);
     }
+    if(click_words === true)
+        return [click_words_list, click_words_solition];
     return inserted;
 /*
     target.selectAll("span").data(words).enter().append("span")
@@ -255,9 +276,21 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
         })*/
 }
 
-function fadeIn(element){
+function fadeIn(element) {
     element.style("opacity", 0).style("overflow", "hidden").style("height", "0px")
         .transition(1).style("opacity", 1).style("height", "auto");
+}
+function fadeOut(element) {
+    element.style("overflow", "hidden").transition().style("height", "0px").remove();
+}
+
+function questionFinished(question) {
+    document.getElementById("button_next").onclick = function () {
+        document.getElementById("button_next").onclick = addNext;
+        fadeOut(question);
+        addNext();
+    }
+    document.getElementById("button_next").dataset.status = "active";
 }
 
 function addSpeach(data) {
@@ -291,12 +324,7 @@ function addMultipleChoice(data) {
             if(i == data.solution) {
                 checkbox.dataset.status = "right";
                 checkbox.innerText = "✓";
-                document.getElementById("button_next").onclick = function () {
-                    document.getElementById("button_next").onclick = addNext;
-                    question.style("overflow", "hidden").transition().style("height", "0px").remove();
-                    addNext();
-                }
-                document.getElementById("button_next").dataset.status = "active";
+                questionFinished(question);
             }
             else {
                 checkbox.dataset.status = "false";
@@ -315,7 +343,7 @@ function addFinishMultipleChoice(data) {
     let story = d3.select("#story");
     let phrase = story.append("p");
     phrase.append("span").attr("class", "speaker").text(data.speaker);
-    //phrase.append("span").attr("class", "text").text(data.text.replace("*", "______"));
+
     let base_lang = 0;
     if(data.answers[data.solution][2] !== undefined)
         base_lang = 1;
@@ -331,13 +359,10 @@ function addFinishMultipleChoice(data) {
             if(i == data.solution) {
                 checkbox.dataset.status = "right";
                 checkbox.innerText = "✓";
+                // show the filled in text
                 inserted.attr("data-hidden", undefined);
-                document.getElementById("button_next").onclick = function () {
-                    document.getElementById("button_next").onclick = addNext;
-                    question.style("overflow", "hidden").style("opacity", 1).transition().duration(750).style("height", "0px").style("opacity", 0).remove();
-                    addNext();
-                }
-                document.getElementById("button_next").dataset.status = "active";
+                // finish the question
+                questionFinished(question);
             }
             else {
                 checkbox.dataset.status = "false";
@@ -366,29 +391,17 @@ function shuffle(a) {
 }
 function addOrder(data) {
     let index = 0;
-    function getEmptyLength() {
-        let length = "";
-        for(let i = index; i < data.words.length; i++)
-            for(let j = 0; j < data.words[i].length + 1; j++)
-                length += "_";
-        return length;
-    }
 
     let story = d3.select("#story");
     let phrase = story.append("p");
     phrase.append("span").attr("class", "speaker").text(data.speaker);
     let inserted = addTextWithTranslation(phrase.append("span").attr("class", "text"),
         data.text, data.translation, data.words, data.translations);
-    //phrase.append("span").attr("class", "text").text(getEmptyLength());
-    let text = "";
 
     let sort = [];
     for(let i = 0; i < data.words.length; i++)
         sort.push(i);
     shuffle(sort);
-
-    let selected_words = [];
-    let selected_translations = [];
 
     let question = story.append("p");
     question.append("span").attr("class", "question").text(data.question);
@@ -400,14 +413,8 @@ function addOrder(data) {
                 this.dataset.status = "empty";
                 inserted.attr("data-hidden", d => (d<=index) ? undefined : true);
                 index += 1;
-                if(index === data.words.length) {
-                    document.getElementById("button_next").onclick = function () {
-                        document.getElementById("button_next").onclick = addNext;
-                        question.style("overflow", "hidden").transition().style("height", "0px").remove();
-                        addNext();
-                    }
-                    document.getElementById("button_next").dataset.status = "active";
-                }
+                if(index === data.words.length)
+                    questionFinished(question);
             }
             else {
                 if(this.dataset.status === "unselected")
@@ -417,6 +424,39 @@ function addOrder(data) {
 
     fadeIn(question);
 }
+function addClick(data) {
+    let story = d3.select("#story");
+
+    let question = story.append("p");
+    question.append("span").attr("class", "question").text(data.question);
+
+    let phrase = story.append("p");
+    phrase.append("span").attr("class", "speaker").text(data.speaker);
+    let [click_words_list, click_words_solition] = addTextWithTranslation(phrase.append("span").attr("class", "text"),
+        data.text, data.translation, undefined, undefined, true);
+
+    for(let i = 0; i < click_words_list.length; i++) {
+        if(i === click_words_solition) {
+            click_words_list[i].on("click", function() {
+                for(let i = 0; i < click_words_list.length; i++) {
+                    if(i !== click_words_solition)
+                        click_words_list[i].attr("data-status", "inactive");
+                }
+                d3.select(this).attr("data-")
+                questionFinished(question);
+            });
+        }
+        else {
+            click_words_list[i].on("click", function() {
+                d3.select(this).attr("data-status", "wrong_shake").transition().delay(820).attr("data-status", "inactive");
+            });
+        }
+    }
+
+    fadeIn(question);
+    fadeIn(phrase);
+}
+
 function addPairs(data) {
     let count = 0;
     let selected = undefined;
@@ -434,55 +474,33 @@ function addPairs(data) {
     question.append("p").selectAll("div").data(sort).enter()
         .append("button").attr("class", "clickword").text(d => data.words[d]).attr("data-status", "unselected")
         .on("click", function(d, i) {
-            if(this.dataset.status == "inactive")
+            if(this.dataset.status === "inactive")
                 return
-            if(selected == undefined) {
+            if(selected === undefined) {
                 this.dataset.status = "selected";
                 selected = d;
                 selected_item = this;
-                console.log(selected, selected_item);
             }
-            else if(selected == d) {
+            else if(selected === d) {
                 this.dataset.status = "unselected";
                 selected = undefined;
                 selected_item = undefined;
             }
             else {
-                console.log(selected_item, this, selected_item, d)
                 if(Math.floor(selected/2) === Math.floor(d/2)) {
                     this.dataset.status = "inactive";
                     selected_item.dataset.status = "inactive";
                     count += 1;
                     selected = undefined;
                     selected_item = undefined;
-                    if(count == data.words.length/2) {
-                        document.getElementById("button_next").onclick = function () {
-                            document.getElementById("button_next").onclick = addNext;
-                            question.style("overflow", "hidden").transition().style("height", "0px").remove();
-                            addNext();
-                        }
-                        document.getElementById("button_next").dataset.status = "active";
-                    }
+                    if(count === data.words.length/2)
+                        questionFinished(question);
                 }
                 else {
                     selected_item.dataset.status = "unselected";
                     this.status = "unselected";
                     selected = undefined;
                     selected_item = undefined;
-                }
-            }
-            if(0) {
-                this.dataset.status = "empty";
-                text += " " + data.words[d];
-                count += 1;
-                phrase.select(".text").text(text+" "+getEmptyLength());
-                if(count == data.words.length) {
-                    document.getElementById("button_next").onclick = function () {
-                        document.getElementById("button_next").onclick = addNext;
-                        question.style("overflow", "hidden").transition().style("height", "0px").remove();
-                        addNext();
-                    }
-                    document.getElementById("button_next").dataset.status = "active";
                 }
             }
         })
@@ -512,6 +530,8 @@ function addNext() {
         addOrder(phrases[index]);
     if(phrases[index].tag === "pairs")
         addPairs(phrases[index]);
+    if(phrases[index].tag === "click")
+        addClick(phrases[index]);
     index += 1;
     document.documentElement.scrollTo({
         left: 0,
