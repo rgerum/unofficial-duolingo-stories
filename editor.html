@@ -96,7 +96,7 @@ async function loadStory(name) {
     languages_ids = await getLanguages();
     if(name===null) {
         story = `title=...
-tile_base=...
+title_base=...
 lang=nl
 lang_base=en
 `;
@@ -130,7 +130,15 @@ updateStoryDisplay();
 async function saveStory() {
     updateStoryDisplay();
     document.getElementById("button_save").getElementsByTagName("img")[0].style.display = "inline-block";
-    let data = {"name": story_properties["title"], "name_base": story_properties["title_base"], "lang": languages_ids[story_properties["lang"]], "lang_base": languages_ids[story_properties["lang_base"]], "text": editor.getValue(), "change_date": new Date().now()};
+    let data = {
+        "name": story_properties["title"],
+        "name_base": story_properties["title_base"],
+        "lang": languages_ids[story_properties["lang"]],
+        "lang_base": languages_ids[story_properties["lang_base"]],
+        "xp": story_properties["xp"],
+        "text": editor.getValue(),
+        "change_date": new Date().now()
+    };
     if(story_id !== undefined)
         data.id = story_id;
     console.log("save", data);

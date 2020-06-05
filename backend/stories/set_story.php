@@ -15,6 +15,7 @@ $keys = ["id" => "int",
     "lang_base" => "string",
     "author" => "int",
     "change_date" => "string",
+    "xp" => "int",
     "text" => "string"];
 
 $_POST["author"] = $_SESSION["user"];
