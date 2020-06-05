@@ -194,7 +194,7 @@ function addTitle() {
     phrase.append("span").attr("class", "title").text(story_properties.title);
     document.getElementById("button_next").dataset.status = "active";
 }
-function addTextWithTranslation(target, words, translation, words_fill, translation_fill, click_words=true) {
+function addTextWithTranslation(target, words, translation, words_fill, translation_fill, click_words=false) {
     console.log("addTextWithTranslation", target, words, translation, words_fill, translation_fill);
     if(typeof words === "string")
         words = words.trim().split(/\s+/);
@@ -340,6 +340,7 @@ function addMultipleChoice(data) {
     fadeIn(question);
 }
 function addFinishMultipleChoice(data) {
+    console.log("addFinishMultipleChoice");
     let story = d3.select("#story");
     let phrase = story.append("p");
     phrase.append("span").attr("class", "speaker").text(data.speaker);
@@ -356,10 +357,11 @@ function addFinishMultipleChoice(data) {
         .append("div").attr("class", "answer")
         .on("click", function(d, i) {
             let checkbox = this.firstChild;
-            if(i == data.solution) {
+            if(i === data.solution) {
                 checkbox.dataset.status = "right";
                 checkbox.innerText = "✓";
                 // show the filled in text
+                console.log("inserted", inserted)
                 inserted.attr("data-hidden", undefined);
                 // finish the question
                 questionFinished(question);
