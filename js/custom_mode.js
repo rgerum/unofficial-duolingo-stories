@@ -29,8 +29,8 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
             "start" : [
                 {token : ["comment"], regex : /(#.*$)/},
                 {token : ["keyword", "text"], regex : /(^.*)(=)/, next  : "value"},
-                {token : ["keyword", "string", "text"], regex : /(^>)(.*:)(.*$)/},
-                {token : ["keyword", "string", "variable.parameter"], regex : /(^~)(.*:)(.*$)/},
+                {token : ["keyword", "string", "text"], regex : /(^>)(.*:)?(.*$)/},
+                {token : ["keyword", "string", "variable.parameter"], regex : /(^~)(.*:)?(.*$)/},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(choice)(\])/, next  : "choice"},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(order)(\])/, next  : "order"},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(fill)(\])/, next  : "fill"},
@@ -85,7 +85,7 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
             ],
 
             "fill" : [
-                {token : ["string", "text", "keyword", "text"], regex : /(.*:)([^\*]*)(\*?)(.*$)/, next:"fill2"},
+                {token : ["string", "text", "keyword", "text"], regex : /(.*:)?([^\*]*)(\*?)(.*$)/, next:"fill2"},
                 {defaultToken : "invalid"}
             ],
             "fill2" : [

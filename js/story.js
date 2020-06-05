@@ -67,7 +67,7 @@ function processStoryFile() {
             continue;
         if (line.substr(0, 1) === ">") {
             line = line.substr(1);
-            line = line.split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
+            line = line.split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
             phrases.push({tag: "phrase", speaker: line[0], text: line[1]});
             continue;
         }
@@ -79,11 +79,11 @@ function processStoryFile() {
                 phrases.push({tag: line[0], question: line[1], answers: [], solution: 0});
             }
             if (line[0] === "fill") {
-                let line2 = line[1].split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
+                let line2 = line[1].split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
                 phrases.push({tag: line[0], question: "", speaker: line2[0], text: line2[1], translation: "", answers: [], solution: 0});
             }
             if (line[0] === "order") {
-                let line2 = line[1].split(/\s*([^:]+)\s*:\s*(.*)\s*/).splice(1, 2);
+                let line2 = line[1].split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
                 phrases.push({tag: line[0], question: "", speaker: line2[0], text: line2[1], translation: "", words: []});
             }
             if (line[0] === "pairs") {
@@ -97,7 +97,7 @@ function processStoryFile() {
         if(phrases[phrases.length - 1]) {
             if (phrases[phrases.length - 1].tag === "phrase" && line.substr(0, 1) === "~") {
                 line = line.substr(1);
-                line = line.split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
+                line = line.split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
                 phrases[phrases.length - 1].translation = line[1];
                 phrases[phrases.length - 1].translation_speaker = line[0];
                 continue;
@@ -136,7 +136,7 @@ function processStoryFile() {
                     if (line[1] === "~") {
                         let anwers = phrases[phrases.length - 1].answers;
                         if(anwers.length === 0) {
-                            line = line[2].split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
+                            line = line[2].split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
                             phrases[phrases.length - 1].translation = line[1];
                         }
                         else {
@@ -160,12 +160,12 @@ function processStoryFile() {
             if (phrases[phrases.length - 1].tag === "click") {
                 if(line[0] === "~") {
                     line = line.substr(1);
-                    line = line.split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
+                    line = line.split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
                     phrases[phrases.length - 1].translation = line[1];
                     phrases[phrases.length - 1].translation_speaker = line[0];
                 }
                 else {
-                    line = line.split(/\s*([^:]+)\s*:\s*(.+)\s*/).splice(1, 2);
+                    line = line.split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
                     phrases[phrases.length - 1].text = line[1];
                     phrases[phrases.length - 1].speaker = line[0];
                 }
@@ -223,7 +223,7 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
 
     let inserted = undefined;
     let click_words_list = [];
-    let click_words_solition = 0;
+    let click_words_solution = 0;
     for(let i in words) {
         if(words[i] === "")
             continue;
@@ -235,7 +235,7 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
                     .text(d => words[i].replace(/~/g, " "))
                 click_words_list.push(newword);
                 if(parts[2] === "+")
-                    click_words_solition = click_words_list.length-1;
+                    click_words_solution = click_words_list.length-1;
                 continue
             }
         }
@@ -261,7 +261,7 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
             addWord(words[i], translation[i]);
     }
     if(click_words === true)
-        return [click_words_list, click_words_solition];
+        return [click_words_list, click_words_solution];
     return inserted;
 /*
     target.selectAll("span").data(words).enter().append("span")
@@ -296,7 +296,8 @@ function questionFinished(question) {
 function addSpeach(data) {
     let story = d3.select("#story");
     let phrase = story.append("p");
-    phrase.append("span").attr("class", "speaker").text(data.speaker);
+    if(data.speaker !== undefined)
+        phrase.append("span").attr("class", "speaker").text(data.speaker);
     if(data.translation == undefined)
         phrase.append("span").attr("class", "text").text(data.text);//.each(addTextWithHints);
     else {
@@ -343,7 +344,8 @@ function addFinishMultipleChoice(data) {
     console.log("addFinishMultipleChoice");
     let story = d3.select("#story");
     let phrase = story.append("p");
-    phrase.append("span").attr("class", "speaker").text(data.speaker);
+    if(data.speaker !== undefined)
+        phrase.append("span").attr("class", "speaker").text(data.speaker);
 
     let base_lang = 0;
     if(data.answers[data.solution][2] !== undefined)
@@ -396,7 +398,8 @@ function addOrder(data) {
 
     let story = d3.select("#story");
     let phrase = story.append("p");
-    phrase.append("span").attr("class", "speaker").text(data.speaker);
+    if(data.speaker !== undefined)
+        phrase.append("span").attr("class", "speaker").text(data.speaker);
     let inserted = addTextWithTranslation(phrase.append("span").attr("class", "text"),
         data.text, data.translation, data.words, data.translations);
 
@@ -433,7 +436,8 @@ function addClick(data) {
     question.append("span").attr("class", "question").text(data.question);
 
     let phrase = story.append("p");
-    phrase.append("span").attr("class", "speaker").text(data.speaker);
+    if(data.speaker !== undefined)
+        phrase.append("span").attr("class", "speaker").text(data.speaker);
     let [click_words_list, click_words_solition] = addTextWithTranslation(phrase.append("span").attr("class", "text"),
         data.text, data.translation, undefined, undefined, true);
 
