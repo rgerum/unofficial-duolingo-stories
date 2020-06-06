@@ -296,13 +296,29 @@ function questionFinished(question) {
 function addSpeach(data) {
     let story = d3.select("#story");
     let phrase = story.append("p");
+    //if(data.speaker !== undefined)
+    //    phrase.append("span").attr("class", "speaker").text(data.speaker);
+    let bubble = phrase;
     if(data.speaker !== undefined)
-        phrase.append("span").attr("class", "speaker").text(data.speaker);
-    if(data.translation == undefined)
-        phrase.append("span").attr("class", "text").text(data.text);//.each(addTextWithHints);
-    else {
-        addTextWithTranslation(phrase.append("span"), data.text, data.translation);
+    {
+        let name = story_properties["icon_"+data.speaker];
+        if(name === undefined) {
+            phrase.append("span").attr("class", "speaker").text(data.speaker);
+        }
+        else {
+            phrase.attr("class", "phrase");
+            phrase.append("img").attr("class", "head").attr("src", name)
+            bubble = phrase.append("div").attr("class", "bubble");
+            if (data.translation === undefined)
+                bubble.append("span").attr("class", "text").text(data.text);//.each(addTextWithHints);
+        }
     }
+    if(data.translation == undefined)
+        bubble.append("span").attr("class", "text").text(data.text);//.each(addTextWithHints);
+    else {
+        addTextWithTranslation(bubble.append("span"), data.text, data.translation);
+    }
+
     fadeIn(phrase);
 
     document.getElementById("button_next").dataset.status = "active";
