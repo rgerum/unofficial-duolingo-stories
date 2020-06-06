@@ -89,6 +89,15 @@ editor.commands.addCommand({
     readOnly: true // false if this command should not apply in readOnly mode
 });
 
+editor.commands.addCommand({
+    name: 'save',
+    bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
+    exec: function(editor) {
+        saveStory();
+    },
+    readOnly: true // false if this command should not apply in readOnly mode
+});
+
 let story = undefined;
 let story_id = undefined;
 let languages_ids = undefined;
