@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Duolingo - Unofficial stories - Documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="js/story.js"></script>
+
+    <link rel="stylesheet" href="css/story.css"></link>
+
+    <script src="https://ajaxorg.github.io/ace-builds/src/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://ajaxorg.github.io/ace-builds/src/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/custom_mode.js" type="text/javascript" charset="utf-8"></script>
+
+    <style type="text/css" media="screen">
+        #editor {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        .title {
+            font-size: 40px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="header" style="display: none">
+        <div id="progress"><span id="progress_inside"></span></div>
+    </div>
+    <div id="main">
+
+        <div id="story">
+
+        </div>
+    </div>
+    <div id="footer" style="display:none; left: 50vw; right: 0px; width: 50%">
+        <div id="button_next" style="display: none" class="button" onclick="addNext();">continue</div>
+    </div>
+
+<script>
+
+let story = undefined;
+let story_id = undefined;
+let languages_ids = undefined;
+async function loadStory(name) {
+    languages_ids = await getLanguages();
+    if(name===null) {
+        story = `title=...
+title_base=...
+lang=nl
+lang_base=en
+`;
+    }
+    else {
+        //let response = await fetch(name+".txt");
+        let response = await fetch(`${backend}get_story.php?id=${name}`);
+        let data = await response.json();
+        story_id = data[0]["id"];
+        story = data[0]["text"];
+    }
+    //editor.setValue(story);
+    updateStoryDisplay();
+}
+scroll_enabled = false;
+const urlParams = new URLSearchParams(window.location.search);
+loadStory(31)
+
+function updateStoryDisplay() {
+    //story = editor.getValue();
+    processStoryFile();
+    index = 0;
+    d3.select("#story").selectAll("*").remove();
+    addTitle();
+    while (index < phrases.length) {
+        document.getElementById("button_next").dataset.status = "active";
+        addNext();
+    }
+}
+updateStoryDisplay();
+
+
+</script>
+</body>
+</html>
