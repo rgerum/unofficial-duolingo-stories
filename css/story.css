@@ -1,16 +1,20 @@
 @font-face {
     font-family: nunito;
-    src: url(nunito/Nunito-Regular.ttf);
+    src: url(nunito/Nunito-Regular_new.ttf);
 }
 @font-face {
     font-family: nunito;
-    src: url(nunito/Nunito-Bold.ttf);
+    src: url(nunito/Nunito-Bold_new.ttf);
     font-weight: bold;
+}
+@font-face {
+    font-family: fabada;
+    src: url(fabada/Fabada-regular.ttf);
 }
 
 body {
 //    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-    font-family: nunito;
+    font-family: nunito, fabada;
     position: relative;
     font-size: 19px;
 }
