@@ -80,7 +80,14 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
             ],
             "order4" : [
                 {token : ["variable.parameter", "keyword"], regex : /([^\/]+)(\/)/, next:"order4"},
-                {token : "variable.parameter", regex : /[^\\]+$/, next:"start"},
+                {token : "variable.parameter", regex : /[^\\]+$/, next:"order5"},
+                {defaultToken : "invalid"}
+            ],
+            "order5" : [
+                {token : "string", regex : /(?=^>)/, next  : "start"},
+                {token : "string", regex : /(?=^\[)/, next  : "start"},
+                {token : ["string", "keyword"], regex : /([^\/]+)(\/)/, next:"order5"},
+                {token : ["string", "keyword"], regex : /([^\/]+)($)/, next:"order5"},
                 {defaultToken : "invalid"}
             ],
 

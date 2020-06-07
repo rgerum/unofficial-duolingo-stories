@@ -111,7 +111,7 @@ function processStoryFile() {
             }
             if (line[0] === "order") {
                 let line2 = line[1].split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
-                phrases.push({tag: line[0], question: "", speaker: line2[0], text: line2[1], translation: "", words: []});
+                phrases.push({tag: line[0], question: "", speaker: line2[0], text: line2[1], translations: [], words: []});
             }
             if (line[0] === "pairs") {
                 phrases.push({tag: line[0], question: line[1], words: [], solution: 0});
@@ -178,10 +178,10 @@ function processStoryFile() {
             if (phrases[phrases.length - 1].tag === "order") {
                 if (phrases[phrases.length - 1].question === "")
                     phrases[phrases.length - 1].question = line;
-                else if(phrases[phrases.length - 1].words.length === 0)
-                    phrases[phrases.length - 1].words = line.split("/");
+                else if(phrases[phrases.length - 1].words.length === 0 || phrases[phrases.length - 1].translations.length !== 0)
+                    phrases[phrases.length - 1].words.push(line.split("/"));
                 else
-                    phrases[phrases.length - 1].translations = line.split("/");
+                    phrases[phrases.length - 1].translations.push(line.split("/"));
                 continue;
             }
             if (phrases[phrases.length - 1].tag === "click") {
@@ -474,24 +474,64 @@ function addOrder(data) {
     if(data.speaker !== undefined)
         phrase.append("span").attr("class", "speaker").text(data.speaker);
     let inserted = addTextWithTranslation(phrase.append("span").attr("class", "text"),
-        data.text, data.translation, data.words, data.translations);
+        data.text, data.translation, data.words[0], data.translations[0]);
 
     let sort = [];
-    for(let i = 0; i < data.words.length; i++)
+    for(let i = 0; i < data.words[0].length; i++)
         sort.push(i);
     shuffle(sort);
+
+    let allowed_order = [];
+    for(let i = 0; i < data.words.length; i++) {
+        allowed_order.push([]);
+    }
+    for(let i = 0; i < data.words[0].length; i++) {
+        allowed_order[0].push(i);
+        for(let j = 1; j < data.words.length; j++) {
+            allowed_order[j].push(parseInt(data.words[j][i])-1);
+        }
+    }
+    console.log("allowed_order", allowed_order);
+
+    let clicked_order = [];
+    function checkOrderAllowed(new_value) {
+        for (let j = 0; j < allowed_order.length; j++) {
+            for(let i = 0; i < allowed_order[j].length; i++) {
+                console.log("check", j, i, clicked_order[i], allowed_order[j][i], new_value, "-", i === clicked_order.length, new_value === allowed_order[j][i])
+                if (i === clicked_order.length && new_value === allowed_order[j][i])
+                    return true;
+                if(clicked_order[i] !== allowed_order[j][i])
+                    break
+            }
+        }
+        return false;
+    }
+
+    function getSortOder(d) {
+        for(let j = 0; j < clicked_order.length; j++) {
+            console.log("---", clicked_order[j], parseInt(d), clicked_order[j] == parseInt(d))
+            if (clicked_order[j] == parseInt(d))
+                return j;
+        }
+        return 99;
+    }
 
     let question = story.append("p");
     question.append("span").attr("class", "question").text(data.question);
     question.append("p").selectAll("div").data(sort).enter()
         .append("button").attr("class", "clickword")        .attr("data-status", "unselected")
-        .text(d => data.words[d].replace(/~/g, " "))
+        .text(d => data.words[0][d].replace(/~/g, " "))
         .on("click", function(d, i) {
-            if(d === index) {
+            if(checkOrderAllowed(d)) {
+                clicked_order.push(d);
+                console.log("clicked_order", clicked_order, inserted.nodes())
                 this.dataset.status = "empty";
-                inserted.attr("data-hidden", d => (d<=index) ? undefined : true);
+                inserted.attr("data-hidden", function(d, i) {
+                        return (clicked_order.includes(parseInt(d))) ? undefined : true
+                    })
+                    .sort((a, b) => getSortOder(a) - getSortOder(b));
                 index += 1;
-                if(index === data.words.length)
+                if(index === data.words[0].length)
                     questionFinished(question);
             }
             else {
