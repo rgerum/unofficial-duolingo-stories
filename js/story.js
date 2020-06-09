@@ -28,8 +28,19 @@ function fetch_post(url, data) {
 
 story = undefined;
 story_id = undefined;
+audio_map = undefined;
+audio_objects = undefined;
 async function loadStory(name) {
     //let response = await fetch(name+".txt");
+    audio_map = await fetch(`audio/audio_${name}.json`);
+    if(audio_map.status !== 200)
+        audio_map = undefined;
+    else {
+        audio_map = await audio_map.json();
+        audio_objects = {}
+        for(let id in audio_map)
+            audio_objects[id] = new Audio(`audio/speech_${name}_${id}.mp3`);
+    }
     let response = await fetch(`${backend}get_story.php?id=${name}`);
     let data = await response.json();
     story_id = data[0]["id"];
@@ -95,7 +106,7 @@ function processStoryFile() {
         if (line.substr(0, 1) === ">") {
             line = line.substr(1);
             line = line.split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
-            phrases.push({tag: "phrase", speaker: line[0], text: line[1]});
+            phrases.push({tag: "phrase", id: phrases.length+1, speaker: line[0], text: line[1]});
             continue;
         }
 
@@ -238,10 +249,21 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
         console.log("addWord", words, translation);
         let w = words.split(/([^.,!?:]*)([.,!?:]*)/);
         let span = target;
-        let word = span.append("span").attr("class", "word").text(w[1].replace(/~/g, " "))
+
+        let singe_words = w[1].replace(/~/g, " ").split(" ")
+
+        let word = span.append("span");
+        if(singe_words.length === 1)
+            word.attr("class", "word").text(singe_words[0])
+        else
+            word.selectAll("span").data(singe_words).enter().append("span").attr("class", "word").text((d,i)=>d+(i===(singe_words.length-1) ? "": " "));
+
         if(translation !== undefined && translation !== "" && translation !== "~" && translation !== "~." && translation !== "~," && translation !== "~!" && translation !== "~?" && translation !== "~:") {
             let t = translation.split(/([^.,!?:]*)([.,!?:]*)/);
-            word.attr("class", "word tooltip")
+            if(singe_words.length === 1)
+                word.attr("class", "word tooltip")
+            else
+                word.attr("class", "tooltip")
             word.append("span").attr("class", "tooltiptext").text(t[1].replace(/~/g, " "));
         }
         let space = span.append("span").text(w[2]+" ");
@@ -374,6 +396,20 @@ function addSpeach(data) {
         bubble.append("span").attr("class", "text").text(data.text);//.each(addTextWithHints);
     else {
         addTextWithTranslation(bubble.append("span"), data.text, data.translation);
+    }
+    if(audio_map !== undefined) {
+        let audio_map_data = audio_map[data.id];
+        let times = [];
+        for(let part of audio_map_data) {
+            times.push(part.time);
+        }
+        function wait(d, i) {
+            console.log("wait", d, i, times[i])
+            return times[i];
+        }
+
+        phrase.selectAll(".word").style("opacity", 0.5).transition().delay(wait).style("opacity", 1);
+        audio_objects[data.id].play();
     }
 
     fadeIn(phrase);
