@@ -32,14 +32,14 @@ audio_map = undefined;
 audio_objects = undefined;
 async function loadStory(name) {
     //let response = await fetch(name+".txt");
-    audio_map = await fetch(`audio/audio_${name}.json`);
+    audio_map = await fetch(`audio/${name}/audio_${name}.json`);
     if(audio_map.status !== 200)
         audio_map = undefined;
     else {
         audio_map = await audio_map.json();
         audio_objects = {}
         for(let id in audio_map)
-            audio_objects[id] = new Audio(`audio/speech_${name}_${id}.mp3`);
+            audio_objects[id] = new Audio(`audio/${name}/speech_${name}_${id}.mp3`);
     }
     let response = await fetch(`${backend}get_story.php?id=${name}`);
     let data = await response.json();
@@ -114,21 +114,21 @@ function processStoryFile() {
             // split the part in brackets
             line = line.split(/\s*\[(.*)\]\s*(.+)\s*/).splice(1, 2);
             if (line[0] === "choice") {
-                phrases.push({tag: line[0], question: line[1], answers: [], solution: 0});
+                phrases.push({tag: line[0], id: phrases.length+1, question: line[1], answers: [], solution: 0});
             }
             if (line[0] === "fill") {
                 let line2 = line[1].split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
-                phrases.push({tag: line[0], question: "", speaker: line2[0], text: line2[1], translation: "", answers: [], solution: 0});
+                phrases.push({tag: line[0], id: phrases.length+1, question: "", speaker: line2[0], text: line2[1], translation: "", answers: [], solution: 0});
             }
             if (line[0] === "order") {
                 let line2 = line[1].split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
-                phrases.push({tag: line[0], question: "", speaker: line2[0], text: line2[1], translations: [], words: []});
+                phrases.push({tag: line[0], id: phrases.length+1, question: "", speaker: line2[0], text: line2[1], translations: [], words: []});
             }
             if (line[0] === "pairs") {
-                phrases.push({tag: line[0], question: line[1], words: [], solution: 0});
+                phrases.push({tag: line[0], id: phrases.length+1, question: line[1], words: [], solution: 0});
             }
             if (line[0] === "click") {
-                phrases.push({tag: line[0], question: line[1], speaker: "", text: "", solution: 0});
+                phrases.push({tag: line[0], id: phrases.length+1, question: line[1], speaker: "", text: "", solution: 0});
             }
             continue;
         }
@@ -168,8 +168,16 @@ function processStoryFile() {
                     if (line[1] === "+")
                         phrases[phrases.length - 1].solution = phrases[phrases.length - 1].answers.length;
                     if (line[1] === "+" || line[1] === "-") {
+                        let correct = line[1] === "+";
                         let splited = line[2].split("/");
                         phrases[phrases.length - 1].answers.push([splited[0], "", splited[1]]);
+                        // construct the target text (for audio)
+                        if(correct) {
+                            if (splited[1] === undefined)
+                                phrases[phrases.length - 1].full_text = phrases[phrases.length - 1].text.replace("*", splited[0]);
+                            else
+                                phrases[phrases.length - 1].full_text = phrases[phrases.length - 1].text.replace("*", splited[1]);
+                        }
                     }
                     if (line[1] === "~") {
                         let anwers = phrases[phrases.length - 1].answers;
@@ -189,8 +197,14 @@ function processStoryFile() {
             if (phrases[phrases.length - 1].tag === "order") {
                 if (phrases[phrases.length - 1].question === "")
                     phrases[phrases.length - 1].question = line;
-                else if(phrases[phrases.length - 1].words.length === 0 || phrases[phrases.length - 1].translations.length !== 0)
+                else if(phrases[phrases.length - 1].words.length === 0 || phrases[phrases.length - 1].translations.length !== 0) {
                     phrases[phrases.length - 1].words.push(line.split("/"));
+
+                    // construct the target text (for audio)
+                    if(phrases[phrases.length - 1].words.length === 1) {
+                        phrases[phrases.length - 1].full_text = phrases[phrases.length - 1].text.replace("*", line.split("/").join(" "));
+                    }
+                }
                 else
                     phrases[phrases.length - 1].translations.push(line.split("/"));
                 continue;
@@ -372,33 +386,33 @@ function addCode(data) {
     editor.blur();
 }
 
-function addSpeach(data) {
+function addSpeaker(speaker) {
     let story = d3.select("#story");
     let phrase = story.append("p");
     //if(data.speaker !== undefined)
     //    phrase.append("span").attr("class", "speaker").text(data.speaker);
     let bubble = phrase;
-    if(data.speaker !== undefined)
+    if(speaker !== undefined)
     {
-        let name = story_properties["icon_"+data.speaker];
+        let name = story_properties
+            ["icon_"+speaker];
         if(name === undefined) {
-            phrase.append("span").attr("class", "speaker").text(data.speaker);
+            phrase.append("span").attr("class", "speaker").text(speaker);
         }
         else {
             phrase.attr("class", "phrase");
             phrase.append("img").attr("class", "head").attr("src", name)
             bubble = phrase.append("div").attr("class", "bubble");
-            if (data.translation === undefined)
-                bubble.append("span").attr("class", "text").text(data.text);//.each(addTextWithHints);
+            //if (data.translation === undefined)
+            //    bubble.append("span").attr("class", "text").text(text);//.each(addTextWithHints);
         }
     }
-    if(data.translation == undefined)
-        bubble.append("span").attr("class", "text").text(data.text);//.each(addTextWithHints);
-    else {
-        addTextWithTranslation(bubble.append("span"), data.text, data.translation);
-    }
+    return [phrase, bubble];
+}
+
+function playAudio(id, phrase) {
     if(audio_map !== undefined) {
-        let audio_map_data = audio_map[data.id];
+        let audio_map_data = audio_map[id];
         let times = [];
         for(let part of audio_map_data) {
             times.push(part.time);
@@ -409,8 +423,19 @@ function addSpeach(data) {
         }
 
         phrase.selectAll(".word").style("opacity", 0.5).transition().delay(wait).style("opacity", 1);
-        audio_objects[data.id].play();
+        audio_objects[id].play();
     }
+}
+
+function addSpeech(data) {
+    let [phrase, bubble] = addSpeaker(data.speaker);
+    if(data.translation == undefined)
+        bubble.append("span").attr("class", "text").text(data.text);//.each(addTextWithHints);
+    else {
+        addTextWithTranslation(bubble.append("span"), data.text, data.translation);
+    }
+    
+    playAudio(data.id, phrase);
 
     fadeIn(phrase);
 
@@ -452,14 +477,15 @@ function addMultipleChoice(data) {
 function addFinishMultipleChoice(data) {
     console.log("addFinishMultipleChoice");
     let story = d3.select("#story");
-    let phrase = story.append("p");
-    if(data.speaker !== undefined)
-        phrase.append("span").attr("class", "speaker").text(data.speaker);
+
+    let [phrase, bubble] = addSpeaker(data.speaker);
+    //if(data.speaker !== undefined)
+    //    phrase.append("span").attr("class", "speaker").text(data.speaker);
 
     let base_lang = 0;
     if(data.answers[data.solution][2] !== undefined)
         base_lang = 1;
-    let inserted = addTextWithTranslation(phrase.append("span").attr("class", "text"),
+    let inserted = addTextWithTranslation(bubble.append("span").attr("class", "text"),
         data.text, data.translation, data.answers[data.solution][0+base_lang*2], data.answers[data.solution][1+base_lang*2]);
 
     let question = story.append("p");
@@ -488,6 +514,7 @@ function addFinishMultipleChoice(data) {
             addTextWithTranslation(p.append("div").attr("class", "answer_text"), d[0], d[1]);
         })
 
+    playAudio(data.id, phrase);
 
     fadeIn(question);
 }
@@ -506,10 +533,9 @@ function addOrder(data) {
     let index = 0;
 
     let story = d3.select("#story");
-    let phrase = story.append("p");
-    if(data.speaker !== undefined)
-        phrase.append("span").attr("class", "speaker").text(data.speaker);
-    let inserted = addTextWithTranslation(phrase.append("span").attr("class", "text"),
+    let [phrase, bubble] = addSpeaker(data.speaker);
+
+    let inserted = addTextWithTranslation(bubble.append("span").attr("class", "text"),
         data.text, data.translation, data.words[0], data.translations[0]);
 
     let sort = [];
@@ -576,6 +602,8 @@ function addOrder(data) {
             }
         })
 
+    playAudio(data.id, phrase);
+
     fadeIn(question);
 }
 function addClick(data) {
@@ -584,7 +612,7 @@ function addClick(data) {
     let question = story.append("p");
     question.append("span").attr("class", "question").text(data.question);
 
-    let phrase = story.append("p");
+    let phrase = question.append("p");//story.append("p");
     if(data.speaker !== undefined)
         phrase.append("span").attr("class", "speaker").text(data.speaker);
     let [click_words_list, click_words_solition] = addTextWithTranslation(phrase.append("span").attr("class", "text"),
@@ -682,7 +710,7 @@ function addNext() {
         addCode(phrases[index]);
 
     if(phrases[index].tag === "phrase")
-        addSpeach(phrases[index]);
+        addSpeech(phrases[index]);
     if(phrases[index].tag === "choice")
         addMultipleChoice(phrases[index]);
     if(phrases[index].tag === "fill")
@@ -723,4 +751,12 @@ async function hoverWord(element) {
         }
     }
     console.log("currenttrans", this.dataset.translation, this.dataset.has_translation);
+}
+
+function download_json() {
+    let j = document.createElement("a")
+    j.id = "download"
+    j.download = "story"+story_id+".json"
+    j.href = URL.createObjectURL(new Blob([JSON.stringify({"meta": story_properties, "phrases": phrases}, null, 2)]))
+    j.click()
 }
