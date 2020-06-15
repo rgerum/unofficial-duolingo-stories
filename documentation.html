@@ -63,7 +63,7 @@ lang_base=en
     }
     else {
         //let response = await fetch(name+".txt");
-        let response = await fetch(`${backend}get_story.php?id=${name}`);
+        let response = await fetch(`${backend_stories}get_story.php?id=${name}`);
         let data = await response.json();
         story_id = data[0]["id"];
         story = data[0]["text"];

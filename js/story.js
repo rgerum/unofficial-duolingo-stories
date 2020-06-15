@@ -1,4 +1,5 @@
-backend = "https://carex.uber.space/stories/backend/stories/"
+backend = "https://carex.uber.space/stories/backend/"
+backend_stories = backend+"stories/"
 
 Date.prototype.now = function () {
     var day = ((this.getDate() < 10)?"0":"") + this.getDate();
@@ -41,7 +42,7 @@ async function loadStory(name) {
         for(let id in audio_map)
             audio_objects[id] = new Audio(`audio/${name}/speech_${name}_${id}.mp3`);
     }
-    let response = await fetch(`${backend}get_story.php?id=${name}`);
+    let response = await fetch(`${backend_stories}get_story.php?id=${name}`);
     let data = await response.json();
     story_id = data[0]["id"];
     story = data[0]["text"];
@@ -51,7 +52,7 @@ async function loadStory(name) {
 //    addNext();
 }
 async function getLanguages() {
-    let response = await fetch(`${backend}get_languages.php`);
+    let response = await fetch(`${backend_stories}get_languages.php`);
     let data = await response.json();
     let languages_ids = {}
     for(let lang of data)
@@ -59,7 +60,7 @@ async function getLanguages() {
     return languages_ids;
 }
 async function setStoryDone(id) {
-    let response = await fetch(`${backend}set_story_done.php?id=${id}`);
+    let response = await fetch(`${backend_stories}set_story_done.php?id=${id}`);
     console.log("response", response);
 }
 

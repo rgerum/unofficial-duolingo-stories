@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="js/login.js"></script>
     <script src="js/story.js"></script>
 
     <link rel="stylesheet" href="css/story.css"></link>
@@ -27,19 +28,54 @@
             margin: 0;
         }
 
+        #header {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 30px;
+            background: white;
+            padding: 30px 30px;
+            box-sizing: border-box;
+        }
+
+        #header {
+            border-bottom: 1px solid gray;
+            height: 80px;
+            padding-top: 10px;
+        }
+        #main {
+            /*padding-top: 80px;*/
+        }
+
     </style>
 </head>
 <body>
-<div style="display: grid; grid-template-columns: 50% 50%;">
+<div id="header">
+    <div id="header_left" style="display: inline-block">
+        <div class="button" onclick="location.href = 'editor_overview.html?lang='+urlParams.get('lang');" style="float: none">Overview</div>
+        <a href="documentation.html">Documentation</a>
+    </div>
+    <div id="login_form" style="display: none; float: right">
+        <div id="login_status"></div>
+        <input id=username type="text" value="" placeholder="username">
+        <input id=password type="password" value="" placeholder="password">
+        <div class="button" onclick="login_button();" style="float: none">Login</div>
+    </div>
+    <div id="loggedin" style="display: none; float: right">
+        <span id="display_username" style="font-size: 1.2em; padding-right: 14px; display: inline-block;"></span>
+        <!--<div id="button_editor" class="button" onclick="location.href = 'index.html'+window.location.search;" style="display:none; float: none">Home</div>-->
+        <div class="button" onclick="button_logout();" style="float: none">Logout</div>
+    </div>
+    <div id="progress" style="display: none"><span id="progress_inside"></span></div>
+</div>
+<div style="padding-top: 0px; display: grid; grid-template-columns: 50% 50%;">
     <div>
-    <div id="editor" contenteditable="" style="width: 50%" >
+    <div id="editor" contenteditable="" style="margin-top: 80px; width: 50%" >
     </div>
     </div>
     <div style="background: white; height: 100vh; overflow: scroll;">
-    <div id="header" style="display: none">
-        <div id="progress"><span id="progress_inside"></span></div>
-    </div>
-    <div id="main">
+    <div id="main" style="margin-top: 80px">
 
         <div id="story">
 
@@ -54,6 +90,44 @@
 </div>
 
 <script>
+    const urlParams = new URLSearchParams(window.location.search);
+
+    /* LOGIN */
+
+
+    async function button_logout() {
+        await logout();
+        check_login();
+    }
+
+    async function login_button() {
+        let success = await login(inputs_to_dict({username: "#username", password: "#password"}));
+        if(success == false) {
+            document.getElementById("login_status").innerText = "Error: username or password is wrong.";
+        }
+        else {
+            document.getElementById("login_status").innerHTML = "Successfully logged in. Go to the <a href='index.html'>overview</a>.";
+            check_login();
+        }
+    }
+    async function check_login() {
+        let login = await get_login();
+        console.log("login", login);
+        if(login === undefined) {
+            document.getElementById("login_form").style.display = "block";
+            document.getElementById("loggedin").style.display = "none";
+        }
+        else {
+            document.getElementById("login_form").style.display = "none";
+            document.getElementById("loggedin").style.display = "block";
+            //document.getElementById("button_editor").style.display = login.role != 0 ? "inline-block" : "none";
+            document.getElementById("display_username").innerText = login.username;
+        }
+    }
+    check_login();
+
+    /* EDITOR */
+
     var langTools = ace.require("ace/ext/language_tools");
     var editor = ace.edit("editor");
 
@@ -106,13 +180,13 @@ async function loadStory(name) {
     if(name===null) {
         story = `title=...
 title_base=...
-lang=nl
+lang=${urlParams.get('lang')}
 lang_base=en
 `;
     }
     else {
         //let response = await fetch(name+".txt");
-        let response = await fetch(`${backend}get_story.php?id=${name}`);
+        let response = await fetch(`${backend_stories}get_story.php?id=${name}`);
         let data = await response.json();
         story_id = data[0]["id"];
         story = data[0]["text"];
@@ -120,7 +194,7 @@ lang_base=en
     editor.setValue(story);
     updateStoryDisplay();
 }
-const urlParams = new URLSearchParams(window.location.search);
+
 loadStory(urlParams.get('story'))
 
 function updateStoryDisplay() {
@@ -151,7 +225,13 @@ async function saveStory() {
     if(story_id !== undefined)
         data.id = story_id;
     console.log("save", data);
-    let x = await fetch_post(backend+"set_story.php", data);
+    let x = await fetch_post(backend_stories+"set_story.php", data);
+    if(x.status !== 200) {
+        check_login();
+        alert("Story could not be saved. Maybe you are not logged in?")
+        document.getElementById("button_save").getElementsByTagName("img")[0].style.display = "none";
+        return;
+    }
     x = await x.json();
     x = x[0];
     console.log("saved", x);

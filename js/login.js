@@ -1,4 +1,5 @@
-let backend = 'https://carex.uber.space/stories/backend/user/';
+let backend = 'https://carex.uber.space/stories/backend/';
+let backend_user = backend+'user/';
 
 function inputs_to_dict(inputs) {
     let result = {}
@@ -28,7 +29,7 @@ function fetch_post(url, data) {
 }
 
 async function get_login() {
-    let response = await fetch(`${backend}get_login.php`)
+    let response = await fetch(`${backend_user}get_login.php`)
     if(response.status === 403)
         return undefined;
     console.log(response);
@@ -37,8 +38,8 @@ async function get_login() {
 }
 
 async function login(data) {
-    console.log(data, dict_to_query(data), `${backend}check_auth.php?${dict_to_query(data)}`)
-    let reponse = await fetch(`${backend}check_auth.php?${dict_to_query(data)}`)
+    console.log(data, dict_to_query(data), `${backend_user}check_auth.php?${dict_to_query(data)}`)
+    let reponse = await fetch(`${backend_user}check_auth.php?${dict_to_query(data)}`)
     if(reponse.status === 403)
         return false;
     console.log(reponse);
@@ -46,8 +47,8 @@ async function login(data) {
 }
 
 async function register(data) {
-    console.log(`${backend}register_send.php`);
-    let response = await fetch_post(`${backend}register_send.php`, data)
+    console.log(`${backend_user}register_send.php`);
+    let response = await fetch_post(`${backend_user}register_send.php`, data)
     if(response.status === 403) {
         let text = await response.text();
         return [false, text];
@@ -61,8 +62,8 @@ async function register(data) {
 
 
 async function activate(data) {
-    console.log(data, dict_to_query(data), `${backend}get_activation.php?${dict_to_query(data)}`)
-    let reponse = await fetch(`${backend}get_activation.php?${dict_to_query(data)}`)
+    console.log(data, dict_to_query(data), `${backend_user}get_activation.php?${dict_to_query(data)}`)
+    let reponse = await fetch(`${backend_user}get_activation.php?${dict_to_query(data)}`)
     if(reponse.status !== 200) {
         return false;
     }
@@ -71,6 +72,6 @@ async function activate(data) {
 }
 
 async function logout() {
-    let reponse = await fetch(`${backend}set_logout.php`)
+    let reponse = await fetch(`${backend_user}set_logout.php`)
     get_login();
 }

@@ -7,6 +7,8 @@
 
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="js/login.js"></script>
+    <script src="js/story.js"></script>
+    <script type="text/javascript" src="js/sort-table.min.js"></script>
 
     <style>
         body {
@@ -260,6 +262,32 @@
         }
         #main {
             padding-top: 80px;
+            max-width: 700px;
+        }
+
+        #story_list {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #story_list td, #story_list th {
+            /*border: 1px solid #ddd;*/
+            padding: 8px;
+        }
+
+        #story_list tr:nth-child(even){background-color: #f2f2f2;}
+
+        #story_list tr:hover {background-color: #ddd;}
+
+        #story_list tr a { color: black; font-weight: bold; }
+
+        #story_list th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #78c800;
+            color: white;
         }
     </style>
 </head>
@@ -267,7 +295,7 @@
 
 <div id="header">
     <div id="header_left" style="display: inline-block">
-        <div class="button" onclick="location.href = 'editor.html';" style="float: none">New Story</div>
+        <div class="button" onclick="location.href = 'editor.html?lang='+urlParams.get('lang');" style="float: none">New Story</div>
         <a href="documentation.html">Documentation</a>
     </div>
     <div id="login_form" style="display: none; float: right">
@@ -275,7 +303,6 @@
         <input id=username type="text" value="" placeholder="username">
         <input id=password type="password" value="" placeholder="password">
         <div class="button" onclick="login_button();" style="float: none">Login</div>
-        <div class="button" onclick="location.href = 'login.html';" style="float: none">Register</div>
     </div>
     <div id="loggedin" style="display: none; float: right">
         <span id="display_username" style="font-size: 1.2em; padding-right: 14px; display: inline-block;"></span>
@@ -285,14 +312,19 @@
 </div>
 <div id="main">
     <h1>Editor - Stories</h1>
-    <div id="list" style="display: grid; grid-template-columns: auto auto auto;">
+    <p id="languages"></p>
+    <table id="story_list" class="js-sort-table">
+        <thead>
+        <tr><th style="border-radius: 10px 0 0 0">Name</th><th>XP</th><th>Author</th><th>Creation</th><th style="border-radius: 0 10px 0 0">Change</th></tr>
+        </thead>
+      <tbody>
 
-    </div>
-    <ul>
+      </tbody>
+    </table>
 
-    </ul>
 </div>
 <script>
+    const urlParams = new URLSearchParams(window.location.search);
 
 async function button_logout() {
     await logout();
@@ -322,31 +354,44 @@ async function check_login() {
         document.getElementById("button_editor").style.display = login.role != 0 ? "inline-block" : "none";
         document.getElementById("display_username").innerText = login.username;
     }
-    const urlParams = new URLSearchParams(window.location.search);
+
     loadStory(urlParams.get('lang'), urlParams.get('lang_base') || "en");
 }
 check_login();
 
 list = [];
 async function loadStory(lang, lang_base) {
-    let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
+    let response_lang = await fetch(`${backend_stories}get_languages.php`);
+    let data_lang = await response_lang.json();
+    d3.select("#languages").selectAll("span").remove();
+    for(let lang of data_lang) {
+        if(lang.short === "en")
+            continue
+        let div = d3.select("#languages").append("span");
+        div.append("span").html(" &bull; ")
+        let a = div.append("a").text(lang.name).attr("href", "editor_overview.html?lang="+lang.short);
+        if(lang.short === urlParams.get('lang'))
+            a.style("font-weight", "bold");
+    }
+
+    let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list_editor.php?lang=${lang}&lang_base=${lang_base}`);
     if(response.status != 200)
         return
     let data = await response.json();
     console.log(data);
-    d3.select("#list").selectAll("div").remove();
-    d3.select("#list").selectAll("div").data(data).enter().append("div")
-        .style("width", "150px")
-        .each(function (d) {
-            d3.select(this).append("a")
-                .attr("class", "button_story")
-                .attr("href", "editor.html?story="+d.id)
-                .attr("data-done", d=>d.time != null)
-            d3.select(this).append("div")
-                .attr("class", "story_title")
+    d3.select("tbody").selectAll("tr").remove();
+    d3.select("tbody").selectAll("tr").data(data).enter().append("tr")
+        .each(function(d) {
+            d3.select(this).append("td").append("a")
+                .attr("href", "editor.html?story="+d.id+"&lang="+urlParams.get('lang'))
                 .text(d.name_base)
+            d3.select(this).append("td").text("+"+d.xp+"xp")
+            d3.select(this).append("td").text(d.username)
+            d3.select(this).append("td").text(d.date)
+            d3.select(this).append("td").text(d.change_date)
         })
 
+    sortTable(document.getElementById("story_list"), 3, -1)
 }
 </script>
 </body>
