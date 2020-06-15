@@ -18,7 +18,8 @@ $keys = ["id" => "int",
     "xp" => "int",
     "text" => "string"];
 
-$_POST["author"] = $_SESSION["user"];
+if($_POST["id"] == "")
+    $_POST["author"] = $_SESSION["user"]["id"];
 
 $id = updateDatabase($keys, "story", $_POST, "id");
 
