@@ -2,9 +2,16 @@ import boto3
 import json
 from pathlib import Path
 
+key_data = {}
+with open("rootkey.csv", "r") as fp:
+    for line in fp:
+        key, value = line.strip().split("=")
+        key_data[key] = value
+
+
 polly_client = boto3.Session(
-    aws_access_key_id="AKIAIBJQ5Z3ENEMXS42Q",
-    aws_secret_access_key="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",
+    aws_access_key_id=key_data["AWSAccessKeyId"],
+    aws_secret_access_key=key_data["AWSSecretKey"],
     region_name='eu-central-1').client('polly')
 
 def getSpeachMarks(VoiceId, Text):
@@ -17,6 +24,7 @@ def getSpeachMarks(VoiceId, Text):
     return text
 
 def saveAudio(filename, VoiceId, Text):
+    print("saveAudio", filename, VoiceId, Text)
     response = polly_client.synthesize_speech(VoiceId=VoiceId,
                                                   OutputFormat='mp3',
                                                   Text=Text)
@@ -27,7 +35,7 @@ def saveAudio(filename, VoiceId, Text):
 def responseToDict(resp):
     return [json.loads(x) for x in resp.split("\n") if x != ""]
 
-story_id = 2
+story_id = 58
 output_dir = Path(str(story_id))
 output_dir.mkdir(exist_ok=True)
 
@@ -38,6 +46,11 @@ meta = story["meta"]
 story = story["phrases"]
 
 speakers = dict(default="Ruben")
+print(meta["lang"])
+#exit()
+if meta["lang"] == "no":
+    speakers = dict(default="Liv")
+
 
 for key in meta:
     if key.startswith("speaker"):
@@ -45,7 +58,12 @@ for key in meta:
 
 data = {}
 for part in story:
-    VoiceId = speakers[part.get("speaker", "default")]
+    try:
+        VoiceId = speakers[part.get("speaker", "default")]
+    except KeyError:
+        VoiceId = speakers["default"]
+    print(VoiceId, '"'+VoiceId+'"')
+    #exit()
     Text = None
     if part["tag"] == "phrase":
         Text = part["text"]
@@ -58,7 +76,7 @@ for part in story:
         saveAudio(output_dir / f"speech_{story_id}_{part['id']}.mp3", VoiceId, Text)
         #print("-", responseToDict(data[str(part["id"])]), "-", sep="")
         data[part["id"]] = responseToDict(getSpeachMarks(VoiceId, Text))
-        print(part["id"], speakers[part.get("speaker", "default")], part["text"].replace("~", " "))
+        #print(part["id"], speakers[part.get("speaker", "default")], part["text"].replace("~", " "))
         print(data)
         #exit()
 
