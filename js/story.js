@@ -431,12 +431,19 @@ function playAudio(id, phrase) {
 
 function addSpeech(data) {
     let [phrase, bubble] = addSpeaker(data.speaker);
-    if(data.translation == undefined)
+
+    if(audio_map !== undefined) {
+        let loudspeaker = bubble.append("img").attr("src", "https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg")
+            .attr("width", "28px").attr("class", "speaker")
+            .on("click", function() { console.log("click"); playAudio(data.id, phrase)});
+    }
+
+    if(data.translation === undefined)
         bubble.append("span").attr("class", "text").text(data.text);//.each(addTextWithHints);
     else {
         addTextWithTranslation(bubble.append("span"), data.text, data.translation);
     }
-    
+
     playAudio(data.id, phrase);
 
     fadeIn(phrase);

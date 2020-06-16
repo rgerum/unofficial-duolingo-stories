@@ -384,3 +384,10 @@ span[data-hidden=true] {
     position: absolute;
     top: 0;
 }
+
+.speaker {
+    position: relative;
+    top: 6px;
+    margin-right: 8px;
+    cursor: pointer;
+}
