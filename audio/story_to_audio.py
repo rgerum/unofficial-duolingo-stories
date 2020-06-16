@@ -53,6 +53,14 @@ print(meta["lang"])
 #exit()
 if meta["lang"] == "no":
     speakers = dict(default="Liv")
+if meta["lang"] == "sv":
+    speakers = dict(default="Astrid")
+if meta["lang"] == "ru":
+    speakers = dict(default="Maxim")
+if meta["lang"] == "ja":
+    speakers = dict(default="Takumi")
+if meta["lang"] == "zh":
+    speakers = dict(default="Zhiyu")
 
 
 for key in meta:
