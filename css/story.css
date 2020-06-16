@@ -12,9 +12,19 @@
     src: url(fabada/Fabada-regular.ttf);
 }
 
+@font-face {
+    font-family: nunito;
+    src: url(vollkorn/VollkornMedium-jEVry.ttf);
+}
+@font-face {
+    font-family: nunito;
+    src: url(vollkorn/VollkornBold-ALwGg.ttf);
+    font-weight: bold;
+}
+
 body {
-//    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-    font-family: nunito, fabada;
+    /* font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";*/
+    font-family: nunito, vollkorn;/*, -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";*/
     position: relative;
     font-size: 19px;
 }

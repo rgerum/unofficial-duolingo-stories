@@ -1,5 +1,6 @@
 backend = "https://carex.uber.space/stories/backend/"
 backend_stories = backend+"stories/"
+backend_audio = "https://carex.uber.space/stories/audio/"
 
 Date.prototype.now = function () {
     var day = ((this.getDate() < 10)?"0":"") + this.getDate();
@@ -760,4 +761,13 @@ function download_json() {
     j.download = "story"+story_id+".json"
     j.href = URL.createObjectURL(new Blob([JSON.stringify({"meta": story_properties, "phrases": phrases}, null, 2)]))
     j.click()
+}
+
+async function upload_json() {
+    let json = JSON.stringify({"meta": story_properties, "phrases": phrases});
+    let response = await fetch_post(`${backend_audio}set_audio.php`, {"id": story_id, "json": json});
+    console.log(response);
+    let text = await response.text();
+    console.log(text);
+    return text;
 }

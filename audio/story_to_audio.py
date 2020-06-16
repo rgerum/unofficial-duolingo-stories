@@ -1,5 +1,7 @@
+#!/usr/bin/env python3
 import boto3
 import json
+import sys
 from pathlib import Path
 
 key_data = {}
@@ -24,7 +26,7 @@ def getSpeachMarks(VoiceId, Text):
     return text
 
 def saveAudio(filename, VoiceId, Text):
-    print("saveAudio", filename, VoiceId, Text)
+    print("saveAudio", filename, VoiceId)#, Text)
     response = polly_client.synthesize_speech(VoiceId=VoiceId,
                                                   OutputFormat='mp3',
                                                   Text=Text)
@@ -35,7 +37,7 @@ def saveAudio(filename, VoiceId, Text):
 def responseToDict(resp):
     return [json.loads(x) for x in resp.split("\n") if x != ""]
 
-story_id = 58
+story_id = int(sys.argv[1])
 output_dir = Path(str(story_id))
 output_dir.mkdir(exist_ok=True)
 
@@ -44,9 +46,10 @@ with open(f"story{story_id}.json", "rb") as fp:
 
 meta = story["meta"]
 story = story["phrases"]
-
 speakers = dict(default="Ruben")
 print(meta["lang"])
+
+#raise ValueError
 #exit()
 if meta["lang"] == "no":
     speakers = dict(default="Liv")
@@ -69,7 +72,7 @@ for part in story:
         Text = part["text"]
     else:
         Text = part.get("full_text", None)
-    print(VoiceId, Text, part)
+    #print(VoiceId, Text, part)
 
     if Text is not None:
         Text = Text.replace("~", " ")
@@ -77,27 +80,10 @@ for part in story:
         #print("-", responseToDict(data[str(part["id"])]), "-", sep="")
         data[part["id"]] = responseToDict(getSpeachMarks(VoiceId, Text))
         #print(part["id"], speakers[part.get("speaker", "default")], part["text"].replace("~", " "))
-        print(data)
+        #print(data)
         #exit()
 
 with Path(output_dir / f"audio_{story_id}.json").open("w") as fp:
     json.dump(data, fp, indent=2)
 
-VoideId = "Ruben"
-Text = "Aafke huurt dit weekend een kamer bij Lonneke. Ze klopt op de deur."
-if 0:
-    response = polly_client.synthesize_speech(VoiceId=VoideId,
-                    OutputFormat='json',
-                    SpeechMarkTypes=["word"],
-                    Text = Text)
-    print(response)
-    text = response["AudioStream"].read().decode()
-    print(text)
-if 0:
-    response = polly_client.synthesize_speech(VoiceId=VoideId,
-                                              OutputFormat='mp3',
-                                              Text=Text)
-    print(response)
-    file = open('speech.mp3', 'wb')
-    file.write(response['AudioStream'].read())
-    file.close()
+print("finished")
