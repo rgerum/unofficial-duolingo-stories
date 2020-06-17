@@ -315,7 +315,7 @@
     <p id="languages"></p>
     <table id="story_list" class="js-sort-table">
         <thead>
-        <tr><th style="border-radius: 10px 0 0 0">Name</th><th>XP</th><th>Author</th><th>Creation</th><th style="border-radius: 0 10px 0 0">Change</th></tr>
+        <tr><th style="border-radius: 10px 0 0 0">Name</th><th>XP</th><th>Author</th><th>Creation</th><th>Change</th><th style="border-radius: 0 10px 0 0">Done</th></tr>
         </thead>
       <tbody>
 
@@ -369,7 +369,7 @@ async function loadStory(lang, lang_base) {
             continue
         let div = d3.select("#languages").append("span");
         div.append("span").html(" &bull; ")
-        let a = div.append("a").text(lang.name).attr("href", "editor_overview.html?lang="+lang.short);
+        let a = div.append("a").text(lang.name+" ("+lang.count+")").attr("href", "editor_overview.html?lang="+lang.short);
         if(lang.short === urlParams.get('lang'))
             a.style("font-weight", "bold");
     }
@@ -389,6 +389,7 @@ async function loadStory(lang, lang_base) {
             d3.select(this).append("td").text(d.username)
             d3.select(this).append("td").text(d.date)
             d3.select(this).append("td").text(d.change_date)
+            d3.select(this).append("td").text(d.count+"x")
         })
 
     sortTable(document.getElementById("story_list"), 3, -1)
