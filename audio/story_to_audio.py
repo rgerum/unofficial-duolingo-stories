@@ -76,7 +76,7 @@ for part in story:
     print(VoiceId, '"'+VoiceId+'"')
     #exit()
     Text = None
-    if part["tag"] == "phrase":
+    if part["tag"] == "phrase" or part["tag"] == "title":
         Text = part["text"]
     else:
         Text = part.get("full_text", None)

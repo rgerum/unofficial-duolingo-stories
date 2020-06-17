@@ -49,8 +49,8 @@ async function loadStory(name) {
     story = data[0]["text"];
     document.getElementById("button_next").dataset.status = "active";
     processStoryFile();
-    addTitle();
-//    addNext();
+    //addTitle();
+    addNext();
 }
 async function getLanguages() {
     let response = await fetch(`${backend_stories}get_languages.php`);
@@ -238,6 +238,7 @@ function processStoryFile() {
             story_properties[key] = value;
         }
     }
+    phrases.splice(0, 0, {tag: "title", id: 0, text: story_properties.title, translation: story_properties.title_translation});
     console.log(phrases);
 }
 
@@ -245,7 +246,10 @@ let index = 0;
 function addTitle() {
     let story = d3.select("#story");
     let phrase = story.append("p");
-    phrase.append("span").attr("class", "title").text(story_properties.title);
+    let title = phrase.append("span").attr("class", "title")
+    addLoudspeaker(0, title);
+    addTextWithTranslation(title, story_properties.title, story_properties.title_translation)
+    playAudio(0, title)
     document.getElementById("button_next").dataset.status = "active";
 }
 function addTextWithTranslation(target, words, translation, words_fill, translation_fill, click_words=false) {
@@ -425,18 +429,25 @@ function playAudio(id, phrase) {
         }
 
         phrase.selectAll(".word").style("opacity", 0.5).transition().delay(wait).style("opacity", 1);
+        //audio_objects[id].stop();
+        audio_objects[id].pause();
+        audio_objects[id].currentTime = 0;
         audio_objects[id].play();
+    }
+}
+
+function addLoudspeaker(id, bubble) {
+    if(audio_map !== undefined) {
+        let loudspeaker = bubble.append("img").attr("src", "https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg")
+            .attr("width", "28px").attr("class", "speaker")
+            .on("click", function() { console.log("click"); playAudio(id, bubble)});
     }
 }
 
 function addSpeech(data) {
     let [phrase, bubble] = addSpeaker(data.speaker);
 
-    if(audio_map !== undefined) {
-        let loudspeaker = bubble.append("img").attr("src", "https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg")
-            .attr("width", "28px").attr("class", "speaker")
-            .on("click", function() { console.log("click"); playAudio(data.id, phrase)});
-    }
+    addLoudspeaker(data.id, bubble);
 
     if(data.translation === undefined)
         bubble.append("span").attr("class", "text").text(data.text);//.each(addTextWithHints);
@@ -717,6 +728,11 @@ function addNext() {
         addHtml(phrases[index]);
     if(phrases[index].tag === "code")
         addCode(phrases[index]);
+
+    if(phrases[index].tag === "title") {
+        addTitle(phrases[index]);
+        console.log("[phrase]", "title", phrases[index]);
+    }
 
     if(phrases[index].tag === "phrase")
         addSpeech(phrases[index]);

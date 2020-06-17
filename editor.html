@@ -203,7 +203,7 @@ function updateStoryDisplay() {
     processStoryFile();
     index = 0;
     d3.select("#story").selectAll("*").remove();
-    addTitle();
+    //addTitle();
     while (index < phrases.length) {
         document.getElementById("button_next").dataset.status = "active";
         addNext();
