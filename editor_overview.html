@@ -259,6 +259,7 @@
             border-bottom: 1px solid gray;
             height: 80px;
             padding-top: 10px;
+            z-index: 1;
         }
         #main {
             padding-top: 80px;
@@ -289,6 +290,69 @@
             background-color: #78c800;
             color: white;
         }
+
+        /* The switch - the box around the slider */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 30px;
+            height: 17px;
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* The slider */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 13px;
+            width: 13px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #78C800;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #78C800;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(13px);
+            -ms-transform: translateX(13px);
+            transform: translateX(13px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 17px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -315,7 +379,7 @@
     <p id="languages"></p>
     <table id="story_list" class="js-sort-table">
         <thead>
-        <tr><th style="border-radius: 10px 0 0 0">Name</th><th>XP</th><th>Author</th><th>Creation</th><th>Change</th><th style="border-radius: 0 10px 0 0">Done</th></tr>
+        <tr><th style="border-radius: 10px 0 0 0">Name</th><th style="text-align: right">XP</th><th>Author</th><th>Creation</th><th>Change</th><th style="text-align: center">Done</th><th style="border-radius: 0 10px 0 0">Public</th></tr>
         </thead>
       <tbody>
 
@@ -385,11 +449,42 @@ async function loadStory(lang, lang_base) {
             d3.select(this).append("td").append("a")
                 .attr("href", "editor.html?story="+d.id+"&lang="+urlParams.get('lang'))
                 .text(d.name_base)
-            d3.select(this).append("td").text("+"+d.xp+"xp")
+            d3.select(this).append("td").style("text-align", "right").text("+"+d.xp+"xp")
             d3.select(this).append("td").text(d.username)
             d3.select(this).append("td").text(d.date)
             d3.select(this).append("td").text(d.change_date)
-            d3.select(this).append("td").text(d.count+"x")
+            d3.select(this).append("td").style("text-align", "right").each(function() {
+                d3.select(this).append("span").html(`${d.count}x&nbsp;`);
+                d3.select(this).append("a").attr("href", "story.html?test&story=" + d.id + "&lang=" + urlParams.get('lang')).text("[test]")
+            });
+            d3.select(this).append("td").style("text-align", "right").html(`
+                <!-- Rounded switch -->
+                <label class="switch">
+                  <input type="checkbox" ${d.public ? "checked" : ""}>
+                  <span class="slider round"></span>
+                </label>
+                `).on("click", async function () {
+                    console.log("clicked", this, d.public);
+                    d3.event.preventDefault();
+                    if(!d.public) {
+                        if(confirm(`Do you want to publish the story \"${d.name_base}\"?`)) {
+                            let response = await fetch(backend_stories+"set_story_public.php?id="+d.id+"&public=1");
+                            if(response.status === 200) {
+                                d3.select(this).select("input").attr("checked", "true");
+                                d.public = 1;
+                            }
+                        }
+                    }
+                    else {
+                        if(confirm(`Do you want to hide the story \"${d.name_base}\"?`)) {
+                            let response = await fetch(backend_stories+"set_story_public.php?id="+d.id+"&public=0");
+                            if(response.status === 200) {
+                                d3.select(this).select("input").attr("checked", null);
+                                d.public = 0;
+                            }
+                        }
+                    }
+                })
         })
 
     sortTable(document.getElementById("story_list"), 3, -1)

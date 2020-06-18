@@ -16,6 +16,7 @@ SELECT story.id, story.name, story.xp, name_base, MAX(story_done.time) as time F
 LEFT JOIN story_done ON story_done.story_id = story.id AND story_done.user_id = $user 
 JOIN language l1 ON story.lang = l1.id AND l1.short = $lang
 JOIN language l2 ON story.lang_base = l2.id AND l2.short = $lang_base
+WHERE public = 1
 GROUP BY story.id";
 
     queryDatabase($query);

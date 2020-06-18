@@ -13,14 +13,21 @@
 }
 
 @font-face {
-    font-family: nunito;
+    font-family: vollkorn;
     src: url(vollkorn/VollkornMedium-jEVry.ttf);
 }
 @font-face {
-    font-family: nunito;
+    font-family: vollkorn;
     src: url(vollkorn/VollkornBold-ALwGg.ttf);
     font-weight: bold;
 }
+
+@font-face {
+    font-family: comfortaa;
+    src: url(comfortaa/Comfortaa-VariableFont_wght.ttf);
+}
+
+
 
 body {
     /* font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";*/

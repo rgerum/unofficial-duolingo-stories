@@ -419,6 +419,8 @@ function addSpeaker(speaker) {
 function playAudio(id, phrase) {
     if(audio_map !== undefined) {
         let audio_map_data = audio_map[id];
+        if(audio_map_data === undefined)
+            return;
         let times = [];
         for(let part of audio_map_data) {
             times.push(part.time);
@@ -438,6 +440,9 @@ function playAudio(id, phrase) {
 
 function addLoudspeaker(id, bubble) {
     if(audio_map !== undefined) {
+        let audio_map_data = audio_map[id];
+        if(audio_map_data === undefined)
+            return;
         let loudspeaker = bubble.append("img").attr("src", "https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg")
             .attr("width", "28px").attr("class", "speaker")
             .on("click", function() { console.log("click"); playAudio(id, bubble)});
@@ -717,10 +722,16 @@ function addNext() {
     document.getElementById("button_next").dataset.status = "inactive";
     setProgress(index*100/phrases.length);
     if(index == phrases.length) {
-        setStoryDone(story_id);
+        if(urlParams.get('test') === null) {
+            setStoryDone(story_id);
+            document.getElementById("button_next").onclick = function() { window.location.href = 'index.html?lang='+story_properties["lang"]+"&lang_base="+story_properties["lang_base"]};
+        }
+        else {
+            document.getElementById("button_next").onclick = function() { window.location.href = 'editor_overview.html?lang='+story_properties["lang"]+"&lang_base="+story_properties["lang_base"]};
+        }
         document.getElementById("button_next").dataset.status = "active";
         document.getElementById("button_next").innerText = "finished";
-        document.getElementById("button_next").onclick = function() { window.location.href = 'index.html?lang='+story_properties["lang"]+"&lang_base="+story_properties["lang_base"]};
+
 
         return;
     }
