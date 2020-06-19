@@ -473,7 +473,7 @@ function addTextWithHints(elem) {
         .attr("class", "word")
         .text(d=>d).on("mouseover", hoverWord);
 }
-function addMultipleChoice(data) {
+function addQuestionChoice(data) {
     let story = d3.select("#story");
     let question = story.append("p");
     question.append("span").attr("class", "question").text(data.question);
@@ -499,13 +499,14 @@ function addMultipleChoice(data) {
 
     fadeIn(question);
 }
-function addFinishMultipleChoice(data) {
-    console.log("addFinishMultipleChoice");
+function addQuestionFill(data) {
+    console.log("addFinishMultipleChoice", data.id);
     let story = d3.select("#story");
 
     let [phrase, bubble] = addSpeaker(data.speaker);
     //if(data.speaker !== undefined)
     //    phrase.append("span").attr("class", "speaker").text(data.speaker);
+    addLoudspeaker(data.id, bubble);
 
     let base_lang = 0;
     if(data.answers[data.solution][2] !== undefined)
@@ -554,11 +555,13 @@ function shuffle(a) {
     }
     return a;
 }
-function addOrder(data) {
+function addQuestionOrder(data) {
     let index = 0;
 
     let story = d3.select("#story");
     let [phrase, bubble] = addSpeaker(data.speaker);
+
+    addLoudspeaker(data.id, bubble);
 
     let inserted = addTextWithTranslation(bubble.append("span").attr("class", "text"),
         data.text, data.translation, data.words[0], data.translations[0]);
@@ -631,7 +634,7 @@ function addOrder(data) {
 
     fadeIn(question);
 }
-function addClick(data) {
+function addQuestionClick(data) {
     let story = d3.select("#story");
 
     let question = story.append("p");
@@ -665,7 +668,7 @@ function addClick(data) {
     fadeIn(phrase);
 }
 
-function addPairs(data) {
+function addQuestionPairs(data) {
     let count = 0;
     let selected = undefined;
     let selected_item = undefined;
@@ -748,15 +751,15 @@ function addNext() {
     if(phrases[index].tag === "phrase")
         addSpeech(phrases[index]);
     if(phrases[index].tag === "choice")
-        addMultipleChoice(phrases[index]);
+        addQuestionChoice(phrases[index]);
     if(phrases[index].tag === "fill")
-        addFinishMultipleChoice(phrases[index]);
+        addQuestionFill(phrases[index]);
     if(phrases[index].tag === "order")
-        addOrder(phrases[index]);
+        addQuestionOrder(phrases[index]);
     if(phrases[index].tag === "pairs")
-        addPairs(phrases[index]);
+        addQuestionPairs(phrases[index]);
     if(phrases[index].tag === "click")
-        addClick(phrases[index]);
+        addQuestionClick(phrases[index]);
     index += 1;
     if(scroll_enabled)
     document.documentElement.scrollTo({
