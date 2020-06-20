@@ -15,6 +15,7 @@ $keys = ["id" => "int",
     "lang_base" => "string",
     "author" => "int",
     "change_date" => "string",
+    "image" => "string",
     "xp" => "int",
     "text" => "string"];
 

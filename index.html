@@ -23,6 +23,13 @@
             cursor: pointer;
             box-sizing: border-box;
             margin: 0 25px;
+            position: relative;
+        }
+        .button_story img {
+            position: absolute;
+            width: 120px;
+            left: -11px;
+            top: -11px;
         }
         .button_story:hover {
             filter: brightness(1.2);
@@ -151,9 +158,11 @@ async function loadStory(lang, lang_base) {
         .style("width", "150px")
         .attr("href", d=>"story.html?story="+d.id)
         .each(function (d) {
-            d3.select(this).append("button")
+            let button = d3.select(this).append("button")
                 .attr("class", "button_story")
                 .attr("data-done", d=>d.time != null)
+            if(d.image)
+                button.append("img").attr("src", d.image)
             d3.select(this).append("div")
                 .attr("class", "story_title")
                 .text(d.name_base)
