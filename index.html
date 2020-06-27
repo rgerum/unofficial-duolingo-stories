@@ -103,13 +103,12 @@
 <div id="main">
     <h1>Unofficial Duolingo Stories</h1>
     <p style="text-align: center">This page is a community project to bring the original <a href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages. If you want to contribute <a href="https://forum.duolingo.com/comment/38992372">tell me</a>.</p>
-    <p style="text-align: center">Currently available in <a href="index.html?lang=nl">Dutch</a>, <a href="index.html?lang=el">Greek</a> and <a href="index.html?lang=no">Norwegian</a>.</p>
-    <div id="list" style="display: grid; grid-template-columns: auto auto auto auto;">
+    <p style="text-align: center">Currently available in <a href="index.html?lang=nl">Dutch</a>, <a href="index.html?lang=el">Greek</a>, <a href="index.html?lang=no">Norwegian</a> and <a href="index.html?lang=ru">Russian</a>.</p>
+
+    <div id="list" style="display: grid; grid-template-columns: auto auto auto auto;"></div>
 
     </div>
-    <ul>
 
-    </ul>
 </div>
 <script>
 
@@ -149,7 +148,7 @@ check_login();
 list = [];
 async function loadStory(lang, lang_base) {
     let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
-    if(response.status != 200)
+    if(response.status !== 200)
         return
     let data = await response.json();
     console.log(data);
@@ -161,8 +160,12 @@ async function loadStory(lang, lang_base) {
             let button = d3.select(this).append("button")
                 .attr("class", "button_story")
                 .attr("data-done", d=>d.time != null)
-            if(d.image)
-                button.append("img").attr("src", d.image)
+            if(d.image) {
+                if(d.time != null && d.image_done != null)
+                    button.append("img").attr("src", d.image_done)
+                else
+                    button.append("img").attr("src", d.image)
+            }
             d3.select(this).append("div")
                 .attr("class", "story_title")
                 .text(d.name_base)

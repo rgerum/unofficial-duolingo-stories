@@ -263,7 +263,7 @@
         }
         #main {
             padding-top: 80px;
-            max-width: 700px;
+            max-width: 800px;
         }
 
         #story_list {
@@ -379,7 +379,7 @@
     <p id="languages"></p>
     <table id="story_list" class="js-sort-table">
         <thead>
-        <tr><th style="border-radius: 10px 0 0 0">Name</th><th style="text-align: right">XP</th><th>Author</th><th>Creation</th><th>Change</th><th style="text-align: center">Done</th><th style="border-radius: 0 10px 0 0">Public</th></tr>
+        <tr><th colspan="2" style="border-radius: 10px 0 0 0">Name</th><th style="text-align: right">XP</th><th>Author</th><th>Creation</th><th>Change</th><th style="text-align: center">Done</th><th style="border-radius: 0 10px 0 0">Public</th></tr>
         </thead>
       <tbody>
 
@@ -446,9 +446,16 @@ async function loadStory(lang, lang_base) {
     d3.select("tbody").selectAll("tr").remove();
     d3.select("tbody").selectAll("tr").data(data).enter().append("tr")
         .each(function(d) {
-            d3.select(this).append("td").append("a")
+            let td = d3.select(this).append("td").attr("width", "60px");
+            if(d.image)
+                td.append("img").attr("src", d.image).attr("width", "30px")
+            if(d.image_done)
+                td.append("img").attr("src", d.image_done).attr("width", "30px")
+            td = d3.select(this).append("td");
+            td.append("a")
                 .attr("href", "editor.html?story="+d.id+"&lang="+urlParams.get('lang'))
                 .text(d.name_base)
+
             d3.select(this).append("td").style("text-align", "right").text("+"+d.xp+"xp")
             d3.select(this).append("td").text(d.username)
             d3.select(this).append("td").text(d.date)
@@ -487,7 +494,7 @@ async function loadStory(lang, lang_base) {
                 })
         })
 
-    sortTable(document.getElementById("story_list"), 3, -1)
+    sortTable(document.getElementById("story_list"), 4, -1)
 }
 </script>
 </body>

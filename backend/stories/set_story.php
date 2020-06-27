@@ -16,6 +16,8 @@ $keys = ["id" => "int",
     "author" => "int",
     "change_date" => "string",
     "image" => "string",
+    "image_done" => "string",
+    "image_locked" => "string",
     "xp" => "int",
     "text" => "string"];
 
