@@ -107,10 +107,28 @@
 
     <div id="list" style="display: grid; grid-template-columns: auto auto auto auto;"></div>
 
+    <hr/>
+
+    <div style="text-align: center; color:gray; font-size: 0.8em">
+        These stories are owned by Duolingo, Inc. and are used under license from Duolingo.<br/>
+        Duolingo is not responsible for the translation of these stories <span id="license_language"></span> and is not an official product of Duolingo.
+        Any further use of these stories requires a license from Duolingo.<br/>
+        Visit <a style="color:gray" href="www.duolingo.com">www.duolingo.com</a> for more information.
     </div>
 
 </div>
 <script>
+async function getLanguageNames() {
+    backend = "https://carex.uber.space/stories/backend/"
+    backend_stories = backend+"stories/"
+
+    let response = await fetch(`${backend_stories}get_languages.php`);
+    let data = await response.json();
+    let language_names = {}
+    for(let lang of data)
+        language_names[lang.short] = lang.name;
+    return language_names;
+}
 
 async function button_logout() {
     await logout();
@@ -147,6 +165,7 @@ check_login();
 
 list = [];
 async function loadStory(lang, lang_base) {
+    let language_names = await getLanguageNames();
     let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
     if(response.status !== 200)
         return
@@ -174,6 +193,7 @@ async function loadStory(lang, lang_base) {
                 .text("+"+d.xp+"xp")
         })
 
+    d3.select("#license_language").text("into "+language_names[lang]);
 }
 </script>
 </body>

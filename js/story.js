@@ -48,6 +48,7 @@ async function loadStory(name) {
     story_id = data[0]["id"];
     story = data[0]["text"];
     document.getElementById("button_next").dataset.status = "active";
+    document.getElementById("license_language").innerText = data[0]["language"];
     processStoryFile();
     //addTitle();
     addNext();
