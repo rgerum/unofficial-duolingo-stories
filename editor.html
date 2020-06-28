@@ -173,6 +173,11 @@ editor.commands.addCommand({
     readOnly: true // false if this command should not apply in readOnly mode
 });
 
+let dirty = false;
+editor.getSession().on('change', function() {
+    dirty = true;
+});
+
 let story = undefined;
 let story_id = undefined;
 let languages_ids = undefined;
@@ -193,6 +198,7 @@ lang_base=en
         story = data[0]["text"];
     }
     editor.setValue(story);
+    dirty = false;
     updateStoryDisplay();
 }
 
@@ -241,8 +247,20 @@ async function saveStory() {
     x = x[0];
     console.log("saved", x);
     story_id = x.id;
+    dirty = false;
     document.getElementById("button_save").getElementsByTagName("img")[0].style.display = "none";
 }
+
+window.hideWarning = false;
+window.addEventListener('beforeunload', (event) => {
+    if (dirty) {
+        if(!confirm("You have unsaved changed, do you really want to leave the editor?")) {
+            event.preventDefault();
+            event.returnValue = '';
+        }
+    }
+
+});
 
 async function generateAudio() {
     if(confirm("Do you want to generate .mp3 files for the current story?")) {
