@@ -82,11 +82,40 @@
             width: 100%;
             text-align: center;
         }
+
+        #header_language #header_lang_selector{
+            display: none;
+            padding: 0px;
+            width: 160px;
+            background: white;
+            border-radius: 15px;
+            border: 1px solid lightgray;
+            overflow-y: auto;
+            margin: 0;
+
+        }
+        #header_language:hover #header_lang_selector {
+            display: block;
+
+        }
+
+        .language_select_item {
+            padding: 5px;
+            border-bottom: 1px solid lightgray;
+        }
+        .language_select_item:hover {
+            background: #e2e1e1;
+        }
+
     </style>
 </head>
 <body>
 
 <div id="header">
+    <div id="header_language" style="display: block; float:left"><div id=current_language_flag class="flag"></div>
+        <div id="header_lang_selector">
+
+    </div></div>
     <div id="login_form" style="display: none; float: right">
         <div id="login_status"></div>
         <input id=username type="text" value="" placeholder="username">
@@ -103,21 +132,24 @@
 <div id="main">
     <h1>Unofficial Duolingo Stories</h1>
     <p style="text-align: center">This page is a community project to bring the original <a href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages. If you want to contribute <a href="https://forum.duolingo.com/comment/38992372">tell me</a>.</p>
-    <p style="text-align: center">Currently available in <a href="index.html?lang=nl">Dutch</a>, <a href="index.html?lang=el">Greek</a>, <a href="index.html?lang=no">Norwegian</a> and <a href="index.html?lang=ru">Russian</a>.</p>
-
+<!--    <p style="text-align: center">Currently available in <a href="index.html?lang=nl">Dutch</a>, <a href="index.html?lang=el">Greek</a>, <a href="index.html?lang=no">Norwegian</a> and <a href="index.html?lang=ru">Russian</a>.</p>
+-->
+    <hr/>
+    <br/>
     <div id="list" style="flex-wrap: wrap; display: flex; justify-content: center;"></div>
 
     <hr/>
 
     <div style="text-align: center; color:gray; font-size: 0.8em">
         These stories are owned by Duolingo, Inc. and are used under license from Duolingo.<br/>
-        Duolingo is not responsible for the translation of these stories <span id="license_language"></span> and is not an official product of Duolingo.
+        Duolingo is not responsible for the translation of these stories <span id="license_language"></span> and this is not an official product of Duolingo.
         Any further use of these stories requires a license from Duolingo.<br/>
         Visit <a style="color:gray" href="www.duolingo.com">www.duolingo.com</a> for more information.
     </div>
 
 </div>
 <script>
+    // https://d35aaqx5ub95lt.cloudfront.net/images/juicy-flag-sprite-8.svg
 `
 images_lip_colors = {}
 for(let set of data.sets) {
@@ -296,12 +328,15 @@ images_lip_colors = {
         "https://stories-cdn.duolingo.com/image/d9b06923d4631ad9ea59fd33d28c08f8c6ecd7cc.svg": "666161",
         "https://stories-cdn.duolingo.com/image/2f5d7c623ff71838607c8b789fc979ba0f0bd045.svg": "3e1d70"
     }
+
+let language_data = undefined;
 async function getLanguageNames() {
     backend = "https://carex.uber.space/stories/backend/"
     backend_stories = backend+"stories/"
 
     let response = await fetch(`${backend_stories}get_languages.php`);
     let data = await response.json();
+    language_data = data;
     let language_names = {}
     for(let lang of data)
         language_names[lang.short] = lang.name;
@@ -344,6 +379,35 @@ check_login();
 list = [];
 async function loadStory(lang, lang_base) {
     let language_names = await getLanguageNames();
+    if(lang === null) {
+        for(let language of language_data) {
+            if(language.public === 0)
+                continue
+            let div = d3.select("#list").append("a");
+            div.attr("class", "language_select_button")
+            div.attr("href", "index.html?lang="+language.short);
+            console.log(`0 ${language.flag}px`);
+            div.append("div").attr("class", "flag flag_big").style("background-position", `0 ${language.flag}px`);
+            div.append("span").text(language.name).attr("class", "language_select_button_text")
+        }
+        return
+    }
+
+    for(let language of language_data) {
+        console.log(language.short, lang, language.short === lang);
+        if(language.short === lang) {
+            d3.select("#current_language_flag").style("background-position", `0 ${language.flag}px`);
+            console.log(d3.select("#current_language_flag").style("background-position"));
+        }
+        if (language.public === 0)
+            continue
+        let a = d3.select("#header_lang_selector").append("a").attr("class", "language_select_item")
+            .attr("href", "index.html?lang="+language.short)
+            .style("display", "block")
+        a.append("div").attr("class", "flag").style("background-position", `0 ${language.flag}px`);
+        a.append("span").text(language.name);
+    }
+
     let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
     if(response.status !== 200)
         return

@@ -398,3 +398,52 @@ span[data-hidden=true] {
     margin-right: 8px;
     cursor: pointer;
 }
+
+.language_select_button {
+    align-items: center;
+    background: #fff;
+    border-radius: 16px;
+    border: solid #e5e5e5;
+    border-width: 2px 2px 4px;
+    box-sizing: content-box;
+    cursor: pointer;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    height: 210px;
+    justify-content: center;
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-top: 24px;
+    max-width: 210px;
+    min-width: 210px;
+    padding: 0;
+    position: relative;
+    text-align: center;
+    text-transform: none;
+
+    text-decoration: none;
+}
+.language_select_button:hover {
+    filter: brightness(.9);
+}
+
+.flag {
+    display: inline-block;
+    background-size: 40px;
+    display: inline-block;
+    height: 32.19512px;
+    width: 40px;
+    background-image: url(https://d35aaqx5ub95lt.cloudfront.net/images/juicy-flag-sprite-8.svg);
+}
+.flag_big {
+    margin: 20px;
+    transform: scale(2.2);
+}
+.language_select_button_text {
+    color: #4c4c4c;
+    display: block;
+    font-size: 19px;
+    font-weight: 700;
+    margin-top: 10px;
+}

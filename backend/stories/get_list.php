@@ -16,7 +16,7 @@ SELECT story.id, story.image, story.image_done, story.name, story.xp, name_base,
 LEFT JOIN story_done ON story_done.story_id = story.id AND story_done.user_id = $user 
 JOIN language l1 ON story.lang = l1.id AND l1.short = $lang
 JOIN language l2 ON story.lang_base = l2.id AND l2.short = $lang_base
-WHERE public = 1
+WHERE story.public = 1
 GROUP BY story.id";
 
     queryDatabase($query);
