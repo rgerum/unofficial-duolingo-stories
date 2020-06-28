@@ -75,34 +75,8 @@ let story_properties = undefined;
 function processStoryFile() {
     phrases = [];
     story_properties = {title: "", language: ""}
-    let code_block = false;
+
     for (let line of story.split("\n")) {
-        if (line.substr(0, 3) === '"""') {
-            if(code_block === true) {
-                code_block = false;
-                phrases[phrases.length - 1].text = phrases[phrases.length - 1].text.trim();
-            }
-            else {
-                code_block = true;
-                phrases.push({tag: "code", text: ""});
-            }
-            continue;
-        }
-        if (line.substr(0, 3) === '>>>') {
-            if(code_block === true) {
-                code_block = false;
-                phrases[phrases.length - 1].text = phrases[phrases.length - 1].text.trim();
-            }
-            else {
-                code_block = true;
-                phrases.push({tag: "html", text: ""});
-            }
-            continue;
-        }
-        if(code_block) {
-            phrases[phrases.length - 1].text += line+"\n";
-            continue;
-        }
         line = line.trim();
         if (line.length === 0 || line.substr(0, 1) === "#")
             continue;
@@ -361,36 +335,6 @@ function questionFinished(question) {
         addNext();
     }
     document.getElementById("button_next").dataset.status = "active";
-}
-
-function addHtml(data) {
-    let story = d3.select("#story");
-    let part = story.append("div")
-    part.node().innerHTML += data.text;
-}
-let editors = [];
-function addCode(data) {
-    let story = d3.select("#story");
-    let phrase = story.append("div").attr("id", "editor"+editors.length);
-    //phrase.text(data.text);
-
-    var editor = ace.edit(phrase.node());
-    console.log("EDITOR", editor);
-    editors.push(editor);
-
-    editor.setOptions({
-        maxLines: Infinity
-    });
-
-    editor.session.setMode("ace/mode/javascript-custom");
-    editor.setTheme("ace/theme/dracula");
-
-    editor.session.setUseWrapMode(true);
-    editor.resize();
-    editor.setReadOnly(true);
-
-    editor.setValue(data.text);
-    editor.blur();
 }
 
 function addSpeaker(speaker) {
