@@ -49,6 +49,11 @@ async function loadStory(name) {
     story = data[0]["text"];
     document.getElementById("button_next").dataset.status = "active";
     document.getElementById("license_language").innerText = data[0]["language"];
+
+    if(data[0].discussion)
+        d3.select("#button_discuss").style("display", "inline")
+            .on("click", _=>{window.open(data[0].discussion);})
+
     processStoryFile();
     //addTitle();
     addNext();

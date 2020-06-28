@@ -18,6 +18,7 @@ $keys = ["id" => "int",
     "image" => "string",
     "image_done" => "string",
     "image_locked" => "string",
+    "discussion" => "string",
     "xp" => "int",
     "text" => "string"];
 
