@@ -4,6 +4,11 @@ import json
 import sys
 from pathlib import Path
 
+from transliterate import get_translit_function
+
+from gtts import gTTS
+from mutagen.mp3 import MP3
+
 key_data = {}
 with open("rootkey.csv", "r") as fp:
     for line in fp:
@@ -16,16 +21,36 @@ polly_client = boto3.Session(
     aws_secret_access_key=key_data["AWSSecretKey"],
     region_name='eu-central-1').client('polly')
 
-def getSpeachMarks(VoiceId, Text):
+
+def getSpeachMarks(VoiceId, Text, force_polly=False):
+    if meta["lang"] == "el" and not force_polly:
+        length_google = MP3(last_filename).info.length
+        saveAudio("tmp.mp3", "Bianca", translit(Text, reversed=True))
+        length_polly = MP3("tmp.mp3").info.length
+
+        data = getSpeachMarks("Bianca", translit(Text, reversed=True), force_polly=True)
+        for i in range(len(data)):
+            data[i]["time"] = data[i]["time"] / length_polly * length_google
+        return data
+
     response = polly_client.synthesize_speech(VoiceId=VoiceId,
                                               OutputFormat='json',
                                               SpeechMarkTypes=["word"],
                                               Text=Text)
     print(response)
     text = response["AudioStream"].read().decode()
-    return text
+    return responseToDict(text)
 
+last_filename = ""
 def saveAudio(filename, VoiceId, Text):
+    global last_filename
+    last_filename = filename
+    
+    if meta["lang"] == "el":
+        tts = gTTS(Text, lang="el")
+        tts.save(filename)
+        return
+
     print("saveAudio", filename, VoiceId)#, Text)
     response = polly_client.synthesize_speech(VoiceId=VoiceId,
                                                   OutputFormat='mp3',
@@ -61,7 +86,15 @@ if meta["lang"] == "ja":
     speakers = dict(default="Takumi")
 if meta["lang"] == "zh":
     speakers = dict(default="Zhiyu")
+if meta["lang"] == "it":
+    speakers = dict(default="Bianca")
+if meta["lang"] == "el":
+    speakers = dict(default="Bianca")  # hack use italian
 
+try:
+    translit = get_translit_function(meta["lang"])
+except:
+    translit = None
 
 for key in meta:
     if key.startswith("speaker"):
@@ -86,7 +119,7 @@ for part in story:
         Text = Text.replace("~", " ")
         saveAudio(output_dir / f"speech_{story_id}_{part['id']}.mp3", VoiceId, Text)
         #print("-", responseToDict(data[str(part["id"])]), "-", sep="")
-        data[part["id"]] = responseToDict(getSpeachMarks(VoiceId, Text))
+        data[part["id"]] = getSpeachMarks(VoiceId, Text)
         #print(part["id"], speakers[part.get("speaker", "default")], part["text"].replace("~", " "))
         #print(data)
         #exit()
