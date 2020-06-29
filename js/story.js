@@ -247,7 +247,9 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
 
     function addWord(words, translation) {
         console.log("addWord", words, translation);
-        let w = words.split(/([^.,!?:]*)([.,!?:]*)/);
+        let w = words.split(/^(.*[^.,!?:])?([.,!?:]*)$/);
+        if(w[1]=== undefined)
+            w[1] = "";
         let span = target;
 
         let singe_words = w[1].replace(/~/g, " ").split(" ")
@@ -259,7 +261,9 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
             word.selectAll("span").data(singe_words).enter().append("span").attr("class", "word").text((d,i)=>d+(i===(singe_words.length-1) ? "": " "));
 
         if(translation !== undefined && translation !== "" && translation !== "~" && translation !== "~." && translation !== "~," && translation !== "~!" && translation !== "~?" && translation !== "~:") {
-            let t = translation.split(/([^.,!?:]*)([.,!?:]*)/);
+            let t = translation.split(/^(.*[^.,!?:])?([.,!?:]*)$/);
+            if(t[1]=== undefined)
+                t[1] = "";
             if(singe_words.length === 1)
                 word.attr("class", "word tooltip")
             else
