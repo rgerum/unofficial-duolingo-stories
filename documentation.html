@@ -107,30 +107,74 @@ xp=22
 # and optional icons for the speakers. You can right-click on any speaker in an original duolingo story and click "Copy Image Location" to get this link
 icon_Aafke=https://stories-cdn.duolingo.com/image/fbedb048ce9fbb6357a1ec9554132f34f460fc90.svg
 icon_Lonneke=https://stories-cdn.duolingo.com/image/3ce3b3a473f960ba383fdbf763466da50e2abf19.svg
+
+# the images for the story (color, golden, black-white)
+image=https://stories-cdn.duolingo.com/image/983ea34533d3216746f071a9dc5daf00481ceb0b.svg
+image_done=https://stories-cdn.duolingo.com/image/97aa495e58411b1e925790219df45503e44eebc4.svg
+image_locked=https://stories-cdn.duolingo.com/image/9a1587f14658162354ad4d9746a837cf919e29cc.svg
+
+# the link to the duolingo forum post to discuss the story
+discussion=https://forum.duolingo.com/comment/33427764
             </script>
         <p> Lines that start with <b>#</b> are comments which are ignored in processing of the story.</p>
 
         <h2>Speech Audio</h2>
         <p>For some languages automatic audio files can be generated.</p>
 
-        <p>In the metadata the speaker name for each character in the story can be defined.</p>
-
-        <p>This is only necessary if the language supports multiple voices, if no voice is specified the default voice is used.
-        </p>
-
-        <ul>
-            <li><b>Dutch:</b> Ruben (default, male), Lotte (female) </li>
-            <li><b>Norwegian:</b> Liv (default, female)</li>
-            <li><b>Swedish:</b> Astrid (default, female)</li>
-            <li><b>Russian:</b> Maxim (default, male), Tatyana (female)</li>
-            <li><b>Japanese:</b> Takumi (default, male), Mizuki (female)</li>
-            <li><b>Chinese:</b> Zhiyu (default, female)</li>
-        </ul>
+        <p>In the metadata the <b>speaker name</b> for each character in the story can be defined.</p>
 
         <script type="code">
 speaker_Fenne=Lotte
 speaker_Pompey=Ruben
             </script>
+
+        <p>This is only necessary if the language supports multiple voices, if no voice is specified the default voice is used.
+        </p>
+
+        <ul>
+            <li><b>Dutch:</b>
+                <ul>
+                    <li>Ruben (default, male)</li>
+                    <li>Lotte (female)</li>
+                </ul>
+            </li>
+            <li><b>Norwegian:</b>
+                <ul>
+                    <li>Liv (default, female)</li>
+                </ul>
+            </li>
+            <li><b>Swedish:</b>
+                <ul>
+                    <li>Astrid (default, female)</li>
+                </ul>
+            </li>
+            <li><b>Russian:</b>
+                <ul>
+                    <li>Maxim (default, male)</li>
+                    <li>Tatyana (female)</li>
+                </ul>
+            </li>
+            <li><b>Japanese:</b>
+                <ul>
+                    <li>Takumi (default, male)</li>
+                    <li>Mizuki (female)</li>
+                </ul>
+            </li>
+            <li><b>Chinese:</b>
+                <ul>
+                    <li>Zhiyu (default, female)</li>
+                </ul>
+            </li>
+            <li><b>Italian:</b>
+                <ul>
+                    <li>Bianca (default, female)</li>
+                    <li>Carla (female)</li>
+                    <li>Giorgio (Male)</li>
+                </ul>
+            </li>
+        </ul>
+
+
         <p>Audio files are generated with a click on <b>generate audio</b>. We currently use Amazon Poly.</p>
         <p>
             The free contingent is quite high but nevertheless generating audio should be not triggered too often per story.
@@ -147,7 +191,7 @@ speaker_Pompey=Ruben
 
         <script type="code">
 > Aafke huurt dit weekend een kamer bij Lonneke. Ze klopt op de deur.
-~ ~        rents this weekend a room by ~. She knocks on the door.
+~ ~     rents this weekend a  room  by  ~.       She knocks on the door.
 
 > Aafke: Hallo, ik ben Aafke.
 ~ ~: Hi, I am ~.
