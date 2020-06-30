@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Story Export (Unofficial Duolingo Stories)
 // @namespace    https://carex.uber.space/stories/
-// @version      0.9
+// @version      0.9.1
 // @description  Converts official duolingostories to the format of the unoffical duolingo story project
 // @author       Randriano
 // @match        https://www.duolingo.com/stories/*
@@ -151,7 +151,7 @@
                 continue
             }
             if(element.type === "ARRANGE") {
-                text.push("[order] "+getTextFromElement(last_elements[1]));
+                text.push("[order] "+getTextFromElement(last_elements[1])[0]);
                 text.push(last_elements[0].prompt.text);
                 let parts = []
                 for(let index of element.phraseOrder) {
