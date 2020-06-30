@@ -242,6 +242,8 @@ function addTextWithTranslation(target, words, translation, words_fill, translat
         translation = [];
     if(typeof words_fill === "string")
         words_fill = words_fill.trim().split(/\s+/);
+    if(translation_fill === undefined)
+        translation_fill = ""
     if(typeof translation_fill === "string")
         translation_fill = translation_fill.trim().split(/\s+/);
 

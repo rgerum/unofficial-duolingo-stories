@@ -218,7 +218,12 @@ function updateStoryDisplay() {
 updateStoryDisplay();
 
 async function saveStory() {
-    updateStoryDisplay();
+    try {
+        updateStoryDisplay();
+    }
+    catch (e) {
+
+    }
     document.getElementById("button_save").getElementsByTagName("img")[0].style.display = "inline-block";
     let data = {
         "name": story_properties["title"],
