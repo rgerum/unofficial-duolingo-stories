@@ -50,7 +50,7 @@ async function loadStory(name) {
     document.getElementById("button_next").dataset.status = "active";
     document.getElementById("license_language").innerText = data[0]["language"];
 
-    if(data[0].discussion)
+    if(data[0].discussion && data[0].discussion !== "undefined")
         d3.select("#button_discuss").style("display", "inline")
             .on("click", _=>{window.open(data[0].discussion);})
 
