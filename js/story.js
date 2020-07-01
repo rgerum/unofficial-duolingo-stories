@@ -75,6 +75,18 @@ function setProgress(i) {
     document.getElementById("progress_inside").style.width = i+"%";
 }
 
+function splitTextSpeech(text) {
+    "asd. asd - asd; Here...".split(/([-.:,;?\s]+)/)
+}
+
+function getInputStringText(text) {
+    return text.replace(/(\w*)\{([^\}]*)\}/g, "$1");
+}
+
+function getInputStringSpeachtext(text) {
+    return text.replace(/(\w*)\{([^\}]*)\}/g, "$2");
+}
+
 let phrases = undefined;
 let story_properties = undefined;
 function processStoryFile() {
@@ -88,7 +100,7 @@ function processStoryFile() {
         if (line.substr(0, 1) === ">") {
             line = line.substr(1);
             line = line.split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
-            phrases.push({tag: "phrase", id: phrases.length+1, speaker: line[0], text: line[1]});
+            phrases.push({tag: "phrase", id: phrases.length+1, speaker: line[0], text: getInputStringText(line[1]), speech: getInputStringSpeachtext(line[1])});
             continue;
         }
 

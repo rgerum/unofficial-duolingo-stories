@@ -110,9 +110,15 @@ for part in story:
     #exit()
     Text = None
     if part["tag"] == "phrase" or part["tag"] == "title":
-        Text = part["text"]
+        if "speech" in part:
+            Text = part["speech"]
+        else:
+            Text = part["text"]
     else:
-        Text = part.get("full_text", None)
+        if "speech" in part:
+            Text = part["speech"]
+        else:
+            Text = part.get("full_text", None)
     #print(VoiceId, Text, part)
 
     if Text is not None:
