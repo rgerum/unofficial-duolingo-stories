@@ -90,6 +90,8 @@ if meta["lang"] == "it":
     speakers = dict(default="Bianca")
 if meta["lang"] == "el":
     speakers = dict(default="Bianca")  # hack use italian
+if meta["lang"] == "hi":
+    speakers = dict(default="Aditi")
 
 try:
     translit = get_translit_function(meta["lang"])
