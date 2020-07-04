@@ -80,11 +80,11 @@ function splitTextSpeech(text) {
 }
 
 function getInputStringText(text) {
-    return text.replace(/(\w*)\{([^\}]*)\}/g, "$1");
+    return text.replace(/([^~ ,;.:-_?!]*)\{([^\}]*)\}/g, "$1");
 }
 
 function getInputStringSpeachtext(text) {
-    return text.replace(/(\w*)\{([^\}]*)\}/g, "$2");
+    return text.replace(/([^~ ,;.:-_?!]*)\{([^\}]*)\}/g, "$2");
 }
 
 let phrases = undefined;
