@@ -107,6 +107,38 @@
             background: #e2e1e1;
         }
 
+        .set {
+            font-size: 27px;
+            font-weight: 700;
+            margin: 0 26px;
+            padding-bottom: 20px;
+            text-align: center;
+        }
+
+        .set::before {
+            margin-left: -50%;
+            right: 16px;
+        }
+
+        .set::after {
+            left: 16px;
+            margin-right: -50%;
+        }
+
+        .set::after, .set::before {
+            background: #e5e5e5;
+            content: "";
+            display: inline-block;
+            height: 2px;
+            position: relative;
+            vertical-align: middle;
+            width: 50%;
+        }
+
+        .set_list {
+            flex-wrap: wrap; display: flex; justify-content: center;
+        }
+
     </style>
 </head>
 <body>
@@ -136,7 +168,9 @@
 -->
     <hr/>
     <br/>
-    <div id="list" style="flex-wrap: wrap; display: flex; justify-content: center;"></div>
+    <div id="list">
+
+    </div>
 
     <hr/>
 
@@ -158,6 +192,19 @@ for(let set of data.sets) {
    images_lip_colors[story.illustrationUrls.active] = story.colors.activeLip;
   }
 }
+
+    async function loadAll(lang, lang_base) {
+        let resp = await fetch(\`https://stories.duolingo.com/api2/stories?fromLanguage=$ {lang}&illustrationFormat=svg&learningLanguage=$ {lang_base}&masterVersions=false\`);
+        let data = resp.json();
+        for(let set in data) {
+            for(let index in data[set]) {
+                console.log(set, index, data[set][index]);
+            }
+        }
+
+    }
+    console.log("loadAll", loadAll);
+    window.loadAll = loadAll;
 `
 images_lip_colors = {
         "https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg": "d17900",
@@ -413,7 +460,42 @@ async function loadStory(lang, lang_base) {
         return
     let data = await response.json();
     console.log(data);
-    d3.select("#list").selectAll("a").remove();
+    d3.select("#list").selectAll().remove();
+    `
+            <div class="set">Set 5</div>
+        <div class="set_list"></div>
+`
+    let set = 0;
+    let div = undefined;
+    for(let d of data) {
+        console.log("d", d);
+        if(set != d.set_id) {
+            d3.select("#list").append("div").attr("class", "set").text("Set "+d.set_id)
+            set = d.set_id;
+            div = d3.select("#list").append("div").attr("class", "set_list");
+        }
+        let a = div.append("a")
+            .style("width", "150px")
+            .attr("href", _=>"story.html?story="+d.id)
+        let button = a.append("button")
+            .attr("class", "button_story")
+            .attr("data-done", _=>d.time != null)
+        if(d.image) {
+            if(d.time != null && d.image_done != null)
+                button.append("img").attr("src", d.image_done)
+            else {
+                button.append("img").attr("src", d.image);
+                console.log(images_lip_colors[d.image]+" 0 6px;", button);
+                button.style("box-shadow", "#"+images_lip_colors[d.image]+" 0 6px")
+            }
+        }
+        a.append("div")
+            .attr("class", "story_title")
+            .text(d.name_base)
+        a.append("div")
+            .attr("class", "story_xp")
+            .text("+"+d.xp+"xp")
+    }/*
     d3.select("#list").selectAll("a").data(data).enter().append("a")
         .style("width", "150px")
         .attr("href", d=>"story.html?story="+d.id)
@@ -436,7 +518,7 @@ async function loadStory(lang, lang_base) {
             d3.select(this).append("div")
                 .attr("class", "story_xp")
                 .text("+"+d.xp+"xp")
-        })
+        })*/
 
     d3.select("#license_language").text("into "+language_names[lang]);
 }

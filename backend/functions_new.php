@@ -13,6 +13,8 @@ function database() {
 
 function sqlSafeString($param) {
     global $db;
+    if($param === "undefined")
+        return "NULL";
     // Hier wird wg. der grossen Verbreitung auf MySQL eingegangen
     return (NULL === $param ? "NULL" : '"'.mysqli_escape_string ($db, $param).'"');
 }

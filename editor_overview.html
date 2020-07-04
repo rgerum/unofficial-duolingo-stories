@@ -384,7 +384,7 @@
     <p id="languages"></p>
     <table id="story_list" class="js-sort-table">
         <thead>
-        <tr><th colspan="2" style="border-radius: 10px 0 0 0">Name</th><th style="text-align: right">XP</th><th>Author</th><th>Creation</th><th>Change</th><th style="text-align: center">Done</th><th style="border-radius: 0 10px 0 0">Public</th></tr>
+        <tr><th style="border-radius: 10px 0 0 0">Set</th><th colspan="2" >Name</th><th style="text-align: right">XP</th><th>Author</th><th>Creation</th><th>Change</th><th style="text-align: center">Done</th><th style="border-radius: 0 10px 0 0">Public</th></tr>
         </thead>
       <tbody>
 
@@ -451,11 +451,19 @@ async function loadStory(lang, lang_base) {
     d3.select("tbody").selectAll("tr").remove();
     d3.select("tbody").selectAll("tr").data(data).enter().append("tr")
         .each(function(d) {
-            let td = d3.select(this).append("td").attr("width", "60px");
+            function pad(x) {
+                if(x < 10)
+                    return "&nbsp;"+x;
+                return x;
+            }
+            let td = d3.select(this).append("td");
+            if(d.set_id)
+                td.append("span").html("<b>"+pad(d.set_id)+"</b>"+"&nbsp;-&nbsp;"+pad(d.set_index))
+            td = d3.select(this).append("td").attr("width", "30px");
             if(d.image)
                 td.append("img").attr("src", d.image).attr("width", "30px")
-            if(d.image_done)
-                td.append("img").attr("src", d.image_done).attr("width", "30px")
+            //if(d.image_done)
+            //    td.append("img").attr("src", d.image_done).attr("width", "30px")
             td = d3.select(this).append("td");
             td.append("a")
                 .attr("href", "editor.html?story="+d.id+"&lang="+urlParams.get('lang'))
@@ -499,7 +507,7 @@ async function loadStory(lang, lang_base) {
                 })
         })
 
-    sortTable(document.getElementById("story_list"), 4, -1)
+    sortTable(document.getElementById("story_list"), 5, -1)
 }
 </script>
 </body>

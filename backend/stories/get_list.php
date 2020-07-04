@@ -12,12 +12,13 @@ if(isset($_GET['lang']) && isset($_GET['lang_base'])) {
     else
         $user = "NULL";
     $query = "
-SELECT story.id, story.image, story.image_done, story.name, story.xp, name_base, MAX(story_done.time) as time FROM story
+SELECT story.id, story.set_id, story.set_index, story.image, story.image_done, story.name, story.xp, name_base, MAX(story_done.time) as time FROM story
 LEFT JOIN story_done ON story_done.story_id = story.id AND story_done.user_id = $user 
 JOIN language l1 ON story.lang = l1.id AND l1.short = $lang
 JOIN language l2 ON story.lang_base = l2.id AND l2.short = $lang_base
 WHERE story.public = 1
-GROUP BY story.id";
+GROUP BY story.id
+ORDER BY set_id, set_index";
 
     queryDatabase($query);
 }

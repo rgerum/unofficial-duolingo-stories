@@ -20,6 +20,10 @@ $keys = ["id" => "int",
     "image_locked" => "string",
     "discussion" => "string",
     "xp" => "int",
+    "duo_id" => "string",
+    "cefr" => "string",
+    "set_id" => "int",
+    "set_index" => "int",
     "text" => "string"];
 
 if($_POST["id"] == "")
