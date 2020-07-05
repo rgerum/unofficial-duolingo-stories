@@ -76,15 +76,15 @@ function setProgress(i) {
 }
 
 function splitTextSpeech(text) {
-    "asd. asd - asd; Here...".split(/([-.:,;?\s]+)/)
+    "asd. asd - asd; Here...".split(/([-.:,;?…\s]+)/)
 }
 
 function getInputStringText(text) {
-    return text.replace(/([^~ ,;.:-_?!]*)\{([^\}]*)\}/g, "$1");
+    return text.replace(/([^~ ,;.:-_?!…]*)\{([^\}]*)\}/g, "$1");
 }
 
 function getInputStringSpeachtext(text) {
-    return text.replace(/([^~ ,;.:-_?!]*)\{([^\}]*)\}/g, "$2");
+    return text.replace(/([^~ ,;.:-_?!…]*)\{([^\}]*)\}/g, "$2");
 }
 
 let phrases = undefined;
@@ -111,6 +111,10 @@ function processStoryFile() {
                 phrases.push({tag: line[0], id: phrases.length+1, question: line[1], answers: [], solution: 0});
             }
             if (line[0] === "fill") {
+                let line2 = line[1].split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
+                phrases.push({tag: line[0], id: phrases.length+1, question: "", speaker: line2[0], text: line2[1], translation: "", answers: [], solution: 0});
+            }
+            if (line[0] === "next") {
                 let line2 = line[1].split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
                 phrases.push({tag: line[0], id: phrases.length+1, question: "", speaker: line2[0], text: line2[1], translation: "", answers: [], solution: 0});
             }
@@ -152,7 +156,7 @@ function processStoryFile() {
                 }
                 continue;
             }
-            if (phrases[phrases.length - 1].tag === "fill") {
+            if (phrases[phrases.length - 1].tag === "fill" || phrases[phrases.length - 1].tag === "next") {
                 line = line.split(/\s*([~+-])\s*(.+)\s*/);
                 console.log("FILL", line, line[1], line.length)
                 if (line.length === 1 && phrases[phrases.length - 1].question === "") {
@@ -467,7 +471,7 @@ function addQuestionChoice(data) {
 
     fadeIn(question);
 }
-function addQuestionFill(data) {
+function addQuestionNext(data) {
     console.log("addFinishMultipleChoice", data.id);
     let story = d3.select("#story");
 
@@ -506,6 +510,47 @@ function addQuestionFill(data) {
             let p = d3.select(this);
             p.append("div").attr("class", "checkbox").text(" ")
             addTextWithTranslation(p.append("div").attr("class", "answer_text"), d[0], d[1]);
+        })
+
+    playAudio(data.id, phrase);
+
+    fadeIn(question);
+}
+function addQuestionFill(data) {
+    console.log("addFinishMultipleChoice", data.id);
+    let story = d3.select("#story");
+
+    let [phrase, bubble] = addSpeaker(data.speaker);
+    //if(data.speaker !== undefined)
+    //    phrase.append("span").attr("class", "speaker").text(data.speaker);
+    addLoudspeaker(data.id, bubble);
+
+    let base_lang = 0;
+    if(data.answers[data.solution][2] !== undefined)
+        base_lang = 1;
+    let inserted = addTextWithTranslation(bubble.append("span").attr("class", "text"),
+        data.text, data.translation, data.answers[data.solution][0+base_lang*2], data.answers[data.solution][1+base_lang*2]);
+
+    let question = story.append("p");
+    question.append("span").attr("class", "question").text(data.question);
+    question.append("p").selectAll("button").data(data.answers).enter()
+        .append("button").attr("class", "answer")
+        .on("click", function(d, i) {
+            if(i === data.solution) {
+                this.dataset.status = "right";
+                // show the filled in text
+                console.log("inserted", inserted)
+                inserted.attr("data-hidden", undefined);
+                // finish the question
+                questionFinished(question);
+            }
+            else {
+                this.dataset.status = "inactive";
+            }
+        })
+        .each(function(d, i) {
+            let p = d3.select(this);
+            addTextWithTranslation(p.attr("class", "answer_button"), d[0], d[1]);
         })
 
     playAudio(data.id, phrase);
@@ -722,6 +767,8 @@ function addNext() {
         addQuestionChoice(phrases[index]);
     if(phrases[index].tag === "fill")
         addQuestionFill(phrases[index]);
+    if(phrases[index].tag === "next")
+        addQuestionNext(phrases[index]);
     if(phrases[index].tag === "order")
         addQuestionOrder(phrases[index]);
     if(phrases[index].tag === "pairs")
