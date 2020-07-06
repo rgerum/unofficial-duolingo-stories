@@ -427,10 +427,11 @@ list = [];
 async function loadStory(lang, lang_base) {
     let language_names = await getLanguageNames();
     if(lang === null) {
+        let list_div = d3.select("#list").append("div").attr("class", "set_list");
         for(let language of language_data) {
             if(language.public === 0)
                 continue
-            let div = d3.select("#list").append("a");
+            let div = list_div.append("a");
             div.attr("class", "language_select_button")
             div.attr("href", "index.html?lang="+language.short);
             console.log(`0 ${language.flag}px`);
@@ -461,10 +462,7 @@ async function loadStory(lang, lang_base) {
     let data = await response.json();
     console.log(data);
     d3.select("#list").selectAll().remove();
-    `
-            <div class="set">Set 5</div>
-        <div class="set_list"></div>
-`
+
     let set = 0;
     let div = undefined;
     for(let d of data) {
