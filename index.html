@@ -435,7 +435,9 @@ async function loadStory(lang, lang_base) {
             div.attr("class", "language_select_button")
             div.attr("href", "index.html?lang="+language.short);
             console.log(`0 ${language.flag}px`);
-            div.append("div").attr("class", "flag flag_big").style("background-position", `0 ${language.flag}px`);
+            let flag = div.append("div").attr("class", "flag flag_big").style("background-position", `0 ${language.flag}px`);
+            if(language.flag_file != null)
+                flag.style("background-image", `url(${language.flag_file})`);
             div.append("span").text(language.name).attr("class", "language_select_button_text")
         }
         return
@@ -444,7 +446,10 @@ async function loadStory(lang, lang_base) {
     for(let language of language_data) {
         console.log(language.short, lang, language.short === lang);
         if(language.short === lang) {
-            d3.select("#current_language_flag").style("background-position", `0 ${language.flag}px`);
+            let flag = d3.select("#current_language_flag").style("background-position", `0 ${language.flag}px`);
+            if(language.flag_file != null) {
+                flag.style("background-image", `url(${language.flag_file})`);
+            }
             console.log(d3.select("#current_language_flag").style("background-position"));
         }
         if (language.public === 0)
@@ -452,7 +457,9 @@ async function loadStory(lang, lang_base) {
         let a = d3.select("#header_lang_selector").append("a").attr("class", "language_select_item")
             .attr("href", "index.html?lang="+language.short)
             .style("display", "block")
-        a.append("div").attr("class", "flag").style("background-position", `0 ${language.flag}px`);
+        let flag = a.append("div").attr("class", "flag").style("background-position", `0 ${language.flag}px`);
+        if(language.flag_file != null)
+            flag.style("background-image", `url(${language.flag_file})`);
         a.append("span").text(language.name);
     }
 
