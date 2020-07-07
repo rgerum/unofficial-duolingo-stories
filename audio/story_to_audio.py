@@ -25,10 +25,10 @@ polly_client = boto3.Session(
 def getSpeachMarks(VoiceId, Text, force_polly=False):
     if meta["lang"] == "el" and not force_polly:
         length_google = MP3(last_filename).info.length
-        saveAudio("tmp.mp3", "Bianca", translit(Text, reversed=True))
+        saveAudio("tmp.mp3", speakers["default"], translit(Text, reversed=True))
         length_polly = MP3("tmp.mp3").info.length
 
-        data = getSpeachMarks("Bianca", translit(Text, reversed=True), force_polly=True)
+        data = getSpeachMarks(speakers["default"], translit(Text, reversed=True), force_polly=True)
         for i in range(len(data)):
             data[i]["time"] = data[i]["time"] / length_polly * length_google
         return data
@@ -46,8 +46,8 @@ def saveAudio(filename, VoiceId, Text):
     global last_filename
     last_filename = filename
     
-    if meta["lang"] == "el":
-        tts = gTTS(Text, lang="el")
+    if meta["lang"] == "el" or meta["lang"] == "tl":
+        tts = gTTS(Text, lang=meta["lang"])
         tts.save(filename)
         return
 
@@ -92,11 +92,15 @@ if meta["lang"] == "el":
     speakers = dict(default="Bianca")  # hack use italian
 if meta["lang"] == "hi":
     speakers = dict(default="Aditi")
+if meta["lang"] == "tl":
+    speakers = dict(default="Conchita")  # hack use spanish
 
 try:
     translit = get_translit_function(meta["lang"])
 except:
-    translit = None
+    def func(x, *args, **kwargs):
+        return x
+    translit = func
 
 for key in meta:
     if key.startswith("speaker"):
