@@ -32,6 +32,9 @@ story = undefined;
 story_id = undefined;
 audio_map = undefined;
 audio_objects = undefined;
+audio_right = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3");
+audio_wrong = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3")
+
 async function loadStory(name) {
     //let response = await fetch(name+".txt");
     audio_map = await fetch(`audio/${name}/audio_${name}.json`);
@@ -568,6 +571,17 @@ function shuffle(a) {
     }
     return a;
 }
+function playSoundRight() {
+    audio_right.pause();
+    audio_right.currentTime = 0;
+    audio_right.play();
+}
+function playSoundWrong() {
+    audio_wrong.pause();
+    audio_wrong.currentTime = 0;
+    audio_wrong.play();
+}
+
 function addQuestionOrder(data) {
     let index = 0;
 
