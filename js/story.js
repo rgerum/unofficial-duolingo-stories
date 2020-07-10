@@ -450,20 +450,29 @@ function addQuestionChoice(data) {
     let story = d3.select("#story");
     let question = story.append("p");
     question.append("span").attr("class", "question").text(data.question);
-    question.append("p").selectAll("div").data(data.answers).enter()
+
+    function selectAnswer(i) {
+        let checkbox = answers.nodes()[i].firstChild;
+        if(i === data.solution) {
+            checkbox.dataset.status = "right";
+            checkbox.innerText = "✓";
+            questionFinished(question);
+            document.removeEventListener("keydown", selectAnswer);
+        }
+        else {
+            checkbox.dataset.status = "false";
+            checkbox.innerText = "×";
+        }
+    }
+
+    document.addEventListener("keydown", event => {
+        if (event.key >= "1" || event.key <= answers.node().length) {
+            selectAnswer(parseInt(event.key)-1);
+        }
+    });
+    let answers = question.append("p").selectAll("div").data(data.answers).enter()
         .append("div").attr("class", "answer")
-        .on("click", function(d, i) {
-            let checkbox = this.firstChild;
-            if(i == data.solution) {
-                checkbox.dataset.status = "right";
-                checkbox.innerText = "✓";
-                questionFinished(question);
-            }
-            else {
-                checkbox.dataset.status = "false";
-                checkbox.innerText = "×";
-            }
-        })
+        .on("click", function(d, i) { selectAnswer(i);})
         .each(function(d, i) {
             let p = d3.select(this);
             p.append("div").attr("class", "checkbox").text(" ")
@@ -487,26 +496,35 @@ function addQuestionNext(data) {
     let inserted = addTextWithTranslation(bubble.append("span").attr("class", "text"),
         data.text, data.translation, data.answers[data.solution][0+base_lang*2], data.answers[data.solution][1+base_lang*2]);
 
+    function selectAnswer(i) {
+        let checkbox = answers.nodes()[i].firstChild;
+        if(i === data.solution) {
+            checkbox.dataset.status = "right";
+            checkbox.innerText = "✓";
+            // show the filled in text
+            console.log("inserted", inserted)
+            inserted.attr("data-hidden", undefined);
+            // finish the question
+            questionFinished(question);
+            document.removeEventListener("keydown", selectAnswer);
+        }
+        else {
+            checkbox.dataset.status = "false";
+            checkbox.innerText = "×";
+        }
+    }
+
+    document.addEventListener("keydown", event => {
+        if (event.key >= "1" || event.key <= answers.node().length) {
+            selectAnswer(parseInt(event.key)-1);
+        }
+    });
+
     let question = story.append("p");
     question.append("span").attr("class", "question").text(data.question);
-    question.append("p").selectAll("div").data(data.answers).enter()
+    let answers = question.append("p").selectAll("div").data(data.answers).enter()
         .append("div").attr("class", "answer")
-        .on("click", function(d, i) {
-            let checkbox = this.firstChild;
-            if(i === data.solution) {
-                checkbox.dataset.status = "right";
-                checkbox.innerText = "✓";
-                // show the filled in text
-                console.log("inserted", inserted)
-                inserted.attr("data-hidden", undefined);
-                // finish the question
-                questionFinished(question);
-            }
-            else {
-                checkbox.dataset.status = "false";
-                checkbox.innerText = "×";
-            }
-        })
+        .on("click", function(d, i) { selectAnswer(i); })
         .each(function(d, i) {
             let p = d3.select(this);
             p.append("div").attr("class", "checkbox").text(" ")
@@ -532,23 +550,32 @@ function addQuestionFill(data) {
     let inserted = addTextWithTranslation(bubble.append("span").attr("class", "text"),
         data.text, data.translation, data.answers[data.solution][0+base_lang*2], data.answers[data.solution][1+base_lang*2]);
 
+    function selectAnswer(i) {
+        let element = answers.nodes()[i];
+        if(i === data.solution) {
+            element.dataset.status = "right";
+            // show the filled in text
+            inserted.attr("data-hidden", undefined);
+            // finish the question
+            questionFinished(question);
+            document.removeEventListener("keydown", selectAnswer);
+        }
+        else {
+            element.dataset.status = "inactive";
+        }
+    }
+
+    document.addEventListener("keydown", event => {
+        if (event.key >= "1" || event.key <= answers.node().length) {
+            selectAnswer(parseInt(event.key)-1);
+        }
+    });
+
     let question = story.append("p");
     question.append("span").attr("class", "question").text(data.question);
-    question.append("p").selectAll("button").data(data.answers).enter()
+    let answers = question.append("p").selectAll("button").data(data.answers).enter()
         .append("button").attr("class", "answer")
-        .on("click", function(d, i) {
-            if(i === data.solution) {
-                this.dataset.status = "right";
-                // show the filled in text
-                console.log("inserted", inserted)
-                inserted.attr("data-hidden", undefined);
-                // finish the question
-                questionFinished(question);
-            }
-            else {
-                this.dataset.status = "inactive";
-            }
-        })
+        .on("click", function(d, i) { selectAnswer(i);})
         .each(function(d, i) {
             let p = d3.select(this);
             addTextWithTranslation(p.attr("class", "answer_button"), d[0], d[1]);
@@ -835,3 +862,9 @@ async function upload_json() {
     console.log(text);
     return text;
 }
+
+document.addEventListener("keydown", event => {
+    if (event.code === "Enter" || event.code === "Space") {
+        document.getElementById("button_next").onclick();
+    }
+});
