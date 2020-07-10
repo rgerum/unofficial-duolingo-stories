@@ -66,7 +66,7 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
                 {defaultToken : "text"}
             ],
             "order" : [
-                {token : ["string", "text"], regex : /(.*:)(.*$)/, next:"order2"},
+                {token : ["string", "text"], regex : /(.*:)?(.*$)/, next:"order2"},
                 {defaultToken : "invalid"}
             ],
             "order2" : [
@@ -74,11 +74,15 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
                 {defaultToken : "invalid"}
             ],
             "order3" : [
+                {token : "string", regex : /(?=^>)/, next  : "start"},
+                {token : "string", regex : /(?=^\[)/, next  : "start"},
                 {token : ["word", "keyword"], regex : /([^\/]+)(\/)/, next:"order3"},
                 {token : "word", regex : /[^\\]+$/, next:"order4"},
                 {defaultToken : "invalid"}
             ],
             "order4" : [
+                {token : "string", regex : /(?=^>)/, next  : "start"},
+                {token : "string", regex : /(?=^\[)/, next  : "start"},
                 {token : ["variable.parameter", "keyword"], regex : /([^\/]+)(\/)/, next:"order4"},
                 {token : "variable.parameter", regex : /[^\\]+$/, next:"order5"},
                 {defaultToken : "invalid"}

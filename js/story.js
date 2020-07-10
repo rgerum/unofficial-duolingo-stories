@@ -122,7 +122,7 @@ function processStoryFile() {
                 phrases.push({tag: line[0], id: phrases.length+1, question: "", speaker: line2[0], text: line2[1], translation: "", answers: [], solution: 0});
             }
             if (line[0] === "order") {
-                let line2 = line[1].split(/\s*(?:([^:]+)\s*:)?\s*(.+)\s*/).splice(1, 2);
+                let line2 = line[1].split(/\s*(?:([^:]*)\s*:)?\s*(.+)\s*/).splice(1, 2);
                 phrases.push({tag: line[0], id: phrases.length+1, question: "", speaker: line2[0], text: line2[1], translations: [], words: []});
             }
             if (line[0] === "pairs") {
@@ -373,7 +373,7 @@ function addSpeaker(speaker) {
     //if(data.speaker !== undefined)
     //    phrase.append("span").attr("class", "speaker").text(data.speaker);
     let bubble = phrase;
-    if(speaker !== undefined)
+    if(speaker !== undefined && speaker.trim() !== "")
     {
         let name = story_properties
             ["icon_"+speaker];
@@ -384,8 +384,6 @@ function addSpeaker(speaker) {
             phrase.attr("class", "phrase");
             phrase.append("img").attr("class", "head").attr("src", name)
             bubble = phrase.append("div").attr("class", "bubble");
-            //if (data.translation === undefined)
-            //    bubble.append("span").attr("class", "text").text(text);//.each(addTextWithHints);
         }
     }
     return [phrase, bubble];
