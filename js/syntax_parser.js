@@ -54,6 +54,7 @@ function processStoryFile() {
 
         lines.push(line);
     }
+    lines.push("");
 
     for(let index = 0; index < lines.length; index++) {
 
