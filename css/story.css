@@ -408,7 +408,7 @@ span[data-hidden=true] {
 
 
 /* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover:not([data-hidden]) .tooltiptext {
+.tooltip:hover:not([data-hidden=true]) .tooltiptext {
     visibility: visible;
     opacity: 1;
 }
@@ -510,4 +510,18 @@ span[data-hidden=true] {
     font-size: 19px;
     font-weight: 700;
     margin-top: 10px;
+}
+
+.ssml {
+    font-size: 0.8em;
+    margin: 0;
+    font-family: monospace;
+}
+
+.ssml_speaker {
+    background: lightgray;
+    padding: 2px 5px;
+    border-radius: 5px;
+    margin-right: 3px;
+    font-size: 0.8em;
 }

@@ -84,7 +84,6 @@
         </div>
     </div>
     <div id="footer" style="left: 50vw; right: 0px; width: 50%">
-        <div id="button_next" style="display: none" class="button" onclick="addNext();">continue</div>
         <div id="button_save" class="button" onclick="saveStory();" style="float:left"><img style="display: none" src="Spinner-1s-40px.svg" height="15px">save</div>
         <div id="button_audio" class="button" onclick="generateAudio();" style="float:left; display: none"><img style="display: none" src="Spinner-1s-40px.svg" height="15px">generate Audio</div>
         <div id="button_reload" class="button" onclick="updateStoryDisplay();">update</div>
@@ -198,9 +197,12 @@ lang_base=en
         let data = await response.json();
         story_id = data[0]["id"];
         story = data[0]["text"];
+
+        await reloadAudio();
     }
     editor.setValue(story);
     dirty = false;
+    isEditor = true;
     updateStoryDisplay();
 }
 
@@ -213,7 +215,7 @@ function updateStoryDisplay() {
     d3.select("#story").selectAll("*").remove();
     //addTitle();
     while (index < phrases.length) {
-        document.getElementById("button_next").dataset.status = "active";
+        //document.getElementById("button_next").dataset.status = "active";
         addNext();
     }
 }
@@ -262,6 +264,7 @@ async function saveStory() {
     document.getElementById("button_save").getElementsByTagName("img")[0].style.display = "none";
 }
 
+isEditor = true;
 window.hideWarning = false;
 window.addEventListener('beforeunload', (event) => {
     if (dirty) {
@@ -276,15 +279,13 @@ window.addEventListener('beforeunload', (event) => {
 async function generateAudio() {
     if(confirm("Do you want to generate .mp3 files for the current story?")) {
         document.getElementById("button_audio").getElementsByTagName("img")[0].style.display = "inline-block";
-        let text = await upload_json();
+        let text = await generate_all_audio();
         if(text === "") {
             alert("An error occurred.");
         }
         document.getElementById("button_audio").getElementsByTagName("img")[0].style.display = "none";
     }
 }
-if(["nl", "no", "sv", "ru", "zh", "ja", "el", "it", "hi", "tl", "tr"].includes(urlParams.get('lang')))
-    document.getElementById("button_audio").style.display = "inline";
 
 </script>
 </body>

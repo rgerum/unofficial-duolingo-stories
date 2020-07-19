@@ -1,6 +1,10 @@
-function splitTextSpeech(text) {
-    //"asd. asd - asd; Here...".split(/([-—.:,;?!¿¡"'…\s]+)/)
-    "asd. asd - asd; Here...".split(/([\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~]+)/)
+function splitTextTokens(text, keep_tilde=true) {
+    if(!text)
+        return [];
+    if(keep_tilde)
+        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\!"#$%&*,\-.\/:;<=>?@^_`{|}]+)/)
+    else
+        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\!"#$%&*,\-.\/:;<=>?@^_`{|}~]+)/)
 }
 
 function getInputStringText(text) {
@@ -8,7 +12,101 @@ function getInputStringText(text) {
 }
 
 function getInputStringSpeachtext(text) {
-    return text.replace(/([^~ ,;.:-_?!…]*)\{([^\}]*)\}/g, "$2");
+    return "<speak>"+text.replace(/([^~ ,;.:-_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ")+"</speak>";
+}
+
+function getSpeaker(name) {
+    if(story_properties["speaker_"+name])
+        return story_properties["speaker_"+name];
+    if(!language_data || !language_data[story_properties.lang])
+        return undefined;
+    return language_data[story_properties.lang].speaker;
+}
+
+ssml_list = [];
+
+function generateHintMap(text, translation) {
+    let text_list = splitTextTokens(text);
+    text = text.replace(/~/g, " ");
+    if(!translation)
+        translation = ""
+    let trans_list = splitTextTokens(translation);
+    let hints = [];
+    let hintMap = [];
+    let text_pos = 0;
+    for(let i = 0; i < text_list.length; i++) {
+        if(i%2 === 0 && trans_list[i] && trans_list[i] !== "~") {
+            hintMap.push({hintIndex: hints.length, rangeFrom: text_pos, rangeTo: text_pos+text_list[i].length-1});
+            hints.push(trans_list[i].replace(/~/g, " "));
+        }
+        text_pos += text_list[i].length;
+    }
+    return {text:text, hints:hints, hintMap:hintMap};
+}
+
+function generateAudioMap(text, audiomap, id) {
+    let text_speak = getInputStringSpeachtext(text);
+    let text_display = getInputStringText(text);
+    let text_speak_list = splitTextTokens(text_speak, false);
+    let text_display_list = splitTextTokens(text_display, false);
+
+    let keypoints = [];
+    let text_pos = 0;
+    for(let i = 0; i < text_display_list.length; i++) {
+        if(i%2 === 0 && audiomap[parseInt(i/2)]) {
+            keypoints.push({
+                rangeEnd: text_pos + text_display_list[i].length,
+                audioStart: audiomap[parseInt(i/2)].time,
+                })
+        }
+        text_pos += text_display_list[i].length;
+    }
+    return {url: getAudioUrl(id), speak_text: text_speak, keypoints: keypoints, audio_object:  new Audio(getAudioUrl(id))};
+}
+
+function generateMaps(speaker, text, translation, audiomap, id) {
+    let data = {type: "LINE"};
+    let content = generateHintMap(getInputStringText(text), translation);
+    if(audiomap && audiomap[id])
+        content.audio = generateAudioMap(text, audiomap[id], id);
+    else
+        content.audio = {}
+    if(getSpeaker(speaker))
+        content.audio.ssml = {text: getInputStringSpeachtext(text), speaker: getSpeaker(speaker), id: id};
+    if(speaker) {
+        data.line = {
+            type: "CHARACTER",
+            content: content,
+            characterId: speaker,
+            avatarUrl: story_properties["icon_"+speaker],
+        }
+    }
+    else {
+        data.line = {
+            type: "PROSE",
+            content: content,
+        }
+    }
+    data.hideRangesForChallenge = [];
+    data.trackingProperties = {line_index: id};
+    return data;
+}
+
+function getTextWithTranslation(lines, index, regex1, regex2) {
+    let match = lines[index].match(regex1);
+    if(match === null)
+        return [index, undefined, undefined];
+    let match2 = lines[index+1].match(regex2);
+    if(match2 === null)
+        return [index, match[match.length-1], undefined]
+    index += 1;
+    return [index, match[match.length-1], match2[match2.length-1]];
+}
+
+function getTextWithTranslationsHintMap(lines, index, regex1, regex2) {
+    let text, translation;
+    [index, text, translation] = getTextWithTranslation(lines, index, regex1, regex2);
+    return [index, generateHintMap(text || "", translation || "")];
 }
 
 function readAnswerLines(lines, index, data) {
@@ -39,6 +137,48 @@ function readAnswerLines(lines, index, data) {
     return index;
 }
 
+function readAnswerLines2(lines, index, data) {
+    let answers = [];
+    let answer;
+    let correctAnswerIndex = 0;
+    // iterate over the next lines, they are the answers
+    while(index < lines.length - 1) {
+        if(!lines[index+1].startsWith("+") && !lines[index+1].startsWith("-"))
+            break
+
+        if(lines[index+1].startsWith("+"))
+            correctAnswerIndex = answers.length;
+
+        [index, answer] = getTextWithTranslationsHintMap(lines, index+1, /^([-+])\s*(.*)\s*$/, /^[~]\s*(.*)\s*$/)
+
+        // add the answer
+        answers.push(answer);
+    }
+    return [index, answers, correctAnswerIndex];
+}
+
+function hintMapToText(content) {
+    let text_pos = 0;
+    let text = "";
+
+    // iterate over all hints
+    for(let hint of content.hintMap) {
+        // add the text since the last hint
+        if(hint.rangeFrom > text_pos)
+            text += content.text.substring(text_pos, hint.rangeFrom).replace(/([^\s\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*,\-.\/:;<=>?@^_`{|}~]+)/g, "~");
+
+        // add the text with the hint
+        text += content.hints[hint.hintIndex];
+
+        // advance the position
+        text_pos = hint.rangeTo+1;
+    }
+    // add the text after the last hint
+    if(text_pos < content.text.length)
+        text += content.text.substring(text_pos, content.text.length).replace(/([^\s\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*,\-.\/:;<=>?@^_`{|}~]+)/g, "~");
+    return text;
+}
+
 let phrases = undefined;
 let story_properties = undefined;
 function processStoryFile() {
@@ -55,6 +195,8 @@ function processStoryFile() {
         lines.push(line);
     }
     lines.push("");
+
+    let line_index = 1;
 
     for(let index = 0; index < lines.length; index++) {
 
@@ -75,15 +217,9 @@ function processStoryFile() {
                 [_, _, translation] = lines[index+1].match(/^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
                 index += 1;
             }
-            // gather the data
-            let data = {
-                tag: "phrase",
-                id: phrases.length+1,
-                speaker: speaker,
-                text: getInputStringText(text),
-                speech: getInputStringSpeachtext(text),
-                translation: translation,
-            };
+            let data = generateMaps(speaker, text, translation, audio_map, line_index);
+            line_index += 1;
+
             // add it and continue
             phrases.push(data);
             continue;
@@ -91,19 +227,277 @@ function processStoryFile() {
 
         // question choice
         if (lines[index].startsWith("[choice]")) {
-            // split the question text
-            let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
+            let question, answers, correctAnswerIndex;
+
+            [index, question] = getTextWithTranslationsHintMap(lines, index, /^\[(.*)\]\s*(.*)\s*$/, /^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
+
             // set the data
             let data = {
-                tag: tag,
-                id: phrases.length+1,
+                type: "MULTIPLE_CHOICE",
                 question: question,
-                answers: [],
-                solution: 0,
+                answers: answers,
+                correctAnswerIndex: correctAnswerIndex,
+                trackingProperties: {line_index: line_index, challenge_type: "multiple-choice"},
             };
-            index = readAnswerLines(lines, index, data);
+            line_index += 1;
             // add the data
             phrases.push(data);
+            continue;
+        }
+
+        // question fill
+        if (lines[index].startsWith("[fill]")) {
+            // split the question text
+            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            let translation = undefined;
+            // if the next line starts with ~ it is the translation for the text
+            if (lines[index + 1].startsWith("~")) {
+                [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+                index += 1;
+            }
+
+            let question = undefined;
+            if (!lines[index + 1].startsWith("+") && !lines[index + 1].startsWith("-")) {
+                question = lines[index + 1].trim();
+                index += 1;
+            }
+
+            let answers;
+            [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
+
+            let hideRangesForChallenge = [];
+            if(text.indexOf("*")) {
+                let start = text.indexOf("*");
+                hideRangesForChallenge = {start: start, end: start+answers[correctAnswerIndex].text.length};
+                text = text.replace("*", answers[correctAnswerIndex].text);
+                if(translation)
+                    translation = translation.replace("*", hintMapToText(answers[correctAnswerIndex]));
+            }
+
+            phrases.push({
+                type: "CHALLENGE_PROMPT",
+                prompt: generateHintMap(question, ""),
+                trackingProperties: {line_index: line_index, challenge_type: "select-phrases"},
+            })
+
+            phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
+            phrases[phrases.length-1].hideRangesForChallenge = hideRangesForChallenge;
+
+            // set the data
+            phrases.push({
+                type: "SELECT_PHRASE",
+                answers: answers,
+                correctAnswerIndex: correctAnswerIndex,
+                trackingProperties: {line_index: line_index, challenge_type: "select-phrases"},
+            });
+            line_index += 1;
+
+            continue;
+        }
+
+        // question next
+        if (lines[index].startsWith("[next]")) {
+            // split the question text
+            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            let translation = undefined;
+            // if the next line starts with ~ it is the translation for the text
+            if (lines[index + 1].startsWith("~")) {
+                [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+                index += 1;
+            }
+
+            let question = undefined;
+            if (!lines[index + 1].startsWith("+") && !lines[index + 1].startsWith("-")) {
+                question = lines[index + 1].trim();
+                index += 1;
+            }
+
+            let answers;
+            [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
+
+            if(text.indexOf("*")) {
+                let start = text.indexOf("*");
+                hideRangesForChallenge = {start: start, end: start+answers[correctAnswerIndex].text.length};
+                text = text.replace("*", answers[correctAnswerIndex].text);
+            }
+
+            phrases.push({
+                type: "CHALLENGE_PROMPT",
+                prompt: generateHintMap(question, ""),
+                trackingProperties: {line_index: line_index, challenge_type: "continuation"},
+            })
+
+            phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
+            phrases[phrases.length-1].hideRangesForChallenge = hideRangesForChallenge;
+
+            // set the data
+            phrases.push({
+                type: "MULTIPLE_CHOICE",
+                answers: answers,
+                correctAnswerIndex: correctAnswerIndex,
+                trackingProperties: {line_index: line_index, challenge_type: "continuation"},
+            });
+            line_index += 1;
+
+            continue;
+        }
+
+        // question order
+        if (lines[index].startsWith("[order]")) {
+            // split the question text
+            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            let translation = undefined;
+            // if the next line starts with ~ it is the translation for the text
+            if (lines[index+1].startsWith("~")) {
+                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+                index += 1;
+            }
+            let question = lines[index+1].trim();
+            index += 1;
+
+            let words = [], translations = [], full_text = [];
+            let hideRangesForChallenge = [];
+            let characterPositions = [];
+
+            for(; index < lines.length - 1; index+=1) {
+                if(lines[index+1].startsWith("[") || lines[index+1].startsWith(">"))
+                    break
+                if(words.length === 0 || translations.length !== 0) {
+                    words.push(lines[index + 1].split("/"));
+
+                    // construct the target text (for audio)
+                    if(words.length === 1) {
+                        let start = text.indexOf("*");
+                        let pos = start;
+                        for(let x of lines[index+1].split("/")) {
+                            pos += x.length;
+                            characterPositions.push(pos);
+                            pos += 1;
+                        }
+                        let filler = lines[index+1].split("/").join(" ");
+                        hideRangesForChallenge = {start: start, end: start+filler.length};
+                        text = text.replace("*", filler);
+                        for(let j = 0; j < words[0].length; j++)
+                            words[0][j] = words[0][j].replace(/~/g, " ");
+                    }
+                }
+                else {
+                    translations.push(lines[index + 1].split("/"));
+                    if(translation)
+                        translation = translation.replace("*", lines[index + 1].split("/").join(" "));
+                }
+            }
+
+            let sort = [];
+            for(let i = 0; i < words[0].length; i++)
+                sort.push(i);
+            shuffle(sort);
+
+            let selectablePhrases = [];
+            for(let i of sort)
+                selectablePhrases.push(words[0][i]);
+
+            phrases.push({
+                type: "CHALLENGE_PROMPT",
+                prompt: generateHintMap(question, ""),
+                trackingProperties: {line_index: line_index, challenge_type: "arrange"},
+            })
+
+            phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
+            phrases[phrases.length-1].hideRangesForChallenge = hideRangesForChallenge;
+
+            // set the data
+            phrases.push({
+                type: "ARRANGE",
+                selectablePhrases: selectablePhrases,
+                phraseOrder: sort,
+                characterPositions: characterPositions,
+                trackingProperties: {line_index: line_index, challenge_type: "arrange"},
+            });
+            line_index += 1;
+            continue;
+        }
+
+        // question point-to-phrase
+        if (lines[index].startsWith("[click]")) {
+            // read in the question (with translation)
+            let question, question_translation, translation, speaker, text, _;
+            [index, question, question_translation] = getTextWithTranslation(lines, index, /^\[.*\]\s*(.*)\s*$/, /^~\s*(.*)\s*$/);
+
+            // read the line (with translation)
+            [_, speaker, text] = lines[index].match(/^>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            [index, text, translation] = getTextWithTranslation(lines, index+1, /^>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/, /^~\s*(.*)\s*$/);
+
+            // Split the text into text with buttons
+            let parts = splitTextTokens(text, true);
+            let new_text = "";
+            let transcriptParts = [];
+            let answerIndex = 0;
+            let correctAnswerIndex = 0;
+            for(let part of parts) {
+                // Button with + is the correct answer
+                if(part.startsWith("[+") && part.endsWith("]")) {
+                    correctAnswerIndex = answerIndex;
+                    part = part.substr(2, part.length-3);
+                    transcriptParts.push({text: part.replace(/~/g, " "), selectable: true});
+                    answerIndex += 1;
+                }
+                // a button with a wrong answer
+                else if(part.startsWith("[") && part.endsWith("]")) {
+                    part = part.substr(1, part.length-2)
+                    transcriptParts.push({text: part.replace(/~/g, " "), selectable: true});
+                    answerIndex += 1;
+                }
+                // text which is not a button
+                else
+                    transcriptParts.push({text: part.replace(/~/g, " "), selectable: false});
+                // join the text parts
+                new_text += part;
+            }
+
+            // the text line
+            phrases.push(generateMaps(speaker, new_text, translation, audio_map, line_index));
+
+            // the question
+            phrases.push({
+                type: "POINT_TO_PHRASE",
+                question: generateHintMap(question, question_translation),
+                transcriptParts: transcriptParts,
+                correctAnswerIndex: correctAnswerIndex,
+                trackingProperties: {line_index: line_index, challenge_type: "point-to-phrase"},
+            });
+            line_index += 1;
+            continue;
+        }
+
+        // question pairs
+        if (lines[index].startsWith("[pairs]")) {
+            // split the question text
+            let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
+
+            let fallbackHints = [];
+
+            // iterate over the next lines, they are the answers
+            for(; index < lines.length - 1; index+=1) {
+                // check if it starts with + or -
+                let match = lines[index+1].match(/^\s*(.*)\s* - \s*(.*)\s*$/);
+                if(match === null)
+                    break
+                // split text
+                let [_, lang1, lang2] = match;
+                fallbackHints.push({phrase: lang1.replace(/~/g, " "), translation: lang2.replace(/~/g, " ")});
+            }
+
+            // set the data
+            phrases.push({
+                type: "MATCH",
+                prompt: question,
+                fallbackHints: fallbackHints,
+                trackingProperties: {line_index: line_index, challenge_type: "match"},
+            });
+            line_index += 1;
+
             continue;
         }
 
@@ -210,8 +604,8 @@ function processStoryFile() {
                     break
                 // split text
                 let [_, lang1, lang2] = match;
-                data.words.push(lang1);
-                data.words.push(lang2);
+                data.words.push(lang1.replace(/~/g, " "));
+                data.words.push(lang2.replace(/~/g, " "));
             }
             // add the data
             phrases.push(data);
@@ -249,6 +643,23 @@ function processStoryFile() {
             continue;
         }
     }
-    phrases.splice(0, 0, {tag: "title", id: 0, text: story_properties.title, translation: story_properties.title_translation});
+    //phrases.splice(0, 0, {tag: "title", id: 0, text: story_properties.title, translation: story_properties.title_translation});
+    phrases.splice(0, 0, generateMaps(null, story_properties.title, story_properties.title_translation, audio_map, 0));
+    phrases[0].line.type = "TITLE";
     console.log(phrases);
+
+    if(isEditor) {
+        ssml_list = {};
+        for (let phrase of phrases) {
+            if (phrase.type === "LINE") {
+                let audio = phrase.line.content.audio;
+                if (audio && audio.ssml)
+                    ssml_list[audio.ssml.id] = audio.ssml;
+            }
+        }
+        if(Object.keys(ssml_list).length)
+            document.getElementById("button_audio").style.display = "inline";
+        else
+            document.getElementById("button_audio").style.display = "none";
+    }
 }

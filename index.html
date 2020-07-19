@@ -437,7 +437,7 @@ async function loadStory(lang, lang_base) {
             console.log(`0 ${language.flag}px`);
             let flag = div.append("div").attr("class", "flag flag_big").style("background-position", `0 ${language.flag}px`);
             if(language.flag_file != null)
-                flag.style("background-image", `url(${language.flag_file})`);
+                flag.style("background-image", `url(flags/${language.flag_file})`);
             div.append("span").text(language.name).attr("class", "language_select_button_text")
         }
         return
@@ -448,7 +448,7 @@ async function loadStory(lang, lang_base) {
         if(language.short === lang) {
             let flag = d3.select("#current_language_flag").style("background-position", `0 ${language.flag}px`);
             if(language.flag_file != null) {
-                flag.style("background-image", `url(${language.flag_file})`);
+                flag.style("background-image", `url(flags/${language.flag_file})`);
             }
             console.log(d3.select("#current_language_flag").style("background-position"));
         }
@@ -459,7 +459,7 @@ async function loadStory(lang, lang_base) {
             .style("display", "block")
         let flag = a.append("div").attr("class", "flag").style("background-position", `0 ${language.flag}px`);
         if(language.flag_file != null)
-            flag.style("background-image", `url(${language.flag_file})`);
+            flag.style("background-image", `url(flags/${language.flag_file})`);
         a.append("span").text(language.name);
     }
 
