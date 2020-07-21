@@ -34,6 +34,7 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(choice)(\])/, next  : "choice"},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(order)(\])/, next  : "order"},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(fill)(\])/, next  : "fill"},
+                {token : ["keyword", "string", "keyword"], regex : /(^\[)(next)(\])/, next  : "next"},
                 {token : ["keyword", "string", "keyword"], regex : /(^\[)(pairs)(\])/, next  : "pairs"},
                 {token : ["keyword", "string", "keyword", "text"], regex : /(^\[)(click)(\])(.*$)/, next  : "click"},
                 {caseInsensitive: true},
@@ -100,11 +101,30 @@ define('ace/mode/example_highlight_rules', [], function(require, exports, module
                 {defaultToken : "invalid"}
             ],
             "fill2" : [
-                {token : ["string", "variable.parameter", "keyword", "variable.parameter"], regex : /(~.*:)([^\*]*)(\*?)(.*$)/, next:"fill2"},
-                {token : "text", regex : /(.*$)/, next:"fill3"},
+                {token : ["variable.parameter", "keyword", "variable.parameter"], regex : /^(~[^\*]*)(\*?)(.*$)/, next:"fill2"},
+                {token : "text", regex : /([^~].*$)/, next:"fill3"},
                 {defaultToken : "invalid"}
             ],
             "fill3" : [
+                {token : ["keyword", "entity.name.function"], regex : /(^\+)(.*)/},
+                {token : ["keyword", "text"], regex : /(^\-)(.*)/},
+                {token : ["keyword", "variable.parameter"], regex : /(^~)(.*)/},
+                //{token : "string", regex : /^\s*$/, next  : "start"},
+                {token : "string", regex : /(?=^>)/, next  : "start"},
+                {token : "string", regex : /(?=^\[)/, next  : "start"},
+                {defaultToken : "invalid"}
+            ],
+
+            "next" : [
+                {token : ["string", "text", "keyword", "text"], regex : /(.*:)?([^\*]*)(\*?)(.*$)/, next:"next2"},
+                {defaultToken : "invalid"}
+            ],
+            "next2" : [
+                {token : ["variable.parameter", "keyword", "variable.parameter"], regex : /^(~[^\*]*)(\*?)(.*$)/, next:"fill2"},
+                {token : "text", regex : /([^~].*$)/, next:"fill3"},
+                {defaultToken : "invalid"}
+            ],
+            "next3" : [
                 {token : ["keyword", "entity.name.function"], regex : /(^\+)(.*)/},
                 {token : ["keyword", "text"], regex : /(^\-)(.*)/},
                 {token : ["keyword", "variable.parameter"], regex : /(^~)(.*)/},

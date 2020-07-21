@@ -2,9 +2,9 @@ function splitTextTokens(text, keep_tilde=true) {
     if(!text)
         return [];
     if(keep_tilde)
-        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\!"#$%&*,\-.\/:;<=>?@^_`{|}]+)/)
+        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\!"#$%&*,.\/:;<=>?@^_`{|}]+)/)
     else
-        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\!"#$%&*,\-.\/:;<=>?@^_`{|}~]+)/)
+        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\!"#$%&*,.\/:;<=>?@^_`{|}~]+)/)
 }
 
 function getInputStringText(text) {
@@ -267,10 +267,14 @@ function processStoryFile() {
             [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
 
             let hideRangesForChallenge = [];
-            if(text.indexOf("*")) {
+            let ssml = getInputStringSpeachtext(text);
+            if(text.indexOf("*") !== -1) {
                 let start = text.indexOf("*");
                 hideRangesForChallenge = {start: start, end: start+answers[correctAnswerIndex].text.length};
                 text = text.replace("*", answers[correctAnswerIndex].text);
+                if(!translation)
+                    translation = hintMapToText(answers[correctAnswerIndex]);
+                ssml = ssml.replace("*", answers[correctAnswerIndex].text);
                 if(translation)
                     translation = translation.replace("*", hintMapToText(answers[correctAnswerIndex]));
             }
@@ -283,6 +287,9 @@ function processStoryFile() {
 
             phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
             phrases[phrases.length-1].hideRangesForChallenge = hideRangesForChallenge;
+            if(phrases[phrases.length-1].line.content.audio && phrases[phrases.length-1].line.content.audio.ssml) {
+                phrases[phrases.length-1].line.content.audio.ssml.text = ssml;
+            }
 
             // set the data
             phrases.push({
@@ -316,10 +323,12 @@ function processStoryFile() {
             let answers;
             [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
 
-            if(text.indexOf("*")) {
+            let ssml = getInputStringSpeachtext(text);
+            if(text.indexOf("*") !== -1) {
                 let start = text.indexOf("*");
                 hideRangesForChallenge = {start: start, end: start+answers[correctAnswerIndex].text.length};
                 text = text.replace("*", answers[correctAnswerIndex].text);
+                ssml = ssml.replace("*", "<prosody volume=\"silent\">"+answers[correctAnswerIndex].text+"</prosody>");
             }
 
             phrases.push({
@@ -330,6 +339,9 @@ function processStoryFile() {
 
             phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
             phrases[phrases.length-1].hideRangesForChallenge = hideRangesForChallenge;
+            if(phrases[phrases.length-1].line.content.audio) {
+                phrases[phrases.length-1].line.content.audio.ssml.text = ssml;
+            }
 
             // set the data
             phrases.push({

@@ -432,16 +432,14 @@ check_login();
 
 list = [];
 async function loadStory(lang, lang_base) {
-    let response_lang = await fetch(`${backend_stories}get_languages.php`);
+    let response_lang = await fetch(`${backend_stories}get_courses.php`);
     let data_lang = await response_lang.json();
     d3.select("#languages").selectAll("span").remove();
     for(let lang of data_lang) {
-        if(lang.short === "en")
-            continue
         let div = d3.select("#languages").append("span");
         div.append("span").html(" &bull; ")
-        let a = div.append("a").text(lang.name+" ("+lang.count+")").attr("href", "editor_overview.html?lang="+lang.short);
-        if(lang.short === urlParams.get('lang'))
+        let a = div.append("a").text(`${lang.learningLanguageName} [${lang.fromLanguage}] (${lang.count})`).attr("href", `editor_overview.html?lang=${lang.learningLanguage}&lang_base=${lang.fromLanguage}`);
+        if(lang.learningLanguage === lang && lang.fromLanguage === lang_base)
             a.style("font-weight", "bold");
     }
 
@@ -480,7 +478,6 @@ async function loadStory(lang, lang_base) {
                 d3.select(this).append("a").attr("href", "story.html?test&story=" + d.id + "&lang=" + urlParams.get('lang')).text("[test]")
             });
             d3.select(this).append("td").style("text-align", "right").html(`
-                <!-- Rounded switch -->
                 <label class="switch">
                   <input type="checkbox" ${d.public ? "checked" : ""}>
                   <span class="slider round"></span>

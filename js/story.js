@@ -331,6 +331,50 @@ function addTypeSelectPhrase(data, data2, data3) {
     fadeIn(question);
 }
 
+function addTypeContinuation(data, data2, data3) {
+    let story = d3.select("#story");
+
+    let prompt = addTypeChallengePrompt(data);
+
+    let line = addTypeLine(data2);
+
+    function selectAnswer(i) {
+        let checkbox = answers.nodes()[i].firstChild;
+        if(i === data3.correctAnswerIndex) {
+            checkbox.dataset.status = "right";
+            checkbox.innerText = "✓";
+            // show the filled in text
+            line.selectAll('[data-hidden="true"]').attr("data-hidden", undefined);
+            questionFinished(question, prompt);
+            document.removeEventListener("keydown", selectAnswer);
+        }
+        else {
+            checkbox.dataset.status = "false";
+            checkbox.innerText = "×";
+        }
+    }
+
+    document.addEventListener("keydown", event => {
+        if(isEditor)
+            return
+        if (event.key >= "1" || event.key <= answers.node().length) {
+            selectAnswer(parseInt(event.key)-1);
+        }
+    });
+    let question = story.append("p");
+    let answers = question.append("p").selectAll("div").data(data3.answers).enter()
+        .append("div").attr("class", "answer")
+        .on("click", function(d, i) { selectAnswer(i);})
+        .each(function(d, i) {
+            let p = d3.select(this);
+            p.append("div").attr("class", "checkbox").text(" ")
+            addTextWithTranslationX(p.append("div").attr("class", "answer_text"), d);
+        })
+    //playAudio(data.id, phrase);
+
+    fadeIn(question);
+}
+
 function addTypeMatch(data) {
     let count = 0;
     let selected = undefined;
@@ -1028,6 +1072,8 @@ function addNext() {
     else if(phrases[index].type === "CHALLENGE_PROMPT") {
         if(phrases[index+2].type === "SELECT_PHRASE")
             addTypeSelectPhrase(phrases[index], phrases[index + 1], phrases[index + 2]);
+        else if(phrases[index+2].type === "MULTIPLE_CHOICE")
+            addTypeContinuation(phrases[index], phrases[index + 1], phrases[index + 2]);
         else if(phrases[index+2].type === "ARRANGE")
             addTypeArrange(phrases[index], phrases[index + 1], phrases[index + 2]);
         index += 2;

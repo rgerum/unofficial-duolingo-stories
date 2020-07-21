@@ -377,16 +377,18 @@ images_lip_colors = {
     }
 
 let language_data = undefined;
+backend = "https://carex.uber.space/stories/backend/"
+backend_stories = backend+"stories/"
 async function getLanguageNames() {
-    backend = "https://carex.uber.space/stories/backend/"
-    backend_stories = backend+"stories/"
 
     let response = await fetch(`${backend_stories}get_languages.php`);
     let data = await response.json();
-    language_data = data;
+    language_data = {};
     let language_names = {}
-    for(let lang of data)
+    for(let lang of data) {
         language_names[lang.short] = lang.name;
+        language_data[lang.short] = lang;
+    }
     return language_names;
 }
 
@@ -407,7 +409,7 @@ async function login_button() {
 }
 async function check_login() {
     let login = await get_login();
-    console.log("login", login);
+
     if(login === undefined) {
         document.getElementById("login_form").style.display = "block";
         document.getElementById("loggedin").style.display = "none";
@@ -425,16 +427,20 @@ check_login();
 
 list = [];
 async function loadStory(lang, lang_base) {
+    let response_courses = await fetch(`${backend_stories}get_courses.php`);
+    let data_courses = await response_courses.json();
+
     let language_names = await getLanguageNames();
     if(lang === null) {
+        d3.select("#list").selectAll().remove();
         let list_div = d3.select("#list").append("div").attr("class", "set_list");
-        for(let language of language_data) {
-            if(language.public === 0)
+        for(let course of data_courses) {
+            if(!course.public)
                 continue
+            let language = language_data[course.learningLanguage];
             let div = list_div.append("a");
             div.attr("class", "language_select_button")
-            div.attr("href", "index.html?lang="+language.short);
-            console.log(`0 ${language.flag}px`);
+            div.attr("href", `index.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`);
             let flag = div.append("div").attr("class", "flag flag_big").style("background-position", `0 ${language.flag}px`);
             if(language.flag_file != null)
                 flag.style("background-image", `url(flags/${language.flag_file})`);
@@ -443,19 +449,20 @@ async function loadStory(lang, lang_base) {
         return
     }
 
-    for(let language of language_data) {
-        console.log(language.short, lang, language.short === lang);
+    d3.select("#header_lang_selector").selectAll("a").remove();
+    for(let course of data_courses) {
+        let language = language_data[course.learningLanguage];
+
         if(language.short === lang) {
             let flag = d3.select("#current_language_flag").style("background-position", `0 ${language.flag}px`);
             if(language.flag_file != null) {
                 flag.style("background-image", `url(flags/${language.flag_file})`);
             }
-            console.log(d3.select("#current_language_flag").style("background-position"));
         }
-        if (language.public === 0)
+        if (!course.public)
             continue
         let a = d3.select("#header_lang_selector").append("a").attr("class", "language_select_item")
-            .attr("href", "index.html?lang="+language.short)
+            .attr("href", `index.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`)
             .style("display", "block")
         let flag = a.append("div").attr("class", "flag").style("background-position", `0 ${language.flag}px`);
         if(language.flag_file != null)
@@ -467,13 +474,12 @@ async function loadStory(lang, lang_base) {
     if(response.status !== 200)
         return
     let data = await response.json();
-    console.log(data);
+
     d3.select("#list").selectAll().remove();
 
-    let set = 0;
+    let set = -1;
     let div = undefined;
     for(let d of data) {
-        console.log("d", d);
         if(set != d.set_id) {
             d3.select("#list").append("div").attr("class", "set").text("Set "+d.set_id)
             set = d.set_id;
@@ -490,7 +496,6 @@ async function loadStory(lang, lang_base) {
                 button.append("img").attr("src", d.image_done)
             else {
                 button.append("img").attr("src", d.image);
-                console.log(images_lip_colors[d.image]+" 0 6px;", button);
                 button.style("box-shadow", "#"+images_lip_colors[d.image]+" 0 6px")
             }
         }
