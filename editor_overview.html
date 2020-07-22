@@ -375,7 +375,7 @@
     </div>
 </div>
 <div id="main">
-    <h1>Editor - Stories</h1>
+    <h1 id="title">Editor - Stories</h1>
     <!--
     <div style="background: #478cc2; border-radius: 5px; padding: 1px 10px">
     <p>NEW: Install <a href="https://www.tampermonkey.net/">Tampermonkey</a> and <a href="story_export.user.js">story_export.user.js</a> to export official stories from duolingo.com for this project.</p>
@@ -396,6 +396,19 @@
 </div>
 <script>
     const urlParams = new URLSearchParams(window.location.search);
+
+    let language_data = undefined;
+    backend = "https://carex.uber.space/stories/backend/"
+    backend_stories = backend+"stories/"
+    async function getLanguageData() {
+        let response = await fetch(`${backend_stories}get_languages.php`);
+        let data = await response.json();
+        language_data = {};
+        for(let lang of data)
+            language_data[lang.short] = lang;
+
+        return language_data;
+    }
 
 async function button_logout() {
     await logout();
@@ -446,6 +459,13 @@ async function loadStory(lang, lang_base) {
     let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list_editor.php?lang=${lang}&lang_base=${lang_base}`);
     if(response.status != 200)
         return
+
+    await getLanguageData();
+
+    if(language_data)
+        document.getElementById("title").innerText += ` - ${language_data[lang].name} (from ${language_data[lang_base].name})`
+
+
     let data = await response.json();
     console.log(data);
     d3.select("tbody").selectAll("tr").remove();
@@ -466,7 +486,7 @@ async function loadStory(lang, lang_base) {
             //    td.append("img").attr("src", d.image_done).attr("width", "30px")
             td = d3.select(this).append("td");
             td.append("a")
-                .attr("href", "editor.html?story="+d.id+"&lang="+urlParams.get('lang'))
+                .attr("href", "editor.html?story="+d.id+"&lang="+urlParams.get('lang')+ "&lang_base=" + urlParams.get('lang_base'))
                 .text(d.name_base)
 
             d3.select(this).append("td").style("text-align", "right").text("+"+d.xp+"xp")
@@ -475,7 +495,7 @@ async function loadStory(lang, lang_base) {
             d3.select(this).append("td").text(d.change_date)
             d3.select(this).append("td").style("text-align", "right").each(function() {
                 d3.select(this).append("span").html(`${d.count}x&nbsp;`);
-                d3.select(this).append("a").attr("href", "story.html?test&story=" + d.id + "&lang=" + urlParams.get('lang')).text("[test]")
+                d3.select(this).append("a").attr("href", "story.html?test&story=" + d.id + "&lang=" + urlParams.get('lang') + "&lang_base=" + urlParams.get('lang_base')).text("[test]")
             });
             d3.select(this).append("td").style("text-align", "right").html(`
                 <label class="switch">

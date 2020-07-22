@@ -55,7 +55,7 @@
 <body>
 <div id="header">
     <div id="header_left" style="display: inline-block">
-        <div class="button" onclick="location.href = 'editor_overview.html?lang='+urlParams.get('lang');" style="float: none">Overview</div>
+        <div class="button" onclick="location.href = 'editor_overview.html?lang='+urlParams.get('lang')+'&lang_base='+urlParams.get('lang_base');" style="float: none">Overview</div>
         <a href="documentation.html">Documentation</a>
     </div>
     <div id="login_form" style="display: none; float: right">
@@ -197,6 +197,10 @@ lang_base=en
         let data = await response.json();
         story_id = data[0]["id"];
         story = data[0]["text"];
+
+        console.log("data", data[0]);
+        if(data[0]["author"] == 1)
+            document.getElementById("button_save").style.display = "none";
 
         await reloadAudio();
     }

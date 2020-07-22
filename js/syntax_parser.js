@@ -2,9 +2,9 @@ function splitTextTokens(text, keep_tilde=true) {
     if(!text)
         return [];
     if(keep_tilde)
-        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\!"#$%&*,.\/:;<=>?@^_`{|}]+)/)
+        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
     else
-        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\!"#$%&*,.\/:;<=>?@^_`{|}~]+)/)
+        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
 }
 
 function getInputStringText(text) {
@@ -339,7 +339,7 @@ function processStoryFile() {
 
             phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
             phrases[phrases.length-1].hideRangesForChallenge = hideRangesForChallenge;
-            if(phrases[phrases.length-1].line.content.audio) {
+            if(phrases[phrases.length-1].line.content.audio && phrases[phrases.length-1].line.content.audio.ssml) {
                 phrases[phrases.length-1].line.content.audio.ssml.text = ssml;
             }
 
