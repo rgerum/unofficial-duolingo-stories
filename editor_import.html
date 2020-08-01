@@ -359,9 +359,6 @@
 
 <div id="header">
     <div id="header_left" style="display: inline-block">
-        <div class="button" onclick="location.href = 'editor.html?lang='+urlParams.get('lang')+'&lang_base='+urlParams.get('lang_base');" style="float: none">New Story</div>
-        <div class="button" onclick="location.href = 'editor_import.html?lang='+urlParams.get('lang')+'&lang_base='+urlParams.get('lang_base');" style="float: none">Import Story</div>
-        <a href="documentation.html">Documentation</a>
     </div>
     <div id="login_form" style="display: none; float: right">
         <div id="login_status"></div>
@@ -387,7 +384,7 @@
     <p id="languages"></p>
     <table id="story_list" class="js-sort-table">
         <thead>
-        <tr><th style="border-radius: 10px 0 0 0">Set</th><th colspan="2" >Name</th><th style="text-align: right">XP</th><th>Author</th><th>Creation</th><th>Change</th><th style="text-align: center">Done</th><th style="border-radius: 0 10px 0 0">Public</th></tr>
+        <tr><th style="border-radius: 10px 0 0 0">Set</th><th colspan="2" >Spanish (from en)</th><th>Set</th><th colspan="2" >French (from en)</th><th>Set</th><th colspan="2" >English (from es)</th></tr>
         </thead>
       <tbody>
 
@@ -446,88 +443,61 @@ check_login();
 
 list = [];
 async function loadStory(lang, lang_base) {
-    let response_lang = await fetch(`${backend_stories}get_courses.php`);
-    let data_lang = await response_lang.json();
-    d3.select("#languages").selectAll("span").remove();
-    for(let lang of data_lang) {
-        let div = d3.select("#languages").append("span");
-        div.append("span").html(" &bull; ")
-        let a = div.append("a").text(`${lang.learningLanguageName} [${lang.fromLanguage}] (${lang.count})`).attr("href", `editor_overview.html?lang=${lang.learningLanguage}&lang_base=${lang.fromLanguage}`);
-        if(lang.learningLanguage === lang && lang.fromLanguage === lang_base)
-            a.style("font-weight", "bold");
-    }
-
-    let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list_editor.php?lang=${lang}&lang_base=${lang_base}`);
-    if(response.status != 200)
-        return
-
     await getLanguageData();
 
-    if(language_data)
-        document.getElementById("title").innerText += ` - ${language_data[lang].name} (from ${language_data[lang_base].name})`
+    function pad(x) {
+        if(x < 10)
+            return "&nbsp;"+x;
+        return x;
+    }
 
+    pairs = [["es", "en"], ["fr", "en"], ["en", "es"]];
+    data_list = [];
 
-    let data = await response.json();
-    console.log(data);
+    for(let pair of pairs) {
+        let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list_import.php?lang=${pair[0]}&lang_base=${pair[1]}&lang2=${lang}&lang_base2=${lang_base}`);
+        if (response.status != 200)
+            return
+
+        let data = await response.json();
+        console.log(data);
+        data_list.push(data)
+    }
     d3.select("tbody").selectAll("tr").remove();
-    d3.select("tbody").selectAll("tr").data(data).enter().append("tr")
-        .each(function(d) {
-            function pad(x) {
-                if(x < 10)
-                    return "&nbsp;"+x;
-                return x;
+
+    for(let i = 0; i < data_list[0].length; i++) {
+        let tr = d3.select("tbody").append("tr");
+
+        for(let j = 0; j < 3; j++) {
+            let d = data_list[j][i];
+            if(!d) {
+                let td = tr.append("td");
+                td = tr.append("td");
+                td = tr.append("td");
             }
-            let td = d3.select(this).append("td");
-            if(d.set_id)
-                td.append("span").html("<b>"+pad(d.set_id)+"</b>"+"&nbsp;-&nbsp;"+pad(d.set_index))
-            td = d3.select(this).append("td").attr("width", "30px");
-            if(d.image)
-                td.append("img").attr("src", d.image).attr("width", "30px")
-            //if(d.image_done)
-            //    td.append("img").attr("src", d.image_done).attr("width", "30px")
-            td = d3.select(this).append("td");
-            td.append("a")
-                .attr("href", "editor.html?story="+d.id+"&lang="+urlParams.get('lang')+ "&lang_base=" + urlParams.get('lang_base'))
-                .text(d.name_base)
+            else {
 
-            d3.select(this).append("td").style("text-align", "right").text("+"+d.xp+"xp")
-            d3.select(this).append("td").text(d.username)
-            d3.select(this).append("td").text(d.date)
-            d3.select(this).append("td").text(d.change_date)
-            d3.select(this).append("td").style("text-align", "right").each(function() {
-                d3.select(this).append("span").html(`${d.count}x&nbsp;`);
-                d3.select(this).append("a").attr("href", "story.html?test&story=" + d.id + "&lang=" + urlParams.get('lang') + "&lang_base=" + urlParams.get('lang_base')).text("[test]")
-            });
-            d3.select(this).append("td").style("text-align", "right").html(`
-                <label class="switch">
-                  <input type="checkbox" ${d.public ? "checked" : ""}>
-                  <span class="slider round"></span>
-                </label>
-                `).on("click", async function () {
-                    console.log("clicked", this, d.public);
-                    d3.event.preventDefault();
-                    if(!d.public) {
-                        if(confirm(`Do you want to publish the story \"${d.name_base}\"?`)) {
-                            let response = await fetch(backend_stories+"set_story_public.php?id="+d.id+"&public=1");
-                            if(response.status === 200) {
-                                d3.select(this).select("input").attr("checked", "true");
-                                d.public = 1;
-                            }
-                        }
-                    }
-                    else {
-                        if(confirm(`Do you want to hide the story \"${d.name_base}\"?`)) {
-                            let response = await fetch(backend_stories+"set_story_public.php?id="+d.id+"&public=0");
-                            if(response.status === 200) {
-                                d3.select(this).select("input").attr("checked", null);
-                                d.public = 0;
-                            }
-                        }
-                    }
-                })
-        })
+                let td = tr.append("td");
+                if (d.set_id)
+                    td.append("span").html("<b>" + pad(d.set_id) + "</b>" + "&nbsp;-&nbsp;" + pad(d.set_index))
+                td = tr.append("td").attr("width", "30px");
+                if (d.image) {
+                    if (d.copies)
+                        td.append("img").attr("src", d.image_done).attr("width", "30px")
+                    else
+                        td.append("img").attr("src", d.image).attr("width", "30px")
+                }
+                //if(d.image_done)
+                //    td.append("img").attr("src", d.image_done).attr("width", "30px")
+                td = tr.append("td");
+                td.append("a")
+                    .attr("href", "editor.html?import=" + d.id + "&lang=" + urlParams.get('lang') + "&lang_base=" + urlParams.get('lang_base'))
+                    .text(d.name_base)
+            }
+        }
+    }
 
-    sortTable(document.getElementById("story_list"), 5, -1)
+    //sortTable(document.getElementById("story_list"), 5, -1)
 }
 </script>
 </body>

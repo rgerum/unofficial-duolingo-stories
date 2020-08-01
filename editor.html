@@ -174,6 +174,17 @@ editor.commands.addCommand({
     readOnly: true // false if this command should not apply in readOnly mode
 });
 
+editor.commands.addCommand({
+    name: 'accent',
+    bindKey: {win: '*',  mac: '*'},
+    exec: function(editor) {
+        //editor.navigateLeft();
+        editor.insert("́")
+        //editor.navigateRight();
+    },
+    readOnly: true // false if this command should not apply in readOnly mode
+});
+
 let dirty = false;
 editor.getSession().on('change', function() {
     dirty = true;
@@ -182,14 +193,26 @@ editor.getSession().on('change', function() {
 let story = undefined;
 let story_id = undefined;
 let languages_ids = undefined;
-async function loadStory(name) {
+async function loadStory(name, name2) {
     languages_ids = await getLanguages();
-    if(name===null) {
+    console.log(name, name2)
+    if(!name && !name2) {
         story = `title=...
 title_base=...
 lang=${urlParams.get('lang')}
-lang_base=en
+lang_base=${urlParams.get('lang_base') || "en"}
 `;
+    }
+    else if(!name) {
+        //let response = await fetch(name+".txt");
+        let response = await fetch(`${backend_stories}get_story.php?id=${name2}`);
+        let data = await response.json();
+        let text = data[0]["text"];
+        text = text.replace(/lang=.*/, `lang=${urlParams.get('lang')}`)
+        text = text.replace(/lang_base=.*/, `lang_base=${urlParams.get('lang_base')}`)
+        console.log(text);
+        window.text = text;
+        story = text;
     }
     else {
         //let response = await fetch(name+".txt");
@@ -210,7 +233,7 @@ lang_base=en
     updateStoryDisplay();
 }
 
-loadStory(urlParams.get('story'))
+loadStory(urlParams.get('story'), urlParams.get('import'))
 
 function updateStoryDisplay() {
     story = editor.getValue();
