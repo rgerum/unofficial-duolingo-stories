@@ -637,6 +637,7 @@ function questionFinished(question, prompt) {
             fadeOut(question);
             if (prompt)
                 fadeOut(prompt);
+            d3.select("#footer").attr("data-right", undefined);
             addNext();
         }
         document.getElementById("button_next").dataset.status = "active";
@@ -879,6 +880,7 @@ function playSoundRight() {
     audio_right.pause();
     audio_right.currentTime = 0;
     audio_right.play();
+    d3.select("#footer").attr("data-right", true)
 }
 function playSoundWrong() {
     audio_wrong.pause();

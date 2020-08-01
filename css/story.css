@@ -578,13 +578,27 @@ span[data-hidden=true] {
 
 /* footer */
 
+#footer {
+    padding: 0px;
+}
+
+#footer[data-right] > #footer_buttons {
+    background-color: #b8f28b;
+}
+
+#footer[data-right] > #footer_result {
+    display: block;
+}
+
 #footer_buttons {
     position: relative;
     z-index: 3;
     display: flex;
+    padding: 16px 16px;
 }
 
 #footer_result {
+    display: none;
     background-color: #b8f28b;
     color: #58a700;
     z-index: 2;
@@ -667,7 +681,6 @@ span[data-hidden=true] {
 
 @media (max-width:700px) {
     #footer {
-        padding: 16px 16px;
         height: auto;
         border-top: 0px;
     }
