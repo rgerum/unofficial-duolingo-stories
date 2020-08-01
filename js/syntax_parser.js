@@ -18,6 +18,8 @@ function getInputStringSpeachtext(text) {
 }
 
 function getSpeaker(name) {
+    if(!name)
+        name = "Narrator"
     if(story_properties["speaker_"+name])
         return story_properties["speaker_"+name];
     if(!language_data || !language_data[story_properties.lang])
