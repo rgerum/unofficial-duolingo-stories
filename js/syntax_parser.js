@@ -14,7 +14,7 @@ function getInputStringText(text) {
 }
 
 function getInputStringSpeachtext(text) {
-    return "<speak>"+text.replace(/([^~ ,;.:-_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ")+"</speak>";
+    return "<speak>"+text.replace(/([^~ ,;.:-_?!…]*)\{([^\}:]*):([^\}]*)\}/g, '<phoneme alphabet="$3" ph="$2">$1</phoneme>').replace(/([^~ ,;.:-_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ")+"</speak>";
 }
 
 function getSpeaker(name) {
