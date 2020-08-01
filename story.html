@@ -14,7 +14,8 @@
 </head>
 <body>
 <div id="header">
-    <div id="progress"><span id="progress_inside"></span></div>
+    <div id="header_icon"><span id="quit" onclick="quit();"></span></div>
+    <div id="progress"><div id="progress_inside"><div id="progress_highlight"></div></div></div>
 </div>
 <div id="main">
     <div id="story">
@@ -34,6 +35,13 @@
 <script>
 isEditor = false;
 const urlParams = new URLSearchParams(window.location.search);
+lang = urlParams.get('lang');
+lang_base = urlParams.get('lang_base');
+function quit() {
+    if(confirm("Are you sure you want to quit? Your progress in this story will be lost.")) {
+        location.href = "index.html?lang="+lang+"&lang_base="+lang_base;
+    }
+}
 loadStory(urlParams.get('story'))
 </script>
 </body>

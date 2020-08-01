@@ -23,6 +23,9 @@ async function loadStory(name) {
     story_id = data[0]["id"];
     story = data[0]["text"];
 
+    lang = data[0]['lang'];
+    lang_base = data[0]["lang_base"];
+
     await reloadAudio();
 
     if(document.getElementById("button_next")) {
@@ -250,10 +253,12 @@ function addTypeMultipleChoice(data) {
             checkbox.innerText = "✓";
             questionFinished(question);
             document.removeEventListener("keydown", selectAnswer);
+            playSoundRight();
         }
         else {
             checkbox.dataset.status = "false";
             checkbox.innerText = "×";
+            playSoundWrong();
         }
     }
 
@@ -303,9 +308,11 @@ function addTypeSelectPhrase(data, data2, data3) {
             // finish the question
             questionFinished(question, prompt);
             document.removeEventListener("keydown", selectAnswer);
+            playSoundRight();
         }
         else {
             element.dataset.status = "inactive";
+            playSoundWrong();
         }
     }
 
@@ -347,10 +354,12 @@ function addTypeContinuation(data, data2, data3) {
             line.selectAll('[data-hidden="true"]').attr("data-hidden", undefined);
             questionFinished(question, prompt);
             document.removeEventListener("keydown", selectAnswer);
+            playSoundRight();
         }
         else {
             checkbox.dataset.status = "false";
             checkbox.innerText = "×";
+            playSoundWrong();
         }
     }
 
@@ -452,12 +461,16 @@ function addTypeArrange(data, data2, data3) {
                 line.selectAll('[data-hidden="true"]').attr("data-hidden", function() { return this.dataset.end > data3.characterPositions[index] });
 
                 index += 1;
-                if(index === data3.selectablePhrases.length)
+                if(index === data3.selectablePhrases.length) {
+                    playSoundRight();
                     questionFinished(question, prompt);
+                }
             }
             else {
-                if(this.dataset.status === "unselected")
+                if(this.dataset.status === "unselected") {
                     d3.select(this).attr("data-status", "wrong_shake").transition().delay(820).attr("data-status", "unselected")
+                    playSoundWrong();
+                }
             }
         })
 
@@ -481,10 +494,12 @@ function addTypePointToPhrase(data, data1) {
                 if(d === data.correctAnswerIndex) {
                     phrase.selectAll("button").attr("data-status", "inactive");
                     d3.select(this).attr("data-status", "unselected");
+                    playSoundRight();
                     questionFinished(question);
                 }
                 else {
                     d3.select(this).attr("data-status", "wrong_shake").transition().delay(820).attr("data-status", "inactive");
+                    playSoundWrong();
                 }
             })
             button_index += 1;
