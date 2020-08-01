@@ -25,6 +25,7 @@ async function loadStory(name) {
 
     lang = data[0]['lang'];
     lang_base = data[0]["lang_base"];
+    rtl = data[0]["rtl"];
 
     await reloadAudio();
 
@@ -212,11 +213,14 @@ function addTypeLine(data) {
     let phrase, bubble;
     if(data.line.type === "TITLE") {
         let story = d3.select("#story");
-        phrase = story.append("p");
+        phrase = story.append("p").attr("class", "title");
         bubble = phrase.append("span").attr("class", "title")
     }
     else
         [phrase, bubble] = addSpeakerX(data.line);
+
+    if(rtl)
+        phrase.attr("data-rtl", true);
 
     addLoudspeakerX(bubble, data.line.content);
 
@@ -494,6 +498,8 @@ function addTypePointToPhrase(data, data1) {
     addTextWithTranslationX(question.append("span").attr("class", "question"), data.question);
 
     let phrase = question.append("p");//story.append("p");
+    if(rtl)
+        phrase.attr("data-rtl", true);
     let button_index = 0;
     for(let element of data.transcriptParts) {
         if(element.selectable) {

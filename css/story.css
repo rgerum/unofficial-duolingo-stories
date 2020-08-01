@@ -842,3 +842,46 @@ span[data-hidden=true] {
     right: 0;
     top: 0;
 }
+
+
+/* rtl */
+
+p[data-rtl] {
+    direction: rtl;
+}
+
+.phrase[data-rtl] {
+    direction: rtl;
+}
+
+.phrase[data-rtl] .head {
+    margin-left: 12px;
+    margin-right: 0px;
+}
+
+.phrase[data-rtl] .bubble {
+    border-top-left-radius: 14px;
+    border-top-right-radius: 0px;
+}
+
+.phrase[data-rtl] .bubble:before {
+    border-left: 12px solid #dedede;
+    border-right: 0;
+    border-top-right-radius: 50%;
+    border-top-left-radius: 0;
+    right: -14px;
+    left: auto;
+}
+
+.phrase[data-rtl] .bubble:after {
+    border-left: 12px solid #fff;
+    border-right: 0;
+    right: -9px;
+    left: auto;
+}
+
+p[data-rtl] .speaker {
+    transform: scale(-1, 1);
+    margin-right: 0;
+    margin-left: 8px;
+}

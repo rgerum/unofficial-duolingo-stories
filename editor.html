@@ -193,8 +193,11 @@ editor.getSession().on('change', function() {
 let story = undefined;
 let story_id = undefined;
 let languages_ids = undefined;
+
 async function loadStory(name, name2) {
     languages_ids = await getLanguages();
+    rtl = language_data[urlParams.get('lang')]["rtl"];
+    console.log("RTL", rtl, urlParams.get('lang'), language_data[urlParams.get('lang')], language_data[urlParams.get('lang')]["rtl"]);
     console.log(name, name2)
     if(!name && !name2) {
         story = `title=...
