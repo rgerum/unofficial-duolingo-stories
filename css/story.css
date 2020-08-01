@@ -501,6 +501,7 @@ span[data-hidden=true] {
     font-size: 0.8em;
 }
 
+/* header with progress bar */
 
 #progress {
     display: inline-block;
@@ -565,5 +566,115 @@ span[data-hidden=true] {
     #header {
         padding: 17px 20px;
         z-index: 2;
+    }
+}
+
+/* --- */
+
+#story {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+/* footer */
+
+#footer_buttons {
+    position: relative;
+    z-index: 3;
+    display: flex;
+}
+
+#footer_result {
+    background-color: #b8f28b;
+    color: #58a700;
+    z-index: 2;
+
+    animation-duration: .2s;
+    animation-fill-mode: forwards;
+    animation-name: _1p2UU;
+    animation-timing-function: cubic-bezier(.35,1.8,.35,.83);
+    bottom: 0;
+    left: 0;
+    margin: 0 -16px;
+    padding: 24px 16px 72px;
+    position: absolute;
+    right: 0;
+}
+
+@keyframes _1p2UU {
+    0% {
+        transform:translateY(100%)
+    }
+    to {
+        transform:translateY(0)
+    }
+}
+
+#footer_result > div {
+    display: flex;
+}
+
+#footer_result_icon {
+    animation-duration: .4s;
+    animation-fill-mode: forwards;
+    animation-name: _2Uurp;
+    animation-timing-function: ease-in-out;
+}
+
+@keyframes _2Uurp {
+    0% {
+        opacity:0;
+        transform:scale3d(.7,.7,1)
+    }
+    33% {
+        opacity:1;
+        transform:scale3d(1.1,1.1,1)
+    }
+    66% {
+        transform:scale3d(.9,.9,1)
+    }
+    to {
+        transform:scaleX(1)
+    }
+}
+
+#footer_result_text {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0;
+    width: 100%;
+}
+
+#footer_result_text h2 {
+    color: #58a700;
+    font-size: 25px;
+    margin: 0 0 0 12px;
+}
+
+@media (min-width:700px) {
+    .result {
+        -webkit-animation-name: NRgpX;
+        animation-name: NRgpX;
+        display: flex;
+        flex-direction: column;
+        grid-column: 1/5;
+        margin: 0;
+        padding: 0;
+        position: relative;
+    }
+}
+
+@media (max-width:700px) {
+    #footer {
+        padding: 16px 16px;
+        height: auto;
+        border-top: 0px;
+    }
+    #button_discuss {
+        display: none;
+    }
+    #button_next {
+        width: 100%;
     }
 }
