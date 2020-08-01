@@ -248,16 +248,20 @@ function addTypeMultipleChoice(data) {
 
     function selectAnswer(i) {
         let checkbox = answers.nodes()[i].firstChild;
+        if(d3.select(answers.nodes()[i]).attr("data-off"))
+            return;
         if(i === data.correctAnswerIndex) {
-            checkbox.dataset.status = "right";
-            checkbox.innerText = "✓";
+            for(let ii in answers.nodes()) {
+                d3.select(answers.nodes()[ii]).attr("data-off", true)
+            }
+            d3.select(answers.nodes()[i]).attr("data-right", true)
             questionFinished(question);
             document.removeEventListener("keydown", selectAnswer);
             playSoundRight();
         }
         else {
-            checkbox.dataset.status = "false";
-            checkbox.innerText = "×";
+            d3.select(answers.nodes()[i]).attr("data-off", true)
+            d3.select(answers.nodes()[i]).attr("data-false", true)
             playSoundWrong();
         }
     }
@@ -269,13 +273,13 @@ function addTypeMultipleChoice(data) {
             selectAnswer(parseInt(event.key)-1);
         }
     });
-    let answers = question.append("p").selectAll("div").data(data.answers).enter()
-        .append("div").attr("class", "answer")
+    let answers = question.append("ul").attr("class", "multiple_choice_ul").selectAll("li").data(data.answers).enter()
+        .append("li").attr("class", "multiple_choice_li")
         .on("click", function(d, i) { selectAnswer(i);})
         .each(function(d, i) {
             let p = d3.select(this);
-            p.append("div").attr("class", "checkbox").text(" ")
-            addTextWithTranslationX(p.append("div").attr("class", "answer_text"), d);
+            p.append("button").attr("class", "multiple_choice_checkbox").text(" ")
+            addTextWithTranslationX(p.append("div").attr("class", "multiple_choice_answer_text"), d);
         })
 
     fadeIn(question);
@@ -297,10 +301,13 @@ function addTypeSelectPhrase(data, data2, data3) {
 
     function selectAnswer(i) {
         let element = answers.nodes()[i];
+        if(answers.nodes()[i].dataset.status) {
+            return;
+        }
         if(i === data3.correctAnswerIndex) {
             for(let ii = 0; ii < answers.nodes().length; ii++) {
                 if(ii !== i)
-                    answers.nodes()[ii].dataset.status = "inactive";
+                    answers.nodes()[ii].dataset.status = "off";
             }
             element.dataset.status = "right";
             // show the filled in text
@@ -330,6 +337,7 @@ function addTypeSelectPhrase(data, data2, data3) {
         .on("click", function(d, i) { selectAnswer(i);})
         .each(function(d, i) {
             let p = d3.select(this);
+            d.hintMap = [];
             addTextWithTranslationX(p.attr("class", "answer_button"), d);
         })
 
