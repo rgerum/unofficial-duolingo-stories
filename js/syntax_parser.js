@@ -2,9 +2,11 @@ function splitTextTokens(text, keep_tilde=true) {
     if(!text)
         return [];
     if(keep_tilde)
-        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
+        //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
+        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
     else
-        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
+        //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
+        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
 }
 
 function getInputStringText(text) {
