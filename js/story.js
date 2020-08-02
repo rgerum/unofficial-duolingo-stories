@@ -12,6 +12,16 @@ audio_right = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39d
 audio_wrong = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3")
 rtl = false;
 
+audio_objects = {}
+function loadAudios() {
+    for(let element of story_json.elements) {
+        if(element.line && element.line.content && element.line.content.audio) {
+            let audio = element.line.content.audio;
+            if(audio.url)
+                audio_objects[audio.url] = new Audio(audio.url);
+        }
+    }
+}
 
 function getAudioUrl(id) {
     return `audio/${story_id}/speech_${story_id}_${id}.mp3`
@@ -19,6 +29,30 @@ function getAudioUrl(id) {
 
 async function loadStory(name) {
     await getLanguages();
+
+    let response_json = await fetch(`${backend_stories}get_story_json.php?id=${name}`);
+    if(response_json.status === 200) {
+        story_json = await response_json.json();
+        if(story_json) {
+            console.log("LOADED JSON");
+            rtl = language_data[story_json.learningLanguage]["rtl"];
+
+            if(document.getElementById("button_next")) {
+                document.getElementById("button_next").dataset.status = "active";
+            }
+            document.getElementById("license_language").innerText = language_data[story_json.learningLanguage].name;
+
+            if(story_json.discussion)
+                d3.select("#button_discuss").style("display", "inline")
+                    .on("click", _=>{window.open(story_json.discussion);})
+
+            loadAudios();
+
+            addNext();
+
+            return
+        }
+    }
 
     let response = await fetch(`${backend_stories}get_story.php?id=${name}`);
     let data = await response.json();
@@ -29,8 +63,6 @@ async function loadStory(name) {
     lang_base = data[0]["lang_base"];
     rtl = data[0]["rtl"];
 
-    await reloadAudio();
-
     if(document.getElementById("button_next")) {
         document.getElementById("button_next").dataset.status = "active";
     }
@@ -40,7 +72,10 @@ async function loadStory(name) {
         d3.select("#button_discuss").style("display", "inline")
             .on("click", _=>{window.open(data[0].discussion);})
 
+    await reloadAudioMap();
     processStoryFile();
+
+    loadAudios();
     //addTitle();
     addNext();
 }
@@ -106,7 +141,7 @@ function addTextWithTranslationX(dom, content, hideRangesForChallenge, transcrip
     }
     function addWord(dom, start, end) {
         let text_pos = start
-        if(!content.audio || !content.audio.audio_object) {
+        if(!content.audio || !audio_objects[content.audio.url]) {
             addWord2(dom, text_pos, end);
             return dom;
         }
@@ -190,21 +225,21 @@ function addSpeakerX(line) {
 }
 
 function playAudioX(phrase, content) {
-    if(content.audio !== undefined && content.audio.audio_object !== undefined) {
+    if(content.audio !== undefined && audio_objects[content.audio.url] !== undefined) {
         phrase.selectAll("[data-audio]")
             .style("opacity", 0.5)
             .transition()
             .delay(function() { return parseInt(this.dataset.audio)})
             .style("opacity", 1);
 
-        content.audio.audio_object.pause();
-        content.audio.audio_object.currentTime = 0;
-        content.audio.audio_object.play();
+        audio_objects[content.audio.url].pause();
+        audio_objects[content.audio.url].currentTime = 0;
+        audio_objects[content.audio.url].play();
     }
 }
 
 function addLoudspeakerX(bubble, content) {
-    if(content.audio !== undefined && content.audio.audio_object !== undefined) {
+    if(content.audio !== undefined && audio_objects[content.audio.url] !== undefined) {
         let loudspeaker = bubble.append("img").attr("src", "https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg")
             .attr("width", "28px").attr("class", "speaker")
             .on("click", function() { playAudioX(bubble, content)});
@@ -258,7 +293,6 @@ function addMultipleChoiceAnswers(question, data, finishedCallback) {
             d3.select(answers.nodes()[i]).attr("data-right", true)
             if(finishedCallback)
                 finishedCallback()
-            questionFinished(question);
             document.removeEventListener("keydown", selectAnswer);
             playSoundRight();
         }
@@ -292,7 +326,9 @@ function addTypeMultipleChoice(data) {
 
     addTextWithTranslationX(question.append("span").attr("class", "question"), data.question);
 
-    addMultipleChoiceAnswers(question, data);
+    addMultipleChoiceAnswers(question, data, function () {
+        questionFinished(question);
+    });
 
     fadeIn(question);
 }
@@ -368,6 +404,7 @@ function addTypeContinuation(data, data2, data3) {
     let question = story.append("p");
     addMultipleChoiceAnswers(question, data3, function () {
         line.selectAll('[data-hidden="true"]').attr("data-hidden", undefined);
+        questionFinished(question, prompt);
     });
 
 
@@ -574,17 +611,16 @@ function addNext() {
         if(urlParams.get('test') === null) {
             setStoryDone(story_id);
             if(document.getElementById("button_next"))
-                document.getElementById("button_next").onclick = function() { window.location.href = 'index.html?lang='+story_properties["lang"]+"&lang_base="+story_properties["lang_base"]};
+                document.getElementById("button_next").onclick = function() { window.location.href = 'index.html?lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage};
         }
         else {
             if(document.getElementById("button_next"))
-                document.getElementById("button_next").onclick = function() { window.location.href = 'editor_overview.html?lang='+story_properties["lang"]+"&lang_base="+story_properties["lang_base"]};
+                document.getElementById("button_next").onclick = function() { window.location.href = 'editor_overview.html?lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage};
         }
         if(document.getElementById("button_next")) {
             document.getElementById("button_next").dataset.status = "active";
             document.getElementById("button_next").innerText = "finished";
         }
-
 
         return;
     }
@@ -616,74 +652,6 @@ function addNext() {
         top: document.documentElement.scrollHeight - document.documentElement.clientHeight,
         behavior: 'smooth'
     });
-}
-
-
-let json;
-async function hoverWord(element) {
-    if(this.dataset.has_translation === null)
-        return;
-    if(this.dataset.has_translation === undefined) {
-        this.dataset.has_translation = null;
-        console.log("https://linguee-api.herokuapp.com/api?q=" + this.innerText + "&src="+story_properties.lang+"&dst=en")
-        let test = await fetch("https://linguee-api.herokuapp.com/api?q=" + this.innerText + "&src="+story_properties.lang+"&dst=en")
-        json = await test.json();
-        if (json.exact_matches && json.exact_matches[0].translations) {
-            let trans = json.exact_matches[0].translations[0].text
-            this.dataset.has_translation = true;
-            this.dataset.translation = trans;
-            console.log(trans);
-            d3.select(this).attr("class", "word tooltip").append("span").attr("class", "tooltiptext").text(trans);
-        } else {
-            this.dataset.has_translation = false;
-        }
-    }
-    console.log("currenttrans", this.dataset.translation, this.dataset.has_translation);
-}
-
-function download_json() {
-    let j = document.createElement("a")
-    j.id = "download"
-    j.download = "story"+story_id+".json"
-    j.href = URL.createObjectURL(new Blob([JSON.stringify({"meta": story_properties, "phrases": story_json.elements}, null, 2)]))
-    j.click()
-}
-
-async function upload_json() {
-    let json = JSON.stringify({"meta": story_properties, "phrases": story_json.elements});
-    let response = await fetch_post(`${backend_audio}set_audio.php`, {"id": story_id, "json": json});
-    console.log(response);
-    let text = await response.text();
-    console.log(text);
-    return text;
-}
-
-async function generate_audio_line(line_id) {
-    let json = JSON.stringify(ssml_list);
-    let response = await fetch_post(`${backend_audio}set_audio.php`, {"id": story_id, "json": json, "line_id": line_id});
-    console.log(response);
-    let text = await response.text();
-    console.log(text);
-    return text;
-}
-
-async function generate_all_audio() {
-    for(let id in ssml_list) {
-        await generate_audio_line(id);
-    }
-    await reloadAudio();
-}
-
-async function reloadAudio() {
-    audio_map = await fetch(`audio/${story_id}/audio_${story_id}.json`);
-    if(audio_map.status !== 200)
-        audio_map = undefined;
-    else {
-        audio_map = await audio_map.json();
-        audio_objects = {}
-        for(let id in audio_map)
-            audio_objects[id] = new Audio(`audio/${story_id}/speech_${story_id}_${id}.mp3`);
-    }
 }
 
 document.addEventListener("keydown", event => {

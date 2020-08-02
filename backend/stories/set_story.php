@@ -24,7 +24,8 @@ $keys = ["id" => "int",
     "cefr" => "string",
     "set_id" => "int",
     "set_index" => "int",
-    "text" => "string"];
+    "text" => "string",
+    "json" => "string"];
 
 if($_POST["id"] == "")
     $_POST["author"] = $_SESSION["user"]["id"];

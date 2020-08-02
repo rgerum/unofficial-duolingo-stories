@@ -65,7 +65,7 @@ function generateAudioMap(text, audiomap, id) {
         }
         text_pos += text_display_list[i].length;
     }
-    return {url: getAudioUrl(id), speak_text: text_speak, keypoints: keypoints, audio_object:  new Audio(getAudioUrl(id))};
+    return {url: getAudioUrl(id), keypoints: keypoints};
 }
 
 function generateMaps(speaker, text, translation, audiomap, id) {
@@ -691,5 +691,69 @@ function processStoryFile() {
             locked: story_properties["image_locked"],
         },
         fromLanguageName: story_properties["title_base"],
+        discussion: story_properties["discussion"],
     }
+}
+
+function updateAudioLinks(line_id) {
+    function processElement(element) {
+        if(element.line && element.line.content && element.line.content.audio) {
+            let audio = element.line.content.audio;
+            if(audio.url)
+                audio.url = audio.url.replace(/\?.*$/, "")+`?${Date.now()}`;
+        }
+    }
+    if(line_id !== undefined)
+        return processElement(story_json.elements[line_id]);
+    for(let element of story_json.elements) {
+        processElement(element);
+    }
+}
+
+async function reloadAudioMap() {
+    audio_map = await fetch(`audio/${story_id}/audio_${story_id}.json`);
+    if(audio_map.status !== 200)
+        audio_map = undefined;
+    else {
+        audio_map = await audio_map.json();
+    }
+}
+
+
+let json;
+
+function download_json() {
+    let j = document.createElement("a")
+    j.id = "download"
+    j.download = "story"+story_id+".json"
+    j.href = URL.createObjectURL(new Blob([JSON.stringify({"meta": story_properties, "phrases": story_json.elements}, null, 2)]))
+    j.click()
+}
+
+async function upload_json() {
+    let json = JSON.stringify({"meta": story_properties, "phrases": story_json.elements});
+    let response = await fetch_post(`${backend_audio}set_audio.php`, {"id": story_id, "json": json});
+    console.log(response);
+    let text = await response.text();
+    console.log(text);
+    return text;
+}
+
+async function generate_audio_line(line_id) {
+    let json = JSON.stringify(ssml_list);
+    let response = await fetch_post(`${backend_audio}set_audio.php`, {"id": story_id, "json": json, "line_id": line_id});
+    console.log(response);
+    let text = await response.text();
+    console.log(text);
+    updateAudioLinks(line_id);
+    loadAudios();
+    await reloadAudioMap();
+    return text;
+}
+
+async function generate_all_audio() {
+    for(let id in ssml_list) {
+        await generate_audio_line(id);
+    }
+    loadAudios();
 }

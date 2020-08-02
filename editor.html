@@ -228,7 +228,7 @@ lang_base=${urlParams.get('lang_base') || "en"}
         if(data[0]["author"] == 1)
             document.getElementById("button_save").style.display = "none";
 
-        await reloadAudio();
+        await reloadAudioMap();
     }
     editor.setValue(story);
     dirty = false;
@@ -254,6 +254,7 @@ updateStoryDisplay();
 async function saveStory() {
     try {
         updateStoryDisplay();
+        updateAudioLinks();
     }
     catch (e) {
 
@@ -274,7 +275,8 @@ async function saveStory() {
         "set_id": story_properties["set_id"],
         "set_index": story_properties["set_index"],
         "text": editor.getValue(),
-        "change_date": new Date().now()
+        "change_date": new Date().now(),
+        "json": JSON.stringify(story_json),
     };
     if(story_id !== undefined)
         data.id = story_id;
