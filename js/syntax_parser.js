@@ -443,7 +443,8 @@ function processStoryFile() {
             [index, question, question_translation] = getTextWithTranslation(lines, index, /^\[.*\]\s*(.*)\s*$/, /^~\s*(.*)\s*$/);
 
             // read the line (with translation)
-            [_, speaker, text] = lines[index].match(/^>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            [_, speaker, text] = lines[index+1].match(/^>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            console.log("[click]", speaker, text, lines[index], question, question_translation);
             [index, text, translation] = getTextWithTranslation(lines, index+1, /^>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/, /^~\s*(.*)\s*$/);
 
             // Split the text into text with buttons

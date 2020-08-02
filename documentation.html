@@ -441,9 +441,13 @@ sportief - athletic
             div.id = "story"
 
             //addTitle();
-            while (index < story_json.elements.length) {
-                document.getElementById("button_next").dataset.status = "active";
-                addNext();
+            addAll();
+            d3.selectAll(".hidden").classed("hidden", false)
+            if(0) {
+                while (index < story_json.elements.length) {
+                    document.getElementById("button_next").dataset.status = "active";
+                    addNext();
+                }
             }
 
             div.id = undefined;
