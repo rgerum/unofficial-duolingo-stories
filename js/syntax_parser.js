@@ -742,6 +742,8 @@ async function upload_json() {
 
 async function generate_audio_line(line_id) {
     let json = JSON.stringify(ssml_list);
+    let audio_reloader = d3.select("#audio_reload"+line_id);
+    audio_reloader.attr("data-reload", true);
     let response = await fetch_post(`${backend_audio}set_audio.php`, {"id": story_id, "json": json, "line_id": line_id});
     console.log(response);
     let text = await response.text();
@@ -749,6 +751,7 @@ async function generate_audio_line(line_id) {
     updateAudioLinks(line_id);
     loadAudios();
     await reloadAudioMap();
+    audio_reloader.attr("data-reload", undefined);
     return text;
 }
 

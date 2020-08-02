@@ -294,10 +294,13 @@ function addTypeLine(data) {
     addTextWithTranslationX(bubble, data.line.content, data.hideRangesForChallenge);
 
     if(isEditor && data.line.content.audio && data.line.content.audio.ssml) {
+        let id = data.line.content.audio.ssml.id;
         let ssml = bubble.append("p").attr("class", "ssml");
         ssml.append("span").attr("class", "ssml_speaker").text(data.line.content.audio.ssml.speaker);
         ssml.append("span").text(data.line.content.audio.ssml.text);
         ssml.append("span").attr("class", "ssml_speaker").text("#"+data.line.content.audio.ssml.id);
+        ssml.append("span").attr("class", "audio_reload").attr("id", "audio_reload"+data.line.content.audio.ssml.id)
+            .on("click", () => generate_audio_line(id));
     }
 
     return phrase;
