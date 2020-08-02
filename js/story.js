@@ -10,6 +10,7 @@ audio_map = undefined;
 audio_objects = undefined;
 audio_right = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3");
 audio_wrong = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3")
+audio_finished = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3")
 rtl = false;
 
 div_elements = [];
@@ -654,6 +655,22 @@ function questionFinished(question, prompt, callback) {
     }
 }
 
+function addStoryFinish() {
+    let page = d3.select("#main").append("div").attr("class", "page_finished").append("div");
+    let image = page.append("div").attr("class", "finished_image_container");
+    let stars = image.append("div");
+    stars.append("div").attr("class", "star1")
+    stars.append("div").attr("class", "star2")
+    stars.append("div").attr("class", "star3")
+    image = image.append("div").attr("class", "finished_image");
+    image.append("img").attr("src", story_json.illustrations.active);
+    image.append("img").attr("src", story_json.illustrations.gilded).attr("class", "image_golden");
+    page.append("h2").text("Story complete!");
+    page.append("p").text(`You finished "${story_json.fromLanguageName}"`);
+    d3.select("#header").style("display", "none")
+    audio_finished.play();
+}
+
 
 
 
@@ -684,59 +701,6 @@ function playSoundWrong() {
 }
 
 scroll_enabled = true;
-function addNext() {
-    let elements = story_json.elements;
-    if(document.getElementById("button_next") && document.getElementById("button_next").dataset.status == "inactive")
-        return;
-    if(document.getElementById("button_next"))
-        document.getElementById("button_next").dataset.status = "inactive";
-    setProgress(index*100/elements.length);
-    if(index == elements.length) {
-        if(urlParams.get('test') === null) {
-            setStoryDone(story_id);
-            if(document.getElementById("button_next"))
-                document.getElementById("button_next").onclick = function() { window.location.href = 'index.html?lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage};
-        }
-        else {
-            if(document.getElementById("button_next"))
-                document.getElementById("button_next").onclick = function() { window.location.href = 'editor_overview.html?lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage};
-        }
-        if(document.getElementById("button_next")) {
-            document.getElementById("button_next").dataset.status = "active";
-            document.getElementById("button_next").innerText = "finished";
-        }
-
-        return;
-    }
-
-    if(elements[index].type === "LINE") {
-        addTypeLine(elements[index]);
-    }
-    else if(elements[index].type === "MULTIPLE_CHOICE")
-        addTypeMultipleChoice(elements[index]);
-    else if(elements[index].type === "CHALLENGE_PROMPT") {
-        if(elements[index+2].type === "SELECT_PHRASE")
-            addTypeSelectPhrase(elements[index], elements[index + 1], elements[index + 2]);
-        else if(elements[index+2].type === "MULTIPLE_CHOICE")
-            addTypeContinuation(elements[index], elements[index + 1], elements[index + 2]);
-        else if(elements[index+2].type === "ARRANGE")
-            addTypeArrange(elements[index], elements[index + 1], elements[index + 2]);
-        index += 2;
-    }
-    else if(elements[index].type === "POINT_TO_PHRASE")
-        addTypePointToPhrase(elements[index], elements[index-1]);
-
-    else if(elements[index].type === "MATCH")
-        addTypeMatch(elements[index])
-
-    index += 1;
-    if(scroll_enabled)
-    document.documentElement.scrollTo({
-        left: 0,
-        top: document.documentElement.scrollHeight - document.documentElement.clientHeight,
-        behavior: 'smooth'
-    });
-}
 
 function addAll() {
     let elements = story_json.elements;
@@ -760,6 +724,7 @@ function addAll() {
         else if (elements[index].type === "MATCH")
             addTypeMatch(elements[index])
     }
+
 }
 
 function addNext() {
@@ -779,10 +744,17 @@ function addNext() {
             if(document.getElementById("button_next"))
                 document.getElementById("button_next").onclick = function() { window.location.href = 'editor_overview.html?lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage};
         }
+        addStoryFinish();
         if(document.getElementById("button_next")) {
             document.getElementById("button_next").dataset.status = "active";
-            document.getElementById("button_next").innerText = "finished";
+            //document.getElementById("button_next").innerText = "finished";
         }
+
+        document.documentElement.scrollTo({
+            left: 0,
+            top: document.documentElement.scrollHeight - document.documentElement.clientHeight,
+            behavior: 'smooth'
+        });
 
         return;
     }
