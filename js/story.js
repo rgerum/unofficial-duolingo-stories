@@ -10,6 +10,8 @@ audio_map = undefined;
 audio_objects = undefined;
 audio_right = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3");
 audio_wrong = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3")
+rtl = false;
+
 
 function getAudioUrl(id) {
     return `audio/${story_id}/speech_${story_id}_${id}.mp3`
@@ -244,12 +246,7 @@ function addTypeLine(data) {
     return phrase;
 }
 
-function addTypeMultipleChoice(data) {
-    let story = d3.select("#story");
-    let question = story.append("p");
-
-    addTextWithTranslationX(question.append("span").attr("class", "question"), data.question);
-
+function addMultipleChoiceAnswers(question, data, finishedCallback) {
     function selectAnswer(i) {
         let checkbox = answers.nodes()[i].firstChild;
         if(d3.select(answers.nodes()[i]).attr("data-off"))
@@ -259,6 +256,8 @@ function addTypeMultipleChoice(data) {
                 d3.select(answers.nodes()[ii]).attr("data-off", true)
             }
             d3.select(answers.nodes()[i]).attr("data-right", true)
+            if(finishedCallback)
+                finishedCallback()
             questionFinished(question);
             document.removeEventListener("keydown", selectAnswer);
             playSoundRight();
@@ -285,6 +284,15 @@ function addTypeMultipleChoice(data) {
             p.append("button").attr("class", "multiple_choice_checkbox").text(" ")
             addTextWithTranslationX(p.append("div").attr("class", "multiple_choice_answer_text"), d);
         })
+}
+
+function addTypeMultipleChoice(data) {
+    let story = d3.select("#story");
+    let question = story.append("p");
+
+    addTextWithTranslationX(question.append("span").attr("class", "question"), data.question);
+
+    addMultipleChoiceAnswers(question, data);
 
     fadeIn(question);
 }
@@ -357,40 +365,12 @@ function addTypeContinuation(data, data2, data3) {
 
     let line = addTypeLine(data2);
 
-    function selectAnswer(i) {
-        let checkbox = answers.nodes()[i].firstChild;
-        if(i === data3.correctAnswerIndex) {
-            checkbox.dataset.status = "right";
-            checkbox.innerText = "✓";
-            // show the filled in text
-            line.selectAll('[data-hidden="true"]').attr("data-hidden", undefined);
-            questionFinished(question, prompt);
-            document.removeEventListener("keydown", selectAnswer);
-            playSoundRight();
-        }
-        else {
-            checkbox.dataset.status = "false";
-            checkbox.innerText = "×";
-            playSoundWrong();
-        }
-    }
-
-    document.addEventListener("keydown", event => {
-        if(isEditor)
-            return
-        if (event.key >= "1" || event.key <= answers.node().length) {
-            selectAnswer(parseInt(event.key)-1);
-        }
-    });
     let question = story.append("p");
-    let answers = question.append("p").selectAll("div").data(data3.answers).enter()
-        .append("div").attr("class", "answer")
-        .on("click", function(d, i) { selectAnswer(i);})
-        .each(function(d, i) {
-            let p = d3.select(this);
-            p.append("div").attr("class", "checkbox").text(" ")
-            addTextWithTranslationX(p.append("div").attr("class", "answer_text"), d);
-        })
+    addMultipleChoiceAnswers(question, data3, function () {
+        line.selectAll('[data-hidden="true"]').attr("data-hidden", undefined);
+    });
+
+
     //playAudio(data.id, phrase);
 
     fadeIn(question);
@@ -416,10 +396,10 @@ function addTypeMatch(data) {
 
     let question = story.append("p");
     question.append("span").attr("class", "question").text(data.prompt);
-    question.append("p").selectAll("div").data(sort).enter()
-        .append("button").attr("class", "clickword").text(d => words[d]).attr("data-status", "unselected")
+    question.append("p").style("text-align", "center").selectAll("div").data(sort).enter()
+        .append("button").attr("class", "word_match").text(d => words[d]).attr("data-status", "unselected")
         .on("click", function(d, i) {
-            if(this.dataset.status === "inactive")
+            if(this.dataset.status === "right")
                 return
             if(selected === undefined) {
                 this.dataset.status = "selected";
@@ -427,14 +407,14 @@ function addTypeMatch(data) {
                 selected_item = this;
             }
             else if(selected === d) {
-                this.dataset.status = "unselected";
+                this.dataset.status = undefined;
                 selected = undefined;
                 selected_item = undefined;
             }
             else {
                 if(Math.floor(selected/2) === Math.floor(d/2)) {
-                    this.dataset.status = "inactive";
-                    selected_item.dataset.status = "inactive";
+                    this.dataset.status = "right";
+                    selected_item.dataset.status = "right";
                     count += 1;
                     selected = undefined;
                     selected_item = undefined;
@@ -442,8 +422,8 @@ function addTypeMatch(data) {
                         questionFinished(question);
                 }
                 else {
-                    selected_item.dataset.status = "unselected";
-                    this.status = "unselected";
+                    d3.select(this).attr("data-status", "wrong").transition().delay(1500).attr("data-status", undefined);
+                    d3.select(selected_item).attr("data-status", "wrong").transition().delay(1500).attr("data-status", undefined);
                     selected = undefined;
                     selected_item = undefined;
                 }
@@ -461,14 +441,13 @@ function addTypeArrange(data, data2, data3) {
 
     let line = addTypeLine(data2);
 
-    let question = story.append("p");
+    let question = story.append("p").style("text-align", "center");
     question.append("p").selectAll("div").data(data3.selectablePhrases).enter()
-        .append("button").attr("class", "clickword")
-        .attr("data-status", "unselected")
+        .append("span").attr("class", "word_order")
         .text(d => d)
         .on("click", function(d, i) {
             if(data3.phraseOrder[i] === index) {
-                this.dataset.status = "empty";
+                this.dataset.status = "off";
 
                 line.selectAll('[data-hidden="true"]').attr("data-hidden", function() { return this.dataset.end > data3.characterPositions[index] });
 
@@ -479,8 +458,8 @@ function addTypeArrange(data, data2, data3) {
                 }
             }
             else {
-                if(this.dataset.status === "unselected") {
-                    d3.select(this).attr("data-status", "wrong_shake").transition().delay(820).attr("data-status", "unselected")
+                if(this.dataset.status !== "off") {
+                    d3.select(this).attr("data-status", "wrong").transition().delay(820).attr("data-status", undefined);
                     playSoundWrong();
                 }
             }
@@ -503,16 +482,18 @@ function addTypePointToPhrase(data, data1) {
     let button_index = 0;
     for(let element of data.transcriptParts) {
         if(element.selectable) {
-            phrase.append("button").attr("class", "clickword").attr("data-status", "unselected").datum(button_index)
+            phrase.append("div").attr("class", "word_button").datum(button_index)
                                  .text(element.text).on("click", function(d) {
+                if(d3.select(this).attr("data-status"))
+                   return
                 if(d === data.correctAnswerIndex) {
-                    phrase.selectAll("button").attr("data-status", "inactive");
-                    d3.select(this).attr("data-status", "unselected");
+                    phrase.selectAll("div").attr("data-status", "off");
+                    d3.select(this).attr("data-status", "right");
                     playSoundRight();
                     questionFinished(question);
                 }
                 else {
-                    d3.select(this).attr("data-status", "wrong_shake").transition().delay(820).attr("data-status", "inactive");
+                    d3.select(this).attr("data-status", "wrong");
                     playSoundWrong();
                 }
             })

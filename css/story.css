@@ -286,6 +286,7 @@ body {
 #story {
     padding-top: 40px;
     padding-bottom: 50vh;
+    user-select: none;
 }
 #footer {
     border-top: 1px solid gray;
@@ -884,4 +885,217 @@ p[data-rtl] .speaker {
     transform: scale(-1, 1);
     margin-right: 0;
     margin-left: 8px;
+}
+
+/* Question Point to Word (click) */
+
+.word_button {
+    background: #fff;
+    border: solid #e5e5e5;
+    border-width: 2px 2px 4px;
+    border-radius: 9px;
+    cursor: pointer;
+    line-height: 3.2;
+    margin-right: 4px;
+    padding: 8px 12px 7px;
+    touch-action: manipulation;
+    white-space: nowrap;
+    z-index: 1;
+
+    display: inline;
+    position: relative;
+}
+
+.word_button[data-status=wrong] {
+    animation: _2QR4Q 1.5s;
+    background: #fff;
+    border-bottom-width: 2px;
+    border-color: #e5e5e5;
+    color: #afafaf;
+    cursor: auto;
+    padding-bottom: 9px;
+}
+
+.word_button[data-status=off] {
+    animation: _1wESO .5s;
+    border-bottom-width: 2px;
+    color: #afafaf;
+    cursor: auto;
+    padding-bottom: 9px;
+}
+
+.word_button[data-status=right] {
+    background: #b8f28b;
+    border-color: #ade756;
+    color: #78c800;
+    cursor: auto;
+}
+
+@keyframes _2QR4Q {
+    0%,
+    66% {
+        background:#ffd7d8;
+        border-bottom-width:4px;
+        border-color:#f5a4a4;
+        color:#ff4b4b;
+        padding-bottom:7px
+    }
+    to {
+        background:#fff;
+        border-bottom-width:2px;
+        border-color:#e5e5e5;
+        color:#afafaf;
+        padding-bottom:9px
+    }
+}
+@keyframes _1wESO {
+    0% {
+        border-bottom-width:4px;
+        color:#4b4b4b;
+        padding-bottom:7px
+    }
+    to {
+        border-bottom-width:2px;
+        color:#afafaf;
+        padding-bottom:9px
+    }
+}
+
+/* Order Word */
+.word_order {
+    line-height: 1.45;
+    background: #fff;
+    border: solid #e5e5e5;
+    border-width: 2px 2px 4px;
+    border-radius: 14px;
+    color: #4b4b4b;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 19px;
+    margin: 4px;
+    padding: 8px 15px;
+    touch-action: manipulation;
+}
+
+.word_order[data-status=wrong] {
+    animation-duration: .8s;
+    animation-name: _2W3fZ;
+    position: relative;
+}
+
+.word_order[data-status=off] { /* _37G8A.RGNlp */
+    background-color: #e5e5e5;
+    box-shadow: none;
+    color: transparent;
+    cursor: auto;
+}
+
+@keyframes _2W3fZ {
+    0%,
+    to {
+        background-color:transparent;
+        color:#4b4b4b;
+        left:0
+    }
+    12.5%,
+    37.5%,
+    62.5%,
+    87.5% {
+        background-color:#ffd7d8;
+        border-color:#f5a4a4;
+        color:#ff4b4b;
+        left:-4px
+    }
+    25%,
+    50%,
+    75% {
+        background-color:#ffd7d8;
+        border-color:#f5a4a4;
+        color:#ff4b4b;
+        left:4px
+    }
+}
+
+/* Match the pairs */
+.word_match {
+    background: #fff;
+    border: solid #e5e5e5;
+    border-width: 2px 2px 4px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 19px;
+    line-height: 1.45;
+    margin: 4px;
+    margin-top: 6px;
+    padding: 8px 15px;
+    position: relative;
+    touch-action: manipulation;
+    vertical-align: top;
+    z-index: 1;
+}
+
+.word_match:hover {
+    filter: brightness(.9);
+}
+
+.word_match[data-status=selected] {
+    background: #ddf4ff;
+    border-color: #84d8ff;
+    color: #1cb0f6;
+}
+
+.word_match[data-status=selected]:hover {
+    background: #a4dffb;
+    border-color: #3ebbf6;
+    color: #00aff9;
+    filter: none;
+}
+
+.word_match[data-status=wrong] {
+    animation: _1RzPf 1.5s;
+    background: #fff;
+    border-color: #e5e5e5;
+    color: #4b4b4b;
+}
+
+@keyframes _1RzPf {
+    0%,
+    66% {
+        background:#ffd7d8;
+        border-color:#f5a4a4;
+        color:#ff4b4b
+    }
+    to {
+        background:#fff;
+        border-color:#e5e5e5;
+        color:#4b4b4b
+    }
+}
+
+.word_match[data-status=right] {
+    animation: _3aFN7 1.5s;
+    background: #fff;
+    border-bottom-width: 2px;
+    border-color: #e5e5e5;
+    color: #cfcfcf;
+    margin-bottom: 6px;
+    cursor: auto;
+}
+
+@keyframes _3aFN7 {
+    0%,
+    66% {
+        background:#b8f28b;
+        border-bottom-width:4px;
+        border-color:#ade756;
+        color:#58a700;
+        margin-bottom:0
+    }
+    to {
+        background:#fff;
+        border-bottom-width:2px;
+        border-color:#e5e5e5;
+        color:#cfcfcf;
+        margin-bottom:2px
+    }
 }
