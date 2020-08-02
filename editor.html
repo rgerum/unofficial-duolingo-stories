@@ -244,7 +244,7 @@ function updateStoryDisplay() {
     index = 0;
     d3.select("#story").selectAll("*").remove();
     //addTitle();
-    while (index < phrases.length) {
+    while (index < story_json.elements.length) {
         //document.getElementById("button_next").dataset.status = "active";
         addNext();
     }

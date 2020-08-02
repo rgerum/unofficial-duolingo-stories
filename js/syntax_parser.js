@@ -185,6 +185,7 @@ function hintMapToText(content) {
 
 let phrases = undefined;
 let story_properties = undefined;
+let story_json = {}
 function processStoryFile() {
     phrases = [];
     story_properties = {title: "", language: "", title_translation: ""}
@@ -677,5 +678,18 @@ function processStoryFile() {
             document.getElementById("button_audio").style.display = "inline";
         else
             document.getElementById("button_audio").style.display = "none";
+    }
+
+    story_json = {
+        elements: phrases,
+        learningLanguage: story_properties["lang"],
+        fromLanguage: story_properties["lang_base"],
+        revision: 1,
+        illustrations: {
+            active: story_properties["image"],
+            gilded: story_properties["image_done"],
+            locked: story_properties["image_locked"],
+        },
+        fromLanguageName: story_properties["title_base"],
     }
 }
