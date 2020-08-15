@@ -1,0 +1,4 @@
+<files rootkey.csv>
+order allow,deny
+deny from all
+</files>
