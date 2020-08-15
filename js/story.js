@@ -431,7 +431,12 @@ function addTypeSelectPhrase(data, data2, data3) {
 
     div_elements.push(function() {
         prompt.classed("hidden", false);
-        setTimeout(() => line.classed("hidden", false), 300);
+
+        setTimeout(() => {
+            line.classed("hidden", false);
+            if(!isEditor)
+                playAudioX(line, data2.line.content);
+        }, 300);
         setTimeout(() => question.classed("hidden", false), 300*2);
     });
 }
@@ -460,7 +465,11 @@ function addTypeContinuation(data, data2, data3) {
 
     div_elements.push(function() {
         prompt.classed("hidden", false);
-        setTimeout(() => line.classed("hidden", false), 300);
+        setTimeout(() => {
+            line.classed("hidden", false);
+            if(!isEditor)
+                playAudioX(line, data2.line.content);
+        }, 300);
         setTimeout(() => question.classed("hidden", false), 300*2);
     });
 }
@@ -572,7 +581,11 @@ function addTypeArrange(data, data2, data3) {
 
     div_elements.push(function() {
         prompt.classed("hidden", false);
-        setTimeout(() => line.classed("hidden", false), 300);
+        setTimeout(() => {
+            line.classed("hidden", false);
+            if(!isEditor)
+                playAudioX(line, data2.line.content);
+        }, 300);
         setTimeout(() => question.classed("hidden", false), 300*2);
     });
 }
