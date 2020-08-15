@@ -54,6 +54,8 @@ async function loadStory(name) {
                 d3.select("#button_discuss").style("display", "inline")
                     .on("click", _=>{window.open(story_json.discussion);})
 
+            story_id = parseInt(name);
+
             loadAudios();
 
             addAll();
