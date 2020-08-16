@@ -14,7 +14,7 @@ function getInputStringText(text) {
 }
 
 function getInputStringSpeachtext(text) {
-    return "<speak>"+text.replace(/([^~ ,;.:-_?!…]*)\{([^\}:]*):([^\}]*)\}/g, '<phoneme alphabet="$3" ph="$2">$1</phoneme>').replace(/([^~ ,;.:-_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ")+"</speak>";
+    return "<speak>"+text.replace(/([^~ ,;.:-_?!…]*)\{([^\}:]*):([^\}]*)\}/g, '<phoneme alphabet="$3" ph="$2">$1</phoneme>').replace(/([^~ ,;.:-_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ").replace(/\|/g, "​")+"</speak>";
 }
 
 function getSpeaker(name) {
@@ -30,8 +30,10 @@ function getSpeaker(name) {
 ssml_list = [];
 
 function generateHintMap(text, translation) {
+    if(!text)
+        text = "";
     let text_list = splitTextTokens(text);
-    text = text.replace(/~/g, " ");
+    text = text.replace(/~/g, " ").replace(/\|/g, "​");
     if(!translation)
         translation = ""
     let trans_list = splitTextTokens(translation);
@@ -41,7 +43,7 @@ function generateHintMap(text, translation) {
     for(let i = 0; i < text_list.length; i++) {
         if(i%2 === 0 && trans_list[i] && trans_list[i] !== "~") {
             hintMap.push({hintIndex: hints.length, rangeFrom: text_pos, rangeTo: text_pos+text_list[i].length-1});
-            hints.push(trans_list[i].replace(/~/g, " "));
+            hints.push(trans_list[i].replace(/~/g, " ").replace(/\|/g, "​"));
         }
         text_pos += text_list[i].length;
     }
@@ -396,7 +398,7 @@ function processStoryFile() {
                         hideRangesForChallenge = {start: start, end: start+filler.length};
                         text = text.replace("*", filler);
                         for(let j = 0; j < words[0].length; j++)
-                            words[0][j] = words[0][j].replace(/~/g, " ");
+                            words[0][j] = words[0][j].replace(/~/g, " ").replace(/\|/g, "​");
                     }
                 }
                 else {
@@ -458,18 +460,18 @@ function processStoryFile() {
                 if(part.startsWith("[+") && part.endsWith("]")) {
                     correctAnswerIndex = answerIndex;
                     part = part.substr(2, part.length-3);
-                    transcriptParts.push({text: part.replace(/~/g, " "), selectable: true});
+                    transcriptParts.push({text: part.replace(/~/g, " ").replace(/\|/g, "​"), selectable: true});
                     answerIndex += 1;
                 }
                 // a button with a wrong answer
                 else if(part.startsWith("[") && part.endsWith("]")) {
                     part = part.substr(1, part.length-2)
-                    transcriptParts.push({text: part.replace(/~/g, " "), selectable: true});
+                    transcriptParts.push({text: part.replace(/~/g, " ").replace(/\|/g, "​"), selectable: true});
                     answerIndex += 1;
                 }
                 // text which is not a button
                 else
-                    transcriptParts.push({text: part.replace(/~/g, " "), selectable: false});
+                    transcriptParts.push({text: part.replace(/~/g, " ").replace(/\|/g, "​"), selectable: false});
                 // join the text parts
                 new_text += part;
             }
@@ -504,7 +506,7 @@ function processStoryFile() {
                     break
                 // split text
                 let [_, lang1, lang2] = match;
-                fallbackHints.push({phrase: lang1.replace(/~/g, " "), translation: lang2.replace(/~/g, " ")});
+                fallbackHints.push({phrase: lang1.replace(/~/g, " ").replace(/\|/g, "​"), translation: lang2.replace(/~/g, " ").replace(/\|/g, "​")});
             }
 
             // set the data
@@ -622,8 +624,8 @@ function processStoryFile() {
                     break
                 // split text
                 let [_, lang1, lang2] = match;
-                data.words.push(lang1.replace(/~/g, " "));
-                data.words.push(lang2.replace(/~/g, " "));
+                data.words.push(lang1.replace(/~/g, " ").replace(/\|/g, "​"));
+                data.words.push(lang2.replace(/~/g, " ").replace(/\|/g, "​"));
             }
             // add the data
             phrases.push(data);
