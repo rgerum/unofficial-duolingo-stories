@@ -11,6 +11,7 @@ from mutagen.mp3 import MP3
 
 from .aws_polly import AmazonPolly
 from .azure import Azure
+from .google import Google
 
 
 def processLine(story_id, line_id):
@@ -36,7 +37,9 @@ def processLine(story_id, line_id):
     # get the ssml data for this line
     ssml = story[line_id]
 
-    if "-" in ssml['speaker']:
+    if "-Standard-" in ssml['speaker'] or "-Wavenet-" in ssml['speaker']:
+        engine = Google()
+    elif "-" in ssml['speaker']:
         engine = Azure()
     else:
         engine = AmazonPolly()
