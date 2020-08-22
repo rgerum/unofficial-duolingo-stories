@@ -11,48 +11,49 @@
     <script src="js/story.js"></script>
 
     <link rel="stylesheet" href="css/story.css" />
+    <link rel="stylesheet" href="css/spinner.css"></link>
 </head>
 <body>
-<div id="header">
-    <div id="header_icon"><span id="quit" onclick="quit();"></span></div>
-    <div id="progress"><div id="progress_inside"><div id="progress_highlight"></div></div></div>
-</div>
-<div id="main">
-    <div id="story">
-        <div style="margin-top: 20px; text-align: center; color:gray; font-size: 0.6em">
-            This story is owned by Duolingo, Inc. and is used under license from Duolingo.<br/>
-            Duolingo is not responsible for the translation of this story into <span id="license_language"></span> and is not an official product of Duolingo.
-            Any further use of this story requires a license from Duolingo.<br/>
-            Visit <a style="color:gray" href="https://www.duolingo.com">www.duolingo.com</a> for more information.
-        </div>
+    <div id="header">
+        <div id="header_icon"><span id="quit" onclick="quit();"></span></div>
+        <div id="progress"><div id="progress_inside"><div id="progress_highlight"></div></div></div>
     </div>
-
-</div>
-<div id="footer">
-    <div id="footer_content"> <!-- IE_DM -->
-        <div id="footer_result"> <!-- _3Gn4K _2nAJm -->
-            <div> <!-- -Z086 -->
-                <div id="footer_result_icon"><span></span></div>
-                <div id="footer_result_text"><h2>You are correct</h2></div>
+    <div id="main">
+        <div id="story">
+            <div style="margin-top: 20px; text-align: center; color:gray; font-size: 0.6em">
+                This story is owned by Duolingo, Inc. and is used under license from Duolingo.<br/>
+                Duolingo is not responsible for the translation of this story into <span id="license_language"></span> and is not an official product of Duolingo.
+                Any further use of this story requires a license from Duolingo.<br/>
+                Visit <a style="color:gray" href="https://www.duolingo.com">www.duolingo.com</a> for more information.
+            </div>
+            <div id=spinner style="position: relative; width: 100%; height: 200px">
+                <div class="spinner_parent">
+                    <div class="spinner_point point1"></div>
+                    <div class="spinner_point point2"></div>
+                    <div class="spinner_point point3"></div>
+                </div>
             </div>
         </div>
-        <div id="footer_buttons">
-            <button id="button_discuss" style="float:left; display:none" class="button">Discussion</button>
-            <button id="button_next" class="button" onclick="addNext();">continue</button>
+
+    </div>
+    <div id="footer">
+        <div id="footer_content"> <!-- IE_DM -->
+            <div id="footer_result"> <!-- _3Gn4K _2nAJm -->
+                <div> <!-- -Z086 -->
+                    <div id="footer_result_icon"><span></span></div>
+                    <div id="footer_result_text"><h2>You are correct</h2></div>
+                </div>
+            </div>
+            <div id="footer_buttons">
+                <button id="button_discuss" style="float:left; display:none" class="button">Discussion</button>
+                <button id="button_next" class="button" onclick="addNext();">continue</button>
+            </div>
         </div>
     </div>
-</div>
-<script>
-isEditor = false;
-const urlParams = new URLSearchParams(window.location.search);
-lang = urlParams.get('lang');
-lang_base = urlParams.get('lang_base');
-function quit() {
-    if(confirm("Are you sure you want to quit? Your progress in this story will be lost.")) {
-        goBack();
-    }
-}
-loadStory(urlParams.get('story'))
-</script>
+    <script>
+        isEditor = false;
+        const urlParams = new URLSearchParams(window.location.search);
+        loadStory(urlParams.get('story'));
+    </script>
 </body>
 </html>

@@ -55,6 +55,9 @@ async function loadStory(name) {
             loadAudios();
 
             addAll();
+
+            d3.select("#spinner").style("display", "none");
+
             addNext();
 
             return
@@ -85,6 +88,7 @@ async function loadStory(name) {
     loadAudios();
     //addTitle();
     addAll();
+    d3.select("#spinner").style("display", "none");
     addNext();
 }
 language_data = {};
@@ -787,6 +791,12 @@ function goBack() {
     }
     else
         window.location.href = 'editor_overview.html?lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage;
+}
+
+function quit() {
+    if(confirm("Are you sure you want to quit? Your progress in this story will be lost.")) {
+        goBack();
+    }
 }
 
 function scroll() {
