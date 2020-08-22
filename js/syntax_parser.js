@@ -50,6 +50,10 @@ function generateHintMap(text, translation) {
     return {text:text, hints:hints, hintMap:hintMap};
 }
 
+function getAudioUrl(id) {
+    return `audio/${story_id}/speech_${story_id}_${id}.mp3`
+}
+
 function generateAudioMap(text, audiomap, id) {
     let text_speak = getInputStringSpeachtext(text);
     let text_display = getInputStringText(text);

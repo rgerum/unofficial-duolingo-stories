@@ -9,8 +9,8 @@ story_id = undefined;
 audio_map = undefined;
 audio_objects = undefined;
 audio_right = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3");
-audio_wrong = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3")
-audio_finished = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3")
+audio_wrong = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3");
+audio_finished = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3");
 rtl = false;
 
 div_elements = [];
@@ -24,10 +24,6 @@ function loadAudios() {
                 audio_objects[audio.url] = new Audio(audio.url);
         }
     }
-}
-
-function getAudioUrl(id) {
-    return `audio/${story_id}/speech_${story_id}_${id}.mp3`
 }
 
 async function loadStory(name) {
@@ -117,7 +113,7 @@ function setProgress(i) {
 /*              */
 
 
-function addTextWithTranslationX(dom, content, hideRangesForChallenge, transcriptParts) {
+function addTextWithTranslation(dom, content, hideRangesForChallenge, transcriptParts) {
     //                 let newword = target.append("button").attr("class", "clickword")        .attr("data-status", "unselected")
     //                     .text(d => words[i].replace(/~/g, " "))
     //                 click_words_list.push(newword);
@@ -250,7 +246,7 @@ function playAudioX(phrase, content) {
     }
 }
 
-function addLoudspeakerX(bubble, content) {
+function addLoudspeaker(bubble, content) {
     if(content.audio !== undefined && audio_objects[content.audio.url] !== undefined) {
         let loudspeaker = bubble.append("img").attr("src", "https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg")
             .attr("width", "28px").attr("class", "speaker")
@@ -267,8 +263,6 @@ function addTypeLineElement(data) {
 
         if(!isEditor)
             playAudioX(phrase, data.line.content);
-
-        //fadeIn(phrase);
 
         if(document.getElementById("button_next"))
             document.getElementById("button_next").dataset.status = "active";
@@ -291,9 +285,9 @@ function addTypeLine(data) {
     if(rtl)
         phrase.attr("data-rtl", true);
 
-    addLoudspeakerX(bubble, data.line.content);
+    addLoudspeaker(bubble, data.line.content);
 
-    addTextWithTranslationX(bubble, data.line.content, data.hideRangesForChallenge);
+    addTextWithTranslation(bubble, data.line.content, data.hideRangesForChallenge);
 
     if(isEditor && data.line.content.audio && data.line.content.audio.ssml) {
         let id = data.line.content.audio.ssml.id;
@@ -310,41 +304,35 @@ function addTypeLine(data) {
 
 function addMultipleChoiceAnswers(question, data, finishedCallback) {
     function selectAnswer(i) {
-        let checkbox = answers.nodes()[i].firstChild;
-        if(d3.select(answers.nodes()[i]).attr("data-off"))
-            return;
+        let element = answer_nodes[i]
+        if(!element || d3.select(element).attr("data-off"))
+            return
+
         if(i === data.correctAnswerIndex) {
-            for(let ii in answers.nodes()) {
-                d3.select(answers.nodes()[ii]).attr("data-off", true)
-            }
-            d3.select(answers.nodes()[i]).attr("data-right", true)
+            answers.attr("data-off", true)
+            d3.select(element).attr("data-right", true)
+            document.selectAnswer = undefined;
             if(finishedCallback)
                 finishedCallback()
-            document.removeEventListener("keydown", selectAnswer);
             playSoundRight();
         }
         else {
-            d3.select(answers.nodes()[i]).attr("data-off", true)
-            d3.select(answers.nodes()[i]).attr("data-false", true)
+            d3.select(element).attr("data-off", true)
+            d3.select(element).attr("data-false", true)
             playSoundWrong();
         }
     }
 
-    document.addEventListener("keydown", event => {
-        if(isEditor)
-            return
-        if (event.key >= "1" || event.key <= answers.node().length) {
-            selectAnswer(parseInt(event.key)-1);
-        }
-    });
     let answers = question.append("ul").attr("class", "multiple_choice_ul").selectAll("li").data(data.answers).enter()
         .append("li").attr("class", "multiple_choice_li")
         .on("click", function(d, i) { selectAnswer(i);})
         .each(function(d, i) {
             let p = d3.select(this);
             p.append("button").attr("class", "multiple_choice_checkbox").text(" ")
-            addTextWithTranslationX(p.append("div").attr("class", "multiple_choice_answer_text"), d);
+            addTextWithTranslation(p.append("div").attr("class", "multiple_choice_answer_text"), d);
         })
+    let answer_nodes = answers.nodes();
+    return selectAnswer;
 }
 
 function addTypeMultipleChoice(data) {
@@ -354,14 +342,15 @@ function addTypeMultipleChoice(data) {
     question.classed("hidden", true);
     question.classed("fadeGlideIn", true);
 
-    addTextWithTranslationX(question.append("span").attr("class", "question"), data.question);
+    addTextWithTranslation(question.append("span").attr("class", "question"), data.question);
 
-    addMultipleChoiceAnswers(question, data, function () {
+    let selectAnswer = addMultipleChoiceAnswers(question, data, function () {
         questionFinished(question);
     });
 
     div_elements.push(function() {
         question.classed("hidden", false);
+        document.selectAnswer = selectAnswer;
         fadeIn(question);
     });
 }
@@ -369,7 +358,7 @@ function addTypeMultipleChoice(data) {
 function addTypeChallengePrompt(data) {
     let story = d3.select("#story");
     let question = story.append("p");
-    addTextWithTranslationX(question.append("span").attr("class", "question"), data.prompt);
+    addTextWithTranslation(question.append("span").attr("class", "question"), data.prompt);
     return question;
 }
 
@@ -381,21 +370,21 @@ function addTypeSelectPhrase(data, data2, data3) {
     let line = addTypeLine(data2);
 
     function selectAnswer(i) {
-        let element = answers.nodes()[i];
-        if(answers.nodes()[i].dataset.status) {
+        let element = answer_nodes[i];
+        if(!element || answer_nodes[i].dataset.status)
             return;
-        }
+
         if(i === data3.correctAnswerIndex) {
-            for(let ii = 0; ii < answers.nodes().length; ii++) {
+            for(let ii = 0; ii < answer_nodes.length; ii++) {
                 if(ii !== i)
-                    answers.nodes()[ii].dataset.status = "off";
+                    answer_nodes[ii].dataset.status = "off";
             }
             element.dataset.status = "right";
             // show the filled in text
             line.selectAll('[data-hidden="true"]').attr("data-hidden", undefined);
             // finish the question
+            document.selectAnswer = undefined;
             questionFinished(question, prompt);
-            document.removeEventListener("keydown", selectAnswer);
             playSoundRight();
         }
         else {
@@ -404,14 +393,6 @@ function addTypeSelectPhrase(data, data2, data3) {
         }
     }
 
-    document.addEventListener("keydown", event => {
-        if(isEditor)
-            return
-        if (event.key >= "1" || event.key <= answers.node().length) {
-            selectAnswer(parseInt(event.key)-1);
-        }
-    });
-
     let question = story.append("p");
     let answers = question.append("p").selectAll("button").data(data3.answers).enter()
         .append("button").attr("class", "answer")
@@ -419,8 +400,9 @@ function addTypeSelectPhrase(data, data2, data3) {
         .each(function(d, i) {
             let p = d3.select(this);
             d.hintMap = [];
-            addTextWithTranslationX(p.attr("class", "answer_button"), d);
+            addTextWithTranslation(p.attr("class", "answer_button"), d);
         })
+    let answer_nodes = answers.nodes();
 
     prompt.classed("hidden", true);
     question.classed("hidden", true);
@@ -433,6 +415,7 @@ function addTypeSelectPhrase(data, data2, data3) {
 
     div_elements.push(function() {
         prompt.classed("hidden", false);
+        document.selectAnswer = selectAnswer;
 
         setTimeout(() => {
             line.classed("hidden", false);
@@ -451,7 +434,7 @@ function addTypeContinuation(data, data2, data3) {
     let line = addTypeLine(data2);
 
     let question = story.append("p");
-    addMultipleChoiceAnswers(question, data3, function () {
+    let selectAnswer = addMultipleChoiceAnswers(question, data3, function () {
         line.selectAll('[data-hidden="true"]').attr("data-hidden", undefined);
         questionFinished(question, prompt);
     });
@@ -473,6 +456,7 @@ function addTypeContinuation(data, data2, data3) {
                 playAudioX(line, data2.line.content);
         }, 300);
         setTimeout(() => question.classed("hidden", false), 300*2);
+        document.selectAnswer = selectAnswer;
     });
 }
 
@@ -596,7 +580,7 @@ function addTypePointToPhrase(data, data1) {
     let story = d3.select("#story");
 
     let question = story.append("p");
-    addTextWithTranslationX(question.append("span").attr("class", "question"), data.question);
+    addTextWithTranslation(question.append("span").attr("class", "question"), data.question);
 
     let line = d3.select(question.node().previousSibling);
 
@@ -689,23 +673,6 @@ function addStoryFinish() {
     audio_finished.play();
 }
 
-
-
-
-
-
-
-/**
- * Shuffles array in place. ES6 version
- * @param {Array} a items An array containing the items.
- */
-function shuffle(a) {
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-}
 function playSoundRight() {
     audio_right.pause();
     audio_right.currentTime = 0;
@@ -720,74 +687,87 @@ function playSoundWrong() {
 
 scroll_enabled = true;
 
+/**
+ * Add all the story elements to the DOM
+ */
 function addAll() {
     let elements = story_json.elements;
+    // iterate over all the elements of the story
     for(let index = 0; index < elements.length; index++) {
-
+        // a normal text line
         if (elements[index].type === "LINE") {
             addTypeLineElement(elements[index]);
-        } else if (elements[index].type === "MULTIPLE_CHOICE")
+        }
+        // a multiple choice question
+        else if (elements[index].type === "MULTIPLE_CHOICE")
             addTypeMultipleChoice(elements[index]);
+        // a question consisting of multiple elements
         else if (elements[index].type === "CHALLENGE_PROMPT") {
+            // a select the right phrase question
             if (elements[index + 2].type === "SELECT_PHRASE")
                 addTypeSelectPhrase(elements[index], elements[index + 1], elements[index + 2]);
+            // a continuation question
             else if (elements[index + 2].type === "MULTIPLE_CHOICE")
                 addTypeContinuation(elements[index], elements[index + 1], elements[index + 2]);
+            // a bring the words in the right order question
             else if (elements[index + 2].type === "ARRANGE")
                 addTypeArrange(elements[index], elements[index + 1], elements[index + 2]);
+            // advance the index because these elements belong together
             index += 2;
-        } else if (elements[index].type === "POINT_TO_PHRASE")
+        }
+        // a click on the right word question
+        else if (elements[index].type === "POINT_TO_PHRASE")
             addTypePointToPhrase(elements[index], elements[index - 1]);
-
+        // a match the pairs question
         else if (elements[index].type === "MATCH")
             addTypeMatch(elements[index])
     }
-
 }
 
+/**
+ * The user has clicked on the "continue" button
+ */
 function addNext() {
-    let elements = story_json.elements;
-    if(document.getElementById("button_next") && document.getElementById("button_next").dataset.status == "inactive")
+    let button = document.getElementById("button_next");
+    // only if the button is active
+    if(button && button.dataset.status === "inactive")
         return;
-    if(document.getElementById("button_next"))
-        document.getElementById("button_next").dataset.status = "inactive";
-    setProgress(index*100/div_elements.length);
-    if(index == div_elements.length) {
-        if(urlParams.get('test') === null) {
-            setStoryDone(story_id);
-            if(document.getElementById("button_next"))
-                document.getElementById("button_next").onclick = function() { window.location.href = 'index.html?lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage};
-        }
-        else {
-            if(document.getElementById("button_next"))
-                document.getElementById("button_next").onclick = function() { window.location.href = 'editor_overview.html?lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage};
-        }
-        addStoryFinish();
-        if(document.getElementById("button_next")) {
-            document.getElementById("button_next").dataset.status = "active";
-            //document.getElementById("button_next").innerText = "finished";
-        }
+    // set the button to inactive
+    if(button)
+        button.dataset.status = "inactive";
 
-        document.documentElement.scrollTo({
-            left: 0,
-            top: document.documentElement.scrollHeight - document.documentElement.clientHeight,
-            behavior: 'smooth'
-        });
+    // advance the progress bar
+    setProgress(index*100/div_elements.length);
+
+    // if we have reached the last element
+    if(index === div_elements.length) {
+        // if this is not just a test
+        if(urlParams.get('test') === null) {
+            // store in the database that the story was done
+            setStoryDone(story_id);
+        }
+        // the button loads now back to the previous page
+        if(button)
+            button.onclick = function() { goBack(); };
+        // add the story finished page
+        addStoryFinish();
+        if(button) {
+            button.dataset.status = "active";
+        }
+        // scroll to the finished page
+        scroll();
 
         return;
     }
-
+    // execute the command to show the next part
     div_elements[index]();
-
+    // advance the index
     index += 1;
-    if(scroll_enabled)
-        document.documentElement.scrollTo({
-            left: 0,
-            top: document.documentElement.scrollHeight - document.documentElement.clientHeight,
-            behavior: 'smooth'
-        });
+    // and scroll to the new question
+    scroll();
 }
 
+document.selectAnswer = undefined;
 document.addEventListener("keydown", event => {
     if(isEditor)
         return
@@ -795,4 +775,25 @@ document.addEventListener("keydown", event => {
         if(document.getElementById("button_next"))
             document.getElementById("button_next").onclick();
     }
+    if (event.key >= "1" || event.key <= "9") {
+        if(document.selectAnswer)
+            document.selectAnswer(parseInt(event.key)-1);
+    }
 });
+
+function goBack() {
+    if(urlParams.get('test') === null) {
+        window.location.href = 'index.html?lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage;
+    }
+    else
+        window.location.href = 'editor_overview.html?lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage;
+}
+
+function scroll() {
+    if(scroll_enabled)
+        document.documentElement.scrollTo({
+            left: 0,
+            top: document.documentElement.scrollHeight - document.documentElement.clientHeight,
+            behavior: 'smooth'
+        });
+}
