@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS `course` (
   `fromLanguage` int(11) NOT NULL DEFAULT 0,
   `public` tinyint(4) NOT NULL DEFAULT 0,
   `official` int(11) NOT NULL DEFAULT 0,
+  `name` char(255) CHARACTER SET utf8 DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -80,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `story` (
   `course_id` int(11) DEFAULT NULL,
   `json` mediumtext CHARACTER SET utf8 DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1074 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1093 DEFAULT CHARSET=latin1;
 
 -- Daten Export vom Benutzer nicht ausgewählt
 
@@ -91,7 +92,7 @@ CREATE TABLE IF NOT EXISTS `story_done` (
   `story_id` int(11) NOT NULL,
   `time` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=91293 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=91603 DEFAULT CHARSET=latin1;
 
 -- Daten Export vom Benutzer nicht ausgewählt
 
@@ -107,7 +108,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `activated` tinyint(4) NOT NULL DEFAULT 0,
   `activation_link` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=652 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=669 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- Daten Export vom Benutzer nicht ausgewählt
 

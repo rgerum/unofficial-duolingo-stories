@@ -457,13 +457,14 @@ async function loadStory(lang, lang_base) {
             if(!course.public)
                 continue
             let language = language_data[course.learningLanguage];
+            let name = course.name || language.name;
             let div = list_div.append("a");
             div.attr("class", "language_select_button")
             div.attr("href", `index.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`);
             let flag = div.append("div").attr("class", "flag flag_big").style("background-position", `0 ${language.flag}px`);
             if(language.flag_file != null)
                 flag.style("background-image", `url(flags/${language.flag_file})`);
-            div.append("span").text(language.name).attr("class", "language_select_button_text")
+            div.append("span").text(name).attr("class", "language_select_button_text")
         }
         d3.select("#spinner").style("display", "none");
         return
@@ -472,6 +473,7 @@ async function loadStory(lang, lang_base) {
     d3.select("#header_lang_selector").selectAll("a").remove();
     for(let course of data_courses) {
         let language = language_data[course.learningLanguage];
+        let name = course.name || language.name;
 
         if(language.short === lang) {
             let flag = d3.select("#current_language_flag").style("background-position", `0 ${language.flag}px`);
@@ -487,7 +489,7 @@ async function loadStory(lang, lang_base) {
         let flag = a.append("div").attr("class", "flag").style("background-position", `0 ${language.flag}px`);
         if(language.flag_file != null)
             flag.style("background-image", `url(flags/${language.flag_file})`);
-        a.append("span").text(language.name);
+        a.append("span").text(name);
     }
 
     let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
