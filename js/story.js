@@ -118,20 +118,6 @@ function setProgress(i) {
 
 
 function addTextWithTranslation(dom, content, hideRangesForChallenge, transcriptParts) {
-    //                 let newword = target.append("button").attr("class", "clickword")        .attr("data-status", "unselected")
-    //                     .text(d => words[i].replace(/~/g, " "))
-    //                 click_words_list.push(newword);
-    if(0) {
-        let tokens = splitTextTokens(content.text);
-        let start = 0, end = 0;
-        let last_element = undefined;
-        for (let token of tokens) {
-            end = start + token.length;
-            dom.append("span").attr("class", "word")
-            start = end;
-        }
-    }
-
     function getOverlap(start1, end1, start2, end2) {
         if(start2 === undefined || end2 === undefined)
             return false;
@@ -217,7 +203,7 @@ function addTextWithTranslation(dom, content, hideRangesForChallenge, transcript
         addSplitWord(dom.append("span").attr("class", "word"), text_pos, content.text.length);
 }
 
-function addSpeakerX(line) {
+function addSpeaker(line) {
     let story = d3.select("#story");
     let phrase = story.append("p");
 
@@ -236,7 +222,7 @@ function addSpeakerX(line) {
     return [phrase, bubble];
 }
 
-function playAudioX(phrase, content) {
+function playAudio(phrase, content) {
     if(content.audio !== undefined && audio_objects[content.audio.url] !== undefined) {
         phrase.selectAll("[data-audio]")
             .style("opacity", 0.5)
@@ -253,28 +239,13 @@ function playAudioX(phrase, content) {
 function addLoudspeaker(bubble, content) {
     if(content.audio !== undefined && audio_objects[content.audio.url] !== undefined) {
         let loudspeaker = bubble.append("img").attr("src", "https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg")
-            .attr("width", "28px").attr("class", "speaker")
-            .on("click", function() { playAudioX(bubble, content)});
+            .attr("width", "28px").attr("class", "loudspeaker")
+            .on("click", function() { playAudio(bubble, content)});
     }
 }
 
-function addTypeLineElement(data) {
-    let phrase = addTypeLine(data);
-    phrase.classed("fadeGlideIn", true);
 
-    div_elements.push(function() {
-        phrase.classed("hidden", false);
-
-        if(!isEditor)
-            playAudioX(phrase, data.line.content);
-
-        if(document.getElementById("button_next"))
-            document.getElementById("button_next").dataset.status = "active";
-    });
-    return phrase;
-}
-
-function addTypeLine(data) {
+function addSpeechLine(data) {
     let phrase, bubble;
     if(data.line.type === "TITLE") {
         let story = d3.select("#story");
@@ -282,7 +253,7 @@ function addTypeLine(data) {
         bubble = phrase.append("span").attr("class", "title")
     }
     else
-        [phrase, bubble] = addSpeakerX(data.line);
+        [phrase, bubble] = addSpeaker(data.line);
 
     phrase.classed("hidden", true);
 
@@ -307,72 +278,55 @@ function addTypeLine(data) {
 }
 
 function addMultipleChoiceAnswers(question, data, finishedCallback) {
+    // callback when one of the answers was selected
     function selectAnswer(i) {
+        // check if it is a valid element
         let element = answer_nodes[i]
         if(!element || d3.select(element).attr("data-off"))
             return
 
+        // is it the correct answer?
         if(i === data.correctAnswerIndex) {
+            // deactivate the other inputs
             answers.attr("data-off", true)
+            // set the clicked input to "right"
             d3.select(element).attr("data-right", true)
+            // remove the keydown event
             document.selectAnswer = undefined;
+            // call the finished callback
             if(finishedCallback)
                 finishedCallback()
+            // play the sound
             playSoundRight();
         }
         else {
+            // deactivate it and set it to "x"
             d3.select(element).attr("data-off", true)
             d3.select(element).attr("data-false", true)
+            // play the sound
             playSoundWrong();
         }
     }
 
-    let answers = question.append("ul").attr("class", "multiple_choice_ul").selectAll("li").data(data.answers).enter()
-        .append("li").attr("class", "multiple_choice_li")
-        .on("click", function(d, i) { selectAnswer(i);})
+    // add the answer group and add the items
+    let answers = question.append("ul").attr("class", "multiple_choice_ul")
+        // add the li items
+        .selectAll("li").data(data.answers).enter().append("li")
+        .attr("class", "multiple_choice_li")
+        // add the click callback
+        .on("click", (d, i) => selectAnswer(i))
+        // add the text
         .each(function(d, i) {
             let p = d3.select(this);
             p.append("button").attr("class", "multiple_choice_checkbox").text(" ")
             addTextWithTranslation(p.append("div").attr("class", "multiple_choice_answer_text"), d);
         })
     let answer_nodes = answers.nodes();
+    // return the callback function
     return selectAnswer;
 }
 
-function addTypeMultipleChoice(data) {
-    let story = d3.select("#story");
-    let question = story.append("p");
-
-    question.classed("hidden", true);
-    question.classed("fadeGlideIn", true);
-
-    addTextWithTranslation(question.append("span").attr("class", "question"), data.question);
-
-    let selectAnswer = addMultipleChoiceAnswers(question, data, function () {
-        questionFinished(question);
-    });
-
-    div_elements.push(function() {
-        question.classed("hidden", false);
-        document.selectAnswer = selectAnswer;
-        fadeIn(question);
-    });
-}
-
-function addTypeChallengePrompt(data) {
-    let story = d3.select("#story");
-    let question = story.append("p");
-    addTextWithTranslation(question.append("span").attr("class", "question"), data.prompt);
-    return question;
-}
-
-function addTypeSelectPhrase(data, data2, data3) {
-    let story = d3.select("#story");
-
-    let prompt = addTypeChallengePrompt(data);
-
-    let line = addTypeLine(data2);
-
+function addButtonAnswers(question, data3, finishedCallback) {
     function selectAnswer(i) {
         let element = answer_nodes[i];
         if(!element || answer_nodes[i].dataset.status)
@@ -384,11 +338,11 @@ function addTypeSelectPhrase(data, data2, data3) {
                     answer_nodes[ii].dataset.status = "off";
             }
             element.dataset.status = "right";
-            // show the filled in text
-            line.selectAll('[data-hidden="true"]').attr("data-hidden", undefined);
             // finish the question
             document.selectAnswer = undefined;
-            questionFinished(question, prompt);
+            // call the finished callback
+            if(finishedCallback)
+                finishedCallback()
             playSoundRight();
         }
         else {
@@ -397,9 +351,8 @@ function addTypeSelectPhrase(data, data2, data3) {
         }
     }
 
-    let question = story.append("p");
-    let answers = question.append("p").selectAll("button").data(data3.answers).enter()
-        .append("button").attr("class", "answer")
+    let answers = question.append("p")
+        .selectAll("button").data(data3.answers).enter().append("button").attr("class", "answer")
         .on("click", function(d, i) { selectAnswer(i);})
         .each(function(d, i) {
             let p = d3.select(this);
@@ -407,15 +360,71 @@ function addTypeSelectPhrase(data, data2, data3) {
             addTextWithTranslation(p.attr("class", "answer_button"), d);
         })
     let answer_nodes = answers.nodes();
+}
 
-    prompt.classed("hidden", true);
-    question.classed("hidden", true);
+function addChallengePrompt(data) {
+    let story = d3.select("#story");
+    let question = story.append("p")
+        .classed("hidden", true)
+        .classed("fadeGlideIn", true);
+    addTextWithTranslation(question.append("span").attr("class", "question"), data.prompt);
+    return question;
+}
 
-    prompt.classed("fadeGlideIn", true);
-    question.classed("fadeGlideIn", true);
+/* the elements */
+
+function addTypeLineElement(data) {
+    // add a normal speech line
+    let phrase = addSpeechLine(data).classed("fadeGlideIn", true);
+
+    // add start call
+    div_elements.push(function() {
+        // show the line
+        phrase.classed("hidden", false);
+
+        // play the audio
+        if(!isEditor)
+            playAudio(phrase, data.line.content);
+
+        // directly allow to click the next button
+        if(document.getElementById("button_next"))
+            document.getElementById("button_next").dataset.status = "active";
+    });
+    return phrase;
+}
+
+function addTypeMultipleChoice(data) {
+    // add the parent element
+    let question = d3.select("#story").append("p").classed("hidden", true).classed("fadeGlideIn", true);
+    // add the question text
+    addTextWithTranslation(question.append("span").attr("class", "question"), data.question);
+    // add the answers
+    let selectAnswer = addMultipleChoiceAnswers(question, data, ()=> questionFinished(question));
+
+    // add start call
+    div_elements.push(function() {
+        // on start, show the question
+        question.classed("hidden", false);
+        fadeIn(question);
+        // and accept key events
+        document.selectAnswer = selectAnswer;
+    });
+}
+
+function addTypeSelectPhrase(data, data2, data3) {
+    // add the question
+    let prompt = addChallengePrompt(data);
+    // add the speech line
+    let line = addSpeechLine(data2);
+    // add the answers
+    let answers = d3.select("#story").append("p").attr("class", "hidden fadeGlideIn");
+    let selectAnswer = addButtonAnswers(answers, data3, () => {
+        // show the filled in text
+        line.selectAll('[data-hidden="true"]').attr("data-hidden", undefined);
+        questionFinished(answers, prompt);
+    })
+
     line.classed("fadeGlideIn", true);
-
-    //playAudio(data.id, phrase);
 
     div_elements.push(function() {
         prompt.classed("hidden", false);
@@ -424,42 +433,34 @@ function addTypeSelectPhrase(data, data2, data3) {
         setTimeout(() => {
             line.classed("hidden", false);
             if(!isEditor)
-                playAudioX(line, data2.line.content);
+                playAudio(line, data2.line.content);
         }, 300);
-        setTimeout(() => question.classed("hidden", false), 300*2);
+        setTimeout(() => answers.classed("hidden", false), 300*2);
     });
 }
 
 function addTypeContinuation(data, data2, data3) {
-    let story = d3.select("#story");
+    // add the question
+    let prompt = addChallengePrompt(data);
+    // add the speech line
+    let line = addSpeechLine(data2);
 
-    let prompt = addTypeChallengePrompt(data);
-
-    let line = addTypeLine(data2);
-
-    let question = story.append("p");
-    let selectAnswer = addMultipleChoiceAnswers(question, data3, function () {
+    let answers = d3.select("#story").append("p").attr("class", "hidden fadeGlideIn");
+    let selectAnswer = addMultipleChoiceAnswers(answers, data3, function () {
         line.selectAll('[data-hidden="true"]').attr("data-hidden", undefined);
-        questionFinished(question, prompt);
+        questionFinished(answers, prompt);
     });
 
-    prompt.classed("hidden", true);
-    question.classed("hidden", true);
-
-    prompt.classed("fadeGlideIn", true);
-    question.classed("fadeGlideIn", true);
     line.classed("fadeGlideIn", true);
-
-    //playAudio(data.id, phrase);
 
     div_elements.push(function() {
         prompt.classed("hidden", false);
         setTimeout(() => {
             line.classed("hidden", false);
             if(!isEditor)
-                playAudioX(line, data2.line.content);
+                playAudio(line, data2.line.content);
         }, 300);
-        setTimeout(() => question.classed("hidden", false), 300*2);
+        setTimeout(() => answers.classed("hidden", false), 300*2);
         document.selectAnswer = selectAnswer;
     });
 }
@@ -532,9 +533,9 @@ function addTypeArrange(data, data2, data3) {
     let index = 0;
     let story = d3.select("#story");
 
-    let prompt = addTypeChallengePrompt(data);
+    let prompt = addChallengePrompt(data);
 
-    let line = addTypeLine(data2);
+    let line = addSpeechLine(data2);
 
     let question = story.append("p").style("text-align", "center");
     question.append("p").selectAll("div").data(data3.selectablePhrases).enter()
@@ -560,10 +561,9 @@ function addTypeArrange(data, data2, data3) {
             }
         })
 
-    prompt.classed("hidden", true);
+
     question.classed("hidden", true);
 
-    prompt.classed("fadeGlideIn", true);
     question.classed("fadeGlideIn", true);
     line.classed("fadeGlideIn", true);
 
@@ -574,7 +574,7 @@ function addTypeArrange(data, data2, data3) {
         setTimeout(() => {
             line.classed("hidden", false);
             if(!isEditor)
-                playAudioX(line, data2.line.content);
+                playAudio(line, data2.line.content);
         }, 300);
         setTimeout(() => question.classed("hidden", false), 300*2);
     });
