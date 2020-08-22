@@ -9,6 +9,7 @@
     <script src="js/login.js"></script>
 
     <link rel="stylesheet" href="css/story.css" />
+    <link rel="stylesheet" href="css/spinner.css"></link>
 
     <style>
         .button_story {
@@ -174,6 +175,13 @@
     <br/>
     <div id="list">
 
+    </div>
+    <div id=spinner style="position: relative; width: 100%; height: 200px">
+        <div class="spinner_parent">
+            <div class="spinner_point point1"></div>
+            <div class="spinner_point point2"></div>
+            <div class="spinner_point point3"></div>
+        </div>
     </div>
 
     <hr/>
@@ -434,8 +442,15 @@ async function loadStory(lang, lang_base) {
     let response_courses = await fetch(`${backend_stories}get_courses.php`);
     let data_courses = await response_courses.json();
 
+    let valid_course = false;
+    for(let course of data_courses) {
+        if(course.learningLanguage === lang && course.fromLanguage === lang_base) {
+            valid_course = true;
+        }
+    }
+
     let language_names = await getLanguageNames();
-    if(lang === null) {
+    if(lang === null || !valid_course) {
         d3.select("#list").selectAll().remove();
         let list_div = d3.select("#list").append("div").attr("class", "set_list");
         for(let course of data_courses) {
@@ -450,6 +465,7 @@ async function loadStory(lang, lang_base) {
                 flag.style("background-image", `url(flags/${language.flag_file})`);
             div.append("span").text(language.name).attr("class", "language_select_button_text")
         }
+        d3.select("#spinner").style("display", "none");
         return
     }
 
@@ -535,6 +551,8 @@ async function loadStory(lang, lang_base) {
         })*/
 
     d3.select("#license_language").text("into "+language_names[lang]);
+
+    d3.select("#spinner").style("display", "none");
 }
 </script>
 </body>
