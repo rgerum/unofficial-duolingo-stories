@@ -450,7 +450,7 @@ function processStoryFile() {
 
             // read the line (with translation)
             [_, speaker, text] = lines[index+1].match(/^>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
-            console.log("[click]", speaker, text, lines[index], question, question_translation);
+            //console.log("[click]", speaker, text, lines[index], question, question_translation);
             [index, text, translation] = getTextWithTranslation(lines, index+1, /^>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/, /^~\s*(.*)\s*$/);
 
             // Split the text into text with buttons
@@ -670,7 +670,7 @@ function processStoryFile() {
     //phrases.splice(0, 0, {tag: "title", id: 0, text: story_properties.title, translation: story_properties.title_translation});
     phrases.splice(0, 0, generateMaps(null, story_properties.title, story_properties.title_translation, audio_map, 0));
     phrases[0].line.type = "TITLE";
-    console.log(phrases);
+    //console.log(phrases);
 
     if(isEditor) {
         ssml_list = {};
@@ -700,6 +700,7 @@ function processStoryFile() {
         fromLanguageName: story_properties["title_base"],
         discussion: story_properties["discussion"],
     }
+    return story_json;
 }
 
 function updateAudioLinks(line_id) {

@@ -75,6 +75,22 @@ class Google(object):
           }
         }
         """ % (text, lang, region, lang, region, voiceName)).encode("utf-8"))
+        if 0:
+            print(("""
+                      {
+                        "audioConfig": {
+                          "audioEncoding": "MP3"
+                        },
+                        "input": {
+                          "ssml": "%s"
+                        },
+                        "voice": {
+                          "languageCode": "%s-%s",
+                          "name": "%s-%s-%s"
+                        }
+                      }
+                      """ % (text, lang, region, lang, region, voiceName)).encode("utf-8")
+                      )
         if response.status_code == 200:
             self.filename = filename
             print(json.loads(response.content))

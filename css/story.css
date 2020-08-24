@@ -36,6 +36,8 @@ body {
     font-size: 19px;
     margin: 0px;
 }
+button:focus{outline:none !important;}
+a:focus{outline:none !important;}
 #main {
     max-width: 500px;
     margin: 0 auto;

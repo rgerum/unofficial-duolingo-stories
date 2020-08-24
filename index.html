@@ -7,6 +7,8 @@
 
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="js/login.js"></script>
+    <script src="js/api_calls.js"></script>
+    <script src="js/interface.js"></script>
 
     <link rel="stylesheet" href="css/story.css" />
     <link rel="stylesheet" href="css/spinner.css"></link>
@@ -169,8 +171,6 @@
 <div id="main">
     <h1>Unofficial Duolingo Stories</h1>
     <p style="text-align: center">This page is a community project to bring the original <a href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages. If you want to contribute <a href="https://forum.duolingo.com/comment/38992372">tell me</a>.</p>
-<!--    <p style="text-align: center">Currently available in <a href="index.html?lang=nl">Dutch</a>, <a href="index.html?lang=el">Greek</a>, <a href="index.html?lang=no">Norwegian</a> and <a href="index.html?lang=ru">Russian</a>.</p>
--->
     <hr/>
     <br/>
     <div id="list">
@@ -388,22 +388,6 @@ images_lip_colors = {
         "https://stories-cdn.duolingo.com/image/2f5d7c623ff71838607c8b789fc979ba0f0bd045.svg": "3e1d70"
     }
 
-let language_data = undefined;
-backend = "https://carex.uber.space/stories/backend/"
-backend_stories = backend+"stories/"
-async function getLanguageNames() {
-
-    let response = await fetch(`${backend_stories}get_languages.php`);
-    let data = await response.json();
-    language_data = {};
-    let language_names = {}
-    for(let lang of data) {
-        language_names[lang.short] = lang.name;
-        language_data[lang.short] = lang;
-    }
-    return language_names;
-}
-
 async function button_logout() {
     await logout();
     check_login();
@@ -437,123 +421,26 @@ async function check_login() {
 }
 check_login();
 
-list = [];
 async function loadStory(lang, lang_base) {
-    let response_courses = await fetch(`${backend_stories}get_courses.php`);
-    let data_courses = await response_courses.json();
+    let data_languages = await getLanguageNames();
+    let data_courses = await getCourses();
+    let data_stories = await getStories(lang, lang_base);
 
-    let valid_course = false;
-    for(let course of data_courses) {
-        if(course.learningLanguage === lang && course.fromLanguage === lang_base) {
-            valid_course = true;
-        }
+    // add the language selection drop down menu
+    addSmallLanguageButtons(d3.select("#header_lang_selector"), data_courses, data_languages, lang);
+
+    if(!isCourseValid(data_courses, lang, lang_base)) {
+        // if the link is not to a specific course, display all languages
+        addBigLanguageButtons(d3.select("#list"), data_courses, data_languages);
+    }
+    else {
+        // if there is a distinct course, display all the sets and stories of this course
+        addStorySets(d3.select("#list"), data_stories)
+        // update the language name in the licence text
+        d3.select("#license_language").text("into "+data_languages[lang].name);
     }
 
-    let language_names = await getLanguageNames();
-    if(lang === null || !valid_course) {
-        d3.select("#list").selectAll().remove();
-        let list_div = d3.select("#list").append("div").attr("class", "set_list");
-        for(let course of data_courses) {
-            if(!course.public)
-                continue
-            let language = language_data[course.learningLanguage];
-            let name = course.name || language.name;
-            let div = list_div.append("a");
-            div.attr("class", "language_select_button")
-            div.attr("href", `index.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`);
-            let flag = div.append("div").attr("class", "flag flag_big").style("background-position", `0 ${language.flag}px`);
-            if(language.flag_file != null)
-                flag.style("background-image", `url(flags/${language.flag_file})`);
-            div.append("span").text(name).attr("class", "language_select_button_text")
-        }
-        d3.select("#spinner").style("display", "none");
-        return
-    }
-
-    d3.select("#header_lang_selector").selectAll("a").remove();
-    for(let course of data_courses) {
-        let language = language_data[course.learningLanguage];
-        let name = course.name || language.name;
-
-        if(language.short === lang) {
-            let flag = d3.select("#current_language_flag").style("background-position", `0 ${language.flag}px`);
-            if(language.flag_file != null) {
-                flag.style("background-image", `url(flags/${language.flag_file})`);
-            }
-        }
-        if (!course.public)
-            continue
-        let a = d3.select("#header_lang_selector").append("a").attr("class", "language_select_item")
-            .attr("href", `index.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`)
-            .style("display", "block")
-        let flag = a.append("div").attr("class", "flag").style("background-position", `0 ${language.flag}px`);
-        if(language.flag_file != null)
-            flag.style("background-image", `url(flags/${language.flag_file})`);
-        a.append("span").text(name);
-    }
-
-    let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
-    if(response.status !== 200)
-        return
-    let data = await response.json();
-
-    d3.select("#list").selectAll().remove();
-
-    let set = -1;
-    let div = undefined;
-    for(let d of data) {
-        if(set != d.set_id) {
-            d3.select("#list").append("div").attr("class", "set").text("Set "+d.set_id)
-            set = d.set_id;
-            div = d3.select("#list").append("div").attr("class", "set_list");
-        }
-        let a = div.append("a")
-            .style("width", "150px")
-            .attr("href", _=>"story.html?story="+d.id)
-        let button = a.append("button")
-            .attr("class", "button_story")
-            .attr("data-done", _=>d.time != null)
-        if(d.image) {
-            if(d.time != null && d.image_done != null)
-                button.append("img").attr("src", d.image_done)
-            else {
-                button.append("img").attr("src", d.image);
-                button.style("box-shadow", "#"+images_lip_colors[d.image]+" 0 6px")
-            }
-        }
-        a.append("div")
-            .attr("class", "story_title")
-            .text(d.name_base)
-        a.append("div")
-            .attr("class", "story_xp")
-            .text("+"+d.xp+"xp")
-    }/*
-    d3.select("#list").selectAll("a").data(data).enter().append("a")
-        .style("width", "150px")
-        .attr("href", d=>"story.html?story="+d.id)
-        .each(function (d) {
-            let button = d3.select(this).append("button")
-                .attr("class", "button_story")
-                .attr("data-done", d=>d.time != null)
-            if(d.image) {
-                if(d.time != null && d.image_done != null)
-                    button.append("img").attr("src", d.image_done)
-                else {
-                    button.append("img").attr("src", d.image);
-                    console.log(images_lip_colors[d.image]+" 0 6px;", button);
-                    button.style("box-shadow", "#"+images_lip_colors[d.image]+" 0 6px")
-                }
-            }
-            d3.select(this).append("div")
-                .attr("class", "story_title")
-                .text(d.name_base)
-            d3.select(this).append("div")
-                .attr("class", "story_xp")
-                .text("+"+d.xp+"xp")
-        })*/
-
-    d3.select("#license_language").text("into "+language_names[lang]);
-
+    // hide the spinner
     d3.select("#spinner").style("display", "none");
 }
 </script>

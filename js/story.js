@@ -27,42 +27,32 @@ function loadAudios() {
 }
 
 async function loadStory(name) {
-    await getLanguages();
+    let language_data = await getLanguageNames();
 
-    let response_json = await fetch(`${backend_stories}get_story_json.php?id=${name}`);
-    if(response_json.status === 200) {
-        try {
-            story_json = await response_json.json();
-        }
-        catch (e) {
-            story_json = undefined;
-        }
-        if(story_json) {
-            console.log("LOADED JSON");
-            rtl = language_data[story_json.learningLanguage]["rtl"];
+    story_json = await getStoryJSON(name)
+    rtl = language_data[story_json.learningLanguage]["rtl"];
 
-            if(document.getElementById("button_next")) {
-                document.getElementById("button_next").dataset.status = "active";
-            }
-            document.getElementById("license_language").innerText = language_data[story_json.learningLanguage].name;
-
-            if(story_json.discussion)
-                d3.select("#button_discuss").style("display", "inline")
-                    .on("click", _=>{window.open(story_json.discussion);})
-
-            story_id = parseInt(name);
-
-            loadAudios();
-
-            addAll();
-
-            d3.select("#spinner").style("display", "none");
-
-            addNext();
-
-            return
-        }
+    if(document.getElementById("button_next")) {
+        document.getElementById("button_next").dataset.status = "active";
     }
+    document.getElementById("license_language").innerText = language_data[story_json.learningLanguage].name;
+
+    if(story_json.discussion)
+        d3.select("#button_discuss").style("display", "inline")
+            .on("click", _=>{window.open(story_json.discussion);})
+
+    story_id = parseInt(name);
+
+    loadAudios();
+
+    addAll();
+
+    d3.select("#spinner").style("display", "none");
+
+    addNext();
+
+    return
+    /*
 
     let response = await fetch(`${backend_stories}get_story.php?id=${name}`);
     let data = await response.json();
@@ -90,6 +80,8 @@ async function loadStory(name) {
     addAll();
     d3.select("#spinner").style("display", "none");
     addNext();
+
+     */
 }
 language_data = {};
 async function getLanguages() {
