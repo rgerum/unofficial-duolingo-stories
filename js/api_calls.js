@@ -33,6 +33,16 @@ async function getStories(lang, lang_base) {
     }
 }
 
+async function getStoriesEditor(lang, lang_base) {
+    try {
+        let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list_editor.php?lang=${lang}&lang_base=${lang_base}`);
+        return await response.json();
+    }
+    catch (e) {
+        return undefined;
+    }
+}
+
 async function getStoryJSON(id) {
     let response_json = await fetch(`${backend_stories}get_story_json.php?id=${id}`);
     if(response_json.status === 200) {

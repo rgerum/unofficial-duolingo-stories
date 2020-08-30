@@ -10,6 +10,10 @@
     <script src="js/story.js"></script>
     <script type="text/javascript" src="js/sort-table.min.js"></script>
 
+    <script src="js/api_calls.js"></script>
+    <script src="js/interface.js"></script>
+
+    <link rel="stylesheet" href="css/story.css"></link>
     <link rel="stylesheet" href="css/spinner.css"></link>
 
     <style>
@@ -265,7 +269,7 @@
         }
         #main {
             padding-top: 80px;
-            max-width: 800px;
+            max-width: 1300px;
         }
 
         #story_list {
@@ -355,11 +359,27 @@
         .slider.round:before {
             border-radius: 50%;
         }
+
+        .course_selection_button {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            color: black;
+            border-bottom: 1px solid lightgray;
+        }
+        .course_selection_button:hover {
+            background: lightgray;
+        }
+
+        .course_count {
+            width: 30px;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
 
-<div id="header">
+<div id="header" style="display: block;">
     <div id="header_left" style="display: inline-block">
         <div id=button_new class="button" onclick="location.href = 'editor.html?lang='+urlParams.get('lang')+'&lang_base='+urlParams.get('lang_base');" style="float: none; display: none">New Story</div>
         <div id=button_import class="button" onclick="location.href = 'editor_import.html?lang='+urlParams.get('lang')+'&lang_base='+urlParams.get('lang_base');" style="float: none; display: none">Import Story</div>
@@ -377,48 +397,37 @@
         <div class="button" onclick="button_logout();" style="float: none">Logout</div>
     </div>
 </div>
-<div id="main">
-    <h1 id="title">Editor - Stories</h1>
-    <!--
-    <div style="background: #478cc2; border-radius: 5px; padding: 1px 10px">
-    <p>NEW: Install <a href="https://www.tampermonkey.net/">Tampermonkey</a> and <a href="story_export.user.js">story_export.user.js</a> to export official stories from duolingo.com for this project.</p>
-        <p>After you installed the extension and the script, start a story on duolingo, reload (press F5) and click on the "get story text" button in the upper left corner. Then past the text to a new story on this page here.</p>
-    <p>Please give me feedback on the export or talk to me if you have questions.</p>
-    </div>
-    -->
-    <p id="languages"></p>
-    <table id="story_list" style="display: none" class="js-sort-table">
-        <thead>
-        <tr><th style="border-radius: 10px 0 0 0">Set</th><th colspan="2" >Name</th><th style="text-align: right">XP</th><th>Author</th><th>Creation</th><th>Change</th><th style="text-align: center">Done</th><th style="border-radius: 0 10px 0 0">Public</th></tr>
-        </thead>
-      <tbody>
+<div id="main" style="display: grid; grid-template-columns: 250px auto 250px">
+    <div id="languages"></div>
+    <div>
+        <h1 id="title">Editor - Stories</h1>
+        <!--
+        <div style="background: #478cc2; border-radius: 5px; padding: 1px 10px">
+        <p>NEW: Install <a href="https://www.tampermonkey.net/">Tampermonkey</a> and <a href="story_export.user.js">story_export.user.js</a> to export official stories from duolingo.com for this project.</p>
+            <p>After you installed the extension and the script, start a story on duolingo, reload (press F5) and click on the "get story text" button in the upper left corner. Then past the text to a new story on this page here.</p>
+        <p>Please give me feedback on the export or talk to me if you have questions.</p>
+        </div>
+        -->
+        <table id="story_list" style="display: none" class="js-sort-table">
+            <thead>
+            <tr><th style="border-radius: 10px 0 0 0">Set</th><th colspan="2" >Name</th><th style="text-align: right">XP</th><th>Author</th><th>Creation</th><th>Change</th><th style="text-align: center">Done</th><th style="border-radius: 0 10px 0 0">Public</th></tr>
+            </thead>
+          <tbody>
 
-      </tbody>
-    </table>
-    <p id="no_stories" style="display: none">Click on one of the courses to display its stories.</p>
-    <div id=spinner style="position: relative; width: 100%; height: 200px">
-        <div class="spinner_parent">
-            <div class="spinner_point point1"></div>
-            <div class="spinner_point point2"></div>
-            <div class="spinner_point point3"></div>
+          </tbody>
+        </table>
+        <p id="no_stories" style="display: none">Click on one of the courses to display its stories.</p>
+        <div id=spinner style="position: relative; width: 100%; height: 200px">
+            <div class="spinner_parent">
+                <div class="spinner_point point1"></div>
+                <div class="spinner_point point2"></div>
+                <div class="spinner_point point3"></div>
+            </div>
         </div>
     </div>
 </div>
 <script>
     const urlParams = new URLSearchParams(window.location.search);
-
-    let language_data = undefined;
-    backend = "https://carex.uber.space/stories/backend/"
-    backend_stories = backend+"stories/"
-    async function getLanguageData() {
-        let response = await fetch(`${backend_stories}get_languages.php`);
-        let data = await response.json();
-        language_data = {};
-        for(let lang of data)
-            language_data[lang.short] = lang;
-
-        return language_data;
-    }
 
 async function button_logout() {
     await logout();
@@ -455,27 +464,14 @@ check_login();
 
 list = [];
 async function loadStory(lang, lang_base) {
-    let response_lang = await fetch(`${backend_stories}get_courses.php`);
-    let data_lang = await response_lang.json();
-    let valid_course = false;
-    d3.select("#languages").selectAll("span").remove();
-    for(let course of data_lang) {
-        let div = d3.select("#languages").append("span");
-        div.append("span").html(" &bull; ")
-        let a = div.append("a").text(`${course.learningLanguageName} [${course.fromLanguage}] (${course.count})`).attr("href", `editor_overview.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`);
-        if(course.learningLanguage === lang && course.fromLanguage === lang_base) {
-            a.style("font-weight", "bold");
-            valid_course = true;
-            console.log("TRUE");
-        }
-    }
+    let data_language = await getLanguageNames();
+    let data_courses = await getCourses();
 
-    await getLanguageData();
+    addEditorCourses(d3.select("#languages"), data_courses, data_language, lang, lang_base);
 
-    let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list_editor.php?lang=${lang}&lang_base=${lang_base}`);
-    let data = undefined;
-    if(response.status === 200)
-        data = await response.json();
+    let valid_course = isCourseValid(data_courses, lang, lang_base)
+
+    let data = await getStoriesEditor(lang, lang_base);
 
     d3.select("#spinner").style("display", "none");
     if(valid_course) {
@@ -489,66 +485,10 @@ async function loadStory(lang, lang_base) {
     if(!data)
         return
 
-    if(language_data)
-        document.getElementById("title").innerText += ` - ${language_data[lang].name} (from ${language_data[lang_base].name})`
+    if(data_language)
+        document.getElementById("title").innerText += ` - ${data_language[lang].name} (from ${data_language[lang_base].name})`
 
-    d3.select("tbody").selectAll("tr").remove();
-    d3.select("tbody").selectAll("tr").data(data).enter().append("tr")
-        .each(function(d) {
-            function pad(x) {
-                if(x < 10)
-                    return "&nbsp;"+x;
-                return x;
-            }
-            let td = d3.select(this).append("td");
-            if(d.set_id)
-                td.append("span").html("<b>"+pad(d.set_id)+"</b>"+"&nbsp;-&nbsp;"+pad(d.set_index))
-            td = d3.select(this).append("td").attr("width", "30px");
-            if(d.image)
-                td.append("img").attr("src", d.image).attr("width", "30px")
-            //if(d.image_done)
-            //    td.append("img").attr("src", d.image_done).attr("width", "30px")
-            td = d3.select(this).append("td");
-            td.append("a")
-                .attr("href", "editor.html?story="+d.id+"&lang="+urlParams.get('lang')+ "&lang_base=" + urlParams.get('lang_base'))
-                .text(d.name_base)
-
-            d3.select(this).append("td").style("text-align", "right").text("+"+d.xp+"xp")
-            d3.select(this).append("td").text(d.username)
-            d3.select(this).append("td").text(d.date)
-            d3.select(this).append("td").text(d.change_date)
-            d3.select(this).append("td").style("text-align", "right").each(function() {
-                d3.select(this).append("span").html(`${d.count}x&nbsp;`);
-                d3.select(this).append("a").attr("href", "story.html?test&story=" + d.id + "&lang=" + urlParams.get('lang') + "&lang_base=" + urlParams.get('lang_base')).text("[test]")
-            });
-            d3.select(this).append("td").style("text-align", "right").html(`
-                <label class="switch">
-                  <input type="checkbox" ${d.public ? "checked" : ""}>
-                  <span class="slider round"></span>
-                </label>
-                `).on("click", async function () {
-                    console.log("clicked", this, d.public);
-                    d3.event.preventDefault();
-                    if(!d.public) {
-                        if(confirm(`Do you want to publish the story \"${d.name_base}\"?`)) {
-                            let response = await fetch(backend_stories+"set_story_public.php?id="+d.id+"&public=1");
-                            if(response.status === 200) {
-                                d3.select(this).select("input").attr("checked", "true");
-                                d.public = 1;
-                            }
-                        }
-                    }
-                    else {
-                        if(confirm(`Do you want to hide the story \"${d.name_base}\"?`)) {
-                            let response = await fetch(backend_stories+"set_story_public.php?id="+d.id+"&public=0");
-                            if(response.status === 200) {
-                                d3.select(this).select("input").attr("checked", null);
-                                d.public = 0;
-                            }
-                        }
-                    }
-                })
-        })
+    addEditorTable(d3.select("tbody"), data);
 
     sortTable(document.getElementById("story_list"), 5, -1)
 }
