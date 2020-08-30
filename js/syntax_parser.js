@@ -327,15 +327,16 @@ function processStoryFile() {
 
             let question = undefined;
             if (!lines[index + 1].startsWith("+") && !lines[index + 1].startsWith("-")) {
-                question = lines[index + 1].trim();
-                index += 1;
+
+                [index, question, question_translation] = getTextWithTranslation(lines, index+1, /^\s*(.+)\s*$/, /^~\s*(.*)\s*$/);
+                //index += 1;
             }
 
             let answers;
             [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
 
             let ssml = getInputStringSpeachtext(text);
-            if(text.indexOf("*") !== -1) {
+            if(text.indexOf("*") !== -1 && answers[correctAnswerIndex] !== undefined) {
                 let start = text.indexOf("*");
                 hideRangesForChallenge = {start: start, end: start+answers[correctAnswerIndex].text.length};
                 text = text.replace("*", answers[correctAnswerIndex].text);
@@ -344,7 +345,7 @@ function processStoryFile() {
 
             phrases.push({
                 type: "CHALLENGE_PROMPT",
-                prompt: generateHintMap(question, ""),
+                prompt: generateHintMap(question, question_translation),
                 trackingProperties: {line_index: line_index, challenge_type: "continuation"},
             })
 
