@@ -17,6 +17,7 @@ div_elements = [];
 
 audio_objects = {}
 function loadAudios() {
+    audio_objects = {}
     for(let element of story_json.elements) {
         if(element.line && element.line.content && element.line.content.audio) {
             let audio = element.line.content.audio;

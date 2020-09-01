@@ -77,7 +77,7 @@
     </style>
 </head>
 <body>
-<div id="header">
+<div id="header" style="display: block">
     <div id="header_left" style="display: inline-block">
         <div class="button" onclick="location.href = 'editor_overview.html?lang='+urlParams.get('lang')+'&lang_base='+urlParams.get('lang_base');" style="float: none">Overview</div>
         <a href="documentation.html">Documentation</a>
@@ -110,6 +110,7 @@
     <div id="footer" style="left: 50vw; right: 0px; width: 50%">
         <div id="button_save" class="button" onclick="saveStory();" style="float:left"><img style="display: none" src="Spinner-1s-40px.svg" height="15px">save</div>
         <div id="button_audio" class="button" onclick="generateAudio();" style="float:left; display: none"><img style="display: none" src="Spinner-1s-40px.svg" height="15px">generate Audio</div>
+        <div id="button_test" class="button" onclick="test();">test</div>
         <div id="button_reload" class="button" onclick="updateStoryDisplay();">update</div>
     </div>
     </div>
@@ -265,6 +266,7 @@ loadStory(urlParams.get('story'), urlParams.get('import'))
 function updateStoryDisplay() {
     story = editor.getValue();
     processStoryFile();
+    loadAudios();
     index = 0;
     d3.select("#story").selectAll("*").remove();
     //addTitle();

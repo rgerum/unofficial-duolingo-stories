@@ -51,7 +51,7 @@ function generateHintMap(text, translation) {
 }
 
 function getAudioUrl(id) {
-    return `audio/${story_id}/speech_${story_id}_${id}.mp3`
+    return `audio/${story_id}/speech_${story_id}_${id}.mp3?${Date.now()}`
 }
 
 function generateAudioMap(text, audiomap, id) {
@@ -720,7 +720,7 @@ function updateAudioLinks(line_id) {
 }
 
 async function reloadAudioMap() {
-    audio_map = await fetch(`audio/${story_id}/audio_${story_id}.json`);
+    audio_map = await fetch(`audio/${story_id}/audio_${story_id}.json?${Date.now()}`);
     if(audio_map.status !== 200)
         audio_map = undefined;
     else {
