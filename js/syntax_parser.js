@@ -167,6 +167,29 @@ function readAnswerLines2(lines, index, data) {
     return [index, answers, correctAnswerIndex];
 }
 
+function readAnswerLinesNoHints(lines, index, data) {
+    let answers = [];
+    let translations = [];
+    let answer, translation;
+    let correctAnswerIndex = 0;
+    // iterate over the next lines, they are the answers
+    while(index < lines.length - 1) {
+        if(!lines[index+1].startsWith("+") && !lines[index+1].startsWith("-"))
+            break
+
+        if(lines[index+1].startsWith("+"))
+            correctAnswerIndex = answers.length;
+
+        [index, answer, translation] = getTextWithTranslation(lines, index+1, /^([-+])\s*(.*)\s*$/, /^[~]\s*(.*)\s*$/)
+        console.log(index, answer, translation);
+
+        // add the answer
+        answers.push(answer);
+        translations.push(translation);
+    }
+    return [index, answers, translations, correctAnswerIndex];
+}
+
 function hintMapToText(content) {
     let text_pos = 0;
     let text = "";
@@ -275,6 +298,7 @@ function processStoryFile() {
             }
 
             let answers;
+            [_, answers_raw, translation_raw, correctAnswerIndex] = readAnswerLinesNoHints(lines, index);
             [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
 
             let hideRangesForChallenge = [];
@@ -282,13 +306,14 @@ function processStoryFile() {
             if(text.indexOf("*") !== -1) {
                 let start = text.indexOf("*");
                 hideRangesForChallenge = {start: start, end: start+answers[correctAnswerIndex].text.length};
-                text = text.replace("*", answers[correctAnswerIndex].text);
+                text = text.replace("*", answers_raw[correctAnswerIndex]);
                 if(!translation)
-                    translation = hintMapToText(answers[correctAnswerIndex]);
+                    translation = translation_raw[correctAnswerIndex];
                 ssml = ssml.replace("*", answers[correctAnswerIndex].text);
                 if(translation)
-                    translation = translation.replace("*", hintMapToText(answers[correctAnswerIndex]));
+                    translation = translation.replace("*", translation_raw[correctAnswerIndex]);
             }
+            console.log("FIL", text, translation, translation_raw, answers_raw, correctAnswerIndex);
 
             phrases.push({
                 type: "CHALLENGE_PROMPT",
