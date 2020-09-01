@@ -48,9 +48,17 @@ def processLine(story_id, line_id):
     engine.save_audio(output_dir / f"speech_{story_id}_{ssml['id']}.mp3", ssml['speaker'], ssml['text'])
 
     # generate the alignment
-    output_data[ssml['id']] = engine.get_speech_marks(ssml['speaker'], ssml['text'])
-    #print(output_data[ssml['id']])
+    print("pre", output_file, output_data.keys())
+    output_data[f"{ssml['id']}"] = engine.get_speech_marks(ssml['speaker'], ssml['text'])
+    print("alignment", ssml['id'])
 
+    print("update json")
     # store the output data back in the json file
     with output_file.open("w") as fp:
         json.dump(output_data, fp, indent=2)
+
+    print("dumped", output_file, output_data.keys())
+
+    with output_file.open("rb") as fp:
+        output_data = json.load(fp)
+    print("post", output_file, output_data.keys())

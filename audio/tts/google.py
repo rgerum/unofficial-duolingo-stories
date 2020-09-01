@@ -74,7 +74,7 @@ class Google(object):
             "name": "%s-%s-%s"
           }
         }
-        """ % (text, lang, region, lang, region, voiceName)).encode("utf-8"))
+        """ % (text.replace("\"", "'"), lang, region, lang, region, voiceName)).encode("utf-8"))
         if 0:
             print(("""
                       {
@@ -89,12 +89,12 @@ class Google(object):
                           "name": "%s-%s-%s"
                         }
                       }
-                      """ % (text, lang, region, lang, region, voiceName)).encode("utf-8")
+                      """ % (text.replace("\"", "'"), lang, region, lang, region, voiceName)).encode("utf-8")
                       )
         if response.status_code == 200:
             self.filename = filename
-            print(json.loads(response.content))
-            print(json.loads(response.content)["audioContent"])
+            #print(json.loads(response.content))
+            #print(json.loads(response.content)["audioContent"])
             import base64
             with Path(filename).open('wb') as audio:
                 audio.write(base64.b64decode(json.loads(response.content)["audioContent"]))
