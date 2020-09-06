@@ -9,8 +9,11 @@ story_id = undefined;
 audio_map = undefined;
 audio_objects = undefined;
 audio_right = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3");
+audio_right.volume = 0.5;
 audio_wrong = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3");
+audio_wrong.volume = 0.5;
 audio_finished = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3");
+audio_finished.volume = 0.5;
 rtl = false;
 
 div_elements = [];
