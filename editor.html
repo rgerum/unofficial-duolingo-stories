@@ -8,6 +8,7 @@
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="js/login.js"></script>
     <script src="js/includes.js"></script>
+    <script src="js/api_calls.js"></script>
     <script src="js/syntax_parser.js"></script>
     <script src="js/story.js"></script>
 
@@ -220,6 +221,9 @@ let story_id = undefined;
 let languages_ids = undefined;
 
 async function loadStory(name, name2) {
+    if(lexicon === undefined)
+        lexicon = await getLexicon(urlParams.get('lang'));
+
     languages_ids = await getLanguages();
     rtl = language_data[urlParams.get('lang')]["rtl"];
     console.log("RTL", rtl, urlParams.get('lang'), language_data[urlParams.get('lang')], language_data[urlParams.get('lang')]["rtl"]);

@@ -74,3 +74,13 @@ function isCourseValid(data_courses, lang, lang_base) {
     }
     return valid_course;
 }
+
+async function getLexicon(lang) {
+    try {
+        let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_lexicon.php?lang=${lang}`);
+        return await response.json();
+    }
+    catch (e) {
+        return {};
+    }
+}

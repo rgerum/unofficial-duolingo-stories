@@ -14,6 +14,12 @@ function getInputStringText(text) {
 }
 
 function getInputStringSpeachtext(text) {
+    for(let c in lexicon.letters) {
+        text = text.replace(new RegExp(c, "g"), lexicon.letters[c]);
+    }
+    for(let fragment of lexicon.fragments) {
+        text = text.replace(new RegExp(fragment.match, "g"), fragment.replace);
+    }
     return "<speak>"+text.replace(/([^-|~ ,;.:_?!…]*)\{([^\}:]*):([^\}]*)\}/g, '<phoneme alphabet="$3" ph="$2">$1</phoneme>').replace(/([^-|~ ,;.:_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ").replace(/\|/g, "​")+"</speak>";
 }
 
@@ -28,6 +34,7 @@ function getSpeaker(name) {
 }
 
 ssml_list = [];
+lexicon = undefined;
 
 function generateHintMap(text, translation) {
     if(!text)
