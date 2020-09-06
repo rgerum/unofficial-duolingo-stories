@@ -181,7 +181,6 @@ function readAnswerLinesNoHints(lines, index, data) {
             correctAnswerIndex = answers.length;
 
         [index, answer, translation] = getTextWithTranslation(lines, index+1, /^([-+])\s*(.*)\s*$/, /^[~]\s*(.*)\s*$/)
-        console.log(index, answer, translation);
 
         // add the answer
         answers.push(answer);
@@ -304,7 +303,7 @@ function processStoryFile() {
             let hideRangesForChallenge = [];
             let ssml = getInputStringSpeachtext(text);
             if(text.indexOf("*") !== -1) {
-                let start = text.indexOf("*");
+                let start = getInputStringText(text).indexOf("*");
                 hideRangesForChallenge = {start: start, end: start+answers[correctAnswerIndex].text.length};
                 text = text.replace("*", answers_raw[correctAnswerIndex]);
                 if(!translation)
@@ -313,7 +312,6 @@ function processStoryFile() {
                 if(translation)
                     translation = translation.replace("*", translation_raw[correctAnswerIndex]);
             }
-            console.log("FIL", text, translation, translation_raw, answers_raw, correctAnswerIndex);
 
             phrases.push({
                 type: "CHALLENGE_PROMPT",
@@ -362,7 +360,7 @@ function processStoryFile() {
 
             let ssml = getInputStringSpeachtext(text);
             if(text.indexOf("*") !== -1 && answers[correctAnswerIndex] !== undefined) {
-                let start = text.indexOf("*");
+                let start = getInputStringText(text).indexOf("*");
                 hideRangesForChallenge = {start: start, end: start+answers[correctAnswerIndex].text.length};
                 text = text.replace("*", answers[correctAnswerIndex].text);
                 ssml = ssml.replace("*", "<prosody volume=\"silent\">"+answers[correctAnswerIndex].text+"</prosody>");
@@ -417,7 +415,7 @@ function processStoryFile() {
 
                     // construct the target text (for audio)
                     if(words.length === 1) {
-                        let start = text.indexOf("*");
+                        let start = getInputStringText(text).indexOf("*");
                         let pos = start;
                         for(let x of lines[index+1].split("/")) {
                             pos += x.length;
