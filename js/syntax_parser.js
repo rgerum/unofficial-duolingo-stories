@@ -243,11 +243,11 @@ function processStoryFile() {
         // speaker
         if (lines[index].startsWith(">")) {
             // split speaker and text
-            let [_, speaker, text] = lines[index].match(/^>\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            let [_, speaker, text] = lines[index].match(/^>\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
             let translation = undefined;
             // if the next line starts with ~ it is the translation for the text
             if (lines[index+1].startsWith("~")) {
-                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
                 index += 1;
             }
             let data = generateMaps(speaker, text, translation, audio_map, line_index);
@@ -262,7 +262,7 @@ function processStoryFile() {
         if (lines[index].startsWith("[choice]")) {
             let question, answers, correctAnswerIndex;
 
-            [index, question] = getTextWithTranslationsHintMap(lines, index, /^\[(.*)\]\s*(.*)\s*$/, /^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            [index, question] = getTextWithTranslationsHintMap(lines, index, /^\[(.*)\]\s*(.*)\s*$/, /^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
             [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
 
             // set the data
@@ -282,11 +282,11 @@ function processStoryFile() {
         // question fill
         if (lines[index].startsWith("[fill]")) {
             // split the question text
-            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
             let translation = undefined;
             // if the next line starts with ~ it is the translation for the text
             if (lines[index + 1].startsWith("~")) {
-                [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+                [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
                 index += 1;
             }
 
@@ -340,11 +340,11 @@ function processStoryFile() {
         // question next
         if (lines[index].startsWith("[next]")) {
             // split the question text
-            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
             let translation = undefined;
             // if the next line starts with ~ it is the translation for the text
             if (lines[index + 1].startsWith("~")) {
-                [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+                [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
                 index += 1;
             }
 
@@ -393,11 +393,11 @@ function processStoryFile() {
         // question order
         if (lines[index].startsWith("[order]")) {
             // split the question text
-            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
             let translation = undefined;
             // if the next line starts with ~ it is the translation for the text
             if (lines[index+1].startsWith("~")) {
-                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
                 index += 1;
             }
             let question = lines[index+1].trim();
@@ -473,9 +473,9 @@ function processStoryFile() {
             [index, question, question_translation] = getTextWithTranslation(lines, index, /^\[.*\]\s*(.*)\s*$/, /^~\s*(.*)\s*$/);
 
             // read the line (with translation)
-            [_, speaker, text] = lines[index+1].match(/^>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            [_, speaker, text] = lines[index+1].match(/^>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
             //console.log("[click]", speaker, text, lines[index], question, question_translation);
-            [index, text, translation] = getTextWithTranslation(lines, index+1, /^>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/, /^~\s*(.*)\s*$/);
+            [index, text, translation] = getTextWithTranslation(lines, index+1, /^>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/, /^~\s*(.*)\s*$/);
 
             // Split the text into text with buttons
             let parts = splitTextTokens(text, true);
@@ -552,11 +552,11 @@ function processStoryFile() {
         // question fill / next
         if (lines[index].startsWith("[fill]") || lines[index].startsWith("[next]")) {
             // split the question text
-            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
             let translation = undefined;
             // if the next line starts with ~ it is the translation for the text
             if (lines[index + 1].startsWith("~")) {
-                [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+                [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
                 index += 1;
             }
 
@@ -587,11 +587,11 @@ function processStoryFile() {
         // question order
         if (lines[index].startsWith("[order]")) {
             // split the question text
-            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
             let translation = undefined;
             // if the next line starts with ~ it is the translation for the text
             if (lines[index+1].startsWith("~")) {
-                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
                 index += 1;
             }
             let question = lines[index+1].trim();
@@ -665,13 +665,13 @@ function processStoryFile() {
             // split the question text
             let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
 
-            let [__, speaker, text] = lines[index+1].match(/^>?\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+            let [__, speaker, text] = lines[index+1].match(/^>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
             index += 1;
 
             let translation = undefined;
             // if the next line starts with ~ it is the translation for the text
             if (lines[index+1].startsWith("~")) {
-                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^:]+)\s*:)?:?\s*(.+)\s*$/);
+                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
                 index += 1;
             }
 
