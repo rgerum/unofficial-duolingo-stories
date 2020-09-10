@@ -199,6 +199,15 @@ editor.commands.addCommand({
     },
     readOnly: true // false if this command should not apply in readOnly mode
 });
+
+editor.commands.addCommand({
+    name: 'tilde',
+    bindKey: {win: 'Shift-Space',  mac: 'Shift-Space'},
+    exec: function(editor) {
+        editor.insert("~")
+    },
+    readOnly: true // false if this command should not apply in readOnly mode
+});
 /*
 editor.commands.addCommand({
     name: 'accent',
