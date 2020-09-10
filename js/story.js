@@ -34,12 +34,14 @@ async function loadStory(name) {
     let language_data = await getLanguageNames();
 
     story_json = await getStoryJSON(name)
-    rtl = language_data[story_json.learningLanguage]["rtl"];
+    if(language_data !== undefined)
+        rtl = language_data[story_json.learningLanguage]["rtl"];
 
     if(document.getElementById("button_next")) {
         document.getElementById("button_next").dataset.status = "active";
     }
-    document.getElementById("license_language").innerText = language_data[story_json.learningLanguage].name;
+    if(language_data !== undefined)
+        document.getElementById("license_language").innerText = language_data[story_json.learningLanguage].name;
 
     if(story_json.discussion)
         d3.select("#button_discuss").style("display", "inline")
@@ -782,7 +784,10 @@ document.addEventListener("keydown", event => {
 });
 
 function goBack() {
-    if(urlParams.get('test') === null) {
+    if(urlParams.get('editor') !== null) {
+        window.location.href = 'editor.html?story='+story_id+'&lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage;
+    }
+    else if(urlParams.get('test') === null) {
         window.location.href = 'index.html?lang='+story_json.learningLanguage+"&lang_base="+story_json.fromLanguage;
     }
     else

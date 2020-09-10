@@ -353,6 +353,13 @@ async function generateAudio() {
     }
 }
 
+function test() {
+    if(story_id === undefined)
+        alert("The story can only be tested if it has been saved for the first time.")
+    else
+        location.href = 'story.html?story='+story_id+'&lang='+urlParams.get('lang')+'&lang_base='+urlParams.get('lang_base')+"&test=1&editor=1";
+}
+
 </script>
 </body>
 </html>
