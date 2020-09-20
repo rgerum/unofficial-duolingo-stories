@@ -22,7 +22,7 @@ function getInputStringSpeachtext(text) {
         for(let fragment of lexicon.fragments) {
             text = text.replace(new RegExp(fragment.match, "g"), fragment.replace);
         }
-    text = text.replace(/(\.\.\.|…)/g, '<sub alias="">$1</sub>');
+    text = text.replace(/(\.\.\.|…)/g, '<sub alias="">$1</sub><break/>');
     return "<speak>"+text.replace(/([^-|~ ,;.:_?!…]*)\{([^\}:]*):([^\}]*)\}/g, '<phoneme alphabet="$3" ph="$2">$1</phoneme>').replace(/([^-|~ ,;.:_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ").replace(/\|/g, "​")+"</speak>";
 }
 
@@ -230,8 +230,8 @@ function processStoryFile() {
 
     let lines = [];
     for (let line of story.split("\n")) {
-        // ignore empty lines or lines with comments
-        line = line.trim();
+        // ignore empty lines or lines with comments (and remove rtl isolate)
+        line = line.trim().replace(/\u2067/, "");
         if (line.length === 0 || line.substr(0, 1) === "#")
             continue;
 
