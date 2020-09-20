@@ -208,6 +208,17 @@ editor.commands.addCommand({
     },
     readOnly: true // false if this command should not apply in readOnly mode
 });
+
+editor.commands.addCommand({
+    name: 'speaker',
+    bindKey: {win: '>',  mac: '>'},
+    exec: function(editor) {
+        if(rtl)
+            editor.insert("\u2067")
+        editor.insert(">")
+    },
+    readOnly: true // false if this command should not apply in readOnly mode
+});
 /*
 editor.commands.addCommand({
     name: 'accent',
@@ -251,6 +262,8 @@ lang_base=${urlParams.get('lang_base') || "en"}
         let text = data[0]["text"];
         text = text.replace(/lang=.*/, `lang=${urlParams.get('lang')}`)
         text = text.replace(/lang_base=.*/, `lang_base=${urlParams.get('lang_base')}`)
+        if(rtl)
+            text = text.replace(/>/g, "\u2067>").replace(/\u2067\u2067>/g, "\u2067>")
         console.log(text);
         window.text = text;
         story = text;
