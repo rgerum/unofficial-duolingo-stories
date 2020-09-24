@@ -257,8 +257,13 @@ function processStoryFile() {
             let translation = undefined;
             // if the next line starts with ~ it is the translation for the text
             if (lines[index+1].startsWith("~")) {
-                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                index += 1;
+                try {
+                    [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                    index += 1;
+                }
+                catch (e) {
+                    
+                }
             }
             let data = generateMaps(speaker, text, translation, audio_map, line_index);
             line_index += 1;
