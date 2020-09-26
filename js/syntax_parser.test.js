@@ -161,22 +161,17 @@ test('question choice', () => {
 + Yes, that’s true.
 - No, that’s not true.
     `);
-    expect(story_json.elements.length).toBe(1);
-    let element = story_json.elements[0];
-    expect(element).toStrictEqual({
-        type: 'MULTIPLE_CHOICE',
-        question: {
-            text: 'Lonneke thinks that she maybe won’t rent the room again later.',
-            hints: [],
-            hintMap: []
-        },
-        answers: [
-            { text: 'Yes, that’s true.', hints: [], hintMap: [] },
-            { text: 'No, that’s not true.', hints: [], hintMap: [] }
-        ],
-        correctAnswerIndex: 0,
-        trackingProperties: { line_index: 1, challenge_type: 'multiple-choice' }
-    });
+    expect(story_json.elements).toStrictEqual([{"answers": [{"hintMap": [], "hints": [], "text": "Yes, that’s true."}, {"hintMap": [], "hints": [], "text": "No, that’s not true."}], "correctAnswerIndex": 0, "question": {"hintMap": [], "hints": [], "text": "Lonneke thinks that she maybe won’t rent the room again later."}, "trackingProperties": {"challenge_type": "multiple-choice", "line_index": 1}, "type": "MULTIPLE_CHOICE"}]);
+
+    story_json = processStoryFile(`   
+[choice] Lonneke thinks that she maybe~won’t~rent~the~room~again~later.
+~        Lonneke denkt  dass sie das~Zimmer~vielleicht~später~vermieten~möchte.
++ Yes, that’s true.
+~ Ja, das~ist richtig.
+- No, that’s not true.
+~ Nein, das ist falsch.
+    `);
+    expect(story_json.elements).toStrictEqual([{"answers": [{"hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 2}, {"hintIndex": 1, "rangeFrom": 5, "rangeTo": 10}, {"hintIndex": 2, "rangeFrom": 12, "rangeTo": 15}], "hints": ["Ja", "das ist", "richtig"], "text": "Yes, that’s true."}, {"hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 1}, {"hintIndex": 1, "rangeFrom": 4, "rangeTo": 9}, {"hintIndex": 2, "rangeFrom": 11, "rangeTo": 13}, {"hintIndex": 3, "rangeFrom": 15, "rangeTo": 18}], "hints": ["Nein", "das", "ist", "falsch"], "text": "No, that’s not true."}], "correctAnswerIndex": 0, "question": {"hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 6}, {"hintIndex": 1, "rangeFrom": 8, "rangeTo": 13}, {"hintIndex": 2, "rangeFrom": 15, "rangeTo": 18}, {"hintIndex": 3, "rangeFrom": 20, "rangeTo": 22}, {"hintIndex": 4, "rangeFrom": 24, "rangeTo": 60}], "hints": ["Lonneke", "denkt", "dass", "sie", "das Zimmer vielleicht später vermieten möchte"], "text": "Lonneke thinks that she maybe won’t rent the room again later."}, "trackingProperties": {"challenge_type": "multiple-choice", "line_index": 1}, "type": "MULTIPLE_CHOICE"}]);
 });
 
 test('fill', () => {
@@ -192,6 +187,20 @@ Choose the best answer:
 ~ since one month
     `);
     expect(story_json.elements).toStrictEqual([{"prompt": {"hintMap": [], "hints": [], "text": "Choose the best answer:"}, "trackingProperties": {"challenge_type": "select-phrases", "line_index": 1}, "type": "CHALLENGE_PROMPT"}, {"hideRangesForChallenge": {"end": 19, "start": 4}, "line": {"avatarUrl": undefined, "characterId": "Lonneke", "content": {"audio": {}, "hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 1}, {"hintIndex": 1, "rangeFrom": 4, "rangeTo": 8}, {"hintIndex": 2, "rangeFrom": 10, "rangeTo": 12}, {"hintIndex": 3, "rangeFrom": 14, "rangeTo": 18}], "hints": ["Ja", "since", "one", "month"], "text": "Ja, sinds een maand."}, "type": "CHARACTER"}, "trackingProperties": {"line_index": 1}, "type": "LINE"}, {"answers": [{"hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 4}, {"hintIndex": 1, "rangeFrom": 6, "rangeTo": 9}, {"hintIndex": 2, "rangeFrom": 11, "rangeTo": 15}], "hints": ["since", "two", "months"], "text": "sinds twee maand"}, {"hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 4}, {"hintIndex": 1, "rangeFrom": 6, "rangeTo": 8}, {"hintIndex": 2, "rangeFrom": 10, "rangeTo": 14}], "hints": ["for", "a", "month"], "text": "vanaf een maand"}, {"hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 4}, {"hintIndex": 1, "rangeFrom": 6, "rangeTo": 8}, {"hintIndex": 2, "rangeFrom": 10, "rangeTo": 14}], "hints": ["since", "one", "month"], "text": "sinds een maand"}], "correctAnswerIndex": 2, "trackingProperties": {"challenge_type": "select-phrases", "line_index": 1}, "type": "SELECT_PHRASE"}]);
+
+    story_json = processStoryFile(`
+[fill] Lonneke: Ja, *.
+~ ~: Ja. *.
+Choose the best answer:
+~ Wähne die beste Antwort:
+- sinds twee maand
+~ since two months
+- vanaf een maand
+~ for a month
++ sinds een maand
+~ since one month
+    `);
+    expect(story_json.elements).toStrictEqual([{"prompt": {"hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 5}, {"hintIndex": 1, "rangeFrom": 7, "rangeTo": 9}, {"hintIndex": 2, "rangeFrom": 11, "rangeTo": 14}, {"hintIndex": 3, "rangeFrom": 16, "rangeTo": 21}], "hints": ["Wähne", "die", "beste", "Antwort"], "text": "Choose the best answer:"}, "trackingProperties": {"challenge_type": "select-phrases", "line_index": 1}, "type": "CHALLENGE_PROMPT"}, {"hideRangesForChallenge": {"end": 19, "start": 4}, "line": {"characterId": "Lonneke", "content": {"audio": {}, "hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 1}, {"hintIndex": 1, "rangeFrom": 4, "rangeTo": 8}, {"hintIndex": 2, "rangeFrom": 10, "rangeTo": 12}, {"hintIndex": 3, "rangeFrom": 14, "rangeTo": 18}], "hints": ["Ja", "since", "one", "month"], "text": "Ja, sinds een maand."}, "type": "CHARACTER"}, "trackingProperties": {"line_index": 1}, "type": "LINE"}, {"answers": [{"hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 4}, {"hintIndex": 1, "rangeFrom": 6, "rangeTo": 9}, {"hintIndex": 2, "rangeFrom": 11, "rangeTo": 15}], "hints": ["since", "two", "months"], "text": "sinds twee maand"}, {"hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 4}, {"hintIndex": 1, "rangeFrom": 6, "rangeTo": 8}, {"hintIndex": 2, "rangeFrom": 10, "rangeTo": 14}], "hints": ["for", "a", "month"], "text": "vanaf een maand"}, {"hintMap": [{"hintIndex": 0, "rangeFrom": 0, "rangeTo": 4}, {"hintIndex": 1, "rangeFrom": 6, "rangeTo": 8}, {"hintIndex": 2, "rangeFrom": 10, "rangeTo": 14}], "hints": ["since", "one", "month"], "text": "sinds een maand"}], "correctAnswerIndex": 2, "trackingProperties": {"challenge_type": "select-phrases", "line_index": 1}, "type": "SELECT_PHRASE"}]);
 
 });
 

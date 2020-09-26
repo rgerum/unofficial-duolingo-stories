@@ -311,6 +311,12 @@ function processStoryFile(story) {
                     index += 1;
                 }
 
+                let question_translation = undefined;
+                if (lines[index + 1].startsWith("~")) {
+                    [_, question_translation] = lines[index + 1].match(/^~\s*(.*)\s*$/);
+                    index += 1;
+                }
+
                 let answers;
                 [_, answers_raw, translation_raw, correctAnswerIndex] = readAnswerLinesNoHints(lines, index);
                 [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
@@ -330,7 +336,7 @@ function processStoryFile(story) {
 
                 phrases.push({
                     type: "CHALLENGE_PROMPT",
-                    prompt: generateHintMap(question, ""),
+                    prompt: generateHintMap(question, question_translation),
                     trackingProperties: {line_index: line_index, challenge_type: "select-phrases"},
                 })
 
@@ -545,6 +551,12 @@ function processStoryFile(story) {
                 // split the question text
                 let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
 
+                let question_translation = undefined;
+                if (lines[index + 1].startsWith("~")) {
+                    [_, question_translation] = lines[index + 1].match(/^~\s*(.*)\s*$/);
+                    index += 1;
+                }
+
                 let fallbackHints = [];
 
                 // iterate over the next lines, they are the answers
@@ -578,7 +590,7 @@ function processStoryFile(story) {
             phrases.push({
                 type: "ERROR",
                 line: lines[index],
-                message: e,
+                message: "ERROR: "+e,
             });
         }
 
