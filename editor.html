@@ -291,7 +291,7 @@ loadStory(urlParams.get('story'), urlParams.get('import'))
 
 function updateStoryDisplay() {
     story = editor.getValue();
-    processStoryFile();
+    processStoryFile(story);
     loadAudios();
     index = 0;
     d3.select("#story").selectAll("*").remove();

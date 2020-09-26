@@ -14,14 +14,16 @@ function getInputStringText(text) {
 }
 
 function getInputStringSpeachtext(text) {
-    if(lexicon.letters !== undefined)
-        for(let c in lexicon.letters) {
-            text = text.replace(new RegExp(c, "g"), lexicon.letters[c]);
-        }
-    if(lexicon.fragments !== undefined)
-        for(let fragment of lexicon.fragments) {
-            text = text.replace(new RegExp(fragment.match, "g"), fragment.replace);
-        }
+    if(lexicon != undefined) {
+        if (lexicon.letters !== undefined)
+            for (let c in lexicon.letters) {
+                text = text.replace(new RegExp(c, "g"), lexicon.letters[c]);
+            }
+        if (lexicon.fragments !== undefined)
+            for (let fragment of lexicon.fragments) {
+                text = text.replace(new RegExp(fragment.match, "g"), fragment.replace);
+            }
+    }
     text = text.replace(/(\.\.\.|…)/g, '<sub alias="">$1</sub><break/>');
     return "<speak>"+text.replace(/([^-|~ ,;.:_?!…]*)\{([^\}:]*):([^\}]*)\}/g, '<phoneme alphabet="$3" ph="$2">$1</phoneme>').replace(/([^-|~ ,;.:_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ").replace(/\|/g, "​")+"</speak>";
 }
@@ -221,11 +223,10 @@ function hintMapToText(content) {
     return text;
 }
 
-let phrases = undefined;
 let story_properties = undefined;
 let story_json = {}
-function processStoryFile() {
-    phrases = [];
+function processStoryFile(story) {
+    let phrases = [];
     story_properties = {title: "", language: "", title_translation: ""}
 
     let lines = [];
@@ -807,3 +808,5 @@ async function generate_all_audio() {
     }
     loadAudios();
 }
+
+module.exports = processStoryFile;

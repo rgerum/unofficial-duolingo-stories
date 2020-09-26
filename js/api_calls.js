@@ -61,7 +61,7 @@ async function getStoryJSON(id) {
     story_id = data[0]["id"];
     await reloadAudioMap();
     story = data[0]["text"];
-    story_json = processStoryFile();
+    story_json = processStoryFile(story);
     return story_json;
 }
 
