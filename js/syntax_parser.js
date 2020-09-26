@@ -706,6 +706,12 @@ function processStoryFile(story) {
             phrases.push(data);
             continue;
         }
+
+        phrases.push({
+            type: "ERROR",
+            line: lines[index],
+            message: "could not understand line: "+lines[index],
+        });
     }
     //phrases.splice(0, 0, {tag: "title", id: 0, text: story_properties.title, translation: story_properties.title_translation});
     phrases.splice(0, 0, generateMaps(null, story_properties.title, story_properties.title_translation, audio_map, 0));
