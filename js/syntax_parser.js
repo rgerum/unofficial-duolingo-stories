@@ -1,3 +1,7 @@
+if(typeof require !== 'undefined') {
+    shuffle = require('./includes.js').shuffle;
+}
+
 function splitTextTokens(text, keep_tilde=true) {
     if(!text)
         return [];
@@ -243,480 +247,484 @@ function processStoryFile(story) {
     let line_index = 1;
 
     for(let index = 0; index < lines.length; index++) {
+        try {
+            // metadata
+            if (lines[index].search("=") !== -1) {
+                let [key, value] = lines[index].split("=");
+                story_properties[key.trim()] = value.trim();
+                continue
+            }
 
-        // metadata
-        if(lines[index].search("=") !== -1) {
-            let [key, value] = lines[index].split("=");
-            story_properties[key.trim()] = value.trim();
-            continue
-        }
+            // speaker
+            if (lines[index].startsWith(">")) {
+                // split speaker and text
+                let [_, speaker, text] = lines[index].match(/^>\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                let translation = undefined;
+                // if the next line starts with ~ it is the translation for the text
+                if (lines[index + 1].startsWith("~")) {
+                    [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.*)\s*$/);
+                    index += 1;
+                }
+                let data = generateMaps(speaker, text, translation, audio_map, line_index);
+                line_index += 1;
 
-        // speaker
-        if (lines[index].startsWith(">")) {
-            // split speaker and text
-            let [_, speaker, text] = lines[index].match(/^>\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-            let translation = undefined;
-            // if the next line starts with ~ it is the translation for the text
-            if (lines[index+1].startsWith("~")) {
-                try {
+                // add it and continue
+                phrases.push(data);
+                continue;
+            }
+
+            // question choice
+            if (lines[index].startsWith("[choice]")) {
+                let question, answers, correctAnswerIndex;
+
+                [index, question] = getTextWithTranslationsHintMap(lines, index, /^\[(.*)\]\s*(.*)\s*$/, /^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
+
+                // set the data
+                let data = {
+                    type: "MULTIPLE_CHOICE",
+                    question: question,
+                    answers: answers,
+                    correctAnswerIndex: correctAnswerIndex,
+                    trackingProperties: {line_index: line_index, challenge_type: "multiple-choice"},
+                };
+                line_index += 1;
+                // add the data
+                phrases.push(data);
+                continue;
+            }
+
+            // question fill
+            if (lines[index].startsWith("[fill]")) {
+                // split the question text
+                let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                let translation = undefined;
+                // if the next line starts with ~ it is the translation for the text
+                if (lines[index + 1].startsWith("~")) {
                     [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
                     index += 1;
                 }
-                catch (e) {
-                    
+
+                let question = undefined;
+                if (!lines[index + 1].startsWith("+") && !lines[index + 1].startsWith("-")) {
+                    question = lines[index + 1].trim();
+                    index += 1;
                 }
-            }
-            let data = generateMaps(speaker, text, translation, audio_map, line_index);
-            line_index += 1;
 
-            // add it and continue
-            phrases.push(data);
-            continue;
-        }
+                let answers;
+                [_, answers_raw, translation_raw, correctAnswerIndex] = readAnswerLinesNoHints(lines, index);
+                [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
 
-        // question choice
-        if (lines[index].startsWith("[choice]")) {
-            let question, answers, correctAnswerIndex;
-
-            [index, question] = getTextWithTranslationsHintMap(lines, index, /^\[(.*)\]\s*(.*)\s*$/, /^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-            [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
-
-            // set the data
-            let data = {
-                type: "MULTIPLE_CHOICE",
-                question: question,
-                answers: answers,
-                correctAnswerIndex: correctAnswerIndex,
-                trackingProperties: {line_index: line_index, challenge_type: "multiple-choice"},
-            };
-            line_index += 1;
-            // add the data
-            phrases.push(data);
-            continue;
-        }
-
-        // question fill
-        if (lines[index].startsWith("[fill]")) {
-            // split the question text
-            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-            let translation = undefined;
-            // if the next line starts with ~ it is the translation for the text
-            if (lines[index + 1].startsWith("~")) {
-                [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                index += 1;
-            }
-
-            let question = undefined;
-            if (!lines[index + 1].startsWith("+") && !lines[index + 1].startsWith("-")) {
-                question = lines[index + 1].trim();
-                index += 1;
-            }
-
-            let answers;
-            [_, answers_raw, translation_raw, correctAnswerIndex] = readAnswerLinesNoHints(lines, index);
-            [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
-
-            let hideRangesForChallenge = [];
-            let ssml = getInputStringSpeachtext(text);
-            if(text.indexOf("*") !== -1) {
-                let start = getInputStringText(text).indexOf("*");
-                hideRangesForChallenge = {start: start, end: start+answers[correctAnswerIndex].text.length};
-                text = text.replace("*", answers_raw[correctAnswerIndex]);
-                if(!translation)
-                    translation = translation_raw[correctAnswerIndex];
-                ssml = ssml.replace("*", answers[correctAnswerIndex].text);
-                if(translation)
-                    translation = translation.replace("*", translation_raw[correctAnswerIndex]);
-            }
-
-            phrases.push({
-                type: "CHALLENGE_PROMPT",
-                prompt: generateHintMap(question, ""),
-                trackingProperties: {line_index: line_index, challenge_type: "select-phrases"},
-            })
-
-            phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
-            phrases[phrases.length-1].hideRangesForChallenge = hideRangesForChallenge;
-            if(phrases[phrases.length-1].line.content.audio && phrases[phrases.length-1].line.content.audio.ssml) {
-                phrases[phrases.length-1].line.content.audio.ssml.text = ssml;
-            }
-
-            // set the data
-            phrases.push({
-                type: "SELECT_PHRASE",
-                answers: answers,
-                correctAnswerIndex: correctAnswerIndex,
-                trackingProperties: {line_index: line_index, challenge_type: "select-phrases"},
-            });
-            line_index += 1;
-
-            continue;
-        }
-
-        // question next
-        if (lines[index].startsWith("[next]")) {
-            // split the question text
-            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-            let translation = undefined;
-            // if the next line starts with ~ it is the translation for the text
-            if (lines[index + 1].startsWith("~")) {
-                [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                index += 1;
-            }
-
-            let question = undefined;
-            if (!lines[index + 1].startsWith("+") && !lines[index + 1].startsWith("-")) {
-
-                [index, question, question_translation] = getTextWithTranslation(lines, index+1, /^\s*(.+)\s*$/, /^~\s*(.*)\s*$/);
-                //index += 1;
-            }
-
-            let answers;
-            [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
-
-            let ssml = getInputStringSpeachtext(text);
-            if(text.indexOf("*") !== -1 && answers[correctAnswerIndex] !== undefined) {
-                let start = getInputStringText(text).indexOf("*");
-                hideRangesForChallenge = {start: start, end: start+answers[correctAnswerIndex].text.length};
-                text = text.replace("*", answers[correctAnswerIndex].text);
-                ssml = ssml.replace("*", "<prosody volume=\"silent\">"+answers[correctAnswerIndex].text+"</prosody>");
-            }
-
-            phrases.push({
-                type: "CHALLENGE_PROMPT",
-                prompt: generateHintMap(question, question_translation),
-                trackingProperties: {line_index: line_index, challenge_type: "continuation"},
-            })
-
-            phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
-            phrases[phrases.length-1].hideRangesForChallenge = hideRangesForChallenge;
-            if(phrases[phrases.length-1].line.content.audio && phrases[phrases.length-1].line.content.audio.ssml) {
-                phrases[phrases.length-1].line.content.audio.ssml.text = ssml;
-            }
-
-            // set the data
-            phrases.push({
-                type: "MULTIPLE_CHOICE",
-                answers: answers,
-                correctAnswerIndex: correctAnswerIndex,
-                trackingProperties: {line_index: line_index, challenge_type: "continuation"},
-            });
-            line_index += 1;
-
-            continue;
-        }
-
-        // question order
-        if (lines[index].startsWith("[order]")) {
-            // split the question text
-            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-            let translation = undefined;
-            // if the next line starts with ~ it is the translation for the text
-            if (lines[index+1].startsWith("~")) {
-                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                index += 1;
-            }
-            let question = lines[index+1].trim();
-            index += 1;
-
-            let words = [], translations = [], full_text = [];
-            let hideRangesForChallenge = [];
-            let characterPositions = [];
-
-            for(; index < lines.length - 1; index+=1) {
-                if(lines[index+1].startsWith("[") || lines[index+1].startsWith(">"))
-                    break
-                if(words.length === 0 || translations.length !== 0) {
-                    words.push(lines[index + 1].split("/"));
-
-                    // construct the target text (for audio)
-                    if(words.length === 1) {
-                        let start = getInputStringText(text).indexOf("*");
-                        let pos = start;
-                        for(let x of lines[index+1].split("/")) {
-                            pos += x.length;
-                            characterPositions.push(pos);
-                            pos += 1;
-                        }
-                        let filler = lines[index+1].split("/").join(" ");
-                        hideRangesForChallenge = {start: start, end: start+filler.length};
-                        text = text.replace("*", filler);
-                        for(let j = 0; j < words[0].length; j++)
-                            words[0][j] = words[0][j].replace(/~/g, " ").replace(/\|/g, "​");
-                    }
+                let hideRangesForChallenge = [];
+                let ssml = getInputStringSpeachtext(text);
+                if (text.indexOf("*") !== -1) {
+                    let start = getInputStringText(text).indexOf("*");
+                    hideRangesForChallenge = {start: start, end: start + answers[correctAnswerIndex].text.length};
+                    text = text.replace("*", answers_raw[correctAnswerIndex]);
+                    if (!translation)
+                        translation = translation_raw[correctAnswerIndex];
+                    ssml = ssml.replace("*", answers[correctAnswerIndex].text);
+                    if (translation)
+                        translation = translation.replace("*", translation_raw[correctAnswerIndex]);
                 }
-                else {
-                    translations.push(lines[index + 1].split("/"));
-                    if(translation)
-                        translation = translation.replace("*", lines[index + 1].split("/").join(" "));
+
+                phrases.push({
+                    type: "CHALLENGE_PROMPT",
+                    prompt: generateHintMap(question, ""),
+                    trackingProperties: {line_index: line_index, challenge_type: "select-phrases"},
+                })
+
+                phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
+                phrases[phrases.length - 1].hideRangesForChallenge = hideRangesForChallenge;
+                if (phrases[phrases.length - 1].line.content.audio && phrases[phrases.length - 1].line.content.audio.ssml) {
+                    phrases[phrases.length - 1].line.content.audio.ssml.text = ssml;
                 }
+
+                // set the data
+                phrases.push({
+                    type: "SELECT_PHRASE",
+                    answers: answers,
+                    correctAnswerIndex: correctAnswerIndex,
+                    trackingProperties: {line_index: line_index, challenge_type: "select-phrases"},
+                });
+                line_index += 1;
+
+                continue;
             }
 
-            let sort = [];
-            for(let i = 0; i < words[0].length; i++)
-                sort.push(i);
-            shuffle(sort);
-
-            let selectablePhrases = [];
-            for(let i of sort)
-                selectablePhrases.push(words[0][i]);
-
-            phrases.push({
-                type: "CHALLENGE_PROMPT",
-                prompt: generateHintMap(question, ""),
-                trackingProperties: {line_index: line_index, challenge_type: "arrange"},
-            })
-
-            phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
-            phrases[phrases.length-1].hideRangesForChallenge = hideRangesForChallenge;
-
-            // set the data
-            phrases.push({
-                type: "ARRANGE",
-                selectablePhrases: selectablePhrases,
-                phraseOrder: sort,
-                characterPositions: characterPositions,
-                trackingProperties: {line_index: line_index, challenge_type: "arrange"},
-            });
-            line_index += 1;
-            continue;
-        }
-
-        // question point-to-phrase
-        if (lines[index].startsWith("[click]")) {
-            // read in the question (with translation)
-            let question, question_translation, translation, speaker, text, _;
-            [index, question, question_translation] = getTextWithTranslation(lines, index, /^\[.*\]\s*(.*)\s*$/, /^~\s*(.*)\s*$/);
-
-            // read the line (with translation)
-            [_, speaker, text] = lines[index+1].match(/^>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-            //console.log("[click]", speaker, text, lines[index], question, question_translation);
-            [index, text, translation] = getTextWithTranslation(lines, index+1, /^>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/, /^~\s*(.*)\s*$/);
-
-            // Split the text into text with buttons
-            let parts = splitTextTokens(text, true);
-            let new_text = "";
-            let transcriptParts = [];
-            let answerIndex = 0;
-            let correctAnswerIndex = 0;
-            for(let part of parts) {
-                // Button with + is the correct answer
-                if(part.startsWith("[+") && part.endsWith("]")) {
-                    correctAnswerIndex = answerIndex;
-                    part = part.substr(2, part.length-3);
-                    transcriptParts.push({text: part.replace(/~/g, " ").replace(/\|/g, "​"), selectable: true});
-                    answerIndex += 1;
+            // question next
+            if (lines[index].startsWith("[next]")) {
+                // split the question text
+                let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                let translation = undefined;
+                // if the next line starts with ~ it is the translation for the text
+                if (lines[index + 1].startsWith("~")) {
+                    [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                    index += 1;
                 }
-                // a button with a wrong answer
-                else if(part.startsWith("[") && part.endsWith("]")) {
-                    part = part.substr(1, part.length-2)
-                    transcriptParts.push({text: part.replace(/~/g, " ").replace(/\|/g, "​"), selectable: true});
-                    answerIndex += 1;
+
+                let question = undefined;
+                if (!lines[index + 1].startsWith("+") && !lines[index + 1].startsWith("-")) {
+
+                    [index, question, question_translation] = getTextWithTranslation(lines, index + 1, /^\s*(.+)\s*$/, /^~\s*(.*)\s*$/);
+                    //index += 1;
                 }
-                // text which is not a button
-                else
-                    transcriptParts.push({text: part.replace(/~/g, " ").replace(/\|/g, "​"), selectable: false});
-                // join the text parts
-                new_text += part;
+
+                let answers;
+                [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
+
+                let ssml = getInputStringSpeachtext(text);
+                if (text.indexOf("*") !== -1 && answers[correctAnswerIndex] !== undefined) {
+                    let start = getInputStringText(text).indexOf("*");
+                    hideRangesForChallenge = {start: start, end: start + answers[correctAnswerIndex].text.length};
+                    text = text.replace("*", answers[correctAnswerIndex].text);
+                    ssml = ssml.replace("*", "<prosody volume=\"silent\">" + answers[correctAnswerIndex].text + "</prosody>");
+                }
+
+                phrases.push({
+                    type: "CHALLENGE_PROMPT",
+                    prompt: generateHintMap(question, question_translation),
+                    trackingProperties: {line_index: line_index, challenge_type: "continuation"},
+                })
+
+                phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
+                phrases[phrases.length - 1].hideRangesForChallenge = hideRangesForChallenge;
+                if (phrases[phrases.length - 1].line.content.audio && phrases[phrases.length - 1].line.content.audio.ssml) {
+                    phrases[phrases.length - 1].line.content.audio.ssml.text = ssml;
+                }
+
+                // set the data
+                phrases.push({
+                    type: "MULTIPLE_CHOICE",
+                    answers: answers,
+                    correctAnswerIndex: correctAnswerIndex,
+                    trackingProperties: {line_index: line_index, challenge_type: "continuation"},
+                });
+                line_index += 1;
+
+                continue;
             }
 
-            // the text line
-            phrases.push(generateMaps(speaker, new_text, translation, audio_map, line_index));
-
-            // the question
-            phrases.push({
-                type: "POINT_TO_PHRASE",
-                question: generateHintMap(question, question_translation),
-                transcriptParts: transcriptParts,
-                correctAnswerIndex: correctAnswerIndex,
-                trackingProperties: {line_index: line_index, challenge_type: "point-to-phrase"},
-            });
-            line_index += 1;
-            continue;
-        }
-
-        // question pairs
-        if (lines[index].startsWith("[pairs]")) {
-            // split the question text
-            let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
-
-            let fallbackHints = [];
-
-            // iterate over the next lines, they are the answers
-            for(; index < lines.length - 1; index+=1) {
-                // check if it starts with + or -
-                let match = lines[index+1].match(/^\s*(.*)\s* - \s*(.*)\s*$/);
-                if(match === null)
-                    break
-                // split text
-                let [_, lang1, lang2] = match;
-                fallbackHints.push({phrase: lang1.replace(/~/g, " ").replace(/\|/g, "​"), translation: lang2.replace(/~/g, " ").replace(/\|/g, "​")});
-            }
-
-            // set the data
-            phrases.push({
-                type: "MATCH",
-                prompt: question,
-                fallbackHints: fallbackHints,
-                trackingProperties: {line_index: line_index, challenge_type: "match"},
-            });
-            line_index += 1;
-
-            continue;
-        }
-
-        // question fill / next
-        if (lines[index].startsWith("[fill]") || lines[index].startsWith("[next]")) {
-            // split the question text
-            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-            let translation = undefined;
-            // if the next line starts with ~ it is the translation for the text
-            if (lines[index + 1].startsWith("~")) {
-                [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                index += 1;
-            }
-
-            let question = undefined;
-            if (!lines[index + 1].startsWith("+") && !lines[index + 1].startsWith("-")) {
+            // question order
+            if (lines[index].startsWith("[order]")) {
+                // split the question text
+                let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                let translation = undefined;
+                // if the next line starts with ~ it is the translation for the text
+                if (lines[index + 1].startsWith("~")) {
+                    [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                    index += 1;
+                }
                 let question = lines[index + 1].trim();
                 index += 1;
-            }
 
-            // set the data
-            let data = {
-                tag: tag,
-                id: phrases.length+1,
-                question: question,
-                answers: [],
-                solution: 0,
+                let words = [], translations = [], full_text = [];
+                let hideRangesForChallenge = [];
+                let characterPositions = [];
 
-                speaker: speaker,
-                text: text,
-                translation: translation,
-            };
-            index = readAnswerLines(lines, index, data);
-            // add the data
-            phrases.push(data);
-            continue;
-        }
+                for (; index < lines.length - 1; index += 1) {
+                    if (lines[index + 1].startsWith("[") || lines[index + 1].startsWith(">"))
+                        break
+                    if (words.length === 0 || translations.length !== 0) {
+                        words.push(lines[index + 1].split("/"));
 
-        // question order
-        if (lines[index].startsWith("[order]")) {
-            // split the question text
-            let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-            let translation = undefined;
-            // if the next line starts with ~ it is the translation for the text
-            if (lines[index+1].startsWith("~")) {
-                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                index += 1;
-            }
-            let question = lines[index+1].trim();
-            index += 1;
-
-            // set the data
-            let data = {
-                tag: tag,
-                id: phrases.length+1,
-                question: question,
-                answers: [],
-                solution: 0,
-
-                speaker: speaker,
-                text: text,
-                translation: translation,
-
-                words: [],
-                translations: [],
-            };
-
-            for(; index < lines.length - 1; index+=1) {
-                if(lines[index+1].startsWith("[") || lines[index+1].startsWith(">"))
-                    break
-                if(data.words.length === 0 || data.translations.length !== 0) {
-                    data.words.push(lines[index + 1].split("/"));
-
-                    // construct the target text (for audio)
-                    if(data.words.length === 1) {
-                        data.full_text = data.text.replace("*", lines[index+1].split("/").join(" "));
+                        // construct the target text (for audio)
+                        if (words.length === 1) {
+                            let start = getInputStringText(text).indexOf("*");
+                            let pos = start;
+                            for (let x of lines[index + 1].split("/")) {
+                                pos += x.length;
+                                characterPositions.push(pos);
+                                pos += 1;
+                            }
+                            let filler = lines[index + 1].split("/").join(" ");
+                            hideRangesForChallenge = {start: start, end: start + filler.length};
+                            text = text.replace("*", filler);
+                            for (let j = 0; j < words[0].length; j++)
+                                words[0][j] = words[0][j].replace(/~/g, " ").replace(/\|/g, "​");
+                        }
+                    } else {
+                        translations.push(lines[index + 1].split("/"));
+                        if (translation)
+                            translation = translation.replace("*", lines[index + 1].split("/").join(" "));
                     }
                 }
-                else
-                    data.translations.push(lines[index+1].split("/"));
+
+                let sort = [];
+                for (let i = 0; i < words[0].length; i++)
+                    sort.push(i);
+                shuffle(sort);
+
+                let selectablePhrases = [];
+                for (let i of sort)
+                    selectablePhrases.push(words[0][i]);
+
+                phrases.push({
+                    type: "CHALLENGE_PROMPT",
+                    prompt: generateHintMap(question, ""),
+                    trackingProperties: {line_index: line_index, challenge_type: "arrange"},
+                })
+
+                phrases.push(generateMaps(speaker, text, translation, audio_map, line_index));
+                phrases[phrases.length - 1].hideRangesForChallenge = hideRangesForChallenge;
+
+                // set the data
+                phrases.push({
+                    type: "ARRANGE",
+                    selectablePhrases: selectablePhrases,
+                    phraseOrder: sort,
+                    characterPositions: characterPositions,
+                    trackingProperties: {line_index: line_index, challenge_type: "arrange"},
+                });
+                line_index += 1;
+                continue;
             }
 
-            // add the data
-            phrases.push(data);
-            continue;
-        }
+            // question point-to-phrase
+            if (lines[index].startsWith("[click]")) {
+                // read in the question (with translation)
+                let question, question_translation, translation, speaker, text, _;
+                [index, question, question_translation] = getTextWithTranslation(lines, index, /^\[.*\]\s*(.*)\s*$/, /^~\s*(.*)\s*$/);
 
-        // question pairs
-        if (lines[index].startsWith("[pairs]")) {
-            // split the question text
-            let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
-            // set the data
-            let data = {
-                tag: tag,
-                id: phrases.length+1,
-                question: question,
-                words: [],
-            };
-            // iterate over the next lines, they are the answers
-            for(; index < lines.length - 1; index+=1) {
-                // check if it starts with + or -
-                let match = lines[index+1].match(/^\s*(.*)\s* - \s*(.*)\s*$/);
-                if(match === null)
-                    break
-                // split text
-                let [_, lang1, lang2] = match;
-                data.words.push(lang1.replace(/~/g, " ").replace(/\|/g, "​"));
-                data.words.push(lang2.replace(/~/g, " ").replace(/\|/g, "​"));
+                // read the line (with translation)
+                [_, speaker, text] = lines[index + 1].match(/^>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                //console.log("[click]", speaker, text, lines[index], question, question_translation);
+                [index, text, translation] = getTextWithTranslation(lines, index + 1, /^>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/, /^~\s*(.*)\s*$/);
+
+                // Split the text into text with buttons
+                let parts = splitTextTokens(text, true);
+                let new_text = "";
+                let transcriptParts = [];
+                let answerIndex = 0;
+                let correctAnswerIndex = 0;
+                for (let part of parts) {
+                    // Button with + is the correct answer
+                    if (part.startsWith("[+") && part.endsWith("]")) {
+                        correctAnswerIndex = answerIndex;
+                        part = part.substr(2, part.length - 3);
+                        transcriptParts.push({text: part.replace(/~/g, " ").replace(/\|/g, "​"), selectable: true});
+                        answerIndex += 1;
+                    }
+                    // a button with a wrong answer
+                    else if (part.startsWith("[") && part.endsWith("]")) {
+                        part = part.substr(1, part.length - 2)
+                        transcriptParts.push({text: part.replace(/~/g, " ").replace(/\|/g, "​"), selectable: true});
+                        answerIndex += 1;
+                    }
+                    // text which is not a button
+                    else
+                        transcriptParts.push({text: part.replace(/~/g, " ").replace(/\|/g, "​"), selectable: false});
+                    // join the text parts
+                    new_text += part;
+                }
+
+                // the text line
+                phrases.push(generateMaps(speaker, new_text, translation, audio_map, line_index));
+
+                // the question
+                phrases.push({
+                    type: "POINT_TO_PHRASE",
+                    question: generateHintMap(question, question_translation),
+                    transcriptParts: transcriptParts,
+                    correctAnswerIndex: correctAnswerIndex,
+                    trackingProperties: {line_index: line_index, challenge_type: "point-to-phrase"},
+                });
+                line_index += 1;
+                continue;
             }
-            // add the data
-            phrases.push(data);
-            continue;
-        }
 
-        // question click
-        if (lines[index].startsWith("[click]")) {
-            // split the question text
-            let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
+            // question pairs
+            if (lines[index].startsWith("[pairs]")) {
+                // split the question text
+                let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
 
-            let [__, speaker, text] = lines[index+1].match(/^>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-            index += 1;
+                let fallbackHints = [];
 
-            let translation = undefined;
-            // if the next line starts with ~ it is the translation for the text
-            if (lines[index+1].startsWith("~")) {
-                [_, _, translation] = lines[index+1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                // iterate over the next lines, they are the answers
+                for (; index < lines.length - 1; index += 1) {
+                    // check if it starts with + or -
+                    let match = lines[index + 1].match(/^\s*(.*)\s* - \s*(.*)\s*$/);
+                    if (match === null)
+                        break
+                    // split text
+                    let [_, lang1, lang2] = match;
+                    fallbackHints.push({
+                        phrase: lang1.replace(/~/g, " ").replace(/\|/g, "​"),
+                        translation: lang2.replace(/~/g, " ").replace(/\|/g, "​")
+                    });
+                }
+
+                // set the data
+                phrases.push({
+                    type: "MATCH",
+                    prompt: question,
+                    fallbackHints: fallbackHints,
+                    trackingProperties: {line_index: line_index, challenge_type: "match"},
+                });
+                line_index += 1;
+
+                continue;
+            }
+
+            // question fill / next
+            if (lines[index].startsWith("[fill]") || lines[index].startsWith("[next]")) {
+                // split the question text
+                let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                let translation = undefined;
+                // if the next line starts with ~ it is the translation for the text
+                if (lines[index + 1].startsWith("~")) {
+                    [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                    index += 1;
+                }
+
+                let question = undefined;
+                if (!lines[index + 1].startsWith("+") && !lines[index + 1].startsWith("-")) {
+                    let question = lines[index + 1].trim();
+                    index += 1;
+                }
+
+                // set the data
+                let data = {
+                    tag: tag,
+                    id: phrases.length + 1,
+                    question: question,
+                    answers: [],
+                    solution: 0,
+
+                    speaker: speaker,
+                    text: text,
+                    translation: translation,
+                };
+                index = readAnswerLines(lines, index, data);
+                // add the data
+                phrases.push(data);
+                continue;
+            }
+
+            // question order
+            if (lines[index].startsWith("[order]")) {
+                // split the question text
+                let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                let translation = undefined;
+                // if the next line starts with ~ it is the translation for the text
+                if (lines[index + 1].startsWith("~")) {
+                    [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                    index += 1;
+                }
+                let question = lines[index + 1].trim();
                 index += 1;
+
+                // set the data
+                let data = {
+                    tag: tag,
+                    id: phrases.length + 1,
+                    question: question,
+                    answers: [],
+                    solution: 0,
+
+                    speaker: speaker,
+                    text: text,
+                    translation: translation,
+
+                    words: [],
+                    translations: [],
+                };
+
+                for (; index < lines.length - 1; index += 1) {
+                    if (lines[index + 1].startsWith("[") || lines[index + 1].startsWith(">"))
+                        break
+                    if (data.words.length === 0 || data.translations.length !== 0) {
+                        data.words.push(lines[index + 1].split("/"));
+
+                        // construct the target text (for audio)
+                        if (data.words.length === 1) {
+                            data.full_text = data.text.replace("*", lines[index + 1].split("/").join(" "));
+                        }
+                    } else
+                        data.translations.push(lines[index + 1].split("/"));
+                }
+
+                // add the data
+                phrases.push(data);
+                continue;
             }
 
-            // set the data
-            let data = {
-                tag: tag,
-                id: phrases.length+1,
-                question: question,
-                answers: [],
-                speaker: speaker,
-                text: text,
-                translation: translation,
-            };
+            // question pairs
+            if (lines[index].startsWith("[pairs]")) {
+                // split the question text
+                let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
+                // set the data
+                let data = {
+                    tag: tag,
+                    id: phrases.length + 1,
+                    question: question,
+                    words: [],
+                };
+                // iterate over the next lines, they are the answers
+                for (; index < lines.length - 1; index += 1) {
+                    // check if it starts with + or -
+                    let match = lines[index + 1].match(/^\s*(.*)\s* - \s*(.*)\s*$/);
+                    if (match === null)
+                        break
+                    // split text
+                    let [_, lang1, lang2] = match;
+                    data.words.push(lang1.replace(/~/g, " ").replace(/\|/g, "​"));
+                    data.words.push(lang2.replace(/~/g, " ").replace(/\|/g, "​"));
+                }
+                // add the data
+                phrases.push(data);
+                continue;
+            }
 
-            // add the data
-            phrases.push(data);
-            continue;
+            // question click
+            if (lines[index].startsWith("[click]")) {
+                // split the question text
+                let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
+
+                let [__, speaker, text] = lines[index + 1].match(/^>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                index += 1;
+
+                let translation = undefined;
+                // if the next line starts with ~ it is the translation for the text
+                if (lines[index + 1].startsWith("~")) {
+                    [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
+                    index += 1;
+                }
+
+                // set the data
+                let data = {
+                    tag: tag,
+                    id: phrases.length + 1,
+                    question: question,
+                    answers: [],
+                    speaker: speaker,
+                    text: text,
+                    translation: translation,
+                };
+
+                // add the data
+                phrases.push(data);
+                continue;
+            }
+        }
+        catch (e) {
+            console.log("error", e)
         }
 
-        phrases.push({
-            type: "ERROR",
-            line: lines[index],
-            message: "could not understand line: "+lines[index],
-        });
+        if(lines[index] !== "") {
+            phrases.push({
+                type: "ERROR",
+                line: lines[index],
+                message: "could not understand line: " + lines[index],
+            });
+        }
     }
-    //phrases.splice(0, 0, {tag: "title", id: 0, text: story_properties.title, translation: story_properties.title_translation});
-    phrases.splice(0, 0, generateMaps(null, story_properties.title, story_properties.title_translation, audio_map, 0));
-    phrases[0].line.type = "TITLE";
-    //console.log(phrases);
+    if(story_properties.title != "") {
+        //phrases.splice(0, 0, {tag: "title", id: 0, text: story_properties.title, translation: story_properties.title_translation});
+        phrases.splice(0, 0, generateMaps(null, story_properties.title, story_properties.title_translation, audio_map, 0));
+        phrases[0].line.type = "TITLE";
+        //console.log(phrases);
+    }
 
     if(isEditor) {
         ssml_list = {};
@@ -815,4 +823,6 @@ async function generate_all_audio() {
     loadAudios();
 }
 
-module.exports = processStoryFile;
+try {
+    module.exports = processStoryFile;
+} catch (e) {}
