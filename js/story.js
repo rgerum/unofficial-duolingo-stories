@@ -371,6 +371,15 @@ function addChallengePrompt(data) {
 
 /* the elements */
 
+function addTypeError(data) {
+    let story = d3.select("#story");
+    let question = story.append("p")
+        .classed("hidden", true)
+        .classed("fadeGlideIn", true);
+    question.append("span").attr("class", "error").text(data.message);
+    return question;
+}
+
 function addTypeLineElement(data) {
     // add a normal speech line
     let phrase = addSpeechLine(data).classed("fadeGlideIn", true);
@@ -723,6 +732,8 @@ function addAll() {
         // a match the pairs question
         else if (elements[index].type === "MATCH")
             addTypeMatch(elements[index])
+        else if (elements[index].type === "ERROR")
+            addTypeError(elements[index])
     }
 }
 

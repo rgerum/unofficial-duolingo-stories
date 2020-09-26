@@ -417,6 +417,11 @@ function processStoryFile(story) {
                 }
                 let question = lines[index + 1].trim();
                 index += 1;
+                let question_translation = undefined;
+                if (lines[index + 1].startsWith("~")) {
+                    [_, question_translation] = lines[index + 1].match(/^~\s*(.*)\s*$/);
+                    index += 1;
+                }
 
                 let words = [], translations = [], full_text = [];
                 let hideRangesForChallenge = [];
@@ -425,6 +430,7 @@ function processStoryFile(story) {
                 for (; index < lines.length - 1; index += 1) {
                     if (lines[index + 1].startsWith("[") || lines[index + 1].startsWith(">"))
                         break
+
                     if (words.length === 0 || translations.length !== 0) {
                         words.push(lines[index + 1].split("/"));
 
@@ -445,8 +451,9 @@ function processStoryFile(story) {
                         }
                     } else {
                         translations.push(lines[index + 1].split("/"));
-                        if (translation)
-                            translation = translation.replace("*", lines[index + 1].split("/").join(" "));
+                        if (translation === undefined)
+                            translation = "*";
+                        translation = translation.replace("*", lines[index + 1].split("/").join(" "));
                     }
                 }
 
@@ -461,7 +468,7 @@ function processStoryFile(story) {
 
                 phrases.push({
                     type: "CHALLENGE_PROMPT",
-                    prompt: generateHintMap(question, ""),
+                    prompt: generateHintMap(question, question_translation),
                     trackingProperties: {line_index: line_index, challenge_type: "arrange"},
                 })
 
@@ -565,150 +572,14 @@ function processStoryFile(story) {
 
                 continue;
             }
-
-            // question fill / next
-            if (lines[index].startsWith("[fill]") || lines[index].startsWith("[next]")) {
-                // split the question text
-                let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                let translation = undefined;
-                // if the next line starts with ~ it is the translation for the text
-                if (lines[index + 1].startsWith("~")) {
-                    [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                    index += 1;
-                }
-
-                let question = undefined;
-                if (!lines[index + 1].startsWith("+") && !lines[index + 1].startsWith("-")) {
-                    let question = lines[index + 1].trim();
-                    index += 1;
-                }
-
-                // set the data
-                let data = {
-                    tag: tag,
-                    id: phrases.length + 1,
-                    question: question,
-                    answers: [],
-                    solution: 0,
-
-                    speaker: speaker,
-                    text: text,
-                    translation: translation,
-                };
-                index = readAnswerLines(lines, index, data);
-                // add the data
-                phrases.push(data);
-                continue;
-            }
-
-            // question order
-            if (lines[index].startsWith("[order]")) {
-                // split the question text
-                let [_, tag, speaker, text] = lines[index].match(/^\[(.*)\]\s*>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                let translation = undefined;
-                // if the next line starts with ~ it is the translation for the text
-                if (lines[index + 1].startsWith("~")) {
-                    [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                    index += 1;
-                }
-                let question = lines[index + 1].trim();
-                index += 1;
-
-                // set the data
-                let data = {
-                    tag: tag,
-                    id: phrases.length + 1,
-                    question: question,
-                    answers: [],
-                    solution: 0,
-
-                    speaker: speaker,
-                    text: text,
-                    translation: translation,
-
-                    words: [],
-                    translations: [],
-                };
-
-                for (; index < lines.length - 1; index += 1) {
-                    if (lines[index + 1].startsWith("[") || lines[index + 1].startsWith(">"))
-                        break
-                    if (data.words.length === 0 || data.translations.length !== 0) {
-                        data.words.push(lines[index + 1].split("/"));
-
-                        // construct the target text (for audio)
-                        if (data.words.length === 1) {
-                            data.full_text = data.text.replace("*", lines[index + 1].split("/").join(" "));
-                        }
-                    } else
-                        data.translations.push(lines[index + 1].split("/"));
-                }
-
-                // add the data
-                phrases.push(data);
-                continue;
-            }
-
-            // question pairs
-            if (lines[index].startsWith("[pairs]")) {
-                // split the question text
-                let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
-                // set the data
-                let data = {
-                    tag: tag,
-                    id: phrases.length + 1,
-                    question: question,
-                    words: [],
-                };
-                // iterate over the next lines, they are the answers
-                for (; index < lines.length - 1; index += 1) {
-                    // check if it starts with + or -
-                    let match = lines[index + 1].match(/^\s*(.*)\s* - \s*(.*)\s*$/);
-                    if (match === null)
-                        break
-                    // split text
-                    let [_, lang1, lang2] = match;
-                    data.words.push(lang1.replace(/~/g, " ").replace(/\|/g, "​"));
-                    data.words.push(lang2.replace(/~/g, " ").replace(/\|/g, "​"));
-                }
-                // add the data
-                phrases.push(data);
-                continue;
-            }
-
-            // question click
-            if (lines[index].startsWith("[click]")) {
-                // split the question text
-                let [_, tag, question] = lines[index].match(/^\[(.*)\]\s*(.*)\s*$/);
-
-                let [__, speaker, text] = lines[index + 1].match(/^>?\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                index += 1;
-
-                let translation = undefined;
-                // if the next line starts with ~ it is the translation for the text
-                if (lines[index + 1].startsWith("~")) {
-                    [_, _, translation] = lines[index + 1].match(/^~\s*(?:([^ :]+)\s*:)?:?\s*(.+)\s*$/);
-                    index += 1;
-                }
-
-                // set the data
-                let data = {
-                    tag: tag,
-                    id: phrases.length + 1,
-                    question: question,
-                    answers: [],
-                    speaker: speaker,
-                    text: text,
-                    translation: translation,
-                };
-
-                // add the data
-                phrases.push(data);
-                continue;
-            }
         }
         catch (e) {
-            console.log("error", e)
+            console.log("error", e);
+            phrases.push({
+                type: "ERROR",
+                line: lines[index],
+                message: e,
+            });
         }
 
         if(lines[index] !== "") {
