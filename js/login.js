@@ -48,13 +48,19 @@ async function login(data) {
 
 async function register(data) {
     console.log(`${backend_user}register_send.php`);
-    let response = await fetch_post(`${backend_user}register_send.php`, data)
+    let response;
+    try {
+        response = await fetch_post(`${backend_user}register_send.php`, data)
+    }
+    catch (e) {
+        return [false, "Something went wrong."];
+    }
     if(response.status === 403) {
         let text = await response.text();
         return [false, text];
     }
     else if(response.status !== 200) {
-        return [false, "Error: an unknown error did occur."];
+        return [false, "Something went wrong."];
     }
     console.log(response);
     return [true, ""];

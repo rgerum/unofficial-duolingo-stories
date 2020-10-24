@@ -23,10 +23,46 @@ async function getCourses() {
     }
 }
 
+async function getPublicCourses() {
+    try {
+        let response_courses = await fetch(`${backend_stories}get_courses.php`);
+        let data_courses = await response_courses.json();
+        let public_courses = [];
+        for(let course of data_courses)
+            if(course.public)
+                public_courses.push(course)
+        return public_courses;
+    }
+    catch (e) {
+        return [];
+    }
+}
+
 async function getStories(lang, lang_base) {
     try {
         let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
         return await response.json();
+    }
+    catch (e) {
+        return [];
+    }
+}
+
+async function getStoriesSets(lang, lang_base) {
+    try {
+        let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
+        let data =  await response.json();
+
+        let set = -1;
+        let sets = [];
+        for(let d of data) {
+            if (set != d.set_id) {
+                set = d.set_id;
+                sets.push([]);
+            }
+            sets[sets.length - 1].push(d);
+        }
+        return sets;
     }
     catch (e) {
         return [];
@@ -59,7 +95,10 @@ async function getStoryJSON(id) {
     let data = await response.json();
 
     story_id = data[0]["id"];
-    await reloadAudioMap();
+    try {
+        await reloadAudioMap();
+    }
+    catch (e) {}
     story = data[0]["text"];
     story_json = processStoryFile(story);
     return story_json;
@@ -84,3 +123,8 @@ async function getLexicon(lang) {
         return {};
     }
 }
+
+async function setStoryDone(id) {
+    let response = await fetch(`${backend_stories}set_story_done.php?id=${id}`);
+}
+

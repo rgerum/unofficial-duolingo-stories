@@ -2,7 +2,22 @@
   "scripts": {
     "test": "jest"
   },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-transform-react-jsx": "^7.10.4"
+  },
   "dependencies": {
+    "babel-plugin-transform-react-jsx": "^6.24.1",
     "jest": "^26.4.2"
-  }
+  },
+  "plugins": [
+    "@babel/plugin-transform-react-jsx"
+  ],
+  "presets": [
+    [
+      "@babel/env",
+      {}
+    ]
+  ]
 }

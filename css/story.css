@@ -35,6 +35,7 @@ body {
     position: relative;
     font-size: 19px;
     margin: 0px;
+    box-sizing: border-box;
 }
 button:focus{outline:none !important;}
 a:focus{outline:none !important;}
@@ -419,6 +420,7 @@ span[data-hidden=true] {
 
 .phrase {
     display: flex;
+    margin: 20px 0px;
 }
 
 .head {
@@ -465,6 +467,8 @@ span[data-hidden=true] {
     top: 6px;
     margin-right: 8px;
     cursor: pointer;
+    width: 28px;
+    height: 23px;
 }
 
 .language_select_button {
@@ -548,6 +552,7 @@ span[data-hidden=true] {
     border-radius: calc(var(--height)/2);
     height: var(--height);
     position: relative;
+    transition: width 0.2s;
 }
 
 #progress_highlight {
@@ -1337,3 +1342,9 @@ p[data-rtl] .speaker {
     }
 }
 
+.legal {
+    margin-top: 20px;
+    text-align: center;
+    color:gray;
+    font-size: 0.6em
+}
