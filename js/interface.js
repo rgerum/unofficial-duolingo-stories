@@ -83,7 +83,7 @@ function addStorySets(parent, data) {
     }
 }
 
-function addEditorCourses(parent, data_lang, language_data, lang, lang_base) {
+export function addEditorCourses(parent, data_lang, language_data, lang, lang_base) {
     parent.selectAll("div").remove();
     for(let course of data_lang) {
         let language = language_data[course.learningLanguage];
@@ -109,7 +109,8 @@ function addEditorCourses(parent, data_lang, language_data, lang, lang_base) {
     }
 }
 
-function addEditorTable(parent, data) {
+export function addEditorTable(parent, data) {
+    const urlParams = new URLSearchParams(window.location.search);
     console.log("addEditorTable", parent, data);
     parent.selectAll("tr").remove();
     parent.selectAll("tr").data(data).enter().append("tr")

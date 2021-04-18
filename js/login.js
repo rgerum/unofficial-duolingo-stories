@@ -28,7 +28,7 @@ function fetch_post(url, data) {
     return fetch(req);
 }
 
-async function get_login() {
+export async function get_login() {
     let response = await fetch(`${backend_user}get_login.php`)
     if(response.status === 403)
         return undefined;
@@ -37,7 +37,7 @@ async function get_login() {
     return text;
 }
 
-async function login(data) {
+export async function login(data) {
     console.log(data, dict_to_query(data), `${backend_user}check_auth.php?${dict_to_query(data)}`)
     let reponse = await fetch(`${backend_user}check_auth.php?${dict_to_query(data)}`)
     if(reponse.status === 403)
@@ -46,7 +46,7 @@ async function login(data) {
     return true;
 }
 
-async function register(data) {
+export async function register(data) {
     console.log(`${backend_user}register_send.php`);
     let response;
     try {
@@ -55,6 +55,7 @@ async function register(data) {
     catch (e) {
         return [false, "Something went wrong."];
     }
+    console.log(response)
     if(response.status === 403) {
         let text = await response.text();
         return [false, text];
@@ -67,7 +68,7 @@ async function register(data) {
 }
 
 
-async function activate(data) {
+export async function activate(data) {
     console.log(data, dict_to_query(data), `${backend_user}get_activation.php?${dict_to_query(data)}`)
     let reponse = await fetch(`${backend_user}get_activation.php?${dict_to_query(data)}`)
     if(reponse.status !== 200) {
@@ -76,8 +77,9 @@ async function activate(data) {
     console.log(reponse);
     return true;
 }
+window.activate = activate;
 
-async function logout() {
+export async function logout() {
     let reponse = await fetch(`${backend_user}set_logout.php`)
     get_login();
 }

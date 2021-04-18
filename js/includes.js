@@ -9,7 +9,7 @@ Date.prototype.now = function () {
     return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
 };
 
-function fetch_post(url, data) {
+export function fetch_post(url, data) {
     var fd = new FormData();
     //very simply, doesn't handle complete objects
     for(var i in data){
@@ -36,7 +36,7 @@ Math.random_seeded = function() {
     return random_seed;
 };
 
-function shuffle(a) {
+export function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random_seeded() * (i + 1));
         [a[i], a[j]] = [a[j], a[i]];

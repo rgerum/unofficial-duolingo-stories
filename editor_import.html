@@ -392,12 +392,15 @@
     </table>
 
 </div>
-<script>
+<script type="module">
+    import {get_login} from "./js/login.js";
+    import {addEditorCourses, addEditorTable} from "./js/interface.js";
+    import {getLanguageNames, getStoriesEditor, getCourses, isCourseValid} from "./js/api_calls.js";
     const urlParams = new URLSearchParams(window.location.search);
 
     let language_data = undefined;
     backend = "https://carex.uber.space/stories/backend/"
-    backend_stories = backend+"stories/"
+    let backend_stories = backend+"stories/"
     async function getLanguageData() {
         let response = await fetch(`${backend_stories}get_languages.php`);
         let data = await response.json();
@@ -451,8 +454,8 @@ async function loadStory(lang, lang_base) {
         return x;
     }
 
-    pairs = [["es", "en"], ["fr", "en"], ["en", "es"]];
-    data_list = [];
+    let pairs = [["es", "en"], ["fr", "en"], ["en", "es"]];
+    let data_list = [];
 
     for(let pair of pairs) {
         let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list_import.php?lang=${pair[0]}&lang_base=${pair[1]}&lang2=${lang}&lang_base2=${lang_base}`);

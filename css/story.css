@@ -620,7 +620,7 @@ span[data-hidden=true] {
 }
 
 #footer_content {
-    max-width: 1000px;
+/*    max-width: 1000px; */
     position: relative;
     touch-action: none;
     align-items: center;

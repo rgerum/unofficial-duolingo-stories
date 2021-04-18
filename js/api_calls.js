@@ -1,18 +1,18 @@
 let language_data = undefined;
-backend = "https://carex.uber.space/stories/backend/"
-backend_stories = backend+"stories/"
+let backend = "https://carex.uber.space/stories/backend/"
+let backend_stories = backend+"stories/"
 
-async function getLanguageNames() {
+export async function getLanguageNames() {
     let response = await fetch(`${backend_stories}get_languages.php`);
     let data = await response.json();
-    language_data = {};
+    window.language_data = {};
     for(let lang of data) {
-        language_data[lang.short] = lang;
+        window.language_data[lang.short] = lang;
     }
-    return language_data;
+    return window.language_data;
 }
 
-async function getCourses() {
+export async function getCourses() {
     try {
         let response_courses = await fetch(`${backend_stories}get_courses.php`);
         let data_courses = await response_courses.json();
@@ -23,7 +23,7 @@ async function getCourses() {
     }
 }
 
-async function getPublicCourses() {
+export async function getPublicCourses() {
     try {
         let response_courses = await fetch(`${backend_stories}get_courses.php`);
         let data_courses = await response_courses.json();
@@ -38,7 +38,7 @@ async function getPublicCourses() {
     }
 }
 
-async function getStories(lang, lang_base) {
+export async function getStories(lang, lang_base) {
     try {
         let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
         return await response.json();
@@ -48,7 +48,7 @@ async function getStories(lang, lang_base) {
     }
 }
 
-async function getStoriesSets(lang, lang_base) {
+export async function getStoriesSets(lang, lang_base) {
     try {
         let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
         let data =  await response.json();
@@ -69,7 +69,7 @@ async function getStoriesSets(lang, lang_base) {
     }
 }
 
-async function getStoriesEditor(lang, lang_base) {
+export async function getStoriesEditor(lang, lang_base) {
     try {
         let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list_editor.php?lang=${lang}&lang_base=${lang_base}`);
         return await response.json();
@@ -79,8 +79,13 @@ async function getStoriesEditor(lang, lang_base) {
     }
 }
 
-async function getStoryJSON(id) {
+export async function setPublic(id, is_public) {
+    return await fetch(backend_stories+"set_story_public.php?id="+id+"&public="+is_public);
+}
+
+export async function getStoryJSON(id) {
     let response_json = await fetch(`${backend_stories}get_story_json.php?id=${id}`);
+    let story_json;
     if(response_json.status === 200) {
         try {
             story_json = await response_json.json();
@@ -104,7 +109,21 @@ async function getStoryJSON(id) {
     return story_json;
 }
 
-function isCourseValid(data_courses, lang, lang_base) {
+export async function getStory(id) {
+    let response = await fetch(`${backend_stories}get_story.php?id=${id}`);
+    let data = await response.json();
+
+    story_id = data[0]["id"];
+    try {
+        await reloadAudioMap();
+    }
+    catch (e) {}
+    story = data[0]["text"];
+    story_json = processStoryFile(story);
+    return story;
+}
+
+export function isCourseValid(data_courses, lang, lang_base) {
     let valid_course = false;
     for(let course of data_courses) {
         if(course.learningLanguage === lang && course.fromLanguage === lang_base) {
@@ -114,7 +133,7 @@ function isCourseValid(data_courses, lang, lang_base) {
     return valid_course;
 }
 
-async function getLexicon(lang) {
+export async function getLexicon(lang) {
     try {
         let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_lexicon.php?lang=${lang}`);
         return await response.json();
@@ -124,7 +143,7 @@ async function getLexicon(lang) {
     }
 }
 
-async function setStoryDone(id) {
+export async function setStoryDone(id) {
     let response = await fetch(`${backend_stories}set_story_done.php?id=${id}`);
 }
 

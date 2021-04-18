@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="js/login.js"></script>
+    <script type="module" src="js/login.js"></script>
 
     <style>
         body {
@@ -254,11 +254,7 @@
     <div id="status">activating account</div>
 
     <div id="login_form" style="display: none;">
-    <h1>Login</h1>
-    <div id="login_status"></div>
-    <input id=username type="text" value="" placeholder="username">
-    <input id=password type="password" value="" placeholder="password">
-    <div class="button" onclick="login_button();">Login</div>
+    You can now go back to the <a href="index.html">Main page</a> and log in.
     </div>
 </div>
 <script>
@@ -274,7 +270,6 @@ async function do_activate() {
         document.getElementById("login_form").style.display = "block";
     }
 }
-do_activate();
 
 async function login_button() {
     let success = await login(inputs_to_dict({username: "#username", password: "#password"}));
@@ -285,6 +280,11 @@ async function login_button() {
         document.getElementById("login_status").innerHTML = "Successfully logged in. Go to the <a href='index.html?lang=nl'>overview</a>.";
     }
 }
+
+window.addEventListener("DOMContentLoaded", () => {
+    do_activate();
+})
+
 
 </script>
 </body>

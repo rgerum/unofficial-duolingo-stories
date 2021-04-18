@@ -1,4 +1,8 @@
-images_lip_colors = {
+import {useInput, useDataFetcher, useEventListener} from '../js/hooks.js'
+import {get_login, login, logout, register} from '../js/login.js'
+import {getPublicCourses, getStoriesSets} from '../js/api_calls.js'
+
+let images_lip_colors = {
     "https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg": "d17900",
     "https://stories-cdn.duolingo.com/image/df24f7756b139f6eda927eb776621b9febe1a3f1.svg": "55321f",
     "https://stories-cdn.duolingo.com/image/717bd84875f83c678f64f124937a278061e0e778.svg": "4db000",
@@ -168,7 +172,19 @@ images_lip_colors = {
     "https://stories-cdn.duolingo.com/image/2f5d7c623ff71838607c8b789fc979ba0f0bd045.svg": "3e1d70"
 }
 
-function useUsername() {
+export function Spinner(props) {
+    return (
+        <div id="spinner" style={{position: "relative", width: "100%", height: "200px"}}>
+            <div className="spinner_parent">
+                <div className="spinner_point point1" />
+                <div className="spinner_point point2" />
+                <div className="spinner_point point3" />
+            </div>
+        </div>
+    );
+}
+
+export function useUsername() {
     let [username, setUsername] = React.useState(null);
 
     async function getUsernameFirstTime() {
@@ -178,7 +194,6 @@ function useUsername() {
 
     async function doLogin(username, password) {
         let success = await login({username: username, password: password});
-
         if(success === false) {
             //window.alert("Error: username or password is wrong.");
             return undefined;
@@ -202,7 +217,7 @@ function useUsername() {
 }
 
 
-function Login(props) {
+export function Login(props) {
     let [username, doLogin, doLogout] = props.useUsername;
     let [showLogin, setShowLogin] = React.useState(0);
     let [state, setState] = React.useState(0);
@@ -304,10 +319,10 @@ function Login(props) {
         </>
 }
 
-function Flag(props) {
+export function Flag(props) {
     let language = {flag: 0, flag_file: ""};
-    if(language_data && props.lang)
-        language = language_data[props.lang];
+    if(window.language_data && props.lang)
+        language = window.language_data[props.lang];
     return <div className={"flag "+props.className}
                 style={language.flag_file ? {backgroundImage: `url(flags/${language.flag_file})`} : {backgroundPosition: `0 ${language.flag}px`}}
     />
@@ -316,7 +331,7 @@ function Flag(props) {
 function LanguageButtonSmall(props) {
     let course = props.course;
 
-    let language = language_data[course.learningLanguage];
+    let language = window.language_data[course.learningLanguage];
     return <a
         className="language_select_item"
         onClick={props.onClick}
@@ -359,7 +374,7 @@ function LanguageSelectorBig(props) {
 
 function LanguageButton(props) {
     let course = props.course;
-    let language = language_data[course.learningLanguage];
+    let language = window.language_data[course.learningLanguage];
     return <a
         className="language_select_button"
         onClick={props.onClick}
@@ -410,7 +425,7 @@ function StoryButton(props) {
 }
 
 
-function IndexContent(props) {
+export function IndexContent(props) {
     let lang = props.course[0];
     let lang_base = props.course[1];
     let [username, doLogin, doLogout] = useUsername();
@@ -443,7 +458,7 @@ function IndexContent(props) {
             <div style={{textAlign: "center", color:"gray", fontSize: "0.8em"}}>
                 These stories are owned by Duolingo, Inc. and are used under license from Duolingo.<br/>
                 Duolingo is not responsible for the translation of these stories <span
-                id="license_language">{language_data && language_data[lang] ? "into "+language_data[lang].name : ""}</span> and this is not an official product of Duolingo.
+                id="license_language">{window.language_data && window.language_data[lang] ? "into "+window.language_data[lang].name : ""}</span> and this is not an official product of Duolingo.
                 Any further use of these stories requires a license from Duolingo.<br/>
                 Visit <a style={{color:"gray"}} href="https://www.duolingo.com">www.duolingo.com</a> for more
                 information.

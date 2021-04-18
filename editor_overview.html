@@ -5,13 +5,16 @@
     <title>Duolingo - Unofficial stories</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+
     <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="js/sort-table.min.js"></script>
+    <!--
     <script src="js/login.js"></script>
     <script src="js/story.js"></script>
-    <script type="text/javascript" src="js/sort-table.min.js"></script>
 
     <script src="js/api_calls.js"></script>
-    <script src="js/interface.js"></script>
+    <script src="js/interface.js"></script>-->
 
     <link rel="stylesheet" href="css/story.css"></link>
     <link rel="stylesheet" href="css/spinner.css"></link>
@@ -378,7 +381,9 @@
     </style>
 </head>
 <body>
-
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+</script>
 <div id="header" style="display: block;">
     <div id="header_left" style="display: inline-block">
         <div id=button_new class="button" onclick="location.href = 'editor.html?lang='+urlParams.get('lang')+'&lang_base='+urlParams.get('lang_base');" style="float: none; display: none">New Story</div>
@@ -426,7 +431,11 @@
         </div>
     </div>
 </div>
-<script>
+<script type="module">
+    import {get_login} from "./js/login.js";
+    import {addEditorCourses, addEditorTable} from "./js/interface.js";
+    import {getLanguageNames, getStoriesEditor, getCourses, isCourseValid} from "./js/api_calls.js";
+
     const urlParams = new URLSearchParams(window.location.search);
 
 async function button_logout() {
@@ -462,7 +471,7 @@ async function check_login() {
 }
 check_login();
 
-list = [];
+let list = [];
 async function loadStory(lang, lang_base) {
     let data_language = await getLanguageNames();
     let data_courses = await getCourses();

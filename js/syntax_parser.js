@@ -1,5 +1,11 @@
+import {shuffle} from "../js/includes.js";
+import {fetch_post} from "../js/includes.js";
+
 if(typeof require !== 'undefined') {
-    shuffle = require('./includes.js').shuffle;
+    try {
+        shuffle = require('./includes.js').shuffle;
+    }
+    catch (e) {}
 }
 
 function splitTextTokens(text, keep_tilde=true) {
@@ -42,8 +48,8 @@ function getSpeaker(name) {
     return language_data[story_properties.lang].speaker;
 }
 
-ssml_list = [];
-lexicon = undefined;
+window.ssml_list = [];
+window.lexicon = undefined;
 
 function generateHintMap(text, translation) {
     if(!text)
@@ -229,7 +235,7 @@ function hintMapToText(content) {
 
 let story_properties = undefined;
 let story_json = {}
-function processStoryFile(story) {
+export function processStoryFile(story) {
     let phrases = [];
     story_properties = {title: "", language: "", title_translation: ""}
 
@@ -318,7 +324,7 @@ function processStoryFile(story) {
                 }
 
                 let answers;
-                [_, answers_raw, translation_raw, correctAnswerIndex] = readAnswerLinesNoHints(lines, index);
+                let [__, answers_raw, translation_raw, correctAnswerIndex] = readAnswerLinesNoHints(lines, index);
                 [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
 
                 let hideRangesForChallenge = [];
@@ -370,16 +376,18 @@ function processStoryFile(story) {
                 }
 
                 let question = undefined;
+                let question_translation = undefined;
                 if (!lines[index + 1].startsWith("+") && !lines[index + 1].startsWith("-")) {
 
                     [index, question, question_translation] = getTextWithTranslation(lines, index + 1, /^\s*(.+)\s*$/, /^~\s*(.*)\s*$/);
                     //index += 1;
                 }
 
-                let answers;
+                let answers, correctAnswerIndex;
                 [index, answers, correctAnswerIndex] = readAnswerLines2(lines, index);
 
                 let ssml = getInputStringSpeachtext(text);
+                let hideRangesForChallenge;
                 if (text.indexOf("*") !== -1 && answers[correctAnswerIndex] !== undefined) {
                     let start = getInputStringText(text).indexOf("*");
                     hideRangesForChallenge = {start: start, end: start + answers[correctAnswerIndex].text.length};
@@ -636,11 +644,12 @@ function processStoryFile(story) {
         },
         fromLanguageName: story_properties["title_base"],
         discussion: story_properties["discussion"],
+        story_properties: story_properties,
     }
     return story_json;
 }
 
-function updateAudioLinks(line_id) {
+export function updateAudioLinks(story_json, line_id) {
     function processElement(element) {
         if(element.line && element.line.content && element.line.content.audio) {
             let audio = element.line.content.audio;
@@ -653,17 +662,18 @@ function updateAudioLinks(line_id) {
     for(let element of story_json.elements) {
         processElement(element);
     }
+    return story_json;
 }
 
-async function reloadAudioMap() {
-    audio_map = await fetch(`audio/${story_id}/audio_${story_id}.json?${Date.now()}`);
+export async function reloadAudioMap() {
+    let audio_map = await fetch(`audio/${story_id}/audio_${story_id}.json?${Date.now()}`);
     if(audio_map.status !== 200)
-        audio_map = undefined;
+        window.audio_map = undefined;
     else {
-        audio_map = await audio_map.json();
+        window.audio_map = await audio_map.json();
     }
 }
-
+window.reloadAudioMap = reloadAudioMap;
 
 let json;
 
@@ -684,7 +694,7 @@ async function upload_json() {
     return text;
 }
 
-async function generate_audio_line(line_id) {
+export async function generate_audio_line(story_json, line_id) {
     let json = JSON.stringify(ssml_list);
     let audio_reloader = d3.select("#audio_reload"+line_id);
     audio_reloader.attr("data-reload", true);
@@ -692,18 +702,19 @@ async function generate_audio_line(line_id) {
     console.log(response);
     let text = await response.text();
     console.log(text);
-    updateAudioLinks(line_id);
-    loadAudios();
+    updateAudioLinks(story_json, line_id);
+    loadAudios(story_json);
     await reloadAudioMap();
     audio_reloader.attr("data-reload", undefined);
     return text;
 }
+window.generate_audio_line = generate_audio_line;
 
-async function generate_all_audio() {
+export async function generate_all_audio(story_json) {
     for(let id in ssml_list) {
-        await generate_audio_line(id);
+        await generate_audio_line(story_json, id);
     }
-    loadAudios();
+    loadAudios(story_json);
 }
 
 try {

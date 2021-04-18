@@ -1,8 +1,12 @@
-audio_right = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3");
+import {useInput, useDataFetcher, useEventListener} from '../js/hooks.js'
+import {getStoryJSON} from '../js/api_calls.js'
+import {shuffle} from '../js/includes.js'
+
+let audio_right = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3");
 audio_right.volume = 0.5;
-audio_wrong = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3");
+let audio_wrong = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3");
 audio_wrong.volume = 0.5;
-audio_finished = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3");
+let audio_finished = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3");
 audio_finished.volume = 0.5;
 
 function playSoundRight() {
@@ -16,9 +20,25 @@ function playSoundWrong() {
     audio_wrong.play();
 }
 
+async function setStoryDone(id) {
+    let response = await fetch(`${backend_stories}set_story_done.php?id=${id}`);
+    console.log("response", response);
+}
+
 function AudioPlay(props) {
     return <img onClick={props.onClick} src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
                 className="loudspeaker"  />;
+}
+
+function splitTextTokens(text, keep_tilde=true) {
+    if(!text)
+        return [];
+    if(keep_tilde)
+        //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
+        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
+    else
+        //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
+        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
 }
 
 function HintLineContent(props) {
@@ -157,6 +177,7 @@ function QuestionMultipleChoice(props) {
     let element = props.element;
     let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
     let hidden2 = (props.progress != element.trackingProperties.line_index) ? "hidden": ""
+    if(props.editor) hidden2 = "";
 
     useCallOnActivation(element.trackingProperties.line_index, props.controls.block_next);
     let [buttonState, click] = useChoiceButtons(element.answers.length, element.correctAnswerIndex,
@@ -195,6 +216,7 @@ function QuestionSelectPhrase(props) {
     let element = props.element;
     let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
     let hidden2 = (props.progress != element.trackingProperties.line_index) ? "hidden": ""
+    if(props.editor) hidden2 = "";
 
     useCallOnActivation(element.trackingProperties.line_index, props.controls.block_next);
     let [buttonState, click] = useChoiceButtons(element.answers.length, element.correctAnswerIndex,
@@ -225,6 +247,7 @@ function QuestionSelectPhrase(props) {
 function QuestionArrange(props) {
     let element = props.element;
     let hidden2 = (props.progress != element.trackingProperties.line_index) ? "hidden": ""
+    if(props.editor) hidden2 = "";
 
     let [buttonState, click] = useArrangeButtons(element.phraseOrder, props.controls.right, props.controls.wrong,
         (i) => props.controls.unhide(element.trackingProperties.line_index,
@@ -305,6 +328,7 @@ class QuestionMatch extends React.Component {
         let element = props.element;
         let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
         let hidden2 = (props.progress != element.trackingProperties.line_index) ? "hidden": ""
+        if(props.editor) hidden2 = "";
         return <div className={"fadeGlideIn "+hidden2}>
             <span className="question">{element.prompt}</span>
             <div style={{textAlign: "center"}}>
@@ -323,6 +347,7 @@ function QuestionPointToPhrase(props) {
     let hidden = "";
     if(props.hidden)
         hidden = "hidden";
+    if(props.editor) hidden = "";
 
     let button_indices = {};
     for(let [index, part] of Object.entries(element.transcriptParts))
@@ -335,6 +360,8 @@ function QuestionPointToPhrase(props) {
         },
         props.controls.wrong
     );
+
+    console.log("QuestionPointToPhrase", hidden, props.editor);
 
     return <div className={hidden}>
         <div className="question">
@@ -360,6 +387,7 @@ function ChallengePrompt(props) {
     let element = props.element;
     let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
     let hidden2 = (props.progress != element.trackingProperties.line_index) ? "hidden": ""
+    if(props.editor) hidden2 = "";
     return <div className={"fadeGlideIn "+hidden2}>
                 <span className="question">
                     <HintLineContent content={element.prompt} />
@@ -369,25 +397,25 @@ function ChallengePrompt(props) {
 
 function StoryLine(props) {
     if(props.element.type === "MULTIPLE_CHOICE") {
-        return <QuestionMultipleChoice controls={props.controls} progress={props.progress} element={props.element} />
+        return <QuestionMultipleChoice editor={props.editor} controls={props.controls} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "SELECT_PHRASE") {
-        return <QuestionSelectPhrase controls={props.controls} progress={props.progress} element={props.element} />
+        return <QuestionSelectPhrase editor={props.editor} controls={props.controls} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "CHALLENGE_PROMPT") {
-        return <ChallengePrompt controls={props.controls} progress={props.progress} element={props.element}/>
+        return <ChallengePrompt editor={props.editor} controls={props.controls} progress={props.progress} element={props.element}/>
     }
     if(props.element.type === "ARRANGE") {
-        return <QuestionArrange controls={props.controls} progress={props.progress} element={props.element} />
+        return <QuestionArrange editor={props.editor} controls={props.controls} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "POINT_TO_PHRASE") {
-        return <QuestionPointToPhrase controls={props.controls} progress={props.progress} element={props.element} />
+        return <QuestionPointToPhrase editor={props.editor} controls={props.controls} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "MATCH") {
-        return <QuestionMatch controls={props.controls} progress={props.progress} element={props.element} />
+        return <QuestionMatch editor={props.editor} controls={props.controls} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "LINE") {
-        return <TextLine progress={props.progress} element={props.element} />
+        return <TextLine editor={props.editor} progress={props.progress} element={props.element} />
     }
     return null;
 }
@@ -425,15 +453,19 @@ function TextLine(props) {
     let element = props.element;
     let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
+
     if(props.hidden)
         hidden = "hidden";
+
+    if(props.editor)
+        hidden = "";
 
     let [audioRange, playAudio] = useAudio(element)
 
     let hideRangesForChallenge = element.hideRangesForChallenge;
     if(props.progress !== element.trackingProperties.line_index)
         hideRangesForChallenge = undefined;
-
+    console.log("xxx", element.line.content.audio)
     if (element.line.type === "TITLE")
         return <div className={"title fadeGlideIn "+hidden}>
                     <span className="title">
@@ -442,13 +474,24 @@ function TextLine(props) {
                     </span>
         </div>;
     else if (element.line.avatarUrl)
-        return <div className={"phrase fadeGlideIn "+hidden}>
+        return <><div className={"phrase fadeGlideIn "+hidden}>
             <img className="head" src={element.line.avatarUrl}/>
             <span className="bubble">
                         <AudioPlay onClick={playAudio} />
                         <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.line.content} />
-                    </span>
-        </div>;
+                {(props.editor && (element.line.content.audio)) ?
+                <><br/>
+                    <span className="ssml_speaker">{element.line.content.audio.ssml.speaker}</span>
+                    <span className="ssml">{element.line.content.audio.ssml.text}</span>
+                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>
+                </> : <></>
+                }
+            </span>
+
+        </div>
+</>
+    ;
+
     else
         return <div className={"phrase fadeGlideIn "+hidden}>
                 <span>
@@ -479,14 +522,15 @@ function Part(props) {
 
     if(challenge_type === "point-to-phrase") {
         return <div>
-            <TextLine progress={props.progress} element={props.part[0]} hidden={!(progress === 0 || progress === 2)}/>
-            <QuestionPointToPhrase controls={props.controls} progress={props.progress} element={props.part[1]} hidden={!(progress === 1)} />
+            <TextLine editor={props.editor} progress={props.progress} element={props.part[0]} hidden={(!(progress === 0 || progress === 2)) && !props.editor}/>
+            <QuestionPointToPhrase editor={props.editor} controls={props.controls} progress={props.progress} element={props.part[1]} hidden={!(progress === 1)} />
         </div>
     }
     let hidden = (props.progress < props.part[0].trackingProperties.line_index) ? "hidden": ""
+    if(props.editor) hidden = "";
     return <div className={"part "+hidden} data-challengetype={challenge_type}>
         {props.part.map((element, i) => (
-            <StoryLine key={i} controls={props.controls} progress={props.progress} element={element} />
+            <StoryLine key={i} editor={props.editor} controls={props.controls} progress={props.progress} element={element} />
         ))}
     </div>
 }
@@ -505,11 +549,11 @@ function FinishedPage(props) {
                     <img src={props.story.illustrations.gilded} className="image_golden"/>
                 </div>
             </div>
-            <h2>Story complete!</h2><p>You finished "Good morning"</p></div>
+            <h2>Story complete!</h2><p>You finished "{props.story.fromLanguageName}"</p></div>
     </div>
 }
 
-class Story extends React.Component {
+export class Story extends React.Component {
     constructor(props) {
         super(props);
         let urlParams = new URLSearchParams(window.location.search);
@@ -615,11 +659,19 @@ class Story extends React.Component {
     }
 
     render() {
-        if(this.state.story === undefined)
+        let story = this.state.story;
+        let editor = this.props.editor || false;
+        if(this.props.story_json !== undefined)
+            story = this.props.story_json;
+        if(story === undefined)
             return null;
         var parts = [];
         let last_id = -1;
-        for(let element of this.state.story.elements) {
+        for(let element of story.elements) {
+            if(element.trackingProperties == undefined) {
+                console.log("!!!", element);
+                continue;
+            }
             if(last_id !== element.trackingProperties.line_index) {
                 parts.push([]);
                 last_id = element.trackingProperties.line_index;
@@ -628,6 +680,15 @@ class Story extends React.Component {
         }
 
         let finished = (this.state.progress === parts.length);
+
+        if(editor)
+            return (
+                        <div id="story" style={{paddingBottom: "0px"}}>
+                            {parts.map((part, i) => (
+                                <Part key={i} editor={editor} controls={this.controls} progress={this.state.progress} part={part} />
+                            ))}
+                        </div>
+            );
 
         return (
             <div>
@@ -643,16 +704,16 @@ class Story extends React.Component {
                     <div id="story" style={{paddingBottom: "0px"}}>
                         <div className="legal">
                             This story is owned by Duolingo, Inc. and is used under license from Duolingo.<br/>
-                            Duolingo is not responsible for the translation of this story into <span>{language_data !== undefined ? language_data[this.state.story.learningLanguage].name : ""}</span> and is not an official product of Duolingo.
+                            Duolingo is not responsible for the translation of this story into <span>{window.language_data !== undefined ? window.language_data[story.learningLanguage].name : ""}</span> and is not an official product of Duolingo.
                             Any further use of this story requires a license from Duolingo.<br/>
                             Visit <a style={{color: "gray"}} href="https://www.duolingo.com">www.duolingo.com</a> for more information.
                         </div>
                         {parts.map((part, i) => (
-                            <Part key={i} controls={this.controls} progress={this.state.progress} part={part} />
+                            <Part key={i} editor={editor} controls={this.controls} progress={this.state.progress} part={part} />
                         ))}
                     </div>
                     <div style={{height: this.state.spacer+"px"}} />
-                    {finished ? <FinishedPage story={this.state.story} /> : null
+                    {finished ? <FinishedPage story={story} /> : null
                     }
                 </div>
                 <div id="footer"

@@ -5,6 +5,7 @@ backend_audio = "https://carex.uber.space/stories/audio/"
 isEditor = false;
 
 story = undefined;
+story_json = undefined;
 story_id = undefined;
 audio_map = undefined;
 audio_objects = undefined;
@@ -19,7 +20,7 @@ rtl = false;
 div_elements = [];
 
 audio_objects = {}
-function loadAudios() {
+function loadAudios(story_json) {
     audio_objects = {}
     for(let element of story_json.elements) {
         if(element.line && element.line.content && element.line.content.audio) {

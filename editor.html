@@ -5,6 +5,8 @@
     <title>Duolingo - Unofficial stories</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="js/login.js"></script>
     <script src="js/includes.js"></script>
@@ -17,6 +19,11 @@
     <script src="https://ajaxorg.github.io/ace-builds/src/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://ajaxorg.github.io/ace-builds/src/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/custom_mode.js" type="text/javascript" charset="utf-8"></script>
+<!--
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+   -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
 
     <style type="text/css" media="screen">
         #editor {
@@ -78,6 +85,9 @@
     </style>
 </head>
 <body>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+</script>
 <div id="header" style="display: block">
     <div id="header_left" style="display: inline-block">
         <div class="button" onclick="location.href = 'editor_overview.html?lang='+urlParams.get('lang')+'&lang_base='+urlParams.get('lang_base');" style="float: none">Overview</div>
@@ -117,270 +127,8 @@
     </div>
 </div>
 
+<script src="js/editor_main.js" type="module" charset="utf-8"></script>
 <script>
-    const urlParams = new URLSearchParams(window.location.search);
-
-    /* LOGIN */
-
-
-    async function button_logout() {
-        await logout();
-        check_login();
-    }
-
-    async function login_button() {
-        let success = await login(inputs_to_dict({username: "#username", password: "#password"}));
-        if(success == false) {
-            document.getElementById("login_status").innerText = "Error: username or password is wrong.";
-        }
-        else {
-            document.getElementById("login_status").innerHTML = "Successfully logged in. Go to the <a href='index.html'>overview</a>.";
-            check_login();
-        }
-    }
-    async function check_login() {
-        let login = await get_login();
-        console.log("login", login);
-        if(login === undefined) {
-            document.getElementById("login_form").style.display = "block";
-            document.getElementById("loggedin").style.display = "none";
-        }
-        else {
-            document.getElementById("login_form").style.display = "none";
-            document.getElementById("loggedin").style.display = "block";
-            //document.getElementById("button_editor").style.display = login.role != 0 ? "inline-block" : "none";
-            document.getElementById("display_username").innerText = login.username;
-        }
-    }
-    check_login();
-
-    /* EDITOR */
-
-    var langTools = ace.require("ace/ext/language_tools");
-    var editor = ace.edit("editor");
-
-    editor.session.setMode("ace/mode/javascript-custom");
-    editor.setOptions({
-        enableBasicAutocompletion: true,
-        enableLiveAutocompletion: true
-    });
-    editor.setTheme("ace/theme/dracula");
-
-    var myCompleter = {
-        getCompletions: function(editor, session, pos, prefix, callback) {
-            var wordList = ["gh"];
-            callback(null, wordList.map(function(word) {
-                return {
-                    caption: word,
-                    value: word
-                };
-            }));
-        }
-    };
-    langTools.addCompleter(myCompleter);
-
-editor.session.setUseWrapMode(true);
-editor.resize();
-
-editor.commands.addCommand({
-    name: 'compile',
-    bindKey: {win: 'Ctrl-Enter',  mac: 'Command-Enter'},
-    exec: function(editor) {
-        updateStoryDisplay();
-    },
-    readOnly: true // false if this command should not apply in readOnly mode
-});
-
-editor.commands.addCommand({
-    name: 'save',
-    bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
-    exec: function(editor) {
-        saveStory();
-    },
-    readOnly: true // false if this command should not apply in readOnly mode
-});
-
-editor.commands.addCommand({
-    name: 'tilde',
-    bindKey: {win: 'Shift-Space',  mac: 'Shift-Space'},
-    exec: function(editor) {
-        editor.insert("~")
-    },
-    readOnly: true // false if this command should not apply in readOnly mode
-});
-
-editor.commands.addCommand({
-    name: 'speaker',
-    bindKey: {win: '>',  mac: '>'},
-    exec: function(editor) {
-        if(rtl)
-            editor.insert("\u2067")
-        editor.insert(">")
-    },
-    readOnly: true // false if this command should not apply in readOnly mode
-});
-/*
-editor.commands.addCommand({
-    name: 'accent',
-    bindKey: {win: '*',  mac: '*'},
-    exec: function(editor) {
-        //editor.navigateLeft();
-        editor.insert("́")
-        //editor.navigateRight();
-    },
-    readOnly: true // false if this command should not apply in readOnly mode
-});
-*/
-let dirty = false;
-editor.getSession().on('change', function() {
-    dirty = true;
-});
-
-let story = undefined;
-let story_id = undefined;
-let languages_ids = undefined;
-
-async function loadStory(name, name2) {
-    if(lexicon === undefined)
-        lexicon = await getLexicon(urlParams.get('lang'));
-
-    languages_ids = await getLanguages();
-    rtl = language_data[urlParams.get('lang')]["rtl"];
-    console.log("RTL", rtl, urlParams.get('lang'), language_data[urlParams.get('lang')], language_data[urlParams.get('lang')]["rtl"]);
-    console.log(name, name2)
-    if(!name && !name2) {
-        story = `title=...
-title_base=...
-lang=${urlParams.get('lang')}
-lang_base=${urlParams.get('lang_base') || "en"}
-`;
-    }
-    else if(!name) {
-        //let response = await fetch(name+".txt");
-        let response = await fetch(`${backend_stories}get_story.php?id=${name2}`);
-        let data = await response.json();
-        let text = data[0]["text"];
-        text = text.replace(/lang=.*/, `lang=${urlParams.get('lang')}`)
-        text = text.replace(/lang_base=.*/, `lang_base=${urlParams.get('lang_base')}`)
-        if(rtl)
-            text = text.replace(/>/g, "\u2067>").replace(/\u2067\u2067>/g, "\u2067>")
-        console.log(text);
-        window.text = text;
-        story = text;
-    }
-    else {
-        //let response = await fetch(name+".txt");
-        let response = await fetch(`${backend_stories}get_story.php?id=${name}`);
-        let data = await response.json();
-        story_id = data[0]["id"];
-        story = data[0]["text"];
-
-        console.log("data", data[0]);
-        if(data[0]["author"] == 1)
-            document.getElementById("button_save").style.display = "none";
-
-        await reloadAudioMap();
-    }
-    editor.setValue(story);
-    dirty = false;
-    isEditor = true;
-    updateStoryDisplay();
-}
-
-loadStory(urlParams.get('story'), urlParams.get('import'))
-
-function updateStoryDisplay() {
-    story = editor.getValue();
-    processStoryFile(story);
-    loadAudios();
-    index = 0;
-    d3.select("#story").selectAll("*").remove();
-    //addTitle();
-    addAll();
-    d3.selectAll(".hidden").classed("hidden", false);
-    if(0) {
-        while (index < story_json.elements.length) {
-            //document.getElementById("button_next").dataset.status = "active";
-            addNext();
-        }
-    }
-}
-updateStoryDisplay();
-
-async function saveStory() {
-    try {
-        updateStoryDisplay();
-        updateAudioLinks();
-    }
-    catch (e) {
-
-    }
-    document.getElementById("button_save").getElementsByTagName("img")[0].style.display = "inline-block";
-    let data = {
-        "name": story_properties["title"],
-        "name_base": story_properties["title_base"],
-        "lang": languages_ids[story_properties["lang"]],
-        "lang_base": languages_ids[story_properties["lang_base"]],
-        "xp": story_properties["xp"],
-        "image": story_properties["image"],
-        "image_done": story_properties["image_done"],
-        "image_locked": story_properties["image_locked"],
-        "discussion": story_properties["discussion"],
-        "duo_id": story_properties["duo_id"],
-        "cefr": story_properties["cefr"],
-        "set_id": story_properties["set_id"],
-        "set_index": story_properties["set_index"],
-        "text": editor.getValue(),
-        "change_date": new Date().now(),
-        "json": JSON.stringify(story_json),
-    };
-    if(story_id !== undefined)
-        data.id = story_id;
-    console.log("save", data);
-    let x = await fetch_post(backend_stories+"set_story.php", data);
-    if(x.status !== 200) {
-        check_login();
-        alert("Story could not be saved. Maybe you are not logged in?")
-        document.getElementById("button_save").getElementsByTagName("img")[0].style.display = "none";
-        return;
-    }
-    x = await x.json();
-    x = x[0];
-    console.log("saved", x);
-    story_id = x.id;
-    dirty = false;
-    document.getElementById("button_save").getElementsByTagName("img")[0].style.display = "none";
-}
-
-isEditor = true;
-window.hideWarning = false;
-window.addEventListener('beforeunload', (event) => {
-    if (dirty) {
-        if(!confirm("You have unsaved changed, do you really want to leave the editor?")) {
-            event.preventDefault();
-            event.returnValue = '';
-        }
-    }
-
-});
-
-async function generateAudio() {
-    if(confirm("Do you want to generate .mp3 files for the current story?")) {
-        document.getElementById("button_audio").getElementsByTagName("img")[0].style.display = "inline-block";
-        let text = await generate_all_audio();
-        if(text === "") {
-            alert("An error occurred.");
-        }
-        document.getElementById("button_audio").getElementsByTagName("img")[0].style.display = "none";
-    }
-}
-
-function test() {
-    if(story_id === undefined)
-        alert("The story can only be tested if it has been saved for the first time.")
-    else
-        location.href = 'story.html?story='+story_id+'&lang='+urlParams.get('lang')+'&lang_base='+urlParams.get('lang_base')+"&test=1&editor=1";
-}
 
 </script>
 </body>

@@ -61,5 +61,6 @@ if($result) {
     return "All good";
 }
 else {
+    print("Email could not be sent.");
     http_response_code(403);
 }
