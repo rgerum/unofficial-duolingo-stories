@@ -1,6 +1,7 @@
 let language_data = undefined;
 let backend = "https://carex.uber.space/stories/backend/"
 let backend_stories = backend+"stories/"
+window.backend_stories = backend_stories
 
 export async function getLanguageNames() {
     let response = await fetch(`${backend_stories}get_languages.php`);
