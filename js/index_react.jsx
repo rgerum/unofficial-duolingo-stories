@@ -1,6 +1,6 @@
-import {useInput, useDataFetcher, useEventListener} from '../js/hooks.js'
-import {get_login, login, logout, register} from '../js/login.js'
-import {getPublicCourses, getStoriesSets} from '../js/api_calls.js'
+import {useInput, useDataFetcher, useEventListener, useDataFetcher2} from '../js/hooks.js'
+import {useUsername, Login} from './login.js'
+import {getLanguageNames, getPublicCourses, getStoriesSets} from '../js/api_calls.js'
 
 let images_lip_colors = {
     "https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg": "d17900",
@@ -184,188 +184,52 @@ export function Spinner(props) {
     );
 }
 
-export function useUsername() {
-    let [username, setUsername] = React.useState(null);
-
-    async function getUsernameFirstTime() {
-        let login = await get_login();
-        setUsername(login);
-    }
-
-    async function doLogin(username, password) {
-        let success = await login({username: username, password: password});
-        if(success === false) {
-            //window.alert("Error: username or password is wrong.");
-            return undefined;
-        }
-        else {
-            let login = await get_login();
-            setUsername(login);
-            return login;
-        }
-    }
-    async function doLogout() {
-        await logout();
-        setUsername(undefined);
-    }
-    if(username === null) {
-        setUsername(undefined);
-        getUsernameFirstTime();
-        return [undefined, doLogin, doLogout];
-    }
-    return [username, doLogin, doLogout];
-}
-
-
-export function Login(props) {
-    let [username, doLogin, doLogout] = props.useUsername;
-    let [showLogin, setShowLogin] = React.useState(0);
-    let [state, setState] = React.useState(0);
-    let [error, setError] = React.useState("");
-    let [message, setMessage] = React.useState("");
-
-    let [usernameInput, usernameInputSetValue] = useInput();
-    let [passwordInput, passwordInputSetValue] = useInput();
-    let [emailInput, emailInputSetValue] = useInput();
-
-    async function buttonLogin() {
-        setState(1);
-        let username;
-        try {
-            username = await doLogin(usernameInput, passwordInput);
-        }
-        catch (e) {
-            setError("Something went wrong.");
-            setState(-1);
-            return;
-        }
-        if(username === undefined) {
-            setError("Wrong username or password. Try again.");
-            setState(-1);
-        }
-        else {
-            setState(0);
-            setShowLogin(0);
-        }
-    }
-
-    async function register_button() {
-        setState(1);
-        let [success, msg] = await register({username: usernameInput, password: passwordInput, email: emailInput});
-
-        if(success === false) {
-            if(msg === "")
-                msg = "Something went wrong."
-            setError(msg);
-            setState(-1);
-        }
-        else {
-            setState(2);
-            setMessage("Your account has been registered. An e-mail with an activation link has been sent to you. Please click on the link in the e-mail to proceed. You may need to look into your spam folder.");
-        }
-    }
-
-    return <>
-    <div id="loggedin" style={{float: "right"}}>
-        {username !== undefined ?
-            <>
-            <span id="display_username" style={{fontSize: "1.2em", paddingRight: "14px", display: "inline-block"}}>{username.username}</span>
-            {username.role != 0 ? <button id="button_editor" className="button"
-                                       onClick={()=>{location.href = 'editor_overview.html'+window.location.search}}
-                                       >Editor</button> : null}
-                <button className="button" onClick={() => doLogout()} style={{float: "none"}}>Log out</button>
-            </>
-            :
-            <button className="button" onClick={() => setShowLogin(1)} style={{float: "none"}}>Log in</button>
-        }
-    </div>
-        {(showLogin === 1 && username === undefined) ?
-            <div id="login_dialog">
-                <span id="quit" onClick={()=>setShowLogin(0)} />
-                <div>
-                    <h2>Log in</h2>
-                    <p>Attention, you cannot login with your Duolingo account.</p><p>You have to register for the unofficial stories separately, as they are an independent project.</p>
-                    <input value={usernameInput} onChange={usernameInputSetValue} type="text" placeholder="Username"/>
-                    <input value={passwordInput} onChange={passwordInputSetValue} type="password" placeholder="Password"/>
-                    {state === -1 ? <span className="login_error">{error}</span>: null}
-                    <button className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
-                    <p>Don't have an account? <a onClick={()=>setShowLogin(2)}>SIGN UP</a></p>
-                </div>
-            </div>
-            : (showLogin === 2 && username === undefined) ?
-                <div id="login_dialog">
-                    <span id="quit" onClick={() => setShowLogin(0)}/>
-                    <div>
-                        <h2>Sign up</h2>
-                        <p>If you register you can keep track of the stories you have already finished.</p>
-                        <p>Registration is optional, stories can be accessed even without login.</p>
-                        <input value={usernameInput} onChange={usernameInputSetValue} type="text"
-                               placeholder="Username"/>
-                        <input value={emailInput} onChange={emailInputSetValue} type="email" placeholder="Email"/>
-                        <input value={passwordInput} onChange={passwordInputSetValue} type="password"
-                               placeholder="Password"/>
-                        {state === -1 ?
-                            <span className="login_error">{error}</span> : null }
-                        {state === 2 ?
-                            <span>{message}</span> :
-                            <button className="button"
-                                    onClick={register_button}>{state !== 1 ? "Sign up" : "..."}</button>
-                        }
-                        <p>Already have an account? <a onClick={()=>setShowLogin(1)}>LOG IN</a></p>
-                    </div>
-                </div>
-            : null
-        }
-        </>
-}
-
-export function Flag(props) {
-    let language = {flag: 0, flag_file: ""};
-    if(window.language_data && props.lang)
-        language = window.language_data[props.lang];
-    return <div className={"flag "+props.className}
-                style={language.flag_file ? {backgroundImage: `url(flags/${language.flag_file})`} : {backgroundPosition: `0 ${language.flag}px`}}
-    />
-}
 
 function LanguageButtonSmall(props) {
+    /**
+     * A button in the language drop down menu (flag + name)
+     */
     let course = props.course;
 
-    let language = window.language_data[course.learningLanguage];
+    let language = props.language_data[course.learningLanguage];
     return <a
         className="language_select_item"
         onClick={props.onClick}
         href={`index.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`}
         style={{display: "block"}}
     >
-        <Flag lang={course.learningLanguage}/>
+        <Flag language_data={props.language_data}  lang={course.learningLanguage}/>
         <span>{course.name || language.name}</span>
     </a>;
 }
 function LanguageSelector(props) {
     const courses = useDataFetcher(getPublicCourses);
 
-    if(courses === undefined)
+    if(courses === undefined || props.language_data === undefined)
         return <div id="header_lang_selector" />
     return (
         <div id="header_lang_selector">
             {courses.map(course => (
-                <LanguageButtonSmall key={course.id} course={course} onClick={(e) => {e.preventDefault(); props.languageClicked(course.learningLanguage, course.fromLanguage)}} />
+                <LanguageButtonSmall language_data={props.language_data} key={course.id} language_data={props.language_data} course={course} onClick={(e) => {e.preventDefault(); props.languageClicked(course.learningLanguage, course.fromLanguage)}} />
             ))}
         </div>
     );
 }
 
+/*
+* LanguageSelectorBig
+* */
+
 function LanguageSelectorBig(props) {
     const courses = useDataFetcher(getPublicCourses);
 
-    if(courses === undefined)
+    if(courses === undefined || props.language_data === undefined)
         return <Spinner />
     return (
         <div id="list">
             <div className="set_list">
                 {courses.map(course => (
-                    <LanguageButton key={course.id} course={course} onClick={(e) => {e.preventDefault(); props.languageClicked(course.learningLanguage, course.fromLanguage)}} />
+                    <LanguageButton key={course.id} language_data={props.language_data} course={course} onClick={(e) => {e.preventDefault(); props.languageClicked(course.learningLanguage, course.fromLanguage)}} />
                 ))}
             </div>
         </div>
@@ -374,17 +238,32 @@ function LanguageSelectorBig(props) {
 
 function LanguageButton(props) {
     let course = props.course;
-    let language = window.language_data[course.learningLanguage];
+    let language = props.language_data[course.learningLanguage];
     return <a
         className="language_select_button"
         onClick={props.onClick}
         href={`index.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`}
     >
-        <Flag className="flag_big" lang={course.learningLanguage}/>
+        <Flag language_data={props.language_data} className="flag_big" lang={course.learningLanguage}/>
 
         <span className="language_select_button_text">{course.name || language.name}</span>
     </a>;
 }
+
+export function Flag(props) {
+    /**
+     * A big flag button
+     * @type {{flag_file: string, flag: number}}
+     */
+    let language = {flag: 0, flag_file: ""};
+    if(props.language_data && props.lang)
+        language = props.language_data[props.lang];
+    return <div className={"flag "+props.className}
+                style={language.flag_file ? {backgroundImage: `url(flags/${language.flag_file})`} : {backgroundPosition: `0 ${language.flag}px`}}
+    />
+}
+
+/* ******** */
 
 function SetList(props) {
     const sets = useDataFetcher(getStoriesSets, [props.lang, props.lang_base, props.username]);
@@ -437,8 +316,8 @@ export function IndexContent(props) {
     return <div>
         <div id="header_index">
             <div id="header_language" style={{display: "block", float:"left"}}>
-                <Flag lang={lang}/>
-                <LanguageSelector languageClicked={languageClicked} />
+                <Flag language_data={props.language_data} lang={lang}/>
+                <LanguageSelector language_data={props.language_data} languageClicked={languageClicked} />
             </div>
             <Login useUsername={[username, doLogin, doLogout]} />
         </div>
@@ -450,7 +329,7 @@ export function IndexContent(props) {
             <br/>
             {lang !== undefined ?
                 <SetList lang={lang} lang_base={lang_base} username={username} onStoryClicked={(id)=>props.onStartStory(id)}/> :
-                <LanguageSelectorBig languageClicked={languageClicked}/>
+                <LanguageSelectorBig language_data={props.language_data} languageClicked={languageClicked}/>
             }
 
             <hr/>
@@ -458,7 +337,7 @@ export function IndexContent(props) {
             <div style={{textAlign: "center", color:"gray", fontSize: "0.8em"}}>
                 These stories are owned by Duolingo, Inc. and are used under license from Duolingo.<br/>
                 Duolingo is not responsible for the translation of these stories <span
-                id="license_language">{window.language_data && window.language_data[lang] ? "into "+window.language_data[lang].name : ""}</span> and this is not an official product of Duolingo.
+                id="license_language">{props.language_data && props.language_data[lang] ? "into "+props.language_data[lang].name : ""}</span> and this is not an official product of Duolingo.
                 Any further use of these stories requires a license from Duolingo.<br/>
                 Visit <a style={{color:"gray"}} href="https://www.duolingo.com">www.duolingo.com</a> for more
                 information.

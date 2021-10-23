@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Duolingo - Unofficial stories</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="module" src="dist/login.js"></script>
+
+    <link rel="stylesheet" href="css/story.css" />
+    <link rel="stylesheet" href="css/index.css" />
+    <link rel="stylesheet" href="css/spinner.css" />
+</head>
+<body>
+
+<div id="login_dialog">
+    <div id="checked" style="display: none">
+        <h2>Reset Password</h2>
+        <p id="set_input">
+            <input id="input_password" type="password" placeholder="Password"/>
+
+            <button className="button" onclick="login_button()">Change</button>
+        </p>
+
+        <p id="login_status">
+            You can now go back to the <a href="index.html">Main page</a> and log in.
+        </p>
+    </div>
+    <div id="invalid" style="display: none">
+        <h2>Invalid or expired link</h2>
+    </div>
+    <div id="loading">
+        <h2>Loading...</h2>
+    </div>
+</div>
+<script>
+    let urlParams = new URLSearchParams(window.location.search);
+
+async function check() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let success = await reset_pw_check({username: urlParams.get("username"), uuid: urlParams.get("activation_link")});
+    document.getElementById("loading").style.display = "none";
+    if(success == false) {
+        document.getElementById("invalid").style.display = "block";
+    }
+    else {
+        document.getElementById("checked").style.display = "block";
+    }
+}
+
+async function login_button() {
+    let success = await reset_pw_set({username: urlParams.get("username"), uuid: urlParams.get("activation_link"), password: document.getElementById("input_password").value});
+    document.getElementById("set_input").style.display = "none";
+    if(success == false) {
+        document.getElementById("login_status").innerText = "Error: something went wrong.";
+    }
+    else {
+        document.getElementById("login_status").innerHTML = "You can now go back to the <a href=\"index.html\">Main page</a> and log in.";
+    }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    check();
+})
+
+
+</script>
+</body>
+</html>

@@ -1,14 +1,12 @@
-import {useEventListener, useDataFetcher2} from '../js/hooks.js'
-import {IndexContent} from './index_react.js'
+import {useEventListener} from '../js/hooks.js'
+import {Overview} from './editor_overview.js'
 import {Story} from './story_react.js'
-import {getLanguageNames} from "../js/api_calls.js";
 
 
 function App(props) {
     let urlParams = new URLSearchParams(window.location.search);
     const [story, setStory] = React.useState(urlParams.get("story") || null);
     const [course, setCourse] = React.useState([urlParams.get("lang") || undefined, urlParams.get("lang_base") || undefined]);
-    let [language_data, language_dataRefetch] = useDataFetcher2(getLanguageNames, []);
 
     function changeStory(id) {
         setStory(id);
@@ -22,9 +20,9 @@ function App(props) {
     }
     function doSetCourse(course) {
         if(course[0] === undefined)
-            history.pushState({course: course}, "Language"+course, `index.html`);
+            history.pushState({course: course}, "Language"+course, `editor_overview.html`);
         else
-            history.pushState({course: course}, "Language"+course, `index.html?lang=${course[0]}&lang_base=${course[1]}`);
+            history.pushState({course: course}, "Language"+course, `editor_overview.html?lang=${course[0]}&lang_base=${course[1]}`);
         setCourse(course);
     }
 
@@ -47,8 +45,8 @@ function App(props) {
         changeStory(urlParams.get('story'));
     }
     if(story === null)
-        return <IndexContent language_data={language_data} course={course} setCourse={doSetCourse} onStartStory={changeStory} />
-    return <Story language_data={language_data} story={story} onQuit={()=>{changeStory(null)}} />
+        return <Overview course={course} setCourse={doSetCourse} onStartStory={changeStory} />
+    return <Story story={story} onQuit={()=>{changeStory(null)}} />
 }
 
 window.addEventListener("DOMContentLoaded", () => {

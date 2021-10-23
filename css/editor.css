@@ -1,0 +1,356 @@
+body {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    position: relative;
+}
+#main {
+    max-width: 500px;
+    margin: 0 auto;
+}
+.speaker {
+    font-weight: bold;
+}
+.speaker::after {
+    content: ": ";
+}
+.text {
+
+}
+.title {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+.button_story {
+    width: 100px;
+    height: 100px;
+    display: inline-block;
+    background: #0071c8;
+    color: white;
+    border-radius: 15px;
+    border: 1px solid #005fa7;
+    box-shadow: #005fa7 0 6px;
+    cursor: pointer;
+    box-sizing: border-box;
+    margin: 0 25px;
+}
+.button_story:hover {
+    filter: brightness(1.2);
+    /*transform: translate(0, 5px);
+    box-shadow: #58a700 0 0px;*/
+}
+.button_story[data-done=true] {
+    background: #ffbb09;
+    border: 1px solid #ffbb09;
+    box-shadow: #a75c00 0 6px;
+}
+.story_title {
+    display: inline-block;
+    text-align: center;
+    font-weight: bold;
+    width: 150px;
+    font-size: 1.2em;
+    margin-top: 5px;
+    margin-bottom: 20px;
+}
+.button {
+    text-transform: uppercase;
+    padding: 12px 30px;
+    float: right;
+    display: inline-block;
+    background: #78c800;
+    color: white;
+    border-radius: 15px;
+    box-shadow: #58a700 0 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+}
+.button:hover[data-status="active"] {
+    filter: brightness(1.2);
+    /*transform: translate(0, 5px);
+    box-shadow: #58a700 0 0px;*/
+}
+.button[data-status="inactive"] {
+    background: #a3a3a3;
+    transform: translate(0, 5px);
+    box-shadow: #575757 0 0px;
+    color: #575757;
+    cursor: default;
+}
+#progress {
+    z-index: 5;
+    background: lightgray;
+    border-radius: 5px;
+    width: 100%;
+    height: 10px;
+    padding: 0;
+}
+#progress span {
+    display: block;
+    width: 0%;
+    height: 100%;
+    background: #78c800;;
+    border-radius: 5px;
+}
+
+.question {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.answer {
+    position: relative;
+    cursor: pointer;
+}
+.checkbox {
+    display: inline-block;
+    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid lightgray;
+    box-shadow: 0 3px lightgray;
+    font-size: 1.2em;
+    text-align: center;
+    font-weight: bold;
+}
+.checkbox[data-status="right"] {
+    background: #d7feb9;
+    border-color: #ade756;
+    box-shadow: 0 3px #ade756;
+    color: #7da13c;
+}
+.checkbox[data-status="false"] {
+    background: #feb9b9;
+    border-color: #e7565b;
+    box-shadow: 0 3px #e75662;
+    color: #a13c3c;
+}
+.answer_text {
+    display: inline-block;
+    width: calc(100% - 50px);
+    padding: 5px;
+}
+.clickword {
+    background: #fff;
+    display: inline-block;
+    border-radius: 10px;
+    border: 1px solid lightgray;
+    box-shadow: 0 3px lightgray;
+    text-align: center;
+    padding: 8px;
+    margin: 5px;
+    cursor: pointer;
+}
+.clickword[data-status="empty"] {
+    background: lightgray;
+    color: lightgray;
+    cursor: default;
+}
+.clickword[data-status="selected"] {
+    background: #ddf4ff;
+    border-color: #84d8ff;
+    color: #1cb0f6;
+    box-shadow: 0 3px #84d8ff;
+}
+.clickword:hover[data-status="unselected"] {
+    filter:brightness(0.9);
+}
+.clickword:hover[data-status="selected"] {
+    background: #a4dffb;
+    border-color: #3ebbf6;
+    color: #00aff9;
+    box-shadow: 0 3px #3ebbf6;
+}
+.clickword[data-status="inactive"] {
+    opacity: 0.5;
+}
+#header {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 30px;
+    background: white;
+    padding: 30px 30px;
+    box-sizing: border-box;
+}
+#story {
+    padding-top: 40px;
+    padding-bottom: 100px;
+}
+#footer {
+    border-top: 1px solid gray;
+    position: fixed;
+    background: white;
+    z-index: 10;
+    bottom: 0px;
+    left: 0;
+    height: 100px;
+    padding: 30px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+.word::after {
+    content: " ";
+    border-bottom: none;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+
+    /* Position the tooltip text */
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+
+    /* Fade in tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+#header {
+    border-bottom: 1px solid gray;
+    height: 80px;
+    padding-top: 10px;
+    z-index: 1;
+}
+#main {
+    padding-top: 80px;
+    max-width: 1300px;
+}
+
+#story_list {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#story_list td, #story_list th {
+    /*border: 1px solid #ddd;*/
+    padding: 8px;
+}
+
+#story_list tr:nth-child(even){background-color: #f2f2f2;}
+
+#story_list tr:hover {background-color: #ddd;}
+
+#story_list tr a { color: black; font-weight: bold; }
+
+#story_list th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #78c800;
+    color: white;
+}
+
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 17px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 13px;
+    width: 13px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #78C800;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #78C800;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(13px);
+    -ms-transform: translateX(13px);
+    transform: translateX(13px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 17px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.course_selection_button {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    color: black;
+    border-bottom: 1px solid lightgray;
+}
+.course_selection_button:hover {
+    background: lightgray;
+}
+
+.course_count {
+    width: 30px;
+    text-align: right;
+}

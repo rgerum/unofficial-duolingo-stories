@@ -1,13 +1,10 @@
-import {getLanguageNames} from '../js/api_calls.js'
 
 export function useDataFetcher2(fetcher, args = []) {
     const [data, updateData] = React.useState(undefined);
     const [done, updateDone] = React.useState(false);
     React.useEffect(() => {
         async function doFetch() {
-            updateData(undefined); //if(language_data === undefined)
-
-            await getLanguageNames();
+            updateData(undefined);
             const fetched_data = await fetcher(...args);
             updateData(fetched_data);
             updateDone(true);
@@ -28,9 +25,8 @@ export function useDataFetcher(fetcher, args = []) {
     const [done, updateDone] = React.useState(false);
     React.useEffect(() => {
         async function doFetch() {
-            updateData(undefined); //if(language_data === undefined)
+            updateData(undefined);
 
-            await getLanguageNames();
             const fetched_data = await fetcher(...args);
             updateData(fetched_data);
             updateDone(true);

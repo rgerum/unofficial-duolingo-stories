@@ -1,0 +1,21 @@
+{
+  "name": "Unofficial Duolingo Stories",
+  "short_name": "UnofficialDuolingoStories",
+  "start_url": "index.html",
+  "orientation": "portrait",
+  "display": "standalone",
+  "background_color": "#fff",
+  "theme_color": "#1cb0f6",
+  "description": "A community project to bring the stories of Duolingo to more languages.",
+  "icons": [{
+    "src": "icons/favicon-32x32.png",
+    "sizes": "32x32",
+    "type": "image/png"
+  },
+  {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+  }]
+}

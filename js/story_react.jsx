@@ -22,7 +22,6 @@ function playSoundWrong() {
 
 async function setStoryDone(id) {
     let response = await fetch(`${backend_stories}set_story_done.php?id=${id}`);
-    console.log("response", response);
 }
 
 function AudioPlay(props) {
@@ -76,8 +75,8 @@ function HintLineContent(props) {
 
         if(parts.length === 1) {
             return addWord2(start, end)
-            addWord(dom, start, end);
-            return dom;
+            //addWord(dom, start, end);
+            //return dom;
         }
         let elements = [];
         for(let p of parts) {
@@ -361,8 +360,6 @@ function QuestionPointToPhrase(props) {
         props.controls.wrong
     );
 
-    console.log("QuestionPointToPhrase", hidden, props.editor);
-
     return <div className={hidden}>
         <div className="question">
             <HintLineContent content={element.question} />
@@ -420,10 +417,11 @@ function StoryLine(props) {
     return null;
 }
 
+var audio_base_path = "https://carex.uber.space/stories/";
 function useAudio(element) {
     let [audioRange, setAudioRange] = React.useState(99999);
     let audio = element.line.content.audio;
-    let audioObject = new Audio(audio.url);
+    let audioObject = new Audio(audio_base_path + audio.url);
 
     if(audio === undefined)
         return [0, () => {}]
@@ -465,7 +463,7 @@ function TextLine(props) {
     let hideRangesForChallenge = element.hideRangesForChallenge;
     if(props.progress !== element.trackingProperties.line_index)
         hideRangesForChallenge = undefined;
-    console.log("xxx", element.line.content.audio)
+
     if (element.line.type === "TITLE")
         return <div className={"title fadeGlideIn "+hidden}>
                     <span className="title">
@@ -536,20 +534,25 @@ function Part(props) {
 }
 
 function FinishedPage(props) {
+    /* The page at the end of the story. */
     return <div className="page_finished">
         <div>
             <div className="finished_image_container">
+                {/* add the three blinking stars */}
                 <div>
                     <div className="star1" />
                     <div className="star2" />
                     <div className="star3" />
                 </div>
+                {/* the icon of the story which changes from color to golden */}
                 <div className="finished_image">
                     <img src={props.story.illustrations.active} />
                     <img src={props.story.illustrations.gilded} className="image_golden"/>
                 </div>
             </div>
-            <h2>Story complete!</h2><p>You finished "{props.story.fromLanguageName}"</p></div>
+            {/* the text showing that the story is done */}
+            <h2>Story complete!</h2><p>You finished "{props.story.fromLanguageName}"</p>
+        </div>
     </div>
 }
 
@@ -644,7 +647,7 @@ export class Story extends React.Component {
         let last = parts[parts.length-1];
         let spacer = innerHeight/2-last.clientHeight*0.5;
 
-        scroll();
+        scroll_down();
         if(spacer !== this.state.spacer)
             this.setState({spacer: spacer});
     }
@@ -669,7 +672,6 @@ export class Story extends React.Component {
         let last_id = -1;
         for(let element of story.elements) {
             if(element.trackingProperties == undefined) {
-                console.log("!!!", element);
                 continue;
             }
             if(last_id !== element.trackingProperties.line_index) {
@@ -704,7 +706,7 @@ export class Story extends React.Component {
                     <div id="story" style={{paddingBottom: "0px"}}>
                         <div className="legal">
                             This story is owned by Duolingo, Inc. and is used under license from Duolingo.<br/>
-                            Duolingo is not responsible for the translation of this story into <span>{window.language_data !== undefined ? window.language_data[story.learningLanguage].name : ""}</span> and is not an official product of Duolingo.
+                            Duolingo is not responsible for the translation of this story into <span>{this.props.language_data !== undefined ? this.props.language_data[story.learningLanguage].name : ""}</span> and is not an official product of Duolingo.
                             Any further use of this story requires a license from Duolingo.<br/>
                             Visit <a style={{color: "gray"}} href="https://www.duolingo.com">www.duolingo.com</a> for more information.
                         </div>
@@ -747,7 +749,8 @@ export class Story extends React.Component {
 
 }
 
-function scroll() {
+function scroll_down() {
+    // scroll down to the bottom
     document.documentElement.scrollTo({
         left: 0,
         top: document.documentElement.scrollHeight - document.documentElement.clientHeight,

@@ -1,9 +1,12 @@
-let language_data = undefined;
 let backend = "https://carex.uber.space/stories/backend/"
 let backend_stories = backend+"stories/"
 window.backend_stories = backend_stories
 
 export async function getLanguageNames() {
+    /**
+     * Get the language data table.
+     * @type {Response}
+     */
     let response = await fetch(`${backend_stories}get_languages.php`);
     let data = await response.json();
     window.language_data = {};
@@ -100,12 +103,12 @@ export async function getStoryJSON(id) {
     let response = await fetch(`${backend_stories}get_story.php?id=${id}`);
     let data = await response.json();
 
-    story_id = data[0]["id"];
+    let story_id = data[0]["id"];
     try {
         await reloadAudioMap();
     }
     catch (e) {}
-    story = data[0]["text"];
+    let story = data[0]["text"];
     story_json = processStoryFile(story);
     return story_json;
 }
@@ -114,13 +117,13 @@ export async function getStory(id) {
     let response = await fetch(`${backend_stories}get_story.php?id=${id}`);
     let data = await response.json();
 
-    story_id = data[0]["id"];
+    let story_id = data[0]["id"];
     try {
         await reloadAudioMap();
     }
     catch (e) {}
-    story = data[0]["text"];
-    story_json = processStoryFile(story);
+    let story = data[0]["text"];
+    let story_json = processStoryFile(story);
     return story;
 }
 
@@ -145,6 +148,6 @@ export async function getLexicon(lang) {
 }
 
 export async function setStoryDone(id) {
-    let response = await fetch(`${backend_stories}set_story_done.php?id=${id}`);
+    await fetch(`${backend_stories}set_story_done.php?id=${id}`);
 }
 
