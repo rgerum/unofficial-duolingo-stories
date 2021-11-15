@@ -1,0 +1,247 @@
+
+.button_story {
+    width: 100px;
+    height: 100px;
+    display: inline-block;
+    background: #0071c8;
+    color: white;
+    border-radius: 15px;
+    border: 1px solid #005fa7;
+    box-shadow: #005fa7 0 6px;
+    cursor: pointer;
+    box-sizing: border-box;
+    margin: 0 25px;
+    position: relative;
+}
+.button_story img {
+    position: absolute;
+    width: 120px;
+    left: -11px;
+    top: -11px;
+}
+.button_story:hover {
+    filter: brightness(1.2);
+    /*transform: translate(0, 5px);
+    box-shadow: #58a700 0 0px;*/
+}
+.button_story[data-done=true] {
+    background: #ffbb09;
+    border: 1px solid #ffbb09;
+    box-shadow: #a75c00 0 6px;
+}
+.button_story:active {
+    transform: translate(0, 5px);
+    box-shadow: lightgray 0 0px;
+    transition: 0.1s box-shadow, 0.1s transform;
+}
+.story_title {
+    display: inline-block;
+    text-align: center;
+    font-weight: bold;
+    width: 150px;
+    font-size: 17px;
+    margin-top: 5px;
+}
+.story_xp {
+    display: inline-block;
+    text-align: center;
+    font-weight: bold;
+    width: 150px;
+    font-size: 17px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+    color: gray;
+}
+
+#header_index {
+    display: block;
+    border-bottom: 1px solid gray;
+    height: 80px;
+    padding-top: 10px;
+}
+#main_index {
+    max-width: 900px;
+    padding-top: 30px;
+    margin: 0 auto;
+}
+a {
+    color: black;
+}
+
+h1 {
+    width: 100%;
+    text-align: center;
+}
+
+#header_language #header_lang_selector{
+    display: none;
+    padding: 0px;
+    width: 160px;
+    background: white;
+    border-radius: 15px;
+    border: 1px solid lightgray;
+    overflow-y: scroll;
+    margin: 0;
+    max-height: 270px;
+
+}
+#header_language:hover #header_lang_selector {
+    display: block;
+
+}
+
+.language_select_item {
+    padding: 5px;
+    border-bottom: 1px solid lightgray;
+}
+.language_select_item:hover {
+    background: #e2e1e1;
+}
+
+.set {
+    font-size: 27px;
+    font-weight: 700;
+    margin: 0 26px;
+    padding-bottom: 20px;
+    text-align: center;
+    width: 100%;
+}
+
+.set::before {
+    margin-left: -50%;
+    right: 16px;
+}
+
+.set::after {
+    left: 16px;
+    margin-right: -50%;
+}
+
+.set::after, .set::before {
+    background: #e5e5e5;
+    content: "";
+    display: inline-block;
+    height: 2px;
+    position: relative;
+    vertical-align: middle;
+    width: 50%;
+}
+
+.set_list {
+    flex-wrap: wrap; display: flex; justify-content: center;
+}
+
+
+/* login */
+
+#login_dialog {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    background: white;
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+    top: 0;
+    left: 0;
+}
+
+#login_dialog div {
+    display: block;
+    width: 375px;
+    text-align: center;
+}
+
+#login_dialog div input {
+    align-items: center;
+    background: #f7f7f7;
+    border: 2px solid #e5e5e5;
+    border-radius: 16px;
+    display: flex;
+    margin-top: 8px;
+    position: relative;
+    width: 100%;
+    padding: 10px 17px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+#login_dialog button {
+    background-color: #1cb0f6;
+    border-color: #1899d6;
+    color: #fff;
+    width: 100%;
+    box-shadow: none;
+    border: solid #1899d6;
+    border-width: 0 0 4px;
+    margin-top: 8px;
+    transform: translate(0, 0px);
+    margin-bottom: 8px;
+}
+
+#login_dialog button:active {
+    margin-top: 12px;
+    border-width: 0 0 0px;
+}
+
+#login_dialog button:hover {
+    filter: brightness(1.1);
+}
+
+#login_dialog #quit {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
+#login_dialog .login_error {
+    color: #ea2b2b;
+}
+
+#login_dialog a {
+    cursor: pointer;
+    color: #1cb0f6;
+}
+
+/* story */
+.story_link {
+    margin-bottom: 23px;
+    width: 180px;
+}
+
+.button_story2 {
+    width: 110px;
+    height: 110px;
+    background: #516ddb;
+    border-radius: 20px;
+    border-color: #807cea;
+    cursor: pointer;
+    box-sizing: content-box;
+    margin: 0 25px;
+    position: relative;
+    border-width: 0px 0 4px;
+    padding: 0;
+}
+.button_story2 img {
+    position: absolute;
+    width: 132px;
+    left: -11px;
+    top: -11px;
+}
+.button_story2[data-done=true] {
+    background: #ffbb09;
+    border-color: rgb(255, 177, 0);
+}
+.button_story2:active {
+    border-width: 0px;
+    margin-top: 4px;
+}
+.story_title2 {
+    display: inline-block;
+    text-align: center;
+    font-weight: bold;
+    width: 160px;
+    font-size: 17px;
+    margin-top: 5px;
+}

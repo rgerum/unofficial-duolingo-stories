@@ -1,0 +1,11 @@
+#login_dialog button.link {
+    /* display: inline; */
+    width: auto;
+    transform: none;
+    background: none;
+    color: #1cb0f6;
+    margin: 0;
+    border: none;
+    font-size: 1em;
+    font-weight: bold;
+}
