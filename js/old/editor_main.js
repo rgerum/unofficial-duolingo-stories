@@ -1,11 +1,11 @@
-import {useInput, useDataFetcher, useDataFetcher2, useEventListener} from '../js/hooks.js'
-import {IndexContent, Login, useUsername, Flag, Spinner} from '../dist/index_react.js'
-import {Story} from '../dist/story_react.js'
-import {getStoriesEditor, setPublic, getCourses, getStory} from "../js/api_calls.js";
+import {useInput, useDataFetcher, useDataFetcher2, useEventListener} from '../../stories-app/src/hooks.js'
+import {IndexContent, Login, useUsername, Flag, Spinner} from '../../dist/index_react.js'
+import {Story} from '../../dist/story_react.js'
+import {getStoriesEditor, setPublic, getCourses, getStory} from "../../stories-app/src/api_calls.js";
 import {processStoryFile, reloadAudioMap, updateAudioLinks, generate_all_audio} from "../js/syntax_parser.js";
-import {get_login} from "../js/login.js";
-import {getLexicon} from "../js/api_calls.js";
-import {fetch_post} from "../js/includes.js";
+import {get_login} from "../../src/login.js";
+import {getLexicon} from "../../stories-app/src/api_calls.js";
+import {fetch_post} from "../../stories-app/src/includes.js";
 
 const urlParams = new URLSearchParams(window.location.search);
 

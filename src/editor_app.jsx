@@ -1,4 +1,4 @@
-import {useEventListener} from '../js/hooks.js'
+import {useEventListener} from '../stories-app/src/hooks.js'
 import {Overview} from './editor_overview.js'
 import {Story} from './story_react.js'
 

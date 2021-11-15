@@ -1,7 +1,7 @@
-import {useEventListener, useDataFetcher2} from '../js/hooks.js'
+import {useEventListener, useDataFetcher2} from '../stories-app/src/hooks.js'
 import {IndexContent} from './index_react.js'
 import {Story} from './story_react.js'
-import {getLanguageNames} from "../js/api_calls.js";
+import {getLanguageNames} from "../stories-app/src/api_calls.js";
 
 
 function App(props) {

@@ -1,23 +1,27 @@
 {
+  "name": "unofficial-duolingo-stories",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
   "scripts": {
-    "test": "jest"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src -d dist"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rgerum/unofficial-duolingo-stories.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rgerum/unofficial-duolingo-stories/issues"
+  },
+  "homepage": "https://github.com/rgerum/unofficial-duolingo-stories#readme",
+  "dependencies": {},
   "devDependencies": {
     "@babel/cli": "^7.0.0",
     "@babel/core": "^7.0.0",
-    "@babel/plugin-transform-react-jsx": "^7.10.4"
-  },
-  "dependencies": {
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "jest": "^26.4.2"
-  },
-  "plugins": [
-    "@babel/plugin-transform-react-jsx"
-  ],
-  "presets": [
-    [
-      "@babel/env",
-      {}
-    ]
-  ]
+    "@babel/plugin-transform-react-jsx": "^7.14.9"
+  }
 }

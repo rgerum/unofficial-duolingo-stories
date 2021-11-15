@@ -1,7 +1,7 @@
-import {useInput, useDataFetcher, useDataFetcher2, useEventListener} from '../js/hooks.js'
+import {useInput, useDataFetcher, useDataFetcher2, useEventListener} from '../../stories-app/src/hooks.js'
 import {IndexContent, Login, useUsername, Flag, Spinner} from './index_react.js'
 import {Story} from './story_react.js'
-import {getStoriesEditor, setPublic, getCourses, getStory} from "../js/api_calls.js";
+import {getStoriesEditor, setPublic, getCourses, getStory} from "../../stories-app/src/api_calls.js";
 
 function CourseList(props) {
     const courses = useDataFetcher(getCourses);
