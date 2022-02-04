@@ -180,7 +180,7 @@ function updateDatabase($keys, $table, $data, $id_key="id") {
     $db = database();
 
     // unset the id if it is none
-    if($data[$id_key] == "")
+    if(!isset($data[$id_key]) || $data[$id_key] == "")
         unset($data[$id_key]);
 
     // initialize arrays
@@ -220,11 +220,11 @@ function updateDatabase($keys, $table, $data, $id_key="id") {
         else
         {
             // iterate over keys
-            foreach ($_POST as $key => $value)
+            foreach ($data as $key => $value)
             {
                 // check if the key is known
                 if($key != "delete" && !isset($keys[$key]))
-                    echo "key $key not recognized!\n";
+                    ;//echo "key $key not recognized!\n";
                 else
                 {
                     // add the key and value to the lists

@@ -66,7 +66,7 @@ function App(props) {
   }
   else if(story === null)
     return <IndexContent language_data={language_data} course={course} setCourse={doSetCourse} onStartStory={changeStory} />
-  return <Story language_data={language_data} story={story} onQuit={()=>{changeStory(null)}} />
+  return <Story language_data={language_data} story_id={story} onQuit={()=>{changeStory(null)}} />
 }
 
 export default App;

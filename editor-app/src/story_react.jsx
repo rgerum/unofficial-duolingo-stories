@@ -1,7 +1,7 @@
 import React from 'react';
 import {useEventListener} from './hooks.js'
-import {getStoryJSON} from './api_calls.js'
-import {shuffle} from './includes.js'
+import {getStory} from './api_calls.js'
+import {shuffle} from './includes.mjs'
 import './story.css';
 
 let backend = "https://carex.uber.space/stories/backend/"
@@ -31,6 +31,8 @@ async function setStoryDone(id) {
 }
 
 function AudioPlay(props) {
+    if(props.onClick === undefined)
+        return <></>
     return <img onClick={props.onClick} src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
                 className="loudspeaker" alt="speaker" />;
 }
@@ -210,7 +212,7 @@ function QuestionMultipleChoice(props) {
                 >
                     <button className="multiple_choice_checkbox"/>
                     <div className="multiple_choice_answer_text">
-                        {answer.text}
+                        <HintLineContent content={answer} />
                     </div>
                 </li>
             ))}
@@ -243,7 +245,7 @@ function QuestionSelectPhrase(props) {
                                 (buttonState[index] === "false") ? "inactive" : undefined
                         }
                 >
-                    {answer.text}
+                    {answer.text ? answer.text : answer}
                 </button>
             ))}
         </div>
@@ -428,6 +430,12 @@ function StoryLine(props) {
     if(props.element.type === "LINE") {
         return <TextLine editor={props.editor} progress={props.progress} element={props.element} />
     }
+    if(props.element.type === "HEADER") {
+        return <Header editor={props.editor} progress={props.progress} element={props.element} />
+    }
+    if(props.element.type === "ERROR") {
+        return <div class={["error"]}>{props.element.text}</div>
+    }
     return null;
 }
 
@@ -435,6 +443,8 @@ var audio_base_path = "https://carex.uber.space/stories/";
 function useAudio(element) {
     let [audioRange, setAudioRange] = React.useState(99999);
     let audio = element?.line?.content?.audio;
+    if(audio === undefined)
+        audio = element?.learningLanguageTitleContent?.audio;
 
     useEventListener("progress_changed", e => {
         if(audio === undefined)
@@ -446,7 +456,7 @@ function useAudio(element) {
     })
 
     if(audio === undefined)
-        return [0, () => {}]
+        return [10000000, undefined]
 
     let audioObject = new Audio(audio_base_path + audio.url);
 
@@ -464,6 +474,34 @@ function useAudio(element) {
     return [audioRange, playAudio];
 }
 
+function Header(props) {
+    let element = props.element;
+    let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
+    //let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
+
+    if(props.hidden)
+        hidden = "hidden";
+
+    if(props.editor) {
+        hidden = "";
+        if(props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
+            hidden = "story_selection";
+    }
+
+    let [audioRange, playAudio] = useAudio(element)
+
+    let hideRangesForChallenge = undefined;
+    // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
+    return <div className={"title fadeGlideIn "+hidden} style={{textAlign: "center"}}>
+                <div><img className="title_img" src={element.illustrationUrl} /></div>
+                <span className="title">
+                    <AudioPlay onClick={playAudio} />
+                    <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.learningLanguageTitleContent} />
+                </span>
+    </div>;
+}
+
+
 function TextLine(props) {
     let element = props.element;
     let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
@@ -472,8 +510,11 @@ function TextLine(props) {
     if(props.hidden)
         hidden = "hidden";
 
-    if(props.editor)
+    if(props.editor) {
         hidden = "";
+        if(props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
+            hidden = "story_selection";
+    }
 
     let [audioRange, playAudio] = useAudio(element)
 
@@ -615,7 +656,6 @@ export class Story extends React.Component {
     }
 
     story_id_changed(e) {
-        console.log("story_id_changed", e);
         this.loadData(e.detail);
     }
 

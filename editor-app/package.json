@@ -1,0 +1,48 @@
+{
+  "name": "webpack-react",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Michael Pontus <m.pontus@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack --mode production",
+    "start": "webpack-dev-server --mode development"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/plugin-proposal-class-properties": "^7.16.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+    "@babel/plugin-transform-react-constant-elements": "^7.16.0",
+    "@babel/plugin-transform-react-inline-elements": "^7.16.0",
+    "@babel/plugin-transform-runtime": "^7.16.4",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.0",
+    "@babel/runtime": "^7.16.3",
+    "@svgr/webpack": "^6.1.0",
+    "babel-loader": "^8.2.3",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "css-loader": "^6.5.1",
+    "file-loader": "^6.2.0",
+    "formdata-node": "^4.3.2",
+    "html-webpack-plugin": "^5.5.0",
+    "mini-css-extract-plugin": "^2.4.5",
+    "style-loader": "^3.3.1",
+    "terser-webpack-plugin": "^5.2.5",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.64.4",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.6.0"
+  },
+  "dependencies": {
+    "@codemirror/basic-setup": "^0.19.0",
+    "@codemirror/highlight": "^0.19.6",
+    "@codemirror/lang-javascript": "^0.19.3",
+    "@codemirror/language": "^0.19.7",
+    "@codemirror/stream-parser": "^0.19.2",
+    "@codemirror/view": "^0.19.26",
+    "diff": "^5.0.0",
+    "node-fetch": "^3.1.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  }
+}

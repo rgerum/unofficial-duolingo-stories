@@ -1,0 +1,20 @@
+{
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "jest": "^26.4.2"
+  },
+  "plugins": [
+    "@babel/plugin-transform-react-jsx"
+  ],
+  "presets": [
+    [
+      "react",
+      "@babel/env",
+      {}
+    ]
+  ]
+}
