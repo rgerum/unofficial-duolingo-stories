@@ -153,6 +153,24 @@ else if($action == "story") {
      }
      exec("python3 upload_github.py $id $_POST[course_id] $author_name $message", $output, $retval);
 }
+else if($action == "story_delete") {
+    $keys = ["id" => "int"];
+    $id = intVal($_REQUEST['id']);
+    query_one($db, "DELETE FROM story WHERE id = $id;")
+
+     $newfile = fopen($id.".txt", "w");
+     $str = $_POST["text"];
+     fwrite($newfile, $str);
+     fclose($newfile);
+
+     $output=null;
+     $retval=null;
+     if(isset($_SESSION["user"])) {
+        $author_name = '"'.$_SESSION["user"]["username"].'"';
+        $message = '"delete '.$_POST["name"].' from course '.$_POST["course_id"].'"';
+     }
+     exec("python3 upload_github.py $id $_POST[course_id] $author_name $message delete", $output, $retval);
+}
 else {
     echo "unknown action";
 }

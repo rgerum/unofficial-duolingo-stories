@@ -67,4 +67,11 @@ export async function setStory(data) {
     return res;
 }
 
+export async function deleteStory(data) {
+    let res = await fetch_post(`${backend_set}?action=story_delete`, data);
+    res = await res.text()
+    return res;
+}
+
+
 

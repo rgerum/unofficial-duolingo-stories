@@ -93,13 +93,96 @@ def upload_to_github(repository, src, dst, author_name, author_email, git_messag
     )
     return (resp, jeez)
 
+
+def delete_from_github(repository, src, dst, author_name, author_email, git_message, branch="heads/main"):
+    # Get last commit SHA of a branch
+    resp, jeez = github_request("GET", f"/repos/{repository}/git/ref/{branch}")
+    last_commit_sha = jeez["object"]["sha"]
+    print("Last commit SHA: " + last_commit_sha)
+
+    """
+    const { data: { sha } } = await octokit.request('GET /repos/{owner}/{repo}/contents/{file_path}', {
+          owner: "owner-name",
+          repo: "repo-name",
+          file_path: "file-path-with-extension-from-root"
+        });
+    """
+
+    resp, jeez = github_request(
+        "GET",
+        f"/repos/{repository}/contents/{dst}",
+        data={
+
+        },
+    )
+    tree_sha = jeez["sha"]
+
+    """
+    delete /repos/{owner}/{repo}/contents/{path}
+
+    Parameters
+    Name 	Type 	In 	Description
+    accept 	string 	header
+
+    Setting to application/vnd.github.v3+json is recommended.
+    owner 	string 	path
+    repo 	string 	path
+    path 	string 	path
+
+    path parameter
+    message 	string 	body
+
+    Required. The commit message.
+    sha 	string 	body
+
+    Required. The blob SHA of the file being replaced.
+    branch 	string 	body
+
+    The branch name. Default: the repository’s default branch (usually master)
+    committer 	object 	body
+
+    object containing information about the committer.
+    """
+    resp, jeez = github_request(
+        "DELETE",
+        f"/repos/{repository}/contents/{dst}",
+        data={
+            "message": git_message,
+            "author": {
+                "name": author_name,
+                "email": author_email,
+            },
+            "committer": {
+                "name": author_name,
+                "email": author_email,
+            },
+            "parents": [last_commit_sha],
+            "sha": tree_sha,
+        },
+    )
+    new_commit_sha = jeez["commit"]["sha"]
+
+    resp, jeez = github_request(
+        "PATCH",
+        f"/repos/{repository}/git/refs/{branch}",
+        data={"sha": new_commit_sha},
+    )
+    return (resp, jeez)
+
 if __name__ == "__main__":
     print(sys.argv)
     file = sys.argv[1]
     course = sys.argv[2]
     author = sys.argv[3]
     message = sys.argv[4]
+    if len(sys.argv) >= 6:
+        command = sys.argv[5]
+    else:
+        command = "add"
     print("file", file, course, author, "message", message)
-    upload_to_github("rgerum/unofficial-duolingo-stories-content", f"{file}.txt", f"{course}/{file}.txt", f"{author}", f"{author}@carex.uberspace.de", message)
+    if command == "add":
+        upload_to_github("rgerum/unofficial-duolingo-stories-content", f"{file}.txt", f"{course}/{file}.txt", f"{author}", f"{author}@carex.uberspace.de", message)
+    else:
+        delete_from_github("rgerum/unofficial-duolingo-stories-content", f"{file}.txt", f"{course}/{file}.txt", f"{author}", f"{author}@carex.uberspace.de", message)
     import os
     os.remove(f"{file}.txt")
