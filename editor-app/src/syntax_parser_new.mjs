@@ -1,4 +1,4 @@
-import {getAvatar} from "./api_calls.js";
+import {getAvatar} from "./api_calls.mjs";
 
 
 function splitTextTokens(text, keep_tilde=true) {
@@ -326,18 +326,28 @@ export function speaker_text_trans(line) {
     let hideRanges = getHideRanges(content);
     // split number of speaker
     if(speaker) {
-        let [, id] = speaker.match(/\D*(\d*)/);
-        id = parseInt(id);
-        if(!character_avatars[id]) {
-            getAvatar(id).then((avatar)=>(character_avatars[id] = avatar?.link));
-        }
-        let avatar = character_avatars[id];
-        speaker = {"characterId": id, "avatarUrl": avatar}
+        let [, id] = speaker.match(/Speaker(.*)/);
+        speaker = get_avatar(id);
     }
     return [speaker, content, hideRanges, selectablePhrases, characterPositions];
 }
 
-function genereateLineElement(line_pair, line_index, group) {
+function get_avatar(id) {
+    id = parseInt(id) ? parseInt(id) : id;
+    if(!character_avatars[id]) {
+        getAvatar(id).then((avatar)=>(add_avatar(id, avatar ? avatar.link : undefined)));
+    }
+    let avatar = character_avatars[id];
+    let speaker = {"characterId": id, "avatarUrl": avatar}
+    return speaker;
+}
+
+function add_avatar(id, link) {
+    console.log("add_avatar", id, link)
+    character_avatars[id] = link;
+}
+
+function generateLineElement(line_pair, line_index, group) {
     let element = undefined;
     let [speaker, content, hideRanges, selectablePhrases, characterPositions] = speaker_text_trans(line_pair);
     if (speaker === undefined)
@@ -388,6 +398,26 @@ function shuftleArray(selectablePhrases) {
     return [phraseOrder, selectablePhrases2]
 }
 
+function line_to_audio(line) {
+    let audio = {}
+    line = line.substring(1);
+    let parts = line.split(";");
+    audio.url = parts.splice(0, 1)[0];
+
+    audio.keypoints = [];
+    let last_end = 0;
+    let last_time = 0;
+    for(let part of parts) {
+        let [start, duration] = part.split(",")
+        start = parseInt(start);
+        duration = parseInt(duration);
+        audio.keypoints.push({rangeEnd: last_end + start, audioStart: last_time + duration});
+        last_end += start;
+        last_time += duration;
+    }
+    return audio;
+}
+
 function parseGroup(groups) {
     let elements = [];
     let line_index = 1;
@@ -399,7 +429,17 @@ function parseGroup(groups) {
             if (name === "DATA") {
                 for(let i in lines) {
                     let [key, value] = lines[i][0].split("=");
-                    meta[key.trim()] = value.trim();
+                    key = key.trim()
+                    value = value.trim()
+                    if(key === "set") {
+                        [meta["set_id"], meta["set_index"]] = value.split("|");
+                    }
+                    else if(key.startsWith("icon_")) {
+                        add_avatar(key.substring(5), value);
+                    }
+                    else {
+                        meta[key] = value;
+                    }
                 }
             }
             else if (name === "HEADER") {
@@ -411,8 +451,14 @@ function parseGroup(groups) {
                     "trackingProperties": {},
                     "editor": {"start_no": group.start_no, "end_no": group.end_no}
                 });
+                if(lines[1] && lines[1][0].startsWith("$")) {
+                    elements[elements.length - 1].audio = line_to_audio(lines[1][0]);
+                }
             } else if (name === "LINE") {
-                elements.push(genereateLineElement(lines[0], line_index, group)[0]);
+                elements.push(generateLineElement(lines[0], line_index, group)[0]);
+                if(lines[1] && lines[1][0].startsWith("$")) {
+                    elements[elements.length - 1].audio = line_to_audio(lines[1][0]);
+                }
                 line_index += 1;
             } else if (name === "ARRANGE") {
                 let [speaker, content] = speaker_text_trans(lines[0]);
@@ -425,8 +471,11 @@ function parseGroup(groups) {
                     },
                     "editor": {"start_no": group.start_no, "end_no": group.end_no}
                 })
-                let [elem, selectablePhrases, characterPositions] = genereateLineElement(lines[1], line_index, group);
+                let [elem, selectablePhrases, characterPositions] = generateLineElement(lines[1], line_index, group);
                 elements.push(elem);
+                if(lines[2] && lines[2][0].startsWith("$")) {
+                    elements[elements.length - 1].audio = line_to_audio(lines[2][0]);
+                }
                 let [phraseOrder, selectablePhrases2] = shuftleArray(selectablePhrases);
 
                 elements.push({
@@ -452,8 +501,11 @@ function parseGroup(groups) {
                     },
                     "editor": {"start_no": group.start_no, "end_no": group.end_no}
                 })
-                let [elem, selectablePhrases, characterPositions] = genereateLineElement(lines[1], line_index, group);
+                let [elem, selectablePhrases, characterPositions] = generateLineElement(lines[1], line_index, group);
                 elements.push(elem);
+                if(lines[2] && lines[2][0].startsWith("$")) {
+                    elements[elements.length - 1].audio = line_to_audio(lines[2][0]);
+                }
 
                 let answer_lines = lines.splice(2);
                 let answers = [];
@@ -486,8 +538,11 @@ function parseGroup(groups) {
                     },
                     "editor": {"start_no": group.start_no, "end_no": group.end_no}
                 })
-                let [elem, selectablePhrases, characterPositions] = genereateLineElement(lines[1], line_index, group);
+                let [elem, selectablePhrases, characterPositions] = generateLineElement(lines[1], line_index, group);
                 elements.push(elem);
+                if(lines[2] && lines[2][0].startsWith("$")) {
+                    elements[elements.length - 1].audio = line_to_audio(lines[2][0]);
+                }
 
                 let answer_lines = lines.splice(2);
                 let answers = [];
@@ -591,8 +646,11 @@ function parseGroup(groups) {
                     return [correctAnswerIndex, transcriptParts]
                 }
                 let [correctAnswerIndex, transcriptParts] = pointToPhraseButtons(lines[1])
-                let [elem, selectablePhrases, characterPositions] = genereateLineElement(lines[1], line_index, group);
+                let [elem, selectablePhrases, characterPositions] = generateLineElement(lines[1], line_index, group);
                 elements.push(elem);
+                if(lines[2] && lines[2][0].startsWith("$")) {
+                    elements[elements.length - 1].audio = line_to_audio(lines[2][0]);
+                }
                 let [phraseOrder, selectablePhrases2] = shuftleArray(selectablePhrases);
 
                 elements.push({
@@ -736,5 +794,12 @@ async function generate_all_audio(story_json) {
     loadAudios(story_json);
 }
 
-window.character_avatars = {
+let character_avatars = {
 }
+try {
+    window.character_avatars = character_avatars
+}
+catch (e) {
+    
+}
+

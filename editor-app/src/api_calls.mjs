@@ -47,8 +47,13 @@ export async function getStory(id) {
     return response_json.json();
 }
 export async function getAvatar(id) {
-    let response_json = await fetch(`${backend_get}?action=avatar&id=${id}`);
-    return response_json.json();
+    try {
+        let response_json = await fetch(`${backend_get}?action=avatar&id=${id}`);
+        return response_json.json();
+    }
+    catch (e) {
+        return {};
+    }
 }
 
 export async function getImportList(id, id2) {

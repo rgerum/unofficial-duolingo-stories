@@ -97,6 +97,9 @@ function text_map_back(t) {
 }
 
 function text_hide_challenge(t, hideRangesForChallenge) {
+    if(hideRangesForChallenge.start !== undefined) // legacy
+        hideRangesForChallenge = [hideRangesForChallenge]
+
     t = text_copy(t);
     for(let challenge of hideRangesForChallenge) {
         t = text_splice(t, challenge.start, 0, ["[", " "])
@@ -160,21 +163,71 @@ function text_print(t) {
     return `${t.text}\n`
 }
 
-function processStory(json, set_id, story_id) {
+function audio_to_text(audio) {
+    if(audio === undefined)
+        return "";
+    let text = "";
+    text += "$"+audio.url.match(/audio\/(.*)\?\d*/)[1];
+    let point = 0, key_time = 0;
+    for(let keypoint of audio.keypoints) {
+        text +=`;${keypoint.rangeEnd - point},${keypoint.audioStart - key_time}`;
+        point = keypoint.rangeEnd;
+        key_time = keypoint.audioStart;
+    }
+    text += "\n";
+    return text;
+}
+
+export function processStory(json, set_id, story_id, old_text, avatar_list) {
     let T = "~";
     let text = ""
+
+    let old_meta = {}; // legacy
+    let speaker_list = {};
+    let speaker_icons = "";
+
+    if(old_text !== undefined) {
+        for (let line of old_text.split("\n")) {
+            let match = line.match(/\s*(\w+)\s*=\s*(\S+)\s*/);
+            if(match) {
+                old_meta[match[1]] = match[2];
+                if(match[1].startsWith("icon_")) {
+                    let speaker_name = match[1].substring(5);
+                    for(let avatar of avatar_list) {
+
+                        if(avatar[1] === match[2]) {
+                            speaker_list[speaker_name] = avatar[0]
+                        }
+                    }
+                    if(speaker_list[speaker_name] === undefined) {
+                        speaker_icons += `icon_${speaker_name}=${match[2]}\n`;
+                        console.log(speaker_icons)
+                    }
+                }
+                if(match[1].startsWith("speaker_")) {
+                    speaker_icons += `${match[1]}=${match[2]}\n`;
+                }
+            }
+        }
+        set_id = old_meta["set_id"];
+        story_id = old_meta["set_index"];
+    }
+    console.log(old_meta)
 
     text += "[DATA]\n";
     text += `fromLanguageName=${json.fromLanguageName}\n`;
     text += `icon=${json.illustrations.active.match(/image\/(.*).svg/)[1]}\n`;
-    text += `set_id=${set_id}\n`;
-    text += `set_index=${story_id}\n`;
+    text += `set=${set_id}|${story_id}\n`;
     text += "\n";
+
+    if(speaker_icons !== "") // legacy
+        text += speaker_icons + "\n";
 
     let challenge_prompt = undefined;
     let element_index = -1;
     for (let element of json.elements) {
         element_index += 1;
+
         if (element.type === "LINE") {
             if(element.line.avatarUrl) {
                 avatars[element.line.characterId] = element.line.avatarUrl
@@ -183,12 +236,18 @@ function processStory(json, set_id, story_id) {
                 challenge_prompt.push(element);
             else if(json.elements[element_index+1].type === "POINT_TO_PHRASE")
                 challenge_prompt = [element];
+            else if (element.line.type === "TITLE") { // legacy
+                let t = text_new(element.line.content.text)
+                t = text_splice(t, 0, 0, make_same_length(["> ", T+" "]));
+                t = text_add_hints(t, element.line.content)
+                text += `[HEADER]\n${text_print(t)}${audio_to_text(element.line.content.audio)}\n`
+            }
             else {
                 let t = text_new(element.line.content.text)
                 t = text_splice(t, 0, 0, make_same_length([line_speaker(element.line), T]));
                 t = text_hide_challenge(t, element.hideRangesForChallenge);
                 t = text_add_hints(t, element.line.content)
-                text += `[LINE]\n${text_print(t)}\n`
+                text += `[LINE]\n${text_print(t)}${audio_to_text(element.line.content.audio)}\n`
             }
         } else if (element.type === "HEADER") {
             let t = text_new(element.learningLanguageTitleContent.text)
@@ -205,11 +264,13 @@ function processStory(json, set_id, story_id) {
             t = text_splice(t, 0, 0, make_same_length([line_speaker(challenge_prompt[1].line), T]));
             t = text_hide_challenge(t, challenge_prompt[1].hideRangesForChallenge);
             t = text_add_hints(t, challenge_prompt[1].line.content)
-            text += `[SELECT_PHRASE]\n${text_print(t0)}${text_print(t)}`
+            text += `[SELECT_PHRASE]\n${text_print(t0)}${text_print(t)}${audio_to_text(challenge_prompt[1].line.content.audio)}`
 
             challenge_prompt = undefined;
 
             for(let i in element.answers) {
+                if(element.answers[i].slice === undefined) // legacy
+                    element.answers[i] = element.answers[i].text
                 let t = text_new(element.answers[i])
                 t = text_splice(t, 0, 0, [(parseInt(i) === parseInt(element.correctAnswerIndex)) ? "+ " : "- ", T+" "]);
                 text += text_print(t)
@@ -235,7 +296,7 @@ function processStory(json, set_id, story_id) {
                     t = text_splice(t, 0, 0, make_same_length([line_speaker(challenge_prompt[1].line), T]));
                     t = text_hide_challenge(t, challenge_prompt[1].hideRangesForChallenge);
                     t = text_add_hints(t, challenge_prompt[1].line.content)
-                    text += `[CONTINUATION]\n${text_print(t0)}${text_print(t)}`
+                    text += `[CONTINUATION]\n${text_print(t0)}${text_print(t)}${audio_to_text(challenge_prompt[1].line.content.audio)}`
                 }
                 else {
                     throw "Undefined multiple choice challenge type"
@@ -265,7 +326,7 @@ function processStory(json, set_id, story_id) {
             t = text_add_hints(t, challenge_prompt[1].line.content)
             t = text_add_arrange(t, element)
 
-            text += `[ARRANGE]\n${text_print(t0)}${text_print(t)}\n`
+            text += `[ARRANGE]\n${text_print(t0)}${text_print(t)}${audio_to_text(challenge_prompt[1].line.content.audio)}\n`
             challenge_prompt = undefined;
         }
         else if(element.type === "POINT_TO_PHRASE") {
@@ -279,7 +340,7 @@ function processStory(json, set_id, story_id) {
             let t0 = text_new(element.question.text)
             t0 = text_add_hints(t0, element.question)
             t0 = text_splice(t0, 0, 0, ["> ", "~ "]);
-            text += `[POINT_TO_PHRASE]\n${text_print(t0)}${text_print(t)}\n`
+            text += `[POINT_TO_PHRASE]\n${text_print(t0)}${text_print(t)}${audio_to_text(challenge_prompt[0].line.content.audio)}\n`
 
             challenge_prompt = undefined;
         }
@@ -303,7 +364,6 @@ function processStory(json, set_id, story_id) {
             throw "Undefined element type"
         }
     }
-    console.log(text);
     return text;
 }
 
@@ -407,7 +467,7 @@ async function test() {
         console.log(e, "saved")
     });
 }
-test();
+//test();
 
 //import fetch from "node-fetch";
 import {FormData} from "formdata-node"

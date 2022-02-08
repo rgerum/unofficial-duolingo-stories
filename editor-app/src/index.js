@@ -7,7 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Story} from "./story_react";
 import {EditorOverview} from "./editor"
-import {getStory, setStory} from "./api_calls";
+import {getStory, setStory} from "./api_calls.mjs";
 
 import {example} from "./parser"
 

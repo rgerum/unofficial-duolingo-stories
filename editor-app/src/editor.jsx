@@ -3,7 +3,7 @@ import {useDataFetcher, useDataFetcher2, useEventListener} from './hooks'
 import {Spinner} from './react/spinner'
 import {Flag} from './react/flag'
 import {useUsername, Login, LoginDialog} from './login'
-import {setPublic, getCourses, getCourse, getImportList, setImport, getSession} from "./api_calls";
+import {setPublic, getCourses, getCourse, getImportList, setImport, getSession} from "./api_calls.mjs";
 import "./editor.css"
 
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import {useEventListener} from './hooks.js'
-import {getStory} from './api_calls.js'
+import {getStory} from './api_calls.mjs'
 import {shuffle} from './includes.mjs'
 import './story.css';
 
