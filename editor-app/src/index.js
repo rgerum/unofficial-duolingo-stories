@@ -79,6 +79,7 @@ else {
                     document.getElementById('preview')
                 );
                 last_lineno = lineno;
+                document.getElementsByClassName("story_selection")[0]?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"})
             }
         }
 
