@@ -3,56 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Duolingo - Unofficial stories</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script type="text/javascript" src="js/sort-table.min.js"></script>
 
     <style>
         body {
-            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             position: relative;
         }
+
         #main {
             max-width: 500px;
             margin: 0 auto;
         }
+
         .speaker {
             font-weight: bold;
         }
+
         .speaker::after {
             content: ": ";
         }
+
         .text {
 
         }
+
         .title {
             font-weight: bold;
             font-size: 1.2em;
         }
-        .button_story {
-            width: 100px;
-            height: 100px;
-            display: inline-block;
-            background: #0071c8;
-            color: white;
-            border-radius: 15px;
-            border: 1px solid #005fa7;
-            box-shadow: #005fa7 0 6px;
-            cursor: pointer;
-            box-sizing: border-box;
-            margin: 0 25px;
-        }
-        .button_story:hover {
-            filter: brightness(1.2);
-            /*transform: translate(0, 5px);
-            box-shadow: #58a700 0 0px;*/
-        }
-        .button_story[data-done=true] {
-            background: #ffbb09;
-            border: 1px solid #ffbb09;
-            box-shadow: #a75c00 0 6px;
-        }
+
         .story_title {
             display: inline-block;
             text-align: center;
@@ -62,6 +45,7 @@
             margin-top: 5px;
             margin-bottom: 20px;
         }
+
         .button {
             text-transform: uppercase;
             padding: 12px 30px;
@@ -75,18 +59,21 @@
             font-weight: bold;
             text-align: center;
         }
+
         .button:hover[data-status="active"] {
             filter: brightness(1.2);
             /*transform: translate(0, 5px);
             box-shadow: #58a700 0 0px;*/
         }
+
         .button[data-status="inactive"] {
             background: #a3a3a3;
             transform: translate(0, 5px);
-            box-shadow: #575757 0 0px;
+            box-shadow: #575757 0 0;
             color: #575757;
             cursor: default;
         }
+
         #progress {
             z-index: 5;
             background: lightgray;
@@ -95,9 +82,10 @@
             height: 10px;
             padding: 0;
         }
+
         #progress span {
             display: block;
-            width: 0%;
+            width: 0;
             height: 100%;
             background: #78c800;;
             border-radius: 5px;
@@ -112,6 +100,7 @@
             position: relative;
             cursor: pointer;
         }
+
         .checkbox {
             display: inline-block;
             border-radius: 5px;
@@ -123,57 +112,27 @@
             text-align: center;
             font-weight: bold;
         }
+
         .checkbox[data-status="right"] {
             background: #d7feb9;
             border-color: #ade756;
             box-shadow: 0 3px #ade756;
             color: #7da13c;
         }
+
         .checkbox[data-status="false"] {
             background: #feb9b9;
             border-color: #e7565b;
             box-shadow: 0 3px #e75662;
             color: #a13c3c;
         }
+
         .answer_text {
             display: inline-block;
             width: calc(100% - 50px);
             padding: 5px;
         }
-        .clickword {
-            background: #fff;
-            display: inline-block;
-            border-radius: 10px;
-            border: 1px solid lightgray;
-            box-shadow: 0 3px lightgray;
-            text-align: center;
-            padding: 8px;
-            margin: 5px;
-            cursor: pointer;
-        }
-        .clickword[data-status="empty"] {
-            background: lightgray;
-            color: lightgray;
-            cursor: default;
-        }
-        .clickword[data-status="selected"] {
-            background: #ddf4ff;
-            border-color: #84d8ff;
-            color: #1cb0f6;
-            box-shadow: 0 3px #84d8ff;
-        }
-        .clickword:hover[data-status="unselected"] {
-            filter:brightness(0.9);
-        }
-        .clickword:hover[data-status="selected"] {
-            background: #a4dffb;
-            border-color: #3ebbf6;
-            color: #00aff9;
-            box-shadow: 0 3px #3ebbf6;
-        }
-        .clickword[data-status="inactive"] {
-            opacity: 0.5;
-        }
+
         #header {
             position: fixed;
             left: 0;
@@ -184,16 +143,18 @@
             padding: 30px 30px;
             box-sizing: border-box;
         }
+
         #story {
             padding-top: 40px;
             padding-bottom: 100px;
         }
+
         #footer {
             border-top: 1px solid gray;
             position: fixed;
             background: white;
             z-index: 10;
-            bottom: 0px;
+            bottom: 0;
             left: 0;
             height: 100px;
             padding: 30px;
@@ -201,55 +162,6 @@
             box-sizing: border-box;
         }
 
-        /* Tooltip container */
-        .tooltip {
-            position: relative;
-            border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-        }
-        .word::after {
-            content: " ";
-            border-bottom: none;
-        }
-
-        /* Tooltip text */
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 120px;
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            padding: 5px 0;
-            border-radius: 6px;
-
-            /* Position the tooltip text */
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -60px;
-
-            /* Fade in tooltip */
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        /* Tooltip arrow */
-        .tooltip .tooltiptext::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #555 transparent transparent transparent;
-        }
-
-        /* Show the tooltip text when you mouse over the tooltip container */
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
     </style>
 
     <style>
@@ -259,6 +171,7 @@
             padding-top: 10px;
             z-index: 1;
         }
+
         #main {
             padding-top: 80px;
             max-width: 800px;
@@ -275,11 +188,18 @@
             padding: 8px;
         }
 
-        #story_list tr:nth-child(even){background-color: #f2f2f2;}
+        #story_list tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
 
-        #story_list tr:hover {background-color: #ddd;}
+        #story_list tr:hover {
+            background-color: #ddd;
+        }
 
-        #story_list tr a { color: black; font-weight: bold; }
+        #story_list tr a {
+            color: black;
+            font-weight: bold;
+        }
 
         #story_list th {
             padding-top: 12px;
@@ -338,8 +258,6 @@
         }
 
         input:checked + .slider:before {
-            -webkit-transform: translateX(13px);
-            -ms-transform: translateX(13px);
             transform: translateX(13px);
         }
 
@@ -364,9 +282,11 @@
         <input id=password type="password" value="" placeholder="password">
         <div class="button" onclick="login_button();" style="float: none">Login</div>
     </div>
-    <div id="loggedin" style="display: none; float: right">
+    <div id="logged_in" style="display: none; float: right">
         <span id="display_username" style="font-size: 1.2em; padding-right: 14px; display: inline-block;"></span>
-        <div id="button_editor" class="button" onclick="location.href = 'index.html'+window.location.search;" style="display:none; float: none">Home</div>
+        <div id="button_editor" class="button" onclick="location.href = 'index.html'+window.location.search;"
+             style="display:none; float: none">Home
+        </div>
         <div class="button" onclick="button_logout();" style="float: none">Logout</div>
     </div>
 </div>
@@ -382,7 +302,14 @@
     <p id="languages"></p>
     <table id="story_list" class="js-sort-table">
         <thead>
-        <tr><th style="border-radius: 10px 0 0 0">username</th><th>email</th><th>Registration Date</th><th style="text-align: right">stories</th><th>activated</th><th style="border-radius: 0 10px 0 0">Write</th></tr>
+        <tr>
+            <th style="border-radius: 10px 0 0 0">username</th>
+            <th>email</th>
+            <th>Registration Date</th>
+            <th style="text-align: right">stories</th>
+            <th>activated</th>
+            <th style="border-radius: 0 10px 0 0">Write</th>
+        </tr>
         </thead>
         <tbody>
 
@@ -394,116 +321,117 @@
 
 
     let backend = 'https://carex.uber.space/stories/backend/';
-    let backend_user = backend+'user/';
+    let backend_user = backend + 'user/';
 
     function inputs_to_dict(inputs) {
         let result = {}
-        for(let name in inputs) {
+        for (let name in inputs) {
             result[name] = document.querySelector(inputs[name]).value;
         }
         return result;
     }
+
     function dict_to_query(data) {
         let query = [];
-        for(let name in data)
+        for (let name in data)
             query.push(`${encodeURIComponent(name)}=${encodeURIComponent(data[name])}`);
         return query.join("&")
     }
+
     function fetch_post(url, data) {
-        var fd = new FormData();
+        let fd = new FormData();
         //very simply, doesn't handle complete objects
-        for(var i in data){
-            fd.append(i,data[i]);
+        for (let i in data) {
+            fd.append(i, data[i]);
         }
-        var req = new Request(url,{
-            method:"POST",
-            body:fd,
-            mode:"cors"
+        let req = new Request(url, {
+            method: "POST",
+            body: fd,
+            mode: "cors"
         });
         return fetch(req);
     }
 
     async function get_login() {
         let response = await fetch(`${backend_user}get_login.php`)
-        if(response.status === 403)
+        if (response.status === 403)
             return undefined;
 
-        let text = response.json();
-        return text;
+        return response.json();
     }
 
     async function login(data) {
-        let reponse = await fetch(`${backend_user}check_auth.php?${dict_to_query(data)}`)
-        if(reponse.status === 403)
-            return false;
-        return true;
+        let response = await fetch(`${backend_user}check_auth.php?${dict_to_query(data)}`)
+        return response.status !== 403;
+
     }
 
     const urlParams = new URLSearchParams(window.location.search);
 
     backend = "https://carex.uber.space/stories/backend/"
-    backend_stories = backend+"stories/"
-    backend_admin = backend+"admin/"
+    backend_stories = backend + "stories/"
+    backend_admin = backend + "admin/"
 
     async function button_logout() {
         await logout();
-        check_login();
+        await check_login();
     }
 
     function pad(x) {
-        if(x < 1000)
-            return "&nbsp;"+x;
-        if(x < 100)
-            return "&nbsp;"+x;
-        if(x < 10)
-            return "&nbsp;"+x;
+        if (x < 1000)
+            return "&nbsp;" + x;
+        if (x < 100)
+            return "&nbsp;" + x;
+        if (x < 10)
+            return "&nbsp;" + x;
         return x;
     }
 
 
     async function login_button() {
         let success = await login(inputs_to_dict({username: "#username", password: "#password"}));
-        if(success == false) {
+        if (success === false) {
             document.getElementById("login_status").innerText = "Error: username or password is wrong.";
-        }
-        else {
+        } else {
             document.getElementById("login_status").innerHTML = "Successfully logged in. Go to the <a href='index.html'>overview</a>.";
-            check_login();
+            await check_login();
         }
     }
+
     async function check_login() {
         let login = await get_login();
         console.log("login", login);
-        if(login === undefined) {
+        if (login === undefined) {
             document.getElementById("login_form").style.display = "block";
-            document.getElementById("loggedin").style.display = "none";
-        }
-        else {
+            document.getElementById("logged_in").style.display = "none";
+        } else {
             document.getElementById("login_form").style.display = "none";
-            document.getElementById("loggedin").style.display = "block";
-            document.getElementById("button_editor").style.display = login.role != 0 ? "inline-block" : "none";
+            document.getElementById("logged_in").style.display = "block";
+            document.getElementById("button_editor").style.display = login.role !== 0 ? "inline-block" : "none";
             document.getElementById("display_username").innerText = login.username;
         }
 
-        loadStory(urlParams.get('lang'), urlParams.get('lang_base') || "en");
+        await loadStory();
     }
+
     check_login();
 
     list = [];
-    async function loadStory(lang, lang_base) {
+
+    async function loadStory() {
         let response = await fetch(`${backend_admin}get_user_list.php`);
-        if(response.status != 200)
+        if (response.status !== 200)
             return
 
         let data = await response.json();
         console.log(data);
         d3.select("tbody").selectAll("tr").remove();
         d3.select("tbody").selectAll("tr").data(data).enter().append("tr")
-            .each(function(d) {
+            .each(function (d) {
                 d3.select(this).append("td").text(d.username)
-                td = d3.select(this).append("td");
+                let td = d3.select(this).append("td");
                 td.append("a")
-                    .attr("href", "mailto:"+d.email+"?subject=[Unofficial Duolingo Stories] Welcome")
+                    .attr("href", "mailto:" + d.email + "?subject=[Unofficial Duolingo Stories] Welcome")
                     .text(d.email)
                 d3.select(this).append("td").text(d.regdate)
                 d3.select(this).append("td").style("text-align", "right").html(pad(d.count))
@@ -516,19 +444,18 @@
                 `).on("click", async function () {
                     console.log("clicked", this, d.activated);
                     d3.event.preventDefault();
-                    if(!d.activated) {
-                        if(confirm(`Do you want to activate the user account \"${d.username}\"?`)) {
-                            let response = await fetch(backend_admin+"set_user_active.php?id="+d.id+"&activated=1");
-                            if(response.status === 200) {
+                    if (!d.activated) {
+                        if (confirm(`Do you want to activate the user account \"${d.username}\"?`)) {
+                            let response = await fetch(backend_admin + "set_user_active.php?id=" + d.id + "&activated=1");
+                            if (response.status === 200) {
                                 d3.select(this).select("input").attr("checked", "true");
                                 d.activated = 1;
                             }
                         }
-                    }
-                    else {
-                        if(confirm(`Do you want to deactivate the user account \"${d.username}\"?`)) {
-                            let response = await fetch(backend_admin+"set_user_active.php?id="+d.id+"&activated=0");
-                            if(response.status === 200) {
+                    } else {
+                        if (confirm(`Do you want to deactivate the user account \"${d.username}\"?`)) {
+                            let response = await fetch(backend_admin + "set_user_active.php?id=" + d.id + "&activated=0");
+                            if (response.status === 200) {
                                 d3.select(this).select("input").attr("checked", null);
                                 d.activated = 0;
                             }
@@ -544,19 +471,18 @@
                 `).on("click", async function () {
                     console.log("clicked", this, d.role);
                     d3.event.preventDefault();
-                    if(!d.role) {
-                        if(confirm(`Do you want to give the user \"${d.username}\" write permissions?`)) {
-                            let response = await fetch(backend_admin+"set_user_write.php?id="+d.id+"&write=1");
-                            if(response.status === 200) {
+                    if (!d.role) {
+                        if (confirm(`Do you want to give the user \"${d.username}\" write permissions?`)) {
+                            let response = await fetch(backend_admin + "set_user_write.php?id=" + d.id + "&write=1");
+                            if (response.status === 200) {
                                 d3.select(this).select("input").attr("checked", "true");
                                 d.role = 1;
                             }
                         }
-                    }
-                    else {
-                        if(confirm(`Do you want to revoke write permissions from the user \"${d.username}\"?`)) {
-                            let response = await fetch(backend_admin+"set_user_write.php?id="+d.id+"&write=0");
-                            if(response.status === 200) {
+                    } else {
+                        if (confirm(`Do you want to revoke write permissions from the user \"${d.username}\"?`)) {
+                            let response = await fetch(backend_admin + "set_user_write.php?id=" + d.id + "&write=0");
+                            if (response.status === 200) {
                                 d3.select(this).select("input").attr("checked", null);
                                 d.role = 0;
                             }
