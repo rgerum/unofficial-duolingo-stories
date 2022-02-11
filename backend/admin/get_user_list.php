@@ -11,7 +11,7 @@ $db = database();
 $lang = sqlSafeString($_GET['lang']);
 $lang_base = sqlSafeString($_GET['lang_base']);
 $query = "
-SELECT user.id, user.username, user.role, user.email, user.regdate, user.activated, COUNT(story.id) count FROM user LEFT JOIN story ON story.author = user.id GROUP BY user.id
+SELECT user.id, user.username, user.role, user.email, user.regdate, user.activated, user.admin, COUNT(story.id) count FROM user LEFT JOIN story ON story.author = user.id GROUP BY user.id
 ";
 
 queryDatabase($query);
