@@ -1,6 +1,6 @@
 import {StreamLanguage} from "@codemirror/stream-parser"
 
-const STATE_DEFAULT = "default";
+const STATE_DEFAULT = "atom";
 
 const STATE_DATA_KEY = "heading";
 const STATE_DATA_VALUE = "name";
