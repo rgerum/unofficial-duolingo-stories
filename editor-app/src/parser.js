@@ -36,11 +36,11 @@ function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
         }
     }
     if (allow_buttons === 2)
-        if (stream.match(/\(\+[^\(\)]*\)/)) {
+        if (stream.match(/\(\+[^()]*\)/)) {
             return STATE_TEXT_BUTTON_RIGHT_EVEN;
         }
     if (allow_buttons)
-        if (stream.match(/\([^\(\)]*\)/)) {
+        if (stream.match(/\([^()]*\)/)) {
             if (state.bracket)
                 return STATE_TEXT_BUTTON_ODD
             return STATE_TEXT_BUTTON_EVEN
@@ -48,6 +48,11 @@ function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
 
     if(stream.match(/ *[^ $\]\[]+ */)) {
         state.odd = !state.odd
+        if(state.bracket && allow_hide) {
+            if (state.odd)
+                return STATE_TEXT_HIDE_EVEN
+            return STATE_TEXT_HIDE_ODD
+        }
 
         if (state.odd)
             return STATE_TEXT_EVEN
@@ -365,178 +370,12 @@ function parserWithMetadata(stream, state) {
 
     stream.skipToEnd();
     return STATE_ERROR;
-    // new element
-    if(state.pos === "default" && stream.eat("[")) {
-        state.pos = "type";
-        return STATE_DEFAULT
-    }
-    // inside new element
-    if(state.pos === "type") {
-        if(stream.eat("]")) {
-            state.pos = "default";
-            return STATE_DEFAULT
-        }
-        let type = stream.match(/[^\]]+/)[0];
-        state.type = type;
-        state.odd = false;
-        return "keyword"
-    }
-    if(state.type === "DATA") {
-        if(stream.match(/[^=]+/)) {
-            if(state.odd) {
-                state.odd = false;
-                return STATE_TEXT_ODD;
-            }
-            return "heading";
-        }
-        if(stream.eat("=")) {
-            state.odd = true;
-            return STATE_DEFAULT
-        }
-    }
-    if(state.pos === "speech") {
-        if(stream.match(/ +/)) {
-            if(state.bracket)
-                return STATE_TEXT_HIDE_EVEN
-            return STATE_DEFAULT;
-        }
-        if(!state.translate) {
-            parserTextWithTranslation(stream, state,
-                state.type === "ARRANGE" || state.type === "CONTINUATION" || state.type === "SELECT_PHRASE",
-                (state.type === "POINT_TO_PHRASE" || state.type === "ARRANGE") + (state.type === "POINT_TO_PHRASE")
-                )
-        }
-        if(stream.eol()) {
-            stream.skipToEnd()
-            state.pos = "default";
-            state.odd = false;
-            state.translate = false;
-            state.bracket = false;
-            return "here"
-        }
-        if(
-            ((state.type === "ARRANGE") && stream.match(/ *[^ $\]\[\(\)]+ */)) ||
-            ((state.type === "CONTINUATION" || "SELECT_PHRASE") && stream.match(/ *[^ $\]\[]+ */)) ||
-            ((state.type === "POINT_TO_PHRASE") && stream.match(/ *[^ $\(\)]+ */)) ||
-            (stream.match(/ *[^ $\]\[]+ */))
-        ) {
-            if(stream.eol())
-                state.pos = "default"
-            state.odd = !state.odd
-            if(state.translate === true) {
-                if (state.odd)
-                    return STATE_TRANS_EVEN
-                return STATE_TRANS_ODD
-            }
-            if(state.bracket) {
-                if (state.odd)
-                    return STATE_TEXT_HIDE_EVEN
-                return STATE_TEXT_HIDE_ODD
-            }
-            if(state.paranthese) {
-                if (state.odd)
-                    return "number"
-                return "modifier"
-            }
-            if (state.odd)
-                return STATE_TEXT_EVEN
-            return STATE_TEXT_ODD
-        }
-        else {
-            stream.skipToEnd()
-            state.pos = "default"
-            state.odd = false;
-            state.translate = false;
-            state.bracket = false;
-            return "here";
-        }
-    }
-    if(state.pos === "match_part") {
-        if(state.odd === false) {
-            if(stream.match(/[^<>]*/)) {
-                state.odd = undefined
-                return STATE_TEXT_EVEN
-            }
-        }
-        else if(state.odd === undefined) {
-            if(stream.match(/ *<> */)) {
-                state.odd = true
-                return STATE_DEFAULT
-            }
-        }
-        else {
-            stream.skipToEnd()
-            state.pos = "default"
-            state.odd = false;
-            return STATE_TRANS_EVEN;
-        }
-    }
-    if(state.type === "LINE" || state.type === "HEADER"
-        || state.type === "MULTIPLE_CHOICE"
-        || state.type === "MATCH"
-        || state.type === "CONTINUATION"
-        || state.type === "SELECT_PHRASE"
-        || state.type === "ARRANGE"
-        || state.type === "POINT_TO_PHRASE"
-    ) {
-        if(stream.eat(">")) {
-            state.pos = "speech";
-            state.odd = false;
-            state.translate = false;
-            state.bracket = false;
-            return "strong"
-        }
-        if(stream.eat("~")) {
-            state.pos = "speech";
-            state.odd = false;
-            state.translate = true;
-            return "strong"
-        }
-        if(stream.match(/.+:/)) {
-            state.pos = "speech";
-            state.odd = false;
-            state.translate = false;
-            state.bracket = false;
-            return "heading"
-        }
-        if(state.type === "MATCH") {
-            if (stream.eat("-")) {
-                state.pos = "match_part";
-                state.odd = false;
-                state.translate = false;
-                return STATE_DEFAULT
-            }
-        }
-        if(state.type === "MULTIPLE_CHOICE"
-            || state.type === "CONTINUATION"
-            || state.type === "SELECT_PHRASE"
-        ) {
-            if (stream.eat("+")) {
-                state.pos = "speech";
-                state.odd = false;
-                state.translate = false;
-                state.bracket = false;
-                return STATE_DEFAULT
-            }
-            if (stream.eat("-")) {
-                state.pos = "speech";
-                state.odd = false;
-                state.translate = false;
-                state.bracket = false;
-                return STATE_DEFAULT
-            }
-        }
-    }
-    state.eol();
-    state.odd = false;
-    state.bracket = false;
-    return "deleted"
 }
 
 
 export const exampleLanguage = StreamLanguage.define({
     token: parserWithMetadata,
-    startState(indentUnit) { return {pos:"default"}
+    startState() { return {pos:"default"}
     }
 })
 
