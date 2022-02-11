@@ -443,6 +443,7 @@ var audio_base_path = "https://carex.uber.space/stories/";
 function useAudio(element) {
     let [audioRange, setAudioRange] = React.useState(99999);
     let audio = element?.line?.content?.audio;
+
     if(audio === undefined)
         audio = element?.learningLanguageTitleContent?.audio;
 

@@ -124,7 +124,7 @@ else {
             selection = "#3E4451",
             cursor = "#528bff"
          */
-        
+
         const color_even = "#00389d",
             color_odd = "#009623"
 
