@@ -1,6 +1,5 @@
 import React from 'react';
 import {useEventListener} from './hooks.js'
-import {getStory} from './api_calls.mjs'
 import {shuffle} from './includes.mjs'
 import './story.css';
 
@@ -60,9 +59,8 @@ function HintLineContent(props) {
             return false;
         if(start1 <= start2 && start2 < end1)
             return true;
-        if(start2 <= start1 && start1 < end2)
-            return true;
-        return false;
+        return start2 <= start1 && start1 < end2;
+
     }
 
     function addWord2(start, end) {
@@ -229,8 +227,10 @@ function QuestionSelectPhrase(props) {
     useCallOnActivation(element.trackingProperties.line_index, props.controls.block_next);
     let [buttonState, click] = useChoiceButtons(element.answers.length, element.correctAnswerIndex,
         ()=> {
-            props.controls.unhide(props.element.trackingProperties.line_index);
-            props.controls.right();
+            if(!props.editor) {
+                props.controls.unhide(props.element.trackingProperties.line_index);
+                props.controls.right();
+            }
         },
         props.controls.wrong
     );
@@ -258,8 +258,8 @@ function QuestionArrange(props) {
     if(props.editor) hidden2 = "";
 
     let [buttonState, click] = useArrangeButtons(element.phraseOrder, props.controls.right, props.controls.wrong,
-        (i) => props.controls.unhide(element.trackingProperties.line_index,
-            element.characterPositions[i]))
+        (i) => {if(!props.editor) props.controls.unhide(element.trackingProperties.line_index,
+            element.characterPositions[i])})
 
     return <div style={{textAlign: "center"}} className={"fadeGlideIn "+hidden2}>
         <div>
@@ -370,8 +370,10 @@ function QuestionPointToPhrase(props) {
 
     let [buttonState, click] = useChoiceButtons(element.transcriptParts.length, element.correctAnswerIndex,
         ()=> {
-            props.controls.unhide(props.element.trackingProperties.line_index);
-            props.controls.right();
+            if(!props.editor) {
+                props.controls.unhide(props.element.trackingProperties.line_index);
+                props.controls.right();
+            }
         },
         props.controls.wrong
     );
@@ -434,7 +436,7 @@ function StoryLine(props) {
         return <Header editor={props.editor} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "ERROR") {
-        return <div class={["error"]}>{props.element.text}</div>
+        return <div className={["error"]}>{props.element.text}</div>
     }
     return null;
 }
@@ -485,7 +487,7 @@ function Header(props) {
 
     if(props.editor) {
         hidden = "";
-        if(props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
+        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
             hidden = "story_selection";
     }
 
@@ -494,7 +496,7 @@ function Header(props) {
     let hideRangesForChallenge = undefined;
     // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
     return <div className={"title fadeGlideIn "+hidden} style={{textAlign: "center"}}>
-                <div><img className="title_img" src={element.illustrationUrl} /></div>
+                <div><img alt="title image" className="title_img" src={element.illustrationUrl} /></div>
                 <span className="title">
                     <AudioPlay onClick={playAudio} />
                     <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.learningLanguageTitleContent} />
@@ -513,14 +515,14 @@ function TextLine(props) {
 
     if(props.editor) {
         hidden = "";
-        if(props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
+        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
             hidden = "story_selection";
     }
 
     let [audioRange, playAudio] = useAudio(element)
 
     if(element.line === undefined)
-        return <div></div>
+        return <></>
 
     let hideRangesForChallenge = element.hideRangesForChallenge;
     if(props.progress !== element.trackingProperties.line_index)
