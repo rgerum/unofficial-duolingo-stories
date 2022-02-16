@@ -182,7 +182,6 @@ function QuestionMultipleChoice(props) {
     let element = props.element;
     //let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
-    if(props.editor) hidden2 = "";
 
     useCallOnActivation(element.trackingProperties.line_index, props.controls.block_next);
     let [buttonState, click] = useChoiceButtons(element.answers.length, element.correctAnswerIndex,
@@ -193,6 +192,12 @@ function QuestionMultipleChoice(props) {
         },
         props.controls.wrong
     );
+
+    if(props.editor) {
+        hidden2 = "";
+        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
+            hidden2 = "story_selection";
+    }
 
     return <div className={"fadeGlideIn "+hidden2}>
         {element.question ?
@@ -222,7 +227,11 @@ function QuestionSelectPhrase(props) {
     let element = props.element;
     //let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
-    if(props.editor) hidden2 = "";
+    if(props.editor) {
+        hidden2 = "";
+        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
+            hidden2 = "story_selection";
+    }
 
     useCallOnActivation(element.trackingProperties.line_index, props.controls.block_next);
     let [buttonState, click] = useChoiceButtons(element.answers.length, element.correctAnswerIndex,
@@ -255,7 +264,11 @@ function QuestionSelectPhrase(props) {
 function QuestionArrange(props) {
     let element = props.element;
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
-    if(props.editor) hidden2 = "";
+    if(props.editor) {
+        hidden2 = "";
+        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
+            hidden2 = "story_selection";
+    }
 
     let [buttonState, click] = useArrangeButtons(element.phraseOrder, props.controls.right, props.controls.wrong,
         (i) => {if(!props.editor) props.controls.unhide(element.trackingProperties.line_index,
@@ -343,7 +356,11 @@ class QuestionMatch extends React.Component {
         let element = props.element;
         //let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
         let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
-        if(props.editor) hidden2 = "";
+        if(props.editor) {
+            hidden2 = "";
+            if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
+                hidden2 = "story_selection";
+        }
         return <div className={"fadeGlideIn "+hidden2}>
             <span className="question">{element.prompt}</span>
             <div style={{textAlign: "center"}}>
@@ -362,7 +379,11 @@ function QuestionPointToPhrase(props) {
     let hidden = "";
     if(props.hidden)
         hidden = "hidden";
-    if(props.editor) hidden = "";
+    if(props.editor) {
+        hidden = "";
+        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
+            hidden = "story_selection";
+    }
 
     let button_indices = {};
     for(let [index, part] of Object.entries(element.transcriptParts))
@@ -402,7 +423,11 @@ function ChallengePrompt(props) {
     let element = props.element;
     //let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
-    if(props.editor) hidden2 = "";
+    if(props.editor) {
+        hidden2 = "";
+        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
+            hidden2 = "story_selection";
+    }
     return <div className={"fadeGlideIn "+hidden2}>
                 <span className="question">
                     <HintLineContent content={element.prompt} />
@@ -536,7 +561,7 @@ function TextLine(props) {
                     </span>
         </div>;
     else if (element.line.avatarUrl)
-        return <><div className={"phrase fadeGlideIn "+hidden}>
+        return <><div className={"phrase fadeGlideIn "+hidden} lineno={props.element?.editor?.start_no}>
             <img className="head" src={element.line.avatarUrl} alt="head"/>
             <span className="bubble">
                         <AudioPlay onClick={playAudio} />
