@@ -7,11 +7,11 @@ import {getStory, setStory} from "./api_calls.mjs";
 import {EditorState, EditorView, basicSetup} from "@codemirror/basic-setup"
 import {HighlightStyle, tags as t} from "@codemirror/highlight"
 import {processStoryFile} from "./syntax_parser_new.mjs";
-
+import { Extension, EditorSelection, SelectionRange, Facet, Compartment} from "@codemirror/state";
 
 import {example} from "./parser.mjs"
-
-
+window.EditorView = EditorView
+window.EditorSelection = EditorSelection
 let urlParams = new URLSearchParams(window.location.search);
 
 if(!urlParams.get("story")) {
@@ -85,6 +85,17 @@ else {
                 );
                 last_lineno = lineno;
                 document.getElementsByClassName("story_selection")[0]?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"})
+                for(let element of document.querySelectorAll("div[lineno]")) {
+                    element.onclick = (e) => {
+                        console.log("clicked", element)
+                        let pos = view.state.doc.line(parseInt(element.attributes.lineno.value)+1).from;
+                        view.dispatch(view.state.update({
+                            selection: EditorSelection.cursor(pos),
+                            scrollIntoView: true,
+                        }));
+                        //view.scrollPosIntoView(view.state.doc.line(parseInt(element.attributes.lineno.value)).from)
+                    }
+                }
             }
         }
 
