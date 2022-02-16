@@ -35,6 +35,7 @@ else {
 
         window.button_save = function() {
             let save = async function() {
+                document.querySelector("#button_save span").innerText = "Saving";
                 let data = {
                     id: story_data.id,
                     duo_id: story_data.duo_id,
@@ -47,6 +48,7 @@ else {
                     json: JSON.stringify(story),
                 }
                 await setStory(data)
+                document.querySelector("#button_save span").innerText = "Save";
             }
             save();
         }
