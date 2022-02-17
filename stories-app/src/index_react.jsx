@@ -327,8 +327,10 @@ export function IndexContent(props) {
         <div id="main_index">
             <h1>Unofficial Duolingo Stories</h1>
             <p style={{textAlign: "center"}}>This page is a community project to bring the original <a
-                href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages. If you want
-                to contribute <a href="https://forum.duolingo.com/comment/38992372">tell me</a>.</p>
+                href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages.
+                <br/>As the Duolingo Forum is shutting down, you can now meet us on Discord <a href="https://discord.gg/4NGVScARR3">join</a>.
+                <br/>
+                The old forum discussion is currently still available <a href="https://forum.duolingo.com/comment/38992372">here</a>.</p>
             <br/>
             {lang !== undefined ?
                 <SetList lang={lang} lang_base={lang_base} username={username} onStoryClicked={(id)=>props.onStartStory(id)}/> :
