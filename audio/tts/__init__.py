@@ -65,3 +65,38 @@ def processLine(story_id, line_id):
     with output_file.open("rb") as fp:
         output_data = json.load(fp)
     print("post", output_file, output_data.keys())
+
+
+
+def processLine2(story_id, speaker, text):
+    import uuid
+    # output file
+    output_dir = Path(str(story_id))
+    output_dir.mkdir(exist_ok=True)
+    while True:
+        id = str(uuid.uuid1()).split("-")[0]
+        output_file = Path(output_dir / f"{id}.mp3")
+        if not output_file.exists():
+            break
+
+    if Abair.checkVoiceId(speaker):
+        engine = Abair()
+    elif "-Standard-" in speaker or "-Wavenet-" in speaker:
+        engine = Google()
+    elif "-" in speaker:
+        engine = Azure()
+    else:
+        engine = AmazonPolly()
+
+    # generate the audio
+    engine.save_audio(output_file, speaker, text)
+
+    # generate the alignment
+    output_data = {}
+    #print("pre", output_file, output_data.keys())
+    output_data["output_file"] = str(output_file)
+    output_data["marks"] = engine.get_speech_marks(speaker, text)
+    #print("alignment", speaker)
+
+    #print("update json")
+    print(json.dumps(output_data))

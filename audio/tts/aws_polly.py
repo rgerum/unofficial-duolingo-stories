@@ -35,7 +35,7 @@ class AmazonPolly:
                                                   SpeechMarkTypes=["word"],
                                                   Text=Text,
                                                   TextType="ssml")
-        print(response)
+        #print(response)
         text = response["AudioStream"].read().decode()
         return responseToDict(text)
 
@@ -44,7 +44,7 @@ class AmazonPolly:
                                                       OutputFormat='mp3',
                                                       Text=Text,
                                                       TextType="ssml")
-        print(response)
+        #print(response)
         with Path(filename).open('wb') as fp:
             fp.write(response['AudioStream'].read())
 

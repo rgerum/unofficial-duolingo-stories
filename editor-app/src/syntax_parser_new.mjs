@@ -106,7 +106,7 @@ function split_lines(text) {
 
 function processBlockData(line_iter, story) {
     while(line_iter.get()) {
-        let [, line] = line_iter.get();
+        let line = line_iter.get();
         if(line.indexOf("=") !== -1) {
             let [key, value] = line.split("=");
             story.meta[key.trim()] = value.trim();
@@ -141,8 +141,25 @@ function getInputStringText(text) {
     return text.replace(/([^-|~ ,;.:_?!…]*){([^}]*)}/g, "$1");
 }
 
-function speaker_text_trans(data) {
-    let [, speaker, text] = data.text.match(/\s*(?:>?\s*(\w*)\s*:|>|\+|-)\s*(\S.*\S)\s*/);
+
+function getInputStringSpeachtext(text) {
+    let lexicon;
+    if(lexicon != undefined) {
+        if (lexicon.letters !== undefined)
+            for (let c in lexicon.letters) {
+                text = text.replace(new RegExp(c, "g"), lexicon.letters[c]);
+            }
+        if (lexicon.fragments !== undefined)
+            for (let fragment of lexicon.fragments) {
+                text = text.replace(new RegExp(fragment.match, "g"), fragment.replace);
+            }
+    }
+    text = text.replace(/(\.\.\.|…)/g, '<sub alias="">$1</sub><break/>');
+    return "<speak>"+text.replace(/([^-|~ ,;.:_?!…]*)\{([^\}:]*):([^\}]*)\}/g, '<phoneme alphabet="$3" ph="$2">$1</phoneme>').replace(/([^-|~ ,;.:_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ").replace(/\|/g, "​")+"</speak>";
+}
+
+function speaker_text_trans(data, meta) {
+    let [, speaker_text, text] = data.text.match(/\s*(?:>?\s*(\w*)\s*:|>|\+|-)\s*(\S.*\S)\s*/);
     let translation = "";
     if(data.trans)
         [, translation] = data.trans.match(/\s*~\s*(\S.*\S)\s*/);
@@ -151,10 +168,20 @@ function speaker_text_trans(data) {
     let [selectablePhrases, characterPositions] = getButtons(content);
     let hideRanges = getHideRanges(content);
     // split number of speaker
-    if(speaker) {
-        let [, id] = speaker.match(/Speaker(.*)/);
-        speaker = get_avatar(id);
+    let speaker;
+    let speaker_id;
+    if(speaker_text) {
+        [, speaker_id] = speaker_text.match(/Speaker(.*)/);
+        speaker = get_avatar(speaker_id);
     }
+    let audio;
+    if(data.allow_audio) {
+        audio = line_to_audio(data.audio, text, meta["speaker_" + speaker_id], meta.story_id)
+        audio.ssml.line = data.audio_line;
+        audio.ssml.line_insert = data.audio_line_inset;
+        content.audio = audio
+    }
+
     let line;
     if(speaker) {
         line = {
@@ -170,32 +197,32 @@ function speaker_text_trans(data) {
             content: content,
         }
     }
-    let audio;
-    if(data.audio)
-        audio = line_to_audio(data.audio)
     return {speaker: speaker, line: line, content: content, hideRanges: hideRanges, selectablePhrases: selectablePhrases, characterPositions: characterPositions, audio: audio};
 }
 
-function line_to_audio(line) {
+function line_to_audio(line, text, speaker, story_id) {
+    let text_speak = getInputStringSpeachtext(text);
     let audio = {}
-    line = line.substring(1);
-    let parts = line.split(";");
-    audio.url = "audio/"+parts.splice(0, 1)[0];
     audio.ssml = {
-        "text": "<speak>De tuin</speak>",
-        "speaker": "Ruben",
-        "id": 0
+        "text": text_speak,
+        "speaker": speaker,
+        "id": story_id,
     }
-    audio.keypoints = [];
-    let last_end = 0;
-    let last_time = 0;
-    for(let part of parts) {
-        let [start, duration] = part.split(",")
-        start = parseInt(start);
-        duration = parseInt(duration);
-        audio.keypoints.push({rangeEnd: last_end + start, audioStart: last_time + duration});
-        last_end += start;
-        last_time += duration;
+    if(line) {
+        line = line.substring(1);
+        let parts = line.split(";");
+        audio.url = "audio/" + parts.splice(0, 1)[0];
+        audio.keypoints = [];
+        let last_end = 0;
+        let last_time = 0;
+        for (let part of parts) {
+            let [start, duration] = part.split(",")
+            start = parseInt(start);
+            duration = parseInt(duration);
+            audio.keypoints.push({rangeEnd: last_end + start, audioStart: last_time + duration});
+            last_end += start;
+            last_time += duration;
+        }
     }
     return audio;
 }
@@ -215,17 +242,22 @@ function add_avatar(id, link) {
 
 function getText(line_iter, allow_speaker, allow_trans, allow_audio) {
     let speaker = {}
-    let [, line] = line_iter.get();
+    let line = line_iter.get();
     if (line.startsWith(">") || (allow_speaker && line.match(/\w*:/))) {
         speaker.text = line;
-        [, line] = line_iter.advance(1);
+        line = line_iter.advance(1);
         if (line.startsWith("~") && allow_trans) {
             speaker.trans = line;
-            [, line] = line_iter.advance();
+            line = line_iter.advance();
         }
-        if (line.startsWith("$") && allow_audio) {
-            speaker.audio = line;
-            line_iter.advance();
+        if(allow_audio) {
+            speaker.allow_audio = allow_audio;
+            speaker.audio_line_inset = line_iter.get_lineno();
+            if (line.startsWith("$")) {
+                speaker.audio = line;
+                speaker.audio_line = line_iter.get_lineno();
+                line_iter.advance();
+            }
         }
     }
     return speaker;
@@ -235,15 +267,15 @@ function getAnswers(line_iter, allow_trans) {
     let answers = []
     let correct_answer = undefined;
     while(line_iter.get()) {
-        let [lineno, line] = line_iter.get();
+        let line = line_iter.get();
         if (line.startsWith("+") || line.startsWith("-")) {
             if(line.startsWith("+"))
                 correct_answer = answers.length;
             let answer = {text: line};
-            [lineno, line] = line_iter.advance();
-            if (line.startsWith("~") && allow_trans) {
+            line = line_iter.advance();
+            if (line && line.startsWith("~") && allow_trans) {
                 answer.trans = line;
-                [lineno, line] = line_iter.advance();
+                line = line_iter.advance();
             }
             if(allow_trans) {
                 let data_text = speaker_text_trans(answer)
@@ -287,21 +319,24 @@ function pointToPhraseButtons(line) {
 }
 
 function processBlockHeader(line_iter, story) {
+    let start_no = line_iter.get_lineno(-1);
     let data = getText(line_iter, false, true, true);
-    let data_text = speaker_text_trans(data)
+    let data_text = speaker_text_trans(data, story.meta)
     story.elements.push({
         type: "HEADER",
-        illustrationUrl: "https://stories-cdn.duolingo.com/image/"+story.meta["icon"],
+        illustrationUrl: "https://stories-cdn.duolingo.com/image/"+story.meta["icon"]+".svg",
         learningLanguageTitleContent: data_text.content,
         trackingProperties: {},
         audio: data_text.audio,
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     return false
 }
 
 function processBlockLine(line_iter, story) {
+    let start_no = line_iter.get_lineno(-1);
     let data = getText(line_iter, true, true, true);
-    let data_text = speaker_text_trans(data)
+    let data_text = speaker_text_trans(data, story.meta)
 
     story.elements.push({
         type: "LINE",
@@ -310,15 +345,17 @@ function processBlockLine(line_iter, story) {
         trackingProperties: {
             line_index: story.meta.line_index,
         },
-        audio: data_text.audio
+        audio: data_text.audio,
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
     return false
 }
 
 function processBlockMultipleChoice(line_iter, story) {
+    let start_no = line_iter.get_lineno(-1);
     let data = getText(line_iter, false, true, false);
-    let data_text = speaker_text_trans(data)
+    let data_text = speaker_text_trans(data, story.meta)
 
     let [answers, correct_answer] = getAnswers(line_iter, true);
     story.elements.push({
@@ -330,17 +367,19 @@ function processBlockMultipleChoice(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "multiple-choice"
         },
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
     return false
 }
 
 function processBlockSelectPhrase(line_iter, story) {
+    let start_no = line_iter.get_lineno(-1);
     let question_data = getText(line_iter, false, true, false);
-    let question_data_text = speaker_text_trans(question_data)
+    let question_data_text = speaker_text_trans(question_data, story.meta)
 
     let data = getText(line_iter, true, true, true);
-    let data_text = speaker_text_trans(data)
+    let data_text = speaker_text_trans(data, story.meta)
 
     let [answers, correct_answer] = getAnswers(line_iter, false);
     story.elements.push({
@@ -350,6 +389,7 @@ function processBlockSelectPhrase(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "select-phrases"
         },
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.elements.push({
         type: "LINE",
@@ -358,7 +398,8 @@ function processBlockSelectPhrase(line_iter, story) {
         trackingProperties: {
             line_index: story.meta.line_index,
         },
-        audio: data_text.audio
+        audio: data_text.audio,
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.elements.push({
         type: "SELECT_PHRASE",
@@ -369,16 +410,18 @@ function processBlockSelectPhrase(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "select-phrases"
         },
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
 }
 
 function processBlockContinuation(line_iter, story) {
+    let start_no = line_iter.get_lineno(-1);
     let question_data = getText(line_iter, false, true, false);
-    let question_data_text = speaker_text_trans(question_data)
+    let question_data_text = speaker_text_trans(question_data, story.meta)
 
     let data = getText(line_iter, true, true, true);
-    let data_text = speaker_text_trans(data)
+    let data_text = speaker_text_trans(data, story.meta)
 
     let [answers, correct_answer] = getAnswers(line_iter, true);
     story.elements.push({
@@ -388,6 +431,7 @@ function processBlockContinuation(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "continuation"
         },
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.elements.push({
         type: "LINE",
@@ -396,7 +440,8 @@ function processBlockContinuation(line_iter, story) {
         trackingProperties: {
             line_index: story.meta.line_index,
         },
-        audio: data_text.audio
+        audio: data_text.audio,
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.elements.push({
         type: "MULTIPLE_CHOICE",
@@ -407,16 +452,18 @@ function processBlockContinuation(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "continuation"
         },
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
 }
 
 function processBlockArrange(line_iter, story) {
+    let start_no = line_iter.get_lineno(-1);
     let question_data = getText(line_iter, false, true, false);
-    let question_data_text = speaker_text_trans(question_data)
+    let question_data_text = speaker_text_trans(question_data, story.meta)
 
     let data = getText(line_iter, true, true, true);
-    let data_text = speaker_text_trans(data)
+    let data_text = speaker_text_trans(data, story.meta)
 
     let [phraseOrder, selectablePhrases2] = shuffleArray(data_text.selectablePhrases);
     story.elements.push({
@@ -426,6 +473,7 @@ function processBlockArrange(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "arrange"
         },
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.elements.push({
         type: "LINE",
@@ -434,7 +482,8 @@ function processBlockArrange(line_iter, story) {
         trackingProperties: {
             line_index: story.meta.line_index,
         },
-        audio: data_text.audio
+        audio: data_text.audio,
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.elements.push({
         type: "ARRANGE",
@@ -445,17 +494,19 @@ function processBlockArrange(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "arrange"
         },
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
 }
 
 
 function processBlockPointToPhrase(line_iter, story) {
+    let start_no = line_iter.get_lineno(-1);
     let question_data = getText(line_iter, false, true, false);
-    let question_data_text = speaker_text_trans(question_data)
+    let question_data_text = speaker_text_trans(question_data, story.meta)
 
     let data = getText(line_iter, true, true, true);
-    let data_text = speaker_text_trans(data)
+    let data_text = speaker_text_trans(data, story.meta)
 
     let [correctAnswerIndex, transcriptParts] = pointToPhraseButtons(data.text)
 
@@ -466,7 +517,8 @@ function processBlockPointToPhrase(line_iter, story) {
         trackingProperties: {
             line_index: story.meta.line_index,
         },
-        audio: data_text.audio
+        audio: data_text.audio,
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.elements.push({
         type: "POINT_TO_PHRASE",
@@ -477,17 +529,19 @@ function processBlockPointToPhrase(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "point-to-phrase"
         },
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
 }
 
 function processBlockMatch(line_iter, story) {
+    let start_no = line_iter.get_lineno(-1);
     let question_data = getText(line_iter, false, true, false);
-    let question_data_text = speaker_text_trans(question_data)
+    let question_data_text = speaker_text_trans(question_data, story.meta)
 
     let answers = [];
     while(line_iter.get()) {
-        let [, line] = line_iter.get()
+        let line = line_iter.get()
         let match = line.match(/-\s*(.*\S)\s*<>\s*(.*\S)\s*/);
         if(match) {
             let [, word1, word2] = match;
@@ -506,6 +560,7 @@ function processBlockMatch(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "match"
         },
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
 }
@@ -525,30 +580,51 @@ const block_functions = {
 function line_iterator(lines) {
     let index = 0;
     function get(offset=0) {
-        return lines[index + offset];
+        if(lines[index + offset])
+            return lines[index + offset][1];
+    }
+    function get_lineno(offset=0) {
+        if(lines[index + offset])
+            return lines[index + offset][0];
     }
     function advance(offset=1) {
         index += offset;
-        return lines[index];
+        return get();
     }
-    return {get:get, advance:advance}
+    return {get:get, get_lineno:get_lineno, advance:advance}
 }
 
-export function processStoryFile(text) {
+export function processStoryFile(text, story_id) {
     let lines = split_lines(text);
 
-    let story = {elements: [], meta: {line_index: 1}}
+    let story = {elements: [], meta: {line_index: 1, story_id: story_id}}
     let line_iter = line_iterator(lines)
     while(line_iter.get()) {
-        let [, line] = line_iter.get()
+        let line = line_iter.get()
         if(line.startsWith("[") && line.endsWith("]")) {
             line_iter.advance();
             let current_block = line.substring(1, line.length - 1)
-            if(block_functions[current_block]) {
-                block_functions[current_block](line_iter, story)
-                continue
+            try {
+                if (block_functions[current_block]) {
+                    block_functions[current_block](line_iter, story)
+                    continue
+                }
+            }
+            catch (e) {
+                console.error(e);
+
             }
         }
+        story.elements.push({
+            type: "ERROR",
+            text: line,
+            trackingProperties: {
+                line_index: story.meta.line_index,
+                challenge_type: "error"
+            },
+           // "editor": {"start_no": group.start_no, "end_no": group.end_no}
+        });
+        story.meta.line_index += 1;
         //console.log("error", lineno, line)
         line_iter.advance();
     }
@@ -565,3 +641,50 @@ catch (e) {
     
 }
 
+
+import {fetch_post} from "./includes.mjs";
+async function generate_audio_line(ssml) {
+    console.log(ssml);
+    let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`, {"id": ssml["id"], "speaker": ssml["speaker"], "text": ssml["text"]});
+    let ssml_response = await response2.json();
+    console.log("ssml_response", ssml_response);
+    let text = "$"+ssml_response["output_file"]
+    let last_time = 0;
+    let last_end = 0;
+    for(let mark of ssml_response.marks) {
+        text += ";";
+        text += mark.value.length + last_end;
+        text += ",";
+        text += mark.time-last_time;
+        last_end = 1;
+        last_time = mark.time
+    }
+    if(ssml.line !== undefined) {
+        let linestate = view.state.doc.line(ssml.line)
+        console.log(
+            {
+                from: linestate.from,
+                to: linestate.to,
+                insert: text
+            }
+        )
+        view.dispatch(view.state.update({
+            changes: {
+                from: linestate.from,
+                to: linestate.to,
+                insert: text
+            }
+        }))
+    }
+    else {
+        let linestate = view.state.doc.line(ssml.line_insert-1)
+        view.dispatch(view.state.update({
+            changes: {
+                from: linestate.from,
+                to: linestate.from,
+                insert: text+"\n"
+            }
+        }))
+    }
+}
+window.generate_audio_line = generate_audio_line

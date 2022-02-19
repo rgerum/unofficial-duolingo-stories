@@ -1,8 +1,4 @@
-import {speaker_text_trans} from "./syntax_parser_new.mjs";
-import {jsonDiff} from "diff/lib/diff/json.js";
-import {diffJson} from "diff";
-import * as assert from "assert";
-import * as Console from "console";
+
 
 function make_same_length([t, r], fill="_") {
     return [

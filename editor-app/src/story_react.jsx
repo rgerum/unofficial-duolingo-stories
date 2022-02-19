@@ -483,7 +483,7 @@ function useAudio(element) {
         }
     })
 
-    if(audio === undefined)
+    if(audio === undefined || audio.url === undefined)
         return [10000000, undefined]
 
     let audioObject = new Audio(audio_base_path + audio.url);
@@ -570,6 +570,7 @@ function TextLine(props) {
                 <><br/>
                     <span className="ssml_speaker">{element.line.content.audio.ssml.speaker}</span>
                     <span className="ssml">{element.line.content.audio.ssml.text}</span>
+                    <span className="ssml_reload" onClick={() => window.generate_audio_line(element.line.content.audio.ssml)}>Ö</span>
                 </> : <></>
                 }
             </span>

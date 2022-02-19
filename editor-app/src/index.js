@@ -70,11 +70,12 @@ else {
                 return
             //last_lineno = lineno;
             if (last_lineno !== lineno || last_avatar !== Object.keys(window.character_avatars).length) {
+                last_lineno = lineno;
                 console.log("updateDisplay", last_lineno !== lineno, last_avatar !== Object.keys(window.character_avatars).length, story === undefined)
                 if (story === undefined || last_avatar !== Object.keys(window.character_avatars).length) {
                     console.log("parse Story")
                     editor_text = state.doc.toString();
-                    [story, story_meta] = processStoryFile(editor_text);
+                    [story, story_meta] = processStoryFile(editor_text, story_data.id);
                 }
                 last_avatar = Object.keys(window.character_avatars).length;
                 window.story = story;
@@ -238,10 +239,11 @@ else {
             extensions: [basicSetup, sync, theme, example(), highlightStyle]
         })
 
-        new EditorView({
+        let view = new EditorView({
             state: startState,
             parent: document.getElementById('editor')
         })
+        window.view = view;
     }
     a()
 }

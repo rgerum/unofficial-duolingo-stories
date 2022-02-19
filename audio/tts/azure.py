@@ -26,7 +26,7 @@ class Azure(object):
         }
         response = requests.post(fetch_token_url, headers=headers)
         self.access_token = str(response.text)
-        print("self.access_token", self.access_token)
+        #print("self.access_token", self.access_token)
         
     def get_speech_marks(self, VoiceId, text):
         duration = MP3(self.filename).info.length * 1000
@@ -93,8 +93,8 @@ class Azure(object):
             self.filename = filename
             with Path(filename).open('wb') as audio:
                 audio.write(response.content)
-                print("\nStatus code: " + str(response.status_code) +
-                      "\nYour TTS is ready for playback.\n")
+                #print("\nStatus code: " + str(response.status_code) +
+                #      "\nYour TTS is ready for playback.\n")
         else:
             print("\nStatus code: " + str(response.status_code) +
                   "\nSomething went wrong. Check your subscription key and headers.\n")

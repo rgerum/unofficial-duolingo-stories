@@ -54,7 +54,7 @@ function ImportList(props) {
                 <tr key={story.id}>
                     <td><span><b>{pad(story.set_id)}</b>&nbsp;-&nbsp;{pad(story.set_index)}</span></td>
                     <td width="44px"><img src={story.copies ? story.gilded : story.active} width="44px" /></td>
-                    <td><a href={`#`} onClick={()=>do_import(story.id)}>{story.name}</a></td>
+                    <td><a href={`#`} title={story.duo_id} onClick={()=>do_import(story.id)}>{story.name}</a></td>
                     <td style={{textAlign: "right"}}><span>{story.copies}x&nbsp;</span>
 
                     </td>
@@ -218,16 +218,18 @@ export function EditorOverview(props) {
         }
     })
     console.log("username", username)
-    if(username === undefined) return <Spinner />
-    if(username.username === undefined) return <div style={{margin: "auto"}}>
-        <img style={{margin: "auto"}} width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
-        You need to be logged in to use the editor.
-    </div>
-    if(username.role !== 1) return <div style={{margin: "auto"}}>
-        <img width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
-        <img src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" />
-        You need to have permissions to access the editor.
-    </div>
+    if(0) {
+        if (username === undefined) return <Spinner/>
+        if (username.username === undefined) return <div style={{margin: "auto"}}>
+            <img style={{margin: "auto"}} width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg"/><br/>
+            You need to be logged in to use the editor.
+        </div>
+        if(username.role !== 1) return <div style={{margin: "auto"}}>
+            <img width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
+            <img src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" />
+            You need to have permissions to access the editor.
+        </div>
+    }
     return <Overview course={course} setCourse={doSetCourse}/>
 }
 

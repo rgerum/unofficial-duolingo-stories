@@ -104,7 +104,7 @@ class Abair(object):
             self.filename = filename
 
             tree = ElementTree.fromstring(response.content)
-            print(response)
+            #print(response)
 
             wav = None
             for sentence in tree.findall("sentence"):

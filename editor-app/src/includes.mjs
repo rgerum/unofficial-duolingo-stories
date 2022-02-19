@@ -24,22 +24,7 @@ export async function fetch_post(url, data) {
         body:fd,
         mode:"cors"
     })
-    return res
-    var req = new Request(url,{
-        method:"POST",
-        body:fd,
-        mode:"cors"
-    });
-    return fetch(req);
-}
-
-export function inputs_to_dict(inputs) {
-    /** Convert a list of input fields to a dictionary */
-    let result = {}
-    for(let name in inputs) {
-        result[name] = document.querySelector(inputs[name]).value;
-    }
-    return result;
+    return res;
 }
 
 export function dict_to_query(data) {
