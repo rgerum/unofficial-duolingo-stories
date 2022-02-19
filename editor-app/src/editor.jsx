@@ -34,7 +34,7 @@ function ImportList(props) {
         console.log("do_impor", id, course.id);
         let id2 = await setImport(id, course.id);
         console.log(id2, "?story="+id2);
-        //window.location.href = "?story="+id2;
+        window.location.href = "?story="+id2;
     }
     return courseImport ?
         <>

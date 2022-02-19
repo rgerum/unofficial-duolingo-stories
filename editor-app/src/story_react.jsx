@@ -1,6 +1,7 @@
 import React from 'react';
 import {useEventListener} from './hooks.js'
 import {shuffle} from './includes.mjs'
+import {EditorSSMLDisplay} from "./audio_edit.jsx";
 import './story.css';
 
 let backend = "https://carex.uber.space/stories/backend/"
@@ -567,11 +568,8 @@ function TextLine(props) {
                         <AudioPlay onClick={playAudio} />
                         <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.line.content} />
                 {(props.editor && (element.line.content.audio)) ?
-                <><br/>
-                    <span className="ssml_speaker">{element.line.content.audio.ssml.speaker}</span>
-                    <span className="ssml">{element.line.content.audio.ssml.text}</span>
-                    <span className="ssml_reload" onClick={() => window.generate_audio_line(element.line.content.audio.ssml)}>Ö</span>
-                </> : <></>
+                    <EditorSSMLDisplay ssml={element.line.content.audio.ssml}/>
+                 : <></>
                 }
             </span>
 

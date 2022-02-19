@@ -81,7 +81,7 @@ module.exports = function(_env, argv) {
             })
         ].filter(Boolean),
         optimization: {
-            minimize: isProduction,
+            minimize: isProduction && false,
             minimizer: [
                 new TerserWebpackPlugin({
                     terserOptions: {
