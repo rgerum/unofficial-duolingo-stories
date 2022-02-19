@@ -104,14 +104,27 @@ else {
 
         window.setInterval(updateDisplay, 1000);
 
+        let last_event_lineno
         let sync = EditorView.updateListener.of((v) => {
             lineno = v.state.doc.lineAt(v.state.selection.ranges[0].from).number;
+            if(last_event_lineno !== lineno) {
+                last_event_lineno = lineno;
+                const event = new CustomEvent("editorLineChanged", {
+                    detail: {
+                        lineno: lineno
+                    }
+                });
+
+                window.dispatchEvent(event);
+            }
+
             editor_state = {line_no: lineno}
             state = v.state;
             if (v.docChanged) {
                 story = undefined;
                 last_lineno = undefined;
             }
+
         })
 
         let theme = EditorView.theme({

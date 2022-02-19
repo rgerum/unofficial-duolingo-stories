@@ -101,6 +101,8 @@ function split_lines(text) {
 
         lines.push([lineno, line]);
     }
+    lines.push([lineno+1, ""]);
+    lines.push([lineno+2, ""]);
     return lines
 }
 
@@ -142,18 +144,7 @@ function getInputStringText(text) {
 }
 
 
-function getInputStringSpeachtext(text) {
-    let lexicon;
-    if(lexicon != undefined) {
-        if (lexicon.letters !== undefined)
-            for (let c in lexicon.letters) {
-                text = text.replace(new RegExp(c, "g"), lexicon.letters[c]);
-            }
-        if (lexicon.fragments !== undefined)
-            for (let fragment of lexicon.fragments) {
-                text = text.replace(new RegExp(fragment.match, "g"), fragment.replace);
-            }
-    }
+function getInputStringSpeechText(text) {
     text = text.replace(/(\.\.\.|…)/g, '<sub alias="">$1</sub><break/>');
     return "<speak>"+text.replace(/([^-|~ ,;.:_?!…]*)\{([^\}:]*):([^\}]*)\}/g, '<phoneme alphabet="$3" ph="$2">$1</phoneme>').replace(/([^-|~ ,;.:_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ").replace(/\|/g, "​")+"</speak>";
 }
@@ -201,7 +192,7 @@ function speaker_text_trans(data, meta) {
 }
 
 function line_to_audio(line, text, speaker, story_id) {
-    let text_speak = getInputStringSpeachtext(text);
+    let text_speak = getInputStringSpeechText(text);
     let audio = {}
     audio.ssml = {
         "text": text_speak,
@@ -320,6 +311,7 @@ function pointToPhraseButtons(line) {
 
 function processBlockHeader(line_iter, story) {
     let start_no = line_iter.get_lineno(-1);
+    let start_no1 = line_iter.get_lineno();
     let data = getText(line_iter, false, true, true);
     let data_text = speaker_text_trans(data, story.meta)
     story.elements.push({
@@ -328,13 +320,14 @@ function processBlockHeader(line_iter, story) {
         learningLanguageTitleContent: data_text.content,
         trackingProperties: {},
         audio: data_text.audio,
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
     })
     return false
 }
 
 function processBlockLine(line_iter, story) {
     let start_no = line_iter.get_lineno(-1);
+    let start_no1 = line_iter.get_lineno();
     let data = getText(line_iter, true, true, true);
     let data_text = speaker_text_trans(data, story.meta)
 
@@ -346,7 +339,7 @@ function processBlockLine(line_iter, story) {
             line_index: story.meta.line_index,
         },
         audio: data_text.audio,
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
     })
     story.meta.line_index += 1;
     return false
@@ -354,6 +347,7 @@ function processBlockLine(line_iter, story) {
 
 function processBlockMultipleChoice(line_iter, story) {
     let start_no = line_iter.get_lineno(-1);
+    let start_no1 = line_iter.get_lineno();
     let data = getText(line_iter, false, true, false);
     let data_text = speaker_text_trans(data, story.meta)
 
@@ -367,7 +361,7 @@ function processBlockMultipleChoice(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "multiple-choice"
         },
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
     })
     story.meta.line_index += 1;
     return false
@@ -375,12 +369,15 @@ function processBlockMultipleChoice(line_iter, story) {
 
 function processBlockSelectPhrase(line_iter, story) {
     let start_no = line_iter.get_lineno(-1);
+    let start_no1 = line_iter.get_lineno();
     let question_data = getText(line_iter, false, true, false);
     let question_data_text = speaker_text_trans(question_data, story.meta)
 
+    let start_no2 = line_iter.get_lineno(0);
     let data = getText(line_iter, true, true, true);
     let data_text = speaker_text_trans(data, story.meta)
 
+    let start_no3 = line_iter.get_lineno(0);
     let [answers, correct_answer] = getAnswers(line_iter, false);
     story.elements.push({
         type: "CHALLENGE_PROMPT",
@@ -389,7 +386,7 @@ function processBlockSelectPhrase(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "select-phrases"
         },
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no, "end_no": start_no2, "active_no": start_no1}
     })
     story.elements.push({
         type: "LINE",
@@ -399,7 +396,7 @@ function processBlockSelectPhrase(line_iter, story) {
             line_index: story.meta.line_index,
         },
         audio: data_text.audio,
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no2, "end_no": start_no3}
     })
     story.elements.push({
         type: "SELECT_PHRASE",
@@ -410,19 +407,22 @@ function processBlockSelectPhrase(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "select-phrases"
         },
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no3, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
 }
 
 function processBlockContinuation(line_iter, story) {
     let start_no = line_iter.get_lineno(-1);
+    let start_no1 = line_iter.get_lineno();
     let question_data = getText(line_iter, false, true, false);
     let question_data_text = speaker_text_trans(question_data, story.meta)
 
+    let start_no2 = line_iter.get_lineno();
     let data = getText(line_iter, true, true, true);
     let data_text = speaker_text_trans(data, story.meta)
 
+    let start_no3 = line_iter.get_lineno();
     let [answers, correct_answer] = getAnswers(line_iter, true);
     story.elements.push({
         type: "CHALLENGE_PROMPT",
@@ -431,7 +431,7 @@ function processBlockContinuation(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "continuation"
         },
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no, "end_no": start_no2, "active_no": start_no1}
     })
     story.elements.push({
         type: "LINE",
@@ -441,7 +441,7 @@ function processBlockContinuation(line_iter, story) {
             line_index: story.meta.line_index,
         },
         audio: data_text.audio,
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no2, "end_no": start_no3}
     })
     story.elements.push({
         type: "MULTIPLE_CHOICE",
@@ -452,16 +452,18 @@ function processBlockContinuation(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "continuation"
         },
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no3, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
 }
 
 function processBlockArrange(line_iter, story) {
     let start_no = line_iter.get_lineno(-1);
+    let start_no1 = line_iter.get_lineno();
     let question_data = getText(line_iter, false, true, false);
     let question_data_text = speaker_text_trans(question_data, story.meta)
 
+    let start_no2 = line_iter.get_lineno();
     let data = getText(line_iter, true, true, true);
     let data_text = speaker_text_trans(data, story.meta)
 
@@ -473,7 +475,7 @@ function processBlockArrange(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "arrange"
         },
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no, "end_no": start_no2, "active_no": start_no1}
     })
     story.elements.push({
         type: "LINE",
@@ -483,7 +485,7 @@ function processBlockArrange(line_iter, story) {
             line_index: story.meta.line_index,
         },
         audio: data_text.audio,
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no2, "end_no": line_iter.get_lineno()}
     })
     story.elements.push({
         type: "ARRANGE",
@@ -494,7 +496,7 @@ function processBlockArrange(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "arrange"
         },
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no2, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
 }
@@ -502,9 +504,11 @@ function processBlockArrange(line_iter, story) {
 
 function processBlockPointToPhrase(line_iter, story) {
     let start_no = line_iter.get_lineno(-1);
+    let start_no1 = line_iter.get_lineno();
     let question_data = getText(line_iter, false, true, false);
     let question_data_text = speaker_text_trans(question_data, story.meta)
 
+    let start_no2 = line_iter.get_lineno();
     let data = getText(line_iter, true, true, true);
     let data_text = speaker_text_trans(data, story.meta)
 
@@ -518,7 +522,7 @@ function processBlockPointToPhrase(line_iter, story) {
             line_index: story.meta.line_index,
         },
         audio: data_text.audio,
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no, "end_no": start_no2, "active_no": start_no1}
     })
     story.elements.push({
         type: "POINT_TO_PHRASE",
@@ -529,13 +533,14 @@ function processBlockPointToPhrase(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "point-to-phrase"
         },
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no2, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
 }
 
 function processBlockMatch(line_iter, story) {
     let start_no = line_iter.get_lineno(-1);
+    let start_no1 = line_iter.get_lineno();
     let question_data = getText(line_iter, false, true, false);
     let question_data_text = speaker_text_trans(question_data, story.meta)
 
@@ -560,7 +565,7 @@ function processBlockMatch(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "match"
         },
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno()}
+        editor: {"start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
     })
     story.meta.line_index += 1;
 }

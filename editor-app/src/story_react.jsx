@@ -3,6 +3,7 @@ import {useEventListener} from './hooks.js'
 import {shuffle} from './includes.mjs'
 import {EditorSSMLDisplay} from "./audio_edit.jsx";
 import './story.css';
+import {EditorSelection} from "@codemirror/state";
 
 let backend = "https://carex.uber.space/stories/backend/"
 let backend_stories = backend+"stories/"
@@ -194,13 +195,10 @@ function QuestionMultipleChoice(props) {
         props.controls.wrong
     );
 
-    if(props.editor) {
-        hidden2 = "";
-        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
-            hidden2 = "story_selection";
-    }
+    let onClick;
+    [hidden2, onClick] = EditorHook(hidden2, props.element.editor);
 
-    return <div className={"fadeGlideIn "+hidden2}>
+    return <div className={"fadeGlideIn "+hidden2} onClick={onClick}>
         {element.question ?
             <span className="question">
                     <HintLineContent content={element.question} />
@@ -228,11 +226,9 @@ function QuestionSelectPhrase(props) {
     let element = props.element;
     //let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
-    if(props.editor) {
-        hidden2 = "";
-        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
-            hidden2 = "story_selection";
-    }
+
+    let onClick;
+    [hidden2, onClick] = EditorHook(hidden2, props.element.editor);
 
     useCallOnActivation(element.trackingProperties.line_index, props.controls.block_next);
     let [buttonState, click] = useChoiceButtons(element.answers.length, element.correctAnswerIndex,
@@ -245,7 +241,7 @@ function QuestionSelectPhrase(props) {
         props.controls.wrong
     );
 
-    return <div className={"fadeGlideIn "+hidden2}>
+    return <div className={"fadeGlideIn "+hidden2} onClick={onClick}>
         <div>
             {element.answers.map((answer, index) => (
                 <button key={index} className="answer_button"
@@ -265,17 +261,16 @@ function QuestionSelectPhrase(props) {
 function QuestionArrange(props) {
     let element = props.element;
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
-    if(props.editor) {
-        hidden2 = "";
-        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
-            hidden2 = "story_selection";
-    }
+
+    let onClick;
+    [hidden2, onClick] = EditorHook(hidden2, props.element.editor);
+
 
     let [buttonState, click] = useArrangeButtons(element.phraseOrder, props.controls.right, props.controls.wrong,
         (i) => {if(!props.editor) props.controls.unhide(element.trackingProperties.line_index,
             element.characterPositions[i])})
 
-    return <div style={{textAlign: "center"}} className={"fadeGlideIn "+hidden2}>
+    return <div style={{textAlign: "center"}} className={"fadeGlideIn "+hidden2} onClick={onClick}>
         <div>
             {element.selectablePhrases.map((phrase, index) => (
                 <span key={index} className="word_order"
@@ -293,6 +288,21 @@ class QuestionMatch extends React.Component {
 
         //this.props.controls.block_next();
         window.addEventListener("progress_changed", this.progress_changed.bind(this))
+
+        this.editor = props.element.editor;
+        window.addEventListener("editorLineChanged", (e) => this.editorLineChanged(e));
+    }
+
+    editorLineChanged(e) {
+        let editor = this.editor;
+        let should_be_selected = editor && editor.start_no <= e.detail.lineno && e.detail.lineno < editor.end_no;
+        console.log("match editorLineChanged", should_be_selected, this.state.selected, editor.start_no, e.detail.lineno, editor.end_no)
+        if (should_be_selected !== this.state.selected)
+            this.setSelected(should_be_selected);
+    }
+
+    setSelected(x) {
+        this.setState({selected: x});
     }
 
     createOrder(props) {
@@ -308,6 +318,7 @@ class QuestionMatch extends React.Component {
         this.state = {
             clicked: clicked,
             last_clicked: undefined,
+            selected: false,
         };
     }
 
@@ -357,12 +368,11 @@ class QuestionMatch extends React.Component {
         let element = props.element;
         //let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
         let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
-        if(props.editor) {
-            hidden2 = "";
-            if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
-                hidden2 = "story_selection";
-        }
-        return <div className={"fadeGlideIn "+hidden2}>
+
+        let onClick;
+        [hidden2, onClick] = EditorNoHook(hidden2, props.element.editor, this.state.selected);
+
+        return <div className={"fadeGlideIn "+hidden2} onClick={onClick}>
             <span className="question">{element.prompt}</span>
             <div style={{textAlign: "center"}}>
                 {this.order.map((phrase, index) => (
@@ -380,11 +390,9 @@ function QuestionPointToPhrase(props) {
     let hidden = "";
     if(props.hidden)
         hidden = "hidden";
-    if(props.editor) {
-        hidden = "";
-        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
-            hidden = "story_selection";
-    }
+
+    let onClick;
+    [hidden, onClick] = EditorHook(hidden, props.element.editor);
 
     let button_indices = {};
     for(let [index, part] of Object.entries(element.transcriptParts))
@@ -400,7 +408,7 @@ function QuestionPointToPhrase(props) {
         props.controls.wrong
     );
 
-    return <div className={hidden}>
+    return <div className={hidden} onClick={onClick}>
         <div className="question">
             <HintLineContent content={element.question} />
         </div>
@@ -424,12 +432,11 @@ function ChallengePrompt(props) {
     let element = props.element;
     //let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
-    if(props.editor) {
-        hidden2 = "";
-        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
-            hidden2 = "story_selection";
-    }
-    return <div className={"fadeGlideIn "+hidden2}>
+
+    let onClick;
+    [hidden2, onClick] = EditorHook(hidden2, props.element.editor);
+
+    return <div className={"fadeGlideIn "+hidden2} onClick={onClick}>
                 <span className="question">
                     <HintLineContent content={element.prompt} />
                 </span>
@@ -511,17 +518,14 @@ function Header(props) {
     if(props.hidden)
         hidden = "hidden";
 
-    if(props.editor) {
-        hidden = "";
-        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
-            hidden = "story_selection";
-    }
+    let onClick;
+    [hidden, onClick] = EditorHook(hidden, props.element.editor);
 
     let [audioRange, playAudio] = useAudio(element)
 
     let hideRangesForChallenge = undefined;
     // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
-    return <div className={"title fadeGlideIn "+hidden} style={{textAlign: "center"}}>
+    return <div className={"title fadeGlideIn "+hidden} style={{textAlign: "center"}} onClick={onClick}>
                 <div><img alt="title image" className="title_img" src={element.illustrationUrl} /></div>
                 <span className="title">
                     <AudioPlay onClick={playAudio} />
@@ -530,6 +534,53 @@ function Header(props) {
     </div>;
 }
 
+function EditorHook(hidden, editor) {
+    let onClick;
+    if(editor) {
+        hidden = "";
+        onClick = () => {
+            let pos = view.state.doc.line(parseInt(editor.start_no)).from;
+            if(editor.active_no)
+                pos = view.state.doc.line(parseInt(editor.active_no)).from;
+            view.dispatch(view.state.update({
+                selection: EditorSelection.cursor(pos),
+                scrollIntoView: true,
+            }));
+        }
+    }
+
+    let [selected, setSelected] = React.useState(false);
+    if(selected)
+        hidden = "story_selection";
+    useEventListener("editorLineChanged", (e) =>
+    {
+        let should_be_selected = editor && editor.start_no <= e.detail.lineno && e.detail.lineno < editor.end_no;
+        if (should_be_selected !== selected)
+            setSelected(should_be_selected);
+    })
+    return [hidden, onClick];
+}
+
+function EditorNoHook(hidden, editor, selected) {
+    let onClick;
+    if(editor) {
+        hidden = "";
+        onClick = () => {
+            let pos = view.state.doc.line(parseInt(editor.start_no)).from;
+            if(editor.active_no)
+                pos = view.state.doc.line(parseInt(editor.active_no)).from;
+            view.dispatch(view.state.update({
+                selection: EditorSelection.cursor(pos),
+                scrollIntoView: true,
+            }));
+        }
+    }
+
+    if(selected)
+        hidden = "story_selection";
+
+    return [hidden, onClick];
+}
 
 function TextLine(props) {
     let element = props.element;
@@ -539,11 +590,8 @@ function TextLine(props) {
     if(props.hidden)
         hidden = "hidden";
 
-    if(props.editor) {
-        hidden = "";
-        if(props.element.editor && props.element.editor.start_no <= props.editor.line_no && props.editor.line_no < props.element.editor.end_no)
-            hidden = "story_selection";
-    }
+    let onClick;
+    [hidden, onClick] = EditorHook(hidden, props.element.editor);
 
     let [audioRange, playAudio] = useAudio(element)
 
@@ -562,7 +610,7 @@ function TextLine(props) {
                     </span>
         </div>;
     else if (element.line.avatarUrl)
-        return <><div className={"phrase fadeGlideIn "+hidden} lineno={props.element?.editor?.start_no}>
+        return <><div className={"phrase fadeGlideIn "+hidden} onClick={onClick}>
             <img className="head" src={element.line.avatarUrl} alt="head"/>
             <span className="bubble">
                         <AudioPlay onClick={playAudio} />
