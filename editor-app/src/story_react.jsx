@@ -198,7 +198,7 @@ function QuestionMultipleChoice(props) {
     let onClick;
     [hidden2, onClick] = EditorHook(hidden2, props.element.editor);
 
-    return <div className={"fadeGlideIn "+hidden2} onClick={onClick}>
+    return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
         {element.question ?
             <span className="question">
                     <HintLineContent content={element.question} />
@@ -241,7 +241,7 @@ function QuestionSelectPhrase(props) {
         props.controls.wrong
     );
 
-    return <div className={"fadeGlideIn "+hidden2} onClick={onClick}>
+    return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
         <div>
             {element.answers.map((answer, index) => (
                 <button key={index} className="answer_button"
@@ -270,7 +270,7 @@ function QuestionArrange(props) {
         (i) => {if(!props.editor) props.controls.unhide(element.trackingProperties.line_index,
             element.characterPositions[i])})
 
-    return <div style={{textAlign: "center"}} className={"fadeGlideIn "+hidden2} onClick={onClick}>
+    return <div style={{textAlign: "center"}} className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
         <div>
             {element.selectablePhrases.map((phrase, index) => (
                 <span key={index} className="word_order"
@@ -372,7 +372,7 @@ class QuestionMatch extends React.Component {
         let onClick;
         [hidden2, onClick] = EditorNoHook(hidden2, props.element.editor, this.state.selected);
 
-        return <div className={"fadeGlideIn "+hidden2} onClick={onClick}>
+        return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
             <span className="question">{element.prompt}</span>
             <div style={{textAlign: "center"}}>
                 {this.order.map((phrase, index) => (
@@ -408,7 +408,7 @@ function QuestionPointToPhrase(props) {
         props.controls.wrong
     );
 
-    return <div className={hidden} onClick={onClick}>
+    return <div className={hidden} onClick={onClick} lineno={element?.editor?.block_start_no}>
         <div className="question">
             <HintLineContent content={element.question} />
         </div>
@@ -436,7 +436,7 @@ function ChallengePrompt(props) {
     let onClick;
     [hidden2, onClick] = EditorHook(hidden2, props.element.editor);
 
-    return <div className={"fadeGlideIn "+hidden2} onClick={onClick}>
+    return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
                 <span className="question">
                     <HintLineContent content={element.prompt} />
                 </span>
@@ -525,7 +525,7 @@ function Header(props) {
 
     let hideRangesForChallenge = undefined;
     // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
-    return <div className={"title fadeGlideIn "+hidden} style={{textAlign: "center"}} onClick={onClick}>
+    return <div className={"title fadeGlideIn "+hidden} style={{textAlign: "center"}} onClick={onClick} lineno={element?.editor?.block_start_no}>
                 <div><img alt="title image" className="title_img" src={element.illustrationUrl} /></div>
                 <span className="title">
                     <AudioPlay onClick={playAudio} />
@@ -544,7 +544,7 @@ function EditorHook(hidden, editor) {
                 pos = view.state.doc.line(parseInt(editor.active_no)).from;
             view.dispatch(view.state.update({
                 selection: EditorSelection.cursor(pos),
-                scrollIntoView: true,
+                //scrollIntoView: true,
             }));
         }
     }
@@ -603,14 +603,14 @@ function TextLine(props) {
         hideRangesForChallenge = undefined;
     // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
     if (element.line.type === "TITLE")
-        return <div className={"title fadeGlideIn "+hidden}>
+        return <div className={"title fadeGlideIn "+hidden} lineno={element?.editor?.block_start_no}>
                     <span className="title">
                         <AudioPlay onClick={playAudio} />
                         <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.line.content} />
                     </span>
         </div>;
     else if (element.line.avatarUrl)
-        return <><div className={"phrase fadeGlideIn "+hidden} onClick={onClick}>
+        return <><div className={"phrase fadeGlideIn "+hidden} onClick={onClick} lineno={element?.editor?.block_start_no}>
             <img className="head" src={element.line.avatarUrl} alt="head"/>
             <span className="bubble">
                         <AudioPlay onClick={playAudio} />

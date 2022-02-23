@@ -320,7 +320,7 @@ function processBlockHeader(line_iter, story) {
         learningLanguageTitleContent: data_text.content,
         trackingProperties: {},
         audio: data_text.audio,
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
+        editor: {"block_start_no": start_no, "start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
     })
     return false
 }
@@ -339,7 +339,7 @@ function processBlockLine(line_iter, story) {
             line_index: story.meta.line_index,
         },
         audio: data_text.audio,
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
+        editor: {"block_start_no": start_no, "start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
     })
     story.meta.line_index += 1;
     return false
@@ -361,7 +361,7 @@ function processBlockMultipleChoice(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "multiple-choice"
         },
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
+        editor: {"block_start_no": start_no, "start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
     })
     story.meta.line_index += 1;
     return false
@@ -386,7 +386,7 @@ function processBlockSelectPhrase(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "select-phrases"
         },
-        editor: {"start_no": start_no, "end_no": start_no2, "active_no": start_no1}
+        editor: {"block_start_no": start_no, "start_no": start_no, "end_no": start_no2, "active_no": start_no1}
     })
     story.elements.push({
         type: "LINE",
@@ -431,7 +431,7 @@ function processBlockContinuation(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "continuation"
         },
-        editor: {"start_no": start_no, "end_no": start_no2, "active_no": start_no1}
+        editor: {"block_start_no": start_no, "start_no": start_no, "end_no": start_no2, "active_no": start_no1}
     })
     story.elements.push({
         type: "LINE",
@@ -475,7 +475,7 @@ function processBlockArrange(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "arrange"
         },
-        editor: {"start_no": start_no, "end_no": start_no2, "active_no": start_no1}
+        editor: {"block_start_no": start_no, "start_no": start_no, "end_no": start_no2, "active_no": start_no1}
     })
     story.elements.push({
         type: "LINE",
@@ -522,7 +522,7 @@ function processBlockPointToPhrase(line_iter, story) {
             line_index: story.meta.line_index,
         },
         audio: data_text.audio,
-        editor: {"start_no": start_no, "end_no": start_no2, "active_no": start_no1}
+        editor: {"block_start_no": start_no, "start_no": start_no, "end_no": start_no2, "active_no": start_no1}
     })
     story.elements.push({
         type: "POINT_TO_PHRASE",
@@ -565,7 +565,7 @@ function processBlockMatch(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "match"
         },
-        editor: {"start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
+        editor: {"block_start_no": start_no, "start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
     })
     story.meta.line_index += 1;
 }

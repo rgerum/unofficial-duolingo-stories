@@ -25,6 +25,74 @@ if(!urlParams.get("story")) {
     );
 }
 else {
+    window.scroll_lookup = [];
+    function map_editor_to_preview(pos) {
+        let line = pos/26.6;///26.6;
+        let pos1 = Math.floor(line)
+        let factor = line % 1;
+        console.log(line, pos1, factor, window.scroll_lookup[pos1], factor * (window.scroll_lookup[pos1+1]-window.scroll_lookup[pos1]))
+        let new_pos = window.scroll_lookup[pos1] + factor * (window.scroll_lookup[pos1+1]-window.scroll_lookup[pos1])
+        return new_pos;
+    }
+    window.map_editor_to_preview = map_editor_to_preview
+    document.getElementById("editor").addEventListener('scroll', function(e) {
+        requestAnimationFrame(()=>{
+        let editor = document.getElementById("editor");
+        let preview = document.getElementById("preview");
+        let svg_parent = document.getElementById("margin");
+
+        let offset = 0;//svg_parent.getBoundingClientRect().height*(1.5/4)
+        let new_pos = map_editor_to_preview(editor.scrollTop + offset) - offset;///26.6;
+        preview.scrollTo(0, new_pos);
+
+
+        let svg_element = 0;
+        let width1 = svg_parent.getBoundingClientRect().width * 0.48
+        let width1b = svg_parent.getBoundingClientRect().width * 0.50
+        let width2 = svg_parent.getBoundingClientRect().width * 0.52
+        let width3 = svg_parent.getBoundingClientRect().width * 1.00
+        for(let element of document.querySelectorAll("div[lineno]")) {
+            let new_lineno = parseInt(element.attributes.lineno.value);
+            let new_top = element.getBoundingClientRect().top  - svg_parent.getBoundingClientRect().top - 10;// - preview.scrollTop - preview.getBoundingClientRect().top
+            let new_linetop = (4+new_lineno)*26.6 - editor.scrollTop - svg_parent.getBoundingClientRect().top - editor.getBoundingClientRect().top
+            svg_parent.children[svg_element].setAttribute("d", `M0,${new_linetop} L ${width1},${new_linetop} 
+                                                                                  C${width1b},${new_linetop} ${width1b},${new_top} ${width2},${new_top} L${width3},${new_top}`)
+            element.getBoundingClientRect().top
+            svg_element += 1;
+        }
+        })
+
+    });
+    function createScrollLookUp() {
+        let line_map = []
+        let last_lineno = 0;
+        let last_top = 0;
+        let svg_element = 0;
+        let svg_parent = document.getElementById("margin");
+        for(let element of document.querySelectorAll("div[lineno]")) {
+            let new_lineno = parseInt(element.attributes.lineno.value);
+            let new_top = element.getBoundingClientRect().top + document.getElementById("preview").scrollTop;
+            if(svg_parent.children[svg_element] === undefined) {
+                let element = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                element.setAttribute("line-width", 2)
+                element.setAttribute("stroke", "lightgray")
+                element.setAttribute("fill", "none")
+                element.setAttribute("line-style", "dashed")
+                svg_parent.appendChild(element);
+            }
+            svg_element += 1;
+            for(let line=last_lineno; line < new_lineno; line+=1) {
+                let top = (line - last_lineno) / (new_lineno - last_lineno) * (new_top - last_top) + last_top;
+                line_map.push(top);
+                console.log(line);
+            }
+            last_lineno = new_lineno;
+            last_top = new_top;
+        }
+        console.log("line_map", line_map)
+        return line_map;
+    }
+
     document.getElementById('button_import').style.display = "none"
 
     window.button_back = function() {
@@ -69,7 +137,7 @@ else {
             if(state === undefined)
                 return
             //last_lineno = lineno;
-            if (last_lineno !== lineno || last_avatar !== Object.keys(window.character_avatars).length) {
+            if (story === undefined  || last_avatar !== Object.keys(window.character_avatars).length) {
                 last_lineno = lineno;
                 console.log("updateDisplay", last_lineno !== lineno, last_avatar !== Object.keys(window.character_avatars).length, story === undefined)
                 if (story === undefined || last_avatar !== Object.keys(window.character_avatars).length) {
@@ -86,17 +154,24 @@ else {
                     </React.StrictMode>,
                     document.getElementById('preview')
                 );
+                window.scroll_lookup = createScrollLookUp();
                 last_lineno = lineno;
-                document.getElementsByClassName("story_selection")[0]?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"})
-                for(let element of document.querySelectorAll("div[lineno]")) {
-                    element.onclick = (e) => {
-                        console.log("clicked", element)
-                        let pos = view.state.doc.line(parseInt(element.attributes.lineno.value)+1).from;
-                        view.dispatch(view.state.update({
-                            selection: EditorSelection.cursor(pos),
-                            scrollIntoView: true,
-                        }));
-                        //view.scrollPosIntoView(view.state.doc.line(parseInt(element.attributes.lineno.value)).from)
+                if(0) {
+                    document.getElementsByClassName("story_selection")[0]?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "nearest",
+                        inline: "nearest"
+                    })
+                    for (let element of document.querySelectorAll("div[lineno]")) {
+                        element.onclick = (e) => {
+                            console.log("clicked", element)
+                            let pos = view.state.doc.line(parseInt(element.attributes.lineno.value) + 1).from;
+                            view.dispatch(view.state.update({
+                                selection: EditorSelection.cursor(pos),
+                                scrollIntoView: true,
+                            }));
+                            //view.scrollPosIntoView(view.state.doc.line(parseInt(element.attributes.lineno.value)).from)
+                        }
                     }
                 }
             }
