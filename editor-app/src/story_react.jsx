@@ -626,7 +626,7 @@ function TextLine(props) {
     ;
 
     else
-        return <div className={"phrase fadeGlideIn "+hidden}>
+        return <div className={"phrase fadeGlideIn "+hidden} lineno={element?.editor?.block_start_no}>
                 <span>
                     <AudioPlay onClick={playAudio} />
                     <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.line.content} />
