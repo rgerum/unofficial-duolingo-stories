@@ -283,27 +283,42 @@ function getAnswers(line_iter, allow_trans) {
 
 function pointToPhraseButtons(line) {
     [, , line] = line.match(/\s*(?:>?\s*(\w*)\s*:|>|\+|-)\s*(\S.*\S)\s*/);
+    line = line.replace(/(\s*)\)/g, ")$1")
+    line = line.replace(/~/g, " ")
     let transcriptParts = [];
     let correctAnswerIndex = 0;
     let index = 0;
-    let tokens = splitTextTokens(line);
-    for(let token of tokens) {
-        let selectable = false;
-        if(token.substring(0, 2) === "(+") {
-            correctAnswerIndex = index
-            token = token.substring(2, token.length-1)
-            selectable = true;
-        }
-        if(token.substring(0, 1) === "(") {
-            index += 1
-            token = token.substring(1, token.length-1)
-            selectable = true;
-        }
-        if(token !== "")
+
+    while(line.length) {
+        let pos = line.indexOf("(");
+        if(pos === -1) {
             transcriptParts.push({
-                selectable: selectable,
-                text: token,
+                selectable: false,
+                text: line,
             })
+            break
+        }
+        if(line.substring(0, pos) !== "") {
+            transcriptParts.push({
+                selectable: false,
+                text: line.substring(0, pos),
+            })
+        }
+        line = line.substring(pos+1);
+        if(line.startsWith("+")) {
+            correctAnswerIndex = index;
+            line = line.substring(1);
+        }
+        let pos2 = line.indexOf(")");
+        if(pos2 === -1)
+            pos2 = line.length-1;
+        transcriptParts.push({
+            selectable: true,
+            text: line.substring(0, pos2).trim(),
+        })
+        index += 1
+        line = line.substring(pos2+1);
+
     }
 
     return [correctAnswerIndex, transcriptParts]
