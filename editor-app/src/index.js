@@ -25,73 +25,112 @@ if(!urlParams.get("story")) {
     );
 }
 else {
+    let editor = document.getElementById("editor");
+    let preview = document.getElementById("preview");
+    let svg_parent = document.getElementById("margin");
+
     window.scroll_lookup = [];
-    function map_editor_to_preview(pos) {
-        let line = pos/26.6;///26.6;
-        let pos1 = Math.floor(line)
-        let factor = line % 1;
-        console.log(line, pos1, factor, window.scroll_lookup[pos1], factor * (window.scroll_lookup[pos1+1]-window.scroll_lookup[pos1]))
-        let new_pos = window.scroll_lookup[pos1] + factor * (window.scroll_lookup[pos1+1]-window.scroll_lookup[pos1])
-        return new_pos;
-    }
-    window.map_editor_to_preview = map_editor_to_preview
-    document.getElementById("editor").addEventListener('scroll', function(e) {
-        requestAnimationFrame(()=>{
-        let editor = document.getElementById("editor");
-        let preview = document.getElementById("preview");
-        let svg_parent = document.getElementById("margin");
 
-        let offset = 0;//svg_parent.getBoundingClientRect().height*(1.5/4)
-        let new_pos = map_editor_to_preview(editor.scrollTop + offset) - offset;///26.6;
-        preview.scrollTo(0, new_pos);
-
-
+    function update_lines() {
         let svg_element = 0;
         let width1 = svg_parent.getBoundingClientRect().width * 0.48
         let width1b = svg_parent.getBoundingClientRect().width * 0.50
         let width2 = svg_parent.getBoundingClientRect().width * 0.52
         let width3 = svg_parent.getBoundingClientRect().width * 1.00
+        let height = svg_parent.getBoundingClientRect().height
+
+        let pairs = []
+        let pairs2 = []
+        let path = "M0,0 ";
         for(let element of document.querySelectorAll("div[lineno]")) {
             let new_lineno = parseInt(element.attributes.lineno.value);
             let new_top = element.getBoundingClientRect().top  - svg_parent.getBoundingClientRect().top - 10;// - preview.scrollTop - preview.getBoundingClientRect().top
             let new_linetop = (4+new_lineno)*26.6 - editor.scrollTop - svg_parent.getBoundingClientRect().top - editor.getBoundingClientRect().top
-            svg_parent.children[svg_element].setAttribute("d", `M0,${new_linetop} L ${width1},${new_linetop} 
-                                                                                  C${width1b},${new_linetop} ${width1b},${new_top} ${width2},${new_top} L${width3},${new_top}`)
+            if(svg_element % 2 === 0)
+                path += `L0,${new_linetop} L ${width1},${new_linetop} C${width1b},${new_linetop} ${width1b},${new_top} ${width2},${new_top} L${width3},${new_top}`;
+            else
+                path += `L${width3},${new_top} L ${width2},${new_top} C${width1b},${new_top} ${width1b},${new_linetop} ${width1},${new_linetop} L0,${new_linetop}`;
             element.getBoundingClientRect().top
             svg_element += 1;
+            pairs.push([new_linetop, new_top])
+            pairs2.push([new_lineno, new_top])
         }
+        if(svg_element % 2 === 1)
+            path += `L${width3},${height} L ${0},${height}`;
+        svg_parent.children[0].setAttribute("d", path)
+    }
+
+    let last_editor_scroll_pos = 0;
+    document.getElementById("editor").addEventListener('scroll', function(e) {
+        requestAnimationFrame(()=>{
+        if(last_editor_scroll_pos === editor.scrollTop)
+            return
+        last_editor_scroll_pos = editor.scrollTop;
+
+        let offset_lines = 1;
+        let o = editor.getBoundingClientRect().height/2
+        let target_equal_lineno = (editor.scrollTop-4 + o)/26.6+offset_lines;
+        let pairss = window.line_map
+        for(let i = 0; i < pairss.length-1; i+= 1) {
+            let [x1, y1] = pairss[i];
+            let [x2, y2] = pairss[i+1];
+            if(x1 <= target_equal_lineno && target_equal_lineno < x2) {
+                let f = (target_equal_lineno-x1)/(x2-x1);
+                let offsetx = y1+f*(y2-y1);
+                last_preview_scroll_pos = parseInt(offsetx - o);
+                preview.scrollTo(0, offsetx - o);
+                break
+            }
+        }
+
+        update_lines();
+        })
+
+    });
+    let last_preview_scroll_pos = 0;
+    preview.addEventListener('scroll', function(e) {
+        requestAnimationFrame(()=>{
+            if(last_preview_scroll_pos === preview.scrollTop)
+                return
+            last_preview_scroll_pos = preview.scrollTop;
+
+            let offset_lines = 1;
+            let o = preview.getBoundingClientRect().height/2
+            //let target_equal_lineno = (editor.scrollTop-4 + o)/26.6+offset_lines;
+            let target_equal_pos = preview.scrollTop + o;
+            let pairss = window.line_map
+            for(let i = 0; i < pairss.length-1; i+= 1) {
+                let [x1, y1] = pairss[i];
+                let [x2, y2] = pairss[i+1];
+                if(y1 <= target_equal_pos && target_equal_pos < y2) {
+                    let f = (target_equal_pos-y1)/(y2-y1);
+                    let offsetx_lineno = x1+f*(x2-x1);
+                    let offsetx = (offsetx_lineno - offset_lines) * 26.6 - o + 4
+                    last_editor_scroll_pos = parseInt(offsetx);
+                    editor.scrollTo(0, offsetx);
+                    break
+                }
+            }
+
+            update_lines();
         })
 
     });
     function createScrollLookUp() {
         let line_map = []
-        let last_lineno = 0;
-        let last_top = 0;
-        let svg_element = 0;
-        let svg_parent = document.getElementById("margin");
+        let preview = document.getElementById("preview");
+        window.line_map = []
         for(let element of document.querySelectorAll("div[lineno]")) {
             let new_lineno = parseInt(element.attributes.lineno.value);
-            let new_top = element.getBoundingClientRect().top + document.getElementById("preview").scrollTop;
-            if(svg_parent.children[svg_element] === undefined) {
-                let element = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                element.setAttribute("line-width", 2)
-                element.setAttribute("stroke", "lightgray")
-                element.setAttribute("fill", "none")
-                element.setAttribute("line-style", "dashed")
-                svg_parent.appendChild(element);
-            }
-            svg_element += 1;
-            for(let line=last_lineno; line < new_lineno; line+=1) {
-                let top = (line - last_lineno) / (new_lineno - last_lineno) * (new_top - last_top) + last_top;
-                line_map.push(top);
-                console.log(line);
-            }
-            last_lineno = new_lineno;
-            last_top = new_top;
+            let new_top = element.getBoundingClientRect().top + preview.scrollTop - preview.getBoundingClientRect().top - 10;
+            window.line_map.push([new_lineno, new_top])
         }
-        console.log("line_map", line_map)
+        update_lines();
         return line_map;
     }
+    window.addEventListener("resize", function () {
+        createScrollLookUp();
+    });
 
     document.getElementById('button_import').style.display = "none"
 

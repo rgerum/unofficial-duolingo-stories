@@ -64,7 +64,10 @@
     <div class="editor_button"></div>
 </div>
 <div id="root">
-<svg id="margin" style="float:left; position: fixed; z-index: 2; width: 100%; height: 100%; pointer-events: none;"></svg>
+<svg id="margin" style="float:left; position: fixed; z-index: -1; width: 100%; height: 100%; pointer-events: none;">
+    <path line-width="2" stroke="#eee" d="" fill="#fbfbfb "></path>
+
+</svg>
 <div id="editor" style="float:left; overflow: scroll; width: 48%; height: calc(100vh - 64px)"></div>
 <svg id="margin2" style="float:left; overflow: scroll; width: 2%; height: calc(100vh - 64px)"></svg>
 <div id="preview" style="float:left; overflow: scroll; width: 50%; height: calc(100vh - 64px)"></div>
