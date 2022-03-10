@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Story} from "./story_react";
 import {EditorOverview} from "./editor"
+import {AvatarNames} from "./avatar_editor";
 import {getStory, setStory} from "./api_calls.mjs";
 
 import {EditorState, EditorView, basicSetup} from "@codemirror/basic-setup"
@@ -14,12 +15,22 @@ window.EditorView = EditorView
 window.EditorSelection = EditorSelection
 let urlParams = new URLSearchParams(window.location.search);
 
-if(!urlParams.get("story")) {
+if(!urlParams.get("story") && !urlParams.get("language")) {
     document.getElementById('button_save').style.display = "none"
     document.getElementById('button_back').style.display = "none"
     ReactDOM.render(
         <React.StrictMode>
             <EditorOverview/>
+        </React.StrictMode>,
+        document.getElementById('root')
+    );
+}
+else if(!urlParams.get("story")) {
+    document.getElementById('button_save').style.display = "none"
+    document.getElementById('button_back').style.display = "none"
+    ReactDOM.render(
+        <React.StrictMode>
+            <AvatarNames />
         </React.StrictMode>,
         document.getElementById('root')
     );

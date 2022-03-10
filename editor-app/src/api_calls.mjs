@@ -37,6 +37,17 @@ export async function getCourse(id) {
     }
 }
 
+export async function getAvatars(id) {
+    console.log("getAvatars", id, `${backend_get}?action=avatar_names&id=${id}`)
+    try {
+        let response = await fetch(`${backend_get}?action=avatar_names&id=${id}`);
+        return await response.json();
+    }
+    catch (e) {
+        return {};
+    }
+}
+
 export async function setPublic(id, is_public) {
     return await fetch(backend_stories+"set_story_public.php?id="+id+"&public="+is_public);
 }
