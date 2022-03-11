@@ -1,12 +1,21 @@
 .avatar_editor {
     display: flex;
     flex-wrap: wrap;
+    overflow-y: scroll;
+    height: calc(100vh - 64px);
+    width: calc(100vw - 400px);
+}
+
+.speaker_list {
+    overflow-y: scroll;
+    width: 400px;
+    height: calc(100vh - 64px);
 }
 
 .avatar {
     border: 1px solid lightgrey;
     border-radius: 5px;
-    width: 80px;
+    width: 100px;
     margin: 10px;
     padding: 5px;
     display: flex;
@@ -19,7 +28,7 @@
 }
 
 .avatar p input {
-    width: 70px;
+    width: 90px;
     border: 1px solid lightgrey;
     border-radius: 5px;
     padding: 5px;

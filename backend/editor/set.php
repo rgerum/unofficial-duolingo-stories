@@ -105,6 +105,15 @@ if($action == "import") {
     exec("python3 upload_github.py $id $data[course_id] $author_name $message", $output, $retval);
     //print_r($output);
 }
+else if($action == "avatar") {
+    $keys = ["id" => "int",
+        "name" => "string",
+        "speaker" => "string",
+        "language_id" => "int",
+        "avatar_id" => "int",
+    ];
+    $id = updateDatabase($keys, "avatar_mapping", $_POST, "id");
+}
 else if($action == "story") {
     $keys = ["id" => "int",
         "duo_id" => "string",

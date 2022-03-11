@@ -48,6 +48,26 @@ export async function getAvatars(id) {
     }
 }
 
+export async function getSpeakers(id) {
+    try {
+        let response = await fetch(`${backend_get}?action=speakers&id=${id}`);
+        return await response.json();
+    }
+    catch (e) {
+        return {};
+    }
+}
+
+export async function setAvatarSpeaker(data) {
+    try {
+        let response = await fetch_post(`${backend_set}?action=avatar`, data);
+        return await response.json();
+    }
+    catch (e) {
+        return {};
+    }
+}
+
 export async function setPublic(id, is_public) {
     return await fetch(backend_stories+"set_story_public.php?id="+id+"&public="+is_public);
 }
