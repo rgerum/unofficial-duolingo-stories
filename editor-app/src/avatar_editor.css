@@ -1,10 +1,14 @@
 .avatar_editor {
-    display: flex;
-    flex-wrap: wrap;
     overflow-y: scroll;
     height: calc(100vh - 64px);
     width: calc(100vw - 400px);
 }
+
+.avatar_editor div {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 
 .speaker_list {
     overflow-y: scroll;

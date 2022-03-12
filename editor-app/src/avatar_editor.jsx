@@ -24,8 +24,8 @@ function Avatar(props) {
     if(avatar.avatar_id === 0) {
         return <div className={"avatar"}>
             <p>{avatar.avatar_id}</p>
-            <p style={{width: "50px", height: "66.6px"}}>
-                <img src={avatar.link} style={{width: "50px"}}/>
+            <p style={{height: "50px"}}>
+                <img src={avatar.link} style={{height: "50px"}}/>
             </p>
 
             <p>{inputName}</p>
@@ -36,7 +36,7 @@ function Avatar(props) {
     return <div className={"avatar"}>
         <p>{avatar.avatar_id}</p>
         <p>
-            <img src={avatar.link} style={{width: "50px"}}/>
+            <img src={avatar.link} style={{height: "50px"}}/>
         </p>
 
         <p><input value={inputName} onChange={inputNameSetValue} type="text" placeholder="Name"/></p>
@@ -89,12 +89,18 @@ export function AvatarNames(props) {
         </table>
     </div>
     <div className={"avatar_editor"} style={{"overflow-y": "scroll"}}>
+        <p>These characters are the default cast of duolingo. Their names should be kept as close to the original as possible.</p>
+        <div>
         {avatars_new_important.map((avatar, index) =>
             <Avatar key={index} language_id={language} avatar={avatar} />
         )}
+        </div>
+        <p>These characters just appear in a couple of stories.</p>
+        <div>
         {avatars_new.map((avatar, index) =>
             <Avatar key={index} language_id={language} avatar={avatar} />
         )}
+        </div>
     </div>
     </>
 }
