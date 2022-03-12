@@ -172,13 +172,15 @@ function speaker_text_trans(data, meta) {
     if(speaker_text) {
         [, speaker_id] = speaker_text.match(/Speaker(.*)/);
     }
-    speaker = get_avatar(speaker_id, meta.avatar_names, meta.avatar_overwrites);
-    meta.cast[speaker_id] = {
-        speaker: meta.avatar_overwrites[speaker_id]?.speaker || meta.avatar_names[speaker_id]?.speaker || meta.avatar_names[0].speaker,
-        link: meta.avatar_overwrites[speaker_id]?.link || meta.avatar_names[speaker_id]?.link,
-        name: meta.avatar_overwrites[speaker_id]?.name || meta.avatar_names[speaker_id]?.name,
-        id: speaker_id,
-    };
+    if(meta) {
+        speaker = get_avatar(speaker_id, meta.avatar_names, meta.avatar_overwrites);
+        meta.cast[speaker_id] = {
+            speaker: meta.avatar_overwrites[speaker_id]?.speaker || meta.avatar_names[speaker_id]?.speaker || meta.avatar_names[0].speaker,
+            link: meta.avatar_overwrites[speaker_id]?.link || meta.avatar_names[speaker_id]?.link,
+            name: meta.avatar_overwrites[speaker_id]?.name || meta.avatar_names[speaker_id]?.name,
+            id: speaker_id,
+        };
+    }
     let audio;
     if(data.allow_audio) {
         let speaker_name = meta["speaker_" + "narrator"] || meta.avatar_names[0].speaker;
