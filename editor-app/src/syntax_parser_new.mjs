@@ -167,7 +167,10 @@ function speaker_text_trans(data, meta) {
     }
     let audio;
     if(data.allow_audio) {
-        audio = line_to_audio(data.audio, text, meta["speaker_" + speaker_id], meta.story_id)
+        let speaker_name = meta["speaker_" + "narrator"] || avatar_names[0].speaker;
+        if(speaker_id)
+            speaker_name = meta["speaker_" + speaker_id] || avatar_names[speaker_id].speaker;
+        audio = line_to_audio(data.audio, text, speaker_name, meta.story_id)
         audio.ssml.line = data.audio_line;
         audio.ssml.line_insert = data.audio_line_inset;
         content.audio = audio
@@ -220,6 +223,8 @@ function line_to_audio(line, text, speaker, story_id) {
 
 function get_avatar(id) {
     id = parseInt(id) ? parseInt(id) : id;
+    console.log("avatar_names[id]", avatar_names[id])
+    return {"characterId": id, "avatarUrl": avatar_names[id]?.link};
     if(!character_avatars[id]) {
         getAvatar(id).then((avatar)=>(add_avatar(id, avatar ? avatar.link : undefined)));
     }

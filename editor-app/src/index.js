@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import {Story} from "./story_react";
 import {EditorOverview} from "./editor"
 import {AvatarNames} from "./avatar_editor";
-import {getStory, setStory} from "./api_calls.mjs";
+import {getAvatars, getStory, setStory} from "./api_calls.mjs";
 
 import {EditorState, EditorView, basicSetup} from "@codemirror/basic-setup"
 import {HighlightStyle, tags as t} from "@codemirror/highlight"
@@ -180,7 +180,13 @@ else {
         let editor_text = undefined;
 
         let story_data = await getStory(urlParams.get("story"));
-        window.story_data = story_data
+        let avatar_names_list = await getAvatars(0, story_data.course_id)
+        let avatar_names = {}
+        for(let avatar of avatar_names_list) {
+            avatar_names[avatar.avatar_id] = avatar;
+        }
+        window.story_data = story_data;
+        window.avatar_names = avatar_names;
         let last_avatar = undefined;
 
         function updateDisplay() {

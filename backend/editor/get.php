@@ -65,7 +65,12 @@ if($action == "avatar") {
 }
 else if($action == "avatar_names") {
     $id = intVal($_REQUEST['id']);
-    query_json_list($db,"SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id WHERE (language_id = $id or language_id is NULL) ORDER BY a.id");
+    if($id == 0) {
+        $course_id = intVal($_REQUEST['course_id']);
+        query_json_list($db,"SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id WHERE (language_id = (SELECT learningLanguage FROM course WHERE id = $course_id) or language_id is NULL) ORDER BY a.id");
+    }
+    else
+        query_json_list($db,"SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id WHERE (language_id = $id or language_id is NULL) ORDER BY a.id");
 }
 else if($action == "speakers") {
     $id = intVal($_REQUEST['id']);
