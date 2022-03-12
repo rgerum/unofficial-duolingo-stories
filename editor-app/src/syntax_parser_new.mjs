@@ -169,11 +169,17 @@ function speaker_text_trans(data, meta) {
     let hideRanges = getHideRanges(content);
     // split number of speaker
     let speaker;
-    let speaker_id;
+    let speaker_id = 0;
     if(speaker_text) {
         [, speaker_id] = speaker_text.match(/Speaker(.*)/);
-        speaker = get_avatar(speaker_id, meta.avatar_names, meta.avatar_overwrites);
     }
+    speaker = get_avatar(speaker_id, meta.avatar_names, meta.avatar_overwrites);
+    meta.cast[speaker_id] = {
+        speaker: meta.avatar_overwrites[speaker_id]?.speaker || meta.avatar_names[speaker_id]?.speaker || meta.avatar_names[0].speaker,
+        link: meta.avatar_overwrites[speaker_id]?.link || meta.avatar_names[speaker_id]?.link,
+        name: meta.avatar_overwrites[speaker_id]?.name || meta.avatar_names[speaker_id]?.name,
+        id: speaker_id,
+    };
     let audio;
     if(data.allow_audio) {
         let speaker_name = meta["speaker_" + "narrator"] || meta.avatar_names[0].speaker;
@@ -186,7 +192,7 @@ function speaker_text_trans(data, meta) {
     }
 
     let line;
-    if(speaker) {
+    if(speaker && speaker_id !== 0) {
         line = {
             type: "CHARACTER",
             avatarUrl: speaker.avatarUrl,
@@ -628,7 +634,7 @@ function line_iterator(lines) {
 export function processStoryFile(text, story_id, avatar_names) {
     let lines = split_lines(text);
 
-    let story = {elements: [], meta: {line_index: 1, story_id: story_id, avatar_names: avatar_names, avatar_overwrites: {}}}
+    let story = {elements: [], meta: {line_index: 1, story_id: story_id, avatar_names: avatar_names, avatar_overwrites: {}, cast: {}}}
     let line_iter = line_iterator(lines)
     while(line_iter.get()) {
         let line = line_iter.get()

@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Story} from "./story_react";
+import {Story, Cast} from "./story_react";
 import {EditorOverview} from "./editor"
 import {AvatarNames} from "./avatar_editor";
 import {getAvatars, getStory, setStory} from "./api_calls.mjs";
@@ -130,7 +130,7 @@ else {
     function createScrollLookUp() {
         let line_map = []
         let preview = document.getElementById("preview");
-        window.line_map = []
+        window.line_map = [[0, 0]]
         for(let element of document.querySelectorAll("div[lineno]")) {
             let new_lineno = parseInt(element.attributes.lineno.value);
             let new_top = element.getBoundingClientRect().top + preview.scrollTop - preview.getBoundingClientRect().top - 10;
@@ -204,6 +204,7 @@ else {
 
                 ReactDOM.render(
                     <React.StrictMode>
+                        <Cast story_meta={story_meta}/>
                         <Story editor={editor_state} story={story}/>
                     </React.StrictMode>,
                     document.getElementById('preview')

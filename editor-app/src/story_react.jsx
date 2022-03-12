@@ -890,6 +890,32 @@ export class Story extends React.Component {
 
 }
 
+function Character(props) {
+    let characer = props.character;
+    return <tr className="character">
+        <td style={{textAlign: "right"}}>{characer.id}</td>
+        <td><img className="head" src={characer.link} /></td>
+        <td>{characer.name}</td>
+        <td><span className="ssml_speaker">{characer.speaker}</span></td>
+    </tr>
+}
+export function Cast(props) {
+    let cast = [];
+    for(let id in props.story_meta.cast) {
+        cast.push(props.story_meta.cast[id]);
+    }
+    return <>
+        <h2>Cast</h2>
+    <table className="cast">
+        <tbody>
+        {cast.map((character, i) => (
+            <Character key={i} character={character}  />
+        ))}
+        </tbody>
+    </table>
+    </>
+}
+
 function scroll_down() {
     // scroll down to the bottom
     document.documentElement.scrollTo({
