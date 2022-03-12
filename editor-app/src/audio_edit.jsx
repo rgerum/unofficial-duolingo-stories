@@ -12,7 +12,10 @@ export function EditorSSMLDisplay(props) {
     return <><br/>
         <span className="ssml_speaker">{props.ssml.speaker}</span>
         <span className="ssml">{props.ssml.text}</span>
-        <span id={line_id} className={"ssml_reload audio_reload " + (loading ? "audio_reload_spin" : "")} onClick={reload}/>
+        { props.ssml.speaker ?
+            <span id={line_id} className={"ssml_reload audio_reload " + (loading ? "audio_reload_spin" : "")}
+                  onClick={reload}/> : <></>
+        }
     </>
 }
 

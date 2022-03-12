@@ -152,7 +152,6 @@ function getInputStringText(text) {
     return text.replace(/([^-|~ ,;.:_?!…]*){([^}]*)}/g, "$1");
 }
 
-
 function getInputStringSpeechText(text) {
     text = text.replace(/(\.\.\.|…)/g, '<sub alias="">$1</sub><break/>');
     return "<speak>"+text.replace(/([^-|~ ,;.:_?!…]*)\{([^\}:]*):([^\}]*)\}/g, '<phoneme alphabet="$3" ph="$2">$1</phoneme>').replace(/([^-|~ ,;.:_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ").replace(/\|/g, "​")+"</speak>";
