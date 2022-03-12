@@ -119,7 +119,16 @@ function processBlockData(line_iter, story) {
     }
     for(let key in story.meta) {
         if(key.startsWith("icon_")) {
-            add_avatar(key.substring(5), story.meta[key]);
+            let id = key.substring(5);
+            if(!story.meta.avatar_overwrites[id])
+                story.meta.avatar_overwrites[id] = {id: id}
+            story.meta.avatar_overwrites[id].link = story.meta[key];
+        }
+        if(key.startsWith("speaker_")) {
+            let id = key.substring(8);
+            if(!story.meta.avatar_overwrites[id])
+                story.meta.avatar_overwrites[id] = {id: id}
+            story.meta.avatar_overwrites[id].speaker = story.meta[key];
         }
     }
     story.fromLanguageName = story.meta.fromLanguageName
@@ -163,13 +172,13 @@ function speaker_text_trans(data, meta) {
     let speaker_id;
     if(speaker_text) {
         [, speaker_id] = speaker_text.match(/Speaker(.*)/);
-        speaker = get_avatar(speaker_id);
+        speaker = get_avatar(speaker_id, meta.avatar_names, meta.avatar_overwrites);
     }
     let audio;
     if(data.allow_audio) {
-        let speaker_name = meta["speaker_" + "narrator"] || avatar_names[0].speaker;
+        let speaker_name = meta["speaker_" + "narrator"] || meta.avatar_names[0].speaker;
         if(speaker_id)
-            speaker_name = meta["speaker_" + speaker_id] || avatar_names[speaker_id].speaker;
+            speaker_name = meta.avatar_overwrites[speaker_id]?.speaker || meta.avatar_names[speaker_id]?.speaker || meta.avatar_names[0].speaker;
         audio = line_to_audio(data.audio, text, speaker_name, meta.story_id)
         audio.ssml.line = data.audio_line;
         audio.ssml.line_insert = data.audio_line_inset;
@@ -221,15 +230,12 @@ function line_to_audio(line, text, speaker, story_id) {
     return audio;
 }
 
-function get_avatar(id) {
+function get_avatar(id, avatar_names, avatar_overwrites) {
     id = parseInt(id) ? parseInt(id) : id;
+    if(avatar_overwrites[id])
+        return {"characterId": id, "avatarUrl": avatar_overwrites[id]?.link};
     console.log("avatar_names[id]", avatar_names[id])
     return {"characterId": id, "avatarUrl": avatar_names[id]?.link};
-    if(!character_avatars[id]) {
-        getAvatar(id).then((avatar)=>(add_avatar(id, avatar ? avatar.link : undefined)));
-    }
-    let avatar = character_avatars[id];
-    return {"characterId": id, "avatarUrl": avatar};
 }
 
 function add_avatar(id, link) {
@@ -619,10 +625,10 @@ function line_iterator(lines) {
     return {get:get, get_lineno:get_lineno, advance:advance}
 }
 
-export function processStoryFile(text, story_id) {
+export function processStoryFile(text, story_id, avatar_names) {
     let lines = split_lines(text);
 
-    let story = {elements: [], meta: {line_index: 1, story_id: story_id}}
+    let story = {elements: [], meta: {line_index: 1, story_id: story_id, avatar_names: avatar_names, avatar_overwrites: {}}}
     let line_iter = line_iterator(lines)
     while(line_iter.get()) {
         let line = line_iter.get()
@@ -653,16 +659,9 @@ export function processStoryFile(text, story_id) {
         //console.log("error", lineno, line)
         line_iter.advance();
     }
+    let meta = story.meta;
+    delete story.meta;
 
-    return [story, story.meta];
-}
-
-let character_avatars = {}
-
-try {
-    window.character_avatars = character_avatars
-}
-catch (e) {
-    
+    return [story, meta];
 }
 

@@ -165,6 +165,7 @@ else {
                     text: editor_text,
                     json: JSON.stringify(story),
                 }
+
                 await setStory(data)
                 document.querySelector("#button_save span").innerText = "Save";
             }
@@ -186,22 +187,19 @@ else {
             avatar_names[avatar.avatar_id] = avatar;
         }
         window.story_data = story_data;
-        window.avatar_names = avatar_names;
-        let last_avatar = undefined;
 
         function updateDisplay() {
             if(state === undefined)
                 return
             //last_lineno = lineno;
-            if (story === undefined  || last_avatar !== Object.keys(window.character_avatars).length) {
+            if (story === undefined) {
                 last_lineno = lineno;
-                console.log("updateDisplay", last_lineno !== lineno, last_avatar !== Object.keys(window.character_avatars).length, story === undefined)
-                if (story === undefined || last_avatar !== Object.keys(window.character_avatars).length) {
+                //console.log("updateDisplay", last_lineno !== lineno, last_avatar !== Object.keys(window.character_avatars).length, story === undefined)
+                if (story === undefined) {
                     console.log("parse Story")
                     editor_text = state.doc.toString();
-                    [story, story_meta] = processStoryFile(editor_text, story_data.id);
+                    [story, story_meta] = processStoryFile(editor_text, story_data.id, avatar_names);
                 }
-                last_avatar = Object.keys(window.character_avatars).length;
                 window.story = story;
 
                 ReactDOM.render(
