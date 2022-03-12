@@ -530,6 +530,10 @@ function Header(props) {
                 <span className="title">
                     <AudioPlay onClick={playAudio} />
                     <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.learningLanguageTitleContent} />
+                    {(props.editor && (element.audio)) ?
+                        <EditorSSMLDisplay ssml={element.audio.ssml}/>
+                        : <></>
+                    }
                 </span>
     </div>;
 }
@@ -630,6 +634,10 @@ function TextLine(props) {
                 <span>
                     <AudioPlay onClick={playAudio} />
                     <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.line.content} />
+                    {(props.editor && (element.line.content.audio)) ?
+                        <EditorSSMLDisplay ssml={element.line.content.audio.ssml}/>
+                        : <></>
+                    }
                 </span>
         </div>;
 }
