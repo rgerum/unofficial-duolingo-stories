@@ -278,19 +278,23 @@ function parseBockArrange(stream, state) {
 
 function parseBockPointToPhrase(stream, state) {
     if(stream.sol()) {
-        if(stream.eat(">") && state.block.line===0) {
+        if(state.block.line===0 && stream.eat(">")) {
             startLine(state, 1, true, "text");
             return STATE_DEFAULT;
         }
-        if(stream.eat("~") && state.block.allow_trans) {
+        if(state.block.allow_trans && stream.eat("~")) {
             startLine(state, undefined, false, "trans");
             return STATE_DEFAULT;
         }
-        if(stream.match(/\S+:/) && state.block.line===1) {
+        if(state.block.line===1 && stream.match(/\S+:/)) {
             startLine(state, 2, true, "text", true);
             return STATE_SPEAKER_TYPE;
         }
-        if(stream.eat("$") && state.block.allow_audio) {
+        if(state.block.line===1 && stream.eat(">")) {
+            startLine(state, 2, true, "text", true);
+            return STATE_DEFAULT;
+        }
+        if(state.block.allow_audio && stream.eat("$")) {
             startLine(state); stream.skipToEnd();
             return STATE_AUDIO;
         }
