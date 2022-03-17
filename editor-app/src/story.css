@@ -1327,3 +1327,7 @@ p[data-rtl] .speaker {
     background: #f3f9ff;
     border-radius: 8px;
 }
+
+.cast_element {
+    margin-bottom: -80px;
+}
