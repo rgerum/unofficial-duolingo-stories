@@ -4,7 +4,7 @@ import {Spinner} from './react/spinner'
 import {Flag} from './react/flag'
 import {useUsername, Login, LoginDialog} from './login'
 import {useInput} from "./hooks";
-import {getAvatars, getSpeakers, setAvatarSpeaker} from "./api_calls.mjs";
+import {getAvatars, getLanguageName, getSpeakers, setAvatarSpeaker} from "./api_calls.mjs";
 import "./avatar_editor.css"
 
 function Avatar(props) {
@@ -42,6 +42,20 @@ function Avatar(props) {
         <p><input value={inputName} onChange={inputNameSetValue} type="text" placeholder="Name"/></p>
         <p><input value={inputSpeaker} onChange={inputSpeakerSetValue} type="text" placeholder="Speaker"/></p>
         <p><input value="save" onClick={save} disabled={(inputName && inputName === avatar.name && inputSpeaker && inputSpeaker === avatar.speaker) ? true : false} type="button"/></p>
+    </div>
+}
+
+export function AvatarEditorHeader(props) {
+    let urlParams = new URLSearchParams(window.location.search);
+    const [language, setLanguage] = React.useState(parseInt(urlParams.get("language")) || undefined);
+    const [language_data, _] = useDataFetcher2(getLanguageName, [language]);
+
+    if(language_data === undefined)
+        return <></>
+    return <div className="AvatarEditorHeader">
+        <b>Character-Editor</b>
+        <Flag flag={language_data.flag} flag_file={language_data.flag_file}/>
+        <span className={"AvatarEditorHeaderFlagname"}>{language_data.name}</span>
     </div>
 }
 

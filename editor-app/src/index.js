@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Story, Cast} from "./story_react";
 import {EditorOverview} from "./editor"
-import {AvatarNames} from "./avatar_editor";
+import {AvatarEditorHeader, AvatarNames} from "./avatar_editor";
 import {getAvatars, getStory, setStory} from "./api_calls.mjs";
 
 import {EditorState, EditorView, basicSetup} from "@codemirror/basic-setup"
@@ -33,6 +33,12 @@ else if(!urlParams.get("story")) {
             <AvatarNames />
         </React.StrictMode>,
         document.getElementById('root')
+    );
+    ReactDOM.render(
+        <React.StrictMode>
+            <AvatarEditorHeader/>
+        </React.StrictMode>,
+        document.getElementById('toolbar')
     );
 }
 else {

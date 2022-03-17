@@ -76,6 +76,10 @@ else if($action == "speakers") {
     $id = intVal($_REQUEST['id']);
     query_json_list($db,"SELECT * FROM speaker WHERE language_id = $id");
 }
+else if($action == "language") {
+    $id = intVal($_REQUEST['id']);
+    query_json($db,"SELECT * FROM language WHERE id = $id");
+}
 else if($action == "image") {
     $id = intVal($_REQUEST['id']);
     query_json($db,"SELECT * FROM image WHERE id = $id");

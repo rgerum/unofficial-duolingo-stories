@@ -58,6 +58,16 @@ export async function getSpeakers(id) {
     }
 }
 
+export async function getLanguageName(id) {
+    try {
+        let response = await fetch(`${backend_get}?action=language&id=${id}`);
+        return await response.json();
+    }
+    catch (e) {
+        return {};
+    }
+}
+
 export async function setAvatarSpeaker(data) {
     try {
         let response = await fetch_post(`${backend_set}?action=avatar`, data);

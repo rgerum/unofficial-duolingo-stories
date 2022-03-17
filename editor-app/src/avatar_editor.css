@@ -42,3 +42,17 @@
     width: 20px;
     cursor: pointer;
 }
+
+.AvatarEditorHeader {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+}
+
+.AvatarEditorHeader b {
+    padding-right: 10px;
+}
+
+.AvatarEditorHeader span {
+    padding-left: 10px;
+}
