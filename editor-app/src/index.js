@@ -181,7 +181,7 @@ else {
         let editor_text = undefined;
 
         let story_data = await getStory(urlParams.get("story"));
-        let avatar_names_list = await getAvatars(0, story_data.course_id)
+        let avatar_names_list = await getAvatars(story_data.learningLanguage)
         let avatar_names = {}
         for(let avatar of avatar_names_list) {
             avatar_names[avatar.avatar_id] = avatar;
@@ -204,7 +204,7 @@ else {
 
                 ReactDOM.render(
                     <React.StrictMode>
-                        <Cast story_meta={story_meta}/>
+                        <Cast story_meta={story_meta} learningLanguage={story_data.learningLanguage}/>
                         <Story editor={editor_state} story={story}/>
                     </React.StrictMode>,
                     document.getElementById('preview')

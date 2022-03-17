@@ -175,7 +175,7 @@ function speaker_text_trans(data, meta) {
     if(meta) {
         speaker = get_avatar(speaker_id, meta.avatar_names, meta.avatar_overwrites);
         meta.cast[speaker_id] = {
-            speaker: meta.avatar_overwrites[speaker_id]?.speaker || meta.avatar_names[speaker_id]?.speaker || meta.avatar_names[0].speaker,
+            speaker: meta.avatar_overwrites[speaker_id]?.speaker || meta.avatar_names[speaker_id]?.speaker || meta.avatar_names[0]?.speaker || "",
             link: meta.avatar_overwrites[speaker_id]?.link || meta.avatar_names[speaker_id]?.link,
             name: meta.avatar_overwrites[speaker_id]?.name || meta.avatar_names[speaker_id]?.name,
             id: speaker_id,

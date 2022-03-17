@@ -64,6 +64,10 @@ export function AvatarNames(props) {
             images.push(avatar.link)
         }
     }
+    function copyText(e, text) {
+        navigator.clipboard.writeText(text);
+        e.preventDefault();
+    }
 
     if(avatars === undefined || speakers === undefined || language === undefined)
         return <Spinner/>
@@ -79,8 +83,8 @@ export function AvatarNames(props) {
             </thead>
             <tbody>
         {speakers.map((speaker, index) =>
-            <tr key={index}>
-                <td>{speaker.speaker}</td>
+            <tr key={index} onClick={(e) => copyText(e, speaker.speaker)}>
+                <td><span className="ssml_speaker">{speaker.speaker}</span> <span className="copy_button" title="copy to clipboard"><img src="icons/copy.svg"/></span></td>
                 <td>{speaker.gender}</td>
                 <td>{speaker.type}</td>
             </tr>

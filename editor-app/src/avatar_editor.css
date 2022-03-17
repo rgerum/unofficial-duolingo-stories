@@ -37,3 +37,8 @@
     border-radius: 5px;
     padding: 5px;
 }
+
+.copy_button img {
+    width: 20px;
+    cursor: pointer;
+}
