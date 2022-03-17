@@ -74,7 +74,7 @@ else if($action == "avatar_names") {
 }
 else if($action == "speakers") {
     $id = intVal($_REQUEST['id']);
-    query_json_list($db,"SELECT * FROM speaker");
+    query_json_list($db,"SELECT * FROM speaker WHERE language_id = $id");
 }
 else if($action == "image") {
     $id = intVal($_REQUEST['id']);
@@ -134,7 +134,7 @@ else if($action == "course") {
 }
 else if($action == "story") {
     $id = $_REQUEST['id'];
-    query_json($db,"SELECT * FROM story WHERE id = $id");
+    query_json($db,"SELECT story.id, duo_id, story.name, set_id, set_index, text, c.learningLanguage as learningLanguage, c.fromLanguage as fromLanguage FROM story JOIN course c on story.course_id = c.id WHERE story.id = $id");
 }
 else {
     echo "unknown action";
