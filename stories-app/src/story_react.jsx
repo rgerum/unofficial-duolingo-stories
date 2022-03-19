@@ -683,7 +683,7 @@ export class Story extends React.Component {
     }
 
     finish() {
-        setStoryDone(this.props.story);
+        setStoryDone(this.props.story_id);
         this.props.onQuit();
     }
 
