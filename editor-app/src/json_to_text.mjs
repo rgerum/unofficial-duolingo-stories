@@ -1,4 +1,14 @@
-
+let backend_get = "https://carex.uber.space/stories/backend/editor/get.php"
+export async function getAvatars(id, course_id) {
+    console.log("getAvatars", id, `${backend_get}?action=avatar_names&id=${id}`)
+    try {
+        let response = await fetch(`${backend_get}?action=avatar_names&id=${id}&course_id=${course_id}`);
+        return await response.json();
+    }
+    catch (e) {
+        return {};
+    }
+}
 
 function make_same_length([t, r], fill="_") {
     return [
@@ -149,6 +159,9 @@ function line_speaker(line) {
         return "> ";
     }
     else if(line.type === "CHARACTER") {
+        if(avatar_id_from_image_global[line.avatarUrl])
+            return `Speaker${avatar_id_from_image_global[line.avatarUrl]}: `;
+        let bla = fo;
         return `Speaker${line.characterId}: `;
     }
 }
@@ -163,6 +176,8 @@ function audio_to_text(audio) {
     if(audio === undefined)
         return "";
     let text = "";
+    if(!audio.url.match(/audio\/(.*)\?\d*/))
+        return "";
     text += "$"+audio.url.match(/audio\/(.*)\?\d*/)[1];
     let point = 0, key_time = 0;
     for(let keypoint of audio.keypoints) {
@@ -174,7 +189,7 @@ function audio_to_text(audio) {
     return text;
 }
 
-export function processStory(json, set_id, story_id, old_text, avatar_list) {
+export function processStory(json, set_id, story_id, old_text, avatar_list, avatar_id_from_image) {
     let T = "~";
     let text = ""
 
@@ -189,10 +204,17 @@ export function processStory(json, set_id, story_id, old_text, avatar_list) {
                 old_meta[match[1]] = match[2];
                 if(match[1].startsWith("icon_")) {
                     let speaker_name = match[1].substring(5);
-                    for(let avatar of avatar_list) {
+                    console.log("search!", match)
+                    if(avatar_id_from_image && avatar_id_from_image[match[2]]) {
+                        speaker_list[speaker_name] = avatar_id_from_image[match[2]]
+                        console.log("Found!", speaker_list[speaker_name])
+                    }
+                    else {
+                        for (let avatar of avatar_list) {
 
-                        if(avatar[1] === match[2]) {
-                            speaker_list[speaker_name] = avatar[0]
+                            if (avatar[1] === match[2]) {
+                                speaker_list[speaker_name] = avatar[0]
+                            }
                         }
                     }
                     if(speaker_list[speaker_name] === undefined) {
@@ -205,8 +227,10 @@ export function processStory(json, set_id, story_id, old_text, avatar_list) {
                 }
             }
         }
-        set_id = old_meta["set_id"];
-        story_id = old_meta["set_index"];
+        if(old_meta["set_id"])
+            set_id = old_meta["set_id"];
+        if(old_meta["set_index"])
+            story_id = old_meta["set_index"];
     }
     console.log(old_meta)
 
@@ -378,7 +402,7 @@ function add_icon(story) {
     }
 }
 
-
+let avatar_id_from_image_global;
 //import {fetch_post} from "./includes.mjs";
 async function test() {
     /*
@@ -403,6 +427,19 @@ async function test() {
         "json" => "string",
         "api" => "int"];
      */
+    let avatars = await getAvatars(2);
+    let avatars_new = [];
+    let images = [];
+    let avatar_id_from_image = {};
+    avatar_id_from_image_global = avatar_id_from_image
+    for(let avatar of avatars) {
+        if(images.indexOf(avatar.link) === -1) {
+            avatars_new.push(avatar);
+            images.push(avatar.link);
+            avatar_id_from_image[avatar.link] = avatar.avatar_id;
+        }
+    }
+
     let data2 = JSON.parse(fs.readFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/duolingo_data/_stories.txt"));
     //console.log(data2)
     for(let set_id in data2.sets) {
@@ -411,7 +448,7 @@ async function test() {
             console.log(story)
             add_icon(story)
             let json = fs.readFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/duolingo_data/"+story.id+".txt")
-            let text = processStory(JSON.parse(json), set_id, story_id)
+            let text = processStory(JSON.parse(json), parseInt(set_id)+1, parseInt(story_id)+1, "", [], avatar_id_from_image)
             let data = {
                 duo_id: story.id,
                 name: story.title,
@@ -431,6 +468,8 @@ async function test() {
             catch (e) {
                 console.log(e)
             }
+            if(story_id == 2)
+                return
             //break
         }
         //break
@@ -463,7 +502,7 @@ async function test() {
         console.log(e, "saved")
     });
 }
-//test();
+test();
 
 //import fetch from "node-fetch";
 import {FormData} from "formdata-node"
