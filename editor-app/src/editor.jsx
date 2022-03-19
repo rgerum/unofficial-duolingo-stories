@@ -3,7 +3,7 @@ import {useDataFetcher, useDataFetcher2, useEventListener} from './hooks'
 import {Spinner} from './react/spinner'
 import {Flag} from './react/flag'
 import {useUsername, Login, LoginDialog} from './login'
-import {setPublic, getCourses, getCourse, getImportList, setImport, getSession} from "./api_calls.mjs";
+import {setPublic, getCourses, getCourse, getImportList, setImport, getSession, getLanguageName} from "./api_calls.mjs";
 import "./editor.css"
 
 
@@ -38,7 +38,6 @@ function ImportList(props) {
     }
     return courseImport ?
         <>
-        <h1 id="title">{`${course.learningLanguageName} - (from ${course.fromLanguageName}) Import`}</h1>
         <div>Importing from Spainsh (from English).</div>
         <table id="story_list" style={{display: "inline-block"}} className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
@@ -78,9 +77,8 @@ function pad(x) {
 function EditList(props) {
     let course = props.course;
     let setShowImport = props.setShowImport;
-    document.getElementById('button_import').onclick = ()=>setShowImport(course.id)
+// TODO    document.getElementById('button_import').onclick = ()=>setShowImport(course.id)
     return <>
-        <h1 id="title">{`${course.learningLanguageName} - (from ${course.fromLanguageName})`}</h1>
         <table id="story_list" style={{display: "inline-block"}}
                className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
@@ -128,21 +126,7 @@ function EditList(props) {
 function StoriesList(props) {
     let course_id = props.course_id;
     const [course, courseRefetch] = useDataFetcher2(getCourse, [course_id]);
-    const [showImport, do_setShowImport] = React.useState(false);
-    function setShowImport(state) {
-        if(state) {
-            document.getElementById('button_import').style.display = "none"
-            document.getElementById('button_back').style.display = "flex"
-            document.getElementById('button_back').onclick = ()=>setShowImport(false)
-        }
-        else {
-            document.getElementById('button_import').style.display = "flex"
-            document.getElementById('button_back').style.display = "none"
-        }
-        do_setShowImport(state);
-    }
-    if(showImport && showImport !== course_id)
-        setShowImport(false);
+    let showImport = props.showImport;
     return <>{
         course === undefined ?
         <>
@@ -150,8 +134,8 @@ function StoriesList(props) {
             <Spinner/>
         </>
         : showImport ?
-            <ImportList course={course} setShowImport={setShowImport}/>
-        : <EditList course={course} setShowImport={setShowImport}/>
+            <ImportList course={course}/>
+        : <EditList course={course}/>
     }</>
 }
 
@@ -180,7 +164,7 @@ function Overview(props) {
         <div id="main_overview">
             <div id="main_overview_container">
             { course_id ?
-                <StoriesList course_id={course_id}/>
+                <StoriesList course_id={course_id} showImport={props.showImport}/>
                 :
                 <><h1 id="title">Editor - Stories</h1>
                 <p id="no_stories">Click on one of the courses to display its stories.</p>
@@ -194,30 +178,33 @@ function Overview(props) {
 
 export function EditorOverview(props) {
     let urlParams = new URLSearchParams(window.location.search);
-    const [course, setCourse] = React.useState(urlParams.get("course") || undefined);
+    const [course_id, setCourseID] = React.useState(urlParams.get("course") || undefined);
+    const [course, courseRefetch] = useDataFetcher2(getCourse, [course_id]);
     const [username, usernameRefetch] = useDataFetcher2(getSession, []);
 
+    const [showImport, do_setShowImport] = React.useState(false);
 
-    function doSetCourse(course) {
-        if(course === undefined)
-            ;//history.pushState({course: course}, "Language"+course, `index.html`);
-        else
-            ;//history.pushState({course: course}, "Language"+course, `index.html?lang=${course[0]}&lang_base=${course[1]}`);
-        setCourse(course);
+    function doSetCourse(course_new) {
+        if(course_new === course_id)
+            return
+        console.log("dosetCourse", course_new, `index.html?course=${course_new}`)
+
+        history.pushState({course: course_new}, "Language"+course_new, `?course=${course_new}`);
+        setCourseID(course_new);
+        courseRefetch();
     }
 
     useEventListener("popstate", (event) => {
         if(event.state.story)
             changeStory(event.state.story)
         else {
-            setStory(null);
             if(event.state.course)
-                doSetCourse(event.state.course)
+                setCourseID(event.state.course)
             else
-                doSetCourse([undefined, undefined])
+                setCourseID(undefined)
         }
     })
-    console.log("username", username)
+    console.log("overview_course", course)
     if(0) {
         if (username === undefined) return <Spinner/>
         if (username.username === undefined) return <div style={{margin: "auto"}}>
@@ -230,6 +217,54 @@ export function EditorOverview(props) {
             You need to have permissions to access the editor.
         </div>
     }
-    return <Overview course={course} setCourse={doSetCourse}/>
+    return <>
+        <div id="toolbar">
+            <CourseEditorHeader course={course} showImport={showImport} do_setShowImport={do_setShowImport} />
+        </div>
+        <div id="root">
+            <Overview course={course_id} setCourse={doSetCourse} showImport={showImport}/>
+        </div>
+    </>
 }
 
+
+export function CourseEditorHeader(props) {
+    let course = props.course;
+    if(!props.course)
+        return <><div className="AvatarEditorHeader">
+            <b>Course-Editor</b>
+        </div></>
+    return <><div className="AvatarEditorHeader">
+        <b>Course-Editor</b>
+        <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
+        <Flag className={"flag_sub"} flag={course.fromLanguageFlag} flag_file={course.fromLanguageFlagFile}/>
+        <span className={"AvatarEditorHeaderFlagname"}>{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
+        {course.official ? <></> :
+            !props.showImport ?
+            <div id="button_import" className="editor_button" onClick={() => props.do_setShowImport(1)}
+            style={{marginLeft: "auto"}}>
+            <div><img src="icons/import.svg"/></div>
+            <span>Import</span>
+            </div> :
+            <div id="button_back" className="editor_button" onClick={() => props.do_setShowImport(0)}
+            style={{marginLeft: "auto"}}>
+            <div><img src="icons/back.svg"/></div>
+            <span>Back</span>
+            </div>
+        }
+    </div></>
+}
+/*
+    "id": 2,
+    "name": null,
+    "fromLanguage": "en",
+    "fromLanguageName": "English",
+    "fromLanguageFlagFile": null,
+    "fromLanguageFlag": 0,
+    "learningLanguage": "nl",
+    "learningLanguageName": "Dutch",
+    "learningLanguageFlagFile": null,
+    "learningLanguageFlag": -354.146,
+    "public": 1,
+    "official": 0,
+ */

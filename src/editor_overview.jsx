@@ -261,12 +261,13 @@ function EditorOverview(props) {
             doSetCourse(course);
         }
     }
-    function doSetCourse(course) {
-        if(course[0] === undefined)
-            ;//history.pushState({course: course}, "Language"+course, `index.html`);
-        else
-            ;//history.pushState({course: course}, "Language"+course, `index.html?lang=${course[0]}&lang_base=${course[1]}`);
-        setCourse(course);
+    function doSetCourse(course_new) {
+        return
+        if(course_new === course)
+            return
+        console.log("dosetCourse", course_new, `index.html?course=${course_new}`)
+        history.pushState({course: course_new}, "Language"+course_new, `index.html?course=${course_new}`);
+        setCourse(course_new);
     }
 
     useEventListener("popstate", (event) => {

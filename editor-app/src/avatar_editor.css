@@ -47,6 +47,15 @@
     display: flex;
     align-items: center;
     padding: 15px;
+    width: 100%;
+}
+
+.flag_sub {
+    margin-left: -22px;
+    margin-top: 18px;
+    width: 35px;
+    background-size: 36px;
+    height: 26px;
 }
 
 .AvatarEditorHeader b {

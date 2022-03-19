@@ -43,13 +43,13 @@ export function StoryEditorHeader(props) {
 }
 
 if(!urlParams.get("story") && !urlParams.get("language")) {
-    document.getElementById('button_save').style.display = "none"
-    document.getElementById('button_back').style.display = "none"
+    //document.getElementById('button_save').style.display = "none"
+    //document.getElementById('button_back').style.display = "none"
     ReactDOM.render(
         <React.StrictMode>
             <EditorOverview/>
         </React.StrictMode>,
-        document.getElementById('root')
+        document.getElementById('body')
     );
 }
 else if(!urlParams.get("story")) {
@@ -69,6 +69,7 @@ else if(!urlParams.get("story")) {
     );
 }
 else {
+    console.log("urlParams", urlParams)
     let editor = document.getElementById("editor");
     let preview = document.getElementById("preview");
     let svg_parent = document.getElementById("margin");
@@ -179,7 +180,7 @@ else {
     document.getElementById('button_import').style.display = "none"
 
     window.button_back = function() {
-        window.location.href = "?";
+        window.location.href = "?course="+story_data.course_id;
     }
 
     async function a() {
