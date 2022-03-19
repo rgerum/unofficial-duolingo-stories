@@ -15,6 +15,9 @@ const STATE_TEXT_HIDE_ODD = "typeName";
 
 const STATE_TEXT_BUTTON_EVEN = "number";
 const STATE_TEXT_BUTTON_ODD = "labelName";
+
+const STATE_TEXT_HIDE_BUTTON_EVEN = "meta";
+const STATE_TEXT_HIDE_BUTTON_ODD = "comment";
 const STATE_TEXT_BUTTON_RIGHT_EVEN = "modifier";
 
 const STATE_BLOCK_TYPE = "keyword";
@@ -25,6 +28,11 @@ const STATE_ERROR = "deleted";
 const STATE_AUDIO = "color";
 
 function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
+    if(stream.match(/ +/)) {
+        if(state.bracket && allow_hide)
+            return STATE_TEXT_HIDE_EVEN
+        return STATE_DEFAULT;
+    }
     if (allow_hide) {
         if (stream.eat("[")) {
             state.bracket = true;
@@ -37,16 +45,23 @@ function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
     }
     if (allow_buttons === 2)
         if (stream.match(/\(\+[^()]*\)/)) {
+            state.odd = !state.odd;
             return STATE_TEXT_BUTTON_RIGHT_EVEN;
         }
     if (allow_buttons)
         if (stream.match(/\([^()]*\)/)) {
-            if (state.bracket)
+            state.odd = !state.odd;
+            if (state.bracket) {
+                if(state.odd)
+                    return STATE_TEXT_HIDE_BUTTON_ODD
+                return STATE_TEXT_HIDE_BUTTON_EVEN
+            }
+            if(state.odd)
                 return STATE_TEXT_BUTTON_ODD
             return STATE_TEXT_BUTTON_EVEN
         }
 
-    if(stream.match(/ *[^ $\]\[]+ */)) {
+    if(stream.match(/[^ $\]\[]+/)) {
         state.odd = !state.odd
         if(state.bracket && allow_hide) {
             if (state.odd)
@@ -108,15 +123,15 @@ function parseBockData(stream, state) {
 
 function parseBockHeader(stream, state) {
     if(stream.sol()) {
-        if(stream.eat(">") && state.block.line===0) {
+        if(state.block.line===0 && stream.eat(">")) {
             startLine(state, 1, true, "text", true);
             return STATE_DEFAULT;
         }
-        if(stream.eat("~") && state.block.allow_trans) {
+        if(state.block.allow_trans && stream.eat("~")) {
             startLine(state, 1, false, "trans");
             return STATE_DEFAULT;
         }
-        if(stream.eat("$") && state.block.allow_audio) {
+        if(state.block.allow_audio && stream.eat("$")) {
             startLine(state); stream.skipToEnd();
             return STATE_AUDIO;
         }
@@ -132,19 +147,19 @@ function parseBockHeader(stream, state) {
 
 function parseBockLine(stream, state) {
     if(stream.sol()) {
-        if(stream.eat(">") && state.block.line===0) {
+        if(state.block.line===0 && stream.eat(">")) {
             startLine(state, 1, true, "text", true);
             return STATE_DEFAULT;
         }
-        if(stream.match(/\S+:/) && state.block.line===0) {
+        if(state.block.line===0 && stream.match(/\S+:/)) {
             startLine(state, 1, true, "text", true);
             return STATE_SPEAKER_TYPE;
         }
-        if(stream.eat("~") && state.block.allow_trans) {
+        if(state.block.allow_trans && stream.eat("~")) {
             startLine(state, 1, false, "trans");
             return STATE_DEFAULT;
         }
-        if(stream.eat("$") && state.block.allow_audio) {
+        if(state.block.allow_audio && stream.eat("$")) {
             startLine(state); stream.skipToEnd();
             return STATE_AUDIO;
         }
@@ -174,29 +189,33 @@ function startLine(state, line, allow_trans, line_type, allow_audio) {
 
 function parseBockSelectPhrase(stream, state) {
     if(stream.sol()) {
-        if(stream.eat(">") && state.block.line===0) {
+        if(state.block.line===0 && stream.eat(">")) {
             startLine(state, 1, true, "text");
             return STATE_DEFAULT;
         }
-        if(stream.eat("~") && state.block.allow_trans) {
+        if(state.block.allow_trans && stream.eat("~")) {
             startLine(state, undefined, false, "trans");
             return STATE_DEFAULT;
         }
-        if(stream.match(/\S+:/) && state.block.line===1) {
+        if(state.block.line===1 && stream.match(/\S+:/)) {
             startLine(state, 2, true, "text", true);
             return STATE_SPEAKER_TYPE;
         }
-        if(stream.eat("$") && state.block.allow_audio) {
+        if(state.block.line===1 && stream.eat(/>/)) {
+            startLine(state, 2, true, "text", true);
+            return STATE_DEFAULT;
+        }
+        if(state.block.allow_audio && stream.eat("$")) {
             startLine(state); stream.skipToEnd();
             return STATE_AUDIO;
         }
 
-        if(stream.eat("+") && state.block.line>=2) {
+        if(state.block.line>=2 && stream.eat("+")) {
             startLine(state, 3, false, "text");
             stream.skipToEnd();
             return STATE_DEFAULT;
         }
-        if(stream.eat("-") && state.block.line>=2) {
+        if(state.block.line>=2 && stream.eat("-")) {
             startLine(state, 3, false, "text");
             stream.skipToEnd();
             return STATE_DEFAULT;
@@ -214,21 +233,61 @@ function parseBockSelectPhrase(stream, state) {
     return STATE_ERROR;
 }
 
-function parseBockMultipleChoice(stream, state) {
+function parseBockContinuation(stream, state) {
     if(stream.sol()) {
-        if(stream.eat(">") && state.block.line===0) {
+        if(state.block.line===0 && stream.eat(">")) {
             startLine(state, 1, true, "text");
             return STATE_DEFAULT;
         }
-        if(stream.eat("~") && state.block.allow_trans) {
+        if(state.block.allow_trans && stream.eat("~")) {
             startLine(state, undefined, false, "trans");
             return STATE_DEFAULT;
         }
-        if(stream.eat("+") && state.block.line>=1) {
+        if(state.block.line===1 && stream.match(/\S+:/)) {
+            startLine(state, 2, true, "text", true);
+            return STATE_SPEAKER_TYPE;
+        }
+        if(state.block.allow_audio && stream.eat("$")) {
+            startLine(state); stream.skipToEnd();
+            return STATE_AUDIO;
+        }
+
+        if(state.block.line>=2 && stream.eat("+")) {
+            startLine(state, 3, true, "text");
+            return STATE_DEFAULT;
+        }
+        if(state.block.line>=2 && stream.eat("-")) {
+            startLine(state, 3, true, "text");
+            return STATE_DEFAULT;
+        }
+
+        stream.skipToEnd();
+        return STATE_ERROR;
+    }
+    if(state.block.line_type === "text")
+        return parserTextWithTranslation(stream, state, state.block.line === 2)
+    if(state.block.line_type === "trans")
+        return parserTranslation(stream, state)
+
+    stream.skipToEnd();
+    return STATE_ERROR;
+}
+
+function parseBockMultipleChoice(stream, state) {
+    if(stream.sol()) {
+        if(state.block.line===0 && stream.eat(">")) {
+            startLine(state, 1, true, "text");
+            return STATE_DEFAULT;
+        }
+        if(state.block.allow_trans && stream.eat("~")) {
+            startLine(state, undefined, false, "trans");
+            return STATE_DEFAULT;
+        }
+        if(state.block.line>=1 && stream.eat("+")) {
             startLine(state, 2, true, "text");
             return STATE_DEFAULT;
         }
-        if(stream.eat("-") && state.block.line>=1) {
+        if(state.block.line>=1 && stream.eat("-")) {
             startLine(state, 2, true, "text");
             return STATE_DEFAULT;
         }
@@ -247,19 +306,19 @@ function parseBockMultipleChoice(stream, state) {
 
 function parseBockArrange(stream, state) {
     if(stream.sol()) {
-        if(stream.eat(">") && state.block.line===0) {
+        if(state.block.line===0 && stream.eat(">")) {
             startLine(state, 1, true, "text");
             return STATE_DEFAULT;
         }
-        if(stream.eat("~") && state.block.allow_trans) {
+        if(state.block.allow_trans && stream.eat("~")) {
             startLine(state, undefined, false, "trans");
             return STATE_DEFAULT;
         }
-        if(stream.match(/\S+:/) && state.block.line===1) {
+        if(state.block.line===1 && stream.match(/\S+:/)) {
             startLine(state, 2, true, "text", true);
             return STATE_SPEAKER_TYPE;
         }
-        if(stream.eat("$") && state.block.allow_audio) {
+        if(state.block.allow_audio && stream.eat("$")) {
             startLine(state); stream.skipToEnd();
             return STATE_AUDIO;
         }
@@ -314,15 +373,15 @@ function parseBockPointToPhrase(stream, state) {
 
 function parseBockMatch(stream, state) {
     if(stream.sol()) {
-        if(stream.eat(">") && state.block.line===0) {
+        if(state.block.line===0 && stream.eat(">")) {
             startLine(state, 1, true, "text");
             return STATE_DEFAULT;
         }
-        if(stream.eat("~") && state.block.allow_trans) {
+        if(state.block.allow_trans && stream.eat("~")) {
             startLine(state, undefined, false, "trans");
             return STATE_DEFAULT;
         }
-        if(stream.eat("-") && state.block.line===1) {
+        if(state.block.line===1 && stream.eat("-")) {
             startLine(state, 1, false, "pair");
             return STATE_DEFAULT;
         }
@@ -347,6 +406,7 @@ const BLOCK_FUNCS = {
     "LINE": parseBockLine,
     "MULTIPLE_CHOICE": parseBockMultipleChoice,
     "SELECT_PHRASE": parseBockSelectPhrase,
+    "CONTINUATION": parseBockContinuation,
     "ARRANGE": parseBockArrange,
     "MATCH": parseBockMatch,
     "POINT_TO_PHRASE": parseBockPointToPhrase,

@@ -292,42 +292,41 @@ else {
             color_odd = "#009623"
 
         let highlightStyle = HighlightStyle.define([
+            // STATE_TRANS_EVEN
             {tag: t.propertyName, color: color_even, fontStyle: "italic", opacity: 0.5},
+            // STATE_TRANS_ODD
             {tag: t.macroName, color: color_odd, fontStyle: "italic", opacity: 0.5},
+            // STATE_TEXT_EVEN
             {tag: t.tagName, color: color_even},
+            // STATE_TEXT_ODD
             {tag: t.name, color: color_odd},
 
+            // STATE_TEXT_HIDE_EVEN
             {tag: t.className, color: color_even, textDecoration: "underline"},
+            // STATE_TEXT_HIDE_ODD
             {tag: t.typeName, color: color_odd, textDecoration: "underline"},
 
+            // STATE_TEXT_BUTTON_EVEN
             {tag: t.number, color: color_even, background: "#c8c8c8", borderRadius: "10px"},
-            {
-                tag: t.labelName,
-                color: color_even,
-                textDecoration: "underline",
-                background: "#c8c8c8",
-                borderRadius: "10px"
-            },
-            {tag: t.modifier, color: color_even, background: "#9bd297", borderRadius: "10px"},
+            // STATE_TEXT_BUTTON_ODD
+            {tag: t.labelName, color: color_odd, background: "#c8c8c8", borderRadius: "10px"},
+            // STATE_TEXT_HIDE_BUTTON_EVEN
+            {tag: t.meta, color: color_even, textDecoration: "underline", background: "#c8c8c8", borderRadius: "10px"},
+            // STATE_TEXT_HIDE_BUTTON_ODD
+            {tag: t.comment, color: color_odd, textDecoration: "underline", background: "#c8c8c8", borderRadius: "10px"},
+            // STATE_TEXT_BUTTON_RIGHT_EVEN
+            {tag: t.modifier, color: "black", background: "#9bd297", borderRadius: "10px"},
 
-
-            {
-                tag: t.keyword,
-                color: violet
-            },
-            {
-                tag: [t.deleted, t.character],
-                color: coral,
-                textDecoration: "line-through",
-            },
+            // STATE_BLOCK_TYPE
+            {tag: t.keyword, color: violet},
+            // STATE_ERROR
+            {tag: [t.deleted, t.character], color: coral, textDecoration: "line-through",},
             {
                 tag: [t.function(t.variableName)],
                 color: malibu
             },
-            {
-                tag: [t.color, t.constant(t.name), t.standard(t.name)],
-                color: whiskey
-            },
+            // STATE_AUDIO
+            {tag: [t.color, t.constant(t.name), t.standard(t.name)], color: whiskey},
             {
                 tag: [t.definition(t.name), t.separator],
                 color: ivory
@@ -340,10 +339,7 @@ else {
                 tag: [t.operator, t.operatorKeyword, t.url, t.escape, t.regexp, t.link, t.special(t.string)],
                 color: cyan
             },
-            {
-                tag: [t.meta, t.comment],
-                color: stone
-            },
+
             {
                 tag: t.strong,
                 fontWeight: "bold"
