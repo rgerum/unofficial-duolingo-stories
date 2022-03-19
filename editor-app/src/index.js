@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import {Story, Cast} from "./story_react";
 import {EditorOverview} from "./editor"
 import {AvatarEditorHeader, AvatarNames} from "./avatar_editor";
-import {getAvatars, getStory, setStory} from "./api_calls.mjs";
+import {getAvatars, getLanguageName, getStory, setStory} from "./api_calls.mjs";
 
 import {EditorState, EditorView, basicSetup} from "@codemirror/basic-setup"
 import {HighlightStyle, tags as t} from "@codemirror/highlight"
@@ -11,9 +11,36 @@ import {processStoryFile} from "./syntax_parser_new.mjs";
 import { Extension, EditorSelection, SelectionRange, Facet, Compartment} from "@codemirror/state";
 
 import {example} from "./parser.mjs"
+import {useDataFetcher2} from "./hooks";
+import {Flag} from "./react/flag";
 window.EditorView = EditorView
 window.EditorSelection = EditorSelection
 let urlParams = new URLSearchParams(window.location.search);
+
+export function StoryEditorHeader(props) {
+    let urlParams = new URLSearchParams(window.location.search);
+    const [language, setLanguage] = React.useState(props.story_data.learningLanguage || undefined);
+    const [language2, setLanguage2] = React.useState(props.story_data.fromLanguage || undefined);
+    const [language_data, _] = useDataFetcher2(getLanguageName, [language]);
+    const [language_data2, __] = useDataFetcher2(getLanguageName, [language2]);
+
+    if(language_data === undefined || language_data2 === undefined)
+        return <></>
+    return <><div className="AvatarEditorHeader">
+        <b>Story-Editor</b>
+        <Flag flag={language_data.flag} flag_file={language_data.flag_file}/>
+        <Flag className={"flag_sub"} flag={language_data2.flag} flag_file={language_data2.flag_file}/>
+        <span className={"AvatarEditorHeaderFlagname"}>{`${language_data.name} (from ${language_data2.name})`}</span>
+        <img width="50px" src={`https://stories-cdn.duolingo.com/image/${story_data.image}.svg`} style={{marginLeft: "auto"}} />
+        <span className={"AvatarEditorHeaderFlagname"}>{props.story_data.name}</span>
+        <div id="button_back" className="editor_button" onClick={window.button_back} style={{marginLeft: "auto"}}>
+            <div><img src="icons/back.svg" /></div>
+            <span>Back</span></div>
+        <div id="button_save" className="editor_button" onClick={window.button_save}>
+            <div><img src="icons/save.svg" /></div>
+            <span>Save</span></div>
+    </div></>
+}
 
 if(!urlParams.get("story") && !urlParams.get("language")) {
     document.getElementById('button_save').style.display = "none"
@@ -193,6 +220,13 @@ else {
             avatar_names[avatar.avatar_id] = avatar;
         }
         window.story_data = story_data;
+
+        ReactDOM.render(
+            <React.StrictMode>
+                <StoryEditorHeader story_data={story_data}/>
+            </React.StrictMode>,
+            document.getElementById('toolbar')
+        );
 
         function updateDisplay() {
             if(state === undefined)
