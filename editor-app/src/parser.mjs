@@ -318,6 +318,10 @@ function parseBockArrange(stream, state) {
             startLine(state, 2, true, "text", true);
             return STATE_SPEAKER_TYPE;
         }
+        if(state.block.line===1 && stream.eat(">")) {
+            startLine(state, 2, true, "text", true);
+            return STATE_DEFAULT;
+        }
         if(state.block.allow_audio && stream.eat("$")) {
             startLine(state); stream.skipToEnd();
             return STATE_AUDIO;
