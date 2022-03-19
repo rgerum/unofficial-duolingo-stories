@@ -29,6 +29,7 @@ const STATE_AUDIO = "color";
 
 function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
     if(stream.match(/ +/)) {
+        state.odd = !state.odd
         if(state.bracket && allow_hide)
             return STATE_TEXT_HIDE_EVEN
         return STATE_DEFAULT;
@@ -45,12 +46,10 @@ function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
     }
     if (allow_buttons === 2)
         if (stream.match(/\(\+[^()]*\)/)) {
-            state.odd = !state.odd;
             return STATE_TEXT_BUTTON_RIGHT_EVEN;
         }
     if (allow_buttons)
         if (stream.match(/\([^()]*\)/)) {
-            state.odd = !state.odd;
             if (state.bracket) {
                 if(state.odd)
                     return STATE_TEXT_HIDE_BUTTON_ODD
@@ -61,17 +60,16 @@ function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
             return STATE_TEXT_BUTTON_EVEN
         }
 
-    if(stream.match(/[^ $\]\[]+/)) {
-        state.odd = !state.odd
+    if( (!allow_buttons && stream.match(/[^ $\]\[]+/)) || (allow_buttons && stream.match(/[^ $\]\[\(\)]+/))) {
         if(state.bracket && allow_hide) {
             if (state.odd)
-                return STATE_TEXT_HIDE_EVEN
-            return STATE_TEXT_HIDE_ODD
+                return STATE_TEXT_HIDE_ODD
+            return STATE_TEXT_HIDE_EVEN
         }
 
         if (state.odd)
-            return STATE_TEXT_EVEN
-        return STATE_TEXT_ODD
+            return STATE_TEXT_ODD
+        return STATE_TEXT_EVEN
     }
     stream.skipToEnd();
     return STATE_ERROR;
@@ -83,8 +81,8 @@ function parserTranslation(stream, state) {
         state.odd = !state.odd
 
         if (state.odd)
-            return STATE_TRANS_EVEN
-        return STATE_TRANS_ODD
+            return STATE_TRANS_ODD
+        return STATE_TRANS_EVEN
     }
     stream.skipToEnd();
     return STATE_ERROR;

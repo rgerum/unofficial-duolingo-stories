@@ -322,8 +322,8 @@ else {
             cursor = "#528bff"
          */
 
-        const color_even = "#00389d",
-            color_odd = "#009623"
+        const color_even = "#009623",
+            color_odd = "#00389d"
 
         let highlightStyle = HighlightStyle.define([
             // STATE_TRANS_EVEN
