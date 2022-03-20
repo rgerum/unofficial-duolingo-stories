@@ -115,7 +115,9 @@ else {
         let offset_lines = 1;
         let o = editor.getBoundingClientRect().height/2
         let target_equal_lineno = (editor.scrollTop-4 + o)/26.6+offset_lines;
-        let pairss = window.line_map
+        let pairss = window.line_map;
+        if(pairss === undefined)
+            return;
         for(let i = 0; i < pairss.length-1; i+= 1) {
             let [x1, y1] = pairss[i];
             let [x2, y2] = pairss[i+1];

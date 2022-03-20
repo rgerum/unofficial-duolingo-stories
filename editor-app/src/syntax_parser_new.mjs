@@ -161,7 +161,7 @@ function speaker_text_trans(data, meta) {
     let [, speaker_text, text] = data.text.match(/\s*(?:>?\s*(\w*)\s*:|>|\+|-)\s*(\S.*\S)\s*/);
     let translation = "";
     if(data.trans)
-        [, translation] = data.trans.match(/\s*~\s*(\S.*\S)\s*/);
+        [, translation] = data.trans.match(/\s*~\s*(\S.*\S|\S)\s*/);
     let content = generateHintMap(getInputStringText(text), translation);
 
     let [selectablePhrases, characterPositions] = getButtons(content);
@@ -241,7 +241,6 @@ function get_avatar(id, avatar_names, avatar_overwrites) {
     id = parseInt(id) ? parseInt(id) : id;
     if(avatar_overwrites[id])
         return {"characterId": id, "avatarUrl": avatar_overwrites[id]?.link};
-    console.log("avatar_names[id]", avatar_names[id])
     return {"characterId": id, "avatarUrl": avatar_names[id]?.link};
 }
 
