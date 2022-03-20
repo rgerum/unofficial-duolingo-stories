@@ -143,7 +143,7 @@ else if($action == "story") {
     if((!isset($_POST["author"]) || $_POST["author"] == "") && isset($_SESSION["user"]))
         $_POST["author"] = $_SESSION["user"]["id"];
 
-    unset($data["author"]);
+    //unset($_POST["author"]);
     echo "send...\n";
     echo "\n";
     $id = updateDatabase($keys, "story", $_POST, "id");
@@ -159,8 +159,8 @@ else if($action == "story") {
     if(isset($_SESSION["user"])) {
         $author_name = '"'.$_SESSION["user"]["username"].'"';
         $message = '"updated '.$_POST["name"].' in course '.$_POST["course_id"].'"';
+        exec("python3 upload_github.py $id $_POST[course_id] $author_name $message", $output, $retval);
     }
-    exec("python3 upload_github.py $id $_POST[course_id] $author_name $message", $output, $retval);
 }
 else if($action == "story_delete") {
     $keys = ["id" => "int"];

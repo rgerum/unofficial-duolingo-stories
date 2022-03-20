@@ -47,7 +47,7 @@ function text_copy(text) {
     }
 }
 
-function text_splice(t, old_pos, del, [insert1, insert2]) {
+function text_splice(t, old_pos, del, [insert1, insert2], near_next_space=false) {
     console.assert(insert1.length === insert2.length, "Strings don't have equal length.")
     console.assert(old_pos >= 0, "Pos needs to be positive")
     console.assert(old_pos <= t.original_text.length, "Pos needs to be in string")
@@ -65,6 +65,10 @@ function text_splice(t, old_pos, del, [insert1, insert2]) {
     insert2 = insert2.slice(del)
 
     t.text = t.text.slice(0, pos) + insert1 + t.text.slice(pos);
+    if(near_next_space) {
+        while(t.tran.substring(pos, pos+1) && t.tran.substring(pos, pos+1) !== " ")
+            pos += 1;
+    }
     t.tran = t.tran.slice(0, pos) + insert2 + t.tran.slice(pos);
 
     for (let i = old_pos+del; i < t.map_old_to_new.length; i++) {
@@ -118,14 +122,23 @@ function text_add_arrange(t, part) {
     t = text_copy(t);
     for (let i in part.characterPositions) {
         let index = 0;
-        for (let j in part.phraseOrder) {
-            if (part.phraseOrder[j] === parseInt(i))
-                index = j;
+        if(0) {
+            for (let j in part.phraseOrder) {
+                if (part.phraseOrder[j] === parseInt(i))
+                    index = j;
+            }
         }
-        let pos = t.original_text.indexOf(part.selectablePhrases[index])
+        index = part.phraseOrder[i];
         let length = part.selectablePhrases[index].length;
+        let pos = part.characterPositions[i] - length;
+        while(pos && t.original_text.substring(pos, pos+length) !== part.selectablePhrases[index]) {
+            console.log(i, index, pos, t.original_text.substring(pos, pos+length), part.selectablePhrases[index])
+            pos -= 1;
+        }
+        //let pos = t.original_text.indexOf(part.selectablePhrases[index])
+
         t = text_splice(t, pos, 0, ["(", " "])
-        t = text_splice(t, pos + length, 0, [")", " "])
+        t = text_splice(t, pos + length, 0, [")", " "], true)
     }
     // swap space and )
     t.text = t.text.replace(/( *)\)/g, ")$1")
@@ -151,6 +164,8 @@ function text_add_selectable(t, transcriptParts, correctAnswerIndex) {
         }
         pos += length;
     }
+    // swap space and )
+    t.text = t.text.replace(/( *)\)/g, ")$1")
     return t;
 }
 
@@ -445,6 +460,8 @@ async function test() {
     for(let set_id in data2.sets) {
         for(let story_id in data2.sets[set_id]) {
             let story = data2.sets[set_id][story_id]
+            //if(story.id !== 'es-en-una-familia-muy-grande')
+            //    continue
             console.log(story)
             add_icon(story)
             let json = fs.readFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/duolingo_data/"+story.id+".txt")
@@ -468,8 +485,8 @@ async function test() {
             catch (e) {
                 console.log(e)
             }
-            if(story_id == 2)
-                return
+            //if(story_id == 2)
+            //    return
             //break
         }
         //break

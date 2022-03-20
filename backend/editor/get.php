@@ -138,7 +138,7 @@ else if($action == "course") {
 }
 else if($action == "story") {
     $id = $_REQUEST['id'];
-    query_json($db,"SELECT story.id, course_id, duo_id, image, story.name, set_id, set_index, text, c.learningLanguage as learningLanguage, c.fromLanguage as fromLanguage FROM story JOIN course c on story.course_id = c.id WHERE story.id = $id");
+    query_json($db,"SELECT story.id, c.official as official, course_id, duo_id, image, story.name, set_id, set_index, text, c.learningLanguage as learningLanguage, c.fromLanguage as fromLanguage FROM story JOIN course c on story.course_id = c.id WHERE story.id = $id");
 }
 else {
     echo "unknown action";
