@@ -159,7 +159,7 @@ function text_add_selectable(t, transcriptParts, correctAnswerIndex) {
             t = text_splice(t, pos, 0, ["(", " "])
             if(index === correctAnswerIndex)
                 t = text_splice(t, pos, 0, ["+", " "])
-            t = text_splice(t, pos + length, 0, [")", " "])
+            t = text_splice(t, pos + length, 0, [")", " "], true)
             index += 1;
         }
         pos += length;
@@ -460,8 +460,8 @@ async function test() {
     for(let set_id in data2.sets) {
         for(let story_id in data2.sets[set_id]) {
             let story = data2.sets[set_id][story_id]
-            //if(story.id !== 'es-en-una-familia-muy-grande')
-            //    continue
+            if(story.id !== 'es-en-que-necesitas')
+                continue
             console.log(story)
             add_icon(story)
             let json = fs.readFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/duolingo_data/"+story.id+".txt")
