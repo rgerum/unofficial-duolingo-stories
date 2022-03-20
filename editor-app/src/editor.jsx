@@ -230,7 +230,7 @@ export function EditorOverview(props) {
 
 export function CourseEditorHeader(props) {
     let course = props.course;
-    if(!props.course)
+    if(!props.course || props.course.fromLanguageName === undefined)
         return <><div className="AvatarEditorHeader">
             <b>Course-Editor</b>
         </div></>
@@ -239,7 +239,7 @@ export function CourseEditorHeader(props) {
         <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
         <Flag className={"flag_sub"} flag={course.fromLanguageFlag} flag_file={course.fromLanguageFlagFile}/>
         <span className={"AvatarEditorHeaderFlagname"}>{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
-        {course.official ? <></> :
+        {course.official ? <span><i>official</i></span> :
             !props.showImport ?
             <div id="button_import" className="editor_button" onClick={() => props.do_setShowImport(1)}
             style={{marginLeft: "auto"}}>
