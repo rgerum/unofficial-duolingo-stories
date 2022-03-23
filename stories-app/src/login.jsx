@@ -25,7 +25,7 @@ export async function get_login() {
 export async function login(data) {
     console.log('login', data)
     // check if the user is logged in
-    let reponse = await fetch(`${backend_user}user.php?action=login&${dict_to_query(data)}`)
+    let reponse = await fetch_post(`${backend_user}user.php?action=login`, data)
     console.log(reponse);
     if(reponse.status === 403)
         return false;
@@ -123,7 +123,7 @@ export async function reset_pw_set(data) {
 
 export async function activate(data) {
     console.log("activate", data);
-    let reponse = await fetch(`${backend_user}user.php?action=activate&${dict_to_query(data)}`);
+    let reponse = await fetch_post(`${backend_user}user.php?action=activate`, data);
     if(reponse.status !== 200) {
         return false;
     }
