@@ -1,4 +1,3 @@
-import {getAvatar} from "./api_calls.mjs";
 
 function generateHintMap(text, translation) {
     if(!text)
@@ -7,7 +6,7 @@ function generateHintMap(text, translation) {
     text = text.replace(/~/g, " ").replace(/\|/g, "â€‹");
     if(!translation)
         translation = ""
-    let trans_list = splitTextTokens(translation);
+    let trans_list = splitTextTokens2(translation);
     let hints = [];
     let hintMap = [];
     let text_pos = 0;
@@ -21,7 +20,7 @@ function generateHintMap(text, translation) {
         }
         text_pos += text_list[i].length;
     }
-    return {hintMap:hintMap, hints:hints, text:text};
+    return {hintMap:hintMap, hints:hints, text:text.trim()};
 }
 
 function hintsShift(content, pos) {
@@ -42,18 +41,24 @@ function getButtons(content) {
     }
     let characterPositions = [];
     let pos1 = content.text.indexOf("(");
+    pos1 = content.text.indexOf(")");
+    while(pos1 !== -1) {
+        hintsShift(content, pos1)
+        pos1 = content.text.indexOf(")")
+    }
+    pos1 = content.text.indexOf("(");
+    let first = true;
     while(pos1 !== -1) {
         hintsShift(content, pos1)
         if(content.text.substring(pos1, pos1+1) === "+")
             hintsShift(content, pos1)
+        if(!first)
+            characterPositions.push(pos1-1);
+        first = false;
         pos1 = content.text.indexOf("(")
     }
-    pos1 = content.text.indexOf(")");
-    while(pos1 !== -1) {
-        hintsShift(content, pos1)
-        characterPositions.push(pos1);
-        pos1 = content.text.indexOf(")")
-    }
+    characterPositions.push(content.text.length-2);
+
     return [selectablePhrases, characterPositions]
 }
 
@@ -137,12 +142,24 @@ function processBlockData(line_iter, story) {
 function splitTextTokens(text, keep_tilde=true) {
     if(!text)
         return [];
+    //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
     if(keep_tilde)
         //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
-        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]+)/)
+        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…\]]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/)
     else
         //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
-        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]+)/)
+        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]*)/)
+}
+
+function splitTextTokens2(text, keep_tilde=true) {
+    if(!text)
+        return [];
+    if(keep_tilde)
+        //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
+        return text.split(/([\s]+)/)
+    else
+        //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
+        return text.split(/([\s~]+)/)
 }
 
 function getInputStringText(text) {
@@ -158,7 +175,8 @@ function getInputStringSpeechText(text) {
 }
 
 function speaker_text_trans(data, meta) {
-    let [, speaker_text, text] = data.text.match(/\s*(?:>?\s*(\w*)\s*:|>|\+|-)\s*(\S.*\S)\s*/);
+    //console.log("data.text", data.text)
+    let [, speaker_text, text] = data.text.match(/\s*(?:>?\s*(\w*)\s*:|>|\+|-)\s*(\S.*\S|\S)\s*/);
     let translation = "";
     if(data.trans)
         [, translation] = data.trans.match(/\s*~\s*(\S.*\S|\S)\s*/);
@@ -302,6 +320,7 @@ function pointToPhraseButtons(line) {
     [, , line] = line.match(/\s*(?:>?\s*(\w*)\s*:|>|\+|-)\s*(\S.*\S)\s*/);
     line = line.replace(/(\s*)\)/g, ")$1")
     line = line.replace(/~/g, " ")
+    line = line.replace(/ +/g, " ")
     let transcriptParts = [];
     let correctAnswerIndex = 0;
     let index = 0;
@@ -309,17 +328,21 @@ function pointToPhraseButtons(line) {
     while(line.length) {
         let pos = line.indexOf("(");
         if(pos === -1) {
-            transcriptParts.push({
-                selectable: false,
-                text: line,
-            })
+            for(let l of splitTextTokens(line))
+                if(l !== "")
+                transcriptParts.push({
+                    selectable: false,
+                    text: l,
+                })
             break
         }
         if(line.substring(0, pos) !== "") {
-            transcriptParts.push({
-                selectable: false,
-                text: line.substring(0, pos),
-            })
+            for(let l of splitTextTokens(line.substring(0, pos),))
+                if(l !== "")
+                transcriptParts.push({
+                    selectable: false,
+                    text: l
+                })
         }
         line = line.substring(pos+1);
         if(line.startsWith("+")) {
@@ -349,6 +372,7 @@ function processBlockHeader(line_iter, story) {
     story.elements.push({
         type: "HEADER",
         illustrationUrl: "https://stories-cdn.duolingo.com/image/"+story.meta["icon"]+".svg",
+        title: story.meta["fromLanguageName"],
         learningLanguageTitleContent: data_text.content,
         trackingProperties: {},
         audio: data_text.audio,
@@ -390,12 +414,12 @@ function processBlockMultipleChoice(line_iter, story) {
         correctAnswerIndex: correct_answer,
         question: data_text.content,
         trackingProperties: {
-            line_index: story.meta.line_index,
+            line_index: story.meta.line_index-1,
             challenge_type: "multiple-choice"
         },
         editor: {"block_start_no": start_no, "start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
     })
-    story.meta.line_index += 1;
+    //story.meta.line_index += 1;
     return false
 }
 
@@ -434,7 +458,6 @@ function processBlockSelectPhrase(line_iter, story) {
         type: "SELECT_PHRASE",
         answers: answers,
         correctAnswerIndex: correct_answer,
-        question: data_text.content,
         trackingProperties: {
             line_index: story.meta.line_index,
             challenge_type: "select-phrases"
@@ -479,7 +502,7 @@ function processBlockContinuation(line_iter, story) {
         type: "MULTIPLE_CHOICE",
         answers: answers,
         correctAnswerIndex: correct_answer,
-        question: data_text.content,
+        //question: data_text.content,
         trackingProperties: {
             line_index: story.meta.line_index,
             challenge_type: "continuation"
