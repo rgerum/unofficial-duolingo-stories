@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useDataFetcher, useDataFetcher2, useEventListener} from './hooks'
 import {Spinner} from './react/spinner'
 import {Flag} from './react/flag'
@@ -6,6 +6,7 @@ import {useUsername, Login, LoginDialog} from './login'
 import {useInput} from "./hooks";
 import {getAvatars, getLanguageName, getSpeakers, setAvatarSpeaker} from "./api_calls.mjs";
 import "./avatar_editor.css"
+import {fetch_post} from "./includes.mjs";
 
 function Avatar(props) {
     let avatar = props.avatar;
@@ -30,6 +31,7 @@ function Avatar(props) {
 
             <p>{inputName}</p>
             <p><input value={inputSpeaker} onChange={inputSpeakerSetValue} type="text" placeholder="Speaker"/></p>
+            <span className="copy_button" title="play audio" onClick={(e) => props.play(e, inputSpeaker, "Duo")}><img src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"/></span>
             <p><input value="save" onClick={save} disabled={(inputName && inputName === avatar.name && inputSpeaker && inputSpeaker === avatar.speaker) ? true : false} type="button"/></p>
         </div>
     }
@@ -41,6 +43,7 @@ function Avatar(props) {
 
         <p><input value={inputName} onChange={inputNameSetValue} type="text" placeholder="Name"/></p>
         <p><input value={inputSpeaker} onChange={inputSpeakerSetValue} type="text" placeholder="Speaker"/></p>
+        <span className="copy_button" title="play audio" onClick={(e) => props.play(e, inputSpeaker, inputName)}><img src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"/></span>
         <p><input value="save" onClick={save} disabled={(inputName && inputName === avatar.name && inputSpeaker && inputSpeaker === avatar.speaker) ? true : false} type="button"/></p>
     </div>
 }
@@ -64,6 +67,17 @@ export function AvatarNames(props) {
     const [language, setLanguage] = React.useState(parseInt(urlParams.get("language")) || undefined);
     const [avatars, _] = useDataFetcher2(getAvatars, [language]);
     const [speakers, __] = useDataFetcher2(getSpeakers, [language]);
+    const [language_data, ___] = useDataFetcher2(getLanguageName, [language]);
+    let [speakText, setSpeakText] = useState(undefined);
+    const [stored, setStored] = useState({});
+
+    if(speakText === undefined)
+        speakText = language_data?.default_text || "My name is $name.";
+
+    function doSetSpeakText(event) {
+        setStored({})
+        setSpeakText(event.target.value);
+    }
 
     let images = [];
     let avatars_new = [];
@@ -82,11 +96,35 @@ export function AvatarNames(props) {
         navigator.clipboard.writeText(text);
         e.preventDefault();
     }
+    async function play(e, text, name) {
+        if(stored[text] === undefined) {
+            console.log("play", text, speakText)
+            //navigator.clipboard.writeText(text);
+            //generate_audio_line({"id": 0, "speaker": text, "text": speakText})
+            let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
+                {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
+            let ssml_response = await response2.json();
+            console.log("ssml_response", ssml_response)
+            let audio = new Audio("https://carex.uber.space/stories/audio/" + ssml_response["output_file"]);
+            stored[text] = audio;
+            setStored(stored);
+        }
+        else
+            console.log("stored");
+        let audio = stored[text];
+        audio.play();
+
+
+        e.preventDefault();
+    }
 
     if(avatars === undefined || speakers === undefined || language === undefined)
         return <Spinner/>
     return <>
     <div className="speaker_list">
+        <div>
+            <textarea value={speakText} onChange={doSetSpeakText} style={{width: "100%"}}/>
+        </div>
         <table id="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
@@ -97,8 +135,12 @@ export function AvatarNames(props) {
             </thead>
             <tbody>
         {speakers.map((speaker, index) =>
-            <tr key={index} onClick={(e) => copyText(e, speaker.speaker)}>
-                <td><span className="ssml_speaker">{speaker.speaker}</span> <span className="copy_button" title="copy to clipboard"><img src="icons/copy.svg"/></span></td>
+            <tr key={index} >
+                <td>
+                    <span className="copy_button" title="play audio" onClick={(e) => play(e, speaker.speaker, "Duo")}><img src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"/></span>
+                    <span className="ssml_speaker">{speaker.speaker}</span>
+                    <span className="copy_button" title="copy to clipboard" onClick={(e) => copyText(e, speaker.speaker)}><img src="icons/copy.svg"/></span>
+                </td>
                 <td>{speaker.gender}</td>
                 <td>{speaker.type}</td>
             </tr>
@@ -106,17 +148,17 @@ export function AvatarNames(props) {
             </tbody>
         </table>
     </div>
-    <div className={"avatar_editor"} style={{"overflow-y": "scroll"}}>
+    <div className={"avatar_editor"} style={{"overflowY": "scroll"}}>
         <p>These characters are the default cast of duolingo. Their names should be kept as close to the original as possible.</p>
         <div>
         {avatars_new_important.map((avatar, index) =>
-            <Avatar key={index} language_id={language} avatar={avatar} />
+            <Avatar key={index} play={play} language_id={language} avatar={avatar} />
         )}
         </div>
         <p>These characters just appear in a couple of stories.</p>
         <div>
         {avatars_new.map((avatar, index) =>
-            <Avatar key={index} language_id={language} avatar={avatar} />
+            <Avatar key={index} play={play} language_id={language} avatar={avatar} />
         )}
         </div>
     </div>
