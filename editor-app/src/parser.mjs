@@ -12,6 +12,7 @@ const STATE_TEXT_ODD = "name";
 
 const STATE_TEXT_HIDE_EVEN = "className";
 const STATE_TEXT_HIDE_ODD = "typeName";
+const STATE_TEXT_HIDE_NEUTRAL = "changed";
 
 const STATE_TEXT_BUTTON_EVEN = "number";
 const STATE_TEXT_BUTTON_ODD = "labelName";
@@ -28,10 +29,10 @@ const STATE_ERROR = "deleted";
 const STATE_AUDIO = "color";
 
 function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
-    if(stream.match(/ +/)) {
+    if(stream.match(/[ |]+/)) {
         state.odd = !state.odd
         if(state.bracket && allow_hide)
-            return STATE_TEXT_HIDE_EVEN
+            return STATE_TEXT_HIDE_NEUTRAL
         return STATE_DEFAULT;
     }
     if (allow_hide) {
@@ -60,7 +61,7 @@ function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
             return STATE_TEXT_BUTTON_EVEN
         }
 
-    if( (!allow_buttons && stream.match(/[^ $\]\[]+/)) || (allow_buttons && stream.match(/[^ $\]\[\(\)]+/))) {
+    if( (!allow_buttons && stream.match(/[^ |$\]\[]+/)) || (allow_buttons && stream.match(/[^ |$\]\[\(\)]+/))) {
         if(state.bracket && allow_hide) {
             if (state.odd)
                 return STATE_TEXT_HIDE_ODD
@@ -77,9 +78,11 @@ function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
 
 
 function parserTranslation(stream, state) {
-    if(stream.match(/ *[^ $\]\[]+ */)) {
+    if(stream.match(/[ |]+/)) {
         state.odd = !state.odd
-
+        return STATE_DEFAULT;
+    }
+    if(stream.match(/[^ |$\]\[]+/)) {
         if (state.odd)
             return STATE_TRANS_ODD
         return STATE_TRANS_EVEN

@@ -342,11 +342,14 @@ else {
             {tag: t.className, color: color_even, textDecoration: "underline"},
             // STATE_TEXT_HIDE_ODD
             {tag: t.typeName, color: color_odd, textDecoration: "underline"},
+            // STATE_TEXT_HIDE_NEUTRAL
+            {tag: t.changed, textDecoration: "underline"},
 
             // STATE_TEXT_BUTTON_EVEN
             {tag: t.number, color: color_even, background: "#c8c8c8", borderRadius: "10px"},
             // STATE_TEXT_BUTTON_ODD
             {tag: t.labelName, color: color_odd, background: "#c8c8c8", borderRadius: "10px"},
+
             // STATE_TEXT_HIDE_BUTTON_EVEN
             {tag: t.meta, color: color_even, textDecoration: "underline", background: "#c8c8c8", borderRadius: "10px"},
             // STATE_TEXT_HIDE_BUTTON_ODD
@@ -369,7 +372,7 @@ else {
                 color: ivory
             },
             {
-                tag: [t.changed, t.annotation, t.self, t.namespace],
+                tag: [t.annotation, t.self, t.namespace],
                 color: chalky
             },
             {
