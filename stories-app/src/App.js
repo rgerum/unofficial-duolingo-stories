@@ -3,7 +3,7 @@ import './App.css';
 import {useDataFetcher2, useEventListener} from "./hooks";
 import {getLanguageNames} from "./api_calls";
 import {IndexContent} from "./index_react";
-import {Story} from "./story_react";
+import {StoryOld} from "./story_react_old";
 import {Task} from "./task";
 
 
@@ -66,7 +66,7 @@ function App(props) {
   }
   else if(story === null)
     return <IndexContent language_data={language_data} course={course} setCourse={doSetCourse} onStartStory={changeStory} />
-  return <Story language_data={language_data} story_id={story} onQuit={()=>{changeStory(null)}} />
+  return <StoryOld language_data={language_data} story_id={story} onQuit={()=>{changeStory(null)}} />
 }
 
 export default App;

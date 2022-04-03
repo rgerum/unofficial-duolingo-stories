@@ -1,7 +1,8 @@
 import React from 'react';
 import {useEventListener} from './hooks.js'
-import {getStoryJSON} from './api_calls.js'
+import {getStoryJSON, setStoryDone} from './api_calls.js'
 import {shuffle} from './includes.js'
+import {Story} from "./story_react_new";
 import './story.css';
 
 
@@ -23,9 +24,7 @@ function playSoundWrong() {
     audio_wrong.play();
 }
 
-async function setStoryDone(id) {
-    await fetch(`${backend_stories}set_story_done.php?id=${id}`);
-}
+
 
 function AudioPlay(props) {
     return <img onClick={props.onClick} src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
@@ -55,9 +54,7 @@ function HintLineContent(props) {
             return false;
         if(start1 <= start2 && start2 < end1)
             return true;
-        if(start2 <= start1 && start1 < end2)
-            return true;
-        return false;
+        return start2 <= start1 && start1 < end2;
     }
 
     function addWord2(start, end) {
@@ -575,7 +572,7 @@ function FinishedPage(props) {
     </div>
 }
 
-export class Story extends React.Component {
+export class StoryOld extends React.Component {
     constructor(props) {
         super(props);
         //let urlParams = new URLSearchParams(window.location.search);
@@ -717,6 +714,9 @@ export class Story extends React.Component {
                             ))}
                         </div>
             );
+
+        if(story.learningLanguage === undefined)
+            return <Story language_data={this.props.language_data} story_id={this.props.story_id} onQuit={this.props.onQuit} />
 
         return (
             <div>

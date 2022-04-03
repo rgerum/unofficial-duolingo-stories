@@ -27,6 +27,12 @@ a:focus{outline:none !important;}
     font-size: 25px;
     line-height: 34px;
 }
+.title_img {
+    height: 175px;
+    width: 175px;
+}
+
+
 .button {
     text-transform: uppercase;
     padding: 12px 30px;

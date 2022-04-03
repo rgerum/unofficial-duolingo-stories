@@ -289,10 +289,12 @@ function SetList(props) {
 
 function StoryButton(props) {
     let story = props.story;
+    if(!story.image.startsWith("http"))
+        story.image = `https://stories-cdn.duolingo.com/image/${story.image}.svg`;
     return <a
         className="story_link"
         onClick={(e) => {e.preventDefault(); props.onStoryClicked(story.id); }}
-        href={`story.html?story=${story.id}`}
+        href={`?story=${story.id}`}
     >
         <button
             className="button_story2"
