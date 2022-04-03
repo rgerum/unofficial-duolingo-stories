@@ -1,4 +1,11 @@
-let backend = "https://carex.uber.space/stories/backend/"
+export function get_backend() {
+    let backend = "https://carex.uber.space/stories/backend/"
+    if(window.location.host === "www.duostories.org" || window.location.host === "duostories.org")
+        backend = "https://"+window.location.host+"/stories/backend/"
+    let backend_stories = backend+"stories/"
+    return backend;
+}
+let backend = get_backend();
 let backend_stories = backend+"stories/"
 window.backend_stories = backend_stories
 
@@ -44,7 +51,7 @@ export async function getPublicCourses() {
 
 export async function getStories(lang, lang_base) {
     try {
-        let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
+        let response = await fetch(`${backend}/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
         return await response.json();
     }
     catch (e) {
@@ -54,7 +61,7 @@ export async function getStories(lang, lang_base) {
 
 export async function getStoriesSets(lang, lang_base) {
     try {
-        let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
+        let response = await fetch(`${backend}/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
         let data =  await response.json();
 
         let set = -1;
@@ -75,7 +82,7 @@ export async function getStoriesSets(lang, lang_base) {
 
 export async function getStoriesEditor(lang, lang_base) {
     try {
-        let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_list_editor.php?lang=${lang}&lang_base=${lang_base}`);
+        let response = await fetch(`${backend}/stories/get_list_editor.php?lang=${lang}&lang_base=${lang_base}`);
         return await response.json();
     }
     catch (e) {
@@ -114,7 +121,7 @@ export function isCourseValid(data_courses, lang, lang_base) {
 
 export async function getLexicon(lang) {
     try {
-        let response = await fetch(`https://carex.uber.space/stories/backend/stories/get_lexicon.php?lang=${lang}`);
+        let response = await fetch(`${backend}/stories/get_lexicon.php?lang=${lang}`);
         return await response.json();
     }
     catch (e) {
@@ -125,4 +132,3 @@ export async function getLexicon(lang) {
 export async function setStoryDone(id) {
     await fetch(`${backend_stories}set_story_done.php?id=${id}`);
 }
-

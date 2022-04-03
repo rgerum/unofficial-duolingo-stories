@@ -4,9 +4,6 @@ import {getStoryJSON} from './api_calls.js'
 import {shuffle} from './includes.js'
 import './story.css';
 
-let backend = "https://carex.uber.space/stories/backend/"
-let backend_stories = backend+"stories/"
-window.backend_stories = backend_stories
 
 let audio_right = new Audio("https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3");
 audio_right.volume = 0.5;
@@ -431,7 +428,10 @@ function StoryLine(props) {
     return null;
 }
 
-var audio_base_path = "https://carex.uber.space/stories/";
+let audio_base_path = "https://carex.uber.space/stories/"
+if(window.location.host === "www.duostories.org" || window.location.host === "duostories.org")
+    audio_base_path = "https://"+window.location.host+"/stories/"
+
 function useAudio(element) {
     let [audioRange, setAudioRange] = React.useState(99999);
     let audio = element?.line?.content?.audio;

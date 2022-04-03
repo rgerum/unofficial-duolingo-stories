@@ -250,6 +250,10 @@ function LanguageButton(props) {
     </a>;
 }
 
+let flag_folder = "https://carex.uber.space/stories/"
+if(window.location.host === "www.duostories.org" || window.location.host === "duostories.org")
+    flag_folder = "https://"+window.location.host+"/stories/"
+
 export function Flag(props) {
     /**
      * A big flag button
@@ -259,7 +263,7 @@ export function Flag(props) {
     if(props.language_data && props.lang)
         language = props.language_data[props.lang];
     return <div className={"flag "+props.className}
-                style={language.flag_file ? {backgroundImage: `url(flags/${language.flag_file})`} : {backgroundPosition: `0 ${language.flag}px`}}
+                style={language.flag_file ? {backgroundImage: `url(${flag_folder}/flags/${language.flag_file})`} : {backgroundPosition: `0 ${language.flag}px`}}
     />
 }
 
