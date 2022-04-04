@@ -4,7 +4,7 @@ body {
     font-family: nunito, vollkorn;/*, -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";*/
     position: relative;
     font-size: 19px;
-    margin: 0px;
+    margin: 0;
     box-sizing: border-box;
 }
 button:focus{outline:none !important;}
@@ -56,13 +56,13 @@ a:focus{outline:none !important;}
 }
 .button:active {
     transform: translate(0, 5px);
-    box-shadow: #58a700 0 0px;
+    box-shadow: #58a700 0 0;
     transition: 0.1s box-shadow, 0.1s transform;
 }
 .button[data-status="inactive"] {
     background: #a3a3a3;
     transform: translate(0, 5px);
-    box-shadow: #575757 0 0px;
+    box-shadow: #575757 0 0;
     color: #575757;
     cursor: default;
 }
@@ -136,7 +136,7 @@ a:focus{outline:none !important;}
 }
 .clickword:active {
     transform: translate(0, 5px);
-    box-shadow: lightgray 0 0px;
+    box-shadow: lightgray 0 0;
     transition: 0.1s box-shadow, 0.1s transform;
 }
 .clickword[data-status="empty"] {
@@ -144,7 +144,7 @@ a:focus{outline:none !important;}
     color: lightgray;
     cursor: default;
     transform: translate(0, 5px);
-    box-shadow: lightgray 0 0px;
+    box-shadow: lightgray 0 0;
 }
 .clickword[data-status="selected"] {
     background: #ddf4ff;
@@ -194,6 +194,8 @@ a:focus{outline:none !important;}
     display: block;
     width: 100%;
     user-select: none;
+    font-family: nunito;
+    color: black;
 }
 @media (max-width:480px) {
     .answer_button {
@@ -282,7 +284,7 @@ a:focus{outline:none !important;}
     position: fixed;
     background: white;
     z-index: 10;
-    bottom: 0px;
+    bottom: 0;
     left: 0;
     height: 140px;
     padding: 30px;
@@ -296,7 +298,7 @@ a:focus{outline:none !important;}
 /*    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
     line-height: 2em;
     background-image: linear-gradient(to right, #e5e5e5 60%, rgba(255, 255, 255, 0) 0%);
-    background-position: 0% 100%;
+    background-position: 0 100%;
     background-repeat: repeat-x;
     background-size: 5px 2px;
     padding-bottom: 5px;
@@ -351,7 +353,7 @@ span[data-hidden=true] {
     color:white;
     background-image: linear-gradient(to right, #e5e5e5 60%, #e5e5e5 60%) !important;
     line-height: 2em;
-    background-position: 0% 100%;
+    background-position: 0 100%;
     background-repeat: repeat-x;
     background-size: 5px 2px;
     padding-bottom: 5px;
@@ -364,7 +366,7 @@ span[data-hidden=true] {
     transition: opacity 0.3s;
 
     bottom: 125%;
-    width: 120px;
+    /* width: 120px;*/
 
     background-color: #f7f7f7;
     border: 2px solid #e5e5e5;
@@ -393,7 +395,7 @@ span[data-hidden=true] {
 
 .phrase {
     display: flex;
-    margin: 20px 0px;
+    margin: 20px 0;
 }
 
 .head {
@@ -407,7 +409,6 @@ span[data-hidden=true] {
     background-color: #fff;
     border: 2px solid #dedede;
     border-radius: 14px;
-    border-top-left-radius: 14px;
     border-top-left-radius: 0;
     max-width: 80%;
     padding: 10px 12px;
@@ -476,7 +477,6 @@ span[data-hidden=true] {
 .flag {
     display: inline-block;
     background-size: 40px;
-    display: inline-block;
     height: 32.19512px;
     width: 40px;
     background-image: url(https://d35aaqx5ub95lt.cloudfront.net/images/juicy-flag-sprite-8.svg);
@@ -520,7 +520,7 @@ span[data-hidden=true] {
 }
 #progress_inside {
     display: block;
-    width: 0%;
+    width: 0;
     background: #78c800;
     border-radius: calc(var(--height)/2);
     height: var(--height);
@@ -589,7 +589,7 @@ span[data-hidden=true] {
 /* footer */
 
 #footer {
-    padding: 0px;
+    padding: 0;
 }
 
 #footer_content {
@@ -767,7 +767,7 @@ span[data-hidden=true] {
 @media (max-width:700px) {
     #footer {
         height: auto;
-        border-top: 0px;
+        border-top: 0;
     }
     #button_discuss {
         display: none;
@@ -780,20 +780,14 @@ span[data-hidden=true] {
 /* multiple choice */
 
 .multiple_choice_ul {
-    margin: 0;
-
     color: #4b4b4b;
     font-size: 19px;
     font-weight: 500;
     line-height: 1.68;
     list-style: none;
-    margin: 0 25px 0 39px;
     padding: 0;
     position: relative;
-
-    list-style: none;
     margin: 0;
-    padding: 0;
 }
 
 .multiple_choice_li {
@@ -807,10 +801,6 @@ span[data-hidden=true] {
 .multiple_choice_checkbox {
     background: #fff;
     border: solid #e5e5e5;
-    border-top-width: medium;
-    border-right-width: medium;
-    border-bottom-width: medium;
-    border-left-width: medium;
     border-width: 2px 2px 4px;
     border-radius: 9px;
     cursor: pointer;
@@ -926,12 +916,12 @@ p[data-rtl] {
 
 .phrase[data-rtl] .head {
     margin-left: 12px;
-    margin-right: 0px;
+    margin-right: 0;
 }
 
 .phrase[data-rtl] .bubble {
     border-top-left-radius: 14px;
-    border-top-right-radius: 0px;
+    border-top-right-radius: 0;
 }
 
 .phrase[data-rtl] .bubble:before {
@@ -1101,6 +1091,8 @@ p[data-rtl] .speaker {
     touch-action: manipulation;
     vertical-align: top;
     z-index: 1;
+    font-family: nunito;
+    color: black;
 }
 
 .word_match:hover {
