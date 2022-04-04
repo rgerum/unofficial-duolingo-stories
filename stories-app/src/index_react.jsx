@@ -332,11 +332,11 @@ export function IndexContent(props) {
         </div>
         <div id="main_index">
             <h1>Unofficial Duolingo Stories</h1>
-            <p style={{textAlign: "center"}}>This page is a community project to bring the original <a
-                href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages.
-                <br/>As the Duolingo Forum is shutting down, you can now meet us on Discord <a href="https://discord.gg/4NGVScARR3">join</a>.
+            <p style={{textAlign: "center"}}>
+                This page is a community project to bring the original <a href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages.
                 <br/>
-                The old forum discussion is currently still available <a href="https://forum.duolingo.com/comment/38992372">here</a>.</p>
+                If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.
+            </p>
             <br/>
             {lang !== undefined ?
                 <SetList lang={lang} lang_base={lang_base} username={username} onStoryClicked={(id)=>props.onStartStory(id)}/> :
@@ -348,7 +348,7 @@ export function IndexContent(props) {
             <div style={{textAlign: "center", color:"gray", fontSize: "0.8em"}}>
                 These stories are owned by Duolingo, Inc. and are used under license from Duolingo.<br/>
                 Duolingo is not responsible for the translation of these stories <span
-                id="license_language">{props.language_data && props.language_data[lang] ? "into "+props.language_data[lang].name : ""}</span> and this is not an official product of Duolingo.
+                id="license_language">{props.language_data && props.language_data[lang] ? "into "+props.language_data[lang].name : ""}</span> and this is not an official product of Duolingo.<br/>
                 Any further use of these stories requires a license from Duolingo.<br/>
                 Visit <a style={{color:"gray"}} href="https://www.duolingo.com">www.duolingo.com</a> for more
                 information.

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import {Story, Cast} from "./story_react";
 import {EditorOverview} from "./editor"
 import {AvatarEditorHeader, AvatarNames} from "./avatar_editor";
-import {getAvatars, getLanguageName, getStory, setStory} from "./api_calls.mjs";
+import {getAvatars, getImage, getLanguageName, getStory, setStory} from "./api_calls.mjs";
 
 import {EditorState, EditorView, basicSetup} from "@codemirror/basic-setup"
 import {HighlightStyle, tags as t} from "@codemirror/highlight"
@@ -217,6 +217,8 @@ else {
         let editor_text = undefined;
 
         let story_data = await getStory(urlParams.get("story"));
+        // cache the image
+        getImage(story_data.image)
         let avatar_names_list = await getAvatars(story_data.learningLanguage)
         let avatar_names = {}
         for(let avatar of avatar_names_list) {
@@ -239,11 +241,28 @@ else {
                 last_lineno = lineno;
                 //console.log("updateDisplay", last_lineno !== lineno, last_avatar !== Object.keys(window.character_avatars).length, story === undefined)
                 if (story === undefined) {
-                    console.log("parse Story")
+                    console.log("parse Story", "story_data", story_data)
                     editor_text = state.doc.toString();
                     [story, story_meta] = processStoryFile(editor_text, story_data.id, avatar_names);
+                    let image = getImage(story_meta.icon)
+                    story.illustrations = {
+                        active: image.active,
+                        gilded: image.gilded,
+                        locked: image.locked,
+                    }
+                    //story.learningLanguage = "es",
+                    //    "fromLanguage": "en",
+                    /*
+                    "illustrations": {
+    "active": "https://stories-cdn.duolingo.com/image/9ac312d372abe49d99606848f5a7a8414143346d.svg",
+    "gilded": "https://stories-cdn.duolingo.com/image/7bd913249101cb2a56b87e005d364a5810db108e.svg",
+    "locked": "https://stories-cdn.duolingo.com/image/ae651762db4b1e5669394228804b7d6daa7c1a6b.svg"
+  }
+                     */
                 }
                 window.story = story;
+                window.getImage = getImage;
+                window.story_meta = story_meta;
 
                 ReactDOM.render(
                     <React.StrictMode>

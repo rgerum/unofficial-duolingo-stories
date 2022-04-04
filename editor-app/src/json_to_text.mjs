@@ -1,9 +1,8 @@
 import {diffJson} from "diff";
-import {processStoryFile} from "./syntax_parser_new.mjs";
+import {processStoryFile, splitTextTokens} from "./syntax_parser_new.mjs";
 
 let backend_get = "https://carex.uber.space/stories/backend/editor/get.php"
 export async function getAvatars(id, course_id) {
-    console.log("getAvatars", id, `${backend_get}?action=avatar_names&id=${id}`)
     try {
         let response = await fetch(`${backend_get}?action=avatar_names&id=${id}&course_id=${course_id}`);
         return await response.json();
@@ -20,17 +19,27 @@ function make_same_length([t, r], fill="_") {
     ]
 }
 
-function splitTextTokens(text, keep_tilde=true) {
-    if(!text)
-        return [];
-    if(keep_tilde)
-        //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
-        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]+)/)
-    else
-        //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
-        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]+)/)
-}
 
+function stringIndex (search, find, position = "all") {
+
+    var currIndex = 0, indexes = [], found = true;
+
+    while (found) {
+        var searchIndex = search.indexOf(find);
+        if (searchIndex > -1) {
+            currIndex += searchIndex + find.length;
+            search = search.substr (searchIndex + find.length);
+            indexes.push (currIndex - find.length);
+        } else found = false; //no other string to search for - exit from while loop
+    }
+
+    if (position == 'all') return indexes;
+    if (position > indexes.length -1) return [];
+
+    position = (position == "last") ? indexes.length -1 : position;
+
+    return indexes[position];
+}
 
 function text_add_hints(t, {hints, hintMap}) {
     if(hintMap.length === 0) {
@@ -39,19 +48,43 @@ function text_add_hints(t, {hints, hintMap}) {
     }
     hints = [...hints];
     hintMap = [...hintMap];
-    let parts = splitTextTokens(t.original_text);
+    /*
+    let zwsp_pos = stringIndex(t.original_text, "​")
+    t.text = t.text.replace(/​/g, "-")
+    console.log(t.text)
+    console.log(zwsp_pos)
+    for(let pos of zwsp_pos) {
+        t = text_splice(t, pos-1, 1, ["", ""]);
+        console.log(pos, t.text)
+    }*/
+    //t.text = t.text.replace(/​/g, "-")
+    console.log(t.text)
+    let parts = splitTextTokens(t.original_text.replace(/​/g, "."));
     let pos = 0;
 
     let ii = 0;
+    console.log(parts);
+    console.log(hintMap);
+    // iterate over all the naturally split parts
     for(let i=0; i < parts.length; i++) {
         let pos2 = pos+parts[i].length-1;
+        // omit empty parts
         if(parts[i].length === 0) {
             pos = pos2+1
             continue;
         }
         if(i % 2 === 0) {
             let hint =hintMap[ii]
-            //console.log(pos, pos2, hint, hints[ii])
+            console.log(pos, pos2, hint, hints[ii])
+            // maybe we need to split up the current hint
+            while(hint !== undefined && pos2 > hint.rangeTo) {
+                t = text_splice(t, hint.rangeTo+1, 0, ["|", " "]);
+                ii += 1;
+                pos = hint.rangeTo+1;
+                hint = hintMap[ii];
+                console.log(pos, pos2, hint, hints[ii])
+                console.log(t.text)
+            }
             if(hint === undefined || hint.rangeFrom > pos2) {
                 hintMap.splice(ii, 0, {rangeFrom: pos, rangeTo: pos2})
                 hints.splice(ii, 0, "~")
@@ -64,13 +97,23 @@ function text_add_hints(t, {hints, hintMap}) {
         pos = pos2+1
     }
     //console.log("parts", parts, hintMap)
-    //throw "as"
+    /*"hints": [
+        "my",
+        "English",
+        "textbook",
+        "where"
+    ],*/
 
     for(let i in hintMap) {
         let hint = hintMap[i];
         let word = t.original_text.substring(hint.rangeFrom, hint.rangeTo+1)
+        console.log(hint, word)
         t = text_splice(t, hint.rangeFrom, word.length, make_same_length([word.replace(/ /g, "~"), hints[i].replace(/ /g, "~")]));
+        console.log(t.text)
+        console.log(t.tran)
     }
+    //if(hints[0] === "my")
+    //    throw "as"
     t = text_swap_regex(t)
 
     return t;
@@ -169,13 +212,15 @@ function text_add_arrange(t, part) {
     t = text_copy(t);
     for (let i in part.characterPositions) {
         let index = 0;
-        if(0) {
+        if(1) {
             for (let j in part.phraseOrder) {
                 if (part.phraseOrder[j] === parseInt(i))
                     index = j;
             }
         }
-        index = part.phraseOrder[i];
+        else {
+            index = part.phraseOrder[i];
+        }
         let length = part.selectablePhrases[index].length;
         let pos = part.characterPositions[i] - length;
         while(pos && t.original_text.substring(pos, pos+length) !== part.selectablePhrases[index]) {
@@ -189,6 +234,10 @@ function text_add_arrange(t, part) {
     }
     // swap space and )
     t.text = t.text.replace(/( *)\)/g, ")$1")
+    // swap ,)
+    t.text = t.text.replace(/,\)/g, "),")
+    t.text = t.text.replace(/]\)/g, ")]")
+    t.text = t.text.replace(/(\W)\)]/g, ")]$1")
     // swap spaces before ) to be after the )
     //text.text = text.text.replace(/( *)\)/g, ")$1")
     // swap ]) for )]
@@ -221,9 +270,10 @@ function line_speaker(line) {
         return "> ";
     }
     else if(line.type === "CHARACTER") {
+        console.log("line.avatarUrl", line.avatarUrl)
         if(avatar_id_from_image_global[line.avatarUrl])
             return `Speaker${avatar_id_from_image_global[line.avatarUrl]}: `;
-        let bla = fo;
+        //let bla = fo;
         return `Speaker${line.characterId}: `;
     }
 }
@@ -238,7 +288,7 @@ function audio_to_text(audio) {
     if(audio === undefined)
         return "";
     let text = "";
-    if(!audio.url.match(/audio\/(.*)\?\d*/))
+    if(!audio?.url?.match(/audio\/(.*)\?\d*/))
         return "";
     text += "$"+audio.url.match(/audio\/(.*)\?\d*/)[1];
     let point = 0, key_time = 0;
@@ -298,7 +348,12 @@ export function processStory(json, set_id, story_id, old_text, avatar_list, avat
 
     text += "[DATA]\n";
     text += `fromLanguageName=${json.fromLanguageName}\n`;
-    text += `icon=${json.illustrations.active.match(/image\/(.*).svg/)[1]}\n`;
+    try {
+        text += `icon=${json.illustrations.active.match(/image\/(.*).svg/)[1]}\n`;
+    }
+    catch (e) {
+        text += `icon=${json.illustrations.active}\n`;
+    }
     text += `set=${set_id}|${story_id}\n`;
     text += "\n";
 
@@ -446,6 +501,7 @@ export function processStory(json, set_id, story_id, old_text, avatar_list, avat
             throw "Undefined element type"
         }
     }
+    text = text.replace(/​/g, "")
     return text;
 }
 
@@ -463,8 +519,34 @@ function add_icon(story) {
         gildedLip: story.colors.gildedLip,
     }
 }
+function sortedObject(o1) {
+    if(typeof(o1) === "object" && !Array.isArray(o1)) {
+        let sorted = Object.entries(o1).sort(([k1], [k2]) => k1. localeCompare(k2));
+        let sorted2 = []
+        for(let o of sorted) {
+            o[1] = sortedObject(o[1]);
+            // console.log("...", o)
+            sorted2.push(o);
+        }
+        return Object.fromEntries(sorted2);
+    }
+    else if(Array.isArray(o1)) {
+        let sorted2 = [];
+        for(let o of o1) {
+            // console.log("...", o)
+            sorted2.push(sortedObject(o));
+        }
+        return sorted2;
+    }
+    else
+        return o1;
+}
 
 function compare_stories(json, text, story_id, avatar_names, avatar_id_from_image) {
+    console.log("compare_stories")
+
+    let [story_new_json, story_meta] = processStoryFile(text, story_id, avatar_names);
+
     let elements2 = []
     for(let i in json.elements) {
         // e.g. es-en-me-encanta-tu-corte-de-pelo // 'I Love Your Haircut!'
@@ -476,6 +558,22 @@ function compare_stories(json, text, story_id, avatar_names, avatar_id_from_imag
         }
     }
     json.elements = elements2;
+
+
+    let old = true;
+
+    if(old) {
+        json.elements[0] = {
+            "illustrationUrl": story_new_json.elements[0].illustrationUrl,
+            "learningLanguageTitleContent":
+            json.elements[0].line.content,
+            "title": story_new_json.elements[0].title,
+            "trackingProperties": {},
+            "type": "HEADER"
+        }
+    }
+
+    let old_index_offset = 0;
     for(let element of json.elements) {
         if(!element)
             continue
@@ -485,7 +583,9 @@ function compare_stories(json, text, story_id, avatar_names, avatar_id_from_imag
         }
         if(element.type === "LINE") {
             delete element.line.content.audio;
-            element.line.characterId = avatar_id_from_image[element.line.avatarUrl]
+            let id = avatar_id_from_image[element.line.avatarUrl]
+            if(id !== undefined)  // for old stories
+                element.line.characterId = id
             element.line.content.text = element.line.content.text.trim()
             delete element.line.content.audioPrefix
             delete element.line.content.audioSuffix
@@ -525,11 +625,46 @@ function compare_stories(json, text, story_id, avatar_names, avatar_id_from_imag
         delete json.showPromptsInTargetLanguage
         delete json.trackingProperties
         delete json.trackingConstants
-
+        // old stories
+        delete json.story_properties;
+        delete json.discussion;
+        if(element.hideRangesForChallenge && !Array.isArray(element.hideRangesForChallenge)) {
+            element.hideRangesForChallenge = [element.hideRangesForChallenge]
+        }
+        if(old) {
+            if(element.trackingProperties.challenge_type === "multiple-choice") {
+                old_index_offset -= 1;
+            }
+            if(element.trackingProperties && element.trackingProperties.line_index)
+                element.trackingProperties.line_index += old_index_offset;
+            if(element.type === "LINE" && element.line.type === "CHARACTER" && !element.line.characterId) {
+                let char = line_speaker(element.line).substring("Speaker".length)
+                element.line.characterId = char
+            }
+            if(element.transcriptParts) {
+                let parts = []
+                for(let p of element.transcriptParts) {
+                    if(p.text)
+                        parts.push(p)
+                }
+                element.transcriptParts = parts
+            }
+            if(element.characterPositions) {
+                let numbers = []
+                for (let i in element.characterPositions) {
+                    numbers.push(parseInt(element.characterPositions[i]) + 1);
+                }
+                element.characterPositions = numbers;
+            }
+            if(element.type === "ARRANGE" && story_id === 56) {
+                element.characterPositions[element.characterPositions.length-1] -= 1;
+            }
+        }
     }
     fs.writeFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/editor-app/story_compare0.txt", text);
+    json = sortedObject(json);
     fs.writeFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/editor-app/story_compare1.txt", JSON.stringify(json, null, 2));
-    let [story_new_json, story_meta] = processStoryFile(text, story_id, avatar_names);
+
     for(let element of story_new_json.elements) {
         delete element.audio;
         delete element.editor;
@@ -542,6 +677,7 @@ function compare_stories(json, text, story_id, avatar_names, avatar_id_from_imag
             delete element.selectablePhrases;
         }
     }
+    story_new_json = sortedObject(story_new_json);
     fs.writeFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/editor-app/story_compare2.txt", JSON.stringify(story_new_json, null, 2));
     //console.log("same", JSON.stringify(story_new_json) === JSON.stringify(json))
     if(JSON.stringify(story_new_json) !== JSON.stringify(json))
@@ -605,6 +741,7 @@ async function test() {
             add_icon(story)
             let json = fs.readFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/duolingo_data/"+story.id+".txt")
             json = JSON.parse(json);
+
             let text = processStory(json, parseInt(set_id)+1, parseInt(story_id)+1, "", [], avatar_id_from_image)
 
             console.log("story_index", story_index)
@@ -664,8 +801,101 @@ async function test() {
         console.log(e, "saved")
     });
 }
+async function import_old() {
+    let processed = [43, 56, 79, 50, 103
+//        43,   56,  79,   50,  103, 570,  623,
+//        634, 1004, 934,  913,  923, 924,   66,
+//        569,  974,  99, 1278, 1139,  46, 1242,
+//        1249, 1301,  16,   18,   28,  45,   57,
+//        63,   69,  41,    1, 1003, 911,   35
+    ]
+
+    let courses = await (await fetch("https://carex.uber.space/stories/backend/stories/get_courses.php")).json();
+
+    for(let course of courses) {
+        if(course.learningLanguage !== "zh")
+            continue
+        let avatars = await getAvatars(course.id);
+        let avatar_names = {}
+        for (let avatar of avatars) {
+            avatar_names[avatar.avatar_id] = avatar;
+        }
+        let avatars_new = [];
+        let images = [];
+        let avatar_id_from_image = {};
+        avatar_id_from_image_global = avatar_id_from_image
+        for (let avatar of avatars) {
+            if (images.indexOf(avatar.link) === -1) {
+                avatars_new.push(avatar);
+                images.push(avatar.link);
+                avatar_id_from_image[avatar.link] = avatar.avatar_id;
+            }
+        }
+        let course_id = course.id;
+        let res = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`);
+        let stories = await res.json();
+        for (let story of stories) {
+            if(story.id !== 989)
+                continue
+            if (processed.indexOf(story.id) !== -1)
+                continue
+
+            console.log("----", story.id)
+            console.log(story)
+            let res = await fetch(`https://carex.uber.space/stories/backend/stories/get_story_json.php?id=${story.id}`);
+            let json = await res.json();
+            let res2 = await fetch(`https://carex.uber.space/stories/backend/stories/get_story.php?id=${story.id}`);
+            let json2 = await res2.json();
+
+            fs.writeFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/editor-app/story_compare0.txt", json2[0].text);
+            fs.writeFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/editor-app/story_compare1.txt", JSON.stringify(json, null, 2));
+
+            if (json.elements[json.elements.length - 1].prompt === "")
+                json.elements[json.elements.length - 1].prompt = "Tap the pairs."
+
+            let text = processStory(json, story.set_id, story.set_index, json2[0].text, [], avatar_id_from_image)
+            //console.log(text);
+            //text = text.replace(/​/g, "|");
+
+            console.log("processed =", processed)
+            console.log("----", story.id) // TODO look at 974, 1249, 63, 69, 35, 1281
+
+            console.log(json2[0])
+            console.log(json)
+
+            let data = {
+                id: story.id,
+                name: story.name_base,
+                author: json2[0].author,
+                image: story.image.match(/image\/(.*).svg/) ? story.image.match(/image\/(.*).svg/)[1] : story.image,
+                set_id: story.set_id,
+                set_index: story.set_index,
+                course_id: course_id,
+                text: text,
+                json: JSON.stringify(json),
+            }
+            if (story.duo_id)
+                data.duo_id = story.duo_id;
+            //if([43, 56, 79, 570, 634, 924, 569, 974, 99, 46, 1249, 1301, 16, 18, 63, 69, 1,
+            //   1003, 35, 1281].indexOf(story.id) === -1)
+                compare_stories(json, text, story.id, avatar_names, avatar_id_from_image)
+            processed.push(story.id)
+            console.log(data)
+            try {
+            //    let res = await fetch_post(`https://carex.uber.space/stories/backend/editor/set.php?action=story`, data);
+            //    res = await res.text()
+                console.log(res);
+            } catch (e) {
+                console.log(e)
+            }
+            //return
+        }
+    }
+
+}
 try {
-    test();
+    //test();
+    import_old();
 }
 catch (e) {
     console.log(e)

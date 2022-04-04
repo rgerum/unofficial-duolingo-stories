@@ -97,6 +97,28 @@ export async function getAvatar(id) {
     }
 }
 
+let images_cached = {};
+export function getImage(id) {
+    if(images_cached[id] !== undefined) {
+        return images_cached[id];
+    }
+    getImageAsync(id)
+    return {}
+}
+
+export async function getImageAsync(id) {
+    try {
+        let response_json = await fetch(`${backend_get}?action=image&id=${id}`);
+        let image = await response_json.json();
+        images_cached[id] = image;
+        console.log("getImage", images_cached[id], id, image)
+        return image;
+    }
+    catch (e) {
+        return {};
+    }
+}
+
 export async function getImportList(id, id2) {
     let response_json = await fetch(`${backend_get}?action=import&id=${id}&id2=${id2}`);
     return response_json.json();

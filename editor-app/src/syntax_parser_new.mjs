@@ -2,10 +2,12 @@
 function generateHintMap(text, translation) {
     if(!text)
         text = "";
+    text = text.replace(/\|/g, "​");
     let text_list = splitTextTokens(text);
-    text = text.replace(/~/g, " ").replace(/\|/g, "â€‹");
+    text = text.replace(/~/g, " ")//
     if(!translation)
         translation = ""
+    translation = translation.replace(/\|/g, "​");
     let trans_list = splitTextTokens2(translation);
     let hints = [];
     let hintMap = [];
@@ -16,7 +18,7 @@ function generateHintMap(text, translation) {
         }
         if(i%2 === 0 && trans_list[i] && trans_list[i] !== "~") {
             hintMap.push({hintIndex: hints.length, rangeFrom: text_pos, rangeTo: text_pos+text_list[i].length-1});
-            hints.push(trans_list[i].replace(/~/g, " ").replace(/\|/g, "â€‹"));
+            hints.push(trans_list[i].replace(/~/g, " ").replace(/\|/g, "​"));
         }
         text_pos += text_list[i].length;
     }
@@ -136,19 +138,44 @@ function processBlockData(line_iter, story) {
             story.meta.avatar_overwrites[id].speaker = story.meta[key];
         }
     }
+    if(story.meta["set"] && story.meta["set"].indexOf("|") !== -1) {
+        [story.meta.set_id, story.meta.set_index] = story.meta["set"].split("|");
+    }
     story.fromLanguageName = story.meta.fromLanguageName
 }
 
+let punctuation_chars = "\\\/¡!\"\'\`#$%&*,.:;<=>¿?@^_`{|}…"+
+    "。、，！？；：（）～—·《…》〈…〉﹏……——"
+//punctuation_chars = "\\\\¡!\"#$%&*,、，.。\\/:：;<=>¿?@^_`{|}…"
+
+let regex_split_token = new RegExp(`([\\s${punctuation_chars}\\]]*(?:^|\\s|$|​)[\\s${punctuation_chars}]*)`);
+let regex_split_token2 = new RegExp(`([\\s${punctuation_chars}~]*(?:^|\\s|$|​)[\\s${punctuation_chars}~]*)`);
+/*
 function splitTextTokens(text, keep_tilde=true) {
     if(!text)
         return [];
     //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
     if(keep_tilde)
+        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
+    //return text.split(regex_split_token)
+    else
+        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
+    //return text.split(regex_split_token2)
+}
+*/
+
+export function splitTextTokens(text, keep_tilde=true) {
+    if(!text)
+        return [];
+    //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
+    if(keep_tilde)
         //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
-        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…\]]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/)
+        return text.split(regex_split_token)
+    //return text.split(/([\s\\¡!"#$%&*,、，.。\/:：;<=>¿?@^_`{|}…\]]*(?:^|\s|$|​)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/)
     else
         //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
-        return text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]*)/)
+        return text.split(regex_split_token2)
+    //return text.split(/([\s\\¡!"#$%&*,、，.。\/:：;<=>¿?@^_`{|}…~]*(?:^|\s|$|​)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]*)/)
 }
 
 function splitTextTokens2(text, keep_tilde=true) {
@@ -156,25 +183,34 @@ function splitTextTokens2(text, keep_tilde=true) {
         return [];
     if(keep_tilde)
         //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
-        return text.split(/([\s]+)/)
+        return text.split(/([\s​]+)/)
     else
         //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
-        return text.split(/([\s~]+)/)
+        return text.split(/([\s​~]+)/)
 }
 
 function getInputStringText(text) {
     // remove multiple white space characters
     text = text.replace(/(\s)\s+/g, "$1");
     //
-    return text.replace(/([^-|~ ,;.:_?!…]*){([^}]*)}/g, "$1");
+    return text.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
 }
 
-function getInputStringSpeechText(text) {
+function getInputStringSpeechText(text, hide) {
+    if(hide) {
+        text = text.replace("[", "<prosody volume=\"silent\">")
+        text = text.replace("]", "</prosody>")
+    }
     text = text.replace(/(\.\.\.|…)/g, '<sub alias="">$1</sub><break/>');
+    text = text.replace(/\(\+/g, '');
+    text = text.replace(/\(/g, '');
+    text = text.replace(/\)/g, '');
+    text = text.replace(/\[/g, '');
+    text = text.replace(/\]/g, '');
     return "<speak>"+text.replace(/([^-|~ ,;.:_?!…]*)\{([^\}:]*):([^\}]*)\}/g, '<phoneme alphabet="$3" ph="$2">$1</phoneme>').replace(/([^-|~ ,;.:_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>').replace(/~/g, " ").replace(/\|/g, "​")+"</speak>";
 }
 
-function speaker_text_trans(data, meta) {
+function speaker_text_trans(data, meta, use_buttons, hide=false) {
     //console.log("data.text", data.text)
     let [, speaker_text, text] = data.text.match(/\s*(?:>?\s*(\w*)\s*:|>|\+|-)\s*(\S.*\S|\S)\s*/);
     let translation = "";
@@ -182,7 +218,9 @@ function speaker_text_trans(data, meta) {
         [, translation] = data.trans.match(/\s*~\s*(\S.*\S|\S)\s*/);
     let content = generateHintMap(getInputStringText(text), translation);
 
-    let [selectablePhrases, characterPositions] = getButtons(content);
+    let selectablePhrases, characterPositions;
+    if(use_buttons)
+        [selectablePhrases, characterPositions] = getButtons(content);
     let hideRanges = getHideRanges(content);
     // split number of speaker
     let speaker;
@@ -204,7 +242,7 @@ function speaker_text_trans(data, meta) {
         let speaker_name = meta["speaker_" + "narrator"] || meta.avatar_names[0].speaker;
         if(speaker_id)
             speaker_name = meta.avatar_overwrites[speaker_id]?.speaker || meta.avatar_names[speaker_id]?.speaker || meta.avatar_names[0].speaker;
-        audio = line_to_audio(data.audio, text, speaker_name, meta.story_id)
+        audio = line_to_audio(data.audio, text, speaker_name, meta.story_id, hide)
         audio.ssml.line = data.audio_line;
         audio.ssml.line_insert = data.audio_line_inset;
         content.audio = audio
@@ -228,8 +266,8 @@ function speaker_text_trans(data, meta) {
     return {speaker: speaker, line: line, content: content, hideRanges: hideRanges, selectablePhrases: selectablePhrases, characterPositions: characterPositions, audio: audio};
 }
 
-function line_to_audio(line, text, speaker, story_id) {
-    let text_speak = getInputStringSpeechText(text);
+function line_to_audio(line, text, speaker, story_id, hide=false) {
+    let text_speak = getInputStringSpeechText(text, hide);
     let audio = {}
     audio.ssml = {
         "text": text_speak,
@@ -330,19 +368,19 @@ function pointToPhraseButtons(line) {
         if(pos === -1) {
             for(let l of splitTextTokens(line))
                 if(l !== "")
-                transcriptParts.push({
-                    selectable: false,
-                    text: l,
-                })
+                    transcriptParts.push({
+                        selectable: false,
+                        text: l,
+                    })
             break
         }
         if(line.substring(0, pos) !== "") {
             for(let l of splitTextTokens(line.substring(0, pos),))
                 if(l !== "")
-                transcriptParts.push({
-                    selectable: false,
-                    text: l
-                })
+                    transcriptParts.push({
+                        selectable: false,
+                        text: l
+                    })
         }
         line = line.substring(pos+1);
         if(line.startsWith("+")) {
@@ -475,7 +513,7 @@ function processBlockContinuation(line_iter, story) {
 
     let start_no2 = line_iter.get_lineno();
     let data = getText(line_iter, true, true, true);
-    let data_text = speaker_text_trans(data, story.meta)
+    let data_text = speaker_text_trans(data, story.meta, false, true)
 
     let start_no3 = line_iter.get_lineno();
     let [answers, correct_answer] = getAnswers(line_iter, true);
@@ -520,7 +558,7 @@ function processBlockArrange(line_iter, story) {
 
     let start_no2 = line_iter.get_lineno();
     let data = getText(line_iter, true, true, true);
-    let data_text = speaker_text_trans(data, story.meta)
+    let data_text = speaker_text_trans(data, story.meta, true)
 
     let [phraseOrder, selectablePhrases2] = shuffleArray(data_text.selectablePhrases);
     story.elements.push({
@@ -565,7 +603,7 @@ function processBlockPointToPhrase(line_iter, story) {
 
     let start_no2 = line_iter.get_lineno();
     let data = getText(line_iter, true, true, true);
-    let data_text = speaker_text_trans(data, story.meta)
+    let data_text = speaker_text_trans(data, story.meta, true)
 
     let [correctAnswerIndex, transcriptParts] = pointToPhraseButtons(data.text)
 
@@ -682,7 +720,7 @@ export function processStoryFile(text, story_id, avatar_names) {
                 line_index: story.meta.line_index,
                 challenge_type: "error"
             },
-           // "editor": {"start_no": group.start_no, "end_no": group.end_no}
+            // "editor": {"start_no": group.start_no, "end_no": group.end_no}
         });
         story.meta.line_index += 1;
         //console.log("error", lineno, line)
