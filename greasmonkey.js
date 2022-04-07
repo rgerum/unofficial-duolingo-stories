@@ -21,9 +21,9 @@ function fetch_post(url, data) {
 }
 
 console.log("grease monkey 2");
-async function getStories() {
+async function getStories(learningLanguage, fromLanguage) {
     console.log("grease monkey 2xxx");
-    data = await fetch("https://stories.duolingo.com/api2/stories?crowns=163&filterMature=false&fromLanguage=en&illustrationFormat=svg&learningLanguage=es&masterVersions=false&proposed=false&setSize=4&unlockingMechanism=crowns&_=1636940908268");
+    data = await fetch(`https://stories.duolingo.com/api2/stories?crowns=163&filterMature=false&fromLanguage=${fromLanguage}&illustrationFormat=svg&learningLanguage=${learningLanguage}&masterVersions=false&proposed=false&setSize=4&unlockingMechanism=crowns&_=1636940908268`);
     json = await data.json();
     console.log("json", json);
 
@@ -51,7 +51,8 @@ async function getStories() {
     }
     //console.log(json.sets[0][0].id);
 }
-getStories();
+getStories("es", "en");
+getStories("fr", "en");
 window.getStories = getStories
 document.getStories = getStories
 //https://stories.duolingo.com/api2/stories/es-en-buenos-dias?crowns=163&debugShowAllChallenges=false&illustrationFormat=svg&isDesktop=true&masterVersion=false&mode=read&supportedElements=ARRANGE,CHALLENGE_PROMPT,FREEFORM_WRITING,HEADER,HINT_ONBOARDING,LINE,MATCH,MULTIPLE_CHOICE,POINT_TO_PHRASE,SELECT_PHRASE,SUBHEADING,TYPE_TEXT&_=1636940601358
