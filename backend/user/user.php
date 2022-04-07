@@ -116,7 +116,7 @@ if($action == "register") {
     if($result) {
             echo "mail\n";
         send_email("[Unofficial Duolingo Stories] Registration $username",
-            array("stories@carex.uberspace.de" => "Unofficial Duolingo Stories"),
+            array("register@duostories.org" => "Unofficial Duolingo Stories"),
             $email,
             "Hey $username,<br/>
             <br/>
@@ -180,7 +180,7 @@ else if($action == "send") {
     if($result) {
         send_email(
         "[Unofficial Duolingo Stories] Reset Password $username",
-        "stories@carex.uberspace.de",
+        "register@duostories.org",
         $email,
         "Hey $username,<br/>
         You or someone else has requested a new password for 'Unofficial Duolingo Stories'.<br/>
