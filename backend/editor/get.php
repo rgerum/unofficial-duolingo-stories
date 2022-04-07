@@ -81,8 +81,8 @@ else if($action == "language") {
     query_json($db,"SELECT * FROM language WHERE id = $id");
 }
 else if($action == "image") {
-    $id = intVal($_REQUEST['id']);
-    query_json($db,"SELECT * FROM image WHERE id = $id");
+    $id = mysqli_escape_string($db, $_REQUEST['id']);
+    query_json($db,"SELECT * FROM image WHERE id = \"$id\"");
 }
 else if($action == "session") {
     if(!isset($_SESSION["user"])) {
@@ -137,7 +137,7 @@ else if($action == "course") {
     json($course);
 }
 else if($action == "story") {
-    $id = $_REQUEST['id'];
+    $id = intVal($_REQUEST['id']);
     query_json($db,"SELECT story.id, c.official as official, course_id, duo_id, image, story.name, set_id, set_index, text, c.learningLanguage as learningLanguage, c.fromLanguage as fromLanguage FROM story JOIN course c on story.course_id = c.id WHERE story.id = $id");
 }
 else {
