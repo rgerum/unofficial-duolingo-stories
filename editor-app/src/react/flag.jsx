@@ -7,6 +7,6 @@ export function Flag(props) {
      * @type {{flag_file: string, flag: number}}
      */
     return <div className={"flag "+props.className}
-                style={props.flag_file ? {backgroundImage: `url(../flags/${props.flag_file})`} : {backgroundPosition: `0 ${props.flag}px`}}
+                style={props.flag_file ? {backgroundImage: `url(https://duostories.org/stories/flags/${props.flag_file})`} : {backgroundPosition: `0 ${props.flag}px`}}
     />
 }
