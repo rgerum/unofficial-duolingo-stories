@@ -2,8 +2,8 @@ import React from 'react';
 import {useDataFetcher, useDataFetcher2, useEventListener} from './hooks'
 import {Spinner} from './react/spinner'
 import {Flag} from './react/flag'
-import {useUsername, Login, LoginDialog} from './login'
-import {setPublic, getCourses, getCourse, getImportList, setImport, getSession, getLanguageName} from "./api_calls.mjs";
+import {useUsername, LoginDialog} from './login'
+import {setPublic, getCourses, getCourse, getImportList, setImport} from "./api_calls.mjs";
 import "./editor.css"
 
 
@@ -45,14 +45,14 @@ function ImportList(props) {
                 <th style={{borderRadius: "10px 0 0 0"}} data-js-sort-colnum="0">Set</th>
                 <th colSpan="2" data-js-sort-colnum="1">Name</th>
                 <th style={{textAlign: "center"}} data-js-sort-colnum="7">Copies</th>
-                <th style={{borderRadius: "0 10px 0 0"}} data-js-sort-colnum="8"></th>
+                <th style={{borderRadius: "0 10px 0 0"}} data-js-sort-colnum="8" />
             </tr>
             </thead>
             <tbody>
             {courseImport.map(story =>
                 <tr key={story.id}>
                     <td><span><b>{pad(story.set_id)}</b>&nbsp;-&nbsp;{pad(story.set_index)}</span></td>
-                    <td width="44px"><img src={story.copies ? story.gilded : story.active} width="44px" /></td>
+                    <td width="44px"><img alt={"story title"} src={story.copies ? story.gilded : story.active} width="44px" /></td>
                     <td><a href={`#`} title={story.duo_id} onClick={()=>do_import(story.id)}>{story.name}</a></td>
                     <td style={{textAlign: "right"}}><span>{story.copies}x&nbsp;</span>
 
@@ -76,7 +76,6 @@ function pad(x) {
 
 function EditList(props) {
     let course = props.course;
-    let setShowImport = props.setShowImport;
 // TODO    document.getElementById('button_import').onclick = ()=>setShowImport(course.id)
     return <>
         <table id="story_list" style={{display: "inline-block"}}
@@ -96,7 +95,7 @@ function EditList(props) {
             {course.stories.map(story =>
                 <tr key={story.id}>
                     <td><span><b>{pad(story.set_id)}</b>&nbsp;-&nbsp;{pad(story.set_index)}</span></td>
-                    <td width="44px"><img
+                    <td width="44px"><img alt={"story title"}
                         src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
                         width="44px"/></td>
                     <td><a href={`?story=${story.id}`}>{story.name}</a></td>
@@ -125,7 +124,7 @@ function EditList(props) {
 
 function StoriesList(props) {
     let course_id = props.course_id;
-    const [course, courseRefetch] = useDataFetcher2(getCourse, [course_id]);
+    const [course, _] = useDataFetcher2(getCourse, [course_id]);
     let showImport = props.showImport;
     return <>{
         course === undefined ?
@@ -141,24 +140,7 @@ function StoriesList(props) {
 
 function Overview(props) {
     let course_id = props.course;
-    let [username, doLogin, doLogout] = useUsername();
 
-    async function togglePublic(story) {
-        if(confirm(`Do you want to ${story.public ? "hide" : "publish"} the story \"${story.name_base}\"?`)) {
-            let response = setPublic(story.id, !story.public);
-            if(response.status === 200) {
-                await storiesRefetch();
-            }
-        }
-    }
-    let lang = course_id;
-    let lang_base = course_id;
-//     <a href={`story.html?test&story=${story.id}&lang=el&lang_base=en`}>[test]</a>
-    /*
-    *         <div id="header_index">
-            <Login useUsername={[username, doLogin, doLogout]} />
-        </div>
-    * */
     return <>
         <CourseList setCourse={props.setCourse}/>
         <div id="main_overview">
@@ -180,7 +162,9 @@ export function EditorOverview(props) {
     let urlParams = new URLSearchParams(window.location.search);
     const [course_id, setCourseID] = React.useState(urlParams.get("course") || undefined);
     const [course, courseRefetch] = useDataFetcher2(getCourse, [course_id]);
-    const [username, usernameRefetch] = useDataFetcher2(getSession, []);
+    //const [username, usernameRefetch] = useDataFetcher2(getSession, []);
+
+    let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
 
     const [showImport, do_setShowImport] = React.useState(false);
 
@@ -204,13 +188,11 @@ export function EditorOverview(props) {
                 setCourseID(undefined)
         }
     })
-    console.log("overview_course", course)
-    if(0) {
+    console.log("overview_course", course, "username", username)
+    if(1) {
         if (username === undefined) return <Spinner/>
-        if (username.username === undefined) return <div style={{margin: "auto"}}>
-            <img style={{margin: "auto"}} width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg"/><br/>
-            You need to be logged in to use the editor.
-        </div>
+        if (username.username === undefined)
+            return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
         if(username.role !== 1) return <div style={{margin: "auto"}}>
             <img width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
             <img src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" />

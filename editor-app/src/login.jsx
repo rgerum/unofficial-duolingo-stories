@@ -2,6 +2,7 @@ import React from 'react';
 import './login.css';
 import {useInput} from "./hooks";
 import {dict_to_query, fetch_post} from "./includes.mjs";
+import {getSession, login} from "./api_calls.mjs";
 
 let backend = 'https://carex.uber.space/stories/backend/';
 let backend_user = backend+'user/';
@@ -20,16 +21,6 @@ export async function get_login() {
     catch (e) {
         return undefined;
     }
-}
-
-export async function login(data) {
-    console.log('login', data)
-    // check if the user is logged in
-    let reponse = await fetch(`${backend_user}user.php?action=login&${dict_to_query(data)}`)
-    console.log(reponse);
-    if(reponse.status === 403)
-        return false;
-    return true;
 }
 
 export async function register(data) {
@@ -124,10 +115,8 @@ export async function reset_pw_set(data) {
 export async function activate(data) {
     console.log("activate", data);
     let reponse = await fetch(`${backend_user}user.php?action=activate&${dict_to_query(data)}`);
-    if(reponse.status !== 200) {
-        return false;
-    }
-    return true;
+    return reponse.status === 200;
+
 }
 
 
@@ -148,7 +137,7 @@ export function useUsername() {
     let [showLogin, setShowLogin] = React.useState(1);
 
     async function getUsernameFirstTime() {
-        let login = await get_login();
+        let login = await getSession();
         setUsername(login);
     }
 
@@ -159,7 +148,7 @@ export function useUsername() {
             return undefined;
         }
         else {
-            let login = await get_login();
+            let login = await getSession();
             setUsername(login);
             return login;
         }
@@ -198,7 +187,8 @@ export function Login(props) {
 }
 
 export function LoginDialog(props) {
-    let [username, doLogin, , showLogin, setShowLogin] = useUsername();
+    let [username, doLogin, , showLogin, setShowLogin] = props.useUsername;
+    username = username.username;
 
     let [state, setState] = React.useState(0);
     let [error, setError] = React.useState("");
@@ -264,16 +254,13 @@ export function LoginDialog(props) {
     return <>
         {(showLogin === 1 && username === undefined) ?
             <div id="login_dialog">
-                <span id="quit" onClick={()=>setShowLogin(0)} />
                 <div>
-                    <h2>Log in</h2>
-                    <p>Attention, you cannot login with your Duolingo account.</p><p>You have to register for the unofficial stories separately, as they are an independent project.</p>
+                    <h2>Editor Log in</h2>
+                    <p>You need an account that has been activated as a contributor.</p>
                     <input value={usernameInput} onChange={usernameInputSetValue} type="text" placeholder="Username"/>
                     <input value={passwordInput} onChange={passwordInputSetValue} type="password" placeholder="Password"/>
                     {state === -1 ? <span className="login_error">{error}</span>: null}
                     <button className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
-                    <p>Don't have an account? <button className={"link"} onClick={()=>setShowLogin(2)}>SIGN UP</button></p>
-                    <p>Forgot your password? <button className={"link"} onClick={()=>setShowLogin(3)}>RESET</button></p>
                 </div>
             </div>
         : (showLogin === 2 && username === undefined) ?
