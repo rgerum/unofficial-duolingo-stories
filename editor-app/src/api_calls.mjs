@@ -1,14 +1,13 @@
 import {fetch_post} from "./includes.mjs";
 
-let backend_get = "https://carex.uber.space/stories/backend/editor/get.php"
-let backend_set = "https://carex.uber.space/stories/backend/editor/set.php"
+let backend_get = "https://editor.duostories.org/get"
+let backend_set = "https://editor.duostories.org/backend/editor/set.php"
 
 
 export async function getCourses() {
     try {
-        let response_courses = await fetch(`${backend_get}?action=courses`);
-        let data_courses = await response_courses.json();
-        return data_courses;
+        let response_courses = await fetch(`${backend_get}/courses`);
+        return await response_courses.json();
     }
     catch (e) {
         return [];
@@ -17,19 +16,27 @@ export async function getCourses() {
 
 export async function getSession() {
     try {
-        let response_courses = await fetch(`${backend_get}?action=session`);
-        let data_courses = await response_courses.json();
-        return data_courses;
+        let response_courses = await fetch(`${backend_get}/session`);
+        return await response_courses.json();
     }
     catch (e) {
         return undefined;
     }
 }
 
+
+export async function login(data) {
+    console.log('login', data)
+    // check if the user is logged in
+    let reponse = await fetch_post(`${backend_get}/login`, data)
+    console.log(reponse);
+    return reponse.status !== 403;
+
+}
+
 export async function getCourse(id) {
-    console.log("getCourse", id, `${backend_get}?action=course&id=${id}`)
     try {
-        let response = await fetch(`${backend_get}?action=course&id=${id}`);
+        let response = await fetch(`${backend_get}/course?id=${id}`);
         return await response.json();
     }
     catch (e) {
@@ -38,9 +45,9 @@ export async function getCourse(id) {
 }
 
 export async function getAvatars(id, course_id) {
-    console.log("getAvatars", id, `${backend_get}?action=avatar_names&id=${id}`)
+    console.log("getAvatars", id, `${backend_get}/avatar_names?id=${id}`)
     try {
-        let response = await fetch(`${backend_get}?action=avatar_names&id=${id}&course_id=${course_id}`);
+        let response = await fetch(`${backend_get}/avatar_names?id=${id}&course_id=${course_id}`);
         return await response.json();
     }
     catch (e) {
@@ -50,7 +57,7 @@ export async function getAvatars(id, course_id) {
 
 export async function getSpeakers(id) {
     try {
-        let response = await fetch(`${backend_get}?action=speakers&id=${id}`);
+        let response = await fetch(`${backend_get}/speakers?id=${id}`);
         return await response.json();
     }
     catch (e) {
@@ -60,7 +67,7 @@ export async function getSpeakers(id) {
 
 export async function getLanguageName(id) {
     try {
-        let response = await fetch(`${backend_get}?action=language&id=${id}`);
+        let response = await fetch(`${backend_get}/language?id=${id}`);
         return await response.json();
     }
     catch (e) {
@@ -70,7 +77,7 @@ export async function getLanguageName(id) {
 
 export async function setAvatarSpeaker(data) {
     try {
-        let response = await fetch_post(`${backend_set}?action=avatar`, data);
+        let response = await fetch_post(`${backend_set}/avatar`, data);
         return await response.json();
     }
     catch (e) {
@@ -84,12 +91,12 @@ export async function setPublic(id, is_public) {
 
 
 export async function getStory(id) {
-    let response_json = await fetch(`${backend_get}?action=story&id=${id}`);
+    let response_json = await fetch(`${backend_get}/story?id=${id}`);
     return response_json.json();
 }
 export async function getAvatar(id) {
     try {
-        let response_json = await fetch(`${backend_get}?action=avatar&id=${id}`);
+        let response_json = await fetch(`${backend_get}/avatar?id=${id}`);
         return response_json.json();
     }
     catch (e) {
@@ -108,7 +115,7 @@ export function getImage(id) {
 
 export async function getImageAsync(id) {
     try {
-        let response_json = await fetch(`${backend_get}?action=image&id=${id}`);
+        let response_json = await fetch(`${backend_get}/image?id=${id}`);
         let image = await response_json.json();
         images_cached[id] = image;
         console.log("getImage", images_cached[id], id, image)
@@ -120,23 +127,23 @@ export async function getImageAsync(id) {
 }
 
 export async function getImportList(id, id2) {
-    let response_json = await fetch(`${backend_get}?action=import&id=${id}&id2=${id2}`);
+    let response_json = await fetch(`${backend_get}/import?id=${id}&id2=${id2}`);
     return response_json.json();
 }
 
 export async function setImport(id, course_id) {
-    let response_json = await fetch(`${backend_set}?action=import&id=${id}&course_id=${course_id}`);
+    let response_json = await fetch(`${backend_set}/import?id=${id}&course_id=${course_id}`);
     return response_json.text();
 }
 
 export async function setStory(data) {
-    let res = await fetch_post(`${backend_set}?action=story`, data);
+    let res = await fetch_post(`${backend_set}/story`, data);
     res = await res.text()
     return res;
 }
 
 export async function deleteStory(data) {
-    let res = await fetch_post(`${backend_set}?action=story_delete`, data);
+    let res = await fetch_post(`${backend_set}/story_delete`, data);
     res = await res.text()
     return res;
 }
