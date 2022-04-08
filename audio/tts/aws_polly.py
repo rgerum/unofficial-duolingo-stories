@@ -48,4 +48,16 @@ class AmazonPolly:
         with Path(filename).open('wb') as fp:
             fp.write(response['AudioStream'].read())
 
+    def get_voices_list(self):
+        response = self.polly_client.describe_voices()["Voices"]
+        voices = []
+        for r in response:
+            voices.append([r["LanguageCode"], r["Id"], r["Gender"].upper(), ["NORMAL", "NEURAL"]["neural" in  r["SupportedEngines"]], "Amazon Polly"])
+        return voices
+
+
+if __name__ == "__main__":
+    app = AmazonPolly()
+    app.get_voices_list()
+
 

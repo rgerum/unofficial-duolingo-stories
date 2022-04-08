@@ -120,6 +120,12 @@ class Abair(object):
             print("\nStatus code: " + str(response.status_code) +
                   "\nSomething went wrong.\n")
 
+    def get_voices_list(self):
+        return [
+            ["ga-UL", "ga_UL_Gweedore", "FEMALE", "NEURAL","Abair"],
+            ["ga-CO", "ga_CO_Connemara", "MALE", "NEURAL","Abair"],
+            ["ga-MU", "ga_MU_Dingle", "FEMALE", "NEURAL","Abair"],
+        ]
 
 if __name__ == "__main__":
     engine = Abair()

@@ -104,10 +104,38 @@ class Google(object):
             print("\nStatus code: " + str(response.status_code) +
                   "\nSomething went wrong. Check your subscription key and headers.\n")
 
+    def get_voices_list(self):
+        headers = {
+            'User-Agent': 'duostories.org'
+        }
+        #if text.startswith("<speak>"):
+        #    text = text[len("<speak>"):]
+        #if text.endswith("</speak>"):
+        #    text = text[:-len("</speak>")]
+
+        #print("text")
+        import sys
+        #print(text.encode(sys.stdout.encoding, errors='replace'))
+
+        print("https://texttospeech.googleapis.com/v1/voices?key="+self.subscription_key)
+        response = requests.get("https://texttospeech.googleapis.com/v1/voices?key="+self.subscription_key,
+        headers=headers,
+        )
+
+        if response.status_code == 200:
+            voices = json.loads(response.content)
+            print(voices)
+            voice_list = []
+            for voice in voices["voices"]:
+                voice_list.append([voice["languageCodes"][0], voice["name"], voice["ssmlGender"].upper(), ["NORMAL","NEURAL"]["Wavenet" in voice["name"]], "Google TTS"])
+            return voice_list
+        else:
+            print("\nStatus code: " + str(response.status_code) +
+                  "\nSomething went wrong. Check your subscription key and headers.\n")
 
 if __name__ == "__main__":
     app = Google()
     #app.get_token()
-    app.save_audio("test.mp3", "da-DK-Standard-E", "<speak>Андрій вдома зі своєю дружиною Софією.</speak>")
+    #app.save_audio("test.mp3", "da-DK-Standard-E", "<speak>Андрій вдома зі своєю дружиною Софією.</speak>")
     # Get a list of voices https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-text-to-speech#get-a-list-of-voices
-    # app.get_voices_list()
+    app.get_voices_list()

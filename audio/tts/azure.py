@@ -5,6 +5,7 @@ from xml.etree import ElementTree
 from mutagen.mp3 import MP3
 from pathlib import Path
 import re
+import json
 
 
 class Azure(object):
@@ -22,7 +23,7 @@ class Azure(object):
     def get_token(self):
         fetch_token_url = "https://westeurope.api.cognitive.microsoft.com/sts/v1.0/issueToken"
         headers = {
-            'Ocp-Apim-Subscription-Key': "1444ab1cec6344e9969ba85b086d094f"
+            'Ocp-Apim-Subscription-Key': self.subscription_key,
         }
         response = requests.post(fetch_token_url, headers=headers)
         self.access_token = str(response.text)
@@ -48,6 +49,7 @@ class Azure(object):
         return marks
         
     def save_audio(self, filename, VoiceId, text):
+        print("save_audio")
         self.get_token()
         base_url = 'https://westeurope.tts.speech.microsoft.com/'
         path = 'cognitiveservices/v1'
@@ -56,7 +58,7 @@ class Azure(object):
             'Authorization': 'Bearer ' + self.access_token,
             'Content-Type': 'application/ssml+xml',
             'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3',
-            'User-Agent': 'YOUR_RESOURCE_NAME'
+            'User-Agent': 'duostories.org'
         }
         if text.startswith("<speak>"):
             text = text[len("<speak>"):]
@@ -99,10 +101,34 @@ class Azure(object):
             print("\nStatus code: " + str(response.status_code) +
                   "\nSomething went wrong. Check your subscription key and headers.\n")
 
+    def get_voices_list(self):
+        print("get_voices_list")
+        self.get_token()
+        base_url = 'https://westeurope.tts.speech.microsoft.com/'
+        path = 'cognitiveservices/voices/list'
+
+        constructed_url = base_url + path
+        headers = {
+            'Authorization': 'Bearer ' + self.access_token,
+        }
+
+        import sys
+        response = requests.get(constructed_url, headers=headers)
+        if response.status_code == 200:
+            voices = json.loads(response.content)
+            voice_list = []
+            for voice in voices:
+                if voice["Status"] != "Deprecated":
+                    voice_list.append([voice["Locale"], voice["ShortName"], voice["Gender"].upper(),voice["VoiceType"].upper(), "Microsoft Azure"])
+            return voice_list
+                #print(voice)
+        else:
+            print("\nStatus code: " + str(response.status_code) +
+                  "\nSomething went wrong. Check your subscription key and headers.\n")
 
 if __name__ == "__main__":
-    app = TextToSpeech(subscription_key)
+    app = Azure()
     app.get_token()
-    app.save_audio()
+    #app.save_audio("test.mp3", 'en-US-JennyNeural', 'This is a test.')
     # Get a list of voices https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-text-to-speech#get-a-list-of-voices
-    # app.get_voices_list()
+    app.get_voices_list()
