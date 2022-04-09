@@ -1,7 +1,7 @@
 import {fetch_post} from "./includes.mjs";
 
 let backend_get = "https://editor.duostories.org/get"
-let backend_set = "https://editor.duostories.org/backend/editor/set.php"
+let backend_set = "https://editor.duostories.org/set"
 
 
 export async function getCourses() {
