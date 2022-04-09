@@ -8,7 +8,7 @@ import {getAvatars, getImage, getLanguageName, getStory, setStory} from "./api_c
 import {EditorState, EditorView, basicSetup} from "@codemirror/basic-setup"
 import {HighlightStyle, tags as t} from "@codemirror/highlight"
 import {processStoryFile} from "./syntax_parser_new.mjs";
-import { Extension, EditorSelection, SelectionRange, Facet, Compartment} from "@codemirror/state";
+import {EditorSelection} from "@codemirror/state";
 
 import {example} from "./parser.mjs"
 import {useDataFetcher2} from "./hooks";
@@ -18,7 +18,6 @@ window.EditorSelection = EditorSelection
 let urlParams = new URLSearchParams(window.location.search);
 
 export function StoryEditorHeader(props) {
-    let urlParams = new URLSearchParams(window.location.search);
     const [language, setLanguage] = React.useState(props.story_data.learningLanguage || undefined);
     const [language2, setLanguage2] = React.useState(props.story_data.fromLanguage || undefined);
     const [language_data, _] = useDataFetcher2(getLanguageName, [language]);
@@ -31,13 +30,13 @@ export function StoryEditorHeader(props) {
         <Flag flag={language_data.flag} flag_file={language_data.flag_file}/>
         <Flag className={"flag_sub"} flag={language_data2.flag} flag_file={language_data2.flag_file}/>
         <span className={"AvatarEditorHeaderFlagname"}>{`${language_data.name} (from ${language_data2.name})`}</span>
-        <img width="50px" src={`https://stories-cdn.duolingo.com/image/${story_data.image}.svg`} style={{marginLeft: "auto"}} />
+        <img alt="story title" width="50px" src={`https://stories-cdn.duolingo.com/image/${story_data.image}.svg`} style={{marginLeft: "auto"}} />
         <span className={"AvatarEditorHeaderFlagname"}>{props.story_data.name}</span>
         <div id="button_back" className="editor_button" onClick={window.button_back} style={{marginLeft: "auto"}}>
-            <div><img src="icons/back.svg" /></div>
+            <div><img alt="icon back" src="icons/back.svg" /></div>
             <span>Back</span></div>
         <div id="button_save" className="editor_button" onClick={window.button_save}>
-            <div><img src="icons/save.svg" /></div>
+            <div><img alt="icon save" src="icons/save.svg" /></div>
             <span>Save</span></div>
     </div></>
 }
@@ -69,6 +68,17 @@ else if(!urlParams.get("story")) {
     );
 }
 else {
+    let unsaved_changes = false;
+
+    window.hideWarning = false;
+    window.addEventListener('beforeunload', (event) => {
+        if (unsaved_changes) {
+            event.preventDefault();
+            event.returnValue = 'You have unsaved changed, are you sure you want to quit?';
+        }
+    });
+
+
     console.log("urlParams", urlParams)
     let editor = document.getElementById("editor");
     let preview = document.getElementById("preview");
@@ -81,7 +91,7 @@ else {
         let width1 = svg_parent.getBoundingClientRect().width * 0.48
         let width1b = svg_parent.getBoundingClientRect().width * 0.50
         let width2 = svg_parent.getBoundingClientRect().width * 0.52
-        let width3 = svg_parent.getBoundingClientRect().width * 1.00
+        let width3 = svg_parent.getBoundingClientRect().width
         let height = svg_parent.getBoundingClientRect().height
 
         let pairs = []
@@ -189,20 +199,26 @@ else {
 
         window.button_save = function() {
             let save = async function() {
-                document.querySelector("#button_save span").innerText = "Saving";
-                let data = {
-                    id: story_data.id,
-                    duo_id: story_data.duo_id,
-                    name: story_meta.fromLanguageName,
-                    image: story_meta.icon,
-                    set_id: parseInt(story_meta.set_id),
-                    set_index: parseInt(story_meta.set_index),
-                    course_id: story_data.course_id,
-                    text: editor_text,
-                    json: JSON.stringify(story),
-                }
+                try {
+                    document.querySelector("#button_save span").innerText = "Saving";
+                    let data = {
+                        id: story_data.id,
+                        duo_id: story_data.duo_id,
+                        name: story_meta.fromLanguageName,
+                        image: story_meta.icon,
+                        set_id: parseInt(story_meta.set_id),
+                        set_index: parseInt(story_meta.set_index),
+                        course_id: story_data.course_id,
+                        text: editor_text,
+                        json: JSON.stringify(story),
+                    }
 
-                await setStory(data)
+                    await setStory(data)
+                    unsaved_changes = false;
+                }
+                catch (e) {
+                    window.alert("Story could not be saved.")
+                }
                 document.querySelector("#button_save span").innerText = "Save";
             }
             save();
@@ -313,6 +329,7 @@ else {
             editor_state = {line_no: lineno}
             state = v.state;
             if (v.docChanged) {
+                unsaved_changes = true;
                 story = undefined;
                 last_lineno = undefined;
             }
@@ -443,11 +460,10 @@ else {
             extensions: [basicSetup, sync, theme, example(), highlightStyle]
         })
 
-        let view = new EditorView({
+        window.view = new EditorView({
             state: startState,
             parent: document.getElementById('editor')
         })
-        window.view = view;
     }
     a()
 }
