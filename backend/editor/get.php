@@ -60,6 +60,38 @@ $db = database();
 
 $action = $_REQUEST['action'];
 
+if($action == "session") {
+    if(isset($_SESSION["user"]))
+        echo "{\"username\": \"".$_SESSION["user"]["username"]."\", \"role\": ".$_SESSION["user"]["role"]."}";
+    else
+        echo "{}";
+    die();
+}
+else if($action == "login") {
+    list($username, , $password) = get_values($db, ['username', 'password']);
+    $username = mysqli_escape_string($db, $_REQUEST["username"]);
+    $user = mysqli_fetch_assoc(mysqli_query($db, "SELECT * FROM user WHERE username = '$username' AND activated = 1"));
+    $hash = $user["password"];
+    echo "check".phpbb_check_hash($_REQUEST["password"], $hash);
+    echo "<br/>";
+    if(phpbb_check_hash($_REQUEST["password"], $hash)) {
+        echo "yes";
+        echo "<br/>";
+    	$_SESSION["user"] = $user;
+        print_r($_SESSION);
+        http_response_code(200);
+    }
+    else
+        http_response_code(403);
+    die();
+}
+
+if(!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) {
+    http_response_code(403);
+    die();
+}
+
+
 if($action == "avatar") {
     $id = intVal($_REQUEST['id']);
     query_json($db,"SELECT * FROM avatar WHERE id = $id");
@@ -84,29 +116,6 @@ else if($action == "language") {
 else if($action == "image") {
     $id = mysqli_escape_string($db, $_REQUEST['id']);
     query_json($db,"SELECT * FROM image WHERE id = \"$id\"");
-}
-else if($action == "session") {
-    if(isset($_SESSION["user"]))
-        echo "{\"username\": \"".$_SESSION["user"]["username"]."\", \"role\": ".$_SESSION["user"]["role"]."}";
-    else
-        echo "{}";
-}
-else if($action == "login") {
-    list($username, , $password) = get_values($db, ['username', 'password']);
-    $username = mysqli_escape_string($db, $_REQUEST["username"]);
-    $user = mysqli_fetch_assoc(mysqli_query($db, "SELECT * FROM user WHERE username = '$username' AND activated = 1"));
-    $hash = $user["password"];
-    echo "check".phpbb_check_hash($_REQUEST["password"], $hash);
-    echo "<br/>";
-    if(phpbb_check_hash($_REQUEST["password"], $hash)) {
-        echo "yes";
-        echo "<br/>";
-    	$_SESSION["user"] = $user;
-        print_r($_SESSION);
-        http_response_code(200);
-    }
-    else
-        http_response_code(403);
 }
 else if($action == "import") {
     $id = intVal($_REQUEST['id']);
