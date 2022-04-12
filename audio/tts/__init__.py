@@ -89,13 +89,14 @@ def processLine2(story_id, speaker, text):
         engine = AmazonPolly()
 
     # generate the audio
-    engine.save_audio(output_file, speaker, text)
+    marks2 = engine.save_audio(output_file, speaker, text)
 
     # generate the alignment
     output_data = {}
     #print("pre", output_file, output_data.keys())
     output_data["output_file"] = str(output_file)
     output_data["marks"] = engine.get_speech_marks(speaker, text)
+    output_data["marks2"] = marks2
     #print("alignment", speaker)
 
     #print("update json")
