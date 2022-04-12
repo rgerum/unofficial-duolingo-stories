@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Story, Cast} from "./story_react";
 import {EditorOverview} from "./editor"
-import {AvatarEditorHeader, AvatarNames} from "./avatar_editor";
+import {AvatarMain} from "./avatar_editor";
 import {getAvatars, getImage, getLanguageName, getStory, setStory} from "./api_calls.mjs";
 
 import {EditorState, EditorView, basicSetup} from "@codemirror/basic-setup"
@@ -54,17 +54,12 @@ if(!urlParams.get("story") && !urlParams.get("language")) {
 else if(!urlParams.get("story")) {
     document.getElementById('button_save').style.display = "none"
     document.getElementById('button_back').style.display = "none"
+
     ReactDOM.render(
         <React.StrictMode>
-            <AvatarNames />
+            <AvatarMain />
         </React.StrictMode>,
-        document.getElementById('root')
-    );
-    ReactDOM.render(
-        <React.StrictMode>
-            <AvatarEditorHeader/>
-        </React.StrictMode>,
-        document.getElementById('toolbar')
+        document.getElementById('body')
     );
 }
 else {

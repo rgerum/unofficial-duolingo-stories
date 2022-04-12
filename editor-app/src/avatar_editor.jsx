@@ -7,6 +7,7 @@ import {useInput} from "./hooks";
 import {getAvatars, getLanguageName, getSpeakers, setAvatarSpeaker} from "./api_calls.mjs";
 import "./avatar_editor.css"
 import {fetch_post} from "./includes.mjs";
+import {CourseEditorHeader} from "./editor";
 
 function Avatar(props) {
     let avatar = props.avatar;
@@ -48,7 +49,7 @@ function Avatar(props) {
     </div>
 }
 
-export function AvatarEditorHeader(props) {
+function AvatarEditorHeader(props) {
     let urlParams = new URLSearchParams(window.location.search);
     const [language, setLanguage] = React.useState(parseInt(urlParams.get("language")) || undefined);
     const [language_data, _] = useDataFetcher2(getLanguageName, [language]);
@@ -62,7 +63,18 @@ export function AvatarEditorHeader(props) {
     </div>
 }
 
-export function AvatarNames(props) {
+export function AvatarMain(props) {
+    return <>
+        <div id="toolbar">
+            <AvatarEditorHeader />
+        </div>
+        <div id="root">
+            <AvatarNames />
+        </div>
+    </>
+}
+
+function AvatarNames(props) {
     let urlParams = new URLSearchParams(window.location.search);
     const [language, setLanguage] = React.useState(parseInt(urlParams.get("language")) || undefined);
     const [avatars, _] = useDataFetcher2(getAvatars, [language]);
