@@ -1,5 +1,63 @@
+.main_title {
+  font-size: 34px;
+}
+.title_desc {
+  font-size: 19px;
+  text-align: center;
+}
+@media screen and (max-width:480px) {
+  .main_title {
+    font-size: 25px;
+    margin-bottom: 0;
+  }
+  .title_desc {
+    font-size: 19px;
+    color: #777;
+  }
 
-.button_story {
+  .title_desc a {
+    color: #777;
+  }
+}
+
+.button_story_img {
+  border: 0;
+  border-radius: 17px;
+  height: 113px;
+  margin: 15px 10px 0;
+  overflow: visible;
+  position: relative;
+  width: 113px;
+
+  display: inline-block;
+  background: rgb(255, 177, 0) none repeat scroll 0% 0%;
+}
+
+.button_story_img img {
+  height: 124px;
+  left: -11px;
+  position: absolute;
+  top: -15px;
+  width: 135px;
+}
+.button_story_parent {
+  margin: 7px 17px 10px;
+  display: inline-block;
+  width: 134px;
+}
+.button_story_text {
+  color: #4b4b4b;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 21px;
+  margin-top: 16px;
+  margin-bottom: 7px;
+  width: 134px;
+  text-align: center;
+}
+
+
+.button_story2 {
   width: 100px;
   height: 100px;
   display: inline-block;
@@ -101,10 +159,9 @@ h1 {
 .set {
   font-size: 27px;
   font-weight: 700;
-  margin: 0 26px;
-  padding-bottom: 20px;
   text-align: center;
   width: 100%;
+  overflow-x: hidden;
 }
 
 .set::before {
@@ -128,7 +185,10 @@ h1 {
 }
 
 .set_list {
-  flex-wrap: wrap; display: flex; justify-content: center;
+  margin: 0 16px;
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: center;
 }
 
 

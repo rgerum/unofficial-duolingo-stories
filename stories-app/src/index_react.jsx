@@ -291,22 +291,22 @@ function StoryButton(props) {
     let story = props.story;
     if(!story.image.startsWith("http"))
         story.image = `https://stories-cdn.duolingo.com/image/${story.image}.svg`;
-    return <a
-        className="story_link"
+    return <div
+        className="button_story_parent"
         onClick={(e) => {e.preventDefault(); props.onStoryClicked(story.id); }}
         href={`?story=${story.id}`}
     >
-        <button
-            className="button_story2"
+        <div
+            className="button_story_img"
             data-done={story.time != null}
-            style={story.time === null ? {borderColor: "#"+images_lip_colors[story.image]} : {}}
+            style={story.time === null ? {background: "#"+images_lip_colors[story.image]} : {}}
         >
             <img src={story.time != null ? story.image_done : story.image} alt="story"/>
-        </button>
+        </div>
         <div
-            className="story_title2"
+            className="button_story_text"
         >{story.name_base}</div>
-    </a>;
+    </div>;
 }
 
 
@@ -331,10 +331,11 @@ export function IndexContent(props) {
             <Login useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
         </div>
         <div id="main_index">
-            <h1>Unofficial Duolingo Stories</h1>
-            <p style={{textAlign: "center"}}>
-                This page is a community project to bring the original <a href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages.
-                <br/>
+            <h1 className={"main_title"}>Unofficial Duolingo Stories</h1>
+            <p className={"title_desc"}>
+                A community project to bring the original <a href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages.
+            </p>
+            <p className={"title_desc"}>
                 If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.
             </p>
             <br/>
