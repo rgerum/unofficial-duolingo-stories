@@ -42,6 +42,13 @@ class Google(object):
         return marks
         
     def save_audio(self, filename, VoiceId, text):
+        """
+        output_data["output_file"] = str(output_file)
+                output_data["marks"] = engine.get_speech_marks(speaker, text)
+                output_data["marks2"] = marks2
+        """
+        response_data = {"output_file": str(filename), "engine": "google"}
+
         headers = {
             'Content-Type': 'application/ssml+xml; charset=utf-8',
             'User-Agent': 'YOUR_RESOURCE_NAME'
@@ -49,6 +56,8 @@ class Google(object):
         lang, region, voiceName = VoiceId.split("-", 2)
 
         text = add_marks(text)
+        response_data["text"] = text
+
 
         response = requests.post("https://texttospeech.googleapis.com/v1beta1/text:synthesize?key="+self.subscription_key,
         headers=headers,
@@ -71,11 +80,12 @@ class Google(object):
         if response.status_code == 200:
             self.filename = filename
             with Path(filename).open('wb') as audio:
-                data = json.lods(response.content)
+                data = json.loads(response.content)
                 audio.write(base64.b64decode(data["audioContent"]))
-                print("\nStatus code: " + str(response.status_code) +
-                      "\nYour TTS is ready for playback.\n")
-                return data["timepoints"]
+                #print("\nStatus code: " + str(response.status_code) +
+                #      "\nYour TTS is ready for playback.\n")
+                response_data["marks2"] = data["timepoints"]
+                return response_data
         else:
             print(response.content.decode())
             print("\nStatus code: " + str(response.status_code) +
@@ -119,10 +129,10 @@ def add_marks(text):
         elif text != "":
             i += len(text)
             text2 += text+f'<mark name="{i}"/>'
-        else:
+        elif space != "":
             i += len(space)
-            text2 += space
-    print(text2)
+            text2 += space#+f'<mark name="{i}"/>'
+
     return text2
 
 if __name__ == "__main__":
@@ -130,6 +140,7 @@ if __name__ == "__main__":
     #app.get_token()
     text = '<speak>Marian was zo moe   dat  ze  <prosody volume="silent">zout in haar koffie deed in plaats van suiker</prosody>.</speak>'
     #text2 = add_marks(text)
+    #print(text2)
     app.save_audio("test.mp3", "da-DK-Standard-E", text)
     app.save_audio("test.mp3", "da-DK-Standard-E", '<speak>Hallo<mark name="timepoint_0"/>, ik</speak>')
     # Get a list of voices https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-text-to-speech#get-a-list-of-voices

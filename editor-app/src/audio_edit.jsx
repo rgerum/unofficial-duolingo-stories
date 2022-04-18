@@ -26,15 +26,31 @@ async function generate_audio_line(ssml) {
     let ssml_response = await response2.json();
 
     let text = "$"+ssml_response["output_file"]
-    let last_time = 0;
-    let last_end = 0;
-    for(let mark of ssml_response.marks) {
-        text += ";";
-        text += parseInt(mark.value.length) + parseInt(last_end);
-        text += ",";
-        text += parseInt(mark.time)-last_time;
-        last_end = 1;
-        last_time = parseInt(mark.time);
+    if(ssml_response.marks2) {
+        let last_time = 0;
+        let last_time_delta = 0;
+        let last_end = 0;
+        for (let mark of ssml_response.marks2) {
+            text += ";";
+            text += parseInt(mark.markName) - last_end;
+            text += ",";
+            text += last_time_delta;
+            last_end = parseInt(mark.markName);
+            last_time_delta = parseInt(mark.timeSeconds*1000) - last_time;
+            last_time = parseInt(mark.timeSeconds*1000);
+        }
+    }
+    else {
+        let last_time = 0;
+        let last_end = 0;
+        for (let mark of ssml_response.marks) {
+            text += ";";
+            text += parseInt(mark.value.length) + parseInt(last_end);
+            text += ",";
+            text += parseInt(mark.time) - last_time;
+            last_end = 1;
+            last_time = parseInt(mark.time);
+        }
     }
     if(ssml.line !== undefined) {
         let line_state = view.state.doc.line(ssml.line)

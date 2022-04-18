@@ -57,10 +57,10 @@ function synthesizeSpeech(filename, voice_id, text) {
     synthesizer.speakSsmlAsync(text,
         function (result) {
             if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-                console.log({
+                console.log(JSON.stringify({
                     output_file: filename,
                     marks: marks,
-                });
+                }));
             } else {
                 console.error("Speech synthesis canceled, " + result.errorDetails +
                     "\nDid you update the subscription info?");

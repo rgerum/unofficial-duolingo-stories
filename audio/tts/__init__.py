@@ -3,14 +3,15 @@ import boto3
 import json
 import sys
 from pathlib import Path
-
+import subprocess
 from transliterate import get_translit_function
 
 from gtts import gTTS
 from mutagen.mp3 import MP3
+import shutil
 
 from .aws_polly import AmazonPolly
-from .azure import Azure
+#from .azure_tts import Azure
 from .google import Google
 from .abair import Abair
 
@@ -43,7 +44,9 @@ def processLine(story_id, line_id):
     elif "-Standard-" in ssml['speaker'] or "-Wavenet-" in ssml['speaker']:
         engine = Google()
     elif "-" in ssml['speaker']:
-        engine = Azure()
+        #engine = Azure()
+        subprocess.Popen(["nodejs", "azure_tts/azure_tts.js", output_dir / f"speech_{story_id}_{ssml['id']}.mp3", ssml['speaker'], ssml['text']])
+        return
     else:
         engine = AmazonPolly()
 
@@ -84,19 +87,22 @@ def processLine2(story_id, speaker, text):
     elif "-Standard-" in speaker or "-Wavenet-" in speaker:
         engine = Google()
     elif "-" in speaker:
-        engine = Azure()
+        #engine = Azure()
+        subprocess.Popen(["node", "tts/azure_node/azure_tts.js", output_file, speaker, text])
+        return
     else:
         engine = AmazonPolly()
 
     # generate the audio
-    marks2 = engine.save_audio(output_file, speaker, text)
+    output_data = engine.save_audio(output_file, speaker, text)
 
     # generate the alignment
-    output_data = {}
-    #print("pre", output_file, output_data.keys())
-    output_data["output_file"] = str(output_file)
-    output_data["marks"] = engine.get_speech_marks(speaker, text)
-    output_data["marks2"] = marks2
+    if output_data is None:
+        output_data = {}
+        #print("pre", output_file, output_data.keys())
+        output_data["output_file"] = str(output_file)
+        output_data["marks"] = engine.get_speech_marks(speaker, text)
+
     #print("alignment", speaker)
 
     #print("update json")

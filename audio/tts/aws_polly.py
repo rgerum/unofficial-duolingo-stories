@@ -58,6 +58,9 @@ class AmazonPolly:
 
 if __name__ == "__main__":
     app = AmazonPolly()
-    app.get_voices_list()
+    print(app.get_voices_list())
+    text = '<speak>Marian was zo moe   dat  ze  <prosody volume="silent">zout in haar koffie deed in plaats van suiker</prosody>.</speak>'
+    app.save_audio("test.mp3", "Mads", text)
+    print(app.get_speech_marks("Mads", text))
 
 
