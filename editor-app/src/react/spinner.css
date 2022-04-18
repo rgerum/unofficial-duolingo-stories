@@ -1,4 +1,9 @@
 /* spinner */
+.spinner {
+    position: relative;
+    width: 100%;
+    height: 200px;
+}
 .spinner_parent {
     grid-gap: 12px;
     left: 50%;
@@ -8,13 +13,13 @@
     display: grid;
     grid-template-columns: repeat(3,min-content);
 }
-.point1 {
+.spinner_p1 {
     animation-name: _1_fmw;
 }
-.point2 {
+.spinner_p2 {
     animation-name: _3ihUS;
 }
-.point3 {
+.spinner_p3 {
     animation-name: _20909;
 }
 .spinner_point {
@@ -69,4 +74,26 @@
     to {
         opacity:.25
     }
+}
+
+.spinner_blue {
+    display: inline-block;
+    position: relative;
+    width: 20px;
+    height: 20px;
+}
+.spinner_blue_parent {
+    grid-gap: 2px;
+    left: 50%;
+    position: absolute;
+    top: 70%;
+    transform: translateX(-50%) translateY(-50%);
+    display: grid;
+    grid-template-columns: repeat(3,min-content);
+}
+
+.spinner_blue_point {
+    height: 4px;
+    width: 4px;
+    background-color: #0089e5;
 }

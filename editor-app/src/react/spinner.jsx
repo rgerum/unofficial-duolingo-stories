@@ -3,11 +3,23 @@ import "./spinner.css"
 
 export function Spinner(props) {
     return (
-        <div id="spinner" style={{position: "relative", width: "100%", height: "200px"}}>
+        <div className="spinner">
             <div className="spinner_parent">
-                <div className="spinner_point point1" />
-                <div className="spinner_point point2" />
-                <div className="spinner_point point3" />
+                <div className="spinner_point spinner_p1" />
+                <div className="spinner_point spinner_p2" />
+                <div className="spinner_point spinner_p3" />
+            </div>
+        </div>
+    );
+}
+
+export function SpinnerBlue(props) {
+    return (
+        <div className="spinner spinner_blue">
+            <div className="spinner_parent spinner_blue_parent">
+                <div className="spinner_point spinner_p1 spinner_blue_point" />
+                <div className="spinner_point spinner_p2 spinner_blue_point" />
+                <div className="spinner_point spinner_p3 spinner_blue_point" />
             </div>
         </div>
     );

@@ -4,7 +4,7 @@
     width: calc(100vw - 400px);
 }
 
-.avatar_editor div {
+.avatar_editor_group {
     display: flex;
     flex-wrap: wrap;
 }
@@ -40,7 +40,19 @@
 
 .copy_button img {
     width: 20px;
+}
+.copy_button {
     cursor: pointer;
+    padding-right: 5px;
+}
+.play_button {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    padding-right: 5px;
+}
+.play_button img {
+    width: 20px;
 }
 
 .AvatarEditorHeader {

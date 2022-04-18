@@ -52,9 +52,6 @@ if(!urlParams.get("story") && !urlParams.get("language")) {
     );
 }
 else if(!urlParams.get("story")) {
-    document.getElementById('button_save').style.display = "none"
-    document.getElementById('button_back').style.display = "none"
-
     ReactDOM.render(
         <React.StrictMode>
             <AvatarMain />
@@ -183,8 +180,6 @@ else {
     window.addEventListener("resize", function () {
         createScrollLookUp();
     });
-
-    document.getElementById('button_import').style.display = "none"
 
     window.button_back = function() {
         window.location.href = "?course="+story_data.course_id;
