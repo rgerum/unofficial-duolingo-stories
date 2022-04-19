@@ -292,6 +292,21 @@ a:focus{outline:none !important;}
     box-sizing: border-box;
 }
 
+.tooltip_editor {
+    display: inline-flex;
+    flex-direction: column;
+    flex-grow: 1;
+    border-left: 1px solid #bfbfbf;
+    padding-left: 5px;
+}
+.tooltiptext_editor {
+    font-style: italic;
+    background: whitesmoke;
+    font-size: 0.9em;
+    opacity: .5;
+    margin-left: -4px;
+    padding-left: 6px;
+}
 /* Tooltip container */
 .tooltip {
     position: relative;
@@ -350,7 +365,8 @@ a:focus{outline:none !important;}
     border-width: 2px;
 }
 span[data-hidden=true] {
-    color:white;
+    /*color:white; for editor it should still be visible*/
+    color: #afafaf;
     background-image: linear-gradient(to right, #e5e5e5 60%, #e5e5e5 60%) !important;
     line-height: 2em;
     background-position: 0 100%;

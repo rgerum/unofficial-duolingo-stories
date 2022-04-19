@@ -105,7 +105,7 @@ function HintLineContent(props) {
         //addSplitWord(dom.append("span").attr("class", "word"), text_pos, hint.rangeFrom);
 
         // add the text with the hint
-        elements.push(<span key={hint.rangeFrom + " "+hint.rangeTo+1} className="word tooltip">{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}<span className="tooltiptext">{content.hints[hint.hintIndex]}</span></span>)
+        elements.push(<span key={hint.rangeFrom + " "+hint.rangeTo+1} className="word tooltip_editor"><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className="tooltiptext_editor">{content.hints[hint.hintIndex]}</span></span>)
         //addSplitWord(dom.append("span").attr("class", "word tooltip"), hint.rangeFrom, hint.rangeTo+1)
         //    .append("span").attr("class", "tooltiptext").text(content.hints[hint.hintIndex]);
         // advance the position
@@ -602,9 +602,9 @@ function TextLine(props) {
     if(element.line === undefined)
         return <></>
 
-    let hideRangesForChallenge = element.hideRangesForChallenge;
-    if(props.progress !== element.trackingProperties.line_index)
-        hideRangesForChallenge = undefined;
+    let hideRangesForChallenge = element.hideRangesForChallenge[0];
+    //if(props.progress !== element.trackingProperties.line_index)
+    //    hideRangesForChallenge = undefined;
     // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
     if (element.line.type === "TITLE")
         return <div className={"title fadeGlideIn "+hidden} lineno={element?.editor?.block_start_no}>

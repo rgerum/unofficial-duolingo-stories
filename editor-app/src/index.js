@@ -365,11 +365,11 @@ else {
             {tag: t.name, color: color_odd},
 
             // STATE_TEXT_HIDE_EVEN
-            {tag: t.className, color: color_even, textDecoration: "underline"},
+            {tag: t.className, color: color_even, opacity: 0.4, borderBottom: "2px solid black"}, // textDecoration: "underline",
             // STATE_TEXT_HIDE_ODD
-            {tag: t.typeName, color: color_odd, textDecoration: "underline"},
+            {tag: t.typeName, color: color_odd, opacity: 0.4, borderBottom: "2px solid black"},
             // STATE_TEXT_HIDE_NEUTRAL
-            {tag: t.changed, textDecoration: "underline"},
+            {tag: t.changed, opacity: 0.4, borderBottom: "2px solid black"},
 
             // STATE_TEXT_BUTTON_EVEN
             {tag: t.number, color: color_even, background: "#c8c8c8", borderRadius: "10px"},
@@ -377,9 +377,9 @@ else {
             {tag: t.labelName, color: color_odd, background: "#c8c8c8", borderRadius: "10px"},
 
             // STATE_TEXT_HIDE_BUTTON_EVEN
-            {tag: t.meta, color: color_even, textDecoration: "underline", background: "#c8c8c8", borderRadius: "10px"},
+            {tag: t.meta, color: color_even, borderBottom: "2px solid black", background: "#c8c8c8", borderRadius: "10px", opacity: 0.4},
             // STATE_TEXT_HIDE_BUTTON_ODD
-            {tag: t.comment, color: color_odd, textDecoration: "underline", background: "#c8c8c8", borderRadius: "10px"},
+            {tag: t.comment, color: color_odd, borderBottom: "2px solid black", background: "#c8c8c8", borderRadius: "10px", opacity: 0.4},
             // STATE_TEXT_BUTTON_RIGHT_EVEN
             {tag: t.modifier, color: "black", background: "#9bd297", borderRadius: "10px"},
 
