@@ -1,4 +1,5 @@
 .idea/
+sql_dump/
 /audio/rootkey.csv
 /audio/tts/rootkey.csv
 node_modules/
