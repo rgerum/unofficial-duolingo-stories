@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Story, Cast} from "./story_react";
-import {EditorOverview} from "./editor"
+import {EditorOverviewLogin} from "./editor"
 import {AvatarMain} from "./avatar_editor";
 import {getAvatars, getImage, getLanguageName, getStory, setStory} from "./api_calls.mjs";
 
@@ -42,11 +42,9 @@ export function StoryEditorHeader(props) {
 }
 
 if(!urlParams.get("story") && !urlParams.get("language")) {
-    //document.getElementById('button_save').style.display = "none"
-    //document.getElementById('button_back').style.display = "none"
     ReactDOM.render(
         <React.StrictMode>
-            <EditorOverview/>
+            <EditorOverviewLogin />
         </React.StrictMode>,
         document.getElementById('body')
     );

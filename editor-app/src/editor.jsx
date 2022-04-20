@@ -38,7 +38,7 @@ function ImportList(props) {
     }
     return courseImport ?
         <>
-        <div>Importing from Spainsh (from English).</div>
+        <div>Importing from Spanish (from English).</div>
         <table id="story_list" style={{display: "inline-block"}} className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
@@ -123,8 +123,7 @@ function EditList(props) {
 }
 
 function StoriesList(props) {
-    let course_id = props.course_id;
-    const [course, _] = useDataFetcher2(getCourse, [course_id]);
+    let course = props.course;
     let showImport = props.showImport;
     return <>{
         course === undefined ?
@@ -139,14 +138,15 @@ function StoriesList(props) {
 }
 
 function Overview(props) {
-    let course_id = props.course;
+    let course = props.course;
+    let course_id = props.course_id;
 
     return <>
         <CourseList setCourse={props.setCourse}/>
         <div id="main_overview">
             <div id="main_overview_container">
             { course_id ?
-                <StoriesList course_id={course_id} showImport={props.showImport}/>
+                <StoriesList course={course} showImport={props.showImport}/>
                 :
                 <><h1 id="title">Editor - Stories</h1>
                 <p id="no_stories">Click on one of the courses to display its stories.</p>
@@ -157,21 +157,34 @@ function Overview(props) {
     </>
 }
 
+export function EditorOverviewLogin(props) {
+    let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
+
+    // loading
+    if (username === undefined) return <Spinner/>
+    // no username show login
+    if (username.username === undefined)
+        return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
+    // not allowed?
+    if(username.role !== 1) return <div style={{margin: "auto"}}>
+            <img width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
+            <img src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" />
+            You need to have permissions to access the editor.
+        </div>
+    // logged in and allowed!
+    return <EditorOverview/>
+}
 
 export function EditorOverview(props) {
     let urlParams = new URLSearchParams(window.location.search);
     const [course_id, setCourseID] = React.useState(urlParams.get("course") || undefined);
     const [course, courseRefetch] = useDataFetcher2(getCourse, [course_id]);
-    //const [username, usernameRefetch] = useDataFetcher2(getSession, []);
-
-    let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
 
     const [showImport, do_setShowImport] = React.useState(false);
 
     function doSetCourse(course_new) {
         if(course_new === course_id)
             return
-        console.log("dosetCourse", course_new, `index.html?course=${course_new}`)
 
         history.pushState({course: course_new}, "Language"+course_new, `?course=${course_new}`);
         setCourseID(course_new);
@@ -188,23 +201,13 @@ export function EditorOverview(props) {
                 setCourseID(undefined)
         }
     })
-    console.log("overview_course", course, "username", username)
-    if(1) {
-        if (username === undefined) return <Spinner/>
-        if (username.username === undefined)
-            return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
-        if(username.role !== 1) return <div style={{margin: "auto"}}>
-            <img width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
-            <img src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" />
-            You need to have permissions to access the editor.
-        </div>
-    }
+
     return <>
         <div id="toolbar">
             <CourseEditorHeader course={course} showImport={showImport} do_setShowImport={do_setShowImport} />
         </div>
         <div id="root">
-            <Overview course={course_id} setCourse={doSetCourse} showImport={showImport}/>
+            <Overview course_id={course_id} course={course} setCourse={doSetCourse} showImport={showImport}/>
         </div>
     </>
 }
@@ -236,17 +239,3 @@ export function CourseEditorHeader(props) {
         }
     </div></>
 }
-/*
-    "id": 2,
-    "name": null,
-    "fromLanguage": "en",
-    "fromLanguageName": "English",
-    "fromLanguageFlagFile": null,
-    "fromLanguageFlag": 0,
-    "learningLanguage": "nl",
-    "learningLanguageName": "Dutch",
-    "learningLanguageFlagFile": null,
-    "learningLanguageFlag": -354.146,
-    "public": 1,
-    "official": 0,
- */
