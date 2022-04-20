@@ -7,7 +7,7 @@ import {StoryOld} from "./story_react_old";
 import {Task} from "./task";
 
 
-function App(props) {
+function App() {
   let urlParams = new URLSearchParams(window.location.search);
   // activate
   const [task, setTask] = React.useState(urlParams.get("task") || null);

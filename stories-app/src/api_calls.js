@@ -2,7 +2,6 @@ export function get_backend() {
     let backend = "https://carex.uber.space/stories/backend/"
     if(window.location.host === "www.duostories.org" || window.location.host === "duostories.org")
         backend = "https://"+window.location.host+"/stories/backend/"
-    let backend_stories = backend+"stories/"
     return backend;
 }
 let backend = get_backend();
@@ -26,8 +25,7 @@ export async function getLanguageNames() {
 export async function getCourses() {
     try {
         let response_courses = await fetch(`${backend_stories}get_courses.php`);
-        let data_courses = await response_courses.json();
-        return data_courses;
+        return await response_courses.json();
     }
     catch (e) {
         return [];
@@ -43,16 +41,6 @@ export async function getPublicCourses() {
             if(course.public)
                 public_courses.push(course)
         return public_courses;
-    }
-    catch (e) {
-        return [];
-    }
-}
-
-export async function getStories(lang, lang_base) {
-    try {
-        let response = await fetch(`${backend}/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
-        return await response.json();
     }
     catch (e) {
         return [];
@@ -107,16 +95,6 @@ export async function getStoryJSON(id) {
             return story_json;
         }
     }
-}
-
-export function isCourseValid(data_courses, lang, lang_base) {
-    let valid_course = false;
-    for(let course of data_courses) {
-        if(course.learningLanguage === lang && course.fromLanguage === lang_base) {
-            valid_course = true;
-        }
-    }
-    return valid_course;
 }
 
 export async function getLexicon(lang) {

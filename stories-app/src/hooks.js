@@ -12,7 +12,7 @@ export function useDataFetcher2(fetcher, args = []) {
             updateDone(true);
         }
 
-        doFetch();
+        return doFetch();
     }, args);
     async function refetch() {
         const fetched_data = await fetcher(...args);

@@ -223,9 +223,12 @@ function text_add_arrange(t, part) {
         }
         let length = part.selectablePhrases[index].length;
         let pos = part.characterPositions[i] - length;
+
         while(pos && t.original_text.substring(pos, pos+length) !== part.selectablePhrases[index]) {
             console.log(i, index, pos, t.original_text.substring(pos, pos+length), part.selectablePhrases[index])
             pos -= 1;
+            if(pos <= 0)
+                throw "no pos found"
         }
         //let pos = t.original_text.indexOf(part.selectablePhrases[index])
 
@@ -371,7 +374,7 @@ export function processStory(json, set_id, story_id, old_text, avatar_list, avat
             }
             if(challenge_prompt !== undefined)
                 challenge_prompt.push(element);
-            else if(json.elements[element_index+1].type === "POINT_TO_PHRASE")
+            else if(json.elements[element_index+1]?.type === "POINT_TO_PHRASE")
                 challenge_prompt = [element];
             else if (element.line.type === "TITLE") { // legacy
                 let t = text_new(element.line.content.text)
@@ -813,7 +816,13 @@ async function import_old() {
     let courses = await (await fetch("https://carex.uber.space/stories/backend/stories/get_courses.php")).json();
 
     for(let course of courses) {
-        if(course.learningLanguage !== "zh")
+        if(course.learningLanguage === "zh" || course.learningLanguage === "nl" ||
+            (course.learningLanguage === "es" && course.fromLanguage === "en") ||
+            (course.learningLanguage === "fr" && course.fromLanguage === "en") ||
+            (course.learningLanguage === "fr" && course.fromLanguage === "es") ||
+            (course.learningLanguage === "en" && course.learningLanguage === "es"))
+            continue
+        if(course.learningLanguage === "ru")
             continue
         let avatars = await getAvatars(course.id);
         let avatar_names = {}
@@ -835,13 +844,15 @@ async function import_old() {
         let res = await fetch(`https://carex.uber.space/stories/backend/stories/get_list.php?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`);
         let stories = await res.json();
         for (let story of stories) {
-            if(story.id !== 989)
-                continue
+            //if(story.id === 573)
+            //    continue
             if (processed.indexOf(story.id) !== -1)
                 continue
 
-            console.log("----", story.id)
+            console.log("----", story.id, course.learningLanguage)
             console.log(story)
+            if(story.api === 2)
+                continue
             let res = await fetch(`https://carex.uber.space/stories/backend/stories/get_story_json.php?id=${story.id}`);
             let json = await res.json();
             let res2 = await fetch(`https://carex.uber.space/stories/backend/stories/get_story.php?id=${story.id}`);
@@ -878,16 +889,18 @@ async function import_old() {
                 data.duo_id = story.duo_id;
             //if([43, 56, 79, 570, 634, 924, 569, 974, 99, 46, 1249, 1301, 16, 18, 63, 69, 1,
             //   1003, 35, 1281].indexOf(story.id) === -1)
-                compare_stories(json, text, story.id, avatar_names, avatar_id_from_image)
+                //compare_stories(json, text, story.id, avatar_names, avatar_id_from_image)
+            //exit()
             processed.push(story.id)
             console.log(data)
             try {
-            //    let res = await fetch_post(`https://carex.uber.space/stories/backend/editor/set.php?action=story`, data);
-            //    res = await res.text()
+                let res = await fetch_post(`https://carex.uber.space/stories/backend/editor/set.php?action=story`, data);
+                res = await res.text()
                 console.log(res);
             } catch (e) {
                 console.log(e)
             }
+            //exit()
             //return
         }
     }
