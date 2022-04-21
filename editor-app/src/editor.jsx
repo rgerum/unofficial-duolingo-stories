@@ -163,14 +163,8 @@ export function EditorOverviewLogin(props) {
     // loading
     if (username === undefined) return <Spinner/>
     // no username show login
-    if (username.username === undefined)
+    if (username.username === undefined || username.role !== 1)
         return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
-    // not allowed?
-    if(username.role !== 1) return <div style={{margin: "auto"}}>
-            <img width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
-            <img src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" />
-            You need to have permissions to access the editor.
-        </div>
     // logged in and allowed!
     return <EditorOverview/>
 }

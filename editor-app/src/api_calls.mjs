@@ -55,13 +55,6 @@ async function fetch_get(url) {
         mode:"cors"
     })
     return res
-    return fetch(url, {
-        method: "GET",
-        headers: new Headers({"foo": "bla",
-        }),
-        mode:"cors"
-//        headers: {"AuthUsername": login_data.username, "AuthPassword": login_data.password}
-    })
 }
 
 export async function getCourses() {
@@ -85,7 +78,6 @@ export async function getSession() {
 }
 
 export async function login(data) {
-    console.log('login', data)
     // currenty only store the local cookies for local test
     if(isLocalNetwork()) {
         login_data = data;

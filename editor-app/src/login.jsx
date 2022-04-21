@@ -127,11 +127,6 @@ export async function logout() {
 }
 
 
-export function LoginButton() {
-    let [username, doLogin, doLogout] = useUsername();
-    return <Login useUsername={[username, doLogin, doLogout]} />
-}
-
 export function useUsername() {
     let [username, setUsername] = React.useState(null);
     let [showLogin, setShowLogin] = React.useState(1);
@@ -263,48 +258,15 @@ export function LoginDialog(props) {
                     <button className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
                 </div>
             </div>
-        : (showLogin === 2 && username === undefined) ?
+        :
             <div id="login_dialog">
-                <span id="quit" onClick={() => setShowLogin(0)}/>
                 <div>
-                    <h2>Sign up</h2>
-                    <p>If you register you can keep track of the stories you have already finished.</p>
-                    <p>Registration is optional, stories can be accessed even without login.</p>
-                    <input value={usernameInput} onChange={usernameInputSetValue} type="text"
-                           placeholder="Username"/>
-                    <input value={emailInput} onChange={emailInputSetValue} type="email" placeholder="Email"/>
-                    <input value={passwordInput} onChange={passwordInputSetValue} type="password"
-                           placeholder="Password"/>
-                    {state === -1 ?
-                        <span className="login_error">{error}</span> : null }
-                    {state === 2 ?
-                        <span>{message}</span> :
-                        <button className="button"
-                                onClick={register_button}>{state !== 1 ? "Sign up" : "..."}</button>
-                    }
-                    <p>Already have an account? <button className={"link"} onClick={()=>setShowLogin(1)}>LOG IN</button></p>
-                    <p>Forgot your password? <button className={"link"} onClick={()=>setShowLogin(3)}>RESET</button></p>
+                    <h2>Not allowed</h2>
+                    <img width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
+                    <p>You need to have permissions<br/>to access the editor.<br/></p>
+                    <p>If wou want to contribute,<br/>you can talk to us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.</p>
                 </div>
             </div>
-        : (showLogin === 3 && username === undefined) ?
-            <div id="login_dialog">
-                <span id="quit" onClick={() => setShowLogin(0)}/>
-                <div>
-                    <h2>Reset password</h2>
-                    <p>If you forgot your password, we can send you a link to choose a new one.</p>
-                    <input value={usernameInput} onChange={usernameInputSetValue} type="text"
-                           placeholder="Username"/>
-                    {state === -1 ?
-                        <span className="login_error">{error}</span> : null }
-                    {state === 2 ?
-                        <span>{message}</span> :
-                        <button className="button"
-                                onClick={reset_button}>{state !== 1 ? "Reset" : "..."}</button>
-                    }
-                    <p>Or still remember your password? <button className={"link"} onClick={()=>setShowLogin(1)}>LOG IN</button></p>
-                </div>
-            </div>
-            : null
         }
     </>
 }
