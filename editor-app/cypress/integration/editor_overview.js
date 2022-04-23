@@ -14,7 +14,7 @@ describe('Navigate Course Editor', () => {
         cy.intercept('POST', '**/language?id=9', { fixture: 'language_9.json' }).as("language_9")
         cy.intercept('POST', '**/language?id=1', { fixture: 'language_1.json' }).as("language_1")
 
-        cy.visit()
+        cy.visit("")
         //cy.get("input[type=text]").type("test")
         //cy.get("input[type=password]").type("test")
         //cy.get("button").type("click")
