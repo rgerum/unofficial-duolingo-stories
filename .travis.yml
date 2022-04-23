@@ -1,7 +1,7 @@
 language: node_js
 node_js:
-  - node
+  - 16
 script:
-  - cd editor
+  - cd editor-app
   - npm start & wait-on http://localhost:8080
   - npx cypress run --record --key $CYPRESS_KEY
