@@ -1,6 +1,3 @@
-let server = 'https://editor.duostories.org';
-server = 'http://localhost:8080/';
-
 
 describe('Test Logins', () => {
     beforeEach(() => {
@@ -11,7 +8,7 @@ describe('Test Logins', () => {
         cy.intercept('**/session', {body: {}}).as("session_empty")
         cy.intercept('POST', '**/courses', { fixture: 'courses.json' }).as("courses")
 
-        cy.visit(server)
+        cy.visit("")
     })
     it('Unauthorized login', () => {
         cy.get("input[type=text]").type("test2")

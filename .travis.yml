@@ -1,5 +1,7 @@
 language: node_js
 node_js:
   - node
-before_script:
-  - npm install --save-dev jest
+script:
+  - cd editor
+  - npm start & wait-on http://localhost:8080
+  - npx cypress run --record --key $CYPRESS_KEY
