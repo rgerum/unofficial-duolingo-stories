@@ -15,7 +15,7 @@ function CourseList(props) {
         {courses.map((course, index) =>
             <div key={index}>
                 <a className="course_selection_button"
-                   href={`editor_overview.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`}
+                   href={`?course=${course.id}`}
                    onClick={(e) => {e.preventDefault(); props.setCourse(course.id);}}
                 >
                     <span className="course_count">{course.count}</span>
@@ -125,8 +125,9 @@ function EditList(props) {
 function StoriesList(props) {
     let course = props.course;
     let showImport = props.showImport;
+    console.log("StoriesList", course)
     return <>{
-        course === undefined ?
+        course === undefined || course.stories === undefined ?
         <>
             <h1>Loading</h1>
             <Spinner/>
@@ -163,6 +164,7 @@ export function EditorOverviewLogin(props) {
     // loading
     if (username === undefined) return <Spinner/>
     // no username show login
+    console.log("username", username)
     if (username.username === undefined || username.role !== 1)
         return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
     // logged in and allowed!

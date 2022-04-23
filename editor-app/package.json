@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "build": "webpack --mode production",
-    "start": "webpack-dev-server --mode development"
+    "start": "webpack-dev-server --mode development",
+    "cypress:open": "cypress open"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
@@ -22,6 +23,7 @@
     "babel-loader": "^8.2.3",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "css-loader": "^6.5.1",
+    "cypress": "^9.5.4",
     "file-loader": "^6.2.0",
     "formdata-node": "^4.3.2",
     "html-webpack-plugin": "^5.5.0",

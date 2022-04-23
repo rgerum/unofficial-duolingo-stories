@@ -1,0 +1,11 @@
+{
+  "id": 1,
+  "name": "English",
+  "short": "en",
+  "flag": 0,
+  "public": 0,
+  "flag_file": null,
+  "speaker": null,
+  "rtl": 0,
+  "default_text": "My name is $name."
+}

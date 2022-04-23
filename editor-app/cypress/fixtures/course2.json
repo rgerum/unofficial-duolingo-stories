@@ -1,0 +1,72 @@
+{
+  "id": 2,
+  "name": null,
+  "fromLanguage": "en",
+  "fromLanguageName": "English",
+  "fromLanguageFlagFile": null,
+  "fromLanguageFlag": 0,
+  "learningLanguage": "nl",
+  "learningLanguageName": "Dutch",
+  "learningLanguageFlagFile": null,
+  "learningLanguageFlag": -354.146,
+  "public": 1,
+  "official": 0,
+  "stories": [
+    {
+      "id": 1,
+      "set_id": 11,
+      "set_index": 5,
+      "name": "Room for Rent",
+      "image": "e1d2c08f443668d8f99ef3d26f1d04b70d187ab3",
+      "image_done": "https:\/\/stories-cdn.duolingo.com\/image\/68734aab69835db8a039f035e11c81bd74263a20.svg",
+      "xp": 22,
+      "name_base": "Room for Rent",
+      "username": "randriano",
+      "date": "2020-05-26 20:00:35",
+      "change_date": "2020-09-09 18:59:28",
+      "public": 1
+    },
+    {
+      "id": 16,
+      "set_id": 9,
+      "set_index": 3,
+      "name": "You Can Talk?",
+      "image": "a13fae69b40921c2d4f62a0295a19ff0c25d26eb",
+      "image_done": "https:\/\/stories-cdn.duolingo.com\/image\/365321c14985a374bbbef64ce89cea3b659d55e7.svg",
+      "xp": 22,
+      "name_base": "You Can Talk?",
+      "username": "randriano",
+      "date": "2020-05-29 09:14:13",
+      "change_date": "2020-09-09 18:59:30",
+      "public": 1
+    },
+    {
+      "id": 18,
+      "set_id": 9,
+      "set_index": 5,
+      "name": "We Have to Talk",
+      "image": "3b13eb5d447097726c62cdc5f0c59ce615fae365",
+      "image_done": "https:\/\/stories-cdn.duolingo.com\/image\/1c9f727b7aa85994403ad096428c91583a66b0c3.svg",
+      "xp": 22,
+      "name_base": "We Have to Talk",
+      "username": "randriano",
+      "date": "2020-05-29 09:25:01",
+      "change_date": "2020-09-09 18:59:32",
+      "public": 1
+    },
+    {
+      "id": 28,
+      "set_id": 9,
+      "set_index": 7,
+      "name": "Worst Date Ever",
+      "image": "bc18fe62fb2dd751d977f80742520922d3235edb",
+      "image_done": "https:\/\/stories-cdn.duolingo.com\/image\/12c2a324c5043e34f0708b14aeb4cfd5ba08fb7e.svg",
+      "xp": 22,
+      "name_base": "Worst Date Ever",
+      "username": "Kris",
+      "date": "2020-06-05 15:31:23",
+      "change_date": "2020-09-09 19:01:02",
+      "public": 1
+    }
+  ]
+}

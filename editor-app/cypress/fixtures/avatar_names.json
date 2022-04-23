@@ -1,0 +1,1594 @@
+[
+  {
+    "id": null,
+    "avatar_id": 0,
+    "language_id": null,
+    "name": "Narrator",
+    "link": "https:\/\/design.duolingo.com\/ee58f22644428b8182ae.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 6,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/e8a1ff4a04c73a6e772cec1625ce6b99206a27bb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 7,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/596397f72671e899a4fa1f6c8d4d0b43623b69e6.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 15,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/0b17e553aff1266746ff875d513cba9b22fd06c2.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 40,
+    "language_id": null,
+    "name": "Falstaff",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/ede66e49b1b994db1653cc1cff29155224d3864d.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 44,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/a2d9f0906373220a9311d679a68313889cc11d68.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 57,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/f256839a6cd6af9c12d7425e358a83f128c754ae.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 58,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/cf69dae61625845b78327b1108e5bb5ad626be39.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 100,
+    "language_id": null,
+    "name": "Daniel",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/9ed7124d96bbf015b7b8d9c62ddd6abba98d29c4.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 101,
+    "language_id": null,
+    "name": "Gabriela",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/27d9035afe381e7c5ae6d21dd2a456ae7a576b14.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 113,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b9dd6e609a6099c3128e4d9f70de58e6eafc68af.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 125,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/4c2513acde6538d854ec076b2221ddd89c4d1ea1.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 127,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/ca724aa3c43b40f9259b19ed4aadaa1aaf64d6ad.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 129,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/e9dfe70bddacc2b2cdc91dd08c7aebee297dc1ee.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 145,
+    "language_id": null,
+    "name": "Andres",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/a2d9f0906373220a9311d679a68313889cc11d68.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 175,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/74334e2671f124349218384c46efbd43518925bf.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 258,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/6494ad6645c319839414225ea4cc0a805b664294.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 260,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/dbdf16d2c7daeb5c3358b0b3d1f382baa777c104.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 273,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/a2d9f0906373220a9311d679a68313889cc11d68.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 274,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/a3d95a3a8206400f6c3e3509168809dba57c9193.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 292,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3037a98d2819c4de686d1aa6072e5bbfda892619.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 295,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/f2395572d43f661c949624dc27e3a71798eff217.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 300,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/fd6d761a3a95a2f84ed5dbed277fca1f3c4d7858.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 307,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/d75836343379f4c053a8a83751e80025fd5c07bd.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 321,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/14f7c1d81cc08880057f974eea31d84b0cb0ecc1.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 336,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/fd9c603a82713d7dfd7a2086f2830d6496ecb53a.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 338,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/5aad8c31463fd20b56e7d72aed2b04179c8e0360.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 341,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/54514fa42cea4783aeb5aa0d33c0590edc59ef85.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 342,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/d4166756c7291a6a31da0c6f9e01ea08c1f89b08.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 343,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/d1085498533ef2915379b9db11ec40e4da7dc8fb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 366,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/fdb3995c24d746eea1d081436b3e5c2a57bcf7ab.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 367,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/f2395572d43f661c949624dc27e3a71798eff217.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 378,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b9dd6e609a6099c3128e4d9f70de58e6eafc68af.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 385,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/535f40ef2e4bf4ef1d93385f17e47b3bd941ac4a.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 386,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b2aca27a420fd311f3707eb37a41c92d0037f8b8.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 395,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/6fd49550625a0d5f413d174d081e8059d4780936.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 414,
+    "language_id": null,
+    "name": "Eddy",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/203a6761107ea5e54d492357b727da4f3d9139a7.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 415,
+    "language_id": null,
+    "name": "Junior",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3444bf73abfe20eb6f9de1b5b5103feaa7caaf19.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 416,
+    "language_id": null,
+    "name": "Lily",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/baff6e45d4f21e6947932fddf27ba76b5a6c58e9.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 418,
+    "language_id": null,
+    "name": "Zari",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b603d66652590a597f5952576abeb2a09f355986.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 419,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/ca2cdc4d01264449cc655cc932132c7babdce6db.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 438,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2dc96ee05b81f9500410c70f3329fc4eed22f36e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 439,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3bf958813f4cfaa1ffd9151ba48d73a37fb73357.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 440,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/15b7a1e615723d23d97116bb9a90ecca427f15b5.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 446,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/5aad8c31463fd20b56e7d72aed2b04179c8e0360.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 504,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/d30e8dd96220936fcd89eab8471b4d61d55f4a9e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 506,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/e8a1ff4a04c73a6e772cec1625ce6b99206a27bb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 507,
+    "language_id": null,
+    "name": "Bea",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/608b98fee923ab24cc5cc99d2875c90fa22806eb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 508,
+    "language_id": null,
+    "name": "Lin",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/34844185612dd13973e589cd50d5ae3481d965bb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 509,
+    "language_id": null,
+    "name": "Lucy",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/97fda9f814aa995e495cd22f5fc3a61a77cc729a.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 510,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/535f40ef2e4bf4ef1d93385f17e47b3bd941ac4a.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 511,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/bff2161dc6234822ddb9516f96da7dacea1a4426.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 526,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3327b191f4f4e29c44e71c738dd99adc1fefb77d.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 528,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/fde78d6d88e444060fa3a8a46e9d4bf56e45a9cb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 559,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/dc4058321a15e05c147731aaadaa8ca6e11e382c.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 560,
+    "language_id": null,
+    "name": "Priti",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2b2b64afe0c2af19eed8ac69c36cb8803d0a090e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 561,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/373e51c7e072e353d5aac3d3f449c987525454a7.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 592,
+    "language_id": null,
+    "name": "Oscar",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/9ab5ac83a7e196737bf98cb7347c6b63ac485090.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 593,
+    "language_id": null,
+    "name": "Vikram",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/7074d00522c0be6307e3e405f503699a99d2121e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 625,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/fd74e084a88055c4aee7a0a053c32d1d1513c03f.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 658,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/6c8d18161182e68d4dfc5fa08bc6e8390c493c7c.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 659,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b22c219bf9b215e3ba0fb517ad603451652e18f3.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 691,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2dc96ee05b81f9500410c70f3329fc4eed22f36e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 724,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/37193cda8a89cd806e4b2d2ff083e854a6bebcf4.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 790,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/45e64b81e69c0b960be740b1645ac0d47db0db8f.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 823,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/14998dae603594b16b370c5c79b3da8f04dc944e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 856,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2f19013af9bd938f0e890a0e1d81b09c8811276d.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 889,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/ab765275966eb4e5f7307e436c247b720faac81b.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 922,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/57aa84e8454cc1023c456dc7b5ceaf5f052ee8cf.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 955,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b22c219bf9b215e3ba0fb517ad603451652e18f3.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 988,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/397571c00ccdcabe65a727f95eb786cb04668177.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1021,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/14998dae603594b16b370c5c79b3da8f04dc944e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1054,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/ab765275966eb4e5f7307e436c247b720faac81b.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1087,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/f73f0cac41501eab9a596fe5ebbeb50a3bb14dca.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1088,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b1cf53b971bfa007a3b63d7932a8dcb7cf5c1609.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1120,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b9dd6e609a6099c3128e4d9f70de58e6eafc68af.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1186,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3ce3b3a473f960ba383fdbf763466da50e2abf19.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1187,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/58f3be745ce45f4dd41dd48dad7e6fe1807c6d83.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1319,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/f9561a2e0a3fa30c379e44a6e4c9d44d29a80274.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1320,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/c70e6f604d5a97ae86b9f16b512280e49aea3d3d.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1321,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/804b40691aa87777cd1e6b4f0773712343d024d2.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1352,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3037a98d2819c4de686d1aa6072e5bbfda892619.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1385,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b22c219bf9b215e3ba0fb517ad603451652e18f3.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1386,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/cdb29500d05845d2bc5d904a9e254c1283e10f0d.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1418,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/ca724aa3c43b40f9259b19ed4aadaa1aaf64d6ad.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1419,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2dc96ee05b81f9500410c70f3329fc4eed22f36e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1451,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/535f40ef2e4bf4ef1d93385f17e47b3bd941ac4a.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1484,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/5aad8c31463fd20b56e7d72aed2b04179c8e0360.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1550,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3ce3b3a473f960ba383fdbf763466da50e2abf19.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1551,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/6811cc8a66d69c0a7db3a012f0d79e557047e74b.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1583,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/cdb29500d05845d2bc5d904a9e254c1283e10f0d.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1616,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/efde2af1adf866946ea78b838059377a521aa5f3.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1649,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/83808840979e84c1481843e29087cec37ff72d85.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1682,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/605e63b9154930d65713f9ddb147f2121f7cc143.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1715,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2e011528ec8ea07cf15cf149e13f953e9824d0dd.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1748,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/54514fa42cea4783aeb5aa0d33c0590edc59ef85.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1781,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/dbdf16d2c7daeb5c3358b0b3d1f382baa777c104.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1814,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/52584a9468bc748fea48761353cc6faf499893c2.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1847,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/52cd89877a97a4e66822cf8ee3fedc09aabea0aa.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1848,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/8e39429a781a5a56bb416363d9fd32c935bfba3e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1880,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/397571c00ccdcabe65a727f95eb786cb04668177.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1913,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/6c8d18161182e68d4dfc5fa08bc6e8390c493c7c.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1914,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/37193cda8a89cd806e4b2d2ff083e854a6bebcf4.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 1979,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/804b40691aa87777cd1e6b4f0773712343d024d2.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2045,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/74334e2671f124349218384c46efbd43518925bf.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2078,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/d75836343379f4c053a8a83751e80025fd5c07bd.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2111,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/15b7a1e615723d23d97116bb9a90ecca427f15b5.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2144,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/bb6608978d59831785e05e08c96800e126c4d621.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2177,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/f73f0cac41501eab9a596fe5ebbeb50a3bb14dca.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2178,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/58f3be745ce45f4dd41dd48dad7e6fe1807c6d83.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2210,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/4778acf12cd6e1732b4fe126b705649132239dce.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2243,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/d1d6d706575e64d0f93cc97a86796ac231605c44.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2276,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/7f5ebdc551ab83bc59e2ebcb6d190f41a28ac6ea.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2309,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/596397f72671e899a4fa1f6c8d4d0b43623b69e6.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2342,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/e8a1ff4a04c73a6e772cec1625ce6b99206a27bb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2375,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/804b40691aa87777cd1e6b4f0773712343d024d2.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2408,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/fd74e084a88055c4aee7a0a053c32d1d1513c03f.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2441,
+    "language_id": null,
+    "name": "Bea",
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/608b98fee923ab24cc5cc99d2875c90fa22806eb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2474,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/266a4a076efe14e51e91b288d0e87078e6eec153.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2540,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/53c59745648fd474dc6ee0cd6f36274045a75548.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2573,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/39e98da7a9df9de4cfced23c28a5dbe62067ed69.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2606,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/845d3ea090df3886960f0c5d8b215bf7d5ab39f4.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2639,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/9ed7124d96bbf015b7b8d9c62ddd6abba98d29c4.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2672,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/397571c00ccdcabe65a727f95eb786cb04668177.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2705,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/ab869bed15ddb8adff2b4d5b3453c835923166c3.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2738,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2dc96ee05b81f9500410c70f3329fc4eed22f36e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2771,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/52cd89877a97a4e66822cf8ee3fedc09aabea0aa.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2804,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3037a98d2819c4de686d1aa6072e5bbfda892619.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2837,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/27a4c40ce9afc3a8c879bd4df195d4774772d070.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2870,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/373e51c7e072e353d5aac3d3f449c987525454a7.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2871,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/f256839a6cd6af9c12d7425e358a83f128c754ae.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2903,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/15b7a1e615723d23d97116bb9a90ecca427f15b5.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2904,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/4778acf12cd6e1732b4fe126b705649132239dce.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2905,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/f5d867899c7ee8b86f1099df0340ac0dd3792b02.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2906,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/e8a1ff4a04c73a6e772cec1625ce6b99206a27bb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2936,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/7f5ebdc551ab83bc59e2ebcb6d190f41a28ac6ea.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 2969,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/804b40691aa87777cd1e6b4f0773712343d024d2.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3002,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/4c2513acde6538d854ec076b2221ddd89c4d1ea1.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3035,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2f19013af9bd938f0e890a0e1d81b09c8811276d.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3068,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/e8a1ff4a04c73a6e772cec1625ce6b99206a27bb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3101,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/ca724aa3c43b40f9259b19ed4aadaa1aaf64d6ad.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3102,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/4c2513acde6538d854ec076b2221ddd89c4d1ea1.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3103,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/39e98da7a9df9de4cfced23c28a5dbe62067ed69.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3104,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/6c8d18161182e68d4dfc5fa08bc6e8390c493c7c.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3105,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b1cf53b971bfa007a3b63d7932a8dcb7cf5c1609.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3106,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/83808840979e84c1481843e29087cec37ff72d85.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3107,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/657ec4ba34c62f42bdc5eb45f3788a1667f674cb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3134,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/af7f9423b6416ca248bbfc802c5c0ce25324253c.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3135,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3de016ba53879dc5e52566dde3f61a7e6a412347.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3136,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/e8a1ff4a04c73a6e772cec1625ce6b99206a27bb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3137,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/397571c00ccdcabe65a727f95eb786cb04668177.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3139,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/58f3be745ce45f4dd41dd48dad7e6fe1807c6d83.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3140,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/e8a1ff4a04c73a6e772cec1625ce6b99206a27bb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3141,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/f256839a6cd6af9c12d7425e358a83f128c754ae.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3142,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b9dd6e609a6099c3128e4d9f70de58e6eafc68af.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3143,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/d1d6d706575e64d0f93cc97a86796ac231605c44.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3144,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/53c59745648fd474dc6ee0cd6f36274045a75548.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3145,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/0f8e30ac4834d4f984988bb6f4d60ed816e84c65.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3146,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2dc96ee05b81f9500410c70f3329fc4eed22f36e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3147,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2e011528ec8ea07cf15cf149e13f953e9824d0dd.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3148,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3327b191f4f4e29c44e71c738dd99adc1fefb77d.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3149,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b2aca27a420fd311f3707eb37a41c92d0037f8b8.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3150,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/f73f0cac41501eab9a596fe5ebbeb50a3bb14dca.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3151,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/74334e2671f124349218384c46efbd43518925bf.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3153,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/a5b4f792041481249431161f8edbbd0816dee51f.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3154,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/fd6d761a3a95a2f84ed5dbed277fca1f3c4d7858.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3155,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/596397f72671e899a4fa1f6c8d4d0b43623b69e6.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3156,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/fde78d6d88e444060fa3a8a46e9d4bf56e45a9cb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3157,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3037a98d2819c4de686d1aa6072e5bbfda892619.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3158,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/54514fa42cea4783aeb5aa0d33c0590edc59ef85.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3159,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b22c219bf9b215e3ba0fb517ad603451652e18f3.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3160,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/49507d3c7282316d21e40a525a6656e5423b10c1.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3161,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/83808840979e84c1481843e29087cec37ff72d85.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3162,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/96b9c49cbd8f25473108090ea7e2372f3d845a04.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3163,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3197fab73adc0e29914885edd8f491eeb9e09e82.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3164,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b9dd6e609a6099c3128e4d9f70de58e6eafc68af.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3166,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/8e39429a781a5a56bb416363d9fd32c935bfba3e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3167,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/397571c00ccdcabe65a727f95eb786cb04668177.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3168,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/f256839a6cd6af9c12d7425e358a83f128c754ae.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3169,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/e8a1ff4a04c73a6e772cec1625ce6b99206a27bb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3170,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/53c59745648fd474dc6ee0cd6f36274045a75548.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3171,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/14998dae603594b16b370c5c79b3da8f04dc944e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3172,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/efde2af1adf866946ea78b838059377a521aa5f3.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3173,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3dfcbe9d86f148ad3cfb426ec5fa493d6cb6cb5f.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3200,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b9dd6e609a6099c3128e4d9f70de58e6eafc68af.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3201,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/54514fa42cea4783aeb5aa0d33c0590edc59ef85.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3233,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/84089061712ccaf34214703b78788acbcff9c120.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3266,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/3ce3b3a473f960ba383fdbf763466da50e2abf19.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3267,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/4c2513acde6538d854ec076b2221ddd89c4d1ea1.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3268,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/5aad8c31463fd20b56e7d72aed2b04179c8e0360.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3269,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/0f8e30ac4834d4f984988bb6f4d60ed816e84c65.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3299,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/b3206a379ebffff9ba3b460f0dafa5b696979a52.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3300,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/672ac281355973be022125f6d5a069bfc38232ce.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3301,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2f19013af9bd938f0e890a0e1d81b09c8811276d.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3302,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/fbf8d486ad2d68dd591cedf600f49ef4eb84a089.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3303,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/be1e09e250d5744641db5e070727bb3e4465e4fb.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3304,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/2b9c555607d2e7973575fe9822e5a495b932f5e2.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3305,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/8e39429a781a5a56bb416363d9fd32c935bfba3e.svg",
+    "speaker": null
+  },
+  {
+    "id": null,
+    "avatar_id": 3306,
+    "language_id": null,
+    "name": null,
+    "link": "https:\/\/stories-cdn.duolingo.com\/image\/fdb3995c24d746eea1d081436b3e5c2a57bcf7ab.svg",
+    "speaker": null
+  }
+]

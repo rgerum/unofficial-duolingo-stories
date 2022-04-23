@@ -92,6 +92,8 @@ export async function login(data) {
 }
 
 export async function getCourse(id) {
+    if(!id)
+        return {}
     try {
         let response = await fetch_get(`${backend_get}/course?id=${id}`);
         return await response.json();

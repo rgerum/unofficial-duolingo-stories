@@ -1,0 +1,2513 @@
+[
+  {
+    "id": 1350,
+    "set_id": 1,
+    "set_index": 1,
+    "name": "Good Morning",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/344e43fc1b8fe4c6370f1095bd773e4478334436.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg",
+    "copies": 0
+  },
+  {
+    "id": 1353,
+    "set_id": 1,
+    "set_index": 2,
+    "name": "A Date",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/8f5de62e27e14a3e766d60caa1dfbca5a12e6480.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/df24f7756b139f6eda927eb776621b9febe1a3f1.svg",
+    "copies": 0
+  },
+  {
+    "id": 1354,
+    "set_id": 1,
+    "set_index": 3,
+    "name": "One Thing",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/99ab40ae5ceb445db690f74ab843094202ed47ca.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/717bd84875f83c678f64f124937a278061e0e778.svg",
+    "copies": 0
+  },
+  {
+    "id": 1355,
+    "set_id": 1,
+    "set_index": 4,
+    "name": "The Honeymoon",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/635341af510dc9e1b5af967e3945040eb87b930c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/7e5d271488d31d6f1d0c503512e642ca7effe84f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1356,
+    "set_id": 2,
+    "set_index": 1,
+    "name": "The Red Jacket",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/2db35eb4e71d2117816fb43e8f36500320faad3b.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5361833c123aec9adfa60b0dc63398cd1aa49ef2.svg",
+    "copies": 0
+  },
+  {
+    "id": 1357,
+    "set_id": 2,
+    "set_index": 2,
+    "name": "The Passport",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/56c5cffdd014051ee497192dd27764ffd56c0cee.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/643347b755001a918130ddf5f6d3e914e63a00ce.svg",
+    "copies": 0
+  },
+  {
+    "id": 1358,
+    "set_id": 2,
+    "set_index": 3,
+    "name": "A Very Big Family",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/cb1bd612b5cdf70b41dae95110e10f67af367778.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/7b985ad4907aa6222424ea7f917bf10209b62843.svg",
+    "copies": 0
+  },
+  {
+    "id": 1359,
+    "set_id": 2,
+    "set_index": 4,
+    "name": "Doctor Eddy",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/ee3b26756c0d3b85ae186ee7733635375615172d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/29c5abbf74b46e43a4de510ac83e302c0722a100.svg",
+    "copies": 0
+  },
+  {
+    "id": 1360,
+    "set_id": 3,
+    "set_index": 1,
+    "name": "A New Coat",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/86411aba0776eb8ffe2e0524172c22b6ad0835e2.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/966f6e25540bc4ba5347e59005bcc1e2827fdd66.svg",
+    "copies": 0
+  },
+  {
+    "id": 1361,
+    "set_id": 3,
+    "set_index": 2,
+    "name": "The New Student",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/c8ea06bca713918effa128474da553c4d1ec9ace.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5afbf601db955e3db76a96aea1d4e0a535c16e7c.svg",
+    "copies": 0
+  },
+  {
+    "id": 1362,
+    "set_id": 3,
+    "set_index": 3,
+    "name": "A Question",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e90eac26e74c7ddcac9d7235bcb183768cad886f.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d845f544be0f67c8960124f8ef46185826f40763.svg",
+    "copies": 0
+  },
+  {
+    "id": 1363,
+    "set_id": 3,
+    "set_index": 4,
+    "name": "To the Station!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/02857a839a92e79d6d994b5146853d4b44f2e61a.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5bee618bd907474764094eddf36ddcbc46523c98.svg",
+    "copies": 0
+  },
+  {
+    "id": 1364,
+    "set_id": 4,
+    "set_index": 1,
+    "name": "The Vegetarian",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/82781437a7256881b51aa4fd1a9c6c2414128a6f.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/dc9d2edcd2a744cd53771bab283eb22922dd1347.svg",
+    "copies": 0
+  },
+  {
+    "id": 1365,
+    "set_id": 4,
+    "set_index": 2,
+    "name": "More Space",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/d240dde4c250618e18d310aa8579870b81f1339c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d052dcca47838cd5debc241d8963f4a99b3bb873.svg",
+    "copies": 0
+  },
+  {
+    "id": 1366,
+    "set_id": 4,
+    "set_index": 3,
+    "name": "Clothes for my Vacation",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/36c3809ac002679bca6787418f9b8b323bec1fda.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/6fee4723d01611cffa9b4b76fd5be36697ef1e96.svg",
+    "copies": 0
+  },
+  {
+    "id": 1367,
+    "set_id": 4,
+    "set_index": 4,
+    "name": "The Reservation",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/dbb16670d47ff8f04c6e6c8503689dd655cb1131.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/3ef44f16233d10a5c2f1b5cb171779208191e11a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1368,
+    "set_id": 5,
+    "set_index": 1,
+    "name": "The Dog",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/eb9e003590c1d80876aa05ee1f90c10265cab88b.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/686b57de279883b2c4e07f6addbde23a91c8ed51.svg",
+    "copies": 0
+  },
+  {
+    "id": 1369,
+    "set_id": 5,
+    "set_index": 2,
+    "name": "What Do You Need?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/7da747b734e2b4cd98bf0ef3db1970d920da98e1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/8c5ae7b18c5ff0f37394646c91bd6a579213dcbc.svg",
+    "copies": 0
+  },
+  {
+    "id": 1370,
+    "set_id": 5,
+    "set_index": 3,
+    "name": "A Coffee, Please!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/85fffc3df8be7d481a4f2a9cf636071a922e6e0a.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/221d57fa97fa27260e9dd5ad3457870d033f291a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1371,
+    "set_id": 5,
+    "set_index": 4,
+    "name": "Lily's Clothes",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e2fa6736dc53b3d4bee895cfa35e4cb8ec91199d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a9d84d4e299c60bdb37d50cc28d74b53af395ac1.svg",
+    "copies": 0
+  },
+  {
+    "id": 1372,
+    "set_id": 6,
+    "set_index": 1,
+    "name": "At the Supermarket",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/412937350c2d3541465d4500e9c07562ec3eeb71.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9f4968b6294916f0d8c9f64c8a172ef8c0c368ef.svg",
+    "copies": 0
+  },
+  {
+    "id": 1373,
+    "set_id": 6,
+    "set_index": 2,
+    "name": "The Perfect Girlfriend",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/1c07fc8d864c36ed913375674ecaa40f3646c80e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/802c81c8811f5ca43acd16ce2f8d32b18f15352f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1374,
+    "set_id": 6,
+    "set_index": 3,
+    "name": "My vacation in Canada",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/0fcf34513440350c230bf4e526a4bc21717961ac.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/fc28a1488ca79d6561e70133420c732ab54487b3.svg",
+    "copies": 0
+  },
+  {
+    "id": 1375,
+    "set_id": 6,
+    "set_index": 4,
+    "name": "The English Test",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/67c0cf3b25f91fbb2c4a68ac1e11d7517fa1533e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/fb16be061ee25cbd89be9a23e762f04047652d7f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1376,
+    "set_id": 7,
+    "set_index": 1,
+    "name": "I Need a New Video Game",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/0737967b5b9d6d743e2de03591bec8c34095f22e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/ce0ae956035c1bac6b9c64737466d59c5d027e97.svg",
+    "copies": 0
+  },
+  {
+    "id": 1377,
+    "set_id": 7,
+    "set_index": 2,
+    "name": "Where Is Your Girlfriend?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/c5c16c3d5c87916306a01bf2d7eab3f79165ed48.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/0d18f0403cfa415591d7ef50a9e9c01f1094936e.svg",
+    "copies": 0
+  },
+  {
+    "id": 1378,
+    "set_id": 7,
+    "set_index": 3,
+    "name": "The Basketball Player",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/1845fc381e173449100b73b5dc84322dd6d0a060.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/93b7dddcb57fc76fde878bfb42e8c4f35d68fb5d.svg",
+    "copies": 0
+  },
+  {
+    "id": 1379,
+    "set_id": 7,
+    "set_index": 4,
+    "name": "One Ticket to Barcelona",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b1a349c9e39c8ee369cd070cd8a9ae55e77c1550.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/b8d10ee56171817ff548af825d5065b5561d1482.svg",
+    "copies": 0
+  },
+  {
+    "id": 1380,
+    "set_id": 8,
+    "set_index": 1,
+    "name": "Thanks?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/12a41a3c905674f7be66dfe1232b46666aa8192b.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/0e35077f2bf31284d5967e7096a66da10d0a9bdf.svg",
+    "copies": 0
+  },
+  {
+    "id": 1381,
+    "set_id": 8,
+    "set_index": 2,
+    "name": "The Dance Class",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/9dbcb096411c2c0565dfd1485da26335348d88ff.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9a1213d7cb11cc1ab115544c9557336da748fca6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1382,
+    "set_id": 8,
+    "set_index": 3,
+    "name": "You Are Not Mary",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/be42214a6d3c30b25903c425b2eb66f38fcdd2d1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/7a321a8d84d41c79b4d3c85aced0cbcdd13756b6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1383,
+    "set_id": 8,
+    "set_index": 4,
+    "name": "A Family Dinner",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e56a0fb319b9dba225f422d4af1281bb093c51ee.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/076bc5bf725308c211b9c04f07d3622683e84d78.svg",
+    "copies": 0
+  },
+  {
+    "id": 1384,
+    "set_id": 9,
+    "set_index": 1,
+    "name": "Junior Exercises",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/bb97ca6251e49a5a9d9fc432a240e23ff0557fce.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9f2d4bdaca5fe3e93b4a97529d903567ee23fd4e.svg",
+    "copies": 0
+  },
+  {
+    "id": 1385,
+    "set_id": 9,
+    "set_index": 2,
+    "name": "The Garden",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/948a08e431248597d405739d3834102a9bed6129.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/b4090fb3357cd46aa8eac9f22c4fbbe3265d273e.svg",
+    "copies": 0
+  },
+  {
+    "id": 1386,
+    "set_id": 9,
+    "set_index": 3,
+    "name": "The Perfect Person",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/32aa66f693fec8ec8d2ff21a5689e5155ae47d22.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9a22c5f11ddc4785a81d887f35d522f3317e2f4c.svg",
+    "copies": 0
+  },
+  {
+    "id": 1387,
+    "set_id": 9,
+    "set_index": 4,
+    "name": "Need Help?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e3c385490bccc307004e1e372ee8c25e3558c7a5.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/ec74184ed69da39d62ba574fa9d615f7d0c53da1.svg",
+    "copies": 0
+  },
+  {
+    "id": 1388,
+    "set_id": 10,
+    "set_index": 1,
+    "name": "Junior's Decision",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/85e6115a636c5ed7b228be9ce1f0fc1306b97f50.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/e0600de22649754eb7336b587834d36407767819.svg",
+    "copies": 0
+  },
+  {
+    "id": 1389,
+    "set_id": 10,
+    "set_index": 2,
+    "name": "I Want a Dog!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/d913e759980e608a1fc2a3028cc375278ce15f40.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/f0d8a8f3340da1d468766192cafa7ac1ee986355.svg",
+    "copies": 0
+  },
+  {
+    "id": 1390,
+    "set_id": 10,
+    "set_index": 3,
+    "name": "The Model",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/ca6ffaf094cb2ef7c03dd24cb1f4cac8651833b4.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/bf0f585cb9c595dad852ba30870242b639057e4f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1391,
+    "set_id": 10,
+    "set_index": 4,
+    "name": "The Portrait",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/6dd74ea554f499638ae1b4b983d6d05c294a9082.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/12547a4c20bef9c66913ef1a725b6fd4f0c544ea.svg",
+    "copies": 0
+  },
+  {
+    "id": 1392,
+    "set_id": 11,
+    "set_index": 1,
+    "name": "Can You Take My Picture?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/f7d40614553cfac6ff5762cd3993ae395d616d31.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/7dd783a29013b7951880f8d2428316358039470c.svg",
+    "copies": 0
+  },
+  {
+    "id": 1393,
+    "set_id": 11,
+    "set_index": 2,
+    "name": "A New Sport",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/90224399403b7d772341ffafe401575220b5cda0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/4779d731014382d1398621baf6c630efe3e344c0.svg",
+    "copies": 0
+  },
+  {
+    "id": 1394,
+    "set_id": 11,
+    "set_index": 3,
+    "name": "Lucy and the Dinosaurs",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b6b78e654f7e8addad3330aa167e07933b067cab.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/f6ce899637bb8181ee5e78382fdf71a0f01e4f95.svg",
+    "copies": 0
+  },
+  {
+    "id": 1395,
+    "set_id": 11,
+    "set_index": 4,
+    "name": "Where Are My Keys?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/f62cf4d1be946bb7480a002bc8e64b03aaa08f57.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/3f21c887f044dc2ac0d1f0d0ea74e1200b587ac2.svg",
+    "copies": 0
+  },
+  {
+    "id": 1396,
+    "set_id": 12,
+    "set_index": 1,
+    "name": "A Very Dirty Apartment",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e5e819c549e5ddeb03ab509333e4832f38e92d94.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/0e6ab8c3a4e3224cb700e8daeac0038f7f0e929e.svg",
+    "copies": 0
+  },
+  {
+    "id": 1397,
+    "set_id": 12,
+    "set_index": 2,
+    "name": "The Monkeys",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/f1a94f9373a7ccee9e6a46ac6b153098eb0b5b7e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/c29e4533eca0186f83adafac9383fef2ed3aee56.svg",
+    "copies": 0
+  },
+  {
+    "id": 1398,
+    "set_id": 12,
+    "set_index": 3,
+    "name": "That Is Art",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/371ead86e115c7dde2b230d96ad99aed79fe3ee1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/501e7d609ee0dd5ba11ff7cdcf9740b12a7a7945.svg",
+    "copies": 0
+  },
+  {
+    "id": 1399,
+    "set_id": 12,
+    "set_index": 4,
+    "name": "The Waiter Is Right",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/544c8911ee17001afdf416afb714f904c99bd7c6.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/c8d008581b5b813d1b4afcedbe914f70003145c6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1400,
+    "set_id": 13,
+    "set_index": 1,
+    "name": "I Am Sick",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/fc14dfd14b9d50d5f97b7a9047ae533a4951d483.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/68ffeb0d8b8a73e7de5cd3b964b34d0e08761977.svg",
+    "copies": 0
+  },
+  {
+    "id": 1401,
+    "set_id": 13,
+    "set_index": 2,
+    "name": "I Want a Pizza",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/3d43e989e9e5463dc6fe721ed648af0153556d29.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/3eebaf390a99fcebfaf064cfa42f14c071b5b97f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1402,
+    "set_id": 13,
+    "set_index": 3,
+    "name": "The Diary",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/73ed0fb14cb0a652cd3432c9351963689b22c799.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/11054d83adbe171cda3e5669c57e1e26d6cbd8db.svg",
+    "copies": 0
+  },
+  {
+    "id": 1403,
+    "set_id": 13,
+    "set_index": 4,
+    "name": "Óscar's Flowers",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/747c5c114a292498be7db51bf4b00449bac083e6.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/3bc2c3a627aad5f5aef4f68ae652c16713f9048f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1404,
+    "set_id": 14,
+    "set_index": 1,
+    "name": "I'm Always Late",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/fd54afce6be424a99fabc4c7e6fdb302ed51ed47.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a62bcc657853c02d336da2c3899591f7a148634c.svg",
+    "copies": 0
+  },
+  {
+    "id": 1405,
+    "set_id": 14,
+    "set_index": 2,
+    "name": "I Don't Work Today",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/f6c2e20df2502289c500465905645fd875b9b2a7.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5450714ebd6e5c59daf764d85a8fc7f9edb1c23a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1406,
+    "set_id": 14,
+    "set_index": 3,
+    "name": "Junior's Birthday",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/7bd913249101cb2a56b87e005d364a5810db108e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9ac312d372abe49d99606848f5a7a8414143346d.svg",
+    "copies": 0
+  },
+  {
+    "id": 1407,
+    "set_id": 14,
+    "set_index": 4,
+    "name": "What's Your Name?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/d947a4ef61bdc1ef24e28844518b5f56b5fbb017.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/689567546d7675ad256e56c304d89b12a7c38c8a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1408,
+    "set_id": 15,
+    "set_index": 1,
+    "name": "An Interesting Conversation",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/826dd39a35e72c77f1778b4eccc23aaae93da1d1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/6711cee61441da3d7aa6099466d6fff137239c3a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1409,
+    "set_id": 15,
+    "set_index": 2,
+    "name": "It's Not for Kids",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/3f75af3274c120efd51d734afdf104903a1e1249.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/92f8e9fbcb106a065c67e2efcbb467a67077da4b.svg",
+    "copies": 0
+  },
+  {
+    "id": 1410,
+    "set_id": 15,
+    "set_index": 3,
+    "name": "Too Dangerous",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/d934826f0caa9d0c8361fb4daf78bb32ddef7c95.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/1702eab67b54c34d15254bb3fb5daefb13f3a2ac.svg",
+    "copies": 0
+  },
+  {
+    "id": 1411,
+    "set_id": 15,
+    "set_index": 4,
+    "name": "Drawing in the Park",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/41aa2ee2d155ac41618277441dc3d58598174876.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/96fd9b652456a41bca2912838b14cb5bd9f7827a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1412,
+    "set_id": 16,
+    "set_index": 1,
+    "name": "The Art Homework",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/8e915ff47bab4ed5c9b71329b9c54cf7adcc462a.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/81f7ed2bd4ece4842874e1ea985c979bd6457de6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1413,
+    "set_id": 16,
+    "set_index": 2,
+    "name": "Pizza Night",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/c91b7f5dfa1f0661b09b1d4486ee064e7d5dc9c2.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/dcb1760c8fe5f2221fc2e3bc373a13632881ae44.svg",
+    "copies": 0
+  },
+  {
+    "id": 1414,
+    "set_id": 16,
+    "set_index": 3,
+    "name": "The Big Game",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/9a581903c7f8a30fc3e57680103b227fae66df8b.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/170e9caad206d87350e17e32c18226edefea8131.svg",
+    "copies": 0
+  },
+  {
+    "id": 1415,
+    "set_id": 16,
+    "set_index": 4,
+    "name": "Junior's Breakfast",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/4296eb538c3beb66333e98879c11b868da5027a0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/6d79d91b8caad82e9f6ce44a1b458f12ac6a7a9f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1416,
+    "set_id": 17,
+    "set_index": 1,
+    "name": "My First Painting",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/8666c2933a0b309c5d27d1cbd3a57fb744042d63.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/b4a0fb96a3bb2af295051d49d3c112c4c91779e6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1417,
+    "set_id": 17,
+    "set_index": 2,
+    "name": "The Taxi",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/0955dd8b19a6fd9a27fb126fc45185121ce310bd.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/44410efbb175e599d5fbe5b4d86050262f324ca0.svg",
+    "copies": 0
+  },
+  {
+    "id": 1418,
+    "set_id": 17,
+    "set_index": 3,
+    "name": "An Emergency",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/2b44969c9bd7f0e52a6578f250a7151d3f281287.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/7e5d8724d525fd56e3abc838f2849ae269ebefd5.svg",
+    "copies": 0
+  },
+  {
+    "id": 1419,
+    "set_id": 17,
+    "set_index": 4,
+    "name": "A Love Letter",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/f43759d8783689442f0ed8d80faa877595e215f9.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/4ba2733ddb8bdc3f0924c6463da01f5d1eccaf40.svg",
+    "copies": 0
+  },
+  {
+    "id": 1420,
+    "set_id": 18,
+    "set_index": 1,
+    "name": "Vikram's Plants",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/1420a75c99089bb6d8c75922c6b1f98b4e0a7a52.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/c3349839a5c44c2f209b5fc0993e4567e294246a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1421,
+    "set_id": 18,
+    "set_index": 2,
+    "name": "The Cake",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/04b7d35a93a98bff7f8f737fd986426db950ebb4.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/4a31a2e8269bfd907d862c44a3b320899c169419.svg",
+    "copies": 0
+  },
+  {
+    "id": 1422,
+    "set_id": 18,
+    "set_index": 3,
+    "name": "The Promotion",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/cbaa0a6efb56bf60b547bc595e45db2edc812f9c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/86aeb2f8135a55e49ebe8c6da5e13efdcde38d01.svg",
+    "copies": 0
+  },
+  {
+    "id": 1423,
+    "set_id": 18,
+    "set_index": 4,
+    "name": "The Ex-Girlfriend",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b42982b0d911802c022a0eb90aa65219c6d9c6f8.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/29463cb983d5da30288b0758a5f9ec7313b76094.svg",
+    "copies": 0
+  },
+  {
+    "id": 1424,
+    "set_id": 19,
+    "set_index": 1,
+    "name": "The Song",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/7f0673d3d98c08a7b2e95284b5a738430d3ad1bf.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/be8f47fb647fd1b6b62660bfeceaa284fb800d10.svg",
+    "copies": 0
+  },
+  {
+    "id": 1425,
+    "set_id": 19,
+    "set_index": 2,
+    "name": "Send Me an Email",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a5ac639a0ec85cc631ba7aec9b96a3bf9429a792.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/e70b0075377ea237ac6a6a55eaf12b14491ab78b.svg",
+    "copies": 0
+  },
+  {
+    "id": 1426,
+    "set_id": 19,
+    "set_index": 3,
+    "name": "An Excellent Teacher",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/f23309582fbb27b0310f4b20331fcfb767c7afda.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/fea97b34f975e980cb0f47aab08a6980675bbd81.svg",
+    "copies": 0
+  },
+  {
+    "id": 1427,
+    "set_id": 19,
+    "set_index": 4,
+    "name": "A Problem with the Car",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/1f5004afb25dae60a6dfcba08c0bb8d5964093bf.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/e161ff53b5f470063ac66df2698eddb71232c290.svg",
+    "copies": 0
+  },
+  {
+    "id": 1428,
+    "set_id": 20,
+    "set_index": 1,
+    "name": "A Fishing Trip",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/6de3b146040f0efe20280f1f3dcceeed164dc431.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/b25effb6b84f963315c4cf0b94d70033d61e59cb.svg",
+    "copies": 0
+  },
+  {
+    "id": 1429,
+    "set_id": 20,
+    "set_index": 2,
+    "name": "Hércules's Funeral",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/53c5f4b33bd95c49dd295e6d82b2e812d5a4a442.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d269170970dbcc5a5f80f6ea1ffed7394ae2b584.svg",
+    "copies": 0
+  },
+  {
+    "id": 1430,
+    "set_id": 20,
+    "set_index": 3,
+    "name": "Free Pizza",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/603053e5d2a51ef667e98a6b99df1c79744fcf88.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/1dcd5216b93313f075eb62584804a9bec488724e.svg",
+    "copies": 0
+  },
+  {
+    "id": 1431,
+    "set_id": 20,
+    "set_index": 4,
+    "name": "A Surprise Ending",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a92cf272e5183c7506d625da322f1d0c488a0f15.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/136e95ddf7eef68f8c312f81c3b03bf4100a14e7.svg",
+    "copies": 0
+  },
+  {
+    "id": 1432,
+    "set_id": 21,
+    "set_index": 1,
+    "name": "My Favorite Band",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/7bf566723d7117bfd7e2d75f2022d1bb7d79f8f0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/8809c44c2194d282a6e1573d25dcac12b6132022.svg",
+    "copies": 0
+  },
+  {
+    "id": 1433,
+    "set_id": 21,
+    "set_index": 2,
+    "name": "The Seat Is Yours!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/582b1b5d30bb81186f476f1a3b87241fe0e4dbc1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/cd2e97ba5e87d05c1e69dd805c067ece32ea89d5.svg",
+    "copies": 0
+  },
+  {
+    "id": 1434,
+    "set_id": 21,
+    "set_index": 3,
+    "name": "Recycling Is Important",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/ccdbe9f5500c9faf983751892e570ffbf1d16063.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/18c0212eeba49eed091e3e9334243a61b781aa9d.svg",
+    "copies": 0
+  },
+  {
+    "id": 1435,
+    "set_id": 21,
+    "set_index": 4,
+    "name": "Why Did She Break Up with Me?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/6ed83e34397cb4be511107e7acdc86160d4c824d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9d77d24b95463b2b7a2e8c9aa8f7b1c9f8de9013.svg",
+    "copies": 0
+  },
+  {
+    "id": 1436,
+    "set_id": 22,
+    "set_index": 1,
+    "name": "Thanks, Mom",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e077d4925a4898fcf3b6c6c51abc2cb35d626f75.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/bf40ef982a083d2f6c8dbc8896888db65d7f1488.svg",
+    "copies": 0
+  },
+  {
+    "id": 1437,
+    "set_id": 22,
+    "set_index": 2,
+    "name": "You Can Talk?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/365321c14985a374bbbef64ce89cea3b659d55e7.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a13fae69b40921c2d4f62a0295a19ff0c25d26eb.svg",
+    "copies": 0
+  },
+  {
+    "id": 1438,
+    "set_id": 22,
+    "set_index": 3,
+    "name": "Camping!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/3490d5f1db538f5342c0c83d7afbe786581f830f.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/6a073f6357dc14ea58e162202f936682895b11ec.svg",
+    "copies": 0
+  },
+  {
+    "id": 1439,
+    "set_id": 22,
+    "set_index": 4,
+    "name": "A Weekend at Bea's House",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/aa6abecc13a63623f995eb7c5179c9c10a47d3c2.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/e9870ece5e694f8efd3df5550e7bb5d130fadecf.svg",
+    "copies": 0
+  },
+  {
+    "id": 1440,
+    "set_id": 23,
+    "set_index": 1,
+    "name": "Two Tickets",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/13a470fab74ff887cb4c7b9975583fe337c93efa.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/1038afc2cf4744d25820807d461131e153f7ddcf.svg",
+    "copies": 0
+  },
+  {
+    "id": 1441,
+    "set_id": 23,
+    "set_index": 2,
+    "name": "You're Getting Older",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/37151a756427685cf10a036b231ef8cea3c2be9d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/4b810ac5ac1d241fb2380e6785db12c40b5c0508.svg",
+    "copies": 0
+  },
+  {
+    "id": 1442,
+    "set_id": 23,
+    "set_index": 3,
+    "name": "New Year, New Bea",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/57b631c35e6bfbaec9cfe74cf9d446aed613c3b5.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/8771524805b100d0e185a914607b8c5d904534bc.svg",
+    "copies": 0
+  },
+  {
+    "id": 1443,
+    "set_id": 23,
+    "set_index": 4,
+    "name": "I'm Going to Rome",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/fd61d3af01ac49466f6df9eeffa9889dd9f8cccd.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/7a9d96c0ef5e239395ce01891267355130ad35aa.svg",
+    "copies": 0
+  },
+  {
+    "id": 1444,
+    "set_id": 24,
+    "set_index": 1,
+    "name": "The Second Date",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/71b46a87401f99abdcedce25657f9cb0617fd383.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/3de4c74a9c516e04a9ccbd4614f29e68acb55f2a.svg",
+    "copies": 1
+  },
+  {
+    "id": 1445,
+    "set_id": 24,
+    "set_index": 2,
+    "name": "Can I Take Your Picture?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/3f924c92029970b9d421af90943bc85bf6f13328.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d6cfdc678db3116881efba02e683423389b53370.svg",
+    "copies": 0
+  },
+  {
+    "id": 1446,
+    "set_id": 24,
+    "set_index": 3,
+    "name": "The Letter",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/5bb56471fee9bef1fddbbd35fa26b6da45df7ea7.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/1517cbcf4f4e76f1dc8b0687b90969af2c828c4f.svg",
+    "copies": 1
+  },
+  {
+    "id": 1447,
+    "set_id": 24,
+    "set_index": 4,
+    "name": "Too Fast",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/4c6fde8f37e72c183fd1fc806745c637c06e7d5d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/0dacade4e0909e7d3d1149423aa5f432618b1157.svg",
+    "copies": 0
+  },
+  {
+    "id": 1448,
+    "set_id": 25,
+    "set_index": 1,
+    "name": "I Have a White Hair!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/0573f33956583ccbea32b4d59066658c810fa77d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/101b38fafc765483e659badbd2b174d558c65da2.svg",
+    "copies": 0
+  },
+  {
+    "id": 1449,
+    "set_id": 25,
+    "set_index": 2,
+    "name": "The Pink Dress",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/c0965a3c10fa16458a4784e19432e39aa8e7fc3e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/ffba9eba0bc98eb1b87842bfd234eb4274095663.svg",
+    "copies": 0
+  },
+  {
+    "id": 1450,
+    "set_id": 25,
+    "set_index": 3,
+    "name": "The Elevator",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a68e0da9e6d8dce4de9b02ed64b4aeb949662116.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/f5dc8cdee1c001f2b1b6c4c56613c01a458a17c3.svg",
+    "copies": 0
+  },
+  {
+    "id": 1451,
+    "set_id": 25,
+    "set_index": 4,
+    "name": "The Wedding",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/aef0b65b7b11a7a8e95329425ba75a7d2555eb46.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/1af589ac8182b2da5175dd9c2dc973d1089ef4f2.svg",
+    "copies": 0
+  },
+  {
+    "id": 1452,
+    "set_id": 26,
+    "set_index": 1,
+    "name": "The Manager's Office",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/201f7d01caa4d22126b88743f8be5fd7192bf85c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5e30e8550b553e3eab1690b49a538c688e556e50.svg",
+    "copies": 0
+  },
+  {
+    "id": 1453,
+    "set_id": 26,
+    "set_index": 2,
+    "name": "Grandmother's Recipe",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b313e6220a8829c0a1986b88006f86f12a31aa89.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/f846bda2ef7cfcb2a7b491fdab26521cbd7b480d.svg",
+    "copies": 0
+  },
+  {
+    "id": 1454,
+    "set_id": 26,
+    "set_index": 3,
+    "name": "A Love Story",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e66a7f1a6a0b3eff0a8e00bd7e985e09f8f86063.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/b957b41bd8d5fcb39a128a06784c94f776e81d43.svg",
+    "copies": 0
+  },
+  {
+    "id": 1455,
+    "set_id": 26,
+    "set_index": 4,
+    "name": "The Horoscope Is a Big Lie",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/5394d9c02152fe4a113b266df46c7f1d596f278b.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/10523c977de263efd9025298f59cc9e2f702d3f1.svg",
+    "copies": 0
+  },
+  {
+    "id": 1456,
+    "set_id": 27,
+    "set_index": 1,
+    "name": "Someone Stole My Sandwich",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/9f3b27c618f00363391637a3990147ce3524df87.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/71bc9bc5c6a5619a4f4ee9651bbb246b449bf495.svg",
+    "copies": 0
+  },
+  {
+    "id": 1457,
+    "set_id": 27,
+    "set_index": 2,
+    "name": "Do You Want to Break up with Me?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/6618a7ac023c90deab3f4f00794c629a38899be3.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/8f4366e7efa33308b803737d9fcb51ac94bcc27f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1458,
+    "set_id": 27,
+    "set_index": 3,
+    "name": "Pasta Problems",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/9498582f979ac3db6cf3b202e4894977c6c9019f.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9a8e4c90ef30a62e59cf23d4265247e2655c4cec.svg",
+    "copies": 0
+  },
+  {
+    "id": 1459,
+    "set_id": 27,
+    "set_index": 4,
+    "name": "This Tastes Strange",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e45af4dc516355e3bf060c4e15fc8c4d5b50588c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/2af10d537225ca8ebd8d85b0d77cdc2dc60ebb71.svg",
+    "copies": 0
+  },
+  {
+    "id": 1460,
+    "set_id": 28,
+    "set_index": 1,
+    "name": "The Dragon Cake",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/faf02225be3e19d4d555e44b52717ddc2e72da8b.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/c2fbecd45802dc974e3ec727a0206cfec66fd87f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1461,
+    "set_id": 28,
+    "set_index": 2,
+    "name": "Is It Love?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/80a0f6daacb14ed9afeff6b2a2114d86a8c962d3.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d7461e0ccc18067f34ff9c385653ac769bde4875.svg",
+    "copies": 0
+  },
+  {
+    "id": 1462,
+    "set_id": 28,
+    "set_index": 3,
+    "name": "The Boxing Match",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/c812bd768a043d883b693d71bb38b79fcc6f1c6d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/149224cb1a7c361279bece453d459dc57ba243a5.svg",
+    "copies": 0
+  },
+  {
+    "id": 1463,
+    "set_id": 28,
+    "set_index": 4,
+    "name": "The Flat Tire",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/022b918066aec612ad53d8431a12ec0be22203ca.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/76e5ba84900b1c2ebd321eafd9329980919ccede.svg",
+    "copies": 0
+  },
+  {
+    "id": 1464,
+    "set_id": 29,
+    "set_index": 1,
+    "name": "The Tent",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/471878d2290e83304aff15d212a589f0db734e8c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/15da04337561f2df975e0ed2ea8ee243a726b629.svg",
+    "copies": 0
+  },
+  {
+    "id": 1465,
+    "set_id": 29,
+    "set_index": 2,
+    "name": "The Movie Premiere",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a9d63e23914000581aa2b7cf3867deee98179364.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/3bcede6752ca2da06f769fd523244f5c763cebc6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1466,
+    "set_id": 29,
+    "set_index": 3,
+    "name": "Changes",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/3974820e0a1e5db8351e47bfebd6add487a2e8d7.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a2ac5b4bdad2cf4c70c2d3a4f3ff8e0ade6aba2d.svg",
+    "copies": 0
+  },
+  {
+    "id": 1467,
+    "set_id": 29,
+    "set_index": 4,
+    "name": "I Want the Sandwich",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/91eebaf3a9a518ee405b398c83fe53fa14c57c36.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/43b9829cc459f78e9742fdf418c9b0821bb1646e.svg",
+    "copies": 0
+  },
+  {
+    "id": 1468,
+    "set_id": 30,
+    "set_index": 1,
+    "name": "The Blue Duck",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b347903b58fa39cc99ee7f0499f6bb36975aea3e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/6ae21d07992767f2eef541bbcfde5913af8fc7a1.svg",
+    "copies": 0
+  },
+  {
+    "id": 1469,
+    "set_id": 30,
+    "set_index": 2,
+    "name": "Let's Ask for Directions",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/0c26e851fe643ec1e2cfff460a808c946b6ba359.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/0699ccdd9abbb4922a33be28cf6143a530843cc1.svg",
+    "copies": 0
+  },
+  {
+    "id": 1470,
+    "set_id": 30,
+    "set_index": 3,
+    "name": "The Sweater",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/9d230c8afcb0a407397ddb8ba17915d8548b8a40.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a6221e8716923ce3381efbbfc20a0913ce314fdb.svg",
+    "copies": 0
+  },
+  {
+    "id": 1471,
+    "set_id": 30,
+    "set_index": 4,
+    "name": "A Coffee Artist",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/8149cde6a030c40655f024c81f1301820cd365b1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/721a83a9cb283d95fc4a904b27a83c7a60b7760a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1472,
+    "set_id": 31,
+    "set_index": 1,
+    "name": "My Leg Hurts",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/31e16bb5c92227aa06082c1c0596e7e04a90ed62.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/e03c9c686e0856f66bc51a3f912c8be470a7f18b.svg",
+    "copies": 0
+  },
+  {
+    "id": 1473,
+    "set_id": 31,
+    "set_index": 2,
+    "name": "The Old Lady",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/165094c191f5da8c624ba1fb0d7a4d4e0a2e95c1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5efd5d3e85a10ad5c37e72a842288f5c3d967300.svg",
+    "copies": 0
+  },
+  {
+    "id": 1474,
+    "set_id": 31,
+    "set_index": 3,
+    "name": "Dinner with the Director",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/498de8a5d14de2e26058590665d973d4ede15a56.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/48ff56bf472c683d952ff24420066dbef5e7ac9f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1475,
+    "set_id": 31,
+    "set_index": 4,
+    "name": "Óscar in Los Angeles",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/6cbeffa51e14711694e20a259515bd528e09365c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/aa7be12b0429b89da80e093e44f1d40788aba012.svg",
+    "copies": 0
+  },
+  {
+    "id": 1476,
+    "set_id": 32,
+    "set_index": 1,
+    "name": "Airport Vacation",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/d2027c097f8c8c87e51e6c62418a3b806793a63c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/2b278a0330bde258574bdf9c02d9149192bc7d06.svg",
+    "copies": 0
+  },
+  {
+    "id": 1477,
+    "set_id": 32,
+    "set_index": 2,
+    "name": "Zari Learns How to Drive",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/741514b0c754b0b29059e4f806c516e5a3f50d03.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/08eed3487d27ad8df0cd4559d29cc60f65b2e2f1.svg",
+    "copies": 0
+  },
+  {
+    "id": 1478,
+    "set_id": 32,
+    "set_index": 3,
+    "name": "Who's Coming to Dinner?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/2d8ab4277c501b3185c34acacd739710eab904ac.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/dc357430b977e970c350bd02c026ab07731f28f3.svg",
+    "copies": 0
+  },
+  {
+    "id": 1479,
+    "set_id": 32,
+    "set_index": 4,
+    "name": "Perfect for the Job",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/d6448379012e2304f104bb606611288381d5f10d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5899822ff564221d831e0f0f0a91755383fd85a6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1480,
+    "set_id": 33,
+    "set_index": 1,
+    "name": "The Best Grade",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a7f51c5d6251b794e021150451f7fb01171a4573.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/621f4c71898fd95fc635a3cc1f3f74ef58bb3dfc.svg",
+    "copies": 0
+  },
+  {
+    "id": 1481,
+    "set_id": 33,
+    "set_index": 2,
+    "name": "A Horrible Date",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/4dfb2a0bdbc06cc0c68b7db3bbc846027ee05f7e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a0fcf3ace5fe44c02a92d0f17972a2115b744eb8.svg",
+    "copies": 0
+  },
+  {
+    "id": 1482,
+    "set_id": 33,
+    "set_index": 3,
+    "name": "Is He Calling Me?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/436d2ff88a1fdebccde9218081a733d85e906594.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/cee444ea2f249c913835205531b4e68f994b65b4.svg",
+    "copies": 0
+  },
+  {
+    "id": 1483,
+    "set_id": 33,
+    "set_index": 4,
+    "name": "The Security Question",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/65f2d4dadfff47f2400cc0575a901198a23f7e2c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9558b378d2ca0a3f0626205e03866b3e91153f01.svg",
+    "copies": 0
+  },
+  {
+    "id": 1484,
+    "set_id": 34,
+    "set_index": 1,
+    "name": "Work from Home",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/2d9886bbb72338d1dbf39ec2d784e633a0956ac0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a791ba499744af6b30bd5863838619250f9b3437.svg",
+    "copies": 0
+  },
+  {
+    "id": 1485,
+    "set_id": 34,
+    "set_index": 2,
+    "name": "The Drawing",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b5f1040f25ed8d9e26dbc0bd88e835c67bf47ba7.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/b004e0c7781b4ebf2a8ca485c1350bb7bc5883e6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1486,
+    "set_id": 34,
+    "set_index": 3,
+    "name": "The Perfect Moment",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/3654e3cbd111d76ad31cb4525a0f135d6cc0a0b1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/6a7e27a82dfe78e2546e5da50285e42496874dde.svg",
+    "copies": 0
+  },
+  {
+    "id": 1487,
+    "set_id": 34,
+    "set_index": 4,
+    "name": "The Bakery",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/fcde45143642727109fa1329d548996f58940795.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/dac984797ecc974f28ee915b961f8f66455fe4b6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1488,
+    "set_id": 35,
+    "set_index": 1,
+    "name": "A New Hobby",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/33214915c96cba06b1018b3feb4d275822e213cf.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/62007089a594753623424845fe8d5efd80654385.svg",
+    "copies": 0
+  },
+  {
+    "id": 1489,
+    "set_id": 35,
+    "set_index": 2,
+    "name": "The Boy Who I Love",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/80e8d7c635f45ef968f68bd76527bc15b7dc7a7d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/1e9075313162050e2812d85ddee29fc78ff91831.svg",
+    "copies": 0
+  },
+  {
+    "id": 1490,
+    "set_id": 35,
+    "set_index": 3,
+    "name": "Screams on the Night Train",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/8112c20545c099ce574a63be603fb1caa51b07a0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/6a2cfe9a3b62354a66111cce8d24f451aa087ef0.svg",
+    "copies": 0
+  },
+  {
+    "id": 1491,
+    "set_id": 35,
+    "set_index": 4,
+    "name": "Vikram's Surprise",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/78de33e4c5edb5d223b48b7e399287363c0a89fc.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/2729a328a5a5eca5cd0db3189fc0c1ce390cfb4f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1492,
+    "set_id": 36,
+    "set_index": 1,
+    "name": "I Want to Be Like You",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/266495ecc34218e020d29e824e4d98ea9fcd9ae8.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/801667abeebafff15f24357bcfe453e3f5688383.svg",
+    "copies": 0
+  },
+  {
+    "id": 1493,
+    "set_id": 36,
+    "set_index": 2,
+    "name": "Bird Sitting",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/29ff33ad853617d039075dcf5a3ce87019df6eea.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/bec6ac06369ced77777ad5151e3a385213c413b8.svg",
+    "copies": 0
+  },
+  {
+    "id": 1494,
+    "set_id": 36,
+    "set_index": 3,
+    "name": "Lily Takes Out the Trash",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e1c4caa731122e722a8256cd8d34f41afb79d7a1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/093ca1e21f226b69b5c86085e1710ffbca164b46.svg",
+    "copies": 0
+  },
+  {
+    "id": 1495,
+    "set_id": 36,
+    "set_index": 4,
+    "name": "The Hacker",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e5ed4fda4d8ab4737f5820bc153493cc7ce7d5dc.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a22fead6c7883506dab25f8e6ea7c66c0f406c7c.svg",
+    "copies": 0
+  },
+  {
+    "id": 1496,
+    "set_id": 37,
+    "set_index": 1,
+    "name": "I Love Your Haircut!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/9b00875fe88cd8f31728cb8311ae85e3408fac3d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/4cd3b26d7cc23dce02dcb78364dc83c5a012cbd7.svg",
+    "copies": 0
+  },
+  {
+    "id": 1497,
+    "set_id": 37,
+    "set_index": 2,
+    "name": "The New Jeans",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/93f63b0da74725a9b9d0bf59f284857d2c16f131.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/f626ff0ffb04c43f1e356ecce52d30f0b07af892.svg",
+    "copies": 0
+  },
+  {
+    "id": 1498,
+    "set_id": 37,
+    "set_index": 3,
+    "name": "I Have to Tell You the Truth",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/df4cdbdb4740e383ed641f9189e6d27c40665f7c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9165f18e29e96da5e384b552a943a5cd3dc534f6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1499,
+    "set_id": 37,
+    "set_index": 4,
+    "name": "The New Roommate",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/dd4ff9e401e3290add7dcffad831745e6a9fce32.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/01ad2f6fead363d9258efd96f3a6dc40d585b715.svg",
+    "copies": 0
+  },
+  {
+    "id": 1500,
+    "set_id": 38,
+    "set_index": 1,
+    "name": "A Band for Girls",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/79681f338aa32f1b2308c49c35035bb832adfa36.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/e06e0eabe5fd4103395ae5a7d53a28d4f2b75574.svg",
+    "copies": 0
+  },
+  {
+    "id": 1501,
+    "set_id": 38,
+    "set_index": 2,
+    "name": "At the Gym",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/0057ac8bd14a62f7232fc56cfb3bbd03a3d14870.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/c11e22dbce96e56db5b41dd6e0d41b36ee6e24f8.svg",
+    "copies": 0
+  },
+  {
+    "id": 1502,
+    "set_id": 38,
+    "set_index": 3,
+    "name": "A Very Long Flight",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/54adb59307acaa198021ee43f53b6b09e7c798d4.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/307bb67b645fe1888cb349a09f91a3ee1c200599.svg",
+    "copies": 0
+  },
+  {
+    "id": 1503,
+    "set_id": 38,
+    "set_index": 4,
+    "name": "Janet's Play",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/25109ff2cd8ebdef158c5a08d291734c7e539f18.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/fc56d56ed14057226df892a48414f5b1c55abe77.svg",
+    "copies": 0
+  },
+  {
+    "id": 1504,
+    "set_id": 39,
+    "set_index": 1,
+    "name": "The Magic School",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/c904b530c9952494a6604aef226691c17a8e14a6.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/8161f0f8e3c323619ee3e6d4c192be801cf2c33d.svg",
+    "copies": 0
+  },
+  {
+    "id": 1505,
+    "set_id": 39,
+    "set_index": 2,
+    "name": "The Cake Contest",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/3d7d445e4aff5325462c389c951819ec75e2eabe.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/0a98539b616a4908c9715c94db4a67fec58e6b40.svg",
+    "copies": 0
+  },
+  {
+    "id": 1506,
+    "set_id": 39,
+    "set_index": 3,
+    "name": "This Isn't Working",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b653537e4d94d75e12fb96a55a69c457669be3c8.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/44f38e39c6769b51408ae83596a1e538d967e8bb.svg",
+    "copies": 0
+  },
+  {
+    "id": 1507,
+    "set_id": 39,
+    "set_index": 4,
+    "name": "Space Turtles",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/dfc62fb8d369542f74628a32a6c7863422c0a0cc.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9705eaba9c242e5c1f1eb5c85f1889f5f230729e.svg",
+    "copies": 0
+  },
+  {
+    "id": 1508,
+    "set_id": 40,
+    "set_index": 1,
+    "name": "Some turbulence",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/78426b5c50369f31d4e52674de31e234b8f9f5b0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/4cc7d26545ca3ce33f0b2411e8695f290da78dc8.svg",
+    "copies": 0
+  },
+  {
+    "id": 1509,
+    "set_id": 40,
+    "set_index": 2,
+    "name": "The Party",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/5162da475ff4d03f9b122ad9f38ad7fdeb583e4e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/ce7bdc77eb0bfd3e19e3b0db208edc729aeee2bd.svg",
+    "copies": 0
+  },
+  {
+    "id": 1510,
+    "set_id": 40,
+    "set_index": 3,
+    "name": "I Need to Practice",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e9fa3c23bdc06088f2c206b3e4c6077a915a23d1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5437689d6786b565b6ce7884cf6d380ca8423e5e.svg",
+    "copies": 0
+  },
+  {
+    "id": 1511,
+    "set_id": 40,
+    "set_index": 4,
+    "name": "Eddy for Mayor!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/5394c3edf31cc9d90f01f6fb488ee38c1c66c6cb.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/05e13f3549c52c61ea9727badeb376fee1a4d7c4.svg",
+    "copies": 0
+  },
+  {
+    "id": 1512,
+    "set_id": 41,
+    "set_index": 1,
+    "name": "Famous on Social Media",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/0dae15c29cfc41c881e78cec52fae09b515d2aab.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/4361901539e334857d4b465b09d2bdad3dfeedd8.svg",
+    "copies": 0
+  },
+  {
+    "id": 1513,
+    "set_id": 41,
+    "set_index": 2,
+    "name": "The Farewell Party",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/5a88b8531a40679aa2def605687c85480a0c0233.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/b79230ae81e343d886b4cea62a52d0b5883bd728.svg",
+    "copies": 0
+  },
+  {
+    "id": 1514,
+    "set_id": 41,
+    "set_index": 3,
+    "name": "At the Pharmacy",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a116c7f8c3db8219dc8fe7b0bbe0557465a6be42.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/6474c610eb947c791e797e878e28c279f3905aea.svg",
+    "copies": 0
+  },
+  {
+    "id": 1515,
+    "set_id": 41,
+    "set_index": 4,
+    "name": "One day at the beach",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/8d95fcf260d1962c539ce8ab0c7a3d7ec191f8bb.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/048f32489b7d22d4fc22c67bc5c64a01f5828a3e.svg",
+    "copies": 0
+  },
+  {
+    "id": 1516,
+    "set_id": 42,
+    "set_index": 1,
+    "name": "It's Too Expensive",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/27825537cbb2ce850832da35a7d4c9883a167f4d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/f53bcbcd74f00acabcca4d9d2408fb16e6d30f3f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1517,
+    "set_id": 42,
+    "set_index": 2,
+    "name": "The Frog",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b4961ab69b080a2b7bd220a23938bd788f528a7b.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/06db7ba838b03bc9b49602fa8dbb7c00881f929d.svg",
+    "copies": 0
+  },
+  {
+    "id": 1518,
+    "set_id": 42,
+    "set_index": 3,
+    "name": "The Interview",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/c5689ec9b9c4ab42c051204653e5fba3c2a6a8dc.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/857c570ed760cd6d06526cecf0b469a7c0ef3236.svg",
+    "copies": 0
+  },
+  {
+    "id": 1519,
+    "set_id": 42,
+    "set_index": 4,
+    "name": "Lily's painting",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/4aa19a00f8303447c04181c5293667d18f3eb919.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/e917f49d6b7ff96ca39f110ebb88551e3359dbd4.svg",
+    "copies": 0
+  },
+  {
+    "id": 1520,
+    "set_id": 43,
+    "set_index": 1,
+    "name": "An Old Friend",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e56c1d461e8c04fe2460dcb8adc7144a838954b6.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9a24d590833b6d4c1753efa2e1d6cd5b1c0b9f9a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1521,
+    "set_id": 43,
+    "set_index": 2,
+    "name": "The Fire Alarm",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b6da2e8362d9d40d6aa2fe04fa7caeb165bc7881.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/02f81c4c3a04af8641d672020bdf73ef3e65896a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1522,
+    "set_id": 43,
+    "set_index": 3,
+    "name": "I Love Boxing",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b00a85ff508c12d11a045e93a7ba346120950b83.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/e8d3a96a2826a751c3e63c8af602c08f7080e1fd.svg",
+    "copies": 0
+  },
+  {
+    "id": 1523,
+    "set_id": 43,
+    "set_index": 4,
+    "name": "I Can Do Anything",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/44a67d8d05015cfb6db49409ac0f1fcd53d1d672.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/c001a1a6a10a255cd0f4bcac72418bd9bb013474.svg",
+    "copies": 0
+  },
+  {
+    "id": 1524,
+    "set_id": 44,
+    "set_index": 1,
+    "name": "The Tea Set",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/f4524962c6ecf341923cbfa989b19223171631d5.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/364bddf1e2cbd39437d61f97a9961df4badf4af8.svg",
+    "copies": 0
+  },
+  {
+    "id": 1525,
+    "set_id": 44,
+    "set_index": 2,
+    "name": "I Love Pirates",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/4207faae78d870b1d5c2057d0004328edeb06dee.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/165a7a41d8d4b3060ca395954c2835c4ff28f8ce.svg",
+    "copies": 0
+  },
+  {
+    "id": 1526,
+    "set_id": 44,
+    "set_index": 3,
+    "name": "The Gift",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/69feb752c95154b1c02c4778dde1b1b4beff14ab.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/8629734384786d1c817d99a7cdfc347428e45cdf.svg",
+    "copies": 0
+  },
+  {
+    "id": 1527,
+    "set_id": 44,
+    "set_index": 4,
+    "name": "My Head Is Too Big",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/25c2daabcfaa093f64e38250b640e0e2e9353c13.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/61d254dbfbf92aa1161048dabf7cf31ca6f0381b.svg",
+    "copies": 0
+  },
+  {
+    "id": 1528,
+    "set_id": 45,
+    "set_index": 1,
+    "name": "Eat the Vegetables",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/78d9ea0bad492500022326fbaf2c8e818b88ae98.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d7afe820810878109a4ef9fe3541910867c495d6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1529,
+    "set_id": 45,
+    "set_index": 2,
+    "name": "Are We Cool?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/7bd3465b5d22de3a1753f1dfc2e687a1c716108f.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/bc09e8bcd55916d4a08fcd04aa9c36948f4f4521.svg",
+    "copies": 0
+  },
+  {
+    "id": 1530,
+    "set_id": 45,
+    "set_index": 3,
+    "name": "One Star",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a0f587df8b2c17babec52d5b472e4deacf0b30a1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a24567f83b3546d02278cbe2982cfca552c71080.svg",
+    "copies": 0
+  },
+  {
+    "id": 1531,
+    "set_id": 45,
+    "set_index": 4,
+    "name": "Are You Sick?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/33ca65c6f76ced3e6fb6442c61393658c23dd77d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/663fec86d4d856de021b6f16c5c5c83ed5bb534f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1532,
+    "set_id": 46,
+    "set_index": 1,
+    "name": "A Cruise at Sunset",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/8cb506ddd68c00db3485b49603895bcad6785508.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/86472677622341456ef5cc50613b7b4b3bb006f4.svg",
+    "copies": 0
+  },
+  {
+    "id": 1533,
+    "set_id": 46,
+    "set_index": 2,
+    "name": "Pajamas and Potato Chips",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/70f55ced7f16bd99a868500621ecc77113e18750.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/b6e4bdf11acda563a6723792a723ad8edb45aff4.svg",
+    "copies": 0
+  },
+  {
+    "id": 1534,
+    "set_id": 46,
+    "set_index": 3,
+    "name": "The Water Slide",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/cc6e04253b487e9b0dd627cf53600d93437e9c6f.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/ce0ea6ca8500a382f0215b6031ffb62ddb1616e7.svg",
+    "copies": 0
+  },
+  {
+    "id": 1535,
+    "set_id": 46,
+    "set_index": 4,
+    "name": "The Magic Trick",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/07e5ab8e4f02e8431d4ddb1ec690c9cd9ebc8790.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d6181c60c7a77aaca9c6ac396dc139ac4aa848ad.svg",
+    "copies": 0
+  },
+  {
+    "id": 1536,
+    "set_id": 47,
+    "set_index": 1,
+    "name": "The Boss's Son",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b149ae83fa5344a2ef71181aeb628edc0c6b229e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/87ac89b7e142066531e80a26ced37d206083f6d7.svg",
+    "copies": 0
+  },
+  {
+    "id": 1537,
+    "set_id": 47,
+    "set_index": 2,
+    "name": "The Haunted Hotel",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/fde4c35a5e56b4e1d5f0e7b5c08f712877ce1396.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/18255257009f7aa560a9c7f331bf08c7bd2711e5.svg",
+    "copies": 0
+  },
+  {
+    "id": 1538,
+    "set_id": 47,
+    "set_index": 3,
+    "name": "Eddy the Princess",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/2dbf886a7fb4cce67357d9dd61003d7e6b93d965.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/cc012bb84f0654b17d2c210e827bb3698c9bf368.svg",
+    "copies": 0
+  },
+  {
+    "id": 1539,
+    "set_id": 47,
+    "set_index": 4,
+    "name": "The Boat Party",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/bf0d06c29446ecf51604bbf76881f2c1969ea743.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/b5eb826d3a64739be512d6655685593d061378c9.svg",
+    "copies": 0
+  },
+  {
+    "id": 1540,
+    "set_id": 48,
+    "set_index": 1,
+    "name": "The Book Club",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/4fdd93d288a701c27dcecb7cbb502552615125fb.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/224c467db868f77cd44a8ab8a0b1179e3ca1a8e7.svg",
+    "copies": 0
+  },
+  {
+    "id": 1541,
+    "set_id": 48,
+    "set_index": 2,
+    "name": "The Baby Photo",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/9f865aa22091a1f0edb696c5b60a82927734ca39.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/608435f5b2c3eaa0011590abf47e1ae92b8138bf.svg",
+    "copies": 0
+  },
+  {
+    "id": 1542,
+    "set_id": 48,
+    "set_index": 3,
+    "name": "The Move",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/60415a859a28fce83e3f44fa09ee22aea6683c79.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/1207e92b451e858adc8163cb73cf6bafb190fdae.svg",
+    "copies": 0
+  },
+  {
+    "id": 1543,
+    "set_id": 48,
+    "set_index": 4,
+    "name": "The Bride",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/775381f7ab58701fe3aebc4cc4a38f3d64c51757.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/42af81d0ee31fb44d4d5d3162de9e7d3b8765153.svg",
+    "copies": 0
+  },
+  {
+    "id": 1544,
+    "set_id": 49,
+    "set_index": 1,
+    "name": "A Very Fancy Wedding",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/5e185062c86795bed5ec67614113b179fac7617a.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/732ec5afd01e01da806de38ce2b70c19a6b52e33.svg",
+    "copies": 0
+  },
+  {
+    "id": 1545,
+    "set_id": 49,
+    "set_index": 2,
+    "name": "But I'm Driving",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/45405bedc1f9a40780d5d723631297516106234c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/cc2a52bc6b367269cf450bdc0cc6a70a19a199d2.svg",
+    "copies": 0
+  },
+  {
+    "id": 1546,
+    "set_id": 49,
+    "set_index": 3,
+    "name": "Fifty Years Later",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/bd548e0e36a7d723cbcd5effbc2d4518daa043d3.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5eb0b5c115c59a82a098ee4e6de9b8386df8db6d.svg",
+    "copies": 0
+  },
+  {
+    "id": 1547,
+    "set_id": 49,
+    "set_index": 4,
+    "name": "Let's Move the Bed",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a5be42212cf1830fd07312804271864e553d4cc5.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/0f7ed20f8dd9abe2d26821e7d69caa9a9d28f194.svg",
+    "copies": 0
+  },
+  {
+    "id": 1548,
+    "set_id": 50,
+    "set_index": 1,
+    "name": "The New App",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/443f07b7aaaa4b71f033aeabe8991388d0d83a29.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/f4881f1c1ad32fbc97657b1eac17c752c927aa7a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1549,
+    "set_id": 50,
+    "set_index": 2,
+    "name": "That's Not Dinner",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/ae25b96d18fd3beb44f7b21cdf33744a0c345524.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/e0718b43f841b45b2c93f3500731f0a130105110.svg",
+    "copies": 0
+  },
+  {
+    "id": 1550,
+    "set_id": 50,
+    "set_index": 3,
+    "name": "Eddy's Haircut",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a23f7379eb25ab5eab70313322141cca8913836e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/7f5eed8e21ecae2b3a840ece026a544e67778e1b.svg",
+    "copies": 0
+  },
+  {
+    "id": 1551,
+    "set_id": 50,
+    "set_index": 4,
+    "name": "The Wedding Present",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/5fcf8aa8536b6fce01dcb325bc98a3c405b37a52.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/2280896be61cd070fb781ff2aab8b028ed805506.svg",
+    "copies": 0
+  },
+  {
+    "id": 1552,
+    "set_id": 51,
+    "set_index": 1,
+    "name": "Bea's Date",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/c2ebc9bcea7bf4c9e2eebaa53c2c04b3fbe91af1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/cab4be49323f5dd876f6351e2fb939b328536fa9.svg",
+    "copies": 0
+  },
+  {
+    "id": 1553,
+    "set_id": 51,
+    "set_index": 2,
+    "name": "Waiting for Jorge",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/37f57bcc086d2115ffd48c5870c49b29c43e79e5.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/7d8114eab9a5a0933ffdb44a23c7a12e3a5e0682.svg",
+    "copies": 0
+  },
+  {
+    "id": 1554,
+    "set_id": 51,
+    "set_index": 3,
+    "name": "I'm Going to Run a Marathon!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/ac23366f901eef0e4cd68003925dc9ecbad0dfdc.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a6179aaec1af89edba11dfca8dc3026a8b19bff3.svg",
+    "copies": 0
+  },
+  {
+    "id": 1555,
+    "set_id": 51,
+    "set_index": 4,
+    "name": "Aliens Exist",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/709d23b23591aae671058052dbd0712e4c0b4dc0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/403328a8a99b6867a220d65b6a6a48ac40e26783.svg",
+    "copies": 0
+  },
+  {
+    "id": 1556,
+    "set_id": 52,
+    "set_index": 1,
+    "name": "Space Vikings",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b436c4c39211d404b6aab97d45f19b3334aac049.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/165c194c33c80a7d30ebba79d0d4cf51c79f8527.svg",
+    "copies": 0
+  },
+  {
+    "id": 1557,
+    "set_id": 52,
+    "set_index": 2,
+    "name": "I Have No Reception",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/93a4e14a4151b89240dd25c125e67f5edce838c0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d72ea91e3c190e09f1659bad7070c54d56364893.svg",
+    "copies": 0
+  },
+  {
+    "id": 1558,
+    "set_id": 52,
+    "set_index": 3,
+    "name": "Where Are the Paddles?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/5bca97adbeb2acc56c1917e81b3d4898de1d6fa2.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/bbbf59720476669932c111e1a738c86b6d678fbe.svg",
+    "copies": 0
+  },
+  {
+    "id": 1559,
+    "set_id": 52,
+    "set_index": 4,
+    "name": "The Perfect Anniversary",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/956c0bdd6dae0fd23e5c3ec220fb443f9d0d5aaf.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/8103bcc2bd34c0b59a2105674893f50dc6d6b1e2.svg",
+    "copies": 0
+  },
+  {
+    "id": 1560,
+    "set_id": 53,
+    "set_index": 1,
+    "name": "Where Is the Dog?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/fda16efd68fb9a31bd8732b3d09dbe5ad71f6af3.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/135bfa5e0d6d878b4ce35e6e832d8f7a732cc0e0.svg",
+    "copies": 0
+  },
+  {
+    "id": 1561,
+    "set_id": 53,
+    "set_index": 2,
+    "name": "Junior Can Decide",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/240c115e5288f273a1ae8afb697bfc1337bd4c51.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/910cf269cf38b2a0441e600618700714b332fc63.svg",
+    "copies": 0
+  },
+  {
+    "id": 1562,
+    "set_id": 53,
+    "set_index": 3,
+    "name": "The Password",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/52a54b5d8c2183316d8e5a3d0716c57a4a3f4fc9.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/df55926fb49e02e584470636fa0f11228c5c5ab5.svg",
+    "copies": 0
+  },
+  {
+    "id": 1563,
+    "set_id": 53,
+    "set_index": 4,
+    "name": "Memories from the Past",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e4ea4fb5cc7194946de0e6284948e36f4cc0ff2b.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/f2f5aab9c0da9c6411bbc58019e630a7d7fecb48.svg",
+    "copies": 0
+  },
+  {
+    "id": 1564,
+    "set_id": 54,
+    "set_index": 1,
+    "name": "Junior Makes a Mess",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/707f26ddf1f8d61b07d6970fac9ad1d2250f3245.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9eeb3ced23a26ab9c4d8652e252d257120fa20b1.svg",
+    "copies": 0
+  },
+  {
+    "id": 1565,
+    "set_id": 54,
+    "set_index": 2,
+    "name": "The Audition",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/65324ccf6a8315bbc60662c9cb126748f9419459.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/f3745fe24cd744157cf90a5aefb406de6e26785a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1566,
+    "set_id": 54,
+    "set_index": 3,
+    "name": "A Scary Movie",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/1227c1fdb5f1fa74cc8fbd9e260e31e6522eb36f.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a1bbf834056206ad49e2cdb3e37429d21dafecc5.svg",
+    "copies": 0
+  },
+  {
+    "id": 1567,
+    "set_id": 54,
+    "set_index": 4,
+    "name": "Aunt Betty",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/992eeaa46a22d3b9d44b1d0d78046e61c3e77af2.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/6b43af575436274a77c4a1096dde31088be555b2.svg",
+    "copies": 0
+  },
+  {
+    "id": 1568,
+    "set_id": 55,
+    "set_index": 1,
+    "name": "Twenty Years",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/1cfd10fff68bb1318973c0bff839d7f7dd9c95ae.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/e6814530cc47bb66ac80182a70c8119ae00da28a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1569,
+    "set_id": 55,
+    "set_index": 2,
+    "name": "Junior's Interview",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/20c8572751cb0bf81eb620bffa27cc0c140ca9d8.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/990c177e87e1e541636fcd21d879719817ad82d2.svg",
+    "copies": 0
+  },
+  {
+    "id": 1570,
+    "set_id": 55,
+    "set_index": 3,
+    "name": "The Drummer",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/75e127009efd4c3302abb5e671d261381e96cf1c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/2aafedc771180ca0d5229dd773bd0d4e11e1cde0.svg",
+    "copies": 0
+  },
+  {
+    "id": 1571,
+    "set_id": 55,
+    "set_index": 4,
+    "name": "Sorry I'm Late",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/6ac622438d38582c2ecc18c40e3bd08dbbdd34ee.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/8124db018f889ac2f6d24ac1f370242dbb0ad65e.svg",
+    "copies": 0
+  },
+  {
+    "id": 1572,
+    "set_id": 56,
+    "set_index": 1,
+    "name": "I like Your Tie",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/4288e384a24f7b6b324c1cddb3850f5b93aaf6b7.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d21c68e3211da19a42de21a0fe19156e7c76dcd3.svg",
+    "copies": 0
+  },
+  {
+    "id": 1573,
+    "set_id": 56,
+    "set_index": 2,
+    "name": "The Accident",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/85a8e445179256e8f3ef66800c1133f003ca88fb.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/c6d90731fde97538d6f34f72c53719c8043ae7f5.svg",
+    "copies": 0
+  },
+  {
+    "id": 1574,
+    "set_id": 56,
+    "set_index": 3,
+    "name": "The Movie Is about to Begin",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a2697cd804524056eb0cd5b73590a4a136c3eeb4.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/3bd2f67694dc090bb3ad482fb4fddb7effb3e8a6.svg",
+    "copies": 0
+  },
+  {
+    "id": 1575,
+    "set_id": 56,
+    "set_index": 4,
+    "name": "This Isn't a Date?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/d33812195b69c1f645f4cb1c232453be424cfb2a.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5a7f42ce5afd7ee6c0e055ab749426e2a5906838.svg",
+    "copies": 0
+  },
+  {
+    "id": 1576,
+    "set_id": 57,
+    "set_index": 1,
+    "name": "The Art Show",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/baa56feb670746e9ae0d2f346f9bd1cb84f8e7c0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/f8062ed1fadd7f081e35947278751581a6c34136.svg",
+    "copies": 0
+  },
+  {
+    "id": 1577,
+    "set_id": 57,
+    "set_index": 2,
+    "name": "Look at that whale!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/1642b538580e232536f351e7c44d017ff9dd2e0f.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/22b39335e978707ac7e378fceacbac4f7b3e5b07.svg",
+    "copies": 0
+  },
+  {
+    "id": 1578,
+    "set_id": 57,
+    "set_index": 3,
+    "name": "I'll Fix It!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/d572673850ac3d768ade2652d95d911ada359b89.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/b4b1611f2c99f52476fc60924513c7feefe46064.svg",
+    "copies": 0
+  },
+  {
+    "id": 1579,
+    "set_id": 57,
+    "set_index": 4,
+    "name": "Clara's Party",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/aa4800c8114db0a8bd3c677f9b3b1d4aa62ad3ee.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/7057d2b696fa55067be67b5ce21bf1ace0da5165.svg",
+    "copies": 0
+  },
+  {
+    "id": 1580,
+    "set_id": 58,
+    "set_index": 1,
+    "name": "Eddy's Meeting",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b40a806be9ab3806c585c3864fd1f3a5d4703762.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d050289cd38a7056ed4d9717a7f23b2828adbb9f.svg",
+    "copies": 0
+  },
+  {
+    "id": 1581,
+    "set_id": 58,
+    "set_index": 2,
+    "name": "I'm the Manager",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/877f02a45fb7f5ecd88342d994deb5cd3dfeab05.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/1513737cda2e973e29b5daeaee62b458e49fad5c.svg",
+    "copies": 0
+  },
+  {
+    "id": 1582,
+    "set_id": 58,
+    "set_index": 3,
+    "name": "Is Your Wifi Working?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/0c6dd5978817dff45cbc21508669c3d30bff4460.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/074a5ab61a047d40fdd7079e2fa37bf394a2fbbf.svg",
+    "copies": 0
+  },
+  {
+    "id": 1583,
+    "set_id": 58,
+    "set_index": 4,
+    "name": "The Worst Season",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/77e3c01d6fe16bea525cd1bdb712f25fbac55427.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5e4e9012d9857aee0d7fae3518c470c2fc0b1a55.svg",
+    "copies": 0
+  },
+  {
+    "id": 1584,
+    "set_id": 59,
+    "set_index": 1,
+    "name": "Call a Doctor!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/3e11ab3ae6a88cb24864b35352d4c53ed34f82b9.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/c92c412287a69a673eeae5639f07af4c004bb634.svg",
+    "copies": 0
+  },
+  {
+    "id": 1585,
+    "set_id": 59,
+    "set_index": 2,
+    "name": "Lin's Resume",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/74f1ad6632da08cc0a9a896e4cc31679116d589e.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/8e5e77d262103500eeca12f2cd193e7766c3285b.svg",
+    "copies": 0
+  },
+  {
+    "id": 1586,
+    "set_id": 59,
+    "set_index": 3,
+    "name": "The Great Baking Show",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/479ca2cd6d694e4e705cb17563dc444a600b2daf.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/1116dbdc8841b7479ba1afb379922656641b1b62.svg",
+    "copies": 0
+  },
+  {
+    "id": 1587,
+    "set_id": 59,
+    "set_index": 4,
+    "name": "The Refund",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/6fd6c637530463f272471913506b002a89461586.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/8d2cee2e2c88355a3e6a2d98c1b6723c455c41b5.svg",
+    "copies": 0
+  },
+  {
+    "id": 1588,
+    "set_id": 60,
+    "set_index": 1,
+    "name": "Something New",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e2cc1a6ce14103c3fc2c2685fe8712a85c994367.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a9cdc8a83d99494190cd292a9f3b41da4c2ee4a3.svg",
+    "copies": 0
+  },
+  {
+    "id": 1589,
+    "set_id": 60,
+    "set_index": 2,
+    "name": "The Lost Costume",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b8061ad9769dc8c4f3e35e4561b1052082970290.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/7ed2a64969f8b30063d5ec75f4dae3d01074573a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1590,
+    "set_id": 60,
+    "set_index": 3,
+    "name": "The Cat Rule",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/c61fc50ac9ec5bb9a526be1a60a46fd198130af8.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/cf456fd247b4e865382f745b035e6d6a99179473.svg",
+    "copies": 0
+  },
+  {
+    "id": 1591,
+    "set_id": 60,
+    "set_index": 4,
+    "name": "It's Forbidden to Feed the Seals",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/5e18c36a7c35f03f56ac6b99e49f4912cf1de9cd.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/21f68e3bac63bf8b8d0d3a3d3bdf3207c986ffc4.svg",
+    "copies": 0
+  },
+  {
+    "id": 1592,
+    "set_id": 61,
+    "set_index": 1,
+    "name": "The Yoga Class",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/c989a29b0e3a22af07df395413a4ff66ac629fe1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a91e2cc8f2aca54ba5f35426fcea10dfe9dac700.svg",
+    "copies": 0
+  },
+  {
+    "id": 1593,
+    "set_id": 61,
+    "set_index": 2,
+    "name": "The Flu Shot",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/c3892efd0a70acd2ca997ee8d423d709b2ec6085.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/222533c8796169cf6c8fb897c31c7b0f51f3a1bf.svg",
+    "copies": 0
+  },
+  {
+    "id": 1594,
+    "set_id": 61,
+    "set_index": 3,
+    "name": "Where's My Jacket?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/aeb33df9e6c0467a8cb387cc70ac3f360e3a3538.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/c118dba677be114f65466bf9f2e2bb74df28ff32.svg",
+    "copies": 0
+  },
+  {
+    "id": 1595,
+    "set_id": 61,
+    "set_index": 4,
+    "name": "The Worst Monkey in the Zoo",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/d6743aa2595f55ad5b6eae95524dd24508ce7a08.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5fbef3515e1c05aae2179cc3a6bf95cbd695dd24.svg",
+    "copies": 0
+  },
+  {
+    "id": 1596,
+    "set_id": 62,
+    "set_index": 1,
+    "name": "Bea's List",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/d063b2ee0cb4934736d42e82662400d629a8d46c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/fa01e80e2693ea644261decf449a0cd55e06cac2.svg",
+    "copies": 0
+  },
+  {
+    "id": 1597,
+    "set_id": 62,
+    "set_index": 2,
+    "name": "A Monster under the Bed",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/507d5e8235b34e78a78cae0b6079fd9b11b788c1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/2ae39ad74abbad9f61bed45e4ff88fbafc38f692.svg",
+    "copies": 0
+  },
+  {
+    "id": 1598,
+    "set_id": 62,
+    "set_index": 3,
+    "name": "Cousins",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/071f7bb32301367697f526b38a59b115e61e0728.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/4836b431f901bf1c44837c02de019cab84831e3a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1599,
+    "set_id": 62,
+    "set_index": 4,
+    "name": "Inhale, Exhale",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e66f8a1bf3ce1873114b0d38a28a36b31809cc53.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/4f73cbdcb805af9af869a20300f8a0563fefd730.svg",
+    "copies": 0
+  },
+  {
+    "id": 1600,
+    "set_id": 63,
+    "set_index": 1,
+    "name": "In the Front Row",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/ba61cf90eae581a2fc6b464187e6053cbaa25767.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/2d03636afd6c976c087761130ff03da6796e545c.svg",
+    "copies": 0
+  },
+  {
+    "id": 1601,
+    "set_id": 63,
+    "set_index": 2,
+    "name": "A Night Without Junior",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/54c7235c9bfaadd65edd3d671c289cb031b83a99.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9e5ecd5a83d9fd09c43c35856fe4648b0b266256.svg",
+    "copies": 0
+  },
+  {
+    "id": 1602,
+    "set_id": 63,
+    "set_index": 3,
+    "name": "Is it too late?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/ea32306b8bd2ce661953eb3904104e5aa3f757e1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/9f380dfcb188f1cb4c193d35837640e1481bd5e4.svg",
+    "copies": 0
+  },
+  {
+    "id": 1603,
+    "set_id": 63,
+    "set_index": 4,
+    "name": "Bad at Soccer",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/dc1efa959de5fdf54aa9bda70628abf0dfe0fea8.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/6123e90bc350e883b594dd3ea99b319c7cca0b3c.svg",
+    "copies": 0
+  },
+  {
+    "id": 1604,
+    "set_id": 64,
+    "set_index": 1,
+    "name": "Can You Give Me the Recipe?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/3f692460ac1b0f3e04d046d93976bc69f235d10d.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/0b60db6f7208bbcf2240149cb1c6e9d12496c185.svg",
+    "copies": 0
+  },
+  {
+    "id": 1605,
+    "set_id": 64,
+    "set_index": 2,
+    "name": "On the News",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a88e34231587eb6d690d6575ea42297d3767dd78.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/6e47b2eb81ee51d85c851ee5c3c4d230068ccea3.svg",
+    "copies": 0
+  },
+  {
+    "id": 1606,
+    "set_id": 64,
+    "set_index": 3,
+    "name": "Let's Save the Animals!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/2e5162f5085357355bfbce42d9e59b9dc81a20a0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/86974eb007f7d6fb261dd0147af9bb60d65929f8.svg",
+    "copies": 0
+  },
+  {
+    "id": 1607,
+    "set_id": 64,
+    "set_index": 4,
+    "name": "Junior's New Business",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/9a3b596671b52cb61d472331f82fa32de52733cc.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/25cc19b3695540b082e9f9de7957414fdf57d9be.svg",
+    "copies": 0
+  },
+  {
+    "id": 1608,
+    "set_id": 65,
+    "set_index": 1,
+    "name": "Too Many Things",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/2df4a7eced1ac77aebece724cf3d7413487aa760.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d591347f51cef687b45deeb7b4936438795152f0.svg",
+    "copies": 0
+  },
+  {
+    "id": 1609,
+    "set_id": 65,
+    "set_index": 2,
+    "name": "The Secret Place",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/124b2ebc5658c5b270299c7e5a3c312d1823f71b.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/e67f28d20c6227ef761cb76f8c2f63e0f6bbe4f4.svg",
+    "copies": 0
+  },
+  {
+    "id": 1610,
+    "set_id": 65,
+    "set_index": 3,
+    "name": "Eddy's Tears",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/bd47248abc51d06c02a9555e9c9fe45e363481b0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/a7a061bc4f58465dad5bae7cbbeca785e03fad9e.svg",
+    "copies": 0
+  },
+  {
+    "id": 1611,
+    "set_id": 65,
+    "set_index": 4,
+    "name": "I'm Fine!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/8c741fbe476fcc7bac4dd06b8744133fd79114a6.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/296f92949221ba7e2c42b55337255de0b09cb7a7.svg",
+    "copies": 0
+  },
+  {
+    "id": 1612,
+    "set_id": 66,
+    "set_index": 1,
+    "name": "Surprise Party",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/a0061f64ab708f61744f0b7884b1179eb0ddda44.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/cd119e89aaf59a22f65503e29a5a41e7e614f61b.svg",
+    "copies": 0
+  },
+  {
+    "id": 1613,
+    "set_id": 66,
+    "set_index": 2,
+    "name": "The Principal's Office",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/59bf4a90e27e0fdce7ed1b032d994e47288e3dee.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/808542f0e2f004a8cbe3db08efbb530ade8ef98b.svg",
+    "copies": 0
+  },
+  {
+    "id": 1614,
+    "set_id": 66,
+    "set_index": 3,
+    "name": "Is She Mad at Me?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/24e59f531a3f2ba59124f5ea0d1abb9a9002f228.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/326b6b98942de5d87e7b42420ff5f1fa560de882.svg",
+    "copies": 0
+  },
+  {
+    "id": 1615,
+    "set_id": 66,
+    "set_index": 4,
+    "name": "Some Very Tasty Cookies",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/b85bd837d13955959504ed636b6d0ff0275cbc05.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/30ba33e2da76cb77d1f617322be08711815af430.svg",
+    "copies": 0
+  },
+  {
+    "id": 1616,
+    "set_id": 67,
+    "set_index": 1,
+    "name": "Dating Apps",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/e85756596c467c7a07f835a81fa1980663475f8c.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/5a61ee91e98959eb67205521135561446e07b54d.svg",
+    "copies": 0
+  },
+  {
+    "id": 1617,
+    "set_id": 67,
+    "set_index": 2,
+    "name": "My Horse Hates Me",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/bfa4b7af28d62ff7e3413a7cdf76dd1f366f190b.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/73243031c69bfdc7e11b19f65f22d599d3d71c59.svg",
+    "copies": 0
+  },
+  {
+    "id": 1618,
+    "set_id": 67,
+    "set_index": 3,
+    "name": "The Videotape",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/047da6c87d45c7faa00d26a5b721a49805c538a9.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/63bd1741a058b97b10044f22b85adfa1c7f7921a.svg",
+    "copies": 0
+  },
+  {
+    "id": 1619,
+    "set_id": 67,
+    "set_index": 4,
+    "name": "Remove This Statue",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/3df9bcb1f93e1020eb176afe6659a8196205b4d6.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/823749dd6444125abd71a484d75f11fce2ad483b.svg",
+    "copies": 0
+  },
+  {
+    "id": 1620,
+    "set_id": 68,
+    "set_index": 1,
+    "name": "What Are You Wearing?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/7c758509f733b0a921dcab884981a47d78eeca20.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/44c400dd03eab1e496c94fe99f72b94b77a460dc.svg",
+    "copies": 0
+  },
+  {
+    "id": 1621,
+    "set_id": 68,
+    "set_index": 2,
+    "name": "The Mountain",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/515a5d47733fec5daf4d124d90cf7e92bc23865f.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/b99d5c7a485491bd4b83f5fe03bd6a364087ea43.svg",
+    "copies": 0
+  },
+  {
+    "id": 1622,
+    "set_id": 68,
+    "set_index": 3,
+    "name": "A Difficult Person",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/d1c28e0439d067164f41d77b381eaeb0ac34f8f0.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/adc33f4a01fab20335955bb132ea4e6bc0d3e4a7.svg",
+    "copies": 0
+  },
+  {
+    "id": 1623,
+    "set_id": 68,
+    "set_index": 4,
+    "name": "Pirate World",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/3758b3225081ad65a9b4127adfd23442598679c3.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/53d72ecfdee186c3bd939f46d9fee32303def285.svg",
+    "copies": 0
+  },
+  {
+    "id": 1624,
+    "set_id": 69,
+    "set_index": 1,
+    "name": "I Can Predict the Future",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/cf626cfef4679a3c1d26e94e28c19c82b8ccc555.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/2adf726e7885a518f678c1cd6db182642df69dd7.svg",
+    "copies": 0
+  },
+  {
+    "id": 1625,
+    "set_id": 69,
+    "set_index": 2,
+    "name": "Uncle Edward's House",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/de5561656e2504068ef28f9d1e8c11bfd898bca6.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/d3dad1b25d2a25a953c69d544028e5a456f9ad28.svg",
+    "copies": 0
+  },
+  {
+    "id": 1626,
+    "set_id": 69,
+    "set_index": 3,
+    "name": "Get Out of Here!",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/837603ddd87d187512db685325b16ffbb6cff439.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/57ba38fa72bedbef6dc0f234e5953188d13734eb.svg",
+    "copies": 0
+  },
+  {
+    "id": 1627,
+    "set_id": 69,
+    "set_index": 4,
+    "name": "My Card Is Suspended?",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/9b6c5862300e57bab3522680bd34390897efacdd.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/98e27b1d8de5bdaae888da3a56cc672f414fdf27.svg",
+    "copies": 0
+  },
+  {
+    "id": 1628,
+    "set_id": 69,
+    "set_index": 5,
+    "name": "Painting at Sunrise",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/063a9bb4e863f89d8fb413c09b8ae2c0748089c1.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/213662aa0ac1b1b9dec249ddc1f71125601eba72.svg",
+    "copies": 0
+  },
+  {
+    "id": 1629,
+    "set_id": 69,
+    "set_index": 6,
+    "name": "A Relaxing Weekend",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/2f94fb94c2bf594be991729717b516949b654528.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/f0eb3c1f72b895852aafeb1d32c4decbea486f54.svg",
+    "copies": 0
+  },
+  {
+    "id": 1630,
+    "set_id": 69,
+    "set_index": 7,
+    "name": "A Walk in Nature",
+    "gilded": "https:\/\/stories-cdn.duolingo.com\/image\/cc1a831d5f6209f75bca61137286f569d95bdbee.svg",
+    "active": "https:\/\/stories-cdn.duolingo.com\/image\/7c7bff57edb092a0043a270f9c38f3153699b0da.svg",
+    "copies": 0
+  }
+]

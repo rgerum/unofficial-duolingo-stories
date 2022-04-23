@@ -1,0 +1,11 @@
+{
+  "id": 9,
+  "name": "Russian",
+  "short": "ru",
+  "flag": -257.561,
+  "public": 1,
+  "flag_file": null,
+  "speaker": "Maxim",
+  "rtl": 0,
+  "default_text": "Меня зовут $name."
+}

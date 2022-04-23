@@ -1,0 +1,72 @@
+{
+  "id": 9,
+  "name": null,
+  "fromLanguage": "en",
+  "fromLanguageName": "English",
+  "fromLanguageFlagFile": null,
+  "fromLanguageFlag": 0,
+  "learningLanguage": "ru",
+  "learningLanguageName": "Russian",
+  "learningLanguageFlagFile": null,
+  "learningLanguageFlag": -257.561,
+  "public": 1,
+  "official": 0,
+  "stories": [
+    {
+      "id": 75,
+      "set_id": 11,
+      "set_index": 5,
+      "name": "Room for Rent",
+      "image": "e1d2c08f443668d8f99ef3d26f1d04b70d187ab3",
+      "image_done": "https:\/\/stories-cdn.duolingo.com\/image\/68734aab69835db8a039f035e11c81bd74263a20.svg",
+      "xp": 22,
+      "name_base": "Room for Rent",
+      "username": "TatyanaB",
+      "date": "2020-06-17 12:24:55",
+      "change_date": "2021-05-09 10:42:48",
+      "public": 1
+    },
+    {
+      "id": 78,
+      "set_id": 1,
+      "set_index": 8,
+      "name": "The exam",
+      "image": "cb76f485e6668f6f964fdf792d3f67ce5ae566b9",
+      "image_done": "https:\/\/stories-cdn.duolingo.com\/image\/127a3541ff8a7dce320e9fc6f0a4f12a602734d4.svg",
+      "xp": 14,
+      "name_base": "The exam",
+      "username": "TatyanaB",
+      "date": "2020-06-18 14:25:26",
+      "change_date": "2020-09-08 12:38:25",
+      "public": 1
+    },
+    {
+      "id": 81,
+      "set_id": 1,
+      "set_index": 1,
+      "name": "Good morning!",
+      "image": "783305780a6dad8e0e4eb34109d948e6a5fc2c35",
+      "image_done": "https:\/\/stories-cdn.duolingo.com\/image\/344e43fc1b8fe4c6370f1095bd773e4478334436.svg",
+      "xp": 14,
+      "name_base": "Good morning!",
+      "username": "TatyanaB",
+      "date": "2020-06-20 18:07:38",
+      "change_date": "2021-11-06 11:21:08",
+      "public": 1
+    },
+    {
+      "id": 91,
+      "set_id": 1,
+      "set_index": 3,
+      "name": "One thing",
+      "image": "717bd84875f83c678f64f124937a278061e0e778",
+      "image_done": "https:\/\/stories-cdn.duolingo.com\/image\/99ab40ae5ceb445db690f74ab843094202ed47ca.svg",
+      "xp": 14,
+      "name_base": "One thing",
+      "username": "TatyanaB",
+      "date": "2020-06-25 21:10:08",
+      "change_date": "2020-11-11 00:18:00",
+      "public": 1
+    }
+  ]
+}
