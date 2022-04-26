@@ -18,8 +18,9 @@ export function EditorSSMLDisplay(props) {
         <span className="ssml_speaker">{props.ssml.speaker}</span>
         <span className="ssml">{props.ssml.text}</span>
         { props.ssml.speaker ?
-            <span id={line_id} className={"ssml_reload audio_reload " + (loading ? "audio_reload_spin" : "")}
-                  onClick={reload}/> : <></>
+            <span title={loading ? "generating audio..." : "regenerate audio"} id={line_id} className={"ssml_reload audio_reload " + (loading ? "audio_reload_spin" : "")}
+                  onClick={reload}/> :
+            <span><img title="no speaker defined" alt="error" src="icons/error.svg"/></span>
         }
     </>
 }
