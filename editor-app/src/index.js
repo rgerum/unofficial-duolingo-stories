@@ -44,10 +44,10 @@ export function StoryEditorHeader(props) {
         requestAnimationFrame(createScrollLookUp);
     }
 
-    const [language, setLanguage] = React.useState(props.story_data.learningLanguage || undefined);
-    const [language2, setLanguage2] = React.useState(props.story_data.fromLanguage || undefined);
-    const [language_data, _] = useDataFetcher2(getLanguageName, [language]);
-    const [language_data2, __] = useDataFetcher2(getLanguageName, [language2]);
+    const [language, ] = React.useState(props.story_data.learningLanguage || undefined);
+    const [language2, ] = React.useState(props.story_data.fromLanguage || undefined);
+    const [language_data, ] = useDataFetcher2(getLanguageName, [language]);
+    const [language_data2, ] = useDataFetcher2(getLanguageName, [language2]);
 
     if(language_data === undefined || language_data2 === undefined)
         return <></>
@@ -119,7 +119,6 @@ else {
     });
 
 
-    console.log("urlParams", urlParams)
     let editor = document.getElementById("editor");
     let preview = document.getElementById("preview");
     let svg_parent = document.getElementById("margin");
@@ -134,8 +133,8 @@ else {
         let width3 = svg_parent.getBoundingClientRect().width
         let height = svg_parent.getBoundingClientRect().height
 
-        let pairs = []
-        let pairs2 = []
+        //let pairs = []
+        //let pairs2 = []
         let path = "M0,0 ";
         for(let element of document.querySelectorAll("div[lineno]")) {
             let new_lineno = parseInt(element.attributes.lineno.value);
@@ -147,8 +146,8 @@ else {
                 path += `L${width3},${new_top} L ${width2},${new_top} C${width1b},${new_top} ${width1b},${new_linetop} ${width1},${new_linetop} L0,${new_linetop}`;
             element.getBoundingClientRect().top
             svg_element += 1;
-            pairs.push([new_linetop, new_top])
-            pairs2.push([new_lineno, new_top])
+            //pairs.push([new_linetop, new_top])
+            //pairs2.push([new_lineno, new_top])
         }
         if(svg_element % 2 === 1)
             path += `L${width3},${height} L ${0},${height}`;
@@ -156,7 +155,7 @@ else {
     }
 
     let last_editor_scroll_pos = 0;
-    document.getElementById("editor").addEventListener('scroll', function(e) {
+    document.getElementById("editor").addEventListener('scroll', function() {
         requestAnimationFrame(()=>{
         if(last_editor_scroll_pos === editor.scrollTop)
             return
@@ -185,7 +184,7 @@ else {
 
     });
     let last_preview_scroll_pos = 0;
-    preview.addEventListener('scroll', function(e) {
+    preview.addEventListener('scroll', function() {
         requestAnimationFrame(()=>{
             if(last_preview_scroll_pos === preview.scrollTop)
                 return
@@ -294,8 +293,6 @@ else {
             if (story === undefined) {
                 last_lineno = lineno;
                 //console.log("updateDisplay", last_lineno !== lineno, last_avatar !== Object.keys(window.character_avatars).length, story === undefined)
-                if (story === undefined) {
-                    console.log("parse Story", "story_data", story_data)
                     editor_text = state.doc.toString();
                     [story, story_meta] = processStoryFile(editor_text, story_data.id, avatar_names);
                     let image = getImage(story_meta.icon)
@@ -313,7 +310,6 @@ else {
     "locked": "https://stories-cdn.duolingo.com/image/ae651762db4b1e5669394228804b7d6daa7c1a6b.svg"
   }
                      */
-                }
                 window.story = story;
                 window.getImage = getImage;
                 window.story_meta = story_meta;
@@ -334,8 +330,7 @@ else {
                         inline: "nearest"
                     })
                     for (let element of document.querySelectorAll("div[lineno]")) {
-                        element.onclick = (e) => {
-                            console.log("clicked", element)
+                        element.onclick = () => {
                             let pos = view.state.doc.line(parseInt(element.attributes.lineno.value) + 1).from;
                             view.dispatch(view.state.update({
                                 selection: EditorSelection.cursor(pos),

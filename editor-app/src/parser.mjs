@@ -61,7 +61,7 @@ function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
             return STATE_TEXT_BUTTON_EVEN
         }
 
-    if( (!allow_buttons && stream.match(/[^ |$\]\[]+/)) || (allow_buttons && stream.match(/[^ |$\]\[\(\)]+/))) {
+    if( (!allow_buttons && stream.match(/[^ |$\]\[]+/)) || (allow_buttons && stream.match(/[^ |$\]\[()]+/))) {
         if(state.bracket && allow_hide) {
             if (state.odd)
                 return STATE_TEXT_HIDE_ODD
@@ -178,14 +178,16 @@ function parseBockLine(stream, state) {
 }
 
 function startLine(state, line, allow_trans, line_type, allow_audio) {
+    var block = {...state.block};
     if(line)
-        state.block.line = line;
+        block.line = line;
     if(allow_audio === undefined && state.block.allow_trans && state.block.allow_audio)
         allow_audio = state.block.allow_audio;
-    state.block.allow_audio = allow_audio;
-    state.block.allow_trans = allow_trans;
+    block.allow_audio = allow_audio;
+    block.allow_trans = allow_trans;
     state.odd = false;
-    state.block.line_type = line_type;
+    block.line_type = line_type;
+    state.block = block;
 }
 
 function parseBockSelectPhrase(stream, state) {
