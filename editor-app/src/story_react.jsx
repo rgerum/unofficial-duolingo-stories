@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useEventListener} from './hooks.js'
 import {shuffle} from './includes.mjs'
 import {EditorSSMLDisplay} from "./audio_edit.jsx";
@@ -54,6 +54,9 @@ function HintLineContent(props) {
     var audioRange = props.audioRange;
     var hideRangesForChallenge = props.hideRangesForChallenge;
 
+    var [show_trans, set_show_trans] = useState(window.editorShowTranslations);
+    useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); console.log("editorShowTranslations", e.detail.show, e)})
+
     function getOverlap(start1, end1, start2, end2) {
         if(start2 === end2)
             return false;
@@ -105,7 +108,7 @@ function HintLineContent(props) {
         //addSplitWord(dom.append("span").attr("class", "word"), text_pos, hint.rangeFrom);
 
         // add the text with the hint
-        elements.push(<span key={hint.rangeFrom + " "+hint.rangeTo+1} className="word tooltip_editor"><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className="tooltiptext_editor">{content.hints[hint.hintIndex]}</span></span>)
+        elements.push(<span key={hint.rangeFrom + " "+hint.rangeTo+1} className={"word "+(show_trans ? "tooltip_editor" : "tooltip")}><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className={show_trans ? "tooltiptext_editor" : "tooltiptext"}>{content.hints[hint.hintIndex]}</span></span>)
         //addSplitWord(dom.append("span").attr("class", "word tooltip"), hint.rangeFrom, hint.rangeTo+1)
         //    .append("span").attr("class", "tooltiptext").text(content.hints[hint.hintIndex]);
         // advance the position

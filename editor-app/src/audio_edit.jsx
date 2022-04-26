@@ -4,11 +4,16 @@ export function EditorSSMLDisplay(props) {
     let [loading, setLoading] = React.useState(false);
     let line_id = "ssml"+(props.ssml.line ? props.ssml.line : props.ssml.line_insert);
 
+    var [show_audio, set_show_audio] = React.useState(window.editorShowSsml);
+    useEventListener("editorShowSsml", (e) => set_show_audio(e.detail.show))
+
+
     async function reload() {
         setLoading(true);
         await generate_audio_line(props.ssml);
         setLoading(false);
     }
+    if(!show_audio) return <></>
     return <><br/>
         <span className="ssml_speaker">{props.ssml.speaker}</span>
         <span className="ssml">{props.ssml.text}</span>
@@ -21,6 +26,7 @@ export function EditorSSMLDisplay(props) {
 
 import {fetch_post} from "./includes.mjs";
 import React from "react";
+import {useEventListener} from "./hooks";
 async function generate_audio_line(ssml) {
     let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`, {"id": ssml["id"], "speaker": ssml["speaker"], "text": ssml["text"]});
     let ssml_response = await response2.json();

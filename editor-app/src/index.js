@@ -17,7 +17,33 @@ window.EditorView = EditorView
 window.EditorSelection = EditorSelection
 let urlParams = new URLSearchParams(window.location.search);
 
+window.editorShowTranslations = false
+window.editorShowSsml = false
 export function StoryEditorHeader(props) {
+    const [show_trans, set_show_trans] = React.useState(window.editorShowTranslations);
+    function do_set_show_trans() {
+        let value = !show_trans;
+        const event = new CustomEvent("editorShowTranslations", {
+            detail: {show: value}
+        });
+        window.dispatchEvent(event);
+        window.editorShowTranslations = value
+        set_show_trans(value);
+        requestAnimationFrame(createScrollLookUp);
+    }
+    const [show_ssml, set_show_ssml] = React.useState(window.editorShowSsml);
+    function do_set_show_ssml() {
+        let value = !show_ssml;
+        const event = new CustomEvent("editorShowSsml", {
+            detail: {show: value}
+        });
+
+        window.dispatchEvent(event);
+        window.editorShowSsml = value
+        set_show_ssml(value);
+        requestAnimationFrame(createScrollLookUp);
+    }
+
     const [language, setLanguage] = React.useState(props.story_data.learningLanguage || undefined);
     const [language2, setLanguage2] = React.useState(props.story_data.fromLanguage || undefined);
     const [language_data, _] = useDataFetcher2(getLanguageName, [language]);
@@ -26,18 +52,42 @@ export function StoryEditorHeader(props) {
     if(language_data === undefined || language_data2 === undefined)
         return <></>
     return <><div className="AvatarEditorHeader">
+        <div id="button_back" className="editor_button" onClick={window.button_back} style={{paddingLeft: 0}}>
+            <div><img alt="icon back" src="icons/back.svg" /></div>
+            <span>Back</span>
+        </div>
         <b>Story-Editor</b>
         <Flag flag={language_data.flag} flag_file={language_data.flag_file}/>
         <Flag className={"flag_sub"} flag={language_data2.flag} flag_file={language_data2.flag_file}/>
         <span className={"AvatarEditorHeaderFlagname"}>{`${language_data.name} (from ${language_data2.name})`}</span>
         <img alt="story title" width="50px" src={`https://stories-cdn.duolingo.com/image/${story_data.image}.svg`} style={{marginLeft: "auto"}} />
         <span className={"AvatarEditorHeaderFlagname"}>{props.story_data.name}</span>
-        <div id="button_back" className="editor_button" onClick={window.button_back} style={{marginLeft: "auto"}}>
-            <div><img alt="icon back" src="icons/back.svg" /></div>
-            <span>Back</span></div>
+        <div style={{marginLeft: "auto"}} className="editor_button" onClick={(e) => {
+            e.preventDefault();
+            do_set_show_trans()
+        }}>
+            <label className="switch">
+                <input type="checkbox" checked={show_trans ? "checked" : ""}
+                       readOnly="readOnly"/>
+                <span className="slider round"/>
+            </label>
+            <span>Hints</span>
+        </div>
+        <div className="editor_button" onClick={(e) => {
+            e.preventDefault();
+            do_set_show_ssml()
+        }}>
+            <label className="switch">
+                <input type="checkbox" checked={show_ssml ? "checked" : ""}
+                       readOnly="readOnly"/>
+                <span className="slider round"/>
+            </label>
+            <span>Audio</span>
+        </div>
         <div id="button_save" className="editor_button" onClick={window.button_save}>
             <div><img alt="icon save" src="icons/save.svg" /></div>
-            <span>Save</span></div>
+            <span>Save</span>
+        </div>
     </div></>
 }
 
