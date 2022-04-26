@@ -108,6 +108,33 @@ else if(!urlParams.get("story")) {
     );
 }
 else {
+    /* resize */
+    var p = document.querySelector('#margin2');
+    p.style.cursor = "col-resize"
+
+    p.addEventListener('mousedown', initDrag, false);
+
+    var startX = 0, startWidth = 0, startWidth2;
+
+    function initDrag(e) {
+        startX = e.clientX;
+        startWidth = parseInt(document.defaultView.getComputedStyle(editor).width, 10);
+        startWidth2 = parseInt(document.defaultView.getComputedStyle(preview).width, 10);
+        document.documentElement.addEventListener('mousemove', doDrag, false);
+        document.documentElement.addEventListener('mouseup', stopDrag, false);
+    }
+
+    function doDrag(e) {
+        editor.style.width = (startWidth + e.clientX - startX) + 'px';
+        preview.style.width = (startWidth2 - e.clientX + startX) + 'px';
+        createScrollLookUp();
+    }
+
+    function stopDrag() {
+        document.documentElement.removeEventListener('mousemove', doDrag, false);    document.documentElement.removeEventListener('mouseup', stopDrag, false);
+    }
+
+    /* end resize */
     let unsaved_changes = false;
 
     window.hideWarning = false;
@@ -127,9 +154,9 @@ else {
 
     function update_lines() {
         let svg_element = 0;
-        let width1 = svg_parent.getBoundingClientRect().width * 0.48
-        let width1b = svg_parent.getBoundingClientRect().width * 0.50
-        let width2 = svg_parent.getBoundingClientRect().width * 0.52
+        let width1 = parseInt(document.defaultView.getComputedStyle(editor).width, 10);//svg_parent.getBoundingClientRect().width * 0.48
+        let width1b = parseInt(document.defaultView.getComputedStyle(editor).width, 10) + 20;//svg_parent.getBoundingClientRect().width * 0.50
+        let width2 = parseInt(document.defaultView.getComputedStyle(editor).width, 10) + 40;//svg_parent.getBoundingClientRect().width * 0.52
         let width3 = svg_parent.getBoundingClientRect().width
         let height = svg_parent.getBoundingClientRect().height
 
