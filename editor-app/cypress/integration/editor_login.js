@@ -11,26 +11,28 @@ describe('Test Logins', () => {
         cy.visit("")
     })
     it('Unauthorized login', () => {
-        cy.get("input[type=text]").type("test2")
-        cy.get("input[type=password]").type("test2")
+        cy.get("[data-cy=username]").type("test2")
+        cy.get("[data-cy=password]").type("test2")
         cy.intercept('**/session', {body: { "username": "test", "role": 0}}).as("session_invalid")
-        cy.get("button").click()
+        cy.get("[data-cy=submit]").click()
         cy.contains("Not allowed")
+        cy.get("[data-cy=back]").click()
+        cy.get("[data-cy=username]")
     })
     it('Unsuccessful login attempt!', () => {
         cy.intercept('**/login*', {statusCode: 403, body: {}}).as("login_error")
 
-        cy.get("input[type=text]").type("test")
-        cy.get("input[type=password]").type("wrong")
-        cy.get("button").click()
-        cy.get(".login_error")
+        cy.get("[data-cy=username]").type("test")
+        cy.get("[data-cy=password]").type("wrong")
+        cy.get("[data-cy=submit]").click()
+        cy.get("[data-cy=login_error]")
     })
 
     it('Successful login!', () => {
-        cy.get("input[type=text]").type("test")
-        cy.get("input[type=password]").type("right")
+        cy.get("[data-cy=username]").type("test")
+        cy.get("[data-cy=password]").type("right")
         cy.intercept('**/session', {body: { "username": "test", "role": 1}}).as("session_valid")
-        cy.get("button").click()
+        cy.get("[data-cy=submit]").click()
         cy.contains("Course-Editor")
     })
 
