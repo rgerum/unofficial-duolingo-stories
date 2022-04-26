@@ -1336,6 +1336,14 @@ p[data-rtl] .speaker {
     border-radius: 8px;
 }
 
+.story_selection .bubble {
+    border-color: #a4d1ff;
+}
+
+.story_selection .bubble:before {
+    border-right-color: #a4d1ff;
+}
+
 .cast_element {
     margin-bottom: -80px;
 }
