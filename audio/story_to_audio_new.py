@@ -17,7 +17,6 @@ speaker = sys.argv[2]
 filename = sys.argv[3]
 with open(filename, "rb") as fp:
     text = fp.read().decode("utf-8")
-Path(filename).unlink()
 
 if not text.startswith("<speak"):
     text = "<speak>"+text+"</speak>"
@@ -26,5 +25,7 @@ print("story_id", story_id, file=sys.stderr)
 print("speaker", speaker, file=sys.stderr)
 print("text", text, len(text), type(text), file=sys.stderr)
 
-
-processLine2(story_id, speaker, text)
+try:
+    processLine2(story_id, speaker, text, filename)
+finally:
+    Path(filename).unlink()

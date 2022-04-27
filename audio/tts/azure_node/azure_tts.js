@@ -1,4 +1,5 @@
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
+const fs = require('fs');
 
 function get_raw(text) {
     text = text.replace(/ +/g, " ");
@@ -18,7 +19,9 @@ function get_raw(text) {
 }
 
 
-function synthesizeSpeech(filename, voice_id, text) {
+function synthesizeSpeech(filename, voice_id, text, file) {
+    if(file)
+        text = fs.readFileSync(file, 'utf8');
     const speechConfig = sdk.SpeechConfig.fromSubscription("1444ab1cec6344e9969ba85b086d094f", "westeurope");
     const audioConfig = sdk.AudioConfig.fromAudioFileOutput(filename);
     speechConfig.speechSynthesisVoiceName = "en-US-JennyNeural"
@@ -43,7 +46,7 @@ function synthesizeSpeech(filename, voice_id, text) {
         //console.log(data)
     }
     //console.log(synthesizer.wordBoundary)
-    synthesizer.wordBoundary = ((w) => console.log("x"), boundaryEvent)
+    synthesizer.wordBoundary = boundaryEvent
 
     text = text.replace(/^<speak>/, "")
     text = text.replace(/<\/speak>$/, "")
@@ -79,6 +82,6 @@ function synthesizeSpeech(filename, voice_id, text) {
     // </code>
 }
 //synthesizeSpeech("path-to-file.wav", "en-US-JennyNeural", "<speak>Marian was zo moe   dat  ze  <prosody volume=\"silent\">zout in haar koffie deed in plaats van suiker</prosody>.</speak>")
-synthesizeSpeech(process.argv[2], process.argv[3], process.argv[4])
+synthesizeSpeech(process.argv[2], process.argv[3], process.argv[4], process.argv[5])
 //console.log("done", x)
 //console.log(process.argv);

@@ -71,7 +71,7 @@ def processLine(story_id, line_id):
 
 
 
-def processLine2(story_id, speaker, text):
+def processLine2(story_id, speaker, text, filename):
     import uuid
     # output file
     output_dir = Path(str(story_id))
@@ -88,7 +88,7 @@ def processLine2(story_id, speaker, text):
         engine = Google()
     elif "-" in speaker:
         #engine = Azure()
-        subprocess.Popen(["node", "tts/azure_node/azure_tts.js", output_file, speaker, text])
+        subprocess.Popen(["node", "tts/azure_node/azure_tts.js", output_file, speaker, text.encode("utf-8")])
         return
     else:
         engine = AmazonPolly()
@@ -107,3 +107,7 @@ def processLine2(story_id, speaker, text):
 
     #print("update json")
     print(json.dumps(output_data))
+
+
+#if __name__ == "__main__":
+#    processLine2(0, "ru-RU-DariyaNeural", '<speak>Marian äöü was zo moe   dat  ze  <prosody volume="silent">zout in haar koffie deed in plaats van suiker</prosody>.</speak>')

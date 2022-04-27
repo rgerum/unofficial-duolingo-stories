@@ -91,7 +91,6 @@ function PlayButton(props) {
             await play(e, text, name);
         }
         catch (e) {
-            console.log(e);
             return setLoading(-1);
         }
         setLoading(0);
@@ -127,6 +126,9 @@ function AvatarNames() {
     let [speakText, setSpeakText] = useState("");
     const [stored, setStored] = useState({});
 
+    const [pitch, setPitch] = useState(2);
+    const [speed, setSpeed] = useState(2);
+
     if(speakText === "")
         speakText = language_data?.default_text || "My name is $name.";
 
@@ -150,14 +152,16 @@ function AvatarNames() {
     }
 
     async function play(e, text, name) {
-        if(stored[text] === undefined) {
+        let speakText2 = `<prosody pitch="${["x-low", "low", "medium", "high", "x-high"][pitch]}" rate="${["x-slow", "slow", "medium", "fast", "x-fast"][speed]}">${speakText}</prosody>`;
+        console.log(speakText2);
+        if(stored[text+pitch+speed] === undefined) {
             let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
-                {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
+                {"id": 0, "speaker": text, "text": speakText2.replace("$name", name)});
             let ssml_response = await response2.json();
-            stored[text] = new Audio("https://carex.uber.space/stories/audio/" + ssml_response["output_file"]);
+            stored[text+pitch+speed] = new Audio("https://carex.uber.space/stories/audio/" + ssml_response["output_file"]);
             setStored(stored);
         }
-        let audio = stored[text];
+        let audio = stored[text+pitch+speed];
         audio.play();
 
 
@@ -170,6 +174,12 @@ function AvatarNames() {
     <div className="speaker_list">
         <div>
             <textarea value={speakText} onChange={doSetSpeakText} style={{width: "100%"}}/>
+        </div>
+        <div className="slidecontainer">
+            Pitch: <input type="range" min="0" max="4" value={pitch} id="pitch" onChange={(e)=>setPitch(e.target.value)}/>
+        </div>
+        <div className="slidecontainer">
+            Speed: <input type="range" min="0" max="4" value={speed} id="speed" onChange={(e)=>setSpeed(e.target.value)}/>
         </div>
         <table id="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
