@@ -29,7 +29,24 @@ import {fetch_post} from "./includes.mjs";
 import React from "react";
 import {useEventListener} from "./hooks";
 async function generate_audio_line(ssml) {
-    let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`, {"id": ssml["id"], "speaker": ssml["speaker"], "text": ssml["text"]});
+    let speaker = ssml["speaker"].trim();
+    let speak_text = ssml["text"].trim();
+    let match = speaker.match(/([^(]*)\((.*)\)/);
+
+    if(match) {
+        speaker = match[1];
+        let attributes = "";
+        for(let part of match[2].matchAll(/(\w*)=([\w-]*)/g)) {
+            attributes += ` ${part[1]}="${part[2]}"`;
+        }
+        if(speak_text.startsWith("<speak>"))
+            speak_text = speak_text.substring("<speak>".length)
+        if(speak_text.endsWith("</speak>"))
+            speak_text = speak_text.substring(0, speak_text.length-"</speak>".length)
+        speak_text = `<speak><prosody ${attributes}>${speak_text}</prosody></speak>`;
+    }
+
+    let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`, {"id": ssml["id"], "speaker": speaker, "text": speak_text});
     let ssml_response = await response2.json();
 
     let text = "$"+ssml_response["output_file"]

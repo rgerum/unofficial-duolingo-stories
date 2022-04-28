@@ -72,11 +72,6 @@ export function AvatarMain() {
     </>
 }
 
-function copyText(e, text) {
-    e.preventDefault();
-    return navigator.clipboard.writeText(text);
-}
-
 function PlayButton(props) {
     let play = props.play;
     let speaker = props.speaker;
@@ -91,6 +86,7 @@ function PlayButton(props) {
             await play(e, text, name);
         }
         catch (e) {
+            console.error(e);
             return setLoading(-1);
         }
         setLoading(0);
@@ -105,6 +101,7 @@ function PlayButton(props) {
 
 function SpeakerEntry(props) {
     let speaker = props.speaker;
+    let copyText = props.copyText;
 
     return <tr>
         <td>
@@ -129,6 +126,20 @@ function AvatarNames() {
     const [pitch, setPitch] = useState(2);
     const [speed, setSpeed] = useState(2);
 
+    function copyText(e, text) {
+        let p = ["x-low", "low", "medium", "high", "x-high"][pitch];
+        let s = ["x-slow", "slow", "medium", "fast", "x-fast"][speed];
+        if(pitch !== 2 && speed !== 2)
+            text = `${text}(pitch=${p}, rate=${s})`
+        else if(pitch !== 2 && speed === 2)
+            text = `${text}(pitch=${p})`
+        else if(pitch === 2 && speed !== 2)
+            text = `${text}(rate=${s})`
+
+        e.preventDefault();
+        return navigator.clipboard.writeText(text);
+    }
+
     if(speakText === "")
         speakText = language_data?.default_text || "My name is $name.";
 
@@ -151,17 +162,38 @@ function AvatarNames() {
         }
     }
 
-    async function play(e, text, name) {
+    async function play2(e, text, name) {
         let speakText2 = `<prosody pitch="${["x-low", "low", "medium", "high", "x-high"][pitch]}" rate="${["x-slow", "slow", "medium", "fast", "x-fast"][speed]}">${speakText}</prosody>`;
-        console.log(speakText2);
-        if(stored[text+pitch+speed] === undefined) {
+        let id = text+pitch+speed+name;
+        return play(e, id, text, name, speakText2)
+    }
+
+    async function play3(e, text, name) {
+        text = text.trim();
+        let match = text.match(/([^(]*)\((.*)\)/);
+        let speakText2 = speakText;
+        if(match) {
+            text = match[1];
+            let attributes = "";
+            for(let part of match[2].matchAll(/(\w*)=([\w-]*)/g)) {
+                attributes += ` ${part[1]}="${part[2]}"`;
+            }
+            speakText2 = `<prosody ${attributes}>${speakText}</prosody>`;
+        }
+
+        let id = text+pitch+speed+name;
+        return play(e, id, text, name, speakText2)
+    }
+
+    async function play(e, id, text, name, speakText) {
+        if(stored[id] === undefined) {
             let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
-                {"id": 0, "speaker": text, "text": speakText2.replace("$name", name)});
+                {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
             let ssml_response = await response2.json();
-            stored[text+pitch+speed] = new Audio("https://carex.uber.space/stories/audio/" + ssml_response["output_file"]);
+            stored[id] = new Audio("https://carex.uber.space/stories/audio/" + ssml_response["output_file"]);
             setStored(stored);
         }
-        let audio = stored[text+pitch+speed];
+        let audio = stored[id];
         audio.play();
 
 
@@ -176,10 +208,10 @@ function AvatarNames() {
             <textarea value={speakText} onChange={doSetSpeakText} style={{width: "100%"}}/>
         </div>
         <div className="slidecontainer">
-            Pitch: <input type="range" min="0" max="4" value={pitch} id="pitch" onChange={(e)=>setPitch(e.target.value)}/>
+            Pitch: <input type="range" min="0" max="4" value={pitch} id="pitch" onChange={(e)=>setPitch(parseInt(e.target.value))}/>
         </div>
         <div className="slidecontainer">
-            Speed: <input type="range" min="0" max="4" value={speed} id="speed" onChange={(e)=>setSpeed(e.target.value)}/>
+            Speed: <input type="range" min="0" max="4" value={speed} id="speed" onChange={(e)=>setSpeed(parseInt(e.target.value))}/>
         </div>
         <table id="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
@@ -191,7 +223,7 @@ function AvatarNames() {
             </thead>
             <tbody>
             {speakers.map((speaker, index) =>
-                <SpeakerEntry key={index} speaker={speaker} play={play} />
+                <SpeakerEntry key={index} copyText={copyText} speaker={speaker} play={play2} />
             )}
             </tbody>
         </table>
@@ -200,13 +232,13 @@ function AvatarNames() {
         <p>These characters are the default cast of duolingo. Their names should be kept as close to the original as possible.</p>
         <div className={"avatar_editor_group"}>
         {avatars_new_important.map((avatar, index) =>
-            <Avatar key={index} play={play} language_id={language} avatar={avatar} />
+            <Avatar key={index} play={play3} language_id={language} avatar={avatar} />
         )}
         </div>
         <p>These characters just appear in a couple of stories.</p>
         <div className={"avatar_editor_group"}>
         {avatars_new.map((avatar, index) =>
-            <Avatar key={index} play={play} language_id={language} avatar={avatar} />
+            <Avatar key={index} play={play3} language_id={language} avatar={avatar} />
         )}
         </div>
     </div>
