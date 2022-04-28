@@ -3,18 +3,18 @@ import {useDataFetcher, useDataFetcher2, useEventListener} from './hooks'
 import {Spinner} from './react/spinner'
 import {Flag} from './react/flag'
 import {useUsername, LoginDialog} from './login'
-import {setPublic, getCourses, getCourse, getImportList, setImport} from "./api_calls.mjs";
+import {getCourses, getCourse, getImportList, setImport} from "./api_calls.mjs";
 import "./editor.css"
 
 
 function CourseList(props) {
-    const courses = useDataFetcher(getCourses);
+    const courses = props.courses;
     if(courses === undefined)
-        return null;
+        return <div id="languages"><Spinner/></div>;
     return <div id="languages">
         {courses.map((course, index) =>
             <div key={index}>
-                <a className="course_selection_button"
+                <a className={"course_selection_button" + (props.course_id === course.id ? " course_selection_button_active" : "")}
                    href={`?course=${course.id}`}
                    onClick={(e) => {e.preventDefault(); props.setCourse(course.id);}}
                 >
@@ -29,7 +29,7 @@ function CourseList(props) {
 
 function ImportList(props) {
     let course = props.course;
-    const [courseImport, courseImportRefetch] = useDataFetcher2(getImportList, [12, course.id]);
+    const [courseImport, ] = useDataFetcher2(getImportList, [12, course.id]);
     async function do_import(id) {
         console.log("do_impor", id, course.id);
         let id2 = await setImport(id, course.id);
@@ -39,13 +39,13 @@ function ImportList(props) {
     return courseImport ?
         <>
         <div>Importing from Spanish (from English).</div>
-        <table id="story_list" style={{display: "inline-block"}} className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
+        <table id="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
-                <th style={{borderRadius: "10px 0 0 0"}} data-js-sort-colnum="0">Set</th>
+                <th data-js-sort-colnum="0">Set</th>
                 <th colSpan="2" data-js-sort-colnum="1">Name</th>
                 <th style={{textAlign: "center"}} data-js-sort-colnum="7">Copies</th>
-                <th style={{borderRadius: "0 10px 0 0"}} data-js-sort-colnum="8" />
+                <th data-js-sort-colnum="8" />
             </tr>
             </thead>
             <tbody>
@@ -76,29 +76,30 @@ function pad(x) {
 
 function EditList(props) {
     let course = props.course;
-// TODO    document.getElementById('button_import').onclick = ()=>setShowImport(course.id)
+    let stories = props.course?.stories
+    if(stories === undefined)
+        stories = []
     return <>
-        <table id="story_list" style={{display: "inline-block"}}
-               className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
+        <table id="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
-                <th style={{borderRadius: "10px 0 0 0"}} data-js-sort-colnum="0">Set</th>
-                <th colSpan="2" data-js-sort-colnum="1">Name</th>
+                <th data-js-sort-colnum="0">Set</th>
+                <th style={{width: "100%"}} colSpan="2" data-js-sort-colnum="1">Name</th>
                 <th data-js-sort-colnum="4">Author</th>
                 <th data-js-sort-colnum="5" className="js-sort-active">Creation</th>
                 <th data-js-sort-colnum="6">Change</th>
                 <th style={{textAlign: "center"}} data-js-sort-colnum="7">Done</th>
-                <th style={{borderRadius: "0 10px 0 0"}} data-js-sort-colnum="8">Public</th>
+                <th data-js-sort-colnum="8">Public</th>
             </tr>
             </thead>
             <tbody>
-            {course.stories.map(story =>
+            {stories.map(story =>
                 <tr key={story.id}>
                     <td><span><b>{pad(story.set_id)}</b>&nbsp;-&nbsp;{pad(story.set_index)}</span></td>
                     <td width="44px"><img alt={"story title"}
                         src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
-                        width="44px"/></td>
-                    <td><a href={`?story=${story.id}`}>{story.name}</a></td>
+                        width="44px" height={"40px"}/></td>
+                    <td style={{width: "100%"}}><a href={`?story=${story.id}`}>{story.name}</a></td>
                     <td>{story.username}</td>
                     <td>{story.date}</td>
                     <td>{story.change_date}</td>
@@ -119,66 +120,35 @@ function EditList(props) {
             )}
             </tbody>
         </table>
+        {course ? <></> : <Spinner/>}
     </>
 }
 
-function StoriesList(props) {
-    let course = props.course;
-    let showImport = props.showImport;
-    console.log("StoriesList", course)
-    return <>{
-        course === undefined || course.stories === undefined ?
-        <>
-            <h1>Loading</h1>
-            <Spinner/>
-        </>
-        : showImport ?
-            <ImportList course={course}/>
-        : <EditList course={course}/>
-    }</>
-}
 
-function Overview(props) {
-    let course = props.course;
-    let course_id = props.course_id;
-
-    return <>
-        <CourseList setCourse={props.setCourse}/>
-        <div id="main_overview">
-            <div id="main_overview_container">
-            { course_id ?
-                <StoriesList course={course} showImport={props.showImport}/>
-                :
-                <><h1 id="title">Editor - Stories</h1>
-                <p id="no_stories">Click on one of the courses to display its stories.</p>
-                </>
-            }
-            </div>
-        </div>
-    </>
-}
-
-export function EditorOverviewLogin(props) {
+export function EditorOverviewLogin() {
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
 
     // loading
     if (username === undefined) return <Spinner/>
     // no username show login
-    console.log("username", username)
     if (username.username === undefined || username.role !== 1)
         return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
     // logged in and allowed!
     return <EditorOverview/>
 }
 
-export function EditorOverview(props) {
+export function EditorOverview() {
     let urlParams = new URLSearchParams(window.location.search);
+
+    const courses = useDataFetcher(getCourses);
+
     const [course_id, setCourseID] = React.useState(urlParams.get("course") || undefined);
     const [course, courseRefetch] = useDataFetcher2(getCourse, [course_id]);
 
     const [showImport, do_setShowImport] = React.useState(false);
 
     function doSetCourse(course_new) {
+        do_setShowImport(false);
         if(course_new === course_id)
             return
 
@@ -188,30 +158,46 @@ export function EditorOverview(props) {
     }
 
     useEventListener("popstate", (event) => {
-        if(event.state.story)
-            changeStory(event.state.story)
+        if(event.state?.story)
+            changeStory(event.state?.story)
         else {
-            if(event.state.course)
-                setCourseID(event.state.course)
-            else
-                setCourseID(undefined)
+            setCourseID(event.state?.course)
         }
     })
 
     return <>
         <div id="toolbar">
-            <CourseEditorHeader course={course} showImport={showImport} do_setShowImport={do_setShowImport} />
+            <CourseEditorHeader courses={courses} course_id={course_id} showImport={showImport} do_setShowImport={do_setShowImport} />
         </div>
         <div id="root">
-            <Overview course_id={course_id} course={course} setCourse={doSetCourse} showImport={showImport}/>
+            <CourseList courses={courses} course_id={course_id} setCourse={doSetCourse}/>
+            <div id="main_overview">
+                { course_id && showImport ?
+                    <ImportList course={course}/>
+                  : course_id ?
+                    <EditList course={course}/>
+                  :
+                    <p id="no_stories">Click on one of the courses to display its stories.</p>
+                }
+            </div>
         </div>
     </>
 }
 
 
 export function CourseEditorHeader(props) {
-    let course = props.course;
-    if(!props.course || props.course.fromLanguageName === undefined)
+    let courses = props.courses;
+    let course = undefined;
+    if(courses) {
+        for (let c of courses) {
+            if(c.id === props.course_id) {
+                course = c;
+                break;
+            }
+        }
+    }
+
+    if(!course || course.fromLanguageName === undefined)
         return <><div className="AvatarEditorHeader">
             <b>Course-Editor</b>
         </div></>
@@ -224,12 +210,12 @@ export function CourseEditorHeader(props) {
             !props.showImport ?
             <div id="button_import" className="editor_button" onClick={() => props.do_setShowImport(1)}
             style={{marginLeft: "auto"}}>
-            <div><img src="icons/import.svg"/></div>
+            <div><img alt="import button" src="icons/import.svg"/></div>
             <span>Import</span>
             </div> :
             <div id="button_back" className="editor_button" onClick={() => props.do_setShowImport(0)}
             style={{marginLeft: "auto"}}>
-            <div><img src="icons/back.svg"/></div>
+            <div><img alt="back button" src="icons/back.svg"/></div>
             <span>Back</span>
             </div>
         }

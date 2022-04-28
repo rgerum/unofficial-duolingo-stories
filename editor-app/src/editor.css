@@ -10,7 +10,6 @@ root {
 
 
 #story_list {
-    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     border-collapse: collapse;
     width: 100%;
 }
@@ -27,8 +26,8 @@ root {
 #story_list tr a { color: black; font-weight: bold; }
 
 #story_list th {
-    padding-top: 12px;
-    padding-bottom: 12px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     text-align: left;
     background-color: #78c800;
     color: white;
@@ -85,8 +84,6 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-    -webkit-transform: translateX(13px);
-    -ms-transform: translateX(13px);
     transform: translateX(13px);
 }
 
@@ -99,6 +96,9 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
+.course_selection_button_active {
+    background: lightgray;
+}
 
 .course_selection_button {
     text-decoration: none;

@@ -1,6 +1,6 @@
 import {fetch_post} from "./includes.mjs";
 
-let backend_get = "https://editor.duostories.org/get_xx"
+let backend_get = "https://editor.duostories.org/get"
 let backend_set = "https://editor.duostories.org/set"
 
 function getCookie(cname) {
@@ -9,10 +9,10 @@ function getCookie(cname) {
     let ca = decodedCookie.split(';');
     for(let i = 0; i <ca.length; i++) {
         let c = ca[i];
-        while (c.charAt(0) == ' ') {
+        while (c.charAt(0) === ' ') {
             c = c.substring(1);
         }
-        if (c.indexOf(name) == 0) {
+        if (c.indexOf(name) === 0) {
             return c.substring(name.length, c.length);
         }
     }
@@ -49,12 +49,11 @@ async function fetch_get(url) {
     for(var i in login_data){
         fd.append(i,login_data[i]);
     }
-    var res = fetch(url, {
-        method:"POST",
-        body:fd,
-        mode:"cors"
+    return fetch(url, {
+        method: "POST",
+        body: fd,
+        mode: "cors"
     })
-    return res
 }
 
 export async function getCourses() {
