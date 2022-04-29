@@ -88,8 +88,6 @@ function EditList(props) {
                 <th data-js-sort-colnum="4">Author</th>
                 <th data-js-sort-colnum="5" className="js-sort-active">Creation</th>
                 <th data-js-sort-colnum="6">Change</th>
-                <th style={{textAlign: "center"}} data-js-sort-colnum="7">Done</th>
-                <th data-js-sort-colnum="8">Public</th>
             </tr>
             </thead>
             <tbody>
@@ -103,19 +101,6 @@ function EditList(props) {
                     <td>{story.username}</td>
                     <td>{story.date}</td>
                     <td>{story.change_date}</td>
-                    <td style={{textAlign: "right"}}><span>{story.count}x&nbsp;</span>
-
-                    </td>
-                    <td style={{textAlign: "right"}}>
-                        <label className="switch" onClick={(e) => {
-                            e.preventDefault();
-                            togglePublic(story)
-                        }}>
-                            <input type="checkbox" checked={story.public ? "checked" : ""}
-                                   readOnly="readOnly"/>
-                            <span className="slider round"/>
-                        </label>
-                    </td>
                 </tr>
             )}
             </tbody>
