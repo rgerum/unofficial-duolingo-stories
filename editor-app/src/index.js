@@ -20,6 +20,7 @@ let urlParams = new URLSearchParams(window.location.search);
 window.editorShowTranslations = false
 window.editorShowSsml = false
 export function StoryEditorHeader(props) {
+    let createScrollLookUp = props.createScrollLookUp;
     const [show_trans, set_show_trans] = React.useState(window.editorShowTranslations);
     function do_set_show_trans() {
         let value = !show_trans;
@@ -308,7 +309,7 @@ else {
 
         ReactDOM.render(
             <React.StrictMode>
-                <StoryEditorHeader story_data={story_data}/>
+                <StoryEditorHeader createScrollLookUp={createScrollLookUp} story_data={story_data}/>
             </React.StrictMode>,
             document.getElementById('toolbar')
         );

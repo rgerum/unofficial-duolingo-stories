@@ -55,7 +55,7 @@ function HintLineContent(props) {
     var hideRangesForChallenge = props.hideRangesForChallenge;
 
     var [show_trans, set_show_trans] = useState(window.editorShowTranslations);
-    useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); console.log("editorShowTranslations", e.detail.show, e)})
+    useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); })
 
     function getOverlap(start1, end1, start2, end2) {
         if(start2 === end2)
@@ -299,7 +299,7 @@ class QuestionMatch extends React.Component {
     editorLineChanged(e) {
         let editor = this.editor;
         let should_be_selected = editor && editor.start_no <= e.detail.lineno && e.detail.lineno < editor.end_no;
-        console.log("match editorLineChanged", should_be_selected, this.state.selected, editor.start_no, e.detail.lineno, editor.end_no)
+
         if (should_be_selected !== this.state.selected)
             this.setSelected(should_be_selected);
     }
@@ -346,7 +346,7 @@ class QuestionMatch extends React.Component {
                 last_clicked: undefined,
                 clicked: state.clicked.map((item, i) => i === state.last_clicked ? "right" : i === index ? "right" : item)
             }))
-            let right_count = this.state.clicked.map((item, i)=>(item === "right")).reduce((a,b)=>a+b, 0);
+            let right_count = this.state.clicked.map((item, )=>(item === "right")).reduce((a,b)=>a+b, 0);
             if(right_count >= this.state.clicked.length-2)
                 this.props.controls.right();
         }
@@ -905,7 +905,7 @@ function Character(props) {
     let characer = props.character;
     return <tr className="character">
         <td style={{textAlign: "right"}}>{characer.id}</td>
-        <td><img className="head" src={characer.link} /></td>
+        <td><img alt={"speaker head"} className="head" src={characer.link} /></td>
         <td>{characer.name}</td>
         <td><span className="ssml_speaker">{characer.speaker}</span></td>
     </tr>
