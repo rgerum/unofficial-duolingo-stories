@@ -128,18 +128,19 @@ export function EditorOverview() {
     const courses = useDataFetcher(getCourses);
 
     const [course_id, setCourseID] = React.useState(urlParams.get("course") || undefined);
-    const [course, courseRefetch] = useDataFetcher2(getCourse, [course_id]);
+    const [course, ] = useDataFetcher2(getCourse, [course_id]);
 
     const [showImport, do_setShowImport] = React.useState(false);
 
     function doSetCourse(course_new) {
-        do_setShowImport(false);
-        if(course_new === course_id)
+        if(showImport)
+            do_setShowImport(false);
+        if(course_new === course_id) {
             return
+        }
 
         history.pushState({course: course_new}, "Language"+course_new, `?course=${course_new}`);
         setCourseID(course_new);
-        courseRefetch();
     }
 
     useEventListener("popstate", (event) => {
