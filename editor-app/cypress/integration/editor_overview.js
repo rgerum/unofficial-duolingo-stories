@@ -25,22 +25,22 @@ describe('Navigate Course Editor', () => {
         // Click on Spanish to see if it is an offical story
         cy.contains("Spanish [en]").parent().click()
         cy.get("#story_list").get("tr").should('have.length.greaterThan', 1)
-        cy.get('.AvatarEditorHeader').should('contain', 'official')
-        cy.get('.AvatarEditorHeader').should('not.contain', 'Import')
+        cy.get('[data-cy=label_official]')
+        cy.get('[data-cy=button_import]').should('not.exist')
     })
 
     it('Open Dutch (un official) and try import', () => {
         // Open Dutch
         cy.contains("Dutch [en]").parent().click()
         cy.get("#story_list").get("tr").should('have.length.greaterThan', 1)
-        cy.get('.AvatarEditorHeader').should('not.contain', 'official')
-        cy.get('#button_import').should('contain', 'Import').click()
+        cy.get('[data-cy=label_official]').should('not.exist')
+        cy.get('[data-cy=button_import]').click()
 
-        cy.get("#main_overview_container").contains('Importing')
-        cy.get("#main_overview_container").get("tr").should("have.length.greaterThan", 1)
+        cy.get("#main_overview").contains('Importing')
+        cy.get("#main_overview").get("tr").should("have.length.greaterThan", 1)
 
         cy.get('#button_back').click()
-        cy.get("#main_overview_container").should('not.contain', 'Importing')
+        cy.get("#main_overview").should('not.contain', 'Importing')
     })
 
     it('Open Russian and start Editor', () => {
@@ -49,7 +49,7 @@ describe('Navigate Course Editor', () => {
         cy.get("#story_list").get("tr").should('have.length.greaterThan', 1)
         cy.get('.AvatarEditorHeader').should('not.contain', 'official')
 
-        cy.get("#main_overview_container").get("tr").contains("Room for Rent").click()
+        cy.get("#main_overview").get("tr").contains("Room for Rent").click()
         cy.get("#story").get(".title")
         cy.get("#preview").scrollTo('bottom')
         //cy.get('#button_back').click()
