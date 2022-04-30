@@ -15,17 +15,15 @@ describe('Navigate Course Editor', () => {
         cy.intercept('POST', '**/language?id=1', { fixture: 'language_1.json' }).as("language_1")
 
         cy.visit("")
-        //cy.get("input[type=text]").type("test")
-        //cy.get("input[type=password]").type("test")
-        //cy.get("button").type("click")
-        //cy.contains("Course-Editor")
     })
 
     it('Open Spanish (official)', () => {
         // Click on Spanish to see if it is an offical story
         cy.contains("Spanish [en]").parent().click()
+        cy.url().should('include', '?course=12')
         cy.get("[data-cy=course-title]").contains("Spanish")
-        cy.get("#story_list").get("tr").should('have.length.greaterThan', 1)
+
+        cy.get("[data-cy=story_list]").get("tr").should('have.length.greaterThan', 1)
         cy.get('[data-cy=label_official]')
         cy.get('[data-cy=button_import]').should('not.exist')
     })
@@ -34,50 +32,61 @@ describe('Navigate Course Editor', () => {
         // Open Dutch
         cy.contains("Dutch [en]").parent().click()
         cy.get("[data-cy=course-title]").contains("Dutch")
-        cy.get("#story_list").get("tr").should('have.length.greaterThan', 1)
+        cy.get("[data-cy=story_list]").get("tr").should('have.length.greaterThan', 1)
         cy.get('[data-cy=label_official]').should('not.exist')
         cy.get('[data-cy=button_import]').click()
 
-        cy.get("#main_overview").contains('Importing')
-        cy.get("#main_overview").get("tr").should("have.length.greaterThan", 1)
+        cy.get("[data-cy=import_list]").parent().contains('Importing')
+        cy.get("[data-cy=import_list]").get("tr").should("have.length.greaterThan", 1)
 
-        cy.get('#button_back').click()
-        cy.get("#main_overview").should('not.contain', 'Importing')
+        cy.get('[data-cy=button_back]').click()
+        cy.get("[data-cy=story_list]").parent().should('not.contain', 'Importing')
     })
 
     it('Open Russian and start Editor', () => {
-        // Open Dutch
+        // Select the Russian stories
         cy.contains("Russian [en]").parent().click()
         cy.get("[data-cy=course-title]").contains("Russian")
-        cy.get("#story_list").get("tr").should('have.length.greaterThan', 1)
-        cy.get('.AvatarEditorHeader').should('not.contain', 'official')
+        cy.get("[data-cy=story_list]").get("tr").should('have.length.greaterThan', 1)
 
-        cy.get("#main_overview").get("tr").contains("Room for Rent").click()
+        // should not be official
+        cy.get('[data-cy=label_official]').should('not.exist')
+
+        // click on one of the stories
+        cy.get("[data-cy=story_list]").get("tr").contains("Room for Rent").click()
+
+        // story should open, and we should be able to scroll down
         cy.get("#story").get(".title")
         cy.get("#preview").scrollTo('bottom')
         //cy.get('#button_back').click()
     })
 
-    it('Navigation via link', () => {
+    it('Navigation via link and back/forward', () => {
+        // directly link to the dutch stories
         cy.visit("?course=2")
         cy.get("[data-cy=course-title]").contains("Dutch")
 
+        // navigate to russian
         cy.contains("Russian [en]").parent().click()
         cy.url().should('include', '?course=9')
         cy.get("[data-cy=course-title]").contains("Russian")
 
+        // then to spanish
         cy.contains("Spanish [en]").parent().click()
         cy.url().should('include', '?course=12')
         cy.get("[data-cy=course-title]").contains("Spanish")
 
+        // test back (with history state)
         cy.go('back')
         cy.url().should('include', '?course=9')
         cy.get("[data-cy=course-title]").contains("Russian")
 
+        // test back (without history state)
         cy.go('back')
         cy.url().should('include', '?course=2')
         cy.get("[data-cy=course-title]").contains("Dutch")
 
+        // test 2x forward
         cy.go('forward')
         cy.url().should('include', '?course=9')
         cy.get("[data-cy=course-title]").contains("Russian")
@@ -86,6 +95,7 @@ describe('Navigate Course Editor', () => {
         cy.url().should('include', '?course=12')
         cy.get("[data-cy=course-title]").contains("Spanish")
 
+        // and once back
         cy.go('back')
         cy.url().should('include', '?course=9')
         cy.get("[data-cy=course-title]").contains("Russian")

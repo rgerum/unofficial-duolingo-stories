@@ -39,7 +39,7 @@ function ImportList(props) {
     return courseImport ?
         <>
         <div>Importing from Spanish (from English).</div>
-        <table id="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
+        <table id="story_list" data-cy="import_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
                 <th data-js-sort-colnum="0">Set</th>
@@ -80,7 +80,7 @@ function EditList(props) {
     if(stories === undefined)
         stories = []
     return <>
-        <table id="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
+        <table id="story_list" data-cy="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
                 <th data-js-sort-colnum="0">Set</th>
@@ -201,7 +201,7 @@ export function CourseEditorHeader(props) {
             <span>Import</span>
             </div> :
             <div id="button_back" className="editor_button" onClick={() => props.do_setShowImport(0)}
-            style={{marginLeft: "auto"}}>
+            style={{marginLeft: "auto"}} data-cy="button_back">
             <div><img alt="back button" src="icons/back.svg"/></div>
             <span>Back</span>
             </div>
