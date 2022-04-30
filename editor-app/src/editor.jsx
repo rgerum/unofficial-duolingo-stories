@@ -127,7 +127,7 @@ export function EditorOverview() {
 
     const courses = useDataFetcher(getCourses);
 
-    const [course_id, setCourseID] = React.useState(urlParams.get("course") || undefined);
+    const [course_id, setCourseID] = React.useState(parseInt(urlParams.get("course")) || undefined);
     const [course, ] = useDataFetcher2(getCourse, [course_id]);
 
     const [showImport, do_setShowImport] = React.useState(false);
@@ -144,10 +144,11 @@ export function EditorOverview() {
     }
 
     useEventListener("popstate", (event) => {
+        let course = parseInt((new URLSearchParams(window.location.search)).get("course"))
         if(event.state?.story)
             changeStory(event.state?.story)
         else {
-            setCourseID(event.state?.course)
+            setCourseID(event.state?.course || course)
         }
     })
 
@@ -191,7 +192,7 @@ export function CourseEditorHeader(props) {
         <b>Course-Editor</b>
         <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
         <Flag className={"flag_sub"} flag={course.fromLanguageFlag} flag_file={course.fromLanguageFlagFile}/>
-        <span className={"AvatarEditorHeaderFlagname"}>{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
+        <span className={"AvatarEditorHeaderFlagname"} data-cy="course-title">{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
         {course.official ? <span data-cy="label_official"><i>official</i></span> :
             !props.showImport ?
             <div id="button_import" className="editor_button" onClick={() => props.do_setShowImport(1)}
