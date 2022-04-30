@@ -1,0 +1,170 @@
+[
+  {
+    "id": 1,
+    "language_id": 2,
+    "speaker": "Lotte",
+    "gender": "FEMALE",
+    "type": "NORMAL",
+    "service": "Amazon Polly"
+  },
+  {
+    "id": 52,
+    "language_id": 2,
+    "speaker": "Ruben",
+    "gender": "MALE",
+    "type": "NORMAL",
+    "service": "Amazon Polly"
+  },
+  {
+    "id": 64,
+    "language_id": 2,
+    "speaker": "nl-BE-Standard-A",
+    "gender": "FEMALE",
+    "type": "NORMAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 65,
+    "language_id": 2,
+    "speaker": "nl-BE-Standard-B",
+    "gender": "MALE",
+    "type": "NORMAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 66,
+    "language_id": 2,
+    "speaker": "nl-NL-Standard-B",
+    "gender": "MALE",
+    "type": "NORMAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 67,
+    "language_id": 2,
+    "speaker": "nl-NL-Standard-C",
+    "gender": "MALE",
+    "type": "NORMAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 68,
+    "language_id": 2,
+    "speaker": "nl-NL-Standard-D",
+    "gender": "FEMALE",
+    "type": "NORMAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 69,
+    "language_id": 2,
+    "speaker": "nl-NL-Standard-A",
+    "gender": "FEMALE",
+    "type": "NORMAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 70,
+    "language_id": 2,
+    "speaker": "nl-NL-Standard-E",
+    "gender": "FEMALE",
+    "type": "NORMAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 266,
+    "language_id": 2,
+    "speaker": "nl-BE-Wavenet-A",
+    "gender": "FEMALE",
+    "type": "NEURAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 267,
+    "language_id": 2,
+    "speaker": "nl-BE-Wavenet-B",
+    "gender": "MALE",
+    "type": "NEURAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 268,
+    "language_id": 2,
+    "speaker": "nl-NL-Wavenet-B",
+    "gender": "MALE",
+    "type": "NEURAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 269,
+    "language_id": 2,
+    "speaker": "nl-NL-Wavenet-C",
+    "gender": "MALE",
+    "type": "NEURAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 270,
+    "language_id": 2,
+    "speaker": "nl-NL-Wavenet-D",
+    "gender": "FEMALE",
+    "type": "NEURAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 271,
+    "language_id": 2,
+    "speaker": "nl-NL-Wavenet-A",
+    "gender": "FEMALE",
+    "type": "NEURAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 272,
+    "language_id": 2,
+    "speaker": "nl-NL-Wavenet-E",
+    "gender": "FEMALE",
+    "type": "NEURAL",
+    "service": "Google TTS"
+  },
+  {
+    "id": 472,
+    "language_id": 2,
+    "speaker": "nl-BE-ArnaudNeural",
+    "gender": "MALE",
+    "type": "NEURAL",
+    "service": "Microsoft Azure"
+  },
+  {
+    "id": 473,
+    "language_id": 2,
+    "speaker": "nl-BE-DenaNeural",
+    "gender": "FEMALE",
+    "type": "NEURAL",
+    "service": "Microsoft Azure"
+  },
+  {
+    "id": 474,
+    "language_id": 2,
+    "speaker": "nl-NL-ColetteNeural",
+    "gender": "FEMALE",
+    "type": "NEURAL",
+    "service": "Microsoft Azure"
+  },
+  {
+    "id": 475,
+    "language_id": 2,
+    "speaker": "nl-NL-FennaNeural",
+    "gender": "FEMALE",
+    "type": "NEURAL",
+    "service": "Microsoft Azure"
+  },
+  {
+    "id": 476,
+    "language_id": 2,
+    "speaker": "nl-NL-MaartenNeural",
+    "gender": "MALE",
+    "type": "NEURAL",
+    "service": "Microsoft Azure"
+  }
+]

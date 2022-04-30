@@ -1,0 +1,11 @@
+{
+  "id": 2,
+  "name": "Dutch",
+  "short": "nl",
+  "flag": -354.146,
+  "public": 1,
+  "flag_file": null,
+  "speaker": "Ruben",
+  "rtl": 0,
+  "default_text": "Mijn naam is $name."
+}

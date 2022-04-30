@@ -47,27 +47,29 @@ function Avatar(props) {
     </div>
 }
 
-function AvatarEditorHeader() {
-    let urlParams = new URLSearchParams(window.location.search);
-    const [language, ] = React.useState(parseInt(urlParams.get("language")) || undefined);
-    const [language_data, ] = useDataFetcher2(getLanguageName, [language]);
+function AvatarEditorHeader(props) {
+    let language_data = props.language_data;
 
     if(language_data === undefined)
         return <></>
     return <div className="AvatarEditorHeader">
         <b>Character-Editor</b>
         <Flag flag={language_data.flag} flag_file={language_data.flag_file}/>
-        <span className={"AvatarEditorHeaderFlagName"}>{language_data.name}</span>
+        <span data-cy="language-name" className={"AvatarEditorHeaderFlagName"}>{language_data.name}</span>
     </div>
 }
 
 export function AvatarMain() {
+    let urlParams = new URLSearchParams(window.location.search);
+    const [language, ] = React.useState(parseInt(urlParams.get("language")) || undefined);
+    const [language_data, ] = useDataFetcher2(getLanguageName, [language]);
+
     return <>
         <div id="toolbar">
-            <AvatarEditorHeader />
+            <AvatarEditorHeader language={language} language_data={language_data}/>
         </div>
         <div id="root">
-            <AvatarNames />
+            <AvatarNames language={language} language_data={language_data}/>
         </div>
     </>
 }
@@ -114,12 +116,12 @@ function SpeakerEntry(props) {
     </tr>
 }
 
-function AvatarNames() {
-    let urlParams = new URLSearchParams(window.location.search);
-    const [language, ] = React.useState(parseInt(urlParams.get("language")) || undefined);
+function AvatarNames(props) {
+    let language = props.language;
+    let language_data = props.language_data;
     const [avatars, ] = useDataFetcher2(getAvatars, [language]);
     const [speakers, ] = useDataFetcher2(getSpeakers, [language]);
-    const [language_data, ] = useDataFetcher2(getLanguageName, [language]);
+
     let [speakText, setSpeakText] = useState("");
     const [stored, setStored] = useState({});
 
@@ -213,7 +215,7 @@ function AvatarNames() {
         <div className="slidecontainer">
             Speed: <input type="range" min="0" max="4" value={speed} id="speed" onChange={(e)=>setSpeed(parseInt(e.target.value))}/>
         </div>
-        <table id="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
+        <table id="story_list" data-cy="voice_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
                 <th style={{borderRadius: "10px 0 0 0"}} data-js-sort-colnum="0">Name</th>
@@ -230,13 +232,13 @@ function AvatarNames() {
     </div>
     <div className={"avatar_editor"} style={{"overflowY": "scroll"}}>
         <p>These characters are the default cast of duolingo. Their names should be kept as close to the original as possible.</p>
-        <div className={"avatar_editor_group"}>
+        <div className={"avatar_editor_group"} data-cy="avatar_list1">
         {avatars_new_important.map((avatar, index) =>
             <Avatar key={index} play={play3} language_id={language} avatar={avatar} />
         )}
         </div>
         <p>These characters just appear in a couple of stories.</p>
-        <div className={"avatar_editor_group"}>
+        <div className={"avatar_editor_group"} data-cy="avatar_list2">
         {avatars_new.map((avatar, index) =>
             <Avatar key={index} play={play3} language_id={language} avatar={avatar} />
         )}

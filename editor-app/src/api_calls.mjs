@@ -102,10 +102,10 @@ export async function getCourse(id) {
     }
 }
 
-export async function getAvatars(id, course_id) {
+export async function getAvatars(id) {
     console.log("getAvatars", id, `${backend_get}/avatar_names?id=${id}`)
     try {
-        let response = await fetch_get(`${backend_get}/avatar_names?id=${id}&course_id=${course_id}`);
+        let response = await fetch_get(`${backend_get}/avatar_names?id=${id}`);
         return await response.json();
     }
     catch (e) {

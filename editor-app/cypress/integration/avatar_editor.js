@@ -12,47 +12,22 @@ describe('Navigate Course Editor', () => {
         //cy.intercept('POST', '**/image?id=*', { fixture: 'image.json' }).as("image")
         //cy.intercept('POST', '**/avatar_names?*', { fixture: 'avatar_names.json' }).as("avatar_names")
         //cy.intercept('POST', '**/language?id=9', { fixture: 'language_9.json' }).as("language_9")
-        //cy.intercept('POST', '**/language?id=1', { fixture: 'language_1.json' }).as("language_1")
+        cy.intercept('POST', '**/language?id=2', { fixture: 'language_2.json' }).as("language_2")
+        cy.intercept('POST', '**/speakers?id=2', { fixture: 'speakers_2.json' }).as("speakers_2")
+        cy.intercept('POST', '**/avatar_names?id=2', { fixture: 'avatars_2.json' }).as("avatars_2")
 
-        cy.visit("?")
+        cy.visit("?language=2")
         //cy.get("input[type=text]").type("test")
         //cy.get("input[type=password]").type("test")
         //cy.get("button").type("click")
         //cy.contains("Course-Editor")
     })
 
-    it('Open Spanish (official)', () => {
+    it('Open Dutch', () => {
         // Click on Spanish to see if it is an offical story
-        cy.contains("Spanish [en]").parent().click()
-        cy.get("#story_list").get("tr").should('have.length.greaterThan', 1)
-        cy.get('[data-cy=label_official]')
-        cy.get('[data-cy=button_import]').should('not.exist')
+        cy.get("[data-cy=language-name]").contains("Dutch")
+        cy.get("[data-cy=voice_list]").get("tr").should('have.length.greaterThan', 1)
+        cy.get("[data-cy=avatar_list1]").get("div").should('have.length.greaterThan', 1)
+        cy.get("[data-cy=avatar_list2]").get("div").should('have.length.greaterThan', 1)
     })
-
-    it('Open Dutch (un official) and try import', () => {
-        // Open Dutch
-        cy.contains("Dutch [en]").parent().click()
-        cy.get("#story_list").get("tr").should('have.length.greaterThan', 1)
-        cy.get('[data-cy=label_official]').should('not.exist')
-        cy.get('[data-cy=button_import]').click()
-
-        cy.get("#main_overview").contains('Importing')
-        cy.get("#main_overview").get("tr").should("have.length.greaterThan", 1)
-
-        cy.get('#button_back').click()
-        cy.get("#main_overview").should('not.contain', 'Importing')
-    })
-
-    it('Open Russian and start Editor', () => {
-        // Open Dutch
-        cy.contains("Russian [en]").parent().click()
-        cy.get("#story_list").get("tr").should('have.length.greaterThan', 1)
-        cy.get('.AvatarEditorHeader').should('not.contain', 'official')
-
-        cy.get("#main_overview").get("tr").contains("Room for Rent").click()
-        cy.get("#story").get(".title")
-        cy.get("#preview").scrollTo('bottom')
-        //cy.get('#button_back').click()
-    })
-
 })
