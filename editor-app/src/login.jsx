@@ -73,14 +73,7 @@ export function LoginDialog(props) {
     //Press Enter To Login Function
     const handleLogin = (event) =>{
         if(event.keyCode === 13){
-            let activeElement = document.activeElement.id;
-
-            if(activeElement === "login_dialog_username") {
-                document.getElementById("login_dialog_password").focus()
-            }
-            else if(activeElement === "login_dialog_password") {
-                buttonLogin();
-            }
+            buttonLogin();
         }
     }
     //End Of Enter To Login Function
@@ -92,8 +85,8 @@ export function LoginDialog(props) {
                 <div>
                     <h2>Editor Log in</h2>
                     <p>You need an account that has been activated as a contributor.</p>
-                    <input value={usernameInput} onChange={usernameInputSetValue} type="text" placeholder="Username" data-cy="username" id="login_dialog_username" autoFocus/>
-                    <input value={passwordInput} onChange={passwordInputSetValue} type="password" placeholder="Password"  data-cy="password" id="login_dialog_password"/>
+                    <input value={usernameInput} onChange={usernameInputSetValue} type="text" placeholder="Username" data-cy="username"/>
+                    <input value={passwordInput} onChange={passwordInputSetValue} type="password" placeholder="Password"  data-cy="password"/>
                     {state === -1 ? <span className="login_error" data-cy="login_error">{error}</span>: null}
                     <button className="button" onClick={buttonLogin}  data-cy="submit">{state !== 1 ? "Log in" : "..."}</button>
                 </div>
