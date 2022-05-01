@@ -70,10 +70,18 @@ export function LoginDialog(props) {
         }
     }
 
+    //Press Enter To Login Function
+    const handleLogin = (event) =>{
+        if(event.keyCode === 13){
+            buttonLogin();
+        }
+    }
+    //End Of Enter To Login Function
+
 
     return <>
         {(showLogin === 1 && username === undefined) ?
-            <div id="login_dialog">
+            <div id="login_dialog" onKeyDown={handleLogin} >
                 <div>
                     <h2>Editor Log in</h2>
                     <p>You need an account that has been activated as a contributor.</p>
