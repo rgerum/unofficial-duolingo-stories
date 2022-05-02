@@ -14,6 +14,9 @@ import {example} from "./parser.mjs"
 import {useDataFetcher2} from "./hooks";
 import {Flag} from "./react/flag";
 import {Cast} from "./react/cast";
+import {world} from "story-component";
+
+world()
 
 window.EditorView = EditorView
 window.EditorSelection = EditorSelection

@@ -1,4 +1,7 @@
+import React from "react";
+import {useEventListener, fetch_post} from "./includes";
 import "./audio_edit.css"
+
 
 export function EditorSSMLDisplay(props) {
     let [loading, setLoading] = React.useState(false);
@@ -25,9 +28,7 @@ export function EditorSSMLDisplay(props) {
     </>
 }
 
-import {fetch_post} from "./includes.mjs";
-import React from "react";
-import {useEventListener} from "./hooks";
+
 async function generate_audio_line(ssml) {
     let speaker = ssml["speaker"].trim();
     let speak_text = ssml["text"].trim();

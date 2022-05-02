@@ -1,5 +1,5 @@
 import React from "react";
-import {shuffle} from "../includes.mjs";
+import {shuffle} from "./includes";
 import {EditorNoHook} from "./editor_hooks";
 
 

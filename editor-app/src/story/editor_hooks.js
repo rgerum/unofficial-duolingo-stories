@@ -1,6 +1,6 @@
-import {EditorSelection} from "@codemirror/state";
 import React from "react";
-import {useEventListener} from "../hooks";
+import {EditorSelection} from "@codemirror/state";
+import {useEventListener} from "./includes";
 
 export function EditorHook(hidden, editor) {
     let onClick;

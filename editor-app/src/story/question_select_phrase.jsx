@@ -1,5 +1,5 @@
-import {EditorHook} from "./editor_hooks";
 import React from "react";
+import {EditorHook} from "./editor_hooks";
 import {useChoiceButtons} from "./questions_includes";
 import {useCallOnActivation} from "./questions_includes";
 

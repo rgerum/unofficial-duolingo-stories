@@ -1,5 +1,5 @@
 import React from "react";
-import {useEventListener} from "../hooks";
+import {useEventListener} from "./includes";
 
 
 export function useChoiceButtons(count, rightIndex, callRight, callWrong) {

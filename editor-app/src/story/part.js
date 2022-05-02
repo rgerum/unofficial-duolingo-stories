@@ -1,7 +1,7 @@
 import React from "react";
 import {Header, TextLine} from "./header";
 import {QuestionPointToPhrase} from "./question_point_to_phrase";
-import {useEventListener} from "../hooks";
+import {useEventListener} from "./includes";
 import {EditorHook} from "./editor_hooks";
 import {HintLineContent} from "./line_hints";
 import {QuestionMultipleChoice} from "./question_multiple_choice";

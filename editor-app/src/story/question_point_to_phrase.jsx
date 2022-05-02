@@ -1,7 +1,7 @@
+import React from "react";
 import {EditorHook} from "./editor_hooks";
 import {useChoiceButtons} from "./questions_includes";
 import {HintLineContent} from "./line_hints";
-import React from "react";
 
 
 export function QuestionPointToPhrase(props) {

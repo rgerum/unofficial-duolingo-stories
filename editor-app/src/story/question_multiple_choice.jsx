@@ -1,7 +1,7 @@
+import React from "react";
 import {useChoiceButtons} from "./questions_includes";
 import {EditorHook} from "./editor_hooks";
 import {HintLineContent} from "./line_hints";
-import React from "react";
 import {useCallOnActivation} from "./questions_includes";
 
 

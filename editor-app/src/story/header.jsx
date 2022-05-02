@@ -1,8 +1,8 @@
+import React from "react";
 import {EditorHook} from "./editor_hooks";
 import {HintLineContent} from "./line_hints";
-import {EditorSSMLDisplay} from "../audio_edit";
-import React from "react";
-import {useEventListener} from "../hooks";
+import {EditorSSMLDisplay} from "./audio_edit";
+import {useEventListener} from "./includes";
 
 
 export function Header(props) {
