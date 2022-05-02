@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Story, Cast} from "./story_react";
+import {Story} from "./story/story_react";
 import {EditorOverviewLogin} from "./editor"
 import {AvatarMain} from "./avatar_editor";
 import {getAvatars, getImage, getLanguageName, getStory, setStory} from "./api_calls.mjs";
@@ -13,6 +13,8 @@ import {EditorSelection} from "@codemirror/state";
 import {example} from "./parser.mjs"
 import {useDataFetcher2} from "./hooks";
 import {Flag} from "./react/flag";
+import {Cast} from "./react/cast";
+
 window.EditorView = EditorView
 window.EditorSelection = EditorSelection
 let urlParams = new URLSearchParams(window.location.search);
