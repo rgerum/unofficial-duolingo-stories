@@ -1,3 +1,7 @@
+/*
+This parser does the syntax highlighting for the editor
+ */
+
 import {StreamLanguage} from "@codemirror/stream-parser"
 
 const STATE_DEFAULT = "atom";
