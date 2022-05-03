@@ -1,5 +1,5 @@
 {
-  "name": "message-app",
+  "name": "stories-app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -11,7 +11,7 @@
     "react-scripts": "4.0.3",
     "web-vitals": "^1.1.2"
   },
-  "homepage": "stories",
+  "homepage": "www.duostories.org",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

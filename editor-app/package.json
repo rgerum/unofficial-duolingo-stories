@@ -1,8 +1,8 @@
 {
-  "name": "webpack-react",
+  "name": "editor-app",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "Michael Pontus <m.pontus@gmail.com>",
+  "author": "Richard Gerum",
   "license": "MIT",
   "scripts": {
     "build": "webpack --mode production",
