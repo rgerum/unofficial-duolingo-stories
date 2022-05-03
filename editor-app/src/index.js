@@ -1,22 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {EditorOverviewLogin} from "./editor"
+import {EditorOverviewLogin} from "./course-editor"
 import {AvatarMain} from "./avatar_editor";
 import {getAvatars, getImage, getLanguageName, getStory, setStory} from "./api_calls.mjs";
 
 import {EditorState, EditorView, basicSetup} from "@codemirror/basic-setup"
-import {HighlightStyle, tags as t} from "@codemirror/highlight"
 import {processStoryFile} from "./syntax_parser_new.mjs";
 import {EditorSelection} from "@codemirror/state";
 
-import {example} from "./parser.mjs"
+import {example, highlightStyle} from "./parser.mjs"
 import {useDataFetcher2} from "./hooks";
 import {Flag} from "./react/flag";
 import {Cast} from "./react/cast";
 import {Story} from 'story-component';
 
-//console.log(Badge)
-//let Story = Badge
 window.EditorView = EditorView
 window.EditorSelection = EditorSelection
 let urlParams = new URLSearchParams(window.location.search);
@@ -150,8 +147,6 @@ else {
             event.returnValue = 'You have unsaved changed, are you sure you want to quit?';
         }
     });
-
-
 
     window.button_back = function() {
         window.location.href = "?course="+story_data.course_id;
@@ -300,118 +295,6 @@ else {
             ".cm-invalid": {color: "green"},
         });
 
-        const chalky = "#e5c07b",
-            coral = "#e06c75",
-            cyan = "#56b6c2",
-            invalid = "#ffffff",
-            ivory = "#abb2bf",
-            stone = "#7d8799", // Brightened compared to original to increase contrast
-            malibu = "#61afef",
-            sage = "#98c379",
-            whiskey = "#d19a66",
-            violet = "#c678dd"
-        /*
-            darkBackground = "#21252b",
-            highlightBackground = "#2c313a",
-            background = "#282c34",
-            tooltipBackground = "#353a42",
-            selection = "#3E4451",
-            cursor = "#528bff"
-         */
-
-        const color_even = "#009623",
-            color_odd = "#00389d"
-
-        let highlightStyle = HighlightStyle.define([
-            // STATE_TRANS_EVEN
-            {tag: t.propertyName, color: color_even, fontStyle: "italic", opacity: 0.5},
-            // STATE_TRANS_ODD
-            {tag: t.macroName, color: color_odd, fontStyle: "italic", opacity: 0.5},
-            // STATE_TEXT_EVEN
-            {tag: t.tagName, color: color_even},
-            // STATE_TEXT_ODD
-            {tag: t.name, color: color_odd},
-
-            // STATE_TEXT_HIDE_EVEN
-            {tag: t.className, color: color_even, opacity: 0.4, borderBottom: "2px solid black"}, // textDecoration: "underline",
-            // STATE_TEXT_HIDE_ODD
-            {tag: t.typeName, color: color_odd, opacity: 0.4, borderBottom: "2px solid black"},
-            // STATE_TEXT_HIDE_NEUTRAL
-            {tag: t.changed, opacity: 0.4, borderBottom: "2px solid black"},
-
-            // STATE_TEXT_BUTTON_EVEN
-            {tag: t.number, color: color_even, background: "#c8c8c8", borderRadius: "10px"},
-            // STATE_TEXT_BUTTON_ODD
-            {tag: t.labelName, color: color_odd, background: "#c8c8c8", borderRadius: "10px"},
-
-            // STATE_TEXT_HIDE_BUTTON_EVEN
-            {tag: t.meta, color: color_even, borderBottom: "2px solid black", background: "#c8c8c8", borderRadius: "10px", opacity: 0.4},
-            // STATE_TEXT_HIDE_BUTTON_ODD
-            {tag: t.comment, color: color_odd, borderBottom: "2px solid black", background: "#c8c8c8", borderRadius: "10px", opacity: 0.4},
-            // STATE_TEXT_BUTTON_RIGHT_EVEN
-            {tag: t.modifier, color: "black", background: "#9bd297", borderRadius: "10px"},
-
-            // STATE_BLOCK_TYPE
-            {tag: t.keyword, color: violet},
-            // STATE_ERROR
-            {tag: [t.deleted, t.character], color: coral, textDecoration: "line-through",},
-            {
-                tag: [t.function(t.variableName)],
-                color: malibu
-            },
-            // STATE_AUDIO
-            {tag: [t.color, t.constant(t.name), t.standard(t.name)], color: whiskey},
-            {
-                tag: [t.definition(t.name), t.separator],
-                color: ivory
-            },
-            {
-                tag: [t.annotation, t.self, t.namespace],
-                color: chalky
-            },
-            {
-                tag: [t.operator, t.operatorKeyword, t.url, t.escape, t.regexp, t.link, t.special(t.string)],
-                color: cyan
-            },
-
-            {
-                tag: t.strong,
-                fontWeight: "bold"
-            },
-            {
-                tag: t.emphasis,
-                fontStyle: "italic"
-            },
-            {
-                tag: t.strikethrough,
-                textDecoration: "line-through"
-            },
-            {
-                tag: t.link,
-                color: stone,
-                textDecoration: "underline"
-            },
-            {
-                tag: t.heading,
-                fontWeight: "bold",
-                color: coral
-            },
-            {
-                tag: t.atom
-            },
-            {
-                tag: [t.bool, t.special(t.variableName)],
-                color: whiskey
-            },
-            {
-                tag: [t.processingInstruction, t.string, t.inserted],
-                color: sage
-            },
-            {
-                tag: t.invalid,
-                color: invalid
-            },
-        ])
 
         let startState = EditorState.create({
             doc: story_data.text || "",

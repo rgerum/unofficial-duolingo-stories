@@ -4,7 +4,7 @@ import {Spinner} from './react/spinner'
 import {Flag} from './react/flag'
 import {useUsername, LoginDialog} from './login'
 import {getCourses, getCourse, getImportList, setImport} from "./api_calls.mjs";
-import "./editor.css"
+import "./course-editor.css"
 
 
 function CourseList(props) {
