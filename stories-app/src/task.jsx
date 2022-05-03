@@ -68,7 +68,7 @@ export function Task(props) {
                     <>
                         <p id="status">Activation successful.</p>
                         <p id="login_form">
-                            You can now go back to the <a href="index.html">Main page</a> and log in.
+                            You can now go back to the <a href="../../admin/index.html">Main page</a> and log in.
                         </p>
                     </>
                     :
@@ -96,7 +96,7 @@ export function Task(props) {
                 </p>
                  : restpwstate === 2 ?
                 <p id="login_status">
-                    You can now go back to the <a href="index.html">Main page</a> and log in.
+                    You can now go back to the <a href="../../admin/index.html">Main page</a> and log in.
                 </p> : null}
             </div>
         : restpwstate === -1 ?
