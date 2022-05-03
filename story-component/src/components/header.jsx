@@ -1,14 +1,13 @@
+import React from "react";
 import {EditorHook} from "./editor_hooks";
 import {HintLineContent} from "./line_hints";
-import {EditorSSMLDisplay} from "../audio_edit";
-import React from "react";
-import {useEventListener} from "../hooks";
+import {EditorSSMLDisplay} from "./audio_edit";
+import {useEventListener} from "./includes";
 
 
 export function Header(props) {
     let element = props.element;
     let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
-    //let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
 
     if(props.hidden)
         hidden = "hidden";
@@ -19,12 +18,12 @@ export function Header(props) {
     let [audioRange, playAudio] = useAudio(element)
 
     let hideRangesForChallenge = undefined;
-    // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
+
     return <div className={"title fadeGlideIn "+hidden} style={{textAlign: "center"}} onClick={onClick} lineno={element?.editor?.block_start_no}>
         <div><img alt="title image" className="title_img" src={element.illustrationUrl} /></div>
         <span className="title">
-                    <AudioPlay onClick={playAudio} />
-                    <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.learningLanguageTitleContent} />
+            <AudioPlay onClick={playAudio} />
+            <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.learningLanguageTitleContent} />
             {(props.editor && (element.audio)) ?
                 <EditorSSMLDisplay ssml={element.audio.ssml}/>
                 : <></>
@@ -37,7 +36,6 @@ export function Header(props) {
 export function TextLine(props) {
     let element = props.element;
     let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
-    //let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
 
     if(props.hidden)
         hidden = "hidden";
