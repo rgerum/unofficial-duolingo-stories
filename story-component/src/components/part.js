@@ -52,23 +52,17 @@ function useCallOnNextClicked(index, handler) {
     })
 }
 
-
-
-
-
-
 function ChallengePrompt(props) {
     let element = props.element;
-    //let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
 
     let onClick;
     [hidden2, onClick] = EditorHook(hidden2, props.element.editor);
 
     return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
-                <span className="question">
-                    <HintLineContent content={element.prompt} />
-                </span>
+        <span className="question">
+            <HintLineContent content={element.prompt} />
+        </span>
     </div>
 }
 

@@ -2,6 +2,18 @@ import React from "react";
 import {shuffle} from "./includes";
 import {EditorNoHook} from "./editor_hooks";
 
+/*
+The MATCH question.
+It consists of two columns of buttons. The learner needs to find the right pars.
+
+[MATCH]
+> Tap the pairs
+- estás <> you are
+- mucho <> a lot
+- es <> is
+- las llaves <> the keys
+- la <> the
+ */
 
 export class QuestionMatch extends React.Component {
     constructor(props) {
@@ -50,7 +62,7 @@ export class QuestionMatch extends React.Component {
     }
 
     click(index) {
-        // do no allow to click on finished words again
+        // do not allow to click on finished words again
         if(this.state.clicked[index] === "right")
             return
         // select the word

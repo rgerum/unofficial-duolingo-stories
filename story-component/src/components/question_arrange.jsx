@@ -1,6 +1,15 @@
 import React from "react";
 import {EditorHook} from "./editor_hooks";
 
+/*
+The ARRANGE question
+It consists of buttons that the learner needs to click in the right order.
+
+[ARRANGE]
+> Tap what you hear
+Speaker560: ¡[(Necesito) (las~llaves) (de) (mi) (carro)!]
+~              I~need     the~keys     of   my   car
+ */
 
 export function QuestionArrange(props) {
     let element = props.element;

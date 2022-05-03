@@ -4,15 +4,7 @@ import './story.css';
 import {playSoundRight, playSoundWrong} from "./sound_effects";
 import {Part} from "./part";
 import {FinishedPage} from "./finish_page";
-
-let backend = "https://carex.uber.space/stories/backend/"
-let backend_stories = backend+"stories/"
-//window.backend_stories = backend_stories
-
-
-async function setStoryDone(id) {
-    return fetch(`${backend_stories}set_story_done.php?id=${id}`);
-}
+import {setStoryDone, scroll_down} from "./includes";
 
 export class Story extends React.Component {
     constructor(props) {
@@ -207,14 +199,4 @@ export class Story extends React.Component {
         );
     }
 
-}
-
-
-function scroll_down() {
-    // scroll down to the bottom
-    document.documentElement.scrollTo({
-        left: 0,
-        top: document.documentElement.scrollHeight - document.documentElement.clientHeight,
-        behavior: 'smooth'
-    });
 }
