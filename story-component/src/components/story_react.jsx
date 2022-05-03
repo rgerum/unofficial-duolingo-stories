@@ -1,32 +1,18 @@
 import React from 'react';
 import './story.css';
 
-
 import {playSoundRight, playSoundWrong} from "./sound_effects";
 import {Part} from "./part";
 import {FinishedPage} from "./finish_page";
 
 let backend = "https://carex.uber.space/stories/backend/"
 let backend_stories = backend+"stories/"
-window.backend_stories = backend_stories
+//window.backend_stories = backend_stories
 
 
 async function setStoryDone(id) {
-    await fetch(`${backend_stories}set_story_done.php?id=${id}`);
+    return fetch(`${backend_stories}set_story_done.php?id=${id}`);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export class Story extends React.Component {
     constructor(props) {
@@ -61,10 +47,6 @@ export class Story extends React.Component {
         window.addEventListener("story_id_changed", this.story_id_changed.bind(this))
         if(this.props.story_id)
             this.loadData(this.props.story_id)
-        /*else if(this.props.story) {
-            console.log("set the storz", this.props.story)
-            this.setState({story: this.props.story, progress: 0});
-        }*/
     }
 
     story_id_changed(e) {
