@@ -72,7 +72,7 @@ export function LoginDialog(props) {
 
         //Press Enter To Login Function
         const handleLogin = (event) =>{
-            if(event.keyCode === 13){
+            if(event.key === "Enter" || event.code === "Enter" ){
                 buttonLogin()
             }
         }
