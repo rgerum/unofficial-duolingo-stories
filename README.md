@@ -11,12 +11,22 @@ translate and review stories.
 
 ## How to run locally
 
-If you have downloaded or cloned the repository you can run the apps locally using
-  
-   `npm run start`
-   
-from either the "stories-app" folder or the "editor-app" folder, depending on which part you want to test.
+If you have downloaded or cloned the repository you need to install the npm packages in the parent folder and all the three subfolders. Execute these commands in the root folder:
 
+```
+npm install
+cd story-component && npm install && cd ..
+cd stories-app && npm install && cd ..
+cd editor-app && npm install && cd ..
+```
+   
+Then you can either go to the "stories-app" folder or the "editor-app" folder, depending on which part you want to run.  
+Then execute
+
+```
+npm run start
+```
+   
 ## How to contribute
 To contribute to the project you should open an issue to discuss your proposed change. You can assign the issue to yourself to show that you want to work on that. If there is a consensus that this bug should be fixed or this feature should be implemented, then follow the following steps:
 
