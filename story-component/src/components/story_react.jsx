@@ -69,11 +69,11 @@ export class Story extends React.Component {
         this.setState(state=>{
             let story = state.story;
             for(let element of story.elements) {
-                if(element.trackingProperties.line_index === index && element.hideRangesForChallenge !== undefined) {
+                if(element.trackingProperties.line_index === index && element.hideRangesForChallenge !== undefined && element.hideRangesForChallenge.length) {
                     if(pos === undefined)
-                        element.hideRangesForChallenge.start = element.hideRangesForChallenge.end;
+                        element.hideRangesForChallenge[0].start = element.hideRangesForChallenge[0].end;
                     else
-                        element.hideRangesForChallenge.start = pos;
+                        element.hideRangesForChallenge[0].start = pos;
                 }
             }
             return {story: story};

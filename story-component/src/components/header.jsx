@@ -48,7 +48,9 @@ export function TextLine(props) {
     if(element.line === undefined)
         return <></>
 
-    let hideRangesForChallenge = element.hideRangesForChallenge[0];
+    let hideRangesForChallenge = element.hideRangesForChallenge;
+    if(window.view === undefined && props.progress !== element.trackingProperties.line_index)
+        hideRangesForChallenge = undefined;
     //if(props.progress !== element.trackingProperties.line_index)
     //    hideRangesForChallenge = undefined;
     // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->

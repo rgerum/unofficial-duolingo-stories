@@ -16,7 +16,7 @@ function splitTextTokens(text, keep_tilde=true) {
 export function HintLineContent(props) {
     var content = props.content;
     var audioRange = props.audioRange;
-    var hideRangesForChallenge = props.hideRangesForChallenge;
+    var hideRangesForChallenge = props.hideRangesForChallenge ? props.hideRangesForChallenge[0] : props.hideRangesForChallenge;
 
     var [show_trans, set_show_trans] = useState(window.editorShowTranslations);
     useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); })
@@ -29,15 +29,21 @@ export function HintLineContent(props) {
         if(start1 <= start2 && start2 < end1)
             return true;
         return start2 <= start1 && start1 < end2;
-
     }
 
     function addWord2(start, end) {
-        return <span className="word"
+        let is_hidden = hideRangesForChallenge !== undefined &&
+        getOverlap(start, end, hideRangesForChallenge.start, hideRangesForChallenge.end) ? true : undefined
+        let style = {}
+        if(is_hidden && window.view)
+            style.color = "#afafaf";
+        if(audioRange < start)
+            style.opacity = 0.5;
+
+        return <span className={"word"}
                      key={start+" "+end}
-                     style={audioRange < start ? {opacity: 0.5} : {}}
-                     data-hidden={hideRangesForChallenge !== undefined &&
-                     getOverlap(start, end, hideRangesForChallenge.start, hideRangesForChallenge.end) ? true : undefined}
+                     style={style}
+                     data-hidden={is_hidden}
         >{content.text.substring(start, end)}</span>
     }
 

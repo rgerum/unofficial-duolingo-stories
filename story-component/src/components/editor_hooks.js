@@ -2,9 +2,12 @@ import React from "react";
 import {EditorSelection} from "@codemirror/state";
 import {useEventListener} from "./includes";
 
+
+window.view = undefined;
 export function EditorHook(hidden, editor) {
     let onClick;
-    if(editor) {
+
+    if(editor && view) {
         hidden = "";
         onClick = () => {
             let pos = view.state.doc.line(parseInt(editor.start_no)).from;
@@ -31,7 +34,7 @@ export function EditorHook(hidden, editor) {
 
 export function EditorNoHook(hidden, editor, selected) {
     let onClick;
-    if(editor) {
+    if(editor && view) {
         hidden = "";
         onClick = () => {
             let pos = view.state.doc.line(parseInt(editor.start_no)).from;

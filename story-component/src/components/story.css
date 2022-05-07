@@ -365,8 +365,7 @@ a:focus{outline:none !important;}
     border-width: 2px;
 }
 span[data-hidden=true] {
-    /*color:white; for editor it should still be visible*/
-    color: #afafaf;
+    color: white;
     background-image: linear-gradient(to right, #e5e5e5 60%, #e5e5e5 60%) !important;
     line-height: 2em;
     background-position: 0 100%;

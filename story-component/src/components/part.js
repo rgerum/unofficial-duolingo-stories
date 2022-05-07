@@ -27,7 +27,10 @@ export function Part(props) {
             }
         }
     }
-    useCallOnNextClicked(props.part[0].trackingProperties.line_index, next);
+    let line_index = props.part[0].trackingProperties.line_index;
+    if(props.part[0].type === "HEADER")
+        line_index = 0;
+    useCallOnNextClicked(line_index, next);
 
     if(challenge_type === "point-to-phrase") {
         return <div>
