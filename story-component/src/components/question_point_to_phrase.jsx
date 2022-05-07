@@ -56,7 +56,6 @@ export function QuestionPointToPhrase(props) {
                     <div className="word_button"
                          key={index}
                          onClick={()=>click(button_indices[index])}
-                         {/* the button state can be right, wrong, off or default */}
                          data-status={(buttonState[button_indices[index]] === "right") ? "right" :
                                       (buttonState[button_indices[index]] === "false-done"
                                           || buttonState[button_indices[index]] === "done") ? "off" :

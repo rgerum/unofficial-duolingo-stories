@@ -4,7 +4,8 @@ import './story.css';
 import {playSoundRight, playSoundWrong} from "./sound_effects";
 import {Part} from "./part";
 import {FinishedPage} from "./finish_page";
-import {setStoryDone, scroll_down} from "./includes";
+import {setStoryDone, getStoryJSON, scroll_down} from "./includes";
+
 
 export class Story extends React.Component {
     constructor(props) {
@@ -158,7 +159,7 @@ export class Story extends React.Component {
                     <div id="story" style={{paddingBottom: "0px"}}>
                         <div className="legal">
                             This story is owned by Duolingo, Inc. and is used under license from Duolingo.<br/>
-                            Duolingo is not responsible for the translation of this story into <span>{this.props.language_data !== undefined ? this.props.language_data[story.learningLanguage].name : ""}</span> and is not an official product of Duolingo.
+                            Duolingo is not responsible for the translation of this story into <span>{/*this.props.language_data !== undefined ? this.props.language_data[story.learningLanguage].name : ""*/}</span> and is not an official product of Duolingo.
                             Any further use of this story requires a license from Duolingo.<br/>
                             Visit <a style={{color: "gray"}} href="https://www.duolingo.com">www.duolingo.com</a> for more information.
                         </div>

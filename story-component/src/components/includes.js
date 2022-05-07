@@ -54,6 +54,20 @@ export async function setStoryDone(id) {
     return fetch(`${backend_stories}set_story_done.php?id=${id}`);
 }
 
+export async function getStoryJSON(id) {
+    let response_json = await fetch(`${backend_stories}get_story_json.php?id=${id}`);
+    let story_json;
+    if(response_json.status === 200) {
+        try {
+            story_json = await response_json.json();
+        } catch (e) {
+            story_json = undefined;
+        }
+        if (story_json) {
+            return story_json;
+        }
+    }
+}
 
 export function scroll_down() {
     // scroll down to the bottom

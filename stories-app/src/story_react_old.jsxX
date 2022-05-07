@@ -2,7 +2,7 @@ import React from 'react';
 import {useEventListener} from './hooks.js'
 import {getStoryJSON, setStoryDone} from './api_calls.js'
 import {shuffle} from './includes.js'
-import {Story} from "./story_react_new";
+import {Story} from "./story_react_new.jsxX";
 import './story.css';
 
 
