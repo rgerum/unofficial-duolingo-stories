@@ -279,7 +279,7 @@ else {
                 window.dispatchEvent(event);
             }
 
-            editor_state = {line_no: lineno}
+            editor_state = {line_no: lineno, view: view}
             state = v.state;
             if (v.docChanged) {
                 unsaved_changes = true;

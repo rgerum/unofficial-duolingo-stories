@@ -104,7 +104,7 @@ export class QuestionMatch extends React.Component {
         let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
 
         let onClick;
-        [hidden2, onClick] = EditorNoHook(hidden2, props.element.editor, this.state.selected);
+        [hidden2, onClick] = EditorNoHook(hidden2, props.element.editor, props.editor, this.state.selected);
 
         return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
             <span className="question">{element.prompt}</span>

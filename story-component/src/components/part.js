@@ -60,7 +60,7 @@ function ChallengePrompt(props) {
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
 
     let onClick;
-    [hidden2, onClick] = EditorHook(hidden2, props.element.editor);
+    [hidden2, onClick] = EditorHook(hidden2, props.element.editor, props.editor);
 
     return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
         <span className="question">

@@ -136,14 +136,16 @@ export class Story extends React.Component {
 
         let finished = (this.state.progress === parts.length);
 
-        if(editor)
+        if(editor) {
             return (
-                        <div id="story" style={{paddingBottom: "0px"}}>
-                            {parts.map((part, i) => (
-                                <Part key={i} editor={editor} controls={this.controls} progress={this.state.progress} part={part} />
-                            ))}
-                        </div>
+                <div id="story" style={{paddingBottom: "0px"}}>
+                    {parts.map((part, i) => (
+                        <Part key={i} editor={editor} controls={this.controls} progress={this.state.progress}
+                              part={part}/>
+                    ))}
+                </div>
             );
+        }
 
         return (
             <div>

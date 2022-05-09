@@ -3,12 +3,15 @@ import {EditorSelection} from "@codemirror/state";
 import {useEventListener} from "./includes";
 
 
-window.view = undefined;
-export function EditorHook(hidden, editor) {
+export function EditorHook(hidden, editor, editor_props) {
     let onClick;
+    let view = editor_props.view;
+
+    if(editor_props) {
+        hidden = "";
+    }
 
     if(editor && view) {
-        hidden = "";
         onClick = () => {
             let pos = view.state.doc.line(parseInt(editor.start_no)).from;
             if(editor.active_no)
@@ -32,8 +35,14 @@ export function EditorHook(hidden, editor) {
     return [hidden, onClick];
 }
 
-export function EditorNoHook(hidden, editor, selected) {
+export function EditorNoHook(hidden, editor, editor_props, selected) {
     let onClick;
+    let view = editor_props.view;
+
+    if(editor_props) {
+        hidden = "";
+    }
+
     if(editor && view) {
         hidden = "";
         onClick = () => {

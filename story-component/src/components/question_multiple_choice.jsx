@@ -41,7 +41,7 @@ export function QuestionMultipleChoice(props) {
 
     // connect the editor functions
     let onClick;
-    [hidden2, onClick] = EditorHook(hidden2, props.element.editor);
+    [hidden2, onClick] = EditorHook(hidden2, props.element.editor, props.editor);
 
     return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
         {/* Display the question if a question is there */}

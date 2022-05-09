@@ -14,6 +14,7 @@ function App() {
   const [task, setTask] = React.useState(urlParams.get("task") || null);
   // story
   const [story, setStory] = React.useState(urlParams.get("story") || null);
+  const [test_mode, ] = React.useState(urlParams.get("test") || null);
   const [course, setCourse] = React.useState([urlParams.get("lang") || undefined, urlParams.get("lang_base") || undefined]);
   // language_dataRefetch
   let [language_data, ] = useDataFetcher2(getLanguageNames, []);
@@ -21,7 +22,10 @@ function App() {
   function changeStory(id, task) {
     setStory(id);
     if(id) {
-      window.history.pushState({story: id}, "Story" + id, `?story=${id}`);
+      if(test_mode)
+        window.history.pushState({story: id}, "Story" + id, `?story=${id}&test=1`);
+      else
+        window.history.pushState({story: id}, "Story" + id, `?story=${id}`);
       dispatchEvent(new CustomEvent('progress_changed', {detail: id}));
     }
     else if(task) {
@@ -62,6 +66,13 @@ function App() {
     setInitialized(1);
     changeStory(urlParams.get('story'), urlParams.get('task'));
   }
+
+  if(test_mode) {
+    return <div id="main">
+      <Story editor={{lineno: 3}} story_id={story} />
+    </div>
+  }
+
   if(task !== null) {
     return <Task task={task} />
   }

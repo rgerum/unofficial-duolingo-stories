@@ -24,7 +24,7 @@ export function QuestionPointToPhrase(props) {
 
     // connect the editor functions
     let onClick;
-    [hidden, onClick] = EditorHook(hidden, props.element.editor);
+    [hidden, onClick] = EditorHook(hidden, props.element.editor, props.editor);
 
     // find which parts of the text should be converted to buttons
     let button_indices = {};

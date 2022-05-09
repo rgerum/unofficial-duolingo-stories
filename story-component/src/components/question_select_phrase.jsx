@@ -23,7 +23,7 @@ export function QuestionSelectPhrase(props) {
 
     // connect the editor functions
     let onClick;
-    [hidden2, onClick] = EditorHook(hidden2, props.element.editor);
+    [hidden2, onClick] = EditorHook(hidden2, props.element.editor, props.editor);
 
     // use the choice buttons (a checkmark field with a text line next to it)
     useCallOnActivation(element.trackingProperties.line_index, props.controls.block_next);

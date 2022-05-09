@@ -16,7 +16,7 @@ export function QuestionArrange(props) {
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
 
     let onClick;
-    [hidden2, onClick] = EditorHook(hidden2, props.element.editor);
+    [hidden2, onClick] = EditorHook(hidden2, props.element.editor, props.editor);
 
 
     let [buttonState, click] = useArrangeButtons(element.phraseOrder, props.controls.right, props.controls.wrong,

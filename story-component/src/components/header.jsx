@@ -13,7 +13,7 @@ export function Header(props) {
         hidden = "hidden";
 
     let onClick;
-    [hidden, onClick] = EditorHook(hidden, props.element.editor);
+    [hidden, onClick] = EditorHook(hidden, props.element.editor, props.editor);
 
     let [audioRange, playAudio] = useAudio(element)
 
@@ -41,7 +41,7 @@ export function TextLine(props) {
         hidden = "hidden";
 
     let onClick;
-    [hidden, onClick] = EditorHook(hidden, props.element.editor);
+    [hidden, onClick] = EditorHook(hidden, props.element.editor, props.editor);
 
     let [audioRange, playAudio] = useAudio(element)
 
