@@ -10,21 +10,17 @@ the learners will see (hosted on www.duostories.org) and the editor-app is the p
 translate and review stories.
 
 ## How to run locally
-
-If you have downloaded or cloned the repository you need to install the npm packages in the parent folder and all the three subfolders. Execute these commands in the root folder:
-
+Install lerna to manage the multiple packages in the repo:
 ```
-npm install
-cd story-component && npm install && cd ..
-cd stories-app && npm install && cd ..
-cd editor-app && npm install && cd ..
+npm install --global lerna
 ```
-   
-Then you can either go to the "stories-app" folder or the "editor-app" folder, depending on which part you want to run.  
-Then execute
-
+Use lerna to install the dependencies
 ```
-npm run start
+lerna bootstrap
+```
+Use lerna to start all packages simultaneously
+```
+lerna run --parallel --stream start
 ```
    
 ## How to contribute
