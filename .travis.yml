@@ -2,12 +2,9 @@ language: node_js
 node_js:
   - 16
 before_install:
-  - npm install
-  - cd story-component
-  - npm install
-  - cd ..
-  - cd editor-app
-  - npm install
+  - npm install --global lerna
+  - lerna bootstrap
 script:
-  - npm start & wait-on http://localhost:8080
+  - lerna run --parallel --stream start & wait-on http://localhost:8080
+  - cd packages/editor-app
   - npx cypress run --record --key $CYPRESS_KEY
