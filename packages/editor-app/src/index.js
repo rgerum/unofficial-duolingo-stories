@@ -279,7 +279,17 @@ else {
                 window.dispatchEvent(event);
             }
 
-            editor_state = {line_no: lineno, view: view}
+            editor_state = {
+                line_no: lineno,
+                view: view,
+                select: (line, scroll) => {
+                    let pos = view.state.doc.line(parseInt(line)).from;
+                    view.dispatch(view.state.update({
+                        selection: EditorSelection.cursor(pos),
+                        scrollIntoView: scroll,
+                    }));
+                }
+            }
             state = v.state;
             if (v.docChanged) {
                 unsaved_changes = true;
