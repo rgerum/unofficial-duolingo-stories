@@ -1,47 +1,47 @@
 {
-  "name": "story-component",
+  "name": "root",
   "version": "0.1.0",
   "private": true,
-  "main": "dist/index.js",
   "dependencies": {
-    "@codemirror/state": "^0.20.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+    "editor-app": "file:packages/editor-app",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "^5.0.1",
-    "web-vitals": "^1.1.2",
-    "story-component": "file:./story-component"
-  },
-  "homepage": "stories",
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "rm -rf dist && NODE_ENV=development babel src --out-dir dist --copy-files",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 firefox version",
-      "last 1 chrome version",
-      "last 1 safari version"
-    ]
+    "stories-app": "file:packages/stories-app",
+    "story-component": "file:packages/story-component",
+    "web-vitals": "^1.1.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.10",
     "@babel/core": "^7.17.10",
-    "@babel/preset-env": "^7.17.10"
+    "@babel/plugin-proposal-class-properties": "^7.16.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+    "@babel/plugin-transform-react-constant-elements": "^7.16.0",
+    "@babel/plugin-transform-react-inline-elements": "^7.16.0",
+    "@babel/plugin-transform-runtime": "^7.16.4",
+    "@babel/preset-env": "^7.17.10",
+    "@babel/preset-react": "^7.16.0",
+    "@babel/runtime": "^7.16.3",
+    "@svgr/webpack": "^6.1.0",
+    "babel-loader": "^8.2.3",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "css-loader": "^6.5.1",
+    "cypress": "^9.5.4",
+    "file-loader": "^6.2.0",
+    "formdata-node": "^4.3.2",
+    "html-webpack-plugin": "^5.5.0",
+    "lerna": "^4.0.0",
+    "mini-css-extract-plugin": "^2.4.5",
+    "npm-watch": "^0.11.0",
+    "style-loader": "^3.3.1",
+    "terser-webpack-plugin": "^5.2.5",
+    "url-loader": "^4.1.1",
+    "wait-on": "^6.0.1",
+    "webpack": "^5.64.4",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.6.0"
   }
 }

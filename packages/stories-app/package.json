@@ -1,15 +1,14 @@
 {
-  "name": "story-component",
+  "name": "stories-app",
   "version": "0.1.0",
   "private": true,
-  "main": "dist/index.js",
   "dependencies": {
-    "@codemirror/state": "^0.20.0"
+    "story-component": "file:../story-component"
   },
   "homepage": "stories",
   "scripts": {
     "start": "react-scripts start",
-    "build": "rm -rf dist && NODE_ENV=development babel src --out-dir dist --copy-files",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -30,10 +29,5 @@
       "last 1 chrome version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@babel/cli": "^7.17.10",
-    "@babel/core": "^7.17.10",
-    "@babel/preset-env": "^7.17.10"
   }
 }

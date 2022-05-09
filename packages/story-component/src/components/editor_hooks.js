@@ -1,5 +1,4 @@
 import React from "react";
-import {EditorSelection} from "@codemirror/state";
 import {useEventListener} from "./includes";
 
 
@@ -13,13 +12,10 @@ export function EditorHook(hidden, editor, editor_props) {
 
     if(editor && view) {
         onClick = () => {
-            let pos = view.state.doc.line(parseInt(editor.start_no)).from;
             if(editor.active_no)
-                pos = view.state.doc.line(parseInt(editor.active_no)).from;
-            view.dispatch(view.state.update({
-                selection: EditorSelection.cursor(pos),
-                //scrollIntoView: true,
-            }));
+                editor_props.select(editor.active_no);
+            else
+                editor_props.select(editor.start_no);
         }
     }
 
@@ -46,13 +42,10 @@ export function EditorNoHook(hidden, editor, editor_props, selected) {
     if(editor && view) {
         hidden = "";
         onClick = () => {
-            let pos = view.state.doc.line(parseInt(editor.start_no)).from;
             if(editor.active_no)
-                pos = view.state.doc.line(parseInt(editor.active_no)).from;
-            view.dispatch(view.state.update({
-                selection: EditorSelection.cursor(pos),
-                scrollIntoView: true,
-            }));
+                editor_props.select(editor.active_no,true);
+            else
+                editor_props.select(editor.start_no,true);
         }
     }
 

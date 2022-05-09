@@ -1,30 +1,30 @@
 @font-face {
     font-family: nunito;
-    src: url(src/nunito/Nunito-Regular_new.ttf);
+    src: url(../../src/nunito/Nunito-Regular_new.ttf);
 }
 @font-face {
     font-family: nunito;
-    src: url(src/nunito/Nunito-Bold_new.ttf);
+    src: url(../../src/nunito/Nunito-Bold_new.ttf);
     font-weight: bold;
 }
 @font-face {
     font-family: fabada;
-    src: url(src/fabada/Fabada-regular.ttf);
+    src: url(../../src/fabada/Fabada-regular.ttf);
 }
 
 @font-face {
     font-family: vollkorn;
-    src: url(src/vollkorn/VollkornMedium-jEVry.ttf);
+    src: url(../../src/vollkorn/VollkornMedium-jEVry.ttf);
 }
 @font-face {
     font-family: vollkorn;
-    src: url(src/vollkorn/VollkornBold-ALwGg.ttf);
+    src: url(../../src/vollkorn/VollkornBold-ALwGg.ttf);
     font-weight: bold;
 }
 
 @font-face {
     font-family: comfortaa;
-    src: url(src/comfortaa/Comfortaa-VariableFont_wght.ttf);
+    src: url(../../src/comfortaa/Comfortaa-VariableFont_wght.ttf);
 }
 
 
