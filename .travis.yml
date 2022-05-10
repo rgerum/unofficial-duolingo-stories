@@ -11,6 +11,6 @@ script:
   - npx cypress run --record --key $CYPRESS_KEY
   - cd ..
   - pwd
-  - cd packages/stories-app
+  - cd stories-app
   - pwd
   - npx cypress run --record --key $CYPRESS_KEY
