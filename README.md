@@ -1,7 +1,10 @@
 # Unofficial Duolingo Stories
+[![Build Status](https://app.travis-ci.com/rgerum/unofficial-duolingo-stories.svg?branch=master)](https://app.travis-ci.com/rgerum/unofficial-duolingo-stories)
+[![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
+
 This project brings the official Duolingo Stories to new languages, translated by a community effort.
 
-It is not an official product of Duolingo, nor is there any plan to integrate it into their platform or app.
+It is *not* an official product of Duolingo, nor is there any plan to integrate it into their platform or app.
 
 It is hosted at www.duostories.org and reproduces the story experience from the official Duolingo stories.
 
@@ -10,15 +13,17 @@ the learners will see (hosted on www.duostories.org) and the editor-app is the p
 translate and review stories.
 
 ## How to run locally
-Install lerna to manage the multiple packages in the repo:
+This repository contains multiple packages that are managed with [Lerna](https://lerna.js.org/).
+
+To run it, you need to have Lerna installed:
 ```
 npm install --global lerna
 ```
-Use lerna to install the dependencies
+Lerna can then install the dependencies of all packages:
 ```
 lerna bootstrap
 ```
-Use lerna to start all packages simultaneously
+And it can then run all packages simultaneously
 ```
 lerna run --parallel --stream start
 ```
