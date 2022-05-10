@@ -8,3 +8,5 @@ script:
   - lerna run --parallel --stream start & wait-on http://localhost:8080
   - cd packages/editor-app
   - npx cypress run --record --key $CYPRESS_KEY
+  - cd ../packages/stories-app & wait-on http://localhost:3000
+  - npx cypress run --record --key $CYPRESS_KEY

@@ -71,6 +71,7 @@ function LanguageButton(props) {
     let course = props.course;
     let language = props.language_data[course.learningLanguage];
     return <a
+        data-cy={"language_button_big_"+course.id}
         className="language_select_button"
         onClick={props.onClick}
         href={`index.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`}
@@ -121,6 +122,7 @@ function SetList(props) {
 function StoryButton(props) {
     let story = props.story;
     return <div
+        data-cy={"story_button_"+story.id}
         className="button_story_parent"
         onClick={(e) => {e.preventDefault(); props.onStoryClicked(story.id); }}
         href={`?story=${story.id}`}
