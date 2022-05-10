@@ -44,6 +44,8 @@
   margin: 7px 17px 10px;
   display: inline-block;
   width: 134px;
+  cursor: pointer;
+  text-decoration: none;
 }
 .button_story_text {
   color: #4b4b4b;

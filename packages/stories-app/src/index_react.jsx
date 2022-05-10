@@ -125,7 +125,6 @@ function StoryButton(props) {
         data-cy={"story_button_"+story.id}
         className="button_story_parent"
         onClick={(e) => {e.preventDefault(); props.onStoryClicked(story.id); }}
-        href={`?story=${story.id}`}
     >
         <div
             className="button_story_img"
