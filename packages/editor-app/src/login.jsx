@@ -73,14 +73,7 @@ export function LoginDialog(props) {
         //Press Enter To Login Function
         const handleLogin = (event) =>{
             if(event.keyCode === 13){
-                let activeElement = document.activeElement.id;
-    
-                if(activeElement === "login_dialog_username") {
-                    document.getElementById("login_dialog_password").focus()
-                }
-                else if(activeElement === "login_dialog_password") {
-                    buttonLogin();
-                }
+                buttonLogin()
             }
         }
         //End Of Enter To Login Function
