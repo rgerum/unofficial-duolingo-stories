@@ -358,9 +358,9 @@ else {
         let last_editor_scroll_pos = 0;
         editor.addEventListener('scroll', function() {
             requestAnimationFrame(()=>{
-                if(last_editor_scroll_pos === editor.scrollTop)
+                if(last_editor_scroll_pos === parseInt(editor.scrollTop))
                     return
-                last_editor_scroll_pos = editor.scrollTop;
+                last_editor_scroll_pos = parseInt(editor.scrollTop);
 
                 let offset_lines = 1;
                 let o = editor.getBoundingClientRect().height/2
@@ -375,7 +375,7 @@ else {
                         let f = (target_equal_lineno-x1)/(x2-x1);
                         let offsetx = y1+f*(y2-y1);
                         last_preview_scroll_pos = parseInt(offsetx - o);
-                        preview.scrollTo(0, offsetx - o);
+                        preview.scrollTo({top: offsetx - o, behavior: "auto"});
                         break
                     }
                 }
@@ -387,9 +387,9 @@ else {
         let last_preview_scroll_pos = 0;
         preview.addEventListener('scroll', function() {
             requestAnimationFrame(()=>{
-                if(last_preview_scroll_pos === preview.scrollTop)
+                if(last_preview_scroll_pos === parseInt(preview.scrollTop))
                     return
-                last_preview_scroll_pos = preview.scrollTop;
+                last_preview_scroll_pos = parseInt(preview.scrollTop);
 
                 let offset_lines = 1;
                 let o = preview.getBoundingClientRect().height/2
@@ -404,7 +404,7 @@ else {
                         let offsetx_lineno = x1+f*(x2-x1);
                         let offsetx = (offsetx_lineno - offset_lines) * 26.6 - o + 4
                         last_editor_scroll_pos = parseInt(offsetx);
-                        editor.scrollTo(0, offsetx);
+                        editor.scrollTo({top: offsetx, behavior: "auto"});
                         break
                     }
                 }
