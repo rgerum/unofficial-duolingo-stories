@@ -125,3 +125,34 @@ input:checked + .slider:before {
     width: 30px;
     text-align: right;
 }
+
+
+.status_dropdown {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    display: none;
+    padding: 0;
+    width: 160px;
+    background: white;
+    border-radius: 15px;
+    border: 1px solid lightgray;
+    overflow-y: scroll;
+    margin: 0;
+    max-height: 270px;
+    z-index: 10;
+}
+.status_dropdown_container {
+    position: relative;
+}
+td:hover .status_dropdown {
+    display: block;
+}
+.status_value {
+    display: block;
+    padding: 5px;
+    border-bottom: 1px solid lightgray;
+}
+.status_value:hover {
+    background: #e2e1e1;
+}

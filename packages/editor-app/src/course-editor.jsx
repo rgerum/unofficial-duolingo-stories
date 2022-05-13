@@ -1,9 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useDataFetcher, useDataFetcher2, useEventListener} from './hooks'
-import {Spinner} from './react/spinner'
+import {Spinner, SpinnerBlue} from './react/spinner'
 import {Flag} from './react/flag'
 import {useUsername, LoginDialog} from './login'
-import {getCourses, getCourse, getImportList, setImport} from "./api_calls.mjs";
+import {getCourses, getCourse, getImportList, setImport, setStatus} from "./api_calls.mjs";
 import "./course-editor.css"
 
 
@@ -74,6 +74,34 @@ function pad(x) {
     return x;
 }
 
+function DropDownStatus(props) {
+
+    let [loading, setLoading] = useState(0);
+    let [status, set_status] = useState(props.status);
+
+    async function changeState(status) {
+        setLoading(1);
+        try {
+            await setStatus({id: props.id, status: status})
+        }
+        catch (e) {
+            console.error(e);
+            return setLoading(-1);
+        }
+        set_status(status);
+        setLoading(0);
+    }
+    let states = ["draft", "feedback", "finished"];
+    return <div className="status_dropdown_container">
+        {status} {loading === 1 ? <SpinnerBlue /> :
+                  loading ===-1 ? <img title="an error occurred" alt="error" src="icons/error.svg"/> : <></>}
+        <div className="status_dropdown">
+        {states.map((state, i) =>
+            <span key={i} className="status_value" onClick={() => changeState(state)}>{state}</span>
+        )}
+        </div></div>
+}
+
 function EditList(props) {
     let course = props.course;
     let stories = props.course?.stories
@@ -85,6 +113,7 @@ function EditList(props) {
             <tr>
                 <th data-js-sort-colnum="0">Set</th>
                 <th style={{width: "100%"}} colSpan="2" data-js-sort-colnum="1">Name</th>
+                <th data-js-sort-colnum="2">Status</th>
                 <th data-js-sort-colnum="4">Author</th>
                 <th data-js-sort-colnum="5" className="js-sort-active">Creation</th>
                 <th data-js-sort-colnum="6">Change</th>
@@ -98,6 +127,7 @@ function EditList(props) {
                         src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
                         width="44px" height={"40px"}/></td>
                     <td style={{width: "100%"}}><a href={`?story=${story.id}`}>{story.name}</a></td>
+                    <td><DropDownStatus id={story.id} status={story.status}/></td>
                     <td>{story.username}</td>
                     <td>{story.date}</td>
                     <td>{story.change_date}</td>

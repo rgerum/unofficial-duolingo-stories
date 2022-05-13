@@ -13,7 +13,7 @@ ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
 include ( '../functions_new.php' );
-
+include("../user/hash_functions.php");
 
 function get_values($db, $names) {
     $output = [];
@@ -42,12 +42,33 @@ function query_one($db, $query) {
     $result = mysqli_query($db, $query);
     return mysqli_fetch_assoc($result);
 }
+
+$db = database();
+
+
+
+if( (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) && isset($_REQUEST['username'])) {
+    //http_response_code(403);
+
+    // try to login again
+    list($username, , $password) = get_values($db, ['username', 'password']);
+    $username = mysqli_escape_string($db, $_REQUEST["username"]);
+    $user = mysqli_fetch_assoc(mysqli_query($db, "SELECT * FROM user WHERE username = '$username' AND activated = 1"));
+    $hash = $user["password"];
+    if(phpbb_check_hash($_REQUEST["password"], $hash)) {
+        $_SESSION["user"] = $user;
+    }
+    unset($_REQUEST["password"]);
+    unset($_REQUEST["username"]);
+    unset($_POST["password"]);
+    unset($_POST["username"]);
+}
+
 if(!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) {
     http_response_code(403);
     die();
 }
 
-$db = database();
 $action = $_REQUEST['action'];
 if($action == "import") {
     $id = intVal($_REQUEST['id']);
@@ -113,6 +134,12 @@ else if($action == "avatar") {
         "avatar_id" => "int",
     ];
     $id = updateDatabase($keys, "avatar_mapping", $_POST, "id");
+}
+else if($action == "status") {
+    $keys = ["id" => "int",
+        "status" => "string",
+    ];
+    $id = updateDatabase($keys, "story", $_POST, "id");
 }
 else if($action == "story") {
     $keys = ["id" => "int",

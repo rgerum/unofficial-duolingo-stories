@@ -162,13 +162,13 @@ else if($action == "course") {
     if(isset($course[0]))
         $course = $course[0];
       if(0)
-        $stories = query_json_list_return($db,"SELECT story.id, story.set_id, story.set_index, story.name, story.image, story.image_done, story.xp, story.name_base, COUNT(done.id) count, user.username, story.date, story.change_date, story.public FROM story
+        $stories = query_json_list_return($db,"SELECT story.id, story.set_id, story.set_index, story.name, story.status, story.image, story.image_done, story.xp, story.name_base, COUNT(done.id) count, user.username, story.date, story.change_date, story.public FROM story
         LEFT JOIN user ON story.author = user.id
         LEFT JOIN story_done done ON story.id = done.story_id
         WHERE story.course_id = $id
         GROUP BY story.id");
       else
-        $stories = query_json_list_return($db,"SELECT story.id, story.set_id, story.set_index, story.name, story.image, story.image_done, story.xp, story.name_base, user.username, story.date, story.change_date, story.public FROM story
+        $stories = query_json_list_return($db,"SELECT story.id, story.set_id, story.set_index, story.name, story.status, story.image, story.image_done, story.xp, story.name_base, user.username, story.date, story.change_date, story.public FROM story
         LEFT JOIN user ON story.author = user.id
         WHERE story.course_id = $id
         ");
