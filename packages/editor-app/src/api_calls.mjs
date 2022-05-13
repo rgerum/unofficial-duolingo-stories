@@ -61,11 +61,11 @@ export async function fetch_post(url, data) {
     /** like fetch but with post instead of get */
     var fd = new FormData();
     //very simply, doesn't handle complete objects
-    for(let i in data){
-        fd.append(i,data[i]);
-    }
     for(let i in login_data){
         fd.append(i,login_data[i]);
+    }
+    for(let i in data){
+        fd.append(i,data[i]);
     }
     return fetch(url, {
         method: "POST",
