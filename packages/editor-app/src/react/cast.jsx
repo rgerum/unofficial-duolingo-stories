@@ -22,6 +22,7 @@ export function Cast(props) {
             <p>{no_speaker_count} characters do not have a speaker voice assigned. Go to the <a target="_blank" href={"?language="+props.learningLanguage}>Character-Editor</a> to add the voices.</p> :
             <p>To change voices or names go to the <a target="_blank" href={"?language="+props.learningLanguage}>Character-Editor</a>.</p>
         }
+        <p>Use these links to share this story with other contributors to <a href={`https://www.duostories.org/?story=${props.id}`}>test</a> or <a href={`https://www.duostories.org/?story=${props.id}&test=1`}>review</a> the story.</p>
     </div>
 }
 

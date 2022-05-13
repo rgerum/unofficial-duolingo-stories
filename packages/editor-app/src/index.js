@@ -236,7 +236,7 @@ else {
 
                 ReactDOM.render(
                     <React.StrictMode>
-                        <Cast story_meta={story_meta} learningLanguage={story_data.learningLanguage}/>
+                        <Cast id={story_data.id} story_meta={story_meta} learningLanguage={story_data.learningLanguage}/>
                         <Story editor={editor_state} story={story}/>
                     </React.StrictMode>,
                     document.getElementById('preview')

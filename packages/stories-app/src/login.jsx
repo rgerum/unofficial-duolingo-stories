@@ -1,7 +1,7 @@
 import React from 'react';
 import './login.css';
 import {useInput} from "./hooks.js";
-import {dict_to_query, fetch_post} from "./includes.js";
+import {fetch_post} from "./includes.js";
 import {get_backend} from "./api_calls";
 
 let backend = get_backend();
