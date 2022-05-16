@@ -68,7 +68,8 @@ export function Task(props) {
                     <>
                         <p id="status">Activation successful.</p>
                         <p id="login_form">
-                            You can now go back to the <a href="../../../admin/index.html">Main page</a> and log in.
+                          {/* Use of absolute link because relative links would only be relative to carex.uber.space */}
+                          You can now go back to the <a href='https://duostories.org'>Main page</a> and log in.
                         </p>
                     </>
                     :
@@ -96,7 +97,8 @@ export function Task(props) {
                 </p>
                  : restpwstate === 2 ?
                 <p id="login_status">
-                    You can now go back to the <a href="../../../admin/index.html">Main page</a> and log in.
+                  {/* Use of absolute link because relative links would only be relative to carex.uber.space */}
+                  You can now go back to the <a href='https://duostories.org'>Main page</a> and log in.
                 </p> : null}
             </div>
         : restpwstate === -1 ?
