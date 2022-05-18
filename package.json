@@ -14,6 +14,10 @@
     "story-component": "file:packages/story-component",
     "web-vitals": "^1.1.2"
   },
+  "scripts": {
+    "build": "lerna run build",
+    "start": "lerna run --parallel --stream start"
+  },
   "devDependencies": {
     "@babel/cli": "^7.17.10",
     "@babel/core": "^7.17.10",
