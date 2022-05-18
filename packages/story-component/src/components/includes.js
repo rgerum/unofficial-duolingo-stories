@@ -45,9 +45,14 @@ export function useEventListener(eventName, handler, element = window) {
 
 
 
-let backend = "https://carex.uber.space/stories/backend/"
+export function get_backend() {
+    let backend = "https://carex.uber.space/stories/backend/"
+    if(window.location.host === "www.duostories.org" || window.location.host === "duostories.org")
+        backend = "https://"+window.location.host+"/stories/backend/"
+    return backend;
+}
+let backend = get_backend();
 let backend_stories = backend+"stories/"
-//window.backend_stories = backend_stories
 
 
 export async function setStoryDone(id) {

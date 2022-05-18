@@ -61,6 +61,19 @@ $db = database();
 $action = $_REQUEST['action'];
 
 
+if( (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) && isset($_REQUEST['username'])) {
+    //http_response_code(403);
+
+    // try to login again
+    list($username, , $password) = get_values($db, ['username', 'password']);
+    $username = mysqli_escape_string($db, $_REQUEST["username"]);
+    $user = mysqli_fetch_assoc(mysqli_query($db, "SELECT * FROM user WHERE username = '$username' AND activated = 1"));
+    $hash = $user["password"];
+    if(phpbb_check_hash($_REQUEST["password"], $hash)) {
+        $_SESSION["user"] = $user;
+    }
+}
+
 if($action == "session") {
     if(isset($_SESSION["user"]))
         echo "{\"username\": \"".$_SESSION["user"]["username"]."\", \"role\": ".$_SESSION["user"]["role"]."}";
@@ -85,19 +98,6 @@ else if($action == "login") {
     else
         http_response_code(403);
     die();
-}
-
-if( (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) && isset($_REQUEST['username'])) {
-    //http_response_code(403);
-
-    // try to login again
-    list($username, , $password) = get_values($db, ['username', 'password']);
-    $username = mysqli_escape_string($db, $_REQUEST["username"]);
-    $user = mysqli_fetch_assoc(mysqli_query($db, "SELECT * FROM user WHERE username = '$username' AND activated = 1"));
-    $hash = $user["password"];
-    if(phpbb_check_hash($_REQUEST["password"], $hash)) {
-        $_SESSION["user"] = $user;
-    }
 }
 
 if(!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) {
@@ -154,8 +154,8 @@ else if($action == "courses") {
 }
 else if($action == "course") {
     $id = intVal($_REQUEST['id']);
-    $course = query_json_list_return($db,"SELECT course.id, course.name, l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
-                                                                          l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
+    $course = query_json_list_return($db,"SELECT course.id, course.name, course.fromLanguage as fromLanguageID, l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
+                                                                         course.learningLanguage as learningLanguageID, l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
                                                                   course.public, course.official FROM course
                                       LEFT JOIN language l1 ON l1.id = course.fromLanguage
                                       LEFT JOIN language l2 ON l2.id = course.learningLanguage
