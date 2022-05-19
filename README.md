@@ -33,6 +33,7 @@ To contribute to the project you should open an issue to discuss your proposed c
 
   - create a fork of the repository
   - clone it to your computer
+  - create a branch for your feature
   - make the changes to the code
   - commit and push the changes to github
   - create a pull request
