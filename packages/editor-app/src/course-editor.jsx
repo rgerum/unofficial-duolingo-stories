@@ -139,19 +139,6 @@ function EditList(props) {
     </>
 }
 
-
-export function EditorOverviewLogin() {
-    let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
-
-    // loading
-    if (username === undefined) return <Spinner/>
-    // no username show login
-    if (username.username === undefined || username.role !== 1)
-        return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
-    // logged in and allowed!
-    return <EditorOverview/>
-}
-
 export function EditorOverview() {
     let urlParams = new URLSearchParams(window.location.search);
 
