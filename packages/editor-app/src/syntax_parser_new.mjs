@@ -201,7 +201,7 @@ function getInputStringSpeechText(text, hide) {
         text = text.replace("[", "<prosody volume=\"silent\">")
         text = text.replace("]", "</prosody>")
     }
-    text = text.replace(/(\.\.\.|…)/g, '<sub alias="">$1</sub><break/>');
+    text = text.replace(/(\.\.\.|…)/g, '<sub alias=" ">$1</sub><break/>');
     text = text.replace(/\(\+/g, '');
     text = text.replace(/\(/g, '');
     text = text.replace(/\)/g, '');
