@@ -42,7 +42,7 @@ async function login_button(setResetPwState, passwordInput) {
 }
 
 
-export function Task(props) {
+export function User_activation_reset(props) {
     let [initialized, setInitialized] = React.useState(0);
     let [activated, setActivated] = React.useState(0);
     let [restpwstate, setResetPwState] = React.useState(0);
@@ -69,7 +69,7 @@ export function Task(props) {
                         <p id="status">Activation successful.</p>
                         <p id="login_form">
                           {/* Use of absolute link because relative links would only be relative to carex.uber.space */}
-                          You can now go back to the <a href='https://duostories.org'>Main page</a> and log in.
+                          You can now go back to the <a href='https://www.duostories.org'>Main page</a> and log in.
                         </p>
                     </>
                     :
@@ -98,7 +98,7 @@ export function Task(props) {
                  : restpwstate === 2 ?
                 <p id="login_status">
                   {/* Use of absolute link because relative links would only be relative to carex.uber.space */}
-                  You can now go back to the <a href='https://duostories.org'>Main page</a> and log in.
+                  You can now go back to the <a href='https://www.duostories.org'>Main page</a> and log in.
                 </p> : null}
             </div>
         : restpwstate === -1 ?
