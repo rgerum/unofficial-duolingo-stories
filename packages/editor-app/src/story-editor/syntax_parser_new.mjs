@@ -300,9 +300,6 @@ function get_avatar(id, avatar_names, avatar_overwrites) {
     return {"characterId": id, "avatarUrl": avatar_names[id]?.link};
 }
 
-function add_avatar(id, link) {
-    character_avatars[id] = link;
-}
 
 function getText(line_iter, allow_speaker, allow_trans, allow_audio) {
     let speaker = {}

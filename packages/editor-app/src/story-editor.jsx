@@ -98,7 +98,6 @@ function StoryEditorHeader(props) {
 
 export function EditorNode() {
     React.useEffect(() => {
-        //document.getElementById("editor").innerText = "mounted";
         if(window.view === undefined) {
             window.view = "loading"
             MountEditor();
@@ -218,7 +217,7 @@ function MountEditor() {
                     </React.StrictMode>,
                     document.getElementById('preview')
                 );
-                window.scroll_lookup = createScrollLookUp();
+                createScrollLookUp();
                 last_lineno = lineno;
             }
         }

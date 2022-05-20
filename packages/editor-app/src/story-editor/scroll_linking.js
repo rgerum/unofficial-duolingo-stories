@@ -1,9 +1,6 @@
 /* scroll linking */
 export function addScrollLinking(view) {
-    let editor = view.scrollDOM//document.getElementById("editor");
-    console.log("document.getElementById(\"editor\").firstChild;", document.getElementById("editor").firstChild)
-
-//let editor;// = document.getElementById("editor");
+    let editor = view.scrollDOM;
     let preview = document.getElementById("preview");
     let svg_parent = document.getElementById("margin");
 
@@ -11,14 +8,12 @@ export function addScrollLinking(view) {
 
     function update_lines() {
         let svg_element = 0;
-        let width1 = parseInt(document.defaultView.getComputedStyle(editor).width, 10);//svg_parent.getBoundingClientRect().width * 0.48
-        let width1b = parseInt(document.defaultView.getComputedStyle(editor).width, 10) + 20;//svg_parent.getBoundingClientRect().width * 0.50
-        let width2 = parseInt(document.defaultView.getComputedStyle(editor).width, 10) + 40;//svg_parent.getBoundingClientRect().width * 0.52
+        let width1 = parseInt(document.defaultView.getComputedStyle(editor).width, 10);
+        let width1b = parseInt(document.defaultView.getComputedStyle(editor).width, 10) + 20;
+        let width2 = parseInt(document.defaultView.getComputedStyle(editor).width, 10) + 40;
         let width3 = svg_parent.getBoundingClientRect().width
         let height = svg_parent.getBoundingClientRect().height
 
-        //let pairs = []
-        //let pairs2 = []
         let path = "M0,0 ";
         for (let element of document.querySelectorAll("div[lineno]")) {
             let new_lineno = parseInt(element.attributes.lineno.value);
@@ -30,8 +25,6 @@ export function addScrollLinking(view) {
                 path += `L${width3},${new_top} L ${width2},${new_top} C${width1b},${new_top} ${width1b},${new_linetop} ${width1},${new_linetop} L0,${new_linetop}`;
             element.getBoundingClientRect().top
             svg_element += 1;
-            //pairs.push([new_linetop, new_top])
-            //pairs2.push([new_lineno, new_top])
         }
         if (svg_element % 2 === 1)
             path += `L${width3},${height} L ${0},${height}`;
@@ -76,7 +69,6 @@ export function addScrollLinking(view) {
 
             let offset_lines = 1;
             let o = preview.getBoundingClientRect().height / 2
-            //let target_equal_lineno = (editor.scrollTop-4 + o)/26.6+offset_lines;
             let target_equal_pos = preview.scrollTop + o;
             let pairss = window.line_map
             for (let i = 0; i < pairss.length - 1; i += 1) {

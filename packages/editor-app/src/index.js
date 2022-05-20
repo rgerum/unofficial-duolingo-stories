@@ -27,7 +27,6 @@ export function LoginWrapper() {
     }
     else {
         return <EditorNode />
-        return <div>bla</div>
     }
 }
 
