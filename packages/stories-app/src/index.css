@@ -149,8 +149,9 @@ h1 {
   overflow-y: scroll;
   margin: 0;
   max-height: 270px;
-
+  position: absolute;
 }
+
 #header_language:hover #header_lang_selector {
   display: block;
 
