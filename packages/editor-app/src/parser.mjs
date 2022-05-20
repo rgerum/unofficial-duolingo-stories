@@ -34,6 +34,7 @@ const STATE_SPEAKER_TYPE = STATE_DATA_KEY;
 const STATE_ERROR = "deleted";
 
 const STATE_AUDIO = "color";
+const STATE_COMMENT = "t.strong";
 
 
 const chalky = "#e5c07b",
@@ -113,7 +114,7 @@ export let highlightStyle = HighlightStyle.define([
 
     {
         tag: t.strong,
-        fontWeight: "bold"
+        color: stone
     },
     {
         tag: t.emphasis,
@@ -555,6 +556,10 @@ function parseBlockDef(stream, state) {
 }
 
 function parserWithMetadata(stream, state) {
+    if(stream.match("#")) {
+        stream.skipToEnd();
+        return STATE_COMMENT;
+    }
     if(stream.sol()) {
         stream.match(/\s*/);
         if(stream.eat("[")) {
