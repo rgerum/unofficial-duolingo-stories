@@ -7,11 +7,27 @@ export function CourseList(props) {
 
     if(courses === undefined)
         return <Spinner />
+
+    let base_languages = {}
+    for(let course of courses) {
+        if(base_languages[course.fromLanguageName] === undefined)
+            base_languages[course.fromLanguageName] = [];
+        base_languages[course.fromLanguageName].push(course)
+    }
+
     return (
-        <div className="set_list">
-            {courses.map(course => (
-                <LanguageButton key={course.id} course={course} onClick={(e) => {e.preventDefault(); props.languageClicked(course.learningLanguage, course.fromLanguage)}} />
-            ))}
+        <div>
+            {Object.entries(base_languages).map(([name, courses_list]) => (
+                <div className="set_list" key={name}><hr/><div className="course_group_name">Stories for {name} Speakers</div>
+                    {courses_list.map(course => (
+                    <LanguageButton key={course.id} course={course} onClick={(e) => {
+                        e.preventDefault();
+                        props.languageClicked(course.learningLanguage, course.fromLanguage)
+                    }}/>
+                    ))}
+                </div>
+            ))
+            }
         </div>
     );
 }
