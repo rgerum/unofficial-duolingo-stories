@@ -8,12 +8,10 @@ export function CourseList(props) {
     if(courses === undefined)
         return <Spinner />
     return (
-        <div id="list">
-            <div className="set_list">
-                {courses.map(course => (
-                    <LanguageButton key={course.id} course={course} onClick={(e) => {e.preventDefault(); props.languageClicked(course.learningLanguage, course.fromLanguage)}} />
-                ))}
-            </div>
+        <div className="set_list">
+            {courses.map(course => (
+                <LanguageButton key={course.id} course={course} onClick={(e) => {e.preventDefault(); props.languageClicked(course.learningLanguage, course.fromLanguage)}} />
+            ))}
         </div>
     );
 }

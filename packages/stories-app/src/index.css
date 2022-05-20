@@ -120,10 +120,16 @@
   padding-top: 10px;
 }
 #main_index {
-  max-width: 900px;
+  max-width: 1092px;
   padding-top: 30px;
   margin: 0 auto;
 }
+
+#list {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 a {
   color: black;
 }
