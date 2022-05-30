@@ -188,7 +188,7 @@ export function Login(props) {
                 <>
                     <span id="display_username" style={{fontSize: "1.2em", paddingRight: "14px", display: "inline-block"}}>{username.username}</span>
                     {username.role !== 0 ? <button id="button_editor" className="button"
-                                                  onClick={()=>{"https://editor.duostories.org"}}
+                                                  onClick={()=>{window.location.href = "https://editor.duostories.org"}}
                     >Editor</button> : null}
                     <button className="button" onClick={() => doLogout()} style={{float: "none"}}>Log out</button>
                 </>
