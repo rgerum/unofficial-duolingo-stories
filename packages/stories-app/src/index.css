@@ -124,6 +124,10 @@
     margin-left: 5px;
 }
 
+.undefined {
+    background-position-y: -2736px;
+}
+
 #main_index {
   max-width: 985px;
   padding-top: 30px;
