@@ -148,7 +148,7 @@ else if($action == "courses") {
                                                  COUNT(story.id) count, course.public, course.official FROM course
                     LEFT JOIN language l1 ON l1.id = course.fromLanguage
                     LEFT JOIN language l2 ON l2.id = course.learningLanguage
-                    LEFT JOIN story ON (story.lang = course.learningLanguage AND story.lang_base = course.fromLanguage)
+                    LEFT JOIN story ON (story.course_id = course.id)
                     GROUP BY course.id
                     ORDER BY COUNT DESC;");
 }
