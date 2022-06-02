@@ -25,7 +25,7 @@ export function IndexContent(props) {
 
     return <div>
         <div id="header_index">
-            <div id="header_language" style={{display: "block", float:"left"}}>
+            <div id="header_language">
                 <Flag language_data={props.language_data} lang={lang}/>
                 <CourseDropdown courses={courses} languageClicked={languageClicked} />
             </div>

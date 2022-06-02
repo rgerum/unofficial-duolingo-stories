@@ -116,12 +116,9 @@
 #header_index {
   display: block;
   border-bottom: 1px solid gray;
-  height: 80px;
+  height: 50px;
   padding-top: 10px;
-}
-
-#header_language > .flag {
-    margin-left: 5px;
+  border-bottom: 2px solid lightgrey;
 }
 
 .undefined {
@@ -150,6 +147,12 @@ a:hover {
 h1 {
   width: 100%;
   text-align: center;
+}
+
+#header_language {
+  height: 50px;
+  display: block;
+  float: left;
 }
 
 #header_language #header_lang_selector{
@@ -921,7 +924,7 @@ span[data-hidden=true] {
   vertical-align: sub;
 }
 
-.flag~span {
+.language_select_item span {
   padding-left: 5px;
 }
 
