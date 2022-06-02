@@ -50,9 +50,17 @@ function Avatar(props) {
 function AvatarEditorHeader(props) {
     let language_data = props.language_data;
 
+    function button_back() {
+        window.location.href = "?";
+    }
+
     if(language_data === undefined)
         return <></>
     return <div className="AvatarEditorHeader">
+        <div id="button_back" className="editor_button" onClick={button_back} style={{paddingLeft: 0}}>
+            <div><img alt="icon back" src="icons/back.svg" /></div>
+            <span>Back</span>
+        </div>
         <b>Character-Editor</b>
         <Flag flag={language_data.flag} flag_file={language_data.flag_file}/>
         <span data-cy="language-name" className={"AvatarEditorHeaderFlagName"}>{language_data.name}</span>
