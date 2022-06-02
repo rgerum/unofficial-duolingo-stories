@@ -132,8 +132,82 @@
 }
 
 #list {
-  max-width: 900px;
+  max-width: 704px;
   margin: 0 auto;
+}
+
+
+.set {
+  font-size: 27px;
+  font-weight: 700;
+  text-align: center;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.set::before {
+  margin-left: -50%;
+  right: 16px;
+}
+
+.set::after {
+  left: 16px;
+  margin-right: -50%;
+}
+
+.set::after, .set::before {
+  background: #e5e5e5;
+  content: "";
+  display: inline-block;
+  height: 2px;
+  position: relative;
+  vertical-align: middle;
+  width: 50%;
+}
+
+.set_list {
+  margin: 0 16px;
+  flex-wrap: wrap;
+  display: flex;
+}
+
+@media (max-width:703px) {
+  #list {
+    max-width: 536px;
+  }
+}
+
+@media (max-width:536px) {
+  #list {
+    max-width: 368px;
+  }
+}
+
+@media (max-width:368px) {
+  .set_list {
+    margin: 0;
+  }
+  #list {
+    max-width: 336px
+  }
+}
+
+@media (max-width:335px) {
+  .button_story_parent {
+    margin: 0;
+  }
+  #list {
+    max-width: 268px
+  }
+}
+
+@media (max-width:268px) {
+  .button_story_parent {
+    margin: 0 auto;
+  }
+  #list {
+    max-width: 100%;
+  }
 }
 
 a {
@@ -184,40 +258,6 @@ h1 {
 }
 .language_select_item:hover {
   background: #e2e1e1;
-}
-
-.set {
-  font-size: 27px;
-  font-weight: 700;
-  text-align: center;
-  width: 100%;
-  overflow-x: hidden;
-}
-
-.set::before {
-  margin-left: -50%;
-  right: 16px;
-}
-
-.set::after {
-  left: 16px;
-  margin-right: -50%;
-}
-
-.set::after, .set::before {
-  background: #e5e5e5;
-  content: "";
-  display: inline-block;
-  height: 2px;
-  position: relative;
-  vertical-align: middle;
-  width: 50%;
-}
-
-.set_list {
-  margin: 0 16px;
-  flex-wrap: wrap;
-  display: flex;
 }
 
 .course_group_name {
