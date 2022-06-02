@@ -925,8 +925,8 @@ span[data-hidden=true] {
     margin-left: 6px;
     margin-right: 6px;
     margin-top: 12px;
-    max-width: calc(100vw / 3 - 35px);
-    min-width: calc(100vw / 3 - 35px);
+    max-width: calc(100vw / 3 - 26px);
+    min-width: calc(100vw / 3 - 26px);
   }
 }
 
@@ -935,12 +935,12 @@ span[data-hidden=true] {
     margin-left: 6px;
     margin-right: 6px;
     margin-top: 12px;
-    max-width: calc(100vw / 2 - 35px);
-    min-width: calc(100vw / 2 - 35px);
+    max-width: calc(100vw / 2 - 32px);
+    min-width: calc(100vw / 2 - 32px);
   }
 }
 
-@media (max-width: 350px) {
+@media (max-width: 300px) {
   .language_select_button {
     margin-left: 6px;
     margin-right: 6px;
