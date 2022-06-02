@@ -899,11 +899,7 @@ span[data-hidden=true] {
   flex-direction: column;
   height: 210px;
   justify-content: center;
-  margin-left: 12px;
-  margin-right: 12px;
-  margin-top: 24px;
-  max-width: 210px;
-  min-width: 210px;
+
   padding: 0;
   position: relative;
   text-align: center;
@@ -911,8 +907,47 @@ span[data-hidden=true] {
 
   text-decoration: none;
 }
+@media (min-width: 699px) {
+  .language_select_button {
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-top: 24px;
+    max-width: 210px;
+    min-width: 210px;
+  }
+}
 .language_select_button:hover {
   filter: brightness(.9);
+}
+
+@media (max-width: 744px) {
+  .language_select_button {
+    margin-left: 6px;
+    margin-right: 6px;
+    margin-top: 12px;
+    max-width: calc(100vw / 3 - 35px);
+    min-width: calc(100vw / 3 - 35px);
+  }
+}
+
+@media (max-width: 466px) {
+  .language_select_button {
+    margin-left: 6px;
+    margin-right: 6px;
+    margin-top: 12px;
+    max-width: calc(100vw / 2 - 35px);
+    min-width: calc(100vw / 2 - 35px);
+  }
+}
+
+@media (max-width: 350px) {
+  .language_select_button {
+    margin-left: 6px;
+    margin-right: 6px;
+    margin-top: 12px;
+    max-width: 210px;
+    min-width: 210px;
+  }
 }
 
 .flag {

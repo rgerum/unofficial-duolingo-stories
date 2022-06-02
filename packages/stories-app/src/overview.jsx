@@ -39,7 +39,6 @@ export function IndexContent(props) {
             <p className={"title_desc"}>
                 If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.
             </p>
-            <br/>
             {lang !== undefined ?
                 <SetList lang={lang} lang_base={lang_base} username={username} onStoryClicked={(id)=>props.onStartStory(id)}/> :
                 <CourseList courses={courses} languageClicked={languageClicked}/>
