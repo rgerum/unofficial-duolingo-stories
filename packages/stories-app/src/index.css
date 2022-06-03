@@ -321,6 +321,7 @@ hr {
   margin-top: 8px;
   transform: translate(0, 0px);
   margin-bottom: 8px;
+  margin-inline: 0;
 }
 
 #login_dialog button:active {
@@ -1089,6 +1090,7 @@ span[data-hidden=true] {
   background-image: url(//d35aaqx5ub95lt.cloudfront.net/images/icon-sprite8.svg);
   display: inline-block;
   vertical-align: middle;
+  cursor: pointer;
 }
 
 @media (max-width:700px) {
