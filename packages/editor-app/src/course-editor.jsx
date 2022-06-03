@@ -30,7 +30,12 @@ function CourseList(props) {
 function ImportList(props) {
     let course = props.course;
     const [courseImport, ] = useDataFetcher2(getImportList, [12, course.id]);
+    const [importing, setImporting] = useState(false);
+
     async function do_import(id) {
+        // prevent clicking the button twice
+        if(importing) return
+        setImporting(id);
         console.log("do_impor", id, course.id);
         let id2 = await setImport(id, course.id);
         console.log(id2, "?story="+id2);
@@ -53,7 +58,12 @@ function ImportList(props) {
                 <tr key={story.id}>
                     <td><span><b>{pad(story.set_id)}</b>&nbsp;-&nbsp;{pad(story.set_index)}</span></td>
                     <td width="44px"><img alt={"story title"} src={story.copies ? story.gilded : story.active} width="44px" /></td>
-                    <td><a href={`#`} title={story.duo_id} onClick={()=>do_import(story.id)}>{story.name}</a></td>
+                    <td>
+                        {importing === story.id ?
+                            <span>Importing <SpinnerBlue/></span>
+                            : <a href={`#`} title={story.duo_id} onClick={() => do_import(story.id)}>{story.name}</a>
+                        }
+                    </td>
                     <td style={{textAlign: "right"}}><span>{story.copies}x&nbsp;</span>
 
                     </td>
