@@ -145,10 +145,17 @@ function MountEditor() {
     }
 
     async function a() {
-        window.button_delete = function() {
+        window.button_delete = async function() {
             if(confirm("Are you sure that you want to delete this story?")) {
-                deleteStory({id: story_data.id, course_id: story_data.course_id, text: editor_text, name: story_meta.fromLanguageName});
-                window.location.href = "?course=" + story_data.course_id;
+                document.querySelector("#button_delete span").innerText = "Deleting";
+                try {
+                    await deleteStory({id: story_data.id, course_id: story_data.course_id, text: editor_text, name: story_meta.fromLanguageName});
+                    window.location.href = "?course=" + story_data.course_id;
+                }
+                catch (e) {
+                    document.querySelector("#button_delete span").innerText = "Delete";
+                    window.alert("Story could not be deleted");
+                }
             }
         }
         window.button_save = function() {
