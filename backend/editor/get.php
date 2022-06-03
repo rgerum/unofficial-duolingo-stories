@@ -171,7 +171,7 @@ else if($action == "course") {
       else
         $stories = query_json_list_return($db,"SELECT story.id, story.set_id, story.set_index, story.name, story.status, story.image, story.image_done, story.xp, story.name_base, user.username, story.date, story.change_date, story.public FROM story
         LEFT JOIN user ON story.author = user.id
-        WHERE story.course_id = $id
+        WHERE story.course_id = $id AND deleted = false
         ");
     $course["stories"] = $stories;
     json($course);

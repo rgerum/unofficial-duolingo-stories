@@ -9,7 +9,7 @@ import {Story} from "story-component";
 import {Cast} from "./react/cast";
 import {Flag} from "./react/flag";
 import {useDataFetcher2} from "./hooks";
-import {getAvatars, getImage, getLanguageName, getStory, setStory} from "./api_calls.mjs";
+import {deleteStory, getAvatars, getImage, getLanguageName, getStory, setStory} from "./api_calls.mjs";
 
 import {processStoryFile} from "./story-editor/syntax_parser_new.mjs";
 import {example, highlightStyle} from "./story-editor/parser.mjs";
@@ -66,7 +66,12 @@ function StoryEditorHeader(props) {
         <span className={"AvatarEditorHeaderFlagname"}>{`${language_data.name} (from ${language_data2.name})`}</span>
         <img alt="story title" width="50px" src={`https://stories-cdn.duolingo.com/image/${story_data.image}.svg`} style={{marginLeft: "auto"}} />
         <span className={"AvatarEditorHeaderFlagname"}>{props.story_data.name}</span>
-        <div style={{marginLeft: "auto"}} className="editor_button" onClick={(e) => {
+
+        <div style={{marginLeft: "auto"}}  id="button_delete" className="editor_button" onClick={window.button_delete}>
+            <div><img alt="icon save" src="icons/delete.svg" /></div>
+            <span>Delete</span>
+        </div>
+        <div className="editor_button" onClick={(e) => {
             e.preventDefault();
             do_set_show_trans()
         }}>
@@ -136,10 +141,16 @@ function MountEditor() {
     });
 
     window.button_back = function() {
-        window.location.href = "?course="+story_data.course_id;
+        window.location.href = "?course=" + story_data.course_id;
     }
 
     async function a() {
+        window.button_delete = function() {
+            if(confirm("Are you sure that you want to delete this story?")) {
+                deleteStory({id: story_data.id, course_id: story_data.course_id, text: editor_text, name: story_meta.fromLanguageName});
+                window.location.href = "?course=" + story_data.course_id;
+            }
+        }
         window.button_save = function() {
             let save = async function() {
                 try {
