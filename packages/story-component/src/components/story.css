@@ -472,13 +472,6 @@ span[data-hidden=true] {
     margin: 20px;
     transform: scale(2.2);
 }
-.language_select_button_text {
-    color: #4c4c4c;
-    display: block;
-    font-size: 19px;
-    font-weight: 700;
-    margin-top: 10px;
-}
 
 .ssml {
     font-size: 0.8em;

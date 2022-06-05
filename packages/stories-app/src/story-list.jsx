@@ -1,3 +1,5 @@
+import './story-list.css'
+
 import {useDataFetcher} from "./hooks";
 import {getStoriesSets} from "./api_calls";
 import {Spinner} from "./react/spinner";
@@ -9,10 +11,10 @@ export function SetList(props) {
     if(sets === undefined)
         return <Spinner />;
 
-    return <div id="list">
+    return <div id="story_list">
         {sets.map(stories => (
             <div key={stories[0].set_id} className="set_list">
-                <div className="set">Set {stories[0].set_id}</div>
+                <div className="set_title">Set {stories[0].set_id}</div>
                 {stories.map(story => (
                     <StoryButton key={story.id} story={story} onStoryClicked={props.onStoryClicked}  />
                 ))}

@@ -1,3 +1,5 @@
+import "./course-dropdown.css";
+
 import {Flag} from "./react/flag";
 
 

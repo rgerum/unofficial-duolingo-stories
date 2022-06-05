@@ -1,0 +1,27 @@
+
+#header_language #header_lang_selector{
+    display: none;
+    padding: 0;
+    width: 200px;
+    background: white;
+    border-radius: 15px;
+    border: 1px solid lightgray;
+    overflow-y: scroll;
+    margin: 5px 0;
+    position: absolute;
+    z-index: 1;
+    max-height: calc(100vh - 47px);
+}
+
+
+#header_language:hover #header_lang_selector {
+    display: block;
+}
+
+.language_select_item {
+    padding: 5px;
+    border-bottom: 1px solid lightgray;
+}
+.language_select_item:hover {
+    background: #e2e1e1;
+}

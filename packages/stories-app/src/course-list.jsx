@@ -1,3 +1,4 @@
+import './course-list.css';
 import {Flag} from "./react/flag";
 import {Spinner} from "./react/spinner";
 
@@ -18,7 +19,7 @@ export function CourseList(props) {
     return (
         <div>
             {Object.entries(base_languages).map(([name, courses_list]) => (
-                <div className="set_list" key={name}><hr/><div className="course_group_name">Stories for {name} Speakers</div>
+                <div className="course_list" key={name}><hr/><div className="course_group_name">Stories for {name} Speakers</div>
                     {courses_list.map(course => (
                     <LanguageButton key={course.id} course={course} onClick={(e) => {
                         e.preventDefault();
@@ -38,7 +39,7 @@ function LanguageButton(props) {
         data-cy={"language_button_big_"+course.id}
         className="language_select_button"
         onClick={props.onClick}
-        href={`index.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`}
+        href={`?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`}
     >
         <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} className="flag_big" />
 
