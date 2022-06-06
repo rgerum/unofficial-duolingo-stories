@@ -10,3 +10,7 @@
     margin: 20px;
     transform: scale(2.2);
 }
+
+.language_select_item .custom-flag {
+    background-position-y: 2px;
+}
