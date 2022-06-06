@@ -26,7 +26,7 @@ export function IndexContent(props) {
     return <div>
         <div id="header_index">
             <div id="header_language">
-                <Flag language_data={props.language_data} lang={lang}/>
+                <Flag language_data={props.language_data} lang={lang} flag_file={lang.flag_file} file={lang.flag}/>
                 <CourseDropdown courses={courses} languageClicked={languageClicked} />
             </div>
             <Login useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
