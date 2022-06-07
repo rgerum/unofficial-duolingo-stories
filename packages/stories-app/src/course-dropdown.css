@@ -25,3 +25,7 @@
 .language_select_item:hover {
     background: #e2e1e1;
 }
+
+.language_select_item span {
+    padding-left: 5px;
+}

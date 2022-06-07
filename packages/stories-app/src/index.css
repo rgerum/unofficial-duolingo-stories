@@ -665,25 +665,6 @@ span[data-hidden=true] {
   height: 23px;
 }
 
-
-.flag {
-  display: inline-block;
-  background-size: 40px;
-  height: 32.19512px;
-  width: 40px;
-  background-image: url(https://d35aaqx5ub95lt.cloudfront.net/images/juicy-flag-sprite-8.svg);
-  vertical-align: sub;
-}
-
-.language_select_item span {
-  padding-left: 5px;
-}
-
-.flag_big {
-  margin: 20px;
-  transform: scale(2.2);
-}
-
 .ssml {
   font-size: 0.8em;
   margin: 0;
