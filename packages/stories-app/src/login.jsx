@@ -230,22 +230,44 @@ export function LoginDialog(props) {
             setShowLogin(0);
         }
     }
-
+    const handleKeypressLogin = e => {
+        // listens for enter key
+      if (e.keyCode === 13) {
+        buttonLogin();
+      }
+    };  
     async function register_button() {
-        setState(1);
-        let [success, msg] = await register({username: usernameInput, password: passwordInput, email: emailInput});
-
-        if(success === false) {
-            if(msg === "")
-                msg = "Something went wrong."
+        const emailValidation = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+        if (!emailValidation.test(emailInput)) {
+            let msg = "Not a valid email, please try again."
             setError(msg);
-            setState(-1);
-        }
-        else {
-            setState(2);
-            setMessage("Your account has been registered. An e-mail with an activation link has been sent to you. Please click on the link in the e-mail to proceed. You may need to look into your spam folder.");
+            setState(-1)
+
+        } else if (!passwordInput) {
+            setState(-1)
+            setError("Please enter a password")
+        } else {
+            setState(1);
+            let [success, msg] = await register({username: usernameInput, password: passwordInput, email: emailInput});
+
+            if(success === false) {
+                if(msg === "")
+                    msg = "Something went wrong."
+                setError(msg);
+                setState(-1);
+            }
+            else {
+                setState(2);
+                setMessage("Your account has been registered. An e-mail with an activation link has been sent to you. Please click on the link in the e-mail to proceed. You may need to look into your spam folder.");
+            }
         }
     }
+    const handleKeypressSignup = e => {
+        // listens for enter key
+      if (e.keyCode === 13) {
+        register_button();
+      }
+    };
     async function reset_button() {
         setState(1);
         let [success, msg] = await reset_pw({username: usernameInput});
@@ -269,8 +291,8 @@ export function LoginDialog(props) {
                 <div>
                     <h2>Log in</h2>
                     <p>Attention, you cannot login with your Duolingo account.</p><p>You have to register for the unofficial stories separately, as they are an independent project.</p>
-                    <input value={usernameInput} onChange={usernameInputSetValue} type="text" placeholder="Username"/>
-                    <input value={passwordInput} onChange={passwordInputSetValue} type="password" placeholder="Password"/>
+                    <input value={usernameInput} onChange={usernameInputSetValue} onKeyDown={handleKeypressLogin} type="text" placeholder="Username"/>
+                    <input value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressLogin} type="password" placeholder="Password"/>
                     {state === -1 ? <span className="login_error">{error}</span>: null}
                     <button className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
                     <p>Don't have an account? <button className={"link"} onClick={()=>setShowLogin(2)}>SIGN UP</button></p>
@@ -284,10 +306,10 @@ export function LoginDialog(props) {
                     <h2>Sign up</h2>
                     <p>If you register you can keep track of the stories you have already finished.</p>
                     <p>Registration is optional, stories can be accessed even without login.</p>
-                    <input value={usernameInput} onChange={usernameInputSetValue} type="text"
+                    <input value={usernameInput} onChange={usernameInputSetValue} onKeyDown={handleKeypressSignup}type="text"
                            placeholder="Username"/>
-                    <input value={emailInput} onChange={emailInputSetValue} type="email" placeholder="Email"/>
-                    <input value={passwordInput} onChange={passwordInputSetValue} type="password"
+                    <input value={emailInput} onChange={emailInputSetValue} onKeyDown={handleKeypressSignup} type="email" placeholder="Email"/>
+                    <input value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressSignup} type="password"
                            placeholder="Password"/>
                     {state === -1 ?
                         <span className="login_error">{error}</span> : null }
