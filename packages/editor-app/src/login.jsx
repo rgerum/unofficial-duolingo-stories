@@ -97,7 +97,7 @@ export function LoginDialog(props) {
                     <h2>Not allowed</h2>
                     <img alt={"sad duo"} width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
                     <p>You need to have permissions<br/>to access the editor.<br/></p>
-                    <p>If wou want to contribute,<br/>you can talk to us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.</p>
+                    <p>If you want to contribute,<br/>you can talk to us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.</p>
                     <p><button className="link" data-cy="back" onClick={()=>doLogout()}>BACK</button></p>
                 </div>
             </div>
