@@ -2,7 +2,7 @@
 #header_language #header_lang_selector{
     display: none;
     padding: 0;
-    width: 200px;
+    width: 250px;
     background: white;
     border-radius: 15px;
     border: 1px solid lightgray;
@@ -21,11 +21,13 @@
 .language_select_item {
     padding: 5px;
     border-bottom: 1px solid lightgray;
+    text-decoration:none;
 }
 .language_select_item:hover {
-    background: #e2e1e1;
+    background: #ddf4ff;
 }
 
 .language_select_item span {
-    padding-left: 5px;
+    font-size: 18px;
+    font-weight: bold;
 }
