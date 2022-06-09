@@ -8,13 +8,15 @@ import {Story} from "story-component";
 import {useDataFetcher2, useEventListener} from "./hooks";
 import {getLanguageNames} from "./api_calls";
 import {IndexContent} from "./overview";
-import {User_activation_reset} from "./user_activation_reset";
+import {UserActivationOrReset} from "./user_activation_or_reset";
 
 
 function App() {
     let urlParams = new URLSearchParams(window.location.search);
     // activate
     const [task, setTask] = React.useState(urlParams.get("task") || null);
+    // error
+    const [error, ] = React.useState(urlParams.get("error") || null);
     // story
     const [story, setStory] = React.useState(urlParams.get("story") || null);
     const [test_mode, ] = React.useState(urlParams.get("test") || null);
@@ -30,6 +32,9 @@ function App() {
             else
                 window.history.pushState({story: id}, "Story" + id, `?story=${id}`);
             dispatchEvent(new CustomEvent('progress_changed', {detail: id}));
+        }
+        else if(error) {
+            window.history.pushState({error: error}, "Error", `?error=${error}`);
         }
         else if(task) {
             doSetTask(task);
@@ -75,9 +80,12 @@ function App() {
             <Story editor={{lineno: 3}} story_id={story} />
         </div>
     }
+    if(error) {
+        return <div id="main">404</div>
+    }
 
     if(task !== null) {
-        return <User_activation_reset task={task} />
+        return <UserActivationOrReset task={task} />
     }
     else if(story === null)
         return <IndexContent language_data={language_data} course={course} setCourse={doSetCourse} onStartStory={changeStory} />

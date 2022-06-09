@@ -115,9 +115,3 @@ a:focus{outline:none !important;}
   cursor: default;
 }
 
-.legal {
-  margin-top: 20px;
-  text-align: center;
-  color:gray;
-  font-size: 0.6em
-}
