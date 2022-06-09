@@ -68,29 +68,7 @@ h1 {
     margin-left: 18px;
 }
 
-#diamond {
-    width: 15px;
-    height: 15px;
-    position: absolute;
-    left: 2.5px;
-    top: 2.5px;
-    background-color: white;
-    transform: rotate(45deg);
-    transform-origin: center;
-    border-radius: 3px;
-    border: 1px solid #d3d3d3;
-    z-index: 2;
-}
 
-div#diamond-wrap {
-    overflow: hidden;
-    width: 25px;
-    height: 10px;
-    position: absolute;
-    z-index: 2;
-    left: 27px;
-    top: 43.9px;
-}
 
 body {
   /* font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";*/
