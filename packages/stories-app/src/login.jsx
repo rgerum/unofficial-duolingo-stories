@@ -28,9 +28,8 @@ export async function login(data) {
     // check if the user is logged in
     let reponse = await fetch_post(`${backend_user}user.php?action=login`, data)
     console.log(reponse);
-    if(reponse.status === 403)
-        return false;
-    return true;
+    return reponse.status !== 403;
+
 }
 
 export async function register(data) {
@@ -125,10 +124,8 @@ export async function reset_pw_set(data) {
 export async function activate(data) {
     console.log("activate", data);
     let reponse = await fetch_post(`${backend_user}user.php?action=activate`, data);
-    if(reponse.status !== 200) {
-        return false;
-    }
-    return true;
+    return reponse.status === 200;
+
 }
 
 
@@ -237,7 +234,7 @@ export function LoginDialog(props) {
       }
     };  
     async function register_button() {
-        const emailValidation = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+        const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
         if (!emailValidation.test(emailInput)) {
             let msg = "Not a valid email, please try again."
             setError(msg);
@@ -306,7 +303,7 @@ export function LoginDialog(props) {
                     <h2>Sign up</h2>
                     <p>If you register you can keep track of the stories you have already finished.</p>
                     <p>Registration is optional, stories can be accessed even without login.</p>
-                    <input value={usernameInput} onChange={usernameInputSetValue} onKeyDown={handleKeypressSignup}type="text"
+                    <input value={usernameInput} onChange={usernameInputSetValue} onKeyDown={handleKeypressSignup} type="text"
                            placeholder="Username"/>
                     <input value={emailInput} onChange={emailInputSetValue} onKeyDown={handleKeypressSignup} type="email" placeholder="Email"/>
                     <input value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressSignup} type="password"

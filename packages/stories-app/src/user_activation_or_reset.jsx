@@ -42,7 +42,7 @@ async function login_button(setResetPwState, passwordInput) {
 }
 
 
-export function User_activation_reset(props) {
+export function UserActivationOrReset(props) {
     let [initialized, setInitialized] = React.useState(0);
     let [activated, setActivated] = React.useState(0);
     let [restpwstate, setResetPwState] = React.useState(0);
