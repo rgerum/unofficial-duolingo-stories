@@ -24,7 +24,7 @@
     text-decoration:none;
 }
 .language_select_item:hover {
-    background: #ddf4ff;
+    background: #ddf4ff !important;
 }
 
 .language_select_item span {
