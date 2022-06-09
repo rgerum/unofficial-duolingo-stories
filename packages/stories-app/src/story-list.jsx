@@ -1,12 +1,10 @@
 import './story-list.css'
 
-import {useDataFetcher} from "./hooks";
-import {getStoriesSets} from "./api_calls";
 import {Spinner} from "./react/spinner";
 
 
 export function SetList(props) {
-    const sets = useDataFetcher(getStoriesSets, [props.lang, props.lang_base, props.username]);
+    const sets = props.sets;
 
     if(sets === undefined)
         return <Spinner />;

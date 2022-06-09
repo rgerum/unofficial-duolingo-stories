@@ -4,7 +4,7 @@ import {CourseDropdown} from "./course-dropdown";
 import {Flag} from "./react/flag";
 import {SetList} from "./story-list";
 import {useDataFetcher} from "./hooks";
-import {getPublicCourses} from "./api_calls";
+import {getPublicCourses, getStoriesSets} from "./api_calls";
 import {Legal} from "story-component";
 
 
@@ -16,6 +16,7 @@ export function IndexContent(props) {
     let lang_base = props.course[1];
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
     const courses = useDataFetcher(getPublicCourses, []);
+    const course_data = useDataFetcher(getStoriesSets, [lang, lang_base, username]);
 
     function languageClicked(lang, lang_base) {
         props.setCourse([lang, lang_base])
@@ -27,7 +28,7 @@ export function IndexContent(props) {
     return <div>
         <div id="header_index">
             <div id="header_language">
-                <Flag language_data={props.language_data} lang={lang}/>
+                <Flag flag={course_data?.learningLanguageFlag} flag_file={course_data?.learningLanguageFlagFile} />
                 <CourseDropdown courses={courses} languageClicked={languageClicked} />
             </div>
             <Login useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
@@ -41,7 +42,7 @@ export function IndexContent(props) {
                 If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.
             </p>
             {lang !== undefined ?
-                <SetList lang={lang} lang_base={lang_base} username={username} onStoryClicked={(id)=>props.onStartStory(id)}/> :
+                <SetList sets={course_data?.sets} onStoryClicked={(id)=>props.onStartStory(id)}/> :
                 <CourseList courses={courses} languageClicked={languageClicked}/>
             }
 

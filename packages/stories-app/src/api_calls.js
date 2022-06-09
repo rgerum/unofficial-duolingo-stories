@@ -54,17 +54,18 @@ export async function getStoriesSets(lang, lang_base) {
 
         let set = -1;
         let sets = [];
-        for(let d of data) {
+        for(let d of data.stories) {
             if (set !== d.set_id) {
                 set = d.set_id;
                 sets.push([]);
             }
             sets[sets.length - 1].push(d);
         }
-        return sets;
+        data.sets = sets;
+        return data;
     }
     catch (e) {
-        return [];
+        return {sets: []}
     }
 }
 
