@@ -28,6 +28,9 @@ export function IndexContent(props) {
     return <div>
         <div id="header_index">
             <div id="header_language">
+                <div id="diamond-wrap">
+                    <div id="diamond"></div>
+                </div>
                 <Flag flag={course_data?.learningLanguageFlag} flag_file={course_data?.learningLanguageFlagFile} />
                 <CourseDropdown courses={courses} languageClicked={languageClicked} />
             </div>
