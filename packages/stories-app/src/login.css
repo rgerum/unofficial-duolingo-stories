@@ -91,12 +91,13 @@
     border-radius: 30px;
     height: 50px;
     margin: -6px 39px;
-    padding: 8px 17px;
+    padding-top: 7px;
     box-sizing: border-box;
     text-transform: uppercase;
     font-size: 28px;
     color: white;
     position: relative;
+    text-align: center;
 }
 
 #loggedin:hover #profile_dropdown, #loggedin:hover #diamond-wrap {
