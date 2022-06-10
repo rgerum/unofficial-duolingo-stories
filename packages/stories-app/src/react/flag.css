@@ -4,6 +4,8 @@
     height: 32px;
     width: 40px;
     background-image: url(https://d35aaqx5ub95lt.cloudfront.net/vendor/886136e840d16adc3a4ec52245fccdf2.svg);
+    vertical-align:bottom;
+    margin:3px 12px;
 }
 
 .flag_big {
@@ -11,7 +13,7 @@
     transform: scale(2.2);
 }
 
-.language_select_item .custom-flag {
+.custom-flag:not(.flag_big) {
     background-position-y: 2px;
 }
 

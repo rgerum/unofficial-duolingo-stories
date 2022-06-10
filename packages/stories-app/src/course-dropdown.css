@@ -2,7 +2,7 @@
 #header_language #header_lang_selector{
     display: none;
     padding: 0;
-    width: 200px;
+    width: 250px;
     background: white;
     border-radius: 15px;
     border: 1px solid lightgray;
@@ -14,18 +14,45 @@
 }
 
 
-#header_language:hover #header_lang_selector {
+#header_language:hover #header_lang_selector, #header_language:hover #diamond-wrap {
     display: block;
 }
 
 .language_select_item {
     padding: 5px;
     border-bottom: 1px solid lightgray;
+    text-decoration:none;
 }
 .language_select_item:hover {
-    background: #e2e1e1;
+    background: #ddf4ff !important;
 }
 
 .language_select_item span {
-    padding-left: 5px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#diamond {
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    left: 2.5px;
+    top: 2.5px;
+    background-color: white;
+    transform: rotate(45deg);
+    transform-origin: center;
+    border-radius: 3px;
+    border: 1px solid #d3d3d3;
+    z-index: 2;
+}
+
+#diamond-wrap {
+    overflow: hidden;
+    width: 25px;
+    height: 10px;
+    position: absolute;
+    z-index: 2;
+    left: 27px;
+    top: 43.9px;
+    display: none;
 }
