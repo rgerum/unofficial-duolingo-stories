@@ -14,7 +14,7 @@
 }
 
 
-#header_language:hover #header_lang_selector, #header_language:hover #diamond_wrap {
+#header_language:hover #header_lang_selector, #header_language:hover #diamond-wrap {
     display: block;
 }
 
