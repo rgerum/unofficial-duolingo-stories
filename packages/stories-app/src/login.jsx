@@ -180,19 +180,24 @@ export function useUsername() {
 export function Login(props) {
     let [username, , doLogout, , setShowLogin] = props.useUsername;
 
-    return <div id="loggedin" style={{float: "right"}}>
-            {username !== undefined ?
-                <>
-                    <span id="display_username" style={{fontSize: "1.2em", paddingRight: "14px", display: "inline-block"}}>{username.username}</span>
-                    {username.role !== 0 ? <button id="button_editor" className="button"
-                                                  onClick={()=>{window.location.href = "https://editor.duostories.org"}}
-                    >Editor</button> : null}
-                    <button className="button" onClick={() => doLogout()} style={{float: "none"}}>Log out</button>
-                </>
-                :
-                <button className="button" onClick={() => setShowLogin(1)} style={{float: "none"}}>Log in</button>
-            }
+    //username = {role: 1, username: "test"}
+    if(username !== undefined)
+        return <div id="loggedin" title={username.username}>
+            <span>{username.username.substring(0, 1)}</span>
+            <div id="diamond-wrap">
+                <div id="diamond"></div>
+            </div>
+            <div id="profile_dropdown">
+                {username.role !== 0 ? <div id="button_editor" className="profile_dropdown_button"
+                                               onClick={()=>{window.location.href = "https://editor.duostories.org"}}
+                >Editor</div> : null}
+                <div className="profile_dropdown_button" onClick={() => doLogout()} >Log out</div>
+            </div>
         </div>
+
+    return <div id="log_in">
+        <button className="button" onClick={() => setShowLogin(1)} style={{float: "none"}}>Log in</button>
+    </div>
 }
 
 export function LoginDialog(props) {

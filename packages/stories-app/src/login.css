@@ -83,3 +83,61 @@
     font-weight: bold;
     cursor: pointer;
 }
+
+#loggedin {
+    float: right;
+    width: 50px;
+    background: #1cb0f6;
+    border-radius: 30px;
+    height: 50px;
+    margin: -6px 39px;
+    padding: 8px 17px;
+    box-sizing: border-box;
+    text-transform: uppercase;
+    font-size: 28px;
+    color: white;
+    position: relative;
+}
+
+#loggedin:hover #profile_dropdown, #loggedin:hover #diamond-wrap {
+    display: block;
+}
+
+#profile_dropdown {
+    display: none;
+    background: white;
+    position: absolute;
+    left: -32px;
+    width: 118px;
+    border-radius: 15px;
+    border: 1px solid lightgray;
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 12px;
+    text-transform: none;
+    overflow: hidden;
+}
+
+#loggedin #diamond-wrap {
+    left: 14px;
+    top: 49px;
+}
+
+.profile_dropdown_button {
+    text-align: center;
+    height: 29px;
+    padding: 5px;
+    border-bottom: 1px solid lightgray;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.profile_dropdown_button:hover {
+    background: #ddf4ff !important;
+    color: #78c800;
+}
+
+#log_in {
+    float: right;
+}
