@@ -1,10 +1,9 @@
 import {useUsername, Login, LoginDialog} from './login'
 import {CourseList} from "./course-list";
 import {CourseDropdown} from "./course-dropdown";
-import {Flag} from "./react/flag";
 import {SetList} from "./story-list";
 import {useDataFetcher} from "./hooks";
-import {getPublicCourses, getStoriesSets} from "./api_calls";
+import {getCoursesUser, getPublicCourses, getStoriesSets} from "./api_calls";
 import {Legal} from "story-component";
 
 
@@ -16,6 +15,7 @@ export function IndexContent(props) {
     let lang_base = props.course[1];
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
     const courses = useDataFetcher(getPublicCourses, []);
+    const courses_user = useDataFetcher(getCoursesUser, [username]);
     const course_data = useDataFetcher(getStoriesSets, [lang, lang_base, username]);
 
     function languageClicked(lang, lang_base) {
@@ -27,13 +27,8 @@ export function IndexContent(props) {
 
     return <div>
         <div id="header_index">
-            <div id="header_language">
-                <div id="diamond-wrap">
-                    <div id="diamond"></div>
-                </div>
-                <Flag flag={course_data?.learningLanguageFlag} flag_file={course_data?.learningLanguageFlagFile} />
-                <CourseDropdown courses={courses} languageClicked={languageClicked} />
-            </div>
+            <a href={"?"} className="duostories_title">Duostories</a>
+            <CourseDropdown course_data={course_data} courses={(courses_user !== undefined && courses_user.length) ? courses_user : courses} languageClicked={languageClicked} />
             <Login useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
         </div>
         <div id="main_index">

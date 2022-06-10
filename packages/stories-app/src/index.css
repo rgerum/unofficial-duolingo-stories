@@ -57,15 +57,16 @@ h1 {
   text-align: center;
 }
 
-#header_language {
-  height: 50px;
+
+.duostories_title {
+  width: 160px;
   display: block;
   float: left;
-}
-
-
-#header_language > .flag {
-    margin-left: 18px;
+  color: #78c800;
+  font-weight: bold;
+  font-size: 29px;
+  padding: 0 20px;
+  text-decoration: none;
 }
 
 

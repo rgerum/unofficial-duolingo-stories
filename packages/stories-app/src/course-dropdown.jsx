@@ -21,15 +21,31 @@ function LanguageButtonSmall(props) {
 }
 
 export function CourseDropdown(props) {
+    const course_data = props.course_data;
     const courses = props.courses;
 
+
     if(courses === undefined)
-        return <div id="header_lang_selector" />
+        return (
+            <div id="header_language">
+                <div id="diamond-wrap">
+                    <div id="diamond"></div>
+                </div>
+                <Flag flag={course_data?.learningLanguageFlag} flag_file={course_data?.learningLanguageFlagFile} />
+                <div id="header_lang_selector" />
+            </div>
+        );
     return (
-        <div id="header_lang_selector">
-            {courses.map(course => (
-                <LanguageButtonSmall key={course.id} course={course} onClick={(e) => {e.preventDefault(); props.languageClicked(course.learningLanguage, course.fromLanguage)}} />
-            ))}
+    <div id="header_language">
+        <div id="diamond-wrap">
+            <div id="diamond"></div>
         </div>
-    );
+        <Flag flag={course_data?.learningLanguageFlag} flag_file={course_data?.learningLanguageFlagFile} />
+        <div id="header_lang_selector">
+        {courses.map(course => (
+            <LanguageButtonSmall key={course.id} course={course} onClick={(e) => {e.preventDefault(); props.languageClicked(course.learningLanguage, course.fromLanguage)}} />
+        ))}
+        </div>
+    </div>);
+
 }

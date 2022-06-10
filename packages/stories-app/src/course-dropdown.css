@@ -1,5 +1,18 @@
 
-#header_language #header_lang_selector{
+#header_language {
+    height: 50px;
+    display: block;
+    float: left;
+    margin: 0 0 0 calc(100% - 198px - 200px);
+    position: relative;
+}
+
+
+#header_language > .flag {
+    margin-left: 18px;
+}
+
+#header_lang_selector{
     display: none;
     padding: 0;
     width: 250px;
@@ -10,7 +23,8 @@
     margin: 5px 0;
     position: absolute;
     z-index: 1;
-    max-height: calc(100vh - 47px);
+    max-height: calc(100vh - 55px);
+    left: -90px;
 }
 
 
@@ -53,6 +67,6 @@
     position: absolute;
     z-index: 2;
     left: 27px;
-    top: 43.9px;
+    top: 33.9px;
     display: none;
 }

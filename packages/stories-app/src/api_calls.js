@@ -32,6 +32,16 @@ export async function getCourses() {
     }
 }
 
+export async function getCoursesUser() {
+    try {
+        let response_courses = await fetch(`${backend_stories}get_courses_user.php`);
+        return await response_courses.json();
+    }
+    catch (e) {
+        return [];
+    }
+}
+
 export async function getPublicCourses() {
     try {
         let response_courses = await fetch(`${backend_stories}get_courses.php`);
@@ -48,6 +58,8 @@ export async function getPublicCourses() {
 }
 
 export async function getStoriesSets(lang, lang_base) {
+    if(lang === undefined || lang_base === undefined)
+        return {sets: []}
     try {
         let response = await fetch(`${backend}/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
         let data =  await response.json();

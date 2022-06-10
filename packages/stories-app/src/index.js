@@ -5,8 +5,7 @@ import reportWebVitals from './reportWebVitals';
 
 import {Story} from "story-component";
 
-import {useDataFetcher2, useEventListener} from "./hooks";
-import {getLanguageNames} from "./api_calls";
+import {useEventListener} from "./hooks";
 import {IndexContent} from "./overview";
 import {UserActivationOrReset} from "./user_activation_or_reset";
 
@@ -21,8 +20,6 @@ function App() {
     const [story, setStory] = React.useState(urlParams.get("story") || null);
     const [test_mode, ] = React.useState(urlParams.get("test") || null);
     const [course, setCourse] = React.useState([urlParams.get("lang") || undefined, urlParams.get("lang_base") || undefined]);
-    // language_dataRefetch
-    let [language_data, ] = useDataFetcher2(getLanguageNames, []);
 
     function changeStory(id, task) {
         setStory(id);
@@ -88,8 +85,8 @@ function App() {
         return <UserActivationOrReset task={task} />
     }
     else if(story === null)
-        return <IndexContent language_data={language_data} course={course} setCourse={doSetCourse} onStartStory={changeStory} />
-    return <Story language_data={language_data} story_id={story} onQuit={()=>{changeStory(null)}} />
+        return <IndexContent course={course} setCourse={doSetCourse} onStartStory={changeStory} />
+    return <Story story_id={story} onQuit={()=>{changeStory(null)}} />
 }
 
 
