@@ -139,7 +139,7 @@ export class Story extends React.Component {
 
         if(editor) {
             return (
-                <div id="story" style={{paddingBottom: "0px"}}>
+                <div id="story">
                     {parts.map((part, i) => (
                         <Part key={i} editor={editor} controls={this.controls} progress={this.state.progress}
                               part={part}/>
@@ -159,7 +159,7 @@ export class Story extends React.Component {
                     </div>
                 </div>
                 <div id="main">
-                    <div id="story" style={{paddingBottom: "0px"}}>
+                    <div id="story">
                         <Legal />
                         {parts.map((part, i) => (
                             <Part key={i} editor={editor} controls={this.controls} progress={this.state.progress} part={part} />
@@ -180,10 +180,6 @@ export class Story extends React.Component {
                             </div>
                         </div>
                         <div id="footer_buttons">
-                            <button id="button_discuss" style={{float: "left", display: "none"}}
-                                    className="button">
-                                Discussion
-                            </button>
                             {finished ?
                                 <button id="button_next"
                                         className="button" onClick={() => this.finish()}>finished</button>

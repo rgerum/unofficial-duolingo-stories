@@ -275,10 +275,17 @@ a:focus{outline:none !important;}
 }
 
 #story {
-    padding-top: 80px;
-    padding-bottom: 50vh;
+    padding-top: 85px;
+    /*padding-bottom: 50vh*/;
     user-select: none;
+    padding-left: 16px;
+    padding-right: 16px;
 }
+
+#story .legal {
+    font-size: 0.7em;
+}
+
 #footer {
     border-top: 2px solid #e5e5e5;
     position: fixed;
@@ -533,15 +540,8 @@ span[data-hidden=true] {
         z-index: 2;
     }
     #story {
-        padding-top: 40px;
+        padding-top: 30px;
     }
-}
-
-/* --- */
-
-#story {
-    padding-left: 16px;
-    padding-right: 16px;
 }
 
 /* footer */

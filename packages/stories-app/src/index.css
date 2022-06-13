@@ -57,6 +57,11 @@ h1 {
   text-align: center;
 }
 
+hr {
+  border: 0;
+  border-top: 2px solid #e5e5e5;
+}
+
 
 .duostories_title {
   width: 160px;
