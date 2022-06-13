@@ -3,7 +3,6 @@ describe('Test Logins', () => {
     beforeEach(() => {
         cy.intercept('**/user.php?*', {body: "null"}).as("user")
         cy.intercept('**/get_courses.php', { fixture: 'courses.json' }).as("courses")
-        cy.intercept('**/get_languages.php', { fixture: 'languages.json' }).as("languages")
         cy.intercept('**/get_list.php?lang=el&lang_base=en', { fixture: 'get_list_el_en.json' }).as("list_el")
         cy.intercept('**/get_list.php?lang=ru&lang_base=en', { fixture: 'get_list_ru_en.json' }).as("list_ru")
 
