@@ -30,14 +30,23 @@ function setCookie(cname, cvalue, exdays) {
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
-export function isLocalNetwork(hostname = window.location.hostname) {
-    return (
-        (['localhost', '127.0.0.1', '', '::1'].includes(hostname))
-        || (hostname.startsWith('192.168.'))
-        || (hostname.startsWith('10.0.'))
-        || (hostname.endsWith('.local'))
-    )
+export function isLocalNetwork(hostname) {
+    try {
+        if (hostname === undefined)
+            hostname = window.location.hostname;
+        return (
+            (['localhost', '127.0.0.1', '', '::1'].includes(hostname))
+            || (hostname.startsWith('192.168.'))
+            || (hostname.startsWith('10.0.'))
+            || (hostname.endsWith('.local'))
+        )
+    }
+    catch (e) {
+        return true;
+    }
 }
+//import {FormData} from "formdata-node"
+//import fetch from "node-fetch";
 
 let login_data = {username: getCookie("username"), password: getCookie("password")}
 async function fetch_get(url) {
@@ -47,7 +56,8 @@ async function fetch_get(url) {
     var fd = new FormData();
     //very simply, doesn't handle complete objects
     for(var i in login_data){
-        fd.append(i,login_data[i]);
+        if(login_data[i] !== undefined)
+            fd.append(i,login_data[i]);
     }
     return fetch(url, {
         method: "POST",
@@ -103,8 +113,7 @@ export async function login(data) {
         setCookie("password", data["password"])
     }
     // check if the user is logged in
-    let reponse = await fetch_post(`${backend_get}/login`, data)
-    console.log(reponse);
+    let reponse = await fetch_post(`${backend_get}/login`, data);
     return reponse.status !== 403;
 
 }
@@ -122,7 +131,6 @@ export async function getCourse(id) {
 }
 
 export async function getAvatars(id) {
-    console.log("getAvatars", id, `${backend_get}/avatar_names?id=${id}`)
     try {
         let response = await fetch_get(`${backend_get}/avatar_names?id=${id}`);
         return await response.json();
@@ -205,7 +213,6 @@ export async function getImageAsync(id) {
         let response_json = await fetch_get(`${backend_get}/image?id=${id}`);
         let image = await response_json.json();
         images_cached[id] = image;
-        console.log("getImage", images_cached[id], id, image)
         return image;
     }
     catch (e) {

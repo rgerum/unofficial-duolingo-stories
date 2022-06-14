@@ -12,6 +12,7 @@ root {
 #story_list {
     border-collapse: collapse;
     width: 100%;
+    margin-bottom: 100px;
 }
 
 #story_listX tbody{
