@@ -5,94 +5,75 @@ import reportWebVitals from './reportWebVitals';
 
 import {Story} from "story-component";
 
-import {useEventListener} from "./hooks";
+import {useDataFetcher} from "./hooks";
 import {IndexContent} from "./overview";
 import {UserActivationOrReset} from "./user_activation_or_reset";
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Link,
+    useParams,
+} from "react-router-dom";
+import {Spinner} from "./react/spinner";
+import {getStoryJSON} from "story-component/src/components/includes";
+import {LoginDialog} from "./login";
 
+function StoryP() {
+    let { id } = useParams();
+    let test = window.location.href.endsWith("test");
+    let story_data = useDataFetcher(getStoryJSON, [id])
+    if(story_data === undefined)
+        return <Spinner/>
+    if(story_data === null)
+        return <Error/>
+    if(test)
+        return <div id="main"><Story editor={{lineno: 3}} story={story_data} /></div>
+    return <Story story={story_data} />
+}
 
 function App() {
     let urlParams = new URLSearchParams(window.location.search);
-    // activate
-    const [task, setTask] = React.useState(urlParams.get("task") || null);
-    // error
-    const [error, ] = React.useState(urlParams.get("error") || null);
-    // story
-    const [story, setStory] = React.useState(urlParams.get("story") || null);
-    const [test_mode, ] = React.useState(urlParams.get("test") || null);
-    const [course, setCourse] = React.useState([urlParams.get("lang") || undefined, urlParams.get("lang_base") || undefined]);
-
-    function changeStory(id, task) {
-        setStory(id);
-        if(id) {
-            if(test_mode)
-                window.history.pushState({story: id}, "Story" + id, `?story=${id}&test=1`);
-            else
-                window.history.pushState({story: id}, "Story" + id, `?story=${id}`);
-            dispatchEvent(new CustomEvent('progress_changed', {detail: id}));
-        }
-        else if(error) {
-            window.history.pushState({error: error}, "Error", `?error=${error}`);
-        }
-        else if(task) {
-            doSetTask(task);
-        }
-        else {
-            doSetCourse(course);
-        }
-    }
-    function doSetCourse(course) {
-        if(course[0] === undefined)
-            window.history.pushState({course: course}, "Language"+course, ``);
+    if(urlParams.get("story")) {
+        if(urlParams.get("test"))
+            window.location = `/story/${urlParams.get("story")}/test`;
         else
-            window.history.pushState({course: course}, "Language"+course, `?lang=${course[0]}&lang_base=${course[1]}`);
-        setCourse(course);
+            window.location = `/story/${urlParams.get("story")}`;
     }
-    function doSetTask(task) {
-        //urlParams.get("username") // username=test7&activation_link=dd2182ff-e8ec-4bc7-822b-4eeb7e624c27
-        window.history.pushState({task: task}, "Language", `?task=${task}&username=${urlParams.get("username")}&activation_link=${urlParams.get("activation_link")}`);
-        setTask(task);
-    }
+    if(urlParams.get("lang") && urlParams.get("lang_base"))
+        window.location = `/${urlParams.get("lang")}-${urlParams.get("lang_base")}`;
+    if(urlParams.get("task"))
+        window.location = `/task/${urlParams.get("task")}/${urlParams.get("username")}/${urlParams.get("activation_link")}`;
 
-    useEventListener("popstate", (event) => {
-        if(event.state.story)
-            changeStory(event.state.story)
-        else {
-            setStory(null);
-            if(event.state.course)
-                doSetCourse(event.state.course)
-            else
-                doSetCourse([undefined, undefined])
-        }
-    })
+    return <Routes>
+            <Route path='/' element={<IndexContent />}></Route>
+            <Route path='/:lang-:lang_base' element={<IndexContent />}></Route>
+            <Route path='/login' element={<LoginDialog />}></Route>
+            <Route path='/story/:id' element={<StoryP />}></Route>
+            <Route path='/story/:id/test' element={<StoryP />}></Route>
+            <Route path='/task/:task/:username/:hash' element={<UserActivationOrReset />}></Route>
+            <Route path='/*' element={<IndexContent error />}></Route>
+        </Routes>
+}
 
-    let [initialized, setInitialized] = React.useState(0);
-    if(!initialized) {
-        let urlParams = new URLSearchParams(window.location.search);
-        setInitialized(1);
-        changeStory(urlParams.get('story'), urlParams.get('task'));
-    }
-
-    if(test_mode) {
-        return <div id="main">
-            <Story editor={{lineno: 3}} story_id={story} />
+function Error() {
+    return <div id="login_dialog">
+        <div>
+            <h2>404 Not Found</h2>
+            <img alt={"sad duo"} width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
+            <p>The page you requested was not found.<br/></p>
+            <p>If you think this is an error on the website, please report it on <a href="https://discord.gg/4NGVScARR3">Discord</a>.</p>
+            <p><Link className="link" data-cy="back" to="/">to main</Link></p>
         </div>
-    }
-    if(error) {
-        return <div id="main">404</div>
-    }
-
-    if(task !== null) {
-        return <UserActivationOrReset task={task} />
-    }
-    else if(story === null)
-        return <IndexContent course={course} setCourse={doSetCourse} onStartStory={changeStory} />
-    return <Story story_id={story} onQuit={()=>{changeStory(null)}} />
+    </div>
 }
 
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+      <Router>
+        <App />
+      </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );

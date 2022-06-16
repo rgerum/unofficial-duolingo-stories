@@ -44,6 +44,22 @@
   margin: 0 auto;
 }
 
+#error {
+  width: 100%;
+  height: calc(100vh - 300px);
+  display: flex;
+  background: white;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+}
+
+#error div {
+  display: block;
+  width: 375px;
+  text-align: center;
+}
+
 a {
   color: black;
 }

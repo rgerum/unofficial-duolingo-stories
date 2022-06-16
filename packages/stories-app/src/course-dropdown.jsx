@@ -1,6 +1,7 @@
 import "./course-dropdown.css";
 
 import {Flag} from "./react/flag";
+import {Link} from "react-router-dom";
 
 
 function LanguageButtonSmall(props) {
@@ -9,15 +10,14 @@ function LanguageButtonSmall(props) {
      */
     let course = props.course;
 
-    return <a
+    return <Link
         className="language_select_item"
         onClick={props.onClick}
-        href={`index.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`}
-        style={{display: "block"}}
+        to={`/${course.learningLanguage}-${course.fromLanguage}`}
     >
         <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} />
         <span>{course.name || course.learningLanguageName}</span>
-    </a>;
+    </Link>;
 }
 
 export function CourseDropdown(props) {
@@ -43,7 +43,7 @@ export function CourseDropdown(props) {
         <Flag flag={course_data?.learningLanguageFlag} flag_file={course_data?.learningLanguageFlagFile} />
         <div id="header_lang_selector">
         {courses.map(course => (
-            <LanguageButtonSmall key={course.id} course={course} onClick={(e) => {e.preventDefault(); props.languageClicked(course.learningLanguage, course.fromLanguage)}} />
+            <LanguageButtonSmall key={course.id} course={course} />
         ))}
         </div>
     </div>);

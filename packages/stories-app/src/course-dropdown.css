@@ -33,6 +33,7 @@
 }
 
 .language_select_item {
+    display: block;
     padding: 5px;
     border-bottom: 1px solid lightgray;
     text-decoration:none;

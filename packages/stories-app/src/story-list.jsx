@@ -1,5 +1,5 @@
 import './story-list.css'
-
+import {Link,} from "react-router-dom";
 import {Spinner} from "./react/spinner";
 
 
@@ -14,7 +14,7 @@ export function SetList(props) {
             <div key={stories[0].set_id} className="set_list">
                 <div className="set_title">Set {stories[0].set_id}</div>
                 {stories.map(story => (
-                    <StoryButton key={story.id} story={story} onStoryClicked={props.onStoryClicked}  />
+                    <StoryButton key={story.id} story={story} />
                 ))}
             </div>
         ))}
@@ -23,10 +23,10 @@ export function SetList(props) {
 
 function StoryButton(props) {
     let story = props.story;
-    return <div
+    return <Link
         data-cy={"story_button_"+story.id}
         className="button_story_parent"
-        onClick={(e) => {e.preventDefault(); props.onStoryClicked(story.id); }}
+        to={`/story/${story.id}`}
     >
         <div
             className="button_story_img"
@@ -38,5 +38,5 @@ function StoryButton(props) {
         <div
             className="button_story_text"
         >{story.name}</div>
-    </div>;
+    </Link>;
 }

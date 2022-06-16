@@ -1,4 +1,4 @@
-import {useUsername, Login, LoginDialog} from './login'
+import {useUsername, Login} from './login'
 import {CourseList} from "./course-list";
 import {CourseDropdown} from "./course-dropdown";
 import {SetList} from "./story-list";
@@ -6,48 +6,61 @@ import {useDataFetcher} from "./hooks";
 import {getCoursesUser, getPublicCourses, getStoriesSets} from "./api_calls";
 import {Legal} from "story-component";
 
+import {Link, useParams,} from "react-router-dom";
+import React from "react";
 
 /* ******** */
 
 
+function Error() {
+    return <div id="error">
+        <div>
+            <h2>404 Not Found</h2>
+            <img alt={"sad duo"} width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
+            <p>The page you requested was not found.<br/></p>
+            <p>If you think this is an error on the website, please report it on <a href="https://discord.gg/4NGVScARR3">Discord</a>.</p>
+        </div>
+    </div>
+}
+
 export function IndexContent(props) {
-    let lang = props.course[0];
-    let lang_base = props.course[1];
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
     const courses = useDataFetcher(getPublicCourses, []);
     const courses_user = useDataFetcher(getCoursesUser, [username]);
+    let {lang,lang_base} = useParams();
     const course_data = useDataFetcher(getStoriesSets, [lang, lang_base, username]);
 
-    function languageClicked(lang, lang_base) {
-        props.setCourse([lang, lang_base])
-    }
-
-    if(showLogin !== 0)
-        return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
+    let error = props.error;
+    if(lang !== undefined && course_data?.sets?.length === 0)
+        error = true;
 
     return <div>
         <div id="header_index">
-            <a href={"?"} className="duostories_title">Duostories</a>
-            <CourseDropdown course_data={course_data} courses={(courses_user !== undefined && courses_user.length) ? courses_user : courses} languageClicked={languageClicked} />
+            <Link to={"/"} className="duostories_title">Duostories</Link>
+            <CourseDropdown course_data={course_data} courses={(courses_user !== undefined && courses_user.length) ? courses_user : courses} />
             <Login useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
         </div>
         <div id="main_index">
-            <h1 className={"main_title"}>Unofficial Duolingo Stories</h1>
-            <p className={"title_desc"}>
+            {error ? <Error/> :
+            <>
+                <h1 className={"main_title"}>Unofficial Duolingo Stories</h1>
+                <p className={"title_desc"}>
                 A community project to bring the original <a href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages.
-            </p>
-            <p className={"title_desc"}>
+                </p>
+                <p className={"title_desc"}>
                 If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.
-            </p>
-            {lang !== undefined ?
-                <SetList sets={course_data?.sets} onStoryClicked={(id)=>props.onStartStory(id)}/> :
-                <CourseList courses={courses} languageClicked={languageClicked}/>
-            }
+                </p>
 
-            <hr/>
-            <Legal/>
+                {lang !== undefined ?
+                    <SetList sets={course_data?.sets} /> :
+                    <CourseList courses={courses} />
+                }
 
+                <hr/>
+                <Legal/>
+            </>}
         </div>
+
     </div>
 }
 

@@ -1,6 +1,7 @@
 import './course-list.css';
 import {Flag} from "./react/flag";
 import {Spinner} from "./react/spinner";
+import {Link} from "react-router-dom";
 
 
 export function CourseList(props) {
@@ -35,14 +36,13 @@ export function CourseList(props) {
 
 function LanguageButton(props) {
     let course = props.course;
-    return <a
+    return <Link
         data-cy={"language_button_big_"+course.id}
         className="language_select_button"
-        onClick={props.onClick}
-        href={`?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`}
+        to={`/${course.learningLanguage}-${course.fromLanguage}`}
     >
         <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} className="flag_big" />
 
         <span className="language_select_button_text">{course.name || course.learningLanguageName}</span>
-    </a>;
+    </Link>;
 }

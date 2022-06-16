@@ -6,6 +6,7 @@ import {Part} from "./part";
 import {FinishedPage} from "./finish_page";
 import {setStoryDone, getStoryJSON, scroll_down} from "./includes";
 import {Legal} from "./legal";
+import {Link, Navigate} from "react-router-dom";
 
 
 export class Story extends React.Component {
@@ -25,6 +26,7 @@ export class Story extends React.Component {
             blocked: false,
             right: false,
             spacer: 0,
+            navigate_back: 0,
         };
 
         this.controls = {
@@ -112,10 +114,13 @@ export class Story extends React.Component {
 
     finish() {
         setStoryDone(this.props.story_id);
-        this.props.onQuit();
+        this.setState({navigate_back: true});
+        //this.props.onQuit();
     }
 
     render() {
+        if(this.state.navigate_back)
+            return <Navigate to={"/"}/>
         let story = this.state.story || this.props.story;
         let editor = this.props.editor || false;
         if(this.props.story_json !== undefined)
@@ -151,7 +156,7 @@ export class Story extends React.Component {
         return (
             <div>
                 <div id="header">
-                    <div id="header_icon"><span id="quit" onClick={this.props.onQuit} /></div>
+                    <div id="header_icon"><Link id="quit" to="/" /></div>
                     <div id="progress">
                         <div id="progress_inside" style={{width: this.state.progress/parts.length*100+"%"}}>
                             <div id="progress_highlight"></div>

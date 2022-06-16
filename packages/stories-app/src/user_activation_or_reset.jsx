@@ -2,12 +2,12 @@ import React from 'react';
 import './login.css';
 import {useInput} from "./hooks.js";
 import {activate, reset_pw_check, reset_pw_set} from "./login.jsx";
+import {Link, useParams} from "react-router-dom";
 
 
-async function do_activate(setActivated) {
+async function do_activate(setActivated, username, hash) {
     console.log(do_activate)
-    const urlParams = new URLSearchParams(window.location.search);
-    let success = await activate({username: urlParams.get("username"), activation_link: urlParams.get("activation_link")});
+    let success = await activate({username: username, activation_link: hash});
     if(success === false) {
         setActivated(-1);
     }
@@ -17,9 +17,8 @@ async function do_activate(setActivated) {
 }
 
 
-async function check(setResetPwState) {
-    const urlParams = new URLSearchParams(window.location.search);
-    let [success, text] = await reset_pw_check({username: urlParams.get("username"), uuid: urlParams.get("activation_link")});
+async function check(setResetPwState, username, hash) {
+    let [success, text] = await reset_pw_check({username: username, uuid: hash});
     console.log(success, text)
     if(success === false) {
         setResetPwState(-1);
@@ -30,9 +29,8 @@ async function check(setResetPwState) {
 }
 
 
-async function login_button(setResetPwState, passwordInput) {
-    let urlParams = new URLSearchParams(window.location.search);
-    let success = await reset_pw_set({username: urlParams.get("username"), uuid: urlParams.get("activation_link"), password: passwordInput});
+async function login_button(setResetPwState, passwordInput, username, hash) {
+    let success = await reset_pw_set({username: username, uuid: hash, password: passwordInput});
     if(success === false) {
         setResetPwState(3);
     }
@@ -42,23 +40,25 @@ async function login_button(setResetPwState, passwordInput) {
 }
 
 
-export function UserActivationOrReset(props) {
+export function UserActivationOrReset() {
     let [initialized, setInitialized] = React.useState(0);
     let [activated, setActivated] = React.useState(0);
     let [restpwstate, setResetPwState] = React.useState(0);
     let [passwordInput, passwordInputSetValue] = useInput("");
 
-    function reset_pw_clicked() {login_button(setResetPwState, passwordInput)}
+    let {task, username, hash} = useParams();
+
+    function reset_pw_clicked() {login_button(setResetPwState, passwordInput, username, hash)}
 
     if(!initialized) {
         console.log(initialized);
         setInitialized(1);
-        if(props.task === "activate")
-            do_activate(setActivated);
-        else if(props.task === "resetpw")
-            check(setResetPwState);
+        if(task === "activate")
+            do_activate(setActivated, username, hash);
+        else if(task === "resetpw")
+            check(setResetPwState, username, hash);
     }
-    return <>{props.task === "activate" ?
+    return <>{task === "activate" ?
     <div id="login_dialog">
         <div>
             <h2>Activate account</h2>
@@ -69,7 +69,7 @@ export function UserActivationOrReset(props) {
                         <p id="status">Activation successful.</p>
                         <p id="login_form">
                           {/* Use of absolute link because relative links would only be relative to carex.uber.space */}
-                          You can now go back to the <a href='https://www.duostories.org'>Main page</a> and log in.
+                          You can now <Link to='/login'>log in</Link>.
                         </p>
                     </>
                     :
@@ -77,7 +77,7 @@ export function UserActivationOrReset(props) {
             }
         </div>
     </div>
-    : props.task === "resetpw" ?
+    : task === "resetpw" ?
     <div id="login_dialog">
         {restpwstate === 0 ?
             <div id="loading">
@@ -98,7 +98,7 @@ export function UserActivationOrReset(props) {
                  : restpwstate === 2 ?
                 <p id="login_status">
                   {/* Use of absolute link because relative links would only be relative to carex.uber.space */}
-                  You can now go back to the <a href='https://www.duostories.org'>Main page</a> and log in.
+                    You can now <Link to='/login'>log in</Link>.
                 </p> : null}
             </div>
         : restpwstate === -1 ?

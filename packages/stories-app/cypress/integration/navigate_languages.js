@@ -11,12 +11,12 @@ describe('Test Logins', () => {
     it('Open Overview', () => {
         cy.get("[data-cy*=language_button_big]").should("have.length.greaterThan", 1)
         cy.get("[data-cy=language_button_big_3]").click()
-        cy.url().should('include', '?lang=el&lang_base=en')
+        cy.url().should('include', 'el-en')
         cy.get("[data-cy*=story_button]").should("have.length.greaterThan", 1)
         cy.go('back')
 
         cy.get("[data-cy=language_button_big_9]").click()
-        cy.url().should('include', '?lang=ru&lang_base=en')
+        cy.url().should('include', 'ru-en')
         cy.get("[data-cy*=story_button]").should("have.length.greaterThan", 1)
         cy.go('back')
     })

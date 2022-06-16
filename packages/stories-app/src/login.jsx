@@ -3,6 +3,7 @@ import './login.css';
 import {useInput} from "./hooks.js";
 import {fetch_post} from "./includes.js";
 import {get_backend} from "./api_calls";
+import {Link, useNavigate} from "react-router-dom";
 
 let backend = get_backend();
 let backend_user = backend+'user/';
@@ -195,13 +196,14 @@ export function Login(props) {
             </div>
         </div>
 
-    return <div id="log_in">
+    return <Link id="log_in" to={"/login"}>
         <button className="button" onClick={() => setShowLogin(1)} style={{float: "none"}}>Log in</button>
-    </div>
+    </Link>
 }
 
-export function LoginDialog(props) {
-    let [username, doLogin, , showLogin, setShowLogin] = props.useUsername;
+export function LoginDialog() {
+//    let [username, doLogin, , showLogin, setShowLogin] = props.useUsername;
+    let [username, doLogin, , showLogin, setShowLogin] = useUsername();
 
     let [state, setState] = React.useState(0);
     let [error, setError] = React.useState("");
@@ -210,6 +212,8 @@ export function LoginDialog(props) {
     let [usernameInput, usernameInputSetValue] = useInput("");
     let [passwordInput, passwordInputSetValue] = useInput("");
     let [emailInput, emailInputSetValue] = useInput("");
+
+    let navigate = useNavigate();
 
     async function buttonLogin() {
         setState(1);
@@ -229,7 +233,8 @@ export function LoginDialog(props) {
         }
         else {
             setState(0);
-            setShowLogin(0);
+            //setShowLogin(0);
+            navigate("/");
         }
     }
     const handleKeypressLogin = e => {
@@ -287,9 +292,9 @@ export function LoginDialog(props) {
     }
 
     return <>
-        {(showLogin === 1 && username === undefined) ?
+        {(showLogin <= 1 && username === undefined) ?
             <div id="login_dialog">
-                <span id="quit" onClick={()=>setShowLogin(0)} />
+                <Link id="quit" to={"/"} />
                 <div>
                     <h2>Log in</h2>
                     <p>Attention, you cannot login with your Duolingo account.</p><p>You have to register for the unofficial stories separately, as they are an independent project.</p>
@@ -303,7 +308,7 @@ export function LoginDialog(props) {
             </div>
         : (showLogin === 2 && username === undefined) ?
             <div id="login_dialog">
-                <span id="quit" onClick={() => setShowLogin(0)}/>
+                <Link id="quit" to={"/"} />
                 <div>
                     <h2>Sign up</h2>
                     <p>If you register you can keep track of the stories you have already finished.</p>
@@ -326,7 +331,7 @@ export function LoginDialog(props) {
             </div>
         : (showLogin === 3 && username === undefined) ?
             <div id="login_dialog">
-                <span id="quit" onClick={() => setShowLogin(0)}/>
+                <Link id="quit" to={"/"} />
                 <div>
                     <h2>Reset password</h2>
                     <p>If you forgot your password, we can send you a link to choose a new one.</p>
