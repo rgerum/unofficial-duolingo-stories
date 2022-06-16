@@ -706,7 +706,7 @@ span[data-hidden=true] {
 #footer_result_text h2 {
     color: #58a700;
     font-size: 25px;
-    margin: 0 0 0 12px;
+    margin: 23px 0 0 12px;
 }
 
 @media (min-width:700px) {
@@ -1339,5 +1339,24 @@ p[data-rtl] .speaker {
         background: #373737;
         border-color: #3e3e3e;
         color: #807d7d;
+    }
+    .word_button[data-status="wrong"] {
+        background: #373737;
+        border-color: #3e3e3e;
+        color: #807d7d;
+    }
+
+    #progress {
+        background: #666;
+    }
+
+    #footer[data-right] #footer_content {
+        background-color: #5c9d2a;
+    }
+    #footer_result {
+        background-color: #5c9d2a;
+    }
+    #footer_result_text h2 {
+        color: #c6cebc;
     }
 }
