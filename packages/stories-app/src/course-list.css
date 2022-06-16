@@ -25,7 +25,6 @@
 
 .language_select_button {
     align-items: center;
-    background: #fff;
     border-radius: 16px;
     border: solid #e5e5e5;
     border-width: 2px 2px 4px;
@@ -44,6 +43,7 @@
 
     text-decoration: none;
 }
+
 @media (min-width: 699px) {
     .language_select_button {
         margin-left: 12px;
@@ -94,4 +94,13 @@
     font-size: 19px;
     font-weight: 700;
     margin-top: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .language_select_button {
+        border: solid #333232;
+    }
+    .language_select_button_text {
+        color: #dadada;
+    }
 }

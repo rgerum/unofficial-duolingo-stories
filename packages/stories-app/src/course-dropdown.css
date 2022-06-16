@@ -71,3 +71,15 @@
     top: 33.9px;
     display: none;
 }
+
+@media (prefers-color-scheme: dark) {
+    #header_lang_selector {
+        background: #282828;
+    }
+    #diamond {
+        background-color: #282828;
+    }
+    .language_select_item:hover {
+        background: #626b70 !important;
+    }
+}

@@ -794,8 +794,6 @@ span[data-hidden=true] {
     animation-duration: 1.5s;
     -webkit-animation-name: _3Jise;
     animation-name: _3Jise;
-    background: #fff;
-    border-color: #e5e5e5;
     box-shadow: none;
     z-index: 0;
 }
@@ -1281,4 +1279,65 @@ p[data-rtl] .speaker {
 
 .cast_element {
     margin-bottom: -80px;
+}
+
+@media (prefers-color-scheme: dark) {
+    #header {
+        background: #282828;
+    }
+    #footer_content {
+        background: #282828;
+    }
+    .bubble {
+        background-color: #282828;
+        border: 2px solid #4f4e4e;
+    }
+    .bubble::before {
+        border-right: 12px solid #4f4e4e;
+    }
+    .bubble::after {
+        border-right: 12px solid #282828;
+    }
+
+    .multiple_choice_checkbox {
+        background: #282828;
+        border: solid #4f4e4e;
+    }
+    .multiple_choice_ul {
+        color: #d0d0d0;
+    }
+
+    span[data-hidden="true"] {
+        color: #282828;
+    }
+
+    .answer_button {
+        background: #282828;
+        border: solid #4f4e4e;
+        color: white;
+    }
+    .answer_button[data-status="off"] {
+        background: #282828;
+        color: #737171;
+    }
+    .word_button {
+        background: #282828;
+        border: solid #4f4e4e;
+        color: white;
+    }
+    .word_match {
+        background: #282828;
+        border: solid #4f4e4e;
+        color: white;
+    }
+    .word_match[data-status="selected"] {
+        background: #426575;
+        border-color: #5aa7ca;
+        color: #afe5ff;
+    }
+    .word_match[data-status="right"] {
+        background: #373737;
+        border-color: #3e3e3e;
+        color: #807d7d;
+    }
 }

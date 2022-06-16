@@ -116,3 +116,10 @@
     width: 134px;
     text-align: center;
 }
+
+
+@media (prefers-color-scheme: dark) {
+    .button_story_text {
+        color: #dadada;
+    }
+}
