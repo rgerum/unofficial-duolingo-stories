@@ -180,7 +180,7 @@ else if($action == "send") {
     if($result) {
         send_email(
         "[Unofficial Duolingo Stories] Reset Password $username",
-        "register@duostories.org",
+        array("register@duostories.org" => "Unofficial Duolingo Stories"),
         $email,
         "Hey $username,<br/>
         You or someone else has requested a new password for 'Unofficial Duolingo Stories'.<br/>
