@@ -35,7 +35,7 @@ export function QuestionPointToPhrase(props) {
     let [buttonState, click] = useChoiceButtons(element.transcriptParts.length, element.correctAnswerIndex,
         ()=> {
             if(!props.editor) {
-                props.controls.unhide(props.element.trackingProperties.line_index);
+                //props.setUnhide(props.element.trackingProperties.line_index);
                 props.controls.right();
             }
         },

@@ -15,6 +15,7 @@ import {processStoryFile} from "./story-editor/syntax_parser_new.mjs";
 import {example, highlightStyle} from "./story-editor/parser.mjs";
 import {addScrollLinking} from "./story-editor/scroll_linking";
 import {add_resize} from "./story-editor/editor-resize";
+import {BrowserRouter} from "react-router-dom";
 
 
 window.EditorView = EditorView
@@ -230,8 +231,10 @@ function MountEditor() {
 
                 ReactDOM.render(
                     <React.StrictMode>
+                        <BrowserRouter>
                         <Cast id={story_data.id} story_meta={story_meta} learningLanguage={story_data.learningLanguage}/>
                         <Story editor={editor_state} story={story}/>
+                        </BrowserRouter>
                     </React.StrictMode>,
                     document.getElementById('preview')
                 );

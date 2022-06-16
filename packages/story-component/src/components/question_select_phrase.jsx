@@ -32,7 +32,7 @@ export function QuestionSelectPhrase(props) {
     let [buttonState, click] = useChoiceButtons(element.answers.length, element.correctAnswerIndex,
         ()=> {
             if(!props.editor) {
-                props.controls.unhide(props.element.trackingProperties.line_index);
+                props.setUnhide(-1);
                 props.controls.right();
             }
         },

@@ -4,7 +4,7 @@ import {useEventListener} from "./includes";
 
 export function EditorHook(hidden, editor, editor_props) {
     let onClick;
-    let view = editor_props.view;
+    let view = editor_props?.view;
 
     if(editor_props) {
         hidden = "";
@@ -33,7 +33,7 @@ export function EditorHook(hidden, editor, editor_props) {
 
 export function EditorNoHook(hidden, editor, editor_props, selected) {
     let onClick;
-    let view = editor_props.view;
+    let view = editor_props?.view;
 
     if(editor_props) {
         hidden = "";

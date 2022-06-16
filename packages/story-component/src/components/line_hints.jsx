@@ -17,6 +17,12 @@ export function HintLineContent(props) {
     var content = props.content;
     var audioRange = props.audioRange;
     var hideRangesForChallenge = props.hideRangesForChallenge ? props.hideRangesForChallenge[0] : props.hideRangesForChallenge;
+    if(hideRangesForChallenge) {
+        if(props.unhide === -1)
+            hideRangesForChallenge = undefined
+        else
+            hideRangesForChallenge = {start: props.unhide, end: hideRangesForChallenge.end};
+    }
 
     var [show_trans, set_show_trans] = useState(window.editorShowTranslations);
     useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); })

@@ -51,6 +51,7 @@ export function TextLine(props) {
     let hideRangesForChallenge = element.hideRangesForChallenge;
     if(window.view === undefined && props.progress !== element.trackingProperties.line_index)
         hideRangesForChallenge = undefined;
+
     //if(props.progress !== element.trackingProperties.line_index)
     //    hideRangesForChallenge = undefined;
     // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
@@ -66,7 +67,7 @@ export function TextLine(props) {
             <img className="head" src={element.line.avatarUrl} alt="head"/>
             <span className="bubble">
                         <AudioPlay onClick={playAudio} />
-                        <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.line.content} />
+                        <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} unhide={props.unhide} content={element.line.content} />
                 {(props.editor && (element.line.content.audio)) ?
                     <EditorSSMLDisplay ssml={element.line.content.audio.ssml}/>
                     : <></>
