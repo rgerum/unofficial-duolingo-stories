@@ -1,6 +1,7 @@
-import React from "react";
+import React, {useState} from "react";
 import {shuffle} from "./includes";
-import {EditorNoHook} from "./editor_hooks";
+import {EditorHook} from "./editor_hooks";
+import {useCallOnActivation} from "./questions_includes";
 
 /*
 The MATCH question.
@@ -15,106 +16,88 @@ It consists of two columns of buttons. The learner needs to find the right pars.
 - la <> the
  */
 
-export class QuestionMatch extends React.Component {
-    constructor(props) {
-        super(props);
-        this.createOrder(props);
+export function QuestionMatch(props) {
+    let element = props.element;
+    // whether this part is already shown
+    let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
 
-        //this.props.controls.block_next();
-        window.addEventListener("progress_changed", this.progress_changed.bind(this))
+    let [order, setOrder] = useState([]);
+    let [clicked, setClicked] = useState(undefined);
+    let [last_clicked, setLastClicked] = useState(undefined);
 
-        this.editor = props.element.editor;
-        window.addEventListener("editorLineChanged", (e) => this.editorLineChanged(e));
-    }
-
-    editorLineChanged(e) {
-        let editor = this.editor;
-        let should_be_selected = editor && editor.start_no <= e.detail.lineno && e.detail.lineno < editor.end_no;
-
-        if (should_be_selected !== this.state.selected)
-            this.setSelected(should_be_selected);
-    }
-
-    setSelected(x) {
-        this.setState({selected: x});
-    }
-
-    createOrder(props) {
+    // when order is not initialized or when the number of elements changed in the editor
+    if(order === undefined || order.length/2 !== props.element.fallbackHints.length) {
         let clicked = [];
-        this.order = [];
+        let order2 = [];
         for(let i in props.element.fallbackHints) {
-            this.order.push([i, 0]);
-            this.order.push([i, 1]);
+            order2.push([i, 0]);
+            order2.push([i, 1]);
             clicked.push(undefined); clicked.push(undefined);
         }
-        shuffle(this.order);
-
-        this.state = {
-            clicked: clicked,
-            last_clicked: undefined,
-            selected: false,
-        };
+        shuffle(order2);
+        setOrder(order2);
+        setClicked(clicked);
+        setLastClicked(undefined);
     }
 
-    progress_changed(e) {
-        if(e.detail === this.props.element.trackingProperties.line_index)
-            this.props.controls.block_next();
-    }
-
-    click(index) {
+    function click(index) {
         // do not allow to click on finished words again
-        if(this.state.clicked[index] === "right")
+        if(clicked[index] === "right")
             return
         // select the word
-        if(this.state.last_clicked === undefined)
-            this.setState(state=>({last_clicked: index, clicked:state.clicked.map((item, i) => i === state.last_clicked ? undefined : i === index ? "selected" : item)}))
+        if(last_clicked === undefined) {
+            setLastClicked(index);
+            clicked[index] = "selected";
+            setClicked(clicked);
+        }
         // deselect the word
-        else if(this.state.last_clicked === index)
-            this.setState(state=>({last_clicked: undefined, clicked:state.clicked.map((item, i) => i === state.last_clicked ? undefined : i === index ? "selected" : item)}))
+        else if(last_clicked === index) {
+            setLastClicked(undefined);
+            clicked[index] = undefined;
+            setClicked(clicked);
+        }
         // the pair is right
-        else if(this.order[this.state.last_clicked][0] === this.order[index][0]) {
-            this.setState(state => ({
-                last_clicked: undefined,
-                clicked: state.clicked.map((item, i) => i === state.last_clicked ? "right" : i === index ? "right" : item)
-            }))
-            let right_count = this.state.clicked.map((item, )=>(item === "right")).reduce((a,b)=>a+b, 0);
-            if(right_count >= this.state.clicked.length-2)
-                this.props.controls.right();
+        else if(order[last_clicked][0] === order[index][0]) {
+            setLastClicked(undefined);
+            clicked[index] = "right";
+            clicked[last_clicked] = "right";
+            setClicked(clicked);
+            let right_count = clicked.map((item, )=>(item === "right")).reduce((a,b)=>a+b, 0);
+            if(right_count >= clicked.length)
+                props.controls.right();
         }
         // the pair is wrong
-        else if(this.order[this.state.last_clicked][0] !== this.order[index][0]) {
-            let last_clicked = this.state.last_clicked;
-            this.setState(state => ({
-                last_clicked: undefined,
-                clicked: state.clicked.map((item, i) => i === state.last_clicked ? "wrong" : i === index ? "wrong" : item)
-            }))
-            setTimeout(()=>this.setState(state=> (
-                {clicked: state.clicked.map((item, i) => ((i === index || i === last_clicked) && item === "wrong") ? undefined : item)}
-            )), 1500);
+        else if(order[last_clicked][0] !== order[index][0]) {
+            setLastClicked(undefined);
+            clicked[index] = "wrong";
+            clicked[last_clicked] = "wrong";
+            setClicked(clicked);
+            setTimeout(()=> {
+                if(clicked[index] === "wrong")
+                    clicked[index] = undefined;
+                if(clicked[last_clicked] === "wrong")
+                    clicked[last_clicked] = undefined;
+                setClicked(clicked);
+            }, 1500);
         }
     }
 
-    render() {
-        let props = this.props;
-        // when the number of elements changed in the editor
-        if(this.order.length/2 !== props.element.fallbackHints.length)
-            this.createOrder(props);
-        let element = props.element;
-        //let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
-        let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
+    // when this question appears do not allow the user to click "continue" until they answered the question
+    useCallOnActivation(element.trackingProperties.line_index, props.controls.block_next);
 
-        let onClick;
-        [hidden2, onClick] = EditorNoHook(hidden2, props.element.editor, props.editor, this.state.selected);
+    let onClick;
+    [hidden2, onClick] = EditorHook(hidden2, props.element.editor, props.editor);
 
-        return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
-            <span className="question">{element.prompt}</span>
-            <div style={{textAlign: "center"}}>
-                {this.order.map((phrase, index) => (
+    return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
+        <span className="question">{element.prompt}</span>
+        <div style={{textAlign: "center"}}>
+            {order.map((phrase, index) => (
                     <button key={index} className="word_match"
-                            data-status={this.state.clicked[index]}
-                            onClick={()=>this.click(index)}>{element.fallbackHints[phrase[0]][["phrase", "translation"][phrase[1]]]}</button>
-                ))}
-            </div>
+                        data-status={clicked[index]}
+                        onClick={()=>click(index)}>
+                        {element.fallbackHints[phrase[0]] ? element.fallbackHints[phrase[0]][["phrase", "translation"][phrase[1]]] : ""}
+                    </button>
+            ))}
         </div>
-    }
+    </div>
 }
