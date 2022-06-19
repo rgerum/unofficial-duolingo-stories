@@ -1,4 +1,6 @@
 import React, {useState} from "react";
+import "./question_match.css"
+
 import {shuffle} from "./includes";
 import {EditorHook} from "./editor_hooks";
 import {useCallOnActivation} from "./questions_includes";
@@ -21,21 +23,27 @@ export function QuestionMatch(props) {
     // whether this part is already shown
     let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
 
-    let [order, setOrder] = useState([]);
+    let [orderA, setOrderA] = useState([]);
+    let [orderB, setOrderB] = useState([]);
     let [clicked, setClicked] = useState(undefined);
     let [last_clicked, setLastClicked] = useState(undefined);
 
+    let order = orderA.concat(orderB);
+
     // when order is not initialized or when the number of elements changed in the editor
-    if(order === undefined || order.length/2 !== props.element.fallbackHints.length) {
+    if(orderA === undefined || orderA.length !== props.element.fallbackHints.length) {
         let clicked = [];
-        let order2 = [];
+        let orderA = [];
+        let orderB = [];
         for(let i in props.element.fallbackHints) {
-            order2.push([i, 0]);
-            order2.push([i, 1]);
+            orderA.push([i, 0]);
+            orderB.push([i, 1]);
             clicked.push(undefined); clicked.push(undefined);
         }
-        shuffle(order2);
-        setOrder(order2);
+        shuffle(orderA);
+        shuffle(orderB);
+        setOrderA(orderA);
+        setOrderB(orderB);
         setClicked(clicked);
         setLastClicked(undefined);
     }
@@ -45,9 +53,11 @@ export function QuestionMatch(props) {
         if(clicked[index] === "right")
             return
         // select the word
-        if(last_clicked === undefined) {
-            setLastClicked(index);
+        if(last_clicked === undefined || ((index >= orderB.length) === (last_clicked >= orderB.length))) {
             clicked[index] = "selected";
+            if(last_clicked !== undefined)
+                clicked[last_clicked] = undefined;
+            setLastClicked(index);
             setClicked(clicked);
         }
         // deselect the word
@@ -58,9 +68,9 @@ export function QuestionMatch(props) {
         }
         // the pair is right
         else if(order[last_clicked][0] === order[index][0]) {
-            setLastClicked(undefined);
             clicked[index] = "right";
             clicked[last_clicked] = "right";
+            setLastClicked(undefined);
             setClicked(clicked);
             let right_count = clicked.map((item, )=>(item === "right")).reduce((a,b)=>a+b, 0);
             if(right_count >= clicked.length)
@@ -68,15 +78,16 @@ export function QuestionMatch(props) {
         }
         // the pair is wrong
         else if(order[last_clicked][0] !== order[index][0]) {
-            setLastClicked(undefined);
+            let last_clicked_old = last_clicked;
             clicked[index] = "wrong";
-            clicked[last_clicked] = "wrong";
+            clicked[last_clicked_old] = "wrong";
+            setLastClicked(undefined);
             setClicked(clicked);
             setTimeout(()=> {
                 if(clicked[index] === "wrong")
                     clicked[index] = undefined;
-                if(clicked[last_clicked] === "wrong")
-                    clicked[last_clicked] = undefined;
+                if(clicked[last_clicked_old] === "wrong")
+                    clicked[last_clicked_old] = undefined;
                 setClicked(clicked);
             }, 1500);
         }
@@ -90,14 +101,25 @@ export function QuestionMatch(props) {
 
     return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
         <span className="question">{element.prompt}</span>
-        <div style={{textAlign: "center"}}>
-            {order.map((phrase, index) => (
-                    <button key={index} className="word_match"
+        <div className="match_container">
+            <div className="match_col">
+            {orderB.map((phrase, index) => (
+                    <button key={index} className="match_word"
                         data-status={clicked[index]}
                         onClick={()=>click(index)}>
                         {element.fallbackHints[phrase[0]] ? element.fallbackHints[phrase[0]][["phrase", "translation"][phrase[1]]] : ""}
                     </button>
             ))}
+            </div>
+            <div className="match_col">
+            {orderA.map((phrase, index) => (
+                <button key={index} className="match_word"
+                        data-status={clicked[index + orderB.length]}
+                        onClick={()=>click(index + orderB.length)}>
+                    {element.fallbackHints[phrase[0]] ? element.fallbackHints[phrase[0]][["phrase", "translation"][phrase[1]]] : ""}
+                </button>
+            ))}
+            </div>
         </div>
     </div>
 }
