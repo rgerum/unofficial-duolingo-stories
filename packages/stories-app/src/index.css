@@ -116,36 +116,41 @@ a:focus{outline:none !important;}
 
 .button {
   text-transform: uppercase;
-  padding: 12px 30px;
+  padding: 13px 30px;
   float: right;
   display: inline-block;
-  background: #78c800;
+  background: #58cc02;
   color: white;
   border-radius: 15px;
-  box-shadow: #58a700 0 5px;
-  margin-inline: 6px;
+  /* box-shadow: #58a700 0 5px; */
+  /* margin-inline: 6px; */
   font-weight: bold;
-  text-align: center;
+  /* text-align: center; */
   border: 0;
   font-size: 16px;
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+  /* font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"; */
   transition: 0.1s box-shadow, 0.1s transform;
+  border-color: #58a700;
+  border-bottom: 4px solid #58a700;
 }
 .button:hover {
-  filter: brightness(1.2);
+  filter: brightness(1.1);
   /*transform: translate(0, 5px);
   box-shadow: #58a700 0 0px;*/
 }
 .button:active {
-  transform: translate(0, 5px);
-  box-shadow: #58a700 0 0;
-  transition: 0.1s box-shadow, 0.1s transform;
+  transform: translate(0, 4px);
+  border-bottom: 0 solid #58a700;
+  transition: 0.1s border-bottom, 0.1s transform;
 }
 .button[data-status="inactive"] {
-  background: #a3a3a3;
-  transform: translate(0, 5px);
-  box-shadow: #575757 0 0;
-  color: #575757;
+  background: #e5e5e5;
+  transform: translate(0, 4px);
+  border-bottom: 0 solid #58a700;
+  color: #afafaf;
   cursor: default;
+}
+.button[data-status="inactive"]:hover {
+  filter: none;
 }
 

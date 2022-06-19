@@ -140,4 +140,6 @@
 
 #log_in {
     float: right;
+    padding-right: 12px;
+    margin-top: -4px;
 }
