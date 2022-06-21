@@ -28,6 +28,13 @@
   border-bottom: 2px solid lightgrey;
 }
 
+
+@media (prefers-color-scheme: dark) {
+  #header_index {
+    border-bottom-color: #37464f;
+  }
+}
+
 #quit {
   background-image: url(//d35aaqx5ub95lt.cloudfront.net/images/icon-sprite8.svg);
   background-position: -373px -154px;
@@ -78,6 +85,12 @@ hr {
   border-top: 2px solid #e5e5e5;
 }
 
+@media (prefers-color-scheme: dark) {
+  hr {
+    border-top-color: #3c474b;
+  }
+}
+
 
 .duostories_title {
   width: 160px;
@@ -103,11 +116,11 @@ body {
 
 @media (prefers-color-scheme: dark) {
   body {
-    background: #282828;
-    color: #fff;
+    background: #131f22;
+    color: #f1f7fb;
   }
   a {
-    color: #fff;
+    color: #f1f7fb;
   }
 }
 

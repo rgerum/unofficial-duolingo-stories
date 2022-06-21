@@ -1,4 +1,6 @@
 import React from "react";
+import "./question_point_to_phrase.css"
+
 import {EditorHook} from "./editor_hooks";
 import {useChoiceButtons} from "./questions_includes";
 import {HintLineContent} from "./line_hints";
@@ -42,6 +44,16 @@ export function QuestionPointToPhrase(props) {
         props.controls.wrong
     );
 
+    function get_color(state) {
+        if(state === "right")
+            return "color_right button_disabled_up"
+        if(state === "false")
+            return "color_false button_inactive_anim"
+        if(state === "done")
+            return "color_disabled button_inactive"
+        return "color_base button_click"
+    }
+
     return <div className={hidden} onClick={onClick} lineno={element?.editor?.block_start_no}>
         {/* display the question */}
         <div className="question">
@@ -53,13 +65,9 @@ export function QuestionPointToPhrase(props) {
                 /* is the text selectable? */
                 part.selectable ?
                     /* then display a button */
-                    <div className="word_button"
+                    <div className={"word_button "+get_color(buttonState[button_indices[index]])}
                          key={index}
-                         onClick={()=>click(button_indices[index])}
-                         data-status={(buttonState[button_indices[index]] === "right") ? "right" :
-                                      (buttonState[button_indices[index]] === "false-done"
-                                          || buttonState[button_indices[index]] === "done") ? "off" :
-                                      (buttonState[button_indices[index]] === "false") ? "wrong" : undefined}>
+                         onClick={()=>click(button_indices[index])}>
                         {part.text}
                     </div>
                     /* if it is not selectable just display the text */

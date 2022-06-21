@@ -1,4 +1,6 @@
 import React, {useState} from "react";
+import "./line_hints.css"
+
 import {useEventListener} from "./includes";
 
 

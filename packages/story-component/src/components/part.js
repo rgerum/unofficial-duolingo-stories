@@ -1,4 +1,6 @@
 import React from "react";
+import "./part.css"
+
 import {Header, TextLine} from "./header";
 import {QuestionPointToPhrase} from "./question_point_to_phrase";
 import {useEventListener} from "./includes";

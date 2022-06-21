@@ -99,6 +99,10 @@
     top: -15px;
     width: 135px;
 }
+.button_story_img img:active {
+    top: -12px;
+    transition: 0.1s top;
+}
 .button_story_parent {
     margin: 7px 17px 10px;
     display: inline-block;
@@ -120,6 +124,9 @@
 
 @media (prefers-color-scheme: dark) {
     .button_story_text {
-        color: #dadada;
+        color: #f1f7fb;
+    }
+    .set_title::after, .set_title::before {
+        background: #37464f;
     }
 }

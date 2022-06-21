@@ -28,7 +28,8 @@ export function QuestionMatch(props) {
     let [clicked, setClicked] = useState(undefined);
     let [last_clicked, setLastClicked] = useState(undefined);
 
-    let order = orderA.concat(orderB);
+    let order = orderB.concat(orderA);
+    console.log(orderA, orderB,order);
 
     // when order is not initialized or when the number of elements changed in the editor
     if(orderA === undefined || orderA.length !== props.element.fallbackHints.length) {
@@ -36,8 +37,8 @@ export function QuestionMatch(props) {
         let orderA = [];
         let orderB = [];
         for(let i in props.element.fallbackHints) {
-            orderA.push([i, 0]);
-            orderB.push([i, 1]);
+            orderA.push(parseInt(i));
+            orderB.push(parseInt(i));
             clicked.push(undefined); clicked.push(undefined);
         }
         shuffle(orderA);
@@ -49,6 +50,7 @@ export function QuestionMatch(props) {
     }
 
     function click(index) {
+        index = parseInt(index);
         // do not allow to click on finished words again
         if(clicked[index] === "right")
             return
@@ -67,7 +69,7 @@ export function QuestionMatch(props) {
             setClicked(clicked);
         }
         // the pair is right
-        else if(order[last_clicked][0] === order[index][0]) {
+        else if(order[last_clicked] === order[index]) {
             clicked[index] = "right";
             clicked[last_clicked] = "right";
             setLastClicked(undefined);
@@ -77,7 +79,7 @@ export function QuestionMatch(props) {
                 props.controls.right();
         }
         // the pair is wrong
-        else if(order[last_clicked][0] !== order[index][0]) {
+        else if(order[last_clicked] !== order[index]) {
             let last_clicked_old = last_clicked;
             clicked[index] = "wrong";
             clicked[last_clicked_old] = "wrong";
@@ -99,24 +101,32 @@ export function QuestionMatch(props) {
     let onClick;
     [hidden2, onClick] = EditorHook(hidden2, props.element.editor, props.editor);
 
+    function get_color(state) {
+        if(state === "right")
+            return "color_right_fade_to_disabled button_inactive_anim"
+        if(state === "wrong")
+            return "color_false_to_base button_click"
+        if(state === "selected")
+            return "color_selected button_click"
+        return "color_base button_click"
+    }
+
     return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
         <span className="question">{element.prompt}</span>
         <div className="match_container">
             <div className="match_col">
             {orderB.map((phrase, index) => (
-                    <button key={index} className="match_word"
-                        data-status={clicked[index]}
+                    <button key={index} className={"match_word "+get_color(clicked[index])}
                         onClick={()=>click(index)}>
-                        {element.fallbackHints[phrase[0]] ? element.fallbackHints[phrase[0]][["phrase", "translation"][phrase[1]]] : ""}
+                        {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][1]] : ""}
                     </button>
             ))}
             </div>
             <div className="match_col">
             {orderA.map((phrase, index) => (
-                <button key={index} className="match_word"
-                        data-status={clicked[index + orderB.length]}
+                <button key={index} className={"match_word "+get_color(clicked[index + orderB.length])}
                         onClick={()=>click(index + orderB.length)}>
-                    {element.fallbackHints[phrase[0]] ? element.fallbackHints[phrase[0]][["phrase", "translation"][phrase[1]]] : ""}
+                    {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][0]] : ""}
                 </button>
             ))}
             </div>

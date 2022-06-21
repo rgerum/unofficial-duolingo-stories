@@ -1,4 +1,5 @@
 import React from "react";
+import "./finish_page.css"
 
 
 export function FinishedPage(props) {

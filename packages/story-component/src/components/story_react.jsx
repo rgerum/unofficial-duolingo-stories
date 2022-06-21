@@ -6,7 +6,9 @@ import {Part} from "./part";
 import {FinishedPage} from "./finish_page";
 import {setStoryDone, scroll_down} from "./includes";
 import {Legal} from "./legal";
-import {Link, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
+import {Footer} from "./story_footer";
+import {StoryHeader} from "./story_header";
 
 
 export function Story(props) {
@@ -97,14 +99,7 @@ export function Story(props) {
 
     return (
         <div>
-            <div id="header">
-                <div id="header_icon"><Link id="quit" to="/" /></div>
-                <div id="progress">
-                    <div id="progress_inside" style={{width: progress/parts.length*100+"%"}}>
-                        <div id="progress_highlight"></div>
-                    </div>
-                </div>
-            </div>
+            <StoryHeader progress={progress} length={parts.length}/>
             <div id="main">
                 <div id="story">
                     <Legal />
@@ -116,27 +111,7 @@ export function Story(props) {
                 {finished ? <FinishedPage story={story} /> : null
                 }
             </div>
-            <div id="footer"
-                 data-right={right ? "true" : undefined}
-            >
-                <div id="footer_content">
-                    <div id="footer_result">
-                        <div>
-                            <div id="footer_result_icon"><span/></div>
-                            <div id="footer_result_text"><h2>You are correct</h2></div>
-                        </div>
-                    </div>
-                    <div id="footer_buttons">
-                        {finished ?
-                            <button id="button_next"
-                                    className="button" onClick={() => finish()}>finished</button>
-                            : <button id="button_next"
-                                      data-status={blocked ? "inactive" : undefined}
-                                      className="button" onClick={() => next()}>continue</button>
-                        }
-                    </div>
-                </div>
-            </div>
+            <Footer right={right} finished={finished} blocked={blocked} next={next} finish={finish} />
         </div>
     );
 }

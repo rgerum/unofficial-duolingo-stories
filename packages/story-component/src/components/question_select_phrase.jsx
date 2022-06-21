@@ -1,4 +1,6 @@
 import React from "react";
+import "./question_select_phrase.css"
+
 import {EditorHook} from "./editor_hooks";
 import {useChoiceButtons} from "./questions_includes";
 import {useCallOnActivation} from "./questions_includes";
@@ -39,18 +41,24 @@ export function QuestionSelectPhrase(props) {
         props.controls.wrong
     );
 
+
+    function get_color(state) {
+        if(state === "right")
+            return "color_right button_disabled_up"
+        if(state === "false")
+            return "color_false button_inactive_anim"
+        if(state === "done")
+            return "color_disabled button_inactive"
+        return "color_base button_click"
+    }
+
     return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
         <div>
             {/* display the buttons */}
             {element.answers.map((answer, index) => (
                 /* one answer button */
-                <button key={index} className="answer_button"
-                        onClick={() => click(index)}
-                        data-status={(buttonState[index] === "right") ? "right" :
-                                     (buttonState[index] === "false-done" || buttonState[index] === "done") ? "off" :
-                                     (buttonState[index] === "false") ? "inactive" :
-                                     undefined
-                        }>
+                <button key={index} className={"answer_button "+get_color(buttonState[index])}
+                        onClick={() => click(index)}>
                     {answer.text ? answer.text : answer}
                 </button>
             ))}

@@ -1,4 +1,6 @@
 import React from "react";
+import "./question_arrange.css"
+
 import {EditorHook} from "./editor_hooks";
 import {useCallOnActivation} from "./questions_includes";
 
