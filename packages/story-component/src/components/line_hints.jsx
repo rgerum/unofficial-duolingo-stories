@@ -86,7 +86,10 @@ export function HintLineContent(props) {
         //addSplitWord(dom.append("span").attr("class", "word"), text_pos, hint.rangeFrom);
 
         // add the text with the hint
-        elements.push(<span key={hint.rangeFrom + " "+hint.rangeTo+1} className={"word "+(show_trans ? "tooltip_editor" : "tooltip")}><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className={show_trans ? "tooltiptext_editor" : "tooltiptext"}>{content.hints[hint.hintIndex]}</span></span>)
+        let is_hidden = hideRangesForChallenge !== undefined &&
+        getOverlap(hint.rangeFrom, hint.rangeTo, hideRangesForChallenge.start, hideRangesForChallenge.end) ? true : undefined
+
+        elements.push(<span key={hint.rangeFrom + " "+hint.rangeTo+1} data-hidden={is_hidden} className={"word "+(show_trans ? "tooltip_editor" : "tooltip")}><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className={show_trans ? "tooltiptext_editor" : "tooltiptext"}>{content.hints[hint.hintIndex]}</span></span>)
         //addSplitWord(dom.append("span").attr("class", "word tooltip"), hint.rangeFrom, hint.rangeTo+1)
         //    .append("span").attr("class", "tooltiptext").text(content.hints[hint.hintIndex]);
         // advance the position

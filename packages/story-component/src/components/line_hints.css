@@ -19,7 +19,7 @@
     position: relative;
     /*    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
     line-height: 2em;
-    background-image: linear-gradient(to right, #e5e5e5 60%, rgba(255, 255, 255, 0) 0%);
+    background-image: linear-gradient(to right, var(--underline-dashed) 60%, rgba(255, 255, 255, 0) 0%);
     background-position: 0 100%;
     background-repeat: repeat-x;
     background-size: 5px 2px;
@@ -27,7 +27,7 @@
 }
 
 .tooltip:not([data-hidden]):hover {
-    background-image: linear-gradient(to right, #7b7b7b 60%, rgba(255, 255, 255, 0) 0%);
+    background-image: linear-gradient(to right, var(--underline-dashed-highlight) 60%, rgba(255, 255, 255, 0) 0%);
 }
 
 /* Tooltip text */
@@ -67,13 +67,13 @@
 
     transform: rotate(-45deg);
 
-    background-color: #f7f7f7;
-    border-color:  transparent transparent #e5e5e5 #e5e5e5;
+    background-color: var(--tooltip-backgroud);
+    border-color:  transparent transparent var(--tooltip-border) var(--tooltip-border);
     border-width: 2px;
 }
 span[data-hidden=true] {
-    color: white;
-    background-image: linear-gradient(to right, #e5e5e5 60%, #e5e5e5 60%) !important;
+    color: var(--body-background);
+    background-image: linear-gradient(to right, var(--underline-solid) 60%, var(--underline-solid) 60%) !important;
     line-height: 2em;
     background-position: 0 100%;
     background-repeat: repeat-x;
@@ -89,10 +89,10 @@ span[data-hidden=true] {
 
     bottom: 125%;
     /* width: 120px;*/
-    background-color: #f7f7f7;
-    border: 2px solid #e5e5e5;
+    background-color: var(--tooltip-backgroud);
+    border: 2px solid var(--tooltip-border);
     border-radius: 14px;
-    color: #4c4c4c;
+    color: var(--tooltip-color);
     display: block;
     font-size: 19px;
     font-style: normal;

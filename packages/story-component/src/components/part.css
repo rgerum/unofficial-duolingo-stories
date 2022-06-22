@@ -61,7 +61,7 @@
 }
 
 .ssml_speaker {
-    background: lightgray;
+    background: var(--editor-ssml);
     padding: 2px 5px;
     border-radius: 5px;
     margin-right: 3px;

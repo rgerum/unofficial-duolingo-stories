@@ -4,7 +4,7 @@
     height: calc(100vh - 100px);
     margin-bottom: 100px;
     width: 100%;
-    border-top: 2px solid #e5e5e5;
+    border-top: 2px solid var(--overview-hr);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -57,7 +57,7 @@
     width: 20.4px;
     animation-duration: 2s;
     animation-name: _2pTl2;
-    background-color: #ffc800;
+    background-color: var(--finished-star-gold);
     border-radius: 3.3px;
     opacity: .5;
     transform: rotate(-45deg) scale(1);
@@ -68,7 +68,7 @@
     animation-duration: 2s;
     -webkit-animation-name: _2pTl2;
     animation-name: _2pTl2;
-    background-color: #ffc800;
+    background-color: var(--finished-star-gold);
     border-radius: 3.3px;
     opacity: .5;
     transform: rotate(-45deg) scale(1);
@@ -83,7 +83,7 @@
 .star3 {
     animation-duration: 2s;
     animation-name: _2pTl2;
-    background-color: #ffc800;
+    background-color: var(--finished-star-gold);
     border-radius: 3.3px;
     opacity: .5;
     transform: rotate(-45deg) scale(1);

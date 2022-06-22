@@ -8,6 +8,7 @@
     color: var(--color_base_color);
     border-width: 2px 2px 4px;
     border-radius: 14px;
+    border-style: solid;
 /*    color: #4b4b4b;*/
     cursor: pointer;
     display: inline-block;
@@ -24,7 +25,7 @@
 }
 
 .word_order[data-status=off] { /* _37G8A.RGNlp */
-    background-color: var(--color_base_background);
+    background-color: var(--color_base_border);
     box-shadow: none;
     color: transparent;
     cursor: auto;

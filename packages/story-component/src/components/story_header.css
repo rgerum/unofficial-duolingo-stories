@@ -3,7 +3,7 @@
 
 #progress {
     display: inline-block;
-    background: #e5e5e5;
+    background: var(--progress-back);
     width: 100%;
 
     --height: 16px;
@@ -13,7 +13,7 @@
 #progress_inside {
     display: block;
     width: 0;
-    background: #78c800;
+    background: var(--progress-inside);
     border-radius: calc(var(--height)/2);
     height: var(--height);
     position: relative;
@@ -21,7 +21,7 @@
 }
 
 #progress_highlight {
-    background: #fff;
+    background: var(--progress-highlight);
     border-radius: inherit;
     height: 30%;
     left: calc(var(--height)/2);
@@ -39,7 +39,7 @@
     left: 0;
     top: 0;
     width: 100%;
-    background: white;
+    background: var(--body-background);
     box-sizing: border-box;
     z-index: 10;
 }
@@ -70,24 +70,5 @@
     #header {
         margin: 0 calc(50% - 500px);
         max-width: 1000px;
-    }
-}
-
-
-@media (prefers-color-scheme: dark) {
-
-    #header {
-        background: #131f22;
-    }
-
-    #progress {
-        background: #37464f;
-    }
-
-    #progress_inside {
-        background-color: #93d333;
-    }
-    #progress_highlight {
-        background-color: #a9dc5c;
     }
 }
