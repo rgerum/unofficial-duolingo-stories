@@ -21,8 +21,9 @@
 
 #login_dialog div input {
     align-items: center;
-    background: #f7f7f7;
-    border: 2px solid #e5e5e5;
+    background: var(--input-background);
+    border: 2px solid var(--input-border);
+    color: var(--text-color);
     border-radius: 16px;
     display: flex;
     margin-top: 8px;
@@ -34,12 +35,12 @@
 }
 
 #login_dialog button {
-    background-color: #1cb0f6;
-    color: #fff;
+    background-color: var(--button-blue-background);
+    color: var(--button-blue-color);
     width: 100%;
     box-shadow: none;
-    border: solid #1899d6;
-    border-width: 0 0 4px;
+    border: solid var(--button-blue-border);
+    border-width: var(--button-side-border) var(--button-side-border) 4px;
     margin-top: 8px;
     transform: translate(0, 0px);
     margin-bottom: 8px;
@@ -62,12 +63,12 @@
 }
 
 #login_dialog .login_error {
-    color: #ea2b2b;
+    color: var(--error-red);
 }
 
 #login_dialog a {
     cursor: pointer;
-    color: #1cb0f6;
+    color: var(--link-blue);
 }
 
 #login_dialog button.link {
@@ -75,7 +76,7 @@
     width: auto;
     transform: none;
     background: none;
-    color: #1cb0f6;
+    color: var(--link-blue);
     margin: 0;
     border: none;
     font-size: 1em;
@@ -86,7 +87,7 @@
 #loggedin {
     float: right;
     width: 50px;
-    background: #1cb0f6;
+    background: var(--profile-background);
     border-radius: 30px;
     height: 50px;
     margin: -6px 39px;
@@ -94,7 +95,7 @@
     box-sizing: border-box;
     text-transform: uppercase;
     font-size: 28px;
-    color: white;
+    color: var(--profile-text);
     position: relative;
     text-align: center;
 }
@@ -105,13 +106,13 @@
 
 #profile_dropdown {
     display: none;
-    background: white;
+    background: var(--body-background);
     position: absolute;
     left: -32px;
     width: 118px;
     border-radius: 15px;
-    border: 1px solid lightgray;
-    color: black;
+    border: 1px solid var(--header-border);
+    color: var(--text-color);
     font-size: 18px;
     font-weight: bold;
     margin-top: 12px;
@@ -128,14 +129,14 @@
     text-align: center;
     height: 29px;
     padding: 5px;
-    border-bottom: 1px solid lightgray;
+    border-bottom: 1px solid var(--header-border);
     text-decoration: none;
     cursor: pointer;
 }
 
 .profile_dropdown_button:hover {
-    background: #ddf4ff !important;
-    color: #78c800;
+    background: var(--language-selector-hover-background) !important;
+    color: var(--link-hover);
 }
 
 #log_in {

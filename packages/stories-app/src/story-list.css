@@ -24,7 +24,7 @@
 }
 
 .set_title::after, .set_title::before {
-    background: #e5e5e5;
+    background: var(--overview-hr);
     content: "";
     display: inline-block;
     height: 2px;
@@ -89,7 +89,7 @@
     width: 113px;
 
     display: inline-block;
-    background: rgb(255, 177, 0) none repeat scroll 0 0;
+    background: var(--story-button-gold) none repeat scroll 0 0;
 }
 
 .button_story_img img {
@@ -111,7 +111,7 @@
     text-decoration: none;
 }
 .button_story_text {
-    color: #4b4b4b;
+    color: var(--text-color-dim);
     font-size: 17px;
     font-weight: 700;
     line-height: 21px;
@@ -119,14 +119,4 @@
     margin-bottom: 7px;
     width: 134px;
     text-align: center;
-}
-
-
-@media (prefers-color-scheme: dark) {
-    .button_story_text {
-        color: #f1f7fb;
-    }
-    .set_title::after, .set_title::before {
-        background: #37464f;
-    }
 }
