@@ -19,10 +19,11 @@ export function HintLineContent(props) {
     var content = props.content;
     var audioRange = props.audioRange;
     var hideRangesForChallenge = props.hideRangesForChallenge ? props.hideRangesForChallenge[0] : props.hideRangesForChallenge;
+
     if(hideRangesForChallenge) {
         if(props.unhide === -1)
             hideRangesForChallenge = undefined
-        else
+        else if(props.unhide > hideRangesForChallenge.start)
             hideRangesForChallenge = {start: props.unhide, end: hideRangesForChallenge.end};
     }
 
@@ -89,7 +90,7 @@ export function HintLineContent(props) {
         let is_hidden = hideRangesForChallenge !== undefined &&
         getOverlap(hint.rangeFrom, hint.rangeTo, hideRangesForChallenge.start, hideRangesForChallenge.end) ? true : undefined
 
-        elements.push(<span key={hint.rangeFrom + " "+hint.rangeTo+1} data-hidden={is_hidden} className={"word "+(show_trans ? "tooltip_editor" : "tooltip")}><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className={show_trans ? "tooltiptext_editor" : "tooltiptext"}>{content.hints[hint.hintIndex]}</span></span>)
+        elements.push(<span key={hint.rangeFrom + " "+hint.rangeTo+1} className={"word "+(show_trans ? "tooltip_editor" : "tooltip")}><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className={show_trans ? "tooltiptext_editor" : "tooltiptext"}>{content.hints[hint.hintIndex]}</span></span>)
         //addSplitWord(dom.append("span").attr("class", "word tooltip"), hint.rangeFrom, hint.rangeTo+1)
         //    .append("span").attr("class", "tooltiptext").text(content.hints[hint.hintIndex]);
         // advance the position
