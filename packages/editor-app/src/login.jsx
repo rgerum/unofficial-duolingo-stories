@@ -1,4 +1,5 @@
 import React from 'react';
+import './index.css'
 import './login.css';
 import {useInput} from "./hooks";
 import {getSession, login} from "./api_calls.mjs";
