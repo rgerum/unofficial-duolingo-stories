@@ -122,7 +122,7 @@ if($action == "register") {
             <br/>
             You have registered on 'Unofficial Duolingo Stories'.<br/>
             To complete your registration click on the following link.<br/>
-            <a href='https://carex.uber.space/stories/?task=activate&username=$username&activation_link=$activation_link'>Activate account</a>
+            <a href='https://www.duostories.org/task/activate/$username/$activation_link'>Activate account</a>
             <br/><br/>
             Happy learning.
             ");
@@ -185,7 +185,7 @@ else if($action == "send") {
         "Hey $username,<br/>
         You or someone else has requested a new password for 'Unofficial Duolingo Stories'.<br/>
         Use the following link to change your password (the link is valid for one day).<br/>
-        <a href='https://carex.uber.space/stories/?task=resetpw&username=$_POST[username]&activation_link=$activation_link'>Reset password</a>
+        <a href='https://www.duostories.org/task/resetpw/$_POST[username]/$activation_link'>Reset password</a>
         <br/><br/>
         Happy learning.
         ");
