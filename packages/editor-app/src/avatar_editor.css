@@ -16,8 +16,14 @@
     height: calc(100vh - 64px);
 }
 
+textarea {
+    border: 1px solid var(--input-border);
+    background: var(--input-background);
+    color: var(--text-color);
+}
+
 .avatar {
-    border: 1px solid lightgrey;
+    border: 1px solid var(--header-border);
     border-radius: 5px;
     width: 100px;
     margin: 10px;
@@ -33,7 +39,9 @@
 
 .avatar p input {
     width: 90px;
-    border: 1px solid lightgrey;
+    border: 1px solid var(--input-border);
+    background: var(--input-background);
+    color: var(--text-color);
     border-radius: 5px;
     padding: 5px;
 }

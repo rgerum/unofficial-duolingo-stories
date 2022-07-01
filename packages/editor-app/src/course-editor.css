@@ -30,18 +30,18 @@ root {
     padding: 8px;
 }
 
-#story_list tr:nth-child(even){background-color: #f2f2f2;}
+#story_list tr:nth-child(even){background-color: var(--body-background-faint);}
 
-#story_list tr:hover {background-color: #ddd;}
+#story_list tr:hover {background-color: var(--body-background-hover);}
 
-#story_list tr a { color: black; font-weight: bold; }
+#story_list tr a { color: var(--text-color); font-weight: bold; }
 
 #story_list th {
     padding-top: 5px;
     padding-bottom: 5px;
     text-align: left;
-    background-color: #78c800;
-    color: white;
+    background-color: var(--button-background);
+    color: var(--button-color);
 }
 
 /* The switch - the box around the slider */
@@ -69,7 +69,7 @@ root {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: var(--overview-hr);
     -webkit-transition: .4s;
     transition: .4s;
 }
@@ -81,17 +81,17 @@ root {
     width: 13px;
     left: 2px;
     bottom: 2px;
-    background-color: white;
+    background-color: var(--body-background);
     -webkit-transition: .4s;
     transition: .4s;
 }
 
 input:checked + .slider {
-    background-color: #78C800;
+    background-color: var(--button-background);
 }
 
 input:focus + .slider {
-    box-shadow: 0 0 1px #78C800;
+    box-shadow: 0 0 1px var(--button-border);
 }
 
 input:checked + .slider:before {
@@ -108,18 +108,18 @@ input:checked + .slider:before {
 }
 
 .course_selection_button_active {
-    background: lightgray;
+    background: var(--body-background-hover);
 }
 
 .course_selection_button {
     text-decoration: none;
     display: flex;
     align-items: center;
-    color: black;
-    border-bottom: 1px solid lightgray;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--header-border);
 }
 .course_selection_button:hover {
-    background: lightgray;
+    background: var(--body-background-hover);
 }
 
 .course_count {
@@ -139,9 +139,9 @@ input:checked + .slider:before {
     display: none;
     padding: 0;
     width: 160px;
-    background: white;
+    background: var(--body-background);
     border-radius: 15px;
-    border: 1px solid lightgray;
+    border: 1px solid var(--header-border);
     overflow-y: scroll;
     margin: 0;
     max-height: 270px;
@@ -156,10 +156,10 @@ td:hover .status_dropdown {
 .status_value {
     display: block;
     padding: 5px;
-    border-bottom: 1px solid lightgray;
+    border-bottom: 1px solid var(--header-border);
 }
 .status_value:hover {
-    background: #e2e1e1;
+    background: var(--body-background-hover);
 }
 
 
@@ -170,9 +170,9 @@ td:hover .status_dropdown {
     display: none;
     padding: 0;
     width: 160px;
-    background: white;
+    background: var(--body-background);
     border-radius: 15px;
-    border: 1px solid lightgray;
+    border: 1px solid var(--header-border);
     overflow-y: scroll;
     margin: 0;
     max-height: 270px;
@@ -187,8 +187,8 @@ td:hover .status_dropdown {
 .status_value {
     display: block;
     padding: 5px;
-    border-bottom: 1px solid lightgray;
+    border-bottom: 1px solid var(--header-border);
 }
 .status_value:hover {
-    background: #e2e1e1;
+    background: var(--body-background-hover);
 }

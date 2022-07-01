@@ -67,6 +67,10 @@ body {
         --footer-right-background: #37464f;
         --footer-right-color: #79b933;
 
+        --editor-selection-background: #202f36;
+        --editor-selection-border: #3f85a7;
+        --editor-ssml: #555;
+
         --progress-inside: #93d333;
         --progress-highlight: #a9dc5c;
 

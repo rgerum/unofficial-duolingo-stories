@@ -114,7 +114,7 @@ export function EditorNode() {
         </div>
         <div id="root">
             <svg id="margin">
-                <path line-width="2" stroke="#eee" d="" fill="#fbfbfb "></path>
+                <path line-width="2" d=""></path>
 
             </svg>
             <div id="editor"></div>
