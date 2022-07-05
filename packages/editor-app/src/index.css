@@ -72,6 +72,20 @@ body {
         --svg-fill: #192328;
         --svg-stroke: #1f292f;
     }
+    .ͼ2 .cm-activeLine {
+        background-color: #37464f !important;
+    }
+    .cm-gutters {
+        background-color: #37464f !important;
+        color: #6a6969 !important;
+        border-right: 1px solid #37464f !important;
+    }
+    .tooltiptext_editor {
+        background: #37464f !important;
+    }
+    .course_count {
+        color: #c4c4c4 !important;
+    }
 }
 
 .button {
