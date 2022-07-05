@@ -13,6 +13,7 @@ import {StoryHeader} from "./story_header";
 
 export function Story(props) {
     let story = props.story;
+    let id = props.id;
     let editor = props.editor;
 
     let [progress, setProgress] = useState(0);
@@ -47,7 +48,7 @@ export function Story(props) {
 
     let navigate = useNavigate();
     function finish() {
-        setStoryDone(story.id);
+        setStoryDone(id);
         navigate("/");
     }
 

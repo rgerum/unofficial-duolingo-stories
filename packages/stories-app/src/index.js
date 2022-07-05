@@ -28,8 +28,8 @@ function StoryP() {
     if(story_data === null)
         return <Error/>
     if(test)
-        return <div id="main"><Story editor={{lineno: 3}} story={story_data} /></div>
-    return <Story story={story_data} />
+        return <div id="main"><Story id={id} editor={{lineno: 3}} story={story_data} /></div>
+    return <Story id={id} story={story_data} />
 }
 
 function App() {
