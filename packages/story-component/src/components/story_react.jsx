@@ -15,6 +15,7 @@ export function Story(props) {
     let story = props.story;
     let id = props.id;
     let editor = props.editor;
+    let course = story.learningLanguage + "-" + story.fromLanguage;
 
     let [progress, setProgress] = useState(0);
     let [spacer, setSpacer] = useState(0);
@@ -49,7 +50,7 @@ export function Story(props) {
     let navigate = useNavigate();
     function finish() {
         setStoryDone(id);
-        navigate("/");
+        navigate("/"+course);
     }
 
     useEffect(() => {
@@ -100,7 +101,7 @@ export function Story(props) {
 
     return (
         <div>
-            <StoryHeader progress={progress} length={parts.length}/>
+            <StoryHeader progress={progress} length={parts.length} course={course} />
             <div id="main">
                 <div id="story">
                     <Legal />
