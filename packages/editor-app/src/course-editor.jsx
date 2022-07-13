@@ -117,6 +117,15 @@ function EditList(props) {
     let stories = props.course?.stories
     if(stories === undefined)
         stories = []
+    let set_ends = [];
+    let last_set = 1;
+    for(let story of stories) {
+        if(story.set_id === last_set)
+            set_ends.push(0);
+        else
+            set_ends.push(1);
+        last_set = story.set_id;
+    }
     return <>
         <table id="story_list" data-cy="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
@@ -130,8 +139,8 @@ function EditList(props) {
             </tr>
             </thead>
             <tbody>
-            {stories.map(story =>
-                <tr key={story.id}>
+            {stories.map((story, i) =>
+                <tr key={story.id} className={set_ends[i] ? "set_start" : ""}>
                     <td><span><b>{pad(story.set_id)}</b>&nbsp;-&nbsp;{pad(story.set_index)}</span></td>
                     <td width="44px"><img alt={"story title"}
                         src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}

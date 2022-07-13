@@ -44,6 +44,10 @@ root {
     color: var(--button-color);
 }
 
+.set_start {
+    border-top: 3px solid var(--button-background);
+}
+
 /* The switch - the box around the slider */
 .switch {
     position: relative;
