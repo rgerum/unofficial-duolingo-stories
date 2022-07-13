@@ -150,6 +150,13 @@ input:checked + .slider:before {
     margin: 0;
     max-height: 270px;
     z-index: 10;
+    cursor: pointer;
+}
+.status_text {
+    background: var(--editor-ssml);
+    border-radius: 10px;
+    padding: 2px 5px;
+    white-space: nowrap;
 }
 .status_dropdown_container {
     position: relative;

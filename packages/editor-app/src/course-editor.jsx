@@ -101,9 +101,24 @@ function DropDownStatus(props) {
         set_status(status);
         setLoading(0);
     }
+    function status_wrapper(status, public_) {
+        if(props.official)
+            return "🥇 official"
+        if(public_)
+            return "📢 published"
+        if(status === "draft")
+            return "✍️ draft"
+        if(status === "finished")
+            return "✅ finished"
+        if(status === "feedback")
+            return "🗨️ feedback"
+        if(status === "published")
+            return "📢 published"
+        return status
+    }
     let states = ["draft", "feedback", "finished"];
     return <div className="status_dropdown_container">
-        {status} {loading === 1 ? <SpinnerBlue /> :
+        {<span className={"status_text"}>{status_wrapper(status, props.public)}</span>} {loading === 1 ? <SpinnerBlue /> :
                   loading ===-1 ? <img title="an error occurred" alt="error" src="icons/error.svg"/> : <></>}
         <div className="status_dropdown">
         {states.map((state, i) =>
@@ -146,7 +161,7 @@ function EditList(props) {
                         src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
                         width="44px" height={"40px"}/></td>
                     <td style={{width: "100%"}}><a href={`?story=${story.id}`}>{story.name}</a></td>
-                    <td><DropDownStatus id={story.id} status={story.status}/></td>
+                    <td><DropDownStatus id={story.id} status={story.status} public={story.public} official={props.course.official}/></td>
                     <td>{story.username}</td>
                     <td>{story.date}</td>
                     <td>{story.change_date}</td>
