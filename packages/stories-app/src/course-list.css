@@ -28,6 +28,7 @@
     border-radius: 16px;
     border: solid var(--overview-hr);
     border-width: 2px 2px 4px;
+    background: var(--body-background);
     box-sizing: content-box;
     cursor: pointer;
     display: flex;
