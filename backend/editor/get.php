@@ -169,10 +169,12 @@ else if($action == "course") {
         WHERE story.course_id = $id
         GROUP BY story.id");
       else
-        $stories = query_json_list_return($db,"SELECT story.id, story.set_id, story.set_index, story.name, story.status, story.image, story.image_done, story.xp, story.name_base, user.username, story.date, story.change_date, story.public FROM story
-        LEFT JOIN user ON story.author = user.id
-        WHERE story.course_id = $id AND deleted = false
-        ORDER BY story.set_id, story.set_index
+        $stories = query_json_list_return($db,"SELECT COUNT(sa.id) as approvals, story.id, story.set_id, story.set_index, story.name, story.status, story.image, story.image_done, story.xp, story.name_base, user.username, story.date, story.change_date, story.public FROM story
+                                               LEFT JOIN user ON story.author = user.id
+                                               LEFT JOIN story_approval sa on story.id = sa.story_id
+                                               WHERE story.course_id = $id AND deleted = false
+                                               GROUP BY story.id
+                                               ORDER BY story.set_id, story.set_index;
         ");
     $course["stories"] = $stories;
     json($course);

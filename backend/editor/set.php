@@ -141,6 +141,23 @@ else if($action == "status") {
     ];
     $id = updateDatabase($keys, "story", $_POST, "id");
 }
+else if($action == "approve") {
+    $story_id = intVal($_REQUEST['story_id']);
+    $keys = [
+        "story_id" => "int",
+    ];
+    $user_id = $_SESSION["user"]["id"];
+
+    if(mysqli_num_rows(mysqli_query($db, "SELECT id FROM story_approval WHERE story_id = $story_id AND user_id = $user_id;"))) {
+       mysqli_query($db, "DELETE FROM story_approval WHERE story_id = $story_id AND user_id = $user_id;");
+    }
+    else {
+        mysqli_query($db, "INSERT INTO story_approval (story_id, user_id) VALUES ($story_id, $user_id);");
+    }
+
+    $data = query_one($db, "SELECT COUNT(id) as count FROM story_approval WHERE story_id = $story_id;");
+    echo $data["count"];
+}
 else if($action == "story") {
     $keys = ["id" => "int",
         "duo_id" => "string",

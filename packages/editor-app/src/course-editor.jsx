@@ -3,7 +3,7 @@ import {useDataFetcher, useDataFetcher2, useEventListener} from './hooks'
 import {Spinner, SpinnerBlue} from './react/spinner'
 import {Flag} from './react/flag'
 import {useUsername, LoginDialog} from './login'
-import {getCourses, getCourse, getImportList, setImport, setStatus} from "./api_calls.mjs";
+import {getCourses, getCourse, getImportList, setImport, setStatus, setApproval} from "./api_calls.mjs";
 import "./course-editor.css"
 
 
@@ -84,10 +84,52 @@ function pad(x) {
     return x;
 }
 
+function Approvals(props) {
+    let [count, setCount] = useState(props.count);
+
+    if(props.official)
+        return <></>
+
+    async function addApproval() {
+        let text = await setApproval({story_id: props.id});
+        if(text !== undefined) {
+            let count = parseInt(text)
+            setCount(count)
+            if(count === 0)
+                set_status("draft");
+            if(count === 1)
+                set_status("feedback");
+            if(count >= 2)
+                set_status("finished");
+        }
+    }
+    return <span className="approval" onClick={addApproval}>
+        {"👍 "+count}
+    </span>
+}
+
 function DropDownStatus(props) {
 
     let [loading, setLoading] = useState(0);
     let [status, set_status] = useState(props.status);
+    let [count, setCount] = useState(props.count);
+
+    if(props.official)
+        return <></>
+
+    async function addApproval() {
+        let text = await setApproval({story_id: props.id});
+        if(text !== undefined) {
+            let count = parseInt(text)
+            setCount(count)
+            if(count === 0)
+                changeState("draft");
+            if(count === 1)
+                changeState("feedback");
+            if(count >= 2)
+                changeState("finished");
+        }
+    }
 
     async function changeState(status) {
         setLoading(1);
@@ -116,7 +158,24 @@ function DropDownStatus(props) {
             return "📢 published"
         return status
     }
+    /*
+    <div className="status_dropdown_container">
+            <div className="status_dropdown">
+            <p><b>draft:</b> author is still working on it</p>
+            <p><b>feedback:</b> author gave approval</p>
+            <p><b>finished:</b> others gave their approval</p>
+            <p><b>published:</b> the whole set is finished</p>
+        </div>
+     */
     let states = ["draft", "feedback", "finished"];
+    return <div className="status_field">
+        {<span className={"status_text"}>{status_wrapper(status, props.public)}</span>} {loading === 1 ? <SpinnerBlue /> :
+        loading ===-1 ? <img title="an error occurred" alt="error" src="icons/error.svg"/> : <></>}
+        {props.official ? <></> : <span className="approval" onClick={addApproval}>
+        {"👍 "+count}
+    </span>}
+        </div>
+    /*
     return <div className="status_dropdown_container">
         {<span className={"status_text"}>{status_wrapper(status, props.public)}</span>} {loading === 1 ? <SpinnerBlue /> :
                   loading ===-1 ? <img title="an error occurred" alt="error" src="icons/error.svg"/> : <></>}
@@ -125,6 +184,7 @@ function DropDownStatus(props) {
             <span key={i} className="status_value" onClick={() => changeState(state)}>{state}</span>
         )}
         </div></div>
+     */
 }
 
 function EditList(props) {
@@ -142,6 +202,21 @@ function EditList(props) {
         last_set = story.set_id;
     }
     return <>
+        <div>
+            <ul>
+                <li>To create a new story click the "Import" button. The story starts as "✍️ draft".</li>
+                <li>When you have finished working on the story,
+                    click the "👍" icon to approve it and change the status to "🗨 feedback".</li>
+                <li>
+                    Now tell contributors on Discord to check the story.
+                    When one or more people have checked the story and also gave their approval "👍" the status changes to "✅  finished".
+                </li>
+                <li>
+                    When one complete set is finished it will switch to "📢 published". <i>Not yet implemented. Will soon be implemented.</i>
+                </li>
+            </ul>
+
+        </div>
         <table id="story_list" data-cy="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
@@ -161,7 +236,7 @@ function EditList(props) {
                         src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
                         width="44px" height={"40px"}/></td>
                     <td style={{width: "100%"}}><a href={`?story=${story.id}`}>{story.name}</a></td>
-                    <td><DropDownStatus id={story.id} status={story.status} public={story.public} official={props.course.official}/></td>
+                    <td><DropDownStatus id={story.id} count={story.approvals} status={story.status} public={story.public} official={props.course.official}/></td>
                     <td>{story.username}</td>
                     <td>{story.date}</td>
                     <td>{story.change_date}</td>

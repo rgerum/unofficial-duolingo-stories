@@ -134,7 +134,20 @@ input:checked + .slider:before {
     color: #333;
 }
 
+.status_field {
+    white-space: nowrap;
+}
+.approval {
+    background: var(--editor-ssml);
+    border-radius: 10px;
+    padding: 2px 5px;
+    white-space: nowrap;
+    cursor: pointer;
+}
 
+.approval:hover {
+    filter: brightness(.9);
+}
 
 .status_dropdown {
     position: absolute;
@@ -161,7 +174,7 @@ input:checked + .slider:before {
 .status_dropdown_container {
     position: relative;
 }
-td:hover .status_dropdown {
+status_dropdown_container:hover .status_dropdown {
     display: block;
 }
 .status_value {

@@ -180,6 +180,16 @@ export async function setStatus(data) {
     }
 }
 
+export async function setApproval(data) {
+    try {
+        let response = await fetch_post(`${backend_set}/approve`, data);
+        return await response.text();
+    }
+    catch (e) {
+        return undefined;
+    }
+}
+
 export async function setPublic(id, is_public) {
     return await fetch_get(backend_stories+"set_story_public.php?id="+id+"&public="+is_public);
 }
