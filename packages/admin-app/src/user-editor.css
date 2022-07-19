@@ -1,0 +1,218 @@
+root {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    position: relative;
+}
+
+#main {
+    padding-top: 80px;
+    max-width: 1300px;
+}
+
+
+#story_list {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 100px;
+}
+
+#story_listX tbody{
+    display:block;
+    overflow:auto;
+    height:200px;
+    width:100%;
+}
+#story_listX thead tr{
+     display:block;
+ }
+
+#story_list td, #story_list th {
+    /*border: 1px solid #ddd;*/
+    padding: 8px;
+}
+
+#story_list tr:nth-child(even){background-color: var(--body-background-faint);}
+
+#story_list tr:hover {background-color: var(--body-background-hover);}
+
+#story_list tr a { color: var(--text-color); font-weight: bold; }
+
+#story_list th {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: left;
+    background-color: var(--button-background);
+    color: var(--button-color);
+}
+
+.set_start {
+    border-top: 3px solid var(--button-background);
+}
+
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 17px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+
+
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--overview-hr);
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 13px;
+    width: 13px;
+    left: 2px;
+    bottom: 2px;
+    background-color: var(--body-background);
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--button-background);
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px var(--button-border);
+}
+
+input:checked + .slider:before {
+    transform: translateX(13px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 17px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.course_selection_button_active {
+    background: var(--body-background-hover);
+}
+
+.course_selection_button {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--header-border);
+}
+.course_selection_button:hover {
+    background: var(--body-background-hover);
+}
+
+.course_count {
+    width: 30px;
+    text-align: right;
+    padding-right: 20px;
+    padding-left: 20px;
+    color: #333;
+}
+
+.status_field {
+    white-space: nowrap;
+}
+.approval {
+    background: var(--editor-ssml);
+    border-radius: 10px;
+    padding: 2px 5px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.approval:hover {
+    filter: brightness(.9);
+}
+
+.status_dropdown {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    display: none;
+    padding: 0;
+    width: 160px;
+    background: var(--body-background);
+    border-radius: 15px;
+    border: 1px solid var(--header-border);
+    overflow-y: scroll;
+    margin: 0;
+    max-height: 270px;
+    z-index: 10;
+    cursor: pointer;
+}
+.status_text {
+    background: var(--editor-ssml);
+    border-radius: 10px;
+    padding: 2px 5px;
+    white-space: nowrap;
+}
+.status_dropdown_container {
+    position: relative;
+}
+status_dropdown_container:hover .status_dropdown {
+    display: block;
+}
+.status_value {
+    display: block;
+    padding: 5px;
+    border-bottom: 1px solid var(--header-border);
+}
+.status_value:hover {
+    background: var(--body-background-hover);
+}
+
+
+.status_dropdown {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    display: none;
+    padding: 0;
+    width: 160px;
+    background: var(--body-background);
+    border-radius: 15px;
+    border: 1px solid var(--header-border);
+    overflow-y: scroll;
+    margin: 0;
+    max-height: 270px;
+    z-index: 10;
+}
+.status_dropdown_container {
+    position: relative;
+}
+td:hover .status_dropdown {
+    display: block;
+}
+.status_value {
+    display: block;
+    padding: 5px;
+    border-bottom: 1px solid var(--header-border);
+}
+.status_value:hover {
+    background: var(--body-background-hover);
+}
