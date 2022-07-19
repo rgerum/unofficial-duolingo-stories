@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    height="70"
    width="0.85416669in"
    version="1.1"
    id="svg2227"
    sodipodi:docname="flag_shet.svg"
-   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
   <sodipodi:namedview
      id="namedview12"
      pagecolor="#505050"
@@ -23,26 +20,17 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="in"
      showgrid="false"
-     inkscape:zoom="3.9496965"
-     inkscape:cx="1.3925125"
-     inkscape:cy="108.74253"
-     inkscape:window-width="1848"
+     inkscape:zoom="11.171429"
+     inkscape:cx="40.997442"
+     inkscape:cy="42.116368"
+     inkscape:window-width="1846"
      inkscape:window-height="1016"
-     inkscape:window-x="72"
-     inkscape:window-y="27"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="g273" />
   <metadata
-     id="metadata2233">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
+     id="metadata2233" />
   <defs
      id="defs2231" />
   <svg
@@ -68,9 +56,9 @@
          id="path267"
          style="fill:#1cb0f6;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:4" />
       <polygon
-         id="polygon271"
-         points="26,23 70,23 70,31 26,31 26,54 18,54 18,31 0,31 0,23 18,23 18,0 26,0 "
-         style="fill:#ffffff;fill-opacity:1" />
+         id="polygon269"
+         points="15,1.5573241e-15 29,0 29,20 70,20 70,34 29,34 29,54 15,54 15,34 0,34 1.4828929e-15,20 15,20 "
+         style="fill:#ffffff;fill-rule:nonzero" />
     </g>
   </g>
 </svg>
