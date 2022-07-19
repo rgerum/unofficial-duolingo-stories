@@ -2,9 +2,16 @@ import React, {useEffect} from 'react';
 import ReactDOM from 'react-dom';
 import {LoginDialog, useUsername} from "./login";
 import {Spinner} from "./react/spinner";
-import {UserOverview} from "./user-editor";
+import {UserList} from "./user-editor";
+import {LanguageList} from "./language-editor"
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Link,
+    useParams,
+} from "react-router-dom";
 
-let urlParams = new URLSearchParams(window.location.search);
 
 export function LoginWrapper() {
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
@@ -17,12 +24,25 @@ export function LoginWrapper() {
         return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
 
     // logged in and allowed!
-    return <UserOverview/>
+    return <>
+        <div id="toolbar">
+            <Link to="/">users</Link>
+            <Link to="/languages">languages</Link>
+        </div>
+        <div id="root">
+            <Routes>
+                <Route path='/' element={<UserList />}></Route>
+                <Route path='/languages' element={<LanguageList />}></Route>
+            </Routes>
+        </div>
+    </>
 }
 
 ReactDOM.render(
     <React.StrictMode>
-        <LoginWrapper />
+        <Router>
+            <LoginWrapper />
+        </Router>
     </React.StrictMode>,
     document.getElementById('body')
 );

@@ -63,7 +63,7 @@ function Write(props) {
     </label>
 }
 
-function UserList(props) {
+export function UserList(props) {
     const users = useDataFetcher(getUserList);
 
     if(users === undefined)

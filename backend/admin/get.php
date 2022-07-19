@@ -115,6 +115,11 @@ else if($action == "user_list") {
 
     queryDatabase($query);
 }
+else if($action == "language_list") {
+    $query = "SELECT * FROM language;";
+
+    queryDatabase($query);
+}
 else if($action == "avatar_names") {
     $id = intVal($_REQUEST['id']);
     if($id == 0) {

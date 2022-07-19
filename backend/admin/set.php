@@ -146,6 +146,17 @@ else if($action == "user_write") {
 
     echo mysqli_affected_rows($db);
 }
+else if($action == "language") {
+    $keys = ["id" => "int",
+        "name" => "string",
+        "short" => "string",
+        "flag" => "string",
+        "flag_file" => "string",
+        "rtl" => "int",
+        "speaker" => "string",
+];
+    $id = updateDatabase($keys, "language", $_POST, "id");
+}
 else if($action == "avatar") {
     $keys = ["id" => "int",
         "name" => "string",

@@ -94,6 +94,26 @@ export async function getUserList() {
     }
 }
 
+export async function getLanguageList() {
+    try {
+        let response_courses = await fetch_get(`${backend_get}/language_list`);
+        return await response_courses.json();
+    }
+    catch (e) {
+        return [];
+    }
+}
+
+export async function setLanguage(data) {
+    try {
+        let response = await fetch_post(`${backend_set}/language`, data);
+        return response.text();
+    }
+    catch (e) {
+        return [];
+    }
+}
+
 export async function getCourses() {
     try {
         let response_courses = await fetch_get(`${backend_get}/courses`);
