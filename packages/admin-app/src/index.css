@@ -173,7 +173,7 @@ body {
    stroke: var(--svg-stroke);
 }
 
-.toolbar a {
+#toolbar a {
     display: block;
     border: 1px solid;
     padding: 20px;

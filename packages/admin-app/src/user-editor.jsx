@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {useDataFetcher, useDataFetcher2, useEventListener} from './hooks'
+import {useDataFetcher, useDataFetcher2, useEventListener, useInput} from './hooks'
 import {Spinner, SpinnerBlue} from './react/spinner'
 import {Flag} from './react/flag'
 import {
@@ -66,10 +66,28 @@ function Write(props) {
 export function UserList(props) {
     const users = useDataFetcher(getUserList);
 
+    const [search, setSearch] = useInput("");
+
     if(users === undefined)
         return <Spinner />
 
+    let filtered_user = [];
+    if(search === "")
+        filtered_user = users;
+    else {
+        for(let user of users) {
+            console.log("filter", user.username)
+            console.log("filter2", user)
+            if((""+user.username).toLowerCase().indexOf(search.toLowerCase()) !== -1) {
+                filtered_user.push(user);
+            }
+        }
+    }
+
     return <>
+        <div>Search
+            <input value={search} onChange={setSearch}/>
+        </div>
         <table id="story_list" data-cy="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
@@ -82,7 +100,7 @@ export function UserList(props) {
             </tr>
             </thead>
             <tbody>
-            {users.map((user, i) =>
+            {filtered_user.map((user, i) =>
                 <tr key={user.id}>
                     <td>{user.username}</td>
                     <td>{user.email}</td>

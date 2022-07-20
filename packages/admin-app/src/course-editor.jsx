@@ -127,6 +127,8 @@ export function CourseList(props) {
     const languages = useDataFetcher(getLanguageList);
     const users = useDataFetcher(getCourseList);
 
+    const [search, setSearch] = useInput("");
+
     if(languages === undefined || users === undefined)
         return <Spinner />
 
@@ -135,7 +137,24 @@ export function CourseList(props) {
         languages_id[l.id] = l;
     console.log("languages_id", languages_id);
 
+    let filtered_courses = [];
+    if(search === "")
+        filtered_courses = users;
+    else {
+        for(let course of users) {
+            if(!languages_id[course.learningLanguage])
+                continue
+            if(languages_id[course.learningLanguage].name.toLowerCase().indexOf(search.toLowerCase()) !== -1 ||
+                languages_id[course.fromLanguage].name.toLowerCase().indexOf(search.toLowerCase()) !== -1) {
+                filtered_courses.push(course);
+            }
+        }
+    }
+
     return <>
+        <div>Search
+            <input value={search} onChange={setSearch}/>
+        </div>
         <table id="story_list" data-cy="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
@@ -149,7 +168,7 @@ export function CourseList(props) {
             </thead>
             <tbody>
             <AttributeList languages={languages_id} obj={{"name":"", "public": 0, "fromLanguage": 1, "learningLanguage": -1}} attributes={["learningLanguage","fromLanguage","public", "name"]} />
-            {users.map((user, i) =>
+            {filtered_courses.map((user, i) =>
                 <AttributeList key={user.id} languages={languages_id} obj={user} attributes={["learningLanguage","fromLanguage","public", "name"]} />
             )}
             </tbody>

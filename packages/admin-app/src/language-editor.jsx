@@ -42,12 +42,28 @@ function AttributeList(props) {
 export function LanguageList(props) {
     const users = useDataFetcher(getLanguageList);
 
+    const [search, setSearch] = useInput("");
+
     if(users === undefined)
         return <Spinner />
+
+    let filtered_languages = [];
+    if(search === "")
+        filtered_languages = users;
+    else {
+        for(let language of users) {
+            if(language.name.toLowerCase().indexOf(search.toLowerCase()) !== -1) {
+                filtered_languages.push(language);
+            }
+        }
+    }
 /*
 https://admin.duostories.org/get2/language_list
  */
     return <>
+        <div>Search
+            <input value={search} onChange={setSearch}/>
+        </div>
         <table id="story_list" data-cy="story_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
@@ -63,8 +79,8 @@ https://admin.duostories.org/get2/language_list
             </thead>
             <tbody>
             <AttributeList obj={{"name":"new language"}} attributes={["name","short","flag", "flag_file", "speaker", "rtl"]} />
-            {users.map((user, i) =>
-                <AttributeList key={i} obj={user} attributes={["name","short","flag", "flag_file", "speaker", "rtl"]} />
+            {filtered_languages.map((user, i) =>
+                <AttributeList key={user.id} obj={user} attributes={["name","short","flag", "flag_file", "speaker", "rtl"]} />
             )}
             </tbody>
         </table>
