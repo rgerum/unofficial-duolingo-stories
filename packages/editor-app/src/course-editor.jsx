@@ -212,7 +212,7 @@ function EditList(props) {
                     When one or more people have checked the story and also gave their approval "👍" the status changes to "✅  finished".
                 </li>
                 <li>
-                    When one complete set is finished it will switch to "📢 published". <i>Not yet implemented. Will soon be implemented.</i>
+                    When one complete set is finished it will switch to "📢 published".
                 </li>
             </ul>
 

@@ -157,6 +157,12 @@ else if($action == "approve") {
 
     $data = query_one($db, "SELECT COUNT(id) as count FROM story_approval WHERE story_id = $story_id;");
     echo $data["count"];
+
+    # get the number of finished stories in this set
+    $data = query_one($db, "SELECT COUNT(set_id) count FROM story WHERE set_id = (SELECT set_id FROM story WHERE id = $story_id) AND course_id = (SELECT course_id FROM story WHERE id = $story_id) AND status = 'finished' AND deleted = 0 GROUP BY set_id;");
+    if($data["count"] >= 4) {
+        mysqli_query($db, "UPDATE story SET public = 1 WHERE set_id = (SELECT set_id FROM story WHERE id = $story_id) AND course_id = (SELECT course_id FROM story WHERE id = $story_id) AND status = 'finished' AND deleted = 0;");
+    }
 }
 else if($action == "story") {
     $keys = ["id" => "int",
