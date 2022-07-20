@@ -11,6 +11,7 @@ import {
     Link,
     useParams,
 } from "react-router-dom";
+import {CourseList} from "./course-editor";
 
 
 export function LoginWrapper() {
@@ -28,11 +29,13 @@ export function LoginWrapper() {
         <div id="toolbar">
             <Link to="/">users</Link>
             <Link to="/languages">languages</Link>
+            <Link to="/courses">courses</Link>
         </div>
         <div id="root">
             <Routes>
                 <Route path='/' element={<UserList />}></Route>
                 <Route path='/languages' element={<LanguageList />}></Route>
+                <Route path='/courses' element={<CourseList />}></Route>
             </Routes>
         </div>
     </>

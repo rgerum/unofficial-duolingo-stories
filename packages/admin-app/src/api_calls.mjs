@@ -104,6 +104,16 @@ export async function getLanguageList() {
     }
 }
 
+export async function getCourseList() {
+    try {
+        let response_courses = await fetch_get(`${backend_get}/course_list`);
+        return await response_courses.json();
+    }
+    catch (e) {
+        return [];
+    }
+}
+
 export async function setLanguage(data) {
     try {
         let response = await fetch_post(`${backend_set}/language`, data);
@@ -113,6 +123,17 @@ export async function setLanguage(data) {
         return [];
     }
 }
+
+export async function setCourse(data) {
+    try {
+        let response = await fetch_post(`${backend_set}/course`, data);
+        return response.text();
+    }
+    catch (e) {
+        return [];
+    }
+}
+
 
 export async function getCourses() {
     try {

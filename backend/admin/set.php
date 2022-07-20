@@ -157,6 +157,15 @@ else if($action == "language") {
 ];
     $id = updateDatabase($keys, "language", $_POST, "id");
 }
+else if($action == "course") {
+    $keys = ["id" => "int",
+        "learningLanguage" => "int",
+        "fromLanguage" => "int",
+        "public" => "int",
+        "name" => "string",
+];
+    $id = updateDatabase($keys, "course", $_POST, "id");
+}
 else if($action == "avatar") {
     $keys = ["id" => "int",
         "name" => "string",

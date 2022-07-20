@@ -120,6 +120,11 @@ else if($action == "language_list") {
 
     queryDatabase($query);
 }
+else if($action == "course_list") {
+    $query = "SELECT * FROM course;";
+
+    queryDatabase($query);
+}
 else if($action == "avatar_names") {
     $id = intVal($_REQUEST['id']);
     if($id == 0) {

@@ -172,3 +172,64 @@ body {
    fill: var(--svg-fill);
    stroke: var(--svg-stroke);
 }
+
+.toolbar a {
+    display: block;
+    border: 1px solid;
+    padding: 20px;
+    background: lightgray;
+    border-radius: 5px;
+    margin-left: 20px;
+    color: black;
+}
+
+
+
+
+
+/* Dropdown Button */
+.dropbtn {
+    background-color: #FFF;
+    border: 1px solid;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #ddd;}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {display: block;
+    height: 180px;
+    overflow: scroll;
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {}
+
+.lang {
+    display: flex;
+    align-items: center;
+}

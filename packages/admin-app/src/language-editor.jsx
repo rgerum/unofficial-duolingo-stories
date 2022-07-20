@@ -1,18 +1,10 @@
 import React, {useState} from 'react';
 import {useDataFetcher, useDataFetcher2, useInput} from './hooks'
-import {Spinner, SpinnerBlue} from './react/spinner'
+import {Spinner} from './react/spinner'
 import {Flag} from './react/flag'
 import {
-    getCourses,
-    getCourse,
-    getImportList,
-    setImport,
-    setStatus,
-    setApproval,
-    getUserList,
-    setUserActivated, setUserWrite, getLanguageList, setLanguage
+    getLanguageList, setLanguage
 } from "./api_calls.mjs";
-import "./user-editor.css"
 
 function ChangeAbleValue(props) {
     const [value, setValue] = useInput(props.obj[props.name]);
@@ -72,7 +64,7 @@ https://admin.duostories.org/get2/language_list
             <tbody>
             <AttributeList obj={{"name":"new language"}} attributes={["name","short","flag", "flag_file", "speaker", "rtl"]} />
             {users.map((user, i) =>
-                <AttributeList obj={user} attributes={["name","short","flag", "flag_file", "speaker", "rtl"]} />
+                <AttributeList key={i} obj={user} attributes={["name","short","flag", "flag_file", "speaker", "rtl"]} />
             )}
             </tbody>
         </table>
