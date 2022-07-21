@@ -184,7 +184,13 @@ body {
 }
 
 
-
+#console {
+    color: snow;
+    background: black;
+    font-family: monospace;
+    width: 100%;
+    padding: 5px;
+}
 
 
 /* Dropdown Button */

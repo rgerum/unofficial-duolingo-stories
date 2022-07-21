@@ -43,6 +43,13 @@ function query_one($db, $query) {
     return mysqli_fetch_assoc($result);
 }
 
+function execute($command) {
+    echo "> ";
+    echo $command;
+    echo "\n";
+    passthru("export PATH=/home/carex/.local/bin:/home/carex/bin:/opt/uberspace/etc/carex/binpaths/ruby:/opt/rh/devtoolset-9/root/usr/bin:/home/carex/.cargo/bin:/home/carex/.luarocks/bin:/home/carex/go/bin:/home/carex/.deno/bin:/home/carex/.config/composer/vendor/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/carex/.dotnet/tools: && $command 2>&1");
+}
+
 $db = database();
 
 
@@ -165,6 +172,37 @@ else if($action == "course") {
         "name" => "string",
 ];
     $id = updateDatabase($keys, "course", $_POST, "id");
+}
+else if($action == "sync_flags") {
+     chdir("../../github/");
+
+     execute("pwd");
+
+     execute("git fetch origin master && git reset --hard FETCH_HEAD");
+     execute("rsync -av flags/ ../flags");
+}
+else if($action == "sync_editor") {
+     chdir("../../github/");
+     execute("pwd 2>&1");
+
+     execute("git fetch origin master && git reset --hard FETCH_HEAD");
+
+     execute("lerna bootstrap");
+     execute("npm run build");
+
+     execute("rsync -av packages/editor-app/dist/ ../editor/ ");
+     execute("rsync -av packages/editor-app/public/icons/ ../editor/icons/ ");
+}
+else if($action == "sync_stories") {
+     chdir("../../github/");
+     execute("pwd 2>&1");
+
+     execute("git fetch origin master && git reset --hard FETCH_HEAD");
+
+     execute("lerna bootstrap");
+     execute("npm run build");
+
+     execute("rsync -av packages/stories-app/build/ ../ ");
 }
 else if($action == "avatar") {
     $keys = ["id" => "int",

@@ -134,6 +134,36 @@ export async function setCourse(data) {
     }
 }
 
+export async function setSyncFlag() {
+    try {
+        let response = await fetch_post(`${backend_set}/sync_flags`, {});
+        return response.text();
+    }
+    catch (e) {
+        return "error";
+    }
+}
+
+export async function setSyncFrontendStories() {
+    try {
+        let response = await fetch_post(`${backend_set}/sync_stories`, {});
+        return response.text();
+    }
+    catch (e) {
+        return "error";
+    }
+}
+
+export async function setSyncFrontendEditor() {
+    try {
+        let response = await fetch_post(`${backend_set}/sync_editor`, {});
+        return response.text();
+    }
+    catch (e) {
+        return "error";
+    }
+}
+
 
 export async function getCourses() {
     try {

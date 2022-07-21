@@ -12,6 +12,7 @@ import {
     useParams,
 } from "react-router-dom";
 import {CourseList} from "./course-editor";
+import {Sync} from "./github-sync";
 
 
 export function LoginWrapper() {
@@ -27,15 +28,17 @@ export function LoginWrapper() {
     // logged in and allowed!
     return <>
         <div id="toolbar">
-            <Link to="/">users</Link>
+            <Link to="/users">users</Link>
             <Link to="/languages">languages</Link>
             <Link to="/courses">courses</Link>
+            <Link to="/sync">sync</Link>
         </div>
         <div id="root">
             <Routes>
-                <Route path='/' element={<UserList />}></Route>
+                <Route path='/users' element={<UserList />}></Route>
                 <Route path='/languages' element={<LanguageList />}></Route>
                 <Route path='/courses' element={<CourseList />}></Route>
+                <Route path='/sync' element={<Sync />}></Route>
             </Routes>
         </div>
     </>
