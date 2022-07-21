@@ -25,7 +25,7 @@ lerna bootstrap
 ```
 And it can then run all packages simultaneously
 ```
-lerna run --parallel --stream start
+npm run start
 ```
    
 ## How to contribute
