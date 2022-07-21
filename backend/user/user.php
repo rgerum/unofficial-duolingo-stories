@@ -146,7 +146,7 @@ else if($action == "activate") {
 }
 else if($action == "get_login") {
     if(isset($_SESSION["user"]))
-        echo "{\"username\": \"".$_SESSION["user"]["username"]."\", \"role\": ".$_SESSION["user"]["role"]."}";
+        echo "{\"username\": \"".$_SESSION["user"]["username"]."\", \"role\": ".$_SESSION["user"]["role"].", \"admin\": ".$_SESSION["user"]["admin"]."}";
     else
         echo "null";
 }

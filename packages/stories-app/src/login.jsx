@@ -192,6 +192,9 @@ export function Login(props) {
                 {username.role !== 0 ? <div id="button_editor" className="profile_dropdown_button"
                                                onClick={()=>{window.location.href = "https://editor.duostories.org"}}
                 >Editor</div> : null}
+                {username.admin !== 0 ? <div id="button_editor" className="profile_dropdown_button"
+                                            onClick={()=>{window.location.href = "https://admin.duostories.org"}}
+                >Admin</div> : null}
                 <div className="profile_dropdown_button" onClick={() => doLogout()} >Log out</div>
             </div>
         </div>
