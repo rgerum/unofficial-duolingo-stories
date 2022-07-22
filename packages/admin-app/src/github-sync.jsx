@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {
-    setSyncFlag, setSyncFrontendEditor, setSyncFrontendStories
+    setSyncFlag, setSyncFrontendEditor, setSyncFrontendStories, setSyncVoiceList
 } from "./api_calls.mjs";
 import {Spinner} from "./react/spinner";
 
@@ -26,6 +26,12 @@ export function Sync(props) {
         setOutput(text);
         setLoading(false);
     }
+    async function SyncVoiceList() {
+        setLoading(true);
+        let text = await setSyncVoiceList();
+        setOutput(text);
+        setLoading(false);
+    }
     if(loading)
         return <Spinner />
     return <div>
@@ -33,6 +39,7 @@ export function Sync(props) {
             <li onClick={SyncFlags}>Sync Flags</li>
             <li onClick={SyncFrontendStories}>Sync Stories Frontend</li>
             <li onClick={SyncFrontendEditor}>Sync Editor Frontend</li>
+            <li onClick={SyncVoiceList}>Sync Voice List with TTS providers</li>
         </ul>
         <pre id="console">{output}</pre>
     </div>

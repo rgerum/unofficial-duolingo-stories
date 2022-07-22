@@ -164,6 +164,17 @@ export async function setSyncFrontendEditor() {
     }
 }
 
+export async function setSyncVoiceList() {
+    try {
+        let response = await fetch_post(`${backend_set}/sync_voice_list`, {});
+        return response.text();
+    }
+    catch (e) {
+        return "error";
+    }
+}
+
+
 
 export async function getCourses() {
     try {

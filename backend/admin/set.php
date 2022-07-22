@@ -204,6 +204,9 @@ else if($action == "sync_stories") {
 
      execute("rsync -av packages/stories-app/build/ ../ ");
 }
+else if($action == "sync_voice_list") {
+     execute("python3 set_all_voices.py");
+}
 else if($action == "avatar") {
     $keys = ["id" => "int",
         "name" => "string",
