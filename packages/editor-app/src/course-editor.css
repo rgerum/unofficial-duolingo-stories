@@ -112,7 +112,8 @@ input:checked + .slider:before {
 }
 
 .course_selection_button_active {
-    background: var(--body-background-hover);
+    background: var(--body-background);
+    filter: brightness(0.9);
 }
 
 .course_selection_button {
@@ -123,13 +124,14 @@ input:checked + .slider:before {
     border-bottom: 1px solid var(--header-border);
 }
 .course_selection_button:hover {
-    background: var(--body-background-hover);
+    background: var(--body-background);
+    filter: brightness(0.9);
 }
 
 .course_count {
     width: 30px;
     text-align: right;
-    padding-right: 20px;
+    padding-right: 5px;
     padding-left: 20px;
     color: #333;
 }
@@ -174,7 +176,7 @@ input:checked + .slider:before {
 .status_dropdown_container {
     position: relative;
 }
-status_dropdown_container:hover .status_dropdown {
+.status_dropdown_container:hover .status_dropdown {
     display: block;
 }
 .status_value {
