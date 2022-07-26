@@ -23,7 +23,8 @@
        d="m 16.563038,4 h 44.873924 c 4.368442,0 5.952545,0.4548455 7.549582,1.3089503 C 70.583581,6.163055 71.836945,7.416419 72.69105,9.013456 73.545154,10.610493 74,12.194596 74,16.563038 V 22 H 4 V 16.563038 C 4,12.194596 4.4548455,10.610493 5.3089503,9.013456 6.163055,7.416419 7.416419,6.163055 9.013456,5.3089503 10.610493,4.4548455 12.194596,4 16.563038,4 Z" />
     <g
        id="shield"
-       style="opacity:1">
+       style="opacity:1"
+       transform="translate(-1.999886,-2.000469)">
       <path
          id="rect32714"
          style="fill:#ff4b4b;fill-opacity:1;stroke:none;stroke-width:14.3426;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
