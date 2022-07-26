@@ -30,6 +30,15 @@ export function IndexContent(props) {
     let {lang,lang_base} = useParams();
     const course_data = useDataFetcher(getStoriesSets, [lang, lang_base, username]);
 
+    let story_count = 0;
+    let language_count = 0;
+    if(courses) {
+        for (let course of courses) {
+            story_count += course.count;
+            language_count += 1;
+        }
+    }
+
     let error = props.error;
     if(lang !== undefined && course_data?.sets?.length === 0)
         error = true;
@@ -46,6 +55,7 @@ export function IndexContent(props) {
                 <h1 className={"main_title"}>Unofficial Duolingo Stories</h1>
                 <p className={"title_desc"}>
                 A community project to bring the original <a href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages.
+                    {courses ? <><br/>{story_count} stories in {language_count} languages and counting!</> : <></>}
                 </p>
                 <p className={"title_desc"}>
                 If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.
