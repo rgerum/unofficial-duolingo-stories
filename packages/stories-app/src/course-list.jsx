@@ -43,6 +43,7 @@ function LanguageButton(props) {
     >
         <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} className="flag_big" />
 
-        <span className="language_select_button_text">{course.name || course.learningLanguageName}</span>
+        <span className="language_select_button_text">{course.name}</span>
+        <span className="language_story_count">{course.count} stories</span>
     </Link>;
 }

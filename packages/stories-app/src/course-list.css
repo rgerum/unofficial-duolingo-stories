@@ -97,6 +97,12 @@
     margin-top: 10px;
 }
 
+.language_story_count {
+    color: var(--text-color-dim);
+    opacity: 0.5;
+    font-size: 15px;
+}
+
 @media (prefers-color-scheme: dark) {
     .language_select_button {
         border-color: #37464f;
