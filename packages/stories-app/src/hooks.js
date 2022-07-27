@@ -4,6 +4,7 @@ import React from 'react';
 export function useDataFetcher2(fetcher, args = []) {
     const [data, updateData] = React.useState(undefined);
     const [, updateDone] = React.useState(false);
+
     React.useEffect(() => {
         async function doFetch() {
             updateData(undefined);
@@ -12,8 +13,9 @@ export function useDataFetcher2(fetcher, args = []) {
             updateDone(true);
         }
 
-        return doFetch();
-    }, args);
+        doFetch();
+        // eslint-disable-next-line
+    }, [...args]);
     async function refetch() {
         const fetched_data = await fetcher(...args);
         updateData(fetched_data);
@@ -36,7 +38,8 @@ export function useDataFetcher(fetcher, args = []) {
         }
 
         doFetch();
-    }, args);
+        // eslint-disable-next-line
+    }, [...args]);
     return data;
 }
 
