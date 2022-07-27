@@ -7,9 +7,9 @@
     position: relative;
 }
 
-
-#header_language > .flag {
+#header_language > svg {
     margin-left: 18px;
+    margin-top: 3px;
 }
 
 #header_lang_selector{
@@ -33,10 +33,11 @@
 }
 
 .language_select_item {
-    display: block;
-    padding: 5px;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
     border-bottom: 1px solid var(--header-border);
-    text-decoration:none;
+    text-decoration: none;
 }
 .language_select_item:hover {
     background: var(--language-selector-hover-background) !important;
@@ -45,6 +46,7 @@
 .language_select_item span {
     font-size: 18px;
     font-weight: bold;
+    padding-left: 10px;
 }
 
 #diamond {
@@ -68,6 +70,6 @@
     position: absolute;
     z-index: 2;
     left: 27px;
-    top: 33.9px;
+    top: 37.9px;
     display: none;
 }

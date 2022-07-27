@@ -13,10 +13,6 @@
     transform: scale(2.2);
 }
 
-.custom-flag:not(.flag_big) {
-    background-position-y: 2px;
-}
-
 .undefined {
     background-position-y: -2736px;
 }

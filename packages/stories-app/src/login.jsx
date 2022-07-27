@@ -25,10 +25,8 @@ export async function get_login() {
 }
 
 export async function login(data) {
-    console.log('login', data)
     // check if the user is logged in
     let reponse = await fetch_post(`${backend_user}user.php?action=login`, data)
-    console.log(reponse);
     return reponse.status !== 403;
 
 }
@@ -123,7 +121,6 @@ export async function reset_pw_set(data) {
 
 
 export async function activate(data) {
-    console.log("activate", data);
     let reponse = await fetch_post(`${backend_user}user.php?action=activate`, data);
     return reponse.status === 200;
 
@@ -165,11 +162,9 @@ export function useUsername() {
     }
     async function doLogout() {
         await logout();
-        console.log("doLogout", undefined)
         setUsername(undefined);
     }
     if(username === null) {
-        console.log("firsttime", username)
         setUsername(undefined);
         getUsernameFirstTime();
         return [undefined, doLogin, doLogout];

@@ -41,7 +41,7 @@ function LanguageButton(props) {
         className="language_select_button"
         to={`/${course.learningLanguage}-${course.fromLanguage}`}
     >
-        <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} className="flag_big" />
+        <Flag iso={course.learningLanguage} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} className="flag_big" />
 
         <span className="language_select_button_text">{course.name}</span>
         <span className="language_story_count">{course.count} stories</span>

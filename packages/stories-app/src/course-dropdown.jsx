@@ -15,7 +15,7 @@ function LanguageButtonSmall(props) {
         onClick={props.onClick}
         to={`/${course.learningLanguage}-${course.fromLanguage}`}
     >
-        <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} />
+        <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} />
         <span>{course.name || course.learningLanguageName}</span>
     </Link>;
 }
@@ -31,7 +31,7 @@ export function CourseDropdown(props) {
                 <div id="diamond-wrap">
                     <div id="diamond"></div>
                 </div>
-                <Flag flag={course_data?.learningLanguageFlag} flag_file={course_data?.learningLanguageFlagFile} />
+                <Flag iso={course_data?.learningLanguage} flag={course_data?.learningLanguageFlag} width={40} flag_file={course_data?.learningLanguageFlagFile} />
                 <div id="header_lang_selector" />
             </div>
         );
@@ -40,7 +40,7 @@ export function CourseDropdown(props) {
         <div id="diamond-wrap">
             <div id="diamond"></div>
         </div>
-        <Flag flag={course_data?.learningLanguageFlag} flag_file={course_data?.learningLanguageFlagFile} />
+        <Flag iso={course_data?.learningLanguage} flag={course_data?.learningLanguageFlag} width={40} flag_file={course_data?.learningLanguageFlagFile} />
         <div id="header_lang_selector">
         {courses.map(course => (
             <LanguageButtonSmall key={course.id} course={course} />

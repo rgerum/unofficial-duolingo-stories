@@ -32,6 +32,7 @@ export function IndexContent(props) {
 
     let story_count = 0;
     let language_count = 0;
+
     if(courses) {
         for (let course of courses) {
             story_count += course.count;
