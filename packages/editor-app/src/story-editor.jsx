@@ -16,6 +16,7 @@ import {example, highlightStyle} from "./story-editor/parser.mjs";
 import {addScrollLinking} from "./story-editor/scroll_linking";
 import {add_resize} from "./story-editor/editor-resize";
 import {BrowserRouter} from "react-router-dom";
+import {SoundRecorder} from "./sound-recorder";
 
 
 window.EditorView = EditorView
@@ -108,10 +109,11 @@ export function EditorNode() {
             window.view = "loading"
             MountEditor();
         }
-    }, []);
+    }, []);// <SoundRecorder/>
     return <div id="body">
         <div id="toolbar">
         </div>
+
         <div id="root">
             <svg id="margin">
                 <path line-width="2" d=""></path>

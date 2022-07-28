@@ -1,0 +1,17 @@
+.audio_active text {
+    fill: var(--text-color);
+}
+.audio_active line {
+    stroke: var(--text-color);
+}
+.audio_active circle {
+    fill: var(--text-color);
+}
+.audio_active {
+    cursor: pointer;
+}
+
+
+.audio_inactive {
+    opacity: 0.5;
+}

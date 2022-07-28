@@ -252,5 +252,24 @@ export async function deleteStory(data) {
     return res;
 }
 
+export const upload_audio_endpoint = `${backend_set}/audio_upload`;
+
+export async function setUploadAudio(id, blob, filename) {
+    /** like fetch but with post instead of get */
+    var fd = new FormData();
+    //very simply, doesn't handle complete objects
+    for(let i in login_data){
+        fd.append(i,login_data[i]);
+    }
+    fd.append("id", id);
+    fd.append("file", blob, filename);
+    return fetch(upload_audio_endpoint, {
+        method: "POST",
+        body: fd,
+        mode: "cors"
+    });
+}
+
+
 
 
