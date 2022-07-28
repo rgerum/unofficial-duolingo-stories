@@ -20,7 +20,7 @@ export function Flag(props) {
         "tr",//10
         "nl",//11
         "sv",//12
-        "ir",//13
+        "ga",//13
         "el",//14
         "he",//15
         "pl",//16
