@@ -104,6 +104,8 @@ function StoryEditorHeader(props) {
 
 
 export function EditorNode() {
+    let urlParams = new URLSearchParams(window.location.search);
+
     React.useEffect(() => {
         if(window.view === undefined) {
             window.view = "loading"
@@ -113,7 +115,7 @@ export function EditorNode() {
     return <div id="body">
         <div id="toolbar">
         </div>
-
+        {urlParams.get("beta") ? <SoundRecorder/> : <></>}
         <div id="root">
             <svg id="margin">
                 <path line-width="2" d=""></path>

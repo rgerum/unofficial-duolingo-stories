@@ -4,6 +4,8 @@ import "./audio_edit.css"
 
 
 export function EditorSSMLDisplay(props) {
+    let urlParams = new URLSearchParams(window.location.search);
+
     let [loading, setLoading] = React.useState(false);
     let line_id = "ssml"+(props.ssml.line ? props.ssml.line : props.ssml.line_insert);
 
@@ -25,6 +27,7 @@ export function EditorSSMLDisplay(props) {
                   onClick={reload}/> :
             <span><img title="no speaker defined" alt="error" src="icons/error.svg"/></span>
         }
+        {urlParams.get("beta") ? <a onClick={() => window.open_recoder(props)}>🎤</a> : <></>}
     </>
 }
 

@@ -244,6 +244,8 @@ function speaker_text_trans(data, meta, use_buttons, hide=false) {
             speaker_name = meta.avatar_overwrites[speaker_id]?.speaker || meta.avatar_names[speaker_id]?.speaker || meta.avatar_names[0].speaker;
         audio = line_to_audio(data.audio, text, speaker_name, meta.story_id, hide)
         audio.ssml.inser_index = window.audio_insert_lines.length;
+        audio.ssml.plan_text = text;
+        audio.ssml.plan_text_speaker_name = speaker_name;
         window.audio_insert_lines.push([data.audio_line, data.audio_line_inset])
         //audio.ssml.line = data.audio_line;
         //audio.ssml.line_insert = data.audio_line_inset;
