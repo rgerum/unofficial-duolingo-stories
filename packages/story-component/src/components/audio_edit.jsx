@@ -77,8 +77,9 @@ async function generate_audio_line(ssml) {
             last_time = parseInt(mark.time);
         }
     }
-    if(ssml.line !== undefined) {
-        let line_state = view.state.doc.line(ssml.line)
+    let [line, line_insert] = window.audio_insert_lines[ssml.inser_index];
+    if(line !== undefined) {
+        let line_state = view.state.doc.line(line)
         view.dispatch(view.state.update({
             changes: {
                 from: line_state.from,
@@ -88,7 +89,7 @@ async function generate_audio_line(ssml) {
         }))
     }
     else {
-        let line_state = view.state.doc.line(ssml.line_insert-1)
+        let line_state = view.state.doc.line(line_insert-1)
         view.dispatch(view.state.update({
             changes: {
                 from: line_state.from,
