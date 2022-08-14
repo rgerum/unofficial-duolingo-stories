@@ -76,7 +76,7 @@ export function AvatarMain() {
         <div id="toolbar">
             <AvatarEditorHeader language={language} language_data={language_data}/>
         </div>
-        <div id="root">
+        <div id="root" className="character-editor-content">
             <AvatarNames language={language} language_data={language_data}/>
         </div>
     </>
@@ -114,7 +114,7 @@ function SpeakerEntry(props) {
     let copyText = props.copyText;
 
     return <tr>
-        <td>
+        <td className="speaker-entry-copy">
             <PlayButton play={props.play} speaker={speaker.speaker} name="Duo" />
             <span className="ssml_speaker">{speaker.speaker}</span>
             <span className="copy_button" title="copy to clipboard" onClick={(e) => copyText(e, speaker.speaker)}><img alt="copy" src="icons/copy.svg"/></span>
@@ -213,7 +213,7 @@ function AvatarNames(props) {
     if(avatars === undefined || speakers === undefined || language === undefined)
         return <Spinner/>
     return <>
-    <div className="speaker_list">
+    <div className={"speaker_list" + (speakers?.length > 0 ? "": " no-voices")}>
         <div>
             <textarea value={speakText} onChange={doSetSpeakText} style={{width: "100%"}}/>
         </div>
@@ -223,7 +223,7 @@ function AvatarNames(props) {
         <div className="slidecontainer">
             Speed: <input type="range" min="0" max="4" value={speed} id="speed" onChange={(e)=>setSpeed(parseInt(e.target.value))}/>
         </div>
-        <table id="story_list" data-cy="voice_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
+        <table id="story_list" data-cy="voice_list" className="voice_list js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
                 <th style={{borderRadius: "10px 0 0 0"}} data-js-sort-colnum="0">Name</th>
@@ -238,7 +238,7 @@ function AvatarNames(props) {
             </tbody>
         </table>
     </div>
-    <div className={"avatar_editor"} style={{"overflowY": "scroll"}}>
+    <div className={"avatar_editor" + (speakers?.length > 0? "": " no-voices")} style={{"overflowY": "scroll"}}>
         <p>These characters are the default cast of duolingo. Their names should be kept as close to the original as possible.</p>
         <div className={"avatar_editor_group"} data-cy="avatar_list1">
         {avatars_new_important.map((avatar, index) =>
