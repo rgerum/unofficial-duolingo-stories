@@ -1,8 +1,24 @@
 .avatar_editor {
     overflow-y: scroll;
+    margin-left: 8px;
+    width: 100%;
     height: calc(100vh - 64px);
-    width: calc(100vw - 400px);
 }
+
+.character-editor-content {
+  flex-direction: column;
+}
+
+@media only screen and (min-width: 560px) {
+
+    .character-editor-content {
+      flex-direction: row;
+    }
+
+    .avatar_editor:not(.no-voices) {
+      width: calc(100vw - 400px);
+    }
+  }
 
 .avatar_editor_group {
     display: flex;
@@ -12,8 +28,27 @@
 
 .speaker_list {
     overflow-y: scroll;
-    width: 400px;
+    width: 100%;
     height: calc(100vh - 64px);
+}
+
+.speaker_list.no-voices {
+  display: none;
+}
+
+@media only screen and (min-width: 560px) {
+  .speaker_list {
+    width: 400px
+  }
+}
+
+.voice_list {
+  margin-top: 16px;
+}
+
+.speaker-entry-copy {
+  display: flex;
+  align-items: flex-start;
 }
 
 textarea {
