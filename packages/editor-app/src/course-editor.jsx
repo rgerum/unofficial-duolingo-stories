@@ -5,6 +5,7 @@ import {Flag} from './react/flag'
 import {useUsername, LoginDialog} from './login'
 import {getCourses, getCourse, getImportList, setImport, setStatus, setApproval} from "./api_calls.mjs";
 import "./course-editor.css"
+import { useLocalStorage } from '../../admin-app/src/hooks';
 
 
 function CourseList(props) {
@@ -253,7 +254,16 @@ export function EditorOverview() {
 
     const courses = useDataFetcher(getCourses);
 
-    const [course_id, setCourseID] = React.useState(parseInt(urlParams.get("course")) || undefined);
+    const [courseIdSelected, setCourseIdSelected] = useLocalStorage("course_id_selected", urlParams.get("course"));
+
+    const [course_id, setCourseID] = React.useState(parseInt(courseIdSelected) || undefined);
+    
+    React.useEffect(() => {
+      if(!urlParams.get("course")) {
+        history.pushState({course: courseIdSelected}, "Language"+courseIdSelected, `?course=${courseIdSelected}`);
+      }
+    }, [courseIdSelected])
+
     const [course, ] = useDataFetcher2(getCourse, [course_id]);
 
     const [showImport, do_setShowImport] = React.useState(false);
@@ -267,6 +277,7 @@ export function EditorOverview() {
 
         history.pushState({course: course_new}, "Language"+course_new, `?course=${course_new}`);
         setCourseID(course_new);
+        setCourseIdSelected(course_new);
     }
 
     useEventListener("popstate", (event) => {
