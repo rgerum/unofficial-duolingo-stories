@@ -1,13 +1,16 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import {LoginDialog, useUsername} from "./login";
 import {Spinner} from "./react/spinner";
 import {EditorOverview} from "./course-editor"
 import {AvatarMain} from "./avatar_editor";
 import {EditorNode} from "./story-editor";
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+} from "react-router-dom";
 
-
-let urlParams = new URLSearchParams(window.location.search);
 
 export function LoginWrapper() {
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
@@ -18,21 +21,19 @@ export function LoginWrapper() {
     if (username.username === undefined || username.role !== 1)
         return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
 
-    // logged in and allowed!
-    if(!urlParams.get("story") && !urlParams.get("language")) {
-        return <EditorOverview />
-    }
-    else if(!urlParams.get("story")) {
-        return <AvatarMain />
-    }
-    else {
-        return <EditorNode />
-    }
+    return <Routes>
+        <Route path='/course/:id' element={<EditorOverview />}></Route>
+        <Route path='/' element={<EditorOverview />}></Route>
+        <Route path='/story/:story' element={<EditorNode />}></Route>
+        <Route path='/language/:language' element={<AvatarMain />}></Route>
+    </Routes>
 }
 
 ReactDOM.render(
     <React.StrictMode>
-        <LoginWrapper />
+        <Router>
+            <LoginWrapper />
+        </Router>
     </React.StrictMode>,
     document.getElementById('body')
 );
