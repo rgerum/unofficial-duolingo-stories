@@ -5,7 +5,7 @@ import {Flag} from './react/flag'
 import {getCourses, getCourse, getImportList, setImport, setStatus, setApproval} from "./api_calls.mjs";
 import "./course-editor.css"
 import { useLocalStorage } from '../../admin-app/src/hooks';
-import {Link, useParams,} from "react-router-dom";
+import {Link, useNavigate, useParams,} from "react-router-dom";
 
 
 function CourseList(props) {
@@ -31,15 +31,16 @@ function ImportList(props) {
     let course = props.course;
     const [courseImport, ] = useDataFetcher2(getImportList, [12, course.id]);
     const [importing, setImporting] = useState(false);
+    let navigate = useNavigate();
 
     async function do_import(id) {
         // prevent clicking the button twice
         if(importing) return
         setImporting(id);
-        console.log("do_impor", id, course.id);
+        console.log("do_import", id, course.id);
         let id2 = await setImport(id, course.id);
         console.log(id2, "?story="+id2);
-        window.location.href = "?story="+id2;
+        navigate("/story/"+id2);
     }
     return courseImport ?
         <>
@@ -251,10 +252,9 @@ function EditList(props) {
 export function EditorOverview() {
     let { id } = useParams();
     let course_id = parseInt(id);
-    console.log("useParams", course_id)
+
     const courses = useDataFetcher(getCourses);
     const [course, ] = useDataFetcher2(getCourse, [course_id]);
-    console.log("course",course, course_id)
 
     const [showImport, do_setShowImport] = React.useState(false);
 

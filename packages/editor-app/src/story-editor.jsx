@@ -108,10 +108,7 @@ export function EditorNode() {
     let navigate = useNavigate();
 
     React.useEffect(() => {
-        if(window.view === undefined) {
-            window.view = "loading"
-            MountEditor(story, navigate);
-        }
+        MountEditor(story, navigate);
     }, []);// <SoundRecorder/>
     return <div id="body">
         <div id="toolbar">
