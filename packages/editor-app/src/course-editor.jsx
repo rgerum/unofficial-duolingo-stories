@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {useDataFetcher, useDataFetcher2, useEventListener} from './hooks'
 import {Spinner, SpinnerBlue} from './react/spinner'
 import {Flag} from './react/flag'
-import {useUsername, LoginDialog} from './login'
+import {LoggedInButton} from './login'
 import {getCourses, getCourse, getImportList, setImport, setStatus, setApproval} from "./api_calls.mjs";
 import "./course-editor.css"
 import { useLocalStorage } from '../../admin-app/src/hooks';
@@ -171,7 +171,7 @@ function DropDownStatus(props) {
     let states = ["draft", "feedback", "finished"];
     return <div className="status_field">
         {<span className={"status_text"}>{status_wrapper(status, props.public)}</span>} {loading === 1 ? <SpinnerBlue /> :
-        loading ===-1 ? <img title="an error occurred" alt="error" src="icons/error.svg"/> : <></>}
+        loading ===-1 ? <img title="an error occurred" alt="error" src="/icons/error.svg"/> : <></>}
         {props.official ? <></> : <span className="approval" onClick={addApproval}>
         {"👍 "+count}
     </span>}
@@ -249,7 +249,7 @@ function EditList(props) {
     </>
 }
 
-export function EditorOverview() {
+export function EditorOverview(props) {
     let urlParams = new URLSearchParams(window.location.search);
 
     const courses = useDataFetcher(getCourses);
@@ -291,7 +291,7 @@ export function EditorOverview() {
 
     return <>
         <div id="toolbar">
-            <CourseEditorHeader courses={courses} course_id={course_id} showImport={showImport} do_setShowImport={do_setShowImport} />
+            <CourseEditorHeader username={props.username} doLogout={props.doLogout} courses={courses} course_id={course_id} showImport={showImport} do_setShowImport={do_setShowImport} />
         </div>
         <div id="root">
             <CourseList courses={courses} course_id={course_id} setCourse={doSetCourse}/>
@@ -334,14 +334,15 @@ export function CourseEditorHeader(props) {
             !props.showImport ?
             <div id="button_import" className="editor_button" onClick={() => props.do_setShowImport(1)}
             style={{marginLeft: "auto"}} data-cy="button_import">
-            <div><img alt="import button" src="icons/import.svg"/></div>
+            <div><img alt="import button" src="/icons/import.svg"/></div>
             <span>Import</span>
             </div> :
             <div id="button_back" className="editor_button" onClick={() => props.do_setShowImport(0)}
             style={{marginLeft: "auto"}} data-cy="button_back">
-            <div><img alt="back button" src="icons/back.svg"/></div>
+            <div><img alt="back button" src="/icons/back.svg"/></div>
             <span>Back</span>
             </div>
         }
+        <LoggedInButton username={props.username} doLogout={props.doLogout}/>
     </div></>
 }

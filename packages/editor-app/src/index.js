@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import {LoginDialog, useUsername} from "./login";
 import {Spinner} from "./react/spinner";
@@ -20,13 +20,13 @@ export function LoginWrapper() {
 
     // logged in and allowed!
     if(!urlParams.get("story") && !urlParams.get("language")) {
-        return <EditorOverview />
+        return <EditorOverview username={username} doLogout={doLogout} />
     }
     else if(!urlParams.get("story")) {
-        return <AvatarMain />
+        return <AvatarMain username={username} doLogout={doLogout} />
     }
     else {
-        return <EditorNode />
+        return <EditorNode username={username} doLogout={doLogout} />
     }
 }
 

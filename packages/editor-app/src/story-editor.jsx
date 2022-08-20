@@ -17,6 +17,7 @@ import {addScrollLinking} from "./story-editor/scroll_linking";
 import {add_resize} from "./story-editor/editor-resize";
 import {BrowserRouter} from "react-router-dom";
 import {SoundRecorder} from "./sound-recorder";
+import {LoggedInButton} from "./login";
 
 
 window.EditorView = EditorView
@@ -59,7 +60,7 @@ function StoryEditorHeader(props) {
         return <></>
     return <><div className="AvatarEditorHeader">
         <div id="button_back" className="editor_button" onClick={window.button_back} style={{paddingLeft: 0}}>
-            <div><img alt="icon back" src="icons/back.svg" /></div>
+            <div><img alt="icon back" src="/icons/back.svg" /></div>
             <span>Back</span>
         </div>
         <b>Story-Editor</b>
@@ -70,7 +71,7 @@ function StoryEditorHeader(props) {
         <span className={"AvatarEditorHeaderFlagname"}>{props.story_data.name}</span>
 
         <div style={{marginLeft: "auto"}}  id="button_delete" className="editor_button" onClick={window.button_delete}>
-            <div><img alt="icon save" src="icons/delete.svg" /></div>
+            <div><img alt="icon save" src="/icons/delete.svg" /></div>
             <span>Delete</span>
         </div>
         <div className="editor_button" onClick={(e) => {
@@ -96,20 +97,21 @@ function StoryEditorHeader(props) {
             <span>Audio</span>
         </div>
         <div id="button_save" className="editor_button" onClick={window.button_save}>
-            <div><img alt="icon save" src="icons/save.svg" /></div>
+            <div><img alt="icon save" src="/icons/save.svg" /></div>
             <span>Save</span>
         </div>
+        <LoggedInButton username={props.username} doLogout={props.doLogout}/>
     </div></>
 }
 
 
-export function EditorNode() {
+export function EditorNode(props) {
     let urlParams = new URLSearchParams(window.location.search);
 
     React.useEffect(() => {
         if(window.view === undefined) {
             window.view = "loading"
-            MountEditor();
+            MountEditor(props);
         }
     }, []);// <SoundRecorder/>
     return <div id="body">
@@ -129,7 +131,7 @@ export function EditorNode() {
 }
 
 
-function MountEditor() {
+function MountEditor(props) {
     let createScrollLookUp = () => {
         window.dispatchEvent(new CustomEvent("resize"));
     };
@@ -210,7 +212,7 @@ function MountEditor() {
 
         ReactDOM.render(
             <React.StrictMode>
-                <StoryEditorHeader story_data={story_data}/>
+                <StoryEditorHeader story_data={story_data} username={props.username} doLogout={props.doLogout}/>
             </React.StrictMode>,
             document.getElementById('toolbar')
         );

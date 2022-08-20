@@ -5,6 +5,7 @@ import {Flag} from './react/flag'
 import {getAvatars, getLanguageName, getSpeakers, setAvatarSpeaker} from "./api_calls.mjs";
 import "./avatar_editor.css"
 import {fetch_post} from "./includes.mjs";
+import {LoggedInButton} from "./login";
 
 function Avatar(props) {
     let avatar = props.avatar;
@@ -58,23 +59,25 @@ function AvatarEditorHeader(props) {
         return <></>
     return <div className="AvatarEditorHeader">
         <div id="button_back" className="editor_button" onClick={button_back} style={{paddingLeft: 0}}>
-            <div><img alt="icon back" src="icons/back.svg" /></div>
+            <div><img alt="icon back" src="/icons/back.svg" /></div>
             <span>Back</span>
         </div>
         <b>Character-Editor</b>
         <Flag flag={language_data.flag} flag_file={language_data.flag_file}/>
         <span data-cy="language-name" className={"AvatarEditorHeaderFlagName"}>{language_data.name}</span>
+        <div style={{marginLeft: "auto"}}></div>
+        <LoggedInButton username={props.username} doLogout={props.doLogout}/>
     </div>
 }
 
-export function AvatarMain() {
+export function AvatarMain(props) {
     let urlParams = new URLSearchParams(window.location.search);
     const [language, ] = React.useState(parseInt(urlParams.get("language")) || undefined);
     const [language_data, ] = useDataFetcher2(getLanguageName, [language]);
 
     return <>
         <div id="toolbar">
-            <AvatarEditorHeader language={language} language_data={language_data}/>
+            <AvatarEditorHeader language={language} language_data={language_data} username={props.username} doLogout={props.doLogout}/>
         </div>
         <div id="root" className="character-editor-content">
             <AvatarNames language={language} language_data={language_data}/>
@@ -105,7 +108,7 @@ function PlayButton(props) {
     return <span className="play_button" title="play audio" onClick={(e) => do_play(e, speaker, name)}>
                 {loading === 0 ? <img alt="play" src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"/> :
                  loading === 1 ? <SpinnerBlue /> :
-                 loading ===-1 ? <img title="an error occurred" alt="error" src="icons/error.svg"/> : <></>}
+                 loading ===-1 ? <img title="an error occurred" alt="error" src="/icons/error.svg"/> : <></>}
             </span>
 }
 
@@ -117,7 +120,7 @@ function SpeakerEntry(props) {
         <td className="speaker-entry-copy">
             <PlayButton play={props.play} speaker={speaker.speaker} name="Duo" />
             <span className="ssml_speaker">{speaker.speaker}</span>
-            <span className="copy_button" title="copy to clipboard" onClick={(e) => copyText(e, speaker.speaker)}><img alt="copy" src="icons/copy.svg"/></span>
+            <span className="copy_button" title="copy to clipboard" onClick={(e) => copyText(e, speaker.speaker)}><img alt="copy" src="/icons/copy.svg"/></span>
         </td>
         <td>{speaker.gender}</td>
         <td>{speaker.type}</td>
