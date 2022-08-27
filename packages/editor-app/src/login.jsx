@@ -3,6 +3,7 @@ import './index.css'
 import './login.css';
 import {useInput} from "./hooks";
 import {getSession, login} from "./api_calls.mjs";
+import {setCookie} from "stories-app/src/includes";
 
 
 export function useUsername() {
@@ -14,8 +15,8 @@ export function useUsername() {
         setUsername(login);
     }
 
-    async function doLogin(username, password) {
-        let success = await login({username: username, password: password});
+    async function doLogin(username, password, remember) {
+        let success = await login({username: username, password: password}, remember);
         if(success === false) {
             //window.alert("Error: username or password is wrong.");
             return undefined;
@@ -28,6 +29,8 @@ export function useUsername() {
     }
     async function doLogout() {
         //await logout();
+        setCookie("username");
+        setCookie("password");
         setUsername({});
         setShowLogin(1);
     }
@@ -46,6 +49,11 @@ export function LoginDialog(props) {
 
     let [state, setState] = React.useState(0);
     let [error, setError] = React.useState("");
+    let [remember, setRememberX] = React.useState(false);
+
+    function setRemember(e) {
+        setRememberX(e.target.checked);
+    }
 
     let [usernameInput, usernameInputSetValue] = useInput("");
     let [passwordInput, passwordInputSetValue] = useInput("");
@@ -54,7 +62,7 @@ export function LoginDialog(props) {
         setState(1);
         let username;
         try {
-            username = await doLogin(usernameInput, passwordInput);
+            username = await doLogin(usernameInput, passwordInput, remember);
         }
         catch (e) {
             setError("Something went wrong.", e);
@@ -88,7 +96,8 @@ export function LoginDialog(props) {
                     <p>You need an account that has been activated as a contributor.</p>
                     <input value={usernameInput} onChange={usernameInputSetValue} type="text" placeholder="Username" data-cy="username" id="login_dialog_username" autoFocus/>
                     <input value={passwordInput} onChange={passwordInputSetValue} type="password" placeholder="Password"  data-cy="password" id="login_dialog_password"/>
-                    {state === -1 ? <span className="login_error" data-cy="login_error">{error}</span>: null}
+                    {state === -1 ? <><span className="login_error" data-cy="login_error">{error}</span><br/></>: null}
+                    <span><input type="checkbox" checked={remember} onChange={setRemember}/> keep me logged in</span>
                     <button className="button" onClick={buttonLogin}  data-cy="submit">{state !== 1 ? "Log in" : "..."}</button>
                 </div>
             </div>

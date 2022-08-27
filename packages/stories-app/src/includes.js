@@ -1,3 +1,4 @@
+
 export function now() {
     var day = ((this.getDate() < 10)?"0":"") + this.getDate();
     var month = (((this.getMonth()+1) < 10)?"0":"") + (this.getMonth()+1);
@@ -9,12 +10,46 @@ export function now() {
     return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
 }
 
+export function setCookie(cname, cvalue, exdays) {
+    if(!exdays) {
+        document.cookie = cname + "=" + cvalue + ";"
+        return;
+    }
+    const d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    let expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+export function isLocalNetwork(hostname) {
+    try {
+        if (hostname === undefined)
+            hostname = window.location.hostname;
+        return (
+            (['localhost', '127.0.0.1', '', '::1'].includes(hostname))
+            || (hostname.startsWith('192.168.'))
+            || (hostname.startsWith('10.0.'))
+            || (hostname.endsWith('.local'))
+        )
+    }
+    catch (e) {
+        return true;
+    }
+}
+
 export function fetch_post(url, data) {
     /** like fetch but with post instead of get */
     var fd = new FormData();
     //very simply, doesn't handle complete objects
     for(var i in data){
         fd.append(i,data[i]);
+    }
+    if(!isLocalNetwork()) {
+        return fetch(url, {
+            method: "POST",
+            body: fd,
+            credentials: "same-origin"
+        });
     }
     var req = new Request(url,{
         method:"POST",

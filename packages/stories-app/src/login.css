@@ -19,6 +19,11 @@
     text-align: center;
 }
 
+#login_dialog div input[type='checkbox'] {
+    display: inline;
+    width: auto;
+}
+
 #login_dialog div input {
     align-items: center;
     background: var(--input-background);

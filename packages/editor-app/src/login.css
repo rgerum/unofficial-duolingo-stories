@@ -10,6 +10,10 @@
     font-weight: bold;
 }
 
+#login_dialog div input[type='checkbox'] {
+    display: inline;
+    width: auto;
+}
 
 /* login */
 
@@ -185,3 +189,5 @@
     padding-right: 12px;
     margin-top: -4px;
 }
+
+

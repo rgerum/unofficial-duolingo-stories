@@ -1,7 +1,7 @@
 import React from 'react';
 import './login.css';
 import {useInput} from "./hooks.js";
-import {fetch_post} from "./includes.js";
+import {fetch_post, setCookie, isLocalNetwork} from "./includes.js";
 import {get_backend} from "./api_calls";
 import {Link, useNavigate} from "react-router-dom";
 
@@ -11,7 +11,11 @@ let backend_user = backend+'user/';
 
 export async function get_login() {
     // get the current login status
-    let response = await fetch(`${backend_user}user.php?action=get_login`)
+    let response;
+    if(isLocalNetwork())
+        response = await fetch(`${backend_user}user.php?action=get_login`)
+    else
+        response = await fetch(`${backend_user}user.php?action=get_login`, {credentials: "same-origin"})
     try {
         // return the response
         let json = await response.json();
@@ -24,10 +28,14 @@ export async function get_login() {
     }
 }
 
-export async function login(data) {
+export async function login(data, remember) {
+    if(remember) {
+        setCookie("username", data["username"], 30);
+        setCookie("password", data["password"], 30);
+    }
     // check if the user is logged in
-    let reponse = await fetch_post(`${backend_user}user.php?action=login`, data)
-    return reponse.status !== 403;
+    let response = await fetch_post(`${backend_user}user.php?action=login`, data)
+    return response.status !== 403;
 
 }
 
@@ -129,6 +137,8 @@ export async function activate(data) {
 
 export async function logout() {
     // send the signal to logout
+    setCookie("username");
+    setCookie("password");
     await fetch(`${backend_user}user.php?action=logout`);
     get_login();
 }
@@ -148,8 +158,8 @@ export function useUsername() {
         setUsername(login);
     }
 
-    async function doLogin(username, password) {
-        let success = await login({username: username, password: password});
+    async function doLogin(username, password, remember) {
+        let success = await login({username: username, password: password}, remember);
         if(success === false) {
             //window.alert("Error: username or password is wrong.");
             return undefined;
@@ -211,13 +221,19 @@ export function LoginDialog() {
     let [passwordInput, passwordInputSetValue] = useInput("");
     let [emailInput, emailInputSetValue] = useInput("");
 
+    let [remember, setRememberX] = React.useState(false);
+
+    function setRemember(e) {
+        setRememberX(e.target.checked);
+    }
+
     let navigate = useNavigate();
 
     async function buttonLogin() {
         setState(1);
         let username;
         try {
-            username = await doLogin(usernameInput, passwordInput);
+            username = await doLogin(usernameInput, passwordInput, remember);
         }
         catch (e) {
             console.log(e);
@@ -298,7 +314,8 @@ export function LoginDialog() {
                     <p>Attention, you cannot login with your Duolingo account.</p><p>You have to register for the unofficial stories separately, as they are an independent project.</p>
                     <input value={usernameInput} onChange={usernameInputSetValue} onKeyDown={handleKeypressLogin} type="text" placeholder="Username"/>
                     <input value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressLogin} type="password" placeholder="Password"/>
-                    {state === -1 ? <span className="login_error">{error}</span>: null}
+                    {state === -1 ? <><span className="login_error">{error}</span><br/></>: null}
+                    <span><input type="checkbox" checked={remember} onChange={setRemember}/> keep me logged in</span>
                     <button className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
                     <p>Don't have an account? <button className={"link"} onClick={()=>setShowLogin(2)}>SIGN UP</button></p>
                     <p>Forgot your password? <button className={"link"} onClick={()=>setShowLogin(3)}>RESET</button></p>

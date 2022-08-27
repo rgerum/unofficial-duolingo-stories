@@ -77,6 +77,13 @@ export async function fetch_post(url, data) {
     for(let i in data){
         fd.append(i,data[i]);
     }
+    if(!isLocalNetwork()) {
+        return fetch(url, {
+            method: "POST",
+            body: fd,
+            credentials: "same-origin"
+        });
+    }
     return fetch(url, {
         method: "POST",
         body: fd,
@@ -105,12 +112,16 @@ export async function getSession() {
     }
 }
 
-export async function login(data) {
-    // currenty only store the local cookies for local test
+export async function login(data, remember) {
+    // currently only store the local cookies for local test
     if(isLocalNetwork()) {
         login_data = data;
         setCookie("username", data["username"])
         setCookie("password", data["password"])
+    }
+    if(remember) {
+        setCookie("username", data["username"], 30);
+        setCookie("password", data["password"], 30);
     }
     // check if the user is logged in
     let reponse = await fetch_post(`${backend_get}/login`, data);
