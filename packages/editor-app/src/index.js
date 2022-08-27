@@ -13,6 +13,15 @@ import {
 
 
 export function LoginWrapper() {
+    let urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.get("story"))
+        window.location = `/story/${urlParams.get("story")}`;
+    if(urlParams.get("course"))
+        window.location = `/course/${urlParams.get("course")}`;
+    if(urlParams.get("language"))
+        window.location = `/language/${urlParams.get("language")}`;
+
+
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
 
     // loading
