@@ -2,9 +2,8 @@ import {useUsername, Login} from './login'
 import {CourseList} from "./course-list";
 import {CourseDropdown} from "./course-dropdown";
 import {SetList} from "./story-list";
-import {useDataFetcher} from "./hooks";
 import {getCoursesUser, getPublicCourses, getStoriesSets} from "./api_calls";
-import {Legal} from "story-component";
+import {Legal, useDataFetcher} from "story-component";
 
 import {Link, useParams,} from "react-router-dom";
 import React from "react";

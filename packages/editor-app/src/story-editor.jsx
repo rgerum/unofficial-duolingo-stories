@@ -4,11 +4,10 @@ import ReactDOM from "react-dom";
 import {basicSetup, EditorState, EditorView} from "@codemirror/basic-setup";
 import {EditorSelection} from "@codemirror/state";
 
-import {Story} from "story-component";
+import {Story, Flag} from "story-component";
 
 import {Cast} from "./react/cast";
-import {Flag} from "./react/flag";
-import {useDataFetcher2} from "./hooks";
+import {useDataFetcher2} from "story-component";
 import {deleteStory, getAvatars, getImage, getLanguageName, getStory, setStory} from "./api_calls.mjs";
 
 import {processStoryFile} from "./story-editor/syntax_parser_new.mjs";
@@ -64,8 +63,8 @@ function StoryEditorHeader(props) {
             <span>Back</span>
         </div>
         <b>Story-Editor</b>
-        <Flag flag={language_data.flag} flag_file={language_data.flag_file}/>
-        <Flag className={"flag_sub"} flag={language_data2.flag} flag_file={language_data2.flag_file}/>
+        <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
+        <Flag iso={language_data2.short} width={40*0.9} className={"flag_sub"} flag={language_data2.flag} flag_file={language_data2.flag_file}/>
         <span className={"AvatarEditorHeaderFlagname"}>{`${language_data.name} (from ${language_data2.name})`}</span>
         <img alt="story title" width="50px" src={`https://stories-cdn.duolingo.com/image/${story_data.image}.svg`} style={{marginLeft: "auto"}} />
         <span className={"AvatarEditorHeaderFlagname"}>{props.story_data.name}</span>
@@ -120,7 +119,7 @@ export function EditorNode(props) {
         {urlParams.get("beta") ? <SoundRecorder/> : <></>}
         <div id="root">
             <svg id="margin">
-                <path line-width="2" d=""></path>
+                <path d=""></path>
 
             </svg>
             <div id="editor"></div>

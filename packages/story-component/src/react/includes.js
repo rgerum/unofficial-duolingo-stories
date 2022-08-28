@@ -1,14 +1,4 @@
 
-export function now() {
-    var day = ((this.getDate() < 10)?"0":"") + this.getDate();
-    var month = (((this.getMonth()+1) < 10)?"0":"") + (this.getMonth()+1);
-    var year = this.getFullYear();
-    var hours = ((this.getHours() < 10)?"0":"") + this.getHours();
-    var minutes = ((this.getMinutes() < 10)?"0":"") + this.getMinutes();
-    var seconds = ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
-
-    return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
-}
 
 export function setCookie(cname, cvalue, exdays) {
     if(!exdays) {
@@ -20,6 +10,25 @@ export function setCookie(cname, cvalue, exdays) {
     let expires = "expires="+ d.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
+
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return undefined;
+}
+
+
 
 export function isLocalNetwork(hostname) {
     try {

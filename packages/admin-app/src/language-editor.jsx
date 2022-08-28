@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
-import {useDataFetcher, useDataFetcher2, useInput} from './hooks'
-import {Spinner} from './react/spinner'
-import {Flag} from './react/flag'
+import React from 'react';
+import {useDataFetcher, useInput} from 'story-component'
+import {Spinner} from 'story-component'
+import {Flag} from 'story-component'
 import {
     getLanguageList, setLanguage
 } from "./api_calls.mjs";
@@ -22,7 +22,8 @@ function ChangeAbleValue(props) {
 function AttributeList(props) {
     const [edit, setEdit] = useInput(false);
 
-    var data = {...props.obj};
+    const data = {...props.obj};
+
     function onChange(key, value) {
         data[key] = value === "" ? undefined : value;
         console.log("changed", data);
@@ -31,15 +32,16 @@ function AttributeList(props) {
         console.log(await setLanguage(data));
         setEdit(false);
     }
+    console.log("props", props)
 
     return <tr onClick={() => setEdit(true)}>
-        <td><Flag flag={props.obj.flag} flag_file={props.obj.flag_file} /></td>
+        <td><Flag iso={props.obj.short} width={40} flag={props.obj.flag} flag_file={props.obj.flag_file} /></td>
         {props.attributes.map(attr =>
         <ChangeAbleValue obj={props.obj} name={attr} edit={edit} callback={onChange}/>
     )}<td>{edit ? <span onClick={save}>[save]</span> : ""}</td></tr>
 }
 
-export function LanguageList(props) {
+export function LanguageList() {
     const users = useDataFetcher(getLanguageList);
 
     const [search, setSearch] = useInput("");
@@ -79,7 +81,7 @@ https://admin.duostories.org/get2/language_list
             </thead>
             <tbody>
             <AttributeList obj={{"name":"new language"}} attributes={["name","short","flag", "flag_file", "speaker", "rtl"]} />
-            {filtered_languages.map((user, i) =>
+            {filtered_languages.map(user =>
                 <AttributeList key={user.id} obj={user} attributes={["name","short","flag", "flag_file", "speaker", "rtl"]} />
             )}
             </tbody>

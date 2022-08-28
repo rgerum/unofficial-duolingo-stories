@@ -1,7 +1,7 @@
 import React from 'react';
 import './index.css'
 import './login.css';
-import {useInput} from "./hooks";
+import {useInput} from "story-component";
 import {getSession, login} from "./api_calls.mjs";
 
 

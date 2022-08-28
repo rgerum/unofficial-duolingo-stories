@@ -62,7 +62,7 @@ export async function getStoriesSets(lang, lang_base) {
         return {sets: []}
     try {
         let response = await fetch(`${backend}/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
-        let data =  await response.json();
+        let data = await response.json();
 
         let set = -1;
         let sets = [];

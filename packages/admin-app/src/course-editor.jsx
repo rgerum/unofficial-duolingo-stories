@@ -1,27 +1,17 @@
-import React, {useState} from 'react';
-import {useDataFetcher, useDataFetcher2, useInput} from './hooks'
-import {Spinner, SpinnerBlue} from './react/spinner'
-import {Flag} from './react/flag'
+import React from 'react';
+import {useDataFetcher, useInput} from 'story-component'
+import {Spinner} from 'story-component'
+import {Flag} from 'story-component'
 import {
-    getLanguageList, setLanguage, getCourseList, setCourse
+    getLanguageList, getCourseList, setCourse
 } from "./api_calls.mjs";
 
-function DropDown(props) {
-    return <div className="dropdown">
-        <button className="dropbtn">{props.value}</button>
-        <div className="dropdown-content">
-            {props.options.map(opt =>
-                    <a href="#">{opt.value}</a>
-                )}
-        </div>
-    </div>
-}
 
 function ChangeAbleValue(props) {
     const [value, setValue] = useInput(props.obj[props.name]);
     const [name, setName] = useInput(props.languages[props.obj[props.name]]?.name || "");
 
-    function edited(e) {
+    let edited = function(e) {
         props.callback(props.name, e.target.value);
         setValue(e)
     }
@@ -34,7 +24,7 @@ function ChangeAbleValue(props) {
                 break;
             }
         }
-        function edited(e) {
+        edited = function(e) {
             let value = e.target?.value ? e.target.value : e
             for(let lang of Object.getOwnPropertyNames(props.languages)) {
                 if(props.languages[lang].name.toLowerCase() === value.toLowerCase()) {
@@ -58,8 +48,8 @@ function ChangeAbleValue(props) {
                     <button className="dropbtn">
                         <div className="lang">
                             {valid ?
-                        <Flag flag={props.languages[value].flag} flag_file={props.languages[value].flag_file} />
-                                : <Flag flag={-2736} />
+                        <Flag iso={props.languages[value].short} width={40} flag={props.languages[value].flag} flag_file={props.languages[value].flag_file} />
+                                : <Flag width={40} flag={-2736} />
                             }
                         <input value={name} onChange={edited}/>
                         </div>
@@ -68,7 +58,7 @@ function ChangeAbleValue(props) {
                         {language_id.map(lang =>
                             <a key={props.languages[lang].id} onClick={() => edited(props.languages[lang].name)}>
                                 <div className="lang">
-                                <Flag flag={props.languages[lang].flag} flag_file={props.languages[lang].flag_file} />
+                                <Flag iso={props.languages[lang].short} width={40} flag={props.languages[lang].flag} flag_file={props.languages[lang].flag_file} />
                                 <div>{props.languages[lang].name}</div>
                             </div>
                             </a>
@@ -78,13 +68,13 @@ function ChangeAbleValue(props) {
             </td>
         }
         return <td>
-            {value != -1 ?
+            {value !== -1 ?
                 <div className="lang">
-                <Flag flag={props.languages[value].flag} flag_file={props.languages[value].flag_file} />
+                <Flag iso={props.languages[value].short} width={40} flag={props.languages[value].flag} flag_file={props.languages[value].flag_file} />
                     {props.languages[value].name}
                 </div>
                 :
-                <div className="lang"><Flag flag={-2736} />
+                <div className="lang"><Flag width={40} flag={-2736} />
                     {"New"}
                 </div>
             }
@@ -100,9 +90,9 @@ function AttributeList(props) {
     const [edit, setEdit] = useInput(false);
 
     let languages = props.languages;
-    let obj = props.obj;
 
-    var data = {...props.obj};
+    const data = {...props.obj};
+
     function onChange(key, value) {
         data[key] = value === "" ? undefined : value;
         console.log("changed", data);
@@ -116,14 +106,13 @@ function AttributeList(props) {
         return <tr></tr>
 
     return <tr onClick={() => setEdit(true)}>
-        <td>
-        </td>
+        <td></td>
         {props.attributes.map(attr =>
         <ChangeAbleValue obj={props.obj} languages={languages} name={attr} edit={edit} callback={onChange}/>
     )}<td>{edit ? <span onClick={save}>[save]</span> : ""}</td></tr>
 }
 
-export function CourseList(props) {
+export function CourseList() {
     const languages = useDataFetcher(getLanguageList);
     const users = useDataFetcher(getCourseList);
 
@@ -168,7 +157,7 @@ export function CourseList(props) {
             </thead>
             <tbody>
             <AttributeList languages={languages_id} obj={{"name":"", "public": 0, "fromLanguage": 1, "learningLanguage": -1}} attributes={["learningLanguage","fromLanguage","public", "name"]} />
-            {filtered_courses.map((user, i) =>
+            {filtered_courses.map(user =>
                 <AttributeList key={user.id} languages={languages_id} obj={user} attributes={["learningLanguage","fromLanguage","public", "name"]} />
             )}
             </tbody>

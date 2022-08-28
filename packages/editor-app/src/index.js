@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {LoginDialog, useUsername} from "./login";
-import {Spinner} from "./react/spinner";
+import {Spinner} from "story-component";
 import {EditorOverview} from "./course-editor"
 import {AvatarMain} from "./avatar_editor";
 import {EditorNode} from "./story-editor";

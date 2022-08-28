@@ -1,7 +1,6 @@
 import React from 'react';
 import './login.css';
-import {useInput} from "./hooks.js";
-import {fetch_post, setCookie, isLocalNetwork} from "./includes.js";
+import {useInput, fetch_post, setCookie, isLocalNetwork} from "story-component";
 import {get_backend} from "./api_calls";
 import {Link, useNavigate} from "react-router-dom";
 
@@ -140,7 +139,7 @@ export async function logout() {
     setCookie("username");
     setCookie("password");
     await fetch(`${backend_user}user.php?action=logout`);
-    get_login();
+    await get_login();
 }
 
 
@@ -237,7 +236,7 @@ export function LoginDialog() {
         }
         catch (e) {
             console.log(e);
-            setError("Something went wrong.", e);
+            setError("Something went wrong.");
             setState(-1);
             return;
         }

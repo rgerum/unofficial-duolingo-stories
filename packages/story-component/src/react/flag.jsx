@@ -65,15 +65,16 @@ export function Flag(props) {
     let style = {
         width: (props.width || 88),
         height: 66/82*(props.width || 88),
+        minWidth: (props.width || 88),
     }
     if(props.flag_file) {
-        return <svg viewBox={`-2 -2 82 66`} data-test={`flag-${props.iso}`} style={style}>
+        return <svg className={props.className} viewBox={`-2 -2 82 66`} data-test={`flag-${props.iso}`} style={style}>
                 <image height="62"
                        href={`https://duostories.org/stories/flags/${props.flag_file}`}
                        width="78"></image>
         </svg>
     }
-    return <svg viewBox={`0 ${count} 82 66`} data-test={`flag-${props.iso}`} style={style}>
+    return <svg className={props.className} viewBox={`0 ${count} 82 66`} data-test={`flag-${props.iso}`} style={style}>
             <image height="3168"
                    href="https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
                    width="82"></image>

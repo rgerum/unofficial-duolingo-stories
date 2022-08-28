@@ -2,11 +2,11 @@ import React, {useState} from 'react';
 import {
     setSyncFlag, setSyncFrontendEditor, setSyncFrontendStories, setSyncVoiceList
 } from "./api_calls.mjs";
-import {Spinner} from "./react/spinner";
+import {Spinner} from "story-component";
 
-export function Sync(props) {
-    let [loading, setLoading] = useState();
-    let [output, setOutput] = useState();
+export function Sync() {
+    let [loading, setLoading] = useState(false);
+    let [output, setOutput] = useState("");
 
     async function SyncFlags() {
         setLoading(true);

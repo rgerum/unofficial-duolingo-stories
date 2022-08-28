@@ -1,6 +1,5 @@
 import './course-list.css';
-import {Flag} from "./react/flag";
-import {Spinner} from "./react/spinner";
+import {Flag, Spinner} from "story-component";
 import {Link} from "react-router-dom";
 
 
@@ -47,7 +46,7 @@ function LanguageButton(props) {
         className="language_select_button"
         to={`/${course.learningLanguage}-${course.fromLanguage}`}
     >
-        <Flag iso={course.learningLanguage} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} className="flag_big" />
+        <Flag iso={course.learningLanguage} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} />
 
         <span className="language_select_button_text">{course.name}</span>
         <span className="language_story_count">{course.count} stories</span>
