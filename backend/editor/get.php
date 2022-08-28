@@ -60,7 +60,18 @@ $db = database();
 
 $action = $_REQUEST['action'];
 
+if( (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) && isset($_COOKIE['username'])) {
+    //http_response_code(403);
 
+    // try to login again
+    list($username, , $password) = get_values($db, ['username', 'password']);
+    $username = mysqli_escape_string($db, $_COOKIE["username"]);
+    $user = mysqli_fetch_assoc(mysqli_query($db, "SELECT * FROM user WHERE username = '$username' AND activated = 1"));
+    $hash = $user["password"];
+    if(phpbb_check_hash($_COOKIE["password"], $hash)) {
+        $_SESSION["user"] = $user;
+    }
+}
 if( (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) && isset($_REQUEST['username'])) {
     //http_response_code(403);
 

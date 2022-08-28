@@ -1,6 +1,6 @@
 import "./course-dropdown.css";
 
-import {Flag} from "./react/flag";
+import {Flag} from "story-component";
 import {Link} from "react-router-dom";
 
 

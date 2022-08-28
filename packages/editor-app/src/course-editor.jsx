@@ -19,7 +19,7 @@ function CourseList(props) {
                    to={`/course/${course.id}`}
                 >
                     <span className="course_count">{course.count}</span>
-                    <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
+                    <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
                     <span>{`${course.learningLanguageName} [${course.fromLanguage}]`}</span>
                 </Link>
             </div>
@@ -85,30 +85,6 @@ function pad(x) {
     return x;
 }
 
-function Approvals(props) {
-    let [count, setCount] = useState(props.count);
-
-    if(props.official)
-        return <></>
-
-    async function addApproval() {
-        let text = await setApproval({story_id: props.id});
-        if(text !== undefined) {
-            let count = parseInt(text)
-            setCount(count)
-            if(count === 0)
-                set_status("draft");
-            if(count === 1)
-                set_status("feedback");
-            if(count >= 2)
-                set_status("finished");
-        }
-    }
-    return <span className="approval" onClick={addApproval}>
-        {"👍 "+count}
-    </span>
-}
-
 function DropDownStatus(props) {
 
     let [loading, setLoading] = useState(0);
@@ -159,16 +135,7 @@ function DropDownStatus(props) {
             return "📢 published"
         return status
     }
-    /*
-    <div className="status_dropdown_container">
-            <div className="status_dropdown">
-            <p><b>draft:</b> author is still working on it</p>
-            <p><b>feedback:</b> author gave approval</p>
-            <p><b>finished:</b> others gave their approval</p>
-            <p><b>published:</b> the whole set is finished</p>
-        </div>
-     */
-    let states = ["draft", "feedback", "finished"];
+
     return <div className="status_field">
         {<span className={"status_text"}>{status_wrapper(status, props.public)}</span>} {loading === 1 ? <SpinnerBlue /> :
         loading ===-1 ? <img title="an error occurred" alt="error" src="/icons/error.svg"/> : <></>}
@@ -176,16 +143,6 @@ function DropDownStatus(props) {
         {"👍 "+count}
     </span>}
         </div>
-    /*
-    return <div className="status_dropdown_container">
-        {<span className={"status_text"}>{status_wrapper(status, props.public)}</span>} {loading === 1 ? <SpinnerBlue /> :
-                  loading ===-1 ? <img title="an error occurred" alt="error" src="icons/error.svg"/> : <></>}
-        <div className="status_dropdown">
-        {states.map((state, i) =>
-            <span key={i} className="status_value" onClick={() => changeState(state)}>{state}</span>
-        )}
-        </div></div>
-     */
 }
 
 function EditList(props) {
@@ -249,6 +206,7 @@ function EditList(props) {
     </>
 }
 
+
 export function EditorOverview() {
     let { id } = useParams();
     let course_id = parseInt(id);
@@ -271,7 +229,7 @@ export function EditorOverview() {
 
     return <>
         <div id="toolbar">
-            <CourseEditorHeader courses={courses} course_id={course_id} showImport={showImport} do_setShowImport={do_setShowImport} />
+            <CourseEditorHeader username={props.username} doLogout={props.doLogout} courses={courses} course_id={course_id} showImport={showImport} do_setShowImport={do_setShowImport} />
         </div>
         <div id="root">
             <CourseList courses={courses} course_id={course_id} setCourse={doSetCourse}/>
@@ -307,8 +265,8 @@ export function CourseEditorHeader(props) {
         </div></>
     return <><div className="AvatarEditorHeader">
         <b>Course-Editor</b>
-        <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
-        <Flag className={"flag_sub"} flag={course.fromLanguageFlag} flag_file={course.fromLanguageFlagFile}/>
+        <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
+        <Flag iso={course.fromLanguage} width={40*0.9} className={"flag_sub"} flag={course.fromLanguageFlag} flag_file={course.fromLanguageFlagFile}/>
         <span className={"AvatarEditorHeaderFlagname"} data-cy="course-title">{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
         {course.official ? <span data-cy="label_official"><i>official</i></span> :
             !props.showImport ?
@@ -323,5 +281,6 @@ export function CourseEditorHeader(props) {
             <span>Back</span>
             </div>
         }
+        <LoggedInButton username={props.username} doLogout={props.doLogout}/>
     </div></>
 }

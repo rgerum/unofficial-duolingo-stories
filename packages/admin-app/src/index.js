@@ -1,7 +1,7 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import {LoginDialog, useUsername} from "./login";
-import {Spinner} from "./react/spinner";
+import {Spinner} from "story-component";
 import {UserList} from "./user-editor";
 import {LanguageList} from "./language-editor"
 import {
@@ -9,16 +9,15 @@ import {
     Routes,
     Route,
     Link,
-    useParams,
 } from "react-router-dom";
 import {CourseList} from "./course-editor";
 import {Sync} from "./github-sync";
+import {LoggedInButton} from "./login";
 
 
 export function LoginWrapper() {
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
 
-    console.log(username)
     // loading
     if (username === undefined) return <Spinner/>
     // no username show login
@@ -32,6 +31,7 @@ export function LoginWrapper() {
             <Link to="/languages">languages</Link>
             <Link to="/courses">courses</Link>
             <Link to="/sync">sync</Link>
+            <LoggedInButton username={username} doLogout={doLogout}/>
         </div>
         <div id="root">
             <Routes>

@@ -3,9 +3,8 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 
-import {Story} from "story-component";
+import {Story, Spinner, useDataFetcher} from "story-component";
 
-import {useDataFetcher} from "./hooks";
 import {IndexContent} from "./overview";
 import {UserActivationOrReset} from "./user_activation_or_reset";
 import {
@@ -15,9 +14,9 @@ import {
     Link,
     useParams,
 } from "react-router-dom";
-import {Spinner} from "./react/spinner";
 import {getStoryJSON} from "story-component/src/components/includes";
 import {LoginDialog} from "./login";
+
 
 function StoryP() {
     let { id } = useParams();

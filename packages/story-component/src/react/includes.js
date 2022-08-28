@@ -1,12 +1,49 @@
-export function now() {
-    var day = ((this.getDate() < 10)?"0":"") + this.getDate();
-    var month = (((this.getMonth()+1) < 10)?"0":"") + (this.getMonth()+1);
-    var year = this.getFullYear();
-    var hours = ((this.getHours() < 10)?"0":"") + this.getHours();
-    var minutes = ((this.getMinutes() < 10)?"0":"") + this.getMinutes();
-    var seconds = ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
+import "./includes.css"
 
-    return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+export function setCookie(cname, cvalue, exdays) {
+    if(!exdays) {
+        document.cookie = cname + "=" + cvalue + ";"
+        return;
+    }
+    const d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    let expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+
+export function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return undefined;
+}
+
+
+
+export function isLocalNetwork(hostname) {
+    try {
+        if (hostname === undefined)
+            hostname = window.location.hostname;
+        return (
+            (['localhost', '127.0.0.1', '', '::1'].includes(hostname))
+            || (hostname.startsWith('192.168.'))
+            || (hostname.startsWith('10.0.'))
+            || (hostname.endsWith('.local'))
+        )
+    }
+    catch (e) {
+        return true;
+    }
 }
 
 export function fetch_post(url, data) {
@@ -15,6 +52,13 @@ export function fetch_post(url, data) {
     //very simply, doesn't handle complete objects
     for(var i in data){
         fd.append(i,data[i]);
+    }
+    if(!isLocalNetwork()) {
+        return fetch(url, {
+            method: "POST",
+            body: fd,
+            credentials: "same-origin"
+        });
     }
     var req = new Request(url,{
         method:"POST",

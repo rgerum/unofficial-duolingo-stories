@@ -1,6 +1,6 @@
 import React from 'react';
 import './login.css';
-import {useInput} from "./hooks.js";
+import {useInput} from "story-component";
 import {activate, reset_pw_check, reset_pw_set} from "./login.jsx";
 import {Link, useParams} from "react-router-dom";
 

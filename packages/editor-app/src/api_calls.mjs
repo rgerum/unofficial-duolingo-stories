@@ -1,52 +1,8 @@
-//import {fetch_post} from "./includes.mjs";
+import {fetch_post, setCookie, getCookie, isLocalNetwork} from "story-component";
 
 let backend_get = "https://editor.duostories.org/get"
 let backend_set = "https://editor.duostories.org/set"
 
-function getCookie(cname) {
-    let name = cname + "=";
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
-    for(let i = 0; i <ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return undefined;
-}
-
-function setCookie(cname, cvalue, exdays) {
-    if(!exdays) {
-        document.cookie = cname + "=" + cvalue + ";"
-        return;
-    }
-    const d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-    let expires = "expires="+ d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-}
-
-export function isLocalNetwork(hostname) {
-    try {
-        if (hostname === undefined)
-            hostname = window.location.hostname;
-        return (
-            (['localhost', '127.0.0.1', '', '::1'].includes(hostname))
-            || (hostname.startsWith('192.168.'))
-            || (hostname.startsWith('10.0.'))
-            || (hostname.endsWith('.local'))
-        )
-    }
-    catch (e) {
-        return true;
-    }
-}
-//import {FormData} from "formdata-node"
-//import fetch from "node-fetch";
 
 let login_data = {username: getCookie("username"), password: getCookie("password")}
 async function fetch_get(url) {
@@ -65,25 +21,6 @@ async function fetch_get(url) {
         mode: "cors"
     })
 }
-
-
-export async function fetch_post(url, data) {
-    /** like fetch but with post instead of get */
-    var fd = new FormData();
-    //very simply, doesn't handle complete objects
-    for(let i in login_data){
-        fd.append(i,login_data[i]);
-    }
-    for(let i in data){
-        fd.append(i,data[i]);
-    }
-    return fetch(url, {
-        method: "POST",
-        body: fd,
-        mode: "cors"
-    });
-}
-
 
 export async function getCourses() {
     try {
@@ -105,12 +42,16 @@ export async function getSession() {
     }
 }
 
-export async function login(data) {
-    // currenty only store the local cookies for local test
+export async function login(data, remember) {
+    // currently only store the local cookies for local test
     if(isLocalNetwork()) {
         login_data = data;
         setCookie("username", data["username"])
         setCookie("password", data["password"])
+    }
+    if(remember) {
+        setCookie("username", data["username"], 30);
+        setCookie("password", data["password"], 30);
     }
     // check if the user is logged in
     let reponse = await fetch_post(`${backend_get}/login`, data);

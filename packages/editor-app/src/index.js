@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {LoginDialog, useUsername} from "./login";
-import {Spinner} from "./react/spinner";
+import {Spinner} from "story-component";
 import {EditorOverview} from "./course-editor"
 import {AvatarMain} from "./avatar_editor";
 import {EditorNode} from "./story-editor";
@@ -29,7 +29,7 @@ export function LoginWrapper() {
     // no username show login
     if (username.username === undefined || username.role !== 1)
         return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
-
+        
     return <Routes>
         <Route path='/course/:id' element={<EditorOverview />}></Route>
         <Route path='/' element={<EditorOverview />}></Route>

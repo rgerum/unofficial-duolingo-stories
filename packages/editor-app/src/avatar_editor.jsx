@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
-import {useDataFetcher2, useInput} from './hooks'
-import {Spinner, SpinnerBlue} from './react/spinner'
-import {Flag} from './react/flag'
+import {useDataFetcher2, useInput, fetch_post, Flag} from 'story-component'
+import {Spinner, SpinnerBlue, LoggedInButton} from 'story-component'
 import {getAvatars, getLanguageName, getSpeakers, setAvatarSpeaker} from "./api_calls.mjs";
 import "./avatar_editor.css"
 import {fetch_post} from "./includes.mjs";
@@ -52,6 +51,7 @@ function Avatar(props) {
 
 function AvatarEditorHeader(props) {
     let language_data = props.language_data;
+    console.log("language_data", language_data)
 
     if(language_data === undefined)
         return <></>
@@ -61,10 +61,13 @@ function AvatarEditorHeader(props) {
             <span>Back</span>
         </Link>
         <b>Character-Editor</b>
-        <Flag flag={language_data.flag} flag_file={language_data.flag_file}/>
+        <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
         <span data-cy="language-name" className={"AvatarEditorHeaderFlagName"}>{language_data.name}</span>
+        <div style={{marginLeft: "auto"}}></div>
+        <LoggedInButton username={props.username} doLogout={props.doLogout}/>
     </div>
 }
+
 
 export function AvatarMain() {
     let {language} = useParams();
@@ -72,7 +75,7 @@ export function AvatarMain() {
 
     return <>
         <div id="toolbar">
-            <AvatarEditorHeader language={language} language_data={language_data}/>
+            <AvatarEditorHeader language={language} language_data={language_data} username={props.username} doLogout={props.doLogout}/>
         </div>
         <div id="root" className="character-editor-content">
             <AvatarNames language={language} language_data={language_data}/>

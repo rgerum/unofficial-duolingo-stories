@@ -1,6 +1,6 @@
 import './story-list.css'
 import {Link,} from "react-router-dom";
-import {Spinner} from "./react/spinner";
+import {Spinner} from "story-component";
 
 
 export function SetList(props) {
