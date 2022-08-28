@@ -3,7 +3,6 @@ import {useDataFetcher2, useInput, fetch_post, Flag} from 'story-component'
 import {Spinner, SpinnerBlue, LoggedInButton} from 'story-component'
 import {getAvatars, getLanguageName, getSpeakers, setAvatarSpeaker} from "./api_calls.mjs";
 import "./avatar_editor.css"
-import {fetch_post} from "./includes.mjs";
 import {useParams} from "react-router-dom";
 import {Link} from "react-router-dom";
 
@@ -69,7 +68,7 @@ function AvatarEditorHeader(props) {
 }
 
 
-export function AvatarMain() {
+export function AvatarMain(props) {
     let {language} = useParams();
     const [language_data, ] = useDataFetcher2(getLanguageName, [language]);
 

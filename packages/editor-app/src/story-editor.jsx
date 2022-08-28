@@ -108,7 +108,7 @@ export function EditorNode(props) {
     let navigate = useNavigate();
 
     React.useEffect(() => {
-        MountEditor(story, navigate);
+        MountEditor(story, navigate, props);
     }, []);// <SoundRecorder/>
     return <div id="body">
         <div id="toolbar">
@@ -127,7 +127,7 @@ export function EditorNode(props) {
 }
 
 
-function MountEditor(story_id, navigate) {
+function MountEditor(story_id, navigate, props) {
     let createScrollLookUp = () => {
         window.dispatchEvent(new CustomEvent("resize"));
     };

@@ -1,10 +1,9 @@
 import React, {useState} from 'react';
-import {useDataFetcher, useDataFetcher2} from './hooks'
-import {Spinner, SpinnerBlue} from './react/spinner'
-import {Flag} from './react/flag'
+import {useDataFetcher, useDataFetcher2} from 'story-component'
+import {Spinner, SpinnerBlue} from 'story-component'
+import {Flag, LoggedInButton} from 'story-component'
 import {getCourses, getCourse, getImportList, setImport, setStatus, setApproval} from "./api_calls.mjs";
 import "./course-editor.css"
-import { useLocalStorage } from '../../admin-app/src/hooks';
 import {Link, useNavigate, useParams,} from "react-router-dom";
 
 
@@ -207,7 +206,7 @@ function EditList(props) {
 }
 
 
-export function EditorOverview() {
+export function EditorOverview(props) {
     let { id } = useParams();
     let course_id = parseInt(id);
 
