@@ -1,6 +1,6 @@
 import React from 'react';
 import './login.css';
-import {useInput, fetch_post, setCookie, isLocalNetwork} from "story-component";
+import {useInput, fetch_post, setCookie, isLocalNetwork, LoggedInButton} from "story-component";
 import {get_backend} from "./api_calls";
 import {Link, useNavigate} from "react-router-dom";
 
@@ -187,21 +187,7 @@ export function Login(props) {
 
     //username = {role: 1, username: "test"}
     if(username !== undefined)
-        return <div id="loggedin" title={username.username}>
-            <span>{username.username.substring(0, 1)}</span>
-            <div id="diamond-wrap">
-                <div id="diamond"></div>
-            </div>
-            <div id="profile_dropdown">
-                {username.role !== 0 ? <div id="button_editor" className="profile_dropdown_button"
-                                               onClick={()=>{window.location.href = "https://editor.duostories.org"}}
-                >Editor</div> : null}
-                {username.admin !== 0 ? <div id="button_editor" className="profile_dropdown_button"
-                                            onClick={()=>{window.location.href = "https://admin.duostories.org"}}
-                >Admin</div> : null}
-                <div className="profile_dropdown_button" onClick={() => doLogout()} >Log out</div>
-            </div>
-        </div>
+        return <LoggedInButton username={username} doLogout={doLogout}/>
 
     return <Link id="log_in" to={"/login"}>
         <button className="button" onClick={() => setShowLogin(1)} style={{float: "none"}}>Log in</button>

@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
-import {useDataFetcher, useDataFetcher2, useEventListener, Flag} from 'story-component'
+import {useDataFetcher, useDataFetcher2, useEventListener, Flag, LoggedInButton} from 'story-component'
 import {Spinner, SpinnerBlue} from 'story-component'
-import {LoggedInButton} from './login'
 import {getCourses, getCourse, getImportList, setImport, setStatus, setApproval} from "./api_calls.mjs";
 import "./course-editor.css"
 import {useLocalStorage} from 'story-component';

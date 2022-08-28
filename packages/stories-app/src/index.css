@@ -86,14 +86,6 @@ body {
   }
 }
 
-#header_index {
-  display: block;
-  height: 50px;
-  padding-top: 10px;
-  border-bottom: 2px solid var(--header-border);
-}
-
-
 #quit {
   background-image: url(//d35aaqx5ub95lt.cloudfront.net/images/icon-sprite8.svg);
   background-position: -373px -154px;
@@ -150,7 +142,6 @@ hr {
   color: var(--duostories-title);
   font-weight: bold;
   font-size: 29px;
-  padding: 0 20px;
   text-decoration: none;
 }
 

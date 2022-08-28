@@ -1,4 +1,4 @@
-
+import "./includes.css"
 
 export function setCookie(cname, cvalue, exdays) {
     if(!exdays) {
@@ -12,7 +12,7 @@ export function setCookie(cname, cvalue, exdays) {
 }
 
 
-function getCookie(cname) {
+export function getCookie(cname) {
     let name = cname + "=";
     let decodedCookie = decodeURIComponent(document.cookie);
     let ca = decodedCookie.split(';');

@@ -1,4 +1,4 @@
-import {fetch_post, setCookie, isLocalNetwork} from "story-component";
+import {fetch_post, setCookie, getCookie, isLocalNetwork} from "story-component";
 
 let backend_get = "https://admin.duostories.org/get2"
 let backend_set = "https://admin.duostories.org/set2"

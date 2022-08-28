@@ -1,15 +1,9 @@
 
 #header_language {
-    height: 50px;
-    display: block;
-    float: left;
-    margin: 0 0 0 calc(100% - 198px - 200px);
+    margin-left: auto;
     position: relative;
-}
-
-#header_language > svg {
-    margin-left: 18px;
-    margin-top: 3px;
+    height: 32px;
+    padding: 7px 0;
 }
 
 #header_lang_selector{
@@ -69,7 +63,7 @@
     height: 10px;
     position: absolute;
     z-index: 2;
-    left: 27px;
-    top: 37.9px;
     display: none;
+    left: calc(50% - 12px);
+    bottom: -6px;
 }

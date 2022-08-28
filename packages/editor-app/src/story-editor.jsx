@@ -7,7 +7,7 @@ import {EditorSelection} from "@codemirror/state";
 import {Story, Flag} from "story-component";
 
 import {Cast} from "./react/cast";
-import {useDataFetcher2} from "story-component";
+import {useDataFetcher2, LoggedInButton} from "story-component";
 import {deleteStory, getAvatars, getImage, getLanguageName, getStory, setStory} from "./api_calls.mjs";
 
 import {processStoryFile} from "./story-editor/syntax_parser_new.mjs";
@@ -16,7 +16,6 @@ import {addScrollLinking} from "./story-editor/scroll_linking";
 import {add_resize} from "./story-editor/editor-resize";
 import {BrowserRouter} from "react-router-dom";
 import {SoundRecorder} from "./sound-recorder";
-import {LoggedInButton} from "./login";
 
 
 window.EditorView = EditorView
