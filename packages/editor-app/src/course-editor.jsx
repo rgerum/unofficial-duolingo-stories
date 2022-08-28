@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
-import {useDataFetcher, useDataFetcher2, useEventListener, Flag, LoggedInButton} from 'story-component'
-import {Spinner, SpinnerBlue} from 'story-component'
+import {useDataFetcher, useDataFetcher2} from './hooks'
+import {Spinner, SpinnerBlue} from './react/spinner'
+import {Flag} from './react/flag'
 import {getCourses, getCourse, getImportList, setImport, setStatus, setApproval} from "./api_calls.mjs";
 import "./course-editor.css"
-import {useLocalStorage} from 'story-component';
+import { useLocalStorage } from '../../admin-app/src/hooks';
+import {Link, useNavigate, useParams,} from "react-router-dom";
 
 
 function CourseList(props) {
@@ -13,14 +15,13 @@ function CourseList(props) {
     return <div id="languages">
         {courses.map((course, index) =>
             <div key={index}>
-                <a className={"course_selection_button" + (props.course_id === course.id ? " course_selection_button_active" : "")}
-                   href={`?course=${course.id}`}
-                   onClick={(e) => {e.preventDefault(); props.setCourse(course.id);}}
+                <Link className={"course_selection_button" + (props.course_id === course.id ? " course_selection_button_active" : "")}
+                   to={`/course/${course.id}`}
                 >
                     <span className="course_count">{course.count}</span>
                     <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
                     <span>{`${course.learningLanguageName} [${course.fromLanguage}]`}</span>
-                </a>
+                </Link>
             </div>
         )}
     </div>
@@ -30,15 +31,16 @@ function ImportList(props) {
     let course = props.course;
     const [courseImport, ] = useDataFetcher2(getImportList, [12, course.id]);
     const [importing, setImporting] = useState(false);
+    let navigate = useNavigate();
 
     async function do_import(id) {
         // prevent clicking the button twice
         if(importing) return
         setImporting(id);
-        console.log("do_impor", id, course.id);
+        console.log("do_import", id, course.id);
         let id2 = await setImport(id, course.id);
         console.log(id2, "?story="+id2);
-        window.location.href = "?story="+id2;
+        navigate("/story/"+id2);
     }
     return courseImport ?
         <>
@@ -191,7 +193,7 @@ function EditList(props) {
                     <td width="44px"><img alt={"story title"}
                         src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
                         width="44px" height={"40px"}/></td>
-                    <td style={{width: "100%"}}><a href={`?story=${story.id}`}>{story.name}</a></td>
+                    <td style={{width: "100%"}}><Link to={`/story/${story.id}`}>{story.name}</Link></td>
                     <td><DropDownStatus id={story.id} count={story.approvals} status={story.status} public={story.public} official={props.course.official}/></td>
                     <td>{story.username}</td>
                     <td>{story.date}</td>
@@ -204,21 +206,12 @@ function EditList(props) {
     </>
 }
 
-export function EditorOverview(props) {
-    let urlParams = new URLSearchParams(window.location.search);
+
+export function EditorOverview() {
+    let { id } = useParams();
+    let course_id = parseInt(id);
 
     const courses = useDataFetcher(getCourses);
-
-    const [courseIdSelected, setCourseIdSelected] = useLocalStorage("course_id_selected", urlParams.get("course"));
-
-    const [course_id, setCourseID] = React.useState(parseInt(courseIdSelected) || undefined);
-    
-    React.useEffect(() => {
-      if(!urlParams.get("course")) {
-        history.pushState({course: courseIdSelected}, "Language"+courseIdSelected, `?course=${courseIdSelected}`);
-      }
-    }, [courseIdSelected])
-
     const [course, ] = useDataFetcher2(getCourse, [course_id]);
 
     const [showImport, do_setShowImport] = React.useState(false);
@@ -230,19 +223,9 @@ export function EditorOverview(props) {
             return
         }
 
-        history.pushState({course: course_new}, "Language"+course_new, `?course=${course_new}`);
         setCourseID(course_new);
         setCourseIdSelected(course_new);
     }
-
-    useEventListener("popstate", (event) => {
-        let course = parseInt((new URLSearchParams(window.location.search)).get("course"))
-        if(event.state?.story)
-            changeStory(event.state?.story)
-        else {
-            setCourseID(event.state?.course || course)
-        }
-    })
 
     return <>
         <div id="toolbar">

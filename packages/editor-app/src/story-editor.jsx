@@ -14,13 +14,12 @@ import {processStoryFile} from "./story-editor/syntax_parser_new.mjs";
 import {example, highlightStyle} from "./story-editor/parser.mjs";
 import {addScrollLinking} from "./story-editor/scroll_linking";
 import {add_resize} from "./story-editor/editor-resize";
-import {BrowserRouter} from "react-router-dom";
+import {BrowserRouter, useParams, useNavigate} from "react-router-dom";
 import {SoundRecorder} from "./sound-recorder";
 
 
 window.EditorView = EditorView
 window.EditorSelection = EditorSelection
-let urlParams = new URLSearchParams(window.location.search);
 
 window.editorShowTranslations = false
 window.editorShowSsml = false
@@ -105,12 +104,11 @@ function StoryEditorHeader(props) {
 
 export function EditorNode(props) {
     let urlParams = new URLSearchParams(window.location.search);
+    let {story} = useParams();
+    let navigate = useNavigate();
 
     React.useEffect(() => {
-        if(window.view === undefined) {
-            window.view = "loading"
-            MountEditor(props);
-        }
+        MountEditor(story, navigate);
     }, []);// <SoundRecorder/>
     return <div id="body">
         <div id="toolbar">
@@ -129,7 +127,7 @@ export function EditorNode(props) {
 }
 
 
-function MountEditor(props) {
+function MountEditor(story_id, navigate) {
     let createScrollLookUp = () => {
         window.dispatchEvent(new CustomEvent("resize"));
     };
@@ -146,7 +144,7 @@ function MountEditor(props) {
     });
 
     window.button_back = function() {
-        window.location.href = "?course=" + story_data.course_id;
+        navigate(`/course/${story_data.course_id}`);
     }
 
     async function a() {
@@ -155,7 +153,7 @@ function MountEditor(props) {
                 document.querySelector("#button_delete span").innerText = "Deleting";
                 try {
                     await deleteStory({id: story_data.id, course_id: story_data.course_id, text: editor_text, name: story_meta.fromLanguageName});
-                    window.location.href = "?course=" + story_data.course_id;
+                    navigate(`/course/${story_data.course_id}`);
                 }
                 catch (e) {
                     document.querySelector("#button_delete span").innerText = "Delete";
@@ -198,7 +196,7 @@ function MountEditor(props) {
         let state = undefined;
         let editor_text = undefined;
 
-        let story_data = await getStory(urlParams.get("story"));
+        let story_data = await getStory(story_id);
         // cache the image
         getImage(story_data.image)
         let avatar_names_list = await getAvatars(story_data.learningLanguage)

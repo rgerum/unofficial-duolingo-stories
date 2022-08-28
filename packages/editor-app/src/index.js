@@ -5,11 +5,23 @@ import {Spinner} from "story-component";
 import {EditorOverview} from "./course-editor"
 import {AvatarMain} from "./avatar_editor";
 import {EditorNode} from "./story-editor";
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+} from "react-router-dom";
 
-
-let urlParams = new URLSearchParams(window.location.search);
 
 export function LoginWrapper() {
+    let urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.get("story"))
+        window.location = `/story/${urlParams.get("story")}`;
+    if(urlParams.get("course"))
+        window.location = `/course/${urlParams.get("course")}`;
+    if(urlParams.get("language"))
+        window.location = `/language/${urlParams.get("language")}`;
+
+
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
 
     // loading
@@ -17,22 +29,20 @@ export function LoginWrapper() {
     // no username show login
     if (username.username === undefined || username.role !== 1)
         return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
-
-    // logged in and allowed!
-    if(!urlParams.get("story") && !urlParams.get("language")) {
-        return <EditorOverview username={username} doLogout={doLogout} />
-    }
-    else if(!urlParams.get("story")) {
-        return <AvatarMain username={username} doLogout={doLogout} />
-    }
-    else {
-        return <EditorNode username={username} doLogout={doLogout} />
-    }
+        
+    return <Routes>
+        <Route path='/course/:id' element={<EditorOverview />}></Route>
+        <Route path='/' element={<EditorOverview />}></Route>
+        <Route path='/story/:story' element={<EditorNode />}></Route>
+        <Route path='/language/:language' element={<AvatarMain />}></Route>
+    </Routes>
 }
 
 ReactDOM.render(
     <React.StrictMode>
-        <LoginWrapper />
+        <Router>
+            <LoginWrapper />
+        </Router>
     </React.StrictMode>,
     document.getElementById('body')
 );

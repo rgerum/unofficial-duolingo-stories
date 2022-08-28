@@ -3,6 +3,10 @@ import {useDataFetcher2, useInput, fetch_post, Flag} from 'story-component'
 import {Spinner, SpinnerBlue, LoggedInButton} from 'story-component'
 import {getAvatars, getLanguageName, getSpeakers, setAvatarSpeaker} from "./api_calls.mjs";
 import "./avatar_editor.css"
+import {fetch_post} from "./includes.mjs";
+import {useParams} from "react-router-dom";
+import {Link} from "react-router-dom";
+
 
 function Avatar(props) {
     let avatar = props.avatar;
@@ -49,17 +53,13 @@ function AvatarEditorHeader(props) {
     let language_data = props.language_data;
     console.log("language_data", language_data)
 
-    function button_back() {
-        window.location.href = "?";
-    }
-
     if(language_data === undefined)
         return <></>
     return <div className="AvatarEditorHeader">
-        <div id="button_back" className="editor_button" onClick={button_back} style={{paddingLeft: 0}}>
+        <Link to={"/"} id="button_back" className="editor_button" style={{paddingLeft: 0}}>
             <div><img alt="icon back" src="/icons/back.svg" /></div>
             <span>Back</span>
-        </div>
+        </Link>
         <b>Character-Editor</b>
         <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
         <span data-cy="language-name" className={"AvatarEditorHeaderFlagName"}>{language_data.name}</span>
@@ -68,9 +68,9 @@ function AvatarEditorHeader(props) {
     </div>
 }
 
-export function AvatarMain(props) {
-    let urlParams = new URLSearchParams(window.location.search);
-    const [language, ] = React.useState(parseInt(urlParams.get("language")) || undefined);
+
+export function AvatarMain() {
+    let {language} = useParams();
     const [language_data, ] = useDataFetcher2(getLanguageName, [language]);
 
     return <>
