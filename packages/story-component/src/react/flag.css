@@ -24,3 +24,9 @@
     background-size: 36px;
     height: 26px;
 }
+
+.flag_border_rect {
+    fill: none;
+    stroke: var(--body-background);
+    stroke-width: 5;
+}

@@ -72,11 +72,13 @@ export function Flag(props) {
                 <image height="62"
                        href={`https://duostories.org/stories/flags/${props.flag_file}`}
                        width="78"></image>
+                <rect className={"flag_border_rect"} x="2" y="2" rx="12" ry="12" width="74" height="58"></rect>
         </svg>
     }
     return <svg className={props.className} viewBox={`0 ${count} 82 66`} data-test={`flag-${props.iso}`} style={style}>
             <image height="3168"
                    href="https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
                    width="82"></image>
+            <rect className={"flag_border_rect"} x="4" y={count+4} rx="12" ry="12" width="74" height="58"></rect>
     </svg>
 }
