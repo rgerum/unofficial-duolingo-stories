@@ -62,7 +62,7 @@ export function IndexContent(props) {
                 </p>
 
                 {lang !== undefined ?
-                    <SetList sets={course_data?.sets} /> :
+                    <SetList sets={course_data?.sets} desc={course_data?.desc} /> :
                     <CourseList courses={courses} />
                 }
 

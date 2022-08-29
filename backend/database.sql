@@ -59,6 +59,7 @@ create table course
     public           tinyint default 0      not null,
     official         int     default 0      not null,
     name             char(255) charset utf8 null,
+    `desc`           text                   null,
     constraint course_language_id_fk
         foreign key (learningLanguage) references language (id),
     constraint course_language_id_fk_2
@@ -122,7 +123,9 @@ create table story_approval
         primary key,
     story_id int                                  not null,
     user_id  int                                  not null,
-    date     datetime default current_timestamp() not null
+    date     datetime default current_timestamp() not null,
+    constraint story_approval_story_id_user_id_uindex
+        unique (story_id, user_id)
 );
 
 create table story_done

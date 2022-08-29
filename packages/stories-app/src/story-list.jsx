@@ -10,6 +10,13 @@ export function SetList(props) {
         return <Spinner />;
 
     return <div id="story_list">
+        {props.desc ?
+            <div className="set_list">
+                <div className="set_title">About</div><p>
+                {props.desc}
+            </p>
+            </div>
+            : <></>}
         {sets.map(stories => (
             <div key={stories[0].set_id} className="set_list">
                 <div className="set_title">Set {stories[0].set_id}</div>

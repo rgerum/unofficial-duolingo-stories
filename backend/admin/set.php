@@ -170,6 +170,7 @@ else if($action == "course") {
         "fromLanguage" => "int",
         "public" => "int",
         "name" => "string",
+        "desc" => "string",
 ];
     $id = updateDatabase($keys, "course", $_POST, "id");
 }
