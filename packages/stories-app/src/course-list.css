@@ -102,15 +102,3 @@
     opacity: 0.5;
     font-size: 15px;
 }
-
-@media (prefers-color-scheme: dark) {
-    .language_select_button {
-        border-color: #37464f;
-    }
-    .language_select_button_text {
-        color: #f1f7fb;
-    }
-    .course_list hr {
-        border-top-color: #37464f;
-    }
-}

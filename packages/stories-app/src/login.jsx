@@ -143,11 +143,6 @@ export async function logout() {
 }
 
 
-export function LoginButton() {
-    let [username, doLogin, doLogout] = useUsername();
-    return <Login useUsername={[username, doLogin, doLogout]} />
-}
-
 export function useUsername() {
     let [username, setUsername] = React.useState(null);
     let [showLogin, setShowLogin] = React.useState(0);
@@ -185,7 +180,7 @@ export function useUsername() {
 export function Login(props) {
     let [username, , doLogout, , setShowLogin] = props.useUsername;
 
-    //username = {role: 1, username: "test"}
+    //username = {role: 1, admin: 0, username: "test"}
     if(username !== undefined)
         return <LoggedInButton username={username} doLogout={doLogout}/>
 
