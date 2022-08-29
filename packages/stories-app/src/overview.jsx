@@ -55,7 +55,7 @@ export function IndexContent(props) {
                 <h1 className={"main_title"}>Unofficial Duolingo Stories</h1>
                 <p className={"title_desc"}>
                 A community project to bring the original <a href="https://www.duolingo.com/stories">Duolingo Stories</a> to new languages.
-                    {courses ? <><br/>{story_count} stories in {language_count} languages and counting!</> : <></>}
+                    {courses ? <><br/>{story_count} stories in {language_count} courses and counting!</> : <></>}
                 </p>
                 <p className={"title_desc"}>
                 If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.
