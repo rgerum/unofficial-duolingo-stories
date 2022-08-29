@@ -43,15 +43,19 @@ export function IndexContent(props) {
     
     // Split off minor conlangs - we don't want on front page
     let conlangs = [];
-    
-    if (props.filter){
-        if ("conlang" in props.filter){
-            for (let course in courses) {
-                if (course.isConlang) {
-                    conlangs.push(course)
+
+    for (let course in courses) {               
+        if (props.filter){
+            if ("conlang" in props.filter){
+                    if (course.isConlang) {
+                        conlangs.push(course)
+                    }
+                    courses = conlangs;
+            } else {
+                for (let course in conlangs) {
+                    courses = courses.filter(item => item !== course);
                 }
             }
-            courses = conlangs;
         }
     }
     
