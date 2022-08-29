@@ -24,7 +24,7 @@ function Error() {
 
 export function IndexContent(props) {
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
-    const courses = useDataFetcher(getPublicCourses, []);
+    let courses = useDataFetcher(getPublicCourses, []);
     
     const courses_user = useDataFetcher(getCoursesUser, [username]);
     let {lang,lang_base} = useParams();
@@ -81,8 +81,9 @@ export function IndexContent(props) {
                 If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.
                 </p>
                 {Object.keys(conlangs).length ? 
-                    <p> <b> Notice: </b>You're currently on the page for conlangs without ISO-3 codes. We keep them here as to not clutter the front page, but we're always happy to have more!
-                        <br> To return to the main page, click <Link to="/" >here</Link>. </p>
+                    <p><b>Notice:</b> You're currently on the page for conlangs without ISO-3 codes. We keep them here as to not clutter the front page, but we're always happy to have more!
+                        <br/> To return to the main page, click <Link to="/" >here</Link>.
+                    </p>
                     : <></>}
 
                 {lang !== undefined ?
