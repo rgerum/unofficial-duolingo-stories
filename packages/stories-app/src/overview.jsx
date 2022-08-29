@@ -82,7 +82,7 @@ export function IndexContent(props) {
                 </p>
                 {Object.keys(conlangs).length ? 
                     <p> <b> Notice: </b>You're currently on the page for conlangs without ISO-3 codes. We keep them here as to not clutter the front page, but we're always happy to have more!
-                        <br> To return to the main page, click <a href="https://duostories.org">here</a>. </p>
+                        <br> To return to the main page, click <Link to="/" >here</Link>. </p>
                     : <></>}
 
                 {lang !== undefined ?
