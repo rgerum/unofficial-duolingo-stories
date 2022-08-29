@@ -25,20 +25,40 @@ function Error() {
 export function IndexContent(props) {
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
     const courses = useDataFetcher(getPublicCourses, []);
+    
     const courses_user = useDataFetcher(getCoursesUser, [username]);
     let {lang,lang_base} = useParams();
     const course_data = useDataFetcher(getStoriesSets, [lang, lang_base, username]);
 
+    
     let story_count = 0;
     let language_count = 0;
-
+    
     if(courses) {
         for (let course of courses) {
             story_count += course.count;
             language_count += 1;
         }
     }
+    
+    // Split off minor conlangs - we don't want on front page
+    let conlangs = [];
 
+    for (let course in courses) {               
+        if (props.filter){
+            if ("conlang" in props.filter){
+                    if (course.isConlang) {
+                        conlangs.push(course)
+                    }
+                    courses = conlangs;
+            } else {
+                for (let course in conlangs) {
+                    courses = courses.filter(item => item !== course);
+                }
+            }
+        }
+    }
+    
     let error = props.error;
     if(lang !== undefined && course_data?.sets?.length === 0)
         error = true;
@@ -60,6 +80,10 @@ export function IndexContent(props) {
                 <p className={"title_desc"}>
                 If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.
                 </p>
+                {Object.keys(conlangs).length ? 
+                    <p> <b> Notice: </b>You're currently on the page for conlangs without ISO-3 codes. We keep them here as to not clutter the front page, but we're always happy to have more!
+                        <br> To return to the main page, click <Link to="/" >here</Link>. </p>
+                    : <></>}
 
                 {lang !== undefined ?
                     <SetList sets={course_data?.sets} desc={course_data?.desc} /> :

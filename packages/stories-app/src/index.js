@@ -46,6 +46,7 @@ function App() {
 
     return <Routes>
             <Route path='/' element={<IndexContent />}></Route>
+            <Route path='conlangs' element={<IndexContent filter={'conlang'} />}></Route>
             <Route path='/:lang-:lang_base' element={<IndexContent />}></Route>
             <Route path='/login' element={<LoginDialog />}></Route>
             <Route path='/story/:id' element={<StoryP />}></Route>
