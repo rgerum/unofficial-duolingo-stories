@@ -111,11 +111,43 @@ else if($action == "login") {
     die();
 }
 
+
+if($action == "stats") {
+echo "[";
+query_json_list($db, 'SELECT c.id, l1.short as "learning", l2.short as "from", l1.name as "learningName", l2.name as "fromName" FROM course c
+                      JOIN language l1 ON c.learningLanguage = l1.id
+                      JOIN language l2 ON c.fromLanguage = l2.id;');
+echo ",";
+query_json_list($db, "SELECT t.yr,
+        t.mth,
+        course_id,
+        t.stories_done,
+        t.stories_done_registered,
+        t.user_count,
+        t.stories_done_registered/t.stories_done as registered_user_percentage,
+        t.user_count / (t.stories_done_registered/t.stories_done) as extrapolated_users
+
+ FROM (
+ SELECT
+    EXTRACT(YEAR FROM c.time) AS yr,   -- for each year
+    EXTRACT(MONTH FROM c.time) AS mth, -- & month combination
+    s.course_id AS course_id,
+    count(*) AS stories_done,
+    count(user_id) AS stories_done_registered,
+    count(DISTINCT(user_id)) AS user_count
+ FROM
+    story_done c
+ JOIN story s on s.id = c.story_id
+ GROUP BY yr, mth, s.course_id
+ ORDER BY yr DESC , mth DESC) as t");
+ echo "]";
+ die();
+}
+
 if(!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) {
     http_response_code(403);
     die();
 }
-
 
 if($action == "avatar") {
     $id = intVal($_REQUEST['id']);
