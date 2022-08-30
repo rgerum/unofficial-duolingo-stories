@@ -33,27 +33,27 @@ export function IndexContent(props) {
     
     let story_count = 0;
     let language_count = 0;
-    
+
+    // Split off minor conlangs - we don't want on front page
+    let conlangs = [];
+
     if(courses) {
         for (let course of courses) {
             story_count += course.count;
             language_count += 1;
         }
-    }
-    
-    // Split off minor conlangs - we don't want on front page
-    let conlangs = [];
 
-    for (let course in courses) {               
-        if (props.filter){
-            if (props.filter === "conlang"){
+        for (let course of courses) {
+            if (props.filter) {
+                if (props.filter === "conlang") {
                     if (course.conlang) {
                         conlangs.push(course)
                     }
                     courses = conlangs;
-            } else {
-                for (let course in conlangs) {
-                    courses = courses.filter(item => item !== course);
+                } else {
+                    for (let course in conlangs) {
+                        courses = courses.filter(item => item !== course);
+                    }
                 }
             }
         }
