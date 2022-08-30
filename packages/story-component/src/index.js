@@ -16,3 +16,6 @@ export {setCookie, getCookie, isLocalNetwork, fetch_post, inputs_to_dict, dict_t
 
 import {LoggedInButton} from "./react/loggedinbutton";
 export {LoggedInButton}
+
+import {load_dark_mode} from "./react/dark_mode"
+export {load_dark_mode}

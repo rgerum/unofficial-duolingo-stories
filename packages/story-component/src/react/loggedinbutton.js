@@ -14,6 +14,9 @@ export function LoggedInButton(props) {
                 <div id="diamond"></div>
             </div>
             <div id="profile_dropdown">
+                <div id="button_editor" className="profile_dropdown_button button_dark_mode" onClick={()=>{window.toggle_dark()}}>
+                    Dark Mode
+                </div>
                 {username.role !== 0 ?
                     <div id="button_editor" className="profile_dropdown_button" onClick={()=>{window.location.href = "https://www.duostories.org"}}>
                         Stories

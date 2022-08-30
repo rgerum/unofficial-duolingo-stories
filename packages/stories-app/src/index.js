@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 import {getStoryJSON} from "story-component/src/components/includes";
 import {LoginDialog} from "./login";
+import {load_dark_mode} from "story-component";
 
 
 function StoryP() {
@@ -82,3 +83,5 @@ ReactDOM.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+window.addEventListener("DOMContentLoaded", load_dark_mode);

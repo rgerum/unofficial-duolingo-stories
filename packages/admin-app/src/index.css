@@ -1,4 +1,4 @@
-body {
+:root {
     --title-color-dim: #777;
 
     --header-border: lightgrey;
@@ -13,31 +13,6 @@ body {
     --body-background: white;
     --body-background-faint: #f2f2f2;
     --body-background-hover: #ddd;
-
-    --button-background: #58cc02;
-    --button-color: white;
-    --button-border: #58a700;
-
-    --button-inactive-background: #e5e5e5;
-    --button-inactive-color: #afafaf;
-
-    --button-blue-background: #1cb0f6;
-    --button-blue-border: #1899d6;
-    --button-blue-color: var(--button-color);
-    --button-side-border: 0px;
-
-    --language-selector-hover-background: #ddf4ff;
-
-    --input-background: #f7f7f7;
-    --input-border: #e5e5e5;
-
-    --error-red: #ea2b2b;
-    --link-blue: #1cb0f6;
-
-    --profile-background: #1cb0f6;
-    --profile-text: white;
-
-    --story-button-gold: rgb(255, 177, 0);
 
     --svg-fill: #fbfbfb;
     --svg-stroke: #eee;
@@ -211,7 +186,7 @@ body {
     position: absolute;
     background-color: #f1f1f1;
     min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
     z-index: 1;
 }
 

@@ -14,31 +14,6 @@ body {
     --body-background-faint: #f2f2f2;
     --body-background-hover: #ddd;
 
-    --button-background: #58cc02;
-    --button-color: white;
-    --button-border: #58a700;
-
-    --button-inactive-background: #e5e5e5;
-    --button-inactive-color: #afafaf;
-
-    --button-blue-background: #1cb0f6;
-    --button-blue-border: #1899d6;
-    --button-blue-color: var(--button-color);
-    --button-side-border: 0px;
-
-    --language-selector-hover-background: #ddf4ff;
-
-    --input-background: #f7f7f7;
-    --input-border: #e5e5e5;
-
-    --error-red: #ea2b2b;
-    --link-blue: #1cb0f6;
-
-    --profile-background: #1cb0f6;
-    --profile-text: white;
-
-    --story-button-gold: rgb(255, 177, 0);
-
     --svg-fill: #fbfbfb;
     --svg-stroke: #eee;
 }
@@ -85,64 +60,6 @@ body {
     }
     .course_count {
         color: #c4c4c4;
-    }
-}
-
-
-@media (prefers-color-scheme: dark) {
-    #root {
-        --editor-ssml: lightgray;
-    }
-    #preview {
-        --color_base_border: #e5e5e5;
-        --color_base_background: #fff;
-        --color_base_color: black;
-        --editor-selection-background: #f3f9ff;
-        --editor-selection-border: #a4d1ff;
-        --editor-ssml: lightgray;
-
-        --title-color-dim: #777;
-
-        --header-border: lightgrey;
-
-        --overview-hr: #e5e5e5;
-
-        --duostories-title: #78c800;
-
-        --text-color: black;
-        --text-color-dim: #4c4c4c;
-        --link-hover: #78c800;
-        --body-background: white;
-        --body-background-faint: #f2f2f2;
-        --body-background-hover: #ddd;
-
-        --button-background: #58cc02;
-        --button-color: white;
-        --button-border: #58a700;
-
-        --button-inactive-background: #e5e5e5;
-        --button-inactive-color: #afafaf;
-
-        --button-blue-background: #1cb0f6;
-        --button-blue-border: #1899d6;
-        --button-blue-color: var(--button-color);
-        --button-side-border: 0px;
-
-        --language-selector-hover-background: #ddf4ff;
-
-        --input-background: #f7f7f7;
-        --input-border: #e5e5e5;
-
-        --error-red: #ea2b2b;
-        --link-blue: #1cb0f6;
-
-        --profile-background: #1cb0f6;
-        --profile-text: white;
-
-        --story-button-gold: rgb(255, 177, 0);
-
-        --svg-fill: #fbfbfb;
-        --svg-stroke: #eee;
     }
 }
 
