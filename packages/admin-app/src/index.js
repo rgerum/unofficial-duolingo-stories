@@ -31,7 +31,7 @@ export function LoginWrapper() {
             <Link to="/languages">languages</Link>
             <Link to="/courses">courses</Link>
             <Link to="/sync">sync</Link>
-            <LoggedInButton username={username} doLogout={doLogout}/>
+            <LoggedInButton username={username} doLogout={doLogout} page="admin"/>
         </div>
         <div id="root">
             <Routes>

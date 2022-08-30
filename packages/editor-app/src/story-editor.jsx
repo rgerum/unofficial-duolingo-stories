@@ -97,7 +97,7 @@ function StoryEditorHeader(props) {
             <div><img alt="icon save" src="/icons/save.svg" /></div>
             <span>Save</span>
         </div>
-        <LoggedInButton username={props.username} doLogout={props.doLogout}/>
+        <LoggedInButton username={props.username} doLogout={props.doLogout} page="editor"/>
     </div></>
 }
 

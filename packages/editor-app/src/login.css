@@ -85,3 +85,7 @@
     cursor: pointer;
     color: var(--link-blue);
 }
+
+#loggedin > span {
+    padding-left: 0;
+}

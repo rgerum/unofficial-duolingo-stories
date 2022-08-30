@@ -280,6 +280,6 @@ export function CourseEditorHeader(props) {
             <span>Back</span>
             </div>
         }
-        <LoggedInButton username={props.username} doLogout={props.doLogout}/>
+        <LoggedInButton username={props.username} doLogout={props.doLogout} page="editor"/>
     </div></>
 }

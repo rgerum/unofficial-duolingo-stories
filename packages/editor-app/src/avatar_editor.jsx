@@ -63,7 +63,7 @@ function AvatarEditorHeader(props) {
         <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
         <span data-cy="language-name" className={"AvatarEditorHeaderFlagName"}>{language_data.name}</span>
         <div style={{marginLeft: "auto"}}></div>
-        <LoggedInButton username={props.username} doLogout={props.doLogout}/>
+        <LoggedInButton username={props.username} doLogout={props.doLogout} page="editor"/>
     </div>
 }
 

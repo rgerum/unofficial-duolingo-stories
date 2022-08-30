@@ -182,7 +182,7 @@ export function Login(props) {
 
     //username = {role: 1, admin: 0, username: "test"}
     if(username !== undefined)
-        return <LoggedInButton username={username} doLogout={doLogout}/>
+        return <LoggedInButton username={username} doLogout={doLogout} page="stories"/>
 
     return <Link id="log_in" to={"/login"}>
         <button className="button" onClick={() => setShowLogin(1)} style={{float: "none"}}>Log in</button>
