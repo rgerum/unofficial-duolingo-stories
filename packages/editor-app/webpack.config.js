@@ -21,6 +21,10 @@ module.exports = function(_env, argv) {
         module: {
             rules: [
                 {
+                    test: /\.js$/,
+                    loader: 'ify-loader'
+                },
+                {
                     test: /\.jsx?$/,
                     exclude: /node_modules/,
                     use: {

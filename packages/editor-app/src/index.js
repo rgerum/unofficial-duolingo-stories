@@ -10,6 +10,7 @@ import {
     Routes,
     Route,
 } from "react-router-dom";
+import {Stats} from "./stats";
 
 
 export function LoginWrapper() {
@@ -35,6 +36,7 @@ export function LoginWrapper() {
         <Route path='/' element={<EditorOverview username={username} doLogout={doLogout}/>}></Route>
         <Route path='/story/:story' element={<EditorNode username={username} doLogout={doLogout}/>}></Route>
         <Route path='/language/:language' element={<AvatarMain username={username} doLogout={doLogout}/>}></Route>
+        <Route path='/stats' element={<Stats username={username} doLogout={doLogout}/>}></Route>
     </Routes>
 }
 

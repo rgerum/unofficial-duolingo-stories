@@ -8,8 +8,8 @@
     "cypress:open": "cypress open"
   },
   "dependencies": {
-    "@codemirror/basic-setup": "^0.19.3",
     "@codemirror/autocomplete": "^0.19.15",
+    "@codemirror/basic-setup": "^0.19.3",
     "@codemirror/commands": "^0.19.8",
     "@codemirror/lang-javascript": "^0.19.7",
     "@codemirror/language": "^0.19.10",
@@ -19,7 +19,9 @@
     "@codemirror/stream-parser": "^0.19.2",
     "@codemirror/view": "^0.19.48",
     "diff": "^5.0.0",
+    "ify-loader": "^1.1.0",
     "node-fetch": "^3.1.0",
+    "plotly.js-dist": "^2.14.0",
     "story-component": "file:../story-component"
   }
 }
