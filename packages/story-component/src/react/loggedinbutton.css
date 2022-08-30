@@ -2,6 +2,7 @@
 #loggedin {
     float: right;
     width: 50px;
+    min-width: 50px;
     background: var(--profile-background);
     border-radius: 30px;
     height: 50px;
