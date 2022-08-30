@@ -97,32 +97,23 @@ function get_values($names) {
     return $output;
 }
 
+function check_login($username, $password) {
+    $username = mysqli_escape_string($db, $username);
+    $user = mysqli_fetch_assoc(mysqli_query($db, "SELECT * FROM user WHERE username = '$username' AND activated = 1"));
+    $hash = $user["password"];
+    if(phpbb_check_hash($password, $hash)) {
+        $_SESSION["user"] = $user;
+    }
+}
+
 $db = database();
 
 
 if( (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) && isset($_COOKIE['username'])) {
-    //http_response_code(403);
-
-    // try to login again
-    list($username, , $password) = get_values($db, ['username', 'password']);
-    $username = mysqli_escape_string($db, $_COOKIE["username"]);
-    $user = mysqli_fetch_assoc(mysqli_query($db, "SELECT * FROM user WHERE username = '$username' AND activated = 1"));
-    $hash = $user["password"];
-    if(phpbb_check_hash($_COOKIE["password"], $hash)) {
-        $_SESSION["user"] = $user;
-    }
+    check_login($_COOKIE['username'], $_COOKIE["password"]);
 }
 if( (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) && isset($_REQUEST['username'])) {
-    //http_response_code(403);
-
-    // try to login again
-    list($username, , $password) = get_values($db, ['username', 'password']);
-    $username = mysqli_escape_string($db, $_REQUEST["username"]);
-    $user = mysqli_fetch_assoc(mysqli_query($db, "SELECT * FROM user WHERE username = '$username' AND activated = 1"));
-    $hash = $user["password"];
-    if(phpbb_check_hash($_REQUEST["password"], $hash)) {
-        $_SESSION["user"] = $user;
-    }
+    check_login($_REQUEST['username'], $_REQUEST["password"]);
 }
 
 $action = $_REQUEST['action'];
