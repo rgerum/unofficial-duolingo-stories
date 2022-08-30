@@ -27,7 +27,9 @@ export function CourseList(props) {
     }
     // sort the base languages and then add English as first (and most relevant)
     languages = languages.sort();
-    languages.unshift("English");
+    // if we have english courses add "English" as the first entry
+    if(base_languages["English"])
+        languages.unshift("English");
 
     return (
         <div>
