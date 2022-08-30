@@ -152,14 +152,15 @@ export function CourseList() {
                 <th data-js-sort-colnum="1">fromLanguage</th>
                 <th data-js-sort-colnum="1">public</th>
                 <th data-js-sort-colnum="2">name</th>
-                <th data-js-sort-colnum="3">desc</th>
+                <th data-js-sort-colnum="2">conlang</th>
+                <th data-js-sort-colnum="3">about</th>
                 <th data-js-sort-colnum="4"></th>
             </tr>
             </thead>
             <tbody>
-            <AttributeList languages={languages_id} obj={{"name":"", "public": 0, "fromLanguage": 1, "learningLanguage": -1, "desc": ""}} attributes={["learningLanguage","fromLanguage","public", "name", "desc"]} />
+            <AttributeList languages={languages_id} obj={{"name":"", "public": 0, "fromLanguage": 1, "learningLanguage": -1, "about": "", "conlang": 0}} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "about"]} />
             {filtered_courses.map(user =>
-                <AttributeList key={user.id} languages={languages_id} obj={user} attributes={["learningLanguage","fromLanguage","public", "name", "desc"]} />
+                <AttributeList key={user.id} languages={languages_id} obj={user} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "about"]} />
             )}
             </tbody>
         </table>

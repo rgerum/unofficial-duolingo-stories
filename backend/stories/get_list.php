@@ -24,7 +24,7 @@ if(isset($_GET['lang']) && isset($_GET['lang_base'])) {
     $course = query_json_list_return($db,
         "SELECT course.id, course.name, course.fromLanguage as fromLanguageID, l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
                                         course.learningLanguage as learningLanguageID, l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
-                                  course.public, course.official, course.desc FROM course
+                                  course.public, course.official, course.about FROM course
         LEFT JOIN language l1 ON l1.id = course.fromLanguage
         LEFT JOIN language l2 ON l2.id = course.learningLanguage
         WHERE course.id = (SELECT c.id FROM course c

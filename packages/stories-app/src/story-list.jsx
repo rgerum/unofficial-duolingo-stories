@@ -10,10 +10,10 @@ export function SetList(props) {
         return <Spinner />;
 
     return <div id="story_list">
-        {props.desc ?
+        {props.about ?
             <div className="set_list">
                 <div className="set_title">About</div><p>
-                {props.desc}
+                {props.about}
             </p>
             </div>
             : <></>}

@@ -54,12 +54,13 @@ create table course
 (
     id               int auto_increment
         primary key,
-    learningLanguage int     default 0      not null,
-    fromLanguage     int     default 0      not null,
-    public           tinyint default 0      not null,
-    official         int     default 0      not null,
+    learningLanguage int        default 0   not null,
+    fromLanguage     int        default 0   not null,
+    public           tinyint    default 0   not null,
+    official         int        default 0   not null,
     name             char(255) charset utf8 null,
-    `desc`           text                   null,
+    about            text                   null,
+    conlang          tinyint(1) default 0   null,
     constraint course_language_id_fk
         foreign key (learningLanguage) references language (id),
     constraint course_language_id_fk_2
