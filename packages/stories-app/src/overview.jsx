@@ -46,7 +46,7 @@ export function IndexContent(props) {
 
     for (let course in courses) {               
         if (props.filter){
-            if ("conlang" in props.filter){
+            if (props.filter === "conlang"){
                     if (course.isConlang) {
                         conlangs.push(course)
                     }
