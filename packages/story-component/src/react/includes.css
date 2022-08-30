@@ -8,6 +8,12 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 20px;
     position: fixed;
+    padding: 0 calc( (100% - 1000px) / 2);
+}
+
+@media (max-width: 1040px) {
+    #header_index {
+        padding: 0 20px;
+    }
 }
