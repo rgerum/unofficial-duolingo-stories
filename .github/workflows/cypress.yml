@@ -32,7 +32,7 @@ jobs:
       run: cd packages/editor-app && npm run build
       
     - name: Start Editor Server
-      run: cd packages/editor-app && npm run start
+      run: cd packages/editor-app && npm run start &
       
     - name: Test Editor
       run: cd packages/editor-app && npx cypress run
@@ -59,7 +59,7 @@ jobs:
       run: cd packages/stories-app && npm run build
   
     - name: Start Stories Server
-      run: cd packages/stories-app && npm run start
+      run: cd packages/stories-app && npm run start &
       
     - name: Test Stories
       run: cd packages/stories-app && npx cypress run
