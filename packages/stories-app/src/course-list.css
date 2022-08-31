@@ -102,3 +102,27 @@
     opacity: 0.5;
     font-size: 15px;
 }
+
+.language_select_button.conlang-link {
+  width: fit-content;
+  max-width: 953px;
+  flex-flow: row;
+  justify-content: flex-start;
+  gap: 15px;
+  height: min-content;
+}
+.conlang-flag {
+  margin-inline-start: max(10%, 40px);
+  padding-block: 25px;
+}
+.arrow {
+  justify-self: flex-end;
+  position: absolute;
+  right: 0;
+}
+
+@media screen and (max-width: 500px) {
+  .arrow {
+    display: none
+  }
+}
