@@ -78,7 +78,8 @@ export function IndexContent(props) {
                     {courses ? <><br/>{story_count} stories in {language_count} courses and counting!</> : <></>}
                 </p>
                 <p className={"title_desc"}>
-                If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.
+                If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a><br/>
+                or learn more about the project in our <Link to={"/faq"}>FAQ</Link>.
                 </p>
                 {Object.keys(conlangs).length ? 
                     <p><b>Notice:</b> You're currently on the page for conlangs without ISO-3 codes. We keep them here as to not clutter the front page, but we're always happy to have more!
