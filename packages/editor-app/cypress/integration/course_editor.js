@@ -20,7 +20,7 @@ describe('Navigate Course Editor', () => {
     it('Open Spanish (official)', () => {
         // Click on Spanish to see if it is an offical story
         cy.contains("Spanish [en]").parent().click()
-        cy.url().should('include', '?course=12')
+        cy.url().should('include', '/course/12')
         cy.get("[data-cy=course-title]").contains("Spanish")
 
         cy.get("[data-cy=story_list]").get("tr").should('have.length.greaterThan', 1)
@@ -68,36 +68,36 @@ describe('Navigate Course Editor', () => {
 
         // navigate to russian
         cy.contains("Russian [en]").parent().click()
-        cy.url().should('include', '?course=9')
+        cy.url().should('include', '/course/9')
         cy.get("[data-cy=course-title]").contains("Russian")
 
         // then to spanish
         cy.contains("Spanish [en]").parent().click()
-        cy.url().should('include', '?course=12')
+        cy.url().should('include', '/course/12')
         cy.get("[data-cy=course-title]").contains("Spanish")
 
         // test back (with history state)
         cy.go('back')
-        cy.url().should('include', '?course=9')
+        cy.url().should('include', '/course/9')
         cy.get("[data-cy=course-title]").contains("Russian")
 
         // test back (without history state)
         cy.go('back')
-        cy.url().should('include', '?course=2')
+        cy.url().should('include', '/course/2')
         cy.get("[data-cy=course-title]").contains("Dutch")
 
         // test 2x forward
         cy.go('forward')
-        cy.url().should('include', '?course=9')
+        cy.url().should('include', '/course/9')
         cy.get("[data-cy=course-title]").contains("Russian")
 
         cy.go('forward')
-        cy.url().should('include', '?course=12')
+        cy.url().should('include', '/course/12')
         cy.get("[data-cy=course-title]").contains("Spanish")
 
         // and once back
         cy.go('back')
-        cy.url().should('include', '?course=9')
+        cy.url().should('include', '/course/9')
         cy.get("[data-cy=course-title]").contains("Russian")
     })
 })

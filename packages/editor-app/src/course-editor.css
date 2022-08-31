@@ -219,7 +219,7 @@ td:hover .status_dropdown {
     background: var(--body-background-hover);
 }
 
-@media (max-width: 1120px) {
+@media (max-width: 0px) {
     #languages {
         display: none;
     }
