@@ -143,6 +143,16 @@ query_json_list($db, "SELECT t.yr,
  echo "]";
  die();
 }
+if($action == "avatar_names") {
+    $id = intVal($_REQUEST['id']);
+    if($id == 0) {
+        $course_id = intVal($_REQUEST['course_id']);
+        query_json_list($db,"SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id WHERE (language_id = (SELECT learningLanguage FROM course WHERE id = $course_id) or language_id is NULL) ORDER BY a.id");
+    }
+    else
+        query_json_list($db,"SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM (SELECT * FROM avatar_mapping WHERE language_id = $id) as avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id ORDER BY a.id");
+    die();
+}
 
 if(!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) {
     http_response_code(403);
@@ -177,7 +187,7 @@ else if($action == "image") {
 else if($action == "import") {
     $id = intVal($_REQUEST['id']);
     $id2 = intVal($_REQUEST['id2']);
-    query_json_list($db, "SELECT  s1.id, s1.set_id, s1.set_index, s1.name, image.gilded, image.active , COUNT(s2.id) copies
+    query_json_list($db, "SELECT s1.id, s1.set_id, s1.set_index, s1.name, image.gilded, image.active, COUNT(s2.id) copies
                           FROM story s1
                           LEFT JOIN (SELECT s2.duo_id, s2.id FROM story s2 WHERE s2.course_id = $id2) AS s2 ON s1.duo_id = s2.duo_id
                           JOIN image on image.id = s1.image

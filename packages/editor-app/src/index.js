@@ -33,6 +33,7 @@ export function LoginWrapper() {
         
     return <Routes>
         <Route path='/course/:id' element={<EditorOverview username={username} doLogout={doLogout}/>}></Route>
+        <Route path='/course/:id/import/:import_id' element={<EditorOverview username={username} doLogout={doLogout}/>}></Route>
         <Route path='/' element={<EditorOverview username={username} doLogout={doLogout}/>}></Route>
         <Route path='/story/:story' element={<EditorNode username={username} doLogout={doLogout}/>}></Route>
         <Route path='/language/:language' element={<AvatarMain username={username} doLogout={doLogout}/>}></Route>

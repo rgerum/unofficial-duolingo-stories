@@ -28,7 +28,7 @@ function CourseList(props) {
 
 function ImportList(props) {
     let course = props.course;
-    const [courseImport, ] = useDataFetcher2(getImportList, [12, course.id]);
+    const [courseImport, ] = useDataFetcher2(getImportList, [props.import_id, course?.id]);
     const [importing, setImporting] = useState(false);
     let navigate = useNavigate();
 
@@ -41,9 +41,17 @@ function ImportList(props) {
         console.log(id2, "?story="+id2);
         navigate("/story/"+id2);
     }
+
+    if(course === undefined)
+        return <></>
     return courseImport ?
         <>
-        <div>Importing from Spanish (from English).</div>
+            {props.import_id === 12 ?
+                <div>Importing from Spanish (from English). <Link to={`/course/${course.id}/import/66`}>switch to
+                    English (from Spanish)</Link></div> :
+                <div>Importing from English (from Spanish). <Link to={`/course/${course.id}/import/12`}>switch to
+                    Spanish (from English)</Link></div>
+            }
         <table id="story_list" data-cy="import_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
@@ -207,34 +215,22 @@ function EditList(props) {
 
 
 export function EditorOverview(props) {
-    let { id } = useParams();
+    let { id, import_id } = useParams();
+    import_id = parseInt(import_id);
     let course_id = parseInt(id);
 
     const courses = useDataFetcher(getCourses);
     const [course, ] = useDataFetcher2(getCourse, [course_id]);
 
-    const [showImport, do_setShowImport] = React.useState(false);
-
-    function doSetCourse(course_new) {
-        if(showImport)
-            do_setShowImport(false);
-        if(course_new === course_id) {
-            return
-        }
-
-        setCourseID(course_new);
-        setCourseIdSelected(course_new);
-    }
-
     return <>
         <div id="toolbar">
-            <CourseEditorHeader username={props.username} doLogout={props.doLogout} courses={courses} course_id={course_id} showImport={showImport} do_setShowImport={do_setShowImport} />
+            <CourseEditorHeader username={props.username} doLogout={props.doLogout} courses={courses} course_id={course_id} import_id={import_id} />
         </div>
         <div id="root">
-            <CourseList courses={courses} course_id={course_id} setCourse={doSetCourse}/>
+            <CourseList courses={courses} course_id={course_id} />
             <div id="main_overview">
-                { course_id && showImport ?
-                    <ImportList course={course}/>
+                { course_id && import_id ?
+                    <ImportList course={course} import_id={import_id}/>
                   : course_id ?
                     <EditList course={course}/>
                   :
@@ -268,17 +264,17 @@ export function CourseEditorHeader(props) {
         <Flag iso={course.fromLanguage} width={40*0.9} className={"flag_sub"} flag={course.fromLanguageFlag} flag_file={course.fromLanguageFlagFile}/>
         <span className={"AvatarEditorHeaderFlagname"} data-cy="course-title">{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
         {course.official ? <span data-cy="label_official"><i>official</i></span> :
-            !props.showImport ?
-            <div id="button_import" className="editor_button" onClick={() => props.do_setShowImport(1)}
-            style={{marginLeft: "auto"}} data-cy="button_import">
-            <div><img alt="import button" src="/icons/import.svg"/></div>
-            <span>Import</span>
-            </div> :
-            <div id="button_back" className="editor_button" onClick={() => props.do_setShowImport(0)}
-            style={{marginLeft: "auto"}} data-cy="button_back">
-            <div><img alt="back button" src="/icons/back.svg"/></div>
-            <span>Back</span>
-            </div>
+            !props.import_id ?
+            <Link id="button_import" className="editor_button" to={`/course/${course.id}/import/12`}
+                style={{marginLeft: "auto"}} data-cy="button_import">
+                <div><img alt="import button" src="/icons/import.svg"/></div>
+                <span>Import</span>
+            </Link> :
+            <Link id="button_back" className="editor_button" to={`/course/${course.id}`}
+                style={{marginLeft: "auto"}} data-cy="button_back">
+                <div><img alt="back button" src="/icons/back.svg"/></div>
+                <span>Back</span>
+            </Link>
         }
         <LoggedInButton username={props.username} doLogout={props.doLogout} page="editor"/>
     </div></>
