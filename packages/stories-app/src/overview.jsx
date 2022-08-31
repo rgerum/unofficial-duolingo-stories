@@ -59,10 +59,13 @@ export function IndexContent(props) {
         }
     }
     
+    //Set text in link to conlangs to correct number of conlangs.
+    
+    document.getElementById("conlangs-count").innerHTML = `${conlangs.length} languages`;
     let error = props.error;
     if(lang !== undefined && course_data?.sets?.length === 0)
         error = true;
-
+    
     return <div>
         <div id="header_index">
             <Link to={"/"} className="duostories_title">Duostories</Link>
