@@ -16,7 +16,7 @@ jobs:
     
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
     - name: Install Lerna
       run: npm install --global lerna
@@ -24,11 +24,14 @@ jobs:
     - name: Bootstrap
       run: lerna bootstrap
       
+    - name: Build
+      run: npm run build
+      
     - name: Go to Editor Folder
       run: cd packages/editor-app
     - run: pwd
     - name: Start Editor Server
-      run: npm run start & wait-on http://localhost:8080
+      run: cd packages/editor-app && npm run start & wait-on http://localhost:8080
     - name: Test Editor
-      run: npx cypress run
+      run: cd packages/editor-app && npx cypress run
       
