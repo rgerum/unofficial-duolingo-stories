@@ -29,9 +29,7 @@ export function CourseList(props) {
     languages = languages.sort();
     
     // Add link to conlangs page in second position:
-    
-    languages.push(
-);
+   
         
     // if we have english courses add "English" as the first entry
     if(base_languages["English"])
