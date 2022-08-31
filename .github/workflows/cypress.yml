@@ -23,12 +23,12 @@ jobs:
         
     - name: Bootstrap
       run: lerna bootstrap
-
-    - name: Run
-      run: lerna run --parallel --stream start & wait-on http://localhost:8080
       
-    - name: Test Editor
+    - name: Go to Editor Folder
       run: cd packages/editor-app
     - run: pwd
-    - run: npx cypress run
+    - name: Start Editor Server
+      run: npm run start & wait-on http://localhost:8080
+    - name: Test Editor
+      run: npx cypress run
       
