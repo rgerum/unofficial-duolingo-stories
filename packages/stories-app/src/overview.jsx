@@ -58,10 +58,7 @@ export function IndexContent(props) {
             }
         }
     }
-    
-    //Set text in link to conlangs to correct number of conlangs.
-    
-    document.getElementById("conlangs-count").innerHTML = `${conlangs.length} languages`;
+
     let error = props.error;
     if(lang !== undefined && course_data?.sets?.length === 0)
         error = true;
@@ -90,7 +87,7 @@ export function IndexContent(props) {
                     : <></>}
 
                 {lang !== undefined ?
-                    <SetList sets={course_data?.sets} about={course_data?.about} /> :
+                    <SetList sets={course_data?.sets} about={course_data?.about} conlang_count={conlangs.length} /> :
                     <CourseList courses={courses} />
                 }
 
