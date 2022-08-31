@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import {LoginDialog, useUsername} from "./login";
 import {Spinner} from "story-component";
 import {EditorOverview} from "./course-editor"
@@ -40,11 +40,10 @@ export function LoginWrapper() {
     </Routes>
 }
 
-ReactDOM.render(
+createRoot(document.getElementById('body')).render(
     <React.StrictMode>
         <Router>
             <LoginWrapper />
         </Router>
-    </React.StrictMode>,
-    document.getElementById('body')
+    </React.StrictMode>
 );

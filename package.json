@@ -7,13 +7,13 @@
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
     "editor-app": "file:packages/editor-app",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
     "react-scripts": "^5.0.1",
     "stories-app": "file:packages/stories-app",
     "story-component": "file:packages/story-component",
-    "web-vitals": "^1.1.2"
+    "web-vitals": "^3.0.0"
   },
   "scripts": {
     "build": "lerna run build",
