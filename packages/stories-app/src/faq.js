@@ -23,7 +23,11 @@ export function Faq() {
         <div id="main_index">
             <h1>FAQ</h1>
         <h2>Is this website open source?</h2>
-        <p>Yes it is! The code is hosted on Github <a href="https://github.com/rgerum/unofficial-duolingo-stories">rgerum/unofficial-duolingo-stories <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/rgerum/unofficial-duolingo-stories?style=social" /></a></p>
+        <p>Yes it is! The code is hosted on Github <a href="https://github.com/rgerum/unofficial-duolingo-stories">rgerum/unofficial-duolingo-stories</a>
+        </p>
+        <p>
+        If you like it you can give it a star. <a href="https://github.com/rgerum/unofficial-duolingo-stories"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/rgerum/unofficial-duolingo-stories?style=social" /></a>
+        </p>
 
         <h2>When will these stories be on the official Duolingo website?</h2>
         <p>Probably never. This project is not linked to Duolingo in any way. Duolingo has in the past worked with volunteers
@@ -49,8 +53,8 @@ export function Faq() {
         Maybe when we finished translating all of them ;-).</p>
 
         <h2>I found a mistake!</h2>
-        <p>Yes despite our continuous effort there might be mistakes in the translations. You can reach us on <a href="https://discord.gg/4NGVScARR3">Discord</a>
-        to report mistakes.</p>
+        <p>Yes despite our continuous effort there might be mistakes in the translations. You can reach us
+            on <a href="https://discord.gg/4NGVScARR3">Discord</a> to report mistakes.</p>
 
         <h2>I found a bug on the page or want to suggest a new feature.</h2>
         <p>We have a <a href={"https://github.com/rgerum/unofficial-duolingo-stories/issues"}>bugtracker</a> on Github where you can report issues or feature requests. Or again discuss them with
@@ -59,8 +63,8 @@ export function Faq() {
         <h2>Who runs this website?</h2>
         <p>The website was developed by me, "randrian". You can find me on <a href="https://www.duolingo.com/profile/Randriano">Duolingo</a> or on <a href="https://github.com/rgerum">Github</a>.
         Some people did minor contributions to the website, see the Github repository. You are welcome to be part of them.</p>
-        <p>I am in no way associated with Duolingo</p>
-        <p>But of course this website would be nothing without its active group of contributors! Meet them on <a href="https://discord.gg/4NGVScARR3">Discord</a></p>
+        <p>I am in no way associated with Duolingo.</p>
+        <p>But of course this website would be nothing without its active group of contributors! Meet them on <a href="https://discord.gg/4NGVScARR3">Discord</a>.</p>
     </div>
     </div>
 }
