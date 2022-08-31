@@ -27,6 +27,10 @@ export function CourseList(props) {
     }
     // sort the base languages and then add English as first (and most relevant)
     languages = languages.sort();
+    
+    // Add link to conlangs page in second position:
+    languages.unshift("Conlangs")
+        
     // if we have english courses add "English" as the first entry
     if(base_languages["English"])
         languages.unshift("English");
@@ -34,6 +38,14 @@ export function CourseList(props) {
     return (
         <div>
             {languages.map(name => (
+                name === "Conlangs" ?
+                    <Link key={name} to="/conlangs" className="language_select_button conlang-link">
+                        <Flag iso={"conlangs"} flag_file={"flag_conlangs.svg"} />
+                        <span className="language_select_button_text">Conlangs Index:</span>
+                        <span className="language_story_count" id="conlangs-count">{props.conlang_count} stories</span>
+                        <img src="/icons/arrow.svg" alt=">" />
+                    </Link>
+                    :
                 <div className="course_list" key={name}>
                     <hr/>
                     <div className="course_group_name">Stories for {name} Speakers</div>

@@ -58,11 +58,11 @@ export function IndexContent(props) {
             }
         }
     }
-    
+
     let error = props.error;
     if(lang !== undefined && course_data?.sets?.length === 0)
         error = true;
-
+    
     return <div>
         <div id="header_index">
             <Link to={"/"} className="duostories_title">Duostories</Link>
@@ -87,7 +87,7 @@ export function IndexContent(props) {
                     : <></>}
 
                 {lang !== undefined ?
-                    <SetList sets={course_data?.sets} about={course_data?.about} /> :
+                    <SetList sets={course_data?.sets} about={course_data?.about} conlang_count={conlangs.length} /> :
                     <CourseList courses={courses} />
                 }
 
