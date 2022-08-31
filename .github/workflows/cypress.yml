@@ -10,7 +10,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  test_editor:
 
     runs-on: ubuntu-latest
     
@@ -23,9 +23,12 @@ jobs:
         
     - name: Bootstrap
       run: lerna bootstrap
-      
-    - name: Build
-      run: npm run build
+
+    - name: Build Story Component
+      run: cd packages/story-component && npm run build
+
+    - name: Build Editor
+      run: cd packages/editor-app && npm run build
       
     - name: Go to Editor Folder
       run: cd packages/editor-app
@@ -34,4 +37,32 @@ jobs:
       run: cd packages/editor-app && npm run start & wait-on http://localhost:8080
     - name: Test Editor
       run: cd packages/editor-app && npx cypress run
+      
+  test_story_app:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install Lerna
+      run: npm install --global lerna
+        
+    - name: Bootstrap
+      run: lerna bootstrap
+
+    - name: Build Story Component
+      run: cd packages/story-component && npm run build
+
+    - name: Build Stories
+      run: cd packages/stories-app && npm run build
+      
+    - name: Go to Stories Folder
+      run: cd packages/stories-app
+    - run: pwd
+    - name: Start Stories Server
+      run: cd packages/stories-app && npm run start & wait-on http://localhost:3000
+    - name: Test Stories
+      run: cd packages/stories-app && npx cypress run
       
