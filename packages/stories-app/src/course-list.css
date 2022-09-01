@@ -104,21 +104,25 @@
 }
 
 .language_select_button.conlang-link {
-  width: fit-content;
   max-width: 953px;
-  flex-flow: row;
+  flex-flow: row wrap;
   justify-content: flex-start;
   gap: 15px;
   height: min-content;
+  margin-inline: 20px;
 }
-.conlang-flag {
+
+.conlang-link > svg {
   margin-inline-start: max(10%, 40px);
   padding-block: 25px;
 }
+
 .arrow {
-  justify-self: flex-end;
+  margin-right: max(10%, 40px);
   position: absolute;
   right: 0;
+  color: #cbcbcb;
+  font-size: 40px
 }
 
 @media screen and (max-width: 500px) {
