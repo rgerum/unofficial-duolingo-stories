@@ -17,6 +17,7 @@ import {
 import {getStoryJSON} from "story-component/src/components/includes";
 import {LoginDialog} from "./login";
 import {load_dark_mode} from "story-component";
+import {Faq} from "./faq";
 
 
 function StoryP() {
@@ -53,6 +54,7 @@ function App() {
             <Route path='/story/:id' element={<StoryP />}></Route>
             <Route path='/story/:id/test' element={<StoryP />}></Route>
             <Route path='/task/:task/:username/:hash' element={<UserActivationOrReset />}></Route>
+            <Route path='/faq' element={<Faq />}></Route>
             <Route path='/*' element={<IndexContent error />}></Route>
         </Routes>
 }

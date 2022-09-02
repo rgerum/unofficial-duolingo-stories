@@ -1,5 +1,5 @@
 # Unofficial Duolingo Stories
-[![Build Status](https://app.travis-ci.com/rgerum/unofficial-duolingo-stories.svg?branch=master)](https://app.travis-ci.com/rgerum/unofficial-duolingo-stories)
+[![Cypress Test](https://github.com/rgerum/unofficial-duolingo-stories/actions/workflows/cypress.yml/badge.svg)](https://github.com/rgerum/unofficial-duolingo-stories/actions/workflows/cypress.yml)
 [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
 
 This project brings the official Duolingo Stories to new languages, translated by a community effort.
