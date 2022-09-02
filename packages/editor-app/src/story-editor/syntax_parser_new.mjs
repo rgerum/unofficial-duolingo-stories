@@ -239,9 +239,9 @@ function speaker_text_trans(data, meta, use_buttons, hide=false) {
     }
     let audio;
     if(data.allow_audio) {
-        let speaker_name = meta["speaker_" + "narrator"] || meta.avatar_names[0].speaker;
+        let speaker_name = meta["speaker_" + "narrator"] || meta.avatar_names[0]?.speaker;
         if(speaker_id)
-            speaker_name = meta.avatar_overwrites[speaker_id]?.speaker || meta.avatar_names[speaker_id]?.speaker || meta.avatar_names[0].speaker;
+            speaker_name = meta.avatar_overwrites[speaker_id]?.speaker || meta.avatar_names[speaker_id]?.speaker || meta.avatar_names[0]?.speaker;
         audio = line_to_audio(data.audio, text, speaker_name, meta.story_id, hide)
         audio.ssml.inser_index = window.audio_insert_lines.length;
         audio.ssml.plan_text = text;

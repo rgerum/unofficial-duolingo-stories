@@ -81,6 +81,17 @@ export async function getAvatars(id) {
     }
 }
 
+export async function getAvatarsList(id) {
+    if(!id)
+        return {}
+    let avatar_names_list = await getAvatars(id);
+    let avatar_names = {}
+    for(let avatar of avatar_names_list) {
+        avatar_names[avatar.avatar_id] = avatar;
+    }
+    return avatar_names_list;
+}
+
 export async function getSpeakers(id) {
     try {
         let response = await fetch_get(`${backend_get}/speakers?id=${id}`);

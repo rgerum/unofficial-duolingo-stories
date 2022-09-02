@@ -2,8 +2,7 @@
 This parser does the syntax highlighting for the editor
  */
 
-import {StreamLanguage} from "@codemirror/stream-parser"
-import {HighlightStyle, tags as t} from "@codemirror/highlight"
+import {StreamLanguage} from "@codemirror/language"
 
 // Ideally this should be proper tag definitions instead of mapping them to arbitrary tag symbols
 // I just did not find out yet how to define custom tag symbols
@@ -59,97 +58,102 @@ const chalky = "#e5c07b",
 const color_even = "#009623",
     color_odd = "#00389d"
 
+import {tags} from "@lezer/highlight"
+import {HighlightStyle} from "@codemirror/language"
 
-export let highlightStyle = HighlightStyle.define([
+export let myHighlightStyle = HighlightStyle.define([
     // STATE_TRANS_EVEN
-    {tag: t.propertyName, color: color_even, fontStyle: "italic", opacity: 0.5},
+    {tag: tags.propertyName, color: color_even, fontStyle: "italic", opacity: 0.5},
     // STATE_TRANS_ODD
-    {tag: t.macroName, color: color_odd, fontStyle: "italic", opacity: 0.5},
+    {tag: tags.macroName, color: color_odd, fontStyle: "italic", opacity: 0.5},
     // STATE_TEXT_EVEN
-    {tag: t.tagName, color: color_even},
+    {tag: tags.tagName, color: color_even},
     // STATE_TEXT_ODD
-    {tag: t.name, color: color_odd},
+    {tag: tags.name, color: color_odd},
 
     // STATE_TEXT_HIDE_EVEN
-    {tag: t.className, color: color_even, opacity: 0.4, borderBottom: "2px solid black"}, // textDecoration: "underline",
+    {tag: tags.className, color: color_even, opacity: 0.4, borderBottom: "2px solid black"}, // textDecoration: "underline",
     // STATE_TEXT_HIDE_ODD
-    {tag: t.typeName, color: color_odd, opacity: 0.4, borderBottom: "2px solid black"},
+    {tag: tags.typeName, color: color_odd, opacity: 0.4, borderBottom: "2px solid black"},
     // STATE_TEXT_HIDE_NEUTRAL
-    {tag: t.changed, opacity: 0.4, borderBottom: "2px solid black"},
+    {tag: tags.changed, opacity: 0.4, borderBottom: "2px solid black"},
 
     // STATE_TEXT_BUTTON_EVEN
-    {tag: t.number, color: color_even, background: "#c8c8c8", borderRadius: "10px"},
+    {tag: tags.number, color: color_even, background: "#c8c8c8", borderRadius: "10px"},
     // STATE_TEXT_BUTTON_ODD
-    {tag: t.labelName, color: color_odd, background: "#c8c8c8", borderRadius: "10px"},
+    {tag: tags.labelName, color: color_odd, background: "#c8c8c8", borderRadius: "10px"},
 
     // STATE_TEXT_HIDE_BUTTON_EVEN
-    {tag: t.meta, color: color_even, borderBottom: "2px solid black", background: "#c8c8c8", borderRadius: "10px", opacity: 0.4},
+    {tag: tags.meta, color: color_even, borderBottom: "2px solid black", background: "#c8c8c8", borderRadius: "10px", opacity: 0.4},
     // STATE_TEXT_HIDE_BUTTON_ODD
-    {tag: t.comment, color: color_odd, borderBottom: "2px solid black", background: "#c8c8c8", borderRadius: "10px", opacity: 0.4},
+    {tag: tags.comment, color: color_odd, borderBottom: "2px solid black", background: "#c8c8c8", borderRadius: "10px", opacity: 0.4},
     // STATE_TEXT_BUTTON_RIGHT_EVEN
-    {tag: t.modifier, color: "black", background: "#9bd297", borderRadius: "10px"},
+    {tag: tags.modifier, color: "black", background: "#9bd297", borderRadius: "10px"},
 
     // STATE_BLOCK_TYPE
-    {tag: t.keyword, color: violet},
+    {tag: tags.keyword, color: violet},
     // STATE_ERROR
-    {tag: [t.deleted, t.character], color: coral, textDecoration: "line-through",},
+    {tag: [tags.deleted, tags.character], color: coral, textDecoration: "line-through",},
     {
-        tag: [t.function(t.variableName)],
+        tag: [tags.function(tags.variableName)],
         color: malibu
     },
     // STATE_AUDIO
-    {tag: [t.color, t.constant(t.name), t.standard(t.name)], color: whiskey},
+    {tag: [tags.color, tags.constant(tags.name), tags.standard(tags.name)], color: whiskey},
     {
-        tag: [t.definition(t.name), t.separator],
+        tag: [tags.definition(tags.name), tags.separator],
         color: ivory
     },
     {
-        tag: [t.annotation, t.self, t.namespace],
+        tag: [tags.annotation, tags.self, tags.namespace],
         color: chalky
     },
     {
-        tag: [t.operator, t.operatorKeyword, t.url, t.escape, t.regexp, t.link, t.special(t.string)],
+        tag: [tags.operator, tags.operatorKeyword, tags.url, tags.escape, tags.regexp, tags.link, tags.special(tags.string)],
         color: cyan
     },
 
     {
-        tag: t.strong,
+        tag: tags.strong,
         color: stone
     },
     {
-        tag: t.emphasis,
+        tag: tags.emphasis,
         fontStyle: "italic"
     },
     {
-        tag: t.strikethrough,
+        tag: tags.strikethrough,
         textDecoration: "line-through"
     },
     {
-        tag: t.link,
+        tag: tags.link,
         color: stone,
         textDecoration: "underline"
     },
     {
-        tag: t.heading,
+        tag: tags.heading,
         fontWeight: "bold",
         color: coral
     },
     {
-        tag: t.atom
+        tag: tags.atom
     },
     {
-        tag: [t.bool, t.special(t.variableName)],
+        tag: [tags.bool, tags.special(tags.variableName)],
         color: whiskey
     },
     {
-        tag: [t.processingInstruction, t.string, t.inserted],
+        tag: [tags.processingInstruction, tags.string, tags.inserted],
         color: sage
     },
     {
-        tag: t.invalid,
+        tag: tags.invalid,
         color: invalid
     },
 ])
+
+import {syntaxHighlighting} from "@codemirror/language"
+export let highlightStyle = syntaxHighlighting(myHighlightStyle);
 
 function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
     if(stream.match(/[ |]+/)) {
@@ -548,7 +552,7 @@ const BLOCK_FUNCS = {
 
 function parseBlockDef(stream, state) {
     if(stream.eat("]")) {
-        state.func = BLOCK_FUNCS[state.block.name];
+        state.func = BLOCK_FUNCS[state?.block?.name];
         return STATE_DEFAULT;
     }
     state.block = {name: stream.match(/[^\]]+/)[0], line: 0};

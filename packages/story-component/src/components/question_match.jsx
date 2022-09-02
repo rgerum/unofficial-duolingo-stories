@@ -29,7 +29,6 @@ export function QuestionMatch(props) {
     let [last_clicked, setLastClicked] = useState(undefined);
 
     let order = orderB.concat(orderA);
-    console.log(orderA, orderB,order);
 
     // when order is not initialized or when the number of elements changed in the editor
     if(orderA === undefined || orderA.length !== props.element.fallbackHints.length) {

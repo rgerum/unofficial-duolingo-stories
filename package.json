@@ -35,6 +35,8 @@
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "css-loader": "^6.5.1",
     "cypress": "^9.5.4",
+    "eslint": "^8.23.0",
+    "eslint-plugin-react": "^7.31.1",
     "file-loader": "^6.2.0",
     "formdata-node": "^4.3.2",
     "html-webpack-plugin": "^5.5.0",
