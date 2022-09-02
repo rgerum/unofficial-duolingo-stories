@@ -43,17 +43,17 @@ export function Faq() {
         You can join us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.</p>
 
         <h2>Will you add a course in language X?</h2>
-        <p>If we have a volunteer or better a group of volunteers then yes. Maybe you can spread the word and find some
-        native speakers in your target language and bring them to our <a href="https://discord.gg/4NGVScARR3">Discord</a> server.</p>
+        <p>If we have a volunteer, or better yet, a group of volunteers, then yes. Maybe you can spread the word, find some
+        native speakers in your target language, and bring them to our <a href="https://discord.gg/4NGVScARR3">Discord</a> server.</p>
 
         <h2>Can I write my own stories as a contributor?</h2>
-        <p>Our current goal is to create good translations of the existing Duolingo stories. Duolingo has but great
-        effort in developing stories that help learners in learning a new language using stories. We do not have the
+        <p>Our current goal is to create good translations of the existing Duolingo stories. Duolingo has put great
+        effort into developing stories that help learners to learn a new language using stories. We do not have the
         resources to create similar high quality stories, nor do we see the need to go beyond the current stories.
-        Maybe when we finished translating all of them ;-).</p>
+        Maybe when we have finished translating all of them ;-).</p>
 
         <h2>I found a mistake!</h2>
-        <p>Yes despite our continuous effort there might be mistakes in the translations. You can reach us
+        <p>Yes, despite our continuous efforts, there might be mistakes in the translations. You can reach us
             on <a href="https://discord.gg/4NGVScARR3">Discord</a> to report mistakes.</p>
 
         <h2>I found a bug on the page or want to suggest a new feature.</h2>
