@@ -19,7 +19,7 @@ function CourseList(props) {
                 >
                     <span className="course_count">{course.count}</span>
                     <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
-                    <span>{`${course.learningLanguageName} [${course.fromLanguage}]`}</span>
+                    <span>{`${course.learningLanguageName} [${course.fromLanguage}]`}{course.official ? <img src="https://d35aaqx5ub95lt.cloudfront.net/vendor/b3ede3d53c932ee30d981064671c8032.svg" title="official" alt={"official"}/> : null}</span>
                 </Link>
             </div>
         )}
