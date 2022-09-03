@@ -73,6 +73,7 @@ function StoryEditorHeader(props) {
             props.func_save();
         }
         catch (e) {
+            console.log("error save", e);
             window.alert("Story could not be saved.")
         }
         document.querySelector("#button_save span").innerText = "Save";
@@ -84,6 +85,7 @@ function StoryEditorHeader(props) {
                 props.func_delete();
             }
             catch (e) {
+                console.log("error delete", e);
                 document.querySelector("#button_delete span").innerText = "Delete";
                 window.alert("Story could not be deleted");
             }
@@ -153,8 +155,8 @@ function Editor(props) {
     const [story_meta, set_story_meta] = React.useState();
     const [view, set_view] = React.useState();
 
-    const [func_save, set_func_save] = React.useState(()=>{});
-    const [func_delete, set_func_delete] = React.useState(()=>{});
+    const [func_save, set_func_save] = React.useState(() => ()=>{console.log("x")});
+    const [func_delete, set_func_delete] = React.useState(() => ()=>{});
 
     const navigate = useNavigate();
 
@@ -196,7 +198,7 @@ function Editor(props) {
             await setStory(data)
             unsaved_changes = false;
         }
-        set_func_save(Save);
+        set_func_save(() => Save);
 
         async function Delete() {
             if(story_meta === undefined || story_data === undefined)
@@ -204,7 +206,7 @@ function Editor(props) {
             await deleteStory({id: story_data.id, course_id: story_data.course_id, text: editor_text, name: story_meta.fromLanguageName});
             navigate(`/course/${story_data.course_id}`);
         }
-        set_func_delete(Delete)
+        set_func_delete(() => Delete)
 
         function updateDisplay() {
             if(stateX === undefined || story_data === undefined)
@@ -310,12 +312,12 @@ function Editor(props) {
     );
 }
 
-export function EditorNode() {
+export function EditorNode(props) {
     let {story} = useParams();
     const story_data = useDataFetcher(getStory, [parseInt(story)]);
     const avatar_names = useDataFetcher(getAvatarsList, [story_data?.learningLanguage])
 
     //if(!story_data || !avatar_names)
     //    return <Spinner />
-    return <Editor story_data={story_data} avatar_names={avatar_names}/>
+    return <Editor story_data={story_data} avatar_names={avatar_names} username={props.username} doLogout={props.doLogout}/>
 }

@@ -15,7 +15,7 @@ export function EditorSSMLDisplay(props) {
 
     async function reload() {
         setLoading(true);
-        await generate_audio_line(props.ssml);
+        await generate_audio_line(props.ssml, props.editor.view);
         setLoading(false);
     }
     if(!show_audio) return <></>
@@ -25,14 +25,14 @@ export function EditorSSMLDisplay(props) {
         { props.ssml.speaker ?
             <span title={loading ? "generating audio..." : "regenerate audio"} id={line_id} className={"ssml_reload audio_reload " + (loading ? "audio_reload_spin" : "")}
                   onClick={reload}/> :
-            <span><img title="no speaker defined" alt="error" src="icons/error.svg"/></span>
+            <span><img title="no speaker defined" alt="error" src="/icons/error.svg"/></span>
         }
         {urlParams.get("beta") ? <a onClick={() => window.open_recoder(props)}>🎤</a> : <></>}
     </>
 }
 
 
-async function generate_audio_line(ssml) {
+async function generate_audio_line(ssml, view) {
     let speaker = ssml["speaker"].trim();
     let speak_text = ssml["text"].trim();
     let match = speaker.match(/([^(]*)\((.*)\)/);

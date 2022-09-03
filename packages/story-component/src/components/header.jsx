@@ -25,7 +25,7 @@ export function Header(props) {
             <AudioPlay onClick={playAudio} />
             <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.learningLanguageTitleContent} />
             {(props.editor && (element.audio)) ?
-                <EditorSSMLDisplay ssml={element.audio.ssml} audio={element.audio}/>
+                <EditorSSMLDisplay ssml={element.audio.ssml} audio={element.audio} editor={props.editor}/>
                 : <></>
             }
                 </span>
@@ -69,7 +69,7 @@ export function TextLine(props) {
                         <AudioPlay onClick={playAudio} />
                         <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} unhide={props.unhide} content={element.line.content} />
                 {(props.editor && (element.line.content.audio)) ?
-                    <EditorSSMLDisplay ssml={element.line.content.audio.ssml} audio={element.line.content.audio}/>
+                    <EditorSSMLDisplay ssml={element.line.content.audio.ssml} audio={element.line.content.audio} editor={props.editor}/>
                     : <></>
                 }
             </span>
@@ -84,7 +84,7 @@ export function TextLine(props) {
                     <AudioPlay onClick={playAudio} />
                     <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.line.content} />
                     {(props.editor && (element.line.content.audio)) ?
-                        <EditorSSMLDisplay ssml={element.line.content.audio.ssml} audio={element.line.content.audio}/>
+                        <EditorSSMLDisplay ssml={element.line.content.audio.ssml} audio={element.line.content.audio} editor={props.editor}/>
                         : <></>
                     }
                 </span>
