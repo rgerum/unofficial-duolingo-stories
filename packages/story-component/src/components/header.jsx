@@ -104,7 +104,7 @@ function useAudio(element) {
     useEventListener("progress_changed", e => {
         if(audio === undefined)
             return
-        if(e.detail === element.trackingProperties.line_index) {
+        if(e.detail === (element.trackingProperties.line_index || 0)) {
             if(audio && audio.url)
                 playAudio();
         }

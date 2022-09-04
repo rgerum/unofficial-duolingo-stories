@@ -17,7 +17,7 @@ export function Story(props) {
     let editor = props.editor;
     let course = story.learningLanguage + "-" + story.fromLanguage;
 
-    let [progress, setProgress] = useState(0);
+    let [progress, setProgress] = useState(-1);
     let [spacer, setSpacer] = useState(0);
     let [right, setRight] = useState(0);
     let [blocked, setBlocked] = useState(0);
@@ -87,6 +87,11 @@ export function Story(props) {
     }
 
     let finished = (progress === parts.length);
+
+    React.useEffect(() => {
+        if(progress === -1)
+            advance_progress();
+    });
 
     if(editor) {
         return (
