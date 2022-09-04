@@ -68,14 +68,17 @@ function StoryEditorHeader(props) {
         loadLanguageData();
     }, [story_data])
 
+    const [save_text, set_save_text] = React.useState("Save");
     async function Save() {
         try {
+            set_save_text("Saving...");
             props.func_save();
         }
         catch (e) {
             console.log("error save", e);
             window.alert("Story could not be saved.")
         }
+        set_save_text("Save");
         document.querySelector("#button_save span").innerText = "Save";
     }
     async function Delete() {
@@ -135,7 +138,7 @@ function StoryEditorHeader(props) {
         </div>
         <div id="button_save" className="editor_button" onClick={Save}>
             <div><img alt="icon save" src="/icons/save.svg" /></div>
-            <span>Save</span>
+            <span>{save_text}</span>
         </div>
         <LoggedInButton username={props.username} doLogout={props.doLogout} page="editor"/>
     </div></>
@@ -155,7 +158,7 @@ function Editor(props) {
     const [story_meta, set_story_meta] = React.useState();
     const [view, set_view] = React.useState();
 
-    const [func_save, set_func_save] = React.useState(() => ()=>{console.log("x")});
+    const [func_save, set_func_save] = React.useState(() => ()=>{});
     const [func_delete, set_func_delete] = React.useState(() => ()=>{});
 
     const navigate = useNavigate();

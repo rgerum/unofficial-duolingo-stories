@@ -26,13 +26,11 @@ function AttributeList(props) {
 
     function onChange(key, value) {
         data[key] = value === "" ? undefined : value;
-        console.log("changed", data);
     }
     async function save() {
-        console.log(await setLanguage(data));
+        await setLanguage(data);
         setEdit(false);
     }
-    console.log("props", props)
 
     return <tr onClick={() => setEdit(true)}>
         <td><Flag iso={props.obj.short} width={40} flag={props.obj.flag} flag_file={props.obj.flag_file} /></td>

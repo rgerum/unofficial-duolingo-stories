@@ -50,7 +50,6 @@ function Avatar(props) {
 
 function AvatarEditorHeader(props) {
     let language_data = props.language_data;
-    console.log("language_data", language_data)
 
     if(language_data === undefined)
         return <></>

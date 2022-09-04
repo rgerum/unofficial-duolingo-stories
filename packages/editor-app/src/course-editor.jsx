@@ -36,9 +36,8 @@ function ImportList(props) {
         // prevent clicking the button twice
         if(importing) return
         setImporting(id);
-        console.log("do_import", id, course.id);
+
         let id2 = await setImport(id, course.id);
-        console.log(id2, "?story="+id2);
         navigate("/story/"+id2);
     }
 

@@ -42,7 +42,6 @@ function ChangeAbleValue(props) {
                 if(props.languages[lang].name.toLowerCase().indexOf(name.toLowerCase()) !== -1)
                     language_id.push(lang);
             }
-            console.log("language_idsss", language_id);
             return <td>
                 <div className="dropdown">
                     <button className="dropbtn">
@@ -95,10 +94,9 @@ function AttributeList(props) {
 
     function onChange(key, value) {
         data[key] = value === "" ? undefined : value;
-        console.log("changed", data);
     }
     async function save() {
-        console.log(await setCourse(data));
+        await setCourse(data);
         setEdit(false);
     }
 
@@ -124,7 +122,6 @@ export function CourseList() {
     let languages_id = {}
     for(let l of languages)
         languages_id[l.id] = l;
-    console.log("languages_id", languages_id);
 
     let filtered_courses = [];
     if(search === "")

@@ -6,7 +6,6 @@ import {Link, useParams} from "react-router-dom";
 
 
 async function do_activate(setActivated, username, hash) {
-    console.log(do_activate)
     let success = await activate({username: username, activation_link: hash});
     if(success === false) {
         setActivated(-1);
@@ -18,8 +17,7 @@ async function do_activate(setActivated, username, hash) {
 
 
 async function check(setResetPwState, username, hash) {
-    let [success, text] = await reset_pw_check({username: username, uuid: hash});
-    console.log(success, text)
+    let [success, ] = await reset_pw_check({username: username, uuid: hash});
     if(success === false) {
         setResetPwState(-1);
     }
@@ -51,7 +49,6 @@ export function UserActivationOrReset() {
     function reset_pw_clicked() {login_button(setResetPwState, passwordInput, username, hash)}
 
     if(!initialized) {
-        console.log(initialized);
         setInitialized(1);
         if(task === "activate")
             do_activate(setActivated, username, hash);

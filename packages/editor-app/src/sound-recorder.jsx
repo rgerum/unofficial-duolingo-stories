@@ -26,7 +26,6 @@ export function SoundRecorder() {
             new_timings.push((part.audioStart + last_audiostart)/1000);
             last_audiostart += part.audioStart;
         }
-        console.log("new_timings", new_timings)
         setTimings(new_timings);
         setAudioFilename(props.audio.url.split("/").pop());
         setAudioURL(audio_base_path + props.audio.url);
@@ -38,26 +37,19 @@ export function SoundRecorder() {
         let audio_line = "$"+ssml.id+"/"+filename;
         for(let i in parts) {
             let t = parseInt((timings[i] - time_offset)*1000);
-            console.log("---", i, parts[i].length, t, - ((i==="0") ? 1 : 0));
             time_offset += t/1000
             audio_line += ";";
             audio_line += parts[i].length - ((i==="0") ? 1 : 0);
             audio_line += ",";
             audio_line += t;
         }
-        console.log(audio_line);
         setAudioLine(audio_line);
     }
 
     function setAudioURL(audioURL) {
-        console.log("audioURL", audioURL)
-
-
-        console.log("blob")
 
         function visualize(audioBuffer) {
             window.audioBuffer = audioBuffer;
-            console.log("visualize")
 
             const rawData = audioBuffer.getChannelData(0); // We only need to work with one channel of data
             // Number of samples we want to have in our final data set
@@ -93,11 +85,9 @@ export function SoundRecorder() {
         const audioContext = new AudioContext();
         window.audioContext= audioContext
         let x = fetch(audioURL,{method: "GET", mode: "cors"})
-            .then(response => {console.log("1", response); return response.arrayBuffer()})
-            .then(arrayBuffer => {console.log("2", arrayBuffer); return audioContext.decodeAudioData(arrayBuffer)})
-            .then(audioBuffer => {console.log("3", audioBuffer); return visualize(audioBuffer)});
-
-        console.log("0", x)
+            .then(response => { return response.arrayBuffer()})
+            .then(arrayBuffer => { return audioContext.decodeAudioData(arrayBuffer)})
+            .then(audioBuffer => { return visualize(audioBuffer)});
 
         const audio = document.getElementById('audio_record');
         audio.setAttribute('controls', '');
@@ -126,10 +116,8 @@ export function SoundRecorder() {
                 let filename = window.audio_insert_lines[ssml.inser_index][1]+".ogg";
                 setAudioFilename(filename)
 
-                console.log("data available after MediaRecorder.stop() called.");
                 chunks_updated();
                 chunks = [];
-                console.log("recorder stopped");
             }
 
             mediaRecorder.ondataavailable = function(e) {
@@ -145,7 +133,6 @@ export function SoundRecorder() {
     })
 
     async function save() {
-        console.log("curret_blob",curret_blob)
         let result = await setUploadAudio(ssml.id, window.curret_blob, audio_filename);
 
         let [line, line_insert] = window.audio_insert_lines[ssml.inser_index];
@@ -169,19 +156,14 @@ export function SoundRecorder() {
                 }
             }))
         }
-        console.log("save", result)
         return result;
     }
 
     function start() {
         mediaRecorder.start();
-        console.log(mediaRecorder.state);
-        console.log("recorder started");
     }
     function stop() {
         mediaRecorder.stop();
-        console.log(mediaRecorder.state);
-        console.log("recorder stopped");
     }
     function play() {
         const audio = document.getElementById('audio_record');
@@ -211,7 +193,6 @@ export function SoundRecorder() {
         parts.push(elements.shift()+elements.shift()+elements.shift()+elements.shift())
     }
     while(elements.length) {
-        console.log(parts, elements, elements.length)
         parts.push(elements.shift() + elements.shift());
 
     }
