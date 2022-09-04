@@ -43,7 +43,7 @@ export function CourseList(props) {
                         <Flag iso={"conlangs"} flag_file={"flag_conlangs.svg"} />
                         <span className="language_select_button_text">Conlangs Index:</span>
                         <span className="language_story_count" id="conlangs-count">{props.conlang_count} stories</span>
-                        <img src="/icons/arrow.svg" alt=">" />
+                        <img class="arrow" src="/stories/icons/arrow.svg" alt=">" />
                     </Link>
                     :
                 <div className="course_list" key={name}>
