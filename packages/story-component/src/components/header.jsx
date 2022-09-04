@@ -15,7 +15,7 @@ export function Header(props) {
     let onClick;
     [hidden, onClick] = EditorHook(hidden, props.element.editor, props.editor);
 
-    let [audioRange, playAudio] = useAudio(element)
+    let [audioRange, playAudio] = useAudio(element, props.audios)
 
     let hideRangesForChallenge = undefined;
 
@@ -43,7 +43,7 @@ export function TextLine(props) {
     let onClick;
     [hidden, onClick] = EditorHook(hidden, props.element.editor, props.editor);
 
-    let [audioRange, playAudio] = useAudio(element)
+    let [audioRange, playAudio] = useAudio(element, props.audios)
 
     if(element.line === undefined)
         return <></>
@@ -94,7 +94,7 @@ export function TextLine(props) {
 
 window.playing_audio = [];
 var audio_base_path = "https://carex.uber.space/stories/";
-function useAudio(element) {
+function useAudio(element, audios) {
     let [audioRange, setAudioRange] = React.useState(99999);
     let audio = element?.line?.content?.audio;
 
@@ -113,7 +113,11 @@ function useAudio(element) {
     if(audio === undefined || audio.url === undefined)
         return [10000000, undefined]
 
-    let audioObject = React.useMemo(() => new Audio(audio_base_path + audio.url), [audio_base_path + audio.url]);
+    let audioObject = React.useMemo(() => {
+        if(audios && audios[audio.url])
+            return audios[audio.url];
+        return new Audio(audio_base_path + audio.url);
+    }, [audio_base_path + audio.url]);
 
     function playAudio() {
         for(let audio_cancel of window.playing_audio)

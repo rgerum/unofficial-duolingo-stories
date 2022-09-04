@@ -37,7 +37,7 @@ export function Part(props) {
 
     if(challenge_type === "point-to-phrase") {
         return <div>
-            <TextLine editor={props.editor} progress={props.progress} element={props.part[0]} hidden={(!(progress === 0 || progress === 2)) && !props.editor}/>
+            <TextLine editor={props.editor} progress={props.progress} element={props.part[0]} hidden={(!(progress === 0 || progress === 2)) && !props.editor} audios={props.audios}/>
             <QuestionPointToPhrase editor={props.editor} controls={props.controls} progress={props.progress} element={props.part[1]} hidden={!(progress === 1)} />
         </div>
     }
@@ -45,7 +45,7 @@ export function Part(props) {
     if(props.editor) hidden = "";
     return <div className={"part "+hidden} data-challengetype={challenge_type}>
         {props.part.map((element, i) => (
-            <StoryLine key={i} editor={props.editor} unhide={unhide} setUnhide={setUnhide} controls={props.controls} progress={props.progress} element={element} />
+            <StoryLine key={i} editor={props.editor} unhide={unhide} setUnhide={setUnhide} controls={props.controls} progress={props.progress} element={element} audios={props.audios} />
         ))}
     </div>
 }
@@ -92,10 +92,10 @@ function StoryLine(props) {
         return <QuestionMatch editor={props.editor} controls={props.controls} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "LINE") {
-        return <TextLine editor={props.editor} progress={props.progress} unhide={props.unhide} element={props.element} />
+        return <TextLine editor={props.editor} progress={props.progress} unhide={props.unhide} element={props.element} audios={props.audios} />
     }
     if(props.element.type === "HEADER") {
-        return <Header editor={props.editor} progress={props.progress} element={props.element} />
+        return <Header editor={props.editor} progress={props.progress} element={props.element} audios={props.audios} />
     }
     if(props.element.type === "ERROR") {
         return <div className={["error"]}>{props.element.text}</div>

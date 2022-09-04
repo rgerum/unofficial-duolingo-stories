@@ -9,6 +9,7 @@ import {Legal} from "./legal";
 import {useNavigate} from "react-router-dom";
 import {Footer} from "./story_footer";
 import {StoryHeader} from "./story_header";
+import {Spinner} from "../react/spinner";
 
 
 export function Story(props) {
@@ -21,6 +22,8 @@ export function Story(props) {
     let [spacer, setSpacer] = useState(0);
     let [right, setRight] = useState(0);
     let [blocked, setBlocked] = useState(0);
+
+    let [audio_loaded, setAudioLoaded] = useState(0);
 
     function wrong() {
         playSoundWrong();
@@ -89,9 +92,9 @@ export function Story(props) {
     let finished = (progress === parts.length);
 
     React.useEffect(() => {
-        if(progress === -1)
+        if(progress === -1 && audio_loaded)
             advance_progress();
-    });
+    }, [audio_loaded]);
 
     if(editor) {
         return (
@@ -104,6 +107,42 @@ export function Story(props) {
         );
     }
 
+    let audios = undefined;
+    if(!editor) {
+        let audio_urls = [];
+        for(let element of story.elements) {
+            if (element.type === "HEADER" || element.type === "LINE")
+                if(element.audio)
+                    audio_urls.push(element.audio.url);
+        }
+
+        var audio_base_path = "https://carex.uber.space/stories/";
+        audios = React.useMemo(() => {
+            let count = 0;
+            let audios = {};
+            for (let url of audio_urls) {
+                count += 1;
+                if (audios[url] === undefined) {
+                    let a = new Audio(audio_base_path + url);
+                    function loadingFinished(e) {
+                        a.removeEventListener('canplaythrough', loadingFinished);
+                        a.removeEventListener('error', loadingFinished);
+                        count -= 1;
+                        if (count === 0)
+                            setAudioLoaded(1);
+                    }
+                    a.addEventListener('canplaythrough', loadingFinished, false);
+                    a.addEventListener('error', loadingFinished);
+                    audios[url] = a;
+                }
+            }
+            return audios;
+        }, [story.id])
+    }
+
+    if(!audio_loaded)
+        return <Spinner />
+
     return (
         <div>
             <StoryHeader progress={progress} length={parts.length} course={course} />
@@ -111,7 +150,7 @@ export function Story(props) {
                 <div id="story">
                     <Legal />
                     {parts.map((part, i) => (
-                        <Part key={i} editor={editor} controls={controls} progress={progress} part={part} />
+                        <Part key={i} editor={editor} controls={controls} progress={progress} part={part} audios={audios} />
                     ))}
                 </div>
                 <div style={{height: spacer+"px"}} />
