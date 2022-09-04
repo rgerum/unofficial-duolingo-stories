@@ -203,6 +203,13 @@ export function LoginDialog() {
 
     let [remember, setRememberX] = React.useState(false);
 
+    function doSetShowLogin(value) {
+        setShowLogin(value);
+        setState(0);
+        setError("");
+        setMessage("");
+    }
+
     function setRemember(e) {
         setRememberX(e.target.checked);
     }
@@ -297,8 +304,8 @@ export function LoginDialog() {
                     {state === -1 ? <><span className="login_error">{error}</span><br/></>: null}
                     <span><input type="checkbox" checked={remember} onChange={setRemember}/> keep me logged in</span>
                     <button className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
-                    <p>Don't have an account? <button className={"link"} onClick={()=>setShowLogin(2)}>SIGN UP</button></p>
-                    <p>Forgot your password? <button className={"link"} onClick={()=>setShowLogin(3)}>RESET</button></p>
+                    <p>Don't have an account? <button className={"link"} onClick={()=>doSetShowLogin(2)}>SIGN UP</button></p>
+                    <p>Forgot your password? <button className={"link"} onClick={()=>doSetShowLogin(3)}>RESET</button></p>
                 </div>
             </div>
         : (showLogin === 2 && username === undefined) ?
@@ -320,8 +327,8 @@ export function LoginDialog() {
                         <button className="button"
                                 onClick={register_button}>{state !== 1 ? "Sign up" : "..."}</button>
                     }
-                    <p>Already have an account? <button className={"link"} onClick={()=>setShowLogin(1)}>LOG IN</button></p>
-                    <p>Forgot your password? <button className={"link"} onClick={()=>setShowLogin(3)}>RESET</button></p>
+                    <p>Already have an account? <button className={"link"} onClick={()=>doSetShowLogin(1)}>LOG IN</button></p>
+                    <p>Forgot your password? <button className={"link"} onClick={()=>doSetShowLogin(3)}>RESET</button></p>
                 </div>
             </div>
         : (showLogin === 3 && username === undefined) ?
@@ -339,7 +346,7 @@ export function LoginDialog() {
                         <button className="button"
                                 onClick={reset_button}>{state !== 1 ? "Reset" : "..."}</button>
                     }
-                    <p>Or still remember your password? <button className={"link"} onClick={()=>setShowLogin(1)}>LOG IN</button></p>
+                    <p>Or still remember your password? <button className={"link"} onClick={()=>doSetShowLogin(1)}>LOG IN</button></p>
                 </div>
             </div>
             : null
