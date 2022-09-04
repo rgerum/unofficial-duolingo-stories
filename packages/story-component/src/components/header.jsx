@@ -92,6 +92,7 @@ export function TextLine(props) {
 }
 
 
+window.playing_audio = [];
 var audio_base_path = "https://carex.uber.space/stories/";
 function useAudio(element) {
     let [audioRange, setAudioRange] = React.useState(99999);
@@ -112,17 +113,31 @@ function useAudio(element) {
     if(audio === undefined || audio.url === undefined)
         return [10000000, undefined]
 
-    let audioObject = new Audio(audio_base_path + audio.url);
+    let audioObject = React.useMemo(() => new Audio(audio_base_path + audio.url), [audio_base_path + audio.url]);
 
     function playAudio() {
+        for(let audio_cancel of window.playing_audio)
+            audio_cancel();
+        window.playing_audio = [];
         audioObject.pause();
         audioObject.currentTime = 0;
         audioObject.play();
+        let timeouts = [];
+        let last_end = 0;
         for(let keypoint of audio.keypoints) {
-            setTimeout(() => {
+            last_end = keypoint.rangeEnd;
+            let t = setTimeout(() => {
                 setAudioRange(keypoint.rangeEnd);
             }, keypoint.audioStart);
+            timeouts.push(t);
         }
+        function cancel() {
+            for(let t in timeouts)
+                clearTimeout(t);
+            setAudioRange(last_end);
+            audioObject.pause();
+        }
+        window.playing_audio.push(cancel);
     }
 
     return [audioRange, playAudio];
