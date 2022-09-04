@@ -89,7 +89,7 @@ export function IndexContent(props) {
 
                 {lang !== undefined ?
                     <SetList sets={course_data?.sets} about={course_data?.about} conlang_count={conlangs.length} /> :
-                    <CourseList courses={courses} />
+                    <CourseList courses={courses} filter={props.filter} />
                 }
 
                 <hr/>
