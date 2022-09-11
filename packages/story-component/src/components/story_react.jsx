@@ -121,8 +121,8 @@ export function Story(props) {
             let count = 0;
             let audios = {};
             for (let url of audio_urls) {
-                count += 1;
-                if (audios[url] === undefined) {
+                if (audios[url] === undefined && url !== undefined) {
+                    count += 1;
                     let a = new Audio(audio_base_path + url);
                     function loadingFinished(e) {
                         a.removeEventListener('canplaythrough', loadingFinished);
