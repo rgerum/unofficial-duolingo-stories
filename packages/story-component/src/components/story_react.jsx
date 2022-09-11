@@ -123,7 +123,7 @@ export function Story(props) {
             for (let url of audio_urls) {
                 if (audios[url] === undefined && url !== undefined) {
                     count += 1;
-                    let a = new Audio(audio_base_path + url);
+                    let a = new Audio();
                     function loadingFinished(e) {
                         a.removeEventListener('canplaythrough', loadingFinished);
                         a.removeEventListener('error', loadingFinished);
@@ -134,6 +134,8 @@ export function Story(props) {
                     a.addEventListener('canplaythrough', loadingFinished, false);
                     a.addEventListener('error', loadingFinished);
                     audios[url] = a;
+                    a.src = audio_base_path + url;
+                    a.load();
                 }
             }
             if (count === 0)
