@@ -136,6 +136,8 @@ export function Story(props) {
                     audios[url] = a;
                 }
             }
+            if (count === 0)
+                setAudioLoaded(1);
             return audios;
         }, [story.id])
     }
