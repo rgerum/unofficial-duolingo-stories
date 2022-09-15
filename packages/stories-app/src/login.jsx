@@ -32,6 +32,10 @@ export async function login(data, remember) {
         setCookie("username", data["username"], 30);
         setCookie("password", data["password"], 30);
     }
+    else {
+        document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
     // check if the user is logged in
     let response = await fetch_post(`${backend_user}user.php?action=login`, data)
     return response.status !== 403;
@@ -136,8 +140,8 @@ export async function activate(data) {
 
 export async function logout() {
     // send the signal to logout
-    setCookie("username");
-    setCookie("password");
+    document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     await fetch(`${backend_user}user.php?action=logout`);
     await get_login();
 }

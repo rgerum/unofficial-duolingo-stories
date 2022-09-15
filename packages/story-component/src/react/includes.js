@@ -1,6 +1,9 @@
 import "./includes.css"
 
+window.setCookie = setCookie;
+window.resetSession = () => setCookie("PHPSESSID");
 export function setCookie(cname, cvalue, exdays) {
+    cvalue = encodeURIComponent(cvalue);
     if(!exdays) {
         document.cookie = cname + "=" + cvalue + ";"
         return;
