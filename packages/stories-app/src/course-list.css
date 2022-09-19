@@ -130,3 +130,32 @@
     display: none
   }
 }
+
+.celebration {
+    justify-content: center;
+    padding: 25px 0;
+    max-width: 953px;
+    flex-flow: row wrap;
+    gap: 15px;
+    height: min-content;
+    margin-inline: 20px;
+}
+.celebration_date {
+    color: var(--text-color-dim);
+    opacity: 0.5;
+    font-size: 15px;
+}
+.celebration svg {
+    padding-block: 0;
+}
+.celebration_icon {
+    font-size: 40px;
+}
+@media screen and (max-width: 538px) {
+    .celebration_icon {
+        display: none;
+    }
+    .celebration svg {
+        display: none;
+    }
+}

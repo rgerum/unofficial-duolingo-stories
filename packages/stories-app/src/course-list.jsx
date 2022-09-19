@@ -38,6 +38,12 @@ export function CourseList(props) {
 
     return (
         <div>
+            <Link key={0} to="/tr-en" className="language_select_button celebration">
+                <Flag iso="tr" />
+                <div className="language_select_button_text" style={{width: "68%"}}>Celebrating our Turkish team which just reached 100 translated stories!
+                    Congratulations to <i>Danika_Dakika</i> and <i>deck</i>. <span className="celebration_date">— 19. Sep. 2022</span></div>
+                <span className="celebration_icon">🎉</span>
+            </Link>
             {languages.map(name => (
                 name === "Conlangs" ?
                     <Link key={name} to="/conlangs" className="language_select_button conlang-link">
