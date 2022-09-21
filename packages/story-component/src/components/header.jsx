@@ -110,8 +110,10 @@ function useAudio(element, audios) {
         }
     })
 
-    if(audio === undefined || audio.url === undefined)
+    if(audio === undefined || audio.url === undefined) {
+        React.useMemo(()=>{}, [undefined]);
         return [10000000, undefined]
+    }
 
     let audioObject = React.useMemo(() => {
         if(audios && audios[audio.url])

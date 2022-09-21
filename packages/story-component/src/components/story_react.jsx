@@ -97,6 +97,7 @@ export function Story(props) {
     }, [audio_loaded]);
 
     if(editor) {
+        React.useMemo(() => {}, [story.id])
         return (
             <div id="story">
                 {parts.map((part, i) => (

@@ -29,7 +29,7 @@ if(isset($_GET['lang']) && isset($_GET['lang_base'])) {
         LEFT JOIN language l2 ON l2.id = course.learningLanguage
         WHERE course.id = (SELECT c.id FROM course c
                       JOIN language l1 ON c.learningLanguage = l1.id AND l1.short = $lang
-                      JOIN language l2 ON c.fromLanguage = l2.id AND l2.short = $lang_base);");
+                      JOIN language l2 ON c.fromLanguage = l2.id AND l2.short = $lang_base WHERE c.official = 0);");
     if(isset($course[0]))
        $course = $course[0];
 
@@ -47,7 +47,7 @@ if(isset($_GET['lang']) && isset($_GET['lang_base'])) {
     JOIN image i on story.image = i.id
     WHERE story.public = 1 and story.course_id = (SELECT c.id FROM course c
         JOIN language l1 ON c.learningLanguage = l1.id AND l1.short = $lang
-        JOIN language l2 ON c.fromLanguage = l2.id AND l2.short = $lang_base)
+        JOIN language l2 ON c.fromLanguage = l2.id AND l2.short = $lang_base WHERE c.official = 0)
     GROUP BY story.id
     ORDER BY set_id, set_index;";
 
