@@ -7,7 +7,6 @@ import {
     BrowserRouter as Router,
     Routes,
     Route,
-    Link,
 } from "react-router-dom";
 import {load_dark_mode} from "story-component";
 const Faq = lazy(() => import('./faq'));
@@ -43,18 +42,6 @@ function App() {
             <Route path='/*' element={<IndexContent error />}></Route>
         </Routes>
     </Suspense>
-}
-
-function Error() {
-    return <div id="login_dialog">
-        <div>
-            <h2>404 Not Found</h2>
-            <img alt={"sad duo"} width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
-            <p>The page you requested was not found.<br/></p>
-            <p>If you think this is an error on the website, please report it on <a href="https://discord.gg/4NGVScARR3">Discord</a>.</p>
-            <p><Link className="link" data-cy="back" to="/">to main</Link></p>
-        </div>
-    </div>
 }
 
 createRoot(document.getElementById('root')).render(
