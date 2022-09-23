@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^11.2.7",
-    "@testing-library/user-event": "^12.8.3",
     "editor-app": "file:packages/editor-app",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -40,7 +37,7 @@
     "file-loader": "^6.2.0",
     "formdata-node": "^4.3.2",
     "html-webpack-plugin": "^5.5.0",
-    "lerna": "^5.1.8",
+    "lerna": "^5.5.1",
     "mini-css-extract-plugin": "^2.4.5",
     "npm-watch": "^0.11.0",
     "style-loader": "^3.3.1",

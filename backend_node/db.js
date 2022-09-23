@@ -1,6 +1,7 @@
 const mysql = require("mysql");
 const dbConfig = require("./db.config.js");
 
+
 // Create a connection to the database
 const connection = mysql.createConnection({
     host: dbConfig.HOST,
@@ -15,4 +16,15 @@ connection.connect(error => {
     console.log("Successfully connected to the database.");
 });
 
-module.exports = connection;
+async function query(query, args) {
+    return new Promise(function(resolve, reject) {
+        connection.query(query, args, (err, res) => {
+            if (err) {
+                console.log("err", err);
+                reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
+module.exports = query;
