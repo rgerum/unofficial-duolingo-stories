@@ -1,21 +1,11 @@
-import {Story} from "./components/story_react";
-import {Legal} from "./components/legal";
+export {Story} from "./components/story_react";
+export {Legal} from "./components/legal";
 
-export {Story, Legal}
+export {Flag} from "./react/flag";
+export {Spinner, SpinnerBlue} from "./react/spinner";
 
-import {Flag} from "./react/flag";
-import {Spinner, SpinnerBlue} from "./react/spinner";
+export {useDataFetcher, useDataFetcher2, useInput, useEventListener, useLocalStorage} from "./react/hooks";
+export {setCookie, getCookie, isLocalNetwork, fetch_post, inputs_to_dict, dict_to_query, shuffle} from "./react/includes";
 
-export {Flag, Spinner, SpinnerBlue}
-
-import {useDataFetcher, useDataFetcher2, useInput, useEventListener, useLocalStorage} from "./react/hooks";
-export {useDataFetcher, useDataFetcher2, useInput, useEventListener, useLocalStorage}
-
-import {setCookie, getCookie, isLocalNetwork, fetch_post, inputs_to_dict, dict_to_query, shuffle} from "./react/includes";
-export {setCookie, getCookie, isLocalNetwork, fetch_post, inputs_to_dict, dict_to_query, shuffle}
-
-import {LoggedInButton} from "./react/loggedinbutton";
-export {LoggedInButton}
-
-import {load_dark_mode} from "./react/dark_mode"
-export {load_dark_mode}
+export {LoggedInButton} from "./react/loggedinbutton";
+export {load_dark_mode} from "./react/dark_mode";

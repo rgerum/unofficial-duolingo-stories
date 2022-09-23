@@ -3,7 +3,7 @@ import {Flag, Spinner} from "story-component";
 import {Link} from "react-router-dom";
 
 
-export function CourseList(props) {
+export default function CourseList(props) {
     const courses = props.courses;
 
     // show spinner if not yet loaded

@@ -3,7 +3,7 @@ import {Link,} from "react-router-dom";
 import {Spinner} from "story-component";
 
 
-export function SetList(props) {
+export default function SetList(props) {
     const sets = props.sets;
 
     if(sets === undefined)

@@ -1,37 +1,21 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import {createRoot} from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 
-import {Story, Spinner, useDataFetcher} from "story-component";
-
-import {IndexContent} from "./overview";
-import {UserActivationOrReset} from "./user_activation_or_reset";
 import {
     BrowserRouter as Router,
     Routes,
     Route,
     Link,
-    useParams,
 } from "react-router-dom";
-import {getStoryJSON} from "story-component/src/components/includes";
-import {LoginDialog} from "./login";
 import {load_dark_mode} from "story-component";
-import {Faq} from "./faq";
+const Faq = lazy(() => import('./faq'));
+const UserActivationOrReset = lazy(() => import('./user_activation_or_reset'));
+const IndexContent = lazy(() => import('./overview'));
+const LoginDialog = lazy(() => import('./login'));
+const StoryP = lazy(() => import('./story_wrapper'));
 
-
-function StoryP() {
-    let { id } = useParams();
-    let test = window.location.href.endsWith("test");
-    let story_data = useDataFetcher(getStoryJSON, [id])
-    if(story_data === undefined)
-        return <Spinner/>
-    if(story_data === null)
-        return <Error/>
-    if(test)
-        return <div id="main"><Story id={id} editor={{lineno: 3}} story={story_data} /></div>
-    return <Story id={id} story={story_data} />
-}
 
 function App() {
     let urlParams = new URLSearchParams(window.location.search);
@@ -46,7 +30,8 @@ function App() {
     if(urlParams.get("task"))
         window.location = `/task/${urlParams.get("task")}/${urlParams.get("username")}/${urlParams.get("activation_link")}`;
 
-    return <Routes>
+    return <Suspense fallback={<div>Loading...</div>}>
+        <Routes>
             <Route path='/' element={<IndexContent />}></Route>
             <Route path='conlangs' element={<IndexContent filter={'conlang'} />}></Route>
             <Route path='/:lang-:lang_base' element={<IndexContent />}></Route>
@@ -57,6 +42,7 @@ function App() {
             <Route path='/faq' element={<Faq />}></Route>
             <Route path='/*' element={<IndexContent error />}></Route>
         </Routes>
+    </Suspense>
 }
 
 function Error() {

@@ -20,7 +20,7 @@ function LanguageButtonSmall(props) {
     </Link>;
 }
 
-export function CourseDropdown(props) {
+export default function CourseDropdown(props) {
     const course_data = props.course_data;
     const courses = props.courses;
 

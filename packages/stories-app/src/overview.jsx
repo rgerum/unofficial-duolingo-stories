@@ -1,7 +1,7 @@
 import {useUsername, Login} from './login'
-import {CourseList} from "./course-list";
-import {CourseDropdown} from "./course-dropdown";
-import {SetList} from "./story-list";
+import CourseList from "./course-list";
+import CourseDropdown from "./course-dropdown";
+import SetList from "./story-list";
 import {getCoursesUser, getPublicCourses, getStoriesSets} from "./api_calls";
 import {Legal, useDataFetcher} from "story-component";
 
@@ -22,7 +22,7 @@ function Error() {
     </div>
 }
 
-export function IndexContent(props) {
+export default function IndexContent(props) {
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
     let courses = useDataFetcher(getPublicCourses, []);
     

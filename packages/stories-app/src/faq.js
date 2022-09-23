@@ -1,12 +1,12 @@
 import {Link, useParams} from "react-router-dom";
-import {CourseDropdown} from "./course-dropdown";
+import CourseDropdown from "./course-dropdown";
 import {Login, useUsername} from "./login";
 import React from "react";
 import {getCoursesUser, getPublicCourses, getStoriesSets} from "./api_calls";
 import {useDataFetcher} from "story-component";
 
 
-export function Faq() {
+export default function Faq() {
     let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
     let courses = useDataFetcher(getPublicCourses, []);
 

@@ -193,7 +193,7 @@ export function Login(props) {
     </Link>
 }
 
-export function LoginDialog() {
+export default function LoginDialog() {
 //    let [username, doLogin, , showLogin, setShowLogin] = props.useUsername;
     let [username, doLogin, , showLogin, setShowLogin] = useUsername();
 
