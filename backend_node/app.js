@@ -3,17 +3,15 @@ const session = require('express-session')
 
 const app = express()
 const port = 3001
-
 const path = '/stories/backend_node'
 
 //app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
 
 let RedisStore = require("connect-redis")(session)
+const redisConfig = require("./config/redis.config.js");
 const redis = require('redis');
-const redisClient = redis.createClient({ legacyMode: true,
-    socket: {path: '/home/carex/.redis/sock'}
-});
+const redisClient = redis.createClient(redisConfig);
 redisClient.connect().catch(console.error)
 
 
