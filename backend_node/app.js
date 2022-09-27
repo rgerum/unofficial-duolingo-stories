@@ -1,7 +1,10 @@
 const express = require('express')
 const session = require('express-session')
+const compression = require('compression')
 
 const app = express()
+app.use(compression())
+
 const port = 3001
 const path = '/stories/backend_node'
 
