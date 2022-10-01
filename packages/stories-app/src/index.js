@@ -9,7 +9,7 @@ import {
     Route,
 } from "react-router-dom";
 import {load_dark_mode} from "story-component";
-const Faq = lazy(() => import('./faq'));
+import {useUsername2} from "./login";
 const UserActivationOrReset = lazy(() => import('./user_activation_or_reset'));
 const IndexContent = lazy(() => import('./overview'));
 const LoginDialog = lazy(() => import('./login'));
@@ -29,20 +29,20 @@ function App() {
     if(urlParams.get("task"))
         window.location = `/task/${urlParams.get("task")}/${urlParams.get("username")}/${urlParams.get("activation_link")}`;
 
-    return <Suspense fallback={<div>Loading...</div>}>
+    let userdata = useUsername2();
+
+    return <Suspense fallback={<></>}>
         <Routes>
-            <Route path='/' element={<IndexContent />}></Route>
-            <Route path='conlangs' element={<IndexContent filter={'conlang'} />}></Route>
-            <Route path='/:lang-:lang_base' element={<IndexContent />}></Route>
-            <Route path='/login' element={<LoginDialog />}></Route>
+            <Route path='/login' element={<LoginDialog userdata={userdata}/>}></Route>
             <Route path='/story/:id' element={<StoryP />}></Route>
             <Route path='/story/:id/test' element={<StoryP />}></Route>
             <Route path='/task/:task/:username/:hash' element={<UserActivationOrReset />}></Route>
-            <Route path='/faq' element={<Faq />}></Route>
-            <Route path='/*' element={<IndexContent error />}></Route>
+            <Route path='/:lang-:lang_base/*' element={<IndexContent userdata={userdata}/>}></Route>
+            <Route path='/*' element={<IndexContent userdata={userdata}/>}></Route>
         </Routes>
     </Suspense>
 }
+
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

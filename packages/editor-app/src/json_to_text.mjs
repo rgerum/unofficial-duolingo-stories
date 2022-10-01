@@ -1,4 +1,4 @@
-import {diffJson} from "diff";
+//import {diffJson} from "diff";
 //import {processStoryFile, splitTextTokens} from "./story-editor/syntax_parser_new.mjs";
 
 let punctuation_chars = "\\\/¡!\"\'\`#$%&*,.:;<=>¿?@^_`{|}…"+
@@ -734,6 +734,8 @@ async function test() {
         "json" => "string",
         "api" => "int"];
      */
+    let course_id = 129;
+    let folder = "/home/richard/Dropbox/unofficial-duolingo-stories/import_tools/duolingo_data_en_tr"
     let avatars = await getAvatars(2);
     let avatar_names = {}
     for(let avatar of avatars) {
@@ -751,7 +753,7 @@ async function test() {
         }
     }
 
-    let data2 = JSON.parse(fs.readFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/import_tools/duolingo_data/_stories.txt"));
+    let data2 = JSON.parse(fs.readFileSync(folder+"/_stories.txt"));
     //console.log(data2)
     for(let set_id in data2.sets) {
         for(let story_id in data2.sets[set_id]) {
@@ -763,7 +765,7 @@ async function test() {
             //    continue
             console.log(story)
             add_icon(story)
-            let json = fs.readFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/import_tools/duolingo_data/"+story.id+".txt")
+            let json = fs.readFileSync(folder+"/"+story.id+".txt")
             json = JSON.parse(json);
 
             console.log("### processStory")
@@ -780,11 +782,9 @@ async function test() {
                 image: story.illustrationUrls.active.match(/image\/(.*).svg/)[1],
                 set_id: parseInt(set_id)+1,
                 set_index: parseInt(story_id)+1,
-                course_id: 66,// 12 es-en, 66 en-es
+                course_id: course_id,// 12 es-en, 66 en-es
                 text: text,
                 json: JSON.stringify(json),
-                username: "randriano",
-                password: "carlmureg"
             }
             console.log("---------upload")
             try {
@@ -794,6 +794,7 @@ async function test() {
             }
             catch (e) {
                 console.log(e)
+                die()
             }
             //die
             //if(story_id == 2)

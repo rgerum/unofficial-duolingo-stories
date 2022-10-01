@@ -1,51 +1,46 @@
 import "./course-dropdown.css";
 
-import {Flag} from "story-component";
-import {Link} from "react-router-dom";
+import {Flag, useDataFetcher} from "story-component";
+import {getCoursesUser, getStoriesSets, useSuspendedDataFetcher} from "./api_calls";
+import {MyLink} from "./mylink";
+import {useParams} from "react-router-dom";
 
 
-function LanguageButtonSmall(props) {
+function LanguageButtonSmall({course, startTransition}) {
     /**
      * A button in the language drop down menu (flag + name)
      */
-    let course = props.course;
 
-    return <Link
+    return <MyLink
         className="language_select_item"
-        onClick={props.onClick}
+        startTransition={startTransition}
         to={`/${course.learningLanguage}-${course.fromLanguage}`}
     >
         <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} />
         <span>{course.name || course.learningLanguageName}</span>
-    </Link>;
+    </MyLink>;
 }
 
-export default function CourseDropdown(props) {
-    const course_data = props.course_data;
-    const courses = props.courses;
+export default function CourseDropdown({userdata, startTransition}) {
+    let {lang, lang_base} = useParams();
+    const course_data = useDataFetcher(getCoursesUser, [userdata.username]);
+    const course = useSuspendedDataFetcher(getStoriesSets, [lang, lang_base, userdata.username]);
 
+    if(userdata?.username === undefined || course_data === undefined || course_data?.length === 0)
+        return <div id="header_language_placeholder"></div>
 
-    if(courses === undefined)
-        return (
-            <div id="header_language">
-                <div id="diamond-wrap">
-                    <div id="diamond"></div>
-                </div>
-                <Flag iso={course_data?.learningLanguage} flag={course_data?.learningLanguageFlag} width={40} flag_file={course_data?.learningLanguageFlagFile} />
-                <div id="header_lang_selector" />
-            </div>
-        );
+    console.log("dropdown", course, course.learningLanguage, lang, lang_base)
     return (
     <div id="header_language">
         <div id="diamond-wrap">
             <div id="diamond"></div>
         </div>
-        <Flag iso={course_data?.learningLanguage} flag={course_data?.learningLanguageFlag} width={40} flag_file={course_data?.learningLanguageFlagFile} />
-        <div id="header_lang_selector">
-        {courses.map(course => (
-            <LanguageButtonSmall key={course.id} course={course} />
+        <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
+        <nav id="header_lang_selector">
+        {course_data.map(course => (
+            <LanguageButtonSmall key={course.id} course={course} startTransition={startTransition} />
         ))}
-        </div>
+        </nav>
     </div>);
 
 }

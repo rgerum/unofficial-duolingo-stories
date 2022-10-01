@@ -8,9 +8,43 @@ let backend = get_backend();
 let backend_stories = backend+"stories/"
 window.backend_stories = backend_stories
 
+const backend_express = "https://duostories.org/stories/backend_node/"
+
+
+let fetch_promises = {}
+window.fetch_promises = fetch_promises;
+export function useSuspendedDataFetcher(fetcher, args= []) {
+    let key = `${fetcher.name} ${args}`;
+    if(fetch_promises[key] === undefined) {
+        fetch_promises[key] = {
+            promise: undefined,
+            response: undefined,
+            status: "pending",
+        }
+        fetch_promises[key].promise = fetcher(...args).then((res) => {
+                fetch_promises[key].response = res;
+                fetch_promises[key].status = "done";
+            }
+        );
+    }
+    if(fetch_promises[key].status === "pending")
+        throw fetch_promises[key].promise;
+    return fetch_promises[key].response;
+}
+
 export async function getCoursesUser() {
     try {
-        let response_courses = await fetch(`${backend_stories}get_courses_user.php`);
+        let response_courses = await fetch(`${backend_express}courses_user`, {credentials: "include"});
+        return await response_courses.json();
+    }
+    catch (e) {
+        return [];
+    }
+}
+
+export async function getCoursesCount() {
+    try {
+        let response_courses = await fetch(`${backend_express}course_counts`);
         return await response_courses.json();
     }
     catch (e) {
@@ -20,13 +54,8 @@ export async function getCoursesUser() {
 
 export async function getPublicCourses() {
     try {
-        let response_courses = await fetch(`${backend_stories}get_courses.php`);
-        let data_courses = await response_courses.json();
-        let public_courses = [];
-        for(let course of data_courses)
-            if(course.public)
-                public_courses.push(course)
-        return public_courses;
+        let response_courses = await fetch(`${backend_express}courses`);
+        return await response_courses.json();
     }
     catch (e) {
         return [];
@@ -37,20 +66,8 @@ export async function getStoriesSets(lang, lang_base) {
     if(lang === undefined || lang_base === undefined)
         return {sets: []}
     try {
-        let response = await fetch(`${backend}/stories/get_list.php?lang=${lang}&lang_base=${lang_base}`);
-        let data = await response.json();
-
-        let set = -1;
-        let sets = [];
-        for(let d of data.stories) {
-            if (set !== d.set_id) {
-                set = d.set_id;
-                sets.push([]);
-            }
-            sets[sets.length - 1].push(d);
-        }
-        data.sets = sets;
-        return data;
+        let response = await fetch(`${backend_express}course/${lang}-${lang_base}`, {credentials: 'include'});
+        return await response.json();
     }
     catch (e) {
         return {sets: []}

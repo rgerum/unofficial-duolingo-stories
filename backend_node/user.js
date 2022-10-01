@@ -35,8 +35,8 @@ router.get('/session', function (req, res) {
 })
 
 
-router.post('/login', express.urlencoded({ extended: false }), async function (req, res) {
-    let res2 = await query(`SELECT * FROM user WHERE username = ? AND activated = 1 `, req.body.username);
+router.post('/login', async function (req, res) {
+    let res2 = await query(`SELECT * FROM user WHERE username = ? AND activated = 1`, req.body.username);
 
     if(res2.length === 0) {
         res.send("no user");
@@ -74,7 +74,8 @@ router.get('/logout',(req,res) => {
         if(err) {
             return console.log(err);
         }
-        res.redirect(path+'/');
+        res.send("done")
+        //res.redirect(path+'/');
     });
 
 });

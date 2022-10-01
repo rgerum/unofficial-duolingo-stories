@@ -22,6 +22,15 @@ function func_catch(func) {
     }
 }
 
+async function get_counts() {
+    let res = await query(`SELECT COUNT(DISTINCT course.id) AS count_courses, COUNT(DISTINCT story.id) as count_stories FROM course
+LEFT JOIN language l1 ON l1.id = course.fromLanguage
+LEFT JOIN language l2 ON l2.id = course.learningLanguage
+LEFT JOIN story ON (course.id = story.course_id)
+WHERE story.public = 1 and course.public = 1`);
+    return res[0];
+}
+
 async function get_story({story_id}) {
     let res = await query(`SELECT l1.short AS fromLanguage, l2.short AS learningLanguage, story.id, story.json 
               FROM story 
@@ -84,6 +93,20 @@ ORDER BY name;
     return grouped_languages;
 }
 
+async function get_courses_user({user_id}) {
+    // sort courses by base language
+    return await query(`
+SELECT course.id, course.name,
+ l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
+ l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
+ course.public, course.official, time FROM course
+LEFT JOIN language l1 ON l1.id = course.fromLanguage
+LEFT JOIN language l2 ON l2.id = course.learningLanguage
+    INNER JOIN (SELECT s.course_id, story_done.id as sdid, MAX(story_done.time) as time FROM story s INNER JOIN story_done ON story_done.story_id = s.id WHERE story_done.user_id = ? GROUP BY course_id) as ss on course.id = ss.course_id
+     ORDER BY time DESC
+    `, [user_id]);
+}
+
 async function post_story_done({user_id, story_id}) {
     if(!user_id) {
         return {status: 403}
@@ -93,7 +116,20 @@ async function post_story_done({user_id, story_id}) {
 }
 
 async function get_course({user_id, lang, lang_base}) {
-    let res = await query(`
+    const course_query = await query(`
+        SELECT course.id, course.about, 
+        l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
+        l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag     
+        FROM course 
+        LEFT JOIN language l1 ON l1.id = course.fromLanguage
+        LEFT JOIN language l2 ON l2.id = course.learningLanguage
+        WHERE course.short = ? LIMIT 1
+        `, [lang+"-"+lang_base]);
+    if(course_query.length === 0)
+        return {status: 404};
+    const course = course_query[0];
+
+    const res = await query(`
         SELECT story.id, story.set_id, story.set_index, story.name, story_done.time as time,
         i.active, i.activeLip, i.gilded, i.gildedLip
         FROM story
@@ -104,7 +140,7 @@ async function get_course({user_id, lang, lang_base}) {
         ORDER BY set_id, set_index;
         `, [user_id, lang+"-"+lang_base]);
     if(res.length === 0)
-        return;
+        return {status: 404};
 
     // group into sets
     let set = -1;
@@ -117,12 +153,14 @@ async function get_course({user_id, lang, lang_base}) {
         sets[sets.length - 1].push(d);
     }
 
-    return sets;
+    return {...course, sets: sets};
 }
 
 router.get('/story/:story_id', func_catch(get_story));
 router.get('/story/:story_id/done', func_catch(post_story_done));
+router.get('/course_counts', func_catch(get_counts));
 router.get('/courses', func_catch(get_courses));
+router.get('/courses_user', func_catch(get_courses_user));
 router.get('/course/:lang-:lang_base', func_catch(get_course));
 
 module.exports = router;

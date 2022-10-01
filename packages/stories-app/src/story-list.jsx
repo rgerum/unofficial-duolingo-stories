@@ -1,26 +1,24 @@
 import './story-list.css'
-import {Link,} from "react-router-dom";
-import {Spinner} from "story-component";
+import {Link, useParams} from "react-router-dom";
+import {getStoriesSets, useSuspendedDataFetcher} from "./api_calls";
 
 
-export default function SetList(props) {
-    const sets = props.sets;
-
-    if(sets === undefined)
-        return <Spinner />;
+export default function SetList({userdata, conlang_count}) {
+    let {lang,lang_base} = useParams();
+    const course = useSuspendedDataFetcher(getStoriesSets, [lang, lang_base, userdata.username]);
 
     return <div id="story_list">
-        {props.about ?
+        {course.about ?
             <div className="set_list">
                 <div className="set_title">About</div><p>
-                {props.about}
+                {course.about}
             </p>
             </div>
             : <></>}
-        {sets.map(stories => (
-            <div key={stories[0].set_id} className="set_list">
-                <div className="set_title">Set {stories[0].set_id}</div>
-                {stories.map(story => (
+        {course.sets.map(set => (
+            <div key={set[0].set_id} className="set_list">
+                <div className="set_title">Set {set[0].set_id}</div>
+                {set.map(story => (
                     <StoryButton key={story.id} story={story} />
                 ))}
             </div>
@@ -28,8 +26,7 @@ export default function SetList(props) {
     </div>
 }
 
-function StoryButton(props) {
-    let story = props.story;
+function StoryButton({story}) {
     return <Link
         data-cy={"story_button_"+story.id}
         className="button_story_parent"
@@ -40,7 +37,7 @@ function StoryButton(props) {
             data-done={story.time != null}
             style={story.time === null ? {background: "#"+story.activeLip} : {}}
         >
-            <img src={story.time != null ? story.gilded : story.active} alt="story"/>
+            <img src={story.time != null ? story.gilded : story.active} alt=""/>
         </div>
         <div
             className="button_story_text"

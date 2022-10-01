@@ -1,20 +1,18 @@
 import React from 'react';
 import './login.css';
-import {useInput, fetch_post, setCookie, isLocalNetwork, LoggedInButton} from "story-component";
-import {get_backend} from "./api_calls";
+import {useInput, fetch_post, LoggedInButton} from "story-component";
+import {get_backend, useSuspendedDataFetcher} from "./api_calls";
 import {Link, useNavigate} from "react-router-dom";
 
 let backend = get_backend();
 let backend_user = backend+'user/';
 
+const backend_express = "https://duostories.org/stories/backend_node/"
 
-export async function get_login() {
+//////////
+export async function get_login2() {
     // get the current login status
-    let response;
-    if(isLocalNetwork())
-        response = await fetch(`${backend_user}user.php?action=get_login`)
-    else
-        response = await fetch(`${backend_user}user.php?action=get_login`, {credentials: "same-origin"})
+    const response = await fetch(`${backend_express}session`, {credentials: 'include'});  // {credentials: "same-origin"}
     try {
         // return the response
         let json = await response.json();
@@ -27,19 +25,65 @@ export async function get_login() {
     }
 }
 
-export async function login(data, remember) {
-    if(remember) {
-        setCookie("username", data["username"], 30);
-        setCookie("password", data["password"], 30);
-    }
-    else {
-        document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    }
-    // check if the user is logged in
-    let response = await fetch_post(`${backend_user}user.php?action=login`, data)
-    return response.status !== 403;
+export function useUsername2() {
+    const [user, setUser] = React.useState(undefined);
+    let courses_user = useSuspendedDataFetcher(get_login2, []);
 
+    if(user !== undefined)
+        courses_user = user;
+
+    async function login2(username, password, remember) {
+        console.log("login2")
+        await login(username, password, remember);
+        console.log("done")
+        let user = await get_login2();
+        console.log("get login", user);
+        setUser(user);
+        return user;
+    }
+
+    async function logout2() {
+        await logout();
+        let user = await get_login2();
+        setUser(user);
+        return user;
+    }
+
+    return {
+        username: courses_user?.username,
+        admin: courses_user?.admin,
+        role: courses_user?.role,
+        response: courses_user,
+        login: login2,
+        logout: logout2,
+    };
+}
+
+
+
+////////////
+
+
+export async function login(username, password, remember) {
+    document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    async function fetch_post(url, data)
+    {
+        // check if the user is logged in
+        var req = new Request(url, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+            mode: "cors",
+            credentials: 'include',
+        });
+        return fetch(req);
+    }
+
+    let response = await fetch_post(`${backend_express}login`, {username: username, password: password, remember: remember});
+    return response.status !== 403;
 }
 
 export async function register(data) {
@@ -134,7 +178,6 @@ export async function reset_pw_set(data) {
 export async function activate(data) {
     let reponse = await fetch_post(`${backend_user}user.php?action=activate`, data);
     return reponse.status === 200;
-
 }
 
 
@@ -142,60 +185,20 @@ export async function logout() {
     // send the signal to logout
     document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    await fetch(`${backend_user}user.php?action=logout`);
-    await get_login();
+    await fetch(`${backend_express}logout`, {credentials: 'include'});
 }
 
-
-export function useUsername() {
-    let [username, setUsername] = React.useState(null);
-    let [showLogin, setShowLogin] = React.useState(0);
-
-    async function getUsernameFirstTime() {
-        let login = await get_login();
-        setUsername(login);
-    }
-
-    async function doLogin(username, password, remember) {
-        let success = await login({username: username, password: password}, remember);
-        if(success === false) {
-            //window.alert("Error: username or password is wrong.");
-            return undefined;
-        }
-        else {
-            let login = await get_login();
-            setUsername(login);
-            return login;
-        }
-    }
-    async function doLogout() {
-        await logout();
-        setUsername(undefined);
-    }
-    if(username === null) {
-        setUsername(undefined);
-        getUsernameFirstTime();
-        return [undefined, doLogin, doLogout];
-    }
-    return [username, doLogin, doLogout, showLogin, setShowLogin];
-}
-
-
-export function Login(props) {
-    let [username, , doLogout, , setShowLogin] = props.useUsername;
-
-    //username = {role: 1, admin: 0, username: "test"}
-    if(username !== undefined)
-        return <LoggedInButton username={username} doLogout={doLogout} page="stories"/>
+export function Login({userdata}) {
+    if(userdata.username !== undefined)
+        return <LoggedInButton userdata={userdata} page="stories"/>
 
     return <Link id="log_in" to={"/login"}>
-        <button className="button" onClick={() => setShowLogin(1)} style={{float: "none"}}>Log in</button>
+        <button className="button" style={{float: "none"}}>Log in</button>
     </Link>
 }
 
-export default function LoginDialog() {
-//    let [username, doLogin, , showLogin, setShowLogin] = props.useUsername;
-    let [username, doLogin, , showLogin, setShowLogin] = useUsername();
+export default function LoginDialog({userdata}) {
+    let [showLogin, setShowLogin] = React.useState(0);
 
     let [state, setState] = React.useState(0);
     let [error, setError] = React.useState("");
@@ -224,7 +227,7 @@ export default function LoginDialog() {
         setState(1);
         let username;
         try {
-            username = await doLogin(usernameInput, passwordInput, remember);
+            username = await userdata.login(usernameInput, passwordInput, remember);
         }
         catch (e) {
             console.log(e);
@@ -295,9 +298,11 @@ export default function LoginDialog() {
             setMessage("Have received an email with a reset link. You may need to look into your spam folder.");
         }
     }
+    if(userdata === undefined)
+        throw "nooo"
 
     return <>
-        {(showLogin <= 1 && username === undefined) ?
+        {(showLogin <= 1) ?
             <div id="login_dialog">
                 <Link id="quit" to={"/"} />
                 <div>
@@ -312,7 +317,7 @@ export default function LoginDialog() {
                     <p>Forgot your password? <button className={"link"} onClick={()=>doSetShowLogin(3)}>RESET</button></p>
                 </div>
             </div>
-        : (showLogin === 2 && username === undefined) ?
+        : (showLogin === 2) ?
             <div id="login_dialog">
                 <Link id="quit" to={"/"} />
                 <div>
@@ -335,7 +340,7 @@ export default function LoginDialog() {
                     <p>Forgot your password? <button className={"link"} onClick={()=>doSetShowLogin(3)}>RESET</button></p>
                 </div>
             </div>
-        : (showLogin === 3 && username === undefined) ?
+        : (showLogin === 3) ?
             <div id="login_dialog">
                 <Link id="quit" to={"/"} />
                 <div>

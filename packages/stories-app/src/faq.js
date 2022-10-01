@@ -1,25 +1,8 @@
-import {Link, useParams} from "react-router-dom";
-import CourseDropdown from "./course-dropdown";
-import {Login, useUsername} from "./login";
 import React from "react";
-import {getCoursesUser, getPublicCourses, getStoriesSets} from "./api_calls";
-import {useDataFetcher} from "story-component";
 
 
 export default function Faq() {
-    let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
-    let courses = useDataFetcher(getPublicCourses, []);
-
-    const courses_user = useDataFetcher(getCoursesUser, [username]);
-    let {lang,lang_base} = useParams();
-    const course_data = useDataFetcher(getStoriesSets, [lang, lang_base, username]);
-
     return <div>
-        <div id="header_index">
-            <Link to={"/"} className="duostories_title">Duostories</Link>
-            <CourseDropdown course_data={course_data} courses={(courses_user !== undefined && courses_user.length) ? courses_user : courses} />
-            <Login useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
-        </div>
         <div id="main_index">
             <h1>FAQ</h1>
         <h2>Is this website open source?</h2>

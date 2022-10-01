@@ -10,6 +10,7 @@ import {useNavigate} from "react-router-dom";
 import {Footer} from "./story_footer";
 import {StoryHeader} from "./story_header";
 import {Spinner} from "../react/spinner";
+//import {StoryTitlePage} from "./story_title_page";
 
 
 export function Story(props) {
@@ -144,6 +145,9 @@ export function Story(props) {
             return audios;
         }, [story.id])
     }
+
+    //if(progress === -1)
+    //    return <StoryTitlePage story={story}/>
 
     if(!audio_loaded)
         return <Spinner />
