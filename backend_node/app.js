@@ -5,16 +5,19 @@ const compression = require('compression')
 const app = express()
 app.use(compression())
 
-const port = 3001
-const path = '/stories/backend_node'
+const port = process.env.PORT || 3001
+const path = (process.env.NODE_ENV === 'test') ? '/stories/backend_node_test' : '/stories/backend_node';
 
-app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    next();
-});
+// in the test environment allow calls from localhost
+if(process.env.NODE_ENV === 'test') {
+    app.use(function (req, res, next) {
+        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+        res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+        res.setHeader('Access-Control-Allow-Credentials', true);
+        next();
+    });
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
