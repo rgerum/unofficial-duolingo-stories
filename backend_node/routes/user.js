@@ -1,7 +1,7 @@
 const express = require('express');
 const nodemailer = require("nodemailer");
-const query = require("./db.js");
-const phpbb_check_hash = require("./hash_functions2");
+const query = require("./../includes/db.js");
+const phpbb_check_hash = require("./../includes/hash_functions2");
 
 let router = express.Router();
 
@@ -59,6 +59,13 @@ router.post('/login', async function (req, res) {
         req.session.user_id = res2[0].id;
         req.session.role = res2[0].role;
         req.session.admin = res2[0].admin;
+
+        // if it should be remembered set the duration to 30 days
+        if(req.body.remember) {
+            const hour = 3600000 * 24 * 30
+            req.session.cookie.expires = new Date(Date.now() + hour)
+            req.session.cookie.maxAge = hour
+        }
 
         // save the session before redirection to ensure page
         // load does not happen before session is saved

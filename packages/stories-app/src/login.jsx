@@ -33,11 +33,8 @@ export function useUsername2() {
         courses_user = user;
 
     async function login2(username, password, remember) {
-        console.log("login2")
         await login(username, password, remember);
-        console.log("done")
         let user = await get_login2();
-        console.log("get login", user);
         setUser(user);
         return user;
     }
@@ -225,9 +222,9 @@ export default function LoginDialog({userdata}) {
 
     async function buttonLogin() {
         setState(1);
-        let username;
+        let userdata_new;
         try {
-            username = await userdata.login(usernameInput, passwordInput, remember);
+            userdata_new = await userdata.login(usernameInput, passwordInput, remember);
         }
         catch (e) {
             console.log(e);
@@ -235,7 +232,7 @@ export default function LoginDialog({userdata}) {
             setState(-1);
             return;
         }
-        if(username === undefined) {
+        if(userdata_new.username === undefined) {
             setError("Wrong username or password. Try again.");
             setState(-1);
         }
@@ -298,8 +295,6 @@ export default function LoginDialog({userdata}) {
             setMessage("Have received an email with a reset link. You may need to look into your spam folder.");
         }
     }
-    if(userdata === undefined)
-        throw "nooo"
 
     return <>
         {(showLogin <= 1) ?
