@@ -1,10 +1,11 @@
 
 describe('Test Logins', () => {
     beforeEach(() => {
-        cy.intercept('**/user.php?*', {body: "null"}).as("user")
-        cy.intercept('**/get_courses.php', { fixture: 'courses.json' }).as("courses")
-        cy.intercept('**/get_list.php?lang=el&lang_base=en', { fixture: 'get_list_el_en.json' }).as("list_el")
-        cy.intercept('**/get_list.php?lang=ru&lang_base=en', { fixture: 'get_list_ru_en.json' }).as("list_ru")
+        cy.intercept('**/backend_node/session', {body: "null"}).as("user")
+        cy.intercept('**/backend_node/courses', { fixture: 'courses.json' }).as("courses")
+        cy.intercept('**/backend_node/course_counts', { fixture: 'course_count.json' }).as("course_count")
+        cy.intercept('**/backend_node/course/el-en', { fixture: 'get_list_el_en.json' }).as("list_el")
+        cy.intercept('**/backend_node/course/ru-en', { fixture: 'get_list_ru_en.json' }).as("list_ru")
 
         cy.visit("")
     })
