@@ -1,9 +1,11 @@
 import "./course-dropdown.css";
 
-import {Flag, useDataFetcher} from "story-component";
-import {getCoursesUser, getStoriesSets, useSuspendedDataFetcher} from "./api_calls";
-import {MyLink} from "./mylink";
 import {useParams} from "react-router-dom";
+import {MyLink} from "./mylink";
+import {Flag, useDataFetcher} from "story-component";
+import {useSuspendedDataFetcher} from "./api_calls/include";
+import {getCoursesUser, getStoriesSets} from "./api_calls/course";
+
 
 
 function LanguageButtonSmall({course, startTransition}) {

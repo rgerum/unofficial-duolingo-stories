@@ -1,7 +1,7 @@
 import React from 'react';
 import {Story, Spinner, useDataFetcher} from "story-component";
 import {Link, useParams} from "react-router-dom";
-import {getStoryJSON} from "story-component/src/components/includes";
+import {getStoryJSON} from "./api_calls/course";
 
 function Error() {
     return <div id="login_dialog">

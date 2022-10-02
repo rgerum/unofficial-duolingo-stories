@@ -1,9 +1,9 @@
 import './story-list.css'
 import {Link, useParams} from "react-router-dom";
-import {getStoriesSets, useSuspendedDataFetcher} from "./api_calls";
+import {useSuspendedDataFetcher} from "./api_calls/include";
+import {getStoriesSets} from "./api_calls/course";
 
-
-export default function SetList({userdata, conlang_count}) {
+export default function SetList({userdata}) {
     let {lang,lang_base} = useParams();
     const course = useSuspendedDataFetcher(getStoriesSets, [lang, lang_base, userdata.username]);
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import './login.css';
 import {useInput} from "story-component";
-import {activate, reset_pw_check, reset_pw_set} from "./login.jsx";
+import {activate, reset_pw_check, reset_pw_set} from "./api_calls/user";
 import {Link, useParams} from "react-router-dom";
 
 

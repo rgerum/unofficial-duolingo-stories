@@ -75,7 +75,7 @@ ORDER BY name;
     return grouped_languages;
 }
 
-async function get_courses_user({user_id}) {
+async function get_courses_user({}, {user_id}) {
     // sort courses by base language
     return await query(`
 SELECT course.id, course.name,
@@ -89,7 +89,7 @@ LEFT JOIN language l2 ON l2.id = course.learningLanguage
     `, [user_id]);
 }
 
-async function post_story_done({user_id, story_id}) {
+async function post_story_done({story_id}, {user_id}) {
     if(!user_id) {
         return {status: 403}
     }
@@ -97,7 +97,7 @@ async function post_story_done({user_id, story_id}) {
     return {message: "done"}
 }
 
-async function get_course({user_id, lang, lang_base}) {
+async function get_course({lang, lang_base}, {user_id}) {
     const course_query = await query(`
         SELECT course.id, course.about, 
         l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,

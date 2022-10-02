@@ -42,13 +42,13 @@ app.get(path+'/', function (req, res) {
     res.send('<form action="/stories/backend_node/login" method="post">' +
         'Username: <input name="username"><br>' +
         'Password: <input name="password" type="password"><br>' +
-        '<input type="submit" text="Login"></form>')
+        '<input type="submit"></form>')
 })
 
-const user = require('./user.js')
+const user = require('./routes/user.js')
 app.use(path, user);
 
-const course = require('./course.js')
+const course = require('./routes/course.js')
 app.use(path, course);
 
 app.listen(port, () => {

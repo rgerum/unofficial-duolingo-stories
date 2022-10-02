@@ -1,8 +1,9 @@
 import './course-list.css';
-import {Flag, Spinner} from "story-component";
-import {Link} from "react-router-dom";
+import {Flag} from "story-component";
 import {MyLink} from "./mylink";
-import {getPublicCourses, useSuspendedDataFetcher} from "./api_calls";
+import {useSuspendedDataFetcher} from "./api_calls/include";
+import {getPublicCourses} from "./api_calls/course";
+
 
 export default function CourseList({conlang_count, startTransition}) {
     let courses = useSuspendedDataFetcher(getPublicCourses, []);

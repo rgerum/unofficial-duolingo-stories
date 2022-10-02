@@ -1,8 +1,9 @@
 import React, {lazy, Suspense} from 'react';
 import {Link, Route, Routes, useParams,} from "react-router-dom";
 
-import {useUsername2, Login} from './login'
-import {getCoursesCount, getPublicCourses, useSuspendedDataFetcher} from "./api_calls";
+import {Login} from './login'
+import {useSuspendedDataFetcher} from "./api_calls/include";
+import {getCoursesCount} from "./api_calls/course";
 import {Legal, Spinner} from "story-component";
 
 const CourseList = lazy(() => import('./course-list'));
@@ -26,7 +27,7 @@ export default function IndexContent({userdata}) {
         <div id="main_index" style={{ opacity: isPending ? 0.8 : 1 }}>
             <Routes>
                 <Route path='/' element={<MainContent userdata={userdata} startTransition={startTransition}/>}></Route>
-                <Route path='conlangs' element={<MainContent userdata={userdata} startTransition={startTransition}filter={'conlang'} />}></Route>
+                <Route path='conlangs' element={<MainContent userdata={userdata} startTransition={startTransition} filter={'conlang'} />}></Route>
                 <Route path='/:lang-:lang_base' element={<MainContent userdata={userdata} startTransition={startTransition}/>}></Route>
                 <Route path='/faq' element={<Faq />}></Route>
                 <Route path='/*' element={<MainContent userdata={userdata} startTransition={startTransition} error />}></Route>

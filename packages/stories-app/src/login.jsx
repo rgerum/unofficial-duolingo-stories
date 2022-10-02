@@ -1,29 +1,12 @@
 import React from 'react';
 import './login.css';
-import {useInput, fetch_post, LoggedInButton} from "story-component";
-import {get_backend, useSuspendedDataFetcher} from "./api_calls";
+import {useInput, LoggedInButton} from "story-component";
+import {useSuspendedDataFetcher} from "./api_calls/include";
+import {get_login2, login, logout, register, reset_pw} from "./api_calls/user";
 import {Link, useNavigate} from "react-router-dom";
 
-let backend = get_backend();
-let backend_user = backend+'user/';
-
-const backend_express = "https://duostories.org/stories/backend_node/"
 
 //////////
-export async function get_login2() {
-    // get the current login status
-    const response = await fetch(`${backend_express}session`, {credentials: 'include'});  // {credentials: "same-origin"}
-    try {
-        // return the response
-        let json = await response.json();
-        if(json === null)
-            return undefined;
-        return json;
-    }
-    catch (e) {
-        return undefined;
-    }
-}
 
 export function useUsername2() {
     const [user, setUser] = React.useState(undefined);
@@ -61,129 +44,8 @@ export function useUsername2() {
 ////////////
 
 
-export async function login(username, password, remember) {
-    document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    async function fetch_post(url, data)
-    {
-        // check if the user is logged in
-        var req = new Request(url, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-            mode: "cors",
-            credentials: 'include',
-        });
-        return fetch(req);
-    }
-
-    let response = await fetch_post(`${backend_express}login`, {username: username, password: password, remember: remember});
-    return response.status !== 403;
-}
-
-export async function register(data) {
-    // register a new user
-    let response;
-    try {
-        response = await fetch_post(`${backend_user}user.php?action=register`, data)
-    }
-    // something wrong :-(
-    catch (e) {
-        return [false, "Something went wrong."];
-    }
-    // not allowed? perhaps the username is already taken
-    if(response.status === 403) {
-        let text = await response.text();
-        return [false, text];
-    }
-    // again something wrong?
-    else if(response.status !== 200) {
-        return [false, "Something went wrong."];
-    }
-    // everything ok!
-    return [true, ""];
-}
-export async function reset_pw(data) {
-    // register a new user
-    let response;
-    try {
-        response = await fetch_post(`${backend_user}user.php?action=send`, data)
-    }
-        // something wrong :-(
-    catch (e) {
-        return [false, "Something went wrong."];
-    }
-    // not allowed? perhaps the username is already taken
-    if(response.status === 403) {
-        let text = await response.text();
-        return [false, text];
-    }
-    // again something wrong?
-    else if(response.status !== 200) {
-        return [false, "Something went wrong."];
-    }
-    // everything ok!
-    return [true, ""];
-}
-export async function reset_pw_check(data) {
-    // register a new user
-    let response;
-    try {
-        response = await fetch_post(`${backend_user}user.php?action=check`, data)
-    }
-        // something wrong :-(
-    catch (e) {
-        return [false, "Something went wrong."];
-    }
-    // not allowed? perhaps the username is already taken
-    if(response.status === 403) {
-        let text = await response.text();
-        return [false, text];
-    }
-    // again something wrong?
-    else if(response.status !== 200) {
-        return [false, "Something went wrong."];
-    }
-    // everything ok!
-    return [true, ""];
-}
-
-export async function reset_pw_set(data) {
-    // register a new user
-    let response;
-
-    try {
-        response = await fetch_post(`${backend_user}user.php?action=set`, data);
-    } // something wrong :-(
-    catch (e) {
-        return false;
-    } // not allowed? perhaps the username is already taken
-
-    if (response.status === 403) {
-        await response.text();
-        return false;
-    } // again something wrong?
-    else if (response.status !== 200) {
-        return false;
-    } // everything ok!
-    return true;
-}
 
 
-export async function activate(data) {
-    let reponse = await fetch_post(`${backend_user}user.php?action=activate`, data);
-    return reponse.status === 200;
-}
-
-
-export async function logout() {
-    // send the signal to logout
-    document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    await fetch(`${backend_express}logout`, {credentials: 'include'});
-}
 
 export function Login({userdata}) {
     if(userdata.username !== undefined)
