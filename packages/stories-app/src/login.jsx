@@ -269,6 +269,12 @@ export function LoginDialog(props) {
     } else {
       setState(2);
 
+    // Clear The Input Fields
+    usernameInputSetValue({ target: { value: "" } });
+    passwordInputSetValue({ target: { value: "" } });
+    emailInputSetValue({ target: { value: "" } });
+
+
       setMessage(
         "Your account has been registered. An e-mail with an activation link has been sent to you. Please click on the link in the e-mail to proceed. You may need to look into your spam folder."
       );
@@ -289,6 +295,16 @@ export function LoginDialog(props) {
       );
     }
   }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                      -                                     */
+  /* -------------------------------------------------------------------------- */
+  /* -------------------------------------------------------------------------- */
+  /*                                  RETURN UI                                 */
+  /* -------------------------------------------------------------------------- */
+  /* -------------------------------------------------------------------------- */
+  /*                                      -                                     */
+  /* -------------------------------------------------------------------------- */
 
   return (
     <>
