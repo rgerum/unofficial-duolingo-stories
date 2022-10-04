@@ -1,0 +1,43 @@
+.audio_active text {
+    fill: var(--text-color);
+}
+.audio_active line {
+    stroke: var(--text-color);
+}
+.audio_active circle {
+    fill: var(--text-color);
+}
+.audio_active {
+    cursor: pointer;
+}
+
+
+.audio_inactive {
+    opacity: 0.5;
+}
+
+#quit {
+    background-image: url(//d35aaqx5ub95lt.cloudfront.net/images/icon-sprite8.svg);
+    background-position: -373px -154px;
+    cursor: pointer;
+    display: inline-block;
+    height: 18px;
+    vertical-align: middle;
+    width: 18px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+#sound_recorder {
+    position: relative;
+    background: whitesmoke;
+    border: 1px solid;
+    padding: 0 15px;
+}
+.sound_target {
+    background: white;
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+}

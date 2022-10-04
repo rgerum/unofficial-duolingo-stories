@@ -1,0 +1,80 @@
+
+#loggedin {
+    float: right;
+    width: 50px;
+    min-width: 50px;
+    background: var(--profile-background);
+    border-radius: 30px;
+    height: 50px;
+    margin: 0 0 0 20px;
+    padding-top: 7px;
+    box-sizing: border-box;
+    text-transform: uppercase;
+    font-size: 28px;
+    color: var(--profile-text);
+    position: relative;
+    text-align: center;
+}
+
+#loggedin:hover #profile_dropdown, #loggedin:hover #diamond-wrap {
+    display: block;
+}
+
+#profile_dropdown {
+    display: none;
+    background: var(--body-background);
+    position: absolute;
+    left: -32px;
+    width: 118px;
+    border-radius: 15px;
+    border: 1px solid var(--header-border);
+    color: var(--text-color);
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 12px;
+    text-transform: none;
+    overflow: hidden;
+}
+
+#diamond {
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    left: 2.5px;
+    top: 2.5px;
+    background-color: var(--body-background);;
+    transform: rotate(45deg);
+    transform-origin: center;
+    border-radius: 3px;
+    border: 1px solid var(--header-border);
+    z-index: 2;
+}
+
+#diamond-wrap {
+    overflow: hidden;
+    width: 25px;
+    height: 10px;
+    position: absolute;
+    z-index: 2;
+    display: none;
+    left: calc(50% - 12px);
+    bottom: -6px;
+}
+
+#loggedin #diamond-wrap {
+    bottom: -8px;
+}
+
+.profile_dropdown_button {
+    text-align: center;
+    height: 29px;
+    padding: 5px;
+    border-bottom: 1px solid var(--header-border);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.profile_dropdown_button:hover {
+    background: var(--language-selector-hover-background) !important;
+    color: var(--link-hover);
+}

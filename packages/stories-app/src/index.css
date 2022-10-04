@@ -1,3 +1,5 @@
+
+
 .main_title {
   font-size: 34px;
 }
@@ -12,20 +14,12 @@
   }
   .title_desc {
     font-size: 19px;
-    color: #777;
+    color: var(--title-color-dim);
   }
 
   .title_desc a {
-    color: #777;
+    color: var(--title-color-dim);
   }
-}
-
-#header_index {
-  display: block;
-  border-bottom: 1px solid gray;
-  height: 50px;
-  padding-top: 10px;
-  border-bottom: 2px solid lightgrey;
 }
 
 #quit {
@@ -40,16 +34,31 @@
 
 #main_index {
   max-width: 985px;
-  padding-top: 30px;
+  padding-top: 90px;
   margin: 0 auto;
 }
 
+#error {
+  width: 100%;
+  height: calc(100vh - 300px);
+  display: flex;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+}
+
+#error div {
+  display: block;
+  width: 375px;
+  text-align: center;
+}
+
 a {
-  color: black;
+  color: var(--text-color);
 }
 
 a:hover {
-  color: #78c800;
+  color: var(--link-hover);
 }
 
 h1 {
@@ -57,16 +66,21 @@ h1 {
   text-align: center;
 }
 
-#header_language {
-  height: 50px;
+hr {
+  border: 0;
+  border-top: 2px solid var(--overview-hr);
+}
+
+.duostories_title {
+  width: 160px;
   display: block;
   float: left;
+  color: var(--duostories-title);
+  font-weight: bold;
+  font-size: 29px;
+  text-decoration: none;
 }
 
-
-#header_language > .flag {
-    margin-left: 5px;
-}
 
 
 body {
@@ -76,48 +90,51 @@ body {
   font-size: 19px;
   margin: 0;
   box-sizing: border-box;
+  color: var(--text-color);
+  background: var(--body-background);
 }
+
+
 button:focus{outline:none !important;}
 a:focus{outline:none !important;}
 
 .button {
   text-transform: uppercase;
-  padding: 12px 30px;
+  padding: 13px 30px;
   float: right;
   display: inline-block;
-  background: #78c800;
-  color: white;
+  background: var(--button-background);
+  color: var(--button-color);
   border-radius: 15px;
-  box-shadow: #58a700 0 5px;
-  margin-inline: 6px;
+  /* box-shadow: #58a700 0 5px; */
+  /* margin-inline: 6px; */
   font-weight: bold;
-  text-align: center;
+  /* text-align: center; */
   border: 0;
   font-size: 16px;
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+  /* font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"; */
   transition: 0.1s box-shadow, 0.1s transform;
+  border-color: var(--button-border);
+  border-bottom: 4px solid var(--button-border);
 }
 .button:hover {
-  filter: brightness(1.2);
+  filter: brightness(1.1);
   /*transform: translate(0, 5px);
   box-shadow: #58a700 0 0px;*/
 }
 .button:active {
-  transform: translate(0, 5px);
-  box-shadow: #58a700 0 0;
-  transition: 0.1s box-shadow, 0.1s transform;
+  transform: translate(0, 4px);
+  border-bottom: 0 solid var(--button-border);
+  transition: 0.1s border-bottom, 0.1s transform;
 }
 .button[data-status="inactive"] {
-  background: #a3a3a3;
-  transform: translate(0, 5px);
-  box-shadow: #575757 0 0;
-  color: #575757;
+  background: var(--button-inactive-background);
+  transform: translate(0, 4px);
+  border-bottom: 0 solid var(--button-border);;
+  color: var(--button-inactive-color);
   cursor: default;
 }
-
-.legal {
-  margin-top: 20px;
-  text-align: center;
-  color:gray;
-  font-size: 0.6em
+.button[data-status="inactive"]:hover {
+  filter: none;
 }
+

@@ -1,0 +1,20 @@
+.match_container {
+    display: flex;
+    column-gap: 20px;
+}
+
+.match_word {
+    font-size: 19px;
+    line-height: 1.45;
+    margin: 4px;
+    margin-top: 6px;
+    padding: 8px 15px;
+    position: relative;
+    vertical-align: top;
+    z-index: 1;
+    font-family: nunito, sans-serif;
+    width: 100%;
+}
+
+
+/* Match the pairs */

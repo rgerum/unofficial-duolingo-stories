@@ -3,7 +3,7 @@ class Azure(object):
     def __init__(self):
 
         key_data = {}
-        with open("rootkey.csv", "r") as fp:
+        with open(Path(__file__).parent / "rootkey.csv", "r") as fp:
             for line in fp:
                 key, value = line.strip().split("=")
                 key_data[key] = value

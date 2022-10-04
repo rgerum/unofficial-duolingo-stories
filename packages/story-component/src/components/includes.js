@@ -66,12 +66,10 @@ export async function getStoryJSON(id) {
         try {
             story_json = await response_json.json();
         } catch (e) {
-            story_json = undefined;
-        }
-        if (story_json) {
-            return story_json;
+            story_json = null;
         }
     }
+    return story_json;
 }
 
 export function scroll_down() {

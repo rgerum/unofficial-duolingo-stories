@@ -1,0 +1,19 @@
+#header_index {
+    width: 100%;
+    height: 60px;
+    border-bottom: 2px solid var(--header-border);
+    background: var(--body-background);
+    z-index: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: fixed;
+    padding: 0 calc( (100% - 1000px) / 2);
+}
+
+@media (max-width: 1040px) {
+    #header_index {
+        padding: 0 20px;
+    }
+}

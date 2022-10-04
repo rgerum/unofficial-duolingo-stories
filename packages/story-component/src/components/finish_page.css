@@ -1,0 +1,119 @@
+
+/* finished end */
+.page_finished {
+    height: calc(100vh - 100px);
+    margin-bottom: 100px;
+    width: 100%;
+    border-top: 2px solid var(--overview-hr);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.page_finished div {
+    text-align: center;
+}
+
+.finished_image_container {
+    display: inline-block;
+    height: 200px;
+    justify-content: center;
+    position: relative;
+    width: 200px;
+}
+
+.finished_image {
+    display: inline-block;
+    height: 100%;
+    justify-content: center;
+    margin: 0;
+    overflow: visible;
+    padding: 0;
+    position: relative;
+    width: 100%;
+}
+
+.finished_image img {
+    width: 100%;
+    left: 0;
+    top: 0;
+    height: 100%;
+    position: absolute;
+}
+
+.image_golden {
+    animation-delay: 0s;
+    animation-duration: 2s;
+    animation-name: fadeIn;
+    opacity: 1;
+    visibility: visible;
+}
+
+.star1 {
+    animation-delay: .1s;
+    height: 20.4px;
+    left: -30px;
+    top: 20px;
+    width: 20.4px;
+    animation-duration: 2s;
+    animation-name: _2pTl2;
+    background-color: var(--finished-star-gold);
+    border-radius: 3.3px;
+    opacity: .5;
+    transform: rotate(-45deg) scale(1);
+    position: absolute;
+}
+
+.star2 {
+    animation-duration: 2s;
+    -webkit-animation-name: _2pTl2;
+    animation-name: _2pTl2;
+    background-color: var(--finished-star-gold);
+    border-radius: 3.3px;
+    opacity: .5;
+    transform: rotate(-45deg) scale(1);
+    position: absolute;
+    animation-delay: .3s;
+    bottom: -20px;
+    height: 19.2px;
+    right: -15px;
+    width: 19.2px;
+}
+
+.star3 {
+    animation-duration: 2s;
+    animation-name: _2pTl2;
+    background-color: var(--finished-star-gold);
+    border-radius: 3.3px;
+    opacity: .5;
+    transform: rotate(-45deg) scale(1);
+    animation-delay: .2s;
+    height: 12.2px;
+    left: 0;
+    position: absolute;
+    top: -10px;
+    width: 12.2px;
+}
+
+@keyframes _2pTl2 {
+    0% {
+        opacity:.5;
+        transform:rotate(-45deg) scale(1)
+    }
+    25% {
+        opacity:0;
+        transform:rotate(-45deg) scale(.5)
+    }
+    50% {
+        opacity:.5;
+        transform:rotate(-45deg) scale(1)
+    }
+    75% {
+        opacity:0;
+        transform:rotate(-45deg) scale(.5)
+    }
+    to {
+        opacity:.5;
+        transform:rotate(-45deg) scale(1)
+    }
+}

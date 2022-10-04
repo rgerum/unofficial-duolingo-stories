@@ -1,43 +1,8 @@
-//import {fetch_post} from "./includes.mjs";
+import {fetch_post, setCookie, getCookie, isLocalNetwork} from "story-component";
 
 let backend_get = "https://editor.duostories.org/get"
 let backend_set = "https://editor.duostories.org/set"
 
-function getCookie(cname) {
-    let name = cname + "=";
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
-    for(let i = 0; i <ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return undefined;
-}
-
-function setCookie(cname, cvalue, exdays) {
-    if(!exdays) {
-        document.cookie = cname + "=" + cvalue + ";"
-        return;
-    }
-    const d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-    let expires = "expires="+ d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-}
-
-export function isLocalNetwork(hostname = window.location.hostname) {
-    return (
-        (['localhost', '127.0.0.1', '', '::1'].includes(hostname))
-        || (hostname.startsWith('192.168.'))
-        || (hostname.startsWith('10.0.'))
-        || (hostname.endsWith('.local'))
-    )
-}
 
 let login_data = {username: getCookie("username"), password: getCookie("password")}
 async function fetch_get(url) {
@@ -47,7 +12,8 @@ async function fetch_get(url) {
     var fd = new FormData();
     //very simply, doesn't handle complete objects
     for(var i in login_data){
-        fd.append(i,login_data[i]);
+        if(login_data[i] !== undefined)
+            fd.append(i,login_data[i]);
     }
     return fetch(url, {
         method: "POST",
@@ -55,25 +21,6 @@ async function fetch_get(url) {
         mode: "cors"
     })
 }
-
-
-export async function fetch_post(url, data) {
-    /** like fetch but with post instead of get */
-    var fd = new FormData();
-    //very simply, doesn't handle complete objects
-    for(let i in login_data){
-        fd.append(i,login_data[i]);
-    }
-    for(let i in data){
-        fd.append(i,data[i]);
-    }
-    return fetch(url, {
-        method: "POST",
-        body: fd,
-        mode: "cors"
-    });
-}
-
 
 export async function getCourses() {
     try {
@@ -95,16 +42,19 @@ export async function getSession() {
     }
 }
 
-export async function login(data) {
-    // currenty only store the local cookies for local test
+export async function login(data, remember) {
+    // currently only store the local cookies for local test
     if(isLocalNetwork()) {
         login_data = data;
         setCookie("username", data["username"])
         setCookie("password", data["password"])
     }
+    if(remember) {
+        setCookie("username", data["username"], 30);
+        setCookie("password", data["password"], 30);
+    }
     // check if the user is logged in
-    let reponse = await fetch_post(`${backend_get}/login`, data)
-    console.log(reponse);
+    let reponse = await fetch_post(`${backend_get}/login`, data);
     return reponse.status !== 403;
 
 }
@@ -122,7 +72,6 @@ export async function getCourse(id) {
 }
 
 export async function getAvatars(id) {
-    console.log("getAvatars", id, `${backend_get}/avatar_names?id=${id}`)
     try {
         let response = await fetch_get(`${backend_get}/avatar_names?id=${id}`);
         return await response.json();
@@ -130,6 +79,17 @@ export async function getAvatars(id) {
     catch (e) {
         return {};
     }
+}
+
+export async function getAvatarsList(id) {
+    if(!id)
+        return {}
+    let avatar_names_list = await getAvatars(id);
+    let avatar_names = {}
+    for(let avatar of avatar_names_list) {
+        avatar_names[avatar.avatar_id] = avatar;
+    }
+    return avatar_names_list;
 }
 
 export async function getSpeakers(id) {
@@ -172,6 +132,16 @@ export async function setStatus(data) {
     }
 }
 
+export async function setApproval(data) {
+    try {
+        let response = await fetch_post(`${backend_set}/approve`, data);
+        return await response.text();
+    }
+    catch (e) {
+        return undefined;
+    }
+}
+
 export async function setPublic(id, is_public) {
     return await fetch_get(backend_stories+"set_story_public.php?id="+id+"&public="+is_public);
 }
@@ -205,7 +175,6 @@ export async function getImageAsync(id) {
         let response_json = await fetch_get(`${backend_get}/image?id=${id}`);
         let image = await response_json.json();
         images_cached[id] = image;
-        console.log("getImage", images_cached[id], id, image)
         return image;
     }
     catch (e) {
@@ -234,6 +203,25 @@ export async function deleteStory(data) {
     res = await res.text()
     return res;
 }
+
+export const upload_audio_endpoint = `${backend_set}/audio_upload`;
+
+export async function setUploadAudio(id, blob, filename) {
+    /** like fetch but with post instead of get */
+    var fd = new FormData();
+    //very simply, doesn't handle complete objects
+    for(let i in login_data){
+        fd.append(i,login_data[i]);
+    }
+    fd.append("id", id);
+    fd.append("file", blob, filename);
+    return fetch(upload_audio_endpoint, {
+        method: "POST",
+        body: fd,
+        mode: "cors"
+    });
+}
+
 
 
 

@@ -1,0 +1,32 @@
+.flag {
+    display: inline-block;
+    background-size: 40px;
+    height: 32px;
+    width: 40px;
+    background-image: url(https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg);
+    vertical-align:bottom;
+    margin:3px 12px;
+}
+
+.flag_big {
+    margin: 20px;
+    transform: scale(2.2);
+}
+
+.undefined {
+    background-position-y: -2736px;
+}
+
+.flag_sub {
+    margin-left: -22px;
+    margin-top: 18px;
+    width: 35px;
+    background-size: 36px;
+    height: 26px;
+}
+
+.flag_border_rect {
+    fill: none;
+    stroke: var(--body-background);
+    stroke-width: 5;
+}

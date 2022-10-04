@@ -1,8 +1,24 @@
 .avatar_editor {
     overflow-y: scroll;
+    margin-left: 8px;
+    width: 100%;
     height: calc(100vh - 64px);
-    width: calc(100vw - 400px);
 }
+
+.character-editor-content {
+  flex-direction: column;
+}
+
+@media only screen and (min-width: 560px) {
+
+    .character-editor-content {
+      flex-direction: row;
+    }
+
+    .avatar_editor:not(.no-voices) {
+      width: calc(100vw - 400px);
+    }
+  }
 
 .avatar_editor_group {
     display: flex;
@@ -12,12 +28,37 @@
 
 .speaker_list {
     overflow-y: scroll;
-    width: 400px;
+    width: 100%;
     height: calc(100vh - 64px);
 }
 
+.speaker_list.no-voices {
+  display: none;
+}
+
+@media only screen and (min-width: 560px) {
+  .speaker_list {
+    width: 400px
+  }
+}
+
+.voice_list {
+  margin-top: 16px;
+}
+
+.speaker-entry-copy {
+  display: flex;
+  align-items: flex-start;
+}
+
+textarea {
+    border: 1px solid var(--input-border);
+    background: var(--input-background);
+    color: var(--text-color);
+}
+
 .avatar {
-    border: 1px solid lightgrey;
+    border: 1px solid var(--header-border);
     border-radius: 5px;
     width: 100px;
     margin: 10px;
@@ -33,7 +74,9 @@
 
 .avatar p input {
     width: 90px;
-    border: 1px solid lightgrey;
+    border: 1px solid var(--input-border);
+    background: var(--input-background);
+    color: var(--text-color);
     border-radius: 5px;
     padding: 5px;
 }

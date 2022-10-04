@@ -1,35 +1,48 @@
 import "./course-dropdown.css";
 
-import {Flag} from "./react/flag";
+import {useParams} from "react-router-dom";
+import {MyLink} from "./mylink";
+import {Flag, useDataFetcher} from "story-component";
+import {useSuspendedDataFetcher} from "./api_calls/include";
+import {getCoursesUser, getStoriesSets} from "./api_calls/course";
 
 
-function LanguageButtonSmall(props) {
+
+function LanguageButtonSmall({course, startTransition}) {
     /**
      * A button in the language drop down menu (flag + name)
      */
-    let course = props.course;
 
-    return <a
+    return <MyLink
         className="language_select_item"
-        onClick={props.onClick}
-        href={`index.html?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`}
-        style={{display: "block"}}
+        startTransition={startTransition}
+        to={`/${course.learningLanguage}-${course.fromLanguage}`}
     >
-        <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} />
+        <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} />
         <span>{course.name || course.learningLanguageName}</span>
-    </a>;
+    </MyLink>;
 }
 
-export function CourseDropdown(props) {
-    const courses = props.courses;
+export default function CourseDropdown({userdata, startTransition}) {
+    let {lang, lang_base} = useParams();
+    const course_data = useDataFetcher(getCoursesUser, [userdata.username]);
+    const course = useSuspendedDataFetcher(getStoriesSets, [lang, lang_base, userdata.username]);
 
-    if(courses === undefined)
-        return <div id="header_lang_selector" />
+    if(userdata?.username === undefined || course_data === undefined || course_data?.length === 0)
+        return <div id="header_language_placeholder"></div>
+
+    console.log("dropdown", course, course.learningLanguage, lang, lang_base)
     return (
-        <div id="header_lang_selector">
-            {courses.map(course => (
-                <LanguageButtonSmall key={course.id} course={course} onClick={(e) => {e.preventDefault(); props.languageClicked(course.learningLanguage, course.fromLanguage)}} />
-            ))}
+    <div id="header_language">
+        <div id="diamond-wrap">
+            <div id="diamond"></div>
         </div>
-    );
+        <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
+        <nav id="header_lang_selector">
+        {course_data.map(course => (
+            <LanguageButtonSmall key={course.id} course={course} startTransition={startTransition} />
+        ))}
+        </nav>
+    </div>);
+
 }

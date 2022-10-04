@@ -45,19 +45,21 @@ function query_one($db, $query) {
 
 $db = database();
 
-
-
-if( (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) && isset($_REQUEST['username'])) {
-    //http_response_code(403);
-
-    // try to login again
-    list($username, , $password) = get_values($db, ['username', 'password']);
-    $username = mysqli_escape_string($db, $_REQUEST["username"]);
+function check_login($db, $username, $password) {
+    $username = mysqli_escape_string($db, $username);
     $user = mysqli_fetch_assoc(mysqli_query($db, "SELECT * FROM user WHERE username = '$username' AND activated = 1"));
     $hash = $user["password"];
-    if(phpbb_check_hash($_REQUEST["password"], $hash)) {
+    if(phpbb_check_hash($password, $hash)) {
         $_SESSION["user"] = $user;
     }
+}
+
+if( (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) && isset($_COOKIE['username'])) {
+    check_login($db, $_COOKIE['username'], $_COOKIE["password"]);
+}
+
+if( (!isset($_SESSION["user"]) || $_SESSION["user"]["role"] == 0) && isset($_REQUEST['username'])) {
+    check_login($db, $_REQUEST['username'], $_REQUEST["password"]);
     unset($_REQUEST["password"]);
     unset($_REQUEST["username"]);
     unset($_POST["password"]);
@@ -141,6 +143,29 @@ else if($action == "status") {
     ];
     $id = updateDatabase($keys, "story", $_POST, "id");
 }
+else if($action == "approve") {
+    $story_id = intVal($_REQUEST['story_id']);
+    $keys = [
+        "story_id" => "int",
+    ];
+    $user_id = $_SESSION["user"]["id"];
+
+    if(mysqli_num_rows(mysqli_query($db, "SELECT id FROM story_approval WHERE story_id = $story_id AND user_id = $user_id;"))) {
+       mysqli_query($db, "DELETE FROM story_approval WHERE story_id = $story_id AND user_id = $user_id;");
+    }
+    else {
+        mysqli_query($db, "INSERT INTO story_approval (story_id, user_id) VALUES ($story_id, $user_id);");
+    }
+
+    $data = query_one($db, "SELECT COUNT(id) as count FROM story_approval WHERE story_id = $story_id;");
+    echo $data["count"];
+
+    # get the number of finished stories in this set
+    $data = query_one($db, "SELECT COUNT(set_id) count FROM story WHERE set_id = (SELECT set_id FROM story WHERE id = $story_id) AND course_id = (SELECT course_id FROM story WHERE id = $story_id) AND status = 'finished' AND deleted = 0 GROUP BY set_id;");
+    if($data["count"] >= 4) {
+        mysqli_query($db, "UPDATE story SET public = 1 WHERE set_id = (SELECT set_id FROM story WHERE id = $story_id) AND course_id = (SELECT course_id FROM story WHERE id = $story_id) AND status = 'finished' AND deleted = 0;");
+    }
+}
 else if($action == "story") {
     $keys = ["id" => "int",
         "duo_id" => "string",
@@ -208,6 +233,35 @@ else if($action == "story_delete") {
         $message = '"delete '.$_POST["name"].' from course '.$_POST["course_id"].'"';
     }
     exec("python3 upload_github.py $id $_POST[course_id] $author_name $message delete", $output, $retval);
+}
+else if($action == "audio_upload") {
+    $id = intVal($_REQUEST['id']);
+    if(isset($_FILES['file']['name'])){
+       // file name
+       $filename = $_FILES['file']['name'];
+
+       // Location
+       $location = '../../audio/'.$id."/".$filename;
+       echo $location;
+
+       // file extension
+       $file_extension = pathinfo($location, PATHINFO_EXTENSION);
+       $file_extension = strtolower($file_extension);
+
+       // Valid extensions
+       $valid_ext = array("mp3", "ogg");
+
+       $response = 0;
+       if(in_array($file_extension,$valid_ext)){
+          // Upload file
+          if(move_uploaded_file($_FILES['file']['tmp_name'],$location)){
+             $response = 1;
+          }
+       }
+
+       echo $response;
+       exit;
+    }
 }
 else {
     echo "unknown action";

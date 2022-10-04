@@ -1,10 +1,11 @@
 import React, {useState} from 'react';
-import {useDataFetcher2, useInput} from './hooks'
-import {Spinner, SpinnerBlue} from './react/spinner'
-import {Flag} from './react/flag'
+import {useDataFetcher2, useInput, fetch_post, Flag} from 'story-component'
+import {Spinner, SpinnerBlue, LoggedInButton} from 'story-component'
 import {getAvatars, getLanguageName, getSpeakers, setAvatarSpeaker} from "./api_calls.mjs";
 import "./avatar_editor.css"
-import {fetch_post} from "./includes.mjs";
+import {useParams} from "react-router-dom";
+import {Link} from "react-router-dom";
+
 
 function Avatar(props) {
     let avatar = props.avatar;
@@ -50,33 +51,31 @@ function Avatar(props) {
 function AvatarEditorHeader(props) {
     let language_data = props.language_data;
 
-    function button_back() {
-        window.location.href = "?";
-    }
-
     if(language_data === undefined)
         return <></>
     return <div className="AvatarEditorHeader">
-        <div id="button_back" className="editor_button" onClick={button_back} style={{paddingLeft: 0}}>
-            <div><img alt="icon back" src="icons/back.svg" /></div>
+        <Link to={"/"} id="button_back" className="editor_button" style={{paddingLeft: 0}}>
+            <div><img alt="icon back" src="/icons/back.svg" /></div>
             <span>Back</span>
-        </div>
+        </Link>
         <b>Character-Editor</b>
-        <Flag flag={language_data.flag} flag_file={language_data.flag_file}/>
+        <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
         <span data-cy="language-name" className={"AvatarEditorHeaderFlagName"}>{language_data.name}</span>
+        <div style={{marginLeft: "auto"}}></div>
+        <LoggedInButton username={props.username} doLogout={props.doLogout} page="editor"/>
     </div>
 }
 
-export function AvatarMain() {
-    let urlParams = new URLSearchParams(window.location.search);
-    const [language, ] = React.useState(parseInt(urlParams.get("language")) || undefined);
+
+export function AvatarMain(props) {
+    let {language} = useParams();
     const [language_data, ] = useDataFetcher2(getLanguageName, [language]);
 
     return <>
         <div id="toolbar">
-            <AvatarEditorHeader language={language} language_data={language_data}/>
+            <AvatarEditorHeader language={language} language_data={language_data} username={props.username} doLogout={props.doLogout}/>
         </div>
-        <div id="root">
+        <div id="root" className="character-editor-content">
             <AvatarNames language={language} language_data={language_data}/>
         </div>
     </>
@@ -105,7 +104,7 @@ function PlayButton(props) {
     return <span className="play_button" title="play audio" onClick={(e) => do_play(e, speaker, name)}>
                 {loading === 0 ? <img alt="play" src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"/> :
                  loading === 1 ? <SpinnerBlue /> :
-                 loading ===-1 ? <img title="an error occurred" alt="error" src="icons/error.svg"/> : <></>}
+                 loading ===-1 ? <img title="an error occurred" alt="error" src="/icons/error.svg"/> : <></>}
             </span>
 }
 
@@ -114,10 +113,10 @@ function SpeakerEntry(props) {
     let copyText = props.copyText;
 
     return <tr>
-        <td>
+        <td className="speaker-entry-copy">
             <PlayButton play={props.play} speaker={speaker.speaker} name="Duo" />
             <span className="ssml_speaker">{speaker.speaker}</span>
-            <span className="copy_button" title="copy to clipboard" onClick={(e) => copyText(e, speaker.speaker)}><img alt="copy" src="icons/copy.svg"/></span>
+            <span className="copy_button" title="copy to clipboard" onClick={(e) => copyText(e, speaker.speaker)}><img alt="copy" src="/icons/copy.svg"/></span>
         </td>
         <td>{speaker.gender}</td>
         <td>{speaker.type}</td>
@@ -213,7 +212,7 @@ function AvatarNames(props) {
     if(avatars === undefined || speakers === undefined || language === undefined)
         return <Spinner/>
     return <>
-    <div className="speaker_list">
+    <div className={"speaker_list" + (speakers?.length > 0 ? "": " no-voices")}>
         <div>
             <textarea value={speakText} onChange={doSetSpeakText} style={{width: "100%"}}/>
         </div>
@@ -223,7 +222,7 @@ function AvatarNames(props) {
         <div className="slidecontainer">
             Speed: <input type="range" min="0" max="4" value={speed} id="speed" onChange={(e)=>setSpeed(parseInt(e.target.value))}/>
         </div>
-        <table id="story_list" data-cy="voice_list" className="js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
+        <table id="story_list" data-cy="voice_list" className="voice_list js-sort-table js-sort-5 js-sort-desc" data-js-sort-table="true">
             <thead>
             <tr>
                 <th style={{borderRadius: "10px 0 0 0"}} data-js-sort-colnum="0">Name</th>
@@ -238,7 +237,7 @@ function AvatarNames(props) {
             </tbody>
         </table>
     </div>
-    <div className={"avatar_editor"} style={{"overflowY": "scroll"}}>
+    <div className={"avatar_editor" + (speakers?.length > 0? "": " no-voices")} style={{"overflowY": "scroll"}}>
         <p>These characters are the default cast of duolingo. Their names should be kept as close to the original as possible.</p>
         <div className={"avatar_editor_group"} data-cy="avatar_list1">
         {avatars_new_important.map((avatar, index) =>

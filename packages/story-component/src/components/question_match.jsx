@@ -1,6 +1,9 @@
-import React from "react";
+import React, {useState} from "react";
+import "./question_match.css"
+
 import {shuffle} from "./includes";
-import {EditorNoHook} from "./editor_hooks";
+import {EditorHook} from "./editor_hooks";
+import {useCallOnActivation} from "./questions_includes";
 
 /*
 The MATCH question.
@@ -15,106 +18,117 @@ It consists of two columns of buttons. The learner needs to find the right pars.
 - la <> the
  */
 
-export class QuestionMatch extends React.Component {
-    constructor(props) {
-        super(props);
-        this.createOrder(props);
+export function QuestionMatch(props) {
+    let element = props.element;
+    // whether this part is already shown
+    let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
 
-        //this.props.controls.block_next();
-        window.addEventListener("progress_changed", this.progress_changed.bind(this))
+    let [orderA, setOrderA] = useState([]);
+    let [orderB, setOrderB] = useState([]);
+    let [clicked, setClicked] = useState(undefined);
+    let [last_clicked, setLastClicked] = useState(undefined);
 
-        this.editor = props.element.editor;
-        window.addEventListener("editorLineChanged", (e) => this.editorLineChanged(e));
-    }
+    let order = orderB.concat(orderA);
 
-    editorLineChanged(e) {
-        let editor = this.editor;
-        let should_be_selected = editor && editor.start_no <= e.detail.lineno && e.detail.lineno < editor.end_no;
-
-        if (should_be_selected !== this.state.selected)
-            this.setSelected(should_be_selected);
-    }
-
-    setSelected(x) {
-        this.setState({selected: x});
-    }
-
-    createOrder(props) {
+    // when order is not initialized or when the number of elements changed in the editor
+    if(orderA === undefined || orderA.length !== props.element.fallbackHints.length) {
         let clicked = [];
-        this.order = [];
+        let orderA = [];
+        let orderB = [];
         for(let i in props.element.fallbackHints) {
-            this.order.push([i, 0]);
-            this.order.push([i, 1]);
+            orderA.push(parseInt(i));
+            orderB.push(parseInt(i));
             clicked.push(undefined); clicked.push(undefined);
         }
-        shuffle(this.order);
-
-        this.state = {
-            clicked: clicked,
-            last_clicked: undefined,
-            selected: false,
-        };
+        shuffle(orderA);
+        shuffle(orderB);
+        setOrderA(orderA);
+        setOrderB(orderB);
+        setClicked(clicked);
+        setLastClicked(undefined);
     }
 
-    progress_changed(e) {
-        if(e.detail === this.props.element.trackingProperties.line_index)
-            this.props.controls.block_next();
-    }
-
-    click(index) {
+    function click(index) {
+        index = parseInt(index);
         // do not allow to click on finished words again
-        if(this.state.clicked[index] === "right")
+        if(clicked[index] === "right")
             return
         // select the word
-        if(this.state.last_clicked === undefined)
-            this.setState(state=>({last_clicked: index, clicked:state.clicked.map((item, i) => i === state.last_clicked ? undefined : i === index ? "selected" : item)}))
+        if(last_clicked === undefined || ((index >= orderB.length) === (last_clicked >= orderB.length))) {
+            clicked[index] = "selected";
+            if(last_clicked !== undefined)
+                clicked[last_clicked] = undefined;
+            setLastClicked(index);
+            setClicked(clicked);
+        }
         // deselect the word
-        else if(this.state.last_clicked === index)
-            this.setState(state=>({last_clicked: undefined, clicked:state.clicked.map((item, i) => i === state.last_clicked ? undefined : i === index ? "selected" : item)}))
+        else if(last_clicked === index) {
+            setLastClicked(undefined);
+            clicked[index] = undefined;
+            setClicked(clicked);
+        }
         // the pair is right
-        else if(this.order[this.state.last_clicked][0] === this.order[index][0]) {
-            this.setState(state => ({
-                last_clicked: undefined,
-                clicked: state.clicked.map((item, i) => i === state.last_clicked ? "right" : i === index ? "right" : item)
-            }))
-            let right_count = this.state.clicked.map((item, )=>(item === "right")).reduce((a,b)=>a+b, 0);
-            if(right_count >= this.state.clicked.length-2)
-                this.props.controls.right();
+        else if(order[last_clicked] === order[index]) {
+            clicked[index] = "right";
+            clicked[last_clicked] = "right";
+            setLastClicked(undefined);
+            setClicked(clicked);
+            let right_count = clicked.map((item, )=>(item === "right")).reduce((a,b)=>a+b, 0);
+            if(right_count >= clicked.length)
+                props.controls.right();
         }
         // the pair is wrong
-        else if(this.order[this.state.last_clicked][0] !== this.order[index][0]) {
-            let last_clicked = this.state.last_clicked;
-            this.setState(state => ({
-                last_clicked: undefined,
-                clicked: state.clicked.map((item, i) => i === state.last_clicked ? "wrong" : i === index ? "wrong" : item)
-            }))
-            setTimeout(()=>this.setState(state=> (
-                {clicked: state.clicked.map((item, i) => ((i === index || i === last_clicked) && item === "wrong") ? undefined : item)}
-            )), 1500);
+        else if(order[last_clicked] !== order[index]) {
+            let last_clicked_old = last_clicked;
+            clicked[index] = "wrong";
+            clicked[last_clicked_old] = "wrong";
+            setLastClicked(undefined);
+            setClicked(clicked);
+            setTimeout(()=> {
+                if(clicked[index] === "wrong")
+                    clicked[index] = undefined;
+                if(clicked[last_clicked_old] === "wrong")
+                    clicked[last_clicked_old] = undefined;
+                setClicked(clicked);
+            }, 1500);
         }
     }
 
-    render() {
-        let props = this.props;
-        // when the number of elements changed in the editor
-        if(this.order.length/2 !== props.element.fallbackHints.length)
-            this.createOrder(props);
-        let element = props.element;
-        //let hidden = (props.progress < element.trackingProperties.line_index) ? "hidden": ""
-        let hidden2 = (props.progress !== element.trackingProperties.line_index) ? "hidden": ""
+    // when this question appears do not allow the user to click "continue" until they answered the question
+    useCallOnActivation(element.trackingProperties.line_index, props.controls.block_next);
 
-        let onClick;
-        [hidden2, onClick] = EditorNoHook(hidden2, props.element.editor, props.editor, this.state.selected);
+    let onClick;
+    [hidden2, onClick] = EditorHook(hidden2, props.element.editor, props.editor);
 
-        return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
-            <span className="question">{element.prompt}</span>
-            <div style={{textAlign: "center"}}>
-                {this.order.map((phrase, index) => (
-                    <button key={index} className="word_match"
-                            data-status={this.state.clicked[index]}
-                            onClick={()=>this.click(index)}>{element.fallbackHints[phrase[0]][["phrase", "translation"][phrase[1]]]}</button>
-                ))}
+    function get_color(state) {
+        if(state === "right")
+            return "color_right_fade_to_disabled button_inactive_anim"
+        if(state === "wrong")
+            return "color_false_to_base button_click"
+        if(state === "selected")
+            return "color_selected button_click"
+        return "color_base button_click"
+    }
+
+    return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
+        <span className="question">{element.prompt}</span>
+        <div className="match_container">
+            <div className="match_col">
+            {orderB.map((phrase, index) => (
+                    <button key={index} className={"match_word "+get_color(clicked[index])}
+                        onClick={()=>click(index)}>
+                        {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][1]] : ""}
+                    </button>
+            ))}
+            </div>
+            <div className="match_col">
+            {orderA.map((phrase, index) => (
+                <button key={index} className={"match_word "+get_color(clicked[index + orderB.length])}
+                        onClick={()=>click(index + orderB.length)}>
+                    {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][0]] : ""}
+                </button>
+            ))}
             </div>
         </div>
-    }
+    </div>
 }

@@ -1,0 +1,17 @@
+
+.answer_button {
+    font-size: 19px;
+    line-height: 1.45;
+    padding: 14px 24px 11px;
+    margin-bottom: 10px;
+    display: block;
+    width: 100%;
+    -webkit-user-select: none;
+    user-select: none;
+    font-family: nunito, sans-serif;
+}
+@media (max-width:480px) {
+    .answer_button {
+        padding: 8px 15px;
+    }
+}

@@ -1,4 +1,6 @@
 import React, {useState} from "react";
+import "./line_hints.css"
+
 import {useEventListener} from "./includes";
 
 
@@ -17,6 +19,13 @@ export function HintLineContent(props) {
     var content = props.content;
     var audioRange = props.audioRange;
     var hideRangesForChallenge = props.hideRangesForChallenge ? props.hideRangesForChallenge[0] : props.hideRangesForChallenge;
+
+    if(hideRangesForChallenge) {
+        if(props.unhide === -1)
+            hideRangesForChallenge = undefined
+        else if(props.unhide > hideRangesForChallenge.start)
+            hideRangesForChallenge = {start: props.unhide, end: hideRangesForChallenge.end};
+    }
 
     var [show_trans, set_show_trans] = useState(window.editorShowTranslations);
     useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); })
@@ -78,6 +87,9 @@ export function HintLineContent(props) {
         //addSplitWord(dom.append("span").attr("class", "word"), text_pos, hint.rangeFrom);
 
         // add the text with the hint
+        let is_hidden = hideRangesForChallenge !== undefined &&
+        getOverlap(hint.rangeFrom, hint.rangeTo, hideRangesForChallenge.start, hideRangesForChallenge.end) ? true : undefined
+
         elements.push(<span key={hint.rangeFrom + " "+hint.rangeTo+1} className={"word "+(show_trans ? "tooltip_editor" : "tooltip")}><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className={show_trans ? "tooltiptext_editor" : "tooltiptext"}>{content.hints[hint.hintIndex]}</span></span>)
         //addSplitWord(dom.append("span").attr("class", "word tooltip"), hint.rangeFrom, hint.rangeTo+1)
         //    .append("span").attr("class", "tooltiptext").text(content.hints[hint.hintIndex]);

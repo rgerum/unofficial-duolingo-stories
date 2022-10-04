@@ -1,5 +1,23 @@
-import {diffJson} from "diff";
-import {processStoryFile, splitTextTokens} from "./syntax_parser_new.mjs";
+//import {diffJson} from "diff";
+//import {processStoryFile, splitTextTokens} from "./story-editor/syntax_parser_new.mjs";
+
+let punctuation_chars = "\\\/¡!\"\'\`#$%&*,.:;<=>¿?@^_`{|}…"+
+    "。、，！？；：（）～—·《…》〈…〉﹏……——"
+let regex_split_token = new RegExp(`([\\s${punctuation_chars}\\]]*(?:^|\\s|$|​)[\\s${punctuation_chars}]*)`);
+let regex_split_token2 = new RegExp(`([\\s${punctuation_chars}~]*(?:^|\\s|$|​)[\\s${punctuation_chars}~]*)`);
+export function splitTextTokens(text, keep_tilde=true) {
+    if(!text)
+        return [];
+    //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
+    if(keep_tilde)
+        //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
+        return text.split(regex_split_token)
+    //return text.split(/([\s\\¡!"#$%&*,、，.。\/:：;<=>¿?@^_`{|}…\]]*(?:^|\s|$|​)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/)
+    else
+        //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
+        return text.split(regex_split_token2)
+    //return text.split(/([\s\\¡!"#$%&*,、，.。\/:：;<=>¿?@^_`{|}…~]*(?:^|\s|$|​)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]*)/)
+}
 
 let backend_get = "https://carex.uber.space/stories/backend/editor/get.php"
 export async function getAvatars(id, course_id) {
@@ -212,7 +230,8 @@ function text_add_arrange(t, part) {
     t = text_copy(t);
     for (let i in part.characterPositions) {
         let index = 0;
-        if(1) {
+
+        if(0) {
             for (let j in part.phraseOrder) {
                 if (part.phraseOrder[j] === parseInt(i))
                     index = j;
@@ -221,13 +240,14 @@ function text_add_arrange(t, part) {
         else {
             index = part.phraseOrder[i];
         }
+        console.log("characterPos", i, index, part.phraseOrder)
         let length = part.selectablePhrases[index].length;
         let pos = part.characterPositions[i] - length;
 
         while(pos && t.original_text.substring(pos, pos+length) !== part.selectablePhrases[index]) {
             console.log(i, index, pos, t.original_text.substring(pos, pos+length), part.selectablePhrases[index])
             pos -= 1;
-            if(pos <= 0)
+            if(pos < 0)
                 throw "no pos found"
         }
         //let pos = t.original_text.indexOf(part.selectablePhrases[index])
@@ -367,6 +387,7 @@ export function processStory(json, set_id, story_id, old_text, avatar_list, avat
     let element_index = -1;
     for (let element of json.elements) {
         element_index += 1;
+        console.log("#### element", element_index, element)
 
         if (element.type === "LINE") {
             if(element.line.avatarUrl) {
@@ -713,6 +734,8 @@ async function test() {
         "json" => "string",
         "api" => "int"];
      */
+    let course_id = 129;
+    let folder = "/home/richard/Dropbox/unofficial-duolingo-stories/import_tools/duolingo_data_en_tr"
     let avatars = await getAvatars(2);
     let avatar_names = {}
     for(let avatar of avatars) {
@@ -730,25 +753,26 @@ async function test() {
         }
     }
 
-    let data2 = JSON.parse(fs.readFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/duolingo_data/_stories.txt"));
+    let data2 = JSON.parse(fs.readFileSync(folder+"/_stories.txt"));
     //console.log(data2)
     for(let set_id in data2.sets) {
         for(let story_id in data2.sets[set_id]) {
             let story = data2.sets[set_id][story_id]
             let story_index = set_id * 100 + story_id;
-            if(story_index < 60002) // 53000
-                continue
+            //if(story_index < 60002) // 53000
+            //    continue
             //if(story.id !== 'es-en-en-el-supermercado')
             //    continue
             console.log(story)
             add_icon(story)
-            let json = fs.readFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/duolingo_data/"+story.id+".txt")
+            let json = fs.readFileSync(folder+"/"+story.id+".txt")
             json = JSON.parse(json);
 
+            console.log("### processStory")
             let text = processStory(json, parseInt(set_id)+1, parseInt(story_id)+1, "", [], avatar_id_from_image)
 
             console.log("story_index", story_index)
-            compare_stories(json, text, story_id, avatar_names, avatar_id_from_image)
+            //compare_stories(json, text, story_id, avatar_names, avatar_id_from_image)
             //console.log(diffJson(story_new_json, json));
             //return
             let data = {
@@ -758,18 +782,21 @@ async function test() {
                 image: story.illustrationUrls.active.match(/image\/(.*).svg/)[1],
                 set_id: parseInt(set_id)+1,
                 set_index: parseInt(story_id)+1,
-                course_id: 12,
+                course_id: course_id,// 12 es-en, 66 en-es
                 text: text,
                 json: JSON.stringify(json),
             }
+            console.log("---------upload")
             try {
-                let res = await fetch_post(`https://carex.uber.space/stories/backend/editor/set.php?action=story`, data);
-                res = await res.text()
-                console.log(res);
+                //let res = await fetch_post(`https://carex.uber.space/stories/backend/editor/set.php?action=story`, data);
+                //res = await res.text()
+                //console.log(res);
             }
             catch (e) {
                 console.log(e)
+                die()
             }
+            //die
             //if(story_id == 2)
             //    return
             //break
@@ -778,14 +805,14 @@ async function test() {
     }
     //console.log(data2)
     //console.log(avatars)
-    if(0)
+    //if(0)
     for(let avatar_id in avatars) {
         let avatar_link = avatars[avatar_id];
         let data = await fetch(`https://carex.uber.space/stories/backend/admin/upload.php?action=avatar&id=${avatar_id}&link=${avatar_link}`)
         console.log(await data.text())
     }
     //console.log(icons)
-    if(0)
+    //if(0)
     for(let icon_id in icons) {
         let icon = icons[icon_id];
         let data = await fetch(`https://carex.uber.space/stories/backend/admin/upload.php?action=image&id=${icon_id}&active=${icon.active}&gilded=${icon.gilded}&locked=${icon.locked}&activeLip=${icon.activeLip}&gildedLip=${icon.gildedLip}`);
@@ -858,6 +885,7 @@ async function import_old() {
             let res2 = await fetch(`https://carex.uber.space/stories/backend/stories/get_story.php?id=${story.id}`);
             let json2 = await res2.json();
 
+            console.log("write")
             fs.writeFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/editor-app/story_compare0.txt", json2[0].text);
             fs.writeFileSync("/home/richard/Dropbox/unofficial-duolingo-stories/editor-app/story_compare1.txt", JSON.stringify(json, null, 2));
 
@@ -893,6 +921,7 @@ async function import_old() {
             //exit()
             processed.push(story.id)
             console.log(data)
+            console.log("-----------------upload")
             try {
                 let res = await fetch_post(`https://carex.uber.space/stories/backend/editor/set.php?action=story`, data);
                 res = await res.text()
@@ -907,8 +936,8 @@ async function import_old() {
 
 }
 try {
-    //test();
-    import_old();
+    test();
+    //import_old();
 }
 catch (e) {
     console.log(e)

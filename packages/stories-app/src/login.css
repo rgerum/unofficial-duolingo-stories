@@ -2,28 +2,31 @@
 /* login */
 
 #login_dialog {
-    position: fixed;
     width: 100%;
     height: 100vh;
     display: flex;
-    background: white;
     z-index: 10;
     align-items: center;
     justify-content: center;
-    top: 0;
-    left: 0;
 }
 
 #login_dialog div {
     display: block;
     width: 375px;
     text-align: center;
+    margin: 20px;
+}
+
+#login_dialog div input[type='checkbox'] {
+    display: inline;
+    width: auto;
 }
 
 #login_dialog div input {
     align-items: center;
-    background: #f7f7f7;
-    border: 2px solid #e5e5e5;
+    background: var(--input-background);
+    border: 2px solid var(--input-border);
+    color: var(--text-color);
     border-radius: 16px;
     display: flex;
     margin-top: 8px;
@@ -35,12 +38,12 @@
 }
 
 #login_dialog button {
-    background-color: #1cb0f6;
-    color: #fff;
+    background-color: var(--button-blue-background);
+    color: var(--button-blue-color);
     width: 100%;
     box-shadow: none;
-    border: solid #1899d6;
-    border-width: 0 0 4px;
+    border: solid var(--button-blue-border);
+    border-width: var(--button-side-border) var(--button-side-border) 4px;
     margin-top: 8px;
     transform: translate(0, 0px);
     margin-bottom: 8px;
@@ -63,12 +66,12 @@
 }
 
 #login_dialog .login_error {
-    color: #ea2b2b;
+    color: var(--error-red);
 }
 
 #login_dialog a {
     cursor: pointer;
-    color: #1cb0f6;
+    color: var(--link-blue);
 }
 
 #login_dialog button.link {
@@ -76,10 +79,14 @@
     width: auto;
     transform: none;
     background: none;
-    color: #1cb0f6;
+    color: var(--link-blue);
     margin: 0;
     border: none;
     font-size: 1em;
     font-weight: bold;
     cursor: pointer;
+}
+
+
+#log_in {
 }

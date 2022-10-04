@@ -1,4 +1,6 @@
 import React from "react";
+import "./part.css"
+
 import {Header, TextLine} from "./header";
 import {QuestionPointToPhrase} from "./question_point_to_phrase";
 import {useEventListener} from "./includes";
@@ -14,6 +16,7 @@ export function Part(props) {
     let challenge_type = props.part[props.part.length-1].trackingProperties.challenge_type;
 
     let [progress, setProgress] = React.useState(0);
+    let [unhide, setUnhide] = React.useState(0);
 
     let next = () => {props.controls.advance_progress();}
     if(challenge_type === "point-to-phrase") {
@@ -34,7 +37,7 @@ export function Part(props) {
 
     if(challenge_type === "point-to-phrase") {
         return <div>
-            <TextLine editor={props.editor} progress={props.progress} element={props.part[0]} hidden={(!(progress === 0 || progress === 2)) && !props.editor}/>
+            <TextLine editor={props.editor} progress={props.progress} element={props.part[0]} hidden={(!(progress === 0 || progress === 2)) && !props.editor} audios={props.audios}/>
             <QuestionPointToPhrase editor={props.editor} controls={props.controls} progress={props.progress} element={props.part[1]} hidden={!(progress === 1)} />
         </div>
     }
@@ -42,7 +45,7 @@ export function Part(props) {
     if(props.editor) hidden = "";
     return <div className={"part "+hidden} data-challengetype={challenge_type}>
         {props.part.map((element, i) => (
-            <StoryLine key={i} editor={props.editor} controls={props.controls} progress={props.progress} element={element} />
+            <StoryLine key={i} editor={props.editor} unhide={unhide} setUnhide={setUnhide} controls={props.controls} progress={props.progress} element={element} audios={props.audios} />
         ))}
     </div>
 }
@@ -71,28 +74,28 @@ function ChallengePrompt(props) {
 
 function StoryLine(props) {
     if(props.element.type === "MULTIPLE_CHOICE") {
-        return <QuestionMultipleChoice editor={props.editor} controls={props.controls} progress={props.progress} element={props.element} />
+        return <QuestionMultipleChoice editor={props.editor} controls={props.controls} setUnhide={props.setUnhide} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "SELECT_PHRASE") {
-        return <QuestionSelectPhrase editor={props.editor} controls={props.controls} progress={props.progress} element={props.element} />
+        return <QuestionSelectPhrase editor={props.editor} controls={props.controls} setUnhide={props.setUnhide} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "CHALLENGE_PROMPT") {
-        return <ChallengePrompt editor={props.editor} controls={props.controls} progress={props.progress} element={props.element}/>
+        return <ChallengePrompt editor={props.editor} controls={props.controls} setUnhide={props.setUnhide} progress={props.progress} element={props.element}/>
     }
     if(props.element.type === "ARRANGE") {
-        return <QuestionArrange editor={props.editor} controls={props.controls} progress={props.progress} element={props.element} />
+        return <QuestionArrange editor={props.editor} controls={props.controls} setUnhide={props.setUnhide} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "POINT_TO_PHRASE") {
-        return <QuestionPointToPhrase editor={props.editor} controls={props.controls} progress={props.progress} element={props.element} />
+        return <QuestionPointToPhrase editor={props.editor} controls={props.controls} setUnhide={props.setUnhide} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "MATCH") {
         return <QuestionMatch editor={props.editor} controls={props.controls} progress={props.progress} element={props.element} />
     }
     if(props.element.type === "LINE") {
-        return <TextLine editor={props.editor} progress={props.progress} element={props.element} />
+        return <TextLine editor={props.editor} progress={props.progress} unhide={props.unhide} element={props.element} audios={props.audios} />
     }
     if(props.element.type === "HEADER") {
-        return <Header editor={props.editor} progress={props.progress} element={props.element} />
+        return <Header editor={props.editor} progress={props.progress} element={props.element} audios={props.audios} />
     }
     if(props.element.type === "ERROR") {
         return <div className={["error"]}>{props.element.text}</div>

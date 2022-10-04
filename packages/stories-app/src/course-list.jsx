@@ -1,30 +1,35 @@
 import './course-list.css';
-import {Flag} from "./react/flag";
-import {Spinner} from "./react/spinner";
+import {Flag} from "story-component";
+import {MyLink} from "./mylink";
+import {useSuspendedDataFetcher} from "./api_calls/include";
+import {getPublicCourses} from "./api_calls/course";
 
 
-export function CourseList(props) {
-    const courses = props.courses;
-
-    if(courses === undefined)
-        return <Spinner />
-
-    let base_languages = {}
-    for(let course of courses) {
-        if(base_languages[course.fromLanguageName] === undefined)
-            base_languages[course.fromLanguageName] = [];
-        base_languages[course.fromLanguageName].push(course)
-    }
+export default function CourseList({conlang_count, startTransition}) {
+    let courses = useSuspendedDataFetcher(getPublicCourses, []);
 
     return (
         <div>
-            {Object.entries(base_languages).map(([name, courses_list]) => (
-                <div className="course_list" key={name}><hr/><div className="course_group_name">Stories for {name} Speakers</div>
-                    {courses_list.map(course => (
-                    <LanguageButton key={course.id} course={course} onClick={(e) => {
-                        e.preventDefault();
-                        props.languageClicked(course.learningLanguage, course.fromLanguage)
-                    }}/>
+            <MyLink key={0} to="/tr-en" className="language_select_button celebration" startTransition={startTransition}>
+                <Flag iso="tr" />
+                <div className="language_select_button_text" style={{width: "68%"}}>Celebrating our Turkish team which just reached 100 translated stories!
+                    Congratulations to <i>Danika_Dakika</i> and <i>deck</i>. <span className="celebration_date">— 19. Sep. 2022</span></div>
+                <span className="celebration_icon">🎉</span>
+            </MyLink>
+            {Object.entries(courses).map(([name,]) => (
+                name === "Conlangs" ?
+                    <MyLink key={name} to="/conlangs" className="language_select_button conlang-link" startTransition={startTransition}>
+                        <Flag iso={"conlangs"} flag_file={"flag_conlangs.svg"} />
+                        <span className="language_select_button_text">Conlangs Index:</span>
+                        <span className="language_story_count" id="conlangs-count">{conlang_count} stories</span>
+                        <img className="arrow" src="/stories/icons/arrow.svg" alt=">" />
+                    </MyLink>
+                    :
+                <div className="course_list" key={name}>
+                    <hr/>
+                    <div className="course_group_name">Stories for {name} Speakers</div>
+                    {courses[name].map(course => (
+                    <LanguageButton key={course.id} course={course} startTransition={startTransition} />
                     ))}
                 </div>
             ))
@@ -35,14 +40,16 @@ export function CourseList(props) {
 
 function LanguageButton(props) {
     let course = props.course;
-    return <a
+
+    return <MyLink
         data-cy={"language_button_big_"+course.id}
         className="language_select_button"
-        onClick={props.onClick}
-        href={`?lang=${course.learningLanguage}&lang_base=${course.fromLanguage}`}
+        startTransition={props.startTransition}
+        to={`/${course.learningLanguage}-${course.fromLanguage}`}
     >
-        <Flag flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} className="flag_big" />
+        <Flag iso={course.learningLanguage} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} />
 
-        <span className="language_select_button_text">{course.name || course.learningLanguageName}</span>
-    </a>;
+        <span className="language_select_button_text">{course.name}</span>
+        <span className="language_story_count">{course.count} stories</span>
+    </MyLink>;
 }

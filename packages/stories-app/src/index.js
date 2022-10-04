@@ -1,98 +1,60 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React, { Suspense, lazy } from 'react';
+import {createRoot} from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 
-import {Story} from "story-component";
-
-import {useDataFetcher2, useEventListener} from "./hooks";
-import {getLanguageNames} from "./api_calls";
-import {IndexContent} from "./overview";
-import {User_activation_reset} from "./user_activation_reset";
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+} from "react-router-dom";
+import {load_dark_mode} from "story-component";
+import {useUsername2} from "./login";
+const UserActivationOrReset = lazy(() => import('./user_activation_or_reset'));
+const IndexContent = lazy(() => import('./overview'));
+const LoginDialog = lazy(() => import('./login'));
+const StoryP = lazy(() => import('./story_wrapper'));
 
 
 function App() {
     let urlParams = new URLSearchParams(window.location.search);
-    // activate
-    const [task, setTask] = React.useState(urlParams.get("task") || null);
-    // story
-    const [story, setStory] = React.useState(urlParams.get("story") || null);
-    const [test_mode, ] = React.useState(urlParams.get("test") || null);
-    const [course, setCourse] = React.useState([urlParams.get("lang") || undefined, urlParams.get("lang_base") || undefined]);
-    // language_dataRefetch
-    let [language_data, ] = useDataFetcher2(getLanguageNames, []);
-
-    function changeStory(id, task) {
-        setStory(id);
-        if(id) {
-            if(test_mode)
-                window.history.pushState({story: id}, "Story" + id, `?story=${id}&test=1`);
-            else
-                window.history.pushState({story: id}, "Story" + id, `?story=${id}`);
-            dispatchEvent(new CustomEvent('progress_changed', {detail: id}));
-        }
-        else if(task) {
-            doSetTask(task);
-        }
-        else {
-            doSetCourse(course);
-        }
-    }
-    function doSetCourse(course) {
-        if(course[0] === undefined)
-            window.history.pushState({course: course}, "Language"+course, ``);
+    if(urlParams.get("story")) {
+        if(urlParams.get("test"))
+            window.location = `/story/${urlParams.get("story")}/test`;
         else
-            window.history.pushState({course: course}, "Language"+course, `?lang=${course[0]}&lang_base=${course[1]}`);
-        setCourse(course);
+            window.location = `/story/${urlParams.get("story")}`;
     }
-    function doSetTask(task) {
-        //urlParams.get("username") // username=test7&activation_link=dd2182ff-e8ec-4bc7-822b-4eeb7e624c27
-        window.history.pushState({task: task}, "Language", `?task=${task}&username=${urlParams.get("username")}&activation_link=${urlParams.get("activation_link")}`);
-        setTask(task);
-    }
+    if(urlParams.get("lang") && urlParams.get("lang_base"))
+        window.location = `/${urlParams.get("lang")}-${urlParams.get("lang_base")}`;
+    if(urlParams.get("task"))
+        window.location = `/task/${urlParams.get("task")}/${urlParams.get("username")}/${urlParams.get("activation_link")}`;
 
-    useEventListener("popstate", (event) => {
-        if(event.state.story)
-            changeStory(event.state.story)
-        else {
-            setStory(null);
-            if(event.state.course)
-                doSetCourse(event.state.course)
-            else
-                doSetCourse([undefined, undefined])
-        }
-    })
+    let userdata = useUsername2();
 
-    let [initialized, setInitialized] = React.useState(0);
-    if(!initialized) {
-        let urlParams = new URLSearchParams(window.location.search);
-        setInitialized(1);
-        changeStory(urlParams.get('story'), urlParams.get('task'));
-    }
-
-    if(test_mode) {
-        return <div id="main">
-            <Story editor={{lineno: 3}} story_id={story} />
-        </div>
-    }
-
-    if(task !== null) {
-        return <User_activation_reset task={task} />
-    }
-    else if(story === null)
-        return <IndexContent language_data={language_data} course={course} setCourse={doSetCourse} onStartStory={changeStory} />
-    return <Story language_data={language_data} story_id={story} onQuit={()=>{changeStory(null)}} />
+    return <Suspense fallback={<></>}>
+        <Routes>
+            <Route path='/login' element={<LoginDialog userdata={userdata}/>}></Route>
+            <Route path='/story/:id' element={<StoryP />}></Route>
+            <Route path='/story/:id/test' element={<StoryP />}></Route>
+            <Route path='/task/:task/:username/:hash' element={<UserActivationOrReset />}></Route>
+            <Route path='/:lang-:lang_base/*' element={<IndexContent userdata={userdata}/>}></Route>
+            <Route path='/*' element={<IndexContent userdata={userdata}/>}></Route>
+        </Routes>
+    </Suspense>
 }
 
 
-ReactDOM.render(
+createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+      <Router>
+        <App />
+      </Router>
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+window.addEventListener("DOMContentLoaded", load_dark_mode);

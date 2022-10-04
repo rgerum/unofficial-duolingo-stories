@@ -97,7 +97,23 @@ function get_values($names) {
     return $output;
 }
 
+function check_login($db, $username, $password) {
+    $username = mysqli_escape_string($db, $username);
+    $user = mysqli_fetch_assoc(mysqli_query($db, "SELECT * FROM user WHERE username = '$username' AND activated = 1"));
+    $hash = $user["password"];
+    if(phpbb_check_hash($password, $hash)) {
+        $_SESSION["user"] = $user;
+    }
+}
+
 $db = database();
+
+if( !isset($_SESSION["user"]) && isset($_COOKIE['username'])) {
+    check_login($db, $_COOKIE['username'], $_COOKIE["password"]);
+}
+if( !isset($_SESSION["user"]) && isset($_REQUEST['username'])) {
+    check_login($db, $_REQUEST['username'], $_REQUEST["password"]);
+}
 
 $action = $_REQUEST['action'];
 
@@ -122,7 +138,7 @@ if($action == "register") {
             <br/>
             You have registered on 'Unofficial Duolingo Stories'.<br/>
             To complete your registration click on the following link.<br/>
-            <a href='https://carex.uber.space/stories/?task=activate&username=$username&activation_link=$activation_link'>Activate account</a>
+            <a href='https://www.duostories.org/task/activate/$username/$activation_link'>Activate account</a>
             <br/><br/>
             Happy learning.
             ");
@@ -146,7 +162,7 @@ else if($action == "activate") {
 }
 else if($action == "get_login") {
     if(isset($_SESSION["user"]))
-        echo "{\"username\": \"".$_SESSION["user"]["username"]."\", \"role\": ".$_SESSION["user"]["role"]."}";
+        echo "{\"username\": \"".$_SESSION["user"]["username"]."\", \"role\": ".$_SESSION["user"]["role"].", \"admin\": ".$_SESSION["user"]["admin"]."}";
     else
         echo "null";
 }
@@ -180,12 +196,12 @@ else if($action == "send") {
     if($result) {
         send_email(
         "[Unofficial Duolingo Stories] Reset Password $username",
-        "register@duostories.org",
+        array("register@duostories.org" => "Unofficial Duolingo Stories"),
         $email,
         "Hey $username,<br/>
         You or someone else has requested a new password for 'Unofficial Duolingo Stories'.<br/>
         Use the following link to change your password (the link is valid for one day).<br/>
-        <a href='https://carex.uber.space/stories/?task=resetpw&username=$_POST[username]&activation_link=$activation_link'>Reset password</a>
+        <a href='https://www.duostories.org/task/resetpw/$_POST[username]/$activation_link'>Reset password</a>
         <br/><br/>
         Happy learning.
         ");

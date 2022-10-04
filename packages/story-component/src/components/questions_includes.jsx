@@ -15,7 +15,7 @@ export function useChoiceButtons(count, rightIndex, callRight, callWrong) {
             // update all button states
             setButtonState(buttonState => buttonState.map((v, i) =>
                 i === index ? "right" :
-                v === "false" ? "false-done" :
+                v === "false" ? "false" :
                     "done"
             ))
             // callback for clicking the right button

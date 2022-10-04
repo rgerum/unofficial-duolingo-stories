@@ -15,7 +15,7 @@ export function Header(props) {
     let onClick;
     [hidden, onClick] = EditorHook(hidden, props.element.editor, props.editor);
 
-    let [audioRange, playAudio] = useAudio(element)
+    let [audioRange, playAudio] = useAudio(element, props.audios)
 
     let hideRangesForChallenge = undefined;
 
@@ -25,7 +25,7 @@ export function Header(props) {
             <AudioPlay onClick={playAudio} />
             <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.learningLanguageTitleContent} />
             {(props.editor && (element.audio)) ?
-                <EditorSSMLDisplay ssml={element.audio.ssml}/>
+                <EditorSSMLDisplay ssml={element.audio.ssml} audio={element.audio} editor={props.editor}/>
                 : <></>
             }
                 </span>
@@ -43,7 +43,7 @@ export function TextLine(props) {
     let onClick;
     [hidden, onClick] = EditorHook(hidden, props.element.editor, props.editor);
 
-    let [audioRange, playAudio] = useAudio(element)
+    let [audioRange, playAudio] = useAudio(element, props.audios)
 
     if(element.line === undefined)
         return <></>
@@ -51,6 +51,7 @@ export function TextLine(props) {
     let hideRangesForChallenge = element.hideRangesForChallenge;
     if(window.view === undefined && props.progress !== element.trackingProperties.line_index)
         hideRangesForChallenge = undefined;
+
     //if(props.progress !== element.trackingProperties.line_index)
     //    hideRangesForChallenge = undefined;
     // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
@@ -66,9 +67,9 @@ export function TextLine(props) {
             <img className="head" src={element.line.avatarUrl} alt="head"/>
             <span className="bubble">
                         <AudioPlay onClick={playAudio} />
-                        <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.line.content} />
+                        <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} unhide={props.unhide} content={element.line.content} />
                 {(props.editor && (element.line.content.audio)) ?
-                    <EditorSSMLDisplay ssml={element.line.content.audio.ssml}/>
+                    <EditorSSMLDisplay ssml={element.line.content.audio.ssml} audio={element.line.content.audio} editor={props.editor}/>
                     : <></>
                 }
             </span>
@@ -83,7 +84,7 @@ export function TextLine(props) {
                     <AudioPlay onClick={playAudio} />
                     <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.line.content} />
                     {(props.editor && (element.line.content.audio)) ?
-                        <EditorSSMLDisplay ssml={element.line.content.audio.ssml}/>
+                        <EditorSSMLDisplay ssml={element.line.content.audio.ssml} audio={element.line.content.audio} editor={props.editor}/>
                         : <></>
                     }
                 </span>
@@ -91,8 +92,9 @@ export function TextLine(props) {
 }
 
 
+window.playing_audio = [];
 var audio_base_path = "https://carex.uber.space/stories/";
-function useAudio(element) {
+function useAudio(element, audios) {
     let [audioRange, setAudioRange] = React.useState(99999);
     let audio = element?.line?.content?.audio;
 
@@ -102,26 +104,46 @@ function useAudio(element) {
     useEventListener("progress_changed", e => {
         if(audio === undefined)
             return
-        if(e.detail === element.trackingProperties.line_index) {
+        if(e.detail === (element.trackingProperties.line_index || 0)) {
             if(audio && audio.url)
                 playAudio();
         }
     })
 
-    if(audio === undefined || audio.url === undefined)
+    if(audio === undefined || audio.url === undefined) {
+        React.useMemo(()=>{}, [undefined]);
         return [10000000, undefined]
+    }
 
-    let audioObject = new Audio(audio_base_path + audio.url);
+    let audioObject = React.useMemo(() => {
+        if(audios && audios[audio.url])
+            return audios[audio.url];
+        return new Audio(audio_base_path + audio.url);
+    }, [audio_base_path + audio.url]);
 
     function playAudio() {
+        for(let audio_cancel of window.playing_audio)
+            audio_cancel();
+        window.playing_audio = [];
         audioObject.pause();
         audioObject.currentTime = 0;
         audioObject.play();
+        let timeouts = [];
+        let last_end = 0;
         for(let keypoint of audio.keypoints) {
-            setTimeout(() => {
+            last_end = keypoint.rangeEnd;
+            let t = setTimeout(() => {
                 setAudioRange(keypoint.rangeEnd);
             }, keypoint.audioStart);
+            timeouts.push(t);
         }
+        function cancel() {
+            for(let t in timeouts)
+                clearTimeout(t);
+            setAudioRange(last_end);
+            audioObject.pause();
+        }
+        window.playing_audio.push(cancel);
     }
 
     return [audioRange, playAudio];

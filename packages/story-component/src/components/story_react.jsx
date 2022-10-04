@@ -1,205 +1,172 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import './story.css';
 
 import {playSoundRight, playSoundWrong} from "./sound_effects";
 import {Part} from "./part";
 import {FinishedPage} from "./finish_page";
-import {setStoryDone, getStoryJSON, scroll_down} from "./includes";
+import {setStoryDone, scroll_down} from "./includes";
+import {Legal} from "./legal";
+import {useNavigate} from "react-router-dom";
+import {Footer} from "./story_footer";
+import {StoryHeader} from "./story_header";
+import {Spinner} from "../react/spinner";
+//import {StoryTitlePage} from "./story_title_page";
 
 
-export class Story extends React.Component {
-    constructor(props) {
-        super(props);
-        //let urlParams = new URLSearchParams(window.location.search);
+export function Story(props) {
+    let story = props.story;
+    let id = props.id;
+    let editor = props.editor;
+    let course = story.learningLanguage + "-" + story.fromLanguage;
 
-        this.state = {
-            courses: [],
-            stories: [],
-            lang: undefined,
-            lang_base: undefined,
-            loading: true,
-            login: undefined,
-            story: undefined,
-            progress: 0,
-            blocked: false,
-            right: false,
-            spacer: 0,
-        };
+    let [progress, setProgress] = useState(-1);
+    let [spacer, setSpacer] = useState(0);
+    let [right, setRight] = useState(0);
+    let [blocked, setBlocked] = useState(0);
 
-        this.controls = {
-            wrong: this.wrong.bind(this),
-            right: this.right.bind(this),
-            block_next: this.block_next.bind(this),
-            unhide: this.unhide.bind(this),
-            setNextCallback: this.setNextCallback.bind(this),
-            next: this.next.bind(this),
-            advance_progress: this.advance_progress.bind(this),
-        }
-        this.next_callback = undefined;
+    let [audio_loaded, setAudioLoaded] = useState(0);
 
-        window.addEventListener("story_id_changed", this.story_id_changed.bind(this))
-        if(this.props.story_id)
-            this.loadData(this.props.story_id)
-    }
-
-    story_id_changed(e) {
-        this.loadData(e.detail);
-    }
-
-    async loadData(name) {
-        let story_json = await getStoryJSON(name);
-        this.setState({story: story_json, progress: 0});
-    }
-
-    setNextCallback(callback) {
-        this.next_callback = callback;
-    }
-
-    next() {
-        if(!this.state.blocked)
-            dispatchEvent(new CustomEvent('next_button_clicked', {detail: this.state.progress}));
-    }
-
-    advance_progress() {
-        dispatchEvent(new CustomEvent('progress_changed', {detail: this.state.progress + 1}));
-        this.setState(state=>({progress: state.progress += 1, right: false}));
-    }
-
-    unhide(index, pos) {
-        this.setState(state=>{
-            let story = state.story;
-            for(let element of story.elements) {
-                if(element.trackingProperties.line_index === index && element.hideRangesForChallenge !== undefined && element.hideRangesForChallenge.length) {
-                    if(pos === undefined)
-                        element.hideRangesForChallenge[0].start = element.hideRangesForChallenge[0].end;
-                    else
-                        element.hideRangesForChallenge[0].start = pos;
-                }
-            }
-            return {story: story};
-        });
-    }
-
-    wrong() {
+    function wrong() {
         playSoundWrong();
     }
 
-    right() {
+    function right_call() {
         playSoundRight();
-        this.setState({right: true, blocked: false});
+        setRight(true);
+        setBlocked(false);
     }
 
-    block_next() {
-        this.setState({blocked: true});
+    function block_next() {
+        setBlocked(true);
     }
 
-    setSpacer() {
+    function next() {
+        if(!blocked)
+            dispatchEvent(new CustomEvent('next_button_clicked', {detail: progress}));
+    }
+
+    function advance_progress() {
+        dispatchEvent(new CustomEvent('progress_changed', {detail: progress + 1}));
+        setProgress(progress += 1);
+        setRight(false);
+    }
+
+    let navigate = useNavigate();
+    function finish() {
+        setStoryDone(id);
+        navigate("/"+course);
+    }
+
+    useEffect(() => {
         if(!document.getElementById("story")) return
         let parts = document.getElementById("story").querySelectorAll("div.part:not(.hidden)")
         let last = parts[parts.length-1];
-        let spacer = window.innerHeight/2-last.clientHeight*0.5;
+        let spacerX = window.innerHeight/2-last.clientHeight*0.5;
 
-        if(!this.props.editor)
+        if(!editor)
             scroll_down();
-        if(spacer !== this.state.spacer)
-            this.setState({spacer: spacer});
+        if(spacerX !== spacer)
+            setSpacer(spacerX);
+    });
+
+    let controls = {
+        wrong: wrong,
+        right: right_call,
+        block_next: block_next,
+        next: next,
+        advance_progress: advance_progress,
     }
 
-    componentDidUpdate() {
-        this.setSpacer();
-    }
-
-    finish() {
-        setStoryDone(this.props.story_id);
-        this.props.onQuit();
-    }
-
-    render() {
-        let story = this.state.story || this.props.story;
-        let editor = this.props.editor || false;
-        if(this.props.story_json !== undefined)
-            story = this.props.story_json;
-        if(story === undefined)
-            return null;
-        var parts = [];
-        let last_id = -1;
-        for(let element of story.elements) {
-            if(element.trackingProperties === undefined) {
-                continue;
-            }
-            if(last_id !== element.trackingProperties.line_index) {
-                parts.push([]);
-                last_id = element.trackingProperties.line_index;
-            }
-            parts[parts.length-1].push(element);
+    var parts = [];
+    let last_id = -1;
+    for(let element of story.elements) {
+        if(element.trackingProperties === undefined) {
+            continue;
         }
-
-        let finished = (this.state.progress === parts.length);
-
-        if(editor) {
-            return (
-                <div id="story" style={{paddingBottom: "0px"}}>
-                    {parts.map((part, i) => (
-                        <Part key={i} editor={editor} controls={this.controls} progress={this.state.progress}
-                              part={part}/>
-                    ))}
-                </div>
-            );
+        if(last_id !== element.trackingProperties.line_index) {
+            parts.push([]);
+            last_id = element.trackingProperties.line_index;
         }
+        parts[parts.length-1].push(element);
+    }
 
+    let finished = (progress === parts.length);
+
+    React.useEffect(() => {
+        if(progress === -1 && audio_loaded)
+            advance_progress();
+    }, [audio_loaded]);
+
+    if(editor) {
+        React.useMemo(() => {}, [story.id])
         return (
-            <div>
-                <div id="header">
-                    <div id="header_icon"><span id="quit" onClick={this.props.onQuit} /></div>
-                    <div id="progress">
-                        <div id="progress_inside" style={{width: this.state.progress/parts.length*100+"%"}}>
-                            <div id="progress_highlight"></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="main">
-                    <div id="story" style={{paddingBottom: "0px"}}>
-                        <div className="legal">
-                            This story is owned by Duolingo, Inc. and is used under license from Duolingo.<br/>
-                            Duolingo is not responsible for the translation of this story into <span>{/*this.props.language_data !== undefined ? this.props.language_data[story.learningLanguage].name : ""*/}</span> and is not an official product of Duolingo.
-                            Any further use of this story requires a license from Duolingo.<br/>
-                            Visit <a style={{color: "gray"}} href="https://www.duolingo.com">www.duolingo.com</a> for more information.
-                        </div>
-                        {parts.map((part, i) => (
-                            <Part key={i} editor={editor} controls={this.controls} progress={this.state.progress} part={part} />
-                        ))}
-                    </div>
-                    <div style={{height: this.state.spacer+"px"}} />
-                    {finished ? <FinishedPage story={story} /> : null
-                    }
-                </div>
-                <div id="footer"
-                     data-right={this.state.right ? "true" : undefined}
-                >
-                    <div id="footer_content">
-                        <div id="footer_result">
-                            <div>
-                                <div id="footer_result_icon"><span/></div>
-                                <div id="footer_result_text"><h2>You are correct</h2></div>
-                            </div>
-                        </div>
-                        <div id="footer_buttons">
-                            <button id="button_discuss" style={{float: "left", display: "none"}}
-                                    className="button">
-                                Discussion
-                            </button>
-                            {finished ?
-                                <button id="button_next"
-                                        className="button" onClick={() => this.finish()}>finished</button>
-                                : <button id="button_next"
-                                          data-status={this.state.blocked ? "inactive" : undefined}
-                                          className="button" onClick={() => this.next()}>continue</button>
-                            }
-                        </div>
-                    </div>
-                </div>
+            <div id="story">
+                {parts.map((part, i) => (
+                    <Part key={i} editor={editor} controls={controls} progress={progress}
+                          part={part}/>
+                ))}
             </div>
         );
     }
 
+    let audios = undefined;
+    if(!editor) {
+        let audio_urls = [];
+        for(let element of story.elements) {
+            if (element.type === "HEADER" || element.type === "LINE")
+                if(element.audio)
+                    audio_urls.push(element.audio.url);
+        }
+
+        var audio_base_path = "https://carex.uber.space/stories/";
+        audios = React.useMemo(() => {
+            let count = 0;
+            let audios = {};
+            for (let url of audio_urls) {
+                if (audios[url] === undefined && url !== undefined) {
+                    count += 1;
+                    let a = new Audio();
+                    function loadingFinished(e) {
+                        a.removeEventListener('canplaythrough', loadingFinished);
+                        a.removeEventListener('error', loadingFinished);
+                        count -= 1;
+                        if (count === 0)
+                            setAudioLoaded(1);
+                    }
+                    a.addEventListener('canplaythrough', loadingFinished, false);
+                    a.addEventListener('error', loadingFinished);
+                    audios[url] = a;
+                    a.src = audio_base_path + url;
+                    a.load();
+                }
+            }
+            if (count === 0)
+                setAudioLoaded(1);
+            return audios;
+        }, [story.id])
+    }
+
+    //if(progress === -1)
+    //    return <StoryTitlePage story={story}/>
+
+    if(!audio_loaded)
+        return <Spinner />
+
+    return (
+        <div>
+            <StoryHeader progress={progress} length={parts.length} course={course} />
+            <div id="main">
+                <div id="story">
+                    <Legal />
+                    {parts.map((part, i) => (
+                        <Part key={i} editor={editor} controls={controls} progress={progress} part={part} audios={audios} />
+                    ))}
+                </div>
+                <div style={{height: spacer+"px"}} />
+                {finished ? <FinishedPage story={story} /> : null
+                }
+            </div>
+            <Footer right={right} finished={finished} blocked={blocked} next={next} finish={finish} />
+        </div>
+    );
 }

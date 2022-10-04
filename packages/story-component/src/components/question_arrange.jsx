@@ -1,5 +1,8 @@
 import React from "react";
+import "./question_arrange.css"
+
 import {EditorHook} from "./editor_hooks";
+import {useCallOnActivation} from "./questions_includes";
 
 /*
 The ARRANGE question
@@ -18,10 +21,10 @@ export function QuestionArrange(props) {
     let onClick;
     [hidden2, onClick] = EditorHook(hidden2, props.element.editor, props.editor);
 
+    useCallOnActivation(element.trackingProperties.line_index, props.controls.block_next);
 
     let [buttonState, click] = useArrangeButtons(element.phraseOrder, props.controls.right, props.controls.wrong,
-        (i) => {if(!props.editor) props.controls.unhide(element.trackingProperties.line_index,
-            element.characterPositions[i])})
+        (i) => {if(!props.editor) props.setUnhide(element.characterPositions[i])})
 
     return <div style={{textAlign: "center"}} className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
         <div>

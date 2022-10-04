@@ -1,4 +1,6 @@
 import React from "react";
+import "./question_multiple_choice.css"
+
 import {useChoiceButtons} from "./questions_includes";
 import {EditorHook} from "./editor_hooks";
 import {HintLineContent} from "./line_hints";
@@ -33,7 +35,7 @@ export function QuestionMultipleChoice(props) {
     let [buttonState, click] = useChoiceButtons(element.answers.length, element.correctAnswerIndex,
         ()=> {
             if(props.editor) return;
-            props.controls.unhide(props.element.trackingProperties.line_index);
+            props.setUnhide(-1);
             props.controls.right();
         },
         props.controls.wrong
@@ -42,6 +44,30 @@ export function QuestionMultipleChoice(props) {
     // connect the editor functions
     let onClick;
     [hidden2, onClick] = EditorHook(hidden2, props.element.editor, props.editor);
+
+    function get_color(state) {
+        if(state === "right")
+            return "color_right button_disabled_up"
+        if(state === "false")
+            return "color_false button_inactive_anim"
+        if(state === "done")
+            return "color_disabled button_inactive"
+        return "color_base button_click"
+    }
+    function get_color_text(state) {
+        if(state === "right")
+            return "color_base"
+        if(state === "false")
+            return "color_disabled"
+        if(state === "done")
+            return "color_disabled"
+        return "color_base"
+    }
+    /*
+                        data-right={buttonState[index] === "right" ? "true" : undefined}
+                    data-off={buttonState[index] === "right" || buttonState[index] === "false-done" ? "true" : undefined}
+                    data-false={buttonState[index] === "false" ? "true" : undefined}
+     */
 
     return <div className={"fadeGlideIn "+hidden2} onClick={onClick} lineno={element?.editor?.block_start_no}>
         {/* Display the question if a question is there */}
@@ -54,15 +80,12 @@ export function QuestionMultipleChoice(props) {
         <ul className="multiple_choice_ul">
             {element.answers.map((answer, index) => (
                 /* on answer field */
-                <li key={index} className="multiple_choice_li"
+                <li key={index} className={"multiple_choice_li "}
                     onClick={()=>click(index)}
-                    data-right={buttonState[index] === "right" ? "true" : undefined}
-                    data-off={buttonState[index] === "right" || buttonState[index] === "false-done" ? "true" : undefined}
-                    data-false={buttonState[index] === "false" ? "true" : undefined}
                 >
                     {/* with a button and a text */}
-                    <button className="multiple_choice_checkbox"/>
-                    <div className="multiple_choice_answer_text">
+                    <button className={"multiple_choice_checkbox "+get_color(buttonState[index])}/>
+                    <div className={"multiple_choice_answer_text "+get_color_text(buttonState[index])}>
                         <HintLineContent content={answer} />
                     </div>
                 </li>
