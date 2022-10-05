@@ -5,7 +5,7 @@
   "dependencies": {
     "story-component": "file:../story-component"
   },
-  "homepage": "stories",
+  "homepage": "",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

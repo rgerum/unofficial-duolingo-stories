@@ -3,7 +3,7 @@ import {backend_express, fetch_post} from "./include";
 
 export async function get_login2() {
     // get the current login status
-    const response = await fetch(`${backend_express}session`, {credentials: 'include'});  // {credentials: "same-origin"}
+    const response = await fetch(`${backend_express}/session`, {credentials: 'include'});  // {credentials: "same-origin"}
     try {
         // return the response
         let json = await response.json();
@@ -21,7 +21,7 @@ export async function login(username, password, remember) {
     document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
-    let response = await fetch_post(`${backend_express}login`, {username: username, password: password, remember: remember});
+    let response = await fetch_post(`${backend_express}/login`, {username: username, password: password, remember: remember});
     return response.status !== 403;
 }
 
@@ -30,14 +30,14 @@ export async function logout() {
     // send the signal to logout
     document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    await fetch(`${backend_express}logout`, {credentials: 'include'});
+    await fetch(`${backend_express}/logout`, {credentials: 'include'});
 }
 
 export async function register(data) {
     // register a new user
     let response;
     try {
-        response = await fetch_post(`${backend_express}register`, data)
+        response = await fetch_post(`${backend_express}/register`, data)
     }
         // something wrong :-(
     catch (e) {
@@ -60,7 +60,7 @@ export async function reset_pw(data) {
     // register a new user
     let response;
     try {
-        response = await fetch_post(`${backend_express}send`, data)
+        response = await fetch_post(`${backend_express}/send`, data)
     }
         // something wrong :-(
     catch (e) {
@@ -106,7 +106,7 @@ export async function reset_pw_set(data) {
     let response;
 
     try {
-        response = await fetch_post(`${backend_express}set`, data);
+        response = await fetch_post(`${backend_express}/set`, data);
     } // something wrong :-(
     catch (e) {
         return false;
@@ -124,6 +124,6 @@ export async function reset_pw_set(data) {
 
 
 export async function activate(data) {
-    let reponse = await fetch_post(`${backend_express}activate`, data);
+    let reponse = await fetch_post(`${backend_express}/activate`, data);
     return reponse.status === 200;
 }

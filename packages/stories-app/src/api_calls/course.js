@@ -2,7 +2,7 @@ import {backend_express} from "./include";
 
 export async function getCoursesUser() {
     try {
-        let response_courses = await fetch(`${backend_express}courses_user`, {credentials: "include"});
+        let response_courses = await fetch(`${backend_express}/courses_user`, {credentials: "include"});
         return await response_courses.json();
     }
     catch (e) {
@@ -12,7 +12,7 @@ export async function getCoursesUser() {
 
 export async function getCoursesCount() {
     try {
-        let response_courses = await fetch(`${backend_express}course_counts`);
+        let response_courses = await fetch(`${backend_express}/course_counts`);
         return await response_courses.json();
     }
     catch (e) {
@@ -22,7 +22,7 @@ export async function getCoursesCount() {
 
 export async function getPublicCourses() {
     try {
-        let response_courses = await fetch(`${backend_express}courses`);
+        let response_courses = await fetch(`${backend_express}/courses`);
         return await response_courses.json();
     }
     catch (e) {
@@ -34,7 +34,7 @@ export async function getStoriesSets(lang, lang_base) {
     if(lang === undefined || lang_base === undefined)
         return {sets: []}
     try {
-        let response = await fetch(`${backend_express}course/${lang}-${lang_base}`, {credentials: 'include'});
+        let response = await fetch(`${backend_express}/course/${lang}-${lang_base}`, {credentials: 'include'});
         return await response.json();
     }
     catch (e) {
@@ -44,7 +44,7 @@ export async function getStoriesSets(lang, lang_base) {
 
 
 export async function getStoryJSON(id) {
-    let response_json = await fetch(`${backend_express}story/${id}`);
+    let response_json = await fetch(`${backend_express}/story/${id}`);
     let story_json;
     if(response_json.status === 200) {
         try {
