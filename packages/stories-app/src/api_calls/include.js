@@ -10,7 +10,7 @@ export let backend_express = "backend_node";
 if(isLocalNetwork())
     backend_express = "https://duostories.org/stories/backend_node_test";
 if(window.location.hostname === "test.duostories.org")
-    backend_express = "stories/backend_node_test/course_counts";
+    backend_express = "stories/backend_node_test";
 
 
 let fetch_promises = {}
