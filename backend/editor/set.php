@@ -217,7 +217,7 @@ else if($action == "story") {
 else if($action == "story_delete") {
     $keys = ["id" => "int"];
     $id = intVal($_REQUEST['id']);
-    query_one($db, "UPDATE story SET deleted = 1 WHERE id = $id;");
+    query_one($db, "UPDATE story SET deleted = 1, public = 0 WHERE id = $id;");
     //echo "UPDATE story SET deleted = 1 WHERE id = $id;";
     //query_one($db, "DELETE FROM story WHERE id = $id;");
 
