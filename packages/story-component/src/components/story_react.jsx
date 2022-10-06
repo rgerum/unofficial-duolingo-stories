@@ -40,10 +40,10 @@ export function Story(props) {
         setBlocked(true);
     }
 
-    function next() {
+    let next = React.useCallback(() => {
         if(!blocked)
             dispatchEvent(new CustomEvent('next_button_clicked', {detail: progress}));
-    }
+    }, [blocked, progress]);
 
     function advance_progress() {
         dispatchEvent(new CustomEvent('progress_changed', {detail: progress + 1}));
@@ -95,7 +95,7 @@ export function Story(props) {
     React.useEffect(() => {
         if(progress === -1 && audio_loaded)
             advance_progress();
-    }, [audio_loaded]);
+    }, [audio_loaded, advance_progress, progress]);
 
     if(editor) {
         React.useMemo(() => {}, [story.id])
@@ -146,11 +146,20 @@ export function Story(props) {
         }, [story.id])
     }
 
-    //if(progress === -1)
-    //    return <StoryTitlePage story={story}/>
+    let key_event_handler = React.useCallback((e) => {
+        if (e.key === "Enter")
+            next();
+    }, [blocked, progress]);
+    React.useEffect(() => {
+        window.addEventListener('keypress', key_event_handler);
+        return () => window.removeEventListener('keypress', key_event_handler);
+    }, [blocked, progress]);
 
     if(!audio_loaded)
         return <Spinner />
+
+    //if(progress === -1)
+    //    return <StoryTitlePage story={story}/>
 
     return (
         <div>
