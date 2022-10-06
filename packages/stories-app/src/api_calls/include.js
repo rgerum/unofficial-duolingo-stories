@@ -6,11 +6,11 @@ function isLocalNetwork(hostname) {
         return true;
     }
 }
-export let backend_express = "backend_node";
+export let backend_express = "/backend_node";
 if(isLocalNetwork())
     backend_express = "https://duostories.org/stories/backend_node_test";
 if(window.location.hostname === "test.duostories.org")
-    backend_express = "stories/backend_node_test";
+    backend_express = "/stories/backend_node_test";
 
 
 let fetch_promises = {}
