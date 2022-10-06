@@ -16,7 +16,7 @@ if(window.location.hostname === "test.duostories.org")
 let fetch_promises = {}
 window.fetch_promises = fetch_promises;
 export function useSuspendedDataFetcher(fetcher, args= []) {
-    let key = `${fetcher.name} ${args}`;
+    let key = `${fetcher} ${args}`;
     if(fetch_promises[key] === undefined) {
         fetch_promises[key] = {
             promise: undefined,

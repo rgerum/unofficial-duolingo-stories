@@ -31,7 +31,6 @@ export default function CourseDropdown({userdata, startTransition}) {
     if(userdata?.username === undefined || course_data === undefined || course_data?.length === 0)
         return <div id="header_language_placeholder"></div>
 
-    console.log("dropdown", course, course.learningLanguage, lang, lang_base)
     return (
     <div id="header_language">
         <div id="diamond-wrap">
