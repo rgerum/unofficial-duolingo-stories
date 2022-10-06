@@ -77,7 +77,7 @@ async function activate({username, activation_link}) {
 async function send({username}) {
 
     // check username
-    let username_check = await check_username(username, false);
+    let username_check = await check_username(username, true);
     if(username_check?.status)
         return username_check
     let {id, email} = username_check;
@@ -100,6 +100,7 @@ async function send({username}) {
         console.log(info.envelope);
         console.log(info.messageId);
     });
+    return "1";
 }
 
 
@@ -113,12 +114,13 @@ async function checkUUID(id, uuid) {
 }
 
 async function check({username, uuid},) {
-    let username_check = await check_username(username, false);
+    let username_check = await check_username(username, true);
     if(username_check?.status)
         return username_check
     let {id} = username_check;
 
-    if(checkUUID(id, uuid)) {
+    console.log("checkuuid", id,uuid, await checkUUID(id, uuid));
+    if(await checkUUID(id, uuid)) {
         return "1";
     }
     else {
@@ -128,16 +130,16 @@ async function check({username, uuid},) {
 
 async function set({username, password, uuid},) {
     let password_hashed = await phpbb_hash(password);
-    let username_check = await check_username(username, false);
+    let username_check = await check_username(username, true);
     if(username_check?.status)
         return username_check
     let {id} = username_check;
 
-    if(checkUUID(id, uuid)) {
+    if(await checkUUID(id, uuid)) {
         // update the password
-        await query("UPDATE user SET password = ? WHERE id = ", [password_hashed, id]);
+        await query("UPDATE user SET password = ? WHERE id = ?", [password_hashed, id]);
         // link is only valid once
-        await query("DELETE FROM user_pw_reset WHERE user_pw_reset WHERE user_id = ? AND uuid = ?", [id, uuid]);
+        await query("DELETE FROM user_pw_reset WHERE user_id = ? AND uuid = ?", [id, uuid]);
 
         return "1";
     }

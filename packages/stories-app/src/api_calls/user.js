@@ -1,7 +1,7 @@
 import {backend_express, fetch_post} from "./include";
 
 
-export async function get_login2() {
+export async function get_login() {
     // get the current login status
     const response = await fetch(`${backend_express}/session`, {credentials: 'include'});  // {credentials: "same-origin"}
     try {

@@ -9,7 +9,7 @@ import {
     Route,
 } from "react-router-dom";
 import {load_dark_mode} from "story-component";
-import {useUsername2} from "./login";
+import {useUsername} from "./login";
 const UserActivationOrReset = lazy(() => import('./user_activation_or_reset'));
 const IndexContent = lazy(() => import('./overview'));
 const LoginDialog = lazy(() => import('./login'));
@@ -29,7 +29,7 @@ function App() {
     if(urlParams.get("task"))
         window.location = `/task/${urlParams.get("task")}/${urlParams.get("username")}/${urlParams.get("activation_link")}`;
 
-    let userdata = useUsername2();
+    let userdata = useUsername();
 
     return <Suspense fallback={<></>}>
         <Routes>

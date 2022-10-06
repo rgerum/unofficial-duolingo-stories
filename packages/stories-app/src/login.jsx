@@ -2,29 +2,29 @@ import React from 'react';
 import './login.css';
 import {useInput, LoggedInButton} from "story-component";
 import {useSuspendedDataFetcher} from "./api_calls/include";
-import {get_login2, login, logout, register, reset_pw} from "./api_calls/user";
+import {get_login, login, logout, register, reset_pw} from "./api_calls/user";
 import {Link, useNavigate} from "react-router-dom";
 
 
 //////////
 
-export function useUsername2() {
+export function useUsername() {
     const [user, setUser] = React.useState(undefined);
-    let courses_user = useSuspendedDataFetcher(get_login2, []);
+    let courses_user = useSuspendedDataFetcher(get_login, []);
 
     if(user !== undefined)
         courses_user = user;
 
     async function login2(username, password, remember) {
         await login(username, password, remember);
-        let user = await get_login2();
+        let user = await get_login();
         setUser(user);
         return user;
     }
 
     async function logout2() {
         await logout();
-        let user = await get_login2();
+        let user = await get_login();
         setUser(user);
         return user;
     }
