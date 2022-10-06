@@ -14,6 +14,8 @@ import {Spinner} from "../react/spinner";
 
 
 export function Story(props) {
+    const storyElement = React.useRef();
+
     let story = props.story;
     let id = props.id;
     let editor = props.editor;
@@ -21,8 +23,8 @@ export function Story(props) {
 
     let [progress, setProgress] = useState(-1);
     let [spacer, setSpacer] = useState(0);
-    let [right, setRight] = useState(0);
-    let [blocked, setBlocked] = useState(0);
+    let [right, setRight] = useState(false);
+    let [blocked, setBlocked] = useState(false);
 
     let [audio_loaded, setAudioLoaded] = useState(0);
 
@@ -45,21 +47,21 @@ export function Story(props) {
             dispatchEvent(new CustomEvent('next_button_clicked', {detail: progress}));
     }, [blocked, progress]);
 
-    function advance_progress() {
+    let advance_progress = React.useCallback(() => {
         dispatchEvent(new CustomEvent('progress_changed', {detail: progress + 1}));
-        setProgress(progress += 1);
+        setProgress(progress + 1);
         setRight(false);
-    }
+    }, [progress, setProgress, setRight]);
 
     let navigate = useNavigate();
-    function finish() {
+    let finish = React.useCallback(() => {
         setStoryDone(id);
         navigate("/"+course);
-    }
+    }, [id, course, navigate]);
 
     useEffect(() => {
-        if(!document.getElementById("story")) return
-        let parts = document.getElementById("story").querySelectorAll("div.part:not(.hidden)")
+        if(!storyElement.current) return
+        let parts = storyElement.current.querySelectorAll("div.part:not(.hidden)")
         let last = parts[parts.length-1];
         let spacerX = window.innerHeight/2-last.clientHeight*0.5;
 
@@ -67,7 +69,7 @@ export function Story(props) {
             scroll_down();
         if(spacerX !== spacer)
             setSpacer(spacerX);
-    });
+    }, [editor, spacer, storyElement, progress]);
 
     let controls = {
         wrong: wrong,
@@ -77,7 +79,7 @@ export function Story(props) {
         advance_progress: advance_progress,
     }
 
-    var parts = [];
+    let parts = [];
     let last_id = -1;
     for(let element of story.elements) {
         if(element.trackingProperties === undefined) {
@@ -118,7 +120,7 @@ export function Story(props) {
                     audio_urls.push(element.audio.url);
         }
 
-        var audio_base_path = "https://carex.uber.space/stories/";
+        const audio_base_path = "https://carex.uber.space/stories/";
         audios = React.useMemo(() => {
             let count = 0;
             let audios = {};
@@ -143,17 +145,17 @@ export function Story(props) {
             if (count === 0)
                 setAudioLoaded(1);
             return audios;
-        }, [story.id])
+        }, [audio_urls])
     }
 
     let key_event_handler = React.useCallback((e) => {
         if (e.key === "Enter")
             next();
-    }, [blocked, progress]);
+    }, [next]);
     React.useEffect(() => {
         window.addEventListener('keypress', key_event_handler);
         return () => window.removeEventListener('keypress', key_event_handler);
-    }, [blocked, progress]);
+    }, [key_event_handler]);
 
     if(!audio_loaded)
         return <Spinner />
@@ -165,7 +167,7 @@ export function Story(props) {
         <div>
             <StoryHeader progress={progress} length={parts.length} course={course} />
             <div id="main">
-                <div id="story">
+                <div id="story" ref={storyElement}>
                     <Legal />
                     {parts.map((part, i) => (
                         <Part key={i} editor={editor} controls={controls} progress={progress} part={part} audios={audios} />
