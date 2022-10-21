@@ -175,6 +175,10 @@ else if($action == "course") {
         "about" => "string",
 ];
     $id = updateDatabase($keys, "course", $_POST, "id");
+
+    mysqli_query($db, "UPDATE course JOIN language l on l.id = course.fromLanguage JOIN language l2 on l2.id = course.learningLanguage
+                       SET course.short = CONCAT(l2.short, "-", l.short)
+                       WHERE course.id = $_POST[id];");
 }
 else if($action == "sync_flags") {
      chdir("../../github/");
