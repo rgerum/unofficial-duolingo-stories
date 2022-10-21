@@ -3,9 +3,9 @@ import React from "react";
 
 
 export function LoggedInButton(props) {
-    let userdata = props.userdata
+    let userdata = props?.userdata
     let username = userdata || props.username;
-    let doLogout = userdata.logout || props.doLogout;
+    let doLogout = userdata?.logout || props.doLogout;
     let current_page = props.page;
 
     //username = {role: 1, username: "test"}
