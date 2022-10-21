@@ -9,7 +9,7 @@ async function get_counts() {
 LEFT JOIN language l1 ON l1.id = course.fromLanguage
 LEFT JOIN language l2 ON l2.id = course.learningLanguage
 LEFT JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1 and course.public = 1`);
+WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1`);
     return res[0];
 }
 
@@ -41,7 +41,7 @@ SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name,
 LEFT JOIN language l1 ON l1.id = course.fromLanguage
 LEFT JOIN language l2 ON l2.id = course.learningLanguage
 LEFT JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1
+WHERE story.public = 1 AND story.deleted = 0
 GROUP BY course.id
 ORDER BY name;
     `);
@@ -117,7 +117,7 @@ async function get_course({lang, lang_base}, {user_id}) {
         FROM story
         LEFT JOIN story_done ON story_done.story_id = story.id AND story_done.user_id = ?
         JOIN image i on story.image = i.id
-        WHERE story.public = 1 AND story.course_id = (SELECT c.id FROM course c WHERE c.short = ?)
+        WHERE story.public = 1 AND story.deleted = 0 AND story.course_id = (SELECT c.id FROM course c WHERE c.short = ?)
         GROUP BY story.id
         ORDER BY set_id, set_index;
         `, [user_id, lang+"-"+lang_base]);
