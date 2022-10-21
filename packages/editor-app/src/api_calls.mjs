@@ -89,7 +89,7 @@ export async function getAvatarsList(id) {
     for(let avatar of avatar_names_list) {
         avatar_names[avatar.avatar_id] = avatar;
     }
-    return avatar_names_list;
+    return avatar_names;
 }
 
 export async function getSpeakers(id) {
