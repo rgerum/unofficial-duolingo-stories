@@ -8,14 +8,16 @@ import {getPublicCourses} from "./api_calls/course";
 export default function CourseList({conlang_count, startTransition}) {
     let courses = useSuspendedDataFetcher(getPublicCourses, []);
 
+    /*
+    <MyLink key={0} to="/tr-en" className="language_select_button celebration" startTransition={startTransition}>
+        <Flag iso="tr" />
+        <div className="language_select_button_text" style={{width: "68%"}}>Celebrating our Turkish team which just reached 100 translated stories!
+            Congratulations to <i>Danika_Dakika</i> and <i>deck</i>. <span className="celebration_date">— 19. Sep. 2022</span></div>
+        <span className="celebration_icon">🎉</span>
+    </MyLink>
+     */
     return (
         <div>
-            <MyLink key={0} to="/tr-en" className="language_select_button celebration" startTransition={startTransition}>
-                <Flag iso="tr" />
-                <div className="language_select_button_text" style={{width: "68%"}}>Celebrating our Turkish team which just reached 100 translated stories!
-                    Congratulations to <i>Danika_Dakika</i> and <i>deck</i>. <span className="celebration_date">— 19. Sep. 2022</span></div>
-                <span className="celebration_icon">🎉</span>
-            </MyLink>
             {Object.entries(courses).map(([name,]) => (
                 name === "Conlangs" ?
                     <MyLink key={name} to="/conlangs" className="language_select_button conlang-link" startTransition={startTransition}>
