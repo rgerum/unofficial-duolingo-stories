@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "story-component": "*"
   },
   "homepage": "stories/admin",
   "scripts": {
