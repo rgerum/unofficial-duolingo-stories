@@ -55,12 +55,12 @@ function ChangeAbleValue(props) {
                     </button>
                     <div className="dropdown-content">
                         {language_id.map(lang =>
-                            <a key={props.languages[lang].id} onClick={() => edited(props.languages[lang].name)}>
+                            <button key={props.languages[lang].id} onClick={() => edited(props.languages[lang].name)}>
                                 <div className="lang">
                                 <Flag iso={props.languages[lang].short} width={40} flag={props.languages[lang].flag} flag_file={props.languages[lang].flag_file} />
                                 <div>{props.languages[lang].name}</div>
                             </div>
-                            </a>
+                            </button>
                         )}
                     </div>
                 </div>
