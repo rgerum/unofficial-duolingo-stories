@@ -116,12 +116,14 @@ export function Story(props) {
         let audio_urls = [];
         for(let element of story.elements) {
             if (element.type === "HEADER" || element.type === "LINE")
-                if(element.audio)
+                if(element.audio && element.audio.url)
                     audio_urls.push(element.audio.url);
         }
 
         const audio_base_path = "https://carex.uber.space/stories/";
         audios = React.useMemo(() => {
+            if(audio_loaded)
+                return
             let count = 0;
             let audios = {};
             for (let url of audio_urls) {
@@ -142,8 +144,10 @@ export function Story(props) {
                     a.load();
                 }
             }
-            if (count === 0)
+            if (count === 0) {
+                console.log("count 0")
                 setAudioLoaded(1);
+            }
             return audios;
         }, [audio_urls])
     }
