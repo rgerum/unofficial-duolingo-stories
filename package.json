@@ -38,7 +38,7 @@
     "file-loader": "^6.2.0",
     "formdata-node": "^4.3.2",
     "html-webpack-plugin": "^5.5.0",
-    "lerna": "^5.5.1",
+    "lerna": "^6.0.1",
     "mini-css-extract-plugin": "^2.4.5",
     "npm-watch": "^0.11.0",
     "style-loader": "^3.3.1",
