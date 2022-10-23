@@ -11,7 +11,13 @@ const path = (process.env.NODE_ENV === 'test') ? '/stories/backend_node_test' : 
 // in the test environment allow calls from localhost
 if(process.env.NODE_ENV === 'test') {
     app.use(function (req, res, next) {
-        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+
+        var allowedDomains = ['http://localhost:3000','http://localhost:8080' ];
+        var origin = req.headers.origin;
+        if(allowedDomains.indexOf(origin) > -1){
+            res.setHeader('Access-Control-Allow-Origin', origin);
+        }
+
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
         res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
         res.setHeader('Access-Control-Allow-Credentials', true);
@@ -53,6 +59,9 @@ app.use(path, user);
 
 const course = require('./routes/course.js')
 app.use(path, course);
+
+const editor = require('./routes/editor.js')
+app.use(path, editor);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

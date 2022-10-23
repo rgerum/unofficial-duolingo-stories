@@ -1,0 +1,152 @@
+const express = require('express')
+const query = require("./../includes/db.js");
+const {func_catch, update_query} = require("./../includes/includes.js");
+
+let router = express.Router();
+
+async function course({course_id}) {
+    let res = await query(`SELECT course.id, course.name, course.fromLanguage as fromLanguageID, l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
+    course.learningLanguage as learningLanguageID, l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
+        course.public, course.official FROM course
+    LEFT JOIN language l1 ON l1.id = course.fromLanguage
+    LEFT JOIN language l2 ON l2.id = course.learningLanguage
+    WHERE course.id = ?;`, [course_id]);
+    if (res.length === 0) {
+        //result.sendStatus(404);
+        return
+    }
+    let course = res[0];
+    let stories = await query(`SELECT COUNT(sa.id) as approvals, story.id, story.set_id, story.set_index, story.name, story.status, story.image, story.image_done, story.xp, story.name_base, user.username, story.date, story.change_date, story.public FROM story
+    LEFT JOIN user ON story.author = user.id
+    LEFT JOIN story_approval sa on story.id = sa.story_id
+    WHERE story.course_id = ? AND deleted = false
+    GROUP BY story.id
+    ORDER BY story.set_id, story.set_index;`, [course_id]);
+    course["stories"] = stories;
+    return course;
+}
+
+async function avatar_names({id, course_id}) {
+    if(id === 0) {
+        return await query(`SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id WHERE (language_id = (SELECT learningLanguage FROM course WHERE id = ?) or language_id is NULL) ORDER BY a.id`, [course_id]);
+    }
+    else {
+        return await query(`SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM (SELECT * FROM avatar_mapping WHERE language_id = ?) as avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id ORDER BY a.id`, [id]);
+    }
+}
+
+async function speakers({id}) {
+    return await query(`SELECT * FROM speaker WHERE language_id = ?`, [id]);
+}
+
+async function language({id}) {
+    return (await query(`SELECT * FROM language WHERE id = ?`, [id]))[0];
+}
+
+async function story({id}) {
+    return (await query(`SELECT story.id, c.official as official, course_id, duo_id, image, story.name, set_id, set_index, text, c.learningLanguage as learningLanguage, c.fromLanguage as fromLanguage FROM story JOIN course c on story.course_id = c.id WHERE story.id = ?`, [id]))[0];
+}
+
+async function avatar({id}) {
+    return (await query(`SELECT * FROM avatar WHERE id = ?`, [id]))[0];
+}
+
+async function image({id}) {
+    return (await query(`SELECT * FROM image WHERE id = ?`, [id]))[0];
+}
+
+async function import2({id, id2}) {
+    return await query(`SELECT s1.id, s1.set_id, s1.set_index, s1.name, image.gilded, image.active, COUNT(s2.id) copies
+                          FROM story s1
+                          LEFT JOIN (SELECT s2.duo_id, s2.id FROM story s2 WHERE s2.course_id = ?) AS s2 ON s1.duo_id = s2.duo_id
+                          JOIN image on image.id = s1.image
+                          WHERE s1.course_id = ?
+                          GROUP BY s1.id
+                          ORDER BY s1.set_id, s1.set_index`, [id2, id]);
+}
+
+
+async function set_avatar(data) {
+    return await update_query("avatar_mapping", data, ["name", "speaker", "language_id", "avatar_id"]);
+}
+
+async function set_status(data) {
+    return await update_query("story", data, ["status"]);
+}
+
+async function set_approve({story_id, user_id}) {
+    let res = await query(`SELECT id FROM story_approval WHERE story_id = ? AND user_id = ?;`, [story_id, user_id]);
+    if(res.affectedRows) {
+        await query(`DELETE FROM story_approval WHERE story_id = ? AND user_id = ?;`, [story_id, user_id]);
+    }
+    else {
+        await query(`INSERT INTO story_approval (story_id, user_id) VALUES ?, ?);`, [story_id, user_id]);
+    }
+    let res2 = await query(`SELECT COUNT(id) as count FROM story_approval WHERE story_id = ?;`, [story_id])[0];
+
+    // get the number of finished stories in this set
+    let res3 = await query(`SELECT COUNT(set_id) count FROM story WHERE set_id = (SELECT set_id FROM story WHERE id = ?) AND course_id = (SELECT course_id FROM story WHERE id = ?) AND status = 'finished' AND deleted = 0 GROUP BY set_id;`, [story_id, story_id]);
+    if(res3["count"] >= 4) {
+        await query(`UPDATE story SET public = 1 WHERE set_id = (SELECT set_id FROM story WHERE id = ?) AND course_id = (SELECT course_id FROM story WHERE id = ?) AND status = 'finished' AND deleted = 0;`, [story_id, story_id]);
+    }
+}
+
+async function set_import({id, course_id}, {user_id}) {
+   let data = await query(`SELECT * FROM story WHERE id = ?;`, [id])[0];
+   delete data['id'];
+   delete data['change_date'];
+   delete data['date'];
+   data['author'] = user_id;
+   data['course_id'] = course_id;
+   let res = await update_query("story", data, ["duo_id", "name", "author", "change_date", "image", "set_id", "set_index", "course_id", "text", "json", "api"]);
+   let new_id = res.insertId;
+
+   let data2 = await query(`SELECT text,name,course_id, id FROM story WHERE id = ?;`, [new_id])[0];
+
+   /* TODO
+     $newfile = fopen($id.".txt", "w");
+    $str = $data["text"];
+    fwrite($newfile, $str);
+    fclose($newfile);
+
+    $output=null;
+    $retval=null;
+    if(isset($_SESSION["user"])) {
+        $author_name = '"duolingo"';
+        $message = '"added '.$data["name"].' in course '.$data["course_id"].'"';
+    }
+    exec("python3 upload_github.py $id $data[course_id] $author_name $message", $output, $retval);
+    //print_r($output);
+    */
+}
+
+async function set_story(data) {
+    data["api"] = 2;
+    if(data["id"] === undefined) {
+        //let res = await query('SELECT id FROM story WHERE API = 2 AND duo_id = "'.mysqli_escape_string ($db, $_POST['duo_id']).'" AND course_id = '.intVal($_POST['course_id']).";")
+    }
+
+    let res = await update_query("story", data, ["duo_id", "name", "author", "change_date", "image", "set_id", "set_index", "course_id", "text", "json", "api"]);
+}
+
+async function delete_story(data) {
+
+}
+
+router.get('/editor/course/:course_id', func_catch(course));
+router.get('/editor/avatar_names/:id', func_catch(avatar_names));
+router.get('/editor/speakers/:id', func_catch(speakers));
+router.get('/editor/language/:id', func_catch(language));
+router.get('/editor/story/:id', func_catch(story));
+router.get('/editor/avatar/:id', func_catch(avatar));
+router.get('/editor/image/:id', func_catch(image));
+router.get('/editor/import/:id/:id2', func_catch(import2));
+
+router.post('/editor/set_avatar', func_catch(set_avatar));
+router.post('/editor/set_status', func_catch(set_status));
+router.post('/editor/set_approve', func_catch(set_approve));
+router.post('/editor/set_import', func_catch(set_import));
+router.post('/editor/set_story', func_catch(set_story));
+router.post('/editor/delete_story', func_catch(delete_story));
+
+module.exports = router;

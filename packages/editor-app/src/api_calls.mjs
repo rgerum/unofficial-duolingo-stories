@@ -3,6 +3,12 @@ import {fetch_post, setCookie, getCookie, isLocalNetwork} from "story-component"
 let backend_get = "https://editor.duostories.org/get"
 let backend_set = "https://editor.duostories.org/set"
 
+export let backend_express = "/stories/backend_node";
+if(isLocalNetwork())
+    backend_express = "https://test.duostories.org/stories/backend_node_test";
+if(window.location.hostname === "test.duostories.org")
+    backend_express = "/stories/backend_node_test";
+backend_express += "/editor"
 
 let login_data = {username: getCookie("username"), password: getCookie("password")}
 async function fetch_get(url) {
@@ -63,7 +69,7 @@ export async function getCourse(id) {
     if(!id)
         return {}
     try {
-        let response = await fetch_get(`${backend_get}/course?id=${id}`);
+        let response = await fetch(`${backend_express}/course/${id}`);
         return await response.json();
     }
     catch (e) {
@@ -73,7 +79,7 @@ export async function getCourse(id) {
 
 export async function getAvatars(id) {
     try {
-        let response = await fetch_get(`${backend_get}/avatar_names?id=${id}`);
+        let response = await fetch(`${backend_express}/avatar_names/${id}`);
         return await response.json();
     }
     catch (e) {
@@ -94,7 +100,7 @@ export async function getAvatarsList(id) {
 
 export async function getSpeakers(id) {
     try {
-        let response = await fetch_get(`${backend_get}/speakers?id=${id}`);
+        let response = await fetch(`${backend_express}/speakers/${id}`);
         return await response.json();
     }
     catch (e) {
@@ -104,7 +110,7 @@ export async function getSpeakers(id) {
 
 export async function getLanguageName(id) {
     try {
-        let response = await fetch_get(`${backend_get}/language?id=${id}`);
+        let response = await fetch(`${backend_express}/language/${id}`);
         return await response.json();
     }
     catch (e) {
@@ -172,7 +178,7 @@ export function getImage(id) {
 
 export async function getImageAsync(id) {
     try {
-        let response_json = await fetch_get(`${backend_get}/image?id=${id}`);
+        let response_json = await fetch_get(`${backend_express}/image/${id}`);
         let image = await response_json.json();
         images_cached[id] = image;
         return image;
@@ -183,7 +189,7 @@ export async function getImageAsync(id) {
 }
 
 export async function getImportList(id, id2) {
-    let response_json = await fetch_get(`${backend_get}/import?id=${id}&id2=${id2}`);
+    let response_json = await fetch(`${backend_express}/import/${id}/${id2}`);
     return response_json.json();
 }
 
