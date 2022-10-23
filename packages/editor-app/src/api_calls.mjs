@@ -8,7 +8,22 @@ if(isLocalNetwork())
     backend_express = "https://test.duostories.org/stories/backend_node_test";
 if(window.location.hostname === "test.duostories.org")
     backend_express = "/stories/backend_node_test";
-backend_express += "/editor"
+let backend_express_editor = backend_express + "/editor"
+
+export async function fetch_post2(url, data)
+{
+    // check if the user is logged in
+    var req = new Request(url, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        mode: "cors",
+        credentials: 'include',
+    });
+    return fetch(req);
+}
 
 let login_data = {username: getCookie("username"), password: getCookie("password")}
 async function fetch_get(url) {
@@ -30,7 +45,7 @@ async function fetch_get(url) {
 
 export async function getCourses() {
     try {
-        let response_courses = await fetch_get(`${backend_get}/courses`);
+        let response_courses = await fetch(`${backend_express_editor}/courses`);
         return await response_courses.json();
     }
     catch (e) {
@@ -40,7 +55,7 @@ export async function getCourses() {
 
 export async function getSession() {
     try {
-        let response_courses = await fetch_get(`${backend_get}/session`);
+        let response_courses = await fetch(`${backend_express}/session`, {credentials: 'include'});
         return await response_courses.json();
     }
     catch (e) {
@@ -50,17 +65,12 @@ export async function getSession() {
 
 export async function login(data, remember) {
     // currently only store the local cookies for local test
-    if(isLocalNetwork()) {
-        login_data = data;
-        setCookie("username", data["username"])
-        setCookie("password", data["password"])
-    }
-    if(remember) {
-        setCookie("username", data["username"], 30);
-        setCookie("password", data["password"], 30);
-    }
+    document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
     // check if the user is logged in
-    let reponse = await fetch_post(`${backend_get}/login`, data);
+    data["remember"] = remember;
+    let reponse = await fetch_post2(`${backend_express}/login`, data);
     return reponse.status !== 403;
 
 }
@@ -69,7 +79,7 @@ export async function getCourse(id) {
     if(!id)
         return {}
     try {
-        let response = await fetch(`${backend_express}/course/${id}`);
+        let response = await fetch(`${backend_express_editor}/course/${id}`);
         return await response.json();
     }
     catch (e) {
@@ -79,7 +89,7 @@ export async function getCourse(id) {
 
 export async function getAvatars(id) {
     try {
-        let response = await fetch(`${backend_express}/avatar_names/${id}`);
+        let response = await fetch(`${backend_express_editor}/avatar_names/${id}`);
         return await response.json();
     }
     catch (e) {
@@ -100,7 +110,7 @@ export async function getAvatarsList(id) {
 
 export async function getSpeakers(id) {
     try {
-        let response = await fetch(`${backend_express}/speakers/${id}`);
+        let response = await fetch(`${backend_express_editor}/speakers/${id}`);
         return await response.json();
     }
     catch (e) {
@@ -110,7 +120,7 @@ export async function getSpeakers(id) {
 
 export async function getLanguageName(id) {
     try {
-        let response = await fetch(`${backend_express}/language/${id}`);
+        let response = await fetch(`${backend_express_editor}/language/${id}`);
         return await response.json();
     }
     catch (e) {
@@ -178,7 +188,7 @@ export function getImage(id) {
 
 export async function getImageAsync(id) {
     try {
-        let response_json = await fetch_get(`${backend_express}/image/${id}`);
+        let response_json = await fetch_get(`${backend_express_editor}/image/${id}`);
         let image = await response_json.json();
         images_cached[id] = image;
         return image;
@@ -189,7 +199,7 @@ export async function getImageAsync(id) {
 }
 
 export async function getImportList(id, id2) {
-    let response_json = await fetch(`${backend_express}/import/${id}/${id2}`);
+    let response_json = await fetch(`${backend_express_editor}/import/${id}/${id2}`);
     return response_json.json();
 }
 

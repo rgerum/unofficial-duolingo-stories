@@ -4,6 +4,17 @@ const {func_catch, update_query} = require("./../includes/includes.js");
 
 let router = express.Router();
 
+async function courses() {
+    return await query(`SELECT course.id, course.name, l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
+    l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
+        COUNT(story.id) count, course.public, course.official FROM course
+    LEFT JOIN language l1 ON l1.id = course.fromLanguage
+    LEFT JOIN language l2 ON l2.id = course.learningLanguage
+    LEFT JOIN story ON (story.course_id = course.id AND story.deleted = 0)
+    GROUP BY course.id
+    ORDER BY COUNT DESC;`);
+}
+
 async function course({course_id}) {
     let res = await query(`SELECT course.id, course.name, course.fromLanguage as fromLanguageID, l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
     course.learningLanguage as learningLanguageID, l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
@@ -133,6 +144,7 @@ async function delete_story(data) {
 
 }
 
+router.get('/editor/courses', func_catch(courses));
 router.get('/editor/course/:course_id', func_catch(course));
 router.get('/editor/avatar_names/:id', func_catch(avatar_names));
 router.get('/editor/speakers/:id', func_catch(speakers));
