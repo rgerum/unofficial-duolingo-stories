@@ -55,8 +55,22 @@ let backend = get_backend();
 let backend_stories = backend+"stories/"
 
 
+function isLocalNetwork(hostname) {
+    try {
+        if (hostname === undefined) hostname = window.location.hostname;
+        return ['localhost', '127.0.0.1', '', '::1'].includes(hostname) || hostname.startsWith('192.168.') || hostname.startsWith('10.0.') || hostname.endsWith('.local');
+    } catch (e) {
+        return true;
+    }
+}
+export let backend_express = "/stories/backend_node";
+if(isLocalNetwork())
+    backend_express = "https://duostories.org/stories/backend_node_test";
+if(window.location.hostname === "test.duostories.org")
+    backend_express = "/stories/backend_node_test";
+
 export async function setStoryDone(id) {
-    return fetch(`${backend_stories}set_story_done.php?id=${id}`);
+    return fetch(`${backend_express}/story/${id}/done`, {credentials: 'include'});
 }
 
 export async function getStoryJSON(id) {
