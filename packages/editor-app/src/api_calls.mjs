@@ -1,6 +1,5 @@
 import {fetch_post, setCookie, getCookie, isLocalNetwork} from "story-component";
 
-let backend_get = "https://editor.duostories.org/get"
 let backend_set = "https://editor.duostories.org/set"
 
 export let backend_express = "/stories/backend_node";
@@ -130,7 +129,7 @@ export async function getLanguageName(id) {
 
 export async function setAvatarSpeaker(data) {
     try {
-        let response = await fetch_post(`${backend_set}/avatar`, data);
+        let response = await fetch_post(`${backend_express_editor}/set_avatar`, data);
         return await response.json();
     }
     catch (e) {
@@ -140,7 +139,7 @@ export async function setAvatarSpeaker(data) {
 
 export async function setStatus(data) {
     try {
-        let response = await fetch_post(`${backend_set}/status`, data);
+        let response = await fetch_post(`${backend_express_editor}/set_status`, data);
         return await response.json();
     }
     catch (e) {
@@ -150,7 +149,7 @@ export async function setStatus(data) {
 
 export async function setApproval(data) {
     try {
-        let response = await fetch_post(`${backend_set}/approve`, data);
+        let response = await fetch_post(`${backend_express_editor}/set_approve`, data);
         return await response.text();
     }
     catch (e) {
@@ -158,18 +157,14 @@ export async function setApproval(data) {
     }
 }
 
-export async function setPublic(id, is_public) {
-    return await fetch_get(backend_stories+"set_story_public.php?id="+id+"&public="+is_public);
-}
-
-
 export async function getStory(id) {
-    let response_json = await fetch_get(`${backend_get}/story?id=${id}`);
+    let response_json = await fetch(`${backend_express_editor}/story/${id}`, {credentials: 'include'});
     return response_json.json();
 }
+
 export async function getAvatar(id) {
     try {
-        let response_json = await fetch_get(`${backend_get}/avatar?id=${id}`);
+        let response_json = await fetch_get(`${backend_express_editor}/avatar/${id}`);
         return response_json.json();
     }
     catch (e) {
@@ -204,18 +199,18 @@ export async function getImportList(id, id2) {
 }
 
 export async function setImport(id, course_id) {
-    let response_json = await fetch_get(`${backend_set}/import?id=${id}&course_id=${course_id}`);
+    let response_json = await fetch(`${backend_express_editor}/set_import/${course_id}/${id}`, {credentials: 'include'});
     return response_json.text();
 }
 
 export async function setStory(data) {
-    let res = await fetch_post(`${backend_set}/story`, data);
+    let res = await fetch_post(`${backend_express_editor}/story`, data);
     res = await res.text()
     return res;
 }
 
 export async function deleteStory(data) {
-    let res = await fetch_post(`${backend_set}/story_delete`, data);
+    let res = await fetch_post(`${backend_express_editor}/story_delete`, data);
     res = await res.text()
     return res;
 }

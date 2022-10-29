@@ -2,17 +2,17 @@
 describe('Navigate Course Editor', () => {
     beforeEach(() => {
         cy.fixture('courses.json').as('courses')
-        cy.intercept('POST', '**/session', { fixture: 'session.json' }).as("session")
-        cy.intercept('POST', '**/courses', { fixture: 'courses.json' }).as("courses")
-        cy.intercept('POST', '**/course?id=12', { fixture: 'course12.json' }).as("course_es")
-        cy.intercept('POST', '**/course?id=2', { fixture: 'course2.json' }).as("course_du")
-        cy.intercept('POST', '**/course?id=9', { fixture: 'course9.json' }).as("course_ru")
-        cy.intercept('POST', '**/import?id=12&id2=2', { fixture: 'import_12_2.json' }).as("import_du")
-        cy.intercept('POST', '**/story?id=75', { fixture: 'story_75.json' }).as("story75")
-        cy.intercept('POST', '**/image?id=*', { fixture: 'image.json' }).as("image")
-        cy.intercept('POST', '**/avatar_names?*', { fixture: 'avatar_names.json' }).as("avatar_names")
-        cy.intercept('POST', '**/language?id=9', { fixture: 'language_9.json' }).as("language_9")
-        cy.intercept('POST', '**/language?id=1', { fixture: 'language_1.json' }).as("language_1")
+        cy.intercept('**/session', { fixture: 'session.json' }).as("session")
+        cy.intercept('**/courses', { fixture: 'courses.json' }).as("courses")
+        cy.intercept('**/*backend*/**/course/12', { fixture: 'course12.json' }).as("course_es")
+        cy.intercept('**/*backend*/**/course/2', { fixture: 'course2.json' }).as("course_du")
+        cy.intercept('**/*backend*/**/course/9', { fixture: 'course9.json' }).as("course_ru")
+        cy.intercept('**/import/12/2', { fixture: 'import_12_2.json' }).as("import_du")
+        cy.intercept('**/story/75', { fixture: 'story_75.json' }).as("story75")
+        cy.intercept('**/image/*', { fixture: 'image.json' }).as("image")
+        cy.intercept('**/avatar_names', { fixture: 'avatar_names.json' }).as("avatar_names")
+        cy.intercept('**/language/9', { fixture: 'language_9.json' }).as("language_9")
+        cy.intercept('**/language/1', { fixture: 'language_1.json' }).as("language_1")
 
         cy.visit("")
     })
@@ -63,7 +63,7 @@ describe('Navigate Course Editor', () => {
 
     it('Navigation via link and back/forward', () => {
         // directly link to the dutch stories
-        cy.visit("?course=2")
+        cy.visit("/course/2")
         cy.get("[data-cy=course-title]").contains("Dutch")
 
         // navigate to russian

@@ -2,7 +2,7 @@
 describe('Navigate Course Editor', () => {
     beforeEach(() => {
         cy.fixture('courses.json').as('courses')
-        cy.intercept('POST', '**/session', { fixture: 'session.json' }).as("session")
+        cy.intercept('**/session', { fixture: 'session.json' }).as("session")
         //cy.intercept('POST', '**/courses', { fixture: 'courses.json' }).as("courses")
         //cy.intercept('POST', '**/course?id=12', { fixture: 'course12.json' }).as("course_es")
         //cy.intercept('POST', '**/course?id=2', { fixture: 'course2.json' }).as("course_du")
@@ -12,11 +12,11 @@ describe('Navigate Course Editor', () => {
         //cy.intercept('POST', '**/image?id=*', { fixture: 'image.json' }).as("image")
         //cy.intercept('POST', '**/avatar_names?*', { fixture: 'avatar_names.json' }).as("avatar_names")
         //cy.intercept('POST', '**/language?id=9', { fixture: 'language_9.json' }).as("language_9")
-        cy.intercept('POST', '**/language?id=2', { fixture: 'language_2.json' }).as("language_2")
-        cy.intercept('POST', '**/speakers?id=2', { fixture: 'speakers_2.json' }).as("speakers_2")
-        cy.intercept('POST', '**/avatar_names?id=2', { fixture: 'avatars_2.json' }).as("avatars_2")
+        cy.intercept('**/*backend*/**/language/2', { fixture: 'language_2.json' }).as("language_2")
+        cy.intercept('**/*backend*/**/speakers/2', { fixture: 'speakers_2.json' }).as("speakers_2")
+        cy.intercept('**/avatar_names/2', { fixture: 'avatars_2.json' }).as("avatars_2")
 
-        cy.visit("?language=2")
+        cy.visit("language/2")
         //cy.get("input[type=text]").type("test")
         //cy.get("input[type=password]").type("test")
         //cy.get("button").type("click")

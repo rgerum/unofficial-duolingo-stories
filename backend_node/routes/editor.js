@@ -27,13 +27,12 @@ async function course({course_id}) {
         return
     }
     let course = res[0];
-    let stories = await query(`SELECT COUNT(sa.id) as approvals, story.id, story.set_id, story.set_index, story.name, story.status, story.image, story.image_done, story.xp, story.name_base, user.username, story.date, story.change_date, story.public FROM story
+    course["stories"] = await query(`SELECT COUNT(sa.id) as approvals, story.id, story.set_id, story.set_index, story.name, story.status, story.image, story.image_done, story.xp, story.name_base, user.username, story.date, story.change_date, story.public FROM story
     LEFT JOIN user ON story.author = user.id
     LEFT JOIN story_approval sa on story.id = sa.story_id
     WHERE story.course_id = ? AND deleted = false
     GROUP BY story.id
     ORDER BY story.set_id, story.set_index;`, [course_id]);
-    course["stories"] = stories;
     return course;
 }
 
@@ -93,7 +92,7 @@ async function set_approve({story_id, user_id}) {
     else {
         await query(`INSERT INTO story_approval (story_id, user_id) VALUES ?, ?);`, [story_id, user_id]);
     }
-    let res2 = await query(`SELECT COUNT(id) as count FROM story_approval WHERE story_id = ?;`, [story_id])[0];
+    //let res2 = await query(`SELECT COUNT(id) as count FROM story_approval WHERE story_id = ?;`, [story_id])[0];
 
     // get the number of finished stories in this set
     let res3 = await query(`SELECT COUNT(set_id) count FROM story WHERE set_id = (SELECT set_id FROM story WHERE id = ?) AND course_id = (SELECT course_id FROM story WHERE id = ?) AND status = 'finished' AND deleted = 0 GROUP BY set_id;`, [story_id, story_id]);
@@ -157,7 +156,7 @@ router.get('/editor/import/:id/:id2', func_catch(import2));
 router.post('/editor/set_avatar', func_catch(set_avatar));
 router.post('/editor/set_status', func_catch(set_status));
 router.post('/editor/set_approve', func_catch(set_approve));
-router.post('/editor/set_import', func_catch(set_import));
+router.get('/editor/set_import/:course_id/:id', func_catch(set_import));
 router.post('/editor/set_story', func_catch(set_story));
 router.post('/editor/delete_story', func_catch(delete_story));
 
