@@ -20,12 +20,28 @@ function func_catch(func) {
 }
 
 async function update_query(table, data, names, id_key="id") {
-    let query_parts = "";
+    let query_parts = [];
+    let arguments = [];
     for(let name of names) {
-        if(name !== id_key)
-            query_parts += `${name}=${data[name]} `;
+        if(name !== id_key) {
+            query_parts.push(`${name}=?`);
+            arguments.push(data[name]);
+        }
     }
-    return await query(`UPDATE ${table} SET ${query_parts} WHERE ${id_key} = ${data[id_key]};`);
+    arguments.push(data[id_key]);
+    return await query(`UPDATE ${table} SET ${query_parts.join(', ')} WHERE ${id_key} = ?;`, arguments);
 }
 
-module.exports = {func_catch: func_catch, update_query: update_query};
+async function insert_query(table, data, names) {
+    let query_parts = [];
+    let values = [];
+    let arguments = [];
+    for(let name of names) {
+        query_parts.push(`${name}`);
+        values.push("?");
+        arguments.push(data[name]);
+    }
+    return await query(`INSERT INTO ${table} (${query_parts.join(', ')}) VALUES (${values.join(", ")});`, arguments);
+}
+
+module.exports = {func_catch: func_catch, update_query: update_query, insert_query: insert_query};

@@ -32,3 +32,4 @@ yarn-debug.log*
 yarn-error.log*
 /backend/editor/token.txt
 /duolingo_data/
+/backend_node/includes/token.txt

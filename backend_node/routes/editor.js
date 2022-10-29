@@ -1,6 +1,7 @@
-const express = require('express')
+const express = require('express');
 const query = require("./../includes/db.js");
-const {func_catch, update_query} = require("./../includes/includes.js");
+const {func_catch, update_query, insert_query} = require("./../includes/includes.js");
+const {upload_github} = require("./../includes/upload_github.js");
 
 let router = express.Router();
 
@@ -101,48 +102,51 @@ async function set_approve({story_id, user_id}) {
     }
 }
 
-async function set_import({id, course_id}, {user_id}) {
-   let data = await query(`SELECT * FROM story WHERE id = ?;`, [id])[0];
-   delete data['id'];
-   delete data['change_date'];
-   delete data['date'];
+async function set_import({id, course_id}, {user_id, username}) {
+   let data = (await query(`SELECT duo_id, name, image, set_id, set_index, text, json FROM story WHERE id = ?;`, [id]))[0];
    data['author'] = user_id;
    data['course_id'] = course_id;
-   let res = await update_query("story", data, ["duo_id", "name", "author", "change_date", "image", "set_id", "set_index", "course_id", "text", "json", "api"]);
+   data['api'] = 2;
+
+   let res = await insert_query("story", data, ["duo_id", "name", "author", "image", "set_id", "set_index", "course_id", "text", "json", "api"]);
    let new_id = res.insertId;
+   let data2 = (await query(`SELECT text,name,course_id, id FROM story WHERE id = ?;`, [new_id]))[0];
 
-   let data2 = await query(`SELECT text,name,course_id, id FROM story WHERE id = ?;`, [new_id])[0];
-
-   /* TODO
-     $newfile = fopen($id.".txt", "w");
-    $str = $data["text"];
-    fwrite($newfile, $str);
-    fclose($newfile);
-
-    $output=null;
-    $retval=null;
-    if(isset($_SESSION["user"])) {
-        $author_name = '"duolingo"';
-        $message = '"added '.$data["name"].' in course '.$data["course_id"].'"';
-    }
-    exec("python3 upload_github.py $id $data[course_id] $author_name $message", $output, $retval);
-    //print_r($output);
-    */
+   await upload_github(data2['id'], data2["course_id"], data2["text"], username,`added ${data["name"]} in course ${data["course_id"]}`);
+   return {id: new_id}
 }
 
-async function set_story(data) {
+async function set_story(data, {username}) {
     data["api"] = 2;
+    // if no id is given we look for a
     if(data["id"] === undefined) {
-        //let res = await query('SELECT id FROM story WHERE API = 2 AND duo_id = "'.mysqli_escape_string ($db, $_POST['duo_id']).'" AND course_id = '.intVal($_POST['course_id']).";")
+        let res = await query(`SELECT id FROM story WHERE API = 2 AND duo_id = ? AND course_id = ? LIMIT 1;`, [data["duo_id"], data["course_id"]]);
+        if(res.length)
+            data["id"] = res[0]["id"];
     }
 
-    let res = await update_query("story", data, ["duo_id", "name", "author", "change_date", "image", "set_id", "set_index", "course_id", "text", "json", "api"]);
+    let res = await update_query("story", data, ["duo_id", "name", "image", "set_id", "set_index", "course_id", "text", "json", "api"]);
+
+    await upload_github(data['id'], data["course_id"], data["text"], username,`updated ${data["name"]} in course ${data["course_id"]}`);
+    return "done"
 }
 
-async function delete_story(data) {
-
+async function delete_story({id}, {username}) {
+    let res = await query(`UPDATE story SET deleted = 1, public = 0 WHERE id = ?;`, [id]);
+    await upload_github(data['id'], data["course_id"], data["text"], username, `delete ${data["name"]} from course ${data["course_id"]}`, true);
+    return "done"
 }
 
+function checkAuthentication(req, res, next) {
+    // check if the user has the edit role for the editor
+    if (req.session.role >= 1)
+        return next();
+
+    // if the user is not logged in throw a 403
+    res.status(403).send("only for users with editor write permission")
+}
+
+router.use(checkAuthentication)
 router.get('/editor/courses', func_catch(courses));
 router.get('/editor/course/:course_id', func_catch(course));
 router.get('/editor/avatar_names/:id', func_catch(avatar_names));
