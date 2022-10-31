@@ -21,7 +21,12 @@ if(process.env.NODE_ENV === 'test') {
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
         res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
         res.setHeader('Access-Control-Allow-Credentials', true);
-        next();
+
+        if ('OPTIONS' === req.method) {
+            res.sendStatus(200);
+        } else {
+            next();
+        }
     });
 }
 
