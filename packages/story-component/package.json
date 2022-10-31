@@ -2,40 +2,17 @@
   "name": "story-component",
   "version": "0.1.0",
   "private": true,
-  "main": "dist/index.js",
+  "module": "src/index.js",
   "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.3.0"
   },
-  "homepage": "stories",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^2.2.0",
+    "vite": "^3.2.2"
+  },
   "scripts": {
-    "start": "npm-watch",
-    "build": "rm -rf dist && NODE_ENV=development babel src --out-dir dist --copy-files",
-    "test": "node_modules/.bin/react-scripts test",
-    "eject": "node_modules/.bin/react-scripts eject"
-  },
-  "watch": {
-    "build": {
-      "patterns": [
-        "src"
-      ],
-      "extensions": "js,jsx"
-    }
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 firefox version",
-      "last 1 chrome version",
-      "last 1 safari version"
-    ]
+    "build": "vite build"
   }
 }
