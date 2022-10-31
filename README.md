@@ -10,7 +10,8 @@ It is hosted at www.duostories.org and reproduces the story experience from the 
 
 The project consists basically of two front end apps, the stories-app and the editor-app. The stories-app is the part that 
 the learners will see (hosted on www.duostories.org) and the editor-app is the part that the contributors will see to 
-translate and review stories.
+translate and review stories. The apps are based on React and are bundled with vite. The backend is based on express.js 
+which connects to a mysql database.
 
 ## How to run locally
 This repository contains multiple packages that are managed with [Lerna](https://lerna.js.org/).

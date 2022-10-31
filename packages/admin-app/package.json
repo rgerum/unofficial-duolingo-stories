@@ -3,30 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.3.0",
     "story-component": "*"
   },
-  "homepage": "stories/admin",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^2.2.0",
+    "vite": "^3.2.2"
+  },
   "scripts": {
-    "start": "PORT=3006 react-scripts start",
-    "build": "react-scripts build",
+    "start": "npx http-server ./dist",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "cypress:open": "cypress open"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 firefox version",
-      "last 1 chrome version",
-      "last 1 safari version"
-    ]
   }
 }
