@@ -2,8 +2,6 @@
   "name": "root",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-  },
   "scripts": {
     "initialize": "npm install && npm run clean && lerna bootstrap",
     "clean": "lerna clean --yes && lerna exec -- rm -rf dist",
@@ -12,9 +10,15 @@
     "start": "lerna run --parallel --stream dev",
     "dev": "lerna run --parallel --stream dev"
   },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.3.0"
+  },
   "devDependencies": {
-    "lerna": "^6.0.1",
     "@vitejs/plugin-react": "^2.2.0",
-    "vite": "^3.2.2"
+    "lerna": "^6.0.1",
+    "vite": "^3.2.2",
+    "cypress": "^10.11.0"
   }
 }

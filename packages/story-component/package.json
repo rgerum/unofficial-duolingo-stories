@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "module": "src/index.js",
+  "scripts": {
+    "build": "vite build"
+  },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -11,8 +14,5 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^2.2.0",
     "vite": "^3.2.2"
-  },
-  "scripts": {
-    "build": "vite build"
   }
 }

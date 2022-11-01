@@ -2,13 +2,11 @@
   "name": "backend_node",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "child_process": "^1.0.2",
     "compression": "^1.7.4",
