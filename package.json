@@ -7,8 +7,9 @@
     "clean": "lerna clean --yes && lerna exec -- rm -rf dist",
     "refresh": "lerna bootstrap",
     "build": "lerna run build",
-    "start": "lerna run --parallel --stream dev",
-    "dev": "lerna run --parallel --stream dev"
+    "start": "lerna run --parallel --stream start",
+    "dev": "lerna run --parallel --stream dev",
+    "start:stories-app": "lerna run start --stream --scope=stories-app"
   },
   "dependencies": {
     "react": "^18.2.0",
