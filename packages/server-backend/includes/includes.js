@@ -20,6 +20,8 @@ function func_catch(func) {
 }
 
 async function update_query(table, data, names, id_key="id") {
+    if(data[id_key] === undefined)
+        return insert_query(table, data, names);
     let query_parts = [];
     let arguments = [];
     for(let name of names) {

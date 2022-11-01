@@ -114,17 +114,6 @@ export async function setSyncVoiceList() {
 }
 
 
-
-export async function getCourses() {
-    try {
-        let response_courses = await fetch_get(`${backend_get}/courses`);
-        return await response_courses.json();
-    }
-    catch (e) {
-        return [];
-    }
-}
-
 export async function getSession() {
     try {
         let response_courses = await fetch_get(`${backend_get}/session`);

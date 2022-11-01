@@ -68,6 +68,9 @@ app.use(path, course);
 const editor = require('./routes/editor.js')
 app.use(path, editor);
 
+const admin = require('./routes/admin.js')
+app.use(path, admin);
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
