@@ -20,10 +20,7 @@ cp -r packages/stories-app/build/ ../test_environment/stories-app/
 
 # copy the express backend
 cp -r packages/server-backend ../test_environment/
-mv ../test_environment/server-backend ../test_environment/backend_node
-cd ../test_environment/backend_node
-# install its packages
-npm install
+
 # and restart the server
 supervisorctl restart express_test
 
