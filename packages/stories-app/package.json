@@ -16,7 +16,7 @@
     "start": "npx http-server ./dist",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --port 5779",
     "cypress:open": "cypress open"
   }
 }
