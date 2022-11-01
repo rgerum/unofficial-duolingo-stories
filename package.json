@@ -5,11 +5,16 @@
   "dependencies": {
   },
   "scripts": {
+    "initialize": "npm install && npm run clean && lerna bootstrap",
+    "clean": "lerna clean --yes && lerna exec -- rm -rf dist",
+    "refresh": "lerna bootstrap",
     "build": "lerna run build",
     "start": "lerna run --parallel --stream dev",
     "dev": "lerna run --parallel --stream dev"
   },
   "devDependencies": {
-    "lerna": "^6.0.1"
+    "lerna": "^6.0.1",
+    "@vitejs/plugin-react": "^2.2.0",
+    "vite": "^3.2.2"
   }
 }

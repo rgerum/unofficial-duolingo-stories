@@ -19,11 +19,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Install Lerna
-      run: npm install --global lerna
-        
-    - name: Bootstrap
-      run: lerna bootstrap
+    - name: Initialize
+      run: npm run initialize
 
     - name: Build Story Component
       run: cd packages/story-component && npm run build
@@ -46,11 +43,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Install Lerna
-      run: npm install --global lerna
-        
-    - name: Bootstrap
-      run: lerna bootstrap
+    - name: Initialize
+      run: npm run initialize
 
     - name: Build Story Component
       run: cd packages/story-component && npm run build
