@@ -19,7 +19,8 @@ mkdir ../test_environment
 cp -r packages/stories-app/build/ ../test_environment/stories-app/
 
 # copy the express backend
-cp -r backend_node ../test_environment/
+cp -r packages/server-backend ../test_environment/
+mv ../test_environment/server-backend ../test_environment/backend_node
 cd ../test_environment/backend_node
 # install its packages
 npm install
