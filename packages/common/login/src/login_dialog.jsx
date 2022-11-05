@@ -15,7 +15,7 @@ export function Login({userdata}) {
     </Link>
 }
 
-export function LoginDialog({userdata, page}) {
+export function LoginDialog({userdata, page, navigate}) {
     let [showLogin, setShowLogin] = React.useState(0);
 
     let [state, setState] = React.useState(0);
@@ -39,7 +39,7 @@ export function LoginDialog({userdata, page}) {
         setRememberX(e.target.checked);
     }
 
-    let navigate = useNavigate();
+    navigate = navigate || useNavigate();
 
     async function buttonLogin() {
         setState(1);
@@ -128,7 +128,7 @@ export function LoginDialog({userdata, page}) {
                                data-cy="username" type="text" placeholder="Username"/>
                         <input value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressLogin}
                                data-cy="password" type="password" placeholder="Password"/>
-                        {state === -1 ? <><span className="login_error">{error}</span><br/></> : null}
+                        {state === -1 ? <><span className="login_error" data-cy="login_error">{error}</span><br/></> : null}
                         <span><input type="checkbox" checked={remember}
                                      onChange={setRemember}/> keep me logged in</span>
                         <button className="button" onClick={buttonLogin} data-cy="submit">{state !== 1 ? "Log in" : "..."}</button>
@@ -158,7 +158,7 @@ export function LoginDialog({userdata, page}) {
                                data-cy="username" type="text" placeholder="Username"/>
                         <input value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressLogin}
                                data-cy="password" type="password" placeholder="Password"/>
-                        {state === -1 ? <><span className="login_error">{error}</span><br/></> : null}
+                        {state === -1 ? <><span className="login_error" data-cy="login_error">{error}</span><br/></> : null}
                         <span><input type="checkbox" checked={remember}
                                      onChange={setRemember}/> keep me logged in</span>
                         <button data-cy="submit" className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
@@ -189,7 +189,7 @@ export function LoginDialog({userdata, page}) {
                                data-cy="username" type="text" placeholder="Username"/>
                         <input value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressLogin}
                                data-cy="password" type="password" placeholder="Password"/>
-                        {state === -1 ? <><span className="login_error">{error}</span><br/></> : null}
+                        {state === -1 ? <><span className="login_error" data-cy="login_error">{error}</span><br/></> : null}
                         <span><input type="checkbox" checked={remember}
                                      onChange={setRemember}/> keep me logged in</span>
                         <button data-cy="submit" className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
@@ -212,7 +212,7 @@ export function LoginDialog({userdata, page}) {
                         <input data-cy="password" value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressSignup} type="password"
                                placeholder="Password"/>
                         {state === -1 ?
-                            <span className="login_error">{error}</span> : null }
+                            <span className="login_error" data-cy="login_error">{error}</span> : null }
                         {state === 2 ?
                             <span>{message}</span> :
                             <button data-cy="submit"  className="button"
@@ -231,7 +231,7 @@ export function LoginDialog({userdata, page}) {
                             <input data-cy="username" value={usernameInput} onChange={usernameInputSetValue} type="text"
                                    placeholder="Username"/>
                             {state === -1 ?
-                                <span className="login_error">{error}</span> : null }
+                                <span className="login_error" data-cy="login_error">{error}</span> : null }
                             {state === 2 ?
                                 <span>{message}</span> :
                                 <button data-cy="submit"  className="button"

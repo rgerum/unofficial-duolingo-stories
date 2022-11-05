@@ -2,6 +2,7 @@
 describe('Test Logins', () => {
     beforeEach(() => {
         cy.intercept('**/login*', {body: {}}).as("login")
+        cy.intercept('**/logout*', {body: {}}).as("logout")
         //cy.intercept('**/session', {body: {}})
         cy.intercept('**/session', {body: {}}).as("session_empty")
         cy.intercept('**/courses', { fixture: 'courses.json' }).as("courses")
@@ -14,6 +15,7 @@ describe('Test Logins', () => {
         cy.intercept('**/session', {body: { "username": "test", "role": 0}}).as("session_invalid")
         cy.get("[data-cy=submit]").click()
         cy.contains("Not allowed")
+        cy.intercept('**/session', {body: {}}).as("session_empty")
         cy.get("[data-cy=back]").click()
         cy.get("[data-cy=username]")
     })

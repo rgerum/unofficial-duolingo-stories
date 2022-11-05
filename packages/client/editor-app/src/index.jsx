@@ -9,7 +9,7 @@ import {EditorNode} from "./story-editor";
 import {
     BrowserRouter as Router,
     Routes,
-    Route,
+    Route, useNavigate,
 } from "react-router-dom";
 import {Stats} from "./stats";
 
@@ -23,14 +23,15 @@ export function LoginWrapper() {
     if(urlParams.get("language"))
         window.location = `/language/${urlParams.get("language")}`;
 
-
+    let navigate = useNavigate();
     let userdata = useUsername();
 
     // loading
     if (userdata === undefined) return <Spinner/>
     // no username show login
-    if (userdata.username === undefined || userdata.role !== 1)
-        return <LoginDialog userdata={userdata} page={"editor"} />
+    if (userdata.username === undefined || userdata.role !== 1) {
+        return <LoginDialog userdata={userdata} page={"editor"} navigate={navigate}/>
+    }
 
     return <Suspense fallback={<></>}>
         <Routes>
