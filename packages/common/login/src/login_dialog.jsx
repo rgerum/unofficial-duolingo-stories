@@ -1,7 +1,7 @@
 import React from 'react';
 import './login.css';
 import {LoggedInButton} from "./loggedinbutton";
-import {useInput} from "story-component";
+import {useInput} from "includes";
 import {register, reset_pw} from "./api_calls/user";
 import {Link, useNavigate} from "react-router-dom";
 

@@ -8,15 +8,17 @@ It is *not* an official product of Duolingo, nor is there any plan to integrate 
 
 It is hosted at www.duostories.org and reproduces the story experience from the official Duolingo stories.
 
-The project consists basically of two front end apps, the stories-app and the editor-app. The stories-app is the part that 
-the learners will see (hosted on www.duostories.org) and the editor-app is the part that the contributors will see to 
-translate and review stories. The apps are based on React and are bundled with vite. The backend is based on express.js 
-which connects to a mysql database.
+The project consists basically of three front end apps, the stories-app, the editor-app and the admin-app. 
+The stories-app is the part that the learners will see (hosted on www.duostories.org) and the editor-app is the part
+that the contributors will see to translate and review stories.
+The apps are based on React and are bundled with vite. These are all stored in `packages/client`. 
+
+The backend is based on express.js which connects to a mysql database, found in `packages/server`.
 
 ## How to run locally
 This repository contains multiple packages that are managed with [Lerna](https://lerna.js.org/).
 
-To set it up, call (will install lerna and bootstap it) 
+To set it up, call (will install lerna and bootstrap it)
 ```
 npm run initialize
 ```

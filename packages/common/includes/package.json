@@ -1,5 +1,5 @@
 {
-  "name": "login",
+  "name": "includes",
   "version": "0.1.0",
   "private": true,
   "module": "src/index.js",
@@ -9,9 +9,7 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.3.0",
-    "includes": "*",
-    "story-component": "*"
+    "react-router-dom": "^6.3.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^2.2.0",

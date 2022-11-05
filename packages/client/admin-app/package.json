@@ -1,17 +1,21 @@
 {
-  "name": "login",
+  "name": "admin-app",
   "version": "0.1.0",
   "private": true,
-  "module": "src/index.js",
   "scripts": {
-    "build": "vite build"
+    "start": "npx http-server ./dist",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 5781",
+    "cypress:open": "cypress open"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
     "includes": "*",
-    "story-component": "*"
+    "login": "*",
+    "ui_elements": "*"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^2.2.0",
