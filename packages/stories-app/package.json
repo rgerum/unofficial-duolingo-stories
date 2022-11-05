@@ -1,9 +1,9 @@
 {
   "name": "stories-app",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "npx http-server ./dist",
+    "start": "npx http-server ./build",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --port 5779",

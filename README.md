@@ -16,17 +16,14 @@ which connects to a mysql database.
 ## How to run locally
 This repository contains multiple packages that are managed with [Lerna](https://lerna.js.org/).
 
-To run it, you need to have Lerna installed:
+To set it up, call (will install lerna and bootstap it) 
 ```
-npm install --global lerna
+npm run initialize
 ```
-Lerna can then install the dependencies of all packages:
+
+To develop you can then run
 ```
-lerna bootstrap
-```
-And it can then run all packages simultaneously
-```
-npm run start
+npm run dev
 ```
    
 ## How to contribute

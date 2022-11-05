@@ -9,7 +9,10 @@
     "build": "lerna run build",
     "start": "lerna run --parallel --stream start",
     "dev": "lerna run --parallel --stream dev",
-    "start:stories-app": "lerna run start --stream --scope=stories-app"
+    "start:stories-app": "lerna run start --stream --scope=stories-app",
+    "start:editor-app": "lerna run start --stream --scope=editor-app",
+    "start:admin-app": "lerna run start --stream --scope=admin-app",
+    "start:server-backend": "lerna run start --stream --scope=server-backend"
   },
   "dependencies": {
     "react": "^18.2.0",
