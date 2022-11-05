@@ -12,9 +12,8 @@ const path = (process.env.NODE_ENV === 'test') ? '/stories/backend_node_test' : 
 if(process.env.NODE_ENV === 'test') {
     app.use(function (req, res, next) {
 
-        var allowedDomains = ['http://localhost:5780','http://localhost:5781','http://localhost:5173'];
         var origin = req.headers.origin;
-        if(allowedDomains.indexOf(origin) > -1) {
+        if(origin.match(/http:\/\/localhost:\d*$/)) {
             res.setHeader('Access-Control-Allow-Origin', origin);
         }
 
