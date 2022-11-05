@@ -11,6 +11,7 @@ describe('Navigate Course Editor', () => {
         cy.intercept('**/story/75', { fixture: 'story_75.json' }).as("story75")
         cy.intercept('**/image/*', { fixture: 'image.json' }).as("image")
         cy.intercept('**/avatar_names', { fixture: 'avatar_names.json' }).as("avatar_names")
+        cy.intercept('**/avatar_names/9', { fixture: 'avatar_names.json' }).as("avatar_names")
         cy.intercept('**/language/9', { fixture: 'language_9.json' }).as("language_9")
         cy.intercept('**/language/1', { fixture: 'language_1.json' }).as("language_1")
 
