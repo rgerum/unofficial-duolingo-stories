@@ -38,3 +38,5 @@ duolingo_data*
 sync.sh
 sync_test.sh
 publishX.sh
+/packages/**/cypress/videos/
+/packages/**/cypress/**/screenshots/

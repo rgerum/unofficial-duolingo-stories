@@ -1,12 +1,10 @@
 
 describe('Test Logins', () => {
     beforeEach(() => {
-        cy.fixture('courses.json').as('courses')
-
         cy.intercept('**/login*', {body: {}}).as("login")
         //cy.intercept('**/session', {body: {}})
         cy.intercept('**/session', {body: {}}).as("session_empty")
-        cy.intercept('POST', '**/courses', { fixture: 'courses.json' }).as("courses")
+        cy.intercept('**/courses', { fixture: 'courses.json' }).as("courses")
 
         cy.visit("")
     })

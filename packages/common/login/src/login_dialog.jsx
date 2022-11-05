@@ -125,13 +125,13 @@ export function LoginDialog({userdata, page}) {
                         <h2>Editor Log in</h2>
                         <p>You need an account that has been activated as a contributor.</p>
                         <input value={usernameInput} onChange={usernameInputSetValue} onKeyDown={handleKeypressLogin}
-                               type="text" placeholder="Username"/>
+                               data-cy="username" type="text" placeholder="Username"/>
                         <input value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressLogin}
-                               type="password" placeholder="Password"/>
+                               data-cy="password" type="password" placeholder="Password"/>
                         {state === -1 ? <><span className="login_error">{error}</span><br/></> : null}
                         <span><input type="checkbox" checked={remember}
                                      onChange={setRemember}/> keep me logged in</span>
-                        <button className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
+                        <button className="button" onClick={buttonLogin} data-cy="submit">{state !== 1 ? "Log in" : "..."}</button>
                     </div>
                 </div>
                 :
@@ -141,7 +141,7 @@ export function LoginDialog({userdata, page}) {
                         <img alt={"sad duo"} width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
                         <p>You need to have permissions<br/>to access the editor.<br/></p>
                         <p>If wou want to contribute,<br/>you can talk to us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.</p>
-                        <p><button className="link" data-cy="back" onClick={()=>userdata.logout()}>BACK</button></p>
+                        <p><button className="link" data-cy="back" onClick={()=>userdata.logout()} >BACK</button></p>
                     </div>
                 </div>
             }
@@ -155,13 +155,13 @@ export function LoginDialog({userdata, page}) {
                         <h2>Admin Panel Log in</h2>
                         <p>You need an admin account to login here.</p>
                         <input value={usernameInput} onChange={usernameInputSetValue} onKeyDown={handleKeypressLogin}
-                               type="text" placeholder="Username"/>
+                               data-cy="username" type="text" placeholder="Username"/>
                         <input value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressLogin}
-                               type="password" placeholder="Password"/>
+                               data-cy="password" type="password" placeholder="Password"/>
                         {state === -1 ? <><span className="login_error">{error}</span><br/></> : null}
                         <span><input type="checkbox" checked={remember}
                                      onChange={setRemember}/> keep me logged in</span>
-                        <button className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
+                        <button data-cy="submit" className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
                     </div>
                 </div>
                 :
@@ -186,13 +186,13 @@ export function LoginDialog({userdata, page}) {
                         <p>Attention, you cannot login with your Duolingo account.</p><p>You have to register for the
                         unofficial stories separately, as they are an independent project.</p>
                         <input value={usernameInput} onChange={usernameInputSetValue} onKeyDown={handleKeypressLogin}
-                               type="text" placeholder="Username"/>
+                               data-cy="username" type="text" placeholder="Username"/>
                         <input value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressLogin}
-                               type="password" placeholder="Password"/>
+                               data-cy="password" type="password" placeholder="Password"/>
                         {state === -1 ? <><span className="login_error">{error}</span><br/></> : null}
                         <span><input type="checkbox" checked={remember}
                                      onChange={setRemember}/> keep me logged in</span>
-                        <button className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
+                        <button data-cy="submit" className="button" onClick={buttonLogin}>{state !== 1 ? "Log in" : "..."}</button>
                         <p>Don't have an account? <button className={"link"} onClick={() => doSetShowLogin(2)}>SIGN
                             UP</button></p>
                         <p>Forgot your password? <button className={"link"}
@@ -206,16 +206,16 @@ export function LoginDialog({userdata, page}) {
                         <h2>Sign up</h2>
                         <p>If you register you can keep track of the stories you have already finished.</p>
                         <p>Registration is optional, stories can be accessed even without login.</p>
-                        <input value={usernameInput} onChange={usernameInputSetValue} onKeyDown={handleKeypressSignup} type="text"
+                        <input data-cy="username" value={usernameInput} onChange={usernameInputSetValue} onKeyDown={handleKeypressSignup} type="text"
                                placeholder="Username"/>
-                        <input value={emailInput} onChange={emailInputSetValue} onKeyDown={handleKeypressSignup} type="email" placeholder="Email"/>
-                        <input value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressSignup} type="password"
+                        <input data-cy="email" value={emailInput} onChange={emailInputSetValue} onKeyDown={handleKeypressSignup} type="email" placeholder="Email"/>
+                        <input data-cy="password" value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressSignup} type="password"
                                placeholder="Password"/>
                         {state === -1 ?
                             <span className="login_error">{error}</span> : null }
                         {state === 2 ?
                             <span>{message}</span> :
-                            <button className="button"
+                            <button data-cy="submit"  className="button"
                                     onClick={register_button}>{state !== 1 ? "Sign up" : "..."}</button>
                         }
                         <p>Already have an account? <button className={"link"} onClick={()=>doSetShowLogin(1)}>LOG IN</button></p>
@@ -228,13 +228,13 @@ export function LoginDialog({userdata, page}) {
                         <div>
                             <h2>Reset password</h2>
                             <p>If you forgot your password, we can send you a link to choose a new one.</p>
-                            <input value={usernameInput} onChange={usernameInputSetValue} type="text"
+                            <input data-cy="username" value={usernameInput} onChange={usernameInputSetValue} type="text"
                                    placeholder="Username"/>
                             {state === -1 ?
                                 <span className="login_error">{error}</span> : null }
                             {state === 2 ?
                                 <span>{message}</span> :
-                                <button className="button"
+                                <button data-cy="submit"  className="button"
                                         onClick={reset_button}>{state !== 1 ? "Reset" : "..."}</button>
                             }
                             <p>Or still remember your password? <button className={"link"} onClick={()=>doSetShowLogin(1)}>LOG IN</button></p>

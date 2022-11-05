@@ -1,7 +1,6 @@
 
 describe('Navigate Course Editor', () => {
     beforeEach(() => {
-        cy.fixture('courses.json').as('courses')
         cy.intercept('**/session', { fixture: 'session.json' }).as("session")
         cy.intercept('**/courses', { fixture: 'courses.json' }).as("courses")
         cy.intercept('**/*backend*/**/course/12', { fixture: 'course12.json' }).as("course_es")
