@@ -17,6 +17,7 @@ export function Story(props) {
     const storyElement = React.useRef();
 
     let story = props.story;
+    let navigate = props.navigate || useNavigate();
     let id = props.id;
     let editor = props.editor;
     let course = story.learningLanguage + "-" + story.fromLanguage;
@@ -53,7 +54,6 @@ export function Story(props) {
         setRight(false);
     }, [progress, setProgress, setRight]);
 
-    let navigate = useNavigate();
     let finish = React.useCallback(() => {
         setStoryDone(id);
         navigate("/"+course);
@@ -130,7 +130,7 @@ export function Story(props) {
                 if (audios[url] === undefined && url !== undefined) {
                     count += 1;
                     let a = new Audio();
-                    function loadingFinished(e) {
+                    function loadingFinished() {
                         a.removeEventListener('canplaythrough', loadingFinished);
                         a.removeEventListener('error', loadingFinished);
                         count -= 1;

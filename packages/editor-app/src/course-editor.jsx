@@ -11,6 +11,10 @@ import {Link, useNavigate, useParams,} from "react-router-dom";
 function CourseList({courses, course_id}) {
     if(courses === undefined)
         return <div id="languages"><Spinner/></div>;
+    // Error loading courses
+    if(courses.length === 0){
+        return <div id="languages">Error loading courses</div>;
+    }
     return <div id="languages">
         {courses.map((course, index) =>
             <div key={index}>
@@ -42,6 +46,10 @@ function ImportList({course, import_id}) {
 
     if(course === undefined)
         return <></>
+
+    // when there was an error loading
+    if(courseImport && courseImport.length === 0)
+        return <>Error loading.</>
     return courseImport ?
         <>
             {import_id === 12 ?
@@ -150,9 +158,8 @@ function DropDownStatus(props) {
         </div>
 }
 
-function EditList(props) {
-    let course = props.course;
-    let stories = props.course?.stories
+function EditList({course}) {
+    let stories = course?.stories
     if(stories === undefined)
         stories = []
     let set_ends = [];
@@ -199,7 +206,7 @@ function EditList(props) {
                         src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
                         width="44px" height={"40px"}/></td>
                     <td style={{width: "100%"}}><Link to={`/story/${story.id}`}>{story.name}</Link></td>
-                    <td><DropDownStatus id={story.id} count={story.approvals} status={story.status} public={story.public} official={props.course.official}/></td>
+                    <td><DropDownStatus id={story.id} count={story.approvals} status={story.status} public={story.public} official={course.official}/></td>
                     <td>{story.username}</td>
                     <td>{story.date}</td>
                     <td>{story.change_date}</td>
@@ -208,6 +215,7 @@ function EditList(props) {
             </tbody>
         </table>
         {course ? <></> : <Spinner/>}
+        {course && course?.stories === undefined ? <>Error loading.</> : <></>}
     </>
 }
 

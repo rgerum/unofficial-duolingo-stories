@@ -72,14 +72,19 @@ export async function getAvatars(id) {
 }
 
 export async function getAvatarsList(id) {
-    if(!id)
-        return {}
-    let avatar_names_list = await getAvatars(id);
-    let avatar_names = {}
-    for(let avatar of avatar_names_list) {
-        avatar_names[avatar.avatar_id] = avatar;
+    try {
+        if (!id)
+            return {}
+        let avatar_names_list = await getAvatars(id);
+        let avatar_names = {}
+        for (let avatar of avatar_names_list) {
+            avatar_names[avatar.avatar_id] = avatar;
+        }
+        return avatar_names;
     }
-    return avatar_names;
+    catch (e) {
+        return {error: "error"}
+    }
 }
 
 export async function getSpeakers(id) {
@@ -133,8 +138,13 @@ export async function setApproval(data) {
 }
 
 export async function getStory(id) {
-    let response_json = await fetch(`${backend_express_editor}/story/${id}`, {credentials: 'include'});
-    return response_json.json();
+    try {
+        let response_json = await fetch(`${backend_express_editor}/story/${id}`, {credentials: 'include'});
+        return response_json.json();
+    }
+    catch (e) {
+        return {error: "error"}
+    }
 }
 
 export async function getAvatar(id) {
@@ -169,8 +179,13 @@ export async function getImageAsync(id) {
 }
 
 export async function getImportList(id, id2) {
-    let response_json = await fetch(`${backend_express_editor}/import/${id}/${id2}`, {credentials: 'include'});
-    return response_json.json();
+    try {
+        let response_json = await fetch(`${backend_express_editor}/import/${id}/${id2}`, {credentials: 'include'});
+        return response_json.json();
+    }
+    catch (e) {
+        return [];
+    }
 }
 
 export async function setImport(id, course_id) {

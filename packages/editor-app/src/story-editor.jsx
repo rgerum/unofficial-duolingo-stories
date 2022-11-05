@@ -304,7 +304,7 @@ function Editor({story_data, avatar_names, userdata}) {
                         <Cast id={story_data.id} story_meta={story_meta} learningLanguage={story_data.learningLanguage}/>
                         : null}
                     {story_state ?
-                    <Story editor={editor_state} story={story_state}/> : null}
+                    <Story editor={editor_state} story={story_state} navigate={navigate}/> : null}
                 </div>
             </div>
         </div>
@@ -315,7 +315,14 @@ function Editor({story_data, avatar_names, userdata}) {
 export function EditorNode({userdata}) {
     let {story} = useParams();
     const story_data = useDataFetcher(getStory, [parseInt(story)]);
-    const avatar_names = useDataFetcher(getAvatarsList, [story_data?.learningLanguage])
+    const avatar_names = useDataFetcher(getAvatarsList, [story_data?.learningLanguage]);
+
+    if(story_data?.error) {
+        return <>Error loading story</>
+    }
+    if(avatar_names?.error) {
+        return <>Error loading avatar names</>
+    }
 
     //if(!story_data || !avatar_names)
     //    return <Spinner />

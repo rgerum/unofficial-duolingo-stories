@@ -1,5 +1,5 @@
 import "./index.css"
-import React from 'react';
+import React, { Suspense } from 'react';
 import {createRoot} from 'react-dom/client';
 import {LoginDialog, useUsername} from 'login';
 import {Spinner} from "story-component";
@@ -31,15 +31,17 @@ export function LoginWrapper() {
     // no username show login
     if (userdata.username === undefined || userdata.role !== 1)
         return <LoginDialog userdata={userdata} page={"editor"} />
-        
-    return <Routes>
-        <Route path='/course/:id' element={<EditorOverview userdata={userdata} />}></Route>
-        <Route path='/course/:id/import/:import_id' element={<EditorOverview userdata={userdata} />}></Route>
-        <Route path='/' element={<EditorOverview userdata={userdata} />}></Route>
-        <Route path='/story/:story' element={<EditorNode userdata={userdata} />}></Route>
-        <Route path='/language/:language' element={<AvatarMain userdata={userdata} />}></Route>
-        <Route path='/stats' element={<Stats userdata={userdata} />}></Route>
-    </Routes>
+
+    return <Suspense fallback={<></>}>
+        <Routes>
+            <Route path='/course/:id' element={<EditorOverview userdata={userdata} />}></Route>
+            <Route path='/course/:id/import/:import_id' element={<EditorOverview userdata={userdata} />}></Route>
+            <Route path='/' element={<EditorOverview userdata={userdata} />}></Route>
+            <Route path='/story/:story' element={<EditorNode userdata={userdata} />}></Route>
+            <Route path='/language/:language' element={<AvatarMain userdata={userdata} />}></Route>
+            <Route path='/stats' element={<Stats userdata={userdata} />}></Route>
+        </Routes>
+    </Suspense>
 }
 
 createRoot(document.getElementById('body')).render(
