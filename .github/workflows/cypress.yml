@@ -32,7 +32,7 @@ jobs:
       run: cd packages/editor-app && npm run preview &
       
     - name: Test Editor
-      run: cd packages/editor-app && npx cypress run
+      run: cd packages/editor-app && npx cypress run --record
       
   test_story_app:
     name: Story App
@@ -56,5 +56,5 @@ jobs:
       run: cd packages/stories-app && npm run preview &
       
     - name: Test Stories
-      run: cd packages/stories-app && npx cypress run
+      run: cd packages/stories-app && npx cypress run --record
       
