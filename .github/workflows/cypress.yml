@@ -17,7 +17,7 @@ jobs:
     
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Initialize
       run: npm run initialize
@@ -32,7 +32,7 @@ jobs:
       run: cd packages/editor-app && npm run preview &
       
     - name: Test Editor
-      run: cd packages/editor-app && npx cypress run --record --key $CYPRESS_RECORD_KEY
+      run: cd packages/editor-app && npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
       
   test_story_app:
     name: Story App
@@ -41,7 +41,7 @@ jobs:
     
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Initialize
       run: npm run initialize
@@ -56,5 +56,5 @@ jobs:
       run: cd packages/stories-app && npm run preview &
       
     - name: Test Stories
-      run: cd packages/stories-app && npx cypress run --record --key $CYPRESS_RECORD_KEY
+      run: cd packages/stories-app && npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
       
