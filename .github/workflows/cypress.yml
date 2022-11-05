@@ -22,17 +22,14 @@ jobs:
     - name: Initialize
       run: npm run initialize
 
-    - name: Build Story Component
-      run: cd packages/story-component && npm run build
+    - name: Build
+      run: npm run build
 
-    - name: Build Editor
-      run: cd packages/editor-app && npm run build
-      
     - name: Start Editor Server
-      run: cd packages/editor-app && npm run preview &
+      run: cd packages/client/editor-app && npm run preview &
       
     - name: Test Editor
-      run: cd packages/editor-app && npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
+      run: cd packages/client/editor-app && npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
       
   test_story_app:
     name: Story App
@@ -46,15 +43,12 @@ jobs:
     - name: Initialize
       run: npm run initialize
 
-    - name: Build Story Component
-      run: cd packages/story-component && npm run build
+    - name: Build
+      run: npm run build
 
-    - name: Build Stories
-      run: cd packages/stories-app && npm run build
-  
     - name: Start Stories Server
-      run: cd packages/stories-app && npm run preview &
+      run: cd packages/client/stories-app && npm run preview &
       
     - name: Test Stories
-      run: cd packages/stories-app && npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
+      run: cd packages/client/stories-app && npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
       
