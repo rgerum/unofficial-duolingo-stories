@@ -8,11 +8,11 @@ export async function get_login() {
         // return the response
         let json = await response.json();
         if(json === null)
-            return undefined;
+            return {error: true};
         return json;
     }
     catch (e) {
-        return undefined;
+        return {error: true};
     }
 }
 

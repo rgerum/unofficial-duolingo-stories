@@ -5,20 +5,15 @@ import {playSoundRight, playSoundWrong} from "./sound_effects";
 import {Part} from "./part";
 import {FinishedPage} from "./finish_page";
 import {setStoryDone, scroll_down} from "./includes";
-import {useNavigate} from "react-router-dom";
 import {Footer} from "./story_footer";
 import {StoryHeader} from "./story_header";
 import {Spinner, Legal} from "ui_elements";
 //import {StoryTitlePage} from "./story_title_page";
 
 
-export function Story(props) {
+export function Story({story, navigate, id, editor}) {
     const storyElement = React.useRef();
 
-    let story = props.story;
-    let navigate = props.navigate || useNavigate();
-    let id = props.id;
-    let editor = props.editor;
     let course = story.learningLanguage + "-" + story.fromLanguage;
 
     let [progress, setProgress] = useState(-1);

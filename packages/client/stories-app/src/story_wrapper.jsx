@@ -2,7 +2,7 @@ import React from 'react';
 import {useDataFetcher} from "includes";
 import {Story} from "story";
 import {Spinner} from "ui_elements";
-import {Link, useParams} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import {getStoryJSON} from "./api_calls/course";
 
 function Error() {
@@ -19,6 +19,7 @@ function Error() {
 
 export default function StoryP() {
     let { id } = useParams();
+    const navigate = useNavigate();
     let test = window.location.href.endsWith("test");
     let story_data = useDataFetcher(getStoryJSON, [id])
     if(story_data === undefined)
@@ -27,5 +28,5 @@ export default function StoryP() {
         return <Error/>
     if(test)
         return <div id="main"><Story id={id} editor={{lineno: 3}} story={story_data} /></div>
-    return <Story id={id} story={story_data} />
+    return <Story id={id} story={story_data} navigate={navigate}/>
 }

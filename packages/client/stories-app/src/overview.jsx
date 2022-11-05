@@ -1,5 +1,5 @@
 import React, {lazy, Suspense} from 'react';
-import {Link, Route, Routes, useParams,} from "react-router-dom";
+import {Link, Route, Routes, useNavigate, useParams,} from "react-router-dom";
 
 import {Login} from 'login'
 import {useSuspendedDataFetcher} from "./api_calls/include";
@@ -15,13 +15,13 @@ const Faq = lazy(() => import('./faq'));
 
 export default function IndexContent({userdata}) {
     const [isPending, startTransition] = React.useTransition();
-
+    let navigate = useNavigate();
 
     return <div>
         <nav id="header_index">
             <Link to={"/"} className="duostories_title">Duostories</Link>
             <CourseDropdown userdata={userdata} startTransition={startTransition} />
-            <Login userdata={userdata} />
+            <Login userdata={userdata} navigate={navigate}/>
         </nav>
         <Suspense fallback={<Spinner />}>
         <div id="main_index" style={{ opacity: isPending ? 0.8 : 1 }}>

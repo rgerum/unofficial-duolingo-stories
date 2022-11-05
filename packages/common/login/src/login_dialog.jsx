@@ -3,16 +3,15 @@ import './login.css';
 import {LoggedInButton} from "./loggedinbutton";
 import {useInput} from "includes";
 import {register, reset_pw} from "./api_calls/user";
-import {Link, useNavigate} from "react-router-dom";
 
 
-export function Login({userdata}) {
-    if(userdata.username !== undefined)
+export function Login({userdata, navigate}) {
+    if(userdata?.username !== undefined)
         return <LoggedInButton userdata={userdata} page="stories"/>
 
-    return <Link id="log_in" to={"/login"}>
+    return <a id="log_in" href="/login" onClick={(e) => {e.preventDefault(); navigate("/login")}}>
         <button className="button" style={{float: "none"}}>Log in</button>
-    </Link>
+    </a>
 }
 
 export function LoginDialog({userdata, page, navigate}) {

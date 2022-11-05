@@ -1,7 +1,7 @@
 
 describe('Test Logins', () => {
     beforeEach(() => {
-        cy.intercept('**/backend_node*/session', {body: "null"}).as("user")
+        cy.intercept('**/backend_node*/session', {body: {}}).as("user")
         cy.intercept('**/backend_node*/courses', { fixture: 'courses.json' }).as("courses")
         cy.intercept('**/backend_node*/courses_user', { fixture: 'courses_user.json' }).as("courses_user")
         cy.intercept('**/backend_node*/course_counts', { fixture: 'course_count.json' }).as("course_count")
