@@ -57,13 +57,13 @@ describe('Navigate Course Editor', () => {
         cy.get("[data-cy=story_list]").get("tr").contains("Room for Rent").click()
 
         // story should open, and we should be able to scroll down
-        cy.get("#story").get(".title")
-        cy.get("#preview").scrollTo('bottom')
+        cy.get('#story').get(".title").should('exist')
+        //cy.get("#preview").scrollTo('bottom')
         //cy.get('#button_back').click()
     })
 
     it('Navigation via link and back/forward', () => {
-        // directly link to the dutch stories
+        // directly link to the Dutch stories
         cy.visit("/course/2")
         cy.get("[data-cy=course-title]").contains("Dutch")
 
