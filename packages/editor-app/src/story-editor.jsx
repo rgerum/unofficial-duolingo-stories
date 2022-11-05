@@ -8,9 +8,10 @@ import {EditorState, EditorSelection} from "@codemirror/state";
 import {example, highlightStyle} from "./story-editor/parser.mjs";
 import {useScrollLinking} from "./story-editor/scroll_linking";
 import {useResizeEditor} from "./story-editor/editor-resize";
-import {SoundRecorder} from "./sound-recorder";
+//import {SoundRecorder} from "./sound-recorder";
 
-import {LoggedInButton, useDataFetcher} from "story-component";
+import {LoggedInButton} from 'login';
+import {useDataFetcher} from "story-component";
 
 import {Story, Flag} from "story-component";
 import {Cast} from "./react/cast";
@@ -27,8 +28,7 @@ import {
 
 window.editorShowTranslations = false
 window.editorShowSsml = false
-function StoryEditorHeader(props) {
-    const story_data = props.story_data;
+function StoryEditorHeader({story_data, userdata}) {
     const [show_trans, set_show_trans] = React.useState(window.editorShowTranslations);
     function do_set_show_trans() {
         let value = !show_trans;
@@ -140,18 +140,15 @@ function StoryEditorHeader(props) {
             <div><img alt="icon save" src="/icons/save.svg" /></div>
             <span>{save_text}</span>
         </div>
-        <LoggedInButton username={props.username} doLogout={props.doLogout} page="editor"/>
+        <LoggedInButton userdata={userdata} page="editor"/>
     </div></>
 }
 
-function Editor(props) {
+function Editor({story_data, avatar_names, userdata}) {
     const editor = React.useRef();
     const preview = React.useRef();
     const margin = React.useRef();
     const svg_parent = React.useRef();
-
-    const story_data = props.story_data;
-    const avatar_names = props.avatar_names;
 
     const [editor_state, set_editor_state] = React.useState();
     const [story_state, set_story_state] = React.useState();
@@ -292,7 +289,7 @@ function Editor(props) {
     return (
         <div id="body">
             <div id="toolbar">
-                <StoryEditorHeader story_data={story_data} username={props.username} doLogout={props.doLogout}
+                <StoryEditorHeader story_data={story_data} userdata={userdata}
                                    func_save={func_save} func_delete={func_delete}/>
             </div>
             <div id="root">
@@ -315,12 +312,12 @@ function Editor(props) {
     );
 }
 
-export function EditorNode(props) {
+export function EditorNode({userdata}) {
     let {story} = useParams();
     const story_data = useDataFetcher(getStory, [parseInt(story)]);
     const avatar_names = useDataFetcher(getAvatarsList, [story_data?.learningLanguage])
 
     //if(!story_data || !avatar_names)
     //    return <Spinner />
-    return <Editor story_data={story_data} avatar_names={avatar_names} username={props.username} doLogout={props.doLogout}/>
+    return <Editor story_data={story_data} avatar_names={avatar_names} userdata={userdata}/>
 }

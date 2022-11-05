@@ -1,4 +1,4 @@
-import {setCookie, getCookie, isLocalNetwork} from "story-component";
+import {isLocalNetwork} from "story-component";
 
 let backend_set = "https://editor.duostories.org/set"
 
@@ -39,24 +39,6 @@ export async function fetch_post2(url, data)
     return fetch(req);
 }
 
-let login_data = {username: getCookie("username"), password: getCookie("password")}
-async function fetch_get(url) {
-    if(!isLocalNetwork())
-        return fetch(url);
-    /** like fetch but with post instead of get */
-    var fd = new FormData();
-    //very simply, doesn't handle complete objects
-    for(var i in login_data){
-        if(login_data[i] !== undefined)
-            fd.append(i,login_data[i]);
-    }
-    return fetch(url, {
-        method: "POST",
-        body: fd,
-        mode: "cors"
-    })
-}
-
 export async function getCourses() {
     try {
         let response_courses = await fetch(`${backend_express_editor}/courses`, {credentials: 'include'});
@@ -65,28 +47,6 @@ export async function getCourses() {
     catch (e) {
         return [];
     }
-}
-
-export async function getSession() {
-    try {
-        let response_courses = await fetch(`${backend_express}/session`, {credentials: 'include'});
-        return await response_courses.json();
-    }
-    catch (e) {
-        return undefined;
-    }
-}
-
-export async function login(data, remember) {
-    // currently only store the local cookies for local test
-    document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-    // check if the user is logged in
-    data["remember"] = remember;
-    let reponse = await fetch_post2(`${backend_express}/login`, data);
-    return reponse.status !== 403;
-
 }
 
 export async function getCourse(id) {
@@ -248,7 +208,3 @@ export async function setUploadAudio(id, blob, filename) {
         mode: "cors"
     });
 }
-
-
-
-

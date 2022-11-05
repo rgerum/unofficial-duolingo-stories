@@ -8,10 +8,9 @@ import {
     Route,
 } from "react-router-dom";
 import {load_dark_mode} from "story-component";
-import {useUsername} from "./login";
-const UserActivationOrReset = lazy(() => import('./user_activation_or_reset'));
+import {LoginDialog, useUsername} from "login";
+import {UserActivationOrReset} from "login";
 const IndexContent = lazy(() => import('./overview'));
-const LoginDialog = lazy(() => import('./login'));
 const StoryP = lazy(() => import('./story_wrapper'));
 
 

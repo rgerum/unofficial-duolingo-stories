@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {useDataFetcher2, useInput, fetch_post, Flag} from 'story-component'
-import {Spinner, SpinnerBlue, LoggedInButton} from 'story-component'
+import {Spinner, SpinnerBlue} from 'story-component'
+import {LoggedInButton} from 'login'
 import {getAvatars, getLanguageName, getSpeakers, setAvatarSpeaker} from "./api_calls.mjs";
 import "./avatar_editor.css"
 import {useParams} from "react-router-dom";

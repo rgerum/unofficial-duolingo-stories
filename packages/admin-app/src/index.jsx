@@ -1,6 +1,7 @@
+import "./index.css"
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import {LoginDialog, useUsername} from "./login";
+import {LoginDialog, useUsername} from "login";
 import {Spinner} from "story-component";
 import {UserList} from "./user-editor";
 import {LanguageList} from "./language-editor"
@@ -12,17 +13,17 @@ import {
 } from "react-router-dom";
 import {CourseList} from "./course-editor";
 import {Sync} from "./github-sync";
-import {LoggedInButton} from "./login";
+import {LoggedInButton} from "login";
 
 
 export function LoginWrapper() {
-    let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
+    let userdata = useUsername();
 
     // loading
-    if (username === undefined) return <Spinner/>
+    if (userdata === undefined) return <Spinner/>
     // no username show login
-    if (username.username === undefined || username.admin !== 1)
-        return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
+    if (userdata.username === undefined || userdata.admin !== 1)
+        return <LoginDialog userdata={userdata} page={"admin"}  />
 
     // logged in and allowed!
     return <>
@@ -31,7 +32,7 @@ export function LoginWrapper() {
             <Link to="/languages">languages</Link>
             <Link to="/courses">courses</Link>
             <Link to="/sync">sync</Link>
-            <LoggedInButton username={username} doLogout={doLogout} page="admin"/>
+            <LoggedInButton userdata={userdata} page="admin"/>
         </div>
         <div id="root">
             <Routes>

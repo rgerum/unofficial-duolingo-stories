@@ -108,11 +108,7 @@ body {
     margin-right: 10px;
     width: 36px
 }
-#languages {
-    overflow: scroll;
-    height: calc(100vh - 64px);
-    width: 515px;
-}
+
 
 #root {
     display: flex;
@@ -147,4 +143,8 @@ body {
 #margin path {
    fill: var(--svg-fill);
    stroke: var(--svg-stroke);
+}
+
+#loggedin > span {
+    padding-left: 0;
 }

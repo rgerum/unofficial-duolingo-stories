@@ -1,7 +1,7 @@
 import React, {lazy, Suspense} from 'react';
 import {Link, Route, Routes, useParams,} from "react-router-dom";
 
-import {Login} from './login'
+import {Login} from 'login'
 import {useSuspendedDataFetcher} from "./api_calls/include";
 import {getCoursesCount} from "./api_calls/course";
 import {Legal, Spinner} from "story-component";

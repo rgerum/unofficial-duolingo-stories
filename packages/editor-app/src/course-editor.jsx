@@ -1,20 +1,20 @@
+import "./course-editor.css"
 import React, {useState} from 'react';
 import {useDataFetcher, useDataFetcher2} from 'story-component'
 import {Spinner, SpinnerBlue} from 'story-component'
-import {Flag, LoggedInButton} from 'story-component'
+import {Flag} from 'story-component'
+import {LoggedInButton} from 'login'
 import {getCourses, getCourse, getImportList, setImport, setStatus, setApproval} from "./api_calls.mjs";
-import "./course-editor.css"
 import {Link, useNavigate, useParams,} from "react-router-dom";
 
 
-function CourseList(props) {
-    const courses = props.courses;
+function CourseList({courses, course_id}) {
     if(courses === undefined)
         return <div id="languages"><Spinner/></div>;
     return <div id="languages">
         {courses.map((course, index) =>
             <div key={index}>
-                <Link className={"course_selection_button" + (props.course_id === course.id ? " course_selection_button_active" : "")}
+                <Link className={"course_selection_button" + (course_id === course.id ? " course_selection_button_active" : "")}
                    to={`/course/${course.id}`}
                 >
                     <span className="course_count">{course.count}</span>
@@ -26,9 +26,8 @@ function CourseList(props) {
     </div>
 }
 
-function ImportList(props) {
-    let course = props.course;
-    const [courseImport, ] = useDataFetcher2(getImportList, [props.import_id, course?.id]);
+function ImportList({course, import_id}) {
+    const [courseImport, ] = useDataFetcher2(getImportList, [import_id, course?.id]);
     const [importing, setImporting] = useState(false);
     let navigate = useNavigate();
 
@@ -45,7 +44,7 @@ function ImportList(props) {
         return <></>
     return courseImport ?
         <>
-            {props.import_id === 12 ?
+            {import_id === 12 ?
                 <div>Importing from Spanish (from English). <Link to={`/course/${course.id}/import/66`}>switch to
                     English (from Spanish)</Link></div> :
                 <div>Importing from English (from Spanish). <Link to={`/course/${course.id}/import/12`}>switch to
@@ -213,7 +212,7 @@ function EditList(props) {
 }
 
 
-export function EditorOverview(props) {
+export function EditorOverview({userdata}) {
     let { id, import_id } = useParams();
     import_id = parseInt(import_id);
     let course_id = parseInt(id);
@@ -223,7 +222,7 @@ export function EditorOverview(props) {
 
     return <>
         <div id="toolbar">
-            <CourseEditorHeader username={props.username} doLogout={props.doLogout} courses={courses} course_id={course_id} import_id={import_id} />
+            <CourseEditorHeader userdata={userdata} courses={courses} course_id={course_id} import_id={import_id} />
         </div>
         <div id="root">
             <CourseList courses={courses} course_id={course_id} />
@@ -241,12 +240,11 @@ export function EditorOverview(props) {
 }
 
 
-export function CourseEditorHeader(props) {
-    let courses = props.courses;
+export function CourseEditorHeader({courses, course_id, userdata, import_id}) {
     let course = undefined;
     if(courses) {
         for (let c of courses) {
-            if(c.id === props.course_id) {
+            if(c.id === course_id) {
                 course = c;
                 break;
             }
@@ -263,7 +261,7 @@ export function CourseEditorHeader(props) {
         <Flag iso={course.fromLanguage} width={40*0.9} className={"flag_sub"} flag={course.fromLanguageFlag} flag_file={course.fromLanguageFlagFile}/>
         <span className={"AvatarEditorHeaderFlagname"} data-cy="course-title">{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
         {course.official ? <span data-cy="label_official"><i>official</i></span> :
-            !props.import_id ?
+            !import_id ?
             <Link id="button_import" className="editor_button" to={`/course/${course.id}/import/12`}
                 style={{marginLeft: "auto"}} data-cy="button_import">
                 <div><img alt="import button" src="/icons/import.svg"/></div>
@@ -275,6 +273,6 @@ export function CourseEditorHeader(props) {
                 <span>Back</span>
             </Link>
         }
-        <LoggedInButton username={props.username} doLogout={props.doLogout} page="editor"/>
+        <LoggedInButton userdata={userdata} page="editor"/>
     </div></>
 }

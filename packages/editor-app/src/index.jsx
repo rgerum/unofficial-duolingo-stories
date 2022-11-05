@@ -1,6 +1,7 @@
+import "./index.css"
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import {LoginDialog, useUsername} from "./login";
+import {LoginDialog, useUsername} from 'login';
 import {Spinner} from "story-component";
 import {EditorOverview} from "./course-editor"
 import {AvatarMain} from "./avatar_editor";
@@ -23,21 +24,21 @@ export function LoginWrapper() {
         window.location = `/language/${urlParams.get("language")}`;
 
 
-    let [username, doLogin, doLogout, showLogin, setShowLogin] = useUsername();
+    let userdata = useUsername();
 
     // loading
-    if (username === undefined) return <Spinner/>
+    if (userdata === undefined) return <Spinner/>
     // no username show login
-    if (username.username === undefined || username.role !== 1)
-        return <LoginDialog useUsername={[username, doLogin, doLogout, showLogin, setShowLogin]} />
+    if (userdata.username === undefined || userdata.role !== 1)
+        return <LoginDialog userdata={userdata} page={"editor"} />
         
     return <Routes>
-        <Route path='/course/:id' element={<EditorOverview username={username} doLogout={doLogout}/>}></Route>
-        <Route path='/course/:id/import/:import_id' element={<EditorOverview username={username} doLogout={doLogout}/>}></Route>
-        <Route path='/' element={<EditorOverview username={username} doLogout={doLogout}/>}></Route>
-        <Route path='/story/:story' element={<EditorNode username={username} doLogout={doLogout}/>}></Route>
-        <Route path='/language/:language' element={<AvatarMain username={username} doLogout={doLogout}/>}></Route>
-        <Route path='/stats' element={<Stats username={username} doLogout={doLogout}/>}></Route>
+        <Route path='/course/:id' element={<EditorOverview userdata={userdata} />}></Route>
+        <Route path='/course/:id/import/:import_id' element={<EditorOverview userdata={userdata} />}></Route>
+        <Route path='/' element={<EditorOverview userdata={userdata} />}></Route>
+        <Route path='/story/:story' element={<EditorNode userdata={userdata} />}></Route>
+        <Route path='/language/:language' element={<AvatarMain userdata={userdata} />}></Route>
+        <Route path='/stats' element={<Stats userdata={userdata} />}></Route>
     </Routes>
 }
 
