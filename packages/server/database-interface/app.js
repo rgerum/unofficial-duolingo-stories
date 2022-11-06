@@ -13,7 +13,7 @@ if(process.env.NODE_ENV === 'test') {
     app.use(function (req, res, next) {
 
         var origin = req.headers.origin;
-        if(origin && origin.match(/http:\/\/localhost:\d*$/)) {
+        if(origin && (origin.match(/http:\/\/localhost:\d*$/) || origin.match(/http:\/\/.*\.railway.app$/))) {
             res.setHeader('Access-Control-Allow-Origin', origin);
         }
 

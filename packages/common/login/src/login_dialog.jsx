@@ -38,8 +38,6 @@ export function LoginDialog({userdata, page, navigate}) {
         setRememberX(e.target.checked);
     }
 
-    navigate = navigate || useNavigate();
-
     async function buttonLogin() {
         setState(1);
         let userdata_new;
