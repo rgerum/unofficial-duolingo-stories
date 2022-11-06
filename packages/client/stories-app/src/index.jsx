@@ -6,7 +6,7 @@ import {createRoot} from 'react-dom/client';
 import {
     BrowserRouter as Router,
     Routes,
-    Route,
+    Route, useNavigate,
 } from "react-router-dom";
 import {load_dark_mode} from "includes";
 import {LoginDialog, useUsername} from "login";
@@ -29,10 +29,11 @@ function App() {
         window.location = `/task/${urlParams.get("task")}/${urlParams.get("username")}/${urlParams.get("activation_link")}`;
 
     let userdata = useUsername();
+    let navigate = useNavigate();
 
     return <Suspense fallback={<></>}>
         <Routes>
-            <Route path='/login' element={<LoginDialog userdata={userdata}/>}></Route>
+            <Route path='/login' element={<LoginDialog userdata={userdata} navigate={navigate}/>}></Route>
             <Route path='/story/:id' element={<StoryP />}></Route>
             <Route path='/story/:id/test' element={<StoryP />}></Route>
             <Route path='/task/:task/:username/:hash' element={<UserActivationOrReset />}></Route>
