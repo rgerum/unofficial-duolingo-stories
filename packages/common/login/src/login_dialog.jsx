@@ -177,7 +177,7 @@ export function LoginDialog({userdata, page, navigate}) {
     return <>
         {(showLogin <= 1) ?
                 <div id="login_dialog">
-                    <Link id="quit" to={"/"}/>
+                    <a id="quit" href="/" onClick={(e) => {e.preventDefault(); navigate("/")}}/>
                     <div>
                         <h2>Log in</h2>
                         <p>Attention, you cannot login with your Duolingo account.</p><p>You have to register for the
@@ -198,7 +198,7 @@ export function LoginDialog({userdata, page, navigate}) {
                 </div>
             : (showLogin === 2) ?
                 <div id="login_dialog">
-                    <Link id="quit" to={"/"} />
+                    <a id="quit" href="/" onClick={(e) => {e.preventDefault(); navigate("/")}}/>
                     <div>
                         <h2>Sign up</h2>
                         <p>If you register you can keep track of the stories you have already finished.</p>
@@ -221,7 +221,7 @@ export function LoginDialog({userdata, page, navigate}) {
                 </div>
                 : (showLogin === 3) ?
                     <div id="login_dialog">
-                        <Link id="quit" to={"/"} />
+                        <a id="quit" href="/" onClick={(e) => {e.preventDefault(); navigate("/")}}/>
                         <div>
                             <h2>Reset password</h2>
                             <p>If you forgot your password, we can send you a link to choose a new one.</p>
