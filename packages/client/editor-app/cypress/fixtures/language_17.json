@@ -1,0 +1,11 @@
+{
+  "id": 17,
+  "name": "Hebrew",
+  "short": "he",
+  "flag": null,
+  "public": 1,
+  "flag_file": null,
+  "speaker": "Avri",
+  "rtl": 1,
+  "default_text": "קוראים לי $name."
+}
