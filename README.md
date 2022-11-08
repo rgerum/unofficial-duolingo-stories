@@ -1,6 +1,8 @@
 # Unofficial Duolingo Stories
 [![Cypress Test](https://github.com/rgerum/unofficial-duolingo-stories/actions/workflows/cypress.yml/badge.svg)](https://github.com/rgerum/unofficial-duolingo-stories/actions/workflows/cypress.yml)
 [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
+[![chat](https://img.shields.io/discord/726701782075572277)](https://discord.com/invite/4NGVScARR3)
+
 
 This project brings the official Duolingo Stories to new languages, translated by a community effort.
 
