@@ -8,7 +8,7 @@ function isLocalNetwork(hostname) {
 }
 export let backend_express = "/stories/backend_node";
 if(isLocalNetwork())
-    backend_express = "https://duostories.org/stories/backend_node_test";
+    backend_express = "https://test.duostories.org/stories/backend_node_test";
 if(window.location.hostname === "test.duostories.org")
     backend_express = "/stories/backend_node_test";
 
