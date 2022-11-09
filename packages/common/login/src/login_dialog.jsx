@@ -3,15 +3,16 @@ import './login.css';
 import {LoggedInButton} from "./loggedinbutton";
 import {useInput} from "includes";
 import {register, reset_pw} from "./api_calls/user";
+import {MyLink} from "ui_elements";
 
 
 export function Login({userdata, navigate}) {
     if(userdata?.username !== undefined)
         return <LoggedInButton userdata={userdata} page="stories"/>
 
-    return <a id="log_in" href="/login" onClick={(e) => {e.preventDefault(); navigate("/login")}}>
+    return <MyLink id="log_in" to="/login" navigate={navigate}>
         <button className="button" style={{float: "none"}}>Log in</button>
-    </a>
+    </MyLink>
 }
 
 export function LoginDialog({userdata, page, navigate}) {
@@ -177,7 +178,7 @@ export function LoginDialog({userdata, page, navigate}) {
     return <>
         {(showLogin <= 1) ?
                 <div id="login_dialog">
-                    <a id="quit" href="/" onClick={(e) => {e.preventDefault(); navigate("/")}}/>
+                    <MyLink id="quit" to="/" navigate={navigate}/>
                     <div>
                         <h2>Log in</h2>
                         <p>Attention, you cannot login with your Duolingo account.</p><p>You have to register for the
@@ -198,7 +199,7 @@ export function LoginDialog({userdata, page, navigate}) {
                 </div>
             : (showLogin === 2) ?
                 <div id="login_dialog">
-                    <a id="quit" href="/" onClick={(e) => {e.preventDefault(); navigate("/")}}/>
+                    <MyLink id="quit" to="/" navigate={navigate}/>
                     <div>
                         <h2>Sign up</h2>
                         <p>If you register you can keep track of the stories you have already finished.</p>
@@ -221,7 +222,7 @@ export function LoginDialog({userdata, page, navigate}) {
                 </div>
                 : (showLogin === 3) ?
                     <div id="login_dialog">
-                        <a id="quit" href="/" onClick={(e) => {e.preventDefault(); navigate("/")}}/>
+                        <MyLink id="quit" to="/" navigate={navigate}/>
                         <div>
                             <h2>Reset password</h2>
                             <p>If you forgot your password, we can send you a link to choose a new one.</p>

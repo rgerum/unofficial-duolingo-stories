@@ -1,8 +1,7 @@
 import "./course-dropdown.css";
 
-import {useParams} from "react-router-dom";
-import {MyLink} from "./mylink";
-import {Flag} from "ui_elements";
+import {useNavigate, useParams} from "react-router-dom";
+import {Flag, MyLink} from "ui_elements";
 import {useDataFetcher} from "includes";
 import {useSuspendedDataFetcher} from "./api_calls/include";
 import {getCoursesUser, getStoriesSets} from "./api_calls/course";
@@ -13,11 +12,13 @@ function LanguageButtonSmall({course, startTransition}) {
     /**
      * A button in the language drop down menu (flag + name)
      */
+    let navigate = useNavigate();
 
     return <MyLink
         className="language_select_item"
         startTransition={startTransition}
         to={`/${course.learningLanguage}-${course.fromLanguage}`}
+        navigate={navigate}
     >
         <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} />
         <span>{course.name || course.learningLanguageName}</span>

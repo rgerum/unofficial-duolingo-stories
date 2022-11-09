@@ -163,7 +163,7 @@ export function Story({story, navigate, id, editor}) {
 
     return (
         <div>
-            <StoryHeader progress={progress} length={parts.length} course={course} />
+            <StoryHeader progress={progress} length={parts.length} course={course} navigate={navigate} />
             <div id="main">
                 <div id="story" ref={storyElement}>
                     <Legal />

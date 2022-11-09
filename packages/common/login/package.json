@@ -9,8 +9,8 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.4.3",
-    "includes": "*"
+    "includes": "*",
+    "ui_elements": "*"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^2.2.0",
