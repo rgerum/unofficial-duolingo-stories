@@ -25,6 +25,7 @@ import {
     getStory,
     setStory
 } from "./api_calls.mjs";
+import usePrompt from "./usePrompt";
 
 
 window.editorShowTranslations = false
@@ -159,10 +160,30 @@ function Editor({story_data, avatar_names, userdata}) {
     const [func_save, set_func_save] = React.useState(() => ()=>{});
     const [func_delete, set_func_delete] = React.useState(() => ()=>{});
 
+    const [unsaved_changes, set_unsaved_changes] = React.useState(false);
+
     const navigate = useNavigate();
 
     useResizeEditor(editor.current, preview.current, margin.current);
     useScrollLinking(view, preview.current, svg_parent.current);
+
+    usePrompt('You have unsaved changed, are you sure you want to quit?', unsaved_changes);
+    let beforeunload = React.useCallback((event) => {
+        if (unsaved_changes) {
+            event.preventDefault();
+            return event.returnValue = 'You have unsaved changed, are you sure you want to quit?';
+        }
+
+    }, [unsaved_changes]);
+
+    React.useEffect(() => {
+        console.log("liser", unsaved_changes);
+        if(!unsaved_changes)
+            return;
+        console.log("add event liser")
+        window.addEventListener('beforeunload', beforeunload)
+        return () => window.removeEventListener('beforeunload', beforeunload);
+    }, [unsaved_changes]);
 
     React.useEffect(() => {
         if(!story_data || !avatar_names)
@@ -170,8 +191,6 @@ function Editor({story_data, avatar_names, userdata}) {
         let createScrollLookUp = () => {
             window.dispatchEvent(new CustomEvent("resize"));
         };
-
-        let unsaved_changes = false;
 
         let story = undefined;
         let story_meta = undefined;
@@ -197,7 +216,7 @@ function Editor({story_data, avatar_names, userdata}) {
             }
 
             await setStory(data)
-            unsaved_changes = false;
+            set_unsaved_changes(false);
         }
         set_func_save(() => Save);
 
@@ -262,7 +281,7 @@ function Editor({story_data, avatar_names, userdata}) {
             }
             stateX = v.state;
             if (v.docChanged) {
-                unsaved_changes = true;
+                set_unsaved_changes(true);
                 story = undefined;
                 last_lineno = undefined;
             }
