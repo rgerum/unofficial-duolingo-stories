@@ -19,6 +19,13 @@ export default function CourseList({conlang_count, startTransition}) {
      */
     return (
         <div>
+
+            <div key={0} className="language_select_button celebration" >
+                <span className="celebration_icon">🎉</span>
+                <div className="language_select_button_text" style={{width: "68%"}}>We reached 1000 translated stories this week!<br/>
+                    Congratulations to all contributors. <span className="celebration_date">— 10. Nov. 2022</span></div>
+                <span className="celebration_icon">🎉</span>
+            </div>
             {Object.entries(courses).map(([name,]) => (
                 name === "Conlangs" ?
                     <MyLink key={name} to="/conlangs" navigate={navigate} className="language_select_button conlang-link" startTransition={startTransition}>
