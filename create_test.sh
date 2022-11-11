@@ -10,12 +10,12 @@ rm -r ../test_environment/
 mkdir ../test_environment
 
 # copy the stores-app
-cp -r packages/client/stories-app/dist/ ../test_environment/stories-app/
-cp -r packages/client/editor-app/dist/ ../test_environment/editor-app/
-cp -r packages/client/admin-app/dist/ ../test_environment/admin-app/
+rsync -r packages/client/stories-app/dist/* ../test_environment/stories-app
+rsync -r packages/client/editor-app/dist/* ../test_environment/editor-app
+rsync -r packages/client/admin-app/dist/* ../test_environment/admin-app
 
 # copy the express backend
-cp -r packages/server/database-interface ../test_environment/
+rsync -r packages/server/database-interface/* ../test_environment/database-interface
 
 # and restart the server
 supervisorctl restart express_test

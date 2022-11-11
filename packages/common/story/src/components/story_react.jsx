@@ -96,7 +96,7 @@ export function Story({story, navigate, id, editor}) {
     if(editor) {
         React.useMemo(() => {}, [story.id])
         return (
-            <div id="story">
+            <div id="story" ref={storyElement} className={story.learningLanguageRTL ? "story_rtl" : ""} >
                 {parts.map((part, i) => (
                     <Part key={i} editor={editor} controls={controls} progress={progress}
                           part={part}/>
@@ -165,7 +165,7 @@ export function Story({story, navigate, id, editor}) {
         <div>
             <StoryHeader progress={progress} length={parts.length} course={course} navigate={navigate} />
             <div id="main">
-                <div id="story" ref={storyElement}>
+                <div id="story" ref={storyElement} className={story.learningLanguageRTL ? "story_rtl" : ""}>
                     <Legal />
                     {parts.map((part, i) => (
                         <Part key={i} editor={editor} controls={controls} progress={progress} part={part} audios={audios} />

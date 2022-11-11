@@ -41,7 +41,9 @@ a:focus{outline:none !important;}
 
 
 
-
+.story_rtl {
+    direction: rtl;
+}
 
 
 /* rtl */

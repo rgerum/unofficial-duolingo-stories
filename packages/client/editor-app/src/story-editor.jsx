@@ -30,7 +30,7 @@ import usePrompt from "./usePrompt";
 
 window.editorShowTranslations = false
 window.editorShowSsml = false
-function StoryEditorHeader({story_data, userdata}) {
+function StoryEditorHeader({story_data, userdata, language_data, language_data2}) {
     const [show_trans, set_show_trans] = React.useState(window.editorShowTranslations);
     function do_set_show_trans() {
         let value = !show_trans;
@@ -54,21 +54,6 @@ function StoryEditorHeader({story_data, userdata}) {
         set_show_ssml(value);
         window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent("resize")));
     }
-
-    const [language_data, set_language_data] = React.useState();
-    const [language_data2, set_language_data2] = React.useState();
-    React.useEffect(() => {
-        async function loadLanguageData() {
-            if(!story_data)
-                return () => {}
-            let language_data = await getLanguageName(story_data.learningLanguage)
-            let language_data2 = await getLanguageName(story_data.fromLanguage)
-            set_language_data(language_data);
-            set_language_data2(language_data2);
-            return () => {}
-        }
-        loadLanguageData();
-    }, [story_data])
 
     const [save_text, set_save_text] = React.useState("Save");
     async function Save() {
@@ -151,6 +136,22 @@ function Editor({story_data, avatar_names, userdata}) {
     const preview = React.useRef();
     const margin = React.useRef();
     const svg_parent = React.useRef();
+
+
+    const [language_data, set_language_data] = React.useState();
+    const [language_data2, set_language_data2] = React.useState();
+    React.useEffect(() => {
+        async function loadLanguageData() {
+            if(!story_data)
+                return () => {}
+            let language_data = await getLanguageName(story_data.learningLanguage)
+            let language_data2 = await getLanguageName(story_data.fromLanguage)
+            set_language_data(language_data);
+            set_language_data2(language_data2);
+            return () => {}
+        }
+        loadLanguageData();
+    }, [story_data])
 
     const [editor_state, set_editor_state] = React.useState();
     const [story_state, set_story_state] = React.useState();
@@ -241,6 +242,8 @@ function Editor({story_data, avatar_names, userdata}) {
                     gilded: image.gilded,
                     locked: image.locked,
                 }
+                story.learningLanguageRTL = language_data?.rtl;
+                story.fromLanguageRTL = language_data2?.rtl;
 
                 set_editor_state(editor_state);
                 set_story_state(story);
@@ -304,13 +307,13 @@ function Editor({story_data, avatar_names, userdata}) {
         return () => {
             view.destroy();
         };
-    }, [story_data, avatar_names]);
+    }, [story_data, avatar_names, language_data, language_data2]);
 
     return (
         <div id="body">
             <div id="toolbar">
                 <StoryEditorHeader story_data={story_data} userdata={userdata}
-                                   func_save={func_save} func_delete={func_delete}/>
+                                   func_save={func_save} func_delete={func_delete} language_data={language_data} language_data2={language_data2}/>
             </div>
             <div id="root">
                 <svg id="margin" ref={svg_parent}>

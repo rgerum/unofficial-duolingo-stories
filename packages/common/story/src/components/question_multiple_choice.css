@@ -9,6 +9,10 @@
 .multiple_choice_answer_text {
     padding-left: 18px;
 }
+.story_rtl .multiple_choice_answer_text {
+    padding-left: 0;
+    padding-right: 18px;
+}
 
 .multiple_choice_li {
     margin: 20px 0;
