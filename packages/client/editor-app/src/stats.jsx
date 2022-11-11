@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import Plotly from "plotly.js-dist";
+//import Plotly from "plotly.js-dist";
 
 async function processData(courses, data, metric, y_axis, id) {
     let course_dict = {};
@@ -79,6 +79,7 @@ async function load() {
 
 
 export function Stats() {
+    return <div>Stats are disabled for now until I implement them in a more efficient way.</div>
     useEffect(() => load());
     return <>
     <div id="tester" style={{width:"600px", height: "400px"}}></div>
