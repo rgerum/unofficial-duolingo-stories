@@ -78,7 +78,13 @@ async function import2({id, id2}) {
 
 
 async function set_avatar(data) {
-    return await update_query("avatar_mapping", data, ["name", "speaker", "language_id", "avatar_id"]);
+    let res = await query(`SELECT id FROM avatar_mapping WHERE language_id = ? AND avatar_id = ?;`, [data.language_id, data.avatar_id]);
+
+    if(res.length) {
+        data.id = res[0].id;
+        return await update_query("avatar_mapping", data, ["name", "speaker", "language_id", "avatar_id"]);
+    }
+    return await insert_query("avatar_mapping", data, ["name", "speaker", "language_id", "avatar_id"]);
 }
 
 async function set_status(data) {
