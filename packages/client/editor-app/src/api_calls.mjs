@@ -130,7 +130,7 @@ export async function setStatus(data) {
 export async function setApproval(data) {
     try {
         let response = await fetch_post(`${backend_express_editor}/set_approve`, data);
-        return await response.text();
+        return (await response.json()).count;
     }
     catch (e) {
         return undefined;

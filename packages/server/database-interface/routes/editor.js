@@ -85,21 +85,25 @@ async function set_status(data) {
     return await update_query("story", data, ["status"]);
 }
 
-async function set_approve({story_id, user_id}) {
+async function set_approve({story_id}, {user_id}) {
     let res = await query(`SELECT id FROM story_approval WHERE story_id = ? AND user_id = ?;`, [story_id, user_id]);
-    if(res.affectedRows) {
+    let action;
+    if(res.length) {
         await query(`DELETE FROM story_approval WHERE story_id = ? AND user_id = ?;`, [story_id, user_id]);
+        action = "deleted";
     }
     else {
-        await query(`INSERT INTO story_approval (story_id, user_id) VALUES ?, ?);`, [story_id, user_id]);
+        await query(`INSERT INTO story_approval (story_id, user_id) VALUES (?, ?);`, [story_id, user_id]);
+        action = 'added';
     }
-    //let res2 = await query(`SELECT COUNT(id) as count FROM story_approval WHERE story_id = ?;`, [story_id])[0];
+    let res2 = (await query(`SELECT COUNT(id) as count FROM story_approval WHERE story_id = ?;`, [story_id]))[0];
 
     // get the number of finished stories in this set
-    let res3 = await query(`SELECT COUNT(set_id) count FROM story WHERE set_id = (SELECT set_id FROM story WHERE id = ?) AND course_id = (SELECT course_id FROM story WHERE id = ?) AND status = 'finished' AND deleted = 0 GROUP BY set_id;`, [story_id, story_id]);
+    let res3 = (await query(`SELECT COUNT(set_id) count FROM story WHERE set_id = (SELECT set_id FROM story WHERE id = ?) AND course_id = (SELECT course_id FROM story WHERE id = ?) AND status = 'finished' AND deleted = 0;`, [story_id, story_id]))[0];
     if(res3["count"] >= 4) {
         await query(`UPDATE story SET public = 1 WHERE set_id = (SELECT set_id FROM story WHERE id = ?) AND course_id = (SELECT course_id FROM story WHERE id = ?) AND status = 'finished' AND deleted = 0;`, [story_id, story_id]);
     }
+    return {count: res2["count"], finished_in_set: res3["count"], action: action}
 }
 
 async function set_import({id, course_id}, {user_id, username}) {
