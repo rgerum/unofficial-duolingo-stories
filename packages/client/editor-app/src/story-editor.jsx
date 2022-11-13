@@ -30,7 +30,7 @@ import usePrompt from "./usePrompt";
 
 window.editorShowTranslations = false
 window.editorShowSsml = false
-function StoryEditorHeader({story_data, userdata, language_data, language_data2, func_save, func_delete}) {
+function StoryEditorHeader({story_data, userdata, unsaved_changes, language_data, language_data2, func_save, func_delete}) {
     const [show_trans, set_show_trans] = React.useState(window.editorShowTranslations);
     function do_set_show_trans() {
         let value = !show_trans;
@@ -125,7 +125,7 @@ function StoryEditorHeader({story_data, userdata, language_data, language_data2,
         </div>
         <div id="button_save" className="editor_button" onClick={Save}>
             <div><img alt="icon save" src="/icons/save.svg" /></div>
-            <span>{save_text}</span>
+            <span title={unsaved_changes ? "Story contains unsaved changes" : "No unsaved changes."}>{save_text + (unsaved_changes ? "*" : "")}</span>
         </div>
         <LoggedInButton userdata={userdata} page="editor"/>
     </div></>
@@ -312,7 +312,7 @@ function Editor({story_data, avatar_names, userdata}) {
     return (
         <div id="body">
             <div id="toolbar">
-                <StoryEditorHeader story_data={story_data} userdata={userdata}
+                <StoryEditorHeader story_data={story_data} userdata={userdata} unsaved_changes={unsaved_changes}
                                    func_save={func_save} func_delete={func_delete} language_data={language_data} language_data2={language_data2}/>
             </div>
             <div id="root">
