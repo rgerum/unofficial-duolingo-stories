@@ -10,21 +10,30 @@ import {Link} from "react-router-dom";
 
 function Avatar(props) {
     let avatar = props.avatar;
-    let [inputName, inputNameSetValue] = useInput(avatar.name || "");
-    let [inputSpeaker, inputSpeakerSetValue] = useInput(avatar.speaker || "");
+    let [name, setName] = useState(avatar.name);
+    let [speaker, setSpeaker] = useState(avatar.speaker);
+    let [inputName, inputNameSetValue] = useInput(name || "");
+    let [inputSpeaker, inputSpeakerSetValue] = useInput(speaker || "");
+
+    let unsavedChanged = inputName !== (name || "") || inputSpeaker !== (speaker || "");
+
     let language_id = props.language_id;
-    function save() {
+    async function save() {
+        let name = inputName;
+        let speaker = inputSpeaker;
         let data = {
-            name: inputName,
-            speaker: inputSpeaker,
+            name: name,
+            speaker: speaker,
             language_id: language_id,
             avatar_id: avatar.avatar_id,
         };
-        return setAvatarSpeaker(data)
+        await setAvatarSpeaker(data);
+        setName(name);
+        setSpeaker(speaker);
     }
     if(avatar.avatar_id === -1) {
         return <div className={"avatar"}>
-            <p>{avatar.avatar_id}</p>
+            <p>{avatar.avatar_id}<span>{unsavedChanged ? "*" : ""}</span></p>
             <p style={{height: "50px"}}>
                 <img alt="avatar" src={avatar.link} style={{height: "50px"}}/>
             </p>
@@ -32,11 +41,11 @@ function Avatar(props) {
             <p>{inputName}</p>
             <p><input value={inputSpeaker} onChange={inputSpeakerSetValue} type="text" placeholder="Speaker"/></p>
             <span className="copy_button" title="play audio" onClick={(e) => props.play(e, inputSpeaker, "Duo")}><img alt="play" src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"/></span>
-            <p><input className="save-btn" value="save" onClick={save} disabled={!!(inputName && inputName === avatar.name && inputSpeaker && inputSpeaker === avatar.speaker)} type="button"/></p>
+            <p><input className="save-btn" value="save" onClick={save} disabled={!unsavedChanged} type="button"/></p>
         </div>
     }
     return <div className={"avatar"}>
-        <p>{avatar.avatar_id}</p>
+        <p>{avatar.avatar_id}<span>{unsavedChanged ? "*" : ""}</span></p>
         <p>
             <img alt="avatar" src={avatar.link} style={{height: "50px"}}/>
         </p>
@@ -45,7 +54,7 @@ function Avatar(props) {
         <p><input value={inputSpeaker} onChange={inputSpeakerSetValue} type="text" placeholder="Speaker"/></p>
 
         <PlayButton play={props.play} speaker={inputSpeaker} name={avatar.avatar_id === 0 ? "Duo" : inputName} />
-        <p><input value="save" className="save-btn" onClick={save} disabled={!!(inputName && inputName === avatar.name && inputSpeaker && inputSpeaker === avatar.speaker)} type="button"/></p>
+        <p><input value="save" className="save-btn" onClick={save} disabled={!unsavedChanged} type="button"/></p>
     </div>
 }
 
