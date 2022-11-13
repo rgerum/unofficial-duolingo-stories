@@ -30,7 +30,7 @@ import usePrompt from "./usePrompt";
 
 window.editorShowTranslations = false
 window.editorShowSsml = false
-function StoryEditorHeader({story_data, userdata, language_data, language_data2}) {
+function StoryEditorHeader({story_data, userdata, language_data, language_data2, func_save, func_delete}) {
     const [show_trans, set_show_trans] = React.useState(window.editorShowTranslations);
     function do_set_show_trans() {
         let value = !show_trans;
@@ -59,7 +59,7 @@ function StoryEditorHeader({story_data, userdata, language_data, language_data2}
     async function Save() {
         try {
             set_save_text("Saving...");
-            props.func_save();
+            func_save();
         }
         catch (e) {
             console.log("error save", e);
@@ -72,7 +72,7 @@ function StoryEditorHeader({story_data, userdata, language_data, language_data2}
         if(confirm("Are you sure that you want to delete this story?")) {
             document.querySelector("#button_delete span").innerText = "Deleting";
             try {
-                props.func_delete();
+                func_delete();
             }
             catch (e) {
                 console.log("error delete", e);
