@@ -28,8 +28,11 @@ async function course({course_id}) {
         return
     }
     let course = res[0];
-    course["stories"] = await query(`SELECT COUNT(sa.id) as approvals, story.id, story.set_id, story.set_index, story.name, story.status, story.image, story.image_done, story.xp, story.name_base, user.username, story.date, story.change_date, story.public FROM story
+    course["stories"] = await query(`SELECT COUNT(sa.id) as approvals, story.id, story.set_id, story.set_index, story.name, story.status, story.image,
+       story.image_done, story.xp, story.name_base, user.username, user2.username AS author_change, story.date, story.change_date, story.public
+    FROM story
     LEFT JOIN user ON story.author = user.id
+    LEFT JOIN user user2 ON story.author_change = user2.id
     LEFT JOIN story_approval sa on story.id = sa.story_id
     WHERE story.course_id = ? AND deleted = false
     GROUP BY story.id

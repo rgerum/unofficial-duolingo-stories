@@ -157,6 +157,16 @@ function DropDownStatus(props) {
         </div>
 }
 
+function formatDate(datetime) {
+    function pad(x) {
+        if(x < 10)
+            return "0"+x;
+        return x;
+    }
+    let d = new Date(datetime);
+    return `${d.getFullYear()}-${pad(d.getMonth())}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
 function EditList({course}) {
     let stories = course?.stories
     if(stories === undefined)
@@ -194,7 +204,8 @@ function EditList({course}) {
                 <th data-js-sort-colnum="2">Status</th>
                 <th data-js-sort-colnum="4">Author</th>
                 <th data-js-sort-colnum="5" className="js-sort-active">Creation</th>
-                <th data-js-sort-colnum="6">Change</th>
+                <th data-js-sort-colnum="6">Author</th>
+                <th data-js-sort-colnum="7">Change</th>
             </tr>
             </thead>
             <tbody>
@@ -207,8 +218,9 @@ function EditList({course}) {
                     <td style={{width: "100%"}}><Link to={`/story/${story.id}`}>{story.name}</Link></td>
                     <td><DropDownStatus id={story.id} count={story.approvals} status={story.status} public={story.public} official={course.official}/></td>
                     <td>{story.username}</td>
-                    <td>{story.date}</td>
-                    <td>{story.change_date}</td>
+                    <td>{formatDate(story.date)}</td>
+                    <td>{story.author_change}</td>
+                    <td>{formatDate(story.change_date)}</td>
                 </tr>
             )}
             </tbody>
