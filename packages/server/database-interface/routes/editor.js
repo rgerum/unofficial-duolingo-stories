@@ -126,8 +126,11 @@ async function set_import({id, course_id}, {user_id, username}) {
    return {id: new_id}
 }
 
-async function set_story(data, {username}) {
+async function set_story(data, {username, user_id}) {
     data["api"] = 2;
+    data["change_date"] = (new Date()).toISOString();
+    data["author_change"] = user_id;
+
     // if no id is given we look for a
     if(data["id"] === undefined) {
         let res = await query(`SELECT id FROM story WHERE API = 2 AND duo_id = ? AND course_id = ? LIMIT 1;`, [data["duo_id"], data["course_id"]]);
@@ -135,14 +138,14 @@ async function set_story(data, {username}) {
             data["id"] = res[0]["id"];
     }
 
-    let res = await update_query("story", data, ["duo_id", "name", "image", "set_id", "set_index", "course_id", "text", "json", "api"]);
+    await update_query("story", data, ["duo_id", "name", "image", "change_date", "author_change", "set_id", "set_index", "course_id", "text", "json", "api"]);
 
     await upload_github(data['id'], data["course_id"], data["text"], username,`updated ${data["name"]} in course ${data["course_id"]}`);
     return "done"
 }
 
 async function delete_story({id}, {username}) {
-    let res = await query(`UPDATE story SET deleted = 1, public = 0 WHERE id = ?;`, [id]);
+    await query(`UPDATE story SET deleted = 1, public = 0 WHERE id = ?;`, [id]);
     await upload_github(data['id'], data["course_id"], data["text"], username, `delete ${data["name"]} from course ${data["course_id"]}`, true);
     return "done"
 }
