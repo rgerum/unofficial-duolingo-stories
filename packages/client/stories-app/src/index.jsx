@@ -1,6 +1,6 @@
 import './index.css';
 
-import React, { Suspense, lazy } from 'react';
+import React, {Suspense, lazy, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 
 import {
@@ -11,6 +11,7 @@ import {
 import {load_dark_mode} from "includes";
 import {LoginDialog, useUsername} from "login";
 import {UserActivationOrReset} from "login";
+import {setStoryDone} from "./api_calls/course";
 const IndexContent = lazy(() => import('./overview'));
 const StoryP = lazy(() => import('./story_wrapper'));
 
@@ -31,14 +32,17 @@ function App() {
     let userdata = useUsername();
     let navigate = useNavigate();
 
+    let [storyFinishedIndex, setStoryFinishedIndex] = useState(0);
+    let storyFinishedIndexUpdate = async (id) => {await setStoryDone(id); setStoryFinishedIndex(storyFinishedIndex+1);}
+
     return <Suspense fallback={<></>}>
         <Routes>
             <Route path='/login' element={<LoginDialog userdata={userdata} navigate={navigate}/>}></Route>
-            <Route path='/story/:id' element={<StoryP />}></Route>
+            <Route path='/story/:id' element={<StoryP storyFinishedIndexUpdate={storyFinishedIndexUpdate} />}></Route>
             <Route path='/story/:id/test' element={<StoryP />}></Route>
             <Route path='/task/:task/:username/:hash' element={<UserActivationOrReset />}></Route>
-            <Route path='/:lang-:lang_base/*' element={<IndexContent userdata={userdata}/>}></Route>
-            <Route path='/*' element={<IndexContent userdata={userdata}/>}></Route>
+            <Route path='/:lang-:lang_base/*' element={<IndexContent userdata={userdata} storyFinishedIndex={storyFinishedIndex}/>}></Route>
+            <Route path='/*' element={<IndexContent userdata={userdata} storyFinishedIndex={storyFinishedIndex}/>}></Route>
         </Routes>
     </Suspense>
 }

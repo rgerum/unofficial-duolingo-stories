@@ -55,3 +55,8 @@ export async function getStoryJSON(id) {
     }
     return story_json;
 }
+
+
+export async function setStoryDone(id) {
+    return fetch(`${backend_express}/story/${id}/done`, {credentials: 'include'});
+}

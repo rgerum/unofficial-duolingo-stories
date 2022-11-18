@@ -17,7 +17,7 @@ function Error() {
     </div>
 }
 
-export default function StoryP() {
+export default function StoryP({storyFinishedIndexUpdate}) {
     let { id } = useParams();
     const navigate = useNavigate();
     let test = window.location.href.endsWith("test");
@@ -28,5 +28,5 @@ export default function StoryP() {
         return <Error/>
     if(test)
         return <div id="main"><Story id={id} editor={{lineno: 3}} story={story_data} /></div>
-    return <Story id={id} story={story_data} navigate={navigate}/>
+    return <Story id={id} story={story_data} navigate={navigate} storyFinishedIndexUpdate={storyFinishedIndexUpdate}/>
 }

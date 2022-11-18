@@ -4,14 +4,14 @@ import './story.css';
 import {playSoundRight, playSoundWrong} from "./sound_effects";
 import {Part} from "./part";
 import {FinishedPage} from "./finish_page";
-import {setStoryDone, scroll_down} from "./includes";
+import {scroll_down} from "./includes";
 import {Footer} from "./story_footer";
 import {StoryHeader} from "./story_header";
 import {Spinner, Legal} from "ui_elements";
 //import {StoryTitlePage} from "./story_title_page";
 
 
-export function Story({story, navigate, id, editor}) {
+export function Story({story, navigate, id, editor, storyFinishedIndexUpdate}) {
     const storyElement = React.useRef();
 
     let course = story.learningLanguage + "-" + story.fromLanguage;
@@ -49,7 +49,7 @@ export function Story({story, navigate, id, editor}) {
     }, [progress, setProgress, setRight]);
 
     let finish = React.useCallback(() => {
-        setStoryDone(id);
+        storyFinishedIndexUpdate(id);
         navigate("/"+course);
     }, [id, course, navigate]);
 

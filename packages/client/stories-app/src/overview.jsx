@@ -13,7 +13,7 @@ const Faq = lazy(() => import('./faq'));
 
 /* ******** */
 
-export default function IndexContent({userdata}) {
+export default function IndexContent({userdata, storyFinishedIndex}) {
     const [isPending, startTransition] = React.useTransition();
     let navigate = useNavigate();
 
@@ -26,11 +26,11 @@ export default function IndexContent({userdata}) {
         <Suspense fallback={<Spinner />}>
         <div id="main_index" style={{ opacity: isPending ? 0.8 : 1 }}>
             <Routes>
-                <Route path='/' element={<MainContent userdata={userdata} startTransition={startTransition}/>}></Route>
+                <Route path='/' element={<MainContent userdata={userdata} startTransition={startTransition} storyFinishedIndex={storyFinishedIndex}/>}></Route>
                 <Route path='conlangs' element={<MainContent userdata={userdata} startTransition={startTransition} filter={'conlang'} />}></Route>
-                <Route path='/:lang-:lang_base' element={<MainContent userdata={userdata} startTransition={startTransition}/>}></Route>
+                <Route path='/:lang-:lang_base' element={<MainContent userdata={userdata} startTransition={startTransition} storyFinishedIndex={storyFinishedIndex}/>}></Route>
                 <Route path='/faq' element={<Faq />}></Route>
-                <Route path='/*' element={<MainContent userdata={userdata} startTransition={startTransition} error />}></Route>
+                <Route path='/*' element={<MainContent userdata={userdata} startTransition={startTransition} storyFinishedIndex={storyFinishedIndex} error />}></Route>
             </Routes>
         </div>
         </Suspense>
@@ -38,7 +38,7 @@ export default function IndexContent({userdata}) {
     </div>
 }
 
-function MainContent({userdata, filter, startTransition}) {
+function MainContent({userdata, filter, startTransition, storyFinishedIndex}) {
     let counts = useSuspendedDataFetcher(getCoursesCount, []);
     let {lang} = useParams();
 
@@ -64,8 +64,8 @@ function MainContent({userdata, filter, startTransition}) {
 
     <Suspense fallback={<Spinner />}>
         {lang !== undefined ?
-            <SetList userdata={userdata} conlang_count={conlangs.length} /> :
-            <CourseList filter={filter} startTransition={startTransition} />
+            <SetList userdata={userdata} conlang_count={conlangs.length} storyFinishedIndex={storyFinishedIndex} /> :
+            <CourseList filter={filter} startTransition={startTransition}  />
         }
 
         <hr/>

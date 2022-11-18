@@ -43,49 +43,6 @@ export function useEventListener(eventName, handler, element = window) {
     );
 }
 
-
-
-export function get_backend() {
-    let backend = "https://carex.uber.space/stories/backend/"
-    if(window.location.host === "www.duostories.org" || window.location.host === "duostories.org")
-        backend = "https://"+window.location.host+"/stories/backend/"
-    return backend;
-}
-let backend = get_backend();
-let backend_stories = backend+"stories/"
-
-
-function isLocalNetwork(hostname) {
-    try {
-        if (hostname === undefined) hostname = window.location.hostname;
-        return ['localhost', '127.0.0.1', '', '::1'].includes(hostname) || hostname.startsWith('192.168.') || hostname.startsWith('10.0.') || hostname.endsWith('.local');
-    } catch (e) {
-        return true;
-    }
-}
-export let backend_express = "/stories/backend_node";
-if(isLocalNetwork())
-    backend_express = "https://duostories.org/stories/backend_node_test";
-if(window.location.hostname === "test.duostories.org")
-    backend_express = "/stories/backend_node_test";
-
-export async function setStoryDone(id) {
-    return fetch(`${backend_express}/story/${id}/done`, {credentials: 'include'});
-}
-
-export async function getStoryJSON(id) {
-    let response_json = await fetch(`${backend_stories}get_story_json.php?id=${id}`);
-    let story_json;
-    if(response_json.status === 200) {
-        try {
-            story_json = await response_json.json();
-        } catch (e) {
-            story_json = null;
-        }
-    }
-    return story_json;
-}
-
 export function scroll_down() {
     // scroll down to the bottom
     document.documentElement.scrollTo({

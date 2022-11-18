@@ -95,10 +95,10 @@ LEFT JOIN language l2 ON l2.id = course.learningLanguage
 
 async function post_story_done({story_id}, {user_id}) {
     if(!user_id) {
-        await query(`INSERT INTO story_done (story_id) VALUES(?)`, [story_id]);
+        await query(`INSERT INTO story_done (story_id) VALUES(?)`, [parseInt(story_id)]);
         return {status: 'done'}
     }
-    await query(`INSERT INTO story_done (user_id, story_id) VALUES(?, ?)`, [user_id, story_id]);
+    await query(`INSERT INTO story_done (user_id, story_id) VALUES(?, ?)`, [user_id, parseInt(story_id)]);
     return {message: "done"}
 }
 
