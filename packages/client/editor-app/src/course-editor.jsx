@@ -164,7 +164,7 @@ function formatDate(datetime) {
         return x;
     }
     let d = new Date(datetime);
-    return `${d.getFullYear()}-${pad(d.getMonth())}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
 function EditList({course}) {
