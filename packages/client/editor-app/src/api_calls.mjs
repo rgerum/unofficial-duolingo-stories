@@ -117,24 +117,9 @@ export async function setAvatarSpeaker(data) {
     }
 }
 
-export async function setStatus(data) {
-    try {
-        let response = await fetch_post(`${backend_express_editor}/set_status`, data);
-        return await response.json();
-    }
-    catch (e) {
-        return {};
-    }
-}
-
 export async function setApproval(data) {
-    try {
-        let response = await fetch_post(`${backend_express_editor}/set_approve`, data);
-        return (await response.json()).count;
-    }
-    catch (e) {
-        return undefined;
-    }
+    let response = await fetch_post(`${backend_express_editor}/set_approve`, data);
+    return await response.json();
 }
 
 export async function getStory(id) {

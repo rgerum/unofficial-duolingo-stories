@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import {useDataFetcher, useDataFetcher2} from 'includes'
 import {Spinner, SpinnerBlue, Flag} from 'ui_elements'
 import {LoggedInButton} from 'login'
-import {getCourses, getCourse, getImportList, setImport, setStatus, setApproval} from "./api_calls.mjs";
+import {getCourses, getCourse, getImportList, setImport, setApproval} from "./api_calls.mjs";
 import {Link, useNavigate, useParams,} from "react-router-dom";
 
 
@@ -107,31 +107,24 @@ function DropDownStatus(props) {
         return <></>
 
     async function addApproval() {
-        let text = await setApproval({story_id: props.id});
-        if(text !== undefined) {
-            let count = parseInt(text)
-            setCount(count)
-            if(count === 0)
-                changeState("draft");
-            if(count === 1)
-                changeState("feedback");
-            if(count >= 2)
-                changeState("finished");
-        }
-    }
-
-    async function changeState(status) {
         setLoading(1);
         try {
-            await setStatus({id: props.id, status: status})
+            let response = await setApproval({story_id: props.id});
+            if (response?.count !== undefined) {
+                let count = parseInt(response.count)
+                setCount(count)
+                if (response.published.length)
+                    props.updateCourses();
+                set_status(response.story_status);
+                setLoading(0);
+            }
         }
         catch (e) {
             console.error(e);
             return setLoading(-1);
         }
-        set_status(status);
-        setLoading(0);
     }
+
     function status_wrapper(status, public_) {
         if(props.official)
             return "🥇 official"
@@ -167,7 +160,7 @@ function formatDate(datetime) {
     return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
-function EditList({course}) {
+function EditList({course, updateCourses}) {
     let stories = course?.stories
     if(stories === undefined)
         stories = []
@@ -216,7 +209,7 @@ function EditList({course}) {
                         src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
                         width="44px" height={"40px"}/></td>
                     <td style={{width: "100%"}}><Link to={`/story/${story.id}`}>{story.name}</Link></td>
-                    <td><DropDownStatus id={story.id} count={story.approvals} status={story.status} public={story.public} official={course.official}/></td>
+                    <td><DropDownStatus id={story.id} count={story.approvals} status={story.status} public={story.public} official={course.official} updateCourses={updateCourses}/></td>
                     <td>{story.username}</td>
                     <td>{formatDate(story.date)}</td>
                     <td>{story.author_change}</td>
@@ -237,7 +230,10 @@ export function EditorOverview({userdata}) {
     let course_id = parseInt(id);
 
     const courses = useDataFetcher(getCourses);
-    const [course, ] = useDataFetcher2(getCourse, [course_id]);
+    const [index, setCourseUpdateIndex] = useState(0);
+    const [course, ] = useDataFetcher2(getCourse, [course_id, index]);
+
+    const updateCourses = () => setCourseUpdateIndex(index+1);
 
     return <>
         <div id="toolbar">
@@ -249,7 +245,7 @@ export function EditorOverview({userdata}) {
                 { course_id && import_id ?
                     <ImportList course={course} import_id={import_id}/>
                   : course_id ?
-                    <EditList course={course}/>
+                    <EditList course={course} updateCourses={updateCourses} />
                   :
                     <p id="no_stories">Click on one of the courses to display its stories.</p>
                 }

@@ -106,13 +106,32 @@ async function set_approve({story_id}, {user_id}) {
         action = 'added';
     }
     let res2 = (await query(`SELECT COUNT(id) as count FROM story_approval WHERE story_id = ?;`, [story_id]))[0];
+    let count = res2["count"];
+
+    let status = undefined;
+    if(count === 0)
+        status = "draft"
+    if(count === 1)
+        status = "feedback"
+    if(count >= 2)
+        status = "finished"
+    await set_status({status: status, id: story_id});
 
     // get the number of finished stories in this set
-    let res3 = (await query(`SELECT COUNT(set_id) count FROM story WHERE set_id = (SELECT set_id FROM story WHERE id = ?) AND course_id = (SELECT course_id FROM story WHERE id = ?) AND status = 'finished' AND deleted = 0;`, [story_id, story_id]))[0];
-    if(res3["count"] >= 4) {
-        await query(`UPDATE story SET public = 1 WHERE set_id = (SELECT set_id FROM story WHERE id = ?) AND course_id = (SELECT course_id FROM story WHERE id = ?) AND status = 'finished' AND deleted = 0;`, [story_id, story_id]);
+    let res3 = await query(`SELECT story.id, story.public FROM story WHERE set_id = (SELECT set_id FROM story WHERE id = ?) AND
+                                            course_id = (SELECT course_id FROM story WHERE id = ?) AND status = 'finished' AND deleted = 0;`, [story_id, story_id]);
+
+    let published = []
+    if(res3.length >= 4) {
+        let date_published = (new Date()).toISOString();
+        for(let story of res3) {
+            if(story.public === 0) {
+                await query(`UPDATE story SET public = 1, date_published = ? WHERE id = ?;`, [date_published, story.id]);
+                published.push(story.id);
+            }
+        }
     }
-    return {count: res2["count"], finished_in_set: res3["count"], action: action}
+    return {count: count, story_status: status, finished_in_set: res3.length, action: action, published: published};
 }
 
 async function set_import({id, course_id}, {user_id, username}) {
@@ -174,7 +193,6 @@ router.get('/editor/image/:id', func_catch(image));
 router.get('/editor/import/:id/:id2', func_catch(import2));
 
 router.post('/editor/set_avatar', func_catch(set_avatar));
-router.post('/editor/set_status', func_catch(set_status));
 router.post('/editor/set_approve', func_catch(set_approve));
 router.get('/editor/set_import/:course_id/:id', func_catch(set_import));
 router.post('/editor/set_story', func_catch(set_story));
