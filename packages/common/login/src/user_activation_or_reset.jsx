@@ -48,6 +48,13 @@ export function UserActivationOrReset() {
 
     function reset_pw_clicked() {login_button(setResetPwState, passwordInput, username, hash)}
 
+    if(task === "activate")
+        document.title = `Duostories Activate Account`;
+    else if(task === "activresetpwate")
+        document.title = `Duostories Reset Password`;
+    else
+        document.title = `Duostories`;
+
     if(!initialized) {
         setInitialized(1);
         if(task === "activate")

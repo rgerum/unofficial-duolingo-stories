@@ -26,6 +26,7 @@ export default function StoryP({storyFinishedIndexUpdate}) {
         return <Spinner/>
     if(story_data === null)
         return <Error/>
+    document.title = `Duostories ${story_data.learningLanguageLong} from ${story_data.fromLanguageLong}: ${story_data.fromLanguageName}`;
     if(test)
         return <div id="main"><Story id={id} editor={{lineno: 3}} story={story_data} /></div>
     return <Story id={id} story={story_data} navigate={navigate} storyFinishedIndexUpdate={storyFinishedIndexUpdate}/>

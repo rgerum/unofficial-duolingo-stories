@@ -7,6 +7,8 @@ export default function SetList({userdata, storyFinishedIndex}) {
     let {lang,lang_base} = useParams();
     const course = useSuspendedDataFetcher(getStoriesSets, [lang, lang_base, userdata.username, storyFinishedIndex]);
 
+    document.title = `${course.learningLanguageName} Duolingo Stories: improve your ${course.learningLanguageName} learning by community translated Duolingo stories.`;
+
     return <div id="story_list">
         {course.about ?
             <div className="set_list">

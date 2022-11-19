@@ -28,6 +28,8 @@ export function LoginDialog({userdata, page, navigate}) {
 
     let [remember, setRememberX] = React.useState(false);
 
+    document.title = `Duostories Login`;
+
     function doSetShowLogin(value) {
         setShowLogin(value);
         setState(0);

@@ -2,6 +2,8 @@ import React from "react";
 
 
 export default function Faq() {
+    document.title = `Duostories FAQ`;
+
     return <div>
         <div id="main_index">
             <h1>FAQ</h1>

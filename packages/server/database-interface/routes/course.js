@@ -15,6 +15,7 @@ WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1`);
 
 async function get_story({story_id}) {
     let res = await query(`SELECT l1.short AS fromLanguage, l2.short AS learningLanguage, 
+              l1.name AS fromLanguageLong, l2.name AS learningLanguageLong, 
               l1.rtl AS fromLanguageRTL, l2.rtl AS learningLanguageRTL,
               story.id, story.json 
               FROM story 
@@ -28,9 +29,13 @@ async function get_story({story_id}) {
     }
     let data = JSON.parse(res[0]["json"]);
     data.id = res[0]["id"];
+
     data.fromLanguage = res[0]["fromLanguage"];
+    data.fromLanguageLong = res[0]["fromLanguageLong"];
     data.fromLanguageRTL = res[0]["fromLanguageRTL"];
+
     data.learningLanguage = res[0]["learningLanguage"];
+    data.learningLanguageLong = res[0]["learningLanguageLong"];
     data.learningLanguageRTL = res[0]["learningLanguageRTL"];
 
     return data;

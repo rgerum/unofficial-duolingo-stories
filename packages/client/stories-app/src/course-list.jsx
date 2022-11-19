@@ -9,6 +9,9 @@ import {useNavigate} from "react-router-dom";
 export default function CourseList({conlang_count, startTransition}) {
     let courses = useSuspendedDataFetcher(getPublicCourses, []);
     let navigate = useNavigate();
+
+    document.title = `Duostories: improve your Duolingo learning with community translated Duolingo stories.`;
+
     /*
         <div key={0} className="language_select_button celebration" >
             <span className="celebration_icon">🎉</span>
