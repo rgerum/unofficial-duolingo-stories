@@ -8,7 +8,7 @@ import {Spinner, Legal} from "ui_elements";
 
 const CourseList = lazy(() => import('./course-list'));
 const CourseDropdown = lazy(() => import('./course-dropdown'));
-const SetList = lazy(() => import('./story-list'));
+const MainContentSetList = lazy(() => import('./story-list'));
 const Faq = lazy(() => import('./faq'));
 
 /* ******** */
@@ -44,6 +44,9 @@ function MainContent({userdata, filter, startTransition, storyFinishedIndex}) {
 
     let conlangs = [];
 
+    if(lang !== undefined)
+        return <MainContentSetList userdata={userdata} storyFinishedIndex={storyFinishedIndex}/>
+
     return <>
     <header>
         <h1 className={"main_title"}>Unofficial Duolingo Stories</h1>
@@ -63,14 +66,10 @@ function MainContent({userdata, filter, startTransition, storyFinishedIndex}) {
     </header>
 
     <Suspense fallback={<Spinner />}>
-        {lang !== undefined ?
-            <SetList userdata={userdata} conlang_count={conlangs.length} storyFinishedIndex={storyFinishedIndex} /> :
-            <CourseList filter={filter} startTransition={startTransition}  />
-        }
+        <CourseList filter={filter} startTransition={startTransition}  />
 
         <hr/>
         <Legal/>
     </Suspense>
     </>
 }
-

@@ -1,13 +1,48 @@
 import './story-list.css'
+import React, {Suspense} from "react";
 import {Link, useParams} from "react-router-dom";
 import {useSuspendedDataFetcher} from "./api_calls/include";
 import {getStoriesSets} from "./api_calls/course";
+import {Legal, Spinner} from "ui_elements";
 
-export default function SetList({userdata, storyFinishedIndex}) {
-    let {lang,lang_base} = useParams();
+export default function MainContentSetList({userdata, storyFinishedIndex}) {
+    let {lang, lang_base} = useParams();
+
     const course = useSuspendedDataFetcher(getStoriesSets, [lang, lang_base, userdata.username, storyFinishedIndex]);
 
     document.title = `${course.learningLanguageName} Duolingo Stories: improve your ${course.learningLanguageName} learning by community translated Duolingo stories.`;
+
+    let conlangs = [];
+    let count = 0;
+    for(let set of course.sets)
+        count += set.length;
+
+    return <>
+        <header>
+            <h1 className={"main_title"}>Unofficial {course.learningLanguageName} Duolingo Stories</h1>
+            <p className={"title_desc"}>
+                Learn {course.learningLanguageName} with {count} community translated Duolingo Stories.
+            </p>
+            <p className={"title_desc"}>
+                If you want to contribute or discuss the stories, meet us on <a href="https://discord.gg/4NGVScARR3">Discord</a><br/>
+                or learn more about the project in our <Link to={"/faq"}>FAQ</Link>.
+            </p>
+            {Object.keys(conlangs).length ?
+                <p><b>Notice:</b> You're currently on the page for conlangs without ISO-3 codes. We keep them here as to not clutter the front page, but we're always happy to have more!
+                    <br/> To return to the main page, click <Link to="/" >here</Link>.
+                </p>
+                : <></>}
+        </header>
+
+        <Suspense fallback={<Spinner />}>
+            <SetList course={course} userdata={userdata} conlang_count={conlangs.length} storyFinishedIndex={storyFinishedIndex} /> :
+            <hr/>
+            <Legal/>
+        </Suspense>
+    </>
+}
+
+export function SetList({course}) {
 
     return <div id="story_list">
         {course.about ?
