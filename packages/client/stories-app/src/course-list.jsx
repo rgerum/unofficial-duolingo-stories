@@ -10,22 +10,22 @@ export default function CourseList({conlang_count, startTransition}) {
     let courses = useSuspendedDataFetcher(getPublicCourses, []);
     let navigate = useNavigate();
     /*
-    <MyLink key={0} to="/tr-en" navigate={navigate} className="language_select_button celebration" startTransition={startTransition}>
-        <Flag iso="tr" />
-        <div className="language_select_button_text" style={{width: "68%"}}>Celebrating our Turkish team which just reached 100 translated stories!
-            Congratulations to <i>Danika_Dakika</i> and <i>deck</i>. <span className="celebration_date">— 19. Sep. 2022</span></div>
-        <span className="celebration_icon">🎉</span>
-    </MyLink>
+        <div key={0} className="language_select_button celebration" >
+            <span className="celebration_icon">🎉</span>
+            <div className="language_select_button_text" style={{width: "68%"}}>We reached 1000 translated stories this week!<br/>
+                Congratulations to all contributors. <span className="celebration_date">— 10. Nov. 2022</span></div>
+            <span className="celebration_icon">🎉</span>
+        </div>
      */
     return (
         <div>
-
-            <div key={0} className="language_select_button celebration" >
+            <MyLink key={0} to="/nl-en" navigate={navigate} className="language_select_button celebration" startTransition={startTransition}>
+                <Flag iso="nl" />
+                <div className="language_select_button_text" style={{width: "68%"}}>Celebrating our Dutch team which just reached 100 translated stories!
+                    Congratulations to <i>Plutone</i> and <i>zaop</i>. <span className="celebration_date">— 19. Nov. 2022</span></div>
                 <span className="celebration_icon">🎉</span>
-                <div className="language_select_button_text" style={{width: "68%"}}>We reached 1000 translated stories this week!<br/>
-                    Congratulations to all contributors. <span className="celebration_date">— 10. Nov. 2022</span></div>
-                <span className="celebration_icon">🎉</span>
-            </div>
+            </MyLink>
+   
             {Object.entries(courses).map(([name,]) => (
                 name === "Conlangs" ?
                     <MyLink key={name} to="/conlangs" navigate={navigate} className="language_select_button conlang-link" startTransition={startTransition}>
