@@ -21,14 +21,14 @@ export function Header(props) {
 
     return <div className={"title fadeGlideIn "+hidden} style={{textAlign: "center"}} onClick={onClick} lineno={element?.editor?.block_start_no}>
         <div><img alt="title image" className="title_img" src={element.illustrationUrl} /></div>
-        <span className="title">
+        <h1 className="title">
             <AudioPlay onClick={playAudio} />
             <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.learningLanguageTitleContent} />
             {(props.editor && (element.audio)) ?
                 <EditorSSMLDisplay ssml={element.audio.ssml} audio={element.audio} editor={props.editor}/>
                 : <></>
             }
-                </span>
+                </h1>
     </div>;
 }
 
