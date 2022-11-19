@@ -104,8 +104,8 @@ function AttributeList(props) {
 
     return <tr onClick={() => setEdit(true)}>
         <td></td>
-        {props.attributes.map(attr =>
-        <ChangeAbleValue obj={props.obj} languages={languages} name={attr} edit={edit} callback={onChange}/>
+        {props.attributes.map((attr, i) =>
+        <ChangeAbleValue key={i} obj={props.obj} languages={languages} name={attr} edit={edit} callback={onChange}/>
     )}<td>{edit ? <span onClick={save}>[save]</span> : ""}</td></tr>
 }
 
@@ -155,8 +155,8 @@ export function CourseList() {
             </thead>
             <tbody>
             <AttributeList languages={languages_id} obj={{"name":"", "public": 0, "fromLanguage": 1, "learningLanguage": -1, "about": "", "conlang": 0}} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "about"]} />
-            {filtered_courses.map(user =>
-                <AttributeList key={user.id} languages={languages_id} obj={user} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "about"]} />
+            {filtered_courses.map(course =>
+                <AttributeList key={course.id} languages={languages_id} obj={course} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "about"]} />
             )}
             </tbody>
         </table>

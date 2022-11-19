@@ -33,8 +33,8 @@ function AttributeList(props) {
 
     return <tr onClick={() => setEdit(true)}>
         <td><Flag iso={props.obj.short} width={40} flag={props.obj.flag} flag_file={props.obj.flag_file} /></td>
-        {props.attributes.map(attr =>
-        <ChangeAbleValue obj={props.obj} name={attr} edit={edit} callback={onChange}/>
+        {props.attributes.map((attr, i) =>
+        <ChangeAbleValue key={i} obj={props.obj} name={attr} edit={edit} callback={onChange}/>
     )}<td>{edit ? <span onClick={save}>[save]</span> : ""}</td></tr>
 }
 
