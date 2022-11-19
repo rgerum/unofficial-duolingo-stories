@@ -49,24 +49,17 @@ export function isLocalNetwork(hostname) {
     }
 }
 
-export function fetch_post(url, data) {
-    /** like fetch but with post instead of get */
-    var fd = new FormData();
-    //very simply, doesn't handle complete objects
-    for(var i in data){
-        fd.append(i,data[i]);
-    }
-    if(!isLocalNetwork()) {
-        return fetch(url, {
-            method: "POST",
-            body: fd,
-            credentials: "same-origin"
-        });
-    }
-    var req = new Request(url,{
-        method:"POST",
-        body:fd,
-        mode:"cors"
+export async function fetch_post(url, data)
+{
+    // check if the user is logged in
+    var req = new Request(url, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        mode: "cors",
+        credentials: 'include',
     });
     return fetch(req);
 }
