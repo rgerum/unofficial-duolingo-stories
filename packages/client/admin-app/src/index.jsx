@@ -9,7 +9,7 @@ import {
     BrowserRouter as Router,
     Routes,
     Route,
-    Link,
+    Link, useNavigate,
 } from "react-router-dom";
 import {CourseList} from "./course-editor";
 import {Sync} from "./github-sync";
@@ -19,11 +19,13 @@ import {LoggedInButton} from "login";
 export function LoginWrapper() {
     let userdata = useUsername();
 
+    let navigate = useNavigate();
+
     // loading
     if (userdata === undefined) return <Spinner/>
     // no username show login
     if (userdata.username === undefined || userdata.admin !== 1)
-        return <LoginDialog userdata={userdata} page={"admin"}  />
+        return <LoginDialog userdata={userdata} page={"admin"} navigate={navigate}  />
 
     // logged in and allowed!
     return <>
@@ -40,6 +42,7 @@ export function LoginWrapper() {
                 <Route path='/languages' element={<LanguageList />}></Route>
                 <Route path='/courses' element={<CourseList />}></Route>
                 <Route path='/sync' element={<Sync />}></Route>
+                <Route path='/' element={<></>}></Route>
             </Routes>
         </div>
     </>
