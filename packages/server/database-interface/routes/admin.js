@@ -21,6 +21,8 @@ async function set_language(data) {
 }
 
 async function set_course(data) {
+    if(data["official"] === undefined)
+        data["official"] = 0;
     let res = await update_query('course', data, ["learningLanguage", "fromLanguage", "public", "name", "official", "conlang", "about"]);
     let id = data["id"] || res.insertId;
     return await query(`UPDATE course JOIN language l on l.id = course.fromLanguage JOIN language l2 on l2.id = course.learningLanguage
