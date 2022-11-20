@@ -11,7 +11,7 @@ export default function MainContentSetList({userdata, storyFinishedIndex}) {
 
     const course = useSuspendedDataFetcher(getStoriesSets, [lang, lang_base, userdata.username, storyFinishedIndex]);
 
-    document.title = `${course.learningLanguageName} Duolingo Stories: improve your ${course.learningLanguageName} learning by community translated Duolingo stories.`;
+    document.title = `${course.learningLanguageName} Duolingo Stories`;
 
     let conlangs = [];
     let count = 0;
@@ -21,6 +21,8 @@ export default function MainContentSetList({userdata, storyFinishedIndex}) {
     return <>
         <Helmet>
             <link rel="canonical" href={`https://www.duostories.org/${lang}-${lang_base}`} />
+            <meta name="description" content={`Improve your ${course.learningLanguageName} learning by community-translated Duolingo stories.`}/>
+            <meta name="keywords" content={`${course.learningLanguageName}, language, learning, stories, Duolingo, community, volunteers`}/>
         </Helmet>
 
         <header>

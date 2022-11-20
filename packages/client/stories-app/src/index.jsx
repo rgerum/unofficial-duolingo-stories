@@ -12,7 +12,7 @@ import {load_dark_mode} from "includes";
 import {LoginDialog, useUsername} from "login";
 import {UserActivationOrReset} from "login";
 import {setStoryDone} from "./api_calls/course";
-import {HelmetProvider} from "react-helmet-async";
+import {Helmet, HelmetProvider} from "react-helmet-async";
 const IndexContent = lazy(() => import('./overview'));
 const StoryP = lazy(() => import('./story_wrapper'));
 
@@ -37,6 +37,15 @@ function App() {
     let storyFinishedIndexUpdate = async (id) => {await setStoryDone(id); setStoryFinishedIndex(storyFinishedIndex+1);}
 
     return <Suspense fallback={<></>}>
+        <Helmet>
+            <meta property="og:title" content="Duostories" />
+            <meta property="og:type" content="website" />
+            <meta property="og:image" content="social.png" />
+            <meta property="og:description" content={`Duostories brings the official Duolingo Stories to new languages, translated by a community effort.`} />
+            <meta property="og:url" content="https://www.duostories.org" />
+            <meta property="og:locale" content="en_US" />
+        </Helmet>
+
         <Routes>
             <Route path='/login' element={<LoginDialog userdata={userdata} navigate={navigate}/>}></Route>
             <Route path='/story/:id' element={<StoryP storyFinishedIndexUpdate={storyFinishedIndexUpdate} />}></Route>

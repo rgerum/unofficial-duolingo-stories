@@ -5,6 +5,7 @@ import {useSuspendedDataFetcher} from "./api_calls/include";
 import {getPublicCourses} from "./api_calls/course";
 import {useNavigate} from "react-router-dom";
 import {Helmet} from "react-helmet-async";
+import React from "react";
 
 
 export default function CourseList({conlang_count, startTransition}) {
@@ -25,6 +26,8 @@ export default function CourseList({conlang_count, startTransition}) {
         <div>
             <Helmet>
                 <link rel="canonical" href="https://www.duostories.org" />
+                <meta name="description" content={`Supplement your Duolingo course with community-translated Duolingo stories.`}/>
+                <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
             </Helmet>
 
             <MyLink key={0} to="/nl-en" navigate={navigate} className="language_select_button celebration" startTransition={startTransition}>
