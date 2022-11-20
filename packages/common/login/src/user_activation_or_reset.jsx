@@ -3,6 +3,7 @@ import './login.css';
 import {useInput} from "includes";
 import {activate, reset_pw_check, reset_pw_set} from "./api_calls/user";
 import {Link, useParams} from "react-router-dom";
+import {Helmet} from "react-helmet-async";
 
 
 async function do_activate(setActivated, username, hash) {
@@ -62,7 +63,12 @@ export function UserActivationOrReset() {
         else if(task === "resetpw")
             check(setResetPwState, username, hash);
     }
-    return <>{task === "activate" ?
+
+    return <>
+        <Helmet>
+            <link rel="canonical" href={`https://www.duostories.org/${task}/${username}/${hash}`} />
+        </Helmet>
+        {task === "activate" ?
     <div id="login_dialog">
         <div>
             <h2>Activate account</h2>

@@ -4,6 +4,7 @@ import {MyLink} from "ui_elements";
 import {useSuspendedDataFetcher} from "./api_calls/include";
 import {getPublicCourses} from "./api_calls/course";
 import {useNavigate} from "react-router-dom";
+import {Helmet} from "react-helmet-async";
 
 
 export default function CourseList({conlang_count, startTransition}) {
@@ -22,6 +23,10 @@ export default function CourseList({conlang_count, startTransition}) {
      */
     return (
         <div>
+            <Helmet>
+                <link rel="canonical" href="https://www.duostories.org" />
+            </Helmet>
+
             <MyLink key={0} to="/nl-en" navigate={navigate} className="language_select_button celebration" startTransition={startTransition}>
                 <Flag iso="nl" />
                 <div className="language_select_button_text" style={{width: "68%"}}>Celebrating our Dutch team which just reached 100 translated stories!

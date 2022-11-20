@@ -4,6 +4,7 @@ import {Link, useParams} from "react-router-dom";
 import {useSuspendedDataFetcher} from "./api_calls/include";
 import {getStoriesSets} from "./api_calls/course";
 import {Legal, Spinner} from "ui_elements";
+import {Helmet} from "react-helmet-async";
 
 export default function MainContentSetList({userdata, storyFinishedIndex}) {
     let {lang, lang_base} = useParams();
@@ -18,6 +19,10 @@ export default function MainContentSetList({userdata, storyFinishedIndex}) {
         count += set.length;
 
     return <>
+        <Helmet>
+            <link rel="canonical" href={`https://www.duostories.org/${lang}-${lang_base}`} />
+        </Helmet>
+
         <header>
             <h1 className={"main_title"}>Unofficial {course.learningLanguageName} Duolingo Stories</h1>
             <p className={"title_desc"}>

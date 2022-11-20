@@ -12,6 +12,7 @@ import {load_dark_mode} from "includes";
 import {LoginDialog, useUsername} from "login";
 import {UserActivationOrReset} from "login";
 import {setStoryDone} from "./api_calls/course";
+import {HelmetProvider} from "react-helmet-async";
 const IndexContent = lazy(() => import('./overview'));
 const StoryP = lazy(() => import('./story_wrapper'));
 
@@ -51,7 +52,9 @@ function App() {
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
       <Router>
-        <App />
+          <HelmetProvider>
+            <App />
+          </HelmetProvider>
       </Router>
   </React.StrictMode>
 );

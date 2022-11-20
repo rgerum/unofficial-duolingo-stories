@@ -4,6 +4,7 @@ import {LoggedInButton} from "./loggedinbutton";
 import {useInput} from "includes";
 import {register, reset_pw} from "./api_calls/user";
 import {MyLink} from "ui_elements";
+import {Helmet} from "react-helmet-async";
 
 
 export function Login({userdata, navigate}) {
@@ -176,8 +177,10 @@ export function LoginDialog({userdata, page, navigate}) {
             }
         </>
     }
-
     return <>
+        <Helmet>
+            <link rel="canonical" href={`https://www.duostories.org/login`} />
+        </Helmet>
         {(showLogin <= 1) ?
                 <div id="login_dialog">
                     <MyLink id="quit" to="/" navigate={navigate}/>

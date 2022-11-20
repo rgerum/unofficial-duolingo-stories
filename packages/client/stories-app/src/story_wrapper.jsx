@@ -4,6 +4,7 @@ import {Story} from "story";
 import {Spinner} from "ui_elements";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {getStoryJSON} from "./api_calls/course";
+import {Helmet} from "react-helmet-async";
 
 function Error() {
     return <div id="login_dialog">
@@ -28,6 +29,16 @@ export default function StoryP({storyFinishedIndexUpdate}) {
         return <Error/>
     document.title = `Duostories ${story_data.learningLanguageLong} from ${story_data.fromLanguageLong}: ${story_data.fromLanguageName}`;
     if(test)
-        return <div id="main"><Story id={id} editor={{lineno: 3}} story={story_data} /></div>
-    return <Story id={id} story={story_data} navigate={navigate} storyFinishedIndexUpdate={storyFinishedIndexUpdate}/>
+        return <>
+            <Helmet>
+                <link rel="canonical" href={`https://www.duostories.org/story/${id}/test`} />
+            </Helmet>
+            <div id="main"><Story id={id} editor={{lineno: 3}} story={story_data} /></div>
+        </>
+    return <>
+        <Helmet>
+            <link rel="canonical" href={`https://www.duostories.org/story/${id}`} />
+        </Helmet>
+        <Story id={id} story={story_data} navigate={navigate} storyFinishedIndexUpdate={storyFinishedIndexUpdate}/>
+    </>
 }

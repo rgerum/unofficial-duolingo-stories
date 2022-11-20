@@ -1,10 +1,14 @@
 import React from "react";
+import {Helmet} from "react-helmet-async";
 
 
 export default function Faq() {
     document.title = `Duostories FAQ`;
 
     return <div>
+        <Helmet>
+            <link rel="canonical" href={`https://www.duostories.org/faq`} />
+        </Helmet>
         <div id="main_index">
             <h1>FAQ</h1>
         <h2>Is this website open source?</h2>
