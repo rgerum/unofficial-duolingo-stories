@@ -17,5 +17,8 @@ rsync -r packages/client/admin-app/dist/* ../test_environment/admin-app
 # copy the express backend
 rsync -r packages/server/database-interface/* ../test_environment/database-interface
 
+# copy flag files
+rsync -rv flags/ ../flags/
+
 # and restart the server
 supervisorctl restart express_test
