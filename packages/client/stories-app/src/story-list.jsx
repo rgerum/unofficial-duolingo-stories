@@ -42,7 +42,7 @@ export default function MainContentSetList({userdata, storyFinishedIndex}) {
         </header>
 
         <Suspense fallback={<Spinner />}>
-            <SetList course={course} userdata={userdata} conlang_count={conlangs.length} storyFinishedIndex={storyFinishedIndex} /> :
+            <SetList course={course} userdata={userdata} conlang_count={conlangs.length} storyFinishedIndex={storyFinishedIndex} />
             <hr/>
             <Legal/>
         </Suspense>
