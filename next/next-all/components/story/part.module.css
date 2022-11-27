@@ -1,0 +1,56 @@
+
+
+.ssml {
+    font-size: 0.8em;
+    margin: 0;
+    font-family: monospace;
+}
+
+.ssml_speaker {
+    background: var(--editor-ssml);
+    padding: 2px 5px;
+    border-radius: 5px;
+    margin-right: 3px;
+    font-size: 0.8em;
+}
+
+
+.story_rtl .loudspeaker {
+    margin-left: 8px;
+    margin-right: 0;
+    transform: scale(-1);
+}
+
+.story_rtl .head {
+    margin-right: 0;
+    margin-left: 12px;
+}
+
+.story_rtl .bubble::before {
+    border-bottom: 12px solid transparent;
+    border-right: 0 solid var(--color_base_border);
+    border-left: 12px solid var(--color_base_border);
+    border-top-left-radius: 0;
+    border-top-right-radius: 50%;
+    content: "";
+    left: unset;
+    right: -14px;
+    position: absolute;
+    top: -2px;
+}
+
+.story_rtl .bubble::after {
+    border-bottom: 12px solid transparent;
+    border-right: 0 solid var(--color_base_background);
+    border-left: 12px solid var(--color_base_background);
+    content: "";
+    left: unset;
+    right: -9px;
+    position: absolute;
+    top: 0;
+}
+
+.story_rtl .bubble {
+    border-top-left-radius: 14px;
+    border-top-right-radius: 0;
+}

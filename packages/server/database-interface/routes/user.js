@@ -216,7 +216,7 @@ async function login({username, password, remember}, session) {
     // load does not happen before session is saved
     await save(session);
     console.log("done", session)
-    return "done";
+    return session;
 }
 
 async function logout({}, session) {
@@ -287,7 +287,7 @@ router.post('/login', async function (req, res) {
         // load does not happen before session is saved
         req.session.save(function (err) {
             if (err) return next(err)
-            res.send("done")
+            res.json(req.session)
         })
     })
 })

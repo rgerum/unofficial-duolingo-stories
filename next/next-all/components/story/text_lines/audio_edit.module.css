@@ -1,0 +1,23 @@
+.audio_reload {
+    display: inline-block;
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+    transition-property: transform;
+    transition-duration: 1s;
+    background-image: url("https://carex.uber.space/stories/old/refresh.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.audio_reload_spin {
+    animation-name: rotate;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes rotate {
+    from {transform: rotate(0deg);}
+    to {transform: rotate(360deg);}
+}

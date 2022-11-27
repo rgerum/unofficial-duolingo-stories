@@ -1,0 +1,27 @@
+
+.header_lang_selector {
+    width: 214px !important;
+    max-height: calc(100vh - 55px);
+    left: -83px !important;
+}
+
+.language_select_item {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    height: 42px;
+    border-bottom: 1px solid var(--header-border);
+    text-decoration: none;
+}
+.language_select_item svg {
+    margin: 0;
+}
+.language_select_item:hover {
+    background: var(--language-selector-hover-background) !important;
+}
+
+.language_select_item span {
+    font-size: 18px;
+    font-weight: bold;
+    padding-left: 10px;
+}

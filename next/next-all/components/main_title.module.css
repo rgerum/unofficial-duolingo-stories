@@ -1,0 +1,11 @@
+
+.main_title {
+    font-size: 34px;
+}
+
+@media screen and (max-width:480px) {
+    .main_title {
+        font-size: 25px;
+        margin-bottom: 0;
+    }
+}

@@ -1,0 +1,19 @@
+
+.button:hover {
+    filter: brightness(1.1);
+}
+.button {
+    text-transform: uppercase;
+    padding: 13px 30px;
+    float: right;
+    display: inline-block;
+    background: var(--button-background);
+    color: var(--button-color);
+    border-radius: 15px;
+    font-weight: 700;
+    border: 0;
+    font-size: 16px;
+    transition: .1s box-shadow,.1s transform;
+    border-color: var(--button-border);
+    border-bottom: 4px solid var(--button-border);
+}

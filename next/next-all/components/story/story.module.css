@@ -1,0 +1,93 @@
+
+
+
+
+#main {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+
+#story {
+    padding-top: 85px;
+    /*padding-bottom: 50vh*/;
+    user-select: none;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+#story .legal {
+    font-size: 0.7em;
+}
+
+
+
+.story_rtl {
+    direction: rtl;
+}
+
+
+/* rtl */
+
+.story p[data-rtl] {
+    direction: rtl;
+}
+
+.phrase[data-rtl] {
+    direction: rtl;
+}
+
+.phrase[data-rtl] .head {
+    margin-left: 12px;
+    margin-right: 0;
+}
+
+.phrase[data-rtl] .bubble {
+    border-top-left-radius: 14px;
+    border-top-right-radius: 0;
+}
+
+.phrase[data-rtl] .bubble:before {
+    border-left: 12px solid #dedede;
+    border-right: 0;
+    border-top-right-radius: 50%;
+    border-top-left-radius: 0;
+    right: -14px;
+    left: auto;
+}
+
+.phrase[data-rtl] .bubble:after {
+    border-left: 12px solid #fff;
+    border-right: 0;
+    right: -9px;
+    left: auto;
+}
+
+p[data-rtl] .speaker {
+    transform: scale(-1, 1);
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+
+/* */
+
+
+
+.story_selection {
+    background: var(--editor-selection-background);
+    border-radius: 8px;
+}
+
+.story_selection .bubble {
+    border-color: var(--editor-selection-border);
+}
+
+.story_selection .bubble:before {
+    border-right-color: var(--editor-selection-border);
+}
+
+.cast_element {
+    margin-bottom: -80px;
+}
+

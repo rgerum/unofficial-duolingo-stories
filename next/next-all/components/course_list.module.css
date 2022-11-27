@@ -1,0 +1,22 @@
+
+.course_list hr {
+    width: 100%;
+    border: 0;
+    border-top: 2px solid var(--overview-hr);
+    height: 0;
+    margin-top: 35px;
+    margin-bottom: 20px;
+}
+
+.course_list {
+    margin: 0 16px;
+    flex-wrap: wrap;
+    display: flex;
+}
+
+.course_group_name {
+    font-weight: bold;
+    width: 100%;
+    padding-left: 5px;
+    font-size: 24px;
+}

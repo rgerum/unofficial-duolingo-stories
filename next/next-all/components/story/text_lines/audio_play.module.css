@@ -1,0 +1,9 @@
+
+.loudspeaker {
+    position: relative;
+    top: 6px;
+    margin-right: 8px;
+    cursor: pointer;
+    width: 28px;
+    height: 23px;
+}

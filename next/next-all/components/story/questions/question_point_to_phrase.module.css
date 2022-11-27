@@ -1,0 +1,29 @@
+
+/* Question Point to Word (click) */
+
+.word_button {
+    border-radius: 9px;
+    line-height: 3.2;
+    margin-right: 4px;
+    padding: 8px 12px 7px;
+    white-space: nowrap;
+    z-index: 1;
+    display: inline;
+    position: relative;
+}
+
+.right {
+    composes: color_right button_disabled_up from "../common.module.css";
+}
+
+.false {
+    composes: color_false button_inactive_anim from "../common.module.css";
+}
+
+.done {
+    composes: color_disabled button_inactive from "../common.module.css";
+}
+
+.default {
+    composes: color_base button_click from "../common.module.css";
+}

@@ -107,6 +107,15 @@ async function post_story_done({story_id}, {user_id}) {
     return {message: "done"}
 }
 
+async function get_user_stories_done({course_id}, {user_id}) {
+    const stories_done = await query(`SELECT story_id FROM story_done WHERE user_id = ? GROUP BY id`, [user_id]);
+    let done = [];
+    for (let story_done of stories_done) {
+        done.push(story_done.story_id)
+    }
+    return done;
+}
+
 async function get_course({lang, lang_base}, {user_id}) {
     const course_query = await query(`
         SELECT course.id, course.about, 
@@ -145,7 +154,11 @@ async function get_course({lang, lang_base}, {user_id}) {
         sets[sets.length - 1].push(d);
     }
 
-    return {...course, sets: sets};
+    let count = 0;
+    for(let set of sets)
+        count += set.length;
+
+    return {...course, sets: sets, count: count};
 }
 
 router.get('/story/:story_id', func_catch(get_story));
@@ -154,5 +167,6 @@ router.get('/course_counts', func_catch(get_counts));
 router.get('/courses', func_catch(get_courses));
 router.get('/courses_user', func_catch(get_courses_user));
 router.get('/course/:lang-:lang_base', func_catch(get_course));
+router.get('/user_stories_done', func_catch(get_user_stories_done));
 
 module.exports = router;

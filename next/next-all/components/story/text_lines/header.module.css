@@ -1,0 +1,11 @@
+
+.title {
+    font-weight: 700;
+    font-size: 25px;
+    line-height: 34px;
+    margin: 0;
+}
+.title_img {
+    height: 175px;
+    width: 175px;
+}

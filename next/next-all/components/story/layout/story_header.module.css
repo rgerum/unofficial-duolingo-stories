@@ -1,0 +1,84 @@
+
+/* header with progress bar */
+
+#progress {
+    display: inline-block;
+    background: var(--progress-back);
+    width: 100%;
+
+    --height: 16px;
+    border-radius: calc(var(--height)/2);
+    height: var(--height);
+}
+#progress_inside {
+    display: block;
+    width: 0;
+    background: var(--progress-inside);
+    border-radius: calc(var(--height)/2);
+    height: var(--height);
+    position: relative;
+    transition: width 0.2s;
+}
+
+#progress_highlight {
+    background: var(--progress-highlight);
+    border-radius: inherit;
+    height: 30%;
+    left: calc(var(--height)/2);
+    opacity: .2;
+    right: calc(var(--height)/2);
+    top: 25%;
+    position: absolute;
+}
+
+#header {
+    display: flex;
+    align-items: center;
+    padding: 45px 40px 40px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: var(--body-background);
+    box-sizing: border-box;
+    z-index: 10;
+}
+
+#header_icon {
+    cursor: pointer;
+    display: inline-block;
+    margin-right: 20px;
+    pointer-events: auto;
+    line-height: 20.5px;
+}
+
+@media (max-width:700px) {
+    #header {
+        padding: 17px 20px;
+        z-index: 2;
+    }
+    #story {
+        padding-top: 30px;
+    }
+}
+
+
+@media (min-width: 1000px) {
+    #footer_content {
+        margin: 0 calc(50% - 500px);
+    }
+    #header {
+        margin: 0 calc(50% - 500px);
+        max-width: 1000px;
+    }
+}
+
+#quit {
+    background-image: url(//d35aaqx5ub95lt.cloudfront.net/images/icon-sprite8.svg);
+    background-position: -373px -154px;
+    cursor: pointer;
+    display: inline-block;
+    height: 18px;
+    vertical-align: middle;
+    width: 18px;
+}

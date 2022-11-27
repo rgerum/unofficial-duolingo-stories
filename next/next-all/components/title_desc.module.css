@@ -1,0 +1,15 @@
+
+.title_desc {
+    font-size: 19px;
+    text-align: center;
+}
+@media screen and (max-width:480px) {
+    .title_desc {
+        font-size: 19px;
+        color: var(--title-color-dim);
+    }
+
+    .title_desc a {
+        color: var(--title-color-dim);
+    }
+}

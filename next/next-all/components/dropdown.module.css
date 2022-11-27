@@ -1,0 +1,57 @@
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown:hover > :last-child, .dropdown:hover .diamond_wrap {
+    display: block;
+}
+
+.dropdown > :last-child {
+    display: none;
+    background: var(--body-background);
+    position: absolute;
+    left: -32px;
+    width: 118px;
+    border-radius: 15px;
+    border: 1px solid var(--header-border);
+    color: var(--text-color);
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 7px;
+    text-transform: none;
+    overflow-y: scroll;
+}
+
+.dropdown > :last-child > {
+    height: 39px;
+}
+
+.diamond {
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    left: 2.5px;
+    top: 2.5px;
+    background-color: var(--body-background);;
+    transform: rotate(45deg);
+    transform-origin: center;
+    border-radius: 3px;
+    border: 1px solid var(--header-border);
+    z-index: 2;
+}
+
+.diamond_wrap {
+    overflow: hidden;
+    width: 25px;
+    height: 10px;
+    position: absolute;
+    z-index: 2;
+    display: none;
+    left: calc(50% - 12px);
+    bottom: -6px;
+}
+
+.dropdown .diamond_wrap {
+    bottom: -8px;
+}
