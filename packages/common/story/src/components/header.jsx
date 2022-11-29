@@ -82,7 +82,7 @@ export function TextLine(props) {
         return <div className={"phrase fadeGlideIn "+hidden} lineno={element?.editor?.block_start_no}>
                 <span>
                     <AudioPlay onClick={playAudio} />
-                    <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} content={element.line.content} />
+                    <HintLineContent audioRange={audioRange} hideRangesForChallenge={hideRangesForChallenge} unhide={props.unhide} content={element.line.content} />
                     {(props.editor && (element.line.content.audio)) ?
                         <EditorSSMLDisplay ssml={element.line.content.audio.ssml} audio={element.line.content.audio} editor={props.editor}/>
                         : <></>
