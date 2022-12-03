@@ -83,8 +83,12 @@
     border-color:  transparent transparent var(--tooltip-border) var(--tooltip-border);
     border-width: 2px;
 }
+.word {
+    user-select: text;
+}
 .word[data-hidden=true] {
     color: var(--body-background);
+    user-select: none;
     background-image: linear-gradient(to right, var(--underline-solid) 60%, var(--underline-solid) 60%) !important;
     line-height: 2em;
     background-position: 0 100%;
@@ -94,6 +98,7 @@
 }
 
 .tooltiptext {
+    user-select: none;
     visibility: hidden;
     /* Fade in tooltip */
     opacity: 0;
