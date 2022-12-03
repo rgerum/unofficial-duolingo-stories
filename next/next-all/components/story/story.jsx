@@ -9,6 +9,8 @@ import Footer from "./layout/story_footer";
 import StoryHeader from "./layout/story_header";
 import Legal from "../legal";
 
+export const StoryContext = React.createContext({});
+export const EditorContext = React.createContext(undefined);
 
 export default function Story({story, navigate, id, editor, storyFinishedIndexUpdate}) {
     const storyElement = React.useRef();
@@ -27,15 +29,16 @@ export default function Story({story, navigate, id, editor, storyFinishedIndexUp
     let ref_audio2 = React.useRef();
     let ref_audio3 = React.useRef();
 
-    function wrong() {
+    const wrong = React.useCallback(() => {
         ref_audio2.current.play();
-    }
+    }, [ref_audio2]);
 
-    function right_call() {
+    const right_call = React.useCallback(() => {
+        console.log("right");
         ref_audio1.current.play();
         setRight(true);
         setBlocked(false);
-    }
+    }, [ref_audio1, setRight, setBlocked]);
 
     function block_next() {
         setBlocked(true);
@@ -72,14 +75,16 @@ export default function Story({story, navigate, id, editor, storyFinishedIndexUp
             setSpacer(spacerX);
     }, [editor, spacer, storyElement, progress]);
 
-    let controls = {
+
+    let controls = React.useCallback(() => { return {
         wrong: wrong,
         right: right_call,
         block_next: block_next,
         setProgressStep: setProgressStep,
         next: next,
         advance_progress: advance_progress,
-    }
+        id: Math.random(),
+    }}, [wrong, right_call, setProgressStep, next, advance_progress])();
 
     let parts = [];
     let last_id = -1;
@@ -187,9 +192,11 @@ export default function Story({story, navigate, id, editor, storyFinishedIndexUp
             <div id={styles.main}>
                 <div id={styles.story} ref={storyElement} className={story.learningLanguageRTL ? styles.story_rtl : ""}>
                     <Legal />
-                    {parts.map((part, i) => (
-                        <Part key={i} editor={editor} controls={controls} progress={progress} part={part} audios={audios} />
-                    ))}
+                    <StoryContext.Provider value={controls}>
+                        {parts.map((part, i) => (
+                            <Part key={i} editor={editor} controls={controls} progress={progress} part={part} audios={audios} />
+                        ))}
+                    </StoryContext.Provider>
                 </div>
                 <div style={{height: spacer+"px"}} />
                 {finished ? <FinishedPage story={story} /> : null

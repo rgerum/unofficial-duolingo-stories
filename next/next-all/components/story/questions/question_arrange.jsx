@@ -3,6 +3,7 @@ import styles from "./question_arrange.module.css"
 import styles_common from "../common.module.css"
 
 import {EditorHook} from "../editor_hooks";
+import {EditorContext, StoryContext} from "../story";
 
 /*
 The ARRANGE question
@@ -14,7 +15,10 @@ Speaker560: ¡[(Necesito) (las~llaves) (de) (mi) (carro)!]
 ~              I~need     the~keys     of   my   car
  */
 
-export default function QuestionArrange({editor, controls, setUnhide, progress, element}) {
+export default function QuestionArrange({setUnhide, progress, element}) {
+    const controls = React.useContext(StoryContext);
+    const editor = React.useContext(EditorContext);
+
     const [done, setDone] = React.useState(false);
     const active = progress === element.trackingProperties.line_index;
 

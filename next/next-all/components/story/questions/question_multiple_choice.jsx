@@ -5,6 +5,7 @@ import styles_common from "../common.module.css"
 import useChoiceButtons from "./questions_useChoiceButtons";
 import {EditorHook} from "../editor_hooks";
 import HintLineContent from "../text_lines/line_hints";
+import {EditorContext, StoryContext} from "../story";
 
 
 /*
@@ -23,7 +24,10 @@ SELECT_PHRASE question, but here the learner does not hear the hidden part of th
  */
 
 
-export default function QuestionMultipleChoice({editor, controls, setUnhide, progress, element}) {
+export default function QuestionMultipleChoice({setUnhide, progress, element}) {
+    const controls = React.useContext(StoryContext);
+    const editor = React.useContext(EditorContext);
+
     const [done, setDone] = React.useState(false);
     const active = progress === element.trackingProperties.line_index;
 

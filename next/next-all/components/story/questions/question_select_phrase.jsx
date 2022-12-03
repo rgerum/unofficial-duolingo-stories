@@ -5,6 +5,7 @@ import styles_common from "../common.module.css"
 import {EditorHook} from "../editor_hooks";
 import useChoiceButtons from "./questions_useChoiceButtons";
 import font from "../../../lib/font";
+import {EditorContext, StoryContext} from "../story";
 
 /*
 The SELECT_PHRASE question.
@@ -20,7 +21,10 @@ Speaker507: Hoy   tengo  [un~partido~importante].
 - una parte imponente
  */
 
-export default function QuestionSelectPhrase({editor, controls, setUnhide, progress, element}) {
+export default function QuestionSelectPhrase({setUnhide, progress, element}) {
+    const controls = React.useContext(StoryContext);
+    const editor = React.useContext(EditorContext);
+
     const [done, setDone] = React.useState(false);
     const active = progress === element.trackingProperties.line_index;
 

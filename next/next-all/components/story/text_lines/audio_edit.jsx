@@ -4,12 +4,13 @@ import styles from "./audio_edit.module.css"
 
 
 export default function EditorSSMLDisplay({ssml, element, audio, editor}) {
-    let urlParams = new URLSearchParams(window.location.search);
+    //let urlParams = new URLSearchParams(window.location.search);
+    const beta = false;
 
     let [loading, setLoading] = React.useState(false);
     let line_id = "ssml"+(ssml.line ? ssml.line : ssml.line_insert);
 
-    var [show_audio, set_show_audio] = React.useState(window.editorShowSsml);
+    var [show_audio, set_show_audio] = React.useState(editor.editorShowSsml);
     useEventListener("editorShowSsml", (e) => set_show_audio(e.detail.show))
 
 
@@ -27,7 +28,7 @@ export default function EditorSSMLDisplay({ssml, element, audio, editor}) {
                   onClick={reload}/> :
             <span><img title="no speaker defined" alt="error" src="/icons/error.svg"/></span>
         }
-        {urlParams.get("beta") ? <a onClick={() => window.open_recoder({ssml, element, audio, editor})}>🎤</a> : <></>}
+        {beta ? <a onClick={() => window.open_recoder({ssml, element, audio, editor})}>🎤</a> : <></>}
     </>
 }
 

@@ -55,10 +55,10 @@ export default function Faq() {
                 us on <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.</p>
 
             <h2>Who runs this website?</h2>
-            <p>The website was developed by me, "randrian". You can find me on <a href="https://www.duolingo.com/profile/Randriano">Duolingo</a> or on <a href="https://github.com/rgerum">Github</a>.
+            <p>The website was developed by me, "randrian". You can find me on <Link href="https://www.duolingo.com/profile/Randriano">Duolingo</Link> or on <a href="https://github.com/rgerum">Github</a>.
                 Some people did minor contributions to the website, see the Github repository. You are welcome to be part of them.</p>
             <p>I am in no way associated with Duolingo.</p>
-            <p>But of course this website would be nothing without its active group of contributors! Meet them on <a href="https://discord.gg/4NGVScARR3">Discord</a>.</p>
+            <p>But of course this website would be nothing without its active group of contributors! Meet them on <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.</p>
         </Layout>
     </>
 }

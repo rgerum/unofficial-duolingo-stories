@@ -7,16 +7,18 @@ import AudioPlay from "./audio_play"
 import styles_common from "../common.module.css"
 import styles from "./header.module.css"
 import useAudio from "./use_audio";
+import {EditorContext} from "../story";
 
 
-export default function Header({editor, element, audios}) {
+export default function Header({element, progress}) {
+    const editor = React.useContext(EditorContext);
     let active = 1;
     let hidden = (!active) ? styles_common.hidden : ""
 
     let onClick;
     [hidden, onClick] = EditorHook(hidden, element.editor, editor);
 
-    let [audioRange, playAudio, ref, url] = useAudio(element, audios)
+    let [audioRange, playAudio, ref, url] = useAudio(element, progress)
 
     let hideRangesForChallenge = undefined;
 

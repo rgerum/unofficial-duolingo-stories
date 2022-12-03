@@ -1,7 +1,7 @@
 import React from "react";
 
 
-export default function useAudio(element, audios, progress) {
+export default function useAudio(element, progress) {
     let [audioRange, setAudioRange] = React.useState(99999);
     let audio = element?.line?.content?.audio;
     let ref = React.useRef();

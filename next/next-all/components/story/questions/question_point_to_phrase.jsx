@@ -5,6 +5,7 @@ import styles_common from "../common.module.css"
 import {EditorHook} from "../editor_hooks";
 import useChoiceButtons from "./questions_useChoiceButtons";
 import HintLineContent from "../text_lines/line_hints";
+import {EditorContext, StoryContext} from "../story";
 
 
 /*
@@ -19,12 +20,15 @@ Speaker560: (Perdón), mi amor, (estoy) (+cansada). ¡(Trabajo) mucho!
 
  */
 
-export default function QuestionPointToPhrase({editor, controls, progress, element, hidden}) {
+export default function QuestionPointToPhrase({progress, element}) {
+    const controls = React.useContext(StoryContext);
+    const editor = React.useContext(EditorContext);
+
     const [done, setDone] = React.useState(false);
     const active1 = progress === element.trackingProperties.line_index;
     const active2 = (progress-0.5) === element.trackingProperties.line_index;
 
-    hidden = !active2 ? styles_common.hidden : "";
+    let hidden = !active2 ? styles_common.hidden : "";
 
     useEffect(() => {
         if(active1) {

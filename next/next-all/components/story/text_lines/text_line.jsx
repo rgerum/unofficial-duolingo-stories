@@ -7,9 +7,12 @@ import HintLineContent from "./line_hints";
 import EditorSSMLDisplay from "./audio_edit";
 import AudioPlay from "./audio_play";
 import useAudio from "./use_audio";
+import {EditorContext} from "../story";
 
 
-export default function TextLine({editor, progress, unhide, element, audios}) {
+export default function TextLine({progress, unhide, element}) {
+    const editor = React.useContext(EditorContext);
+
     let active = progress >= element.trackingProperties.line_index;
     if(progress-0.5 === element.trackingProperties.line_index)
         active = 0;
@@ -19,7 +22,7 @@ export default function TextLine({editor, progress, unhide, element, audios}) {
     let onClick;
     [hidden, onClick] = EditorHook(hidden, element.editor, editor);
 
-    let [audioRange, playAudio, ref, url] = useAudio(element, audios, progress)
+    let [audioRange, playAudio, ref, url] = useAudio(element, progress)
 
     if(element.line === undefined)
         return <></>

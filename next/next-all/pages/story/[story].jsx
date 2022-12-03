@@ -8,8 +8,8 @@ export default function StoryMain({story}) {
         return <div>:-(</div>
     return <>
         <Head>
-            <title>{`Duostories ${story_data.learningLanguageLong} from ${story_data.fromLanguageLong}: ${story_data.fromLanguageName}`}</title>
-            <link rel="canonical" href={`https://www.duostories.org/story/${id}`} />
+            <title>{`Duostories ${story.learningLanguageLong} from ${story.fromLanguageLong}: ${story.fromLanguageName}`}</title>
+            <link rel="canonical" href={`https://www.duostories.org/story/${story.id}`} />
         </Head>
         <Story story={story} />
     </>

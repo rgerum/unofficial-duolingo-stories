@@ -150,7 +150,7 @@ export function LoginDialog({page}) {
                         <h2>Not allowed</h2>
                         <img alt={"sad duo"} width="80p" src="https://design.duolingo.com/28e4b3aebfae83e5ff2f.svg" /><br/>
                         <p>You need to have permissions<br/>to access the editor.<br/></p>
-                        <p>If wou want to contribute,<br/>you can talk to us on <a href="https://discord.gg/4NGVScARR3">Discord</a>.</p>
+                        <p>If wou want to contribute,<br/>you can talk to us on <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.</p>
                         <p><button className={styles.link} data-cy="back" onClick={()=>userdata.logout()} >BACK</button></p>
                     </div>
                 </div>

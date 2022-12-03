@@ -5,6 +5,7 @@ import styles_common from "../common.module.css"
 import {shuffle} from "../includes";
 import {EditorHook} from "../editor_hooks";
 import font from "../../../lib/font";
+import {EditorContext, StoryContext} from "../story";
 
 
 /*
@@ -20,7 +21,10 @@ It consists of two columns of buttons. The learner needs to find the right pars.
 - la <> the
  */
 
-export default function QuestionMatch({editor, controls, progress, element}) {
+export default function QuestionMatch({progress, element}) {
+    const controls = React.useContext(StoryContext);
+    const editor = React.useContext(EditorContext);
+
     const [done, setDone] = React.useState(false);
     const active = progress === element.trackingProperties.line_index;
 
@@ -125,7 +129,7 @@ export default function QuestionMatch({editor, controls, progress, element}) {
         <div className={styles.match_container}>
             <div className="match_col">
             {orderB.map((phrase, index) => (
-                <div className={styles.test}>
+                <div key={index} className={styles.test}>
                     <button key={index} className={font.className+' '+styles.match_word+" "+get_color(clicked[index])}
                         onClick={()=>click(index)}>
                         {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][1]] : ""}
@@ -135,11 +139,11 @@ export default function QuestionMatch({editor, controls, progress, element}) {
             </div>
             <div className="match_col">
             {orderA.map((phrase, index) => (
-                <div className={styles.test}>
-                <button key={index} className={font.className+' '+styles.match_word+" "+get_color(clicked[index + orderB.length])}
-                        onClick={()=>click(index + orderB.length)}>
-                    {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][0]] : ""}
-                </button>
+                <div key={index} className={styles.test}>
+                    <button key={index} className={font.className+' '+styles.match_word+" "+get_color(clicked[index + orderB.length])}
+                            onClick={()=>click(index + orderB.length)}>
+                        {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][0]] : ""}
+                    </button>
                 </div>
             ))}
             </div>
