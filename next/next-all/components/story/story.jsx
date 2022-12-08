@@ -18,7 +18,6 @@ export default function Story({story, navigate, id, editor, storyFinishedIndexUp
     let course = story.learningLanguage + "-" + story.fromLanguage;
 
     let [progress, setProgress] = useState(-1);
-    let [spacer, setSpacer] = useState(0);
     let [right, setRight] = useState(false);
     let [blocked, setBlocked] = useState(false);
     let [progressStep, setProgressStep] = useState(1);
@@ -34,7 +33,6 @@ export default function Story({story, navigate, id, editor, storyFinishedIndexUp
     }, [ref_audio2]);
 
     const right_call = React.useCallback(() => {
-        console.log("right");
         ref_audio1.current.play();
         setRight(true);
         setBlocked(false);
@@ -64,16 +62,14 @@ export default function Story({story, navigate, id, editor, storyFinishedIndexUp
     }, [id, course, navigate]);
 
     useEffect(() => {
-        if(!storyElement.current) return
-        let parts = storyElement.current.querySelectorAll("div.part:not(.hidden)")
-        let last = parts[parts.length-1];
-        let spacerX = window.innerHeight/2-last?.clientHeight*0.5;
+        if (!storyElement.current) return
+        let parts = storyElement.current.querySelectorAll("div.part:not([data-hidden=true])")
+        let last = parts[parts.length - 1];
 
-        if(!editor)
-            scroll_down();
-        if(spacerX !== spacer)
-            setSpacer(spacerX);
-    }, [editor, spacer, storyElement, progress]);
+        if (!editor) {
+            last.scrollIntoView({ behavior: 'smooth', block: 'center'});
+        }
+    }, [editor, storyElement, progress]);
 
 
     let controls = React.useCallback(() => { return {
@@ -154,7 +150,6 @@ export default function Story({story, navigate, id, editor, storyFinishedIndexUp
                 }
             }
             if (count === 0) {
-                console.log("count 0")
                 setAudioLoaded(1);
             }
             return audios;
@@ -198,7 +193,7 @@ export default function Story({story, navigate, id, editor, storyFinishedIndexUp
                         ))}
                     </StoryContext.Provider>
                 </div>
-                <div style={{height: spacer+"px"}} />
+                <div className={styles.spacer} />
                 {finished ? <FinishedPage story={story} /> : null
                 }
             </div>

@@ -2,6 +2,7 @@ import React from "react";
 import Head from 'next/head'
 
 import Story from "../../components/story/story";
+import {get_story} from "../api/story/[story_id]";
 
 export default function StoryMain({story}) {
     if(!story)
@@ -17,8 +18,9 @@ export default function StoryMain({story}) {
 
 export async function getServerSideProps({params}) {
     // Fetch data from external API
-    const res = await fetch(`https://test.duostories.org/stories/backend_node_test/story/${params.story}`)
-    const story = await res.json()
+    //const res = await fetch(`https://test.duostories.org/stories/backend_node_test/story/${params.story}`)
+    //const story = await res.json()
+    const story = await get_story(params.story);
 
     // Pass data to the page via props
     return { props: { story } }

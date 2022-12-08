@@ -6,6 +6,7 @@ import {EditorHook} from "../editor_hooks";
 import useChoiceButtons from "./questions_useChoiceButtons";
 import HintLineContent from "../text_lines/line_hints";
 import {EditorContext, StoryContext} from "../story";
+import QuestionPrompt from "./question_prompt";
 
 
 /*
@@ -74,9 +75,7 @@ export default function QuestionPointToPhrase({progress, element}) {
 
     return <div className={hidden} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
         {/* display the question */}
-        <div className="question">
-            <HintLineContent content={element.question} />
-        </div>
+        <QuestionPrompt question={element.question} />
         {/* display the text */}
         <div>
             {element.transcriptParts.map((part, index) => (

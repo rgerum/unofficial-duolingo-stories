@@ -6,6 +6,7 @@ import useChoiceButtons from "./questions_useChoiceButtons";
 import {EditorHook} from "../editor_hooks";
 import HintLineContent from "../text_lines/line_hints";
 import {EditorContext, StoryContext} from "../story";
+import QuestionPrompt from "./question_prompt";
 
 
 /*
@@ -76,11 +77,7 @@ export default function QuestionMultipleChoice({setUnhide, progress, element}) {
 
     return <div className={styles_common.fadeGlideIn+" "+hidden2} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
         {/* Display the question if a question is there */}
-        {element.question ?
-            <span className="question">
-                <HintLineContent content={element.question} />
-            </span> : null
-        }
+        {element.question ? <QuestionPrompt question={element.question} /> : null}
         {/* Display the answers */}
         <ul className={styles.multiple_choice_ul}>
             {element.answers.map((answer, index) => (

@@ -91,3 +91,15 @@ p[data-rtl] .speaker {
     margin-bottom: -80px;
 }
 
+.grid {
+    position: fixed;
+    left: 0;
+    top: 0;
+    border: 1px solid red;
+    height: 50vh;
+    width: 100vw;
+}
+
+.spacer {
+    height: 50vh;
+}

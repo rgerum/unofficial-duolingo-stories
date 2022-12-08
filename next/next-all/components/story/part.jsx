@@ -19,10 +19,11 @@ import {EditorContext} from "./story";
 export default function Part(props) {
     let challenge_type = props.part[props.part.length-1].trackingProperties.challenge_type;
     let [unhide, setUnhide] = React.useState(0);
+    let is_hidden = props.progress < props.part[0].trackingProperties.line_index;
 
-    let hidden = (props.progress < props.part[0].trackingProperties.line_index) ? styles_common.hidden: ""
+    let hidden = (is_hidden) ? styles_common.hidden: ""
     if(props.editor) hidden = "";
-    return <div className={"part"+" "+hidden} data-challengetype={challenge_type}>
+    return <div className={"part"+" "+hidden} data-hidden={is_hidden} data-challengetype={challenge_type}>
         {props.part.map((element, i) => (
             <StoryLine key={i} unhide={unhide} setUnhide={setUnhide} progress={props.progress} element={element} />
         ))}
@@ -38,7 +39,7 @@ function ChallengePrompt({progress, element}) {
     [hidden2, onClick] = EditorHook(hidden2, element.editor, editor);
 
     return <div className={styles_common.fadeGlideIn+" "+hidden2} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
-        <span className="question">
+        <span className={styles_common.question}>
             <HintLineContent content={element.prompt} />
         </span>
     </div>

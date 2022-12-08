@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from "react";
-import styles from "./question_match.module.css"
-import styles_common from "../common.module.css"
+import styles from "./question_match.module.css";
+import styles_common from "../common.module.css";
 
 import {shuffle} from "../includes";
 import {EditorHook} from "../editor_hooks";
 import font from "../../../lib/font";
 import {EditorContext, StoryContext} from "../story";
-
+import QuestionPrompt from "./question_prompt";
 
 /*
 The MATCH question.
@@ -125,7 +125,7 @@ export default function QuestionMatch({progress, element}) {
     }
 
     return <div className={styles_common.fadeGlideIn+" "+hidden2} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
-        <span className="question">{element.prompt}</span>
+        <QuestionPrompt question={element.prompt} />
         <div className={styles.match_container}>
             <div className="match_col">
             {orderB.map((phrase, index) => (

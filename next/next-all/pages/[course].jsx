@@ -5,6 +5,8 @@ import Layout from "../components/layout";
 import SetList from "../components/set_list";
 import MainTitle from "../components/main_title";
 import TitleDesc from "../components/title_desc";
+import {get_course} from "./api/course/[course_id]";
+import {get_courses} from "./api/course";
 
 export default function MainContentSetList({course}) {
 
@@ -36,8 +38,9 @@ export default function MainContentSetList({course}) {
 // This gets called on every request  <Legal/>
 export async function getStaticProps({params}) {
     // Fetch data from external API
-    const res = await fetch(`https://test.duostories.org/stories/backend_node_test/course/${params.course}`)
-    const course = await res.json()
+    //const res = await fetch(`https://test.duostories.org/stories/backend_node_test/course/${params.course}`)
+    //const course = await res.json()
+    const course = await get_course(params.course);
 
     // Pass data to the page via props
     return { props: { course } }
@@ -45,8 +48,9 @@ export async function getStaticProps({params}) {
 
 export async function getStaticPaths({}) {
     // Fetch data from external API
-    const res = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`)
-    const courses = await res.json()
+    //const res = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`)
+    //const courses = await res.json()
+    let courses = await get_courses();
 
     let paths = [];
     for(let group in courses) {

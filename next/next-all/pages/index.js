@@ -6,6 +6,8 @@ import Flag from "../components/flag";
 import CourseList from "../components/course_list";
 import MainTitle from "../components/main_title";
 import TitleDesc from "../components/title_desc";
+import {get_counts} from "./api/course/counts";
+import {get_courses} from "./api/course";
 
 
 function Page({ counts, courses, userdata}) {
@@ -39,11 +41,13 @@ function Page({ counts, courses, userdata}) {
 // This gets called on every request
 export async function getStaticProps() {
     // Fetch data from external API
-    const res = await fetch(`https://test.duostories.org/stories/backend_node_test/course_counts`)
-    const counts = await res.json()
+    //const res = await etch(`https://test.duostories.org/stories/backend_node_test/course_counts`)
+    //const counts = await res.json()
+    const counts = await get_counts();
 
-    let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
-    let courses =  await response_courses.json();
+    //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
+    //let courses =  await response_courses.json();
+    let courses = await get_courses();
 
     // Pass data to the page via props
     return { props: { counts, courses } }
