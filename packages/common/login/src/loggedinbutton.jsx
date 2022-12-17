@@ -3,6 +3,13 @@ import React from "react";
 
 
 export function LoggedInButton({userdata, page}) {
+    function getDarkModeButtonText() { return window.get_isDarkMode() ? "Light Mode" : "Dark Mode"; }
+
+    function updateDarkModeButtonText() {
+        let darkModeButton = document.getElementsByClassName("button_dark_mode")[0];
+        if (darkModeButton) darkModeButton.innerHTML = getDarkModeButtonText();
+    }
+
     //username = {role: 1, username: "test"}
     if(userdata === undefined)
         return <></>
@@ -13,8 +20,8 @@ export function LoggedInButton({userdata, page}) {
             </div>
             <div id="profile_dropdown">
                 {page === "stories" ?
-                <div id="button_editor" className="profile_dropdown_button button_dark_mode" onClick={()=>{window.toggle_dark()}}>
-                    Dark Mode
+                <div id="button_editor" className="profile_dropdown_button button_dark_mode" onClick={()=>{window.toggle_dark(); updateDarkModeButtonText()}}>
+                    {getDarkModeButtonText()}
                 </div> : null}
                 {userdata.role !== 0 && page !== "stories" ?
                     <div id="button_editor" className="profile_dropdown_button" onClick={()=>{window.location.href = "https://www.duostories.org"}}>
