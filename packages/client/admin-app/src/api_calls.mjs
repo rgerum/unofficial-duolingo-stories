@@ -40,6 +40,8 @@ export async function getCourseList() {
 }
 
 export async function setLanguage(data) {
+    if(data.rtl === undefined)
+        data.rtl = 0;
     try {
         let response = await fetch_post(`${backend_express_admin}/set_language`, data);
         return response.text();
