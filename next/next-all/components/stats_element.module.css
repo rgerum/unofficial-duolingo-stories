@@ -1,0 +1,57 @@
+.count {
+
+}
+.count2 {
+    font-size: 14px;
+    margin-top: -8px;
+}
+.learningLanguage {
+}
+.fromLanguage {
+}
+.languageBox {
+    text-align: right;
+    writing-mode: vertical-rl;
+    transform: scale(-1, -1);
+    font-size: 14px;
+    padding-bottom: 8px;
+}
+.bar {
+    position: absolute;
+    width: 30px;
+    background: #ff4b4b;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: 0px;
+    bottom: 0;
+}
+.bar2 {
+    position: absolute;
+    width: 30px;
+    background: #1cb0f6;
+    border-radius: 5px 5px 0px 0px;
+    border-bottom: 0px;
+    left: 13px;
+    bottom: 0;
+    z-index: -1;
+}
+.bar_container {
+    position: relative;
+    border-bottom: 2px solid black;
+    width: 46px;
+    padding: 0px 7px;
+}
+.language {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.flagBox {
+    position: relative;
+    padding-bottom: 3px;
+}
+.flagBox svg:nth-child(2) {
+    left: 19px;
+    top: 13px;
+    position: absolute;
+}
