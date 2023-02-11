@@ -1,47 +1,32 @@
 import styles from "./loggedinbutton.module.css"
-import React, {useEffect, useState} from "react";
+import React from "react";
+import {useUser} from "../../lib/hooks";
 import Dropdown from "../layout/dropdown";
 import {signOut, useSession} from "next-auth/react";
 
 
-function useDarkLight() {
-    const [activeTheme, setActiveTheme] = useState(document.body.dataset.theme);
-    const inactiveTheme = activeTheme === "light" ? "dark" : "light";
-    //...
-
-    useEffect(() => {
-        document.body.dataset.theme = activeTheme;
-        window.localStorage.setItem("theme", activeTheme);
-    }, [activeTheme]);
-
-    return {set: setActiveTheme, toggle: () => setActiveTheme(inactiveTheme), value: activeTheme}
-}
-
-export default function LoggedInButton({page}) {
+export function LoggedInButton({page}) {
     const { data: session } = useSession();
-    const controls = useDarkLight();
+    //const { userdata, logout} = useUser();
 
     if(session === undefined)
         return <></>
     return <Dropdown>
         <div className={styles.round} style={{ backgroundImage: `url('${session.user?.image}')` }}>{session.user.name.substring(0, 1)}</div>
         <div>
-            <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "/profile"}}>
-                Profile
-            </div>
             {page === "stories" ?
-                <div id="button_editor" className={styles.profile_dropdown_button + "  button_dark_mode"} onClick={()=>{controls.toggle()}}>
-                    {controls.value === "light" ? "Dark Mode" : "Light Mode"}
+                <div id="button_editor" className={styles.profile_dropdown_button + "  button_dark_mode"} onClick={()=>{window.toggle_dark()}}>
+                    Dark Mode
                 </div> : null}
-            {session.user?.role && page !== "stories" ?
+            {session.user.role !== 0 && page !== "stories" ?
                 <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "https://www.duostories.org"}}>
                     Stories
                 </div> : null}
-            {session.user?.role && page !== "editor" ?
+            {session.user.role !== 0 && page !== "editor" ?
                 <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "https://editor.duostories.org"}}>
                     Editor
                 </div> : null}
-            {session.user?.admin && page !== "admin" ?
+            {session.user.admin !== 0 && page !== "admin" ?
                 <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "https://admin.duostories.org"}}>
                     Admin
                 </div> : null}
