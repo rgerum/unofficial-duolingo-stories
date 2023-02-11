@@ -2,9 +2,9 @@ import React from "react";
 import Head from 'next/head'
 
 import {get_stats} from "../../api/stats/[year]/[month]";
-import Flag from "../../../components/flag";
-import StatsElement from "../../../components/stats_element";
-import StatsElement2 from "../../../components/stats_element2";
+import Flag from "../../../components/layout/flag";
+import StatsElement from "../../../components/stats/stats_element";
+import StatsElement2 from "../../../components/stats/stats_element2";
 
 function arrayRemove(arr, value) {
 

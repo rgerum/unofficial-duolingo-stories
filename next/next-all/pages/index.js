@@ -1,11 +1,11 @@
 import Head from 'next/head'
 import Link from "next/link";
 
-import Layout,  from '../components/layout'
-import Flag from "../components/flag";
-import CourseList from "../components/course_list";
-import MainTitle from "../components/main_title";
-import TitleDesc from "../components/title_desc";
+import Layout,  from '../components/layout/layout'
+import Flag from "../components/layout/flag";
+import CourseList from "../components/layout/course_list";
+import MainTitle from "../components/layout/main_title";
+import TitleDesc from "../components/layout/title_desc";
 import {get_counts} from "./api/course/counts";
 import {get_courses} from "./api/course";
 

@@ -1,5 +1,5 @@
 import styles from "./stats_element2.module.css"
-import Flag from "./flag";
+import Flag from "../layout/flag";
 import React from "react";
 
 export default function StatsElement2({course}) {

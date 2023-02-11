@@ -2,7 +2,7 @@
 /* login */
 
 .button {
-    composes: button from "../button.module.css";
+    composes: button from "../layout/button.module.css";
 }
 
 .login_dialog {
@@ -42,7 +42,7 @@
 }
 
 .login_dialog_button {
-    composes: button from "../button.module.css";
+    composes: button from "../layout/button.module.css";
     background-color: var(--button-blue-background);
     color: var(--button-blue-color);
     width: 100%;

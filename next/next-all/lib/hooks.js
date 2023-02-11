@@ -1,6 +1,7 @@
 import React from "react";
 import useSWR from "swr";
 import {login, logout} from "../components/login/api_calls/user";
+import {useSession} from "next-auth/react";
 
 export function useInput(def) {
     let [value, setValue] = React.useState(def);
@@ -41,15 +42,15 @@ export function useUser () {
 }
 
 export function useUserCourses() {
-    const {userdata} = useUser();
+    const { data: session } = useSession();
 
-    const { data } = useSWR(() => userdata.user_id ? 'https://test.duostories.org/stories/backend_node_test/courses_user' : null, fetch2)
+    const { data } = useSWR(() => session.user.name ? 'api/course/user' : null, fetch2)
     return data
 }
 
 export function useUserStoriesDone() {
-    const {userdata} = useUser();
+    const { data: session } = useSession();
 
-    const { data } = useSWR(() => userdata.user_id ? 'https://test.duostories.org/stories/backend_node_test/user_stories_done' : null, fetch2)
+    const { data } = useSWR(() => session.user.name ? 'api/course/user_done' : null, fetch2)
     return {user_stories_done: data}
 }

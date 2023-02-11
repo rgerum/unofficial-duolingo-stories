@@ -1,5 +1,5 @@
 import styles from "./stats_element.module.css"
-import Flag from "./flag";
+import Flag from "../layout/flag";
 import React from "react";
 
 export default function StatsElement({lang1, lang2, count, count_old, max_count}) {

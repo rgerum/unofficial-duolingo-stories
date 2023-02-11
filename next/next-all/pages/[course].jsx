@@ -1,10 +1,10 @@
 import Head from 'next/head'
 import Link from 'next/link'
 
-import Layout from "../components/layout";
-import SetList from "../components/set_list";
-import MainTitle from "../components/main_title";
-import TitleDesc from "../components/title_desc";
+import Layout from "../components/layout/layout";
+import SetList from "../components/layout/set_list";
+import MainTitle from "../components/layout/main_title";
+import TitleDesc from "../components/layout/title_desc";
 import {get_course} from "./api/course/[course_id]";
 import {get_courses} from "./api/course";
 
@@ -55,7 +55,7 @@ export async function getStaticPaths({}) {
     let paths = [];
     for(let group in courses) {
         for (let course of courses[group]) {
-            paths.push({params: {course: `${course.learningLanguage}-${course.fromLanguage}`}})
+            paths.push({params: {course: `${course.learningLanguage}-${course.fromLanguage}`}});
         }
     }
 

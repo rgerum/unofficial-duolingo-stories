@@ -1,6 +1,6 @@
 import styles from "./set_list.module.css"
 import StoryButton from "./story_button";
-import {useUser} from "./login/login_dialog";
+//import {useUser} from "./login/login_dialog";
 
 export default function SetList({course}) {
 

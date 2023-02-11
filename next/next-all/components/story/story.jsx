@@ -7,7 +7,7 @@ import Part from "./part";
 import FinishedPage from "./layout/finish_page";
 import Footer from "./layout/story_footer";
 import StoryHeader from "./layout/story_header";
-import Legal from "../legal";
+import Legal from "../layout/legal";
 
 export const StoryContext = React.createContext({});
 export const EditorContext = React.createContext(undefined);

@@ -27,4 +27,45 @@ async function query(query, args) {
         });
     });
 }
+
+export async function update(table_name, data, mapping) {
+    let values = [];
+    let updates = [];
+    for(let key in data) {
+        if(mapping[key]) {
+            values.append(data[key]);
+            updates.push(`${mapping[key]} = ?`);
+        }
+    }
+    updates.push(data.id);
+    let update_string = updates.join(", ");
+    const user_new = await query(`UPDATE ${table_name}
+                            SET ${update_string}
+                            WHERE id = ?
+                            LIMIT 1;`, values);
+}
+
+export async function insert(table_name, data, mapping) {
+    console.log("insert", table_name, data, mapping);
+    let values = [];
+    let columns = [];
+    let value_placeholders = [];
+    for(let key in data) {
+        if(mapping[key]) {
+            values.append(data[key]);
+            columns.push(`${mapping[key]}`);
+            value_placeholders.push(`?`);
+        }
+    }
+    let columns_string = columns.join(", ");
+    let value_placeholders_string = value_placeholders.join(", ");
+    console.log("insert", `INSERT INTO ${table_name}
+                            (${columns_string})
+                            VALUES (${value_placeholders_string})
+                            LIMIT 1;`, values)
+    const user_new = await query(`INSERT INTO ${table_name}
+                            (${columns_string})
+                            VALUES (${value_placeholders_string})
+                            LIMIT 1;`, values);
+}
 module.exports = query;
