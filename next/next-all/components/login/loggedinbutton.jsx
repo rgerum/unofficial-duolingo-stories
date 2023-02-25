@@ -14,6 +14,9 @@ export function LoggedInButton({page}) {
     return <Dropdown>
         <div className={styles.round} style={{ backgroundImage: `url('${session.user?.image}')` }}>{session.user.name.substring(0, 1)}</div>
         <div>
+            <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "/profile"}}>
+                Profile
+            </div>
             {page === "stories" ?
                 <div id="button_editor" className={styles.profile_dropdown_button + "  button_dark_mode"} onClick={()=>{window.toggle_dark()}}>
                     Dark Mode
