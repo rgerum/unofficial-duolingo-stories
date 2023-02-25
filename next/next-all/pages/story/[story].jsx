@@ -3,8 +3,15 @@ import Head from 'next/head'
 
 import Story from "../../components/story/story";
 import {get_story} from "../api/story/[story_id]";
+import {useRouter} from "next/router";
+
+export async function setStoryDone(id) {
+    return fetch(`/api/story/${id}/done`, {credentials: 'include'});
+}
 
 export default function StoryMain({story}) {
+    const router = useRouter();
+    let storyFinishedIndexUpdate = async (id) => {await setStoryDone(story.id); }
     if(!story)
         return <div>:-(</div>
     return <>
@@ -12,7 +19,7 @@ export default function StoryMain({story}) {
             <title>{`Duostories ${story.learningLanguageLong} from ${story.fromLanguageLong}: ${story.fromLanguageName}`}</title>
             <link rel="canonical" href={`https://www.duostories.org/story/${story.id}`} />
         </Head>
-        <Story story={story} />
+        <Story story={story} storyFinishedIndexUpdate={storyFinishedIndexUpdate} router={router} />
     </>
 }
 
