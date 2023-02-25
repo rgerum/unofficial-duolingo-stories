@@ -6,13 +6,12 @@ import GithubProvider from "next-auth/providers/github"
 //import Auth0Provider from "next-auth/providers/auth0"
 import DiscordProvider from "next-auth/providers/discord";
 // import AppleProvider from "next-auth/providers/apple"
-// import EmailProvider from "next-auth/providers/email"
+import EmailProvider from "next-auth/providers/email"
 
 import CredentialsProvider from "next-auth/providers/credentials"
 import query from "../../../lib/db"
 import {phpbb_check_hash} from "../../../lib/auth/hash_functions2";
 import MyAdapter from "../../../lib/database_adapter";
-
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
@@ -23,6 +22,10 @@ export const authOptions = {
   // https://next-auth.js.org/configuration/providers/oauth
   adapter: MyAdapter(),
   providers: [
+    EmailProvider({
+      server: process.env.EMAIL_SERVER,
+      from: process.env.EMAIL_FROM
+    }),
     /* EmailProvider({
          server: process.env.EMAIL_SERVER,
          from: process.env.EMAIL_FROM,
@@ -54,7 +57,11 @@ export const authOptions = {
     }),
     GoogleProvider({
       clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_SECRET
+      clientSecret: process.env.GOOGLE_SECRET,
+      authorizationUrl:
+          'https://accounts.google.com/o/oauth2/v2/auth?prompt=consent&access_type=offline&response_type=code',
+      scope:
+          'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/youtube.readonly',
     }),
     /*TwitterProvider({
       clientId: process.env.TWITTER_ID,
@@ -73,18 +80,15 @@ export const authOptions = {
       },
       async authorize(credentials, req) {
         let res2 = await query(`SELECT * FROM user WHERE username = ? AND activated = 1`, credentials.username);
-        console.log(res2);
         if(res2.length === 0) {
           return null
         }
         let user = res2[0];
 
         let correct = await phpbb_check_hash(credentials.password, user.password);
-        console.log("incorrect", correct)
         if (!correct) {
           return null
         }
-        console.log("right", correct, user.username)
 
         return {
           name: user.username,
@@ -102,14 +106,11 @@ export const authOptions = {
   },
   callbacks: {
     async jwt({ token, user, account, profile, isNewUser }) {
-      console.log("jwt", token, user, account, profile, isNewUser );
-      token.userRole = "admin"
       if(user) {
         token.admin = user?.admin;
         token.role = user?.role;
         token.id = user?.id;
       }
-      console.log("token", token)
       return token
     }
   }

@@ -20,12 +20,15 @@ export async function update(table_name, data, mapping) {
             updates.push(`${mapping[key]} = ?`);
         }
     }
-    updates.push(data.id);
+    values.push(data.id);
     let update_string = updates.join(", ");
     const user_new = await query(`UPDATE ${table_name}
                             SET ${update_string}
                             WHERE id = ?
                             LIMIT 1;`, values);
+    return await query_one(`SELECT ${getSelectionString(mapping, "t")} FROM ${table_name} t
+                            WHERE id = ?
+                            LIMIT 1;`, [data.id]);
 }
 
 export async function insert(table_name, data, mapping) {
@@ -56,17 +59,13 @@ export async function insert(table_name, data, mapping) {
 }
 
 async function query_one(query_string, args) {
-    console.log("query_one", query_string, args)
     const request = await query(query_string, args);
-    console.log(request)
-    console.log(request.length)
     if (!request.length)
         return null
-    console.log({ ...request[0] })
     return { ...request[0] }
 }
 
-let mapping_user = {name: "username", email: "email", emailVerified: "emailVerified", image: "image"};
+let mapping_user = {name: "username", email: "email", emailVerified: "emailVerified", image: "image", admin: "admin", role: "role"};
 let mapping_account = {userId: "user_id", type: "type", provider: "provider", providerAccountId: "provider_account_id",
     refresh_token: "refresh_token",
     access_token: "access_token",
@@ -90,50 +89,46 @@ let mapping_verification_token = {
 export default function MyAdapter() {
     return {
         async createUser(user) {
-            console.log("createUser", user);
-            console.log("now letsinsert", insert)
-            console.log(mapping_user)
+            console.log("-------- createUser", user);
             return await insert("user", user, mapping_user);
         },
         async getUser(id) {
-            console.log("getUser", id);
+            console.log("-------- getUser", id);
             return await query_one(`SELECT ${getSelectionString(mapping_user, "u")} FROM user u WHERE id = ? LIMIT 1;`, [id]);
         },
         async getUserByEmail(email) {
-            console.log("getUserByEmail", email);
+            console.log("-------- getUserByEmail", email);
             return await query_one(`SELECT ${getSelectionString(mapping_user, "u")} FROM user u WHERE email = ? LIMIT 1;`, [email]);
         },
         async getUserByAccount({ providerAccountId, provider }) {
-            console.log("getUserByAccount", providerAccountId, provider);
+            console.log("-------- getUserByAccount", providerAccountId, provider);
             return await query_one(`SELECT ${getSelectionString(mapping_user, "u")} FROM user u
                             JOIN account a on u.id = a.user_id WHERE a.provider_account_id = ? AND a.provider = ?
                             LIMIT 1;`, [providerAccountId, provider]);
         },
         async updateUser(user) {
-            console.log("updateUser", user);
+            console.log("-------- updateUser", user);
             return update("user", user, mapping_user);
         },
         async deleteUser(userId) {
-            console.log("deleteUser", userId);
+            console.log("-------- deleteUser", userId);
             await query(`DELETE FROM user WHERE id = ?`, [userId]);
             await query(`DELETE FROM account WHERE user_id = ?`, [userId]);
             await query(`DELETE FROM session WHERE user_id = ?`, [userId]);
         },
         async linkAccount(account) {
-            console.log("linkAccount", account);
+            console.log("-------- linkAccount", account);
             return insert("account", account, mapping_account);
         },
         async unlinkAccount({ providerAccountId, provider }) {
-            console.log("unlinkAccount", providerAccountId, provider);
             await query(`DELETE FROM account WHERE provider_account_id = ? AND provider = ?`, [providerAccountId, provider]);
         },
         async createSession(session) {
-            console.log("createSession", session);
-            //{ sessionToken, userId, expires }
+            console.log("-------- createSession", session);
             return insert("session", session, mapping_session);
         },
         async getSessionAndUser(sessionToken) {
-            console.log("getSessionAndUser", sessionToken);
+            console.log("-------- getSessionAndUser", sessionToken);
             const session = await query_one(`SELECT ${getSelectionString(mapping_session, "s")} FROM session s WHERE session_token = ? LIMIT 1`, [sessionToken]);
             if(!session)
                 return null
@@ -141,19 +136,19 @@ export default function MyAdapter() {
             return {session, user}
         },
         async updateSession({ sessionToken }) {
-            console.log("updateSession", sessionToken);
+            console.log("-------- updateSession", sessionToken);
             return update("session", sessionToken, mapping_session)
         },
         async deleteSession(sessionToken) {
-            console.log("deleteSession", sessionToken);
             await query(`DELETE FROM session WHERE session_token = ?`, [sessionToken]);
         },
         async createVerificationToken(data) {
-            let id = await insert("verification_token", data, mapping_verification_token);
-            return await query_one(`SELECT ${getSelectionString(verification_token, "t")} FROM verification_token t WHERE id = ? LIMIT 1`, [id]);
+            console.log("-------- createVerificationToken", data)
+            return await insert("verification_token", data, mapping_verification_token);
         },
         async useVerificationToken({ identifier, token }) {
-            let ver_token = await query_one(`SELECT ${getSelectionString(mapping_verification_token, "t")} FROM verification_token WHERE identifier = ? AND token = ?`, [identifier, token])
+            console.log("-------- useVerificationToken", identifier, token)
+            let ver_token = await query_one(`SELECT ${getSelectionString(mapping_verification_token, "t")} FROM verification_token t WHERE identifier = ? AND token = ?`, [identifier, token])
             if(!ver_token)
                 return null
             await query(`DELETE FROM verification_token WHERE id = ?`, [ver_token.id]);
