@@ -63,7 +63,7 @@ async function reqister({username, password, email}){
             <br/>
             You have registered on 'Unofficial Duolingo Stories'.<br/>
             To complete your registration click on the following link.<br/>
-            <a href='https://www.duostories.org/task/activate/${username}/${activation_link}'>Activate account</a>
+            <a href='https://test.editor.duostories.org/activate/${username}/${activation_link}'>Activate account</a>
             <br/><br/>
             Happy learning.
         `
