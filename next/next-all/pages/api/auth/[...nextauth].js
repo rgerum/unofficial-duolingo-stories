@@ -105,6 +105,12 @@ export const authOptions = {
     colorScheme: "light"
   },
   callbacks: {
+    async session({ session, token, user }) {
+      session.user.admin = token.admin
+      session.user.role = token.role
+
+      return session
+    },
     async jwt({ token, user, account, profile, isNewUser }) {
       if(user) {
         token.admin = user?.admin;
