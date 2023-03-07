@@ -1,0 +1,141 @@
+#login_dialog div {
+    display: block;
+    width: 375px;
+    text-align: center;
+    margin: 20px;
+}
+
+#login_dialog {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+}
+
+#login_dialog div input {
+    align-items: center;
+    background: var(--input-background);
+    border: 2px solid var(--input-border);
+    color: var(--text-color);
+    border-radius: 16px;
+    display: flex;
+    margin-top: 8px;
+    position: relative;
+    width: 100%;
+    padding: 10px 17px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.button:hover {
+    filter: brightness(1.1);
+}
+
+.button:hover {
+    filter: brightness(1.1);
+}
+.button {
+    cursor: pointer;
+    text-transform: uppercase;
+    padding: 13px 30px;
+    float: right;
+    display: inline-block;
+    background: var(--button-background);
+    color: var(--button-color);
+    border-radius: 15px;
+    font-weight: 700;
+    border: 0;
+    font-size: 16px;
+    transition: .1s box-shadow,.1s transform;
+    border-color: var(--button-border);
+    border-bottom: 4px solid var(--button-border);
+}
+.button {
+    background-color: var(--button-blue-background);
+    color: var(--button-blue-color);
+    width: 100%;
+    box-shadow: none;
+    border: solid var(--button-blue-border);
+    border-width: var(--button-side-border) var(--button-side-border) 4px;
+    margin-top: 8px;
+    transform: translate(0);
+    margin-bottom: 8px;
+    margin-inline: 0;
+}
+
+#login_dialog .link {
+    width: auto;
+    transform: none;
+    background: none;
+    text-decoration: none;
+    color: var(--link-blue);
+    margin: 0;
+    border: none;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#login_dialog hr {
+    border: 0;
+    border-top-color: currentcolor;
+    border-top-style: none;
+    border-top-width: 0px;
+    border-top: 2px solid var(--input-border);
+    display: block;
+    margin: 15px auto -14px;
+    overflow: visible;
+    position: relative;
+}
+#login_dialog hr::before {
+    background: var(--body-background);
+    color: var(--input-border);
+    content: "or";
+    padding: 0 .4rem;
+    position: relative;
+    top: -1rem;
+}
+#login_dialog > div {
+    text-align: center;
+}
+.button2 {
+    composes: button;
+    display: flex;
+    align-items: center;
+    width: calc(50% - 10px);
+    margin-right: 10px;
+    color: var(--text-color);
+    border: solid var(--overview-hr);
+    border-width: 2px 2px 4px;
+    background: var(--body-background);
+}
+.button2 span {
+    margin-left: 10px;
+}
+.button2:hover {
+    filter: brightness(.9);
+}
+.error {
+    display: block;
+    background: var(--error-red);
+    color: white;
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px;
+}
+#login_dialog #quit {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+#quit {
+    background-image: url(//d35aaqx5ub95lt.cloudfront.net/images/icon-sprite8.svg);
+    background-position: -373px -154px;
+    cursor: pointer;
+    display: inline-block;
+    height: 18px;
+    vertical-align: middle;
+    width: 18px;
+}

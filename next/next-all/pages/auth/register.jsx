@@ -110,6 +110,7 @@ export default function Register() {
         </Head>
 
         <div id={styles.login_dialog}>
+            <Link href="/" id={styles.quit}></Link>
             <div>
                 <h2>Sign up</h2>
                 <p>If you register you can keep track of the stories you have already finished.</p>
