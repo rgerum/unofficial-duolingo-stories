@@ -80,6 +80,7 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
         next: next,
         advance_progress: advance_progress,
         id: Math.random(),
+        rtl: story.learningLanguageRTL,
     }}, [wrong, right_call, setProgressStep, next, advance_progress])();
 
     let parts = [];
