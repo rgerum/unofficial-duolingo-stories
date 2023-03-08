@@ -1,0 +1,96 @@
+
+.flagBox {
+    position: relative;
+    padding-bottom: 3px;
+}
+.flagBox svg:nth-child(2) {
+    left: 19px;
+    top: 13px;
+    position: absolute;
+}
+.languageBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.box1 {
+    width: 121px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+}
+.box2 {
+    font-size: 0.8em;
+}
+.fromLanguage {
+    font-size: 0.7em;
+}
+.increase {
+    font-size: 0.7em;
+    width: 47px;
+}
+.increasePlus {
+    color: green;
+}
+.increasePlus::before {
+    content: "+";
+}
+.increaseMinus {
+    color: red;
+}
+.increaseHidden {
+    visibility: hidden;
+}
+.countOld {
+    font-size: 0.7em;
+    width: 36px;
+}
+.rankOld {
+    font-size: 0.7em;
+}
+.statName {
+}
+.statCount {
+    width: 51px;
+    text-align: right;
+}
+.stat {
+}
+.statsBox {
+    display: flex;
+    border-radius: 16px;
+    border: solid var(--overview-hr);
+    border-width: 2px 2px 4px;
+    background: var(--body-background);
+    margin-bottom: 5px;
+    width: 627px;
+}
+
+.bar {
+    position: absolute;
+    height: 15px;
+    background: #ff4b4b;
+    border-radius: 0 5px 5px 0;
+    border-bottom: 0;
+    left: 0;
+    top: 4px;
+    z-index: 1;
+}
+.bar2 {
+    position: absolute;
+    height: 15px;
+    background: #1cb0f6;
+    border-radius: 0 5px 5px 0;
+    border-bottom: 0;
+    top: 8px;
+    left: 0;
+    z-index: 0;
+}
+.bar_container {
+    position: relative;
+    border-left: 2px solid black;
+    height: 24px;
+    padding: 7px 0;
+}

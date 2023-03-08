@@ -7,3 +7,9 @@
     width: 28px;
     height: 23px;
 }
+
+.rtl_loudspeaker {
+    transform: scale(-1, 1);
+    margin-right: 0;
+    margin-left: 8px;
+}

@@ -17,10 +17,16 @@
 }
 
 .head {
+    transform: scale(-1, 1);
     height: 50px;
     margin-right: 12px;
     width: 50px;
     display: flex;
+}
+
+.rtl_head {
+    margin-left: 12px;
+    margin-right: 0;
 }
 
 .bubble {
@@ -55,4 +61,25 @@
     left: -9px;
     position: absolute;
     top: 0;
+}
+
+.rtl_bubble {
+    border-top-left-radius: 14px;
+    border-top-right-radius: 0;
+}
+
+.rtl_bubble:before {
+    border-left: 12px solid #dedede;
+    border-right: 0;
+    border-top-right-radius: 50%;
+    border-top-left-radius: 0;
+    right: -14px;
+    left: auto;
+}
+
+.rtl_bubble:after {
+    border-left: 12px solid #fff;
+    border-right: 0;
+    right: -9px;
+    left: auto;
 }

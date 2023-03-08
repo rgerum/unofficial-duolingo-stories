@@ -7,12 +7,12 @@ import Part from "./part";
 import FinishedPage from "./layout/finish_page";
 import Footer from "./layout/story_footer";
 import StoryHeader from "./layout/story_header";
-import Legal from "../legal";
+import Legal from "../layout/legal";
 
 export const StoryContext = React.createContext({});
 export const EditorContext = React.createContext(undefined);
 
-export default function Story({story, navigate, id, editor, storyFinishedIndexUpdate}) {
+export default function Story({story, router, id, editor, storyFinishedIndexUpdate}) {
     const storyElement = React.useRef();
 
     let course = story.learningLanguage + "-" + story.fromLanguage;
@@ -58,8 +58,8 @@ export default function Story({story, navigate, id, editor, storyFinishedIndexUp
 
     let finish = React.useCallback(() => {
         storyFinishedIndexUpdate(id);
-        navigate("/"+course);
-    }, [id, course, navigate]);
+        router.push("/"+course);
+    }, [id, course, router]);
 
     useEffect(() => {
         if (!storyElement.current) return
@@ -80,6 +80,7 @@ export default function Story({story, navigate, id, editor, storyFinishedIndexUp
         next: next,
         advance_progress: advance_progress,
         id: Math.random(),
+        rtl: story.learningLanguageRTL,
     }}, [wrong, right_call, setProgressStep, next, advance_progress])();
 
     let parts = [];
@@ -183,7 +184,7 @@ export default function Story({story, navigate, id, editor, storyFinishedIndexUp
                 <source src={'https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3'} type="audio/mp3" />
             </audio>
 
-            <StoryHeader progress={progress} length={parts.length} course={course} navigate={navigate} />
+            <StoryHeader progress={progress} length={parts.length} course={course} />
             <div id={styles.main}>
                 <div id={styles.story} ref={storyElement} className={story.learningLanguageRTL ? styles.story_rtl : ""}>
                     <Legal />

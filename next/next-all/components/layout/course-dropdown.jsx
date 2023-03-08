@@ -2,7 +2,7 @@ import styles from "./course-dropdown.module.css";
 import Link from "next/link";
 import Flag from "./flag";
 import Dropdown from "./dropdown";
-import {useUserCourses} from "../lib/hooks";
+import {useUserCourses} from "../../lib/hooks";
 
 
 

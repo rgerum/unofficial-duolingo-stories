@@ -1,4 +1,6 @@
 
+export const backend_express = "";
+
 export async function fetch_post(url, data)
 {
     // check if the user is logged in

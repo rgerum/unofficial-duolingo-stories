@@ -7,11 +7,12 @@ import HintLineContent from "./line_hints";
 import EditorSSMLDisplay from "./audio_edit";
 import AudioPlay from "./audio_play";
 import useAudio from "./use_audio";
-import {EditorContext} from "../story";
+import {EditorContext, StoryContext} from "../story";
 
 
 export default function TextLine({progress, unhide, element}) {
     const editor = React.useContext(EditorContext);
+    const controls = React.useContext(StoryContext);
 
     let active = progress >= element.trackingProperties.line_index;
     if(progress-0.5 === element.trackingProperties.line_index)
@@ -47,8 +48,8 @@ export default function TextLine({progress, unhide, element}) {
         </div>;
     else if (element.line.avatarUrl)
         return <><div className={styles.phrase+" "+styles_common.fadeGlideIn+" "+hidden} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
-            <img className={styles.head} src={element.line.avatarUrl} alt="head"/>
-            <span className={styles.bubble}>
+            <img className={styles.head+" "+(controls.rtl ? styles.rtl_head : "")} src={element.line.avatarUrl} alt="head"/>
+            <span className={styles.bubble+" "+(controls.rtl ? styles.rtl_bubble : "")}>
                 <audio ref={ref}>
                     <source src={url} type="audio/mp3" />
                 </audio>

@@ -4,21 +4,25 @@ import {useRouter} from "next/router";
 
 import styles from './login.module.css';
 
-import {LoggedInButton} from "./loggedinbutton";
 import {register, reset_pw} from "./api_calls/user";
 import {useUser} from "../../lib/hooks";
 import {useInput} from "../../lib/hooks";
+import {signIn, useSession} from "next-auth/react";
 
+import dynamic from "next/dynamic";
+
+const LoggedInButton = dynamic(() => import("./loggedinbutton"), {
+    ssr: false,
+});
 
 export function Login() {
-    const { userdata } = useUser();
+    //const { userdata } = useUser();
+    const { data: session } = useSession();
 
-    if(userdata?.username !== undefined)
+    if(session?.user.name !== undefined)
         return <LoggedInButton page="stories"/>
 
-    return <Link id="log_in" href="/login">
-        <button className={styles.button} style={{float: "none"}}>Log in</button>
-    </Link>
+    return <button onClick={() => signIn()} className={styles.button} style={{float: "none"}}>Log in</button>
 }
 
 export function LoginDialog({page}) {

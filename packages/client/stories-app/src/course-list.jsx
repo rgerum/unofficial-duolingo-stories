@@ -21,6 +21,13 @@ export default function CourseList({conlang_count, startTransition}) {
                 Congratulations to all contributors. <span className="celebration_date">— 10. Nov. 2022</span></div>
             <span className="celebration_icon">🎉</span>
         </div>
+
+        <MyLink key={0} to="/nl-en" navigate={navigate} className="language_select_button celebration" startTransition={startTransition}>
+            <Flag iso="nl" />
+            <div className="language_select_button_text" style={{width: "68%"}}>Celebrating our Dutch team which just reached 100 translated stories!
+                Congratulations to <i>Plutone</i> and <i>zaop</i>. <span className="celebration_date">— 19. Nov. 2022</span></div>
+            <span className="celebration_icon">🎉</span>
+        </MyLink>
      */
     return (
         <div>
@@ -29,13 +36,6 @@ export default function CourseList({conlang_count, startTransition}) {
                 <meta name="description" content={`Supplement your Duolingo course with community-translated Duolingo stories.`}/>
                 <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
             </Helmet>
-
-            <MyLink key={0} to="/nl-en" navigate={navigate} className="language_select_button celebration" startTransition={startTransition}>
-                <Flag iso="nl" />
-                <div className="language_select_button_text" style={{width: "68%"}}>Celebrating our Dutch team which just reached 100 translated stories!
-                    Congratulations to <i>Plutone</i> and <i>zaop</i>. <span className="celebration_date">— 19. Nov. 2022</span></div>
-                <span className="celebration_icon">🎉</span>
-            </MyLink>
    
             {Object.entries(courses).map(([name,]) => (
                 name === "Conlangs" ?

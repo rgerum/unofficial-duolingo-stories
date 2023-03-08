@@ -2,7 +2,7 @@ import React from "react";
 import Head from "next/head";
 import Link from "next/link";
 
-import Layout from "../components/layout";
+import Layout from "../components/layout/layout";
 
 
 export default function Faq() {

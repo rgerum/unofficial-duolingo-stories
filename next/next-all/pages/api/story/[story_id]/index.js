@@ -1,5 +1,5 @@
-import query from "../../../lib/db"
-import {get_course} from "../course/[course_id]";
+import query from "../../../../lib/db"
+
 
 export default async function story(req, res) {
     const { story_id } = req.query

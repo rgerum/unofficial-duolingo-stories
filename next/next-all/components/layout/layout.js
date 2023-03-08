@@ -2,9 +2,10 @@ import Link from 'next/link'
 
 import styles from './layout.module.css'
 
-import {Login} from "./login";
+import {Login} from "./../login";
 import CourseDropdown from "./course-dropdown";
 import Legal from "./legal";
+import { useSession, signIn, signOut } from "next-auth/react"
 
 export default function Layout({ children, course }) {
     /*
