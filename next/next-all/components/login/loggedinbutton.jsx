@@ -1,11 +1,25 @@
 import styles from "./loggedinbutton.module.css"
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Dropdown from "../layout/dropdown";
 import {signOut, useSession} from "next-auth/react";
 
 
-export function LoggedInButton({page}) {
+function useDarkLight() {
+    const [activeTheme, setActiveTheme] = useState(document.body.dataset.theme);
+    const inactiveTheme = activeTheme === "light" ? "dark" : "light";
+    //...
+
+    useEffect(() => {
+        document.body.dataset.theme = activeTheme;
+        window.localStorage.setItem("theme", activeTheme);
+    }, [activeTheme]);
+
+    return {set: setActiveTheme, toggle: () => setActiveTheme(inactiveTheme), value: activeTheme}
+}
+
+export default function LoggedInButton({page}) {
     const { data: session } = useSession();
+    const controls = useDarkLight();
 
     if(session === undefined)
         return <></>
@@ -16,8 +30,8 @@ export function LoggedInButton({page}) {
                 Profile
             </div>
             {page === "stories" ?
-                <div id="button_editor" className={styles.profile_dropdown_button + "  button_dark_mode"} onClick={()=>{window.toggle_dark()}}>
-                    Dark Mode
+                <div id="button_editor" className={styles.profile_dropdown_button + "  button_dark_mode"} onClick={()=>{controls.toggle()}}>
+                    {controls.value === "light" ? "Dark Mode" : "Light Mode"}
                 </div> : null}
             {session.user?.role && page !== "stories" ?
                 <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "https://www.duostories.org"}}>

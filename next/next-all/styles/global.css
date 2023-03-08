@@ -68,7 +68,9 @@ a:focus{outline:none !important;}
 
 
 
-:root {
+
+body,
+body[data-theme="light"]  {
   --title-color-dim: #777;
 
   --header-border: lightgrey;
@@ -151,7 +153,7 @@ a:focus{outline:none !important;}
 }
 
 
-.dark-mode {
+body[data-theme="dark"] {
   --header-border: #37464f;
 
   --overview-hr: #3c474b;

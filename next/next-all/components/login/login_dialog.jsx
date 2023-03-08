@@ -4,12 +4,16 @@ import {useRouter} from "next/router";
 
 import styles from './login.module.css';
 
-import {LoggedInButton} from "./loggedinbutton";
 import {register, reset_pw} from "./api_calls/user";
 import {useUser} from "../../lib/hooks";
 import {useInput} from "../../lib/hooks";
 import {signIn, useSession} from "next-auth/react";
 
+import dynamic from "next/dynamic";
+
+const LoggedInButton = dynamic(() => import("./loggedinbutton"), {
+    ssr: false,
+});
 
 export function Login() {
     //const { userdata } = useUser();
