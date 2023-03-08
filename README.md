@@ -40,4 +40,6 @@ To contribute to the project you should open an issue to discuss your proposed c
   - commit and push the changes to github
   - create a pull request
   
+Please make sure to only commit changes to files that are necessary to the issue. Try to not commit accidentally other changes, e.g. package-lock.json files. This makes it harder to review and merge the pull request.  
+  
 If everything is fine, I will accept the pull request and  I will soon upload it to the website.
