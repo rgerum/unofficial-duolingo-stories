@@ -6,7 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@next/font": "^13.1.6",
+    "@next/font": "^13.2.3",
     "mysql": "^2.18.1",
     "next": "latest",
     "next-auth": "latest",
