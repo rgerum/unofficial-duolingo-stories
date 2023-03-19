@@ -21,7 +21,7 @@ function ProviderButton({d, value}) {
 export default function Page({ providers, userdata}) {
     console.log(providers.role);
     return <><Head>
-        <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
+        <title>Duostories: Userprofile</title>
         <link rel="canonical" href="https://www.duostories.org/profile" />
         <meta name="description" content={`Supplement your Duolingo course with community-translated Duolingo stories.`}/>
         <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>

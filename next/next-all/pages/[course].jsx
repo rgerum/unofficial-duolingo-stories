@@ -9,10 +9,10 @@ import {get_course} from "./api/course/[course_id]";
 import {get_courses} from "./api/course";
 
 export default function MainContentSetList({course}) {
-
+    console.log(course);
     return <>
         <Head>
-            <link rel="canonical" href={`https://www.duostories.org/}`} />
+            <link rel="canonical" href={`https://www.duostories.org/${course.short}`} />
             <title>{`${course.learningLanguageName} Duolingo Stories`}</title>
             <meta name="description" content={`Improve your ${course.learningLanguageName} learning by community-translated Duolingo stories.`}/>
             <meta name="keywords" content={`${course.learningLanguageName}, language, learning, stories, Duolingo, community, volunteers`}/>
