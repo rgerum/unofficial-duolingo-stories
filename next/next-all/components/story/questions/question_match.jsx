@@ -4,7 +4,6 @@ import styles_common from "../common.module.css";
 
 import {shuffle} from "../includes";
 import {EditorHook} from "../editor_hooks";
-import font from "../../../lib/font";
 import {EditorContext, StoryContext} from "../story";
 import QuestionPrompt from "./question_prompt";
 
@@ -130,7 +129,7 @@ export default function QuestionMatch({progress, element}) {
             <div className="match_col">
             {orderB.map((phrase, index) => (
                 <div key={index} className={styles.test}>
-                    <button key={index} className={font.className+' '+styles.match_word+" "+get_color(clicked[index])}
+                    <button key={index} className={styles.match_word+" "+get_color(clicked[index])}
                         onClick={()=>click(index)}>
                         {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][1]] : ""}
                     </button>
@@ -140,7 +139,7 @@ export default function QuestionMatch({progress, element}) {
             <div className="match_col">
             {orderA.map((phrase, index) => (
                 <div key={index} className={styles.test}>
-                    <button key={index} className={font.className+' '+styles.match_word+" "+get_color(clicked[index + orderB.length])}
+                    <button key={index} className={styles.match_word+" "+get_color(clicked[index + orderB.length])}
                             onClick={()=>click(index + orderB.length)}>
                         {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][0]] : ""}
                     </button>

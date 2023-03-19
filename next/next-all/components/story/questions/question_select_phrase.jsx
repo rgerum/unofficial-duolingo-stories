@@ -4,7 +4,6 @@ import styles_common from "../common.module.css"
 
 import {EditorHook} from "../editor_hooks";
 import useChoiceButtons from "./questions_useChoiceButtons";
-import font from "../../../lib/font";
 import {EditorContext, StoryContext} from "../story";
 
 /*
@@ -70,7 +69,7 @@ export default function QuestionSelectPhrase({setUnhide, progress, element}) {
             {/* display the buttons */}
             {element.answers.map((answer, index) => (
                 /* one answer button */
-                <button key={index} className={font.className+' '+styles.answer_button+" "+get_color(buttonState[index])}
+                <button key={index} className={styles.answer_button+" "+get_color(buttonState[index])}
                         onClick={() => click(index)}>
                     {answer.text ? answer.text : answer}
                 </button>

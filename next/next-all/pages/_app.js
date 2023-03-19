@@ -1,12 +1,7 @@
 import React from "react";
 import '../styles/global.css'
 import { SessionProvider } from "next-auth/react"
-
-import { Nunito } from '@next/font/google'
-
-// If loading a variable font, you don't need to specify the font weight
-const nunito = Nunito({ subsets: ['latin-ext', 'cyrillic-ext', "vietnamese", ] })
-
+import "@fontsource/nunito"
 
 export default function App({
                               Component,
@@ -14,7 +9,7 @@ export default function App({
                             }) {
   return (
       <SessionProvider session={session}>
-        <main className={nunito.className}>
+        <main>
           <Component {...pageProps} />
         </main>
       </SessionProvider>

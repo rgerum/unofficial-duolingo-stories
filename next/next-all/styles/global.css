@@ -8,6 +8,9 @@ body {
   font-size: 18px;
 }
 
+
+body { font-family: "Nunito", sans-serif; }
+
 * {
   box-sizing: border-box;
 }
