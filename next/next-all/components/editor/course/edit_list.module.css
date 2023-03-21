@@ -1,0 +1,48 @@
+.story_list {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 100px;
+}
+
+.story_list th {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: left;
+    background-color: var(--button-background);
+    color: var(--button-color);
+}
+
+.story_list tr:nth-child(2n) {
+    background-color: var(--body-background-faint);
+}
+
+.set_start {
+    border-top: 3px solid var(--button-background);
+}
+
+.story_list tr a {
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+.status_field {
+    white-space: nowrap;
+}
+
+.status_text {
+    background: var(--editor-ssml);
+    border-radius: 10px;
+    padding: 2px 5px;
+    white-space: nowrap;
+}
+
+.approval:hover {
+    filter: brightness(.9);
+}
+.approval {
+    background: var(--editor-ssml);
+    border-radius: 10px;
+    padding: 2px 5px;
+    white-space: nowrap;
+    cursor: pointer;
+}

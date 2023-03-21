@@ -1,0 +1,69 @@
+import Head from 'next/head'
+import Link from "next/link";
+
+import Layout from '../../../components/editor/course/layout'
+import Flag from "../../../components/layout/flag";
+//import {get_counts} from "../api/course/counts";
+import {get_courses_ungrouped} from "../../api/course";
+import CourseList from "../../../components/editor/course/course_list";
+//import {get_course} from "../api/course/[course_id]";
+import styles from "./[course].module.css"
+import {get_course_editor} from "../../api/course/[course_id]";
+import EditList from "../../../components/editor/course/edit_list";
+import {get_courses} from "../../api/course";
+
+
+function Page({courses, course, userdata}) {
+    // Render data...
+    let course_id = undefined;
+    return <>
+        <Head>
+            <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
+            <link rel="canonical" href="https://www.duostories.org" />
+            <meta name="description" content={`Supplement your Duolingo course with community-translated Duolingo stories.`}/>
+            <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
+        </Head>
+        <Layout userdata={userdata} course={course}>
+            <div className={styles.root}>
+                <CourseList courses={courses} course_id={course_id} />
+                <div className={styles.main_overview}>
+                    <EditList course={course} />
+                </div>
+            </div>
+        </Layout>
+    </>
+}
+
+
+
+// This gets called on every request
+export async function getStaticProps({params}) {
+    //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
+    //let courses =  await response_courses.json();
+    let courses = await get_courses_ungrouped();
+
+    let course = await get_course_editor(params.course);
+
+    // Pass data to the page via props
+    return { props: { courses, course } }
+}
+
+export async function getStaticPaths({}) {
+    // Fetch data from external API
+    //const res = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`)
+    //const courses = await res.json()
+    let courses = await get_courses();
+
+    let paths = [];
+    for(let group in courses) {
+        for (let course of courses[group]) {
+            //paths.push({params: {course: `${course.learningLanguage}-${course.fromLanguage}`}});
+            paths.push({params: {course: `${course.id}`}});
+        }
+    }
+
+    // Pass data to the page via props
+    return { paths: paths, fallback: false,}
+}
+
+export default Page

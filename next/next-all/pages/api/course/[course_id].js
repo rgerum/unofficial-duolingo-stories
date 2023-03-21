@@ -58,3 +58,42 @@ export async function get_course(course_id, user_id) {
 
     return {...course, sets: sets, count: count};
 }
+
+export async function get_course_editor(course_id) {
+
+    const course_query = await query(`
+        SELECT course.id, course.short, course.about, 
+        l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
+        l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag     
+        FROM course 
+        LEFT JOIN language l1 ON l1.id = course.fromLanguage
+        LEFT JOIN language l2 ON l2.id = course.learningLanguage
+        WHERE course.id = ? LIMIT 1
+        `, [course_id]);
+
+    if(course_query.length === 0)
+        return {error: "no course", course_id: course_id};
+    const course = Object.assign({}, course_query[0]);
+
+    const res = await query(`SELECT COUNT(sa.id) as approvals, story.id, story.set_id, story.set_index, story.name, story.status, story.image,
+       story.image_done, story.xp, story.name_base, user.username, user2.username AS author_change, story.date, story.change_date, story.public
+    FROM story
+    LEFT JOIN user ON story.author = user.id
+    LEFT JOIN user user2 ON story.author_change = user2.id
+    LEFT JOIN story_approval sa on story.id = sa.story_id
+    WHERE story.course_id = ? AND deleted = false
+    GROUP BY story.id
+    ORDER BY story.set_id, story.set_index;`, [course_id]);
+    if(res.length === 0)
+        return {error: "no stories"};
+
+    let stories = [];
+    for(let r of res) {
+        r = {...r};
+        r.date = `${r.date}`;
+        r.change_date = `${r.change_date}`;
+        stories.push(r);
+    }
+
+    return {...course, stories: stories};
+}

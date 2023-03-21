@@ -9,7 +9,7 @@ import {get_course} from "./api/course/[course_id]";
 import {get_courses} from "./api/course";
 
 export default function MainContentSetList({course}) {
-    console.log(course);
+
     return <>
         <Head>
             <link rel="canonical" href={`https://www.duostories.org/${course.short}`} />

@@ -1,0 +1,26 @@
+.languages {
+    overflow: scroll;
+    height: calc(100vh - 64px);
+    width: 515px;
+}
+
+.course_selection_button {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--header-border);
+}
+
+.course_selection_button_active {
+    background: var(--body-background);
+    filter: brightness(0.9);
+}
+
+.course_count {
+    width: 30px;
+    text-align: right;
+    padding-right: 5px;
+    padding-left: 20px;
+    color: #333;
+}

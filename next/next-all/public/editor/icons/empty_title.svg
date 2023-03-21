@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 135 124"
+   fill="none"
+   version="1.1"
+   id="svg53"
+   xmlns="http://www.w3.org/2000/svg">
+  <path
+     d="m 28.385,11.012 h 79 c 9.389,0 17,7.61 17,17 v 79 c 0,9.389 -7.611,17 -17,17 h -79 c -9.39,0 -17,-7.611 -17,-17 v -79 c 0,-9.39 7.61,-17 17,-17 z"
+     fill="#46d7ff"
+     id="path2"
+     style="fill:#3d3d3d;fill-opacity:1" />
+  <defs
+     id="defs51">
+    <clipPath
+       id="clip0">
+      <path
+         fill="#fff"
+         d="M0 0h135v124H0z"
+         id="path48" />
+    </clipPath>
+  </defs>
+</svg>

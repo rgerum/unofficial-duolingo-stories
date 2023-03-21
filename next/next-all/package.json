@@ -9,7 +9,7 @@
     "@fontsource/nunito": "^4.5.12",
     "mysql": "^2.18.1",
     "next": "latest",
-    "next-auth": "latest",
+    "next-auth": "^4.19.2",
     "nodemailer": "^6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
