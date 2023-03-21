@@ -78,6 +78,10 @@ function formatDate(datetime) {
     return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
+export async function setApproval(data) {
+    let response = await fetch(`/api/editor/approve/${data.story_id}`);
+    return await response.json();
+}
 
 function DropDownStatus(props) {
 
@@ -133,5 +137,5 @@ function DropDownStatus(props) {
 }
 
 function SpinnerBlue() {
-    return <spa>TODO</spa>
+    return <span>TODO</span>
 }

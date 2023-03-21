@@ -1,16 +1,12 @@
 import Head from 'next/head'
-import Link from "next/link";
 
-import Layout from '../../../components/editor/course/layout'
-import Flag from "../../../components/layout/flag";
-//import {get_counts} from "../api/course/counts";
-import {get_courses_ungrouped} from "../../api/course";
-import CourseList from "../../../components/editor/course/course_list";
-//import {get_course} from "../api/course/[course_id]";
-import styles from "./[course].module.css"
-import {get_course_editor} from "../../api/course/[course_id]";
-import EditList from "../../../components/editor/course/edit_list";
-import {get_courses} from "../../api/course";
+import Layout from '../../../../components/editor/course/layout'
+import {get_courses_ungrouped} from "../../../api/course";
+import CourseList from "../../../../components/editor/course/course_list";
+import styles from "./index.module.css"
+import {get_course_editor} from "../../../api/course/[course_id]";
+import EditList from "../../../../components/editor/course/edit_list";
+import {get_courses} from "../../../api/course";
 
 
 function Page({courses, course, userdata}) {
