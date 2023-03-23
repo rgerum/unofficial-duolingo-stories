@@ -11,7 +11,6 @@ import {get_courses} from "../../../api/course";
 
 function Page({courses, course, userdata}) {
     // Render data...
-    let course_id = undefined;
     return <>
         <Head>
             <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
@@ -21,7 +20,7 @@ function Page({courses, course, userdata}) {
         </Head>
         <Layout userdata={userdata} course={course}>
             <div className={styles.root}>
-                <CourseList courses={courses} course_id={course_id} />
+                <CourseList courses={courses} course_id={course.id} />
                 <div className={styles.main_overview}>
                     <EditList course={course} />
                 </div>

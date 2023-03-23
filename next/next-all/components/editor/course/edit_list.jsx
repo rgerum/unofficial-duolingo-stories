@@ -5,7 +5,7 @@ import styles from "./edit_list.module.css"
 
 export default function EditList({course, updateCourses}) {
     let stories = course?.stories
-    console.log("course", course);
+
     if(stories === undefined)
         stories = []
     let set_ends = [];

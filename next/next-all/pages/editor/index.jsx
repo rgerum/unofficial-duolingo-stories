@@ -4,7 +4,7 @@ import Link from "next/link";
 import Layout from '../../components/editor/course/layout'
 import {get_courses_ungrouped} from "../api/course";
 import CourseList from "../../components/editor/course/course_list";
-import styles from "./course/[course].module.css"
+import styles from "./course/[course]/index.module.css"
 
 function Page({courses, userdata}) {
     // Render data...
