@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {useState} from "react";
 import styles from "./edit_list.module.css"
+import {SpinnerBlue} from "../../layout/spinner";
 
 
 export default function EditList({course, updateCourses}) {
@@ -134,8 +135,4 @@ function DropDownStatus(props) {
         {"👍 "+count}
     </span>}
     </div>
-}
-
-function SpinnerBlue() {
-    return <span>TODO</span>
 }
