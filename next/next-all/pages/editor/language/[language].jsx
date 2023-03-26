@@ -2,11 +2,13 @@ import Head from 'next/head'
 
 import {useState} from "react";
 import {useInput} from "../../../lib/hooks";
-import Layout from '../../../components/editor/course/layout'
 import {get_avatar_names, get_language, get_languages, get_speakers} from "../../api/editor/avatar/[language]";
 import {SpinnerBlue} from "../../../components/layout/spinner";
 import {fetch_post} from "../../../lib/fetch_post";
 import styles from "./[language].module.css"
+import Flag from "../../../components/layout/flag";
+import Link from "next/link";
+import {Login} from "../../../components/login";
 
 function Page({language, speakers, avatar_names, userdata}) {
     // Render data...
@@ -18,12 +20,60 @@ function Page({language, speakers, avatar_names, userdata}) {
             <meta name="description" content={`Supplement your Duolingo course with community-translated Duolingo stories.`}/>
             <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
         </Head>
-        <Layout userdata={userdata} language={language}>
+        <Layout language_data={language}>
             <div className={styles.root + " " + styles.characterEditorContent}>
                 <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
             </div>
         </Layout>
     </>
+}
+
+export function Layout({ children, language_data }) {
+    /*
+    <CourseDropdown userdata={userdata} />
+    <Login userdata={userdata} />
+    */
+//const { userdata, error } = useSWR('https://test.duostories.org/stories/backend_node_test/session', fetch)
+
+//if (error) return <div>failed to load</div>
+//if (!userdata) return <div>loading...</div>
+
+    return (
+        <>
+            <nav className={styles.header_index}>
+                <Link href={"/editor"} id="button_back" className={styles.editor_button} style={{paddingLeft: 0}}>
+                    <div><img alt="icon back" src="/editor/icons/back.svg" /></div>
+                    <span>Back</span>
+                </Link>
+                <b>Character-Editor</b>
+                <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
+                <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
+                <div style={{marginLeft: "auto"}}></div>
+                <Login/>
+            </nav>
+            <div className={styles.main_index}>
+                {children}
+            </div>
+        </>
+    )
+}
+
+function AvatarEditorHeader(props) {
+    let language_data = props.language_data;
+
+    if(language_data === undefined)
+        return <></>
+    return <div className={styles.AvatarEditorHeader}>
+        <Link to={"/"} id="button_back" className={styles.editoButton} style={{paddingLeft: 0}}>
+            <div><img alt="icon back" src="/editor/icons/back.svg" /></div>
+            <span>Back</span>
+        </Link>
+        <b>Character-Editor</b>
+        <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
+        <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
+        <div style={{marginLeft: "auto"}}></div>
+        <Login/>
+    </div>
 }
 
 export async function setAvatarSpeaker(data) {
@@ -84,25 +134,6 @@ function Avatar(props) {
         <p><input value="save" className={styles.saveBtn} onClick={save} disabled={!unsavedChanged} type="button"/></p>
     </div>
 }
-
-function AvatarEditorHeader(props) {
-    let language_data = props.language_data;
-
-    if(language_data === undefined)
-        return <></>
-    return <div className={styles.AvatarEditorHeader}>
-        <Link to={"/"} id="button_back" className={styles.editoButton} style={{paddingLeft: 0}}>
-            <div><img alt="icon back" src="/editor/icons/back.svg" /></div>
-            <span>Back</span>
-        </Link>
-        <b>Character-Editor</b>
-        <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
-        <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
-        <div style={{marginLeft: "auto"}}></div>
-        <LoggedInButton username={props.username} doLogout={props.doLogout} page="editor"/>
-    </div>
-}
-
 
 export function AvatarMain(props) {
     let {language} = useParams();
@@ -294,9 +325,7 @@ export async function getStaticProps({params}) {
     //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
     //let courses =  await response_courses.json();
     let language = await get_language(params.language);
-
     let speakers = await get_speakers(params.language);
-
     let avatar_names = await get_avatar_names(params.language);
 
     // Pass data to the page via props
