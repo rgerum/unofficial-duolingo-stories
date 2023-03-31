@@ -6,7 +6,9 @@
     "start": "next start"
   },
   "dependencies": {
+    "@codemirror/state": "^6.2.0",
     "@fontsource/nunito": "^4.5.12",
+    "codemirror": "^6.0.1",
     "mysql": "^2.18.1",
     "next": "latest",
     "next-auth": "^4.19.2",

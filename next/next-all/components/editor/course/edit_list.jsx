@@ -53,7 +53,7 @@ export default function EditList({course, updateCourses}) {
                     <td width="44px"><img alt={"story title"}
                                           src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
                                           width="44px" height={"40px"}/></td>
-                    <td style={{width: "100%"}}><Link href={`/story/${story.id}`}>{story.name}</Link></td>
+                    <td style={{width: "100%"}}><Link href={`/editor/story/${story.id}`}>{story.name}</Link></td>
                     <td><DropDownStatus id={story.id} count={story.approvals} status={story.status} public={story.public} official={course.official} updateCourses={updateCourses}/></td>
                     <td>{story.username}</td>
                     <td>{formatDate(story.date)}</td>
@@ -130,7 +130,7 @@ function DropDownStatus(props) {
 
     return <div className={styles.status_field}>
         {<span className={styles.status_text}>{status_wrapper(status, props.public)}</span>} {loading === 1 ? <SpinnerBlue /> :
-        loading ===-1 ? <img title="an error occurred" alt="error" src="/icons/error.svg"/> : <></>}
+        loading ===-1 ? <img title="an error occurred" alt="error" src="/editor/icons/error.svg"/> : <></>}
         {props.official ? <></> : <span className={styles.approval} onClick={addApproval}>
         {"👍 "+count}
     </span>}
