@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import styles from "./line_hints.module.css"
 
 import {useEventListener} from "../includes";
-
+import {EditorContext} from "../story";
 
 function splitTextTokens(text, keep_tilde=true) {
     if(!text)
@@ -24,9 +24,11 @@ export default function HintLineContent({content, audioRange, hideRangesForChall
         else if(unhide > hideRangesForChallenge.start)
             hideRangesForChallenge = {start: unhide, end: hideRangesForChallenge.end};
     }
+    const editor = React.useContext(EditorContext);
 
-    var [show_trans, set_show_trans] = useState(0); //TODO window.editorShowTranslations);
-    useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); })
+    let show_trans = editor.show_trans;
+    //var [show_trans, set_show_trans] = useState(0); //TODO window.editorShowTranslations);
+    //useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); })
 
     function getOverlap(start1, end1, start2, end2) {
         if(start2 === end2)

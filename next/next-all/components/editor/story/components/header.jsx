@@ -14,9 +14,13 @@ export function StoryEditorHeader({
                                       language_data,
                                       language_data2,
                                       func_save,
-                                      func_delete
+                                      func_delete,
+                                      show_trans,
+                                      set_show_trans,
+                                      show_ssml,
+                                      set_show_ssml,
                                   }) {
-    const [show_trans, set_show_trans] = React.useState(); // TODO window.editorShowTranslations
+    //const [show_trans, set_show_trans] = React.useState(); // TODO window.editorShowTranslations
     function do_set_show_trans() {
         let value = !show_trans;
         const event = new CustomEvent("editorShowTranslations", {
@@ -28,7 +32,7 @@ export function StoryEditorHeader({
         window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent("resize")));
     }
 
-    const [show_ssml, set_show_ssml] = React.useState(); // TODO window.editorShowSsml
+    //const [show_ssml, set_show_ssml] = React.useState(); // TODO window.editorShowSsml
     function do_set_show_ssml() {
         let value = !show_ssml;
         const event = new CustomEvent("editorShowSsml", {

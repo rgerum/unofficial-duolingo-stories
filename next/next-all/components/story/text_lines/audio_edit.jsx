@@ -1,18 +1,21 @@
 import React from "react";
 import {useEventListener, fetch_post} from "../includes";
 import styles from "./audio_edit.module.css"
+import {EditorContext} from "../story";
 
 
-export default function EditorSSMLDisplay({ssml, element, audio, editor}) {
+export default function EditorSSMLDisplay({ssml, element, audio}) {
     //let urlParams = new URLSearchParams(window.location.search);
     const beta = false;
 
     let [loading, setLoading] = React.useState(false);
     let line_id = "ssml"+(ssml.line ? ssml.line : ssml.line_insert);
 
-    var [show_audio, set_show_audio] = React.useState(editor.editorShowSsml);
-    useEventListener("editorShowSsml", (e) => set_show_audio(e.detail.show))
+    //var [show_audio, set_show_audio] = React.useState(editor.editorShowSsml);
+    //useEventListener("editorShowSsml", (e) => set_show_audio(e.detail.show))
+    const editor = React.useContext(EditorContext);
 
+    let show_audio = editor.show_ssml;
 
     async function reload() {
         setLoading(true);
@@ -26,7 +29,7 @@ export default function EditorSSMLDisplay({ssml, element, audio, editor}) {
         { ssml.speaker ?
             <span title={loading ? "generating audio..." : "regenerate audio"} id={line_id} className={styles.ssml_reload+" "+styles.audio_reload+" "+ (loading ? styles.audio_reload_spin : "")}
                   onClick={reload}/> :
-            <span><img title="no speaker defined" alt="error" src="/icons/error.svg"/></span>
+            <span><img title="no speaker defined" alt="error" src="/editor/icons/error.svg"/></span>
         }
         {beta ? <a onClick={() => window.open_recoder({ssml, element, audio, editor})}>🎤</a> : <></>}
     </>

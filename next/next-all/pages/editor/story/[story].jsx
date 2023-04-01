@@ -82,6 +82,10 @@ function Editor({story_data, avatar_names, userdata}) {
         loadLanguageData();
     }, [story_data])
 
+    const [show_trans, set_show_trans] = React.useState(false);
+    const [show_ssml, set_show_ssml] = React.useState();
+    console.log("show_trans", show_trans)
+
     const [editor_state, set_editor_state] = React.useState();
     const [story_state, set_story_state] = React.useState();
     const [story_meta, set_story_meta] = React.useState();
@@ -210,7 +214,8 @@ function Editor({story_data, avatar_names, userdata}) {
                         selection: EditorSelection.cursor(pos),
                         scrollIntoView: scroll,
                     }));
-                }
+                },
+                show_trans: show_trans,
             }
             stateX = v.state;
             if (v.docChanged) {
@@ -241,10 +246,14 @@ function Editor({story_data, avatar_names, userdata}) {
 
     //             <!--<div id="toolbar">--!
     //<nav className={styles.header_index}>
+    let editor_state2 = {...editor_state}
+    editor_state2.show_trans = show_trans
+    editor_state2.show_ssml = show_ssml
     return (
         <div id="body">
             <StoryEditorHeader story_data={story_data} userdata={userdata} unsaved_changes={unsaved_changes}
-                               func_save={func_save} func_delete={func_delete}
+                               func_save={func_save} func_delete={func_delete} show_trans={show_trans} set_show_trans={set_show_trans}
+                               show_ssml={show_ssml} set_show_ssml={set_show_ssml}
                                language_data={language_data} language_data2={language_data2}/>
             <div className={styles.root}>
                 <svg className={styles.margin} ref={svg_parent}>
@@ -257,7 +266,7 @@ function Editor({story_data, avatar_names, userdata}) {
                         <Cast id={story_data.id} story_meta={story_meta} learningLanguage={story_data.learningLanguage}/>
                         : null}
                     {story_state ?
-                        <EditorContext.Provider value={editor_state}>
+                        <EditorContext.Provider value={editor_state2}>
                             <Story editor={editor_state} story={story_state} navigate={navigate}/>
                         </EditorContext.Provider> : null}
                 </div>
