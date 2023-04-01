@@ -5,24 +5,15 @@ import React from 'react';
 import {basicSetup, EditorView} from "codemirror";
 import {EditorSelection, EditorState} from "@codemirror/state";
 import {example, highlightStyle} from "../../../components/editor/story/parser.mjs";
-import {useScrollLinking} from "../../../components/editor/story/scroll_linking";
-import {useResizeEditor} from "../../../components/editor/story/editor-resize";
+import useScrollLinking from "../../../components/editor/story/scroll_linking";
+import useResizeEditor from "../../../components/editor/story/editor-resize";
 //import {SoundRecorder} from "./sound-recorder";
 import Story, {EditorContext} from "../../../components/story/story";
-import {Cast} from "../../../components/editor/story/cast";
+import Cast from "../../../components/editor/story/cast";
 
 import {processStoryFile} from "../../../components/editor/story/syntax_parser_new";
-/*
-import {
-    deleteStory,
-    getAvatarsList,
-    getImage,
-    getLanguageName,
-    getStory,
-    setStory
-} from "../../../components/editor/story/api_calls";*/
 import usePrompt from "../../../components/editor/story/usePrompt";
-//import {get_avatar_names, get_language, get_speakers} from "../../api/editor/avatar/[language]";
+
 import {get_story, getAvatarsList} from "../../api/editor/story/get";
 import {useRouter} from "next/router";
 import {StoryEditorHeader} from "../../../components/editor/story/components/header";
@@ -258,7 +249,6 @@ function Editor({story_data, avatar_names, userdata}) {
             <div className={styles.root}>
                 <svg className={styles.margin} ref={svg_parent}>
                     <path d=""></path>
-
                 </svg>
                 <div className={styles.editor} ref={editor}></div>
                 <svg className={styles.margin2} ref={margin}></svg>
@@ -285,8 +275,8 @@ export async function getServerSideProps({params}) {
     //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
     //let courses =  await response_courses.json();
     let story_data = await get_story({id: params.story});
-    console.log("story_data", params.story)
-    let avatar_names = await getAvatarsList(story_data?.language);
+
+    let avatar_names = await getAvatarsList(story_data?.learningLanguage);
 
     // Pass data to the page via props
     return { props: { story_data, avatar_names } }

@@ -13,6 +13,11 @@
     pointer-events: none;
 }
 
+.margin path {
+    fill: var(--svg-fill);
+    stroke: var(--svg-stroke);
+}
+
 .editor {
     float: left;
     width: 48%;

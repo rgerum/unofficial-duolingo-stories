@@ -1,0 +1,19 @@
+.head {
+    height: 50px;
+    margin-right: 12px;
+    width: 50px;
+    display: flex;
+}
+
+.ssml_speaker {
+    background: var(--editor-ssml);
+    padding: 2px 5px;
+    border-radius: 5px;
+    margin-right: 3px;
+    font-size: 0.8em;
+}
+.character {}
+.cast_element {
+    margin-bottom: -80px;
+}
+.cast {}

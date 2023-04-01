@@ -156,6 +156,9 @@ body[data-theme="light"]  {
 
 
   --body-background-faint: #f2f2f2;
+
+  --svg-fill: #fbfbfb;
+  --svg-stroke: #eee;
 }
 
 

@@ -1,10 +1,10 @@
 import React from "react";
 
 
-export function useScrollLinking(view, preview, svg_parent) {
-    let editor = view?.scrollDOM;
-    let last_editor_scroll_pos = 0;
-    let last_preview_scroll_pos = 0;
+export default function useScrollLinking(view, preview, svg_parent) {
+    let editor= view?.scrollDOM;
+    let last_editor_scroll_pos= 0;
+    let last_preview_scroll_pos= 0;
     let line_map = [];
 
     let update_lines = React.useCallback(() => {
@@ -20,8 +20,8 @@ export function useScrollLinking(view, preview, svg_parent) {
         let height = svg_parent.getBoundingClientRect().height
 
         let path = "M0,0 ";
-        for (let element of document.querySelectorAll("div[lineno]")) {
-            let new_lineno = parseInt(element.attributes.lineno.value);
+        for (let element of document.querySelectorAll("div[data-lineno]")) {
+            let new_lineno = parseInt(element.dataset.lineno);
             let new_top = element.getBoundingClientRect().top - svg_parent.getBoundingClientRect().top - 10;// - preview.scrollTop - preview.getBoundingClientRect().top
             let new_linetop = (4 + new_lineno) * 26.6 - editor.scrollTop - svg_parent.getBoundingClientRect().top - editor.getBoundingClientRect().top
 
@@ -113,8 +113,8 @@ export function useScrollLinking(view, preview, svg_parent) {
         if(!preview)
             return;
         line_map = [[0, 0]]
-        for (let element of document.querySelectorAll("div[lineno]")) {
-            let new_lineno = parseInt(element.attributes.lineno.value);
+        for (let element of document.querySelectorAll("div[data-lineno]")) {
+            let new_lineno = parseInt(element.dataset.lineno);
             let new_top = element.getBoundingClientRect().top + preview.scrollTop - preview.getBoundingClientRect().top - 10;
             line_map.push([new_lineno, new_top])
         }

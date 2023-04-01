@@ -1,7 +1,7 @@
 import React from "react";
 
 
-export function useResizeEditor(editor, preview, p) {
+export default function useResizeEditor(editor, preview, p) {
     const initDrag = React.useCallback((e) => {
         var startX = 0, startWidth = 0, startWidth2;
 
