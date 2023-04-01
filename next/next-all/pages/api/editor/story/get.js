@@ -8,7 +8,10 @@ async function query_obj(q, args) {
 }
 
 export async function get_story({id}) {
-    return (await query_obj(`SELECT story.id, c.official as official, course_id, duo_id, image, story.name, set_id, set_index, text, c.learningLanguage as learningLanguage, c.fromLanguage as fromLanguage FROM story JOIN course c on story.course_id = c.id WHERE story.id = ?`, [id]))[0];
+    let story = (await query_obj(`SELECT story.id, c.official as official, course_id, duo_id, image, story.name, set_id, set_index, text, c.learningLanguage as learningLanguage, c.fromLanguage as fromLanguage FROM story JOIN course c on story.course_id = c.id WHERE story.id = ?`, [id]))[0]
+    if(story === undefined)
+        return null
+    return story;
 }
 
 async function get_avatar_names({id, course_id}) {

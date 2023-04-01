@@ -71,7 +71,7 @@ export function StoryEditorHeader({
     return <>
         <div className={styles.toolbar} >
         <div className={styles.AvatarEditorHeader}>
-            <EditorButton img={"back.svg"} text={"Back"} id="button_back" href={`/course/${story_data?.course_id}`}
+            <EditorButton img={"back.svg"} text={"Back"} id="button_back" href={`/editor/course/${story_data?.course_id}`}
                               style={{paddingLeft: 0}} />
             <b>Story-Editor</b>
             <Flag iso={language_data?.short} width={40} flag={language_data?.flag}

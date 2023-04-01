@@ -29,12 +29,12 @@ import {StoryEditorHeader} from "../../../components/editor/story/components/hea
 
 
 let images_cached = {};
-export function getImage(id) {
+export async function getImage(id) {
     if(images_cached[id] !== undefined) {
         return images_cached[id];
     }
-    getImageAsync(id)
-    return {}
+    return await getImageAsync(id);
+    //return {}
 }
 
 export async function getImageAsync(id) {
@@ -49,6 +49,27 @@ export async function getImageAsync(id) {
     }
 }
 
+export async function getLanguageName(id) {
+    try {
+        let response = await fetch(`/api/editor/story/language/${id}`, {credentials: 'include'});
+        return await response.json();
+    } catch (e) {
+        return {};
+    }
+}
+
+export async function setStory(data) {
+    let res = await fetch_post(`/api/editor/story/set_story`, data);
+    res = await res.text()
+    return res;
+}
+
+export async function deleteStory(data) {
+    let res = await fetch_post(`/api/editor/story/delete_story`, data);
+    res = await res.text()
+    return res;
+}
+
 function Editor({story_data, avatar_names, userdata}) {
     const editor = React.useRef();
     const preview = React.useRef();
@@ -61,11 +82,10 @@ function Editor({story_data, avatar_names, userdata}) {
         async function loadLanguageData() {
             if(!story_data)
                 return () => {}
-            // TODO
-            //let language_data = await getLanguageName(story_data.learningLanguage)
-            //let language_data2 = await getLanguageName(story_data.fromLanguage)
-            //set_language_data(language_data);
-            //set_language_data2(language_data2);
+            let language_data = await getLanguageName(story_data.learningLanguage)
+            let language_data2 = await getLanguageName(story_data.fromLanguage)
+            set_language_data(language_data);
+            set_language_data2(language_data2);
             return () => {}
         }
         loadLanguageData();
@@ -143,11 +163,11 @@ function Editor({story_data, avatar_names, userdata}) {
             if(story_meta === undefined || story_data === undefined)
                 return
             await deleteStory({id: story_data.id, course_id: story_data.course_id, text: editor_text, name: story_meta.fromLanguageName});
-            navigate(`/course/${story_data.course_id}`);
+            await navigate(`/course/${story_data.course_id}`);
         }
         set_func_delete(() => Delete)
 
-        function updateDisplay() {
+        async function updateDisplay() {
             if(stateX === undefined || story_data === undefined)
                 return
             if (story === undefined) {
@@ -155,7 +175,7 @@ function Editor({story_data, avatar_names, userdata}) {
                 editor_text = stateX.doc.toString();
                 [story, story_meta] = processStoryFile(editor_text, story_data.id, avatar_names);
                 console.log("storyMete", story)
-                let image = getImage(story_meta.icon)
+                let image = await getImage(story_meta.icon)
                 story.illustrations = {
                     active: image.active,
                     gilded: image.gilded,
@@ -265,6 +285,7 @@ export async function getServerSideProps({params}) {
     //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
     //let courses =  await response_courses.json();
     let story_data = await get_story({id: params.story});
+    console.log("story_data", params.story)
     let avatar_names = await getAvatarsList(story_data?.language);
 
     // Pass data to the page via props

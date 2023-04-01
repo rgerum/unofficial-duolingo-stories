@@ -10,7 +10,7 @@ export default async function api(req, res) {
         if(!token?.role)
             return res.status(401).json("You need to be a registered contributor.");
 
-        let answer = await get_image({id});
+        let answer = await language({id});
 
         if(answer === undefined)
             return res.status(404).test("Error not found");
@@ -27,7 +27,6 @@ async function query_obj(q, args) {
     return res.map(d => {return {...d}});
 }
 
-
-export async function get_image({id}) {
-    return (await query_obj(`SELECT * FROM image WHERE id = ?`, [id]))[0];
+async function language({id}) {
+    return (await query_obj(`SELECT * FROM language WHERE id = ?`, [id]))[0];
 }

@@ -223,3 +223,7 @@ body[data-theme="dark"] {
 
   --finished-star-gold: #ffc800;
 }
+
+.cm-editor {
+  height: 100%;
+}
