@@ -128,6 +128,7 @@ function Editor({story_data, avatar_names, userdata}) {
 
         let story = undefined;
         let story_meta = undefined;
+        let audio_insert_lines = undefined;
         let last_lineno = undefined;
         let lineno = undefined;
         let editor_state = undefined;
@@ -168,7 +169,7 @@ function Editor({story_data, avatar_names, userdata}) {
             if (story === undefined) {
                 last_lineno = lineno;
                 editor_text = stateX.doc.toString();
-                [story, story_meta] = processStoryFile(editor_text, story_data.id, avatar_names);
+                [story, story_meta, audio_insert_lines] = processStoryFile(editor_text, story_data.id, avatar_names);
                 console.log("storyMete", story)
                 let image = await getImage(story_meta.icon)
                 story.illustrations = {
@@ -179,7 +180,7 @@ function Editor({story_data, avatar_names, userdata}) {
                 story.learningLanguageRTL = language_data?.rtl;
                 story.fromLanguageRTL = language_data2?.rtl;
 
-                set_editor_state(editor_state);
+                set_editor_state({...editor_state, audio_insert_lines});
                 set_story_state(story);
                 set_story_meta(story_meta);
 
@@ -215,6 +216,7 @@ function Editor({story_data, avatar_names, userdata}) {
                         scrollIntoView: scroll,
                     }));
                 },
+                audio_insert_lines: audio_insert_lines,
                 show_trans: show_trans,
             }
             stateX = v.state;

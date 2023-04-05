@@ -3,7 +3,7 @@
 import React from "react";
 import styles from "./header.module.css";
 import Link from "next/link";
-import Flag from "../../../layout/flag";
+import {DoubleFlag} from "../../../layout/flag";
 import {Login} from "../../../login";
 import EditorButton from "../../editor_button";
 
@@ -78,10 +78,7 @@ export function StoryEditorHeader({
             <EditorButton img={"back.svg"} text={"Back"} id="button_back" href={`/editor/course/${story_data?.course_id}`}
                               style={{paddingLeft: 0}} />
             <b>Story-Editor</b>
-            <Flag iso={language_data?.short} width={40} flag={language_data?.flag}
-                  flag_file={language_data?.flag_file}/>
-            <Flag iso={language_data2?.short} width={40 * 0.9} className={"flag_sub"} flag={language_data2?.flag}
-                  flag_file={language_data2?.flag_file}/>
+            <DoubleFlag width={40} lang1={language_data} lang2={language_data2}/>
             {language_data?.name && language_data2?.name ?
                 <span
                     className={"AvatarEditorHeaderFlagname"}>{`${language_data?.name} (from ${language_data2?.name})`}</span> : null}

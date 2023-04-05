@@ -19,6 +19,7 @@ export default function useAudio(element, progress) {
         }
         window.playing_audio = [];
         audioObject.pause();
+        audioObject.load();
         audioObject.currentTime = 0;
         audioObject.play();
         let timeouts = [];
@@ -37,7 +38,7 @@ export default function useAudio(element, progress) {
             audioObject.pause();
         }
         window.playing_audio.push(cancel);
-    }, []);
+    }, [audio, ref]);
     React.useEffect(() => {
         if(element.trackingProperties.line_index === progress)
             playAudio();

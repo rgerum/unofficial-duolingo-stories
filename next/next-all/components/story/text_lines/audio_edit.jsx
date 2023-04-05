@@ -19,7 +19,7 @@ export default function EditorSSMLDisplay({ssml, element, audio}) {
 
     async function reload() {
         setLoading(true);
-        await generate_audio_line(ssml, editor.view);
+        await generate_audio_line(ssml, editor.view, editor.audio_insert_lines);
         setLoading(false);
     }
     if(!show_audio) return <></>
@@ -36,7 +36,7 @@ export default function EditorSSMLDisplay({ssml, element, audio}) {
 }
 
 
-async function generate_audio_line(ssml, view) {
+async function generate_audio_line(ssml, view, audio_insert_lines) {
     let speaker = ssml["speaker"].trim();
     let speak_text = ssml["text"].trim();
     let match = speaker.match(/([^(]*)\((.*)\)/);
@@ -84,7 +84,7 @@ async function generate_audio_line(ssml, view) {
             last_time = parseInt(mark.time);
         }
     }
-    let [line, line_insert] = window.audio_insert_lines[ssml.inser_index];
+    let [line, line_insert] = audio_insert_lines[ssml.inser_index];
     if(line !== undefined) {
         let line_state = view.state.doc.line(line)
         view.dispatch(view.state.update({

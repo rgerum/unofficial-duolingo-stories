@@ -48,6 +48,11 @@ ORDER BY name;
     return grouped_languages;
 }
 
+export async function get_courses_ids() {
+    let courses = await query(`SELECT course.id FROM course;`);
+    return courses;
+}
+
 export async function get_courses_ungrouped() {
     let courses = await query(`
 SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name,

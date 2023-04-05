@@ -17,8 +17,14 @@
     filter: brightness(0.9);
 }
 
+.course_selection_button:hover {
+    background: var(--body-background);
+    filter: brightness(0.9);
+    color: black;
+}
+
 .course_count {
-    width: 30px;
+    width: 55px;
     text-align: right;
     padding-right: 5px;
     padding-left: 20px;

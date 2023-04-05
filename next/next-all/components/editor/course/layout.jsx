@@ -3,9 +3,10 @@ import Link from 'next/link'
 import styles from './layout.module.css'
 
 import {Login} from "../../login";
-import Flag from "../../layout/flag";
+import Flag, {DoubleFlag} from "../../layout/flag";
 import CourseDropdown from "../../layout/course-dropdown";
 import { useSession, signIn, signOut } from "next-auth/react"
+import React from "react";
 
 export default function Layout({ children, course, import_id }) {
 /*
@@ -22,8 +23,10 @@ export default function Layout({ children, course, import_id }) {
     <nav className={styles.header_index}>
         <b>Course-Editor</b>
         {course ? <>
-        <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
-        <Flag iso={course.fromLanguage} width={40*0.9} className={styles.flag_sub} flag={course.fromLanguageFlag} flag_file={course.fromLanguageFlagFile}/>
+            <DoubleFlag width={40}
+                        lang1={{short: course.learningLanguage, flag:course.learningLanguageFlag, flag_file:course.learningLanguageFlagFile}}
+                        lang2={{short: course.fromLanguage, flag:course.fromLanguageFlag, flag_file:course.fromLanguageFlagFile}}
+                    />
         <span className={"AvatarEditorHeaderFlagname"} data-cy="course-title">{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
         </> : <></>
         }

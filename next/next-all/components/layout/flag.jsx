@@ -68,17 +68,25 @@ export default function Flag(props) {
         minWidth: (props.width || 88),
     }
     if(props.flag_file) {
-        return <svg className={styles.flag + " " + props.className} viewBox={`-2 -2 82 66`} data-test={`flag-${props.iso}`} style={style}>
+        return <svg className={props.className + " " + styles.flag} viewBox={`-2 -2 82 66`} data-test={`flag-${props.iso}`} style={style}>
             <image height="62"
                    href={`https://duostories.org/stories/flags/${props.flag_file}`}
                    width="78"></image>
             <rect className={styles.flag_border_rect} x="2" y="2" rx="12" ry="12" width="74" height="58"></rect>
         </svg>
     }
-    return <svg className={styles.flag + " " + props.className} viewBox={`0 ${count} 82 66`} data-test={`flag-${props.iso}`} style={style}>
+    return <svg className={props.className + " " + styles.flag} viewBox={`0 ${count} 82 66`} data-test={`flag-${props.iso}`} style={style}>
         <image height="3168"
                href="https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
                width="82"></image>
         <rect className={styles.flag_border_rect} x="4" y={count+4} rx="12" ry="12" width="74" height="58"></rect>
     </svg>
+}
+
+export function DoubleFlag({lang1, lang2, width}) {
+    return <>
+        <Flag iso={lang1?.short} flag={lang1?.flag} flag_file={lang1?.flag_file} width={width}/>
+        <Flag iso={lang2?.short} flag={lang2?.flag} flag_file={lang2?.flag_file} width={width*0.9} className={styles.flag_sub}/>
+    </>
+
 }

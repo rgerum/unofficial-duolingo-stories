@@ -243,10 +243,10 @@ function speaker_text_trans(data, meta, use_buttons, hide=false) {
         if(speaker_id)
             speaker_name = meta.avatar_overwrites[speaker_id]?.speaker || meta.avatar_names[speaker_id]?.speaker || meta.avatar_names[0]?.speaker;
         audio = line_to_audio(data.audio, text, speaker_name, meta.story_id, hide)
-        //audio.ssml.inser_index = window.audio_insert_lines.length;
+        audio.ssml.inser_index = meta.audio_insert_lines.length;
         audio.ssml.plan_text = text;
         audio.ssml.plan_text_speaker_name = speaker_name;
-        //window.audio_insert_lines.push([data.audio_line, data.audio_line_inset])
+        meta.audio_insert_lines.push([data.audio_line, data.audio_line_inset])
         //audio.ssml.line = data.audio_line;
         //audio.ssml.line_insert = data.audio_line_inset;
         content.audio = audio
@@ -700,7 +700,7 @@ export function processStoryFile(text, story_id, avatar_names) {
 
     let lines = split_lines(text);
 
-    let story = {elements: [], meta: {line_index: 1, story_id: story_id, avatar_names: avatar_names, avatar_overwrites: {}, cast: {}}}
+    let story = {elements: [], meta: {audio_insert_lines: [], line_index: 1, story_id: story_id, avatar_names: avatar_names, avatar_overwrites: {}, cast: {}}}
     let line_iter = line_iterator(lines)
     while(line_iter.get()) {
         let line = line_iter.get()
@@ -733,7 +733,9 @@ export function processStoryFile(text, story_id, avatar_names) {
     }
     let meta = story.meta;
     delete story.meta;
+    let audio_insert_lines = meta.audio_insert_lines;
+    delete meta.audio_insert_lines;
 
-    return [story, meta];
+    return [story, meta, audio_insert_lines];
 }
 

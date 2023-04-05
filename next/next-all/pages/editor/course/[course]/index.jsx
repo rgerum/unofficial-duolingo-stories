@@ -1,12 +1,11 @@
 import Head from 'next/head'
 
 import Layout from '../../../../components/editor/course/layout'
-import {get_courses_ungrouped} from "../../../api/course";
+import {get_courses_ids, get_courses_ungrouped} from "../../../api/course";
 import CourseList from "../../../../components/editor/course/course_list";
 import styles from "./index.module.css"
 import {get_course_editor} from "../../../api/course/[course_id]";
 import EditList from "../../../../components/editor/course/edit_list";
-import {get_courses} from "../../../api/course";
 
 
 function Page({courses, course, userdata}) {
@@ -47,15 +46,13 @@ export async function getStaticPaths({}) {
     // Fetch data from external API
     //const res = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`)
     //const courses = await res.json()
-    let courses = await get_courses();
+    let courses = await get_courses_ids();
 
     let paths = [];
-    for(let group in courses) {
-        for (let course of courses[group]) {
-            //paths.push({params: {course: `${course.learningLanguage}-${course.fromLanguage}`}});
-            paths.push({params: {course: `${course.id}`}});
-        }
+    for(let course of courses) {
+        paths.push({params: {course: `${course.id}`}});
     }
+    //console.log("paths", paths)
 
     // Pass data to the page via props
     return { paths: paths, fallback: false,}
