@@ -34,11 +34,11 @@ export default function LoggedInButton({page}) {
                     {controls.value === "light" ? "Dark Mode" : "Light Mode"}
                 </div> : null}
             {session.user?.role && page !== "stories" ?
-                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "https://www.duostories.org"}}>
+                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "/"}}>
                     Stories
                 </div> : null}
             {session.user?.role && page !== "editor" ?
-                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "https://editor.duostories.org"}}>
+                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "/editor"}}>
                     Editor
                 </div> : null}
             {session.user?.admin && page !== "admin" ?

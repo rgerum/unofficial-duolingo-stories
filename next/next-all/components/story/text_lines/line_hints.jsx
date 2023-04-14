@@ -26,7 +26,7 @@ export default function HintLineContent({content, audioRange, hideRangesForChall
     }
     const editor = React.useContext(EditorContext);
 
-    let show_trans = editor.show_trans;
+    let show_trans = editor?.show_trans;
     //var [show_trans, set_show_trans] = useState(0); //TODO window.editorShowTranslations);
     //useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); })
 

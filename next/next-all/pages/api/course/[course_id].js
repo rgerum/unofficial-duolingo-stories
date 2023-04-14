@@ -62,7 +62,7 @@ export async function get_course(course_id, user_id) {
 export async function get_course_editor(course_id) {
 
     const course_query = await query(`
-        SELECT course.id, course.short, course.about, 
+        SELECT course.id, course.short, course.about, course.official,
         l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
         l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag     
         FROM course 

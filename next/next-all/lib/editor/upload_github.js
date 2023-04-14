@@ -9,7 +9,7 @@ async function upload_github(id, course_id, content, username, message, del=fals
     await fs.writeFile(`${id}.txt`, content);
 
     if(del) {
-        exec(`python3 includes/upload_github.py ${shell_escape(id)} ${shell_escape(course_id)} ${shell_escape(username)} ${shell_escape(message)} delete`, (error, stdout, stderr) => {
+        exec(`python3 lib/editor/upload_github.py ${shell_escape(id)} ${shell_escape(course_id)} ${shell_escape(username)} ${shell_escape(message)} delete`, (error, stdout, stderr) => {
             if (error) {
                 console.log(error);
             }
@@ -20,7 +20,7 @@ async function upload_github(id, course_id, content, username, message, del=fals
         });
     }
     else {
-        exec(`python3 includes/upload_github.py ${shell_escape(id)} ${shell_escape(course_id)} ${shell_escape(username)} ${shell_escape(message)}`, (error, stdout, stderr) => {
+        exec(`python3 lib/editor/upload_github.py ${shell_escape(id)} ${shell_escape(course_id)} ${shell_escape(username)} ${shell_escape(message)}`, (error, stdout, stderr) => {
             if (error) {
                 console.log(error);
             }

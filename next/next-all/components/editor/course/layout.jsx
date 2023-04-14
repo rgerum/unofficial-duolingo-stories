@@ -33,19 +33,19 @@ export default function Layout({ children, course, import_id }) {
         <div style={{marginLeft: "auto"}}></div>
         {course ? <>{course.official ? <span data-cy="label_official"><i>official</i></span> :
             !import_id ?
-                <Link id="button_import" className={styles.editor_button} href={`/course/${course.id}/import/12`}
+                <Link id="button_import" className={styles.editor_button} href={`/editor/course/${course.id}/import/12`}
                       data-cy="button_import">
                     <div><img alt="import button" src="/editor/icons/import.svg"/></div>
                     <span>Import</span>
                 </Link> :
-                <Link id="button_back" className={styles.editor_button} href={`/course/${course.id}`}
+                <Link id="button_back" className={styles.editor_button} href={`/editor/course/${course.id}`}
                       data-cy="button_back">
                     <div><img alt="back button" src="/editor/icons/back.svg"/></div>
                     <span>Back</span>
                 </Link>
         }</> : ""}
         <div style={{marginLeft: "50px"}}></div>
-        <Login />
+        <Login page={"editor"}/>
     </nav>
     <div className={styles.main_index}>
         {children}

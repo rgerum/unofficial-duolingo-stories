@@ -49,7 +49,7 @@ export function Layout({ children, language_data }) {
                 <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
                 <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
                 <div style={{marginLeft: "auto"}}></div>
-                <Login/>
+                <Login page={"editor"}/>
             </nav>
             <div className={styles.main_index}>
                 {children}

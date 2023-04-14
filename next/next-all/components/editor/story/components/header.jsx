@@ -95,7 +95,7 @@ export function StoryEditorHeader({
 
             <EditorButton id="button_save" onClick={Save} img={"save.svg"} text={save_text + (unsaved_changes ? "*" : "")} />
 
-            <Login/>
+            <Login page={"editor"}/>
         </div>
         </div>
     </>

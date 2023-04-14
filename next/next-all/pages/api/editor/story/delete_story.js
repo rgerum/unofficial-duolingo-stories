@@ -24,6 +24,7 @@ export default async function api(req, res) {
 
 async function delete_story({id}, {username}) {
     await query(`UPDATE story SET deleted = 1, public = 0 WHERE id = ?;`, [id]);
+    let data = (await query(`SELECT * FROM story WHERE id = ?;`, [id]))[0];
     await upload_github(data['id'], data["course_id"], data["text"], username, `delete ${data["name"]} from course ${data["course_id"]}`, true);
     return "done"
 }

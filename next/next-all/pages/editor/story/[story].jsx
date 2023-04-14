@@ -17,6 +17,7 @@ import usePrompt from "../../../components/editor/story/usePrompt";
 import {get_story, getAvatarsList} from "../../api/editor/story/get";
 import {useRouter} from "next/router";
 import {StoryEditorHeader} from "../../../components/editor/story/components/header";
+import {fetch_post} from "../../../lib/fetch_post";
 
 
 let images_cached = {};
@@ -159,7 +160,7 @@ function Editor({story_data, avatar_names, userdata}) {
             if(story_meta === undefined || story_data === undefined)
                 return
             await deleteStory({id: story_data.id, course_id: story_data.course_id, text: editor_text, name: story_meta.fromLanguageName});
-            await navigate(`/course/${story_data.course_id}`);
+            await navigate(`/editor/course/${story_data.course_id}`);
         }
         set_func_delete(() => Delete)
 
