@@ -6,6 +6,7 @@ import CourseList from "../../../../../components/editor/course/course_list";
 import styles from "./../index.module.css"
 import {get_course_editor} from "../../../../api/course/[course_id]";
 import ImportList from "../../../../../components/editor/course/import_list";
+import {getSession} from "next-auth/react";
 //import EditList from "../../../../../components/editor/course/edit_list";
 //import {get_story, getAvatarsList} from "../../../../api/editor/story/get";
 
@@ -31,17 +32,26 @@ function Page({courses, course, userdata, imports, from}) {
 }
 
 
-export async function getServerSideProps({params}) {
+export async function getServerSideProps(context) {
+    const session = await getSession(context);
+
+    if (!session) {
+        return {redirect: {destination: '/editor/login', permanent: false,},};
+    }
+    if (!session.user.role) {
+        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
+    }
+    
     //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
     //let courses =  await response_courses.json();
     let courses = await get_courses_ungrouped();
 
-    let imports = await get_course_import(params);
+    let imports = await get_course_import(context.params);
 
-    let course = await get_course_editor(params.course);
+    let course = await get_course_editor(context.params.course);
 
     // Pass data to the page via props
-    return { props: { courses, course, imports, from: params.from} }
+    return { props: { courses, course, imports, from: context.params.from} }
 }
 
 export default Page

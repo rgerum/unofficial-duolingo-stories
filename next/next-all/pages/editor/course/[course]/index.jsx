@@ -1,14 +1,15 @@
 import Head from 'next/head'
 
 import Layout from '../../../../components/editor/course/layout'
-import {get_courses_ids, get_courses_ungrouped} from "../../../api/course";
+import {get_courses_ungrouped} from "../../../api/course";
 import CourseList from "../../../../components/editor/course/course_list";
 import styles from "./index.module.css"
 import {get_course_editor} from "../../../api/course/[course_id]";
 import EditList from "../../../../components/editor/course/edit_list";
+import {getSession} from "next-auth/react";
 
 
-function Page({courses, course, userdata}) {
+export default function Page({courses, course, userdata}) {
     // Render data...
     return <>
         <Head>
@@ -30,32 +31,20 @@ function Page({courses, course, userdata}) {
 
 
 
-// This gets called on every request
-export async function getStaticProps({params}) {
-    //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
-    //let courses =  await response_courses.json();
+export async function getServerSideProps(context) {
+    const session = await getSession(context);
+
+    if (!session) {
+        return {redirect: {destination: '/editor/login', permanent: false,},};
+    }
+    if (!session.user.role) {
+        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
+    }
+
     let courses = await get_courses_ungrouped();
 
-    let course = await get_course_editor(params.course);
+    let course = await get_course_editor(context.params.course);
 
     // Pass data to the page via props
     return { props: { courses, course } }
 }
-
-export async function getStaticPaths({}) {
-    // Fetch data from external API
-    //const res = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`)
-    //const courses = await res.json()
-    let courses = await get_courses_ids();
-
-    let paths = [];
-    for(let course of courses) {
-        paths.push({params: {course: `${course.id}`}});
-    }
-    //console.log("paths", paths)
-
-    // Pass data to the page via props
-    return { paths: paths, fallback: false,}
-}
-
-export default Page

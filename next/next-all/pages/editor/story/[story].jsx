@@ -18,6 +18,7 @@ import {get_story, getAvatarsList} from "../../api/editor/story/get";
 import {useRouter} from "next/router";
 import {StoryEditorHeader} from "../../../components/editor/story/components/header";
 import {fetch_post} from "../../../lib/fetch_post";
+import {getSession} from "next-auth/react";
 
 
 let images_cached = {};
@@ -283,10 +284,19 @@ export default function EditorNode({userdata, story_data, avatar_names}) {
     return <Editor story_data={story_data} avatar_names={avatar_names} userdata={userdata}/>
 }
 
-export async function getServerSideProps({params}) {
+export async function getServerSideProps(context) {
+    const session = await getSession(context);
+
+    if (!session) {
+        return {redirect: {destination: '/editor/login', permanent: false,},};
+    }
+    if (!session.user.role) {
+        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
+    }
+
     //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
     //let courses =  await response_courses.json();
-    let story_data = await get_story({id: params.story});
+    let story_data = await get_story({id: context.params.story});
 
     let avatar_names = await getAvatarsList(story_data?.learningLanguage);
 

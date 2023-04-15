@@ -1,12 +1,13 @@
 import Head from 'next/head'
-import Link from "next/link";
 
 import Layout from '../../components/editor/course/layout'
 import {get_courses_ungrouped} from "../api/course";
 import CourseList from "../../components/editor/course/course_list";
 import styles from "./course/[course]/index.module.css"
+import {getSession} from "next-auth/react";
 
-function Page({courses, userdata}) {
+export default function Page({courses, userdata}) {
+
     // Render data...
     let course_id = undefined;
     return <>
@@ -29,14 +30,19 @@ function Page({courses, userdata}) {
 
 
 
-// This gets called on every request
-export async function getStaticProps(params) {
-    //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
-    //let courses =  await response_courses.json();
+export async function getServerSideProps(context) {
+    const session = await getSession(context);
+
+    if (!session) {
+        return {redirect: {destination: '/editor/login', permanent: false,},};
+    }
+    if (!session.user.role) {
+        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
+    }
+
     let courses = await get_courses_ungrouped();
 
-    // Pass data to the page via props
-    return { props: { courses } }
+    return {
+        props: {courses},
+    };
 }
-
-export default Page

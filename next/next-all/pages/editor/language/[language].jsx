@@ -2,7 +2,7 @@ import Head from 'next/head'
 
 import {useState} from "react";
 import {useInput} from "../../../lib/hooks";
-import {get_avatar_names, get_language, get_languages, get_speakers} from "../../api/editor/avatar/[language]";
+import {get_avatar_names, get_language, get_speakers} from "../../api/editor/avatar/[language]";
 import {SpinnerBlue} from "../../../components/layout/spinner";
 //import {fetch_post} from "../../../lib/fetch_post";
 import {fetch_post} from "../../../components/story/includes"
@@ -10,8 +10,9 @@ import styles from "./[language].module.css"
 import Flag from "../../../components/layout/flag";
 import Link from "next/link";
 import {Login} from "../../../components/login";
+import {getSession} from "next-auth/react";
 
-function Page({language, speakers, avatar_names, userdata}) {
+export default function Page({language, speakers, avatar_names, userdata}) {
     // Render data...
     let course_id = undefined;
     return <>
@@ -321,33 +322,20 @@ function AvatarNames({language, speakers, avatar_names}) {
 
 
 
+export async function getServerSideProps(context) {
+    const session = await getSession(context);
 
-// This gets called on every request
-export async function getStaticProps({params}) {
-    //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
-    //let courses =  await response_courses.json();
-    let language = await get_language(params.language);
-    let speakers = await get_speakers(params.language);
-    let avatar_names = await get_avatar_names(params.language);
+    if (!session) {
+        return {redirect: {destination: '/editor/login', permanent: false,},};
+    }
+    if (!session.user.role) {
+        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
+    }
+
+    let language = await get_language(context.params.language);
+    let speakers = await get_speakers(context.params.language);
+    let avatar_names = await get_avatar_names(context.params.language);
 
     // Pass data to the page via props
     return { props: { avatar_names, speakers, language } }
 }
-
-export async function getStaticPaths({}) {
-    // Fetch data from external API
-    //const res = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`)
-    //const courses = await res.json()
-    let langs = await get_languages();
-
-    let paths = [];
-    for(let lang of langs) {
-        //paths.push({params: {course: `${course.learningLanguage}-${course.fromLanguage}`}});
-        paths.push({params: {language: `${lang.id}`}});
-    }
-
-    // Pass data to the page via props
-    return { paths: paths, fallback: false,}
-}
-
-export default Page
