@@ -64,7 +64,7 @@ LEFT JOIN language l2 ON l2.id = course.learningLanguage
 LEFT JOIN story ON (course.id = story.course_id)
 WHERE story.deleted = 0
 GROUP BY course.id
-ORDER BY count DESC;
+ORDER BY count DESC, fromLanguageName;
     `);
     return courses.map((d) => {return {...d}});
 }

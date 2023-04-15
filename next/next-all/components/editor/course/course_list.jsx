@@ -18,8 +18,9 @@ export default function CourseList({courses, course_id}) {
                       href={`/editor/course/${course.id}`}
                 >
                     <span className={styles.course_count}>{course.count}</span>
-                    <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile}/>
-                    <span>{`${course.learningLanguageName} [${course.fromLanguage}]`}{course.official ? <img src="https://d35aaqx5ub95lt.cloudfront.net/vendor/b3ede3d53c932ee30d981064671c8032.svg" title="official" alt={"official"}/> : null}</span>
+                    <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} style={{margin: "3px"}}/>
+                    <span>{`${course.learningLanguageName} [${course.fromLanguage}]`}</span>
+                    {course.official ? <span className={styles.crown}><img src="https://d35aaqx5ub95lt.cloudfront.net/vendor/b3ede3d53c932ee30d981064671c8032.svg" title="official" alt={"official"}/></span> : null}
                 </Link>
             </div>
         )}

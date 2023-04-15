@@ -4,7 +4,8 @@ import {useState} from "react";
 import {useInput} from "../../../lib/hooks";
 import {get_avatar_names, get_language, get_languages, get_speakers} from "../../api/editor/avatar/[language]";
 import {SpinnerBlue} from "../../../components/layout/spinner";
-import {fetch_post} from "../../../lib/fetch_post";
+//import {fetch_post} from "../../../lib/fetch_post";
+import {fetch_post} from "../../../components/story/includes"
 import styles from "./[language].module.css"
 import Flag from "../../../components/layout/flag";
 import Link from "next/link";
@@ -259,6 +260,7 @@ function AvatarNames({language, speakers, avatar_names}) {
 
     async function play(e, id, text, name, speakText) {
         if(stored[id] === undefined) {
+
             let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
                 {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
             let ssml_response = await response2.json();

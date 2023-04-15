@@ -49,7 +49,7 @@ export default function EditList({course, updateCourses}) {
             <tbody>
             {stories.map((story, i) =>
                 <tr key={story.id} className={set_ends[i] ? styles.set_start : ""}>
-                    <td><span><b>{pad(story.set_id)}</b>&nbsp;-&nbsp;{pad(story.set_index)}</span></td>
+                    <td><span><b>{pad_space(story.set_id)}</b>&nbsp;-&nbsp;{pad_space(story.set_index)}</span></td>
                     <td width="44px"><img alt={"story title"}
                                           src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
                                           width="44px" height={"40px"}/></td>
@@ -66,6 +66,12 @@ export default function EditList({course, updateCourses}) {
         {course ? <></> : <></>}
         {course && course?.stories === undefined ? <>Error loading.</> : <></>}
     </>
+}
+
+function pad_space(x) {
+    if(x < 10)
+        return " "+x;
+    return x;
 }
 
 function pad(x) {

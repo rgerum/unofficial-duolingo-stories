@@ -64,7 +64,6 @@
 .avatar {
     border: 1px solid var(--header-border);
     border-radius: 5px;
-    width: 100px;
     margin: 10px;
     padding: 5px;
     display: flex;
@@ -77,7 +76,7 @@
 }
 
 .avatar p input {
-    width: 90px;
+    width: 102px;
     border: 1px solid var(--input-border);
     background: var(--input-background);
     color: var(--text-color);
@@ -155,7 +154,12 @@
     margin-bottom: 100px;
 }
 
+.story_list td {
+    padding: 6px;
+}
+
 .story_list th {
+    padding: 8px;
     padding-top: 5px;
     padding-bottom: 5px;
     text-align: left;

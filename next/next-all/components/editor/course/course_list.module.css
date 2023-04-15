@@ -2,6 +2,7 @@
     overflow: scroll;
     height: calc(100vh - 64px);
     width: 515px;
+    border-right: 1px solid var(--header-border);
 }
 
 .course_selection_button {
@@ -24,9 +25,12 @@
 }
 
 .course_count {
-    width: 55px;
+    width: 45px;
     text-align: right;
-    padding-right: 5px;
-    padding-left: 20px;
     color: #333;
+}
+
+.crown {
+    margin-left: 5px;
+    height: 28px;
 }

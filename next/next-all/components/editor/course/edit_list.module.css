@@ -4,6 +4,10 @@
     margin-bottom: 100px;
 }
 
+.story_list td, .story_list th {
+    padding: 5px;
+}
+
 .story_list th {
     padding-top: 5px;
     padding-bottom: 5px;
