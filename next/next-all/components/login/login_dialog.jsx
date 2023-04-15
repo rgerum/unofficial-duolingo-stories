@@ -15,7 +15,7 @@ const LoggedInButton = dynamic(() => import("./loggedinbutton"), {
     ssr: false,
 });
 
-export function Login({page}) {
+export default function Login({page}) {
     //const { userdata } = useUser();
     const { data: session } = useSession();
     if(!page)

@@ -4,7 +4,7 @@ import React from "react";
 import styles from "./header.module.css";
 import Link from "next/link";
 import {DoubleFlag} from "../../../layout/flag";
-import {Login} from "../../../login";
+import Login from "../../../login/login_dialog";
 import EditorButton from "../../editor_button";
 
 export function StoryEditorHeader({

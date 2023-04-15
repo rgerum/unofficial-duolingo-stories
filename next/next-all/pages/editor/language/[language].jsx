@@ -9,7 +9,7 @@ import {fetch_post} from "../../../components/story/includes"
 import styles from "./[language].module.css"
 import Flag from "../../../components/layout/flag";
 import Link from "next/link";
-import {Login} from "../../../components/login";
+import Login from "../../../components/login/login_dialog";
 import {getSession} from "next-auth/react";
 
 export default function Page({language, speakers, avatar_names, userdata}) {

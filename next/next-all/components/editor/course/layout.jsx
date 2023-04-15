@@ -1,8 +1,7 @@
 import Link from 'next/link'
 
 import styles from './layout.module.css'
-
-import {Login} from "../../login";
+import Login from "../../login/login_dialog";
 import Flag, {DoubleFlag} from "../../layout/flag";
 import CourseDropdown from "../../layout/course-dropdown";
 import { useSession, signIn, signOut } from "next-auth/react"

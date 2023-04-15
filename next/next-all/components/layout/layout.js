@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 import styles from './layout.module.css'
 
-import {Login} from "./../login";
+import Login from "./../login/login_dialog";
 import CourseDropdown from "./course-dropdown";
 import Legal from "./legal";
 import { useSession, signIn, signOut } from "next-auth/react"
