@@ -38,7 +38,7 @@
     padding-bottom: 5px;
 }
 
-.tooltip:not([data-hidden]):hover {
+.tooltip:not([data-hidetip]):hover {
     background-image: linear-gradient(to right, var(--underline-dashed-highlight) 60%, rgba(255, 255, 255, 0) 0%);
 }
 
