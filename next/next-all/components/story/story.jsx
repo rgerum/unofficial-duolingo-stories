@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import styles from './story.module.css';
 
-import {scroll_down} from "./includes";
-
 import Part from "./part";
 import FinishedPage from "./layout/finish_page";
 import Footer from "./layout/story_footer";
@@ -14,6 +12,7 @@ export const EditorContext = React.createContext(undefined);
 
 export default function Story({story, router, id, editor, storyFinishedIndexUpdate}) {
     const storyElement = React.useRef();
+    const mainElement = React.useRef();
 
     let course = story.learningLanguage + "-" + story.fromLanguage;
 
@@ -63,8 +62,14 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
 
     useEffect(() => {
         if (!storyElement.current) return
+        if (mainElement.current.querySelector("#finishedPage")) {
+            mainElement.current.querySelector("#finishedPage").scrollIntoView({ behavior: 'smooth', block: 'center'});
+            return;
+        }
+
         let parts = storyElement.current.querySelectorAll("div.part:not([data-hidden=true])")
         let last = parts[parts.length - 1];
+        console.log("scroll into View", last,)
 
         if (!editor) {
             last.scrollIntoView({ behavior: 'smooth', block: 'center'});
@@ -185,7 +190,7 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
             </audio>
 
             <StoryHeader progress={progress} length={parts.length} course={course} />
-            <div id={styles.main}>
+            <div id={styles.main} ref={mainElement}>
                 <div id={styles.story} ref={storyElement} className={story.learningLanguageRTL ? styles.story_rtl : ""}>
                     <Legal />
                     <StoryContext.Provider value={controls}>

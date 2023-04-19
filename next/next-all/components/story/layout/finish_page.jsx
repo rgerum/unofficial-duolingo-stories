@@ -4,7 +4,7 @@ import styles from "./finish_page.module.css"
 
 export default function FinishedPage({story}) {
     /* The page at the end of the story. */
-    return <div className={styles.page_finished}>
+    return <div id="finishedPage" className={styles.page_finished} data-hidden={false}>
         <div>
             <div className={styles.finished_image_container}>
                 {/* add the three blinking stars */}

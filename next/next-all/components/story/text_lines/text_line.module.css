@@ -18,7 +18,7 @@
 
 .head {
     height: 50px;
-    margin-right: 12px;
+    margin-right: 18px;
     width: 50px;
     display: flex;
 }
@@ -37,7 +37,6 @@
     border-width: 2px;
     border-radius: 14px;
     border-top-left-radius: 0;
-    max-width: 80%;
     padding: 10px 12px;
     width: max-content;
     /*margin-left: 20px;*/

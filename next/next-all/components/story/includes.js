@@ -49,15 +49,6 @@ export function useEventListener(eventName, handler, element = undefined) {
     },  {ssr: false})
 }
 
-export function scroll_down() {
-    // scroll down to the bottom
-    document.documentElement.scrollTo({
-        left: 0,
-        top: document.documentElement.scrollHeight - document.documentElement.clientHeight,
-        behavior: 'smooth'
-    });
-}
-
 /**
  * Shuffles array in place. ES6 version
  * @param {Array} a items An array containing the items.
