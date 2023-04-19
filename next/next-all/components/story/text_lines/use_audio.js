@@ -40,7 +40,7 @@ export default function useAudio(element, progress) {
         window.playing_audio.push(cancel);
     }, [audio, ref]);
     React.useEffect(() => {
-        if(element.trackingProperties.line_index === progress)
+        if(element.trackingProperties.line_index === progress || (element.trackingProperties.line_index === undefined && progress === -1))
             playAudio();
     }, [progress, playAudio]);
 
