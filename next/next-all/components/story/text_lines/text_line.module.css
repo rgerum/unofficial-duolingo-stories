@@ -17,7 +17,6 @@
 }
 
 .head {
-    transform: scale(-1, 1);
     height: 50px;
     margin-right: 12px;
     width: 50px;
@@ -25,6 +24,7 @@
 }
 
 .rtl_head {
+    transform: scale(-1, 1);
     margin-left: 12px;
     margin-right: 0;
 }
