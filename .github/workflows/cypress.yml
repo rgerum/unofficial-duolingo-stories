@@ -11,7 +11,7 @@ on:
 
 jobs:
   test_editor:
-    name: Editor App
+    name: Test
 
     runs-on: ubuntu-latest
     
@@ -20,35 +20,10 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Initialize
-      run: npm run initialize
+      run: cd next/next-all && npm run initialize
 
     - name: Build
-      run: npm run build
+      run: cd next/next-all && npm run dev &
 
-    - name: Start Editor Server
-      run: cd packages/client/editor-app && npm run preview &
-      
     - name: Test Editor
-      run: cd packages/client/editor-app && npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
-      
-  test_story_app:
-    name: Story App
-
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Initialize
-      run: npm run initialize
-
-    - name: Build
-      run: npm run build
-
-    - name: Start Stories Server
-      run: cd packages/client/stories-app && npm run preview &
-      
-    - name: Test Stories
-      run: cd packages/client/stories-app && npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
-      
+      run: cd next/next-all && npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
