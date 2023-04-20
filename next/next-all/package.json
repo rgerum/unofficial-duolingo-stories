@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "cypress": "cypress open"
   },
   "dependencies": {
     "@codemirror/state": "^6.2.0",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@types/node": "^17",
     "@types/react": "^18.0.15",
+    "cypress": "^12.10.0",
     "typescript": "^4"
   }
 }

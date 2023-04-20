@@ -1,0 +1,855 @@
+{
+  "id": 9,
+  "about": null,
+  "fromLanguage": "en",
+  "fromLanguageName": "English",
+  "fromLanguageFlagFile": null,
+  "fromLanguageFlag": 0,
+  "learningLanguage": "ru",
+  "learningLanguageName": "Russian",
+  "learningLanguageFlagFile": null,
+  "learningLanguageFlag": -257.561,
+  "sets": [
+    [
+      {
+        "id": 1324,
+        "set_id": 0,
+        "set_index": 1,
+        "name": "Russian Alphabet. Part 1",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/cb76f485e6668f6f964fdf792d3f67ce5ae566b9.svg",
+        "activeLip": "6f4ba2",
+        "gilded": "https://stories-cdn.duolingo.com/image/127a3541ff8a7dce320e9fc6f0a4f12a602734d4.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1325,
+        "set_id": 0,
+        "set_index": 2,
+        "name": "Russian Alphabet. Part 2",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/cb76f485e6668f6f964fdf792d3f67ce5ae566b9.svg",
+        "activeLip": "6f4ba2",
+        "gilded": "https://stories-cdn.duolingo.com/image/127a3541ff8a7dce320e9fc6f0a4f12a602734d4.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1323,
+        "set_id": 0,
+        "set_index": 3,
+        "name": "Russian Alphabet. Part 3",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/cb76f485e6668f6f964fdf792d3f67ce5ae566b9.svg",
+        "activeLip": "6f4ba2",
+        "gilded": "https://stories-cdn.duolingo.com/image/127a3541ff8a7dce320e9fc6f0a4f12a602734d4.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 81,
+        "set_id": 1,
+        "set_index": 1,
+        "name": "Good morning!",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg",
+        "activeLip": "d17900",
+        "gilded": "https://stories-cdn.duolingo.com/image/344e43fc1b8fe4c6370f1095bd773e4478334436.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 109,
+        "set_id": 1,
+        "set_index": 2,
+        "name": "A Date",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/df24f7756b139f6eda927eb776621b9febe1a3f1.svg",
+        "activeLip": "55321f",
+        "gilded": "https://stories-cdn.duolingo.com/image/8f5de62e27e14a3e766d60caa1dfbca5a12e6480.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 91,
+        "set_id": 1,
+        "set_index": 3,
+        "name": "One thing",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/717bd84875f83c678f64f124937a278061e0e778.svg",
+        "activeLip": "4db000",
+        "gilded": "https://stories-cdn.duolingo.com/image/99ab40ae5ceb445db690f74ab843094202ed47ca.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1071,
+        "set_id": 1,
+        "set_index": 4,
+        "name": "Surprise!",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/1b10a427eeaa15c0ed6b690e78cbe8cb1b43e4e3.svg",
+        "activeLip": "eb8bd4",
+        "gilded": "https://stories-cdn.duolingo.com/image/db9d8b2b9d82c999be6b73f37f8761ad324bed44.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 568,
+        "set_id": 2,
+        "set_index": 1,
+        "name": "In the Museum",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/09fc3d3f2b5acf538364fe21f1b5ab3a457b1d7b.svg",
+        "activeLip": "74685e",
+        "gilded": "https://stories-cdn.duolingo.com/image/47c4888380aa975e38c6a70e3dc265ff57ba24a9.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 94,
+        "set_id": 2,
+        "set_index": 2,
+        "name": "Honeymoon",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/7e5d271488d31d6f1d0c503512e642ca7effe84f.svg",
+        "activeLip": "4db000",
+        "gilded": "https://stories-cdn.duolingo.com/image/635341af510dc9e1b5af967e3945040eb87b930c.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 574,
+        "set_id": 2,
+        "set_index": 3,
+        "name": "In the Clothing Store",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/5361833c123aec9adfa60b0dc63398cd1aa49ef2.svg",
+        "activeLip": "90acb4",
+        "gilded": "https://stories-cdn.duolingo.com/image/2db35eb4e71d2117816fb43e8f36500320faad3b.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 78,
+        "set_id": 2,
+        "set_index": 4,
+        "name": "The exam",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/cb76f485e6668f6f964fdf792d3f67ce5ae566b9.svg",
+        "activeLip": "6f4ba2",
+        "gilded": "https://stories-cdn.duolingo.com/image/127a3541ff8a7dce320e9fc6f0a4f12a602734d4.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 582,
+        "set_id": 3,
+        "set_index": 1,
+        "name": "I Need Money!",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/d52beeb7535f755c3ac9c0475dfc3c87a8f1fa07.svg",
+        "activeLip": "69d6d9",
+        "gilded": "https://stories-cdn.duolingo.com/image/f931f17cb50e3c976e2c0123afdb534b9518363d.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 590,
+        "set_id": 3,
+        "set_index": 2,
+        "name": "Saturday Night",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/09cbfe4b009b6617a05701652d4210d552d0f5a2.svg",
+        "activeLip": "7f59b8",
+        "gilded": "https://stories-cdn.duolingo.com/image/b9853adc0bb4b19ee5edaf7ef6eb4272d8aac81a.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 598,
+        "set_id": 3,
+        "set_index": 3,
+        "name": "The Green Dress",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/5dd7c1c9e363ca081026fc76b834b84df03c1ce5.svg",
+        "activeLip": "3b3f42",
+        "gilded": "https://stories-cdn.duolingo.com/image/7370b51cff4b8b575b85003a90ba765a0bc8c87e.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 602,
+        "set_id": 3,
+        "set_index": 4,
+        "name": "My favorite pen",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/c705fb9dbd8dd847d687d6e63c7e6eeba2e4d60d.svg",
+        "activeLip": "e5a259",
+        "gilded": "https://stories-cdn.duolingo.com/image/e51cb62f7e2a903684e9f3e85b9f93b999d97dde.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 603,
+        "set_id": 4,
+        "set_index": 1,
+        "name": "A Big Family",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/9a2dcd1a9eaff04d1e9b4338e9afcead94c365bf.svg",
+        "activeLip": "f5bbbb",
+        "gilded": "https://stories-cdn.duolingo.com/image/381b6acbe40d6f5898cfdfcaa14d853a089f807d.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 646,
+        "set_id": 4,
+        "set_index": 2,
+        "name": "The Interview",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/e3c4951a636e72c3f82ef749d5fbf2e61d51628d.svg",
+        "activeLip": "78c800",
+        "gilded": "https://stories-cdn.duolingo.com/image/e0398b4b2ff37cc3bc1d531da9bd4fffd9816938.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 657,
+        "set_id": 4,
+        "set_index": 3,
+        "name": "The Bag",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/966f6e25540bc4ba5347e59005bcc1e2827fdd66.svg",
+        "activeLip": "874522",
+        "gilded": "https://stories-cdn.duolingo.com/image/86411aba0776eb8ffe2e0524172c22b6ad0835e2.svg",
+        "gildedLip": "fbb100"
+      },
+      {
+        "id": 629,
+        "set_id": 4,
+        "set_index": 4,
+        "name": "The Passport",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/5dc22a453cc462fa2ac2412700a39a9e1b47d4e6.svg",
+        "activeLip": "e42222",
+        "gilded": "https://stories-cdn.duolingo.com/image/e00ec6e4d77850827e67a446b0fce93753e697e9.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 649,
+        "set_id": 5,
+        "set_index": 1,
+        "name": "A Question",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/087b93170babff3e2d63cc840a339f221e6957b0.svg",
+        "activeLip": "3b3f42",
+        "gilded": "https://stories-cdn.duolingo.com/image/36c6b955226c5a1b526f885043fdfe3eaa7c8ad7.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 674,
+        "set_id": 5,
+        "set_index": 2,
+        "name": "More Space",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/d052dcca47838cd5debc241d8963f4a99b3bb873.svg",
+        "activeLip": "58a700",
+        "gilded": "https://stories-cdn.duolingo.com/image/d240dde4c250618e18d310aa8579870b81f1339c.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 898,
+        "set_id": 5,
+        "set_index": 3,
+        "name": "Friends",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/743f08a1a28a5e27e7e78ba3c46443b92365789b.svg",
+        "activeLip": "78c800",
+        "gilded": "https://stories-cdn.duolingo.com/image/0c52860d90b58118e8ec83fb11505f1b019770b2.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 638,
+        "set_id": 5,
+        "set_index": 4,
+        "name": "The Reservation",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/51d1c685bd34b719a260b60637e6774fce1d2cb8.svg",
+        "activeLip": "356a00",
+        "gilded": "https://stories-cdn.duolingo.com/image/4f8947c04ab9d0456068f20fdcb0fdac4dba4d8d.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 902,
+        "set_id": 6,
+        "set_index": 1,
+        "name": "Who Is It?",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/f3d07f61cdd95c84cb15d7f9d0e4b0dc8173072b.svg",
+        "activeLip": "f43b3b",
+        "gilded": "https://stories-cdn.duolingo.com/image/831cf25a306384fb90634d50dd62000a41815ee4.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 908,
+        "set_id": 6,
+        "set_index": 2,
+        "name": "The Dance Class",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/9a1213d7cb11cc1ab115544c9557336da748fca6.svg",
+        "activeLip": "6f4ba2",
+        "gilded": "https://stories-cdn.duolingo.com/image/9dbcb096411c2c0565dfd1485da26335348d88ff.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 909,
+        "set_id": 6,
+        "set_index": 3,
+        "name": "May I Help You?",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/ec74184ed69da39d62ba574fa9d615f7d0c53da1.svg",
+        "activeLip": "bebebe",
+        "gilded": "https://stories-cdn.duolingo.com/image/e3c385490bccc307004e1e372ee8c25e3558c7a5.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 916,
+        "set_id": 6,
+        "set_index": 4,
+        "name": "The Garden",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/b4090fb3357cd46aa8eac9f22c4fbbe3265d273e.svg",
+        "activeLip": "1dc0ee",
+        "gilded": "https://stories-cdn.duolingo.com/image/948a08e431248597d405739d3834102a9bed6129.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 928,
+        "set_id": 7,
+        "set_index": 1,
+        "name": "A Strange Noise",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/21138fac4fa22d97330dc25cec4b68dcda9abc13.svg",
+        "activeLip": "4b4b4b",
+        "gilded": "https://stories-cdn.duolingo.com/image/052a769edad66c9d8e2ec8cfb86603c9144b4823.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 984,
+        "set_id": 7,
+        "set_index": 2,
+        "name": "A Visit to Paris",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/82f278cdb107bead5682d9161323e0ba329af607.svg",
+        "activeLip": "4db000",
+        "gilded": "https://stories-cdn.duolingo.com/image/4ac45062d03b29285af6679c245f4a46fc4f561f.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 939,
+        "set_id": 7,
+        "set_index": 3,
+        "name": "The New Shopping Mall",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/22d80e422eeb2f9e860d1f014edf989ff6257372.svg",
+        "activeLip": "bebebe",
+        "gilded": "https://stories-cdn.duolingo.com/image/d46287689ba699510f35621faa0bc0d21e37f437.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 962,
+        "set_id": 7,
+        "set_index": 4,
+        "name": "Happy Birthday!",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/af44dc77489e379a0652ce2e7b42bc96e3839833.svg",
+        "activeLip": "eb8bd4",
+        "gilded": "https://stories-cdn.duolingo.com/image/24d4005e876e69ea4fdfe02bb3f76705bdba4059.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 983,
+        "set_id": 8,
+        "set_index": 1,
+        "name": "The Tourist",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/c28cb69bf3836fd092352596d98fc29a300c70ce.svg",
+        "activeLip": "d78a20",
+        "gilded": "https://stories-cdn.duolingo.com/image/94bd0bb7bbd459210b8160578e33f123c8d47ab2.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 917,
+        "set_id": 8,
+        "set_index": 2,
+        "name": "I can't fall asleep",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/0641ff57af041e20c48758333ca7a5e76006d438.svg",
+        "activeLip": "0078ce",
+        "gilded": "https://stories-cdn.duolingo.com/image/454ef5fcd68527a26df8f00666ae657a0d107c36.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 639,
+        "set_id": 8,
+        "set_index": 3,
+        "name": "The Restaurant",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/d009bf5a911fc69baee4534e0bcc9e5478a9b633.svg",
+        "activeLip": "814624",
+        "gilded": "https://stories-cdn.duolingo.com/image/15fc2748c9fe90d01440435670755f5e9f2132ac.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 642,
+        "set_id": 8,
+        "set_index": 4,
+        "name": "I Want a dog",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/51e004f16574a25cf124ce8d3c718187674dfbdc.svg",
+        "activeLip": "10a3e9",
+        "gilded": "https://stories-cdn.duolingo.com/image/c5ff124c948c2cb968cc598724d41cfd5d5e8788.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 660,
+        "set_id": 9,
+        "set_index": 1,
+        "name": "A Difficult Problem",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/88e500c781ec4505c30a55fa55eda9d2df4a04da.svg",
+        "activeLip": "fe94d5",
+        "gilded": "https://stories-cdn.duolingo.com/image/f428c0d8816356ad60bb43b514868f9ba36235ea.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 900,
+        "set_id": 9,
+        "set_index": 2,
+        "name": "Every Day",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/7118252e70f96bc0ffa531032ec8c2efaf043e7b.svg",
+        "activeLip": "066dcc",
+        "gilded": "https://stories-cdn.duolingo.com/image/344e465fab7c60f79d559d11f217e5325ea74751.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 903,
+        "set_id": 9,
+        "set_index": 3,
+        "name": "The Train Ticket",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/1cad8a6eda3c353f9c7c98e338cb8fc3d211644d.svg",
+        "activeLip": "6f4ea1",
+        "gilded": "https://stories-cdn.duolingo.com/image/7d1d8c06451395916cbfb245ec7756707fb6aea3.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 907,
+        "set_id": 9,
+        "set_index": 4,
+        "name": "Dinner for a birthday",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/0abdcc5823240ad538848a828283979a1c445fa9.svg",
+        "activeLip": "33a000",
+        "gilded": "https://stories-cdn.duolingo.com/image/458c08aa5b89e72889d8ee36389617460e402866.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 912,
+        "set_id": 10,
+        "set_index": 1,
+        "name": "At the farm",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/91023e19762be713ac3b9ec727924006b6ca8ce0.svg",
+        "activeLip": "58a700",
+        "gilded": "https://stories-cdn.duolingo.com/image/9c8fdd4122b594d0345df04946a3728ab321ca35.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 937,
+        "set_id": 10,
+        "set_index": 2,
+        "name": "Basketball Player",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/b9a6aee812d1c55a3facf77e6d552591342f0037.svg",
+        "activeLip": "52ae32",
+        "gilded": "https://stories-cdn.duolingo.com/image/a48a856f10e479e9625513c1f5edff4b2017aa0a.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 951,
+        "set_id": 10,
+        "set_index": 3,
+        "name": "Night Music",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/205eb89c151a9cea69e598e00b5cbe534c23881a.svg",
+        "activeLip": "2f2f2f",
+        "gilded": "https://stories-cdn.duolingo.com/image/8a218b47d33807279db8532e5217d0eaf6267998.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1129,
+        "set_id": 10,
+        "set_index": 4,
+        "name": "Our First House",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/dc39b146e09be64389b169c261884a6c5ea6fcca.svg",
+        "activeLip": "60dbf8",
+        "gilded": "https://stories-cdn.duolingo.com/image/22e2fc5321164c6cae27499ed98a5fca9d0164c5.svg",
+        "gildedLip": "fbb100"
+      }
+    ],
+    [
+      {
+        "id": 1154,
+        "set_id": 11,
+        "set_index": 1,
+        "name": "Mukhtar, Sit!",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/6830f32cae89c97b8418a589d0539c3d87bbff2b.svg",
+        "activeLip": "1b509f",
+        "gilded": "https://stories-cdn.duolingo.com/image/061a9e274eb9db137ba32847efe55ca9a1949841.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1156,
+        "set_id": 11,
+        "set_index": 2,
+        "name": "My Favorite Game",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/30aefbeb8dcf34c7a93bff266a4252b79ec143e5.svg",
+        "activeLip": "f5bbbb",
+        "gilded": "https://stories-cdn.duolingo.com/image/cd8932ef21bb562c803ef9fbd6b73672ab5022b6.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1172,
+        "set_id": 11,
+        "set_index": 3,
+        "name": "The breakfast",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/c356b975f0ed8c71436b609a97a30491dd71e111.svg",
+        "activeLip": "0078ce",
+        "gilded": "https://stories-cdn.duolingo.com/image/6ccf19721d02555b27eabd7b88211c892248618f.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1178,
+        "set_id": 11,
+        "set_index": 4,
+        "name": "Grandma's New Cellphone",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/b719cbfd3a627fae092fae93dbf83c8c3cb7fd18.svg",
+        "activeLip": "1cb0f6",
+        "gilded": "https://stories-cdn.duolingo.com/image/293ffa40f3e26e8c445333af47992eee8db31cea.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 1192,
+        "set_id": 12,
+        "set_index": 1,
+        "name": "A Beer, Please!",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/02ed13ae1aba57917368af1e2492564588e51b06.svg",
+        "activeLip": "945837",
+        "gilded": "https://stories-cdn.duolingo.com/image/69dfcf48bd11e281f32320ffc36b58e184383604.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1217,
+        "set_id": 12,
+        "set_index": 2,
+        "name": "A Bad Day",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/d177f65e767d30af6fc75f7d0fc2c886ce601bea.svg",
+        "activeLip": "6f4ea1",
+        "gilded": "https://stories-cdn.duolingo.com/image/3a9424c40b404f2de993b7b3a43861e57e857623.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1221,
+        "set_id": 12,
+        "set_index": 3,
+        "name": "New Sneakers",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/c7b3eabc1e12d46fdff41335bca8b3daa589f0cf.svg",
+        "activeLip": "1cb0f6",
+        "gilded": "https://stories-cdn.duolingo.com/image/87da8fc9d6bc2f4d2c5537882b6280be5c477434.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1218,
+        "set_id": 12,
+        "set_index": 4,
+        "name": "School Disco Party",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/9ad6bc610313267c3fbb650a0d94480aa76c8a1c.svg",
+        "activeLip": "0078ce",
+        "gilded": "https://stories-cdn.duolingo.com/image/0ed3c89551fdd71b860b238eb45a8ec0dddaec2b.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 1227,
+        "set_id": 13,
+        "set_index": 1,
+        "name": "Love Letters",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/5c8a64d8aec1682d26f003aafdd4f8fa0abfe4d7.svg",
+        "activeLip": "5a3a8a",
+        "gilded": "https://stories-cdn.duolingo.com/image/a243e861a5423caff320765e3df728afd1bc19bf.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1223,
+        "set_id": 13,
+        "set_index": 2,
+        "name": "Let's Go to the Beach!",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/7adc3c6ae983a10e3b79bd0efb8bfbb5ed3725c2.svg",
+        "activeLip": "f5a12e",
+        "gilded": "https://stories-cdn.duolingo.com/image/45831f6f60c0d2b39cfc87edadf9b691d5b8fa4c.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1224,
+        "set_id": 13,
+        "set_index": 3,
+        "name": "An Interesting Conversation",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/6711cee61441da3d7aa6099466d6fff137239c3a.svg",
+        "activeLip": "78c800",
+        "gilded": "https://stories-cdn.duolingo.com/image/826dd39a35e72c77f1778b4eccc23aaae93da1d1.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1225,
+        "set_id": 13,
+        "set_index": 4,
+        "name": "I'm Ready!",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/8bc8ee88f110f544dee2d14bdd67af1e645989a9.svg",
+        "activeLip": "9069cd",
+        "gilded": "https://stories-cdn.duolingo.com/image/f75fe216986ae242f2d22999dd935caf81762dc9.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 1230,
+        "set_id": 14,
+        "set_index": 1,
+        "name": "Three Months",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/ceca620db9f2f5fade10e8e825088effc46968c0.svg",
+        "activeLip": "3b3f42",
+        "gilded": "https://stories-cdn.duolingo.com/image/8959797e6453d819c2a3b986ec73d22bc5e1bb49.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1220,
+        "set_id": 14,
+        "set_index": 2,
+        "name": "A Drawing in the Park",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/96fd9b652456a41bca2912838b14cb5bd9f7827a.svg",
+        "activeLip": "1899d6",
+        "gilded": "https://stories-cdn.duolingo.com/image/41aa2ee2d155ac41618277441dc3d58598174876.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1237,
+        "set_id": 14,
+        "set_index": 3,
+        "name": "An Important Job",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/4709ac3b88be5e6b76c502500ea0f593bea8bd14.svg",
+        "activeLip": "a56644",
+        "gilded": "https://stories-cdn.duolingo.com/image/0dda29a5f76da4061408aa4c228a67a08d360c2b.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1229,
+        "set_id": 14,
+        "set_index": 4,
+        "name": "The New Place",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/78280e171c39627186afb39898b33c5d1af1e43d.svg",
+        "activeLip": "78c800",
+        "gilded": "https://stories-cdn.duolingo.com/image/80e884e2d63e3e3a4a8e85ad758b82dd90606b61.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 1228,
+        "set_id": 15,
+        "set_index": 1,
+        "name": "It's Too Dangerous",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/d0d5327cf96850b66bb9db4aa71b64a0050a53b3.svg",
+        "activeLip": "2b70c9",
+        "gilded": "https://stories-cdn.duolingo.com/image/5e269ac5d94c8215243ebf99b8d907195949019c.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1240,
+        "set_id": 15,
+        "set_index": 2,
+        "name": "The Big Game",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/170e9caad206d87350e17e32c18226edefea8131.svg",
+        "activeLip": "2b70c9",
+        "gilded": "https://stories-cdn.duolingo.com/image/9a581903c7f8a30fc3e57680103b227fae66df8b.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1239,
+        "set_id": 15,
+        "set_index": 3,
+        "name": "Danger! (1/2)",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/7cd7723e6a361adbea522f2dc71b13755d4d578c.svg",
+        "activeLip": "c21714",
+        "gilded": "https://stories-cdn.duolingo.com/image/ddf3a03265540617a71d0bfad11d2123b52a8586.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1238,
+        "set_id": 15,
+        "set_index": 4,
+        "name": "Danger! (2/2)",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/7cd7723e6a361adbea522f2dc71b13755d4d578c.svg",
+        "activeLip": "c21714",
+        "gilded": "https://stories-cdn.duolingo.com/image/ddf3a03265540617a71d0bfad11d2123b52a8586.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 1251,
+        "set_id": 16,
+        "set_index": 1,
+        "name": "A New Job",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/792e2286967c20465f3e45293ca8140533aa119e.svg",
+        "activeLip": "fa6bc2",
+        "gilded": "https://stories-cdn.duolingo.com/image/29c45450070698acae0fa14d93cb6a4a5fef714a.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1284,
+        "set_id": 16,
+        "set_index": 2,
+        "name": "In Train",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/6d37fa1702d8cb50ebffb3f79fc7c5d020b5459c.svg",
+        "activeLip": "4a8d00",
+        "gilded": "https://stories-cdn.duolingo.com/image/77ac8980cff6ab7140a13a9260de87403197f2aa.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1245,
+        "set_id": 16,
+        "set_index": 3,
+        "name": "Free Pizza",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/1dcd5216b93313f075eb62584804a9bec488724e.svg",
+        "activeLip": "1dc0ee",
+        "gilded": "https://stories-cdn.duolingo.com/image/603053e5d2a51ef667e98a6b99df1c79744fcf88.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1261,
+        "set_id": 16,
+        "set_index": 4,
+        "name": "The Song",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/be8f47fb647fd1b6b62660bfeceaa284fb800d10.svg",
+        "activeLip": "90d5f1",
+        "gilded": "https://stories-cdn.duolingo.com/image/7f0673d3d98c08a7b2e95284b5a738430d3ad1bf.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 1297,
+        "set_id": 17,
+        "set_index": 1,
+        "name": "New Friend",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/a32a3223372d29f372287688ec336de9494a603e.svg",
+        "activeLip": "b03131",
+        "gilded": "https://stories-cdn.duolingo.com/image/392394106431636414af8fee77a942c7ab004cb3.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 931,
+        "set_id": 17,
+        "set_index": 2,
+        "name": "Do I Know You?",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/f4b7a86b9ce48eb4c9b1538021a584b4449c98a0.svg",
+        "activeLip": "1b5db1",
+        "gilded": "https://stories-cdn.duolingo.com/image/c54904c3ad97563952da381b5f4b57ee7d2f1f5c.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 75,
+        "set_id": 17,
+        "set_index": 3,
+        "name": "Room for Rent",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/e1d2c08f443668d8f99ef3d26f1d04b70d187ab3.svg",
+        "activeLip": "ea2b2b",
+        "gilded": "https://stories-cdn.duolingo.com/image/68734aab69835db8a039f035e11c81bd74263a20.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 973,
+        "set_id": 17,
+        "set_index": 4,
+        "name": "The Perfect Vacation",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/47c4cafa5f4b71f0e3d1cd73377b0324f70da2e6.svg",
+        "activeLip": "419500",
+        "gilded": "https://stories-cdn.duolingo.com/image/d51e7725d40b54db8c341a3d3cac52f1fedca2dc.svg",
+        "gildedLip": "ffb100"
+      }
+    ],
+    [
+      {
+        "id": 1257,
+        "set_id": 18,
+        "set_index": 1,
+        "name": "Is it you?",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/2ccb57023b0ccbeb4541a22890559fbe30b7acc2.svg",
+        "activeLip": "e834a5",
+        "gilded": "https://stories-cdn.duolingo.com/image/cc7e0eb2d9308508bc11f6762d36d55369f8ce36.svg",
+        "gildedLip": "ffb100"
+      },
+      {
+        "id": 1269,
+        "set_id": 18,
+        "set_index": 2,
+        "name": "It's My Ex!",
+        "time": null,
+        "active": "https://stories-cdn.duolingo.com/image/d9ab12bffb7890199d0cc6e3961a31c5254cb206.svg",
+        "activeLip": "58a700",
+        "gilded": "https://stories-cdn.duolingo.com/image/06acadea4c18eb58eae1f555271633065a398f19.svg",
+        "gildedLip": "ffb100"
+      }
+    ]
+  ]
+}
