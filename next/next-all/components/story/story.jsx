@@ -16,7 +16,7 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
 
     let course = story.learningLanguage + "-" + story.fromLanguage;
 
-    let [progress, setProgress] = useState(-1);
+    let [progress, setProgress] = useState(editor ? -2 : -1);
     let [right, setRight] = useState(false);
     let [blocked, setBlocked] = useState(false);
     let [progressStep, setProgressStep] = useState(1);
@@ -62,7 +62,7 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
 
     useEffect(() => {
         if (!storyElement.current) return
-        if (mainElement.current.querySelector("#finishedPage")) {
+        if (mainElement.current && mainElement.current.querySelector("#finishedPage")) {
             mainElement.current.querySelector("#finishedPage").scrollIntoView({ behavior: 'smooth', block: 'center'});
             return;
         }
