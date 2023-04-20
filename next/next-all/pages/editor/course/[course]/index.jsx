@@ -41,9 +41,15 @@ export async function getServerSideProps(context) {
         return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
     }
 
-    let courses = await get_courses_ungrouped();
-
     let course = await get_course_editor(context.params.course);
+
+    if(!course) {
+        return {
+            notFound: true,
+        }
+    }
+
+    let courses = await get_courses_ungrouped();
 
     // Pass data to the page via props
     return { props: { courses, course } }

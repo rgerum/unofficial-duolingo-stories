@@ -333,6 +333,13 @@ export async function getServerSideProps(context) {
     }
 
     let language = await get_language(context.params.language);
+
+    if(!language) {
+        return {
+            notFound: true,
+        }
+    }
+
     let speakers = await get_speakers(context.params.language);
     let avatar_names = await get_avatar_names(context.params.language);
 

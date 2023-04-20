@@ -72,7 +72,7 @@ export async function get_course_editor(course_id) {
         `, [course_id]);
 
     if(course_query.length === 0)
-        return {error: "no course", course_id: course_id};
+        return undefined;
     const course = Object.assign({}, course_query[0]);
 
     const res = await query(`SELECT COUNT(sa.id) as approvals, story.id, story.set_id, story.set_index, story.name, story.status, story.image,
@@ -84,8 +84,8 @@ export async function get_course_editor(course_id) {
     WHERE story.course_id = ? AND deleted = false
     GROUP BY story.id
     ORDER BY story.set_id, story.set_index;`, [course_id]);
-    if(res.length === 0)
-        return {error: "no stories"};
+    //if(res.length === 0)
+    //    return {error: "no stories"};
 
     let stories = [];
     for(let r of res) {

@@ -12,8 +12,7 @@ export async function setStoryDone(id) {
 export default function StoryMain({story}) {
     const router = useRouter();
     let storyFinishedIndexUpdate = async (id) => {await setStoryDone(story.id); }
-    if(!story)
-        return <div>:-(</div>
+
     return <>
         <Head>
             <title>{`Duostories ${story.learningLanguageLong} from ${story.fromLanguageLong}: ${story.fromLanguageName}`}</title>
@@ -28,6 +27,12 @@ export async function getServerSideProps({params}) {
     //const res = await fetch(`https://test.duostories.org/stories/backend_node_test/story/${params.story}`)
     //const story = await res.json()
     const story = await get_story(params.story);
+
+    if(!story) {
+        return {
+            notFound: true,
+        }
+    }
 
     // Pass data to the page via props
     return { props: { story } }

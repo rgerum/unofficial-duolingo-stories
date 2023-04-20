@@ -50,6 +50,12 @@ export async function getServerSideProps(context) {
 
     let course = await get_course_editor(context.params.course);
 
+    if(!course || !imports.length) {
+        return {
+            notFound: true,
+        }
+    }
+
     // Pass data to the page via props
     return { props: { courses, course, imports, from: context.params.from} }
 }

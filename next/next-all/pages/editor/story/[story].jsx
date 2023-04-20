@@ -298,6 +298,12 @@ export async function getServerSideProps(context) {
     //let courses =  await response_courses.json();
     let story_data = await get_story({id: context.params.story});
 
+    if(!story_data) {
+        return {
+            notFound: true,
+        }
+    }
+
     let avatar_names = await getAvatarsList(story_data?.learningLanguage);
 
     // Pass data to the page via props
