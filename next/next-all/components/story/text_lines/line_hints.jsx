@@ -1,7 +1,6 @@
-import React, {useState} from "react";
+import React from "react";
 import styles from "./line_hints.module.css"
 
-import {useEventListener} from "../includes";
 import {EditorContext} from "../story";
 
 function splitTextTokens(text, keep_tilde=true) {

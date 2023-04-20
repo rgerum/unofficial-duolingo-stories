@@ -1,5 +1,4 @@
 import React from "react";
-import {useEventListener} from "./includes";
 
 
 export function EditorHook(hidden, editor, editor_props) {
@@ -22,12 +21,12 @@ export function EditorHook(hidden, editor, editor_props) {
     let [selected, setSelected] = React.useState(false);
     if(selected)
         hidden = "story_selection";
-    useEventListener("editorLineChanged", (e) =>
+    /*useEventListener("editorLineChanged", (e) =>
     {
         let should_be_selected = editor && editor.start_no <= e.detail.lineno && e.detail.lineno < editor.end_no;
         if (should_be_selected !== selected)
             setSelected(should_be_selected);
-    })
+    })*/ //TODO
     return [hidden, onClick];
 }
 

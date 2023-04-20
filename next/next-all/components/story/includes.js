@@ -16,10 +16,11 @@ export async function fetch_post(url, data) {
     });
 }
 
+// TODO remove this function
 export function useEventListener(eventName, handler, element = undefined) {
     dynamic(() => {
-        console.log("dynamic", useEventListener)
-        if (element === undefined)
+        console.log("eventListner", typeof window, typeof window !== "undefined")
+        if (element === undefined && typeof window !== "undefined")
             element = window;
         // Create a ref that stores handler
         const savedHandler = React.useRef(); // Update ref.current value if handler changes.
