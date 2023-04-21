@@ -7,9 +7,12 @@
     "cypress": "cypress open"
   },
   "dependencies": {
+    "@aws-sdk/client-polly": "^3.316.0",
     "@codemirror/state": "^6.2.0",
     "@fontsource/nunito": "^4.5.12",
+    "@google-cloud/text-to-speech": "^4.2.2",
     "codemirror": "^6.0.1",
+    "microsoft-cognitiveservices-speech-sdk": "^1.27.0",
     "mysql": "^2.18.1",
     "next": "latest",
     "next-auth": "^4.19.2",
