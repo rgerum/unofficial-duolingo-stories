@@ -40,15 +40,20 @@ export default async function api(req, res) {
         let id = parseInt(req.body.id);
         let speaker = req.body.speaker;
         let text = req.body.text;
-        let filename = `public/audio/${id}`;
-        try {
-            await mkdir(filename);
-        }
-        catch (e) {}
-        while(true) {
-            filename += "/" + uuid().split("-")[0] + ".mp3";
-            if(!await exists(filename))
-                break;
+        let filename = undefined;
+        let file;
+        if(id !== 0) {
+            filename = `public/audio/${id}`;
+            try {
+                await mkdir(filename);
+            } catch (e) {
+            }
+            while (true) {
+                file = uuid().split("-")[0] + ".mp3";
+                filename += "/" + file;
+                if (!await exists(filename))
+                    break;
+            }
         }
 
         let answer;
@@ -64,7 +69,9 @@ export default async function api(req, res) {
             answer = await engine_polly.synthesizeSpeech(filename, speaker, text);
             answer.engine = "polly";
         }
-        answer.output_file = answer.output_file.substring('public/'.length)
+        if(id !== 0) {
+            answer.output_file = `${id}/` + file;
+        }
 
         if(answer === undefined)
             return res.status(404).test("Error not found");

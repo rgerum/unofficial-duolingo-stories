@@ -45,6 +45,9 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
         const { audioContent, timepoints } = await response.json();
 
         return new Promise((resolve, reject) => {
+            if(filename === undefined) {
+                resolve({marks: marks, content: audioContent});
+            }
             fs.writeFile(filename, Buffer.from(audioContent, "base64"), () => {
                 //{"time":1025,"type":"word","start":14,"end":17,"value":"moe"}
                 for(let mark_index in timepoints) {

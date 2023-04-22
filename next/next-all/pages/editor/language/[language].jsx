@@ -4,8 +4,7 @@ import {useState} from "react";
 import {useInput} from "../../../lib/hooks";
 import {get_avatar_names, get_language, get_speakers} from "../../api/editor/avatar/[language]";
 import {SpinnerBlue} from "../../../components/layout/spinner";
-//import {fetch_post} from "../../../lib/fetch_post";
-import {fetch_post} from "../../../components/story/includes"
+import {fetch_post} from "../../../lib/fetch_post";
 import styles from "./[language].module.css"
 import Flag from "../../../components/layout/flag";
 import Link from "next/link";
@@ -262,10 +261,24 @@ function AvatarNames({language, speakers, avatar_names}) {
     async function play(e, id, text, name, speakText) {
         if(stored[id] === undefined) {
 
-            let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
-                {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
+            //let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
+            //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
+            let response2 = await fetch_post(`/api/audio`,
+                    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
             let ssml_response = await response2.json();
-            stored[id] = new Audio("https://carex.uber.space/stories/audio/" + ssml_response["output_file"]);
+
+            let binaryString = window.atob(ssml_response.content);
+            let binaryData = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                binaryData[i] = binaryString.charCodeAt(i);
+            }
+            let blob = new Blob([binaryData], { type: "audio/mp3" });
+            let url = URL.createObjectURL(blob);
+            let audio = new Audio();
+            audio.src = url;
+            stored[id] = audio;
+
+            //stored[id] = new Audio("https://carex.uber.space/stories/audio/" + ssml_response["output_file"] + "?"+Math.random());
             setStored(stored);
         }
         let audio = stored[id];

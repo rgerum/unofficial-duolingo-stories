@@ -58,6 +58,22 @@ function streamToString(stream) {
     });
 }
 
+async function streamToBase64(stream) {
+    return new Promise((resolve, reject) => {
+        const chunks = [];
+        stream.on('data', chunk => chunks.push(chunk));
+        stream.on('error', reject);
+        stream.on('end', () => {
+            // Concatenate all the chunks into a single buffer
+            const buffer = Buffer.concat(chunks);
+
+            // Encode the buffer to base64
+            const base64 = buffer.toString('base64');
+            resolve(base64);
+        });
+    });
+}
+
 
 async function synthesizeSpeechPolly(filename, voice_id, text) {
     // Create an instance of the Polly service object
@@ -95,7 +111,11 @@ async function synthesizeSpeechPolly(filename, voice_id, text) {
     params.OutputFormat = "json";
     let data2 = await synthesizeSpeech(polly, params);
 
-    await writeStream(filename, data.AudioStream);
+    let content;
+    if(filename)
+        await writeStream(filename, data.AudioStream);
+    else
+       content = await streamToBase64(data.AudioStream);
 
     // Handle the audio data
     let data_read2 = await streamToString(data2.AudioStream);
@@ -106,6 +126,7 @@ async function synthesizeSpeechPolly(filename, voice_id, text) {
     return {
         output_file: filename,
         marks: marks,
+        content: content,
     }
 }
 

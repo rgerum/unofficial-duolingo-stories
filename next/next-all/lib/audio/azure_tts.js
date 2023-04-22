@@ -24,7 +24,7 @@ export async function synthesizeSpeechAzure(filename, voice_id, text, file) {
         if (file)
             text = fs.readFileSync(file, 'utf8');
         const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.AZURE_APIKEY, "westeurope");
-        const audioConfig = sdk.AudioConfig.fromAudioFileOutput(filename);
+        const audioConfig = sdk.AudioConfig.fromAudioFileOutput((filename === undefined) ? '/dev/null' : filename);
 
         // create the speech synthesizer.
         var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
@@ -55,11 +55,14 @@ export async function synthesizeSpeechAzure(filename, voice_id, text, file) {
         synthesizer.speakSsmlAsync(text,
             function (result) {
                 if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
+                    let content;
+                    if(filename === undefined)
+                        content = Buffer.from(result.audioData).toString('base64');
                     let output = {
                         output_file: filename,
-                            marks: marks,
+                        marks: marks,
+                        content: content,
                     }
-                    console.log(JSON.stringify(output));
                     resolve(output);
                 } else {
                     console.error("Speech synthesis canceled, " + result.errorDetails +
