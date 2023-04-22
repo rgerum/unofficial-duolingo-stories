@@ -70,7 +70,7 @@ export default function Flag(props) {
     if(props.flag_file) {
         return <svg className={props.className + " " + styles.flag} viewBox={`-2 -2 82 66`} data-test={`flag-${props.iso}`} style={style}>
             <image height="62"
-                   href={`https://duostories.org/stories/flags/${props.flag_file}`}
+                   href={`https://carex.uber.space/stories/flags/${props.flag_file}`}
                    width="78"></image>
             <rect className={styles.flag_border_rect} x="2" y="2" rx="12" ry="12" width="74" height="58"></rect>
         </svg>
