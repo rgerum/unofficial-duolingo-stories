@@ -19,6 +19,7 @@ import {useRouter} from "next/router";
 import {StoryEditorHeader} from "../../../components/editor/story/components/header";
 import {fetch_post} from "../../../lib/fetch_post";
 import {getSession} from "next-auth/react";
+import Head from "next/head";
 
 
 let images_cached = {};
@@ -253,7 +254,11 @@ function Editor({story_data, avatar_names, userdata}) {
     let editor_state2 = {...editor_state}
     editor_state2.show_trans = show_trans
     editor_state2.show_ssml = show_ssml
-    return (
+    return (<>
+        <Head>
+            <title>{`Duostories ${story_data.learningLanguageLong} from ${story_data.fromLanguageLong}: ${story_data.fromLanguageName}`}</title>
+            <link rel="canonical" href={`https://www.duostories.org/editor/story/${story_data.id}`} />
+        </Head>
         <div id="body">
             <StoryEditorHeader story_data={story_data} userdata={userdata} unsaved_changes={unsaved_changes}
                                func_save={func_save} func_delete={func_delete} show_trans={show_trans} set_show_trans={set_show_trans}
@@ -276,8 +281,7 @@ function Editor({story_data, avatar_names, userdata}) {
                 </div>
             </div>
         </div>
-
-    );
+    </>);
 }
 
 export default function EditorNode({userdata, story_data, avatar_names}) {

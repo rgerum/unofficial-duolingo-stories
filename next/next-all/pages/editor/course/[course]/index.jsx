@@ -14,8 +14,8 @@ export default function Page({courses, course, userdata}) {
     return <>
         <Head>
             <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
-            <link rel="canonical" href="https://www.duostories.org" />
-            <meta name="description" content={`Supplement your Duolingo course with community-translated Duolingo stories.`}/>
+            <link rel="canonical" href={`https://www.duostories.org/editor/${course.id}`} />
+            <meta name="description" content={`Contribute by translating stories.`}/>
             <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
         </Head>
         <Layout userdata={userdata} course={course}>
