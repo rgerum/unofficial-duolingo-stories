@@ -1,0 +1,20 @@
+
+
+.admin_table th  {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: left;
+    background-color: var(--button-background);
+    color: var(--button-color);
+}
+.admin_table {
+    border-collapse: collapse;
+}
+
+.admin_table tr:nth-child(2n) {
+    background-color: var(--body-background-faint);
+}
+
+.admin_table td input {
+    width: 95%;
+}
