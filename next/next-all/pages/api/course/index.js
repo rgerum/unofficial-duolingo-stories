@@ -74,7 +74,7 @@ export async function get_course_import({course, from}) {
                       FROM story s1
                       LEFT JOIN (SELECT s2.duo_id, s2.id FROM story s2 WHERE s2.course_id = ?) AS s2 ON s1.duo_id = s2.duo_id
                       JOIN image on image.id = s1.image
-                      WHERE s1.course_id = ?
+                      WHERE s1.course_id = ? AND s1.deleted = 0
                       GROUP BY s1.id
                       ORDER BY s1.set_id, s1.set_index`, [course, from]);
     return courses.map((d) => {return {...d}});
