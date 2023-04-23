@@ -18,3 +18,30 @@
 .admin_table td input {
     width: 95%;
 }
+
+.dropdown:hover .dropdownContent {
+    display: block;
+    max-height: 180px;
+    overflow: scroll;
+}
+.drop_button {
+    background-color:#fff;
+    border:1px solid
+}
+.dropdownContent {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0 8px 16px #0003;
+    z-index: 1;
+    width: 200px;
+}
+.dropdownContent button {
+    width: 100%;
+    border: none;
+}
+.lang {
+    display: flex;
+    align-items: center;
+}

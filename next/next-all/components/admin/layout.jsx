@@ -20,6 +20,11 @@ export default function Layout({ children }) {
             <div><img alt="import button" src="/editor/icons/import.svg"/></div>
             <span>Languages</span>
         </Link>
+        <Link id="button_import" className={styles.editor_button} href={`/admin/courses`}
+              data-cy="button_import">
+            <div><img alt="import button" src="/editor/icons/import.svg"/></div>
+            <span>Courses</span>
+        </Link>
         <div style={{marginLeft: "auto"}}></div>
         <Login page={"admin"}/>
     </nav>

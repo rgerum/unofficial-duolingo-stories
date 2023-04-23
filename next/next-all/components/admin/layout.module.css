@@ -86,12 +86,12 @@
 }
 .editor_button {
     color: var(--text-color-dim);
-    padding: 14px 34px;
+    padding: 0 14px;
     cursor: pointer;
     align-items: center;
     display: flex;
     flex-direction: row;
-    width: 105px;
+    min-width: 105px;
     text-decoration: none;
 }
 .editor_button img {
