@@ -29,10 +29,11 @@ export default function LoggedInButton({page}) {
             <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "/profile"}}>
                 Profile
             </div>
-            {page === "stories" ?
-                <div id="button_editor" className={styles.profile_dropdown_button + "  button_dark_mode"} onClick={()=>{controls.toggle()}}>
-                    {controls.value === "light" ? "Dark Mode" : "Light Mode"}
-                </div> : null}
+            {<div id="button_editor" className={styles.profile_dropdown_button + "  button_dark_mode"} onClick={() => {
+                controls.toggle()
+            }}>
+                {controls.value === "light" ? "Dark Mode" : "Light Mode"}
+            </div>}
             {session.user?.role && page !== "stories" ?
                 <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "/"}}>
                     Stories
@@ -42,7 +43,7 @@ export default function LoggedInButton({page}) {
                     Editor
                 </div> : null}
             {session.user?.admin && page !== "admin" ?
-                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "https://admin.duostories.org"}}>
+                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "/admin"}}>
                     Admin
                 </div> : null}
             <div className={styles.profile_dropdown_button} onClick={() => signOut()} >Log out</div>
