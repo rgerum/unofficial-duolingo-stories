@@ -1,24 +1,17 @@
 # update the repository
 git pull
-# install the npm packages
-lerna bootstrap
-# build
+
+# copy the nextjs app
+cp -r next/next-all/* ../beta/
+
+# go to the beta directory
+cd ../beta
+
+# install packages
+npm install
+
+# run the build command
 npm run build
 
-# empty the test environment
-rm -r ../test_environment/
-mkdir ../test_environment
-
-# copy the stores-app
-rsync -r packages/client/stories-app/dist/* ../test_environment/stories-app
-rsync -r packages/client/editor-app/dist/* ../test_environment/editor-app
-rsync -r packages/client/admin-app/dist/* ../test_environment/admin-app
-
-# copy the express backend
-rsync -r packages/server/database-interface/* ../test_environment/database-interface
-
-# copy flag files
-rsync -rv flags/ ../flags/
-
-# and restart the server
-supervisorctl restart express_test
+# restart the server
+supervisorctl restart beta
