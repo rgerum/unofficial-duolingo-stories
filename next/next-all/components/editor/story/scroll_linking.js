@@ -23,7 +23,7 @@ export default function useScrollLinking(view, preview, svg_parent) {
         for (let element of document.querySelectorAll("div[data-lineno]")) {
             let new_lineno = parseInt(element.dataset.lineno);
             let new_top = element.getBoundingClientRect().top - svg_parent.getBoundingClientRect().top - 10;// - preview.scrollTop - preview.getBoundingClientRect().top
-            let new_linetop = (4 + new_lineno) * 26.6 - editor.scrollTop - svg_parent.getBoundingClientRect().top - editor.getBoundingClientRect().top
+            let new_linetop = -5 + (4 + new_lineno) * 26.6 - editor.scrollTop - svg_parent.getBoundingClientRect().top - editor.getBoundingClientRect().top
 
             if (svg_element % 2 === 0)
                 path += `L0,${new_linetop} L ${width1},${new_linetop} C${width1b},${new_linetop} ${width1b},${new_top} ${width2},${new_top} L${width3},${new_top}`;

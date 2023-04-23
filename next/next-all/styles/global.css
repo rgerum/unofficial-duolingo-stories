@@ -159,8 +159,18 @@ body[data-theme="light"]  {
 
   --svg-fill: #fbfbfb;
   --svg-stroke: #eee;
+
+  --editor-hints-background: whitesmoke;
 }
 
+body[data-theme="dark"] .ͼ2 .cm-gutters {
+  border-right: 1px solid #253b41;
+  background-color: #334046;
+}
+
+body[data-theme="dark"] .ͼ2 .cm-activeLineGutter {
+  background-color: #44575d;
+}
 
 body[data-theme="dark"] {
   --header-border: #37464f;
@@ -225,6 +235,11 @@ body[data-theme="dark"] {
   --underline-dashed-highlight: #f1f7fb;
 
   --body-background-faint: #202f36;
+
+  --svg-fill: #202f36;
+  --svg-stroke: #2c464d;
+
+  --editor-hints-background: #313131;
 
   --finished-star-gold: #ffc800;
 }

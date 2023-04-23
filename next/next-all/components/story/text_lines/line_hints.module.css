@@ -14,7 +14,7 @@
 }
 .tooltiptext_editor {
     font-style: italic;
-    background: whitesmoke;
+    background: var(--editor-hints-background);
     font-size: 0.9em;
     opacity: .5;
     margin-left: -4px;
