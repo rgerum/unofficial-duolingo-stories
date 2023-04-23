@@ -69,7 +69,7 @@
 }
 
 .rtl_bubble:before {
-    border-left: 12px solid #dedede;
+    border-left: 12px solid var(--color_base_border);
     border-right: 0;
     border-top-right-radius: 50%;
     border-top-left-radius: 0;
@@ -78,7 +78,7 @@
 }
 
 .rtl_bubble:after {
-    border-left: 12px solid #fff;
+    border-left: 12px solid var(--color_base_background);
     border-right: 0;
     right: -9px;
     left: auto;
