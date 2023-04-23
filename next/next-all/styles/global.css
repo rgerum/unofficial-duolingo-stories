@@ -224,6 +224,8 @@ body[data-theme="dark"] {
   --underline-dashed: #37464f;
   --underline-dashed-highlight: #f1f7fb;
 
+  --body-background-faint: #202f36;
+
   --finished-star-gold: #ffc800;
 }
 

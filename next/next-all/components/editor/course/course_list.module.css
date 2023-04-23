@@ -21,13 +21,12 @@
 .course_selection_button:hover {
     background: var(--body-background);
     filter: brightness(0.9);
-    color: black;
 }
 
 .course_count {
     width: 45px;
     text-align: right;
-    color: #333;
+    color: var(--text-color-dim);
 }
 
 .crown {
