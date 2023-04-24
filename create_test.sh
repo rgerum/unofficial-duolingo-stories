@@ -2,16 +2,16 @@
 git pull
 
 # copy the nextjs app
-cp -r next/next-all/* ../beta/
+#cp -r next/next-all/* ../beta/
 
 # go to the beta directory
-cd ../beta
+#cd ../beta
 
 # install packages
-npm install
+#npm install
 
 # run the build command
-npm run build
+#npm run build
 
 # restart the server
-supervisorctl restart beta
+#supervisorctl restart beta
