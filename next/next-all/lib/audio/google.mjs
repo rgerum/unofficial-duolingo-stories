@@ -90,7 +90,40 @@ function add_marks(text) {
 }
 
 async function getVoices() {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json; charset=utf-8");
 
+    const request = {
+        languageCode: "en-US",
+    };
+
+    const response = await fetch(
+        `https://texttospeech.googleapis.com/v1/voices?key=${apiKey}`,
+        {
+            method: "GET",
+            headers,
+        }
+    );
+
+    if (response.ok) {
+        const { voices } = await response.json();
+        console.log(`Voices: ${JSON.stringify(voices, null, 2)}`);
+        let voices_result = [];
+        for(let voice of voices) {
+            voices_result.push({
+                language: voice.languageCodes[0].split("-")[0],
+                name: voice.name,
+                gender: voice.ssmlGender,
+                type: (voice.name.indexOf("Neural")) ? "NEURAL" : "NORMAL",
+                service: "Google TTS",
+            })
+        }
+        console.log(voices_result);
+        return voices_result;
+        // do something with voices
+    } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+    }
 }
 
 async function isValidVoice(voice) {
@@ -98,5 +131,6 @@ async function isValidVoice(voice) {
 }
 
 
-export default {"synthesizeSpeech": synthesizeSpeechGoogle, "getVoices": getVoices, "isValidVoice": isValidVoice}
+export default {name: "google", "synthesizeSpeech": synthesizeSpeechGoogle, "getVoices": getVoices, "isValidVoice": isValidVoice}
 //synthesizeSpeech("test.mp3", voiceName, ssml);
+//getVoices();

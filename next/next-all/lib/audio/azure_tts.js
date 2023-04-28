@@ -19,7 +19,7 @@ function get_raw(text) {
 }
 
 
-export async function synthesizeSpeechAzure(filename, voice_id, text, file) {
+async function synthesizeSpeechAzure(filename, voice_id, text, file) {
     return new Promise((resolve, reject) => {
         if (file)
             text = fs.readFileSync(file, 'utf8');
@@ -82,7 +82,25 @@ export async function synthesizeSpeechAzure(filename, voice_id, text, file) {
 }
 
 async function getVoices() {
+    const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.AZURE_APIKEY, "westeurope");
 
+    // create the speech synthesizer.
+    var synthesizer = new sdk.SpeechSynthesizer(speechConfig);
+
+    let voices = await synthesizer.getVoicesAsync();
+    let result_voices = [];
+    for(let voice of voices.voices) {
+        console.log(voice)
+        result_voices.push({
+            language: voice.locale.split("-")[0],
+            name: voice.shortName,
+            gender: (voice.gender === 1) ? "FEMALE" : "MALE",
+            type: (voice.voiceType === 1) ? "NEURAL" : "NORMAL",
+            service: "Microsoft Azure",
+        })
+    }
+    console.log(result_voices);
+    return result_voices;
 }
 
 async function isValidVoice(voice) {
@@ -90,4 +108,6 @@ async function isValidVoice(voice) {
 }
 
 
-export default {"synthesizeSpeech": synthesizeSpeechAzure, "getVoices": getVoices, "isValidVoice": isValidVoice}
+export default {name: "azure", "synthesizeSpeech": synthesizeSpeechAzure, "getVoices": getVoices, "isValidVoice": isValidVoice}
+
+//getVoices()

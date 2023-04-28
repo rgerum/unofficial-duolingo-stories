@@ -1,7 +1,6 @@
 // Load the AWS SDK for Node.js
 import {Polly} from "@aws-sdk/client-polly";
-
-var fs = require('fs');
+import fs from "fs";
 
 // Set the region and credentials for the AWS SDK
 let config = {
@@ -135,9 +134,19 @@ async function getVoices() {
         var polly = new Polly(config);
         polly.describeVoices({}, (err, data) => {
             if (err) {
-                console.log('Error:', err);
+                reject(err);
             } else {
-                console.log('Available Voices:', data.Voices);
+                let voices_result = [];
+                for(let voice of data.Voices) {
+                    voices_result.push({
+                        language: voice.LanguageCode.split("-")[0],
+                        name: voice.Id,
+                        gender: voice.Gender.toUpperCase(),
+                        type: (voice.SupportedEngines[0] === "neural") ? "NEURAL" : "NORMAL",
+                        service: "Amazon Polly",
+                    })
+                }
+                resolve(voices_result);
             }
         });
     });
@@ -146,12 +155,4 @@ async function isValidVoice(voice) {
     return voice.indexOf("-") === -1
 }
 
-export default {"synthesizeSpeech": synthesizeSpeechPolly, "getVoices": getVoices, "isValidVoice": isValidVoice}
-/*
-async function main() {
-    let res = await synthesizeSpeech("test.mp3", "Joanna", "Hello world!");
-    console.log("end", res)
-}
-main()
-
- */
+export default {name: "polly", "synthesizeSpeech": synthesizeSpeechPolly, "getVoices": getVoices, "isValidVoice": isValidVoice}

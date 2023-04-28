@@ -1,7 +1,5 @@
 import {getToken} from "next-auth/jwt";
-import engine_azure from "../../../lib/audio/azure_tts";
-import engine_google from "../../../lib/audio/google.mjs";
-import engine_polly from "../../../lib/audio/polly";
+import {audio_engines} from "../../../lib/audio";
 var fs = require('fs');
 const { uuid } = require('uuidv4');
 
@@ -57,17 +55,12 @@ export default async function api(req, res) {
         }
 
         let answer;
-        if(await engine_google.isValidVoice(speaker)) {
-            answer = await engine_google.synthesizeSpeech(filename, speaker, text);
-            answer.engine = "google";
-        }
-        else if(await engine_azure.isValidVoice(speaker)) {
-            answer = await engine_azure.synthesizeSpeech(filename, speaker, text);
-            answer.engine = "azure";
-        }
-        else {
-            answer = await engine_polly.synthesizeSpeech(filename, speaker, text);
-            answer.engine = "polly";
+        for(let engine of audio_engines) {
+            if(await engine.isValidVoice(speaker)) {
+                answer = await engine.synthesizeSpeech(filename, speaker, text);
+                answer.engine = engine.name;
+                break;
+            }
         }
         if(id !== 0) {
             answer.output_file = `${id}/` + file;
