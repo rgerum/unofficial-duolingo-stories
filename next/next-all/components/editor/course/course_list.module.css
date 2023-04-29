@@ -3,6 +3,7 @@
     height: calc(100vh - 64px);
     width: 515px;
     border-right: 1px solid var(--header-border);
+    background-color: var(--body-background);
 }
 
 .course_selection_button {
@@ -32,4 +33,16 @@
 .crown {
     margin-left: 5px;
     height: 28px;
+}
+
+@media (max-width: 1040px) {
+    .languages {
+        width: 100vw;
+        position: absolute;
+        transition: left 1s;
+        left: -100vw;
+    }
+    .languages[data-show=true] {
+        left: 0;
+    }
 }

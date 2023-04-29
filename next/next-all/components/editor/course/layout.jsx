@@ -6,8 +6,9 @@ import Flag, {DoubleFlag} from "../../layout/flag";
 import CourseDropdown from "../../layout/course-dropdown";
 import { useSession, signIn, signOut } from "next-auth/react"
 import React from "react";
+import EditorButton from "../editor_button";
 
-export default function Layout({ children, course, import_id }) {
+export default function Layout({ children, course, import_id, toggleShow }) {
 /*
 <CourseDropdown userdata={userdata} />
 <Login userdata={userdata} />
@@ -25,6 +26,7 @@ export default function Layout({ children, course, import_id }) {
             <DoubleFlag width={40}
                         lang1={{short: course.learningLanguage, flag:course.learningLanguageFlag, flag_file:course.learningLanguageFlagFile}}
                         lang2={{short: course.fromLanguage, flag:course.fromLanguageFlag, flag_file:course.fromLanguageFlagFile}}
+                        onClick={toggleShow}
                     />
         <span className={"AvatarEditorHeaderFlagname"} data-cy="course-title">{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
         </> : <></>
@@ -32,18 +34,12 @@ export default function Layout({ children, course, import_id }) {
         <div style={{marginLeft: "auto"}}></div>
         {course ? <>{course.official ? <span data-cy="label_official"><i>official</i></span> :
             !import_id ?
-                <Link id="button_import" className={styles.editor_button} href={`/editor/course/${course.id}/import/12`}
-                      data-cy="button_import">
-                    <div><img alt="import button" src="/editor/icons/import.svg"/></div>
-                    <span>Import</span>
-                </Link> :
-                <Link id="button_back" className={styles.editor_button} href={`/editor/course/${course.id}`}
-                      data-cy="button_back">
-                    <div><img alt="back button" src="/editor/icons/back.svg"/></div>
-                    <span>Back</span>
-                </Link>
+                <EditorButton id="button_import" href={`/editor/course/${course.id}/import/12`}
+                      data-cy="button_import" img={"import.svg"} text={"Import"} /> :
+                <EditorButton id="button_back" href={`/editor/course/${course.id}`}
+                      data-cy="button_back" img={"back.svg"} text={"Back"}/>
         }</> : ""}
-        <div style={{marginLeft: "50px"}}></div>
+        <div className={styles.spacer}></div>
         <Login page={"editor"}/>
     </nav>
     <div className={styles.main_index}>

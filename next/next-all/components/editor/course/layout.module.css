@@ -104,3 +104,12 @@
         width: auto;
     }
 }
+
+.spacer {
+    margin-left: 50px
+}
+@media (max-width: 1120px) {
+    .spacer {
+        margin-left: 0;
+    }
+}

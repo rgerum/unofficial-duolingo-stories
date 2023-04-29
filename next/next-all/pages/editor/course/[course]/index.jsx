@@ -7,10 +7,20 @@ import styles from "./index.module.css"
 import {get_course_editor} from "../../../api/course/[course_id]";
 import EditList from "../../../../components/editor/course/edit_list";
 import {getSession} from "next-auth/react";
+import {useState} from "react";
+import {useSwipeable} from "react-swipeable";
 
 
 export default function Page({courses, course, userdata}) {
     // Render data...
+    let [showList, setShowList] = useState(false);
+    let toggleShow = () => setShowList(!showList);
+
+    const handlers = useSwipeable({
+        onSwipedRight: (eventData) => setShowList(true),
+        onSwipedLeft: (eventData) => setShowList(false),
+    });
+
     return <>
         <Head>
             <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
@@ -18,9 +28,9 @@ export default function Page({courses, course, userdata}) {
             <meta name="description" content={`Contribute by translating stories.`}/>
             <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
         </Head>
-        <Layout userdata={userdata} course={course}>
-            <div className={styles.root}>
-                <CourseList courses={courses} course_id={course.id} />
+        <Layout userdata={userdata} course={course} toggleShow={toggleShow}>
+            <div  {...handlers} className={styles.root}>
+                <CourseList courses={courses} course_id={course.id} showList={showList} />
                 <div className={styles.main_overview}>
                     <EditList course={course} />
                 </div>

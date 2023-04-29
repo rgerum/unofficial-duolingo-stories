@@ -19,7 +19,7 @@ export default function Page({courses, userdata}) {
         </Head>
         <Layout userdata={userdata}>
             <div className={styles.root}>
-                <CourseList courses={courses} course_id={course_id} />
+                <CourseList courses={courses} course_id={course_id} showList={true} />
                 <div className={styles.main_overview}>
                     <p id="no_stories">Click on one of the courses to display its stories.</p>
                 </div>

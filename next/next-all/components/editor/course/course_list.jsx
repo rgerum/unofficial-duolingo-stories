@@ -3,7 +3,7 @@ import Flag from "../../layout/flag";
 import styles from "./course_list.module.css"
 
 
-export default function CourseList({courses, course_id}) {
+export default function CourseList({courses, course_id, showList}) {
     if(courses === undefined)
         return <div className={styles.languages}><Spinner/></div>;
     // Error loading courses
@@ -11,7 +11,7 @@ export default function CourseList({courses, course_id}) {
         return <div className={styles.languages}>Error loading courses</div>;
     }
     //console.log("courses", courses);var(--body-background-faint)
-    return <div className={styles.languages}>
+    return <div className={styles.languages} data-show={showList}>
         {courses.map((course, index) =>
             <div key={index}>
                 <Link className={styles.course_selection_button + " " + (course_id === course.id ? styles.course_selection_button_active : "")}
