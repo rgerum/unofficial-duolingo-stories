@@ -7,7 +7,7 @@ export default async function month(req, res) {
         const { story } = req.query
         const token = await getToken({ req })
 
-        let answer = await set_approve({story_id: parseInt(story), user_id: token?.id});
+        let answer = await set_approve({story_id: parseInt(story), user_id: token?.id, revalidate: res.revalidate});
 
         if(answer === undefined)
             return res.status(404).test("Error not found");
@@ -39,7 +39,7 @@ async function set_status(data) {
     return await update("story", data, ["status"]);
 }
 
-async function set_approve({story_id, user_id}) {
+async function set_approve({story_id, user_id, revalidate}) {
     let res = await query(`SELECT id FROM story_approval WHERE story_id = ? AND user_id = ?;`, [story_id, user_id]);
     let action;
     if(res.length) {
@@ -75,6 +75,12 @@ async function set_approve({story_id, user_id}) {
                 published.push(story.id);
             }
         }
+    }
+    if(revalidate && published.length) {
+        let response_course_id = await query(`SELECT short FROM course WHERE course.id = (SELECT story.course_id FROM story WHERE story.id = ?)`, [story_id]);
+        console.log(`revalidate /${response_course_id[0].short}`)
+        await revalidate(`/${response_course_id[0].short}`);
+        await revalidate(`/`);
     }
     return {count: count, story_status: status, finished_in_set: res3.length, action: action, published: published};
 }
