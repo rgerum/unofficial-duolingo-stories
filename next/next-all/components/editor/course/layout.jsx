@@ -28,7 +28,7 @@ export default function Layout({ children, course, import_id, toggleShow }) {
                         lang2={{short: course.fromLanguage, flag:course.fromLanguageFlag, flag_file:course.fromLanguageFlagFile}}
                         onClick={toggleShow}
                     />
-        <span className={"AvatarEditorHeaderFlagname"} data-cy="course-title">{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
+        <span className={styles.AvatarEditorHeaderFlagname} data-cy="course-title">{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
         </> : <></>
         }
         <div style={{marginLeft: "auto"}}></div>

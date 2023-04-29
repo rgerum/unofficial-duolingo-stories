@@ -30,6 +30,14 @@
         padding: 0 20px;
     }
 }
+.AvatarEditorHeaderFlagname {
+
+}
+@media (max-width: 800px) {
+    .AvatarEditorHeaderFlagname {
+        display: none;
+    }
+}
 .main_index {
     margin-top: 60px;
 }

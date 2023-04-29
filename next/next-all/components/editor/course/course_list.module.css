@@ -24,11 +24,13 @@
     border-radius: 16px;
     padding: 1px 6px;
     font-size: 19px;
+    width: 100%;
+    margin-right: 10px;
 }
 
 .languagesScroll {
     overflow: scroll;
-    height: calc(100% - 64px);
+    height: calc(100% - 34px);
 }
 
 .course_selection_button {
