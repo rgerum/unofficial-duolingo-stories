@@ -64,35 +64,6 @@ export default function EditList({course, updateCourses}) {
                 )}
             </div>
         </div>
-        <table className={styles.story_list + " js-sort-table js-sort-5 js-sort-desc"} data-cy="story_list" data-js-sort-table="true">
-            <thead>
-            <tr>
-                <th data-js-sort-colnum="0">Set</th>
-                <th style={{width: "100%"}} colSpan="2" data-js-sort-colnum="1">Name</th>
-                <th data-js-sort-colnum="2">Status</th>
-                <th data-js-sort-colnum="4">Author</th>
-                <th data-js-sort-colnum="5" className="js-sort-active">Creation</th>
-                <th data-js-sort-colnum="6">Author</th>
-                <th data-js-sort-colnum="7">Change</th>
-            </tr>
-            </thead>
-            <tbody>
-            {stories.map((story, i) =>
-                <tr key={story.id} className={set_ends[i] ? styles.set_start : ""}>
-                    <td><span><b>{pad_space(story.set_id)}</b>&nbsp;-&nbsp;{pad_space(story.set_index)}</span></td>
-                    <td width="44px"><img alt={"story title"}
-                                          src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
-                                          width="44px" height={"40px"}/></td>
-                    <td style={{width: "100%"}}><Link href={`/editor/story/${story.id}`}>{story.name}</Link></td>
-                    <td><DropDownStatus id={story.id} count={story.approvals} status={story.status} public={story.public} official={course.official} updateCourses={updateCourses}/></td>
-                    <td>{story.username}</td>
-                    <td>{formatDate(story.date)}</td>
-                    <td>{story.author_change}</td>
-                    <td>{formatDate(story.change_date)}</td>
-                </tr>
-            )}
-            </tbody>
-        </table>
         {course ? <></> : <></>}
         {course && course?.stories === undefined ? <>Error loading.</> : <></>}
     </>
