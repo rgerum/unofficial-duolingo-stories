@@ -34,6 +34,36 @@ export default function EditList({course, updateCourses}) {
             </ul>
 
         </div>
+        <div className={styles.table}>
+            <div className={styles.thead}>
+                <div className={styles.row}>
+                    <div data-js-sort-colnum="0">Set</div>
+                    <div></div>
+                    <div data-js-sort-colnum="1">Name</div>
+                    <div data-js-sort-colnum="2">Status</div>
+                    <div data-js-sort-colnum="4">Author</div>
+                    <div data-js-sort-colnum="5" className="js-sort-active">Creation</div>
+                    <div data-js-sort-colnum="6">Author</div>
+                    <div data-js-sort-colnum="7">Change</div>
+                </div>
+            </div>
+            <div className={styles.tbody}>
+                {stories.map((story, i) =>
+                    <div className={styles.row + " " + (set_ends[i] ? styles.set_start : "")} key={story.id}>
+                        <div><span><b>{pad_space(story.set_id)}</b>&nbsp;-&nbsp;{pad_space(story.set_index)}</span></div>
+                        <div width="44px"><img alt={"story title"}
+                                              src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
+                                              width="44px" height={"40px"}/></div>
+                        <div><Link href={`/editor/story/${story.id}`}>{story.name}</Link></div>
+                        <div><DropDownStatus id={story.id} count={story.approvals} status={story.status} public={story.public} official={course.official} updateCourses={updateCourses}/></div>
+                        <div>{story.username}</div>
+                        <div>{formatDate(story.date)}</div>
+                        <div>{story.author_change}</div>
+                        <div>{formatDate(story.change_date)}</div>
+                    </div>
+                )}
+            </div>
+        </div>
         <table className={styles.story_list + " js-sort-table js-sort-5 js-sort-desc"} data-cy="story_list" data-js-sort-table="true">
             <thead>
             <tr>

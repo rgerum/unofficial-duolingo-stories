@@ -62,7 +62,7 @@
     height: 28px;
 }
 
-@media (max-width: 1040px) {
+@media (max-width: 1300px) {
     .languages {
         width: 100vw;
         position: absolute;

@@ -55,7 +55,11 @@
 }
 
 .header_index span {
-    padding-left: 0px;
+    padding-left: 0;
+}
+
+.official {
+    padding-right: 15px;
 }
 
 @media (max-width: 1120px) {
