@@ -42,6 +42,12 @@ export async function getStaticProps({params}) {
     //const course = await res.json()
     const course = await get_course(params.course);
 
+    if(!course) {
+        return {
+            notFound: true,
+        }
+    }
+
     // Pass data to the page via props
     return { props: { course } }
 }

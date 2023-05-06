@@ -47,7 +47,14 @@ async function set_course(data, revalidate) {
     // revalidate the page
     let response_course_id = await query(`SELECT short FROM course WHERE course.id = ?`, [id]);
     console.log(`revalidate /${response_course_id[0].short}`)
-    await revalidate(`/${response_course_id[0].short}`);
-    await revalidate(`/`);
+    try {
+        let reval = await revalidate(`/${response_course_id[0].short}`);
+        console.log(reval);
+        let reval2 = await revalidate(`/`);
+        console.log(reval2)
+    }
+    catch (e) {
+        console.log("revalidate error", e)
+    }
     return result;
 }

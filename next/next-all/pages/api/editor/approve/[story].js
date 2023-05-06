@@ -1,5 +1,6 @@
 import query from "../../../../lib/db"
 import {getToken} from "next-auth/jwt";
+import {update} from "../../../../lib/db";
 
 
 export default async function month(req, res) {
@@ -19,7 +20,7 @@ export default async function month(req, res) {
     }
 }
 
-export async function update(table_name, data) {
+export async function updateX(table_name, data) {
     let values = [];
     let updates = [];
     for(let key in data) {
@@ -28,10 +29,14 @@ export async function update(table_name, data) {
     }
     values.push(data.id);
     let update_string = updates.join(", ");
+    console.log(`UPDATE ${table_name}
+                            SET ${update_string}
+                            WHERE id = ?
+                            LIMIT 1;`, values)
     const user_new = await query(`UPDATE ${table_name}
                             SET ${update_string}
                             WHERE id = ?
-                            LIMIT 1;`, values);
+                            ;`, values);
     return user_new;
 }
 
@@ -40,18 +45,23 @@ async function set_status(data) {
 }
 
 async function set_approve({story_id, user_id, revalidate}) {
+    console.log("set_approve")
     let res = await query(`SELECT id FROM story_approval WHERE story_id = ? AND user_id = ?;`, [story_id, user_id]);
+    console.log(res)
     let action;
     if(res.length) {
+        console.log("delete")
         await query(`DELETE FROM story_approval WHERE story_id = ? AND user_id = ?;`, [story_id, user_id]);
         action = "deleted";
     }
     else {
+        console.log("insert")
         await query(`INSERT INTO story_approval (story_id, user_id) VALUES (?, ?);`, [story_id, user_id]);
         action = 'added';
     }
     let res2 = (await query(`SELECT COUNT(id) as count FROM story_approval WHERE story_id = ?;`, [story_id]))[0];
     let count = res2["count"];
+    console.log("count",count)
 
     let status = undefined;
     if(count === 0)
@@ -60,8 +70,9 @@ async function set_approve({story_id, user_id, revalidate}) {
         status = "feedback"
     if(count >= 2)
         status = "finished"
+    console.log("se status", status)
     await set_status({status: status, id: story_id});
-
+    console.log("dne")
     // get the number of finished stories in this set
     let res3 = await query(`SELECT story.id, story.public FROM story WHERE set_id = (SELECT set_id FROM story WHERE id = ?) AND
                                             course_id = (SELECT course_id FROM story WHERE id = ?) AND status = 'finished' AND deleted = 0;`, [story_id, story_id]);

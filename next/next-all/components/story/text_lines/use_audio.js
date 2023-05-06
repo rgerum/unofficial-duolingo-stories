@@ -9,7 +9,7 @@ export default function useAudio(element, progress) {
     if(audio === undefined)
         audio = element?.learningLanguageTitleContent?.audio;
 
-    const playAudio = React.useCallback(() => {
+    const playAudio = React.useCallback(async () => {
         if(audio === undefined || !audio?.keypoints || !audio?.url)
             return
         let audioObject = ref.current;

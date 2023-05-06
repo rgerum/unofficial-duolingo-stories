@@ -39,7 +39,7 @@ export async function get_course(course_id, user_id) {
         ORDER BY set_id, set_index;
         `, [user_id, course_id]);
     if(res.length === 0)
-        return undefined;
+        return {...course, sets: [], count: 0};
 
     // group into sets
     let set = -1;

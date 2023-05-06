@@ -7,7 +7,7 @@ export default async function story(req, res) {
     let answer = await get_story(story_id);
 
     if(answer === undefined)
-        return res.status(404).test("Error not found");
+        return res.status(404).text("Error not found");
 
     return res.json(answer);
 }
