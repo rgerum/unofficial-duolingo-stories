@@ -60,6 +60,7 @@ async function createAll() {
         add_data("story", "story-nl-en.json"),
         add_data("story", "story-ca-en.json"),
         add_data("story", "story-es-en.json"),
+        add_data("story_approval", "approvals.json"),
         add_data("avatar", "avatar.json"),
         add_data("user", "user.json"),
     ]);
