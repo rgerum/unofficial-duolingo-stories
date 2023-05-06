@@ -19,8 +19,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Initialize
-      run: cd next/next-all && npm run initialize
+    - name: Create DB
+      run: cd next/next-all && npm run init
 
     - name: Build
       run: cd next/next-all && npm run dev &

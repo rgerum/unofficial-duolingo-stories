@@ -6,7 +6,7 @@ export default function LanguageButton(props) {
     let course = props.course;
 
     return <Link
-        data-cy={"language_button_big_"+course.id}
+        data-cy={"language_button_big_"+course.short}
         className={styles.language_select_button}
         href={`/${course.learningLanguage}-${course.fromLanguage}`}
     >

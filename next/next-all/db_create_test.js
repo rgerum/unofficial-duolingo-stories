@@ -36,8 +36,6 @@ async function createAll() {
         let res = await fetch(data_url + filename);
         let data = await res.json();
 
-        console.log(filename, data);
-
         // Get the keys from the first object in the array
         const keys = Object.keys(data[0]);
 
@@ -51,16 +49,19 @@ async function createAll() {
             const values = keys.map((key) => item[key]);
             stmt.run(values);
         });
+
+        console.log(filename, "added");
     }
 
     await Promise.all([
-    add_data("language", "language.json"),
-    add_data("course", "course.json"),
-    add_data("image", "image.json"),
-    add_data("story", "story.json"),
-    add_data("story", "story-es-en.json"),
-    add_data("avatar", "avatar.json"),
-    add_data("user", "user.json"),
+        add_data("language", "language.json"),
+        add_data("course", "course.json"),
+        add_data("image", "image.json"),
+        add_data("story", "story-nl-en.json"),
+        add_data("story", "story-ca-en.json"),
+        add_data("story", "story-es-en.json"),
+        add_data("avatar", "avatar.json"),
+        add_data("user", "user.json"),
     ]);
 
     fs.writeFile('.env.local', `NODE_ENV="test"\nNEXTAUTH_SECRET=1234`, err => {
