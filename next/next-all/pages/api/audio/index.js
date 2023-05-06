@@ -41,7 +41,7 @@ export default async function api(req, res) {
         let filename = undefined;
         let file;
         if(id !== 0) {
-            filename = `public/audio/${id}`;
+            filename = `../audio/${id}`;
             try {
                 await mkdir(filename);
             } catch (e) {
