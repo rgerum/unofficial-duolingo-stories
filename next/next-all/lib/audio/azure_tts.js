@@ -25,7 +25,7 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
             text = fs.readFileSync(file, 'utf8');
         const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.AZURE_APIKEY, "westeurope");
         const audioConfig = sdk.AudioConfig.fromAudioFileOutput((filename === undefined) ? '/dev/null' : filename);
-
+        speechConfig.speechSynthesisOutputFormat = 5;
         // create the speech synthesizer.
         var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
 
