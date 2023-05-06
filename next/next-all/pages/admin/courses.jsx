@@ -1,5 +1,5 @@
 import Head from 'next/head'
-
+import Link from "next/link";
 import Layout from '../../components/admin/layout'
 import {language_list} from "../api/admin/set_language";
 import styles from "./index.module.css"
@@ -118,6 +118,8 @@ function AttributeList(props) {
 
     return <tr onClick={() => setEdit(true)}>
         <td></td>
+        <td>{props.obj.id}</td>
+        <td><Link href={"/"+props.obj.short}>{props.obj.short}</Link></td>
         {props.attributes.map((attr, i) =>
             <ChangeAbleValue key={i} obj={props.obj} languages={languages} name={attr} edit={edit} callback={onChange}/>
         )}<td>{edit ? <span onClick={save}>[save]</span> : ""}</td></tr>
@@ -154,6 +156,8 @@ export function CourseList({users, languages}) {
         <table id="story_list" data-cy="story_list" className={"js-sort-table js-sort-5 js-sort-desc "+styles.admin_table} data-js-sort-table="true">
             <thead>
             <tr>
+                <th></th>
+                <th></th>
                 <th></th>
                 <th data-js-sort-colnum="0">learningLanguage</th>
                 <th data-js-sort-colnum="1">fromLanguage</th>
