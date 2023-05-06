@@ -26,7 +26,14 @@ export async function get_speakers(id) {
 }
 
 export async function get_language(id) {
-    return (await query_obj(`SELECT * FROM language WHERE id = ? LIMIT 1`, [id]))[0];
+    const isNumeric = value => value.length !== 0 && [...value].every(c => c >= '0' && c <= '9');
+    let course_query;
+    if(isNumeric(id)) {
+        return (await query_obj(`SELECT * FROM language WHERE id = ? LIMIT 1`, [id]))[0];
+    }
+    else {
+        return (await query_obj(`SELECT * FROM language WHERE short = ? LIMIT 1`, [id]))[0];
+    }
 }
 
 export async function get_languages() {
