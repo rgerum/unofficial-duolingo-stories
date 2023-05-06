@@ -61,8 +61,7 @@ SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name,
  COUNT(story.id) count, course.public, course.official, course.conlang FROM course
 LEFT JOIN language l1 ON l1.id = course.fromLanguage
 LEFT JOIN language l2 ON l2.id = course.learningLanguage
-LEFT JOIN story ON (course.id = story.course_id)
-WHERE story.deleted = 0
+LEFT JOIN (SELECT * FROM story WHERE story.deleted = 0) as story ON (course.id = story.course_id)
 GROUP BY course.id
 ORDER BY count DESC, fromLanguageName;
     `);
