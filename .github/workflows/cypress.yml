@@ -19,6 +19,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Install
+      run: cd next/next-all && npm install
+
     - name: Create DB
       run: cd next/next-all && npm run init
 
