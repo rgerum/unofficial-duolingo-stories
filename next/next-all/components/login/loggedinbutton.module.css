@@ -13,6 +13,7 @@
 }
 
 .profile_dropdown_button {
+    display: block;
     text-align: center;
     height: 39px;
     padding: 5px;

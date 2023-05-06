@@ -2,6 +2,7 @@ import styles from "./loggedinbutton.module.css"
 import React, {useEffect, useState} from "react";
 import Dropdown from "../layout/dropdown";
 import {signOut, useSession} from "next-auth/react";
+import Link from "next/link";
 
 
 function useDarkLight() {
@@ -33,26 +34,26 @@ export default function LoggedInButton({page, course_id}) {
     return <Dropdown>
         <div className={styles.round} style={{ backgroundImage: `url('${session.user?.image}')` }}>{session.user.name.substring(0, 1)}</div>
         <div>
-            <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "/profile"}}>
+            <Link className={styles.profile_dropdown_button} href={"/profile"}>
                 Profile
-            </div>
-            {<div id="button_editor" className={styles.profile_dropdown_button + "  button_dark_mode"} onClick={() => {
+            </Link>
+            {<div className={styles.profile_dropdown_button + "  button_dark_mode"} onClick={() => {
                 controls.toggle()
             }}>
                 {controls.value === "light" ? "Dark Mode" : "Light Mode"}
             </div>}
             {session.user?.role && page !== "stories" ?
-                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = stories_link}}>
+                <Link className={styles.profile_dropdown_button} href={stories_link}>
                     Stories
-                </div> : null}
+                </Link> : null}
             {session.user?.role && page !== "editor" ?
-                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = editor_link}}>
+                <Link className={styles.profile_dropdown_button} href={editor_link}>
                     Editor
-                </div> : null}
+                </Link> : null}
             {session.user?.admin && page !== "admin" ?
-                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "/admin"}}>
+                <Link className={styles.profile_dropdown_button} href={"/admin"}>
                     Admin
-                </div> : null}
+                </Link> : null}
             <div className={styles.profile_dropdown_button} onClick={() => signOut()} >Log out</div>
         </div>
     </Dropdown>
