@@ -17,9 +17,16 @@ function useDarkLight() {
     return {set: setActiveTheme, toggle: () => setActiveTheme(inactiveTheme), value: activeTheme}
 }
 
-export default function LoggedInButton({page}) {
+export default function LoggedInButton({page, course_id}) {
     const { data: session } = useSession();
     const controls = useDarkLight();
+
+    let editor_link = "/editor"
+    if(course_id)
+        editor_link = "/editor/course/"+course_id
+    let stories_link = "/"
+    if(course_id)
+        stories_link = "/"+course_id
 
     if(session === undefined)
         return <></>
@@ -35,11 +42,11 @@ export default function LoggedInButton({page}) {
                 {controls.value === "light" ? "Dark Mode" : "Light Mode"}
             </div>}
             {session.user?.role && page !== "stories" ?
-                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "/"}}>
+                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = stories_link}}>
                     Stories
                 </div> : null}
             {session.user?.role && page !== "editor" ?
-                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = "/editor"}}>
+                <div id="button_editor" className={styles.profile_dropdown_button} onClick={()=>{window.location.href = editor_link}}>
                     Editor
                 </div> : null}
             {session.user?.admin && page !== "admin" ?

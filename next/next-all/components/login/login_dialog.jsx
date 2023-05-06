@@ -15,14 +15,14 @@ const LoggedInButton = dynamic(() => import("./loggedinbutton"), {
     ssr: false,
 });
 
-export default function Login({page}) {
+export default function Login({page, course_id}) {
     //const { userdata } = useUser();
     const { data: session } = useSession();
     if(!page)
         page = "stories";
 
     if(session?.user.name !== undefined)
-        return <LoggedInButton page={page}/>
+        return <LoggedInButton page={page} course_id={course_id}/>
 
     return <button onClick={() => signIn()} className={styles.button} style={{float: "none"}}>Log in</button>
 }

@@ -40,7 +40,7 @@ export default function Layout({ children, course, import_id, toggleShow }) {
                       data-cy="button_back" img={"back.svg"} text={"Back"}/>
         }</> : ""}
         <div className={styles.spacer}></div>
-        <Login page={"editor"}/>
+        <Login page={"editor"} course_id={course?.short}/>
     </nav>
     <div className={styles.main_index}>
         {children}
