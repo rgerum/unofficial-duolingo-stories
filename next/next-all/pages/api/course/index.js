@@ -55,7 +55,7 @@ export async function get_courses_ids() {
 
 export async function get_courses_ungrouped() {
     let courses = await query(`
-SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name,
+SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name, course.short,
  l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
  l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
  COUNT(story.id) count, course.public, course.official, course.conlang FROM course

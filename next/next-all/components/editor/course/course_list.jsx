@@ -36,7 +36,7 @@ export default function CourseList({courses, course_id, showList}) {
             {filtered_courses.map((course, index) =>
                 <div key={index}>
                     <Link className={styles.course_selection_button + " " + (course_id === course.id ? styles.course_selection_button_active : "")}
-                          href={`/editor/course/${course.id}`}
+                          href={`/editor/course/${course.short}`}
                     >
                         <span className={styles.course_count}>{course.count}</span>
                         <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} style={{margin: "3px"}}/>
