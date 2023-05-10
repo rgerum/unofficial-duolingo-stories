@@ -41,6 +41,7 @@ export default function QuestionArrange({setUnhide, progress, element}) {
         <div>
             {element.selectablePhrases.map((phrase, index) => (
                 <span key={index} className={styles.word_order}
+                      data-cy="arrange-button"
                       data-status={[undefined, "off", "wrong"][buttonState[index]]}
                       onClick={()=>click(index)}>{phrase}</span>
             ))}

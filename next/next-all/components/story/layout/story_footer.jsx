@@ -14,9 +14,10 @@ export default function Footer({right, finished, blocked, next, finish}) {
             </div>
             <div className={styles.footer_buttons}>
                 {finished ?
-                    <button className={styles.button_next+" "+styles.button} onClick={finish}>finished</button>
+                    <button className={styles.button_next+" "+styles.button} data-cy={"button-finished"} onClick={finish}>finished</button>
                     : <button className={styles.button_next+" "+styles.button}
                               data-status={blocked ? "inactive" : undefined}
+                              data-cy={"continue"}
                               onClick={blocked ? () => {} : next}>continue</button>
                 }
             </div>

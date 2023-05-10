@@ -70,6 +70,7 @@ export default function QuestionSelectPhrase({setUnhide, progress, element}) {
             {element.answers.map((answer, index) => (
                 /* one answer button */
                 <button key={index} className={styles.answer_button+" "+get_color(buttonState[index])}
+                        data-cy="select-button"
                         onClick={() => click(index)}>
                     {answer.text ? answer.text : answer}
                 </button>

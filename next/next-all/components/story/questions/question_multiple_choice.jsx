@@ -75,7 +75,9 @@ export default function QuestionMultipleChoice({setUnhide, progress, element}) {
         return styles_common.color_base
     }
 
-    return <div className={styles_common.fadeGlideIn+" "+hidden2} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
+    return <div className={styles_common.fadeGlideIn+" "+hidden2} onClick={onClick} data-lineno={element?.editor?.block_start_no}
+        data-cy={!hidden2 ? "multiple-choice" : ""}
+    >
         {/* Display the question if a question is there */}
         {element.question ? <QuestionPrompt question={element.question} /> : null}
         {/* Display the answers */}
@@ -86,7 +88,7 @@ export default function QuestionMultipleChoice({setUnhide, progress, element}) {
                     onClick={()=>click(index)}
                 >
                     {/* with a button and a text */}
-                    <button className={styles.multiple_choice_checkbox+" "+get_color(buttonState[index])}/>
+                    <button className={styles.multiple_choice_checkbox+" "+get_color(buttonState[index])} data-cy="button"/>
                     <div className={styles.multiple_choice_answer_text+" "+get_color_text(buttonState[index])}>
                         <HintLineContent content={answer} />
                     </div>

@@ -23,7 +23,8 @@ export default function Part(props) {
 
     let hidden = (is_hidden) ? styles_common.hidden: ""
     if(props.editor) hidden = "";
-    return <div className={"part"+" "+hidden} data-hidden={is_hidden} data-challengetype={challenge_type}>
+    console.log("hidden", is_hidden);
+    return <div className={"part"+" "+hidden} data-hidden={is_hidden} data-challengetype={challenge_type} data-cy={!is_hidden ? "part" : "part_hidden"}>
         {props.part.map((element, i) => (
             <StoryLine key={i} unhide={unhide} setUnhide={setUnhide} progress={props.progress} element={element} />
         ))}

@@ -20,7 +20,7 @@ export default function Layout({ children, course }) {
   return (
       <>
         <nav className={styles.header_index}>
-            <Link href={"/"} className={styles.duostories_title}>Duostories</Link>
+            <Link href={"/"} className={styles.duostories_title} data-cy={"logo"}>Duostories</Link>
             <div style={{marginLeft: "auto"}}></div>
             <CourseDropdown course={course}/>
             <Login course_id={course?.short}/>

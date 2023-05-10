@@ -130,7 +130,7 @@ export default function QuestionMatch({progress, element}) {
             {orderB.map((phrase, index) => (
                 <div key={index} className={styles.test}>
                     <button key={index} className={styles.match_word+" "+get_color(clicked[index])}
-                        onClick={()=>click(index)}>
+                            data-cy="col1-button" onClick={()=>click(index)}>
                         {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][1]] : ""}
                     </button>
                 </div>
@@ -140,7 +140,7 @@ export default function QuestionMatch({progress, element}) {
             {orderA.map((phrase, index) => (
                 <div key={index} className={styles.test}>
                     <button key={index} className={styles.match_word+" "+get_color(clicked[index + orderB.length])}
-                            onClick={()=>click(index + orderB.length)}>
+                            data-cy="col2-button" onClick={()=>click(index + orderB.length)}>
                         {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][0]] : ""}
                     </button>
                 </div>

@@ -83,7 +83,7 @@ export default function QuestionPointToPhrase({progress, element}) {
                 part.selectable ?
                     /* then display a button */
                     <div className={styles.word_button+" "+get_color(buttonState[button_indices[index]])}
-                         key={index}
+                         key={index} data-cy="point-button"
                          onClick={()=>click(button_indices[index])}>
                         {part.text}
                     </div>
