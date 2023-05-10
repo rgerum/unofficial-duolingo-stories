@@ -24,7 +24,8 @@ export default function Login({page, course_id}) {
     if(session?.user.name !== undefined)
         return <LoggedInButton page={page} course_id={course_id}/>
 
-    return <button onClick={() => signIn()} className={styles.button} style={{float: "none"}}>Log in</button>
+    return <button onClick={() => signIn()} className={styles.button}
+                   data-cy="login-button" style={{float: "none"}}>Log in</button>
 }
 
 export function LoginDialog({page}) {

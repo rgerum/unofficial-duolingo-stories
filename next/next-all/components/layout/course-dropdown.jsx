@@ -13,6 +13,7 @@ function LanguageButtonSmall({course}) {
     return <Link
         className={styles.language_select_item}
         href={`/${course.learningLanguage}-${course.fromLanguage}`}
+        data-cy="button_lang_dropdown"
     >
         <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} />
         <span>{course.name || course.learningLanguageName}</span>
