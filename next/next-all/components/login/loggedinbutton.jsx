@@ -32,7 +32,7 @@ export default function LoggedInButton({page, course_id}) {
     if(session === undefined)
         return <></>
     return <Dropdown>
-        <div className={styles.round} style={{ backgroundImage: `url('${session.user?.image}')` }}>{session.user.name.substring(0, 1)}</div>
+        <div className={styles.round} style={session.user?.image ? { backgroundImage: `url('${session.user?.image}')` } : {}}>{session.user.name.substring(0, 1)}</div>
         <div>
             <Link className={styles.profile_dropdown_button} href={"/profile"}>
                 Profile
