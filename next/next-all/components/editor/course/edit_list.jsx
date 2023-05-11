@@ -32,8 +32,8 @@ export default function EditList({course, updateCourses}) {
                     When one complete set is finished it will switch to "📢 published".
                 </li>
             </ul>
-
         </div>
+        <p>To set the voices for use the <Link href={`/editor/language/${course.fromLanguage}`}>Character Editor</Link>.</p>
         <div className={styles.table}>
             <div className={styles.thead}>
                 <div className={styles.row}>
