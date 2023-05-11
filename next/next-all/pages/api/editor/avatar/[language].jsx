@@ -7,6 +7,12 @@ async function query_obj(q, args) {
 }
 
 export async function get_avatar_names(id, course_id) {
+    const isNumeric = value => value.length !== 0 && [...value].every(c => c >= '0' && c <= '9');
+    let course_query;
+    if(!isNumeric(id)) {
+        id = (await query_obj(`SELECT id FROM language WHERE short = ? LIMIT 1`, [id]))[0].id;
+    }
+
     if(id === 0) {
         return await query_obj(`SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id WHERE (language_id = (SELECT learningLanguage FROM course WHERE id = ?) or language_id is NULL) ORDER BY a.id`, [course_id]);
     }
@@ -22,6 +28,12 @@ ORDER BY a.id
 }
 
 export async function get_speakers(id) {
+    const isNumeric = value => value.length !== 0 && [...value].every(c => c >= '0' && c <= '9');
+    let course_query;
+    if(!isNumeric(id)) {
+        id = (await query_obj(`SELECT id FROM language WHERE short = ? LIMIT 1`, [id]))[0].id;
+    }
+
     return await query_obj(`SELECT * FROM speaker WHERE language_id = ?`, [id]);
 }
 
