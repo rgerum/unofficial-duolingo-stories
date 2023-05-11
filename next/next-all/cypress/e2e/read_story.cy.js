@@ -9,7 +9,7 @@ describe('Test Story', () => {
         // open the Dutch course
         cy.get("[data-cy=language_button_big_test-en]").click()
         cy.url().should('include', 'test-en')
-        cy.get("[data-cy*=story_button]").ey(0).click()
+        cy.get("[data-cy*=story_button]").eq(0).click()
 
         // have one part, the title
         cy.get("[data-cy=part]").should("have.lengthOf", 1)
