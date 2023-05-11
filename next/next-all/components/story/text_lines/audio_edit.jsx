@@ -9,6 +9,7 @@ export default function EditorSSMLDisplay({ssml, element, audio}) {
     const beta = false;
 
     let [loading, setLoading] = React.useState(false);
+    let [error, setError] = React.useState(false);
     let line_id = "ssml"+(ssml.line ? ssml.line : ssml.line_insert);
 
     //var [show_audio, set_show_audio] = React.useState(editor.editorShowSsml);
@@ -19,7 +20,12 @@ export default function EditorSSMLDisplay({ssml, element, audio}) {
 
     async function reload() {
         setLoading(true);
-        await generate_audio_line(ssml, editor.view, editor.audio_insert_lines);
+        try {
+            await generate_audio_line(ssml, editor.view, editor.audio_insert_lines);
+        }
+        catch (e) {
+            setError(e);
+        }
         setLoading(false);
     }
     if(!show_audio) return <></>
@@ -27,8 +33,15 @@ export default function EditorSSMLDisplay({ssml, element, audio}) {
         <span className={styles.ssml_speaker}>{ssml.speaker}</span>
         <span className={styles.ssml}>{ssml.text}</span>
         { ssml.speaker ?
-            <span title={loading ? "generating audio..." : "regenerate audio"} id={line_id} className={styles.ssml_reload+" "+styles.audio_reload+" "+ (loading ? styles.audio_reload_spin : "")}
-                  onClick={reload}/> :
+            (
+                error ?
+                    <span><img title="error generating audio" alt="error" src="/editor/icons/error.svg"/></span>
+                :
+                    <span title={loading ? "generating audio..." : "regenerate audio"} id={line_id}
+                          className={styles.ssml_reload + " " + styles.audio_reload + " " + (loading ? styles.audio_reload_spin : "")}
+                          onClick={reload}/>
+            )
+            :
             <span><img title="no speaker defined" alt="error" src="/editor/icons/error.svg"/></span>
         }
         {beta ? <a onClick={() => window.open_recoder({ssml, element, audio, editor})}>🎤</a> : <></>}
