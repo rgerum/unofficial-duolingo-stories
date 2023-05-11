@@ -82,11 +82,11 @@ export default function SignIn({ providers }) {
 
                     <hr/>*/}
                     {Object.values(providers).map((provider) => ( (provider.id !== "email" && provider.id !== "credentials") ?
-                    <button className={styles.button2} onClick={() => signIn(provider.id)}>
+                    <button key={provider.id} className={styles.button2} onClick={() => signIn(provider.id)}>
                         <img loading="lazy" id="provider-logo" src={`https://authjs.dev/img/providers/${provider.id}.svg`} width="24" height="24"/>
                         <span>{provider.name}</span>
                     </button>
-                    : <></>
+                    : <span key={provider.id}></span>
             ))}
                 </div>
             </div>
