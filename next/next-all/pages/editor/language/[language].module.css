@@ -148,10 +148,20 @@
 
 /* table */
 
+.tablecontainer {
+    overflow-y: scroll;
+    height: calc(100% - 110px);
+}
+
 .story_list {
     border-collapse: collapse;
     width: 100%;
-    margin-bottom: 100px;
+    margin-top: 0;
+}
+
+.story_list th {
+    position: sticky;
+    top: 0; /* Don't forget this, required for the stickiness */
 }
 
 .story_list td {
@@ -234,4 +244,27 @@
 
 .main_index {
     margin-top: 60px;
+}
+
+@media (max-width: 600px) {
+    .tablecontainer {
+        height: calc(50vh - 30px - 110px);
+    }
+    .root {
+        display: block;
+    }
+    .speaker_list {
+        height: auto;
+    }
+    .avatar_editor {
+        height: calc(50vh - 30px);
+        margin: 0;
+    }
+    .avatar {
+        margin: 0;
+    }
+    .avatar_editor_group {
+        gap: 5px;
+        padding: 5px;
+    }
 }

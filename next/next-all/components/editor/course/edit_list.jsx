@@ -33,7 +33,7 @@ export default function EditList({course, updateCourses}) {
                 </li>
             </ul>
         </div>
-        <p>To set the voices for use the <Link href={`/editor/language/${course.fromLanguage}`}>Character Editor</Link>.</p>
+        <p>To set the voices for use the <Link href={`/editor/language/${course.learningLanguage}`}>Character Editor</Link>.</p>
         <div className={styles.table}>
             <div className={styles.thead}>
                 <div className={styles.row}>

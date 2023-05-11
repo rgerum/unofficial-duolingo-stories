@@ -1,6 +1,6 @@
 import Head from 'next/head'
 
-import {useState} from "react";
+import React, {useState} from "react";
 import {useInput} from "../../../lib/hooks";
 import {get_avatar_names, get_language, get_speakers} from "../../api/editor/avatar/[language]";
 import {SpinnerBlue} from "../../../components/layout/spinner";
@@ -10,6 +10,7 @@ import Flag from "../../../components/layout/flag";
 import Link from "next/link";
 import Login from "../../../components/login/login_dialog";
 import {getSession} from "next-auth/react";
+import EditorButton from "../../../components/editor/editor_button";
 
 export default function Page({language, speakers, avatar_names, userdata}) {
     // Render data...
@@ -42,10 +43,7 @@ export function Layout({ children, language_data }) {
     return (
         <>
             <nav className={styles.header_index}>
-                <Link href={"/editor"} id="button_back" className={styles.editor_button} style={{paddingLeft: 0}}>
-                    <div><img alt="icon back" src="/editor/icons/back.svg" /></div>
-                    <span>Back</span>
-                </Link>
+                <EditorButton id="button_back" href={`/editor`} data-cy="button_back" img={"back.svg"} text={"Back"} style={{paddingLeft: 0}}/>
                 <b>Character-Editor</b>
                 <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
                 <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
@@ -301,6 +299,7 @@ function AvatarNames({language, speakers, avatar_names}) {
             <div className={styles.slidecontainer}>
                 Speed: <input type="range" min="0" max="4" value={speed} id="speed" onChange={(e)=>setSpeed(parseInt(e.target.value))}/>
             </div>
+            <div className={styles.tablecontainer}>
             <table className={styles.story_list + " " +styles.voice_list} data-cy="voice_list" data-js-sort-table="true">
                 <thead>
                 <tr>
@@ -315,6 +314,7 @@ function AvatarNames({language, speakers, avatar_names}) {
                 )}
                 </tbody>
             </table>
+            </div>
         </div>
         <div className={styles.avatar_editor + " " + (speakers?.length > 0? "": styles.noVoices)} style={{"overflowY": "scroll"}}>
             <p>These characters are the default cast of duolingo. Their names should be kept as close to the original as possible.</p>
