@@ -6,7 +6,12 @@ import {get_story} from "../api/story/[story_id]";
 import {useRouter} from "next/router";
 
 export async function setStoryDone(id) {
-    return fetch(`/api/story/${id}/done`, {credentials: 'include'});
+    let res = await fetch(`/api/story/${id}/done`, {credentials: 'include'});
+    let answer = res.json();
+    if(answer?.message === "done")
+        return true
+    return res;
+
 }
 
 export default function StoryMain({story}) {
