@@ -42,9 +42,9 @@ export default function EditList({course, updateCourses}) {
                     <div data-js-sort-colnum="1">Name</div>
                     <div data-js-sort-colnum="2">Status</div>
                     <div data-js-sort-colnum="4">Author</div>
-                    <div data-js-sort-colnum="5" className="js-sort-active">Creation</div>
+                    <div data-js-sort-colnum="5" className="js-sort-active">Created</div>
                     <div data-js-sort-colnum="6">Author</div>
-                    <div data-js-sort-colnum="7">Change</div>
+                    <div data-js-sort-colnum="7">Updated</div>
                 </div>
             </div>
             <div className={styles.tbody}>
