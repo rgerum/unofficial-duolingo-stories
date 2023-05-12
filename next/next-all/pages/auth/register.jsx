@@ -115,17 +115,20 @@ export default function Register() {
                 <h2>Sign up</h2>
                 <p>If you register you can keep track of the stories you have already finished.</p>
                 <p>Registration is optional, stories can be accessed even without login.</p>
-                <input data-cy="username" value={usernameInput} onChange={usernameInputSetValue} type="text"
-                       placeholder="Username"/>
-                <input data-cy="email" value={emailInput} onChange={emailInputSetValue} onKeyDown={handleKeypressSignup} type="email" placeholder="Email"/>
-                <input data-cy="password" value={passwordInput} onChange={passwordInputSetValue} onKeyDown={handleKeypressSignup} type="password"
-                       placeholder="Password"/>
-                {state === -1 ?
-                    <span className="login_error" data-cy="login_error">{error}</span> : null }
+                {state === -1 ? <span className={styles.error}>{error}</span> : <></>}
                 {state === 2 ?
-                    <span>{message}</span> :
-                    <button data-cy="submit"  className={styles.button}
-                            onClick={register_button}>{state !== 1 ? "Sign up" : "..."}</button>
+                    <span className={styles.message}>{message}</span>
+                    :
+                    <>
+                        <input data-cy="username" value={usernameInput} onChange={usernameInputSetValue} type="text"
+                               placeholder="Username"/>
+                        <input data-cy="email" value={emailInput} onChange={emailInputSetValue}
+                               onKeyDown={handleKeypressSignup} type="email" placeholder="Email"/>
+                        <input data-cy="password" value={passwordInput} onChange={passwordInputSetValue}
+                               onKeyDown={handleKeypressSignup} type="password" placeholder="Password"/>
+                        <button data-cy="submit"  className={styles.button}
+                                onClick={register_button}>{state !== 1 ? "Sign up" : "..."}</button>
+                    </>
                 }
                 <p>Already have an account? <Link className={styles.link} href="/api/auth/signin">LOG IN</Link></p>
             </div>

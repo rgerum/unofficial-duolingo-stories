@@ -125,6 +125,14 @@
     border-radius: 10px;
     padding: 10px;
 }
+.message {
+    display: block;
+    background: var(--button-blue-background);
+    color: white;
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px;
+}
 #login_dialog #quit {
     position: absolute;
     right: 20px;
