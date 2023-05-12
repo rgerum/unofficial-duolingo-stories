@@ -61,3 +61,16 @@
         padding: 0 20px;
     }
 }
+
+@media (max-width: 975px) {
+    .editor {
+        width: 100%;
+        height: calc((100vh - 64px) / 2);
+    }
+    .preview {
+        width: 100%;
+        height: calc((100vh - 64px) / 2);
+        position: absolute;
+        top: calc((100vh - 64px) / 2 + 64px);
+    }
+}

@@ -78,16 +78,17 @@ export function StoryEditorHeader({
             <EditorButton img={"back.svg"} text={"Back"} id="button_back" href={`/editor/course/${story_data?.course_id}`}
                               style={{paddingLeft: 0}} />
             <b>Story-Editor</b>
-            <DoubleFlag width={40} lang1={language_data} lang2={language_data2}/>
+            <DoubleFlag width={40} lang1={language_data} lang2={language_data2} className={styles.flag}/>
             {language_data?.name && language_data2?.name ?
                 <span
-                    className={"AvatarEditorHeaderFlagname"}>{`${language_data?.name} (from ${language_data2?.name})`}</span> : null}
+                    className={styles.AvatarEditorHeaderFlagname}>{`${language_data?.name} (from ${language_data2?.name})`}</span> : null}
             {story_data?.image ?
-                <img alt="story title" width="50px"
+                <img alt="story title" width="50px" className={styles.story_img}
                      src={`https://stories-cdn.duolingo.com/image/${story_data?.image}.svg`}
                      style={{marginLeft: "auto"}}/>
-                : <img alt="story title" width="50px" src={`/icons/empty_title.svg`} style={{marginLeft: "auto"}}/>}
-            <span className={"AvatarEditorHeaderFlagname"}>{story_data?.name}</span>
+                : <img alt="story title" width="50px" className={styles.story_img}
+                       src={`/icons/empty_title.svg`} style={{marginLeft: "auto"}}/>}
+            <span className={styles.AvatarEditorHeaderFlagname}>{story_data?.name}</span>
 
             <EditorButton style={{marginLeft: "auto"}} id="button_delete" onClick={Delete} img={"delete.svg"} text={"Delete"} />
             <EditorButton onClick={do_set_show_trans} checked={show_trans ? "checked" : ""} text={"Hints"} />

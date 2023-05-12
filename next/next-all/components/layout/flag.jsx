@@ -83,10 +83,10 @@ export default function Flag(props) {
     </svg>
 }
 
-export function DoubleFlag({lang1, lang2, width, onClick}) {
+export function DoubleFlag({lang1, lang2, width, onClick, className}) {
     return <>
-        <Flag iso={lang1?.short} flag={lang1?.flag} flag_file={lang1?.flag_file} width={width} onClick={onClick}/>
-        <Flag iso={lang2?.short} flag={lang2?.flag} flag_file={lang2?.flag_file} width={width*0.9} onClick={onClick} className={styles.flag_sub}/>
+        <Flag iso={lang1?.short} flag={lang1?.flag} flag_file={lang1?.flag_file} width={width} onClick={onClick} className={className} />
+        <Flag iso={lang2?.short} flag={lang2?.flag} flag_file={lang2?.flag_file} width={width*0.9} onClick={onClick} className={className + " " +styles.flag_sub}/>
     </>
 
 }

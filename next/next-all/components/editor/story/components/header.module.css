@@ -4,7 +4,16 @@
     }
 }
 @media (max-width: 975px) {
+    .flag {
+        display: none !important;
+    }
     .AvatarEditorHeaderFlagname {
+        display: none;
+    }
+    .story_img {
+        display: none;
+    }
+    .AvatarEditorHeader div:last-child {
         display: none;
     }
 }
