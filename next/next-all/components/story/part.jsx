@@ -62,9 +62,6 @@ function StoryLine(props) {
     if(props.element.type === "ARRANGE") {
         return <QuestionArrange setUnhide={props.setUnhide} progress={props.progress} element={props.element} />
     }
-    if(props.element.type === "POINT_TO_PHRASE") {
-        return <QuestionPointToPhrase progress={props.progress} element={props.element} />
-    }
     if(props.element.type === "MATCH") {
         return <QuestionMatch progress={props.progress} element={props.element} />
     }

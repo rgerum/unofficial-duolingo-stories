@@ -56,6 +56,7 @@ describe('Test Story', () => {
 
         // MULTIPLE CHOICE
         cy.get("[data-cy=part]").should("have.lengthOf", 4)
+        cy.get("[data-cy=continue]").click()
         cy.get("[data-cy=multiple-choice] [data-cy=button]").first().click()
 
         cy.get("[data-cy=continue]").click()

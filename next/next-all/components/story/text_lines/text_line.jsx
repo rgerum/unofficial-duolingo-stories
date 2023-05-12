@@ -15,7 +15,8 @@ export default function TextLine({progress, unhide, element}) {
     const controls = React.useContext(StoryContext);
 
     let active = progress >= element.trackingProperties.line_index;
-    if(progress-0.5 === element.trackingProperties.line_index)
+
+    if (progress - 0.5 === element.trackingProperties.line_index && element.hideRangesForChallenge.length)
         active = 0;
 
     let hidden = (!active) ? styles_common.hidden : "";

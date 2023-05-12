@@ -30,13 +30,31 @@ export default function QuestionMultipleChoice({setUnhide, progress, element}) {
     const editor = React.useContext(EditorContext);
 
     const [done, setDone] = React.useState(false);
-    const active = progress === element.trackingProperties.line_index;
+    let active1 = progress === element.trackingProperties.line_index;
+    let active = progress === element.trackingProperties.line_index;
+
+    if(element.trackingProperties["challenge_type"] === "multiple-choice") {
+        active = (progress-0.5) === element.trackingProperties.line_index;
+    }
 
     useEffect(() => {
-        if(active && !done) {
-            controls.block_next();
+        if(element.trackingProperties["challenge_type"] === "multiple-choice") {
+            if (active1) {
+                controls.setProgressStep(0.5);
+            }
+            if (active) {
+                controls.setProgressStep(0.5);
+                if (!done) {
+                    controls.block_next();
+                }
+            }
         }
-    }, [active, done]);
+        else {
+            if(active && !done) {
+                controls.block_next();
+            }
+        }
+    }, [active1, active, done]);
 
     // whether this part is already shown
     let hidden2 = (!active) ? styles_common.hidden : ""
