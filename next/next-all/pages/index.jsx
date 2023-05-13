@@ -50,7 +50,7 @@ export async function getStaticProps() {
     let courses = await get_courses();
 
     // Pass data to the page via props
-    return { props: { counts, courses } }
+    return { props: { counts, courses }, revalidate: 60*60, }
 }
 
 export default Page

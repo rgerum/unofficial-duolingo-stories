@@ -49,7 +49,7 @@ export async function getStaticProps({params}) {
     }
 
     // Pass data to the page via props
-    return { props: { course } }
+    return { props: { course }, revalidate: 60*60 }
 }
 
 export async function getStaticPaths({}) {
@@ -66,5 +66,5 @@ export async function getStaticPaths({}) {
     }
 
     // Pass data to the page via props
-    return { paths: paths, fallback: false,}
+    return { paths: paths, fallback: 'blocking',}
 }
