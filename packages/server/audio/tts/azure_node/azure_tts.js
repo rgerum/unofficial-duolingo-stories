@@ -87,8 +87,8 @@ async function synthesizeSpeech(filename, voice_id, text, file) {
         // </code>
     });
 }
-let promise = synthesizeSpeech("path-to-file.wav", "en-US-JennyNeural", "<speak>Marian was zo moe   dat  ze  <prosody volume=\"silent\">zout in haar koffie deed in plaats van suiker</prosody>.</speak>")
-console.log(promise)
+//let promise = synthesizeSpeech("path-to-file.wav", "en-US-JennyNeural", "<speak>Marian was zo moe   dat  ze  <prosody volume=\"silent\">zout in haar koffie deed in plaats van suiker</prosody>.</speak>")
+//console.log(promise)
 //synthesizeSpeech(process.argv[2], process.argv[3], process.argv[4], process.argv[5])
 //console.log("done", x)
 //console.log(process.argv);
