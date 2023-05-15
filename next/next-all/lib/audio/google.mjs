@@ -66,7 +66,7 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
 }
 
 function add_marks(text) {
-    const regexSplitToken = /(<[^>]+>)|(\w+)|([^\w<>]*)/g;
+    const regexSplitToken = /(<[^>]+>)|(\S+)|([^\w<>]*)/g;
     const regexCombineWhitespace = / +/g;
     text = text.replace(regexCombineWhitespace, " ").trim();
     let text2 = "";
