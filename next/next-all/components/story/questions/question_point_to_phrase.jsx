@@ -60,7 +60,7 @@ export default function QuestionPointToPhrase({progress, element}) {
                 setDone(true);
             }
         },
-        controls.wrong
+        controls.wrong, active2 && !done
     );
 
     function get_color(state) {
