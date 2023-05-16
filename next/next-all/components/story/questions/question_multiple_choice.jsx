@@ -67,7 +67,7 @@ export default function QuestionMultipleChoice({setUnhide, progress, element}) {
             setDone(true);
             controls.right();
         },
-        controls.wrong
+        controls.wrong, active && !done
     );
 
     // connect the editor functions
