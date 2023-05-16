@@ -33,9 +33,8 @@ export default function QuestionArrange({setUnhide, progress, element}) {
     let onClick;
     [hidden2, onClick] = EditorHook(hidden2, element.editor, editor);
 
-
     let [buttonState, click] = useArrangeButtons(element.phraseOrder, controls.right, controls.wrong,
-        (i) => {setDone(true); if(!editor) setUnhide(element.characterPositions[i])})
+        (i) => {setDone(true); if(!editor) setUnhide(element.characterPositions[i])}, active)
 
     return <div style={{textAlign: "center"}} className={styles_common.fadeGlideIn+" "+hidden2} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
         <div>
@@ -50,11 +49,11 @@ export default function QuestionArrange({setUnhide, progress, element}) {
 }
 
 
-function useArrangeButtons(order, callRight, callWrong, callAdvance) {
+function useArrangeButtons(order, callRight, callWrong, callAdvance, active) {
     let [buttonState, setButtonState] = React.useState([...new Array(order.length)]);
     let [position, setPosition] = React.useState(0);
 
-    function click(index) {
+    let click = React.useCallback((index) => {
         if(buttonState[index] === 1)
             return
 
@@ -70,7 +69,19 @@ function useArrangeButtons(order, callRight, callWrong, callAdvance) {
             setButtonState(buttonState => buttonState.map((v, i) => i === index ? 2 : v))
             callWrong();
         }
-    }
+    }, [buttonState, position, order, callRight, callWrong]);
+
+    let key_event_handler = React.useCallback((e) => {
+        let value = parseInt(e.key)-1;
+        if(value < order.length)
+            click(value);
+    }, [click]);
+    React.useEffect(() => {
+        if(active) {
+            window.addEventListener('keypress', key_event_handler);
+            return () => window.removeEventListener('keypress', key_event_handler);
+        }
+    }, [key_event_handler, active]);
 
     return [buttonState, click]
 }
