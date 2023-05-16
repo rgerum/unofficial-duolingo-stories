@@ -163,9 +163,14 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
     }
 
     let key_event_handler = React.useCallback((e) => {
-        if (e.key === "Enter")
-            next();
-    }, [next]);
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            if(!finished)
+                next();
+            else
+                finish();
+        }
+    }, [next, finish, finished]);
     React.useEffect(() => {
         window.addEventListener('keypress', key_event_handler);
         return () => window.removeEventListener('keypress', key_event_handler);

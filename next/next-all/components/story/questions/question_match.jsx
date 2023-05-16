@@ -61,7 +61,7 @@ export default function QuestionMatch({progress, element}) {
         setLastClicked(undefined);
     }
 
-    function click(index) {
+    let click = React.useCallback((index) => {
         index = parseInt(index);
         // do not allow to click on finished words again
         if(clicked[index] === "right")
@@ -108,7 +108,21 @@ export default function QuestionMatch({progress, element}) {
                 setClicked(clicked);
             }, 1500);
         }
-    }
+    }, [clicked, last_clicked, orderB, setLastClicked, setClicked, setDone]);
+
+    let key_event_handler = React.useCallback((e) => {
+        let value = parseInt(e.key)-1;
+        if(value === -1)
+            value = 9;
+        if(value < orderA.length + orderB.length)
+            click(value);
+    }, [click]);
+    React.useEffect(() => {
+        if(active) {
+            window.addEventListener('keypress', key_event_handler);
+            return () => window.removeEventListener('keypress', key_event_handler);
+        }
+    }, [key_event_handler, active]);
 
     let onClick;
     [hidden2, onClick] = EditorHook(hidden2, element.editor, editor);

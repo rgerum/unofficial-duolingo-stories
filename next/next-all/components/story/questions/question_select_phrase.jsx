@@ -50,7 +50,7 @@ export default function QuestionSelectPhrase({setUnhide, progress, element}) {
                     controls?.right();
             }
         },
-        controls?.wrong || (() => {})
+        controls?.wrong || (() => {}), active && !done
     );
 
 
