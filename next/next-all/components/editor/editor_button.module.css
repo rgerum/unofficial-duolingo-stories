@@ -18,6 +18,10 @@
 .editor_button:hover {
     filter: brightness(.7) contrast(2.5);
 }
+
+body[data-theme="dark"] .editor_button:hover {
+    filter: brightness(1.7) contrast(2.5);
+}
 .editor_button img {
     margin-right: 10px;
     width: 36px
