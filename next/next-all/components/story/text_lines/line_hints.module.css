@@ -97,6 +97,17 @@
     padding-bottom: 5px;
 }
 
+.word[data-hidden=editor] {
+/*    color: var(--body-background);*/
+    opacity: 70%;
+    background-image: linear-gradient(to right, var(--underline-solid) 60%, var(--underline-solid) 60%) !important;
+    line-height: 2em;
+    background-position: 0 100%;
+    background-repeat: repeat-x;
+    background-size: 5px 2px;
+    padding-bottom: 5px;
+}
+
 .tooltiptext {
     user-select: none;
     visibility: hidden;

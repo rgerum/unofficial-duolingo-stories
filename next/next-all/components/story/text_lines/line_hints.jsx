@@ -42,6 +42,8 @@ export default function HintLineContent({content, audioRange, hideRangesForChall
     function addWord2(start, end) {
         let is_hidden = hideRangesForChallenge !== undefined &&
         getOverlap(start, end, hideRangesForChallenge.start, hideRangesForChallenge.end) ? true : undefined
+        if(is_hidden && editor)
+            is_hidden = "editor"
         let style = {}
         //TODO
         //if(is_hidden && window.view)
@@ -89,6 +91,8 @@ export default function HintLineContent({content, audioRange, hideRangesForChall
         // add the text with the hint
         let is_hidden = hideRangesForChallenge !== undefined &&
         getOverlap(hint.rangeFrom, hint.rangeTo, hideRangesForChallenge.start, hideRangesForChallenge.end) ? true : undefined
+        if(editor)
+            is_hidden = false;
 
         elements.push(<span key={hint.rangeFrom + " "+hint.rangeTo+1} className={styles.word+" "+(is_hidden ? "" : (show_trans ? styles.tooltip_editor : styles.tooltip))}><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className={show_trans ? styles.tooltiptext_editor : styles.tooltiptext}>{content.hints[hint.hintIndex]}</span></span>)
         //addSplitWord(dom.append("span").attr("class", "word tooltip"), hint.rangeFrom, hint.rangeTo+1)

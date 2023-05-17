@@ -31,7 +31,7 @@ export default function TextLine({progress, unhide, element, part}) {
 
     let hideRangesForChallenge = element.hideRangesForChallenge;
      // TODO window.view === undefined && props.progress !== element.trackingProperties.line_index)
-    if(progress !== element.trackingProperties.line_index)
+    if(progress !== element.trackingProperties.line_index && !editor)
         hideRangesForChallenge = undefined;
 
     //if(props.progress !== element.trackingProperties.line_index)
