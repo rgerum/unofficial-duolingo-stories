@@ -10,13 +10,13 @@ import useAudio from "./use_audio";
 import {EditorContext, StoryContext} from "../story";
 
 
-export default function TextLine({progress, unhide, element}) {
+export default function TextLine({progress, unhide, element, part}) {
     const editor = React.useContext(EditorContext);
     const controls = React.useContext(StoryContext);
 
     let active = progress >= element.trackingProperties.line_index;
 
-    if (progress - 0.5 === element.trackingProperties.line_index && element.hideRangesForChallenge.length)
+    if (progress - 0.5 === element.trackingProperties.line_index && (part.length > 1 && part[1].type === "POINT_TO_PHRASE"))
         active = 0;
 
     let hidden = (!active) ? styles_common.hidden : "";

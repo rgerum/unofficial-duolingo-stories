@@ -26,7 +26,7 @@ export default function Part(props) {
     console.log("hidden", is_hidden);
     return <div className={"part"+" "+hidden} data-hidden={is_hidden} data-challengetype={challenge_type} data-cy={!is_hidden ? "part" : "part_hidden"}>
         {props.part.map((element, i) => (
-            <StoryLine key={i} unhide={unhide} setUnhide={setUnhide} progress={props.progress} element={element} />
+            <StoryLine key={i} unhide={unhide} setUnhide={setUnhide} progress={props.progress} element={element} part={props.part} />
         ))}
     </div>
 }
@@ -66,7 +66,7 @@ function StoryLine(props) {
         return <QuestionMatch progress={props.progress} element={props.element} />
     }
     if(props.element.type === "LINE") {
-        return <TextLine progress={props.progress} unhide={props.unhide} element={props.element} />
+        return <TextLine progress={props.progress} unhide={props.unhide} element={props.element} part={props.part}/>
     }
     if(props.element.type === "HEADER") {
         return <Header progress={props.progress} element={props.element} />
