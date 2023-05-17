@@ -111,12 +111,23 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
     if(editor) {
         React.useMemo(() => {}, [story.id])
         return (
-            <div id="story" ref={storyElement} className={story.learningLanguageRTL ? "story_rtl" : ""} >
-                {parts.map((part, i) => (
-                    <Part key={i} editor={editor} controls={controls} progress={progress}
-                          part={part}/>
-                ))}
-            </div>
+            <StoryContext.Provider value={controls}>
+                <audio ref={ref_audio1} volume="0.5">
+                    <source src={'https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3'} type="audio/mp3" />
+                </audio>
+                <audio ref={ref_audio2} volume="0.5">
+                    <source src={'https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3'} type="audio/mp3" />
+                </audio>
+                <audio ref={ref_audio3} volume="0.5">
+                    <source src={'https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3'} type="audio/mp3" />
+                </audio>
+                <div id="story" ref={storyElement} className={story.learningLanguageRTL ? "story_rtl" : ""} >
+                    {parts.map((part, i) => (
+                        <Part key={i} editor={editor} controls={controls} progress={progress}
+                              part={part}/>
+                    ))}
+                </div>
+            </StoryContext.Provider>
         );
     }
 
