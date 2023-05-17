@@ -172,6 +172,57 @@ body[data-theme="dark"] .ͼ2 .cm-activeLineGutter {
   background-color: #44575d;
 }
 
+body[data-theme="dark"] .ͼq {
+  color: #00ff3c;
+}
+
+body[data-theme="dark"] .ͼo {
+  color: #00ff3c;
+  opacity: 0.7;
+}
+
+body[data-theme="dark"] .ͼs {
+  color: #00ff3c;
+  opacity: 0.6;
+  border-bottom: 2px solid white;
+}
+
+body[data-theme="dark"] .ͼx {
+  color: #007b1d;
+  border-bottom: 2px solid white;
+  background: #c8c8c8;
+  border-radius: 10px;
+  opacity: 0.6;
+}
+
+body[data-theme="dark"] .ͼu {
+  opacity: 0.6;
+  border-bottom: 2px solid white;
+}
+
+body[data-theme="dark"] .ͼr {
+  color: #015cff;
+}
+
+body[data-theme="dark"] .ͼp {
+  color: #015cff;
+  opacity: 0.7;
+}
+
+body[data-theme="dark"] .ͼt {
+  color: #005bff;
+  opacity: 0.6;
+  border-bottom: 2px solid white;
+}
+
+body[data-theme="dark"] .ͼy {
+  color: #005cff;
+  border-bottom: 2px solid white;
+  background: #c1c1c1;
+  border-radius: 10px;
+  opacity: 0.6;
+}
+
 body[data-theme="dark"] {
   --header-border: #37464f;
 
