@@ -2,6 +2,7 @@ import Link from "next/link";
 import {useState} from "react";
 import styles from "./edit_list.module.css"
 import {SpinnerBlue} from "../../layout/spinner";
+import {useRouter} from "next/router";
 
 
 export default function EditList({course, updateCourses}) {
@@ -96,6 +97,7 @@ function DropDownStatus(props) {
     let [loading, setLoading] = useState(0);
     let [status, set_status] = useState(props.status);
     let [count, setCount] = useState(props.count);
+    const router = useRouter();
 
     if(props.official)
         return <></>
@@ -107,8 +109,9 @@ function DropDownStatus(props) {
             if (response?.count !== undefined) {
                 let count = parseInt(response.count)
                 setCount(count)
-                if (response.published.length)
-                    props.updateCourses();
+                if (response.published.length) {
+                    router.replace(router.asPath);
+                }
                 set_status(response.story_status);
                 setLoading(0);
             }
