@@ -1,6 +1,9 @@
 # update the repository
 git pull
 
+# copy the flags
+cp -r flags/* ../flags/
+
 # copy the nextjs app
 #cp -r next/next-all/* ../beta/
 
