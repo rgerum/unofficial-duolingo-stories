@@ -112,5 +112,14 @@ export async function get_course_editor(course_id) {
         stories.push(r);
     }
 
-    return {...course, stories: stories};
+    let res2 = await query(`SELECT c.short, u.id, u.username, MAX(sa.date) as last_date FROM course c JOIN story s on c.id = s.course_id JOIN story_approval sa on s.id = sa.story_id JOIN user u on u.id = sa.user_id WHERE course_id = ? GROUP BY user_id, c.id ORDER BY last_date DESC`, [course.id])
+
+    let contributors = [];
+    for(let r of res2) {
+        r = {...r};
+        r.last_date = `${r.last_date}`;
+        contributors.push(r);
+    }
+
+    return {...course, stories: stories, contributors: contributors};
 }

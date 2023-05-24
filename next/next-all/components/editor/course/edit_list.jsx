@@ -19,6 +19,18 @@ export default function EditList({course, updateCourses}) {
             set_ends.push(1);
         last_set = story.set_id;
     }
+    let active_contributors = [];
+    let past_contributors = [];
+    const now = new Date();
+    for(let contrib of course.contributors) {
+        let date = new Date(contrib.last_date);
+        if (now.getTime() - date > 30 * 24 * 60 * 60 * 1000) {
+            past_contributors.push(contrib)
+        }
+        else
+            active_contributors.push(contrib)
+    }
+
     return <>
         <div>
             <ul>
@@ -35,6 +47,8 @@ export default function EditList({course, updateCourses}) {
             </ul>
         </div>
         <p>To set the voices for use the <Link href={`/editor/language/${course.learningLanguage}`}>Character Editor</Link>.</p>
+        <p style={{fontWeight: "bold"}}>Active Contributors: {active_contributors.map((d, i) => <span key={i}>{d.username}, </span>)} {active_contributors.length === 0 ? "No Contributors" : ""}</p>
+        <p>Past Contributors: {past_contributors.map((d, i) => <span key={i}>{d.username}, </span>)}</p>
         <div className={styles.table}>
             <div className={styles.thead}>
                 <div className={styles.row}>
