@@ -1,6 +1,7 @@
 
 .dropdown {
     position: relative;
+    right: calc(5vw);
 }
 
 .dropdown:hover > :last-child, .dropdown:hover .diamond_wrap {
@@ -20,7 +21,6 @@
     font-weight: bold;
     margin-top: 7px;
     text-transform: none;
-    overflow-y: scroll;
 }
 
 .dropdown > :last-child > {
