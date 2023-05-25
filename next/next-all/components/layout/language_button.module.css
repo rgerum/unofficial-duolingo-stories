@@ -19,6 +19,8 @@
     text-transform: none;
 
     text-decoration: none;
+
+    overflow: hidden;
 }
 
 @media (min-width: 699px) {
@@ -134,4 +136,17 @@
     .celebration svg {
         display: none;
     }
+}
+.conlang {
+    background: green;
+    position: absolute;
+    top: 16px;
+    left: -29px;
+    display: block;
+    transform: rotateZ(-45deg);
+    width: 120px;
+    border: 1px solid #1c511c;
+    font-size: 15px;
+    padding: 1px 11px;
+    color: white;
 }
