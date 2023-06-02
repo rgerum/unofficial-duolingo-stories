@@ -1,6 +1,8 @@
 
 
 .admin_table th  {
+    position: sticky;
+    top: 60px;
     padding-top: 5px;
     padding-bottom: 5px;
     text-align: left;
