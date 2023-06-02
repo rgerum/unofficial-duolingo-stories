@@ -14,10 +14,10 @@ SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name, course.sh
 LEFT JOIN language l1 ON l1.id = course.fromLanguage
 LEFT JOIN language l2 ON l2.id = course.learningLanguage
 LEFT JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1
+WHERE story.public = 1 AND story.deleted = 0 
 GROUP BY course.id
 ORDER BY name;
-    `);
+    `);// AND course.public = 1
     // sort courses by base language
     let base_languages = {};
     let languages = [];
