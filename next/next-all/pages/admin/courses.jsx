@@ -8,7 +8,7 @@ import {useInput} from "../../lib/hooks";
 import {Spinner} from "../../components/layout/spinner";
 import Flag from "../../components/layout/flag";
 import {fetch_post} from "../../lib/fetch_post";
-import {course_list} from "../api/admin/set_course";
+import {course_list, course_tag_list} from "../api/admin/set_course";
 
 
 export async function setCourse(data) {
@@ -26,6 +26,11 @@ function ChangeAbleValue(props) {
     let edited = function(e) {
         props.callback(props.name, e.target.value);
         setValue(e)
+    }
+    if(props.name === "tag_list" && !props.edit) {
+        if(!value)
+            return <td></td>
+        return <td>{value.split(",").map(d => <span key={d} className={styles.tag}>{d}</span>)}</td>
     }
 
     if(props.name.endsWith("Language")) {
@@ -125,7 +130,7 @@ function AttributeList(props) {
         )}<td>{edit ? <span onClick={save}>[save]</span> : ""}</td></tr>
 }
 
-export function CourseList({users, languages}) {
+export function CourseList({users, languages, course_tags}) {
     const [search, setSearch] = useInput("");
 
     if(languages === undefined || users === undefined)
@@ -164,21 +169,28 @@ export function CourseList({users, languages}) {
                 <th data-js-sort-colnum="1">public</th>
                 <th data-js-sort-colnum="2">name</th>
                 <th data-js-sort-colnum="2">conlang</th>
+                <th data-js-sort-colnum="2">tag_list</th>
                 <th data-js-sort-colnum="3">about</th>
                 <th data-js-sort-colnum="4"></th>
             </tr>
             </thead>
             <tbody>
-            <AttributeList languages={languages_id} obj={{"name":"", "public": 0, "fromLanguage": 1, "learningLanguage": -1, "about": "", "conlang": 0}} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "about"]} />
+            <AttributeList languages={languages_id} obj={{"name":"", "public": 0, "fromLanguage": 1, "learningLanguage": -1, "about": "", "tag_list": "", "conlang": 0}} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "about"]} />
             {filtered_courses.map(course =>
-                <AttributeList key={course.id} languages={languages_id} obj={course} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "about"]} />
+                <AttributeList key={course.id} languages={languages_id} obj={course} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "tag_list", "about"]} />
             )}
             </tbody>
         </table>
     </>
 }
 
-export default function Page({courses, languages, userdata}) {
+function CourseTagList({course_tags}) {
+    return <div>Tags:
+        {course_tags.map((d)=> <span key={d.id} className={styles.tag}>{d.name}</span>)}
+    </div>
+}
+
+export default function Page({courses, course_tags, languages, userdata}) {
 
     // Render data...
     let course_id = undefined;
@@ -190,7 +202,8 @@ export default function Page({courses, languages, userdata}) {
             <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
         </Head>
         <Layout userdata={userdata}>
-            <CourseList users={courses} languages={languages} />
+            <CourseTagList course_tags={course_tags} />
+            <CourseList users={courses} languages={languages} course_tags={course_tags} />
         </Layout>
     </>
 }
@@ -208,9 +221,10 @@ export async function getServerSideProps(context) {
     }
 
     let courses = await course_list();
+    let course_tags = await course_tag_list();
     let languages = await language_list();
 
     return {
-        props: {courses, languages},
+        props: {courses, course_tags, languages},
     };
 }

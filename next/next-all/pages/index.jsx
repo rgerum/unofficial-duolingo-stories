@@ -47,7 +47,7 @@ export async function getStaticProps() {
 
     //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
     //let courses =  await response_courses.json();
-    let courses = await get_courses();
+    let courses = await get_courses("main");
 
     // Pass data to the page via props
     return { props: { counts, courses }, revalidate: 60*60, }
