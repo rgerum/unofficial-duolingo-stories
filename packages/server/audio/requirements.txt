@@ -1,5 +1,0 @@
-boto3
-transliterate
-gtts
-mutagen
-pydub
