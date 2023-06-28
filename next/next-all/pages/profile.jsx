@@ -7,7 +7,9 @@ import MainTitle from "../components/layout/main_title";
 import TitleDesc from "../components/layout/title_desc";
 import {getLinkedProviders} from "./api/profile";
 import {signIn} from "next-auth/react";
+import {getSession} from "next-auth/react";
 import styles from "./profile.module.css"
+import styles2 from "./auth/register.module.css"
 
 function ProviderButton({d, value}) {
     console.log(d, value);
@@ -19,7 +21,28 @@ function ProviderButton({d, value}) {
 }
 
 export default function Page({ providers, userdata}) {
-    console.log(providers.role);
+    // if not logged in show a notice
+    if(!providers) {
+        return <>
+            <Head>
+                <title>Duostories Login</title>
+                <link rel="canonical" href={`https://www.duostories.org/login`} />
+            </Head>
+
+            <div id={styles2.login_dialog}>
+                <Link href="/" id={styles2.quit}></Link>
+                <div>
+                    <h2>Not Logged in</h2>
+                    <p>
+                        You need to be logged in to see your profile.
+                    </p>
+                    <button data-cy="submit"  className={styles2.button}
+                            onClick={signIn}>{ "Log in" }</button>
+                </div>
+            </div>
+        </>
+    }
+
     return <><Head>
         <title>Duostories: Userprofile</title>
         <link rel="canonical" href="https://www.duostories.org/profile" />
@@ -53,6 +76,11 @@ export default function Page({ providers, userdata}) {
 }
 
 export async function getServerSideProps(context) {
+    const session = await getSession(context);
+
+    if (!session) {
+        return {props: {}}
+    }
     const providers = await getLinkedProviders(context.req)
     return {props: {providers}}
 }
