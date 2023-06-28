@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-polly": "^3.316.0",
+    "@aws-sdk/client-polly": "^3.362.0",
     "@google-cloud/text-to-speech": "^4.2.2",
     "microsoft-cognitiveservices-speech-sdk": "^1.29.0",
     "node-fetch": "^3.3.1"
