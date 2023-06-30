@@ -14,7 +14,7 @@
     "@google-cloud/text-to-speech": "^4.2.2",
     "@octokit/rest": "^19.0.7",
     "codemirror": "^6.0.1",
-    "microsoft-cognitiveservices-speech-sdk": "^1.27.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.29.0",
     "mysql": "^2.18.1",
     "next": "^13.4.2",
     "next-auth": "^4.19.2",
