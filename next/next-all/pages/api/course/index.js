@@ -86,6 +86,27 @@ ORDER BY count DESC, fromLanguageName;
 }
 
 export async function get_course_import({course, from}) {
+    const isNumeric = value => value.length !== 0 && [...value].every(c => c >= '0' && c <= '9');
+
+    if(!isNumeric(course)) {
+        let q = await query(`
+        SELECT course.id FROM course 
+        WHERE course.short = ? LIMIT 1
+        `, [course]);
+        if (q.length === 0)
+            return undefined;
+        course = q[0].id;
+    }
+    if(!isNumeric(from)) {
+        let q = await query(`
+        SELECT course.id FROM course 
+        WHERE course.short = ? LIMIT 1
+        `, [from]);
+        if (q.length === 0)
+            return undefined;
+        from = q[0].id;
+    }
+
     let courses = await query(`SELECT s1.id, s1.set_id, s1.set_index, s1.name, image.gilded AS image_done, image.active AS image, COUNT(s2.id) copies
                       FROM story s1
                       LEFT JOIN (SELECT s2.duo_id, s2.id FROM story s2 WHERE s2.course_id = ?) AS s2 ON s1.duo_id = s2.duo_id

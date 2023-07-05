@@ -36,10 +36,10 @@ export default function ImportList({course, updateCourses, imports, import_id}) 
         last_set = story.set_id;
     }
     return <>
-        {import_id === "12" ?
-            <div>Importing from Spanish (from English). <Link href={`/editor/course/${course.id}/import/66`}>switch to
+        {(import_id === "12" || import_id === "es-en") ?
+            <div>Importing from Spanish (from English). <Link href={`/editor/course/${course.short}/import/en-es-o`}>switch to
                 English (from Spanish)</Link></div> :
-            <div>Importing from English (from Spanish). <Link href={`/editor/course/${course.id}/import/12`}>switch to
+            <div>Importing from English (from Spanish). <Link href={`/editor/course/${course.short}/import/es-en`}>switch to
                 Spanish (from English)</Link></div>
         }
         <table className={styles.story_list + " js-sort-table js-sort-5 js-sort-desc"} data-cy="story_list" data-js-sort-table="true">

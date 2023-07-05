@@ -34,9 +34,9 @@ export default function Layout({ children, course, import_id, toggleShow }) {
         <div style={{marginLeft: "auto"}}></div>
         {course ? <>{course.official ? <span className={styles.official} data-cy="label_official"><i>official</i></span> :
             !import_id ?
-                <EditorButton id="button_import" href={`/editor/course/${course.id}/import/12`}
+                <EditorButton id="button_import" href={`/editor/course/${course.short}/import/es-en`}
                       data-cy="button_import" img={"import.svg"} text={"Import"} /> :
-                <EditorButton id="button_back" href={`/editor/course/${course.id}`}
+                <EditorButton id="button_back" href={`/editor/course/${course.short}`}
                       data-cy="button_back" img={"back.svg"} text={"Back"}/>
         }</> : ""}
         <div className={styles.spacer}></div>

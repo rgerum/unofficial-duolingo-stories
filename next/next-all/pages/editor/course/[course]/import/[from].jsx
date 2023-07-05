@@ -50,7 +50,7 @@ export async function getServerSideProps(context) {
 
     let course = await get_course_editor(context.params.course);
 
-    if(!course || !imports.length) {
+    if(!course || !imports || !imports.length) {
         return {
             notFound: true,
         }
