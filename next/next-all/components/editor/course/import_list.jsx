@@ -10,7 +10,7 @@ export async function setImport(id, course_id) {
     return data.id;
 }
 
-export default function ImportList({course, updateCourses, imports, import_id}) {
+export default function ImportList({course, imports, import_id}) {
     let stories = course?.stories;
     const [importing, setImporting] = useState(false);
     let router = useRouter();
@@ -78,65 +78,7 @@ function pad(x) {
     return x;
 }
 
-function formatDate(datetime) {
-    let d = new Date(datetime);
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-}
-
 export async function setApproval(data) {
     let response = await fetch(`/api/editor/approve/${data.story_id}`);
     return await response.json();
-}
-
-function DropDownStatus(props) {
-
-    let [loading, setLoading] = useState(0);
-    let [status, set_status] = useState(props.status);
-    let [count, setCount] = useState(props.count);
-
-    if(props.official)
-        return <></>
-
-    async function addApproval() {
-        setLoading(1);
-        try {
-            let response = await setApproval({story_id: props.id});
-            if (response?.count !== undefined) {
-                let count = parseInt(response.count)
-                setCount(count)
-                if (response.published.length)
-                    props.updateCourses();
-                set_status(response.story_status);
-                setLoading(0);
-            }
-        }
-        catch (e) {
-            console.error(e);
-            return setLoading(-1);
-        }
-    }
-
-    function status_wrapper(status, public_) {
-        if(props.official)
-            return "🥇 official"
-        if(public_)
-            return "📢 published"
-        if(status === "draft")
-            return "✍️ draft"
-        if(status === "finished")
-            return "✅ finished"
-        if(status === "feedback")
-            return "🗨️ feedback"
-        if(status === "published")
-            return "📢 published"
-        return status
-    }
-
-    return <div className={styles.status_field}>
-        {<span className={styles.status_text}>{status_wrapper(status, props.public)}</span>} {loading === 1 ? <SpinnerBlue /> :
-        loading ===-1 ? <img title="an error occurred" alt="error" src="/editor/icons/error.svg"/> : <></>}
-        {props.official ? <></> : <span className={styles.approval} onClick={addApproval}>
-        {"👍 "+count}
-    </span>}
-    </div>
 }

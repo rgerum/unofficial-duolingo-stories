@@ -21,11 +21,6 @@ async function query_create(structure_query) {
     });
 }
 
-async function getData(filename) {
-    let res = await fetch(data_url + filename);
-    return res.json();
-}
-
 async function createAll() {
 
     const structure_query = await (await fetch(data_url + "structure.sql")).text();
@@ -64,6 +59,7 @@ async function createAll() {
         add_data("story_approval", "approvals.json"),
         add_data("avatar", "avatar.json"),
         add_data("user", "user.json"),
+        add_data("course_tag_map", "course_tag_map.json"),
     ]);
 
     fs.writeFile('.env.local', `NODE_ENV="test"\nNEXTAUTH_SECRET=1234`, err => {
@@ -73,4 +69,4 @@ async function createAll() {
         // file written successfully
     });
 }
-let create = createAll();
+createAll().then();

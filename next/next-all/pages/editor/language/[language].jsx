@@ -7,14 +7,12 @@ import {SpinnerBlue} from "../../../components/layout/spinner";
 import {fetch_post} from "../../../lib/fetch_post";
 import styles from "./[language].module.css"
 import Flag from "../../../components/layout/flag";
-import Link from "next/link";
 import Login from "../../../components/login/login_dialog";
 import {getSession} from "next-auth/react";
 import EditorButton from "../../../components/editor/editor_button";
 
-export default function Page({language, speakers, avatar_names, userdata}) {
+export default function Page({language, speakers, avatar_names}) {
     // Render data...
-    let course_id = undefined;
     return <>
         <Head>
             <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
@@ -55,24 +53,6 @@ export function Layout({ children, language_data }) {
             </div>
         </>
     )
-}
-
-function AvatarEditorHeader(props) {
-    let language_data = props.language_data;
-
-    if(language_data === undefined)
-        return <></>
-    return <div className={styles.AvatarEditorHeader}>
-        <Link to={"/"} id="button_back" className={styles.editoButton} style={{paddingLeft: 0}}>
-            <div><img alt="icon back" src="/editor/icons/back.svg" /></div>
-            <span>Back</span>
-        </Link>
-        <b>Character-Editor</b>
-        <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
-        <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
-        <div style={{marginLeft: "auto"}}></div>
-        <Login/>
-    </div>
 }
 
 export async function setAvatarSpeaker(data) {
@@ -134,19 +114,6 @@ function Avatar(props) {
     </div>
 }
 
-export function AvatarMain(props) {
-    let {language} = useParams();
-    const [language_data, ] = useDataFetcher2(getLanguageName, [language]);
-
-    return <>
-        <div id="toolbar">
-            <AvatarEditorHeader language={language} language_data={language_data} username={props.username} doLogout={props.doLogout}/>
-        </div>
-        <div id="root" className={styles.characterEditorContent}>
-            <AvatarNames language={language} language_data={language_data}/>
-        </div>
-    </>
-}
 
 function PlayButton(props) {
     let play = props.play;
@@ -175,7 +142,7 @@ function PlayButton(props) {
             </span>
 }
 
-function SpeakerEntry(props) {
+export function SpeakerEntry(props) {
     let speaker = props.speaker;
     let copyText = props.copyText;
 

@@ -66,8 +66,7 @@ ORDER BY name;
 }
 
 export async function get_courses_ids() {
-    let courses = await query(`SELECT course.id FROM course;`);
-    return courses;
+    return await query(`SELECT course.id FROM course;`);
 }
 
 export async function get_courses_ungrouped() {
