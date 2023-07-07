@@ -14,7 +14,7 @@ SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name, course.sh
 LEFT JOIN language l1 ON l1.id = course.fromLanguage
 LEFT JOIN language l2 ON l2.id = course.learningLanguage
 LEFT JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1 AND story.deleted = 0 
+WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1
 GROUP BY course.id
 ORDER BY name;
     `);
@@ -29,7 +29,7 @@ JOIN course_tag ct on ctm.course_tag_id = ct.id
 JOIN language l1 ON l1.id = course.fromLanguage
 JOIN language l2 ON l2.id = course.learningLanguage
 JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1 AND story.deleted = 0 AND ct.name = ?
+WHERE story.public = 1 AND story.deleted = 0 AND ct.name = ? AND course.public = 1
 GROUP BY course.id
 ORDER BY name;
     `, [tag]);
