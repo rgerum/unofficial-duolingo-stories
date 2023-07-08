@@ -115,7 +115,7 @@ function Avatar(props) {
 }
 
 
-function PlayButton(props) {
+export function PlayButton(props) {
     let play = props.play;
     let speaker = props.speaker;
     let name = props.name;

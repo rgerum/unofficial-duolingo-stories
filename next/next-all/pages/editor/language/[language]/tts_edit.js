@@ -8,7 +8,7 @@ import Flag from "../../../../components/layout/flag";
 import Login from "../../../../components/login/login_dialog";
 import {transcribe_text} from "../../../../lib/editor/tts_transcripte.mjs";
 import {useInput} from "../../../../lib/hooks";
-import {SpeakerEntry} from "../[language]";
+import {PlayButton, SpeakerEntry} from "../[language]";
 import {fetch_post} from "../../../../lib/fetch_post";
 
 export default function Page({language, speakers}) {
@@ -29,6 +29,7 @@ WORDS:
 `)
     let [text, setText] = useInput("Enter a text to be spoken");
     let [text2, setText2] = React.useState("");
+    let [customSpeaker, setCustomSpeaker] = useInput("");
     const [pitch, setPitch] = useState(2);
     const [speed, setSpeed] = useState(2);
 
@@ -110,6 +111,11 @@ WORDS:
                             {speakers.map((speaker, index) =>
                                 <SpeakerEntry key={index} speaker={speaker} play={play2} />
                             )}
+                            <tr>
+                            <td><PlayButton play={play2} speaker={customSpeaker} name="Duo" /><input value={customSpeaker} onChange={setCustomSpeaker} /></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
