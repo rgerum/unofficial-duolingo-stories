@@ -65,7 +65,7 @@ letters:
     v: w
     z: z
 fragments:
-    tsx: cz
+    tsx: cz:ipa
     gx: dż
     hx: ch
     yx: rz
@@ -100,7 +100,7 @@ words:
     ptm: posttagmeze
     bv: bonvolu
 `
-let text = "Ich better teste amion und einen hut"
+let text = "Ich better testetsx amion und einen hut"
 export function transcribe_text(text, data) {
     data = jsyaml.load(data)
     console.log(data)
