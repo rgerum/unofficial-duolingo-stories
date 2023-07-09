@@ -1,13 +1,12 @@
-import { getProviders, signIn } from "next-auth/react"
+import { getProviders } from "next-auth/react"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "../api/auth/[...nextauth]";
 import styles from "./register.module.css"
 import Head from "next/head";
 import React from "react";
-import {register, useInput} from "./register";
 import Link from "next/link";
 
-export default function Error({ providers }) {
+export default function Error({}) {
 
 
     return (

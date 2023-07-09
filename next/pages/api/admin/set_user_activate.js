@@ -1,5 +1,4 @@
 import query from  "../../../lib/db";
-import {insert_query, update_query} from "../../../lib/query_variants";
 import {getToken} from "next-auth/jwt";
 
 export default async function api(req, res) {
@@ -33,8 +32,4 @@ export async function user_list() {
 
 async function set_user_activate({id, activated}) {
     return await query(`UPDATE user SET activated = ? WHERE user.id = ?;`, [activated, id]);
-}
-
-async function set_user_write({id, write}) {
-    return await query_obj(`UPDATE user SET role = ? WHERE user.id = ?;`, [write, id]);
 }

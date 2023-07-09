@@ -130,7 +130,7 @@ function AttributeList(props) {
         )}<td>{edit ? <span onClick={save}>[save]</span> : ""}</td></tr>
 }
 
-export function CourseList({users, languages, course_tags}) {
+export function CourseList({users, languages}) {
     const [search, setSearch] = useInput("");
 
     if(languages === undefined || users === undefined)
@@ -191,9 +191,6 @@ function CourseTagList({course_tags}) {
 }
 
 export default function Page({courses, course_tags, languages, userdata}) {
-
-    // Render data...
-    let course_id = undefined;
     return <>
         <Head>
             <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>

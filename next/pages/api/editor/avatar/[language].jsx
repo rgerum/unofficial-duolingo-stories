@@ -1,5 +1,4 @@
 import query from "../../../../lib/db"
-import {getToken} from "next-auth/jwt";
 
 async function query_obj(q, args) {
     let res = await query(q, args);
@@ -8,7 +7,6 @@ async function query_obj(q, args) {
 
 export async function get_avatar_names(id, course_id) {
     const isNumeric = value => value.length !== 0 && [...value].every(c => c >= '0' && c <= '9');
-    let course_query;
     if(!isNumeric(id)) {
         id = (await query_obj(`SELECT id FROM language WHERE short = ? LIMIT 1`, [id]))[0].id;
     }
@@ -29,7 +27,6 @@ ORDER BY a.id
 
 export async function get_speakers(id) {
     const isNumeric = value => value.length !== 0 && [...value].every(c => c >= '0' && c <= '9');
-    let course_query;
     if(!isNumeric(id)) {
         id = (await query_obj(`SELECT id FROM language WHERE short = ? LIMIT 1`, [id]))[0].id;
     }
@@ -39,7 +36,6 @@ export async function get_speakers(id) {
 
 export async function get_language(id) {
     const isNumeric = value => value.length !== 0 && [...value].every(c => c >= '0' && c <= '9');
-    let course_query;
     if(isNumeric(id)) {
         return (await query_obj(`SELECT * FROM language WHERE id = ? LIMIT 1`, [id]))[0];
     }

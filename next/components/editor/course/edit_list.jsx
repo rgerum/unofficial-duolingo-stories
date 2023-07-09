@@ -66,7 +66,7 @@ export default function EditList({course, updateCourses}) {
                 {stories.map((story, i) =>
                     <div className={styles.row + " " + (set_ends[i] ? styles.set_start : "")} key={story.id}>
                         <div><span><b>{pad_space(story.set_id)}</b>&nbsp;-&nbsp;{pad_space(story.set_index)}</span></div>
-                        <div width="44px"><img alt={"story title"}
+                        <div style={{width:"44px"}}><img alt={"story title"}
                                               src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
                                               width="44px" height={"40px"}/></div>
                         <div><Link href={`/editor/story/${story.id}`}>{story.name}</Link></div>

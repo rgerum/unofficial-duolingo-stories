@@ -104,9 +104,6 @@ export function UserList({users}) {
 
 
 export default function Page({users, userdata}) {
-
-    // Render data...
-    let course_id = undefined;
     return <>
         <Head>
             <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>

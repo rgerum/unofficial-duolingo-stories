@@ -1,5 +1,5 @@
 import query from "../../../lib/db"
-const {phpbb_check_hash, phpbb_hash} = require("./../../../lib/auth/hash_functions2");
+const {phpbb_hash} = require("./../../../lib/auth/hash_functions2");
 const { uuid } = require('uuidv4');
 const nodemailer = require("nodemailer");
 

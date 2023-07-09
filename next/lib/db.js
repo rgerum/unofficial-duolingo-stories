@@ -1,5 +1,4 @@
 if(!process.env.NEXTAUTH_URL) {
-    const fs = require('fs');
     const sqlite3 = require('sqlite3').verbose();
 
     // Create a new in-memory database
@@ -30,7 +29,7 @@ if(!process.env.NEXTAUTH_URL) {
         }
         let columns_string = columns.join(", ");
         let value_placeholders_string = value_placeholders.join(", ");
-        const user_new = await query(`INSERT INTO ${table_name}
+        await query(`INSERT INTO ${table_name}
                             (${columns_string})
                             VALUES (${value_placeholders_string}) ;`, values);
     }
@@ -47,11 +46,10 @@ if(!process.env.NEXTAUTH_URL) {
         console.log(`UPDATE ${table_name}
                             SET ${update_string}
                             WHERE id = ?;`, values)
-        const user_new = await query(`UPDATE ${table_name}
+        return await query(`UPDATE ${table_name}
                             SET ${update_string}
                             WHERE id = ?
                             ;`, values);
-        return user_new;
     }
 
 
@@ -127,7 +125,7 @@ else {
         }
         let columns_string = columns.join(", ");
         let value_placeholders_string = value_placeholders.join(", ");
-        const user_new = await query(`INSERT INTO ${table_name}
+        await query(`INSERT INTO ${table_name}
                             (${columns_string})
                             VALUES (${value_placeholders_string})
                             LIMIT 1;`, values);

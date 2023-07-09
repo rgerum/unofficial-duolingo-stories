@@ -2,7 +2,6 @@ import Head from 'next/head'
 import Link from "next/link";
 
 import Layout,  from '../components/layout/layout'
-import Flag from "../components/layout/flag";
 import CourseList from "../components/layout/course_list";
 import MainTitle from "../components/layout/main_title";
 import TitleDesc from "../components/layout/title_desc";

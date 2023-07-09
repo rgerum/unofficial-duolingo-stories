@@ -1,5 +1,4 @@
 import query from  "../../../lib/db";
-import {insert_query, update_query} from "../../../lib/query_variants";
 import {getToken} from "next-auth/jwt";
 
 export default async function api(req, res) {
