@@ -29,7 +29,7 @@
   "devDependencies": {
     "@types/node": "^17",
     "@types/react": "^18.0.15",
-    "cypress": "^4.2.0",
+    "cypress": "^12.17.0",
     "sqlite3": "^5.1.6",
     "typescript": "^4"
   }
