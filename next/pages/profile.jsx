@@ -13,7 +13,7 @@ import styles2 from "./auth/register.module.css"
 function ProviderButton({d, value}) {
     console.log(d, value);
     return <div className={styles.account}>
-        <img loading="lazy" id="provider-logo" src={`https://authjs.dev/img/providers/${d}.svg`} width="24" height="24"/>
+        <img alt="" loading="lazy" id="provider-logo" src={`https://authjs.dev/img/providers/${d}.svg`} width="24" height="24"/>
         <div>{d}: {value ? <span className={styles.linkedd}>Linked</span> : <span className={styles.link} onClick={() => signIn(d)}>Link</span>}</div>
     </div>
 }
@@ -51,7 +51,7 @@ export default function Page({ providers, userdata}) {
         <header>
             <MainTitle>Profile</MainTitle>
             <TitleDesc>
-                Your user profile, its liked roles and linked login accounts.
+                Your user profile, liked roles and linked login accounts.
             </TitleDesc>
         </header>
         <div className={styles.profile}>
@@ -62,7 +62,7 @@ export default function Page({ providers, userdata}) {
             </div>
 
             <h2>Linked Accounts</h2>
-            <span>When you have liked your account to a login provider you can use these providers instead of login in with username and password or email.</span>
+            <span>When you have linked your account to a login provider you can use these providers instead of logging in with username and password.</span>
             <div className={styles.links}>
             {Object.entries(providers.provider_linked).map(([key, value]) => <ProviderButton key={key} d={key} value={value} />)}
             </div>
