@@ -175,7 +175,7 @@ export function CourseList({users, languages}) {
             </tr>
             </thead>
             <tbody>
-            <AttributeList languages={languages_id} obj={{"name":"", "public": 0, "fromLanguage": 1, "learningLanguage": -1, "about": "", "tag_list": "", "conlang": 0}} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "about"]} />
+            <AttributeList languages={languages_id} obj={{"name":"", "public": 0, "fromLanguage": 1, "learningLanguage": -1, "about": "", "tag_list": "", "conlang": 0}} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "tag_list", "about"]} />
             {filtered_courses.map(course =>
                 <AttributeList key={course.id} languages={languages_id} obj={course} attributes={["learningLanguage","fromLanguage","public", "name", "conlang", "tag_list", "about"]} />
             )}
