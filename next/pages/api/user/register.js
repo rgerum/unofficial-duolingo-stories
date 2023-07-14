@@ -1,6 +1,6 @@
 import query from "../../../lib/db"
 const {phpbb_hash} = require("./../../../lib/auth/hash_functions2");
-const { uuid } = require('uuidv4');
+import { v4 as uuid } from 'uuid';
 const nodemailer = require("nodemailer");
 
 export default async (req, res) => {

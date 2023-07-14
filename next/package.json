@@ -24,7 +24,7 @@
     "react-dom": "^18.2.0",
     "react-swipeable": "^7.0.0",
     "swr": "^2.0.3",
-    "uuidv4": "^6.2.13"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "^17",

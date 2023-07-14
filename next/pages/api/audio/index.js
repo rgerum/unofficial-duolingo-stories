@@ -1,7 +1,7 @@
 import {getToken} from "next-auth/jwt";
 import {audio_engines} from "../../../lib/audio";
 var fs = require('fs');
-const { uuid } = require('uuidv4');
+import { v4 as uuid } from 'uuid';
 
 async function mkdir(folderName) {
     return new Promise((resolve, reject) => {
