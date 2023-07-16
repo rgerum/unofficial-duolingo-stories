@@ -13,7 +13,7 @@ mydb = mysql.connector.connect(
 
 def move(source, target):
     if not Path(target).parent.exists():
-        Path(target).parent.mkdir(parent=True)
+        Path(target).parent.mkdir(parents=True)
     shutil.move(source, target)
 
 
