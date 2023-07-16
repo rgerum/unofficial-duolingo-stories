@@ -1,7 +1,7 @@
 import mysql.connector
 import re
 from pathlib import Path
-import shutils
+import shutil
 
 mydb = mysql.connector.connect(
   host="localhost",
@@ -13,11 +13,11 @@ mydb = mysql.connector.connect(
 def move(source, target):
     if not Path(target).parent.exits():
         Path(target).parent.mkdir(parent=True)
-    shutils.move(source, target)
+    shutil.move(source, target)
 
 
 os.chdir("../..")
-shutils.move("audio", "audio_old")
+shutil.move("audio", "audio_old")
 
 page = 10
 offset = 0
