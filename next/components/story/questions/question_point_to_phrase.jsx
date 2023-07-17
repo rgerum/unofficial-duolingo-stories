@@ -4,7 +4,6 @@ import styles_common from "../common.module.css"
 
 import {EditorHook} from "../editor_hooks";
 import useChoiceButtons from "./questions_useChoiceButtons";
-import HintLineContent from "../text_lines/line_hints";
 import {EditorContext, StoryContext} from "../story";
 import QuestionPrompt from "./question_prompt";
 
@@ -85,7 +84,7 @@ export default function QuestionPointToPhrase({progress, element}) {
                     <div className={styles.word_button+" "+get_color(buttonState[button_indices[index]])}
                          key={index} data-cy="point-button"
                          onClick={()=>click(button_indices[index])}>
-                        {part.text}
+                        {part.text.replace(/\{.*?}/g, "")}
                     </div>
                     /* if it is not selectable just display the text */
                     : <span key={index}>{part.text}</span>

@@ -72,7 +72,7 @@ export default function QuestionSelectPhrase({setUnhide, progress, element}) {
                 <button key={index} className={styles.answer_button+" "+get_color(buttonState[index])}
                         data-cy="select-button"
                         onClick={() => click(index)}>
-                    {answer.text ? answer.text : answer}
+                    {answer.text ? answer.text.replace(/\{.*?}/g, "") : answer.replace(/\{.*?}/g, "")}
                 </button>
             ))}
         </div>
