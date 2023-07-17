@@ -23,6 +23,12 @@
     overflow-y: scroll;
 }
 
+@media (max-width: 1080px) {
+    .dropdown > :last-child {
+        left: -50px;
+    }
+}
+
 .dropdown > :last-child > {
     height: 39px;
 }

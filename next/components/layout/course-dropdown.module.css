@@ -12,6 +12,8 @@
     height: 42px;
     border-bottom: 1px solid var(--header-border);
     text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .language_select_item svg {
     margin: 0;

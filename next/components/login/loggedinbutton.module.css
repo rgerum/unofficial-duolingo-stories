@@ -24,6 +24,10 @@
     font-size: 18px;
     font-weight: 700;
     text-transform: none;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .profile_dropdown_button:hover {

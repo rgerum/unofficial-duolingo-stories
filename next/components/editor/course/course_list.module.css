@@ -40,6 +40,11 @@
     color: var(--text-color);
     border-bottom: 1px solid var(--header-border);
 }
+.course_selection_course_name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 .course_selection_button_active {
     background: var(--body-background);
