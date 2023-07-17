@@ -61,7 +61,8 @@ export async function getStaticPaths({}) {
 
     let paths = [];
     for(let tag of tags) {
-        paths.push({params: {tag: tag.name}});
+        if(tag.name !== '')
+            paths.push({params: {tag: tag.name}});
     }
 
     // Pass data to the page via props
