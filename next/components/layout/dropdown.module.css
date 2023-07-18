@@ -20,7 +20,7 @@
     font-weight: bold;
     margin-top: 7px;
     text-transform: none;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 @media (max-width: 1080px) {
