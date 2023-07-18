@@ -4,8 +4,6 @@ import fs from "fs";
 
 const apiKey = process.env.GITHUB_APIKEY;
 
-const ssml = '<speak>Hello World! This is a sample TTS</speak>';
-
 export async function synthesizeSpeechGoogle(filename, voice_id, text) {
 //async function getAudio(apiKey, voiceLang, voiceName, ssml) {
     let [lang, region, voiceName] = voice_id.split("-", 2);
@@ -40,18 +38,25 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
             body: JSON.stringify(request),
         }
     );
-
+console.log("ssml", ssml)
     if (response.ok) {
         const { audioContent, timepoints } = await response.json();
 
         return new Promise((resolve, reject) => {
             if(filename === undefined) {
+                for(let mark_index in timepoints) {
+                    mark_index = mark_index*1;
+                    if(mark_index+1 < timepoints.length)
+                        marks[mark_index+1]["time"] = timepoints[mark_index]["timeSeconds"]*1000
+                }
                 resolve({marks: marks, content: audioContent});
             }
             fs.writeFile(filename, Buffer.from(audioContent, "base64"), () => {
                 //{"time":1025,"type":"word","start":14,"end":17,"value":"moe"}
                 for(let mark_index in timepoints) {
-                    marks[mark_index]["time"] = timepoints[mark_index]["timeSeconds"]*1000
+                    mark_index = mark_index*1;
+                    if(mark_index+1 < timepoints.length)
+                        marks[mark_index+1]["time"] = timepoints[mark_index]["timeSeconds"]*1000
                 }
                 resolve({output_file: filename, marks: marks});
             });
