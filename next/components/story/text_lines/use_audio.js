@@ -47,5 +47,5 @@ export default function useAudio(element, progress) {
     if(audio === undefined || !audio?.keypoints || !audio?.url)
         return [audioRange, undefined, ref, undefined];
 
-    return [audioRange, playAudio, ref, 'https://carex.uber.space/stories/'+audio.url];
+    return [audioRange, playAudio, ref, 'https://duostori.uber.space/'+audio.url];
 }
