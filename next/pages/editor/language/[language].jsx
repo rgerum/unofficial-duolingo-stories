@@ -11,6 +11,10 @@ import Login from "../../../components/login/login_dialog";
 import {getSession} from "next-auth/react";
 import EditorButton from "../../../components/editor/editor_button";
 
+import AudioPlay from "../../../components/story/text_lines/audio_play";
+import HintLineContent from "../../../components/story/text_lines/line_hints";
+import useAudio from "../../../components/story/text_lines/use_audio";
+
 export default function Page({language, speakers, avatar_names}) {
     // Render data...
     return <>
@@ -157,12 +161,45 @@ export function SpeakerEntry(props) {
     </tr>
 }
 
+
+
+let element_init = {
+    trackingProperties: {
+        line: 0
+    },
+    line: {
+
+        content:
+            {
+                "hintMap": [
+                ],
+                "hints": [
+                ],
+                "text": "",
+                "audio": {
+                    "ssml": {
+                        "text": "<speak>Jan is thuis met  zijn vrouw, Marian.</speak>",
+                        "speaker": "nl-NL-FennaNeural(pitch=x-low)",
+                        "id": 43,
+                        "inser_index": 1,
+                        "plan_text": "Jan is thuis met  zijn vrouw, Marian.",
+                        "plan_text_speaker_name": "nl-NL-FennaNeural(pitch=x-low)"
+                    },
+                    "url": "audio/xx.mp3",
+                    "keypoints": [
+                    ]
+                }
+            }
+    }
+}
 function AvatarNames({language, speakers, avatar_names}) {
     let [speakText, setSpeakText] = useState("");
     const [stored, setStored] = useState({});
 
     const [pitch, setPitch] = useState(2);
     const [speed, setSpeed] = useState(2);
+
+    let [element, setElement] = useState(element_init);
 
     function copyText(e, text) {
         let p = ["x-low", "low", "medium", "high", "x-high"][pitch];
@@ -243,6 +280,24 @@ function AvatarNames({language, speakers, avatar_names}) {
             audio.src = url;
             stored[id] = audio;
 
+            let tt = speakText.replace("$name", name).replace(/<.*?>/g, "");
+            element = {...element}
+            element.line.content = {...element.line.content}
+            element.line.content.text = tt;
+            element.line.content.audio.keypoints = []
+            let audioObject = ref.current;
+            audioObject.src = url;
+            //element.line.content.audio.url = url
+            // {audioStart: 50, rangeEnd: 3}
+            let last_pos = 0;
+            for(let marks of ssml_response.marks) {
+                last_pos += tt.substring(last_pos).indexOf(marks.value)
+                element.line.content.audio.keypoints.push(
+                    {audioStart: marks.time, rangeEnd: last_pos}
+                )
+            }
+            setElement(element);
+
             //stored[id] = new Audio("https://carex.uber.space/stories/audio/" + ssml_response["output_file"] + "?"+Math.random());
             setStored(stored);
         }
@@ -253,10 +308,21 @@ function AvatarNames({language, speakers, avatar_names}) {
         e.preventDefault();
     }
 
+    let [audioRange, playAudio, ref, url] = useAudio(element, 1)
+
     //if(avatars === undefined || speakers === undefined || language === undefined)
     //    return <Spinner/>
     return <>
         <div className={styles.speaker_list + " " + (speakers?.length > 0 ? "": styles.noVoices)}>
+
+
+            <audio ref={ref}>
+                <source src={url} type="audio/mp3" />
+            </audio>
+            <AudioPlay onClick={playAudio} />
+            <HintLineContent audioRange={audioRange} content={element.line.content} />
+
+
             <div>
                 <textarea className={styles.textarea} value={speakText} onChange={doSetSpeakText} style={{width: "100%"}}/>
             </div>
