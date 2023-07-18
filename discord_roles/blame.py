@@ -14,7 +14,10 @@ def get_commits_per_file(filename):
 def get_author_percentages(filename, ignore_rev=None):
     print(filename)
     if ignore_rev is None:
-        ignore_rev = get_commits_per_file(filename)[-1][0].decode()
+        try:
+            ignore_rev = get_commits_per_file(filename)[-1][0].decode()
+        except IndexError:
+            ignore_rev = None
     if ignore_rev:
         #print(subprocess.run(["git", "show", ignore_rev+":"+str(filename)], capture_output=True, text=True).stdout)
         base_file = [l.strip() for l in subprocess.run(["git", "show", ignore_rev+":"+str(filename)], capture_output=True, text=True).stdout.split("\n")]
