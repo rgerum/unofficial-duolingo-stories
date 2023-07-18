@@ -1,4 +1,4 @@
- mysql-connector-python
- pandas
- numpy
- discord
+mysql-connector-python
+pandas
+numpy
+discord
