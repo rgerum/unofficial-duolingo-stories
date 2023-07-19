@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useRef} from "react";
 import styles from "./line_hints.module.css"
 
 import {EditorContext} from "../story";
@@ -13,6 +13,33 @@ function splitTextTokens(text, keep_tilde=true) {
         //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
         return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}~]+)/)
 }
+
+function Tooltip({className, children}) {
+    const ref = useRef();
+    function onMouseEnter() {
+        let tooltipElement = ref.current.children[1];
+
+        // Calculate the position of the tooltip
+        const tooltipRect = tooltipElement.getBoundingClientRect();
+
+        let offset = 0;
+        if(tooltipElement.style.left.split(" ").length >= 2) {
+            offset = parseInt(tooltipElement.style.left.split(" ")[2].split("px)"));
+        }
+        // Check if the tooltip would be cut off on the right
+        if (tooltipRect.right + offset > window.innerWidth) {
+            tooltipElement.style.left = `calc(50% + ${window.innerWidth - tooltipRect.right - offset}px)`;
+        }
+        // check if the tooltip would be cuf off on the left
+        else if(tooltipRect.left - offset < 0) {
+            tooltipElement.style.left = `calc(50% + ${-tooltipRect.left + offset}px)`;
+        } else {
+            tooltipElement.style.left = `50%`;
+        }
+    }
+    return <span onMouseEnter={onMouseEnter} ref={ref} className={className}>{...children}</span>
+}
+
 
 export default function HintLineContent({content, audioRange, hideRangesForChallenge, unhide}) {
     hideRangesForChallenge = hideRangesForChallenge ? hideRangesForChallenge[0] : hideRangesForChallenge;
@@ -94,7 +121,7 @@ export default function HintLineContent({content, audioRange, hideRangesForChall
         if(editor)
             is_hidden = false;
 
-        elements.push(<span key={hint.rangeFrom + " "+hint.rangeTo+1} className={styles.word+" "+(is_hidden ? "" : (show_trans ? styles.tooltip_editor : styles.tooltip))}><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className={show_trans ? styles.tooltiptext_editor : styles.tooltiptext}>{content.hints[hint.hintIndex]}</span></span>)
+        elements.push(<Tooltip key={hint.rangeFrom + " "+hint.rangeTo+1} className={styles.word+" "+(is_hidden ? "" : (show_trans ? styles.tooltip_editor : styles.tooltip))}><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className={show_trans ? styles.tooltiptext_editor : styles.tooltiptext}>{content.hints[hint.hintIndex]}</span></Tooltip>)
         //addSplitWord(dom.append("span").attr("class", "word tooltip"), hint.rangeFrom, hint.rangeTo+1)
         //    .append("span").attr("class", "tooltiptext").text(content.hints[hint.hintIndex]);
         // advance the position
