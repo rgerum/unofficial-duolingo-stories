@@ -12,7 +12,7 @@ It is hosted at www.duostories.org and reproduces the story experience from the 
 The app is based on Next.js with React. It is currently in `next/next-all`.
 
 ## How to run locally
-Got to the folder `next/next-all`.
+Got to the folder `next/`.
 
 Install the npm packages
 ```
