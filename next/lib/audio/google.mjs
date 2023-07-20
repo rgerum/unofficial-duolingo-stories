@@ -45,6 +45,7 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
             if(filename === undefined) {
                 for(let mark_index in timepoints) {
                     mark_index = mark_index*1;
+                    marks[0]["time"] = 0;
                     if(mark_index+1 < timepoints.length)
                         marks[mark_index+1]["time"] = timepoints[mark_index]["timeSeconds"]*1000
                 }
@@ -54,6 +55,7 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
                 //{"time":1025,"type":"word","start":14,"end":17,"value":"moe"}
                 for(let mark_index in timepoints) {
                     mark_index = mark_index*1;
+                    marks[0]["time"] = 0;
                     if(mark_index+1 < timepoints.length)
                         marks[mark_index+1]["time"] = timepoints[mark_index]["timeSeconds"]*1000
                 }
