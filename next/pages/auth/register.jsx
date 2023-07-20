@@ -31,7 +31,6 @@ export async function fetch_post(url, data)
 }
 
 export async function register(data) {
-    console.log("register")
     // register a new user
     let response;
     try {

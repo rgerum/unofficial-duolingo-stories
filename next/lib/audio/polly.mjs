@@ -42,7 +42,6 @@ async function writeStream(filename, readable){
 
     // Listen for 'finish' event to know when the write is complete
         writable.on('finish', () => {
-            console.log('Write complete');
             resolve();
         });
     });

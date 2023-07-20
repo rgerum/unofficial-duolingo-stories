@@ -22,7 +22,6 @@ export default function Page({story, userdata}) {
         let data = await res.json();
         setStory(data);
     }
-    console.log(story_)
     return <>
         <Head>
             <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>

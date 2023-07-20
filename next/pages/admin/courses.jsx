@@ -12,7 +12,6 @@ import {course_list, course_tag_list} from "../api/admin/set_course";
 
 
 export async function setCourse(data) {
-    console.log("data", data)
     let res = await fetch_post(`/api/admin/set_course`, data);
     res = await res.text()
     return res;
@@ -111,7 +110,6 @@ function AttributeList(props) {
 
     function onChange(key, value) {
         data[key] = value === "" ? undefined : value;
-        console.log("onChange", key, value, data);
     }
     async function save() {
         await setCourse(data);

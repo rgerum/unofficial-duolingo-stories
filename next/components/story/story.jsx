@@ -69,7 +69,6 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
 
         let parts = storyElement.current.querySelectorAll("div.part:not([data-hidden=true])")
         let last = parts[parts.length - 1];
-        console.log("scroll into View", last,)
 
         if (!editor) {
             last.scrollIntoView({ behavior: 'smooth', block: 'center'});

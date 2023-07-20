@@ -41,19 +41,13 @@ export async function story_properties(id) {
 }
 
 async function set_story(data) {
-    console.log(data)
     let res = await update('story', data, ["public"]);
-    console.log("get", res, data)
     let answer = await story_properties(data.id);
-    console.log("get", res, data.id, answer)
     return answer;
 }
 
 async function remove_approval(data) {
-    console.log(data)
     let res = await query(`DELETE FROM story_approval WHERE id = ?;`, [data.approval_id]);
-    console.log("get", res, data)
     let answer = await story_properties(data.id);
-    console.log("get", res, data.id, answer)
     return answer;
 }

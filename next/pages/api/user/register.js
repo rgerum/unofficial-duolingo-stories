@@ -5,12 +5,9 @@ const nodemailer = require("nodemailer");
 
 export default async (req, res) => {
     try {
-        console.log("call")
         let ret = await reqister(req.body);
-        console.log("call", ret)
         if(ret?.status)
             return res.status(ret.status).send(ret?.message);
-        console.log("call end")
         return res.json(ret);//
     }
     catch (err) {
@@ -27,7 +24,6 @@ let transporter = nodemailer.createTransport({
 
 async function check_username(username, existing) {
     let result = await query("SELECT id, email FROM user WHERE LOWER(username) = LOWER(?)", [username]);
-    console.log("check_username->result", result, username, existing)
     if(existing) {
         if(result.length) {
             return result[0];
@@ -45,16 +41,12 @@ async function check_username(username, existing) {
 async function reqister({username, password, email}){
     // check username
     let username_check = await check_username(username, false);
-    console.log("username_check", username_check)
     if(username_check?.status)
         return username_check
 
-    console.log("hash")
     let password_hashed = await phpbb_hash(password);
-    console.log("hash", password_hashed)
     let activation_link = uuid();
     await query("INSERT INTO user (username, email, password, activation_link) VALUES(?, ?, ?, ?)", [username, email, password_hashed, activation_link]);
-    console.log("user inserted")
     transporter.sendMail({
         from: 'Unofficial Duolingo Stories <register@duostories.org>',
         to: email,

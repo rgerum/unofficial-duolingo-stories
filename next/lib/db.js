@@ -43,9 +43,6 @@ if(!process.env.NEXTAUTH_URL) {
         }
         values.push(data.id);
         let update_string = updates.join(", ");
-        console.log(`UPDATE ${table_name}
-                            SET ${update_string}
-                            WHERE id = ?;`, values)
         return await query(`UPDATE ${table_name}
                             SET ${update_string}
                             WHERE id = ?
@@ -107,7 +104,6 @@ else {
     }
 
     async function insert(table_name, data, mapping) {
-        console.log("insert", table_name, data, mapping);
         let values = [];
         let columns = [];
         let value_placeholders = [];

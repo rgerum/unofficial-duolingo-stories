@@ -87,7 +87,6 @@ function Editor({story_data, avatar_names, userdata}) {
 
     const [show_trans, set_show_trans] = React.useState(false);
     const [show_ssml, set_show_ssml] = React.useState();
-    console.log("show_trans", show_trans)
 
     const [editor_state, set_editor_state] = React.useState();
     const [story_state, set_story_state] = React.useState();
@@ -114,10 +113,8 @@ function Editor({story_data, avatar_names, userdata}) {
     }, [unsaved_changes]);
 
     React.useEffect(() => {
-        console.log("liser", unsaved_changes);
         if(!unsaved_changes)
             return;
-        console.log("add event liser")
         window.addEventListener('beforeunload', beforeunload)
         return () => window.removeEventListener('beforeunload', beforeunload);
     }, [unsaved_changes]);
@@ -173,7 +170,6 @@ function Editor({story_data, avatar_names, userdata}) {
                 last_lineno = lineno;
                 editor_text = stateX.doc.toString();
                 [story, story_meta, audio_insert_lines] = processStoryFile(editor_text, story_data.id, avatar_names);
-                console.log("storyMete", story)
                 let image = await getImage(story_meta.icon)
                 story.illustrations = {
                     active: image.active,

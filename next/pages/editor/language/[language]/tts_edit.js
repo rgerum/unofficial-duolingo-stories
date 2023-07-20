@@ -38,7 +38,6 @@ WORDS:
             id: language.id,
             tts_replace: data,
         };
-        console.log("save_tts_replace", d)
         let response = await fetch_post(`/api/editor/avatar/save_tts_replace`, d);
         if(response.status === 200)
             return await response.json();
@@ -79,7 +78,6 @@ WORDS:
         await save();
         let [text2, ] = transcribe_text(text, data);
         setText2(text2);
-        console.log(text2);
         return text2;
     }
     return <>

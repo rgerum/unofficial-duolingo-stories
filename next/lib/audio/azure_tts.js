@@ -31,7 +31,8 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
 
         var last_pos = 0;
         var marks = []
-        var boundaryEvent = (w, v) => {
+
+        synthesizer.wordBoundary = (w, v) => {
             //console.log(v)
             //console.log(text2.substring(last_pos))//
             last_pos = text2.substring(last_pos).search(v.privText) + last_pos
@@ -44,7 +45,6 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
             }
             marks.push(data);
         }
-        synthesizer.wordBoundary = boundaryEvent
 
         text = text.replace(/^<speak>/, "")
         text = text.replace(/<\/speak>$/, "")
@@ -90,7 +90,6 @@ async function getVoices() {
     let voices = await synthesizer.getVoicesAsync();
     let result_voices = [];
     for(let voice of voices.voices) {
-        console.log(voice)
         result_voices.push({
             language: voice.locale.split("-")[0],
             name: voice.shortName,
@@ -99,7 +98,6 @@ async function getVoices() {
             service: "Microsoft Azure",
         })
     }
-    console.log(result_voices);
     return result_voices;
 }
 

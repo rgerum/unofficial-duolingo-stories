@@ -11,7 +11,6 @@ import styles from "./profile.module.css"
 import styles2 from "./auth/register.module.css"
 
 function ProviderButton({d, value}) {
-    console.log(d, value);
     return <div className={styles.account}>
         <img alt="" loading="lazy" id="provider-logo" src={`https://authjs.dev/img/providers/${d}.svg`} width="24" height="24"/>
         <div>{d}: {value ? <span className={styles.linkedd}>Linked</span> : <span className={styles.link} onClick={() => signIn(d)}>Link</span>}</div>

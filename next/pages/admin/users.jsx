@@ -18,7 +18,6 @@ export async function setUserActivated(data) {
 }
 
 export async function setUserWrite(data) {
-    console.log("data", data)
     let res = await fetch_post(`/api/admin/set_user_write`, data);
     res = await res.text()
     return res;
@@ -130,7 +129,6 @@ export async function getServerSideProps(context) {
     }
 
     let users = await user_list();
-    console.log(users)
 
     return {
         props: {users},

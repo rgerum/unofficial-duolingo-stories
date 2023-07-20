@@ -11,7 +11,6 @@ import {fetch_post} from "../../lib/fetch_post";
 
 
 export async function setLanguage(data) {
-    console.log("data", data)
     let res = await fetch_post(`/api/admin/set_language`, data);
     res = await res.text()
     return res;
@@ -37,7 +36,6 @@ function AttributeList(props) {
 
     function onChange(key, value) {
         data[key] = value === "" ? undefined : value;
-        console.log("on change", data)
     }
     async function save() {
         await setLanguage(data);

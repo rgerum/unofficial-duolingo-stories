@@ -18,7 +18,6 @@ export default async function story_done(req, res) {
 }
 
 async function post_story_done({story_id, user_id}) {
-    console.log("post_story_done", story_id, user_id)
     if(!user_id) {
         await query(`INSERT INTO story_done (story_id) VALUES(?)`, [parseInt(story_id)]);
         return {message: 'done'}

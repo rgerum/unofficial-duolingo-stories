@@ -38,7 +38,6 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
             body: JSON.stringify(request),
         }
     );
-console.log("ssml", ssml)
     if (response.ok) {
         const { audioContent, timepoints } = await response.json();
 
@@ -112,7 +111,6 @@ async function getVoices() {
 
     if (response.ok) {
         const { voices } = await response.json();
-        console.log(`Voices: ${JSON.stringify(voices, null, 2)}`);
         let voices_result = [];
         for(let voice of voices) {
             voices_result.push({
@@ -123,7 +121,6 @@ async function getVoices() {
                 service: "Google TTS",
             })
         }
-        console.log(voices_result);
         return voices_result;
         // do something with voices
     } else {
