@@ -3,9 +3,9 @@ import pandas as pd
 
 mydb = mysql.connector.connect(
   host="localhost",
-  user="carex",
-  password="5hfW-18MSXgYvjrewhbP",
-  database="carex_stories"
+  user="duostori",
+  password="VtyX.sXIYeiHR_:vI.aa",
+  database="duostori"
 )
 
 def get_user_to_discord_mapping():
@@ -85,6 +85,23 @@ def get_milestone_grouped():
             print(i, author.number, f"({len(data0[data0.author == i])})", user_discord_id.get(i, "none"))
             if user_discord_id.get(i, None):
                 user_roles.append([user_discord_id.get(i), mile])
+        data = data[data.number < mile]
+    print(user_roles)
+    return user_roles
+
+def get_milestone_grouped2():
+    data, data0 = join_and_group_data()
+    milestones = [4, 8, 20, 40, 80, 120]
+
+    user_discord_id = get_user_to_discord_mapping()
+    user_roles = []
+    for mile in milestones[::-1]:
+        print("----", mile, 'stories', "----")
+        d = data[data.number >= mile]
+        for i, author in d.iterrows():
+            print(i, author.number, f"({len(data0[data0.author == i])})", user_discord_id.get(i, "none"))
+            if not user_discord_id.get(i, None):
+                user_roles.append([i, mile])
         data = data[data.number < mile]
     print(user_roles)
     return user_roles
