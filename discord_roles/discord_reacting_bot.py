@@ -45,13 +45,6 @@ class MyClient(discord.Client):
         if message.author == client.user:
                 return  # Ignore messages sent by the bot itself
 
-        duostories_id = get_duostories_id(message.author.id)
-        if get_duostories_id(message.author.id):
-            print("connected to duostories", get_duostories_id(message.author.id))
-        else:
-            print("not connected")
-
-
         # for the contributor request channel
         if getattr(message.channel, "parent", None) and message.channel.parent.id == 1133167220109877280:
             channel = message.channel
@@ -68,12 +61,6 @@ class MyClient(discord.Client):
                 await first_message.remove_reaction('🔗', client.user)
                 if message.id == first_message.id:
                     await message.channel.send("Please connect your Duostories account to your Discord account (on https://duostories.org/profile). Then post another message here and I will check again.")
-
-
-        print(f'Message from {message.author}: {message.content} {message.channel} {message.channel.id}')
-        if message.channel.id == 942888953781051412:
-            await message.add_reaction('👋')
-            await message.channel.send("?")
 
     async def check_reaction(self, reaction):
         # Check if the reacting user is a moderator
