@@ -108,6 +108,7 @@ class MyClient(discord.Client):
 
             if user_member and role_to_give:
                 await user_member.add_roles(role_to_give)
+                self.log(f"🧑‍💻️ I gave {user.name} the role {role_to_give.name}.")
                 print(f"Gave {user.name} the role: {role_to_give.name}")
 
                 duostories_id = get_duostories_id(user.id)
@@ -129,7 +130,13 @@ class MyClient(discord.Client):
             for role in roles_added:
                 if role.id == 941815741143977994:
                     print("update database")
-                    set_user_role(after.id, 1)
+                    try:
+                        set_user_role(after.id, 1)
+                        self.log(f"📝 added write permissions for {after.name}")
+                    except:
+                        self.log(f"⚠️ could not added write permissions for {after.name}, a database error occoured.")
+                else:
+                    self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
                 print(f"User {after.name} has been given the role: {role.name}")
 
             # Add your reaction logic here for when roles are added to a user.
@@ -139,11 +146,22 @@ class MyClient(discord.Client):
             for role in roles_removed:
                 if role.id == 941815741143977994:
                     print("update database")
-                    set_user_role(after.id, 0)
+                    try:
+                        set_user_role(after.id, 0)
+                        self.log(f"❌ removed write permissions for {after.name}")
+                    except:
+                        self.log(f"⚠️ could not remove write permissions for {after.name}, a database error occoured.")
+                else:
+                    self.log(f"⚠️ could not remove write permissions for {after.name}, account is not linked to duostories.")
                 print(f"User {after.name} has lost the role: {role.name}")
 
             # Add your reaction logic here for when roles are removed from a user.
             # For example, you could send a message or remove another role.
+
+    async def log(self, message):
+        channel = self.get_channel(1133529323396145172)
+        channel.send(message)
+
 
 intents = discord.Intents.default()
 intents.message_content = True
