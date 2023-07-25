@@ -4,31 +4,41 @@ from pathlib import Path
 import mysql.connector
 import pandas as pd
 
-mydb = mysql.connector.connect(
-  host="localhost",
-  user="duostori",
-  password="VtyX.sXIYeiHR_:vI.aa",
-  database="duostori"
-)
+class Database:
+    def __enter__(self):
+        mydb = mysql.connector.connect(
+          host="localhost",
+          user="duostori",
+          password="VtyX.sXIYeiHR_:vI.aa",
+          database="duostori"
+        )
+        self.mydb = mydb
+        return mydb
+
+    def __exit__(self, *args, **kwargs):
+        self.mydb.close()
+
 
 def get_duostories_id(discord_id):
-    mycursor = mydb.cursor()
-    mycursor.execute("""SELECT user_id FROM account WHERE provider = "discord" AND provider_account_id = %s LIMIT 1""", [discord_id])
-    myresult = mycursor.fetchall()
-    if len(myresult):
-        return myresult[0][0]
+    with Database() as mydb:
+        mycursor = mydb.cursor()
+        mycursor.execute("""SELECT user_id FROM account WHERE provider = "discord" AND provider_account_id = %s LIMIT 1""", [discord_id])
+        myresult = mycursor.fetchall()
+        if len(myresult):
+            return myresult[0][0]
 
 def set_user_role(discord_id, role):
-    # update the user
-    mycursor = mydb.cursor()
-    mycursor.execute(f"""UPDATE user SET role = {int(role)} WHERE user.id = (SELECT user_id FROM account WHERE provider = 'discord' AND provider_account_id = '{discord_id}' LIMIT 1);""")
-    myresult = mycursor.fetchall()
+    with Database() as mydb:
+        # update the user
+        mycursor = mydb.cursor()
+        mycursor.execute(f"""UPDATE user SET role = {int(role)} WHERE user.id = (SELECT user_id FROM account WHERE provider = 'discord' AND provider_account_id = '{discord_id}' LIMIT 1);""")
+        myresult = mycursor.fetchall()
 
-    # check
-    mycursor = mydb.cursor()
-    mycursor.execute("""SELECT user_id, role FROM account JOIN user ON user_id = user.id WHERE provider = "discord" AND provider_account_id = %s LIMIT 1""", [discord_id])
-    myresult = mycursor.fetchall()
-    print(myresult)
+        # check
+        mycursor = mydb.cursor()
+        mycursor.execute("""SELECT user_id, role FROM account JOIN user ON user_id = user.id WHERE provider = "discord" AND provider_account_id = %s LIMIT 1""", [discord_id])
+        myresult = mycursor.fetchall()
+        print(myresult)
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token obtained from the Discord Developer Portal.
 params = Path(__file__).parent / ".env.local"
@@ -95,7 +105,7 @@ class MyClient(discord.Client):
 
             if user_member and role_to_give:
                 await user_member.add_roles(role_to_give)
-                self.log(f"🧑‍💻️ I gave {user.name} the role {role_to_give.name}.")
+                await self.log(f"🧑‍💻️ I gave {user.name} the role {role_to_give.name}.")
                 print(f"Gave {user.name} the role: {role_to_give.name}")
 
                 duostories_id = get_duostories_id(user.id)
@@ -119,11 +129,12 @@ class MyClient(discord.Client):
                     print("update database")
                     try:
                         set_user_role(after.id, 1)
-                        self.log(f"📝 added write permissions for {after.name}")
-                    except:
-                        self.log(f"⚠️ could not added write permissions for {after.name}, a database error occoured.")
+                        await self.log(f"📝 added write permissions for {after.name}")
+                    except Exception as err:
+                        print(err)
+                        await self.log(f"⚠️ could not added write permissions for {after.name}, a database error occoured.")
                 else:
-                    self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
+                    await self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
                 print(f"User {after.name} has been given the role: {role.name}")
 
             # Add your reaction logic here for when roles are added to a user.
@@ -135,11 +146,12 @@ class MyClient(discord.Client):
                     print("update database")
                     try:
                         set_user_role(after.id, 0)
-                        self.log(f"❌ removed write permissions for {after.name}")
-                    except:
-                        self.log(f"⚠️ could not remove write permissions for {after.name}, a database error occoured.")
+                        await self.log(f"❌ removed write permissions for {after.name}")
+                    except Exception as err:
+                        print(err)
+                        await self.log(f"⚠️ could not remove write permissions for {after.name}, a database error occoured.")
                 else:
-                    self.log(f"⚠️ could not remove write permissions for {after.name}, account is not linked to duostories.")
+                    await self.log(f"⚠️ could not remove write permissions for {after.name}, account is not linked to duostories.")
                 print(f"User {after.name} has lost the role: {role.name}")
 
             # Add your reaction logic here for when roles are removed from a user.
@@ -147,7 +159,7 @@ class MyClient(discord.Client):
 
     async def log(self, message):
         channel = self.get_channel(1133529323396145172)
-        channel.send(message)
+        await channel.send(message)
 
 
 intents = discord.Intents.default()
