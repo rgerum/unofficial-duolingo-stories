@@ -1,7 +1,7 @@
 import React from "react";
 
-import Story from "../../../../../components/story/story";
-import {get_story} from "../../../../../pages/api/story/[story_id]";
+import Story from "components/story/story";
+import {get_story} from "pages/api/story/[story_id]";
 
 
 

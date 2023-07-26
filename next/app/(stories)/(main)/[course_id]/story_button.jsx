@@ -1,6 +1,6 @@
 import styles from "./story_button.module.css"
 import Link from "next/link";
-import {useUserStoriesDone} from "../../../../lib/hooks";
+import {useUserStoriesDone} from "lib/hooks";
 
 
 export default function StoryButton({story}) {

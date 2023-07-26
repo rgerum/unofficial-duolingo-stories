@@ -5,7 +5,6 @@ import query from "lib/db";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "pages/api/auth/[...nextauth]";
 import ProviderButton from "./button";
-import {redirect} from "next/navigation";
 import {signIn} from "next-auth/react";
 
 async function get_user_id_from_username(user_name) {

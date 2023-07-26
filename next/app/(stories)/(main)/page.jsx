@@ -76,7 +76,6 @@ export default async function Page({ }) {
 
     let courses = await get_courses();
 
-    let userdata = undefined;
     await sleep(2000);
 
     // Render data...

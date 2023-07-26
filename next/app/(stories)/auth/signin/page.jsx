@@ -1,9 +1,7 @@
 import { getServerSession } from "next-auth/next"
-import {authOptions} from "../../../pages/api/auth/[...nextauth]";
-import "../../../styles/global.css"
-import styles from "../register.module.css"
+import {authOptions} from "pages/api/auth/[...nextauth]";
+import "styles/global.css"
 import React from "react";
-import Link from "next/link";
 import { redirect } from 'next/navigation'
 import {LoginOptions} from "./login_options";
 

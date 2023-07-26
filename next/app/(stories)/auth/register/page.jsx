@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next"
-import {authOptions} from "../../../pages/api/auth/[...nextauth]";
-import "../../../styles/global.css"
+import {authOptions} from "pages/api/auth/[...nextauth]";
+import "styles/global.css"
 import styles from "../register.module.css"
 import React from "react";
 import Link from "next/link";
