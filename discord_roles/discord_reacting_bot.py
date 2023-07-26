@@ -71,8 +71,9 @@ class MyClient(discord.Client):
             if duostories_id:
                 await first_message.add_reaction('🔗')
                 await first_message.remove_reaction('✖️', client.user)
+                await first_message.remove_reaction('❌', client.user)
             else:
-                await first_message.add_reaction('✖️')
+                await first_message.add_reaction('❌')
                 await first_message.remove_reaction('🔗', client.user)
                 if message.id == first_message.id:
                     await message.channel.send("Please connect your Duostories account to your Discord account (on https://duostories.org/profile). Then post another message here and I will check again.")
