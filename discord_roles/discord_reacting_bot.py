@@ -45,7 +45,12 @@ params = Path(__file__).parent / ".env.local"
 params = {f.split("=")[0]:f.split("=")[1] for f in params.read_text().split("\n") if f != ''}
 
 TOKEN = params['DISCORD_TOKEN']
+CHANNEL_CONTRIBUTOR_REQUEST = 1132747276234792980
+#CHANNEL_CONTRIBUTOR_REQUEST = 1133167220109877280  # test channel
+CHANNEL_BOT_LOG = 1133529323396145172
 
+ROLE_MODERATOR = 735581436903424120
+ROLE_CONTRIBUTOR = 941815741143977994
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -56,7 +61,7 @@ class MyClient(discord.Client):
                 return  # Ignore messages sent by the bot itself
 
         # for the contributor request channel
-        if getattr(message.channel, "parent", None) and message.channel.parent.id == 1133167220109877280:
+        if getattr(message.channel, "parent", None) and message.channel.parent.id == CHANNEL_CONTRIBUTOR_REQUEST:
             channel = message.channel
             # get the applicants message
             first_message = await channel.fetch_message(channel.id)
@@ -74,7 +79,7 @@ class MyClient(discord.Client):
 
     async def check_reaction(self, reaction):
         # Check if the reacting user is a moderator
-        is_moderator = discord.utils.get(reaction.member.roles, id=735581436903424120)
+        is_moderator = discord.utils.get(reaction.member.roles, id=ROLE_MODERATOR)
 
         if reaction.member == client.user:
             return  # Ignore reactions on the bot's own messages
@@ -83,6 +88,16 @@ class MyClient(discord.Client):
 
             # Get the channel where the reaction occurred
             channel = client.get_channel(reaction.channel_id)
+
+            is_contributor_request_channel = False
+            try:
+                if channel.parent.id == CHANNEL_CONTRIBUTOR_REQUEST:
+                    is_contributor_request_channel = True
+            except AttributeError:
+                is_contributor_request_channel = False
+
+            if is_contributor_request_channel is False:
+                return None
 
             # Fetch the message using the message_id from the payload
             message = await channel.fetch_message(reaction.message_id)
@@ -101,7 +116,7 @@ class MyClient(discord.Client):
             guild = client.get_guild(reaction.guild_id)
             user_member = await guild.fetch_member(user.id)
 
-            role_to_give = discord.utils.get(guild.roles, id=941815741143977994)
+            role_to_give = discord.utils.get(guild.roles, id=ROLE_CONTRIBUTOR)
 
             if user_member and role_to_give:
                 await user_member.add_roles(role_to_give)
@@ -125,7 +140,7 @@ class MyClient(discord.Client):
 
         if roles_added:
             for role in roles_added:
-                if role.id == 941815741143977994:
+                if role.id == ROLE_CONTRIBUTOR:
                     print("update database")
                     try:
                         set_user_role(after.id, 1)
@@ -142,7 +157,7 @@ class MyClient(discord.Client):
 
         if roles_removed:
             for role in roles_removed:
-                if role.id == 941815741143977994:
+                if role.id == ROLE_CONTRIBUTOR:
                     print("update database")
                     try:
                         set_user_role(after.id, 0)
@@ -158,7 +173,7 @@ class MyClient(discord.Client):
             # For example, you could send a message or remove another role.
 
     async def log(self, message):
-        channel = self.get_channel(1133529323396145172)
+        channel = self.get_channel(CHANNEL_BOT_LOG)
         await channel.send(message)
 
 
