@@ -1,10 +1,10 @@
 import styles from "./story_button.module.css"
 import Link from "next/link";
-import {useUserStoriesDone} from "../../lib/hooks";
+import {useUserStoriesDone} from "../../../../lib/hooks";
 
 
 export default function StoryButton({story}) {
-    const {user_stories_done} = useUserStoriesDone();
+    const {user_stories_done} = false;// useUserStoriesDone();
 
     const done = user_stories_done && (user_stories_done?.indexOf(story.id) !== -1);
 

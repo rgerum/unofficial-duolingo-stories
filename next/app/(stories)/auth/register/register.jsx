@@ -1,7 +1,8 @@
+"use client"
 //import {LoginDialog} from "../components/login";
 import Head from "next/head";
 import React from "react";
-import styles from "./register.module.css"
+import styles from "../register.module.css"
 import Link from "next/link";
 
 export function useInput(def) {
@@ -14,6 +15,7 @@ export function useInput(def) {
     }
     return [value, set];
 } // Hook
+
 
 export async function fetch_post(url, data)
 {
@@ -108,29 +110,24 @@ export default function Register() {
             <link rel="canonical" href={`https://www.duostories.org/login`} />
         </Head>
 
-        <div id={styles.login_dialog}>
-            <Link href="/" id={styles.quit}></Link>
-            <div>
-                <h2>Sign up</h2>
-                <p>If you register you can keep track of the stories you have already finished.</p>
-                <p>Registration is optional, stories can be accessed even without login.</p>
-                {state === -1 ? <span className={styles.error}>{error}</span> : <></>}
-                {state === 2 ?
-                    <span className={styles.message}>{message}</span>
-                    :
-                    <>
-                        <input data-cy="username" value={usernameInput} onChange={usernameInputSetValue} type="text"
-                               placeholder="Username"/>
-                        <input data-cy="email" value={emailInput} onChange={emailInputSetValue}
-                               onKeyDown={handleKeypressSignup} type="email" placeholder="Email"/>
-                        <input data-cy="password" value={passwordInput} onChange={passwordInputSetValue}
-                               onKeyDown={handleKeypressSignup} type="password" placeholder="Password"/>
-                        <button data-cy="submit"  className={styles.button}
-                                onClick={register_button}>{state !== 1 ? "Sign up" : "..."}</button>
-                    </>
-                }
-                <p>Already have an account? <Link className={styles.link} href="/api/auth/signin">LOG IN</Link></p>
-            </div>
-        </div>
+            <h2>Sign up</h2>
+            <p>If you register you can keep track of the stories you have already finished.</p>
+            <p>Registration is optional, stories can be accessed even without login.</p>
+            {state === -1 ? <span className={styles.error}>{error}</span> : <></>}
+            {state === 2 ?
+                <span className={styles.message}>{message}</span>
+                :
+                <>
+                    <input data-cy="username" value={usernameInput} onChange={usernameInputSetValue} type="text"
+                           placeholder="Username"/>
+                    <input data-cy="email" value={emailInput} onChange={emailInputSetValue}
+                           onKeyDown={handleKeypressSignup} type="email" placeholder="Email"/>
+                    <input data-cy="password" value={passwordInput} onChange={passwordInputSetValue}
+                           onKeyDown={handleKeypressSignup} type="password" placeholder="Password"/>
+                    <button data-cy="submit"  className={styles.button}
+                            onClick={register_button}>{state !== 1 ? "Sign up" : "..."}</button>
+                </>
+            }
+            <p>Already have an account? <Link className={styles.link} href="/api/auth/signin">LOG IN</Link></p>
     </>
 }

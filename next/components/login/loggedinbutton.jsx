@@ -1,12 +1,14 @@
+'use client';
+
 import styles from "./loggedinbutton.module.css"
 import React, {useEffect, useState} from "react";
 import Dropdown from "../layout/dropdown";
-import {signOut, useSession} from "next-auth/react";
+import {signIn, signOut} from "next-auth/react";
 import Link from "next/link";
 
 
 function useDarkLight() {
-    const [activeTheme, setActiveTheme] = useState(document.body.dataset.theme);
+    const [activeTheme, setActiveTheme] = useState((typeof document !== 'undefined') ? document.body.dataset.theme : undefined);
     const inactiveTheme = activeTheme === "light" ? "dark" : "light";
     //...
 
@@ -18,8 +20,13 @@ function useDarkLight() {
     return {set: setActiveTheme, toggle: () => setActiveTheme(inactiveTheme), value: activeTheme}
 }
 
-export default function LoggedInButton({page, course_id}) {
-    const { data: session } = useSession();
+export function LogInButton() {
+    return <button onClick={() => signIn()} className={styles.button}
+                   data-cy="login-button" style={{float: "none"}}>Log in</button>
+}
+
+export default function LoggedInButton({page, course_id, session}) {
+    //const { data: session } = useSession();
     const controls = useDarkLight();
 
     let editor_link = "/editor"
@@ -30,7 +37,8 @@ export default function LoggedInButton({page, course_id}) {
         stories_link = "/"+course_id
 
     if(session === undefined)
-        return <></>
+        return <button onClick={() => signIn()} className={styles.button}
+                       data-cy="login-button" style={{float: "none"}}>Log in</button>
     return <Dropdown>
         <div className={styles.round} style={session.user?.image ? { backgroundImage: `url('${session.user?.image}')` } : {}}>{session.user.name.substring(0, 1)}</div>
         <div>

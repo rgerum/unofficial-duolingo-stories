@@ -2,6 +2,16 @@ import styles from "./course_list.module.css"
 import LanguageButton from "./language_button";
 
 export default function CourseList({courses}) {
+
+    if(!courses) {
+        return <div className={styles.course_list}>
+            <hr/>
+            <div className={styles.course_group_name}><span className={styles.loading}>&nbsp;</span></div>
+            {[...Array(5)].map((d, i) =>
+                <LanguageButton key={i}/>
+            )}
+        </div>
+    }
     return <>{Object.entries(courses).map(([name,]) => (
         <div className={styles.course_list} key={name}>
             <hr/>
