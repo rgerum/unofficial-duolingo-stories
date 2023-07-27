@@ -7,7 +7,7 @@ export default function Login() {
     return <>
         <Head>
             <title>Duostories Login</title>
-            <link rel="canonical" href={`https://www.duostories.org/login`} />
+            <link rel="canonical" href={`https://duostories.org/login`} />
         </Head>
 
     </>

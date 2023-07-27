@@ -16,7 +16,7 @@ function Page({courses, course, userdata, imports, from}) {
     return <>
         <Head>
             <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
-            <link rel="canonical" href={`https://www.duostories.org/editor/${course.id}/import/${from}`} />
+            <link rel="canonical" href={`https://duostories.org/editor/${course.id}/import/${from}`} />
             <meta name="description" content={`Contribute by translating stories.`}/>
             <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
         </Head>

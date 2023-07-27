@@ -11,7 +11,7 @@ export default function Page({courses, userdata}) {
     return <>
         <Head>
             <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
-            <link rel="canonical" href="https://www.duostories.org/admin" />
+            <link rel="canonical" href="https://duostories.org/admin" />
             <meta name="description" content={`Contribute by translating stories.`}/>
             <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
         </Head>

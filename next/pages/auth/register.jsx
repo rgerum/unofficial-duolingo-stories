@@ -105,7 +105,7 @@ export default function Register() {
     return <>
         <Head>
             <title>Duostories Login</title>
-            <link rel="canonical" href={`https://www.duostories.org/login`} />
+            <link rel="canonical" href={`https://duostories.org/login`} />
         </Head>
 
         <div id={styles.login_dialog}>

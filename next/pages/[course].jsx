@@ -12,7 +12,7 @@ export default function MainContentSetList({course}) {
 
     return <>
         <Head>
-            <link rel="canonical" href={`https://www.duostories.org/${course.short}`} />
+            <link rel="canonical" href={`https://duostories.org/${course.short}`} />
             <title>{`${course.learningLanguageName} Duolingo Stories`}</title>
             <meta name="description" content={`Improve your ${course.learningLanguageName} learning by community-translated Duolingo stories.`}/>
             <meta name="keywords" content={`${course.learningLanguageName}, language, learning, stories, Duolingo, community, volunteers`}/>

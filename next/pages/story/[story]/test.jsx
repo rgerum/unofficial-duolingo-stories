@@ -13,7 +13,7 @@ export default function Page({story}) {
     return <>
         <Head>
             <title>{`Duostories ${story.learningLanguageLong} from ${story.fromLanguageLong}: ${story.fromLanguageName}`}</title>
-            <link rel="canonical" href={`https://www.duostories.org/story/${story.id}`} />
+            <link rel="canonical" href={`https://duostories.org/story/${story.id}`} />
         </Head>
         <div id={styles.main}>
             <EditorContext.Provider value={{lineno: 3}}>

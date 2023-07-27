@@ -253,7 +253,7 @@ function Editor({story_data, avatar_names, userdata}) {
     return (<>
         <Head>
             <title>{`Duostories ${story_data.learningLanguageLong} from ${story_data.fromLanguageLong}: ${story_data.fromLanguageName}`}</title>
-            <link rel="canonical" href={`https://www.duostories.org/editor/story/${story_data.id}`} />
+            <link rel="canonical" href={`https://duostories.org/editor/story/${story_data.id}`} />
         </Head>
         <div id="body">
             <StoryEditorHeader story_data={story_data} userdata={userdata} unsaved_changes={unsaved_changes}

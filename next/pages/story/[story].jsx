@@ -21,7 +21,7 @@ export default function StoryMain({story}) {
     return <>
         <Head>
             <title>{`Duostories ${story.learningLanguageLong} from ${story.fromLanguageLong}: ${story.fromLanguageName}`}</title>
-            <link rel="canonical" href={`https://www.duostories.org/story/${story.id}`} />
+            <link rel="canonical" href={`https://duostories.org/story/${story.id}`} />
         </Head>
         <Story story={story} storyFinishedIndexUpdate={storyFinishedIndexUpdate} router={router} />
     </>

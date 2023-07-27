@@ -7,7 +7,7 @@ import {activate} from "../../api/user/activate";
 export default function UserActivationOrReset({activated, username, hash}) {
     return <>
         <Head>
-            <link rel="canonical" href={`https://www.duostories.org/activate/${username}/${hash}`} />
+            <link rel="canonical" href={`https://duostories.org/activate/${username}/${hash}`} />
         </Head>
         <div id="login_dialog">
             <div>

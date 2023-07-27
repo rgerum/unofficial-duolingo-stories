@@ -74,7 +74,7 @@ export function UserActivationOrReset() {
 
     return <>
         <Helmet>
-            <link rel="canonical" href={`https://www.duostories.org/${task}/${username}/${hash}`} />
+            <link rel="canonical" href={`https://duostories.org/${task}/${username}/${hash}`} />
         </Helmet>
         {task === "activate" ?
     <div className={styles.login_dialog}>

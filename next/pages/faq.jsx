@@ -10,7 +10,7 @@ export default function Faq() {
 
     return <>
         <Head>
-            <link rel="canonical" href={`https://www.duostories.org/faq`} />
+            <link rel="canonical" href={`https://duostories.org/faq`} />
             <title>Duostories FAQ</title>
             <meta name="description" content={`Information about the duostories project.`}/>
         </Head>

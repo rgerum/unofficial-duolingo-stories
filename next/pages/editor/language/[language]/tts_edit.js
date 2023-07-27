@@ -83,7 +83,7 @@ WORDS:
     return <>
         <Head>
             <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
-            <link rel="canonical" href={`https://www.duostories.org/editor/language/${language.id}`} />
+            <link rel="canonical" href={`https://duostories.org/editor/language/${language.id}`} />
             <meta name="description" content={`Contribute by translating stories.`}/>
             <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
         </Head>
