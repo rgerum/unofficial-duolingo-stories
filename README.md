@@ -7,7 +7,7 @@ This project brings the official Duolingo Stories to new languages, translated b
 
 It is *not* an official product of Duolingo, nor is there any plan to integrate it into their platform or app.
 
-It is hosted at www.duostories.org and reproduces the story experience from the official Duolingo stories.
+It is hosted at https://duostories.org and reproduces the story experience from the official Duolingo stories.
 
 The app is based on Next.js with React. It is currently in `next/next-all`.
 
