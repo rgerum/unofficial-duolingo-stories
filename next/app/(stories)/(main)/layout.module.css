@@ -42,3 +42,14 @@
   width: 500px;
   height: 30px;
 }
+
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 300px);
+}
+
+.loading p {
+  text-align: center;
+}

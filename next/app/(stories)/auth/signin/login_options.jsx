@@ -3,7 +3,7 @@ import styles from "../register.module.css";
 import Link from "next/link";
 import {signIn} from "next-auth/react";
 import React from "react";
-import {useRouter} from "next/navigation";
+
 
 export function useInput(def) {
     let [value, setValue] = React.useState(def);
@@ -25,9 +25,9 @@ export function LoginOptions({providers}) {
 
     let [usernameInput, usernameInputSetValue] = useInput("");
     let [passwordInput, passwordInputSetValue] = useInput("");
-    let [emailInput, emailInputSetValue] = useInput("");
+    //let [emailInput, emailInputSetValue] = useInput("");
 
-
+    /*
     let error_codes = {
         "OAuthSignin": "Try signing in with a different account.",
         "OAuthCallback": "Try signing in with a different account.",
@@ -40,6 +40,7 @@ export function LoginOptions({providers}) {
         "SessionRequired": "Please sign in to access this page.",
         "Default": "Unable to sign in."}
     const router = useRouter();
+     */
     let error = "";//error_codes[router.query["error"]];
 
 
@@ -75,7 +76,7 @@ export function LoginOptions({providers}) {
                         <hr/>*/}
         {Object.values(providers).map((provider) => ( (provider.id !== "email" && provider.id !== "credentials") ?
                 <button key={provider.id} className={styles.button2} onClick={() => signIn(provider.id)}>
-                    <img loading="lazy" id="provider-logo" src={`https://authjs.dev/img/providers/${provider.id}.svg`} width="24" height="24"/>
+                    <img alt="" loading="lazy" id="provider-logo" src={`https://authjs.dev/img/providers/${provider.id}.svg`} width="24" height="24"/>
                     <span>{provider.name}</span>
                 </button>
                 : <span key={provider.id}></span>

@@ -1,11 +1,10 @@
-import MainTitle from "../main_title";
-import TitleDesc from "../title_desc";
 import styles from "./profile.module.css"
 import query from "lib/db";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "pages/api/auth/[...nextauth]";
 import ProviderButton from "./button";
 import {signIn} from "next-auth/react";
+import Header from "../header";
 
 async function get_user_id_from_username(user_name) {
     let res = await query(`SELECT id FROM user WHERE username = ?`, [user_name]);
@@ -47,12 +46,12 @@ export default async function Page() {
 
     console.log(providers.role);
     return <>
-        <header>
-            <MainTitle>Profile</MainTitle>
-            <TitleDesc>
+        <Header>
+            <h1>Profile</h1>
+            <p>
                 Your user profile, its liked roles and linked login accounts.
-            </TitleDesc>
-        </header>
+            </p>
+        </Header>
         <div className={styles.profile}>
             <div>Username: <input value={providers.name}/></div>
             <div>Email: <input value={providers.email}/></div>

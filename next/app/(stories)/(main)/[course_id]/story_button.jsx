@@ -1,12 +1,23 @@
 import styles from "./story_button.module.css"
 import Link from "next/link";
-import {useUserStoriesDone} from "lib/hooks";
+//import {useUserStoriesDone} from "lib/hooks";
 
 
-export default function StoryButton({story}) {
-    const {user_stories_done} = false;// useUserStoriesDone();
+export default function StoryButton({story, done}) {
+    if(!story) {
+        return <div className={styles.button_story_parent}>
 
-    const done = user_stories_done && (user_stories_done?.indexOf(story.id) !== -1);
+            <div
+                className={styles.button_story_img + " " + styles.animated_background}
+                data-done={false}
+            >
+            </div>
+            <div className={styles.button_story_text+ " " + styles.animated_background}>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </div>
+
+        </div>
+    }
 
     return <Link
         data-cy={"story_button_"+story.id}
