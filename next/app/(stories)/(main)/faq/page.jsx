@@ -8,6 +8,12 @@ import Link from "next/link";
             <meta name="description" content={`Information about the duostories project.`}/>
         </Head>
  */
+export const metadata = {
+    title: 'Duostories FAQ',
+    description: 'Information about the duostories project.',
+    canonical: 'https://duostories.org/faq',
+};
+
 export default async function Page() {
 
     return <>

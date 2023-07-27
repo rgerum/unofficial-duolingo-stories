@@ -6,6 +6,11 @@ import ProviderButton from "./button";
 import {signIn} from "next-auth/react";
 import Header from "../header";
 
+
+export const metadata = {
+    canonical: 'https://duostories.org/profile',
+};
+
 async function get_user_id_from_username(user_name) {
     let res = await query(`SELECT id FROM user WHERE username = ?`, [user_name]);
     if(res.length)

@@ -8,12 +8,13 @@ import styles from './layout.module.css'
 import {authOptions} from "pages/api/auth/[...nextauth]";
 import CourseDropdown from "./course-dropdown";
 import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";
-/*
-*/
+
 
 export const metadata = {
-    title: 'Home',
-    description: 'Welcome to Next.js',
+    title: 'Duostories: improve your Duolingo learning with community translated Duolingo stories.',
+    description: 'Supplement your Duolingo course with community-translated Duolingo stories.',
+    canonical: 'https://duostories.org',
+    keywords: 'language, learning, stories, Duolingo, community, volunteers',
 };
 
 async function get_courses_user(user_name){
