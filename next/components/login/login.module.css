@@ -3,6 +3,7 @@
 
 .button {
     composes: button from "../layout/button.module.css";
+    cursor: pointer;
 }
 
 .login_dialog {

@@ -3,6 +3,7 @@ import React from "react";
 import query from "lib/db";
 
 import StoryWrapper from "./story_wrapper";
+import {notFound} from "next/navigation";
 
 
 export async function get_story(story_id) {
@@ -33,12 +34,42 @@ export async function get_story(story_id) {
     return data;
 }
 
-/*
-        <Head>
-            <title>{`Duostories ${story.learningLanguageLong} from ${story.fromLanguageLong}: ${story.fromLanguageName}`}</title>
-            <link rel="canonical" href={`https://www.duostories.org/story/${story.id}`} />
-        </Head>
- */
+
+export async function get_story_meta(course_id) {
+
+    const course_query = await query(`SELECT l1.short AS fromLanguage, l2.short AS learningLanguage, 
+              l1.name AS fromLanguageLong, l2.name AS learningLanguageLong, 
+              l1.rtl AS fromLanguageRTL, l2.rtl AS learningLanguageRTL, story.name AS fromLanguageName
+              FROM story 
+              JOIN course c on story.course_id = c.id 
+              LEFT JOIN language l1 ON l1.id = c.fromLanguage
+              LEFT JOIN language l2 ON l2.id = c.learningLanguage 
+              WHERE story.id = ?;
+        `, [course_id]);
+
+    if(course_query.length === 0)
+        return undefined;
+    return Object.assign({}, course_query[0]);
+}
+
+
+export async function generateMetadata({ params, searchParams }, parent) {
+    const story = await get_story_meta(params.story);
+
+    if(!story)
+        notFound();
+
+    const meta = await parent;
+
+    return {
+        title: `Duostories ${story.learningLanguageLong} from ${story.fromLanguageLong}: ${story.fromLanguageName}`,
+        alternates: {
+            canonical: `https://duostories.org/story/${params.story}`,
+        },
+        keywords: [story.learningLanguageLong, ...meta.keywords],
+    }
+}
+
 export default async function Page({params}) {
     const story = await get_story(params.story);
 

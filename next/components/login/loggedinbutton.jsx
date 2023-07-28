@@ -1,6 +1,7 @@
 'use client';
 
 import styles from "./loggedinbutton.module.css"
+import styles2 from "./login.module.css"
 import React, {useEffect, useState} from "react";
 import Dropdown from "../layout/dropdown";
 import {signIn, signOut} from "next-auth/react";
@@ -21,7 +22,7 @@ function useDarkLight() {
 }
 
 export function LogInButton() {
-    return <button onClick={() => signIn()} className={styles.button}
+    return <button onClick={() => signIn()} className={styles2.button}
                    data-cy="login-button" style={{float: "none"}}>Log in</button>
 }
 
@@ -37,7 +38,7 @@ export default function LoggedInButton({page, course_id, session}) {
         stories_link = "/"+course_id
 
     if(session === undefined)
-        return <button onClick={() => signIn()} className={styles.button}
+        return <button onClick={() => signIn()} className={styles2.button}
                        data-cy="login-button" style={{float: "none"}}>Log in</button>
     return <Dropdown>
         <div className={styles.round} style={session.user?.image ? { backgroundImage: `url('${session.user?.image}')` } : {}}>{session.user.name.substring(0, 1)}</div>

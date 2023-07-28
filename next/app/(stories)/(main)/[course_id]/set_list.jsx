@@ -3,6 +3,7 @@ import StoryButton from "./story_button";
 import query from "lib/db";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "pages/api/auth/[...nextauth]";
+import {notFound} from "next/navigation";
 
 export async function get_course_done(course_id, username) {
     const done_query = await query(`SELECT s.id FROM story_done JOIN story s on s.id = story_done.story_id WHERE user_id = (SELECT id FROM user WHERE username = ?) AND s.course_id = (SELECT id FROM course WHERE short = ?) GROUP BY s.id`, [username, course_id]);
@@ -84,6 +85,8 @@ export default async function SetList({course_id}) {
     }
 
     const course = await get_course(course_id);
+    if(!course)
+        notFound();
 
     return <div className={styles.story_list}>
         {course.about ?

@@ -13,8 +13,10 @@ import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";
 export const metadata = {
     title: 'Duostories: improve your Duolingo learning with community translated Duolingo stories.',
     description: 'Supplement your Duolingo course with community-translated Duolingo stories.',
-    canonical: 'https://duostories.org',
-    keywords: 'language, learning, stories, Duolingo, community, volunteers',
+    alternates: {
+        canonical: 'https://duostories.org',
+    },
+    keywords: ['language', 'learning', 'stories', 'Duolingo', 'community', 'volunteers'],
 };
 
 async function get_courses_user(user_name){
@@ -44,7 +46,7 @@ async function get_course_flags() {
     return all_courses_flags;
 }
 
-export default async function RootLayout({children}) {
+export default async function Layout({children}) {
     // @ts-ignore
     let all_courses_flags = await get_course_flags();
 
@@ -55,8 +57,7 @@ export default async function RootLayout({children}) {
         active_courses = await get_courses_user(session.user.name)
 
     return (
-        <html lang="en">
-        <body>
+            <>
             <nav className={styles.header_index}>
                 <Link href={"/"} className={styles.duostories_title} data-cy={"logo"}>Duostories</Link>
                 <div style={{marginLeft: "auto"}}></div>
@@ -71,7 +72,6 @@ export default async function RootLayout({children}) {
                 {children}
             </div>
             <Legal language_name={undefined} />
-        </body>
-        </html>
+            </>
     );
 }

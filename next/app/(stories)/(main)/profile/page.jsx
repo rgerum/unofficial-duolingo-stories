@@ -3,12 +3,13 @@ import query from "lib/db";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "pages/api/auth/[...nextauth]";
 import ProviderButton from "./button";
-import {signIn} from "next-auth/react";
 import Header from "../header";
 
 
 export const metadata = {
-    canonical: 'https://duostories.org/profile',
+    alternates: {
+        canonical: 'https://duostories.org/profile',
+    }
 };
 
 async function get_user_id_from_username(user_name) {
@@ -23,7 +24,7 @@ async function getLinkedProviders() {
     //const token = await getToken({ req })
     const session = await getServerSession(authOptions);
     if(!session)
-        await signIn();
+        return undefined;
     let user_id = await get_user_id_from_username(session.user.name);
     const req2 = await query(`SELECT provider FROM account WHERE user_id = ?`, [user_id]);
 
@@ -48,6 +49,13 @@ async function getLinkedProviders() {
 
 export default async function Page() {
     const providers = await getLinkedProviders();
+
+    if(providers === undefined) {
+        return <Header>
+            <p>Not Logged in</p>
+            <p>You need to be logged in to see your profile.</p>
+        </Header>
+    }
 
     console.log(providers.role);
     return <>

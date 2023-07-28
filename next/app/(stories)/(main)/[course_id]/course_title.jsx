@@ -4,6 +4,7 @@ import query from "lib/db";
 import Header from "../header";
 
 import styles from "./story_button.module.css"
+import {notFound} from "next/navigation";
 
 
 export async function get_course(course_id) {
@@ -44,6 +45,8 @@ export default async function CourseTitle({course_id}) {
         </>
     }
     const course = await get_course(course_id);
+    if(!course)
+        notFound();
     /*
      */
     return <>
