@@ -1,12 +1,8 @@
-import Head from 'next/head'
-
-import Layout from '../../components/admin/layout'
-import styles from "./index.module.css"
-import {getSession} from "next-auth/react";
-import {useInput} from "../../lib/hooks";
-import {Spinner} from "../../components/layout/spinner";
-import {fetch_post} from "../../lib/fetch_post";
-import {user_list} from "../api/admin/set_user_activate";
+'use client'
+import styles from "../index.module.css"
+import {useInput} from "lib/hooks";
+import {Spinner} from "components/layout/spinner";
+import {fetch_post} from "lib/fetch_post";
 import {useState} from "react";
 
 
@@ -99,38 +95,4 @@ export function UserList({users}) {
             </tbody>
         </table>
     </>
-}
-
-
-export default function Page({users, userdata}) {
-    return <>
-        <Head>
-            <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
-            <link rel="canonical" href="https://www.duostories.org/editor" />
-            <meta name="description" content={`Contribute by translating stories.`}/>
-            <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
-        </Head>
-        <Layout userdata={userdata}>
-            <UserList users={users} />
-        </Layout>
-    </>
-}
-
-
-
-export async function getServerSideProps(context) {
-    const session = await getSession(context);
-
-    if (!session) {
-        return {redirect: {destination: '/editor/login', permanent: false,},};
-    }
-    if (!session.user.admin) {
-        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
-    }
-
-    let users = await user_list();
-
-    return {
-        props: {users},
-    };
 }

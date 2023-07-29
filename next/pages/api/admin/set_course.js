@@ -28,12 +28,24 @@ async function query_obj(q, args) {
 }
 
 export async function course_list() {
-    return await query_obj(`SELECT course.id, course.learningLanguage, course.fromLanguage, course.public, course.official, course.name, course.about, course.conlang, course.short,
-       GROUP_CONCAT(course_tag.name SEPARATOR ',') AS tag_list
-FROM course
-LEFT JOIN course_tag_map ON course.id = course_tag_map.course_id
-LEFT JOIN course_tag ON course_tag.id = course_tag_map.course_tag_id
-GROUP BY course.id, course.short;`);
+    return await query_obj(`SELECT
+    course.id,
+    course.learningLanguage,
+    course.fromLanguage,
+    course.public,
+    course.official,
+    course.name,
+    course.about,
+    course.conlang,
+    course.short,
+    (
+        SELECT GROUP_CONCAT(course_tag.name, ',')
+        FROM course_tag_map
+        LEFT JOIN course_tag ON course_tag.id = course_tag_map.course_tag_id
+        WHERE course.id = course_tag_map.course_id
+    ) AS tag_list
+FROM course;
+`);
 }
 
 export async function course_tag_list() {
@@ -41,17 +53,17 @@ export async function course_tag_list() {
 }
 
 
-async function set_course(data, revalidate) {
+async function set_course(data) {
     if(data["official"] === undefined)
         data["official"] = 0;
-    let id = undefined;
+    let id;
     let tag_list = data["tag_list"];
     delete data["tag_list"];
     if(data.id === undefined) {
         id = await insert_query('course', data);
     }
     else {
-        let res = await update_query('course', data, ["learningLanguage", "fromLanguage", "public", "name", "official", "conlang", "about"]);
+        await update_query('course', data, ["learningLanguage", "fromLanguage", "public", "name", "official", "conlang", "about"]);
         id = data["id"];
     }
     // update the tags
@@ -79,8 +91,8 @@ async function set_course(data, revalidate) {
     // revalidate the page
     let response_course_id = await query(`SELECT short FROM course WHERE course.id = ?`, [id]);
     try {
-        let reval = revalidatePath(`/${response_course_id[0].short}`);
-        let reval2 = revalidatePath(`/`);
+        revalidatePath(`/${response_course_id[0].short}`);
+        revalidatePath(`/`);
     }
     catch (e) {
         console.log("revalidate error", e)

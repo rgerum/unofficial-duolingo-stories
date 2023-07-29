@@ -27,7 +27,7 @@ export default async function Layout({ children }) {
         <LayoutFlag courses={courses}/>
 
         {(session?.user) ?
-            <LoggedInButton page={"stories"} course_id={undefined} session={session}/> :
+            <LoggedInButton page={"editor"} course_id={undefined} session={session}/> :
             <LogInButton/>
         }
     </nav>

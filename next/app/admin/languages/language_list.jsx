@@ -1,13 +1,9 @@
-import Head from 'next/head'
-
-import Layout from '../../components/admin/layout'
-import {language_list} from "../api/admin/set_language";
-import styles from "./index.module.css"
-import {getSession} from "next-auth/react";
-import {useInput} from "../../lib/hooks";
-import {Spinner} from "../../components/layout/spinner";
-import Flag from "../../components/layout/flag";
-import {fetch_post} from "../../lib/fetch_post";
+'use client'
+import styles from "../index.module.css"
+import {useInput} from "lib/hooks";
+import {Spinner} from "components/layout/spinner";
+import Flag from "components/layout/flag";
+import {fetch_post} from "lib/fetch_post";
 
 
 export async function setLanguage(data) {
@@ -49,7 +45,7 @@ function AttributeList(props) {
         )}<td>{edit ? <span onClick={save}>[save]</span> : ""}</td></tr>
 }
 
-export function LanguageList({users}) {
+export default function LanguageList({users}) {
     const [search, setSearch] = useInput("");
 
     if(users === undefined)
@@ -95,35 +91,3 @@ export function LanguageList({users}) {
     </>
 }
 
-export default function Page({languages, userdata}) {
-    return <>
-        <Head>
-            <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
-            <link rel="canonical" href="https://www.duostories.org/editor" />
-            <meta name="description" content={`Contribute by translating stories.`}/>
-            <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
-        </Head>
-        <Layout userdata={userdata}>
-            <LanguageList users={languages} />
-        </Layout>
-    </>
-}
-
-
-
-export async function getServerSideProps(context) {
-    const session = await getSession(context);
-
-    if (!session) {
-        return {redirect: {destination: '/editor/login', permanent: false,},};
-    }
-    if (!session.user.admin) {
-        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
-    }
-
-    let languages = await language_list();
-
-    return {
-        props: {languages},
-    };
-}

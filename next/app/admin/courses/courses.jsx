@@ -1,14 +1,10 @@
-import Head from 'next/head'
+'use client'
 import Link from "next/link";
-import Layout from '../../components/admin/layout'
-import {language_list} from "../api/admin/set_language";
-import styles from "./index.module.css"
-import {getSession} from "next-auth/react";
-import {useInput} from "../../lib/hooks";
-import {Spinner} from "../../components/layout/spinner";
-import Flag from "../../components/layout/flag";
-import {fetch_post} from "../../lib/fetch_post";
-import {course_list, course_tag_list} from "../api/admin/set_course";
+import styles from "../index.module.css"
+import {useInput} from "lib/hooks";
+import {Spinner} from "components/layout/spinner";
+import Flag from "components/layout/flag";
+import {fetch_post} from "lib/fetch_post";
 
 
 export async function setCourse(data) {
@@ -182,44 +178,10 @@ export function CourseList({users, languages}) {
     </>
 }
 
-function CourseTagList({course_tags}) {
+export function CourseTagList({course_tags}) {
     return <div>Tags:
         {course_tags.map((d)=> <span key={d.id} className={styles.tag}>{d.name}</span>)}
     </div>
 }
 
-export default function Page({courses, course_tags, languages, userdata}) {
-    return <>
-        <Head>
-            <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
-            <link rel="canonical" href="https://www.duostories.org/editor" />
-            <meta name="description" content={`Contribute by translating stories.`}/>
-            <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
-        </Head>
-        <Layout userdata={userdata}>
-            <CourseTagList course_tags={course_tags} />
-            <CourseList users={courses} languages={languages} course_tags={course_tags} />
-        </Layout>
-    </>
-}
 
-
-
-export async function getServerSideProps(context) {
-    const session = await getSession(context);
-
-    if (!session) {
-        return {redirect: {destination: '/editor/login', permanent: false,},};
-    }
-    if (!session.user.admin) {
-        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
-    }
-
-    let courses = await course_list();
-    let course_tags = await course_tag_list();
-    let languages = await language_list();
-
-    return {
-        props: {courses, course_tags, languages},
-    };
-}

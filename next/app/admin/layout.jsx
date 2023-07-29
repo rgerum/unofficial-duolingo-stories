@@ -1,10 +1,17 @@
 import Link from 'next/link'
-
+import {authOptions} from "pages/api/auth/[...nextauth]";
 import styles from './layout.module.css'
-import Login from "../login/login_dialog";
 import React from "react";
+import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";
+import {getServerSession} from "next-auth/next";
+import {redirect} from "next/navigation";
 
-export default function Layout({ children }) {
+
+export default async function Layout({ children }) {
+    const session = await getServerSession(authOptions);
+
+    if(!session?.user?.admin)
+        redirect('/auth/admin');
 
     return (
     <>
@@ -31,7 +38,10 @@ export default function Layout({ children }) {
             <span>Story</span>
         </Link>
         <div style={{marginLeft: "auto"}}></div>
-        <Login page={"admin"}/>
+        {(session?.user) ?
+            <LoggedInButton page={"admin"} course_id={undefined} session={session}/> :
+            <LogInButton/>
+        }
     </nav>
     <div className={styles.main_index}>
         {children}

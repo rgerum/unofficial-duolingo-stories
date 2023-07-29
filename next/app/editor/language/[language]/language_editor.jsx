@@ -42,7 +42,7 @@ export function Layout({ children, language_data, session }) {
                 <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
                 <div style={{marginLeft: "auto"}}></div>
                 {(session?.user) ?
-                    <LoggedInButton page={"stories"} course_id={undefined} session={session}/> :
+                    <LoggedInButton page={"editor"} course_id={undefined} session={session}/> :
                     <LogInButton/>
                 }
             </nav>
