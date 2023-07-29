@@ -4,17 +4,7 @@ import Head from "next/head";
 import React from "react";
 import styles from "../register.module.css"
 import Link from "next/link";
-
-export function useInput(def) {
-    let [value, setValue] = React.useState(def);
-    function set(e) {
-        let v = e?.target ? e?.target?.value : e;
-        if (v === null || v === undefined)
-            v = "";
-        setValue(v);
-    }
-    return [value, set];
-} // Hook
+import {useInput} from "lib/hooks"
 
 
 export async function fetch_post(url, data)
@@ -58,9 +48,6 @@ export async function register(data) {
 
 
 export default function Register() {
-    // <LoginDialog />
-    let [showLogin, setShowLogin] = React.useState(0);
-
     let [state, setState] = React.useState(0);
     let [error, setError] = React.useState("");
     let [message, setMessage] = React.useState("");
@@ -68,8 +55,6 @@ export default function Register() {
     let [usernameInput, usernameInputSetValue] = useInput("");
     let [passwordInput, passwordInputSetValue] = useInput("");
     let [emailInput, emailInputSetValue] = useInput("");
-
-    let [remember, setRememberX] = React.useState(false);
 
     async function register_button() {
         const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/

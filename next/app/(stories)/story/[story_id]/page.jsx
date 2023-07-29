@@ -54,7 +54,7 @@ export async function get_story_meta(course_id) {
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
-    const story = await get_story_meta(params.story);
+    const story = await get_story_meta(params.story_id);
 
     if(!story)
         notFound();
@@ -64,14 +64,14 @@ export async function generateMetadata({ params, searchParams }, parent) {
     return {
         title: `Duostories ${story.learningLanguageLong} from ${story.fromLanguageLong}: ${story.fromLanguageName}`,
         alternates: {
-            canonical: `https://duostories.org/story/${params.story}`,
+            canonical: `https://duostories.org/story/${params.story_id}`,
         },
         keywords: [story.learningLanguageLong, ...meta.keywords],
     }
 }
 
 export default async function Page({params}) {
-    const story = await get_story(params.story);
+    const story = await get_story(params.story_id);
 
     return <>
         <StoryWrapper story={story} />

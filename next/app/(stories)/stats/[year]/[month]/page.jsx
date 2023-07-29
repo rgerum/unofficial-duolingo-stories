@@ -62,9 +62,6 @@ function ref_by_course(data, data_old, key) {
 }
 
 export default async function Page({params}) {
-    // Fetch data from external API
-    //const res = await fetch(`https://test.duostories.org/stories/backend_node_test/story/${params.story}`)
-    //const story = await res.json()
     const data = await get_stats(params.year, params.month);
     data.year = parseInt(params.year);
     data.month = parseInt(params.month);

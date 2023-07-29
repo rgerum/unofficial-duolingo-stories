@@ -1,6 +1,5 @@
 import { getServerSession } from "next-auth/next"
 import {authOptions} from "pages/api/auth/[...nextauth]";
-import "styles/global.css"
 import React from "react";
 import { redirect } from 'next/navigation'
 import Register from "./register";
