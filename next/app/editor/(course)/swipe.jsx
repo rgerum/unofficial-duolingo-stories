@@ -3,7 +3,6 @@ import {useEffect, useState} from "react";
 import {useSwipeable} from "react-swipeable";
 import styles from "./course/[course_id]/index.module.css";
 import CourseList from "./course_list";
-import EditList from "./edit_list";
 
 
 export default function SwiperSideBar({courses, course_id, children}) {
@@ -17,8 +16,8 @@ export default function SwiperSideBar({courses, course_id, children}) {
     let toggleShow = () => setShowList(!showList);
 
     const handlers = useSwipeable({
-        onSwipedRight: (eventData) => setShowList(true),
-        onSwipedLeft: (eventData) => setShowList(false),
+        onSwipedRight: () => setShowList(true),
+        onSwipedLeft: () => setShowList(false),
     });
 
     return <>

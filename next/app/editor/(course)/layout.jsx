@@ -7,10 +7,10 @@ import {authOptions} from "pages/api/auth/[...nextauth]";
 import SwiperSideBar from "./swipe";
 import LayoutFlag from "./layout_flag";
 
-export default async function Layout({ children, course, import_id, toggleShow }) {
+export default async function Layout({ children }) {
 
     const session = await getServerSession(authOptions);
-    console.log("session", session)
+
     if (!session) {
         return {redirect: {destination: '/editor/login', permanent: false,},};
     }
@@ -18,7 +18,7 @@ export default async function Layout({ children, course, import_id, toggleShow }
         return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
     }
     let courses = await get_courses_ungrouped();
-    console.log(courses)
+
     return (
     <>
     <nav className={styles.header_index}>
