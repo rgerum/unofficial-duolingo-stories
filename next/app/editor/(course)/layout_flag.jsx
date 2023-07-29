@@ -2,8 +2,8 @@
 import styles from "./layout.module.css";
 import React from "react";
 import {useSelectedLayoutSegments} from "next/navigation";
-import {DoubleFlag} from "../../components/layout/flag";
-import EditorButton from "../../components/editor/editor_button";
+import {DoubleFlag} from "components/layout/flag";
+import EditorButton from "components/editor/editor_button";
 
 
 export default async function LayoutFlag({courses}) {
@@ -25,7 +25,7 @@ export default async function LayoutFlag({courses}) {
 
             />
             <span className={styles.AvatarEditorHeaderFlagname} data-cy="course-title">{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
-        </> : <>???</>
+        </> : <></>
     }
         <div style={{marginLeft: "auto"}}></div>
         {course ? <>{course.official ? <span className={styles.official} data-cy="label_official"><i>official</i></span> :

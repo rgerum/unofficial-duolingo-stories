@@ -1,5 +1,5 @@
 import { signIn } from "next-auth/react"
-import styles from "../auth/register.module.css"
+import styles from "app/auth/register.module.css"
 import Head from "next/head";
 import React from "react";
 import Link from "next/link";
