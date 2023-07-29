@@ -5,17 +5,17 @@ import {SpinnerBlue} from "components/layout/spinner";
 import {fetch_post} from "lib/fetch_post";
 import styles from "./[language].module.css"
 import Flag from "components/layout/flag";
-//import Login from "components/login/login_dialog";
-import EditorButton from "components/editor/editor_button";
+import EditorButton from "../../editor_button";
 
 import AudioPlay from "components/story/text_lines/audio_play";
 import HintLineContent from "components/story/text_lines/line_hints";
 import useAudio from "components/story/text_lines/use_audio";
+import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";
 
-export default function LanguageEditor({language, speakers, avatar_names}) {
+export default function LanguageEditor({language, speakers, avatar_names, session}) {
     // Render data...
     return <>
-        <Layout language_data={language}>
+        <Layout language_data={language} session={session}>
             <div className={styles.root + " " + styles.characterEditorContent}>
                 <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
             </div>
@@ -23,7 +23,7 @@ export default function LanguageEditor({language, speakers, avatar_names}) {
     </>
 }
 
-export function Layout({ children, language_data }) {
+export function Layout({ children, language_data, session }) {
     /*
     <CourseDropdown userdata={userdata} />
     <Login userdata={userdata} />
@@ -41,6 +41,10 @@ export function Layout({ children, language_data }) {
                 <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
                 <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
                 <div style={{marginLeft: "auto"}}></div>
+                {(session?.user) ?
+                    <LoggedInButton page={"stories"} course_id={undefined} session={session}/> :
+                    <LogInButton/>
+                }
             </nav>
             <div className={styles.main_index}>
                 {children}

@@ -16,7 +16,7 @@ import {processStoryFile} from "components/editor/story/syntax_parser_new";
 import usePrompt from "components/editor/story/usePrompt";
 
 import {useRouter} from "next/navigation";
-import {StoryEditorHeader} from "components/editor/story/components/header";
+import {StoryEditorHeader} from "./header";
 import {fetch_post} from "lib/fetch_post";
 import Head from "next/head";
 
@@ -64,7 +64,7 @@ export async function deleteStory(data) {
     return res;
 }
 
-export default function Editor({story_data, avatar_names, userdata}) {
+export default function Editor({story_data, avatar_names, session}) {
     const editor = React.useRef();
     const preview = React.useRef();
     const margin = React.useRef();
@@ -256,10 +256,10 @@ export default function Editor({story_data, avatar_names, userdata}) {
             <link rel="canonical" href={`https://www.duostories.org/editor/story/${story_data.id}`} />
         </Head>
         <div id="body">
-            <StoryEditorHeader story_data={story_data} userdata={userdata} unsaved_changes={unsaved_changes}
+            <StoryEditorHeader story_data={story_data} unsaved_changes={unsaved_changes}
                                func_save={func_save} func_delete={func_delete} show_trans={show_trans} set_show_trans={set_show_trans}
                                show_ssml={show_ssml} set_show_ssml={set_show_ssml}
-                               language_data={language_data} language_data2={language_data2}/>
+                               language_data={language_data} language_data2={language_data2} session={session}/>
             <div className={styles.root}>
                 <svg className={styles.margin} ref={svg_parent}>
                     <path d=""></path>

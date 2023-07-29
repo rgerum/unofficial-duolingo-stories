@@ -8,8 +8,8 @@ import Editor from "./editor"
 
 export default async function EditorNode({params}) {
     const session = await getServerSession(authOptions);
+    console.log(session)
 
-    const userdata = undefined;
     if (!session) {
         return {redirect: {destination: '/editor/login', permanent: false,},};
     }
@@ -28,5 +28,5 @@ export default async function EditorNode({params}) {
     let avatar_names = await getAvatarsList(story_data?.learningLanguage);
 
 
-    return <Editor story_data={story_data} avatar_names={avatar_names} userdata={userdata}/>
+    return <Editor story_data={story_data} avatar_names={avatar_names} session={session}/>
 }

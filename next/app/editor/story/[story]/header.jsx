@@ -1,15 +1,11 @@
-//window.editorShowTranslations = false
-//window.editorShowSsml = false
 import React from "react";
 import styles from "./header.module.css";
-import Link from "next/link";
-import {DoubleFlag} from "../../../layout/flag";
-import Login from "../../../login/login_dialog";
+import {DoubleFlag} from "components/layout/flag";
 import EditorButton from "../../editor_button";
+import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";
 
 export function StoryEditorHeader({
                                       story_data,
-                                      userdata,
                                       unsaved_changes,
                                       language_data,
                                       language_data2,
@@ -19,6 +15,7 @@ export function StoryEditorHeader({
                                       set_show_trans,
                                       show_ssml,
                                       set_show_ssml,
+                                      session,
                                   }) {
     //const [show_trans, set_show_trans] = React.useState(); // TODO window.editorShowTranslations
     function do_set_show_trans() {
@@ -96,7 +93,10 @@ export function StoryEditorHeader({
 
             <EditorButton id="button_save" onClick={Save} img={"save.svg"} text={save_text + (unsaved_changes ? "*" : "")} />
 
-
+            {(session?.user) ?
+                <LoggedInButton page={"stories"} course_id={undefined} session={session}/> :
+                <LogInButton/>
+            }
         </div>
         </div>
     </>

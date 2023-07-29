@@ -30,6 +30,6 @@ export default async function Page({params}) {
 
     // Render data...
     return <>
-        <LanguageEditor language={language} speakers={speakers} avatar_names={avatar_names}/>
+        <LanguageEditor language={language} speakers={speakers} avatar_names={avatar_names} session={session}/>
     </>
 }

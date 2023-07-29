@@ -3,7 +3,7 @@ import styles from "./layout.module.css";
 import React from "react";
 import {useSelectedLayoutSegments} from "next/navigation";
 import {DoubleFlag} from "components/layout/flag";
-import EditorButton from "components/editor/editor_button";
+import EditorButton from "../editor_button";
 
 
 export default async function LayoutFlag({courses}) {

@@ -1,11 +1,12 @@
 import styles from './layout.module.css'
-//import Login from "components/login/login_dialog";
 import React from "react";
 import {getServerSession} from "next-auth/next";
 import {get_courses_ungrouped} from "pages/api/course";
 import {authOptions} from "pages/api/auth/[...nextauth]";
 import SwiperSideBar from "./swipe";
 import LayoutFlag from "./layout_flag";
+import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";
+
 
 export default async function Layout({ children }) {
 
@@ -25,7 +26,10 @@ export default async function Layout({ children }) {
         <b>Course-Editor</b>
         <LayoutFlag courses={courses}/>
 
-
+        {(session?.user) ?
+            <LoggedInButton page={"stories"} course_id={undefined} session={session}/> :
+            <LogInButton/>
+        }
     </nav>
     <div className={styles.main_index}>
         <SwiperSideBar courses={courses}>

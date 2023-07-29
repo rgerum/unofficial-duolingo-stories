@@ -20,10 +20,10 @@ export default async function Page({params}) {
     if(!course)
         notFound();
 
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    await sleep(2000);
+    //function sleep(ms) {
+    //    return new Promise(resolve => setTimeout(resolve, ms));
+    //}
+    //await sleep(2000);
 
     return <EditList course={course} />
 }
