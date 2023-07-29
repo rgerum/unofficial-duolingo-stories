@@ -1,25 +1,25 @@
+'use client'
 import styles from "./[story].module.css"
 
 import React from 'react';
 
 import {basicSetup, EditorView} from "codemirror";
 import {EditorSelection, EditorState} from "@codemirror/state";
-import {example, highlightStyle} from "../../../components/editor/story/parser.mjs";
-import useScrollLinking from "../../../components/editor/story/scroll_linking";
-import useResizeEditor from "../../../components/editor/story/editor-resize";
+import {example, highlightStyle} from "components/editor/story/parser.mjs";
+import useScrollLinking from "components/editor/story/scroll_linking";
+import useResizeEditor from "components/editor/story/editor-resize";
 //import {SoundRecorder} from "./sound-recorder";
-import Story, {EditorContext} from "../../../components/story/story";
-import Cast from "../../../components/editor/story/cast";
+import Story, {EditorContext} from "components/story/story";
+import Cast from "components/editor/story/cast";
 
-import {processStoryFile} from "../../../components/editor/story/syntax_parser_new";
-import usePrompt from "../../../components/editor/story/usePrompt";
+import {processStoryFile} from "components/editor/story/syntax_parser_new";
+import usePrompt from "components/editor/story/usePrompt";
 
-import {get_story, getAvatarsList} from "../../api/editor/story/get";
-import {useRouter} from "next/router";
-import {StoryEditorHeader} from "../../../components/editor/story/components/header";
-import {fetch_post} from "../../../lib/fetch_post";
-import {getSession} from "next-auth/react";
+import {useRouter} from "next/navigation";
+import {StoryEditorHeader} from "components/editor/story/components/header";
+import {fetch_post} from "lib/fetch_post";
 import Head from "next/head";
+
 
 
 let images_cached = {};
@@ -64,7 +64,7 @@ export async function deleteStory(data) {
     return res;
 }
 
-function Editor({story_data, avatar_names, userdata}) {
+export default function Editor({story_data, avatar_names, userdata}) {
     const editor = React.useRef();
     const preview = React.useRef();
     const margin = React.useRef();
@@ -278,34 +278,4 @@ function Editor({story_data, avatar_names, userdata}) {
             </div>
         </div>
     </>);
-}
-
-export default function EditorNode({userdata, story_data, avatar_names}) {
-    return <Editor story_data={story_data} avatar_names={avatar_names} userdata={userdata}/>
-}
-
-export async function getServerSideProps(context) {
-    const session = await getSession(context);
-
-    if (!session) {
-        return {redirect: {destination: '/editor/login', permanent: false,},};
-    }
-    if (!session.user.role) {
-        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
-    }
-
-    //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
-    //let courses =  await response_courses.json();
-    let story_data = await get_story({id: context.params.story});
-
-    if(!story_data) {
-        return {
-            notFound: true,
-        }
-    }
-
-    let avatar_names = await getAvatarsList(story_data?.learningLanguage);
-
-    // Pass data to the page via props
-    return { props: { story_data, avatar_names } }
 }

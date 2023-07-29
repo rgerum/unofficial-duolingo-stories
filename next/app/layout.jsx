@@ -1,4 +1,5 @@
 import "@fontsource/nunito"
+import "styles/global.css"
 
 export default function RootLayout({children}) {
     return (

@@ -1,8 +1,9 @@
+'use client'
 import Link from "next/link";
 import {useState} from "react";
-import styles from "./edit_list.module.css"
-import {SpinnerBlue} from "../../layout/spinner";
-import {useRouter} from "next/router";
+import styles from "../../../../edit_list.module.css"
+import {SpinnerBlue} from "components/layout/spinner";
+import {useRouter} from "next/navigation";
 
 export async function setImport(id, course_id) {
     let response_json = await fetch(`/api/editor/set_import/${course_id}/${id}`, {credentials: 'include'});

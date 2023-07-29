@@ -1,29 +1,20 @@
-import Head from 'next/head'
-
+'use client'
 import React, {useState} from "react";
-import {useInput} from "../../../lib/hooks";
-import {get_avatar_names, get_language, get_speakers} from "../../api/editor/avatar/[language]";
-import {SpinnerBlue} from "../../../components/layout/spinner";
-import {fetch_post} from "../../../lib/fetch_post";
+import {useInput} from "lib/hooks";
+import {SpinnerBlue} from "components/layout/spinner";
+import {fetch_post} from "lib/fetch_post";
 import styles from "./[language].module.css"
-import Flag from "../../../components/layout/flag";
-import Login from "../../../components/login/login_dialog";
-import {getSession} from "next-auth/react";
-import EditorButton from "../../../components/editor/editor_button";
+import Flag from "components/layout/flag";
+//import Login from "components/login/login_dialog";
+import EditorButton from "components/editor/editor_button";
 
-import AudioPlay from "../../../components/story/text_lines/audio_play";
-import HintLineContent from "../../../components/story/text_lines/line_hints";
-import useAudio from "../../../components/story/text_lines/use_audio";
+import AudioPlay from "components/story/text_lines/audio_play";
+import HintLineContent from "components/story/text_lines/line_hints";
+import useAudio from "components/story/text_lines/use_audio";
 
-export default function Page({language, speakers, avatar_names}) {
+export default function LanguageEditor({language, speakers, avatar_names}) {
     // Render data...
     return <>
-        <Head>
-            <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
-            <link rel="canonical" href={`https://www.duostories.org/editor/language/${language.id}`} />
-            <meta name="description" content={`Contribute by translating stories.`}/>
-            <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
-        </Head>
         <Layout language_data={language}>
             <div className={styles.root + " " + styles.characterEditorContent}>
                 <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
@@ -50,14 +41,14 @@ export function Layout({ children, language_data }) {
                 <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
                 <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
                 <div style={{marginLeft: "auto"}}></div>
-                <Login page={"editor"}/>
             </nav>
             <div className={styles.main_index}>
                 {children}
             </div>
         </>
     )
-}
+}//                 <Login page={"editor"}/>
+
 
 export async function setAvatarSpeaker(data) {
     let response = await fetch_post(`/api/editor/avatar/set_avatar_speaker`, data);
@@ -265,7 +256,7 @@ function AvatarNames({language, speakers, avatar_names}) {
             //let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
             //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
             let response2 = await fetch_post(`/api/audio`,
-                    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
+                {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
             let ssml_response = await response2.json();
 
             let binaryString = window.atob(ssml_response.content);
@@ -332,20 +323,20 @@ function AvatarNames({language, speakers, avatar_names}) {
                 Speed: <input type="range" min="0" max="4" value={speed} id="speed" onChange={(e)=>setSpeed(parseInt(e.target.value))}/>
             </div>
             <div className={styles.tablecontainer}>
-            <table className={styles.story_list + " " +styles.voice_list} data-cy="voice_list" data-js-sort-table="true">
-                <thead>
-                <tr>
-                    <th style={{borderRadius: "10px 0 0 0"}} data-js-sort-colnum="0">Name</th>
-                    <th data-js-sort-colnum="1">Gender</th>
-                    <th style={{borderRadius: "0 10px 0 0"}} data-js-sort-colnum="2">Type</th>
-                </tr>
-                </thead>
-                <tbody>
-                {speakers.map((speaker, index) =>
-                    <SpeakerEntry key={index} copyText={copyText} speaker={speaker} play={play2} />
-                )}
-                </tbody>
-            </table>
+                <table className={styles.story_list + " " +styles.voice_list} data-cy="voice_list" data-js-sort-table="true">
+                    <thead>
+                    <tr>
+                        <th style={{borderRadius: "10px 0 0 0"}} data-js-sort-colnum="0">Name</th>
+                        <th data-js-sort-colnum="1">Gender</th>
+                        <th style={{borderRadius: "0 10px 0 0"}} data-js-sort-colnum="2">Type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {speakers.map((speaker, index) =>
+                        <SpeakerEntry key={index} copyText={copyText} speaker={speaker} play={play2} />
+                    )}
+                    </tbody>
+                </table>
             </div>
         </div>
         <div className={styles.avatar_editor + " " + (speakers?.length > 0? "": styles.noVoices)} style={{"overflowY": "scroll"}}>
@@ -363,31 +354,4 @@ function AvatarNames({language, speakers, avatar_names}) {
             </div>
         </div>
     </>
-}
-
-
-
-export async function getServerSideProps(context) {
-    const session = await getSession(context);
-
-    if (!session) {
-        return {redirect: {destination: '/editor/login', permanent: false,},};
-    }
-    if (!session.user.role) {
-        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
-    }
-
-    let language = await get_language(context.params.language);
-
-    if(!language) {
-        return {
-            notFound: true,
-        }
-    }
-
-    let speakers = await get_speakers(context.params.language);
-    let avatar_names = await get_avatar_names(context.params.language);
-
-    // Pass data to the page via props
-    return { props: { avatar_names, speakers, language } }
 }

@@ -3,7 +3,6 @@ import React from "react";
 import {getServerSession} from "next-auth/next";
 import Legal from "components/layout/legal";
 import query from "lib/db";
-import "styles/global.css"
 import styles from './layout.module.css'
 import {authOptions} from "pages/api/auth/[...nextauth]";
 import CourseDropdown from "./course-dropdown";

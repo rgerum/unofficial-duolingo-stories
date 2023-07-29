@@ -1,7 +1,8 @@
+'use client'
 import Link from "next/link";
-import Flag from "../../layout/flag";
+import Flag from "components/layout/flag";
 import styles from "./course_list.module.css"
-import {useInput} from "../../../lib/hooks";
+import {useInput} from "lib/hooks";
 
 
 export default function CourseList({courses, course_id, showList}) {
