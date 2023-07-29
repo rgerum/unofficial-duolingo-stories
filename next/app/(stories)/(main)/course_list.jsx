@@ -8,7 +8,7 @@ import styles from "./course_list.module.css"
 
 
 
-async function get_courses() {
+async function get_courses(tag) {
     let courses = await query(`
 SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name, course.short,
  l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
@@ -21,6 +21,22 @@ WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1
 GROUP BY course.id
 ORDER BY name;
     `);
+    if(tag) {
+        courses = await query(`
+SELECT ct.name, course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name, course.short,
+ l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
+ l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
+ COUNT(story.id) count, course.public, course.official, course.conlang FROM course
+JOIN course_tag_map ctm on course.id = ctm.course_id
+JOIN course_tag ct on ctm.course_tag_id = ct.id
+JOIN language l1 ON l1.id = course.fromLanguage
+JOIN language l2 ON l2.id = course.learningLanguage
+JOIN story ON (course.id = story.course_id)
+WHERE story.public = 1 AND story.deleted = 0 AND ct.name = ? AND course.public = 1
+GROUP BY course.id
+ORDER BY name;
+    `, [tag]);
+    }
     // sort courses by base language
     let base_languages = {};
     let languages = [];
@@ -51,7 +67,7 @@ ORDER BY name;
     return grouped_languages;
 }
 
-async function CourseListInner({loading}) {
+async function CourseListInner({loading, tag}) {
     if(loading) {
         return <div className={styles.course_list}>
             <hr/>
@@ -61,7 +77,7 @@ async function CourseListInner({loading}) {
             )}
         </div>
     }
-    let courses = await get_courses();
+    let courses = await get_courses(tag);
 
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -80,8 +96,8 @@ async function CourseListInner({loading}) {
     }</>
 }
 
-export default async function CourseList() {
+export default async function CourseList({tag}) {
     return <Suspense fallback={<CourseListInner loading={true} />}>
-        <CourseListInner />
+        <CourseListInner tag={tag}/>
     </Suspense>
 }
