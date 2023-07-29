@@ -20,16 +20,16 @@
     position: absolute;
     width: 30px;
     background: #ff4b4b;
-    border-radius: 5px 5px 0px 0px;
-    border-bottom: 0px;
+    border-radius: 5px 5px 0 0;
+    border-bottom: 0;
     bottom: 0;
 }
 .bar2 {
     position: absolute;
     width: 30px;
     background: #1cb0f6;
-    border-radius: 5px 5px 0px 0px;
-    border-bottom: 0px;
+    border-radius: 5px 5px 0 0;
+    border-bottom: 0;
     left: 13px;
     bottom: 0;
     z-index: -1;
@@ -38,7 +38,7 @@
     position: relative;
     border-bottom: 2px solid black;
     width: 46px;
-    padding: 0px 7px;
+    padding: 0 7px;
 }
 .language {
     align-items: center;

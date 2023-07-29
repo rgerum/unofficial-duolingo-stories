@@ -1,9 +1,8 @@
 import React from "react";
-import Head from 'next/head'
 
-import {get_stats} from "../../api/stats/[year]/[month]";
-import StatsElement from "../../../components/stats/stats_element";
-import StatsElement2 from "../../../components/stats/stats_element2";
+import {get_stats} from "./db_query";
+import StatsElement from "./stats_element";
+import StatsElement2 from "./stats_element2";
 
 
 function DataGroup({title, data, data_old, key_name}) {
@@ -62,7 +61,17 @@ function ref_by_course(data, data_old, key) {
     return refs;
 }
 
-export default function Stats({data, data_old}) {
+export default async function Page({params}) {
+    // Fetch data from external API
+    //const res = await fetch(`https://test.duostories.org/stories/backend_node_test/story/${params.story}`)
+    //const story = await res.json()
+    const data = await get_stats(params.year, params.month);
+    data.year = parseInt(params.year);
+    data.month = parseInt(params.month);
+    const data_old = await get_stats((params.month === 1) ? params.year-1 : params.year, (params.month === 1) ? 12 : params.month-1);
+    data_old.year = (params.month === 1) ? params.year-1 : params.year;
+    data_old.month = (params.month === 1) ? 12 : params.month-1;
+
     let courses = {};
     for(let c of data["courses"]) {
         courses[c.id] = c;
@@ -94,9 +103,6 @@ export default function Stats({data, data_old}) {
     }
 
     return <>
-        <Head>
-            <title>{`Duostories`}</title>
-        </Head>
         <div style={{width: "800px", margin: "auto 0"}}>
         <h1>Report {months[data.month]} {data.year}</h1>
         <DataGroup title={"Stories Published"} data={data} data_old={data_old} key_name={"stories_published"}/>
@@ -107,19 +113,4 @@ export default function Stats({data, data_old}) {
         {stats_course.map((c, i) => <StatsElement2 key={i} course={c}/>)}
         </div>
     </>
-}
-
-export async function getServerSideProps({params}) {
-    // Fetch data from external API
-    //const res = await fetch(`https://test.duostories.org/stories/backend_node_test/story/${params.story}`)
-    //const story = await res.json()
-    const data = await get_stats(params.year, params.month);
-    data.year = params.year;
-    data.month = params.month;
-    const data_old = await get_stats((params.month == 1) ? params.year-1 : params.year, (params.month == 1) ? 12 : params.month-1);
-    data_old.year = (params.month == 1) ? params.year-1 : params.year;
-    data_old.month = (params.month == 1) ? 12 : params.month-1;
-
-    // Pass data to the page via props
-    return { props: { data, data_old } }
 }

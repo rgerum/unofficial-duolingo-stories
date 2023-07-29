@@ -1,20 +1,12 @@
 "use client"
-import styles from "../register.module.css";
+import React from "react";
 import Link from "next/link";
 import {signIn} from "next-auth/react";
-import React from "react";
 
+import {useInput} from "lib/hooks"
 
-export function useInput(def) {
-    let [value, setValue] = React.useState(def);
-    function set(e) {
-        let v = e?.target ? e?.target?.value : e;
-        if (v === null || v === undefined)
-            v = "";
-        setValue(v);
-    }
-    return [value, set];
-} // Hook
+import styles from "../register.module.css";
+import {useSearchParams} from "next/navigation";
 
 
 export function LoginOptions({providers}) {
@@ -27,7 +19,7 @@ export function LoginOptions({providers}) {
     let [passwordInput, passwordInputSetValue] = useInput("");
     //let [emailInput, emailInputSetValue] = useInput("");
 
-    /*
+
     let error_codes = {
         "OAuthSignin": "Try signing in with a different account.",
         "OAuthCallback": "Try signing in with a different account.",
@@ -39,9 +31,8 @@ export function LoginOptions({providers}) {
         "CredentialsSignin": "Sign in failed. Check the details you provided are correct.",
         "SessionRequired": "Please sign in to access this page.",
         "Default": "Unable to sign in."}
-    const router = useRouter();
-     */
-    let error = "";//error_codes[router.query["error"]];
+    let query = useSearchParams();
+    let error = error_codes[query.get("error")];
 
 
 

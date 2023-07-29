@@ -1,14 +1,12 @@
-import Head from "next/head";
 import React from "react";
 import Link from "next/link";
-import {activate} from "../../api/user/activate";
+import {activate} from "./activate";
 
 
-export default function UserActivationOrReset({activated, username, hash}) {
+export default async function Page({params}) {
+    let activated = await activate(params);
+
     return <>
-        <Head>
-            <link rel="canonical" href={`https://www.duostories.org/activate/${username}/${hash}`} />
-        </Head>
         <div id="login_dialog">
             <div>
                 <h2>Activate account</h2>
@@ -28,9 +26,4 @@ export default function UserActivationOrReset({activated, username, hash}) {
             </div>
         </div>
     </>
-}
-
-export async function getServerSideProps({params}) {
-    let activated = await activate(params);
-    return { props: {activated, ...params}}
 }

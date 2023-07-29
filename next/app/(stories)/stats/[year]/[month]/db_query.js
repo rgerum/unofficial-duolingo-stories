@@ -1,15 +1,5 @@
-import query from "../../../../lib/db"
+import query from "lib/db"
 
-export default async function month(req, res) {
-    const { year, month } = req.query
-
-    let answer = await get_stats(year, month);
-
-    if(answer === undefined)
-        return res.status(404).test("Error not found");
-
-    return res.json(answer);
-}
 
 export async function get_stats(year, month) {
     let res = await query(`SELECT course_id, COUNT(s.course_id) AS count FROM story s
