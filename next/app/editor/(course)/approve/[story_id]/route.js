@@ -1,21 +1,25 @@
-import query, {update} from "../../../../lib/db"
+import query, {update} from "lib/db"
 import {getToken} from "next-auth/jwt";
+import {NextResponse} from "next/server";
 
 
-export default async function month(req, res) {
+export async function GET(req, {params: {story_id}}) {
     try {
-        const { story } = req.query
+        console.log("story_id", story_id)
         const token = await getToken({ req })
+        console.log("token",token)
+        if(!token.role)
+            return new Response("Error not allowed", {status: 403});
 
-        let answer = await set_approve({story_id: parseInt(story), user_id: token?.id, revalidate: res.revalidate});
+        let answer = await set_approve({story_id: parseInt(story_id), user_id: token?.id});
 
         if(answer === undefined)
-            return res.status(404).test("Error not found");
+            return new Response("Error not found", {status: 404});
 
-        return res.json(answer);
+        return NextResponse.json(answer);
     }
     catch (err) {
-        res.status(500).json({ message: err.message });
+        return new Response(err.message, {status: 500});
     }
 }
 
@@ -37,7 +41,7 @@ async function set_status(data) {
     return await update("story", data, ["status"]);
 }
 
-async function set_approve({story_id, user_id, revalidate}) {
+async function set_approve({story_id, user_id}) {
     let res = await query(`SELECT id FROM story_approval WHERE story_id = ? AND user_id = ?;`, [story_id, user_id]);
     let action;
     if(res.length) {
@@ -75,11 +79,6 @@ async function set_approve({story_id, user_id, revalidate}) {
             }
         }
     }
-    if(revalidate && published.length) {
-        let response_course_id = await query(`SELECT short FROM course WHERE course.id = (SELECT story.course_id FROM story WHERE story.id = ?)`, [story_id]);
-        console.log(`revalidate /${response_course_id[0].short}`)
-        await revalidate(`/${response_course_id[0].short}`);
-        await revalidate(`/`);
-    }
+
     return {count: count, story_status: status, finished_in_set: res3.length, action: action, published: published};
 }

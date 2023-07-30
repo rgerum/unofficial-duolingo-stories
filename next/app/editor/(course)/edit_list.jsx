@@ -103,7 +103,7 @@ function formatDate(datetime) {
 }
 
 export async function setApproval(data) {
-    let response = await fetch(`/api/editor/approve/${data.story_id}`);
+    let response = await fetch(`/editor/approve/${data.story_id}`);
     return await response.json();
 }
 
@@ -125,7 +125,7 @@ function DropDownStatus(props) {
                 let count = parseInt(response.count)
                 setCount(count)
                 if (response.published.length) {
-                    router.replace(router.asPath);
+                    router.refresh();
                 }
                 set_status(response.story_status);
                 setLoading(0);
