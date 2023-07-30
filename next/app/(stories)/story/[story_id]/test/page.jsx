@@ -1,5 +1,5 @@
 import React from "react";
-import {get_story} from "pages/api/story/[story_id]";
+import {get_story} from "../page";
 import StoryWrapper from "./story_wrapper";
 
 export default async function Page({params}) {

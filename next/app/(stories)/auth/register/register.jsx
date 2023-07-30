@@ -26,7 +26,7 @@ export async function register(data) {
     // register a new user
     let response;
     try {
-        response = await fetch_post(`/api/user/register`, data)
+        response = await fetch_post(`/auth/register/send`, data)
     }
         // something wrong :-(
     catch (e) {

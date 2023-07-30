@@ -1,17 +1,19 @@
-import query from "../../../lib/db"
-const {phpbb_hash} = require("./../../../lib/auth/hash_functions2");
+import query from "lib/db"
+const {phpbb_hash} = require("lib/auth/hash_functions2");
 import { v4 as uuid } from 'uuid';
+import {NextResponse} from "next/server";
 const nodemailer = require("nodemailer");
 
-export default async (req, res) => {
+export async function POST(req) {
     try {
-        let ret = await reqister(req.body);
+        const res = await req.json()
+        let ret = await register(res);
         if(ret?.status)
-            return res.status(ret.status).send(ret?.message);
-        return res.json(ret);//
+            return new Response(ret?.message, {status: ret.status})
+        return NextResponse.json(answer);
     }
     catch (err) {
-        res.status(500).json({ message: err.message });
+        return new Response(err.message, {status: 500})
     }
 }
 
@@ -38,7 +40,7 @@ async function check_username(username, existing) {
     }
 }
 
-async function reqister({username, password, email}){
+async function register({username, password, email}){
     // check username
     let username_check = await check_username(username, false);
     if(username_check?.status)

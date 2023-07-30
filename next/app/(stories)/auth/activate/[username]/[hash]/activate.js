@@ -1,16 +1,5 @@
 import query from "lib/db";
 
-export default async (req, res) => {
-    try {
-        let ret = await activate(req.body);
-        if(ret?.status)
-            return res.status(ret.status).send(ret?.message);
-        return res.json(ret);//
-    }
-    catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-}
 
 async function check_username(username, existing) {
     let result = await query("SELECT id, email FROM user WHERE LOWER(username) = LOWER(?)", [username]);
