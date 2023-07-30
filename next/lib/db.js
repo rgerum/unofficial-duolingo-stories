@@ -21,17 +21,31 @@ if(!process.env.NEXTAUTH_URL) {
         let columns = [];
         let value_placeholders = [];
         for (let key in data) {
-            if (mapping[key]) {
-                values.append(data[key]);
+            if(mapping.includes && mapping.includes(key)) {
+                values.push(data[key]);
+                columns.push(`${key}`);
+                value_placeholders.push(`?`);
+            }
+            else if (mapping[key]) {
+                values.push(data[key]);
                 columns.push(`${mapping[key]}`);
                 value_placeholders.push(`?`);
             }
         }
         let columns_string = columns.join(", ");
         let value_placeholders_string = value_placeholders.join(", ");
-        await query(`INSERT INTO ${table_name}
+
+        return new Promise((resolve, reject) => {
+            db.run(`INSERT INTO ${table_name}
                             (${columns_string})
-                            VALUES (${value_placeholders_string}) ;`, values);
+                            VALUES (${value_placeholders_string});`, values, function(err) {
+                if(err)
+                    reject(err);
+                else {
+                    resolve(this.lastID);
+                }
+            });
+        });
     }
 
     async function update(table_name, data) {
@@ -121,10 +135,11 @@ else {
         }
         let columns_string = columns.join(", ");
         let value_placeholders_string = value_placeholders.join(", ");
-        await query(`INSERT INTO ${table_name}
+        let new_entry = await query(`INSERT INTO ${table_name}
                             (${columns_string})
                             VALUES (${value_placeholders_string})
                             LIMIT 1;`, values);
+        return new_entry.insertId;
     }
 
     module.exports = query;

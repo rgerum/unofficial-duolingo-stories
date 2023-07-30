@@ -5,11 +5,10 @@ import {NextResponse} from "next/server";
 
 export async function GET(req, {params: {story_id}}) {
     try {
-        console.log("story_id", story_id)
         const token = await getToken({ req })
-        console.log("token",token)
+
         if(!token.role)
-            return new Response("Error not allowed", {status: 403});
+            return new Response("Error not allowed", {status: 401});
 
         let answer = await set_approve({story_id: parseInt(story_id), user_id: token?.id});
 

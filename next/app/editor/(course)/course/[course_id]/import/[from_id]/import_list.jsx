@@ -6,7 +6,7 @@ import {SpinnerBlue} from "components/layout/spinner";
 import {useRouter} from "next/navigation";
 
 export async function setImport(id, course_id) {
-    let response_json = await fetch(`/api/editor/set_import/${course_id}/${id}`, {credentials: 'include'});
+    let response_json = await fetch(`/editor/course/${course_id}/import/send/${id}`, {credentials: 'include'});
     let data = await response_json.json();
     return data.id;
 }
