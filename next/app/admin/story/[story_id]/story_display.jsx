@@ -10,12 +10,12 @@ export default function StoryDisplay({story}) {
 
     // Render data...
     async function changePublished() {
-        let res = await fetch_post(`/api/admin/set_story`, {id: story_.id, public: 1-story_.public});
+        let res = await fetch_post(`/admin/story/set`, {id: story_.id, public: 1-story_.public});
         let data = await res.json();
         setStory(data);
     }
     async function deleteApproval(approval_id) {
-        let res = await fetch_post(`/api/admin/set_story`, {id: story_.id, approval_id: approval_id});
+        let res = await fetch_post(`/admin/story/set`, {id: story_.id, approval_id: approval_id});
         let data = await res.json();
         setStory(data);
     }

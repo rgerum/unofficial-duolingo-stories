@@ -1,28 +1,29 @@
-import query from  "../../../lib/db";
+import query, {update} from "lib/db";
 import {getToken} from "next-auth/jwt";
-import {update} from  "../../../lib/db";
+import {NextResponse} from "next/server";
 
-export default async function api(req, res) {
+export async function POST(req) {
     try {
+        const data = await req.json();
         const token = await getToken({ req })
 
         if(!token?.admin)
-            return res.status(401).json("You need to be a registered admin.");
+            return new Response('You need to be a registered admin.', {status: 401})
 
         let answer;
-        if(req.body.approval_id) {
-            answer = await remove_approval(req.body, {username: token.name, user_id: token.id});
+        if(data.approval_id) {
+            answer = await remove_approval(data, {username: token.name, user_id: token.id});
         }
         else
-            answer = await set_story(req.body, {username: token.name, user_id: token.id});
+            answer = await set_story(data, {username: token.name, user_id: token.id});
 
         if(answer === undefined)
-            return res.status(404).test("Error not found");
+            return new Response('Error not found.', {status: 404})
 
-        return res.json(answer);
+        return NextResponse.json(answer);
     }
     catch (err) {
-        res.status(500).json({ message: err.message });
+        return new Response(err.message, {status: 500})
     }
 }
 
@@ -41,13 +42,11 @@ export async function story_properties(id) {
 }
 
 async function set_story(data) {
-    let res = await update('story', data, ["public"]);
-    let answer = await story_properties(data.id);
-    return answer;
+    await update('story', data, ["public"]);
+    return await story_properties(data.id);
 }
 
 async function remove_approval(data) {
-    let res = await query(`DELETE FROM story_approval WHERE id = ?;`, [data.approval_id]);
-    let answer = await story_properties(data.id);
-    return answer;
+    await query(`DELETE FROM story_approval WHERE id = ?;`, [data.approval_id]);
+    return await story_properties(data.id);
 }
