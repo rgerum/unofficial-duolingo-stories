@@ -6,7 +6,7 @@ import {notFound} from "next/navigation";
 import {getServerSession} from "next-auth/next";
 import Editor from "./editor"
 
-export default async function EditorNode({params}) {
+export default async function Page({params}) {
     const session = await getServerSession(authOptions);
     console.log(session)
 

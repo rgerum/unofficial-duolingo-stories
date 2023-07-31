@@ -6,16 +6,7 @@ import SetList from "./set_list";
 import {notFound} from "next/navigation";
 
 
-/*
-        <Head>
-            <link rel="canonical" href={`https://www.duostories.org/${course.short}`} />
-            <title>{`${course.learningLanguageName} Duolingo Stories`}</title>
-            <meta name="description" content={`Improve your ${course.learningLanguageName} learning by community-translated Duolingo stories.`}/>
-            <meta name="keywords" content={`${course.learningLanguageName}, language, learning, stories, Duolingo, community, volunteers`}/>
-        </Head>
- */
-
-export async function get_course(course_id) {
+async function get_course(course_id) {
 
     const course_query = await query(`SELECT l.name AS learningLanguageName FROM course
     JOIN language l on l.id = course.learningLanguage

@@ -22,20 +22,6 @@ export async function GET(req, {params: {story_id}}) {
     }
 }
 
-export async function updateX(table_name, data) {
-    let values = [];
-    let updates = [];
-    for(let key in data) {
-        values.push(data[key]);
-        updates.push(`${key} = ?`);
-    }
-    values.push(data.id);
-    let update_string = updates.join(", ");
-    return await query(`UPDATE ${table_name}
-                        SET ${update_string}
-                        WHERE id = ?;`, values);
-}
-
 async function set_status(data) {
     return await update("story", data, ["status"]);
 }

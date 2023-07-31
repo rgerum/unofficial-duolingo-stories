@@ -11,7 +11,7 @@ async function query_obj(q, args) {
     return res.map(d => {return {...d}});
 }
 
-export async function get_avatar_names(id, course_id) {
+async function get_avatar_names(id, course_id) {
     const isNumeric = value => value.length !== 0 && [...value].every(c => c >= '0' && c <= '9');
     if(!isNumeric(id)) {
         id = (await query_obj(`SELECT id FROM language WHERE short = ? LIMIT 1`, [id]))[0].id;
@@ -31,7 +31,7 @@ ORDER BY a.id
     }
 }
 
-export async function get_speakers(id) {
+async function get_speakers(id) {
     const isNumeric = value => value.length !== 0 && [...value].every(c => c >= '0' && c <= '9');
     if(!isNumeric(id)) {
         id = (await query_obj(`SELECT id FROM language WHERE short = ? LIMIT 1`, [id]))[0].id;
@@ -40,7 +40,7 @@ export async function get_speakers(id) {
     return await query_obj(`SELECT * FROM speaker WHERE language_id = ?`, [id]);
 }
 
-export async function get_language(id) {
+async function get_language(id) {
     const isNumeric = value => value.length !== 0 && [...value].every(c => c >= '0' && c <= '9');
     if(isNumeric(id)) {
         return (await query_obj(`SELECT * FROM language WHERE id = ? LIMIT 1`, [id]))[0];
@@ -48,10 +48,6 @@ export async function get_language(id) {
     else {
         return (await query_obj(`SELECT * FROM language WHERE short = ? LIMIT 1`, [id]))[0];
     }
-}
-
-export async function get_languages() {
-    return await query_obj(`SELECT id FROM language`);
 }
 
 export default async function Page({params}) {

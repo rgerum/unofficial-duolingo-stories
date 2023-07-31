@@ -7,7 +7,7 @@ async function query_obj(q, args) {
     return res.map(d => {return {...d}});
 }
 
-export async function course_list() {
+async function course_list() {
     return await query_obj(`SELECT
     course.id,
     course.learningLanguage,
@@ -28,11 +28,11 @@ FROM course;
 `);
 }
 
-export async function course_tag_list() {
+async function course_tag_list() {
     return await query_obj(`SELECT * FROM course_tag;`);
 }
 
-export async function language_list() {
+async function language_list() {
     return await query_obj(`SELECT * FROM language;`);
 }
 

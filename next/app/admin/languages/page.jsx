@@ -6,7 +6,7 @@ async function query_obj(q, args) {
     return res.map(d => {return {...d}});
 }
 
-export async function language_list() {
+async function language_list() {
     return await query_obj(`SELECT * FROM language;`);
 }
 

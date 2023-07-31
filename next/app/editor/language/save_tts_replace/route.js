@@ -22,6 +22,6 @@ export async function POST(req) {
     }
 }
 
-export async function set_avatar({id, tts_replace}) {
+async function set_avatar({id, tts_replace}) {
     return await update("language", {id, tts_replace}, ["tts_replace"]);
 }

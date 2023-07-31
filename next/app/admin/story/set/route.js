@@ -32,7 +32,7 @@ async function query_obj(q, args) {
     return res.map(d => {return {...d}});
 }
 
-export async function story_properties(id) {
+async function story_properties(id) {
     let data = (await query_obj(`SELECT story.id, story.name, story.image, story.public, course.short FROM story JOIN course ON course.id = story.course_id WHERE story.id = ?;`, [parseInt(id)]));
     if(data.length === 0)
         return undefined

@@ -23,7 +23,7 @@ export async function POST(req) {
     }
 }
 
-export async function set_avatar({id, name, speaker, language_id, avatar_id}) {
+async function set_avatar({id, name, speaker, language_id, avatar_id}) {
     let res = await query(`SELECT id FROM avatar_mapping WHERE language_id = ? AND avatar_id = ?;`, [language_id, avatar_id]);
 
     if(res.length) {
