@@ -7,14 +7,13 @@ import {useState} from "react";
 
 
 export async function setUserActivated(data) {
-    console.log("data", data)
-    let res = await fetch_post(`/api/admin/set_user_activate`, data);
+    let res = await fetch_post(`/admin/users/set/activate`, data);
     res = await res.text()
     return res;
 }
 
 export async function setUserWrite(data) {
-    let res = await fetch_post(`/api/admin/set_user_write`, data);
+    let res = await fetch_post(`/admin/users/set/write`, data);
     res = await res.text()
     return res;
 }
