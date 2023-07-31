@@ -1,69 +1,41 @@
-import query from  "../../../lib/db";
-import {insert_query, update_query} from "../../../lib/query_variants";
+import query from  "lib/db";
+import {insert, update} from "lib/db";
 import {getToken} from "next-auth/jwt";
 import { revalidatePath } from 'next/cache';
+import {NextResponse} from "next/server";
 
-export default async function api(req, res) {
+export async function POST(req, res) {
     try {
+        const data = await req.json();
         const token = await getToken({ req })
 
         if(!token?.admin)
-            return res.status(401).json("You need to be a registered admin.");
+            return new Response('You need to be a registered admin.', {status: 401})
 
-        let answer = await set_course(req.body, {username: token.name, user_id: token.id}, res.revalidate);
+        let answer = await route(data, {username: token.name, user_id: token.id}, res.revalidate);
 
         if(answer === undefined)
-            return res.status(404).test("Error not found");
+            return new Response('Error not found.', {status: 404})
 
-        return res.json(answer);
+        return NextResponse.json(answer);
     }
     catch (err) {
-        res.status(500).json({ message: err.message });
+        return new Response(err.message, {status: 500})
     }
 }
 
-async function query_obj(q, args) {
-    let res = await query(q, args);
-    return res.map(d => {return {...d}});
-}
 
-export async function course_list() {
-    return await query_obj(`SELECT
-    course.id,
-    course.learningLanguage,
-    course.fromLanguage,
-    course.public,
-    course.official,
-    course.name,
-    course.about,
-    course.conlang,
-    course.short,
-    (
-        SELECT GROUP_CONCAT(course_tag.name, ',')
-        FROM course_tag_map
-        LEFT JOIN course_tag ON course_tag.id = course_tag_map.course_tag_id
-        WHERE course.id = course_tag_map.course_id
-    ) AS tag_list
-FROM course;
-`);
-}
-
-export async function course_tag_list() {
-    return await query_obj(`SELECT * FROM course_tag;`);
-}
-
-
-async function set_course(data) {
+async function route(data) {
     if(data["official"] === undefined)
         data["official"] = 0;
     let id;
     let tag_list = data["tag_list"];
     delete data["tag_list"];
     if(data.id === undefined) {
-        id = await insert_query('course', data);
+        id = await insert('course', data);
     }
     else {
-        await update_query('course', data, ["learningLanguage", "fromLanguage", "public", "name", "official", "conlang", "about"]);
+        await update('course', data, ["learningLanguage", "fromLanguage", "public", "name", "official", "conlang", "about"]);
         id = data["id"];
     }
     // update the tags

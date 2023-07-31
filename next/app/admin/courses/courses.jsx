@@ -8,7 +8,7 @@ import {fetch_post} from "lib/fetch_post";
 
 
 export async function setCourse(data) {
-    let res = await fetch_post(`/api/admin/set_course`, data);
+    let res = await fetch_post(`/admin/courses/set`, data);
     res = await res.text()
     return res;
 }
