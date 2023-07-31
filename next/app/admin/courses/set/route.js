@@ -12,7 +12,7 @@ export async function POST(req, res) {
         if(!token?.admin)
             return new Response('You need to be a registered admin.', {status: 401})
 
-        let answer = await route(data, {username: token.name, user_id: token.id}, res.revalidate);
+        let answer = await set_course(data, {username: token.name, user_id: token.id}, res.revalidate);
 
         if(answer === undefined)
             return new Response('Error not found.', {status: 404})
@@ -25,7 +25,7 @@ export async function POST(req, res) {
 }
 
 
-async function route(data) {
+async function set_course(data) {
     if(data["official"] === undefined)
         data["official"] = 0;
     let id;

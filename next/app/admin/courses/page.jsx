@@ -1,5 +1,4 @@
 import query from  "lib/db";
-import {language_list} from "pages/api/admin/set_language";
 import {CourseTagList, CourseList} from "./courses";
 
 
@@ -31,6 +30,10 @@ FROM course;
 
 export async function course_tag_list() {
     return await query_obj(`SELECT * FROM course_tag;`);
+}
+
+export async function language_list() {
+    return await query_obj(`SELECT * FROM language;`);
 }
 
 export default async function Page({}) {
