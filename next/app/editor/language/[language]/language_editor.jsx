@@ -55,7 +55,7 @@ export function Layout({ children, language_data, session }) {
 
 
 export async function setAvatarSpeaker(data) {
-    let response = await fetch_post(`/api/editor/avatar/set_avatar_speaker`, data);
+    let response = await fetch_post(`/editor/language/set_avatar_speaker`, data);
     if(response.status === 200)
         return await response.json();
     throw "error";
