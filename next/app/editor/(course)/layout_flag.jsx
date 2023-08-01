@@ -6,7 +6,7 @@ import {DoubleFlag} from "components/layout/flag";
 import EditorButton from "../editor_button";
 
 
-export default async function LayoutFlag({courses}) {
+export default function LayoutFlag({courses}) {
     const segment = useSelectedLayoutSegments();
     let import_id = segment[4];
     let course = undefined;
@@ -17,9 +17,14 @@ export default async function LayoutFlag({courses}) {
             break;
         }
     }
+    function toggleShow() {
+        console.log("event")
+        const event = new Event("toggleSidebar");
+        window.dispatchEvent(event);
+    }
 // onClick={toggleShow}
     return <>{course ? <>
-            <DoubleFlag width={40}
+            <DoubleFlag width={40} onClick={toggleShow}
                         lang1={{short: course.learningLanguage, flag:course.learningLanguageFlag, flag_file:course.learningLanguageFlagFile}}
                         lang2={{short: course.fromLanguage, flag:course.fromLanguageFlag, flag_file:course.fromLanguageFlagFile}}
 

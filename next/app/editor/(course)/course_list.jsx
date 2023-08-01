@@ -3,10 +3,12 @@ import Link from "next/link";
 import Flag from "components/layout/flag";
 import styles from "./course_list.module.css"
 import {useInput} from "lib/hooks";
+import {useRouter} from "next/navigation";
 
 
-export default function CourseList({courses, course_id, showList}) {
+export default function CourseList({courses, course_id, showList, toggleShow}) {
     const [search, setSearch] = useInput("");
+    const router = useRouter();
 
     if(courses === undefined)
         return <div className={styles.languages}><Spinner/></div>;
@@ -37,7 +39,7 @@ export default function CourseList({courses, course_id, showList}) {
             {filtered_courses.map((course, index) =>
                 <div key={index}>
                     <Link className={styles.course_selection_button + " " + (course_id === course.id ? styles.course_selection_button_active : "")}
-                          href={`/editor/course/${course.short}`}
+                          href={`/editor/course/${course.short}`} onClick={()=>{router.push(`/editor/course/${course.short}`); toggleShow()}}
                     >
                         <span className={styles.course_count}>{course.count}</span>
                         <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} style={{margin: "3px"}}/>
