@@ -33,9 +33,12 @@
 }
 
 .loading {
-    display: block;
-    width: 20em;
-    height: 1em;
+    color: transparent;
+    font-weight: bold;
+    width: 100%;
+    padding-left: 5px;
+    font-size: 24px;
+
     animation-duration: 4s;
     animation-fill-mode: forwards;
     animation-iteration-count: infinite;

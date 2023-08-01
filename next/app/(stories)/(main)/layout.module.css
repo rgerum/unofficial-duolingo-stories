@@ -52,4 +52,6 @@
 
 .loading p {
   text-align: center;
+  font-size: 30px;
+  margin-bottom: -75px;
 }
