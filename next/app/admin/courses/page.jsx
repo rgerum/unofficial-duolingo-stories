@@ -1,14 +1,9 @@
-import query from  "lib/db";
+import {query_objs} from  "lib/db";
 import {CourseTagList, CourseList} from "./courses";
 
 
-async function query_obj(q, args) {
-    let res = await query(q, args);
-    return res.map(d => {return {...d}});
-}
-
 async function course_list() {
-    return await query_obj(`SELECT
+    return await query_objs(`SELECT
     course.id,
     course.learningLanguage,
     course.fromLanguage,
@@ -29,11 +24,11 @@ FROM course;
 }
 
 async function course_tag_list() {
-    return await query_obj(`SELECT * FROM course_tag;`);
+    return await query_objs(`SELECT * FROM course_tag;`);
 }
 
 async function language_list() {
-    return await query_obj(`SELECT * FROM language;`);
+    return await query_objs(`SELECT * FROM language;`);
 }
 
 export default async function Page({}) {

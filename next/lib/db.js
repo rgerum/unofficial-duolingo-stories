@@ -63,10 +63,34 @@ if(!process.env.NEXTAUTH_URL) {
                             ;`, values);
     }
 
+    async function query_one_obj(q, params) {
+        const res = await query(q, params);
+
+        if (res.length === 0)
+            return undefined;
+        return Object.assign({}, res[0]);
+    }
+
+    async function query_objs(q, params, key) {
+        const res = await query(q, params);
+
+        if(key) {
+            let result = {};
+            for(let q of res)
+                result[q[key]] = Object.assign({}, q);
+            return result;
+        }
+        let result = [];
+        for(let q of res)
+            result.push(Object.assign({}, q));
+        return result;
+    }
 
     module.exports = query;
     module.exports.insert = insert;
     module.exports.update = update;
+    module.exports.query_one_obj = query_one_obj;
+    module.exports.query_objs = query_objs;
 }
 else {
     const mysql = require("mysql");
@@ -142,7 +166,33 @@ else {
         return new_entry.insertId;
     }
 
+    async function query_one_obj(q, params) {
+        const res = await query(q, params);
+
+        if (res.length === 0)
+            return undefined;
+        return Object.assign({}, res[0]);
+    }
+
+    async function query_objs(q, params, key) {
+        const res = await query(q, params);
+
+        if(key) {
+            let result = {};
+            for(let q of res)
+                result[q[key]] = Object.assign({}, q);
+            return result;
+        }
+        let result = [];
+        for(let q of res)
+            result.push(Object.assign({}, q));
+        return result;
+    }
+
     module.exports = query;
     module.exports.insert = insert;
     module.exports.update = update;
+    module.exports.query_one_obj = query_one_obj;
+    module.exports.query_objs = query_objs;
 }
+

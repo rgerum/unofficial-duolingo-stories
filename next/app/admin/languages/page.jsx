@@ -1,13 +1,9 @@
-import query from  "lib/db";
+import {query_objs} from  "lib/db";
 import LanguageList from "./language_list";
 
-async function query_obj(q, args) {
-    let res = await query(q, args);
-    return res.map(d => {return {...d}});
-}
 
 async function language_list() {
-    return await query_obj(`SELECT * FROM language;`);
+    return await query_objs(`SELECT * FROM language;`);
 }
 
 

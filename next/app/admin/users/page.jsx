@@ -1,15 +1,9 @@
-import query from  "lib/db";
+import {query_objs} from  "lib/db";
 import {UserList} from "./users";
 
 
-
-async function query_obj(q, args) {
-    let res = await query(q, args);
-    return res.map(d => {return {...d}});
-}
-
 async function user_list() {
-    return await query_obj(`
+    return await query_objs(`
 SELECT
 user.id,
 user.username,

@@ -1,13 +1,7 @@
 import React from "react";
 import Link from "next/link";
 
-/*
-        <Head>
-            <link rel="canonical" href={`https://www.duostories.org/faq`} />
-            <title>Duostories FAQ</title>
-            <meta name="description" content={`Information about the duostories project.`}/>
-        </Head>
- */
+
 export const metadata = {
     title: 'Duostories FAQ',
     description: 'Information about the duostories project.',

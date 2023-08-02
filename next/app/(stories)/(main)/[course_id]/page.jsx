@@ -1,22 +1,23 @@
 import {Suspense} from "react";
-import query from "lib/db";
+import { cache } from 'react'
+import {query_one_obj} from "lib/db";
 
 import CourseTitle from "./course_title";
 import SetList from "./set_list";
 import {notFound} from "next/navigation";
 
 
-async function get_course(course_id) {
-
-    const course_query = await query(`SELECT l.name AS learningLanguageName FROM course
-    JOIN language l on l.id = course.learningLanguage
-  WHERE course.short = ?
+export const get_course = cache(async (course_id) => {
+    const course_query = await query_one_obj(`
+        SELECT l.name AS learningLanguageName FROM course
+        JOIN language l on l.id = course.learningLanguage
+        WHERE course.short = ? LIMIT 1
         `, [course_id]);
 
     if(course_query.length === 0)
         return undefined;
     return Object.assign({}, course_query[0]);
-}
+})
 
 
 export async function generateMetadata({ params, searchParams }, parent) {

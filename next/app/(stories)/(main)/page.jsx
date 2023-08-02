@@ -1,29 +1,19 @@
 import Link from "next/link";
-
-import query from "lib/db";
+import { cache } from 'react'
+import {query_one_obj} from "lib/db";
 
 import Header from "./header";
 import CourseList from "./course_list";
 
 
-async function get_counts() {
-    let res = await query(`SELECT COUNT(DISTINCT course.id) AS count_courses, COUNT(DISTINCT story.id) as count_stories FROM course
+export const get_counts = cache(async () => {
+    return await query_one_obj(`SELECT COUNT(DISTINCT course.id) AS count_courses, COUNT(DISTINCT story.id) as count_stories FROM course
 LEFT JOIN language l1 ON l1.id = course.fromLanguage
 LEFT JOIN language l2 ON l2.id = course.learningLanguage
 LEFT JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1`);
-    return Object.assign({}, res[0]);
-}
+WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1 LIMIT 1`);
+})
 
-
-/*
-<Head>
-            <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
-            <link rel="canonical" href="https://www.duostories.org" />
-            <meta name="description" content={`Supplement your Duolingo course with community-translated Duolingo stories.`}/>
-            <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
-        </Head>
- */
 
 export default async function Page({ }) {
     const counts = await get_counts();
