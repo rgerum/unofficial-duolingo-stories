@@ -7,7 +7,7 @@ import SetList from "./set_list";
 import {notFound} from "next/navigation";
 
 
-export const get_course = cache(async (course_id) => {
+const get_course = cache(async (course_id) => {
     const course_query = await query_one_obj(`
         SELECT l.name AS learningLanguageName FROM course
         JOIN language l on l.id = course.learningLanguage
