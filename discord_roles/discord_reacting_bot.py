@@ -36,9 +36,10 @@ def set_user_role(discord_id, role):
 
         # check
         mycursor = mydb.cursor()
-        mycursor.execute("""SELECT user_id, role FROM account JOIN user ON user_id = user.id WHERE provider = "discord" AND provider_account_id = %s LIMIT 1""", [discord_id])
+        mycursor.execute("""SELECT user_id, user.username, role FROM account JOIN user ON user_id = user.id WHERE provider = "discord" AND provider_account_id = %s LIMIT 1""", [discord_id])
         myresult = mycursor.fetchall()
         print(myresult)
+        return myresult[0]
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token obtained from the Discord Developer Portal.
 params = Path(__file__).parent / ".env.local"
@@ -144,8 +145,8 @@ class MyClient(discord.Client):
                 if role.id == ROLE_CONTRIBUTOR:
                     print("update database")
                     try:
-                        set_user_role(after.id, 1)
-                        await self.log(f"📝 added write permissions for {after.name}")
+                        result = set_user_role(after.id, 1)
+                        await self.log(f"📝 added write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]}")
                     except Exception as err:
                         print(err)
                         await self.log(f"⚠️ could not added write permissions for {after.name}, a database error occoured.")
@@ -161,8 +162,8 @@ class MyClient(discord.Client):
                 if role.id == ROLE_CONTRIBUTOR:
                     print("update database")
                     try:
-                        set_user_role(after.id, 0)
-                        await self.log(f"❌ removed write permissions for {after.name}")
+                        result = set_user_role(after.id, 0)
+                        await self.log(f"❌ removed write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]}")
                     except Exception as err:
                         print(err)
                         await self.log(f"⚠️ could not remove write permissions for {after.name}, a database error occoured.")
