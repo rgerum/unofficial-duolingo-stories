@@ -106,7 +106,7 @@ export default function HintLineContent({content, audioRange, hideRangesForChall
         return elements;
     }
 
-    var elements = [];
+    let elements = [];
     let text_pos = 0;
     // iterate over all hints
     for(let hint of content.hintMap) {

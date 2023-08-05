@@ -61,7 +61,7 @@ export default function Flag(props) {
         if(order[i] === (props.iso || "world"))
             flag = i;
     }
-    let count = parseInt(flag) * 66;
+    let count = Math.round(flag) * 66;
     let style = {
         width: (props.width || 88),
         height: 66/82*(props.width || 88),

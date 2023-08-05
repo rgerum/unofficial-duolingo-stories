@@ -2,13 +2,13 @@
 
 
 
-#main {
+.main {
     max-width: 500px;
     margin: 0 auto;
 }
 
 
-#story {
+.story {
     padding-top: 85px;
     /*padding-bottom: 50vh*/;
     user-select: none;
@@ -16,7 +16,7 @@
     padding-right: 16px;
 }
 
-#story .legal {
+.story .legal {
     font-size: 0.7em;
 }
 

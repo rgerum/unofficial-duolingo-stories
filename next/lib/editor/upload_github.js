@@ -2,7 +2,7 @@ const { Octokit } = require("@octokit/rest");
 
 const octokit = new Octokit({ auth: process.env.GITHUB_REPO_TOKEN });
 
-async function uploadWithDiffToGithub(repository, content, dst, authorName, authorEmail, gitMessage, branch = "heads/main") {
+async function uploadWithDiffToGithub(repository, content, dst, authorName, authorEmail, gitMessage) {
     let file_sha;
     try {
         // get the current SHA of the file
@@ -49,6 +49,9 @@ async function uploadWithDiffToGithub(repository, content, dst, authorName, auth
 
 
 async function upload_github(id, course_id, content, username, message, del=false) {
+    // only when the env variable is set (e.g. not in debug mode)
+    if(!process.env.GITHUB_REPO_TOKEN)
+        return
 
     if(del) {
         await uploadWithDiffToGithub("rgerum/unofficial-duolingo-stories-content", undefined, `${course_id}/${id}.txt`, `${username}`, `${username}@carex.uberspace.de`, message);

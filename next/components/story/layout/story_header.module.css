@@ -1,7 +1,7 @@
 
 /* header with progress bar */
 
-#progress {
+.progress {
     display: inline-block;
     background: var(--progress-back);
     width: 100%;
@@ -10,7 +10,7 @@
     border-radius: calc(var(--height)/2);
     height: var(--height);
 }
-#progress_inside {
+.progress_inside {
     display: block;
     width: 0;
     background: var(--progress-inside);
@@ -20,7 +20,7 @@
     transition: width 0.2s;
 }
 
-#progress_highlight {
+.progress_highlight {
     background: var(--progress-highlight);
     border-radius: inherit;
     height: 30%;
@@ -31,7 +31,7 @@
     position: absolute;
 }
 
-#header {
+.header {
     display: flex;
     align-items: center;
     padding: 45px 40px 40px;
@@ -44,7 +44,7 @@
     z-index: 10;
 }
 
-#header_icon {
+.header_icon {
     cursor: pointer;
     display: inline-block;
     margin-right: 20px;
@@ -53,27 +53,27 @@
 }
 
 @media (max-width:700px) {
-    #header {
+    .header {
         padding: 17px 20px;
         z-index: 2;
     }
-    #story {
+    .story {
         padding-top: 30px;
     }
 }
 
 
 @media (min-width: 1000px) {
-    #footer_content {
+    .footer_content {
         margin: 0 calc(50% - 500px);
     }
-    #header {
+    .header {
         margin: 0 calc(50% - 500px);
         max-width: 1000px;
     }
 }
 
-#quit {
+.quit {
     background-image: url(//d35aaqx5ub95lt.cloudfront.net/images/icon-sprite8.svg);
     background-position: -373px -154px;
     cursor: pointer;

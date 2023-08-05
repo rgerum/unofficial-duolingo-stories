@@ -36,10 +36,12 @@ def set_user_role(discord_id, role):
 
         # check
         mycursor = mydb.cursor()
-        mycursor.execute("""SELECT user_id, role FROM account JOIN user ON user_id = user.id WHERE provider = "discord" AND provider_account_id = %s LIMIT 1""", [discord_id])
+        mycursor.execute("""SELECT user_id, user.username, role FROM account JOIN user ON user_id = user.id WHERE provider = "discord" AND provider_account_id = %s LIMIT 1""", [discord_id])
         myresult = mycursor.fetchall()
         print(myresult)
-        return myresult
+        if len(myresult) == 0:
+            return None
+        return myresult[0]
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token obtained from the Discord Developer Portal.
 params = Path(__file__).parent / ".env.local"
@@ -52,7 +54,6 @@ CHANNEL_BOT_LOG = 1133529323396145172
 
 ROLE_MODERATOR = 735581436903424120
 ROLE_CONTRIBUTOR = 941815741143977994
-ROLE_APPLICANT = 1132745801945321493
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -123,7 +124,6 @@ class MyClient(discord.Client):
 
             if user_member and role_to_give:
                 await user_member.add_roles(role_to_give)
-                await user_member.remove_roles(discord.utils.get(guild.roles, id=ROLE_APPLICANT))
                 await self.log(f"🧑‍💻️ I gave {user.name} the role {role_to_give.name}.")
                 print(f"Gave {user.name} the role: {role_to_give.name}")
 
@@ -131,7 +131,7 @@ class MyClient(discord.Client):
                 if duostories_id:
                     await message.channel.send("I gave you the **Contributor** role and activated your account on Duostories.\nIf you are currently logged in on https://duostories.org, please log out and in again for the changes to take effect.\nYou can then access the editor at https://duostories.org/editor.")
                 else:
-                    await message.channel.send("I gave you the **Contributor** role and but I could not give you access to the Duostories Editor as you haven't connected your Duostories account to Discord. Link your accounts on https://duostories.org/profile")
+                    await message.channel.send("I gave you the **Contributor** role and but I could not activate your account on Duostories as you haven't connected your duostories account to discord.")
 
     async def on_raw_reaction_remove(self, reaction):
         if message := await self.check_reaction(reaction):
@@ -147,8 +147,9 @@ class MyClient(discord.Client):
                 if role.id == ROLE_CONTRIBUTOR:
                     print("update database")
                     try:
-                        if len(set_user_role(after.id, 1)):
-                            await self.log(f"📝 added write permissions for {after.name}")
+                        result = set_user_role(after.id, 1)
+                        if result is not None:
+                            await self.log(f"📝 added write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]}")
                         else:
                             await self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
@@ -164,9 +165,9 @@ class MyClient(discord.Client):
                 if role.id == ROLE_CONTRIBUTOR:
                     print("update database")
                     try:
-
-                        if len(set_user_role(after.id, 0)):
-                            await self.log(f"❌ removed write permissions for {after.name}")
+                        result = set_user_role(after.id, 0)
+                        if result is not None:
+                            await self.log(f"❌ removed write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]}")
                         else:
                             await self.log(f"⚠️ could not remove write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:

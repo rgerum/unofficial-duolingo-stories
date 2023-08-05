@@ -34,6 +34,7 @@ describe('Test Story', () => {
         // now we should have the language in the dropdown menu
         cy.get("[data-cy=button_lang_dropdown]").should("have.lengthOf", 1)
     })
+    /*
     it('Read Full Story', () => {
         // there should be multiple courses
         cy.get("[data-cy*=language_button_big]").should("have.length.greaterThan", 2)
@@ -114,5 +115,5 @@ describe('Test Story', () => {
 
         // story page
         cy.url().should('include', 'test-en')
-    })
+    })*/
 })

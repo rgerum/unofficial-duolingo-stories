@@ -35,6 +35,8 @@ export function splitTextTokens(text, keep_tilde=true) {
 }
 
 let data = `
+mode:
+    ipa: true
 letters:
     a: a
     b: b
@@ -103,11 +105,15 @@ words:
 let text = "Ich better testetsx amion und einen hut"
 export function transcribe_text(text, data) {
     data = jsyaml.load(data)
-    console.log(data)
+
+    let ipa = false;
 
     let mapping = []
     for (let section in data) {
-        console.log(section)
+        if (section.toUpperCase() === "MODE") {
+            if(data[section]["ipa"] == "true")
+                ipa = true
+        }
         if (section.toUpperCase() === "LETTERS") {
             let text2 = "";
             for (let i = 0; i < text.length; i++) {
@@ -161,6 +167,7 @@ export function transcribe_text(text, data) {
             text = text2;
         }
     }
+    if(ipa)
     return [text, mapping];
 }
 //console.log(transcribe_text(text, data))

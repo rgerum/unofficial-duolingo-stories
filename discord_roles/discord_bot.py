@@ -3,6 +3,9 @@ from pathlib import Path
 
 params = Path(__file__).parent / ".env.local"
 params = {f.split("=")[0]:f.split("=")[1] for f in params.read_text().split("\n") if f != ''}
+
+CHANNEL_BOT_LOG = 1133529323396145172
+
 def set_user_roles(users_and_role):
     try:
         global params
@@ -33,6 +36,10 @@ def set_user_roles(users_and_role):
         intents.presences = False
         intents.members = False  # Enable the Members intent
         bot = discord.Client(intents=intents)
+
+        async def log(message):
+                channel = bot.get_channel(CHANNEL_BOT_LOG)
+                await channel.send(message)
 
         # Event triggered when the bot is ready
         @bot.event
@@ -69,10 +76,12 @@ def set_user_roles(users_and_role):
                 if role_max < target_count:
                     #target_count = 4
                     # Add the role to the member
-                    #await member.add_roles(roles[target_count])
-                    #await member.remove_roles(*[role for k, role in roles.items() if k != target_count])
+                    await member.add_roles(roles[target_count])
+                    await member.remove_roles(*[role for k, role in roles.items() if k != target_count])
+                    await log(f"🏅 I gave {member.name} the role {roles[target_count].name}. Previous role '{role_max} Stories'")
                     print(f'Role {roles[target_count].name} added to {member.name}')
                     print(f'Roles {[role.name for k, role in roles.items() if k != target_count]} removed from {member.name}')
+
             await bot.close()
 
         # Start the bot

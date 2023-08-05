@@ -5,9 +5,9 @@ export function Spinner() {
     return (
         <div className={styles.spinner}>
             <div className={styles.spinner_parent}>
-                <div className="spinner_point spinner_p1" />
-                <div className="spinner_point spinner_p2" />
-                <div className="spinner_point spinner_p3" />
+                <div className={styles.spinner_point + " " + styles.spinner_p1} />
+                <div className={styles.spinner_point + " " + styles.spinner_p2} />
+                <div className={styles.spinner_point + " " + styles.spinner_p3} />
             </div>
         </div>
     );

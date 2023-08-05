@@ -4,9 +4,9 @@ import dynamic from "next/dynamic";
 
 export async function fetch_post(url, data) {
     /** like fetch but with post instead of get */
-    var fd = new FormData();
+    let fd = new FormData();
     //very simply, doesn't handle complete objects
-    for(var i in data){
+    for(let i in data){
         fd.append(i,data[i]);
     }
     return fetch(url, {

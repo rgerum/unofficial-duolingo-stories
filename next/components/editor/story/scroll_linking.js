@@ -41,9 +41,9 @@ export default function useScrollLinking(view, preview, svg_parent) {
     let editor_scroll = React.useCallback(() => {
 
         requestAnimationFrame(() => {
-            if (last_editor_scroll_pos === parseInt(editor.scrollTop))
+            if (last_editor_scroll_pos === Math.round(editor.scrollTop))
                 return
-            last_editor_scroll_pos = parseInt(editor.scrollTop);
+            last_editor_scroll_pos = Math.round(editor.scrollTop);
 
             let offset_lines = 1;
             let o = editor.getBoundingClientRect().height / 2
@@ -57,7 +57,7 @@ export default function useScrollLinking(view, preview, svg_parent) {
                 if (x1 <= target_equal_lineno && target_equal_lineno < x2) {
                     let f = (target_equal_lineno - x1) / (x2 - x1);
                     let offsetx = y1 + f * (y2 - y1);
-                    last_preview_scroll_pos = parseInt(offsetx - o);
+                    last_preview_scroll_pos = Math.round(offsetx - o);
                     preview.scrollTo({top: offsetx - o, behavior: "auto"});
                     break
                 }
@@ -90,7 +90,7 @@ export default function useScrollLinking(view, preview, svg_parent) {
                     let f = (target_equal_pos - y1) / (y2 - y1);
                     let offsetx_lineno = x1 + f * (x2 - x1);
                     let offsetx = (offsetx_lineno - offset_lines) * 26.6 - o + 4
-                    last_editor_scroll_pos = parseInt(offsetx);
+                    last_editor_scroll_pos = Math.round(offsetx);
                     editor.scrollTo({top: offsetx, behavior: "auto"});
                     break
                 }
