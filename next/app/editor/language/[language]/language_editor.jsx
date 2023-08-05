@@ -259,7 +259,7 @@ function AvatarNames({language, speakers, avatar_names}) {
 
             //let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
             //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
-            let response2 = await fetch_post(`/api/audio`,
+            let response2 = await fetch_post(`/audio/create`,
                 {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
             let ssml_response = await response2.json();
 

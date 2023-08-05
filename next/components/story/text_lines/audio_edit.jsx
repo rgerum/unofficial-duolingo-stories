@@ -67,7 +67,7 @@ async function generate_audio_line(ssml, view, audio_insert_lines) {
         speak_text = `<speak><prosody ${attributes}>${speak_text}</prosody></speak>`;
     }
 
-    let response2 = await fetch_post(`/api/audio`, {"id": ssml["id"], "speaker": speaker, "text": speak_text});
+    let response2 = await fetch_post(`/audio/create`, {"id": ssml["id"], "speaker": speaker, "text": speak_text});
     let ssml_response = await response2.json();
 
     let text = "$"+ssml_response["output_file"]
