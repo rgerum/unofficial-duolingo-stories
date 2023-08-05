@@ -9,15 +9,6 @@ import Editor from "./editor"
 export default async function Page({params}) {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
-        return {redirect: {destination: '/editor/login', permanent: false,},};
-    }
-    if (!session.user.role) {
-        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
-    }
-
-    //let response_courses = await fetch(`https://test.duostories.org/stories/backend_node_test/courses`);
-    //let courses =  await response_courses.json();
     let story_data = await get_story({id: params.story});
 
     if(!story_data) {

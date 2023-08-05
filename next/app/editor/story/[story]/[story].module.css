@@ -52,7 +52,6 @@
     flex-direction: row;
     align-items: center;
     position: fixed;
-    xpadding: 0 calc((100% - 1000px)/2);
     padding: 0 20px;
     top: 0;
 }

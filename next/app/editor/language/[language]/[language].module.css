@@ -169,9 +169,7 @@
 }
 
 .story_list th {
-    padding: 8px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding: 5px 8px;
     text-align: left;
     background-color: var(--button-background);
     color: var(--button-color);
