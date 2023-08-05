@@ -7,10 +7,13 @@ import {useEffect, useState} from "react";
 export default function SetListClient({course_id, course}) {
     const [done, setDone] = useState({});
 
-    useEffect(async () => {
-        let res = await fetch(`${course_id}/get_done`, {credentials: 'include'});
-        let done = await res.json();
-        setDone(done);
+    useEffect(() => {
+        async function fetchData() {
+            let res = await fetch(`${course_id}/get_done`, {credentials: 'include'});
+            let done = await res.json();
+            setDone(done);
+        }
+        fetchData();
     }, []);
 
     return <div className={styles.story_list}>
