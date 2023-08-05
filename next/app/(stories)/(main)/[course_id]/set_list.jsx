@@ -7,7 +7,7 @@ import {authOptions} from "pages/api/auth/[...nextauth]";
 import {notFound} from "next/navigation";
 import {cache} from "react";
 
-export const get_course_done = cache(async (course_id, username) => {
+export const get_course_done = async (course_id, username) => {
     const done_query = await query(`SELECT s.id FROM story_done JOIN story s on s.id = story_done.story_id WHERE user_id = (SELECT id FROM user WHERE username = ?) AND s.course_id = (SELECT id FROM course WHERE short = ?) GROUP BY s.id`, [username, course_id]);
     const done = {}
     for(let d of done_query) {
@@ -15,7 +15,7 @@ export const get_course_done = cache(async (course_id, username) => {
     }
 
     return done;
-})
+}
 
 export const get_course = cache(async (course_id) => {
     const course = await query_one_obj(`
