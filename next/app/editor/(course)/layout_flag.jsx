@@ -12,7 +12,7 @@ export default function LayoutFlag({courses}) {
     let course = undefined;
 
     for(let c of courses) {
-        if(c.short === segment[1]) {
+        if(c.short === segment[1] || `${c.id}` === segment[1]) {
             course = c;
             break;
         }
