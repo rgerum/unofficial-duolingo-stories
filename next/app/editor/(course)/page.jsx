@@ -1,5 +1,5 @@
 import {getServerSession} from "next-auth/next";
-import {authOptions} from "pages/api/auth/[...nextauth]";
+import {authOptions} from "app/api/auth/[...nextauth]/route";
 
 export default async function Page({}) {
 

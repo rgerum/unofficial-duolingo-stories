@@ -1,4 +1,4 @@
-import {authOptions} from "pages/api/auth/[...nextauth]";
+import {authOptions} from "app/api/auth/[...nextauth]/route";
 import React from "react";
 import {getServerSession} from "next-auth/next";
 import {redirect} from "next/navigation";

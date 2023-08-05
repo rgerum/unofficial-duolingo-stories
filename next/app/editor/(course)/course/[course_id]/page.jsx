@@ -1,4 +1,4 @@
-import {authOptions} from "pages/api/auth/[...nextauth]";
+import {authOptions} from "app/api/auth/[...nextauth]/route";
 import {get_course_editor} from "../../db_get_course_editor";
 import {getServerSession} from "next-auth/next";
 import {notFound} from "next/navigation";

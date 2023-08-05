@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth/next"
-import {authOptions} from "pages/api/auth/[...nextauth]";
+import {authOptions} from "app/api/auth/[...nextauth]/route";
 import React from "react";
 import { redirect } from 'next/navigation'
 import SignInEmail from "./signin_email";

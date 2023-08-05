@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import {authOptions} from "pages/api/auth/[...nextauth]";
+import {authOptions} from "app/api/auth/[...nextauth]/route";
 import styles from './layout.module.css'
 import React from "react";
 import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";

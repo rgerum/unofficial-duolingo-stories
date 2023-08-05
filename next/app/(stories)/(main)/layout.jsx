@@ -5,7 +5,7 @@ import {getServerSession} from "next-auth/next";
 import Legal from "components/layout/legal";
 import {query_objs} from "lib/db";
 import styles from './layout.module.css'
-import {authOptions} from "pages/api/auth/[...nextauth]";
+import {authOptions} from "app/api/auth/[...nextauth]/route";
 import CourseDropdown from "./course-dropdown";
 import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";
 

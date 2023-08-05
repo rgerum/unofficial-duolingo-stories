@@ -4,7 +4,7 @@ import {query_objs, query_one_obj} from "lib/db"
 import LanguageEditor from "./language_editor";
 import {getServerSession} from "next-auth/next";
 
-import {authOptions} from "pages/api/auth/[...nextauth]";
+import {authOptions} from "app/api/auth/[...nextauth]/route";
 
 
 const get_avatar_names = cache(async (id) => {

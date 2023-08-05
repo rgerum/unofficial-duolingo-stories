@@ -9,9 +9,9 @@ import DiscordProvider from "next-auth/providers/discord";
 import EmailProvider from "next-auth/providers/email"
 
 import CredentialsProvider from "next-auth/providers/credentials"
-import query from "../../../lib/db"
-import {phpbb_check_hash} from "../../../lib/auth/hash_functions2";
-import MyAdapter from "../../../lib/database_adapter";
+import query from "lib/db"
+import {phpbb_check_hash} from "lib/auth/hash_functions2";
+import MyAdapter from "lib/database_adapter";
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
@@ -129,4 +129,5 @@ export const authOptions = {
   }
 }
 
-export default NextAuth(authOptions)
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };

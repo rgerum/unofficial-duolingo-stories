@@ -1,6 +1,6 @@
 import query from "lib/db";
 import {getServerSession} from "next-auth/next";
-import {authOptions} from "pages/api/auth/[...nextauth]";
+import {authOptions} from "app/api/auth/[...nextauth]/route";
 import Header from "../header";
 import Profile from "./profile";
 
