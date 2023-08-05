@@ -17,7 +17,7 @@ export async function GET(req, {params}) {
 }
 
 
-export async function get_course_done({course_id, user_id}) {
+async function get_course_done({course_id, user_id}) {
     const done_query = await query(`
 SELECT s.id FROM story_done 
 JOIN story s on s.id = story_done.story_id WHERE user_id = ? AND s.course_id = (SELECT id FROM course WHERE short = ?) GROUP BY s.id`, [user_id, course_id]);

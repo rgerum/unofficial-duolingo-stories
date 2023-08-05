@@ -8,7 +8,7 @@ import Editor from "./editor"
 import {query_one_obj, query_objs} from  "lib/db";
 
 
-export async function get_story({id}) {
+async function get_story({id}) {
     return await query_one_obj(`SELECT story.id, c.official as official, course_id, duo_id, image, story.name, set_id, set_index, text, c.learningLanguage as learningLanguage, c.fromLanguage as fromLanguage FROM story JOIN course c on story.course_id = c.id WHERE story.id = ? LIMIT 1`, [id]);
 }
 
@@ -21,7 +21,7 @@ async function get_avatar_names({id, course_id}) {
     }
 }
 
-export async function getAvatarsList(id) {
+async function getAvatarsList(id) {
     if (!id)
         return {}
     let avatar_names_list = await get_avatar_names({id});

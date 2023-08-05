@@ -24,6 +24,6 @@ export async function GET(req, {params}) {
 }
 
 
-export async function get_image({image_id}) {
+async function get_image({image_id}) {
     return await query_one_obj(`SELECT * FROM image WHERE id = ?`, [image_id]);
 }
