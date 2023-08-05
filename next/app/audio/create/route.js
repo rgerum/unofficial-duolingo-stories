@@ -30,7 +30,7 @@ async function exists(filename){
     });
 }
 
-export default async function POST(req) {
+export async function POST(req) {
     try {
         const token = await getToken({ req })
 

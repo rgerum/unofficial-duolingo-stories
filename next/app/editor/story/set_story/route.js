@@ -4,7 +4,7 @@ import query, {update} from  "lib/db";
 import {upload_github} from "lib/editor/upload_github";
 
 
-export default async function POST(req) {
+export async function POST(req) {
     try {
         const token = await getToken({ req })
 
@@ -36,6 +36,7 @@ async function set_story(data, {username, user_id}) {
     }
 
     await update("story", data, ["duo_id", "name", "image", "change_date", "author_change", "set_id", "set_index", "course_id", "text", "json", "api"]);
+
 
     await upload_github(data['id'], data["course_id"], data["text"], username,`updated ${data["name"]} in course ${data["course_id"]}`);
     return "done"

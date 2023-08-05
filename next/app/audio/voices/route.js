@@ -4,7 +4,7 @@ import {audio_engines} from "../_lib/audio";
 import query from  "lib/db";
 
 
-export default async function GET(req) {
+export async function GET(req) {
     try {
         const token = await getToken({ req })
 

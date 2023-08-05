@@ -4,7 +4,7 @@ import query from  "lib/db";
 import {upload_github} from "lib/editor/upload_github";
 
 
-export default async function POST(req) {
+export async function POST(req) {
     try {
         const token = await getToken({ req })
 

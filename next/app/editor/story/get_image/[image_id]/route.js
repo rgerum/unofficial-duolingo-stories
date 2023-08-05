@@ -3,7 +3,7 @@ import {getToken} from "next-auth/jwt";
 import {query_one_obj} from  "lib/db";
 
 
-export default async function GET(req, {params}) {
+export async function GET(req, {params}) {
     try {
         const {image_id} = params;
         const token = await getToken({ req })
@@ -24,6 +24,6 @@ export default async function GET(req, {params}) {
 }
 
 
-export async function get_image({id}) {
-    return await query_one_obj(`SELECT * FROM image WHERE id = ?`, [id]);
+export async function get_image({image_id}) {
+    return await query_one_obj(`SELECT * FROM image WHERE id = ?`, [image_id]);
 }

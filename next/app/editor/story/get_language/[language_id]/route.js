@@ -3,7 +3,7 @@ import {getToken} from "next-auth/jwt";
 import {query_one_obj} from  "lib/db";
 
 
-export default async function GET(req, {params}) {
+export async function GET(req, {params}) {
     try {
         const {language_id} = params;
         const token = await getToken({ req })
@@ -23,6 +23,6 @@ export default async function GET(req, {params}) {
     }
 }
 
-async function language({id}) {
-    return await query_one_obj(`SELECT * FROM language WHERE id = ?`, [id]);
+async function language({language_id}) {
+    return await query_one_obj(`SELECT * FROM language WHERE id = ?`, [language_id]);
 }
