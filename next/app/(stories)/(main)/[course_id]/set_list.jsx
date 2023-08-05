@@ -2,10 +2,9 @@ import styles from "./set_list.module.css"
 import StoryButton from "./story_button";
 import query from "lib/db";
 import {query_one_obj, query_objs} from "lib/db";
-import {getServerSession} from "next-auth/next";
-import {authOptions} from "pages/api/auth/[...nextauth]";
 import {notFound} from "next/navigation";
 import {cache} from "react";
+import SetListClient from "./set_list_client";
 
 export const get_course_done = async (course_id, username) => {
     const done_query = await query(`SELECT s.id FROM story_done JOIN story s on s.id = story_done.story_id WHERE user_id = (SELECT id FROM user WHERE username = ?) AND s.course_id = (SELECT id FROM course WHERE short = ?) GROUP BY s.id`, [username, course_id]);
@@ -76,33 +75,9 @@ export default async function SetList({course_id}) {
         </div>
     }
 
-    const session = await getServerSession(authOptions);
-
-    let done = {};
-
-    if(session?.user?.name) {
-        done = await get_course_done(course_id, session?.user?.name);
-    }
-
     const course = await get_course(course_id);
     if(!course)
         notFound();
 
-    return <div className={styles.story_list}>
-        {course.about ?
-            <div className={styles.set_list}>
-                <div className={styles.set_title}>About</div><p>
-                {course.about}
-            </p>
-            </div>
-            : <></>}
-        {course.sets.map(set => (
-            <div key={set[0].set_id} className={styles.set_list}>
-                <div className={styles.set_title}>Set {set[0].set_id}</div>
-                {set.map(story => (
-                    <StoryButton key={story.id} story={story} done={done[story.id]} />
-                ))}
-            </div>
-        ))}
-    </div>
+    return <SetListClient course_id={course_id} course={course}/>
 }

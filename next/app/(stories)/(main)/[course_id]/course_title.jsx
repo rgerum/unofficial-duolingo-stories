@@ -5,7 +5,6 @@ import {query_one_obj} from "lib/db";
 import Header from "../header";
 
 import styles from "./story_button.module.css"
-import {notFound} from "next/navigation";
 
 
 export const get_course = cache(async (course_id) => {
@@ -13,7 +12,7 @@ export const get_course = cache(async (course_id) => {
     SELECT l.name AS learningLanguageName, COUNT(course.id) AS count FROM course
     JOIN language l on l.id = course.learningLanguage
     JOIN story s on course.id = s.course_id
-    WHERE course.short = ? AND s.public GROUP BY course.id LIMIT 1
+    WHERE course.short = ? GROUP BY course.id LIMIT 1
         `, [course_id]);
 })
 
@@ -35,7 +34,8 @@ export default async function CourseTitle({course_id}) {
     }
     const course = await get_course(course_id);
     if(!course)
-        notFound();
+        return <Header><h1>Course not found.</h1></Header>
+        //notFound();
     /*
      */
     return <>

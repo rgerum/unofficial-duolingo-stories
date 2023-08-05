@@ -8,15 +8,11 @@ import {notFound} from "next/navigation";
 
 
 const get_course = cache(async (course_id) => {
-    const course_query = await query_one_obj(`
+    return await query_one_obj(`
         SELECT l.name AS learningLanguageName FROM course
         JOIN language l on l.id = course.learningLanguage
         WHERE course.short = ? LIMIT 1
         `, [course_id]);
-
-    if(course_query.length === 0)
-        return undefined;
-    return Object.assign({}, course_query[0]);
 })
 
 
