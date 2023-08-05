@@ -1,13 +1,15 @@
+import {NextResponse} from "next/server";
 import {getToken} from "next-auth/jwt";
-import {audio_engines} from "../../../lib/audio";
-import query from  "../../../lib/db";
+import {audio_engines} from "../_lib/audio";
+import query from  "lib/db";
 
-export default async function api(req, res) {
+
+export default async function GET(req) {
     try {
         const token = await getToken({ req })
 
         if(!token?.admin)
-            return res.status(401).json("You need to be a registered admin.");
+            return new Response('You need to be a registered admin.', {status: 401})
 
         let voices = [];
         for(let engine of audio_engines)
@@ -25,9 +27,9 @@ export default async function api(req, res) {
             }
         }
 
-        return res.json(voices);
+        return NextResponse.json(voices);
     }
     catch (err) {
-        res.status(500).json({ message: err.message, body: req.body });
+        return new Response(err.message, {status: 500})
     }
 }

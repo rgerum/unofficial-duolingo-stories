@@ -1,7 +1,8 @@
+import {NextResponse} from "next/server";
 import {getToken} from "next-auth/jwt";
 import query from  "lib/db";
 import {insert, update} from "lib/db";
-import {NextResponse} from "next/server";
+
 
 export async function POST(req) {
     try {

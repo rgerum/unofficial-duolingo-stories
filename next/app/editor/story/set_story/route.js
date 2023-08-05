@@ -1,24 +1,25 @@
+import {NextResponse} from "next/server";
 import {getToken} from "next-auth/jwt";
-import query from  "../../../../lib/db";
-import {update_query} from "../../../../lib/query_variants";
-import {upload_github} from "../../../../lib/editor/upload_github";
+import query, {update} from  "lib/db";
+import {upload_github} from "lib/editor/upload_github";
 
-export default async function api(req, res) {
+
+export default async function POST(req) {
     try {
         const token = await getToken({ req })
 
         if(!token?.role)
-            return res.status(401).json("You need to be a registered contributor.");
+            return new Response('You need to be a registered contributor.', {status: 401})
 
-        let answer = await set_story(req.body, {username: token.name, user_id: token.id});
+        let answer = await set_story(await req.json(), {username: token.name, user_id: token.id});
 
         if(answer === undefined)
-            return res.status(404).test("Error not found");
+            return new Response('Error not found.', {status: 404})
 
-        return res.json(answer);
+        return NextResponse.json(answer);
     }
     catch (err) {
-        res.status(500).json({ message: err.message });
+        return new Response(err.message, {status: 500})
     }
 }
 
@@ -34,7 +35,7 @@ async function set_story(data, {username, user_id}) {
             data["id"] = res[0]["id"];
     }
 
-    await update_query("story", data, ["duo_id", "name", "image", "change_date", "author_change", "set_id", "set_index", "course_id", "text", "json", "api"]);
+    await update("story", data, ["duo_id", "name", "image", "change_date", "author_change", "set_id", "set_index", "course_id", "text", "json", "api"]);
 
     await upload_github(data['id'], data["course_id"], data["text"], username,`updated ${data["name"]} in course ${data["course_id"]}`);
     return "done"

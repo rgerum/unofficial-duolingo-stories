@@ -1,7 +1,9 @@
+import {NextResponse} from "next/server";
 import {getToken} from "next-auth/jwt";
-import {audio_engines} from "../../../lib/audio";
-let fs = require('fs');
 import { v4 as uuid } from 'uuid';
+let fs = require('fs');
+import {audio_engines} from "../_lib/audio";
+
 
 async function mkdir(folderName) {
     return new Promise((resolve, reject) => {
@@ -28,16 +30,17 @@ async function exists(filename){
     });
 }
 
-export default async function api(req, res) {
+export default async function POST(req) {
     try {
         const token = await getToken({ req })
 
         if(!token?.role)
-            return res.status(401).json("You need to be a registered contributor.");
+            return new Response('You need to be a registered contributor.', {status: 401})
 
-        let id = parseInt(req.body.id);
-        let speaker = req.body.speaker;
-        let text = req.body.text;
+        let data = await req.json();
+        let id = parseInt(data.id);
+        let speaker = data.speaker;
+        let text = data.text;
         let filename = undefined;
         let file;
         if(id !== 0) {
@@ -67,11 +70,11 @@ export default async function api(req, res) {
         }
 
         if(answer === undefined)
-            return res.status(404).test("Error not found");
+            return new Response('Error not found.', {status: 404})
 
-        return res.json(answer);
+        return NextResponse.json(answer);
     }
     catch (err) {
-        res.status(500).json({ message: err.message, body: req.body });
+        return new Response(err.message, {status: 500})
     }
 }

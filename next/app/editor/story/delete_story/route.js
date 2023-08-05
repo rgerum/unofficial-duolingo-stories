@@ -1,23 +1,25 @@
+import {NextResponse} from "next/server";
 import {getToken} from "next-auth/jwt";
-import query from  "../../../../lib/db";
-import {upload_github} from "../../../../lib/editor/upload_github";
+import query from  "lib/db";
+import {upload_github} from "lib/editor/upload_github";
 
-export default async function api(req, res) {
+
+export default async function POST(req) {
     try {
         const token = await getToken({ req })
 
         if(!token?.role)
-            return res.status(401).json("You need to be a registered contributor.");
+            return new Response('You need to be a registered contributor.', {status: 401})
 
-        let answer = await delete_story(req.body, {username: token.name, user_id: token.id});
+        let answer = await delete_story(await req.json(), {username: token.name, user_id: token.id});
 
         if(answer === undefined)
-            return res.status(404).test("Error not found");
+            return new Response('Error not found.', {status: 404})
 
-        return res.json(answer);
+        return NextResponse.json(answer);
     }
     catch (err) {
-        res.status(500).json({ message: err.message });
+        return new Response(err.message, {status: 500})
     }
 }
 

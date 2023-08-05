@@ -32,7 +32,7 @@ export async function getImage(id) {
 
 export async function getImageAsync(id) {
     try {
-        let response_json = await fetch(`/api/editor/story/image/${id}`, {credentials: 'include'});
+        let response_json = await fetch(`/editor/story/get_image/${id}`, {credentials: 'include'});
         let image = await response_json.json();
         images_cached[id] = image;
         return image;
@@ -44,7 +44,7 @@ export async function getImageAsync(id) {
 
 export async function getLanguageName(id) {
     try {
-        let response = await fetch(`/api/editor/story/language/${id}`, {credentials: 'include'});
+        let response = await fetch(`/editor/story/get_language/${id}`, {credentials: 'include'});
         return await response.json();
     } catch (e) {
         return {};
@@ -52,13 +52,13 @@ export async function getLanguageName(id) {
 }
 
 export async function setStory(data) {
-    let res = await fetch_post(`/api/editor/story/set_story`, data);
+    let res = await fetch_post(`/editor/story/set_story`, data);
     res = await res.text()
     return res;
 }
 
 export async function deleteStory(data) {
-    let res = await fetch_post(`/api/editor/story/delete_story`, data);
+    let res = await fetch_post(`/editor/story/delete_story`, data);
     res = await res.text()
     return res;
 }
