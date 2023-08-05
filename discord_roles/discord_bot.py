@@ -81,7 +81,7 @@ def set_user_roles(users_and_role):
                     await log(f"🏅 I gave {member.name} the role {roles[target_count].name}. Previous role '{role_max} Stories'")
                     print(f'Role {roles[target_count].name} added to {member.name}')
                     print(f'Roles {[role.name for k, role in roles.items() if k != target_count]} removed from {member.name}')
-                    break
+
             await bot.close()
 
         # Start the bot
