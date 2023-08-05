@@ -8,7 +8,6 @@ import Editor from "./editor"
 
 export default async function Page({params}) {
     const session = await getServerSession(authOptions);
-    console.log(session)
 
     if (!session) {
         return {redirect: {destination: '/editor/login', permanent: false,},};

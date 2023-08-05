@@ -48,7 +48,6 @@ export default async function Layout({children}) {
     let active_courses;
     if(session?.user?.name)
         active_courses = await get_courses_user(session.user.name)
-    console.log(active_courses)
 
     return (
             <>

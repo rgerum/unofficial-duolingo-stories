@@ -18,7 +18,6 @@ export default function LayoutFlag({courses}) {
         }
     }
     function toggleShow() {
-        console.log("event")
         const event = new Event("toggleSidebar");
         window.dispatchEvent(event);
     }

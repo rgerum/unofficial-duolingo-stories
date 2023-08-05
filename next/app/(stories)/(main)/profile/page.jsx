@@ -57,7 +57,6 @@ export default async function Page() {
         </Header>
     }
 
-    console.log(providers.role);
     return <>
         <Header>
             <h1>Profile</h1>

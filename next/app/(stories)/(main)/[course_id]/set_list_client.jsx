@@ -7,13 +7,9 @@ import {useEffect, useState} from "react";
 export default function SetListClient({course_id, course}) {
     const [done, setDone] = useState({});
 
-    console.log("SetListClient")
     useEffect(async () => {
-        console.log(`${course_id}/get_done`)
         let res = await fetch(`${course_id}/get_done`, {credentials: 'include'});
-        console.log("res")
         let done = await res.json();
-        console.log("json", done)
         setDone(done);
     }, []);
 
