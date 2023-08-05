@@ -39,6 +39,8 @@ def set_user_role(discord_id, role):
         mycursor.execute("""SELECT user_id, user.username, role FROM account JOIN user ON user_id = user.id WHERE provider = "discord" AND provider_account_id = %s LIMIT 1""", [discord_id])
         myresult = mycursor.fetchall()
         print(myresult)
+        if len(myresult) == 0:
+            return None
         return myresult[0]
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token obtained from the Discord Developer Portal.
@@ -146,12 +148,13 @@ class MyClient(discord.Client):
                     print("update database")
                     try:
                         result = set_user_role(after.id, 1)
-                        await self.log(f"📝 added write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]}")
+                        if result is not None:
+                            await self.log(f"📝 added write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]}")
+                        else:
+                            await self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
                         print(err)
                         await self.log(f"⚠️ could not added write permissions for {after.name}, a database error occoured.")
-                else:
-                    await self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
                 print(f"User {after.name} has been given the role: {role.name}")
 
             # Add your reaction logic here for when roles are added to a user.
@@ -163,12 +166,13 @@ class MyClient(discord.Client):
                     print("update database")
                     try:
                         result = set_user_role(after.id, 0)
-                        await self.log(f"❌ removed write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]}")
+                        if result is not None:
+                            await self.log(f"❌ removed write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]}")
+                        else:
+                            await self.log(f"⚠️ could not remove write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
                         print(err)
                         await self.log(f"⚠️ could not remove write permissions for {after.name}, a database error occoured.")
-                else:
-                    await self.log(f"⚠️ could not remove write permissions for {after.name}, account is not linked to duostories.")
                 print(f"User {after.name} has lost the role: {role.name}")
 
             # Add your reaction logic here for when roles are removed from a user.
