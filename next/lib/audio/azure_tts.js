@@ -27,17 +27,17 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
         const audioConfig = sdk.AudioConfig.fromAudioFileOutput((filename === undefined) ? '/dev/null' : filename);
         speechConfig.speechSynthesisOutputFormat = 5;
         // create the speech synthesizer.
-        var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+        let synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
 
-        var last_pos = 0;
-        var marks = []
+        let last_pos = 0;
+        let marks = []
 
         synthesizer.wordBoundary = (w, v) => {
             //console.log(v)
             //console.log(text2.substring(last_pos))//
             last_pos = text2.substring(last_pos).search(v.privText) + last_pos
             let data = {
-                time: parseInt(v.privAudioOffset / 10000),
+                time: Math.round(v.privAudioOffset / 10000),
                 type: "word",
                 start: last_pos,
                 end: last_pos + v.privText.length,
@@ -85,7 +85,7 @@ async function getVoices() {
     const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.AZURE_APIKEY, "westeurope");
 
     // create the speech synthesizer.
-    var synthesizer = new sdk.SpeechSynthesizer(speechConfig);
+    let synthesizer = new sdk.SpeechSynthesizer(speechConfig);
 
     let voices = await synthesizer.getVoicesAsync();
     let result_voices = [];

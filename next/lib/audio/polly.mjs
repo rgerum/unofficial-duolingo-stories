@@ -19,28 +19,14 @@ async function synthesizeSpeech(polly, params) {
     });
 }
 
-async function writeFile(filename, data_read) {
-    return new Promise((resolve, reject) => {
-        fs.writeFile(filename, data_read, function (err) {
-            if (err) {
-                console.log("err", err);
-                reject(err);
-            }
-            else {
-                resolve();
-            }
-        });
-    });
-}
-
 async function writeStream(filename, readable){
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const writable = fs.createWriteStream(filename);
 
     // Pipe the readable stream to the writable stream
         readable.pipe(writable);
 
-    // Listen for 'finish' event to know when the write is complete
+    // Listen for 'finish' event to know when it finished writing
         writable.on('finish', () => {
             resolve();
         });
@@ -75,14 +61,14 @@ async function streamToBase64(stream) {
 
 async function synthesizeSpeechPolly(filename, voice_id, text) {
     // Create an instance of the Polly service object
-    var polly = new Polly(config);
+    let polly = new Polly(config);
 
     text = text.replace(/^<speak>/, "")
     text = text.replace(/<\/speak>$/, "")
     text = text.replace(/pitch="medium"/, "")
 
     // Set the parameters for the synthesis request
-    var params = {
+    let params = {
         OutputFormat: 'mp3',
         Text: `<speak>${text}</speak>`,
         VoiceId: voice_id,
@@ -130,7 +116,7 @@ async function synthesizeSpeechPolly(filename, voice_id, text) {
 
 async function getVoices() {
     return new Promise((resolve, reject) => {
-        var polly = new Polly(config);
+        let polly = new Polly(config);
         polly.describeVoices({}, (err, data) => {
             if (err) {
                 reject(err);

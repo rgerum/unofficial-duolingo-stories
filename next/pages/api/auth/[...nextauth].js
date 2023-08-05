@@ -85,14 +85,14 @@ export const authOptions = {
         username: { label: "Username", type: "text", placeholder: "username" },
         password: {  label: "Password", type: "password" }
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         let res2 = await query(`SELECT * FROM user WHERE username = ? AND activated = 1`, credentials.username);
         if(res2.length === 0) {
           return null
         }
         let user = res2[0];
 
-        let correct = await phpbb_check_hash(credentials.password, user.password);
+        let correct = phpbb_check_hash(credentials.password, user.password);
         if (!correct) {
           return null
         }

@@ -50,11 +50,6 @@
     margin-top: 16px;
 }
 
-.speaker-entry-copy {
-    display: flex;
-    align-items: flex-start;
-}
-
 .textarea {
     border: 1px solid var(--input-border);
     background: var(--input-background);
@@ -101,20 +96,7 @@
     width: 20px;
 }
 
-.AvatarEditorHeader {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    width: 100%;
-}
 
-.flag_sub {
-    margin-left: -22px;
-    margin-top: 18px;
-    width: 35px;
-    background-size: 36px;
-    height: 26px;
-}
 
 .AvatarEditorHeader b {
     padding-right: 10px;
@@ -125,7 +107,6 @@
 }
 
 .saveBtn {}
-.editoButton {}
 .AvatarEditorHeaderFlagName {}
 .slidecontainer {}
 
@@ -177,10 +158,6 @@
 
 .story_list tr:nth-child(2n) {
     background-color: var(--body-background-faint);
-}
-
-.set_start {
-    border-top: 3px solid var(--button-background);
 }
 
 .story_list tr a {

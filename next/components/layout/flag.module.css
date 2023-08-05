@@ -7,11 +7,6 @@
     margin:3px 12px;
 }
 
-.flag_big {
-    margin: 20px;
-    transform: scale(2.2);
-}
-
 .undefined {
     background-position-y: -2736px;
 }

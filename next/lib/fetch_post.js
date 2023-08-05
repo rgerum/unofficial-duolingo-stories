@@ -1,7 +1,7 @@
 export async function fetch_post(url, data)
 {
     // check if the user is logged in
-    var req = new Request(url, {
+    let req = new Request(url, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json',

@@ -1,6 +1,6 @@
 import {getToken} from "next-auth/jwt";
 import {audio_engines} from "../../../lib/audio";
-var fs = require('fs');
+let fs = require('fs');
 import { v4 as uuid } from 'uuid';
 
 async function mkdir(folderName) {
@@ -17,7 +17,7 @@ async function mkdir(folderName) {
 }
 
 async function exists(filename){
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         fs.access(filename, (err) => {
             if (err) {
                 resolve(false)

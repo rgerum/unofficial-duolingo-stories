@@ -4,6 +4,7 @@ import Flag from "components/layout/flag";
 import styles from "./course_list.module.css"
 import {useInput} from "lib/hooks";
 import {useRouter} from "next/navigation";
+import {Spinner} from "../../../components/layout/spinner";
 
 
 export default function CourseList({courses, course_id, showList, toggleShow}) {

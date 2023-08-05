@@ -81,8 +81,6 @@
 .login_dialog hr {
     border: 0;
     border-top-color: currentcolor;
-    border-top-style: none;
-    border-top-width: 0;
     border-top: 2px solid var(--input-border);
     display: block;
     margin: 15px auto -14px;

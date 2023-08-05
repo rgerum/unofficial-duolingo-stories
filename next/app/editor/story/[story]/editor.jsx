@@ -13,7 +13,6 @@ import Story, {EditorContext} from "components/story/story";
 import Cast from "components/editor/story/cast";
 
 import {processStoryFile} from "components/editor/story/syntax_parser_new";
-import usePrompt from "components/editor/story/usePrompt";
 
 import {useRouter} from "next/navigation";
 import {StoryEditorHeader} from "./header";
@@ -103,7 +102,6 @@ export default function Editor({story_data, avatar_names, session}) {
     useResizeEditor(editor.current, preview.current, margin.current);
     useScrollLinking(view, preview.current, svg_parent.current);
 
-    usePrompt('You have unsaved changed, are you sure you want to quit?', unsaved_changes);
     let beforeunload = React.useCallback((event) => {
         if (unsaved_changes) {
             event.preventDefault();

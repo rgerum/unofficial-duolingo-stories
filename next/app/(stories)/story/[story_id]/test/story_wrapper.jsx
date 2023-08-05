@@ -10,7 +10,7 @@ export default function StoryWrapper({story}) {
     const navigate = useRouter().push;
 
     return <>
-        <div id={styles.main}>
+        <div className={styles.main}>
             <EditorContext.Provider value={{lineno: 3}}>
                 <Story story={story} editor={{lineno: 3}} navigate={navigate} />
             </EditorContext.Provider>

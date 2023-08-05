@@ -81,8 +81,8 @@ async function generate_audio_line(ssml, view, audio_insert_lines) {
             text += ",";
             text += last_time_delta;
             last_end = parseInt(mark.markName);
-            last_time_delta = parseInt(mark.timeSeconds*1000) - last_time;
-            last_time = parseInt(mark.timeSeconds*1000);
+            last_time_delta = Math.round(mark.timeSeconds*1000) - last_time;
+            last_time = Math.round(mark.timeSeconds*1000);
         }
     }
     else {
@@ -90,11 +90,11 @@ async function generate_audio_line(ssml, view, audio_insert_lines) {
         let last_end = 0;
         for (let mark of ssml_response.marks) {
             text += ";";
-            text += parseInt(mark.value.length) + parseInt(last_end);
+            text += Math.round(mark.value.length) + Math.round(last_end);
             text += ",";
-            text += parseInt(mark.time) - last_time;
+            text += Math.round(mark.time) - last_time;
             last_end = 1;
-            last_time = parseInt(mark.time);
+            last_time = Math.round(mark.time);
         }
     }
     let [line, line_insert] = audio_insert_lines[ssml.inser_index];

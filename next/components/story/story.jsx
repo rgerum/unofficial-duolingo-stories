@@ -112,13 +112,13 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
         React.useMemo(() => {}, [story.id])
         return (
             <StoryContext.Provider value={controls}>
-                <audio ref={ref_audio1} volume="0.5">
+                <audio ref={ref_audio1}>
                     <source src={'https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3'} type="audio/mp3" />
                 </audio>
-                <audio ref={ref_audio2} volume="0.5">
+                <audio ref={ref_audio2}>
                     <source src={'https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3'} type="audio/mp3" />
                 </audio>
-                <audio ref={ref_audio3} volume="0.5">
+                <audio ref={ref_audio3}>
                     <source src={'https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3'} type="audio/mp3" />
                 </audio>
                 <div id="story" ref={storyElement} className={story.learningLanguageRTL ? "story_rtl" : ""} >
@@ -195,19 +195,19 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
 
     return (
         <div>
-            <audio ref={ref_audio1} volume="0.5">
+            <audio ref={ref_audio1}>
                 <source src={'https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3'} type="audio/mp3" />
             </audio>
-            <audio ref={ref_audio2} volume="0.5">
+            <audio ref={ref_audio2}>
                 <source src={'https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3'} type="audio/mp3" />
             </audio>
-            <audio ref={ref_audio3} volume="0.5">
+            <audio ref={ref_audio3}>
                 <source src={'https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3'} type="audio/mp3" />
             </audio>
 
             <StoryHeader progress={progress} length={parts.length} course={course} />
-            <div id={styles.main} ref={mainElement}>
-                <div id={styles.story} ref={storyElement} className={story.learningLanguageRTL ? styles.story_rtl : ""}>
+            <div className={styles.main} ref={mainElement}>
+                <div ref={storyElement} className={styles.story + " " + story.learningLanguageRTL ? styles.story_rtl : ""}>
                     <Legal />
                     <StoryContext.Provider value={controls}>
                         {parts.map((part, i) => (

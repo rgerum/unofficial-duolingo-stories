@@ -305,7 +305,7 @@ function parseBockLine(stream, state) {
 }
 
 function startLine(state, line, allow_trans, line_type, allow_audio) {
-    var block = {...state.block};
+    let block = {...state.block};
     if(line)
         block.line = line;
     if(allow_audio === undefined && state.block.allow_trans && state.block.allow_audio)

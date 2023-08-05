@@ -5,7 +5,7 @@ if(!process.env.NEXTAUTH_URL) {
     //const db = new sqlite3.Database(':memory:');
     const db = new sqlite3.Database('test.sql');
 
-    async function query(row, params) {
+    async function sqlite_query(row, params) {
         return new Promise((resolve, reject) => {
            db.all(row, params, (err, rows) => {
                 if(err)
@@ -16,7 +16,7 @@ if(!process.env.NEXTAUTH_URL) {
         });
     }
 
-    async function insert(table_name, data, mapping) {
+    async function sqlite_insert(table_name, data, mapping) {
         let values = [];
         let columns = [];
         let value_placeholders = [];
@@ -48,7 +48,7 @@ if(!process.env.NEXTAUTH_URL) {
         });
     }
 
-    async function update(table_name, data) {
+    async function sqlite_update(table_name, data) {
         let values = [];
         let updates = [];
         for(let key in data) {
@@ -57,22 +57,22 @@ if(!process.env.NEXTAUTH_URL) {
         }
         values.push(data.id);
         let update_string = updates.join(", ");
-        return await query(`UPDATE ${table_name}
+        return await sqlite_query(`UPDATE ${table_name}
                             SET ${update_string}
                             WHERE id = ?
                             ;`, values);
     }
 
-    async function query_one_obj(q, params) {
-        const res = await query(q, params);
+    async function sqlite_query_one_obj(q, params) {
+        const res = await sqlite_query(q, params);
 
         if (res.length === 0)
             return undefined;
         return Object.assign({}, res[0]);
     }
 
-    async function query_objs(q, params, key) {
-        const res = await query(q, params);
+    async function sqlite_query_objs(q, params, key) {
+        const res = await sqlite_query(q, params);
 
         if(key) {
             let result = {};
@@ -86,11 +86,11 @@ if(!process.env.NEXTAUTH_URL) {
         return result;
     }
 
-    module.exports = query;
-    module.exports.insert = insert;
-    module.exports.update = update;
-    module.exports.query_one_obj = query_one_obj;
-    module.exports.query_objs = query_objs;
+    module.exports = sqlite_query;
+    module.exports.insert = sqlite_insert;
+    module.exports.update = sqlite_update;
+    module.exports.query_one_obj = sqlite_query_one_obj;
+    module.exports.query_objs = sqlite_query_objs;
 }
 else {
     const mysql = require("mysql");

@@ -10,11 +10,10 @@ export async function update_query(table_name, data) {
     }
     values.push(data.id);
     let update_string = updates.join(", ");
-    const user_new = await query(`UPDATE ${table_name}
+    return await query(`UPDATE ${table_name}
                             SET ${update_string}
                             WHERE id = ?
                             LIMIT 1;`, values);
-    return user_new;
 }
 
 
@@ -32,6 +31,5 @@ export async function insert_query(table_name, data) {
     const user_new = await query(`INSERT INTO ${table_name}
                             (${columns_string})
                             VALUES (${value_placeholders_string}) ;`, values);
-    const id = user_new.insertId;
-    return id;
+    return user_new.insertId;
 }

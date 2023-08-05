@@ -10,7 +10,7 @@ export async function POST(req) {
         if(!token?.admin)
             return new Response('You need to be a registered admin.', {status: 401})
 
-        let answer = await set_user_write(data, {username: token.name, user_id: token.id});
+        let answer = await set_user_write(data);
 
         if(answer === undefined)
             return new Response('Error not found.', {status: 404})
