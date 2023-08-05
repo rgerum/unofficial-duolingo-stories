@@ -19,12 +19,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-      <div id={styles.login_dialog}>
-        <Link href="/" id={styles.quit}></Link>
-        <div>
-          {children}
+        <div className={styles.login_dialog}>
+          <Link href="/" className={styles.quit}></Link>
+          <div>
+            {children}
+          </div>
         </div>
-      </div>
       </body>
     </html>
   )
