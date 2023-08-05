@@ -207,7 +207,7 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
 
             <StoryHeader progress={progress} length={parts.length} course={course} />
             <div className={styles.main} ref={mainElement}>
-                <div ref={storyElement} className={styles.story + " " + story.learningLanguageRTL ? styles.story_rtl : ""}>
+                <div ref={storyElement} className={styles.story + " " + (story.learningLanguageRTL ? styles.story_rtl : "")}>
                     <Legal />
                     <StoryContext.Provider value={controls}>
                         {parts.map((part, i) => (
