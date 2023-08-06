@@ -7,6 +7,7 @@ import FinishedPage from "./layout/finish_page";
 import Footer from "./layout/story_footer";
 import StoryHeader from "./layout/story_header";
 import Legal from "../layout/legal";
+import {StoryTitlePage} from "./layout/story_title_page";
 
 export const StoryContext = React.createContext({});
 export const EditorContext = React.createContext(undefined);
@@ -24,6 +25,8 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
 
     let [audio_loaded, setAudioLoaded] = useState(0);
 
+    let [show_title_page, setShowTitlePage] = useState(0);
+
     let ref_audio1 = React.useRef();
     let ref_audio2 = React.useRef();
     let ref_audio3 = React.useRef();
@@ -38,6 +41,13 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
         setBlocked(false);
     }, [ref_audio1, setRight, setBlocked]);
 
+    const audio_failed_call = React.useCallback(() => {
+        if(show_title_page === 0 || progress === -1) {
+            setShowTitlePage(1);
+            setProgress(-2);
+        }
+    }, [show_title_page, progress, setShowTitlePage, setProgress]);
+
     function block_next() {
         setBlocked(true);
     }
@@ -45,9 +55,11 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
     let advance_progress = React.useCallback(() => {
         dispatchEvent(new CustomEvent('progress_changed', {detail: progress + 1}));
         setProgress(progress + progressStep);
+        if(show_title_page === 1)
+            setShowTitlePage(2);
         setProgressStep(1);
         setRight(false);
-    }, [progress, setProgress, setRight, progressStep]);
+    }, [progress, setProgress, setRight, progressStep, show_title_page, setShowTitlePage]);
 
     let next = React.useCallback(() => {
         if(!blocked) {
@@ -86,7 +98,8 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
         advance_progress: advance_progress,
         id: Math.random(),
         rtl: story.learningLanguageRTL,
-    }}, [wrong, right_call, setProgressStep, next, advance_progress])();
+        audio_failed_call: audio_failed_call,
+    }}, [wrong, right_call, setProgressStep, next, advance_progress, audio_failed_call])();
 
     let parts = [];
     let last_id = -1;
@@ -192,6 +205,8 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
 
     //if(progress === -1)
     //    return <StoryTitlePage story={story}/>
+    if(show_title_page === 1)
+        return <StoryTitlePage story={story} controls={controls}/>
 
     return (
         <div>

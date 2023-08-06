@@ -1,10 +1,13 @@
 import React from "react";
+import {StoryContext} from "../story";
 
 
 export default function useAudio(element, progress) {
     let [audioRange, setAudioRange] = React.useState(99999);
     let audio = element?.line?.content?.audio;
     let ref = React.useRef();
+
+    const controls = React.useContext(StoryContext);
 
     if(audio === undefined)
         audio = element?.learningLanguageTitleContent?.audio;
@@ -21,7 +24,13 @@ export default function useAudio(element, progress) {
         audioObject.pause();
         audioObject.load();
         audioObject.currentTime = 0;
-        audioObject.play();
+        try {
+            await audioObject.play();
+        }
+        catch (e) {
+            controls.audio_failed_call();
+            return
+        }
         let timeouts = [];
         let last_end = 0;
         for (let keypoint of audio.keypoints) {
