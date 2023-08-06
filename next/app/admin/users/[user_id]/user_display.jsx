@@ -1,7 +1,4 @@
 'use client'
-import styles from "../index.module.css"
-import {useInput} from "lib/hooks";
-import {Spinner} from "components/layout/spinner";
 import {fetch_post} from "lib/fetch_post";
 import {useState} from "react";
 
@@ -48,50 +45,23 @@ function Write(props) {
     </label>
 }
 
-export function UserList({users}) {
-    const [search, setSearch] = useInput("");
+export default function UserDisplay({user}) {
+    const [user_, ] = useState(user);
 
-    if(users === undefined)
-        return <Spinner />
-
-    let filtered_user = [];
-    if(search === "")
-        filtered_user = users;
-    else {
-        for(let user of users) {
-            if((""+user.username).toLowerCase().indexOf(search.toLowerCase()) !== -1) {
-                filtered_user.push(user);
-            }
-        }
-    }
-
-    return <>
-        <div>Search
-            <input value={search} onChange={setSearch}/>
-        </div>
-        <table id="story_list" data-cy="story_list" className={"js-sort-table js-sort-5 js-sort-desc "+styles.admin_table} data-js-sort-table="true">
-            <thead>
-            <tr>
-                <th data-js-sort-colnum="0">Username</th>
-                <th data-js-sort-colnum="1">Email</th>
-                <th data-js-sort-colnum="1">Date</th>
-                <th data-js-sort-colnum="2">Stories</th>
-                <th data-js-sort-colnum="4">Activated</th>
-                <th data-js-sort-colnum="5" className="js-sort-active">Write</th>
-            </tr>
-            </thead>
-            <tbody>
-            {filtered_user.map(user =>
-                <tr key={user.id}>
-                    <td>{user.username}</td>
+    return <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                <h1>{user_.username}</h1>
+                <p>Email: {user_.email}</p>
+                <p>{`${user_.regdate}`}</p>
+                <p>Activated: <Activate user={user}/></p>
+                <p>Contributor: <Write user={user}/></p>
+            </div>
+}
+/*
+<td>{user.username}</td>
                     <td>{user.email}</td>
                     <td>{user.regdate}</td>
                     <td>{user.count}</td>
                     <td><Activate user={user}/></td>
                     <td><Write user={user}/></td>
-                </tr>
-            )}
-            </tbody>
-        </table>
-    </>
-}
+ */
+

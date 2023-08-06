@@ -1,28 +1,16 @@
-import {query_objs} from  "lib/db";
-import {UserList} from "./users";
+'use client'
+import {useRouter} from "next/navigation";
+import {useInput} from "lib/hooks";
 
 
-async function user_list() {
-    return await query_objs(`
-SELECT
-user.id,
-user.username,
-user.role,
-user.email,
-user.regdate,
-user.activated,
-user.admin,
-COUNT(story.id) AS count
-FROM user
-LEFT JOIN story ON story.author = user.id
-GROUP BY user.id;
-`);
-}
+export default function Page({}) {
+    let [id, setId] = useInput();
+    let router = useRouter();
 
-export default async function Page({}) {
-    let users = await user_list();
-
+    async function go() {
+        await router.push(`/admin/users/${id}`);
+    }
     return <>
-            <UserList users={users} />
+        <div>User ID or username <input value={id} onChange={setId}/> <button onClick={go}>Go</button></div>
     </>
 }
