@@ -11,7 +11,7 @@ const get_course = cache(async (course_id) => {
     return await query_one_obj(`
         SELECT l.name AS learningLanguageName FROM course
         JOIN language l on l.id = course.learningLanguage
-        WHERE course.short = ? LIMIT 1
+        WHERE course.short = ? AND course.public = 1 LIMIT 1
         `, [course_id]);
 })
 
