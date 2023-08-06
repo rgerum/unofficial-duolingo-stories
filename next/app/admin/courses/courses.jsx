@@ -25,7 +25,7 @@ function ChangeAbleValue(props) {
     if(props.name === "tag_list" && !props.edit) {
         if(!value)
             return <td></td>
-        return <td>{value.split(",").map(d => <span key={d} className={styles.tag}>{d}</span>)}</td>
+        return <td>{[...value.matchAll(/[^, ]+/g)].map(d => d[0]).map(d => <span key={d} className={styles.tag}>{d}</span>)}</td>
     }
 
     if(props.name.endsWith("Language")) {

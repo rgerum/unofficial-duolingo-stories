@@ -39,7 +39,7 @@ async function set_course(data) {
         id = data["id"];
     }
     // update the tags
-    let tags= tag_list.split(",").map(d => d.trim());
+    let tags= [...tag_list.matchAll(/[^, ]+/g)].map(d => d[0].toLowerCase());
     let current_tags = await query(`SELECT *, ctm.id as map_id FROM course_tag JOIN course_tag_map ctm on course_tag.id = ctm.course_tag_id WHERE course_id = ?;`, [id]);
     let all_tags = (await query(`SELECT name FROM course_tag;`)).map(d => d.name);
 
