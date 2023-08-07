@@ -39,7 +39,7 @@ export default function CourseList({courses, course_id, showList, toggleShow}) {
         <div className={styles.languagesScroll}>
             {filtered_courses.map((course, index) =>
                 <div key={index}>
-                    <Link className={styles.course_selection_button + " " + (course_id === course.id ? styles.course_selection_button_active : "")}
+                    <Link className={styles.course_selection_button + " " + (course_id === course.short ? styles.course_selection_button_active : "")}
                           href={`/editor/course/${course.short}`} onClick={()=>{router.push(`/editor/course/${course.short}`); toggleShow()}}
                     >
                         <span className={styles.course_count}>{course.count}</span>

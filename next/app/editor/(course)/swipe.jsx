@@ -4,11 +4,11 @@ import {useEffect, useState} from "react";
 import {useSwipeable} from "react-swipeable";
 import styles from "./course/[course_id]/index.module.css";
 import CourseList from "./course_list";
-import {useSelectedLayoutSegment} from "next/navigation";
+import {useSelectedLayoutSegments} from "next/navigation";
 
 
-export default function SwiperSideBar({courses, course_id, children}) {
-    const segment = useSelectedLayoutSegment()
+export default function SwiperSideBar({courses, children}) {
+    const segment = useSelectedLayoutSegments()[1];
 
     // Render data...
     let [showList, setShowList] = useState(segment === null);
@@ -35,7 +35,7 @@ export default function SwiperSideBar({courses, course_id, children}) {
 
     return <>
         <div  {...handlers} className={styles.root}>
-            <CourseList courses={courses} course_id={course_id} showList={showList} toggleShow={toggleShow} />
+            <CourseList courses={courses} course_id={segment} showList={showList} toggleShow={toggleShow} />
             <div className={styles.main_overview}>
                 {children}
             </div>
