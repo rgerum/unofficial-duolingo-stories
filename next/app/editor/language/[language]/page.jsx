@@ -5,6 +5,7 @@ import LanguageEditor from "./language_editor";
 import {getServerSession} from "next-auth/next";
 
 import {authOptions} from "app/api/auth/[...nextauth]/route";
+import {notFound} from "next/navigation";
 
 
 const get_avatar_names = cache(async (id) => {
@@ -44,19 +45,10 @@ const get_language = cache(async (id) => {
 export default async function Page({params}) {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
-        return {redirect: {destination: '/editor/login', permanent: false,},};
-    }
-    if (!session.user.role) {
-        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
-    }
-
     let language = await get_language(params.language);
 
     if(!language) {
-        return {
-            notFound: true,
-        }
+        notFound();
     }
 
     let speakers = await get_speakers(params.language);
