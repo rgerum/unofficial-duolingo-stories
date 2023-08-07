@@ -29,7 +29,7 @@ SELECT course.id, course.name,
 LEFT JOIN language l1 ON l1.id = course.fromLanguage
 LEFT JOIN language l2 ON l2.id = course.learningLanguage
     INNER JOIN (SELECT s.course_id, story_done.id as sdid, MAX(story_done.time) as time FROM story s INNER JOIN story_done ON story_done.story_id = s.id 
-    WHERE story_done.user_id = (SELECT id FROM user WHERE username = ?) GROUP BY course_id) as ss on course.id = ss.course_id
+    WHERE story_done.user_id = (SELECT id FROM user WHERE username = ? LIMIT 1) GROUP BY course_id) as ss on course.id = ss.course_id
      ORDER BY time DESC
     `, [user_name])
 })

@@ -7,7 +7,7 @@ import {cache} from "react";
 import SetListClient from "./set_list_client";
 
 export const get_course_done = async (course_id, username) => {
-    const done_query = await query(`SELECT s.id FROM story_done JOIN story s on s.id = story_done.story_id WHERE user_id = (SELECT id FROM user WHERE username = ?) AND s.course_id = (SELECT id FROM course WHERE short = ?) GROUP BY s.id`, [username, course_id]);
+    const done_query = await query(`SELECT s.id FROM story_done JOIN story s on s.id = story_done.story_id WHERE user_id = (SELECT id FROM user WHERE username = ? LIMIT 1) AND s.course_id = (SELECT id FROM course WHERE short = ?) GROUP BY s.id`, [username, course_id]);
     const done = {}
     for(let d of done_query) {
         done[d.id] = true;
@@ -35,7 +35,7 @@ export const get_course = cache(async (course_id) => {
         i.active, i.activeLip, i.gilded, i.gildedLip
         FROM story
         JOIN image i on story.image = i.id
-        WHERE story.public = 1 AND story.deleted = 0 AND story.course_id = (SELECT c.id FROM course c WHERE c.short = ?)
+        WHERE story.public = 1 AND story.deleted = 0 AND story.course_id = (SELECT c.id FROM course c WHERE c.short = ? LIMIT 1)
         GROUP BY story.id
         ORDER BY set_id, set_index;
         `, [course_id]);

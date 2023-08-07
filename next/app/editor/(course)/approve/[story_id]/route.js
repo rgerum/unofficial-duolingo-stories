@@ -51,8 +51,8 @@ async function set_approve({story_id, user_id}) {
     await set_status({status: status, id: story_id});
 
     // get the number of finished stories in this set
-    let res3 = await query(`SELECT story.id, story.public FROM story WHERE set_id = (SELECT set_id FROM story WHERE id = ?) AND
-                                            course_id = (SELECT course_id FROM story WHERE id = ?) AND status = 'finished' AND deleted = 0;`, [story_id, story_id]);
+    let res3 = await query(`SELECT story.id, story.public FROM story WHERE set_id = (SELECT set_id FROM story WHERE id = ? LIMIT 1) AND
+                                            course_id = (SELECT course_id FROM story WHERE id = ? LIMIT 1) AND status = 'finished' AND deleted = 0;`, [story_id, story_id]);
 
     let published = []
     if(res3.length >= 4) {

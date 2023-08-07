@@ -54,7 +54,7 @@ async function set_course(data) {
         if(!all_tags.includes(tag)) {
             await query(`INSERT INTO course_tag (name) VALUES (?);`, [tag]);
         }
-        await query(`INSERT INTO course_tag_map (course_id, course_tag_id) VALUES (?, (SELECT id FROM course_tag WHERE name = ?) );`, [id, tag]);
+        await query(`INSERT INTO course_tag_map (course_id, course_tag_id) VALUES (?, (SELECT id FROM course_tag WHERE name = ? LIMIT 1) );`, [id, tag]);
     }
 
     let result = await query(`UPDATE course JOIN language l on l.id = course.fromLanguage JOIN language l2 on l2.id = course.learningLanguage
