@@ -72,7 +72,7 @@ export function StoryEditorHeader({
     return <>
         <div className={styles.toolbar} >
         <div className={styles.AvatarEditorHeader}>
-            <EditorButton img={"back.svg"} text={"Back"} id="button_back" href={`/editor/course/${story_data?.course_id}`}
+            <EditorButton img={"back.svg"} text={"Back"} id="button_back" href={`/editor/course/${story_data?.short}`}
                               style={{paddingLeft: 0}} />
             <b>Story-Editor</b>
             <DoubleFlag width={40} lang1={language_data} lang2={language_data2} className={styles.flag}/>
@@ -94,10 +94,10 @@ export function StoryEditorHeader({
             <EditorButton id="button_save" onClick={Save} img={"save.svg"} text={save_text + (unsaved_changes ? "*" : "")} />
 
             {(session?.user) ?
-                <LoggedInButton page={"editor"} course_id={undefined} session={session}/> :
+                <LoggedInButton page={"editor"} course_id={story_data?.short} session={session}/> :
                 <LogInButton/>
             }
         </div>
         </div>
     </>
-}// <Login page={"editor"}/>
+}

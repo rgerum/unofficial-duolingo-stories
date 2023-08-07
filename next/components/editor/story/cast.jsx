@@ -20,8 +20,8 @@ export default function Cast(props) {
             </tbody>
         </table>
         { no_speaker_count ?
-            <p>{no_speaker_count} characters do not have a speaker voice assigned. Go to the <a target="_blank" href={"/editor/language/"+props.learningLanguage}>Character-Editor</a> to add the voices.</p> :
-            <p>To change voices or names go to the <a target="_blank" href={"/editor/language/"+props.learningLanguage}>Character-Editor</a>.</p>
+            <p>{no_speaker_count} characters do not have a speaker voice assigned. Go to the <a target="_blank" href={"/editor/language/"+props.short}>Character-Editor</a> to add the voices.</p> :
+            <p>To change voices or names go to the <a target="_blank" href={"/editor/language/"+props.short}>Character-Editor</a>.</p>
         }
         <p>Use these links to share this story with other contributors to <a href={`/story/${props.id}`}>test</a> or <a href={`/story/${props.id}/test`}>review</a> the story.</p>
     </div>

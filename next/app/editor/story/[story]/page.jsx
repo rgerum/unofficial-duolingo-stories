@@ -9,7 +9,7 @@ import {query_one_obj, query_objs} from  "lib/db";
 
 
 async function get_story({id}) {
-    return await query_one_obj(`SELECT story.id, c.official as official, course_id, duo_id, image, story.name, set_id, set_index, text, c.learningLanguage as learningLanguage, c.fromLanguage as fromLanguage FROM story JOIN course c on story.course_id = c.id WHERE story.id = ? LIMIT 1`, [id]);
+    return await query_one_obj(`SELECT story.id, c.official as official, course_id, duo_id, image, story.name, set_id, set_index, text, c.short, c.learningLanguage as learningLanguage, c.fromLanguage as fromLanguage FROM story JOIN course c on story.course_id = c.id WHERE story.id = ? LIMIT 1`, [id]);
 }
 
 async function get_avatar_names({id, course_id}) {
@@ -30,6 +30,20 @@ async function getAvatarsList(id) {
         avatar_names[avatar.avatar_id] = avatar;
     }
     return avatar_names;
+}
+
+export async function generateMetadata({ params }) {
+    let story_data = await get_story({id: params.story});
+
+    if(!story_data)
+        notFound();
+
+    return {
+        title: `Duostories ${story_data.learningLanguageLong} from ${story_data.fromLanguageLong}: ${story_data.fromLanguageName}`,
+        alternates: {
+            canonical: `https://duostories.org/editor/story/${story_data.id}`,
+        },
+    }
 }
 
 export default async function Page({params}) {

@@ -6,6 +6,7 @@ import React, {useEffect, useState} from "react";
 import Dropdown from "../layout/dropdown";
 import {signIn, signOut} from "next-auth/react";
 import Link from "next/link";
+import {useSelectedLayoutSegments} from "next/navigation";
 
 
 function useDarkLight() {
@@ -29,6 +30,14 @@ export function LogInButton() {
 export default function LoggedInButton({page, course_id, session}) {
     //const { data: session } = useSession();
     const controls = useDarkLight();
+
+    if(course_id === "segment") {
+        const segment = useSelectedLayoutSegments();
+        if(segment[0] === "course")
+            course_id = segment[1];
+        else
+            course_id = segment[0];
+    }
 
     let editor_link = "/editor"
     if(course_id)

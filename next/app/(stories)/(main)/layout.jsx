@@ -57,7 +57,7 @@ export default async function Layout({children}) {
 
                 <CourseDropdown course_data={active_courses} all_courses_flags={all_courses_flags} />
                 {(session?.user) ?
-                    <LoggedInButton page={"stories"} course_id={undefined} session={session}/> :
+                    <LoggedInButton page={"stories"} course_id={"segment"} session={session}/> :
                     <LogInButton/>
                 }
             </nav>

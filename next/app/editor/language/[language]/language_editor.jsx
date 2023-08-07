@@ -12,10 +12,10 @@ import HintLineContent from "components/story/text_lines/line_hints";
 import useAudio from "components/story/text_lines/use_audio";
 import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";
 
-export default function LanguageEditor({language, speakers, avatar_names, session}) {
+export default function LanguageEditor({language, speakers, avatar_names, session, course}) {
     // Render data...
     return <>
-        <Layout language_data={language} session={session}>
+        <Layout language_data={language} session={session} course={course}>
             <div className={styles.root + " " + styles.characterEditorContent}>
                 <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
             </div>
@@ -23,7 +23,7 @@ export default function LanguageEditor({language, speakers, avatar_names, sessio
     </>
 }
 
-export function Layout({ children, language_data, session }) {
+export function Layout({ children, language_data, session, course }) {
     /*
     <CourseDropdown userdata={userdata} />
     <Login userdata={userdata} />
@@ -36,13 +36,16 @@ export function Layout({ children, language_data, session }) {
     return (
         <>
             <nav className={styles.header_index}>
-                <EditorButton id="button_back" href={`/editor`} data-cy="button_back" img={"back.svg"} text={"Back"} style={{paddingLeft: 0}}/>
+                {course ?
+                    <EditorButton id="button_back" href={`/editor/course/${course.short}`} data-cy="button_back" img={"back.svg"} text={"Back"} style={{paddingLeft: 0}}/> :
+                    <EditorButton id="button_back" href={`/editor`} data-cy="button_back" img={"back.svg"} text={"Back"} style={{paddingLeft: 0}}/>
+                }
                 <b>Character-Editor</b>
                 <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
                 <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
                 <div style={{marginLeft: "auto"}}></div>
                 {(session?.user) ?
-                    <LoggedInButton page={"editor"} course_id={undefined} session={session}/> :
+                    <LoggedInButton page={"editor"} course_id={course?.short} session={session}/> :
                     <LogInButton/>
                 }
             </nav>

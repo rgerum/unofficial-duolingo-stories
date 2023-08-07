@@ -17,7 +17,6 @@ import {processStoryFile} from "components/editor/story/syntax_parser_new";
 import {useRouter} from "next/navigation";
 import {StoryEditorHeader} from "./header";
 import {fetch_post} from "lib/fetch_post";
-import Head from "next/head";
 
 
 
@@ -249,10 +248,6 @@ export default function Editor({story_data, avatar_names, session}) {
     editor_state2.show_trans = show_trans
     editor_state2.show_ssml = show_ssml
     return (<>
-        <Head>
-            <title>{`Duostories ${story_data.learningLanguageLong} from ${story_data.fromLanguageLong}: ${story_data.fromLanguageName}`}</title>
-            <link rel="canonical" href={`https://duostories.org/editor/story/${story_data.id}`} />
-        </Head>
         <div id="body">
             <StoryEditorHeader story_data={story_data} unsaved_changes={unsaved_changes}
                                func_save={func_save} func_delete={func_delete} show_trans={show_trans} set_show_trans={set_show_trans}
@@ -266,7 +261,7 @@ export default function Editor({story_data, avatar_names, session}) {
                 <svg className={styles.margin2} ref={margin}></svg>
                 <div className={styles.preview} ref={preview}>
                     {story_meta && story_data ?
-                        <Cast id={story_data.id} story_meta={story_meta} learningLanguage={story_data.learningLanguage}/>
+                        <Cast id={story_data.id} story_meta={story_meta} learningLanguage={story_data.learningLanguage} short={story_data.short}/>
                         : null}
                     {story_state ?
                         <EditorContext.Provider value={editor_state2}>

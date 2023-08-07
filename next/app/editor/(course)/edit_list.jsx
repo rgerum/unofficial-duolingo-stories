@@ -47,7 +47,7 @@ export default function EditList({course, updateCourses}) {
                 </li>
             </ul>
         </div>
-        <p>To set the voices for use the <Link href={`/editor/language/${course.learningLanguage}`}>Character Editor</Link>.</p>
+        <p>To set the voices for use the <Link href={`/editor/language/${course.short}`}>Character Editor</Link>.</p>
         <p style={{fontWeight: "bold"}}>Active Contributors: {active_contributors.map((d, i) => <span key={i}>{d.username}, </span>)} {active_contributors.length === 0 ? "No Contributors" : ""}</p>
         <p>Past Contributors: {past_contributors.map((d, i) => <span key={i}>{d.username}, </span>)}</p>
         <div className={styles.table}>

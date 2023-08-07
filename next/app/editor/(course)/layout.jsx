@@ -9,15 +9,8 @@ import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";
 
 
 export default async function Layout({ children }) {
-
     const session = await getServerSession(authOptions);
 
-    if (!session) {
-        return {redirect: {destination: '/editor/login', permanent: false,},};
-    }
-    if (!session?.user?.role) {
-        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
-    }
     let courses = await get_courses_ungrouped();
 
     return (
@@ -27,7 +20,7 @@ export default async function Layout({ children }) {
         <LayoutFlag courses={courses}/>
 
         {(session?.user) ?
-            <LoggedInButton page={"editor"} course_id={undefined} session={session}/> :
+            <LoggedInButton page={"editor"} course_id={"segment"} session={session}/> :
             <LogInButton/>
         }
     </nav>
