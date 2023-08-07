@@ -149,7 +149,7 @@ class MyClient(discord.Client):
                     try:
                         result = set_user_role(after.id, 1)
                         if result is not None:
-                            await self.log(f"📝 added write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]}")
+                            await self.log(f"📝 added write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]} https://duostories.org/admin/users/{result[0]}")
                         else:
                             await self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
@@ -167,7 +167,7 @@ class MyClient(discord.Client):
                     try:
                         result = set_user_role(after.id, 0)
                         if result is not None:
-                            await self.log(f"❌ removed write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]}")
+                            await self.log(f"❌ removed write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]} https://duostories.org/admin/users/{result[0]}")
                         else:
                             await self.log(f"⚠️ could not remove write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
