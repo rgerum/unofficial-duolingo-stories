@@ -99,7 +99,7 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
         id: Math.random(),
         rtl: story.learningLanguageRTL,
         audio_failed_call: audio_failed_call,
-    }}, [wrong, right_call, setProgressStep, next, advance_progress, audio_failed_call])();
+    }}, [wrong, right_call, setProgressStep, next, advance_progress, audio_failed_call, story.learningLanguageRTL])();
 
     let parts = [];
     let last_id = -1;
@@ -134,7 +134,7 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
                 <audio ref={ref_audio3}>
                     <source src={'https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3'} type="audio/mp3" />
                 </audio>
-                <div id="story" ref={storyElement} className={story.learningLanguageRTL ? "story_rtl" : ""} >
+                <div ref={storyElement} className={styles.story + " " + (story.learningLanguageRTL ? styles.story_rtl : "")} >
                     {parts.map((part, i) => (
                         <Part key={i} editor={editor} controls={controls} progress={progress}
                               part={part}/>
