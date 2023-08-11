@@ -1,5 +1,5 @@
 import { cache } from 'react'
-import query from "lib/db"
+import query, {query_objs} from "lib/db"
 
 
 export const get_course_editor = cache(async (course_id) => {
@@ -103,7 +103,7 @@ export async function get_course_import({course_id, from_id}) {
 
 
 export const get_courses_ungrouped = cache(async () => {
-    let courses = await query(`
+    let courses = await query_objs(`
 SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name, course.short,
  l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
  l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
@@ -114,5 +114,16 @@ LEFT JOIN (SELECT * FROM story WHERE story.deleted = 0 AND story.public = 1) as 
 GROUP BY course.id
 ORDER BY count DESC, fromLanguageName;
     `);
-    return courses.map((d) => {return {...d}});
+    let counts = await query_objs(`SELECT c.short, COUNT(DISTINCT(sa.user_id)) as count FROM course c JOIN story s on c.id = s.course_id
+    JOIN story_approval sa on s.id = sa.story_id
+                                                            WHERE
+                                                            sa.date > CURRENT_DATE() - INTERVAL 1 MONTH
+                                                            GROUP BY c.id`);
+    for(let c of courses) {
+        for(let c2 of counts) {
+            if(c.short === c2.short)
+                c.contributor_count = c2?.count;
+        }
+    }
+    return courses;
 })

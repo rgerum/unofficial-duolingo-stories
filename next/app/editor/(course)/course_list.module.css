@@ -62,6 +62,13 @@
     color: var(--text-color-dim);
 }
 
+.author {
+    flex-grow: 1;
+    text-align: right;
+    padding-right: 10px;
+    white-space: nowrap;
+}
+
 .crown {
     margin-left: 5px;
     height: 28px;
