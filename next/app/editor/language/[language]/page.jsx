@@ -41,10 +41,6 @@ export default async function Page({params}) {
     const session = await getServerSession(authOptions);
 
     let [language, course] = await get_language(params.language);
-    console.log("langu")
-    console.log(language)
-    console.log("course")
-    console.log(course)
 
     if(!language) {
         notFound();

@@ -30,6 +30,18 @@ export default async function Page({ }) {
                 If you want to contribute or discuss the stories, meet us on <Link href="https://discord.gg/4NGVScARR3">Discord</Link><br/>
                 or learn more about the project in our <Link href={"/faq"}>FAQ</Link>.
             </p>
+            <p>
+                <Link href="https://discord.gg/4NGVScARR3"><img width="32px" src={"/social_icons/discord.svg"} /></Link>
+                &nbsp;&nbsp;
+                <Link href="https://github.com/rgerum/unofficial-duolingo-stories"><img width="32px" src={"/social_icons/github.svg"} /></Link>
+                &nbsp;&nbsp;
+                <Link href="https://opencollective.com/duostories"><img width="32px" src={"/social_icons/opencollective.svg"} /></Link>
+                &nbsp;&nbsp;
+                <Link href="https://www.instagram.com/duostoriesproject/"><img width="32px" src={"/social_icons/instagram.svg"} /></Link>
+                &nbsp;&nbsp;
+                <Link href="https://twitter.com/DuostoriesNews"><img width="32px" src={"/social_icons/twitter.svg"} /></Link>
+
+            </p>
         </Header>
         <div>
             <CourseList/>
