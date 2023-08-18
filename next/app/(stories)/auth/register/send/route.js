@@ -10,7 +10,7 @@ export async function POST(req) {
         let ret = await register(res);
         if(ret?.status)
             return new Response(ret?.message, {status: ret.status})
-        return NextResponse.json(answer);
+        return NextResponse.json(ret);
     }
     catch (err) {
         return new Response(err.message, {status: 500})
@@ -57,7 +57,7 @@ async function register({username, password, email}){
             <br/>
             You have registered on 'Unofficial Duolingo Stories'.<br/>
             To complete your registration click on the following link.<br/>
-            <a href='${process.env.NEXTAUTH_URL}/activate/${username}/${activation_link}'>Activate account</a>
+            <a href='${process.env.NEXTAUTH_URL}/auth/activate/${username}/${activation_link}'>Activate account</a>
             <br/><br/>
             Happy learning.
         `
