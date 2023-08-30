@@ -38,9 +38,9 @@ export default async function Page() {
         <p>If we have a volunteer, or better yet, a group of volunteers, then yes. Maybe you can spread the word, find some
             native speakers in your target language, and bring them to our <Link href="https://discord.gg/4NGVScARR3">Discord</Link> server.</p>
 			
-		<h3 style="margin-left: 30px;">What about a dialect or regionally-specific language?</h3>
-		<p style="margin-left: 30px;">We are hesitant to support languages that are too regionally-specific because at times they are not well-defined enough that a course would even make sense to learners. Applications for dialects/regional languages will be considered against a set of factors on a case-by-case basis. It might be a “yes” if your language:</p>
-			<ul style="margin-left: 30px;">
+		<h3 style={{"marginLeft": "30px"}}>What about a dialect or regionally-specific language?</h3>
+		<p style={{"marginLeft": "30px"}}>We are hesitant to support languages that are too regionally-specific because at times they are not well-defined enough that a course would even make sense to learners. Applications for dialects/regional languages will be considered against a set of factors on a case-by-case basis. It might be a “yes” if your language:</p>
+			<ul style={{"marginLeft": "30px"}}>
 				<li>Is classified as an “endangered” language</li>
 				<li>Has a well-defined written form and spelling</li>
 				<li>Has an ISO code</li>
@@ -48,18 +48,18 @@ export default async function Page() {
 				<li>Has a broad body of published literature</li> 
 			</ul>
 			
-		<h3 style="margin-left: 30px;">What about a constructed language (conlang) or auxiliary language (auxlang)?</h3>
-		<p style="margin-left: 30px;">While the primary focus of this project is to feature natural languages, we acknowledge that some conlangs/auxlangs are used to a similar extent as some minor natural languages. Esperanto is a well-known example with thousands of speakers worldwide. Especially because it is also taught on Duolingo, it makes sense to include it here. </p>
+		<h3 style={{"marginLeft": "30px"}}>What about a constructed language (conlang) or auxiliary language (auxlang)?</h3>
+		<p style={{"marginLeft": "30px"}}>While the primary focus of this project is to feature natural languages, we acknowledge that some conlangs/auxlangs are used to a similar extent as some minor natural languages. Esperanto is a well-known example with thousands of speakers worldwide. Especially because it is also taught on Duolingo, it makes sense to include it here. </p>
 		
-		<p style="margin-left: 30px;">In order to maximize the benefits to learners, we will be more interested in featuring a conlang/auxlang when we see some of these factors, so please be sure to discuss them in your application.</p>
-			<ul style="margin-left: 30px;">
+		<p style={{"marginLeft": "30px"}}>In order to maximize the benefits to learners, we will be more interested in featuring a conlang/auxlang when we see some of these factors, so please be sure to discuss them in your application.</p>
+			<ul style={{"marginLeft": "30px"}}>
 				<li>There are a significant number of speakers/learners of the language (e.g. &gt; 100)</li>
 				<li>The language has been in development for a significant period of time (e.g. 10+ years)</li>
 				<li>There are other websites or texts that provide material on the language (e.g. an official dictionary)</li>
 				<li>The language has received some degree of notoriety in the conlang/auxlang community (e.g. received awards, featured in articles/videos)</li>
 				<li>The language has its own Wikipedia edition (e.g. <Link href="https://eo.wikipedia.org/">Esperanto Wikipedia</Link>, <Link href="https://en.wikipedia.org/wiki/List_of_Wikipedias">List of Wikipedias</Link>) and/or an ISO code (e.g. Esperanto, “epo”)</li>
 			</ul>
-		<p style="margin-left: 30px;">If your language is a personal conlang/auxlang project or a very new project from a small group, we are hesitant to support the language as we do not see clear value for our community of learners. When we do allow these smaller languages access to the project, we will not feature them on the main page of Duostories.org. The course contributor would be given a direct link to share with interested learners.</p>
+		<p style={{"marginLeft": "30px"}}>If your language is a personal conlang/auxlang project or a very new project from a small group, we are hesitant to support the language as we do not see clear value for our community of learners. When we do allow these smaller languages access to the project, we will not feature them on the main page of Duostories.org. The course contributor would be given a direct link to share with interested learners.</p>
 
         <h2>Can I write my own stories as a contributor?</h2>
         <p>Our current goal is to create good translations of the existing Duolingo stories. Duolingo has put great
