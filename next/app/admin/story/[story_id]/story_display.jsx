@@ -27,7 +27,7 @@ export default function StoryDisplay({story}) {
                 <h2>Approvals</h2>
                 <ul>
                     {story_.approvals.map((d) => (
-                        <li key={d.id}>{d.date} {d.username} <span style={{cursor: "pointer"}}
+                        <li key={d.id}>{`${d.date}`} {d.username} <span style={{cursor: "pointer"}}
                                                                    onClick={() => deleteApproval(d.id)}>✗</span>
                         </li>
                     ))}
