@@ -146,7 +146,7 @@ else {
         let columns = [];
         let value_placeholders = [];
         for (let key in data) {
-            if(mapping.includes && mapping.includes(key)) {
+            if(mapping === undefined || (mapping.includes && mapping.includes(key))) {
                 values.push(data[key]);
                 columns.push(`${key}`);
                 value_placeholders.push(`?`);
