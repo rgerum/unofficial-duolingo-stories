@@ -2,7 +2,6 @@ import styles from "./set_list.module.css"
 import StoryButton from "./story_button";
 import query from "lib/db";
 import {query_one_obj, query_objs} from "lib/db";
-import {notFound} from "next/navigation";
 import {cache} from "react";
 import SetListClient from "./set_list_client";
 
@@ -77,7 +76,7 @@ export default async function SetList({course_id}) {
 
     const course = await get_course(course_id);
     if(!course)
-        notFound();
+        return <div>not found</div>
 
     return <SetListClient course_id={course_id} course={course}/>
 }
