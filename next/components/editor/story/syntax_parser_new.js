@@ -360,6 +360,7 @@ function pointToPhraseButtons(line) {
     line = line.replace(/(\s*)\)/g, ")$1")
     line = line.replace(/~/g, " ")
     line = line.replace(/ +/g, " ")
+    line = line.replace(/\|/g, "​")
     let transcriptParts = [];
     let correctAnswerIndex = 0;
     let index = 0;
