@@ -22,10 +22,9 @@ export default function EditList({course, updateCourses}) {
     }
     let active_contributors = [];
     let past_contributors = [];
-    const now = new Date();
+
     for(let contrib of course.contributors) {
-        let date = new Date(contrib.last_date);
-        if (now.getTime() - date > 30 * 24 * 60 * 60 * 1000) {
+        if (!contrib.active) {
             past_contributors.push(contrib)
         }
         else
