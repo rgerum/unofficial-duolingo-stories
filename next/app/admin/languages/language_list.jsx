@@ -7,7 +7,7 @@ import {fetch_post} from "lib/fetch_post";
 
 
 export async function setLanguage(data) {
-    let res = await fetch_post(`/api/admin/set_language`, data);
+    let res = await fetch_post(`/admin/languages/set`, data);
     res = await res.text()
     return res;
 }
