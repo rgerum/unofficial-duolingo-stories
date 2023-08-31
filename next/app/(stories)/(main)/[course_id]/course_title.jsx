@@ -12,7 +12,7 @@ export const get_course = cache(async (course_id) => {
     SELECT l.name AS learningLanguageName, COUNT(course.id) AS count FROM course
     JOIN language l on l.id = course.learningLanguage
     JOIN story s on course.id = s.course_id
-    WHERE course.short = ? GROUP BY course.id LIMIT 1
+    WHERE s.public = 1 AND s.deleted = 0 AND course.short = ? GROUP BY course.id LIMIT 1
         `, [course_id]);
 })
 
