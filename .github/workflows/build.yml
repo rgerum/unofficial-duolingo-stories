@@ -21,7 +21,7 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: ssh tunnel to mysql database
-      run: ssh -L 3306:127.0.0.1:3306 duostori@ara.uberspace.de
+      run: ssh -fN -L 3306:127.0.0.1:3306 duostori@ara.uberspace.de
 
     - name: Install
       run: cd next && npm install
