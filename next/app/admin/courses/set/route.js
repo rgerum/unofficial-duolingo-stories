@@ -5,23 +5,18 @@ import { revalidatePath } from 'next/cache';
 import {NextResponse} from "next/server";
 
 export async function POST(req, res) {
-    try {
-        const data = await req.json();
-        const token = await getToken({ req })
+    const data = await req.json();
+    const token = await getToken({ req })
 
-        if(!token?.admin)
-            return new Response('You need to be a registered admin.', {status: 401})
+    if(!token?.admin)
+        return new Response('You need to be a registered admin.', {status: 401})
 
-        let answer = await set_course(data, {username: token.name, user_id: token.id}, res.revalidate);
+    let answer = await set_course(data, {username: token.name, user_id: token.id}, res.revalidate);
 
-        if(answer === undefined)
-            return new Response('Error not found.', {status: 404})
+    if(answer === undefined)
+        return new Response('Error not found.', {status: 404})
 
-        return NextResponse.json(answer);
-    }
-    catch (err) {
-        return new Response(err.message, {status: 500})
-    }
+    return NextResponse.json(answer);
 }
 
 
@@ -29,7 +24,7 @@ async function set_course(data) {
     if(data["official"] === undefined)
         data["official"] = 0;
     let id;
-    let tag_list = data["tag_list"];
+    let tag_list = data["tag_list"] || "";
     delete data["tag_list"];
     if(data.id === undefined) {
         id = await insert('course', data);
@@ -42,7 +37,6 @@ async function set_course(data) {
     let tags= [...tag_list.matchAll(/[^, ]+/g)].map(d => d[0].toLowerCase());
     let current_tags = await query(`SELECT *, ctm.id as map_id FROM course_tag JOIN course_tag_map ctm on course_tag.id = ctm.course_tag_id WHERE course_id = ?;`, [id]);
     let all_tags = (await query(`SELECT name FROM course_tag;`)).map(d => d.name);
-
     for(let tag_entry of current_tags) {
         if(!tags.includes(tag_entry.name)) {
             await query(`DELETE FROM course_tag_map WHERE id = ?;`, [tag_entry.map_id]);
