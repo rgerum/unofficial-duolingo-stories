@@ -45,6 +45,7 @@ jobs:
         eval `ssh-agent -s`
         ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
         scp build.zip duostori@ara.uberspace.de:~/html/HEAD/
+        ssh duostori@ara.uberspace.de 'rm -rf ~/html/HEAD/next/.next'
         ssh duostori@ara.uberspace.de 'unzip -d ~/html/HEAD/next ~/html/HEAD/build.zip'
         ssh duostori@ara.uberspace.de 'fuser -k 3770/tcp'
         ssh duostori@ara.uberspace.de 'supervisorctl restart beta'
