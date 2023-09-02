@@ -32,8 +32,6 @@ jobs:
       run: cd next && npm install
 
     - run: printf "${{ secrets.ENV_LOCAL }}" >> next/.env.local
-    - run: printf "${{ secrets.ENV_LOCAL }}"
-    - run: cat next/.env.local
 
     - name: Build
       run: cd next && npm run build
@@ -48,3 +46,5 @@ jobs:
         ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
         scp build.zip duostori@ara.uberspace.de:~/html/HEAD/
         ssh duostori@ara.uberspace.de 'unzip -d ~/html/HEAD/next ~/html/HEAD/build.zip'
+        ssh duostori@ara.uberspace.de 'fuser -k 3770/tcp'
+        ssh duostori@ara.uberspace.de 'supervisorctl restart beta'
