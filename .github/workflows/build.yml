@@ -18,6 +18,7 @@ jobs:
 
     - name: ssh tunnel to mysql database
       run: |
+        mkdir -p ~/.ssh/
         ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
         eval `ssh-agent -s`
         ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
