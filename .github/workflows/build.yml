@@ -16,12 +16,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - uses: webfactory/ssh-agent@v0.8.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
     - name: ssh tunnel to mysql database
-      run: ssh -fN -L 3306:127.0.0.1:3306 duostori@ara.uberspace.de
+      run: |
+        ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
+        eval `ssh-agent -s`
+        ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
+        ssh -fN -L 3306:127.0.0.1:3306 duostori@ara.uberspace.de
 
     - name: Install
       run: cd next && npm install
