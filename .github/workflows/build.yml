@@ -1,0 +1,46 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: ssh tunnel to mysql database
+      run: ssh -L 3306:127.0.0.1:3306 duostori@ara.uberspace.de
+
+    - name: Install
+      run: cd next && npm install
+
+    - run: printf "${{ secrets.ENV_LOCAL }}" >> next/.env.local
+    - run: printf "${{ secrets.ENV_LOCAL }}"
+    - run: cat next/.env.local
+
+    - name: Build
+      run: cd next && npm run build
+
+    - name: Build
+      run: cd next && npm run dev &
+
+    - name: zip
+      run: zip -r build.zip .next
+
+    - name: upload
+      run: scp build.zip duostori@ara.uberspace.de:~/html/HEAD/
+
+    - name: unzip
+      run: ssh duostori@ara.uberspace.de 'unzip -d /html/HEAD/next /html/HEAD/build.zip'
