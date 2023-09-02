@@ -16,6 +16,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
     - name: ssh tunnel to mysql database
       run: |
         mkdir -p ~/.ssh/
@@ -38,7 +42,7 @@ jobs:
       run: cd next && npm run dev &
 
     - name: zip
-      run: zip -r build.zip .next
+      run: zip -r build.zip next/.next
 
     - name: upload
       run: scp build.zip duostori@ara.uberspace.de:~/html/HEAD/
