@@ -9,18 +9,7 @@ import styles from "./course_list.module.css"
 
 
 async function get_courses(tag) {
-    let courses = await query(`
-SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name, course.short,
- l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
- l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
- COUNT(story.id) count, course.public, course.official, course.conlang FROM course
-LEFT JOIN language l1 ON l1.id = course.fromLanguage
-LEFT JOIN language l2 ON l2.id = course.learningLanguage
-LEFT JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1
-GROUP BY course.id
-ORDER BY name;
-    `);
+    let courses;
     if(tag) {
         courses = await query(`
 SELECT ct.name, course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name, course.short,
@@ -36,6 +25,20 @@ WHERE story.public = 1 AND story.deleted = 0 AND ct.name = ? AND course.public =
 GROUP BY course.id
 ORDER BY name;
     `, [tag]);
+    }
+    else {
+        courses = await query(`
+SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name, course.short,
+ l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
+ l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
+ COUNT(story.id) count, course.public, course.official, course.conlang FROM course
+LEFT JOIN language l1 ON l1.id = course.fromLanguage
+LEFT JOIN language l2 ON l2.id = course.learningLanguage
+LEFT JOIN story ON (course.id = story.course_id)
+WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1
+GROUP BY course.id
+ORDER BY name;
+    `);
     }
     // sort courses by base language
     let base_languages = {};
@@ -77,7 +80,7 @@ async function CourseListInner({loading, tag}) {
             )}
         </div>
     }
-    let courses = await get_courses(tag);
+    let courses = await get_courses(tag ? tag : "main");
 
     return <>{Object.entries(courses).map(([name,]) => (
         <div className={styles.course_list} key={name}>
