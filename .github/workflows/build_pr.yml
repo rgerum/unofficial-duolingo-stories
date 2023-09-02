@@ -4,7 +4,7 @@
 name: Build
 
 on:
-  push:
+  pull_request:
     branches: [ "master" ]
 
 jobs:
@@ -42,8 +42,8 @@ jobs:
         ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
         eval `ssh-agent -s`
         ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
-        scp build.zip duostori@ara.uberspace.de:~/html/HEAD/
-        ssh duostori@ara.uberspace.de 'rm -rf ~/html/HEAD/next/.next'
-        ssh duostori@ara.uberspace.de 'unzip -d ~/html/HEAD/ ~/html/HEAD/build.zip'
-        ssh duostori@ara.uberspace.de '/usr/sbin/fuser -k 3770/tcp'
-        ssh duostori@ara.uberspace.de 'supervisorctl restart beta'
+        ssh duostori@ara.uberspace.de 'cd html && ./create_deployment.py ${{ github.ref }}'       
+        scp build.zip duostori@ara.uberspace.de:~/html/deploy_${{ github.ref }}/
+        ssh duostori@ara.uberspace.de 'rm -rf ~/html/deploy_${{ github.ref }}/next/.next'
+        ssh duostori@ara.uberspace.de 'unzip -d ~/html/deploy_${{ github.ref }}/ ~/html/deploy_${{ github.ref }}/build.zip'
+        ssh duostori@ara.uberspace.de 'supervisorctl restart deploy_${{ github.ref }}'
