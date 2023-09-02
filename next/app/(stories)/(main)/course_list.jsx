@@ -4,6 +4,7 @@ import query from "lib/db";
 import LanguageButton from "./language_button";
 
 import styles from "./course_list.module.css"
+import Link from "next/link";
 
 
 
@@ -35,7 +36,7 @@ SELECT course.id,  COALESCE(NULLIF(course.name, ''), l2.name) as name, course.sh
 LEFT JOIN language l1 ON l1.id = course.fromLanguage
 LEFT JOIN language l2 ON l2.id = course.learningLanguage
 LEFT JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1
+WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1 AND count > 20
 GROUP BY course.id
 ORDER BY name;
     `);
@@ -43,8 +44,13 @@ ORDER BY name;
     // sort courses by base language
     let base_languages = {};
     let languages = [];
+    let incubator = [];
     // iterate over all courses
     for (let course of courses) {
+        if(course.count < 20) {
+            incubator.push(Object.assign({}, course));
+            continue
+        }
         // if base language not yet in list
         if (base_languages[course.fromLanguageName] === undefined) {
             // initialize the list
@@ -67,7 +73,7 @@ ORDER BY name;
         grouped_languages[lang] = base_languages[lang];
     }
 
-    return grouped_languages;
+    return {grouped_languages, incubator};
 }
 
 async function CourseListInner({loading, tag}) {
@@ -80,7 +86,10 @@ async function CourseListInner({loading, tag}) {
             )}
         </div>
     }
-    let courses = await get_courses(tag ? tag : "main");
+    let {grouped_languages: courses, incubator} = await get_courses(tag ? tag : "main");
+    console.log("incubator", incubator)
+
+    incubator.sort((a, b) => (b.count - a.count));
 
     return <>{Object.entries(courses).map(([name,]) => (
         <div className={styles.course_list} key={name}>
@@ -91,7 +100,21 @@ async function CourseListInner({loading, tag}) {
             ))}
         </div>
     ))
-    }</>
+    }
+        <div className={styles.course_list}>
+            <hr/>
+            <div className={styles.course_group_name}>Incubator Courses</div>
+            <p style={{width: "100%"}}>These course have not reached a minimum of 20 stories yet, but you can still have a look a the stories
+            translated so far. If you think you can help any of these courses grow, meet us
+            on <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.
+            </p>
+    {
+        incubator.map((course) => (
+            <LanguageButton key={course.id} course={course} incubator={true}/>
+        ))
+    }
+        </div>
+    </>
 }
 
 export default async function CourseList({tag}) {
