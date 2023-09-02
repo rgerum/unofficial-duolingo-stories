@@ -8,7 +8,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  build_pr:
     runs-on: ubuntu-latest
     
     steps:
@@ -42,8 +42,8 @@ jobs:
         ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
         eval `ssh-agent -s`
         ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
-        ssh duostori@ara.uberspace.de 'cd html && ./create_deployment.py ${{ github.ref }}'       
-        scp build.zip duostori@ara.uberspace.de:~/html/deploy_${{ github.ref }}/
-        ssh duostori@ara.uberspace.de 'rm -rf ~/html/deploy_${{ github.ref }}/next/.next'
-        ssh duostori@ara.uberspace.de 'unzip -d ~/html/deploy_${{ github.ref }}/ ~/html/deploy_${{ github.ref }}/build.zip'
-        ssh duostori@ara.uberspace.de 'supervisorctl restart deploy_${{ github.ref }}'
+        ssh duostori@ara.uberspace.de 'cd html && ./create_deployment.py ${{ github.event.number }}'       
+        scp build.zip duostori@ara.uberspace.de:~/html/deploy_${{ github.event.number  }}/
+        ssh duostori@ara.uberspace.de 'rm -rf ~/html/deploy_${{ github.event.number  }}/next/.next'
+        ssh duostori@ara.uberspace.de 'unzip -d ~/html/deploy_${{ github.event.number  }}/ ~/html/deploy_${{ github.event.number }}/build.zip'
+        ssh duostori@ara.uberspace.de 'supervisorctl restart deploy_${{ github.event.number  }}'
