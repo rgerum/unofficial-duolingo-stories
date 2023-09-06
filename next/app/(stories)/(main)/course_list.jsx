@@ -87,7 +87,6 @@ async function CourseListInner({loading, tag}) {
         </div>
     }
     let {grouped_languages: courses, incubator} = await get_courses(tag ? tag : "main");
-    console.log("incubator", incubator)
 
     incubator.sort((a, b) => (b.count - a.count));
 
