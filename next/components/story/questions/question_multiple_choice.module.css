@@ -7,11 +7,7 @@
     position: relative;
 }
 .multiple_choice_answer_text {
-    padding-left: 18px;
-}
-.story_rtl .multiple_choice_answer_text {
-    padding-left: 0;
-    padding-right: 18px;
+    padding-inline-start: 18px;
 }
 
 .multiple_choice_li {
