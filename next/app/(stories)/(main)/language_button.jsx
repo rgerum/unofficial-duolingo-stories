@@ -18,7 +18,7 @@ export default function LanguageButton({course, incubator}) {
         <Flag iso={course.learningLanguage} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} />
 
         <span className={styles.language_select_button_text}>{course.name}</span>
-        {incubator ? <span style={{fontSize: "0.8em"}}>(from) {course.fromLanguageName}</span> : <></>}
+        {incubator ? <span style={{fontSize: "0.8em"}}>(from {course.fromLanguageName})</span> : <></>}
         <span className={styles.language_story_count}>{course.count} stories</span>
     </Link>;
 }

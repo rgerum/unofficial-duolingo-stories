@@ -104,8 +104,9 @@ async function CourseListInner({loading, tag}) {
         <div className={styles.course_list}>
             <hr/>
             <div className={styles.course_group_name}>Incubator Courses</div>
-            <p style={{width: "100%"}}>These course have not reached a minimum of 20 stories yet, but you can still have a look a the stories
-            translated so far. If you think you can help any of these courses grow, meet us
+            <p style={{width: "100%"}}>These courses have not reached a minimum of 20 stories yet, but you can still have
+                a look at the stories translated so far. Courses are sorted by number of stories.</p>
+            <p style={{width: "100%"}}>If you can help any of these courses grow, meet us
             on <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.
             </p>
     {
