@@ -39,7 +39,7 @@ function ChallengePrompt({progress, element}) {
     let onClick;
     [hidden2, onClick] = EditorHook(hidden2, element.editor, editor);
 
-    return <div className={styles_common.fadeGlideIn+" "+hidden2} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
+    return <div className={styles_common.fadeGlideIn+" "+hidden2+" "+element.lang} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
         <span className={styles_common.question}>
             <HintLineContent content={element.prompt} />
         </span>

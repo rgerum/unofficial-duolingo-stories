@@ -166,7 +166,7 @@ export default function Editor({story_data, avatar_names, session}) {
             if (story === undefined) {
                 last_lineno = lineno;
                 editor_text = stateX.doc.toString();
-                [story, story_meta, audio_insert_lines] = processStoryFile(editor_text, story_data.id, avatar_names);
+                [story, story_meta, audio_insert_lines] = processStoryFile(editor_text, story_data.id, avatar_names, {learningLanguage: language_data?.short, fromLanguage: language_data2?.short});
                 let image = await getImage(story_meta.icon)
                 story.illustrations = {
                     active: image.active,

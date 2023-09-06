@@ -138,7 +138,7 @@ export default function QuestionMatch({progress, element}) {
     }
 
     return <div className={styles_common.fadeGlideIn+" "+hidden2} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
-        <QuestionPrompt question={element.prompt} />
+        <QuestionPrompt question={element.prompt} lang={element.lang} />
         <div className={styles.match_container}>
             <div className="match_col">
             {orderB.map((phrase, index) => (
@@ -152,7 +152,7 @@ export default function QuestionMatch({progress, element}) {
             </div>
             <div className="match_col">
             {orderA.map((phrase, index) => (
-                <div key={index} className={styles.test}>
+                <div key={index} className={styles.test+" "+element.lang}>
                     <button key={index} className={styles.match_word+" "+get_color(clicked[index + orderB.length])}
                             data-cy="col2-button" onClick={()=>click(index + orderB.length)}>
                         {element.fallbackHints[phrase] ? element.fallbackHints[phrase][["phrase", "translation"][0]] : ""}

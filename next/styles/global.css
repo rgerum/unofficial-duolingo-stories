@@ -298,3 +298,9 @@ body[data-theme="dark"] {
 .cm-editor {
   height: 100%;
 }
+
+/* language specifics */
+
+.en {
+  direction: ltr;
+}

@@ -64,7 +64,7 @@ export default function QuestionSelectPhrase({setUnhide, progress, element}) {
         return styles.default
     }
 
-    return <div className={styles_common.fadeGlideIn+" "+hidden2} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
+    return <div className={styles_common.fadeGlideIn+" "+hidden2+" "+element.lang} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
         <div>
             {/* display the buttons */}
             {element.answers.map((answer, index) => (
