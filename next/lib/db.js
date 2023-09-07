@@ -93,33 +93,23 @@ if(!process.env.NEXTAUTH_URL) {
     module.exports.query_objs = sqlite_query_objs;
 }
 else {
-    const mysql = require("mysql");
+    const mysql = require('mysql2/promise');
     const dbConfig = require("./db.config.js");
 
-
-    // Create a connection to the database
-    const connection = mysql.createConnection({
-        host: dbConfig.HOST,
-        user: dbConfig.USER,
-        password: dbConfig.PASSWORD,
-        database: dbConfig.DB
-    });
-
-    // open the MySQL connection
-    connection.connect(error => {
-        if (error) throw error;
-    });
+    async function connectDatabase() {
+        return await mysql.createConnection({
+            host: dbConfig.HOST,
+            user: dbConfig.USER,
+            password: dbConfig.PASSWORD,
+            database: dbConfig.DB
+        });
+    }
 
     async function query(query, args) {
-        return new Promise(function (resolve, reject) {
-            connection.query(query, args, (err, res) => {
-                if (err) {
-                    console.log("err", err);
-                    reject(err);
-                }
-                resolve(res);
-            });
-        });
+        const connection = await connectDatabase();
+        const [results] = await connection.execute(query, args);
+        connection.end();
+        return results;
     }
 
     async function update(table_name, data, mapping) {
