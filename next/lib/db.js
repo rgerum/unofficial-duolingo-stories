@@ -106,6 +106,8 @@ else {
     }
 
     async function query(query, args) {
+        if(!Array.isArray(args) && args !== undefined)
+            args = [args];
         const connection = await connectDatabase();
         const [results] = await connection.execute(query, args);
         connection.end();
