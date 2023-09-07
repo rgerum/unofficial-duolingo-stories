@@ -15,7 +15,7 @@ export async function get_story(story_id) {
               JOIN course c on story.course_id = c.id 
               LEFT JOIN language l1 ON l1.id = c.fromLanguage
               LEFT JOIN language l2 ON l2.id = c.learningLanguage 
-              WHERE story.id = ?;`, story_id);
+              WHERE story.id = ?;`, [story_id]);
     if (res.length === 0) {
         //result.sendStatus(404);
         return
