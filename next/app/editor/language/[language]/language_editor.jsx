@@ -339,7 +339,7 @@ function AvatarNames({language, speakers, avatar_names}) {
 
             <div>
                 <textarea className={styles.textarea} value={speakText} onChange={doSetSpeakText} style={{width: "100%"}}/>
-                <input className={styles.saveBtn} value={"save"+(speakText != speakTextDefault ? "*" : "")} onClick={saveText} disabled={speakText == speakTextDefault} type="button"/>
+                <input className={styles.saveBtn} value={"save"+(speakText !== speakTextDefault ? "*" : "")} onClick={saveText} disabled={speakText === speakTextDefault} type="button"/>
             </div>
 
             <div className={styles.slidecontainer}>

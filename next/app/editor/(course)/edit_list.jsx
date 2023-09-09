@@ -70,7 +70,7 @@ export default function EditList({course, updateCourses}) {
                                               src={"https://stories-cdn.duolingo.com/image/" + story.image + ".svg"}
                                               width="44px" height={"40px"}/></div>
                         <div><Link href={`/editor/story/${story.id}`}>{story.name}</Link></div>
-                        <div><DropDownStatus id={story.id} count={story.approvals} status={story.status} public={story.public} official={course.official} updateCourses={updateCourses}/></div>
+                        <div><DropDownStatus id={story.id} name={story.name} count={story.approvals} status={story.status} public={story.public} official={course.official} updateCourses={updateCourses}/></div>
                         <div>{story.username}</div>
                         <div>{formatDate(story.date)}</div>
                         <div>{story.author_change}</div>
@@ -101,9 +101,11 @@ function formatDate(datetime) {
     return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
-export async function setApproval(data) {
-    let response = await fetch(`/editor/approve/${data.story_id}`);
-    return await response.json();
+export async function setApproval(data, name) {
+    if(window.confirm(`Did you check the story "${name}" and think it is ready to be published? If you want to give your approval click "ok".\n\nIn case you already gave an approval. "ok" will remove it.`)) {
+        let response = await fetch(`/editor/approve/${data.story_id}`);
+        return await response.json();
+    }
 }
 
 function DropDownStatus(props) {
@@ -119,7 +121,7 @@ function DropDownStatus(props) {
     async function addApproval() {
         setLoading(1);
         try {
-            let response = await setApproval({story_id: props.id});
+            let response = await setApproval({story_id: props.id}, props.name);
             if (response?.count !== undefined) {
                 let count = parseInt(response.count)
                 setCount(count)
