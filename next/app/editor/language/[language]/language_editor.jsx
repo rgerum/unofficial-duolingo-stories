@@ -64,6 +64,13 @@ export async function setAvatarSpeaker(data) {
     throw "error";
 }
 
+export async function setDefaultText(data) {
+    let response = await fetch_post(`/editor/language/set_default_text`, data);
+    if(response.status === 200)
+        return await response.json();
+    throw "error";
+}
+
 
 function Avatar(props) {
     let avatar = props.avatar;
@@ -191,6 +198,7 @@ let element_init = {
 }
 function AvatarNames({language, speakers, avatar_names}) {
     let [speakText, setSpeakText] = useState("");
+    let [speakTextDefault, setSpeakTextDefault] = useState(language.default_text);
     const [stored, setStored] = useState({});
 
     const [pitch, setPitch] = useState(2);
@@ -210,6 +218,16 @@ function AvatarNames({language, speakers, avatar_names}) {
 
         e.preventDefault();
         return navigator.clipboard.writeText(text);
+    }
+
+    async function saveText() {
+        try {
+            await setDefaultText({default_text: speakText, id: language.id});
+            setSpeakTextDefault(speakText);
+        }
+        catch (e) {
+            window.alert("could not be saved");
+        }
     }
 
     if(speakText === "")
@@ -319,10 +337,11 @@ function AvatarNames({language, speakers, avatar_names}) {
             <AudioPlay onClick={playAudio} />
             <HintLineContent audioRange={audioRange} content={element.line.content} />
 
-
             <div>
                 <textarea className={styles.textarea} value={speakText} onChange={doSetSpeakText} style={{width: "100%"}}/>
+                <input className={styles.saveBtn} value={"save"+(speakText != speakTextDefault ? "*" : "")} onClick={saveText} disabled={speakText == speakTextDefault} type="button"/>
             </div>
+
             <div className={styles.slidecontainer}>
                 Pitch: <input type="range" min="0" max="4" value={pitch} id="pitch" onChange={(e)=>setPitch(parseInt(e.target.value))}/>
             </div>
