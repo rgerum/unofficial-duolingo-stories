@@ -32,7 +32,7 @@ export default function CourseList({courses, course_id, showList, toggleShow}) {
     }
 
     //console.log("courses", courses);var(--body-background-faint)
-    return <div className={styles.languages} data-show={showList}>
+    return <div className={styles.languages} data-show={!course_id ? true : showList}>
         <div className={styles.search}><span>Search</span>
             <input value={search} onChange={setSearch}/>
         </div>
