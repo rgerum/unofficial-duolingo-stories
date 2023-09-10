@@ -45,8 +45,10 @@ export default function CourseList({courses, course_id, showList, toggleShow}) {
                         <span className={styles.course_count}>{course.count}</span>
                         <Flag iso={course.learningLanguage} width={40} flag={course.learningLanguageFlag} flag_file={course.learningLanguageFlagFile} style={{margin: "3px"}}/>
                         <span className={styles.course_selection_course_name}>{`${course.learningLanguageName} [${course.fromLanguage}] `}</span>
-                        <span className={styles.author}>{course.contributor_count ? `🧑 ${course.contributor_count}` : "💤"}</span>
-                        {course.official ? <span className={styles.crown}><img src="https://d35aaqx5ub95lt.cloudfront.net/vendor/b3ede3d53c932ee30d981064671c8032.svg" title="official" alt={"official"}/></span> : null}
+                        <span className={styles.author}>{
+                            course.official ?
+                                <span className={styles.crown}><img src="https://d35aaqx5ub95lt.cloudfront.net/vendor/b3ede3d53c932ee30d981064671c8032.svg" title="official" alt="👑"/></span>
+                                : course.contributor_count ? `🧑 ${course.contributor_count}` : "💤"}</span>
                     </Link>
                 </div>
             )}
