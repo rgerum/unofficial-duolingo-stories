@@ -40,7 +40,7 @@ export default function LoggedInButton({page, course_id, session}) {
     }
 
     let editor_link = "/editor"
-    if(course_id)
+    if(course_id && course_id.includes("-"))
         editor_link = "/editor/course/"+course_id
     let stories_link = "/"
     if(course_id)
