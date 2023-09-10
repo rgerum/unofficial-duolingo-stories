@@ -78,8 +78,3 @@ function pad(x) {
         return "0"+x;
     return x;
 }
-
-export async function setApproval(data) {
-    let response = await fetch(`/api/editor/approve/${data.story_id}`);
-    return await response.json();
-}

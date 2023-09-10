@@ -8,7 +8,7 @@ import EditorButton from "../editor_button";
 
 export default function LayoutFlag({courses}) {
     const segment = useSelectedLayoutSegments();
-    let import_id = segment[4];
+    let import_id = segment[3];
     let course = undefined;
 
     for(let c of courses) {
