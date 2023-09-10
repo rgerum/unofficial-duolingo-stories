@@ -29,7 +29,15 @@
     padding: 0 20px;
   }
 }
+
+.main_body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .main_index {
+  flex-grow: 1;
   max-width: 985px;
   padding-top: 90px;
   margin: 0 auto;

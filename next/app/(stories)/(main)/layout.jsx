@@ -61,10 +61,12 @@ export default async function Layout({children}) {
                     <LogInButton/>
                 }
             </nav>
-            <div className={styles.main_index}>
-                {children}
+            <div className={styles.main_body}>
+                <div className={styles.main_index}>
+                    {children}
+                </div>
+                <Legal language_name={undefined} />
             </div>
-            <Legal language_name={undefined} />
             </>
     );
 }

@@ -13,7 +13,7 @@ export default function Profile({providers}) {
         <Header>
             <h1>Profile</h1>
             <p>
-                Your user profile, its liked roles and linked login accounts.
+                Your user profile, its assigned roles and linked login accounts.
             </p>
         </Header>
         <div className={styles.profile}>
