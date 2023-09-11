@@ -50,29 +50,29 @@ export default function LoggedInButton({page, course_id, session}) {
         return <button onClick={() => signIn()} className={styles2.button}
                        data-cy="login-button" style={{float: "none"}}>Log in</button>
     return <Dropdown>
-        <div className={styles.round} style={session.user?.image ? { backgroundImage: `url('${session.user?.image}')` } : {}}>{session.user.name.substring(0, 1)}</div>
+        <div className={styles.round} data-cy="user-button" style={session.user?.image ? { backgroundImage: `url('${session.user?.image}')` } : {}}>{session.user.name.substring(0, 1)}</div>
         <div>
-            <Link className={styles.profile_dropdown_button} href={"/profile"}>
+            <Link className={styles.profile_dropdown_button} href={"/profile"} data-cy="user-profile">
                 Profile
             </Link>
-            {<div className={styles.profile_dropdown_button + "  button_dark_mode"} onClick={() => {
+            {<div className={styles.profile_dropdown_button + "  button_dark_mode"} data-cy="user-lightdark" onClick={() => {
                 controls.toggle()
             }}>
                 {controls.value === "light" ? "Dark Mode" : "Light Mode"}
             </div>}
             {session.user?.role && page !== "stories" ?
-                <Link className={styles.profile_dropdown_button} href={stories_link}>
+                <Link className={styles.profile_dropdown_button} href={stories_link} data-cy="user-stories" >
                     Stories
                 </Link> : null}
             {session.user?.role && page !== "editor" ?
-                <Link className={styles.profile_dropdown_button} href={editor_link}>
+                <Link className={styles.profile_dropdown_button} href={editor_link} data-cy="user-editor" >
                     Editor
                 </Link> : null}
             {session.user?.admin && page !== "admin" ?
-                <Link className={styles.profile_dropdown_button} href={"/admin"}>
+                <Link className={styles.profile_dropdown_button} href={"/admin"} data-cy="user-admin" >
                     Admin
                 </Link> : null}
-            <div className={styles.profile_dropdown_button} onClick={() => signOut()} >Log out</div>
+            <div className={styles.profile_dropdown_button} onClick={() => signOut()} data-cy="user-logout" >Log out</div>
         </div>
     </Dropdown>
 }

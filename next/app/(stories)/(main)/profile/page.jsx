@@ -51,7 +51,7 @@ export default async function Page() {
 
     if(providers === undefined) {
         return <Header>
-            <p>Not Logged in</p>
+            <p data-cy="profile-error">Not Logged in</p>
             <p>You need to be logged in to see your profile.</p>
         </Header>
     }
