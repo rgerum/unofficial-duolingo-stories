@@ -441,7 +441,7 @@ function processBlockLine(line_iter, story) {
     return false
 }
 
-function processBlockMultipleChoice(line_iter, story) {
+function processBlockMultipleChoice(line_iter, story, lang, story_languages) {
     let start_no = line_iter.get_lineno(-1);
     let start_no1 = line_iter.get_lineno();
     let data = getText(line_iter, false, true, false);
@@ -457,13 +457,14 @@ function processBlockMultipleChoice(line_iter, story) {
             line_index: story.meta.line_index-1,
             challenge_type: "multiple-choice"
         },
+        lang: lang || story_languages.fromLanguage,
         editor: {"block_start_no": start_no, "start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
     })
     //story.meta.line_index += 1;
     return false
 }
 
-function processBlockSelectPhrase(line_iter, story) {
+function processBlockSelectPhrase(line_iter, story, lang, story_languages) {
     let start_no = line_iter.get_lineno(-1);
     let start_no1 = line_iter.get_lineno();
     let question_data = getText(line_iter, false, true, false);
@@ -482,6 +483,7 @@ function processBlockSelectPhrase(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "select-phrases"
         },
+        lang: lang || story_languages.fromLanguage,
         editor: {"block_start_no": start_no, "start_no": start_no, "end_no": start_no2, "active_no": start_no1}
     })
     story.elements.push({
@@ -507,7 +509,7 @@ function processBlockSelectPhrase(line_iter, story) {
     story.meta.line_index += 1;
 }
 
-function processBlockContinuation(line_iter, story) {
+function processBlockContinuation(line_iter, story, lang, story_languages) {
     let start_no = line_iter.get_lineno(-1);
     let start_no1 = line_iter.get_lineno();
     let question_data = getText(line_iter, false, true, false);
@@ -526,6 +528,7 @@ function processBlockContinuation(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "continuation"
         },
+        lang: lang || story_languages.fromLanguage,
         editor: {"block_start_no": start_no, "start_no": start_no, "end_no": start_no2, "active_no": start_no1}
     })
     story.elements.push({
@@ -552,7 +555,7 @@ function processBlockContinuation(line_iter, story) {
     story.meta.line_index += 1;
 }
 
-function processBlockArrange(line_iter, story) {
+function processBlockArrange(line_iter, story, lang, story_languages) {
     let start_no = line_iter.get_lineno(-1);
     let start_no1 = line_iter.get_lineno();
     let question_data = getText(line_iter, false, true, false);
@@ -570,6 +573,7 @@ function processBlockArrange(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "arrange"
         },
+        lang: lang || story_languages.fromLanguage,
         editor: {"block_start_no": start_no, "start_no": start_no, "end_no": start_no2, "active_no": start_no1}
     })
     story.elements.push({
@@ -597,7 +601,7 @@ function processBlockArrange(line_iter, story) {
 }
 
 
-function processBlockPointToPhrase(line_iter, story) {
+function processBlockPointToPhrase(line_iter, story, lang, story_languages) {
     let start_no = line_iter.get_lineno(-1);
     let start_no1 = line_iter.get_lineno();
     let question_data = getText(line_iter, false, true, false);
@@ -628,12 +632,13 @@ function processBlockPointToPhrase(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "point-to-phrase"
         },
+        lang: lang || story_languages.fromLanguage,
         editor: {"start_no": start_no2, "end_no": line_iter.get_lineno()}
     })
     story.meta.line_index += 1;
 }
 
-function processBlockMatch(line_iter, story) {
+function processBlockMatch(line_iter, story, lang, story_languages) {
     let start_no = line_iter.get_lineno(-1);
     let start_no1 = line_iter.get_lineno();
     let question_data = getText(line_iter, false, true, false);
@@ -660,6 +665,7 @@ function processBlockMatch(line_iter, story) {
             line_index: story.meta.line_index,
             challenge_type: "match"
         },
+        lang: lang || story_languages.fromLanguage,
         editor: {"block_start_no": start_no, "start_no": start_no, "end_no": line_iter.get_lineno(), "active_no": start_no1}
     })
     story.meta.line_index += 1;
@@ -695,7 +701,7 @@ function line_iterator(lines) {
 }
 
 //window.audio_insert_lines = []
-export function processStoryFile(text, story_id, avatar_names) {
+export function processStoryFile(text, story_id, avatar_names, story_languages) {
     // reset those line as they may have changed
     //window.audio_insert_lines = []
 
@@ -705,12 +711,13 @@ export function processStoryFile(text, story_id, avatar_names) {
     let line_iter = line_iterator(lines)
     while(line_iter.get()) {
         let line = line_iter.get()
-        if(line.startsWith("[") && line.endsWith("]")) {
+        let match = line.match(/\[([^\]]*)\](<(.+)>)?$/);
+        if(match !== null) {
             line_iter.advance();
-            let current_block = line.substring(1, line.length - 1)
+            let current_block = match[1]
             try {
                 if (block_functions[current_block]) {
-                    block_functions[current_block](line_iter, story)
+                    block_functions[current_block](line_iter, story, match[3], story_languages)
                     continue
                 }
             }

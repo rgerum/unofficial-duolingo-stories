@@ -36,7 +36,7 @@ export default function QuestionArrange({setUnhide, progress, element}) {
     let [buttonState, click] = useArrangeButtons(element.phraseOrder, controls.right, controls.wrong,
         (i) => {setDone(true); if(!editor) setUnhide(element.characterPositions[i])}, active)
 
-    return <div style={{textAlign: "center"}} className={styles_common.fadeGlideIn+" "+hidden2} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
+    return <div style={{textAlign: "center"}} className={styles_common.fadeGlideIn+" "+hidden2+" "+element.lang} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
         <div>
             {element.selectablePhrases.map((phrase, index) => (
                 <span key={index} className={styles.word_order}

@@ -38,7 +38,7 @@ export default function TextLine({progress, unhide, element, part}) {
     //    hideRangesForChallenge = undefined;
     // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
     if (element.line.type === "TITLE")
-        return <div className={styles.title+" "+styles_common.fadeGlideIn+" "+hidden} data-lineno={element?.editor?.block_start_no}>
+        return <div className={styles.title+" "+styles_common.fadeGlideIn+" "+hidden+" "+element.lang} data-lineno={element?.editor?.block_start_no}>
                     <span className={styles.title}>
                         <audio ref={ref}>
                             <source src={url} type="audio/mp3" />
@@ -48,7 +48,7 @@ export default function TextLine({progress, unhide, element, part}) {
                     </span>
         </div>;
     else if (element.line.avatarUrl)
-        return <><div className={styles.phrase+" "+styles_common.fadeGlideIn+" "+hidden} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
+        return <><div className={styles.phrase+" "+styles_common.fadeGlideIn+" "+hidden+" "+element.lang} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
             <img className={styles.head+" "+(controls.rtl ? styles.rtl_head : "")} src={element.line.avatarUrl} alt="head"/>
             <span className={styles.bubble+" "+(controls.rtl ? styles.rtl_bubble : "")}>
                 <audio ref={ref}>
@@ -67,7 +67,7 @@ export default function TextLine({progress, unhide, element, part}) {
             ;
 
     else
-        return <div className={styles.phrase+" "+styles_common.fadeGlideIn+" "+hidden} data-lineno={element?.editor?.block_start_no}>
+        return <div className={styles.phrase+" "+styles_common.fadeGlideIn+" "+hidden+" "+element.lang} data-lineno={element?.editor?.block_start_no}>
                 <span>
                     <audio ref={ref}>
                         <source src={url} type="audio/mp3" />

@@ -74,7 +74,7 @@ export default function QuestionPointToPhrase({progress, element}) {
 
     return <div className={hidden} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
         {/* display the question */}
-        <QuestionPrompt question={element.question} />
+        <QuestionPrompt question={element.question} lang={element.lang}/>
         {/* display the text */}
         <div>
             {element.transcriptParts.map((part, index) => (
