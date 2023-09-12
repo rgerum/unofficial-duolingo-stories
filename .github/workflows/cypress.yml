@@ -17,16 +17,20 @@ jobs:
     
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 20
 
     - name: Install
-      run: cd next && npm install
+      run: npm install
 
     - name: Create DB
-      run: cd next && npm run init
+      run: npm run init
 
     - name: Build
-      run: cd next && npm run dev &
+      run: npm run dev &
 
     - name: Test Editor
-      run: cd next && npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
+      run: npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}

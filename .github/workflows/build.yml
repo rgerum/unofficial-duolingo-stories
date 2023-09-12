@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - uses: actions/setup-node@v3
       with:
@@ -27,15 +27,15 @@ jobs:
         ssh -fN -L 3306:127.0.0.1:3306 duostori@ara.uberspace.de
 
     - name: Install
-      run: cd next && npm install
+      run: npm install
 
-    - run: printf "${{ secrets.ENV_LOCAL }}" >> next/.env.local
+    - run: printf "${{ secrets.ENV_LOCAL }}" >> .env.local
 
     - name: Build
-      run: cd next && npm run build
+      run: npm run build
 
     - name: zip
-      run: zip -r build.zip next/.next
+      run: zip -r build.zip .next
 
     - name: upload
       run: |
@@ -43,7 +43,7 @@ jobs:
         eval `ssh-agent -s`
         ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
         scp build.zip duostori@ara.uberspace.de:~/html/HEAD/
-        ssh duostori@ara.uberspace.de 'rm -rf ~/html/HEAD/next/.next'
+        ssh duostori@ara.uberspace.de 'rm -rf ~/html/HEAD/.next'
         ssh duostori@ara.uberspace.de 'unzip -d ~/html/HEAD/ ~/html/HEAD/build.zip'
         ssh duostori@ara.uberspace.de '/usr/sbin/fuser -k 3770/tcp'
         ssh duostori@ara.uberspace.de 'supervisorctl restart beta'

@@ -57,7 +57,7 @@ export const get_course_editor = cache(async (course_id) => {
 
     let res2 = await query(`
     SELECT c.short, u.id, u.username, MAX(sa.date) as last_date,
-       MAX(sa.date) > CURRENT_DATE() - INTERVAL 1 MONTH AS active
+       MAX(sa.date) > date('now', '-1 month') AS active
 FROM course c
     JOIN story s on c.id = s.course_id
     JOIN story_approval sa on s.id = sa.story_id
@@ -124,7 +124,7 @@ ORDER BY count DESC, fromLanguageName;
     let counts = await query_objs(`SELECT c.short, COUNT(DISTINCT(sa.user_id)) as count FROM course c JOIN story s on c.id = s.course_id
     JOIN story_approval sa on s.id = sa.story_id
                                                             WHERE
-                                                            sa.date > CURRENT_DATE() - INTERVAL 1 MONTH
+                                                            sa.date > date('now', '-1 month')
                                                             GROUP BY c.id`);
     for(let c of courses) {
         for(let c2 of counts) {
