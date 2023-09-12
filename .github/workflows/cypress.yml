@@ -1,19 +1,9 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-
-name: Cypress Test
-
-on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-
+name: Cypress tests
+on: push
 jobs:
-  test_editor:
-    name: Test
-
-    runs-on: ubuntu-latest
+  cypress-run:
+    name: Cypress run
+    runs-on: ubuntu-22.04
     
     steps:
     - name: Checkout
@@ -23,14 +13,13 @@ jobs:
       with:
         node-version: 20
 
-    - name: Install
-      run: npm install
-
-    - name: Create DB
-      run: npm run init
-
-    - name: Build
-      run: npm run dev &
-
-    - name: Test Editor
-      run: npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
+    - name: Cypress run
+      uses: cypress-io/github-action@v6
+      with:
+        record: true
+        start: npm run dev
+      env:
+        # pass the Cypress Cloud record key as an environment variable
+        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+        # pass GitHub token to allow accurately detecting a build vs a re-run build
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
