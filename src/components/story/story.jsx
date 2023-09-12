@@ -69,8 +69,11 @@ export default function Story({story, router, id, editor, storyFinishedIndexUpda
     }, [blocked, progress, advance_progress]);
 
     let finish = React.useCallback(() => {
-        storyFinishedIndexUpdate(id);
-        router.push("/"+course);
+        const end = async () => {
+            await storyFinishedIndexUpdate(id);
+            router.push("/"+course);
+        }
+        end();
     }, [id, course, router]);
 
     useEffect(() => {
