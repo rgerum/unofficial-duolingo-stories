@@ -15,6 +15,8 @@ describe('Test Story', () => {
         cy.url().should('include', 'test-en')
         cy.get("[data-cy*=story_button]").eq(1).click()
 
+        cy.url().should('include', 'story')
+
         cy.get("[data-cy=continue]").click()
         cy.get("[data-cy=continue]").click()
 
@@ -39,6 +41,8 @@ describe('Test Story', () => {
         cy.get("[data-cy=language_button_big_test-en]").click()
         cy.url().should('include', 'test-en')
         cy.get("[data-cy*=story_button]").eq(0).click()
+
+        cy.url().should('include', 'story')
 
         // have one part, the title
         cy.get("[data-cy=part]").should("have.lengthOf", 1)
