@@ -3,16 +3,18 @@ if(!process.env.NEXTAUTH_URL) {
 
     // Create a new in-memory database
     //const db = new sqlite3.Database(':memory:');
-    const db = new sqlite3.Database('test.sql');
-
     async function sqlite_query(row, params) {
+        // to make the query compatible with mysql and sqlite
+        row = row.replace("CURRENT_DATE() - INTERVAL 1 MONTH", "date('now', '-1 month')");
         return new Promise((resolve, reject) => {
-           db.all(row, params, (err, rows) => {
-                if(err)
-                    reject(err);
-                else
-                    resolve(rows);
-           });
+            const db = new sqlite3.Database('test.sqlite');
+            db.all(row, params, (err, rows) => {
+                db.close();
+                 if(err)
+                     reject(err);
+                 else
+                     resolve(rows);
+            });
         });
     }
 

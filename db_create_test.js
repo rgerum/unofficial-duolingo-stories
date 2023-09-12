@@ -7,7 +7,7 @@ const data_url = "https://carex.uber.space/stories/test_data/"
 
 // Create a new in-memory database
 //const db = new sqlite3.Database(':memory:');
-const db = new sqlite3.Database('test.sql');
+const db = new sqlite3.Database('test.sqlite');
 
 // Create a table
 async function query_create(structure_query) {
@@ -48,6 +48,18 @@ async function createAll() {
         console.log(filename, "added");
     }
 
+    const write_envs = new Promise((resolve, reject) => {
+        fs.writeFile('.env.local', `NODE_ENV="test"\nNEXTAUTH_SECRET=1234`, err => {
+            if (err) {
+                console.error(err);
+                reject(err)
+            }
+            // file written successfully
+            else
+                resolve("done")
+        });
+    });
+
     await Promise.all([
         add_data("language", "language.json"),
         add_data("course", "course.json"),
@@ -60,13 +72,7 @@ async function createAll() {
         add_data("avatar", "avatar.json"),
         add_data("user", "user.json"),
         add_data("course_tag_map", "course_tag_map.json"),
+        write_envs,
     ]);
-
-    fs.writeFile('.env.local', `NODE_ENV="test"\nNEXTAUTH_SECRET=1234`, err => {
-        if (err) {
-            console.error(err);
-        }
-        // file written successfully
-    });
 }
-createAll().then();
+createAll().then(()=>console.log("done"));

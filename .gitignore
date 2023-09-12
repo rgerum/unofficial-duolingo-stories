@@ -55,4 +55,4 @@ out/
 .env*
 
 old/
-/src/test.sql
+/test.sqlite
