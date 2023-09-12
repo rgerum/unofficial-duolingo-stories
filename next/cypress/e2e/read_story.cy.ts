@@ -13,6 +13,7 @@ describe('Test Story', () => {
         // open the Dutch course
         cy.get("[data-cy=language_button_big_test-en]").click()
         cy.url().should('include', 'test-en')
+        cy.get("[data-loaded=true]")
         cy.get("[data-cy*=story_button]").eq(1).click()
 
         cy.url().should('include', 'story')
@@ -29,7 +30,8 @@ describe('Test Story', () => {
         cy.url().should('include', 'test-en')
 
         // should now see one story done
-        cy.get("[data-done=true]").should("have.length.at.least", 1)
+        cy.get("[data-loaded=true]")
+        cy.get("[data-cy*=story_button]").eq(1).get("[data-done=true]").should("exist")
 
         // now we should have the language in the dropdown menu
         //cy.get("[data-cy=button_lang_dropdown]").should("have.lengthOf", 1)
@@ -40,6 +42,7 @@ describe('Test Story', () => {
         // open the Dutch course
         cy.get("[data-cy=language_button_big_test-en]").click()
         cy.url().should('include', 'test-en')
+        cy.get("[data-loaded=true]")
         cy.get("[data-cy*=story_button]").eq(0).click()
 
         cy.url().should('include', 'story')
@@ -112,7 +115,8 @@ describe('Test Story', () => {
         cy.get("[data-cy=button-finished]").click()
 
         // Finished
-        cy.get("[data-done=true]").should("have.length.at.least", 1)
+        cy.get("[data-loaded=true]")
+        cy.get("[data-cy*=story_button]").eq(0).get("[data-done=true]").should("exist")
 
         // story page
         cy.url().should('include', 'test-en')

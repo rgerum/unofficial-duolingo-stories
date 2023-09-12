@@ -6,7 +6,8 @@ import {useEffect, useState} from "react";
 
 const useFetch = (course_id) => {
     const [data, setData] = useState({});
-    const [isLoading, setIsLoading] = useState("not loaded");
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
     const [isError, setIsError] = useState(false);
 
     useEffect(() => {
@@ -18,6 +19,7 @@ const useFetch = (course_id) => {
                 const result = await fetch(`${course_id}/get_done`, {credentials: 'include'});
 
                 setData(await result.json());
+                setIsLoaded(true);
             } catch (error) {
                 setIsError(true);
             }
@@ -28,13 +30,13 @@ const useFetch = (course_id) => {
         fetchData();
     }, [course_id]);
 
-    return { data, isLoading, isError };
+    return { data, isLoading, isLoaded, isError };
 }
 
 export default function SetListClient({course_id, course}) {
-    const { data: done, isLoading, isError } = useFetch(course_id);
+    const { data: done, isLoading, isLoaded, isError } = useFetch(course_id);
 
-    return <div className={styles.story_list}>
+    return <div className={styles.story_list} data-loaded={isLoaded}>
         {course.about ?
             <div className={styles.set_list}>
                 <div className={styles.set_title}>About</div><p>
