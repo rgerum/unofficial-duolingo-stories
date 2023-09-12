@@ -93,25 +93,43 @@ if(!process.env.NEXTAUTH_URL) {
     module.exports.query_objs = sqlite_query_objs;
 }
 else {
-    const mysql = require('mysql2/promise');
+    const mysql = require('mysql2');
     const dbConfig = require("./db.config.js");
 
-    async function connectDatabase() {
-        return await mysql.createConnection({
-            host: dbConfig.HOST,
-            user: dbConfig.USER,
-            password: dbConfig.PASSWORD,
-            database: dbConfig.DB
-        });
-    }
+    const pool = mysql.createPool({
+        host: dbConfig.HOST,
+        user: dbConfig.USER,
+        password: dbConfig.PASSWORD,
+        database: dbConfig.DB,
+        waitForConnections: true,
+        connectionLimit: 10, // Adjust this as needed
+    });
 
     async function query(query, args) {
         if(!Array.isArray(args) && args !== undefined)
             args = [args];
-        const connection = await connectDatabase();
-        const [results] = await connection.execute(query, args);
-        connection.end();
-        return results;
+
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err, connection) => {
+                if (err) {
+                    console.error('Error getting database connection:', err);
+                    reject(err);
+                    return;
+                }
+
+                // Use the connection for your queries
+                connection.query(query, args, (queryError, results) => {
+                    // Handle your query results here
+                    connection.release(); // Release the connection when done
+                    if(queryError) {
+                        console.error('Error in query:', queryError);
+                        reject(queryError);
+                        return;
+                    }
+                    resolve(results);
+                });
+            });
+        });
     }
 
     async function update(table_name, data, mapping) {

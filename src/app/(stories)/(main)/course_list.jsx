@@ -47,7 +47,7 @@ ORDER BY name;
     let incubator = [];
     // iterate over all courses
     for (let course of courses) {
-        if(course.count < 20) {
+        if(course.count < 0) {
             incubator.push(Object.assign({}, course));
             continue
         }
@@ -100,6 +100,7 @@ async function CourseListInner({loading, tag}) {
         </div>
     ))
     }
+     {incubator.length > 0 ?
         <div className={styles.course_list}>
             <hr/>
             <div className={styles.course_group_name}>Incubator Courses</div>
@@ -108,12 +109,13 @@ async function CourseListInner({loading, tag}) {
             <p style={{width: "100%"}}>If you can help any of these courses grow, meet us
             on <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.
             </p>
-    {
-        incubator.map((course) => (
-            <LanguageButton key={course.id} course={course} incubator={true}/>
-        ))
-    }
-        </div>
+        {
+            incubator.map((course) => (
+                <LanguageButton key={course.id} course={course} incubator={true}/>
+            ))
+        }
+        </div> : <></>}
+
     </>
 }
 
