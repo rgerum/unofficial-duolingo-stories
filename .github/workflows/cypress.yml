@@ -17,7 +17,7 @@ jobs:
       uses: cypress-io/github-action@v6
       with:
         record: true
-        start: npm run dev
+        start: npm run init && npm run dev
       env:
         # pass the Cypress Cloud record key as an environment variable
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
