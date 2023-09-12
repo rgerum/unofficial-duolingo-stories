@@ -1,7 +1,7 @@
 
 describe('Login', () => {
     beforeEach(() => {
-        cy.visit("http://localhost:3000")
+        cy.visit("/")
     })
     it('Login with default user', () => {
         cy.get("[data-cy=login-button]").click()

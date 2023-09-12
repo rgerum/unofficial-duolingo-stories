@@ -1,7 +1,7 @@
 
 describe('Test Logins', () => {
     beforeEach(() => {
-        cy.visit("http://localhost:3000")
+        cy.visit("/")
     })
     it('Open Overview', () => {
         // there should be multiple courses

@@ -4,17 +4,35 @@ import StoryButton from "./story_button";
 import {useEffect, useState} from "react";
 
 
-export default function SetListClient({course_id, course}) {
-    const [done, setDone] = useState({});
+const useFetch = (course_id) => {
+    const [data, setData] = useState({});
+    const [isLoading, setIsLoading] = useState("not loaded");
+    const [isError, setIsError] = useState(false);
 
     useEffect(() => {
-        async function fetchData() {
-            let res = await fetch(`${course_id}/get_done`, {credentials: 'include'});
-            let done = await res.json();
-            setDone(done);
-        }
+        const fetchData = async () => {
+            setIsError(false);
+            setIsLoading(true);
+
+            try {
+                const result = await fetch(`${course_id}/get_done`, {credentials: 'include'});
+
+                setData(await result.json());
+            } catch (error) {
+                setIsError(true);
+            }
+
+            setIsLoading(false);
+        };
+
         fetchData();
-    }, []);
+    }, [course_id]);
+
+    return { data, isLoading, isError };
+}
+
+export default function SetListClient({course_id, course}) {
+    const { data: done, isLoading, isError } = useFetch(course_id);
 
     return <div className={styles.story_list}>
         {course.about ?
