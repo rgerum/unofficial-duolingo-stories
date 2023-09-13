@@ -307,7 +307,7 @@ body[data-theme="dark"] {
 
 @font-face {
   font-family: linja-pona;
-  src: url('/linja-pona-4.9.otf');
+  src: url('/linjalipamanka-normal.otf');
   font-weight: normal;
   font-style: normal;
 }
@@ -316,4 +316,5 @@ body[data-theme="dark"] {
   font-family: linja-pona !important;
   font-feature-settings: "liga" 1, "clig" 1, "calt" 1, "kern" 1, "mark" 1;
   text-rendering: optimizeLegibility;
+  font-size: 1.5em;
 }
