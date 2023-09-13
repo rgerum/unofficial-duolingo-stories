@@ -22,7 +22,7 @@ export default function Header({element, progress}) {
 
     let hideRangesForChallenge = undefined;
 
-    return <div className={styles.title+" "+styles_common.fadeGlideIn+" "+hidden} style={{textAlign: "center"}} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
+    return <div className={styles.title+" "+styles_common.fadeGlideIn+" "+hidden+" "+element.lang} style={{textAlign: "center"}} onClick={onClick} data-lineno={element?.editor?.block_start_no}>
         <div><img alt="title image" className={styles.title_img} src={element.illustrationUrl} /></div>
         <h1 className={styles.title}>
             <audio ref={ref}>
