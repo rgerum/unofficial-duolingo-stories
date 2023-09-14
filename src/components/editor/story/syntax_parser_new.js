@@ -64,14 +64,38 @@ function getButtons(content) {
     return [selectablePhrases, characterPositions]
 }
 
+function regexIndexOf(string, regex, startpos) {
+    var indexOf = string.substring(startpos || 0).search(regex);
+    return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
+}
+function removeDoubleBrackets(content, pos) {
+    for(let char of [/(?<!\[)\[(?!\[)/, /(?<!\])\](?!\])/, /\[\[/, /\]\]/]) {
+        let pos1 = regexIndexOf(content.text, char);
+        while (pos1 !== -1) {
+            for (let i = 0; i < pos.length; i++)
+                if (pos[i] > pos1)
+                    pos[i] -= 1;
+            hintsShift(content, pos1);
+            pos1 = regexIndexOf(content.text, char);
+        }
+    }
+    return pos;
+}
+
 function getHideRanges(content) {
-    let pos1 = content.text.indexOf("[");
-    let pos2 = content.text.indexOf("]");
+    content.text = content.text.replace(/\\n/g, "\n");
+
+    // find brackets that are not doubled
+    let pos1 = regexIndexOf(content.text, /(?<!\[)\[(?!\[)/);
+    let pos2 = regexIndexOf(content.text, /(?<!\])\](?!\])/);
+
     if(pos1 !== -1 && pos2 !== -1) {
-        hintsShift(content, pos1)
-        hintsShift(content, pos2-1)
+        hintsShift(content, pos1);
+        hintsShift(content, pos2-1);
+        [pos1, pos2] = removeDoubleBrackets(content, [pos1, pos2]);
         return [{start: pos1, end: pos2-1}]
     }
+    removeDoubleBrackets(content,[]);
     return []
 }
 
