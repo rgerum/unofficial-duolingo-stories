@@ -46,8 +46,11 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
                 for(let mark_index in timepoints) {
                     mark_index = mark_index*1;
                     marks[0]["time"] = 0;
-                    if(mark_index+1 < timepoints.length)
-                        marks[mark_index+1]["time"] = timepoints[mark_index]["timeSeconds"]*1000
+                    for(let mark of marks) {
+                        if(mark.end === parseInt(timepoints[mark_index].markName)) {
+                            mark["time"] = timepoints[mark_index]["timeSeconds"]*1000
+                        }
+                    }
                 }
                 resolve({marks: marks, content: audioContent});
             }
@@ -56,8 +59,11 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
                 for(let mark_index in timepoints) {
                     mark_index = mark_index*1;
                     marks[0]["time"] = 0;
-                    if(mark_index+1 < timepoints.length)
-                        marks[mark_index+1]["time"] = timepoints[mark_index]["timeSeconds"]*1000
+                    for(let mark of marks) {
+                        if(mark.end === parseInt(timepoints[mark_index].markName)) {
+                            mark["time"] = timepoints[mark_index]["timeSeconds"]*1000
+                        }
+                    }
                 }
                 resolve({output_file: filename, marks: marks});
             });

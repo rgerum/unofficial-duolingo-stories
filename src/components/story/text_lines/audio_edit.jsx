@@ -76,6 +76,10 @@ async function generate_audio_line(ssml, view, audio_insert_lines) {
         let last_time_delta = 0;
         let last_end = 0;
         for (let mark of ssml_response.marks2) {
+            if(mark.timeSeconds === undefined) {
+                last_end = parseInt(mark.markName);
+                continue
+            }
             text += ";";
             text += parseInt(mark.markName) - last_end;
             text += ",";
@@ -89,6 +93,10 @@ async function generate_audio_line(ssml, view, audio_insert_lines) {
         let last_time = 0;
         let last_end = 0;
         for (let mark of ssml_response.marks) {
+            if(mark.time === undefined) {
+                last_end += Math.round(mark.value.length);
+                continue
+            }
             text += ";";
             text += Math.round(mark.value.length) + Math.round(last_end);
             text += ",";
