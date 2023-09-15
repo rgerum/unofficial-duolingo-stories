@@ -78,11 +78,14 @@ export default function HintLineContent({content, audioRange, hideRangesForChall
         if(audioRange < start)
             style.opacity = 0.5;
 
-        return <span className={styles.word}
+        // add the span and optionally add a line break
+        return <><span className={styles.word}
                      key={start+" "+end}
                      style={style}
                      data-hidden={is_hidden}
         >{content.text.substring(start, end)}</span>
+        {(content.text.substring(start, end).indexOf("\n") !== -1) ? <br/> : <></>}
+        </>
     }
 
     function addSplitWord(start, end) {
