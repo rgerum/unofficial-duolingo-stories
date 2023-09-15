@@ -77,7 +77,7 @@ export default function QuestionPointToPhrase({progress, element}) {
         <QuestionPrompt question={element.question} lang={element.lang_question}/>
         {/* display the text */}
         <div className={element.lang}>
-            {element.transcriptParts.map((part, index) => (
+            {element.transcriptParts.map((part, index) => (<>{
                 /* is the text selectable? */
                 part.selectable ?
                     /* then display a button */
@@ -88,7 +88,12 @@ export default function QuestionPointToPhrase({progress, element}) {
                     </div>
                     /* if it is not selectable just display the text */
                     : <span key={index}>{part.text}</span>
-            ))}
+                }{
+                    part.text.indexOf("\n") !== -1 ?
+                        <br/> : <></>
+                }
+            </>)
+            )}
         </div>
     </div>
 }

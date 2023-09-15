@@ -397,7 +397,7 @@ function pointToPhraseButtons(line) {
                 if(l !== "")
                     transcriptParts.push({
                         selectable: false,
-                        text: l,
+                        text: l.replace(/\\n/g, "\n"),
                     })
             break
         }
@@ -406,7 +406,7 @@ function pointToPhraseButtons(line) {
                 if(l !== "")
                     transcriptParts.push({
                         selectable: false,
-                        text: l
+                        text: l.replace(/\\n/g, "\n")
                     })
         }
         line = line.substring(pos+1);
