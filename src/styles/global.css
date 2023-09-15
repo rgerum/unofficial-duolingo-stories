@@ -303,7 +303,7 @@ body[data-theme="dark"] {
 
 .en {
   direction: ltr;
-  color:blue !important;
+  font-family: nunito;
 }
 
 @font-face {
@@ -318,9 +318,4 @@ body[data-theme="dark"] {
   font-feature-settings: "liga" 1, "clig" 1, "calt" 1, "kern" 1, "mark" 1;
   text-rendering: optimizeLegibility;
   font-size: 1.5em;
-}
-
-.test {
-  color:red !important;
-  font-family: Serif;
 }
