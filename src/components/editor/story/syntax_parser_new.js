@@ -352,7 +352,7 @@ function getText(line_iter, allow_speaker, allow_trans, allow_audio) {
     return speaker;
 }
 
-function getAnswers(line_iter, allow_trans) {
+function getAnswers(line_iter, allow_trans, lang_hints) {
     let answers = []
     let correct_answer = undefined;
     while(line_iter.get()) {
@@ -368,6 +368,7 @@ function getAnswers(line_iter, allow_trans) {
             }
             if(allow_trans) {
                 let data_text = speaker_text_trans(answer)
+                data_text.content.lang_hints = lang_hints;
                 answers.push(data_text.content)
             }
             else
@@ -433,6 +434,9 @@ function processBlockHeader(line_iter, story, lang, story_languages) {
     let start_no1 = line_iter.get_lineno();
     let data = getText(line_iter, false, true, true);
     let data_text = speaker_text_trans(data, story.meta)
+
+    data_text.line.content.lang_hints = story_languages.fromLanguage;
+
     story.elements.push({
         type: "HEADER",
         illustrationUrl: "https://stories-cdn.duolingo.com/image/"+story.meta["icon"]+".svg",
@@ -450,7 +454,9 @@ function processBlockLine(line_iter, story, lang, story_languages) {
     let start_no = line_iter.get_lineno(-1);
     let start_no1 = line_iter.get_lineno();
     let data = getText(line_iter, true, true, true);
-    let data_text = speaker_text_trans(data, story.meta)
+    let data_text = speaker_text_trans(data, story.meta);
+
+    data_text.line.content.lang_hints = story_languages.fromLanguage;
 
     story.elements.push({
         type: "LINE",
@@ -500,6 +506,8 @@ function processBlockSelectPhrase(line_iter, story, lang, story_languages) {
     let data = getText(line_iter, true, true, true);
     let data_text = speaker_text_trans(data, story.meta)
 
+    data_text.line.content.lang_hints = story_languages.fromLanguage;
+
     let start_no3 = line_iter.get_lineno(0);
     let [answers, correct_answer] = getAnswers(line_iter, false);
     story.elements.push({
@@ -547,8 +555,10 @@ function processBlockContinuation(line_iter, story, lang, story_languages) {
     let data = getText(line_iter, true, true, true);
     let data_text = speaker_text_trans(data, story.meta, false, true)
 
+    data_text.line.content.lang_hints = story_languages.fromLanguage;
+
     let start_no3 = line_iter.get_lineno();
-    let [answers, correct_answer] = getAnswers(line_iter, true);
+    let [answers, correct_answer] = getAnswers(line_iter, true, story_languages.fromLanguage);
     story.elements.push({
         type: "CHALLENGE_PROMPT",
         prompt: question_data_text.content,
@@ -594,6 +604,8 @@ function processBlockArrange(line_iter, story, lang, story_languages) {
     let start_no2 = line_iter.get_lineno();
     let data = getText(line_iter, true, true, true);
     let data_text = speaker_text_trans(data, story.meta, true)
+
+    data_text.line.content.lang_hints = story_languages.fromLanguage;
 
     let [phraseOrder, selectablePhrases2] = shuffleArray(data_text.selectablePhrases);
     story.elements.push({
@@ -642,6 +654,8 @@ function processBlockPointToPhrase(line_iter, story, lang, story_languages) {
     let start_no2 = line_iter.get_lineno();
     let data = getText(line_iter, true, true, true);
     let data_text = speaker_text_trans(data, story.meta, true)
+
+    data_text.line.content.lang_hints = story_languages.fromLanguage;
 
     let [correctAnswerIndex, transcriptParts] = pointToPhraseButtons(data.text)
 

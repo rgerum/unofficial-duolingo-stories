@@ -126,7 +126,7 @@ export default function HintLineContent({content, audioRange, hideRangesForChall
         if(editor)
             is_hidden = false;
 
-        elements.push(<Tooltip key={hint.rangeFrom + " "+hint.rangeTo+1} className={styles.word+" "+(is_hidden ? "" : (show_trans ? styles.tooltip_editor : styles.tooltip))}><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className={show_trans ? styles.tooltiptext_editor : styles.tooltiptext}>{content.hints[hint.hintIndex]}</span></Tooltip>)
+        elements.push(<Tooltip key={hint.rangeFrom + " "+hint.rangeTo+1} className={styles.word+" "+(is_hidden ? "" : (show_trans ? styles.tooltip_editor : styles.tooltip))}><span>{addSplitWord(hint.rangeFrom, hint.rangeTo+1)}</span><span className={(show_trans ? styles.tooltiptext_editor : styles.tooltiptext)+" "+content.lang_hints}>{content.hints[hint.hintIndex]}</span></Tooltip>)
         //addSplitWord(dom.append("span").attr("class", "word tooltip"), hint.rangeFrom, hint.rangeTo+1)
         //    .append("span").attr("class", "tooltiptext").text(content.hints[hint.hintIndex]);
         // advance the position
