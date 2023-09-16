@@ -125,6 +125,7 @@ async function getVoices() {
                 for(let voice of data.Voices) {
                     voices_result.push({
                         language: voice.LanguageCode.split("-")[0],
+                        locale: voice.LanguageCode,
                         name: voice.Id,
                         gender: voice.Gender.toUpperCase(),
                         type: (voice.SupportedEngines[0] === "neural") ? "NEURAL" : "NORMAL",

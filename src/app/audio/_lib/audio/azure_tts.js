@@ -92,6 +92,7 @@ async function getVoices() {
     for(let voice of voices.voices) {
         result_voices.push({
             language: voice.locale.split("-")[0],
+            locale: voice.locale,
             name: voice.shortName,
             gender: (voice.gender === 1) ? "FEMALE" : "MALE",
             type: (voice.voiceType === 1) ? "NEURAL" : "NORMAL",

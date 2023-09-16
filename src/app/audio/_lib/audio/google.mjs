@@ -123,6 +123,7 @@ async function getVoices() {
         for(let voice of voices) {
             voices_result.push({
                 language: voice.languageCodes[0].split("-")[0],
+                locale: voice.languageCodes[0],
                 name: voice.name,
                 gender: voice.ssmlGender,
                 type: (voice.name.indexOf("Neural")) ? "NEURAL" : "NORMAL",

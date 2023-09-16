@@ -25,8 +25,8 @@ export async function GET(req) {
         try {
             await query(`
         REPLACE INTO speaker (language_id, speaker, gender, type, service)
-         VALUES ((SELECT id FROM language WHERE short = ? LIMIT 1), ?, ?, ?, ?)`,
-                [v.language, v.name, v.gender, v.type, v.service]);
+         VALUES ((SELECT id FROM language WHERE short = ? OR short = ? LIMIT 1), ?, ?, ?, ?)`,
+                [v.language, v.locale, v.name, v.gender, v.type, v.service]);
         }
         catch (e) {
             console.log("unknown language", v?.language, v);
