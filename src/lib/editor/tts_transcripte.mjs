@@ -167,7 +167,7 @@ export function transcribe_text(text, data) {
             text = text2;
         }
     }
-    if(ipa)
+    //if(ipa)
     return [text, mapping];
 }
 //console.log(transcribe_text(text, data))

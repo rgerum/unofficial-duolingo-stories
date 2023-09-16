@@ -1,17 +1,13 @@
-import {getSession} from "next-auth/react";
-import {get_avatar_names, get_language, get_speakers} from "../../../api/editor/avatar/[language]";
-import Head from "next/head";
+'use client'
 import styles from "../[language].module.css";
 import React, {useState} from "react";
-import EditorButton from "../../../../components/editor/editor_button";
-import Flag from "../../../../components/layout/flag";
-import Login from "../../../../components/login/login_dialog";
-import {transcribe_text} from "../../../../lib/editor/tts_transcripte.mjs";
-import {useInput} from "../../../../lib/hooks";
-import {PlayButton, SpeakerEntry} from "../[language]";
-import {fetch_post} from "../../../../lib/fetch_post";
+import {transcribe_text} from "lib/editor/tts_transcripte.mjs";
+import {useInput} from "lib/hooks";
+import {PlayButton, SpeakerEntry} from "../language_editor";
+import {fetch_post} from "lib/fetch_post";
+import {Layout} from "../language_editor"
 
-export default function Page({language, speakers}) {
+export default function Tts_edit({language, speakers, session, course}) {
     // Render data...                <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
     let [data, setData] = useInput(language.tts_replace || `
 # here you can add single letters that should be replaced    
@@ -38,7 +34,7 @@ WORDS:
             id: language.id,
             tts_replace: data,
         };
-        let response = await fetch_post(`/api/editor/avatar/save_tts_replace`, d);
+        let response = await fetch_post(`/editor/language/save_tts_replace`, d);
         if(response.status === 200)
             return await response.json();
         throw "error";
@@ -75,19 +71,16 @@ WORDS:
         e.preventDefault();
     }
     async function process() {
+        console.log("save")
         await save();
+        console.log("process", text, data)
         let [text2, ] = transcribe_text(text, data);
+        console.log("text2", text2);
         setText2(text2);
         return text2;
     }
     return <>
-        <Head>
-            <title>Duostories: improve your Duolingo learning with community translated Duolingo stories.</title>
-            <link rel="canonical" href={`https://duostories.org/editor/language/${language.id}`} />
-            <meta name="description" content={`Contribute by translating stories.`}/>
-            <meta name="keywords" content={`language, learning, stories, Duolingo, community, volunteers`}/>
-        </Head>
-        <Layout language_data={language}>
+        <Layout language_data={language} session={session} course={course}>
             <div className={styles.root + " " + styles.characterEditorContent}>
                 <div className={styles.speaker_list + " " + (speakers?.length > 0 ? "": styles.noVoices)}>
                     <div className={styles.slidecontainer}>
@@ -128,57 +121,4 @@ WORDS:
             </div>
         </Layout>
     </>
-}
-
-
-export function Layout({ children, language_data }) {
-    /*
-    <CourseDropdown userdata={userdata} />
-    <Login userdata={userdata} />
-    */
-//const { userdata, error } = useSWR('https://test.duostories.org/stories/backend_node_test/session', fetch)
-
-//if (error) return <div>failed to load</div>
-//if (!userdata) return <div>loading...</div>
-
-    return (
-        <>
-            <nav className={styles.header_index}>
-                <EditorButton id="button_back" href={`/editor`} data-cy="button_back" img={"back.svg"} text={"Back"} style={{paddingLeft: 0}}/>
-                <b>TTS-Editor</b>
-                <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
-                <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
-                <div style={{marginLeft: "auto"}}></div>
-                <Login page={"editor"}/>
-            </nav>
-            <div className={styles.main_index}>
-                {children}
-            </div>
-        </>
-    )
-}
-
-export async function getServerSideProps(context) {
-    const session = await getSession(context);
-
-    if (!session) {
-        return {redirect: {destination: '/editor/login', permanent: false,},};
-    }
-    if (!session.user.role) {
-        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
-    }
-
-    let language = await get_language(context.params.language);
-
-    if(!language) {
-        return {
-            notFound: true,
-        }
-    }
-
-    let speakers = await get_speakers(context.params.language);
-    let avatar_names = await get_avatar_names(context.params.language);
-
-    // Pass data to the page via props
-    return { props: { avatar_names, speakers, language } }
 }
