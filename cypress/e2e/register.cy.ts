@@ -6,7 +6,6 @@ describe('Email confirmation', () => {
         //query('DELETE FROM user WHERE username = "user_new"')
     })
     it('sends an email', () => {
-        cy.task('hello', { greeting: 'Hello', name: 'World' })
         cy.task('resetEmails', "user@test.org")
 
         cy.visit('/')
