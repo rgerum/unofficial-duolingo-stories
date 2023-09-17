@@ -17,7 +17,7 @@ export default async function Page({params}) {
                             <p id="status">Activation successful.</p>
                             <p id="login_form">
                                 {/* Use of absolute link because relative links would only be relative to carex.uber.space */}
-                                You can now <Link href='/api/auth/signin'>log in</Link>.
+                                You can now <Link href='/api/auth/signin' data-cy="log-in">log in</Link>.
                             </p>
                         </>
                         :
