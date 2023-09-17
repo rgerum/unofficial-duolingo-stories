@@ -10,10 +10,10 @@ if(!process.env.NEXTAUTH_URL) {
             const db = new sqlite3.Database('test.sqlite');
             db.all(row, params, (err, rows) => {
                 db.close();
-                 if(err)
-                     reject(err);
-                 else
-                     resolve(rows);
+                if(err)
+                    reject(err);
+                else
+                    resolve(rows);
             });
         });
     }
@@ -23,7 +23,7 @@ if(!process.env.NEXTAUTH_URL) {
         let columns = [];
         let value_placeholders = [];
         for (let key in data) {
-            if(mapping.includes && mapping.includes(key)) {
+            if(mapping === undefined || (mapping.includes && mapping.includes(key))) {
                 values.push(data[key]);
                 columns.push(`${key}`);
                 value_placeholders.push(`?`);
@@ -38,9 +38,11 @@ if(!process.env.NEXTAUTH_URL) {
         let value_placeholders_string = value_placeholders.join(", ");
 
         return new Promise((resolve, reject) => {
+            const db = new sqlite3.Database('test.sqlite');
             db.run(`INSERT INTO ${table_name}
                             (${columns_string})
                             VALUES (${value_placeholders_string});`, values, function(err) {
+                db.close();
                 if(err)
                     reject(err);
                 else {
