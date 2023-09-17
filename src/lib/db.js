@@ -96,13 +96,12 @@ if(!process.env.NEXTAUTH_URL) {
 }
 else {
     const mysql = require('mysql2');
-    const dbConfig = require("./db.config.js");
 
     const pool = mysql.createPool({
-        host: dbConfig.HOST,
-        user: dbConfig.USER,
-        password: dbConfig.PASSWORD,
-        database: dbConfig.DB,
+        host: process.env.MYSQL_HOST,
+        user: process.env.MYSQL_USER,
+        password: process.env.MYSQL_PASSWORD,
+        database: process.env.MYSQL_DB,
         waitForConnections: true,
         connectionLimit: 10, // Adjust this as needed
     });
