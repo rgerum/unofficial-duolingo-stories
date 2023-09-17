@@ -83,7 +83,13 @@ function removeDoubleBrackets(content, pos) {
 }
 
 function getHideRanges(content) {
-    content.text = content.text.replace(/\\n/g, "\n");
+    let pos_br = content.text.indexOf("\\n");
+    while (pos_br !== -1) {
+        hintsShift(content, pos_br);
+        content.text = content.text.substring(0, pos_br) + "\n" + content.text.substring(pos_br+1)
+        pos_br = content.text.indexOf("\\n");
+    }
+    //content.text = content.text.replace(/\\n/g, "\n");
 
     // find brackets that are not doubled
     let pos1 = regexIndexOf(content.text, /(?<!\[)\[(?!\[)/);
