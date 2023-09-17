@@ -46,5 +46,6 @@ jobs:
         scp build.zip duostori@ara.uberspace.de:~/html/deploy_${{ github.event.number  }}/
         ssh duostori@ara.uberspace.de 'rm -rf ~/html/deploy_${{ github.event.number  }}/.next'
         ssh duostori@ara.uberspace.de 'unzip -d ~/html/deploy_${{ github.event.number  }}/ ~/html/deploy_${{ github.event.number }}/build.zip'
+        ssh duostori@ara.uberspace.de 'supervisorctl stop deploy_${{ github.event.number  }}'
         ssh duostori@ara.uberspace.de '/home/duostori/html/kill_rouge_workers.py'
-        ssh duostori@ara.uberspace.de 'supervisorctl restart deploy_${{ github.event.number  }}'
+        ssh duostori@ara.uberspace.de 'supervisorctl start deploy_${{ github.event.number  }}'
