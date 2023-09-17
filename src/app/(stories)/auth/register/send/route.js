@@ -1,27 +1,16 @@
-import query from "lib/db"
+import query, {insert} from "lib/db"
 const {phpbb_hash} = require("lib/auth/hash_functions2");
 import { v4 as uuid } from 'uuid';
 import {NextResponse} from "next/server";
-const nodemailer = require("nodemailer");
+import transporter from "lib/emailer"
 
 export async function POST(req) {
-    try {
-        const res = await req.json()
-        let ret = await register(res);
-        if(ret?.status)
-            return new Response(ret?.message, {status: ret.status})
-        return NextResponse.json(ret);
-    }
-    catch (err) {
-        return new Response(err.message, {status: 500})
-    }
+    const res = await req.json()
+    let ret = await register(res);
+    if(ret?.status)
+        return new Response(ret?.message, {status: ret.status})
+    return NextResponse.json(ret);
 }
-
-let transporter = nodemailer.createTransport({
-    sendmail: true,
-    newline: 'unix',
-    path: '/usr/sbin/sendmail'
-});
 
 
 async function check_username(username, existing) {
@@ -48,7 +37,12 @@ async function register({username, password, email}){
 
     let password_hashed = await phpbb_hash(password);
     let activation_link = uuid();
-    await query("INSERT INTO user (username, email, password, activation_link) VALUES(?, ?, ?, ?)", [username, email, password_hashed, activation_link]);
+    await insert("user", {
+        username: username,
+        email: email,
+        password: password_hashed,
+        activation_link: activation_link,
+    })
     transporter.sendMail({
         from: 'Unofficial Duolingo Stories <register@duostories.org>',
         to: email,

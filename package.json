@@ -5,6 +5,7 @@
     "build": "next build",
     "start": "next start",
     "init": "node db_create_test.js",
+    "init-reset": "node db_test_reset.js",
     "cypress": "cypress open"
   },
   "dependencies": {
@@ -25,6 +26,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-swipeable": "^7.0.0",
+    "smtp-tester": "^2.1.0",
     "swr": "^2.0.3",
     "utf-8-validate": "^5.0.10",
     "uuid": "^9.0.0"

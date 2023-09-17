@@ -100,7 +100,7 @@ export default function Register() {
             <p>Registration is optional, stories can be accessed even without login.</p>
             {state === -1 ? <span className={styles.error}>{error}</span> : <></>}
             {state === 2 ?
-                <span className={styles.message}>{message}</span>
+                <span className={styles.message} data-cy="message-confirm">{message}</span>
                 :
                 <>
                     <input data-cy="username" value={usernameInput} onChange={usernameInputSetValue} type="text"

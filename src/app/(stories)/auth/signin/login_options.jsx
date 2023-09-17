@@ -58,7 +58,7 @@ export function LoginOptions({providers}) {
                placeholder="Password"/>
         <button data-cy="submit"  className={styles.button}
                 onClick={register_button}>{ "Log in" }</button>
-        <span>Don't have an account? <Link href="/auth/register" className={styles.link}>Sign Up</Link></span>
+        <span>Don't have an account? <Link href="/auth/register" data-cy="register-button" className={styles.link}>Sign Up</Link></span>
         <hr/>
         {/*<input data-cy="email" value={emailInput} onChange={emailInputSetValue} onKeyDown={handleKeypressSignup2} type="email" placeholder="Email" name="email"/>
                         <button data-cy="submit"  className={styles.button}

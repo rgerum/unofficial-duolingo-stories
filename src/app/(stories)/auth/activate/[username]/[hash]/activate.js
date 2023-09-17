@@ -24,9 +24,13 @@ export async function activate({username, hash}) {
     let username_check = await check_username(username, true);
     if(username_check?.status)
         return username_check
-    let result = await query("UPDATE user SET activated = 1 WHERE username = ? AND activation_link = ?;", [username, hash]);
+    // activate the user
+    await query("UPDATE user SET activated = 1 WHERE username = ? AND activation_link = ?;", [username, hash]);
 
-    if(result.affectedRows)
+    // check if it was set correctly
+    let result2 = await query("SELECT activated FROM user WHERE username = ? AND activation_link = ?;", [username, hash]);
+
+    if(result2[0].activated)
         return "done";
     return {status: 403, message:"Username or activation link do not exist."}
 }
