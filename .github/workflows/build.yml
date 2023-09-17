@@ -45,5 +45,5 @@ jobs:
         scp build.zip duostori@ara.uberspace.de:~/html/HEAD/
         ssh duostori@ara.uberspace.de 'rm -rf ~/html/HEAD/.next'
         ssh duostori@ara.uberspace.de 'unzip -d ~/html/HEAD/ ~/html/HEAD/build.zip'
-        ssh duostori@ara.uberspace.de '/usr/sbin/fuser -k 3770/tcp'
+        ssh duostori@ara.uberspace.de '/home/duostori/html/kill_rouge_workers.py'
         ssh duostori@ara.uberspace.de 'supervisorctl restart beta'
