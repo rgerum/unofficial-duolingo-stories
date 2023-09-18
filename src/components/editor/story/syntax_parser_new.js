@@ -39,7 +39,7 @@ function getButtons(content) {
     let buttons = [...content.text.matchAll(/\(([^)]*)\)/g)];
     let selectablePhrases = [];
     for(let button of buttons) {
-        selectablePhrases.push(button[1]);
+        selectablePhrases.push(button[1].replace(/\[\[/g, "[").replace(/]]/g, "]").replace(/\\n/g, "\n"));
     }
     let characterPositions = [];
     let pos1 = content.text.indexOf("(");
@@ -392,6 +392,9 @@ function pointToPhraseButtons(line) {
     line = line.replace(/~/g, " ")
     line = line.replace(/ +/g, " ")
     line = line.replace(/\|/g, "​")
+    line = line.replace(/\[\[/g, "[")
+    line = line.replace(/]]/g, "]")
+    line = line.replace(/\\n/g, "\n")
     let transcriptParts = [];
     let correctAnswerIndex = 0;
     let index = 0;
@@ -403,7 +406,7 @@ function pointToPhraseButtons(line) {
                 if(l !== "")
                     transcriptParts.push({
                         selectable: false,
-                        text: l.replace(/\\n/g, "\n"),
+                        text: l,
                     })
             break
         }
@@ -412,7 +415,7 @@ function pointToPhraseButtons(line) {
                 if(l !== "")
                     transcriptParts.push({
                         selectable: false,
-                        text: l.replace(/\\n/g, "\n")
+                        text: l,
                     })
         }
         line = line.substring(pos+1);
