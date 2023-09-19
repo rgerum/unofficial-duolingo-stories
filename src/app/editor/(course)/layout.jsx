@@ -16,7 +16,6 @@ export default async function Layout({ children }) {
     return (
     <>
     <nav className={styles.header_index}>
-        <b>Course-Editor</b>
         <LayoutFlag courses={courses}/>
 
         {(session?.user) ?

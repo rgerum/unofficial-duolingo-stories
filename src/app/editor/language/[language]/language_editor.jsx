@@ -4,18 +4,17 @@ import {useInput} from "lib/hooks";
 import {SpinnerBlue} from "components/layout/spinner";
 import {fetch_post} from "lib/fetch_post";
 import styles from "./[language].module.css"
-import Flag from "components/layout/flag";
-import EditorButton from "../../editor_button";
 
 import AudioPlay from "components/story/text_lines/audio_play";
 import HintLineContent from "components/story/text_lines/line_hints";
 import useAudio from "components/story/text_lines/use_audio";
 import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";
+import {Breadcrumbs} from "../../_components/breadcrumbs";
 
-export default function LanguageEditor({language, speakers, avatar_names, session, course}) {
+export default function LanguageEditor({language, language2, speakers, avatar_names, session, course}) {
     // Render data...
     return <>
-        <Layout language_data={language} session={session} course={course}>
+        <Layout language_data={language} language2={language2} session={session} course={course}>
             <div className={styles.root + " " + styles.characterEditorContent}>
                 <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
             </div>
@@ -23,7 +22,7 @@ export default function LanguageEditor({language, speakers, avatar_names, sessio
     </>
 }
 
-export function Layout({ children, language_data, session, course }) {
+export function Layout({ children, language_data, language2, session, course }) {
     /*
     <CourseDropdown userdata={userdata} />
     <Login userdata={userdata} />
@@ -36,13 +35,13 @@ export function Layout({ children, language_data, session, course }) {
     return (
         <>
             <nav className={styles.header_index}>
-                {course ?
-                    <EditorButton id="button_back" href={`/editor/course/${course.short}`} data-cy="button_back" img={"back.svg"} text={"Back"} style={{paddingLeft: 0}}/> :
-                    <EditorButton id="button_back" href={`/editor`} data-cy="button_back" img={"back.svg"} text={"Back"} style={{paddingLeft: 0}}/>
-                }
-                <b>Character-Editor</b>
-                <Flag iso={language_data.short} width={40} flag={language_data.flag} flag_file={language_data.flag_file}/>
-                <span data-cy="language-name" className={styles.AvatarEditorHeaderFlagName}>{language_data.name}</span>
+                <Breadcrumbs path={[
+                    {"type": "Editor", "href": `/editor`},
+                    {"type": "sep"},
+                    {"type": "course", "lang1": language_data, "lang2": language2, "href": `/editor/course/${course?.short}`},
+                    {"type": "sep"},
+                    {"type": "Voices"}
+                ]}/>
                 <div style={{marginLeft: "auto"}}></div>
                 {(session?.user) ?
                     <LoggedInButton page={"editor"} course_id={course?.short} session={session}/> :

@@ -2,8 +2,8 @@
 import styles from "./layout.module.css";
 import React from "react";
 import {useSelectedLayoutSegments} from "next/navigation";
-import {DoubleFlag} from "components/layout/flag";
 import EditorButton from "../editor_button";
+import {Breadcrumbs} from "../_components/breadcrumbs";
 
 
 export default function LayoutFlag({courses}) {
@@ -22,15 +22,31 @@ export default function LayoutFlag({courses}) {
         window.dispatchEvent(event);
     }
 // onClick={toggleShow}
-    return <>{course ? <>
-            <DoubleFlag width={40} onClick={toggleShow}
-                        lang1={{short: course.learningLanguage, flag:course.learningLanguageFlag, flag_file:course.learningLanguageFlagFile}}
-                        lang2={{short: course.fromLanguage, flag:course.fromLanguageFlag, flag_file:course.fromLanguageFlagFile}}
-
-            />
-            <span className={styles.AvatarEditorHeaderFlagname} data-cy="course-title">{`${course.learningLanguageName} (from ${course.fromLanguageName})`}</span>
-        </> : <></>
+    let path = [
+        {"type": "Editor"},
+    ]
+    if(course) {
+        path = [
+            {"type": "Editor", "href": `/editor`},
+            {"type": "sep"},
+            {
+                "type": "course",
+                "lang1": {
+                    short: course.learningLanguage,
+                    name: course.learningLanguageName,
+                    flag: course.learningLanguageFlag,
+                    flag_file: course.learningLanguageFlagFile
+                },
+                "lang2": {
+                    short: course.fromLanguage,
+                    name: course.fromLanguageName,
+                    flag: course.fromLanguageFlag,
+                    flag_file: course.fromLanguageFlagFile
+                },
+            }]
     }
+    return <>
+        <Breadcrumbs path={path}/>
         <div style={{marginLeft: "auto"}}></div>
         {course ? <>{course.official ? <span className={styles.official} data-cy="label_official"><i>official</i></span> :
             !import_id ?

@@ -1,8 +1,8 @@
 import React from "react";
 import styles from "./header.module.css";
-import {DoubleFlag} from "components/layout/flag";
 import EditorButton from "../../editor_button";
 import LoggedInButton, {LogInButton} from "components/login/loggedinbutton";
+import {Breadcrumbs} from "../../_components/breadcrumbs";
 
 export function StoryEditorHeader({
                                       story_data,
@@ -72,20 +72,13 @@ export function StoryEditorHeader({
     return <>
         <div className={styles.toolbar} >
         <div className={styles.AvatarEditorHeader}>
-            <EditorButton img={"back.svg"} text={"Back"} id="button_back" href={`/editor/course/${story_data?.short}`}
-                              style={{paddingLeft: 0}} />
-            <b>Story-Editor</b>
-            <DoubleFlag width={40} lang1={language_data} lang2={language_data2} className={styles.flag}/>
-            {language_data?.name && language_data2?.name ?
-                <span
-                    className={styles.AvatarEditorHeaderFlagname}>{`${language_data?.name} (from ${language_data2?.name})`}</span> : null}
-            {story_data?.image ?
-                <img alt="story title" width="50px" className={styles.story_img}
-                     src={`https://stories-cdn.duolingo.com/image/${story_data?.image}.svg`}
-                     style={{marginLeft: "auto"}}/>
-                : <img alt="story title" width="50px" className={styles.story_img}
-                       src={`/icons/empty_title.svg`} style={{marginLeft: "auto"}}/>}
-            <span className={styles.AvatarEditorHeaderFlagname}>{story_data?.name}</span>
+            <Breadcrumbs path={[
+                    {"type": "Editor", "href": `/editor`},
+                    {"type": "sep"},
+                    {"type": "course", "lang1": language_data, "lang2": language_data2, "href": `/editor/course/${story_data?.short}`},
+                    {"type": "sep"},
+                    {"type": "story", "data": story_data}
+                ]}/>
 
             <EditorButton style={{marginLeft: "auto"}} id="button_delete" onClick={Delete} img={"delete.svg"} text={"Delete"} />
             <EditorButton onClick={do_set_show_trans} checked={show_trans ? "checked" : ""} text={"Hints"} />
