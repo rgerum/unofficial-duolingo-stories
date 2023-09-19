@@ -132,8 +132,15 @@ export function transcribe_text(text, data) {
         if (section.toUpperCase() === "FRAGMENTS") {
             for (let frag in data[section]) {
                 let match = text.match(new RegExp(frag, "i"))
-                while(match) {
-                    text = text.replace(match = text.match(new RegExp(frag, "i")), data[section][frag]);
+                let counter = 0;
+                while(match && counter < 100) {
+                    if(match.length >= 3) {
+                        let index = match.index + match[1].length;
+                        match = [match[2]]
+                        match.index = index;
+                    }
+                    text = text.substring(0, match.index) + data[section][frag] + text.substring(match.index + match[0].length);
+                    //text = text.replace(match = text.match(new RegExp(frag, "i")), data[section][frag]);
                     let new_indices = [];
                     for(let j = 0; j < data[section][frag].length; j++) {
                         if(j < match[0].length)
@@ -143,6 +150,7 @@ export function transcribe_text(text, data) {
                     }
                     mapping.splice(match.index, match[0].length, ...new_indices);
                     match = text.match(new RegExp(frag, "i"));
+                    counter += 1;
                 }
             }
         }
@@ -237,3 +245,11 @@ words:
     ptm: posttagmeze
     bv: bonvolu
  */
+/*
+let words = "a akesi ala alasa ale anpa ante anu awen e en esun ijo ike ilo insa jaki jan jelo jo kala kalama kama kasi ken kepeken kili kiwen ko kon kule kulupu kute la lape laso lawa len lete li lili linja lipu loje lon luka lukin lupa ma mama mani meli mi mije moku moli monsi mu mun musi mute nanpa nasa nasin nena ni nimi noka o olin ona open pakala pali palisa pan pana pi pilin pimeja pini pipi poka poki pona pu sama seli selo seme sewi sijelo sike sin sina sinpin sitelen sona soweli suli suno supa suwi tan taso tawa telo tenpo toki tomo tu unpa uta utala walo wan waso wawa weka wile"
+for(let word of words.split(" ").sort((a, b) => b.length - a.length)) {
+    //console.log(word)
+    if(word.length > 1)
+        console.log(`    (\\[[^\\]]*?)(${word})([^\\]]*?\\]): ${word.substring(0, 1).toUpperCase()}`)
+}
+*/
