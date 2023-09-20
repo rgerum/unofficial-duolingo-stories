@@ -1,6 +1,6 @@
-import {Spinner} from "components/layout/spinner";
+import { Spinner } from "components/layout/spinner";
 
-import styles from 'app/(stories)/(main)/layout.module.css'
+import styles from "app/(stories)/(main)/layout.module.css";
 
 /*
     function sleep(ms) {
@@ -10,11 +10,13 @@ import styles from 'app/(stories)/(main)/layout.module.css'
  */
 
 export default function Loading() {
-    // You can add any UI inside Loading, including a Skeleton.
-    return <>
-        <div className={styles.loading}>
-            <p>Loading</p>
-            <Spinner/>
-        </div>
+  // You can add any UI inside Loading, including a Skeleton.
+  return (
+    <>
+      <div className={styles.loading}>
+        <p>Loading</p>
+        <Spinner />
+      </div>
     </>
+  );
 }

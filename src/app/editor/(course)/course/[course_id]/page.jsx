@@ -1,29 +1,28 @@
-import {authOptions} from "app/api/auth/[...nextauth]/route";
-import {get_course_editor} from "../../db_get_course_editor";
-import {getServerSession} from "next-auth/next";
-import {notFound} from "next/navigation";
+import { authOptions } from "app/api/auth/[...nextauth]/route";
+import { get_course_editor } from "../../db_get_course_editor";
+import { getServerSession } from "next-auth/next";
+import { notFound } from "next/navigation";
 import EditList from "../../edit_list";
 
+export default async function Page({ params }) {
+  const session = await getServerSession(authOptions);
 
-export default async function Page({params}) {
+  if (!session) {
+    return { redirect: { destination: "/editor/login", permanent: false } };
+  }
+  if (!session?.user?.role) {
+    return {
+      redirect: { destination: "/editor/not_allowed", permanent: false },
+    };
+  }
 
-    const session = await getServerSession(authOptions);
+  let course = await get_course_editor(params.course_id);
+  if (!course) notFound();
 
-    if (!session) {
-        return {redirect: {destination: '/editor/login', permanent: false,},};
-    }
-    if (!session?.user?.role) {
-        return {redirect: {destination: '/editor/not_allowed', permanent: false,},};
-    }
+  //function sleep(ms) {
+  //    return new Promise(resolve => setTimeout(resolve, ms));
+  //}
+  //await sleep(2000);
 
-    let course = await get_course_editor(params.course_id);
-    if(!course)
-        notFound();
-
-    //function sleep(ms) {
-    //    return new Promise(resolve => setTimeout(resolve, ms));
-    //}
-    //await sleep(2000);
-
-    return <EditList course={course} />
+  return <EditList course={course} />;
 }

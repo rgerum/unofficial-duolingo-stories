@@ -1,33 +1,33 @@
 .header {
-    text-align: center;
-    padding: 0 10px;
+  text-align: center;
+  padding: 0 10px;
 }
 
-.header h1{
-    font-size: 34px;
-    width: auto;
-    text-align: center;
+.header h1 {
+  font-size: 34px;
+  width: auto;
+  text-align: center;
 }
 
-@media screen and (max-width:480px) {
-    .header h1 {
-        font-size: 25px;
-        margin-bottom: 0;
-    }
+@media screen and (max-width: 480px) {
+  .header h1 {
+    font-size: 25px;
+    margin-bottom: 0;
+  }
 }
 
 .header p {
-    font-size: 19px;
-    width: auto;
-    text-align: center;
+  font-size: 19px;
+  width: auto;
+  text-align: center;
 }
-@media screen and (max-width:480px) {
-    .header p {
-        font-size: 19px;
-        color: var(--title-color-dim);
-    }
+@media screen and (max-width: 480px) {
+  .header p {
+    font-size: 19px;
+    color: var(--title-color-dim);
+  }
 
-    .header a {
-        color: var(--title-color-dim);
-    }
+  .header a {
+    color: var(--title-color-dim);
+  }
 }

@@ -12,28 +12,28 @@
 //
 // -- This is a parent command --
 // Cypress.Commands.add('login', (email, password) => { ... })
-Cypress.Commands.add('login', (username, password) => {
-    cy.session(
-        username,
-        () => {
-            cy.visit("/")
+Cypress.Commands.add("login", (username, password) => {
+  cy.session(
+    username,
+    () => {
+      cy.visit("/");
 
-            // log in
-            cy.get("[data-cy=login-button]").click()
-            cy.get("[data-cy=username]").type(username)
-            cy.get("[data-cy=password]").type(password)
-            cy.get("[data-cy=submit]").click()
+      // log in
+      cy.get("[data-cy=login-button]").click();
+      cy.get("[data-cy=username]").type(username);
+      cy.get("[data-cy=password]").type(password);
+      cy.get("[data-cy=submit]").click();
 
-            cy.url().should('not.include', '/auth/')
-        },
-        {
-            validate: () => {
-                cy.visit("/")
-                cy.get("[data-cy=user-button]").should('exist')
-            },
-        }
-    )
-})
+      cy.url().should("not.include", "/auth/");
+    },
+    {
+      validate: () => {
+        cy.visit("/");
+        cy.get("[data-cy=user-button]").should("exist");
+      },
+    },
+  );
+});
 //
 // -- This is a child command --
 // Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
@@ -58,4 +58,4 @@ Cypress.Commands.add('login', (username, password) => {
 // }
 
 // Prevent TypeScript from reading file as legacy script
-export {}
+export {};

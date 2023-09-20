@@ -1,55 +1,53 @@
-
-
-.admin_table th  {
-    position: sticky;
-    top: 60px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    text-align: left;
-    background-color: var(--button-background);
-    color: var(--button-color);
+.admin_table th {
+  position: sticky;
+  top: 60px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  text-align: left;
+  background-color: var(--button-background);
+  color: var(--button-color);
 }
 .admin_table {
-    border-collapse: collapse;
+  border-collapse: collapse;
 }
 
 .admin_table tr:nth-child(2n) {
-    background-color: var(--body-background-faint);
+  background-color: var(--body-background-faint);
 }
 
 .admin_table td input {
-    width: 95%;
+  width: 95%;
 }
 
 .dropdown:hover .dropdownContent {
-    display: block;
-    max-height: 180px;
-    overflow: scroll;
+  display: block;
+  max-height: 180px;
+  overflow: scroll;
 }
 .drop_button {
-    background-color:#fff;
-    border:1px solid
+  background-color: #fff;
+  border: 1px solid;
 }
 .dropdownContent {
-    display: none;
-    position: absolute;
-    background-color: #f1f1f1;
-    min-width: 160px;
-    box-shadow: 0 8px 16px #0003;
-    z-index: 1;
-    width: 200px;
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0 8px 16px #0003;
+  z-index: 1;
+  width: 200px;
 }
 .dropdownContent button {
-    width: 100%;
-    border: none;
+  width: 100%;
+  border: none;
 }
 .lang {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .tag {
-    background: var(--editor-ssml);
-    border-radius: 10px;
-    padding: 5px 10px;
+  background: var(--editor-ssml);
+  border-radius: 10px;
+  padding: 5px 10px;
 }

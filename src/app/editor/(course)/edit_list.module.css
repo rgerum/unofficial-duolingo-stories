@@ -1,192 +1,191 @@
 @media (max-width: 1000px) {
-    .thead {
-        display: none;
-    }
+  .thead {
+    display: none;
+  }
 
-    .row {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        padding: 5px 0;
-    }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 5px 0;
+  }
 
-    .row>div {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
+  .row > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-    .row div:nth-child(1) {
-        width: 60px;
-    }
-    .row div:nth-child(2) {
-        width: 45px;
-    }
+  .row div:nth-child(1) {
+    width: 60px;
+  }
+  .row div:nth-child(2) {
+    width: 45px;
+  }
 
-    .row div:nth-child(3) {
-        width: calc(100vw - 60px - 45px - 180px);
-        padding-left: 5px;
-    }
+  .row div:nth-child(3) {
+    width: calc(100vw - 60px - 45px - 180px);
+    padding-left: 5px;
+  }
 
-    .row div:nth-child(4) {
-        width: 180px;
-        text-align: right;
-    }
+  .row div:nth-child(4) {
+    width: 180px;
+    text-align: right;
+  }
 
-    .row div:nth-child(5)::before {
-        content: "Created: ";
-    }
+  .row div:nth-child(5)::before {
+    content: "Created: ";
+  }
 
-    .row div:nth-child(7)::before {
-        content: "Changed: ";
-    }
+  .row div:nth-child(7)::before {
+    content: "Changed: ";
+  }
 
-    .row div:nth-child(5),
-    .row div:nth-child(7) {
-        font-size: 12px;
-        padding-left: 5px;
-        color: var(--text-color-dim);
-        width: calc(50% - 130px);
-    }
+  .row div:nth-child(5),
+  .row div:nth-child(7) {
+    font-size: 12px;
+    padding-left: 5px;
+    color: var(--text-color-dim);
+    width: calc(50% - 130px);
+  }
 
-    .row div:nth-child(6),
-    .row div:nth-child(8) {
-        width: 130px;
-        font-size: 12px;
-        color: var(--text-color-dim);
-    }
+  .row div:nth-child(6),
+  .row div:nth-child(8) {
+    width: 130px;
+    font-size: 12px;
+    color: var(--text-color-dim);
+  }
 
-    .row:nth-child(2n) {
-        background-color: var(--body-background-faint);
-    }
+  .row:nth-child(2n) {
+    background-color: var(--body-background-faint);
+  }
 }
 @media (max-width: 500px) {
-    .row div:nth-child(3) {
-        width: calc(100vw - 60px - 45px - 85px);
-    }
-    .row div:nth-child(4) {
-        width: 85px;
-        overflow: hidden;
-    }
-    .row div:nth-child(4) div {
-        display: flex;
-        width: auto;
-    }
-    .row div:nth-child(4) span:first-child {
-        display: block;
-        width: 1.5em;
-        overflow: hidden;
-        margin-right: 5px;
-    }
-    .row div:nth-child(5),
-    .row div:nth-child(7) {
-        font-size: 12px;
-        padding-left: 5px;
-        color: var(--text-color-dim);
-        width: calc(100% - 130px);
-    }
+  .row div:nth-child(3) {
+    width: calc(100vw - 60px - 45px - 85px);
+  }
+  .row div:nth-child(4) {
+    width: 85px;
+    overflow: hidden;
+  }
+  .row div:nth-child(4) div {
+    display: flex;
+    width: auto;
+  }
+  .row div:nth-child(4) span:first-child {
+    display: block;
+    width: 1.5em;
+    overflow: hidden;
+    margin-right: 5px;
+  }
+  .row div:nth-child(5),
+  .row div:nth-child(7) {
+    font-size: 12px;
+    padding-left: 5px;
+    color: var(--text-color-dim);
+    width: calc(100% - 130px);
+  }
 
-    .row div:nth-child(6),
-    .row div:nth-child(8) {
-        width: 130px;
-        font-size: 12px;
-        color: var(--text-color-dim);
-    }
+  .row div:nth-child(6),
+  .row div:nth-child(8) {
+    width: 130px;
+    font-size: 12px;
+    color: var(--text-color-dim);
+  }
 
-    .row:nth-child(2n) {
-        background-color: var(--body-background-faint);
-    }
+  .row:nth-child(2n) {
+    background-color: var(--body-background-faint);
+  }
 }
 
 @media (min-width: 1000px) {
-    .table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-bottom: 100px;
-        display: table;
-        vertical-align: middle;
-    }
-    .thead {
-        display: table-header-group;
-    }
-    .tbody {
-        display: table-row-group;
-    }
-
-    .row {
-        display: table-row;
-    }
-
-    .row:nth-child(2n) {
-        background-color: var(--body-background-faint);
-    }
-
-    .row div {
-        display: table-cell;
-        vertical-align: middle;
-        padding: 0 5px;
-    }
-
-    .thead .row div {
-        padding-top: 5px;
-        padding-bottom: 5px;
-        text-align: left;
-        background-color: var(--button-background);
-        color: var(--button-color);
-    }
-}
-
-
-
-.story_list {
+  .table {
     border-collapse: collapse;
     width: 100%;
     margin-bottom: 100px;
-}
+    display: table;
+    vertical-align: middle;
+  }
+  .thead {
+    display: table-header-group;
+  }
+  .tbody {
+    display: table-row-group;
+  }
 
-.story_list td, .story_list th {
-    padding: 5px;
-}
+  .row {
+    display: table-row;
+  }
 
-.story_list th {
+  .row:nth-child(2n) {
+    background-color: var(--body-background-faint);
+  }
+
+  .row div {
+    display: table-cell;
+    vertical-align: middle;
+    padding: 0 5px;
+  }
+
+  .thead .row div {
     padding-top: 5px;
     padding-bottom: 5px;
     text-align: left;
     background-color: var(--button-background);
     color: var(--button-color);
+  }
+}
+
+.story_list {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 100px;
+}
+
+.story_list td,
+.story_list th {
+  padding: 5px;
+}
+
+.story_list th {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  text-align: left;
+  background-color: var(--button-background);
+  color: var(--button-color);
 }
 
 .story_list tr:nth-child(2n) {
-    background-color: var(--body-background-faint);
+  background-color: var(--body-background-faint);
 }
 
 .set_start {
-    border-top: 3px solid var(--button-background);
+  border-top: 3px solid var(--button-background);
 }
 
 .story_list tr a {
-    color: var(--text-color);
-    font-weight: bold;
+  color: var(--text-color);
+  font-weight: bold;
 }
 
 .status_field {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 .status_text {
-    background: var(--editor-ssml);
-    border-radius: 10px;
-    padding: 2px 5px;
-    white-space: nowrap;
+  background: var(--editor-ssml);
+  border-radius: 10px;
+  padding: 2px 5px;
+  white-space: nowrap;
 }
 
 .approval:hover {
-    filter: brightness(.9);
+  filter: brightness(0.9);
 }
 .approval {
-    background: var(--editor-ssml);
-    border-radius: 10px;
-    padding: 2px 5px;
-    white-space: nowrap;
-    cursor: pointer;
+  background: var(--editor-ssml);
+  border-radius: 10px;
+  padding: 2px 5px;
+  white-space: nowrap;
+  cursor: pointer;
 }

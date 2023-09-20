@@ -5,46 +5,46 @@ name: Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 20
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
-    - name: ssh tunnel to mysql database
-      run: |
-        mkdir -p ~/.ssh/
-        ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
-        eval `ssh-agent -s`
-        ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
-        ssh -fN -L 3306:127.0.0.1:3306 duostori@ara.uberspace.de
+      - name: ssh tunnel to mysql database
+        run: |
+          mkdir -p ~/.ssh/
+          ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
+          eval `ssh-agent -s`
+          ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
+          ssh -fN -L 3306:127.0.0.1:3306 duostori@ara.uberspace.de
 
-    - name: Install
-      run: npm install
+      - name: Install
+        run: npm install
 
-    - run: printf "${{ secrets.ENV_LOCAL }}" >> .env.local
+      - run: printf "${{ secrets.ENV_LOCAL }}" >> .env.local
 
-    - name: Build
-      run: npm run build
+      - name: Build
+        run: npm run build
 
-    - name: zip
-      run: zip -r build.zip .next
+      - name: zip
+        run: zip -r build.zip .next
 
-    - name: upload
-      run: |
-        ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
-        eval `ssh-agent -s`
-        ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
-        scp build.zip duostori@ara.uberspace.de:~/html/HEAD/
-        ssh duostori@ara.uberspace.de 'rm -rf ~/html/HEAD/.next'
-        ssh duostori@ara.uberspace.de 'unzip -d ~/html/HEAD/ ~/html/HEAD/build.zip'
-        ssh duostori@ara.uberspace.de 'supervisorctl stop beta'
-        ssh duostori@ara.uberspace.de '/home/duostori/html/kill_rouge_workers.py'
-        ssh duostori@ara.uberspace.de 'supervisorctl start beta'
+      - name: upload
+        run: |
+          ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
+          eval `ssh-agent -s`
+          ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
+          scp build.zip duostori@ara.uberspace.de:~/html/HEAD/
+          ssh duostori@ara.uberspace.de 'rm -rf ~/html/HEAD/.next'
+          ssh duostori@ara.uberspace.de 'unzip -d ~/html/HEAD/ ~/html/HEAD/build.zip'
+          ssh duostori@ara.uberspace.de 'supervisorctl stop beta'
+          ssh duostori@ara.uberspace.de '/home/duostori/html/kill_rouge_workers.py'
+          ssh duostori@ara.uberspace.de 'supervisorctl start beta'

@@ -4,25 +4,25 @@ jobs:
   cypress-run:
     name: Cypress run
     runs-on: ubuntu-22.04
-    
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 20
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
-    - name: Cypress run
-      uses: cypress-io/github-action@v6
-      with:
-        record: true
-        build: npm run init
-        start: npm run dev
-        wait-on: 'http://localhost:3000'
-        wait-on-timeout: 120
-      env:
-        # pass the Cypress Cloud record key as an environment variable
-        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-        # pass GitHub token to allow accurately detecting a build vs a re-run build
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          record: true
+          build: npm run init
+          start: npm run dev
+          wait-on: "http://localhost:3000"
+          wait-on-timeout: 120
+        env:
+          # pass the Cypress Cloud record key as an environment variable
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          # pass GitHub token to allow accurately detecting a build vs a re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

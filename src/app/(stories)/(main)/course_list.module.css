@@ -1,51 +1,49 @@
-
 .course_list hr {
-    width: 100%;
-    border: 0;
-    border-top: 2px solid var(--overview-hr);
-    height: 0;
-    margin-top: 35px;
-    margin-bottom: 20px;
+  width: 100%;
+  border: 0;
+  border-top: 2px solid var(--overview-hr);
+  height: 0;
+  margin-top: 35px;
+  margin-bottom: 20px;
 }
 
 .course_list {
-    margin: 0 16px;
-    flex-wrap: wrap;
-    display: flex;
+  margin: 0 16px;
+  flex-wrap: wrap;
+  display: flex;
 }
 
 .course_group_name {
-    font-weight: bold;
-    width: 100%;
-    padding-left: 5px;
-    font-size: 24px;
+  font-weight: bold;
+  width: 100%;
+  padding-left: 5px;
+  font-size: 24px;
 }
 
-
-
 @keyframes placeHolderShimmer {
-    0% {
-        background-position: -800px 0
-    }
-    100% {
-        background-position: 800px 0
-    }
+  0% {
+    background-position: -800px 0;
+  }
+  100% {
+    background-position: 800px 0;
+  }
 }
 
 .loading {
-    color: transparent;
-    font-weight: bold;
-    width: 100%;
-    padding-left: 5px;
-    font-size: 24px;
+  color: transparent;
+  font-weight: bold;
+  width: 100%;
+  padding-left: 5px;
+  font-size: 24px;
 
-    animation-duration: 4s;
-    animation-fill-mode: forwards;
-    animation-iteration-count: infinite;
-    animation-name: placeHolderShimmer;
-    animation-timing-function: linear;
-    background: #f6f7f8 linear-gradient(to right, #eeeeee 8%, #bbbbbb 18%, #eeeeee 33%);
-    background-size: 800px 104px;
-    position: relative;
-    border-radius: 5px;
+  animation-duration: 4s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: placeHolderShimmer;
+  animation-timing-function: linear;
+  background: #f6f7f8
+    linear-gradient(to right, #eeeeee 8%, #bbbbbb 18%, #eeeeee 33%);
+  background-size: 800px 104px;
+  position: relative;
+  border-radius: 5px;
 }
