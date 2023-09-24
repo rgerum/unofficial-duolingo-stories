@@ -26,12 +26,14 @@ export default function useAudio(element, progress) {
       controls.audio_failed_call();
       return;
     }
+    console.log("...audio", audio);
     let timeouts = [];
     let last_end = 0;
     for (let keypoint of audio.keypoints) {
       last_end = keypoint.rangeEnd;
       let t = setTimeout(() => {
         setAudioRange(keypoint.rangeEnd);
+        console.log("set audio range", keypoint.rangeEnd);
       }, keypoint.audioStart);
       timeouts.push(t);
     }
@@ -57,6 +59,6 @@ export default function useAudio(element, progress) {
     audioRange,
     playAudio,
     ref,
-    "https://duostori.uber.space/" + audio.url,
+    audio.url.startsWith("blob") ? audio.url : ("https://duostori.uber.space/" + audio.url),
   ];
 }

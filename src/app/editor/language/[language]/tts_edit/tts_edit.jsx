@@ -9,6 +9,13 @@ import { Layout } from "../language_editor";
 import HintLineContent from "../../../../../components/story/text_lines/line_hints";
 import AudioPlay from "../../../../../components/story/text_lines/audio_play";
 import useAudio from "../../../../../components/story/text_lines/use_audio";
+import { processStoryFile } from "components/editor/story/syntax_parser_new";
+import {
+  generate_audio_line,
+  content_to_audio,
+  generate_ssml_line
+} from "../../../../../components/story/text_lines/audio_edit";
+import TextLine from "../../../../../components/story/text_lines/text_line";
 
 let element_init = {
   trackingProperties: {
@@ -84,74 +91,79 @@ WORDS:
   }
 
   async function play2(e, speaker, name) {
-    let [text2, mapping, text_clear] = await process();
+    //speaker = `${speaker}(pitch=${["x-low", "low", "medium", "high", "x-high"][pitch]},rate=${["x-slow", "slow", "medium", "fast", "x-fast"][speed]})`;
+
+    let [story, story_meta, audio_insert_lines] = processStoryFile(
+        `[DATA]
+        icon_0=https://design.duolingo.com/ee58f22644428b8182ae.svg
+        speaker_0=${speaker}
+        
+        [LINE]
+        Speaker0: ${text}
+        `,
+        0,
+        {},
+        {
+          learningLanguage: "en",
+          fromLanguage: "tok2",
+        },
+        data,
+    );
+    // nl-NL-FennaNeural(pitch=x-low)
+    /*
     let speakText2 = `<prosody pitch="${
-      ["x-low", "low", "medium", "high", "x-high"][pitch]
+        ["x-low", "low", "medium", "high", "x-high"][pitch]
     }" rate="${
-      ["x-slow", "slow", "medium", "fast", "x-fast"][speed]
+        ["x-slow", "slow", "medium", "fast", "x-fast"][speed]
     }">${text2}</prosody>`;
-    let id = speaker + pitch + speed + name;
-    return play(e, id, speaker, name, speakText2, mapping, text_clear);
+    */
+    //let [new_element, mapping, text_clear] = await process();
+    //let id = speaker + pitch + speed + name;
+    return play(story.elements[0]);
   }
 
-  async function play(e, id, speaker, name, speakText, mapping, text_clear) {
+  async function play(new_element) {
     //let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
     //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
-    let response2 = await fetch_post(`/audio/create`, {
-      id: 0,
-      speaker: speaker,
-      text: speakText.replace("$name", name),
-    });
-    let ssml_response = await response2.json();
 
-    let binaryString = window.atob(ssml_response.content);
-    let binaryData = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      binaryData[i] = binaryString.charCodeAt(i);
-    }
-    let blob = new Blob([binaryData], { type: "audio/mp3" });
-    let url = URL.createObjectURL(blob);
-    let audio = new Audio();
-    audio.src = url;
+    console.log("aud", new_element.line.content.audio)
 
-    let tt = speakText.replace("$name", name).replace(/<.*?>/g, "");
-    element = JSON.parse(JSON.stringify(element));
-    element.line.content = { ...element.line.content };
+    //new_element.line.content.audio.ssml = generate_ssml_line(new_element.line.content.audio.ssml, data, new_element.hideRangesForChallenge)
+    setText2(new_element.audio.ssml.text);
+    let {keypoints, content} = await generate_audio_line(new_element.line.content.audio.ssml)
+
+    let audio = content_to_audio(content);
+    console.log(audio)
+
+    //let tt = speakText.replace("$name", name).replace(/<.*?>/g, "");
+    element = JSON.parse(JSON.stringify(new_element));
+    /*element.line.content = { ...element.line.content };
     element.line.content.text = text_clear;
     element.line.content.lang = language.short;
     element.line.lang = language.short;
-    element.line.content.audio.keypoints = [];
-    let audioObject = ref.current;
-    audioObject.src = url;
+     */
+    element.audio.keypoints = keypoints;
+    element.line.content.audio.keypoints = keypoints;
+
+
+    //let audioObject = ref.current;
+    //audioObject.src = audio.src;
+    element.line.content.audio.url = audio.src;
+    console.log("keypoints", keypoints)
+    console.log("new_element", new_element)
     //element.line.content.audio.url = url
     // {audioStart: 50, rangeEnd: 3}
-    let last_pos = 0;
-    for (let marks of ssml_response.marks) {
-      last_pos += tt.substring(last_pos).indexOf(marks.value);
-      element.line.content.audio.keypoints.push({
-        audioStart: marks.time,
-        rangeEnd: mapping[last_pos],
-      });
-    }
     setElement(element);
 
-    audio.play();
+    //audio.play();
 
-    e.preventDefault();
+    //e.preventDefault();
   }
   async function process() {
     await save();
-    let text_clear = text
-      .replace(/\\n/g, "\n")
-      .replace(/~/g, " ")
-      .replace(/]]/g, "]")
-      .replace(/\[\[/g, "[");
-    let [text2, mapping] = transcribe_text(text, data);
-    setText2(text2);
-    return [text2, mapping, text_clear];
   }
 
-  let [audioRange, playAudio, ref, url] = useAudio(element, 1);
+  //let [audioRange, playAudio, ref, url] = useAudio(element, 1);
 
   return (
     <>
@@ -252,19 +264,15 @@ WORDS:
               style={{ width: "100%" }}
             />
             <br />
-            <button onClick={process}>Process</button>
-            <br />
             <h2>Transcribed Text</h2>
             <span>{text2}</span>
             <h2>Final Text</h2>
-            <audio ref={ref}>
-              <source src={url} type="audio/mp3" />
-            </audio>
-            <AudioPlay onClick={playAudio} />
             <span className={language.short}>
-              <HintLineContent
-                audioRange={audioRange}
-                content={element.line.content}
+              <TextLine
+                  progress={1}
+                  unhide={true}
+                  element={element}
+                  part={[]}
               />
             </span>
 
@@ -276,6 +284,8 @@ WORDS:
               cols={40}
               style={{ width: "100%" }}
             />
+            <br/>
+            <button onClick={process}>save</button>
           </div>
         </div>
       </Layout>

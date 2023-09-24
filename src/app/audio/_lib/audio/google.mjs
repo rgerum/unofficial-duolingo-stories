@@ -11,10 +11,11 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
   const headers = new Headers();
   headers.append("Content-Type", "application/json; charset=utf-8");
 
-  text = text.replace(/^<speak>/, "");
-  text = text.replace(/<\/speak>$/, "");
-  let [text_with_marks, marks] = add_marks(text);
-  let ssml = "<speak>" + text_with_marks + "</speak>";
+  //text = text.replace(/^<speak>/, "");
+  //text = text.replace(/<\/speak>$/, "");
+  //let [text_with_marks, marks] = add_marks(text);
+  //let ssml = "<speak>" + text_with_marks + "</speak>";
+  let ssml = text;
 
   const request = {
     input: {
@@ -43,6 +44,7 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
 
     return new Promise((resolve, reject) => {
       if (filename === undefined) {
+        /*
         for (let mark_index in timepoints) {
           mark_index = mark_index * 1;
           marks[0]["time"] = 0;
@@ -51,10 +53,11 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
               mark["time"] = timepoints[mark_index]["timeSeconds"] * 1000;
             }
           }
-        }
-        resolve({ marks: marks, content: audioContent });
+        }*/
+        resolve({ timepoints: timepoints, content: audioContent });
       }
       fs.writeFile(filename, Buffer.from(audioContent, "base64"), () => {
+        /*
         //{"time":1025,"type":"word","start":14,"end":17,"value":"moe"}
         for (let mark_index in timepoints) {
           mark_index = mark_index * 1;
@@ -64,8 +67,8 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
               mark["time"] = timepoints[mark_index]["timeSeconds"] * 1000;
             }
           }
-        }
-        resolve({ output_file: filename, marks: marks });
+        }*/
+        resolve({ output_file: filename, timepoints: timepoints });
       });
     });
     // do something with audioContent and timepoints
@@ -98,6 +101,7 @@ function add_marks(text) {
       text2 += space;
     }
   }
+  console.log("text", text2);
   return [text2, marks];
 }
 

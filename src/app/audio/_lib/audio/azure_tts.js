@@ -33,23 +33,23 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
     let marks = [];
 
     synthesizer.wordBoundary = (w, v) => {
-      //console.log(v)
+      console.log(v)
       //console.log(text2.substring(last_pos))//
       last_pos = text2.substring(last_pos).search(v.privText) + last_pos;
       let data = {
         time: Math.round(v.privAudioOffset / 10000),
         type: "word",
-        start: last_pos,
-        end: last_pos + v.privText.length,
+        start: v.privTextOffset,//last_pos,
+        end: v.privTextOffset + v.privWordLength,
         value: v.privText,
       };
       marks.push(data);
     };
 
-    text = text.replace(/^<speak>/, "");
-    text = text.replace(/<\/speak>$/, "");
+    //text = text.replace(/^<speak>/, "");
+    //text = text.replace(/<\/speak>$/, "");
     let lang = voice_id.split("-")[0] + "-" + voice_id.split("-")[1];
-    text = `<speak version='1.0' xml:lang='${lang}'><voice name="${voice_id}">${text}</voice></speak>`;
+    //text = `<speak version='1.0' xml:lang='${lang}'><voice name="${voice_id}">${text}</voice></speak>`;
 
     let text2 = get_raw(text);
     synthesizer.speakSsmlAsync(

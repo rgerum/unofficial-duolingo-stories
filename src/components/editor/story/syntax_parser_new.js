@@ -1,3 +1,5 @@
+import {generate_ssml_line, text_to_keypoints} from "../../story/text_lines/audio_edit";
+
 function generateHintMap(text, translation) {
   if (!text) text = "";
   text = text.replace(/\|/g, "​");
@@ -147,7 +149,7 @@ function processBlockData(line_iter, story) {
   while (line_iter.get()) {
     let line = line_iter.get();
     if (line.indexOf("=") !== -1) {
-      let [key, value] = line.split("=");
+      let [key, value] = line.split("=", 2);
       story.meta[key.trim()] = value.trim();
       line_iter.advance();
       continue;
@@ -231,12 +233,13 @@ function getInputStringSpeechText(text, hide) {
     text = text.replace("[", '<prosody volume="silent">');
     text = text.replace("]", "</prosody>");
   }
-  text = text.replace(/(\.\.\.|…)/g, '<sub alias=" ">$1</sub><break/>');
-  text = text.replace(/\(\+/g, "");
-  text = text.replace(/\(/g, "");
-  text = text.replace(/\)/g, "");
-  text = text.replace(/\[/g, "");
-  text = text.replace(/\]/g, "");
+  //text = text.replace(/(\.\.\.|…)/g, '<sub alias=" ">$1</sub><break/>');
+  //text = text.replace(/\(\+/g, "");
+  //text = text.replace(/\(/g, "");
+  //text = text.replace(/\)/g, "");
+  //text = text.replace(/\[/g, "");
+  //text = text.replace(/\]/g, "");
+  return text
   return (
     "<speak>" +
     text
@@ -296,7 +299,8 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
         meta.avatar_overwrites[speaker_id]?.speaker ||
         meta.avatar_names[speaker_id]?.speaker ||
         meta.avatar_names[0]?.speaker;
-    audio = line_to_audio(data.audio, text, speaker_name, meta.story_id, hide);
+    console.log("content", content)
+    audio = line_to_audio(data.audio, content.text, speaker_name, meta.story_id, hide, meta.transcribe_data);
     audio.ssml.inser_index = meta.audio_insert_lines.length;
     audio.ssml.plan_text = text;
     audio.ssml.plan_text_speaker_name = speaker_name;
@@ -331,32 +335,22 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
   };
 }
 
-function line_to_audio(line, text, speaker, story_id, hide = false) {
-  let text_speak = getInputStringSpeechText(text, hide);
+function line_to_audio(line, text, speaker, story_id, hide = false, transcribe_data) {
+  console.log("line_to_audio", text, speaker)
+  //let text_speak = getInputStringSpeechText(text, hide);
   let audio = {};
   audio.ssml = {
-    text: text_speak,
+    text: text,
     speaker: speaker,
     id: story_id,
   };
+  audio.ssml = generate_ssml_line(audio.ssml, transcribe_data, []);// TODO, transcribe_data, hideRanges)
+  console.log("line_to_audio", audio.ssml.text)
   if (line) {
     line = line.substring(1);
-    let parts = line.split(";");
-    audio.url = "audio/" + parts.splice(0, 1)[0];
-    audio.keypoints = [];
-    let last_end = 0;
-    let last_time = 0;
-    for (let part of parts) {
-      let [start, duration] = part.split(",");
-      start = parseInt(start);
-      duration = parseInt(duration);
-      audio.keypoints.push({
-        rangeEnd: last_end + start,
-        audioStart: last_time + duration,
-      });
-      last_end += start;
-      last_time += duration;
-    }
+    let [filename, keypoints] = text_to_keypoints(line)
+    audio.url = "audio/" + filename;
+    audio.keypoints = keypoints;
   }
   return audio;
 }
@@ -836,6 +830,7 @@ export function processStoryFile(
   story_id,
   avatar_names,
   story_languages,
+  transcribe_data,
 ) {
   // reset those line as they may have changed
   //window.audio_insert_lines = []
@@ -851,6 +846,7 @@ export function processStoryFile(
       avatar_names: avatar_names,
       avatar_overwrites: {},
       cast: {},
+      transcribe_data: transcribe_data,
     },
   };
   let line_iter = line_iterator(lines);

@@ -450,6 +450,19 @@ export function transcribe_text(text, data) {
       text = text2;
     }
   }
+  let match = text.match(/(\w*)\{(\w*):ipa\}/);
+  let counter = 0;
+  while (match && counter < 10) {
+    console.log("counter", counter);
+    //console.log(match);
+    text = text.replace(
+      match[0],
+      `<phoneme alphabet="ipa" ph="${match[1]}">${match[2]}</phoneme>`,
+    );
+    match = text.match(/(\w*)\{(\w*):ipa\}/);
+    counter += 1;
+  }
+  //console.log(match);
   //if(ipa)
   return [text, mapping];
 }

@@ -110,7 +110,7 @@ if (!process.env.NEXTAUTH_URL) {
     password: process.env.MYSQL_PASSWORD,
     database: process.env.MYSQL_DB,
     waitForConnections: true,
-    connectionLimit: 10, // Adjust this as needed
+    connectionLimit: 1, // Adjust this as needed
   });
 
   async function query(query, args) {
