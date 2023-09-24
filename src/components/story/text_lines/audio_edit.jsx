@@ -41,7 +41,7 @@ export default function EditorSSMLDisplay({ ssml, element, audio }) {
   return (
     <>
       <br />
-      <span className={styles.ssml_speaker}>{ssml.speaker}</span>
+      <span className={styles.ssml_speaker + " en"}>{ssml.speaker}</span>
       <span className={styles.ssml}>{ssml.text}</span>
       {ssml.speaker ? (
         error ? (

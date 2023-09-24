@@ -177,6 +177,7 @@ export default function Editor({ story_data, avatar_names, session }) {
             learningLanguage: language_data?.short,
             fromLanguage: language_data2?.short,
           },
+            language_data?.tts_replace,
         );
         let image = await getImage(story_meta.icon);
         story.illustrations = {
