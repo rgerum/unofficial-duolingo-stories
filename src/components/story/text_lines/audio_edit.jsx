@@ -29,8 +29,9 @@ export default function EditorSSMLDisplay({ ssml, element, audio }) {
     try {
       let {filename, keypoints} = await generate_audio_line(ssml);
       let text = timings_to_text({filename, keypoints});
-      insert_audio_line(text, editor.view, editor.audio_insert_lines);
+      insert_audio_line(text, ssml, editor.view, editor.audio_insert_lines);
     } catch (e) {
+        console.error("error", e);
       setError(e);
     }
     setLoading(false);
@@ -213,7 +214,6 @@ export async function generate_audio_line(ssml) {
   console.log("ssml_response", ssml_response)
   console.log("ssml_response", speak_text)
   let keypoints = [];
-  let text = "$" + ssml_response["output_file"];
   if (ssml_response.timepoints) {
       for (let mark of ssml_response.timepoints) {
           keypoints.push({
@@ -285,7 +285,7 @@ function timings_to_text({filename, keypoints}) {
         text += Math.round(point.rangeEnd - last_end);
         text += ",";
         text += Math.round(point.audioStart - last_time);
-        last_end = point.rangeEnd[0]
+        last_end = point.rangeEnd
         last_time = point.audioStart
     }
     return text;
@@ -311,7 +311,7 @@ export function text_to_keypoints(line) {
     return [filename, keypoints]
 }
 
-function insert_audio_line(text, view, audio_insert_lines) {
+function insert_audio_line(text, ssml, view, audio_insert_lines) {
   let [line, line_insert] = audio_insert_lines[ssml.inser_index];
   if (line !== undefined) {
     let line_state = view.state.doc.line(line);
