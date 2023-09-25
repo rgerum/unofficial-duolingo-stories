@@ -58,18 +58,20 @@ export default function Tts_edit({
   let [data, setData] = useInput(
     language.tts_replace ||
       `
+# line with # are comments and are ignored
+      
 # here you can add single letters that should be replaced    
-LETTERS:
-    o: u
-    e: i
+#LETTERS:
+#    o: u
+#    e: i
 # here you can add parts of words to be replaced. You can use valid regular expressions (regex) here
 FRAGMENTS:
-    ion\\b: flug
-    sem: dem
+#    ion\\b: flug
+#    sem: dem
 # whole words that should be replaced
-WORDS:
-    oh: uuuh
-    Worcester: WOO-STER
+#WORDS:
+#    oh: uuuh
+#    Worcester: WOO-STER
 `,
   );
   let [text, setText] = useInput("Enter a text to be spoken");
