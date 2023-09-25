@@ -1,4 +1,7 @@
-import {generate_ssml_line, text_to_keypoints} from "../../story/text_lines/audio_edit";
+import {
+  generate_ssml_line,
+  text_to_keypoints,
+} from "../../story/text_lines/audio_edit";
 
 function generateHintMap(text, translation) {
   if (!text) text = "";
@@ -225,7 +228,7 @@ function getInputStringText(text) {
   // remove multiple white space characters
   text = text.replace(/(\s)\s+/g, "$1");
   //
-  return text.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
+  return text; //.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
 }
 
 function getInputStringSpeechText(text, hide) {
@@ -239,7 +242,7 @@ function getInputStringSpeechText(text, hide) {
   //text = text.replace(/\)/g, "");
   //text = text.replace(/\[/g, "");
   //text = text.replace(/\]/g, "");
-  return text
+  return text;
   return (
     "<speak>" +
     text
@@ -261,12 +264,37 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
   );
   let translation = "";
   if (data.trans) [, translation] = data.trans.match(/\s*~\s*(\S.*\S|\S)\s*/);
-  let content = generateHintMap(getInputStringText(text), translation);
+  console.log("content", text, getInputStringText(text));
+
+  getInputStringText(text);
+  let ipa_replacements = [];
+  let ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
+  console.log("ipa_match", text, ipa_match);
+  while (ipa_match) {
+    ipa_replacements.push(ipa_match);
+    text =
+      text.substring(0, ipa_match.index + ipa_match[1].length) +
+      text.substring(ipa_match.index + ipa_match[0].length);
+    ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
+    console.log("ipa_match", text, ipa_match);
+  }
+  //text = text.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
+
+  let content = generateHintMap(text, translation);
+  console.log("content1", content);
 
   let selectablePhrases, characterPositions;
   if (use_buttons)
     [selectablePhrases, characterPositions] = getButtons(content);
+  console.log("content2", content);
   let hideRanges = getHideRanges(content);
+  for (let hide of hideRanges) {
+    for (let match of ipa_replacements) {
+      if (match.index > hide.start) match.index -= 1;
+      if (match.index > hide.end) match.index -= 1;
+    }
+  }
+  console.log("content3", content);
   // split number of speaker
   let speaker;
   let speaker_id = 0;
@@ -299,8 +327,16 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
         meta.avatar_overwrites[speaker_id]?.speaker ||
         meta.avatar_names[speaker_id]?.speaker ||
         meta.avatar_names[0]?.speaker;
-    console.log("content", content)
-    audio = line_to_audio(data.audio, content.text, speaker_name, meta.story_id, hide, meta.transcribe_data);
+    console.log("content", content, ipa_replacements);
+    audio = line_to_audio(
+      data.audio,
+      content.text,
+      speaker_name,
+      meta.story_id,
+      hide ? hideRanges : [],
+      meta.transcribe_data,
+      ipa_replacements,
+    );
     audio.ssml.inser_index = meta.audio_insert_lines.length;
     audio.ssml.plan_text = text;
     audio.ssml.plan_text_speaker_name = speaker_name;
@@ -335,8 +371,16 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
   };
 }
 
-function line_to_audio(line, text, speaker, story_id, hide = false, transcribe_data) {
-  console.log("line_to_audio", text, speaker)
+function line_to_audio(
+  line,
+  text,
+  speaker,
+  story_id,
+  hideRanges,
+  transcribe_data,
+  ipa_replacements,
+) {
+  console.log("line_to_audio", text, speaker);
   //let text_speak = getInputStringSpeechText(text, hide);
   let audio = {};
   audio.ssml = {
@@ -344,11 +388,16 @@ function line_to_audio(line, text, speaker, story_id, hide = false, transcribe_d
     speaker: speaker,
     id: story_id,
   };
-  audio.ssml = generate_ssml_line(audio.ssml, transcribe_data, []);// TODO, transcribe_data, hideRanges)
-  console.log("line_to_audio", audio.ssml.text)
+  audio.ssml = generate_ssml_line(
+    audio.ssml,
+    transcribe_data,
+    hideRanges,
+    ipa_replacements,
+  );
+  console.log("line_to_audio", audio.ssml.text);
   if (line) {
     line = line.substring(1);
-    let [filename, keypoints] = text_to_keypoints(line)
+    let [filename, keypoints] = text_to_keypoints(line);
     audio.url = "audio/" + filename;
     audio.keypoints = keypoints;
   }
