@@ -13,7 +13,7 @@ import { processStoryFile } from "components/editor/story/syntax_parser_new";
 import {
   generate_audio_line,
   content_to_audio,
-  generate_ssml_line
+  generate_ssml_line,
 } from "../../../../../components/story/text_lines/audio_edit";
 import TextLine from "../../../../../components/story/text_lines/text_line";
 
@@ -94,20 +94,20 @@ WORDS:
     //speaker = `${speaker}(pitch=${["x-low", "low", "medium", "high", "x-high"][pitch]},rate=${["x-slow", "slow", "medium", "fast", "x-fast"][speed]})`;
 
     let [story, story_meta, audio_insert_lines] = processStoryFile(
-        `[DATA]
+      `[DATA]
         icon_0=https://design.duolingo.com/ee58f22644428b8182ae.svg
         speaker_0=${speaker}
         
         [LINE]
         Speaker0: ${text}
         `,
-        0,
-        {},
-        {
-          learningLanguage: "en",
-          fromLanguage: "tok2",
-        },
-        data,
+      0,
+      {},
+      {
+        learningLanguage: "en",
+        fromLanguage: "tok2",
+      },
+      data,
     );
     // nl-NL-FennaNeural(pitch=x-low)
     /*
@@ -126,14 +126,16 @@ WORDS:
     //let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
     //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
 
-    console.log("aud", new_element.line.content.audio)
+    console.log("aud", new_element.line.content.audio);
 
     //new_element.line.content.audio.ssml = generate_ssml_line(new_element.line.content.audio.ssml, data, new_element.hideRangesForChallenge)
     setText2(new_element.audio.ssml.text);
-    let {keypoints, content} = await generate_audio_line(new_element.line.content.audio.ssml)
+    let { keypoints, content } = await generate_audio_line(
+      new_element.line.content.audio.ssml,
+    );
 
     let audio = content_to_audio(content);
-    console.log(audio)
+    console.log(audio);
 
     //let tt = speakText.replace("$name", name).replace(/<.*?>/g, "");
     element = JSON.parse(JSON.stringify(new_element));
@@ -145,12 +147,11 @@ WORDS:
     element.audio.keypoints = keypoints;
     element.line.content.audio.keypoints = keypoints;
 
-
     //let audioObject = ref.current;
     //audioObject.src = audio.src;
     element.line.content.audio.url = audio.src;
-    console.log("keypoints", keypoints)
-    console.log("new_element", new_element)
+    console.log("keypoints", keypoints);
+    console.log("new_element", new_element);
     //element.line.content.audio.url = url
     // {audioStart: 50, rangeEnd: 3}
     setElement(element);
@@ -172,6 +173,7 @@ WORDS:
         language2={language2}
         session={session}
         course={course}
+        use_edit={true}
       >
         <div className={styles.root + " " + styles.characterEditorContent}>
           <div
@@ -269,10 +271,10 @@ WORDS:
             <h2>Final Text</h2>
             <span className={language.short}>
               <TextLine
-                  progress={1}
-                  unhide={true}
-                  element={element}
-                  part={[]}
+                progress={1}
+                unhide={true}
+                element={element}
+                part={[]}
               />
             </span>
 
@@ -284,7 +286,7 @@ WORDS:
               cols={40}
               style={{ width: "100%" }}
             />
-            <br/>
+            <br />
             <button onClick={process}>save</button>
           </div>
         </div>

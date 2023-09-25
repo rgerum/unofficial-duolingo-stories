@@ -10,6 +10,7 @@ import HintLineContent from "components/story/text_lines/line_hints";
 import useAudio from "components/story/text_lines/use_audio";
 import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
+import EditorButton from "../../editor_button";
 
 export default function LanguageEditor({
   language,
@@ -46,6 +47,7 @@ export function Layout({
   language2,
   session,
   course,
+  use_edit,
 }) {
   /*
     <CourseDropdown userdata={userdata} />
@@ -55,25 +57,52 @@ export function Layout({
 
   //if (error) return <div>failed to load</div>
   //if (!userdata) return <div>loading...</div>
-
+  let crumbs = {};
+  if (use_edit) {
+    crumbs = [
+      { type: "Editor", href: `/editor` },
+      { type: "sep" },
+      {
+        type: "course",
+        lang1: language_data,
+        lang2: language2,
+        href: `/editor/course/${course?.short}`,
+      },
+      { type: "sep" },
+      { type: "Voices", href: `/editor/language/${course?.short}` },
+      { type: "sep" },
+      { type: "Edit" },
+    ];
+  } else {
+    crumbs = [
+      { type: "Editor", href: `/editor` },
+      { type: "sep" },
+      {
+        type: "course",
+        lang1: language_data,
+        lang2: language2,
+        href: `/editor/course/${course?.short}`,
+      },
+      { type: "sep" },
+      { type: "Voices" },
+    ];
+  }
   return (
     <>
       <nav className={styles.header_index}>
-        <Breadcrumbs
-          path={[
-            { type: "Editor", href: `/editor` },
-            { type: "sep" },
-            {
-              type: "course",
-              lang1: language_data,
-              lang2: language2,
-              href: `/editor/course/${course?.short}`,
-            },
-            { type: "sep" },
-            { type: "Voices" },
-          ]}
-        />
+        <Breadcrumbs path={crumbs} />
         <div style={{ marginLeft: "auto" }}></div>
+        {use_edit ? (
+          <></>
+        ) : (
+          <EditorButton
+            id="button_edit"
+            href={`/editor/language/${course.short}/tts_edit`}
+            data-cy="button_edit"
+            img={"import.svg"}
+            text={"Edit"}
+          />
+        )}
         {session?.user ? (
           <LoggedInButton
             page={"editor"}
