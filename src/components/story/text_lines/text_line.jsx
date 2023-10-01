@@ -35,7 +35,13 @@ export default function TextLine({ progress, unhide, element, part }) {
   // TODO window.view === undefined && props.progress !== element.trackingProperties.line_index)
   if (progress !== element.trackingProperties.line_index && !editor)
     hideRangesForChallenge = undefined;
-
+  if (controls.hide_questions) {
+    hideRangesForChallenge = undefined;
+  }
+  if (controls.auto_play) {
+    element.line.content.hintMap = [];
+    playAudio = undefined;
+  }
   //if(props.progress !== element.trackingProperties.line_index)
   //    hideRangesForChallenge = undefined;
   // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->

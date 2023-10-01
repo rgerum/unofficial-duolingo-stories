@@ -18,6 +18,7 @@ export default function Story({
   id,
   editor,
   storyFinishedIndexUpdate,
+  auto_play,
 }) {
   const storyElement = React.useRef();
   const mainElement = React.useRef();
@@ -55,27 +56,33 @@ export default function Story({
   }, [show_title_page, progress, setShowTitlePage, setProgress]);
 
   function block_next() {
-    setBlocked(true);
+    if (!controls.hide_questions) setBlocked(true);
   }
 
-  let advance_progress = React.useCallback(() => {
-    dispatchEvent(
-      new CustomEvent("progress_changed", { detail: progress + 1 }),
-    );
-    setProgress(progress + progressStep);
-    if (show_title_page === 1) setShowTitlePage(2);
-    setProgressStep(1);
-    setRight(false);
-  }, [
-    progress,
-    setProgress,
-    setRight,
-    progressStep,
-    show_title_page,
-    setShowTitlePage,
-  ]);
+  let advance_progress = React.useCallback(
+    (current_progress) => {
+      if (current_progress !== undefined) progress = current_progress;
+      console.log("advance,", progress);
+      dispatchEvent(
+        new CustomEvent("progress_changed", { detail: progress + 1 }),
+      );
+      setProgress(progress + progressStep);
+      if (show_title_page === 1) setShowTitlePage(2);
+      setProgressStep(1);
+      setRight(false);
+    },
+    [
+      progress,
+      setProgress,
+      setRight,
+      progressStep,
+      show_title_page,
+      setShowTitlePage,
+    ],
+  );
 
   let next = React.useCallback(() => {
+    console.log("next");
     if (!blocked) {
       advance_progress();
     }
@@ -123,6 +130,8 @@ export default function Story({
       id: Math.random(),
       rtl: story.learningLanguageRTL,
       audio_failed_call: audio_failed_call,
+      auto_play: !!auto_play,
+      hide_questions: !!auto_play,
     };
   }, [
     wrong,
@@ -310,7 +319,14 @@ export default function Story({
               (story.learningLanguageRTL ? styles.story_rtl : "")
             }
           >
-            <Legal />
+            {controls.auto_play ? (
+              <>
+                <div className={styles.spacer_small_top} />
+                <Legal />
+              </>
+            ) : (
+              <Legal />
+            )}
             <StoryContext.Provider value={controls}>
               {parts.map((part, i) => (
                 <Part
@@ -324,16 +340,22 @@ export default function Story({
               ))}
             </StoryContext.Provider>
           </div>
-          <div className={styles.spacer} />
+          {controls.auto_play ? (
+            <div className={styles.spacer_small} />
+          ) : (
+            <div className={styles.spacer} />
+          )}
           {finished ? <FinishedPage story={story} /> : null}
         </div>
-        <Footer
-          right={right}
-          finished={finished}
-          blocked={blocked}
-          next={next}
-          finish={finish}
-        />
+        {controls.auto_play ? null : (
+          <Footer
+            right={right}
+            finished={finished}
+            blocked={blocked}
+            next={next}
+            finish={finish}
+          />
+        )}
       </div>
     </>
   );

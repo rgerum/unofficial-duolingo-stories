@@ -7,12 +7,14 @@ import AudioPlay from "./audio_play";
 import styles_common from "../common.module.css";
 import styles from "./header.module.css";
 import useAudio from "./use_audio";
-import { EditorContext } from "../story";
+import { EditorContext, StoryContext } from "../story";
 
 export default function Header({ element, progress }) {
   const editor = React.useContext(EditorContext);
   let active = 1;
   let hidden = !active ? styles_common.hidden : "";
+
+  const controls = React.useContext(StoryContext);
 
   let onClick;
   [hidden, onClick] = EditorHook(hidden, element.editor, editor);
@@ -20,6 +22,11 @@ export default function Header({ element, progress }) {
   let [audioRange, playAudio, ref, url] = useAudio(element, progress);
 
   let hideRangesForChallenge = undefined;
+
+  if (controls.auto_play) {
+    element.learningLanguageTitleContent.hintMap = [];
+    playAudio = undefined;
+  }
 
   return (
     <div

@@ -64,3 +64,11 @@
 .spacer {
   height: 50vh;
 }
+
+.spacer_small {
+  height: 20vh;
+}
+
+.spacer_small_top {
+  height: 10vh;
+}

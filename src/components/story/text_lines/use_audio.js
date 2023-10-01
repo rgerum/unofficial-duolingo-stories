@@ -37,6 +37,16 @@ export default function useAudio(element, progress) {
       }, keypoint.audioStart);
       timeouts.push(t);
     }
+
+    setTimeout(
+      () => {
+        console.log("audio end2", element.trackingProperties.line_index);
+        if (controls.auto_play)
+          controls.advance_progress(element.trackingProperties.line_index || 0);
+      },
+      audioObject.duration * 1000 - 150,
+    );
+
     function cancel() {
       for (let t in timeouts) clearTimeout(t);
       setAudioRange(last_end);

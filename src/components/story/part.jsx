@@ -13,7 +13,7 @@ import QuestionMatch from "./questions/question_match";
 import QuestionMultipleChoice from "./questions/question_multiple_choice";
 import QuestionPointToPhrase from "./questions/question_point_to_phrase";
 import QuestionSelectPhrase from "./questions/question_select_phrase";
-import { EditorContext } from "./story";
+import { EditorContext, StoryContext } from "./story";
 
 export default function Part(props) {
   let challenge_type =
@@ -69,7 +69,9 @@ function ChallengePrompt({ progress, element }) {
 }
 
 function StoryLine(props) {
-  if (props.element.type === "MULTIPLE_CHOICE") {
+  const controls = React.useContext(StoryContext);
+
+  if (props.element.type === "MULTIPLE_CHOICE" && !controls.hide_questions) {
     return (
       <QuestionMultipleChoice
         setUnhide={props.setUnhide}
@@ -78,7 +80,7 @@ function StoryLine(props) {
       />
     );
   }
-  if (props.element.type === "POINT_TO_PHRASE") {
+  if (props.element.type === "POINT_TO_PHRASE" && !controls.hide_questions) {
     return (
       <QuestionPointToPhrase
         progress={props.progress}
@@ -86,7 +88,7 @@ function StoryLine(props) {
       />
     );
   }
-  if (props.element.type === "SELECT_PHRASE") {
+  if (props.element.type === "SELECT_PHRASE" && !controls.hide_questions) {
     return (
       <QuestionSelectPhrase
         setUnhide={props.setUnhide}
@@ -95,12 +97,12 @@ function StoryLine(props) {
       />
     );
   }
-  if (props.element.type === "CHALLENGE_PROMPT") {
+  if (props.element.type === "CHALLENGE_PROMPT" && !controls.hide_questions) {
     return (
       <ChallengePrompt progress={props.progress} element={props.element} />
     );
   }
-  if (props.element.type === "ARRANGE") {
+  if (props.element.type === "ARRANGE" && !controls.hide_questions) {
     return (
       <QuestionArrange
         setUnhide={props.setUnhide}
@@ -109,7 +111,7 @@ function StoryLine(props) {
       />
     );
   }
-  if (props.element.type === "MATCH") {
+  if (props.element.type === "MATCH" && !controls.hide_questions) {
     return <QuestionMatch progress={props.progress} element={props.element} />;
   }
   if (props.element.type === "LINE") {
