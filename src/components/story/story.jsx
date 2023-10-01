@@ -263,75 +263,78 @@ export default function Story({
 
   //if(progress === -1)
   //    return <StoryTitlePage story={story}/>
-  if (show_title_page === 1)
-    return (
-      <div>
+
+  return (
+    <>
+      <div className={show_title_page === 1 ? "" : styles.hidden}>
         <StoryHeader course={course} />
         <StoryTitlePage story={story} controls={controls} />
       </div>
-    );
+      <div className={show_title_page !== 1 ? "" : styles.hidden}>
+        <audio ref={ref_audio1}>
+          <source
+            src={
+              "https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3"
+            }
+            type="audio/mp3"
+          />
+        </audio>
+        <audio ref={ref_audio2}>
+          <source
+            src={
+              "https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3"
+            }
+            type="audio/mp3"
+          />
+        </audio>
+        <audio ref={ref_audio3}>
+          <source
+            src={
+              "https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3"
+            }
+            type="audio/mp3"
+          />
+        </audio>
 
-  return (
-    <div>
-      <audio ref={ref_audio1}>
-        <source
-          src={
-            "https://d35aaqx5ub95lt.cloudfront.net/sounds/37d8f0b39dcfe63872192c89653a93f6.mp3"
-          }
-          type="audio/mp3"
+        <StoryHeader
+          progress={progress}
+          length={parts.length}
+          course={course}
         />
-      </audio>
-      <audio ref={ref_audio2}>
-        <source
-          src={
-            "https://d35aaqx5ub95lt.cloudfront.net/sounds/f0b6ab4396d5891241ef4ca73b4de13a.mp3"
-          }
-          type="audio/mp3"
-        />
-      </audio>
-      <audio ref={ref_audio3}>
-        <source
-          src={
-            "https://d35aaqx5ub95lt.cloudfront.net/sounds/2aae0ea735c8e9ed884107d6f0a09e35.mp3"
-          }
-          type="audio/mp3"
-        />
-      </audio>
-
-      <StoryHeader progress={progress} length={parts.length} course={course} />
-      <div className={styles.main} ref={mainElement}>
-        <div
-          ref={storyElement}
-          className={
-            styles.story +
-            " " +
-            (story.learningLanguageRTL ? styles.story_rtl : "")
-          }
-        >
-          <Legal />
-          <StoryContext.Provider value={controls}>
-            {parts.map((part, i) => (
-              <Part
-                key={i}
-                editor={editor}
-                controls={controls}
-                progress={progress}
-                part={part}
-                audios={audios}
-              />
-            ))}
-          </StoryContext.Provider>
+        <div className={styles.main} ref={mainElement}>
+          <div
+            ref={storyElement}
+            className={
+              styles.story +
+              " " +
+              (story.learningLanguageRTL ? styles.story_rtl : "")
+            }
+          >
+            <Legal />
+            <StoryContext.Provider value={controls}>
+              {parts.map((part, i) => (
+                <Part
+                  key={i}
+                  editor={editor}
+                  controls={controls}
+                  progress={progress}
+                  part={part}
+                  audios={audios}
+                />
+              ))}
+            </StoryContext.Provider>
+          </div>
+          <div className={styles.spacer} />
+          {finished ? <FinishedPage story={story} /> : null}
         </div>
-        <div className={styles.spacer} />
-        {finished ? <FinishedPage story={story} /> : null}
+        <Footer
+          right={right}
+          finished={finished}
+          blocked={blocked}
+          next={next}
+          finish={finish}
+        />
       </div>
-      <Footer
-        right={right}
-        finished={finished}
-        blocked={blocked}
-        next={next}
-        finish={finish}
-      />
-    </div>
+    </>
   );
 }
