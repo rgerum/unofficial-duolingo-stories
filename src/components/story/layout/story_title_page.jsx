@@ -10,7 +10,7 @@ export function StoryTitlePage({ story, controls }) {
       <div>
         <img width="180" src={header.illustrationUrl} alt={"title image"} />
       </div>
-      <div className={styles.story_title_page_title}>{header.title}</div>
+      <h1 className={styles.story_title_page_title}>{header.title}</h1>
       <div>
         <button className={styles.button} onClick={controls.next}>
           Start Story

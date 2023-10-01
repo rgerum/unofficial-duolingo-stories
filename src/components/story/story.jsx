@@ -264,7 +264,12 @@ export default function Story({
   //if(progress === -1)
   //    return <StoryTitlePage story={story}/>
   if (show_title_page === 1)
-    return <StoryTitlePage story={story} controls={controls} />;
+    return (
+      <div>
+        <StoryHeader course={course} />
+        <StoryTitlePage story={story} controls={controls} />
+      </div>
+    );
 
   return (
     <div>
