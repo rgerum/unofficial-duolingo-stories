@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { Fragment, useEffect } from "react";
 import styles from "./question_point_to_phrase.module.css";
 import styles_common from "../common.module.css";
 
@@ -85,7 +85,7 @@ export default function QuestionPointToPhrase({ progress, element }) {
       {/* display the text */}
       <div className={element.lang}>
         {element.transcriptParts.map((part, index) => (
-          <>
+          <Fragment key={index}>
             {
               /* is the text selectable? */
               part.selectable ? (
@@ -96,7 +96,6 @@ export default function QuestionPointToPhrase({ progress, element }) {
                     " " +
                     get_color(buttonState[button_indices[index]])
                   }
-                  key={index}
                   data-cy="point-button"
                   onClick={() => click(button_indices[index])}
                 >
@@ -104,11 +103,11 @@ export default function QuestionPointToPhrase({ progress, element }) {
                 </div>
               ) : (
                 /* if it is not selectable just display the text */
-                <span key={index}>{part.text}</span>
+                <span>{part.text}</span>
               )
             }
             {part.text.indexOf("\n") !== -1 ? <br /> : <></>}
-          </>
+          </Fragment>
         ))}
       </div>
     </div>
