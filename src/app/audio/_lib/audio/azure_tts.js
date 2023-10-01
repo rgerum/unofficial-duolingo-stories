@@ -33,13 +33,13 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
     let marks = [];
 
     synthesizer.wordBoundary = (w, v) => {
-      console.log(v)
+      console.log(v);
       //console.log(text2.substring(last_pos))//
       last_pos = text2.substring(last_pos).search(v.privText) + last_pos;
       let data = {
         time: Math.round(v.privAudioOffset / 10000),
         type: "word",
-        start: v.privTextOffset,//last_pos,
+        start: v.privTextOffset, //last_pos,
         end: v.privTextOffset + v.privWordLength,
         value: v.privText,
       };
