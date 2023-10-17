@@ -4,6 +4,19 @@ import { getServerSession } from "next-auth/next";
 import { notFound } from "next/navigation";
 import EditList from "../../edit_list";
 
+export async function generateMetadata({ params }) {
+  let course = await get_course_editor(params.course_id);
+
+  if (!course) notFound();
+
+  return {
+    title: `${course.learningLanguageName} (from ${course.fromLanguageName}) | Duostories Editor`,
+    alternates: {
+      canonical: `https://duostories.org/editor/${course.short}`,
+    },
+  };
+}
+
 export default async function Page({ params }) {
   const session = await getServerSession(authOptions);
 

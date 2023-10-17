@@ -1,6 +1,15 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "app/api/auth/[...nextauth]/route";
 
+export async function generateMetadata({}) {
+  return {
+    title: `Duostories Editor`,
+    alternates: {
+      canonical: `https://duostories.org/editor/`,
+    },
+  };
+}
+
 export default async function Page({}) {
   const session = await getServerSession(authOptions);
 

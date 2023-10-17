@@ -44,7 +44,7 @@ export async function generateMetadata({ params }) {
   if (!story_data) notFound();
 
   return {
-    title: `Duostories ${story_data.learningLanguageLong} from ${story_data.fromLanguageLong}: ${story_data.fromLanguageName}`,
+    title: `${story_data.name} | Duostories Editor`,
     alternates: {
       canonical: `https://duostories.org/editor/story/${story_data.id}`,
     },

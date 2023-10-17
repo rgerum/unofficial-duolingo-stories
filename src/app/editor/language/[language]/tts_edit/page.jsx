@@ -61,6 +61,19 @@ const get_language = cache(async (id) => {
   }
 });
 
+export async function generateMetadata({ params }) {
+  let [language, course, language2] = await get_language(params.language);
+
+  if (!course) notFound();
+
+  return {
+    title: `Voices Edit | ${language.name} (from ${language2.name}) | Duostories Editor`,
+    alternates: {
+      canonical: `https://duostories.org/editor/language/${course.short}/tts_edit`,
+    },
+  };
+}
+
 export default async function Page({ params }) {
   const session = await getServerSession(authOptions);
 
