@@ -279,7 +279,14 @@ export default function Editor({ story_data, avatar_names, session }) {
           <svg className={styles.margin} ref={svg_parent}>
             <path d=""></path>
           </svg>
-          <div className={styles.editor} ref={editor}></div>
+          <div
+            className={
+              styles.editor +
+              " " +
+              (language_data?.rtl ? styles.editor_rtl : "")
+            }
+            ref={editor}
+          ></div>
           <svg className={styles.margin2} ref={margin}></svg>
           <div className={styles.preview} ref={preview}>
             {story_meta && story_data ? (

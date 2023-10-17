@@ -23,6 +23,10 @@
   scroll-behavior: auto;
 }
 
+.editor_rtl {
+  direction: rtl;
+}
+
 .margin2 {
   cursor: col-resize;
   float: left;
