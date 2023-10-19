@@ -101,7 +101,6 @@ function add_marks(text) {
       text2 += space;
     }
   }
-  console.log("text", text2);
   return [text2, marks];
 }
 

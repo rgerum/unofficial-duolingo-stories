@@ -26,21 +26,18 @@ export default function useAudio(element, progress) {
       controls.audio_failed_call();
       return;
     }
-    console.log("...audio", audio);
     let timeouts = [];
     let last_end = 0;
     for (let keypoint of audio.keypoints) {
       last_end = keypoint.rangeEnd;
       let t = setTimeout(() => {
         setAudioRange(keypoint.rangeEnd);
-        console.log("set audio range", keypoint.rangeEnd);
       }, keypoint.audioStart);
       timeouts.push(t);
     }
 
     setTimeout(
       () => {
-        console.log("audio end2", element.trackingProperties.line_index);
         if (controls.auto_play)
           controls.advance_progress(element.trackingProperties.line_index || 0);
       },

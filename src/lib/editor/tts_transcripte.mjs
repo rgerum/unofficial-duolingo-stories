@@ -453,7 +453,6 @@ export function transcribe_text(text, data) {
   let match = text.match(/(\w*)\{(\w*):ipa\}/);
   let counter = 0;
   while (match && counter < 10) {
-    console.log("counter", counter);
     //console.log(match);
     text = text.replace(
       match[0],

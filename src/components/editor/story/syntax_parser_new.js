@@ -264,29 +264,26 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
   );
   let translation = "";
   if (data.trans) [, translation] = data.trans.match(/\s*~\s*(\S.*\S|\S)\s*/);
-  console.log("content", text, getInputStringText(text));
 
   getInputStringText(text);
   let ipa_replacements = [];
   let ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
-  console.log("ipa_match", text, ipa_match);
+
   while (ipa_match) {
     ipa_replacements.push(ipa_match);
     text =
       text.substring(0, ipa_match.index + ipa_match[1].length) +
       text.substring(ipa_match.index + ipa_match[0].length);
     ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
-    console.log("ipa_match", text, ipa_match);
   }
   //text = text.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
 
   let content = generateHintMap(text, translation);
-  console.log("content1", content);
 
   let selectablePhrases, characterPositions;
   if (use_buttons)
     [selectablePhrases, characterPositions] = getButtons(content);
-  console.log("content2", content);
+
   let hideRanges = getHideRanges(content);
   for (let hide of hideRanges) {
     for (let match of ipa_replacements) {
@@ -294,7 +291,7 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
       if (match.index > hide.end) match.index -= 1;
     }
   }
-  console.log("content3", content);
+
   // split number of speaker
   let speaker;
   let speaker_id = 0;
@@ -327,7 +324,7 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
         meta.avatar_overwrites[speaker_id]?.speaker ||
         meta.avatar_names[speaker_id]?.speaker ||
         meta.avatar_names[0]?.speaker;
-    console.log("content", content, ipa_replacements);
+
     audio = line_to_audio(
       data.audio,
       content.text,
@@ -380,7 +377,6 @@ function line_to_audio(
   transcribe_data,
   ipa_replacements,
 ) {
-  console.log("line_to_audio", text, speaker);
   //let text_speak = getInputStringSpeechText(text, hide);
   let audio = {};
   audio.ssml = {
@@ -394,7 +390,6 @@ function line_to_audio(
     hideRanges,
     ipa_replacements,
   );
-  console.log("line_to_audio", audio.ssml.text);
   if (line) {
     line = line.substring(1);
     let [filename, keypoints] = text_to_keypoints(line);

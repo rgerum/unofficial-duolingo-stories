@@ -122,8 +122,6 @@ export function generate_ssml_line(
     insert(new_words[1], match.index + match[1].length);
   }
 
-  console.log("speak_text", speak_text);
-
   for (let range of hideRanges) {
     if (speaker.split("-").length === 3)
       speak_text = replace_with_mapping(
@@ -209,7 +207,6 @@ export function generate_ssml_line(
       `</voice></speak>`,
       speak_text.text.length,
     );
-    console.log("here", speak_text);
     speak_text.textx = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
     <voice name="en-US-JennyNeural">Enjoy <break/> speech </voice> </speak>`;
   } else {
@@ -280,15 +277,12 @@ export async function generate_audio_line(ssml) {
 
   //speak_text = find_replace_with_mapping(speak_text, /(\W)(is)(\W)/, '$1<phoneme alphabet="ipa" ph="bla">$2</phoneme>$3');
 */
-  console.log("ssml_response", speak_text);
   let response2 = await fetch_post(`/audio/create`, {
     id: ssml["id"],
     speaker: speaker,
     text: speak_text,
   });
   let ssml_response = await response2.json();
-  console.log("ssml_response", ssml_response);
-  console.log("ssml_response", speak_text);
   let keypoints = [];
   if (ssml_response.timepoints) {
     for (let mark of ssml_response.timepoints) {
@@ -319,7 +313,6 @@ export async function generate_audio_line(ssml) {
     let last_time = 0;
     let last_end = 0;
     for (let mark of ssml_response.marks) {
-      console.log("mark", mark, speak_text.substring(mark.start, mark.end));
       if (mark.time === undefined) {
         last_end += Math.round(mark.value.length);
         continue;
@@ -328,11 +321,6 @@ export async function generate_audio_line(ssml) {
         rangeEnd: mapping[Math.round(mark.end)],
         audioStart: Math.round(mark.time),
       });
-      console.log(
-        keypoints[keypoints.length - 1],
-        mark.end,
-        Math.round(mark.end),
-      );
       //timings.push([Math.round(mark.value.length) + Math.round(last_end), Math.round(mark.time) - last_time]);
       last_end += Math.round(mark.value.length);
       last_time = Math.round(mark.time);

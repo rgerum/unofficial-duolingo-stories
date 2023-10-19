@@ -263,13 +263,11 @@ function apply_fragment_replacements(mapped_text, replacements) {
 }
 
 function apply_group(mapped_text, data, options) {
-  console.log("apply_group", options);
   for (let section in data) {
     if (section.toUpperCase() === "OPTIONS") {
       options = { ...options, ...data[section] };
     }
   }
-  console.log("apply_group", options);
 
   for (let section in data) {
     if (section.toUpperCase().startsWith("GROUP")) {
@@ -323,7 +321,6 @@ if (0) {
     eak$: "ion",
     "^b": "B",
   });
-  console.log(speak_text);
 
   //speak_text = add_word_marks_replacements(speak_text);
   //console.log(speak_text)
@@ -335,7 +332,6 @@ if (0) {
     text: "test",
   });
   //speak_text = find_replace_with_mapping(speak_text, "t", "t")
-  console.log(speak_text);
 
   //speak_text = find_replace_with_mapping(speak_text, /\[/, "")
   //console.log(speak_text)
@@ -347,5 +343,4 @@ if (0) {
     /(\W)(is)(\W)/,
     '$1<phoneme alphabet="ipa" ph="bla">$2</phoneme>$3',
   );
-  console.log(speak_text);
 }

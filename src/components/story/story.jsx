@@ -62,7 +62,6 @@ export default function Story({
   let advance_progress = React.useCallback(
     (current_progress) => {
       if (current_progress !== undefined) progress = current_progress;
-      console.log("advance,", progress);
       dispatchEvent(
         new CustomEvent("progress_changed", { detail: progress + 1 }),
       );
@@ -82,7 +81,6 @@ export default function Story({
   );
 
   let next = React.useCallback(() => {
-    console.log("next");
     if (!blocked) {
       advance_progress();
     }

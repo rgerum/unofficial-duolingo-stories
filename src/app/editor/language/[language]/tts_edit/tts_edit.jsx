@@ -128,8 +128,6 @@ FRAGMENTS:
     //let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
     //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
 
-    console.log("aud", new_element.line.content.audio);
-
     //new_element.line.content.audio.ssml = generate_ssml_line(new_element.line.content.audio.ssml, data, new_element.hideRangesForChallenge)
     setText2(new_element.audio.ssml.text);
     let { keypoints, content } = await generate_audio_line(
@@ -137,7 +135,6 @@ FRAGMENTS:
     );
 
     let audio = content_to_audio(content);
-    console.log(audio);
 
     //let tt = speakText.replace("$name", name).replace(/<.*?>/g, "");
     element = JSON.parse(JSON.stringify(new_element));
@@ -152,8 +149,6 @@ FRAGMENTS:
     //let audioObject = ref.current;
     //audioObject.src = audio.src;
     element.line.content.audio.url = audio.src;
-    console.log("keypoints", keypoints);
-    console.log("new_element", new_element);
     //element.line.content.audio.url = url
     // {audioStart: 50, rangeEnd: 3}
     setElement(element);
