@@ -1,21 +1,17 @@
 "use client";
 import styles from "../[language].module.css";
 import React, { useState } from "react";
-import { transcribe_text } from "lib/editor/tts_transcripte.mjs";
 import { useInput } from "lib/hooks";
 import { PlayButton, SpeakerEntry } from "../language_editor";
 import { fetch_post } from "lib/fetch_post";
 import { Layout } from "../language_editor";
-import HintLineContent from "../../../../../components/story/text_lines/line_hints";
-import AudioPlay from "../../../../../components/story/text_lines/audio_play";
-import useAudio from "../../../../../components/story/text_lines/use_audio";
 import { processStoryFile } from "components/editor/story/syntax_parser_new";
 import {
   generate_audio_line,
   content_to_audio,
-  generate_ssml_line,
 } from "../../../../../components/story/text_lines/audio_edit";
 import TextLine from "../../../../../components/story/text_lines/text_line";
+import jsyaml from "js-yaml";
 
 let element_init = {
   trackingProperties: {
@@ -55,7 +51,7 @@ export default function Tts_edit({
   course,
 }) {
   // Render data...                <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
-  let [data, setData] = useInput(
+  let [data, setData] = useState(
     language.tts_replace ||
       `
 # line with # are comments and are ignored
@@ -74,6 +70,17 @@ FRAGMENTS:
 #    Worcester: WOO-STER
 `,
   );
+  function setDataValidated(e) {
+    let v = e?.target ? e?.target?.value : e;
+    if (v === null || v === undefined) v = "";
+    try {
+      jsyaml.load(v);
+      setData(v);
+      setYamlError(false);
+    } catch (e) {
+      setYamlError(true);
+    }
+  }
   let [text, setText] = useInput("Enter a text to be spoken");
   let [text2, setText2] = React.useState("");
   let [customSpeaker, setCustomSpeaker] = useInput("");
@@ -82,11 +89,19 @@ FRAGMENTS:
 
   let [element, setElement] = useState(element_init);
 
+  const [yamlError, setYamlError] = useState(false);
+
   async function save() {
     let d = {
       id: language.id,
       tts_replace: data,
     };
+    // test to process the yaml content
+    try {
+      jsyaml.load(data);
+    } catch (e) {
+      return;
+    }
     let response = await fetch_post(`/editor/language/save_tts_replace`, d);
     if (response.status === 200) return await response.json();
     throw "error";
@@ -278,13 +293,23 @@ FRAGMENTS:
             <br />
             <textarea
               defaultValue={data}
-              onChange={setData}
+              onChange={setDataValidated}
               rows={20}
               cols={40}
-              style={{ width: "100%" }}
+              style={{
+                width: "100%",
+                background: yamlError ? "#ffd4d4" : "none",
+              }}
             />
             <br />
-            <button onClick={process}>save</button>
+            <button onClick={process} disabled={yamlError}>
+              save
+            </button>
+            {yamlError ? (
+              <span>The text box does not contain valid yaml syntax.</span>
+            ) : (
+              <></>
+            )}
           </div>
         </div>
       </Layout>
