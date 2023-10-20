@@ -65,7 +65,7 @@ function DataGroup({ title, data, data_old, key_name }) {
 function ref_by_course(data, data_old, key) {
   let refs = {};
   let index = 1;
-  let max_count = Math.max(data[key][0].count, data_old[key][0].count);
+  let max_count = Math.max(data[key][0]?.count, data_old[key][0]?.count);
   for (let c of data[key]) {
     refs[c.course_id] = {
       count: c.count,
