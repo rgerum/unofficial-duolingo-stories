@@ -1,11 +1,10 @@
-import { cache, Suspense } from "react";
+import { Suspense } from "react";
+import { unstable_cache } from "next/cache";
 import query from "lib/db";
 
-import LanguageButton, { LanguageButtonSuspense } from "./language_button";
+import LanguageButton from "./language_button";
 
 import styles from "./course_list.module.css";
-import Link from "next/link";
-import { unstable_cache } from "next/cache";
 
 let get_courses = unstable_cache(
   async (tag) => {
@@ -46,13 +45,8 @@ ORDER BY name;
     // sort courses by base language
     let base_languages = {};
     let languages = [];
-    let incubator = [];
     // iterate over all courses
     for (let course of courses) {
-      if (course.count < 0) {
-        incubator.push(Object.assign({}, course));
-        continue;
-      }
       // if base language not yet in list
       if (base_languages[course.fromLanguageName] === undefined) {
         // initialize the list
@@ -74,15 +68,13 @@ ORDER BY name;
       grouped_languages[lang] = base_languages[lang];
     }
 
-    return { grouped_languages, incubator };
+    return grouped_languages;
   },
   ["get_courses"],
 );
 
 async function LanguageGroup({ name, tag }) {
-  let { grouped_languages: courses, incubator } = await get_courses(
-    tag ? tag : "main",
-  );
+  let courses = await get_courses(tag ? tag : "main");
   let courses_list = courses[name];
 
   return (
@@ -112,37 +104,13 @@ async function CourseListInner({ loading, tag }) {
       </div>
     );
   }
-  let { grouped_languages: courses, incubator } = await get_courses(
-    tag ? tag : "main",
-  );
-
-  incubator.sort((a, b) => b.count - a.count);
+  let courses = await get_courses(tag ? tag : "main");
 
   return (
     <>
       {Object.entries(courses).map(([name]) => (
         <LanguageGroup key={name} name={name} tag={tag} />
       ))}
-      {incubator.length > 0 ? (
-        <div className={styles.course_list}>
-          <hr />
-          <div className={styles.course_group_name}>Incubator Courses</div>
-          <p style={{ width: "100%" }}>
-            These courses have not reached a minimum of 20 stories yet, but you
-            can still have a look at the stories translated so far. Courses are
-            sorted by number of stories.
-          </p>
-          <p style={{ width: "100%" }}>
-            If you can help any of these courses grow, meet us on{" "}
-            <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.
-          </p>
-          {incubator.map((course) => (
-            <LanguageButton key={course.id} course={course} incubator={true} />
-          ))}
-        </div>
-      ) : (
-        <></>
-      )}
     </>
   );
 }
