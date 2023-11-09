@@ -7,11 +7,9 @@ import CourseList from "./course_list";
 import { unstable_cache } from "next/cache";
 
 const get_counts = unstable_cache(async () => {
-  return await query_one_obj(`SELECT COUNT(DISTINCT course.id) AS count_courses, COUNT(DISTINCT story.id) as count_stories FROM course
-LEFT JOIN language l1 ON l1.id = course.fromLanguage
-LEFT JOIN language l2 ON l2.id = course.learningLanguage
-LEFT JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1 LIMIT 1`);
+  return await query_one_obj(`SELECT COUNT(DISTINCT c.id) AS count_courses, COUNT(DISTINCT s.id) as count_stories FROM course c
+LEFT JOIN story s ON (c.id = s.course_id)
+WHERE s.public = 1 AND s.deleted = 0 AND c.public = 1 LIMIT 1`);
 }, ["get_main_counts"]);
 
 function IconDiscord() {
