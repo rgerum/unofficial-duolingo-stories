@@ -5,19 +5,34 @@ import { query_one_obj } from "lib/db";
 import CourseTitle from "./course_title";
 import SetList from "./set_list";
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 
-const get_course = cache(async (course_id) => {
-  return await query_one_obj(
-    `
+const get_course = unstable_cache(
+  async (course_id) => {
+    return await query_one_obj(
+      `
         SELECT l.name AS learningLanguageName FROM course
         JOIN language l on l.id = course.learningLanguage
         WHERE course.short = ? AND course.public = 1 LIMIT 1
         `,
-    [course_id],
-  );
-});
+      [course_id],
+    );
+  },
+  ["get_course_meta"],
+);
 
 export async function generateMetadata({ params, searchParams }, parent) {
+  console.log("generateMetadata", params.course_id);
+
+  if (
+    params.course_id.indexOf("-") === -1 ||
+    params.course_id.indexOf(".") !== -1
+  ) {
+    console.log("generateMetadata", "not found");
+
+    return notFound();
+  }
+  console.log("generateMetadata", params.course_id);
   const course = await get_course(params.course_id);
 
   if (!course) notFound();
@@ -35,6 +50,13 @@ export async function generateMetadata({ params, searchParams }, parent) {
 }
 
 export default async function Page({ params }) {
+  if (
+    params.course_id.indexOf("-") === -1 ||
+    params.course_id.indexOf(".") !== -1
+  ) {
+    return notFound();
+  }
+
   return (
     <>
       <Suspense fallback={<CourseTitle />}>

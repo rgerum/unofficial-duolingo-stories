@@ -5,18 +5,22 @@ import { query_one_obj } from "lib/db";
 import Header from "../header";
 
 import styles from "./story_button.module.css";
+import { unstable_cache } from "next/cache";
 
-export const get_course = cache(async (course_id) => {
-  return await query_one_obj(
-    `
+export const get_course_header = unstable_cache(
+  async (course_id) => {
+    return await query_one_obj(
+      `
     SELECT l.name AS learningLanguageName, COUNT(course.id) AS count FROM course
     JOIN language l on l.id = course.learningLanguage
     JOIN story s on course.id = s.course_id
     WHERE s.public = 1 AND s.deleted = 0 AND course.short = ? GROUP BY course.id LIMIT 1
         `,
-    [course_id],
-  );
-});
+      [course_id],
+    );
+  },
+  ["get_course_header"],
+);
 
 export default async function CourseTitle({ course_id }) {
   if (!course_id) {
@@ -47,7 +51,7 @@ export default async function CourseTitle({ course_id }) {
       </>
     );
   }
-  const course = await get_course(course_id);
+  const course = await get_course_header(course_id);
   if (!course)
     return (
       <Header>

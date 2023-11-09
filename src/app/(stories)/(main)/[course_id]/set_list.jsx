@@ -4,6 +4,7 @@ import query from "lib/db";
 import { query_one_obj, query_objs } from "lib/db";
 import { cache } from "react";
 import SetListClient from "./set_list_client";
+import { unstable_cache } from "next/cache";
 
 export const get_course_done = async (course_id, username) => {
   const done_query = await query(
@@ -18,9 +19,11 @@ export const get_course_done = async (course_id, username) => {
   return done;
 };
 
-export const get_course = cache(async (course_id) => {
-  const course = await query_one_obj(
-    `
+export const get_course = unstable_cache(
+  async (course_id) => {
+    console.log("get_course", course_id);
+    const course = await query_one_obj(
+      `
         SELECT course.id, course.short, course.about, 
         l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
         l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag     
@@ -29,14 +32,14 @@ export const get_course = cache(async (course_id) => {
         LEFT JOIN language l2 ON l2.id = course.learningLanguage
         WHERE course.short = ? LIMIT 1
         `,
-    [course_id],
-  );
+      [course_id],
+    );
 
-  if (!course) return undefined;
+    if (!course) return undefined;
 
-  const res = await query_objs(
-    `
-        SELECT story.id, story.set_id, story.set_index, story.name,
+    const res = await query_objs(
+      `
+        SELECT story.id, story.set_id, story.set_index, story.name, story.course_id,
         i.active, i.activeLip, i.gilded, i.gildedLip
         FROM story
         JOIN image i on story.image = i.id
@@ -44,26 +47,28 @@ export const get_course = cache(async (course_id) => {
         GROUP BY story.id
         ORDER BY set_id, set_index;
         `,
-    [course_id],
-  );
-  if (res.length === 0) return { ...course, sets: [], count: 0 };
+      [course_id],
+    );
+    if (res.length === 0) return { ...course, sets: [], count: 0 };
 
-  // group into sets
-  let set = -1;
-  let sets = [];
-  for (let d of res) {
-    if (set !== d.set_id) {
-      set = d.set_id;
-      sets.push([]);
+    // group into sets
+    let set = -1;
+    let sets = [];
+    for (let d of res) {
+      if (set !== d.set_id) {
+        set = d.set_id;
+        sets.push([]);
+      }
+      sets[sets.length - 1].push(d);
     }
-    sets[sets.length - 1].push(d);
-  }
 
-  let count = 0;
-  for (let set of sets) count += set.length;
+    let count = 0;
+    for (let set of sets) count += set.length;
 
-  return { ...course, sets: sets, count: count };
-});
+    return { ...course, sets: sets, count: count };
+  },
+  ["get_course"],
+);
 
 export default async function SetList({ course_id }) {
   if (!course_id) {

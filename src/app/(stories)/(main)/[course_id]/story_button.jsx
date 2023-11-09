@@ -1,7 +1,24 @@
+"use client";
 import styles from "./story_button.module.css";
 import Link from "next/link";
+import useSWR from "swr";
 
-export default function StoryButton({ story, done }) {
+const fetcher = (...args) => fetch(...args).then((res) => res.json());
+
+export default function StoryButton({ story }) {
+  const {
+    data: dones,
+    error,
+    isLoading,
+  } = useSWR(story?.course_id ? `${story.course_id}/get_done` : null, fetcher);
+  console.log(
+    "swr",
+    story?.course_id ? `${story.course_id}/get_done` : null,
+    story,
+    dones,
+  );
+  let done = dones ? dones[story.id] : false;
+
   if (!story) {
     return (
       <div className={styles.button_story_parent}>

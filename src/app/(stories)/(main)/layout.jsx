@@ -8,6 +8,7 @@ import styles from "./layout.module.css";
 import { authOptions } from "app/api/auth/[...nextauth]/route";
 import CourseDropdown from "./course-dropdown";
 import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
+import { unstable_cache } from "next/cache";
 
 export const metadata = {
   title:
@@ -45,13 +46,13 @@ LEFT JOIN language l2 ON l2.id = course.learningLanguage
   );
 });
 
-export const get_course_flags = cache(async () => {
+export const get_course_flags = unstable_cache(async () => {
   return await query_objs(
     `SELECT course.short, l.short AS learningLanguage, l.flag AS learningLanguageFlag, l.flag_file AS learningLanguageFlagFile FROM course JOIN language l on l.id = course.learningLanguage WHERE course.public`,
     [],
     "short",
   );
-});
+}, ["get_course_flags"]);
 
 export default async function Layout({ children }) {
   // @ts-ignore
