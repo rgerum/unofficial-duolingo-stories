@@ -94,7 +94,7 @@ SELECT c.short, l1.name AS fromLanguageName, c.fromLanguage FROM course c
 JOIN course_tag_map ctm on c.id = ctm.course_id
 JOIN course_tag ct on ctm.course_tag_id = ct.id
 JOIN language l1 ON l1.id = c.fromLanguage
-WHERE ct.name = 'main' AND c.public = 1 AND l1.name != 'English'
+WHERE ct.name = ? AND c.public = 1 AND l1.name != 'English'
 GROUP BY c.fromLanguage
 ORDER BY fromLanguageName;
     `,
