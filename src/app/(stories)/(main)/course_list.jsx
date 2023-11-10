@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { unstable_cache } from "next/cache";
-import query from "lib/db";
+import query, { query_objs } from "lib/db";
 
 import LanguageButton from "./language_button";
 
@@ -8,74 +8,41 @@ import styles from "./course_list.module.css";
 
 let get_courses = unstable_cache(
   async (tag) => {
-    let courses;
-    if (tag) {
-      courses = await query(
-        `
-SELECT ct.name, course.id, COALESCE(NULLIF(course.name, ''), l2.name) as name, course.short,
- course.learningLanguage AS learningLanguageId,
- l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
- l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
- COUNT(story.id) count, course.public, course.official, course.conlang FROM course
-JOIN course_tag_map ctm on course.id = ctm.course_id
+    let courses = await query(
+      `
+SELECT c.id, l1.name AS fromLanguageName, c.fromLanguage FROM course c
+JOIN course_tag_map ctm on c.id = ctm.course_id
 JOIN course_tag ct on ctm.course_tag_id = ct.id
-JOIN language l1 ON l1.id = course.fromLanguage
-JOIN language l2 ON l2.id = course.learningLanguage
-JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1 AND story.deleted = 0 AND ct.name = ? AND course.public = 1
-GROUP BY course.id
-ORDER BY name;
+JOIN language l1 ON l1.id = c.fromLanguage
+JOIN language l2 ON l2.id = c.learningLanguage
+WHERE ct.name = ? AND c.public = 1
+GROUP BY c.id ORDER BY COALESCE(NULLIF(c.name, ''), l2.name);
     `,
-        [tag],
-      );
-    } else {
-      courses = await query(`
-SELECT course.id, COALESCE(NULLIF(course.name, ''), l2.name) as name, course.short,
- l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
- l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
- COUNT(story.id) count, course.public, course.official, course.conlang FROM course
-LEFT JOIN language l1 ON l1.id = course.fromLanguage
-LEFT JOIN language l2 ON l2.id = course.learningLanguage
-LEFT JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1 AND count > 20
-GROUP BY course.id
-ORDER BY name;
-    `);
-    }
+      [tag],
+    );
     // sort courses by base language
     let base_languages = {};
-    let languages = [];
     // iterate over all courses
     for (let course of courses) {
       // if base language not yet in list
-      if (base_languages[course.fromLanguageName] === undefined) {
+      if (base_languages[course.fromLanguage] === undefined) {
         // initialize the list
-        base_languages[course.fromLanguageName] = [];
-        // and add it to the list of all base languages (we will add English after sorting in the front)
-        if (course.fromLanguageName !== "English")
-          languages.push(course.fromLanguageName);
+        base_languages[course.fromLanguage] = [];
       }
-      base_languages[course.fromLanguageName].push(Object.assign({}, course));
-    }
-    // sort the base languages and then add English as first (and most relevant)
-    languages = languages.sort();
-    // if we have english courses add "English" as the first entry
-    if (base_languages["English"]) languages.unshift("English");
-
-    // create a new sorted
-    let grouped_languages = {};
-    for (let lang of languages) {
-      grouped_languages[lang] = base_languages[lang];
+      base_languages[course.fromLanguage].push(course.id);
     }
 
-    return grouped_languages;
+    return base_languages;
   },
   ["get_courses"],
 );
 
-async function LanguageGroup({ name, tag }) {
+async function LanguageGroup({ name, tag, id }) {
   let courses = await get_courses(tag ? tag : "main");
-  let courses_list = courses[name];
+  let courses_list = courses[id];
+
+  if (!courses_list) return <></>;
+  console.log(id, courses_list);
 
   return (
     <div className={styles.course_list}>
@@ -83,8 +50,8 @@ async function LanguageGroup({ name, tag }) {
       <div className={styles.course_group_name}>
         Stories for {name} Speakers
       </div>
-      {courses_list.map((course) => (
-        <LanguageButton key={course.id} course_id={course.id} />
+      {courses_list?.map((course_id) => (
+        <LanguageButton key={course_id} course_id={course_id} />
       ))}
     </div>
   );
@@ -104,16 +71,48 @@ async function CourseListInner({ loading, tag }) {
       </div>
     );
   }
-  let courses = await get_courses(tag ? tag : "main");
+  let course_groups = await get_courses_list(tag ? tag : "main");
 
   return (
     <>
-      {Object.entries(courses).map(([name]) => (
-        <LanguageGroup key={name} name={name} tag={tag} />
+      {course_groups?.map((group) => (
+        <LanguageGroup
+          key={group.fromLanguage}
+          name={group.fromLanguageName}
+          id={group.fromLanguage}
+          tag={tag}
+        />
       ))}
     </>
   );
 }
+
+let get_courses_list = unstable_cache(
+  async (tag) => {
+    let courses = await query_objs(
+      `
+SELECT c.short, l1.name AS fromLanguageName, c.fromLanguage FROM course c
+JOIN course_tag_map ctm on c.id = ctm.course_id
+JOIN course_tag ct on ctm.course_tag_id = ct.id
+JOIN language l1 ON l1.id = c.fromLanguage
+WHERE ct.name = 'main' AND c.public = 1 AND l1.name != 'English'
+GROUP BY c.fromLanguage
+ORDER BY fromLanguageName;
+    `,
+      [tag],
+    );
+
+    // sort courses by base language
+    let course_groups = [{ fromLanguageName: "English", fromLanguage: "1" }];
+    // iterate over all courses
+    for (let course of courses) {
+      course_groups.push(course);
+    }
+
+    return course_groups;
+  },
+  ["get_courses_list"],
+);
 
 export default async function CourseList({ tag }) {
   return (

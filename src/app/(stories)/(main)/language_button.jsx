@@ -9,17 +9,11 @@ import { unstable_cache } from "next/cache";
 let get_courses = unstable_cache(async () => {
   let courses = await query_objs(
     `
-SELECT 
-course.id,  
-COALESCE(NULLIF(course.name, ''), l2.name) as name, course.short,
-l1.name AS fromLanguageName,
- course.learningLanguage AS learningLanguageId,
- COUNT(story.id) count, course.public, course.official, course.conlang FROM course
-JOIN language l1 ON l1.id = course.fromLanguage
-JOIN language l2 ON l2.id = course.learningLanguage
-JOIN story ON (course.id = story.course_id)
-WHERE story.public = 1 AND story.deleted = 0 AND course.public = 1
-GROUP BY course.id
+SELECT c.id, COALESCE(NULLIF(c.name, ''), l2.name) as name, c.short, COUNT(s.id) count, c.learningLanguage FROM course c
+JOIN language l2 ON l2.id = c.learningLanguage
+JOIN story s ON (c.id = s.course_id)
+WHERE s.public = 1 AND s.deleted = 0 AND c.public = 1
+GROUP BY c.id
     `,
     [],
   );
@@ -34,11 +28,7 @@ let get_course = cache(async (id) => {
   return (await get_courses())[id];
 });
 
-export default async function LanguageButton({
-  course_id,
-  incubator,
-  loading,
-}) {
+export default async function LanguageButton({ course_id, loading }) {
   if (loading) {
     return (
       <div
@@ -65,16 +55,9 @@ export default async function LanguageButton({
       className={styles.language_select_button}
       href={`/${course.short}`}
     >
-      <FlagById id={course.learningLanguageId} />
+      <FlagById id={course.learningLanguage} />
 
       <span className={styles.language_select_button_text}>{course.name}</span>
-      {incubator ? (
-        <span style={{ fontSize: "0.8em" }}>
-          (from {course.fromLanguageName})
-        </span>
-      ) : (
-        <></>
-      )}
       <span className={styles.language_story_count}>
         {course.count} stories
       </span>
