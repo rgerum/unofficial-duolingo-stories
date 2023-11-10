@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { cache } from "react";
 import { query_one_obj } from "lib/db";
 
 import CourseTitle from "./course_title";
@@ -22,17 +21,12 @@ const get_course = unstable_cache(
 );
 
 export async function generateMetadata({ params, searchParams }, parent) {
-  console.log("generateMetadata", params.course_id);
-
   if (
     params.course_id.indexOf("-") === -1 ||
     params.course_id.indexOf(".") !== -1
   ) {
-    console.log("generateMetadata", "not found");
-
     return notFound();
   }
-  console.log("generateMetadata", params.course_id);
   const course = await get_course(params.course_id);
 
   if (!course) notFound();

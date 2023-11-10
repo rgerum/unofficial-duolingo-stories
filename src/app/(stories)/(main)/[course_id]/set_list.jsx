@@ -2,7 +2,6 @@ import styles from "./set_list.module.css";
 import StoryButton from "./story_button";
 import query from "lib/db";
 import { query_one_obj, query_objs } from "lib/db";
-import { cache } from "react";
 import SetListClient from "./set_list_client";
 import { unstable_cache } from "next/cache";
 
@@ -21,7 +20,6 @@ export const get_course_done = async (course_id, username) => {
 
 export const get_course = unstable_cache(
   async (course_id) => {
-    console.log("get_course", course_id);
     const course = await query_one_obj(
       `
         SELECT course.id, course.short, course.about, 

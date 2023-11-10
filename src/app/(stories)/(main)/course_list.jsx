@@ -42,7 +42,6 @@ async function LanguageGroup({ name, tag, id }) {
   let courses_list = courses[id];
 
   if (!courses_list) return <></>;
-  console.log(id, courses_list);
 
   return (
     <div className={styles.course_list}>
