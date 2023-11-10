@@ -1,9 +1,8 @@
 import Link from "next/link";
-import Flag from "components/layout/flag";
 import styles from "./language_button.module.css";
 import { cache, Suspense } from "react";
-import { query_one_obj, query_objs } from "../../../lib/db";
-import FlagById from "../../../components/layout/flag_by_id";
+import { query_objs } from "../../../lib/db";
+import FlagById from "components/layout/flag_by_id";
 import { unstable_cache } from "next/cache";
 
 let get_courses = unstable_cache(async () => {
