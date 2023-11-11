@@ -17,8 +17,8 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           record: true
-          build: npm run init
-          start: npm run dev
+          build: npm run init && npm run build
+          start: npm run start
           wait-on: "http://localhost:3000"
           wait-on-timeout: 120
         env:
