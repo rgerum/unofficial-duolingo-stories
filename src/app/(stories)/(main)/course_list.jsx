@@ -110,7 +110,7 @@ ORDER BY fromLanguageName;
 
     return course_groups;
   },
-  ["get_courses_list"],
+  ["get_courses_list2"],
 );
 
 export default async function CourseList({ tag }) {

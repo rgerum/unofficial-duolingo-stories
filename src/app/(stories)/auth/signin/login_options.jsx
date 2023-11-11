@@ -89,6 +89,15 @@ export function LoginOptions({ providers }) {
         >
           Sign Up
         </Link>
+        <br />
+        Forgot Password?{" "}
+        <Link
+          href="/auth/reset_pw"
+          data-cy="reset-button"
+          className={styles.link}
+        >
+          Reset
+        </Link>
       </span>
       <hr />
       {/*<input data-cy="email" value={emailInput} onChange={emailInputSetValue} onKeyDown={handleKeypressSignup2} type="email" placeholder="Email" name="email"/>
