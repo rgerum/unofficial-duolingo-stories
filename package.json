@@ -5,6 +5,7 @@
     "build": "next build",
     "start": "next start",
     "init": "node db_create_test.js",
+    "init-build": "node init_build.js",
     "init-reset": "node db_test_reset.js",
     "cypress": "cypress open"
   },
