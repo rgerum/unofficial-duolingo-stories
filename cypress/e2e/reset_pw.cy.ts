@@ -25,7 +25,7 @@ describe("Reset password", () => {
     cy.get("[data-cy=message-confirm").should("exist");
     //cy.location('pathname').should('equal', '/confirm')
 
-    cy.wait(500);
+    cy.wait(1000);
     // by now the SMTP server has probably received the email
     cy.task("getLastEmail", "test@duostories.org")
       .then(cy.wrap)
