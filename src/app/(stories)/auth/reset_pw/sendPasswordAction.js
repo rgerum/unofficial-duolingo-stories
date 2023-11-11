@@ -6,6 +6,7 @@ import transporter from "lib/emailer";
 export default async function sendPasswordAction(email) {
   const currentDate = new Date();
   const tomorrow = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
+  console.log("try email", email);
 
   // Format the date and time
   const formattedDate = tomorrow
@@ -17,6 +18,7 @@ export default async function sendPasswordAction(email) {
     "SELECT id, email, username FROM user WHERE email = ? LIMIT 1",
     [email],
   );
+  console.log("user", result);
   if (result.length === 0) return "done";
 
   let identifier = uuid();
@@ -24,6 +26,7 @@ export default async function sendPasswordAction(email) {
     "INSERT INTO verification_token (token, identifier, expires) VALUES (?, ?, ?)",
     [identifier, email, formattedDate],
   );
+  console.log("send email");
 
   transporter.sendMail({
     from: "Unofficial Duolingo Stories <register@duostories.org>",

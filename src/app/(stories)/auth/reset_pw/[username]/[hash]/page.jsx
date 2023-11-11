@@ -3,7 +3,7 @@ import ResetPassword from "./reset_pw";
 import { phpbb_hash } from "lib/auth/hash_functions2";
 import query from "lib/db";
 
-export async function changePasswordAction(password, user_id) {
+async function changePasswordAction(password, user_id) {
   let password_hashed = await phpbb_hash(password);
 
   // set the new password
@@ -41,10 +41,10 @@ export default async function Page({ params }) {
       </div>
     );
   }
-  async function callchangePasswordAction(password) {
+  async function callChangePasswordAction(password) {
     "use server";
     return await changePasswordAction(password, user_id);
   }
 
-  return <ResetPassword callchangePasswordAction={callchangePasswordAction} />;
+  return <ResetPassword callchangePasswordAction={callChangePasswordAction} />;
 }
