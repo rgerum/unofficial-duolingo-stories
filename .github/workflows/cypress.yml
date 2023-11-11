@@ -20,7 +20,7 @@ jobs:
           build: npm run init && npm run build
           start: npm run start
           wait-on: "http://localhost:3000"
-          wait-on-timeout: 120
+          wait-on-timeout: 600
         env:
           # pass the Cypress Cloud record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
