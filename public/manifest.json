@@ -3,6 +3,7 @@
   "short_name": "Duostories",
   "description": "Learn languages with stories",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1cb0f6",
