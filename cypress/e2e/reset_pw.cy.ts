@@ -6,7 +6,7 @@ describe("Reset password", () => {
     //query('DELETE FROM user WHERE username = "user_new"')
   });
   it("reset the password", () => {
-    cy.task("resetEmails", "test@duostories.org");
+    cy.task("resetEmails", "test2@duostories.org");
 
     cy.visit("/");
 
@@ -16,7 +16,7 @@ describe("Reset password", () => {
     cy.get("[data-cy=reset-button]").click();
     cy.url().should("include", "/auth/reset_pw");
 
-    cy.get("[data-cy=email]").type("test@duostories.org");
+    cy.get("[data-cy=email]").type("test2@duostories.org");
 
     cy.intercept("POST", "/auth/register/send").as("register");
     cy.get("[data-cy=submit]").click();
@@ -27,7 +27,7 @@ describe("Reset password", () => {
 
     cy.wait(1000);
     // by now the SMTP server has probably received the email
-    cy.task("getLastEmail", "test@duostories.org")
+    cy.task("getLastEmail", "test2@duostories.org")
       .then(cy.wrap)
       // Tip: modern browsers supports named groups
       //.invoke('match', /href=.*?(?<code>\/auth\/.*?)'/)
