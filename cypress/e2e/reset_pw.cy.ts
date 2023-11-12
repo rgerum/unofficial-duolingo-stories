@@ -45,7 +45,7 @@ describe("Reset password", () => {
         //cy.get("[data-cy=login-button]").click()
         cy.url().should("include", "/auth/signin");
 
-        cy.get("[data-cy=username]").type("user");
+        cy.get("[data-cy=username]").type("user2");
         cy.get("[data-cy=password]").type("test1234");
 
         cy.get("[data-cy=submit]").click();

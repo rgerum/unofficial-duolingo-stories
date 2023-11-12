@@ -21,10 +21,15 @@ async function check_link(username, hash) {
   if (result.length === 0) {
     return undefined;
   }
+  // Format the date and time
+  const formattedDate = new Date()
+    .toISOString()
+    .replace("T", " ")
+    .substring(0, 19);
   // activate the user
   let result2 = await query(
-    "SELECT id FROM verification_token WHERE token = ? AND identifier = ? LIMIT 1",
-    [hash, result[0].email],
+    "SELECT id FROM verification_token WHERE token = ? AND identifier = ? AND expires > ? LIMIT 1",
+    [hash, result[0].email, formattedDate],
   );
   if (result2.length === 0) {
     return undefined;
@@ -37,7 +42,7 @@ export default async function Page({ params }) {
   if (!user_id) {
     return (
       <div id="login_dialog">
-        <p id="status">Activation not successful.</p>
+        <p id="status">Invalid or expired link.</p>
       </div>
     );
   }

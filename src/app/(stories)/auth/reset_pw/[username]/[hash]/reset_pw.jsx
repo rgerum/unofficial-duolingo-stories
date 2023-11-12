@@ -31,7 +31,6 @@ export default function ResetPassword({ callchangePasswordAction }) {
   return (
     <>
       <h2>Reset Password</h2>
-      <p>Enter your new password.</p>
       {state === -1 ? <span className={styles.error}>{error}</span> : <></>}
       {state === 2 ? (
         <span>
@@ -41,24 +40,27 @@ export default function ResetPassword({ callchangePasswordAction }) {
           </Link>
         </span>
       ) : (
-        <form action={register_button}>
-          <input
-            data-cy="password"
-            value={passwordInput}
-            onChange={passwordInputSetValue}
-            onKeyDown={handleKeypressSignup}
-            type="password"
-            placeholder="Password"
-          />
-          <button
-            data-cy="submit"
-            type="submit"
-            className={styles.button}
-            //onClick={register_button}
-          >
-            {state !== 1 ? "Set Password" : "..."}
-          </button>
-        </form>
+        <>
+          <p>Enter your new password.</p>
+          <form action={register_button}>
+            <input
+              data-cy="password"
+              value={passwordInput}
+              onChange={passwordInputSetValue}
+              onKeyDown={handleKeypressSignup}
+              type="password"
+              placeholder="Password"
+            />
+            <button
+              data-cy="submit"
+              type="submit"
+              className={styles.button}
+              //onClick={register_button}
+            >
+              {state !== 1 ? "Set Password" : "..."}
+            </button>
+          </form>
+        </>
       )}
     </>
   );
