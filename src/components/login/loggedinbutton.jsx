@@ -10,7 +10,7 @@ import { useSelectedLayoutSegments } from "next/navigation";
 
 function useDarkLight() {
   const [activeTheme, setActiveTheme] = useState(
-    typeof document !== "undefined" ? document.body.dataset.theme : undefined,
+    typeof document !== "undefined" ? document.body.dataset.theme : "light",
   );
   const inactiveTheme = activeTheme === "light" ? "dark" : "light";
   //...
