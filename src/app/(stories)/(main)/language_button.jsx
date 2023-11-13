@@ -65,6 +65,7 @@ export default async function LanguageButton({ course_id, loading }) {
 }
 
 export async function LanguageButtonSuspense({ course_id }) {
+  return <LanguageButton course_id={course_id} />;
   return (
     <Suspense fallback={<LanguageButton loading={true} />}>
       <LanguageButton course_id={course_id} />
