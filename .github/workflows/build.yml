@@ -78,8 +78,21 @@ jobs:
           eval `ssh-agent -s`
           ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
           scp build.zip duostori@ara.uberspace.de:~/html/HEAD/
+      - name: unzip
+        run: |
+          ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
+          eval `ssh-agent -s`
+          ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
+          
           ssh duostori@ara.uberspace.de 'rm -rf ~/html/HEAD/.next'
           ssh duostori@ara.uberspace.de 'unzip -d ~/html/HEAD/ ~/html/HEAD/build.zip'
+
+      - name: restart
+        run: |
+          ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
+          eval `ssh-agent -s`
+          ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
+          
           ssh duostori@ara.uberspace.de 'supervisorctl stop beta'
           ssh duostori@ara.uberspace.de '/home/duostori/html/kill_rouge_workers.py'
           ssh duostori@ara.uberspace.de '/home/duostori/html/kill_port_users.py beta'
