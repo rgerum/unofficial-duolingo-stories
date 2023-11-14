@@ -37,6 +37,21 @@ jobs:
       - name: zip
         run: zip -r build.zip .next
 
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-data
+          path: build.zip
+
+
+  deploy-beta:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-data
       - name: upload
         run: |
           ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
@@ -47,4 +62,5 @@ jobs:
           ssh duostori@ara.uberspace.de 'unzip -d ~/html/HEAD/ ~/html/HEAD/build.zip'
           ssh duostori@ara.uberspace.de 'supervisorctl stop beta'
           ssh duostori@ara.uberspace.de '/home/duostori/html/kill_rouge_workers.py'
+          ssh duostori@ara.uberspace.de '/home/duostori/html/kill_port_users.py beta'
           ssh duostori@ara.uberspace.de 'supervisorctl start beta'
