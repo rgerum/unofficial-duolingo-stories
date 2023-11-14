@@ -1,18 +1,13 @@
 "use client";
 import styles from "./profile.module.css";
 import { signIn } from "next-auth/react";
+import { GetIcon } from "components/icons";
+import React from "react";
 
 export default function ProviderButton({ d, value }) {
   return (
     <div className={styles.account}>
-      <img
-        loading="lazy"
-        id="provider-logo"
-        src={`https://authjs.dev/img/providers/${d}.svg`}
-        alt=""
-        width="24"
-        height="24"
-      />
+      <GetIcon name={d} />
       <div>
         {d}:{" "}
         {value ? (
