@@ -114,9 +114,6 @@ if (!process.env.NEXTAUTH_URL) {
   });
 
   async function query(query, args) {
-    console.log("------------------");
-    console.log("query", query, args);
-    console.log("------------------");
     if (!Array.isArray(args) && args !== undefined) args = [args];
 
     return new Promise((resolve, reject) => {
