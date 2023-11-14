@@ -10,21 +10,28 @@ import { useSelectedLayoutSegments } from "next/navigation";
 
 function get_current_theme() {
   // it's currently saved in the document?
-  if(typeof document !== "undefined" && document.body.dataset.theme && document.body.dataset.theme !== "undefined") {
-    return document.body.dataset.theme
+  if (
+    typeof document !== "undefined" &&
+    document.body.dataset.theme &&
+    document.body.dataset.theme !== "undefined"
+  ) {
+    return document.body.dataset.theme;
   }
-  if(typeof window !== "undefined") {
+  if (typeof window !== "undefined") {
     // it has been previously saved in the window?
-    if(window.localStorage.getItem("theme") !== undefined && window.localStorage.getItem("theme") !== "undefined") {
-      return window.localStorage.getItem("theme")
+    if (
+      window.localStorage.getItem("theme") !== undefined &&
+      window.localStorage.getItem("theme") !== "undefined"
+    ) {
+      return window.localStorage.getItem("theme");
     }
     // or the user has a preference?
-    if(window.matchMedia('(prefers-color-scheme: dark)').matches)
-      return "dark"
-    return "light"
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches)
+      return "dark";
+    return "light";
   }
   // or we don't know yet
-  return undefined
+  return undefined;
 }
 
 function useDarkLight() {
@@ -33,10 +40,9 @@ function useDarkLight() {
   //...
 
   useEffect(() => {
-    if(activeTheme === undefined || activeTheme === "undefined") {
+    if (activeTheme === undefined || activeTheme === "undefined") {
       setActiveTheme(get_current_theme());
-    }
-    else {
+    } else {
       document.body.dataset.theme = activeTheme;
       window.localStorage.setItem("theme", activeTheme);
     }
@@ -118,7 +124,11 @@ export default function LoggedInButton({ page, course_id, session }) {
               controls.toggle();
             }}
           >
-            {controls.value === "light" ? "Dark Mode" : (controls.value === "dark" ? "Light Mode" : "Light/Dark")}
+            {controls.value === "light"
+              ? "Dark Mode"
+              : controls.value === "dark"
+              ? "Light Mode"
+              : "Light/Dark"}
           </div>
         }
         {session.user?.role && page !== "stories" ? (

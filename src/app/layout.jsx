@@ -8,6 +8,7 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1cb0f6" />
         <title>Duostories</title>
+        <script src="/darklight.js"></script>
       </head>
       <body>{children}</body>
     </html>
