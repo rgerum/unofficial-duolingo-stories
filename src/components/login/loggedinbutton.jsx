@@ -8,16 +8,38 @@ import { signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useSelectedLayoutSegments } from "next/navigation";
 
+function get_current_theme() {
+  // it's currently saved in the document?
+  if(typeof document !== "undefined" && document.body.dataset.theme && document.body.dataset.theme !== "undefined") {
+    return document.body.dataset.theme
+  }
+  if(typeof window !== "undefined") {
+    // it has been previously saved in the window?
+    if(window.localStorage.getItem("theme") !== undefined && window.localStorage.getItem("theme") !== "undefined") {
+      return window.localStorage.getItem("theme")
+    }
+    // or the user has a preference?
+    if(window.matchMedia('(prefers-color-scheme: dark)').matches)
+      return "dark"
+    return "light"
+  }
+  // or we don't know yet
+  return undefined
+}
+
 function useDarkLight() {
-  const [activeTheme, setActiveTheme] = useState(
-    document?.body?.dataset?.theme || "light",
-  );
+  const [activeTheme, setActiveTheme] = useState(get_current_theme());
   const inactiveTheme = activeTheme === "light" ? "dark" : "light";
   //...
 
   useEffect(() => {
-    document.body.dataset.theme = activeTheme;
-    window.localStorage.setItem("theme", activeTheme);
+    if(activeTheme === undefined || activeTheme === "undefined") {
+      setActiveTheme(get_current_theme());
+    }
+    else {
+      document.body.dataset.theme = activeTheme;
+      window.localStorage.setItem("theme", activeTheme);
+    }
   }, [activeTheme]);
 
   return {
@@ -96,7 +118,7 @@ export default function LoggedInButton({ page, course_id, session }) {
               controls.toggle();
             }}
           >
-            {controls.value === "light" ? "Dark Mode" : "Light Mode"}
+            {controls.value === "light" ? "Dark Mode" : (controls.value === "dark" ? "Light Mode" : "Light/Dark")}
           </div>
         }
         {session.user?.role && page !== "stories" ? (
