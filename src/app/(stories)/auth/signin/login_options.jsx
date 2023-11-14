@@ -7,6 +7,7 @@ import { useInput } from "lib/hooks";
 
 import styles from "../register.module.css";
 import { useSearchParams } from "next/navigation";
+import { GetIcon } from "components/icons";
 
 export function LoginOptions({ providers }) {
   async function register_button() {
@@ -112,14 +113,7 @@ export function LoginOptions({ providers }) {
             className={styles.button2}
             onClick={() => signIn(provider.id)}
           >
-            <img
-              alt=""
-              loading="lazy"
-              id="provider-logo"
-              src={`https://authjs.dev/img/providers/${provider.id}.svg`}
-              width="24"
-              height="24"
-            />
+            <GetIcon name={provider.id} />
             <span>{provider.name}</span>
           </button>
         ) : (

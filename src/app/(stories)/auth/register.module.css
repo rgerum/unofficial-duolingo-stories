@@ -65,6 +65,11 @@
   transform: translate(0);
   margin-bottom: 8px;
   margin-inline: 0;
+  padding-right: 0;
+}
+.button svg {
+  width: 24px;
+  height: 24px;
 }
 
 .login_dialog .link {
