@@ -29,6 +29,8 @@ jobs:
       - name: Install
         run: npm install
 
+      - run: printf "${{ secrets.ENV_LOCAL }}" >> .env.local
+
       - name: Build
         run: npm run build
 
