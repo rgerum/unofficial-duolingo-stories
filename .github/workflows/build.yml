@@ -29,8 +29,6 @@ jobs:
       - name: Install
         run: npm install
 
-      - run: printf "${{ secrets.ENV_LOCAL }}" >> .env.local
-
       - name: Build
         run: npm run build
 
@@ -52,6 +50,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-data
+      - name: ssh tunnel for upload
+        run: |
+          mkdir -p ~/.ssh/
+          ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
+          eval `ssh-agent -s`
+          ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
+          ssh -fN -L 3306:127.0.0.1:3306 duostori@ara.uberspace.de
       - name: upload
         run: |
           ssh-keyscan -H ara.uberspace.de >> ~/.ssh/known_hosts
