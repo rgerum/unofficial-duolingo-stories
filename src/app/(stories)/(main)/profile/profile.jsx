@@ -39,6 +39,13 @@ export default function Profile({ providers }) {
             <ProviderButton key={key} d={key} value={value} />
           ))}
         </div>
+
+        <h2>Delete Account</h2>
+        <p>
+          If you want to delete your account, please contact use on
+          <Link href="https://discord.gg/4NGVScARR3">Discord</Link>. We will
+          typically delete your username and email address upon request.
+        </p>
       </div>
     </>
   );
