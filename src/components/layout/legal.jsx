@@ -6,6 +6,15 @@ import styles from "./legal.module.css";
 export default function Legal({ language_name }) {
   return (
     <small className={styles.legal}>
+      {language_name ? (
+        ""
+      ) : (
+        <>
+          <Link href="/privacy_policy">Privacy Policy</Link>
+          <br />
+          <br />
+        </>
+      )}
       These stories are owned by Duolingo, Inc. and are used under license from
       Duolingo.
       <br />
