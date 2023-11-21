@@ -49,7 +49,8 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
     //text = text.replace(/^<speak>/, "");
     //text = text.replace(/<\/speak>$/, "");
     let lang = voice_id.split("-")[0] + "-" + voice_id.split("-")[1];
-    text = `<speak version='1.0' xml:lang='${lang}'><voice name="${voice_id}">${text}</voice></speak>`;
+    if (!text.startsWith("<speak"))
+      text = `<speak version='1.0' xml:lang='${lang}'><voice name="${voice_id}">${text}</voice></speak>`;
 
     let text2 = get_raw(text);
     synthesizer.speakSsmlAsync(

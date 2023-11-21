@@ -141,7 +141,7 @@ async function getVoices() {
 }
 
 async function isValidVoice(voice) {
-  return voice.indexOf("Wavenet") !== -1 || voice.indexOf("Standard") !== -1;
+  return voice.indexOf("Wavenet") !== -1 || voice.indexOf("Standard") !== -1 || voice.indexOf("Neural2") !== -1;
 }
 
 export default {

@@ -448,7 +448,7 @@ function AvatarNames({ language, speakers, avatar_names }) {
       //element.line.content.audio.url = url
       // {audioStart: 50, rangeEnd: 3}
       let last_pos = 0;
-      for (let marks of ssml_response.marks) {
+      for (let marks of ssml_response.marks || []) {
         last_pos += tt.substring(last_pos).indexOf(marks.value);
         element.line.content.audio.keypoints.push({
           audioStart: marks.time,
