@@ -35,7 +35,7 @@ function get_current_theme() {
 }
 
 function useDarkLight() {
-  const [activeTheme, setActiveTheme] = useState(get_current_theme());
+  const [activeTheme, setActiveTheme] = useState(undefined);
   const inactiveTheme = activeTheme === "light" ? "dark" : "light";
   //...
 
