@@ -3,6 +3,7 @@ import { useInput } from "../../../../lib/hooks";
 import Header from "../header";
 import styles from "./profile.module.css";
 import ProviderButton from "./button";
+import Link from "next/link";
 
 export default function Profile({ providers }) {
   let [username, setUsername] = useInput(providers.name);
