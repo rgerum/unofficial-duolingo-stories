@@ -2,12 +2,25 @@
   margin: 0 20px;
 }
 
+.profile div input {
+  align-items: center;
+  background: var(--input-background);
+  border: 2px solid var(--input-border);
+  color: var(--text-color);
+  border-radius: 16px;
+  margin-top: 8px;
+  position: relative;
+  padding: 10px 17px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
 .roles {
   margin-top: 10px;
 }
 
 .roles span {
-  background: lightgray;
+  background: var(--header-border);
   border-radius: 10px;
   padding: 5px 10px;
   margin: 0 5px;
@@ -41,7 +54,7 @@
 }
 
 .linkedd {
-  background: lightgray;
+  background: var(--header-border);
   border-radius: 10px;
   padding: 5px 10px;
   margin: 0 5px;
