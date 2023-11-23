@@ -71,6 +71,7 @@ export function find_replace_with_mapping(mapped_text, find, replace) {
 }
 
 function apply_letter_replacements(mapped_text, replacements, options) {
+  if(!replacements) return mapped_text
   let tag_start = [];
   for (let i = 0; i < mapped_text.text.length; i++) {
     let char = mapped_text.text[i].toLowerCase();
