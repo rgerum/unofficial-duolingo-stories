@@ -7,7 +7,7 @@ export default function get_localisation_func(data) {
     if (!text) return undefined;
     if (replacements) text = replaceTags(text, replacements);
     if (links) return replaceLinks(replaceTags(text, replacements), links);
-    return text;
+    return insetWithNewlines(text);
   }
   return apply;
 }
