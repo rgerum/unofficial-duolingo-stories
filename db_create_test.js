@@ -74,6 +74,7 @@ async function createAll() {
     add_data("story_approval", "approvals.json"),
     add_data("avatar", "avatar.json"),
     add_data("user", "user.json"),
+    add_data("localization", "localization.json"),
     add_data("course_tag_map", "course_tag_map.json"),
     write_envs,
   ]);
