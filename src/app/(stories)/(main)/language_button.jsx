@@ -2,13 +2,14 @@ import Link from "next/link";
 import styles from "./language_button.module.css";
 import { cache, Suspense } from "react";
 import { query_objs } from "../../../lib/db";
+import get_localisation from "lib/get_localisation";
 import FlagById from "components/layout/flag_by_id";
 import { unstable_cache } from "next/cache";
 
 let get_courses = unstable_cache(async () => {
   let courses = await query_objs(
     `
-SELECT c.id, COALESCE(NULLIF(c.name, ''), l2.name) as name, c.short, COUNT(s.id) count, c.learningLanguage FROM course c
+SELECT c.id, COALESCE(NULLIF(c.name, ''), l2.name) as name, c.short, COUNT(s.id) count, c.learningLanguage, c.fromLanguage FROM course c
 JOIN language l2 ON l2.id = c.learningLanguage
 JOIN story s ON (c.id = s.course_id)
 WHERE s.public = 1 AND s.deleted = 0 AND c.public = 1
@@ -47,6 +48,7 @@ export default async function LanguageButton({ course_id, loading }) {
       ></div>
     );
   }
+  let localisation = await get_localisation(course.fromLanguage);
 
   return (
     <Link
@@ -58,7 +60,8 @@ export default async function LanguageButton({ course_id, loading }) {
 
       <span className={styles.language_select_button_text}>{course.name}</span>
       <span className={styles.language_story_count}>
-        {course.count} stories
+        {localisation("n_stories", { $count: course.count }) ||
+          `${course.count} stories`}
       </span>
     </Link>
   );

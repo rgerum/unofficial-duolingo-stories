@@ -23,6 +23,7 @@ export const get_course = unstable_cache(
     const course = await query_one_obj(
       `
         SELECT course.id, course.short, course.about, 
+        course.fromLanguage as fromLanguageId,
         l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
         l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag     
         FROM course 

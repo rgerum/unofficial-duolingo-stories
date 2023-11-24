@@ -19,6 +19,7 @@ export default function Story({
   editor,
   storyFinishedIndexUpdate,
   auto_play,
+  localization,
 }) {
   const storyElement = React.useRef();
   const mainElement = React.useRef();
@@ -275,7 +276,11 @@ export default function Story({
     <>
       <div className={show_title_page === 1 ? "" : styles.hidden}>
         <StoryHeader course={course} />
-        <StoryTitlePage story={story} controls={controls} />
+        <StoryTitlePage
+          story={story}
+          controls={controls}
+          localization={localization}
+        />
       </div>
       <div className={show_title_page !== 1 ? "" : styles.hidden}>
         <audio ref={ref_audio1}>
@@ -343,7 +348,9 @@ export default function Story({
           ) : (
             <div className={styles.spacer} />
           )}
-          {finished ? <FinishedPage story={story} /> : null}
+          {finished ? (
+            <FinishedPage story={story} localization={localization} />
+          ) : null}
         </div>
         {controls.auto_play ? null : (
           <Footer
@@ -352,6 +359,7 @@ export default function Story({
             blocked={blocked}
             next={next}
             finish={finish}
+            localization={localization}
           />
         )}
       </div>

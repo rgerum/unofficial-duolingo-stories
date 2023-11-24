@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { unstable_cache } from "next/cache";
 import query, { query_objs } from "lib/db";
-
+import get_localisation from "lib/get_localisation";
 import LanguageButton from "./language_button";
 
 import styles from "./course_list.module.css";
@@ -39,6 +39,7 @@ GROUP BY c.id ORDER BY COALESCE(NULLIF(c.name, ''), l2.name);
 
 async function LanguageGroup({ name, tag, id }) {
   let courses = await get_courses(tag ? tag : "main");
+  let localisation = await get_localisation(id);
   let courses_list = courses[id];
 
   if (!courses_list) return <></>;
@@ -47,7 +48,7 @@ async function LanguageGroup({ name, tag, id }) {
     <div className={styles.course_list}>
       <hr />
       <div className={styles.course_group_name}>
-        Stories for {name} Speakers
+        {localisation("stories_for") || `Stories for ${name} Speakers`}
       </div>
       {courses_list?.map((course_id) => (
         <LanguageButton key={course_id} course_id={course_id} />

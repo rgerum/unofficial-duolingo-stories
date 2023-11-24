@@ -1,7 +1,14 @@
 import React from "react";
 import styles from "./story_footer.module.css";
 
-export default function Footer({ right, finished, blocked, next, finish }) {
+export default function Footer({
+  right,
+  finished,
+  blocked,
+  next,
+  finish,
+  localization,
+}) {
   return (
     <div className={styles.footer} data-right={right ? "true" : undefined}>
       <div className={styles.footer_content}>
@@ -11,7 +18,7 @@ export default function Footer({ right, finished, blocked, next, finish }) {
               <span />
             </div>
             <div className={styles.footer_result_text}>
-              <h2>You are correct</h2>
+              <h2>{localization("story_correct") || "You are correct"}</h2>
             </div>
           </div>
         </div>
@@ -22,7 +29,7 @@ export default function Footer({ right, finished, blocked, next, finish }) {
               data-cy={"button-finished"}
               onClick={finish}
             >
-              finished
+              {localization("button_finished") || "finished"}
             </button>
           ) : (
             <button
@@ -31,7 +38,7 @@ export default function Footer({ right, finished, blocked, next, finish }) {
               data-cy={"continue"}
               onClick={blocked ? () => {} : next}
             >
-              continue
+              {localization("button_continue") || "continue"}
             </button>
           )}
         </div>

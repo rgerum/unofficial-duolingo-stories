@@ -3,6 +3,7 @@ import styles from "./set_list.module.css";
 import StoryButton from "./story_button";
 import getUserId from "lib/getUserId";
 import query from "lib/db";
+import get_localisation from "lib/get_localisation";
 
 function About({ course }) {
   if (!course.about) return <></>;
@@ -14,10 +15,13 @@ function About({ course }) {
   );
 }
 
-function Set({ set, done }) {
+function Set({ set, done, localisation }) {
   return (
     <div key={set[0].set_id} className={styles.set_list}>
-      <div className={styles.set_title}>Set {set[0].set_id}</div>
+      <div className={styles.set_title}>
+        {localisation("set_n", { $count: set[0].set_id }) ||
+          `Set ${set[0].set_id}`}
+      </div>
       {set.map((story) => (
         <StoryButton key={story.id} story={story} done={done[story.id]} />
       ))}
@@ -44,13 +48,19 @@ JOIN story s on s.id = story_done.story_id WHERE user_id = ? AND s.course_id = (
 export default async function SetListClient({ course_id, course }) {
   let user_id = await getUserId();
   let done = await get_course_done({ course_id, user_id });
+  let localisation = await get_localisation(course.fromLanguageId);
 
   return (
     <div className={styles.story_list}>
       <About course={course} />
 
       {course.sets.map((set) => (
-        <Set key={set[0].set_id} set={set} done={done} />
+        <Set
+          key={set[0].set_id}
+          set={set}
+          done={done}
+          localisation={localisation}
+        />
       ))}
     </div>
   );

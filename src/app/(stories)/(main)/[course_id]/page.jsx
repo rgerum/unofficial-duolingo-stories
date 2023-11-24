@@ -5,12 +5,13 @@ import CourseTitle from "./course_title";
 import SetList from "./set_list";
 import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
+import get_localisation from "../../../../lib/get_localisation";
 
 const get_course = unstable_cache(
   async (course_id) => {
     return await query_one_obj(
       `
-        SELECT l.name AS learningLanguageName FROM course
+        SELECT l.name AS learningLanguageName, course.fromLanguage FROM course
         JOIN language l on l.id = course.learningLanguage
         WHERE course.short = ? AND course.public = 1 LIMIT 1
         `,
@@ -28,14 +29,22 @@ export async function generateMetadata({ params, searchParams }, parent) {
     return notFound();
   }
   const course = await get_course(params.course_id);
+  const localization = await get_localisation(course.fromLanguage);
 
   if (!course) notFound();
 
   const meta = await parent;
 
   return {
-    title: `${course.learningLanguageName} Duolingo Stories`,
-    description: `Improve your ${course.learningLanguageName} learning by community-translated Duolingo stories.`,
+    title:
+      localization("meta_course_title", {
+        $language: course.learningLanguageName,
+      }) || `${course.learningLanguageName} Duolingo Stories`,
+    description:
+      localization("meta_course_description", {
+        $language: course.learningLanguageName,
+      }) ||
+      `Improve your ${course.learningLanguageName} learning by community-translated Duolingo stories.`,
     alternates: {
       canonical: `https://duostories.org/${params.course_id}`,
     },

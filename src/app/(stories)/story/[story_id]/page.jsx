@@ -5,10 +5,11 @@ import query from "lib/db";
 import StoryWrapper from "./story_wrapper";
 import { notFound } from "next/navigation";
 import getUserId from "lib/getUserId";
+import { get_localisation_dict } from "lib/get_localisation";
 
 export async function get_story(story_id) {
   let res = await query(
-    `SELECT l1.short AS fromLanguage, l2.short AS learningLanguage, 
+    `SELECT l1.short AS fromLanguage, l2.short AS learningLanguage, c.fromLanguage as fromLanguageId,
               l1.name AS fromLanguageLong, l2.name AS learningLanguageLong, 
               l1.rtl AS fromLanguageRTL, l2.rtl AS learningLanguageRTL,
               story.id, story.json 
@@ -27,6 +28,7 @@ export async function get_story(story_id) {
   data.id = res[0]["id"];
 
   data.fromLanguage = res[0]["fromLanguage"];
+  data.fromLanguageId = res[0]["fromLanguageId"];
   data.fromLanguageLong = res[0]["fromLanguageLong"];
   data.fromLanguageRTL = res[0]["fromLanguageRTL"];
 
@@ -78,6 +80,8 @@ export default async function Page({ params }) {
   const user_id = await getUserId();
   const story_id = parseInt(params.story_id);
 
+  const localization = await get_localisation_dict(story.fromLanguageId);
+
   async function setStoryDoneAction() {
     "use server";
     if (!user_id) {
@@ -96,6 +100,7 @@ export default async function Page({ params }) {
       <StoryWrapper
         story={story}
         storyFinishedIndexUpdate={setStoryDoneAction}
+        localization={localization}
       />
     </>
   );
