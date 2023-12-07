@@ -186,7 +186,10 @@ export function generate_ssml_line(
       speak_text.text.length,
     );
   }
-  if (speaker.split("-").length === 4) {
+  if (
+    speaker.split("-").length === 4 &&
+    ["Wavenet", "Standard", "Neural2"].includes(speaker.split("-")[2])
+  ) {
     speak_text = add_word_marks_replacements(speak_text);
     speak_text = replace_with_mapping(speak_text, `<speak>`, 0);
     speak_text = replace_with_mapping(
@@ -194,7 +197,7 @@ export function generate_ssml_line(
       `</speak>`,
       speak_text.text.length,
     );
-  } else if (speaker.split("-").length === 3) {
+  } else if (speaker.split("-").length >= 3) {
     let lang = speaker.split("-")[0] + "-" + speaker.split("-")[1];
     //text = `<speak version='1.0' xml:lang='${lang}'><voice name="${voice_id}">${text}</voice></speak>`;
     speak_text = replace_with_mapping(
