@@ -2,7 +2,7 @@
   "name": "Duostories",
   "short_name": "Duostories",
   "description": "Learn languages with stories",
-  "start_url": "/",
+  "start_url": "/learn",
   "scope": "/",
   "id": "/",
   "display": "standalone",
