@@ -29,7 +29,7 @@ export default function StoryButton({ story, done }) {
       <div
         className={styles.button_story_img}
         data-done={done}
-        style={done ? {} : { background: "#" + story.activeLip }}
+        style={done ? {} : { background: "#" + story.active_lip }}
       >
         <img src={done ? story.gilded : story.active} alt="" />
       </div>

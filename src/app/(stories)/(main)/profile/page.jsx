@@ -1,4 +1,4 @@
-import query from "lib/db";
+import { sql } from "lib/db";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "app/api/auth/[...nextauth]/route";
 import Header from "../header";
@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 async function get_user_id_from_username(user_name) {
-  let res = await query(`SELECT id FROM user WHERE username = ?`, [user_name]);
+  let res = await sql`SELECT id FROM "user" WHERE username = ${user_name}`;
   if (res.length) return res[0].id;
   return 0;
 }
@@ -22,9 +22,8 @@ async function getLinkedProviders() {
   const session = await getServerSession(authOptions);
   if (!session) return undefined;
   let user_id = await get_user_id_from_username(session.user.name);
-  const req2 = await query(`SELECT provider FROM account WHERE user_id = ?`, [
-    user_id,
-  ]);
+  const req2 =
+    await sql`SELECT provider FROM account WHERE user_id = ${user_id}`;
 
   let provider_linked = {};
   for (let p of providers_base) {

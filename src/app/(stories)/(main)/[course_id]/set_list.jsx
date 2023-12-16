@@ -1,15 +1,12 @@
 import styles from "./set_list.module.css";
 import StoryButton from "./story_button";
-import query from "lib/db";
-import { query_one_obj, query_objs } from "lib/db";
 import SetListClient from "./set_list_client";
 import { unstable_cache } from "next/cache";
+import { sql } from "lib/db";
 
-export const get_course_done = async (course_id, username) => {
-  const done_query = await query(
-    `SELECT s.id FROM story_done JOIN story s on s.id = story_done.story_id WHERE user_id = (SELECT id FROM user WHERE username = ? LIMIT 1) AND s.course_id = (SELECT id FROM course WHERE short = ?) GROUP BY s.id`,
-    [username, course_id],
-  );
+const get_course_done = async (course_id, username) => {
+  const done_query =
+    await sql`SELECT s.id FROM story_done JOIN story s on s.id = story_done.story_id WHERE user_id = (SELECT id FROM user WHERE username = ${username} LIMIT 1) AND s.course_id = (SELECT id FROM course WHERE short = ${course_id} LIMIT 1) GROUP BY s.id`;
   const done = {};
   for (let d of done_query) {
     done[d.id] = true;
@@ -18,36 +15,31 @@ export const get_course_done = async (course_id, username) => {
   return done;
 };
 
-export const get_course = unstable_cache(
+const get_course = unstable_cache(
   async (course_id) => {
-    const course = await query_one_obj(
-      `
+    const course = (
+      await sql`
         SELECT course.id, course.short, course.about, 
-        course.fromLanguage as fromLanguageId,
-        l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
-        l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag     
+        course.from_language as from_language_id,
+        l1.short AS from_language, l1.name AS from_language_name, l1.flag_file AS from_language_flag_file, l1.flag AS from_language_flag,
+        l2.short AS learning_language, l2.name AS learning_language_name, l2.flag_file AS learning_language_flag_file, l2.flag AS learning_language_flag     
         FROM course 
-        LEFT JOIN language l1 ON l1.id = course.fromLanguage
-        LEFT JOIN language l2 ON l2.id = course.learningLanguage
-        WHERE course.short = ? LIMIT 1
-        `,
-      [course_id],
-    );
+        LEFT JOIN language l1 ON l1.id = course.from_language
+        LEFT JOIN language l2 ON l2.id = course.learning_language
+        WHERE course.short = ${course_id} LIMIT 1
+        `
+    )[0];
 
-    if (!course) return undefined;
+    if (!course) return null;
 
-    const res = await query_objs(
-      `
+    const res = await sql`
         SELECT story.id, story.set_id, story.set_index, story.name, story.course_id,
-        i.active, i.activeLip, i.gilded, i.gildedLip
+        i.active, i.active_lip, i.gilded, i.gilded_lip
         FROM story
         JOIN image i on story.image = i.id
-        WHERE story.public = 1 AND story.deleted = 0 AND story.course_id = (SELECT c.id FROM course c WHERE c.short = ? LIMIT 1)
-        GROUP BY story.id
+        WHERE story.public AND NOT story.deleted AND story.course_id = (SELECT c.id FROM course c WHERE c.short = ${course_id} LIMIT 1)
         ORDER BY set_id, set_index;
-        `,
-      [course_id],
-    );
+        `;
     if (res.length === 0) return { ...course, sets: [], count: 0 };
 
     // group into sets
@@ -66,7 +58,7 @@ export const get_course = unstable_cache(
 
     return { ...course, sets: sets, count: count };
   },
-  ["get_course"],
+  ["get_courseXXXXY"],
 );
 
 export default async function SetList({ course_id }) {

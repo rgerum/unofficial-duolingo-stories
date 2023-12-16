@@ -1,21 +1,18 @@
 import React, { cache } from "react";
 import styles from "./flag.module.css";
-import { query_objs } from "../../lib/db";
+import { sql } from "lib/db";
 import { unstable_cache } from "next/cache";
 
 let get_langs = unstable_cache(async () => {
-  let langs = await query_objs(
-    `
-SELECT id, short AS iso, flag_file, flag FROM language;
-    `,
-    [],
-  );
+  let langs = await sql`
+SELECT id, short AS iso, flag_file, flag FROM language
+    `;
   let lang_list = {};
   for (let lang of langs) {
     lang_list[lang.id] = lang;
   }
   return lang_list;
-}, ["get_langs"]);
+}, ["get_langsYYYYaasa"]);
 
 let get_lang = cache(async (id) => {
   return (await get_langs())[id];
