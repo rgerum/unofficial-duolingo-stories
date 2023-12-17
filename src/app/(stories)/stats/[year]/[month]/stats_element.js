@@ -34,9 +34,9 @@ export default function StatsElement({
         <Flag iso={lang2.short} flag_file={lang2.flag_file} width={30} />
       </div>
       <span className={styles.languageBox}>
-        <span className={styles.learningLanguage}>{lang1.name}</span>
+        <span className={styles.learning_language}>{lang1.name}</span>
         <br />
-        <span className={styles.fromLanguage}>(from {lang2.name})</span>
+        <span className={styles.from_language}>(from {lang2.name})</span>
       </span>
     </div>
   );

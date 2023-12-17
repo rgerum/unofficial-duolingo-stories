@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { query_one_obj } from "lib/db";
+import { sql } from "lib/db";
 
 export async function GET(req, { params }) {
   try {
@@ -24,7 +24,5 @@ export async function GET(req, { params }) {
 }
 
 async function language({ language_id }) {
-  return await query_one_obj(`SELECT * FROM language WHERE id = ?`, [
-    language_id,
-  ]);
+  return (await sql`SELECT * FROM language WHERE id = ${language_id}`)[0];
 }

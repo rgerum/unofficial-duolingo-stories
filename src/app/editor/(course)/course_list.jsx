@@ -31,10 +31,10 @@ export default function CourseList({
   else {
     for (let course of courses) {
       if (
-        course.learningLanguageName
+        course.learning_language_name
           .toLowerCase()
           .indexOf(search.toLowerCase()) !== -1
-        //|| course.fromLanguageName.toLowerCase().indexOf(search.toLowerCase()) !== -1
+        //|| course.from_language_name.toLowerCase().indexOf(search.toLowerCase()) !== -1
       ) {
         filtered_courses.push(course);
       }
@@ -67,15 +67,15 @@ export default function CourseList({
             >
               <span className={styles.course_count}>{course.count}</span>
               <Flag
-                iso={course.learningLanguage}
+                iso={course.learning_language}
                 width={40}
-                flag={course.learningLanguageFlag}
-                flag_file={course.learningLanguageFlagFile}
+                flag={course.learning_language_flag}
+                flag_file={course.learning_language_flag_file}
                 style={{ margin: "3px" }}
               />
               <span
                 className={styles.course_selection_course_name}
-              >{`${course.learningLanguageName} [${course.fromLanguage}] `}</span>
+              >{`${course.learning_language_name} [${course.from_language}] `}</span>
               <span className={styles.author}>
                 {course.official ? (
                   <span className={styles.crown}>

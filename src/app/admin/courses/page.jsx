@@ -1,11 +1,11 @@
-import { query_objs } from "lib/db";
+import { sql } from "lib/db";
 import { CourseTagList, CourseList } from "./courses";
 
 async function course_list() {
-  return await query_objs(`SELECT
+  return await sql`SELECT
     course.id,
-    course.learningLanguage,
-    course.fromLanguage,
+    course.learning_language,
+    course.from_language,
     course.public,
     course.official,
     course.name,
@@ -19,15 +19,15 @@ async function course_list() {
         WHERE course.id = course_tag_map.course_id
     ) AS tag_list
 FROM course;
-`);
+`;
 }
 
 async function course_tag_list() {
-  return await query_objs(`SELECT * FROM course_tag;`);
+  return await sql`SELECT * FROM course_tag;`;
 }
 
 async function language_list() {
-  return await query_objs(`SELECT * FROM language;`);
+  return await sql`SELECT * FROM language;`;
 }
 
 export default async function Page({}) {

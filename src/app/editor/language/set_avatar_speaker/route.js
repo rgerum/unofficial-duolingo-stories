@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import query from "lib/db";
-import { insert, update } from "lib/db";
+import { sql } from "lib/db";
 
 export async function POST(req) {
   try {
@@ -31,22 +30,22 @@ export async function POST(req) {
 }
 
 async function set_avatar({ id, name, speaker, language_id, avatar_id }) {
-  let res = await query(
-    `SELECT id FROM avatar_mapping WHERE language_id = ? AND avatar_id = ?;`,
-    [language_id, avatar_id],
-  );
+  let res =
+    await sql`SELECT id FROM avatar_mapping WHERE language_id = ${language_id} AND avatar_id = ${avatar_id};`;
 
   if (res.length) {
     id = res[0].id;
-    return await update(
-      "avatar_mapping",
-      { id, name, speaker, language_id, avatar_id },
-      ["name", "speaker", "language_id", "avatar_id"],
-    );
+    return sql`
+  UPDATE avatar_mapping SET ${sql({ name, speaker, language_id, avatar_id })}
+  WHERE id = ${id}
+`;
   }
-  return await insert(
-    "avatar_mapping",
-    { id, name, speaker, language_id, avatar_id },
-    ["name", "speaker", "language_id", "avatar_id"],
-  );
+  return (
+    await sql`INSERT INTO avatar_mapping ${sql({
+      name,
+      speaker,
+      language_id,
+      avatar_id,
+    })} RETURNING id;`
+  )[0];
 }

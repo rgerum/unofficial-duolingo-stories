@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { audio_engines } from "../_lib/audio";
-import query from "lib/db";
+import { sql } from "lib/db";
 
 export async function GET(req) {
   const token = await getToken({ req });
@@ -21,12 +21,9 @@ export async function GET(req) {
 
   for (let v of voices) {
     try {
-      await query(
-        `
+      await sql`
         REPLACE INTO speaker (language_id, speaker, gender, type, service)
-         VALUES ((SELECT id FROM language WHERE short = ? OR short = ? LIMIT 1), ?, ?, ?, ?)`,
-        [v.locale, v.language, v.name, v.gender, v.type, v.service],
-      );
+         VALUES ((SELECT id FROM language WHERE short = ${v.locale} OR short = ${v.language} LIMIT 1), ${v.name}, ${v.gender}, ${v.type}, ${v.service});`;
     } catch (e) {
       console.log("unknown language", v?.language, v);
     }

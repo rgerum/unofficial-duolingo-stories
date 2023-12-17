@@ -61,11 +61,11 @@ export async function generateMetadata({ params, searchParams }, parent) {
   const meta = await parent;
 
   return {
-    title: `Duostories ${story.learningLanguageLong} from ${story.fromLanguageLong}: ${story.fromLanguageName}`,
+    title: `Duostories ${story.learning_language_long} from ${story.from_language_long}: ${story.from_language_name}`,
     alternates: {
       canonical: `https://duostories.org/story/${params.story_id}`,
     },
-    keywords: [story.learningLanguageLong, ...meta.keywords],
+    keywords: [story.learning_language_long, ...meta.keywords],
   };
 }
 

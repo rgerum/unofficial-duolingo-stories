@@ -1,6 +1,6 @@
 import React from "react";
 import { cache } from "react";
-import { query_objs, query_one_obj } from "lib/db";
+import { sql } from "lib/db";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "app/api/auth/[...nextauth]/route";
@@ -8,20 +8,17 @@ import { notFound } from "next/navigation";
 import Tts_edit from "./tts_edit";
 
 const get_avatar_names = cache(async (id) => {
-  return await query_objs(
-    `
+  return await sql`
 SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker
-FROM (SELECT id, name, speaker, language_id, avatar_id FROM avatar_mapping WHERE language_id = ?) as avatar_mapping
+FROM (SELECT id, name, speaker, language_id, avatar_id FROM avatar_mapping WHERE language_id = ${id}) as avatar_mapping
 RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id
 WHERE a.link != '[object Object]'
 ORDER BY a.id
-    `,
-    [id],
-  );
+    `;
 });
 
 const get_speakers = cache(async (id) => {
-  return await query_objs(`SELECT * FROM speaker WHERE language_id = ?`, [id]);
+  return await sql`SELECT * FROM speaker WHERE language_id = ${id}`;
 });
 
 const get_language = cache(async (id) => {
@@ -29,32 +26,25 @@ const get_language = cache(async (id) => {
     value.length !== 0 && [...value].every((c) => c >= "0" && c <= "9");
   if (isNumeric(id)) {
     return [
-      await query_one_obj(`SELECT * FROM language WHERE id = ? LIMIT 1`, [id]),
+      (await sql`SELECT * FROM language WHERE id = ${id} LIMIT 1`)[0],
       undefined,
       undefined,
     ];
   } else {
-    let course = await query_one_obj(
-      `SELECT learningLanguage, fromLanguage, short FROM course WHERE short = ? LIMIT 1`,
-      [id],
-    );
+    let course = (
+      await sql`SELECT learning_language, from_language, short FROM course WHERE short = ${id} LIMIT 1`
+    )[0];
     if (course) {
-      id = course.learningLanguage;
-      let id2 = course.fromLanguage;
+      id = course.learning_language;
+      let id2 = course.from_language;
       return [
-        await query_one_obj(`SELECT * FROM language WHERE id = ? LIMIT 1`, [
-          id,
-        ]),
+        (await sql`SELECT * FROM language WHERE id = ${id} LIMIT 1`)[0],
         course,
-        await query_one_obj(`SELECT * FROM language WHERE id = ? LIMIT 1`, [
-          id2,
-        ]),
+        (await sql`SELECT * FROM language WHERE id = ${id2} LIMIT 1`)[0],
       ];
     }
     return [
-      await query_one_obj(`SELECT * FROM language WHERE short = ? LIMIT 1`, [
-        id,
-      ]),
+      (await sql`SELECT * FROM language WHERE short = ${id} LIMIT 1`)[0],
       undefined,
       undefined,
     ];

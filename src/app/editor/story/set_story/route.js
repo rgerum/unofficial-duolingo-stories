@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import query, { update } from "lib/db";
+import { sql } from "lib/db";
 import { upload_github } from "lib/editor/upload_github";
 
 export async function POST(req) {
@@ -33,14 +33,13 @@ async function set_story(data, { username, user_id }) {
 
   // if no id is given we look for a
   if (data["id"] === undefined) {
-    let res = await query(
-      `SELECT id FROM story WHERE API = 2 AND duo_id = ? AND course_id = ? LIMIT 1;`,
-      [data["duo_id"], data["course_id"]],
-    );
+    let res =
+      await sql`SELECT id FROM story WHERE duo_id = ${data["duo_id"]} AND course_id = ${data["course_id"]} LIMIT 1;`;
     if (res.length) data["id"] = res[0]["id"];
   }
 
-  await update("story", data, [
+  return sql`
+  UPDATE story SET ${sql(data, [
     "duo_id",
     "name",
     "image",
@@ -52,7 +51,9 @@ async function set_story(data, { username, user_id }) {
     "text",
     "json",
     "api",
-  ]);
+  ])}
+  WHERE id = ${data.id}
+`;
 
   await upload_github(
     data["id"],

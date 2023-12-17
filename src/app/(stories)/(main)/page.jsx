@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { query_one_obj } from "lib/db";
-
 import Header from "./header";
 import CourseList from "./course_list";
 import { unstable_cache } from "next/cache";

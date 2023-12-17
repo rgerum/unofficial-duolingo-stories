@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { update } from "lib/db";
+import { sql } from "lib/db";
 
 export async function POST(req) {
   try {
@@ -24,5 +24,8 @@ export async function POST(req) {
 }
 
 async function set_avatar({ id, default_text }) {
-  return await update("language", { id, default_text }, ["default_text"]);
+  return sql`
+  UPDATE language SET ${sql({ default_text })}
+  WHERE id = ${id}
+`;
 }

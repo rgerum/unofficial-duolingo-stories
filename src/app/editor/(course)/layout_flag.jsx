@@ -29,16 +29,16 @@ export default function LayoutFlag({ courses }) {
       {
         type: "course",
         lang1: {
-          short: course.learningLanguage,
-          name: course.learningLanguageName,
-          flag: course.learningLanguageFlag,
-          flag_file: course.learningLanguageFlagFile,
+          short: course.learning_language,
+          name: course.learning_language_name,
+          flag: course.learning_language_flag,
+          flag_file: course.learning_language_flag_file,
         },
         lang2: {
-          short: course.fromLanguage,
-          name: course.fromLanguageName,
-          flag: course.fromLanguageFlag,
-          flag_file: course.fromLanguageFlagFile,
+          short: course.from_language,
+          name: course.from_language_name,
+          flag: course.from_language_flag,
+          flag_file: course.from_language_flag_file,
         },
       },
     ];

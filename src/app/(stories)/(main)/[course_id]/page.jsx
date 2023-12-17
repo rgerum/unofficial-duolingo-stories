@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { query_one_obj, sql } from "lib/db";
+import { sql } from "lib/db";
 
 import CourseTitle from "./course_title";
 import SetList from "./set_list";

@@ -1,10 +1,8 @@
-import query from "lib/db";
+import { sql } from "lib/db";
 
 async function check_username(username, existing) {
-  let result = await query(
-    "SELECT id, email FROM user WHERE LOWER(username) = LOWER(?)",
-    [username],
-  );
+  let result =
+    await sql`SELECT id, email FROM "user" WHERE LOWER(username) = LOWER(${username})`;
 
   if (existing) {
     if (result.length) {
@@ -24,16 +22,11 @@ export async function activate({ username, hash }) {
   let username_check = await check_username(username, true);
   if (username_check?.status) return username_check;
   // activate the user
-  await query(
-    "UPDATE user SET activated = 1 WHERE username = ? AND activation_link = ?;",
-    [username, hash],
-  );
+  await sql`UPDATE "user" SET activated = true WHERE username = ${username} AND activation_link = ${hash};`;
 
   // check if it was set correctly
-  let result2 = await query(
-    "SELECT activated FROM user WHERE username = ? AND activation_link = ?;",
-    [username, hash],
-  );
+  let result2 =
+    await sql`SELECT activated FROM "user" WHERE username = ${username} AND activation_link = ${hash};`;
 
   if (result2[0].activated) return "done";
   return { status: 403, message: "Username or activation link do not exist." };

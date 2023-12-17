@@ -176,7 +176,7 @@ function processBlockData(line_iter, story) {
   if (story.meta["set"] && story.meta["set"].indexOf("|") !== -1) {
     [story.meta.set_id, story.meta.set_index] = story.meta["set"].split("|");
   }
-  story.fromLanguageName = story.meta.fromLanguageName;
+  story.from_language_name = story.meta.from_language_name;
 }
 
 let punctuation_chars =
@@ -510,17 +510,17 @@ function processBlockHeader(line_iter, story, lang, story_languages) {
   let data = getText(line_iter, false, true, true);
   let data_text = speaker_text_trans(data, story.meta);
 
-  data_text.line.content.lang_hints = story_languages.fromLanguage;
+  data_text.line.content.lang_hints = story_languages.from_language;
 
   story.elements.push({
     type: "HEADER",
     illustrationUrl:
       "https://stories-cdn.duolingo.com/image/" + story.meta["icon"] + ".svg",
-    title: story.meta["fromLanguageName"],
-    learningLanguageTitleContent: data_text.content,
+    title: story.meta["from_language_name"],
+    learning_languageTitleContent: data_text.content,
     trackingProperties: {},
     audio: data_text.audio,
-    lang: lang || story_languages.learningLanguage,
+    lang: lang || story_languages.learning_language,
     editor: {
       block_start_no: start_no,
       start_no: start_no,
@@ -537,7 +537,7 @@ function processBlockLine(line_iter, story, lang, story_languages) {
   let data = getText(line_iter, true, true, true);
   let data_text = speaker_text_trans(data, story.meta);
 
-  data_text.line.content.lang_hints = story_languages.fromLanguage;
+  data_text.line.content.lang_hints = story_languages.from_language;
 
   story.elements.push({
     type: "LINE",
@@ -547,7 +547,7 @@ function processBlockLine(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
     },
     audio: data_text.audio,
-    lang: lang || story_languages.learningLanguage,
+    lang: lang || story_languages.learning_language,
     editor: {
       block_start_no: start_no,
       start_no: start_no,
@@ -575,7 +575,7 @@ function processBlockMultipleChoice(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index - 1,
       challenge_type: "multiple-choice",
     },
-    lang: lang || story_languages.fromLanguage,
+    lang: lang || story_languages.from_language,
     editor: {
       block_start_no: start_no,
       start_no: start_no,
@@ -597,7 +597,7 @@ function processBlockSelectPhrase(line_iter, story, lang, story_languages) {
   let data = getText(line_iter, true, true, true);
   let data_text = speaker_text_trans(data, story.meta);
 
-  data_text.line.content.lang_hints = story_languages.fromLanguage;
+  data_text.line.content.lang_hints = story_languages.from_language;
 
   let start_no3 = line_iter.get_lineno(0);
   let [answers, correct_answer] = getAnswers(line_iter, false);
@@ -608,7 +608,7 @@ function processBlockSelectPhrase(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
       challenge_type: "select-phrases",
     },
-    lang: lang || story_languages.fromLanguage,
+    lang: lang || story_languages.from_language,
     editor: {
       block_start_no: start_no,
       start_no: start_no,
@@ -624,7 +624,7 @@ function processBlockSelectPhrase(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
     },
     audio: data_text.audio,
-    lang: story_languages.learningLanguage,
+    lang: story_languages.learning_language,
     editor: { start_no: start_no2, end_no: start_no3 },
   });
   story.elements.push({
@@ -635,7 +635,7 @@ function processBlockSelectPhrase(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
       challenge_type: "select-phrases",
     },
-    lang: story_languages.learningLanguage,
+    lang: story_languages.learning_language,
     editor: { start_no: start_no3, end_no: line_iter.get_lineno() },
   });
   story.meta.line_index += 1;
@@ -651,13 +651,13 @@ function processBlockContinuation(line_iter, story, lang, story_languages) {
   let data = getText(line_iter, true, true, true);
   let data_text = speaker_text_trans(data, story.meta, false, true);
 
-  data_text.line.content.lang_hints = story_languages.fromLanguage;
+  data_text.line.content.lang_hints = story_languages.from_language;
 
   let start_no3 = line_iter.get_lineno();
   let [answers, correct_answer] = getAnswers(
     line_iter,
     true,
-    story_languages.fromLanguage,
+    story_languages.from_language,
   );
   story.elements.push({
     type: "CHALLENGE_PROMPT",
@@ -666,7 +666,7 @@ function processBlockContinuation(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
       challenge_type: "continuation",
     },
-    lang: lang || story_languages.fromLanguage,
+    lang: lang || story_languages.from_language,
     editor: {
       block_start_no: start_no,
       start_no: start_no,
@@ -682,7 +682,7 @@ function processBlockContinuation(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
     },
     audio: data_text.audio,
-    lang: story_languages.learningLanguage,
+    lang: story_languages.learning_language,
     editor: { start_no: start_no2, end_no: start_no3 },
   });
   story.elements.push({
@@ -694,7 +694,7 @@ function processBlockContinuation(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
       challenge_type: "continuation",
     },
-    lang: story_languages.learningLanguage,
+    lang: story_languages.learning_language,
     editor: { start_no: start_no3, end_no: line_iter.get_lineno() },
   });
   story.meta.line_index += 1;
@@ -710,7 +710,7 @@ function processBlockArrange(line_iter, story, lang, story_languages) {
   let data = getText(line_iter, true, true, true);
   let data_text = speaker_text_trans(data, story.meta, true);
 
-  data_text.line.content.lang_hints = story_languages.fromLanguage;
+  data_text.line.content.lang_hints = story_languages.from_language;
 
   let [phraseOrder, selectablePhrases2] = shuffleArray(
     data_text.selectablePhrases,
@@ -722,7 +722,7 @@ function processBlockArrange(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
       challenge_type: "arrange",
     },
-    lang: lang || story_languages.fromLanguage,
+    lang: lang || story_languages.from_language,
     editor: {
       block_start_no: start_no,
       start_no: start_no,
@@ -738,7 +738,7 @@ function processBlockArrange(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
     },
     audio: data_text.audio,
-    lang: story_languages.learningLanguage,
+    lang: story_languages.learning_language,
     editor: { start_no: start_no2, end_no: line_iter.get_lineno() },
   });
   story.elements.push({
@@ -750,7 +750,7 @@ function processBlockArrange(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
       challenge_type: "arrange",
     },
-    lang: story_languages.learningLanguage,
+    lang: story_languages.learning_language,
     editor: { start_no: start_no2, end_no: line_iter.get_lineno() },
   });
   story.meta.line_index += 1;
@@ -766,7 +766,7 @@ function processBlockPointToPhrase(line_iter, story, lang, story_languages) {
   let data = getText(line_iter, true, true, true);
   let data_text = speaker_text_trans(data, story.meta, true);
 
-  data_text.line.content.lang_hints = story_languages.fromLanguage;
+  data_text.line.content.lang_hints = story_languages.from_language;
 
   let [correctAnswerIndex, transcriptParts] = pointToPhraseButtons(data.text);
 
@@ -778,7 +778,7 @@ function processBlockPointToPhrase(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
     },
     audio: data_text.audio,
-    lang: story_languages.learningLanguage,
+    lang: story_languages.learning_language,
     editor: {
       block_start_no: start_no,
       start_no: start_no,
@@ -795,8 +795,8 @@ function processBlockPointToPhrase(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
       challenge_type: "point-to-phrase",
     },
-    lang_question: lang || story_languages.fromLanguage,
-    lang: story_languages.learningLanguage,
+    lang_question: lang || story_languages.from_language,
+    lang: story_languages.learning_language,
     editor: { start_no: start_no2, end_no: line_iter.get_lineno() },
   });
   story.meta.line_index += 1;
@@ -829,8 +829,8 @@ function processBlockMatch(line_iter, story, lang, story_languages) {
       line_index: story.meta.line_index,
       challenge_type: "match",
     },
-    lang: story_languages.learningLanguage,
-    lang_question: lang || story_languages.fromLanguage,
+    lang: story_languages.learning_language,
+    lang_question: lang || story_languages.from_language,
     editor: {
       block_start_no: start_no,
       start_no: start_no,

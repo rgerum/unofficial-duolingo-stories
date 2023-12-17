@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import query from "lib/db";
+import { sql } from "lib/db";
 import { upload_github } from "lib/editor/upload_github";
 
 export async function POST(req) {
@@ -27,8 +27,8 @@ export async function POST(req) {
 }
 
 async function delete_story({ id }, { username }) {
-  await query(`UPDATE story SET deleted = 1, public = 0 WHERE id = ?;`, [id]);
-  let data = (await query(`SELECT * FROM story WHERE id = ?;`, [id]))[0];
+  await sql`UPDATE story SET deleted = true, public = false WHERE id = ${id};`;
+  let data = (await sql`SELECT * FROM story WHERE id = ${id};`)[0];
   await upload_github(
     data["id"],
     data["course_id"],

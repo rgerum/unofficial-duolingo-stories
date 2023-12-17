@@ -192,12 +192,12 @@ export function CourseList({ users, languages }) {
   if (search === "") filtered_courses = users;
   else {
     for (let course of users) {
-      if (!languages_id[course.learningLanguage]) continue;
+      if (!languages_id[course.learning_language]) continue;
       if (
-        languages_id[course.learningLanguage].name
+        languages_id[course.learning_language].name
           .toLowerCase()
           .indexOf(search.toLowerCase()) !== -1 ||
-        languages_id[course.fromLanguage].name
+        languages_id[course.from_language].name
           .toLowerCase()
           .indexOf(search.toLowerCase()) !== -1
       ) {
@@ -223,8 +223,8 @@ export function CourseList({ users, languages }) {
             <th></th>
             <th></th>
             <th></th>
-            <th data-js-sort-colnum="0">learningLanguage</th>
-            <th data-js-sort-colnum="1">fromLanguage</th>
+            <th data-js-sort-colnum="0">learning_language</th>
+            <th data-js-sort-colnum="1">from_language</th>
             <th data-js-sort-colnum="1">public</th>
             <th data-js-sort-colnum="2">name</th>
             <th data-js-sort-colnum="2">conlang</th>
@@ -239,15 +239,15 @@ export function CourseList({ users, languages }) {
             obj={{
               name: "",
               public: 0,
-              fromLanguage: 1,
-              learningLanguage: -1,
+              from_language: 1,
+              learning_language: -1,
               about: "",
               tag_list: "",
               conlang: 0,
             }}
             attributes={[
-              "learningLanguage",
-              "fromLanguage",
+              "learning_language",
+              "from_language",
               "public",
               "name",
               "conlang",
@@ -261,8 +261,8 @@ export function CourseList({ users, languages }) {
               languages={languages_id}
               obj={course}
               attributes={[
-                "learningLanguage",
-                "fromLanguage",
+                "learning_language",
+                "from_language",
                 "public",
                 "name",
                 "conlang",

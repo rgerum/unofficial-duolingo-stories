@@ -176,7 +176,7 @@ if (!process.env.NEXTAUTH_URL) {
     return eval("sql`" + query + "`");
   }
 
-  async function update(table_name, data, mapping) {
+  async function update_old(table_name, data, mapping) {
     let values = [];
     let updates = [];
     for (let key in data) {
@@ -196,7 +196,22 @@ if (!process.env.NEXTAUTH_URL) {
     );
   }
 
-  async function insert(table_name, data, mapping) {
+  async function update(table_name, data, mapping) {
+    let values = {};
+    for (let key in data) {
+      if (mapping.includes && mapping.includes(key)) {
+        values[key] = data[key];
+      } else if (mapping[key]) {
+        values[mapping[key]] = data[key];
+      }
+    }
+    return sql`
+  update ${table_name} set ${sql(values)}
+  where id = ${data.id}
+`;
+  }
+
+  async function insert_old(table_name, data, mapping) {
     let values = [];
     let columns = [];
     let value_placeholders = [];
@@ -224,6 +239,24 @@ if (!process.env.NEXTAUTH_URL) {
       values,
     );
     return new_entry.insertId;
+  }
+  async function insert(table_name, data, mapping) {
+    let values = {};
+    for (let key in data) {
+      if (
+        mapping === undefined ||
+        (mapping.includes && mapping.includes(key))
+      ) {
+        values[key] = data[key];
+      } else if (mapping[key]) {
+        values[mapping[key]] = data[key];
+      }
+    }
+    console.log(table_name, values);
+    console.log(sql(values));
+    let new_entry = await sql`
+  insert into ${table_name} ${sql(values)} returning id`;
+    return new_entry[0].id;
   }
 
   async function query_one_obj(q, params) {

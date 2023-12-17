@@ -1,4 +1,4 @@
-import query, { update } from "lib/db";
+import { sql } from "lib/db";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
@@ -33,33 +33,22 @@ export async function POST(req) {
   }
 }
 
-async function query_obj(q, args) {
-  let res = await query(q, args);
-  return res.map((d) => {
-    return { ...d };
-  });
-}
-
 async function story_properties(id) {
-  let data = await query_obj(
-    `SELECT story.id, story.name, story.image, story.public, course.short FROM story JOIN course ON course.id = story.course_id WHERE story.id = ?;`,
-    [parseInt(id)],
-  );
+  let data =
+    await sql`SELECT story.id, story.name, story.image, story.public, course.short FROM story JOIN course ON course.id = story.course_id WHERE story.id = ${id};`;
   if (data.length === 0) return undefined;
   let story = data[0];
-  story.approvals = await query_obj(
-    `SELECT a.id, a.date, u.username FROM story_approval a JOIN user u ON u.id = a.user_id WHERE a.story_id = ?`,
-    [id],
-  );
+  story.approvals =
+    await sql`SELECT a.id, a.date, u.username FROM story_approval a JOIN user u ON u.id = a.user_id WHERE a.story_id = ${id};`;
   return story;
 }
 
 async function set_story(data) {
-  await update("story", data, ["public"]);
+  await sql`UPDATE story SET ${sql(data, "public")}`;
   return await story_properties(data.id);
 }
 
 async function remove_approval(data) {
-  await query(`DELETE FROM story_approval WHERE id = ?;`, [data.approval_id]);
+  await sql`DELETE FROM story_approval WHERE id = ${data.approval_id};`;
   return await story_properties(data.id);
 }

@@ -47,8 +47,8 @@ function DataGroup({ title, data, data_old, key_name }) {
         {data[key_name].map((d, i) => (
           <StatsElement
             key={i}
-            lang1={languages[courses[d.course_id].learningLanguage]}
-            lang2={languages[courses[d.course_id].fromLanguage]}
+            lang1={languages[courses[d.course_id].learning_language]}
+            lang2={languages[courses[d.course_id].from_language]}
             count={d.count}
             count_old={old_stories[d.course_id]?.count}
             max_count={Math.max(
@@ -128,8 +128,8 @@ export default async function Page({ params }) {
     if (c.public)
       stats_course.push({
         id: c.id,
-        learningLanguage: languages[c.learningLanguage],
-        fromLanguage: languages[c.fromLanguage],
+        learning_language: languages[c.learning_language],
+        from_language: languages[c.from_language],
         stories_published: stories_published[c.id],
         stories_read: stories_read[c.id],
         active_users: active_users[c.id],

@@ -4,8 +4,8 @@ import React from "react";
 
 export default function StatsElement2({ course }) {
   let c = course;
-  let lang1 = course.learningLanguage;
-  let lang2 = course.fromLanguage;
+  let lang1 = course.learning_language;
+  let lang2 = course.from_language;
   return (
     <div className={styles.statsBox}>
       <div className={styles.box1}>
@@ -14,9 +14,9 @@ export default function StatsElement2({ course }) {
           <Flag iso={lang2.short} flag_file={lang2.flag_file} width={30} />
         </div>
         <span className={styles.languageBox}>
-          <span className={styles.learningLanguage}>{lang1.name}</span>
+          <span className={styles.learning_language}>{lang1.name}</span>
           <br />
-          <span className={styles.fromLanguage}>(from {lang2.name})</span>
+          <span className={styles.from_language}>(from {lang2.name})</span>
         </span>
       </div>
       <table className={styles.box2}>

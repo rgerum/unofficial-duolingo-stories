@@ -1,4 +1,4 @@
-import query from "lib/db";
+import { sql } from "lib/db";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
@@ -24,8 +24,5 @@ export async function POST(req) {
 }
 
 async function set_user_write({ id, write }) {
-  return await query(`UPDATE user SET role = ? WHERE user.id = ?;`, [
-    write,
-    id,
-  ]);
+  return await sql`UPDATE "user" SET role = {write} WHERE "user".id = {id};`;
 }

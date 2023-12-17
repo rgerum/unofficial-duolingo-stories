@@ -121,8 +121,8 @@ FRAGMENTS:
       0,
       {},
       {
-        learningLanguage: "en",
-        fromLanguage: "tok2",
+        learning_language: "en",
+        from_language: "tok2",
       },
       data,
     );
