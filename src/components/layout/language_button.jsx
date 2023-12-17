@@ -7,12 +7,12 @@ export default function LanguageButton({ course }) {
     <Link
       data-cy={"language_button_big_" + course.short}
       className={styles.language_select_button}
-      href={`/${course.learningLanguage}-${course.fromLanguage}`}
+      href={`/${course.learning_language}-${course.from_language}`}
     >
       <Flag
-        iso={course.learningLanguage}
-        flag={course.learningLanguageFlag}
-        flag_file={course.learningLanguageFlagFile}
+        iso={course.learning_language}
+        flag={course.learning_language_flag}
+        flag_file={course.learning_language_flag_file}
       />
 
       <span className={styles.language_select_button_text}>{course.name}</span>

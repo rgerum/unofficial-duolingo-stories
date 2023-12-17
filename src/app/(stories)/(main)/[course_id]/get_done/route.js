@@ -1,4 +1,4 @@
-import query from "lib/db";
+import { sql } from "lib/db";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
@@ -20,12 +20,8 @@ export async function GET(req, { params }) {
 
 async function get_course_done({ course_id, user_id }) {
   // (SELECT id FROM course WHERE short = ? LIMIT 1)
-  const done_query = await query(
-    `
-SELECT s.id FROM story_done 
-JOIN story s on s.id = story_done.story_id WHERE user_id = ? AND s.course_id = ? GROUP BY s.id`,
-    [user_id, course_id],
-  );
+  const done_query = await sql`SELECT s.id FROM story_done 
+JOIN story s on s.id = story_done.story_id WHERE user_id = ${user_id} AND s.course_id = ${course_id} GROUP BY s.id`;
   const done = {};
   for (let d of done_query) {
     done[d.id] = true;

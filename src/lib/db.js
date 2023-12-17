@@ -1,3 +1,5 @@
+//import { sql } from "@vercel/postgres";
+
 if (!process.env.NEXTAUTH_URL) {
   const sqlite3 = require("sqlite3").verbose();
 
@@ -104,6 +106,16 @@ if (!process.env.NEXTAUTH_URL) {
 } else {
   const mysql = require("mysql2");
 
+  //const { sql } = require("@vercel/postgres");
+  const postgres = require("postgres");
+
+  const sql = postgres(
+    "postgres://duostori_db:VtyX.sXIYeiHR_:vI.aa@localhost:5432/duostori_post",
+    {
+      /* options */
+    },
+  ); // will use psql environment variables
+
   const pool = mysql.createPool({
     host: process.env.MYSQL_HOST,
     user: process.env.MYSQL_USER,
@@ -115,6 +127,8 @@ if (!process.env.NEXTAUTH_URL) {
 
   async function query(query, args) {
     if (!Array.isArray(args) && args !== undefined) args = [args];
+
+    console.log("query:", query, args);
 
     return new Promise((resolve, reject) => {
       pool.getConnection((err, connection) => {
@@ -139,7 +153,30 @@ if (!process.env.NEXTAUTH_URL) {
     });
   }
 
-  async function update(table_name, data, mapping) {
+  function queryXXX(sqlQuery, args) {
+    if (!Array.isArray(args) && args !== undefined) args = [args];
+
+    console.log("query:", sqlQuery, args);
+    // Split the SQL query on '?'
+    const parts = sqlQuery.split("?");
+
+    if (parts.length - 1 !== args.length) {
+      throw new Error(
+        "Number of placeholders does not match number of arguments",
+      );
+    }
+
+    // Dynamically construct the tagged template string
+    let query = parts[0];
+    for (let i = 0; i < args.length; i++) {
+      query += "${" + i + "}" + parts[i + 1];
+    }
+
+    // Evaluate the constructed string as a tagged template
+    return eval("sql`" + query + "`");
+  }
+
+  async function update_old(table_name, data, mapping) {
     let values = [];
     let updates = [];
     for (let key in data) {
@@ -159,7 +196,22 @@ if (!process.env.NEXTAUTH_URL) {
     );
   }
 
-  async function insert(table_name, data, mapping) {
+  async function update(table_name, data, mapping) {
+    let values = {};
+    for (let key in data) {
+      if (mapping.includes && mapping.includes(key)) {
+        values[key] = data[key];
+      } else if (mapping[key]) {
+        values[mapping[key]] = data[key];
+      }
+    }
+    return sql`
+  update ${table_name} set ${sql(values)}
+  where id = ${data.id}
+`;
+  }
+
+  async function insert_old(table_name, data, mapping) {
     let values = [];
     let columns = [];
     let value_placeholders = [];
@@ -188,6 +240,24 @@ if (!process.env.NEXTAUTH_URL) {
     );
     return new_entry.insertId;
   }
+  async function insert(table_name, data, mapping) {
+    let values = {};
+    for (let key in data) {
+      if (
+        mapping === undefined ||
+        (mapping.includes && mapping.includes(key))
+      ) {
+        values[key] = data[key];
+      } else if (mapping[key]) {
+        values[mapping[key]] = data[key];
+      }
+    }
+    console.log(table_name, values);
+    console.log(sql(values));
+    let new_entry = await sql`
+  insert into ${table_name} ${sql(values)} returning id`;
+    return new_entry[0].id;
+  }
 
   async function query_one_obj(q, params) {
     const res = await query(q, params);
@@ -214,4 +284,6 @@ if (!process.env.NEXTAUTH_URL) {
   module.exports.update = update;
   module.exports.query_one_obj = query_one_obj;
   module.exports.query_objs = query_objs;
+
+  module.exports.sql = sql;
 }

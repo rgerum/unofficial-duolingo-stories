@@ -1,5 +1,5 @@
 "use server";
-import query from "lib/db";
+import { sql } from "lib/db";
 import { v4 as uuid } from "uuid";
 import transporter from "lib/emailer";
 
@@ -13,17 +13,13 @@ export default async function sendPasswordAction(email) {
     .replace("T", " ")
     .substring(0, 19);
 
-  let result = await query(
-    "SELECT id, email, username FROM user WHERE email = ? LIMIT 1",
-    [email],
-  );
+  let result =
+    await sql`SELECT id, email, username FROM "user" WHERE email = ${email} LIMIT 1"`;
   if (result.length === 0) return "done";
 
   let identifier = uuid();
-  await query(
-    "INSERT INTO verification_token (token, identifier, expires) VALUES (?, ?, ?)",
-    [identifier, email, formattedDate],
-  );
+  await sql`
+    INSERT INTO verification_token (token, identifier, expires) VALUES (${identifier}, ${email}, ${formattedDate})`;
 
   transporter.sendMail({
     from: "Unofficial Duolingo Stories <register@duostories.org>",

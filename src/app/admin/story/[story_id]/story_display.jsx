@@ -11,7 +11,7 @@ export default function StoryDisplay({ story }) {
   async function changePublished() {
     let res = await fetch_post(`/admin/story/set`, {
       id: story_.id,
-      public: 1 - story_.public,
+      public: !story_.public,
     });
     let data = await res.json();
     setStory(data);

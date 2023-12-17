@@ -11,7 +11,7 @@ export async function generateMetadata({ params }) {
   if (!course) notFound();
 
   return {
-    title: `Import | ${course.learningLanguageName} (from ${course.fromLanguageName}) | Duostories Editor`,
+    title: `Import | ${course.learning_language_name} (from ${course.from_language_name}) | Duostories Editor`,
     alternates: {
       canonical: `https://duostories.org/editor/${course.short}`,
     },

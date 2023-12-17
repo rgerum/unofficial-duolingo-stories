@@ -111,7 +111,7 @@ export default function LanguageList({ users }) {
             obj={{
               name: "new language",
               short: "",
-              flag: "",
+              flag: 0,
               flag_file: "",
               speaker: "",
               rtl: 0,

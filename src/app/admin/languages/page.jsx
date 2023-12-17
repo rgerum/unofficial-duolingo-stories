@@ -1,8 +1,8 @@
-import { query_objs } from "lib/db";
+import { sql } from "lib/db";
 import LanguageList from "./language_list";
 
 async function language_list() {
-  return await query_objs(`SELECT * FROM language;`);
+  return await sql`SELECT * FROM language;`;
 }
 
 export default async function Page({}) {

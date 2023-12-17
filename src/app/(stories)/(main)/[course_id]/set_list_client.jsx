@@ -2,7 +2,7 @@
 import styles from "./set_list.module.css";
 import StoryButton from "./story_button";
 import getUserId from "lib/getUserId";
-import query from "lib/db";
+import { sql } from "lib/db";
 import get_localisation from "lib/get_localisation";
 
 function About({ course }) {
@@ -30,13 +30,9 @@ function Set({ set, done, localisation }) {
 }
 
 async function get_course_done({ course_id, user_id }) {
-  // (SELECT id FROM course WHERE short = ? LIMIT 1)
-  const done_query = await query(
-    `
+  const done_query = await sql`
 SELECT s.id FROM story_done 
-JOIN story s on s.id = story_done.story_id WHERE user_id = ? AND s.course_id = (SELECT c.id FROM course c WHERE c.short = ? LIMIT 1) GROUP BY s.id`,
-    [user_id, course_id],
-  );
+JOIN story s on s.id = story_done.story_id WHERE user_id = ${user_id} AND s.course_id = (SELECT c.id FROM course c WHERE c.short = ${course_id} LIMIT 1) GROUP BY s.id`;
   const done = {};
   for (let d of done_query) {
     done[d.id] = true;
@@ -48,7 +44,7 @@ JOIN story s on s.id = story_done.story_id WHERE user_id = ? AND s.course_id = (
 export default async function SetListClient({ course_id, course }) {
   let user_id = await getUserId();
   let done = await get_course_done({ course_id, user_id });
-  let localisation = await get_localisation(course.fromLanguageId);
+  let localisation = await get_localisation(course.from_language_id);
 
   return (
     <div className={styles.story_list}>

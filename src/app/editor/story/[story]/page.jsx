@@ -5,26 +5,22 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import Editor from "./editor";
 
-import { query_one_obj, query_objs } from "lib/db";
+import { sql } from "lib/db";
 
 async function get_story({ id }) {
-  return await query_one_obj(
-    `SELECT story.id, c.official as official, course_id, duo_id, image, story.name, set_id, set_index, text, c.short, c.learningLanguage as learningLanguage, c.fromLanguage as fromLanguage FROM story JOIN course c on story.course_id = c.id WHERE story.id = ? LIMIT 1`,
-    [id],
-  );
+  return (
+    await sql`SELECT story.id, c.official as official, course_id, duo_id, image, 
+       story.name, set_id, set_index, text, c.short, c.learning_language as learning_language,
+       c.from_language as from_language FROM story JOIN course c on story.course_id = c.id WHERE story.id = ${id} LIMIT 1
+`
+  )[0];
 }
 
 async function get_avatar_names({ id, course_id }) {
   if (id === 0) {
-    return await query_objs(
-      `SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id WHERE (language_id = (SELECT learningLanguage FROM course WHERE id = ?) or language_id is NULL) ORDER BY a.id`,
-      [course_id],
-    );
+    return await sql`SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id WHERE (language_id = (SELECT learning_language FROM course WHERE id = ${course_id}) or language_id is NULL) ORDER BY a.id`;
   } else {
-    return await query_objs(
-      `SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM (SELECT * FROM avatar_mapping WHERE language_id = ?) as avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id ORDER BY a.id`,
-      [id],
-    );
+    return await sql`SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM (SELECT * FROM avatar_mapping WHERE language_id = ${id}) as avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id ORDER BY a.id`;
   }
 }
 
@@ -60,7 +56,7 @@ export default async function Page({ params }) {
     notFound();
   }
 
-  let avatar_names = await getAvatarsList(story_data?.learningLanguage);
+  let avatar_names = await getAvatarsList(story_data?.learning_language);
 
   return (
     <Editor

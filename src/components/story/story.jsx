@@ -24,7 +24,7 @@ export default function Story({
   const storyElement = React.useRef();
   const mainElement = React.useRef();
 
-  let course = story.learningLanguage + "-" + story.fromLanguage;
+  let course = story.learning_language + "-" + story.from_language;
 
   let [progress, setProgress] = useState(editor ? -2 : -1);
   let [right, setRight] = useState(false);
@@ -127,7 +127,7 @@ export default function Story({
       next: next,
       advance_progress: advance_progress,
       id: Math.random(),
-      rtl: story.learningLanguageRTL,
+      rtl: story.learning_language_rtl,
       audio_failed_call: audio_failed_call,
       auto_play: !!auto_play,
       hide_questions: !!auto_play,
@@ -139,7 +139,7 @@ export default function Story({
     next,
     advance_progress,
     audio_failed_call,
-    story.learningLanguageRTL,
+    story.learning_language_rtl,
   ])();
 
   let parts = [];
@@ -194,7 +194,7 @@ export default function Story({
           className={
             styles.story +
             " " +
-            (story.learningLanguageRTL ? styles.story_rtl : "")
+            (story.learning_language_rtl ? styles.story_rtl : "")
           }
         >
           {parts.map((part, i) => (
@@ -319,7 +319,7 @@ export default function Story({
             className={
               styles.story +
               " " +
-              (story.learningLanguageRTL ? styles.story_rtl : "")
+              (story.learning_language_rtl ? styles.story_rtl : "")
             }
           >
             {controls.auto_play ? (

@@ -1,29 +1,25 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import query, { update } from "lib/db";
+import { sql } from "lib/db";
 import { upload_github } from "lib/editor/upload_github";
 
 export async function POST(req) {
-  try {
-    const token = await getToken({ req });
+  const token = await getToken({ req });
 
-    if (!token?.role)
-      return new Response("You need to be a registered contributor.", {
-        status: 401,
-      });
-
-    let answer = await set_story(await req.json(), {
-      username: token.name,
-      user_id: token.id,
+  if (!token?.role)
+    return new Response("You need to be a registered contributor.", {
+      status: 401,
     });
 
-    if (answer === undefined)
-      return new Response("Error not found.", { status: 404 });
+  let answer = await set_story(await req.json(), {
+    username: token.name,
+    user_id: token.id,
+  });
 
-    return NextResponse.json(answer);
-  } catch (err) {
-    return new Response(err.message, { status: 500 });
-  }
+  if (answer === undefined)
+    return new Response("Error not found.", { status: 404 });
+
+  return NextResponse.json(answer);
 }
 
 async function set_story(data, { username, user_id }) {
@@ -33,14 +29,13 @@ async function set_story(data, { username, user_id }) {
 
   // if no id is given we look for a
   if (data["id"] === undefined) {
-    let res = await query(
-      `SELECT id FROM story WHERE API = 2 AND duo_id = ? AND course_id = ? LIMIT 1;`,
-      [data["duo_id"], data["course_id"]],
-    );
+    let res =
+      await sql`SELECT id FROM story WHERE duo_id = ${data["duo_id"]} AND course_id = ${data["course_id"]} LIMIT 1;`;
     if (res.length) data["id"] = res[0]["id"];
   }
 
-  await update("story", data, [
+  await sql`
+  UPDATE story SET ${sql(data, [
     "duo_id",
     "name",
     "image",
@@ -51,8 +46,9 @@ async function set_story(data, { username, user_id }) {
     "course_id",
     "text",
     "json",
-    "api",
-  ]);
+  ])}
+  WHERE id = ${data.id}
+`;
 
   await upload_github(
     data["id"],

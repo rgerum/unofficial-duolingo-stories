@@ -80,7 +80,7 @@ export default function ImportList({ course, imports, import_id }) {
               <td width="44px">
                 <img
                   alt={"story title"}
-                  src={story.copies ? story.image_done : story.image}
+                  src={story.copies > 0 ? story.image_done : story.image}
                   width="44px"
                   height={"40px"}
                 />

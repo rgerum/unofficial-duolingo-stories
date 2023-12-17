@@ -74,8 +74,8 @@ export default function Editor({ story_data, avatar_names, session }) {
   React.useEffect(() => {
     async function loadLanguageData() {
       if (!story_data) return () => {};
-      let language_data = await getLanguageName(story_data.learningLanguage);
-      let language_data2 = await getLanguageName(story_data.fromLanguage);
+      let language_data = await getLanguageName(story_data.learning_language);
+      let language_data2 = await getLanguageName(story_data.from_language);
       set_language_data(language_data);
       set_language_data2(language_data2);
       return () => {};
@@ -158,7 +158,7 @@ export default function Editor({ story_data, avatar_names, session }) {
         id: story_data.id,
         course_id: story_data.course_id,
         text: editor_text,
-        name: story_meta.fromLanguageName,
+        name: story_meta.from_language_name,
       });
       await navigate(`/editor/course/${story_data.course_id}`);
     }
@@ -174,8 +174,8 @@ export default function Editor({ story_data, avatar_names, session }) {
           story_data.id,
           avatar_names,
           {
-            learningLanguage: language_data?.short,
-            fromLanguage: language_data2?.short,
+            learning_language: language_data?.short,
+            from_language: language_data2?.short,
           },
           language_data?.tts_replace,
         );
@@ -185,8 +185,8 @@ export default function Editor({ story_data, avatar_names, session }) {
           gilded: image.gilded,
           locked: image.locked,
         };
-        story.learningLanguageRTL = language_data?.rtl;
-        story.fromLanguageRTL = language_data2?.rtl;
+        story.learning_language_rtl = language_data?.rtl;
+        story.from_language_rtl = language_data2?.rtl;
 
         set_editor_state({ ...editor_state, audio_insert_lines });
         set_story_state(story);
@@ -293,7 +293,7 @@ export default function Editor({ story_data, avatar_names, session }) {
               <Cast
                 id={story_data.id}
                 story_meta={story_meta}
-                learningLanguage={story_data.learningLanguage}
+                learning_language={story_data.learning_language}
                 short={story_data.short}
               />
             ) : null}

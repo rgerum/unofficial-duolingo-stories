@@ -12,16 +12,16 @@ function LanguageButtonSmall({ course }) {
   return (
     <Link
       className={styles.language_select_item}
-      href={`/${course.learningLanguage}-${course.fromLanguage}`}
+      href={`/${course.short}`}
       data-cy="button_lang_dropdown"
     >
       <Flag
-        iso={course.learningLanguage}
+        iso={course.learning_language}
         width={40}
-        flag={course.learningLanguageFlag}
-        flag_file={course.learningLanguageFlagFile}
+        flag={course.learning_language_flag}
+        flag_file={course.learning_language_flag_file}
       />
-      <span>{course.name || course.learningLanguageName}</span>
+      <span>{course.name || course.learning_language_name}</span>
     </Link>
   );
 }
@@ -35,14 +35,17 @@ export default function CourseDropdown({ all_courses_flags, course_data }) {
   return (
     <Dropdown>
       <Flag
-        iso={course?.learningLanguage}
+        iso={course?.learning_language}
         width={40}
-        flag={course?.learningLanguageFlag}
-        flag_file={course?.learningLanguageFlagFile}
+        flag={course?.learning_language_flag}
+        flag_file={course?.learning_language_flag_file}
       />
       <nav className={styles.header_lang_selector}>
-        {course_data.map((course) => (
-          <LanguageButtonSmall key={course.id} course={course} />
+        {course_data.map((id) => (
+          <LanguageButtonSmall
+            key={id.short}
+            course={all_courses_flags[id.short]}
+          />
         ))}
       </nav>
     </Dropdown>

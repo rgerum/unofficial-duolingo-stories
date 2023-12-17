@@ -3,7 +3,7 @@ import React from "react";
 import { cache } from "react";
 import { getServerSession } from "next-auth/next";
 import Legal from "components/layout/legal";
-import { query_objs } from "lib/db";
+import { sql } from "lib/db";
 import styles from "./layout.module.css";
 import { authOptions } from "app/api/auth/[...nextauth]/route";
 import CourseDropdown from "./course-dropdown";
@@ -28,31 +28,34 @@ export const metadata = {
   ],
 };
 
-export const get_courses_user = cache(async (user_name) => {
+const get_courses_user = cache(async (user_name) => {
   // sort courses by base language
-  return await query_objs(
-    `
-SELECT course.id, course.name,
- l1.short AS fromLanguage, l1.name AS fromLanguageName, l1.flag_file AS fromLanguageFlagFile, l1.flag AS fromLanguageFlag,
- l2.short AS learningLanguage, l2.name AS learningLanguageName, l2.flag_file AS learningLanguageFlagFile, l2.flag AS learningLanguageFlag,
- course.public, course.official, time FROM course
-LEFT JOIN language l1 ON l1.id = course.fromLanguage
-LEFT JOIN language l2 ON l2.id = course.learningLanguage
-    INNER JOIN (SELECT s.course_id, story_done.id as sdid, MAX(story_done.time) as time FROM story s INNER JOIN story_done ON story_done.story_id = s.id 
-    WHERE story_done.user_id = (SELECT id FROM user WHERE username = ? LIMIT 1) GROUP BY course_id) as ss on course.id = ss.course_id
-     ORDER BY time DESC
-    `,
-    [user_name],
-  );
+  return await sql`
+SELECT course.short
+FROM course
+INNER JOIN (
+    SELECT s.course_id, MAX(story_done.time) as max_story_time
+    FROM story s
+    INNER JOIN story_done ON story_done.story_id = s.id
+    WHERE story_done.user_id = (
+        SELECT id FROM "user" WHERE username = ${user_name} LIMIT 1
+    )
+    GROUP BY s.course_id
+) as max_time ON course.id = max_time.course_id
+ORDER BY max_time.max_story_time DESC;`;
 });
 
-export const get_course_flags = unstable_cache(async () => {
-  return await query_objs(
-    `SELECT course.short, l.short AS learningLanguage, l.flag AS learningLanguageFlag, l.flag_file AS learningLanguageFlagFile FROM course JOIN language l on l.id = course.learningLanguage WHERE course.public`,
-    [],
-    "short",
-  );
-}, ["get_course_flags"]);
+const get_course_flags = unstable_cache(async () => {
+  const res =
+    await sql`SELECT course.id, COALESCE(NULLIF(course.name, ''), l.name) AS name, course.short,
+ l.short AS learning_language, l.flag AS learning_language_flag, l.flag_file AS learning_language_flag_file FROM course 
+ JOIN language l on l.id = course.learning_language WHERE course.public`;
+  const data = {};
+  for (let r of res) {
+    data[r.short] = r;
+  }
+  return data;
+}, ["get_course_flags_x"]);
 
 export default async function Layout({ children }) {
   // @ts-ignore
@@ -88,7 +91,6 @@ export default async function Layout({ children }) {
       </nav>
       <div className={styles.main_body}>
         <div className={styles.main_index}>{children}</div>
-        <Legal language_name={undefined} />
       </div>
     </>
   );

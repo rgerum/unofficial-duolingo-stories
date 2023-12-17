@@ -1,4 +1,4 @@
-import query, { insert } from "lib/db";
+import { insert, sql } from "lib/db";
 const { phpbb_hash } = require("lib/auth/hash_functions2");
 import { v4 as uuid } from "uuid";
 import { NextResponse } from "next/server";
@@ -12,10 +12,8 @@ export async function POST(req) {
 }
 
 async function check_username(username, existing) {
-  let result = await query(
-    "SELECT id, email FROM user WHERE LOWER(username) = LOWER(?)",
-    [username],
-  );
+  let result =
+    await sql`SELECT id, email FROM "user" WHERE LOWER(username) = LOWER(${username})`;
   if (existing) {
     if (result.length) {
       return result[0];
@@ -36,12 +34,12 @@ async function register({ username, password, email }) {
 
   let password_hashed = await phpbb_hash(password);
   let activation_link = uuid();
-  await insert("user", {
+  await sql`INSERT INTO "user" ${sql({
     username: username,
     email: email,
     password: password_hashed,
     activation_link: activation_link,
-  });
+  })}`;
   transporter.sendMail({
     from: "Unofficial Duolingo Stories <register@duostories.org>",
     to: email,

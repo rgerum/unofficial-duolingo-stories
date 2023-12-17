@@ -22,22 +22,23 @@ function ChangeAbleValue(props) {
     props.callback(props.name, e.target.value);
     setValue(e);
   };
-  if (props.name === "tag_list" && !props.edit) {
+  if (props.name === "tags" && !props.edit) {
     if (!value) return <td></td>;
+    if (typeof value === "string") return <td>{value}</td>;
     return (
       <td>
-        {[...value.matchAll(/[^, ]+/g)]
-          .map((d) => d[0])
-          .map((d) => (
+        {[
+          ...value.map((d) => (
             <span key={d} className={styles.tag}>
               {d}
             </span>
-          ))}
+          )),
+        ]}
       </td>
     );
   }
 
-  if (props.name.endsWith("Language")) {
+  if (props.name.endsWith("language")) {
     let valid = false;
     for (let lang of Object.getOwnPropertyNames(props.languages)) {
       if (props.languages[lang].name.toLowerCase() === name.toLowerCase()) {
@@ -192,12 +193,12 @@ export function CourseList({ users, languages }) {
   if (search === "") filtered_courses = users;
   else {
     for (let course of users) {
-      if (!languages_id[course.learningLanguage]) continue;
+      if (!languages_id[course.learning_language]) continue;
       if (
-        languages_id[course.learningLanguage].name
+        languages_id[course.learning_language].name
           .toLowerCase()
           .indexOf(search.toLowerCase()) !== -1 ||
-        languages_id[course.fromLanguage].name
+        languages_id[course.from_language].name
           .toLowerCase()
           .indexOf(search.toLowerCase()) !== -1
       ) {
@@ -223,12 +224,12 @@ export function CourseList({ users, languages }) {
             <th></th>
             <th></th>
             <th></th>
-            <th data-js-sort-colnum="0">learningLanguage</th>
-            <th data-js-sort-colnum="1">fromLanguage</th>
+            <th data-js-sort-colnum="0">learning_language</th>
+            <th data-js-sort-colnum="1">from_language</th>
             <th data-js-sort-colnum="1">public</th>
             <th data-js-sort-colnum="2">name</th>
             <th data-js-sort-colnum="2">conlang</th>
-            <th data-js-sort-colnum="2">tag_list</th>
+            <th data-js-sort-colnum="2">tags</th>
             <th data-js-sort-colnum="3">about</th>
             <th data-js-sort-colnum="4"></th>
           </tr>
@@ -239,19 +240,19 @@ export function CourseList({ users, languages }) {
             obj={{
               name: "",
               public: 0,
-              fromLanguage: 1,
-              learningLanguage: -1,
+              from_language: 1,
+              learning_language: -1,
               about: "",
-              tag_list: "",
+              tags: "",
               conlang: 0,
             }}
             attributes={[
-              "learningLanguage",
-              "fromLanguage",
+              "learning_language",
+              "from_language",
               "public",
               "name",
               "conlang",
-              "tag_list",
+              "tags",
               "about",
             ]}
           />
@@ -261,12 +262,12 @@ export function CourseList({ users, languages }) {
               languages={languages_id}
               obj={course}
               attributes={[
-                "learningLanguage",
-                "fromLanguage",
+                "learning_language",
+                "from_language",
                 "public",
                 "name",
                 "conlang",
-                "tag_list",
+                "tags",
                 "about",
               ]}
             />
@@ -274,18 +275,5 @@ export function CourseList({ users, languages }) {
         </tbody>
       </table>
     </>
-  );
-}
-
-export function CourseTagList({ course_tags }) {
-  return (
-    <div>
-      Tags:
-      {course_tags.map((d) => (
-        <span key={d.id} className={styles.tag}>
-          {d.name}
-        </span>
-      ))}
-    </div>
   );
 }

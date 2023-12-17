@@ -32,8 +32,8 @@ export default function FinishedPage({ story, localization }) {
         <h2>{localization("story_finished") || "Story complete!"}</h2>
         <p>
           {localization("story_finished_subtitle", {
-            $story_title: story.fromLanguageName,
-          }) || `You finished ${story.fromLanguageName}`}
+            $story_title: story.from_language_name,
+          }) || `You finished ${story.from_language_name}`}
         </p>
       </div>
     </div>

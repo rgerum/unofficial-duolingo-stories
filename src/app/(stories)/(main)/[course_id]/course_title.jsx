@@ -1,27 +1,23 @@
 import Link from "next/link";
-import React from "react";
-import { query_one_obj } from "lib/db";
+import React, { cache } from "react";
 
 import Header from "../header";
 
 import styles from "./story_button.module.css";
 import { unstable_cache } from "next/cache";
 import get_localisation from "lib/get_localisation";
+import { sql } from "lib/db";
 
-export const get_course_header = unstable_cache(
-  async (course_id) => {
-    return await query_one_obj(
-      `
-    SELECT COALESCE(NULLIF(course.name, ''), l.name) AS learningLanguageName, COUNT(course.id) AS count, course.fromLanguage FROM course
-    JOIN language l on l.id = course.learningLanguage
+const get_course_header = async (course_id) => {
+  return (
+    await sql`
+    SELECT COALESCE(NULLIF(course.name, ''), l.name) AS learning_language_name,
+       COUNT(course.id) AS count, course.from_language FROM course
+    JOIN language l on l.id = course.learning_language
     JOIN story s on course.id = s.course_id
-    WHERE s.public = 1 AND s.deleted = 0 AND course.short = ? GROUP BY course.id LIMIT 1
-        `,
-      [course_id],
-    );
-  },
-  ["get_course_header"],
-);
+    WHERE s.public AND NOT s.deleted AND course.short = ${course_id} GROUP BY course.id, l.name`
+  )[0];
+};
 
 export default async function CourseTitle({ course_id }) {
   if (!course_id) {
@@ -53,13 +49,14 @@ export default async function CourseTitle({ course_id }) {
     );
   }
   const course = await get_course_header(course_id);
+
   if (!course)
     return (
       <Header>
         <h1>Course not found.</h1>
       </Header>
     );
-  let localisation = await get_localisation(course.fromLanguage);
+  let localisation = await get_localisation(course.from_language);
   //notFound();
   /*
    */
@@ -68,15 +65,15 @@ export default async function CourseTitle({ course_id }) {
       <Header>
         <h1>
           {localisation("course_page_title", {
-            $language: course.learningLanguageName,
-          }) || `Unofficial ${course.learningLanguageName} Duolingo Stories`}
+            $language: course.learning_language_name,
+          }) || `Unofficial ${course.learning_language_name} Duolingo Stories`}
         </h1>
         <p>
           {localisation("course_page_sub_title", {
-            $language: course.learningLanguageName,
+            $language: course.learning_language_name,
             $count: course.count,
           }) ||
-            `Learn ${course.learningLanguageName} with ${course.count} community
+            `Learn ${course.learning_language_name} with ${course.count} community
           translated Duolingo Stories.`}
         </p>
         <p>

@@ -32,7 +32,7 @@ export function replaceLinks(text, links) {
   if (!text) return undefined;
   return (
     <>
-      {text.split(/{|}/).map((t, i) => (
+      {text.split(/[{}]/).map((t, i) => (
         <React.Fragment key={i}>
           {i % 2 === 0 ? (
             insetWithNewlines(t)

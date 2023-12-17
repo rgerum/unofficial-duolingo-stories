@@ -9,7 +9,7 @@ import DiscordProvider from "next-auth/providers/discord";
 import EmailProvider from "next-auth/providers/email";
 
 import CredentialsProvider from "next-auth/providers/credentials";
-import query from "lib/db";
+import { sql } from "lib/db";
 import { phpbb_check_hash } from "lib/auth/hash_functions2";
 import MyAdapter from "lib/database_adapter";
 
@@ -86,10 +86,8 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        let res2 = await query(
-          `SELECT * FROM user WHERE username = ? AND activated = 1`,
-          credentials.username,
-        );
+        let res2 =
+          await sql`SELECT * FROM user WHERE username = ${credentials.username} AND activated = 1`;
         if (res2.length === 0) {
           return null;
         }
