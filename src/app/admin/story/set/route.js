@@ -36,10 +36,10 @@ export async function POST(req) {
 async function story_properties(id) {
   let data =
     await sql`SELECT story.id, story.name, story.image, story.public, course.short FROM story JOIN course ON course.id = story.course_id WHERE story.id = ${id};`;
-  if (data.length === 0) return undefined;
+  if (data.length === 0) return null;
   let story = data[0];
   story.approvals =
-    await sql`SELECT a.id, a.date, u.username FROM story_approval a JOIN user u ON u.id = a.user_id WHERE a.story_id = ${id};`;
+    await sql`SELECT a.id, a.date, u.username FROM story_approval a JOIN "user" u ON u.id = a.user_id WHERE a.story_id = ${id};`;
   return story;
 }
 
