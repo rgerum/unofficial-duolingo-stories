@@ -22,22 +22,23 @@ function ChangeAbleValue(props) {
     props.callback(props.name, e.target.value);
     setValue(e);
   };
-  if (props.name === "tag_list" && !props.edit) {
+  if (props.name === "tags" && !props.edit) {
     if (!value) return <td></td>;
+    if (typeof value === "string") return <td>{value}</td>;
     return (
       <td>
-        {[...value.matchAll(/[^, ]+/g)]
-          .map((d) => d[0])
-          .map((d) => (
+        {[
+          ...value.map((d) => (
             <span key={d} className={styles.tag}>
               {d}
             </span>
-          ))}
+          )),
+        ]}
       </td>
     );
   }
 
-  if (props.name.endsWith("Language")) {
+  if (props.name.endsWith("language")) {
     let valid = false;
     for (let lang of Object.getOwnPropertyNames(props.languages)) {
       if (props.languages[lang].name.toLowerCase() === name.toLowerCase()) {
@@ -228,7 +229,7 @@ export function CourseList({ users, languages }) {
             <th data-js-sort-colnum="1">public</th>
             <th data-js-sort-colnum="2">name</th>
             <th data-js-sort-colnum="2">conlang</th>
-            <th data-js-sort-colnum="2">tag_list</th>
+            <th data-js-sort-colnum="2">tags</th>
             <th data-js-sort-colnum="3">about</th>
             <th data-js-sort-colnum="4"></th>
           </tr>
@@ -242,7 +243,7 @@ export function CourseList({ users, languages }) {
               from_language: 1,
               learning_language: -1,
               about: "",
-              tag_list: "",
+              tags: "",
               conlang: 0,
             }}
             attributes={[
@@ -251,7 +252,7 @@ export function CourseList({ users, languages }) {
               "public",
               "name",
               "conlang",
-              "tag_list",
+              "tags",
               "about",
             ]}
           />
@@ -266,7 +267,7 @@ export function CourseList({ users, languages }) {
                 "public",
                 "name",
                 "conlang",
-                "tag_list",
+                "tags",
                 "about",
               ]}
             />
@@ -274,18 +275,5 @@ export function CourseList({ users, languages }) {
         </tbody>
       </table>
     </>
-  );
-}
-
-export function CourseTagList({ course_tags }) {
-  return (
-    <div>
-      Tags:
-      {course_tags.map((d) => (
-        <span key={d.id} className={styles.tag}>
-          {d.name}
-        </span>
-      ))}
-    </div>
   );
 }
