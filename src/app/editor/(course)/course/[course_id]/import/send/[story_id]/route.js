@@ -1,5 +1,5 @@
 import { getToken } from "next-auth/jwt";
-import { insert, sql } from "lib/db";
+import { sql } from "lib/db";
 import { upload_github } from "lib/editor/upload_github";
 import { NextResponse } from "next/server";
 
@@ -29,9 +29,6 @@ async function set_import({ id, course_id }, { user_id, username }) {
 
   data["author"] = user_id;
   data["course_id"] = course_id;
-  data["api"] = 2;
-
-  console.log(data);
 
   let data2 = (
     await sql`INSERT INTO story ${sql(data, [

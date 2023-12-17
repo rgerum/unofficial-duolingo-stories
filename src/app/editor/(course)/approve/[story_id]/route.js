@@ -40,7 +40,6 @@ async function set_approve({ story_id, user_id }) {
     await sql`SELECT COUNT(id) as count FROM story_approval WHERE story_id = ${story_id};`
   )[0];
   let count = parseInt(res2.count);
-  console.log(count);
   let status = undefined;
   if (count === 0) status = "draft";
   if (count === 1) status = "feedback";

@@ -14,7 +14,6 @@ export default function StoryDisplay({ story }) {
       public: !story_.public,
     });
     let data = await res.json();
-    console.log(data);
     setStory(data);
   }
   async function deleteApproval(approval_id) {

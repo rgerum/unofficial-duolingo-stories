@@ -35,7 +35,6 @@ export async function get_story(story_id) {
   data.learning_language = res[0]["learning_language"];
   data.learning_language_long = res[0]["learning_language_long"];
   data.learning_language_rtl = res[0]["learning_language_rtl"];
-  console.log(data);
   return data;
 }
 

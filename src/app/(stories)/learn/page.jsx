@@ -29,7 +29,6 @@ export default async function Page() {
 
   if (session?.user) {
     let last_course = await get_last_course(session?.user?.name);
-    console.log(last_course, session?.user?.name, session.user);
     redirect("/" + last_course.short);
   }
 

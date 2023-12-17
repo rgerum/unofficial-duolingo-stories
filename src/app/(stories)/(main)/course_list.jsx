@@ -34,11 +34,10 @@ ORDER BY COALESCE(NULLIF(c.name, ''), l2.name);
 
 async function LanguageGroup({ name, tag, id }) {
   let courses = await get_courses(tag ? tag : "main");
-  console.log("vcourses", courses);
+
   let localisation = await get_localisation(id);
   let courses_list = courses[id];
 
-  console.log("LanguageGroup", name, tag, id);
   if (!courses_list) return <>no list {name}</>;
 
   return (
@@ -69,7 +68,6 @@ async function CourseListInner({ loading, tag }) {
     );
   }
   let course_groups = await get_courses_list(tag ? tag : "main");
-  console.log("course_groups", course_groups);
   return (
     <>
       {course_groups?.map((group) => (

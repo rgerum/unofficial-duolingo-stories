@@ -17,7 +17,6 @@ WHERE s.public AND NOT s.deleted AND c.public`
 
 export default async function Page({}) {
   const counts = await get_counts();
-  console.log("get_counts", counts);
 
   // Render data...
   return (

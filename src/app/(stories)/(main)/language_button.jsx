@@ -4,7 +4,6 @@ import { cache, Suspense } from "react";
 import { sql } from "lib/db";
 import get_localisation from "lib/get_localisation";
 import FlagById from "components/layout/flag_by_id";
-import { unstable_cache } from "next/cache";
 
 let get_courses = cache(async () => {
   let courses = await sql`
@@ -52,8 +51,6 @@ export default async function LanguageButton({ course_id, loading }) {
     );
   }
   let localisation = await get_localisation(course.from_language);
-
-  console.log("id", course, course.learning_language);
 
   return (
     <Link
