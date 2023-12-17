@@ -4,26 +4,22 @@ import { sql } from "lib/db";
 import { upload_github } from "lib/editor/upload_github";
 
 export async function POST(req) {
-  try {
-    const token = await getToken({ req });
+  const token = await getToken({ req });
 
-    if (!token?.role)
-      return new Response("You need to be a registered contributor.", {
-        status: 401,
-      });
-
-    let answer = await set_story(await req.json(), {
-      username: token.name,
-      user_id: token.id,
+  if (!token?.role)
+    return new Response("You need to be a registered contributor.", {
+      status: 401,
     });
 
-    if (answer === undefined)
-      return new Response("Error not found.", { status: 404 });
+  let answer = await set_story(await req.json(), {
+    username: token.name,
+    user_id: token.id,
+  });
 
-    return NextResponse.json(answer);
-  } catch (err) {
-    return new Response(err.message, { status: 500 });
-  }
+  if (answer === undefined)
+    return new Response("Error not found.", { status: 404 });
+
+  return NextResponse.json(answer);
 }
 
 async function set_story(data, { username, user_id }) {
@@ -38,7 +34,7 @@ async function set_story(data, { username, user_id }) {
     if (res.length) data["id"] = res[0]["id"];
   }
 
-  return sql`
+  await sql`
   UPDATE story SET ${sql(data, [
     "duo_id",
     "name",
@@ -50,7 +46,6 @@ async function set_story(data, { username, user_id }) {
     "course_id",
     "text",
     "json",
-    "api",
   ])}
   WHERE id = ${data.id}
 `;

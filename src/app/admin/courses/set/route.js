@@ -27,6 +27,8 @@ async function set_course(data) {
   let id;
   let tag_list = data["tag_list"] || "";
   delete data["tag_list"];
+  console.log(data);
+
   if (data.id === undefined) {
     id = (await sql`INSERT INTO course ${sql(data)} RETURNING id`)[0].id;
   } else {

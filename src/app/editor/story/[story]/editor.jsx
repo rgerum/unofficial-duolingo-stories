@@ -138,7 +138,7 @@ export default function Editor({ story_data, avatar_names, session }) {
       let data = {
         id: story_data.id,
         duo_id: story_data.duo_id,
-        name: story_meta.from_language_name,
+        name: story_meta.fromLanguageName,
         image: story_meta.icon,
         set_id: parseInt(story_meta.set_id),
         set_index: parseInt(story_meta.set_index),
