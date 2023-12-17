@@ -38,6 +38,7 @@ jobs:
           eval `ssh-agent -s`
           ssh-add - <<< "${{secrets.SSH_PRIVATE_KEY}}"
           ssh -fN -L 3306:127.0.0.1:3306 duostori@ara.uberspace.de
+          ssh -fN -L 5432:127.0.0.1:5432 duostori@ara.uberspace.de
 
       - name: Install
         run: npm install
