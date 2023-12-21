@@ -31,6 +31,9 @@ let get_course = cache(async (id) => {
 });
 
 export default async function LanguageButton({ course_id, loading }) {
+  if(!course_id) {
+    return null
+  }
   if (loading) {
     return (
       <div
@@ -41,14 +44,8 @@ export default async function LanguageButton({ course_id, loading }) {
     );
   }
   let course = await get_course(course_id);
-  if (!course) {
-    return (
-      <div
-        className={
-          styles.language_select_button + " " + styles.animated_background
-        }
-      ></div>
-    );
+  if(!course) {
+    return null
   }
   let localisation = await get_localisation(course.from_language);
 
