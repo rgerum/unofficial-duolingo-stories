@@ -517,7 +517,7 @@ function processBlockHeader(line_iter, story, lang, story_languages) {
     illustrationUrl:
       "https://stories-cdn.duolingo.com/image/" + story.meta["icon"] + ".svg",
     title: story.meta["from_language_name"],
-    learning_languageTitleContent: data_text.content,
+    learningLanguageTitleContent: data_text.content,
     trackingProperties: {},
     audio: data_text.audio,
     lang: lang || story_languages.learning_language,

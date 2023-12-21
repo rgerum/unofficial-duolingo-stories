@@ -9,7 +9,7 @@ export default function useAudio(element, progress) {
   const controls = React.useContext(StoryContext);
 
   if (audio === undefined)
-    audio = element?.learning_languageTitleContent?.audio;
+    audio = element?.learningLanguageTitleContent?.audio;
 
   const playAudio = React.useCallback(async () => {
     if (audio === undefined || !audio?.keypoints || !audio?.url) return;
