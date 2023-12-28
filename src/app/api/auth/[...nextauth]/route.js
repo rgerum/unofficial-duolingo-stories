@@ -87,7 +87,7 @@ export const authOptions = {
       },
       async authorize(credentials) {
         let res2 =
-          await sql`SELECT * FROM user WHERE username = ${credentials.username} AND activated = 1`;
+          await sql`SELECT * FROM "user" WHERE username = ${credentials.username} AND activated`;
         if (res2.length === 0) {
           return null;
         }

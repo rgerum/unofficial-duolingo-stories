@@ -1,13 +1,11 @@
 import { authOptions } from "app/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth/next";
 import { cache } from "react";
-import { query_one_obj } from "lib/db";
+import { sql } from "lib/db";
 
 export const get_user_id_by_name = cache(async (user_name) => {
   // sort courses by base language
-  return await query_one_obj(`SELECT id FROM user WHERE username = ? LIMIT 1`, [
-    user_name,
-  ]);
+  return await (sql`SELECT id FROM "user" WHERE username = ${user_name} LIMIT 1`)[0];
 });
 
 export default async function getUserId() {

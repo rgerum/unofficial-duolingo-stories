@@ -1,4 +1,4 @@
-import query from "./db";
+import {sql, insert, update} from "./db";
 
 function getSelectionString(mapping, pre) {
   let elements = [`${pre}.id`];
@@ -7,66 +7,6 @@ function getSelectionString(mapping, pre) {
     else elements.push(`${pre}.${mapping[key]} AS ${key}`);
   }
   return elements.join(", ");
-}
-
-export async function update(table_name, data, mapping) {
-  let values = [];
-  let updates = [];
-  for (let key in data) {
-    if (mapping[key]) {
-      values.push(data[key]);
-      updates.push(`${mapping[key]} = ?`);
-    }
-  }
-  values.push(data.id);
-  let update_string = updates.join(", ");
-  await query(
-    `UPDATE ${table_name}
-                            SET ${update_string}
-                            WHERE id = ?
-                            LIMIT 1;`,
-    values,
-  );
-  return await query_one(
-    `SELECT ${getSelectionString(mapping, "t")} FROM ${table_name} t
-                            WHERE id = ?
-                            LIMIT 1;`,
-    [data.id],
-  );
-}
-
-export async function insert(table_name, data, mapping) {
-  let values = [];
-  let columns = [];
-  let value_placeholders = [];
-  for (let key in data) {
-    if (mapping[key]) {
-      values.push(data[key]);
-      columns.push(`${mapping[key]}`);
-      value_placeholders.push(`?`);
-    }
-  }
-  let columns_string = columns.join(", ");
-  let value_placeholders_string = value_placeholders.join(", ");
-  const user_new = await query(
-    `INSERT INTO ${table_name}
-                            (${columns_string})
-                            VALUES (${value_placeholders_string}) ;`,
-    values,
-  );
-  const id = user_new.insertId;
-  return await query_one(
-    `SELECT ${getSelectionString(mapping, "t")} FROM ${table_name} t
-                            WHERE id = ?
-                            LIMIT 1;`,
-    [id],
-  );
-}
-
-async function query_one(query_string, args) {
-  const request = await query(query_string, args);
-  if (!request.length) return null;
-  return { ...request[0] };
 }
 
 let mapping_user = {
@@ -107,76 +47,64 @@ export default function MyAdapter() {
       return await insert("user", user, mapping_user);
     },
     async getUser(id) {
-      return await query_one(
+      return await (sql
         `SELECT ${getSelectionString(
           mapping_user,
           "u",
-        )} FROM user u WHERE id = ? LIMIT 1;`,
-        [id],
-      );
+        )} FROM "user" u WHERE id = ${id} LIMIT 1;`)[0];
     },
     async getUserByEmail(email) {
-      return await query_one(
+      return await (sql
         `SELECT ${getSelectionString(
           mapping_user,
           "u",
-        )} FROM user u WHERE email = ? LIMIT 1;`,
-        [email],
-      );
+        )} FROM "user" u WHERE email = ${email} LIMIT 1;`)[0];
     },
     async getUserByAccount({ providerAccountId, provider }) {
-      return await query_one(
-        `SELECT ${getSelectionString(mapping_user, "u")} FROM user u
-                            JOIN account a on u.id = a.user_id WHERE a.provider_account_id = ? AND a.provider = ?
-                            LIMIT 1;`,
-        [providerAccountId, provider],
-      );
+      return await (sql
+        `SELECT ${getSelectionString(mapping_user, "u")} FROM "user" u
+                            JOIN account a on u.id = a.user_id WHERE a.provider_account_id = ${providerAccountId} AND a.provider = ${provider}
+                            LIMIT 1;`)[0];
     },
     async updateUser(user) {
       return update("user", user, mapping_user);
     },
     async deleteUser(userId) {
-      await query(`DELETE FROM user WHERE id = ?`, [userId]);
-      await query(`DELETE FROM account WHERE user_id = ?`, [userId]);
-      await query(`DELETE FROM session WHERE user_id = ?`, [userId]);
+      await sql`DELETE FROM "user" WHERE id = ${userId}`;
+      await sql`DELETE FROM account WHERE user_id = ${userId}`;
+      await sql`DELETE FROM session WHERE user_id = ${userId}`;
     },
     async linkAccount(account) {
       return insert("account", account, mapping_account);
     },
     async unlinkAccount({ providerAccountId, provider }) {
-      await query(
-        `DELETE FROM account WHERE provider_account_id = ? AND provider = ?`,
-        [providerAccountId, provider],
-      );
+      await sql
+        `DELETE FROM account WHERE provider_account_id = ${providerAccountId} AND provider = ${provider}`;
     },
     async createSession(session) {
       return insert("session", session, mapping_session);
     },
     async getSessionAndUser(sessionToken) {
-      const session = await query_one(
+      const session = (await sql
         `SELECT ${getSelectionString(
           mapping_session,
           "s",
-        )} FROM session s WHERE session_token = ? LIMIT 1`,
-        [sessionToken],
-      );
+        )} FROM session s WHERE session_token = ${sessionToken} LIMIT 1`
+      )[0];
       if (!session) return null;
-      const user = await query_one(
+      const user = (await sql
         `SELECT ${getSelectionString(
           mapping_user,
           "u",
-        )} FROM user u WHERE id = ? LIMIT 1;`,
-        [session.userId],
-      );
+        )} FROM "user" u WHERE id = ${session.userId} LIMIT 1;`
+      )[0];
       return { session, user };
     },
     async updateSession({ sessionToken }) {
       return update("session", sessionToken, mapping_session);
     },
     async deleteSession(sessionToken) {
-      await query(`DELETE FROM session WHERE session_token = ?`, [
-        sessionToken,
-      ]);
+      await sql`DELETE FROM session WHERE session_token = ${sessionToken}`;
     },
     async createVerificationToken(data) {
       return await insert(
@@ -186,17 +114,14 @@ export default function MyAdapter() {
       );
     },
     async useVerificationToken({ identifier, token }) {
-      let ver_token = await query_one(
+      let ver_token = (await sql
         `SELECT ${getSelectionString(
           mapping_verification_token,
           "t",
-        )} FROM verification_token t WHERE identifier = ? AND token = ?`,
-        [identifier, token],
-      );
+        )} FROM verification_token t WHERE identifier = ${identifier} AND token = ${token} LIMIT 1`
+      )[0];
       if (!ver_token) return null;
-      await query(`DELETE FROM verification_token WHERE id = ?`, [
-        ver_token.id,
-      ]);
+      await sql`DELETE FROM verification_token WHERE id = ${ver_token.id}`;
       return ver_token;
     },
   };
