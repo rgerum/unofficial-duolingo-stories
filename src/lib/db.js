@@ -110,10 +110,13 @@ if (!process.env.NEXTAUTH_URL) {
   const postgres = require("postgres");
 
   const sql = postgres(
-    "postgres://duostori_db:VtyX.sXIYeiHR_:vI.aa@localhost:5432/duostori_post",
-    {
-      /* options */
-    },
+    //"postgres://duostori_db:VtyX.sXIYeiHR_:vI.aa@localhost:5432/duostori_post",
+      process.env.POSTGRES_URL,
+      process.env.POSTGRES_URL.endsWith("verceldb") ?
+    {/* options */
+      //debug: console.log,
+      ssl: "require",
+    } : {},
   ); // will use psql environment variables
 
   const pool = mysql.createPool({
