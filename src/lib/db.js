@@ -1,4 +1,3 @@
-//import { sql } from "@vercel/postgres";
 
 if (!process.env.NEXTAUTH_URL) {
   const sqlite3 = require("sqlite3").verbose();
@@ -105,12 +104,10 @@ if (!process.env.NEXTAUTH_URL) {
   module.exports.query_objs = sqlite_query_objs;
 } else {
 
-  //const { sql } = require("@vercel/postgres");
   const postgres = require("postgres");
 
   // will use psql environment variables
   module.exports.sql = postgres(
-      //"postgres://duostori_db:VtyX.sXIYeiHR_:vI.aa@localhost:5432/duostori_post",
       process.env.POSTGRES_URL,
       process.env.POSTGRES_URL.endsWith("verceldb") ?
           {/* options */
