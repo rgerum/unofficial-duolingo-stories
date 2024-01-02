@@ -30,6 +30,7 @@ function Set({ set, done, localisation }) {
 }
 
 async function get_course_done({ course_id, user_id }) {
+    if (!user_id) return {};
   const done_query = await sql`
 SELECT s.id FROM story_done 
 JOIN story s on s.id = story_done.story_id WHERE user_id = ${user_id} AND s.course_id = (SELECT c.id FROM course c WHERE c.short = ${course_id} LIMIT 1) GROUP BY s.id`;
