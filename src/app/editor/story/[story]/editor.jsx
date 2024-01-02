@@ -144,7 +144,7 @@ export default function Editor({ story_data, avatar_names, session }) {
         set_index: parseInt(story_meta.set_index),
         course_id: story_data.course_id,
         text: editor_text,
-        json: JSON.stringify(story),
+        json: story,
       };
 
       await setStory(data);

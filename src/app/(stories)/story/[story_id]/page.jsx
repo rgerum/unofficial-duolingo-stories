@@ -23,7 +23,7 @@ export async function get_story(story_id) {
     //result.sendStatus(404);
     return;
   }
-  let data = JSON.parse(res[0]["json"]);
+  let data = res[0]["json"];
   data.id = res[0]["id"];
 
   data.from_language = res[0]["from_language"];
