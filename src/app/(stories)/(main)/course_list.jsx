@@ -1,12 +1,12 @@
-import { Suspense } from "react";
-import { unstable_cache } from "next/cache";
+import React, {cache, Suspense} from "react";
 import { sql } from "lib/db";
 import get_localisation from "lib/get_localisation";
 import LanguageButton from "./language_button";
 
 import styles from "./course_list.module.css";
+import Legal from "../../../components/layout/legal";
 
-let get_courses = unstable_cache(
+let get_courses = cache(
   async (tag) => {
     let courses = await sql`
 SELECT c.id, l1.name AS from_language_name, c.from_language FROM course c
@@ -82,7 +82,7 @@ async function CourseListInner({ loading, tag }) {
   );
 }
 
-let get_courses_list = unstable_cache(
+let get_courses_list = cache(
   async (tag) => {
     let courses = await sql`SELECT
     l1.name AS from_language_name,
@@ -116,7 +116,11 @@ ORDER BY
 export default async function CourseList({ tag }) {
   return (
     <Suspense fallback={<CourseListInner loading={true} />}>
-      <CourseListInner tag={tag} />
+        <div>
+          <CourseListInner tag={tag} />
+        </div>
+        <Legal language_name={undefined} />
+
     </Suspense>
   );
 }

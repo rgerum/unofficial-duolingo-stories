@@ -4,7 +4,6 @@ import React, { cache } from "react";
 import Header from "../header";
 
 import styles from "./story_button.module.css";
-import { unstable_cache } from "next/cache";
 import get_localisation from "lib/get_localisation";
 import { sql } from "lib/db";
 

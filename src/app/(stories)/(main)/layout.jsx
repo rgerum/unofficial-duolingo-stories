@@ -8,7 +8,7 @@ import styles from "./layout.module.css";
 import { authOptions } from "app/api/auth/[...nextauth]/route";
 import CourseDropdown from "./course-dropdown";
 import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
-import { unstable_cache } from "next/cache";
+
 
 export const metadata = {
   title:
@@ -45,7 +45,7 @@ INNER JOIN (
 ORDER BY max_time.max_story_time DESC;`;
 });
 
-const get_course_flags = unstable_cache(async () => {
+const get_course_flags = cache(async () => {
   const res =
     await sql`SELECT course.id, COALESCE(NULLIF(course.name, ''), l.name) AS name, course.short,
  l.short AS learning_language, l.flag AS learning_language_flag, l.flag_file AS learning_language_flag_file FROM course 
@@ -55,7 +55,7 @@ const get_course_flags = unstable_cache(async () => {
     data[r.short] = r;
   }
   return data;
-}, ["get_course_flags_x"]);
+});
 
 export default async function Layout({ children }) {
   // @ts-ignore

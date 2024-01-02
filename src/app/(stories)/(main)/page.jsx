@@ -1,13 +1,12 @@
 import Link from "next/link";
 import Header from "./header";
 import CourseList from "./course_list";
-import { unstable_cache } from "next/cache";
 import Icons from "./icons";
-import React from "react";
+import React, {cache} from "react";
 import Legal from "../../../components/layout/legal";
 import { sql } from "../../../lib/db";
 
-const get_counts = unstable_cache(async () => {
+const get_counts = cache(async () => {
   return (
     await sql`SELECT COUNT(DISTINCT c.id) AS count_courses, COUNT(DISTINCT s.id) as count_stories FROM course c
 LEFT JOIN story s ON (c.id = s.course_id)
@@ -39,10 +38,7 @@ export default async function Page({}) {
         </p>
         <Icons />
       </Header>
-      <div>
-        <CourseList />
-      </div>
-      <Legal language_name={undefined} />
+      <CourseList />
     </>
   );
 }

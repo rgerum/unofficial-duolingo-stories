@@ -1,14 +1,13 @@
-import React, { Suspense } from "react";
+import React, {cache, Suspense} from "react";
 import { sql } from "lib/db";
 
 import CourseTitle from "./course_title";
 import SetList from "./set_list";
 import { notFound } from "next/navigation";
-import { unstable_cache } from "next/cache";
 import get_localisation from "../../../../lib/get_localisation";
 import Legal from "../../../../components/layout/legal";
 
-const get_course = unstable_cache(
+const get_course = cache(
   async (course_id) => {
     return (
       (

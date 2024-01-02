@@ -1,8 +1,8 @@
 import styles from "./set_list.module.css";
 import StoryButton from "./story_button";
 import SetListClient from "./set_list_client";
-import { unstable_cache } from "next/cache";
 import { sql } from "lib/db";
+import {cache} from "react";
 
 const get_course_done = async (course_id, username) => {
   const done_query =
@@ -15,7 +15,7 @@ const get_course_done = async (course_id, username) => {
   return done;
 };
 
-const get_course = unstable_cache(
+const get_course = cache(
   async (course_id) => {
     const course = (
       await sql`
