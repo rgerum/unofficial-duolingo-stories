@@ -3,7 +3,7 @@ import { cache } from "react";
 import { sql } from "lib/db";
 import { getServerSession } from "next-auth/next";
 
-import { authOptions } from "app/api/auth/[...nextauth]/route";
+import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import { notFound } from "next/navigation";
 import Tts_edit from "./tts_edit";
 

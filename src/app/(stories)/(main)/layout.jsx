@@ -2,13 +2,11 @@ import Link from "next/link";
 import React from "react";
 import { cache } from "react";
 import { getServerSession } from "next-auth/next";
-import Legal from "components/layout/legal";
 import { sql } from "lib/db";
 import styles from "./layout.module.css";
-import { authOptions } from "app/api/auth/[...nextauth]/route";
+import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import CourseDropdown from "./course-dropdown";
 import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
-
 
 export const metadata = {
   title:
