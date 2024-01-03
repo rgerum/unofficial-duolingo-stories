@@ -1,11 +1,10 @@
 import React from "react";
-
-import { sql } from "lib/db";
-
-import StoryWrapper from "./story_wrapper";
 import { notFound } from "next/navigation";
+import { sql } from "lib/db";
 import getUserId from "lib/getUserId";
 import { get_localisation_dict } from "lib/get_localisation";
+import StoryWrapper from "./story_wrapper";
+import { get_story } from "./getStory";
 
 async function get_story_meta(course_id) {
   const course_query = await sql`SELECT
