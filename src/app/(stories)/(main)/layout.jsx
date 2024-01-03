@@ -69,7 +69,7 @@ export default async function Layout({ children }) {
     <>
       <nav className={styles.header_index}>
         <Link href={"/"} className={styles.duostories_title} data-cy={"logo"}>
-          <img src={"Duostories.svg"} alt={"Duostories"} height="25px" />
+          <img src={"/Duostories.svg"} alt={"Duostories"} height="25px" />
         </Link>
         <div style={{ marginLeft: "auto" }}></div>
 
