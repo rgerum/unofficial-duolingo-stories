@@ -16,7 +16,10 @@ export async function get_story(story_id) {
     //result.sendStatus(404);
     return;
   }
-  let data = res[0]["json"];
+  let data =
+    typeof res[0]["json"] === "string"
+      ? JSON.parse(res[0]["json"])
+      : res[0]["json"];
   data.id = res[0]["id"];
 
   data.from_language = res[0]["from_language"];
