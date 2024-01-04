@@ -2,8 +2,7 @@ import Link from "next/link";
 import Header from "./header";
 import CourseList from "./course_list";
 import Icons from "./icons";
-import React, {cache} from "react";
-import Legal from "../../../components/layout/legal";
+import React, { cache } from "react";
 import { sql } from "../../../lib/db";
 
 const get_counts = cache(async () => {
@@ -12,7 +11,7 @@ const get_counts = cache(async () => {
 LEFT JOIN story s ON (c.id = s.course_id)
 WHERE s.public AND NOT s.deleted AND c.public`
   )[0];
-}, ["get_main_countsTTZT"]);
+});
 
 export default async function Page({}) {
   const counts = await get_counts();

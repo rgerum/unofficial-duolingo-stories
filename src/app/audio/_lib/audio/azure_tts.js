@@ -1,5 +1,6 @@
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 const fs = require("fs");
+import { put } from "@vercel/blob";
 
 function get_raw(text) {
   text = text.replace(/ +/g, " ");
@@ -55,7 +56,7 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
     let text2 = get_raw(text);
     synthesizer.speakSsmlAsync(
       text,
-      function (result) {
+      async function (result) {
         if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
           let content;
           if (filename === undefined)
@@ -65,6 +66,11 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
             marks: marks,
             content: content,
           };
+          let data = fs.readFileSync(filename);
+          await put(filename, data, {
+            access: "public",
+            addRandomSuffix: false,
+          });
           resolve(output);
         } else {
           console.error(

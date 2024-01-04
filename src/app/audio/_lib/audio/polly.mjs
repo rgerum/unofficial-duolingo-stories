@@ -1,6 +1,7 @@
 // Load the AWS SDK for Node.js
 import { Polly } from "@aws-sdk/client-polly";
 import fs from "fs";
+import { put } from '@vercel/blob';
 
 // Set the region and credentials for the AWS SDK
 let config = {
@@ -93,7 +94,11 @@ async function synthesizeSpeechPolly(filename, voice_id, text) {
   let data2 = await synthesizeSpeech(polly, params);
 
   let content;
-  if (filename) await writeStream(filename, data.AudioStream);
+  if (filename) {
+    //await writeStream(filename, data.AudioStream);
+    let data = await streamToString(data2.AudioStream);
+    await put(filename, data, { access: "public", addRandomSuffix: false });
+  }
   else content = await streamToBase64(data.AudioStream);
 
   // Handle the audio data
