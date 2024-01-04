@@ -57,8 +57,10 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
         }*/
         resolve({ timepoints: timepoints, content: audioContent });
       }
-      await put(filename, Buffer.from(audioContent, "base64"), { access: "public", addRandomSuffix: false });
-      resolve({ output_file: filename, timepoints: timepoints });
+      else {
+        await put(filename, Buffer.from(audioContent, "base64"), {access: "public", addRandomSuffix: false});
+        resolve({output_file: filename, timepoints: timepoints});
+      }
       /*
       fs.writeFile(filename, Buffer.from(audioContent, "base64"), () => {
         resolve({ output_file: filename, timepoints: timepoints });
