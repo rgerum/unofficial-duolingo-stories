@@ -8,8 +8,7 @@ export default function useAudio(element, progress) {
 
   const controls = React.useContext(StoryContext);
 
-  if (audio === undefined)
-    audio = element?.learningLanguageTitleContent?.audio;
+  if (audio === undefined) audio = element?.learningLanguageTitleContent?.audio;
 
   const playAudio = React.useCallback(async () => {
     if (audio === undefined || !audio?.keypoints || !audio?.url) return;
@@ -69,6 +68,6 @@ export default function useAudio(element, progress) {
     ref,
     audio.url.startsWith("blob")
       ? audio.url
-      : "https://duostori.uber.space/" + audio.url,
+      : "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/" + audio.url,
   ];
 }
