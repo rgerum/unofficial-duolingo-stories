@@ -24,7 +24,7 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
       "westeurope",
     );
     const audioConfig = sdk.AudioConfig.fromAudioFileOutput(
-      filename === undefined ? "/dev/null" : filename,
+      "/dev/null", //filename === undefined ? "/dev/null" : filename,
     );
     speechConfig.speechSynthesisOutputFormat = 5;
     // create the speech synthesizer.
@@ -59,18 +59,20 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
       async function (result) {
         if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
           let content;
-          if (filename === undefined)
-            content = Buffer.from(result.audioData).toString("base64");
+          //if (filename === undefined)
+          content = Buffer.from(result.audioData).toString("base64");
           let output = {
             output_file: filename,
             marks: marks,
             content: content,
           };
-          let data = fs.readFileSync(filename);
-          await put(filename, data, {
-            access: "public",
-            addRandomSuffix: false,
-          });
+          if (filename !== undefined) {
+            //let data = fs.readFileSync(filename);
+            await put(filename, Buffer.from(result.audioData), {
+              access: "public",
+              addRandomSuffix: false,
+            });
+          }
           resolve(output);
         } else {
           console.error(
