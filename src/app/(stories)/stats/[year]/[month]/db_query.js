@@ -7,14 +7,12 @@ export async function get_stats(year, month) {
     GROUP BY course_id ORDER BY count DESC;`;
   res = res.map((d) => Object.assign({}, d));
 
-  let res2 = await sql(
-    `SELECT course_id, COUNT(s.course_id) AS count FROM story_done sd
+  let res2 =
+    await sql`SELECT course_id, COUNT(s.course_id) AS count FROM story_done sd
         JOIN story s on s.id = sd.story_id
-         WHERE EXTRACT(MONTH FROM sd.time) = ? AND
-         EXTRACT(YEAR FROM sd.time) = ?
-    GROUP BY course_id ORDER BY count DESC;`,
-    [month, year],
-  );
+         WHERE EXTRACT(MONTH FROM sd.time) = ${month} AND
+         EXTRACT(YEAR FROM sd.time) = ${year}
+    GROUP BY course_id ORDER BY count DESC;`;
   res2 = res2.map((d) => Object.assign({}, d));
 
   let res3 =
@@ -29,7 +27,7 @@ export async function get_stats(year, month) {
     await sql`SELECT COUNT(DISTINCT(sd.user_id)) AS count FROM story_done sd
          WHERE EXTRACT(MONTH FROM sd.time) = ${month} AND
          EXTRACT(YEAR FROM sd.time) = ${year}
-    GROUP BY EXTRACT(YEAR FROM sd.time) ORDER BY count DESC;;`;
+    GROUP BY EXTRACT(YEAR FROM sd.time) ORDER BY count DESC;`;
   res3.count = res3b[0].count;
 
   let res4 =

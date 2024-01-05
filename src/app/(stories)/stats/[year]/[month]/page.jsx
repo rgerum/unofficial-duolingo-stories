@@ -18,12 +18,12 @@ function DataGroup({ title, data, data_old, key_name }) {
   let total_count_old = 0;
   for (let l of data[key_name]) {
     story_ids.push(l.course_id);
-    total_count += l.count;
+    total_count += parseInt(l.count);
   }
   let old_stories = {};
   for (let l of data_old[key_name]) {
     old_stories[l.course_id] = l;
-    total_count_old += l.count;
+    total_count_old += parseInt(l.count);
     if (!story_ids.includes(l.course_id)) {
       data[key_name].push({ course_id: l.course_id, count: 0 });
     }
