@@ -119,6 +119,20 @@ export default function Flag(props) {
 }
 
 export function DoubleFlag({ lang1, lang2, width, onClick, className }) {
+  if (!lang2) {
+    return (
+      <>
+        <Flag
+          iso={lang1?.short}
+          flag={lang1?.flag}
+          flag_file={lang1?.flag_file}
+          width={width}
+          onClick={onClick}
+          className={className}
+        />
+      </>
+    );
+  }
   return (
     <>
       <Flag

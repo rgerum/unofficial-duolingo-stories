@@ -54,12 +54,21 @@ const get_language = cache(async (id) => {
 export async function generateMetadata({ params }) {
   let [language, course, language2] = await get_language(params.language);
 
-  if (!course) notFound();
+  if (!language) notFound();
+
+  if (!language2) {
+    return {
+      title: `Voices | ${language.name} | Duostories Editor`,
+      alternates: {
+        canonical: `https://duostories.org/editor/localization/${language.short}`,
+      },
+    };
+  }
 
   return {
     title: `Voices | ${language.name} (from ${language2.name}) | Duostories Editor`,
     alternates: {
-      canonical: `https://duostories.org/editor/language/${course.short}`,
+      canonical: `https://duostories.org/editor/localization/${course.short}`,
     },
   };
 }

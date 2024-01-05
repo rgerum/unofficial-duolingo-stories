@@ -22,7 +22,8 @@ export default function LocalizationEditor({
         course={course}
       >
         <ListLocalizations
-          language_id={language2.id || language.id}
+          language_id={language2?.id || language.id}
+          language_name={language2?.name || language.name}
         ></ListLocalizations>
       </Layout>
     </>
@@ -43,7 +44,7 @@ export function Layout({
       type: "course",
       lang1: language_data,
       lang2: language2,
-      href: `/editor/course/${course?.short}`,
+      href: course?.short ? `/editor/course/${course?.short}` : `/editor`,
     },
     { type: "sep" },
     { type: "Localization" },
@@ -68,7 +69,7 @@ export function Layout({
   );
 } //                 <Login page={"editor"}/>
 
-async function ListLocalizations({ language_id }) {
+async function ListLocalizations({ language_id, language_name }) {
   let data = await sql`SELECT l.tag, l.text AS text_en, l2.text
 FROM localization l
 LEFT JOIN localization l2 ON l.tag = l2.tag AND l2.language_id = ${language_id}
@@ -76,10 +77,6 @@ WHERE l.language_id = 1;`;
 
   async function set_localization(tag, text) {
     "use server";
-    console.log(
-      { tag, text },
-      `UPDATE localization SET text = ${text} WHERE tag = ${tag} AND language_id = ${language_id};`,
-    );
     return sql`INSERT INTO localization (tag, text, language_id)
     VALUES (${tag}, ${text}, ${language_id})
     ON CONFLICT (tag, language_id)
@@ -88,7 +85,7 @@ WHERE l.language_id = 1;`;
 
   return (
     <div>
-      <h1>Localizations</h1>
+      <h1>Localizations {language_name}</h1>
       <table className={styles.table}>
         <thead>
           <tr>
