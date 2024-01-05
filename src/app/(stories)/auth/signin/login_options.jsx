@@ -48,10 +48,7 @@ export function LoginOptions({ providers }) {
   return (
     <>
       <h2>Log in</h2>
-      <p>
-        {error}
-        Attention, you cannot login with your Duolingo account.
-      </p>
+      <p>Attention, you cannot login with your Duolingo account.</p>
       <p>
         You have to register for the unofficial stories separately, as they are
         an independent project.
