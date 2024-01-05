@@ -49,7 +49,11 @@ export default function EditList({ course, updateCourses }) {
       </div>
       <p>
         To set the voices for use the{" "}
-        <Link href={`/editor/language/${course.short}`}>Character Editor</Link>.
+        <Link href={`/editor/language/${course.short}`}>Character Editor</Link>.{" "}
+        <Link href={`/editor/localization/${course.short}`}>
+          Localization Editor
+        </Link>
+        .
       </p>
       <p style={{ fontWeight: "bold" }}>
         Active Contributors:{" "}
