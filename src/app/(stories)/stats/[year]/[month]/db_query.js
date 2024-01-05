@@ -28,7 +28,7 @@ export async function get_stats(year, month) {
          WHERE EXTRACT(MONTH FROM sd.time) = ${month} AND
          EXTRACT(YEAR FROM sd.time) = ${year}
     GROUP BY EXTRACT(YEAR FROM sd.time) ORDER BY count DESC;`;
-  res3.count = res3b[0].count;
+  res3.count = res3b[0]?.count || 0;
 
   let res4 =
     await sql`SELECT s.course_id, COUNT(DISTINCT(sd.story_id)) AS count FROM story_done sd
@@ -48,7 +48,7 @@ export async function get_stats(year, month) {
     stories_published: res,
     stories_read: res2,
     active_users: res3,
-    active_users_count: res3b[0].count,
+    active_users_count: res3b[0]?.count || 0,
     active_stories: res4,
     courses: res_course,
     languages: res_languages,
