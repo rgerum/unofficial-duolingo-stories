@@ -19,8 +19,7 @@ function Set({ set, done, localisation }) {
   return (
     <div key={set[0].set_id} className={styles.set_list}>
       <div className={styles.set_title}>
-        {localisation("set_n", { $count: set[0].set_id }) ||
-          `Set ${set[0].set_id}`}
+        {localisation("set_n", { $count: set[0].set_id })}
       </div>
       {set.map((story) => (
         <StoryButton key={story.id} story={story} done={done[story.id]} />
@@ -30,7 +29,7 @@ function Set({ set, done, localisation }) {
 }
 
 async function get_course_done({ course_id, user_id }) {
-    if (!user_id) return {};
+  if (!user_id) return {};
   const done_query = await sql`
 SELECT s.id FROM story_done 
 JOIN story s on s.id = story_done.story_id WHERE user_id = ${user_id} AND s.course_id = (SELECT c.id FROM course c WHERE c.short = ${course_id} LIMIT 1) GROUP BY s.id`;

@@ -59,8 +59,7 @@ export default async function LanguageButton({ course_id, loading }) {
 
       <span className={styles.language_select_button_text}>{course.name}</span>
       <span className={styles.language_story_count}>
-        {localisation("n_stories", { $count: course.count }) ||
-          `${course.count} stories`}
+        {localisation("n_stories", { $count: course.count })}
       </span>
     </Link>
   );

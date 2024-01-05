@@ -1,5 +1,4 @@
-import Link from "next/link";
-import React, { cache } from "react";
+import React from "react";
 
 import Header from "../header";
 
@@ -65,29 +64,19 @@ export default async function CourseTitle({ course_id }) {
         <h1>
           {localisation("course_page_title", {
             $language: course.learning_language_name,
-          }) || `Unofficial ${course.learning_language_name} Duolingo Stories`}
+          })}
         </h1>
         <p>
           {localisation("course_page_sub_title", {
             $language: course.learning_language_name,
             $count: course.count,
-          }) ||
-            `Learn ${course.learning_language_name} with ${course.count} community
-          translated Duolingo Stories.`}
+          })}
         </p>
         <p>
           {localisation("course_page_discuss", {}, [
             "https://discord.gg/4NGVScARR3",
             "/faq",
-          ]) || (
-            <>
-              If you want to contribute or discuss the stories, meet us on{" "}
-              <Link href="https://discord.gg/4NGVScARR3">Discord</Link>
-              <br />
-              or learn more about the project in our{" "}
-              <Link href={"/faq"}>FAQ</Link>.
-            </>
-          )}
+          ])}
         </p>
       </Header>
     </>

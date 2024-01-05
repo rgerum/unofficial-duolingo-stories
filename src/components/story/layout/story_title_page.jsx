@@ -13,7 +13,7 @@ export function StoryTitlePage({ story, controls, localization }) {
       <h1 className={styles.story_title_page_title}>{header.title}</h1>
       <div>
         <button className={styles.button} onClick={controls.next}>
-          {localization("button_start_story") || "Start Story"}
+          {localization("button_start_story")}
         </button>
       </div>
     </div>

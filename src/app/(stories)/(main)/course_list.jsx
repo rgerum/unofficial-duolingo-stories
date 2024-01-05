@@ -41,7 +41,7 @@ async function LanguageGroup({ name, tag, id }) {
     <div className={styles.course_list}>
       <hr />
       <div className={styles.course_group_name}>
-        {localisation("stories_for") || `Stories for ${name} Speakers`}
+        {localisation("stories_for")}
       </div>
       {courses_list?.map((course_id) => (
         <LanguageButton key={course_id} course_id={course_id} />

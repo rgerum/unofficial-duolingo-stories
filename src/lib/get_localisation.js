@@ -1,22 +1,25 @@
-import query from "lib/db";
 import get_localisation_func from "lib/get_localisation_func";
-import { unstable_cache } from "next/cache";
 import { sql } from "./db";
+import { cache } from "react";
 
-//export async function get_localisation_dict(lang) {
-export const get_localisation_dict = unstable_cache(
-  async (lang) => {
-    if (!lang) return {};
-    let result =
-      await sql`SELECT tag, text FROM localization WHERE language_id = ${lang}`;
-    let data = {};
-    for (let d of result) {
-      data[d.tag] = d.text;
-    }
-    return data;
-  },
-  ["get_localisation_dictx"],
-);
+export const get_localisation_dict = cache(async (lang) => {
+  if (!lang) return {};
+  console.log(`SELECT l.tag, COALESCE(l2.text, l.text) AS text
+FROM localization l
+LEFT JOIN localization l2 ON l.tag = l2.tag AND l2.language_id = ${lang}
+WHERE l.language_id = 1;`);
+
+  let result = await sql`SELECT l.tag, COALESCE(l2.text, l.text) AS text
+FROM localization l
+LEFT JOIN localization l2 ON l.tag = l2.tag AND l2.language_id = ${lang}
+WHERE l.language_id = 1;`;
+  let data = {};
+  for (let d of result) {
+    data[d.tag] = d.text;
+  }
+  console.log("data", data, result);
+  return data;
+});
 
 export default async function get_localisation(lang) {
   let data = await get_localisation_dict(lang);
