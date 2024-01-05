@@ -13,7 +13,6 @@ export async function GET(req) {
   for (let engine of audio_engines) {
     try {
       voices = voices.concat(await engine.getVoices());
-      console.log(engine.name, "done");
     } catch (e) {
       console.log("error", engine.name);
     }

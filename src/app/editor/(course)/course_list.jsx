@@ -41,7 +41,6 @@ export default function CourseList({
     }
   }
 
-  //console.log("courses", courses);var(--body-background-faint)
   return (
     <div className={styles.languages} data-show={!course_id ? true : showList}>
       <div className={styles.search}>

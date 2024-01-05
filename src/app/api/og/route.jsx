@@ -2,7 +2,6 @@ import { ImageResponse } from "next/og";
 import React, { cache } from "react";
 
 //import { sql } from "../../../lib/db";
-import Link from "next/link";
 // App router includes @vercel/og.
 // No need to install it.
 
@@ -35,7 +34,7 @@ export async function GET(request) {
 
     let text = `A community project to bring the original Duolingo Stories to new languages.`;
     let text2 = `${counts.count_stories} stories in ${counts.count_courses} courses and counting!`;
-    console.log(counts);
+
     return new ImageResponse(
       (
         <div

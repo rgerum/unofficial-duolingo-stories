@@ -78,7 +78,6 @@ export default async function Page({ params }) {
 
   let [language, course, language2] = await get_language(params.language);
 
-  console.log({ language, course, language2 });
   if (!language) {
     notFound();
   }

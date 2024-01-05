@@ -4,11 +4,6 @@ import { cache } from "react";
 
 export const get_localisation_dict = cache(async (lang) => {
   if (!lang) return {};
-  console.log(`SELECT l.tag, COALESCE(l2.text, l.text) AS text
-FROM localization l
-LEFT JOIN localization l2 ON l.tag = l2.tag AND l2.language_id = ${lang}
-WHERE l.language_id = 1;`);
-
   let result = await sql`SELECT l.tag, COALESCE(l2.text, l.text) AS text
 FROM localization l
 LEFT JOIN localization l2 ON l.tag = l2.tag AND l2.language_id = ${lang}
@@ -17,7 +12,6 @@ WHERE l.language_id = 1;`;
   for (let d of result) {
     data[d.tag] = d.text;
   }
-  console.log("data", data, result);
   return data;
 });
 
