@@ -1,45 +1,5 @@
 import { sql } from "./db";
 
-function getSelectionString(mapping, pre) {
-  let elements = [`${pre}.id`];
-  for (let key in mapping) {
-    if (key === mapping[key]) elements.push(`${pre}.${key}`);
-    else elements.push(`${pre}.${mapping[key]} AS ${key}`);
-  }
-  return elements.join(", ");
-}
-
-let mapping_user = {
-  name: "username",
-  email: "email",
-  emailVerified: "emailVerified",
-  image: "image",
-  admin: "admin",
-  role: "role",
-};
-let mapping_account = {
-  userId: "user_id",
-  type: "type",
-  provider: "provider",
-  providerAccountId: "provider_account_id",
-  refresh_token: "refresh_token",
-  access_token: "access_token",
-  expires_at: "expires_at",
-  token_type: "token_type",
-  scope: "scope",
-  id_token: "id_token",
-  session_state: "session_state",
-};
-let mapping_session = {
-  sessionToken: "session_token",
-  userId: "user_id",
-  expires: "expires",
-};
-let mapping_verification_token = {
-  identifier: "identifier",
-  token: "token",
-  expires: "expires",
-};
 /** @return { import("next-auth/adapters").Adapter } */
 export default function MyAdapter() {
   return {
