@@ -1,118 +1,13 @@
+const postgres = require("postgres");
 
-if (!process.env.NEXTAUTH_URL) {
-  const sqlite3 = require("sqlite3").verbose();
-
-  // Create a new in-memory database
-  //const db = new sqlite3.Database(':memory:');
-  async function sqlite_query(row, params) {
-    // to make the query compatible with mysql and sqlite
-    row = row.replace(
-      "CURRENT_DATE() - INTERVAL 1 MONTH",
-      "date('now', '-1 month')",
-    );
-    return new Promise((resolve, reject) => {
-      const db = new sqlite3.Database("test.sqlite");
-      db.all(row, params, (err, rows) => {
-        db.close();
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
-  }
-
-  async function sqlite_insert(table_name, data, mapping) {
-    let values = [];
-    let columns = [];
-    let value_placeholders = [];
-    for (let key in data) {
-      if (
-        mapping === undefined ||
-        (mapping.includes && mapping.includes(key))
-      ) {
-        values.push(data[key]);
-        columns.push(`${key}`);
-        value_placeholders.push(`?`);
-      } else if (mapping[key]) {
-        values.push(data[key]);
-        columns.push(`${mapping[key]}`);
-        value_placeholders.push(`?`);
+// will use psql environment variables
+export const sql = postgres(
+  process.env.POSTGRES_URL,
+  process.env.POSTGRES_URL.endsWith("verceldb")
+    ? {
+        /* options */
+        //debug: console.log,
+        ssl: "require",
       }
-    }
-    let columns_string = columns.join(", ");
-    let value_placeholders_string = value_placeholders.join(", ");
-
-    return new Promise((resolve, reject) => {
-      const db = new sqlite3.Database("test.sqlite");
-      db.run(
-        `INSERT INTO ${table_name}
-                            (${columns_string})
-                            VALUES (${value_placeholders_string});`,
-        values,
-        function (err) {
-          db.close();
-          if (err) reject(err);
-          else {
-            resolve(this.lastID);
-          }
-        },
-      );
-    });
-  }
-
-  async function sqlite_update(table_name, data) {
-    let values = [];
-    let updates = [];
-    for (let key in data) {
-      values.push(data[key]);
-      updates.push(`${key} = ?`);
-    }
-    values.push(data.id);
-    let update_string = updates.join(", ");
-    return await sqlite_query(
-      `UPDATE ${table_name}
-                            SET ${update_string}
-                            WHERE id = ?
-                            ;`,
-      values,
-    );
-  }
-
-  async function sqlite_query_one_obj(q, params) {
-    const res = await sqlite_query(q, params);
-
-    if (res.length === 0) return undefined;
-    return Object.assign({}, res[0]);
-  }
-
-  async function sqlite_query_objs(q, params, key) {
-    const res = await sqlite_query(q, params);
-
-    if (key) {
-      let result = {};
-      for (let q of res) result[q[key]] = Object.assign({}, q);
-      return result;
-    }
-    let result = [];
-    for (let q of res) result.push(Object.assign({}, q));
-    return result;
-  }
-
-  module.exports = sqlite_query;
-  module.exports.insert = sqlite_insert;
-  module.exports.update = sqlite_update;
-  module.exports.query_one_obj = sqlite_query_one_obj;
-  module.exports.query_objs = sqlite_query_objs;
-} else {
-
-  const postgres = require("postgres");
-
-  // will use psql environment variables
-  module.exports.sql = postgres(
-      process.env.POSTGRES_URL,
-      process.env.POSTGRES_URL.endsWith("verceldb") ?
-          {/* options */
-            //debug: console.log,
-            ssl: "require",
-          } : {},
-  );
-}
+    : {},
+);
