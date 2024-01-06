@@ -1,4 +1,4 @@
-import { insert, sql } from "lib/db";
+import { sql } from "lib/db";
 const { phpbb_hash } = require("lib/auth/hash_functions2");
 import { v4 as uuid } from "uuid";
 import { NextResponse } from "next/server";
@@ -40,7 +40,7 @@ async function register({ username, password, email }) {
     password: password_hashed,
     activation_link: activation_link,
   })}`;
-  transporter.sendMail({
+  await transporter.sendMail({
     from: "Unofficial Duolingo Stories <register@duostories.org>",
     to: email,
     subject: "[Unofficial Duolingo Stories] Registration ",

@@ -21,7 +21,7 @@ export default async function sendPasswordAction(email) {
   await sql`
     INSERT INTO verification_token (token, identifier, expires) VALUES (${identifier}, ${email}, ${formattedDate})`;
 
-  transporter.sendMail({
+  await transporter.sendMail({
     from: "Unofficial Duolingo Stories <register@duostories.org>",
     to: email,
     subject: "[Unofficial Duolingo Stories] Reset Password ",
