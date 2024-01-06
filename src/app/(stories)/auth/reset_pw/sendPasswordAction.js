@@ -10,16 +10,19 @@ export default async function sendPasswordAction(email) {
   // Format the date and time
   const formattedDate = tomorrow
     .toISOString()
-    .replace("T", " ")
+    //.replace("T", " ")
     .substring(0, 19);
 
   let result =
-    await sql`SELECT id, email, username FROM "user" WHERE email = ${email} LIMIT 1"`;
+    await sql`SELECT id, email, username FROM "user" WHERE email = ${email} LIMIT 1`;
   if (result.length === 0) return "done";
 
   let identifier = uuid();
-  await sql`
-    INSERT INTO verification_token (token, identifier, expires) VALUES (${identifier}, ${email}, ${formattedDate})`;
+  await sql`INSERT INTO verification_token ${sql({
+    token: identifier,
+    identifier: email,
+    expires: formattedDate,
+  })}`;
 
   await transporter.sendMail({
     from: "Unofficial Duolingo Stories <register@duostories.org>",
