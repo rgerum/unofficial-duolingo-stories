@@ -1,22 +1,9 @@
-// emailer.js
-const nodemailer = require("nodemailer");
+import { Resend } from "resend";
 
-if (!process.env.NEXTAUTH_URL) {
-  const transporter = nodemailer.createTransport({
-    host: "localhost",
-    port: 7777,
-    secure: false,
-  });
-  console.log("mailer, local");
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-  module.exports = transporter;
-} else {
-  let transporter = nodemailer.createTransport({
-    sendmail: true,
-    newline: "unix",
-    path: "/usr/sbin/sendmail",
-  });
-  console.log("mailer, sendmail");
-
-  module.exports = transporter;
-}
+module.exports = {
+  sendMail: (mail) => {
+    return resend.emails.send(mail);
+  },
+};
