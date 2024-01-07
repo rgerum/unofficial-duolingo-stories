@@ -30,6 +30,9 @@ ORDER BY COALESCE(NULLIF(c.name, ''), l2.name);
 });
 
 async function LanguageGroup({ name, tag, id }) {
+  //
+  if (id === 111) return <div></div>;
+  console.log(id, "LanguageGroup", name, tag, id);
   let courses = await get_courses(tag ? tag : "main");
 
   let localisation = await get_localisation(id);
