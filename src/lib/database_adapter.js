@@ -28,6 +28,7 @@ FROM "user" WHERE id = ${id} LIMIT 1;`
       )[0];
       user.emailVerified = user.emailverified;
       delete user.emailverified;
+      return user;
     },
     async getUserByEmail(email) {
       let user = (
@@ -43,6 +44,7 @@ FROM "user" WHERE email = ${email} LIMIT 1;`
       )[0];
       user.emailVerified = user.emailverified;
       delete user.emailverified;
+      return user;
     },
     async getUserByAccount({ providerAccountId, provider }) {
       let user = (
@@ -61,6 +63,7 @@ LIMIT 1;`
       )[0];
       user.emailVerified = user.emailverified;
       delete user.emailverified;
+      return user;
     },
     async updateUser(user) {
       return sql`
