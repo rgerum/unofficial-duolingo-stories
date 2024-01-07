@@ -24,5 +24,7 @@ export async function POST(req) {
 }
 
 async function set_user_write({ id, write }) {
-  return await sql`UPDATE "user" SET role = ${write} WHERE "user".id = ${id};`;
+  return await sql`UPDATE "user" SET role = ${
+    write == 1
+  } WHERE "user".id = ${id};`;
 }
