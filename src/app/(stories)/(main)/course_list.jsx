@@ -70,7 +70,7 @@ async function CourseListInner({ loading, tag }) {
       {course_groups?.map((group) => (
         <LanguageGroup
           key={group.from_language}
-          name={group.from_languagen_ame}
+          name={group.from_language_name}
           id={group.from_language}
           tag={tag}
         />
