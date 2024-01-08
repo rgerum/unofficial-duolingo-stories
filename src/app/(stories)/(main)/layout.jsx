@@ -24,6 +24,9 @@ export const metadata = {
     "community",
     "volunteers",
   ],
+  "og:image": "https://duostories.org/og.png",
+  "og:title":
+    "Duostories - Learn Languages with Community Translated Duolingo Stories",
 };
 
 const get_courses_user = cache(async (user_name) => {
