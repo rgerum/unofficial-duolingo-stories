@@ -1,4 +1,4 @@
-const postgres = require("postgres");
+import postgres from "postgres";
 
 // will use psql environment variables
 export const sql = postgres(

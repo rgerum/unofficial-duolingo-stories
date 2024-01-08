@@ -1,9 +1,10 @@
-import { sql } from "./db";
+import { sql } from "./db.mjs";
 
 /** @return { import("next-auth/adapters").Adapter } */
 export default function MyAdapter() {
   return {
     async createUser(user) {
+      //console.log("createUser", user);
       return sql`INSERT INTO "user" ${sql({
         username: user.name,
         email: user.email,
@@ -17,7 +18,8 @@ export default function MyAdapter() {
     async getUser(id) {
       let user = (
         await sql`
-SELECT 
+SELECT
+  id, 
   username AS name,
   email,
   emailverified,
@@ -26,14 +28,17 @@ SELECT
   role
 FROM "user" WHERE id = ${id} LIMIT 1;`
       )[0];
+      if (!user) return null;
       user.emailVerified = user.emailverified;
       delete user.emailverified;
+      //console.log("getUser", id, user);
       return user;
     },
     async getUserByEmail(email) {
       let user = (
         await sql`
-SELECT 
+SELECT
+  id,
   username AS name,
   email,
   emailverified,
@@ -42,14 +47,17 @@ SELECT
   role
 FROM "user" WHERE email = ${email} LIMIT 1;`
       )[0];
+      if (!user) return null;
       user.emailVerified = user.emailverified;
       delete user.emailverified;
+      //console.log("getUserByEmail", email, user);
       return user;
     },
     async getUserByAccount({ providerAccountId, provider }) {
       let user = (
         await sql`
 SELECT 
+  "user".id,
   username AS name,
   email,
   emailverified,
@@ -61,6 +69,7 @@ JOIN account ON "user".id = account.user_id
  WHERE account.provider_account_id = ${providerAccountId} AND account.provider = ${provider}
 LIMIT 1;`
       )[0];
+      if(!user) return null;
       user.emailVerified = user.emailverified;
       delete user.emailverified;
       return user;
@@ -75,7 +84,7 @@ update "user" set ${sql({
         admin: user.admin,
         role: user.role,
       })}
-where user_id = ${user.id}
+where id = ${user.id}
 `;
     },
     async deleteUser(userId) {
