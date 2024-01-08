@@ -44,7 +44,7 @@ export default function MyAdapter() {
 SELECT 
     "user".id, username AS name, email, emailverified AS "emailVerified", image, admin, role 
 FROM "user"
-JOIN accounts ON "user".id = accounts.userId
+JOIN accounts ON "user".id = accounts."userId"
  WHERE accounts.providerAccountId = ${providerAccountId} AND accounts.provider = ${provider}
 LIMIT 1;`;
       //console.log("return", result.length !== 0 ? result[0] : null);
@@ -71,7 +71,7 @@ LIMIT 1;`;
     async deleteUser(userId) {
       //console.log("deleteUser");
       await sql`DELETE FROM "user" WHERE id = ${userId}`;
-      await sql`DELETE FROM accounts WHERE userId = ${userId}`;
+      await sql`DELETE FROM accounts WHERE "userId" = ${userId}`;
       await sql`DELETE FROM session WHERE user_id = ${userId}`;
     },
     async linkAccount(account) {

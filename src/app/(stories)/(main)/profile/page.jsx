@@ -23,7 +23,7 @@ async function getLinkedProviders() {
   if (!session) return undefined;
   let user_id = await get_user_id_from_username(session.user.name);
   const req2 =
-    await sql`SELECT provider FROM accounts WHERE userId = ${user_id}`;
+    await sql`SELECT provider FROM accounts WHERE "userId" = ${user_id}`;
 
   let provider_linked = {};
   for (let p of providers_base) {
