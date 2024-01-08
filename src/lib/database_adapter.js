@@ -72,7 +72,7 @@ LIMIT 1;`;
       //console.log("deleteUser");
       await sql`DELETE FROM "user" WHERE id = ${userId}`;
       await sql`DELETE FROM accounts WHERE "userId" = ${userId}`;
-      await sql`DELETE FROM session WHERE user_id = ${userId}`;
+      await sql`DELETE FROM sessions WHERE "userId" = ${userId}`;
     },
     async linkAccount(account) {
       //console.log("linkAccount", account);
@@ -105,11 +105,11 @@ LIMIT 1;`;
     async createSession(session) {
       //console.log("createSession", session);
       return (
-        await sql`INSERT INTO session ${sql({
-          session_token: session.sessionToken,
-          user_id: session.userId,
+        await sql`INSERT INTO sessions ${sql({
+          sessionToken: session.sessionToken,
+          userId: session.userId,
           expires: session.expires,
-        })} RETURNING id, session_token AS "sessionToken", user_id AS "userId", expires`
+        })} RETURNING id, "sessionToken", "userId", expires`
       )[0];
       //return insert("session", session, mapping_session);
     },
@@ -118,9 +118,9 @@ LIMIT 1;`;
       if (sessionToken === undefined) return null;
       const session = (
         await sql`SELECT 
-        session_token AS "sessionToken",
-        user_id AS "userId",
-        expires FROM session s WHERE session_token = ${sessionToken} LIMIT 1`
+        "sessionToken",
+        "userId",
+        expires FROM sessions s WHERE "sessionToken" = ${sessionToken} LIMIT 1`
       )[0];
       if (!session) return null;
 
@@ -139,18 +139,18 @@ LIMIT 1;`;
     async updateSession(session) {
       //console.log("updateSession", session);
       let sessionOld = (
-        await sql`SELECT * FROM session WHERE session_token = ${session.sessionToken}`
+        await sql`SELECT * FROM sessions WHERE "sessionToken" = ${session.sessionToken}`
       )[0];
       if (!sessionOld) return null;
       if (session.expires !== undefined) sessionOld.expires = session.expires;
       return sql`
-      update session set ${sql(sessionOld)}
-      where session_token = ${session.sessionToken}
+      update sessions set ${sql(sessionOld)}
+      where "sessionToken" = ${session.sessionToken}
 `;
     },
     async deleteSession(sessionToken) {
       //console.log("deleteSession", sessionToken);
-      await sql`DELETE FROM session WHERE session_token = ${sessionToken}`;
+      await sql`DELETE FROM sessions WHERE "sessionToken" = ${sessionToken}`;
     },
     async createVerificationToken(verificationToken) {
       //console.log("createVerificationToken", verificationToken);
