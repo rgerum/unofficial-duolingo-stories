@@ -40,7 +40,7 @@ sync_test.sh
 publishX.sh
 /packages/**/cypress/videos/
 /packages/**/cypress/**/screenshots/
-/next/next-all/test.sql
+/src/next-all/test.sql
 
 
 
@@ -55,4 +55,9 @@ out/
 .env*
 
 old/
-/next/test.sql
+/test.sqlite
+.vercel
+.vercel
+.vercel
+.vercel
+.vercel

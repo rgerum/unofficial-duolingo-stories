@@ -1,0 +1,10 @@
+.root {
+  display: flex;
+}
+
+.main_overview {
+  flex-grow: 4;
+  height: calc(100vh - 64px);
+  overflow-y: scroll;
+  overflow-x: hidden;
+}

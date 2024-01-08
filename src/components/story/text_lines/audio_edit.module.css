@@ -1,0 +1,54 @@
+.audio_reload {
+  display: inline-block;
+  cursor: pointer;
+  width: 25px;
+  height: 25px;
+  transition-property: transform;
+  transition-duration: 1s;
+  background-image: url("https://carex.uber.space/stories/old/refresh.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.audio_reload_spin {
+  animation-name: rotate;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ssml {
+  font-size: 0.8em;
+  margin: 0;
+  font-family: monospace;
+}
+.audio_reload {
+  display: inline-block;
+  cursor: pointer;
+  width: 25px;
+  height: 25px;
+  transition-property: transform;
+  transition-duration: 1s;
+  background-image: url("https://carex.uber.space/stories/old/refresh.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.ssml_speaker {
+  background: var(--editor-ssml);
+  padding: 2px 5px;
+  border-radius: 5px;
+  margin-right: 3px;
+  font-size: 0.8em;
+}
+.ssml_reload {
+}

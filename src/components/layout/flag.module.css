@@ -1,0 +1,26 @@
+.flag {
+  display: inline-block;
+  background-size: 40px;
+  height: 32px;
+  width: 40px;
+  vertical-align: bottom;
+  margin: 3px 12px;
+}
+
+.undefined {
+  background-position-y: -2736px;
+}
+
+.flag_sub {
+  margin-left: -32px;
+  margin-top: 18px;
+  width: 35px;
+  background-size: 36px;
+  height: 26px;
+}
+
+.flag_border_rect {
+  fill: none;
+  stroke: var(--body-background);
+  stroke-width: 5;
+}

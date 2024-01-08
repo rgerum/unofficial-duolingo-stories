@@ -1,0 +1,32 @@
+.answer_button {
+  font-family: "Nunito", sans-serif;
+  font-size: 19px;
+  line-height: 1.45;
+  padding: 14px 24px 11px;
+  margin-bottom: 10px;
+  display: block;
+  width: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+}
+@media (max-width: 480px) {
+  .answer_button {
+    padding: 8px 15px;
+  }
+}
+
+.right {
+  composes: color_right button_disabled_up from "../common.module.css";
+}
+
+.false {
+  composes: color_false button_inactive_anim from "../common.module.css";
+}
+
+.done {
+  composes: color_disabled button_inactive from "../common.module.css";
+}
+
+.default {
+  composes: color_base button_click from "../common.module.css";
+}

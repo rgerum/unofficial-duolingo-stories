@@ -1,0 +1,47 @@
+{
+  "name": "Duostories",
+  "short_name": "Duostories",
+  "description": "Learn languages with stories",
+  "start_url": "/learn",
+  "scope": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1cb0f6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon512_maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "screenshots" : [
+    {
+      "src": "screenshot_1.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "screenshot_2.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "screenshot_3.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg"
+    }
+  ]
+}
