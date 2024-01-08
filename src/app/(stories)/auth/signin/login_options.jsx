@@ -12,7 +12,7 @@ import { GetIcon } from "components/icons";
 export function LoginOptions({ providers }) {
   async function register_button() {
     await signIn("credentials", {
-      username: usernameInput,
+      name: usernameInput,
       password: passwordInput,
     });
   }

@@ -41,7 +41,7 @@ SELECT
     story.name, 
     story.status, 
     story.image,
-    "users".name, 
+    "users".name as author, 
     user2.name AS author_change, 
     story.date, 
     story.change_date, 

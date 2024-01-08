@@ -123,7 +123,7 @@ export default function EditList({ course, updateCourses }) {
                   updateCourses={updateCourses}
                 />
               </div>
-              <div>{story.name}</div>
+              <div>{story.author}</div>
               <div>{formatDate(story.date)}</div>
               <div>{story.author_change}</div>
               <div>{formatDate(story.change_date)}</div>
