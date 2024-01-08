@@ -58,14 +58,14 @@ export default function EditList({ course, updateCourses }) {
       <p style={{ fontWeight: "bold" }}>
         Active Contributors:{" "}
         {active_contributors.map((d, i) => (
-          <span key={i}>{d.username}, </span>
+          <span key={i}>{d.name}, </span>
         ))}{" "}
         {active_contributors.length === 0 ? "No Contributors" : ""}
       </p>
       <p>
         Past Contributors:{" "}
         {past_contributors.map((d, i) => (
-          <span key={i}>{d.username}, </span>
+          <span key={i}>{d.name}, </span>
         ))}
       </p>
       <div className={styles.table}>
@@ -123,7 +123,7 @@ export default function EditList({ course, updateCourses }) {
                   updateCourses={updateCourses}
                 />
               </div>
-              <div>{story.username}</div>
+              <div>{story.name}</div>
               <div>{formatDate(story.date)}</div>
               <div>{story.author_change}</div>
               <div>{formatDate(story.change_date)}</div>

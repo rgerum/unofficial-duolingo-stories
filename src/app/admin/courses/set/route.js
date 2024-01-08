@@ -12,7 +12,7 @@ export async function POST(req, res) {
 
   let answer = await set_course(
     data,
-    { username: token.name, user_id: token.id },
+    { name: token.name, user_id: token.id },
     res.revalidate,
   );
 

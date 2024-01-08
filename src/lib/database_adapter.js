@@ -7,12 +7,12 @@ export default function MyAdapter() {
       //console.log("createUser", user);
       const { name, email, emailVerified, image } = user;
 
-      const result = await sql`INSERT INTO "user" ${sql({
-        username: name,
+      const result = await sql`INSERT INTO "users" ${sql({
+        name: name,
         email: email,
-        emailverified: emailVerified,
+        emailVerified: emailVerified,
         image: image,
-      })} RETURNING id, name, email, emailverified AS "emailVerified", image`;
+      })} RETURNING id, name, email, "emailVerified", image`;
       //console.log("return", result[0]);
       return result[0];
     },
@@ -20,7 +20,7 @@ export default function MyAdapter() {
       //console.log("getUser", id);
       try {
         const result =
-          await sql`select id, username AS name, email, emailverified AS "emailVerified", image, admin, role from "user" where id = ${id}`;
+          await sql`select id, name, email,  "emailVerified", image, admin, role from "users" where id = ${id}`;
         //console.log("return", result.length !== 0 ? result[0] : null);
         return result.length === 0 ? null : result[0];
       } catch (e) {
@@ -31,7 +31,7 @@ export default function MyAdapter() {
       //console.log("getUserByEmail", email);
       try {
         const result =
-          await sql`select id, username AS name, email, emailverified AS "emailVerified", image, admin, role from "user" where email = ${email}`;
+          await sql`select id, name, email, "emailVerified", image, admin, role from "users" where email = ${email}`;
         //console.log("return", result.length !== 0 ? result[0] : null);
         return result.length === 0 ? null : result[0];
       } catch (e) {
@@ -42,9 +42,9 @@ export default function MyAdapter() {
       //console.log("getUserByAccount", providerAccountId, provider);
       let result = await sql`
 SELECT 
-    "user".id, username AS name, email, emailverified AS "emailVerified", image, admin, role 
-FROM "user"
-JOIN accounts ON "user".id = accounts."userId"
+    "users".id, name, email, "emailVerified", image, admin, role 
+FROM "users"
+JOIN accounts ON "users".id = accounts."userId"
  WHERE accounts.providerAccountId = ${providerAccountId} AND accounts.provider = ${provider}
 LIMIT 1;`;
       //console.log("return", result.length !== 0 ? result[0] : null);
@@ -52,10 +52,10 @@ LIMIT 1;`;
     },
     async updateUser(user) {
       //console.log("updateUser", user);
-      let query1 = await sql`SELECT * FROM "user" WHERE id = ${user.id}`;
+      let query1 = await sql`SELECT * FROM "users" WHERE id = ${user.id}`;
       let oldUser = query1[0];
 
-      if (user.name !== undefined) oldUser.username = user.name;
+      if (user.name !== undefined) oldUser.name = user.name;
       if (user.email !== undefined) oldUser.email = user.email;
       if (user.emailVerified !== undefined)
         oldUser.emailverified = user.emailVerified;
@@ -63,14 +63,14 @@ LIMIT 1;`;
       if (user.admin !== undefined) oldUser.admin = user.admin;
       if (user.role !== undefined) oldUser.role = user.role;
 
-      const query2 = await sql`update "user" set ${sql(oldUser)} where id = ${
+      const query2 = await sql`update "users" set ${sql(oldUser)} where id = ${
         user.id
       } RETURNING id, username AS name, email, emailverified AS "emailVerified", image, admin, role`;
       return query2[0];
     },
     async deleteUser(userId) {
       //console.log("deleteUser");
-      await sql`DELETE FROM "user" WHERE id = ${userId}`;
+      await sql`DELETE FROM "users" WHERE id = ${userId}`;
       await sql`DELETE FROM accounts WHERE "userId" = ${userId}`;
       await sql`DELETE FROM sessions WHERE "userId" = ${userId}`;
     },
@@ -126,13 +126,13 @@ LIMIT 1;`;
 
       const user = (
         await sql`SELECT  
-        username AS name,
+        name,
         email,
-        emailverified AS "emailVerified",
+        "emailVerified",
         image,
         admin,
         role 
-        FROM "user" WHERE id = ${session.userId} LIMIT 1;`
+        FROM "users" WHERE id = ${session.userId} LIMIT 1;`
       )[0];
       return { session, user };
     },

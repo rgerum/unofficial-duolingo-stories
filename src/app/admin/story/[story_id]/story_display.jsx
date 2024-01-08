@@ -42,7 +42,7 @@ export default function StoryDisplay({ story }) {
       <ul>
         {story_.approvals.map((d) => (
           <li key={d.id}>
-            {`${d.date}`} {d.username}{" "}
+            {`${d.date}`} {d.name}{" "}
             <span
               style={{ cursor: "pointer" }}
               onClick={() => deleteApproval(d.id)}

@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 async function get_user_id_from_username(user_name) {
-  let res = await sql`SELECT id FROM "user" WHERE username = ${user_name}`;
+  let res = await sql`SELECT id FROM "users" WHERE name = ${user_name}`;
   if (res.length) return res[0].id;
   return 0;
 }

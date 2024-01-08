@@ -41,15 +41,15 @@ SELECT
     story.name, 
     story.status, 
     story.image,
-    "user".username, 
-    user2.username AS author_change, 
+    "users".name, 
+    user2.name AS author_change, 
     story.date, 
     story.change_date, 
     story.public
 FROM 
     story
-LEFT JOIN "user" ON story.author = "user".id
-LEFT JOIN "user" user2 ON story.author_change = user2.id
+LEFT JOIN "users" ON story.author = "users".id
+LEFT JOIN "users" user2 ON story.author_change = user2.id
 WHERE 
     story.course_id = ${course.id} AND deleted = false
 ORDER BY 
@@ -70,7 +70,7 @@ ORDER BY
 SELECT
     c.short,
     u.id,
-    u.username,
+    u.name,
     MAX(sa.date) AS last_date,
     MAX(sa.date) > CURRENT_DATE - INTERVAL '1 month' AS active
 FROM
@@ -80,11 +80,11 @@ JOIN
 JOIN
     story_approval sa ON s.id = sa.story_id
 JOIN
-    "user" u ON u.id = sa.user_id
+    "users" u ON u.id = sa.user_id
 WHERE
     course_id = ${course.id}
 GROUP BY
-    u.id, c.id, c.short, u.username
+    u.id, c.id, c.short, u.name
 ORDER BY
     last_date DESC;   
     `;

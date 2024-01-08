@@ -13,7 +13,7 @@ export async function POST(req) {
       });
 
     let answer = await set_language(data, {
-      username: token.name,
+      name: token.name,
       user_id: token.id,
     });
 
