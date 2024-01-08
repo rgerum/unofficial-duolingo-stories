@@ -93,7 +93,8 @@ where id = ${user.id}
       await sql`DELETE FROM session WHERE user_id = ${userId}`;
     },
     async linkAccount(account) {
-      return sql`INSERT INTO account ${sql({
+      //console.log("linkAccount", account);
+      let d = {
         user_id: account.userId,
         type: account.type,
         provider: account.provider,
@@ -103,9 +104,11 @@ where id = ${user.id}
         expires_at: account.expires_at,
         token_type: account.token_type,
         scope: account.scope,
-        id_token: account.id_token,
-        session_state: account.session_state,
-      })} RETURNING id`;
+        id_token: account.id_token || null,
+        session_state: account.session_state || null,
+      };
+      //console.log(d);
+      return sql`INSERT INTO account ${sql(d)} RETURNING id`;
       //return insert("account", account, mapping_account);
     },
     async unlinkAccount({ providerAccountId, provider }) {
