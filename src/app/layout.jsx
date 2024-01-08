@@ -1,9 +1,10 @@
-import { Nunito } from 'next/font/google'
+import { Nunito } from "next/font/google";
 import "styles/global.css";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/react";
 
 // If loading a variable font, you don't need to specify the font weight
-const nunito = Nunito({ subsets: ['latin-ext', 'cyrillic-ext', 'vietnamese'] })
+const nunito = Nunito({ subsets: ["latin-ext", "cyrillic-ext", "vietnamese"] });
 
 export default function RootLayout({ children }) {
   return (
@@ -41,7 +42,10 @@ load()
 document.addEventListener("DOMContentLoaded", load);
 `}</Script>
       </head>
-      <body className={nunito.className}>{children}</body>
+      <body className={nunito.className}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
