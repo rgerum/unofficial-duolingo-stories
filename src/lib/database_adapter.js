@@ -1,4 +1,4 @@
-import { sql } from "./db.mjs";
+import { sql } from "./db";
 
 /** @return { import("next-auth/adapters").Adapter } */
 export default function MyAdapter() {
@@ -69,7 +69,7 @@ JOIN account ON "user".id = account.user_id
  WHERE account.provider_account_id = ${providerAccountId} AND account.provider = ${provider}
 LIMIT 1;`
       )[0];
-      if(!user) return null;
+      if (!user) return null;
       user.emailVerified = user.emailverified;
       delete user.emailverified;
       return user;
