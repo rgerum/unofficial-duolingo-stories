@@ -36,7 +36,7 @@ INNER JOIN (
     FROM story s
     INNER JOIN story_done ON story_done.story_id = s.id
     WHERE story_done.user_id = (
-        SELECT id FROM "user" WHERE username = ${user_name} LIMIT 1
+        SELECT id FROM "users" WHERE name = ${user_name} LIMIT 1
     )
     GROUP BY s.course_id
 ) as max_time ON course.id = max_time.course_id

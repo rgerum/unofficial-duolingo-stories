@@ -7,12 +7,12 @@ async function changePasswordAction(password, user_id) {
   let password_hashed = await phpbb_hash(password);
 
   // set the new password
-  await sql`UPDATE user SET password = ${password_hashed} WHERE id = ${user_id};`;
+  await sql`UPDATE users SET password = ${password_hashed} WHERE id = ${user_id};`;
 }
 
-async function check_link(username, hash) {
+async function check_link(name, hash) {
   let result = await sql`
-    SELECT id, email FROM "user" WHERE LOWER(username) = LOWER(${username})`;
+    SELECT id, email FROM "users" WHERE LOWER(name) = LOWER(${name})`;
   if (result.length === 0) {
     return undefined;
   }
@@ -31,7 +31,7 @@ async function check_link(username, hash) {
 }
 
 export default async function Page({ params }) {
-  let user_id = await check_link(params.username, params.hash);
+  let user_id = await check_link(params.name, params.hash);
   if (!user_id) {
     return (
       <div id="login_dialog">

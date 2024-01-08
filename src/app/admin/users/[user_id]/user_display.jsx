@@ -57,7 +57,7 @@ export default function UserDisplay({ user }) {
     <div
       style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
     >
-      <h1>{user_.username}</h1>
+      <h1>{user_.name}</h1>
       <p>Email: {user_.email}</p>
       <p>{`${user_.regdate}`}</p>
       <p>
@@ -70,7 +70,7 @@ export default function UserDisplay({ user }) {
   );
 }
 /*
-<td>{user.username}</td>
+<td>{user.name}</td>
                     <td>{user.email}</td>
                     <td>{user.regdate}</td>
                     <td>{user.count}</td>

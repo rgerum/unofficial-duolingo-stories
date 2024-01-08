@@ -6,9 +6,8 @@ async function user_properties(id) {
   const isNumeric = (value) =>
     value.length !== 0 && [...value].every((c) => c >= "0" && c <= "9");
   if (isNumeric(id))
-    return (await sql`SELECT * FROM "user" WHERE id = ${id} LIMIT 1;`)[0];
-  else
-    return (await sql`SELECT * FROM "user" WHERE username = ${id} LIMIT 1;`)[0];
+    return (await sql`SELECT * FROM "users" WHERE id = ${id} LIMIT 1;`)[0];
+  else return (await sql`SELECT * FROM "users" WHERE name = ${id} LIMIT 1;`)[0];
 }
 
 export default async function Page({ params }) {

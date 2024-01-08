@@ -24,7 +24,7 @@ export async function POST(req) {
 }
 
 async function set_user_activate({ id, activated }) {
-  return await sql`UPDATE "user" SET activated = ${
+  return await sql`UPDATE "users" SET activated = ${
     activated == 1
-  } WHERE "user".id = ${id};`;
+  } WHERE "users".id = ${id};`;
 }

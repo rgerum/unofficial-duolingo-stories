@@ -64,7 +64,7 @@ export default function Register() {
     } else {
       setState(1);
       let [success, msg] = await register({
-        username: usernameInput,
+        name: usernameInput,
         password: passwordInput,
         email: emailInput,
       });

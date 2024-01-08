@@ -7,12 +7,12 @@ export default function MyAdapter() {
       //console.log("createUser", user);
       const { name, email, emailVerified, image } = user;
 
-      const result = await sql`INSERT INTO "user" ${sql({
-        username: name,
+      const result = await sql`INSERT INTO "users" ${sql({
+        name: name,
         email: email,
-        emailverified: emailVerified,
+        emailVerified: emailVerified,
         image: image,
-      })} RETURNING id, name, email, emailverified AS "emailVerified", image`;
+      })} RETURNING id, name, email, "emailVerified", image`;
       //console.log("return", result[0]);
       return result[0];
     },
@@ -20,7 +20,7 @@ export default function MyAdapter() {
       //console.log("getUser", id);
       try {
         const result =
-          await sql`select id, username AS name, email, emailverified AS "emailVerified", image, admin, role from "user" where id = ${id}`;
+          await sql`select id, name, email,  "emailVerified", image, admin, role from "users" where id = ${id}`;
         //console.log("return", result.length !== 0 ? result[0] : null);
         return result.length === 0 ? null : result[0];
       } catch (e) {
@@ -31,7 +31,7 @@ export default function MyAdapter() {
       //console.log("getUserByEmail", email);
       try {
         const result =
-          await sql`select id, username AS name, email, emailverified AS "emailVerified", image, admin, role from "user" where email = ${email}`;
+          await sql`select id, name, email, "emailVerified", image, admin, role from "users" where email = ${email}`;
         //console.log("return", result.length !== 0 ? result[0] : null);
         return result.length === 0 ? null : result[0];
       } catch (e) {
@@ -42,20 +42,20 @@ export default function MyAdapter() {
       //console.log("getUserByAccount", providerAccountId, provider);
       let result = await sql`
 SELECT 
-    "user".id, username AS name, email, emailverified AS "emailVerified", image, admin, role 
-FROM "user"
-JOIN account ON "user".id = account.user_id
- WHERE account.provider_account_id = ${providerAccountId} AND account.provider = ${provider}
+    "users".id, name, email, "emailVerified", image, admin, role 
+FROM "users"
+JOIN accounts ON "users".id = accounts."userId"
+ WHERE accounts.providerAccountId = ${providerAccountId} AND accounts.provider = ${provider}
 LIMIT 1;`;
       //console.log("return", result.length !== 0 ? result[0] : null);
       return result.length !== 0 ? result[0] : null;
     },
     async updateUser(user) {
       //console.log("updateUser", user);
-      let query1 = await sql`SELECT * FROM "user" WHERE id = ${user.id}`;
+      let query1 = await sql`SELECT * FROM "users" WHERE id = ${user.id}`;
       let oldUser = query1[0];
 
-      if (user.name !== undefined) oldUser.username = user.name;
+      if (user.name !== undefined) oldUser.name = user.name;
       if (user.email !== undefined) oldUser.email = user.email;
       if (user.emailVerified !== undefined)
         oldUser.emailverified = user.emailVerified;
@@ -63,25 +63,25 @@ LIMIT 1;`;
       if (user.admin !== undefined) oldUser.admin = user.admin;
       if (user.role !== undefined) oldUser.role = user.role;
 
-      const query2 = await sql`update "user" set ${sql(oldUser)} where id = ${
+      const query2 = await sql`update "users" set ${sql(oldUser)} where id = ${
         user.id
       } RETURNING id, username AS name, email, emailverified AS "emailVerified", image, admin, role`;
       return query2[0];
     },
     async deleteUser(userId) {
       //console.log("deleteUser");
-      await sql`DELETE FROM "user" WHERE id = ${userId}`;
-      await sql`DELETE FROM account WHERE user_id = ${userId}`;
-      await sql`DELETE FROM session WHERE user_id = ${userId}`;
+      await sql`DELETE FROM "users" WHERE id = ${userId}`;
+      await sql`DELETE FROM accounts WHERE "userId" = ${userId}`;
+      await sql`DELETE FROM sessions WHERE "userId" = ${userId}`;
     },
     async linkAccount(account) {
       //console.log("linkAccount", account);
       ////console.log("linkAccount", account);
       let d = {
-        user_id: account.userId,
+        userId: account.userId,
         provider: account.provider,
         type: account.type,
-        provider_account_id: account.providerAccountId,
+        providerAccountId: account.providerAccountId,
         access_token: account.access_token || null,
         expires_at: account.expires_at || null,
         refresh_token: account.refresh_token || null,
@@ -91,25 +91,25 @@ LIMIT 1;`;
         token_type: account.token_type || null,
       };
       //console.log(d);
-      let result = await sql`INSERT INTO account ${sql(
+      let result = await sql`INSERT INTO accounts ${sql(
         d,
-      )} RETURNING id, user_id AS "userId", provider, type, provider_account_id AS "providerAccountId", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type`;
+      )} RETURNING id, "userId", provider, type, "providerAccountId", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type`;
       //console.log("result", result[0]);
       return result[0];
       //return insert("account", account, mapping_account);
     },
     async unlinkAccount({ providerAccountId, provider }) {
       //console.log("unlinkAccount", providerAccountId, provider);
-      await sql`DELETE FROM account WHERE provider_account_id = ${providerAccountId} AND provider = ${provider}`;
+      await sql`DELETE FROM accounts WHERE providerAccountId = ${providerAccountId} AND provider = ${provider}`;
     },
     async createSession(session) {
       //console.log("createSession", session);
       return (
-        await sql`INSERT INTO session ${sql({
-          session_token: session.sessionToken,
-          user_id: session.userId,
+        await sql`INSERT INTO sessions ${sql({
+          sessionToken: session.sessionToken,
+          userId: session.userId,
           expires: session.expires,
-        })} RETURNING id, session_token AS "sessionToken", user_id AS "userId", expires`
+        })} RETURNING id, "sessionToken", "userId", expires`
       )[0];
       //return insert("session", session, mapping_session);
     },
@@ -118,39 +118,39 @@ LIMIT 1;`;
       if (sessionToken === undefined) return null;
       const session = (
         await sql`SELECT 
-        session_token AS "sessionToken",
-        user_id AS "userId",
-        expires FROM session s WHERE session_token = ${sessionToken} LIMIT 1`
+        "sessionToken",
+        "userId",
+        expires FROM sessions s WHERE "sessionToken" = ${sessionToken} LIMIT 1`
       )[0];
       if (!session) return null;
 
       const user = (
         await sql`SELECT  
-        username AS name,
+        name,
         email,
-        emailverified AS "emailVerified",
+        "emailVerified",
         image,
         admin,
         role 
-        FROM "user" WHERE id = ${session.userId} LIMIT 1;`
+        FROM "users" WHERE id = ${session.userId} LIMIT 1;`
       )[0];
       return { session, user };
     },
     async updateSession(session) {
       //console.log("updateSession", session);
       let sessionOld = (
-        await sql`SELECT * FROM session WHERE session_token = ${session.sessionToken}`
+        await sql`SELECT * FROM sessions WHERE "sessionToken" = ${session.sessionToken}`
       )[0];
       if (!sessionOld) return null;
       if (session.expires !== undefined) sessionOld.expires = session.expires;
       return sql`
-      update session set ${sql(sessionOld)}
-      where session_token = ${session.sessionToken}
+      update sessions set ${sql(sessionOld)}
+      where "sessionToken" = ${session.sessionToken}
 `;
     },
     async deleteSession(sessionToken) {
       //console.log("deleteSession", sessionToken);
-      await sql`DELETE FROM session WHERE session_token = ${sessionToken}`;
+      await sql`DELETE FROM sessions WHERE "sessionToken" = ${sessionToken}`;
     },
     async createVerificationToken(verificationToken) {
       //console.log("createVerificationToken", verificationToken);

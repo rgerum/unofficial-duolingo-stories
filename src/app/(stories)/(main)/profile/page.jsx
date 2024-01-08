@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 async function get_user_id_from_username(user_name) {
-  let res = await sql`SELECT id FROM "user" WHERE username = ${user_name}`;
+  let res = await sql`SELECT id FROM "users" WHERE name = ${user_name}`;
   if (res.length) return res[0].id;
   return 0;
 }
@@ -23,7 +23,7 @@ async function getLinkedProviders() {
   if (!session) return undefined;
   let user_id = await get_user_id_from_username(session.user.name);
   const req2 =
-    await sql`SELECT provider FROM account WHERE user_id = ${user_id}`;
+    await sql`SELECT provider FROM accounts WHERE "userId" = ${user_id}`;
 
   let provider_linked = {};
   for (let p of providers_base) {

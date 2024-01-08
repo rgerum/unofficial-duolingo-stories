@@ -2,11 +2,11 @@ import styles from "./set_list.module.css";
 import StoryButton from "./story_button";
 import SetListClient from "./set_list_client";
 import { sql } from "lib/db";
-import {cache} from "react";
+import { cache } from "react";
 
-const get_course_done = async (course_id, username) => {
+const get_course_done = async (course_id, name) => {
   const done_query =
-    await sql`SELECT s.id FROM story_done JOIN story s on s.id = story_done.story_id WHERE user_id = (SELECT id FROM "user" WHERE username = ${username} LIMIT 1) AND s.course_id = (SELECT id FROM course WHERE short = ${course_id} LIMIT 1) GROUP BY s.id`;
+    await sql`SELECT s.id FROM story_done JOIN story s on s.id = story_done.story_id WHERE user_id = (SELECT id FROM "users" WHERE name = ${name} LIMIT 1) AND s.course_id = (SELECT id FROM course WHERE short = ${course_id} LIMIT 1) GROUP BY s.id`;
   const done = {};
   for (let d of done_query) {
     done[d.id] = true;
