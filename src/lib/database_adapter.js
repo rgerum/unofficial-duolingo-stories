@@ -44,8 +44,8 @@ export default function MyAdapter() {
 SELECT 
     "user".id, username AS name, email, emailverified AS "emailVerified", image, admin, role 
 FROM "user"
-JOIN account ON "user".id = account.user_id
- WHERE account.provider_account_id = ${providerAccountId} AND account.provider = ${provider}
+JOIN accounts ON "user".id = accounts.userId
+ WHERE accounts.providerAccountId = ${providerAccountId} AND accounts.provider = ${provider}
 LIMIT 1;`;
       //console.log("return", result.length !== 0 ? result[0] : null);
       return result.length !== 0 ? result[0] : null;
@@ -71,17 +71,17 @@ LIMIT 1;`;
     async deleteUser(userId) {
       //console.log("deleteUser");
       await sql`DELETE FROM "user" WHERE id = ${userId}`;
-      await sql`DELETE FROM account WHERE user_id = ${userId}`;
+      await sql`DELETE FROM accounts WHERE userId = ${userId}`;
       await sql`DELETE FROM session WHERE user_id = ${userId}`;
     },
     async linkAccount(account) {
       //console.log("linkAccount", account);
       ////console.log("linkAccount", account);
       let d = {
-        user_id: account.userId,
+        userId: account.userId,
         provider: account.provider,
         type: account.type,
-        provider_account_id: account.providerAccountId,
+        providerAccountId: account.providerAccountId,
         access_token: account.access_token || null,
         expires_at: account.expires_at || null,
         refresh_token: account.refresh_token || null,
@@ -91,16 +91,16 @@ LIMIT 1;`;
         token_type: account.token_type || null,
       };
       //console.log(d);
-      let result = await sql`INSERT INTO account ${sql(
+      let result = await sql`INSERT INTO accounts ${sql(
         d,
-      )} RETURNING id, user_id AS "userId", provider, type, provider_account_id AS "providerAccountId", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type`;
+      )} RETURNING id, "userId", provider, type, "providerAccountId", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type`;
       //console.log("result", result[0]);
       return result[0];
       //return insert("account", account, mapping_account);
     },
     async unlinkAccount({ providerAccountId, provider }) {
       //console.log("unlinkAccount", providerAccountId, provider);
-      await sql`DELETE FROM account WHERE provider_account_id = ${providerAccountId} AND provider = ${provider}`;
+      await sql`DELETE FROM accounts WHERE providerAccountId = ${providerAccountId} AND provider = ${provider}`;
     },
     async createSession(session) {
       //console.log("createSession", session);
