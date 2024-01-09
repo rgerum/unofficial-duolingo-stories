@@ -3,52 +3,40 @@ from pathlib import Path
 
 import mysql.connector
 import pandas as pd
-
-class Database:
-    def __enter__(self):
-        mydb = mysql.connector.connect(
-          host="localhost",
-          user="duostori",
-          password="VtyX.sXIYeiHR_:vI.aa",
-          database="duostori"
-        )
-        self.mydb = mydb
-        return mydb
-
-    def __exit__(self, *args, **kwargs):
-        self.mydb.close()
+import psycopg
 
 
 def get_duostories_id(discord_id):
-    with Database() as mydb:
-        mycursor = mydb.cursor()
-        mycursor.execute("""SELECT user_id FROM account WHERE provider = "discord" AND provider_account_id = %s LIMIT 1""", [discord_id])
-        myresult = mycursor.fetchall()
-        if len(myresult):
-            return myresult[0][0]
+    # Connect to an existing database
+    with psycopg.connect(PG_URL) as conn:
+        # Open a cursor to perform database operations
+        with conn.cursor() as cur:
+            # Query the database and obtain data as Python objects.
+            cur.execute("SELECT \"userId\" FROM accounts WHERE provider = 'discord' AND \"providerAccountId\" = %s LIMIT 1", [discord_id])
+            if cur:
+                return cur.fetchone()[0]
 
 def set_user_role(discord_id, role):
-    with Database() as mydb:
-        # update the user
-        mycursor = mydb.cursor()
-        mycursor.execute(f"""UPDATE user SET role = {int(role)} WHERE user.id = (SELECT user_id FROM account WHERE provider = 'discord' AND provider_account_id = '{discord_id}' LIMIT 1);""")
-        myresult = mycursor.fetchall()
-        mydb.commit()
+    # Connect to an existing database
+    with psycopg.connect(PG_URL) as conn:
+        # Open a cursor to perform database operations
+        with conn.cursor() as cur:
+            cur.execute("UPDATE users SET role = %s WHERE users.id = (SELECT \"userId\" FROM accounts WHERE provider = 'discord' AND \"providerAccountId\" = %s LIMIT 1);", [role == 1, discord_id])
+            conn.commit()
 
-    with Database() as mydb:
-        # check
-        mycursor = mydb.cursor()
-        mycursor.execute("""SELECT user_id, user.username, role FROM account JOIN user ON user_id = user.id WHERE provider = "discord" AND provider_account_id = %s LIMIT 1""", [discord_id])
-        myresult = mycursor.fetchall()
-
-    print(myresult)
-    if len(myresult) == 0:
-        return None
-    return myresult[0]
+        # Open a cursor to perform database operations
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT \"userId\", users.name, role FROM accounts JOIN users ON \"userId\" = users.id WHERE provider = 'discord' AND \"providerAccountId\" = %s LIMIT 1",
+                [discord_id])
+            if cur:
+                return cur.fetchone()
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token obtained from the Discord Developer Portal.
 params = Path(__file__).parent / ".env.local"
 params = {f.split("=")[0]:f.split("=")[1] for f in params.read_text().split("\n") if f != ''}
+
+PG_URL = params['POSTGRES_URL']
 
 TOKEN = params['DISCORD_TOKEN']
 CHANNEL_CONTRIBUTOR_REQUEST = 1132747276234792980
@@ -157,7 +145,7 @@ class MyClient(discord.Client):
                             await self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
                         print(err)
-                        await self.log(f"⚠️ could not added write permissions for {after.name}, a database error occoured.")
+                        await self.log(f"⚠️ could not added write permissions for {after.name}, a database error occurred.")
                 print(f"User {after.name} has been given the role: {role.name}")
 
             # Add your reaction logic here for when roles are added to a user.
