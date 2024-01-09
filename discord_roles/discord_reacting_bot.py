@@ -12,7 +12,7 @@ def get_duostories_id(discord_id):
         # Open a cursor to perform database operations
         with conn.cursor() as cur:
             # Query the database and obtain data as Python objects.
-            cur.execute("SELECT \"userId\" FROM accounts WHERE provider = 'discord' AND \"providerAccountId\" = %s LIMIT 1", [discord_id])
+            cur.execute("SELECT \"userId\" FROM accounts WHERE provider = 'discord' AND \"providerAccountId\" = %s LIMIT 1", [str(discord_id)])
             if cur:
                 return cur.fetchone()[0]
 
@@ -21,14 +21,14 @@ def set_user_role(discord_id, role):
     with psycopg.connect(PG_URL) as conn:
         # Open a cursor to perform database operations
         with conn.cursor() as cur:
-            cur.execute("UPDATE users SET role = %s WHERE users.id = (SELECT \"userId\" FROM accounts WHERE provider = 'discord' AND \"providerAccountId\" = %s LIMIT 1);", [role == 1, discord_id])
+            cur.execute("UPDATE users SET role = %s WHERE users.id = (SELECT \"userId\" FROM accounts WHERE provider = 'discord' AND \"providerAccountId\" = %s LIMIT 1);", [role == 1, str(discord_id)])
             conn.commit()
 
         # Open a cursor to perform database operations
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT \"userId\", users.name, role FROM accounts JOIN users ON \"userId\" = users.id WHERE provider = 'discord' AND \"providerAccountId\" = %s LIMIT 1",
-                [discord_id])
+                [str(discord_id)])
             if cur:
                 return cur.fetchone()
 
