@@ -10,6 +10,7 @@
     "cypress": "cypress open"
   },
   "dependencies": {
+    "@auth/pg-adapter": "^0.2.12",
     "@aws-sdk/client-polly": "^3.484.0",
     "@codemirror/state": "^6.4.0",
     "@google-cloud/text-to-speech": "^5.0.1",
