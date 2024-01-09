@@ -1,3 +1,9 @@
+.row:hover {
+  background: var(--body-background);
+  filter: brightness(0.9);
+  transition: filter .1s ease-in,color .1s ease-in,background-color .1s ease-in;
+}
+
 @media (max-width: 1000px) {
   .thead {
     display: none;
