@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "org.duostories.twa",
+      "sha256_cert_fingerprints":
+      ["AA:AA:9B:32:C3:F9:AF:1E:11:E6:E3:9E:CC:95:4A:F5:8D:84:E5:A7:BE:C3:7D:EF:2A:1B:4C:96:2B:51:BC:6C", "CD:32:C5:69:5C:21:52:6B:0A:0A:F9:BB:D9:23:F6:FF:01:83:44:22:9A:49:E4:B9:CE:BD:C6:9B:89:45:CA:7F"]
+    }
+  }
+]
