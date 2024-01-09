@@ -11,20 +11,28 @@
   "orientation": "portrait",
   "icons": [
     {
+      "src": "icon512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "icon512_maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "icon512.png",
+      "src": "icon512_monochrome.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "monochrome"
     },
     {
-      "src": "icon192.png",
+      "src": "icon192_maskable.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "screenshots" : [
@@ -40,6 +48,16 @@
     },
     {
       "src": "screenshot_3.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "screenshot_4.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "screenshot_5.jpg",
       "sizes": "1080x1920",
       "type": "image/jpeg"
     }
