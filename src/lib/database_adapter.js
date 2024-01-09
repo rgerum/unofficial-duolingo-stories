@@ -45,7 +45,7 @@ SELECT
     "users".id, name, email, "emailVerified", image, admin, role 
 FROM "users"
 JOIN accounts ON "users".id = accounts."userId"
- WHERE accounts.providerAccountId = ${providerAccountId} AND accounts.provider = ${provider}
+ WHERE accounts."providerAccountId" = ${providerAccountId} AND accounts.provider = ${provider}
 LIMIT 1;`;
       //console.log("return", result.length !== 0 ? result[0] : null);
       return result.length !== 0 ? result[0] : null;
@@ -100,7 +100,7 @@ LIMIT 1;`;
     },
     async unlinkAccount({ providerAccountId, provider }) {
       //console.log("unlinkAccount", providerAccountId, provider);
-      await sql`DELETE FROM accounts WHERE providerAccountId = ${providerAccountId} AND provider = ${provider}`;
+      await sql`DELETE FROM accounts WHERE "providerAccountId" = ${providerAccountId} AND provider = ${provider}`;
     },
     async createSession(session) {
       //console.log("createSession", session);

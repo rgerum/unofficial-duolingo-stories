@@ -7,7 +7,18 @@ import EmailProvider from "next-auth/providers/email";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { sql } from "lib/db";
 import { phpbb_check_hash } from "lib/auth/hash_functions2";
-import MyAdapter from "lib/database_adapter";
+//import MyAdapter from "lib/database_adapter";
+
+import PostgresAdapter from "@auth/pg-adapter";
+import { Pool } from "pg";
+
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL,
+  ssl: true,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
@@ -23,7 +34,8 @@ export const authOptions = {
     //newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
   },
   // https://next-auth.js.org/configuration/providers/oauth
-  adapter: MyAdapter(),
+  //adapter: MyAdapter(),
+  adapter: PostgresAdapter(pool),
   providers: [
     EmailProvider({
       server: process.env.EMAIL_SERVER,
