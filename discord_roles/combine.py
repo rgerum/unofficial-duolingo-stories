@@ -1,32 +1,35 @@
-import mysql.connector
+import psycopg
 import pandas as pd
+from pathlib import Path
 
-mydb = mysql.connector.connect(
-  host="localhost",
-  user="duostori",
-  password="VtyX.sXIYeiHR_:vI.aa",
-  database="duostori"
-)
+params = Path(__file__).parent / ".env.local"
+params = {f.split("=")[0]:f.split("=")[1] for f in params.read_text().split("\n") if f != ''}
+PG_URL = params['POSTGRES_URL']
 
 def get_user_to_discord_mapping():
-    mycursor = mydb.cursor()
-    mycursor.execute("""SELECT u.username, a.provider_account_id FROM user u JOIN account a on u.id = a.user_id WHERE a.provider = \"discord\"""")
-    myresult = mycursor.fetchall()
+    with psycopg.connect(PG_URL) as conn:
+        # Open a cursor to perform database operations
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT u.name, a.\"providerAccountId\" FROM users u JOIN accounts a on u.id = a.\"userId\" WHERE a.provider = 'discord'")
 
-    user_discord_id = {}
-    for user in myresult:
-        user_discord_id[user[0]] = user[1]
+            user_discord_id = {}
+            for user in cur:
+                user_discord_id[user[0]] = user[1]
     return user_discord_id
 
 def get_user_approval_count():
-    mycursor = mydb.cursor()
-    mycursor.execute("""
-    SELECT user.username, story_approval.story_id, story_approval.date, s.public FROM story_approval
-        JOIN user ON user.id = story_approval.user_id
-        JOIN story s on s.id = story_approval.story_id
-        order by story_approval.story_id, story_approval.date""")
+    with psycopg.connect(PG_URL) as conn:
+        # Open a cursor to perform database operations
+        with conn.cursor() as cur:
 
-    myresult = mycursor.fetchall()
+            cur.execute("""
+            SELECT users.name, story_approval.story_id, story_approval.date, s.public FROM story_approval
+                    JOIN users ON users.id = story_approval.user_id
+                    JOIN story s on s.id = story_approval.story_id
+                    order by story_approval.story_id, story_approval.date""")
+
+            myresult = cur.fetchall()
 
 
     last_id = None
@@ -43,7 +46,7 @@ def get_user_approval_count():
             #print(x, "---------")
         else:
             #print(x)
-            data_approval.append(dict(author=x[0], story_id=x[1], approval=1, public=x[-1]))
+            data_approval.append(dict(author=x[0], story_id=x[1], approval=1, public=int(x[-1])))
     data_approval = pd.DataFrame(data_approval)
     return data_approval
 
