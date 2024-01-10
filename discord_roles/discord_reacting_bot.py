@@ -70,7 +70,7 @@ class MyClient(discord.Client):
                 await first_message.add_reaction('❌')
                 await first_message.remove_reaction('🔗', client.user)
                 if message.id == first_message.id:
-                    await message.channel.send("Please connect your Duostories account to your Discord account (on https://duostories.org/profile). Then post another message here and I will check again.")
+                    await message.channel.send("Please connect your Duostories account to your Discord account (on <https://duostories.org/profile>). Then post another message here and I will check again.")
 
     async def check_reaction(self, reaction):
         # Check if the reacting user is a moderator
@@ -120,7 +120,7 @@ class MyClient(discord.Client):
 
                 duostories_id = get_duostories_id(user.id)
                 if duostories_id:
-                    await message.channel.send("I gave you the **Contributor** role and activated your account on Duostories.\nIf you are currently logged in on https://duostories.org, please log out and in again for the changes to take effect.\nYou can then access the editor at https://duostories.org/editor.")
+                    await message.channel.send("I gave you the **Contributor** role and activated your account on Duostories.\nIf you are currently logged in on <https://duostories.org>, please log out and in again for the changes to take effect.\nYou can then access the editor at <https://duostories.org/editor>.")
                 else:
                     await message.channel.send("I gave you the **Contributor** role and but I could not activate your account on Duostories as you haven't connected your duostories account to discord.")
 
@@ -140,7 +140,7 @@ class MyClient(discord.Client):
                     try:
                         result = set_user_role(after.id, 1)
                         if result is not None:
-                            await self.log(f"📝 added write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]} https://duostories.org/admin/users/{result[0]}")
+                            await self.log(f"📝 added write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]} <https://duostories.org/admin/users/{result[0]}>")
                         else:
                             await self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
@@ -158,12 +158,12 @@ class MyClient(discord.Client):
                     try:
                         result = set_user_role(after.id, 0)
                         if result is not None:
-                            await self.log(f"❌ removed write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]} https://duostories.org/admin/users/{result[0]}")
+                            await self.log(f"❌ removed write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]} <https://duostories.org/admin/users/{result[0]}>")
                         else:
                             await self.log(f"⚠️ could not remove write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
                         print(err)
-                        await self.log(f"⚠️ could not remove write permissions for {after.name}, a database error occoured.")
+                        await self.log(f"⚠️ could not remove write permissions for {after.name}, a database error occurred.")
                 print(f"User {after.name} has lost the role: {role.name}")
 
             # Add your reaction logic here for when roles are removed from a user.
