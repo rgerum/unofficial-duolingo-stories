@@ -44,7 +44,7 @@ async function story_properties(id) {
 }
 
 async function set_story(data) {
-  await sql`UPDATE story SET ${sql(data, "public")}`;
+  await sql`UPDATE story SET ${sql(data, "public")} WHERE id = ${data.id};`;
   return await story_properties(data.id);
 }
 
