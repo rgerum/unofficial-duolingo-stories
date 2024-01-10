@@ -135,6 +135,13 @@ export default function useScrollLinking(view, preview, svg_parent) {
 
   let windowResize = React.useCallback(() => {
     createScrollLookUp();
+
+    // the same as the scroll editor
+    let new_pos = map_side(editor.scrollTop, createScrollLookUp(), 1, 2);
+    if (new_pos === undefined) return;
+    last_preview_scroll_pos = parseInt(new_pos);
+    preview.scrollTo({ top: last_preview_scroll_pos, behavior: "auto" });
+    update_lines();
   }, [editor, preview, svg_parent]);
   React.useEffect(() => {
     window.addEventListener("resize", windowResize);
