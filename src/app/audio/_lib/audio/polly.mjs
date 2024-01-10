@@ -2,6 +2,7 @@
 import { Polly } from "@aws-sdk/client-polly";
 import fs from "fs";
 import { put } from '@vercel/blob';
+import {sql} from "../../../../lib/db.js";
 
 // Set the region and credentials for the AWS SDK
 let config = {
@@ -43,6 +44,15 @@ function streamToString(stream) {
   });
 }
 
+function streamToBuffer(stream) {
+  const chunks = [];
+  return new Promise((resolve, reject) => {
+    stream.on("data", (chunk) => chunks.push(chunk));
+    stream.on("error", reject);
+    stream.on("end", () => resolve(Buffer.concat(chunks)));
+  });
+}
+
 async function streamToBase64(stream) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -67,13 +77,15 @@ async function synthesizeSpeechPolly(filename, voice_id, text) {
   text = text.replace(/<\/speak>$/, "");
   text = text.replace(/pitch="medium"/, "");
 
+  let voice_data = await getVoiceData(voice_id);
+
   // Set the parameters for the synthesis request
   let params = {
     OutputFormat: "mp3",
     Text: `<speak>${text}</speak>`,
     VoiceId: voice_id,
     TextType: "ssml",
-    Engine: "neural",
+    Engine: voice_data.type === "NEURAL" ? "neural" : "standard",
   };
 
   // Call the synthesizeSpeech method to generate the audio
@@ -96,8 +108,8 @@ async function synthesizeSpeechPolly(filename, voice_id, text) {
   let content;
   if (filename) {
     //await writeStream(filename, data.AudioStream);
-    let data = await streamToString(data2.AudioStream);
-    await put(filename, data, { access: "public", addRandomSuffix: false });
+    let data_file = await streamToBuffer(data.AudioStream);
+    await put(filename, data_file, { access: "public", addRandomSuffix: false });
   }
   else content = await streamToBase64(data.AudioStream);
 
@@ -138,6 +150,10 @@ async function getVoices() {
 }
 async function isValidVoice(voice) {
   return voice.indexOf("-") === -1;
+}
+
+async function getVoiceData(voice) {
+    return (await sql`SELECT * FROM speaker WHERE speaker = ${voice}`)[0];
 }
 
 export default {

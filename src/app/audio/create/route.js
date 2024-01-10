@@ -44,7 +44,7 @@ export async function POST(req) {
   let filename = undefined;
   let file;
   if (id !== 0) {
-    filename = `../audio/${id}`;
+    filename = `audio/${id}`;
     try {
       await mkdir(filename);
     } catch (e) {}
