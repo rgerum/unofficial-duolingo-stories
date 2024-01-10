@@ -56,7 +56,7 @@ async function set_approve({ story_id, user_id }) {
   if (res3.length >= 4) {
     let date_published = new Date().toISOString();
     for (let story of res3) {
-      if (story.public === 0) {
+      if (!story.public) {
         await sql`UPDATE story SET public = true, date_published = ${date_published} WHERE id = ${story.id};`;
         published.push(story.id);
       }

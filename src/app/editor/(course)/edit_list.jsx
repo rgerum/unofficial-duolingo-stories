@@ -184,8 +184,8 @@ function DropDownStatus(props) {
           router.refresh();
         }
         set_status(response.story_status);
-        setLoading(0);
       }
+      setLoading(0);
     } catch (e) {
       console.error(e);
       return setLoading(-1);
