@@ -229,4 +229,5 @@ export default {
     synthesizeSpeech: synthesizeSpeechElevenLabs,
     getVoices: getVoices,
     isValidVoice: isValidVoice,
+    getUserInfo: getUserInfo,
 };
