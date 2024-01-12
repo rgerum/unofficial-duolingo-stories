@@ -59,9 +59,6 @@ function CustomMDX(props) {
 async function Layout({ children, path, datax, headings }) {
   const data = await GetDocsData();
 
-  //console.log("layout", params);
-  console.log("layout", path, data.navigation);
-
   return (
     <div className={styles.container} id="container">
       <div className={styles.blur} id="blur"></div>
@@ -124,7 +121,6 @@ async function Layout({ children, path, datax, headings }) {
 }
 
 export default async function Page({ params }) {
-  console.log("params", params.slug);
   let path = "";
   for (let p of params.slug || ["introduction"]) {
     if (p.indexOf(".") !== -1) continue;
@@ -173,7 +169,6 @@ export default async function Page({ params }) {
             }
             document.getElementById("container").setAttribute("show", value);
         }
-        document.addEventListener("load", (event) => {console.log("add x")});
         document.addEventListener("DOMNodeInserted", (event) => {
             document.getElementById('toggle').onclick = (e) => toggle()
         });
