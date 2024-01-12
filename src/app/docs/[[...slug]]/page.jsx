@@ -47,7 +47,7 @@ const components = {
   ),
 };
 
-export function CustomMDX(props) {
+function CustomMDX(props) {
   return (
     <MDXRemote
       {...props}
@@ -80,8 +80,8 @@ async function Layout({ children, path, datax, headings }) {
           <g
             fill="none"
             stroke="#000"
-            stroke-linecap="square"
-            stroke-width=".28222"
+            strokeLinecap="square"
+            strokeWidth=".28222"
           >
             <path d="m0.80839 0.88828h1.5582" />
             <path d="m0.80839 1.5875h1.5582" />
