@@ -4,6 +4,22 @@ import Link from "next/link";
 import styles from "../layout.module.css";
 import Script from "next/script";
 
+export const dynamic = "force-static";
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const data = await GetDocsData();
+
+  const pages = [];
+  for (let group of data.navigation) {
+    for (let page of group.pages) {
+      pages.push({ slug: page.split("/") });
+    }
+  }
+
+  return pages;
+}
+
 export default async function Page({ params }) {
   console.log("params", params.slug);
   let path = "";
