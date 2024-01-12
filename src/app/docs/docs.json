@@ -5,9 +5,15 @@
       "pages": ["introduction"]
     },
     {
+      "group": "Become a Contributor",
+      "pages": [
+        "become-contributor/application",
+        "become-contributor/colang"
+      ]
+    },
+    {
       "group": "Story Creation",
       "pages": [
-        "story-creation/overview",
         "story-creation/import",
         "story-creation/publishing"
       ]
@@ -15,7 +21,9 @@
     {
       "group": "Story Editing",
       "pages": [
-        "story-editing/overview"
+        "story-editing/overview",
+        "story-editing/translation-hints",
+        "story-editing/exercises"
       ]
     },
     {

@@ -47,6 +47,7 @@
   padding-bottom: 2.5rem;
   overflow-y: scroll;
   z-index: 5;
+  height: calc(100vh - 70px);
 }
 .toc h5 {
   padding-right: 16px;
@@ -66,7 +67,7 @@
   margin: 0;
 }
 
-.toc li a:hover {
+.toc li span:hover {
 background: #f6f6f6;
 }
 .active {
@@ -74,6 +75,9 @@ background: #f6f6f6;
   font-weight: bold;
 }
 .toc li a {
+  text-decoration: none;
+}
+.toc li span {
   display: block;
   width: 100%;
   text-decoration: none;
@@ -87,9 +91,9 @@ background: #f6f6f6;
 
 .main {
   font-size: 18px;
-  padding: 10px 40px;
-  max-width: 784px;
-  width: 100%;
+  padding: 20px 40px;
+  max-width: calc(1472px - 304px - 288px);
+  width: calc(100% - 304px - 288px);
   overflow-y: scroll;
 }
 
@@ -104,7 +108,7 @@ background: #f6f6f6;
 .button_container {
   margin-top: 40px;
   display: flex;
-  justify-content: end;
+  justify-content: flex-end;
   width: 100%;
 }
 
@@ -131,30 +135,71 @@ background: #f6f6f6;
   margin-right: 10px;
 }
 .main footer a:first-child:before {
-  content: "<";
+  content: "‹";
   margin-right: 10px;
 }
 .main footer a:nth-child(2):after {
-  content: ">";
+  content: "›";
   margin-left: 10px;
 }
 
 .short_nav {
   display: none;
 }
+.short_nav svg {
+  cursor: pointer;
+  margin-right: 5px;
+}
+.close {
+  display: none;
+}
 
-@media (max-width: 1000px) {
-  .toc {
+.toc2 {
+  height: 100%;
+  width: 304px;
+  padding-left: 40px;
+  font-weight: bold;
+  font-size: 14px;
+}
+.toc2 a {
+  text-decoration: none;
+}
+@media (max-width: 1280px) {
+  .toc2 {
     display: none;
+  }
+  .main {
+    width: calc(100% - 288px);
+    max-width: calc(100% - 288px);
+  }
+}
+@media (max-width: 1000px) {
+  .close {
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font-size: 30px;
+  }
+  .toc {
     position: fixed;
+    left: -288px;
+    top: 0;
+    height: 100%;
+    transition: left 0.3s ease-in-out;
+  }
+  .main_container {
+    margin-top: calc(70px + 57px);
   }
   .main {
     max-width: 1000px;
     width: 1000px;
-    padding-top: 0;
   }
   .container[show=true] .toc {
-    display: block;
+    left: 0;
   }
   .container[show=true] .blur {
     display: block;
@@ -165,7 +210,23 @@ background: #f6f6f6;
     border-bottom: 2px solid #fbfbfb;
     height: 57px;
     margin-bottom: 40px;
+    width: 100%;
+    position: fixed;
+    background: white;
+    padding-left: 20px;
+    top: 70px;
+    font-size: 15px;
   }
   .short_nav span {
   }
+}
+
+.info {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  background-color: hsla(0,0%,98%,.5);
+  border: 1px solid#e0e0e2;
+  border-radius: 10px;
 }

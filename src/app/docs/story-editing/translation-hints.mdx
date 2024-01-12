@@ -1,0 +1,49 @@
+---
+title: "Translation Hints"
+description: "How to provide translation hints."
+---
+
+An important part of learning with Duostories is to have the
+translation of a word in the story directly available. Therefore, when translation
+the story you also need to provide translation hints.
+
+The system works as follows: you write the sentence in one line and the translation below:
+
+```
+[LINE]
+> Jan is thuis met  zijn vrouw, Marian.
+~ ~   is home  with his  wife   ~
+```
+
+The sentence will be split into words and each word will be matched with the word on the sentence below.
+If a word is translated with "~", no translation will be displayed for the word.
+This is used for names where there is not need for a translation.
+
+<Info>The syntax highlighting will highlight words alternating in blue and green to help you see
+how it will perform the mapping.</Info>
+
+### Joining Words
+Sometimes translations are more complicated than a one to one match of words.
+
+```
+[LINE]
+Speaker292: Weet~jij    waar mijn lesboek Engels is?
+~           do~you~know Where  my textbook English is
+```
+
+Here you can "glue" words together using the tilde sign `~`. They are treated as one word for
+the sake of translation. So *"Weet jij"* will have the joined hint *"do you know"*.
+
+Words in the target language as well as the translation can be joined to create one to many, many to one,
+or many to many mappings.
+
+### Splitting Words
+Sometimes languages do not separate words with spaces. A prominent example here is chinese script.
+
+```
+[LINE]
+Speaker560: 我的|钥匙|在哪里？
+~           my  keys (are)~where
+```
+Here you can use the vertical bar `|` (also known as pipe). Its the opposite of the title and splits words
+for the translation hints while it still appears without spaces in the final story.
