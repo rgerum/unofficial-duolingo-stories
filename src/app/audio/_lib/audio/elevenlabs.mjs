@@ -2,7 +2,6 @@ import {put} from "@vercel/blob";
 
 const WebSocket = require("ws");
 const { decode } = require("base64-arraybuffer");
-const fs = require("fs");
 
 const model = "eleven_multilingual_v2";
 
@@ -103,8 +102,8 @@ async function synthesizeSpeechElevenLabs(filename, voice_id, text) {
 
     let content;
     if(filename) {
-        await put(filename, data_file, { access: "public", addRandomSuffix: false });
-        fs.writeFileSync(filename, completeAudio);
+        await put(filename, completeAudio, { access: "public", addRandomSuffix: false });
+        //fs.writeFileSync(filename, completeAudio);
     }
     else
         content = completeAudio.toString('base64');
@@ -152,14 +151,6 @@ async function synthesizeSpeechElevenLabs(filename, voice_id, text) {
     }
 }
 
-async function main() {
-    synthesizeSpeechElevenLabs(
-        "test2.mp3",
-        "21m00Tcm4TlvDq8ikWAM",
-        "I really want to test how this works.",
-    );
-}
-//main();
 async function getUserInfo() {
     const options = {
         method: "GET",
