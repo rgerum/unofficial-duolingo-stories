@@ -1,0 +1,32 @@
+{
+  "navigation": [
+    {
+      "group": "",
+      "pages": ["introduction"]
+    },
+    {
+      "group": "Story Creation",
+      "pages": [
+        "story-creation/overview",
+        "story-creation/import",
+        "story-creation/publishing"
+      ]
+    },
+    {
+      "group": "Story Editing",
+      "pages": [
+        "story-editing/overview"
+      ]
+    },
+    {
+      "group": "Audio Generation",
+      "pages": [
+        "audio-generation/overview",
+        "audio-generation/character-editor",
+        "audio-generation/engines",
+        "audio-generation/edit",
+        "audio-generation/generate"
+      ]
+    }
+  ]
+}
