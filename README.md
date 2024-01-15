@@ -13,7 +13,24 @@ The app is based on Next.js with React. It is currently in `next/next-all`.
 
 ## How to run locally
 
-Got to the folder `next/`.
+First you need to set up a PostgreSQL server.
+
+If you are on Linux you can use the following commands:
+
+```
+sudo apt install postgresql
+sudo systemctl restart postgresql.service
+sudo -u postgres psql -c "ALTER USER postgres with encrypted password 'postgres';"
+export PGPASSWORD=postgres
+```
+
+Then you need to initialize the database
+
+```
+sudo -u postgres psql -c "CREATE DATABASE duostories_test_db;"
+psql -U postgres -h localhost -d duostories_test_db -f database/schema.sql
+psql -U postgres -h localhost -d duostories_test_db -c \\dt
+```
 
 Install the npm packages
 
@@ -21,13 +38,13 @@ Install the npm packages
 npm install
 ```
 
-Create a local sqlite database
+Create fill the database with test data
 
 ```
 npm run init
 ```
 
-To develop you can then run
+To develop you can then run and visit http://localhost:3000
 
 ```
 npm run dev
