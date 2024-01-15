@@ -18,6 +18,7 @@ jobs:
 
       - name: init db
         run: |
+          export PGPASSWORD=postgres
           psql -U postgres -h localhost -d duostories_test_db -f database/schema.sql
           psql -U postgres -h localhost -d duostories_test_db -c \\dt
 
