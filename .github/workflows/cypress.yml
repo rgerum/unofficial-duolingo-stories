@@ -16,6 +16,11 @@ jobs:
         with:
           node-version: 20
 
+      - name: init db
+        run: |
+          psql -U postgres -h localhost -d duostories_test_db -f database/schema.sql
+          psql -U postgres -h localhost -d duostories_test_db -c \\dt
+
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
