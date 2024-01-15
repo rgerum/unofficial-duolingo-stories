@@ -95,7 +95,7 @@ export const authOptions = {
       },
       async authorize(credentials) {
         let res2 =
-          await sql`SELECT * FROM "users" WHERE LOWER(name) = ${credentials.name.toLowerCase()} AND activated`;
+          await sql`SELECT * FROM users WHERE LOWER(name) = ${credentials.name.toLowerCase()} AND activated`;
         if (res2.length === 0) {
           return null;
         }

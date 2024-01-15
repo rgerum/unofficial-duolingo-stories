@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "name": "official",
+    "password": "$H$9.Y..7Q..CpQkoOk55SRpgyJ3Dqeh7.",
+    "email": "test.official@duostories.org",
+    "emailVerified": null,
+    "image": null,
+    "regdate": "2020-05-29 09:23:19",
+    "role": false,
+    "admin": false,
+    "activated": false
+  },
+  {
+    "id": 2,
+    "name": "user",
+    "password": "$H$9.Y..7Q..CpQkoOk55SRpgyJ3Dqeh7.",
+    "email": "test@duostories.org",
+    "emailVerified": null,
+    "image": null,
+    "regdate": "2020-05-29 09:23:19",
+    "role": false,
+    "admin": false,
+    "activated": true
+  },
+  {
+    "id": 3,
+    "name": "user2",
+    "password": "$H$9.Y..7Q..CpQkoOk55SRpgyJ3Dqeh7.",
+    "email": "test2@duostories.org",
+    "emailVerified": null,
+    "image": null,
+    "regdate": "2020-05-29 09:23:19",
+    "role": false,
+    "admin": false,
+    "activated": true
+  },
+  {
+    "id": 4,
+    "name": "editor",
+    "password": "$H$95.U.....HvjZhMvFczJ3LDhRtr14n0",
+    "email": "test.editor@duostories.org",
+    "emailVerified": null,
+    "image": null,
+    "regdate": "2020-05-29 09:23:19",
+    "role": true,
+    "admin": false,
+    "activated": true
+  },
+  {
+    "id": 5,
+    "name": "admin",
+    "password": "$H$93...4AE0CW5bRg/GHNcOb8vLYUDdP/",
+    "email": "test.admin@duostories.org",
+    "emailVerified": null,
+    "image": null,
+    "regdate": "2020-05-29 09:23:19",
+    "role": true,
+    "admin": true,
+    "activated": true
+  }
+]

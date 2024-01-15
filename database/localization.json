@@ -1,0 +1,162 @@
+[
+  {
+    "language_id": 7,
+    "tag": "stories_for",
+    "text": "讲中文的人的故事"
+  },
+  {
+    "language_id": 7,
+    "tag": "n_stories",
+    "text": "$count 个故事"
+  },
+  {
+    "language_id": 7,
+    "tag": "course_page_title",
+    "text": "非官方 $language Duolingo 故事"
+  },
+  {
+    "language_id": 7,
+    "tag": "course_page_sub_title",
+    "text": "通过 $count 社区翻译的 Duolingo 故事学习 $language。"
+  },
+  {
+    "language_id": 7,
+    "tag": "course_page_discuss",
+    "text": "如果您想参与或讨论这些故事，请在 {Discord} 上与我们见面\n或在{常见问题}中了解更多项目信息。"
+  },
+  {
+    "language_id": 7,
+    "tag": "set_n",
+    "text": "第 $count 套"
+  },
+  {
+    "language_id": 12,
+    "tag": "stories_for",
+    "text": "Historias para hispanohablantes"
+  },
+  {
+    "language_id": 12,
+    "tag": "n_stories",
+    "text": "$count historias"
+  },
+  {
+    "language_id": 12,
+    "tag": "course_page_title",
+    "text": "Historias Duolingo no oficiales de $language"
+  },
+  {
+    "language_id": 12,
+    "tag": "course_page_sub_title",
+    "text": "Aprende $language con las $count Historias de Duolingo traducidas por la comunidad."
+  },
+  {
+    "language_id": 12,
+    "tag": "course_page_discuss",
+    "text": "Si quieres contribuir o discutir las historias, reúnete con nosotros en {Discord}\no infórmate sobre el proyecto en nuestras {FAQ}."
+  },
+  {
+    "language_id": 12,
+    "tag": "set_n",
+    "text": "Set $count"
+  },
+  {
+    "language_id": 12,
+    "tag": "story_correct",
+    "text": "Tienes razón."
+  },
+  {
+    "language_id": 12,
+    "tag": "button_continue",
+    "text": "continuar"
+  },
+  {
+    "language_id": 12,
+    "tag": "button_finished",
+    "text": "terminado"
+  },
+  {
+    "language_id": 12,
+    "tag": "story_finished",
+    "text": "¡Historia completa!"
+  },
+  {
+    "language_id": 12,
+    "tag": "story_finished_subtitle",
+    "text": "Has terminado $story_title"
+  },
+  {
+    "language_id": 12,
+    "tag": "button_start_story",
+    "text": "Empezar Historia"
+  },
+  {
+    "language_id": 1,
+    "tag": "stories_for",
+    "text": "Stories for English Speakers"
+  },
+  {
+    "language_id": 1,
+    "tag": "n_stories",
+    "text": "$count stories"
+  },
+  {
+    "language_id": 1,
+    "tag": "course_page_title",
+    "text": "Unofficial $language Duolingo Stories"
+  },
+  {
+    "language_id": 1,
+    "tag": "course_page_sub_title",
+    "text": "Learn $language with $count community translated Duolingo Stories."
+  },
+  {
+    "language_id": 1,
+    "tag": "course_page_discuss",
+    "text": "If you want to contribute or discuss the stories, meet us on {Discord}\nor learn more about the project in our {FAQ}."
+  },
+  {
+    "language_id": 1,
+    "tag": "button_start_story",
+    "text": "Start story"
+  },
+  {
+    "language_id": 1,
+    "tag": "story_correct",
+    "text": "You are correct"
+  },
+  {
+    "language_id": 1,
+    "tag": "button_continue",
+    "text": "continue"
+  },
+  {
+    "language_id": 1,
+    "tag": "story_finished",
+    "text": "Story complete!"
+  },
+  {
+    "language_id": 1,
+    "tag": "story_finished_subtitle",
+    "text": "You finished $story_title"
+  },
+  {
+    "language_id": 1,
+    "tag": "button_finished",
+    "text": "finished"
+  },
+  {
+    "language_id": 1,
+    "tag": "meta_course_title",
+    "text": "$language Duolingo Stories"
+  },
+  {
+    "language_id": 1,
+    "tag": "meta_course_description",
+    "text": "Improve your $language learning by community-translated Duolingo stories."
+  },
+  {
+    "language_id": 1,
+    "tag": "set_n",
+    "text": "Set $count"
+  }
+]
