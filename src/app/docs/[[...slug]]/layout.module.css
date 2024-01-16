@@ -1,7 +1,15 @@
 .container {
 }
 
-
+.blur2 {
+  display: none;
+  background: white;
+  opacity: 0.8;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  z-index: 6;
+}
 .blur {
   display: none;
   backdrop-filter: blur(4px) brightness(0.9);
@@ -11,6 +19,10 @@
   z-index: 3;
 }
 .navbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
   height: 70px;
   width: 100%;
   background: white;
@@ -20,12 +32,24 @@
   top: 0;
 }
 .navbar>div {
-  margin: auto;
   display: flex;
   align-items: center;
   max-width: 1472px;
   height: 70px;
   padding: 16px 48px;
+}
+.navbar .search {
+  outline: none;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+}
+.search span {
+  border: 1px solid #fbfbfb;
+  padding: 3px;
+  border-radius: 5px;
+  margin-left: 50px;
+  background: white;
 }
 
 .main_container {
@@ -35,6 +59,7 @@
   margin-top: 70px;
   height: calc(100vh - 70px);
 }
+
 
 .toc {
   background: white;
@@ -172,6 +197,62 @@ background: #f6f6f6;
     width: calc(100% - 288px);
     max-width: calc(100% - 288px);
   }
+}
+.search_modal {
+  display: none;
+  position: fixed;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 640px;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.08),0px 1px 1px rgba(0,0,0,.02),0px 8px 16px -4px rgba(0,0,0,.04),0px 24px 32px -8px rgba(0,0,0,.06);
+  overflow: hidden;
+  transform-origin: left;
+  animation: scaleIn .2s ease;
+  transition: transform .1s ease;
+  outline: none;
+  z-index: 100;
+  font-size: 16px;
+}
+.search_modal div:first-child {
+  border-bottom: 2px solid #fbfbfb;
+  padding: 10px;
+  display: flex;
+}
+.search_modal input {
+  width: 100%;
+  border: 0;
+  outline: none;
+}
+.search_modal div:first-child button {
+  border: 1px solid #fbfbfb;
+  padding: 5px;
+  border-radius: 5px;
+}
+.search_modal div:nth-child(2) {
+  padding: 10px;
+  overflow-y: scroll;
+  max-height: 400px;
+}
+.search_modal div:nth-child(2) a {
+  text-decoration: none;
+  display: block;
+  padding: 5px;
+  border-radius: 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.search_modal div:nth-child(2) a[data-type="main"] {
+  font-weight: bold;
+}
+.search_modal div:nth-child(2) a[data-type="sub"] {
+  padding-left: 40px;
+}
+.search_modal div:nth-child(2) a:hover {
+  background: #f6f6f6;
 }
 @media (max-width: 1000px) {
   .close {

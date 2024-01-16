@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 
-const basefolder = "src/app/docs";
+const basefolder = "public/docs";
 
 export async function getPageData(path) {
   try {

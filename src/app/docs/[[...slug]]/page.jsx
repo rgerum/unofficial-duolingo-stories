@@ -1,8 +1,9 @@
-import { MDXRemote } from "next-mdx-remote/rsc";
-import { GetDocsData, getPageData } from "../doc_data";
 import Link from "next/link";
-import styles from "../layout.module.css";
 import Script from "next/script";
+import { MDXRemote } from "next-mdx-remote/rsc";
+import { GetDocsData, getPageData } from "./doc_data";
+import styles from "./layout.module.css";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-static";
 export const dynamicParams = true;
@@ -10,7 +11,7 @@ export const dynamicParams = true;
 export async function generateStaticParams() {
   const data = await GetDocsData();
 
-  const pages = [{}];
+  const pages = [{ slug: [] }];
   for (let group of data.navigation) {
     for (let page of group.pages) {
       pages.push({ slug: page.split("/") });
@@ -62,8 +63,23 @@ async function Layout({ children, path, datax, headings }) {
   return (
     <div className={styles.container} id="container">
       <div className={styles.blur} id="blur"></div>
+      <div className={styles.blur2} id="blur2"></div>
+      <div className={styles.search_modal} id="search_modal">
+        <div>
+          <input
+            id="search_input"
+            placeholder=" Search Documentation..."
+          ></input>
+          <button>Esc</button>
+        </div>
+        <div id="search_results"></div>
+      </div>
       <div className={styles.navbar}>
         <div>Duostories</div>
+        <button id="search" className={styles.search}>
+          Search Documentation...
+          <span>CtrlK</span>
+        </button>
       </div>
       <div className={styles.short_nav}>
         <svg
@@ -126,6 +142,8 @@ export default async function Page({ params }) {
     if (p.indexOf(".") !== -1) continue;
     path += "/" + p;
   }
+  if (path.endsWith(".js") || path.endsWith(".mdx")) return notFound();
+  console.log(path);
   let data = await getPageData(path);
   let doc_data = await GetDocsData();
   let previous = null;
@@ -169,18 +187,22 @@ export default async function Page({ params }) {
             }
             document.getElementById("container").setAttribute("show", value);
         }
+        function init() {
+          document.getElementById('toggle').onclick = (e) => toggle()
+          document.getElementById('blur').onclick = (e) => toggle()
+          document.getElementById('close').onclick = (e) => toggle()
+        }
         document.addEventListener("DOMNodeInserted", (event) => {
-            document.getElementById('toggle').onclick = (e) => toggle()
+            init();
         });
         document.addEventListener("DOMNodeRemoved", (event) => {
-            document.getElementById('toggle').onclick = (e) => toggle()
+            init();
         });
-        document.getElementById('toggle').onclick = (e) => toggle()
-        document.getElementById('blur').onclick = (e) => toggle()
-        document.getElementById('close').onclick = (e) => toggle()
+        init();
+        
         `}
       </Script>
-      <header id="header" class="relative">
+      <header id="header">
         <div>{data.group}</div>
         <h1>{data.title}</h1>
         <div>{data.description}</div>
@@ -191,7 +213,7 @@ export default async function Page({ params }) {
           className={styles.button}
           href={`https://github.com/${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}/edit/${process.env.VERCEL_GIT_COMMIT_REF}/src/app/docs${path}.mdx`}
         >
-          <small class="text-sm leading-4">Suggest edits</small>
+          <small>Suggest edits</small>
         </Link>
       </div>
       <footer>
@@ -207,6 +229,7 @@ export default async function Page({ params }) {
         )}
       </footer>
       <hr />
+      <Script src="/docs/search.js"></Script>
     </Layout>
   );
 }
