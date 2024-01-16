@@ -12,10 +12,10 @@
       ]
     },
     {
-      "group": "Story Creation",
+      "group": "Story Importing",
       "pages": [
         "story-creation/import",
-        "story-creation/publishing"
+        "story-creation/translate"
       ]
     },
     {
@@ -33,7 +33,15 @@
         "audio-generation/character-editor",
         "audio-generation/engines",
         "audio-generation/edit",
-        "audio-generation/generate"
+        "audio-generation/generate",
+        "audio-generation/fix-problems"
+      ]
+    },
+    {
+      "group": "Story Publishing",
+      "pages": [
+        "story-publishing/publishing",
+        "story-publishing/without_tts"
       ]
     }
   ]

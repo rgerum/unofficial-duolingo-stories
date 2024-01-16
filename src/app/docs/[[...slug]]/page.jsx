@@ -32,7 +32,7 @@ async function PageLink({ page, active }) {
 }
 
 function save_tag(tag) {
-  return tag.trim().toLowerCase().replace(" ", "-");
+  return tag.trim().toLowerCase().replace(/\s+/g, "-");
 }
 
 const components = {

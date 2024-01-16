@@ -1,0 +1,26 @@
+---
+title: "Fix Problems"
+description: "What do I do if the TTS is pronouncing words incorrectly?"
+---
+
+### Use another voice/service
+Some TTS voices/services might be better in your language than others. If you are fortunate to have multiple voices to
+choose from, you might be able to just avoid using the ones that don't work well.
+
+### Trick the TTS system
+You can "trick" the TTS by using any text you want when you generate the audio. After you create the audio, you can
+change the text back to be written correctly. You might need to experiment with a few different ways of writing the
+text until the pronunciation sounds correct and natural. Tip: keep track of when you do this with #comment lines, so
+that if you need to edit anything in the line later, it will be easy to copy-paste the "trick" text in-and-out to create
+new audio. Ex:
+
+![The import button](/docs/audio-generation/replace.png "Keeping track of replaced words")
+
+### Curly Braces Method
+You can use the "curly braces" method. If you write that section of text as `show~word{speak~word}`, the TTS will show the
+first part (which is spelled/written correctly), and speak the part in the curly braces (spelled/written however you
+need to get the correct pronunciation).
+
+Caution: there is a known bug that this method stops the audio generator from
+adding the time markers for the "read along" highlighting of the text. You might only have highlighting for part of your
+line, or no highlighting at all.
