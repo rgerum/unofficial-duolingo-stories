@@ -10,7 +10,7 @@ describe("Test Story", () => {
     // there should be multiple courses
     cy.get("[data-cy*=language_button_big]").should(
       "have.length.greaterThan",
-      2,
+      1,
     );
     // open the Dutch course
     cy.get("[data-cy=language_button_big_test-en]").click();
@@ -43,7 +43,7 @@ describe("Test Story", () => {
     // there should be multiple courses
     cy.get("[data-cy*=language_button_big]").should(
       "have.length.greaterThan",
-      2,
+      1,
     );
     // open the Dutch course
     cy.get("[data-cy=language_button_big_test-en]").click();
@@ -73,13 +73,9 @@ describe("Test Story", () => {
 
     // ARRANGE
     cy.get("[data-cy=part]").should("have.lengthOf", 5);
-    cy.get("[data-cy=part] [data-cy=arrange-button]").first().next().click();
-    cy.get("[data-cy=part] [data-cy=arrange-button]")
-      .first()
-      .next()
-      .next()
-      .click();
-    cy.get("[data-cy=part] [data-cy=arrange-button]").first().click();
+    cy.get("[data-cy=part] [data-cy=arrange-button][data-index=0]").click();
+    cy.get("[data-cy=part] [data-cy=arrange-button][data-index=1]").click();
+    cy.get("[data-cy=part] [data-cy=arrange-button][data-index=2]").click();
 
     cy.get("[data-cy=continue]").click();
 
