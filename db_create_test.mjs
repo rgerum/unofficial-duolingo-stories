@@ -132,6 +132,7 @@ SET learning_language_name = (
     WHERE language.id = course.from_language
 );
 `
+  sql.end();
   //await sql`INSERT INTO story_approval ${sql(await load("approvals.json"))}`;
   console.log("done");
 }
