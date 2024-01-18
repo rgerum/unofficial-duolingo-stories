@@ -34,6 +34,8 @@ jobs:
           psql -U postgres -h localhost -d duostories_test_db -f database/schema.sql
           psql -U postgres -h localhost -d duostories_test_db -c \\dt
 
+      - run: printf "${{ secrets.ENV_LOCAL }}" >> .env.local
+
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
