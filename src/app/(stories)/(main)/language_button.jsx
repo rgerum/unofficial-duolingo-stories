@@ -1,34 +1,9 @@
 import Link from "next/link";
 import styles from "./language_button.module.css";
-import { cache, Suspense } from "react";
-import { sql } from "lib/db";
+import { Suspense } from "react";
 import get_localisation from "lib/get_localisation";
 import FlagById from "components/layout/flag_by_id";
-
-let get_courses = cache(async () => {
-  let courses = await sql`
-SELECT c.id,
-       COALESCE(NULLIF(c.name, ''), l2.name) AS name,
-       c.short,
-       COUNT(s.id) AS count,
-       c.learning_language,
-       c.from_language
-FROM course c
-JOIN language l2 ON l2.id = c.learning_language
-JOIN story s ON (c.id = s.course_id)
-WHERE s.public AND NOT s.deleted AND c.public
-GROUP BY c.id, l2.name;
-    `;
-  let courses_ids = {};
-  for (let course of courses) {
-    courses_ids[course.id] = course;
-  }
-  return courses_ids;
-}); //, ["get_coursesXXXXZZZZXXXZyyy"]);
-
-let get_course = cache(async (id) => {
-  return (await get_courses())[id];
-});
+import { get_course } from "./get_course_data";
 
 export default async function LanguageButton({ course_id, loading }) {
   if (loading) {

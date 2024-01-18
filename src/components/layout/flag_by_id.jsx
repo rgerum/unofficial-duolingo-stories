@@ -1,15 +1,20 @@
-import React, { cache } from "react";
+import React from "react";
 import styles from "./flag.module.css";
-import { sql } from "lib/db";
+import { sql, cache } from "lib/db";
 
-let get_langs = cache(async () => {
-  let langs = await sql`SELECT id, short AS iso, flag_file, flag FROM language`;
-  let lang_list = {};
-  for (let lang of langs) {
-    lang_list[lang.id] = lang;
-  }
-  return lang_list;
-});
+let get_langs = cache(
+  async () => {
+    let langs =
+      await sql`SELECT id, short AS iso, flag_file, flag FROM language`;
+    let lang_list = {};
+    for (let lang of langs) {
+      lang_list[lang.id] = lang;
+    }
+    return lang_list;
+  },
+  ["get_langs"],
+  { tags: ["lang"] },
+);
 
 let get_lang = cache(async (id) => {
   return (await get_langs())[id];

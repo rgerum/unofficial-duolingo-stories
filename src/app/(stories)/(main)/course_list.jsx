@@ -1,39 +1,15 @@
-import React, { cache, Suspense } from "react";
-import { sql } from "lib/db";
+import React, { Suspense } from "react";
 import get_localisation from "lib/get_localisation";
 import LanguageButton from "./language_button";
 
 import styles from "./course_list.module.css";
 import Legal from "../../../components/layout/legal";
-
-let get_courses = cache(async (tag) => {
-  let courses = await sql`
-SELECT c.id, l1.name AS from_language_name, c.from_language FROM course c
-JOIN language l1 ON l1.id = c.from_language
-JOIN language l2 ON l2.id = c.learning_language
-WHERE ${tag} = ANY(c.tags) AND c.public
-ORDER BY COALESCE(NULLIF(c.name, ''), l2.name);
-    `;
-  // sort courses by base language
-  let base_languages = {};
-  // iterate over all courses
-  for (let course of courses) {
-    // if base language not yet in list
-    if (base_languages[course.from_language] === undefined) {
-      // initialize the list
-      base_languages[course.from_language] = [];
-    }
-    base_languages[course.from_language].push(course.id);
-  }
-
-  return base_languages;
-});
+import { get_course_groups, get_courses_in_group } from "./get_course_data";
 
 async function LanguageGroup({ name, tag, id }) {
-  let courses = await get_courses(tag ? tag : "main");
+  let courses_list = await get_courses_in_group(id);
 
   let localisation = await get_localisation(id);
-  let courses_list = courses[id];
 
   if (!courses_list) return <>no list {name}</>;
 
@@ -43,8 +19,8 @@ async function LanguageGroup({ name, tag, id }) {
       <div className={styles.course_group_name}>
         {localisation("stories_for")}
       </div>
-      {courses_list?.map((course_id) => (
-        <LanguageButton key={course_id} course_id={course_id} />
+      {courses_list?.map((course) => (
+        <LanguageButton key={course.id} course_id={course.short} />
       ))}
     </div>
   );
@@ -64,7 +40,7 @@ async function CourseListInner({ loading, tag }) {
       </div>
     );
   }
-  let course_groups = await get_courses_list(tag ? tag : "main");
+  let course_groups = await get_course_groups();
   return (
     <>
       {course_groups?.map((group) => (
@@ -78,34 +54,6 @@ async function CourseListInner({ loading, tag }) {
     </>
   );
 }
-
-let get_courses_list = cache(async (tag) => {
-  let courses = await sql`SELECT
-    l1.name AS from_language_name,
-    c.from_language
-FROM
-    course c
-JOIN
-    language l1 ON l1.id = c.from_language
-WHERE
-    ${tag} = ANY(c.tags) AND
-    c.public AND
-    l1.name != 'English'
-GROUP BY
-    c.from_language, l1.name
-ORDER BY
-    from_language_name;
-    `;
-
-  // sort courses by base language
-  let course_groups = [{ from_language_name: "English", from_language: 1 }];
-  // iterate over all courses
-  for (let course of courses) {
-    course_groups.push(course);
-  }
-
-  return course_groups;
-});
 
 export default async function CourseList({ tag }) {
   return (

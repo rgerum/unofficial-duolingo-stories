@@ -113,6 +113,25 @@ async function main() {
       }
     }
   }
+  // add generated fields
+  await sql`UPDATE course
+SET count = (
+    SELECT COUNT(*)
+    FROM story
+    WHERE story.course_id = course.id AND story.public AND NOT story.deleted
+);`
+  await sql`
+UPDATE course
+SET learning_language_name = (
+    SELECT name
+    FROM language
+    WHERE language.id = course.learning_language
+), from_language_name = (
+    SELECT name
+    FROM language
+    WHERE language.id = course.from_language
+);
+`
   //await sql`INSERT INTO story_approval ${sql(await load("approvals.json"))}`;
   console.log("done");
 }

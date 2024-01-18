@@ -124,7 +124,10 @@ create table course
     name              varchar(255),
     about             text,
     conlang           boolean default false,
-    tags              varchar(20)[]
+    tags              varchar(20)[],
+    count             integer,
+    learning_language_name varchar(255),
+    from_language_name varchar(255)
 );
 
 create table sessions
