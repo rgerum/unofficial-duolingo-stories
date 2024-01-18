@@ -1,21 +1,8 @@
 import React from "react";
-
 import Header from "../header";
-
 import styles from "./story_button.module.css";
 import get_localisation from "lib/get_localisation";
-import { sql } from "lib/db";
-
-const get_course_header = async (course_id) => {
-  return (
-    await sql`
-    SELECT COALESCE(NULLIF(course.name, ''), l.name) AS learning_language_name,
-       COUNT(course.id) AS count, course.from_language FROM course
-    JOIN language l on l.id = course.learning_language
-    JOIN story s on course.id = s.course_id
-    WHERE s.public AND NOT s.deleted AND course.short = ${course_id} GROUP BY course.id, l.name`
-  )[0];
-};
+import { get_course } from "../get_course_data";
 
 export default async function CourseTitle({ course_id }) {
   if (!course_id) {
@@ -46,7 +33,7 @@ export default async function CourseTitle({ course_id }) {
       </>
     );
   }
-  const course = await get_course_header(course_id);
+  const course = await get_course(course_id);
 
   if (!course)
     return (

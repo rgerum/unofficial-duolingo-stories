@@ -14,7 +14,7 @@ ORDER BY
     from_language_name, name;
 `;
   },
-  ["get_course_dataXx"],
+  ["get_course_data"],
   { tags: ["course_data"] },
 );
 

@@ -17,7 +17,7 @@ function About({ course }) {
 
 function Set({ set, done, localisation }) {
   return (
-    <div key={set[0].set_id} className={styles.set_list}>
+    <div className={styles.set_list}>
       <div className={styles.set_title}>
         {localisation("set_n", { $count: set[0].set_id })}
       </div>
@@ -50,13 +50,8 @@ export default async function SetListClient({ course_id, course }) {
     <div className={styles.story_list}>
       <About course={course} />
 
-      {course.sets.map((set) => (
-        <Set
-          key={set[0].set_id}
-          set={set}
-          done={done}
-          localisation={localisation}
-        />
+      {Object.entries(course).map(([key, value]) => (
+        <Set key={key} set={value} done={done} localisation={localisation} />
       ))}
     </div>
   );
