@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { track } from "@vercel/analytics";
+import { track } from "@vercel/analytics/server";
 
 const cyrb53 = (str, seed = 0) => {
   let h1 = 0xdeadbeef ^ seed,
