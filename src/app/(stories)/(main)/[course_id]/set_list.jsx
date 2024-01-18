@@ -2,6 +2,7 @@ import styles from "./set_list.module.css";
 import StoryButton from "./story_button";
 import SetListClient from "./set_list_client";
 import { get_course_sets } from "./get_story_data";
+import { get_course } from "../get_course_data";
 
 export default async function SetList({ course_id }) {
   if (!course_id) {
@@ -19,8 +20,9 @@ export default async function SetList({ course_id }) {
     );
   }
 
+  const course_data = await get_course(course_id);
   const course = await get_course_sets(course_id);
   if (!course) return <div>not found</div>;
 
-  return <SetListClient course_id={course_id} course={course} />;
+  return <SetListClient course_id={course_data.id} course={course} />;
 }
