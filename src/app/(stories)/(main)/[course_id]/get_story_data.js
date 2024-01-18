@@ -28,7 +28,7 @@ SELECT id, name, course_id, image, set_id, set_index
 FROM
     story
 WHERE
-    public
+    public AND not deleted
 ORDER BY
     course_id, set_id, set_index;
 `;
