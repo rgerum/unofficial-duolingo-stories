@@ -57,14 +57,6 @@ async function CourseListInner({ loading, tag }) {
 
 export default async function CourseList({ tag }) {
   return (
-    <>
-      <div>
-        <CourseListInner tag={tag} />
-      </div>
-      <Legal language_name={undefined} />
-    </>
-  );
-  return (
     <Suspense fallback={<CourseListInner loading={true} />}>
       <div>
         <CourseListInner tag={tag} />
