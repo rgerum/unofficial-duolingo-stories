@@ -1,6 +1,7 @@
 import { sql } from "lib/db";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 
 export async function GET(req, { params: { story_id } }) {
   const token = await getToken({ req });
@@ -55,11 +56,23 @@ async function set_approve({ story_id, user_id }) {
   let published = [];
   if (res3.length >= 4) {
     let date_published = new Date().toISOString();
+    let count_published = 0;
     for (let story of res3) {
       if (!story.public) {
         await sql`UPDATE story SET public = true, date_published = ${date_published} WHERE id = ${story.id};`;
         published.push(story.id);
+        count_published++;
       }
+    }
+    console.log("published", count_published);
+    if (count_published) {
+      await sql`UPDATE course
+SET count = (
+    SELECT COUNT(*)
+    FROM story
+    WHERE story.course_id = course.id AND story.public AND NOT story.deleted
+) WHERE id = (SELECT course_id FROM story WHERE id = ${res3[0].id});`;
+      revalidateTag("course_data");
     }
   }
 
