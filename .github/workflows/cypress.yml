@@ -22,11 +22,15 @@ jobs:
           psql -U postgres -h localhost -d duostories_test_db -f database/schema.sql
           psql -U postgres -h localhost -d duostories_test_db -c \\dt
 
+      - name: Build
+        run: |
+          npm run init-build
+
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
           record: true
-          build: npm run init-build
+          #build: npm run init-build
           start: npm run start
           wait-on: "http://localhost:3000"
           wait-on-timeout: 600
