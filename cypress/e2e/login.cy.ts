@@ -17,7 +17,7 @@ describe("Login", () => {
     // there should be multiple courses
     cy.get("[data-cy*=language_button_big]").should(
       "have.length.greaterThan",
-      2,
+      1,
     );
 
     cy.get("[data-cy=user-profile]").click({ force: true });

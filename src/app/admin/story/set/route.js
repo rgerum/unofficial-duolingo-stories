@@ -1,6 +1,7 @@
 import { sql } from "lib/db";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 
 export async function POST(req) {
   try {
@@ -45,6 +46,15 @@ async function story_properties(id) {
 
 async function set_story(data) {
   await sql`UPDATE story SET ${sql(data, "public")} WHERE id = ${data.id};`;
+
+  await sql`UPDATE course
+SET count = (
+    SELECT COUNT(*)
+    FROM story
+    WHERE story.course_id = course.id AND story.public AND NOT story.deleted
+) WHERE id = (SELECT course_id FROM story WHERE id = ${data.id});`;
+  revalidateTag("course_data");
+
   return await story_properties(data.id);
 }
 

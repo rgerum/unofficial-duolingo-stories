@@ -1,23 +1,11 @@
-import React, { cache, Suspense } from "react";
+import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { sql } from "lib/db";
 
 import CourseTitle from "./course_title";
 import SetList from "./set_list";
 import get_localisation from "../../../../lib/get_localisation";
 import Legal from "../../../../components/layout/legal";
-
-const get_course = cache(async (course_id) => {
-  return (
-    (
-      await sql`
-        SELECT l.name AS learning_language_name, course.from_language FROM course
-        JOIN language l on l.id = course.learning_language
-        WHERE course.short = ${course_id} AND course.public LIMIT 1
-        `
-    )[0] || null
-  );
-});
+import { get_course_data, get_course } from "../get_course_data";
 
 export async function generateMetadata({ params, searchParams }, parent) {
   if (
@@ -27,7 +15,6 @@ export async function generateMetadata({ params, searchParams }, parent) {
     return notFound();
   }
   const course = await get_course(params.course_id);
-
   if (!course) notFound();
   const localization = await get_localisation(course.from_language);
 
@@ -51,7 +38,7 @@ export async function generateMetadata({ params, searchParams }, parent) {
 }
 
 export async function generateStaticParams() {
-  const courses = await sql`SELECT short FROM course WHERE course.public`;
+  const courses = await get_course_data();
 
   return courses.map((course) => ({
     course_id: course.short,

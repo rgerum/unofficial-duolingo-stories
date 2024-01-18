@@ -1,0 +1,108 @@
+[DATA]
+fromLanguageName=The Boxing Match
+icon=149224cb1a7c361279bece453d459dc57ba243a5
+set=0|3 #28|3
+deleted=1
+
+[HEADER]
+> La  pelea~de~boxeo
+~ the boxing~match  
+
+[LINE]
+> Lin y   su  abuela,      Lucy, están~viendo una pelea~de~boxeo en un bar.
+~ Lin and her grandmother  Lucy  are~watching a   boxing~match   at a  bar 
+
+[LINE]
+Speaker508: Abue,    me~voy      después~de esta bebida.
+~           Grandma  I'm~leaving after      this drink  
+
+[SELECT_PHRASE]
+> Select the missing word or phrase
+Speaker509: ¡Pero es   la  pelea~más~importante [del~año]!    
+~            but  it's the most~important~match  of~the~year  
++ del año
+- del baño
+- tacaño
+
+[LINE]
+Speaker508: Odio   el~boxeo. Es   aburridísimo.
+~           I~hate boxing    it's very~boring  
+
+[MULTIPLE_CHOICE]
+> Boxing is Lin's favorite sport.
++ No, that's wrong.
+- Yes, that's right.
+
+[LINE]
+Speaker509: ¿Qué~dices?           ¡Es   muy  emocionante!
+~            what~are~you~saying   it's very exciting    
+
+[POINT_TO_PHRASE]
+> Choose the option that means "fighting."
+Speaker508: (Son)      (solo) dos (hombres) (+peleando) con  guantes~enormes.
+~            they~are   just  two  men        fighting  with huge~gloves     
+
+[LINE]
+Speaker509: No~son       solo hombres… ¡Son      atletas! 
+~           they~are~not just men       they~are athletes 
+
+[LINE]
+Speaker508: Solo~quieren   ganar  un estúpido trofeo.
+~           they~just~want to~win a  stupid   trophy 
+
+[MULTIPLE_CHOICE]
+> Lin says that boxing is…
+- …a good way to make new friends.
++ …just two men fighting for a trophy.
+- …how she lost a tooth.
+
+[LINE]
+> Lin pone   su  vaso  sobre la~mesa   y   se~levanta.
+~ Lin places her glass on    the~table and gets~up    
+
+[LINE]
+Speaker509: ¿Adónde~vas?         
+~            where~are~you~going 
+
+[CONTINUATION]
+> What comes next?
+Speaker508: Voy~a     casa a~ver    "¿Es    amor?" en [la~tele].
+~           I'm~going home to~watch   is~it love   on  TV       
+- el~sándwich 
+~ the~sandwich
++ la~tele
+~ TV     
+- mis calcetines
+~ my  socks     
+
+[LINE]
+Speaker509: ¿El~programa donde veinte hombres se~pelean por la  misma mujer?
+~            the~show    where twenty men     fight     for the same  woman 
+
+[ARRANGE]
+> Tap what you hear
+Speaker509: ¡[(Y)   (lo~peor)   (es~que)  (no~ganan)       (ningún~trofeo)!]
+~              and   the~worst   is~that   they~don't~win   any~trophy      
+
+[LINE]
+Speaker508: No, pero pelean     por amor.
+~           no  but  they~fight for love 
+
+[LINE]
+Speaker509: ¿Y   tú  dices que  el~boxeo es aburrido?
+~            and you say   that boxing   is boring   
+
+[MULTIPLE_CHOICE]
+> Did you catch that? Lucy thinks…
+- …twenty women are boxing one man.
+- …Lin would be a great boxer.
++ …fighting over a woman is boring.
+
+[MATCH]
+> Tap the pairs
+- muy <> very
+- no ganan <> they don't win
+- es <> it's
+- la mesa <> the table
+- aburridísimo <> very boring
+

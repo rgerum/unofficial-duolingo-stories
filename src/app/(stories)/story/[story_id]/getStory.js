@@ -6,7 +6,7 @@ export async function get_story(story_id) {
               l1.name AS from_language_long, l2.name AS learning_language_long, 
               story.name AS from_language_name,
               l1.rtl AS from_language_rtl, l2.rtl AS learning_language_rtl,
-              story.id, story.json 
+              story.id, story.json, story.course_id
               FROM story 
               JOIN course c on story.course_id = c.id 
               LEFT JOIN language l1 ON l1.id = c.from_language
@@ -21,6 +21,7 @@ export async function get_story(story_id) {
       ? JSON.parse(res[0]["json"])
       : res[0]["json"];
   data.id = res[0]["id"];
+  data.course_id = res[0]["course_id"];
 
   data.from_language = res[0]["from_language"];
   data.from_language_id = res[0]["from_language_id"];

@@ -1,0 +1,77 @@
+---
+title: "Publish without Audio"
+description: "How to publish stories without TTS audio."
+---
+
+Our goal is to have audio in all of the stories we publish, to best match the Duolingo experience, and to give
+learners practice at listening comprehension. But we can probably all agree that teaching incorrect pronunciation is
+worse than having no listening practice at all!
+
+After experimenting with the different TTS services and voices we have available (and the above tips and tricks),
+if you cannot find any that correctly pronounce your language, there are some edits you will need to make to your
+stories. Converting the "listening" questions to similar "comprehension" questions will give readers a better learning
+experience.
+
+<Info>If you want to make it easy to convert back to listening exercises when TTS voices become available in the future
+🤞🏽, you can make a duplicate of the exercise, comment-out #the lines of the old one, and convert the new one.</Info>
+
+### Convert "Arrange" to "Point to Phrase"
+
+- Change the exercise title from `[ARRANGE]` to `[POINT_TO_PHRASE]`.
+- Change the prompt-line from `> Tap what you hear` to `> Choose the option that means "."`
+- Remove the square brackets `[ ]` around the "Speaker"-line.
+- Select which word/phrase you will ask the learner to recognize, and mark it with a plus-sign inside the
+  parentheses: `(+CorrectAnswer)`.
+- Add the hint for that word/phrase in the prompt-line: `> Choose the option that means "From~Language Hint."`
+
+
+Old:
+```
+#[ARRANGE]
+#> Tap what you hear
+#Speaker100: [(Babam)  (Kanadalı)   (ve)   (annem)  (Türkiyeli).]
+#~      my~father (is)~from~Canada   and   my~mother   (is)~from~Turkey
+```
+
+New:
+```
+[POINT_TO_PHRASE]
+> Choose the option that means "my~mother."
+Speaker100: (Babam)  (Kanadalı)   (ve)   (+annem)  (Türkiyeli).
+~      my~father (is)~from~Canada   and   my~mother   (is)~from~Turkey
+```
+
+### Convert "Select Phrase" to "Continuation"
+
+- Change the exercise title from `[SELECT_PHRASE]` to `[CONTINUATION]`.
+- Change the prompt-line from `> Select the missing phrase` to `> What comes next?`
+- Change your alternate answers from the "sound-alikes" useful on the listening exercise to answers that will not make
+  sense in your sentence.
+- Add hint-lines after each of the multiple choice answers, like: `~ From~Language Hint`
+  (using tildes and pipes as needed to align the hints and answers).
+
+
+Old:
+```
+#[SELECT_PHRASE]
+#> Select the missing phrase
+#Speaker507: Bugün [önemli~bir maçım] var.
+#~           today an~important my~game I~have
+#+ önemli bir maçım
+#- önemli bir maçımız
+#- önemsiz bir maçım
+```
+
+New:
+```
+[CONTINUATION]
+> What comes next?
+Speaker507: Bugün [önemli~bir maçım] var.
+~           today an~important my~game I~have
++ önemli~bir maçım
+~ an~important my~game
+- mor kurbağalarım
+~ purple my~frogs
+- altı çarşambam
+~ six my~Tuesday
+```

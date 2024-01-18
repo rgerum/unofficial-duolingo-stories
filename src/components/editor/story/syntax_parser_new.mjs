@@ -1,7 +1,7 @@
 import {
   generate_ssml_line,
   text_to_keypoints,
-} from "../../story/text_lines/audio_edit";
+} from "../../story/text_lines/audio_edit_tools.mjs";
 
 function generateHintMap(text, translation) {
   if (!text) text = "";

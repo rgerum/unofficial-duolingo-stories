@@ -1,0 +1,48 @@
+{
+  "navigation": [
+    {
+      "group": "",
+      "pages": ["introduction"]
+    },
+    {
+      "group": "Become a Contributor",
+      "pages": [
+        "become-contributor/application",
+        "become-contributor/colang"
+      ]
+    },
+    {
+      "group": "Story Importing",
+      "pages": [
+        "story-creation/import",
+        "story-creation/translate"
+      ]
+    },
+    {
+      "group": "Story Editing",
+      "pages": [
+        "story-editing/overview",
+        "story-editing/translation-hints",
+        "story-editing/exercises"
+      ]
+    },
+    {
+      "group": "Audio Generation",
+      "pages": [
+        "audio-generation/overview",
+        "audio-generation/character-editor",
+        "audio-generation/engines",
+        "audio-generation/edit",
+        "audio-generation/generate",
+        "audio-generation/fix-problems"
+      ]
+    },
+    {
+      "group": "Story Publishing",
+      "pages": [
+        "story-publishing/publishing",
+        "story-publishing/without_tts"
+      ]
+    }
+  ]
+}

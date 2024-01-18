@@ -1,0 +1,67 @@
+[DATA]
+fromLanguageName=Testing
+icon=783305780a6dad8e0e4eb34109d948e6a5fc2c35
+set=1|1
+approvals=1,2
+public=1
+
+[HEADER]
+> This is the Title
+~ Thes is the Title
+
+
+[LINE]
+> A narrator line.
+~ A narrator line.
+
+[LINE]
+Speaker593: Hello, I am a speaker!
+~           Hello, I am a speaker!
+
+[LINE]
+Speaker560: I am another speaker!
+~           I am another speaker!
+
+[MULTIPLE_CHOICE]
+> Do you know how MULTIPLE_CHOICE works?
++ Right answers start with a +
+- negative answers with a -      yes  I~need   to~go to work    
+
+[ARRANGE]
+> Tap what you hear. The ARRANGE question uses () to create text buttons.
+Speaker593: [(First) (second) (third)]
+~             First   Second   Third   
+
+[POINT_TO_PHRASE]
+> Choose the option that means "right". In the POINT_TO_PHRASE
+Speaker560: The (+right) (word) has a plus (symbol).
+~            sorry    my love   I~am     tired       I~work   a~lot 
+
+[SELECT_PHRASE]
+> Choose the best answer: The SELECT_PHRASE has similar answers.
+Speaker593: What is the right  [word]?         
+~           What is the right   word
+$56/ddacf426.mp3;3,50;3,225;4,125;9,100
++ word
+- bird
+- skirt
+
+[CONTINUATION]
+> Tap what you hear. CONTINUATION
+Speaker560: I write with [words].
+~           I write with words.
++ words
+~ words
+- sentences
+~ sentences
+- texts
+~ texts
+
+[MATCH]
+> Tap the pairs
+- A <> 1
+- B <> 2
+- C <> 3
+- D <> 4
+- E <> 5
+

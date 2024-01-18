@@ -1,0 +1,109 @@
+---
+title: "Exercises"
+description: "Reading comprehension questions to engage the learner."
+---
+
+The Duostories are like the original Duolingo stories interactive,
+the learner is prompted with questions to make sure the learner understands the story.
+
+### Multiple Choice
+
+```
+[MULTIPLE_CHOICE]
+> Priti can't find her keys.
++ Yes, that's right.
+- No, that's wrong.
+```
+
+The exercise consists of a question and two or more answers.
+The right answer line starts with a `+` sign, the others with a `-` sign.
+
+![Example of Multiple Choice exercise](/docs/story-editing/multiple_choice.png "Multiple Choice")
+
+
+### Arrange
+
+```
+[ARRANGE]
+> Tap what you hear
+Speaker560: ¡[(Necesito) (las~llaves) (de) (mi) (carro)!]
+~              I~need     the~keys     of   my   car
+```
+
+The audio is played for the learner so that the learner
+now needs to reproduce the sentence by bringing the missing words into the right
+order. The part between the square brackets `[]` will be hidden and words in
+parentheses `()` are
+converted into buttons that the user can click to arrange them.
+
+![Example of Arrange exercise](/docs/story-editing/arrange.png "Arrange Choice")
+
+
+### Point to Phrase
+```
+[POINT_TO_PHRASE]
+> Choose the option that means "tired."
+Speaker560: (Perdón), mi amor, (estoy) (+cansada). ¡(Trabajo) mucho!
+~            sorry    my love   I~am     tired       I~work   a~lot
+```
+
+First the sentence is played in the story like a normal sentence.
+Then the story hides the hints and the learner has to pick the word from the sentence with the right meaning.
+Mark some words with parentheses `()` that will be shown as buttons. The right answer
+is indicated by a plus sign `+` after the opening parentheses `(` .
+
+![Example of Point to Phrase exercise](/docs/story-editing/arrange.png "Point to Phrase")
+
+
+### Select Phrase
+```
+[SELECT_PHRASE]
+> Select the missing phrase
+Speaker507: Hoy   tengo  [un~partido~importante].
+~           today I~have  an~important~game
++ un partido importante
+- un batido importante
+- una parte imponente
+```
+
+Here the audio is played for the whole sentences but a part of the sentences is hidden. This
+part is enclosed in square brackets `[]`. Then the user has to select from three
+similar sounding alternatives what was really said in the sentences.
+
+![Example of Select Phrase exercise](/docs/story-editing/select_phrase.png "Select Phrase")
+
+### Continuation
+```
+[CONTINUATION]
+> What's next?
+Speaker508: Tienes   cuatro botellas [de vino].
+~           you~have four   bottles   of wine
+- la  mesa
+~ the table
+- de pastel
+~ of cake
++ de vino
+~ of wine
+```
+The learner sees a sentences where a part is missing. This part will also be omitted by the audio.
+The learner then has to fill in the gap with one of three different alternatives.
+
+<Info>Although this seems very similar to `[SELECT_PHRASE]`, they are different as here its about
+filling in a missing word from the context whereas in `[SELECT_PHRASE]` is about listening to the audio.</Info>
+
+![Example of Continuation exercise](/docs/story-editing/select_phrase.png "Continuation")
+
+### Match
+```
+[MATCH]
+> Tap the pairs
+- estás <> you are
+- mucho <> a lot
+- es <> is
+- las llaves <> the keys
+- la <> the
+```
+The last exercise of a story is to match 5 words that occurred in the story with their translation.
+Write the word in the target language on the left followed by `<>` and on the right the translation.
+
+![Example of Match exercise](/docs/story-editing/match.png "Match")

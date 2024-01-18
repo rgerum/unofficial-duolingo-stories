@@ -13,7 +13,53 @@ The app is based on Next.js with React. It is currently in `next/next-all`.
 
 ## How to run locally
 
-Got to the folder `next/`.
+First you need to set up a PostgreSQL server.
+
+If you are on Linux you can use the following commands to install Postgres:
+
+Ubuntu:
+
+```
+sudo apt install postgresql
+```
+
+Fedora:
+
+```
+# Install and initialize PostgreSQL
+sudo dnf install postgresql-server postgresql-contrib
+sudo postgresql-setup --initdb --unit postgresql
+
+# If you get ident errors when running the psql lines below, try switching to md5
+# And don't forget to restart the service!
+sudo sed -i -e 's/ident/md5/g' /var/lib/pgsql/data/pg_hba.conf
+
+# To start postgresql server by default when booting up
+sudo systemctl enable postgresql
+```
+
+To set it up:
+
+```
+sudo systemctl restart postgresql.service
+sudo -u postgres psql -c "ALTER USER postgres with encrypted password 'postgres';"
+export PGPASSWORD=postgres
+```
+
+Then you need to initialize the database
+
+```
+sudo -u postgres psql -c "CREATE DATABASE duostories_test_db;"
+psql -U postgres -h localhost -d duostories_test_db -f database/schema.sql
+psql -U postgres -h localhost -d duostories_test_db -c \\dt
+```
+
+Now you need to create a file called `.env.local` in the base folder of the project and add the following 
+environment variable containing the URL for the Postgres database:
+
+```
+POSTGRES_URL=postgresql://postgres:postgres@localhost:5432/duostories_test_db
+```
 
 Install the npm packages
 
@@ -21,13 +67,13 @@ Install the npm packages
 npm install
 ```
 
-Create a local sqlite database
+Create fill the database with test data
 
 ```
 npm run init
 ```
 
-To develop you can then run
+To develop you can then run and visit http://localhost:3000
 
 ```
 npm run dev

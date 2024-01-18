@@ -1,0 +1,138 @@
+[DATA]
+fromLanguageName=Doctor Eddy
+icon=29c5abbf74b46e43a4de510ac83e302c0722a100
+set=2|4
+approvals=1
+
+[HEADER]
+> Dokter Eddy
+~ doctor    Eddy
+$5326/aa572766.mp3;6,50;5,500
+
+[LINE]
+> Eddy is in de supermarkt
+~ Eddy is at the supermarket  
+$5326/afbb3d00.mp3;4,50;3,412;3,188;3,125;11,87
+
+[LINE]
+> Een vrouw spreekt hem aan
+~ a   woman adresses  him (to)
+$5326/b095c5ec.mp3;3,50;6,187;8,338;4,437;4,150
+
+[MULTIPLE_CHOICE]
+> Eddy adresses a woman
+- Yes, that's right.
++ No, that's wrong.
+
+[LINE]
+Speaker724: Hallo meneer!
+~            hello sir
+$5326/b5ceabe6.mp3;5,50;7,462
+
+[LINE]
+Speaker414: Ja?
+~           Yes?
+$5326/bcfcc6d2.mp3;2,50
+
+[LINE]
+Speaker724: Bent u   misschien     een dokter? 
+~           are  you by~any~chance a   doctor 
+$5326/66844b36.mp3;4,50;2,300;10,100;4,487;7,113
+
+[LINE]
+Speaker414: Ik? Een dokter? uh...
+~            me a   doctor  uh 
+$5326/6b891ddc.mp3;2,50;4,737;7,213;3,925
+
+[LINE]
+Speaker414: Ja!      Hoe heeft u dat~gezien? 
+~           yes~I~am how did you see~that 
+$5326/344514dc.mp3;2,50;4,862;6,263;2,300;4,62;7,200
+
+[LINE]
+Speaker724:   Gelukkig!
+~             that's~good 
+$5326/76a34eae.mp3;8,50
+
+[LINE]
+> Maar     Eddy is geen dokter. 
+~ However, Eddy is not~a doctor 
+$5326/56f9b376.mp3;4,50;5,300;3,325;5,200;7,325
+
+[ARRANGE]
+> Tap what you hear
+Speaker414: [(Ik~heb)  (veel)    (geld).]
+~             I~have   a~lot~of   money    
+$5326/7d45179c.mp3;2,50;4,187;5,163;5,300
+
+[LINE]
+Speaker414: Ik woon in een heel groot huis
+~           I live  in a   very big house  
+$5326/2599e220.mp3;2,50;5,187;3,288;4,125;5,125;6,275;5,362
+
+[LINE]
+Speaker414: Ik heb heel dure      broeken
+~           I have very expensive pants 
+$5326/2a115dba.mp3;2,50;4,175;5,162;5,288;8,312
+
+[LINE]
+Speaker724: Okee maar
+~           OK   but  
+$5326/86a87554.mp3;4,50;5,450
+
+[LINE]
+Speaker724: Die  man heeft nu    een dokter     nodig
+~           that man needs (now) a   doctor~now (heeft~nodig=needs)  
+$5326/8c7f1bb8.mp3;3,50;4,212;6,313;3,312;4,288;7,112;6,363
+
+[LINE]
+Speaker724: Hij staat         bij  de melk
+~           he  is~(standing) near the milk  
+$5326/92e9d66e.mp3;3,50;6,237;4,438;3,187;5,88
+
+[LINE]
+Speaker724: Alstublíeft, deze man heeft~uw~hulp~nodig!
+~           please       that man needs~your~help  
+$5326/96f09ed2.mp3;11,50;5,987;4,338;6,287;3,300;5,175;6,288
+
+[MULTIPLE_CHOICE]
+> The man who needs help is near the…
+- …station.
+- …tomatoes.
++ …milk.
+
+[POINT_TO_PHRASE]
+> Choose the option that means "ill."
+Speaker724: (Hij~is)  (erg)  (+ziek)!
+~             he~is   very    ill     
+$5326/9c7066a8.mp3;3,50;3,287;4,238;5,250
+
+[LINE]
+Speaker414: Oh, nee.
+~            oh  no 
+$5326/a35a349e.mp3;2,50;4,550
+
+[LINE]
+> Eddy ziet een vrouw, en spreekt haar  aan
+~ Eddy sees a   woman and adresses  her (spreekt~aan=addresses)
+$5326/de67126e.mp3;4,50;5,312;4,238;6,137;3,675;8,175;5,413;4,187
+
+[LINE]
+Speaker414: Hallo mevrouw, bent u een dokter? 
+~           hello  madam, are you a doctor 
+$5326/95501886.mp3;5,50;8,400;5,775;2,287;4,88;7,125
+
+[MULTIPLE_CHOICE]
+> What happened in the story?
+- Eddy started med school to become a doctor.
++ Eddy pretended to be a doctor to impress a woman.
+- Eddy saved a man at the supermarket.
+
+[MATCH]
+> Tap the pairs
+- the pair of trousers <> de broek
+- not a <> geen
+- sir <> meneer
+- a lot of <> veel
+- to address <> aanspreken
+

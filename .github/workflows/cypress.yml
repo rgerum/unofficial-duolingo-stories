@@ -6,12 +6,35 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      - uses: ikalnytskyi/action-setup-postgres@v5
+        with:
+          database: duostories_test_db
       - name: Checkout
         uses: actions/checkout@v4
 
       - uses: actions/setup-node@v3
         with:
           node-version: 20
+
+      - uses: actions/cache@v3
+        with:
+          # See here for caching with `yarn` https://github.com/actions/cache/blob/main/examples.md#node---yarn or you can leverage caching with actions/setup-node https://github.com/actions/setup-node
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          # Generate a new cache whenever packages or source files change.
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          # If source files changed but packages didn't, rebuild from a prior cache.
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: init db
+        run: |
+          export PGPASSWORD=postgres
+          psql -U postgres -h localhost -d duostories_test_db -f database/schema.sql
+          psql -U postgres -h localhost -d duostories_test_db -c \\dt
+
+      - run: printf "${{ secrets.ENV_LOCAL }}" >> .env.local
 
       - name: Cypress run
         uses: cypress-io/github-action@v6

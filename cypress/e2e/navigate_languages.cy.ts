@@ -16,8 +16,8 @@ describe("Test Logins", () => {
     cy.go("back");
 
     // go to the CCatalan course
-    cy.get("[data-cy=language_button_big_ca-en]").click();
-    cy.url().should("include", "ca-en");
+    cy.get("[data-cy=language_button_big_test-en]").click();
+    cy.url().should("include", "test-en");
     cy.get("[data-cy*=story_button]").should("have.length.greaterThan", 1);
     // click on the logo to go back
     cy.get("[data-cy=logo]").click();

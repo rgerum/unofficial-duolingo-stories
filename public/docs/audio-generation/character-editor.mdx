@@ -1,0 +1,40 @@
+---
+title: "Character Editor"
+description: "Assign voices to characters."
+---
+
+In the character editor you can assign voices to the characters that appear in the stories.
+
+### Character Names
+You can also assign a name to the character. The name is just for reference if the character is addressed in a story
+to always use the same spelling.
+
+The characters in the first row are the basic Duolingo cast. We want to keep their names
+as close to the original as possible. Just adjust them to the spelling of the target language.
+
+![First row of the Character editor](/docs/audio-generation/base_cast.png "Base Characters")
+
+For example, if your language does not have a "v" and uses a "w" instead, you are able to change Vikram's name to "Wikram"
+
+![How Vikram can be changed to Wikram](/docs/audio-generation/vikram.png "Vikram -> Wikram")
+
+As for these ones, feel free to change them to whatever you want to fit your language! For example, If you're making
+Finnish stories, use Finnish names. It will help the stories seem more realistic.
+
+![List of the side characters](/docs/audio-generation/other_cast.png "The side characters")
+
+### Vocal Modifiers
+
+You can add tags on to the end of your TTS to modify it: the rate at which the character speaks and the pitch at which they speak. For example, to make Junior sound more like a child, I can make him speak faster and higher by adding tags, so I put  it-IT-ElsaNeural(pitch=x-high)(rate=fast) in the Speaker section.
+
+Pitch has 5 levels:
+
+`x-low`, `low`, `medium`, `high`, `x-high`
+
+Rate has 5 levels:
+
+`x-slow`, `slow`, `medium`, `fast`, `x-fast`
+
+Feel free to use these, or not.
+
+![Display of the sliders for pitch and speed](/docs/audio-generation/pitch_speed.png "The sliders for pitch and speed")
