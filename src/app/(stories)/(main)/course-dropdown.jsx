@@ -9,6 +9,7 @@ function LanguageButtonSmall({ course, flag_data }) {
   /**
    * A button in the language drop down menu (flag + name)
    */
+  if (!course) return null;
   return (
     <Link
       className={styles.language_select_item}
