@@ -24,7 +24,7 @@
     "eslint-config-next": "^14.0.4",
     "js-yaml": "^4.1.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.34.0",
-    "next": "^14.0.4",
+    "next": "=14.0.1",
     "next-auth": "^4.24.5",
     "next-mdx-remote": "^4.4.1",
     "next-pwa": "^5.6.0",
