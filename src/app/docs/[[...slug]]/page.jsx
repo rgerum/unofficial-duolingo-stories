@@ -147,7 +147,7 @@ export default async function Page({ params }) {
     path += "/" + p;
   }
   if (path.endsWith(".js") || path.endsWith(".mdx")) return notFound();
-  console.log(path);
+
   let data = await getPageData(path);
   let doc_data = await GetDocsData();
   let previous = null;
