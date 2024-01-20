@@ -85,6 +85,17 @@ function display_search(do_show) {
   }
 }
 
+function toggle(value) {
+  if (value === undefined) {
+    if (document.getElementById("container").getAttribute("show") == "true") {
+      value = "false";
+    } else {
+      value = "true";
+    }
+  }
+  document.getElementById("container").setAttribute("show", value);
+}
+
 function init() {
   document.getElementById("search_input").onkeyup = search;
   document.getElementById("search").onclick = () => display_search(true);
@@ -98,6 +109,10 @@ function init() {
       e.preventDefault();
     }
   });
+
+  document.getElementById("toggle").onclick = (e) => toggle();
+  document.getElementById("blur").onclick = (e) => toggle();
+  document.getElementById("close").onclick = (e) => toggle();
 }
 document.addEventListener("DOMNodeInserted", (event) => {
   init();

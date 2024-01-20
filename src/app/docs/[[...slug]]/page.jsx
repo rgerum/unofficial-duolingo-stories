@@ -176,34 +176,6 @@ export default async function Page({ params }) {
 
   return (
     <Layout path={path} datax={data} headings={headings}>
-      <Script id="show-banner">
-        {`
-        function toggle(value) {
-            if(value === undefined) {
-                if( document.getElementById("container").getAttribute("show") == "true") {
-                    value = "false";
-                }
-                else {
-                    value = "true";
-                }    
-            }
-            document.getElementById("container").setAttribute("show", value);
-        }
-        function init() {
-          document.getElementById('toggle').onclick = (e) => toggle()
-          document.getElementById('blur').onclick = (e) => toggle()
-          document.getElementById('close').onclick = (e) => toggle()
-        }
-        document.addEventListener("DOMNodeInserted", (event) => {
-            init();
-        });
-        document.addEventListener("DOMNodeRemoved", (event) => {
-            init();
-        });
-        init();
-        
-        `}
-      </Script>
       <header id="header">
         <div>{data.group}</div>
         <h1>{data.title}</h1>
