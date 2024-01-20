@@ -211,7 +211,7 @@ export default async function Page({ params }) {
       <div className={styles.button_container}>
         <Link
           className={styles.button}
-          href={`https://github.com/${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}/edit/${process.env.VERCEL_GIT_COMMIT_REF}/src/app/docs${path}.mdx`}
+          href={`https://github.com/${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}/edit/${process.env.VERCEL_GIT_COMMIT_REF}/public/docs${path}.mdx`}
         >
           <small>Suggest edits</small>
         </Link>
