@@ -33,7 +33,7 @@ export const sql = postgres(process.env.POSTGRES_URL, {
       }
       console.log("query", { query: hash, sql: args[1] });
     } else {
-      //track("query", { query: cyrb53(args[1]) });
+      track("query", { query: cyrb53(args[1]) });
     }
   },
   ssl: "require",
