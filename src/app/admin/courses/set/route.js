@@ -27,9 +27,13 @@ async function set_course(data) {
   let id;
   let tag_list = data["tags"] || "";
 
-  data["tags"] = [...tag_list.matchAll(/[^, ]+/g)].map((d) =>
-    d[0].toLowerCase(),
-  );
+  if (typeof tag_list === "string") {
+    data["tags"] = [...tag_list.matchAll(/[^, ]+/g)].map((d) =>
+      d[0].toLowerCase(),
+    );
+  }
+  data["public"] =
+    data["public"] == 1 || data["public"] === "true" ? "true" : "false";
   data["short"] = (
     await sql`SELECT CONCAT(l2.short, '-', l.short) as short
 FROM language l, language l2
