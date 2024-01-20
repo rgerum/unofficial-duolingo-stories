@@ -79,7 +79,9 @@ async function Layout({ children, path, datax, headings }) {
           <Link href="/">Duostories</Link>
         </div>
         <button id="search" className={styles.search}>
-          Search Documentation...
+          <span>
+            <span>Search Documentation...</span>
+          </span>
           <span>CtrlK</span>
         </button>
       </div>

@@ -74,14 +74,14 @@ async function search() {
 
 function display_search(do_show) {
   if (do_show) {
-    document.getElementById("search_modal").style.display = "block";
-    document.getElementById("blur2").style.display = "block";
+    document.getElementById("search_modal").setAttribute("show", true);
+    document.getElementById("blur2").setAttribute("show", true);
     document.getElementById("search_input").value = "";
     document.getElementById("search_input").focus();
     search();
   } else {
-    document.getElementById("search_modal").style.display = "none";
-    document.getElementById("blur2").style.display = "none";
+    document.getElementById("search_modal").setAttribute("show", false);
+    document.getElementById("blur2").setAttribute("show", false);
   }
 }
 
