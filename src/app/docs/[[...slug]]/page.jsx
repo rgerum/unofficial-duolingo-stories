@@ -75,9 +75,13 @@ async function Layout({ children, path, datax, headings }) {
         <div id="search_results"></div>
       </div>
       <div className={styles.navbar}>
-        <div>Duostories</div>
+        <div>
+          <Link href="/">Duostories</Link>
+        </div>
         <button id="search" className={styles.search}>
-          Search Documentation...
+          <span>
+            <span>Search Documentation...</span>
+          </span>
           <span>CtrlK</span>
         </button>
       </div>
@@ -143,7 +147,7 @@ export default async function Page({ params }) {
     path += "/" + p;
   }
   if (path.endsWith(".js") || path.endsWith(".mdx")) return notFound();
-  console.log(path);
+
   let data = await getPageData(path);
   let doc_data = await GetDocsData();
   let previous = null;
@@ -174,34 +178,6 @@ export default async function Page({ params }) {
 
   return (
     <Layout path={path} datax={data} headings={headings}>
-      <Script id="show-banner">
-        {`
-        function toggle(value) {
-            if(value === undefined) {
-                if( document.getElementById("container").getAttribute("show") == "true") {
-                    value = "false";
-                }
-                else {
-                    value = "true";
-                }    
-            }
-            document.getElementById("container").setAttribute("show", value);
-        }
-        function init() {
-          document.getElementById('toggle').onclick = (e) => toggle()
-          document.getElementById('blur').onclick = (e) => toggle()
-          document.getElementById('close').onclick = (e) => toggle()
-        }
-        document.addEventListener("DOMNodeInserted", (event) => {
-            init();
-        });
-        document.addEventListener("DOMNodeRemoved", (event) => {
-            init();
-        });
-        init();
-        
-        `}
-      </Script>
       <header id="header">
         <div>{data.group}</div>
         <h1>{data.title}</h1>
@@ -211,7 +187,7 @@ export default async function Page({ params }) {
       <div className={styles.button_container}>
         <Link
           className={styles.button}
-          href={`https://github.com/${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}/edit/${process.env.VERCEL_GIT_COMMIT_REF}/src/app/docs${path}.mdx`}
+          href={`https://github.com/${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}/edit/${process.env.VERCEL_GIT_COMMIT_REF}/public/docs${path}.mdx`}
         >
           <small>Suggest edits</small>
         </Link>

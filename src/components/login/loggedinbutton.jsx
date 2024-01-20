@@ -127,8 +127,8 @@ export default function LoggedInButton({ page, course_id, session }) {
             {controls.value === "light"
               ? "Dark Mode"
               : controls.value === "dark"
-              ? "Light Mode"
-              : "Light/Dark"}
+                ? "Light Mode"
+                : "Light/Dark"}
           </div>
         }
         {session.user?.role && page !== "stories" ? (
@@ -147,6 +147,15 @@ export default function LoggedInButton({ page, course_id, session }) {
             data-cy="user-editor"
           >
             Editor
+          </Link>
+        ) : null}
+        {session.user?.role && page !== "docs" ? (
+          <Link
+            className={styles.profile_dropdown_button}
+            href={"/docs"}
+            data-cy="user-docs"
+          >
+            Docs
           </Link>
         ) : null}
         {session.user?.admin && page !== "admin" ? (

@@ -74,15 +74,26 @@ async function search() {
 
 function display_search(do_show) {
   if (do_show) {
-    document.getElementById("search_modal").style.display = "block";
-    document.getElementById("blur2").style.display = "block";
+    document.getElementById("search_modal").setAttribute("show", true);
+    document.getElementById("blur2").setAttribute("show", true);
     document.getElementById("search_input").value = "";
     document.getElementById("search_input").focus();
     search();
   } else {
-    document.getElementById("search_modal").style.display = "none";
-    document.getElementById("blur2").style.display = "none";
+    document.getElementById("search_modal").setAttribute("show", false);
+    document.getElementById("blur2").setAttribute("show", false);
   }
+}
+
+function toggle(value) {
+  if (value === undefined) {
+    if (document.getElementById("container").getAttribute("show") == "true") {
+      value = "false";
+    } else {
+      value = "true";
+    }
+  }
+  document.getElementById("container").setAttribute("show", value);
 }
 
 function init() {
@@ -98,6 +109,10 @@ function init() {
       e.preventDefault();
     }
   });
+
+  document.getElementById("toggle").onclick = (e) => toggle();
+  document.getElementById("blur").onclick = (e) => toggle();
+  document.getElementById("close").onclick = (e) => toggle();
 }
 document.addEventListener("DOMNodeInserted", (event) => {
   init();
