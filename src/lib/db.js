@@ -33,13 +33,16 @@ export const sql = postgres(process.env.POSTGRES_URL, {
       }
       console.log("query", { query: hash, sql: args[1] });
     } else {
-      track("query", { query: cyrb53(args[1]) });
+      //track("query", { query: cyrb53(args[1]) });
     }
   },
   ssl: "require",
 });
 
-const hash_table = JSON.parse(fs.readFileSync("hash_table.json", "utf8"));
+const hash_table =
+  process.env.LOG_QUERY === "true"
+    ? JSON.parse(fs.readFileSync("hash_table.json", "utf8"))
+    : {};
 
 import { unstable_cache } from "next/cache";
 import fs from "fs";
