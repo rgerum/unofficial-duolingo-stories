@@ -22,13 +22,29 @@ export const sql = postgres(process.env.POSTGRES_URL, {
   /* options */
   //debug: console.log,
   debug: (...args) => {
-    track("query", { query: cyrb53(args[1]) });
+    if (process.env.LOG_QUERY === "true") {
+      const hash = `${cyrb53(args[1])}`;
+      if (!hash_table[hash]) {
+        hash_table[hash] = args[1];
+        fs.writeFileSync(
+          "hash_table.json",
+          JSON.stringify(hash_table, null, 2),
+        );
+      }
+      console.log("query", { query: hash, sql: args[1] });
+    } else {
+      track("query", { query: cyrb53(args[1]) });
+    }
   },
   ssl: "require",
 });
 
+const hash_table = JSON.parse(fs.readFileSync("hash_table.json", "utf8"));
+
 import { unstable_cache } from "next/cache";
+import fs from "fs";
 export const cache = (f, ...args) => {
   //console.log("cache", ...args);
+  if (process.env.NO_CACHE === "true") return f;
   return unstable_cache(f, ...args);
 };
