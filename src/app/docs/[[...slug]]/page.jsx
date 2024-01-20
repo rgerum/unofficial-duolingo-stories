@@ -75,7 +75,9 @@ async function Layout({ children, path, datax, headings }) {
         <div id="search_results"></div>
       </div>
       <div className={styles.navbar}>
-        <div>Duostories</div>
+        <div>
+          <Link href="/">Duostories</Link>
+        </div>
         <button id="search" className={styles.search}>
           Search Documentation...
           <span>CtrlK</span>

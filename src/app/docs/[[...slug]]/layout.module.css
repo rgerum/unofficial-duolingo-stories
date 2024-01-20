@@ -38,6 +38,9 @@
   height: 70px;
   padding: 16px 48px;
 }
+.navbar>div a{
+  text-decoration: none;
+}
 .navbar .search {
   outline: none;
   border: none;
