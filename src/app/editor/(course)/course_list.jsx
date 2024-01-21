@@ -8,12 +8,14 @@ import { Spinner } from "../../../components/layout/spinner";
 
 export default function CourseList({
   courses,
+  languages,
   course_id,
   showList,
   toggleShow,
 }) {
   const [search, setSearch] = useInput("");
   const router = useRouter();
+  console.log(courses);
 
   if (courses === undefined)
     return (
@@ -66,15 +68,14 @@ export default function CourseList({
             >
               <span className={styles.course_count}>{course.count}</span>
               <Flag
-                iso={course.learning_language}
+                iso={languages[course.learning_language].short}
                 width={40}
-                flag={course.learning_language_flag}
-                flag_file={course.learning_language_flag_file}
+                flag_file={languages[course.learning_language].flag_file}
                 style={{ margin: "3px" }}
               />
-              <span
-                className={styles.course_selection_course_name}
-              >{`${course.learning_language_name} [${course.from_language}] `}</span>
+              <span className={styles.course_selection_course_name}>{`${
+                course.learning_language_name
+              } [${languages[course.from_language].short}] `}</span>
               <span className={styles.author}>
                 {course.official ? (
                   <span className={styles.crown}>
@@ -84,8 +85,8 @@ export default function CourseList({
                       alt="👑"
                     />
                   </span>
-                ) : course.contributor_count ? (
-                  `🧑 ${course.contributor_count}`
+                ) : course.contributors.length ? (
+                  `🧑 ${course.contributors.length}`
                 ) : (
                   "💤"
                 )}

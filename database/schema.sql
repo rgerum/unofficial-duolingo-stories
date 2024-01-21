@@ -127,7 +127,9 @@ create table course
     tags              varchar(20)[],
     count             integer,
     learning_language_name varchar(255),
-    from_language_name varchar(255)
+    from_language_name varchar(255),
+    contributors      varchar(255) [] default '{}'::character varying[] not null,
+    contributors_past varchar(255)[] default '{}'::character varying[] not null,
 );
 
 create table sessions

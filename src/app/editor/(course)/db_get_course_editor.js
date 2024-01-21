@@ -1,31 +1,57 @@
 import { cache } from "react";
 import { sql } from "lib/db";
 
+export const get_language_list_data = cache(async () => {
+  let data = await sql`
+                SELECT id, short, flag, flag_file
+                FROM language
+                `;
+  let look_up = {};
+  for (let language of data) {
+    look_up[language.short] = language;
+    look_up[language.id] = language;
+  }
+  return look_up;
+});
+
+export const get_course_list_data = cache(async () => {
+  let data = await sql`
+        SELECT id, short, about, official, count,
+               from_language, from_language_name,
+               learning_language, learning_language_name,
+               contributors, contributors_past
+        FROM course
+        ORDER BY count DESC
+        `;
+  let look_up = {};
+  for (let course of data) {
+    look_up[course.short] = course;
+    look_up[course.id] = course;
+  }
+  return data;
+});
+
 export const get_course_editor = cache(async (course_id) => {
   const isNumeric = (value) =>
     value.length !== 0 && [...value].every((c) => c >= "0" && c <= "9");
   let course_query;
   if (isNumeric(course_id)) {
     course_query = await sql`
-        SELECT course.id, course.short, course.about, course.official,
-        l1.short AS from_language, l1.name AS from_language_name, l1.flag_file AS from_language_flag_file, l1.flag AS from_language_flag,
-        l2.short AS learning_language, l2.name AS learning_language_name, l2.flag_file AS learning_language_flag_file, l2.flag AS learning_language_flag
+        SELECT id, short, about, official, count,
+               from_language, from_language_name,
+               learning_language, learning_language_name
         FROM course
-        LEFT JOIN language l1 ON l1.id = course.from_language
-        LEFT JOIN language l2 ON l2.id = course.learning_language
-        WHERE course.id = ${course_id} LIMIT 1
+        WHERE id = ${course_id} LIMIT 1
         `;
 
     if (course_query.length === 0) return undefined;
   } else {
     course_query = await sql`
-        SELECT course.id, course.short, course.about, course.official,
-        l1.short AS from_language, l1.name AS from_language_name, l1.flag_file AS from_language_flag_file, l1.flag AS from_language_flag,
-        l2.short AS learning_language, l2.name AS learning_language_name, l2.flag_file AS learning_language_flag_file, l2.flag AS learning_language_flag     
-        FROM course 
-        LEFT JOIN language l1 ON l1.id = course.from_language
-        LEFT JOIN language l2 ON l2.id = course.learning_language
-        WHERE course.short = ${course_id} LIMIT 1
+        SELECT id, short, about, official, count,
+               from_language, from_language_name,
+               learning_language, learning_language_name
+        FROM course
+        WHERE short = ${course_id} LIMIT 1
         `;
 
     if (course_query.length === 0) return undefined;
