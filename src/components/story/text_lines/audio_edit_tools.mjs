@@ -269,7 +269,7 @@ export function content_to_audio(content) {
   return audio;
 }
 
-function timings_to_text({ filename, keypoints }) {
+export function timings_to_text({ filename, keypoints }) {
   let text = "$" + filename;
   let last_end = 0;
   let last_time = 0;
@@ -304,7 +304,7 @@ export function text_to_keypoints(line) {
   return [filename, keypoints];
 }
 
-function insert_audio_line(text, ssml, view, audio_insert_lines) {
+export function insert_audio_line(text, ssml, view, audio_insert_lines) {
   let [line, line_insert] = audio_insert_lines[ssml.inser_index];
   if (line !== undefined) {
     let line_state = view.state.doc.line(line);

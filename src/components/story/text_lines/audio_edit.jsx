@@ -1,7 +1,11 @@
 import React from "react";
 import { EditorContext } from "../story";
 import styles from "./audio_edit.module.css";
-import { generate_audio_line } from "./audio_edit_tools";
+import {
+  generate_audio_line,
+  timings_to_text,
+  insert_audio_line,
+} from "./audio_edit_tools";
 
 export default function EditorSSMLDisplay({ ssml, element, audio }) {
   //let urlParams = new URLSearchParams(window.location.search);
