@@ -9,11 +9,14 @@ export default function LayoutFlag({ courses, languages }) {
   const segment = useSelectedLayoutSegments();
   let import_id = segment[3];
   let course = undefined;
+  let course_import = undefined;
 
   for (let c of courses) {
     if (c.short === segment[1] || `${c.id}` === segment[1]) {
       course = c;
-      break;
+    }
+    if (c.short === segment[3] || `${c.id}` === segment[3]) {
+      course_import = c;
     }
   }
   function toggleShow() {
@@ -42,6 +45,26 @@ export default function LayoutFlag({ courses, languages }) {
         },
       },
     ];
+  }
+  if (import_id) {
+    path[path.length - 1].href = `/editor/course/${course.short}`;
+    path.push({ type: "sep" });
+    path.push({
+      type: "course",
+      name: "Import",
+      lang1: {
+        short: languages[course_import.learning_language].short,
+        name: course_import.learning_language_name,
+        flag: languages[course_import.learning_language].flag,
+        flag_file: languages[course_import.learning_language].flag_file,
+      },
+      lang2: {
+        short: languages[course_import.from_language].short,
+        name: course_import.from_language_name,
+        flag: languages[course_import.from_language].flag,
+        flag_file: languages[course_import.from_language].flag_file,
+      },
+    });
   }
   return (
     <>
