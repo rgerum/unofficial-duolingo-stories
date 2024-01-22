@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Script from "next/script";
 
 export const metadata = {
   title: "Duostories FAQ",
@@ -13,6 +14,31 @@ export default async function Page() {
   return (
     <div style={{ padding: "0 15px" }}>
       <h1>Frequently Asked Questions</h1>
+      <h2>Can I support this project financially?</h2>
+      <p>
+        Yes, we have a page on{" "}
+        <Link href={"https://opencollective.com/duostories"}>
+          OpenCollective
+        </Link>
+        . We use the money to cover the hosting costs and for the TTS services.
+        <a
+          href="https://opencollective.com/duostories/contribute"
+          target="_blank"
+        >
+          <img
+            src="https://opencollective.com/duostories/contribute/button@2x.png?color=blue"
+            height="48"
+          />
+        </a>
+        or
+        <a href="https://opencollective.com/duostories/donate" target="_blank">
+          <img
+            src="https://opencollective.com/duostories/donate/button@2x.png?color=blue"
+            height="48"
+          />
+        </a>
+        <Script src="https://opencollective.com/:collectiveSlug/banner.js"></Script>
+      </p>
       <h2>Is this website open source?</h2>
       <p>
         Yes it is! The code is hosted on Github{" "}
