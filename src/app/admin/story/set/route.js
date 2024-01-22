@@ -54,6 +54,7 @@ SET count = (
     WHERE story.course_id = course.id AND story.public AND NOT story.deleted
 ) WHERE id = (SELECT course_id FROM story WHERE id = ${data.id});`;
   revalidateTag("course_data");
+  revalidateTag("story_data");
 
   return await story_properties(data.id);
 }
