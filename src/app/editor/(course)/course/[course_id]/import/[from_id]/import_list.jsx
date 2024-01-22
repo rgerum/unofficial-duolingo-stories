@@ -105,8 +105,6 @@ export default function ImportList({ course, imports, import_id }) {
           ))}
         </tbody>
       </table>
-      {course ? <></> : <></>}
-      {course && course?.stories === undefined ? <>Error loading.</> : <></>}
     </>
   );
 }

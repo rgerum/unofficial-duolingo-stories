@@ -5,9 +5,7 @@ import styles from "./edit_list.module.css";
 import { SpinnerBlue } from "components/layout/spinner";
 import { useRouter } from "next/navigation";
 
-export default function EditList({ course, updateCourses }) {
-  let stories = course?.stories;
-
+export default function EditList({ stories, course, updateCourses }) {
   if (stories === undefined) stories = [];
   let set_ends = [];
   let last_set = 1;
@@ -15,14 +13,6 @@ export default function EditList({ course, updateCourses }) {
     if (story.set_id === last_set) set_ends.push(0);
     else set_ends.push(1);
     last_set = story.set_id;
-  }
-  let active_contributors = [];
-  let past_contributors = [];
-
-  for (let contrib of course.contributors) {
-    if (!contrib.active) {
-      past_contributors.push(contrib);
-    } else active_contributors.push(contrib);
   }
 
   return (
@@ -57,15 +47,15 @@ export default function EditList({ course, updateCourses }) {
       </p>
       <p style={{ fontWeight: "bold" }}>
         Active Contributors:{" "}
-        {active_contributors.map((d, i) => (
-          <span key={i}>{d.name}, </span>
+        {course.contributors.map((d, i) => (
+          <span key={i}>{d}, </span>
         ))}{" "}
-        {active_contributors.length === 0 ? "No Contributors" : ""}
+        {course.contributors.length === 0 ? "No Contributors" : ""}
       </p>
       <p>
         Past Contributors:{" "}
-        {past_contributors.map((d, i) => (
-          <span key={i}>{d.name}, </span>
+        {course.contributors_past.map((d, i) => (
+          <span key={i}>{d}, </span>
         ))}
       </p>
       <div className={styles.table}>
@@ -116,7 +106,7 @@ export default function EditList({ course, updateCourses }) {
                 <DropDownStatus
                   id={story.id}
                   name={story.name}
-                  count={story.approvals}
+                  count={story.approvals.length}
                   status={story.status}
                   public={story.public}
                   official={course.official}
@@ -131,8 +121,6 @@ export default function EditList({ course, updateCourses }) {
           ))}
         </div>
       </div>
-      {course ? <></> : <></>}
-      {course && course?.stories === undefined ? <>Error loading.</> : <></>}
     </>
   );
 }

@@ -1,12 +1,12 @@
 import {
   get_course_import,
-  get_course_editor,
+  get_course_data,
 } from "../../../../db_get_course_editor";
 import ImportList from "./import_list";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }) {
-  let course = await get_course_editor(params.course_id);
+  const course = await get_course_data(params.course_id);
 
   if (!course) notFound();
 
@@ -20,9 +20,13 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
   let from = params.from_id;
-  let course = await get_course_editor(params.course_id);
+  let course = await get_course_data(params.course_id);
+  let course_from = await get_course_data(params.from_id);
 
-  let imports = await get_course_import(params);
+  let imports = await get_course_import({
+    from_id: course_from.id,
+    course_id: course.id,
+  });
 
   if (!imports) {
     imports = [];
@@ -31,7 +35,7 @@ export default async function Page({ params }) {
   // Render data...
   return (
     <>
-      <ImportList course={course} imports={imports} import_id={from} />!
+      <ImportList course={course} imports={imports} import_id={from} />
     </>
   );
 }

@@ -1,11 +1,11 @@
 import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
-import { get_course_editor } from "../../db_get_course_editor";
+import { get_course_data, get_story_list } from "../../db_get_course_editor";
 import { getServerSession } from "next-auth/next";
 import { notFound } from "next/navigation";
 import EditList from "../../edit_list";
 
 export async function generateMetadata({ params }) {
-  let course = await get_course_editor(params.course_id);
+  let course = await get_course_data(params.course_id);
 
   if (!course) notFound();
 
@@ -29,13 +29,15 @@ export default async function Page({ params }) {
     };
   }
 
-  let course = await get_course_editor(params.course_id);
+  const course = await get_course_data(params.course_id);
   if (!course) notFound();
+
+  const stories = await get_story_list(course_data.id);
 
   //function sleep(ms) {
   //    return new Promise(resolve => setTimeout(resolve, ms));
   //}
   //await sleep(2000);
 
-  return <EditList course={course} />;
+  return <EditList stories={stories} course={course} />;
 }
