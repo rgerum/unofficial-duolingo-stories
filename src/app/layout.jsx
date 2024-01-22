@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", load);
       </head>
       <body className={nunito.className}>
         {children}
-        <Analytics />
+        {!process.env.NO_TRACK_QUERY ? <Analytics /> : null}
       </body>
     </html>
   );
