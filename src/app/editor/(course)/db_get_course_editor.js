@@ -16,7 +16,7 @@ export const get_language_list_data = cache(async () => {
 
 export const get_course_list_data = cache(async () => {
   let data = await sql`
-        SELECT id, short, about, official, count,
+        SELECT id, short, about, official, count, public,
                from_language, from_language_name,
                learning_language, learning_language_name,
                contributors, contributors_past

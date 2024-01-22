@@ -32,7 +32,7 @@ export default async function Page({ params }) {
   const course = await get_course_data(params.course_id);
   if (!course) notFound();
 
-  const stories = await get_story_list(course_data.id);
+  const stories = await get_story_list(course.id);
 
   //function sleep(ms) {
   //    return new Promise(resolve => setTimeout(resolve, ms));

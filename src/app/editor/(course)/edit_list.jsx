@@ -9,15 +9,26 @@ export default function EditList({ stories, course, updateCourses }) {
   if (stories === undefined) stories = [];
   let set_ends = [];
   let last_set = 1;
+  let story_published_count = 0;
   for (let story of stories) {
     if (story.set_id === last_set) set_ends.push(0);
     else set_ends.push(1);
     last_set = story.set_id;
+    story_published_count += story.public ? 1 : 0;
   }
 
   return (
     <>
       <div>
+        {!course.public && story_published_count ? (
+          <div className={styles.warning}>
+            ⚠ This course is not public, but has {story_published_count}{" "}
+            stories set to "public".
+            <br />
+            Please ask a moderator on discord to check the course and make it
+            pubic.
+          </div>
+        ) : null}
         <ul>
           <li>
             To create a new story click the "Import" button. The story starts as
