@@ -1,7 +1,11 @@
+DROP TYPE IF EXISTS gender_enum CASCADE;
 create type gender_enum as enum ('MALE', 'FEMALE');
+DROP TYPE IF EXISTS type_enum CASCADE;
 create type type_enum as enum ('NORMAL', 'NEURAL');
+DROP TYPE IF EXISTS story_status CASCADE;
 create type story_status as enum ('draft', 'feedback', 'finished');
 
+DROP TABLE IF EXISTS image CASCADE;
 create table image
 (
     id         varchar(50)  not null
@@ -13,6 +17,7 @@ create table image
     gilded_lip varchar(6)   not null
 );
 
+DROP TABLE IF EXISTS language CASCADE;
 create table language
 (
     id           serial
@@ -29,6 +34,7 @@ create table language
     rtl          boolean default false not null
 );
 
+DROP TABLE IF EXISTS avatar CASCADE;
 create table avatar
 (
     id   serial
@@ -37,6 +43,7 @@ create table avatar
     name varchar(100) default NULL::character varying
 );
 
+DROP TABLE IF EXISTS users CASCADE;
 create table users
 (
     id              serial
@@ -53,6 +60,7 @@ create table users
     activation_link varchar(255)             default NULL::character varying
 );
 
+DROP TABLE IF EXISTS accounts CASCADE;
 create table accounts
 (
     id                  serial
@@ -71,6 +79,7 @@ create table accounts
     session_state       text
 );
 
+DROP TABLE IF EXISTS speaker CASCADE;
 create table speaker
 (
     id          serial
@@ -84,6 +93,7 @@ create table speaker
     service     varchar(50) not null
 );
 
+DROP TABLE IF EXISTS localization CASCADE;
 create table localization
 (
     id          serial
@@ -96,6 +106,7 @@ create table localization
         unique (language_id, tag)
 );
 
+DROP TABLE IF EXISTS avatar_mapping CASCADE;
 create table avatar_mapping
 (
     id          serial
@@ -109,6 +120,7 @@ create table avatar_mapping
     unique (avatar_id, language_id)
 );
 
+DROP TABLE IF EXISTS course CASCADE;
 create table course
 (
     id                serial
@@ -129,9 +141,10 @@ create table course
     learning_language_name varchar(255),
     from_language_name varchar(255),
     contributors      varchar(255) [] default '{}'::character varying[] not null,
-    contributors_past varchar(255)[] default '{}'::character varying[] not null,
+    contributors_past varchar(255)[] default '{}'::character varying[] not null
 );
 
+DROP TABLE IF EXISTS sessions CASCADE;
 create table sessions
 (
     id             serial
@@ -142,6 +155,7 @@ create table sessions
             references users
 );
 
+DROP TABLE IF EXISTS verification_token CASCADE;
 create table verification_token
 (
     id         serial,
@@ -151,6 +165,7 @@ create table verification_token
     primary key (identifier, token)
 );
 
+DROP TABLE IF EXISTS story CASCADE;
 create table story
 (
     id             serial
@@ -177,6 +192,7 @@ create table story
     deleted        boolean                  default false
 );
 
+DROP TABLE IF EXISTS story_done CASCADE;
 create table story_done
 (
     id       serial
@@ -189,6 +205,7 @@ create table story_done
     time     timestamp with time zone default CURRENT_TIMESTAMP
 );
 
+DROP TABLE IF EXISTS story_approval CASCADE;
 create table story_approval
 (
     id       serial
