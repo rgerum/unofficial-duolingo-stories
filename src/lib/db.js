@@ -37,7 +37,7 @@ export const sql = postgres(process.env.POSTGRES_URL, {
         track("query", { query: cyrb53(args[1]) });
     }
   },
-  ssl: "require",
+  ssl: process.env.POSTGRES_URL.indexOf("localhost") !== -1 ? false : "require",
 });
 
 const hash_table =
