@@ -75,6 +75,37 @@ SET count = (
       revalidateTag("course_data");
       revalidateTag("story_data");
     }
+    // update contributor list
+    await sql`UPDATE course
+SET contributors = (SELECT COALESCE(array_agg(name), '{}')
+                         FROM (SELECT u.name                                           AS name,
+                                      MAX(sa.date) > CURRENT_DATE - INTERVAL '1 month' AS active
+                               FROM course c
+                                        JOIN
+                                    story s ON c.id = s.course_id
+                                        JOIN
+                                    story_approval sa ON s.id = sa.story_id
+                                        JOIN
+                                    "users" u ON u.id = sa.user_id
+                               WHERE course_id = course.id
+                               GROUP BY u.id, c.id, c.short, u.name
+                               ORDER BY MAX(sa.date) DESC) AS contributors
+                         WHERE active);`;
+    await sql`UPDATE course
+SET contributors_past = (SELECT COALESCE(array_agg(name), '{}')
+                         FROM (SELECT u.name                                           AS name,
+                                      MAX(sa.date) > CURRENT_DATE - INTERVAL '1 month' AS active
+                               FROM course c
+                                        JOIN
+                                    story s ON c.id = s.course_id
+                                        JOIN
+                                    story_approval sa ON s.id = sa.story_id
+                                        JOIN
+                                    "users" u ON u.id = sa.user_id
+                               WHERE course_id = course.id
+                               GROUP BY u.id, c.id, c.short, u.name
+                               ORDER BY MAX(sa.date) DESC) AS contributors
+                         WHERE NOT active);`;
   }
 
   return {
