@@ -1,0 +1,32 @@
+.enter_line {
+    line-height: 71px;
+    min-height: 80px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.enter_line input {
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 26px;
+        outline: none;
+}
+
+.enter_line input:focus{
+    outline: none;
+}
+
+.gap {
+    display: inline-block;
+    border-bottom: 2px solid var(--color_base_border);
+    width: 50px;
+    line-height: 60px;
+}
+
+.enter_line {
+    line-height: 80px; /* Adjust line height as needed */
+    background-image: linear-gradient(to bottom, transparent 93%, var(--color_base_border) 93%, var(--color_base_border) 95%, var(--color_base_border) 95%, transparent 95%);
+    background-size: 100% 80px;
+    background-repeat: repeat-y;
+}

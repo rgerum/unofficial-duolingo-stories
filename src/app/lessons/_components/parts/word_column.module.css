@@ -1,0 +1,9 @@
+.word_column {
+    display: flex;
+    flex-direction: column;
+}
+
+.word_column_group {
+    display: flex;
+    flex-direction: row;
+}

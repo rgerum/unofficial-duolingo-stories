@@ -1,0 +1,38 @@
+
+.preview {
+    display: flex;
+    flex-wrap: wrap;
+}
+.card {
+    border-color: var(--color_base_border);
+    border-style: solid;
+    border-width: 2px 2px 4px;
+    border-radius: 14px;
+
+    padding: 20px;
+}
+
+.card_title {
+    font-size: 0.8em;
+    opacity: 0.5;
+    margin-top: -10px;
+}
+
+.card_question2 {
+    font-weight: bold;
+}
+
+.word {
+    display: inline-block;
+    border-color: var(--color_base_border);
+    border-style: solid;
+    border-width: 2px 2px 4px;
+    border-radius: 14px;
+    padding: 5px;
+    margin: 5px;
+}
+
+.word2 {
+    composes: word;
+    border-color: darkred;
+}
