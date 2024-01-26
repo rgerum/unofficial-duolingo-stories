@@ -46,9 +46,11 @@ async function set_story(data, { username, user_id }) {
     "course_id",
     "text",
     "json",
+    "todo_count",
   ])}
   WHERE id = ${data.id}
 `;
+  await sql`UPDATE course SET todo_count = (SELECT SUM(todo_count) FROM story WHERE course_id = ${data["course_id"]}) WHERE id = ${data["course_id"]}`;
 
   await upload_github(
     data["id"],

@@ -145,6 +145,7 @@ export default function Editor({ story_data, avatar_names, session }) {
         course_id: story_data.course_id,
         text: editor_text,
         json: story,
+        todo_count: story_meta.todo_count,
       };
 
       await setStory(data);

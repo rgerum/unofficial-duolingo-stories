@@ -19,7 +19,7 @@ export const get_course_list_data = cache(async () => {
         SELECT id, short, about, official, count, public,
                from_language, from_language_name,
                learning_language, learning_language_name,
-               contributors, contributors_past
+               contributors, contributors_past, todo_count
         FROM course
         ORDER BY count DESC
         `;
@@ -40,7 +40,7 @@ export const get_course_data = cache(async (id) => {
 
 export const get_story_list_data = cache(async () => {
   const data = await sql`
-        SELECT s.id, s.name, course_id, s.image, set_id, set_index, s.date, change_date, status, public,
+        SELECT s.id, s.name, course_id, s.image, set_id, set_index, s.date, change_date, status, public, todo_count,
             ARRAY_AGG(a.user_id) AS approvals,
             u1.name as author,
             u2.name AS author_change

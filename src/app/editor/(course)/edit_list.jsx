@@ -112,6 +112,13 @@ export default function EditList({ stories, course, updateCourses }) {
               </div>
               <div>
                 <Link href={`/editor/story/${story.id}`}>{story.name}</Link>
+                {story.todo_count ? (
+                  <img
+                    title={`This story has ${story.todo_count} TODOs.`}
+                    alt="error"
+                    src="/editor/icons/error.svg"
+                  />
+                ) : null}
               </div>
               <div>
                 <DropDownStatus

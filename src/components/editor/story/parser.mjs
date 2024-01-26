@@ -31,6 +31,7 @@ const STATE_BLOCK_TYPE = "keyword";
 const STATE_SPEAKER_TYPE = STATE_DATA_KEY;
 
 const STATE_ERROR = "deleted";
+const STATE_TODO = "annotation";
 
 const STATE_AUDIO = "color";
 const STATE_COMMENT = "t.strong";
@@ -154,9 +155,11 @@ export let myHighlightStyle = HighlightStyle.define([
     tag: [tags.definition(tags.name), tags.separator],
     color: ivory,
   },
+  // STATE_TODO
   {
     tag: [tags.annotation, tags.self, tags.namespace],
-    color: chalky,
+    background: coral,
+    color: ivory,
   },
   {
     tag: [
@@ -630,6 +633,10 @@ function parseBlockDef(stream, state) {
 
 function parserWithMetadata(stream, state) {
   if (stream.match("#")) {
+    if(stream.match(/.*TODO.*/)) {
+      stream.skipToEnd();
+      return STATE_TODO;
+    }
     stream.skipToEnd();
     return STATE_COMMENT;
   }

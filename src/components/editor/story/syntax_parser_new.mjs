@@ -135,17 +135,21 @@ function split_lines(text) {
   /* splits the text into lines and removes comments */
   let lines = [];
   let lineno = 0;
+  let todo_count = 0;
   for (let line of text.split("\n")) {
     lineno += 1;
     // ignore empty lines or lines with comments (and remove rtl isolate)
     line = line.trim().replace(/\u2067/, "");
-    if (line.length === 0 || line.substring(0, 1) === "#") continue;
+    if (line.length === 0 || line.substring(0, 1) === "#") {
+      if(line.indexOf("TODO") !== -1) todo_count++;
+      continue;
+    }
 
     lines.push([lineno, line]);
   }
   lines.push([lineno + 1, ""]);
   lines.push([lineno + 2, ""]);
-  return lines;
+  return {lines, todo_count};
 }
 
 function processBlockData(line_iter, story) {
@@ -879,9 +883,9 @@ export function processStoryFile(
   // reset those line as they may have changed
   //window.audio_insert_lines = []
 
-  let lines = split_lines(text);
+  const {lines, todo_count} = split_lines(text);
 
-  let story = {
+  const story = {
     elements: [],
     meta: {
       audio_insert_lines: [],
@@ -893,13 +897,13 @@ export function processStoryFile(
       transcribe_data: transcribe_data,
     },
   };
-  let line_iter = line_iterator(lines);
+  const line_iter = line_iterator(lines);
   while (line_iter.get()) {
-    let line = line_iter.get();
-    let match = line.match(/\[([^\]]*)\](<(.+)>)?$/);
+    const line = line_iter.get();
+    const match = line.match(/\[([^\]]*)\](<(.+)>)?$/);
     if (match !== null) {
       line_iter.advance();
-      let current_block = match[1];
+      const current_block = match[1];
       try {
         if (block_functions[current_block]) {
           block_functions[current_block](
@@ -927,9 +931,10 @@ export function processStoryFile(
     //console.log("error", lineno, line)
     line_iter.advance();
   }
-  let meta = story.meta;
+  story.meta.todo_count = todo_count
+  const meta = story.meta;
   delete story.meta;
-  let audio_insert_lines = meta.audio_insert_lines;
+  const audio_insert_lines = meta.audio_insert_lines;
   delete meta.audio_insert_lines;
 
   return [story, meta, audio_insert_lines];

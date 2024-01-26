@@ -141,7 +141,8 @@ create table course
     learning_language_name varchar(255),
     from_language_name varchar(255),
     contributors      varchar(255) [] default '{}'::character varying[] not null,
-    contributors_past varchar(255)[] default '{}'::character varying[] not null
+    contributors_past varchar(255)[] default '{}'::character varying[] not null,
+    todo_count        integer default 0 not null
 );
 
 DROP TABLE IF EXISTS sessions CASCADE;
@@ -189,7 +190,8 @@ create table story
         references course,
     json           jsonb,
     status         story_status             default 'draft'::story_status,
-    deleted        boolean                  default false
+    deleted        boolean                  default false,
+    todo_count     integer                  default 0 not null
 );
 
 DROP TABLE IF EXISTS story_done CASCADE;

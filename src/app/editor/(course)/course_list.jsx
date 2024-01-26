@@ -77,6 +77,13 @@ export default function CourseList({
                 course.learning_language_name
               } [${languages[course.from_language].short}] `}</span>
               <span className={styles.author}>
+                {course.todo_count ? (
+                  <img
+                    title={`This course has ${course.todo_count} TODOs.`}
+                    alt="TODO"
+                    src="/editor/icons/error.svg"
+                  />
+                ) : null}
                 {course.official ? (
                   <span className={styles.crown}>
                     <img
