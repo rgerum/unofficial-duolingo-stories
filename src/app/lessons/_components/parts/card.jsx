@@ -7,7 +7,7 @@ export default function Card({ children, state, active }) {
     2: styles.card_correct,
     1: styles.card_incorrect,
   };
-  console.log("active", active);
+
   if (active === 10) {
     return <div>{children}</div>;
   }
@@ -56,7 +56,7 @@ export function CardFalse({ children }) {
 export function CardCorrect({ children }) {
   return (
     <>
-      <div className={styles.card_right_answer}>You wrote:</div>
+      <div className={styles.card_right_answer}>Correct:</div>
       {children}
     </>
   );

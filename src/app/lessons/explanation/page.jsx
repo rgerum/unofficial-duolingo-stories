@@ -3,6 +3,7 @@ import React from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import Interactive from "./Interactive";
 import styles from "./explanation.module.css";
+import Table from "./table";
 
 const input = `
 # Welcome to Esperanto
@@ -10,20 +11,11 @@ First lets explain a bit about how to greet!
 
 ## Hello
 
-+ ------------- + ------------ +
-| English       | Esperanto    |
-| ------------- | ------------ |
-| Hello!        | Saluton!     |
-| Good morning! | Bonan tagon! |
-+ ------------- + ------------ +
-
-
-| Item              | In Stock | Price |
-| :---------------- | :------: | ----: |
-| Python Hat        |   True   | 23.99 |
-| SQL Hat           |   True   | 23.99 |
-| Codecademy Tee    |  False   | 19.99 |
-| Codecademy Hoodie |  False   | 42.99 |
+<Table content="
+Esperanto | English
+Saluton | *Hello*
+Bonan Tagon | *Good night*
+"/>
 
 <Interactive text="
 [compose]
@@ -38,6 +30,14 @@ In Esperanto all words that end with an <Red>-o</Red> are nouns.
 This makes it very easy to see that these are nouns:
 tag<Red>o</Red>, nokt<Red>o</Red>
 
+## Pronouns
+<Table content="
+Esperanto | English
+mi | I
+ti | you
+li | he
+"/>
+
 `;
 
 const components = {
@@ -47,6 +47,7 @@ const components = {
     </Interactive>
   ),
   Red: (props) => <span className={styles.red}>{props.children}</span>,
+  Table: (props) => <Table {...props}>{props.children}</Table>,
 };
 
 function CustomMDX(props) {

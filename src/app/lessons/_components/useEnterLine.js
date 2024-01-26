@@ -51,14 +51,12 @@ export default function useEnterLine(words) {
 
   let click1 = React.useCallback(
     (index) => {
-      console.log("click1", index);
       words2_add(words1_remove(index));
     },
     [words1_remove, words2_add],
   );
   let click2 = React.useCallback(
     (index) => {
-      console.log("click2", index);
       words1_add(words2_remove(index));
     },
     [words1_add, words2_remove],
@@ -82,6 +80,5 @@ export default function useEnterLine(words) {
   for (let i = 0; i < params2.length; i++) {
     params2[i].onClick = () => click2(i);
   }
-  console.log(params1, params2);
   return [params1, params2];
 }

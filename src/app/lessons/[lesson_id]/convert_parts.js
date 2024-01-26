@@ -1,4 +1,10 @@
 const convert_parts = {
+  words: (line, index, current_result) => {
+    if (current_result.words === undefined) {
+      current_result.words = [];
+    }
+    current_result.words.push(line.substring(1).trim());
+  },
   compose: (line, index, current_result) => {
     if (!current_result.sentence1) {
       current_result.sentence1 = {
@@ -76,5 +82,44 @@ export function convertToComposeObject(input) {
     }
   });
 
+  const words = results.filter((r) => r.type === "words")[0].words;
+  const word_dict = {};
+  for (let word of words) {
+    word_dict[word] = 0;
+  }
+  for (let part of results) {
+    if (part.type === "compose") {
+      for (let word of tokenize(part.sentence1.text)) {
+        word_dict[word] = word_dict[word] + 1;
+      }
+    }
+  }
+  console.log("word_dict", word_dict);
+
   return results;
+}
+
+var extendedWordChars =
+  /^[A-Za-z\xC0-\u02C6\u02C8-\u02D7\u02DE-\u02FF\u1E00-\u1EFF]+$/;
+
+function tokenize(value) {
+  // All whitespace symbols except newline group into one token, each newline - in separate token
+  var tokens = value.split(/([^\S\r\n]+|[()[\]{}'"\r\n]|\b)/); // Join the boundary splits that we do not consider to be boundaries. This is primarily the extended Latin character set.
+
+  for (var i = 0; i < tokens.length - 1; i++) {
+    // If we have an empty string in the next field and we have only word chars before and after, merge
+    if (
+      !tokens[i + 1] &&
+      tokens[i + 2] &&
+      extendedWordChars.test(tokens[i]) &&
+      extendedWordChars.test(tokens[i + 2])
+    ) {
+      tokens[i] += tokens[i + 2];
+      tokens.splice(i + 1, 2);
+      i--;
+    }
+  }
+
+  //tokens = tokens.filter((token) => token.length > 0);
+  return tokens;
 }

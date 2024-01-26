@@ -6,6 +6,7 @@
     position: absolute;
     top: 0;
     width: 100vw;
+    overflow: hidden;
 }
 .card {
     width: 400px;

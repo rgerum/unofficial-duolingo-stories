@@ -16,7 +16,6 @@ export function ExerciseFillText({ data, onChecked }) {
       }
     }
     onChecked(correct);
-    console.log(correct);
   }
 
   return (

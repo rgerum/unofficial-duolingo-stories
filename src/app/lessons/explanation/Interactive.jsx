@@ -4,7 +4,6 @@ import { convertToComposeObject } from "../[lesson_id]/convert_parts";
 import Part from "../_components/exercise";
 
 export default function Interactive({ text }) {
-  console.log("text", text);
   let elements = convertToComposeObject(text);
 
   return (

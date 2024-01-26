@@ -1,0 +1,61 @@
+.speech_bubble_container {
+    position: relative;
+    width: 100%;
+    display: flex;
+}
+
+.speech_bubble_container[data-orientation="right"] {
+    justify-content: right;
+}
+
+.speech_bubble {
+    background-color: lightgray;
+    border-radius: 30px;
+    padding: 10px 20px;
+    position: relative;
+    margin: 5px 0;
+    width: fit-content;
+}
+.speech_bubble[data-orientation="left"] {
+    border-bottom-left-radius: 0;
+}
+
+.speech_bubble:before {
+    content: "";
+    width: 20px;
+    height: 20px;
+    background-color: lightgray;
+    bottom: 0;
+    position: absolute;
+}
+
+.speech_bubble:after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    bottom: 0;
+    position: absolute;
+}
+
+.speech_bubble[data-orientation="left"]:before {
+    left: -20px;
+}
+.speech_bubble[data-orientation="left"]:after {
+    border-bottom-right-radius: 20px;
+    left: -20px;
+}
+
+.speech_bubble[data-orientation="right"] {
+    border-bottom-right-radius: 0;
+    background-color: #8f7878;
+}
+.speech_bubble[data-orientation="right"]:before {
+    background-color: #8f7878;
+    right: -20px;
+    left: auto;
+}
+.speech_bubble[data-orientation="right"]:after {
+    right: -20px;
+    border-bottom-left-radius: 20px;
+}

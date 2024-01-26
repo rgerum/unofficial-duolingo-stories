@@ -12,7 +12,6 @@ export default function ExerciseMatch({ data, onChecked, active }) {
   const shuffleB = useShuffle(data.pairs);
 
   function Check() {
-    console.log(state);
     if (state !== 0) return onChecked(state - 1);
     if (!params1.words.length) return;
     let correct = true;
@@ -22,7 +21,6 @@ export default function ExerciseMatch({ data, onChecked, active }) {
         break;
       }
     }
-    console.log("set", correct + 1);
     setState(correct + 1);
   }
 

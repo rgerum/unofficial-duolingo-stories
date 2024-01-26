@@ -11,7 +11,6 @@ export function ExerciseTranslate({ data, onChecked, active }) {
   function Check() {
     let correct = text === data.answers;
     onChecked(correct);
-    console.log(correct);
   }
 
   return (

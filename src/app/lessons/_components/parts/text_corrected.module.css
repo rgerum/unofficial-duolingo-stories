@@ -1,0 +1,9 @@
+.corrected {
+    color: green;
+    border-bottom: 2px solid green;
+}
+
+.removed {
+    color: red;
+    border-bottom: 2px solid red;
+}
