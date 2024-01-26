@@ -1,0 +1,35 @@
+.footer {
+  margin-top: 50px;
+}
+.footer_buttons {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 10px;
+}
+.footer_links {
+  display: flex;
+  font-size: 16px;
+  margin-bottom: 50px;
+  justify-content: space-around;
+  border-top: 2px solid var(--overview-hr);
+  opacity: 0.6;
+}
+
+.footer_links>div {
+    padding: 0 10px;
+}
+.footer_links h3 {
+  margin-bottom: 0;
+}
+
+.footer_links li {
+  list-style-type: none;
+}
+.footer_links li:before {
+  content: "• ";
+}
+
+.footer_links ul {
+  padding-left: 0;
+  margin: 0;
+}

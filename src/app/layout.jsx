@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className={nunito.className}>
         {children}
-        <Analytics />
+        {!process.env.NO_TRACK_QUERY ? <Analytics /> : null}
       </body>
     </html>
   );

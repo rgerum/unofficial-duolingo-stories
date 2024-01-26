@@ -5,6 +5,7 @@ import LanguageButton from "./language_button";
 import styles from "./course_list.module.css";
 import Legal from "../../../components/layout/legal";
 import { get_course_groups, get_courses_in_group } from "./get_course_data";
+import FooterLinks from "./footer_links";
 
 async function LanguageGroup({ name, tag, id }) {
   let courses_list = await get_courses_in_group(id);
@@ -61,6 +62,7 @@ export default async function CourseList({ tag }) {
       <div>
         <CourseListInner tag={tag} />
       </div>
+      <FooterLinks />
       <Legal language_name={undefined} />
     </Suspense>
   );

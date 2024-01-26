@@ -6,6 +6,7 @@ import SetList from "./set_list";
 import get_localisation from "../../../../lib/get_localisation";
 import Legal from "../../../../components/layout/legal";
 import { get_course_data, get_course } from "../get_course_data";
+import FooterLinks from "../footer_links";
 
 export async function generateMetadata({ params, searchParams }, parent) {
   if (
@@ -62,7 +63,7 @@ export default async function Page({ params }) {
       <Suspense fallback={<SetList />}>
         <SetList course_id={params.course_id} />
       </Suspense>
-      <hr />
+      <FooterLinks />
       <Legal language_name={undefined} />
     </>
   );

@@ -4,6 +4,7 @@ import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import Header from "../header";
 import Profile from "./profile";
 import getUserId from "../../../../lib/getUserId";
+import FooterLinks from "../footer_links";
 
 export const metadata = {
   alternates: {
@@ -54,5 +55,10 @@ export default async function Page() {
     );
   }
 
-  return <Profile providers={providers} />;
+  return (
+    <>
+      <Profile providers={providers} />
+      <FooterLinks />
+    </>
+  );
 }

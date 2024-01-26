@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Script from "next/script";
+import FooterLinks from "../footer_links";
 
 export const metadata = {
   title: "Duostories FAQ",
@@ -21,7 +22,7 @@ export default async function Page() {
           OpenCollective
         </Link>
         . We use the money to cover the hosting costs and for the TTS services.
-        <a
+        <Link
           href="https://opencollective.com/duostories/contribute"
           target="_blank"
         >
@@ -29,14 +30,17 @@ export default async function Page() {
             src="https://opencollective.com/duostories/contribute/button@2x.png?color=blue"
             height="48"
           />
-        </a>
+        </Link>
         or
-        <a href="https://opencollective.com/duostories/donate" target="_blank">
+        <Link
+          href="https://opencollective.com/duostories/donate"
+          target="_blank"
+        >
           <img
             src="https://opencollective.com/duostories/donate/button@2x.png?color=blue"
             height="48"
           />
-        </a>
+        </Link>
         <Script src="https://opencollective.com/:collectiveSlug/banner.js"></Script>
       </p>
       <h2>Is this website open source?</h2>
@@ -203,6 +207,7 @@ export default async function Page() {
         contributors! Meet them on{" "}
         <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.
       </p>
+      <FooterLinks />
     </div>
   );
 }
