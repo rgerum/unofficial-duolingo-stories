@@ -1,6 +1,31 @@
 import styles from "./preview.module.css";
 
 function Part2({ data }) {
+  if (data.type === "words") {
+    return (
+      <div className={styles.card}>
+        New words:
+        {data.words.map((word, i) => (
+          <div className={styles.word} key={i}>
+            {word}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (data.type === "fill_choice") {
+    return (
+      <div className={styles.card}>
+        <div className={styles.card_title}>{data.type}</div>
+        {data.sentence1.text}
+        {data.choice.map((word, i) => (
+          <div className={styles.word} key={i}>
+            {word}
+          </div>
+        ))}
+      </div>
+    );
+  }
   if (data.type !== "compose" || !data.sentence1) {
     return null;
   }

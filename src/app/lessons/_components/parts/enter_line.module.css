@@ -20,8 +20,17 @@
 .gap {
     display: inline-block;
     border-bottom: 2px solid var(--color_base_border);
-    width: 50px;
+    min-width: 50px;
     line-height: 60px;
+    color: var(--body-background)
+}
+
+.correct {
+    color: green;
+}
+
+.wrong {
+    color: red;
 }
 
 .enter_line {

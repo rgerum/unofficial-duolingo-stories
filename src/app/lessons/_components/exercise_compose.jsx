@@ -43,7 +43,6 @@ export function ExerciseCompose({ data, onChecked, active }) {
   const [params1, params2] = useEnterLine(words);
 
   const Check = useCallback(() => {
-    console.log("Check", state);
     if (state !== 0) return onChecked(state - 1);
     let correct = true;
     if (use_word_bank) {

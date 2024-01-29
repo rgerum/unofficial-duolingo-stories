@@ -1,0 +1,59 @@
+[words]
+- viro
+- virino
+- knabo
+- knabino
+- mi
+- vi
+- li
+- ŝi
+- estas
+- kaj
+
+[compose]
+> Mi estas viro.
+% mi, estas, viro; virino, knabo, knabino
+
+> I am a man.
+% i, am, a, man; woman, boy, girl
+
+[compose]
+> Vi estas virino.
+% vi, estas, virino; viro, knabo, knabino
+
+> You are a woman.
+% you, are, a, woman; man, boy, girl
+
+[compose]
+> Li estas knabo.
+% li, estas, knabo; viro, virino, knabino
+
+> He is a boy.
+% he, is, a, boy; man, woman, girl
+
+[compose]
+> Ŝi estas knabino.
+% ŝi, estas, knabino; viro, virino, knabo
+
+> She is a girl.
+% she, is, a, girl; man, woman, boy
+
+[compose]
+> Knabo kaj knabino.
+% knabo, kaj, knabino; viro, virino, estas
+
+> A boy and a girl.
+% a, boy, and, a, girl; man, is, he
+
+
+[fill_choice]
+> Ŝi estas [knabino].
+- knabino
+- knabo
+- viro
+
+[fill_choice]
+> [Li] estas knabo.
+- ŝi
+- li
+- ni

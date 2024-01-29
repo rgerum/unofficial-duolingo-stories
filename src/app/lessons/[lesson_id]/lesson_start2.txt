@@ -1,0 +1,36 @@
+[words]
+- viro
+- virino
+- knabo
+- knabino
+- mi
+- vi
+- li
+- ŝi
+- estas
+- kaj
+
+[fill_choice]
+> Ŝi estas [knabino].
++ knabino
+- knabo
+- viro
+
+[fill_choice]
+> [Li] estas knabo.
+- ŝi
++ li
+- ni
+
+[fill_choice]
+> Ŝi estas [knabino].
++ knabino
+- knabo
+- viro
+
+
+[fill_choice]
+> Ŝi estas [knabino].
++ knabino
+- knabo
+- viro

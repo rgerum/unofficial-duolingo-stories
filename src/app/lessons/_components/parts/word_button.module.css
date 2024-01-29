@@ -93,11 +93,11 @@
   border: 2px solid var(--color_selected_border-color);
 }
 
-.word_button[data-status="false"] {
+.word_button[data-status="wrong-stay"] {
   border: 2px solid var(--color_false_border-color);
 }
 
-.word_button[data-status="correct"] {
+.word_button[data-status="correct-stay"] {
   border: 2px solid var(--color_right_border-color);
 }
 

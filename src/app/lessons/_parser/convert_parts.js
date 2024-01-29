@@ -1,9 +1,34 @@
+import setHideRanges from "./getHideRanges";
+
 const convert_parts = {
   words: (line, index, current_result) => {
     if (current_result.words === undefined) {
       current_result.words = [];
     }
     current_result.words.push(line.substring(1).trim());
+  },
+  fill_choice: (line, index, current_result) => {
+    if (current_result.sentence1 === undefined) {
+      current_result.sentence1 = {
+        text: "",
+      };
+      current_result.choice = {
+        answers: [],
+        right_answer: -1,
+      };
+    }
+    if (line.startsWith(">")) {
+      current_result.sentence1.text = line.substring(1).trim();
+      setHideRanges(current_result.sentence1);
+    }
+    if (line.startsWith("-")) {
+      current_result.choice.answers.push(line.substring(1).trim());
+    }
+    if (line.startsWith("+")) {
+      current_result.choice.answers.push(line.substring(1).trim());
+      current_result.choice.right_answer =
+        current_result.choice.answers.length - 1;
+    }
   },
   compose: (line, index, current_result) => {
     if (!current_result.sentence1) {
@@ -58,7 +83,7 @@ const convert_parts = {
   },
 };
 
-export function convertToComposeObject(input) {
+export default function convertToComposeObject(input) {
   // Splitting the input string into lines
   const lines = input.split("\n");
 
@@ -90,11 +115,17 @@ export function convertToComposeObject(input) {
   for (let part of results) {
     if (part.type === "compose") {
       for (let word of tokenize(part.sentence1.text)) {
+        if (!extendedWordChars.test(word)) continue;
+        if (
+          word_dict[word] === undefined &&
+          word_dict[word.toLowerCase()] !== undefined
+        ) {
+          word = word.toLowerCase();
+        }
         word_dict[word] = word_dict[word] + 1;
       }
     }
   }
-  console.log("word_dict", word_dict);
 
   return results;
 }
