@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import { convertToComposeObject } from "../convert_parts";
+import convertToComposeObject from "../../_parser/convert_parts";
 import Preview from "../../_components/preview";
 
 export default async function Page() {

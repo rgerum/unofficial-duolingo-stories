@@ -21,7 +21,14 @@ export default function Lesson({ elements, onFinished }) {
   return (
     <>
       {elements.map((data, i) => (
-        <Part key={i} active={getActive(i)} data={data} onChecked={onChecked} />
+        <Part
+          key={i}
+          active={getActive(i)}
+          current={current}
+          total={elements.length}
+          data={data}
+          onChecked={onChecked}
+        />
       ))}
     </>
   );

@@ -33,9 +33,9 @@ tag<Red>o</Red>, nokt<Red>o</Red>
 ## Pronouns
 <Table content="
 Esperanto | English
-mi | I
-ti | you
-li | he
+mi | *I*
+ti | *you*
+li | *he*
 "/>
 
 `;

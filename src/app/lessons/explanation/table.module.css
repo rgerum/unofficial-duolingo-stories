@@ -12,3 +12,7 @@
     padding: 10px;
     border: 1px solid #ccc;
 }
+
+.table td p, .table th p {
+    margin: 0;
+}

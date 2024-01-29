@@ -1,4 +1,5 @@
 import styles from "./table.module.css";
+import { MDXRemote } from "next-mdx-remote/rsc";
 
 export default function Table({ content }) {
   const rows = content
@@ -19,7 +20,9 @@ export default function Table({ content }) {
         {rows.map((row, i) => (
           <tr key={i}>
             {row.map((cell, j) => (
-              <td key={j}>{cell}</td>
+              <td key={j}>
+                <MDXRemote source={cell} />
+              </td>
             ))}
           </tr>
         ))}

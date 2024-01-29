@@ -4,7 +4,7 @@ import GapsLine from "./parts/gaps_line";
 import Card, { CardCheck, CardTitle } from "./parts/card";
 import React, { useState } from "react";
 
-export default function ExerciseFillChoice({ data, onChecked, active }) {
+export default function ExerciseFillChoice({ data, onChecked, ...props }) {
   const [state, setState] = React.useState(0);
   let [params1, check] = useChoiceButtons(
     data.choice.answers,
@@ -21,7 +21,7 @@ export default function ExerciseFillChoice({ data, onChecked, active }) {
   }
 
   return (
-    <Card state={state} active={active}>
+    <Card state={state} {...props}>
       <CardTitle>Select the right answer</CardTitle>
       <GapsLine sentence={data.sentence1} words={[]} state={state} />
       <WordBank words={params1} />
@@ -59,7 +59,7 @@ function useHideList(words, right_answer) {
   );
 
   const select = React.useCallback(
-    (i, partner) => {
+    (i) => {
       // clicking again unselects
       if (selected === -1) {
         return;
@@ -69,11 +69,6 @@ function useHideList(words, right_answer) {
     },
     [setSelected, doSetStatus, selected, status, check_done],
   );
-
-  const get_selected = React.useCallback(() => {
-    if (selected === undefined) return undefined;
-    return words[selected];
-  }, [words, selected]);
 
   const set_selected_status = React.useCallback(
     (new_status) => {

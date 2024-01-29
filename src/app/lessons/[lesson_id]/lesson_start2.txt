@@ -10,27 +10,16 @@
 - estas
 - kaj
 
-[fill_choice]
-> Ŝi estas [knabino].
-+ knabino
-- knabo
-- viro
+[compose]
+> Ŝi estas knabino.
+% ŝi, estas, knabino; viro, virino, knabo
 
-[fill_choice]
-> [Li] estas knabo.
-- ŝi
-+ li
-- ni
+> She is a girl.
+% she, is, a, girl; man, woman, boy
 
-[fill_choice]
-> Ŝi estas [knabino].
-+ knabino
-- knabo
-- viro
+[compose]
+> Knabo kaj knabino.
+% knabo, kaj, knabino; viro, virino, estas
 
-
-[fill_choice]
-> Ŝi estas [knabino].
-+ knabino
-- knabo
-- viro
+> A boy and a girl.
+% a, boy, and, a, girl; man, is, he

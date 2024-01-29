@@ -6,7 +6,7 @@ import useShuffle from "./useShuffle";
 import * as PropTypes from "prop-types";
 
 WordColumn.propTypes = { words: PropTypes.any };
-export default function ExerciseMatch({ data, onChecked, active }) {
+export default function ExerciseMatch({ data, onChecked, ...props }) {
   const [state, setState] = React.useState(0);
   const shuffleA = useShuffle(data.pairs);
   const shuffleB = useShuffle(data.pairs);
@@ -29,7 +29,7 @@ export default function ExerciseMatch({ data, onChecked, active }) {
   });
 
   return (
-    <Card state={state} active={active}>
+    <Card state={state} {...props}>
       <CardTitle>Tap the pairs</CardTitle>
       <WordColumnGroup>
         <WordColumn words={words_a} />

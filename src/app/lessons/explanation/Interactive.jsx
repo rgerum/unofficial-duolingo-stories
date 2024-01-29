@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import { convertToComposeObject } from "../[lesson_id]/convert_parts";
 import Part from "../_components/exercise";
+import convertToComposeObject from "../_parser/convert_parts";
 
 export default function Interactive({ text }) {
   let elements = convertToComposeObject(text);

@@ -1,7 +1,7 @@
 import styles from "./card.module.css";
 import Link from "next/link";
 
-export default function Card({ children, state, active }) {
+export default function Card({ children, state, active, current, total }) {
   const classnames = {
     0: styles.card,
     2: styles.card_correct,
@@ -15,6 +15,9 @@ export default function Card({ children, state, active }) {
     <div className={styles.card_parent}>
       <div className={classnames[state]} data-active={active}>
         <Link href={"/lessons"} className={styles.card_close}></Link>
+        <span>
+          {current + 1} / {total}
+        </span>
         {children}
       </div>
     </div>

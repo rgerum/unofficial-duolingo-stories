@@ -14,10 +14,9 @@ import useShuffle from "./useShuffle";
 import { useEventListener } from "./useEventListener";
 import textCompare from "./textCompare";
 import TextCorrected from "./parts/text_corrected";
-import SpeechBubble from "./parts/speech_bubble";
 import Speaker from "./parts/speaker";
 
-export function ExerciseCompose({ data, onChecked, active }) {
+export function ExerciseCompose({ data, onChecked, ...props }) {
   const distractor_count = 2;
   const inverse = false;
   const audio_only = false;
@@ -65,7 +64,7 @@ export function ExerciseCompose({ data, onChecked, active }) {
 
   const key_event_handler = React.useCallback(
     (e) => {
-      if (!active) return;
+      if (!props.active) return;
       if (e.key === "Enter") {
         Check();
       }
@@ -73,7 +72,7 @@ export function ExerciseCompose({ data, onChecked, active }) {
       //params2.onClick(value);
       //if (value < order.length) click(value);
     },
-    [Check, active],
+    [Check, props.active],
   );
 
   useEventListener("keydown", key_event_handler);
@@ -82,7 +81,7 @@ export function ExerciseCompose({ data, onChecked, active }) {
 
   if (state === 1) {
     return (
-      <Card state={state} active={active}>
+      <Card state={state} {...props}>
         <CardTitle>{type}</CardTitle>
         <CardQuestion audio_only={audio_only}>{sentenceA.text}</CardQuestion>
         {use_word_bank ? (
@@ -108,7 +107,7 @@ export function ExerciseCompose({ data, onChecked, active }) {
 
   if (state === 2) {
     return (
-      <Card state={state} active={active}>
+      <Card state={state} {...props}>
         <CardTitle>{type}</CardTitle>
         <CardQuestion audio_only={audio_only}>{sentenceA.text}</CardQuestion>
         <EnterLine text={sentenceB.text} />
@@ -119,7 +118,7 @@ export function ExerciseCompose({ data, onChecked, active }) {
   }
 
   return (
-    <Card state={state} active={active}>
+    <Card state={state} {...props}>
       <CardTitle>{type}</CardTitle>
       <CardQuestion audio_only={audio_only}>
         {!inverse ? <Speaker /> : null}

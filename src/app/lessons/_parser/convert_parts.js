@@ -107,22 +107,24 @@ export default function convertToComposeObject(input) {
     }
   });
 
-  const words = results.filter((r) => r.type === "words")[0].words;
-  const word_dict = {};
-  for (let word of words) {
-    word_dict[word] = 0;
-  }
-  for (let part of results) {
-    if (part.type === "compose") {
-      for (let word of tokenize(part.sentence1.text)) {
-        if (!extendedWordChars.test(word)) continue;
-        if (
-          word_dict[word] === undefined &&
-          word_dict[word.toLowerCase()] !== undefined
-        ) {
-          word = word.toLowerCase();
+  const words = results?.filter((r) => r.type === "words")[0]?.words;
+  if (words !== undefined) {
+    const word_dict = {};
+    for (let word of words) {
+      word_dict[word] = 0;
+    }
+    for (let part of results) {
+      if (part.type === "compose") {
+        for (let word of tokenize(part.sentence1.text)) {
+          if (!extendedWordChars.test(word)) continue;
+          if (
+            word_dict[word] === undefined &&
+            word_dict[word.toLowerCase()] !== undefined
+          ) {
+            word = word.toLowerCase();
+          }
+          word_dict[word] = word_dict[word] + 1;
         }
-        word_dict[word] = word_dict[word] + 1;
       }
     }
   }

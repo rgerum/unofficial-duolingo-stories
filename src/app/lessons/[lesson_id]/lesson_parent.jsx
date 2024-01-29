@@ -7,6 +7,7 @@ import Lesson from "../_components/lesson";
 
 export default function LessonParent({ elements }) {
   const [shuffled, setShuffled] = React.useState(false);
+  elements = elements.filter((a) => a.type !== "words");
   const [order, setWords] = React.useState(
     [...Array(elements.length)].map((_, i) => i),
   );
