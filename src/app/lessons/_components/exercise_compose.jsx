@@ -17,10 +17,51 @@ import TextCorrected from "./parts/text_corrected";
 import Speaker from "./parts/speaker";
 
 export function ExerciseCompose({ data, onChecked, ...props }) {
-  const distractor_count = 2;
-  const inverse = false;
+  const level = data.level ?? 1;
+
+  const settings = {
+    1: {
+      distractor_count: 0,
+      inverse: false,
+      audio_only: false,
+      use_word_bank: true,
+    },
+    2: {
+      distractor_count: 3,
+      inverse: false,
+      audio_only: false,
+      use_word_bank: true,
+    },
+    3: {
+      distractor_count: 0,
+      inverse: true,
+      audio_only: false,
+      use_word_bank: true,
+    },
+    4: {
+      distractor_count: 3,
+      inverse: true,
+      audio_only: false,
+      use_word_bank: true,
+    },
+    5: {
+      distractor_count: 0,
+      inverse: false,
+      audio_only: false,
+      use_word_bank: false,
+    },
+    6: {
+      distractor_count: 0,
+      inverse: true,
+      audio_only: false,
+      use_word_bank: false,
+    },
+  }[level];
+
+  const distractor_count = settings.distractor_count;
+  const inverse = settings.inverse;
   const audio_only = false;
-  const use_word_bank = true;
+  const use_word_bank = settings.use_word_bank;
 
   const sentenceA = audio_only
     ? data.sentence1

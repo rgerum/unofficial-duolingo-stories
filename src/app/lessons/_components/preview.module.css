@@ -3,6 +3,9 @@
     display: flex;
     flex-wrap: wrap;
 }
+.words {
+    width: 100%;
+}
 .card {
     border-color: var(--color_base_border);
     border-style: solid;

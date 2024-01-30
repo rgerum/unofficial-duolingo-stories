@@ -67,6 +67,8 @@ const convert_parts = {
           .split(",")
           .map((s) => s.trim());
       }
+    } else if (line.startsWith("level")) {
+      current_result.level = line.substring(6).trim();
     }
   },
   match: (line, index, current_result) => {
@@ -83,7 +85,7 @@ const convert_parts = {
   },
 };
 
-export default function convertToComposeObject(input) {
+export default function convertToComposeObject(input, add_word_dict = false) {
   // Splitting the input string into lines
   const lines = input.split("\n");
 
@@ -108,7 +110,7 @@ export default function convertToComposeObject(input) {
   });
 
   const words = results?.filter((r) => r.type === "words")[0]?.words;
-  if (words !== undefined) {
+  if (words !== undefined && add_word_dict) {
     const word_dict = {};
     for (let word of words) {
       word_dict[word] = 0;
@@ -127,6 +129,8 @@ export default function convertToComposeObject(input) {
         }
       }
     }
+    console.log(word_dict);
+    return { results, word_dict };
   }
 
   return results;

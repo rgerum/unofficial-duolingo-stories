@@ -3,7 +3,7 @@ import styles from "./preview.module.css";
 function Part2({ data }) {
   if (data.type === "words") {
     return (
-      <div className={styles.card}>
+      <div className={styles.words}>
         New words:
         {data.words.map((word, i) => (
           <div className={styles.word} key={i}>
@@ -18,7 +18,7 @@ function Part2({ data }) {
       <div className={styles.card}>
         <div className={styles.card_title}>{data.type}</div>
         {data.sentence1.text}
-        {data.choice.map((word, i) => (
+        {data.choice.answers.map((word, i) => (
           <div className={styles.word} key={i}>
             {word}
           </div>
