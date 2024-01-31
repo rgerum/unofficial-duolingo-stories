@@ -10,35 +10,40 @@
 - estas
 - kaj
 
-[compose]
+
+[compose]<1>
 > Mi estas viro.
 % mi, estas, viro; virino, knabo, knabino
 
 > I am a man.
 % i, am, a, man; woman, boy, girl
 
-[compose]
+
+[compose]<2>
 > Vi estas virino.
 % vi, estas, virino; viro, knabo, knabino
 
 > You are a woman.
 % you, are, a, woman; man, boy, girl
 
-[compose]
+
+[compose]<3>
 > Li estas knabo.
 % li, estas, knabo; viro, virino, knabino
 
 > He is a boy.
 % he, is, a, boy; man, woman, girl
 
-[compose]
+
+[compose]<4>
 > Ŝi estas knabino.
 % ŝi, estas, knabino; viro, virino, knabo
 
 > She is a girl.
 % she, is, a, girl; man, woman, boy
 
-[compose]
+
+[compose]<5>
 > Knabo kaj knabino.
 % knabo, kaj, knabino; viro, virino, estas
 
@@ -46,14 +51,39 @@
 % a, boy, and, a, girl; man, is, he
 
 
-[fill_choice]
+[fill_choice]<6>
 > Ŝi estas [knabino].
 - knabino
 - knabo
-- viro
+- viro1
 
-[fill_choice]
+
+[fill_choice]<7>
 > [Li] estas knabo.
 - ŝi
 - li
 - ni
+
+[translate_choice]<8>
+> boy
+- knabo
+- viro
+- kaj
+
+[match]<9>
+- knabo <> body
+- li <> he
+- virino <> woman
+- kaj <> and
+- estas <> is
+
+[levels]
+<1 level=1>
+<2 level=1>
+<3 level=1>
+<4 level=1>
+<5 level=1>
+<6 level=1>
+<7>
+<8>
+<9>

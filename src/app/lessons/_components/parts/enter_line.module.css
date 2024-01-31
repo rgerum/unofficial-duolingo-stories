@@ -1,6 +1,6 @@
 .enter_line {
     line-height: 71px;
-    min-height: 80px;
+    min-height: 72px;
     display: flex;
     flex-wrap: wrap;
 }
@@ -34,8 +34,8 @@
 }
 
 .enter_line {
-    line-height: 80px; /* Adjust line height as needed */
+    line-height: 72px; /* Adjust line height as needed */
     background-image: linear-gradient(to bottom, transparent 93%, var(--color_base_border) 93%, var(--color_base_border) 95%, var(--color_base_border) 95%, transparent 95%);
-    background-size: 100% 80px;
+    background-size: 100% 72px;
     background-repeat: repeat-y;
 }

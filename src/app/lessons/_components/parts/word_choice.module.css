@@ -1,0 +1,9 @@
+.word_choice {
+    display: flex;
+    flex-direction: row;
+}
+
+.word_choice>div {
+    flex-grow: 1;
+    text-align: center;
+}

@@ -1,6 +1,4 @@
-import fs from "fs/promises";
 import convertToComposeObject from "../../_parser/convert_parts";
-import Preview from "../../_components/preview";
 import Part from "../../_components/exercise";
 
 export default async function Page() {
@@ -65,14 +63,30 @@ level: 6
 - bonan tagon <> good morning
 - bonvolu <> please
 - dankon <> thank you
+
+
+[translate_choice]
+> boy
++ knabo
+- viro
+- kaj
+
+[conversation]
+> Bonan tagon.
++ saluton
+- bonvolu
+- dankon
+
   `;
   const elements = convertToComposeObject(input);
 
   return (
     <>
-      {elements.map((part, i) => (
-        <Part key={i} data={part} active={10} />
-      ))}
+      <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+        {elements.map((part, i) => (
+          <Part key={i} data={part} active={10} />
+        ))}
+      </div>
     </>
   );
 }

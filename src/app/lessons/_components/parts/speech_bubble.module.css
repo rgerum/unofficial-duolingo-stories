@@ -22,8 +22,8 @@
 
 .speech_bubble:before {
     content: "";
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     background-color: lightgray;
     bottom: 0;
     position: absolute;
@@ -31,19 +31,19 @@
 
 .speech_bubble:after {
     content: "";
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     background-color: white;
     bottom: 0;
     position: absolute;
 }
 
 .speech_bubble[data-orientation="left"]:before {
-    left: -20px;
+    left: -15px;
 }
 .speech_bubble[data-orientation="left"]:after {
-    border-bottom-right-radius: 20px;
-    left: -20px;
+    border-bottom-right-radius: 15px;
+    left: -15px;
 }
 
 .speech_bubble[data-orientation="right"] {
@@ -52,10 +52,10 @@
 }
 .speech_bubble[data-orientation="right"]:before {
     background-color: #8f7878;
-    right: -20px;
+    right: -15px;
     left: auto;
 }
 .speech_bubble[data-orientation="right"]:after {
-    right: -20px;
-    border-bottom-left-radius: 20px;
+    right: -15px;
+    border-bottom-left-radius: 15px;
 }

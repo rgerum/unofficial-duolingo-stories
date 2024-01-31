@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
-import GapsLine from "./parts/gaps_line";
 import Card, { CardCheck, CardTitle } from "./parts/card";
 import useChoiceButtons from "./useChoiceButtons";
+import SpeechBubble from "./parts/speech_bubble";
 import WordChoice from "./parts/word_choice";
 
-export default function ExerciseFillChoice({ data, onChecked, ...props }) {
+export default function ExerciseConversation({ data, onChecked, ...props }) {
   const [state, setState] = React.useState(0);
   let [params1, check] = useChoiceButtons(
     data.choice.answers,
@@ -24,7 +24,8 @@ export default function ExerciseFillChoice({ data, onChecked, ...props }) {
   return (
     <Card state={state} {...props}>
       <CardTitle>Select the right answer</CardTitle>
-      <GapsLine sentence={data.sentence1} words={[]} state={state} />
+      <SpeechBubble>{data.sentence1.text}</SpeechBubble>
+      <SpeechBubble orientation="right">...</SpeechBubble>
       <WordChoice words={params1} />
       <CardCheck onClick={Check}>Check</CardCheck>
     </Card>

@@ -16,7 +16,7 @@ import textCompare from "./textCompare";
 import TextCorrected from "./parts/text_corrected";
 import Speaker from "./parts/speaker";
 
-export function ExerciseCompose({ data, onChecked, ...props }) {
+export default function ExerciseCompose({ data, onChecked, ...props }) {
   const level = data.level ?? 1;
 
   const settings = {

@@ -8,6 +8,54 @@ const convert_parts = {
     current_result.words.push(line.substring(1).trim());
   },
   fill_choice: (line, index, current_result) => {
+    console.log("fill choice", line);
+    if (current_result.sentence1 === undefined) {
+      current_result.sentence1 = {
+        text: "",
+      };
+      current_result.choice = {
+        answers: [],
+        right_answer: -1,
+      };
+    }
+    if (line.startsWith(">")) {
+      current_result.sentence1.text = line.substring(1).trim();
+      setHideRanges(current_result.sentence1);
+    }
+    if (line.startsWith("-")) {
+      current_result.choice.answers.push(line.substring(1).trim());
+    }
+    if (line.startsWith("+")) {
+      current_result.choice.answers.push(line.substring(1).trim());
+      current_result.choice.right_answer =
+        current_result.choice.answers.length - 1;
+    }
+  },
+
+  translate_choice: (line, index, current_result) => {
+    if (current_result.sentence1 === undefined) {
+      current_result.sentence1 = {
+        text: "",
+      };
+      current_result.choice = {
+        answers: [],
+        right_answer: -1,
+      };
+    }
+    if (line.startsWith(">")) {
+      current_result.sentence1.text = line.substring(1).trim();
+      setHideRanges(current_result.sentence1);
+    }
+    if (line.startsWith("-")) {
+      current_result.choice.answers.push(line.substring(1).trim());
+    }
+    if (line.startsWith("+")) {
+      current_result.choice.answers.push(line.substring(1).trim());
+      current_result.choice.right_answer =
+        current_result.choice.answers.length - 1;
+    }
+  },
+  conversation: (line, index, current_result) => {
     if (current_result.sentence1 === undefined) {
       current_result.sentence1 = {
         text: "",
@@ -91,6 +139,7 @@ export default function convertToComposeObject(input, add_word_dict = false) {
 
   // Creating the object with a type property
   const results = [];
+  const result_tags = {};
   let current_result = {};
   let index = 0;
 
@@ -99,12 +148,16 @@ export default function convertToComposeObject(input, add_word_dict = false) {
     line = line.trim();
     if (line.length === 0) return;
     index = index + 1;
-    if (line.startsWith("[") && line.endsWith("]")) {
+    const matched = line.match(/^\s*\[([-_\w\d]*)](<([-_\w\d]*)>)?/);
+    if (matched) {
       // Handle the type line (e.g., [compose])
       index = 0;
-      current_result = { type: line.substring(1, line.length - 1) };
+      current_result = { type: matched[1], id: matched[3] };
       results.push(current_result);
+      result_tags[matched[3]] = current_result;
+      console.log("matched", current_result);
     } else if (convert_parts[current_result.type]) {
+      console.log("line", current_result.type, line);
       convert_parts[current_result.type](line, index, current_result);
     }
   });

@@ -1,9 +1,9 @@
 import WordButton from "./word_button";
-import styles from "./word_bank.module.css";
+import styles from "./word_choice.module.css";
 
-export default function WordBank({ words }) {
+export default function WordChoice({ words }) {
   return (
-    <div className={styles.word_bank}>
+    <div className={styles.word_choice}>
       {words.map((a, i) => (
         <WordButton key={i} {...a} />
       ))}
