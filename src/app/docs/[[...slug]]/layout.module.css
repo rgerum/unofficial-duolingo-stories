@@ -29,11 +29,6 @@
   z-index: 3;
 }
 .navbar {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  height: 70px;
   width: 100%;
   background: var(--docs-background);
   border-bottom: 2px solid var(--docs-border);
@@ -41,17 +36,23 @@
   z-index: 2;
   top: 0;
 }
-.navbar>div {
+.navbar_inner {
+  margin: auto;
+  max-width: 1450px;
   display: flex;
+  flex-direction: row;
   align-items: center;
-  max-width: 1472px;
+  justify-content: flex-start;
   height: 70px;
-  padding: 16px 48px;
+  padding: 0 20px;
 }
-.navbar>div a{
+.navbar_logo {
+  margin-right: auto;
+}
+.navbar_inner>div a{
   text-decoration: none;
 }
-.navbar .search {
+.navbar_inner .search {
   outline: none;
   border: none;
   padding: 10px;
@@ -80,26 +81,30 @@
 }
 
 .main_container {
-  margin: auto;
-  max-width: 1472px;
   display: flex;
+  justify-content: center;
   margin-top: 70px;
-  height: calc(100vh - 70px);
 }
 
 
 .toc {
-  background: var(--docs-background);
+  width: 288px;
+  flex-shrink: 0;
+  z-index: 5;
+}
+.toc_inner {
   font-size: 14px;
   line-height: 24px;
+
+  background: var(--docs-background);
+  position: fixed;
+  overflow-y: scroll;
   width: 288px;
-  min-width: 288px;
+  height: calc(100vh - 70px);
+
   padding-left: 1rem;
   padding-right: 1.5rem;
   padding-bottom: 2.5rem;
-  overflow-y: scroll;
-  z-index: 5;
-  height: calc(100vh - 70px);
 }
 .toc h5 {
   padding-right: 16px;
@@ -144,9 +149,10 @@ background: var(--docs-toc-hover);
 .main {
   font-size: 18px;
   padding: 20px 40px;
-  max-width: calc(1472px - 304px - 288px);
-  width: calc(100% - 304px - 288px);
   overflow-y: scroll;
+  flex-grow: 1;
+  width: 100px;
+  max-width: 880px;
 }
 
 .main h1 {
@@ -209,9 +215,16 @@ background: var(--docs-toc-hover);
 .toc2 {
   height: 100%;
   width: 304px;
+  flex-shrink: 0;
+}
+.toc2_inner {
+  width: 304px;
   padding-left: 40px;
   font-weight: bold;
   font-size: 14px;
+  overflow-y: scroll;
+  position: fixed;
+  height: calc(100vh - 70px);
 }
 .toc2 a {
   text-decoration: none;
@@ -297,6 +310,7 @@ background: var(--docs-toc-hover);
     background: none;
     cursor: pointer;
     font-size: 30px;
+    z-index: 10;
   }
   .toc {
     position: fixed;
@@ -304,6 +318,9 @@ background: var(--docs-toc-hover);
     top: 0;
     height: 100%;
     transition: left 0.3s ease-in-out;
+  }
+  .toc_inner {
+    height: 100%;
   }
   .main_container {
     margin-top: calc(70px + 57px);
