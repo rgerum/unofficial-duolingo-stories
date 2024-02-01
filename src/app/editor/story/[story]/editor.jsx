@@ -250,8 +250,17 @@ export default function Editor({ story_data, avatar_names, session }) {
     const view = new EditorView({ state, parent: editor.current });
     set_view(view);
 
+    async function key_pressed(e) {
+      if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        await Save();
+      }
+    }
+    document.addEventListener("keydown", key_pressed);
+
     return () => {
       view.destroy();
+      document.removeEventListener("keydown", key_pressed);
     };
   }, [story_data, avatar_names, language_data, language_data2]);
 
