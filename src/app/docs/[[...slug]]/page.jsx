@@ -75,15 +75,17 @@ async function Layout({ children, path, datax, headings }) {
         <div id="search_results"></div>
       </div>
       <div className={styles.navbar}>
-        <div>
-          <Link href="/">Duostories</Link>
+        <div className={styles.navbar_inner}>
+          <div className={styles.navbar_logo}>
+            <Link href="/">Duostories</Link>
+          </div>
+          <button id="search" className={styles.search}>
+            <span>
+              <span>Search Documentation...</span>
+            </span>
+            <span>CtrlK</span>
+          </button>
         </div>
-        <button id="search" className={styles.search}>
-          <span>
-            <span>Search Documentation...</span>
-          </span>
-          <span>CtrlK</span>
-        </button>
       </div>
       <div className={styles.short_nav}>
         <svg
@@ -114,26 +116,30 @@ async function Layout({ children, path, datax, headings }) {
           <button className={styles.close} id="close">
             ×
           </button>
-          {data.navigation.map((item, i) => (
-            <div key={i}>
-              {item.group ? <h5>{item.group}</h5> : null}
-              <ul>
-                {item.pages.map((child, i) => (
-                  <li key={i}>
-                    <PageLink page={child} active={"/" + child === path} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className={styles.toc_inner}>
+            {data.navigation.map((item, i) => (
+              <div key={i}>
+                {item.group ? <h5>{item.group}</h5> : null}
+                <ul>
+                  {item.pages.map((child, i) => (
+                    <li key={i}>
+                      <PageLink page={child} active={"/" + child === path} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
         <div className={styles.main}>{children}</div>
         <div className={styles.toc2}>
-          {headings.map((h, i) => (
-            <p key={i}>
-              <a href={"#" + save_tag(h)}>{h}</a>
-            </p>
-          ))}
+          <div className={styles.toc2_inner}>
+            {headings.map((h, i) => (
+              <p key={i}>
+                <a href={"#" + save_tag(h)}>{h}</a>
+              </p>
+            ))}
+          </div>
         </div>
       </div>
     </div>
