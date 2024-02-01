@@ -10,7 +10,7 @@ export default async function StoryWrapper({
   storyFinishedIndexUpdate,
   localization,
 }) {
-  let router = useRouter();
+  const router = useRouter();
 
   return (
     <>
