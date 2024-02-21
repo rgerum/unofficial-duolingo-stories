@@ -16,7 +16,7 @@
     "@google-cloud/text-to-speech": "^5.0.1",
     "@octokit/rest": "^20.0.2",
     "@vercel/analytics": "^1.1.1",
-    "@vercel/blob": "^0.16.1",
+    "@vercel/blob": "^0.22.1",
     "aws-crt": "^1.20.1",
     "base64-arraybuffer": "^1.0.2",
     "bufferutil": "^4.0.8",
