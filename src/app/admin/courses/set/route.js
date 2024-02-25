@@ -40,13 +40,16 @@ FROM language l, language l2
 WHERE l.id = ${data["from_language"]}
       AND l2.id = ${data["learning_language"]};`
   )[0].short;
-
+  data["from_language_name"] = (await sql`SELECT name FROM language WHERE id = ${data["from_language"]};`)[0].name;
+  data["learning_language_name"] = (await sql`SELECT name FROM language WHERE id = ${data["learning_language"]};`)[0].name;
   if (data.id === undefined) {
     id = (await sql`INSERT INTO course ${sql(data)} RETURNING id`)[0].id;
   } else {
     await sql`UPDATE course SET ${sql(data, [
       "learning_language",
+      "learning_language_name",
       "from_language",
+      "from_language_name",
       "public",
       "name",
       "official",
