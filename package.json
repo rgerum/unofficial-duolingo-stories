@@ -34,6 +34,7 @@
     "react-dom": "^18.2.0",
     "react-swipeable": "^7.0.1",
     "resend": "^2.1.0",
+    "styled-components": "^6.1.8",
     "uuid": "^9.0.1",
     "ws": "^8.16.0"
   },
