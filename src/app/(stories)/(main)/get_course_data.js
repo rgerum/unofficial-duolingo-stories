@@ -3,7 +3,7 @@ import { sql, cache } from "../../../lib/db";
 export const get_course_data = cache(
   async () => {
     return sql`
-SELECT id, short, COALESCE(NULLIF(name, ''), learning_language_name) AS name, count,
+SELECT id, short, COALESCE(NULLIF(name, ''), learning_language_name) AS name, count, about,
 from_language, from_language_name,
 learning_language, learning_language_name
 FROM
