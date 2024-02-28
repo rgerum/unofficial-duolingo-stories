@@ -5,6 +5,7 @@ import getUserId from "lib/getUserId";
 import { get_localisation_dict } from "lib/get_localisation";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
+import getUserName from "../../../../lib/getUserName";
 
 async function get_story_meta(course_id) {
   const course_query = await sql`SELECT
@@ -42,16 +43,28 @@ export default async function Page({ params }) {
   const user_id = await getUserId();
   const story_id = parseInt(params.story_id);
 
+  const user_name = await getUserName();
+
   const localization = await get_localisation_dict(story?.from_language_id);
 
   async function setStoryDoneAction() {
     "use server";
     if (!user_id) {
       await sql`INSERT INTO story_done (story_id) VALUES(${story_id})`;
-      return { message: "done", story_id: story_id };
+      return {
+        message: "done",
+        story_id: story_id,
+        user_id: user_id,
+        user_name: user_name,
+      };
     }
     await sql`INSERT INTO story_done (user_id, story_id) VALUES(${user_id}, ${story_id})`;
-    return { message: "done", story_id: story_id };
+    return {
+      message: "done",
+      story_id: story_id,
+      user_id: user_id,
+      user_name: user_name,
+    };
   }
 
   return (
