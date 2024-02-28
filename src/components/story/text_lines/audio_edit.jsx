@@ -6,6 +6,7 @@ import {
   timings_to_text,
   insert_audio_line,
 } from "./audio_edit_tools";
+import { useSearchParams } from "next/navigation";
 
 export default function EditorSSMLDisplay({ ssml, element, audio }) {
   //let urlParams = new URLSearchParams(window.location.search);
@@ -34,12 +35,17 @@ export default function EditorSSMLDisplay({ ssml, element, audio }) {
     setLoading(false);
   }
 
+  const searchParams = useSearchParams();
+
   if (!show_audio) return <></>;
   return (
     <>
       <br />
       <span className={styles.ssml_speaker + " en"}>{ssml.speaker}</span>
       <span className={styles.ssml}>{ssml.text}</span>
+      {searchParams.get("beta") !== null && (
+        <span onClick={() => editor.show_audio_editor(element)}> 🎤 </span>
+      )}
       {ssml.speaker ? (
         error ? (
           <span>

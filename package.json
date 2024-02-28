@@ -17,6 +17,7 @@
     "@octokit/rest": "^20.0.2",
     "@vercel/analytics": "^1.1.1",
     "@vercel/blob": "^0.22.1",
+    "@wavesurfer/react": "^1.0.4",
     "aws-crt": "^1.20.1",
     "base64-arraybuffer": "^1.0.2",
     "bufferutil": "^4.0.8",
@@ -31,11 +32,13 @@
     "nodemailer": "^6",
     "postgres": "^3.4.3",
     "react": "^18.2.0",
+    "react-audio-voice-recorder": "^2.2.0",
     "react-dom": "^18.2.0",
     "react-swipeable": "^7.0.1",
     "resend": "^2.1.0",
     "styled-components": "^6.1.8",
     "uuid": "^9.0.1",
+    "wavesurfer.js": "^7.7.1",
     "ws": "^8.16.0"
   },
   "devDependencies": {

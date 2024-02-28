@@ -114,6 +114,7 @@ export default function TextLine({ progress, unhide, element, part }) {
               <EditorSSMLDisplay
                 ssml={element.line.content.audio.ssml}
                 audio={element.line.content.audio}
+                element={element}
                 editor={editor}
               />
             ) : (
@@ -152,6 +153,7 @@ export default function TextLine({ progress, unhide, element, part }) {
             <EditorSSMLDisplay
               ssml={element.line.content.audio.ssml}
               audio={element.line.content.audio}
+              element={element}
               editor={editor}
             />
           ) : (

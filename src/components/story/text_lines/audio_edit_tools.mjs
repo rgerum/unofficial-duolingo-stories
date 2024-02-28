@@ -270,7 +270,7 @@ export function content_to_audio(content) {
 }
 
 export function timings_to_text({ filename, keypoints }) {
-  let text = "$" + filename;
+  let text = filename ? ("$" + filename) : ""
   let last_end = 0;
   let last_time = 0;
   for (let point of keypoints) {

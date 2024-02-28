@@ -17,6 +17,11 @@ import { processStoryFile } from "components/editor/story/syntax_parser_new";
 import { useRouter } from "next/navigation";
 import { StoryEditorHeader } from "./header";
 import { fetch_post } from "lib/fetch_post";
+import SoundRecorder from "./sound-recorder";
+import {
+  insert_audio_line,
+  timings_to_text,
+} from "../../../../components/story/text_lines/audio_edit_tools.mjs";
 
 let images_cached = {};
 export async function getImage(id) {
@@ -94,6 +99,8 @@ export default function Editor({ story_data, avatar_names, session }) {
   const [func_save, set_func_save] = React.useState(() => () => {});
   const [func_delete, set_func_delete] = React.useState(() => () => {});
 
+  const [audio_editor_data, setAudioEditorData] = React.useState({});
+
   const [unsaved_changes, set_unsaved_changes] = React.useState(false);
 
   const navigate = useRouter().push;
@@ -111,6 +118,17 @@ export default function Editor({ story_data, avatar_names, session }) {
     },
     [unsaved_changes],
   );
+
+  const onAudioSave = (filename, text) => {
+    text = "$" + filename + text;
+
+    insert_audio_line(
+      text,
+      audio_editor_data.audio.ssml,
+      editor_state.view,
+      editor_state.audio_insert_lines,
+    );
+  };
 
   React.useEffect(() => {
     if (!unsaved_changes) return;
@@ -228,6 +246,7 @@ export default function Editor({ story_data, avatar_names, session }) {
         },
         audio_insert_lines: audio_insert_lines,
         show_trans: show_trans,
+        show_audio_editor: setAudioEditorData,
       };
       stateX = v.state;
       if (v.docChanged) {
@@ -271,7 +290,7 @@ export default function Editor({ story_data, avatar_names, session }) {
   editor_state2.show_ssml = show_ssml;
   return (
     <>
-      <div id="body">
+      <div id="body" className={styles.body}>
         <StoryEditorHeader
           story_data={story_data}
           unsaved_changes={unsaved_changes}
@@ -285,6 +304,21 @@ export default function Editor({ story_data, avatar_names, session }) {
           language_data2={language_data2}
           session={session}
         />
+        {audio_editor_data?.line?.content && (
+          <SoundRecorder
+            content={audio_editor_data.line.content}
+            initialTimingText={timings_to_text({
+              keypoints: audio_editor_data.audio.keypoints,
+            })}
+            url={
+              "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/" +
+              audio_editor_data.audio.url
+            }
+            story_id={story_data.id}
+            onClose={() => setAudioEditorData(null)}
+            onSave={onAudioSave}
+          />
+        )}
         <div className={styles.root}>
           <svg className={styles.margin} ref={svg_parent}>
             <path d=""></path>

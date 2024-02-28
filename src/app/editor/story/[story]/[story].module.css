@@ -1,8 +1,7 @@
 .body {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  border: 10px solid blue;
+  height: 100%;
 }
 
 .root {

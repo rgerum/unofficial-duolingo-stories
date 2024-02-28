@@ -63,6 +63,7 @@ export default function Header({ element, progress }) {
         {editor && element.audio ? (
           <EditorSSMLDisplay
             ssml={element.audio.ssml}
+            element={element}
             audio={element.audio}
             editor={editor}
           />
