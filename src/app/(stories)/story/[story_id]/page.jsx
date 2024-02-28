@@ -5,7 +5,7 @@ import getUserId from "lib/getUserId";
 import { get_localisation_dict } from "lib/get_localisation";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
-import getUserName from "../../../../lib/getUserName";
+import { revalidateTag } from "next/cache";
 
 async function get_story_meta(course_id) {
   const course_query = await sql`SELECT
@@ -39,11 +39,10 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
 export default async function Page({ params }) {
   const story = await get_story(params.story_id);
+  const course_id = story?.course_id;
 
   const user_id = await getUserId();
   const story_id = parseInt(params.story_id);
-
-  const user_name = await getUserName();
 
   const localization = await get_localisation_dict(story?.from_language_id);
 
@@ -54,16 +53,14 @@ export default async function Page({ params }) {
       return {
         message: "done",
         story_id: story_id,
-        user_id: user_id,
-        user_name: user_name,
       };
     }
     await sql`INSERT INTO story_done (user_id, story_id) VALUES(${user_id}, ${story_id})`;
+    revalidateTag(`course_done_${course_id}_${user_id}`);
     return {
       message: "done",
       story_id: story_id,
-      user_id: user_id,
-      user_name: user_name,
+      course_id: course_id,
     };
   }
 
