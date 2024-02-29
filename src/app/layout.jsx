@@ -2,6 +2,7 @@ import { Nunito } from "next/font/google";
 import "styles/global.css";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
+import StyledComponentsRegistry from "lib/registry";
 
 // If loading a variable font, you don't need to specify the font weight
 const nunito = Nunito({ subsets: ["latin-ext", "cyrillic-ext", "vietnamese"] });
@@ -16,7 +17,7 @@ export default function RootLayout({ children }) {
         <Script src="/darklight.js"></Script>
       </head>
       <body className={nunito.className}>
-        {children}
+        <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
         {!process.env.NO_TRACK_QUERY ? <Analytics /> : null}
       </body>
     </html>

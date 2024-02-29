@@ -8,6 +8,7 @@ import { useInput } from "lib/hooks";
 import styles from "../register.module.css";
 import { useSearchParams } from "next/navigation";
 import { GetIcon } from "components/icons";
+import Button from "../../../../components/layout/button";
 
 export function LoginOptions({ providers }) {
   async function register_button() {
@@ -47,38 +48,38 @@ export function LoginOptions({ providers }) {
 
   return (
     <>
-      <h2>Log in</h2>
-      <p>Attention, you cannot login with your Duolingo account.</p>
-      <p>
+      <h1 className={styles.H1}>Log in</h1>
+      <p className={styles.P}>
+        Attention, you cannot login with your Duolingo account.
+      </p>
+      <p className={styles.P}>
         You have to register for the unofficial stories separately, as they are
         an independent project.
       </p>
       {error ? <span className={styles.error}>{error}</span> : <></>}
-      <input
-        data-cy="username"
-        value={usernameInput}
-        onChange={usernameInputSetValue}
-        type="text"
-        name="username"
-        placeholder="Username"
-      />
-      <input
-        data-cy="password"
-        value={passwordInput}
-        onChange={passwordInputSetValue}
-        onKeyDown={handleKeypressSignup}
-        type="password"
-        name="password"
-        placeholder="Password"
-      />
-      <button
-        data-cy="submit"
-        className={styles.button}
-        onClick={register_button}
-      >
-        {"Log in"}
-      </button>
-      <span>
+      <form className={styles.Form} action={register_button}>
+        <input
+          data-cy="username"
+          value={usernameInput}
+          onChange={usernameInputSetValue}
+          type="text"
+          name="username"
+          placeholder="Username"
+        />
+        <input
+          data-cy="password"
+          value={passwordInput}
+          onChange={passwordInputSetValue}
+          onKeyDown={handleKeypressSignup}
+          type="password"
+          name="password"
+          placeholder="Password"
+        />
+        <Button data-cy="submit" onClick={register_button} variant="blue">
+          {"Log in"}
+        </Button>
+      </form>
+      <p className={styles.P}>
         Don't have an account?{" "}
         <Link
           href="/auth/register"
@@ -96,27 +97,29 @@ export function LoginOptions({ providers }) {
         >
           Reset
         </Link>
-      </span>
+      </p>
       <hr />
       {/*<input data-cy="email" value={emailInput} onChange={emailInputSetValue} onKeyDown={handleKeypressSignup2} type="email" placeholder="Email" name="email"/>
                         <button data-cy="submit"  className={styles.button}
                                 onClick={register_button2}>{ "Log in with email" }</button>
 
                         <hr/>*/}
-      {Object.values(providers).map((provider) =>
-        provider.id !== "email" && provider.id !== "credentials" ? (
-          <button
-            key={provider.id}
-            className={styles.button2}
-            onClick={() => signIn(provider.id)}
-          >
-            <GetIcon name={provider.id} />
-            <span>{provider.name}</span>
-          </button>
-        ) : (
-          <span key={provider.id}></span>
-        ),
-      )}
+      <div className={styles.providers}>
+        {Object.values(providers).map((provider) =>
+          provider.id !== "email" && provider.id !== "credentials" ? (
+            <button
+              key={provider.id}
+              className={styles.button2}
+              onClick={() => signIn(provider.id)}
+            >
+              <GetIcon name={provider.id} />
+              <span>{provider.name}</span>
+            </button>
+          ) : (
+            <span key={provider.id}></span>
+          ),
+        )}
+      </div>
     </>
   );
 }

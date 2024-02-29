@@ -4,4 +4,7 @@ const withPWA = require("next-pwa")({
 
 module.exports = withPWA({
   // next.js config
+  compiler: {
+    styledComponents: true,
+  },
 });

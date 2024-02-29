@@ -4,6 +4,7 @@ import styles from "../register.module.css";
 import React from "react";
 import { useInput } from "lib/hooks";
 import { useSearchParams } from "next/navigation";
+import Button from "../../../../components/layout/button";
 
 export default function SignInEmail({}) {
   let [emailInput, emailInputSetValue] = useInput("");
@@ -38,29 +39,29 @@ export default function SignInEmail({}) {
 
   return (
     <>
-      <h2>Log in</h2>
-      <p>Attention, you cannot login with your Duolingo account.</p>
-      <p>
+      <h1 className={styles.H1}>Log in</h1>
+      <p className={styles.P}>
+        Attention, you cannot login with your Duolingo account.
+      </p>
+      <p className={styles.P}>
         You have to register for the unofficial stories separately, as they are
         an independent project.
       </p>
       {error ? <span className={styles.error}>{error}</span> : <></>}
-      <input
-        data-cy="email"
-        value={emailInput}
-        onChange={emailInputSetValue}
-        onKeyDown={handleKeypressSignup2}
-        type="email"
-        placeholder="Email"
-        name="email"
-      />
-      <button
-        data-cy="submit"
-        className={styles.button}
-        onClick={register_button2}
-      >
-        {"Log in with email"}
-      </button>
+      <form className={styles.Form} action={register_button2}>
+        <input
+          data-cy="email"
+          value={emailInput}
+          onChange={emailInputSetValue}
+          onKeyDown={handleKeypressSignup2}
+          type="email"
+          placeholder="Email"
+          name="email"
+        />
+        <Button data-cy="submit" variant="blue" onClick={register_button2}>
+          {"Log in with email"}
+        </Button>
+      </form>
     </>
   );
 }

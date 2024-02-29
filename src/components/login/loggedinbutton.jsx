@@ -7,6 +7,7 @@ import Dropdown from "../layout/dropdown";
 import { signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useSelectedLayoutSegments } from "next/navigation";
+import Button from "../layout/button";
 
 function get_current_theme() {
   // it's currently saved in the document?
@@ -57,14 +58,9 @@ function useDarkLight() {
 
 export function LogInButton() {
   return (
-    <button
-      onClick={() => signIn()}
-      className={styles2.button}
-      data-cy="login-button"
-      style={{ float: "none" }}
-    >
+    <Button onClick={() => signIn()} data-cy="login-button">
       Log in
-    </button>
+    </Button>
   );
 }
 
@@ -86,14 +82,9 @@ export default function LoggedInButton({ page, course_id, session }) {
 
   if (session === undefined)
     return (
-      <button
-        onClick={() => signIn()}
-        className={styles2.button}
-        data-cy="login-button"
-        style={{ float: "none" }}
-      >
+      <Button onClick={() => signIn()} data-cy="login-button">
         Log in
-      </button>
+      </Button>
     );
   return (
     <Dropdown>

@@ -5,6 +5,7 @@ import React from "react";
 import styles from "../register.module.css";
 import Link from "next/link";
 import { useInput } from "lib/hooks";
+import Button from "../../../../components/layout/button";
 
 export async function fetch_post(url, data) {
   // check if the user is logged in
@@ -95,12 +96,12 @@ export default function Register() {
         <link rel="canonical" href={`https://duostories.org/login`} />
       </Head>
 
-      <h2>Sign up</h2>
-      <p>
+      <h1 className={styles.H1}>Sign up</h1>
+      <p className={styles.P}>
         If you register you can keep track of the stories you have already
         finished.
       </p>
-      <p>
+      <p className={styles.P}>
         Registration is optional, stories can be accessed even without login.
       </p>
       {state === -1 ? <span className={styles.error}>{error}</span> : <></>}
@@ -109,7 +110,7 @@ export default function Register() {
           {message}
         </span>
       ) : (
-        <>
+        <form action={register_button} className={styles.Form}>
           <input
             data-cy="username"
             value={usernameInput}
@@ -133,16 +134,12 @@ export default function Register() {
             type="password"
             placeholder="Password"
           />
-          <button
-            data-cy="submit"
-            className={styles.button}
-            onClick={register_button}
-          >
+          <Button data-cy="submit" variant="blue" onClick={register_button}>
             {state !== 1 ? "Sign up" : "..."}
-          </button>
-        </>
+          </Button>
+        </form>
       )}
-      <p>
+      <p className={styles.P}>
         Already have an account?{" "}
         <Link className={styles.link} href="/api/auth/signin">
           LOG IN

@@ -4,6 +4,7 @@ import styles from "../register.module.css";
 import Link from "next/link";
 import { useInput } from "lib/hooks";
 import sendPasswordAction from "./sendPasswordAction";
+import Button from "../../../../components/layout/button";
 
 export async function fetch_post(url, data) {
   // check if the user is logged in
@@ -80,15 +81,17 @@ export default function ResetPassword() {
 
   return (
     <>
-      <h2>Reset Password</h2>
-      <p>You forgot your password? We can send you a link to reset it.</p>
+      <h1 className={styles.H1}>Reset Password</h1>
+      <p className={styles.P}>
+        You forgot your password? We can send you a link to reset it.
+      </p>
       {state === -1 ? <span className={styles.error}>{error}</span> : <></>}
       {state === 2 ? (
         <span className={styles.message} data-cy="message-confirm">
           {message}
         </span>
       ) : (
-        <form action={register_button}>
+        <form action={register_button} className={styles.Form}>
           <input
             data-cy="email"
             value={emailInput}
@@ -98,17 +101,17 @@ export default function ResetPassword() {
             name="email"
             placeholder="Email"
           />
-          <button
+          <Button
             data-cy="submit"
             type="submit"
-            className={styles.button}
+            variant="blue"
             //onClick={register_button}
           >
             {state !== 1 ? "Send Link" : "..."}
-          </button>
+          </Button>
         </form>
       )}
-      <p>
+      <p className={styles.P}>
         Already have an account?{" "}
         <Link className={styles.link} href="/api/auth/signin">
           LOG IN
