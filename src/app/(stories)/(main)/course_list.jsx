@@ -20,9 +20,25 @@ async function LanguageGroup({ name, tag, id }) {
       <div className={styles.course_group_name}>
         {localisation("stories_for")}
       </div>
-      {courses_list?.map((course) => (
-        <LanguageButton key={course.id} course_id={course.short} />
-      ))}
+      <ol className={styles.course_list_ol}>
+        {courses_list?.map((course) => (
+          <li key={course.id}>
+            <LanguageButton course_id={course.short} />
+          </li>
+        ))}
+
+        {courses_list?.map((course) => (
+          <li key={course.id}>
+            <LanguageButton course_id={course.short} />
+          </li>
+        ))}
+
+        {courses_list?.map((course) => (
+          <li key={course.id}>
+            <LanguageButton course_id={course.short} />
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
@@ -35,9 +51,13 @@ async function CourseListInner({ loading, tag }) {
         <div className={styles.course_group_name}>
           <span className={styles.loading}>Stories for English Speakers</span>
         </div>
-        {[...Array(10)].map((d, i) => (
-          <LanguageButton key={i} loading={true} />
-        ))}
+        <ol className={styles.course_list_ol}>
+          {[...Array(10)].map((d, i) => (
+            <li key={i}>
+              <LanguageButton loading={true} />
+            </li>
+          ))}
+        </ol>
       </div>
     );
   }

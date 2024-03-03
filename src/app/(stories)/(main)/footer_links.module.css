@@ -1,10 +1,11 @@
 .footer {
-  margin-top: 50px;
+  margin-top: auto;
 }
 .footer_buttons {
   display: flex;
   justify-content: flex-end;
   padding: 0 10px;
+  margin-top: 50px;
 }
 .footer_links {
   display: flex;

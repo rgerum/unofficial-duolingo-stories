@@ -56,30 +56,30 @@ export default async function Layout({ children }) {
 
   return (
     <>
-      <nav className={styles.header_index}>
-        <Link href={"/"} className={styles.duostories_title} data-cy={"logo"}>
-          <img src={"/Duostories.svg"} alt={"Duostories"} height="25px" />
-        </Link>
-        <div style={{ marginLeft: "auto" }}></div>
+      <div className={styles.header_wrapper}>
+        <nav className={styles.header_index}>
+          <Link href={"/"} className={styles.duostories_title} data-cy={"logo"}>
+            <img src={"/Duostories.svg"} alt={"Duostories"} height="25px" />
+          </Link>
+          <div style={{ marginLeft: "auto" }}></div>
 
-        <CourseDropdown
-          course_data_active={active_courses}
-          course_data={course_data}
-          flag_data={flag_data}
-        />
-        {session?.user ? (
-          <LoggedInButton
-            page={"stories"}
-            course_id={"segment"}
-            session={session}
+          <CourseDropdown
+            course_data_active={active_courses}
+            course_data={course_data}
+            flag_data={flag_data}
           />
-        ) : (
-          <LogInButton />
-        )}
-      </nav>
-      <div className={styles.main_body}>
-        <div className={styles.main_index}>{children}</div>
+          {session?.user ? (
+            <LoggedInButton
+              page={"stories"}
+              course_id={"segment"}
+              session={session}
+            />
+          ) : (
+            <LogInButton />
+          )}
+        </nav>
       </div>
+      <div className={styles.main_index}>{children}</div>
     </>
   );
 }

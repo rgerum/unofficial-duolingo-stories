@@ -9,8 +9,18 @@
 
 .course_list {
   margin: 0 16px;
-  flex-wrap: wrap;
   display: flex;
+  flex-direction: column;
+}
+
+.course_list_ol {
+  padding: 0;
+  display: grid;
+  --min-width: min(190px, calc(50% - 12px));
+  grid-template-columns: repeat(auto-fill, minmax(var(--min-width), 1fr));
+  gap: 12px;
+  width: 100%;
+  list-style-type: none;
 }
 
 .course_group_name {
