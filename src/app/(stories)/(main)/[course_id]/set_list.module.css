@@ -33,7 +33,6 @@
 }
 
 .set_list {
-  margin: 0 16px;
   flex-wrap: wrap;
   display: flex;
 }

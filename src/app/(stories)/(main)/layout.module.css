@@ -35,6 +35,7 @@
 .main_index {
   max-width: 985px;
   margin: 0 auto;
+  padding: 0 16px;
 
   min-height: calc(100% - 60px);
   display: flex;

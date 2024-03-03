@@ -1,3 +1,8 @@
+.course_list {
+  display: flex;
+  flex-direction: column;
+}
+
 .course_list hr {
   width: 100%;
   border: 0;
@@ -5,12 +10,6 @@
   height: 0;
   margin-top: 35px;
   margin-bottom: 20px;
-}
-
-.course_list {
-  margin: 0 16px;
-  display: flex;
-  flex-direction: column;
 }
 
 .course_list_ol {

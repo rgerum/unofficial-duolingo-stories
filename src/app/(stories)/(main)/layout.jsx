@@ -79,7 +79,7 @@ export default async function Layout({ children }) {
           )}
         </nav>
       </div>
-      <div className={styles.main_index}>{children}</div>
+      <main className={styles.main_index}>{children}</main>
     </>
   );
 }
