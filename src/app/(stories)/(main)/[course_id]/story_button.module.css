@@ -35,15 +35,23 @@
 }
 
 .button_story_img img {
-  height: 124px;
-  left: -11px;
   position: absolute;
-  top: -15px;
+  left: -11px;
+  top: -11px;
   width: 135px;
+  height: 124px;
+  transform: translateY(-5px);
+  transition: transform 300ms ease;
 }
-.button_story_img img:active {
-  top: -12px;
-  transition: 0.1s top;
+@media (prefers-reduced-motion: no-preference) {
+  .button_story_parent:hover img {
+    transform: translateY(-7px);
+    transition: transform 100ms ease;
+  }
+  .button_story_parent:active img {
+    transform: translateY(0);
+    transition: transform 50ms ease;
+  }
 }
 
 .button_story_text {

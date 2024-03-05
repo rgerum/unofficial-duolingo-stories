@@ -8,7 +8,8 @@
   margin-top: 50px;
 }
 .footer_links {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   font-size: calc(16 / 16 * 1rem);
   margin-bottom: 50px;
   justify-content: space-around;
