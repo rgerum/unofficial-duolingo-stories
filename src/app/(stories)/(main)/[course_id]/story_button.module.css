@@ -4,6 +4,9 @@
   width: 134px;
   cursor: pointer;
   text-decoration: none;
+
+  border-radius: 5px;
+  outline-offset: 5px;
 }
 
 @media (max-width: 335px) {

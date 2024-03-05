@@ -1,14 +1,13 @@
 .story_list {
-  max-width: 704px;
-  margin: 0 auto;
 }
 
 .set_title {
   font-size: calc(27 / 16 * 1rem);
   font-weight: 700;
   text-align: center;
-  width: 100%;
   overflow-x: hidden;
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .set_title::before {
@@ -33,39 +32,17 @@
 }
 
 .set_list {
-  flex-wrap: wrap;
-  display: flex;
 }
 
-@media (max-width: 703px) {
-  .story_list {
-    max-width: 536px;
-  }
+.set_content {
+  /* to get rid of the list style*/
+  list-style: none;
+  padding: 0;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, clamp(140px, 50%, 200px));
+  justify-content: center;
+  justify-items: center;
 }
 
-@media (max-width: 536px) {
-  .story_list {
-    max-width: 368px;
-  }
-}
 
-@media (max-width: 368px) {
-  .set_list {
-    margin: 0;
-  }
-  .story_list {
-    max-width: 336px;
-  }
-}
-
-@media (max-width: 335px) {
-  .story_list {
-    max-width: 268px;
-  }
-}
-
-@media (max-width: 268px) {
-  .story_list {
-    max-width: 100%;
-  }
-}

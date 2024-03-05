@@ -9,12 +9,16 @@ export default async function SetList({ course_id }) {
     return (
       <div className={styles.story_list}>
         {[...Array(2)].map((d, i) => (
-          <div key={i} className={styles.set_list}>
-            <div className={styles.set_title}>Set {i + 1}</div>
+          <ol key={i} className={styles.set_content}>
+            <div className={styles.set_title} tabIndex="-1">
+              Set {i + 1}
+            </div>
             {[...Array(4)].map((d, i) => (
-              <StoryButton key={i} />
+              <li key={i}>
+                <StoryButton />
+              </li>
             ))}
-          </div>
+          </ol>
         ))}
       </div>
     );

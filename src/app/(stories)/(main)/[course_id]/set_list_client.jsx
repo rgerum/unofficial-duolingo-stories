@@ -17,14 +17,16 @@ function About({ course }) {
 
 function Set({ set, done, localisation }) {
   return (
-    <div className={styles.set_list}>
+    <ol className={styles.set_content}>
       <div className={styles.set_title}>
         {localisation("set_n", { $count: set[0].set_id })}
       </div>
       {set.map((story) => (
-        <StoryButton key={story.id} story={story} done={done[story.id]} />
+        <li key={story.id}>
+          <StoryButton story={story} done={done[story.id]} />
+        </li>
       ))}
-    </div>
+    </ol>
   );
 }
 
