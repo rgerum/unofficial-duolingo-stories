@@ -26,7 +26,7 @@
   font-weight: bold;
   width: 100%;
   padding-left: 5px;
-  font-size: 24px;
+  font-size: calc(24 / 16 * 1rem);
 }
 
 @keyframes placeHolderShimmer {
@@ -43,7 +43,7 @@
   font-weight: bold;
   width: 100%;
   padding-left: 5px;
-  font-size: 24px;
+  font-size: calc(24 / 16 * 1rem);
 
   animation-duration: 4s;
   animation-fill-mode: forwards;

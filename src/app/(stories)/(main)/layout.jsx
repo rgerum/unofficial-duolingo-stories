@@ -9,6 +9,9 @@ import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
 import { get_flag_data } from "../../../components/layout/flag_by_id";
 import { get_course_data } from "./get_course_data";
 import getUserId from "../../../lib/getUserId";
+import styles0 from "./layout.module.css";
+import FooterLinks from "./footer_links";
+import Legal from "../../../components/layout/legal";
 
 export const metadata = {
   title:
@@ -56,30 +59,38 @@ export default async function Layout({ children }) {
 
   return (
     <>
-      <div className={styles.header_wrapper}>
-        <nav className={styles.header_index}>
-          <Link href={"/"} className={styles.duostories_title} data-cy={"logo"}>
-            <img src={"/Duostories.svg"} alt={"Duostories"} height="25px" />
-          </Link>
-          <div style={{ marginLeft: "auto" }}></div>
+      <div className={styles.all_wrapper}>
+        <div className={styles.header_wrapper}>
+          <nav className={styles.header_index}>
+            <Link
+              href={"/"}
+              className={styles.duostories_title}
+              data-cy={"logo"}
+            >
+              <img src={"/Duostories.svg"} alt={"Duostories"} height="25px" />
+            </Link>
+            <div style={{ marginLeft: "auto" }}></div>
 
-          <CourseDropdown
-            course_data_active={active_courses}
-            course_data={course_data}
-            flag_data={flag_data}
-          />
-          {session?.user ? (
-            <LoggedInButton
-              page={"stories"}
-              course_id={"segment"}
-              session={session}
+            <CourseDropdown
+              course_data_active={active_courses}
+              course_data={course_data}
+              flag_data={flag_data}
             />
-          ) : (
-            <LogInButton />
-          )}
-        </nav>
+            {session?.user ? (
+              <LoggedInButton
+                page={"stories"}
+                course_id={"segment"}
+                session={session}
+              />
+            ) : (
+              <LogInButton />
+            )}
+          </nav>
+        </div>
+        <main className={styles0.main_index}>{children}</main>
+        <FooterLinks />
+        <Legal language_name={undefined} />
       </div>
-      <main className={styles.main_index}>{children}</main>
     </>
   );
 }

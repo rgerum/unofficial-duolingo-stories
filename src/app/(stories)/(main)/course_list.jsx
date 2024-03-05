@@ -3,6 +3,7 @@ import get_localisation from "lib/get_localisation";
 import LanguageButton from "./language_button";
 
 import styles from "./course_list.module.css";
+import styles0 from "./layout.module.css";
 import Legal from "../../../components/layout/legal";
 import { get_course_groups, get_courses_in_group } from "./get_course_data";
 import FooterLinks from "./footer_links";
@@ -79,11 +80,7 @@ async function CourseListInner({ loading, tag }) {
 export default async function CourseList({ tag }) {
   return (
     <Suspense fallback={<CourseListInner loading={true} />}>
-      <div>
-        <CourseListInner tag={tag} />
-      </div>
-      <FooterLinks />
-      <Legal language_name={undefined} />
+      <CourseListInner tag={tag} />
     </Suspense>
   );
 }

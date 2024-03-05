@@ -9,7 +9,7 @@
 }
 .footer_links {
   display: flex;
-  font-size: 16px;
+  font-size: calc(16 / 16 * 1rem);
   margin-bottom: 50px;
   justify-content: space-around;
   border-top: 2px solid var(--overview-hr);

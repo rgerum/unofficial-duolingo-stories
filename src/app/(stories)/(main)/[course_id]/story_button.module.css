@@ -45,7 +45,7 @@
 
 .button_story_text {
   color: var(--text-color-dim);
-  font-size: 17px;
+  font-size: calc(17 / 16 * 1rem);
   font-weight: 700;
   line-height: 21px;
   margin-top: 16px;

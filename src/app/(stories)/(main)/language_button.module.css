@@ -24,7 +24,7 @@
 .language_select_button_text {
   color: var(--text-color-dim);
   display: block;
-  font-size: 19px;
+  font-size: calc(19 / 16 * 1rem);
   font-weight: 700;
   margin-top: 10px;
 }
@@ -32,7 +32,7 @@
 .language_story_count {
   color: var(--text-color-dim);
   opacity: 0.5;
-  font-size: 15px;
+  font-size: calc(15 / 16 * 1rem);
 }
 
 .language_select_button.conlang-link {
@@ -54,7 +54,7 @@
   position: absolute;
   right: 0;
   color: #cbcbcb;
-  font-size: 40px;
+  font-size: calc(40 / 16 * 1rem);
 }
 
 @media screen and (max-width: 500px) {
@@ -75,13 +75,13 @@
 .celebration_date {
   color: var(--text-color-dim);
   opacity: 0.5;
-  font-size: 15px;
+  font-size: calc(15 / 16 * 1rem);
 }
 .celebration svg {
   padding-block: 0;
 }
 .celebration_icon {
-  font-size: 40px;
+  font-size: calc(40 / 16 * 1rem);
 }
 @media screen and (max-width: 538px) {
   .celebration_icon {

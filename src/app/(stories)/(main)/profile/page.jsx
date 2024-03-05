@@ -58,7 +58,6 @@ export default async function Page() {
   return (
     <>
       <Profile providers={providers} />
-      <FooterLinks />
     </>
   );
 }

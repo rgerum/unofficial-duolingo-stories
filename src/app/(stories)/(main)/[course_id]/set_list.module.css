@@ -4,7 +4,7 @@
 }
 
 .set_title {
-  font-size: 27px;
+  font-size: calc(27 / 16 * 1rem);
   font-weight: 700;
   text-align: center;
   width: 100%;

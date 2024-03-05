@@ -207,7 +207,6 @@ export default async function Page() {
         contributors! Meet them on{" "}
         <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.
       </p>
-      <FooterLinks />
     </div>
   );
 }

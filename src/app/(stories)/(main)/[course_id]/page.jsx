@@ -63,8 +63,6 @@ export default async function Page({ params }) {
       <Suspense fallback={<SetList />}>
         <SetList course_id={params.course_id} />
       </Suspense>
-      <FooterLinks />
-      <Legal language_name={undefined} />
     </>
   );
 }
