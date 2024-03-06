@@ -91,7 +91,7 @@
     background: var(--body-background);
     position: absolute;
     transition: transform 500ms ease-in;
-    transform: translateX(-100%);
+    transform: translateX(calc(-100% - 10px));
     box-shadow: 2px 19px 10px hsl(20deg 10% 10% / 0.5);
   }
   .languages {
