@@ -27,18 +27,6 @@ async function LanguageGroup({ name, tag, id }) {
             <LanguageButton course_id={course.short} />
           </li>
         ))}
-
-        {courses_list?.map((course) => (
-          <li key={course.id}>
-            <LanguageButton course_id={course.short} />
-          </li>
-        ))}
-
-        {courses_list?.map((course) => (
-          <li key={course.id}>
-            <LanguageButton course_id={course.short} />
-          </li>
-        ))}
       </ol>
     </div>
   );

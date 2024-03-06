@@ -1,10 +1,20 @@
 .root {
-  display: flex;
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "nav main";
+  grid-template-columns: 400px 1fr;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  overflow: hidden;
 }
 
-.main_overview {
-  flex-grow: 4;
-  height: calc(100vh - 64px);
-  overflow-y: scroll;
-  overflow-x: hidden;
+@media (max-width: 1250px) {
+  .root {
+    /*grid-template-areas:
+    "header"
+    "main";
+    grid-template-columns: revert;*/
+    grid-template-columns: 0 1fr;
+  }
 }

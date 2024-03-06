@@ -17,7 +17,7 @@ export default async function Layout({ children }) {
   let languages = await get_language_list_data();
 
   return (
-    <>
+    <SwiperSideBar courses={courses} languages={languages}>
       <nav className={styles.header_index}>
         <LayoutFlag courses={courses} languages={languages} />
 
@@ -31,11 +31,7 @@ export default async function Layout({ children }) {
           <LogInButton />
         )}
       </nav>
-      <div className={styles.main_index}>
-        <SwiperSideBar courses={courses} languages={languages}>
-          {children}
-        </SwiperSideBar>
-      </div>
-    </>
+      <div className={styles.main_overview}>{children}</div>
+    </SwiperSideBar>
   );
 } // <Login page={"editor"} course_id={course?.short}/>s

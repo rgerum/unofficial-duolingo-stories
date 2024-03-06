@@ -74,6 +74,7 @@ body {
   box-sizing: border-box;
   color: var(--text-color);
   background: var(--body-background);
+  font-size: calc(19 / 16 * 1rem);
 }
 /*
 outline-width: 2px;
