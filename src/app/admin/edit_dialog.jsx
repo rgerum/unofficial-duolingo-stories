@@ -89,7 +89,7 @@ const DialogOverlay = styled(Dialog.Overlay)`
 `;
 
 const DialogContent = styled(Dialog.Content)`
-  background-color: white;
+  background-color: var(--body-background);
   border-radius: 6px;
   box-shadow:
     hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
@@ -110,9 +110,12 @@ const DialogContent = styled(Dialog.Content)`
 `;
 
 export const DialogTitle = styled(Dialog.Title)`
-  margin: 0;
+  margin-left: 0;
   font-weight: 500;
-  font-size: calc(18 / 16 * 1rem);
+  font-size: calc(21 / 16 * 1rem);
+
+  margin-top: -16px;
+  margin-bottom: 16px;
 `;
 
 export const DialogDescription = styled(Dialog.Description)`
@@ -122,15 +125,17 @@ export const DialogDescription = styled(Dialog.Description)`
 `;
 
 export const Button = styled.button`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  padding: 0 15px;
-  font-size: calc(16 / 16 * 1rem);
-  line-height: 1;
-  font-weight: 500;
-  height: 35px;
+  text-transform: uppercase;
+  padding: 13px 30px;
+  background: var(--button-background);
+  border-radius: 15px;
+  font-weight: 700;
+  font-size: 1rem;
+
+  color: var(--button-color);
+  border-color: var(--button-border);
+  border: none;
+  border-bottom: 4px solid var(--button-border);
 `;
 
 const IconButton = styled.button`
@@ -151,6 +156,7 @@ export const Fieldset = styled.fieldset`
   gap: 20px;
   align-items: baseline;
   border: 0;
+  width: 100%;
 `;
 
 export const Label = styled.label`
@@ -175,16 +181,13 @@ export const Input = styled.input`
 `;
 
 export const InputArea = styled.textarea`
-  width: 100%;
+  background: var(--input-background);
+  color: var(--text-color);
+  border: 2px solid var(--input-border);
+  border-radius: 16px;
+  padding: 10px 17px;
   flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  padding: 0 10px;
-  font-size: calc(16 / 16 * 1rem);
-  line-height: 1;
-  height: 35px;
+  font-size: 1rem;
 `;
 
 const X = styled.div`
