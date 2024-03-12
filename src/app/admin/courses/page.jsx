@@ -27,7 +27,7 @@ export default async function Page({}) {
 
   return (
     <>
-      <CourseList users={courses} languages={languages} />
+      <CourseList all_courses={courses} languages={languages} />
     </>
   );
 }

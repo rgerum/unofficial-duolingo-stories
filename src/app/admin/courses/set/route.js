@@ -32,10 +32,13 @@ async function set_course(data) {
       d[0].toLowerCase(),
     );
   }
-  data["public"] =
-    data["public"] == 1 || data["public"] === "true" ? "true" : "false";
-  const from_language = (await sql`SELECT name, short FROM language WHERE id = ${data["from_language"]};`)[0];
-  const learning_language = (await sql`SELECT name, short FROM language WHERE id = ${data["learning_language"]};`)[0];
+  //data["public"] = data["public"] == 1 || data["public"] === "true";
+  const from_language = (
+    await sql`SELECT name, short FROM language WHERE id = ${data["from_language"]};`
+  )[0];
+  const learning_language = (
+    await sql`SELECT name, short FROM language WHERE id = ${data["learning_language"]};`
+  )[0];
   data["short"] = `${learning_language.short}-${from_language.short}`;
   data["from_language_name"] = from_language.name;
   data["learning_language_name"] = learning_language.name;
@@ -49,7 +52,7 @@ async function set_course(data) {
       "from_language_name",
       "public",
       "name",
-      "official",
+      //"official",
       "conlang",
       "tags",
       "short",
@@ -57,6 +60,7 @@ async function set_course(data) {
     ])} WHERE id = ${data.id}`;
     id = data["id"];
   }
+  let data_new = await sql`SELECT * FROM course WHERE id = ${id}`;
 
   // revalidate the page
   let response_course_id =
@@ -67,5 +71,5 @@ async function set_course(data) {
   } catch (e) {
     console.log("revalidate error", e);
   }
-  return data;
+  return data_new[0];
 }
