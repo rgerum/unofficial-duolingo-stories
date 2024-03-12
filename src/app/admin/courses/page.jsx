@@ -13,7 +13,7 @@ async function course_list() {
     course.conlang,
     course.short,
     course.tags
-FROM course;
+FROM course ORDER BY course.id;
 `;
 }
 
