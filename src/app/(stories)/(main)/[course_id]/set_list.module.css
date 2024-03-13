@@ -40,9 +40,11 @@
   padding: 0;
 
   display: grid;
-  grid-template-columns: repeat(auto-fill, clamp(140px, 50%, 200px));
+  grid-template-columns: repeat(auto-fill, clamp(140px, 50%, 180px));
+  /* limit the grid to 4 columns */
+  max-width: calc(4 * 180px);
   justify-content: center;
   justify-items: center;
+  /* centering when the grid is with is limited by the 4 columns */
+  margin: 0 auto;
 }
-
-

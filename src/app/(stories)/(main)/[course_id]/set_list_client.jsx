@@ -17,8 +17,8 @@ function About({ course }) {
 
 function Set({ set, done, localisation }) {
   return (
-    <ol className={styles.set_content}>
-      <div className={styles.set_title}>
+    <ol className={styles.set_content} aria-label={`Set ${set[0].set_id}`}>
+      <div className={styles.set_title} aria-hidden={true}>
         {localisation("set_n", { $count: set[0].set_id })}
       </div>
       {set.map((story) => (

@@ -9,8 +9,12 @@ export default async function SetList({ course_id }) {
     return (
       <div className={styles.story_list}>
         {[...Array(2)].map((d, i) => (
-          <ol key={i} className={styles.set_content}>
-            <div className={styles.set_title} tabIndex="-1">
+          <ol
+            key={i}
+            className={styles.set_content}
+            aria-label={`Set ${i + 1}`}
+          >
+            <div className={styles.set_title} tabIndex="-1" aria-hidden={true}>
               Set {i + 1}
             </div>
             {[...Array(4)].map((d, i) => (
