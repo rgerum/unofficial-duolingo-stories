@@ -199,3 +199,51 @@ const X = styled.div`
   vertical-align: middle;
   width: 18px;
 `;
+
+export function InputText({ name, label, value, setValue }) {
+  return (
+    <Fieldset>
+      <Label className="Label" htmlFor={label}>
+        {name}
+      </Label>
+      <Input
+        className="Input"
+        id={label}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
+    </Fieldset>
+  );
+}
+
+export function InputTextArea({ name, label, value, setValue }) {
+  return (
+    <Fieldset>
+      <Label className="Label" htmlFor={label}>
+        {name}
+      </Label>
+      <InputArea
+        id={label}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
+    </Fieldset>
+  );
+}
+
+export function InputBool({ name, label, value, setValue }) {
+  return (
+    <Fieldset>
+      <Label className="Label" htmlFor={label}>
+        {name}
+      </Label>
+      <Input
+        className="Input"
+        type={"checkbox"}
+        id={label}
+        defaultChecked={value}
+        onChange={(e) => setValue(e.target.checked)}
+      />
+    </Fieldset>
+  );
+}

@@ -28,13 +28,15 @@ export async function POST(req) {
 
 async function set_language(data) {
   if (data.id === undefined)
-    return await sql`INSERT INTO language ${sql(data)}`;
-  return await sql`UPDATE language SET ${sql(data, [
-    "name",
-    "short",
-    "flag",
-    "flag_file",
-    "rtl",
-    "speaker",
-  ])} WHERE id = ${data.id}`;
+    return (await sql`INSERT INTO language ${sql(data)} RETURNING *`)[0];
+  return (
+    await sql`UPDATE language SET ${sql(data, [
+      "name",
+      "short",
+      "flag",
+      "flag_file",
+      "rtl",
+      "speaker",
+    ])} WHERE id = ${data.id} RETURNING *`
+  )[0];
 }

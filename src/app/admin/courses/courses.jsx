@@ -8,6 +8,10 @@ import { fetch_post } from "lib/fetch_post";
 import * as EditDialog from "../edit_dialog";
 import React, { useState } from "react";
 import styled from "styled-components";
+import Button from "../../../components/layout/button";
+import Tag from "../../../components/layout/tag";
+import Input from "../../../components/layout/Input";
+import FlagName from "../FlagName";
 
 function InputLanguage({ name, label, value, setValue, languages }) {
   const [nameX, setName] = useInput(languages[value]?.name || "");
@@ -136,69 +140,21 @@ const LangInput = styled(EditDialog.Input)`
   width: 100%;
 `;
 
-function InputText({ name, label, value, setValue }) {
-  return (
-    <EditDialog.Fieldset>
-      <EditDialog.Label className="Label" htmlFor={label}>
-        {name}
-      </EditDialog.Label>
-      <EditDialog.Input
-        className="Input"
-        id={label}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-      />
-    </EditDialog.Fieldset>
-  );
-}
-
-function InputTextArea({ name, label, value, setValue }) {
-  return (
-    <EditDialog.Fieldset>
-      <EditDialog.Label className="Label" htmlFor={label}>
-        {name}
-      </EditDialog.Label>
-      <EditDialog.InputArea
-        id={label}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-      />
-    </EditDialog.Fieldset>
-  );
-}
-
-function InputBool({ name, label, value, setValue }) {
-  return (
-    <EditDialog.Fieldset>
-      <EditDialog.Label className="Label" htmlFor={label}>
-        {name}
-      </EditDialog.Label>
-      <EditDialog.Input
-        className="Input"
-        type={"checkbox"}
-        id={label}
-        defaultChecked={value}
-        onChange={(e) => setValue(e.target.checked)}
-      />
-    </EditDialog.Fieldset>
-  );
-}
-
 function EditCourse({ obj, languages, updateCourse, is_new }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(undefined);
 
-  const [short, setShort] = useState(obj.short);
-  const [fromLanguage, setFromLanguage] = useState(obj.from_language);
+  const [short, setShort] = useState(obj.short || "");
+  const [fromLanguage, setFromLanguage] = useState(obj.from_language || 0);
   const [learningLanguage, setLearningLanguage] = useState(
-    obj.learning_language,
+    obj.learning_language || 0,
   );
 
-  const [name, setName] = useState(obj.name);
-  const [published, setPublished] = useState(obj.public);
-  const [conlang, setConlang] = useState(obj.conlang);
-  const [tags, setTags] = useState(obj.tags);
-  const [about, setAbout] = useState(obj.about);
+  const [name, setName] = useState(obj.name || "");
+  const [published, setPublished] = useState(obj.public || false);
+  const [conlang, setConlang] = useState(obj.conlang || false);
+  const [tags, setTags] = useState(obj.tags || "");
+  const [about, setAbout] = useState(obj.about || "");
 
   async function Send() {
     const data = {
@@ -229,9 +185,9 @@ function EditCourse({ obj, languages, updateCourse, is_new }) {
   return (
     <EditDialog.Root open={open} onOpenChange={setOpen}>
       <EditDialog.Trigger asChild>
-        <EditDialog.Button style={{ marginLeft: "auto" }}>
+        <Button style={{ marginLeft: "auto" }}>
           {is_new ? "Add" : "Edit"}
-        </EditDialog.Button>
+        </Button>
       </EditDialog.Trigger>
       <EditDialog.Content>
         <EditDialog.DialogTitle>
@@ -242,13 +198,13 @@ function EditCourse({ obj, languages, updateCourse, is_new }) {
             ? "Add a new course. Click save when you're done."
             : "Make changes to a course. Click save when you're done."}
         </EditDialog.DialogDescription>
-        <InputText
+        <EditDialog.InputText
           name={"Name"}
           label={"name"}
           value={name}
           setValue={setName}
         />
-        <InputText
+        <EditDialog.InputText
           name={"Short"}
           label={"short"}
           value={short}
@@ -268,25 +224,25 @@ function EditCourse({ obj, languages, updateCourse, is_new }) {
           setValue={setLearningLanguage}
           languages={languages}
         />
-        <InputBool
+        <EditDialog.InputBool
           name={"Public"}
           label={"public"}
           value={published}
           setValue={setPublished}
         />
-        <InputBool
+        <EditDialog.InputBool
           name={"Conlang"}
           label={"conlang"}
           value={conlang}
           setValue={setConlang}
         />
-        <InputText
+        <EditDialog.InputText
           name={"Tags"}
           label={"tags"}
           value={tags}
           setValue={setTags}
         />
-        <InputTextArea
+        <EditDialog.InputTextArea
           name={"About"}
           label={"about"}
           value={about}
@@ -300,9 +256,9 @@ function EditCourse({ obj, languages, updateCourse, is_new }) {
           }}
         >
           {error ? <Error>An error occurred.</Error> : <div></div>}
-          <EditDialog.Button className="Button green" onClick={Send}>
+          <Button className="Button green" onClick={Send}>
             Save changes
-          </EditDialog.Button>
+          </Button>
         </div>
       </EditDialog.Content>
     </EditDialog.Root>
@@ -315,12 +271,6 @@ const Error = styled.div`
   padding: 10px;
   background: var(--error-red);
 `;
-
-export async function setCourse(data) {
-  let res = await fetch_post(`/admin/courses/set`, data);
-  res = await res.text();
-  return res;
-}
 
 function TableRow({ course, languages, updateCourse }) {
   const refRow = React.useRef();
@@ -374,31 +324,17 @@ function TableRow({ course, languages, updateCourse }) {
       <td>{course.id}</td>
       <td>{<Link href={"/" + course.short}>{course.short}</Link>}</td>
       <td>
-        <Flag
-          iso={languages[course.learning_language].short}
-          width={40}
-          flag={languages[course.learning_language].flag}
-          flag_file={languages[course.learning_language].flag_file}
-        />
-        {languages[course.learning_language].name}
+        <FlagName lang={course.learning_language} languages={languages} />
       </td>
       <td>
-        <Flag
-          iso={languages[course.from_language].short}
-          width={40}
-          flag={languages[course.from_language].flag}
-          flag_file={languages[course.from_language].flag_file}
-        />
-        {languages[course.from_language].name}
+        <FlagName lang={course.from_language} languages={languages} />
       </td>
       <td style={{ textAlign: "center" }}>{course.public ? "✅" : "❌"}</td>
       <td>{course.name}</td>
       <td style={{ textAlign: "center" }}>{course.conlang ? "✅" : "❌"}</td>
       <td>
         {course.tags.map((d) => (
-          <span key={d} className={styles.tag}>
-            {d}
-          </span>
+          <Tag key={d}>{d}</Tag>
         ))}
       </td>
       <td>
@@ -447,10 +383,9 @@ export function CourseList({ all_courses, languages }) {
   }
 
   return (
-    <>
-      <div>
-        Search
-        <input value={search} onChange={setSearch} />
+    <Wrapper>
+      <SearchBar>
+        <Input label={"Search"} value={search} onChange={setSearch} />
         <EditCourse
           obj={{
             name: "",
@@ -465,7 +400,7 @@ export function CourseList({ all_courses, languages }) {
           languages={languages_id}
           updateCourse={updateCourse}
         />
-      </div>
+      </SearchBar>
       <table
         id="story_list"
         data-cy="story_list"
@@ -497,9 +432,21 @@ export function CourseList({ all_courses, languages }) {
           ))}
         </tbody>
       </table>
-    </>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  width: fit-content;
+  margin: 0 auto;
+`;
+
+const SearchBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+`;
 
 const AboutWrapper = styled.div`
   white-space: nowrap;

@@ -7,7 +7,9 @@
     "init": "node db_create_test.mjs",
     "init-build": "node init_build.js",
     "init-reset": "node db_test_reset.js",
-    "cypress": "cypress open"
+    "cypress": "cypress open",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@auth/pg-adapter": "^0.2.12",
@@ -45,12 +47,22 @@
     "ws": "^8.16.0"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^1.2.18",
+    "@storybook/addon-essentials": "^8.0.0",
+    "@storybook/addon-interactions": "^8.0.0",
+    "@storybook/addon-links": "^8.0.0",
+    "@storybook/addon-onboarding": "^8.0.0",
+    "@storybook/blocks": "^8.0.0",
+    "@storybook/nextjs": "^8.0.0",
+    "@storybook/react": "^8.0.0",
+    "@storybook/test": "^8.0.0",
     "@types/node": "^20",
     "@types/react": "^18.2.46",
     "cypress": "^13.6.2",
     "prettier": "^3.1.1",
     "smtp-tester": "^2.1.0",
     "sqlite3": "^5.1.6",
+    "storybook": "^8.0.0",
     "typescript": "^5"
   }
 }

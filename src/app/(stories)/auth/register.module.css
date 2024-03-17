@@ -33,15 +33,6 @@
   gap: 8px;
 }
 
-.login_dialog div input {
-  border-radius: 16px;
-  padding: 10px 17px;
-  font-size: 1rem;
-  background: var(--input-background);
-  border: 2px solid var(--input-border);
-  color: var(--text-color);
-  }
-
 .button:hover {
   filter: brightness(1.1);
 }

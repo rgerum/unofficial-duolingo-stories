@@ -13,6 +13,7 @@
   min-height: 100%;
   position: relative;
   padding: 0 16px;
+  isolation: isolate;
 }
 
 .header_wrapper {

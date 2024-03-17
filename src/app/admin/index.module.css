@@ -10,6 +10,13 @@
   border-collapse: collapse;
 }
 
+.admin_table td:first-child {
+  padding-left: 16px;
+}
+.admin_table td:last-child {
+  padding-right: 16px;
+}
+
 .admin_table tr:nth-child(2n) {
   background-color: var(--body-background-faint);
 }
@@ -21,7 +28,7 @@
   width: 95%;
 }
 
-.admin_table tr:hover {
+.admin_table tbody tr:hover {
   filter: brightness(0.9);
 }
 

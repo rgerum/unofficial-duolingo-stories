@@ -25,9 +25,5 @@ export default async function Page({}) {
   let courses = await course_list();
   let languages = await language_list();
 
-  return (
-    <>
-      <CourseList all_courses={courses} languages={languages} />
-    </>
-  );
+  return <CourseList all_courses={courses} languages={languages} />;
 }

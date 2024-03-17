@@ -9,6 +9,7 @@ import styles from "../register.module.css";
 import { useSearchParams } from "next/navigation";
 import { GetIcon } from "components/icons";
 import Button from "../../../../components/layout/button";
+import Input from "../../../../components/layout/Input";
 
 export function LoginOptions({ providers }) {
   async function register_button() {
@@ -58,7 +59,7 @@ export function LoginOptions({ providers }) {
       </p>
       {error ? <span className={styles.error}>{error}</span> : <></>}
       <form className={styles.Form} action={register_button}>
-        <input
+        <Input
           data-cy="username"
           value={usernameInput}
           onChange={usernameInputSetValue}
@@ -66,7 +67,7 @@ export function LoginOptions({ providers }) {
           name="username"
           placeholder="Username"
         />
-        <input
+        <Input
           data-cy="password"
           value={passwordInput}
           onChange={passwordInputSetValue}
@@ -75,7 +76,7 @@ export function LoginOptions({ providers }) {
           name="password"
           placeholder="Password"
         />
-        <Button data-cy="submit" onClick={register_button} variant="blue">
+        <Button data-cy="submit" onClick={register_button} primary>
           {"Log in"}
         </Button>
       </form>
