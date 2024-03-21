@@ -58,7 +58,7 @@
     "@storybook/test": "^8.0.0",
     "@types/node": "^20",
     "@types/react": "^18.2.46",
-    "cypress": "^13.6.2",
+    "cypress": "^13.7.0",
     "prettier": "^3.1.1",
     "smtp-tester": "^2.1.0",
     "sqlite3": "^5.1.6",
