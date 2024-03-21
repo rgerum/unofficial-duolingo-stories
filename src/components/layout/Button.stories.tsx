@@ -20,7 +20,7 @@ type Story = StoryObj<typeof Button>;
  * to learn how to use render functions.
  */
 export const Primary: Story = {
-  render: () => <Button primary>Click</Button>,
+  render: () => <Button primary={true}>Click</Button>,
 };
 
 export const Normal: Story = {

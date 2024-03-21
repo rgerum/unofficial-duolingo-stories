@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export default function Input({ label, ...delegated }) {
+export default function Input({ label = null, ...delegated }) {
   if (label) {
     return (
       <Label>

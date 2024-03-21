@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export default function Button({ children, primary, ...delegated }) {
+export default function Button({ children, primary = false, ...delegated }) {
   const ButtonComponent = primary ? ButtonBlueStyled : ButtonStyled;
 
   return (

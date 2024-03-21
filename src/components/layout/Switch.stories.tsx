@@ -5,11 +5,7 @@ import React from "react";
 
 const meta: Meta<typeof Switch> = {
   component: Switch,
-  argTypes: {
-    primary: {
-      control: "boolean",
-    },
-  },
+  argTypes: {},
 };
 
 export default meta;
