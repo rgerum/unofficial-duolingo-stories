@@ -2,7 +2,7 @@
 fromLanguageName=The red jacket
 icon=5361833c123aec9adfa60b0dc63398cd1aa49ef2
 set=2|1
-approvals=1,2
+approvals=11,12
 
 icon_Natalie=https://stories-cdn.duolingo.com/image/ad3623a2d5ee767d1536ff972bfb9961b40df6ca.svg
 speaker_Mark=Ruben
