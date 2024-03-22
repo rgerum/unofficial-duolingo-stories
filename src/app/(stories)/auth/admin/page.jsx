@@ -12,7 +12,7 @@ export default function Page({}) {
         You need to be logged in with an account that has an admin role.
       </p>
 
-      <Button variant="blue" onClick={() => signIn()}>
+      <Button primary={true} onClick={() => signIn()}>
         Log In
       </Button>
     </>

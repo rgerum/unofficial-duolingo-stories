@@ -20,7 +20,7 @@ export default function Page({}) {
         You might need to login and out again after you got access to the
         editor.
       </p>
-      <Button variant="blue" onClick={() => signIn()}>
+      <Button primary={true} onClick={() => signIn()}>
         Log In
       </Button>
     </>

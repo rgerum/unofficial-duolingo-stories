@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useInput } from "lib/hooks";
 import sendPasswordAction from "./sendPasswordAction";
 import Button from "../../../../components/layout/button";
+import Input from "../../../../components/layout/Input";
 
 export async function fetch_post(url, data) {
   // check if the user is logged in
@@ -92,7 +93,7 @@ export default function ResetPassword() {
         </span>
       ) : (
         <form action={register_button} className={styles.Form}>
-          <input
+          <Input
             data-cy="email"
             value={emailInput}
             onChange={emailInputSetValue}
@@ -102,6 +103,7 @@ export default function ResetPassword() {
             placeholder="Email"
           />
           <Button
+            primary={true}
             data-cy="submit"
             type="submit"
             variant="blue"

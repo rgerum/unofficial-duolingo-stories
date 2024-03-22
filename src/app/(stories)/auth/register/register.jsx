@@ -6,6 +6,7 @@ import styles from "../register.module.css";
 import Link from "next/link";
 import { useInput } from "lib/hooks";
 import Button from "../../../../components/layout/button";
+import Input from "../../../../components/layout/Input";
 
 export async function fetch_post(url, data) {
   // check if the user is logged in
@@ -111,14 +112,14 @@ export default function Register() {
         </span>
       ) : (
         <form action={register_button} className={styles.Form}>
-          <input
+          <Input
             data-cy="username"
             value={usernameInput}
             onChange={usernameInputSetValue}
             type="text"
             placeholder="Username"
           />
-          <input
+          <Input
             data-cy="email"
             value={emailInput}
             onChange={emailInputSetValue}
@@ -126,7 +127,7 @@ export default function Register() {
             type="email"
             placeholder="Email"
           />
-          <input
+          <Input
             data-cy="password"
             value={passwordInput}
             onChange={passwordInputSetValue}
@@ -134,7 +135,12 @@ export default function Register() {
             type="password"
             placeholder="Password"
           />
-          <Button data-cy="submit" variant="blue" onClick={register_button}>
+          <Button
+            primary={true}
+            data-cy="submit"
+            variant="blue"
+            onClick={register_button}
+          >
             {state !== 1 ? "Sign up" : "..."}
           </Button>
         </form>

@@ -5,6 +5,7 @@ import React from "react";
 import { useInput } from "lib/hooks";
 import { useSearchParams } from "next/navigation";
 import Button from "../../../../components/layout/button";
+import Input from "../../../../components/layout/Input";
 
 export default function SignInEmail({}) {
   let [emailInput, emailInputSetValue] = useInput("");
@@ -49,7 +50,7 @@ export default function SignInEmail({}) {
       </p>
       {error ? <span className={styles.error}>{error}</span> : <></>}
       <form className={styles.Form} action={register_button2}>
-        <input
+        <Input
           data-cy="email"
           value={emailInput}
           onChange={emailInputSetValue}
@@ -58,7 +59,12 @@ export default function SignInEmail({}) {
           placeholder="Email"
           name="email"
         />
-        <Button data-cy="submit" variant="blue" onClick={register_button2}>
+        <Button
+          primary={true}
+          data-cy="submit"
+          variant="blue"
+          onClick={register_button2}
+        >
           {"Log in with email"}
         </Button>
       </form>
