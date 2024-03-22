@@ -89,7 +89,7 @@ async function main() {
         course_id: course.id,
         text: text,
         json: story_json,
-        author: course.official ? 1 : 2,
+        author: course.official ? 11 : 12,
         image: story_meta.icon,
         name: story_meta.fromLanguageName,
         status: "draft",

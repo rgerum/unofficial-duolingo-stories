@@ -2,7 +2,7 @@
 fromLanguageName=The Passport
 icon=643347b755001a918130ddf5f6d3e914e63a00ce
 set=2|2
-approvals=1,2
+approvals=11,12
 
 [HEADER]
 > Het Paspoort

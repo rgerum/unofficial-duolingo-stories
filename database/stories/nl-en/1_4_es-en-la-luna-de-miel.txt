@@ -2,7 +2,7 @@
 fromLanguageName=The honeymoon
 icon=7e5d271488d31d6f1d0c503512e642ca7effe84f
 set=1|4
-approvals=1,2
+approvals=11,12
 public=1
 
 speaker_Sophie=Lotte

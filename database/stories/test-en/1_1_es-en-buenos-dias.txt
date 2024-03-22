@@ -2,7 +2,7 @@
 fromLanguageName=Testing
 icon=783305780a6dad8e0e4eb34109d948e6a5fc2c35
 set=1|1
-approvals=1,2
+approvals=11,12
 public=1
 
 [HEADER]
