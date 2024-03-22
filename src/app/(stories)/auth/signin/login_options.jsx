@@ -10,42 +10,25 @@ import { useSearchParams } from "next/navigation";
 import { GetIcon } from "components/icons";
 import Button from "../../../../components/layout/button";
 import Input from "../../../../components/layout/Input";
+import { error_codes } from "../error_codes";
 
 export function LoginOptions({ providers }) {
-  async function register_button() {
+  const externalProviders = Object.values(providers).filter(
+    (provider) => provider.id !== "email" && provider.id !== "credentials",
+  );
+
+  async function signin_submit() {
     await signIn("credentials", {
       name: usernameInput,
       password: passwordInput,
     });
   }
 
-  let [usernameInput, usernameInputSetValue] = useInput("");
-  let [passwordInput, passwordInputSetValue] = useInput("");
-  //let [emailInput, emailInputSetValue] = useInput("");
+  const [usernameInput, usernameInputSetValue] = useInput("");
+  const [passwordInput, passwordInputSetValue] = useInput("");
 
-  let error_codes = {
-    OAuthSignin: "Try signing in with a different account.",
-    OAuthCallback: "Try signing in with a different account.",
-    OAuthCreateAccount: "Try signing in with a different account.",
-    EmailCreateAccount: "Try signing in with a different account.",
-    Callback: "Try signing in with a different account.",
-    OAuthAccountNotLinked:
-      "To confirm your identity, sign in with the same account you used originally.",
-    EmailSignin: "The e-mail could not be sent.",
-    CredentialsSignin:
-      "Sign in failed. Check the details you provided are correct.",
-    SessionRequired: "Please sign in to access this page.",
-    Default: "Unable to sign in.",
-  };
-  let query = useSearchParams();
-  let error = error_codes[query.get("error")];
-
-  const handleKeypressSignup = (e) => {
-    // listens for enter key
-    if (e.keyCode === 13) {
-      register_button();
-    }
-  };
+  const query = useSearchParams();
+  const error = error_codes[query.get("error")];
 
   return (
     <>
@@ -57,8 +40,8 @@ export function LoginOptions({ providers }) {
         You have to register for the unofficial stories separately, as they are
         an independent project.
       </p>
-      {error ? <span className={styles.error}>{error}</span> : <></>}
-      <form className={styles.Form} action={register_button}>
+      {error && <span className={styles.error}>{error}</span>}
+      <form className={styles.Form} action={signin_submit}>
         <Input
           data-cy="username"
           value={usernameInput}
@@ -71,12 +54,11 @@ export function LoginOptions({ providers }) {
           data-cy="password"
           value={passwordInput}
           onChange={passwordInputSetValue}
-          onKeyDown={handleKeypressSignup}
           type="password"
           name="password"
           placeholder="Password"
         />
-        <Button data-cy="submit" onClick={register_button} primary>
+        <Button data-cy="submit" primary>
           {"Log in"}
         </Button>
       </form>
@@ -100,26 +82,17 @@ export function LoginOptions({ providers }) {
         </Link>
       </p>
       <hr />
-      {/*<input data-cy="email" value={emailInput} onChange={emailInputSetValue} onKeyDown={handleKeypressSignup2} type="email" placeholder="Email" name="email"/>
-                        <button data-cy="submit"  className={styles.button}
-                                onClick={register_button2}>{ "Log in with email" }</button>
-
-                        <hr/>*/}
       <div className={styles.providers}>
-        {Object.values(providers).map((provider) =>
-          provider.id !== "email" && provider.id !== "credentials" ? (
-            <button
-              key={provider.id}
-              className={styles.button2}
-              onClick={() => signIn(provider.id)}
-            >
-              <GetIcon name={provider.id} />
-              <span>{provider.name}</span>
-            </button>
-          ) : (
-            <span key={provider.id}></span>
-          ),
-        )}
+        {externalProviders.map((provider) => (
+          <button
+            key={provider.id}
+            className={styles.button2}
+            onClick={() => signIn(provider.id)}
+          >
+            <GetIcon name={provider.id} />
+            <span>{provider.name}</span>
+          </button>
+        ))}
       </div>
     </>
   );

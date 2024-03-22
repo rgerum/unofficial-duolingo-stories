@@ -45,11 +45,11 @@ export async function reset_pw(data) {
 }
 
 export default function ResetPassword() {
-  let [state, setState] = React.useState(0);
-  let [error, setError] = React.useState("");
-  let [message, setMessage] = React.useState("");
+  const [state, setState] = React.useState(0);
+  const [error, setError] = React.useState("");
+  const [message, setMessage] = React.useState("");
 
-  let [emailInput, emailInputSetValue] = useInput("");
+  const [emailInput, emailInputSetValue] = useInput("");
 
   async function register_button() {
     const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -73,12 +73,6 @@ export default function ResetPassword() {
     );
     setState(2);
   }
-  const handleKeypressSignup = (e) => {
-    // listens for enter key
-    if (e.keyCode === 13) {
-      register_button();
-    }
-  };
 
   return (
     <>
@@ -86,7 +80,7 @@ export default function ResetPassword() {
       <p className={styles.P}>
         You forgot your password? We can send you a link to reset it.
       </p>
-      {state === -1 ? <span className={styles.error}>{error}</span> : <></>}
+      {state === -1 && <span className={styles.error}>{error}</span>}
       {state === 2 ? (
         <span className={styles.message} data-cy="message-confirm">
           {message}
@@ -97,18 +91,11 @@ export default function ResetPassword() {
             data-cy="email"
             value={emailInput}
             onChange={emailInputSetValue}
-            onKeyDown={handleKeypressSignup}
             type="email"
             name="email"
             placeholder="Email"
           />
-          <Button
-            primary={true}
-            data-cy="submit"
-            type="submit"
-            variant="blue"
-            //onClick={register_button}
-          >
+          <Button primary={true} data-cy="submit" type="submit" variant="blue">
             {state !== 1 ? "Send Link" : "..."}
           </Button>
         </form>

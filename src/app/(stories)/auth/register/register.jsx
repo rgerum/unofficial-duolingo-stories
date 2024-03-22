@@ -46,13 +46,13 @@ export async function register(data) {
 }
 
 export default function Register() {
-  let [state, setState] = React.useState(0);
-  let [error, setError] = React.useState("");
-  let [message, setMessage] = React.useState("");
+  const [state, setState] = React.useState(0);
+  const [error, setError] = React.useState("");
+  const [message, setMessage] = React.useState("");
 
-  let [usernameInput, usernameInputSetValue] = useInput("");
-  let [passwordInput, passwordInputSetValue] = useInput("");
-  let [emailInput, emailInputSetValue] = useInput("");
+  const [usernameInput, usernameInputSetValue] = useInput("");
+  const [passwordInput, passwordInputSetValue] = useInput("");
+  const [emailInput, emailInputSetValue] = useInput("");
 
   async function register_button() {
     const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -83,12 +83,6 @@ export default function Register() {
       }
     }
   }
-  const handleKeypressSignup = (e) => {
-    // listens for enter key
-    if (e.keyCode === 13) {
-      register_button();
-    }
-  };
 
   return (
     <>
@@ -123,7 +117,6 @@ export default function Register() {
             data-cy="email"
             value={emailInput}
             onChange={emailInputSetValue}
-            onKeyDown={handleKeypressSignup}
             type="email"
             placeholder="Email"
           />
@@ -131,16 +124,10 @@ export default function Register() {
             data-cy="password"
             value={passwordInput}
             onChange={passwordInputSetValue}
-            onKeyDown={handleKeypressSignup}
             type="password"
             placeholder="Password"
           />
-          <Button
-            primary={true}
-            data-cy="submit"
-            variant="blue"
-            onClick={register_button}
-          >
+          <Button primary={true} data-cy="submit" variant="blue">
             {state !== 1 ? "Sign up" : "..."}
           </Button>
         </form>
