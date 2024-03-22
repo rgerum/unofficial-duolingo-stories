@@ -6,7 +6,7 @@
     "start": "next start",
     "init": "node db_create_test.mjs",
     "init-build": "node init_build.js",
-    "init-reset": "node db_test_reset.js",
+    "init-reset": "node db_test_reset.mjs",
     "cypress": "cypress open",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"

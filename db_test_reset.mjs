@@ -6,4 +6,5 @@ process.env.POSTGRES_URL =
 // will use psql environment variables
 const sql = postgres(process.env.POSTGRES_URL);
 
-await sql`DELETE FROM user WHERE username = "user_new"`;
+await sql`DELETE FROM users WHERE name = ${"user_new"}`;
+await sql.end();
