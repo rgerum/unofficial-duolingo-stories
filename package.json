@@ -49,22 +49,22 @@
     "ws": "^8.16.0"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^1.2.18",
-    "@storybook/addon-essentials": "^8.0.0",
-    "@storybook/addon-interactions": "^8.0.0",
-    "@storybook/addon-links": "^8.0.0",
-    "@storybook/addon-onboarding": "^8.0.0",
-    "@storybook/blocks": "^8.0.0",
-    "@storybook/nextjs": "^8.0.0",
-    "@storybook/react": "^8.0.0",
-    "@storybook/test": "^8.0.0",
+    "@chromatic-com/storybook": "^1.2.25",
+    "@storybook/addon-essentials": "^8.0.5",
+    "@storybook/addon-interactions": "^8.0.5",
+    "@storybook/addon-links": "^8.0.5",
+    "@storybook/addon-onboarding": "^8.0.5",
+    "@storybook/blocks": "^8.0.5",
+    "@storybook/nextjs": "^8.0.5",
+    "@storybook/react": "^8.0.5",
+    "@storybook/test": "^8.0.5",
     "@types/node": "^20",
     "@types/react": "^18.2.46",
     "cypress": "^13.7.0",
     "prettier": "^3.1.1",
     "smtp-tester": "^2.1.0",
     "sqlite3": "^5.1.6",
-    "storybook": "^8.0.0",
+    "storybook": "^8.0.5",
     "typescript": "^5"
   }
 }
