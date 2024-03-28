@@ -44,7 +44,7 @@ export { default } from "./${component_name}";
 
 createFile(
   comp_folder,
-  component_name + ".js",
+  component_name + ".jsx",
   `import React from 'react';
 import styles from './${component_name}.module.css';
 
