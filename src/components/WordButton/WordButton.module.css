@@ -116,3 +116,16 @@
         color: var(--color_disabled_color);
     }
 }
+
+
+.word_order[data-status="done"] {
+    background: var(--color_disabled_background);
+    border-color: var(--color_disabled_border-color);
+    color: var(--color_disabled_color);
+}
+
+.word_order[data-status="right-stay"] {
+    background: var(--color_right_background);
+    border-color: var(--color_right_border-color);
+    color: var(--color_right_color);
+}
