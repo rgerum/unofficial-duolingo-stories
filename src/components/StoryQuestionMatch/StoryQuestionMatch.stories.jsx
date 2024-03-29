@@ -11,6 +11,7 @@ export const Normal = {
   render: (args) => (
     <StoryQuestionMatch
       element={{
+        prompt: "Select the pairs.",
         fallbackHints: [
           { phrase: "a", translation: "A" },
           { phrase: "b", translation: "B" },

@@ -90,3 +90,29 @@
         margin-top: 8px;
     }
 }
+
+
+.word_order[data-status="false"] {
+    animation: false_to_disabled 1.5s;
+    background: var(--color_disabled_background);
+    border-color: var(--color_disabled_border-color);
+    color: var(--color_disabled_color);
+    border-style: solid;
+    border-width: 2px 2px 2px;
+    border-radius: 14px;
+}
+
+
+@keyframes false_to_disabled {
+    0%,
+    66% {
+        background: var(--color_false_background);
+        border-color: var(--color_false_border-color);
+        color: var(--color_false_color);
+    }
+    to {
+        background: var(--color_disabled_background);
+        border-color: var(--color_disabled_border-color);
+        color: var(--color_disabled_color);
+    }
+}

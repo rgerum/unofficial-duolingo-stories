@@ -8,6 +8,7 @@ import { shuffle } from "../story/includes";
 //import {EditorHook} from "../story/editor_hooks";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import WordButton from "../WordButton";
+import QuestionPrompt from "../story/questions/question_prompt";
 
 /*
 The MATCH question.
@@ -108,27 +109,30 @@ function StoryQuestionMatch({ /*progress,*/ element }) {
   );
 
   return (
-    <div className={styles.match_container}>
-      {state.lists.map((list, listIndex) => (
-        <div key={listIndex} className={styles.match_col}>
-          {list.map((word, wordIndex) => (
-            <WordButton
-              key={word.key}
-              status={word.state}
-              onClick={() =>
-                dispatch({
-                  type: "select",
-                  listIndex,
-                  wordIndex,
-                  key: crypto.randomUUID(),
-                })
-              }
-            >
-              {word.value}
-            </WordButton>
-          ))}
-        </div>
-      ))}
+    <div>
+      <QuestionPrompt question={element.prompt} lang={element.lang_question} />
+      <div className={styles.match_container}>
+        {state.lists.map((list, listIndex) => (
+          <div key={listIndex} className={styles.match_col}>
+            {list.map((word, wordIndex) => (
+              <WordButton
+                key={word.key}
+                status={word.state}
+                onClick={() =>
+                  dispatch({
+                    type: "select",
+                    listIndex,
+                    wordIndex,
+                    key: crypto.randomUUID(),
+                  })
+                }
+              >
+                {word.value}
+              </WordButton>
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
