@@ -27,6 +27,12 @@
     cursor: auto;
 }
 
+.word_order[data-status="selected"] {
+    background: var(--color_selected_background);
+    border-color: var(--color_selected_border-color);
+    color: var(--color_selected_color);
+}
+
 @keyframes _2W3fZ {
     0%,
     to {
@@ -50,5 +56,37 @@
         border-color: var(--color_false_border-color);
         color: var(--color_false_color);
         left: 4px;
+    }
+}
+
+
+
+.word_order[data-status="right"] {
+    /* color_right_fade_to_disabled */
+    /*composes: button_inactive_anim from "../common.module.css";
+*/
+    animation: right_to_disabled 1.5s;
+    background: var(--color_disabled_background);
+    border-color: var(--color_disabled_border-color);
+    color: var(--color_disabled_color);
+    border-bottom-width: 2px;
+    margin-top: 8px;
+}
+
+@keyframes right_to_disabled {
+    0%,
+    66% {
+        background: var(--color_right_background);
+        border-color: var(--color_right_border-color);
+        color: var(--color_right_color);
+        border-bottom-width: 4px;
+        margin-top: 6px;
+    }
+    to {
+        background: var(--color_disabled_background);
+        border-color: var(--color_disabled_border-color);
+        color: var(--color_disabled_color);
+        border-bottom-width: 2px;
+        margin-top: 8px;
     }
 }
