@@ -5,7 +5,16 @@ const meta = {
   argTypes: {
     status: {
       control: "radio",
-      options: ["default", "right", "wrong", "off", "selected"],
+      options: [
+        "default",
+        "right",
+        "wrong",
+        "off",
+        "selected",
+        "false",
+        "done",
+        "right-stay",
+      ],
     },
   },
 };

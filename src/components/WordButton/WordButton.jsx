@@ -9,7 +9,7 @@ function WordButton({ status, children, ...delegated }) {
       className={styles.word_order}
       data-status={status}
     >
-      {children}
+      <span className={styles.word_inner}>{children}</span>
     </button>
   );
 }
