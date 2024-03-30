@@ -1,4 +1,5 @@
 import React from "react";
+import useKeypress from "./use-keypress.hook";
 
 export function useChoiceButtons(
   count,
@@ -36,19 +37,13 @@ export function useChoiceButtons(
     [buttonState, callRight, callWrong],
   );
 
-  let key_event_handler = React.useCallback(
-    (e) => {
-      let value = parseInt(e.key) - 1;
-      if (value < count) click(value);
+  useKeypress(
+    "number",
+    (value) => {
+      if (value <= count) click(value - 1);
     },
     [click],
   );
-  React.useEffect(() => {
-    if (active) {
-      window.addEventListener("keypress", key_event_handler);
-      return () => window.removeEventListener("keypress", key_event_handler);
-    }
-  }, [key_event_handler, active]);
 
   // return button states and click callback
   return [buttonState, click];

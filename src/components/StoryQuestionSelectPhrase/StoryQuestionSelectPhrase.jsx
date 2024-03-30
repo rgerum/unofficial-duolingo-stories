@@ -18,7 +18,7 @@ Speaker507: Hoy   tengo  [un~partido~importante].
 - una parte imponente
  */
 
-function StoryQuestionSelectPhrase({ element }) {
+function StoryQuestionSelectPhrase({ element, advance }) {
   // get button states and a click function
   let [buttonState, click] = useChoiceButtons(
     element.answers.length,
@@ -29,6 +29,8 @@ function StoryQuestionSelectPhrase({ element }) {
           setDone(true);
           if (controls?.right) controls?.right();
         }*/
+      console.log("advance");
+      advance();
     },
     () => {}, //controls?.wrong || (() => {}),
     true, //active && !done,

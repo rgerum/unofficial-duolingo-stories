@@ -153,15 +153,16 @@ function StoryQuestionMultipleChoiceX({ setUnhide, progress, element }) {
   );
 }
 
-function StoryQuestionMultipleChoice({ element }) {
-  const [done, setDone] = React.useState(false);
+function StoryQuestionMultipleChoice({ element, advance }) {
+  //const [done, setDone] = React.useState(false);
 
   // get button states and a click function
   let [buttonState, click] = useChoiceButtons(
     element.answers.length,
     element.correctAnswerIndex,
     () => {
-      setDone(true);
+      advance();
+      //setDone(true);
     },
     () => {},
     true,

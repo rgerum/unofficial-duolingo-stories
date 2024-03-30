@@ -12,7 +12,7 @@ Speaker560: ¡[(Necesito) (las~llaves) (de) (mi) (carro)!]
 ~              I~need     the~keys     of   my   car
  */
 
-function StoryQuestionArrange({ element }) {
+function StoryQuestionArrange({ element, advance }) {
   const [done, setDone] = React.useState(false);
 
   let [buttonState, click] = useArrangeButtons(
@@ -21,7 +21,12 @@ function StoryQuestionArrange({ element }) {
     () => {}, //controls.wrong,
     (i) => {
       setDone(true);
-      //if (!editor) setUnhide(element.characterPositions[i]);
+      //if (!editor)
+      console.log(i, element.phraseOrder.length);
+      advance(
+        element.characterPositions[i],
+        i === element.phraseOrder.length - 1,
+      );
     },
     true, //active,
   );
