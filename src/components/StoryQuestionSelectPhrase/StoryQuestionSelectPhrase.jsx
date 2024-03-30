@@ -1,8 +1,8 @@
 import React from "react";
 import styles from "./StoryQuestionSelectPhrase.module.css";
 
-import useChoiceButtons from "../story/questions/questions_useChoiceButtons";
 import WordButton from "../WordButton";
+import { useChoiceButtons } from "../../hooks/use-choice-buttons.hook";
 
 /*
 The SELECT_PHRASE question.

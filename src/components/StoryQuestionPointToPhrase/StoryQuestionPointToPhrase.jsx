@@ -3,10 +3,9 @@ import styles from "./StoryQuestionPointToPhrase.module.css";
 //import {EditorContext, StoryContext} from "../story/story";
 //import styles_common from "../story/common.module.css";
 //import {EditorHook} from "../story/editor_hooks";
-import useChoiceButtons from "../story/questions/questions_useChoiceButtons";
-import QuestionPrompt from "../story/questions/question_prompt";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import WordButton from "../WordButton";
+import { useChoiceButtons } from "../../hooks/use-choice-buttons.hook";
 
 /*
 The POINT_TO_PHRASE question
@@ -75,7 +74,7 @@ function StoryQuestionPointToPhrase({ element }) {
   return (
     <div>
       {/* display the question */}
-      <QuestionPrompt
+      <StoryQuestionPrompt
         question={element.question}
         lang={element.lang_question}
       />
