@@ -1,4 +1,6 @@
+import React from "react";
 import StoryChallengeMultipleChoice from "./StoryChallengeMultipleChoice";
+import StoryProgress from "../StoryProgress";
 
 const meta = {
   component: StoryChallengeMultipleChoice,
@@ -68,7 +70,7 @@ const parts = [
       block_start_no: 121,
     },
     trackingProperties: {
-      line_index: 20,
+      line_index: 0,
     },
     hideRangesForChallenge: [],
   },
@@ -99,17 +101,14 @@ const parts = [
     },
     correctAnswerIndex: 0,
     trackingProperties: {
-      line_index: 20,
+      line_index: 0,
       challenge_type: "multiple-choice",
     },
   },
 ];
 
 export const Normal = {
-  render: (args) => (
-    <StoryChallengeMultipleChoice
-      parts={parts}
-      {...args}
-    ></StoryChallengeMultipleChoice>
-  ),
+  render: (args) => {
+    return <StoryProgress parts_list={[parts]} {...args} />;
+  },
 };
