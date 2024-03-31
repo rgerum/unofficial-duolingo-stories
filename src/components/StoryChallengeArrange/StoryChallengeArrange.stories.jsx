@@ -1,4 +1,5 @@
 import StoryChallengeArrange from "./StoryChallengeArrange";
+import StoryProgress from "../StoryProgress";
 
 const meta = {
   component: StoryChallengeArrange,
@@ -22,7 +23,7 @@ const parts = [
       hintMap: [],
     },
     trackingProperties: {
-      line_index: 10,
+      line_index: 0,
       challenge_type: "arrange",
     },
   },
@@ -123,7 +124,7 @@ const parts = [
       start_no: 68,
     },
     trackingProperties: {
-      line_index: 10,
+      line_index: 0,
     },
     hideRangesForChallenge: [
       {
@@ -142,7 +143,7 @@ const parts = [
     selectablePhrases: ["Engels", "ben", "Nee", "ik"],
     characterPositions: [5, 8, 12, 18],
     trackingProperties: {
-      line_index: 10,
+      line_index: 0,
       challenge_type: "arrange",
     },
   },
@@ -150,6 +151,6 @@ const parts = [
 
 export const Normal = {
   render: (args) => (
-    <StoryChallengeArrange parts={parts} {...args}></StoryChallengeArrange>
+    <StoryProgress parts_list={[parts]} {...args}></StoryProgress>
   ),
 };

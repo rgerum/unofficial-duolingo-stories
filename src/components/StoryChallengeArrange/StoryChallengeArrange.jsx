@@ -3,23 +3,30 @@ import styles from "./StoryChallengeArrange.module.css";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import StoryTextLine from "../StoryTextLine";
 import StoryQuestionArrange from "../StoryQuestionArrange";
+import FadeGlideIn from "../FadeGlideIn";
 
-function StoryChallengeArrange({ parts, setDone }) {
+function StoryChallengeArrange({ parts, active, setButtonStatus }) {
   let [unhide, setUnhide] = React.useState(0);
 
   function advance(i, done) {
     setUnhide(i);
 
-    if (done && setDone) {
-      setDone();
+    if (done) {
+      setButtonStatus("right");
     }
   }
 
   return (
     <>
-      <StoryQuestionPrompt question={parts[0].prompt} />
-      <StoryTextLine element={parts[1]} unhide={unhide} />
-      <StoryQuestionArrange element={parts[2]} advance={advance} />
+      <FadeGlideIn show={active}>
+        <StoryQuestionPrompt question={parts[0].prompt} />
+      </FadeGlideIn>
+      <FadeGlideIn>
+        <StoryTextLine element={parts[1]} unhide={unhide} />
+      </FadeGlideIn>
+      <FadeGlideIn show={active}>
+        <StoryQuestionArrange element={parts[2]} advance={advance} />
+      </FadeGlideIn>
     </>
   );
 }

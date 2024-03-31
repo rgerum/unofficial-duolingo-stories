@@ -1,4 +1,5 @@
 import StoryChallengeSelectPhrases from "./StoryChallengeSelectPhrases";
+import StoryProgress from "../StoryProgress";
 
 const meta = {
   component: StoryChallengeSelectPhrases,
@@ -22,7 +23,7 @@ const parts = [
       hintMap: [],
     },
     trackingProperties: {
-      line_index: 14,
+      line_index: 0,
       challenge_type: "select-phrases",
     },
   },
@@ -118,7 +119,7 @@ const parts = [
       start_no: 89,
     },
     trackingProperties: {
-      line_index: 14,
+      line_index: 0,
     },
     hideRangesForChallenge: [
       {
@@ -136,7 +137,7 @@ const parts = [
     answers: ["huisdier", "huisdieren", "thuisbeest"],
     correctAnswerIndex: 0,
     trackingProperties: {
-      line_index: 14,
+      line_index: 0,
       challenge_type: "select-phrases",
     },
   },
@@ -144,9 +145,6 @@ const parts = [
 
 export const Normal = {
   render: (args) => (
-    <StoryChallengeSelectPhrases
-      parts={parts}
-      {...args}
-    ></StoryChallengeSelectPhrases>
+    <StoryProgress parts_list={[parts]} {...args}></StoryProgress>
   ),
 };

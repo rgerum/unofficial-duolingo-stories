@@ -53,14 +53,8 @@ function StoryTextLine({ element, unhide = 0 }) {
   if (element.line.type === "TITLE")
     return (
       <div
-        className={
-          styles.title +
-          " " +
-          styles_common.fadeGlideIn +
-          " " +
-          " " +
-          element.lang
-        }
+        key={element.trackingProperties.line_index}
+        className={styles.title + " " + element.lang}
         data-lineno={element?.editor?.block_start_no}
       >
         <span className={styles.title}>
@@ -78,57 +72,41 @@ function StoryTextLine({ element, unhide = 0 }) {
     );
   else if (element.line.avatarUrl)
     return (
-      <>
-        <div
+      <div
+        key={element.trackingProperties.line_index}
+        className={styles.phrase + " " + element.lang}
+        onClick={onClick}
+        data-lineno={element?.editor?.block_start_no}
+      >
+        <img
+          className={styles.head + " " + (controls.rtl ? styles.rtl_head : "")}
+          src={element.line.avatarUrl}
+          alt="head"
+        />
+        <span
           className={
-            styles.phrase +
-            " " +
-            styles_common.fadeGlideIn +
-            " " +
-            " " +
-            element.lang
+            styles.bubble + " " + (controls.rtl ? styles.rtl_bubble : "")
           }
-          onClick={onClick}
-          data-lineno={element?.editor?.block_start_no}
         >
-          <img
-            className={
-              styles.head + " " + (controls.rtl ? styles.rtl_head : "")
-            }
-            src={element.line.avatarUrl}
-            alt="head"
+          <audio ref={ref}>
+            <source src={url} type="audio/mp3" />
+          </audio>
+          <AudioPlay onClick={playAudio} />
+          <HintLineContent
+            audioRange={audioRange}
+            hideRangesForChallenge={hideRangesForChallenge}
+            unhide={unhide}
+            content={element.line.content}
           />
-          <span
-            className={
-              styles.bubble + " " + (controls.rtl ? styles.rtl_bubble : "")
-            }
-          >
-            <audio ref={ref}>
-              <source src={url} type="audio/mp3" />
-            </audio>
-            <AudioPlay onClick={playAudio} />
-            <HintLineContent
-              audioRange={audioRange}
-              hideRangesForChallenge={hideRangesForChallenge}
-              unhide={unhide}
-              content={element.line.content}
-            />
-            {}
-          </span>
-        </div>
-      </>
+          {}
+        </span>
+      </div>
     );
   else
     return (
       <div
-        className={
-          styles.phrase +
-          " " +
-          styles_common.fadeGlideIn +
-          " " +
-          " " +
-          element.lang
-        }
+        key={element.trackingProperties.line_index}
+        className={styles.phrase + " " + element.lang}
         data-lineno={element?.editor?.block_start_no}
       >
         <span>

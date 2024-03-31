@@ -1,0 +1,28 @@
+.fadeGlideIn {
+    animation-duration: 1000ms, 1000ms;
+    animation-name: fadeIn, glideIn;
+}
+
+@keyframes fadeIn {
+    /* _1X5ik */
+    0% {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+@keyframes glideIn {
+    /* _2Q5Dx */
+    0% {
+        transform: translateY(20px);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.fadeGlideOut {
+    opacity: 0;
+    transition: opacity 10000ms;
+}

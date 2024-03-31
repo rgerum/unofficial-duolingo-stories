@@ -2,13 +2,25 @@ import React from "react";
 import styles from "./StoryProgress.module.css";
 import StoryChallengeMultipleChoice from "../StoryChallengeMultipleChoice";
 import StoryChallengeContinuation from "../StoryChallengeContinuation";
+import StoryChallengeMatch from "../StoryChallengeMatch";
+import StoryChallengeArrange from "../StoryChallengeArrange";
+import StoryChallengePointToPhrase from "../StoryChallengePointToPhrase";
+import StoryChallengeSelectPhrases from "../StoryChallengeSelectPhrases";
+import FadeGlideIn from "../FadeGlideIn";
+import StoryTextLine from "../StoryTextLine";
 
 function Unknown() {
   return <div>Error</div>;
 }
 
 function getComponent(parts) {
-  console.log();
+  if (parts[0].trackingProperties?.challenge_type === "arrange")
+    return StoryChallengeArrange;
+  if (
+    parts[parts.length - 1].trackingProperties?.challenge_type ===
+    "point-to-phrase"
+  )
+    return StoryChallengePointToPhrase;
   if (
     parts[parts.length - 1].trackingProperties?.challenge_type ===
     "multiple-choice"
@@ -16,13 +28,30 @@ function getComponent(parts) {
     return StoryChallengeMultipleChoice;
   if (parts[0].trackingProperties?.challenge_type === "continuation")
     return StoryChallengeContinuation;
-  return Unknown;
+  if (parts[0].trackingProperties?.challenge_type === "select-phrases")
+    return StoryChallengeSelectPhrases;
+  if (parts[0].trackingProperties?.challenge_type === "match")
+    return StoryChallengeMatch;
+
+  return Line;
+}
+
+function Line({ parts, active, setButtonStatus }) {
+  React.useEffect(() => {
+    if (!active) return;
+    setButtonStatus("right");
+  }, [active]);
+  return (
+    <FadeGlideIn>
+      <StoryTextLine element={parts[0]} />
+    </FadeGlideIn>
+  );
 }
 
 function StoryProgress({ parts_list, ...args }) {
   const [partProgress, setPartProgress] = React.useState(0);
-  const [buttonStatus, setButtonStatus] = React.useState("idle");
-  const [storyProgress, setStoryProgress] = React.useState(0);
+  const [buttonStatus, setButtonStatus] = React.useState("wait");
+  const [storyProgress, setStoryProgress] = React.useState(1);
 
   function setDone() {
     setPartProgress(0);
@@ -30,8 +59,12 @@ function StoryProgress({ parts_list, ...args }) {
   }
 
   function next() {
+    console.log("next", buttonStatus);
     if (buttonStatus === "wait") return;
-    if (buttonStatus === "idle") return setPartProgress(partProgress + 1);
+    if (buttonStatus === "idle") {
+      setButtonStatus("wait");
+      return setPartProgress(partProgress + 1);
+    }
     if (buttonStatus === "right") {
       setPartProgress(0);
       setStoryProgress(storyProgress + 1);

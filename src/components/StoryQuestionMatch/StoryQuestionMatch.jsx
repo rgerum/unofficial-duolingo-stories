@@ -82,7 +82,7 @@ function shuffle_lists(state) {
   return { lists: state.lists.map((element) => shuffle(element)) };
 }
 
-function StoryQuestionMatch({ /*progress,*/ element }) {
+function StoryQuestionMatch({ /*progress,*/ element, setDone }) {
   const [state, dispatch] = React.useReducer(
     reducer,
     {
@@ -107,6 +107,10 @@ function StoryQuestionMatch({ /*progress,*/ element }) {
     },
     shuffle_lists,
   );
+  React.useEffect(() => {
+    const all_right = state.lists[0].every((word) => word.state === "right");
+    if (all_right) setDone();
+  }, [state]);
 
   return (
     <div>

@@ -1,4 +1,5 @@
 import StoryChallengePointToPhrase from "./StoryChallengePointToPhrase";
+import StoryProgress from "../StoryProgress";
 
 const meta = {
   component: StoryChallengePointToPhrase,
@@ -184,7 +185,7 @@ const parts = [
       block_start_no: 35,
     },
     trackingProperties: {
-      line_index: 5,
+      line_index: 0,
     },
     hideRangesForChallenge: [],
   },
@@ -261,7 +262,7 @@ const parts = [
     ],
     correctAnswerIndex: 0,
     trackingProperties: {
-      line_index: 5,
+      line_index: 0,
       challenge_type: "point-to-phrase",
     },
   },
@@ -269,9 +270,6 @@ const parts = [
 
 export const Normal = {
   render: (args) => (
-    <StoryChallengePointToPhrase
-      parts={parts}
-      {...args}
-    ></StoryChallengePointToPhrase>
+    <StoryProgress parts_list={[parts]} {...args}></StoryProgress>
   ),
 };

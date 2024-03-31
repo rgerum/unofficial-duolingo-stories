@@ -3,6 +3,7 @@ import styles from "./StoryChallengeContinuation.module.css";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import StoryTextLine from "../StoryTextLine";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
+import FadeGlideIn from "../FadeGlideIn";
 
 function StoryChallengeContinuation({
   parts,
@@ -18,12 +19,18 @@ function StoryChallengeContinuation({
     if (setDone) setButtonStatus("right");
   }
 
-  if (active) {
+  if (1) {
     return (
       <>
-        <StoryQuestionPrompt question={parts[0].prompt} />
-        <StoryTextLine element={parts[1]} unhide={unhide} />
-        <StoryQuestionMultipleChoice element={parts[2]} advance={advance} />
+        <FadeGlideIn show={active}>
+          <StoryQuestionPrompt question={parts[0].prompt} />
+        </FadeGlideIn>
+        <FadeGlideIn>
+          <StoryTextLine element={parts[1]} unhide={unhide} />
+        </FadeGlideIn>
+        <FadeGlideIn show={active}>
+          <StoryQuestionMultipleChoice element={parts[2]} advance={advance} />
+        </FadeGlideIn>
       </>
     );
   }

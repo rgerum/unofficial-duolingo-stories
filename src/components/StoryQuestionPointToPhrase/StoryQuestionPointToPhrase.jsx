@@ -19,7 +19,7 @@ Speaker560: (Perdón), mi amor, (estoy) (+cansada). ¡(Trabajo) mucho!
 
  */
 
-function StoryQuestionPointToPhrase({ element }) {
+function StoryQuestionPointToPhrase({ element, advance }) {
   //const controls = React.useContext(StoryContext);
   //const editor = React.useContext(EditorContext);
 
@@ -54,6 +54,7 @@ function StoryQuestionPointToPhrase({ element }) {
     element.transcriptParts.length,
     element.correctAnswerIndex,
     () => {
+      advance();
       /*if (!editor) {
         //props.setUnhide(props.element.trackingProperties.line_index);
         controls.right();

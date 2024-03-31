@@ -2,6 +2,7 @@ import React from "react";
 import styles from "./StoryChallengeMultipleChoice.module.css";
 import StoryTextLine from "../StoryTextLine";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
+import FadeGlideIn from "../FadeGlideIn";
 
 function StoryChallengeMultipleChoice({
   parts,
@@ -12,28 +13,31 @@ function StoryChallengeMultipleChoice({
 }) {
   React.useEffect(() => {
     if (!active) return;
-    if (partProgress === 1) {
-      setButtonStatus("wait");
+    if (partProgress === 0) {
+      setButtonStatus("idle");
     }
   }, [active, partProgress]);
 
-  if (active && partProgress === 0) {
-    return <StoryTextLine element={parts[0]} />;
-  }
-  if (active && partProgress === 1) {
-    return (
-      <>
-        <StoryTextLine element={parts[0]} />
+  const show_question = active && partProgress === 1;
+
+  return (
+    <>
+      <FadeGlideIn>
+        <StoryTextLine
+          key={parts[0].trackingProperties.line_index}
+          element={parts[0]}
+        />
+      </FadeGlideIn>
+      <FadeGlideIn show={show_question}>
         <StoryQuestionMultipleChoice
           element={parts[1]}
           advance={() => {
             setButtonStatus("right");
           }}
         />
-      </>
-    );
-  }
-  return <StoryTextLine element={parts[0]} />;
+      </FadeGlideIn>
+    </>
+  );
 }
 
 export default StoryChallengeMultipleChoice;

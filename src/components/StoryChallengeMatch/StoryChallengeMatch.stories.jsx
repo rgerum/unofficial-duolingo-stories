@@ -1,4 +1,5 @@
 import StoryChallengeMatch from "./StoryChallengeMatch";
+import StoryProgress from "../StoryProgress";
 
 const meta = {
   component: StoryChallengeMatch,
@@ -40,7 +41,7 @@ const parts = [
       },
     ],
     trackingProperties: {
-      line_index: 24,
+      line_index: 0,
       challenge_type: "match",
     },
   },
@@ -48,6 +49,6 @@ const parts = [
 
 export const Normal = {
   render: (args) => (
-    <StoryChallengeMatch parts={parts} {...args}></StoryChallengeMatch>
+    <StoryProgress parts_list={[parts]} {...args}></StoryProgress>
   ),
 };
