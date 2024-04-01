@@ -10,6 +10,7 @@ import FadeGlideIn from "../FadeGlideIn";
 import StoryTextLine from "../StoryTextLine";
 import { AnimatePresence } from "framer-motion";
 import StoryHeader from "../StoryHeader";
+import ProgressBar from "../ProgressBar";
 
 function Unknown() {
   return <div>Error</div>;
@@ -102,26 +103,34 @@ function StoryProgress({ parts_list, ...args }) {
   }
 
   return (
-    <div>
-      <AnimatePresence>
-        <span key={"a"}>{storyProgress}</span> <span>{partProgress}</span>{" "}
-        <span key={"b"}>{buttonStatus}</span>
-        {part_list_with_component.map(({ Component, id, parts }) => (
-          <Component
-            key={id}
-            parts={parts}
-            partProgress={partProgress}
-            setButtonStatus={setButtonStatus}
-            setDone={setDone}
-            active={storyProgress === getIndex(parts)}
-            {...args}
-          ></Component>
-        ))}
+    <>
+      <div className={styles.header}>
+        <ProgressBar progress={storyProgress} length={parts_list.length} />
+      </div>
+      <div className={styles.story}>
+        <AnimatePresence>
+          <span key={"a"}>{storyProgress}</span> <span>{partProgress}</span>{" "}
+          <span key={"b"}>{buttonStatus}</span>
+          {part_list_with_component.map(({ Component, id, parts }) => (
+            <Component
+              key={id}
+              parts={parts}
+              partProgress={partProgress}
+              setButtonStatus={setButtonStatus}
+              setDone={setDone}
+              active={storyProgress === getIndex(parts)}
+              {...args}
+            ></Component>
+          ))}
+        </AnimatePresence>
+        <div className={styles.spacer}></div>
+      </div>
+      <div className={styles.footer}>
         <button key={"c"} onClick={next}>
           Continue {buttonStatus}
         </button>
-      </AnimatePresence>
-    </div>
+      </div>
+    </>
   );
 }
 
