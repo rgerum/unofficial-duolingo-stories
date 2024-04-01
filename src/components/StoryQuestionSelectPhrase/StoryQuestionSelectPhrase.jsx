@@ -29,7 +29,6 @@ function StoryQuestionSelectPhrase({ element, advance }) {
           setDone(true);
           if (controls?.right) controls?.right();
         }*/
-      console.log("advance");
       advance();
     },
     () => {}, //controls?.wrong || (() => {}),

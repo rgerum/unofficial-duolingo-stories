@@ -22,7 +22,6 @@ function StoryQuestionArrange({ element, advance }) {
     (i) => {
       setDone(true);
       //if (!editor)
-      console.log(i, element.phraseOrder.length);
       advance(
         element.characterPositions[i],
         i === element.phraseOrder.length - 1,

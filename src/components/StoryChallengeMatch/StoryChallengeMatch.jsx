@@ -4,8 +4,9 @@ import StoryQuestionMatch from "../StoryQuestionMatch";
 import FadeGlideIn from "../FadeGlideIn";
 
 function StoryChallengeMatch({ parts, active, setButtonStatus }) {
+  const id = React.useId();
   return (
-    <FadeGlideIn show={active}>
+    <FadeGlideIn key={`${id}-1`} show={active}>
       <StoryQuestionMatch
         element={parts[0]}
         setDone={() => setButtonStatus("right")}

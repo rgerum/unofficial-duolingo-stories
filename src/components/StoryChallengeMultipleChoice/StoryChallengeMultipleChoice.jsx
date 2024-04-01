@@ -18,17 +18,19 @@ function StoryChallengeMultipleChoice({
     }
   }, [active, partProgress]);
 
+  const id = React.useId();
+
   const show_question = active && partProgress === 1;
 
   return (
     <>
-      <FadeGlideIn>
+      <FadeGlideIn key={`${id}-1`}>
         <StoryTextLine
           key={parts[0].trackingProperties.line_index}
           element={parts[0]}
         />
       </FadeGlideIn>
-      <FadeGlideIn show={show_question}>
+      <FadeGlideIn key={`${id}-2`} show={show_question}>
         <StoryQuestionMultipleChoice
           element={parts[1]}
           advance={() => {

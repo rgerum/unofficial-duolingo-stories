@@ -7,9 +7,9 @@ import StoryQuestionArrange from "../StoryQuestionArrange";
 import StoryQuestionMatch from "../StoryQuestionMatch";
 import StoryTextLine from "../StoryTextLine";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
+import FadeGlideIn from "../FadeGlideIn";
 
 function StoryLine({ element }) {
-  console.log("storyline", element.type);
   //const controls = React.useContext(StoryContext);
 
   if (element.type === "MULTIPLE_CHOICE") {
@@ -43,11 +43,14 @@ function StoryLine({ element }) {
 }
 
 function StoryPart({ progress, elements }) {
-  console.log("story part", elements);
+  const id = React.useId();
+
   return (
     <div>
       {elements.map((element) => (
-        <StoryLine element={element} />
+        <FadeGlideIn key={`${id}-1`}>
+          <StoryLine element={element} />
+        </FadeGlideIn>
       ))}
     </div>
   );

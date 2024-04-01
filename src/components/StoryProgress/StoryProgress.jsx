@@ -8,12 +8,15 @@ import StoryChallengePointToPhrase from "../StoryChallengePointToPhrase";
 import StoryChallengeSelectPhrases from "../StoryChallengeSelectPhrases";
 import FadeGlideIn from "../FadeGlideIn";
 import StoryTextLine from "../StoryTextLine";
+import { AnimatePresence } from "framer-motion";
+import StoryHeader from "../StoryHeader";
 
 function Unknown() {
   return <div>Error</div>;
 }
 
 function getComponent(parts) {
+  if (parts[0].type === "HEADER") return Header;
   if (parts[0].trackingProperties?.challenge_type === "arrange")
     return StoryChallengeArrange;
   if (
@@ -36,6 +39,18 @@ function getComponent(parts) {
   return Line;
 }
 
+function Header({ parts, active, setButtonStatus }) {
+  React.useEffect(() => {
+    if (!active) return;
+    setButtonStatus("right");
+  }, [active]);
+  return (
+    <FadeGlideIn>
+      <StoryHeader element={parts[0]} />
+    </FadeGlideIn>
+  );
+}
+
 function Line({ parts, active, setButtonStatus }) {
   React.useEffect(() => {
     if (!active) return;
@@ -51,7 +66,7 @@ function Line({ parts, active, setButtonStatus }) {
 function StoryProgress({ parts_list, ...args }) {
   const [partProgress, setPartProgress] = React.useState(0);
   const [buttonStatus, setButtonStatus] = React.useState("wait");
-  const [storyProgress, setStoryProgress] = React.useState(1);
+  const [storyProgress, setStoryProgress] = React.useState(0);
 
   function setDone() {
     setPartProgress(0);
@@ -59,7 +74,6 @@ function StoryProgress({ parts_list, ...args }) {
   }
 
   function next() {
-    console.log("next", buttonStatus);
     if (buttonStatus === "wait") return;
     if (buttonStatus === "idle") {
       setButtonStatus("wait");
@@ -72,11 +86,16 @@ function StoryProgress({ parts_list, ...args }) {
     }
   }
 
+  function getIndex(parts) {
+    return parts[0].trackingProperties.line_index || 0;
+  }
+
   const part_list_with_component = [];
   for (let parts of parts_list) {
-    if (storyProgress >= parts[0].trackingProperties.line_index) {
+    if (storyProgress >= getIndex(parts)) {
       part_list_with_component.push({
         parts,
+        id: getIndex(parts),
         Component: getComponent(parts),
       });
     }
@@ -84,19 +103,24 @@ function StoryProgress({ parts_list, ...args }) {
 
   return (
     <div>
-      <span>{storyProgress}</span> <span>{partProgress}</span>{" "}
-      <span>{buttonStatus}</span>
-      {part_list_with_component.map(({ Component, parts }) => (
-        <Component
-          parts={parts}
-          partProgress={partProgress}
-          setButtonStatus={setButtonStatus}
-          setDone={setDone}
-          active={storyProgress === parts[0].trackingProperties.line_index}
-          {...args}
-        ></Component>
-      ))}
-      <button onClick={next}>Continue {buttonStatus}</button>
+      <AnimatePresence>
+        <span key={"a"}>{storyProgress}</span> <span>{partProgress}</span>{" "}
+        <span key={"b"}>{buttonStatus}</span>
+        {part_list_with_component.map(({ Component, id, parts }) => (
+          <Component
+            key={id}
+            parts={parts}
+            partProgress={partProgress}
+            setButtonStatus={setButtonStatus}
+            setDone={setDone}
+            active={storyProgress === getIndex(parts)}
+            {...args}
+          ></Component>
+        ))}
+        <button key={"c"} onClick={next}>
+          Continue {buttonStatus}
+        </button>
+      </AnimatePresence>
     </div>
   );
 }

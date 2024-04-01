@@ -6,7 +6,8 @@ import StoryQuestionSelectPhrase from "../StoryQuestionSelectPhrase";
 import FadeGlideIn from "../FadeGlideIn";
 
 function StoryChallengeSelectPhrases({ parts, setButtonStatus, active }) {
-  let [unhide, setUnhide] = React.useState(0);
+  const [unhide, setUnhide] = React.useState(0);
+  const id = React.useId();
 
   function advance(i, done) {
     setUnhide(-1);
@@ -15,13 +16,13 @@ function StoryChallengeSelectPhrases({ parts, setButtonStatus, active }) {
 
   return (
     <>
-      <FadeGlideIn show={active}>
+      <FadeGlideIn key={`${id}-1`} show={active}>
         <StoryQuestionPrompt question={parts[0].prompt} />
       </FadeGlideIn>
-      <FadeGlideIn>
+      <FadeGlideIn key={`${id}-2`}>
         <StoryTextLine element={parts[1]} unhide={unhide} />
       </FadeGlideIn>
-      <FadeGlideIn show={active}>
+      <FadeGlideIn key={`${id}-3`} show={active}>
         <StoryQuestionSelectPhrase element={parts[2]} advance={advance} />
       </FadeGlideIn>
     </>

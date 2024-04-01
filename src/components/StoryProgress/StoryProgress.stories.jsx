@@ -1944,7 +1944,6 @@ export const Normal = {
       }
       parts[parts.length - 1].push(element);
     }
-    console.log(parts);
     return <StoryProgress parts_list={parts} {...args}></StoryProgress>;
   },
 };
