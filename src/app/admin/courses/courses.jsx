@@ -15,6 +15,7 @@ import FlagName from "../FlagName";
 
 function InputLanguage({ name, label, value, setValue, languages }) {
   const [nameX, setName] = useInput(languages[value]?.name || "");
+  const inputRef = React.useRef();
 
   let valid = false;
   for (let lang of Object.getOwnPropertyNames(languages)) {
@@ -60,12 +61,19 @@ function InputLanguage({ name, label, value, setValue, languages }) {
           ) : (
             <Flag width={40} flag={-2736} />
           )}
-          <LangInput id={label} value={nameX} onChange={edited} />
+          <LangInput
+            ref={inputRef}
+            id={label}
+            value={nameX}
+            onChange={edited}
+          />
           <LangDropdownContent>
             {language_id.map((lang) => (
               <LangItemButton
                 key={languages[lang].id}
-                onClick={() => edited(languages[lang].name)}
+                onClick={(event) => {
+                  edited(languages[lang].name);
+                }}
               >
                 <Flag
                   iso={languages[lang].short}
@@ -96,7 +104,6 @@ const LangDropdownContent = styled.div`
   z-index: 1;
 
   width: 100%;
-  position: absolute;
   top: 43px;
   left: 0;
 
@@ -156,7 +163,8 @@ function EditCourse({ obj, languages, updateCourse, is_new }) {
   const [tags, setTags] = useState(obj.tags || "");
   const [about, setAbout] = useState(obj.about || "");
 
-  async function Send() {
+  async function Send(event) {
+    event.preventDefault();
     const data = {
       id: obj.id,
       short: short,
@@ -198,68 +206,68 @@ function EditCourse({ obj, languages, updateCourse, is_new }) {
             ? "Add a new course. Click save when you're done."
             : "Make changes to a course. Click save when you're done."}
         </EditDialog.DialogDescription>
-        <EditDialog.InputText
-          name={"Name"}
-          label={"name"}
-          value={name}
-          setValue={setName}
-        />
-        <EditDialog.InputText
-          name={"Short"}
-          label={"short"}
-          value={short}
-          setValue={setShort}
-        />
-        <InputLanguage
-          name={"From language"}
-          label={"from_language"}
-          value={fromLanguage}
-          setValue={setFromLanguage}
-          languages={languages}
-        />
-        <InputLanguage
-          name={"Learning Language"}
-          label={"learning_language"}
-          value={learningLanguage}
-          setValue={setLearningLanguage}
-          languages={languages}
-        />
-        <EditDialog.InputBool
-          name={"Public"}
-          label={"public"}
-          value={published}
-          setValue={setPublished}
-        />
-        <EditDialog.InputBool
-          name={"Conlang"}
-          label={"conlang"}
-          value={conlang}
-          setValue={setConlang}
-        />
-        <EditDialog.InputText
-          name={"Tags"}
-          label={"tags"}
-          value={tags}
-          setValue={setTags}
-        />
-        <EditDialog.InputTextArea
-          name={"About"}
-          label={"about"}
-          value={about}
-          setValue={setAbout}
-        />
-        <div
-          style={{
-            display: "flex",
-            marginTop: 25,
-            justifyContent: "space-between",
-          }}
-        >
-          {error ? <Error>An error occurred.</Error> : <div></div>}
-          <Button className="Button green" onClick={Send}>
-            Save changes
-          </Button>
-        </div>
+        <form onSubmit={Send}>
+          <EditDialog.InputText
+            name={"Name"}
+            label={"name"}
+            value={name}
+            setValue={setName}
+          />
+          <EditDialog.InputText
+            name={"Short"}
+            label={"short"}
+            value={short}
+            setValue={setShort}
+          />
+          <InputLanguage
+            name={"From language"}
+            label={"from_language"}
+            value={fromLanguage}
+            setValue={setFromLanguage}
+            languages={languages}
+          />
+          <InputLanguage
+            name={"Learning Language"}
+            label={"learning_language"}
+            value={learningLanguage}
+            setValue={setLearningLanguage}
+            languages={languages}
+          />
+          <EditDialog.InputBool
+            name={"Public"}
+            label={"public"}
+            value={published}
+            setValue={setPublished}
+          />
+          <EditDialog.InputBool
+            name={"Conlang"}
+            label={"conlang"}
+            value={conlang}
+            setValue={setConlang}
+          />
+          <EditDialog.InputText
+            name={"Tags"}
+            label={"tags"}
+            value={tags}
+            setValue={setTags}
+          />
+          <EditDialog.InputTextArea
+            name={"About"}
+            label={"about"}
+            value={about}
+            setValue={setAbout}
+          />
+          <div
+            style={{
+              display: "flex",
+              marginTop: 25,
+              justifyContent: "space-between",
+            }}
+          >
+            {error ? <Error>An error occurred.</Error> : <div></div>}
+            <Button className="Button green">Save changes</Button>
+          </div>
+        </form>
       </EditDialog.Content>
     </EditDialog.Root>
   );

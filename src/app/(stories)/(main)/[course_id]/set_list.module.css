@@ -34,6 +34,11 @@
 .set_list {
 }
 
+.set_list_about {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
 .set_content {
   /* to get rid of the list style*/
   list-style: none;

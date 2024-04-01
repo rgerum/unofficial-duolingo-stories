@@ -32,5 +32,11 @@ export default async function SetList({ course_id }) {
   const course = await get_course_sets(course_id);
   if (!course) return <div>not found</div>;
 
-  return <SetListClient course_id={course_data.id} course={course} />;
+  return (
+    <SetListClient
+      course_id={course_data.id}
+      course={course}
+      about={course_data.about}
+    />
+  );
 }
