@@ -5,12 +5,12 @@ import getUserId from "lib/getUserId";
 import { sql, cache } from "lib/db";
 import get_localisation from "lib/get_localisation";
 
-function About({ course }) {
-  if (!course.about) return <></>;
+function About({ about }) {
+  if (!about) return <></>;
   return (
-    <div className={styles.set_list}>
+    <div className={styles.set_list_about}>
       <div className={styles.set_title}>About</div>
-      <p>{course.about}</p>
+      <p>{about}</p>
     </div>
   );
 }
@@ -49,14 +49,14 @@ JOIN story s on s.id = story_done.story_id WHERE user_id = ${user_id} AND s.cour
   )({ course_id, user_id });
 }
 
-export default async function SetListClient({ course_id, course }) {
+export default async function SetListClient({ course_id, course, about }) {
   let user_id = await getUserId();
   let done = await get_course_done({ course_id, user_id });
   let localisation = await get_localisation(course.from_language_id);
 
   return (
     <div className={styles.story_list}>
-      <About course={course} />
+      {about && <About about={about} />}
 
       {Object.entries(course).map(([key, value]) => (
         <Set key={key} set={value} done={done} localisation={localisation} />
