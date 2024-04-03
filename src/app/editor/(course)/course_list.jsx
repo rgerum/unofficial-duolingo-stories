@@ -43,6 +43,20 @@ export default function CourseList({
     }
   }
 
+  filtered_courses = [
+    ...filtered_courses,
+    ...filtered_courses,
+    ...filtered_courses,
+    ...filtered_courses,
+    ...filtered_courses,
+    ...filtered_courses,
+  ];
+  filtered_courses = [
+    ...filtered_courses,
+    ...filtered_courses,
+    ...filtered_courses,
+  ];
+
   return (
     <div className={styles.languages} data-show={!course_id ? true : showList}>
       <div className={styles.backdrop} onClick={() => toggleShow()}></div>
@@ -51,7 +65,7 @@ export default function CourseList({
           <span>Search</span>
           <input value={search} onChange={setSearch} />
         </div>
-        <div className={styles.languagesScroll}>
+        <div>
           {filtered_courses.map((course, index) => (
             <div key={index}>
               <Link
