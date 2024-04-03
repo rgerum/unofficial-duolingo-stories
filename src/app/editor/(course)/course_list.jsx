@@ -43,20 +43,6 @@ export default function CourseList({
     }
   }
 
-  filtered_courses = [
-    ...filtered_courses,
-    ...filtered_courses,
-    ...filtered_courses,
-    ...filtered_courses,
-    ...filtered_courses,
-    ...filtered_courses,
-  ];
-  filtered_courses = [
-    ...filtered_courses,
-    ...filtered_courses,
-    ...filtered_courses,
-  ];
-
   return (
     <div className={styles.languages} data-show={!course_id ? true : showList}>
       <div className={styles.backdrop} onClick={() => toggleShow()}></div>
