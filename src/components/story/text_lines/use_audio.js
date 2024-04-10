@@ -1,7 +1,7 @@
 import React from "react";
 import { StoryContext } from "../story";
 
-export default function useAudio(element, progress) {
+export default function useAudio(element, active) {
   let [audioRange, setAudioRange] = React.useState(99999);
   let audio = element?.line?.content?.audio;
   let ref = React.useRef();
@@ -52,12 +52,8 @@ export default function useAudio(element, progress) {
     window.playing_audio.push(cancel);
   }, [audio, ref]);
   React.useEffect(() => {
-    if (
-      element.trackingProperties.line_index === progress ||
-      (element.trackingProperties.line_index === undefined && progress === -1)
-    )
-      playAudio();
-  }, [progress, playAudio]);
+    if (active) playAudio();
+  }, [active, playAudio]);
 
   if (audio === undefined || !audio?.keypoints || !audio?.url)
     return [audioRange, undefined, ref, undefined];

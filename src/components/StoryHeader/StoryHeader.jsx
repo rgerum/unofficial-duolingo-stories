@@ -5,10 +5,9 @@ import useAudio from "../story/text_lines/use_audio";
 import AudioPlay from "../story/text_lines/audio_play";
 import HintLineContent from "../story/text_lines/line_hints";
 
-function StoryHeader({ element }) {
+function StoryHeader({ active, element }) {
   let onClick = undefined;
-  let progress = 0;
-  const [audioRange, playAudio, ref, url] = useAudio(element, progress);
+  const [audioRange, playAudio, ref, url] = useAudio(element, active);
 
   const hideRangesForChallenge = undefined;
 

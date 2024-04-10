@@ -22,6 +22,7 @@ function StoryChallengePointToPhrase({
       </FadeGlideIn>
       <FadeGlideIn key={`${id}-1`} show={show_question}>
         <StoryQuestionPointToPhrase
+          active={active}
           element={parts[1]}
           advance={() => setButtonStatus("right")}
         />

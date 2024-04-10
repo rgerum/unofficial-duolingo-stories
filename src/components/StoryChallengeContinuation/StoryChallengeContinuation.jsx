@@ -20,7 +20,7 @@ function StoryChallengeContinuation({ parts, setButtonStatus, active }) {
         <StoryQuestionPrompt question={parts[0].prompt} />
       </FadeGlideIn>
       <FadeGlideIn key={`${id}-2`}>
-        <StoryTextLine element={parts[1]} unhide={unhide} />
+        <StoryTextLine active={active} element={parts[1]} unhide={unhide} />
       </FadeGlideIn>
       <FadeGlideIn key={`${id}-3`} show={active}>
         <StoryQuestionMultipleChoice element={parts[2]} advance={advance} />

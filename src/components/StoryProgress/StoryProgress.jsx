@@ -47,7 +47,7 @@ function Header({ parts, active, setButtonStatus }) {
 
   return (
     <FadeGlideIn>
-      <StoryHeader element={parts[0]} />
+      <StoryHeader active={active} element={parts[0]} />
     </FadeGlideIn>
   );
 }
@@ -56,7 +56,7 @@ function Line({ parts, active, setButtonStatus }) {
   if (active) setButtonStatus("continue");
   return (
     <FadeGlideIn>
-      <StoryTextLine element={parts[0]} />
+      <StoryTextLine active={active} element={parts[0]} />
     </FadeGlideIn>
   );
 }

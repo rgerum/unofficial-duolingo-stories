@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "./StoryTextLine.module.css";
 import { EditorContext, StoryContext } from "../story/story";
 import styles_common from "../story/common.module.css";
@@ -9,7 +9,7 @@ import HintLineContent from "../story/text_lines/line_hints";
 import EditorSSMLDisplay from "../story/text_lines/audio_edit";
 
 //progress, unhide, element, part
-function StoryTextLine({ element, unhide = 0 }) {
+function StoryTextLine({ active, element, unhide = 0 }) {
   //const editor = React.useContext(EditorContext);
   //const controls = React.useContext(StoryContext);
 
@@ -29,7 +29,8 @@ function StoryTextLine({ element, unhide = 0 }) {
 */
   let onClick = undefined;
   let progress = 0;
-  let [audioRange, playAudio, ref, url] = useAudio(element, progress);
+  let [audioRange, playAudio, ref, url] = useAudio(element, active);
+  //useEffect(playAudio, [active]);
 
   if (element.line === undefined) return <></>;
 
