@@ -12,6 +12,7 @@ import { AnimatePresence } from "framer-motion";
 import StoryHeader from "../StoryHeader";
 import ProgressBar from "../ProgressBar";
 import StoryFooter from "../StoryFooter";
+import StoryFinishedScreen from "../StoryFinishedScreen";
 
 function Unknown() {
   return <div>Error</div>;
@@ -60,12 +61,34 @@ function Line({ parts, active, setButtonStatus }) {
   );
 }
 
-function StoryProgress({ parts_list, ...args }) {
+function GetParts(story) {
+  const parts = [];
+  let last_id = -1;
+  for (let element of story.elements) {
+    if (element.trackingProperties === undefined) {
+      continue;
+    }
+    if (last_id !== element.trackingProperties.line_index) {
+      parts.push([]);
+      last_id = element.trackingProperties.line_index;
+    }
+    parts[parts.length - 1].push(element);
+  }
+  return parts;
+}
+
+function StoryProgress({ story, parts_list, ...args }) {
+  if (story) {
+    parts_list = GetParts(story);
+  }
   const [partProgress, setPartProgress] = React.useState(0);
   const [buttonStatus, setButtonStatus] = React.useState("wait");
   const [storyProgress, setStoryProgress] = React.useState(0);
 
   function next() {
+    if (buttonStatus === "finished") {
+      return;
+    }
     if (buttonStatus === "wait") return;
     if (buttonStatus === "idle") {
       setButtonStatus("wait");
@@ -74,7 +97,8 @@ function StoryProgress({ parts_list, ...args }) {
     if (buttonStatus === "continue" || buttonStatus === "right") {
       setPartProgress(0);
       setStoryProgress(storyProgress + 1);
-      setButtonStatus("wait");
+      if (storyProgress === parts_list.length - 1) setButtonStatus("finished");
+      else setButtonStatus("wait");
     }
   }
 
@@ -119,6 +143,9 @@ function StoryProgress({ parts_list, ...args }) {
           })}
         </AnimatePresence>
         <div className={styles.spacer}></div>
+        {storyProgress === parts_list.length && (
+          <StoryFinishedScreen story={story} />
+        )}
       </div>
       <StoryFooter buttonStatus={buttonStatus} onClick={next} />
     </>

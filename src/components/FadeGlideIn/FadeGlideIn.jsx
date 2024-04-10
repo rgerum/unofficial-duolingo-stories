@@ -1,16 +1,7 @@
 import React, { useEffect } from "react";
 import styles from "./FadeGlideIn.module.css";
 import { motion } from "framer-motion";
-
-function useScrollIntoView(condition) {
-  const ref = React.useRef();
-
-  useEffect(() => {
-    if (condition)
-      ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, [condition]);
-  return ref;
-}
+import useScrollIntoView from "../../hooks/use-scroll-into-view.hook";
 
 function FadeGlideIn({ children, show = true, duration = 400 }, refX) {
   if (!show) return null;
