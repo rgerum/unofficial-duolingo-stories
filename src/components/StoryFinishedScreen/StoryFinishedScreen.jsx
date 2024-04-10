@@ -1,9 +1,10 @@
 import React from "react";
 import styles from "./StoryFinishedScreen.module.css";
 import useScrollIntoView from "../../hooks/use-scroll-into-view.hook";
+import { useLocalisation } from "../LocalisationProvider/LocalisationProviderContext";
 
-function StoryFinishedScreen({ story, localization }) {
-  if (!localization) localization = () => "";
+function StoryFinishedScreen({ story }) {
+  const localisation = useLocalisation();
   const ref = useScrollIntoView(true);
 
   return (
@@ -33,9 +34,9 @@ function StoryFinishedScreen({ story, localization }) {
           </div>
         </div>
         {/* the text showing that the story is done */}
-        <h2>{localization("story_finished")}</h2>
+        <h2>{localisation("story_finished")}</h2>
         <p>
-          {localization("story_finished_subtitle", {
+          {localisation("story_finished_subtitle", {
             $story_title: story.from_language_name,
           }) || `You finished ${story.from_language_name}`}
         </p>
