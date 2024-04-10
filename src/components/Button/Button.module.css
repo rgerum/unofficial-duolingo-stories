@@ -5,7 +5,8 @@
     border-radius: 15px;
     transition:
             0.1s box-shadow,
-            0.1s transform;
+            0.1s transform,
+    0.1s background-color;
     color: var(--button-color);
 
     background-color: var(--button-border);
@@ -42,4 +43,22 @@
     --foreground-color: var(--button-blue-background);
     color: var(--button-blue-color);
     background-color: var(--button-blue-border);
+}
+
+.ButtonDisabled {
+    background: var(--button-inactive-background);
+    color: var(--button-inactive-color);
+    --foreground-color: var(--button-inactive-background);
+}
+
+.ButtonDisabled .Wrapper {
+    transform: translateY(0px);
+
+    .ButtonDisabled:hover & {
+        filter: revert;
+        transform: translateY(0px);
+    }
+    .ButtonDisabled:active & {
+        transform: translateY(0px);
+    }
 }

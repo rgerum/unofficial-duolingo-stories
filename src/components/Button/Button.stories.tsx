@@ -8,6 +8,9 @@ const meta: Meta<typeof Button> = {
     primary: {
       control: "boolean",
     },
+    disabled: {
+      control: "boolean",
+    },
   },
 };
 
@@ -20,9 +23,13 @@ type Story = StoryObj<typeof Button>;
  * to learn how to use render functions.
  */
 export const Primary: Story = {
-  render: () => <Button primary={true}>Click</Button>,
+  render: (args) => (
+    <Button primary={true} {...args}>
+      Click
+    </Button>
+  ),
 };
 
 export const Normal: Story = {
-  render: () => <Button>Click</Button>,
+  render: (args) => <Button {...args}>Click</Button>,
 };
