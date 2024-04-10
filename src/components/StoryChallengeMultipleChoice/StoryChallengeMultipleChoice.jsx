@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "./StoryChallengeMultipleChoice.module.css";
 import StoryTextLine from "../StoryTextLine";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
@@ -6,17 +6,11 @@ import FadeGlideIn from "../FadeGlideIn";
 
 function StoryChallengeMultipleChoice({
   parts,
-  setDone,
   partProgress,
   setButtonStatus,
   active,
 }) {
-  React.useEffect(() => {
-    if (!active) return;
-    if (partProgress === 0) {
-      setButtonStatus("idle");
-    }
-  }, [active, partProgress]);
+  if (active && partProgress === 0) setButtonStatus("idle");
 
   const id = React.useId();
 

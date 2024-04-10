@@ -5,23 +5,19 @@
 }
 
 .header {
- max-width: 1000px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 40px;
     position: sticky;
     top: 0;
     background: var(--body-background);
     z-index: 1;
+
+    @media (max-width: 500px) {
+        padding: 17px 20px;
+    }
 }
 
-.footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--body-background);
-    padding: 16px;
-}
 
 .spacer {
     height: 33vh;

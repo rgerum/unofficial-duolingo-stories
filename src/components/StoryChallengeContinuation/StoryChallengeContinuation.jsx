@@ -5,19 +5,13 @@ import StoryTextLine from "../StoryTextLine";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
 import FadeGlideIn from "../FadeGlideIn";
 
-function StoryChallengeContinuation({
-  parts,
-  setDone,
-  partProgress,
-  setButtonStatus,
-  active,
-}) {
+function StoryChallengeContinuation({ parts, setButtonStatus, active }) {
   const [unhide, setUnhide] = React.useState(0);
   const id = React.useId();
 
   function advance(i, done) {
     setUnhide(-1);
-    if (setDone) setButtonStatus("right");
+    setButtonStatus("right");
   }
 
   return (

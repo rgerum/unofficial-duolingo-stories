@@ -11,6 +11,7 @@ import StoryTextLine from "../StoryTextLine";
 import { AnimatePresence } from "framer-motion";
 import StoryHeader from "../StoryHeader";
 import ProgressBar from "../ProgressBar";
+import StoryFooter from "../StoryFooter";
 
 function Unknown() {
   return <div>Error</div>;
@@ -41,10 +42,8 @@ function getComponent(parts) {
 }
 
 function Header({ parts, active, setButtonStatus }) {
-  React.useEffect(() => {
-    if (!active) return;
-    setButtonStatus("right");
-  }, [active]);
+  if (active) setButtonStatus("continue");
+
   return (
     <FadeGlideIn>
       <StoryHeader element={parts[0]} />
@@ -53,10 +52,7 @@ function Header({ parts, active, setButtonStatus }) {
 }
 
 function Line({ parts, active, setButtonStatus }) {
-  React.useEffect(() => {
-    if (!active) return;
-    setButtonStatus("right");
-  }, [active]);
+  if (active) setButtonStatus("continue");
   return (
     <FadeGlideIn>
       <StoryTextLine element={parts[0]} />
@@ -69,21 +65,16 @@ function StoryProgress({ parts_list, ...args }) {
   const [buttonStatus, setButtonStatus] = React.useState("wait");
   const [storyProgress, setStoryProgress] = React.useState(0);
 
-  function setDone() {
-    setPartProgress(0);
-    setStoryProgress(storyProgress + 1);
-  }
-
   function next() {
     if (buttonStatus === "wait") return;
     if (buttonStatus === "idle") {
       setButtonStatus("wait");
       return setPartProgress(partProgress + 1);
     }
-    if (buttonStatus === "right") {
+    if (buttonStatus === "continue" || buttonStatus === "right") {
       setPartProgress(0);
       setStoryProgress(storyProgress + 1);
-      setButtonStatus("idle");
+      setButtonStatus("wait");
     }
   }
 
@@ -111,25 +102,25 @@ function StoryProgress({ parts_list, ...args }) {
         <AnimatePresence>
           <span key={"a"}>{storyProgress}</span> <span>{partProgress}</span>{" "}
           <span key={"b"}>{buttonStatus}</span>
-          {part_list_with_component.map(({ Component, id, parts }) => (
-            <Component
-              key={id}
-              parts={parts}
-              partProgress={partProgress}
-              setButtonStatus={setButtonStatus}
-              setDone={setDone}
-              active={storyProgress === getIndex(parts)}
-              {...args}
-            ></Component>
-          ))}
+          {part_list_with_component.map(({ Component, id, parts }) => {
+            const active = storyProgress === getIndex(parts);
+            return (
+              <Component
+                key={id}
+                parts={parts}
+                partProgress={partProgress}
+                setButtonStatus={
+                  active ? setButtonStatus : () => console.log("not allowed")
+                }
+                active={active}
+                {...args}
+              ></Component>
+            );
+          })}
         </AnimatePresence>
         <div className={styles.spacer}></div>
       </div>
-      <div className={styles.footer}>
-        <button key={"c"} onClick={next}>
-          Continue {buttonStatus}
-        </button>
-      </div>
+      <StoryFooter buttonStatus={buttonStatus} onClick={next} />
     </>
   );
 }

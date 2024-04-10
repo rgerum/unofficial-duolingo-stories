@@ -11,21 +11,16 @@ function StoryChallengePointToPhrase({
   setButtonStatus,
   active,
 }) {
-  React.useEffect(() => {
-    if (!active) return;
-    if (partProgress === 0) {
-      setButtonStatus("idle");
-    }
-  }, [active, partProgress]);
+  if (active && partProgress === 0) setButtonStatus("idle");
 
   const id = React.useId();
-
+  const show_question = active && partProgress === 1;
   return (
     <>
-      <FadeGlideIn key={`${id}-1`} show={partProgress !== 1}>
+      <FadeGlideIn key={`${id}-1`} show={!show_question}>
         <StoryTextLine element={parts[0]} />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-2`} show={partProgress === 1}>
+      <FadeGlideIn key={`${id}-1`} show={show_question}>
         <StoryQuestionPointToPhrase
           element={parts[1]}
           advance={() => setButtonStatus("right")}
