@@ -1,12 +1,12 @@
 import React from "react";
-import { StoryContext } from "../story";
+//import { StoryContext } from "../story";
 
-export default function useAudio(element, progress) {
+export default function useAudio(element, active) {
   let [audioRange, setAudioRange] = React.useState(99999);
   let audio = element?.line?.content?.audio;
   let ref = React.useRef();
 
-  const controls = React.useContext(StoryContext);
+  //const controls = React.useContext(StoryContext);
 
   if (audio === undefined) audio = element?.learningLanguageTitleContent?.audio;
 
@@ -23,7 +23,7 @@ export default function useAudio(element, progress) {
     try {
       await audioObject.play();
     } catch (e) {
-      controls.audio_failed_call();
+      //controls.audio_failed_call();
       return;
     }
     let timeouts = [];
@@ -38,8 +38,8 @@ export default function useAudio(element, progress) {
 
     setTimeout(
       () => {
-        if (controls.auto_play)
-          controls.advance_progress(element.trackingProperties.line_index || 0);
+        //if (controls.auto_play)
+        //    controls.advance_progress(element.trackingProperties.line_index || 0);
       },
       audioObject.duration * 1000 - 150,
     );
@@ -52,12 +52,8 @@ export default function useAudio(element, progress) {
     window.playing_audio.push(cancel);
   }, [audio, ref]);
   React.useEffect(() => {
-    if (
-      element.trackingProperties.line_index === progress ||
-      (element.trackingProperties.line_index === undefined && progress === -1)
-    )
-      playAudio();
-  }, [progress, playAudio]);
+    if (active) playAudio();
+  }, [active, playAudio]);
 
   if (audio === undefined || !audio?.keypoints || !audio?.url)
     return [audioRange, undefined, ref, undefined];

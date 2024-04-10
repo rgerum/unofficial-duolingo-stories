@@ -1,12 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import styles from "./StoryTextLine.module.css";
-import { EditorContext, StoryContext } from "../story/story";
-import styles_common from "../story/common.module.css";
-import { EditorHook } from "../story/editor_hooks";
-import useAudio from "../story/text_lines/use_audio";
-import AudioPlay from "../story/text_lines/audio_play";
-import HintLineContent from "../story/text_lines/line_hints";
-import EditorSSMLDisplay from "../story/text_lines/audio_edit";
+import useAudio from "./use-audio.hook";
+import StoryLineHints from "../StoryLineHints";
+import PlayAudio from "../PlayAudio";
 
 //progress, unhide, element, part
 function StoryTextLine({ active, element, unhide = 0 }) {
@@ -62,8 +58,8 @@ function StoryTextLine({ active, element, unhide = 0 }) {
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />
           </audio>
-          <AudioPlay onClick={playAudio} />
-          <HintLineContent
+          <PlayAudio onClick={playAudio} />
+          <StoryLineHints
             audioRange={audioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             content={element.line.content}
@@ -92,8 +88,8 @@ function StoryTextLine({ active, element, unhide = 0 }) {
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />
           </audio>
-          <AudioPlay onClick={playAudio} />
-          <HintLineContent
+          <PlayAudio onClick={playAudio} />
+          <StoryLineHints
             audioRange={audioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             unhide={unhide}
@@ -114,8 +110,8 @@ function StoryTextLine({ active, element, unhide = 0 }) {
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />
           </audio>
-          <AudioPlay onClick={playAudio} />
-          <HintLineContent
+          <PlayAudio onClick={playAudio} />
+          <StoryLineHints
             audioRange={audioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             unhide={unhide}

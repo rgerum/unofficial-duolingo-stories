@@ -1,9 +1,9 @@
 import React from "react";
 import styles from "./StoryHeader.module.css";
 
-import useAudio from "../story/text_lines/use_audio";
-import AudioPlay from "../story/text_lines/audio_play";
-import HintLineContent from "../story/text_lines/line_hints";
+import useAudio from "../StoryTextLine/use-audio.hook";
+import PlayAudio from "../PlayAudio";
+import StoryLineHints from "../StoryLineHints";
 
 function StoryHeader({ active, element }) {
   let onClick = undefined;
@@ -29,8 +29,8 @@ function StoryHeader({ active, element }) {
         <audio ref={ref}>
           <source src={url} type="audio/mp3" />
         </audio>
-        <AudioPlay onClick={playAudio} />
-        <HintLineContent
+        <PlayAudio onClick={playAudio} />
+        <StoryLineHints
           audioRange={audioRange}
           hideRangesForChallenge={hideRangesForChallenge}
           content={element.learningLanguageTitleContent}
