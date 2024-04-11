@@ -4,6 +4,11 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { GetDocsData, getPageData } from "./doc_data";
 import styles from "./layout.module.css";
 import { notFound } from "next/navigation";
+import DocsSearchModal from "../../../components/DocsSearchModal";
+import DocsHeader from "../../../components/DocsHeader";
+import DocsNavigation from "../../../components/DocsNavigation";
+import DocsBreadCrumbNav from "../../../components/DocsBreadCrumbNav";
+import React from "react";
 
 export const dynamic = "force-static";
 export const dynamicParams = true;
@@ -19,16 +24,6 @@ export async function generateStaticParams() {
   }
 
   return pages;
-}
-
-async function PageLink({ page, active }) {
-  const data = await getPageData(page);
-  if (active) return <span className={styles.active}>{data.title}</span>;
-  return (
-    <Link href={`/docs/${page}`} className={active ? styles.active : undefined}>
-      <span>{data.title}</span>
-    </Link>
-  );
 }
 
 function save_tag(tag) {
@@ -54,95 +49,6 @@ function CustomMDX(props) {
       {...props}
       components={{ ...components, ...(props.components || {}) }}
     />
-  );
-}
-
-async function Layout({ children, path, datax, headings }) {
-  const data = await GetDocsData();
-
-  return (
-    <div className={styles.container} id="container">
-      <div className={styles.blur} id="blur"></div>
-      <div className={styles.blur2} id="blur2"></div>
-      <div className={styles.search_modal} id="search_modal">
-        <div>
-          <input
-            id="search_input"
-            placeholder=" Search Documentation..."
-          ></input>
-          <button>Esc</button>
-        </div>
-        <div id="search_results"></div>
-      </div>
-      <div className={styles.navbar}>
-        <div className={styles.navbar_inner}>
-          <div className={styles.navbar_logo}>
-            <Link href="/">Duostories</Link>
-          </div>
-          <button id="search" className={styles.search}>
-            <span>
-              <span>Search Documentation...</span>
-            </span>
-            <span>CtrlK</span>
-          </button>
-        </div>
-      </div>
-      <div className={styles.short_nav}>
-        <svg
-          id="toggle"
-          width="30"
-          height="30"
-          version="1.1"
-          viewBox="0 0 3.175 3.175"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g
-            fill="none"
-            stroke="#000"
-            strokeLinecap="square"
-            strokeWidth=".28222"
-          >
-            <path d="m0.80839 0.88828h1.5582" />
-            <path d="m0.80839 1.5875h1.5582" />
-            <path d="m0.80839 2.2867h1.5582" />
-          </g>
-        </svg>
-        <span>
-          {datax.group ? `${datax.group} › ` : null} <b>{datax.title}</b>
-        </span>
-      </div>
-      <div className={styles.main_container}>
-        <div className={styles.toc} id="toc">
-          <button className={styles.close} id="close">
-            ×
-          </button>
-          <div className={styles.toc_inner}>
-            {data.navigation.map((item, i) => (
-              <div key={i}>
-                {item.group ? <h5>{item.group}</h5> : null}
-                <ul>
-                  {item.pages.map((child, i) => (
-                    <li key={i}>
-                      <PageLink page={child} active={"/" + child === path} />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className={styles.main}>{children}</div>
-        <div className={styles.toc2}>
-          <div className={styles.toc2_inner}>
-            {headings.map((h, i) => (
-              <p key={i}>
-                <a href={"#" + save_tag(h)}>{h}</a>
-              </p>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -183,7 +89,7 @@ export default async function Page({ params }) {
   }
 
   return (
-    <Layout path={path} datax={data} headings={headings}>
+    <>
       <header id="header">
         <div>{data.group}</div>
         <h1>{data.title}</h1>
@@ -212,6 +118,6 @@ export default async function Page({ params }) {
       </footer>
       <hr />
       <Script src="/docs/search.js"></Script>
-    </Layout>
+    </>
   );
 }
