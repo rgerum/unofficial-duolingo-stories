@@ -346,14 +346,15 @@
         gap: 6px;
         align-items: center;
         border-bottom: 2px solid var(--docs-border);
-        height: 57px;
-        margin-bottom: 40px;
         width: 100%;
-        position: fixed;
+
+        position: sticky;
+        top: 82px;
+
         background: var(--docs-background);
-        padding-left: 20px;
-        top: 70px;
-        font-size: 15px;
+        padding: 8px;
+        padding-left: 26px;
+        font-size: calc(15 / 16 * 1rem);
     }
     .short_nav span {
     }

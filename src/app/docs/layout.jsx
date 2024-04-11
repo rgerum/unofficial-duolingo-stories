@@ -1,11 +1,11 @@
-import styles from "./layout.module.css";
-import DocsHeader from "../../../components/DocsHeader";
-import DocsBreadCrumbNav from "../../../components/DocsBreadCrumbNav";
-import DocsNavigation from "../../../components/DocsNavigation";
+import styles from "./[[...slug]]/layout.module.css";
+import DocsHeader from "../../components/DocsHeader";
+import DocsBreadCrumbNav from "../../components/DocsBreadCrumbNav";
+import DocsNavigation from "../../components/DocsNavigation";
 import React from "react";
-import { getDocsData, getPageData } from "./doc_data";
+import { getDocsData, getPageData } from "./[[...slug]]/doc_data";
 import { notFound } from "next/navigation";
-import DocsNavigationBackdrop from "../../../components/DocsNavigationBackdrop";
+import DocsNavigationBackdrop from "../../components/DocsNavigationBackdrop";
 
 export default async function Layout({ children, params }) {
   const data = await getDocsData();
