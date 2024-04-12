@@ -24,7 +24,7 @@ export default async function Layout({ children }) {
     <div className={styles.container} id="container">
       <DocsNavigationBackdrop>
         <DocsHeader />
-        <DocsBreadCrumbNav data={data} path_titles={path_titles} />
+        <DocsBreadCrumbNav path_titles={path_titles} />
 
         <div className={styles.main_container}>
           <DocsNavigation data={data} />

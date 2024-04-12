@@ -4,10 +4,10 @@ import styles from "./DocsBreadCrumbNav.module.css";
 import { showNavContext } from "../DocsNavigationBackdrop";
 import { useSelectedLayoutSegment } from "next/navigation";
 
-function DocsBreadCrumbNav({ data, path_titles }) {
+function DocsBreadCrumbNav({ path_titles }) {
   const { setShow } = React.useContext(showNavContext);
   const segment = useSelectedLayoutSegment();
-  data = path_titles[segment];
+  const current = path_titles[segment];
 
   return (
     <>
@@ -34,7 +34,12 @@ function DocsBreadCrumbNav({ data, path_titles }) {
           </svg>
         </button>
         <span>
-          {data.group ? `${data.group} › ` : null} <b>{data.title}</b>
+          {current && (
+            <>
+              {current.group ? `${current.group} › ` : null}{" "}
+              <b>{current.title}</b>
+            </>
+          )}
         </span>
       </div>
     </>
