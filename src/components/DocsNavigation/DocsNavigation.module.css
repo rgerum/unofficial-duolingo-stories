@@ -77,7 +77,7 @@
         box-shadow: 0 0 10px black;
 
         transform: translateX(calc(-100% - 10px));
-        transition: transform 0.3s ease-in;
+        transition: transform 0.5s ease-in;
     }
     .toc_inner {
         height: 100%;

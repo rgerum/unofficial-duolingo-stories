@@ -27,6 +27,7 @@ function DocsNavigation({ data, path }) {
                     <PageLink
                       page={child.slug}
                       title={child.title}
+                      setShow={setShow}
                       active={"/" + child.slug === path}
                     />
                   </li>
@@ -40,12 +41,16 @@ function DocsNavigation({ data, path }) {
   );
 }
 
-function PageLink({ page, title, active }) {
+function PageLink({ page, title, active, setShow }) {
   const className = active
     ? `${styles.pageLink} ${styles.active}`
     : styles.pageLink;
   return (
-    <Link href={`/docs/${page}`} className={className}>
+    <Link
+      href={`/docs/${page}`}
+      className={className}
+      onClick={() => setShow(false)}
+    >
       {title}
     </Link>
   );
