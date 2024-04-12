@@ -128,7 +128,6 @@ export default async function Page({ params }) {
           )}
         </footer>
         <hr />
-        <Script src="/docs/search.js"></Script>
       </div>
       <div className={styles.toc2}>
         <div className={styles.toc2_inner}>

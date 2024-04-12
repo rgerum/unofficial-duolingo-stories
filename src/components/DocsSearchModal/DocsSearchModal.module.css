@@ -17,7 +17,7 @@
     width: 100vw;
     height: 100vh;
     position: fixed;
-    z-index: 6;
+    z-index: 16;
 }
 .blur {
     display: none;
@@ -26,8 +26,15 @@
     height: 100vh;
     position: fixed;
     top: 0;
-    z-index: 3;
+    z-index: 16;
 }
+.blur[data-show=true] {
+    display: block;
+}
+.search_modal[data-show=true] {
+    display: block;
+}
+
 .navbar {
     width: 100%;
     background: var(--docs-background);
