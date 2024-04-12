@@ -5,11 +5,11 @@ import {
 
 function generateHintMap(text, translation) {
   if (!text) text = "";
-  text = text.replace(/\|/g, "​");
+  text = text.replace(/\|/g, "⁠");
   let text_list = splitTextTokens(text);
   text = text.replace(/~/g, " "); //
   if (!translation) translation = "";
-  translation = translation.replace(/\|/g, "​");
+  translation = translation.replace(/\|/g, "⁠");
   let trans_list = splitTextTokens2(translation);
   let hints = [];
   let hintMap = [];
@@ -24,7 +24,7 @@ function generateHintMap(text, translation) {
         rangeFrom: text_pos,
         rangeTo: text_pos + text_list[i].length - 1,
       });
-      hints.push(trans_list[i].replace(/~/g, " ").replace(/\|/g, "​"));
+      hints.push(trans_list[i].replace(/~/g, " ").replace(/\|/g, "⁠"));
     }
     text_pos += text_list[i].length;
   }
@@ -188,10 +188,10 @@ let punctuation_chars =
 //punctuation_chars = "\\\\¡!\"#$%&*,、，.。\\/:：;<=>¿?@^_`{|}…"
 
 let regex_split_token = new RegExp(
-  `([\\s${punctuation_chars}\\]]*(?:^|\\s|$|​)[\\s${punctuation_chars}]*)`,
+  `([\\s${punctuation_chars}\\]]*(?:^|\\s|$|​|⁠)[\\s${punctuation_chars}]*)`,
 );
 let regex_split_token2 = new RegExp(
-  `([\\s${punctuation_chars}~]*(?:^|\\s|$|​)[\\s${punctuation_chars}~]*)`,
+  `([\\s${punctuation_chars}~]*(?:^|\\s|$|​|⁠)[\\s${punctuation_chars}~]*)`,
 );
 /*
 function splitTextTokens(text, keep_tilde=true) {
@@ -223,9 +223,9 @@ function splitTextTokens2(text, keep_tilde = true) {
   if (!text) return [];
   if (keep_tilde)
     //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
-    return text.split(/([\s​]+)/);
+    return text.split(/([\s​⁠]+)/);
   //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
-  else return text.split(/([\s​~]+)/);
+  else return text.split(/([\s​⁠~]+)/);
 }
 
 function getInputStringText(text) {
@@ -256,7 +256,7 @@ function getInputStringSpeechText(text, hide) {
       )
       .replace(/([^-|~ ,;.:_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>')
       .replace(/~/g, " ")
-      .replace(/\|/g, "​") +
+      .replace(/\|/g, "⁠") +
     "</speak>"
   );
 }
@@ -463,7 +463,7 @@ function pointToPhraseButtons(line) {
   line = line.replace(/(\s*)\)/g, ")$1");
   line = line.replace(/~/g, " ");
   line = line.replace(/ +/g, " ");
-  line = line.replace(/\|/g, "​");
+  line = line.replace(/\|/g, "⁠");
   line = line.replace(/\[\[/g, "[");
   line = line.replace(/]]/g, "]");
   line = line.replace(/\\n/g, "\n");
