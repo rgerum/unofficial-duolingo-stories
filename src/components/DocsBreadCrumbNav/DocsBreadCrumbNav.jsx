@@ -8,10 +8,7 @@ function DocsBreadCrumbNav({ datax }) {
   return (
     <>
       <div className={styles.short_nav}>
-        <button
-          className={styles.unstyledButton}
-          onClick={() => setShow(() => setShow(true))}
-        >
+        <button className={styles.unstyledButton} onClick={() => setShow(true)}>
           <svg
             id="toggle"
             width="30"
