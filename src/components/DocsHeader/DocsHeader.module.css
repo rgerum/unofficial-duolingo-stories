@@ -22,7 +22,6 @@
     text-decoration: none;
 }
 .navbar_inner .search {
-    outline: none;
     border: none;
     padding: 8px 8px 8px 16px;
     border-radius: 10px;
