@@ -369,11 +369,10 @@
 @media (max-width: 640px) {
     .search_modal {
         display: block;
+        bottom: 0;
         width: 100%;
-        bottom: -80%;
-        transition: bottom .2s ease;
-        height: 80%;
-        top: auto;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
     }
     .search_modal[show="true"] {
         bottom: 0;
