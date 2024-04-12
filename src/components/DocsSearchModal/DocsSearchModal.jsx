@@ -72,8 +72,13 @@ function DocsSearchModal({
   searchText,
   setSearchText,
 }) {
+  const ref = React.useRef();
   // close on Escape if open
   useKeypress("Escape", () => showSearch && setShowSearch(false), [showSearch]);
+
+  React.useEffect(() => {
+    if (showSearch) ref.current.focus();
+  }, [showSearch]);
 
   async function search(value) {
     setSearchText(value);
@@ -111,6 +116,7 @@ function DocsSearchModal({
         <div>
           <input
             id="search_input"
+            ref={ref}
             placeholder=" Search Documentation..."
             value={searchText}
             onChange={(e) => search(e.target.value)}

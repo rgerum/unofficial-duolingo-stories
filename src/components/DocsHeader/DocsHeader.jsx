@@ -3,6 +3,7 @@ import React from "react";
 import styles from "./DocsHeader.module.css";
 import Link from "next/link";
 import DocsSearchModal from "../DocsSearchModal";
+import useKeypress from "../../hooks/use-keypress.hook";
 
 function DocsHeader() {
   const [showSearch, setShowSearch] = React.useState(false);
@@ -12,6 +13,16 @@ function DocsHeader() {
     setShowSearch(value);
     setSearchText("");
   }
+  //useKeypress("ctrl+k", () => !showSearch && doShow(true), [showSearch]);
+  useKeypress(
+    "ctrl+k",
+    (e) => {
+      e.preventDefault();
+      !showSearch && doShow(true);
+    },
+    [showSearch],
+    "keydown",
+  );
 
   return (
     <>
@@ -34,7 +45,7 @@ function DocsHeader() {
             <span>
               <span>Search Documentation...</span>
             </span>
-            <span>CtrlK</span>
+            <span>Ctrl K</span>
           </button>
         </div>
       </div>
