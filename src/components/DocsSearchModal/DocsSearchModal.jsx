@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./DocsSearchModal.module.css";
 import useKeypress from "../../hooks/use-keypress.hook";
+import Link from "next/link";
 
 // https://beta.duostories.org/docs/story-creation/import.mdx
 const basefolder = "/docs";
@@ -73,31 +74,35 @@ function DocsSearchModal({
   setSearchText,
 }) {
   const ref = React.useRef();
+  const [searchResults, setSearchResults] = React.useState([]);
   // close on Escape if open
   useKeypress("Escape", () => showSearch && setShowSearch(false), [showSearch]);
 
   React.useEffect(() => {
-    if (showSearch) ref.current.focus();
+    if (showSearch) {
+      ref.current.focus();
+      setSearchResults(undefined);
+    }
   }, [showSearch]);
 
   async function search(value) {
     setSearchText(value);
     const pages = await loadAll();
 
-    let innerHTML = "";
+    const results = [];
     for (let page of pages) {
       let found = false;
       for (let part of page.parts) {
         if (part.text.includes(value)) {
           if (!found) {
             found = true;
-            innerHTML += `<a href="/docs/${page.link}" data-type="main">${page.title}</a>`;
+            results.push({ link: page.link, type: "main", text: page.title });
           }
-          innerHTML += `<a href="/docs/${part.link}" data-type="sub">${part.text}</a>`;
+          results.push({ link: part.link, type: "sub", text: part.text });
         }
       }
     }
-    document.getElementById("search_results").innerHTML = innerHTML;
+    setSearchResults(results);
   }
 
   return (
@@ -123,7 +128,23 @@ function DocsSearchModal({
           ></input>
           <button onClick={() => setShowSearch(false)}>Esc</button>
         </div>
-        <div id="search_results"></div>
+        <div id="search_results">
+          {searchResults === undefined && <span>Type to search</span>}
+          {searchResults && searchResults.length === 0 && (
+            <span>No results</span>
+          )}
+          {searchResults &&
+            searchResults.map((item, index) => (
+              <Link
+                key={item.link + "-" + index}
+                href={`/docs/${item.link}`}
+                data-type={item.type}
+                onClick={() => showSearch(false)}
+              >
+                {item.text}
+              </Link>
+            ))}
+        </div>
       </div>
     </>
   );
