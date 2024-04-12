@@ -2,6 +2,7 @@ import React from "react";
 import styles from "./DocsSearchModal.module.css";
 import useKeypress from "../../hooks/use-keypress.hook";
 import Link from "next/link";
+import * as Dialog from "@radix-ui/react-dialog";
 
 // https://beta.duostories.org/docs/story-creation/import.mdx
 const basefolder = "/docs";
@@ -80,7 +81,7 @@ function DocsSearchModal({
 
   React.useEffect(() => {
     if (showSearch) {
-      ref.current.focus();
+      //ref.current.focus();
       setSearchResults(undefined);
     }
   }, [showSearch]);
@@ -104,48 +105,51 @@ function DocsSearchModal({
     }
     setSearchResults(results);
   }
+  /*
+            <Dialog.Title />
+          <Dialog.Description />
+   */
 
   return (
     <>
-      <div
-        className={styles.blur}
-        id="blur"
-        data-show={showSearch}
-        onClick={() => setShowSearch(false)}
-      ></div>
-      <div
-        className={styles.search_modal}
-        id="search_modal"
-        data-show={showSearch}
-      >
-        <div>
-          <input
-            id="search_input"
-            ref={ref}
-            placeholder=" Search Documentation..."
-            value={searchText}
-            onChange={(e) => search(e.target.value)}
-          ></input>
-          <button onClick={() => setShowSearch(false)}>Esc</button>
-        </div>
-        <div id="search_results">
-          {searchResults === undefined && <span>Type to search</span>}
-          {searchResults && searchResults.length === 0 && (
-            <span>No results</span>
-          )}
-          {searchResults &&
-            searchResults.map((item, index) => (
-              <Link
-                key={item.link + "-" + index}
-                href={`/docs/${item.link}`}
-                data-type={item.type}
-                onClick={() => showSearch(false)}
-              >
-                {item.text}
-              </Link>
-            ))}
-        </div>
-      </div>
+      <Dialog.Portal>
+        <Dialog.Overlay className={styles.blur} data-show={showSearch} />
+        <Dialog.Content
+          className={styles.search_modal}
+          id="search_modal"
+          data-show={showSearch}
+        >
+          <div>
+            <input
+              id="search_input"
+              ref={ref}
+              placeholder=" Search Documentation..."
+              value={searchText}
+              onChange={(e) => search(e.target.value)}
+            ></input>
+            <Dialog.Close asChild={true}>
+              <button onClick={() => setShowSearch(false)}>Esc</button>
+            </Dialog.Close>
+          </div>
+          <div id="search_results">
+            {searchResults === undefined && <span>Type to search</span>}
+            {searchResults && searchResults.length === 0 && (
+              <span>No results</span>
+            )}
+            {searchResults &&
+              searchResults.map((item, index) => (
+                <Link
+                  key={item.link + "-" + index}
+                  href={`/docs/${item.link}`}
+                  data-type={item.type}
+                  onClick={() => showSearch(false)}
+                >
+                  {item.text}
+                </Link>
+              ))}
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
     </>
   );
 }

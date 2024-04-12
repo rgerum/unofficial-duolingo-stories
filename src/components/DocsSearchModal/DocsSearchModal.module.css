@@ -31,6 +31,12 @@
 .blur[data-show=true] {
     display: block;
 }
+.search_modal {
+    --docs-background: white;
+    --docs-border: #fbfbfb; /*var(--overview-hr);*/
+    --docs-toc-hover: #f6f6f6;
+    --docs-toc-active: #eae9eb;
+}
 .search_modal[data-show=true] {
     display: block;
 }

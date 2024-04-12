@@ -4,6 +4,7 @@ import styles from "./DocsHeader.module.css";
 import Link from "next/link";
 import DocsSearchModal from "../DocsSearchModal";
 import useKeypress from "../../hooks/use-keypress.hook";
+import * as Dialog from "@radix-ui/react-dialog";
 
 function DocsHeader() {
   const [showSearch, setShowSearch] = React.useState(false);
@@ -26,27 +27,32 @@ function DocsHeader() {
 
   return (
     <>
-      <DocsSearchModal
-        showSearch={showSearch}
-        setShowSearch={doShow}
-        searchText={searchText}
-        setSearchText={setSearchText}
-      />
       <div className={styles.navbar}>
         <div className={styles.navbar_inner}>
           <div className={styles.navbar_logo}>
             <Link href="/">Duostories</Link>
           </div>
-          <button
-            id="search"
-            className={styles.search}
-            onClick={() => doShow(true)}
-          >
-            <span>
-              <span>Search Documentation...</span>
-            </span>
-            <span>Ctrl K</span>
-          </button>
+
+          <Dialog.Root open={showSearch} onOpenChange={doShow}>
+            <Dialog.Trigger asChild={true}>
+              <button
+                id="search"
+                className={styles.search}
+                onClick={() => doShow(true)}
+              >
+                <span>
+                  <span>Search Documentation...</span>
+                </span>
+                <span>Ctrl K</span>
+              </button>
+            </Dialog.Trigger>
+            <DocsSearchModal
+              showSearch={showSearch}
+              setShowSearch={doShow}
+              searchText={searchText}
+              setSearchText={setSearchText}
+            />
+          </Dialog.Root>
         </div>
       </div>
     </>
