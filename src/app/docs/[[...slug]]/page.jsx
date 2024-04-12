@@ -1,25 +1,21 @@
-import Link from "next/link";
-import Script from "next/script";
-import { MDXRemote } from "next-mdx-remote/rsc";
-import { GetDocsData, getPageData } from "./doc_data";
-import styles from "./layout.module.css";
-import { notFound } from "next/navigation";
-import DocsSearchModal from "../../../components/DocsSearchModal";
-import DocsHeader from "../../../components/DocsHeader";
-import DocsNavigation from "../../../components/DocsNavigation";
-import DocsBreadCrumbNav from "../../../components/DocsBreadCrumbNav";
 import React from "react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { MDXRemote } from "next-mdx-remote/rsc";
+
+import { getDocsData, getPageData } from "./doc_data";
+import styles from "./layout.module.css";
 
 export const dynamic = "force-static";
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  const data = await GetDocsData();
+  const data = await getDocsData();
 
   const pages = [{ slug: [] }];
   for (let group of data.navigation) {
     for (let page of group.pages) {
-      pages.push({ slug: page.split("/") });
+      pages.push({ slug: page.slug.split("/") });
     }
   }
 
@@ -71,19 +67,19 @@ export default async function Page({ params }) {
   if (path.endsWith(".js") || path.endsWith(".mdx")) return notFound();
 
   let data = await getPageData(path);
-  let doc_data = await GetDocsData();
+  let doc_data = await getDocsData();
   let previous = null;
   let found = false;
   let next = null;
   for (let group of doc_data.navigation) {
     for (let page of group.pages) {
-      if (!next && found) next = page;
-      if ("/" + page === path) {
+      if (!next && found) next = page.slug;
+      if ("/" + page.slug === path) {
         data.group = group.group;
         found = true;
       }
       if (!found) {
-        previous = page;
+        previous = page.slug;
       }
     }
   }
