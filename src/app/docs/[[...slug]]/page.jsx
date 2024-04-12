@@ -32,7 +32,17 @@ function save_tag(tag) {
 
 const components = {
   Info: (props) => (
-    <p {...props} className={styles.info}>
+    <p {...props} className={styles.box + " " + styles.info}>
+      {props.children}
+    </p>
+  ),
+  Warning: (props) => (
+    <p {...props} className={styles.box + " " + styles.warning}>
+      {props.children}
+    </p>
+  ),
+  Alert: (props) => (
+    <p {...props} className={styles.box + " " + styles.alert}>
       {props.children}
     </p>
   ),
@@ -90,34 +100,45 @@ export default async function Page({ params }) {
 
   return (
     <>
-      <header id="header">
-        <div>{data.group}</div>
-        <h1>{data.title}</h1>
-        <div>{data.description}</div>
-      </header>
-      <CustomMDX source={data.body} />
-      <div className={styles.button_container}>
-        <Link
-          className={styles.button}
-          href={`https://github.com/${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}/edit/${process.env.VERCEL_GIT_COMMIT_REF}/public/docs${path}.mdx`}
-        >
-          <small>Suggest edits</small>
-        </Link>
+      <div className={styles.main}>
+        <header id="header">
+          <div>{data.group}</div>
+          <h1>{data.title}</h1>
+          <div>{data.description}</div>
+        </header>
+        <CustomMDX source={data.body} />
+        <div className={styles.button_container}>
+          <Link
+            className={styles.button}
+            href={`https://github.com/${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}/edit/${process.env.VERCEL_GIT_COMMIT_REF}/public/docs${path}.mdx`}
+          >
+            <small>Suggest edits</small>
+          </Link>
+        </div>
+        <footer>
+          {previous ? (
+            <Link href={"/docs/" + previous}>{previousData.title}</Link>
+          ) : (
+            <span></span>
+          )}
+          {next ? (
+            <Link href={"/docs/" + next}>{nextData.title}</Link>
+          ) : (
+            <span></span>
+          )}
+        </footer>
+        <hr />
+        <Script src="/docs/search.js"></Script>
       </div>
-      <footer>
-        {previous ? (
-          <Link href={"/docs/" + previous}>{previousData.title}</Link>
-        ) : (
-          <span></span>
-        )}
-        {next ? (
-          <Link href={"/docs/" + next}>{nextData.title}</Link>
-        ) : (
-          <span></span>
-        )}
-      </footer>
-      <hr />
-      <Script src="/docs/search.js"></Script>
+      <div className={styles.toc2}>
+        <div className={styles.toc2_inner}>
+          {headings.map((h, i) => (
+            <p key={i}>
+              <a href={"#" + save_tag(h)}>{h}</a>
+            </p>
+          ))}
+        </div>
+      </div>
     </>
   );
 }

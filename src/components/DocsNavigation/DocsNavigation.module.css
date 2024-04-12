@@ -3,27 +3,22 @@
     width: 288px;
     flex-shrink: 0;
     z-index: 5;
-    background: var(--docs-background);
 }
 .toc_inner {
-    font-size: 14px;
-    line-height: 24px;
-
+    font-size: 1rem;
     background: var(--docs-background);
     position: fixed;
     overflow-y: scroll;
     width: 288px;
     height: calc(100vh - 70px);
 
-    padding-left: 1rem;
-    padding-right: 1.5rem;
-    padding-bottom: 2.5rem;
+    padding: 16px;
 }
 .toc h5 {
     padding: 24px 16px 6px;
     margin: 0;
+    font-size: 1rem;
     font-weight: bold;
-    font-size: calc(14 / 16 * 1rem);
 }
 .toc ul {
     list-style: none;
@@ -50,6 +45,7 @@
     border-radius: .5rem;
     margin: 0;
     padding: 6px 16px;
+    font-weight: 300;
 }
 
 .close {
@@ -75,6 +71,8 @@
         height: 100%;
         z-index: 10;
         padding-top: 32px;
+
+        background: var(--docs-background);
 
         box-shadow: 0 0 10px black;
 

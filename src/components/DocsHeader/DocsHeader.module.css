@@ -29,6 +29,7 @@
     white-space: nowrap;
     display: flex;
     align-items: baseline;
+    font-size: 1rem;
 }
 .search>span:nth-child(1) {
     text-overflow: ellipsis;

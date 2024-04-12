@@ -48,16 +48,7 @@ export default async function Layout({ children, params }) {
 
         <div className={styles.main_container}>
           <DocsNavigation data={data} path={path} />
-          <div className={styles.main}>{children}</div>
-          <div className={styles.toc2}>
-            <div className={styles.toc2_inner}>
-              {headings.map((h, i) => (
-                <p key={i}>
-                  <a href={"#" + save_tag(h)}>{h}</a>
-                </p>
-              ))}
-            </div>
-          </div>
+          {children}
         </div>
       </DocsNavigationBackdrop>
     </div>
