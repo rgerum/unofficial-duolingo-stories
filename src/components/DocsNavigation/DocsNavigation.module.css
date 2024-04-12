@@ -70,7 +70,6 @@
         top: 0;
         height: 100%;
         z-index: 10;
-        padding-top: 32px;
 
         background: var(--docs-background);
 
