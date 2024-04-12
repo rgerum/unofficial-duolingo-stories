@@ -3,9 +3,12 @@ import React from "react";
 import styles from "./DocsNavigation.module.css";
 import Link from "next/link";
 import { showNavContext } from "../DocsNavigationBackdrop";
+import { useSelectedLayoutSegment } from "next/navigation";
 
-function DocsNavigation({ data, path }) {
+function DocsNavigation({ data }) {
   const { show, setShow } = React.useContext(showNavContext);
+
+  const segment = useSelectedLayoutSegment();
 
   return (
     <>
@@ -28,7 +31,7 @@ function DocsNavigation({ data, path }) {
                       page={child.slug}
                       title={child.title}
                       setShow={setShow}
-                      active={"/" + child.slug === path}
+                      active={child.slug === segment}
                     />
                   </li>
                 ))}
@@ -54,10 +57,6 @@ function PageLink({ page, title, active, setShow }) {
       {title}
     </Link>
   );
-}
-
-function save_tag(tag) {
-  return tag.trim().toLowerCase().replace(/\s+/g, "-");
 }
 
 export default DocsNavigation;
