@@ -349,12 +349,13 @@
         width: 100%;
 
         position: sticky;
-        top: 82px;
+        top: 80px;
 
         background: var(--docs-background);
         padding: 8px;
         padding-left: 26px;
         font-size: calc(15 / 16 * 1rem);
+        z-index: 1;
     }
     .short_nav span {
     }
