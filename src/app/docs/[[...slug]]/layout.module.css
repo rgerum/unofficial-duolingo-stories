@@ -92,7 +92,7 @@
   z-index: 5;
 }
 .toc_inner {
-  font-size: 14px;
+  font-size: 1rem;
   line-height: 24px;
 
   background: var(--docs-background);
@@ -112,7 +112,7 @@
   padding-bottom: 6px;
   font-weight: bold;
   margin: 10px 0 5px;
-  font-size: 14px;
+  font-size: 1rem;
 }
 .toc ul {
 }
@@ -146,7 +146,7 @@ background: var(--docs-toc-hover);
 }
 
 .main {
-  font-size: 18px;
+  font-size: calc(18 / 16 * 1rem);
   padding: 20px 32px;
   flex-grow: 1;
   width: 100px;
@@ -167,6 +167,10 @@ background: var(--docs-toc-hover);
 }
 .main p {
   margin: 16px 0 16px 0;
+}
+.main ul, .main ol {
+  padding-left: 19px;
+  margin: 16px 0;
 }
 
 .button_container {
@@ -260,7 +264,7 @@ background: var(--docs-toc-hover);
   transition: transform .1s ease;
   outline: none;
   z-index: 100;
-  font-size: 16px;
+  font-size: 1rem;
 }
 .search_modal[show="true"] {
     display: block;
@@ -315,7 +319,7 @@ background: var(--docs-toc-hover);
     border: 0;
     background: none;
     cursor: pointer;
-    font-size: 30px;
+    font-size: calc(30 / 16 * 1rem);
     z-index: 10;
   }
   .toc {
@@ -349,7 +353,7 @@ background: var(--docs-toc-hover);
     background: var(--docs-background);
     padding-left: 20px;
     top: 70px;
-    font-size: 15px;
+    font-size: 1rem;
   }
   .short_nav span {
   }
