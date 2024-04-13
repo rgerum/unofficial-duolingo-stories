@@ -426,3 +426,23 @@ background: var(--docs-toc-hover);
   content: 'Alert';
   color: #f23535;
 }
+
+.channel_link {
+  background: #b5d9ff;
+  border-radius: 5px;
+  text-decoration: none;
+  padding: 2px 4px;
+  font-family: mono;
+}
+.channel_link:hover {
+  background: #89c3ff;
+}
+
+.image_wrapper {
+  overflow: auto;
+  margin: 0 -32px;
+  padding: 0 32px;
+}
+.image_wrapper p {
+  margin: 0;
+}

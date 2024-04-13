@@ -42,6 +42,15 @@ const components = {
       {props.children}
     </p>
   ),
+  Channel: (props) => (
+    <Link {...props} className={styles.channel_link}>
+      {props.children}
+    </Link>
+  ),
+  a: Link,
+  Image: (props) => (
+    <div className={styles.image_wrapper}>{props.children}</div>
+  ),
   h3: (props) => (
     <h3 {...props} id={save_tag(props.children)}>
       {props.children}
