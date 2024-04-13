@@ -307,6 +307,7 @@ export default function Editor({ story_data, avatar_names, session }) {
         {(audio_editor_data?.line?.content ||
           audio_editor_data?.learningLanguageTitleContent) && (
           <SoundRecorder
+            key={audio_editor_data.trackingProperties.line_index}
             content={
               audio_editor_data?.line?.content ||
               audio_editor_data?.learningLanguageTitleContent
