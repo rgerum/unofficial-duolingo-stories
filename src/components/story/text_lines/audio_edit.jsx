@@ -44,7 +44,13 @@ export default function EditorSSMLDisplay({ ssml, element, audio }) {
       <span className={styles.ssml_speaker + " en"}>{ssml.speaker}</span>
       <span className={styles.ssml}>{ssml.text}</span>
       {searchParams.get("beta") !== null && (
-        <span onClick={() => editor.show_audio_editor(element)}> 🎤 </span>
+        <span
+          onClick={() => editor.show_audio_editor(element)}
+          style={{ cursor: "pointer" }}
+        >
+          {" "}
+          🎤{" "}
+        </span>
       )}
       {ssml.speaker ? (
         error ? (
@@ -81,6 +87,7 @@ export default function EditorSSMLDisplay({ ssml, element, audio }) {
       {beta ? (
         <a
           onClick={() => window.open_recoder({ ssml, element, audio, editor })}
+          style={{ cursor: "pointer" }}
         >
           🎤
         </a>
