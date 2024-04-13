@@ -304,9 +304,13 @@ export default function Editor({ story_data, avatar_names, session }) {
           language_data2={language_data2}
           session={session}
         />
-        {audio_editor_data?.line?.content && (
+        {(audio_editor_data?.line?.content ||
+          audio_editor_data?.learningLanguageTitleContent) && (
           <SoundRecorder
-            content={audio_editor_data.line.content}
+            content={
+              audio_editor_data?.line?.content ||
+              audio_editor_data?.learningLanguageTitleContent
+            }
             initialTimingText={timings_to_text({
               keypoints: audio_editor_data.audio.keypoints,
             })}
