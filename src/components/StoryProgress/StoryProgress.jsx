@@ -42,21 +42,21 @@ function getComponent(parts) {
   return Line;
 }
 
-function Header({ parts, active, setButtonStatus }) {
+function Header({ parts, active, setButtonStatus, settings }) {
   if (active) setButtonStatus("continue");
 
   return (
     <FadeGlideIn>
-      <StoryHeader active={active} element={parts[0]} />
+      <StoryHeader active={active} element={parts[0]} settings={settings} />
     </FadeGlideIn>
   );
 }
 
-function Line({ parts, active, setButtonStatus }) {
+function Line({ parts, active, setButtonStatus, settings }) {
   if (active) setButtonStatus("continue");
   return (
     <FadeGlideIn>
-      <StoryTextLine active={active} element={parts[0]} />
+      <StoryTextLine active={active} element={parts[0]} settings={settings} />
     </FadeGlideIn>
   );
 }
@@ -77,7 +77,7 @@ function GetParts(story) {
   return parts;
 }
 
-function StoryProgress({ story, parts_list, ...args }) {
+function StoryProgress({ story, parts_list, settings, ...args }) {
   if (story) {
     parts_list = GetParts(story);
   }
@@ -108,7 +108,12 @@ function StoryProgress({ story, parts_list, ...args }) {
 
   const part_list_with_component = [];
   for (let parts of parts_list) {
-    if (storyProgress >= getIndex(parts)) {
+    if (storyProgress >= getIndex(parts) || settings.show_all) {
+      if (
+        settings.hide_questions &&
+        parts[0].trackingProperties?.challenge_type === "match"
+      )
+        continue;
       part_list_with_component.push({
         parts,
         id: getIndex(parts),
@@ -120,13 +125,16 @@ function StoryProgress({ story, parts_list, ...args }) {
   return (
     <>
       <div>
-        <div className={styles.header}>
-          <ProgressBar progress={storyProgress} length={parts_list.length} />
-        </div>
+        {!settings.show_all && (
+          <div className={styles.header}>
+            <ProgressBar progress={storyProgress} length={parts_list.length} />
+          </div>
+        )}
         <div className={styles.story}>
           <AnimatePresence>
             {part_list_with_component.map(({ Component, id, parts }) => {
-              const active = storyProgress === getIndex(parts);
+              const active =
+                storyProgress === getIndex(parts) && !settings.show_all;
               return (
                 <Component
                   key={id}
@@ -136,6 +144,7 @@ function StoryProgress({ story, parts_list, ...args }) {
                     active ? setButtonStatus : () => console.log("not allowed")
                   }
                   active={active}
+                  settings={settings}
                   {...args}
                 ></Component>
               );
@@ -146,7 +155,9 @@ function StoryProgress({ story, parts_list, ...args }) {
             <StoryFinishedScreen story={story} />
           )}
         </div>
-        <StoryFooter buttonStatus={buttonStatus} onClick={next} />
+        {!settings.show_all && (
+          <StoryFooter buttonStatus={buttonStatus} onClick={next} />
+        )}
       </div>
     </>
   );

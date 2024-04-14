@@ -10,15 +10,26 @@ function StoryChallengePointToPhrase({
   partProgress,
   setButtonStatus,
   active,
+  settings,
 }) {
   if (active && partProgress === 0) setButtonStatus("idle");
 
   const id = React.useId();
   const show_question = active && partProgress === 1;
+
+  if (settings.hide_questions) {
+    if (active) setButtonStatus("continue");
+    return (
+      <FadeGlideIn key={`${id}-1`}>
+        <StoryTextLine active={active} element={parts[0]} settings={settings} />
+      </FadeGlideIn>
+    );
+  }
+
   return (
     <>
       <FadeGlideIn key={`${id}-1`} show={!show_question}>
-        <StoryTextLine element={parts[0]} />
+        <StoryTextLine element={parts[0]} settings={settings} />
       </FadeGlideIn>
       <FadeGlideIn key={`${id}-1`} show={show_question}>
         <StoryQuestionPointToPhrase

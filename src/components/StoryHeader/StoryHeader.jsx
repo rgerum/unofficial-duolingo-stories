@@ -5,11 +5,19 @@ import useAudio from "../StoryTextLine/use-audio.hook";
 import PlayAudio from "../PlayAudio";
 import StoryLineHints from "../StoryLineHints";
 
-function StoryHeader({ active, element }) {
+function StoryHeader({ active, element, settings }) {
   let onClick = undefined;
   const [audioRange, playAudio, ref, url] = useAudio(element, active);
 
   const hideRangesForChallenge = undefined;
+
+  if (settings?.show_names) {
+    return (
+      <p>
+        {"Narrator"}: {element.learningLanguageTitleContent.text}
+      </p>
+    );
+  }
 
   return (
     <div

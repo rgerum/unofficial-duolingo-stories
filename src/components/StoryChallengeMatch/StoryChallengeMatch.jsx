@@ -3,8 +3,11 @@ import styles from "./StoryChallengeMatch.module.css";
 import StoryQuestionMatch from "../StoryQuestionMatch";
 import FadeGlideIn from "../FadeGlideIn";
 
-function StoryChallengeMatch({ parts, active, setButtonStatus }) {
+function StoryChallengeMatch({ parts, active, setButtonStatus, settings }) {
   const id = React.useId();
+  if (settings.hide_questions) {
+    return null;
+  }
   return (
     <FadeGlideIn key={`${id}-1`} show={active}>
       <StoryQuestionMatch

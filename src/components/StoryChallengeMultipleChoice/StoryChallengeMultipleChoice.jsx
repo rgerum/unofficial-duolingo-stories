@@ -9,12 +9,22 @@ function StoryChallengeMultipleChoice({
   partProgress,
   setButtonStatus,
   active,
+  settings,
 }) {
-  if (active && partProgress === 0) setButtonStatus("idle");
+  if (active && partProgress === 0)
+    setButtonStatus(settings.hide_questions ? "continue" : "idle");
 
   const id = React.useId();
 
   const show_question = active && partProgress === 1;
+
+  if (settings.hide_questions) {
+    return (
+      <FadeGlideIn key={`${id}-1`}>
+        <StoryTextLine active={active} element={parts[0]} settings={settings} />
+      </FadeGlideIn>
+    );
+  }
 
   return (
     <>
@@ -22,6 +32,7 @@ function StoryChallengeMultipleChoice({
         <StoryTextLine
           key={parts[0].trackingProperties.line_index}
           element={parts[0]}
+          settings={settings}
         />
       </FadeGlideIn>
       <FadeGlideIn key={`${id}-2`} show={show_question}>

@@ -4,49 +4,29 @@ import useAudio from "./use-audio.hook";
 import StoryLineHints from "../StoryLineHints";
 import PlayAudio from "../PlayAudio";
 
-//progress, unhide, element, part
-function StoryTextLine({ active, element, unhide = 0 }) {
-  //const editor = React.useContext(EditorContext);
-  //const controls = React.useContext(StoryContext);
-
-  //let active = progress >= element.trackingProperties.line_index;
-  /*
-  if (
-      progress - 0.5 === element.trackingProperties.line_index &&
-      part.length > 1 &&
-      part[1].type === "POINT_TO_PHRASE"
-  )
-    active = 0;
-
-  let hidden = !active ? styles_common.hidden : "";
-
-  let onClick;
-  [hidden, onClick] = EditorHook(hidden, element.editor, editor);
-*/
-  let onClick = undefined;
-  let progress = 0;
-  let [audioRange, playAudio, ref, url] = useAudio(element, active);
-  //useEffect(playAudio, [active]);
+function StoryTextLine({ active, element, unhide = 999999, settings }) {
+  const onClick = undefined;
+  const [audioRange, playAudio, ref, url] = useAudio(element, active);
 
   if (element.line === undefined) return <></>;
 
-  //let unhide = 0;
-  let controls = { rtl: false };
-  let hideRangesForChallenge = element.hideRangesForChallenge;
-  // TODO window.view === undefined && props.progress !== element.trackingProperties.line_index)
-  //if (progress !== element.trackingProperties.line_index && !editor)
-  //  hideRangesForChallenge = undefined;
-  //if (controls.hide_questions) {
-  //  hideRangesForChallenge = undefined;
-  // }
-  /*
-  if (controls.auto_play) {
-    element.line.content.hintMap = [];
-    playAudio = undefined;
-  }*/
-  //if(props.progress !== element.trackingProperties.line_index)
-  //    hideRangesForChallenge = undefined;
-  // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
+  const controls = { rtl: false };
+  const hideRangesForChallenge = element.hideRangesForChallenge;
+
+  if (settings?.show_names) {
+    return (
+      <>
+        <span>
+          {element?.line?.characterName ||
+            element?.line?.characterId ||
+            "Narrator"}
+          :
+        </span>
+        <span> {element.line.content.text}</span>
+      </>
+    );
+  }
+
   if (element.line.type === "TITLE")
     return (
       <div
