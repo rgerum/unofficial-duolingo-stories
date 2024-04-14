@@ -31,7 +31,7 @@
         height: auto;
         padding: 16px;
 
-        & button {
+        .footer button {
             width: 100%;
         }
     }
