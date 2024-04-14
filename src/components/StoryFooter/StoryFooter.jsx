@@ -22,7 +22,7 @@ function StoryFooter({ buttonStatus, onClick }) {
     return (
       <div className={styles.footer}>
         <div className={styles.width_wrapper}>
-          <Button key={"c"} disabled onClick={onClick}>
+          <Button key={"c"} onClick={onClick}>
             {localisation("button_finished") || "finished"}
           </Button>
         </div>

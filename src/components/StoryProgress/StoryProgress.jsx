@@ -119,35 +119,35 @@ function StoryProgress({ story, parts_list, ...args }) {
 
   return (
     <>
-      <div className={styles.header}>
-        <ProgressBar progress={storyProgress} length={parts_list.length} />
+      <div>
+        <div className={styles.header}>
+          <ProgressBar progress={storyProgress} length={parts_list.length} />
+        </div>
+        <div className={styles.story}>
+          <AnimatePresence>
+            {part_list_with_component.map(({ Component, id, parts }) => {
+              const active = storyProgress === getIndex(parts);
+              return (
+                <Component
+                  key={id}
+                  parts={parts}
+                  partProgress={partProgress}
+                  setButtonStatus={
+                    active ? setButtonStatus : () => console.log("not allowed")
+                  }
+                  active={active}
+                  {...args}
+                ></Component>
+              );
+            })}
+          </AnimatePresence>
+          <div className={styles.spacer}></div>
+          {storyProgress === parts_list.length && (
+            <StoryFinishedScreen story={story} />
+          )}
+        </div>
+        <StoryFooter buttonStatus={buttonStatus} onClick={next} />
       </div>
-      <div className={styles.story}>
-        <AnimatePresence>
-          <span key={"a"}>{storyProgress}</span> <span>{partProgress}</span>{" "}
-          <span key={"b"}>{buttonStatus}</span>
-          {part_list_with_component.map(({ Component, id, parts }) => {
-            const active = storyProgress === getIndex(parts);
-            return (
-              <Component
-                key={id}
-                parts={parts}
-                partProgress={partProgress}
-                setButtonStatus={
-                  active ? setButtonStatus : () => console.log("not allowed")
-                }
-                active={active}
-                {...args}
-              ></Component>
-            );
-          })}
-        </AnimatePresence>
-        <div className={styles.spacer}></div>
-        {storyProgress === parts_list.length && (
-          <StoryFinishedScreen story={story} />
-        )}
-      </div>
-      <StoryFooter buttonStatus={buttonStatus} onClick={next} />
     </>
   );
 }
