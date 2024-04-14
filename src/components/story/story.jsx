@@ -19,6 +19,7 @@ export default function Story({
   editor,
   storyFinishedIndexUpdate,
   auto_play,
+  hide_questions,
   localization,
 }) {
   const storyElement = React.useRef();
@@ -130,7 +131,7 @@ export default function Story({
       rtl: story.learning_language_rtl,
       audio_failed_call: audio_failed_call,
       auto_play: !!auto_play,
-      hide_questions: !!auto_play,
+      hide_questions: !!auto_play || hide_questions,
     };
   }, [
     wrong,
