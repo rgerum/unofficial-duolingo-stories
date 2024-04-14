@@ -57,6 +57,10 @@ export default function SoundRecorder({
   story_id,
   onClose,
   onSave,
+  soundRecorderNext,
+  soundRecorderPrevious,
+  total_index,
+  current_index,
 }) {
   const containerRef = useRef(null);
   const [urlIndex, setUrlIndex] = useState(url);
@@ -262,7 +266,10 @@ export default function SoundRecorder({
       <p>{timingText}</p>
       <div ref={containerRef} />
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button onClick={soundRecorderPrevious}>Previous</button>
         <button onClick={onSaveX}>Save</button>
+        <button onClick={soundRecorderNext}>Next</button>
+        {current_index + 1} / {total_index}
       </div>
     </div>
   );
