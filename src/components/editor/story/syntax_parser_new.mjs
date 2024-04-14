@@ -353,6 +353,7 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
       type: "CHARACTER",
       avatarUrl: speaker.avatarUrl,
       characterId: speaker.characterId,
+      characterName: speaker?.characterName,
       content: content,
     };
   } else {
@@ -407,7 +408,7 @@ function get_avatar(id, avatar_names, avatar_overwrites) {
   id = parseInt(id) ? parseInt(id) : id;
   if (avatar_overwrites[id])
     return { characterId: id, avatarUrl: avatar_overwrites[id]?.link };
-  return { characterId: id, avatarUrl: avatar_names[id]?.link };
+  return { characterId: id, avatarUrl: avatar_names[id]?.link, characterName: avatar_names[id]?.name};
 }
 
 function getText(line_iter, allow_speaker, allow_trans, allow_audio) {
