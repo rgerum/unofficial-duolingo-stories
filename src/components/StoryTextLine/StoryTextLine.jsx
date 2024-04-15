@@ -15,14 +15,14 @@ function StoryTextLine({ active, element, unhide = 999999, settings }) {
   const hideRangesForChallenge = element.hideRangesForChallenge;
 
   if (settings?.show_names) {
+    const name =
+      element?.line?.characterName || element?.line?.characterId || "Narrator";
     return (
       <>
         <StoryTextLineSimple
-          speaker={
-            element?.line?.characterName ||
-            element?.line?.characterId ||
-            "Narrator"
-          }
+          speaker={name}
+          highlight={settings?.highlight_name == name}
+          id={settings?.id + "-" + element?.trackingProperties?.line_index}
         >
           {element.line.content.text}
         </StoryTextLineSimple>

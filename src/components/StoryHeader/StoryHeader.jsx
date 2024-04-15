@@ -14,7 +14,11 @@ function StoryHeader({ active, element, settings }) {
 
   if (settings?.show_names) {
     return (
-      <StoryTextLineSimple speaker={"Narrator"}>
+      <StoryTextLineSimple
+        speaker={"Narrator"}
+        highlight={settings?.highlight_name == "Narrator"}
+        id={settings?.id + "-" + 0}
+      >
         {element.learningLanguageTitleContent.text}
       </StoryTextLineSimple>
     );

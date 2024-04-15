@@ -1,11 +1,15 @@
 import React from "react";
 import styles from "./StoryTextLineSimple.module.css";
 
-function StoryTextLineSimple({ speaker, children }) {
+function StoryTextLineSimple({ speaker, highlight, id, children }) {
+  const className = highlight
+    ? `${styles.wrapper} ${styles.highlight}`
+    : styles.wrapper;
   return (
-    <div className={styles.wrapper}>
+    <div className={className}>
       <span className={styles.speaker_name}>{speaker}:</span>
-      <span> {children}</span>
+      <span className={styles.text}> {children}</span>
+      <span className={styles.id}>{id}</span>
     </div>
   );
 }
