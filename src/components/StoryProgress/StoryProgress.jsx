@@ -77,6 +77,13 @@ function GetParts(story) {
   return parts;
 }
 
+function getCharacter(parts) {
+  for (let element of parts) {
+    const value = element?.line?.characterName || element?.line?.characterId;
+    if (value) return value;
+  }
+}
+
 function StoryProgress({ story, parts_list, settings, ...args }) {
   if (story) {
     parts_list = GetParts(story);
@@ -107,7 +114,12 @@ function StoryProgress({ story, parts_list, settings, ...args }) {
   }
 
   const part_list_with_component = [];
+  const character_list = ["Narrator"];
   for (let parts of parts_list) {
+    const character = getCharacter(parts);
+    if (character && !character_list.includes(character)) {
+      character_list.push(character);
+    }
     if (storyProgress >= getIndex(parts) || settings.show_all) {
       if (
         settings.hide_questions &&
@@ -121,6 +133,7 @@ function StoryProgress({ story, parts_list, settings, ...args }) {
       });
     }
   }
+  console.log(story);
 
   return (
     <>
@@ -131,6 +144,21 @@ function StoryProgress({ story, parts_list, settings, ...args }) {
           </div>
         )}
         <div className={styles.story}>
+          {settings.setHighlightName && (
+            <>
+              <div className={styles.characterSelector}>
+                {character_list.map((character) => (
+                  <button
+                    key={character}
+                    onClick={() => settings.setHighlightName(character)}
+                  >
+                    {character}
+                  </button>
+                ))}
+              </div>
+              <h1>{story.from_language_name}</h1>
+            </>
+          )}
           <AnimatePresence>
             {part_list_with_component.map(({ Component, id, parts }) => {
               const active =
