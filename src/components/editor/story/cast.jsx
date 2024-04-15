@@ -45,7 +45,7 @@ export default function Cast(props) {
         <Link href={`/story/${props.id}/test?hide_questions=true`}>
           without the excercises
         </Link>
-        )
+        ) <Link href={`/story_new/${props.id}`}>Story With names</Link>
       </p>
     </div>
   );
