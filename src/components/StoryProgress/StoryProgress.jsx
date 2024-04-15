@@ -133,7 +133,6 @@ function StoryProgress({ story, parts_list, settings, ...args }) {
       });
     }
   }
-  console.log(story);
 
   return (
     <>
@@ -150,11 +149,28 @@ function StoryProgress({ story, parts_list, settings, ...args }) {
                 {character_list.map((character) => (
                   <button
                     key={character}
-                    onClick={() => settings.setHighlightName(character)}
+                    onClick={() => {
+                      if (settings.highlight_name.includes(character)) {
+                        const newList = settings.highlight_name.filter(
+                          (v) => v != character,
+                        );
+                        settings.setHighlightName(newList);
+                      } else {
+                        const newList = [...settings.highlight_name, character];
+                        settings.setHighlightName(newList);
+                      }
+                    }}
                   >
                     {character}
                   </button>
                 ))}
+                <button
+                  onClick={() =>
+                    settings.setHideNonHighlighted(!settings.hideNonHighlighted)
+                  }
+                >
+                  Hide Others
+                </button>
               </div>
               <h1>{story.from_language_name}</h1>
             </>

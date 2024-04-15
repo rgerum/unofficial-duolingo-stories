@@ -7,8 +7,14 @@ import useSearchParamsState from "../../../../hooks/use-search-params-state.hook
 
 export default function StoryWrapper({ story, storyFinishedIndexUpdate }) {
   const router = useRouter();
-  const [highlight_name, setHighlightName] =
-    useSearchParamsState("highlight_name");
+  const [highlight_name, setHighlightName] = useSearchParamsState(
+    "highlight_name",
+    [],
+  );
+  const [hideNonHighlighted, setHideNonHighlighted] = useSearchParamsState(
+    "hide_non_highlighted",
+    false,
+  );
 
   return (
     <>
@@ -20,7 +26,9 @@ export default function StoryWrapper({ story, storyFinishedIndexUpdate }) {
           show_all: true,
           show_names: true,
           highlight_name: highlight_name,
+          hideNonHighlighted: hideNonHighlighted,
           setHighlightName: setHighlightName,
+          setHideNonHighlighted: setHideNonHighlighted,
           id: story.id,
         }}
         storyFinishedIndexUpdate={storyFinishedIndexUpdate}

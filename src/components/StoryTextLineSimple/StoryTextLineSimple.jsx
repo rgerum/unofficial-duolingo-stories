@@ -5,6 +5,7 @@ function StoryTextLineSimple({ speaker, highlight, id, children }) {
   const className = highlight
     ? `${styles.wrapper} ${styles.highlight}`
     : styles.wrapper;
+
   return (
     <div className={className}>
       <span className={styles.speaker_name}>{speaker}:</span>

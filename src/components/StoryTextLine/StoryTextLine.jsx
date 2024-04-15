@@ -17,11 +17,13 @@ function StoryTextLine({ active, element, unhide = 999999, settings }) {
   if (settings?.show_names) {
     const name =
       element?.line?.characterName || element?.line?.characterId || "Narrator";
+    if (!settings?.highlight_name.includes(name) && settings.hideNonHighlighted)
+      return null;
     return (
       <>
         <StoryTextLineSimple
           speaker={name}
-          highlight={settings?.highlight_name == name}
+          highlight={settings?.highlight_name.includes(name)}
           id={settings?.id + "-" + element?.trackingProperties?.line_index}
         >
           {element.line.content.text}

@@ -13,10 +13,13 @@ function StoryHeader({ active, element, settings }) {
   const hideRangesForChallenge = undefined;
 
   if (settings?.show_names) {
+    const name = "Narrator";
+    if (!settings?.highlight_name.includes(name) && settings.hideNonHighlighted)
+      return null;
     return (
       <StoryTextLineSimple
         speaker={"Narrator"}
-        highlight={settings?.highlight_name == "Narrator"}
+        highlight={settings?.highlight_name.includes(name)}
         id={settings?.id + "-" + 0}
       >
         {element.learningLanguageTitleContent.text}
