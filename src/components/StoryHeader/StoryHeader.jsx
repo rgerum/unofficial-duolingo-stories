@@ -4,6 +4,7 @@ import styles from "./StoryHeader.module.css";
 import useAudio from "../StoryTextLine/use-audio.hook";
 import PlayAudio from "../PlayAudio";
 import StoryLineHints from "../StoryLineHints";
+import StoryTextLineSimple from "../StoryTextLineSimple";
 
 function StoryHeader({ active, element, settings }) {
   let onClick = undefined;
@@ -13,9 +14,9 @@ function StoryHeader({ active, element, settings }) {
 
   if (settings?.show_names) {
     return (
-      <p>
-        {"Narrator"}: {element.learningLanguageTitleContent.text}
-      </p>
+      <StoryTextLineSimple speaker={"Narrator"}>
+        {element.learningLanguageTitleContent.text}
+      </StoryTextLineSimple>
     );
   }
 

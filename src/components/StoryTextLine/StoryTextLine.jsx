@@ -3,6 +3,7 @@ import styles from "./StoryTextLine.module.css";
 import useAudio from "./use-audio.hook";
 import StoryLineHints from "../StoryLineHints";
 import PlayAudio from "../PlayAudio";
+import StoryTextLineSimple from "../StoryTextLineSimple";
 
 function StoryTextLine({ active, element, unhide = 999999, settings }) {
   const onClick = undefined;
@@ -16,13 +17,15 @@ function StoryTextLine({ active, element, unhide = 999999, settings }) {
   if (settings?.show_names) {
     return (
       <>
-        <span>
-          {element?.line?.characterName ||
+        <StoryTextLineSimple
+          speaker={
+            element?.line?.characterName ||
             element?.line?.characterId ||
-            "Narrator"}
-          :
-        </span>
-        <span> {element.line.content.text}</span>
+            "Narrator"
+          }
+        >
+          {element.line.content.text}
+        </StoryTextLineSimple>
       </>
     );
   }

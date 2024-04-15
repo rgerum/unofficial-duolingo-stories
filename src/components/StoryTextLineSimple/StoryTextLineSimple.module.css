@@ -1,0 +1,12 @@
+.wrapper {
+    display: flex;
+    align-items: first baseline;
+    margin: 16px 0;
+    gap: 16px;
+}
+.speaker_name {
+    font-weight: 700;
+    width: 100px;
+    display: inline-block;
+    text-align: right;
+}
