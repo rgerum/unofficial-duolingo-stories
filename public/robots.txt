@@ -1,0 +1,13 @@
+//robots.txt
+
+# Block all crawlers for /editor
+User-agent: *
+Disallow: /editor
+
+# Block all crawlers for /admin
+User-agent: *
+Disallow: /admin
+
+# Allow all crawlers
+User-agent: *
+Allow: /
