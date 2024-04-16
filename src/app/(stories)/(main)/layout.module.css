@@ -87,6 +87,13 @@
 
 .icons {
   display: flex;
-  gap: 16px;
+  gap: 0;
   justify-content: center;
+  line-height: 0.5;
+  margin: 0;
+  margin-top: -8px;
+}
+
+.icons a {
+  padding: 8px;
 }
