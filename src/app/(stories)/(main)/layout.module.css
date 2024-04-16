@@ -84,3 +84,9 @@
   font-size: 30px;
   margin-bottom: -75px;
 }
+
+.icons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
