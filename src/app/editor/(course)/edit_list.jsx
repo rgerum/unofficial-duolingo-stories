@@ -16,6 +16,7 @@ export default function EditList({ stories, course, updateCourses }) {
     last_set = story.set_id;
     story_published_count += story.public ? 1 : 0;
   }
+  console.log("course", course);
 
   return (
     <>
@@ -49,13 +50,19 @@ export default function EditList({ stories, course, updateCourses }) {
         </ul>
       </div>
       <p>
-        To set the voices for use the{" "}
-        <Link href={`/editor/language/${course.short}`}>Character Editor</Link>.{" "}
-        <Link href={`/editor/localization/${course.short}`}>
-          Localization Editor
-        </Link>
-        .
+        To set character voices, go to the{" "}
+        <Link href={`/editor/language/${course.short}`}>Character Editor</Link>.
       </p>
+      {course.from_language_name !== "English" && (
+        <p>
+          For language localization settings (for the base language of this
+          course), head to the{" "}
+          <Link href={`/editor/localization/${course.short}`}>
+            Localization Editor
+          </Link>
+          .
+        </p>
+      )}
       <p style={{ fontWeight: "bold" }}>
         Active Contributors:{" "}
         {course.contributors.map((d, i) => (
