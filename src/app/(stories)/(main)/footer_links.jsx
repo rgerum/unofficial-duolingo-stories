@@ -1,6 +1,7 @@
 import Link from "next/link";
 import styles from "./footer_links.module.css";
 import React from "react";
+import Image from "next/image";
 
 export default async function FooterLinks({}) {
   return (
@@ -11,9 +12,11 @@ export default async function FooterLinks({}) {
             href="https://opencollective.com/duostories/contribute"
             target="_blank"
           >
-            <img
+            <Image
               src="https://opencollective.com/duostories/contribute/button@2x.png?color=blue"
               height="48"
+              width="334"
+              alt={"Contribute to our collective"}
             />
           </Link>
         </div>
