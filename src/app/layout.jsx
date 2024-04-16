@@ -9,14 +9,14 @@ const nunito = Nunito({ subsets: ["latin-ext", "cyrillic-ext", "vietnamese"] });
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={nunito.className}>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1cb0f6" />
         <title>Duostories</title>
         <Script src="/darklight.js"></Script>
       </head>
-      <body className={nunito.className}>
+      <body>
         <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
         {!process.env.NO_TRACK_QUERY ? <Analytics /> : null}
       </body>
