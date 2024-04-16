@@ -7,4 +7,14 @@ module.exports = withPWA({
   compiler: {
     styledComponents: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "opencollective.com",
+        port: "",
+        pathname: "/duostories/contribute/**",
+      },
+    ],
+  },
 });
