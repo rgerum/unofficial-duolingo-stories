@@ -21,70 +21,80 @@ export default async function FooterLinks({}) {
           </Link>
         </div>
         <div className={styles.footer_links}>
-          <div>
-            <h3>Social</h3>
-            <ul>
-              <li>
-                <a href="https://discord.gg/4NGVScARR3">Discord</a>
-              </li>
-              <li>
-                <Link href="https://twitter.com/DuostoriesNews">Twitter</Link>
-              </li>
-              <li>
-                <Link href="https://www.instagram.com/duostoriesproject/">
-                  Instagram
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3>Contribute</h3>
-            <ul>
-              <li>
-                <Link href="https://opencollective.com/duostories/contribute">
-                  Contribute
-                </Link>
-              </li>
-              <li>
-                <a href="https://opencollective.com/duostories/donate">
-                  Donate
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3>Legal</h3>
-            <ul>
-              <li>
-                <Link href="/privacy_policy">Privacy Policy</Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3>Open Source</h3>
-            <ul>
-              <li>
-                <Link href="https://github.com/rgerum/unofficial-duolingo-stories">
-                  Github Code
-                </Link>
-              </li>
-              <li>
-                <Link href="https://github.com/rgerum/unofficial-duolingo-stories-content">
-                  Github Content
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3>Apps</h3>
-            <ul>
-              <li>
-                <Link href="https://play.google.com/store/apps/details?id=org.duostories.twa">
-                  Google Play
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <figure>
+            <figcaption>Social</figcaption>
+            <nav>
+              <ul>
+                <li>
+                  <Link href="https://discord.gg/4NGVScARR3">Discord</Link>
+                </li>
+                <li>
+                  <Link href="https://twitter.com/DuostoriesNews">Twitter</Link>
+                </li>
+                <li>
+                  <Link href="https://www.instagram.com/duostoriesproject/">
+                    Instagram
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+          </figure>
+          <figure>
+            <figcaption>Contribute</figcaption>
+            <nav>
+              <ul>
+                <li>
+                  <Link href="https://opencollective.com/duostories/contribute">
+                    Contribute
+                  </Link>
+                </li>
+                <li>
+                  <Link href="https://opencollective.com/duostories/donate">
+                    Donate
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+          </figure>
+          <figure>
+            <figcaption>Legal</figcaption>
+            <nav>
+              <ul>
+                <li>
+                  <Link href="/privacy_policy">Privacy Policy</Link>
+                </li>
+              </ul>
+            </nav>
+          </figure>
+          <figure>
+            <figcaption>Open Source</figcaption>
+            <nav>
+              <ul>
+                <li>
+                  <Link href="https://github.com/rgerum/unofficial-duolingo-stories">
+                    Github Code
+                  </Link>
+                </li>
+                <li>
+                  <Link href="https://github.com/rgerum/unofficial-duolingo-stories-content">
+                    Github Content
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+          </figure>
+          <figure>
+            <figcaption>Apps</figcaption>
+            <nav>
+              <ul>
+                <li>
+                  <Link href="https://play.google.com/store/apps/details?id=org.duostories.twa">
+                    Google Play
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+          </figure>
         </div>
       </footer>
     </>
