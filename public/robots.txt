@@ -1,5 +1,3 @@
-//robots.txt
-
 # Block all crawlers for /editor
 User-agent: *
 Disallow: /editor
