@@ -22,6 +22,22 @@ export async function generateStaticParams() {
   return pages;
 }
 
+export async function generateMetadata({ params }) {
+  let path = "";
+  for (let p of params.slug || ["introduction"]) {
+    if (p.indexOf(".") !== -1) continue;
+    path += "/" + p;
+  }
+  if (path.endsWith(".js") || path.endsWith(".mdx")) return notFound();
+
+  const data = await getPageData(path);
+
+  return {
+    title: data.title + " | Duostories Docs",
+    description: data.description,
+  };
+}
+
 function save_tag(tag) {
   return tag.trim().toLowerCase().replace(/\s+/g, "-");
 }
