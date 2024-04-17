@@ -4,6 +4,7 @@ import styles from "./DocsNavigation.module.css";
 import Link from "next/link";
 import { showNavContext } from "../DocsNavigationBackdrop";
 import { useSelectedLayoutSegment } from "next/navigation";
+import VisuallyHidden from "../VisuallyHidden";
 
 function DocsNavigation({ data }) {
   const { show, setShow } = React.useContext(showNavContext);
@@ -18,7 +19,7 @@ function DocsNavigation({ data }) {
           id="close"
           onClick={() => setShow(false)}
         >
-          ×
+          <VisuallyHidden>Close Menu</VisuallyHidden>×
         </button>
         <div className={styles.toc_inner}>
           {data.navigation.map((item, i) => (

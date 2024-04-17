@@ -3,6 +3,7 @@ import React from "react";
 import styles from "./DocsBreadCrumbNav.module.css";
 import { showNavContext } from "../DocsNavigationBackdrop";
 import { useSelectedLayoutSegment } from "next/navigation";
+import VisuallyHidden from "../VisuallyHidden";
 
 function DocsBreadCrumbNav({ path_titles }) {
   const { setShow } = React.useContext(showNavContext);
@@ -13,6 +14,7 @@ function DocsBreadCrumbNav({ path_titles }) {
     <>
       <div className={styles.short_nav}>
         <button className={styles.unstyledButton} onClick={() => setShow(true)}>
+          <VisuallyHidden>Open Menu</VisuallyHidden>
           <svg
             id="toggle"
             width="30"
