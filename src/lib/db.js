@@ -18,7 +18,7 @@ const cyrb53 = (str, seed = 0) => {
 };
 
 // will use psql environment variables
-export const sql = postgres(process.env.POSTGRES_URL, {
+export const sql = postgres(process.env.POSTGRES_URL2, {
   /* options */
   //debug: console.log,
   debug: (...args) => {
@@ -37,7 +37,8 @@ export const sql = postgres(process.env.POSTGRES_URL, {
         track("query", { query: cyrb53(args[1]) });
     }
   },
-  ssl: process.env.POSTGRES_URL.indexOf("localhost") !== -1 ? false : "require",
+  ssl:
+    process.env.POSTGRES_URL2.indexOf("localhost") !== -1 ? false : "require",
 });
 
 const hash_table =
