@@ -53,6 +53,9 @@ export default async function FooterLinks({}) {
                     Donate
                   </Link>
                 </li>
+                <li>
+                  <Link href="/docs">Docs</Link>
+                </li>
               </ul>
             </nav>
           </figure>
