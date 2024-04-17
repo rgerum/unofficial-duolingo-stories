@@ -15,6 +15,12 @@ module.exports = withPWA({
         port: "",
         pathname: "/duostories/contribute/**",
       },
+      {
+        protocol: "https",
+        hostname: "stories-cdn.duolingo.com",
+        port: "",
+        pathname: "/image/**",
+      },
     ],
   },
 });
