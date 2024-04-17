@@ -30,6 +30,12 @@ export const metadata = {
     "community",
     "volunteers",
   ],
+  openGraph: {
+    title: "Duostories",
+    description:
+      "Supplement your Duolingo course with community-translated Duolingo stories.",
+    type: "website",
+  },
 };
 
 const get_courses_user = cache(
