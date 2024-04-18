@@ -52,7 +52,11 @@
     display: flex;
     align-items: center;
     justify-content: right;
-
+}
+@media (max-width: 500px) {
+    .width_wrapper button {
+        width: 100%;
+    }
 }
 
 .footer_right .width_wrapper {
