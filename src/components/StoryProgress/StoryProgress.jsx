@@ -145,13 +145,7 @@ function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
     if (buttonStatus !== "continue") setButtonStatus("continue");
     return (
       <>
-        <div className={styles.header}>
-          <Link
-            className={styles.header_close}
-            data-cy="quit"
-            href={`/${story.course_short}`}
-          ></Link>
-        </div>
+        <HeaderProgress course_short={story.course_short} />
         <StoryTitlePage story={story} next={next} />
       </>
     );
@@ -160,45 +154,21 @@ function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
     <>
       <div>
         {!settings.show_all && (
-          <div className={styles.header}>
-            <Link
-              className={styles.header_close}
-              data-cy="quit"
-              href={`/${story.course_short}`}
-            ></Link>
-            <ProgressBar progress={storyProgress} length={parts_list.length} />
-          </div>
+          <HeaderProgress
+            course_short={story.course_short}
+            progress={storyProgress}
+            length={parts_list.length}
+          />
         )}
         <div className={styles.story} data-rtl={settings.rtl}>
           {settings.show_names && (
             <>
-              <div className={styles.characterSelector}>
-                {character_list.map((character) => (
-                  <button
-                    key={character}
-                    onClick={() => {
-                      if (settings.highlight_name.includes(character)) {
-                        const newList = settings.highlight_name.filter(
-                          (v) => v != character,
-                        );
-                        settings.setHighlightName(newList);
-                      } else {
-                        const newList = [...settings.highlight_name, character];
-                        settings.setHighlightName(newList);
-                      }
-                    }}
-                  >
-                    {character}
-                  </button>
-                ))}
-                <button
-                  onClick={() =>
-                    settings.setHideNonHighlighted(!settings.hideNonHighlighted)
-                  }
-                >
-                  Hide Others
-                </button>
-              </div>
+              <NameButtons
+                character_list={highlight_name}
+                highlight_name={settings.highlight_name}
+                setHighlightName={settings.setHideNonHighlighted}
+                setHideNonHighlighted={settings.setHideNonHighlighted}
+              />
               <h1>{story.from_language_name}</h1>
             </>
           )}
@@ -229,6 +199,54 @@ function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
         {!settings.show_all && (
           <StoryFooter buttonStatus={buttonStatus} onClick={next} />
         )}
+      </div>
+    </>
+  );
+}
+
+function HeaderProgress({ course_short, progress, length }) {
+  return (
+    <div className={styles.header}>
+      <Link
+        className={styles.header_close}
+        data-cy="quit"
+        href={`/${course_short}`}
+      ></Link>
+      {length !== undefined && (
+        <ProgressBar progress={progress} length={length} />
+      )}
+    </div>
+  );
+}
+
+function NameButtons({
+  character_list,
+  highlight_name,
+  setHighlightName,
+  setHideNonHighlighted,
+}) {
+  return (
+    <>
+      <div className={styles.characterSelector}>
+        {character_list.map((character) => (
+          <button
+            key={character}
+            onClick={() => {
+              if (highlight_name.includes(character)) {
+                const newList = highlight_name.filter((v) => v != character);
+                setHighlightName(newList);
+              } else {
+                const newList = [...highlight_name, character];
+                setHighlightName(newList);
+              }
+            }}
+          >
+            {character}
+          </button>
+        ))}
+        <button onClick={() => setHideNonHighlighted((i) => !i)}>
+          Hide Others
+        </button>
       </div>
     </>
   );
