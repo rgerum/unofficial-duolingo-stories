@@ -5,6 +5,7 @@
     border-radius: calc(var(--height) / 2);
     height: var(--height);
     overflow: hidden;
+    width: 100%;
 }
 
 .progress_inside {
