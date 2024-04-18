@@ -35,7 +35,7 @@ function StoryChallengeMultipleChoice({
           settings={settings}
         />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-2`} show={show_question}>
+      <FadeGlideIn key={`${id}-2`} show={show_question || settings.show_all}>
         <StoryQuestionMultipleChoice
           element={parts[1]}
           advance={() => {

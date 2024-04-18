@@ -9,7 +9,7 @@ function StoryChallengeMatch({ parts, active, setButtonStatus, settings }) {
     return null;
   }
   return (
-    <FadeGlideIn key={`${id}-1`} show={active}>
+    <FadeGlideIn key={`${id}-1`} show={active || settings.show_all}>
       <StoryQuestionMatch
         element={parts[0]}
         setDone={() => setButtonStatus("right")}

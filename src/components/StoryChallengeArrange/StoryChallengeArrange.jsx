@@ -28,8 +28,8 @@ function StoryChallengeArrange({ parts, active, setButtonStatus, settings }) {
 
   return (
     <>
-      <FadeGlideIn key={`${id}-1`} show={active}>
-        <StoryQuestionPrompt question={parts[0].prompt} />
+      <FadeGlideIn key={`${id}-1`} show={active || settings.show_all}>
+        <StoryQuestionPrompt question={parts[0].prompt} lang={parts[0].lang} />
       </FadeGlideIn>
       <FadeGlideIn key={`${id}-2`}>
         <StoryTextLine
@@ -39,7 +39,7 @@ function StoryChallengeArrange({ parts, active, setButtonStatus, settings }) {
           settings={settings}
         />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-3`} show={active}>
+      <FadeGlideIn key={`${id}-3`} show={active || settings.show_all}>
         <StoryQuestionArrange element={parts[2]} advance={advance} />
       </FadeGlideIn>
     </>

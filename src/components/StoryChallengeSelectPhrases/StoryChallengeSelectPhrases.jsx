@@ -30,7 +30,7 @@ function StoryChallengeSelectPhrases({
 
   return (
     <>
-      <FadeGlideIn key={`${id}-1`} show={active}>
+      <FadeGlideIn key={`${id}-1`} show={active || settings.show_all}>
         <StoryQuestionPrompt question={parts[0].prompt} />
       </FadeGlideIn>
       <FadeGlideIn key={`${id}-2`}>
@@ -41,7 +41,7 @@ function StoryChallengeSelectPhrases({
           settings={settings}
         />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-3`} show={active}>
+      <FadeGlideIn key={`${id}-3`} show={active || settings.show_all}>
         <StoryQuestionSelectPhrase element={parts[2]} advance={advance} />
       </FadeGlideIn>
     </>
