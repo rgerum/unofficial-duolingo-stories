@@ -31,7 +31,7 @@ function StoryChallengePointToPhrase({
       <FadeGlideIn key={`${id}-1`} show={!show_question}>
         <StoryTextLine element={parts[0]} settings={settings} />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-1`} show={show_question || settings.show_all}>
+      <FadeGlideIn key={`${id}-2`} show={show_question || settings.show_all}>
         <StoryQuestionPointToPhrase
           active={active}
           element={parts[1]}
