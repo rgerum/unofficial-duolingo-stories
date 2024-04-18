@@ -18,6 +18,18 @@ function Check() {
 function StoryFooter({ buttonStatus, onClick }) {
   const localisation = useLocalisation();
 
+  if (buttonStatus === "...") {
+    return (
+      <div className={styles.footer}>
+        <div className={styles.width_wrapper}>
+          <Button key={"c"} onClick={onClick}>
+            {"..."}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (buttonStatus === "finished") {
     return (
       <div className={styles.footer}>

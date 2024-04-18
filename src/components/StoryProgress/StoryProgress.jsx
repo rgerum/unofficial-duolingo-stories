@@ -1,4 +1,7 @@
 import React from "react";
+import { AnimatePresence } from "framer-motion";
+import Link from "next/link";
+
 import styles from "./StoryProgress.module.css";
 import StoryChallengeMultipleChoice from "../StoryChallengeMultipleChoice";
 import StoryChallengeContinuation from "../StoryChallengeContinuation";
@@ -8,12 +11,11 @@ import StoryChallengePointToPhrase from "../StoryChallengePointToPhrase";
 import StoryChallengeSelectPhrases from "../StoryChallengeSelectPhrases";
 import FadeGlideIn from "../FadeGlideIn";
 import StoryTextLine from "../StoryTextLine";
-import { AnimatePresence } from "framer-motion";
 import StoryHeader from "../StoryHeader";
 import ProgressBar from "../ProgressBar";
 import StoryFooter from "../StoryFooter";
 import StoryFinishedScreen from "../StoryFinishedScreen";
-import Link from "next/link";
+import StoryTitlePage from "../StoryTitlePage";
 
 function Unknown() {
   return <div>Error</div>;
@@ -85,16 +87,20 @@ function getCharacter(parts) {
   }
 }
 
-function StoryProgress({ story, parts_list, settings, ...args }) {
+function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
   if (story) {
     parts_list = GetParts(story);
   }
   const [partProgress, setPartProgress] = React.useState(0);
   const [buttonStatus, setButtonStatus] = React.useState("wait");
-  const [storyProgress, setStoryProgress] = React.useState(0);
+  const [storyProgress, setStoryProgress] = React.useState(
+    settings?.show_title_page ? -1 : 0,
+  );
 
-  function next() {
+  async function next() {
     if (buttonStatus === "finished") {
+      setButtonStatus("...");
+      await onEnd();
       return;
     }
     if (buttonStatus === "wait") return;
@@ -135,6 +141,21 @@ function StoryProgress({ story, parts_list, settings, ...args }) {
     }
   }
 
+  if (storyProgress === -1) {
+    if (buttonStatus !== "continue") setButtonStatus("continue");
+    return (
+      <>
+        <div className={styles.header}>
+          <Link
+            className={styles.header_close}
+            data-cy="quit"
+            href={`/${story.course_short}`}
+          ></Link>
+        </div>
+        <StoryTitlePage story={story} next={next} />
+      </>
+    );
+  }
   return (
     <>
       <div>

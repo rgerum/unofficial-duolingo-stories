@@ -6,6 +6,8 @@ import { get_localisation_dict } from "lib/get_localisation";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
 import { revalidateTag } from "next/cache";
+import LocalisationProvider from "../../../../components/LocalisationProvider";
+import { headers } from "next/headers";
 
 async function get_story_meta(course_id) {
   const course_query = await sql`SELECT
@@ -33,8 +35,19 @@ export async function generateMetadata({ params, searchParams }, parent) {
     alternates: {
       canonical: `https://duostories.org/story/${params.story_id}`,
     },
-    keywords: [story.learning_language_long, ...meta.keywords],
+    keywords: [story.learning_language_long],
   };
+}
+
+function getNavigationMode() {
+  const headersList = headers();
+  // If there is a next-url header, soft navigation has been performed
+  // Otherwise, hard navigation has been performed
+  const nextUrl = headersList.get("next-url");
+  if (nextUrl) {
+    return "soft";
+  }
+  return "hard";
 }
 
 export default async function Page({ params }) {
@@ -66,11 +79,14 @@ export default async function Page({ params }) {
 
   return (
     <>
-      <StoryWrapper
-        story={story}
-        storyFinishedIndexUpdate={setStoryDoneAction}
-        localization={localization}
-      />
+      <LocalisationProvider lang={story.fromLanguage}>
+        <StoryWrapper
+          story={story}
+          storyFinishedIndexUpdate={setStoryDoneAction}
+          localization={localization}
+          show_title_page={getNavigationMode() === "hard"}
+        />
+      </LocalisationProvider>
     </>
   );
 }
