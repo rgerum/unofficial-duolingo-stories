@@ -26,6 +26,8 @@ export default function useAudio(element, active) {
       //controls.audio_failed_call();
       return;
     }
+
+    // timeouts to advance the audio position
     let timeouts = [];
     let last_end = 0;
     for (let keypoint of audio.keypoints) {
@@ -36,8 +38,9 @@ export default function useAudio(element, active) {
       timeouts.push(t);
     }
 
-    setTimeout(
+    window.setTimeout(
       () => {
+        setAudioRange(9999);
         //if (controls.auto_play)
         //    controls.advance_progress(element.trackingProperties.line_index || 0);
       },
@@ -45,8 +48,8 @@ export default function useAudio(element, active) {
     );
 
     function cancel() {
-      for (let t in timeouts) clearTimeout(t);
-      setAudioRange(last_end);
+      for (let t of timeouts) window.clearTimeout(t);
+      setAudioRange(99999);
       audioObject.pause();
     }
     window.playing_audio.push(cancel);
