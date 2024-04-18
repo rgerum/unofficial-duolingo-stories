@@ -8,6 +8,9 @@
         max-width: 100%;
     }
 }
+.story[data-rtl] {
+    direction: rtl;
+}
 
 .characterSelector {
     @media print {

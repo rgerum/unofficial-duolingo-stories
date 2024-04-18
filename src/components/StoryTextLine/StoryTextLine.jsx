@@ -11,7 +11,6 @@ function StoryTextLine({ active, element, unhide = 999999, settings }) {
 
   if (element.line === undefined) return <></>;
 
-  const controls = { rtl: false };
   const hideRangesForChallenge = element.hideRangesForChallenge;
 
   if (settings?.show_names) {
@@ -60,16 +59,8 @@ function StoryTextLine({ active, element, unhide = 999999, settings }) {
         onClick={onClick}
         data-lineno={element?.editor?.block_start_no}
       >
-        <img
-          className={styles.head + " " + (controls.rtl ? styles.rtl_head : "")}
-          src={element.line.avatarUrl}
-          alt="head"
-        />
-        <span
-          className={
-            styles.bubble + " " + (controls.rtl ? styles.rtl_bubble : "")
-          }
-        >
+        <img className={styles.head} src={element.line.avatarUrl} alt="head" />
+        <span className={styles.bubble}>
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />
           </audio>

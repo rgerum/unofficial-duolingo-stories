@@ -142,7 +142,7 @@ function StoryProgress({ story, parts_list, settings, ...args }) {
             <ProgressBar progress={storyProgress} length={parts_list.length} />
           </div>
         )}
-        <div className={styles.story}>
+        <div className={styles.story} data-rtl={settings.rtl}>
           {settings.setHighlightName && (
             <>
               <div className={styles.characterSelector}>
