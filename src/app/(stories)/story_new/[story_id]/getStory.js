@@ -32,5 +32,7 @@ export async function get_story(story_id) {
   data.learning_language = res[0]["learning_language"];
   data.learning_language_long = res[0]["learning_language_long"];
   data.learning_language_rtl = res[0]["learning_language_rtl"];
+
+  data.course_short = data.learning_language + "-" + data.from_language;
   return data;
 }

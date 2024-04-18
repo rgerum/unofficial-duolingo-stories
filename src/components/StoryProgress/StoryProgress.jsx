@@ -13,6 +13,7 @@ import StoryHeader from "../StoryHeader";
 import ProgressBar from "../ProgressBar";
 import StoryFooter from "../StoryFooter";
 import StoryFinishedScreen from "../StoryFinishedScreen";
+import Link from "next/link";
 
 function Unknown() {
   return <div>Error</div>;
@@ -139,11 +140,16 @@ function StoryProgress({ story, parts_list, settings, ...args }) {
       <div>
         {!settings.show_all && (
           <div className={styles.header}>
+            <Link
+              className={styles.header_close}
+              data-cy="quit"
+              href={`/${story.course_short}`}
+            ></Link>
             <ProgressBar progress={storyProgress} length={parts_list.length} />
           </div>
         )}
         <div className={styles.story} data-rtl={settings.rtl}>
-          {settings.setHighlightName && (
+          {settings.show_names && (
             <>
               <div className={styles.characterSelector}>
                 {character_list.map((character) => (
