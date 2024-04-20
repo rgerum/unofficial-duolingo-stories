@@ -1,5 +1,4 @@
 import postgres from "postgres";
-import { track } from "@vercel/analytics/server";
 
 const cyrb53 = (str, seed = 0) => {
   let h1 = 0xdeadbeef ^ seed,
@@ -33,8 +32,8 @@ export const sql = postgres(process.env.POSTGRES_URL2, {
       }
       console.log("query", { query: hash, sql: args[1] });
     } else {
-      if (!process.env.NO_TRACK_QUERY)
-        track("query", { query: cyrb53(args[1]) });
+      //if (!process.env.NO_TRACK_QUERY)
+      //  track("query", { query: cyrb53(args[1]) });
     }
   },
   ssl:
