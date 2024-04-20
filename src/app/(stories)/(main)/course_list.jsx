@@ -32,7 +32,7 @@ async function LanguageGroup({ name, tag, id }) {
   );
 }
 
-async function CourseListInner({ loading, tag }) {
+export async function CourseListInner({ loading, tag }) {
   if (loading) {
     return (
       <div className={styles.course_list}>

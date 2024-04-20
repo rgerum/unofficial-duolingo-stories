@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Header from "./header";
-import CourseList from "./course_list";
+import { CourseListInner } from "./course_list";
 import Icons from "./icons";
 import React from "react";
 import { get_counts } from "./get_course_data";
@@ -29,7 +29,7 @@ export default async function Page({}) {
         </p>
         <Icons />
       </Header>
-      <CourseList />
+      <CourseListInner />
     </>
   );
 }
