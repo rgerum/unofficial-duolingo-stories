@@ -16,6 +16,7 @@ import ProgressBar from "../ProgressBar";
 import StoryFooter from "../StoryFooter";
 import StoryFinishedScreen from "../StoryFinishedScreen";
 import StoryTitlePage from "../StoryTitlePage";
+import VisuallyHidden from "../VisuallyHidden";
 
 function Unknown() {
   return <div>Error</div>;
@@ -211,7 +212,9 @@ function HeaderProgress({ course_short, progress, length }) {
         className={styles.header_close}
         data-cy="quit"
         href={`/${course_short}`}
-      ></Link>
+      >
+        <VisuallyHidden>Back to Course Page</VisuallyHidden>
+      </Link>
       {length !== undefined && (
         <ProgressBar progress={progress} length={length} />
       )}
