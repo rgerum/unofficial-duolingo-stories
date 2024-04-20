@@ -32,6 +32,13 @@ export async function generateMetadata({ params, searchParams }, parent) {
     alternates: {
       canonical: `https://duostories.org/${params.course_id}`,
     },
+    openGraph: {
+      images: [
+        `/api/og-course?lang=${params.course_id.split("-")[0]}&count=${
+          course.count
+        }&name=${course.learning_language_name}`,
+      ],
+    },
     keywords: [course.learning_language_name, ...meta.keywords],
   };
 }
