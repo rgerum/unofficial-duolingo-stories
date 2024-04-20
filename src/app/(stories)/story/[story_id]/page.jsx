@@ -12,6 +12,7 @@ import { headers } from "next/headers";
 async function get_story_meta(course_id) {
   const course_query = await sql`SELECT
         story.name AS from_language_name,
+        story.image,
         l1.name AS from_language_long,
         l2.name AS learning_language_long
     FROM story 
@@ -36,6 +37,11 @@ export async function generateMetadata({ params, searchParams }, parent) {
       canonical: `https://duostories.org/story/${params.story_id}`,
     },
     keywords: [story.learning_language_long],
+    openGraph: {
+      images: [
+        `/api/og-story?title=${story.from_language_name}&image=${story.image}&name=${story.learning_language_long}`,
+      ],
+    },
   };
 }
 
