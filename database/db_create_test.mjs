@@ -7,7 +7,7 @@ const { processStoryFile } = import(
  */
 import postgres from "postgres";
 import fs from "node:fs/promises";
-import { processStoryFile } from "./src/components/editor/story/syntax_parser_new.mjs";
+import { processStoryFile } from "../src/components/editor/story/syntax_parser_new.mjs";
 
 process.env.POSTGRES_URL =
     "postgresql://postgres:postgres@localhost:5432/duostories_test_db";
