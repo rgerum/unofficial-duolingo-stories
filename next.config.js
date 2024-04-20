@@ -21,6 +21,12 @@ module.exports = withPWA({
         port: "",
         pathname: "/image/**",
       },
+      {
+        protocol: "https",
+        hostname: "carex.uber.space",
+        port: "",
+        pathname: "/stories/flags/**",
+      },
     ],
   },
 });

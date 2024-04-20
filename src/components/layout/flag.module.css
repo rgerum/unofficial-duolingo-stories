@@ -7,8 +7,23 @@
   margin: 3px 12px;
 }
 
-.undefined {
-  background-position-y: -2736px;
+.flag_image2 {
+    --flag-scale: 1;
+    --flag_offset: 3;
+
+    display: block;
+
+    width: calc(82px * var(--flag-scale, 1));
+    height: calc(66px * var(--flag-scale, 1));
+
+    object-fit: cover;
+    object-position: 0 calc(-66px * var(--flag-scale, 1) * var(--flag_offset, 0));
+
+    outline: calc(5px * var(--flag-scale, 1)) solid var(--body-background);
+    outline-offset: calc(-6px * var(--flag-scale, 1));
+    border-radius: calc(16px * var(--flag-scale, 1));
+
+    margin: 3px 12px;
 }
 
 .flag_sub {

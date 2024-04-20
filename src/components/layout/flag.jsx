@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./flag.module.css";
+import Image from "next/image";
 
 export default function Flag(props) {
   /**
@@ -60,61 +61,34 @@ export default function Flag(props) {
   for (let i in order) {
     if (order[i] === (props.iso || "world")) flag = i;
   }
-  let count = Math.round(flag) * 66;
+  if (flag === 0 && !props.flag_file && props.iso !== "en") {
+    flag = 37; // "world"
+  }
+
   let style = {
     width: props.width || 88,
     height: (66 / 82) * (props.width || 88),
     minWidth: props.width || 88,
   };
-  if (props.flag_file) {
-    return (
-      <svg
-        className={props.className + " " + styles.flag}
-        viewBox={`-2 -2 82 66`}
-        data-test={`flag-${props.iso}`}
-        style={style}
-        onClick={props.onClick}
-      >
-        <image
-          height="62"
-          href={`https://carex.uber.space/stories/flags/${props.flag_file}`}
-          width="78"
-        ></image>
-        <rect
-          className={styles.flag_border_rect}
-          x="2"
-          y="2"
-          rx="12"
-          ry="12"
-          width="74"
-          height="58"
-        ></rect>
-      </svg>
-    );
-  }
   return (
-    <svg
-      className={props.className + " " + styles.flag}
-      viewBox={`0 ${count} 82 66`}
-      data-test={`flag-${props.iso}`}
-      style={style}
-      onClick={props.onClick}
-    >
-      <image
-        height="3168"
-        href="https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-        width="82"
-      ></image>
-      <rect
-        className={styles.flag_border_rect}
-        x="4"
-        y={count + 4}
-        rx="12"
-        ry="12"
-        width="74"
-        height="58"
-      ></rect>
-    </svg>
+    <>
+      <Image
+        style={{
+          "--flag-scale": (props.width || 88) / 82,
+          "--flag_offset": flag,
+        }}
+        width={style.width}
+        height={style.height}
+        priority={true}
+        className={styles.flag_image2}
+        src={
+          props.flag_file
+            ? `https://carex.uber.space/stories/flags/${props.flag_file}`
+            : "https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
+        }
+        alt={`${props.iso} flag`}
+      />
+    </>
   );
 }
 
