@@ -41,6 +41,7 @@ export async function generateMetadata({ params, searchParams }, parent) {
       images: [
         `/api/og-story?title=${story.from_language_name}&image=${story.image}&name=${story.learning_language_long}`,
       ],
+      url: `https://duostories.org/story/${params.story_id}`,
     },
   };
 }

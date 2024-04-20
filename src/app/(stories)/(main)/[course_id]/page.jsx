@@ -38,6 +38,7 @@ export async function generateMetadata({ params, searchParams }, parent) {
           course.count
         }&name=${course.learning_language_name}`,
       ],
+      url: `https://duostories.org/${params.course_id}`,
     },
     keywords: [course.learning_language_name, ...meta.keywords],
   };

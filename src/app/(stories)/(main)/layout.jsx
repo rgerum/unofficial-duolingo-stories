@@ -35,6 +35,7 @@ export const metadata = {
     description:
       "Supplement your Duolingo course with community-translated Duolingo stories.",
     type: "website",
+    url: `https://duostories.org`,
   },
 };
 
