@@ -1,3 +1,7 @@
+.trigger {
+  margin: 0 16px;
+}
+
 .header_lang_selector {
   width: 214px !important;
   max-height: calc(100vh - 55px);

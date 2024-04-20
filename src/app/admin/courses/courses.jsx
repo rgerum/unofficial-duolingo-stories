@@ -126,6 +126,10 @@ const LangItemButton = styled.button`
   background: var(--body-background);
   padding: 0;
   outline-offset: -2px;
+
+  & img {
+    margin: 4px 8px 4px 0;
+  }
 `;
 
 const LangItemMain = styled.div`
@@ -134,7 +138,7 @@ const LangItemMain = styled.div`
   position: relative;
   padding-left: calc(38px + 8px);
 
-  & > svg {
+  & > img {
     position: absolute;
     top: 0;
     left: -2px;

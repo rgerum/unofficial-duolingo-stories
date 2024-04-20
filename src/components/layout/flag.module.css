@@ -15,6 +15,7 @@
 
     width: calc(82px * var(--flag-scale, 1));
     height: calc(66px * var(--flag-scale, 1));
+    flex-shrink: 0;
 
     object-fit: cover;
     object-position: 0 calc(-66px * var(--flag-scale, 1) * var(--flag_offset, 0));
@@ -22,16 +23,12 @@
     outline: calc(5px * var(--flag-scale, 1)) solid var(--body-background);
     outline-offset: calc(-6px * var(--flag-scale, 1));
     border-radius: calc(16px * var(--flag-scale, 1));
-
-    margin: 3px 12px;
 }
 
 .flag_sub {
   margin-left: -32px;
   margin-top: 18px;
-  width: 35px;
   background-size: 36px;
-  height: 26px;
 }
 
 .flag_border_rect {

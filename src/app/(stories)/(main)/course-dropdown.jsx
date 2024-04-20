@@ -50,6 +50,7 @@ export default function CourseDropdown({
         width={40}
         iso={flag_data[course?.learning_language]?.iso}
         flag_file={flag_data[course?.learning_language]?.flag_file}
+        className={styles.trigger}
       />
       <nav className={styles.header_lang_selector}>
         {course_data_active.map((id) => (

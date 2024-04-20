@@ -72,6 +72,10 @@
   color: var(--text-color-dim);
 }
 
+.flag_margin {
+  margin: 4px 4px 4px 16px;
+}
+
 .author {
   flex-grow: 1;
   text-align: right;

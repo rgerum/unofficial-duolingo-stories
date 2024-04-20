@@ -80,7 +80,7 @@ export default function Flag(props) {
         width={style.width}
         height={style.height}
         priority={true}
-        className={styles.flag_image2}
+        className={styles.flag_image2 + " " + (props.className || "")}
         src={
           props.flag_file
             ? `https://carex.uber.space/stories/flags/${props.flag_file}`

@@ -70,6 +70,7 @@ export default function CourseList({
               >
                 <span className={styles.course_count}>{course.count}</span>
                 <Flag
+                  className={styles.flag_margin}
                   iso={languages[course.learning_language].short}
                   width={40}
                   flag_file={languages[course.learning_language].flag_file}
