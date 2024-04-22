@@ -1,55 +1,36 @@
 import React from "react";
 import styles from "./StoryTextLine.module.css";
-import { EditorContext, StoryContext } from "../story/story";
-import styles_common from "../story/common.module.css";
-import { EditorHook } from "../story/editor_hooks";
-import useAudio from "../story/text_lines/use_audio";
-import AudioPlay from "../story/text_lines/audio_play";
-import HintLineContent from "../story/text_lines/line_hints";
-import EditorSSMLDisplay from "../story/text_lines/audio_edit";
+import useAudio from "./use-audio.hook";
+import StoryLineHints from "../StoryLineHints";
+import PlayAudio from "../PlayAudio";
+import StoryTextLineSimple from "../StoryTextLineSimple";
 
-//progress, unhide, element, part
-function StoryTextLine({ element, unhide = 0 }) {
-  //const editor = React.useContext(EditorContext);
-  //const controls = React.useContext(StoryContext);
-
-  //let active = progress >= element.trackingProperties.line_index;
-  /*
-  if (
-      progress - 0.5 === element.trackingProperties.line_index &&
-      part.length > 1 &&
-      part[1].type === "POINT_TO_PHRASE"
-  )
-    active = 0;
-
-  let hidden = !active ? styles_common.hidden : "";
-
-  let onClick;
-  [hidden, onClick] = EditorHook(hidden, element.editor, editor);
-*/
-  let onClick = undefined;
-  let progress = 0;
-  let [audioRange, playAudio, ref, url] = useAudio(element, progress);
+function StoryTextLine({ active, element, unhide = 999999, settings }) {
+  const onClick = undefined;
+  const [audioRange, playAudio, ref, url] = useAudio(element, active);
 
   if (element.line === undefined) return <></>;
 
-  //let unhide = 0;
-  let controls = { rtl: false };
-  let hideRangesForChallenge = element.hideRangesForChallenge;
-  // TODO window.view === undefined && props.progress !== element.trackingProperties.line_index)
-  //if (progress !== element.trackingProperties.line_index && !editor)
-  //  hideRangesForChallenge = undefined;
-  //if (controls.hide_questions) {
-  //  hideRangesForChallenge = undefined;
-  // }
-  /*
-  if (controls.auto_play) {
-    element.line.content.hintMap = [];
-    playAudio = undefined;
-  }*/
-  //if(props.progress !== element.trackingProperties.line_index)
-  //    hideRangesForChallenge = undefined;
-  // <!--                    <span className="audio_reload" id={"audio_reload"+element.line.content.audio.ssml.id} onClick={() => generate_audio_line(window.story_json, element.line.content.audio.ssml.id)}></span>-->
+  const hideRangesForChallenge = element.hideRangesForChallenge;
+
+  if (settings?.show_names) {
+    const name =
+      element?.line?.characterName || element?.line?.characterId || "Narrator";
+    if (!settings?.highlight_name.includes(name) && settings.hideNonHighlighted)
+      return null;
+    return (
+      <>
+        <StoryTextLineSimple
+          speaker={name}
+          highlight={settings?.highlight_name.includes(name)}
+          id={settings?.id + "-" + element?.trackingProperties?.line_index}
+        >
+          {element.line.content.text}
+        </StoryTextLineSimple>
+      </>
+    );
+  }
+
   if (element.line.type === "TITLE")
     return (
       <div
@@ -61,8 +42,8 @@ function StoryTextLine({ element, unhide = 0 }) {
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />
           </audio>
-          <AudioPlay onClick={playAudio} />
-          <HintLineContent
+          <PlayAudio onClick={playAudio} />
+          <StoryLineHints
             audioRange={audioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             content={element.line.content}
@@ -78,21 +59,13 @@ function StoryTextLine({ element, unhide = 0 }) {
         onClick={onClick}
         data-lineno={element?.editor?.block_start_no}
       >
-        <img
-          className={styles.head + " " + (controls.rtl ? styles.rtl_head : "")}
-          src={element.line.avatarUrl}
-          alt="head"
-        />
-        <span
-          className={
-            styles.bubble + " " + (controls.rtl ? styles.rtl_bubble : "")
-          }
-        >
+        <img className={styles.head} src={element.line.avatarUrl} alt="head" />
+        <span className={styles.bubble}>
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />
           </audio>
-          <AudioPlay onClick={playAudio} />
-          <HintLineContent
+          <PlayAudio onClick={playAudio} />
+          <StoryLineHints
             audioRange={audioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             unhide={unhide}
@@ -113,8 +86,8 @@ function StoryTextLine({ element, unhide = 0 }) {
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />
           </audio>
-          <AudioPlay onClick={playAudio} />
-          <HintLineContent
+          <PlayAudio onClick={playAudio} />
+          <StoryLineHints
             audioRange={audioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             unhide={unhide}

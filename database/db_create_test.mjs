@@ -7,7 +7,7 @@ const { processStoryFile } = import(
  */
 import postgres from "postgres";
 import fs from "node:fs/promises";
-import { processStoryFile } from "./src/components/editor/story/syntax_parser_new.mjs";
+import { processStoryFile } from "../src/components/editor/story/syntax_parser_new.mjs";
 
 process.env.POSTGRES_URL =
     "postgresql://postgres:postgres@localhost:5432/duostories_test_db";
@@ -132,6 +132,8 @@ SET learning_language_name = (
     WHERE language.id = course.from_language
 );
 `
+  await sql`SELECT setval('language_id_seq', COALESCE((SELECT MAX(id) FROM language), 0) + 1, false);`
+  await sql`SELECT setval('course_id_seq', COALESCE((SELECT MAX(id) FROM course), 0) + 1, false);`
   sql.end();
   //await sql`INSERT INTO story_approval ${sql(await load("approvals.json"))}`;
   console.log("done");

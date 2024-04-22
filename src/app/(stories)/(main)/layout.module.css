@@ -84,3 +84,16 @@
   font-size: 30px;
   margin-bottom: -75px;
 }
+
+.icons {
+  display: flex;
+  gap: 0;
+  justify-content: center;
+  line-height: 0.5;
+  margin: 0;
+  margin-top: -8px;
+}
+
+.icons a {
+  padding: 8px;
+}

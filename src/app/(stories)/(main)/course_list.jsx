@@ -3,10 +3,7 @@ import get_localisation from "lib/get_localisation";
 import LanguageButton from "./language_button";
 
 import styles from "./course_list.module.css";
-import styles0 from "./layout.module.css";
-import Legal from "../../../components/layout/legal";
 import { get_course_groups, get_courses_in_group } from "./get_course_data";
-import FooterLinks from "./footer_links";
 
 async function LanguageGroup({ name, tag, id }) {
   let courses_list = await get_courses_in_group(id);
@@ -32,7 +29,7 @@ async function LanguageGroup({ name, tag, id }) {
   );
 }
 
-async function CourseListInner({ loading, tag }) {
+export async function CourseListInner({ loading, tag }) {
   if (loading) {
     return (
       <div className={styles.course_list}>

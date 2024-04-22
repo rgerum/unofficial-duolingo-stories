@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./cast.module.css";
+import Link from "next/link";
 
 export default function Cast(props) {
   let cast = [];
@@ -38,8 +39,13 @@ export default function Cast(props) {
       )}
       <p>
         Use these links to share this story with other contributors to{" "}
-        <a href={`/story/${props.id}`}>test</a> or{" "}
-        <a href={`/story/${props.id}/test`}>review</a> the story.
+        <Link href={`/story/${props.id}`}>test</Link> or{" "}
+        <Link href={`/story/${props.id}/test`}>review</Link> the story. (or
+        review{" "}
+        <Link href={`/story/${props.id}/test?hide_questions=true`}>
+          without the excercises
+        </Link>
+        ) <Link href={`/story_new/${props.id}`}>Story With names</Link>
       </p>
     </div>
   );

@@ -273,13 +273,15 @@ export function timings_to_text({ filename, keypoints }) {
   let text = filename ? ("$" + filename) : ""
   let last_end = 0;
   let last_time = 0;
-  for (let point of keypoints) {
-    text += ";";
-    text += Math.round(point.rangeEnd - last_end);
-    text += ",";
-    text += Math.round(point.audioStart - last_time);
-    last_end = point.rangeEnd;
-    last_time = point.audioStart;
+  if(keypoints) {
+    for (let point of keypoints) {
+      text += ";";
+      text += Math.round(point.rangeEnd - last_end);
+      text += ",";
+      text += Math.round(point.audioStart - last_time);
+      last_end = point.rangeEnd;
+      last_time = point.audioStart;
+    }
   }
   return text;
 }

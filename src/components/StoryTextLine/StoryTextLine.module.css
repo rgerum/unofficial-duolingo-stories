@@ -21,7 +21,7 @@
     display: flex;
 }
 
-.rtl_head {
+div[data-rtl=true] .head {
     transform: scale(-1, 1);
     margin-left: 12px;
     margin-right: 0;
@@ -60,12 +60,12 @@
     top: 0;
 }
 
-.rtl_bubble {
+div[data-rtl=true] .bubble {
     border-top-left-radius: 14px;
     border-top-right-radius: 0;
 }
 
-.rtl_bubble:before {
+div[data-rtl=true] .bubble:before {
     border-left: 12px solid var(--color_base_border);
     border-right: 0;
     border-top-right-radius: 50%;
@@ -74,7 +74,7 @@
     left: auto;
 }
 
-.rtl_bubble:after {
+div[data-rtl=true] .bubble:after {
     border-left: 12px solid var(--color_base_background);
     border-right: 0;
     right: -9px;

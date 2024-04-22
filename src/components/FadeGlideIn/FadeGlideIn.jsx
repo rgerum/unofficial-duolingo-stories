@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "./FadeGlideIn.module.css";
 import { motion } from "framer-motion";
+import useScrollIntoView from "../../hooks/use-scroll-into-view.hook";
 
-function FadeGlideIn({ children, show = true, duration = 400 }, ref) {
+function FadeGlideIn({ children, show = true, duration = 400 }, refX) {
   if (!show) return null;
+  const ref = useScrollIntoView(show);
+
   return (
     <motion.div
       ref={ref}
@@ -23,7 +26,7 @@ function FadeGlideIn({ children, show = true, duration = 400 }, ref) {
       }}
       exit={{ opacity: 0 }}
     >
-      {ref} {children}
+      {children}
     </motion.div>
   );
   const divRef = React.useRef();

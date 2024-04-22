@@ -7,28 +7,40 @@ import FadeGlideIn from "../FadeGlideIn";
 
 function StoryChallengeContinuation({
   parts,
-  setDone,
-  partProgress,
   setButtonStatus,
   active,
+  settings,
 }) {
   const [unhide, setUnhide] = React.useState(0);
   const id = React.useId();
 
   function advance(i, done) {
     setUnhide(-1);
-    if (setDone) setButtonStatus("right");
+    setButtonStatus("right");
+  }
+  if (settings.hide_questions) {
+    if (active) setButtonStatus("continue");
+    return (
+      <FadeGlideIn key={`${id}-1`}>
+        <StoryTextLine active={active} element={parts[1]} settings={settings} />
+      </FadeGlideIn>
+    );
   }
 
   return (
     <>
-      <FadeGlideIn key={`${id}-1`} show={active}>
-        <StoryQuestionPrompt question={parts[0].prompt} />
+      <FadeGlideIn key={`${id}-1`} show={active || settings.show_all}>
+        <StoryQuestionPrompt question={parts[0].prompt} lang={parts[0].lang} />
       </FadeGlideIn>
       <FadeGlideIn key={`${id}-2`}>
-        <StoryTextLine element={parts[1]} unhide={unhide} />
+        <StoryTextLine
+          active={active}
+          element={parts[1]}
+          unhide={unhide}
+          settings={settings}
+        />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-3`} show={active}>
+      <FadeGlideIn key={`${id}-3`} show={active || settings.show_all}>
         <StoryQuestionMultipleChoice element={parts[2]} advance={advance} />
       </FadeGlideIn>
     </>

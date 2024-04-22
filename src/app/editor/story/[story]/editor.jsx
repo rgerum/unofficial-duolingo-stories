@@ -68,6 +68,15 @@ export async function deleteStory(data) {
   return res;
 }
 
+function getMax(list, callback) {
+  let max = -Infinity;
+  for (let obj of list) {
+    const v = callback(obj);
+    if (v > max) max = v;
+  }
+  return max;
+}
+
 export default function Editor({ story_data, avatar_names, session }) {
   const editor = React.useRef();
   const preview = React.useRef();
@@ -102,6 +111,31 @@ export default function Editor({ story_data, avatar_names, session }) {
   const [audio_editor_data, setAudioEditorData] = React.useState({});
 
   const [unsaved_changes, set_unsaved_changes] = React.useState(false);
+
+  function soundRecorderNext() {
+    const index = audio_editor_data.trackingProperties.line_index || 0;
+    for (let element of story_state.elements) {
+      if (
+        element.type === "LINE" &&
+        element.trackingProperties.line_index > index
+      ) {
+        setAudioEditorData(element);
+        break;
+      }
+    }
+  }
+  function soundRecorderPrevious() {
+    const index = audio_editor_data.trackingProperties.line_index || 0;
+    for (let element of [...story_state.elements].reverse()) {
+      if (
+        (element.type === "LINE" || element.type === "HEADER") &&
+        (element.trackingProperties.line_index || 0) < index
+      ) {
+        setAudioEditorData(element);
+        break;
+      }
+    }
+  }
 
   const navigate = useRouter().push;
 
@@ -304,9 +338,14 @@ export default function Editor({ story_data, avatar_names, session }) {
           language_data2={language_data2}
           session={session}
         />
-        {audio_editor_data?.line?.content && (
+        {(audio_editor_data?.line?.content ||
+          audio_editor_data?.learningLanguageTitleContent) && (
           <SoundRecorder
-            content={audio_editor_data.line.content}
+            key={audio_editor_data.trackingProperties.line_index}
+            content={
+              audio_editor_data?.line?.content ||
+              audio_editor_data?.learningLanguageTitleContent
+            }
             initialTimingText={timings_to_text({
               keypoints: audio_editor_data.audio.keypoints,
             })}
@@ -317,6 +356,15 @@ export default function Editor({ story_data, avatar_names, session }) {
             story_id={story_data.id}
             onClose={() => setAudioEditorData(null)}
             onSave={onAudioSave}
+            soundRecorderNext={soundRecorderNext}
+            soundRecorderPrevious={soundRecorderPrevious}
+            total_index={getMax(
+              story_state.elements,
+              (elem) => elem.trackingProperties.line_index || 0,
+            )}
+            current_index={
+              audio_editor_data?.trackingProperties?.line_index || 0
+            }
           />
         )}
         <div className={styles.root}>

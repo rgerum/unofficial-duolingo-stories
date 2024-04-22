@@ -266,6 +266,18 @@ export default function LanguageList({ all_languages }) {
     <Wrapper>
       <SearchBar>
         <Input label={"Search"} value={search} onChange={setSearch} />
+        <EditLanguage
+          obj={{
+            name: "",
+            short: "",
+            flag: 0,
+            flag_file: "",
+            speaker: "",
+            rtl: false,
+          }}
+          is_new={true}
+          updateLanguage={updateLanguage}
+        />
       </SearchBar>
       <table
         id="story_list"

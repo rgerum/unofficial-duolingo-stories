@@ -175,7 +175,7 @@ function StoryQuestionMultipleChoice({ element, advance }) {
   }
 
   return (
-    <div>
+    <div className={element.lang}>
       {/* Display the question if a question is there */}
       {element.question && <StoryQuestionPrompt question={element.question} />}
       {/* Display the answers */}

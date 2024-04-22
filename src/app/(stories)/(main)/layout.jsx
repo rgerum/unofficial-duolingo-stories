@@ -12,6 +12,7 @@ import getUserId from "../../../lib/getUserId";
 import styles0 from "./layout.module.css";
 import FooterLinks from "./footer_links";
 import Legal from "../../../components/layout/legal";
+import Image from "next/image";
 
 export const metadata = {
   title:
@@ -29,6 +30,13 @@ export const metadata = {
     "community",
     "volunteers",
   ],
+  openGraph: {
+    title: "Duostories",
+    description:
+      "Supplement your Duolingo course with community-translated Duolingo stories.",
+    type: "website",
+    url: `https://duostories.org`,
+  },
 };
 
 const get_courses_user = cache(
@@ -67,7 +75,12 @@ export default async function Layout({ children }) {
               className={styles.duostories_title}
               data-cy={"logo"}
             >
-              <img src={"/Duostories.svg"} alt={"Duostories"} height="25px" />
+              <Image
+                src={"/Duostories.svg"}
+                alt={"Duostories"}
+                height={25}
+                width={150.1}
+              />
             </Link>
             <div style={{ marginLeft: "auto" }}></div>
 

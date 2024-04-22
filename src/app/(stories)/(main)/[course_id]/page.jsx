@@ -1,12 +1,10 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { notFound } from "next/navigation";
 
 import CourseTitle from "./course_title";
 import SetList from "./set_list";
 import get_localisation from "../../../../lib/get_localisation";
-import Legal from "../../../../components/layout/legal";
 import { get_course_data, get_course } from "../get_course_data";
-import FooterLinks from "../footer_links";
 
 export async function generateMetadata({ params, searchParams }, parent) {
   if (
@@ -34,6 +32,14 @@ export async function generateMetadata({ params, searchParams }, parent) {
     alternates: {
       canonical: `https://duostories.org/${params.course_id}`,
     },
+    openGraph: {
+      images: [
+        `/api/og-course?lang=${params.course_id.split("-")[0]}&count=${
+          course.count
+        }&name=${course.learning_language_name}`,
+      ],
+      url: `https://duostories.org/${params.course_id}`,
+    },
     keywords: [course.learning_language_name, ...meta.keywords],
   };
 }
@@ -56,13 +62,8 @@ export default async function Page({ params }) {
 
   return (
     <>
-      <Suspense fallback={<CourseTitle />}>
-        <CourseTitle course_id={params.course_id} />
-      </Suspense>
-
-      <Suspense fallback={<SetList />}>
-        <SetList course_id={params.course_id} />
-      </Suspense>
+      <CourseTitle course_id={params.course_id} />
+      <SetList course_id={params.course_id} />
     </>
   );
 }

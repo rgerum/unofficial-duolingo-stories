@@ -1,16 +1,31 @@
 import React from "react";
 import styles from "./StoryHeader.module.css";
 
-import useAudio from "../story/text_lines/use_audio";
-import AudioPlay from "../story/text_lines/audio_play";
-import HintLineContent from "../story/text_lines/line_hints";
+import useAudio from "../StoryTextLine/use-audio.hook";
+import PlayAudio from "../PlayAudio";
+import StoryLineHints from "../StoryLineHints";
+import StoryTextLineSimple from "../StoryTextLineSimple";
 
-function StoryHeader({ element }) {
+function StoryHeader({ active, element, settings }) {
   let onClick = undefined;
-  let progress = 0;
-  const [audioRange, playAudio, ref, url] = useAudio(element, progress);
+  const [audioRange, playAudio, ref, url] = useAudio(element, active);
 
   const hideRangesForChallenge = undefined;
+
+  if (settings?.show_names) {
+    const name = "Narrator";
+    if (!settings?.highlight_name.includes(name) && settings.hideNonHighlighted)
+      return null;
+    return (
+      <StoryTextLineSimple
+        speaker={"Narrator"}
+        highlight={settings?.highlight_name.includes(name)}
+        id={settings?.id + "-" + 0}
+      >
+        {element.learningLanguageTitleContent.text}
+      </StoryTextLineSimple>
+    );
+  }
 
   return (
     <div
@@ -30,8 +45,8 @@ function StoryHeader({ element }) {
         <audio ref={ref}>
           <source src={url} type="audio/mp3" />
         </audio>
-        <AudioPlay onClick={playAudio} />
-        <HintLineContent
+        <PlayAudio onClick={playAudio} />
+        <StoryLineHints
           audioRange={audioRange}
           hideRangesForChallenge={hideRangesForChallenge}
           content={element.learningLanguageTitleContent}
