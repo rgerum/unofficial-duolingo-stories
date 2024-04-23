@@ -1,0 +1,152 @@
+[DATA]
+fromLanguageName=Good morning
+icon=783305780a6dad8e0e4eb34109d948e6a5fc2c35
+set=1|1
+approvals=11,12
+public=1
+
+icon_Jan=https://stories-cdn.duolingo.com/image/f118359885a5dc9babe4808c746e1c15ea9cd6f4.svg
+speaker_Marian=Lotte
+speaker_Jan=Ruben
+
+[HEADER]
+> Goedemorgen! 
+~ Good~morning 
+$43/2725ef44.mp3;11,50
+
+[LINE]
+> Jan is thuis met  zijn vrouw, Marian.
+~ ~   is home  with his  wife   ~      
+$43/2a532e34.mp3;3,50;3,350;6,200;4,350;5,162;6,200;7,675
+
+[LINE]
+Speaker15: Hoi Marian.
+~           Hi  Marian 
+$43/2c75faa2.mp3;3,50;7,325
+
+[LINE]
+Speaker292: Morgen, schat.
+~           Morning  darling 
+$43/ab6157c8.mp3;6,50;6,712
+
+[MULTIPLE_CHOICE]
+> What does "schat" mean?
++ Darling
+- Friend
+- Brother
+
+[LINE]
+Speaker292: Weet~jij    waar mijn lesboek Engels is? 
+~           do~you~know Where  my textbook English is 
+$43/eb4efbec.mp3;4,50;4,337;5,275;5,138;8,200;7,525;3,375
+
+[LINE]
+Speaker15: Sorry?
+~          Sorry 
+$43/a6e81e90.mp3;5,50
+
+[SELECT_PHRASE]
+> Select the missing phrase
+Speaker292: Ik heb  [een examen~Engels] op de  universiteit.
+~           I  have  an  English~exam   at the university   
+$43/bbe45be2.mp3;2,50;4,175;4,175;7,125;7,662;3,413;3,150;13,50
+- en Engels examen
++ een examen Engels
+- een Engelse element
+
+[LINE]
+Speaker292: Waar  is toch               mijn boek?!
+~           Where is (emphazising~word) my   book  
+$43/dd754028.mp3;4,50;3,337;5,188;5,150;5,275
+
+[LINE]
+Speaker15: Het ligt daar,       op de  tafel.
+~          It  is   over~there  on the table 
+$43/04ded8de.mp3;3,50;5,225;5,237;3,488;3,150;6,100
+
+[POINT_TO_PHRASE]
+> Click on the option meaning "tired".
+Speaker292: (Ik) (ben) (+moe) (Jan{jan}).   (Ik) (werk) (zoveel).     
+~            I   am  tired  ~      I   work  so~much
+$43/297a01e6.mp3;2,50;4,162;4,250;4,188;3,1287;5,175;7,400
+
+[LINE]
+Speaker15: Wil~je      een~kop  koffie?
+~          Do~you~want a~cup~of coffee 
+$43/3631cbb2.mp3;3,50;3,300;4,75;4,87;7,250
+
+[LINE]
+Speaker292: Ja,  graag!
+~           Yes  thanks 
+$43/39f70b04.mp3;2,50;6,475
+
+[ARRANGE]
+> Tap what you hear
+Speaker15: [(Met)  (of) (zonder)  (melk)]?
+~            With   or   without   milk   
+$43/57ec8bd6.mp3;3,50;3,325;7,125;5,350
+
+[LINE]
+Speaker292: Zwart, graag.
+~           Black, please. 
+$43/54729340.mp3;5,50;6,600
+
+[LINE]
+Speaker15: Alsjeblieft.
+~          Here~you~are 
+$43/376d2726.mp3;11,50
+
+[LINE]
+> Marian doet suiker in   haar kopje.
+~ ~      puts sugar  into her  cup   
+$43/6484c3ea.mp3;6,50;5,550;7,187;3,475;5,125;6,238
+
+[CONTINUATION]
+> What comes next?
+> Ze   drinkt [haar koffie].
+~ She drinks  her  coffee  
+$43/68a9b9e4.mp3;2,50;7,287;5,363;7,237
+- haar melk
++ haar koffie
+- haar boek
+
+[LINE]
+Speaker292: Gadver!
+~           Damn   
+$43/6e0577e8.mp3;6,50
+
+[LINE]
+Speaker15: Wat? 
+~          What 
+$43/714cb542.mp3;3,50
+
+[LINE]
+Speaker292: Het  is zout, geen suiker!
+~           That is salt not sugar
+$43/71d81310.mp3;3,50;3,200;5,187;5,538;7,375
+
+[LINE]
+Speaker15: Je  bent echt   heel moe,   Marian.
+~          You are  really very tired ~      
+$43/80f99fe4.mp3;2,50;5,150;5,275;5,212;4,275;7,438
+
+[CONTINUATION]
+> Complete the sentence
+> Marian was zo moe,   dat  ze  [zout     in haar koffie deed  in~plaats~van suiker].
+~ ~      was so tired that she  put~salt in her  coffee (put) instead~of    sugar  
+$43/8df42b9c.mp3;6,50;4,537;3,213;4,212;4,563;3,187;5,125;3,350;5,113;7,162;5,375;3,275;7,125;4,338;7,150
+- in~slaap~viel tijdens~het~praten met Jan.
+~ fell~asleep   while~talking      to  ~   
++ zout     in haar koffie deed  in~plaats~van suiker.
+~ put~salt in her  coffee (put) instead~of    sugar  
+- haar        kopje liet~vallen terwijl ze~aan~het~drinken~was.
+~ dropped~her cup   (dropped)   when    she~was~drinking       
+
+[MATCH]
+> Tap the pairs
+- with <> met
+- at home <>thuis
+- the wife <> de vrouw (de echtgenote)
+- darling <> schat
+- the salt <> het zout
+

@@ -50,6 +50,7 @@ export default function HintLineContent({
   hideRangesForChallenge,
   unhide,
 }) {
+  if (!content) return <>Empty</>;
   hideRangesForChallenge = hideRangesForChallenge
     ? hideRangesForChallenge[0]
     : hideRangesForChallenge;

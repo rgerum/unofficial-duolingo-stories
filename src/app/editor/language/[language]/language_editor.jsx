@@ -66,10 +66,15 @@ export function Layout({
         type: "course",
         lang1: language_data,
         lang2: language2,
-        href: `/editor/course/${course?.short}`,
+        href: course?.short ? `/editor/course/${course?.short}` : `/editor`,
       },
       { type: "sep" },
-      { type: "Voices", href: `/editor/language/${course?.short}` },
+      {
+        type: "Voices",
+        href: course?.short
+          ? `/editor/language/${course?.short}`
+          : `/editor/language/${language_data?.short}`,
+      },
       { type: "sep" },
       { type: "Edit" },
     ];
@@ -81,7 +86,7 @@ export function Layout({
         type: "course",
         lang1: language_data,
         lang2: language2,
-        href: `/editor/course/${course?.short}`,
+        href: course?.short ? `/editor/course/${course?.short}` : `/editor`,
       },
       { type: "sep" },
       { type: "Voices" },
@@ -97,7 +102,9 @@ export function Layout({
         ) : (
           <EditorButton
             id="button_edit"
-            href={`/editor/language/${course.short}/tts_edit`}
+            href={`/editor/language/${
+              course?.short || language_data.short
+            }/tts_edit`}
             data-cy="button_edit"
             img={"import.svg"}
             text={"Edit"}

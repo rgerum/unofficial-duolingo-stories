@@ -1,0 +1,38 @@
+[
+  {
+    "id": 12,
+    "learning_language": 12,
+    "from_language": 1,
+    "public": false,
+    "official": true,
+    "name": null,
+    "about": null,
+    "conlang": 0,
+    "short": "es-en-o",
+    "tags": "{}"
+  },
+  {
+    "id": 2,
+    "learning_language": 2,
+    "from_language": 1,
+    "public": true,
+    "official": false,
+    "name": null,
+    "about": null,
+    "conlang": 0,
+    "short": "nl-en",
+    "tags": "{main}"
+  },
+  {
+    "id": 186,
+    "learning_language": 99,
+    "from_language": 1,
+    "public": true,
+    "official": false,
+    "name": "",
+    "about": "This course is just for testing.",
+    "conlang": 0,
+    "short": "test-en",
+    "tags": "{main}"
+  }
+]

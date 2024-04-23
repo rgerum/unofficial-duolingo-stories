@@ -1,0 +1,150 @@
+[DATA]
+fromLanguageName=Is It Love?
+icon=d7461e0ccc18067f34ff9c385653ac769bde4875
+set=0|2 #28|2
+deleted=1
+
+[HEADER]
+> ¿Es    amor?
+~  is~it love
+
+[LINE]
+> Es~hora~de    un nuevo episodio de nuestro programa~de~citas: "¿Es    amor?".
+~ it's~time~for a  new   episode  of our     dating~show          is~it love
+
+[LINE]
+> Eddy conoció~a muchas mujeres durante el~programa…
+~ Eddy met       many   women   during  the~show
+
+[LINE]
+> … ¡pero ahora tiene~que elegir~a    una!
+~    but  now   he~has~to (to)~choose one
+
+[MULTIPLE_CHOICE]
+> On a  television show, Eddy has  to…
+~ On to TV         Show  Eddy have to
++ …choose a  woman to go out with.
+~  choose to Woman to Go out with
+- …eat a  lot of food.
+~  Eat to Lot of Food
+- …drive really fast.
+~  drive Really fast
+
+[LINE]
+> Él está~hablando~con Rosa en este~momento.
+~ he is~talking~to     Rosa in this~moment
+
+[LINE]
+Speaker414: No~puedo creer        que  tengo~que elegir~a    una~sola mujer. ¡Esto es muy  estresante!
+~           I~can't  (to)~believe that I~have~to (to)~choose just~one woman   this is very stressful
+
+[LINE]
+Speaker338: ¡No, es   fácil! Yo creo  que  deberías   elegirme~a~mí.
+~            no  it's easy   I  think that you~should (to)~choose~me
+
+[ARRANGE]
+> Tap what you hear
+Speaker414: [(Pero) (es)   (una) (decisión~difícil).]
+~             but    it's   a     difficult~decision
+
+[LINE]
+Speaker338: ¡¿Ah, sí?!
+~             oh  yes
+
+[SELECT_PHRASE]
+> Select the missing phrase
+Speaker338: Yo creía   que  [te~gustaba]…
+~           I  thought that  you~liked~me
+- le gustaban
+- te gastabas
++ te gustaba
+
+[LINE]
+Speaker414: Sí,  pero también~me~gusta Marina…
+~           yes  but  I~also~like      Marina
+
+[LINE]
+Speaker338: Bueno, sí,  Marina es hermosa.
+~           well   yes  Marina is beautiful
+
+[LINE]
+Speaker414: Ella es interesante y   graciosa.
+~           she  is interesting and funny
+
+[ARRANGE]
+> Tap what you hear
+Speaker338: [(Y)   (ella) (toca)  (muy~bien~el~violín).]
+~             and   she    plays   the~violin~very~well
+
+[LINE]
+Speaker414: ¡Yo sé!   A~ustedes~dos~les~encanta la~música.
+~            I  know  you~both~love             music
+
+[LINE]
+Speaker338: Sí,  tenemos muchas cosas  en común.
+~           yes  we~have many   things in common
+
+[LINE]
+Speaker414: ¡Sí!  A~las~dos~les~gustan las~películas~de~aventura y   los~museos~de~arte.
+~            yes  you~both~like        adventure~movies          and art~museums
+
+[LINE]
+Speaker414: ¡Y   las~dos  escriben poemas!
+~            and you~both write    poems
+
+[LINE]
+Speaker338: Sí,  sus~poemas son hermosos…
+~           yes  her~poems  are beautiful
+
+[LINE]
+Speaker414: ¡No~sé        qué  hacer!
+~            I~don't~know what to~do
+
+[LINE]
+Speaker338: Ya~sé  lo~que deberías   hacer…
+~           I~know what   you~should (to)~do
+
+[LINE]
+Speaker414: ¡¿Qué?!
+~             what
+
+[LINE]
+Speaker338: Olvídate de    Marina y   de    mí. ¡Elige~a alguien más!
+~           forget   about Marina and about me   choose  someone else
+
+[MULTIPLE_CHOICE]
+> Did you catch that? Rosa doesn't…
+- …like Marina's poetry.
+- …like funny movies.
++ …want Eddy to go out with her or Marina.
+
+[LINE]
+Speaker414: ¡¿Qué?!  ¿Por~qué?
+~             what    why
+
+[LINE]
+Speaker338: Porque…  yo quiero elegir~a  Marina.
+~           because  I  want   to~choose Marina
+
+[LINE]
+Speaker414: ¿Ah?
+~            oh
+
+[LINE]
+> En el  próximo episodio de "¿Es    amor?"… ¿¡qué  va~a~decir~Marina!?
+~ in the next    episode  of   is~it love      what is~Marina~going~to~say
+
+[MULTIPLE_CHOICE]
+> What did Rosa realize?
+- Marina writes terrible poetry.
++ She likes Marina and wants to go out with her.
+- She doesn't like Marina or Eddy.
+
+[MATCH]
+> Tap the pairs
+- A las dos les gustan <> you both like
+- creer <> believe
+- una <> one
+- sus poemas <> her poems
+- toca <> plays
+

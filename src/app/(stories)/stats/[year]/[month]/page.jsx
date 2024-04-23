@@ -18,12 +18,12 @@ function DataGroup({ title, data, data_old, key_name }) {
   let total_count_old = 0;
   for (let l of data[key_name]) {
     story_ids.push(l.course_id);
-    total_count += l.count;
+    total_count += parseInt(l.count);
   }
   let old_stories = {};
   for (let l of data_old[key_name]) {
     old_stories[l.course_id] = l;
-    total_count_old += l.count;
+    total_count_old += parseInt(l.count);
     if (!story_ids.includes(l.course_id)) {
       data[key_name].push({ course_id: l.course_id, count: 0 });
     }
@@ -52,8 +52,8 @@ function DataGroup({ title, data, data_old, key_name }) {
             count={d.count}
             count_old={old_stories[d.course_id]?.count}
             max_count={Math.max(
-              data[key_name][0].count,
-              data_old[key_name][0].count,
+              data[key_name][0]?.count || 0,
+              data_old[key_name][0]?.count || 0,
             )}
           />
         ))}
@@ -87,15 +87,17 @@ function ref_by_course(data, data_old, key) {
 }
 
 export default async function Page({ params }) {
-  const data = await get_stats(params.year, params.month);
-  data.year = parseInt(params.year);
-  data.month = parseInt(params.month);
+  let year = parseInt(params.year);
+  let month = parseInt(params.month);
+  const data = await get_stats(year, month);
+  data.year = year;
+  data.month = month;
   const data_old = await get_stats(
-    params.month === 1 ? params.year - 1 : params.year,
-    params.month === 1 ? 12 : params.month - 1,
+    month === 1 ? year - 1 : year,
+    month === 1 ? 12 : month - 1,
   );
-  data_old.year = params.month === 1 ? params.year - 1 : params.year;
-  data_old.month = params.month === 1 ? 12 : params.month - 1;
+  data_old.year = month === 1 ? year - 1 : year;
+  data_old.month = month === 1 ? 12 : month - 1;
 
   let courses = {};
   for (let c of data["courses"]) {

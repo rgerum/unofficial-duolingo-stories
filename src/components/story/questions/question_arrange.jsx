@@ -57,6 +57,7 @@ export default function QuestionArrange({ setUnhide, progress, element }) {
             key={index}
             className={styles.word_order}
             data-cy="arrange-button"
+            data-index={element.phraseOrder[index]}
             data-status={[undefined, "off", "wrong"][buttonState[index]]}
             onClick={() => click(index)}
           >

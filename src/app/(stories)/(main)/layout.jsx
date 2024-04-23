@@ -1,14 +1,18 @@
 import Link from "next/link";
 import React from "react";
-import { cache } from "react";
 import { getServerSession } from "next-auth/next";
-import Legal from "components/layout/legal";
-import { sql } from "lib/db";
+import { sql, cache } from "lib/db";
 import styles from "./layout.module.css";
-import { authOptions } from "app/api/auth/[...nextauth]/route";
+import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import CourseDropdown from "./course-dropdown";
 import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
-import { unstable_cache } from "next/cache";
+import { get_flag_data } from "../../../components/layout/flag_by_id";
+import { get_course_data } from "./get_course_data";
+import getUserId from "../../../lib/getUserId";
+import styles0 from "./layout.module.css";
+import FooterLinks from "./footer_links";
+import Legal from "../../../components/layout/legal";
+import Image from "next/image";
 
 export const metadata = {
   title:
@@ -26,71 +30,79 @@ export const metadata = {
     "community",
     "volunteers",
   ],
+  openGraph: {
+    title: "Duostories",
+    description:
+      "Supplement your Duolingo course with community-translated Duolingo stories.",
+    type: "website",
+    url: `https://duostories.org`,
+  },
 };
 
-const get_courses_user = cache(async (user_name) => {
-  // sort courses by base language
-  return await sql`
-SELECT course.short
-FROM course
-INNER JOIN (
-    SELECT s.course_id, MAX(story_done.time) as max_story_time
-    FROM story s
-    INNER JOIN story_done ON story_done.story_id = s.id
-    WHERE story_done.user_id = (
-        SELECT id FROM "user" WHERE username = ${user_name} LIMIT 1
-    )
-    GROUP BY s.course_id
-) as max_time ON course.id = max_time.course_id
-ORDER BY max_time.max_story_time DESC;`;
-});
-
-const get_course_flags = unstable_cache(async () => {
-  const res =
-    await sql`SELECT course.id, COALESCE(NULLIF(course.name, ''), l.name) AS name, course.short,
- l.short AS learning_language, l.flag AS learning_language_flag, l.flag_file AS learning_language_flag_file FROM course 
- JOIN language l on l.id = course.learning_language WHERE course.public`;
-  const data = {};
-  for (let r of res) {
-    data[r.short] = r;
-  }
-  return data;
-}, ["get_course_flags_x"]);
+const get_courses_user = cache(
+  async (id) => {
+    if (!id) return [];
+    // sort courses by base language
+    return (
+      await sql`
+SELECT s.course_id
+FROM story s
+INNER JOIN story_done ON story_done.story_id = s.id
+WHERE story_done.user_id = ${id}
+GROUP BY s.course_id
+ORDER BY MAX(story_done.time) DESC;`
+    ).map((r) => r.course_id);
+  },
+  ["get_courses_user"],
+  { tags: ["courses_user"] },
+);
 
 export default async function Layout({ children }) {
   // @ts-ignore
-  let all_courses_flags = await get_course_flags();
+  const flag_data = await get_flag_data();
+  const course_data = await get_course_data();
 
   const session = await getServerSession(authOptions);
-
-  let active_courses;
-  if (session?.user?.name)
-    active_courses = await get_courses_user(session.user.name);
+  const active_courses = await get_courses_user(await getUserId());
 
   return (
     <>
-      <nav className={styles.header_index}>
-        <Link href={"/"} className={styles.duostories_title} data-cy={"logo"}>
-          <img src={"Duostories.svg"} alt={"Duostories"} height="25px" />
-        </Link>
-        <div style={{ marginLeft: "auto" }}></div>
+      <div className={styles.all_wrapper}>
+        <div className={styles.header_wrapper}>
+          <nav className={styles.header_index}>
+            <Link
+              href={"/"}
+              className={styles.duostories_title}
+              data-cy={"logo"}
+            >
+              <Image
+                src={"/Duostories.svg"}
+                alt={"Duostories"}
+                height={25}
+                width={150.1}
+              />
+            </Link>
+            <div style={{ marginLeft: "auto" }}></div>
 
-        <CourseDropdown
-          course_data={active_courses}
-          all_courses_flags={all_courses_flags}
-        />
-        {session?.user ? (
-          <LoggedInButton
-            page={"stories"}
-            course_id={"segment"}
-            session={session}
-          />
-        ) : (
-          <LogInButton />
-        )}
-      </nav>
-      <div className={styles.main_body}>
-        <div className={styles.main_index}>{children}</div>
+            <CourseDropdown
+              course_data_active={active_courses}
+              course_data={course_data}
+              flag_data={flag_data}
+            />
+            {session?.user ? (
+              <LoggedInButton
+                page={"stories"}
+                course_id={"segment"}
+                session={session}
+              />
+            ) : (
+              <LogInButton />
+            )}
+          </nav>
+        </div>
+        <main className={styles0.main_index}>{children}</main>
+        <FooterLinks />
+        <Legal language_name={undefined} />
       </div>
     </>
   );

@@ -1,27 +1,10 @@
-import React, { Suspense } from "react";
-import { sql } from "lib/db";
+import React from "react";
+import { notFound } from "next/navigation";
 
 import CourseTitle from "./course_title";
 import SetList from "./set_list";
-import { notFound } from "next/navigation";
-import { unstable_cache } from "next/cache";
 import get_localisation from "../../../../lib/get_localisation";
-import Legal from "../../../../components/layout/legal";
-
-const get_course = unstable_cache(
-  async (course_id) => {
-    return (
-      (
-        await sql`
-        SELECT l.name AS learning_language_name, course.from_language FROM course
-        JOIN language l on l.id = course.learning_language
-        WHERE course.short = ${course_id} AND course.public LIMIT 1
-        `
-      )[0] || null
-    );
-  },
-  ["get_course_metaXXXxx"],
-);
+import { get_course_data, get_course } from "../get_course_data";
 
 export async function generateMetadata({ params, searchParams }, parent) {
   if (
@@ -31,7 +14,6 @@ export async function generateMetadata({ params, searchParams }, parent) {
     return notFound();
   }
   const course = await get_course(params.course_id);
-
   if (!course) notFound();
   const localization = await get_localisation(course.from_language);
 
@@ -50,8 +32,24 @@ export async function generateMetadata({ params, searchParams }, parent) {
     alternates: {
       canonical: `https://duostories.org/${params.course_id}`,
     },
+    openGraph: {
+      images: [
+        `/api/og-course?lang=${params.course_id.split("-")[0]}&count=${
+          course.count
+        }&name=${course.learning_language_name}`,
+      ],
+      url: `https://duostories.org/${params.course_id}`,
+    },
     keywords: [course.learning_language_name, ...meta.keywords],
   };
+}
+
+export async function generateStaticParams() {
+  const courses = await get_course_data();
+
+  return courses.map((course) => ({
+    course_id: course.short,
+  }));
 }
 
 export default async function Page({ params }) {
@@ -64,15 +62,8 @@ export default async function Page({ params }) {
 
   return (
     <>
-      <Suspense fallback={<CourseTitle />}>
-        <CourseTitle course_id={params.course_id} />
-      </Suspense>
-
-      <Suspense fallback={<SetList />}>
-        <SetList course_id={params.course_id} />
-      </Suspense>
-      <hr />
-      <Legal language_name={undefined} />
+      <CourseTitle course_id={params.course_id} />
+      <SetList course_id={params.course_id} />
     </>
   );
 }

@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { Headers } from "node-fetch";
 import fs from "fs";
+import { put } from '@vercel/blob';
 
 const apiKey = process.env.GITHUB_APIKEY;
 
@@ -42,7 +43,7 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
   if (response.ok) {
     const { audioContent, timepoints } = await response.json();
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (filename === undefined) {
         /*
         for (let mark_index in timepoints) {
@@ -56,20 +57,15 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
         }*/
         resolve({ timepoints: timepoints, content: audioContent });
       }
+      else {
+        await put(filename, Buffer.from(audioContent, "base64"), {access: "public", addRandomSuffix: false});
+        resolve({output_file: filename, timepoints: timepoints});
+      }
+      /*
       fs.writeFile(filename, Buffer.from(audioContent, "base64"), () => {
-        /*
-        //{"time":1025,"type":"word","start":14,"end":17,"value":"moe"}
-        for (let mark_index in timepoints) {
-          mark_index = mark_index * 1;
-          marks[0]["time"] = 0;
-          for (let mark of marks) {
-            if (mark.end === parseInt(timepoints[mark_index].markName)) {
-              mark["time"] = timepoints[mark_index]["timeSeconds"] * 1000;
-            }
-          }
-        }*/
         resolve({ output_file: filename, timepoints: timepoints });
       });
+    */
     });
     // do something with audioContent and timepoints
   } else {

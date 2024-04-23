@@ -29,7 +29,7 @@ export default function useScrollLinking(view, preview, svg_parent) {
         svg_parent.getBoundingClientRect().top -
         10; // - preview.scrollTop - preview.getBoundingClientRect().top
       let new_linetop =
-        -5 +
+        -10 +
         (4 + new_lineno) * 26.6 -
         editor.scrollTop -
         svg_parent.getBoundingClientRect().top -
@@ -47,29 +47,45 @@ export default function useScrollLinking(view, preview, svg_parent) {
     svg_parent.children[0].setAttribute("d", path);
   }, [editor, preview, svg_parent]);
 
-  let editor_scroll = React.useCallback(() => {
-    requestAnimationFrame(() => {
-      if (last_editor_scroll_pos === Math.round(editor.scrollTop)) return;
-      last_editor_scroll_pos = Math.round(editor.scrollTop);
-
-      let offset_lines = 1;
-      let o = editor.getBoundingClientRect().height / 2;
-      let target_equal_lineno =
-        (editor.scrollTop - 4 + o) / 26.6 + offset_lines;
-      let pairss = createScrollLookUp();
-      if (pairss === undefined) return;
-      for (let i = 0; i < pairss.length - 1; i += 1) {
-        let [x1, y1] = pairss[i];
-        let [x2, y2] = pairss[i + 1];
-        if (x1 <= target_equal_lineno && target_equal_lineno < x2) {
-          let f = (target_equal_lineno - x1) / (x2 - x1);
-          let offsetx = y1 + f * (y2 - y1);
-          last_preview_scroll_pos = Math.round(offsetx - o);
-          preview.scrollTo({ top: offsetx - o, behavior: "auto" });
-          break;
+  function map_side(scroll_pos, pairss, from_i, to_i) {
+    let o = editor.getBoundingClientRect().height / 3;
+    scroll_pos = scroll_pos + o;
+    if (pairss === undefined) return;
+    function round(x) {
+      return x;
+    }
+    for (let i = 0; i < pairss.length - 1; i += 1) {
+      let x1 = pairss[i][from_i];
+      let x2 = pairss[i + 1][from_i];
+      let y1 = pairss[i][to_i];
+      let y2 = pairss[i + 1][to_i];
+      if (x1 <= scroll_pos && scroll_pos < x2) {
+        //if (i === 5) {
+        let scroll_diff = scroll_pos - x1;
+        let difference = x2 - x1 - (y2 - y1);
+        if (difference > 0) {
+          if (scroll_diff < difference) return round(y1 - o);
+          else return round(y1 + scroll_diff - difference - o);
+        } else {
+          if (scroll_diff < (x2 - x1) / 2) return round(y1 + scroll_diff - o);
+          else return round(y1 + scroll_diff - difference - o);
         }
       }
+    }
+  }
 
+  let editor_scroll = React.useCallback(() => {
+    window.editor = editor;
+    window.preview = preview;
+    requestAnimationFrame(() => {
+      if (Math.round(last_editor_scroll_pos) === Math.round(editor.scrollTop))
+        return;
+      last_editor_scroll_pos = editor.scrollTop;
+
+      let new_pos = map_side(editor.scrollTop, createScrollLookUp(), 1, 2);
+      if (new_pos === undefined) return;
+      last_preview_scroll_pos = parseInt(new_pos);
+      preview.scrollTo({ top: last_preview_scroll_pos, behavior: "auto" });
       update_lines();
     });
   }, [editor, preview]);
@@ -81,26 +97,14 @@ export default function useScrollLinking(view, preview, svg_parent) {
 
   let preview_scroll = React.useCallback(() => {
     requestAnimationFrame(() => {
-      if (last_preview_scroll_pos === parseInt(preview.scrollTop)) return;
-      last_preview_scroll_pos = parseInt(preview.scrollTop);
+      if (Math.round(last_preview_scroll_pos) === Math.round(preview.scrollTop))
+        return;
+      last_preview_scroll_pos = Math.round(preview.scrollTop);
 
-      let offset_lines = 1;
-      let o = preview.getBoundingClientRect().height / 2;
-      let target_equal_pos = preview.scrollTop + o;
-      let pairss = createScrollLookUp();
-      for (let i = 0; i < pairss.length - 1; i += 1) {
-        let [x1, y1] = pairss[i];
-        let [x2, y2] = pairss[i + 1];
-        if (y1 <= target_equal_pos && target_equal_pos < y2) {
-          let f = (target_equal_pos - y1) / (y2 - y1);
-          let offsetx_lineno = x1 + f * (x2 - x1);
-          let offsetx = (offsetx_lineno - offset_lines) * 26.6 - o + 4;
-          last_editor_scroll_pos = Math.round(offsetx);
-          editor.scrollTo({ top: offsetx, behavior: "auto" });
-          break;
-        }
-      }
-
+      let new_pos = map_side(preview.scrollTop, createScrollLookUp(), 2, 1);
+      if (new_pos === undefined) return;
+      last_editor_scroll_pos = parseInt(new_pos);
+      editor.scrollTo({ top: last_editor_scroll_pos, behavior: "auto" });
       update_lines();
     });
   }, [editor, preview]);
@@ -113,15 +117,17 @@ export default function useScrollLinking(view, preview, svg_parent) {
 
   let createScrollLookUp = React.useCallback(() => {
     if (!preview) return;
-    line_map = [[0, 0]];
+    line_map = [[0, 0, 0]];
+
     for (let element of document.querySelectorAll("div[data-lineno]")) {
       let new_lineno = parseInt(element.dataset.lineno);
+      let new_line_top = new_lineno * 26.6 + 2 - 26.6;
       let new_top =
         element.getBoundingClientRect().top +
         preview.scrollTop -
         preview.getBoundingClientRect().top -
         10;
-      line_map.push([new_lineno, new_top]);
+      line_map.push([new_lineno, new_line_top, new_top]);
     }
     update_lines();
     return line_map;
@@ -129,6 +135,13 @@ export default function useScrollLinking(view, preview, svg_parent) {
 
   let windowResize = React.useCallback(() => {
     createScrollLookUp();
+
+    // the same as the scroll editor
+    let new_pos = map_side(editor.scrollTop, createScrollLookUp(), 1, 2);
+    if (new_pos === undefined) return;
+    last_preview_scroll_pos = parseInt(new_pos);
+    preview.scrollTo({ top: last_preview_scroll_pos, behavior: "auto" });
+    update_lines();
   }, [editor, preview, svg_parent]);
   React.useEffect(() => {
     window.addEventListener("resize", windowResize);

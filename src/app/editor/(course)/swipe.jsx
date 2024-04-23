@@ -6,7 +6,7 @@ import styles from "./course/[course_id]/index.module.css";
 import CourseList from "./course_list";
 import { useSelectedLayoutSegments } from "next/navigation";
 
-export default function SwiperSideBar({ courses, children }) {
+export default function SwiperSideBar({ courses, languages, children }) {
   const segment = useSelectedLayoutSegments()[1];
 
   // Render data...
@@ -40,11 +40,12 @@ export default function SwiperSideBar({ courses, children }) {
       <div {...handlers} className={styles.root}>
         <CourseList
           courses={courses}
+          languages={languages}
           course_id={segment}
           showList={showList}
           toggleShow={toggleShow}
         />
-        <div className={styles.main_overview}>{children}</div>
+        {children}
       </div>
     </>
   );

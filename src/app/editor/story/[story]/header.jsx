@@ -17,7 +17,6 @@ export function StoryEditorHeader({
   set_show_ssml,
   session,
 }) {
-  //const [show_trans, set_show_trans] = React.useState(); // TODO window.editorShowTranslations
   function do_set_show_trans() {
     let value = !show_trans;
     const event = new CustomEvent("editorShowTranslations", {
@@ -31,7 +30,6 @@ export function StoryEditorHeader({
     );
   }
 
-  //const [show_ssml, set_show_ssml] = React.useState(); // TODO window.editorShowSsml
   function do_set_show_ssml() {
     let value = !show_ssml;
     const event = new CustomEvent("editorShowSsml", {

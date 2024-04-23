@@ -8,7 +8,7 @@ async function story_properties(id) {
   if (data.length === 0) return undefined;
   let story = data[0];
   story.approvals =
-    await sql`SELECT a.id, a.date, u.username FROM story_approval a JOIN "user" u ON u.id = a.user_id WHERE a.story_id = ${id};`;
+    await sql`SELECT a.id, a.date, u.name FROM story_approval a JOIN "users" u ON u.id = a.user_id WHERE a.story_id = ${id};`;
   return story;
 }
 

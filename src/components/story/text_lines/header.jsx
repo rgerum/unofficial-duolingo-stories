@@ -24,7 +24,7 @@ export default function Header({ element, progress }) {
   let hideRangesForChallenge = undefined;
 
   if (controls.auto_play) {
-    element.learning_languageTitleContent.hintMap = [];
+    element.learningLanguageTitleContent.hintMap = [];
     playAudio = undefined;
   }
 
@@ -58,11 +58,12 @@ export default function Header({ element, progress }) {
         <HintLineContent
           audioRange={audioRange}
           hideRangesForChallenge={hideRangesForChallenge}
-          content={element.learning_languageTitleContent}
+          content={element.learningLanguageTitleContent}
         />
         {editor && element.audio ? (
           <EditorSSMLDisplay
             ssml={element.audio.ssml}
+            element={element}
             audio={element.audio}
             editor={editor}
           />

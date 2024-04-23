@@ -1,0 +1,144 @@
+[DATA]
+fromLanguageName=One thing
+icon=717bd84875f83c678f64f124937a278061e0e778
+set=1|3
+approvals=11,12
+public=1
+
+icon_Jorrit=https://stories-cdn.duolingo.com/image/8dedb551515218979bffa2ba590906d0ed1ee462.svg
+speaker_Maartje=Lotte
+speaker_Jorrit=Ruben
+
+[HEADER]
+> Iets
+$79/22e5c25c.mp3;4,50
+
+[LINE]
+> Maartje is thuis   met  haar broer   Sergio.
+~ ~       is at~home with her  brother ~      
+$79/24ed0aba.mp3;7,50;3,550;6,200;4,375;5,150;6,187;7,275
+
+[LINE]
+Speaker856: Oh! Er    is geen brood meer.
+~           Oh  There is no   bread left 
+$79/2970a7ea.mp3;2,50;3,1150;3,162;5,200;6,375;5,400
+
+[MULTIPLE_CHOICE]
+> Maartje saw there is more bread.
+- That’s true.
++ That’s not true.
+
+[LINE]
+Speaker366: Ga~je         naar de  supermarkt? 
+~           Are~you~going to   the supermarket 
+$79/2ff7d1ce.mp3;2,0;3,174;5,90;3,166;11,65
+
+[LINE]
+Speaker856: Ja,  ik wil  brood      voor~de~lunch.   
+~           Yes  I  want some~bread for~the~lunch 
+$79/35cc9a08.mp3;2,50;3,487;4,175;6,213;5,375;3,162;6,100
+
+[LINE]
+Speaker366: Kun je  iets        voor~me kopen?
+~           Can you (something) (for~me) buy~something~for~me   
+$79/3b0db506.mp3;3,0;3,125;5,102;5,173;3,157;6,105
+
+[MULTIPLE_CHOICE]
+> Sergio wants to know, if
+- Maartje can buy bread
++ Maartje can buy something for him
+- Maartje can buy cheese for him
+
+[LINE]
+Speaker856: Wat~dan?
+~           What    
+$79/3fb21174.mp3;3,50;4,262
+
+[SELECT_PHRASE]
+> Choose the correct word:
+Speaker366: [Een tomaat], alsjeblieft.
+~            a   tomato   please      
+$79/42a5ddd4.mp3;3,0;7,104;13,403
++ Een tomaat
+- Twee tomaat
+
+[LINE]
+Speaker366: Voor mijn salade.
+~           for  my   salad  
+$79/a372eff0.mp3;4,0;5,220;7,174
+
+[LINE]
+Speaker856: Oké.
+~           OK  
+$79/4762623e.mp3;3,50
+
+[LINE]
+Speaker366: Bedankt.
+~           Thanks  
+$79/af744664.mp3;7,0
+
+[LINE]
+Speaker366: Oh ja!  En  drie  broodjes.
+~           Oh yes  And three bread~rolls    
+$79/b87f36d8.mp3;2,0;3,119;4,263;5,305;9,180
+
+[LINE]
+Speaker856: Oké…
+~           OK  
+$79/4995bfec.mp3;3,50
+
+[LINE]
+Speaker366: En  sinaasappelsap…
+~           And orange~juice   
+$79/c8e088b0.mp3;2,0;14,104
+
+[LINE]
+Speaker856: Sergio{Serdzjo}...
+$79/5bf229fa.mp3;7,50
+
+[LINE]
+Speaker366: ...en  koffie, graag.   
+~              and coffee  please 
+$79/aa3d9d72.mp3;5,0;7,424;6,276
+
+[LINE]
+Speaker856: Eh… Ik heb  een idee.
+~           Eh  I  have an  idea 
+$79/619d10c2.mp3;2,50;3,1025;4,112;4,200;5,150
+
+[CONTINUATION]
+> Which word links the two sentences together to make one logical sentence?
+Speaker856: Ik blijf      thuis    [want]     jij gaat    naar de  supermarkt. 
+~           I  will~stay  at~home   because   you will~go to   the supermarket 
+$79/631c58f4.mp3;2,50;6,162;6,388;5,500;4,212;5,275;5,375;3,163;11,87
++ want
+~ want
+- omdat
+~ because
+- dagenlang
+~ for~days
+
+[LINE]
+Speaker366: Waarom?
+~           why    
+$79/f992b5b4.mp3;6,0
+
+[LINE]
+Speaker856: Ik heb           maar één ding  nodig.          Brood.
+~           I  need~(+nodig) only one thing (+hebben)~need  Bread 
+$79/6653e5b4.mp3;2,50;4,162;5,188;4,300;5,287;6,200;6,1513
+
+[MULTIPLE_CHOICE]
+> Maartje wants Sergio to go to the supermarket because...
+- she doesn’t know where to find the coffee.
++ Sergio wants a lot of things.
+- she can buy bread at the bakery.
+
+[MATCH]
+> Put the right words together
+- something <> iets
+- the orange juice <> het sinaasappelsap
+- to buy <> kopen
+- the brother <> de broer
+- the idea <> het idee
+

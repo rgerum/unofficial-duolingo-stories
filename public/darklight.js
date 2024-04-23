@@ -15,9 +15,13 @@ function get_current_theme() {
   return "light";
 }
 
-document.addEventListener("DOMContentLoaded", (event) => {
+console.log("activeTheme...");
+function load() {
   let activeTheme = get_current_theme();
-
+  console.log("activeTheme", activeTheme);
   document.body.dataset.theme = activeTheme;
   window.localStorage.setItem("theme", activeTheme);
-});
+}
+load();
+
+document.addEventListener("DOMContentLoaded", load);

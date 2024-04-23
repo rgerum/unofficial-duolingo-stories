@@ -27,6 +27,18 @@ function BreadcrumbPart({ part, hide }) {
     );
   }
   if (part.type === "course") {
+    if (!part.lang2) {
+      return (
+        <MyLink className={class_name} href={part.href}>
+          <DoubleFlag width={40} lang1={part.lang1} className={styles.flag} />
+          {part.lang1?.name ? (
+            <span className={styles.name}>{`${
+              part?.name || part.lang1?.name
+            }`}</span>
+          ) : null}
+        </MyLink>
+      );
+    }
     return (
       <MyLink className={class_name} href={part.href}>
         <DoubleFlag
@@ -36,9 +48,9 @@ function BreadcrumbPart({ part, hide }) {
           className={styles.flag}
         />
         {part.lang1?.name && part.lang2?.name ? (
-          <span
-            className={styles.name}
-          >{`${part.lang1?.name} (from ${part.lang2?.name})`}</span>
+          <span className={styles.name}>
+            {part?.name || `${part.lang1?.name} (from ${part.lang2?.name})`}
+          </span>
         ) : null}
       </MyLink>
     );

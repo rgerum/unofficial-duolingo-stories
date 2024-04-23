@@ -1,4 +1,4 @@
-import { insert, sql } from "lib/db";
+import { sql } from "lib/db";
 const { phpbb_hash } = require("lib/auth/hash_functions2");
 import { v4 as uuid } from "uuid";
 import { NextResponse } from "next/server";
@@ -11,9 +11,9 @@ export async function POST(req) {
   return NextResponse.json(ret);
 }
 
-async function check_username(username, existing) {
+async function check_username(name, existing) {
   let result =
-    await sql`SELECT id, email FROM "user" WHERE LOWER(username) = LOWER(${username})`;
+    await sql`SELECT id, email FROM "users" WHERE LOWER(name) = LOWER(${name})`;
   if (existing) {
     if (result.length) {
       return result[0];
@@ -27,28 +27,28 @@ async function check_username(username, existing) {
   }
 }
 
-async function register({ username, password, email }) {
+async function register({ name, password, email }) {
   // check username
-  let username_check = await check_username(username, false);
+  let username_check = await check_username(name, false);
   if (username_check?.status) return username_check;
 
   let password_hashed = await phpbb_hash(password);
   let activation_link = uuid();
-  await sql`INSERT INTO "user" ${sql({
-    username: username,
+  await sql`INSERT INTO "users" ${sql({
+    name: name,
     email: email,
     password: password_hashed,
     activation_link: activation_link,
   })}`;
-  transporter.sendMail({
+  await transporter.sendMail({
     from: "Unofficial Duolingo Stories <register@duostories.org>",
     to: email,
     subject: "[Unofficial Duolingo Stories] Registration ",
-    html: `Hey ${username},<br/>
+    html: `Hey ${name},<br/>
             <br/>
             You have registered on 'Unofficial Duolingo Stories'.<br/>
             To complete your registration click on the following link.<br/>
-            <a href='${process.env.NEXTAUTH_URL}/auth/activate/${username}/${activation_link}'>Activate account</a>
+            <a href='${process.env.NEXTAUTH_URL}/auth/activate/${name}/${activation_link}'>Activate account</a>
             <br/><br/>
             Happy learning.
         `,

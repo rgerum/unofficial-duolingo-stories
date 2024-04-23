@@ -1,0 +1,162 @@
+[DATA]
+fromLanguageName=The red jacket
+icon=5361833c123aec9adfa60b0dc63398cd1aa49ef2
+set=2|1
+approvals=11,12
+
+icon_Natalie=https://stories-cdn.duolingo.com/image/ad3623a2d5ee767d1536ff972bfb9961b40df6ca.svg
+speaker_Mark=Ruben
+speaker_Natalie=Lotte
+
+[HEADER]
+> In de Kledingwinkel
+$623/ad770e28.mp3;2,0;3,135;14,76
+
+[LINE]
+> Natalie is in een kledingwinkel  met  haar broer,   Mark.
+~ ~       is in a   clothing~store with her  brother  ~    
+$623/b0b5a680.mp3;7,0;3,583;3,157;4,110;14,126;4,743;5,201;6,195;6,352
+
+[LINE]
+Speaker3160: Deze  kleren  zijn leuk!
+~            These clothes are  nice 
+$623/b4e101e6.mp3;4,50;7,437;5,425;5,163
+
+[LINE]
+Speaker439: Mark, ze   zijn duur!     
+~           ~     they are  expensive 
+$623/b870024e.mp3;4,50;3,612;5,150;5,250
+
+[MULTIPLE_CHOICE]
+> Natalie thinks the clothes are cheap.
++ No, that's not right.
+- Yes, that's true.
+
+[LINE]
+Speaker3160: Wauw!
+~            Wow  
+$623/bdc36114.mp3;4,50
+
+[LINE]
+Speaker3160: Deze jas    is gaaf!       
+~            This jacket is awesome
+$623/c107de86.mp3;4,50;4,437;3,275;5,175
+
+[MULTIPLE_CHOICE]
+> Mark thinks ..
++ .. the jacket is great.
+- .. the shirt is cheap.
+- .. the skirt is great.
+
+[LINE]
+Speaker3160: En  ik houd~van deze kleur. 
+~            And I  love     this colour 
+$623/c60f70d8.mp3;2,50;3,175;5,137;4,263;5,137;6,313
+
+[LINE]
+Speaker439: Mark...
+$623/c9d99176.mp3;4,50
+
+[LINE]
+Speaker3160: Deze     is perfect voor mij!
+~            This~one is perfect for  me  
+$623/cce385c0.mp3;4,50;3,525;8,162;5,525;4,138
+
+[SELECT_PHRASE]
+> Tap the missing words.
+Speaker3160: Ik wil [deze jas.]
+$623/d06a3b26.mp3;2,50;4,225;5,200;4,362
++ deze jas.
+- die kat.
+- dit jas.
+
+[LINE]
+Speaker439: Mark!
+$623/d41c8170.mp3;4,50
+
+[LINE]
+Speaker3160: Wat? 
+~            What 
+$623/d8584936.mp3;3,50
+
+[LINE]
+Speaker439: De  jas    is vijfhonderd  euro. 
+~           The jacket is five~hundred euros 
+$623/db1308b4.mp3;2,50;4,125;3,437;12,163;5,800
+
+[MULTIPLE_CHOICE]
+> How much does the jacket cost?
+- Five million euros.
+- Five euros.
++ Five hundred euros.
+
+[LINE]
+Speaker439: Hij is te  duur.     
+~           It  is too expensive 
+$623/e206505e.mp3;3,50;3,312;3,188;5,125
+
+[LINE]
+Speaker3160: Vijfhonderd  euro?! 
+~            Five~hundred euros  
+$623/e5b6f1a4.mp3;11,50;5,687
+
+[LINE]
+Speaker439: Helaas..       
+~           Unfortunately  
+$623/eb7eea38.mp3;6,50
+
+[LINE]
+Speaker3160: Ik heb  een idee!
+~            I  have an  idea 
+$623/eebbd95e.mp3;2,50;4,212;4,200;5,125
+
+[LINE]
+Speaker3160: Mijn verjaardag is binnenkort.
+~            My   birthday   is soon       
+$623/f1ee5426.mp3;4,50;11,275;3,562;11,150
+
+[MULTIPLE_CHOICE]
+> What does Mark mean?
++ It will be his birthday soon.
+- He's going on vacation soon.
+- It's his wedding anniversary soon.
+
+[LINE]
+Speaker439: Ja,  dus?
+~           Yes  so  
+$623/f5ef0426.mp3;2,50;4,437
+
+[LINE]
+Speaker3160: En  jij bent mijn zus!   
+~            And you are  my   sister 
+$623/fa3bcaf0.mp3;2,50;4,212;5,275;5,213;4,225
+
+[LINE]
+Speaker3160: Je  werkt in Parijs ..
+~            You work  in Paris    
+$623/fe58971c.mp3;2,50;6,150;3,300;7,125
+
+[LINE]
+Speaker3160: Dus je  koopt    daar  ..
+~            So  you will~buy there   
+$623/13e086ce.mp3;3,50;3,250;6,112;5,313
+
+[LINE]
+Speaker439: .. een goedkope jas    voor mijn broer?  
+~              a   cheap    jacket for  my   brother 
+$623/1a6cb514.mp3;3,50;9,125;4,675;5,525;5,162;6,275
+
+[MULTIPLE_CHOICE]
+> What will Natalie do in Paris?
++ Buy a cheap jacket for her brother's birthday.
+- Buy the jacket for five hundred euros for her brother.
+- Work as a clothing designer.
+
+[MATCH]
+> Tap the pairs.
+- the jacket <> de jas
+- cool <> gaaf 
+- the birthday <> de verjaardag
+- soon <> binnenkort
+- cheap <> goedkoop
+

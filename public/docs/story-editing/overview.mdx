@@ -1,0 +1,44 @@
+---
+title: "Overview"
+description: "The editor with the two views."
+---
+
+Duostories is not like the software *Word* where you edit the final output directly, but you write
+the stories in some kind of "coding" language that will be converted to the final story display.
+
+This sounds complicated but in practice is easy to use and helps to see what is going on exactly.
+
+### Editor
+The editor has two panels, on the left you can see the code that you can edit and on the
+right you see how the story will look like. Both views are synchronized when scrolling so that
+you have always the matching view.
+
+### Comments
+```
+# This line is a comment
+```
+Sometimes it can be helpful to leave comments in the code. For example
+if you want to mark a translation where you want to consult another contributor.
+
+You can mark a line with the hash sign `#` to mark it as a comment that should not
+appear in the final story.
+
+### Save
+You can save a story with a click on the ![save](/docs/story-editing/save_button.png "save") symbol. Changes
+to stories are tracked on [GitHub](https://github.com/rgerum/unofficial-duolingo-stories-content).
+
+### Meta data
+```
+[DATA]
+fromLanguageName=A Family Dinner
+icon=076bc5bf725308c211b9c04f07d3622683e84d78
+set=8|4
+```
+
+On the top of the story there is some meta data that defines the name
+as it is shown in the story list, the icon that the story uses and the set.
+The set number is composed o the set id (e.g. Set 8) and the position within the set, the set index (e.g. the 4th story
+of the set).
+
+<Warning>In some legacy stories you still see some character icon or speaker definitions here.
+They are only for compatibility with old stories and should not be used in new story translations.</Warning>

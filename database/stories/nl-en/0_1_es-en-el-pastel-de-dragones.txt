@@ -1,0 +1,123 @@
+[DATA]
+fromLanguageName=The Dragon Cake
+icon=c2fbecd45802dc974e3ec727a0206cfec66fd87f
+set=0|1 #28|1
+deleted=1
+
+[HEADER]
+> El  pastel~de~dragones
+~ the dragon~cake       
+
+[LINE]
+> Bea está con  Vikram. Él está~decorando un~pastel para la~boda     de Kara, una~amiga de Bea.  
+~ Bea is   with Vikram  he is~decorating  a~cake    for  the~wedding of Kara  a~friend  of Bea's 
+
+[LINE]
+Speaker507: ¡Me~encanta cómo decoraste     el~pastel!
+~            I~love     how  you~decorated the~cake  
+
+[LINE]
+Speaker507: Los~novios          están~montando dragones, ¡como los~personajes de   la~serie~favorita~de~Kara~y~David!
+~           the~bride~and~groom are~riding     dragons    like the~characters from Kara~and~David's~favorite~show    
+
+[MULTIPLE_CHOICE]
+> The cake is decorated to look like a TV show.
++ Yes, that's right
+- No, that's wrong.
+
+[LINE]
+Speaker593: Kara es mi primera clienta  y   quiero hacer un excelente trabajo.
+~           Kara is my first   customer and I~want to~do an excellent job     
+
+[ARRANGE]
+> Tap what you hear
+> [(Bea) (recibe)   (un~mensaje) (de)   (Kara).]
+~   Bea   receives   a~message    from   Kara   
+
+[LINE]
+Speaker507: ¡Ay, no! ¡Kara canceló  la~boda!    
+~            oh  no   Kara canceled the~wedding 
+
+[LINE]
+Speaker593: ¿Qué?  ¿Por~qué?
+~            what   why     
+
+[CONTINUATION]
+> What comes next?
+Speaker507: ¡David se~fue~del país    con  [otra    mujer]!
+~            David left~the   country with  another woman  
++ otra    mujer
+~ another woman
+- un~dragón
+~ a~dragon 
+- muchos pasteles
+~ many   cakes   
+
+[LINE]
+Speaker593: ¡Qué~horrible!   
+~            that's~terrible 
+
+[LINE]
+Speaker507: No~lo~puedo~creer. 
+~           I~can't~believe~it 
+
+[SELECT_PHRASE]
+> Select the missing phrase
+Speaker593: Lo~sé…  Quería   hacer   [el~pastel~perfecto] para Kara.
+~           I~know  I~wanted to~make  the~perfect~cake    for  Kara 
+- el pastel de efecto
+- el pincel perfecto
++ el pastel perfecto
+
+[LINE]
+Speaker507: Tengo  una~idea.
+~           I~have an~idea  
+
+[LINE]
+> Bea redecora    el~pastel.
+~ Bea redecorates the~cake  
+
+[LINE]
+Speaker593: Espera… parece~que    los~dragones se~están~comiendo~al novio.
+~           wait    it~looks~like the~dragons  are~eating~the       groom 
+
+[MULTIPLE_CHOICE]
+> Bea redecorated the cake because…
++ …Kara canceled the wedding.
+- …Vikram wants to keep the dragons.
+- …Kara asked her to change it.
+
+[LINE]
+> Bea toma  una~foto  y   se~la~envía a  Kara.
+~ Bea takes a~picture and sends~it    to Kara 
+
+[LINE]
+Speaker507: ¡Kara me~respondió!
+~            Kara answered~me  
+
+[LINE]
+Speaker593: ¿Qué  dijo?       
+~            what did~she~say 
+
+[LINE]
+Speaker507: Se~siente muy  triste, pero le~encanta el~pastel.
+~           she~feels very sad     but  she~loves  the~cake  
+
+[LINE]
+Speaker593: ¿De~verdad? ¡Estoy muy  contento!
+~            really      I~am  very happy    
+
+[MULTIPLE_CHOICE]
+> Why does Kara like the cake after all?
++ The dragons are eating the groom.
+- She decided to marry Bea.
+- She's excited for her wedding.
+
+[MATCH]
+> Tap the pairs
+- los personajes <> the characters
+- Estoy <> I am
+- Por qué <> why
+- primera <> first
+- una foto <> a picture
+

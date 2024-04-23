@@ -1,203 +1,173 @@
-import query from "./db";
+import { sql } from "./db";
 
-function getSelectionString(mapping, pre) {
-  let elements = [`${pre}.id`];
-  for (let key in mapping) {
-    if (key === mapping[key]) elements.push(`${pre}.${key}`);
-    else elements.push(`${pre}.${mapping[key]} AS ${key}`);
-  }
-  return elements.join(", ");
-}
-
-export async function update(table_name, data, mapping) {
-  let values = [];
-  let updates = [];
-  for (let key in data) {
-    if (mapping[key]) {
-      values.push(data[key]);
-      updates.push(`${mapping[key]} = ?`);
-    }
-  }
-  values.push(data.id);
-  let update_string = updates.join(", ");
-  await query(
-    `UPDATE ${table_name}
-                            SET ${update_string}
-                            WHERE id = ?
-                            LIMIT 1;`,
-    values,
-  );
-  return await query_one(
-    `SELECT ${getSelectionString(mapping, "t")} FROM ${table_name} t
-                            WHERE id = ?
-                            LIMIT 1;`,
-    [data.id],
-  );
-}
-
-export async function insert(table_name, data, mapping) {
-  let values = [];
-  let columns = [];
-  let value_placeholders = [];
-  for (let key in data) {
-    if (mapping[key]) {
-      values.push(data[key]);
-      columns.push(`${mapping[key]}`);
-      value_placeholders.push(`?`);
-    }
-  }
-  let columns_string = columns.join(", ");
-  let value_placeholders_string = value_placeholders.join(", ");
-  const user_new = await query(
-    `INSERT INTO ${table_name}
-                            (${columns_string})
-                            VALUES (${value_placeholders_string}) ;`,
-    values,
-  );
-  const id = user_new.insertId;
-  return await query_one(
-    `SELECT ${getSelectionString(mapping, "t")} FROM ${table_name} t
-                            WHERE id = ?
-                            LIMIT 1;`,
-    [id],
-  );
-}
-
-async function query_one(query_string, args) {
-  const request = await query(query_string, args);
-  if (!request.length) return null;
-  return { ...request[0] };
-}
-
-let mapping_user = {
-  name: "username",
-  email: "email",
-  emailVerified: "emailVerified",
-  image: "image",
-  admin: "admin",
-  role: "role",
-};
-let mapping_account = {
-  userId: "user_id",
-  type: "type",
-  provider: "provider",
-  providerAccountId: "provider_account_id",
-  refresh_token: "refresh_token",
-  access_token: "access_token",
-  expires_at: "expires_at",
-  token_type: "token_type",
-  scope: "scope",
-  id_token: "id_token",
-  session_state: "session_state",
-};
-let mapping_session = {
-  sessionToken: "session_token",
-  userId: "user_id",
-  expires: "expires",
-};
-let mapping_verification_token = {
-  identifier: "identifier",
-  token: "token",
-  expires: "expires",
-};
 /** @return { import("next-auth/adapters").Adapter } */
 export default function MyAdapter() {
   return {
     async createUser(user) {
-      return await insert("user", user, mapping_user);
+      //console.log("createUser", user);
+      const { name, email, emailVerified, image } = user;
+
+      const result = await sql`INSERT INTO "users" ${sql({
+        name: name,
+        email: email,
+        emailVerified: emailVerified,
+        image: image,
+      })} RETURNING id, name, email, "emailVerified", image`;
+      //console.log("return", result[0]);
+      return result[0];
     },
     async getUser(id) {
-      return await query_one(
-        `SELECT ${getSelectionString(
-          mapping_user,
-          "u",
-        )} FROM user u WHERE id = ? LIMIT 1;`,
-        [id],
-      );
+      //console.log("getUser", id);
+      try {
+        const result =
+          await sql`select id, name, email,  "emailVerified", image, admin, role from "users" where id = ${id}`;
+        //console.log("return", result.length !== 0 ? result[0] : null);
+        return result.length === 0 ? null : result[0];
+      } catch (e) {
+        return null;
+      }
     },
     async getUserByEmail(email) {
-      return await query_one(
-        `SELECT ${getSelectionString(
-          mapping_user,
-          "u",
-        )} FROM user u WHERE email = ? LIMIT 1;`,
-        [email],
-      );
+      //console.log("getUserByEmail", email);
+      try {
+        const result =
+          await sql`select id, name, email, "emailVerified", image, admin, role from "users" where email = ${email}`;
+        //console.log("return", result.length !== 0 ? result[0] : null);
+        return result.length === 0 ? null : result[0];
+      } catch (e) {
+        return null;
+      }
     },
     async getUserByAccount({ providerAccountId, provider }) {
-      return await query_one(
-        `SELECT ${getSelectionString(mapping_user, "u")} FROM user u
-                            JOIN account a on u.id = a.user_id WHERE a.provider_account_id = ? AND a.provider = ?
-                            LIMIT 1;`,
-        [providerAccountId, provider],
-      );
+      //console.log("getUserByAccount", providerAccountId, provider);
+      let result = await sql`
+SELECT 
+    "users".id, name, email, "emailVerified", image, admin, role 
+FROM "users"
+JOIN accounts ON "users".id = accounts."userId"
+ WHERE accounts."providerAccountId" = ${providerAccountId} AND accounts.provider = ${provider}
+LIMIT 1;`;
+      //console.log("return", result.length !== 0 ? result[0] : null);
+      return result.length !== 0 ? result[0] : null;
     },
     async updateUser(user) {
-      return update("user", user, mapping_user);
+      //console.log("updateUser", user);
+      let query1 = await sql`SELECT * FROM "users" WHERE id = ${user.id}`;
+      let oldUser = query1[0];
+
+      if (user.name !== undefined) oldUser.name = user.name;
+      if (user.email !== undefined) oldUser.email = user.email;
+      if (user.emailVerified !== undefined)
+        oldUser.emailverified = user.emailVerified;
+      if (user.image !== undefined) oldUser.image = user.image;
+      if (user.admin !== undefined) oldUser.admin = user.admin;
+      if (user.role !== undefined) oldUser.role = user.role;
+
+      const query2 = await sql`update "users" set ${sql(oldUser)} where id = ${
+        user.id
+      } RETURNING id, username AS name, email, emailverified AS "emailVerified", image, admin, role`;
+      return query2[0];
     },
     async deleteUser(userId) {
-      await query(`DELETE FROM user WHERE id = ?`, [userId]);
-      await query(`DELETE FROM account WHERE user_id = ?`, [userId]);
-      await query(`DELETE FROM session WHERE user_id = ?`, [userId]);
+      //console.log("deleteUser");
+      await sql`DELETE FROM "users" WHERE id = ${userId}`;
+      await sql`DELETE FROM accounts WHERE "userId" = ${userId}`;
+      await sql`DELETE FROM sessions WHERE "userId" = ${userId}`;
     },
     async linkAccount(account) {
-      return insert("account", account, mapping_account);
+      //console.log("linkAccount", account);
+      ////console.log("linkAccount", account);
+      let d = {
+        userId: account.userId,
+        provider: account.provider,
+        type: account.type,
+        providerAccountId: account.providerAccountId,
+        access_token: account.access_token || null,
+        expires_at: account.expires_at || null,
+        refresh_token: account.refresh_token || null,
+        id_token: account.id_token || null,
+        scope: account.scope || null,
+        session_state: account.session_state || null,
+        token_type: account.token_type || null,
+      };
+      //console.log(d);
+      let result = await sql`INSERT INTO accounts ${sql(
+        d,
+      )} RETURNING id, "userId", provider, type, "providerAccountId", access_token, expires_at, refresh_token, id_token, scope, session_state, token_type`;
+      //console.log("result", result[0]);
+      return result[0];
+      //return insert("account", account, mapping_account);
     },
     async unlinkAccount({ providerAccountId, provider }) {
-      await query(
-        `DELETE FROM account WHERE provider_account_id = ? AND provider = ?`,
-        [providerAccountId, provider],
-      );
+      //console.log("unlinkAccount", providerAccountId, provider);
+      await sql`DELETE FROM accounts WHERE "providerAccountId" = ${providerAccountId} AND provider = ${provider}`;
     },
     async createSession(session) {
-      return insert("session", session, mapping_session);
+      //console.log("createSession", session);
+      return (
+        await sql`INSERT INTO sessions ${sql({
+          sessionToken: session.sessionToken,
+          userId: session.userId,
+          expires: session.expires,
+        })} RETURNING id, "sessionToken", "userId", expires`
+      )[0];
+      //return insert("session", session, mapping_session);
     },
     async getSessionAndUser(sessionToken) {
-      const session = await query_one(
-        `SELECT ${getSelectionString(
-          mapping_session,
-          "s",
-        )} FROM session s WHERE session_token = ? LIMIT 1`,
-        [sessionToken],
-      );
+      //console.log("getSessionAndUser", sessionToken);
+      if (sessionToken === undefined) return null;
+      const session = (
+        await sql`SELECT 
+        "sessionToken",
+        "userId",
+        expires FROM sessions s WHERE "sessionToken" = ${sessionToken} LIMIT 1`
+      )[0];
       if (!session) return null;
-      const user = await query_one(
-        `SELECT ${getSelectionString(
-          mapping_user,
-          "u",
-        )} FROM user u WHERE id = ? LIMIT 1;`,
-        [session.userId],
-      );
+
+      const user = (
+        await sql`SELECT  
+        name,
+        email,
+        "emailVerified",
+        image,
+        admin,
+        role 
+        FROM "users" WHERE id = ${session.userId} LIMIT 1;`
+      )[0];
       return { session, user };
     },
-    async updateSession({ sessionToken }) {
-      return update("session", sessionToken, mapping_session);
+    async updateSession(session) {
+      //console.log("updateSession", session);
+      let sessionOld = (
+        await sql`SELECT * FROM sessions WHERE "sessionToken" = ${session.sessionToken}`
+      )[0];
+      if (!sessionOld) return null;
+      if (session.expires !== undefined) sessionOld.expires = session.expires;
+      return sql`
+      update sessions set ${sql(sessionOld)}
+      where "sessionToken" = ${session.sessionToken}
+`;
     },
     async deleteSession(sessionToken) {
-      await query(`DELETE FROM session WHERE session_token = ?`, [
-        sessionToken,
-      ]);
+      //console.log("deleteSession", sessionToken);
+      await sql`DELETE FROM sessions WHERE "sessionToken" = ${sessionToken}`;
     },
-    async createVerificationToken(data) {
-      return await insert(
-        "verification_token",
-        data,
-        mapping_verification_token,
-      );
+    async createVerificationToken(verificationToken) {
+      //console.log("createVerificationToken", verificationToken);
+      const { identifier, expires, token } = verificationToken;
+      await sql`INSERT INTO verification_token ${sql({
+        identifier,
+        expires,
+        token,
+      })} RETURNING id`;
+      return verificationToken;
     },
     async useVerificationToken({ identifier, token }) {
-      let ver_token = await query_one(
-        `SELECT ${getSelectionString(
-          mapping_verification_token,
-          "t",
-        )} FROM verification_token t WHERE identifier = ? AND token = ?`,
-        [identifier, token],
-      );
-      if (!ver_token) return null;
-      await query(`DELETE FROM verification_token WHERE id = ?`, [
-        ver_token.id,
-      ]);
-      return ver_token;
+      //console.log("useVerificationToken", identifier, token);
+      const result = await sql`DELETE FROM verification_token
+      where identifier = ${identifier} and token = ${token}
+      RETURNING identifier, expires, token `;
+      return result.length !== 0 ? result[0] : null;
     },
   };
 }

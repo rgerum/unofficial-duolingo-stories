@@ -1,0 +1,47 @@
+---
+title: "TTS Edit"
+description: "Change the audio generation with replacement rules."
+---
+
+Sometimes the generated audio does not fit how you want the word or sentence to sound. Or maybe you want to
+use a voice form a different language if your language does not have voices. Therefore, you can adjust the
+text that is send to the Speech Engine.
+
+In the TTS Editor you can define rules to change the text before it is
+send to the TTS service. There are three types of rules. Letter replacements, Fragment replacements
+and Word replacements.
+
+To open it click on the Edit button in the top right corner of the character editor:
+
+![The button to open the TTS editor.](/docs/audio-generation/tts_edit_button.png "Opens the TTS editor.")
+
+
+### Letter Replacements
+
+Letter replacements are defined by a list of letters followed by a colon and a replacement string.
+They are always replaced in the given order. On the left side of the colon there can only be one letter.
+```
+LETTERS:
+    o: u
+    e: i
+```
+
+### Fragment Replacements
+Fragment replacements can be used to change syllables in a word. If the fragment ends in \b it only replaces words that
+end in the fragment. If the fragment starts with \b the fragment has to be at the beginning of the word.
+```
+FRAGMENTS:
+    ion\b: flug
+    sem: dem
+```
+
+### Word replacements
+To replace whole words. A word will only be replaced with it is surrounded by white space or punctuation characters, e.g.
+not if it is found within another word.
+```
+WORDS:
+    oh: uuuh
+    Worcester: WOO-STER
+```
+If you want to provide the word in the [International Phonetic Alphabet (IPA)](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet) instead,
+you can write after the word `:ipa`.

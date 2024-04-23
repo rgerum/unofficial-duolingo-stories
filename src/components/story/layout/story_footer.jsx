@@ -18,7 +18,7 @@ export default function Footer({
               <span />
             </div>
             <div className={styles.footer_result_text}>
-              <h2>{localization("story_correct") || "You are correct"}</h2>
+              <h2>{localization("story_correct")}</h2>
             </div>
           </div>
         </div>
@@ -29,7 +29,7 @@ export default function Footer({
               data-cy={"button-finished"}
               onClick={finish}
             >
-              {localization("button_finished") || "finished"}
+              {localization("button_finished")}
             </button>
           ) : (
             <button
@@ -38,7 +38,7 @@ export default function Footer({
               data-cy={"continue"}
               onClick={blocked ? () => {} : next}
             >
-              {localization("button_continue") || "continue"}
+              {localization("button_continue")}
             </button>
           )}
         </div>

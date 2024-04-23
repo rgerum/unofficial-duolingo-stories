@@ -4,6 +4,9 @@
   width: 134px;
   cursor: pointer;
   text-decoration: none;
+
+  border-radius: 5px;
+  outline-offset: 5px;
 }
 
 @media (max-width: 335px) {
@@ -32,20 +35,28 @@
 }
 
 .button_story_img img {
-  height: 124px;
-  left: -11px;
   position: absolute;
-  top: -15px;
+  left: -11px;
+  top: -11px;
   width: 135px;
+  height: 124px;
+  transform: translateY(-5px);
+  transition: transform 300ms ease;
 }
-.button_story_img img:active {
-  top: -12px;
-  transition: 0.1s top;
+@media (prefers-reduced-motion: no-preference) {
+  .button_story_parent:hover img {
+    transform: translateY(-7px);
+    transition: transform 100ms ease;
+  }
+  .button_story_parent:active img {
+    transform: translateY(0);
+    transition: transform 50ms ease;
+  }
 }
 
 .button_story_text {
   color: var(--text-color-dim);
-  font-size: 17px;
+  font-size: calc(17 / 16 * 1rem);
   font-weight: 700;
   line-height: 21px;
   margin-top: 16px;

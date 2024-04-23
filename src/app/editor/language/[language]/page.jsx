@@ -4,7 +4,7 @@ import { sql } from "lib/db";
 import LanguageEditor from "./language_editor";
 import { getServerSession } from "next-auth/next";
 
-import { authOptions } from "app/api/auth/[...nextauth]/route";
+import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import { notFound } from "next/navigation";
 
 const get_avatar_names = cache(async (id) => {
@@ -53,6 +53,15 @@ const get_language = cache(async (id) => {
 
 export async function generateMetadata({ params }) {
   let [language, course, language2] = await get_language(params.language);
+
+  if (!language2) {
+    return {
+      title: `Voices | ${language.name} | Duostories Editor`,
+      alternates: {
+        canonical: `https://duostories.org/editor/language/${language.short}`,
+      },
+    };
+  }
 
   if (!course) notFound();
 

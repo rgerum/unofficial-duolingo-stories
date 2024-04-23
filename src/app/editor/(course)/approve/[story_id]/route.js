@@ -1,6 +1,7 @@
 import { sql } from "lib/db";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 
 export async function GET(req, { params: { story_id } }) {
   const token = await getToken({ req });
@@ -55,12 +56,56 @@ async function set_approve({ story_id, user_id }) {
   let published = [];
   if (res3.length >= 4) {
     let date_published = new Date().toISOString();
+    let count_published = 0;
     for (let story of res3) {
-      if (story.public === 0) {
+      if (!story.public) {
         await sql`UPDATE story SET public = true, date_published = ${date_published} WHERE id = ${story.id};`;
         published.push(story.id);
+        count_published++;
       }
     }
+    console.log("published", count_published);
+    if (count_published) {
+      await sql`UPDATE course
+SET count = (
+    SELECT COUNT(*)
+    FROM story
+    WHERE story.course_id = course.id AND story.public AND NOT story.deleted
+) WHERE id = (SELECT course_id FROM story WHERE id = ${res3[0].id});`;
+      revalidateTag("course_data");
+      revalidateTag("story_data");
+    }
+    // update contributor list
+    await sql`UPDATE course
+SET contributors = (SELECT COALESCE(array_agg(name), '{}')
+                         FROM (SELECT u.name                                           AS name,
+                                      MAX(sa.date) > CURRENT_DATE - INTERVAL '1 month' AS active
+                               FROM course c
+                                        JOIN
+                                    story s ON c.id = s.course_id
+                                        JOIN
+                                    story_approval sa ON s.id = sa.story_id
+                                        JOIN
+                                    "users" u ON u.id = sa.user_id
+                               WHERE course_id = course.id
+                               GROUP BY u.id, c.id, c.short, u.name
+                               ORDER BY MAX(sa.date) DESC) AS contributors
+                         WHERE active);`;
+    await sql`UPDATE course
+SET contributors_past = (SELECT COALESCE(array_agg(name), '{}')
+                         FROM (SELECT u.name                                           AS name,
+                                      MAX(sa.date) > CURRENT_DATE - INTERVAL '1 month' AS active
+                               FROM course c
+                                        JOIN
+                                    story s ON c.id = s.course_id
+                                        JOIN
+                                    story_approval sa ON s.id = sa.story_id
+                                        JOIN
+                                    "users" u ON u.id = sa.user_id
+                               WHERE course_id = course.id
+                               GROUP BY u.id, c.id, c.short, u.name
+                               ORDER BY MAX(sa.date) DESC) AS contributors
+                         WHERE NOT active);`;
   }
 
   return {

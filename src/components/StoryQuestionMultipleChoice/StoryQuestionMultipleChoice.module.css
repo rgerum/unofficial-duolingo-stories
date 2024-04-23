@@ -1,0 +1,26 @@
+.multiple_choice_checkbox {
+    border-radius: 9px;
+    height: 42px;
+    user-select: none;
+    min-width: 40px;
+    position: relative;
+}
+.multiple_choice_answer_text {
+}
+
+.disabled {
+    color: var(--color_disabled_color);
+}
+
+.multiple_choice_li {
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.multiple_choice_ul {
+    color: #4b4b4b;
+    list-style: none;
+    padding: 0;
+}
+

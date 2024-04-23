@@ -1,6 +1,7 @@
 import { sql } from "lib/db";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 
 export async function POST(req) {
   try {
@@ -15,12 +16,12 @@ export async function POST(req) {
     let answer;
     if (data.approval_id) {
       answer = await remove_approval(data, {
-        username: token.name,
+        name: token.name,
         user_id: token.id,
       });
     } else
       answer = await set_story(data, {
-        username: token.name,
+        name: token.name,
         user_id: token.id,
       });
 
@@ -39,12 +40,22 @@ async function story_properties(id) {
   if (data.length === 0) return null;
   let story = data[0];
   story.approvals =
-    await sql`SELECT a.id, a.date, u.username FROM story_approval a JOIN "user" u ON u.id = a.user_id WHERE a.story_id = ${id};`;
+    await sql`SELECT a.id, a.date, u.name FROM story_approval a JOIN "users" u ON u.id = a.user_id WHERE a.story_id = ${id};`;
   return story;
 }
 
 async function set_story(data) {
-  await sql`UPDATE story SET ${sql(data, "public")}`;
+  await sql`UPDATE story SET ${sql(data, "public")} WHERE id = ${data.id};`;
+
+  await sql`UPDATE course
+SET count = (
+    SELECT COUNT(*)
+    FROM story
+    WHERE story.course_id = course.id AND story.public AND NOT story.deleted
+) WHERE id = (SELECT course_id FROM story WHERE id = ${data.id});`;
+  revalidateTag("course_data");
+  revalidateTag("story_data");
+
   return await story_properties(data.id);
 }
 

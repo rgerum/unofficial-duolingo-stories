@@ -6,6 +6,7 @@ export default function get_localisation_func(data) {
     let text = data[tag];
     if (!text) return undefined;
     if (replacements) text = replaceTags(text, replacements);
+    if (tag.startsWith("meta")) return text;
     if (links) return replaceLinks(replaceTags(text, replacements), links);
     return insetWithNewlines(text);
   }

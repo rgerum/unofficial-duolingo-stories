@@ -1,14 +1,15 @@
-import { authOptions } from "app/api/auth/[...nextauth]/route";
+import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import { getServerSession } from "next-auth/next";
-import { cache } from "react";
-import { query_one_obj } from "lib/db";
+import { sql, cache } from "lib/db";
 
-export const get_user_id_by_name = cache(async (user_name) => {
-  // sort courses by base language
-  return await query_one_obj(`SELECT id FROM user WHERE username = ? LIMIT 1`, [
-    user_name,
-  ]);
-});
+export const get_user_id_by_name = cache(
+  async (user_name) => {
+    return (
+      await sql`SELECT id FROM "users" WHERE name = ${user_name} LIMIT 1`
+    )[0];
+  },
+  ["get_user_id_by_name"],
+);
 
 export default async function getUserId() {
   const session = await getServerSession(authOptions);

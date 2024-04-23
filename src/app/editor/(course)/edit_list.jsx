@@ -5,29 +5,31 @@ import styles from "./edit_list.module.css";
 import { SpinnerBlue } from "components/layout/spinner";
 import { useRouter } from "next/navigation";
 
-export default function EditList({ course, updateCourses }) {
-  let stories = course?.stories;
-
+export default function EditList({ stories, course, updateCourses }) {
   if (stories === undefined) stories = [];
   let set_ends = [];
   let last_set = 1;
+  let story_published_count = 0;
   for (let story of stories) {
     if (story.set_id === last_set) set_ends.push(0);
     else set_ends.push(1);
     last_set = story.set_id;
+    story_published_count += story.public ? 1 : 0;
   }
-  let active_contributors = [];
-  let past_contributors = [];
-
-  for (let contrib of course.contributors) {
-    if (!contrib.active) {
-      past_contributors.push(contrib);
-    } else active_contributors.push(contrib);
-  }
+  console.log("course", course);
 
   return (
     <>
       <div>
+        {!course.public && story_published_count ? (
+          <div className={styles.warning}>
+            ⚠ This course is not public, but has {story_published_count}{" "}
+            stories set to "public".
+            <br />
+            Please ask a moderator on discord to check the course and make it
+            pubic.
+          </div>
+        ) : null}
         <ul>
           <li>
             To create a new story click the "Import" button. The story starts as
@@ -48,20 +50,30 @@ export default function EditList({ course, updateCourses }) {
         </ul>
       </div>
       <p>
-        To set the voices for use the{" "}
+        To set character voices, go to the{" "}
         <Link href={`/editor/language/${course.short}`}>Character Editor</Link>.
       </p>
+      {course.from_language_name !== "English" && (
+        <p>
+          For language localization settings (for the base language of this
+          course), head to the{" "}
+          <Link href={`/editor/localization/${course.short}`}>
+            Localization Editor
+          </Link>
+          .
+        </p>
+      )}
       <p style={{ fontWeight: "bold" }}>
         Active Contributors:{" "}
-        {active_contributors.map((d, i) => (
-          <span key={i}>{d.username}, </span>
+        {course.contributors.map((d, i) => (
+          <span key={i}>{d}, </span>
         ))}{" "}
-        {active_contributors.length === 0 ? "No Contributors" : ""}
+        {course.contributors.length === 0 ? "No Contributors" : ""}
       </p>
       <p>
         Past Contributors:{" "}
-        {past_contributors.map((d, i) => (
-          <span key={i}>{d.username}, </span>
+        {course.contributors_past.map((d, i) => (
+          <span key={i}>{d}, </span>
         ))}
       </p>
       <div className={styles.table}>
@@ -107,19 +119,26 @@ export default function EditList({ course, updateCourses }) {
               </div>
               <div>
                 <Link href={`/editor/story/${story.id}`}>{story.name}</Link>
+                {story.todo_count ? (
+                  <img
+                    title={`This story has ${story.todo_count} TODOs.`}
+                    alt="error"
+                    src="/editor/icons/error.svg"
+                  />
+                ) : null}
               </div>
               <div>
                 <DropDownStatus
                   id={story.id}
                   name={story.name}
-                  count={story.approvals}
+                  count={story.approvals.length}
                   status={story.status}
                   public={story.public}
                   official={course.official}
                   updateCourses={updateCourses}
                 />
               </div>
-              <div>{story.username}</div>
+              <div>{story.author}</div>
               <div>{formatDate(story.date)}</div>
               <div>{story.author_change}</div>
               <div>{formatDate(story.change_date)}</div>
@@ -127,8 +146,6 @@ export default function EditList({ course, updateCourses }) {
           ))}
         </div>
       </div>
-      {course ? <></> : <></>}
-      {course && course?.stories === undefined ? <>Error loading.</> : <></>}
     </>
   );
 }
@@ -180,8 +197,8 @@ function DropDownStatus(props) {
           router.refresh();
         }
         set_status(response.story_status);
-        setLoading(0);
       }
+      setLoading(0);
     } catch (e) {
       console.error(e);
       return setLoading(-1);

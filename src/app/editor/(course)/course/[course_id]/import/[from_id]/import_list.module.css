@@ -46,3 +46,13 @@
   white-space: nowrap;
   cursor: pointer;
 }
+
+.lang_selector {
+  overflow: scroll;
+  white-space: nowrap;
+}
+
+.lang_selector svg:nth-child(2) {
+
+}
+

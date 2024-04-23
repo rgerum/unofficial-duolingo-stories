@@ -1,8 +1,10 @@
 import { sql } from "lib/db";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "app/api/auth/[...nextauth]/route";
+import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import Header from "../header";
 import Profile from "./profile";
+import getUserId from "../../../../lib/getUserId";
+import FooterLinks from "../footer_links";
 
 export const metadata = {
   alternates: {
@@ -10,20 +12,14 @@ export const metadata = {
   },
 };
 
-async function get_user_id_from_username(user_name) {
-  let res = await sql`SELECT id FROM "user" WHERE username = ${user_name}`;
-  if (res.length) return res[0].id;
-  return 0;
-}
-
 async function getLinkedProviders() {
   let providers_base = ["facebook", "github", "google", "discord"];
   //const token = await getToken({ req })
   const session = await getServerSession(authOptions);
   if (!session) return undefined;
-  let user_id = await get_user_id_from_username(session.user.name);
+  let user_id = await getUserId();
   const req2 =
-    await sql`SELECT provider FROM account WHERE user_id = ${user_id}`;
+    await sql`SELECT provider FROM accounts WHERE "userId" = ${user_id}`;
 
   let provider_linked = {};
   for (let p of providers_base) {
@@ -59,5 +55,9 @@ export default async function Page() {
     );
   }
 
-  return <Profile providers={providers} />;
+  return (
+    <>
+      <Profile providers={providers} />
+    </>
+  );
 }

@@ -1,19 +1,9 @@
 import Link from "next/link";
 import Header from "./header";
-import CourseList from "./course_list";
-import { unstable_cache } from "next/cache";
+import { CourseListInner } from "./course_list";
 import Icons from "./icons";
 import React from "react";
-import Legal from "../../../components/layout/legal";
-import { sql } from "../../../lib/db";
-
-const get_counts = unstable_cache(async () => {
-  return (
-    await sql`SELECT COUNT(DISTINCT c.id) AS count_courses, COUNT(DISTINCT s.id) as count_stories FROM course c
-LEFT JOIN story s ON (c.id = s.course_id)
-WHERE s.public AND NOT s.deleted AND c.public`
-  )[0];
-}, ["get_main_countsTTZT"]);
+import { get_counts } from "./get_course_data";
 
 export default async function Page({}) {
   const counts = await get_counts();
@@ -39,10 +29,7 @@ export default async function Page({}) {
         </p>
         <Icons />
       </Header>
-      <div>
-        <CourseList />
-      </div>
-      <Legal language_name={undefined} />
+      <CourseListInner />
     </>
   );
 }

@@ -1,0 +1,127 @@
+[DATA]
+fromLanguageName=The Passport
+icon=643347b755001a918130ddf5f6d3e914e63a00ce
+set=2|2
+approvals=11,12
+
+[HEADER]
+> Het Paspoort
+~ the passport 
+$5388/8c176cec.mp3;3,50;9,225
+
+[LINE]
+> Vikram en zijn vrouw Priti zijn op het vliegveld.
+~ Vikram and his wife    Priti  are   at the airport    
+$5388/849fdd30.mp3;6,0;3,443;5,124;6,273;6,262;5,466;3,262;4,130;10,98
+
+[LINE]
+Speaker593: O~jee, waar  is mijn paspoort?
+~           oh~no  where is my   passport  
+$5388/7bd39938.mp3;1,0;4,179;6,320;3,276;5,155;9,155
+
+[LINE]
+Speaker593: Het~is niet hier!
+~           it's   not here 
+$5388/5696412e.mp3;3,0;3,134;5,155;5,211
+
+[LINE]
+Speaker560: Vikram…
+~           Vikram 
+$5388/98a101c4.mp3;6,0
+
+[SELECT_PHRASE]
+> Select the missing phrase
+Speaker593: Het~zit niet  [in mijn tas]…
+~           it's    not    in my bag      
+$5388/598188f8.mp3;3,0;4,149;5,190;3,200;5,100;4,170
+
++ in mijn tas
+- in mijn jas
+- in zijn tas
+
+[LINE]
+Speaker593: En het~zit niet in mijn jack{jek}
+~           and it's not in my jacket   
+$5388/6479ecfa.mp3
+
+[LINE]
+Speaker560: Vik…
+~           Vik 
+$5388/d58a9c8a.mp3;4,0
+
+[LINE]
+Speaker593: Het ligt nog   in de taxi!
+~           it  's   still in the taxi 
+$5388/67ee9840.mp3;3,0;5,149;4,210;3,170;3,121;5,85
+
+[MULTIPLE_CHOICE]
+> Vikram thinks his passport is in the taxi.
++ Yes, that's right.
+- No, that's wrong.
+
+[LINE]
+> Vikram rent naar~buiten om          de taxi  te~zoeken.
+~ Vikram runs outside     to~look~for the taxi (to~look~for) 
+$5388/7048c7b8.mp3;6,50;5,537;5,300;7,150;3,438;3,125;5,112;3,375;7,125
+
+[LINE]
+Speaker560: Vik, nee!
+~            Vik  no 
+$5388/837e31d0.mp3;6,0;5,454
+
+[ARRANGE]
+> Tap what you hear
+> [(Priti) (rent) (achter) (Vikram) (aan).]
+~   Priti   runs achter~...~aan:~after Vikram achter~...~aan:~after
+$5388/977c7c78.mp3;5,0;5,442;7,235;7,292;4,450
+
+[LINE]
+Speaker593: O  nee, de taxi is  er~niet~meer
+~           oh no   the taxi is not~there~anymore
+$5388/75c069c6.mp3;1,0;4,174;4,300;5,233;3,430;3,150;5,65;5,215
+
+[LINE]
+Speaker593: Wat een ramp!
+~           What a disaster! 
+$5388/79b10194.mp3;3,0;4,200;5,110
+
+[LINE]
+Speaker560: Vikram!
+~            Vikram 
+$5388/b8b58dda.mp3;6,0
+
+[LINE]
+Speaker560: Je   paspoort ligt~niet in de taxi.
+~           your passport is~not    in the taxi 
+$5388/bcc9d9e4.mp3;2,0;9,144;5,556;5,270;3,239;3,135;5,115
+
+[POINT_TO_PHRASE]
+> Choose the option that means "passport."
+Speaker560: (Je) (hebt) (je) (+pas) (in) (je) (hand)
+~            you have your passport in your hand
+$5388/c19d2142.mp3;2,0;5,129;3,236;4,70;3,243;3,100;5,135
+
+[LINE]
+Speaker593: Oh…
+~           oh 
+$5388/7e3c568c.mp3;2,0
+
+[LINE]
+Speaker593: Dank  je  lieverd
+~           thank you my~love 
+$5388/85d26422.mp3;4,0;3,310;8,55
+
+[MULTIPLE_CHOICE]
+> Where was Vikram's passport?
+- in the taxi
+- at his house
++ in his hand
+
+[MATCH]
+> Tap the pairs
+- het passport <> de pas
+- is <> staat, zit, ligt
+- the disaster <> de ramp
+- the jacket <> het jack
+- your <> je, jouw
+

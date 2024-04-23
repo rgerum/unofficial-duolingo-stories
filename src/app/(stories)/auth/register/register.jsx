@@ -5,6 +5,8 @@ import React from "react";
 import styles from "../register.module.css";
 import Link from "next/link";
 import { useInput } from "lib/hooks";
+import Button from "../../../../components/layout/button";
+import Input from "../../../../components/layout/Input";
 
 export async function fetch_post(url, data) {
   // check if the user is logged in
@@ -44,13 +46,13 @@ export async function register(data) {
 }
 
 export default function Register() {
-  let [state, setState] = React.useState(0);
-  let [error, setError] = React.useState("");
-  let [message, setMessage] = React.useState("");
+  const [state, setState] = React.useState(0);
+  const [error, setError] = React.useState("");
+  const [message, setMessage] = React.useState("");
 
-  let [usernameInput, usernameInputSetValue] = useInput("");
-  let [passwordInput, passwordInputSetValue] = useInput("");
-  let [emailInput, emailInputSetValue] = useInput("");
+  const [usernameInput, usernameInputSetValue] = useInput("");
+  const [passwordInput, passwordInputSetValue] = useInput("");
+  const [emailInput, emailInputSetValue] = useInput("");
 
   async function register_button() {
     const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -64,7 +66,7 @@ export default function Register() {
     } else {
       setState(1);
       let [success, msg] = await register({
-        username: usernameInput,
+        name: usernameInput,
         password: passwordInput,
         email: emailInput,
       });
@@ -81,12 +83,6 @@ export default function Register() {
       }
     }
   }
-  const handleKeypressSignup = (e) => {
-    // listens for enter key
-    if (e.keyCode === 13) {
-      register_button();
-    }
-  };
 
   return (
     <>
@@ -95,12 +91,12 @@ export default function Register() {
         <link rel="canonical" href={`https://duostories.org/login`} />
       </Head>
 
-      <h2>Sign up</h2>
-      <p>
+      <h1 className={styles.H1}>Sign up</h1>
+      <p className={styles.P}>
         If you register you can keep track of the stories you have already
         finished.
       </p>
-      <p>
+      <p className={styles.P}>
         Registration is optional, stories can be accessed even without login.
       </p>
       {state === -1 ? <span className={styles.error}>{error}</span> : <></>}
@@ -109,40 +105,34 @@ export default function Register() {
           {message}
         </span>
       ) : (
-        <>
-          <input
+        <form action={register_button} className={styles.Form}>
+          <Input
             data-cy="username"
             value={usernameInput}
             onChange={usernameInputSetValue}
             type="text"
             placeholder="Username"
           />
-          <input
+          <Input
             data-cy="email"
             value={emailInput}
             onChange={emailInputSetValue}
-            onKeyDown={handleKeypressSignup}
             type="email"
             placeholder="Email"
           />
-          <input
+          <Input
             data-cy="password"
             value={passwordInput}
             onChange={passwordInputSetValue}
-            onKeyDown={handleKeypressSignup}
             type="password"
             placeholder="Password"
           />
-          <button
-            data-cy="submit"
-            className={styles.button}
-            onClick={register_button}
-          >
+          <Button primary={true} data-cy="submit" variant="blue">
             {state !== 1 ? "Sign up" : "..."}
-          </button>
-        </>
+          </Button>
+        </form>
       )}
-      <p>
+      <p className={styles.P}>
         Already have an account?{" "}
         <Link className={styles.link} href="/api/auth/signin">
           LOG IN

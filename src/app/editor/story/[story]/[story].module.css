@@ -1,5 +1,13 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .root {
   display: flex;
+  flex-grow: 1;
+  height: 100px;
 }
 
 .margin {
@@ -17,9 +25,8 @@
 }
 
 .editor {
-  float: left;
-  width: 48%;
-  height: calc(100vh - 64px);
+  flex-grow: 1;
+  width: 100px;
   scroll-behavior: auto;
 }
 
@@ -36,11 +43,10 @@
 }
 
 .preview {
-  float: left;
-  overflow: scroll;
-  width: 50%;
-  height: calc(100vh - 64px);
+  flex-grow: 1;
+  width: 100px;
   scroll-behavior: auto;
+  overflow: scroll;
 }
 
 .header_index {
