@@ -10,6 +10,7 @@ function StoryChallengePointToPhrase({
   partProgress,
   setButtonStatus,
   active,
+  hidden,
   settings,
 }) {
   if (active && partProgress === 0) setButtonStatus("idle");
@@ -20,7 +21,7 @@ function StoryChallengePointToPhrase({
   if (settings.hide_questions) {
     if (active) setButtonStatus("continue");
     return (
-      <FadeGlideIn key={`${id}-1`}>
+      <FadeGlideIn key={`${id}-1`} hidden={hidden}>
         <StoryTextLine active={active} element={parts[0]} settings={settings} />
       </FadeGlideIn>
     );
@@ -28,10 +29,14 @@ function StoryChallengePointToPhrase({
 
   return (
     <>
-      <FadeGlideIn key={`${id}-1`} show={!show_question}>
+      <FadeGlideIn key={`${id}-1`} show={!show_question} hidden={hidden}>
         <StoryTextLine element={parts[0]} settings={settings} />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-2`} show={show_question || settings.show_all}>
+      <FadeGlideIn
+        key={`${id}-2`}
+        show={show_question || settings.show_all}
+        hidden={hidden}
+      >
         <StoryQuestionPointToPhrase
           active={active}
           element={parts[1]}

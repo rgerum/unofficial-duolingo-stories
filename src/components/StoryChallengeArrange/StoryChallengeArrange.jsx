@@ -5,7 +5,13 @@ import StoryTextLine from "../StoryTextLine";
 import StoryQuestionArrange from "../StoryQuestionArrange";
 import FadeGlideIn from "../FadeGlideIn";
 
-function StoryChallengeArrange({ parts, active, setButtonStatus, settings }) {
+function StoryChallengeArrange({
+  parts,
+  active,
+  hidden,
+  setButtonStatus,
+  settings,
+}) {
   const [unhide, setUnhide] = React.useState(0);
   const id = React.useId();
 
@@ -28,10 +34,14 @@ function StoryChallengeArrange({ parts, active, setButtonStatus, settings }) {
 
   return (
     <>
-      <FadeGlideIn key={`${id}-1`} show={active || settings.show_all}>
+      <FadeGlideIn
+        key={`${id}-1`}
+        show={active || settings.show_all}
+        hidden={hidden}
+      >
         <StoryQuestionPrompt question={parts[0].prompt} lang={parts[0].lang} />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-2`}>
+      <FadeGlideIn key={`${id}-2`} hidden={hidden}>
         <StoryTextLine
           active={active}
           element={parts[1]}
@@ -39,7 +49,11 @@ function StoryChallengeArrange({ parts, active, setButtonStatus, settings }) {
           settings={settings}
         />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-3`} show={active || settings.show_all}>
+      <FadeGlideIn
+        key={`${id}-3`}
+        show={active || settings.show_all}
+        hidden={hidden}
+      >
         <StoryQuestionArrange element={parts[2]} advance={advance} />
       </FadeGlideIn>
     </>

@@ -9,6 +9,7 @@ function StoryChallengeSelectPhrases({
   parts,
   setButtonStatus,
   active,
+  hidden,
   settings,
 }) {
   const [unhide, setUnhide] = React.useState(0);
@@ -22,7 +23,7 @@ function StoryChallengeSelectPhrases({
   if (settings.hide_questions) {
     if (active) setButtonStatus("continue");
     return (
-      <FadeGlideIn key={`${id}-1`}>
+      <FadeGlideIn key={`${id}-1`} hidden={hidden}>
         <StoryTextLine active={active} element={parts[1]} settings={settings} />
       </FadeGlideIn>
     );
@@ -30,10 +31,14 @@ function StoryChallengeSelectPhrases({
 
   return (
     <>
-      <FadeGlideIn key={`${id}-1`} show={active || settings.show_all}>
+      <FadeGlideIn
+        key={`${id}-1`}
+        show={active || settings.show_all}
+        hidden={hidden}
+      >
         <StoryQuestionPrompt question={parts[0].prompt} />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-2`}>
+      <FadeGlideIn key={`${id}-2`} hidden={hidden}>
         <StoryTextLine
           active={active}
           element={parts[1]}
@@ -41,7 +46,11 @@ function StoryChallengeSelectPhrases({
           settings={settings}
         />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-3`} show={active || settings.show_all}>
+      <FadeGlideIn
+        key={`${id}-3`}
+        show={active || settings.show_all}
+        hidden={hidden}
+      >
         <StoryQuestionSelectPhrase element={parts[2]} advance={advance} />
       </FadeGlideIn>
     </>

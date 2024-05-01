@@ -46,20 +46,20 @@ function getComponent(parts) {
   return Line;
 }
 
-function Header({ parts, active, setButtonStatus, settings }) {
+function Header({ parts, active, hidden, setButtonStatus, settings }) {
   if (active) setButtonStatus("continue");
 
   return (
-    <FadeGlideIn>
+    <FadeGlideIn hidden={hidden}>
       <StoryHeader active={active} element={parts[0]} settings={settings} />
     </FadeGlideIn>
   );
 }
 
-function Line({ parts, active, setButtonStatus, settings }) {
+function Line({ parts, active, hidden, setButtonStatus, settings }) {
   if (active) setButtonStatus("continue");
   return (
-    <FadeGlideIn>
+    <FadeGlideIn hidden={hidden}>
       <StoryTextLine active={active} element={parts[0]} settings={settings} />
     </FadeGlideIn>
   );
@@ -93,9 +93,11 @@ function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
     parts_list = GetParts(story);
   }
   const [partProgress, setPartProgress] = React.useState(0);
-  const [buttonStatus, setButtonStatus] = React.useState("wait");
   const [storyProgress, setStoryProgress] = React.useState(
     settings?.show_title_page ? -1 : 0,
+  );
+  const [buttonStatus, setButtonStatus] = React.useState(
+    storyProgress === -1 ? "continue" : "wait",
   );
 
   async function next() {
@@ -128,7 +130,9 @@ function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
     if (character && !character_list.includes(character)) {
       character_list.push(character);
     }
-    if (storyProgress >= getIndex(parts) || settings.show_all) {
+    const hidden = !(storyProgress >= getIndex(parts) || settings.show_all);
+    if (1) {
+      //storyProgress >= getIndex(parts) || settings.show_all) {
       if (
         settings.hide_questions &&
         parts[0].trackingProperties?.challenge_type === "match"
@@ -137,20 +141,12 @@ function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
       part_list_with_component.push({
         parts,
         id: getIndex(parts),
+        hidden,
         Component: getComponent(parts),
       });
     }
   }
 
-  if (storyProgress === -1) {
-    if (buttonStatus !== "continue") setButtonStatus("continue");
-    return (
-      <>
-        <HeaderProgress course_short={story.course_short} />
-        <StoryTitlePage story={story} next={next} />
-      </>
-    );
-  }
   return (
     <>
       <div>
@@ -158,9 +154,10 @@ function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
           <HeaderProgress
             course_short={story.course_short}
             progress={storyProgress}
-            length={parts_list.length}
+            length={storyProgress === -1 ? undefined : parts_list.length}
           />
         )}
+        {storyProgress === -1 && <StoryTitlePage story={story} next={next} />}
         <div className={styles.story} data-rtl={settings.rtl}>
           {settings.show_names && (
             <>
@@ -174,30 +171,35 @@ function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
             </>
           )}
           <AnimatePresence>
-            {part_list_with_component.map(({ Component, id, parts }) => {
-              const active =
-                storyProgress === getIndex(parts) && !settings.show_all;
-              return (
-                <Component
-                  key={id}
-                  parts={parts}
-                  partProgress={partProgress}
-                  setButtonStatus={
-                    active ? setButtonStatus : () => console.log("not allowed")
-                  }
-                  active={active}
-                  settings={settings}
-                  {...args}
-                ></Component>
-              );
-            })}
+            {part_list_with_component.map(
+              ({ Component, id, parts, hidden }) => {
+                const active =
+                  storyProgress === getIndex(parts) && !settings.show_all;
+                return (
+                  <Component
+                    key={id}
+                    parts={parts}
+                    partProgress={partProgress}
+                    setButtonStatus={
+                      active
+                        ? setButtonStatus
+                        : () => console.log("not allowed")
+                    }
+                    active={active}
+                    settings={settings}
+                    hidden={hidden}
+                    {...args}
+                  ></Component>
+                );
+              },
+            )}
           </AnimatePresence>
           <div className={styles.spacer}></div>
           {storyProgress === parts_list.length && (
             <StoryFinishedScreen story={story} />
           )}
         </div>
-        {!settings.show_all && (
+        {!settings.show_all && storyProgress !== -1 && (
           <StoryFooter buttonStatus={buttonStatus} onClick={next} />
         )}
       </div>

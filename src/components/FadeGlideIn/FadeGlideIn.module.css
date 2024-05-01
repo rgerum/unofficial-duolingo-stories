@@ -1,6 +1,16 @@
 .fadeGlideIn {
-    animation-duration: 1000ms, 1000ms;
-    animation-name: fadeIn, glideIn;
+    animation: fadeIn 400ms ease-out, glideIn 400ms ease-out;
+}
+
+.fadeGlideIn[data-hidden="true"] {
+    display: none;
+    animation: none;
+}
+
+.fadeGlideIn[data-show="false"] {
+    display: none;
+    opacity: 0;
+    transition: opacity 10000ms;
 }
 
 @keyframes fadeIn {
@@ -26,3 +36,5 @@
     opacity: 0;
     transition: opacity 10000ms;
 }
+
+
