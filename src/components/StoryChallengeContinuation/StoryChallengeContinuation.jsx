@@ -50,7 +50,11 @@ function StoryChallengeContinuation({
         show={active || settings.show_all}
         hidden={hidden}
       >
-        <StoryQuestionMultipleChoice element={parts[2]} advance={advance} />
+        <StoryQuestionMultipleChoice
+          element={parts[2]}
+          active={active}
+          advance={advance}
+        />
       </FadeGlideIn>
     </>
   );

@@ -43,6 +43,7 @@ function StoryChallengeMultipleChoice({
       >
         <StoryQuestionMultipleChoice
           element={parts[1]}
+          active={active}
           advance={() => {
             setButtonStatus("right");
           }}

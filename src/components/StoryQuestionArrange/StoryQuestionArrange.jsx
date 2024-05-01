@@ -12,7 +12,7 @@ Speaker560: ¡[(Necesito) (las~llaves) (de) (mi) (carro)!]
 ~              I~need     the~keys     of   my   car
  */
 
-function StoryQuestionArrange({ element, advance }) {
+function StoryQuestionArrange({ element, active, advance }) {
   const [done, setDone] = React.useState(false);
 
   let [buttonState, click] = useArrangeButtons(
@@ -27,7 +27,7 @@ function StoryQuestionArrange({ element, advance }) {
         i === element.phraseOrder.length - 1,
       );
     },
-    true, //active,
+    active, //active,
   );
 
   return (

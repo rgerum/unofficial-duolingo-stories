@@ -51,7 +51,11 @@ function StoryChallengeSelectPhrases({
         show={active || settings.show_all}
         hidden={hidden}
       >
-        <StoryQuestionSelectPhrase element={parts[2]} advance={advance} />
+        <StoryQuestionSelectPhrase
+          element={parts[2]}
+          active={active}
+          advance={advance}
+        />
       </FadeGlideIn>
     </>
   );

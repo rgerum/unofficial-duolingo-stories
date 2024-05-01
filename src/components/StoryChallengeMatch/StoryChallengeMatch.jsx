@@ -22,6 +22,7 @@ function StoryChallengeMatch({
     >
       <StoryQuestionMatch
         element={parts[0]}
+        active={active}
         setDone={() => setButtonStatus("right")}
       />
     </FadeGlideIn>

@@ -54,7 +54,11 @@ function StoryChallengeArrange({
         show={active || settings.show_all}
         hidden={hidden}
       >
-        <StoryQuestionArrange element={parts[2]} advance={advance} />
+        <StoryQuestionArrange
+          element={parts[2]}
+          active={active}
+          advance={advance}
+        />
       </FadeGlideIn>
     </>
   );
