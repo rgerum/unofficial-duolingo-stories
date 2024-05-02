@@ -18,10 +18,6 @@ import StoryFinishedScreen from "../StoryFinishedScreen";
 import StoryTitlePage from "../StoryTitlePage";
 import VisuallyHidden from "../VisuallyHidden";
 
-function Unknown() {
-  return <div>Error</div>;
-}
-
 function getComponent(parts) {
   if (parts[0].type === "HEADER") return Header;
   if (parts[0].trackingProperties?.challenge_type === "arrange")
@@ -89,6 +85,7 @@ function getCharacter(parts) {
 }
 
 function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
+  console.log("highlight_name", settings);
   if (story) {
     parts_list = GetParts(story);
   }
@@ -157,14 +154,16 @@ function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
             length={storyProgress === -1 ? undefined : parts_list.length}
           />
         )}
-        {storyProgress === -1 && <StoryTitlePage story={story} next={next} />}
+        {storyProgress === -1 && !settings.show_all && (
+          <StoryTitlePage story={story} next={next} />
+        )}
         <div className={styles.story} data-rtl={settings.rtl}>
           {settings.show_names && (
             <>
               <NameButtons
-                character_list={highlight_name}
+                character_list={character_list}
                 highlight_name={settings.highlight_name}
-                setHighlightName={settings.setHideNonHighlighted}
+                setHighlightName={settings.setHighlightName}
                 setHideNonHighlighted={settings.setHideNonHighlighted}
               />
               <h1>{story.from_language_name}</h1>
