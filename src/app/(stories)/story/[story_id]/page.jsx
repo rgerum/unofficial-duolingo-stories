@@ -7,10 +7,6 @@ import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
 import { revalidateTag } from "next/cache";
 import LocalisationProvider from "../../../../components/LocalisationProvider";
-import { headers } from "next/headers";
-import { useNavigationMode } from "../../../../components/NavigationModeProvider";
-
-console.log("xxx", useNavigationMode);
 
 async function get_story_meta(course_id) {
   const course_query = await sql`SELECT
