@@ -1,7 +1,9 @@
+import React from "react";
 import { Nunito } from "next/font/google";
 import "styles/global.css";
 import Script from "next/script";
 import StyledComponentsRegistry from "lib/registry";
+import NavigationModeProvider from "../components/NavigationModeProvider";
 
 // If loading a variable font, you don't need to specify the font weight
 const nunito = Nunito({
@@ -18,7 +20,9 @@ export default function RootLayout({ children }) {
         <Script src="/darklight.js"></Script>
       </head>
       <body>
-        <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+        <NavigationModeProvider>
+          <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+        </NavigationModeProvider>
         {/*<AnalyticsTracker />*/}
       </body>
     </html>

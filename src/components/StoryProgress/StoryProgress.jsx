@@ -85,7 +85,6 @@ function getCharacter(parts) {
 }
 
 function StoryProgress({ story, parts_list, settings, onEnd, ...args }) {
-  console.log("highlight_name", settings);
   if (story) {
     parts_list = GetParts(story);
   }
