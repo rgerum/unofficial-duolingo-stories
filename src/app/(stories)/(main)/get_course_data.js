@@ -15,7 +15,7 @@ ORDER BY
 `;
   },
   ["get_course_data"],
-  { tags: ["course_data"] },
+  { tags: ["course_data"], revalidate: 3600 },
 );
 
 export async function get_counts() {
