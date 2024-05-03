@@ -5,23 +5,23 @@ import React from "react";
 
 import { basicSetup, EditorView } from "codemirror";
 import { EditorSelection, EditorState } from "@codemirror/state";
-import { example, highlightStyle } from "components/editor/story/parser.mjs";
-import useScrollLinking from "components/editor/story/scroll_linking";
-import useResizeEditor from "components/editor/story/editor-resize";
+import { example, highlightStyle } from "@/components/editor/story/parser.mjs";
+import useScrollLinking from "@/components/editor/story/scroll_linking";
+import useResizeEditor from "@/components/editor/story/editor-resize";
 //import {SoundRecorder} from "./sound-recorder";
-import Story, { EditorContext } from "components/story/story";
-import Cast from "components/editor/story/cast";
+import Story, { EditorContext } from "@/components/story/story";
+import Cast from "@/components/editor/story/cast";
 
-import { processStoryFile } from "components/editor/story/syntax_parser_new";
+import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 
 import { useRouter } from "next/navigation";
 import { StoryEditorHeader } from "./header";
-import { fetch_post } from "lib/fetch_post";
+import { fetch_post } from "@/lib/fetch_post";
 import SoundRecorder from "./sound-recorder";
 import {
   insert_audio_line,
   timings_to_text,
-} from "../../../../components/story/text_lines/audio_edit_tools.mjs";
+} from "@/components/story/text_lines/audio_edit_tools.mjs";
 
 let images_cached = {};
 export async function getImage(id) {

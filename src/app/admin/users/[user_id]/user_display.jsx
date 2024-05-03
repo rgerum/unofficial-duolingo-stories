@@ -1,5 +1,5 @@
 "use client";
-import { fetch_post } from "lib/fetch_post";
+import { fetch_post } from "@/lib/fetch_post";
 import { useState } from "react";
 
 export async function setUserActivated(data) {

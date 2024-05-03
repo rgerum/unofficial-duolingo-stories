@@ -1,11 +1,11 @@
 import React, { Suspense } from "react";
-import get_localisation from "lib/get_localisation";
+import get_localisation from "@/lib/get_localisation";
 import LanguageButton from "./language_button";
 
 import styles from "./course_list.module.css";
 import { get_course_groups, get_courses_in_group } from "./get_course_data";
 
-async function LanguageGroup({ name, tag, id }) {
+async function LanguageGroup({ name, id }) {
   let courses_list = await get_courses_in_group(id);
 
   let localisation = await get_localisation(id);
@@ -29,7 +29,7 @@ async function LanguageGroup({ name, tag, id }) {
   );
 }
 
-export async function CourseListInner({ loading, tag }) {
+export async function CourseListInner({ loading }) {
   if (loading) {
     return (
       <div className={styles.course_list}>
@@ -55,7 +55,6 @@ export async function CourseListInner({ loading, tag }) {
           key={group.from_language}
           name={group.from_language_name}
           id={group.from_language}
-          tag={tag}
         />
       ))}
     </>

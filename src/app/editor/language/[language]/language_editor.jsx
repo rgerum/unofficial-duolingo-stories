@@ -1,14 +1,14 @@
 "use client";
 import React, { useState } from "react";
-import { useInput } from "lib/hooks";
-import { SpinnerBlue } from "components/layout/spinner";
-import { fetch_post } from "lib/fetch_post";
+import { useInput } from "@/lib/hooks";
+import { SpinnerBlue } from "@/components/layout/spinner";
+import { fetch_post } from "@/lib/fetch_post";
 import styles from "./[language].module.css";
 
-import AudioPlay from "components/story/text_lines/audio_play";
-import HintLineContent from "components/story/text_lines/line_hints";
-import useAudio from "components/story/text_lines/use_audio";
-import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
+import AudioPlay from "@/components/story/text_lines/audio_play";
+import HintLineContent from "@/components/story/text_lines/line_hints";
+import useAudio from "@/components/story/text_lines/use_audio";
+import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
 import EditorButton from "../../editor_button";
 
@@ -57,7 +57,7 @@ export function Layout({
 
   //if (error) return <div>failed to load</div>
   //if (!userdata) return <div>loading...</div>
-  let crumbs = {};
+  let crumbs;
   if (use_edit) {
     crumbs = [
       { type: "Editor", href: `/editor` },

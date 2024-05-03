@@ -1,12 +1,12 @@
 "use client";
-//import {LoginDialog} from "../components/login";
+//import {LoginDialog} from "@/components/login";
 import Head from "next/head";
 import React from "react";
 import styles from "../register.module.css";
 import Link from "next/link";
-import { useInput } from "lib/hooks";
-import Button from "../../../../components/layout/button";
-import Input from "../../../../components/layout/Input";
+import { useInput } from "@/lib/hooks";
+import Button from "@/components/layout/button";
+import Input from "@/components/layout/Input";
 
 export async function fetch_post(url, data) {
   // check if the user is logged in

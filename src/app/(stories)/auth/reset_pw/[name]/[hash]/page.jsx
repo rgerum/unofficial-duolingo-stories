@@ -1,7 +1,7 @@
 import React from "react";
 import ResetPassword from "./reset_pw";
-import { phpbb_hash } from "lib/auth/hash_functions2";
-import { sql } from "lib/db";
+import { phpbb_hash } from "@/lib/auth/hash_functions2";
+import { sql } from "@/lib/db";
 
 async function changePasswordAction(password, user_id) {
   let password_hashed = await phpbb_hash(password);

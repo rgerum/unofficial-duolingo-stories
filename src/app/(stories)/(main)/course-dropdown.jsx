@@ -1,8 +1,8 @@
 "use client";
 import styles from "./course-dropdown.module.css";
 import Link from "next/link";
-import Flag from "components/layout/flag";
-import Dropdown from "components/layout/dropdown";
+import Flag from "@/components/layout/flag";
+import Dropdown from "@/components/layout/dropdown";
 import { useSelectedLayoutSegment } from "next/navigation";
 
 function LanguageButtonSmall({ course, flag_data }) {

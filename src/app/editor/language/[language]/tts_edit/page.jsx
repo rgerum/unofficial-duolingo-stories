@@ -1,6 +1,6 @@
 import React from "react";
 import { cache } from "react";
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "app/api/auth/[...nextauth]/authOptions";

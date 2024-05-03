@@ -3,7 +3,7 @@ import React from "react";
 import styles from "./DocsHeader.module.css";
 import Link from "next/link";
 import DocsSearchModal from "../DocsSearchModal";
-import useKeypress from "../../hooks/use-keypress.hook";
+import useKeypress from "@/hooks/use-keypress.hook";
 import * as Dialog from "@radix-ui/react-dialog";
 
 function DocsHeader() {

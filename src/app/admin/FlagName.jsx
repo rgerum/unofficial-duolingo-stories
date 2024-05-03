@@ -1,5 +1,5 @@
 import React from "react";
-import Flag from "../../components/layout/flag";
+import Flag from "@/components/layout/flag";
 
 export default function FlagName({ lang, languages }) {
   return (

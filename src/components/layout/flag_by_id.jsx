@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./flag.module.css";
-import { sql, cache } from "lib/db";
+import { sql, cache } from "@/lib/db";
 import Flag from "./flag";
 
 export const get_flag_data = cache(

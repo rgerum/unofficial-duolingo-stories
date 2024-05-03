@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import styles from "./edit_list.module.css";
-import { SpinnerBlue } from "components/layout/spinner";
+import { SpinnerBlue } from "@/components/layout/spinner";
 import { useRouter } from "next/navigation";
 
 export default function EditList({ stories, course, updateCourses }) {

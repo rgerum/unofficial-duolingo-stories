@@ -1,9 +1,9 @@
 import React from "react";
 import styles from "./[language].module.css";
 
-import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
+import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 import TextEdit from "./text_edit";
 
 export default function LocalizationEditor({

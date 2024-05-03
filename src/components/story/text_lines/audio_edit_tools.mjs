@@ -1,4 +1,4 @@
-import { fetch_post } from "../../../lib/fetch_post.mjs";
+import { fetch_post } from "@/lib/fetch_post.mjs";
 import {
   add_word_marks_replacements,
   find_replace_with_mapping,

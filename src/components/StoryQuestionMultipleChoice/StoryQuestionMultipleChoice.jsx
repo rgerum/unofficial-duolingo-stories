@@ -7,7 +7,7 @@ import StoryLineHints from "../StoryLineHints";
 //import { EditorContext, StoryContext } from "../story";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import CheckButton from "../CheckButton";
-import { useChoiceButtons } from "../../hooks/use-choice-buttons.hook";
+import { useChoiceButtons } from "@/hooks/use-choice-buttons.hook";
 
 // TODO move
 function EditorHook(hidden, editor, editor_props) {

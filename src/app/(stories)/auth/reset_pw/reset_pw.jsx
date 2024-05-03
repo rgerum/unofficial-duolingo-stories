@@ -2,10 +2,10 @@
 import React from "react";
 import styles from "../register.module.css";
 import Link from "next/link";
-import { useInput } from "lib/hooks";
+import { useInput } from "@/lib/hooks";
 import sendPasswordAction from "./sendPasswordAction";
-import Button from "../../../../components/layout/button";
-import Input from "../../../../components/layout/Input";
+import Button from "@/components/layout/button";
+import Input from "@/components/layout/Input";
 
 export async function fetch_post(url, data) {
   // check if the user is logged in

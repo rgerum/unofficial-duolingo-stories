@@ -1,4 +1,4 @@
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 import LanguageList from "./language_list";
 
 async function language_list() {

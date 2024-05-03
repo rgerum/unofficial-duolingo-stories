@@ -1,18 +1,8 @@
-import { Spinner } from "components/layout/spinner";
-
-import styles from "./layout.module.css";
-import Header from "./header";
+import React from "react";
 import Link from "next/link";
+import Header from "./header";
 import Icons from "./icons";
 import { CourseListInner } from "./course_list";
-import React from "react";
-
-/*
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
- */
 
 export default function Loading() {
   // You can add any UI inside Loading, including a Skeleton.

@@ -2,9 +2,9 @@
 import React from "react";
 
 import { useRouter } from "next/navigation";
-import StoryProgress from "../../../../components/StoryProgress";
-import useSearchParamsState from "../../../../hooks/use-search-params-state.hook";
-import { useNavigationMode } from "../../../../components/NavigationModeProvider";
+import StoryProgress from "@/components/StoryProgress";
+import useSearchParamsState from "@/hooks/use-search-params-state.hook";
+import { useNavigationMode } from "@/components/NavigationModeProvider";
 
 export default function StoryWrapper({ story, storyFinishedIndexUpdate }) {
   const mode = useNavigationMode();

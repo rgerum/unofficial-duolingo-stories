@@ -1,4 +1,4 @@
-import { sql, cache } from "../../../../lib/db";
+import { sql, cache } from "@/lib/db";
 import { get_course } from "../get_course_data";
 
 export const get_image_data = cache(

@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 
 export const get_language_list_data = cache(async () => {
   let data = await sql`

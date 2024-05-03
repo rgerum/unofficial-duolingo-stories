@@ -1,11 +1,8 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment } from "react";
 import styles from "./StoryQuestionPointToPhrase.module.css";
-//import {EditorContext, StoryContext} from "../story/story";
-//import styles_common from "../story/common.module.css";
-//import {EditorHook} from "../story/editor_hooks";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import WordButton from "../WordButton";
-import { useChoiceButtons } from "../../hooks/use-choice-buttons.hook";
+import { useChoiceButtons } from "@/hooks/use-choice-buttons.hook";
 
 /*
 The POINT_TO_PHRASE question

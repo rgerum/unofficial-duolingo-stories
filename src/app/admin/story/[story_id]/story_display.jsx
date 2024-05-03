@@ -1,6 +1,6 @@
 "use client";
-import { fetch_post } from "lib/fetch_post";
-import Switch from "components/layout/switch";
+import { fetch_post } from "@/lib/fetch_post";
+import Switch from "@/components/layout/switch";
 import { useState } from "react";
 import Link from "next/link";
 

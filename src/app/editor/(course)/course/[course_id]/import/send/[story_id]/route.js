@@ -1,6 +1,6 @@
 import { getToken } from "next-auth/jwt";
-import { sql } from "lib/db";
-import { upload_github } from "lib/editor/upload_github";
+import { sql } from "@/lib/db";
+import { upload_github } from "@/lib/editor/upload_github";
 import { NextResponse } from "next/server";
 
 export async function GET(req, { params: { course_id, story_id } }) {

@@ -3,7 +3,7 @@ import styles from "../register.module.css";
 import { signIn } from "next-auth/react";
 import React from "react";
 import Link from "next/link";
-import Button from "../../../../components/layout/button";
+import Button from "@/components/layout/button";
 
 export default function Page({}) {
   return (

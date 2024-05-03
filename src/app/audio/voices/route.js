@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { audio_engines } from "../_lib/audio";
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 
 export async function GET(req) {
   const token = await getToken({ req });

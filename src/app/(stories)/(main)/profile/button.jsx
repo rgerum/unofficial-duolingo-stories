@@ -1,7 +1,7 @@
 "use client";
 import styles from "./profile.module.css";
 import { signIn } from "next-auth/react";
-import { GetIcon } from "components/icons";
+import { GetIcon } from "@/components/icons";
 import React from "react";
 
 export default function ProviderButton({ d, value }) {

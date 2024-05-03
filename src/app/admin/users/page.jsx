@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useInput } from "lib/hooks";
+import { useInput } from "@/lib/hooks";
 
 export default function Page({}) {
   let [id, setId] = useInput();
