@@ -3,15 +3,26 @@ import styles from "./StoryChallengeMatch.module.css";
 import StoryQuestionMatch from "../StoryQuestionMatch";
 import FadeGlideIn from "../FadeGlideIn";
 
-function StoryChallengeMatch({ parts, active, setButtonStatus, settings }) {
+function StoryChallengeMatch({
+  parts,
+  active,
+  hidden,
+  setButtonStatus,
+  settings,
+}) {
   const id = React.useId();
   if (settings.hide_questions) {
     return null;
   }
   return (
-    <FadeGlideIn key={`${id}-1`} show={active || settings.show_all}>
+    <FadeGlideIn
+      key={`${id}-1`}
+      show={active || settings.show_all}
+      hidden={hidden}
+    >
       <StoryQuestionMatch
         element={parts[0]}
+        active={active}
         setDone={() => setButtonStatus("right")}
       />
     </FadeGlideIn>

@@ -82,7 +82,7 @@ function shuffle_lists(state) {
   return { lists: state.lists.map((element) => shuffle(element)) };
 }
 
-function StoryQuestionMatch({ /*progress,*/ element, setDone }) {
+function StoryQuestionMatch({ /*progress,*/ element, active, setDone }) {
   const [state, dispatch] = React.useReducer(
     reducer,
     {

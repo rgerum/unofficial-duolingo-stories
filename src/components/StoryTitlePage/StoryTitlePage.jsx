@@ -12,8 +12,10 @@ function StoryTitlePage({ story, next }) {
       <div>
         <img width="180" src={header.illustrationUrl} alt={"title image"} />
       </div>
-      <h1 className={styles.story_title_page_title}>{header.title}</h1>
-      <div>
+      <div className={styles.story_title_page_title}>
+        {header.learningLanguageTitleContent.text}
+      </div>
+      <div className={styles.story_title_page_button}>
         <Button primary onClick={next}>
           {localisation("button_start_story") || "Start the Story"}
         </Button>

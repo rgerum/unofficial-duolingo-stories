@@ -153,7 +153,7 @@ function StoryQuestionMultipleChoiceX({ setUnhide, progress, element }) {
   );
 }
 
-function StoryQuestionMultipleChoice({ element, advance }) {
+function StoryQuestionMultipleChoice({ element, active, advance }) {
   //const [done, setDone] = React.useState(false);
 
   // get button states and a click function
@@ -165,7 +165,7 @@ function StoryQuestionMultipleChoice({ element, advance }) {
       //setDone(true);
     },
     () => {},
-    true,
+    active,
   );
 
   function get_color_text(state) {

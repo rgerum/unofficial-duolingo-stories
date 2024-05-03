@@ -2,8 +2,8 @@
 import React from "react";
 
 import { useRouter } from "next/navigation";
-import StoryProgress from "../../../../components/StoryProgress";
-import useSearchParamsState from "../../../../hooks/use-search-params-state.hook";
+import StoryProgress from "../../../../../components/StoryProgress";
+import useSearchParamsState from "../../../../../hooks/use-search-params-state.hook";
 
 export default function StoryWrapper({
   story,
@@ -19,16 +19,16 @@ export default function StoryWrapper({
     "hide_non_highlighted",
     false,
   );
-
+  console.log("highlight_nameX", highlight_name);
   return (
     <>
       <StoryProgress
         story={story}
         router={router}
         settings={{
-          hide_questions: false,
-          show_all: false,
-          show_names: false,
+          hide_questions: true,
+          show_all: true,
+          show_names: true,
           rtl: story.learning_language_rtl,
           highlight_name: highlight_name,
           hideNonHighlighted: hideNonHighlighted,

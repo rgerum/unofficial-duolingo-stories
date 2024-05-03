@@ -40,7 +40,7 @@ export function useChoiceButtons(
   useKeypress(
     "number",
     (value) => {
-      if (value <= count) click(value - 1);
+      if (active && value <= count) click(value - 1);
     },
     [click],
   );

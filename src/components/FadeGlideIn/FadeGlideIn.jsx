@@ -3,10 +3,22 @@ import styles from "./FadeGlideIn.module.css";
 import { motion } from "framer-motion";
 import useScrollIntoView from "../../hooks/use-scroll-into-view.hook";
 
-function FadeGlideIn({ children, show = true, duration = 400 }, refX) {
-  if (!show) return null;
-  const ref = useScrollIntoView(show);
+function FadeGlideIn({ children, show = true, hidden, duration = 400 }, refX) {
+  //if (!show) return null;
+  const ref = useScrollIntoView(show && !hidden);
 
+  return (
+    <div
+      className={styles.fadeGlideIn}
+      data-show={show}
+      data-hidden={hidden}
+      ref={ref}
+    >
+      {children}
+    </div>
+  );
+}
+function xxx({ children, show = true, duration = 400 }, refX) {
   return (
     <motion.div
       ref={ref}

@@ -9,6 +9,7 @@ function StoryChallengeMultipleChoice({
   partProgress,
   setButtonStatus,
   active,
+  hidden,
   settings,
 }) {
   if (active && partProgress === 0)
@@ -20,7 +21,7 @@ function StoryChallengeMultipleChoice({
 
   if (settings.hide_questions) {
     return (
-      <FadeGlideIn key={`${id}-1`}>
+      <FadeGlideIn key={`${id}-1`} hidden={hidden}>
         <StoryTextLine active={active} element={parts[0]} settings={settings} />
       </FadeGlideIn>
     );
@@ -28,16 +29,21 @@ function StoryChallengeMultipleChoice({
 
   return (
     <>
-      <FadeGlideIn key={`${id}-1`}>
+      <FadeGlideIn key={`${id}-1`} hidden={hidden}>
         <StoryTextLine
           key={parts[0].trackingProperties.line_index}
           element={parts[0]}
           settings={settings}
         />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-2`} show={show_question || settings.show_all}>
+      <FadeGlideIn
+        key={`${id}-2`}
+        show={show_question || settings.show_all}
+        hidden={hidden}
+      >
         <StoryQuestionMultipleChoice
           element={parts[1]}
+          active={active}
           advance={() => {
             setButtonStatus("right");
           }}

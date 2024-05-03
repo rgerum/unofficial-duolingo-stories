@@ -7,7 +7,6 @@ import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
 import { revalidateTag } from "next/cache";
 import LocalisationProvider from "../../../../components/LocalisationProvider";
-import { headers } from "next/headers";
 
 async function get_story_meta(course_id) {
   const course_query = await sql`SELECT
@@ -42,19 +41,9 @@ export async function generateMetadata({ params, searchParams }, parent) {
         `/api/og-story?title=${story.from_language_name}&image=${story.image}&name=${story.learning_language_long}`,
       ],
       url: `https://duostories.org/story/${params.story_id}`,
+      type: "website",
     },
   };
-}
-
-function getNavigationMode() {
-  const headersList = headers();
-  // If there is a next-url header, soft navigation has been performed
-  // Otherwise, hard navigation has been performed
-  const nextUrl = headersList.get("next-url");
-  if (nextUrl) {
-    return "soft";
-  }
-  return "hard";
 }
 
 export default async function Page({ params }) {
@@ -91,7 +80,6 @@ export default async function Page({ params }) {
           story={story}
           storyFinishedIndexUpdate={setStoryDoneAction}
           localization={localization}
-          show_title_page={getNavigationMode() === "hard"}
         />
       </LocalisationProvider>
     </>
