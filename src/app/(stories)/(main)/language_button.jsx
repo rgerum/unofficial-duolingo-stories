@@ -1,6 +1,5 @@
 import Link from "next/link";
 import styles from "./language_button.module.css";
-import { Suspense } from "react";
 import get_localisation from "@/lib/get_localisation";
 import FlagById from "@/components/layout/flag_by_id";
 import { get_course } from "./get_course_data";

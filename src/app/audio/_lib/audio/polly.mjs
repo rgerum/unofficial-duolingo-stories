@@ -1,8 +1,7 @@
 // Load the AWS SDK for Node.js
 import { Polly } from "@aws-sdk/client-polly";
-import fs from "fs";
 import { put } from '@vercel/blob';
-import {sql} from "@/lib/db.js";
+import { sql } from "@/lib/db.js";
 
 // Set the region and credentials for the AWS SDK
 let config = {
