@@ -72,7 +72,14 @@ function GetParts(story) {
       parts.push([]);
       last_id = element.trackingProperties.line_index;
     }
+    if (element.type === "MULTIPLE_CHOICE" && parts.at(-1).length > 1)
+      parts.push([]);
     parts[parts.length - 1].push(element);
+  }
+  for (let i = 0; i < parts.length; i++) {
+    for (let j = 0; j < parts[i].length; j++) {
+      parts[i][j].trackingProperties.line_index = i;
+    }
   }
   return parts;
 }
