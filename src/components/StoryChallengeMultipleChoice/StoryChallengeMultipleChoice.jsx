@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import styles from "./StoryChallengeMultipleChoice.module.css";
+import React from "react";
 import StoryTextLine from "../StoryTextLine";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
 import FadeGlideIn from "../FadeGlideIn";
