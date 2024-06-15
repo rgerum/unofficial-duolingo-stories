@@ -60,6 +60,7 @@ function BreadcrumbPart({ part, hide }) {
       <MyLink className={class_name} href={part.href}>
         {part.data?.image ? (
           <img
+            style={{ height: "36px" }}
             alt="story title"
             src={`https://stories-cdn.duolingo.com/image/${part.data?.image}.svg`}
           />
