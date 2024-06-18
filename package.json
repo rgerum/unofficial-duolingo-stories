@@ -48,7 +48,7 @@
     "styled-components": "^6.1.8",
     "uuid": "^9.0.1",
     "wavesurfer.js": "^7.7.1",
-    "ws": "^8.16.0"
+    "ws": "^8.17.1"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.2.25",
