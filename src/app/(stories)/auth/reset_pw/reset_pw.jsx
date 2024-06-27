@@ -73,12 +73,6 @@ export default function ResetPassword() {
     );
     setState(2);
   }
-  const handleKeypressSignup = (e) => {
-    // listens for enter key
-    if (e.keyCode === 13) {
-      register_button();
-    }
-  };
 
   return (
     <>
