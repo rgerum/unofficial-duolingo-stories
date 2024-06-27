@@ -50,9 +50,32 @@
 .lang_selector {
   overflow: scroll;
   white-space: nowrap;
+  display: flex;
+  gap: 12px;
+  padding: 4px;
 }
 
 .lang_selector svg:nth-child(2) {
 
 }
 
+.import_lang {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 8px;
+  background: var(--body-background);
+  padding: 4px 8px;
+}
+.import_lang:hover {
+  filter: brightness(0.9);
+}
+
+.double_flag {
+  display: flex;
+}
+
+.double_flag img:nth-child(2) {
+  margin-top: 10px;
+  margin-left: -28px;
+}

@@ -65,8 +65,8 @@ export default async function Page({ params }) {
             key={i}
             href={`/editor/course/${course.short}/import/${c.short}`}
           >
-            <span>
-              <span>
+            <span className={styles.import_lang}>
+              <span className={styles.double_flag}>
                 <DoubleFlag
                   width={40}
                   lang1={languages[c.learning_language]}
