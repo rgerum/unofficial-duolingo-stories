@@ -7,7 +7,7 @@ import {
   IconTwitter,
 } from "components/icons";
 import styles from "./layout.module.css";
-import { IconPlayStore } from "../../../components/icons";
+import { IconPlayStore } from "@/components/icons";
 
 export default function Icons() {
   return (

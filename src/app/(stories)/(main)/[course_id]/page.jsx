@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import CourseTitle from "./course_title";
 import SetList from "./set_list";
-import get_localisation from "../../../../lib/get_localisation";
+import get_localisation from "@/lib/get_localisation";
 import { get_course_data, get_course } from "../get_course_data";
 
 export async function generateMetadata({ params, searchParams }, parent) {

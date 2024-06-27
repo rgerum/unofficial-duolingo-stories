@@ -1,16 +1,16 @@
 "use client";
 import Link from "next/link";
 import styles from "../index.module.css";
-import { useInput } from "lib/hooks";
-import { Spinner } from "components/layout/spinner";
-import Flag from "components/layout/flag";
-import { fetch_post } from "lib/fetch_post";
+import { useInput } from "@/lib/hooks";
+import { Spinner } from "@/components/layout/spinner";
+import Flag from "@/components/layout/flag";
+import { fetch_post } from "@/lib/fetch_post";
 import * as EditDialog from "../edit_dialog";
 import React, { useState } from "react";
 import styled from "styled-components";
-import Button from "../../../components/layout/button";
-import Tag from "../../../components/layout/tag";
-import Input from "../../../components/layout/Input";
+import Button from "@/components/layout/button";
+import Tag from "@/components/layout/tag";
+import Input from "@/components/layout/Input";
 import FlagName from "../FlagName";
 
 function InputLanguage({ name, label, value, setValue, languages }) {
@@ -71,7 +71,7 @@ function InputLanguage({ name, label, value, setValue, languages }) {
             {language_id.map((lang) => (
               <LangItemButton
                 key={languages[lang].id}
-                onClick={(event) => {
+                onClick={() => {
                   edited(languages[lang].name);
                 }}
               >

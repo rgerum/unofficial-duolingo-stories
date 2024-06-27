@@ -2,10 +2,10 @@
 import { signIn } from "next-auth/react";
 import styles from "../register.module.css";
 import React from "react";
-import { useInput } from "lib/hooks";
+import { useInput } from "@/lib/hooks";
 import { useSearchParams } from "next/navigation";
-import Button from "../../../../components/layout/button";
-import Input from "../../../../components/layout/Input";
+import Button from "@/components/layout/button";
+import Input from "@/components/layout/Input";
 import { error_codes } from "../error_codes";
 
 export default function SignInEmail({}) {

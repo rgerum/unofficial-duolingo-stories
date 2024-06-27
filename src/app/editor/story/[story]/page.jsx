@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import Editor from "./editor";
 
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 
 async function get_story({ id }) {
   return (

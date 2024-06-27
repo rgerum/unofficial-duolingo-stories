@@ -1,7 +1,7 @@
 "use server";
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 import { v4 as uuid } from "uuid";
-import transporter from "lib/emailer";
+import transporter from "@/lib/emailer";
 
 export default async function sendPasswordAction(email) {
   const currentDate = new Date();

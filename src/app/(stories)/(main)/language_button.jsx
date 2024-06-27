@@ -1,8 +1,7 @@
 import Link from "next/link";
 import styles from "./language_button.module.css";
-import { Suspense } from "react";
-import get_localisation from "lib/get_localisation";
-import FlagById from "components/layout/flag_by_id";
+import get_localisation from "@/lib/get_localisation";
+import FlagById from "@/components/layout/flag_by_id";
 import { get_course } from "./get_course_data";
 
 export default async function LanguageButton({ course_id, loading }) {
@@ -37,14 +36,5 @@ export default async function LanguageButton({ course_id, loading }) {
         {localisation("n_stories", { $count: course.count })}
       </span>
     </Link>
-  );
-}
-
-export async function LanguageButtonSuspense({ course_id }) {
-  return <LanguageButton course_id={course_id} />;
-  return (
-    <Suspense fallback={<LanguageButton loading={true} />}>
-      <LanguageButton course_id={course_id} />
-    </Suspense>
   );
 }

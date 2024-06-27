@@ -1,8 +1,7 @@
 // Load the AWS SDK for Node.js
 import { Polly } from "@aws-sdk/client-polly";
-import fs from "fs";
 import { put } from '@vercel/blob';
-import {sql} from "../../../../lib/db.js";
+import { sql } from "@/lib/db.js";
 
 // Set the region and credentials for the AWS SDK
 let config = {
@@ -17,20 +16,6 @@ async function synthesizeSpeech(polly, params) {
         console.log("err", err, err.stack);
       }
       resolve(data);
-    });
-  });
-}
-
-async function writeStream(filename, readable) {
-  return new Promise((resolve) => {
-    const writable = fs.createWriteStream(filename);
-
-    // Pipe the readable stream to the writable stream
-    readable.pipe(writable);
-
-    // Listen for 'finish' event to know when it finished writing
-    writable.on("finish", () => {
-      resolve();
     });
   });
 }

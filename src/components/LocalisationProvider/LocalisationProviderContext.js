@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import get_localisation_func from "../../lib/get_localisation_func";
+import get_localisation_func from "@/lib/get_localisation_func";
 
 export const localisationContext = React.createContext();
 

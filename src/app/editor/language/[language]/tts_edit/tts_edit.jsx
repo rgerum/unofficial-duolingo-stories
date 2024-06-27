@@ -1,16 +1,16 @@
 "use client";
+import React from "react";
 import styles from "../[language].module.css";
-import React, { useState } from "react";
-import { useInput } from "lib/hooks";
+import { useInput } from "@/lib/hooks";
 import { PlayButton, SpeakerEntry } from "../language_editor";
-import { fetch_post } from "lib/fetch_post";
+import { fetch_post } from "@/lib/fetch_post";
 import { Layout } from "../language_editor";
-import { processStoryFile } from "components/editor/story/syntax_parser_new";
+import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 import {
   generate_audio_line,
   content_to_audio,
-} from "../../../../../components/story/text_lines/audio_edit_tools.mjs";
-import TextLine from "../../../../../components/story/text_lines/text_line";
+} from "@/components/story/text_lines/audio_edit_tools.mjs";
+import TextLine from "@/components/story/text_lines/text_line";
 import jsyaml from "js-yaml";
 
 let element_init = {
@@ -51,7 +51,7 @@ export default function Tts_edit({
   course,
 }) {
   // Render data...                <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
-  let [data, setData] = useState(
+  let [data, setData] = React.useState(
     language.tts_replace ||
       `
 # line with # are comments and are ignored
@@ -84,12 +84,12 @@ FRAGMENTS:
   let [text, setText] = useInput("Enter a text to be spoken");
   let [text2, setText2] = React.useState("");
   let [customSpeaker, setCustomSpeaker] = useInput("");
-  const [pitch, setPitch] = useState(2);
-  const [speed, setSpeed] = useState(2);
+  const [pitch, setPitch] = React.useState(2);
+  const [speed, setSpeed] = React.useState(2);
 
-  let [element, setElement] = useState(element_init);
+  let [element, setElement] = React.useState(element_init);
 
-  const [yamlError, setYamlError] = useState(false);
+  const [yamlError, setYamlError] = React.useState(false);
 
   async function save() {
     let d = {

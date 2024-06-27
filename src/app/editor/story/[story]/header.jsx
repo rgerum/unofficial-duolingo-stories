@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./header.module.css";
 import EditorButton from "../../editor_button";
-import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
+import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
 
 export function StoryEditorHeader({

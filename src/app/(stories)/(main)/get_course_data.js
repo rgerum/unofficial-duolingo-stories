@@ -1,4 +1,4 @@
-import { sql, cache } from "../../../lib/db";
+import { sql, cache } from "@/lib/db";
 
 export const get_course_data = cache(
   async () => {

@@ -1,4 +1,4 @@
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 
 export async function get_stats(year, month) {
   let res = await sql`SELECT course_id, COUNT(s.course_id) AS count FROM story s

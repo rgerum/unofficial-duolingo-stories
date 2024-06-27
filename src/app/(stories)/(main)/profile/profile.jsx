@@ -1,5 +1,5 @@
 "use client";
-import { useInput } from "../../../../lib/hooks";
+import { useInput } from "@/lib/hooks";
 import Header from "../header";
 import styles from "./profile.module.css";
 import ProviderButton from "./button";

@@ -1,10 +1,9 @@
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import Header from "../header";
 import Profile from "./profile";
-import getUserId from "../../../../lib/getUserId";
-import FooterLinks from "../footer_links";
+import getUserId from "@/lib/getUserId";
 
 export const metadata = {
   alternates: {

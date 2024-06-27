@@ -1,4 +1,4 @@
-import { Spinner } from "components/layout/spinner";
+import { Spinner } from "@/components/layout/spinner";
 
 import styles from "app/(stories)/(main)/layout.module.css";
 

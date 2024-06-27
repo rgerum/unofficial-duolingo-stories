@@ -1,14 +1,14 @@
 "use client";
 import styles from "../index.module.css";
-import { useInput } from "lib/hooks";
-import { Spinner } from "components/layout/spinner";
-import Flag from "components/layout/flag";
-import { fetch_post } from "lib/fetch_post";
+import { useInput } from "@/lib/hooks";
+import { Spinner } from "@/components/layout/spinner";
+import Flag from "@/components/layout/flag";
+import { fetch_post } from "@/lib/fetch_post";
 import styled from "styled-components";
-import Input from "../../../components/layout/Input";
+import Input from "@/components/layout/Input";
 import React, { useState } from "react";
 import * as EditDialog from "../edit_dialog";
-import Button from "../../../components/layout/button";
+import Button from "@/components/layout/button";
 
 export async function setLanguage(data) {
   let res = await fetch_post(`/admin/languages/set`, data);
@@ -143,43 +143,6 @@ const Error = styled.div`
   padding: 10px;
   background: var(--error-red);
 `;
-
-function AttributeList(props) {
-  const [edit, setEdit] = useInput(false);
-
-  const data = { ...props.obj };
-
-  function onChange(key, value) {
-    data[key] = value === "" ? undefined : value;
-  }
-  async function save() {
-    await setLanguage(data);
-    setEdit(false);
-  }
-
-  return (
-    <tr onClick={() => setEdit(true)}>
-      <td>
-        <Flag
-          iso={props.obj.short}
-          width={40}
-          flag={props.obj.flag}
-          flag_file={props.obj.flag_file}
-        />
-      </td>
-      {props.attributes.map((attr, i) => (
-        <ChangeAbleValue
-          key={i}
-          obj={props.obj}
-          name={attr}
-          edit={edit}
-          callback={onChange}
-        />
-      ))}
-      <td>{edit ? <span onClick={save}>[save]</span> : ""}</td>
-    </tr>
-  );
-}
 
 function TableRow({ lang, updateLanguage }) {
   const refRow = React.useRef();

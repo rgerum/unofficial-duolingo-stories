@@ -8,7 +8,7 @@ import {
 import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import SwiperSideBar from "./swipe";
 import LayoutFlag from "./layout_flag";
-import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
+import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
 
 export default async function Layout({ children }) {
   const session = await getServerSession(authOptions);

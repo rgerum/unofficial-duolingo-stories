@@ -1,12 +1,12 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { sql } from "lib/db";
-import getUserId from "lib/getUserId";
-import { get_localisation_dict } from "lib/get_localisation";
+import { sql } from "@/lib/db";
+import getUserId from "@/lib/getUserId";
+import { get_localisation_dict } from "@/lib/get_localisation";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
 import { revalidateTag } from "next/cache";
-import LocalisationProvider from "../../../../components/LocalisationProvider";
+import LocalisationProvider from "@/components/LocalisationProvider";
 
 async function get_story_meta(course_id) {
   const course_query = await sql`SELECT
@@ -23,12 +23,10 @@ async function get_story_meta(course_id) {
   return Object.assign({}, course_query[0]);
 }
 
-export async function generateMetadata({ params, searchParams }, parent) {
+export async function generateMetadata({ params }) {
   const story = await get_story_meta(params.story_id);
 
   if (!story) notFound();
-
-  const meta = await parent;
 
   return {
     title: `Duostories ${story.learning_language_long} from ${story.from_language_long}: ${story.from_language_name}`,

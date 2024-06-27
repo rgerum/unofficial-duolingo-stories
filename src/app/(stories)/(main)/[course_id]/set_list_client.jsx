@@ -1,9 +1,9 @@
 "use server";
 import styles from "./set_list.module.css";
 import StoryButton from "./story_button";
-import getUserId from "lib/getUserId";
-import { sql, cache } from "lib/db";
-import get_localisation from "lib/get_localisation";
+import getUserId from "@/lib/getUserId";
+import { sql, cache } from "@/lib/db";
+import get_localisation from "@/lib/get_localisation";
 
 function About({ about }) {
   if (!about) return <></>;

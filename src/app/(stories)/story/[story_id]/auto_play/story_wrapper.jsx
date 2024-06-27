@@ -1,10 +1,10 @@
 "use client";
 import React from "react";
 
-import Story from "components/story/story";
+import Story from "@/components/story/story";
 import { useRouter } from "next/navigation";
-import styles from "components/story/story.module.css";
-import get_localisation_func from "../../../../../lib/get_localisation_func";
+import styles from "@/components/story/story.module.css";
+import get_localisation_func from "@/lib/get_localisation_func";
 
 export default function StoryWrapper({ story, localization }) {
   const router = useRouter();

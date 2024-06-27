@@ -1,4 +1,4 @@
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 

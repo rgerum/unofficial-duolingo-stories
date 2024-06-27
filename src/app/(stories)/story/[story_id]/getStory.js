@@ -1,4 +1,4 @@
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 
 export async function get_story(story_id) {
   let res =

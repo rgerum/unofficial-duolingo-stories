@@ -1,17 +1,17 @@
 import Link from "next/link";
 import React from "react";
 import { getServerSession } from "next-auth/next";
-import { sql, cache } from "lib/db";
+import { sql, cache } from "@/lib/db";
 import styles from "./layout.module.css";
 import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import CourseDropdown from "./course-dropdown";
-import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
-import { get_flag_data } from "../../../components/layout/flag_by_id";
+import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
+import { get_flag_data } from "@/components/layout/flag_by_id";
 import { get_course_data } from "./get_course_data";
-import getUserId from "../../../lib/getUserId";
+import getUserId from "@/lib/getUserId";
 import styles0 from "./layout.module.css";
 import FooterLinks from "./footer_links";
-import Legal from "../../../components/layout/legal";
+import Legal from "@/components/layout/legal";
 import Image from "next/image";
 
 export const metadata = {
