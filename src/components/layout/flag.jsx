@@ -62,7 +62,8 @@ export default function Flag(props) {
     if (order[i] === (props.iso || "world")) flag = i;
   }
   if (flag === 0 && !props.flag_file && props.iso !== "en") {
-    flag = 37; // "world"
+    // Check if there's a valid flag index, fall back to "world" flag if not
+    flag = (props.flag > 0 && props.flag < 48) ? props.flag : 37; // "world"
   }
 
   let style = {
