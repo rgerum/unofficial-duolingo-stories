@@ -1,9 +1,9 @@
 import React from "react";
 import styles from "./[language].module.css";
 
-import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
+import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 import TextEdit from "./text_edit";
 
 export default function LocalizationEditor({
@@ -86,6 +86,12 @@ WHERE l.language_id = 1;`;
   return (
     <div>
       <h1>Localizations {language_name}</h1>
+      <p>
+        If your course does not have English as a base language, you can adjust
+        the texts of the Duostories interface to match the base language of your
+        course. If multiple courses share the same base language, these texts
+        only need to be translated once.
+      </p>
       <table className={styles.table}>
         <thead>
           <tr>

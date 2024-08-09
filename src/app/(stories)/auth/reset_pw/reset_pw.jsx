@@ -2,8 +2,10 @@
 import React from "react";
 import styles from "../register.module.css";
 import Link from "next/link";
-import { useInput } from "lib/hooks";
+import { useInput } from "@/lib/hooks";
 import sendPasswordAction from "./sendPasswordAction";
+import Button from "@/components/layout/button";
+import Input from "@/components/layout/Input";
 
 export async function fetch_post(url, data) {
   // check if the user is logged in
@@ -43,11 +45,11 @@ export async function reset_pw(data) {
 }
 
 export default function ResetPassword() {
-  let [state, setState] = React.useState(0);
-  let [error, setError] = React.useState("");
-  let [message, setMessage] = React.useState("");
+  const [state, setState] = React.useState(0);
+  const [error, setError] = React.useState("");
+  const [message, setMessage] = React.useState("");
 
-  let [emailInput, emailInputSetValue] = useInput("");
+  const [emailInput, emailInputSetValue] = useInput("");
 
   async function register_button() {
     const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -80,35 +82,31 @@ export default function ResetPassword() {
 
   return (
     <>
-      <h2>Reset Password</h2>
-      <p>You forgot your password? We can send you a link to reset it.</p>
-      {state === -1 ? <span className={styles.error}>{error}</span> : <></>}
+      <h1 className={styles.H1}>Reset Password</h1>
+      <p className={styles.P}>
+        You forgot your password? We can send you a link to reset it.
+      </p>
+      {state === -1 && <span className={styles.error}>{error}</span>}
       {state === 2 ? (
         <span className={styles.message} data-cy="message-confirm">
           {message}
         </span>
       ) : (
-        <form action={register_button}>
-          <input
+        <form action={register_button} className={styles.Form}>
+          <Input
             data-cy="email"
             value={emailInput}
             onChange={emailInputSetValue}
-            onKeyDown={handleKeypressSignup}
             type="email"
             name="email"
             placeholder="Email"
           />
-          <button
-            data-cy="submit"
-            type="submit"
-            className={styles.button}
-            //onClick={register_button}
-          >
+          <Button primary={true} data-cy="submit" type="submit" variant="blue">
             {state !== 1 ? "Send Link" : "..."}
-          </button>
+          </Button>
         </form>
       )}
-      <p>
+      <p className={styles.P}>
         Already have an account?{" "}
         <Link className={styles.link} href="/api/auth/signin">
           LOG IN

@@ -9,19 +9,27 @@
 }
 
 .header_index {
-  width: 100%;
-  height: 60px;
+  grid-area: header;
+  /*width: 100%;*/
+  /*height: 60px;*/
   border-bottom: 2px solid var(--header-border);
-  background: var(--body-background);
-  z-index: 1;
-  box-sizing: border-box;
+/*  background: var(--body-background);*/
+  /*z-index: 1;
+  box-sizing: border-box;*/
   display: flex;
   flex-direction: row;
   align-items: center;
-  position: fixed;
+/*  position: fixed; */
   padding: 0 20px;
-  top: 0;
+/*  top: 0; */
 }
+
+.main_overview {
+  grid-area: main;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
 @media (max-width: 1040px) {
   .header_index {
     padding: 0 20px;
@@ -33,9 +41,6 @@
   .AvatarEditorHeaderFlagname {
     display: none;
   }
-}
-.main_index {
-  margin-top: 58px;
 }
 
 .flag_sub {

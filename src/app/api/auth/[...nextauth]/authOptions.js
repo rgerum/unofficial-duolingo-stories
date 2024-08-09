@@ -5,15 +5,15 @@ import DiscordProvider from "next-auth/providers/discord";
 import EmailProvider from "next-auth/providers/email";
 
 import CredentialsProvider from "next-auth/providers/credentials";
-import { sql } from "lib/db";
-import { phpbb_check_hash } from "lib/auth/hash_functions2";
-//import MyAdapter from "lib/database_adapter";
+import { sql } from "@/lib/db";
+import { phpbb_check_hash } from "@/lib/auth/hash_functions2";
+//import MyAdapter from "@/lib/database_adapter";
 
 import PostgresAdapter from "@auth/pg-adapter";
 import { Pool } from "pg";
 
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
+  connectionString: process.env.POSTGRES_URL2,
   ssl: true,
   max: 20,
   idleTimeoutMillis: 30000,

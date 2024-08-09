@@ -1,0 +1,27 @@
+.story_title_page {
+    height: 100vh;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    pointer-events: none;
+}
+
+.story_title_page div {
+    text-align: center;
+    width: 100%;
+}
+
+.story_title_page_title {
+    font-weight: 700;
+    color: #4b4b4b;
+    font-size: 25px;
+    margin-bottom: 36px;
+    margin-top: 18px;
+}
+.story_title_page_button {
+    pointer-events: auto;
+}

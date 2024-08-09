@@ -1,20 +1,27 @@
 .button:hover {
   filter: brightness(1.1);
 }
+.button:focus {
+  outline-offset: 2px;
+}
 .button {
   text-transform: uppercase;
-  padding: 13px 30px;
-  float: right;
-  display: inline-block;
+  padding: 10px 30px;
   background: var(--button-background);
   color: var(--button-color);
   border-radius: 15px;
   font-weight: 700;
   border: 0;
-  font-size: 16px;
+  font-size: 1rem;
   transition:
     0.1s box-shadow,
     0.1s transform;
   border-color: var(--button-border);
   border-bottom: 4px solid var(--button-border);
+}
+
+.button.blue {
+  background-color: var(--button-blue-background);
+  color: var(--button-blue-color);
+  border-color: var(--button-blue-border);
 }

@@ -1,8 +1,8 @@
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 import LanguageList from "./language_list";
 
 async function language_list() {
-  return await sql`SELECT * FROM language;`;
+  return await sql`SELECT * FROM language ORDER BY id;`;
 }
 
 export default async function Page({}) {
@@ -10,7 +10,7 @@ export default async function Page({}) {
 
   return (
     <>
-      <LanguageList users={languages} />
+      <LanguageList all_languages={languages} />
     </>
   );
 }

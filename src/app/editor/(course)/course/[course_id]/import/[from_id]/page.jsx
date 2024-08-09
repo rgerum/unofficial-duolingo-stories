@@ -7,7 +7,7 @@ import {
 import ImportList from "./import_list";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { DoubleFlag } from "../../../../../../../components/layout/flag";
+import { DoubleFlag } from "@/components/layout/flag";
 import React from "react";
 import styles from "./import_list.module.css";
 
@@ -65,8 +65,8 @@ export default async function Page({ params }) {
             key={i}
             href={`/editor/course/${course.short}/import/${c.short}`}
           >
-            <span>
-              <span>
+            <span className={styles.import_lang}>
+              <span className={styles.double_flag}>
                 <DoubleFlag
                   width={40}
                   lang1={languages[c.learning_language]}

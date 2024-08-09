@@ -1,22 +1,35 @@
 .admin_table th {
   position: sticky;
   top: 60px;
-  padding-top: 5px;
-  padding-bottom: 5px;
   text-align: left;
   background-color: var(--button-background);
   color: var(--button-color);
+  padding: 5px 10px;
 }
 .admin_table {
   border-collapse: collapse;
 }
 
+.admin_table td:first-child {
+  padding-left: 16px;
+}
+.admin_table td:last-child {
+  padding-right: 16px;
+}
+
 .admin_table tr:nth-child(2n) {
   background-color: var(--body-background-faint);
+}
+.admin_table tr:nth-child(2n+1) {
+  background-color: var(--body-background);
 }
 
 .admin_table td input {
   width: 95%;
+}
+
+.admin_table tbody tr:hover {
+  filter: brightness(0.9);
 }
 
 .dropdown:hover .dropdownContent {

@@ -2,7 +2,7 @@
 fromLanguageName=A Very Big Family
 icon=9a2dcd1a9eaff04d1e9b4338e9afcead94c365bf
 set=2|3
-approvals=1,2
+approvals=11,12
 
 speaker_Moeder=Lotte
 speaker_Melissa=Lotte

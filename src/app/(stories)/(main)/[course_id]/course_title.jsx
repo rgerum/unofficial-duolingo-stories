@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "../header";
 import styles from "./story_button.module.css";
-import get_localisation from "lib/get_localisation";
+import get_localisation from "@/lib/get_localisation";
 import { get_course } from "../get_course_data";
 
 export default async function CourseTitle({ course_id }) {

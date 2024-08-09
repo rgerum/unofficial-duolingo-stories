@@ -1,4 +1,4 @@
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 import { getToken } from "next-auth/jwt";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
@@ -32,24 +32,27 @@ async function set_course(data) {
       d[0].toLowerCase(),
     );
   }
-  data["public"] =
-    data["public"] == 1 || data["public"] === "true" ? "true" : "false";
-  data["short"] = (
-    await sql`SELECT CONCAT(l2.short, '-', l.short) as short
-FROM language l, language l2
-WHERE l.id = ${data["from_language"]}
-      AND l2.id = ${data["learning_language"]};`
-  )[0].short;
-
+  //data["public"] = data["public"] == 1 || data["public"] === "true";
+  const from_language = (
+    await sql`SELECT name, short FROM language WHERE id = ${data["from_language"]};`
+  )[0];
+  const learning_language = (
+    await sql`SELECT name, short FROM language WHERE id = ${data["learning_language"]};`
+  )[0];
+  data["short"] = `${learning_language.short}-${from_language.short}`;
+  data["from_language_name"] = from_language.name;
+  data["learning_language_name"] = learning_language.name;
   if (data.id === undefined) {
     id = (await sql`INSERT INTO course ${sql(data)} RETURNING id`)[0].id;
   } else {
     await sql`UPDATE course SET ${sql(data, [
       "learning_language",
+      "learning_language_name",
       "from_language",
+      "from_language_name",
       "public",
       "name",
-      "official",
+      //"official",
       "conlang",
       "tags",
       "short",
@@ -57,6 +60,7 @@ WHERE l.id = ${data["from_language"]}
     ])} WHERE id = ${data.id}`;
     id = data["id"];
   }
+  let data_new = await sql`SELECT * FROM course WHERE id = ${id}`;
 
   // revalidate the page
   let response_course_id =
@@ -67,5 +71,5 @@ WHERE l.id = ${data["from_language"]}
   } catch (e) {
     console.log("revalidate error", e);
   }
-  return data;
+  return data_new[0];
 }

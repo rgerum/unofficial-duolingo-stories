@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 
 export async function GET(req, { params }) {
   try {

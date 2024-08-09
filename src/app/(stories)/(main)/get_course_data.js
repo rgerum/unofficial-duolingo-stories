@@ -1,9 +1,9 @@
-import { sql, cache } from "../../../lib/db";
+import { sql, cache } from "@/lib/db";
 
 export const get_course_data = cache(
   async () => {
     return sql`
-SELECT id, short, COALESCE(NULLIF(name, ''), learning_language_name) AS name, count,
+SELECT id, short, COALESCE(NULLIF(name, ''), learning_language_name) AS name, count, about,
 from_language, from_language_name,
 learning_language, learning_language_name
 FROM
@@ -15,7 +15,7 @@ ORDER BY
 `;
   },
   ["get_course_data"],
-  { tags: ["course_data"] },
+  { tags: ["course_data"], revalidate: 3600 },
 );
 
 export async function get_counts() {

@@ -9,12 +9,20 @@ export default async function SetList({ course_id }) {
     return (
       <div className={styles.story_list}>
         {[...Array(2)].map((d, i) => (
-          <div key={i} className={styles.set_list}>
-            <div className={styles.set_title}>Set {i + 1}</div>
+          <ol
+            key={i}
+            className={styles.set_content}
+            aria-label={`Set ${i + 1}`}
+          >
+            <div className={styles.set_title} tabIndex="-1" aria-hidden={true}>
+              Set {i + 1}
+            </div>
             {[...Array(4)].map((d, i) => (
-              <StoryButton key={i} />
+              <li key={i}>
+                <StoryButton />
+              </li>
             ))}
-          </div>
+          </ol>
         ))}
       </div>
     );
@@ -24,5 +32,11 @@ export default async function SetList({ course_id }) {
   const course = await get_course_sets(course_id);
   if (!course) return <div>not found</div>;
 
-  return <SetListClient course_id={course_data.id} course={course} />;
+  return (
+    <SetListClient
+      course_id={course_data.id}
+      course={course}
+      about={course_data.about}
+    />
+  );
 }

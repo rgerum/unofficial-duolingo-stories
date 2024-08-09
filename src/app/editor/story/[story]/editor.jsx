@@ -5,18 +5,23 @@ import React from "react";
 
 import { basicSetup, EditorView } from "codemirror";
 import { EditorSelection, EditorState } from "@codemirror/state";
-import { example, highlightStyle } from "components/editor/story/parser.mjs";
-import useScrollLinking from "components/editor/story/scroll_linking";
-import useResizeEditor from "components/editor/story/editor-resize";
+import { example, highlightStyle } from "@/components/editor/story/parser.mjs";
+import useScrollLinking from "@/components/editor/story/scroll_linking";
+import useResizeEditor from "@/components/editor/story/editor-resize";
 //import {SoundRecorder} from "./sound-recorder";
-import Story, { EditorContext } from "components/story/story";
-import Cast from "components/editor/story/cast";
+import Story, { EditorContext } from "@/components/story/story";
+import Cast from "@/components/editor/story/cast";
 
-import { processStoryFile } from "components/editor/story/syntax_parser_new";
+import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 
 import { useRouter } from "next/navigation";
 import { StoryEditorHeader } from "./header";
-import { fetch_post } from "lib/fetch_post";
+import { fetch_post } from "@/lib/fetch_post";
+import SoundRecorder from "./sound-recorder";
+import {
+  insert_audio_line,
+  timings_to_text,
+} from "@/components/story/text_lines/audio_edit_tools.mjs";
 
 let images_cached = {};
 export async function getImage(id) {
@@ -63,6 +68,15 @@ export async function deleteStory(data) {
   return res;
 }
 
+function getMax(list, callback) {
+  let max = -Infinity;
+  for (let obj of list) {
+    const v = callback(obj);
+    if (v > max) max = v;
+  }
+  return max;
+}
+
 export default function Editor({ story_data, avatar_names, session }) {
   const editor = React.useRef();
   const preview = React.useRef();
@@ -94,7 +108,34 @@ export default function Editor({ story_data, avatar_names, session }) {
   const [func_save, set_func_save] = React.useState(() => () => {});
   const [func_delete, set_func_delete] = React.useState(() => () => {});
 
+  const [audio_editor_data, setAudioEditorData] = React.useState({});
+
   const [unsaved_changes, set_unsaved_changes] = React.useState(false);
+
+  function soundRecorderNext() {
+    const index = audio_editor_data.trackingProperties.line_index || 0;
+    for (let element of story_state.elements) {
+      if (
+        element.type === "LINE" &&
+        element.trackingProperties.line_index > index
+      ) {
+        setAudioEditorData(element);
+        break;
+      }
+    }
+  }
+  function soundRecorderPrevious() {
+    const index = audio_editor_data.trackingProperties.line_index || 0;
+    for (let element of [...story_state.elements].reverse()) {
+      if (
+        (element.type === "LINE" || element.type === "HEADER") &&
+        (element.trackingProperties.line_index || 0) < index
+      ) {
+        setAudioEditorData(element);
+        break;
+      }
+    }
+  }
 
   const navigate = useRouter().push;
 
@@ -111,6 +152,17 @@ export default function Editor({ story_data, avatar_names, session }) {
     },
     [unsaved_changes],
   );
+
+  const onAudioSave = (filename, text) => {
+    text = "$" + filename + text;
+
+    insert_audio_line(
+      text,
+      audio_editor_data.audio.ssml,
+      editor_state.view,
+      editor_state.audio_insert_lines,
+    );
+  };
 
   React.useEffect(() => {
     if (!unsaved_changes) return;
@@ -228,6 +280,7 @@ export default function Editor({ story_data, avatar_names, session }) {
         },
         audio_insert_lines: audio_insert_lines,
         show_trans: show_trans,
+        show_audio_editor: setAudioEditorData,
       };
       stateX = v.state;
       if (v.docChanged) {
@@ -250,8 +303,17 @@ export default function Editor({ story_data, avatar_names, session }) {
     const view = new EditorView({ state, parent: editor.current });
     set_view(view);
 
+    async function key_pressed(e) {
+      if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        await Save();
+      }
+    }
+    document.addEventListener("keydown", key_pressed);
+
     return () => {
       view.destroy();
+      document.removeEventListener("keydown", key_pressed);
     };
   }, [story_data, avatar_names, language_data, language_data2]);
 
@@ -262,7 +324,7 @@ export default function Editor({ story_data, avatar_names, session }) {
   editor_state2.show_ssml = show_ssml;
   return (
     <>
-      <div id="body">
+      <div id="body" className={styles.body}>
         <StoryEditorHeader
           story_data={story_data}
           unsaved_changes={unsaved_changes}
@@ -276,6 +338,35 @@ export default function Editor({ story_data, avatar_names, session }) {
           language_data2={language_data2}
           session={session}
         />
+        {(audio_editor_data?.line?.content ||
+          audio_editor_data?.learningLanguageTitleContent) && (
+          <SoundRecorder
+            key={audio_editor_data.trackingProperties.line_index}
+            content={
+              audio_editor_data?.line?.content ||
+              audio_editor_data?.learningLanguageTitleContent
+            }
+            initialTimingText={timings_to_text({
+              keypoints: audio_editor_data.audio.keypoints,
+            })}
+            url={
+              "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/" +
+              audio_editor_data.audio.url
+            }
+            story_id={story_data.id}
+            onClose={() => setAudioEditorData(null)}
+            onSave={onAudioSave}
+            soundRecorderNext={soundRecorderNext}
+            soundRecorderPrevious={soundRecorderPrevious}
+            total_index={getMax(
+              story_state.elements,
+              (elem) => elem.trackingProperties.line_index || 0,
+            )}
+            current_index={
+              audio_editor_data?.trackingProperties?.line_index || 0
+            }
+          />
+        )}
         <div className={styles.root}>
           <svg className={styles.margin} ref={svg_parent}>
             <path d=""></path>

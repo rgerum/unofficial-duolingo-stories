@@ -13,12 +13,10 @@
   height: 60px;
   border-bottom: 2px solid var(--header-border);
   background: var(--body-background);
-  z-index: 1;
-  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   align-items: center;
-  position: fixed;
+  position: sticky;
   padding: 0 20px;
   top: 0;
 }
@@ -28,7 +26,6 @@
   }
 }
 .main_index {
-  margin-top: 60px;
 }
 
 .flag_sub {

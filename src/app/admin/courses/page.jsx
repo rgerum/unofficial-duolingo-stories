@@ -1,4 +1,4 @@
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 import { CourseList } from "./courses";
 
 async function course_list() {
@@ -13,7 +13,7 @@ async function course_list() {
     course.conlang,
     course.short,
     course.tags
-FROM course;
+FROM course ORDER BY course.id;
 `;
 }
 
@@ -25,9 +25,5 @@ export default async function Page({}) {
   let courses = await course_list();
   let languages = await language_list();
 
-  return (
-    <>
-      <CourseList users={courses} languages={languages} />
-    </>
-  );
+  return <CourseList all_courses={courses} languages={languages} />;
 }

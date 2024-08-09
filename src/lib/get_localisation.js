@@ -1,4 +1,4 @@
-import get_localisation_func from "lib/get_localisation_func";
+import get_localisation_func from "@/lib/get_localisation_func";
 import { sql, cache } from "./db";
 
 export const get_localisation_dict_all = cache(

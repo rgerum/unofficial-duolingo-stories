@@ -1,8 +1,8 @@
 "use client";
 import styles from "./course-dropdown.module.css";
 import Link from "next/link";
-import Flag from "components/layout/flag";
-import Dropdown from "components/layout/dropdown";
+import Flag from "@/components/layout/flag";
+import Dropdown from "@/components/layout/dropdown";
 import { useSelectedLayoutSegment } from "next/navigation";
 
 function LanguageButtonSmall({ course, flag_data }) {
@@ -50,6 +50,7 @@ export default function CourseDropdown({
         width={40}
         iso={flag_data[course?.learning_language]?.iso}
         flag_file={flag_data[course?.learning_language]?.flag_file}
+        className={styles.trigger}
       />
       <nav className={styles.header_lang_selector}>
         {course_data_active.map((id) => (

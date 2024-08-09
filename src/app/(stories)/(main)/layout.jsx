@@ -1,14 +1,18 @@
 import Link from "next/link";
 import React from "react";
 import { getServerSession } from "next-auth/next";
-import { sql, cache } from "lib/db";
+import { sql, cache } from "@/lib/db";
 import styles from "./layout.module.css";
 import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import CourseDropdown from "./course-dropdown";
-import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
-import { get_flag_data } from "../../../components/layout/flag_by_id";
+import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
+import { get_flag_data } from "@/components/layout/flag_by_id";
 import { get_course_data } from "./get_course_data";
-import getUserId from "../../../lib/getUserId";
+import getUserId from "@/lib/getUserId";
+import styles0 from "./layout.module.css";
+import FooterLinks from "./footer_links";
+import Legal from "@/components/layout/legal";
+import Image from "next/image";
 
 export const metadata = {
   title:
@@ -26,6 +30,13 @@ export const metadata = {
     "community",
     "volunteers",
   ],
+  openGraph: {
+    title: "Duostories",
+    description:
+      "Supplement your Duolingo course with community-translated Duolingo stories.",
+    type: "website",
+    url: `https://duostories.org`,
+  },
 };
 
 const get_courses_user = cache(
@@ -56,29 +67,42 @@ export default async function Layout({ children }) {
 
   return (
     <>
-      <nav className={styles.header_index}>
-        <Link href={"/"} className={styles.duostories_title} data-cy={"logo"}>
-          <img src={"/Duostories.svg"} alt={"Duostories"} height="25px" />
-        </Link>
-        <div style={{ marginLeft: "auto" }}></div>
+      <div className={styles.all_wrapper}>
+        <div className={styles.header_wrapper}>
+          <nav className={styles.header_index}>
+            <Link
+              href={"/"}
+              className={styles.duostories_title}
+              data-cy={"logo"}
+            >
+              <Image
+                src={"/Duostories.svg"}
+                alt={"Duostories"}
+                height={25}
+                width={150.1}
+              />
+            </Link>
+            <div style={{ marginLeft: "auto" }}></div>
 
-        <CourseDropdown
-          course_data_active={active_courses}
-          course_data={course_data}
-          flag_data={flag_data}
-        />
-        {session?.user ? (
-          <LoggedInButton
-            page={"stories"}
-            course_id={"segment"}
-            session={session}
-          />
-        ) : (
-          <LogInButton />
-        )}
-      </nav>
-      <div className={styles.main_body}>
-        <div className={styles.main_index}>{children}</div>
+            <CourseDropdown
+              course_data_active={active_courses}
+              course_data={course_data}
+              flag_data={flag_data}
+            />
+            {session?.user ? (
+              <LoggedInButton
+                page={"stories"}
+                course_id={"segment"}
+                session={session}
+              />
+            ) : (
+              <LogInButton />
+            )}
+          </nav>
+        </div>
+        <main className={styles0.main_index}>{children}</main>
+        <FooterLinks />
+        <Legal language_name={undefined} />
       </div>
     </>
   );

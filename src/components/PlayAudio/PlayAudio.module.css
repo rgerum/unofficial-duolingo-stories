@@ -1,0 +1,14 @@
+.loudspeaker {
+    position: relative;
+    top: 6px;
+    margin-right: 8px;
+    cursor: pointer;
+    width: 28px;
+    height: 23px;
+}
+
+div[data-rtl=true] .loudspeaker {
+    transform: scale(-1, 1);
+    margin-right: 0;
+    margin-left: 8px;
+}

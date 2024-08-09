@@ -1,5 +1,6 @@
 import styles from "./story_button.module.css";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function StoryButton({ story, done }) {
   if (!story) {
@@ -31,7 +32,12 @@ export default function StoryButton({ story, done }) {
         data-done={done}
         style={done ? {} : { background: "#" + story.active_lip }}
       >
-        <img src={done ? story.gilded : story.active} alt="" />
+        <Image
+          src={done ? story.gilded : story.active}
+          alt=""
+          width={135}
+          height={124}
+        />
       </div>
       <div className={styles.button_story_text}>{story.name}</div>
     </Link>

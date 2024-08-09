@@ -13,7 +13,7 @@ export const metadata = {
 
 export default async function Page() {
   return (
-    <div style={{ padding: "0 15px" }}>
+    <div>
       <h1>Frequently Asked Questions</h1>
       <h2>Can I support this project financially?</h2>
       <p>
@@ -207,7 +207,6 @@ export default async function Page() {
         contributors! Meet them on{" "}
         <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.
       </p>
-      <FooterLinks />
     </div>
   );
 }

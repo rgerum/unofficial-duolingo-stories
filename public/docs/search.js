@@ -86,6 +86,7 @@ function display_search(do_show) {
 }
 
 function toggle(value) {
+  return;
   if (value === undefined) {
     if (document.getElementById("container").getAttribute("show") == "true") {
       value = "false";

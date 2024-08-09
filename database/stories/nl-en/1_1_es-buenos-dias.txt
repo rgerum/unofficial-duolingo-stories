@@ -2,7 +2,7 @@
 fromLanguageName=Good morning
 icon=783305780a6dad8e0e4eb34109d948e6a5fc2c35
 set=1|1
-approvals=1,2
+approvals=11,12
 public=1
 
 icon_Jan=https://stories-cdn.duolingo.com/image/f118359885a5dc9babe4808c746e1c15ea9cd6f4.svg

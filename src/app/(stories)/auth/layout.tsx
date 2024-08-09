@@ -24,7 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className={styles.login_dialog}>
       <Link href="/" className={styles.quit}></Link>
-      <div>{children}</div>
+      <div className={styles.login_dialog_wrapper}>{children}</div>
     </div>
   );
 }

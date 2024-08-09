@@ -1,6 +1,6 @@
 import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import { getServerSession } from "next-auth/next";
-import { sql, cache } from "lib/db";
+import { sql, cache } from "@/lib/db";
 
 export const get_user_id_by_name = cache(
   async (user_name) => {

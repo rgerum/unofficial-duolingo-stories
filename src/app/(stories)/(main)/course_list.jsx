@@ -1,13 +1,11 @@
 import React, { Suspense } from "react";
-import get_localisation from "lib/get_localisation";
+import get_localisation from "@/lib/get_localisation";
 import LanguageButton from "./language_button";
 
 import styles from "./course_list.module.css";
-import Legal from "../../../components/layout/legal";
 import { get_course_groups, get_courses_in_group } from "./get_course_data";
-import FooterLinks from "./footer_links";
 
-async function LanguageGroup({ name, tag, id }) {
+async function LanguageGroup({ name, id }) {
   let courses_list = await get_courses_in_group(id);
 
   let localisation = await get_localisation(id);
@@ -20,14 +18,18 @@ async function LanguageGroup({ name, tag, id }) {
       <div className={styles.course_group_name}>
         {localisation("stories_for")}
       </div>
-      {courses_list?.map((course) => (
-        <LanguageButton key={course.id} course_id={course.short} />
-      ))}
+      <ol className={styles.course_list_ol}>
+        {courses_list?.map((course) => (
+          <li key={course.id}>
+            <LanguageButton course_id={course.short} />
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
 
-async function CourseListInner({ loading, tag }) {
+export async function CourseListInner({ loading }) {
   if (loading) {
     return (
       <div className={styles.course_list}>
@@ -35,9 +37,13 @@ async function CourseListInner({ loading, tag }) {
         <div className={styles.course_group_name}>
           <span className={styles.loading}>Stories for English Speakers</span>
         </div>
-        {[...Array(10)].map((d, i) => (
-          <LanguageButton key={i} loading={true} />
-        ))}
+        <ol className={styles.course_list_ol}>
+          {[...Array(10)].map((d, i) => (
+            <li key={i}>
+              <LanguageButton loading={true} />
+            </li>
+          ))}
+        </ol>
       </div>
     );
   }
@@ -49,7 +55,6 @@ async function CourseListInner({ loading, tag }) {
           key={group.from_language}
           name={group.from_language_name}
           id={group.from_language}
-          tag={tag}
         />
       ))}
     </>
@@ -59,11 +64,7 @@ async function CourseListInner({ loading, tag }) {
 export default async function CourseList({ tag }) {
   return (
     <Suspense fallback={<CourseListInner loading={true} />}>
-      <div>
-        <CourseListInner tag={tag} />
-      </div>
-      <FooterLinks />
-      <Legal language_name={undefined} />
+      <CourseListInner tag={tag} />
     </Suspense>
   );
 }

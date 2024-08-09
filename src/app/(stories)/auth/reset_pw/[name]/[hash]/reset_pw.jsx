@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import styles from "../../../register.module.css";
-import { useInput } from "lib/hooks";
+import { useInput } from "@/lib/hooks";
 import Link from "next/link";
 
 export default function ResetPassword({ callchangePasswordAction }) {

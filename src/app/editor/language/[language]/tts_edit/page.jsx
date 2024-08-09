@@ -1,14 +1,14 @@
 import React from "react";
 import { cache } from "react";
-import { sql } from "lib/db";
+import { sql } from "@/lib/db";
 import { getServerSession } from "next-auth/next";
 
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { notFound } from "next/navigation";
 import Tts_edit from "./tts_edit";
 
 const get_avatar_names = cache(async (id) => {
-  return await sql`
+  return sql`
 SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker
 FROM (SELECT id, name, speaker, language_id, avatar_id FROM avatar_mapping WHERE language_id = ${id}) as avatar_mapping
 RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id

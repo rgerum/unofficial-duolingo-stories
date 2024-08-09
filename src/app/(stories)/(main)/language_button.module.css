@@ -4,10 +4,8 @@
   border: solid var(--overview-hr);
   border-width: 2px 2px 4px;
   background: var(--body-background);
-  box-sizing: content-box;
   cursor: pointer;
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
   height: 210px;
   justify-content: center;
@@ -16,57 +14,17 @@
   position: relative;
   text-align: center;
   text-transform: none;
-
   text-decoration: none;
 }
 
-@media (min-width: 699px) {
-  .language_select_button {
-    margin-left: 12px;
-    margin-right: 12px;
-    margin-top: 24px;
-    max-width: 210px;
-    min-width: 210px;
-  }
-}
 .language_select_button:hover {
   filter: brightness(0.9);
-}
-
-@media (max-width: 744px) {
-  .language_select_button {
-    margin-left: 6px;
-    margin-right: 6px;
-    margin-top: 12px;
-    max-width: calc(100vw / 3 - 27px);
-    min-width: calc(100vw / 3 - 27px);
-  }
-}
-
-@media (max-width: 466px) {
-  .language_select_button {
-    margin-left: 6px;
-    margin-right: 6px;
-    margin-top: 12px;
-    max-width: calc(100vw / 2 - 32px);
-    min-width: calc(100vw / 2 - 32px);
-  }
-}
-
-@media (max-width: 300px) {
-  .language_select_button {
-    margin-left: 6px;
-    margin-right: 6px;
-    margin-top: 12px;
-    max-width: 210px;
-    min-width: 210px;
-  }
 }
 
 .language_select_button_text {
   color: var(--text-color-dim);
   display: block;
-  font-size: 19px;
+  font-size: calc(19 / 16 * 1rem);
   font-weight: 700;
   margin-top: 10px;
 }
@@ -74,7 +32,7 @@
 .language_story_count {
   color: var(--text-color-dim);
   opacity: 0.5;
-  font-size: 15px;
+  font-size: calc(15 / 16 * 1rem);
 }
 
 .language_select_button.conlang-link {
@@ -96,7 +54,7 @@
   position: absolute;
   right: 0;
   color: #cbcbcb;
-  font-size: 40px;
+  font-size: calc(40 / 16 * 1rem);
 }
 
 @media screen and (max-width: 500px) {
@@ -117,13 +75,13 @@
 .celebration_date {
   color: var(--text-color-dim);
   opacity: 0.5;
-  font-size: 15px;
+  font-size: calc(15 / 16 * 1rem);
 }
 .celebration svg {
   padding-block: 0;
 }
 .celebration_icon {
-  font-size: 40px;
+  font-size: calc(40 / 16 * 1rem);
 }
 @media screen and (max-width: 538px) {
   .celebration_icon {

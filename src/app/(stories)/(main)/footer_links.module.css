@@ -1,14 +1,16 @@
 .footer {
-  margin-top: 50px;
+  margin-top: auto;
 }
 .footer_buttons {
   display: flex;
   justify-content: flex-end;
   padding: 0 10px;
+  margin-top: 50px;
 }
 .footer_links {
-  display: flex;
-  font-size: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  font-size: calc(16 / 16 * 1rem);
   margin-bottom: 50px;
   justify-content: space-around;
   border-top: 2px solid var(--overview-hr);
@@ -18,8 +20,9 @@
 .footer_links>div {
     padding: 0 10px;
 }
-.footer_links h3 {
+.footer_links figcaption {
   margin-bottom: 0;
+  font-weight: 700;
 }
 
 .footer_links li {
@@ -32,4 +35,10 @@
 .footer_links ul {
   padding-left: 0;
   margin: 0;
+}
+
+@media (pointer: coarse) {
+  .footer_links li a {
+    line-height: calc(48 / 16 * 1rem);
+  }
 }

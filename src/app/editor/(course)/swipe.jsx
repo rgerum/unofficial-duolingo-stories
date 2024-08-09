@@ -45,7 +45,7 @@ export default function SwiperSideBar({ courses, languages, children }) {
           showList={showList}
           toggleShow={toggleShow}
         />
-        <div className={styles.main_overview}>{children}</div>
+        {children}
       </div>
     </>
   );
