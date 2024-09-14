@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.4.1",
-    "@aws-sdk/client-polly": "^3.484.0",
+    "@aws-sdk/client-polly": "^3.651.1",
     "@codemirror/state": "^6.4.0",
     "@google-cloud/text-to-speech": "^5.0.1",
     "@octokit/rest": "^21.0.0",
