@@ -54,7 +54,7 @@ export async function uploadWithDiffToGithub(
   });
 }
 
-async function upload_github(
+export async function upload_github(
   id,
   course_id,
   content,
