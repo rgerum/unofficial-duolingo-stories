@@ -1,7 +1,6 @@
 import React from "react";
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import { sql } from "@/lib/db";
 import Welcome from "./welcome";
 
@@ -25,7 +24,7 @@ LIMIT 1;`;
 }
 
 export default async function Page() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (session?.user) {
     let last_course = await get_last_course(session?.user?.name);

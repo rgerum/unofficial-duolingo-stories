@@ -1,6 +1,6 @@
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
+
 import { get_course_data, get_story_list } from "../../db_get_course_editor";
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 import EditList from "../../edit_list";
 
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session) {
     return { redirect: { destination: "/editor/login", permanent: false } };

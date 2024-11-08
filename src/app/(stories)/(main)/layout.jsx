@@ -1,9 +1,8 @@
 import Link from "next/link";
 import React from "react";
-import { getServerSession } from "next-auth/next";
 import { sql, cache } from "@/lib/db";
 import styles from "./layout.module.css";
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
+import { auth } from "@/auth";
 import CourseDropdown from "./course-dropdown";
 import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
 import { get_flag_data } from "@/components/layout/flag_by_id";
@@ -62,7 +61,7 @@ export default async function Layout({ children }) {
   const flag_data = await get_flag_data();
   const course_data = await get_course_data();
 
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const active_courses = await get_courses_user(await getUserId());
 
   return (

@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
+import { auth } from "@/auth";
 
 export async function generateMetadata({}) {
   return {
@@ -11,7 +10,7 @@ export async function generateMetadata({}) {
 }
 
 export default async function Page({}) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session) {
     return { redirect: { destination: "/editor/login", permanent: false } };

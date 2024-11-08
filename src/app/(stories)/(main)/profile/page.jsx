@@ -1,6 +1,5 @@
 import { sql } from "@/lib/db";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
+import { auth } from "@/auth";
 import Header from "../header";
 import Profile from "./profile";
 import getUserId from "@/lib/getUserId";
@@ -14,7 +13,7 @@ export const metadata = {
 async function getLinkedProviders() {
   let providers_base = ["facebook", "github", "google", "discord"];
   //const token = await getToken({ req })
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return undefined;
   let user_id = await getUserId();
   const req2 =

@@ -1,8 +1,6 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
-
 import { useInput } from "@/lib/hooks";
 
 import styles from "../register.module.css";
@@ -11,6 +9,7 @@ import { GetIcon } from "@/components/icons";
 import Button from "@/components/layout/button";
 import Input from "@/components/layout/Input";
 import { error_codes } from "../error_codes";
+import signIn from "@/signin_cred";
 
 export function LoginOptions({ providers }) {
   const externalProviders = Object.values(providers).filter(

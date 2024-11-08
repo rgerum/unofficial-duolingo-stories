@@ -4,9 +4,8 @@ import React from "react";
 import LoggedInButton, {
   LogInButton,
 } from "../../components/login/loggedinbutton";
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "../api/auth/[...nextauth]/authOptions";
 
 function AdminButton({ children, href, ...delegated }) {
   return (
@@ -20,7 +19,7 @@ function AdminButton({ children, href, ...delegated }) {
 }
 
 export default async function AdminHeader() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session?.user?.admin) redirect("/auth/admin");
 

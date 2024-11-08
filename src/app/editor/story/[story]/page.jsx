@@ -1,8 +1,6 @@
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import React from "react";
-
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 import Editor from "./editor";
 
 import { sql } from "@/lib/db";
@@ -48,7 +46,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   let story_data = await get_story({ id: params.story });
 

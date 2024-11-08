@@ -1,5 +1,4 @@
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 import { sql, cache } from "@/lib/db";
 
 export const get_user_id_by_name = cache(
@@ -12,7 +11,7 @@ export const get_user_id_by_name = cache(
 );
 
 export default async function getUserId() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session?.user?.name) return undefined;
   return (await get_user_id_by_name(session?.user?.name)).id;
 }

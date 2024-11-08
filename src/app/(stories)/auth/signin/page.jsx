@@ -1,11 +1,11 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
+import { auth } from "@/auth";
+
 import React from "react";
 import { redirect } from "next/navigation";
 import { LoginOptions } from "./login_options";
 
 export default async function Page({}) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   // If the user is already logged in, redirect.
   // Note: Make sure not to redirect to the same page
