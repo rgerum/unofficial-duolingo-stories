@@ -11,7 +11,9 @@ import { Pool } from "pg";
 
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URL2,
-  ssl: true,
+  ssl: {
+    rejectUnauthorized: process.env?.POSTGRES_URL2?.indexOf("localhost") === -1,
+  },
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
@@ -35,7 +37,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async session({ session, token }) {
       console.log("session", session, token);
-      if (!token) return;
+      if (!token) return session;
       session.user.admin = token.admin;
       session.user.role = token.role;
 
