@@ -1,5 +1,4 @@
 "use client";
-//import {LoginDialog} from "@/components/login";
 import Head from "next/head";
 import React from "react";
 import styles from "../register.module.css";
@@ -9,7 +8,6 @@ import Button from "@/components/layout/button";
 import Input from "@/components/layout/Input";
 
 export async function fetch_post(url, data) {
-  // check if the user is logged in
   let req = new Request(url, {
     method: "POST",
     headers: {
@@ -23,25 +21,21 @@ export async function fetch_post(url, data) {
 }
 
 export async function register(data) {
-  // register a new user
   let response;
   try {
     response = await fetch_post(`/auth/register/send`, data);
   } catch (e) {
-    // something wrong :-(
     console.log(e);
     return [false, "Something went wrong."];
   }
-  // not allowed? perhaps the username is already taken
+
   if (response.status === 403) {
     let text = await response.text();
     return [false, text];
-  }
-  // again something wrong?
-  else if (response.status !== 200) {
+  } else if (response.status !== 200) {
     return [false, "Something went wrong."];
   }
-  // everything ok!
+
   return [true, ""];
 }
 
@@ -54,33 +48,53 @@ export default function Register() {
   const [passwordInput, passwordInputSetValue] = useInput("");
   const [emailInput, emailInputSetValue] = useInput("");
 
-  async function register_button() {
+  function validateInputs() {
     const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-    if (!emailValidation.test(emailInput)) {
-      let msg = "Not a valid email, please try again.";
-      setError(msg);
-      setState(-1);
-    } else if (!passwordInput) {
-      setState(-1);
-      setError("Please enter a password");
-    } else {
-      setState(1);
-      let [success, msg] = await register({
-        name: usernameInput,
-        password: passwordInput,
-        email: emailInput,
-      });
+    const usernameValidation = /^[a-zA-Z0-9_-]{3,20}$/; // Alphanumeric, 3-20 characters
 
-      if (success === false) {
-        if (msg === "") msg = "Something went wrong.";
-        setError(msg);
-        setState(-1);
-      } else {
-        setState(2);
-        setMessage(
-          "Your account has been registered. An e-mail with an activation link has been sent to you. Please click on the link in the e-mail to proceed. You may need to look into your spam folder.",
-        );
-      }
+    if (!usernameValidation.test(usernameInput)) {
+      setError(
+        "Username must be 3-20 characters long and can only contain letters, numbers, underscores, and dashes.",
+      );
+      return false;
+    }
+
+    if (!emailValidation.test(emailInput)) {
+      setError("Not a valid email, please try again.");
+      return false;
+    }
+
+    if (passwordInput.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return false;
+    }
+
+    return true;
+  }
+
+  async function register_button(event) {
+    event.preventDefault(); // Prevent form submission from refreshing the page
+
+    if (!validateInputs()) {
+      setState(-1);
+      return;
+    }
+
+    setState(1);
+    const [success, msg] = await register({
+      name: usernameInput,
+      password: passwordInput,
+      email: emailInput,
+    });
+
+    if (!success) {
+      setError(msg || "Something went wrong.");
+      setState(-1);
+    } else {
+      setState(2);
+      setMessage(
+        "Your account has been registered. An e-mail with an activation link has been sent to you. Please click on the link in the e-mail to proceed. You may need to look into your spam folder.",
+      );
     }
   }
 
@@ -99,19 +113,23 @@ export default function Register() {
       <p className={styles.P}>
         Registration is optional, stories can be accessed even without login.
       </p>
-      {state === -1 ? <span className={styles.error}>{error}</span> : <></>}
-      {state === 2 ? (
+      {state === -1 && <span className={styles.error}>{error}</span>}
+      {state === 2 && (
         <span className={styles.message} data-cy="message-confirm">
           {message}
         </span>
-      ) : (
-        <form action={register_button} className={styles.Form}>
+      )}
+      {state !== 2 && (
+        <form onSubmit={register_button} className={styles.Form}>
           <Input
             data-cy="username"
             value={usernameInput}
             onChange={usernameInputSetValue}
             type="text"
             placeholder="Username"
+            required
+            pattern="[a-zA-Z0-9_-]{3,20}"
+            title="Username must be 3-20 characters long and can only contain letters, numbers, underscores, and dashes."
           />
           <Input
             data-cy="email"
@@ -119,6 +137,7 @@ export default function Register() {
             onChange={emailInputSetValue}
             type="email"
             placeholder="Email"
+            required
           />
           <Input
             data-cy="password"
@@ -126,6 +145,9 @@ export default function Register() {
             onChange={passwordInputSetValue}
             type="password"
             placeholder="Password"
+            required
+            minLength={6}
+            title="Password must be at least 6 characters long."
           />
           <Button primary={true} data-cy="submit" variant="blue">
             {state !== 1 ? "Sign up" : "..."}
