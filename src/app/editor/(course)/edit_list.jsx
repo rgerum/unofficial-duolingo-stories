@@ -27,7 +27,7 @@ export default function EditList({ stories, course, updateCourses }) {
             stories set to "public".
             <br />
             Please ask a moderator on discord to check the course and make it
-            pubic.
+            public.
           </div>
         ) : null}
         <ul>
