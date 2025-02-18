@@ -1,6 +1,9 @@
 import styled from "styled-components";
 
-export default function Input({ label = null, ...delegated }) {
+export default function Input({
+  label = "",
+  ...delegated
+}: { label?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   if (label) {
     return (
       <Label>
