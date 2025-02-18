@@ -52,7 +52,7 @@ export default function ResetPassword() {
   const [emailInput, emailInputSetValue] = useInput("");
 
   async function register_button() {
-    const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w+)+$/;
     if (!emailValidation.test(emailInput)) {
       let msg = "Not a valid email, please try again.";
       setError(msg);

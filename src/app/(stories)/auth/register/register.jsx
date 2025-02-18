@@ -49,7 +49,7 @@ export default function Register() {
   const [emailInput, emailInputSetValue] = useInput("");
 
   function validateInputs() {
-    const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w+)+$/;
     const usernameValidation = /^[a-zA-Z0-9_-]{3,20}$/; // Alphanumeric, 3-20 characters
 
     if (!usernameValidation.test(usernameInput)) {
