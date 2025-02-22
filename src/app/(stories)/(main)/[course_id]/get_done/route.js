@@ -1,9 +1,9 @@
 import { sql } from "@/lib/db";
-import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import { getUser } from "@/lib/userInterface";
 
 export async function GET(req, { params }) {
-  const token = await getToken({ req });
+  const token = await getUser(req);
 
   let answer = await get_course_done({
     course_id: params.course_id,

@@ -1,4 +1,4 @@
-import { fetch_post } from "@/lib/fetch_post.mjs";
+import { fetch_post } from "../../../lib/fetch_post.mjs";
 import {
   add_word_marks_replacements,
   find_replace_with_mapping,
@@ -270,10 +270,10 @@ export function content_to_audio(content) {
 }
 
 export function timings_to_text({ filename, keypoints }) {
-  let text = filename ? ("$" + filename) : ""
+  let text = filename ? "$" + filename : "";
   let last_end = 0;
   let last_time = 0;
-  if(keypoints) {
+  if (keypoints) {
     for (let point of keypoints) {
       text += ";";
       text += Math.round(point.rangeEnd - last_end);

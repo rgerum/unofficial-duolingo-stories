@@ -8,6 +8,7 @@ import { signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useSelectedLayoutSegments } from "next/navigation";
 import Button from "../layout/button";
+import { getUser } from "@/lib/userInterface";
 
 function get_current_theme() {
   // it's currently saved in the document?
@@ -64,7 +65,7 @@ export function LogInButton() {
   );
 }
 
-export default function LoggedInButton({ page, course_id, session }) {
+export function LoggedInButton({ page, course_id, user }) {
   //const { data: session } = useSession();
   const controls = useDarkLight();
 
@@ -80,7 +81,7 @@ export default function LoggedInButton({ page, course_id, session }) {
   let stories_link = "/";
   if (course_id) stories_link = "/" + course_id;
 
-  if (session === undefined)
+  if (user === undefined)
     return (
       <Button onClick={() => signIn()} data-cy="login-button">
         Log in
@@ -91,13 +92,9 @@ export default function LoggedInButton({ page, course_id, session }) {
       <div
         className={styles.round}
         data-cy="user-button"
-        style={
-          session.user?.image
-            ? { backgroundImage: `url('${session.user?.image}')` }
-            : {}
-        }
+        style={user?.image ? { backgroundImage: `url('${user?.image}')` } : {}}
       >
-        {session.user.name.substring(0, 1)}
+        {user.name.substring(0, 1)}
       </div>
       <div>
         <Link
@@ -122,7 +119,7 @@ export default function LoggedInButton({ page, course_id, session }) {
                 : "Light/Dark"}
           </div>
         }
-        {session.user?.role && page !== "stories" ? (
+        {user?.role && page !== "stories" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={stories_link}
@@ -131,7 +128,7 @@ export default function LoggedInButton({ page, course_id, session }) {
             Stories
           </Link>
         ) : null}
-        {session.user?.role && page !== "editor" ? (
+        {user?.role && page !== "editor" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={editor_link}
@@ -140,7 +137,7 @@ export default function LoggedInButton({ page, course_id, session }) {
             Editor
           </Link>
         ) : null}
-        {session.user?.role && page !== "docs" ? (
+        {user?.role && page !== "docs" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={"/docs"}
@@ -149,7 +146,7 @@ export default function LoggedInButton({ page, course_id, session }) {
             Docs
           </Link>
         ) : null}
-        {session.user?.admin && page !== "admin" ? (
+        {user?.admin && page !== "admin" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={"/admin"}

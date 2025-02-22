@@ -87,8 +87,8 @@ function ref_by_course(data, data_old, key) {
 }
 
 export default async function Page({ params }) {
-  let year = parseInt(params.year);
-  let month = parseInt(params.month);
+  let year = parseInt((await params).year);
+  let month = parseInt((await params).month);
   const data = await get_stats(year, month);
   data.year = year;
   data.month = month;

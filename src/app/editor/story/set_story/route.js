@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
+import { getUser } from "@/lib/userInterface";
 
 export async function POST(req) {
-  const token = await getToken({ req });
+  const token = await getUser(req);
 
   if (!token?.role)
     return new Response("You need to be a registered contributor.", {

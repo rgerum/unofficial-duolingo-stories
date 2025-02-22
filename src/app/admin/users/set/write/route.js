@@ -1,11 +1,11 @@
 import { sql } from "@/lib/db";
-import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import { getUser } from "@/lib/userInterface";
 
 export async function POST(req) {
   try {
     const data = await req.json();
-    const token = await getToken({ req });
+    const token = await getUser(req);
 
     if (!token?.admin)
       return new Response("You need to be a registered admin.", {

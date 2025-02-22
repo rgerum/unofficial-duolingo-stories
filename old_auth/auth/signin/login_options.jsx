@@ -10,25 +10,35 @@ import Button from "@/components/layout/button";
 import Input from "@/components/layout/Input";
 import { error_codes } from "../error_codes";
 import signIn from "@/signin_cred";
+import { Spinner, SpinnerBlue } from "@/components/layout/spinner";
 
 export function LoginOptions({ providers }) {
   const externalProviders = Object.values(providers).filter(
     (provider) => provider.id !== "email" && provider.id !== "credentials",
   );
 
-  async function signin_submit() {
-    await signIn("credentials", {
-      name: usernameInput,
-      password: passwordInput,
-    });
-  }
+  const [state, formAction, isPending] = React.useActionState(
+    async () => {
+      try {
+        const result = await signIn("credentials", {
+          name: usernameInput,
+          password: passwordInput,
+        });
+        console.log(result);
+        return {};
+      } catch (error) {
+        return { error: error };
+      }
+    },
+    { error: null },
+  );
 
   const [usernameInput, usernameInputSetValue] = useInput("");
   const [passwordInput, passwordInputSetValue] = useInput("");
 
   const query = useSearchParams();
   const error = error_codes[query.get("error")];
-
+  console.log(state);
   return (
     <>
       <h1 className={styles.H1}>Log in</h1>
@@ -39,8 +49,8 @@ export function LoginOptions({ providers }) {
         You have to register for the unofficial stories separately, as they are
         an independent project.
       </p>
-      {error && <span className={styles.error}>{error}</span>}
-      <form className={styles.Form} action={signin_submit}>
+      {state.error && <span className={styles.error}>{state.error.msg}</span>}
+      <form className={styles.Form} action={formAction}>
         <Input
           data-cy="username"
           value={usernameInput}
@@ -58,7 +68,7 @@ export function LoginOptions({ providers }) {
           placeholder="Password"
         />
         <Button data-cy="submit" primary>
-          {"Log in"}
+          {isPending ? <SpinnerBlue /> : "Log in"}
         </Button>
       </form>
       <p className={styles.P}>

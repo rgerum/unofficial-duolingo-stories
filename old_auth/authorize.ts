@@ -5,15 +5,17 @@ import { phpbb_check_hash } from "@/lib/auth/hash_functions2";
 export default async function authorize(
   credentials: Partial<Record<"password" | "username", unknown>>,
 ) {
+  console.log("authorize");
   if (typeof credentials.password !== "string")
     throw new Error("Invalid credentials.");
   if (typeof credentials.username !== "string")
     throw new Error("Invalid credentials.");
-
+  console.log("sql");
   let res2 =
     await sql`SELECT * FROM users WHERE LOWER(name) = ${credentials.username.toLowerCase() || ""} AND activated`;
 
   if (res2.length === 0) {
+    console.log("res2.length is 0");
     throw new Error("Invalid credentials.");
   }
   let user = res2[0];
@@ -21,6 +23,7 @@ export default async function authorize(
   let correct = phpbb_check_hash(credentials.password, user.password);
 
   if (!correct) {
+    console.log("wrong password");
     throw new Error("Invalid credentials.");
   }
 

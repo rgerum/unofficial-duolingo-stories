@@ -13,7 +13,7 @@ async function story_properties(id) {
 }
 
 export default async function Page({ params }) {
-  let story = await story_properties(params.story_id);
+  let story = await story_properties((await params).story_id);
 
   if (story === undefined) notFound();
 

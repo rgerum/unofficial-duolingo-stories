@@ -1,8 +1,8 @@
 import { sql } from "@/lib/db";
-import { auth } from "@/auth";
 import Header from "../header";
 import Profile from "./profile";
 import getUserId from "@/lib/getUserId";
+import { getUser } from "@/lib/userInterface";
 
 export const metadata = {
   alternates: {
@@ -12,9 +12,8 @@ export const metadata = {
 
 async function getLinkedProviders() {
   let providers_base = ["facebook", "github", "google", "discord"];
-  //const token = await getToken({ req })
-  const session = await auth();
-  if (!session) return undefined;
+  const user = await getUser();
+  if (!user) return undefined;
   let user_id = await getUserId();
   const req2 =
     await sql`SELECT provider FROM accounts WHERE "userId" = ${user_id}`;
@@ -29,13 +28,13 @@ async function getLinkedProviders() {
     provider_linked[p.provider] = true;
   }
   let role = [];
-  if (session.user.admin) role.push("Admin");
-  if (session.user.role) role.push("Contributor");
+  if (user.admin) role.push("Admin");
+  if (user.role) role.push("Contributor");
 
   return {
     providers,
-    name: session.user.name,
-    email: session.user.email,
+    name: user.name,
+    email: user.email,
     role: role,
     provider_linked,
   };

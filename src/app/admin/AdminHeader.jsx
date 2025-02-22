@@ -1,11 +1,8 @@
 import styles from "./layout.module.css";
 import Link from "next/link";
 import React from "react";
-import LoggedInButton, {
-  LogInButton,
-} from "../../components/login/loggedinbutton";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/userInterface";
+import { LoggedInButtonWrapped } from "@/components/login/LoggedInButtonWrappedServer";
 
 function AdminButton({ children, href, ...delegated }) {
   return (
@@ -19,9 +16,7 @@ function AdminButton({ children, href, ...delegated }) {
 }
 
 export default async function AdminHeader() {
-  const session = await auth();
-
-  if (!session?.user?.admin) redirect("/auth/admin");
+  await requireAdmin();
 
   return (
     <nav className={styles.header_index}>
@@ -32,15 +27,7 @@ export default async function AdminHeader() {
       <AdminButton href="/admin/story">Story</AdminButton>
 
       <div style={{ marginLeft: "auto" }}></div>
-      {session?.user ? (
-        <LoggedInButton
-          page={"admin"}
-          course_id={undefined}
-          session={session}
-        />
-      ) : (
-        <LogInButton />
-      )}
+      <LoggedInButtonWrapped page={"admin"} />
     </nav>
   );
 }

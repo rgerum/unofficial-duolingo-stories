@@ -46,6 +46,5 @@ export default async function Page({}) {
     },
     //"credentials":{"id":"credentials","name":"Credentials","type":"credentials","signinUrl":"http://localhost:3000/api/auth/signin/credentials","callbackUrl":"http://localhost:3000/api/auth/callback/credentials"}
   };
-
   return <LoginOptions providers={providers} />;
 }

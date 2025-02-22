@@ -1,5 +1,5 @@
-import { auth } from "@/auth";
 import { sql, cache } from "@/lib/db";
+import { getUser } from "@/lib/userInterface";
 
 export const get_user_id_by_name = cache(
   async (user_name) => {
@@ -11,7 +11,7 @@ export const get_user_id_by_name = cache(
 );
 
 export default async function getUserId() {
-  const session = await auth();
-  if (!session?.user?.name) return undefined;
-  return (await get_user_id_by_name(session?.user?.name)).id;
+  const user = await getUser();
+  if (!user?.name) return undefined;
+  return (await get_user_id_by_name(user?.name)).id;
 }

@@ -1,9 +1,9 @@
 import React from "react";
 import { cache } from "react";
 import { sql } from "@/lib/db";
-import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 import Tts_edit from "./tts_edit";
+import { getUser } from "@/lib/userInterface";
 
 const get_avatar_names = cache(async (id) => {
   return sql`
@@ -50,7 +50,9 @@ const get_language = cache(async (id) => {
 });
 
 export async function generateMetadata({ params }) {
-  let [language, course, language2] = await get_language(params.language);
+  let [language, course, language2] = await get_language(
+    (await params).language,
+  );
 
   if (!language2) {
     return {
@@ -72,9 +74,11 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const session = await auth();
+  const user = await getUser();
 
-  let [language, course, language2] = await get_language(params.language);
+  let [language, course, language2] = await get_language(
+    (await params).language,
+  );
 
   if (!language) {
     notFound();

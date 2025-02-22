@@ -37,7 +37,7 @@ export const sql = postgres(process.env.POSTGRES_URL2, {
     }
   },
   ssl:
-    process.env.POSTGRES_URL2.indexOf("localhost") !== -1 ? false : "require",
+    process.env?.POSTGRES_URL2.indexOf("localhost") !== -1 ? false : "require",
 });
 
 const hash_table =

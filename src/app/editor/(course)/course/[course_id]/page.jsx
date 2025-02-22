@@ -1,11 +1,10 @@
-
 import { get_course_data, get_story_list } from "../../db_get_course_editor";
-import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 import EditList from "../../edit_list";
+import { getUser } from "@/lib/userInterface";
 
 export async function generateMetadata({ params }) {
-  let course = await get_course_data(params.course_id);
+  let course = await get_course_data((await params).course_id);
 
   if (!course) notFound();
 
@@ -18,18 +17,18 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const session = await auth();
+  const user = await getUser();
 
-  if (!session) {
+  if (!user) {
     return { redirect: { destination: "/editor/login", permanent: false } };
   }
-  if (!session?.user?.role) {
+  if (!user?.role) {
     return {
       redirect: { destination: "/editor/not_allowed", permanent: false },
     };
   }
 
-  const course = await get_course_data(params.course_id);
+  const course = await get_course_data((await params).course_id);
   if (!course) notFound();
 
   const stories = await get_story_list(course.id);

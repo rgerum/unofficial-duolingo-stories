@@ -1,10 +1,10 @@
 import { sql } from "@/lib/db";
-import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
+import { getUser } from "@/lib/userInterface";
 
 export async function GET(req, { params: { story_id } }) {
-  const token = await getToken({ req });
+  const token = await getUser(req);
 
   if (!token.role) return new Response("Error not allowed", { status: 401 });
 
