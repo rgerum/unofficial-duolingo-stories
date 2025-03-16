@@ -9,11 +9,6 @@ export function LoggedInButtonWrappedClient(props: {
   const { course_id, page } = props;
   const { data: session } = useSession();
 
-  console.log(
-    "------------------------LoggedInButtonWrappedClient",
-    course_id,
-    page,
-  );
   const user = session?.user;
 
   return (
