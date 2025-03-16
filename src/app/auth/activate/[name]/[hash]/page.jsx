@@ -4,7 +4,7 @@ import Link from "next/link";
 import { activate } from "./activate";
 
 export default async function Page({ params }) {
-  let activated = await activate(params);
+  let activated = await activate(await params);
 
   return (
     <>

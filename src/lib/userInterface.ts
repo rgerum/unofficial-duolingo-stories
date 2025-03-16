@@ -9,12 +9,12 @@ export async function getUser(
 ) {
   if (typeof req !== "undefined" && typeof response !== "undefined") {
     const session = await auth(req, response);
-    console.log("sessionAPI", session);
+    //console.log("sessionAPI", session);
 
     return session?.user;
   }
   const session = await auth();
-  console.log("sessionHTML", session);
+  //console.log("sessionHTML", session);
   return session?.user;
   return { admin: false };
 }

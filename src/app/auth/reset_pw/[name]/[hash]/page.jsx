@@ -52,7 +52,10 @@ async function check_link(name, hash) {
 }
 
 export default async function Page({ params }) {
-  let { data: user_id, error } = await check_link(params.name, params.hash);
+  let { data: user_id, error } = await check_link(
+    (await params).name,
+    (await params).hash,
+  );
   if (error) {
     return (
       <div id="login_dialog">

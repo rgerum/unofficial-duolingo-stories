@@ -46,7 +46,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => {
     session: { strategy: "jwt" },
     callbacks: {
       jwt({ token, user }) {
-        console.log("jwt", token, user);
         if (user) {
           token.admin = user.admin;
           token.role = user.role;
@@ -55,7 +54,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => {
         return token;
       },
       session({ session, token }) {
-        console.log("session", session, token);
         if (!token) return session;
         session.user.admin = token.admin as boolean;
         session.user.role = token.role as boolean;
