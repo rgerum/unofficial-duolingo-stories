@@ -3,6 +3,7 @@ import { auth, signIn } from "@/auth";
 import React from "react";
 import { redirect } from "next/navigation";
 import { LoginOptions } from "./login_options";
+import { CallbackRouteError } from "@auth/core/errors";
 
 export interface ProviderProps {
   id: string;
@@ -32,7 +33,18 @@ export default async function Page({}) {
       await signIn("credentials", formData);
       return { error: null };
     } catch (error) {
-      return { error: "Invalid credentials" };
+      if ((error as CallbackRouteError)["cause"]) {
+        return {
+          error:
+            (error as CallbackRouteError)["cause"]?.err?.message ||
+            "Sign in error.",
+        };
+      }
+      if ((error as Error).message === "NEXT_REDIRECT") {
+        redirect("/");
+      }
+
+      return { error: "Unknown error" };
     }
   };
 
