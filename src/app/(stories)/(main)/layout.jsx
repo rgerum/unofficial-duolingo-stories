@@ -76,11 +76,10 @@ export default async function Layout({ children }) {
                 src={"/Duostories.svg"}
                 alt={"Duostories"}
                 height={25}
-                width={150.1}
+                width={150}
               />
             </Link>
             <div style={{ marginLeft: "auto" }}></div>
-
             <CourseDropdown
               course_data_active={active_courses}
               course_data={course_data}
