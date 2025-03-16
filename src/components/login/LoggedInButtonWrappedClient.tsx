@@ -15,7 +15,7 @@ export function LoggedInButtonWrappedClient(props: {
     page,
   );
   const user = session?.user;
-  console.log("user", user);
+
   return (
     <>
       {user ? (

@@ -1,16 +1,20 @@
 import { sql } from "@/lib/db";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { getUser } from "@/lib/userInterface";
 
-export async function GET(req, { params: { story_id } }) {
-  const token = await getUser(req);
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ story_id: string }> },
+) {
+  const token = await getUser();
 
-  if (!token.role) return new Response("Error not allowed", { status: 401 });
+  if (!token || !token.role || !token.id)
+    return new Response("Error not allowed", { status: 401 });
 
   let answer = await set_approve({
-    story_id: parseInt(story_id),
-    user_id: token?.id,
+    story_id: parseInt((await params).story_id),
+    user_id: parseInt(token.id),
   });
 
   if (answer === undefined)
@@ -19,14 +23,20 @@ export async function GET(req, { params: { story_id } }) {
   return NextResponse.json(answer);
 }
 
-async function set_status(data) {
+async function set_status(data: { status: string | undefined; id: number }) {
   return sql`
   UPDATE story SET ${sql(data, "status")}
   WHERE id = ${data.id}
 `;
 }
 
-async function set_approve({ story_id, user_id }) {
+async function set_approve({
+  story_id,
+  user_id,
+}: {
+  story_id: number;
+  user_id: number;
+}) {
   let res =
     await sql`SELECT id FROM story_approval WHERE story_id = ${story_id} AND user_id = ${user_id};`;
   let action;

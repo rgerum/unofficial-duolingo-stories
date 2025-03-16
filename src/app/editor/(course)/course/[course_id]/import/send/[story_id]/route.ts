@@ -3,17 +3,21 @@ import { upload_github } from "@/lib/editor/upload_github";
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/userInterface";
 
-export async function GET(req, { params: { course_id, story_id } }) {
-  const token = await getUser(req);
+export async function GET(
+  req: Request,
 
-  if (!token.role)
+  { params }: { params: Promise<{ course_id: string; story_id: string }> },
+) {
+  const token = await getUser();
+
+  if (!token || !token.role || !token.id || !token.name)
     return new Response("You need to be a registered contributor.", {
       status: 401,
     });
 
   let answer = await set_import(
-    { id: story_id, course_id: course_id },
-    { user_id: token?.id, username: token?.name },
+    { id: (await params).story_id, course_id: (await params).course_id },
+    { user_id: token.id, username: token.name },
   );
 
   if (answer === undefined)
@@ -22,7 +26,10 @@ export async function GET(req, { params: { course_id, story_id } }) {
   return NextResponse.json(answer);
 }
 
-async function set_import({ id, course_id }, { user_id, username }) {
+async function set_import(
+  { id, course_id }: { id: string; course_id: string },
+  { user_id, username }: { user_id: string; username: string },
+) {
   let data = (
     await sql`SELECT duo_id, name, image, set_id, set_index, text, json FROM story WHERE id = ${id};`
   )[0];

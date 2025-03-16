@@ -7,9 +7,8 @@ export async function LoggedInButtonWrapped(props: {
   page: string;
 }) {
   const { course_id, page } = props;
-  console.log("------------------------LoggedInButtonWrapped", course_id, page);
   const user = await getUser();
-  console.log("user", user);
+
   return (
     <>
       {user ? (

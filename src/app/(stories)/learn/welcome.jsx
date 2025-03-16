@@ -1,11 +1,11 @@
 "use client";
 import styles from "./learn.module.css";
 import { signIn } from "next-auth/react";
-import styles2 from "../auth/register.module.css";
+import styles2 from "../../auth/register.module.css";
 import Link from "next/link";
 import React from "react";
 
-export default async function Page() {
+export default function Page() {
   return (
     <div className={styles.container}>
       <div>
