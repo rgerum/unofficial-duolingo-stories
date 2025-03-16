@@ -8,10 +8,20 @@ import PostgresAdapter from "@auth/pg-adapter";
 import { Pool } from "@neondatabase/serverless";
 import Credentials from "next-auth/providers/credentials";
 
+import { authorizeUser } from "@/authorize";
+
 declare module "next-auth" {
   /**
    * Returned by `auth`, `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
    */
+  interface User {
+    role: boolean;
+    admin: boolean;
+  }
+  interface JWT {
+    role: boolean;
+    admin: boolean;
+  }
   interface Session {
     user: {
       /** The user's postal address. */
@@ -30,8 +40,37 @@ declare module "next-auth" {
 export const { handlers, auth, signIn, signOut } = NextAuth(() => {
   // Create a `Pool` inside the request handler.
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  // @ts-ignore
   return {
     adapter: PostgresAdapter(pool),
+    session: { strategy: "jwt" },
+    callbacks: {
+      jwt({ token, user }) {
+        console.log("jwt", token, user);
+        if (user) {
+          token.admin = user.admin;
+          token.role = user.role;
+          token.id = user.id;
+        }
+        return token;
+      },
+      session({ session, token }) {
+        console.log("session", session, token);
+        if (!token) return session;
+        session.user.admin = token.admin as boolean;
+        session.user.role = token.role as boolean;
+        session.user.id = token.id as string;
+
+        return session;
+      },
+    },
+    pages: {
+      signIn: "/auth/signin",
+      //signOut: '/auth/signout',
+      //error: '/auth/error',
+      //verifyRequest: '/auth/verify-request',
+      //newUser: '/auth/new-user'
+    },
     providers: [
       GitHub,
       Facebook,
@@ -46,9 +85,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => {
           },
           password: { label: "Password", type: "password" },
         },
-        authorize: async (credentials) => {
-          return { username: credentials.username, role: true, admin: true };
-        },
+        authorize: authorizeUser,
       }),
     ],
   };
