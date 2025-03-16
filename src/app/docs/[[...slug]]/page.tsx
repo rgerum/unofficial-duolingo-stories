@@ -5,6 +5,8 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 
 import { getDocsData, getPageData } from "./doc_data";
 import styles from "./layout.module.css";
+import { MDXComponents } from "mdx/types";
+import CustomMDXServer from "@/components/Docs/CustomMDXServer";
 
 export const dynamic = "force-static";
 export const dynamicParams = true;
@@ -12,7 +14,7 @@ export const dynamicParams = true;
 export async function generateStaticParams() {
   const data = await getDocsData();
 
-  const pages = [{ slug: [] }];
+  const pages = [{ slug: [] as string[] }];
   for (let group of data.navigation) {
     for (let page of group.pages) {
       pages.push({ slug: page.slug.split("/") });
@@ -22,14 +24,12 @@ export async function generateStaticParams() {
   return pages;
 }
 
-export async function generateMetadata({ params }) {
-  let path = "";
-  for (let p of params.slug || ["introduction"]) {
-    if (p.indexOf(".") !== -1) continue;
-    path += "/" + p;
-  }
-  if (path.endsWith(".js") || path.endsWith(".mdx")) return notFound();
-
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string[] }>;
+}) {
+  const path = SlugToPath((await params).slug);
   const data = await getPageData(path);
 
   return {
@@ -38,11 +38,11 @@ export async function generateMetadata({ params }) {
   };
 }
 
-function save_tag(tag) {
+function save_tag(tag: string) {
   return tag.trim().toLowerCase().replace(/\s+/g, "-");
 }
 
-const components = {
+const components: MDXComponents = {
   Info: (props) => (
     <p {...props} className={styles.box + " " + styles.info}>
       {props.children}
@@ -63,34 +63,59 @@ const components = {
       {props.children}
     </Link>
   ),
-  a: Link,
+  a: (props) => <Link href={props.href as string}>{props.children}</Link>,
   Image: (props) => (
     <div className={styles.image_wrapper}>{props.children}</div>
   ),
   h3: (props) => (
-    <h3 {...props} id={save_tag(props.children)}>
+    <h3 {...props} id={save_tag(props.children as string)}>
       {props.children}
     </h3>
   ),
 };
 
-function CustomMDX(props) {
+function CustomMDX(props: { source: string }) {
   return (
     <MDXRemote
       {...props}
-      components={{ ...components, ...(props.components || {}) }}
+      components={components} //...(props.components || {})
     />
   );
 }
 
-export default async function Page({ params }) {
+function SlugToPath(slug: string[]) {
   let path = "";
-  for (let p of params.slug || ["introduction"]) {
+  for (const p of slug || ["introduction"]) {
     if (p.indexOf(".") !== -1) continue;
     path += "/" + p;
   }
   if (path.endsWith(".js") || path.endsWith(".mdx")) return notFound();
+  return path;
+}
 
+export interface Heading {
+  id: string;
+  text: string;
+  level: number;
+}
+
+function getHeadings(title: string, body: string) {
+  const headings: Heading[] = [{ id: save_tag(title), level: 1, text: title }];
+  for (const line of body.split("\n")) {
+    if (line.startsWith("#")) {
+      const [, count, text] = line.match("(#*)s*(.*)") || ["", "####", ""];
+      headings.push({ id: save_tag(text), level: count.length, text: text });
+    }
+  }
+  return headings;
+}
+
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string[] }>;
+}) {
+  const path = SlugToPath((await params).slug);
   let data = await getPageData(path);
   let doc_data = await getDocsData();
   let previous = null;
@@ -111,13 +136,7 @@ export default async function Page({ params }) {
   let previousData = await getPageData("/" + previous);
   let nextData = await getPageData("/" + next);
 
-  let headings = [];
-  for (let line of data.body.split("\n")) {
-    if (line.startsWith("#")) {
-      let [, count, text] = line.match("(#*)s*(.*)");
-      if (count.length === 3) headings.push(text);
-    }
-  }
+  const headings = getHeadings(data.title, data.body);
 
   return (
     <>
@@ -127,7 +146,8 @@ export default async function Page({ params }) {
           <h1>{data.title}</h1>
           <div>{data.description}</div>
         </header>
-        <CustomMDX source={data.body} />
+        <CustomMDXServer source={data.body} />
+        {/*<CustomMDX source={data.body} />*/}
         <div className={styles.button_container}>
           <Link
             className={styles.button}
@@ -154,7 +174,7 @@ export default async function Page({ params }) {
         <div className={styles.toc2_inner}>
           {headings.map((h, i) => (
             <p key={i}>
-              <a href={"#" + save_tag(h)}>{h}</a>
+              <a href={"#" + save_tag(h.text)}>{h.text}</a>
             </p>
           ))}
         </div>
