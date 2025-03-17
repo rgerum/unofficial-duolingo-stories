@@ -1,6 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 import getUserId from "@/lib/getUserId";
 import { get_localisation_dict } from "@/lib/get_localisation";
 import StoryWrapper from "./story_wrapper";

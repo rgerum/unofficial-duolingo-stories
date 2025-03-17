@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 
 async function check_username(name, existing) {
   let result =

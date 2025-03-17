@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 import { upload_github } from "@/lib/editor/upload_github";
 import { getUser } from "@/lib/userInterface";
 

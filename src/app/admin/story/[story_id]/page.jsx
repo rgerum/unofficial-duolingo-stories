@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 import { notFound } from "next/navigation";
 import StoryDisplay from "./story_display";
 

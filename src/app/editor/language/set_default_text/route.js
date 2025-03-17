@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 import { getUser } from "@/lib/userInterface";
 
 export async function POST(req) {

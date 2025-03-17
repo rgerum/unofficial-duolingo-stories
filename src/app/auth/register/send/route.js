@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 const { phpbb_hash } = require("lib/auth/hash_functions2");
 import { v4 as uuid } from "uuid";
 import { NextResponse } from "next/server";

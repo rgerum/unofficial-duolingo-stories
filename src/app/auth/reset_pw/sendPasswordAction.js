@@ -1,5 +1,5 @@
 "use server";
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 import { v4 as uuid } from "uuid";
 import transporter from "@/lib/emailer";
 

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import UserDisplay from "./user_display";
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 
 async function user_properties(id) {
   const isNumeric = (value) =>

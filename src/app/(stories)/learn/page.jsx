@@ -1,6 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 import Welcome from "./welcome";
 import { getUser } from "@/lib/userInterface";
 

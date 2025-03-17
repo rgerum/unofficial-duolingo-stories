@@ -1,6 +1,6 @@
 import React from "react";
 import { cache } from "react";
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 import { notFound } from "next/navigation";
 import LocalizationEditor from "./localization_editor";
 

@@ -76,7 +76,6 @@ export default async function SetListClient({
   course: Record<string, StoryData[]>;
   about: string;
 }) {
-  console.log("course", course);
   let user_id = await getUserId();
   let done = await get_course_done({ course_id, user_id });
   let localisation = await get_localisation(course_data.from_language);
