@@ -12,8 +12,8 @@ export const get_flag_data = cache(
     }
     return lang_list;
   },
-  ["get_langs"],
-  { tags: ["lang"] },
+  ["get_langs_short"],
+  { tags: ["lang"], revalidate: 3600 },
 );
 
 let get_lang = cache(async (id: number) => {
