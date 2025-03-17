@@ -4,7 +4,13 @@ import get_localisation from "@/lib/get_localisation";
 import FlagById from "@/components/layout/flag_by_id";
 import { get_course } from "./get_course_data";
 
-export default async function LanguageButton({ course_id, loading }) {
+export default async function LanguageButton({
+  course_id,
+  loading,
+}: {
+  course_id?: string;
+  loading?: boolean;
+}) {
   if (loading) {
     return (
       <div
@@ -30,7 +36,6 @@ export default async function LanguageButton({ course_id, loading }) {
       href={`/${course.short}`}
     >
       <FlagById id={course.learning_language} />
-
       <span className={styles.language_select_button_text}>{course.name}</span>
       <span className={styles.language_story_count}>
         {localisation("n_stories", { $count: course.count })}

@@ -38,7 +38,7 @@ export const metadata = {
 };
 
 const get_courses_user = cache(
-  async (id) => {
+  async (id: number | undefined) => {
     if (!id) return [];
     // sort courses by base language
     return (
@@ -49,13 +49,17 @@ INNER JOIN story_done ON story_done.story_id = s.id
 WHERE story_done.user_id = ${id}
 GROUP BY s.course_id
 ORDER BY MAX(story_done.time) DESC;`
-    ).map((r) => r.course_id);
+    ).map((r) => r.course_id as number);
   },
   ["get_courses_user"],
   { tags: ["courses_user"] },
 );
 
-export default async function Layout({ children }) {
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   // @ts-ignore
   const flag_data = await get_flag_data();
   const course_data = await get_course_data();

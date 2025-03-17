@@ -1,8 +1,16 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 import styles from "./flag.module.css";
 import Image from "next/image";
+import { LanguageProps } from "@/app/editor/(course)/db_get_course_editor";
 
-export default function Flag(props) {
+export default function Flag(props: {
+  width?: number | undefined;
+  height?: number | undefined;
+  iso?: string;
+  flag_file?: string;
+  flag?: number;
+  className?: string;
+}) {
   /**
    * A big flag button
    * @type {{flag_file: string, flag: number}}
@@ -58,12 +66,15 @@ export default function Flag(props) {
     "zu", //47
   ];
   let flag = 0;
-  for (let i in order) {
-    if (order[i] === (props.iso || "world")) flag = i;
+  if (props.iso) {
+    for (const i in order) {
+      if (order[i] === (props.iso || "world")) flag = parseInt(i);
+    }
   }
+  const flag1 = flag;
   if (flag === 0 && !props.flag_file && props.iso !== "en") {
     // Check if there's a valid flag index, fall back to "world" flag if not
-    flag = (props.flag > 0 && props.flag < 48) ? props.flag : 37; // "world"
+    flag = props.flag && props.flag > 0 && props.flag < 48 ? props.flag : 37; // "world"
   }
 
   let style = {
@@ -74,10 +85,12 @@ export default function Flag(props) {
   return (
     <>
       <Image
-        style={{
-          "--flag-scale": (props.width || 88) / 82,
-          "--flag_offset": flag,
-        }}
+        style={
+          {
+            "--flag-scale": (props.width || 88) / 82,
+            "--flag_offset": flag,
+          } as CSSProperties
+        }
         width={style.width}
         height={style.height}
         priority={true}
@@ -93,7 +106,19 @@ export default function Flag(props) {
   );
 }
 
-export function DoubleFlag({ lang1, lang2, width, onClick, className }) {
+export function DoubleFlag({
+  lang1,
+  lang2,
+  width,
+  onClick,
+  className,
+}: {
+  lang1: LanguageProps;
+  lang2: LanguageProps;
+  width: number;
+  onClick: Function;
+  className?: string;
+}) {
   if (!lang2) {
     return (
       <>
@@ -102,7 +127,7 @@ export function DoubleFlag({ lang1, lang2, width, onClick, className }) {
           flag={lang1?.flag}
           flag_file={lang1?.flag_file}
           width={width}
-          onClick={onClick}
+          //onClick={onClick}
           className={className}
         />
       </>
@@ -115,7 +140,7 @@ export function DoubleFlag({ lang1, lang2, width, onClick, className }) {
         flag={lang1?.flag}
         flag_file={lang1?.flag_file}
         width={width}
-        onClick={onClick}
+        //onClick={onClick}
         className={className}
       />
       <Flag
@@ -123,7 +148,7 @@ export function DoubleFlag({ lang1, lang2, width, onClick, className }) {
         flag={lang2?.flag}
         flag_file={lang2?.flag_file}
         width={width * 0.9}
-        onClick={onClick}
+        //onClick={onClick}
         className={className + " " + styles.flag_sub}
       />
     </>

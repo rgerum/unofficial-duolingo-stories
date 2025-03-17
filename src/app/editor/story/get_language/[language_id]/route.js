@@ -4,7 +4,7 @@ import { getUser } from "@/lib/userInterface";
 
 export async function GET(req, { params }) {
   try {
-    const { language_id } = params;
+    const { language_id } = await params;
     const token = await getUser(req);
 
     if (!token?.role)

@@ -7,7 +7,7 @@ import {
 import ImportList from "./import_list";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { DoubleFlag } from "@/components/layout/flag";
+import { DoubleFlag } from "@/components/layout/flag.tsx";
 import React from "react";
 import styles from "./import_list.module.css";
 

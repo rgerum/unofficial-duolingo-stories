@@ -1,5 +1,17 @@
 import { sql, cache } from "@/lib/db";
 
+export interface CourseData {
+  id: number;
+  short: string;
+  name: string;
+  count: number;
+  aboout: string;
+  from_language: number;
+  from_language_name: string;
+  learning_language: number;
+  learning_language_name: string;
+}
+
 export const get_course_data = cache(
   async () => {
     return sql`
@@ -12,7 +24,7 @@ WHERE
     c.public
 ORDER BY
     from_language_name, name;
-`;
+` as Promise<CourseData[]>;
   },
   ["get_course_data"],
   { tags: ["course_data"], revalidate: 3600 },
@@ -43,12 +55,12 @@ export async function get_course_groups() {
   return course_groups;
 }
 
-export async function get_courses_in_group(from_language) {
+export async function get_courses_in_group(from_language: number) {
   let courses = await get_course_data();
   return courses.filter((course) => course.from_language === from_language);
 }
 
-export async function get_course(short) {
+export async function get_course(short: string) {
   for (let course of await get_course_data()) {
     if (course.short === short) {
       return course;

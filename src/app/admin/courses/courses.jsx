@@ -3,7 +3,7 @@ import Link from "next/link";
 import styles from "../index.module.css";
 import { useInput } from "@/lib/hooks";
 import { Spinner } from "@/components/layout/spinner";
-import Flag from "@/components/layout/flag";
+import Flag from "@/components/layout/flag.tsx";
 import { fetch_post } from "@/lib/fetch_post";
 import * as EditDialog from "../edit_dialog";
 import React, { useState } from "react";

@@ -5,7 +5,7 @@ import LanguageButton from "./language_button";
 import styles from "./course_list.module.css";
 import { get_course_groups, get_courses_in_group } from "./get_course_data";
 
-async function LanguageGroup({ name, id }) {
+async function LanguageGroup({ name, id }: { name: string; id: number }) {
   let courses_list = await get_courses_in_group(id);
 
   let localisation = await get_localisation(id);
@@ -29,7 +29,13 @@ async function LanguageGroup({ name, id }) {
   );
 }
 
-export async function CourseListInner({ loading }) {
+export async function CourseListInner({
+  tag,
+  loading,
+}: {
+  tag?: string;
+  loading?: boolean | undefined;
+}) {
   if (loading) {
     return (
       <div className={styles.course_list}>
@@ -61,7 +67,7 @@ export async function CourseListInner({ loading }) {
   );
 }
 
-export default async function CourseList({ tag }) {
+export default async function CourseList({ tag }: { tag: string }) {
   return (
     <Suspense fallback={<CourseListInner loading={true} />}>
       <CourseListInner tag={tag} />

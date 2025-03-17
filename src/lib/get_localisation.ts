@@ -4,7 +4,7 @@ import { sql, cache } from "./db";
 export const get_localisation_dict_all = cache(
   async () => {
     let result = await sql`SELECT tag, text, language_id FROM localization`;
-    let data = {};
+    let data: Record<number, Record<string, string>> = {};
     for (let d of result) {
       if (data[d.language_id] === undefined) {
         data[d.language_id] = {};
@@ -17,14 +17,13 @@ export const get_localisation_dict_all = cache(
   { tags: ["localisation"] },
 );
 
-export const get_localisation_dict = async (lang) => {
+export const get_localisation_dict = async (lang: number) => {
   if (!lang) return {};
   let data = await get_localisation_dict_all();
-  data = data[lang];
-  return data;
+  return data[lang];
 };
 
-export default async function get_localisation(lang) {
+export default async function get_localisation(lang: number) {
   let data = await get_localisation_dict(lang);
   if (lang !== 1) {
     data = {
