@@ -4,7 +4,11 @@ import styles from "./story_button.module.css";
 import get_localisation from "@/lib/get_localisation";
 import { get_course } from "../get_course_data";
 
-export default async function CourseTitle({ course_id }) {
+export default async function CourseTitle({
+  course_id,
+}: {
+  course_id?: string;
+}) {
   if (!course_id) {
     return (
       <>
@@ -56,7 +60,7 @@ export default async function CourseTitle({ course_id }) {
         <p>
           {localisation("course_page_sub_title", {
             $language: course.learning_language_name,
-            $count: course.count,
+            $count: `${course.count}`,
           })}
         </p>
         <p>

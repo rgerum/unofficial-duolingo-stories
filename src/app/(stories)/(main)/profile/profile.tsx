@@ -4,8 +4,9 @@ import Header from "../header";
 import styles from "./profile.module.css";
 import ProviderButton from "./button";
 import Link from "next/link";
+import { ProfileData } from "@/app/(stories)/(main)/profile/page";
 
-export default function Profile({ providers }) {
+export default function Profile({ providers }: { providers: ProfileData }) {
   let [username, setUsername] = useInput(providers.name);
   let [email, setEmail] = useInput(providers.email);
 

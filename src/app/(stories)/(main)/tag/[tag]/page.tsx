@@ -2,7 +2,11 @@ import Link from "next/link";
 import Header from "../../header";
 import CourseList from "../../course_list";
 
-export default async function Page({ params }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ tag: string }>;
+}) {
   // Render data...
   return (
     <>
@@ -21,7 +25,7 @@ export default async function Page({ params }) {
         </p>
       </Header>
       <div>
-        <CourseList tag={params.tag} />
+        <CourseList tag={(await params).tag} />
       </div>
     </>
   );

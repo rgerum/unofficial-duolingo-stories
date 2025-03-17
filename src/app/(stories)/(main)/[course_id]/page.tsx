@@ -5,10 +5,13 @@ import CourseTitle from "./course_title";
 import SetList from "./set_list";
 import get_localisation from "@/lib/get_localisation";
 import { get_course_data, get_course } from "../get_course_data";
+import { ResolvingMetadata } from "next";
 
-export async function generateMetadata({ params, searchParams }, parent) {
+export async function generateMetadata(
+  { params }: { params: Promise<{ course_id: string }> },
+  parent: ResolvingMetadata,
+) {
   const params0 = await params;
-  console.log("params", params0);
   if (
     params0.course_id.indexOf("-") === -1 ||
     params0.course_id.indexOf(".") !== -1
@@ -43,7 +46,7 @@ export async function generateMetadata({ params, searchParams }, parent) {
       url: `https://duostories.org/${params0.course_id}`,
       type: "website",
     },
-    keywords: [course.learning_language_name, ...meta.keywords],
+    keywords: [course.learning_language_name, ...(meta.keywords || [])],
   };
 }
 
@@ -55,7 +58,11 @@ export async function generateStaticParams() {
   }));
 }
 
-export default async function Page({ params }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ course_id: string }>;
+}) {
   const params0 = await params;
   if (
     params0.course_id.indexOf("-") === -1 ||

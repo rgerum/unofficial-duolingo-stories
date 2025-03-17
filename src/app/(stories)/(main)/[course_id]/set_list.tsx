@@ -4,7 +4,7 @@ import SetListClient from "./set_list_client";
 import { get_course_sets } from "./get_story_data";
 import { get_course } from "../get_course_data";
 
-export default async function SetList({ course_id }) {
+export default async function SetList({ course_id }: { course_id?: string }) {
   if (!course_id) {
     return (
       <div className={styles.story_list}>
@@ -14,7 +14,7 @@ export default async function SetList({ course_id }) {
             className={styles.set_content}
             aria-label={`Set ${i + 1}`}
           >
-            <div className={styles.set_title} tabIndex="-1" aria-hidden={true}>
+            <div className={styles.set_title} tabIndex={-1} aria-hidden={true}>
               Set {i + 1}
             </div>
             {[...Array(4)].map((d, i) => (
@@ -30,10 +30,11 @@ export default async function SetList({ course_id }) {
 
   const course_data = await get_course(course_id);
   const course = await get_course_sets(course_id);
-  if (!course) return <div>not found</div>;
+  if (!course || !course_data) return <div>not found</div>;
 
   return (
     <SetListClient
+      course_data={course_data}
       course_id={course_data.id}
       course={course}
       about={course_data.about}

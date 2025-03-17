@@ -5,7 +5,7 @@ export interface CourseData {
   short: string;
   name: string;
   count: number;
-  aboout: string;
+  about: string;
   from_language: number;
   from_language_name: string;
   learning_language: number;

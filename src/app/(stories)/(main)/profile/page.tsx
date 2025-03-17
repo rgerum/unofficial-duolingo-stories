@@ -10,21 +10,31 @@ export const metadata = {
   },
 };
 
+export interface ProfileData {
+  providers: string[];
+  name: string;
+  email: string;
+  role: string[];
+  provider_linked: Record<string, boolean>;
+}
+
 async function getLinkedProviders() {
   let providers_base = ["facebook", "github", "google", "discord"];
   const user = await getUser();
   if (!user) return undefined;
   let user_id = await getUserId();
+  if (!user_id) throw new Error("No user id provided");
+
   const req2 =
     await sql`SELECT provider FROM accounts WHERE "userId" = ${user_id}`;
 
-  let provider_linked = {};
+  let provider_linked: Record<string, boolean> = {};
   for (let p of providers_base) {
     provider_linked[p] = false;
   }
-  let providers = [];
+  let providers: string[] = [];
   for (let p of req2) {
-    providers.push(p.provider);
+    providers.push(p.provider as string);
     provider_linked[p.provider] = true;
   }
   let role = [];
@@ -37,7 +47,7 @@ async function getLinkedProviders() {
     email: user.email,
     role: role,
     provider_linked,
-  };
+  } as ProfileData;
 }
 
 export default async function Page() {

@@ -23,6 +23,12 @@ export const get_localisation_dict = async (lang: number) => {
   return data[lang];
 };
 
+export type LocalisationFunc = (
+  tag: string,
+  replacements?: Record<string, string>,
+  links?: string[],
+) => string | React.JSX.Element | undefined;
+
 export default async function get_localisation(lang: number) {
   let data = await get_localisation_dict(lang);
   if (lang !== 1) {
@@ -31,5 +37,5 @@ export default async function get_localisation(lang: number) {
       ...data,
     };
   }
-  return get_localisation_func(data);
+  return get_localisation_func(data) as LocalisationFunc;
 }

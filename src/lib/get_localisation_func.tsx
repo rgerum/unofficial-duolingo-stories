@@ -1,19 +1,24 @@
 import React from "react";
 import Link from "next/link";
 
-export default function get_localisation_func(data) {
-  function apply(tag, replacements, links) {
+export default function get_localisation_func(data: Record<string, string>) {
+  function apply(
+    tag: string,
+    replacements?: Record<string, string>,
+    links?: string[],
+  ) {
     let text = data[tag];
     if (!text) return undefined;
     if (replacements) text = replaceTags(text, replacements);
     if (tag.startsWith("meta")) return text;
-    if (links) return replaceLinks(replaceTags(text, replacements), links);
+    if (links && replacements)
+      return replaceLinks(replaceTags(text, replacements), links);
     return insetWithNewlines(text);
   }
   return apply;
 }
 
-function insetWithNewlines(text) {
+function insetWithNewlines(text: string) {
   let parts = text.split("\n");
   let last = parts[parts.length - 1];
   return (
@@ -29,8 +34,7 @@ function insetWithNewlines(text) {
   );
 }
 
-export function replaceLinks(text, links) {
-  if (!text) return undefined;
+export function replaceLinks(text: string, links: string[]) {
   return (
     <>
       {text.split(/[{}]/).map((t, i) => (
@@ -46,8 +50,7 @@ export function replaceLinks(text, links) {
   );
 }
 
-export function replaceTags(text, tags) {
-  if (!text) return undefined;
+export function replaceTags(text: string, tags: Record<string, string>) {
   for (let tag in tags) {
     text = text.replaceAll(tag, tags[tag]);
   }

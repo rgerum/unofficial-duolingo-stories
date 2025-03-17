@@ -1,8 +1,15 @@
 import styles from "./story_button.module.css";
 import Link from "next/link";
 import Image from "next/image";
+import { StoryData } from "@/app/(stories)/(main)/[course_id]/get_story_data";
 
-export default function StoryButton({ story, done }) {
+export default function StoryButton({
+  story,
+  done,
+}: {
+  story?: StoryData;
+  done?: boolean;
+}) {
   if (!story) {
     return (
       <div className={styles.button_story_parent}>
