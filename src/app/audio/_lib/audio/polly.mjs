@@ -1,7 +1,7 @@
 // Load the AWS SDK for Node.js
 import { Polly } from "@aws-sdk/client-polly";
-import { put } from '@vercel/blob';
-import { sql } from "@/lib/db.js";
+import { put } from "@vercel/blob";
+import { sql } from "@/lib/db.ts";
 
 // Set the region and credentials for the AWS SDK
 let config = {
@@ -94,9 +94,11 @@ async function synthesizeSpeechPolly(filename, voice_id, text) {
   if (filename) {
     //await writeStream(filename, data.AudioStream);
     let data_file = await streamToBuffer(data.AudioStream);
-    await put(filename, data_file, { access: "public", addRandomSuffix: false });
-  }
-  else content = await streamToBase64(data.AudioStream);
+    await put(filename, data_file, {
+      access: "public",
+      addRandomSuffix: false,
+    });
+  } else content = await streamToBase64(data.AudioStream);
 
   // Handle the audio data
   let data_read2 = await streamToString(data2.AudioStream);
@@ -138,7 +140,7 @@ async function isValidVoice(voice) {
 }
 
 async function getVoiceData(voice) {
-    return (await sql`SELECT * FROM speaker WHERE speaker = ${voice}`)[0];
+  return (await sql`SELECT * FROM speaker WHERE speaker = ${voice}`)[0];
 }
 
 export default {
