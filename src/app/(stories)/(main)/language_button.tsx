@@ -38,7 +38,7 @@ export default async function LanguageButton({
       <FlagById id={course.learning_language} />
       <span className={styles.language_select_button_text}>{course.name}</span>
       <span className={styles.language_story_count}>
-        {localisation("n_stories", { $count: course.count })}
+        {localisation("n_stories", { $count: `${course.count}` })}
       </span>
     </Link>
   );

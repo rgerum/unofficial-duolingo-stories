@@ -72,7 +72,6 @@ export default function Flag(props: {
     }
   }
   const flag1 = flag;
-  console.log("flag init", props, flag);
   if (flag === 0 && !props.flag_file && props.iso !== "en") {
     // Check if there's a valid flag index, fall back to "world" flag if not
     flag = props.flag && props.flag > 0 && props.flag < 48 ? props.flag : 37; // "world"
@@ -83,7 +82,6 @@ export default function Flag(props: {
     height: (66 / 82) * (props.width || 88),
     minWidth: props.width || 88,
   };
-  console.log(props, flag);
   return (
     <>
       <Image
@@ -93,7 +91,6 @@ export default function Flag(props: {
             "--flag_offset": flag,
           } as CSSProperties
         }
-        title={JSON.stringify(props, null, 2) + " " + flag}
         width={style.width}
         height={style.height}
         priority={true}

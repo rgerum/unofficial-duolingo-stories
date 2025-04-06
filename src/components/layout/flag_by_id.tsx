@@ -17,7 +17,6 @@ export const get_flag_data = cache(
 );
 
 let get_lang = cache(async (id: number) => {
-  console.log("get_lang", await get_flag_data());
   return (await get_flag_data())[id];
 });
 
@@ -31,7 +30,6 @@ export default async function FlagById({
   height?: number;
 }) {
   const { short, flag_file, flag } = await get_lang(id);
-  console.log("FlagById", id, short, flag_file, flag);
   return (
     <Flag
       iso={short}
