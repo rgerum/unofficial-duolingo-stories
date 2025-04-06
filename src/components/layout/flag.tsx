@@ -93,6 +93,7 @@ export default function Flag(props: {
             "--flag_offset": flag,
           } as CSSProperties
         }
+        title={JSON.stringify(props, null, 2) + " " + flag}
         width={style.width}
         height={style.height}
         priority={true}
