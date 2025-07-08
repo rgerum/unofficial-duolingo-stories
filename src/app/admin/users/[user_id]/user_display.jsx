@@ -14,6 +14,12 @@ export async function setUserWrite(data) {
   return res;
 }
 
+export async function setUserDelete(data) {
+  let res = await fetch_post(`/admin/users/set/delete`, data);
+  res = await res.text();
+  return res;
+}
+
 function Activate(props) {
   let [checked, setChecked] = useState(props.user.activated);
   async function OnClick(e) {
@@ -53,6 +59,13 @@ function Write(props) {
 export default function UserDisplay({ user }) {
   const [user_] = useState(user);
 
+  async function Delete() {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      console.log("delete", user_);
+      await setUserDelete({ id: user_.id });
+    }
+  }
+
   return (
     <div
       style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
@@ -65,6 +78,9 @@ export default function UserDisplay({ user }) {
       </p>
       <p>
         Contributor: <Write user={user} />
+      </p>
+      <p>
+        Delete: <button onClick={Delete}>delete</button>
       </p>
     </div>
   );

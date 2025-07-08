@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getUser } from "@/lib/userInterface";
 
 export async function generateMetadata({}) {
   return {
@@ -10,12 +10,12 @@ export async function generateMetadata({}) {
 }
 
 export default async function Page({}) {
-  const session = await auth();
+  const user = await getUser();
 
-  if (!session) {
+  if (!user) {
     return { redirect: { destination: "/editor/login", permanent: false } };
   }
-  if (!session?.user?.role) {
+  if (!user?.role) {
     return {
       redirect: { destination: "/editor/not_allowed", permanent: false },
     };

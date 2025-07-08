@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 import { audio_engines } from "../_lib/audio";
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
+import { getUser } from "@/lib/userInterface";
 
 export async function GET(req) {
-  const token = await getToken({ req });
+  const token = await getUser(req);
 
   if (!token?.admin)
     return new Response("You need to be a registered admin.", { status: 401 });

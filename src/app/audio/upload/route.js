@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 import { v4 as uuid } from "uuid";
 let fs = require("fs");
 import { put } from "@vercel/blob";
+import { getUser } from "@/lib/userInterface";
 
 async function mkdir(folderName) {
   return new Promise((resolve, reject) => {
@@ -30,7 +30,7 @@ async function exists(filename) {
 }
 
 export async function POST(req) {
-  const token = await getToken({ req });
+  const token = await getUser(req);
 
   if (!token?.role)
     return new Response("You need to be a registered contributor.", {

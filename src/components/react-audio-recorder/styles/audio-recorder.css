@@ -1,0 +1,93 @@
+.audio-recorder {
+    background-color: rgb(235, 235, 235);
+    /* border: 1px solid gray; */
+    box-shadow: 0px 2px 5px 0px rgb(190, 190, 190);
+    border-radius: 20px;
+    box-sizing: border-box;
+    color: #000000;
+
+    width: 40px;
+    display: flex;
+    align-items: center;
+
+    transition: all 0.2s ease-in;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.audio-recorder-mic {
+    box-sizing: content-box;
+    cursor: pointer;
+    height: 16px;
+    color: black;
+    padding: 12px;
+}
+
+.audio-recorder .audio-recorder-mic {
+    border-radius: 20px;
+}
+
+.audio-recorder.recording .audio-recorder-mic {
+    border-radius: 0;
+}
+
+.audio-recorder-timer, .audio-recorder-status {
+    color: #000000;
+    margin-left: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1;
+}
+
+.audio-recorder-status {
+    margin-left: 15px;
+    display: flex;
+    align-items: baseline;
+    flex-grow: 1;
+    animation-name: fading-ar-status;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+}
+
+.audio-recorder-status-dot {
+    background-color: rgb(221, 0, 0);
+    border-radius: 50%;
+    height: 10px;
+    width: 9px;
+    margin-right: 5px;
+}
+
+.audio-recorder-options {
+    box-sizing: content-box;
+    height: 16px;
+    cursor: pointer;
+    padding: 12px 6px 12px 12px;
+}
+.audio-recorder-options ~ .audio-recorder-options {
+    padding: 12px 12px 12px 6px;
+    border-radius: 0 5px 5px 0;
+}
+
+.recording {
+    border-radius: 12px;
+    width: 300px;
+    transition: all 0.2s ease-out;
+}
+
+.display-none {
+    display: none;
+}
+
+.audio-recorder-visualizer {
+    margin-left: 15px;
+    flex-grow: 1;
+    align-self: center;
+    display: flex;
+    align-items: center;
+}
+
+@keyframes fading-ar-status {
+    0%   {opacity: 1;}
+    50%  {opacity: 0;}
+    100% {opacity: 1;}
+}

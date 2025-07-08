@@ -2,7 +2,7 @@
 import styles from "../index.module.css";
 import { useInput } from "@/lib/hooks";
 import { Spinner } from "@/components/layout/spinner";
-import Flag from "@/components/layout/flag";
+import Flag from "@/components/layout/flag.tsx";
 import { fetch_post } from "@/lib/fetch_post";
 import styled from "styled-components";
 import Input from "@/components/layout/Input";

@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 import { CourseList } from "./courses";
 
 async function course_list() {

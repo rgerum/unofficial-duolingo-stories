@@ -8,27 +8,21 @@ import styles from "./[language].module.css";
 import AudioPlay from "@/components/story/text_lines/audio_play";
 import HintLineContent from "@/components/story/text_lines/line_hints";
 import useAudio from "@/components/story/text_lines/use_audio";
-import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
 import EditorButton from "../../editor_button";
+import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 
 export default function LanguageEditor({
   language,
   language2,
   speakers,
   avatar_names,
-  session,
   course,
 }) {
   // Render data...
   return (
     <>
-      <Layout
-        language_data={language}
-        language2={language2}
-        session={session}
-        course={course}
-      >
+      <Layout language_data={language} language2={language2} course={course}>
         <div className={styles.root + " " + styles.characterEditorContent}>
           <AvatarNames
             language={language}
@@ -45,7 +39,6 @@ export function Layout({
   children,
   language_data,
   language2,
-  session,
   course,
   use_edit,
 }) {
@@ -110,15 +103,10 @@ export function Layout({
             text={"Edit"}
           />
         )}
-        {session?.user ? (
-          <LoggedInButton
-            page={"editor"}
-            course_id={course?.short}
-            session={session}
-          />
-        ) : (
-          <LogInButton />
-        )}
+        <LoggedInButtonWrappedClient
+          page={"editor"}
+          course_id={course?.short}
+        />
       </nav>
       <div className={styles.main_index}>{children}</div>
     </>

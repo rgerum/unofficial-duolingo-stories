@@ -1,8 +1,7 @@
 import React from "react";
 import { cache } from "react";
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 import LanguageEditor from "./language_editor";
-import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 
 const get_avatar_names = cache(async (id) => {
@@ -50,7 +49,9 @@ const get_language = cache(async (id) => {
 });
 
 export async function generateMetadata({ params }) {
-  let [language, course, language2] = await get_language(params.language);
+  let [language, course, language2] = await get_language(
+    (await params).language,
+  );
 
   if (!language2) {
     return {
@@ -72,9 +73,9 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const session = await auth();
-
-  let [language, course, language2] = await get_language(params.language);
+  let [language, course, language2] = await get_language(
+    (await params).language,
+  );
 
   if (!language) {
     notFound();
@@ -91,7 +92,6 @@ export default async function Page({ params }) {
         language2={language2}
         speakers={speakers}
         avatar_names={avatar_names}
-        session={session}
         course={course}
       />
     </>

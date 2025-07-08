@@ -1,6 +1,6 @@
 import styles from "./breadcrumbs.module.css";
 import React from "react";
-import { DoubleFlag } from "@/components/layout/flag";
+import { DoubleFlag } from "@/components/layout/flag.tsx";
 import Link from "next/link";
 import EditorButton from "../editor_button";
 

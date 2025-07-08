@@ -1,6 +1,6 @@
-import { auth } from "@/auth";
+import { getUser } from "@/lib/userInterface";
 
 export default async function getUserName() {
-  const session = await auth();
-  return session?.user?.name;
+  const user = await getUser();
+  return user?.name;
 }

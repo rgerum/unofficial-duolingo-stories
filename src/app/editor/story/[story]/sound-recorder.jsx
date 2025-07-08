@@ -1,7 +1,7 @@
 import styles from "./sound-recorder.module.css";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
-import { AudioRecorder } from "react-audio-voice-recorder";
+import { AudioRecorder } from "@/components/react-audio-recorder";
 import HintLineContent from "@/components/story/text_lines/line_hints";
 import { splitTextTokens } from "@/lib/editor/tts_transcripte.mjs";
 

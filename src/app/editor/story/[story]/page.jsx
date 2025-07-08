@@ -1,9 +1,8 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { auth } from "@/auth";
 import Editor from "./editor";
 
-import { sql } from "@/lib/db";
+import { sql } from "@/lib/db.ts";
 
 async function get_story({ id }) {
   return (
@@ -33,7 +32,8 @@ async function getAvatarsList(id) {
 }
 
 export async function generateMetadata({ params }) {
-  let story_data = await get_story({ id: params.story });
+  const story = (await params).story;
+  let story_data = await get_story({ id: story });
 
   if (!story_data) notFound();
 
@@ -46,9 +46,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const session = await auth();
-
-  let story_data = await get_story({ id: params.story });
+  const story = (await params).story;
+  let story_data = await get_story({ id: story });
 
   if (!story_data) {
     notFound();
@@ -56,11 +55,5 @@ export default async function Page({ params }) {
 
   let avatar_names = await getAvatarsList(story_data?.learning_language);
 
-  return (
-    <Editor
-      story_data={story_data}
-      avatar_names={avatar_names}
-      session={session}
-    />
-  );
+  return <Editor story_data={story_data} avatar_names={avatar_names} />;
 }

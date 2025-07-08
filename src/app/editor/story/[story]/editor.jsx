@@ -77,7 +77,7 @@ function getMax(list, callback) {
   return max;
 }
 
-export default function Editor({ story_data, avatar_names, session }) {
+export default function Editor({ story_data, avatar_names }) {
   const editor = React.useRef();
   const preview = React.useRef();
   const margin = React.useRef();
@@ -336,7 +336,6 @@ export default function Editor({ story_data, avatar_names, session }) {
           set_show_ssml={set_show_ssml}
           language_data={language_data}
           language_data2={language_data2}
-          session={session}
         />
         {(audio_editor_data?.line?.content ||
           audio_editor_data?.learningLanguageTitleContent) && (
