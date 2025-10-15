@@ -2,12 +2,16 @@ import React from "react";
 import styles from "./cast.module.css";
 import Link from "next/link";
 
-export default function Cast(props) {
+export default function Cast(props: {
+  id: number;
+  cast: { id: number; link: string; speaker: string; name: string }[];
+  short: string;
+}) {
   let cast = [];
   let no_speaker_count = 0;
-  for (let id in props.story_meta.cast) {
-    cast.push(props.story_meta.cast[id]);
-    if (!props.story_meta.cast[id].speaker) no_speaker_count += 1;
+  for (let id in props.cast) {
+    cast.push(props.cast[id]);
+    if (!props.cast[id].speaker) no_speaker_count += 1;
   }
   return (
     <div className={styles.cast_element}>
@@ -51,7 +55,9 @@ export default function Cast(props) {
   );
 }
 
-function Character(props) {
+function Character(props: {
+  character: { id: number; link: string; name: string; speaker: string };
+}) {
   let character = props.character;
   return (
     <tr className={styles.character}>

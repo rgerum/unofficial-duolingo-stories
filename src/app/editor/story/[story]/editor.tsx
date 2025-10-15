@@ -16,15 +16,16 @@ import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 
 import { useRouter } from "next/navigation";
 import { StoryEditorHeader } from "./header";
-import { fetch_post } from "@/lib/fetch_post";
+import { fetch_post } from "@/lib/fetch_post.mjs";
 import SoundRecorder from "./sound-recorder";
 import {
   insert_audio_line,
   timings_to_text,
-} from "@/components/story/text_lines/audio_edit_tools.mjs";
+} from "@/components/story/text_lines/audio_edit_tools";
+import { Avatar, StoryData } from "@/app/editor/story/[story]/page";
 
 let images_cached = {};
-export async function getImage(id) {
+export async function getImage(id: number) {
   if (images_cached[id] !== undefined) {
     return images_cached[id];
   }
@@ -32,7 +33,7 @@ export async function getImage(id) {
   //return {}
 }
 
-export async function getImageAsync(id) {
+export async function getImageAsync(id: number) {
   try {
     let response_json = await fetch(`/editor/story/get_image/${id}`, {
       credentials: "include",
@@ -77,11 +78,17 @@ function getMax(list, callback) {
   return max;
 }
 
-export default function Editor({ story_data, avatar_names }) {
-  const editor = React.useRef();
-  const preview = React.useRef();
-  const margin = React.useRef();
-  const svg_parent = React.useRef();
+export default function Editor({
+  story_data,
+  avatar_names,
+}: {
+  story_data: StoryData;
+  avatar_names: Record<number, Avatar>;
+}) {
+  const editor = React.useRef<HTMLDivElement>(null);
+  const preview = React.useRef<HTMLDivElement>(null);
+  const margin = React.useRef<SVGSVGElement>(null);
+  const svg_parent = React.useRef<SVGSVGElement>(null);
 
   const [language_data, set_language_data] = React.useState();
   const [language_data2, set_language_data2] = React.useState();
@@ -406,7 +413,7 @@ export default function Editor({ story_data, avatar_names }) {
             {story_meta && story_data ? (
               <Cast
                 id={story_data.id}
-                story_meta={story_meta}
+                cast={story_meta.cast}
                 learning_language={story_data.learning_language}
                 short={story_data.short}
               />

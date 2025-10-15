@@ -1,14 +1,19 @@
 import jsyaml from "js-yaml";
 
-export function init_mapping(text) {
-  let mapping = [];
+export function init_mapping(text: string) {
+  let mapping: number[] = [];
   for (let i = 0; i < text.length; i++) {
     mapping.push(i);
   }
   return { text, mapping };
 }
 
-export function replace_with_mapping({ text, mapping }, replace, start, end) {
+export function replace_with_mapping(
+  { text, mapping }: { text: string; mapping: number[] },
+  replace: string,
+  start: number,
+  end?: number,
+) {
   if (mapping === undefined) mapping = init_mapping(text).mapping;
   if (!end) end = start;
   let length = end - start;
@@ -24,10 +29,14 @@ export function replace_with_mapping({ text, mapping }, replace, start, end) {
   return { text, mapping, length: text.length };
 }
 
-export function find_replace_with_mapping(mapped_text, find, replace) {
+export function find_replace_with_mapping(
+  mapped_text: { text: string; mapping: number[] },
+  find: string,
+  replace: string,
+) {
   let match = mapped_text.text.match(find);
   let o = 0;
-  while (match) {
+  while (match && match.index) {
     match.index += o;
     if (match.length > 1) {
       let replacer = replace;
@@ -70,8 +79,11 @@ export function find_replace_with_mapping(mapped_text, find, replace) {
   return mapped_text;
 }
 
-function apply_letter_replacements(mapped_text, replacements, options) {
-  if(!replacements) return mapped_text
+function apply_letter_replacements(
+  mapped_text: { text: string; mapping: number[] },
+  replacements?: Record<string, string>,
+) {
+  if (!replacements) return mapped_text;
   let tag_start = [];
   for (let i = 0; i < mapped_text.text.length; i++) {
     let char = mapped_text.text[i].toLowerCase();
@@ -96,7 +108,16 @@ function apply_letter_replacements(mapped_text, replacements, options) {
  * @param {function} callback - The callback function to be called for each word replacement.
  * @returns {object} - The modified mapped text object.
  */
-function iter_word_replacements(mapped_text, callback, options) {
+function iter_word_replacements(
+  mapped_text: { text: string; mapping: number[] },
+  callback: (
+    mapped_text: { text: string; mapping: number[] },
+    word: string,
+    word_start: number,
+    i: number,
+    bracket_start: number,
+  ) => [mapped_text: { text: string; mapping: number[] }, i: number],
+) {
   // Initialize variables
   let last_char_word = false;
   let word_start = undefined;
@@ -122,7 +143,7 @@ function iter_word_replacements(mapped_text, callback, options) {
     last_char_word = is_word;
 
     // Call the callback function if not inside a tag and a word is found
-    if (tag_start.length === 0 && word) {
+    if (tag_start.length === 0 && word && word_start !== undefined) {
       [mapped_text, i] = callback(
         mapped_text,
         word,
@@ -153,7 +174,11 @@ function iter_word_replacements(mapped_text, callback, options) {
   return mapped_text;
 }
 
-export function apply_word_replacements(mapped_text, replacements, options) {
+export function apply_word_replacements(
+  mapped_text: { text: string; mapping: number[] },
+  replacements: Record<string, string>,
+  options: { in_brackets?: number },
+) {
   mapped_text = iter_word_replacements(
     mapped_text,
     (mapped_text, word, word_start, i, bracket_level) => {
@@ -201,7 +226,10 @@ let punctuation_chars =
 //punctuation_chars = "\\\\¡!\"#$%&*,、，.。\\/:：;<=>¿?@^_`{|}…"
 
 let reg_white = new RegExp(`[\\s${punctuation_chars}~]`);
-export function add_word_marks_replacements(mapped_text) {
+export function add_word_marks_replacements(mapped_text: {
+  text: string;
+  mapping: number[];
+}) {
   mapped_text = iter_word_replacements(
     mapped_text,
     (mapped_text, word, word_start, i, bracket_start) => {
@@ -220,7 +248,7 @@ let regex_split_token = new RegExp(
 let regex_split_token2 = new RegExp(
   `([\\s${punctuation_chars}~]*(?:^|\\s|$|​)[\\s${punctuation_chars}~]*)`,
 );
-function splitTextTokens(text, keep_tilde = true) {
+function splitTextTokens(text: string, keep_tilde = true) {
   if (!text) return [];
   //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
   if (keep_tilde)
@@ -232,13 +260,16 @@ function splitTextTokens(text, keep_tilde = true) {
   //return text.split(/([\s\\¡!"#$%&*,、，.。\/:：;<=>¿?@^_`{|}…~]*(?:^|\s|$|​)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]*)/)
 }
 
-function apply_fragment_replacements(mapped_text, replacements) {
+function apply_fragment_replacements(
+  mapped_text: { text: string; mapping: number[] },
+  replacements: Record<string, string>,
+) {
   mapped_text = iter_word_replacements(
     mapped_text,
     (mapped_text, word, word_start, i, bracket_start) => {
       for (let frag in replacements) {
         let match = word.match(new RegExp(frag, "i"));
-        if (!match) continue;
+        if (!match || !match.index) continue;
         let new_word = replacements[frag];
         mapped_text = replace_with_mapping(
           mapped_text,
@@ -263,14 +294,18 @@ function apply_fragment_replacements(mapped_text, replacements) {
   return mapped_text;
 }
 
-function apply_group(mapped_text, data, options) {
-  for (let section in data) {
+function apply_group(
+  mapped_text: { text: string; mapping: number[] },
+  data: {}[],
+  options: { in_brackets?: number },
+) {
+  for (const section in data) {
     if (section.toUpperCase() === "OPTIONS") {
-      options = { ...options, ...data[section] };
+      options = { ...options, ...data[section] } as { in_brackets?: number };
     }
   }
 
-  for (let section in data) {
+  for (const section in data) {
     if (section.toUpperCase().startsWith("GROUP")) {
       mapped_text = apply_group(mapped_text, data[section], options);
     }
@@ -278,14 +313,14 @@ function apply_group(mapped_text, data, options) {
       mapped_text = apply_letter_replacements(
         mapped_text,
         data[section],
-        options,
+        //options,
       );
     }
     if (section.toUpperCase() === "FRAGMENTS") {
       mapped_text = apply_fragment_replacements(
         mapped_text,
         data[section],
-        options,
+        //options,
       );
     }
     if (section.toUpperCase() === "WORDS") {
@@ -299,10 +334,13 @@ function apply_group(mapped_text, data, options) {
   return mapped_text;
 }
 
-export function transcribe_text(mapped_text, data) {
-  data = jsyaml.load(data);
+export function transcribe_text(
+  mapped_text: { text: string; mapping: number[] },
+  data: string,
+) {
+  const data2 = jsyaml.load(data);
 
-  mapped_text = apply_group(mapped_text, data, {});
+  mapped_text = apply_group(mapped_text, data2, {});
 
   return mapped_text;
 }

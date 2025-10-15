@@ -1,9 +1,37 @@
 import {
   generate_ssml_line,
   text_to_keypoints,
-} from "../../story/text_lines/audio_edit_tools.mjs";
+} from "../../story/text_lines/audio_edit_tools";
+import { Avatar } from "@/app/editor/story/[story]/page";
 
-function generateHintMap(text, translation) {
+// Core Types
+interface HintMapItem {
+  hintIndex: number;
+  rangeFrom: number;
+  rangeTo: number;
+}
+
+interface HintMapResult {
+  hintMap: HintMapItem[];
+  hints: string[];
+  text: string;
+}
+
+interface ContentWithHints {
+  hintMap: HintMapItem[];
+  text: string;
+  [key: string]: any; // For additional properties
+}
+
+export interface HideRange {
+  start: number;
+  end: number;
+}
+
+function generateHintMap(
+  text: string = "",
+  translation: string = "",
+): HintMapResult {
   if (!text) text = "";
   text = text.replace(/\|/g, "⁠");
   let text_list = splitTextTokens(text);
@@ -31,7 +59,7 @@ function generateHintMap(text, translation) {
   return { hintMap: hintMap, hints: hints, text: text.trim() };
 }
 
-function hintsShift(content, pos) {
+function hintsShift(content: ContentWithHints, pos: number): void {
   for (let i in content.hintMap) {
     if (content.hintMap[i].rangeFrom > pos) content.hintMap[i].rangeFrom -= 1;
     if (content.hintMap[i].rangeTo >= pos) content.hintMap[i].rangeTo -= 1;
@@ -40,7 +68,7 @@ function hintsShift(content, pos) {
     content.text.substring(0, pos) + content.text.substring(pos + 1);
 }
 
-function getButtons(content) {
+function getButtons(content: ContentWithHints): [string[], number[]] {
   let buttons = [...content.text.matchAll(/\(([^)]*)\)/g)];
   let selectablePhrases = [];
   for (let button of buttons) {
@@ -70,11 +98,18 @@ function getButtons(content) {
   return [selectablePhrases, characterPositions];
 }
 
-function regexIndexOf(string, regex, startpos) {
+function regexIndexOf(
+  string: string,
+  regex: RegExp,
+  startpos?: number,
+): number {
   var indexOf = string.substring(startpos || 0).search(regex);
   return indexOf >= 0 ? indexOf + (startpos || 0) : indexOf;
 }
-function removeDoubleBrackets(content, pos) {
+function removeDoubleBrackets(
+  content: ContentWithHints,
+  pos: number[],
+): number[] {
   for (let char of [/(?<!\[)\[(?!\[)/, /(?<!\])\](?!\])/, /\[\[/, /\]\]/]) {
     let pos1 = regexIndexOf(content.text, char);
     while (pos1 !== -1) {
@@ -86,7 +121,7 @@ function removeDoubleBrackets(content, pos) {
   return pos;
 }
 
-function getHideRanges(content) {
+function getHideRanges(content: ContentWithHints): HideRange[] {
   let pos_br = content.text.indexOf("\\n");
   while (pos_br !== -1) {
     hintsShift(content, pos_br);
@@ -112,12 +147,12 @@ function getHideRanges(content) {
   return [];
 }
 
-function shuffleArray(selectablePhrases) {
+function shuffleArray(selectablePhrases: string[]): [number[], string[]] {
   let phraseOrder = [];
   for (let i in selectablePhrases) {
     phraseOrder.push(parseInt(i));
   }
-  const shuffleArray = (array) => {
+  const shuffleArray = (array: number[]) => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       const temp = array[i];
@@ -131,9 +166,9 @@ function shuffleArray(selectablePhrases) {
   return [phraseOrder, selectablePhrases2];
 }
 
-function split_lines(text) {
+function split_lines(text: string) {
   /* splits the text into lines and removes comments */
-  let lines = [];
+  let lines: LineTuple[] = [];
   let lineno = 0;
   let todo_count = 0;
   for (let line of text.split("\n")) {
@@ -141,7 +176,7 @@ function split_lines(text) {
     // ignore empty lines or lines with comments (and remove rtl isolate)
     line = line.trim().replace(/\u2067/, "");
     if (line.length === 0 || line.substring(0, 1) === "#") {
-      if(line.indexOf("TODO") !== -1) todo_count++;
+      if (line.indexOf("TODO") !== -1) todo_count++;
       continue;
     }
 
@@ -149,12 +184,13 @@ function split_lines(text) {
   }
   lines.push([lineno + 1, ""]);
   lines.push([lineno + 2, ""]);
-  return {lines, todo_count};
+  return { lines, todo_count };
 }
 
-function processBlockData(line_iter, story) {
+function processBlockData(line_iter: LineIterator, story: Story) {
   while (line_iter.get()) {
     let line = line_iter.get();
+    if (!line) break;
     if (line.indexOf("=") !== -1) {
       let [key, value] = line.split("=", 2);
       story.meta[key.trim()] = value.trim();
@@ -167,14 +203,24 @@ function processBlockData(line_iter, story) {
     if (key.startsWith("icon_")) {
       let id = key.substring(5);
       if (!story.meta.avatar_overwrites[id])
-        story.meta.avatar_overwrites[id] = { id: id };
-      story.meta.avatar_overwrites[id].link = story.meta[key];
+        story.meta.avatar_overwrites[id] = {
+          id: id,
+          link: "",
+          speaker: "",
+          name: "",
+        };
+      story.meta.avatar_overwrites[id].link = story.meta[key] ?? "";
     }
     if (key.startsWith("speaker_")) {
       let id = key.substring(8);
       if (!story.meta.avatar_overwrites[id])
-        story.meta.avatar_overwrites[id] = { id: id };
-      story.meta.avatar_overwrites[id].speaker = story.meta[key];
+        story.meta.avatar_overwrites[id] = {
+          id: id,
+          link: "",
+          speaker: "",
+          name: "",
+        };
+      story.meta.avatar_overwrites[id].speaker = story.meta[key] ?? "";
     }
   }
   if (story.meta["set"] && story.meta["set"].indexOf("|") !== -1) {
@@ -207,7 +253,7 @@ function splitTextTokens(text, keep_tilde=true) {
 }
 */
 
-export function splitTextTokens(text, keep_tilde = true) {
+export function splitTextTokens(text: string, keep_tilde = true) {
   if (!text) return [];
   //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
   if (keep_tilde)
@@ -219,7 +265,7 @@ export function splitTextTokens(text, keep_tilde = true) {
   //return text.split(/([\s\\¡!"#$%&*,、，.。\/:：;<=>¿?@^_`{|}…~]*(?:^|\s|$|​)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]*)/)
 }
 
-function splitTextTokens2(text, keep_tilde = true) {
+function splitTextTokens2(text: string, keep_tilde = true) {
   if (!text) return [];
   if (keep_tilde)
     //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
@@ -228,14 +274,14 @@ function splitTextTokens2(text, keep_tilde = true) {
   else return text.split(/([\s​⁠~]+)/);
 }
 
-function getInputStringText(text) {
+function getInputStringText(text: string) {
   // remove multiple white space characters
   text = text.replace(/(\s)\s+/g, "$1");
   //
   return text; //.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
 }
 
-function getInputStringSpeechText(text, hide) {
+function getInputStringSpeechText(text: string, hide: boolean) {
   if (hide) {
     text = text.replace("[", '<prosody volume="silent">');
     text = text.replace("]", "</prosody>");
@@ -261,20 +307,28 @@ function getInputStringSpeechText(text, hide) {
   );
 }
 
-function speaker_text_trans(data, meta, use_buttons, hide = false) {
+function speaker_text_trans(
+  data: Speaker,
+  meta: Meta,
+  use_buttons = false,
+  hide = false,
+) {
   //console.log("data.text", data.text)
-  let [, speaker_text, text] = data.text.match(
+
+  const text_match = data.text?.match(
     /\s*(?:>?\s*(\w*)\s*:|>|\+|-)\s*(\S.*\S|\S)\s*/,
   );
-  let translation = "";
-  if (data.trans) [, translation] = data.trans.match(/\s*~\s*(\S.*\S|\S)\s*/);
+  const speaker_text = text_match?.[1] || "";
+  let text = text_match?.[2] || "";
+
+  const translation = data.trans?.match(/\s*~\s*(\S.*\S|\S)\s*/)?.[1] || "";
 
   getInputStringText(text);
-  let ipa_replacements = [];
+  let ipa_replacements: string[] & { index: number }[] = [];
   let ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
 
-  while (ipa_match) {
-    ipa_replacements.push(ipa_match);
+  while (ipa_match && ipa_match.index !== undefined) {
+    ipa_replacements.push({ index: ipa_match.index });
     text =
       text.substring(0, ipa_match.index + ipa_match[1].length) +
       text.substring(ipa_match.index + ipa_match[0].length);
@@ -298,9 +352,9 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
 
   // split number of speaker
   let speaker;
-  let speaker_id = 0;
+  let speaker_id = "0";
   if (speaker_text) {
-    [, speaker_id] = speaker_text.match(/Speaker(.*)/);
+    speaker_id = speaker_text.match(/Speaker(.*)/)?.[1] || "0";
   }
   if (meta) {
     speaker = get_avatar(speaker_id, meta.avatar_names, meta.avatar_overwrites);
@@ -330,7 +384,7 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
         meta.avatar_names[0]?.speaker;
 
     audio = line_to_audio(
-      data.audio,
+      data.audio ?? "",
       content.text,
       speaker_name,
       meta.story_id,
@@ -341,14 +395,17 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
     audio.ssml.inser_index = meta.audio_insert_lines.length;
     audio.ssml.plan_text = text;
     audio.ssml.plan_text_speaker_name = speaker_name;
-    meta.audio_insert_lines.push([data.audio_line, data.audio_line_inset]);
+    meta.audio_insert_lines.push([
+      data.audio_line ?? 0,
+      data.audio_line_inset ?? "",
+    ]);
     //audio.ssml.line = data.audio_line;
     //audio.ssml.line_insert = data.audio_line_inset;
     content.audio = audio;
   }
 
   let line;
-  if (speaker && speaker_id !== 0) {
+  if (speaker && speaker_id !== "0") {
     line = {
       type: "CHARACTER",
       avatarUrl: speaker.avatarUrl,
@@ -373,22 +430,38 @@ function speaker_text_trans(data, meta, use_buttons, hide = false) {
   };
 }
 
+type Audio = {
+  ssml: {
+    text: string;
+    speaker: string;
+    id: number;
+
+    inser_index: number | undefined;
+    plan_text: string | undefined;
+    plan_text_speaker_name: string | undefined;
+  };
+  url: undefined | string;
+  keypoints: undefined | { rangeEnd: number; audioStart: number }[];
+};
 function line_to_audio(
-  line,
-  text,
-  speaker,
-  story_id,
-  hideRanges,
-  transcribe_data,
-  ipa_replacements,
+  line: string,
+  text: string,
+  speaker: string,
+  story_id: number,
+  hideRanges: HideRange[],
+  transcribe_data: TranscribeData,
+  ipa_replacements: { index: number }[],
 ) {
   //let text_speak = getInputStringSpeechText(text, hide);
-  let audio = {};
-  audio.ssml = {
-    text: text,
-    speaker: speaker,
-    id: story_id,
-  };
+  let audio = {
+    ssml: {
+      text: text,
+      speaker: speaker,
+      id: story_id,
+    },
+    url: undefined,
+    keypoints: undefined,
+  } as Audio;
   audio.ssml = generate_ssml_line(
     audio.ssml,
     transcribe_data,
@@ -404,27 +477,57 @@ function line_to_audio(
   return audio;
 }
 
-function get_avatar(id, avatar_names, avatar_overwrites) {
-  id = parseInt(id) ? parseInt(id) : id;
-  if (avatar_overwrites[id])
-    return { characterId: id, avatarUrl: avatar_overwrites[id]?.link };
-  return { characterId: id, avatarUrl: avatar_names[id]?.link, characterName: avatar_names[id]?.name};
+function get_avatar(
+  id: string,
+  avatar_names: Record<string, Avatar>,
+  avatar_overwrites: Record<string, AvatarOverwrites>,
+) {
+  const id2 = parseInt(id) ?? id;
+  if (avatar_overwrites[id2])
+    return { characterId: id2, avatarUrl: avatar_overwrites[id2]?.link };
+  return {
+    characterId: id2,
+    avatarUrl: avatar_names[id2]?.link,
+    characterName: avatar_names[id2]?.name,
+  };
 }
 
-function getText(line_iter, allow_speaker, allow_trans, allow_audio) {
-  let speaker = {};
+type Speaker = {
+  text: undefined | string;
+  trans: undefined | string;
+  allow_audio: undefined | boolean;
+  audio_line_inset: undefined | number;
+  audio: undefined | string;
+  audio_line: undefined | number;
+};
+
+function getText(
+  line_iter: LineIterator,
+  allow_speaker: boolean,
+  allow_trans: boolean,
+  allow_audio: boolean,
+) {
+  let speaker: Speaker = {
+    text: undefined,
+    trans: undefined,
+    allow_audio: undefined,
+    audio_line_inset: undefined,
+    audio: undefined,
+    audio_line: undefined,
+  };
   let line = line_iter.get();
+  if (!line) return speaker;
   if (line.startsWith(">") || (allow_speaker && line.match(/\w*:/))) {
     speaker.text = line;
     line = line_iter.advance(1);
-    if (line.startsWith("~") && allow_trans) {
+    if (line?.startsWith("~") && allow_trans) {
       speaker.trans = line;
       line = line_iter.advance();
     }
     if (allow_audio) {
       speaker.allow_audio = allow_audio;
       speaker.audio_line_inset = line_iter.get_lineno();
-      if (line.startsWith("$")) {
+      if (line?.startsWith("$")) {
         speaker.audio = line;
         speaker.audio_line = line_iter.get_lineno();
         line_iter.advance();
@@ -434,7 +537,7 @@ function getText(line_iter, allow_speaker, allow_trans, allow_audio) {
   return speaker;
 }
 
-function getAnswers(line_iter, allow_trans, lang_hints) {
+function getAnswers(line_iter: LineIterator, allow_trans, lang_hints) {
   let answers = [];
   let correct_answer = undefined;
   while (line_iter.get()) {
@@ -509,7 +612,12 @@ function pointToPhraseButtons(line) {
   return [correctAnswerIndex, transcriptParts];
 }
 
-function processBlockHeader(line_iter, story, lang, story_languages) {
+function processBlockHeader(
+  line_iter: LineIterator,
+  story: Story,
+  lang: string,
+  story_languages: StoryLanguages,
+) {
   let start_no = line_iter.get_lineno(-1);
   let start_no1 = line_iter.get_lineno();
   let data = getText(line_iter, false, true, true);
@@ -536,7 +644,12 @@ function processBlockHeader(line_iter, story, lang, story_languages) {
   return false;
 }
 
-function processBlockLine(line_iter, story, lang, story_languages) {
+function processBlockLine(
+  line_iter: LineIterator,
+  story: Story,
+  lang: string,
+  story_languages: StoryLanguages,
+) {
   let start_no = line_iter.get_lineno(-1);
   let start_no1 = line_iter.get_lineno();
   let data = getText(line_iter, true, true, true);
@@ -564,7 +677,12 @@ function processBlockLine(line_iter, story, lang, story_languages) {
   return false;
 }
 
-function processBlockMultipleChoice(line_iter, story, lang, story_languages) {
+function processBlockMultipleChoice(
+  line_iter: LineIterator,
+  story: Story,
+  lang: string,
+  story_languages: StoryLanguages,
+) {
   let start_no = line_iter.get_lineno(-1);
   let start_no1 = line_iter.get_lineno();
   let data = getText(line_iter, false, true, false);
@@ -592,7 +710,12 @@ function processBlockMultipleChoice(line_iter, story, lang, story_languages) {
   return false;
 }
 
-function processBlockSelectPhrase(line_iter, story, lang, story_languages) {
+function processBlockSelectPhrase(
+  line_iter: LineIterator,
+  story: Story,
+  lang: string,
+  story_languages: StoryLanguages,
+) {
   let start_no = line_iter.get_lineno(-1);
   let start_no1 = line_iter.get_lineno();
   let question_data = getText(line_iter, false, true, false);
@@ -646,7 +769,12 @@ function processBlockSelectPhrase(line_iter, story, lang, story_languages) {
   story.meta.line_index += 1;
 }
 
-function processBlockContinuation(line_iter, story, lang, story_languages) {
+function processBlockContinuation(
+  line_iter: LineIterator,
+  story: Story,
+  lang: string,
+  story_languages: StoryLanguages,
+) {
   let start_no = line_iter.get_lineno(-1);
   let start_no1 = line_iter.get_lineno();
   let question_data = getText(line_iter, false, true, false);
@@ -705,7 +833,12 @@ function processBlockContinuation(line_iter, story, lang, story_languages) {
   story.meta.line_index += 1;
 }
 
-function processBlockArrange(line_iter, story, lang, story_languages) {
+function processBlockArrange(
+  line_iter: LineIterator,
+  story: Story,
+  lang: string,
+  story_languages: StoryLanguages,
+) {
   let start_no = line_iter.get_lineno(-1);
   let start_no1 = line_iter.get_lineno();
   let question_data = getText(line_iter, false, true, false);
@@ -761,7 +894,12 @@ function processBlockArrange(line_iter, story, lang, story_languages) {
   story.meta.line_index += 1;
 }
 
-function processBlockPointToPhrase(line_iter, story, lang, story_languages) {
+function processBlockPointToPhrase(
+  line_iter: LineIterator,
+  story: Story,
+  lang: string,
+  story_languages: StoryLanguages,
+) {
   let start_no = line_iter.get_lineno(-1);
   let start_no1 = line_iter.get_lineno();
   let question_data = getText(line_iter, false, true, false);
@@ -807,7 +945,12 @@ function processBlockPointToPhrase(line_iter, story, lang, story_languages) {
   story.meta.line_index += 1;
 }
 
-function processBlockMatch(line_iter, story, lang, story_languages) {
+function processBlockMatch(
+  line_iter: LineIterator,
+  story: Story,
+  lang: string,
+  story_languages: StoryLanguages,
+) {
   let start_no = line_iter.get_lineno(-1);
   let start_no1 = line_iter.get_lineno();
   let question_data = getText(line_iter, false, true, false);
@@ -816,6 +959,7 @@ function processBlockMatch(line_iter, story, lang, story_languages) {
   let answers = [];
   while (line_iter.get()) {
     let line = line_iter.get();
+    if (!line) break;
     let match = line.match(/-\s*(.*\S)\s*<>\s*(.*\S)\s*/);
     if (match) {
       let [, word1, word2] = match;
@@ -846,7 +990,15 @@ function processBlockMatch(line_iter, story, lang, story_languages) {
   story.meta.line_index += 1;
 }
 
-const block_functions = {
+const block_functions: Record<
+  string,
+  (
+    line_iter: LineIterator,
+    story: Story,
+    lang: string,
+    story_languages: StoryLanguages,
+  ) => void
+> = {
   DATA: processBlockData,
   HEADER: processBlockHeader,
   LINE: processBlockLine,
@@ -858,7 +1010,7 @@ const block_functions = {
   MATCH: processBlockMatch,
 };
 
-function line_iterator(lines) {
+function line_iterator(lines: LineTuple[]) {
   let index = 0;
   function get(offset = 0) {
     if (lines[index + offset]) return lines[index + offset][1];
@@ -872,21 +1024,61 @@ function line_iterator(lines) {
   }
   return { get: get, get_lineno: get_lineno, advance: advance };
 }
+type LineIterator = ReturnType<typeof line_iterator>;
+
+export type StoryElement = {};
+export type Story = {
+  elements: StoryElement[];
+  meta: Meta;
+  from_language_name: string | undefined;
+};
+export type Meta = {
+  audio_insert_lines: LineTuple[];
+  line_index: number;
+  story_id: number;
+  avatar_names: Record<string, Avatar>;
+  avatar_overwrites: Record<string, AvatarOverwrites>;
+  cast: Record<string, Cast>;
+  transcribe_data: TranscribeData;
+  todo_count: number;
+  from_language_name: string | undefined;
+  set: string | undefined;
+  set_id: string | undefined;
+  set_index: string | undefined;
+  [key: string]: any;
+};
+
+type AvatarOverwrites = {
+  id: string;
+  link: string;
+  speaker: string;
+  name: string;
+};
+type Cast = { id: string; link: string; speaker: string; name: string };
+
+type StoryLanguages = {
+  learning_language: string;
+  from_language: string;
+};
+
+export type TranscribeData = {};
+
+export type LineTuple = [number, string];
 
 //window.audio_insert_lines = []
 export function processStoryFile(
-  text,
-  story_id,
-  avatar_names,
-  story_languages,
-  transcribe_data,
+  text: string,
+  story_id: number,
+  avatar_names: Record<number, Avatar>,
+  story_languages: StoryLanguages,
+  transcribe_data: TranscribeData,
 ) {
   // reset those line as they may have changed
   //window.audio_insert_lines = []
 
-  const {lines, todo_count} = split_lines(text);
+  const { lines, todo_count } = split_lines(text);
 
-  const story = {
+  const story: Story = {
     elements: [],
     meta: {
       audio_insert_lines: [],
@@ -896,15 +1088,17 @@ export function processStoryFile(
       avatar_overwrites: {},
       cast: {},
       transcribe_data: transcribe_data,
+      todo_count: 0,
     },
   };
   const line_iter = line_iterator(lines);
   while (line_iter.get()) {
     const line = line_iter.get();
+    if (!line) break;
     const match = line.match(/\[([^\]]*)\](<(.+)>)?$/);
     if (match !== null) {
       line_iter.advance();
-      const current_block = match[1];
+      const current_block: string = match[1];
       try {
         if (block_functions[current_block]) {
           block_functions[current_block](
@@ -932,7 +1126,7 @@ export function processStoryFile(
     //console.log("error", lineno, line)
     line_iter.advance();
   }
-  story.meta.todo_count = todo_count
+  story.meta.todo_count = todo_count;
   const meta = story.meta;
   delete story.meta;
   const audio_insert_lines = meta.audio_insert_lines;

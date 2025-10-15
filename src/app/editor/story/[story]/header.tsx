@@ -15,6 +15,9 @@ export function StoryEditorHeader({
   set_show_trans,
   show_ssml,
   set_show_ssml,
+}: {
+  unsaved_changes: boolean;
+  language_data;
 }) {
   function do_set_show_trans() {
     let value = !show_trans;

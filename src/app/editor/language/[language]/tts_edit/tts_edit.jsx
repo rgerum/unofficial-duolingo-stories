@@ -9,7 +9,7 @@ import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 import {
   generate_audio_line,
   content_to_audio,
-} from "@/components/story/text_lines/audio_edit_tools.mjs";
+} from "@/components/story/text_lines/audio_edit_tools";
 import TextLine from "@/components/story/text_lines/text_line";
 import jsyaml from "js-yaml";
 

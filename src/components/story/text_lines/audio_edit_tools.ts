@@ -5,13 +5,19 @@ import {
   init_mapping,
   replace_with_mapping,
   transcribe_text,
-} from "./text_with_mapping.mjs";
+} from "./text_with_mapping";
+import { EditorView } from "codemirror";
+import {
+  HideRange,
+  LineTuple,
+  TranscribeData,
+} from "@/components/editor/story/syntax_parser_new";
 
 export function generate_ssml_line(
-  ssml,
-  transcribe_data,
-  hideRanges,
-  ipa_replacements,
+  ssml: { speaker: string; text: string },
+  transcribe_data: TranscribeData,
+  hideRanges: HideRange[],
+  ipa_replacements: string[] & { index: number }[],
 ) {
   // foo{bar:ipa} replacement
   hideRanges = JSON.parse(JSON.stringify(hideRanges));
@@ -21,7 +27,7 @@ export function generate_ssml_line(
   let match = speaker.match(/([^(]*)\((.*)\)/);
 
   let offset = 0;
-  function insert(insert, pos) {
+  function insert(insert: string, pos: number) {
     speak_text = replace_with_mapping(speak_text, insert, offset + pos);
     for (let range of hideRanges) {
       if (range.end > offset + pos) range.end += insert.length;
@@ -129,7 +135,8 @@ export function generate_ssml_line(
       `</voice></speak>`,
       speak_text.text.length,
     );
-    speak_text.textx = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+    // TODO make sure this is text and not textx
+    speak_text.text = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
     <voice name="en-US-JennyNeural">Enjoy <break/> speech </voice> </speak>`;
   } else {
     speak_text = replace_with_mapping(speak_text, `<speak>`, 0);
@@ -159,7 +166,12 @@ export function generate_ssml_line(
   return ssml;
 }
 
-export async function generate_audio_line(ssml) {
+export async function generate_audio_line(ssml: {
+  text: string;
+  speaker: string;
+  id: number;
+  mapping: Record<number, number>;
+}) {
   let speaker = ssml["speaker"].trim();
   let speak_text = ssml["text"];
   let mapping = ssml["mapping"];
@@ -256,7 +268,7 @@ export async function generate_audio_line(ssml) {
   };
 }
 
-export function content_to_audio(content) {
+export function content_to_audio(content: string) {
   let binaryString = window.atob(content);
   let binaryData = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
@@ -269,7 +281,13 @@ export function content_to_audio(content) {
   return audio;
 }
 
-export function timings_to_text({ filename, keypoints }) {
+export function timings_to_text({
+  filename,
+  keypoints,
+}: {
+  filename: string;
+  keypoints: { rangeEnd: number; audioStart: number }[];
+}) {
   let text = filename ? "$" + filename : "";
   let last_end = 0;
   let last_time = 0;
@@ -286,16 +304,16 @@ export function timings_to_text({ filename, keypoints }) {
   return text;
 }
 
-export function text_to_keypoints(line) {
-  let parts = line.split(";");
-  let filename = parts.splice(0, 1)[0];
-  let keypoints = [];
+export function text_to_keypoints(line: string) {
+  const parts = line.split(";");
+  const filename = parts.splice(0, 1)[0];
+  const keypoints: { rangeEnd: number; audioStart: number }[] = [];
   let last_end = 0;
   let last_time = 0;
-  for (let part of parts) {
-    let [start, duration] = part.split(",");
-    start = parseInt(start);
-    duration = parseInt(duration);
+  for (const part of parts) {
+    const [start0, duration0] = part.split(",");
+    const start = parseInt(start0);
+    const duration = parseInt(duration0);
     keypoints.push({
       rangeEnd: last_end + start,
       audioStart: last_time + duration,
@@ -303,10 +321,20 @@ export function text_to_keypoints(line) {
     last_end += start;
     last_time += duration;
   }
-  return [filename, keypoints];
+  return [filename, keypoints] as const;
 }
 
-export function insert_audio_line(text, ssml, view, audio_insert_lines) {
+export function insert_audio_line(
+  text: string,
+  ssml: {
+    text: string;
+    speaker: string;
+    id: number;
+    inser_index: number;
+  },
+  view: EditorView,
+  audio_insert_lines: LineTuple[],
+) {
   let [line, line_insert] = audio_insert_lines[ssml.inser_index];
   if (line !== undefined) {
     let line_state = view.state.doc.line(line);
