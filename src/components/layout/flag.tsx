@@ -114,9 +114,9 @@ export function DoubleFlag({
   className,
 }: {
   lang1: LanguageProps;
-  lang2: LanguageProps;
-  width: number;
-  onClick: Function;
+  lang2?: LanguageProps;
+  width?: number;
+  onClick?: Function;
   className?: string;
 }) {
   if (!lang2) {
@@ -147,7 +147,7 @@ export function DoubleFlag({
         iso={lang2?.short}
         flag={lang2?.flag}
         flag_file={lang2?.flag_file}
-        width={width * 0.9}
+        width={(width ?? 88) * 0.9}
         //onClick={onClick}
         className={className + " " + styles.flag_sub}
       />

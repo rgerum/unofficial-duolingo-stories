@@ -1,10 +1,18 @@
 import styles from "./breadcrumbs.module.css";
 import React from "react";
-import { DoubleFlag } from "@/components/layout/flag.tsx";
+import { DoubleFlag } from "@/components/layout/flag";
 import Link from "next/link";
 import EditorButton from "../editor_button";
 
-function MyLink({ href, children, className }) {
+function MyLink({
+  href,
+  children,
+  className,
+}: {
+  href: string;
+  children: React.ReactNode;
+  className: string;
+}) {
   if (href !== undefined)
     return (
       <Link href={href} className={className + " " + styles.part_link}>
@@ -14,7 +22,20 @@ function MyLink({ href, children, className }) {
   return <span className={className}>{children}</span>;
 }
 
-function BreadcrumbPart({ part, hide }) {
+function BreadcrumbPart({
+  part,
+  hide,
+}: {
+  part: {
+    type: string;
+    href: string;
+    lang1?: any;
+    lang2?: any;
+    name?: string;
+    data?: any;
+  };
+  hide: boolean;
+}) {
   let class_name = styles.part;
   if (hide) {
     class_name += " " + styles.part_hide;
@@ -78,7 +99,18 @@ function BreadcrumbPart({ part, hide }) {
   );
 }
 
-export function Breadcrumbs({ path }) {
+export function Breadcrumbs({
+  path,
+}: {
+  path: {
+    type: string;
+    href: string;
+    lang1?: any;
+    lang2?: any;
+    name?: string;
+    data?: any;
+  }[];
+}) {
   let link;
   let hide = path.length > 3;
   for (let part of path) {

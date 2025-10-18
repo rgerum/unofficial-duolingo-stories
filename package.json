@@ -26,6 +26,7 @@
     "@radix-ui/react-dropdown-menu": "^2.1.6",
     "@radix-ui/react-navigation-menu": "^1.2.5",
     "@types/hast": "^3.0.4",
+    "@types/js-yaml": "^4.0.9",
     "@vercel/blob": "^0.23.4",
     "@wavesurfer/react": "^1.0.9",
     "ajv": "^8.17.1",

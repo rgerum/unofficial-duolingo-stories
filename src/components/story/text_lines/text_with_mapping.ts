@@ -1,15 +1,19 @@
 import jsyaml from "js-yaml";
+import { TranscribeData } from "@/components/editor/story/syntax_parser_new";
+
+type Mapping = number[];
+type MappedText = { text: string; mapping: Mapping };
 
 export function init_mapping(text: string) {
-  let mapping: number[] = [];
+  const mapping: Mapping = [];
   for (let i = 0; i < text.length; i++) {
     mapping.push(i);
   }
-  return { text, mapping };
+  return { text, mapping } as MappedText;
 }
 
 export function replace_with_mapping(
-  { text, mapping }: { text: string; mapping: number[] },
+  { text, mapping }: MappedText,
   replace: string,
   start: number,
   end?: number,
@@ -31,7 +35,7 @@ export function replace_with_mapping(
 
 export function find_replace_with_mapping(
   mapped_text: { text: string; mapping: number[] },
-  find: string,
+  find: RegExp,
   replace: string,
 ) {
   let match = mapped_text.text.match(find);
@@ -296,7 +300,7 @@ function apply_fragment_replacements(
 
 function apply_group(
   mapped_text: { text: string; mapping: number[] },
-  data: {}[],
+  data: Record<string, any>,
   options: { in_brackets?: number },
 ) {
   for (const section in data) {
@@ -336,9 +340,9 @@ function apply_group(
 
 export function transcribe_text(
   mapped_text: { text: string; mapping: number[] },
-  data: string,
+  data: TranscribeData,
 ) {
-  const data2 = jsyaml.load(data);
+  const data2 = jsyaml.load(data) as Record<string, any>;
 
   mapped_text = apply_group(mapped_text, data2, {});
 
@@ -365,11 +369,18 @@ if (0) {
   //console.log(speak_text)
 }
 if (0) {
-  //speak_text = apply_letter_replacements(speak_text, {"i": "IaI", "a": "i"})
-  speak_text = apply_word_replacements(speak_text, {
-    is: "bla:ipa",
-    text: "test",
-  });
+  let speak_text = init_mapping(
+    "break this... <break name='xx' />is [be KALO and] Text break",
+  );
+  speak_text = apply_letter_replacements(speak_text, { i: "IaI", a: "i" });
+  speak_text = apply_word_replacements(
+    speak_text,
+    {
+      is: "bla:ipa",
+      text: "test",
+    },
+    {},
+  );
   //speak_text = find_replace_with_mapping(speak_text, "t", "t")
 
   //speak_text = find_replace_with_mapping(speak_text, /\[/, "")

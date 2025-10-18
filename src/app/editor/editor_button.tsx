@@ -11,8 +11,18 @@ export default function EditorButton({
   text,
   href,
   checked,
+}: {
+  style?: React.CSSProperties;
+  onClick?: () => void;
+  id?: string;
+  alt?: string;
+  img?: string;
+  text?: string;
+  href?: string;
+  checked?: boolean;
 }) {
   if (checked !== undefined) {
+    if (onClick === undefined) throw new Error();
     return (
       <div
         className={styles.editor_button}
@@ -22,7 +32,7 @@ export default function EditorButton({
         }}
       >
         <label className={styles.switch}>
-          <input type="checkbox" checked={checked} readOnly="readOnly" />
+          <input type="checkbox" checked={checked} readOnly />
           <span className={styles.slider + " " + styles.round} />
         </label>
         <span>{text}</span>

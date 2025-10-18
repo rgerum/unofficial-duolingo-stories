@@ -157,13 +157,12 @@ export function generate_ssml_line(
 
      */
 
-  ssml = {
+  return {
     ...ssml,
     text: speak_text.text,
     mapping: speak_text.mapping,
     speaker: speaker,
   };
-  return ssml;
 }
 
 export async function generate_audio_line(ssml: {
@@ -333,7 +332,7 @@ export function insert_audio_line(
     inser_index: number;
   },
   view: EditorView,
-  audio_insert_lines: LineTuple[],
+  audio_insert_lines: [number | undefined, number][],
 ) {
   let [line, line_insert] = audio_insert_lines[ssml.inser_index];
   if (line !== undefined) {

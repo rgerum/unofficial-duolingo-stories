@@ -15,6 +15,8 @@ interface HintMapResult {
   hintMap: HintMapItem[];
   hints: string[];
   text: string;
+  audio?: Audio;
+  lang_hints?: string;
 }
 
 interface ContentWithHints {
@@ -309,7 +311,7 @@ function getInputStringSpeechText(text: string, hide: boolean) {
 
 function speaker_text_trans(
   data: Speaker,
-  meta: Meta,
+  meta?: Meta,
   use_buttons = false,
   hide = false,
 ) {
@@ -374,7 +376,7 @@ function speaker_text_trans(
     };
   }
   let audio;
-  if (data.allow_audio) {
+  if (data.allow_audio && meta) {
     let speaker_name =
       meta["speaker_" + "narrator"] || meta.avatar_names[0]?.speaker;
     if (speaker_id)
@@ -395,10 +397,7 @@ function speaker_text_trans(
     audio.ssml.inser_index = meta.audio_insert_lines.length;
     audio.ssml.plan_text = text;
     audio.ssml.plan_text_speaker_name = speaker_name;
-    meta.audio_insert_lines.push([
-      data.audio_line ?? 0,
-      data.audio_line_inset ?? "",
-    ]);
+    meta.audio_insert_lines.push([data.audio_line, data.audio_line_inset ?? 0]);
     //audio.ssml.line = data.audio_line;
     //audio.ssml.line_insert = data.audio_line_inset;
     content.audio = audio;
@@ -434,11 +433,11 @@ type Audio = {
   ssml: {
     text: string;
     speaker: string;
-    id: number;
+    id?: number;
 
-    inser_index: number | undefined;
-    plan_text: string | undefined;
-    plan_text_speaker_name: string | undefined;
+    inser_index?: number | undefined;
+    plan_text?: string | undefined;
+    plan_text_speaker_name?: string | undefined;
   };
   url: undefined | string;
   keypoints: undefined | { rangeEnd: number; audioStart: number }[];
@@ -450,7 +449,7 @@ function line_to_audio(
   story_id: number,
   hideRanges: HideRange[],
   transcribe_data: TranscribeData,
-  ipa_replacements: { index: number }[],
+  ipa_replacements: string[] & { index: number }[],
 ) {
   //let text_speak = getInputStringSpeechText(text, hide);
   let audio = {
@@ -495,10 +494,10 @@ function get_avatar(
 type Speaker = {
   text: undefined | string;
   trans: undefined | string;
-  allow_audio: undefined | boolean;
-  audio_line_inset: undefined | number;
-  audio: undefined | string;
-  audio_line: undefined | number;
+  allow_audio?: undefined | boolean;
+  audio_line_inset?: undefined | number;
+  audio?: undefined | string;
+  audio_line?: undefined | number;
 };
 
 function getText(
@@ -537,14 +536,19 @@ function getText(
   return speaker;
 }
 
-function getAnswers(line_iter: LineIterator, allow_trans, lang_hints) {
+function getAnswers(
+  line_iter: LineIterator,
+  allow_trans: boolean,
+  lang_hints?: string | undefined,
+) {
   let answers = [];
   let correct_answer = undefined;
   while (line_iter.get()) {
     let line = line_iter.get();
+    if (!line) break;
     if (line.startsWith("+") || line.startsWith("-")) {
       if (line.startsWith("+")) correct_answer = answers.length;
-      let answer = { text: line };
+      let answer = { text: line, trans: undefined as string | undefined };
       line = line_iter.advance();
       if (line && line.startsWith("~") && allow_trans) {
         answer.trans = line;
@@ -562,8 +566,9 @@ function getAnswers(line_iter: LineIterator, allow_trans, lang_hints) {
   return [answers, correct_answer];
 }
 
-function pointToPhraseButtons(line) {
-  [, , line] = line.match(/\s*(?:>?\s*(\w*)\s*:|>|\+|-)\s*(\S.*\S)\s*/);
+function pointToPhraseButtons(line: string) {
+  const match = line.match(/\s*(?:>?\s*(\w*)\s*:|>|\+|-)\s*(\S.*\S)\s*/);
+  if (match) line = match[2] ?? line;
   line = line.replace(/(\s*)\)/g, ")$1");
   line = line.replace(/~/g, " ");
   line = line.replace(/ +/g, " ");
@@ -851,7 +856,7 @@ function processBlockArrange(
   data_text.line.content.lang_hints = story_languages.from_language;
 
   let [phraseOrder, selectablePhrases2] = shuffleArray(
-    data_text.selectablePhrases,
+    data_text.selectablePhrases ?? [],
   );
   story.elements.push({
     type: "CHALLENGE_PROMPT",
@@ -911,7 +916,9 @@ function processBlockPointToPhrase(
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
-  let [correctAnswerIndex, transcriptParts] = pointToPhraseButtons(data.text);
+  let [correctAnswerIndex, transcriptParts] = pointToPhraseButtons(
+    data.text ?? "",
+  );
 
   story.elements.push({
     type: "LINE",
@@ -1030,10 +1037,10 @@ export type StoryElement = {};
 export type Story = {
   elements: StoryElement[];
   meta: Meta;
-  from_language_name: string | undefined;
+  from_language_name?: string | undefined;
 };
 export type Meta = {
-  audio_insert_lines: LineTuple[];
+  audio_insert_lines: [number | undefined, number][];
   line_index: number;
   story_id: number;
   avatar_names: Record<string, Avatar>;
@@ -1041,10 +1048,10 @@ export type Meta = {
   cast: Record<string, Cast>;
   transcribe_data: TranscribeData;
   todo_count: number;
-  from_language_name: string | undefined;
-  set: string | undefined;
-  set_id: string | undefined;
-  set_index: string | undefined;
+  from_language_name?: string | undefined;
+  set?: string | undefined;
+  set_id?: string | undefined;
+  set_index?: string | undefined;
   [key: string]: any;
 };
 
@@ -1061,7 +1068,7 @@ type StoryLanguages = {
   from_language: string;
 };
 
-export type TranscribeData = {};
+export type TranscribeData = string;
 
 export type LineTuple = [number, string];
 
@@ -1128,9 +1135,13 @@ export function processStoryFile(
   }
   story.meta.todo_count = todo_count;
   const meta = story.meta;
-  delete story.meta;
+  //delete story.meta;
   const audio_insert_lines = meta.audio_insert_lines;
-  delete meta.audio_insert_lines;
+  //delete meta.audio_insert_lines;
 
-  return [story, meta, audio_insert_lines];
+  return [
+    { ...story, meta: undefined },
+    { ...meta, audio_insert_lines: undefined },
+    audio_insert_lines,
+  ] as const;
 }
