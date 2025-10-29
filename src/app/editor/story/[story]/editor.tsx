@@ -5,7 +5,7 @@ import React from "react";
 
 import { basicSetup, EditorView } from "codemirror";
 import { EditorSelection, EditorState } from "@codemirror/state";
-import { example, highlightStyle } from "@/components/editor/story/parser.mjs";
+import { example, highlightStyle } from "@/components/editor/story/parser";
 import useScrollLinking from "@/components/editor/story/scroll_linking";
 import useResizeEditor from "@/components/editor/story/editor-resize";
 //import {SoundRecorder} from "./sound-recorder";
