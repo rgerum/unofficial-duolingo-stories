@@ -2,7 +2,15 @@ import React from "react";
 import styles from "./FadeGlideIn.module.css";
 import useScrollIntoView from "@/hooks/use-scroll-into-view.hook";
 
-function FadeGlideIn({ children, show = true, hidden }) {
+function FadeGlideIn({
+  children,
+  show = true,
+  hidden,
+}: {
+  children: React.ReactNode;
+  show?: boolean;
+  hidden?: boolean;
+}) {
   const ref = useScrollIntoView(show && !hidden);
 
   return (

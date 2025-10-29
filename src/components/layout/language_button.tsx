@@ -1,8 +1,21 @@
 import Link from "next/link";
-import Flag from "./flag.tsx";
+import Flag from "./flag";
 import styles from "./language_button.module.css";
 
-export default function LanguageButton({ course }) {
+export default function LanguageButton({
+  course,
+}: {
+  course: {
+    learning_language: string;
+    learning_language_flag: number;
+    learning_language_flag_file: string;
+    name: string;
+    count: number;
+    conlang: boolean;
+    short: string;
+    from_language: string;
+  };
+}) {
   return (
     <Link
       data-cy={"language_button_big_" + course.short}

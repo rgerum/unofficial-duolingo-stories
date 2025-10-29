@@ -3,8 +3,14 @@ import React from "react";
 import { get_localisation_dict } from "@/lib/get_localisation";
 import { LocalisationProviderInner } from "./LocalisationProviderContext";
 
-function LocalisationProvider({ lang, children }) {
-  const data = React.useMemo(() => get_localisation_dict(lang), [lang]);
+async function LocalisationProvider({
+  lang,
+  children,
+}: {
+  lang: number;
+  children: React.ReactNode;
+}) {
+  const data = await get_localisation_dict(lang);
   return (
     <LocalisationProviderInner data={data}>
       {children}

@@ -1,6 +1,14 @@
 import styled from "styled-components";
 
-export default function Button({ children, primary = false, ...delegated }) {
+export default function Button({
+  children,
+  primary = false,
+  ...delegated
+}: {
+  children: React.ReactNode;
+  primary?: boolean;
+  [key: string]: any;
+}) {
   const ButtonComponent = primary ? ButtonBlueStyled : ButtonStyled;
 
   return (
