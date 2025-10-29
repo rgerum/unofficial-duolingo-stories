@@ -1,6 +1,4 @@
 import styles from "./[[...slug]]/layout.module.css";
-import Link from "next/link";
-import Script from "next/script";
 import React from "react";
 
 export default function Loading() {

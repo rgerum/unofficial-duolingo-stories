@@ -1,10 +1,16 @@
 import styles from "./Button.module.css";
+import React from "react";
 
 export default function Button({
   children,
   disabled,
   primary = false,
   ...delegated
+}: {
+  children: React.ReactNode;
+  disabled?: boolean;
+  primary?: boolean;
+  [key: string]: any;
 }) {
   const className = primary
     ? `${styles.ButtonStyled} ${styles.ButtonBlueStyled}`

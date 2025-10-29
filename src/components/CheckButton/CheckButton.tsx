@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./CheckButton.module.css";
 
-function CheckButton({ type }) {
+function CheckButton({ type }: { type: string }) {
   const className =
     styles.multiple_choice_checkbox + " " + (!!styles[type] && styles[type]);
 

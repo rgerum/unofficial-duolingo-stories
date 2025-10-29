@@ -10,14 +10,14 @@ function DocsHeader() {
   const [showSearch, setShowSearch] = React.useState(false);
   const [searchText, setSearchText] = React.useState("");
 
-  function doShow(value) {
+  function doShow(value: boolean) {
     setShowSearch(value);
     setSearchText("");
   }
   //useKeypress("ctrl+k", () => !showSearch && doShow(true), [showSearch]);
   useKeypress(
     "ctrl+k",
-    (e) => {
+    (e: KeyboardEvent) => {
       e.preventDefault();
       !showSearch && doShow(true);
     },

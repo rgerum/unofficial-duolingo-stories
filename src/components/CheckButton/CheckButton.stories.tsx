@@ -10,5 +10,5 @@ const meta = {
 export default meta;
 
 export const Normal = {
-  render: (args) => <CheckButton {...args}></CheckButton>,
+  render: (args: { type: string }) => <CheckButton {...args}></CheckButton>,
 };

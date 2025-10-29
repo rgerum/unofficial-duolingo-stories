@@ -6,10 +6,14 @@ import React from "react";
 import { getDocsData, getPageData } from "./[[...slug]]/doc_data";
 import DocsNavigationBackdrop from "@/components/DocsNavigationBackdrop";
 
-export default async function Layout({ children }) {
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const data = await getDocsData();
 
-  const path_titles = {};
+  const path_titles: Record<string, { group: string; title: string }> = {};
   for (let group of data.navigation) {
     for (let page of group.pages) {
       const datax = await getPageData(page.slug);

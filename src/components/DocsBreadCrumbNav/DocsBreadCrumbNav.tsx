@@ -5,9 +5,13 @@ import { showNavContext } from "../DocsNavigationBackdrop";
 import { useSelectedLayoutSegment } from "next/navigation";
 import VisuallyHidden from "../VisuallyHidden";
 
-function DocsBreadCrumbNav({ path_titles }) {
+function DocsBreadCrumbNav({
+  path_titles,
+}: {
+  path_titles: Record<string, { group: string; title: string }>;
+}) {
   const { setShow } = React.useContext(showNavContext);
-  const segment = useSelectedLayoutSegment();
+  const segment = useSelectedLayoutSegment() || "";
   const current = path_titles[segment];
 
   return (

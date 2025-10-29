@@ -7,17 +7,28 @@ import * as Dialog from "@radix-ui/react-dialog";
 // https://beta.duostories.org/docs/story-creation/import.mdx
 const basefolder = "/docs";
 
-export async function getPageData(path) {
+export async function getPageData(path: string) {
   try {
     const res = await (await fetch(basefolder + "/" + path + ".mdx")).text();
     let data = res.split("---");
-    let metadata = {};
+    let metadata = {
+      body: "",
+      parts: [] as { type: string; text: string; link: string }[],
+      link: "",
+      title: "",
+      description: "",
+    };
     for (let line of data[1].split("\n")) {
       let pos = line.indexOf(":");
       if (pos === -1) continue;
       let key = line.slice(0, pos).trim();
-      let value = line.slice(pos + 1).trim();
-      metadata[key.trim()] = value.match(/\s*"(.*)"\s*/)[1];
+      let value =
+        line
+          .slice(pos + 1)
+          .trim()
+          .match(/\s*"(.*)"\s*/)?.[1] || "";
+      if (key == "title") metadata.title = value;
+      if (key == "description") metadata.description = value;
     }
     metadata.body = data[2];
     let parts = [];
@@ -38,7 +49,7 @@ export async function getPageData(path) {
       if (line.startsWith("#")) {
         parts.push({
           type: "heading",
-          text: line.match("#*s*(.*)")[1],
+          text: line.match("#*s*(.*)")?.[1] || "",
           link: current_link,
         });
       }
@@ -51,19 +62,47 @@ export async function getPageData(path) {
   }
 }
 
-let data = undefined;
-let pages = undefined;
+import { z } from "zod";
+const schema = z.object({
+  navigation: z.array(
+    z.object({
+      group: z.string(),
+      pages: z.array(z.string()),
+    }),
+  ),
+});
+
+type Page =
+  | {
+      body: string;
+      parts: {
+        type: string;
+        text: string;
+        link: string;
+      }[];
+      link: string;
+      title: string;
+      description: string;
+    }
+  | undefined;
+let data: z.infer<typeof schema> | undefined = undefined;
+let pages: Page[] | undefined = undefined;
+
 async function loadAll() {
-  if (!data) data = await (await fetch("/docs/docs.json")).json();
+  if (!data) {
+    const file_content = await (await fetch("/docs/docs.json")).json();
+    data = schema.parse(file_content);
+  }
   if (!pages) {
-    pages = [];
+    const new_pages: Page[] = [];
     let promises = [];
     for (let group of data.navigation) {
       for (let page of group.pages) {
-        promises.push(getPageData(page).then((page) => pages.push(page)));
+        promises.push(getPageData(page).then((page) => new_pages.push(page)));
       }
     }
     await Promise.all(promises);
+    pages = new_pages;
   }
   return pages;
 }
@@ -73,9 +112,21 @@ function DocsSearchModal({
   setShowSearch,
   searchText,
   setSearchText,
+}: {
+  showSearch: boolean;
+  setShowSearch: (show: boolean) => void;
+  searchText: string;
+  setSearchText: (text: string) => void;
 }) {
-  const ref = React.useRef();
-  const [searchResults, setSearchResults] = React.useState([]);
+  const ref = React.useRef<HTMLInputElement>(null);
+  const [searchResults, setSearchResults] = React.useState<
+    | {
+        link: string;
+        type: string;
+        text: string;
+      }[]
+    | undefined
+  >([]);
   // close on Escape if open
   useKeypress("Escape", () => showSearch && setShowSearch(false), [showSearch]);
 
@@ -86,12 +137,13 @@ function DocsSearchModal({
     }
   }, [showSearch]);
 
-  async function search(value) {
+  async function search(value: string) {
     setSearchText(value);
     const pages = await loadAll();
 
     const results = [];
     for (let page of pages) {
+      if (!page) continue;
       let found = false;
       for (let part of page.parts) {
         if (part.text.includes(value)) {
@@ -142,7 +194,7 @@ function DocsSearchModal({
                   key={item.link + "-" + index}
                   href={`/docs/${item.link}`}
                   data-type={item.type}
-                  onClick={() => showSearch(false)}
+                  onClick={() => setShowSearch(false)}
                 >
                   {item.text}
                 </Link>

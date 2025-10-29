@@ -6,7 +6,13 @@ import { showNavContext } from "../DocsNavigationBackdrop";
 import { useSelectedLayoutSegment } from "next/navigation";
 import VisuallyHidden from "../VisuallyHidden";
 
-function DocsNavigation({ data }) {
+function DocsNavigation({
+  data,
+}: {
+  data: {
+    navigation: { group: string; pages: { slug: string; title: string }[] }[];
+  };
+}) {
   const { show, setShow } = React.useContext(showNavContext);
 
   const segment = useSelectedLayoutSegment();
@@ -45,7 +51,17 @@ function DocsNavigation({ data }) {
   );
 }
 
-function PageLink({ page, title, active, setShow }) {
+function PageLink({
+  page,
+  title,
+  active,
+  setShow,
+}: {
+  page: string;
+  title: string;
+  active: boolean;
+  setShow: (value: boolean) => void;
+}) {
   const className = active
     ? `${styles.pageLink} ${styles.active}`
     : styles.pageLink;

@@ -2,15 +2,11 @@ import DocsHeader from "./DocsHeader";
 
 const meta = {
   component: DocsHeader,
-  argTypes: {
-  },
+  argTypes: {},
 };
 
 export default meta;
 
 export const Normal = {
-  render: (args) => (
-    <DocsHeader {...args}>
-    </DocsHeader>
-  ),
+  render: () => <DocsHeader />,
 };
