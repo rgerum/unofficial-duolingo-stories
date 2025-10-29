@@ -2,7 +2,7 @@
 This parser does the syntax highlighting for the editor
  */
 
-import { StreamLanguage } from "@codemirror/language";
+import { StreamLanguage, StringStream } from "@codemirror/language";
 
 // Ideally this should be proper tag definitions instead of mapping them to arbitrary tag symbols
 // I just did not find out yet how to define custom tag symbols
@@ -216,7 +216,12 @@ export let myHighlightStyle = HighlightStyle.define([
 import { syntaxHighlighting } from "@codemirror/language";
 export let highlightStyle = syntaxHighlighting(myHighlightStyle);
 
-function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
+function parserTextWithTranslation(
+  stream: StringStream,
+  state: any,
+  allow_hide: boolean = false,
+  allow_buttons: number = 0,
+) {
   if (stream.match(/[ |]+/)) {
     state.odd = !state.odd;
     if (state.bracket && allow_hide) return STATE_TEXT_HIDE_NEUTRAL;
@@ -262,7 +267,7 @@ function parserTextWithTranslation(stream, state, allow_hide, allow_buttons) {
   return STATE_ERROR;
 }
 
-function parserTranslation(stream, state) {
+function parserTranslation(stream: StringStream, state: any) {
   if (stream.match(/[ |]+/)) {
     state.odd = !state.odd;
     return STATE_DEFAULT;
@@ -275,7 +280,7 @@ function parserTranslation(stream, state) {
   return STATE_ERROR;
 }
 
-function parserPair(stream, state) {
+function parserPair(stream: StringStream, state: any) {
   if (state.odd === false) {
     stream.match(/.*(?=<>)/);
     state.odd = true;
@@ -287,7 +292,7 @@ function parserPair(stream, state) {
   }
 }
 
-function parseBockData(stream, state) {
+function parseBockData(stream: StringStream, state: any) {
   if (stream.match(/[^=]+/)) {
     if (state.odd) {
       state.odd = false;
@@ -304,7 +309,7 @@ function parseBockData(stream, state) {
   return STATE_ERROR;
 }
 
-function parseBockHeader(stream, state) {
+function parseBockHeader(stream: StringStream, state: any) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text", true);
@@ -329,7 +334,7 @@ function parseBockHeader(stream, state) {
   return STATE_ERROR;
 }
 
-function parseBockLine(stream, state) {
+function parseBockLine(stream: StringStream, state: any) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text", true);
@@ -361,7 +366,13 @@ function parseBockLine(stream, state) {
   return STATE_ERROR;
 }
 
-function startLine(state, line, allow_trans, line_type, allow_audio) {
+function startLine(
+  state: any,
+  line: number = 0,
+  allow_trans: boolean = false,
+  line_type: string = "",
+  allow_audio: boolean = false,
+) {
   let block = { ...state.block };
   if (line) block.line = line;
   if (
@@ -377,7 +388,7 @@ function startLine(state, line, allow_trans, line_type, allow_audio) {
   state.block = block;
 }
 
-function parseBockSelectPhrase(stream, state) {
+function parseBockSelectPhrase(stream: StringStream, state: any) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
@@ -424,7 +435,7 @@ function parseBockSelectPhrase(stream, state) {
   return STATE_ERROR;
 }
 
-function parseBockContinuation(stream, state) {
+function parseBockContinuation(stream: StringStream, state: any) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
@@ -469,7 +480,7 @@ function parseBockContinuation(stream, state) {
   return STATE_ERROR;
 }
 
-function parseBockMultipleChoice(stream, state) {
+function parseBockMultipleChoice(stream: StringStream, state: any) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
@@ -500,7 +511,7 @@ function parseBockMultipleChoice(stream, state) {
   return STATE_ERROR;
 }
 
-function parseBockArrange(stream, state) {
+function parseBockArrange(stream: StringStream, state: any) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
@@ -532,7 +543,7 @@ function parseBockArrange(stream, state) {
       stream,
       state,
       state.block.line === 2,
-      state.block.line === 2,
+      state.block.line === 2 ? 1 : 0,
     );
   if (state.block.line_type === "trans")
     return parserTranslation(stream, state);
@@ -541,7 +552,7 @@ function parseBockArrange(stream, state) {
   return STATE_ERROR;
 }
 
-function parseBockPointToPhrase(stream, state) {
+function parseBockPointToPhrase(stream: StringStream, state: any) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
@@ -573,7 +584,7 @@ function parseBockPointToPhrase(stream, state) {
       stream,
       state,
       state.block.line === 2,
-      (state.block.line === 2) * 2,
+      state.block.line === 2 ? 2 : 0,
     );
   if (state.block.line_type === "trans")
     return parserTranslation(stream, state);
@@ -582,7 +593,7 @@ function parseBockPointToPhrase(stream, state) {
   return STATE_ERROR;
 }
 
-function parseBockMatch(stream, state) {
+function parseBockMatch(stream: StringStream, state: any) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
@@ -610,7 +621,10 @@ function parseBockMatch(stream, state) {
   return STATE_ERROR;
 }
 
-const BLOCK_FUNCS = {
+const BLOCK_FUNCS: Record<
+  string,
+  (stream: StringStream, state: any) => string
+> = {
   DATA: parseBockData,
   HEADER: parseBockHeader,
   LINE: parseBockLine,
@@ -622,18 +636,21 @@ const BLOCK_FUNCS = {
   POINT_TO_PHRASE: parseBockPointToPhrase,
 };
 
-function parseBlockDef(stream, state) {
+function parseBlockDef(stream: StringStream, state: any) {
   if (stream.eat("]")) {
     state.func = BLOCK_FUNCS[state?.block?.name];
     return STATE_DEFAULT;
   }
-  state.block = { name: stream.match(/[^\]]+/)[0], line: 0 };
+  const match = stream.match(/[^\]]+/);
+  const name =
+    match && typeof match === "object" && "0" in match ? match[0] : "";
+  state.block = { name: name, line: 0 };
   return STATE_BLOCK_TYPE;
 }
 
-function parserWithMetadata(stream, state) {
+function parserWithMetadata(stream: StringStream, state: any) {
   if (stream.match("#")) {
-    if(stream.match(/.*TODO.*/)) {
+    if (stream.match(/.*TODO.*/)) {
       stream.skipToEnd();
       return STATE_TODO;
     }
