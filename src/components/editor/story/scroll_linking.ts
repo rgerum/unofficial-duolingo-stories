@@ -1,13 +1,18 @@
 import React from "react";
+import { EditorView } from "codemirror";
 
-export default function useScrollLinking(view, preview, svg_parent) {
+export default function useScrollLinking(
+  view: EditorView,
+  preview: HTMLElement | undefined,
+  svg_parent: HTMLElement | undefined,
+) {
   let editor = view?.scrollDOM;
   let last_editor_scroll_pos = 0;
   let last_preview_scroll_pos = 0;
-  let line_map = [];
 
   let update_lines = React.useCallback(() => {
-    if (!editor) return;
+    if (!editor || !svg_parent) return;
+    if (!document.defaultView) return;
     let svg_element = 0;
     let width1 = parseInt(
       document.defaultView.getComputedStyle(editor).width,
@@ -22,7 +27,9 @@ export default function useScrollLinking(view, preview, svg_parent) {
     let height = svg_parent.getBoundingClientRect().height;
 
     let path = "M0,0 ";
-    for (let element of document.querySelectorAll("div[data-lineno]")) {
+    for (let element of document.querySelectorAll<
+      HTMLElement & { dataset: { lineno: string } }
+    >("div[data-lineno]")) {
       let new_lineno = parseInt(element.dataset.lineno);
       let new_top =
         element.getBoundingClientRect().top -
@@ -47,11 +54,16 @@ export default function useScrollLinking(view, preview, svg_parent) {
     svg_parent.children[0].setAttribute("d", path);
   }, [editor, preview, svg_parent]);
 
-  function map_side(scroll_pos, pairss, from_i, to_i) {
+  function map_side(
+    scroll_pos: number,
+    pairss: [number, number, number][],
+    from_i: number,
+    to_i: number,
+  ) {
     let o = editor.getBoundingClientRect().height / 3;
     scroll_pos = scroll_pos + o;
     if (pairss === undefined) return;
-    function round(x) {
+    function round(x: number) {
       return x;
     }
     for (let i = 0; i < pairss.length - 1; i += 1) {
@@ -75,16 +87,17 @@ export default function useScrollLinking(view, preview, svg_parent) {
   }
 
   let editor_scroll = React.useCallback(() => {
-    window.editor = editor;
-    window.preview = preview;
+    //window.editor = editor;
+    //window.preview = preview;
     requestAnimationFrame(() => {
+      if (!editor || !preview) return;
       if (Math.round(last_editor_scroll_pos) === Math.round(editor.scrollTop))
         return;
       last_editor_scroll_pos = editor.scrollTop;
 
       let new_pos = map_side(editor.scrollTop, createScrollLookUp(), 1, 2);
       if (new_pos === undefined) return;
-      last_preview_scroll_pos = parseInt(new_pos);
+      last_preview_scroll_pos = new_pos;
       preview.scrollTo({ top: last_preview_scroll_pos, behavior: "auto" });
       update_lines();
     });
@@ -97,13 +110,14 @@ export default function useScrollLinking(view, preview, svg_parent) {
 
   let preview_scroll = React.useCallback(() => {
     requestAnimationFrame(() => {
+      if (!editor || !preview) return;
       if (Math.round(last_preview_scroll_pos) === Math.round(preview.scrollTop))
         return;
       last_preview_scroll_pos = Math.round(preview.scrollTop);
 
       let new_pos = map_side(preview.scrollTop, createScrollLookUp(), 2, 1);
       if (new_pos === undefined) return;
-      last_editor_scroll_pos = parseInt(new_pos);
+      last_editor_scroll_pos = new_pos;
       editor.scrollTo({ top: last_editor_scroll_pos, behavior: "auto" });
       update_lines();
     });
@@ -116,10 +130,13 @@ export default function useScrollLinking(view, preview, svg_parent) {
   }, [editor, preview]);
 
   let createScrollLookUp = React.useCallback(() => {
-    if (!preview) return;
-    line_map = [[0, 0, 0]];
+    const line_map: [number, number, number][] = [[0, 0, 0]];
 
-    for (let element of document.querySelectorAll("div[data-lineno]")) {
+    if (!preview) return line_map;
+
+    for (let element of document.querySelectorAll<
+      HTMLElement & { dataset: { lineno: string } }
+    >("div[data-lineno]")) {
       let new_lineno = parseInt(element.dataset.lineno);
       let new_line_top = new_lineno * 26.6 + 2 - 26.6;
       let new_top =
@@ -134,12 +151,13 @@ export default function useScrollLinking(view, preview, svg_parent) {
   }, [editor, preview, svg_parent]);
 
   let windowResize = React.useCallback(() => {
-    createScrollLookUp();
+    if (!editor || !preview) return;
+    //createScrollLookUp();
 
     // the same as the scroll editor
     let new_pos = map_side(editor.scrollTop, createScrollLookUp(), 1, 2);
     if (new_pos === undefined) return;
-    last_preview_scroll_pos = parseInt(new_pos);
+    last_preview_scroll_pos = new_pos;
     preview.scrollTo({ top: last_preview_scroll_pos, behavior: "auto" });
     update_lines();
   }, [editor, preview, svg_parent]);
