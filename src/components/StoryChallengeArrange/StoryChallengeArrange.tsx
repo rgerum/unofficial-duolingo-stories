@@ -11,6 +11,12 @@ function StoryChallengeArrange({
   hidden,
   setButtonStatus,
   settings,
+}: {
+  parts: any[];
+  active: boolean;
+  hidden: boolean;
+  setButtonStatus: (status: string) => void;
+  settings: any;
 }) {
   const [unhide, setUnhide] = React.useState(0);
   const id = React.useId();

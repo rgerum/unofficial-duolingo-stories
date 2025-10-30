@@ -12,7 +12,19 @@ Speaker560: ¡[(Necesito) (las~llaves) (de) (mi) (carro)!]
 ~              I~need     the~keys     of   my   car
  */
 
-function StoryQuestionArrange({ element, active, advance }) {
+function StoryQuestionArrange({
+  element,
+  active,
+  advance,
+}: {
+  element: {
+    selectablePhrases: string[];
+    phraseOrder: number[];
+    characterPositions: number[];
+  };
+  active: boolean;
+  advance: (i: number, done: boolean) => void;
+}) {
   const [done, setDone] = React.useState(false);
 
   let [buttonState, click] = useArrangeButtons(
@@ -49,14 +61,20 @@ function StoryQuestionArrange({ element, active, advance }) {
   );
 }
 
-function useArrangeButtons(order, callRight, callWrong, callAdvance, active) {
+function useArrangeButtons(
+  order: number[],
+  callRight: () => void,
+  callWrong: () => void,
+  callAdvance: (i: number) => void,
+  active: boolean,
+) {
   let [buttonState, setButtonState] = React.useState([
     ...new Array(order.length),
   ]);
   let [position, setPosition] = React.useState(0);
 
   let click = React.useCallback(
-    (index) => {
+    (index: number) => {
       if (buttonState[index] === 1) return;
 
       if (position === order[index]) {
@@ -82,7 +100,7 @@ function useArrangeButtons(order, callRight, callWrong, callAdvance, active) {
   );
 
   let key_event_handler = React.useCallback(
-    (e) => {
+    (e: KeyboardEvent) => {
       let value = parseInt(e.key) - 1;
       if (value < order.length) click(value);
     },
@@ -95,7 +113,7 @@ function useArrangeButtons(order, callRight, callWrong, callAdvance, active) {
     }
   }, [key_event_handler, active]);
 
-  return [buttonState, click];
+  return [buttonState, click] as const;
 }
 
 export default StoryQuestionArrange;

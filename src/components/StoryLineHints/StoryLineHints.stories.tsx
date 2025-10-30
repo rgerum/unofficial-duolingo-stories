@@ -15,7 +15,7 @@ const meta = {
 export default meta;
 
 export const Normal = {
-  render: (args) => (
+  render: () => (
     <div style={{ display: "grid", placeItems: "center", height: "200px" }}>
       <div>
         <StoryLineHints
@@ -39,10 +39,11 @@ export const Normal = {
               },
             ],
             hints: ["Here", "am", "I"],
+            lang_hints: "en",
           }}
+          audioRange={0}
           hideRangesForChallenge={[{ start: 5, end: 9 }]}
           unhide={0}
-          {...args}
         ></StoryLineHints>
       </div>
     </div>

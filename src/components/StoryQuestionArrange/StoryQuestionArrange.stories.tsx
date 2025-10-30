@@ -8,13 +8,15 @@ const meta = {
 export default meta;
 
 export const Normal = {
-  render: (args) => (
+  render: () => (
     <StoryQuestionArrange
       element={{
+        characterPositions: [0, 1, 2, 3],
         phraseOrder: [1, 2, 3, 0],
         selectablePhrases: ["is", "a", "test", "this"],
       }}
-      {...args}
+      active={true}
+      advance={() => {}}
     ></StoryQuestionArrange>
   ),
 };

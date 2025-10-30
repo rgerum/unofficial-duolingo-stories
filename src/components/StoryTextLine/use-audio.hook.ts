@@ -1,0 +1,124 @@
+import React from "react";
+
+declare global {
+  interface Window {
+    playing_audio?: Array<() => void>;
+  }
+}
+
+export type AudioKeypoint = {
+  rangeEnd: number;
+  audioStart: number;
+};
+
+type AudioContent = {
+  audio: {
+    keypoints: AudioKeypoint[];
+    url: string;
+  };
+};
+
+type UseAudioProps = {
+  line: {
+    content: {
+      audio?: {
+        keypoints: AudioKeypoint[];
+        url: string;
+      };
+    };
+  };
+  learningLanguageTitleContent?: {
+    audio?: {
+      keypoints: AudioKeypoint[];
+      url: string;
+    };
+  };
+  trackingProperties?: {
+    line_index: number;
+  };
+};
+
+export default function useAudio(element: UseAudioProps, active: boolean) {
+  const [audioRange, setAudioRange] = React.useState(99999);
+  const audio =
+    element?.line?.content?.audio ||
+    element?.learningLanguageTitleContent?.audio;
+  const ref = React.useRef<HTMLAudioElement>(null);
+
+  const playAudio = React.useCallback(async () => {
+    if (!audio?.keypoints?.length || !audio?.url || !ref.current) return;
+
+    const audioObject = ref.current;
+
+    // Stop any currently playing audio
+    if (window.playing_audio?.length) {
+      window.playing_audio.forEach((cancel) => cancel());
+    }
+
+    window.playing_audio = [];
+
+    try {
+      audioObject.pause();
+      audioObject.load();
+      audioObject.currentTime = 0;
+      await audioObject.play();
+    } catch (e) {
+      console.error("Failed to play audio:", e);
+      return;
+    }
+
+    const timeouts: NodeJS.Timeout[] = [];
+
+    // Set up keypoint timeouts
+    audio.keypoints.forEach((keypoint) => {
+      const timeout = setTimeout(() => {
+        setAudioRange(keypoint.rangeEnd);
+      }, keypoint.audioStart);
+      timeouts.push(timeout);
+    });
+
+    // Set up completion timeout
+    const completionTimeout = window.setTimeout(
+      () => {
+        setAudioRange(9999);
+        // Auto-advance logic would go here
+      },
+      audioObject.duration * 1000 - 150,
+    );
+
+    // Cleanup function
+    const cancel = () => {
+      timeouts.forEach(clearTimeout);
+      clearTimeout(completionTimeout);
+      setAudioRange(99999);
+      audioObject.pause();
+    };
+
+    window.playing_audio?.push(cancel);
+
+    return cancel;
+  }, [audio]);
+
+  React.useEffect(() => {
+    if (active) {
+      playAudio();
+    }
+
+    return () => {
+      // Clean up any pending timeouts if component unmounts
+      if (window.playing_audio?.length) {
+        window.playing_audio.forEach((cancel) => cancel());
+      }
+    };
+  }, [active, playAudio]);
+
+  if (!audio?.keypoints?.length || !audio?.url) {
+    return [audioRange, undefined, ref, undefined] as const;
+  }
+
+  const audioUrl = audio.url.startsWith("blob")
+    ? audio.url
+    : `https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/${audio.url}`;
+
+  return [audioRange, playAudio, ref, audioUrl] as const;
+}

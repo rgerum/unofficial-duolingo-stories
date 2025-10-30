@@ -8,10 +8,7 @@ const meta = {
 export default meta;
 
 export const Normal = {
-  render: (args) => (
-    <StoryQuestionPrompt
-      question={"Is this a question?"}
-      {...args}
-    ></StoryQuestionPrompt>
+  render: () => (
+    <StoryQuestionPrompt question={"Is this a question?"}></StoryQuestionPrompt>
   ),
 };

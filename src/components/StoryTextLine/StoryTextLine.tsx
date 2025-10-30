@@ -1,11 +1,55 @@
 import React from "react";
 import styles from "./StoryTextLine.module.css";
-import useAudio from "./use-audio.hook";
+import useAudio, { AudioKeypoint } from "./use-audio.hook";
 import StoryLineHints from "../StoryLineHints";
 import PlayAudio from "../PlayAudio";
 import StoryTextLineSimple from "../StoryTextLineSimple";
 
-function StoryTextLine({ active, element, unhide = 999999, settings }) {
+function StoryTextLine({
+  active,
+  element,
+  unhide = 999999,
+  settings,
+}: {
+  active: boolean;
+  element: {
+    line: {
+      content: {
+        text: string;
+        hintMap: {
+          rangeFrom: number;
+          rangeTo: number;
+          hintIndex: number;
+        }[];
+        hints: string[];
+        lang_hints?: string;
+        audio?: {
+          keypoints: AudioKeypoint[];
+          url: string;
+        };
+      };
+      type: string;
+      avatarUrl?: string;
+      characterName?: string;
+      characterId?: string;
+    };
+    hideRangesForChallenge?: { start: number; end: number }[];
+    trackingProperties: {
+      line_index: number;
+    };
+    editor?: {
+      block_start_no: number;
+    };
+    lang: string;
+  };
+  unhide?: number;
+  settings: {
+    show_names: boolean;
+    highlight_name: string[];
+    hideNonHighlighted: boolean;
+    id: string;
+  };
+}) {
   const onClick = undefined;
   const [audioRange, playAudio, ref, url] = useAudio(element, active);
 
