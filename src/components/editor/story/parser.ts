@@ -34,7 +34,7 @@ const STATE_ERROR = "deleted";
 const STATE_TODO = "annotation";
 
 const STATE_AUDIO = "color";
-const STATE_COMMENT = "t.strong";
+const STATE_COMMENT = "comment"; //"t.strong";
 
 const chalky = "#e5c07b",
   coral = "#e06c75",
@@ -218,7 +218,7 @@ export let highlightStyle = syntaxHighlighting(myHighlightStyle);
 
 function parserTextWithTranslation(
   stream: StringStream,
-  state: any,
+  state: State,
   allow_hide: boolean = false,
   allow_buttons: number = 0,
 ) {
@@ -267,7 +267,7 @@ function parserTextWithTranslation(
   return STATE_ERROR;
 }
 
-function parserTranslation(stream: StringStream, state: any) {
+function parserTranslation(stream: StringStream, state: State) {
   if (stream.match(/[ |]+/)) {
     state.odd = !state.odd;
     return STATE_DEFAULT;
@@ -280,7 +280,7 @@ function parserTranslation(stream: StringStream, state: any) {
   return STATE_ERROR;
 }
 
-function parserPair(stream: StringStream, state: any) {
+function parserPair(stream: StringStream, state: State) {
   if (state.odd === false) {
     stream.match(/.*(?=<>)/);
     state.odd = true;
@@ -292,7 +292,7 @@ function parserPair(stream: StringStream, state: any) {
   }
 }
 
-function parseBockData(stream: StringStream, state: any) {
+function parseBlockData(stream: StringStream, state: State) {
   if (stream.match(/[^=]+/)) {
     if (state.odd) {
       state.odd = false;
@@ -309,14 +309,14 @@ function parseBockData(stream: StringStream, state: any) {
   return STATE_ERROR;
 }
 
-function parseBockHeader(stream: StringStream, state: any) {
+function parseBlockHeader(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text", true);
       return STATE_DEFAULT;
     }
     if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, 1, false, "trans");
+      startLine(state, 1, false, "trans", true);
       return STATE_DEFAULT;
     }
     if (state.block.allow_audio && stream.eat("$")) {
@@ -334,7 +334,7 @@ function parseBockHeader(stream: StringStream, state: any) {
   return STATE_ERROR;
 }
 
-function parseBockLine(stream: StringStream, state: any) {
+function parseBlockLine(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text", true);
@@ -345,7 +345,7 @@ function parseBockLine(stream: StringStream, state: any) {
       return STATE_SPEAKER_TYPE;
     }
     if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, 1, false, "trans");
+      startLine(state, 1, false, "trans", true);
       return STATE_DEFAULT;
     }
     if (state.block.allow_audio && stream.eat("$")) {
@@ -367,7 +367,7 @@ function parseBockLine(stream: StringStream, state: any) {
 }
 
 function startLine(
-  state: any,
+  state: State,
   line: number = 0,
   allow_trans: boolean = false,
   line_type: string = "",
@@ -388,14 +388,14 @@ function startLine(
   state.block = block;
 }
 
-function parseBockSelectPhrase(stream: StringStream, state: any) {
+function parseBlockSelectPhrase(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
       return STATE_DEFAULT;
     }
     if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans");
+      startLine(state, undefined, false, "trans", true);
       return STATE_DEFAULT;
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
@@ -435,14 +435,14 @@ function parseBockSelectPhrase(stream: StringStream, state: any) {
   return STATE_ERROR;
 }
 
-function parseBockContinuation(stream: StringStream, state: any) {
+function parseBlockContinuation(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
       return STATE_DEFAULT;
     }
     if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans");
+      startLine(state, undefined, false, "trans", true);
       return STATE_DEFAULT;
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
@@ -480,14 +480,14 @@ function parseBockContinuation(stream: StringStream, state: any) {
   return STATE_ERROR;
 }
 
-function parseBockMultipleChoice(stream: StringStream, state: any) {
+function parseBlockMultipleChoice(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
       return STATE_DEFAULT;
     }
     if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans");
+      startLine(state, undefined, false, "trans", true);
       return STATE_DEFAULT;
     }
     if (state.block.line >= 1 && stream.eat("+")) {
@@ -511,14 +511,14 @@ function parseBockMultipleChoice(stream: StringStream, state: any) {
   return STATE_ERROR;
 }
 
-function parseBockArrange(stream: StringStream, state: any) {
+function parseBlockArrange(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
       return STATE_DEFAULT;
     }
     if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans");
+      startLine(state, undefined, false, "trans", true);
       return STATE_DEFAULT;
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
@@ -552,14 +552,14 @@ function parseBockArrange(stream: StringStream, state: any) {
   return STATE_ERROR;
 }
 
-function parseBockPointToPhrase(stream: StringStream, state: any) {
+function parseBlockPointToPhrase(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
-      startLine(state, 1, true, "text");
+      startLine(state, 1, true, "text", true);
       return STATE_DEFAULT;
     }
     if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans");
+      startLine(state, undefined, false, "trans", true);
       return STATE_DEFAULT;
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
@@ -593,14 +593,14 @@ function parseBockPointToPhrase(stream: StringStream, state: any) {
   return STATE_ERROR;
 }
 
-function parseBockMatch(stream: StringStream, state: any) {
+function parseBlockMatch(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
       return STATE_DEFAULT;
     }
     if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans");
+      startLine(state, undefined, false, "trans", true);
       return STATE_DEFAULT;
     }
     if (state.block.line === 1 && stream.eat("-")) {
@@ -623,20 +623,20 @@ function parseBockMatch(stream: StringStream, state: any) {
 
 const BLOCK_FUNCS: Record<
   string,
-  (stream: StringStream, state: any) => string
+  (stream: StringStream, state: State) => string
 > = {
-  DATA: parseBockData,
-  HEADER: parseBockHeader,
-  LINE: parseBockLine,
-  MULTIPLE_CHOICE: parseBockMultipleChoice,
-  SELECT_PHRASE: parseBockSelectPhrase,
-  CONTINUATION: parseBockContinuation,
-  ARRANGE: parseBockArrange,
-  MATCH: parseBockMatch,
-  POINT_TO_PHRASE: parseBockPointToPhrase,
+  DATA: parseBlockData,
+  HEADER: parseBlockHeader,
+  LINE: parseBlockLine,
+  MULTIPLE_CHOICE: parseBlockMultipleChoice,
+  SELECT_PHRASE: parseBlockSelectPhrase,
+  CONTINUATION: parseBlockContinuation,
+  ARRANGE: parseBlockArrange,
+  MATCH: parseBlockMatch,
+  POINT_TO_PHRASE: parseBlockPointToPhrase,
 };
 
-function parseBlockDef(stream: StringStream, state: any) {
+function parseBlockDef(stream: StringStream, state: State) {
   if (stream.eat("]")) {
     state.func = BLOCK_FUNCS[state?.block?.name];
     return STATE_DEFAULT;
@@ -644,11 +644,17 @@ function parseBlockDef(stream: StringStream, state: any) {
   const match = stream.match(/[^\]]+/);
   const name =
     match && typeof match === "object" && "0" in match ? match[0] : "";
-  state.block = { name: name, line: 0 };
+  state.block = {
+    name: name,
+    line: 0,
+    line_type: "",
+    allow_trans: false,
+    allow_audio: false,
+  };
   return STATE_BLOCK_TYPE;
 }
 
-function parserWithMetadata(stream: StringStream, state: any) {
+function parserWithMetadata(stream: StringStream, state: State) {
   if (stream.match("#")) {
     if (stream.match(/.*TODO.*/)) {
       stream.skipToEnd();
@@ -670,10 +676,36 @@ function parserWithMetadata(stream: StringStream, state: any) {
   return STATE_ERROR;
 }
 
+type State = {
+  pos: string;
+  block: {
+    name: string;
+    line: number;
+    line_type: string;
+    allow_trans: boolean;
+    allow_audio: boolean;
+  };
+  odd: boolean;
+  func: any;
+  bracket: boolean;
+};
+
 export const exampleLanguage = StreamLanguage.define({
   token: parserWithMetadata,
   startState() {
-    return { pos: "default" };
+    return {
+      pos: "default",
+      block: {
+        name: "",
+        line: 0,
+        line_type: "",
+        allow_trans: false,
+        allow_audio: false,
+      },
+      odd: false,
+      func: null,
+      bracket: false,
+    };
   },
 });
 
