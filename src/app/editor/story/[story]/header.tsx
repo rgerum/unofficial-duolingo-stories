@@ -3,6 +3,7 @@ import styles from "./header.module.css";
 import EditorButton from "../../editor_button";
 import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
+import { HeaderProps } from "./types";
 
 export function StoryEditorHeader({
   story_data,
@@ -15,10 +16,7 @@ export function StoryEditorHeader({
   set_show_trans,
   show_ssml,
   set_show_ssml,
-}: {
-  unsaved_changes: boolean;
-  language_data;
-}) {
+}: HeaderProps) {
   function do_set_show_trans() {
     let value = !show_trans;
     const event = new CustomEvent("editorShowTranslations", {
@@ -57,17 +55,26 @@ export function StoryEditorHeader({
       window.alert("Story could not be saved.");
     }
     set_save_text("Save");
-    document.querySelector("#button_save span").innerText = "Save";
+    const saveButton = document.querySelector(
+      "#button_save span",
+    ) as HTMLSpanElement;
+    if (saveButton) saveButton.innerText = "Save";
   }
 
   async function Delete() {
     if (confirm("Are you sure that you want to delete this story?")) {
-      document.querySelector("#button_delete span").innerText = "Deleting";
+      const deleteButton = document.querySelector(
+        "#button_delete span",
+      ) as HTMLSpanElement;
+      if (deleteButton) deleteButton.innerText = "Deleting";
       try {
         func_delete();
       } catch (e) {
         console.log("error delete", e);
-        document.querySelector("#button_delete span").innerText = "Delete";
+        const deleteButton = document.querySelector(
+          "#button_delete span",
+        ) as HTMLSpanElement;
+        if (deleteButton) deleteButton.innerText = "Delete";
         window.alert("Story could not be deleted");
       }
     }
@@ -80,15 +87,15 @@ export function StoryEditorHeader({
           <Breadcrumbs
             path={[
               { type: "Editor", href: `/editor` },
-              { type: "sep" },
+              { type: "sep", href: "#" },
               {
                 type: "course",
                 lang1: language_data,
                 lang2: language_data2,
                 href: `/editor/course/${story_data?.short}`,
               },
-              { type: "sep" },
-              { type: "story", data: story_data },
+              { type: "sep", href: "#" },
+              { type: "story", data: story_data, href: `#` },
             ]}
           />
 
@@ -101,12 +108,12 @@ export function StoryEditorHeader({
           />
           <EditorButton
             onClick={do_set_show_trans}
-            checked={show_trans ? "checked" : ""}
+            checked={show_trans}
             text={"Hints"}
           />
           <EditorButton
             onClick={do_set_show_ssml}
-            checked={show_ssml ? "checked" : ""}
+            checked={show_ssml}
             text={"Audio"}
           />
 

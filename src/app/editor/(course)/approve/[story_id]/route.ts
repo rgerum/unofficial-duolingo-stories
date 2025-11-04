@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db.ts";
+import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { getUser } from "@/lib/userInterface";

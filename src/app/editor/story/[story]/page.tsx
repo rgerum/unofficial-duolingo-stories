@@ -20,7 +20,7 @@ export type StoryData = {
 };
 async function get_story({ id }: { id: number }) {
   return (
-    await sql`SELECT story.id, c.official as official, course_id, duo_id, image, 
+    await sql`SELECT story.id, c.official as official, course_id, duo_id, image,
        story.name, set_id, set_index, text, c.short, c.learning_language as learning_language,
        c.from_language as from_language FROM story JOIN course c on story.course_id = c.id WHERE story.id = ${id} LIMIT 1
 `

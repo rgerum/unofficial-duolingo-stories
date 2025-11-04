@@ -6,7 +6,7 @@ import { Spinner } from "@/components/layout/spinner";
 export default function Loading() {
   return (
     <>
-      <StoryHeader progress={0} length={10} />
+      <StoryHeader course="unknown" progress={0} length={10} />
       <div style={{ textAlign: "center", marginTop: "200px" }}>
         <p>Loading Story...</p>
         <Spinner />
