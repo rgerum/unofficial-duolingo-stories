@@ -76,7 +76,7 @@ function StoryLineHints({
 
   if (hideRangesForChallengeEntry) {
     if (unhide === -1) hideRangesForChallengeEntry = undefined;
-    else if (unhide > hideRangesForChallengeEntry.start)
+    else if (unhide && unhide > hideRangesForChallengeEntry.start)
       hideRangesForChallengeEntry = {
         start: unhide,
         end: Math.max(hideRangesForChallengeEntry.end, unhide),
@@ -116,7 +116,7 @@ function StoryLineHints({
     //TODO
     //if(is_hidden && window.view)
     //    style.color = "#afafaf";
-    if (audioRange < start) style.opacity = 0.5;
+    if (audioRange && audioRange < start) style.opacity = 0.5;
 
     let returns = [
       <span

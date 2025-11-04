@@ -21,7 +21,7 @@ function StoryChallengeArrange({
   const [unhide, setUnhide] = React.useState(0);
   const id = React.useId();
 
-  function advance(i, done) {
+  function advance(i: number, done: boolean) {
     setUnhide(i);
 
     if (done) {
