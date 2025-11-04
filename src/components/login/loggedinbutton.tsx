@@ -10,14 +10,22 @@ import { useSelectedLayoutSegments } from "next/navigation";
 import Button from "../layout/button";
 import { getUser } from "@/lib/userInterface";
 
-function get_current_theme() {
+function themeToLightOrDark(
+  theme: string | null,
+): "light" | "dark" | undefined {
+  if (theme === "light") return "light";
+  if (theme === "dark") return "dark";
+  return undefined;
+}
+
+function get_current_theme(): "light" | "dark" | undefined {
   // it's currently saved in the document?
   if (
     typeof document !== "undefined" &&
     document.body.dataset.theme &&
     document.body.dataset.theme !== "undefined"
   ) {
-    return document.body.dataset.theme;
+    return themeToLightOrDark(document.body.dataset.theme);
   }
   if (typeof window !== "undefined") {
     // it has been previously saved in the window?
@@ -25,7 +33,7 @@ function get_current_theme() {
       window.localStorage.getItem("theme") !== undefined &&
       window.localStorage.getItem("theme") !== "undefined"
     ) {
-      return window.localStorage.getItem("theme");
+      return themeToLightOrDark(window.localStorage.getItem("theme"));
     }
     // or the user has a preference?
     if (window.matchMedia("(prefers-color-scheme: dark)").matches)
@@ -37,12 +45,14 @@ function get_current_theme() {
 }
 
 function useDarkLight() {
-  const [activeTheme, setActiveTheme] = useState(undefined);
+  const [activeTheme, setActiveTheme] = useState<"light" | "dark" | undefined>(
+    undefined,
+  );
   const inactiveTheme = activeTheme === "light" ? "dark" : "light";
   //...
 
   useEffect(() => {
-    if (activeTheme === undefined || activeTheme === "undefined") {
+    if (activeTheme === undefined) {
       setActiveTheme(get_current_theme());
     } else {
       document.body.dataset.theme = activeTheme;
@@ -65,7 +75,15 @@ export function LogInButton() {
   );
 }
 
-export function LoggedInButton({ page, course_id, user }) {
+export function LoggedInButton({
+  page,
+  course_id,
+  user,
+}: {
+  page: string;
+  course_id?: string;
+  user?: { name: string; image: string; role: string; admin: boolean };
+}) {
   //const { data: session } = useSession();
   const controls = useDarkLight();
 

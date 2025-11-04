@@ -5,8 +5,11 @@ function update_lines(
   editor: HTMLElement,
   svg_parent: HTMLElement | undefined,
 ) {
-  if (!editor || !svg_parent) return;
+  const line_element = editor.querySelector(".cm-line");
+  if (!editor || !svg_parent || !line_element) return;
   if (!document.defaultView) return;
+  const line_height = line_element.getBoundingClientRect().height;
+
   let svg_element = 0;
   const width1 = parseInt(document.defaultView.getComputedStyle(editor).width);
   if (isNaN(width1)) return;
@@ -28,7 +31,7 @@ function update_lines(
       10; // - preview.scrollTop - preview.getBoundingClientRect().top
     const new_linetop =
       -10 +
-      (4 + new_lineno) * 26.6 -
+      (4 + new_lineno) * line_height -
       editor.scrollTop -
       svg_parent.getBoundingClientRect().top -
       editor.getBoundingClientRect().top;
@@ -45,16 +48,20 @@ function update_lines(
   svg_parent.children[0].setAttribute("d", path);
 }
 
-function createScrollLookUp(preview: HTMLElement | undefined) {
+function createScrollLookUp(
+  editor: HTMLElement,
+  preview: HTMLElement | undefined,
+) {
+  const line_element = editor.querySelector(".cm-line");
   const line_map: [number, number, number][] = [[0, 0, 0]];
+  if (!preview || !line_element) return line_map;
 
-  if (!preview) return line_map;
-
+  const line_height = line_element.getBoundingClientRect().height;
   for (let element of document.querySelectorAll<
     HTMLElement & { dataset: { lineno: string } }
   >("div[data-lineno]")) {
     let new_lineno = parseInt(element.dataset.lineno);
-    let new_line_top = new_lineno * 26.6 + 2 - 26.6;
+    let new_line_top = new_lineno * line_height + 2 - line_height;
     let new_top =
       element.getBoundingClientRect().top +
       preview.scrollTop -
@@ -137,7 +144,7 @@ export default function useScrollLinking(
 
         const new_pos = map_side(
           editor.scrollTop,
-          createScrollLookUp(preview),
+          createScrollLookUp(editor, preview),
           1,
           2,
           editor.getBoundingClientRect().height / 3,
@@ -166,7 +173,7 @@ export default function useScrollLinking(
 
         const new_pos = map_side(
           preview.scrollTop,
-          createScrollLookUp(preview),
+          createScrollLookUp(editor, preview),
           2,
           1,
           editor.getBoundingClientRect().height / 3,
@@ -190,7 +197,7 @@ export default function useScrollLinking(
       // the same as the scroll editor
       const new_pos = map_side(
         editor.scrollTop,
-        createScrollLookUp(preview),
+        createScrollLookUp(editor, preview),
         1,
         2,
         editor.getBoundingClientRect().height / 3,
