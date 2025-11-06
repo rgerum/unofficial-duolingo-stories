@@ -1,7 +1,7 @@
-import fetch from "node-fetch";
-import { Headers } from "node-fetch";
+//import fetch from "node-fetch";
+//import { Headers } from "node-fetch";
 import fs from "fs";
-import { put } from '@vercel/blob';
+import { put } from "@vercel/blob";
 
 const apiKey = process.env.GITHUB_APIKEY;
 
@@ -56,10 +56,12 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
           }
         }*/
         resolve({ timepoints: timepoints, content: audioContent });
-      }
-      else {
-        await put(filename, Buffer.from(audioContent, "base64"), {access: "public", addRandomSuffix: false});
-        resolve({output_file: filename, timepoints: timepoints});
+      } else {
+        await put(filename, Buffer.from(audioContent, "base64"), {
+          access: "public",
+          addRandomSuffix: false,
+        });
+        resolve({ output_file: filename, timepoints: timepoints });
       }
       /*
       fs.writeFile(filename, Buffer.from(audioContent, "base64"), () => {
@@ -137,7 +139,11 @@ async function getVoices() {
 }
 
 async function isValidVoice(voice) {
-  return voice.indexOf("Wavenet") !== -1 || voice.indexOf("Standard") !== -1 || voice.indexOf("Neural2") !== -1;
+  return (
+    voice.indexOf("Wavenet") !== -1 ||
+    voice.indexOf("Standard") !== -1 ||
+    voice.indexOf("Neural2") !== -1
+  );
 }
 
 export default {

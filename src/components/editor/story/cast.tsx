@@ -4,7 +4,10 @@ import Link from "next/link";
 
 export default function Cast(props: {
   id: number;
-  cast: { id: number; link: string; speaker: string; name: string }[];
+  cast: Record<
+    string,
+    { id: string; link: string; speaker: string; name: string }
+  >;
   short: string;
 }) {
   let cast = [];
@@ -56,7 +59,7 @@ export default function Cast(props: {
 }
 
 function Character(props: {
-  character: { id: number; link: string; name: string; speaker: string };
+  character: { id: string; link: string; name: string; speaker: string };
 }) {
   let character = props.character;
   return (

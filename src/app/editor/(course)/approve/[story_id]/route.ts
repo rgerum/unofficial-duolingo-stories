@@ -82,8 +82,8 @@ SET count = (
     FROM story
     WHERE story.course_id = course.id AND story.public AND NOT story.deleted
 ) WHERE id = (SELECT course_id FROM story WHERE id = ${res3[0].id});`;
-      revalidateTag("course_data");
-      revalidateTag("story_data");
+      revalidateTag("course_data", "day");
+      revalidateTag("story_data", "day");
     }
     // update contributor list
     await sql`UPDATE course

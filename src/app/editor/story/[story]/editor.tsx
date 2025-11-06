@@ -12,7 +12,14 @@ import useResizeEditor from "@/components/editor/story/editor-resize";
 import Story, { EditorContext } from "@/components/story/story";
 import Cast from "@/components/editor/story/cast";
 
-import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
+import {
+  processStoryFile,
+  StoryElementArrange,
+  StoryElementHeader,
+  StoryElementLine,
+  StoryElementMatch,
+  StoryElementPointToPhrase,
+} from "@/components/editor/story/syntax_parser_new";
 
 import { useRouter } from "next/navigation";
 import { StoryEditorHeader } from "./header";
@@ -23,9 +30,11 @@ import {
   timings_to_text,
 } from "@/components/story/text_lines/audio_edit_tools";
 import { Avatar, StoryData } from "@/app/editor/story/[story]/page";
+import { z } from "zod";
 
-let images_cached = {};
-export async function getImage(id: number) {
+let images_cached: Record<string, z.infer<typeof ImageSchema>> = {};
+export async function getImage(id: string | undefined) {
+  if (!id) return null;
   if (images_cached[id] !== undefined) {
     return images_cached[id];
   }
@@ -33,43 +42,64 @@ export async function getImage(id: number) {
   //return {}
 }
 
-export async function getImageAsync(id: number) {
+const ImageSchema = z.object({
+  id: z.string(),
+  active: z.string(),
+  gilded: z.string(),
+  locked: z.string(),
+  active_lip: z.string(),
+  gilded_lip: z.string(),
+});
+
+export async function getImageAsync(id: string) {
   try {
     let response_json = await fetch(`/editor/story/get_image/${id}`, {
       credentials: "include",
     });
-    let image = await response_json.json();
+    const image = ImageSchema.parse(await response_json.json());
     images_cached[id] = image;
     return image;
   } catch (e) {
-    return {};
+    return undefined;
   }
 }
 
-export async function getLanguageName(id) {
+const LanguageSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  short: z.string(),
+  flag: z.number(),
+  flag_file: z.string(),
+  speaker: z.string(),
+  default_text: z.string(),
+  tts_replace: z.string(),
+  public: z.boolean(),
+  rtl: z.boolean(),
+});
+type LanguageData = z.infer<typeof LanguageSchema>;
+export async function getLanguageName(id: number) {
   try {
     let response = await fetch(`/editor/story/get_language/${id}`, {
       credentials: "include",
     });
-    return await response.json();
+    console.log("getLanguageName", id, await response.json());
+    return LanguageSchema.parse(await response.json());
   } catch (e) {
-    return {};
+    return undefined;
   }
 }
 
 export async function setStory(data) {
-  let res = await fetch_post(`/editor/story/set_story`, data);
-  res = await res.text();
-  return res;
+  const res = await fetch_post(`/editor/story/set_story`, data);
+  return await res.text();
 }
 
 export async function deleteStory(data) {
   let res = await fetch_post(`/editor/story/delete_story`, data);
-  res = await res.text();
-  return res;
+  return await res.text();
 }
 
-function getMax(list, callback) {
+function getMax<T>(list: T[], callback: (obj: T) => number) {
   let max = -Infinity;
   for (let obj of list) {
     const v = callback(obj);
@@ -77,6 +107,30 @@ function getMax(list, callback) {
   }
   return max;
 }
+
+type StoryType = ReturnType<typeof processStoryFile>[0] & {
+  illustrations: {
+    active: string | undefined;
+    gilded: string | undefined;
+    locked: string | undefined;
+  };
+  learning_language_rtl: boolean;
+  from_language_rtl: boolean;
+};
+
+type StoryMetaType = ReturnType<typeof processStoryFile>[1];
+
+type AudioInsertLinesType = ReturnType<typeof processStoryFile>[2];
+
+type EditorStateType = {
+  line_no: number;
+  view: EditorView;
+  select: (line: string, scroll: boolean) => void;
+  audio_insert_lines: AudioInsertLinesType | undefined;
+  show_trans: boolean;
+  show_audio_editor: (data: any) => void;
+  show_ssml: boolean;
+};
 
 export default function Editor({
   story_data,
@@ -90,8 +144,12 @@ export default function Editor({
   const margin = React.useRef<SVGSVGElement>(null);
   const svg_parent = React.useRef<SVGSVGElement>(null);
 
-  const [language_data, set_language_data] = React.useState();
-  const [language_data2, set_language_data2] = React.useState();
+  const [language_data, set_language_data] = React.useState<
+    LanguageData | undefined
+  >();
+  const [language_data2, set_language_data2] = React.useState<
+    LanguageData | undefined
+  >();
   React.useEffect(() => {
     async function loadLanguageData() {
       if (!story_data) return () => {};
@@ -105,28 +163,37 @@ export default function Editor({
   }, [story_data]);
 
   const [show_trans, set_show_trans] = React.useState(false);
-  const [show_ssml, set_show_ssml] = React.useState();
+  const [show_ssml, set_show_ssml] = React.useState(false);
 
-  const [editor_state, set_editor_state] = React.useState();
-  const [story_state, set_story_state] = React.useState();
-  const [story_meta, set_story_meta] = React.useState();
-  const [view, set_view] = React.useState();
+  const [editor_state, set_editor_state] = React.useState<
+    EditorStateType | undefined
+  >();
+  const [story_state, set_story_state] = React.useState<
+    StoryType | undefined
+  >();
+  const [story_meta, set_story_meta] = React.useState<
+    StoryMetaType | undefined
+  >();
+  const [view, set_view] = React.useState<EditorView | undefined>();
 
   const [func_save, set_func_save] = React.useState(() => () => {});
   const [func_delete, set_func_delete] = React.useState(() => () => {});
 
-  const [audio_editor_data, setAudioEditorData] = React.useState({});
+  const [audio_editor_data, setAudioEditorData] = React.useState<
+    StoryElementLine | StoryElementHeader | undefined
+  >(undefined);
 
   const [unsaved_changes, set_unsaved_changes] = React.useState(false);
 
   const [save_error, set_save_error] = React.useState(false);
 
   function soundRecorderNext() {
-    const index = audio_editor_data.trackingProperties.line_index || 0;
+    if (!story_state) return;
+    const index = audio_editor_data?.trackingProperties.line_index || 0;
     for (let element of story_state.elements) {
       if (
         element.type === "LINE" &&
-        element.trackingProperties.line_index > index
+        (element.trackingProperties?.line_index ?? 0) > index
       ) {
         setAudioEditorData(element);
         break;
@@ -134,11 +201,12 @@ export default function Editor({
     }
   }
   function soundRecorderPrevious() {
-    const index = audio_editor_data.trackingProperties.line_index || 0;
+    if (!story_state) return;
+    const index = audio_editor_data?.trackingProperties.line_index || 0;
     for (let element of [...story_state.elements].reverse()) {
       if (
         (element.type === "LINE" || element.type === "HEADER") &&
-        (element.trackingProperties.line_index || 0) < index
+        (element.trackingProperties?.line_index ?? 0) < index
       ) {
         setAudioEditorData(element);
         break;
@@ -162,9 +230,11 @@ export default function Editor({
     [unsaved_changes],
   );
 
-  const onAudioSave = (filename, text) => {
+  const onAudioSave = (filename: string, text: string) => {
     text = "$" + filename + text;
 
+    if (!audio_editor_data?.audio || !editor_state) return;
+    if (!editor_state.audio_insert_lines) return;
     insert_audio_line(
       text,
       audio_editor_data.audio.ssml,
@@ -185,14 +255,14 @@ export default function Editor({
       window.dispatchEvent(new CustomEvent("resize"));
     };
 
-    let story = undefined;
-    let story_meta = undefined;
-    let audio_insert_lines = undefined;
-    let last_lineno = undefined;
-    let lineno = undefined;
-    let editor_state = undefined;
-    let stateX = undefined;
-    let editor_text = undefined;
+    let story: StoryType | undefined = undefined;
+    let story_meta: StoryMetaType | undefined = undefined;
+    let audio_insert_lines: AudioInsertLinesType | undefined = undefined;
+    let last_lineno: number | undefined = undefined;
+    let lineno: number | undefined = undefined;
+    let editor_state: EditorStateType | undefined = undefined;
+    let stateX: EditorState | undefined = undefined;
+    let editor_text: string | undefined = undefined;
 
     async function Save() {
       try {
@@ -202,10 +272,10 @@ export default function Editor({
           duo_id: story_data.duo_id,
           name: story_meta.fromLanguageName,
           image: story_meta.icon,
-          set_id: parseInt(story_meta.set_id),
-          set_index: parseInt(story_meta.set_index),
+          set_id: story_meta.set_id,
+          set_index: story_meta.set_index,
           course_id: story_data.course_id,
-          text: editor_text,
+          text: editor_text ?? "",
           json: story,
           todo_count: story_meta.todo_count,
         };
@@ -235,28 +305,35 @@ export default function Editor({
       if (story === undefined) {
         last_lineno = lineno;
         editor_text = stateX.doc.toString();
-        [story, story_meta, audio_insert_lines] = processStoryFile(
-          editor_text,
+        const [story2, story_meta2, audio_insert_lines2] = processStoryFile(
+          editor_text ?? "",
           story_data.id,
           avatar_names,
           {
-            learning_language: language_data?.short,
-            from_language: language_data2?.short,
+            learning_language: language_data?.short ?? "",
+            from_language: language_data2?.short ?? "",
           },
-          language_data?.tts_replace,
+          language_data?.tts_replace ?? "",
         );
-        let image = await getImage(story_meta.icon);
-        story.illustrations = {
-          active: image.active,
-          gilded: image.gilded,
-          locked: image.locked,
+        const image = await getImage(story_meta2.icon);
+        story = {
+          ...story2,
+          illustrations: {
+            active: image?.active,
+            gilded: image?.gilded,
+            locked: image?.locked,
+          },
+          learning_language_rtl: language_data?.rtl ?? false,
+          from_language_rtl: language_data2?.rtl ?? false,
         };
-        story.learning_language_rtl = language_data?.rtl;
-        story.from_language_rtl = language_data2?.rtl;
 
-        set_editor_state({ ...editor_state, audio_insert_lines });
+        set_editor_state({
+          ...editor_state,
+          audio_insert_lines: audio_insert_lines2,
+        });
         set_story_state(story);
-        set_story_meta(story_meta);
+        set_story_meta(story_meta2);
+        audio_insert_lines = audio_insert_lines2;
 
         createScrollLookUp();
         last_lineno = lineno;
@@ -265,7 +342,7 @@ export default function Editor({
 
     window.setInterval(updateDisplay, 1000);
 
-    let last_event_lineno;
+    let last_event_lineno: number | undefined;
     let sync = EditorView.updateListener.of((v) => {
       lineno = v.state.doc.lineAt(v.state.selection.ranges[0].from).number;
       if (last_event_lineno !== lineno) {
@@ -282,7 +359,7 @@ export default function Editor({
       editor_state = {
         line_no: lineno,
         view: view,
-        select: (line, scroll) => {
+        select: (line: string, scroll: boolean) => {
           let pos = view.state.doc.line(parseInt(line)).from;
           view.dispatch(
             view.state.update({
@@ -293,6 +370,7 @@ export default function Editor({
         },
         audio_insert_lines: audio_insert_lines,
         show_trans: show_trans,
+        show_ssml: show_ssml,
         show_audio_editor: setAudioEditorData,
       };
       stateX = v.state;
@@ -313,10 +391,10 @@ export default function Editor({
       doc: story_data.text || "",
       extensions: [basicSetup, sync, theme, example(), highlightStyle],
     });
-    const view = new EditorView({ state, parent: editor.current });
+    const view = new EditorView({ state, parent: editor.current ?? undefined });
     set_view(view);
 
-    async function key_pressed(e) {
+    async function key_pressed(e: KeyboardEvent) {
       if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         await Save();
@@ -383,7 +461,7 @@ export default function Editor({
               audio_editor_data.audio.url
             }
             story_id={story_data.id}
-            onClose={() => setAudioEditorData(null)}
+            onClose={() => setAudioEditorData(undefined)}
             onSave={onAudioSave}
             soundRecorderNext={soundRecorderNext}
             soundRecorderPrevious={soundRecorderPrevious}
@@ -414,7 +492,6 @@ export default function Editor({
               <Cast
                 id={story_data.id}
                 cast={story_meta.cast}
-                learning_language={story_data.learning_language}
                 short={story_data.short}
               />
             ) : null}

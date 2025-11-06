@@ -195,7 +195,14 @@ function processBlockData(line_iter: LineIterator, story: Story) {
     if (!line) break;
     if (line.indexOf("=") !== -1) {
       let [key, value] = line.split("=", 2);
-      story.meta[key.trim()] = value.trim();
+      key = key.trim();
+      if (key == "set") {
+        [story.meta.set_id, story.meta.set_index] = value
+          .split("|")
+          .map((x) => parseInt(x));
+      } else if (key == "set_id" || key == "set_index") {
+        story.meta[key] = parseInt(value.trim());
+      } else story.meta[key.trim()] = value.trim();
       line_iter.advance();
       continue;
     }
@@ -224,9 +231,6 @@ function processBlockData(line_iter: LineIterator, story: Story) {
         };
       story.meta.avatar_overwrites[id].speaker = story.meta[key] ?? "";
     }
-  }
-  if (story.meta["set"] && story.meta["set"].indexOf("|") !== -1) {
-    [story.meta.set_id, story.meta.set_index] = story.meta["set"].split("|");
   }
   story.from_language_name = story.meta.from_language_name;
 }
@@ -411,12 +415,12 @@ function speaker_text_trans(
       characterId: speaker.characterId,
       characterName: speaker?.characterName,
       content: content,
-    };
+    } as LineElementCharacter;
   } else {
     line = {
       type: "PROSE",
       content: content,
-    };
+    } as LineElementProse;
   }
   return {
     speaker: speaker,
@@ -433,9 +437,9 @@ type Audio = {
   ssml: {
     text: string;
     speaker: string;
-    id?: number;
+    id: number;
 
-    inser_index?: number | undefined;
+    inser_index: number;
     plan_text?: string | undefined;
     plan_text_speaker_name?: string | undefined;
   };
@@ -563,7 +567,7 @@ function getAnswers(
     }
     break;
   }
-  return [answers, correct_answer];
+  return [answers, correct_answer] as const;
 }
 
 function pointToPhraseButtons(line: string) {
@@ -634,9 +638,9 @@ function processBlockHeader(
     type: "HEADER",
     illustrationUrl:
       "https://stories-cdn.duolingo.com/image/" + story.meta["icon"] + ".svg",
-    title: story.meta["from_language_name"],
+    title: story.meta["from_language_name"] ?? "",
     learningLanguageTitleContent: data_text.content,
-    trackingProperties: {},
+    trackingProperties: { line_index: 0 },
     audio: data_text.audio,
     lang: lang || story_languages.learning_language,
     editor: {
@@ -645,7 +649,7 @@ function processBlockHeader(
       end_no: line_iter.get_lineno(),
       active_no: start_no1,
     },
-  });
+  } as StoryElementHeader);
   return false;
 }
 
@@ -677,7 +681,7 @@ function processBlockLine(
       end_no: line_iter.get_lineno(),
       active_no: start_no1,
     },
-  });
+  } as StoryElementLine);
   story.meta.line_index += 1;
   return false;
 }
@@ -697,7 +701,7 @@ function processBlockMultipleChoice(
   story.elements.push({
     type: "MULTIPLE_CHOICE",
     answers: answers,
-    correctAnswerIndex: correct_answer,
+    correctAnswerIndex: correct_answer ?? 0,
     question: data_text.content,
     trackingProperties: {
       line_index: story.meta.line_index - 1,
@@ -710,7 +714,7 @@ function processBlockMultipleChoice(
       end_no: line_iter.get_lineno(),
       active_no: start_no1,
     },
-  });
+  } as StoryElementMultipleChoice);
   //story.meta.line_index += 1;
   return false;
 }
@@ -748,7 +752,7 @@ function processBlockSelectPhrase(
       end_no: start_no2,
       active_no: start_no1,
     },
-  });
+  } as StoryElementChallengePrompt);
   story.elements.push({
     type: "LINE",
     hideRangesForChallenge: data_text.hideRanges,
@@ -759,18 +763,18 @@ function processBlockSelectPhrase(
     audio: data_text.audio,
     lang: story_languages.learning_language,
     editor: { start_no: start_no2, end_no: start_no3 },
-  });
+  } as StoryElementLine);
   story.elements.push({
     type: "SELECT_PHRASE",
     answers: answers,
-    correctAnswerIndex: correct_answer,
+    correctAnswerIndex: correct_answer ?? 0,
     trackingProperties: {
       line_index: story.meta.line_index,
       challenge_type: "select-phrases",
     },
     lang: story_languages.learning_language,
     editor: { start_no: start_no3, end_no: line_iter.get_lineno() },
-  });
+  } as StoryElementSelectPhrase);
   story.meta.line_index += 1;
 }
 
@@ -811,7 +815,7 @@ function processBlockContinuation(
       end_no: start_no2,
       active_no: start_no1,
     },
-  });
+  } as StoryElementChallengePrompt);
   story.elements.push({
     type: "LINE",
     hideRangesForChallenge: data_text.hideRanges,
@@ -822,11 +826,11 @@ function processBlockContinuation(
     audio: data_text.audio,
     lang: story_languages.learning_language,
     editor: { start_no: start_no2, end_no: start_no3 },
-  });
+  } as StoryElementLine);
   story.elements.push({
     type: "MULTIPLE_CHOICE",
     answers: answers,
-    correctAnswerIndex: correct_answer,
+    correctAnswerIndex: correct_answer ?? 0,
     //question: data_text.content,
     trackingProperties: {
       line_index: story.meta.line_index,
@@ -834,7 +838,7 @@ function processBlockContinuation(
     },
     lang: story_languages.learning_language,
     editor: { start_no: start_no3, end_no: line_iter.get_lineno() },
-  });
+  } as StoryElementMultipleChoice);
   story.meta.line_index += 1;
 }
 
@@ -872,7 +876,7 @@ function processBlockArrange(
       end_no: start_no2,
       active_no: start_no1,
     },
-  });
+  } as StoryElementChallengePrompt);
   story.elements.push({
     type: "LINE",
     hideRangesForChallenge: data_text.hideRanges,
@@ -883,7 +887,7 @@ function processBlockArrange(
     audio: data_text.audio,
     lang: story_languages.learning_language,
     editor: { start_no: start_no2, end_no: line_iter.get_lineno() },
-  });
+  } as StoryElementLine);
   story.elements.push({
     type: "ARRANGE",
     characterPositions: data_text.characterPositions,
@@ -895,7 +899,7 @@ function processBlockArrange(
     },
     lang: story_languages.learning_language,
     editor: { start_no: start_no2, end_no: line_iter.get_lineno() },
-  });
+  } as StoryElementArrange);
   story.meta.line_index += 1;
 }
 
@@ -935,7 +939,7 @@ function processBlockPointToPhrase(
       end_no: start_no2,
       active_no: start_no1,
     },
-  });
+  } as StoryElementLine);
   story.elements.push({
     type: "POINT_TO_PHRASE",
     correctAnswerIndex: correctAnswerIndex,
@@ -948,7 +952,7 @@ function processBlockPointToPhrase(
     lang_question: lang || story_languages.from_language,
     lang: story_languages.learning_language,
     editor: { start_no: start_no2, end_no: line_iter.get_lineno() },
-  });
+  } as StoryElementPointToPhrase);
   story.meta.line_index += 1;
 }
 
@@ -993,7 +997,7 @@ function processBlockMatch(
       end_no: line_iter.get_lineno(),
       active_no: start_no1,
     },
-  });
+  } as StoryElementMatch);
   story.meta.line_index += 1;
 }
 
@@ -1033,7 +1037,166 @@ function line_iterator(lines: LineTuple[]) {
 }
 type LineIterator = ReturnType<typeof line_iterator>;
 
-export type StoryElement = {};
+type LineElementCharacter = {
+  type: "CHARACTER";
+  avatarUrl?: string;
+  characterId: number | string;
+  characterName?: string;
+  content: ContentWithHints;
+};
+type LineElementProse = {
+  type: "PROSE";
+  content: ContentWithHints;
+};
+export type LineElement = LineElementCharacter | LineElementProse;
+
+export type StoryElementHeader = {
+  type: "HEADER";
+  illustrationUrl: string;
+  title: string;
+  learningLanguageTitleContent: ContentWithHints;
+  trackingProperties: { line_index: 0 };
+  audio?: Audio;
+  lang: string;
+  editor: {
+    block_start_no?: number;
+    start_no?: number;
+    end_no?: number;
+    active_no?: number;
+  };
+};
+
+export type StoryElementLine = {
+  type: "LINE";
+  hideRangesForChallenge?: HideRange[];
+  line: LineElement;
+  trackingProperties: { line_index: number; [key: string]: any };
+  audio?: Audio;
+  lang: string;
+  editor: {
+    block_start_no?: number;
+    start_no?: number;
+    end_no?: number;
+    active_no?: number;
+  };
+};
+
+export type StoryElementMultipleChoice = {
+  type: "MULTIPLE_CHOICE";
+  answers: (string | HintMapResult)[];
+  correctAnswerIndex: number;
+  question?: ContentWithHints;
+  trackingProperties: {
+    line_index: number;
+    challenge_type: "multiple-choice" | "continuation";
+  };
+  lang: string;
+  editor: {
+    block_start_no?: number;
+    start_no?: number;
+    end_no?: number;
+    active_no?: number;
+  };
+};
+
+export type StoryElementChallengePrompt = {
+  type: "CHALLENGE_PROMPT";
+  prompt: ContentWithHints;
+  trackingProperties: {
+    line_index: number;
+    challenge_type: "select-phrases" | "continuation" | "arrange";
+  };
+  lang: string;
+  editor: {
+    block_start_no?: number;
+    start_no?: number;
+    end_no?: number;
+    active_no?: number;
+  };
+};
+
+export type StoryElementSelectPhrase = {
+  type: "SELECT_PHRASE";
+  answers: (string | HintMapResult)[];
+  correctAnswerIndex: number;
+  trackingProperties: {
+    line_index: number;
+    challenge_type: "select-phrases";
+  };
+  lang: string;
+  editor: { start_no?: number; end_no?: number };
+};
+
+export type StoryElementArrange = {
+  type: "ARRANGE";
+  characterPositions?: number[];
+  phraseOrder: number[];
+  selectablePhrases: string[];
+  trackingProperties: {
+    line_index: number;
+    challenge_type: "arrange";
+  };
+  lang: string;
+  editor: { start_no?: number; end_no?: number };
+};
+
+export type StoryElementPointToPhrase = {
+  type: "POINT_TO_PHRASE";
+  correctAnswerIndex: number | { selectable: boolean; text: string }[];
+  transcriptParts: number | { selectable: boolean; text: string }[];
+  question: ContentWithHints;
+  trackingProperties: {
+    line_index: number;
+    challenge_type: "point-to-phrase";
+  };
+  lang_question: string;
+  lang: string;
+  editor: {
+    block_start_no?: number;
+    start_no?: number;
+    end_no?: number;
+    active_no?: number;
+  };
+};
+
+export type StoryElementMatch = {
+  type: "MATCH";
+  fallbackHints: { phrase: string; translation: string }[];
+  prompt: string;
+  trackingProperties: {
+    line_index: number;
+    challenge_type: "match";
+  };
+  lang: string;
+  lang_question: string;
+  editor: {
+    block_start_no?: number;
+    start_no?: number;
+    end_no?: number;
+    active_no?: number;
+  };
+};
+
+export type StoryElementError = {
+  type: "ERROR";
+  text: string;
+  trackingProperties: {
+    line_index: number;
+    challenge_type: "error";
+  };
+};
+
+export type StoryElement =
+  | StoryElementHeader
+  | StoryElementLine
+  | StoryElementMultipleChoice
+  | StoryElementChallengePrompt
+  | StoryElementSelectPhrase
+  | StoryElementArrange
+  | StoryElementPointToPhrase
+  | StoryElementMatch
+  | StoryElementError;
+
 export type Story = {
   elements: StoryElement[];
   meta: Meta;
@@ -1045,13 +1208,23 @@ export type Meta = {
   story_id: number;
   avatar_names: Record<string, Avatar>;
   avatar_overwrites: Record<string, AvatarOverwrites>;
-  cast: Record<string, Cast>;
+  cast: Record<
+    string,
+    {
+      id: string;
+      link: string;
+      speaker: string;
+      name: string;
+    }
+  >;
   transcribe_data: TranscribeData;
   todo_count: number;
   from_language_name?: string | undefined;
+  fromLanguageName: string;
   set?: string | undefined;
-  set_id?: string | undefined;
-  set_index?: string | undefined;
+  set_id: number;
+  set_index: number;
+  icon?: string | undefined;
   [key: string]: any;
 };
 
@@ -1093,9 +1266,13 @@ export function processStoryFile(
       story_id: story_id,
       avatar_names: avatar_names,
       avatar_overwrites: {},
+      fromLanguageName: "",
       cast: {},
+      set_id: 0,
+      set_index: 0,
       transcribe_data: transcribe_data,
       todo_count: 0,
+      icon: "",
     },
   };
   const line_iter = line_iterator(lines);
@@ -1138,6 +1315,9 @@ export function processStoryFile(
   //delete story.meta;
   const audio_insert_lines = meta.audio_insert_lines;
   //delete meta.audio_insert_lines;
+
+  console.log(story);
+  console.log(meta);
 
   return [
     { ...story, meta: undefined },

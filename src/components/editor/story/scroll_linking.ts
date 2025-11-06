@@ -1,10 +1,7 @@
 import React from "react";
 import { EditorView } from "codemirror";
 
-function update_lines(
-  editor: HTMLElement,
-  svg_parent: HTMLElement | undefined,
-) {
+function update_lines(editor: HTMLElement, svg_parent: SVGElement | null) {
   const line_element = editor.querySelector(".cm-line");
   if (!editor || !svg_parent || !line_element) return;
   if (!document.defaultView) return;
@@ -124,9 +121,9 @@ function useAutoResetRef<T>() {
 }
 
 export default function useScrollLinking(
-  view: EditorView,
-  preview: HTMLElement | undefined,
-  svg_parent: HTMLElement | undefined,
+  view: EditorView | undefined,
+  preview: HTMLElement | null,
+  svg_parent: SVGElement | null,
 ) {
   const editor = view?.scrollDOM;
   const [last_scrolled_element, setLastScrolledElement] = useAutoResetRef<
@@ -162,7 +159,7 @@ export default function useScrollLinking(
   }, [editor, preview, svg_parent]);
 
   React.useEffect(() => {
-    if (!preview) return;
+    if (!preview || !editor) return;
     update_lines(editor, svg_parent);
 
     function preview_scroll() {
