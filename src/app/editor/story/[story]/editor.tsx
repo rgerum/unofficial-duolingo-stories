@@ -89,12 +89,28 @@ export async function getLanguageName(id: number) {
   }
 }
 
-export async function setStory(data) {
+export async function setStory(data: {
+  id: number;
+  duo_id: number;
+  name: string;
+  image: string | undefined;
+  set_id: number;
+  set_index: number;
+  course_id: number;
+  text: string;
+  json: StoryType | undefined;
+  todo_count: number;
+}) {
   const res = await fetch_post(`/editor/story/set_story`, data);
   return await res.text();
 }
 
-export async function deleteStory(data) {
+export async function deleteStory(data: {
+  id: number;
+  course_id: number;
+  text: string | undefined;
+  name: string | undefined;
+}) {
   let res = await fetch_post(`/editor/story/delete_story`, data);
   return await res.text();
 }
@@ -122,7 +138,7 @@ type StoryMetaType = ReturnType<typeof processStoryFile>[1];
 
 type AudioInsertLinesType = ReturnType<typeof processStoryFile>[2];
 
-type EditorStateType = {
+export type EditorStateType = {
   line_no: number;
   view: EditorView;
   select: (line: string, scroll: boolean) => void;
@@ -182,6 +198,7 @@ export default function Editor({
   const [audio_editor_data, setAudioEditorData] = React.useState<
     StoryElementLine | StoryElementHeader | undefined
   >(undefined);
+  console.log("audio_editor_data", audio_editor_data);
 
   const [unsaved_changes, set_unsaved_changes] = React.useState(false);
 
@@ -220,7 +237,7 @@ export default function Editor({
   useScrollLinking(view, preview.current, svg_parent.current);
 
   let beforeunload = React.useCallback(
-    (event) => {
+    (event: BeforeUnloadEvent) => {
       if (unsaved_changes) {
         event.preventDefault();
         return (event.returnValue =
@@ -327,10 +344,11 @@ export default function Editor({
           from_language_rtl: language_data2?.rtl ?? false,
         };
 
-        set_editor_state({
-          ...editor_state,
-          audio_insert_lines: audio_insert_lines2,
-        });
+        if (editor_state)
+          set_editor_state({
+            ...editor_state,
+            audio_insert_lines: audio_insert_lines2,
+          });
         set_story_state(story);
         set_story_meta(story_meta2);
         audio_insert_lines = audio_insert_lines2;
@@ -410,9 +428,17 @@ export default function Editor({
 
   //             <!--<div id="toolbar">--!
   //<nav className={styles.header_index}>
-  let editor_state2 = { ...editor_state };
-  editor_state2.show_trans = show_trans;
-  editor_state2.show_ssml = show_ssml;
+  let editor_state2 = editor_state ? { ...editor_state } : undefined;
+  if (editor_state2) {
+    editor_state2.show_trans = show_trans;
+    editor_state2.show_ssml = show_ssml;
+  }
+
+  const audio_editor_data_content =
+    (audio_editor_data?.type == "LINE" && audio_editor_data.line.content) ||
+    (audio_editor_data?.type == "HEADER" &&
+      audio_editor_data.learningLanguageTitleContent);
+
   return (
     <>
       <div id="body" className={styles.body}>
@@ -445,35 +471,35 @@ export default function Editor({
           language_data={language_data}
           language_data2={language_data2}
         />
-        {(audio_editor_data?.line?.content ||
-          audio_editor_data?.learningLanguageTitleContent) && (
-          <SoundRecorder
-            key={audio_editor_data.trackingProperties.line_index}
-            content={
-              audio_editor_data?.line?.content ||
-              audio_editor_data?.learningLanguageTitleContent
-            }
-            initialTimingText={timings_to_text({
-              keypoints: audio_editor_data.audio.keypoints,
-            })}
-            url={
-              "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/" +
-              audio_editor_data.audio.url
-            }
-            story_id={story_data.id}
-            onClose={() => setAudioEditorData(undefined)}
-            onSave={onAudioSave}
-            soundRecorderNext={soundRecorderNext}
-            soundRecorderPrevious={soundRecorderPrevious}
-            total_index={getMax(
-              story_state.elements,
-              (elem) => elem.trackingProperties.line_index || 0,
-            )}
-            current_index={
-              audio_editor_data?.trackingProperties?.line_index || 0
-            }
-          />
-        )}
+        {story_state &&
+          audio_editor_data &&
+          audio_editor_data.audio &&
+          audio_editor_data_content && (
+            <SoundRecorder
+              key={audio_editor_data.trackingProperties.line_index}
+              content={audio_editor_data_content}
+              initialTimingText={timings_to_text({
+                filename: audio_editor_data.audio.url ?? "",
+                keypoints: audio_editor_data.audio.keypoints ?? [],
+              })}
+              url={
+                "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/" +
+                audio_editor_data.audio.url
+              }
+              story_id={story_data.id}
+              onClose={() => setAudioEditorData(undefined)}
+              onSave={onAudioSave}
+              soundRecorderNext={soundRecorderNext}
+              soundRecorderPrevious={soundRecorderPrevious}
+              total_index={getMax(
+                story_state.elements,
+                (elem) => elem.trackingProperties.line_index || 0,
+              )}
+              current_index={
+                audio_editor_data?.trackingProperties?.line_index || 0
+              }
+            />
+          )}
         <div className={styles.root}>
           <svg className={styles.margin} ref={svg_parent}>
             <path d=""></path>
@@ -497,11 +523,7 @@ export default function Editor({
             ) : null}
             {story_state ? (
               <EditorContext.Provider value={editor_state2}>
-                <Story
-                  editor={editor_state}
-                  story={story_state}
-                  navigate={navigate}
-                />
+                <Story editor={editor_state} story={story_state} />
               </EditorContext.Provider>
             ) : null}
           </div>

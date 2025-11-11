@@ -19,7 +19,6 @@ export default function StoryWrapper({ story }) {
           <Story
             story={story}
             editor={{ lineno: 3 }}
-            navigate={navigate}
             hide_questions={hide_questions}
           />
         </EditorContext.Provider>

@@ -189,7 +189,7 @@ function split_lines(text: string) {
   return { lines, todo_count };
 }
 
-function processBlockData(line_iter: LineIterator, story: Story) {
+function processBlockData(line_iter: LineIterator, story: StoryWithMeta) {
   while (line_iter.get()) {
     let line = line_iter.get();
     if (!line) break;
@@ -397,10 +397,13 @@ function speaker_text_trans(
       hide ? hideRanges : [],
       meta.transcribe_data,
       ipa_replacements,
+      {
+        inser_index: meta.audio_insert_lines.length,
+        plan_text: text,
+        plan_text_speaker_name: speaker_name,
+      },
     );
-    audio.ssml.inser_index = meta.audio_insert_lines.length;
-    audio.ssml.plan_text = text;
-    audio.ssml.plan_text_speaker_name = speaker_name;
+
     meta.audio_insert_lines.push([data.audio_line, data.audio_line_inset ?? 0]);
     //audio.ssml.line = data.audio_line;
     //audio.ssml.line_insert = data.audio_line_inset;
@@ -438,7 +441,6 @@ type Audio = {
     text: string;
     speaker: string;
     id: number;
-
     inser_index: number;
     plan_text?: string | undefined;
     plan_text_speaker_name?: string | undefined;
@@ -454,23 +456,34 @@ function line_to_audio(
   hideRanges: HideRange[],
   transcribe_data: TranscribeData,
   ipa_replacements: string[] & { index: number }[],
+  ssml_payload: {
+    inser_index: number;
+    plan_text?: string | undefined;
+    plan_text_speaker_name?: string | undefined;
+  },
 ) {
   //let text_speak = getInputStringSpeechText(text, hide);
   let audio = {
     ssml: {
       text: text,
       speaker: speaker,
-      id: story_id,
     },
     url: undefined,
     keypoints: undefined,
   } as Audio;
-  audio.ssml = generate_ssml_line(
-    audio.ssml,
-    transcribe_data,
-    hideRanges,
-    ipa_replacements,
-  );
+  audio.ssml = {
+    ...generate_ssml_line(
+      {
+        text: text,
+        speaker: speaker,
+      },
+      transcribe_data,
+      hideRanges,
+      ipa_replacements,
+    ),
+    id: story_id,
+    ...ssml_payload,
+  };
   if (line) {
     line = line.substring(1);
     let [filename, keypoints] = text_to_keypoints(line);
@@ -623,7 +636,7 @@ function pointToPhraseButtons(line: string) {
 
 function processBlockHeader(
   line_iter: LineIterator,
-  story: Story,
+  story: StoryWithMeta,
   lang: string,
   story_languages: StoryLanguages,
 ) {
@@ -655,7 +668,7 @@ function processBlockHeader(
 
 function processBlockLine(
   line_iter: LineIterator,
-  story: Story,
+  story: StoryWithMeta,
   lang: string,
   story_languages: StoryLanguages,
 ) {
@@ -688,7 +701,7 @@ function processBlockLine(
 
 function processBlockMultipleChoice(
   line_iter: LineIterator,
-  story: Story,
+  story: StoryWithMeta,
   lang: string,
   story_languages: StoryLanguages,
 ) {
@@ -721,7 +734,7 @@ function processBlockMultipleChoice(
 
 function processBlockSelectPhrase(
   line_iter: LineIterator,
-  story: Story,
+  story: StoryWithMeta,
   lang: string,
   story_languages: StoryLanguages,
 ) {
@@ -780,7 +793,7 @@ function processBlockSelectPhrase(
 
 function processBlockContinuation(
   line_iter: LineIterator,
-  story: Story,
+  story: StoryWithMeta,
   lang: string,
   story_languages: StoryLanguages,
 ) {
@@ -844,7 +857,7 @@ function processBlockContinuation(
 
 function processBlockArrange(
   line_iter: LineIterator,
-  story: Story,
+  story: StoryWithMeta,
   lang: string,
   story_languages: StoryLanguages,
 ) {
@@ -905,7 +918,7 @@ function processBlockArrange(
 
 function processBlockPointToPhrase(
   line_iter: LineIterator,
-  story: Story,
+  story: StoryWithMeta,
   lang: string,
   story_languages: StoryLanguages,
 ) {
@@ -958,7 +971,7 @@ function processBlockPointToPhrase(
 
 function processBlockMatch(
   line_iter: LineIterator,
-  story: Story,
+  story: StoryWithMeta,
   lang: string,
   story_languages: StoryLanguages,
 ) {
@@ -1005,7 +1018,7 @@ const block_functions: Record<
   string,
   (
     line_iter: LineIterator,
-    story: Story,
+    story: StoryWithMeta,
     lang: string,
     story_languages: StoryLanguages,
   ) => void
@@ -1197,11 +1210,14 @@ export type StoryElement =
   | StoryElementMatch
   | StoryElementError;
 
-export type Story = {
-  elements: StoryElement[];
+export type StoryWithMeta = StoryType & {
   meta: Meta;
+};
+export type StoryType = {
+  elements: StoryElement[];
   from_language_name?: string | undefined;
 };
+
 export type Meta = {
   audio_insert_lines: [number | undefined, number][];
   line_index: number;
@@ -1258,7 +1274,7 @@ export function processStoryFile(
 
   const { lines, todo_count } = split_lines(text);
 
-  const story: Story = {
+  const story: StoryWithMeta = {
     elements: [],
     meta: {
       audio_insert_lines: [],
