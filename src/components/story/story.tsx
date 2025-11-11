@@ -8,22 +8,45 @@ import Footer from "./layout/story_footer";
 import StoryHeader from "./layout/story_header";
 import Legal from "../layout/legal";
 import { StoryTitlePage } from "./layout/story_title_page";
+import {
+  EditorStateType,
+  StoryTypeExtended,
+} from "@/app/editor/story/[story]/editor";
+import {
+  StoryElement,
+  StoryType,
+} from "@/components/editor/story/syntax_parser_new";
+import { NextRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import { LocalisationFunc } from "@/lib/get_localisation_func";
 
 export const StoryContext = React.createContext({});
-export const EditorContext = React.createContext(undefined);
+export const EditorContext = React.createContext<EditorStateType | undefined>(
+  undefined,
+);
 
 export default function Story({
   story,
-  router,
   id,
   editor,
   storyFinishedIndexUpdate,
   auto_play,
   hide_questions,
   localization,
+}: {
+  story: StoryTypeExtended;
+  id?: number;
+  editor?: EditorStateType | undefined;
+  storyFinishedIndexUpdate?: (id: number) => Promise<void>;
+  auto_play?: boolean;
+  hide_questions?: boolean;
+  localization?: LocalisationFunc;
 }) {
-  const storyElement = React.useRef();
-  const mainElement = React.useRef();
+  console.log("Story", story);
+  const router = useRouter();
+
+  const storyElement = React.useRef<HTMLDivElement>(null);
+  const mainElement = React.useRef<HTMLDivElement>(null);
 
   let course = story.learning_language + "-" + story.from_language;
 
@@ -36,16 +59,16 @@ export default function Story({
 
   let [show_title_page, setShowTitlePage] = useState(0);
 
-  let ref_audio1 = React.useRef();
-  let ref_audio2 = React.useRef();
-  let ref_audio3 = React.useRef();
+  let ref_audio1 = React.useRef<HTMLAudioElement>(null);
+  let ref_audio2 = React.useRef<HTMLAudioElement>(null);
+  let ref_audio3 = React.useRef<HTMLAudioElement>(null);
 
   const wrong = React.useCallback(() => {
-    ref_audio2.current.play();
+    ref_audio2.current?.play();
   }, [ref_audio2]);
 
   const right_call = React.useCallback(() => {
-    ref_audio1.current.play();
+    ref_audio1.current?.play();
     setRight(true);
     setBlocked(false);
   }, [ref_audio1, setRight, setBlocked]);
@@ -62,7 +85,7 @@ export default function Story({
   }
 
   let advance_progress = React.useCallback(
-    (current_progress) => {
+    (current_progress?: number | undefined) => {
       if (current_progress !== undefined) progress = current_progress;
       dispatchEvent(
         new CustomEvent("progress_changed", { detail: progress + 1 }),
@@ -91,7 +114,8 @@ export default function Story({
 
   let finish = React.useCallback(() => {
     const end = async () => {
-      await storyFinishedIndexUpdate(id);
+      if (!id) return;
+      if (storyFinishedIndexUpdate) await storyFinishedIndexUpdate(id);
       router.push("/" + course);
     };
     end();
@@ -99,13 +123,10 @@ export default function Story({
 
   useEffect(() => {
     if (!storyElement.current) return;
-    if (
-      mainElement.current &&
-      mainElement.current.querySelector("#finishedPage")
-    ) {
+    if (mainElement.current?.querySelector("#finishedPage")) {
       mainElement.current
         .querySelector("#finishedPage")
-        .scrollIntoView({ behavior: "smooth", block: "center" });
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
@@ -143,7 +164,7 @@ export default function Story({
     story.learning_language_rtl,
   ])();
 
-  let parts = [];
+  let parts: StoryElement[][] = [];
   let last_id = -1;
   for (let element of story.elements) {
     if (element.trackingProperties === undefined) {
@@ -163,7 +184,7 @@ export default function Story({
   }, [audio_loaded, advance_progress, progress]);
 
   if (editor) {
-    React.useMemo(() => {}, [story.id]);
+    //React.useMemo(() => {}, [story.id]);
     return (
       <StoryContext.Provider value={controls}>
         <audio ref={ref_audio1}>
@@ -214,7 +235,7 @@ export default function Story({
 
   let audios = undefined;
   if (!editor) {
-    let audio_urls = [];
+    let audio_urls: string[] = [];
     for (let element of story.elements) {
       if (element.type === "HEADER" || element.type === "LINE")
         if (element.audio && element.audio.url)
@@ -226,7 +247,7 @@ export default function Story({
       if (audio_loaded) return;
 
       let count = 0;
-      let audios = {};
+      let audios: { [key: string]: HTMLAudioElement } = {};
       audio_urls = [];
       for (let url of audio_urls) {
         if (audios[url] === undefined && url !== undefined) {
@@ -253,7 +274,7 @@ export default function Story({
   }
 
   let key_event_handler = React.useCallback(
-    (e) => {
+    (e: KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         if (!finished) next();
@@ -276,12 +297,14 @@ export default function Story({
   return (
     <>
       <div className={show_title_page === 1 ? "" : styles.hidden}>
-        <StoryHeader course={course} />
-        <StoryTitlePage
-          story={story}
-          controls={controls}
-          localization={localization}
-        />
+        <StoryHeader course={course} length={1} />
+        {localization && (
+          <StoryTitlePage
+            story={story}
+            controls={controls}
+            localization={localization}
+          />
+        )}
       </div>
       <div className={show_title_page !== 1 ? "" : styles.hidden}>
         <audio ref={ref_audio1}>
@@ -349,20 +372,22 @@ export default function Story({
           ) : (
             <div className={styles.spacer} />
           )}
-          {finished ? (
+          {finished && localization ? (
             <FinishedPage story={story} localization={localization} />
           ) : null}
         </div>
-        {controls.auto_play ? null : (
-          <Footer
-            right={right}
-            finished={finished}
-            blocked={blocked}
-            next={next}
-            finish={finish}
-            localization={localization}
-          />
-        )}
+        {controls.auto_play
+          ? null
+          : localization && (
+              <Footer
+                right={right}
+                finished={finished}
+                blocked={blocked}
+                next={next}
+                finish={finish}
+                localization={localization}
+              />
+            )}
       </div>
     </>
   );

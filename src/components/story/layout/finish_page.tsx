@@ -1,7 +1,15 @@
 import React from "react";
 import styles from "./finish_page.module.css";
+import { StoryTypeExtended } from "@/app/editor/story/[story]/editor";
+import { LocalisationFunc } from "@/lib/get_localisation";
 
-export default function FinishedPage({ story, localization }) {
+export default function FinishedPage({
+  story,
+  localization,
+}: {
+  story: StoryTypeExtended;
+  localization: LocalisationFunc;
+}) {
   /* The page at the end of the story. */
   return (
     <div
@@ -32,7 +40,7 @@ export default function FinishedPage({ story, localization }) {
         <h2>{localization("story_finished")}</h2>
         <p>
           {localization("story_finished_subtitle", {
-            $story_title: story.from_language_name,
+            $story_title: story.from_language_name ?? "",
           }) || `You finished ${story.from_language_name}`}
         </p>
       </div>

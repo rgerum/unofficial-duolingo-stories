@@ -2,7 +2,15 @@ import React from "react";
 import styles from "./story_header.module.css";
 import Link from "next/link";
 
-export default function StoryHeader({ course, progress, length }) {
+export default function StoryHeader({
+  course,
+  progress,
+  length,
+}: {
+  course: string;
+  progress?: number;
+  length: number;
+}) {
   if (progress === undefined) {
     return (
       <div className={styles.header}>

@@ -1,9 +1,22 @@
 import styles from "./story_title_page.module.css";
 
 import React from "react";
+import { StoryTypeExtended } from "@/app/editor/story/[story]/editor";
+import { LocalisationFunc } from "@/lib/get_localisation";
+import { StoryElementHeader } from "@/components/editor/story/syntax_parser_new";
 
-export function StoryTitlePage({ story, controls, localization }) {
-  let header = story.elements[0];
+export function StoryTitlePage({
+  story,
+  controls,
+  localization,
+}: {
+  story: StoryTypeExtended;
+  controls: {
+    next: () => void;
+  };
+  localization: LocalisationFunc;
+}) {
+  const header = story.elements[0] as StoryElementHeader;
 
   return (
     <div className={styles.story_title_page}>

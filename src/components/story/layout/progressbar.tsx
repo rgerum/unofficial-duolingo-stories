@@ -1,8 +1,14 @@
 "use client";
-import React from "react";
+import React, { CSSProperties } from "react";
 import styled from "styled-components";
 
-export default function Progressbar({ progress, length }) {
+export default function Progressbar({
+  progress,
+  length,
+}: {
+  progress: number;
+  length: number;
+}) {
   return (
     <Progress
       role="progressbar"
@@ -10,7 +16,9 @@ export default function Progressbar({ progress, length }) {
       aria-valuemin="0"
       aria-valuemax={length}
     >
-      <ProgressInside style={{ "--width": (progress / length) * 100 + "%" }}>
+      <ProgressInside
+        style={{ "--width": (progress / length) * 100 + "%" } as CSSProperties}
+      >
         <ProgressHighlight />
       </ProgressInside>
     </Progress>

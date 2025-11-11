@@ -19,6 +19,7 @@ import {
   StoryElementLine,
   StoryElementMatch,
   StoryElementPointToPhrase,
+  StoryType,
 } from "@/components/editor/story/syntax_parser_new";
 
 import { useRouter } from "next/navigation";
@@ -98,7 +99,7 @@ export async function setStory(data: {
   set_index: number;
   course_id: number;
   text: string;
-  json: StoryType | undefined;
+  json: StoryTypeExtended | undefined;
   todo_count: number;
 }) {
   const res = await fetch_post(`/editor/story/set_story`, data);
@@ -124,7 +125,7 @@ function getMax<T>(list: T[], callback: (obj: T) => number) {
   return max;
 }
 
-type StoryType = ReturnType<typeof processStoryFile>[0] & {
+export type StoryTypeExtended = StoryType & {
   illustrations: {
     active: string | undefined;
     gilded: string | undefined;
@@ -132,6 +133,8 @@ type StoryType = ReturnType<typeof processStoryFile>[0] & {
   };
   learning_language_rtl: boolean;
   from_language_rtl: boolean;
+  learning_language: string | undefined;
+  from_language: string | undefined;
 };
 
 type StoryMetaType = ReturnType<typeof processStoryFile>[1];
@@ -185,7 +188,7 @@ export default function Editor({
     EditorStateType | undefined
   >();
   const [story_state, set_story_state] = React.useState<
-    StoryType | undefined
+    StoryTypeExtended | undefined
   >();
   const [story_meta, set_story_meta] = React.useState<
     StoryMetaType | undefined
@@ -272,7 +275,7 @@ export default function Editor({
       window.dispatchEvent(new CustomEvent("resize"));
     };
 
-    let story: StoryType | undefined = undefined;
+    let story: StoryTypeExtended | undefined = undefined;
     let story_meta: StoryMetaType | undefined = undefined;
     let audio_insert_lines: AudioInsertLinesType | undefined = undefined;
     let last_lineno: number | undefined = undefined;
@@ -342,6 +345,8 @@ export default function Editor({
           },
           learning_language_rtl: language_data?.rtl ?? false,
           from_language_rtl: language_data2?.rtl ?? false,
+          from_language: language_data2?.short,
+          learning_language: language_data?.short,
         };
 
         if (editor_state)

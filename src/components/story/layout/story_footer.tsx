@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./story_footer.module.css";
+import { LocalisationFunc } from "@/lib/get_localisation_func";
 
 export default function Footer({
   right,
@@ -8,6 +9,13 @@ export default function Footer({
   next,
   finish,
   localization,
+}: {
+  right: boolean;
+  finished: boolean;
+  blocked: boolean;
+  next: () => void;
+  finish: () => void;
+  localization: LocalisationFunc;
 }) {
   return (
     <div className={styles.footer} data-right={right ? "true" : undefined}>
