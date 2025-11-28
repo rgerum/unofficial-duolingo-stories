@@ -1,4 +1,4 @@
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/authClient";
 import React from "react";
 import { LogInButton, LoggedInButton } from "@/components/login/loggedinbutton";
 

@@ -3,7 +3,7 @@ import styles from "./story_title_page.module.css";
 import React from "react";
 import { StoryTypeExtended } from "@/app/editor/story/[story]/editor";
 import { LocalisationFunc } from "@/lib/get_localisation";
-import { StoryElementHeader } from "@/components/editor/story/syntax_parser_new";
+import { StoryElementHeader } from "@/components/editor/story/syntax_parser_types";
 
 export function StoryTitlePage({
   story,

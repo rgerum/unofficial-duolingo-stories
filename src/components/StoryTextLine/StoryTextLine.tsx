@@ -1,9 +1,11 @@
 import React from "react";
 import styles from "./StoryTextLine.module.css";
-import useAudio, { AudioKeypoint } from "./use-audio.hook";
+import useAudio from "./use-audio.hook";
 import StoryLineHints from "../StoryLineHints";
 import PlayAudio from "../PlayAudio";
 import StoryTextLineSimple from "../StoryTextLineSimple";
+import { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import { StorySettings } from "@/components/StoryProgress";
 
 function StoryTextLine({
   active,
@@ -12,44 +14,11 @@ function StoryTextLine({
   settings,
 }: {
   active: boolean;
-  element: {
-    line: {
-      content: {
-        text: string;
-        hintMap: {
-          rangeFrom: number;
-          rangeTo: number;
-          hintIndex: number;
-        }[];
-        hints: string[];
-        lang_hints?: string;
-        audio?: {
-          keypoints: AudioKeypoint[];
-          url: string;
-        };
-      };
-      type: string;
-      avatarUrl?: string;
-      characterName?: string;
-      characterId?: string;
-    };
-    hideRangesForChallenge?: { start: number; end: number }[];
-    trackingProperties: {
-      line_index: number;
-    };
-    editor?: {
-      block_start_no: number;
-    };
-    lang: string;
-  };
+  element: StoryElement;
   unhide?: number;
-  settings: {
-    show_names: boolean;
-    highlight_name: string[];
-    hideNonHighlighted: boolean;
-    id: string;
-  };
+  settings: StorySettings;
 }) {
+  if (element.type !== "LINE") throw new Error("not the right element");
   const onClick = undefined;
   const [audioRange, playAudio, ref, url] = useAudio(element, active);
 
@@ -59,7 +28,9 @@ function StoryTextLine({
 
   if (settings?.show_names) {
     const name =
-      element?.line?.characterName || element?.line?.characterId || "Narrator";
+      (element.line.type == "CHARACTER" &&
+        (element.line.characterName || element.line.characterId.toString())) ||
+      "Narrator";
     if (!settings?.highlight_name.includes(name) && settings.hideNonHighlighted)
       return null;
     return (
@@ -75,7 +46,7 @@ function StoryTextLine({
     );
   }
 
-  if (element.line.type === "TITLE")
+  /*if (element.line.type === "TITLE")
     return (
       <div
         key={element.trackingProperties.line_index}
@@ -119,28 +90,28 @@ function StoryTextLine({
         </span>
       </div>
     );
-  else
-    return (
-      <div
-        key={element.trackingProperties.line_index}
-        className={styles.phrase + " " + element.lang}
-        data-lineno={element?.editor?.block_start_no}
-      >
-        <span>
-          <audio ref={ref}>
-            <source src={url} type="audio/mp3" />
-          </audio>
-          <PlayAudio onClick={playAudio} />
-          <StoryLineHints
-            audioRange={audioRange}
-            hideRangesForChallenge={hideRangesForChallenge}
-            unhide={unhide}
-            content={element.line.content}
-          />
-          {}
-        </span>
-      </div>
-    );
+  else*/
+  return (
+    <div
+      key={element.trackingProperties.line_index}
+      className={styles.phrase + " " + element.lang}
+      data-lineno={element?.editor?.block_start_no}
+    >
+      <span>
+        <audio ref={ref}>
+          <source src={url} type="audio/mp3" />
+        </audio>
+        <PlayAudio onClick={playAudio} />
+        <StoryLineHints
+          audioRange={audioRange}
+          hideRangesForChallenge={hideRangesForChallenge}
+          unhide={unhide}
+          content={element.line.content}
+        />
+        {}
+      </span>
+    </div>
+  );
 }
 
 export default StoryTextLine;

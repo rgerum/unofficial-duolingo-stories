@@ -4,6 +4,8 @@ import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import StoryTextLine from "../StoryTextLine";
 import StoryQuestionArrange from "../StoryQuestionArrange";
 import FadeGlideIn from "../FadeGlideIn";
+import { StorySettings } from "@/components/StoryProgress";
+import { StoryElement } from "@/components/editor/story/syntax_parser_types";
 
 function StoryChallengeArrange({
   parts,
@@ -12,14 +14,19 @@ function StoryChallengeArrange({
   setButtonStatus,
   settings,
 }: {
-  parts: any[];
+  parts: StoryElement[];
   active: boolean;
   hidden: boolean;
   setButtonStatus: (status: string) => void;
-  settings: any;
+  settings: StorySettings;
 }) {
   const [unhide, setUnhide] = React.useState(0);
   const id = React.useId();
+
+  if (parts.length !== 3) throw new Error("not the right element");
+  const part_one = parts[0];
+  if (part_one.type !== "CHALLENGE_PROMPT")
+    throw new Error("not the right element");
 
   function advance(i: number, done: boolean) {
     setUnhide(i);
@@ -45,7 +52,7 @@ function StoryChallengeArrange({
         show={active || settings.show_all}
         hidden={hidden}
       >
-        <StoryQuestionPrompt question={parts[0].prompt} lang={parts[0].lang} />
+        <StoryQuestionPrompt question={part_one.prompt} lang={part_one.lang} />
       </FadeGlideIn>
       <FadeGlideIn key={`${id}-2`} hidden={hidden}>
         <StoryTextLine

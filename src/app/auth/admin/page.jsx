@@ -1,6 +1,6 @@
 "use client";
 import styles from "../register.module.css";
-import { signIn } from "next-auth/react";
+import { signIn } from "@/lib/authClient";
 import React from "react";
 import Button from "@/components/layout/button";
 

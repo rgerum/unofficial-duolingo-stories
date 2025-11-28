@@ -1,5 +1,6 @@
 import React, { CSSProperties } from "react";
 import styles from "./StoryLineHints.module.css";
+import { ContentWithHints } from "@/components/editor/story/syntax_parser_new";
 
 //import { EditorContext } from "../story";
 
@@ -59,12 +60,7 @@ function StoryLineHints({
   hideRangesForChallenge,
   unhide,
 }: {
-  content: {
-    text: string;
-    hintMap: { rangeFrom: number; rangeTo: number; hintIndex: number }[];
-    hints: string[];
-    lang_hints?: string;
-  };
+  content: ContentWithHints;
   audioRange?: number;
   hideRangesForChallenge?: { start: number; end: number }[];
   unhide?: number;

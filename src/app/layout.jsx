@@ -4,7 +4,7 @@ import "styles/global.css";
 import Script from "next/script";
 import StyledComponentsRegistry from "@/lib/registry";
 import NavigationModeProvider from "@/components/NavigationModeProvider";
-import { SessionProvider } from "next-auth/react";
+//import { SessionProvider } from "next-auth/react";
 
 // If loading a variable font, you don't need to specify the font weight
 const nunito = Nunito({
@@ -21,12 +21,10 @@ export default function RootLayout({ children }) {
         <Script src="/darklight.js"></Script>
       </head>
       <body>
-        <SessionProvider>
-          <NavigationModeProvider>
-            <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
-          </NavigationModeProvider>
-          {/*<AnalyticsTracker />*/}
-        </SessionProvider>
+        <NavigationModeProvider>
+          <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+        </NavigationModeProvider>
+        {/*<AnalyticsTracker />*/}
       </body>
     </html>
   );

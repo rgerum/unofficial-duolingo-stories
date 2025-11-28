@@ -2,23 +2,13 @@ import React from "react";
 import styles from "./StoryQuestionPrompt.module.css";
 
 import StoryLineHints from "../StoryLineHints";
+import { ContentWithHints } from "@/components/editor/story/syntax_parser_new";
 
 function StoryQuestionPrompt({
   question,
   lang,
 }: {
-  question:
-    | string
-    | {
-        text: string;
-        hintMap: {
-          rangeFrom: number;
-          rangeTo: number;
-          hintIndex: number;
-        }[];
-        hints: string[];
-        lang_hints: string;
-      };
+  question: string | ContentWithHints;
   lang?: string;
 }) {
   if (question === undefined) return null;

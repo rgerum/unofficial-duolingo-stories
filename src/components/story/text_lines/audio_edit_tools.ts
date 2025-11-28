@@ -9,9 +9,8 @@ import {
 import { EditorView } from "codemirror";
 import {
   HideRange,
-  LineTuple,
   TranscribeData,
-} from "@/components/editor/story/syntax_parser_new";
+} from "@/components/editor/story/syntax_parser_types";
 
 export function generate_ssml_line(
   ssml: { speaker: string; text: string },

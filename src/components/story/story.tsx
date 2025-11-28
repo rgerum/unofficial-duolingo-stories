@@ -12,11 +12,7 @@ import {
   EditorStateType,
   StoryTypeExtended,
 } from "@/app/editor/story/[story]/editor";
-import {
-  StoryElement,
-  StoryType,
-} from "@/components/editor/story/syntax_parser_new";
-import { NextRouter } from "next/router";
+import { StoryElement } from "@/components/editor/story/syntax_parser_types";
 import { useRouter } from "next/navigation";
 import { LocalisationFunc } from "@/lib/get_localisation_func";
 

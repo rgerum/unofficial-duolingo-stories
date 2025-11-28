@@ -14,13 +14,12 @@ import Cast from "@/components/editor/story/cast";
 
 import {
   processStoryFile,
-  StoryElementArrange,
-  StoryElementHeader,
-  StoryElementLine,
-  StoryElementMatch,
-  StoryElementPointToPhrase,
   StoryType,
 } from "@/components/editor/story/syntax_parser_new";
+import {
+  StoryElementHeader,
+  StoryElementLine,
+} from "@/components/editor/story/syntax_parser_types";
 
 import { useRouter } from "next/navigation";
 import { StoryEditorHeader } from "./header";

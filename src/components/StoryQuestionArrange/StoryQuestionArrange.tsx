@@ -1,6 +1,6 @@
 import React from "react";
-import styles from "./StoryQuestionArrange.module.css";
 import WordButton from "../WordButton";
+import { StoryElement } from "@/components/editor/story/syntax_parser_types";
 
 /*
 The ARRANGE question
@@ -17,14 +17,13 @@ function StoryQuestionArrange({
   active,
   advance,
 }: {
-  element: {
-    selectablePhrases: string[];
-    phraseOrder: number[];
-    characterPositions: number[];
-  };
+  element: StoryElement;
   active: boolean;
   advance: (i: number, done: boolean) => void;
 }) {
+  if (element.type !== "ARRANGE") throw new Error("not the right element");
+  const characterPositions = element.characterPositions;
+  if (characterPositions == undefined) throw new Error("not the right element");
   const [done, setDone] = React.useState(false);
 
   let [buttonState, click] = useArrangeButtons(
@@ -34,10 +33,7 @@ function StoryQuestionArrange({
     (i) => {
       setDone(true);
       //if (!editor)
-      advance(
-        element.characterPositions[i],
-        i === element.phraseOrder.length - 1,
-      );
+      advance(characterPositions[i], i === element.phraseOrder.length - 1);
     },
     active, //active,
   );
@@ -50,7 +46,7 @@ function StoryQuestionArrange({
             key={index}
             data-cy="arrange-button"
             data-index={element.phraseOrder[index]}
-            status={[undefined, "off", "wrong"][buttonState[index]]}
+            status={["undefined", "off", "wrong"][buttonState[index]]}
             onClick={() => click(index)}
           >
             {phrase}

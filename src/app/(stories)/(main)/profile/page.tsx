@@ -3,6 +3,7 @@ import Header from "../header";
 import Profile from "./profile";
 import getUserId from "@/lib/getUserId";
 import { getUser } from "@/lib/userInterface";
+import { authClient } from "@/lib/authClient";
 
 export const metadata = {
   alternates: {
@@ -51,9 +52,15 @@ async function getLinkedProviders() {
 }
 
 export default async function Page() {
-  const providers = await getLinkedProviders();
+  //const providers = await getLinkedProviders();
+  const {
+    data: session,
+    isPending, //loading state
+    error, //error object
+    refetch, //refetch the session
+  } = authClient.useSession();
 
-  if (providers === undefined) {
+  if (!session) {
     return (
       <Header>
         <p data-cy="profile-error">Not Logged in</p>
