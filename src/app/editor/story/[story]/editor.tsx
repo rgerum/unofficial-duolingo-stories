@@ -23,7 +23,7 @@ import {
 
 import { useRouter } from "next/navigation";
 import { StoryEditorHeader } from "./header";
-import { fetch_post } from "@/lib/fetch_post.mjs";
+import { fetch_post } from "@/lib/fetch_post";
 import SoundRecorder from "./sound-recorder";
 import {
   insert_audio_line,

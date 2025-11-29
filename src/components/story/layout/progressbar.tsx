@@ -13,7 +13,7 @@ export default function Progressbar({
     <Progress
       role="progressbar"
       aria-valuenow={progress}
-      aria-valuemin="0"
+      aria-valuemin={0}
       aria-valuemax={length}
     >
       <ProgressInside

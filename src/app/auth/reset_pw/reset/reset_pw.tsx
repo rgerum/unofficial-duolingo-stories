@@ -12,7 +12,7 @@ export default function ResetPassword() {
 
   const [passwordInput, passwordInputSetValue] = useInput("");
 
-  const token = useSearchParams().get("token");
+  const token = useSearchParams().get("token") ?? "";
 
   if (!token || token == "VALID_TOKEN") {
     return (
@@ -37,12 +37,6 @@ export default function ResetPassword() {
     }
     setState(2);
   }
-  const handleKeypressSignup = (e) => {
-    // listens for enter key
-    if (e.keyCode === 13) {
-      register_button();
-    }
-  };
 
   return (
     <>
@@ -63,7 +57,6 @@ export default function ResetPassword() {
               data-cy="password"
               value={passwordInput}
               onChange={passwordInputSetValue}
-              onKeyDown={handleKeypressSignup}
               type="password"
               placeholder="Password"
             />

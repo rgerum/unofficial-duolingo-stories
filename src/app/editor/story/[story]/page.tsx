@@ -43,11 +43,14 @@ async function get_avatar_names({
   id: number;
   course_id?: number | undefined;
 }): Promise<Avatar[]> {
+  let avatar = undefined;
   if (typeof course_id !== "undefined") {
-    return await sql`SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id WHERE (language_id = (SELECT learning_language FROM course WHERE id = ${course_id}) or language_id is NULL) ORDER BY a.id`;
+    avatar = sql`SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id WHERE (language_id = (SELECT learning_language FROM course WHERE id = ${course_id}) or language_id is NULL) ORDER BY a.id`;
   } else {
-    return await sql`SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM (SELECT * FROM avatar_mapping WHERE language_id = ${id}) as avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id ORDER BY a.id`;
+    avatar = sql`SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker FROM (SELECT * FROM avatar_mapping WHERE language_id = ${id}) as avatar_mapping RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id ORDER BY a.id`;
   }
+  console.log("get_avatar_names", avatar);
+  return avatar;
 }
 
 async function getAvatarsList(id: number) {

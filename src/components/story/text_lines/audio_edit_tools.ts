@@ -1,4 +1,4 @@
-import { fetch_post } from "../../../lib/fetch_post.mjs";
+import { fetch_post } from "@/lib/fetch_post";
 import {
   add_word_marks_replacements,
   find_replace_with_mapping,
@@ -7,10 +7,8 @@ import {
   transcribe_text,
 } from "./text_with_mapping";
 import { EditorView } from "codemirror";
-import {
-  HideRange,
-  TranscribeData,
-} from "@/components/editor/story/syntax_parser_types";
+import { HideRange } from "@/components/editor/story/syntax_parser_types";
+import { TranscribeData } from "@/components/editor/story/syntax_parser_new";
 
 export function generate_ssml_line(
   ssml: { speaker: string; text: string },

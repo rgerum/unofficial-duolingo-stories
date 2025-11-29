@@ -46,12 +46,12 @@ export const auth = betterAuth({
         defaultValue: false,
         input: false, // don't allow user to set role
       },
-      /*admin: {
+      admin: {
         type: "boolean",
         required: false,
         defaultValue: false,
         input: false,
-      },*/
+      },
     },
   },
   account: {

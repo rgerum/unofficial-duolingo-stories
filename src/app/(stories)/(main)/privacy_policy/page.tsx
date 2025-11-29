@@ -21,11 +21,11 @@ export default async function Page() {
 
       <h2>Welcome to duostories.org!</h2>
       <p>
-        Your privacy is critically important to us. At duostories.org, we are
+        {`Your privacy is critically important to us. At duostories.org, we are
         committed to protecting your personal data and ensuring transparency
         about how it's used. This Privacy Policy outlines the types of
         information we collect, how it's used, and the measures we take to
-        protect it. If you have any questions, contact us on{" "}
+        protect it. If you have any questions, contact us on `}
         <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.
       </p>
 

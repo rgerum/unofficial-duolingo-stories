@@ -1,5 +1,5 @@
 import jsyaml from "js-yaml";
-import { TranscribeData } from "@/components/editor/story/syntax_parser_types";
+import { TranscribeData } from "@/components/editor/story/syntax_parser_new";
 
 type Mapping = number[];
 type MappedText = { text: string; mapping: Mapping };

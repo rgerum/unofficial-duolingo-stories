@@ -1,10 +1,9 @@
-import React, { CSSProperties } from "react";
-import styles from "./StoryLineHints.module.css";
-import { ContentWithHints } from "@/components/editor/story/syntax_parser_types";
+import React, { useRef } from "react";
+import styles from "./line_hints.module.css";
 
-//import { EditorContext } from "../story";
+import { EditorContext } from "../story";
 
-function splitTextTokens(text: string, keep_tilde = true) {
+function splitTextTokens(text, keep_tilde = true) {
   if (!text) return [];
   if (keep_tilde)
     //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
@@ -13,26 +12,17 @@ function splitTextTokens(text: string, keep_tilde = true) {
   else return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}~]+)/);
 }
 
-function Tooltip({
-  className,
-  children,
-}: {
-  className: string;
-  children: React.ReactNode;
-}) {
-  const ref = React.useRef<HTMLSpanElement>(null);
+function Tooltip({ className, children }) {
+  const ref = useRef();
   function onMouseEnter() {
-    if (!ref.current) return;
-    let tooltipElement = ref.current.children[1] as HTMLElement;
+    let tooltipElement = ref.current.children[1];
 
     // Calculate the position of the tooltip
     const tooltipRect = tooltipElement.getBoundingClientRect();
 
     let offset = 0;
     if (tooltipElement.style.left.split(" ").length >= 2) {
-      offset = parseInt(
-        tooltipElement.style.left.split(" ")[2].split("px)")[0],
-      );
+      offset = parseInt(tooltipElement.style.left.split(" ")[2].split("px)"));
     }
     // Check if the tooltip would be cut off on the right
     if (tooltipRect.right + offset > window.innerWidth) {
@@ -49,70 +39,61 @@ function Tooltip({
   }
   return (
     <span onMouseEnter={onMouseEnter} ref={ref} className={className}>
-      {children}
+      {...children}
     </span>
   );
 }
 
-function StoryLineHints({
+export default function HintLineContent({
   content,
   audioRange,
   hideRangesForChallenge,
   unhide,
-}: {
-  content: ContentWithHints;
-  audioRange?: number;
-  hideRangesForChallenge?: { start: number; end: number }[];
-  unhide?: number;
 }) {
+  const editor = React.useContext(EditorContext);
+
   if (!content) return <>Empty</>;
-  let hideRangesForChallengeEntry = hideRangesForChallenge
+  hideRangesForChallenge = hideRangesForChallenge
     ? hideRangesForChallenge[0]
     : hideRangesForChallenge;
 
-  if (hideRangesForChallengeEntry) {
-    if (unhide === -1) hideRangesForChallengeEntry = undefined;
-    else if (unhide && unhide > hideRangesForChallengeEntry.start)
-      hideRangesForChallengeEntry = {
+  if (hideRangesForChallenge) {
+    if (unhide === -1) hideRangesForChallenge = undefined;
+    else if (unhide > hideRangesForChallenge.start)
+      hideRangesForChallenge = {
         start: unhide,
-        end: Math.max(hideRangesForChallengeEntry.end, unhide),
+        end: hideRangesForChallenge.end,
       };
   }
-  const editor = null; // React.useContext(EditorContext);
 
-  let show_trans = undefined; // editor?.show_trans;
+  let show_trans = editor?.show_trans;
   //var [show_trans, set_show_trans] = useState(0); //TODO window.editorShowTranslations);
   //useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); })
 
-  function getOverlap(
-    start1: number,
-    end1: number,
-    start2: number,
-    end2: number,
-  ) {
+  function getOverlap(start1, end1, start2, end2) {
     if (start2 === end2) return false;
     if (start2 === undefined || end2 === undefined) return false;
     if (start1 <= start2 && start2 < end1) return true;
     return start2 <= start1 && start1 < end2;
   }
 
-  function addWord2(start: number, end: number) {
-    let is_hidden: boolean | undefined | "editor" =
-      hideRangesForChallengeEntry !== undefined &&
+  function addWord2(start, end) {
+    let is_hidden =
+      hideRangesForChallenge !== undefined &&
       getOverlap(
         start,
         end,
-        hideRangesForChallengeEntry.start,
-        hideRangesForChallengeEntry.end,
+        hideRangesForChallenge.start,
+        hideRangesForChallenge.end,
       )
         ? true
         : undefined;
     if (is_hidden && editor) is_hidden = "editor";
-    let style: CSSProperties = {};
+    let style = {};
     //TODO
     //if(is_hidden && window.view)
     //    style.color = "#afafaf";
-    if (audioRange && audioRange < start) style.opacity = 0.5;
+    if (audioRange < start) style.opacity = 0.5;
 
     let returns = [
       <span
@@ -130,7 +111,7 @@ function StoryLineHints({
     return returns;
   }
 
-  function addSplitWord(start: number, end: number) {
+  function addSplitWord(start, end) {
     let parts = splitTextTokens(content.text.substring(start, end));
     if (parts[0] === "") parts.splice(0, 1);
     if (parts[parts.length - 1] === "") parts.pop();
@@ -160,12 +141,12 @@ function StoryLineHints({
 
     // add the text with the hint
     let is_hidden =
-      hideRangesForChallengeEntry !== undefined &&
+      hideRangesForChallenge !== undefined &&
       getOverlap(
         hint.rangeFrom,
         hint.rangeTo,
-        hideRangesForChallengeEntry.start,
-        hideRangesForChallengeEntry.end,
+        hideRangesForChallenge.start,
+        hideRangesForChallenge.end,
       )
         ? true
         : undefined;
@@ -204,4 +185,3 @@ function StoryLineHints({
 
   return elements;
 }
-export default StoryLineHints;

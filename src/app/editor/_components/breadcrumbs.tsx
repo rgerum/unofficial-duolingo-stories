@@ -3,13 +3,14 @@ import React from "react";
 import { DoubleFlag } from "@/components/layout/flag";
 import Link from "next/link";
 import EditorButton from "../editor_button";
+import { LanguageData } from "@/app/editor/story/[story]/types";
 
 function MyLink({
   href,
   children,
   className,
 }: {
-  href: string;
+  href?: string | undefined;
   children: React.ReactNode;
   className: string;
 }) {
@@ -28,7 +29,7 @@ function BreadcrumbPart({
 }: {
   part: {
     type: string;
-    href: string;
+    href?: string;
     lang1?: any;
     lang2?: any;
     name?: string;
@@ -104,11 +105,10 @@ export function Breadcrumbs({
 }: {
   path: {
     type: string;
-    href: string;
-    lang1?: any;
-    lang2?: any;
-    name?: string;
-    data?: any;
+    href?: string | undefined;
+    lang1?: LanguageData;
+    lang2?: LanguageData;
+    name?: string | undefined;
   }[];
 }) {
   let link;

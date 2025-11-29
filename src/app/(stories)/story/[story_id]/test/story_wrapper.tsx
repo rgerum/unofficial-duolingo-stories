@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { EditorContext } from "@/components/story/story";
 import styles from "@/components/story/story.module.css";
 import { useSearchParams } from "next/navigation";
+import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 
-export default function StoryWrapper({ story }) {
+export default function StoryWrapper({ story }: { story: StoryData }) {
   const navigate = useRouter().push;
 
   const hide_questions = useSearchParams().get("hide_questions");
@@ -15,13 +16,11 @@ export default function StoryWrapper({ story }) {
   return (
     <>
       <div className={styles.main}>
-        <EditorContext.Provider value={{ lineno: 3 }}>
-          <Story
-            story={story}
-            editor={{ lineno: 3 }}
-            hide_questions={hide_questions}
-          />
-        </EditorContext.Provider>
+        <Story
+          story={story}
+          //editor={{ lineno: 3 }}
+          hide_questions={!!hide_questions}
+        />
       </div>
     </>
   );

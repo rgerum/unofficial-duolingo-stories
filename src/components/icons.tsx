@@ -174,7 +174,7 @@ export function IconPlayStore() {
   );
 }
 
-export function GetIcon({ name }) {
+export function GetIcon({ name }: { name: string }) {
   if (name === "twitter") {
     return <IconTwitter />;
   }

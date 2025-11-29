@@ -1,6 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { sql } from "@/lib/db.ts";
+import { sql } from "@/lib/db";
 import getUserId from "@/lib/getUserId";
 import { get_localisation_dict } from "@/lib/get_localisation";
 import StoryWrapper from "./story_wrapper";
@@ -9,7 +9,7 @@ import { revalidateTag } from "next/cache";
 import LocalisationProvider from "@/components/LocalisationProvider";
 import { headers } from "next/headers";
 
-async function get_story_meta(course_id) {
+async function get_story_meta(course_id: number) {
   const course_query = await sql`SELECT
         story.name AS from_language_name,
         l1.name AS from_language_long,
@@ -23,8 +23,12 @@ async function get_story_meta(course_id) {
   return Object.assign({}, course_query[0]);
 }
 
-export async function generateMetadata({ params }) {
-  const story_id = (await params).story_id;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ story_id: string }>;
+}) {
+  const story_id = parseInt((await params).story_id);
   const story = await get_story_meta(story_id);
 
   if (!story) notFound();
@@ -38,8 +42,8 @@ export async function generateMetadata({ params }) {
   };
 }
 
-function getNavigationMode() {
-  const headersList = headers();
+async function getNavigationMode() {
+  const headersList = await headers();
   // If there is a next-url header, soft navigation has been performed
   // Otherwise, hard navigation has been performed
   const nextUrl = headersList.get("next-url");
@@ -49,14 +53,19 @@ function getNavigationMode() {
   return "hard";
 }
 
-export default async function Page({ params }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ story_id: string }>;
+}) {
   const story_id = parseInt((await params).story_id);
   const story = await get_story(story_id);
+  if (!story) notFound();
   const course_id = story?.course_id;
 
   const user_id = await getUserId();
 
-  const localization = await get_localisation_dict(story?.from_language_id);
+  const localization = await get_localisation_dict(story.from_language_id);
 
   async function setStoryDoneAction() {
     "use server";
@@ -68,7 +77,7 @@ export default async function Page({ params }) {
       };
     }
     await sql`INSERT INTO story_done (user_id, story_id) VALUES(${user_id}, ${story_id})`;
-    revalidateTag(`course_done_${course_id}_${user_id}`);
+    revalidateTag(`course_done_${course_id}_${user_id}`, "max");
     return {
       message: "done",
       story_id: story_id,
@@ -78,12 +87,12 @@ export default async function Page({ params }) {
 
   return (
     <>
-      <LocalisationProvider lang={story.fromLanguage}>
+      <LocalisationProvider lang={story.from_language_id}>
         <StoryWrapper
           story={story}
           storyFinishedIndexUpdate={setStoryDoneAction}
-          localization={localization}
-          show_title_page={getNavigationMode() === "hard"}
+          //localization={localization}
+          show_title_page={(await getNavigationMode()) === "hard"}
         />
       </LocalisationProvider>
     </>

@@ -88,7 +88,7 @@ export default async function Page({
         <StoryWrapper
           story={story}
           storyFinishedIndexUpdate={setStoryDoneAction}
-          localization={localization}
+          //localization={localization}
         />
       </LocalisationProvider>
     </>

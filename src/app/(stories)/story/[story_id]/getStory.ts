@@ -1,6 +1,7 @@
 import { sql } from "@/lib/db";
 import { StoryType } from "@/components/editor/story/syntax_parser_new";
 import { z } from "zod";
+import { StoryElement } from "@/components/editor/story/syntax_parser_types";
 
 const story_additional_data = z.object({
   id: z.number(),
@@ -32,10 +33,18 @@ export async function get_story(story_id: number) {
     //result.sendStatus(404);
     return;
   }
-  const data: StoryType =
+  const data =
     typeof res[0]["json"] === "string"
       ? JSON.parse(res[0]["json"])
       : res[0]["json"];
+  const data2 = {
+    elements: data.elements as StoryElement[],
+    illustrations: data.illustrations as {
+      gilded: string;
+      active: string;
+      locked: string;
+    },
+  };
   const additional_data = story_additional_data.parse({
     id: res[0]["id"],
     course_id: res[0]["course_id"],
@@ -54,7 +63,7 @@ export async function get_story(story_id: number) {
   });
   console.log(data);
   console.log(additional_data);
-  return { ...data, ...additional_data };
+  return { ...data2, ...additional_data };
 }
 
 export type StoryData = NonNullable<Awaited<ReturnType<typeof get_story>>>;

@@ -86,7 +86,7 @@ export function LoggedInButton({
   user?: {
     name: string;
     image?: string | null | undefined;
-    role: boolean | null | undefined;
+    role: string | null | undefined;
     admin: boolean | null | undefined;
   };
 }) {

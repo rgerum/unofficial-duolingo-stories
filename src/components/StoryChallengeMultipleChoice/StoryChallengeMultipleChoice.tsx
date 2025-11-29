@@ -3,6 +3,7 @@ import StoryTextLine from "../StoryTextLine";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
 import FadeGlideIn from "../FadeGlideIn";
 import { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import { StorySettings } from "@/components/StoryProgress";
 
 function StoryChallengeMultipleChoice({
   parts,
@@ -19,6 +20,9 @@ function StoryChallengeMultipleChoice({
   hidden: boolean;
   settings: StorySettings;
 }) {
+  const part_one = parts[0];
+  const part_two = parts[1];
+
   if (active && partProgress === 0 && parts.length > 1)
     setButtonStatus(settings.hide_questions ? "continue" : "idle");
 
@@ -31,12 +35,14 @@ function StoryChallengeMultipleChoice({
     if (parts.length === 1) return null;
     return (
       <FadeGlideIn key={`${id}-1`} hidden={hidden}>
-        <StoryTextLine active={active} element={parts[0]} settings={settings} />
+        <StoryTextLine active={active} element={part_one} settings={settings} />
       </FadeGlideIn>
     );
   }
 
   if (parts.length === 1) {
+    if (part_one.type !== "MULTIPLE_CHOICE")
+      throw new Error("not the right element");
     return (
       <>
         <FadeGlideIn
@@ -45,7 +51,7 @@ function StoryChallengeMultipleChoice({
           hidden={hidden}
         >
           <StoryQuestionMultipleChoice
-            element={parts[0]}
+            element={part_one}
             active={active}
             advance={() => {
               setButtonStatus("right");
@@ -56,13 +62,16 @@ function StoryChallengeMultipleChoice({
     );
   }
 
+  if (part_two.type !== "MULTIPLE_CHOICE")
+    throw new Error("not the right element");
+
   return (
     <>
       <FadeGlideIn key={`${id}-1`} hidden={hidden}>
         <StoryTextLine
-          key={parts[0].trackingProperties.line_index}
+          key={part_one.trackingProperties.line_index}
           active={true}
-          element={parts[0]}
+          element={part_one}
           settings={settings}
         />
       </FadeGlideIn>
@@ -72,7 +81,7 @@ function StoryChallengeMultipleChoice({
         hidden={hidden}
       >
         <StoryQuestionMultipleChoice
-          element={parts[1]}
+          element={part_two}
           active={active}
           advance={() => {
             setButtonStatus("right");

@@ -4,8 +4,9 @@ import Profile from "./profile";
 import getUserId from "@/lib/getUserId";
 import { getUser } from "@/lib/userInterface";
 import { authClient } from "@/lib/authClient";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   alternates: {
     canonical: "https://duostories.org/profile",
   },
@@ -71,7 +72,15 @@ export default async function Page() {
 
   return (
     <>
-      <Profile providers={providers} />
+      <Profile
+        providers={{
+          providers: [],
+          name: "",
+          email: "",
+          role: [],
+          provider_linked: {},
+        }}
+      />
     </>
   );
 }

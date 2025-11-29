@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./StoryQuestionPrompt.module.css";
 
 import StoryLineHints from "../StoryLineHints";
-import { ContentWithHints } from "@/components/editor/story/syntax_parser_new";
+import { ContentWithHints } from "@/components/editor/story/syntax_parser_types";
 
 function StoryQuestionPrompt({
   question,

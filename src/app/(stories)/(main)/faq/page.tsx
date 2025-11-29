@@ -195,8 +195,10 @@ export default async function Page() {
 
       <h2>Who runs this website?</h2>
       <p>
-        The website was developed by me, "randrian". You can find me on{" "}
-        <Link href="https://www.duolingo.com/profile/Randriano">Duolingo</Link>{" "}
+        {`The website was developed by me, "randrian". You can find me on `}
+        <Link href="https://www.duolingo.com/profile/Randriano">
+          Duolingo
+        </Link>{" "}
         or on <Link href="https://github.com/rgerum">Github</Link>. Some people
         did minor contributions to the website, see the Github repository. You
         are welcome to be part of them.

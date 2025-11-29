@@ -95,7 +95,7 @@ export function StoryEditorHeader({
                 href: `/editor/course/${story_data?.short}`,
               },
               { type: "sep", href: "#" },
-              { type: "story", data: story_data, href: `#` },
+              { type: "story", href: `#` },
             ]}
           />
 

@@ -29,7 +29,7 @@ export default async function Page({}) {
   ): Promise<{ error: string | null }> => {
     "use server";
     try {
-      if (formData.get("username").indexOf("@") !== -1) {
+      if (`${formData.get("username")}`.indexOf("@") !== -1) {
         const { data, error } = await authClient.signIn.email({
           email: formData.get("username") as string,
           password: formData.get("password") as string,

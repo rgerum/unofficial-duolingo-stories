@@ -17,7 +17,7 @@ if (
     secure: false,
   });
 } else {
-  const sendMail = (mail) => {
+  const sendMail = (mail: Parameters<typeof resend.emails.send>[0]) => {
     console.log("---- sendMail");
     return resend.emails.send(mail);
   };
