@@ -1,29 +1,43 @@
 import React from "react";
 
-import { get_stats } from "./db_query";
+import { get_stats, StatsCourseProps, StatsLanguageProps } from "./db_query";
 import StatsElement from "./stats_element";
 import StatsElement2 from "./stats_element2";
 
-function DataGroup({ title, data, data_old, key_name }) {
-  let courses = {};
-  for (let c of data["courses"]) {
+function DataGroup({
+  title,
+  data,
+  data_old,
+  key_name,
+}: {
+  title: string;
+  data: StatsData;
+  data_old: StatsData;
+  key_name:
+    | "stories_published"
+    | "stories_read"
+    | "active_users"
+    | "active_stories";
+}) {
+  const courses: Record<number, StatsCourseProps> = {};
+  for (const c of data["courses"]) {
     courses[c.id] = c;
   }
-  let languages = {};
-  for (let l of data["languages"]) {
+  const languages: Record<number, StatsLanguageProps> = {};
+  for (const l of data["languages"]) {
     languages[l.id] = l;
   }
-  let story_ids = [];
+  const story_ids: number[] = [];
   let total_count = 0;
   let total_count_old = 0;
-  for (let l of data[key_name]) {
+  for (const l of data[key_name]) {
     story_ids.push(l.course_id);
-    total_count += parseInt(l.count);
+    total_count += l.count;
   }
-  let old_stories = {};
-  for (let l of data_old[key_name]) {
+  const old_stories: Record<number, { count: number; course_id: number }> = {};
+  for (const l of data_old[key_name]) {
     old_stories[l.course_id] = l;
-    total_count_old += parseInt(l.count);
+    total_count_old += l.count;
     if (!story_ids.includes(l.course_id)) {
       data[key_name].push({ course_id: l.course_id, count: 0 });
     }
@@ -31,9 +45,14 @@ function DataGroup({ title, data, data_old, key_name }) {
   return (
     <>
       <h2>
-        {title} {data[key_name + "_count"] || total_count}{" "}
+        {title}
+        {key_name == "active_users"
+          ? data["active_users_count"]
+          : total_count}{" "}
         <span style={{ fontSize: "0.8em" }}>
-          {data_old[key_name + "_count"] || total_count_old}
+          {key_name == "active_users"
+            ? data_old["active_users_count"]
+            : total_count_old}
         </span>
       </h2>
       <div
@@ -62,11 +81,26 @@ function DataGroup({ title, data, data_old, key_name }) {
   );
 }
 
-function ref_by_course(data, data_old, key) {
-  let refs = {};
+type StatsData = Awaited<ReturnType<typeof get_stats>>;
+
+function ref_by_course(
+  data: StatsData,
+  data_old: StatsData,
+  key: "stories_published" | "stories_read" | "active_users" | "active_stories",
+) {
+  const refs: Record<
+    number,
+    {
+      count: number;
+      count_old: number;
+      rank?: number;
+      rank_old?: number;
+      max_count: number;
+    }
+  > = {};
   let index = 1;
-  let max_count = Math.max(data[key][0]?.count, data_old[key][0]?.count);
-  for (let c of data[key]) {
+  const max_count = Math.max(data[key][0]?.count, data_old[key][0]?.count);
+  for (const c of data[key]) {
     refs[c.course_id] = {
       count: c.count,
       count_old: 0,
@@ -76,9 +110,13 @@ function ref_by_course(data, data_old, key) {
     index += 1;
   }
   let index_old = 1;
-  for (let c of data_old[key]) {
+  for (const c of data_old[key]) {
     if (!refs[c.course_id])
-      refs[c.course_id] = { count: 0, max_count: max_count };
+      refs[c.course_id] = {
+        count: 0,
+        max_count: max_count,
+        count_old: c.count,
+      };
     refs[c.course_id].count_old = c.count;
     refs[c.course_id].rank_old = index_old;
     index_old += 1;
@@ -86,7 +124,11 @@ function ref_by_course(data, data_old, key) {
   return refs;
 }
 
-export default async function Page({ params }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ year: string; month: string }>;
+}) {
   let year = parseInt((await params).year);
   let month = parseInt((await params).month);
   const data = await get_stats(year, month);
@@ -99,15 +141,15 @@ export default async function Page({ params }) {
   data_old.year = month === 1 ? year - 1 : year;
   data_old.month = month === 1 ? 12 : month - 1;
 
-  let courses = {};
-  for (let c of data["courses"]) {
+  const courses: Record<number, StatsCourseProps> = {};
+  for (const c of data["courses"]) {
     courses[c.id] = c;
   }
-  let languages = {};
-  for (let l of data["languages"]) {
+  const languages: Record<number, StatsLanguageProps> = {};
+  for (const l of data["languages"]) {
     languages[l.id] = l;
   }
-  let months = {
+  const months: Record<number, string> = {
     1: "Jan",
     2: "Feb",
     3: "Mar",
@@ -121,12 +163,12 @@ export default async function Page({ params }) {
     11: "Nov",
     12: "Dec",
   };
-  let stories_published = ref_by_course(data, data_old, "stories_published");
-  let stories_read = ref_by_course(data, data_old, "stories_read");
-  let active_users = ref_by_course(data, data_old, "active_users");
-  let active_stories = ref_by_course(data, data_old, "active_stories");
-  let stats_course = [];
-  for (let c of data["courses"]) {
+  const stories_published = ref_by_course(data, data_old, "stories_published");
+  const stories_read = ref_by_course(data, data_old, "stories_read");
+  const active_users = ref_by_course(data, data_old, "active_users");
+  const active_stories = ref_by_course(data, data_old, "active_stories");
+  const stats_course = [];
+  for (const c of data["courses"]) {
     if (c.public)
       stats_course.push({
         id: c.id,
@@ -143,7 +185,7 @@ export default async function Page({ params }) {
     <>
       <div style={{ width: "800px", margin: "auto 0" }}>
         <h1>
-          Report {months[data.month]} {data.year}
+          Report {months[month]} {year}
         </h1>
         <DataGroup
           title={"Stories Published"}

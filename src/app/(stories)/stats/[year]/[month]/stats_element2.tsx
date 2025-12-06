@@ -1,8 +1,29 @@
 import styles from "./stats_element2.module.css";
-import Flag from "@/components/layout/flag.tsx";
+import Flag from "@/components/layout/flag";
 import React from "react";
+import { StatsLanguageProps } from "@/app/(stories)/stats/[year]/[month]/db_query";
 
-export default function StatsElement2({ course }) {
+type StatsProps = {
+  count: number;
+  count_old: number;
+  rank?: number | undefined;
+  rank_old?: number | undefined;
+  max_count: number;
+};
+
+export default function StatsElement2({
+  course,
+}: {
+  course: {
+    id: number;
+    learning_language: StatsLanguageProps;
+    from_language: StatsLanguageProps;
+    stories_published: StatsProps;
+    stories_read: StatsProps;
+    active_users: StatsProps;
+    active_stories: StatsProps;
+  };
+}) {
   let c = course;
   let lang1 = course.learning_language;
   let lang2 = course.from_language;
@@ -29,7 +50,7 @@ export default function StatsElement2({ course }) {
   );
 }
 
-function StatElement({ name, prop }) {
+function StatElement({ name, prop }: { name: string; prop: StatsProps }) {
   let increase = ((prop?.count || 0) / (prop?.count_old || 0) - 1) * 100;
   let increaseClass =
     increase > 0

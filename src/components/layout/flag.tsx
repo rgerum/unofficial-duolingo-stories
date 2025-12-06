@@ -7,8 +7,8 @@ export default function Flag(props: {
   width?: number | undefined;
   height?: number | undefined;
   iso?: string;
-  flag_file?: string;
-  flag?: number;
+  flag_file?: string | null;
+  flag?: number | null;
   className?: string;
 }) {
   /**

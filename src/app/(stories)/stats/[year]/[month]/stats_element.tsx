@@ -1,6 +1,7 @@
 import styles from "./stats_element.module.css";
-import Flag from "@/components/layout/flag.tsx";
+import Flag from "@/components/layout/flag";
 import React from "react";
+import { StatsLanguageProps } from "@/app/(stories)/stats/[year]/[month]/db_query";
 
 export default function StatsElement({
   lang1,
@@ -8,6 +9,12 @@ export default function StatsElement({
   count,
   count_old,
   max_count,
+}: {
+  lang1: StatsLanguageProps;
+  lang2: StatsLanguageProps;
+  count: number;
+  count_old: number;
+  max_count: number;
 }) {
   let max_height = 100;
   count_old = count_old || 0;
