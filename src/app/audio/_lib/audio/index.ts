@@ -1,7 +1,7 @@
 import engine_azure from "./azure_tts";
-import engine_google from "./google.mjs";
+import engine_google from "./google";
 import engine_polly from "./polly";
-import engine_elevenlabs from "./elevenlabs.mjs";
+import engine_elevenlabs from "./elevenlabs";
 
 let audio_engines = [
   engine_elevenlabs,
