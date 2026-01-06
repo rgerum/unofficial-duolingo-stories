@@ -5,6 +5,8 @@ import getUserId from "@/lib/getUserId";
 import { getUser } from "@/lib/userInterface";
 import { authClient } from "@/lib/authClient";
 import { Metadata } from "next";
+import { auth } from "@/auth";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   alternates: {
@@ -54,12 +56,9 @@ async function getLinkedProviders() {
 
 export default async function Page() {
   //const providers = await getLinkedProviders();
-  const {
-    data: session,
-    isPending, //loading state
-    error, //error object
-    refetch, //refetch the session
-  } = authClient.useSession();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   if (!session) {
     return (

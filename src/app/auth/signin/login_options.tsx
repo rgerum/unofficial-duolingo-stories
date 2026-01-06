@@ -1,7 +1,6 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { useInput } from "@/lib/hooks";
 
 import styles from "../register.module.css";
 import { GetIcon } from "@/components/icons";
@@ -9,22 +8,17 @@ import Button from "@/components/layout/button";
 import Input from "@/components/layout/Input";
 import { SpinnerBlue } from "@/components/layout/spinner";
 import { ProviderProps } from "@/app/auth/signin/page";
+import { signin_action } from "@/app/auth/signin/signin_action";
 
-export function LoginOptions(props: {
-  providers: ProviderProps[];
-  signin_action: (
-    state: { error: string | null },
-    data: FormData,
-  ) => Promise<{ error: string | null }>;
-}) {
-  const { providers, signin_action } = props;
+export function LoginOptions(props: { providers: ProviderProps[] }) {
+  const { providers } = props;
 
   const [state, formAction, isPending] = React.useActionState(signin_action, {
     error: null,
   });
 
-  const [usernameInput, usernameInputSetValue] = useInput("");
-  const [passwordInput, passwordInputSetValue] = useInput("");
+  const [usernameInput, usernameInputSetValue] = useState("");
+  const [passwordInput, passwordInputSetValue] = useState("");
 
   return (
     <>
@@ -41,7 +35,7 @@ export function LoginOptions(props: {
         <Input
           data-cy="username"
           value={usernameInput}
-          onChange={usernameInputSetValue}
+          onChange={(e) => usernameInputSetValue(e.target.value)}
           type="text"
           name="username"
           placeholder="Username"
@@ -49,7 +43,7 @@ export function LoginOptions(props: {
         <Input
           data-cy="password"
           value={passwordInput}
-          onChange={passwordInputSetValue}
+          onChange={(e) => passwordInputSetValue(e.target.value)}
           type="password"
           name="password"
           placeholder="Password"

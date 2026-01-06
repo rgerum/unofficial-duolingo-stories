@@ -4,7 +4,14 @@ import React from "react";
 import { requireAdmin } from "@/lib/userInterface";
 import { LoggedInButtonWrapped } from "@/components/login/LoggedInButtonWrappedServer";
 
-function AdminButton({ children, href, ...delegated }) {
+function AdminButton({
+  children,
+  href,
+  ...delegated
+}: {
+  children: React.ReactNode;
+  href: string;
+} & React.HTMLAttributes<HTMLAnchorElement>) {
   return (
     <Link className={styles.editor_button} href={href} {...delegated}>
       <div>

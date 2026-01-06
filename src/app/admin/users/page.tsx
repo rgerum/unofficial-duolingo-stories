@@ -1,10 +1,10 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useInput } from "@/lib/hooks";
+import { useState } from "react";
 
 export default function Page({}) {
-  let [id, setId] = useInput();
-  let router = useRouter();
+  const [id, setId] = useState("");
+  const router = useRouter();
 
   async function go() {
     await router.push(`/admin/users/${id}`);
@@ -12,7 +12,8 @@ export default function Page({}) {
   return (
     <>
       <div>
-        User ID or username <input value={id} onChange={setId} />{" "}
+        User ID or username{" "}
+        <input value={id} onChange={(e) => setId(e.target.value)} />{" "}
         <button onClick={go}>Go</button>
       </div>
     </>

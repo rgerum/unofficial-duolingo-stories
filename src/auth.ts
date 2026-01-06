@@ -2,6 +2,7 @@ import { Pool } from "@neondatabase/serverless";
 import { betterAuth } from "better-auth";
 import { phpbb_check_hash } from "@/lib/auth/hash_functions2";
 import { username } from "better-auth/plugins";
+import { nextCookies } from "better-auth/next-js";
 
 import { Resend } from "resend";
 
@@ -26,6 +27,10 @@ export const auth = betterAuth({
     fieldsX: {
       expiresAt: "expires", // Map your existing `expires` field to Better Auth's `expiresAt`
       token: "sessionToken", // Map your existing `sessionToken` field to Better Auth's `token`
+    },
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // Cache duration in seconds (5 minutes)
     },
   },
   verification: {
@@ -121,7 +126,7 @@ export const auth = betterAuth({
       });
     },
   },
-  plugins: [username()],
+  plugins: [nextCookies(), username()],
   socialProviders: {
     github: {
       clientId: process.env.GITHUB_ID as string,

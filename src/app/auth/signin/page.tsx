@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { LoginOptions } from "./login_options";
 import { CallbackRouteError } from "@auth/core/errors";
 import { authClient } from "@/lib/authClient";
+import { auth } from "@/auth";
+import { headers } from "next/headers";
 
 export interface ProviderProps {
   id: string;
@@ -14,7 +16,11 @@ export interface ProviderProps {
 }
 
 export default async function Page({}) {
-  const { data: session } = await authClient.getSession();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  console.log("data", session);
 
   // If the user is already logged in, redirect.
   // Note: Make sure not to redirect to the same page
@@ -23,43 +29,7 @@ export default async function Page({}) {
     redirect("/");
   }
 
-  const signin_action = async (
-    state: { error: string | null },
-    formData: FormData,
-  ): Promise<{ error: string | null }> => {
-    "use server";
-    try {
-      if (`${formData.get("username")}`.indexOf("@") !== -1) {
-        const { data, error } = await authClient.signIn.email({
-          email: formData.get("username") as string,
-          password: formData.get("password") as string,
-        });
-        if (!error) redirect("/");
-        else return { error: error.message ?? "unknown error" };
-      }
-      const { data, error } = await authClient.signIn.username({
-        username: formData.get("username") as string,
-        password: formData.get("password") as string,
-      });
-      if (!error) redirect("/");
-      else return { error: error.message ?? "unknown error" };
-    } catch (error) {
-      if ((error as CallbackRouteError)["cause"]) {
-        return {
-          error:
-            (error as CallbackRouteError)["cause"]?.err?.message ||
-            "Sign in error.",
-        };
-      }
-      if ((error as Error).message === "NEXT_REDIRECT") {
-        redirect("/");
-      }
-
-      return { error: "Unknown error" };
-    }
-  };
-
-  let providers: ProviderProps[] = [
+  const providers: ProviderProps[] = [
     {
       id: "facebook",
       name: "Facebook",
@@ -106,5 +76,5 @@ export default async function Page({}) {
     },
     //"credentials":{"id":"credentials","name":"Credentials","type":"credentials","signinUrl":"http://localhost:3000/api/auth/signin/credentials","callbackUrl":"http://localhost:3000/api/auth/callback/credentials"}
   ];
-  return <LoginOptions providers={providers} signin_action={signin_action} />;
+  return <LoginOptions providers={providers} />;
 }

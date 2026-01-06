@@ -112,6 +112,10 @@ export function LoggedInButton({
         Log in
       </Button>
     );
+
+  const isContributor = user.role == "contributor" || user.role == "admin";
+  const isAdmin = user.role == "admin";
+
   return (
     <Dropdown>
       <div
@@ -144,7 +148,7 @@ export function LoggedInButton({
                 : "Light/Dark"}
           </div>
         }
-        {user?.role && page !== "stories" ? (
+        {isContributor && page !== "stories" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={stories_link}
@@ -153,7 +157,7 @@ export function LoggedInButton({
             Stories
           </Link>
         ) : null}
-        {user?.role && page !== "editor" ? (
+        {isContributor && page !== "editor" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={editor_link}
@@ -162,7 +166,7 @@ export function LoggedInButton({
             Editor
           </Link>
         ) : null}
-        {user?.role && page !== "docs" ? (
+        {isContributor && page !== "docs" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={"/docs"}
@@ -171,7 +175,7 @@ export function LoggedInButton({
             Docs
           </Link>
         ) : null}
-        {user?.admin && page !== "admin" ? (
+        {isAdmin && page !== "admin" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={"/admin"}

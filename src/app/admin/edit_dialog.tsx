@@ -3,7 +3,7 @@ import styled, { keyframes } from "styled-components";
 import React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 
-export function Content({ children }) {
+export function Content({ children }: { children: React.ReactNode }) {
   return (
     <Dialog.Portal>
       <DialogOverlay />
@@ -200,7 +200,17 @@ const X = styled.div`
   width: 18px;
 `;
 
-export function InputText({ name, label, value, setValue }) {
+export function InputText({
+  name,
+  label,
+  value,
+  setValue,
+}: {
+  name: string;
+  label: string;
+  value: string;
+  setValue: (x: string) => void;
+}) {
   return (
     <Fieldset>
       <Label className="Label" htmlFor={label}>
@@ -216,7 +226,17 @@ export function InputText({ name, label, value, setValue }) {
   );
 }
 
-export function InputTextArea({ name, label, value, setValue }) {
+export function InputTextArea({
+  name,
+  label,
+  value,
+  setValue,
+}: {
+  name: string;
+  label: string;
+  value: string;
+  setValue: (x: string) => void;
+}) {
   return (
     <Fieldset>
       <Label className="Label" htmlFor={label}>
@@ -231,7 +251,17 @@ export function InputTextArea({ name, label, value, setValue }) {
   );
 }
 
-export function InputBool({ name, label, value, setValue }) {
+export function InputBool({
+  name,
+  label,
+  value,
+  setValue,
+}: {
+  name: string;
+  label: string;
+  value: boolean;
+  setValue: (x: boolean) => void;
+}) {
   return (
     <Fieldset>
       <Label className="Label" htmlFor={label}>

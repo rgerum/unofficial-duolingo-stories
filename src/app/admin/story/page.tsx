@@ -1,9 +1,9 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useInput } from "@/lib/hooks";
+import { useState } from "react";
 
 export default function Page({}) {
-  let [id, setId] = useInput();
+  let [id, setId] = useState("");
   let router = useRouter();
 
   async function go() {
@@ -12,7 +12,7 @@ export default function Page({}) {
   return (
     <>
       <div>
-        Story ID <input value={id} onChange={setId} />{" "}
+        Story ID <input value={id} onChange={(e) => setId(e.target.value)} />{" "}
         <button onClick={go}>Go</button>
       </div>
     </>

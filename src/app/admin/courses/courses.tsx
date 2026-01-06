@@ -1,9 +1,8 @@
 "use client";
 import Link from "next/link";
 import styles from "../index.module.css";
-import { useInput } from "@/lib/hooks";
 import { Spinner } from "@/components/layout/spinner";
-import Flag from "@/components/layout/flag.tsx";
+import Flag from "@/components/layout/flag";
 import { fetch_post } from "@/lib/fetch_post";
 import * as EditDialog from "../edit_dialog";
 import React, { useState } from "react";
@@ -12,21 +11,34 @@ import Button from "@/components/layout/button";
 import Tag from "@/components/layout/tag";
 import Input from "@/components/layout/Input";
 import FlagName from "../FlagName";
+import { AdminLanguageProps, CourseProps } from "@/app/admin/courses/page";
 
-function InputLanguage({ name, label, value, setValue, languages }) {
-  const [nameX, setName] = useInput(languages[value]?.name || "");
-  const inputRef = React.useRef();
+function InputLanguage({
+  name,
+  label,
+  value,
+  setValue,
+  languages,
+}: {
+  name: string;
+  label: string;
+  value: number;
+  setValue: (value: number) => void;
+  languages: Record<number, AdminLanguageProps>;
+}) {
+  const [nameX, setName] = useState(languages[value]?.name || "");
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   let valid = false;
-  for (let lang of Object.getOwnPropertyNames(languages)) {
+  for (const lang in languages) {
     if (languages[lang].name.toLowerCase() === nameX.toLowerCase()) {
       valid = true;
       break;
     }
   }
-  const edited = function (e) {
-    let value = e.target?.value ? e.target.value : e;
-    for (let lang of Object.getOwnPropertyNames(languages)) {
+  const edited = function (e: React.ChangeEvent<HTMLInputElement> | string) {
+    let value = typeof e == "string" ? e : e.target?.value;
+    for (const lang in languages) {
       if (
         value?.toLowerCase &&
         languages[lang].name.toLowerCase() === value.toLowerCase()
@@ -36,11 +48,12 @@ function InputLanguage({ name, label, value, setValue, languages }) {
         break;
       }
     }
-    setName(e);
+    setName(value);
   };
 
-  let language_id = [];
-  for (let lang of Object.getOwnPropertyNames(languages)) {
+  const language_id: number[] = [];
+  for (const key in languages) {
+    const lang = Number(key);
     if (languages[lang].name.toLowerCase().indexOf(nameX.toLowerCase()) !== -1)
       language_id.push(lang);
   }
@@ -151,9 +164,19 @@ const LangInput = styled(EditDialog.Input)`
   width: 100%;
 `;
 
-function EditCourse({ obj, languages, updateCourse, is_new }) {
+function EditCourse({
+  obj,
+  languages,
+  updateCourse,
+  is_new,
+}: {
+  obj: CourseProps;
+  languages: Record<number, AdminLanguageProps>;
+  updateCourse: (course: CourseProps) => void;
+  is_new: boolean;
+}) {
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState(undefined);
+  const [error, setError] = useState<string | undefined>(undefined);
 
   const [short, setShort] = useState(obj.short || "");
   const [fromLanguage, setFromLanguage] = useState(obj.from_language || 0);
@@ -167,7 +190,7 @@ function EditCourse({ obj, languages, updateCourse, is_new }) {
   const [tags, setTags] = useState(obj.tags || "");
   const [about, setAbout] = useState(obj.about || "");
 
-  async function Send(event) {
+  async function Send(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = {
       id: obj.id,
@@ -252,8 +275,8 @@ function EditCourse({ obj, languages, updateCourse, is_new }) {
           <EditDialog.InputText
             name={"Tags"}
             label={"tags"}
-            value={tags}
-            setValue={setTags}
+            value={tags.join(",")}
+            setValue={(t) => setTags(t.split(",").map((t) => t.trim()))}
           />
           <EditDialog.InputTextArea
             name={"About"}
@@ -284,15 +307,23 @@ const Error = styled.div`
   background: var(--error-red);
 `;
 
-function TableRow({ course, languages, updateCourse }) {
-  const refRow = React.useRef();
+function TableRow({
+  course,
+  languages,
+  updateCourse,
+}: {
+  course: CourseProps;
+  languages: Record<number, AdminLanguageProps>;
+  updateCourse: (course: CourseProps) => void;
+}) {
+  const refRow = React.useRef<HTMLTableRowElement>(null);
 
-  function updateCourseWrapper(new_course) {
+  function updateCourseWrapper(new_course: CourseProps) {
     const frames = [
       { opacity: 0, filter: "blur(10px) saturate(0)" },
       { opacity: 1, filter: "" },
     ];
-    const attributes = [
+    const attributes: (keyof CourseProps)[] = [
       "id",
       "short",
       "learning_language",
@@ -304,7 +335,7 @@ function TableRow({ course, languages, updateCourse }) {
       "about",
     ];
 
-    function check_equal(attribute) {
+    function check_equal(attribute: keyof CourseProps) {
       if (attribute === "tags") {
         return (
           new_course[attribute].sort().join(",") ===
@@ -322,10 +353,11 @@ function TableRow({ course, languages, updateCourse }) {
           new_course[attributes[i]],
           course[attributes[i]],
         );
-        refRow.current.children[i].animate(frames, {
-          duration: 1000,
-          iterations: 1,
-        });
+        if (refRow.current)
+          refRow.current.children[i].animate(frames, {
+            duration: 1000,
+            iterations: 1,
+          });
       }
     }
     updateCourse(new_course);
@@ -357,29 +389,36 @@ function TableRow({ course, languages, updateCourse }) {
           obj={course}
           languages={languages}
           updateCourse={updateCourseWrapper}
+          is_new={false}
         />
       </td>
     </tr>
   );
 }
 
-export function CourseList({ all_courses, languages }) {
-  const [search, setSearch] = useInput("");
-  const [my_courses, setMyCourses] = useInput(all_courses);
+export function CourseList({
+  all_courses,
+  languages,
+}: {
+  all_courses: CourseProps[];
+  languages: AdminLanguageProps[];
+}) {
+  const [search, setSearch] = React.useState("");
+  const [my_courses, setMyCourses] = React.useState(all_courses);
 
-  function updateCourse(course) {
+  function updateCourse(course: CourseProps) {
     setMyCourses(my_courses.map((c) => (c.id === course.id ? course : c)));
   }
 
   if (languages === undefined || my_courses === undefined) return <Spinner />;
 
-  let languages_id = {};
-  for (let l of languages) languages_id[l.id] = l;
+  const languages_id: Record<number, AdminLanguageProps> = {};
+  for (const l of languages) languages_id[l.id] = l;
 
-  let filtered_courses = [];
+  let filtered_courses: CourseProps[] = [];
   if (search === "") filtered_courses = my_courses;
   else {
-    for (let course of my_courses) {
+    for (const course of my_courses) {
       if (!languages_id[course.learning_language]) continue;
       if (
         languages_id[course.learning_language].name
@@ -397,16 +436,23 @@ export function CourseList({ all_courses, languages }) {
   return (
     <Wrapper>
       <SearchBar>
-        <Input label={"Search"} value={search} onChange={setSearch} />
+        <Input
+          label={"Search"}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <EditCourse
           obj={{
-            name: "",
-            public: 0,
-            from_language: 1,
+            id: 0,
             learning_language: -1,
+            from_language: 1,
+            official: false,
+            short: "",
+            name: "",
+            public: false,
             about: "",
-            tags: "",
-            conlang: 0,
+            tags: [],
+            conlang: false,
           }}
           is_new={true}
           languages={languages_id}

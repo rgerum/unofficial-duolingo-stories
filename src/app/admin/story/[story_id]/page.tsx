@@ -1,8 +1,8 @@
-import { sql } from "@/lib/db.ts";
+import { sql } from "@/lib/db";
 import { notFound } from "next/navigation";
 import StoryDisplay from "./story_display";
 
-async function story_properties(id) {
+async function story_properties(id: string) {
   let data =
     await sql`SELECT story.id, story.name, story.image, story.public, course.short FROM story JOIN course ON course.id = story.course_id WHERE story.id = ${id};`;
   if (data.length === 0) return undefined;
@@ -12,7 +12,11 @@ async function story_properties(id) {
   return story;
 }
 
-export default async function Page({ params }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ story_id: string }>;
+}) {
   let story = await story_properties((await params).story_id);
 
   if (story === undefined) notFound();

@@ -1,4 +1,4 @@
-import query from "./db.ts";
+import query from "./db";
 
 export async function update_query(table_name, data) {
   let values = [];

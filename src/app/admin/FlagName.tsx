@@ -1,12 +1,20 @@
 import React from "react";
-import Flag from "@/components/layout/flag.tsx";
+import Flag from "@/components/layout/flag";
 
 export default function FlagName({
   lang,
   languages,
 }: {
-  lang: string;
-  languages: any;
+  lang: number;
+  languages: Record<
+    number,
+    {
+      short: string;
+      flag: number | null;
+      flag_file: string | null;
+      name: string | null;
+    }
+  >;
 }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

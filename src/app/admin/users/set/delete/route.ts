@@ -5,7 +5,7 @@ import { getUser } from "@/lib/userInterface";
 export async function POST(req) {
   try {
     const data = await req.json();
-    const token = await getUser(req);
+    const token = await getUser();
 
     if (!token?.admin)
       return new Response("You need to be a registered admin.", {

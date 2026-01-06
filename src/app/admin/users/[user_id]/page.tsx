@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import UserDisplay from "./user_display";
-import { sql } from "@/lib/db.ts";
+import { sql } from "@/lib/db";
 
-async function user_properties(id) {
-  const isNumeric = (value) =>
+async function user_properties(id: string) {
+  const isNumeric = (value: string) =>
     value.length !== 0 && [...value].every((c) => c >= "0" && c <= "9");
   if (isNumeric(id)) {
     // if it is a discord ID
@@ -18,7 +18,11 @@ async function user_properties(id) {
     )[0];
 }
 
-export default async function Page({ params }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ user_id: string }>;
+}) {
   let user = await user_properties((await params).user_id);
 
   if (user === undefined) notFound();
