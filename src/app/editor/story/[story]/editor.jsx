@@ -5,23 +5,23 @@ import React from "react";
 
 import { basicSetup, EditorView } from "codemirror";
 import { EditorSelection, EditorState } from "@codemirror/state";
-import { example, highlightStyle } from "components/editor/story/parser.mjs";
-import useScrollLinking from "components/editor/story/scroll_linking";
-import useResizeEditor from "components/editor/story/editor-resize";
+import { example, highlightStyle } from "@/components/editor/story/parser.mjs";
+import useScrollLinking from "@/components/editor/story/scroll_linking";
+import useResizeEditor from "@/components/editor/story/editor-resize";
 //import {SoundRecorder} from "./sound-recorder";
-import Story, { EditorContext } from "components/story/story";
-import Cast from "components/editor/story/cast";
+import Story, { EditorContext } from "@/components/story/story";
+import Cast from "@/components/editor/story/cast";
 
-import { processStoryFile } from "components/editor/story/syntax_parser_new";
+import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 
 import { useRouter } from "next/navigation";
 import { StoryEditorHeader } from "./header";
-import { fetch_post } from "lib/fetch_post";
+import { fetch_post } from "@/lib/fetch_post";
 import SoundRecorder from "./sound-recorder";
 import {
   insert_audio_line,
   timings_to_text,
-} from "../../../../components/story/text_lines/audio_edit_tools.mjs";
+} from "@/components/story/text_lines/audio_edit_tools.mjs";
 
 let images_cached = {};
 export async function getImage(id) {
@@ -77,7 +77,7 @@ function getMax(list, callback) {
   return max;
 }
 
-export default function Editor({ story_data, avatar_names, session }) {
+export default function Editor({ story_data, avatar_names }) {
   const editor = React.useRef();
   const preview = React.useRef();
   const margin = React.useRef();
@@ -111,6 +111,8 @@ export default function Editor({ story_data, avatar_names, session }) {
   const [audio_editor_data, setAudioEditorData] = React.useState({});
 
   const [unsaved_changes, set_unsaved_changes] = React.useState(false);
+
+  const [save_error, set_save_error] = React.useState(false);
 
   function soundRecorderNext() {
     const index = audio_editor_data.trackingProperties.line_index || 0;
@@ -186,22 +188,26 @@ export default function Editor({ story_data, avatar_names, session }) {
     let editor_text = undefined;
 
     async function Save() {
-      if (story_meta === undefined || story_data === undefined) return;
-      let data = {
-        id: story_data.id,
-        duo_id: story_data.duo_id,
-        name: story_meta.fromLanguageName,
-        image: story_meta.icon,
-        set_id: parseInt(story_meta.set_id),
-        set_index: parseInt(story_meta.set_index),
-        course_id: story_data.course_id,
-        text: editor_text,
-        json: story,
-        todo_count: story_meta.todo_count,
-      };
+      try {
+        if (story_meta === undefined || story_data === undefined) return;
+        let data = {
+          id: story_data.id,
+          duo_id: story_data.duo_id,
+          name: story_meta.fromLanguageName,
+          image: story_meta.icon,
+          set_id: parseInt(story_meta.set_id),
+          set_index: parseInt(story_meta.set_index),
+          course_id: story_data.course_id,
+          text: editor_text,
+          json: story,
+          todo_count: story_meta.todo_count,
+        };
 
-      await setStory(data);
-      set_unsaved_changes(false);
+        await setStory(data);
+        set_unsaved_changes(false);
+      } catch (e) {
+        set_save_error(true);
+      }
     }
     set_func_save(() => Save);
 
@@ -325,6 +331,23 @@ export default function Editor({ story_data, avatar_names, session }) {
   return (
     <>
       <div id="body" className={styles.body}>
+        {save_error && (
+          <>
+            <div
+              className={styles.error_modal_background}
+              onClick={() => set_save_error(false)}
+            />
+            <div className={styles.save_error}>
+              There was an error saving.{" "}
+              <div
+                className={styles.close}
+                onClick={() => set_save_error(false)}
+              >
+                X
+              </div>
+            </div>
+          </>
+        )}
         <StoryEditorHeader
           story_data={story_data}
           unsaved_changes={unsaved_changes}
@@ -336,7 +359,6 @@ export default function Editor({ story_data, avatar_names, session }) {
           set_show_ssml={set_show_ssml}
           language_data={language_data}
           language_data2={language_data2}
-          session={session}
         />
         {(audio_editor_data?.line?.content ||
           audio_editor_data?.learningLanguageTitleContent) && (

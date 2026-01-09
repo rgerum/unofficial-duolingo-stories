@@ -1,6 +1,6 @@
 import styles from "./breadcrumbs.module.css";
 import React from "react";
-import { DoubleFlag } from "../../../components/layout/flag";
+import { DoubleFlag } from "@/components/layout/flag.tsx";
 import Link from "next/link";
 import EditorButton from "../editor_button";
 
@@ -60,6 +60,7 @@ function BreadcrumbPart({ part, hide }) {
       <MyLink className={class_name} href={part.href}>
         {part.data?.image ? (
           <img
+            style={{ height: "36px" }}
             alt="story title"
             src={`https://stories-cdn.duolingo.com/image/${part.data?.image}.svg`}
           />

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Flag from "./flag";
+import Flag from "./flag.tsx";
 import styles from "./language_button.module.css";
 
 export default function LanguageButton({ course }) {
@@ -14,7 +14,6 @@ export default function LanguageButton({ course }) {
         flag={course.learning_language_flag}
         flag_file={course.learning_language_flag_file}
       />
-
       <span className={styles.language_select_button_text}>{course.name}</span>
       <span className={styles.language_story_count}>
         {course.count} stories

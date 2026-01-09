@@ -1,10 +1,10 @@
 "use client";
 import React from "react";
 
-import Story from "components/story/story";
+import Story from "@/components/story/story";
 import { useRouter } from "next/navigation";
-import { EditorContext } from "components/story/story";
-import styles from "components/story/story.module.css";
+import { EditorContext } from "@/components/story/story";
+import styles from "@/components/story/story.module.css";
 import { useSearchParams } from "next/navigation";
 
 export default function StoryWrapper({ story }) {

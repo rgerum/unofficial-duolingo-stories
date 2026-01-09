@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./DocsSearchModal.module.css";
-import useKeypress from "../../hooks/use-keypress.hook";
+import useKeypress from "@/hooks/use-keypress.hook";
 import Link from "next/link";
 import * as Dialog from "@radix-ui/react-dialog";
 

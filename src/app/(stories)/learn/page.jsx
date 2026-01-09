@@ -1,9 +1,8 @@
 import React from "react";
-import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
-import { sql } from "lib/db";
+import { sql } from "@/lib/db.ts";
 import Welcome from "./welcome";
+import { getUser } from "@/lib/userInterface";
 
 export const metadata = {
   title: "Duostories FAQ",
@@ -25,10 +24,10 @@ LIMIT 1;`;
 }
 
 export default async function Page() {
-  const session = await getServerSession(authOptions);
+  const user = await getUser();
 
-  if (session?.user) {
-    let last_course = await get_last_course(session?.user?.name);
+  if (user) {
+    let last_course = await get_last_course(user?.name);
     if (last_course.length && last_course[0].short)
       redirect("/" + last_course[0].short);
   }

@@ -43,7 +43,7 @@ export default function Cast(props) {
         <Link href={`/story/${props.id}/test`}>review</Link> the story. (or
         review{" "}
         <Link href={`/story/${props.id}/test?hide_questions=true`}>
-          without the excercises
+          without the exercises
         </Link>
         ) <Link href={`/story/${props.id}/script`}>Story Script</Link>
       </p>

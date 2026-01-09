@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import Flag from "components/layout/flag";
+import Flag from "@/components/layout/flag.tsx";
 import styles from "./course_list.module.css";
-import { useInput } from "lib/hooks";
+import { useInput } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
-import { Spinner } from "../../../components/layout/spinner";
+import { Spinner } from "@/components/layout/spinner";
 
 export default function CourseList({
   courses,
@@ -15,7 +15,6 @@ export default function CourseList({
 }) {
   const [search, setSearch] = useInput("");
   const router = useRouter();
-  console.log(courses);
 
   if (courses === undefined)
     return (

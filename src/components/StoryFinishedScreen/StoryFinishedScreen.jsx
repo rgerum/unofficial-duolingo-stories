@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./StoryFinishedScreen.module.css";
-import useScrollIntoView from "../../hooks/use-scroll-into-view.hook";
+import useScrollIntoView from "@/hooks/use-scroll-into-view.hook";
 import { useLocalisation } from "../LocalisationProvider/LocalisationProviderContext";
 
 function StoryFinishedScreen({ story }) {

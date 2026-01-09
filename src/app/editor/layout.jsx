@@ -1,12 +1,11 @@
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
 import React from "react";
-import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
+import { getUser } from "@/lib/userInterface";
 
 export default async function Layout({ children }) {
-  const session = await getServerSession(authOptions);
+  const user = await getUser();
 
-  if (!session?.user?.role) redirect("/auth/editor");
+  if (!user?.role) redirect("/auth/editor");
 
   return <>{children}</>;
 }

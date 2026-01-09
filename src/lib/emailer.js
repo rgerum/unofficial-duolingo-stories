@@ -4,8 +4,9 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 let transporter;
 if (
-  !process.env.NEXTAUTH_URL ||
-  process.env.NEXTAUTH_URL === "http://localhost:3000"
+  !process.env.RESEND_API_KEY
+  //  !process.env.NEXTAUTH_URL ||
+  //  process.env.NEXTAUTH_URL === "http://localhost:3000"
 ) {
   // emailer.js
   const nodemailer = require("nodemailer");

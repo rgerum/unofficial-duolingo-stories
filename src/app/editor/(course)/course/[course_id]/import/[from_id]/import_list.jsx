@@ -1,8 +1,7 @@
 "use client";
-import Link from "next/link";
-import { useState } from "react";
 import styles from "../../../../edit_list.module.css";
-import { SpinnerBlue } from "components/layout/spinner";
+import React from "react";
+import { SpinnerBlue } from "@/components/layout/spinner";
 import { useRouter } from "next/navigation";
 
 export async function setImport(id, course_id) {
@@ -16,7 +15,7 @@ export async function setImport(id, course_id) {
 
 export default function ImportList({ course, course_from, imports }) {
   let stories = course?.stories;
-  const [importing, setImporting] = useState(false);
+  const [importing, setImporting] = React.useState(false);
   let router = useRouter();
 
   async function do_import(id) {

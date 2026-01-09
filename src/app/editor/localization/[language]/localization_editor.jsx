@@ -1,26 +1,16 @@
 import React from "react";
 import styles from "./[language].module.css";
 
-import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
+import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
-import { sql } from "lib/db";
+import { sql } from "@/lib/db.ts";
 import TextEdit from "./text_edit";
 
-export default function LocalizationEditor({
-  language,
-  language2,
-  session,
-  course,
-}) {
+export default function LocalizationEditor({ language, language2, course }) {
   // Render data...
   return (
     <>
-      <Layout
-        language_data={language}
-        language2={language2}
-        session={session}
-        course={course}
-      >
+      <Layout language_data={language} language2={language2} course={course}>
         <ListLocalizations
           language_id={language2?.id || language.id}
           language_name={language2?.name || language.name}
@@ -30,13 +20,7 @@ export default function LocalizationEditor({
   );
 }
 
-export function Layout({
-  children,
-  language_data,
-  language2,
-  session,
-  course,
-}) {
+export function Layout({ children, language_data, language2, course }) {
   let crumbs = [
     { type: "Editor", href: `/editor` },
     { type: "sep" },
@@ -54,15 +38,7 @@ export function Layout({
       <nav className={styles.header_index}>
         <Breadcrumbs path={crumbs} />
         <div style={{ marginLeft: "auto" }}></div>
-        {session?.user ? (
-          <LoggedInButton
-            page={"editor"}
-            course_id={course?.short}
-            session={session}
-          />
-        ) : (
-          <LogInButton />
-        )}
+        <LoggedInButton page={"editor"} course_id={course?.short} />
       </nav>
       <div className={styles.main_index}>{children}</div>
     </>

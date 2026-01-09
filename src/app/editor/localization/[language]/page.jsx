@@ -1,9 +1,6 @@
 import React from "react";
 import { cache } from "react";
-import { sql } from "lib/db";
-import { getServerSession } from "next-auth/next";
-
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
+import { sql } from "@/lib/db.ts";
 import { notFound } from "next/navigation";
 import LocalizationEditor from "./localization_editor";
 
@@ -52,7 +49,9 @@ const get_language = cache(async (id) => {
 });
 
 export async function generateMetadata({ params }) {
-  let [language, course, language2] = await get_language(params.language);
+  let [language, course, language2] = await get_language(
+    (await params).language,
+  );
 
   if (!language) notFound();
 
@@ -74,9 +73,9 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const session = await getServerSession(authOptions);
-
-  let [language, course, language2] = await get_language(params.language);
+  let [language, course, language2] = await get_language(
+    (await params).language,
+  );
 
   if (!language) {
     notFound();
@@ -93,7 +92,6 @@ export default async function Page({ params }) {
         language2={language2}
         speakers={speakers}
         avatar_names={avatar_names}
-        session={session}
         course={course}
       />
     </>

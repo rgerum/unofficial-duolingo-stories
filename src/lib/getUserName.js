@@ -1,7 +1,6 @@
-import { authOptions } from "app/api/auth/[...nextauth]/authOptions";
-import { getServerSession } from "next-auth/next";
+import { getUser } from "@/lib/userInterface";
 
 export default async function getUserName() {
-  const session = await getServerSession(authOptions);
-  return session?.user?.name;
+  const user = await getUser();
+  return user?.name;
 }

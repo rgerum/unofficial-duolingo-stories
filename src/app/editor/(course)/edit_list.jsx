@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import styles from "./edit_list.module.css";
-import { SpinnerBlue } from "components/layout/spinner";
+import { SpinnerBlue } from "@/components/layout/spinner";
 import { useRouter } from "next/navigation";
 
 export default function EditList({ stories, course, updateCourses }) {
@@ -27,7 +27,7 @@ export default function EditList({ stories, course, updateCourses }) {
             stories set to "public".
             <br />
             Please ask a moderator on discord to check the course and make it
-            pubic.
+            public.
           </div>
         ) : null}
         <ul>

@@ -2,8 +2,8 @@
 import React from "react";
 
 import { useRouter } from "next/navigation";
-import StoryProgress from "../../../../../components/StoryProgress";
-import useSearchParamsState from "../../../../../hooks/use-search-params-state.hook";
+import StoryProgress from "@/components/StoryProgress";
+import useSearchParamsState from "@/hooks/use-search-params-state.hook";
 
 export default function StoryWrapper({
   story,

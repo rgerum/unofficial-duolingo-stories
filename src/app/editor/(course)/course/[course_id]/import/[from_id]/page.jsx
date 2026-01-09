@@ -7,12 +7,12 @@ import {
 import ImportList from "./import_list";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { DoubleFlag } from "../../../../../../../components/layout/flag";
+import { DoubleFlag } from "@/components/layout/flag.tsx";
 import React from "react";
 import styles from "./import_list.module.css";
 
 export async function generateMetadata({ params }) {
-  const course = await get_course_data(params.course_id);
+  const course = await get_course_data((await params).course_id);
 
   if (!course) notFound();
 
@@ -25,11 +25,11 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-  const from = params.from_id;
+  const from = (await params).from_id;
   const languages = await get_language_list_data();
-  const course = await get_course_data(params.course_id);
+  const course = await get_course_data((await params).course_id);
   const courses = await get_course_list_data();
-  const course_from = await get_course_data(params.from_id);
+  const course_from = await get_course_data((await params).from_id);
 
   let imports = await get_course_import({
     from_id: course_from.id,
@@ -65,8 +65,8 @@ export default async function Page({ params }) {
             key={i}
             href={`/editor/course/${course.short}/import/${c.short}`}
           >
-            <span>
-              <span>
+            <span className={styles.import_lang}>
+              <span className={styles.double_flag}>
                 <DoubleFlag
                   width={40}
                   lang1={languages[c.learning_language]}

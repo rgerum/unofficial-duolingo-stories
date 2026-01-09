@@ -1,12 +1,12 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { sql } from "lib/db";
-import getUserId from "lib/getUserId";
-import { get_localisation_dict } from "lib/get_localisation";
+import { sql } from "@/lib/db.ts";
+import getUserId from "@/lib/getUserId";
+import { get_localisation_dict } from "@/lib/get_localisation";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "../getStory";
 import { revalidateTag } from "next/cache";
-import LocalisationProvider from "../../../../../components/LocalisationProvider";
+import LocalisationProvider from "@/components/LocalisationProvider";
 import { headers } from "next/headers";
 
 async function get_story_meta(course_id) {
@@ -23,17 +23,16 @@ async function get_story_meta(course_id) {
   return Object.assign({}, course_query[0]);
 }
 
-export async function generateMetadata({ params, searchParams }, parent) {
-  const story = await get_story_meta(params.story_id);
+export async function generateMetadata({ params }) {
+  const story_id = (await params).story_id;
+  const story = await get_story_meta(story_id);
 
   if (!story) notFound();
-
-  const meta = await parent;
 
   return {
     title: `Duostories ${story.learning_language_long} from ${story.from_language_long}: ${story.from_language_name}`,
     alternates: {
-      canonical: `https://duostories.org/story/${params.story_id}`,
+      canonical: `https://duostories.org/story/${story_id}`,
     },
     keywords: [story.learning_language_long],
   };
@@ -51,11 +50,11 @@ function getNavigationMode() {
 }
 
 export default async function Page({ params }) {
-  const story = await get_story(params.story_id);
+  const story_id = parseInt((await params).story_id);
+  const story = await get_story(story_id);
   const course_id = story?.course_id;
 
   const user_id = await getUserId();
-  const story_id = parseInt(params.story_id);
 
   const localization = await get_localisation_dict(story?.from_language_id);
 

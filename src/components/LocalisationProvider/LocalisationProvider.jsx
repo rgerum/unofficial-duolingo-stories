@@ -1,6 +1,6 @@
 "use server";
 import React from "react";
-import { get_localisation_dict } from "../../lib/get_localisation";
+import { get_localisation_dict } from "@/lib/get_localisation";
 import { LocalisationProviderInner } from "./LocalisationProviderContext";
 
 function LocalisationProvider({ lang, children }) {

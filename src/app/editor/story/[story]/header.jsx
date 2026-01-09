@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./header.module.css";
 import EditorButton from "../../editor_button";
-import LoggedInButton, { LogInButton } from "components/login/loggedinbutton";
+import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
 
 export function StoryEditorHeader({
@@ -15,7 +15,6 @@ export function StoryEditorHeader({
   set_show_trans,
   show_ssml,
   set_show_ssml,
-  session,
 }) {
   function do_set_show_trans() {
     let value = !show_trans;
@@ -114,16 +113,10 @@ export function StoryEditorHeader({
             img={"save.svg"}
             text={save_text + (unsaved_changes ? "*" : "")}
           />
-
-          {session?.user ? (
-            <LoggedInButton
-              page={"editor"}
-              course_id={story_data?.short}
-              session={session}
-            />
-          ) : (
-            <LogInButton />
-          )}
+          <LoggedInButtonWrappedClient
+            page={"editor"}
+            course_id={story_data?.short}
+          />
         </div>
       </div>
     </>

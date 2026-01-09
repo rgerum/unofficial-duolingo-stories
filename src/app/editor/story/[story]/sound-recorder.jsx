@@ -1,14 +1,14 @@
 import styles from "./sound-recorder.module.css";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
-import { AudioRecorder } from "react-audio-voice-recorder";
-import HintLineContent from "../../../../components/story/text_lines/line_hints";
-import { splitTextTokens } from "../../../../lib/editor/tts_transcripte.mjs";
+import { AudioRecorder } from "@/components/react-audio-recorder";
+import HintLineContent from "@/components/story/text_lines/line_hints";
+import { splitTextTokens } from "@/lib/editor/tts_transcripte.mjs";
 
 import { useWavesurfer } from "@wavesurfer/react";
 import Timeline from "wavesurfer.js/dist/plugins/timeline.js";
 import Regions from "wavesurfer.js/dist/plugins/regions.js";
-import AudioPlay from "../../../../components/story/text_lines/audio_play";
+import AudioPlay from "@/components/story/text_lines/audio_play";
 
 const audioUrls = [
   "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/audio/43/2a532e34.mp3",

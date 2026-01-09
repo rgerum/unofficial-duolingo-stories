@@ -1,8 +1,8 @@
-const { Octokit } = require("@octokit/rest");
+import { Octokit } from "@octokit/rest";
 
 const octokit = new Octokit({ auth: process.env.GITHUB_REPO_TOKEN });
 
-async function uploadWithDiffToGithub(
+export async function uploadWithDiffToGithub(
   repository,
   content,
   dst,
@@ -54,7 +54,7 @@ async function uploadWithDiffToGithub(
   });
 }
 
-async function upload_github(
+export async function upload_github(
   id,
   course_id,
   content,
@@ -85,5 +85,3 @@ async function upload_github(
     );
   }
 }
-
-module.exports = { upload_github: upload_github };
