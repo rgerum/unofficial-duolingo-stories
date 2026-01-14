@@ -1,6 +1,8 @@
 import { sql } from "@/lib/db";
 import { notFound } from "next/navigation";
 import StoryDisplay from "./story_display";
+import { StorySchema } from "./schema";
+export type { Story } from "./schema";
 
 async function story_properties(id: string) {
   let data =
@@ -9,7 +11,7 @@ async function story_properties(id: string) {
   let story = data[0];
   story.approvals =
     await sql`SELECT a.id, a.date, u.name FROM story_approval a JOIN "users" u ON u.id = a.user_id WHERE a.story_id = ${id};`;
-  return story;
+  return StorySchema.parse(story);
 }
 
 export default async function Page({
@@ -17,7 +19,7 @@ export default async function Page({
 }: {
   params: Promise<{ story_id: string }>;
 }) {
-  let story = await story_properties((await params).story_id);
+  const story = await story_properties((await params).story_id);
 
   if (story === undefined) notFound();
 

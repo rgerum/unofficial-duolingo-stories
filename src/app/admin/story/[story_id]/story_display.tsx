@@ -1,28 +1,21 @@
 "use client";
-import { fetch_post } from "@/lib/fetch_post";
 import Switch from "@/components/layout/switch";
 import { useState } from "react";
 import Link from "next/link";
+import type { Story } from "./page";
+import { togglePublished, removeApproval as removeApprovalAction } from "./actions";
 
-export default function StoryDisplay({ story }) {
-  const [story_, setStory] = useState(story);
+export default function StoryDisplay({ story }: { story: Story }) {
+  const [story_, setStory] = useState<Story>(story);
 
   // Render data...
   async function changePublished() {
-    let res = await fetch_post(`/admin/story/set`, {
-      id: story_.id,
-      public: !story_.public,
-    });
-    let data = await res.json();
-    setStory(data);
+    const updated = await togglePublished(story_.id, story_.public);
+    setStory(updated);
   }
-  async function deleteApproval(approval_id) {
-    let res = await fetch_post(`/admin/story/set`, {
-      id: story_.id,
-      approval_id: approval_id,
-    });
-    let data = await res.json();
-    setStory(data);
+  async function deleteApproval(approval_id: number) {
+    const updated = await removeApprovalAction(story_.id, approval_id);
+    setStory(updated);
   }
   return (
     <div
