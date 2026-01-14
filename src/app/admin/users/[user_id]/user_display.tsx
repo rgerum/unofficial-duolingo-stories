@@ -1,63 +1,74 @@
 "use client";
-import { fetch_post } from "@/lib/fetch_post";
 import { useState } from "react";
+import type { AdminUser } from "./schema";
+import {
+  setUserActivatedAction,
+  setUserWriteAction,
+  setUserDeleteAction,
+} from "./actions";
 
-export async function setUserActivated(data) {
-  let res = await fetch_post(`/admin/users/set/activate`, data);
-  res = await res.text();
-  return res;
+export async function setUserActivated(data: {
+  id: number;
+  activated: 0 | 1 | boolean;
+}) {
+  return await setUserActivatedAction(data);
 }
 
-export async function setUserWrite(data) {
-  let res = await fetch_post(`/admin/users/set/write`, data);
-  res = await res.text();
-  return res;
+export async function setUserWrite(data: {
+  id: number;
+  write: 0 | 1 | boolean;
+}) {
+  return await setUserWriteAction(data);
 }
 
-export async function setUserDelete(data) {
-  let res = await fetch_post(`/admin/users/set/delete`, data);
-  res = await res.text();
-  return res;
+export async function setUserDelete(data: { id: number }) {
+  return await setUserDeleteAction(data);
 }
 
-function Activate(props) {
+function Activate(props: { user: AdminUser }) {
   let [checked, setChecked] = useState(props.user.activated);
-  async function OnClick(e) {
-    e.preventDefault();
-    let value = await setUserActivated({
-      id: props.user.id,
-      activated: checked ? 0 : 1,
-    });
-    if (value !== undefined) setChecked(checked ? 0 : 1);
-  }
+
   return (
-    <label className="switch" onClick={OnClick}>
+    <label
+      className="switch"
+      onClick={async (e) => {
+        e.preventDefault();
+        let value = await setUserActivated({
+          id: props.user.id,
+          activated: checked ? 0 : 1,
+        });
+        if (value !== undefined) setChecked(!checked);
+      }}
+    >
       <input type="checkbox" checked={checked} readOnly />
       <span className="slider round"></span>
     </label>
   );
 }
 
-function Write(props) {
+function Write(props: { user: AdminUser }) {
   let [checked, setChecked] = useState(props.user.role);
-  async function OnClick(e) {
-    e.preventDefault();
-    let value = await setUserWrite({
-      id: props.user.id,
-      write: checked ? 0 : 1,
-    });
-    if (value !== undefined) setChecked(checked ? 0 : 1);
-  }
+
   return (
-    <label className="switch" onClick={OnClick}>
+    <label
+      className="switch"
+      onClick={async (e) => {
+        e.preventDefault();
+        let value = await setUserWrite({
+          id: props.user.id,
+          write: checked ? 0 : 1,
+        });
+        if (value !== undefined) setChecked(!checked);
+      }}
+    >
       <input type="checkbox" checked={checked} readOnly />
       <span className="slider round"></span>
     </label>
   );
 }
 
-export default function UserDisplay({ user }) {
-  const [user_] = useState(user);
+export default function UserDisplay({ user }: { user: AdminUser }) {
+  const [user_] = useState<AdminUser>(user);
 
   async function Delete() {
     if (window.confirm("Are you sure you want to delete this user?")) {
