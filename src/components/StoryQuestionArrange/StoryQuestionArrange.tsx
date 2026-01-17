@@ -92,7 +92,7 @@ function useArrangeButtons(
         callWrong();
       }
     },
-    [buttonState, position, order, callRight, callWrong],
+    [buttonState, position, order, callRight, callWrong, callAdvance],
   );
 
   let key_event_handler = React.useCallback(

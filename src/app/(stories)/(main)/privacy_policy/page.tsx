@@ -1,8 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import FooterLinks from "../footer_links";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Duostories FAQ",
   description: "Information about the duostories project.",
   alternates: {
@@ -93,7 +94,7 @@ export default async function Page() {
       <p>
         We may update this Privacy Policy from time to time. We will notify you
         of any changes by posting the new Privacy Policy on this page and
-        updating the "Effective Date" at the top.
+        updating the &quot;Effective Date&quot; at the top.
       </p>
 
       <h3>7. Contact Information:</h3>

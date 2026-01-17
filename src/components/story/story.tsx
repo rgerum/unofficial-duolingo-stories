@@ -1,4 +1,5 @@
 "use client";
+"use no memo";
 import React, { useEffect, useState } from "react";
 import styles from "./story.module.css";
 
@@ -179,6 +180,64 @@ export default function Story({
     if (progress === -1 && audio_loaded) advance_progress();
   }, [audio_loaded, advance_progress, progress]);
 
+  // Build audio URLs for preloading (only used when not in editor mode)
+  const audio_urls = React.useMemo(() => {
+    if (editor) return [];
+    const urls: string[] = [];
+    for (let element of story.elements) {
+      if (element.type === "HEADER" || element.type === "LINE")
+        if (element.audio && element.audio.url) urls.push(element.audio.url);
+    }
+    return urls;
+  }, [editor, story.elements]);
+
+  const audio_base_path = "https://carex.uber.space/stories/";
+  const audios = React.useMemo(() => {
+    if (editor || audio_loaded) return undefined;
+
+    let count = 0;
+    const audiosMap: { [key: string]: HTMLAudioElement } = {};
+    for (let url of audio_urls) {
+      if (audiosMap[url] === undefined && url !== undefined) {
+        count += 1;
+        let a = new Audio();
+        function loadingFinished() {
+          a.removeEventListener("canplaythrough", loadingFinished);
+          a.removeEventListener("error", loadingFinished);
+          count -= 1;
+          if (count === 0) setAudioLoaded(1);
+        }
+        a.addEventListener("canplaythrough", loadingFinished, false);
+        a.addEventListener("error", loadingFinished);
+        audiosMap[url] = a;
+        a.src = audio_base_path + url;
+        a.load();
+      }
+    }
+    if (count === 0) {
+      setAudioLoaded(1);
+    }
+    return audiosMap;
+  }, [editor, audio_loaded, audio_urls]);
+
+  const key_event_handler = React.useCallback(
+    (e: KeyboardEvent) => {
+      if (editor) return; // Don't handle keyboard in editor mode
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        if (!finished) next();
+        else finish();
+      }
+    },
+    [editor, next, finish, finished],
+  );
+
+  React.useEffect(() => {
+    if (editor) return; // Don't add listener in editor mode
+    window.addEventListener("keypress", key_event_handler);
+    return () => window.removeEventListener("keypress", key_event_handler);
+  }, [editor, key_event_handler]);
+
   if (editor) {
     //React.useMemo(() => {}, [story.id]);
     return (
@@ -228,61 +287,6 @@ export default function Story({
       </StoryContext.Provider>
     );
   }
-
-  let audios = undefined;
-  if (!editor) {
-    let audio_urls: string[] = [];
-    for (let element of story.elements) {
-      if (element.type === "HEADER" || element.type === "LINE")
-        if (element.audio && element.audio.url)
-          audio_urls.push(element.audio.url);
-    }
-
-    const audio_base_path = "https://carex.uber.space/stories/";
-    audios = React.useMemo(() => {
-      if (audio_loaded) return;
-
-      let count = 0;
-      let audios: { [key: string]: HTMLAudioElement } = {};
-      audio_urls = [];
-      for (let url of audio_urls) {
-        if (audios[url] === undefined && url !== undefined) {
-          count += 1;
-          let a = new Audio();
-          function loadingFinished() {
-            a.removeEventListener("canplaythrough", loadingFinished);
-            a.removeEventListener("error", loadingFinished);
-            count -= 1;
-            if (count === 0) setAudioLoaded(1);
-          }
-          a.addEventListener("canplaythrough", loadingFinished, false);
-          a.addEventListener("error", loadingFinished);
-          audios[url] = a;
-          a.src = audio_base_path + url;
-          a.load();
-        }
-      }
-      if (count === 0) {
-        setAudioLoaded(1);
-      }
-      return audios;
-    }, [audio_urls]);
-  }
-
-  let key_event_handler = React.useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        if (!finished) next();
-        else finish();
-      }
-    },
-    [next, finish, finished],
-  );
-  React.useEffect(() => {
-    window.addEventListener("keypress", key_event_handler);
-    return () => window.removeEventListener("keypress", key_event_handler);
-  }, [key_event_handler]);
 
   //if(!audio_loaded)
   //    return <Spinner />

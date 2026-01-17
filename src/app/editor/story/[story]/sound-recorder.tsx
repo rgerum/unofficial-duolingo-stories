@@ -1,3 +1,4 @@
+"use no memo";
 import styles from "./sound-recorder.module.css";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";

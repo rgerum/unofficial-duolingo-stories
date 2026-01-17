@@ -1,3 +1,4 @@
+"use no memo";
 import { useState, useCallback } from "react";
 
 export interface recorderControls {

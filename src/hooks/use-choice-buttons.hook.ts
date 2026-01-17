@@ -36,7 +36,7 @@ export function useChoiceButtons(
         callWrong();
       }
     },
-    [buttonState, callRight, callWrong],
+    [buttonState, callRight, callWrong, rightIndex],
   );
 
   useKeypress(

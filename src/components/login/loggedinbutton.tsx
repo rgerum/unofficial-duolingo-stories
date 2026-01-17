@@ -1,4 +1,5 @@
 "use client";
+"use no memo";
 
 import styles from "./loggedinbutton.module.css";
 import styles2 from "./login.module.css";
@@ -94,8 +95,8 @@ export function LoggedInButton({
   //const { data: session } = useSession();
   const controls = useDarkLight();
 
+  const segment = useSelectedLayoutSegments();
   if (course_id === "segment") {
-    const segment = useSelectedLayoutSegments();
     if (segment[0] === "course") course_id = segment[1];
     else course_id = segment[0];
   }

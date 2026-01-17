@@ -1,4 +1,5 @@
 "use client";
+"use no memo";
 import styles from "./[story].module.css";
 
 import React from "react";

@@ -26,7 +26,7 @@ export default function QuestionArrange({ setUnhide, progress, element }) {
     if (active && !done) {
       controls.block_next();
     }
-  }, [active, done]);
+  }, [active, done, controls]);
 
   let hidden2 = !active ? styles_common.hidden : "";
 
@@ -98,7 +98,7 @@ function useArrangeButtons(order, callRight, callWrong, callAdvance, active) {
         callWrong();
       }
     },
-    [buttonState, position, order, callRight, callWrong],
+    [buttonState, position, order, callRight, callWrong, callAdvance],
   );
 
   let key_event_handler = React.useCallback(

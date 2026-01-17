@@ -31,7 +31,7 @@ export default function QuestionMatch({ progress, element }) {
     if (active && !done && controls?.block_next) {
       controls.block_next();
     }
-  }, [active, done]);
+  }, [active, done, controls]);
 
   // whether this part is already shown
   let hidden2 = !active ? styles_common.hidden : "";
@@ -112,7 +112,7 @@ export default function QuestionMatch({ progress, element }) {
         }, 1500);
       }
     },
-    [clicked, last_clicked, orderB, setLastClicked, setClicked, setDone],
+    [clicked, last_clicked, orderB, setLastClicked, setClicked, setDone, order, controls],
   );
 
   let key_event_handler = React.useCallback(

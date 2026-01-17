@@ -1,4 +1,5 @@
 "use client";
+"use no memo";
 import React, { useState } from "react";
 import { useInput } from "@/lib/hooks";
 import { SpinnerBlue } from "@/components/layout/spinner";

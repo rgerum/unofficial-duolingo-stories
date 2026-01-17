@@ -136,7 +136,7 @@ function StoryQuestionMatch({
   React.useEffect(() => {
     const all_right = state.lists[0].every((word) => word.state === "right");
     if (all_right) setDone();
-  }, [state]);
+  }, [state, setDone]);
 
   return (
     <div>

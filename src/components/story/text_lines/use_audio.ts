@@ -50,7 +50,7 @@ export default function useAudio(element, progress) {
       audioObject.pause();
     }
     window.playing_audio.push(cancel);
-  }, [audio, ref]);
+  }, [audio, ref, controls, element.trackingProperties.line_index]);
   React.useEffect(() => {
     if (
       element.trackingProperties.line_index === progress ||

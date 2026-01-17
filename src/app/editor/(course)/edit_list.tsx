@@ -32,8 +32,7 @@ export default function EditList({
       <div>
         {!course.public && story_published_count ? (
           <div className={styles.warning}>
-            ⚠ This course is not public, but has {story_published_count}{" "}
-            stories set to "public".
+            {`⚠ This course is not public, but has ${story_published_count} stories set to "public".`}
             <br />
             Please ask a moderator on discord to check the course and make it
             public.
@@ -41,20 +40,21 @@ export default function EditList({
         ) : null}
         <ul>
           <li>
-            To create a new story click the "Import" button. The story starts as
-            "✍️ draft".
+            To create a new story click the &quot;Import&quot; button. The story
+            starts as &quot;✍️ draft&quot;.
           </li>
           <li>
-            When you have finished working on the story, click the "👍" icon to
-            approve it and change the status to "🗨 feedback".
+            When you have finished working on the story, click the &quot;👍&quot;
+            icon to approve it and change the status to &quot;🗨 feedback&quot;.
           </li>
           <li>
             Now tell contributors on Discord to check the story. When one or
-            more people have checked the story and also gave their approval "👍"
-            the status changes to "✅ finished".
+            more people have checked the story and also gave their approval
+            &quot;👍&quot; the status changes to &quot;✅ finished&quot;.
           </li>
           <li>
-            When one complete set is finished it will switch to "📢 published".
+            When one complete set is finished it will switch to &quot;📢
+            published&quot;.
           </li>
         </ul>
       </div>

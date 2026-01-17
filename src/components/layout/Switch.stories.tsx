@@ -17,9 +17,11 @@ type Story = StoryObj<typeof Switch>;
  * to learn how to use render functions.
  */
 
+function NormalSwitch() {
+  const [checked, setChecked] = React.useState(false);
+  return <Switch checked={checked} onClick={() => setChecked(!checked)} />;
+}
+
 export const Normal: Story = {
-  render: () => {
-    const [checked, setChecked] = React.useState(false);
-    return <Switch checked={checked} onClick={() => setChecked(!checked)} />;
-  },
+  render: () => <NormalSwitch />,
 };
