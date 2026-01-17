@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { audio_engines } from "../_lib/audio";
-import { sql } from "@/lib/db.ts";
+import { sql } from "@/lib/db";
 import { getUser } from "@/lib/userInterface";
 
 export async function GET(req) {

@@ -1,15 +1,18 @@
 import React from "react";
 
-export function useInput(def: string | undefined) {
-  let [value, setValue] = React.useState(def ?? "");
-  function set(e: React.ChangeEvent<HTMLInputElement>) {
-    let v = e?.target ? e?.target?.value : e;
-    if (v === null || v === undefined) v = "";
+export function useInput(
+  def: string | undefined,
+): [string, (e: React.ChangeEvent<HTMLInputElement>) => string] {
+  const [value, setValue] = React.useState(def ?? "");
+  function set(e: React.ChangeEvent<HTMLInputElement>): string {
+    let v: string;
     if (e?.target?.type === "checkbox") {
-      v = e?.target?.checked;
+      v = String(e?.target?.checked);
+    } else {
+      v = e?.target?.value ?? "";
     }
     setValue(v);
     return v;
   }
   return [value, set];
-} // Hook
+}

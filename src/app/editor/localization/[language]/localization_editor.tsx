@@ -3,7 +3,7 @@ import styles from "./[language].module.css";
 
 import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
-import { sql } from "@/lib/db.ts";
+import { sql } from "@/lib/db";
 import TextEdit from "./text_edit";
 
 export default function LocalizationEditor({ language, language2, course }) {

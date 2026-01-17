@@ -1,4 +1,8 @@
-import query from "./db";
+import { sql } from "./db";
+
+// Note: This file appears to be unused legacy code with MySQL-style queries.
+// The codebase now uses PostgreSQL with the `sql` template literal.
+const query = sql;
 
 export async function update_query(table_name, data) {
   let values = [];

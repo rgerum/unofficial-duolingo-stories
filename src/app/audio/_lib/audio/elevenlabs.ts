@@ -1,21 +1,32 @@
-import {put} from "@vercel/blob";
+import { put } from "@vercel/blob";
+import type {
+  AudioMark,
+  SynthesisResult,
+  Voice,
+  ElevenLabsEngine,
+  ElevenLabsSubscription,
+} from "./types";
 
 const WebSocket = require("ws");
 const { decode } = require("base64-arraybuffer");
 
 const model = "eleven_multilingual_v2";
 
+interface GenerateResult {
+  audioBuffers: Buffer[];
+  alignment: [string, number][];
+}
 
-async function generate(voiceId, text) {
+async function generate(voiceId: string, text: string): Promise<GenerateResult> {
     const wsUrl = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream-input?model_id=${model}&enable_ssml_parsing=false`;
     return new Promise((resolve, reject) => {
         const socket = new WebSocket(wsUrl);
 
-        let audioBuffers = [];
-        const alignment = [];
+        const audioBuffers: Buffer[] = [];
+        const alignment: [string, number][] = [];
 
         // 2. Initialize the connection by sending the BOS message
-        socket.onopen = function (event) {
+        socket.onopen = function (_event: Event) {
             const bosMessage = {
                 text: " ",
                 voice_settings: {
@@ -44,13 +55,16 @@ async function generate(voiceId, text) {
         };
 
         // 5. Handle server responses
-        socket.onmessage = function (event) {
-            const response = JSON.parse(event.data);
-
-            //console.log("Server response:", response);
+        socket.onmessage = function (event: { data: string }) {
+            const response = JSON.parse(event.data) as {
+                alignment?: { chars: string[]; charStartTimesMs: number[] };
+                audio?: string;
+                isFinal?: boolean;
+                normalizedAlignment?: unknown;
+            };
 
             if (response.alignment) {
-                for (let i in response.alignment.chars) {
+                for (let i = 0; i < response.alignment.chars.length; i++) {
                     alignment.push([
                         response.alignment.chars[i],
                         response.alignment.charStartTimesMs[i],
@@ -62,29 +76,22 @@ async function generate(voiceId, text) {
                 // decode and handle the audio data (e.g., play it)
                 const audioChunk = decode(response.audio);
                 audioBuffers.push(Buffer.from(audioChunk));
-
-                //console.log("Received audio chunk");
-            } else {
-                //console.log("No audio data in the response");
             }
 
             if (response.isFinal) {
                 // the generation is complete
                 resolve({ audioBuffers: audioBuffers, alignment: alignment });
             }
-
-            if (response.normalizedAlignment) {
-                // use the alignment info if needed
-            }
         };
 
         // Handle errors
-        socket.onerror = function (error) {
+        socket.onerror = function (error: Error) {
             console.error(`WebSocket Error: ${error}`);
+            reject(error);
         };
 
         // Handle socket closing
-        socket.onclose = function (event) {
+        socket.onclose = function (event: { wasClean: boolean; code: number; reason: string }) {
             if (event.wasClean) {
                 console.info(
                     `Connection closed cleanly, code=${event.code}, reason=${event.reason}`,
@@ -95,27 +102,29 @@ async function generate(voiceId, text) {
         };
     });
 }
-async function synthesizeSpeechElevenLabs(filename, voice_id, text) {
+async function synthesizeSpeechElevenLabs(
+    filename: string | undefined,
+    voice_id: string,
+    text: string,
+): Promise<SynthesisResult> {
     console.log("synthesizeSpeechElevenLabs", filename, voice_id, text);
     const response = await generate(voice_id, text);
     const completeAudio = Buffer.concat(response.audioBuffers);
 
-    let content;
-    if(filename) {
+    let content: string | undefined;
+    if (filename) {
         await put(filename, completeAudio, { access: "public", addRandomSuffix: false });
-        //fs.writeFileSync(filename, completeAudio);
-    }
-    else
+    } else {
         content = completeAudio.toString('base64');
+    }
     console.log(response.alignment);
-    let marks = [];
+    const marks: AudioMark[] = [];
     let word = "";
     let word_start = 0;
-    let last_time = 0;
     let word_start_time = 0;
     for (let i = 0; i < response.alignment.length; i++) {
-        let [c, t] = response.alignment[i];
-        let match = c.match(/[ .,!?:;]/);
+        const [c, t] = response.alignment[i];
+        const match = c.match(/[ .,!?:;]/);
         if (match) {
             if (word.length > 0) {
                 marks.push({
@@ -131,7 +140,6 @@ async function synthesizeSpeechElevenLabs(filename, voice_id, text) {
             word_start_time = t;
         } else {
             word += c;
-            last_time = t;
         }
     }
     if (word.length > 0) {
@@ -148,51 +156,30 @@ async function synthesizeSpeechElevenLabs(filename, voice_id, text) {
         output_file: filename,
         content: content,
         marks: marks
-    }
+    };
 }
 
-async function getUserInfo() {
+async function getUserInfo(): Promise<ElevenLabsSubscription> {
     const options = {
         method: "GET",
-        headers: { "xi-api-key": process.env.ELEVENLABS_APIKEY },
+        headers: { "xi-api-key": process.env.ELEVENLABS_APIKEY! },
     };
 
-    let response = await fetch(
+    const response = await fetch(
         "https://api.elevenlabs.io/v1/user/subscription",
         options,
     );
-    response = await response.json();
-    return response;
-    /*
-    {
-    tier: 'free',
-    character_count: 1175,
-    character_limit: 10000,
-    can_extend_character_limit: false,
-    allowed_to_extend_character_limit: false,
-    next_character_count_reset_unix: 1707497886,
-    voice_limit: 3,
-    max_voice_add_edits: 54,
-    voice_add_edit_counter: 0,
-    professional_voice_limit: 0,
-    can_extend_voice_limit: false,
-    can_use_instant_voice_cloning: false,
-    can_use_professional_voice_cloning: false,
-    currency: null,
-    status: 'free',
-    next_invoice: null,
-    has_open_invoices: false
-  }
-     */
+    return await response.json() as ElevenLabsSubscription;
 }
-async function isValidVoice(voiceId) {
-    const options = { method: "GET", headers: { "xi-api-key": process.env.ELEVENLABS_APIKEY } };
+
+async function isValidVoice(voiceId: string): Promise<boolean> {
+    const options = { method: "GET", headers: { "xi-api-key": process.env.ELEVENLABS_APIKEY! } };
     try {
-        let response = await fetch(
+        const response = await fetch(
             `https://api.elevenlabs.io/v1/voices/${voiceId}`,
             options,
         );
-        let voice = await response.json();
+        const voice = await response.json() as { voice_id?: string };
         console.log(voice);
         return voice.voice_id === voiceId;
     } catch (e) {
@@ -200,25 +187,33 @@ async function isValidVoice(voiceId) {
     }
 }
 
-async function getVoices() {
-    const options = { method: "GET", headers: { "xi-api-key": process.env.ELEVENLABS_APIKEY } };
+async function getVoices(): Promise<Voice[]> {
+    const options = { method: "GET", headers: { "xi-api-key": process.env.ELEVENLABS_APIKEY! } };
 
     try {
-        let response = await fetch("https://api.elevenlabs.io/v1/voices", options);
-        response = await response.json();
-        //console.log(response);
-        for (let voice of response.voices) {
-            console.log(voice.voice_id, voice.name, voice.description, voice.labels);
-        }
+        const response = await fetch("https://api.elevenlabs.io/v1/voices", options);
+        const data = await response.json() as { voices: Array<{ voice_id: string; name: string; labels?: { language?: string } }> };
+        // ElevenLabs doesn't return voices in standard format, return empty for now
+        return data.voices.map(voice => ({
+            language: voice.labels?.language ?? "en",
+            locale: voice.labels?.language ?? "en-US",
+            name: voice.voice_id,
+            gender: "MALE" as const,
+            type: "NEURAL" as const,
+            service: "ElevenLabs",
+        }));
     } catch (e) {
         console.log(e);
+        return [];
     }
 }
 
-export default {
+const elevenlabsEngine: ElevenLabsEngine = {
     name: "elevenlabs",
     synthesizeSpeech: synthesizeSpeechElevenLabs,
     getVoices: getVoices,
     isValidVoice: isValidVoice,
     getUserInfo: getUserInfo,
 };
+
+export default elevenlabsEngine;

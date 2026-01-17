@@ -1,4 +1,4 @@
-import { sql } from "./db.ts";
+import { sql } from "./db";
 
 /** @return { import("next-auth/adapters").Adapter } */
 export default function MyAdapter() {

@@ -1,11 +1,13 @@
-//import fetch from "node-fetch";
-//import { Headers } from "node-fetch";
-import fs from "fs";
 import { put } from "@vercel/blob";
+import type { SynthesisResult, Voice, TTSEngine } from "./types";
 
 const apiKey = process.env.GITHUB_APIKEY;
 
-export async function synthesizeSpeechGoogle(filename, voice_id, text) {
+export async function synthesizeSpeechGoogle(
+  filename: string | undefined,
+  voice_id: string,
+  text: string,
+): Promise<SynthesisResult> {
   //async function getAudio(apiKey, voiceLang, voiceName, ssml) {
   let [lang, region, voiceName] = voice_id.split("-", 2);
 
@@ -78,16 +80,22 @@ export async function synthesizeSpeechGoogle(filename, voice_id, text) {
   }
 }
 
-function add_marks(text) {
+interface MarkData {
+  type: "word";
+  start: number;
+  end: number;
+  value: string;
+}
+
+function add_marks(text: string): [string, MarkData[]] {
   const regexSplitToken = /(<[^>]+>)|([^\s<>]+)|(\s*)/g;
   const regexCombineWhitespace = / +/g;
   text = text.replace(regexCombineWhitespace, " ").trim();
   let text2 = "";
   let i = 0;
   const splitTextTokens = text.matchAll(regexSplitToken);
-  // {"time":1025,"type":"word","start":14,"end":17,"value":"moe"}
-  let marks = [];
-  for (const [match, tag, word, space] of splitTextTokens) {
+  const marks: MarkData[] = [];
+  for (const [, tag, word, space] of splitTextTokens) {
     if (tag) {
       text2 += tag;
     } else if (word) {
@@ -102,13 +110,15 @@ function add_marks(text) {
   return [text2, marks];
 }
 
-async function getVoices() {
+interface GoogleVoice {
+  languageCodes: string[];
+  name: string;
+  ssmlGender: "MALE" | "FEMALE";
+}
+
+async function getVoices(): Promise<Voice[]> {
   const headers = new Headers();
   headers.append("Content-Type", "application/json; charset=utf-8");
-
-  const request = {
-    languageCode: "en-US",
-  };
 
   const response = await fetch(
     `https://texttospeech.googleapis.com/v1/voices?key=${apiKey}`,
@@ -119,26 +129,26 @@ async function getVoices() {
   );
 
   if (response.ok) {
-    const { voices } = await response.json();
-    let voices_result = [];
-    for (let voice of voices) {
+    const { voices } = await response.json() as { voices: GoogleVoice[] };
+    const voices_result: Voice[] = [];
+    for (const voice of voices) {
       voices_result.push({
         language: voice.languageCodes[0].split("-")[0],
         locale: voice.languageCodes[0],
         name: voice.name,
         gender: voice.ssmlGender,
-        type: voice.name.indexOf("Neural") ? "NEURAL" : "NORMAL",
+        type: voice.name.indexOf("Neural") !== -1 ? "NEURAL" : "NORMAL",
         service: "Google TTS",
       });
     }
     return voices_result;
-    // do something with voices
   } else {
     console.error(`Error: ${response.status} - ${response.statusText}`);
+    return [];
   }
 }
 
-async function isValidVoice(voice) {
+function isValidVoice(voice: string): boolean {
   return (
     voice.indexOf("Wavenet") !== -1 ||
     voice.indexOf("Standard") !== -1 ||
@@ -146,11 +156,11 @@ async function isValidVoice(voice) {
   );
 }
 
-export default {
+const googleEngine: TTSEngine = {
   name: "google",
   synthesizeSpeech: synthesizeSpeechGoogle,
   getVoices: getVoices,
   isValidVoice: isValidVoice,
 };
-//synthesizeSpeech("test.mp3", voiceName, ssml);
-//getVoices();
+
+export default googleEngine;

@@ -1,7 +1,7 @@
 import React from "react";
 import ResetPassword from "./reset_pw";
 import { phpbb_hash } from "@/lib/auth/hash_functions2";
-import { sql } from "@/lib/db.ts";
+import { sql } from "@/lib/db";
 
 function isValidUUIDv4(uuid) {
   const uuidV4Regex =

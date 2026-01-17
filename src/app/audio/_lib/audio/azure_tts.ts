@@ -1,8 +1,14 @@
-const sdk = require("microsoft-cognitiveservices-speech-sdk");
-const fs = require("fs");
+import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+import * as fs from "fs";
 import { put } from "@vercel/blob";
+import type {
+  AudioMark,
+  SynthesisResult,
+  Voice,
+  TTSEngine,
+} from "./types";
 
-function get_raw(text) {
+function get_raw(text: string): string {
   text = text.replace(/ +/g, " ");
   let text2 = "";
   for (let m of text.matchAll(/(<[^>]+>)|(\w+)|([^\w<>]*)/g)) {
@@ -16,11 +22,16 @@ function get_raw(text) {
   return text2;
 }
 
-async function synthesizeSpeechAzure(filename, voice_id, text, file) {
+async function synthesizeSpeechAzure(
+  filename: string | undefined,
+  voice_id: string,
+  text: string,
+  file?: string,
+): Promise<SynthesisResult> {
   return new Promise((resolve, reject) => {
     if (file) text = fs.readFileSync(file, "utf8");
     const speechConfig = sdk.SpeechConfig.fromSubscription(
-      process.env.AZURE_APIKEY,
+      process.env.AZURE_APIKEY!,
       "westeurope",
     );
     const audioConfig = sdk.AudioConfig.fromAudioFileOutput(
@@ -28,21 +39,19 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
     );
     speechConfig.speechSynthesisOutputFormat = 5;
     // create the speech synthesizer.
-    let synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+    let synthesizer: sdk.SpeechSynthesizer | undefined = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
 
     let last_pos = 0;
-    let marks = [];
+    const marks: AudioMark[] = [];
 
-    synthesizer.wordBoundary = (w, v) => {
-      //console.log(v);
-      //console.log(text2.substring(last_pos))//
-      last_pos = text2.substring(last_pos).search(v.privText) + last_pos;
-      let data = {
-        time: Math.round(v.privAudioOffset / 10000),
+    synthesizer.wordBoundary = (_w: unknown, v: sdk.SpeechSynthesisWordBoundaryEventArgs) => {
+      last_pos = text2.substring(last_pos).search(v.text) + last_pos;
+      const data: AudioMark = {
+        time: Math.round(v.audioOffset / 10000),
         type: "word",
-        start: v.privTextOffset, //last_pos,
-        end: v.privTextOffset + v.privWordLength,
-        value: v.privText,
+        start: v.textOffset,
+        end: v.textOffset + v.wordLength,
+        value: v.text,
       };
       marks.push(data);
     };
@@ -56,18 +65,15 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
     let text2 = get_raw(text);
     synthesizer.speakSsmlAsync(
       text,
-      async function (result) {
+      async function (result: sdk.SpeechSynthesisResult) {
         if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-          let content;
-          //if (filename === undefined)
-          content = Buffer.from(result.audioData).toString("base64");
-          let output = {
+          const content = Buffer.from(result.audioData).toString("base64");
+          const output: SynthesisResult = {
             output_file: filename,
             marks: marks,
             content: content,
           };
           if (filename !== undefined) {
-            //let data = fs.readFileSync(filename);
             await put(filename, Buffer.from(result.audioData), {
               access: "public",
               addRandomSuffix: false,
@@ -82,12 +88,12 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
           );
           reject(result.errorDetails);
         }
-        synthesizer.close();
+        synthesizer?.close();
         synthesizer = undefined;
       },
-      function (err) {
+      function (err: string) {
         console.trace("err - " + err);
-        synthesizer.close();
+        synthesizer?.close();
         synthesizer = undefined;
         reject(err);
       },
@@ -95,18 +101,18 @@ async function synthesizeSpeechAzure(filename, voice_id, text, file) {
   });
 }
 
-async function getVoices() {
+async function getVoices(): Promise<Voice[]> {
   const speechConfig = sdk.SpeechConfig.fromSubscription(
-    process.env.AZURE_APIKEY,
+    process.env.AZURE_APIKEY!,
     "westeurope",
   );
 
   // create the speech synthesizer.
-  let synthesizer = new sdk.SpeechSynthesizer(speechConfig);
+  const synthesizer = new sdk.SpeechSynthesizer(speechConfig);
 
-  let voices = await synthesizer.getVoicesAsync();
-  let result_voices = [];
-  for (let voice of voices.voices) {
+  const voices = await synthesizer.getVoicesAsync();
+  const result_voices: Voice[] = [];
+  for (const voice of voices.voices) {
     result_voices.push({
       language: voice.locale.split("-")[0],
       locale: voice.locale,
@@ -119,15 +125,15 @@ async function getVoices() {
   return result_voices;
 }
 
-async function isValidVoice(voice) {
+function isValidVoice(voice: string): boolean {
   return voice.indexOf("-") !== -1;
 }
 
-export default {
+const azureEngine: TTSEngine = {
   name: "azure",
   synthesizeSpeech: synthesizeSpeechAzure,
   getVoices: getVoices,
   isValidVoice: isValidVoice,
 };
 
-//getVoices()
+export default azureEngine;
