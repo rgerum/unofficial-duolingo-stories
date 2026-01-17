@@ -7,6 +7,8 @@ import { EditorHook } from "../editor_hooks";
 import HintLineContent from "../text_lines/line_hints";
 import { EditorContext, StoryContext } from "../story";
 import QuestionPrompt from "./question_prompt";
+import type { StoryElementMultipleChoice } from "@/components/editor/story/syntax_parser_types";
+import type { ButtonState } from "../types";
 
 /*
 The MULTIPLE_CHOICE question.
@@ -23,11 +25,17 @@ It also uses the multiple choice component. The learner has to find out how to c
 SELECT_PHRASE question, but here the learner does not hear the hidden part of the sentence.
  */
 
+interface QuestionMultipleChoiceProps {
+  setUnhide: (position: number) => void;
+  progress: number;
+  element: StoryElementMultipleChoice;
+}
+
 export default function QuestionMultipleChoice({
   setUnhide,
   progress,
   element,
-}) {
+}: QuestionMultipleChoiceProps) {
   const controls = React.useContext(StoryContext);
   const editor = React.useContext(EditorContext);
 
@@ -40,51 +48,51 @@ export default function QuestionMultipleChoice({
   }
 
   useEffect(() => {
-    if (element.trackingProperties["challenge_type"] === "multiple-choice") {
+    if (element.trackingProperties.challenge_type === "multiple-choice") {
       if (active1) {
-        controls.setProgressStep(0.5);
+        controls?.setProgressStep(0.5);
       }
       if (active) {
-        controls.setProgressStep(0.5);
+        controls?.setProgressStep(0.5);
         if (!done) {
-          controls.block_next();
+          controls?.block_next();
         }
       }
     } else {
       if (active && !done) {
-        controls.block_next();
+        controls?.block_next();
       }
     }
-  }, [active1, active, done]);
+  }, [active1, active, done, controls, element.trackingProperties.challenge_type]);
 
   // whether this part is already shown
   let hidden2 = !active ? styles_common.hidden : "";
 
   // get button states and a click function
-  let [buttonState, click] = useChoiceButtons(
+  const [buttonState, click] = useChoiceButtons(
     element.answers.length,
     element.correctAnswerIndex,
     () => {
       if (editor) return;
       setUnhide(-1);
       setDone(true);
-      controls.right();
+      controls?.right();
     },
-    controls.wrong,
+    () => controls?.wrong(),
     active && !done,
   );
 
   // connect the editor functions
-  let onClick;
+  let onClick: (() => void) | undefined;
   [hidden2, onClick] = EditorHook(hidden2, element.editor, editor);
 
-  function get_color(state) {
+  function get_color(state: ButtonState): string {
     if (state === "right") return styles.right;
     if (state === "false") return styles.false;
     if (state === "done") return styles.done;
     return styles.default;
   }
-  function get_color_text(state) {
+  function get_color_text(state: ButtonState): string {
     if (state === "right") return styles_common.color_base;
     if (state === "false") return styles_common.color_disabled;
     if (state === "done") return styles_common.color_disabled;

@@ -5,6 +5,8 @@ import styles_common from "../common.module.css";
 import { EditorHook } from "../editor_hooks";
 import useChoiceButtons from "./questions_useChoiceButtons";
 import { EditorContext, StoryContext } from "../story";
+import type { StoryElementSelectPhrase } from "@/components/editor/story/syntax_parser_types";
+import type { ButtonState } from "../types";
 
 /*
 The SELECT_PHRASE question.
@@ -20,7 +22,13 @@ Speaker507: Hoy   tengo  [un~partido~importante].
 - una parte imponente
  */
 
-export default function QuestionSelectPhrase({ setUnhide, progress, element }) {
+interface QuestionSelectPhraseProps {
+  setUnhide?: (position: number) => void;
+  progress: number;
+  element: StoryElementSelectPhrase;
+}
+
+export default function QuestionSelectPhrase({ setUnhide, progress, element }: QuestionSelectPhraseProps) {
   const controls = React.useContext(StoryContext);
   const editor = React.useContext(EditorContext);
 
@@ -30,31 +38,31 @@ export default function QuestionSelectPhrase({ setUnhide, progress, element }) {
   let hidden2 = !active ? styles_common.hidden : "";
 
   useEffect(() => {
-    if (active && !done && controls?.block_next) {
-      controls.block_next();
+    if (active && !done) {
+      controls?.block_next();
     }
-  }, [active, done]);
+  }, [active, done, controls]);
 
   // connect the editor functions
-  let onClick;
+  let onClick: (() => void) | undefined;
   [hidden2, onClick] = EditorHook(hidden2, element.editor, editor);
 
   // get button states and a click function
-  let [buttonState, click] = useChoiceButtons(
+  const [buttonState, click] = useChoiceButtons(
     element.answers.length,
     element.correctAnswerIndex,
     () => {
       if (!editor) {
         if (setUnhide) setUnhide(-1);
         setDone(true);
-        if (controls?.right) controls?.right();
+        controls?.right();
       }
     },
-    controls?.wrong || (() => {}),
+    () => controls?.wrong(),
     active && !done,
   );
 
-  function get_color(state) {
+  function get_color(state: ButtonState): string {
     if (state === "right") return styles.right;
     if (state === "false") return styles.false;
     if (state === "done") return styles.done;
@@ -69,25 +77,26 @@ export default function QuestionSelectPhrase({ setUnhide, progress, element }) {
     >
       <div>
         {/* display the buttons */}
-        {element.answers.map((answer, index) => (
-          /* one answer button */
-          <button
-            key={index}
-            className={
-              styles.answer_button +
-              " " +
-              get_color(buttonState[index]) +
-              " " +
-              element.lang
-            }
-            data-cy="select-button"
-            onClick={() => click(index)}
-          >
-            {answer.text
-              ? answer.text.replace(/\{.*?}/g, "")
-              : answer.replace(/\{.*?}/g, "")}
-          </button>
-        ))}
+        {element.answers.map((answer, index: number) => {
+          const answerText = typeof answer === "string" ? answer : answer.text;
+          return (
+            /* one answer button */
+            <button
+              key={index}
+              className={
+                styles.answer_button +
+                " " +
+                get_color(buttonState[index]) +
+                " " +
+                element.lang
+              }
+              data-cy="select-button"
+              onClick={() => click(index)}
+            >
+              {answerText.replace(/\{.*?}/g, "")}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

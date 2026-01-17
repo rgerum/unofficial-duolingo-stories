@@ -6,6 +6,8 @@ import { shuffle } from "../includes";
 import { EditorHook } from "../editor_hooks";
 import { EditorContext, StoryContext } from "../story";
 import QuestionPrompt from "./question_prompt";
+import type { StoryElementMatch } from "@/components/editor/story/syntax_parser_types";
+import type { MatchClickedState } from "../types";
 
 /*
 The MATCH question.
@@ -20,7 +22,12 @@ It consists of two columns of buttons. The learner needs to find the right pars.
 - la <> the
  */
 
-export default function QuestionMatch({ progress, element }) {
+interface QuestionMatchProps {
+  progress: number;
+  element: StoryElementMatch;
+}
+
+export default function QuestionMatch({ progress, element }: QuestionMatchProps) {
   const controls = React.useContext(StoryContext);
   const editor = React.useContext(EditorContext);
 
@@ -36,92 +43,95 @@ export default function QuestionMatch({ progress, element }) {
   // whether this part is already shown
   let hidden2 = !active ? styles_common.hidden : "";
 
-  let [orderA, setOrderA] = useState([]);
-  let [orderB, setOrderB] = useState([]);
-  let [clicked, setClicked] = useState(undefined);
-  let [last_clicked, setLastClicked] = useState(undefined);
+  const [orderA, setOrderA] = useState<number[]>([]);
+  const [orderB, setOrderB] = useState<number[]>([]);
+  const [clicked, setClicked] = useState<MatchClickedState[]>([]);
+  const [last_clicked, setLastClicked] = useState<number | undefined>(undefined);
 
   let order = orderB.concat(orderA);
 
   // when order is not initialized or when the number of elements changed in the editor
-  if (orderA === undefined || orderA.length !== element.fallbackHints.length) {
-    let clicked = [];
-    let orderA = [];
-    let orderB = [];
-    for (let i in element.fallbackHints) {
-      orderA.push(parseInt(i));
-      orderB.push(parseInt(i));
-      clicked.push(undefined);
-      clicked.push(undefined);
+  if (orderA.length !== element.fallbackHints.length) {
+    const newClicked: MatchClickedState[] = [];
+    const newOrderA: number[] = [];
+    const newOrderB: number[] = [];
+    for (let i = 0; i < element.fallbackHints.length; i++) {
+      newOrderA.push(i);
+      newOrderB.push(i);
+      newClicked.push(undefined);
+      newClicked.push(undefined);
     }
-    shuffle(orderA);
-    shuffle(orderB);
-    setOrderA(orderA);
-    setOrderB(orderB);
-    setClicked(clicked);
+    shuffle(newOrderA);
+    shuffle(newOrderB);
+    setOrderA(newOrderA);
+    setOrderB(newOrderB);
+    setClicked(newClicked);
     setLastClicked(undefined);
   }
 
-  let click = React.useCallback(
-    (index) => {
-      index = parseInt(index);
+  const click = React.useCallback(
+    (index: number | string) => {
+      const idx = typeof index === "string" ? parseInt(index) : index;
       // do not allow to click on finished words again
-      if (clicked[index] === "right") return;
+      if (clicked[idx] === "right") return;
+
+      const newClicked = [...clicked];
+
       // select the word
       if (
         last_clicked === undefined ||
-        index >= orderB.length === last_clicked >= orderB.length
+        (idx >= orderB.length) === (last_clicked >= orderB.length)
       ) {
-        clicked[index] = "selected";
-        if (last_clicked !== undefined) clicked[last_clicked] = undefined;
-        setLastClicked(index);
-        setClicked(clicked);
+        newClicked[idx] = "selected";
+        if (last_clicked !== undefined) newClicked[last_clicked] = undefined;
+        setLastClicked(idx);
+        setClicked(newClicked);
       }
       // deselect the word
-      else if (last_clicked === index) {
+      else if (last_clicked === idx) {
         setLastClicked(undefined);
-        clicked[index] = undefined;
-        setClicked(clicked);
+        newClicked[idx] = undefined;
+        setClicked(newClicked);
       }
       // the pair is right
-      else if (order[last_clicked] === order[index]) {
-        clicked[index] = "right";
-        clicked[last_clicked] = "right";
+      else if (order[last_clicked] === order[idx]) {
+        newClicked[idx] = "right";
+        newClicked[last_clicked] = "right";
         setLastClicked(undefined);
-        setClicked(clicked);
-        let right_count = clicked
-          .map((item) => item === "right")
-          .reduce((a, b) => a + b, 0);
-        if (right_count >= clicked.length) {
+        setClicked(newClicked);
+        const right_count = newClicked.filter((item) => item === "right").length;
+        if (right_count >= newClicked.length) {
           setDone(true);
-          if (controls?.right) controls.right();
+          controls?.right();
         }
       }
       // the pair is wrong
-      else if (order[last_clicked] !== order[index]) {
-        let last_clicked_old = last_clicked;
-        clicked[index] = "wrong";
-        clicked[last_clicked_old] = "wrong";
+      else if (order[last_clicked] !== order[idx]) {
+        const last_clicked_old = last_clicked;
+        newClicked[idx] = "wrong";
+        newClicked[last_clicked_old] = "wrong";
         setLastClicked(undefined);
-        setClicked(clicked);
+        setClicked(newClicked);
         setTimeout(() => {
-          if (clicked[index] === "wrong") clicked[index] = undefined;
-          if (clicked[last_clicked_old] === "wrong")
-            clicked[last_clicked_old] = undefined;
-          setClicked(clicked);
+          setClicked((prev) => {
+            const updated = [...prev];
+            if (updated[idx] === "wrong") updated[idx] = undefined;
+            if (updated[last_clicked_old] === "wrong") updated[last_clicked_old] = undefined;
+            return updated;
+          });
         }, 1500);
       }
     },
     [clicked, last_clicked, orderB, setLastClicked, setClicked, setDone, order, controls],
   );
 
-  let key_event_handler = React.useCallback(
-    (e) => {
+  const key_event_handler = React.useCallback(
+    (e: KeyboardEvent) => {
       let value = parseInt(e.key) - 1;
       if (value === -1) value = 9;
       if (value < orderA.length + orderB.length) click(value);
     },
-    [click],
+    [click, orderA.length, orderB.length],
   );
   React.useEffect(() => {
     if (active) {
@@ -130,10 +140,10 @@ export default function QuestionMatch({ progress, element }) {
     }
   }, [key_event_handler, active]);
 
-  let onClick;
+  let onClick: (() => void) | undefined;
   [hidden2, onClick] = EditorHook(hidden2, element.editor, editor);
 
-  function get_color(state) {
+  function get_color(state: MatchClickedState): string {
     if (state === "right") return styles.right;
     if (state === "wrong") return styles.wrong;
     if (state === "selected") return styles.selected;
@@ -149,7 +159,7 @@ export default function QuestionMatch({ progress, element }) {
       <QuestionPrompt question={element.prompt} lang={element.lang_question} />
       <div className={styles.match_container}>
         <div className="match_col">
-          {orderB.map((phrase, index) => (
+          {orderB.map((phrase: number, index: number) => (
             <div key={index} className={styles.test + " " + element.lang}>
               <button
                 key={index}
@@ -163,15 +173,13 @@ export default function QuestionMatch({ progress, element }) {
                 data-cy="col1-button"
                 onClick={() => click(index)}
               >
-                {element.fallbackHints[phrase]
-                  ? element.fallbackHints[phrase][["phrase", "translation"][1]]
-                  : ""}
+                {element.fallbackHints[phrase]?.translation ?? ""}
               </button>
             </div>
           ))}
         </div>
         <div className="match_col">
-          {orderA.map((phrase, index) => (
+          {orderA.map((phrase: number, index: number) => (
             <div
               key={index}
               className={styles.test + " " + element.lang_question}
@@ -188,9 +196,7 @@ export default function QuestionMatch({ progress, element }) {
                 data-cy="col2-button"
                 onClick={() => click(index + orderB.length)}
               >
-                {element.fallbackHints[phrase]
-                  ? element.fallbackHints[phrase][["phrase", "translation"][0]]
-                  : ""}
+                {element.fallbackHints[phrase]?.phrase ?? ""}
               </button>
             </div>
           ))}

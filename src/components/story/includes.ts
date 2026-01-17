@@ -1,9 +1,17 @@
 /**
  * Shuffles array in place. ES6 version
- * @param {Array} a items An array containing the items.
  */
+
+// Extend Math interface for seeded random
+declare global {
+  interface Math {
+    set_seed: (seed: number) => void;
+    random_seeded: () => number;
+  }
+}
+
 let random_seed = 1234;
-Math.set_seed = function (seed) {
+Math.set_seed = function (seed: number) {
   random_seed = seed;
 };
 Math.random_seeded = function () {
@@ -11,7 +19,7 @@ Math.random_seeded = function () {
   return random_seed - Math.floor(random_seed);
 };
 
-export function shuffle(a) {
+export function shuffle<T>(a: T[]): T[] {
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random_seeded() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];

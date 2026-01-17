@@ -6,6 +6,8 @@ import { EditorHook } from "../editor_hooks";
 import useChoiceButtons from "./questions_useChoiceButtons";
 import { EditorContext, StoryContext } from "../story";
 import QuestionPrompt from "./question_prompt";
+import type { StoryElementPointToPhrase } from "@/components/editor/story/syntax_parser_types";
+import type { ButtonState } from "../types";
 
 /*
 The POINT_TO_PHRASE question
@@ -19,7 +21,12 @@ Speaker560: (Perdón), mi amor, (estoy) (+cansada). ¡(Trabajo) mucho!
 
  */
 
-export default function QuestionPointToPhrase({ progress, element }) {
+interface QuestionPointToPhraseProps {
+  progress: number;
+  element: StoryElementPointToPhrase;
+}
+
+export default function QuestionPointToPhrase({ progress, element }: QuestionPointToPhraseProps) {
   const controls = React.useContext(StoryContext);
   const editor = React.useContext(EditorContext);
 
@@ -31,40 +38,41 @@ export default function QuestionPointToPhrase({ progress, element }) {
 
   useEffect(() => {
     if (active1) {
-      controls.setProgressStep(0.5);
+      controls?.setProgressStep(0.5);
     }
     if (active2) {
-      controls.setProgressStep(0.5);
-      if (!done) controls.block_next();
+      controls?.setProgressStep(0.5);
+      if (!done) controls?.block_next();
     }
-  }, [active1, active2, done]);
+  }, [active1, active2, done, controls]);
 
   // connect the editor functions
-  let onClick;
+  let onClick: (() => void) | undefined;
   [hidden, onClick] = EditorHook(hidden, element.editor, editor);
 
   // find which parts of the text should be converted to buttons
-  let button_indices = {};
-  for (let [index, part] of Object.entries(element.transcriptParts))
-    if (part.selectable)
+  const button_indices: Record<number, number> = {};
+  for (const [index, part] of element.transcriptParts.entries()) {
+    if (part.selectable) {
       button_indices[index] = Object.keys(button_indices).length;
+    }
+  }
 
   // get button states and a click function
-  let [buttonState, click] = useChoiceButtons(
-    element.transcriptParts.length,
+  const [buttonState, click] = useChoiceButtons(
+    element.transcriptParts.filter((p) => p.selectable).length,
     element.correctAnswerIndex,
     () => {
       if (!editor) {
-        //props.setUnhide(props.element.trackingProperties.line_index);
-        controls.right();
+        controls?.right();
         setDone(true);
       }
     },
-    controls.wrong,
+    () => controls?.wrong(),
     active2 && !done,
   );
 
-  function get_color(state) {
+  function get_color(state: ButtonState): string {
     if (state === "right") return styles.right;
     if (state === "false") return styles.false;
     if (state === "done") return styles.done;

@@ -1,21 +1,26 @@
-import React, { useRef } from "react";
+import React, { useRef, ReactNode } from "react";
 import styles from "./line_hints.module.css";
 
 import { EditorContext } from "../story";
+import type { ContentWithHints, HideRange } from "@/components/editor/story/syntax_parser_types";
 
-function splitTextTokens(text, keep_tilde = true) {
+function splitTextTokens(text: string, keep_tilde = true): string[] {
   if (!text) return [];
   if (keep_tilde)
-    //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
     return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}]+)/);
-  //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
   else return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}~]+)/);
 }
 
-function Tooltip({ className, children }) {
-  const ref = useRef();
+interface TooltipProps {
+  className: string;
+  children: ReactNode;
+}
+
+function Tooltip({ className, children }: TooltipProps) {
+  const ref = useRef<HTMLSpanElement>(null);
   function onMouseEnter() {
-    let tooltipElement = ref.current.children[1];
+    if (!ref.current) return;
+    const tooltipElement = ref.current.children[1] as HTMLElement;
 
     // Calculate the position of the tooltip
     const tooltipRect = tooltipElement.getBoundingClientRect();
@@ -44,58 +49,54 @@ function Tooltip({ className, children }) {
   );
 }
 
+interface HintLineContentProps {
+  content: ContentWithHints;
+  audioRange?: number;
+  hideRangesForChallenge?: HideRange[];
+  unhide?: number;
+}
+
 export default function HintLineContent({
   content,
   audioRange,
-  hideRangesForChallenge,
+  hideRangesForChallenge: hideRangesProp,
   unhide,
-}) {
+}: HintLineContentProps) {
   const editor = React.useContext(EditorContext);
 
   if (!content) return <>Empty</>;
-  hideRangesForChallenge = hideRangesForChallenge
-    ? hideRangesForChallenge[0]
-    : hideRangesForChallenge;
 
-  if (hideRangesForChallenge) {
-    if (unhide === -1) hideRangesForChallenge = undefined;
-    else if (unhide > hideRangesForChallenge.start)
-      hideRangesForChallenge = {
+  let hideRange: HideRange | undefined = hideRangesProp?.[0];
+
+  if (hideRange) {
+    if (unhide === -1) hideRange = undefined;
+    else if (unhide !== undefined && unhide > hideRange.start)
+      hideRange = {
         start: unhide,
-        end: hideRangesForChallenge.end,
+        end: hideRange.end,
       };
   }
 
-  let show_trans = editor?.show_trans;
-  //var [show_trans, set_show_trans] = useState(0); //TODO window.editorShowTranslations);
-  //useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); })
+  const show_trans = editor?.show_trans;
 
-  function getOverlap(start1, end1, start2, end2) {
+  function getOverlap(start1: number, end1: number, start2?: number, end2?: number): boolean {
     if (start2 === end2) return false;
     if (start2 === undefined || end2 === undefined) return false;
     if (start1 <= start2 && start2 < end1) return true;
     return start2 <= start1 && start1 < end2;
   }
 
-  function addWord2(start, end) {
-    let is_hidden =
-      hideRangesForChallenge !== undefined &&
-      getOverlap(
-        start,
-        end,
-        hideRangesForChallenge.start,
-        hideRangesForChallenge.end,
-      )
+  function addWord2(start: number, end: number): React.ReactElement[] {
+    let is_hidden: boolean | string | undefined =
+      hideRange !== undefined &&
+      getOverlap(start, end, hideRange.start, hideRange.end)
         ? true
         : undefined;
     if (is_hidden && editor) is_hidden = "editor";
-    let style = {};
-    //TODO
-    //if(is_hidden && window.view)
-    //    style.color = "#afafaf";
-    if (audioRange < start) style.opacity = 0.5;
+    const style: React.CSSProperties = {};
+    if (audioRange !== undefined && audioRange < start) style.opacity = 0.5;
 
-    let returns = [
+    const returns: React.ReactElement[] = [
       <span
         className={styles.word}
         key={start + " " + end}
@@ -107,47 +108,38 @@ export default function HintLineContent({
     ];
     if (content.text.substring(start, end).indexOf("\n") !== -1)
       returns.push(<br key={start + " " + end + " br"} />);
-    // add the span and optionally add a line break
     return returns;
   }
 
-  function addSplitWord(start, end) {
-    let parts = splitTextTokens(content.text.substring(start, end));
+  function addSplitWord(start: number, end: number): React.ReactElement[] {
+    const parts = splitTextTokens(content.text.substring(start, end));
     if (parts[0] === "") parts.splice(0, 1);
     if (parts[parts.length - 1] === "") parts.pop();
 
     if (parts.length === 1) {
       return addWord2(start, end);
-      //addWord(dom, start, end);
-      //return dom;
     }
-    let elements = [];
-    for (let p of parts) {
-      for (let w of addWord2(start, start + p.length)) elements.push(w);
-      start += p.length;
+    const elements: React.ReactElement[] = [];
+    let pos = start;
+    for (const p of parts) {
+      for (const w of addWord2(pos, pos + p.length)) elements.push(w);
+      pos += p.length;
     }
-    // <span className="word">{content.text.substring(text_pos, hint.rangeFrom)}</span>
     return elements;
   }
 
-  let elements = [];
+  const elements: React.ReactNode[] = [];
   let text_pos = 0;
   // iterate over all hints
-  for (let hint of content.hintMap) {
+  for (const hint of content.hintMap) {
     // add the text since the last hint
     if (hint.rangeFrom > text_pos)
       elements.push(addSplitWord(text_pos, hint.rangeFrom));
-    //addSplitWord(dom.append("span").attr("class", "word"), text_pos, hint.rangeFrom);
 
     // add the text with the hint
-    let is_hidden =
-      hideRangesForChallenge !== undefined &&
-      getOverlap(
-        hint.rangeFrom,
-        hint.rangeTo,
-        hideRangesForChallenge.start,
-        hideRangesForChallenge.end,
-      )
+    let is_hidden: boolean | undefined =
+      hideRange !== undefined &&
+      getOverlap(hint.rangeFrom, hint.rangeTo, hideRange.start, hideRange.end)
         ? true
         : undefined;
     if (editor) is_hidden = false;
@@ -166,22 +158,19 @@ export default function HintLineContent({
           className={
             (show_trans ? styles.tooltiptext_editor : styles.tooltiptext) +
             " " +
-            content.lang_hints
+            (content.lang_hints ?? "")
           }
         >
-          {content.hints[hint.hintIndex]}
+          {content.hints?.[hint.hintIndex]}
         </span>
       </Tooltip>,
     );
-    //addSplitWord(dom.append("span").attr("class", "word tooltip"), hint.rangeFrom, hint.rangeTo+1)
-    //    .append("span").attr("class", "tooltiptext").text(content.hints[hint.hintIndex]);
     // advance the position
     text_pos = hint.rangeTo + 1;
   }
   // add the text after the last hint
   if (text_pos < content.text.length)
     elements.push(addSplitWord(text_pos, content.text.length));
-  //            addSplitWord(dom.append("span").attr("class", "word"), text_pos, content.text.length);
 
-  return elements;
+  return <>{elements}</>;
 }

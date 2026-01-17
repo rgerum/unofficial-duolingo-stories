@@ -16,8 +16,9 @@ import {
 import { StoryElement } from "@/components/editor/story/syntax_parser_types";
 import { useRouter } from "next/navigation";
 import { LocalisationFunc } from "@/lib/get_localisation_func";
+import type { StoryControls } from "./types";
 
-export const StoryContext = React.createContext({});
+export const StoryContext = React.createContext<StoryControls | null>(null);
 export const EditorContext = React.createContext<EditorStateType | undefined>(
   undefined,
 );

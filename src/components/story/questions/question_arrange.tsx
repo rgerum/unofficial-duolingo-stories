@@ -4,6 +4,7 @@ import styles_common from "../common.module.css";
 
 import { EditorHook } from "../editor_hooks";
 import { EditorContext, StoryContext } from "../story";
+import type { StoryElementArrange } from "@/components/editor/story/syntax_parser_types";
 
 /*
 The ARRANGE question
@@ -15,7 +16,16 @@ Speaker560: ¡[(Necesito) (las~llaves) (de) (mi) (carro)!]
 ~              I~need     the~keys     of   my   car
  */
 
-export default function QuestionArrange({ setUnhide, progress, element }) {
+// Button states: undefined = default, 1 = off/correct, 2 = wrong
+type ArrangeButtonState = number | undefined;
+
+interface QuestionArrangeProps {
+  setUnhide: (position: number) => void;
+  progress: number;
+  element: StoryElementArrange;
+}
+
+export default function QuestionArrange({ setUnhide, progress, element }: QuestionArrangeProps) {
   const controls = React.useContext(StoryContext);
   const editor = React.useContext(EditorContext);
 
@@ -24,22 +34,22 @@ export default function QuestionArrange({ setUnhide, progress, element }) {
 
   useEffect(() => {
     if (active && !done) {
-      controls.block_next();
+      controls?.block_next();
     }
   }, [active, done, controls]);
 
   let hidden2 = !active ? styles_common.hidden : "";
 
-  let onClick;
+  let onClick: (() => void) | undefined;
   [hidden2, onClick] = EditorHook(hidden2, element.editor, editor);
 
-  let [buttonState, click] = useArrangeButtons(
+  const [buttonState, click] = useArrangeButtons(
     element.phraseOrder,
-    controls.right,
-    controls.wrong,
-    (i) => {
+    () => controls?.right(),
+    () => controls?.wrong(),
+    (i: number) => {
       setDone(true);
-      if (!editor) setUnhide(element.characterPositions[i]);
+      if (!editor && element.characterPositions) setUnhide(element.characterPositions[i]);
     },
     active,
   );
@@ -52,13 +62,13 @@ export default function QuestionArrange({ setUnhide, progress, element }) {
       data-lineno={element?.editor?.block_start_no}
     >
       <div>
-        {element.selectablePhrases.map((phrase, index) => (
+        {element.selectablePhrases.map((phrase: string, index: number) => (
           <span
             key={index}
             className={styles.word_order}
             data-cy="arrange-button"
             data-index={element.phraseOrder[index]}
-            data-status={[undefined, "off", "wrong"][buttonState[index]]}
+            data-status={[undefined, "off", "wrong"][buttonState[index] ?? 0]}
             onClick={() => click(index)}
           >
             {phrase}
@@ -69,45 +79,48 @@ export default function QuestionArrange({ setUnhide, progress, element }) {
   );
 }
 
-function useArrangeButtons(order, callRight, callWrong, callAdvance, active) {
-  let [buttonState, setButtonState] = React.useState([
-    ...new Array(order.length),
-  ]);
-  let [position, setPosition] = React.useState(0);
+function useArrangeButtons(
+  order: number[],
+  callRight: () => void,
+  callWrong: () => void,
+  callAdvance: (position: number) => void,
+  active: boolean,
+): [ArrangeButtonState[], (index: number) => void] {
+  const [buttonState, setButtonState] = React.useState<ArrangeButtonState[]>(
+    () => new Array(order.length).fill(undefined),
+  );
+  const [position, setPosition] = React.useState(0);
 
-  let click = React.useCallback(
-    (index) => {
+  const click = React.useCallback(
+    (index: number) => {
       if (buttonState[index] === 1) return;
 
       if (position === order[index]) {
         if (position === order.length - 1) callRight();
         callAdvance(position);
-        setButtonState((buttonState) =>
-          buttonState.map((v, i) => (i === index ? 1 : v)),
-        );
+        setButtonState((prev) => prev.map((v, i) => (i === index ? 1 : v)));
         setPosition(position + 1);
       } else {
         setTimeout(() => {
-          setButtonState((buttonState) =>
-            buttonState.map((v, i) => (i === index && v === 2 ? 0 : v)),
+          setButtonState((prev) =>
+            prev.map((v, i) => (i === index && v === 2 ? 0 : v)),
           );
         }, 820);
-        setButtonState((buttonState) =>
-          buttonState.map((v, i) => (i === index ? 2 : v)),
-        );
+        setButtonState((prev) => prev.map((v, i) => (i === index ? 2 : v)));
         callWrong();
       }
     },
     [buttonState, position, order, callRight, callWrong, callAdvance],
   );
 
-  let key_event_handler = React.useCallback(
-    (e) => {
-      let value = parseInt(e.key) - 1;
+  const key_event_handler = React.useCallback(
+    (e: KeyboardEvent) => {
+      const value = parseInt(e.key) - 1;
       if (value < order.length) click(value);
     },
-    [click],
+    [click, order.length],
   );
+
   React.useEffect(() => {
     if (active) {
       window.addEventListener("keypress", key_event_handler);
