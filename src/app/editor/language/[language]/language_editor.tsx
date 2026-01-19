@@ -19,6 +19,7 @@ import {
   CourseStudSchema,
 } from "@/app/editor/language/[language]/queries";
 import type { z } from "zod";
+import type { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 
 type CourseStudType = z.infer<typeof CourseStudSchema>;
 type PlayFn = (e: React.MouseEvent, text: string, name: string) => Promise<void>;
@@ -363,14 +364,18 @@ export function SpeakerEntry(props: {
   );
 }
 
-const element_init = {
+const element_init: StoryElementLine = {
+  type: "LINE",
+  lang: "",
   trackingProperties: {
-    line: 0,
+    line_index: 0,
   },
+  editor: {},
   line: {
+    type: "CHARACTER",
+    characterId: 0,
     content: {
       hintMap: [],
-      hints: [],
       text: "",
       audio: {
         ssml: {
@@ -507,7 +512,7 @@ function AvatarNames({
       element.line.content.text = tt;
       element.line.content.audio.keypoints = [];
       let audioObject = ref.current;
-      audioObject.src = url;
+      if (audioObject) audioObject.src = url;
       //element.line.content.audio.url = url
       // {audioStart: 50, rangeEnd: 3}
       let last_pos = 0;

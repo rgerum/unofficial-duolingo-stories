@@ -23,19 +23,19 @@ import type { z } from "zod";
 
 type CourseStudType = z.infer<typeof CourseStudSchema>;
 
-const element_init = {
+const element_init: StoryElementLine = {
   trackingProperties: {
-    line: 0,
+    line_index: 0,
   },
   type: "LINE",
   lang: "tok2",
+  editor: {},
   line: {
     avatarUrl: "https://design.duolingo.com/ee58f22644428b8182ae.svg",
-    characterId: "0",
+    characterId: 0,
     type: "CHARACTER",
     content: {
       hintMap: [],
-      hints: [],
       text: "",
       audio: {
         ssml: {
@@ -153,11 +153,14 @@ FRAGMENTS:
   }
 
   async function play(new_element: StoryElement) {
+    if (new_element.type !== "LINE") return;
     //let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
     //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
 
     //new_element.line.content.audio.ssml = generate_ssml_line(new_element.line.content.audio.ssml, data, new_element.hideRangesForChallenge)
+    if (!new_element.audio?.ssml?.text) return;
     setText2(new_element.audio.ssml.text);
+    if (!new_element.line.content.audio?.ssml) return;
     let { keypoints, content } = await generate_audio_line(
       new_element.line.content.audio.ssml,
     );
@@ -165,18 +168,18 @@ FRAGMENTS:
     const audio = content_to_audio(content);
 
     //let tt = speakText.replace("$name", name).replace(/<.*?>/g, "");
-    const element = JSON.parse(JSON.stringify(new_element)) as StoryElement;
+    const element = JSON.parse(JSON.stringify(new_element)) as StoryElementLine;
     /*element.line.content = { ...element.line.content };
     element.line.content.text = text_clear;
     element.line.content.lang = language.short;
     element.line.lang = language.short;
      */
-    element.audio.keypoints = keypoints;
-    element.line.content.audio.keypoints = keypoints;
+    if (element.audio) element.audio.keypoints = keypoints;
+    if (element.line.content.audio) element.line.content.audio.keypoints = keypoints;
 
     //let audioObject = ref.current;
     //audioObject.src = audio.src;
-    element.line.content.audio.url = audio.src;
+    if (element.line.content.audio) element.line.content.audio.url = audio.src;
     //element.line.content.audio.url = url
     // {audioStart: 50, rangeEnd: 3}
     setElement(element);
@@ -286,7 +289,7 @@ FRAGMENTS:
             <h2>Input Text</h2>
             <textarea
               defaultValue={text}
-              onChange={setText}
+              onChange={(e) => setText({ target: { value: e.target.value } } as React.ChangeEvent<HTMLInputElement>)}
               style={{ width: "100%" }}
             />
             <br />
@@ -296,7 +299,7 @@ FRAGMENTS:
             <span className={language.short}>
               <TextLine
                 progress={1}
-                unhide={true}
+                unhide={999999}
                 element={element}
                 part={[]}
               />

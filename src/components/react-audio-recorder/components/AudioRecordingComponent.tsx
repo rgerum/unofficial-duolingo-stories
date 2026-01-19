@@ -69,23 +69,22 @@ const AudioRecorder: (props: Props) => ReactElement = ({
   const convertToDownloadFileExtension = async (
     webmBlob: Blob
   ): Promise<Blob> => {
-    const FFmpeg = await import("@ffmpeg/ffmpeg");
-    const ffmpeg = FFmpeg.createFFmpeg({ log: false });
+    const { FFmpeg } = await import("@ffmpeg/ffmpeg");
+    const ffmpeg = new FFmpeg();
     await ffmpeg.load();
 
     const inputName = "input.webm";
     const outputName = `output.${downloadFileExtension}`;
 
-    ffmpeg.FS(
-      "writeFile",
+    await ffmpeg.writeFile(
       inputName,
       new Uint8Array(await webmBlob.arrayBuffer())
     );
 
-    await ffmpeg.run("-i", inputName, outputName);
+    await ffmpeg.exec(["-i", inputName, outputName]);
 
-    const outputData = ffmpeg.FS("readFile", outputName);
-    const outputBlob = new Blob([outputData.buffer], {
+    const outputData = await ffmpeg.readFile(outputName);
+    const outputBlob = new Blob([new Uint8Array(outputData as Uint8Array)], {
       type: `audio/${downloadFileExtension}`,
     });
 

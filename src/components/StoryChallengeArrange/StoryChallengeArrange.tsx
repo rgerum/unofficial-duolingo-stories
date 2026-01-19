@@ -5,7 +5,7 @@ import StoryTextLine from "../StoryTextLine";
 import StoryQuestionArrange from "../StoryQuestionArrange";
 import FadeGlideIn from "../FadeGlideIn";
 import { StorySettings } from "@/components/StoryProgress";
-import { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import { StoryElement, StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 
 function StoryChallengeArrange({
   parts,
@@ -40,7 +40,7 @@ function StoryChallengeArrange({
 
     return (
       <FadeGlideIn key={`${id}-1`}>
-        <StoryTextLine active={active} element={parts[1]} settings={settings} />
+        <StoryTextLine active={active} element={parts[1] as StoryElementLine} settings={settings} />
       </FadeGlideIn>
     );
   }
@@ -57,7 +57,7 @@ function StoryChallengeArrange({
       <FadeGlideIn key={`${id}-2`} hidden={hidden}>
         <StoryTextLine
           active={active}
-          element={parts[1]}
+          element={parts[1] as StoryElementLine}
           unhide={unhide}
           settings={settings}
         />

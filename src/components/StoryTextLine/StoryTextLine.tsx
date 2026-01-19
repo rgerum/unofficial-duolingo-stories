@@ -4,7 +4,7 @@ import useAudio from "./use-audio.hook";
 import StoryLineHints from "../StoryLineHints";
 import PlayAudio from "../PlayAudio";
 import StoryTextLineSimple from "../StoryTextLineSimple";
-import { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
 
 function StoryTextLine({
@@ -14,11 +14,10 @@ function StoryTextLine({
   settings,
 }: {
   active: boolean;
-  element: StoryElement;
+  element: StoryElementLine;
   unhide?: number;
   settings: StorySettings;
 }) {
-  if (element.type !== "LINE") throw new Error("not the right element");
   const onClick = undefined;
   const [audioRange, playAudio, ref, url] = useAudio(element, active);
 

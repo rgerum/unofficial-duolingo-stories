@@ -1,4 +1,5 @@
 import React from "react";
+import type { StoryElementLine, StoryElementHeader, Audio } from "@/components/editor/story/syntax_parser_types";
 
 declare global {
   interface Window {
@@ -11,38 +12,13 @@ export type AudioKeypoint = {
   audioStart: number;
 };
 
-type AudioContent = {
-  audio: {
-    keypoints: AudioKeypoint[];
-    url: string;
-  };
-};
+type UseAudioElement = StoryElementLine | StoryElementHeader;
 
-type UseAudioProps = {
-  line: {
-    content: {
-      audio?: {
-        keypoints: AudioKeypoint[];
-        url: string;
-      };
-    };
-  };
-  learningLanguageTitleContent?: {
-    audio?: {
-      keypoints: AudioKeypoint[];
-      url: string;
-    };
-  };
-  trackingProperties?: {
-    line_index: number;
-  };
-};
-
-export default function useAudio(element: UseAudioProps, active: boolean) {
+export default function useAudio(element: UseAudioElement, active: boolean) {
   const [audioRange, setAudioRange] = React.useState(99999);
-  const audio =
-    element?.line?.content?.audio ||
-    element?.learningLanguageTitleContent?.audio;
+  const audio: Audio | undefined = element.type === "LINE"
+    ? element.line?.content?.audio
+    : element.learningLanguageTitleContent?.audio;
   const ref = React.useRef<HTMLAudioElement>(null);
 
   const playAudio = React.useCallback(async () => {

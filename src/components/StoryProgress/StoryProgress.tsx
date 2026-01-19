@@ -18,7 +18,7 @@ import StoryFinishedScreen from "../StoryFinishedScreen";
 import StoryTitlePage from "../StoryTitlePage";
 import VisuallyHidden from "../VisuallyHidden";
 import { StoryType } from "@/components/editor/story/syntax_parser_new";
-import { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import { StoryElement, StoryElementHeader, StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 
 function getComponent(parts: StoryElement[]) {
@@ -59,7 +59,7 @@ function Header({
 
   return (
     <FadeGlideIn hidden={hidden}>
-      <StoryHeader active={active} element={parts[0]} settings={settings} />
+      <StoryHeader active={active} element={parts[0] as StoryElementHeader} settings={settings} />
     </FadeGlideIn>
   );
 }

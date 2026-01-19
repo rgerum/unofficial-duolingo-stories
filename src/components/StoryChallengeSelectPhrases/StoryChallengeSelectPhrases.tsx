@@ -3,7 +3,7 @@ import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import StoryTextLine from "../StoryTextLine";
 import StoryQuestionSelectPhrase from "../StoryQuestionSelectPhrase";
 import FadeGlideIn from "../FadeGlideIn";
-import { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import { StoryElement, StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
 
 function StoryChallengeSelectPhrases({
@@ -35,7 +35,7 @@ function StoryChallengeSelectPhrases({
     if (active) setButtonStatus("continue");
     return (
       <FadeGlideIn key={`${id}-1`} hidden={hidden}>
-        <StoryTextLine active={active} element={parts[1]} settings={settings} />
+        <StoryTextLine active={active} element={parts[1] as StoryElementLine} settings={settings} />
       </FadeGlideIn>
     );
   }
@@ -52,7 +52,7 @@ function StoryChallengeSelectPhrases({
       <FadeGlideIn key={`${id}-2`} hidden={hidden}>
         <StoryTextLine
           active={active}
-          element={parts[1]}
+          element={parts[1] as StoryElementLine}
           unhide={unhide}
           settings={settings}
         />

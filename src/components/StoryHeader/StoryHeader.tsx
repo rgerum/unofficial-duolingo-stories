@@ -5,7 +5,7 @@ import useAudio from "../StoryTextLine/use-audio.hook";
 import PlayAudio from "../PlayAudio";
 import StoryLineHints from "../StoryLineHints";
 import StoryTextLineSimple from "../StoryTextLineSimple";
-import { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import { StoryElementHeader } from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
 
 function StoryHeader({
@@ -14,10 +14,9 @@ function StoryHeader({
   settings,
 }: {
   active: boolean;
-  element: StoryElement;
+  element: StoryElementHeader;
   settings: StorySettings;
 }) {
-  if (element.type !== "HEADER") throw new Error("not the right element");
   let onClick = undefined;
   const [audioRange, playAudio, ref, url] = useAudio(element, active);
 
