@@ -18,7 +18,7 @@ export async function signin_action(
         },
       });
       if (session) redirect("/");
-      else return { error: error.message ?? "unknown error" };
+      else return { error: "Sign in failed" };
     }
     const session = await auth.api.signInUsername({
       body: {
@@ -28,7 +28,7 @@ export async function signin_action(
     });
     console.log("login", session);
     if (session) redirect("/");
-    else return { error: error.message ?? "unknown error" };
+    else return { error: "Sign in failed" };
   } catch (error) {
     if ((error as CallbackRouteError)["cause"]) {
       return {

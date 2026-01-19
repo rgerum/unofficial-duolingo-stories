@@ -10,16 +10,32 @@ import React, { useState } from "react";
 import * as EditDialog from "../edit_dialog";
 import Button from "@/components/layout/button";
 
-export async function setLanguage(data) {
-  let res = await fetch_post(`/admin/languages/set`, data);
-  res = await res.text();
-  return res;
+export interface Language {
+  id?: number;
+  name: string;
+  short: string;
+  flag: number;
+  flag_file: string;
+  speaker: string;
+  rtl: boolean;
 }
 
-function ChangeAbleValue(props) {
-  const [value, setValue] = useInput(props.obj[props.name]);
+export async function setLanguage(data: Language): Promise<string> {
+  const res = await fetch_post(`/admin/languages/set`, data);
+  return await res.text();
+}
 
-  function edited(e) {
+interface ChangeAbleValueProps {
+  obj: Record<string, string | number | boolean>;
+  name: string;
+  callback: (name: string, value: string) => void;
+  edit?: boolean;
+}
+
+function ChangeAbleValue(props: ChangeAbleValueProps) {
+  const [value, setValue] = useInput(String(props.obj[props.name] ?? ""));
+
+  function edited(e: React.ChangeEvent<HTMLInputElement>) {
     props.callback(props.name, e.target.value);
     setValue(e);
   }
@@ -33,23 +49,29 @@ function ChangeAbleValue(props) {
   return <td>{value}</td>;
 }
 
-function EditLanguage({ obj, updateLanguage, is_new }) {
+interface EditLanguageProps {
+  obj: Language;
+  updateLanguage: (lang: Language) => void;
+  is_new?: boolean;
+}
+
+function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState(undefined);
+  const [error, setError] = useState<string | undefined>(undefined);
 
   const [name, setName] = useState(obj.name);
   const [short, setShort] = useState(obj.short);
-  const [flag, setFlag] = useState(obj.flag);
+  const [flag, setFlag] = useState(String(obj.flag));
   const [flag_file, setFlagFile] = useState(obj.flag_file);
   const [speaker, setSpeaker] = useState(obj.speaker);
   const [rtl, setRTL] = useState(obj.rtl);
 
   async function Send() {
-    const data = {
+    const data: Language = {
       id: obj.id,
       name: name,
       short: short,
-      flag: flag,
+      flag: parseInt(flag) || 0,
       flag_file: flag_file,
       speaker: speaker,
       rtl: rtl,
@@ -144,10 +166,15 @@ const Error = styled.div`
   background: var(--error-red);
 `;
 
-function TableRow({ lang, updateLanguage }) {
-  const refRow = React.useRef();
+interface TableRowProps {
+  lang: Language;
+  updateLanguage: (lang: Language) => void;
+}
 
-  function updateLanguageWrapper(new_course) {
+function TableRow({ lang, updateLanguage }: TableRowProps) {
+  const refRow = React.useRef<HTMLTableRowElement>(null);
+
+  function updateLanguageWrapper(new_course: Language) {
     const frames = [
       { opacity: 0, filter: "blur(10px) saturate(0)" },
       { opacity: 1, filter: "" },
@@ -163,13 +190,15 @@ function TableRow({ lang, updateLanguage }) {
       "rtl",
     ];
 
-    function check_equal(attribute) {
-      return new_course[attribute] === lang[attribute];
+    function check_equal(attribute: string) {
+      const newVal = (new_course as unknown as Record<string, unknown>)[attribute];
+      const oldVal = (lang as unknown as Record<string, unknown>)[attribute];
+      return newVal === oldVal;
     }
 
     for (let i = 0; i < attributes.length; i++) {
-      if (!check_equal(attributes[i])) {
-        refRow.current.children[i].animate(frames, {
+      if (!check_equal(attributes[i]) && refRow.current?.children[i]) {
+        (refRow.current.children[i] as HTMLElement).animate(frames, {
           duration: 1000,
           iterations: 1,
         });
@@ -202,21 +231,25 @@ function TableRow({ lang, updateLanguage }) {
   );
 }
 
-export default function LanguageList({ all_languages }) {
+interface LanguageListProps {
+  all_languages: Language[];
+}
+
+export default function LanguageList({ all_languages }: LanguageListProps) {
   const [search, setSearch] = useInput("");
 
-  const [my_langs, setMyLangs] = useInput(all_languages);
+  const [my_langs, setMyLangs] = useState<Language[]>(all_languages);
 
-  function updateLanguage(course) {
+  function updateLanguage(course: Language) {
     setMyLangs(my_langs.map((c) => (c.id === course.id ? course : c)));
   }
 
   if (all_languages === undefined) return <Spinner />;
 
-  let filtered_languages = [];
+  let filtered_languages: Language[] = [];
   if (search === "") filtered_languages = my_langs;
   else {
-    for (let language of my_langs) {
+    for (const language of my_langs) {
       if (language.name.toLowerCase().indexOf(search.toLowerCase()) !== -1) {
         filtered_languages.push(language);
       }

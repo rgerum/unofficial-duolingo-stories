@@ -4,12 +4,36 @@ import React from "react";
 import { useSelectedLayoutSegments } from "next/navigation";
 import EditorButton from "../editor_button";
 import { Breadcrumbs } from "../_components/breadcrumbs";
+import type { CourseProps, LanguageProps } from "./db_get_course_editor";
 
-export default function LayoutFlag({ courses, languages }) {
+interface BreadcrumbPath {
+  type: string;
+  href?: string;
+  name?: string;
+  lang1?: {
+    short: string;
+    name: string;
+    flag: number | null;
+    flag_file: string | null;
+  };
+  lang2?: {
+    short: string;
+    name: string;
+    flag: number | null;
+    flag_file: string | null;
+  };
+}
+
+interface LayoutFlagProps {
+  courses: CourseProps[];
+  languages: Record<string | number, LanguageProps>;
+}
+
+export default function LayoutFlag({ courses, languages }: LayoutFlagProps) {
   const segment = useSelectedLayoutSegments();
   let import_id = segment[3];
-  let course = undefined;
-  let course_import = undefined;
+  let course: CourseProps | undefined = undefined;
+  let course_import: CourseProps | undefined = undefined;
 
   for (let c of courses) {
     if (c.short === segment[1] || `${c.id}` === segment[1]) {
@@ -24,7 +48,7 @@ export default function LayoutFlag({ courses, languages }) {
     window.dispatchEvent(event);
   }
   // onClick={toggleShow}
-  let path = [{ type: "Editor" }];
+  let path: BreadcrumbPath[] = [{ type: "Editor" }];
   if (course) {
     path = [
       { type: "Editor", href: `/editor` },
@@ -46,7 +70,7 @@ export default function LayoutFlag({ courses, languages }) {
       },
     ];
   }
-  if (import_id) {
+  if (import_id && course && course_import) {
     path[path.length - 1].href = `/editor/course/${course.short}`;
     path.push({ type: "sep" });
     path.push({

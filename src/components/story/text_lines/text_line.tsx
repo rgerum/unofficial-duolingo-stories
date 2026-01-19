@@ -8,8 +8,16 @@ import EditorSSMLDisplay from "./audio_edit";
 import AudioPlay from "./audio_play";
 import useAudio from "./use_audio";
 import { EditorContext, StoryContext } from "../story";
+import type { StoryElementLine, StoryElement } from "@/components/editor/story/syntax_parser_types";
 
-export default function TextLine({ progress, unhide, element, part }) {
+interface TextLineProps {
+  progress: number;
+  unhide: number;
+  element: StoryElementLine;
+  part: StoryElement[];
+}
+
+export default function TextLine({ progress, unhide, element, part }: TextLineProps) {
   const editor = React.useContext(EditorContext);
   const controls = React.useContext(StoryContext);
 
@@ -20,11 +28,11 @@ export default function TextLine({ progress, unhide, element, part }) {
     part.length > 1 &&
     part[1].type === "POINT_TO_PHRASE"
   )
-    active = 0;
+    active = false;
 
   let hidden = !active ? styles_common.hidden : "";
 
-  let onClick;
+  let onClick: (() => void) | undefined;
   [hidden, onClick] = EditorHook(hidden, element.editor, editor);
 
   let [audioRange, playAudio, ref, url] = useAudio(element, progress);
@@ -35,10 +43,10 @@ export default function TextLine({ progress, unhide, element, part }) {
   // TODO window.view === undefined && props.progress !== element.trackingProperties.line_index)
   if (progress !== element.trackingProperties.line_index && !editor)
     hideRangesForChallenge = undefined;
-  if (controls.hide_questions) {
+  if (controls?.hide_questions) {
     hideRangesForChallenge = undefined;
   }
-  if (controls.auto_play) {
+  if (controls?.auto_play) {
     element.line.content.hintMap = [];
     playAudio = undefined;
   }
@@ -72,7 +80,7 @@ export default function TextLine({ progress, unhide, element, part }) {
         </span>
       </div>
     );
-  else if (element.line.avatarUrl)
+  else if (element.line.type === "CHARACTER" && element.line.avatarUrl)
     return (
       <>
         <div
@@ -90,14 +98,14 @@ export default function TextLine({ progress, unhide, element, part }) {
         >
           <img
             className={
-              styles.head + " " + (controls.rtl ? styles.rtl_head : "")
+              styles.head + " " + (controls?.rtl ? styles.rtl_head : "")
             }
             src={element.line.avatarUrl}
             alt="head"
           />
           <span
             className={
-              styles.bubble + " " + (controls.rtl ? styles.rtl_bubble : "")
+              styles.bubble + " " + (controls?.rtl ? styles.rtl_bubble : "")
             }
           >
             <audio ref={ref}>

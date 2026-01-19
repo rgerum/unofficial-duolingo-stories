@@ -1,12 +1,26 @@
 import React from "react";
 import styles from "./[language].module.css";
 
-import LoggedInButton, { LogInButton } from "@/components/login/loggedinbutton";
+import { LoggedInButton, LogInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
 import { sql } from "@/lib/db";
 import TextEdit from "./text_edit";
 
-export default function LocalizationEditor({ language, language2, course }) {
+interface LanguageType {
+  id: number;
+  name: string;
+  short: string;
+}
+
+interface CourseType {
+  short?: string;
+}
+
+export default function LocalizationEditor({ language, language2, course }: {
+  language: LanguageType;
+  language2: LanguageType | undefined;
+  course: CourseType | undefined;
+}) {
   // Render data...
   return (
     <>
@@ -20,7 +34,12 @@ export default function LocalizationEditor({ language, language2, course }) {
   );
 }
 
-export function Layout({ children, language_data, language2, course }) {
+export function Layout({ children, language_data, language2, course }: {
+  children: React.ReactNode;
+  language_data: LanguageType;
+  language2: LanguageType | undefined;
+  course: CourseType | undefined;
+}) {
   let crumbs = [
     { type: "Editor", href: `/editor` },
     { type: "sep" },
@@ -45,13 +64,16 @@ export function Layout({ children, language_data, language2, course }) {
   );
 } //                 <Login page={"editor"}/>
 
-async function ListLocalizations({ language_id, language_name }) {
+async function ListLocalizations({ language_id, language_name }: {
+  language_id: number;
+  language_name: string;
+}) {
   let data = await sql`SELECT l.tag, l.text AS text_en, l2.text
 FROM localization l
 LEFT JOIN localization l2 ON l.tag = l2.tag AND l2.language_id = ${language_id}
 WHERE l.language_id = 1;`;
 
-  async function set_localization(tag, text) {
+  async function set_localization(tag: string, text: string) {
     "use server";
     return sql`INSERT INTO localization (tag, text, language_id)
     VALUES (${tag}, ${text}, ${language_id})

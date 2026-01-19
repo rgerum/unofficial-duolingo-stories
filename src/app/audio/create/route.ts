@@ -1,12 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuid } from "uuid";
-let fs = require("fs");
+import fs from "fs";
 import { audio_engines } from "../_lib/audio";
 import { getUser } from "@/lib/userInterface";
+import type { SynthesisResult } from "../_lib/audio/types";
 
-async function mkdir(folderName) {
+async function mkdir(folderName: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    fs.mkdir(folderName, (err) => {
+    fs.mkdir(folderName, (err: NodeJS.ErrnoException | null) => {
       if (err) {
         reject(err);
       } else {
@@ -17,9 +18,9 @@ async function mkdir(folderName) {
   });
 }
 
-async function exists(filename) {
+async function exists(filename: string): Promise<boolean> {
   return new Promise((resolve) => {
-    fs.access(filename, (err) => {
+    fs.access(filename, (err: NodeJS.ErrnoException | null) => {
       if (err) {
         resolve(false);
       } else {
@@ -29,8 +30,8 @@ async function exists(filename) {
   });
 }
 
-export async function POST(req) {
-  const token = await getUser(req);
+export async function POST(req: NextRequest) {
+  const token = await getUser();
 
   if (!token?.role)
     return new Response("You need to be a registered contributor.", {
@@ -55,20 +56,21 @@ export async function POST(req) {
     }
   }
 
-  let answer;
-  for (let engine of audio_engines) {
+  let answer: SynthesisResult | undefined;
+  for (const engine of audio_engines) {
     if (await engine.isValidVoice(speaker)) {
       answer = await engine.synthesizeSpeech(filename, speaker, text);
       answer.engine = engine.name;
       break;
     }
   }
-  if (id !== 0) {
-    answer.output_file = `${id}/` + file;
-  }
 
   if (answer === undefined)
     return new Response("Error not found.", { status: 404 });
+
+  if (id !== 0) {
+    answer.output_file = `${id}/` + file;
+  }
 
   return NextResponse.json(answer);
 }

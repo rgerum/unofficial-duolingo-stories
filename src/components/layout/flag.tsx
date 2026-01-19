@@ -106,6 +106,13 @@ export default function Flag(props: {
   );
 }
 
+// Flexible language type for flags - only requires the fields used
+interface DoubleFlagLanguage {
+  short?: string;
+  flag?: number | null;
+  flag_file?: string | null;
+}
+
 export function DoubleFlag({
   lang1,
   lang2,
@@ -113,10 +120,10 @@ export function DoubleFlag({
   onClick,
   className,
 }: {
-  lang1: LanguageProps;
-  lang2?: LanguageProps;
+  lang1: DoubleFlagLanguage;
+  lang2?: DoubleFlagLanguage;
   width?: number;
-  onClick?: Function;
+  onClick?: () => void;
   className?: string;
 }) {
   if (!lang2) {

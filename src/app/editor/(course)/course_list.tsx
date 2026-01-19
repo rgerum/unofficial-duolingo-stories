@@ -1,10 +1,19 @@
 "use client";
 import Link from "next/link";
-import Flag from "@/components/layout/flag.tsx";
+import Flag from "@/components/layout/flag";
 import styles from "./course_list.module.css";
 import { useInput } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/layout/spinner";
+import type { CourseProps, LanguageProps } from "./db_get_course_editor";
+
+interface CourseListProps {
+  courses: CourseProps[] | undefined;
+  languages: Record<string | number, LanguageProps>;
+  course_id: string | undefined;
+  showList: boolean;
+  toggleShow: () => void;
+}
 
 export default function CourseList({
   courses,
@@ -12,7 +21,7 @@ export default function CourseList({
   course_id,
   showList,
   toggleShow,
-}) {
+}: CourseListProps) {
   const [search, setSearch] = useInput("");
   const router = useRouter();
 
@@ -27,7 +36,7 @@ export default function CourseList({
     return <div className={styles.languages}>Error loading courses</div>;
   }
 
-  let filtered_courses = [];
+  let filtered_courses: CourseProps[] = [];
   if (search === "") filtered_courses = courses;
   else {
     for (let course of courses) {
@@ -73,7 +82,6 @@ export default function CourseList({
                   iso={languages[course.learning_language].short}
                   width={40}
                   flag_file={languages[course.learning_language].flag_file}
-                  style={{ margin: "3px" }}
                 />
                 <span className={styles.course_selection_course_name}>{`${
                   course.learning_language_name

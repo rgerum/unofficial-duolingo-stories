@@ -1,11 +1,8 @@
-"use client";
 import styles from "../register.module.css";
-import { signIn } from "@/lib/authClient";
 import React from "react";
 import Link from "next/link";
-import Button from "@/components/layout/button";
 
-export default function Page({}) {
+export default function Page() {
   return (
     <>
       <h1 className={styles.H1}>Not Allowed</h1>
@@ -20,9 +17,9 @@ export default function Page({}) {
         You might need to login and out again after you got access to the
         editor.
       </p>
-      <Button primary={true} onClick={() => signIn()}>
+      <Link href="/auth/signin" className={styles.button}>
         Log In
-      </Button>
+      </Link>
     </>
   );
 }

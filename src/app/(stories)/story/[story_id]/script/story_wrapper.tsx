@@ -1,9 +1,7 @@
 "use client";
 import React from "react";
 
-import { useRouter } from "next/navigation";
 import StoryProgress from "@/components/StoryProgress";
-import useSearchParamsState from "@/hooks/use-search-params-state.hook";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 
 export default function StoryWrapper({
@@ -15,15 +13,8 @@ export default function StoryWrapper({
   storyFinishedIndexUpdate: () => Promise<{ message: string }>;
   show_title_page: boolean;
 }) {
-  const router = useRouter();
-  const [highlight_name, setHighlightName] = useSearchParamsState(
-    "highlight_name",
-    [],
-  );
-  const [hideNonHighlighted, setHideNonHighlighted] = useSearchParamsState(
-    "hide_non_highlighted",
-    false,
-  );
+  const [highlight_name, setHighlightName] = React.useState<string[]>([]);
+  const [hideNonHighlighted, setHideNonHighlighted] = React.useState(false);
   console.log("highlight_nameX", highlight_name);
   return (
     <>

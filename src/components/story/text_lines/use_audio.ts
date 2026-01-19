@@ -1,20 +1,37 @@
+"use no memo";
 import React from "react";
 import { StoryContext } from "../story";
+import type { StoryElementLine, StoryElementHeader, Audio } from "@/components/editor/story/syntax_parser_types";
 
-export default function useAudio(element, progress) {
-  let [audioRange, setAudioRange] = React.useState(99999);
-  let audio = element?.line?.content?.audio;
-  let ref = React.useRef();
+// Extend window for playing_audio
+declare global {
+  interface Window {
+    playing_audio?: (() => void)[];
+  }
+}
+
+type UseAudioElement = StoryElementLine | StoryElementHeader;
+type UseAudioReturn = [number, (() => Promise<void>) | undefined, React.RefObject<HTMLAudioElement | null>, string | undefined];
+
+export default function useAudio(element: UseAudioElement, progress: number): UseAudioReturn {
+  const [audioRange, setAudioRange] = React.useState(99999);
+  let audio: Audio | undefined = element.type === "LINE"
+    ? element?.line?.content?.audio
+    : element?.learningLanguageTitleContent?.audio;
+  const ref = React.useRef<HTMLAudioElement>(null);
 
   const controls = React.useContext(StoryContext);
 
-  if (audio === undefined) audio = element?.learningLanguageTitleContent?.audio;
+  if (audio === undefined && element.type === "HEADER") {
+    audio = element?.learningLanguageTitleContent?.audio;
+  }
 
   const playAudio = React.useCallback(async () => {
     if (audio === undefined || !audio?.keypoints || !audio?.url) return;
-    let audioObject = ref.current;
+    const audioObject = ref.current;
+    if (!audioObject) return;
     if (window?.playing_audio) {
-      for (let audio_cancel of window.playing_audio) audio_cancel();
+      for (const audio_cancel of window.playing_audio) audio_cancel();
     }
     window.playing_audio = [];
     audioObject.pause();
@@ -23,14 +40,14 @@ export default function useAudio(element, progress) {
     try {
       await audioObject.play();
     } catch (e) {
-      controls.audio_failed_call();
+      controls?.audio_failed_call();
       return;
     }
-    let timeouts = [];
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
     let last_end = 0;
-    for (let keypoint of audio.keypoints) {
+    for (const keypoint of audio.keypoints) {
       last_end = keypoint.rangeEnd;
-      let t = setTimeout(() => {
+      const t = setTimeout(() => {
         setAudioRange(keypoint.rangeEnd);
       }, keypoint.audioStart);
       timeouts.push(t);
@@ -38,16 +55,16 @@ export default function useAudio(element, progress) {
 
     setTimeout(
       () => {
-        if (controls.auto_play)
+        if (controls?.auto_play)
           controls.advance_progress(element.trackingProperties.line_index || 0);
       },
       audioObject.duration * 1000 - 150,
     );
 
     function cancel() {
-      for (let t in timeouts) clearTimeout(t);
+      for (const t of timeouts) clearTimeout(t);
       setAudioRange(last_end);
-      audioObject.pause();
+      audioObject?.pause();
     }
     window.playing_audio.push(cancel);
   }, [audio, ref, controls, element.trackingProperties.line_index]);

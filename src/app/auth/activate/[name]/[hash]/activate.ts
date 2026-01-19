@@ -1,12 +1,24 @@
 import { sql } from "@/lib/db";
 
-async function check_username(name, existing) {
-  let result =
+interface UserCheckResult {
+  id: number;
+  email: string;
+}
+
+interface ErrorResult {
+  status: number;
+  message: string;
+}
+
+type CheckUsernameResult = UserCheckResult | ErrorResult | true;
+
+async function check_username(name: string, existing: boolean): Promise<CheckUsernameResult> {
+  const result =
     await sql`SELECT id, email FROM "users" WHERE LOWER(name) = LOWER(${name})`;
 
   if (existing) {
     if (result.length) {
-      return result[0];
+      return result[0] as UserCheckResult;
     }
     return { status: 403, message: "Error username does not exists" };
   } else {
@@ -17,10 +29,10 @@ async function check_username(name, existing) {
   }
 }
 
-export async function activate({ name, hash }) {
+export async function activate({ name, hash }: { name: string; hash: string }) {
   // check username
-  let username_check = await check_username(name, true);
-  if (username_check?.status) return username_check;
+  const username_check = await check_username(name, true);
+  if (typeof username_check === "object" && "status" in username_check) return username_check;
   // activate the user
   await sql`UPDATE "users" SET activated = true WHERE name = ${name} AND activation_link = ${hash};`;
 

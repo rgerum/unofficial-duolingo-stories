@@ -17,9 +17,11 @@ function DocsHeader() {
   //useKeypress("ctrl+k", () => !showSearch && doShow(true), [showSearch]);
   useKeypress(
     "ctrl+k",
-    (e: KeyboardEvent) => {
-      e.preventDefault();
-      !showSearch && doShow(true);
+    (e: KeyboardEvent | number) => {
+      if (typeof e !== "number") {
+        e.preventDefault();
+        !showSearch && doShow(true);
+      }
     },
     [showSearch],
     "keydown",

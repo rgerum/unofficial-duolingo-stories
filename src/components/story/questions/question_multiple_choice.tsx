@@ -133,7 +133,7 @@ export default function QuestionMultipleChoice({
                 get_color_text(buttonState[index])
               }
             >
-              <HintLineContent content={answer} />
+              <HintLineContent content={typeof answer === "string" ? { text: answer, hintMap: [] } : answer} />
             </div>
           </li>
         ))}

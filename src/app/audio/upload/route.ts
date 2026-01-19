@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuid } from "uuid";
-let fs = require("fs");
+import fs from "fs";
 import { put } from "@vercel/blob";
 import { getUser } from "@/lib/userInterface";
 
-async function mkdir(folderName) {
+async function mkdir(folderName: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    fs.mkdir(folderName, (err) => {
+    fs.mkdir(folderName, (err: NodeJS.ErrnoException | null) => {
       if (err) {
         reject(err);
       } else {
@@ -17,9 +17,9 @@ async function mkdir(folderName) {
   });
 }
 
-async function exists(filename) {
+async function exists(filename: string): Promise<boolean> {
   return new Promise((resolve) => {
-    fs.access(filename, (err) => {
+    fs.access(filename, (err: NodeJS.ErrnoException | null) => {
       if (err) {
         resolve(false);
       } else {
@@ -29,8 +29,8 @@ async function exists(filename) {
   });
 }
 
-export async function POST(req) {
-  const token = await getUser(req);
+export async function POST(req: NextRequest) {
+  const token = await getUser();
 
   if (!token?.role)
     return new Response("You need to be a registered contributor.", {
@@ -40,13 +40,14 @@ export async function POST(req) {
   const data = await req.formData();
   const file = data.get("file");
 
-  if (!file) {
+  if (!file || typeof file === "string") {
     return NextResponse.json({ success: false });
   }
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-  let id = parseInt(data.get("story_id"));
+  const storyIdValue = data.get("story_id");
+  let id = parseInt(typeof storyIdValue === "string" ? storyIdValue : "0");
 
   let filename = undefined;
   if (id !== 0) {
@@ -55,7 +56,8 @@ export async function POST(req) {
       await mkdir(filename);
     } catch (e) {}
     while (true) {
-      let filebase = uuid().split("-")[0] + file.name.match(/.*(\.[^.]*)/)[1];
+      const extMatch = file.name.match(/.*(\.[^.]*)/);
+      let filebase = uuid().split("-")[0] + (extMatch ? extMatch[1] : "");
       filename += "/_" + filebase;
       if (!(await exists(filename))) break;
     }

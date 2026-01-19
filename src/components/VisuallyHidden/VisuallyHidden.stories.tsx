@@ -1,3 +1,4 @@
+import React from "react";
 import VisuallyHidden from "./VisuallyHidden";
 
 const meta = {
@@ -9,7 +10,7 @@ const meta = {
 export default meta;
 
 export const Normal = {
-  render: (args) => (
+  render: (args: React.ComponentProps<typeof VisuallyHidden>) => (
     <VisuallyHidden {...args}>
     </VisuallyHidden>
   ),

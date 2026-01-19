@@ -3,13 +3,17 @@ import styles from "../../../register.module.css";
 import Link from "next/link";
 import { activate } from "./activate";
 
-export default async function Page({ params }) {
-  let activated = await activate(await params);
+interface PageProps {
+  params: Promise<{ name: string; hash: string }>;
+}
+
+export default async function Page({ params }: PageProps) {
+  const activated = await activate(await params);
 
   return (
     <>
       <h1 className={styles.H1}>Activate account</h1>
-      {activated === 0 ? (
+      {typeof activated === "object" && "status" in activated ? (
         <p className={styles.P} id="status">
           activating account...
         </p>

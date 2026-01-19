@@ -27,7 +27,7 @@ function Tooltip({ className, children }: TooltipProps) {
 
     let offset = 0;
     if (tooltipElement.style.left.split(" ").length >= 2) {
-      offset = parseInt(tooltipElement.style.left.split(" ")[2].split("px)"));
+      offset = parseInt(tooltipElement.style.left.split(" ")[2].split("px)")[0]);
     }
     // Check if the tooltip would be cut off on the right
     if (tooltipRect.right + offset > window.innerWidth) {
@@ -44,7 +44,7 @@ function Tooltip({ className, children }: TooltipProps) {
   }
   return (
     <span onMouseEnter={onMouseEnter} ref={ref} className={className}>
-      {...children}
+      {children}
     </span>
   );
 }

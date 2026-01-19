@@ -1,20 +1,27 @@
 import { sql } from "@/lib/db";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getUser } from "@/lib/userInterface";
 
-export async function POST(req) {
-  const data = await req.json();
-  const token = await getUser(req);
+interface LanguageData {
+  id?: number;
+  name: string;
+  short: string;
+  flag: number;
+  flag_file: string;
+  speaker: string;
+  rtl: boolean;
+}
 
-  if (!token?.admin)
+export async function POST(req: NextRequest) {
+  const data: LanguageData = await req.json();
+  const token = await getUser();
+
+  if (token?.role !== "admin")
     return new Response("You need to be a registered admin.", {
       status: 401,
     });
 
-  let answer = await set_language(data, {
-    name: token.name,
-    user_id: token.id,
-  });
+  const answer = await set_language(data);
 
   if (answer === undefined)
     return new Response("Error not found.", { status: 404 });
@@ -22,7 +29,7 @@ export async function POST(req) {
   return NextResponse.json(answer);
 }
 
-async function set_language(data) {
+async function set_language(data: LanguageData) {
   if (data.id === undefined)
     return (await sql`INSERT INTO language ${sql(data)} RETURNING *`)[0];
   return (

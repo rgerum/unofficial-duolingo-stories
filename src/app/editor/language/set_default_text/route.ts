@@ -11,25 +11,25 @@ const DefaultTextSchema = z.object({
 export async function POST(req: Request) {
   try {
     const { id, default_text } = DefaultTextSchema.parse(await req.json());
-    const token = await getUser(req);
+    const token = await getUser();
 
     if (!token?.role)
       return new Response("You need to be a registered contributor.", {
         status: 401,
       });
 
-    let answer = await set_avatar({ id, default_text });
+    let answer = await set_default_text({ id, default_text });
 
     if (answer === undefined)
       return new Response("Error not found.", { status: 404 });
 
     return NextResponse.json(answer);
   } catch (err) {
-    return new Response(err.message, { status: 500 });
+    return new Response(err instanceof Error ? err.message : String(err), { status: 500 });
   }
 }
 
-async function set_avatar({
+async function set_default_text({
   id,
   default_text,
 }: {

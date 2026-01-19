@@ -1,7 +1,8 @@
 import React from "react";
 import { ImageResponse } from "next/og";
+import type { NextRequest } from "next/server";
 
-export async function GET(request) {
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
@@ -9,9 +10,7 @@ export async function GET(request) {
       new URL("../../../../assets/Nunito-Regular.ttf", import.meta.url),
     ).then((res) => res.arrayBuffer());
 
-    const imageData = await fetch(
-      new URL("./og_background.png", import.meta.url),
-    ).then((res) => res.arrayBuffer());
+    const imageUrl = new URL("./og_background.png", import.meta.url).toString();
 
     return new ImageResponse(
       (
@@ -36,7 +35,7 @@ export async function GET(request) {
             }}
             height="630px"
             width="1200px"
-            src={imageData}
+            src={imageUrl}
           />
           <div
             style={{
@@ -50,20 +49,14 @@ export async function GET(request) {
             }}
           >
             <div style={{ fontWeight: "bold", fontSize: 80 }}>
-              {searchParams.get("title", "Good morning")}
+              {searchParams.get("title") ?? "Good morning"}
             </div>
             <div style={{ textAlign: "left" }}>
-              {`${searchParams.get(
-                "name",
-                "Language",
-              )} story on duostories.org`}
+              {`${searchParams.get("name") ?? "Language"} story on duostories.org`}
             </div>
           </div>
           <img
-            src={`https://stories-cdn.duolingo.com/image/${searchParams.get(
-              "image",
-              "783305780a6dad8e0e4eb34109d948e6a5fc2c35",
-            )}.svg`}
+            src={`https://stories-cdn.duolingo.com/image/${searchParams.get("image") ?? "783305780a6dad8e0e4eb34109d948e6a5fc2c35"}.svg`}
             height={290}
             width={300}
           ></img>
@@ -82,7 +75,7 @@ export async function GET(request) {
       },
     );
   } catch (e) {
-    console.log(`${e.message}`);
+    console.log(`${e instanceof Error ? e.message : String(e)}`);
     return new Response(`Failed to generate the image`, {
       status: 500,
     });

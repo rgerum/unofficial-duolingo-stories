@@ -1,9 +1,10 @@
 import React from "react";
 import { ImageResponse } from "next/og";
+import type { NextRequest } from "next/server";
 export const runtime = "edge";
 
-function get_flag_id(iso) {
-  let order = [
+function get_flag_id(iso: string | null): number {
+  const order = [
     "en", //0
     "es", //1
     "fr", //2
@@ -54,13 +55,13 @@ function get_flag_id(iso) {
     "zu", //47
   ];
   let flag = 0;
-  for (let i in order) {
+  for (let i = 0; i < order.length; i++) {
     if (order[i] === (iso || "world")) flag = i;
   }
   return flag;
 }
 
-export async function GET(request) {
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
@@ -68,24 +69,10 @@ export async function GET(request) {
       new URL("../../../../assets/Nunito-Regular.ttf", import.meta.url),
     ).then((res) => res.arrayBuffer());
 
-    // ?title=<title>
-    const hasTitle = searchParams.has("title");
-    const title = hasTitle
-      ? searchParams.get("title")?.slice(0, 100)
-      : "My default title";
-
-    //let counts = get_counts();
-    let counts = { count_stories: 0, count_courses: 0 };
-
-    let text = `A community project to bring the original Duolingo Stories to new languages.`;
-    let text2 = `${counts.count_stories} stories in ${counts.count_courses} courses and counting!`;
-
     const flag_offset = get_flag_id(searchParams.get("lang"));
     const flag_scale = 3;
 
-    const imageData = await fetch(
-      new URL("./og_background.png", import.meta.url),
-    ).then((res) => res.arrayBuffer());
+    const imageUrl = new URL("./og_background.png", import.meta.url).toString();
 
     return new ImageResponse(
       (
@@ -111,7 +98,7 @@ export async function GET(request) {
             }}
             height="100%"
             width="100%"
-            src={imageData}
+            src={imageUrl}
           />
           <div
             style={{
@@ -120,7 +107,6 @@ export async function GET(request) {
               top: 32,
               width: 82 * flag_scale,
               height: 66 * flag_scale,
-              backgroundSizeX: "cover",
               backgroundPosition: `0px -${66 * flag_offset * flag_scale}px`,
               backgroundColor: "#f5f5f5",
               backgroundSize: `${82 * flag_scale}px ${3168 * flag_scale}px`,
@@ -136,7 +122,7 @@ export async function GET(request) {
               fontSize: 82,
             }}
           >
-            {searchParams.get("name", "Language")}
+            {searchParams.get("name") ?? "Language"}
           </div>
           <div
             style={{
@@ -157,7 +143,7 @@ export async function GET(request) {
               fontSize: "40px",
             }}
           >
-            {`${searchParams.get("count", 4)} community translated stories`}
+            {`${searchParams.get("count") ?? "4"} community translated stories`}
           </div>
 
           <div
@@ -187,7 +173,7 @@ export async function GET(request) {
       },
     );
   } catch (e) {
-    console.log(`${e.message}`);
+    console.log(`${e instanceof Error ? e.message : String(e)}`);
     return new Response(`Failed to generate the image`, {
       status: 500,
     });

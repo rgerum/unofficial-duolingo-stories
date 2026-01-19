@@ -1,20 +1,31 @@
 import { sql } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getUser } from "@/lib/userInterface";
 
-export async function POST(req, res) {
-  const data = await req.json();
-  const token = await getUser(req);
+interface CourseData {
+  id?: number;
+  learning_language: number;
+  from_language: number;
+  public?: boolean;
+  name?: string;
+  official?: number;
+  conlang?: boolean;
+  tags?: string | string[];
+  short?: string;
+  about?: string;
+  from_language_name?: string;
+  learning_language_name?: string;
+}
 
-  if (!token?.admin)
+export async function POST(req: NextRequest) {
+  const data: CourseData = await req.json();
+  const token = await getUser();
+
+  if (token?.role !== "admin")
     return new Response("You need to be a registered admin.", { status: 401 });
 
-  let answer = await set_course(
-    data,
-    { name: token.name, user_id: token.id },
-    res.revalidate,
-  );
+  const answer = await set_course(data);
 
   if (answer === undefined)
     return new Response("Error not found.", { status: 404 });
@@ -22,7 +33,7 @@ export async function POST(req, res) {
   return NextResponse.json(answer);
 }
 
-async function set_course(data) {
+async function set_course(data: CourseData) {
   if (data["official"] === undefined) data["official"] = 0;
   let id;
   let tag_list = data["tags"] || "";

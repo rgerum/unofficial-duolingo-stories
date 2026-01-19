@@ -14,10 +14,22 @@ import QuestionMultipleChoice from "./questions/question_multiple_choice";
 import QuestionPointToPhrase from "./questions/question_point_to_phrase";
 import QuestionSelectPhrase from "./questions/question_select_phrase";
 import { EditorContext, StoryContext } from "./story";
+import type { StoryElement, StoryElementChallengePrompt } from "@/components/editor/story/syntax_parser_types";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor";
+import type { StoryControls } from "./types";
 
-export default function Part(props) {
-  let challenge_type =
-    props.part[props.part.length - 1].trackingProperties.challenge_type;
+interface PartProps {
+  part: StoryElement[];
+  progress: number;
+  editor?: EditorStateType;
+  controls?: StoryControls;
+  audios?: { [key: string]: HTMLAudioElement };
+}
+
+export default function Part(props: PartProps) {
+  const lastElement = props.part[props.part.length - 1];
+  const trackingProps = lastElement.trackingProperties as { challenge_type?: string; line_index: number };
+  let challenge_type = trackingProps.challenge_type;
   let [unhide, setUnhide] = React.useState(0);
   let is_hidden = props.progress < props.part[0].trackingProperties.line_index;
 
@@ -45,14 +57,19 @@ export default function Part(props) {
   );
 }
 
-function ChallengePrompt({ progress, element }) {
+interface ChallengePromptProps {
+  progress: number;
+  element: StoryElementChallengePrompt;
+}
+
+function ChallengePrompt({ progress, element }: ChallengePromptProps) {
   const editor = React.useContext(EditorContext);
   let hidden2 =
     progress !== element.trackingProperties.line_index
       ? styles_common.hidden
       : "";
 
-  let onClick;
+  let onClick: (() => void) | undefined;
   [hidden2, onClick] = EditorHook(hidden2, element.editor, editor);
 
   return (
@@ -68,10 +85,18 @@ function ChallengePrompt({ progress, element }) {
   );
 }
 
-function StoryLine(props) {
+interface StoryLineProps {
+  element: StoryElement;
+  progress: number;
+  unhide: number;
+  setUnhide: (value: number) => void;
+  part: StoryElement[];
+}
+
+function StoryLine(props: StoryLineProps) {
   const controls = React.useContext(StoryContext);
 
-  if (props.element.type === "MULTIPLE_CHOICE" && !controls.hide_questions) {
+  if (props.element.type === "MULTIPLE_CHOICE" && !controls?.hide_questions) {
     return (
       <QuestionMultipleChoice
         setUnhide={props.setUnhide}
@@ -80,7 +105,7 @@ function StoryLine(props) {
       />
     );
   }
-  if (props.element.type === "POINT_TO_PHRASE" && !controls.hide_questions) {
+  if (props.element.type === "POINT_TO_PHRASE" && !controls?.hide_questions) {
     return (
       <QuestionPointToPhrase
         progress={props.progress}
@@ -88,7 +113,7 @@ function StoryLine(props) {
       />
     );
   }
-  if (props.element.type === "SELECT_PHRASE" && !controls.hide_questions) {
+  if (props.element.type === "SELECT_PHRASE" && !controls?.hide_questions) {
     return (
       <QuestionSelectPhrase
         setUnhide={props.setUnhide}
@@ -97,12 +122,12 @@ function StoryLine(props) {
       />
     );
   }
-  if (props.element.type === "CHALLENGE_PROMPT" && !controls.hide_questions) {
+  if (props.element.type === "CHALLENGE_PROMPT" && !controls?.hide_questions) {
     return (
       <ChallengePrompt progress={props.progress} element={props.element} />
     );
   }
-  if (props.element.type === "ARRANGE" && !controls.hide_questions) {
+  if (props.element.type === "ARRANGE" && !controls?.hide_questions) {
     return (
       <QuestionArrange
         setUnhide={props.setUnhide}
@@ -111,7 +136,7 @@ function StoryLine(props) {
       />
     );
   }
-  if (props.element.type === "MATCH" && !controls.hide_questions) {
+  if (props.element.type === "MATCH" && !controls?.hide_questions) {
     return <QuestionMatch progress={props.progress} element={props.element} />;
   }
   if (props.element.type === "LINE") {

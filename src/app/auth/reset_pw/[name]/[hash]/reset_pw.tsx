@@ -4,7 +4,11 @@ import styles from "../../../register.module.css";
 import { useInput } from "@/lib/hooks";
 import Link from "next/link";
 
-export default function ResetPassword({ callchangePasswordAction }) {
+interface ResetPasswordProps {
+  callchangePasswordAction: (password: string) => Promise<void>;
+}
+
+export default function ResetPassword({ callchangePasswordAction }: ResetPasswordProps) {
   let [state, setState] = React.useState(0);
   let [error, setError] = React.useState("");
 
@@ -21,7 +25,7 @@ export default function ResetPassword({ callchangePasswordAction }) {
     }
     setState(2);
   }
-  const handleKeypressSignup = (e) => {
+  const handleKeypressSignup = (e: React.KeyboardEvent) => {
     // listens for enter key
     if (e.keyCode === 13) {
       register_button();

@@ -22,8 +22,8 @@ export function EditorHook(
 
   if (editor && view) {
     onClick = () => {
-      if (editor.active_no) editor_props.select(editor.active_no);
-      else if (editor.start_no) editor_props.select(editor.start_no);
+      if (editor.active_no) editor_props.select(String(editor.active_no), false);
+      else if (editor.start_no) editor_props.select(String(editor.start_no), false);
     };
   }
 
@@ -49,8 +49,8 @@ export function EditorNoHook(
   if (editor && view) {
     hidden = "";
     onClick = () => {
-      if (editor.active_no) editor_props.select(editor.active_no, true);
-      else if (editor.start_no) editor_props.select(editor.start_no, true);
+      if (editor.active_no) editor_props.select(String(editor.active_no), true);
+      else if (editor.start_no) editor_props.select(String(editor.start_no), true);
     };
   }
 

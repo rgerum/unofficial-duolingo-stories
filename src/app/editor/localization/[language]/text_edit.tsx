@@ -1,7 +1,13 @@
 "use client";
 import React, { useState } from "react";
 
-export default function TextEdit({ tag, text, set_localization }) {
+interface TextEditProps {
+  tag: string;
+  text: string | null;
+  set_localization: (tag: string, text: string) => Promise<unknown>;
+}
+
+export default function TextEdit({ tag, text, set_localization }: TextEditProps) {
   let [current_text, setText] = useState(text || "");
   return (
     <>

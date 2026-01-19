@@ -1,5 +1,4 @@
 import React from "react";
-import { EditorContext } from "../story";
 import styles from "./audio_edit.module.css";
 import {
   generate_audio_line,
@@ -7,18 +6,35 @@ import {
   insert_audio_line,
 } from "./audio_edit_tools";
 import { useSearchParams } from "next/navigation";
+import type { Audio, StoryElementLine, StoryElementHeader } from "@/components/editor/story/syntax_parser_types";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor";
 
-export default function EditorSSMLDisplay({ ssml, element, audio }) {
+// Extend window for open_recoder
+declare global {
+  interface Window {
+    open_recoder?: (data: {
+      ssml: Audio["ssml"];
+      element: StoryElementLine | StoryElementHeader;
+      audio: Audio;
+      editor: EditorStateType;
+    }) => void;
+  }
+}
+
+interface EditorSSMLDisplayProps {
+  ssml: Audio["ssml"];
+  element: StoryElementLine | StoryElementHeader;
+  audio: Audio;
+  editor: EditorStateType;
+}
+
+export default function EditorSSMLDisplay({ ssml, element, audio, editor }: EditorSSMLDisplayProps) {
   //let urlParams = new URLSearchParams(window.location.search);
   const beta = false;
 
   let [loading, setLoading] = React.useState(false);
-  let [error, setError] = React.useState(false);
-  let line_id = "ssml" + (ssml.line ? ssml.line : ssml.line_insert);
-
-  //var [show_audio, set_show_audio] = React.useState(editor.editorShowSsml);
-  //useEventListener("editorShowSsml", (e) => set_show_audio(e.detail.show))
-  const editor = React.useContext(EditorContext);
+  let [error, setError] = React.useState<boolean>(false);
+  let line_id = "ssml" + ssml.id;
 
   let show_audio = editor.show_ssml;
 
@@ -27,10 +43,12 @@ export default function EditorSSMLDisplay({ ssml, element, audio }) {
     try {
       let { filename, keypoints } = await generate_audio_line(ssml);
       let text = timings_to_text({ filename, keypoints });
-      insert_audio_line(text, ssml, editor.view, editor.audio_insert_lines);
+      if (editor.audio_insert_lines) {
+        insert_audio_line(text, ssml, editor.view, editor.audio_insert_lines);
+      }
     } catch (e) {
       console.error("error", e);
-      setError(e);
+      setError(true);
     }
     setLoading(false);
   }
@@ -86,7 +104,7 @@ export default function EditorSSMLDisplay({ ssml, element, audio }) {
       )}
       {beta ? (
         <a
-          onClick={() => window.open_recoder({ ssml, element, audio, editor })}
+          onClick={() => window.open_recoder?.({ ssml, element, audio, editor })}
           style={{ cursor: "pointer" }}
         >
           🎤

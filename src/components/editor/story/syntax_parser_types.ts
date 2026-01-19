@@ -6,6 +6,7 @@ export type Audio = {
     inser_index: number;
     plan_text?: string | undefined;
     plan_text_speaker_name?: string | undefined;
+    mapping?: Record<number, number>;
   };
   url: undefined | string;
   keypoints: undefined | { rangeEnd: number; audioStart: number }[];
@@ -48,7 +49,11 @@ export type LineElementProse = {
   type: "PROSE";
   content: ContentWithHints;
 };
-export type LineElement = LineElementCharacter | LineElementProse;
+export type LineElementTitle = {
+  type: "TITLE";
+  content: ContentWithHints;
+};
+export type LineElement = LineElementCharacter | LineElementProse | LineElementTitle;
 
 export type StoryElementHeader = {
   type: "HEADER";
@@ -124,7 +129,7 @@ export type StoryElementSelectPhrase = {
     challenge_type: "select-phrases";
   };
   lang: string;
-  editor: { start_no?: number; end_no?: number };
+  editor: { start_no?: number; end_no?: number; block_start_no?: number };
 };
 
 export type StoryElementArrange = {
@@ -137,7 +142,7 @@ export type StoryElementArrange = {
     challenge_type: "arrange";
   };
   lang: string;
-  editor: { start_no?: number; end_no?: number };
+  editor: { start_no?: number; end_no?: number; block_start_no?: number };
 };
 
 export type StoryElementPointToPhrase = {

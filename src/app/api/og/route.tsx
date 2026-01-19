@@ -1,7 +1,8 @@
 import React from "react";
 import { ImageResponse } from "next/og";
+import type { NextRequest } from "next/server";
 
-export async function GET(request) {
+export async function GET(_request: NextRequest) {
   try {
     const fontData = await fetch(
       new URL("../../../../assets/Nunito-Regular.ttf", import.meta.url),
@@ -66,7 +67,7 @@ export async function GET(request) {
       },
     );
   } catch (e) {
-    console.log(`${e.message}`);
+    console.log(`${e instanceof Error ? e.message : String(e)}`);
     return new Response(`Failed to generate the image`, {
       status: 500,
     });

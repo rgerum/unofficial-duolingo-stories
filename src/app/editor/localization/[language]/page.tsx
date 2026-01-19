@@ -4,51 +4,53 @@ import { sql } from "@/lib/db";
 import { notFound } from "next/navigation";
 import LocalizationEditor from "./localization_editor";
 
-const get_avatar_names = cache(async (id) => {
-  return await sql`
-SELECT avatar_mapping.id AS id, a.id AS avatar_id, language_id, COALESCE(avatar_mapping.name, a.name) AS name, link, speaker
-FROM (SELECT id, name, speaker, language_id, avatar_id FROM avatar_mapping WHERE language_id = ${id}) as avatar_mapping
-RIGHT OUTER JOIN avatar a on avatar_mapping.avatar_id = a.id
-WHERE a.link != '[object Object]'
-ORDER BY a.id
-    `;
-});
+interface LanguageType {
+  id: number;
+  name: string;
+  short: string;
+}
 
-const get_speakers = cache(async (id) => {
-  return await sql`SELECT * FROM speaker WHERE language_id = ${id}`;
-});
+interface CourseType {
+  learning_language: number;
+  from_language: number;
+  short: string;
+}
 
-const get_language = cache(async (id) => {
-  const isNumeric = (value) =>
+interface PageProps {
+  params: Promise<{ language: string }>;
+}
+
+const get_language = cache(async (id: string): Promise<[LanguageType | undefined, CourseType | undefined, LanguageType | undefined]> => {
+  const isNumeric = (value: string) =>
     value.length !== 0 && [...value].every((c) => c >= "0" && c <= "9");
   if (isNumeric(id)) {
     return [
-      (await sql`SELECT * FROM language WHERE id = ${id} LIMIT 1`)[0],
+      (await sql`SELECT * FROM language WHERE id = ${id} LIMIT 1`)[0] as LanguageType | undefined,
       undefined,
       undefined,
     ];
   } else {
     let course = (
       await sql`SELECT learning_language, from_language, short FROM course WHERE short = ${id} LIMIT 1`
-    )[0];
+    )[0] as CourseType | undefined;
     if (course) {
-      id = course.learning_language;
+      const langId = course.learning_language;
       let id2 = course.from_language;
       return [
-        (await sql`SELECT * FROM language WHERE id = ${id} LIMIT 1`)[0],
+        (await sql`SELECT * FROM language WHERE id = ${langId} LIMIT 1`)[0] as LanguageType | undefined,
         course,
-        (await sql`SELECT * FROM language WHERE id = ${id2} LIMIT 1`)[0],
+        (await sql`SELECT * FROM language WHERE id = ${id2} LIMIT 1`)[0] as LanguageType | undefined,
       ];
     }
     return [
-      (await sql`SELECT * FROM language WHERE short = ${id} LIMIT 1`)[0],
+      (await sql`SELECT * FROM language WHERE short = ${id} LIMIT 1`)[0] as LanguageType | undefined,
       undefined,
       undefined,
     ];
   }
 });
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params }: PageProps) {
   let [language, course, language2] = await get_language(
     (await params).language,
   );
@@ -67,12 +69,12 @@ export async function generateMetadata({ params }) {
   return {
     title: `Voices | ${language.name} (from ${language2.name}) | Duostories Editor`,
     alternates: {
-      canonical: `https://duostories.org/editor/localization/${course.short}`,
+      canonical: `https://duostories.org/editor/localization/${course?.short}`,
     },
   };
 }
 
-export default async function Page({ params }) {
+export default async function Page({ params }: PageProps) {
   let [language, course, language2] = await get_language(
     (await params).language,
   );
@@ -81,17 +83,12 @@ export default async function Page({ params }) {
     notFound();
   }
 
-  let speakers = await get_speakers(language.id);
-  let avatar_names = await get_avatar_names(language.id);
-
   // Render data...
   return (
     <>
       <LocalizationEditor
         language={language}
         language2={language2}
-        speakers={speakers}
-        avatar_names={avatar_names}
         course={course}
       />
     </>

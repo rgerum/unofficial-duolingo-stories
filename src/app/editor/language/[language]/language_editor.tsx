@@ -18,6 +18,10 @@ import {
   AvatarNamesType,
   CourseStudSchema,
 } from "@/app/editor/language/[language]/queries";
+import type { z } from "zod";
+
+type CourseStudType = z.infer<typeof CourseStudSchema>;
+type PlayFn = (e: React.MouseEvent, text: string, name: string) => Promise<void>;
 
 export default function LanguageEditor({
   language,
@@ -30,7 +34,7 @@ export default function LanguageEditor({
   language2: LanguageType | undefined;
   speakers: SpeakersType[];
   avatar_names: AvatarNamesType[];
-  course: CourseStudSchema | undefined;
+  course: CourseStudType | undefined;
 }) {
   // Render data...
   return (
@@ -63,7 +67,7 @@ export function Layout({
   children: React.ReactNode;
   language_data: LanguageType;
   language2: LanguageType | undefined;
-  course: CourseStudSchema | undefined;
+  course: CourseStudType | undefined;
   use_edit: boolean;
 }) {
   /*
@@ -157,18 +161,18 @@ export async function setDefaultText(data: {
   throw "error";
 }
 
+interface AvatarData {
+  name: string | null;
+  speaker: string | null;
+  language_id: number | null;
+  avatar_id: number;
+  link: string;
+}
+
 function Avatar(props: {
-  avatar: {
-    name: string;
-    speaker: string;
-    language_id: number;
-    avatar_id: number;
-  };
-  language_id: {
-    id: number;
-    name: string;
-    short: string;
-  };
+  avatar: AvatarData;
+  language_id: LanguageType;
+  play: PlayFn;
 }) {
   const avatar = props.avatar;
   const [name, setName] = useState(avatar.name);
@@ -281,14 +285,20 @@ function Avatar(props: {
   );
 }
 
-export function PlayButton(props) {
+interface PlayButtonProps {
+  play: PlayFn;
+  speaker: string | null;
+  name: string;
+}
+
+export function PlayButton(props: PlayButtonProps) {
   let play = props.play;
   let speaker = props.speaker;
   let name = props.name;
 
   let [loading, setLoading] = useState(0);
 
-  async function do_play(e, text, name) {
+  async function do_play(e: React.MouseEvent, text: string, name: string) {
     e.preventDefault();
     setLoading(1);
     try {
@@ -304,7 +314,7 @@ export function PlayButton(props) {
     <span
       className={styles.play_button}
       title="play audio"
-      onClick={(e) => do_play(e, speaker, name)}
+      onClick={(e) => do_play(e, speaker || "", name)}
     >
       {loading === 0 ? (
         <img
@@ -329,7 +339,7 @@ export function PlayButton(props) {
 export function SpeakerEntry(props: {
   speaker: SpeakersType;
   copyText: (e: React.MouseEvent, text: string) => void;
-  play: (e: React.MouseEvent, text: string, name: string) => void;
+  play: PlayFn;
 }) {
   const speaker = props.speaker;
   const copyText = props.copyText;
@@ -390,7 +400,7 @@ function AvatarNames({
   const [speakTextDefault, setSpeakTextDefault] = useState(
     language.default_text,
   );
-  const [stored, setStored] = useState({});
+  const [stored, setStored] = useState<Record<string, HTMLAudioElement>>({});
 
   const [pitch, setPitch] = useState(2);
   const [speed, setSpeed] = useState(2);
@@ -420,7 +430,7 @@ function AvatarNames({
   if (speakText === "")
     speakText = language?.default_text || "My name is $name.";
 
-  function doSetSpeakText(event: React.ChangeEvent<HTMLInputElement>) {
+  function doSetSpeakText(event: React.ChangeEvent<HTMLTextAreaElement>) {
     setStored({});
     setSpeakText(event.target.value);
   }
@@ -442,7 +452,7 @@ function AvatarNames({
       }
     }
 
-  async function play2(e, text: string, name: string) {
+  async function play2(e: React.MouseEvent, text: string, name: string) {
     let speakText2 = `<prosody pitch="${
       ["x-low", "low", "medium", "high", "x-high"][pitch]
     }" rate="${
@@ -452,7 +462,7 @@ function AvatarNames({
     return play(e, id, text, name, speakText2);
   }
 
-  async function play3(e, text: string, name: string) {
+  async function play3(e: React.MouseEvent, text: string, name: string) {
     text = text.trim();
     let match = text.match(/([^(]*)\((.*)\)/);
     let speakText2 = speakText;
@@ -469,7 +479,7 @@ function AvatarNames({
     return play(e, id, text, name, speakText2);
   }
 
-  async function play(e, id, text, name, speakText) {
+  async function play(e: React.MouseEvent, id: string, text: string, name: string, speakText: string) {
     if (stored[id] === undefined) {
       //let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
       //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});

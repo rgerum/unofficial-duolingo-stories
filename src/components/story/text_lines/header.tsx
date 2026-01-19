@@ -8,22 +8,28 @@ import styles_common from "../common.module.css";
 import styles from "./header.module.css";
 import useAudio from "./use_audio";
 import { EditorContext, StoryContext } from "../story";
+import type { StoryElementHeader } from "@/components/editor/story/syntax_parser_types";
 
-export default function Header({ element, progress }) {
+interface HeaderProps {
+  element: StoryElementHeader;
+  progress: number;
+}
+
+export default function Header({ element, progress }: HeaderProps) {
   const editor = React.useContext(EditorContext);
-  let active = 1;
+  const active = 1;
   let hidden = !active ? styles_common.hidden : "";
 
   const controls = React.useContext(StoryContext);
 
-  let onClick;
+  let onClick: (() => void) | undefined;
   [hidden, onClick] = EditorHook(hidden, element.editor, editor);
 
   let [audioRange, playAudio, ref, url] = useAudio(element, progress);
 
-  let hideRangesForChallenge = undefined;
+  const hideRangesForChallenge = undefined;
 
-  if (controls.auto_play) {
+  if (controls?.auto_play) {
     element.learningLanguageTitleContent.hintMap = [];
     playAudio = undefined;
   }

@@ -24,7 +24,7 @@ function splitTextTokens(text, keep_tilde=true) {
 }
 */
 
-export function splitTextTokens(text, keep_tilde = true) {
+export function splitTextTokens(text: string, keep_tilde: boolean = true): string[] {
   if (!text) return [];
   //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
   if (keep_tilde)
@@ -383,22 +383,27 @@ WORDS:
     ku: ku{ku:ipa}
 `;
 let text = "Ich better testetsx amion und einen hut";
-export function transcribe_text(text, data) {
-  data = jsyaml.load(data);
+interface TranscribeConfig {
+  [section: string]: {
+    [key: string]: string;
+  };
+}
 
-  let ipa = false;
+export function transcribe_text(text: string, dataYaml: string): [string, number[]] {
+  const config = jsyaml.load(dataYaml) as TranscribeConfig;
 
-  let mapping = [];
-  for (let section in data) {
+  const mapping: number[] = [];
+  for (const section in config) {
     if (section.toUpperCase() === "MODE") {
-      if (data[section]["ipa"] == "true") ipa = true;
+      // Mode section handling - ipa flag not used currently
     }
     if (section.toUpperCase() === "LETTERS") {
       let text2 = "";
+      const sectionData = config[section];
       for (let i = 0; i < text.length; i++) {
-        if (data[section][text[i]]) {
-          text2 += data[section][text[i]];
-          for (let j = 0; j < data[section][text[i]].length; j++)
+        if (sectionData[text[i]]) {
+          text2 += sectionData[text[i]];
+          for (let j = 0; j < sectionData[text[i]].length; j++)
             mapping.push(i);
         } else {
           text2 += text[i];
@@ -408,26 +413,27 @@ export function transcribe_text(text, data) {
       text = text2;
     }
     if (section.toUpperCase() === "FRAGMENTS") {
-      for (let frag in data[section]) {
-        let match = text.match(new RegExp(frag, "i"));
+      const sectionData = config[section];
+      for (const frag in sectionData) {
+        let match: (RegExpMatchArray & { index?: number }) | null = text.match(new RegExp(frag, "i"));
         let counter = 0;
-        while (match && counter < 100) {
+        while (match && match.index !== undefined && counter < 100) {
+          let matchIndex = match.index;
           if (match.length >= 3) {
-            let index = match.index + match[1].length;
-            match = [match[2]];
-            match.index = index;
+            matchIndex = match.index + match[1].length;
+            match = [match[2]] as RegExpMatchArray;
+            (match as RegExpMatchArray & { index: number }).index = matchIndex;
           }
           text =
-            text.substring(0, match.index) +
-            data[section][frag] +
-            text.substring(match.index + match[0].length);
-          //text = text.replace(match = text.match(new RegExp(frag, "i")), data[section][frag]);
-          let new_indices = [];
-          for (let j = 0; j < data[section][frag].length; j++) {
-            if (j < match[0].length) new_indices.push(match.index + j);
-            else new_indices.push(match.index + match[0].length - 1);
+            text.substring(0, matchIndex) +
+            sectionData[frag] +
+            text.substring(matchIndex + match[0].length);
+          const new_indices: number[] = [];
+          for (let j = 0; j < sectionData[frag].length; j++) {
+            if (j < match[0].length) new_indices.push(matchIndex + j);
+            else new_indices.push(matchIndex + match[0].length - 1);
           }
-          mapping.splice(match.index, match[0].length, ...new_indices);
+          mapping.splice(matchIndex, match[0].length, ...new_indices);
           match = text.match(new RegExp(frag, "i"));
           counter += 1;
         }
@@ -435,16 +441,17 @@ export function transcribe_text(text, data) {
     }
     if (section.toUpperCase() === "WORDS") {
       let text2 = "";
-      for (let word of splitTextTokens(text)) {
-        if (data[section][word]) {
-          let new_indices = [];
-          for (let j = 0; j < data[section][word].length; j++) {
+      const sectionData = config[section];
+      for (const word of splitTextTokens(text)) {
+        if (sectionData[word]) {
+          const new_indices: number[] = [];
+          for (let j = 0; j < sectionData[word].length; j++) {
             if (j < word.length) new_indices.push(text2.length + j);
             else new_indices.push(text2.length + word.length - 1);
           }
           mapping.splice(text2.length, word.length, ...new_indices);
 
-          text2 += data[section][word];
+          text2 += sectionData[word];
         } else text2 += word;
       }
       text = text2;

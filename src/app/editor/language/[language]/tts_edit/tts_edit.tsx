@@ -16,8 +16,12 @@ import {
   AvatarNamesType,
   LanguageType,
   SpeakersType,
+  CourseStudSchema,
 } from "@/app/editor/language/[language]/queries";
-import { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import { StoryElement, StoryElementLine } from "@/components/editor/story/syntax_parser_types";
+import type { z } from "zod";
+
+type CourseStudType = z.infer<typeof CourseStudSchema>;
 
 const element_init = {
   trackingProperties: {
@@ -58,7 +62,7 @@ export default function Tts_edit({
   language: LanguageType;
   language2: LanguageType | undefined;
   speakers: SpeakersType[];
-  course: CourseStudSchema | undefined;
+  course: CourseStudType | undefined;
 }) {
   // Render data...                <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
   const [data, setData] = React.useState(
@@ -81,13 +85,12 @@ FRAGMENTS:
 `,
   );
   function setDataValidated(e: React.ChangeEvent<HTMLTextAreaElement>) {
-    let v = e?.target ? e?.target?.value : e;
-    if (v === null || v === undefined) v = "";
+    const v = e.target.value;
     try {
       jsyaml.load(v);
       setData(v);
       setYamlError(false);
-    } catch (e) {
+    } catch (err) {
       setYamlError(true);
     }
   }
@@ -117,7 +120,7 @@ FRAGMENTS:
     throw "error";
   }
 
-  async function play2(e, speaker, name) {
+  async function play2(e: React.MouseEvent, speaker: string, name: string) {
     //speaker = `${speaker}(pitch=${["x-low", "low", "medium", "high", "x-high"][pitch]},rate=${["x-slow", "slow", "medium", "fast", "x-fast"][speed]})`;
 
     let [story, story_meta, audio_insert_lines] = processStoryFile(
@@ -251,7 +254,7 @@ FRAGMENTS:
                 </thead>
                 <tbody>
                   {speakers?.map((speaker, index) => (
-                    <SpeakerEntry key={index} speaker={speaker} play={play2} />
+                    <SpeakerEntry key={index} speaker={speaker} play={play2} copyText={() => {}} />
                   ))}
                   <tr>
                     <td>

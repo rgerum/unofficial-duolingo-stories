@@ -3,7 +3,15 @@ import React from "react";
 import { DoubleFlag } from "@/components/layout/flag";
 import Link from "next/link";
 import EditorButton from "../editor_button";
-import { LanguageData } from "@/app/editor/story/[story]/types";
+
+// Flexible type that accepts various language data shapes
+interface BreadcrumbLanguage {
+  short?: string;
+  name?: string;
+  flag?: number | null;
+  flag_file?: string | null;
+  id?: number;
+}
 
 function MyLink({
   href,
@@ -106,8 +114,8 @@ export function Breadcrumbs({
   path: {
     type: string;
     href?: string | undefined;
-    lang1?: LanguageData;
-    lang2?: LanguageData;
+    lang1?: BreadcrumbLanguage;
+    lang2?: BreadcrumbLanguage;
     name?: string | undefined;
   }[];
 }) {

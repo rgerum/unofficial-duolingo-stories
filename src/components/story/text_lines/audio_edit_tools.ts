@@ -166,11 +166,11 @@ export async function generate_audio_line(ssml: {
   text: string;
   speaker: string;
   id: number;
-  mapping: Record<number, number>;
+  mapping?: Record<number, number>;
 }) {
   let speaker = ssml["speaker"].trim();
   let speak_text = ssml["text"];
-  let mapping = ssml["mapping"];
+  let mapping = ssml["mapping"] ?? {};
   /*
   let speaker = ssml["speaker"].trim();
   let speak_text = init_mapping(ssml["text"]);
