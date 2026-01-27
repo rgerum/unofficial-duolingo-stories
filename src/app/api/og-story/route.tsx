@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
             height="630px"
             width="1200px"
             src={imageUrl}
+            alt=""
           />
           <div
             style={{
@@ -59,7 +60,8 @@ export async function GET(request: NextRequest) {
             src={`https://stories-cdn.duolingo.com/image/${searchParams.get("image") ?? "783305780a6dad8e0e4eb34109d948e6a5fc2c35"}.svg`}
             height={290}
             width={300}
-          ></img>
+            alt=""
+          />
         </div>
       ),
       {

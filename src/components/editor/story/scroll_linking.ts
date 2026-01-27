@@ -157,6 +157,7 @@ export default function useScrollLinking(
     }
     editor.addEventListener("scroll", editor_scroll);
     return () => editor.removeEventListener("scroll", editor_scroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, preview, svg_parent]);
 
   React.useEffect(() => {
@@ -187,6 +188,7 @@ export default function useScrollLinking(
 
     preview.addEventListener("scroll", preview_scroll);
     return () => preview.removeEventListener("scroll", preview_scroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, preview, svg_parent]);
 
   React.useEffect(() => {

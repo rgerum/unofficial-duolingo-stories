@@ -99,6 +99,7 @@ export async function GET(request: NextRequest) {
             height="100%"
             width="100%"
             src={imageUrl}
+            alt=""
           />
           <div
             style={{

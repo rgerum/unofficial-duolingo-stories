@@ -267,7 +267,7 @@ export default function Editor({
     if (!unsaved_changes) return;
     window.addEventListener("beforeunload", beforeunload);
     return () => window.removeEventListener("beforeunload", beforeunload);
-  }, [unsaved_changes]);
+  }, [unsaved_changes, beforeunload]);
 
   React.useEffect(() => {
     if (!story_data || !avatar_names) return undefined;
@@ -429,6 +429,7 @@ export default function Editor({
       view.destroy();
       document.removeEventListener("keydown", key_pressed);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [story_data, avatar_names, language_data, language_data2]);
 
   //             <!--<div id="toolbar">--!

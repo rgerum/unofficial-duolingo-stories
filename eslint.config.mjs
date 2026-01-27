@@ -23,6 +23,7 @@ const eslintConfig = defineConfig([
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/use-memo": "off",
       "react-hooks/error-boundaries": "off",
+      "@next/next/no-img-element": "off",
     },
   },
 ]);

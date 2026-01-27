@@ -46,20 +46,21 @@ export default function Story({
   const storyElement = React.useRef<HTMLDivElement>(null);
   const mainElement = React.useRef<HTMLDivElement>(null);
 
-  let course = story.learning_language + "-" + story.from_language;
+  const course = story.learning_language + "-" + story.from_language;
 
-  let [progress, setProgress] = useState(editor ? -2 : -1);
-  let [right, setRight] = useState(false);
-  let [blocked, setBlocked] = useState(false);
-  let [progressStep, setProgressStep] = useState(1);
+  const [progress, setProgress] = useState(editor ? -2 : -1);
+  const progressRef = React.useRef(progress);
+  const [right, setRight] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const [progressStep, setProgressStep] = useState(1);
 
-  let [audio_loaded, setAudioLoaded] = useState(0);
+  const [audio_loaded, setAudioLoaded] = useState(0);
 
-  let [show_title_page, setShowTitlePage] = useState(0);
+  const [show_title_page, setShowTitlePage] = useState(0);
 
-  let ref_audio1 = React.useRef<HTMLAudioElement>(null);
-  let ref_audio2 = React.useRef<HTMLAudioElement>(null);
-  let ref_audio3 = React.useRef<HTMLAudioElement>(null);
+  const ref_audio1 = React.useRef<HTMLAudioElement>(null);
+  const ref_audio2 = React.useRef<HTMLAudioElement>(null);
+  const ref_audio3 = React.useRef<HTMLAudioElement>(null);
 
   const wrong = React.useCallback(() => {
     ref_audio2.current?.play();
@@ -78,39 +79,47 @@ export default function Story({
     }
   }, [show_title_page, progress, setShowTitlePage, setProgress]);
 
+  React.useEffect(() => {
+    progressRef.current = progress;
+  }, [progress]);
+
   function block_next() {
     if (!controls.hide_questions) setBlocked(true);
   }
 
-  let advance_progress = React.useCallback(
-    (current_progress?: number | undefined) => {
-      if (current_progress !== undefined) progress = current_progress;
-      dispatchEvent(
-        new CustomEvent("progress_changed", { detail: progress + 1 }),
-      );
-      setProgress(progress + progressStep);
+  const advance_progress = React.useCallback(
+    (expected_progress?: number | undefined) => {
+      if (
+        expected_progress !== undefined &&
+        progressRef.current !== expected_progress
+      ) {
+        return;
+      }
+
+      setProgress((prev) => {
+        if (expected_progress !== undefined && prev !== expected_progress)
+          return prev;
+
+        const next = prev + progressStep;
+        dispatchEvent(new CustomEvent("progress_changed", { detail: next }));
+        return next;
+      });
+
       if (show_title_page === 1) setShowTitlePage(2);
       setProgressStep(1);
       setRight(false);
     },
-    [
-      progress,
-      setProgress,
-      setRight,
-      progressStep,
-      show_title_page,
-      setShowTitlePage,
-    ],
+    [setProgress, setRight, progressStep, show_title_page, setShowTitlePage],
   );
 
-  let next = React.useCallback(() => {
+  const next = React.useCallback(() => {
     if (!blocked) {
       advance_progress();
     }
     //           dispatchEvent(new CustomEvent('next_button_clicked', {detail: progress}));
-  }, [blocked, progress, advance_progress]);
+  }, [blocked, advance_progress]);
 
-  let finish = React.useCallback(() => {
+  const finish = React.useCallback(() => {
     const end = async () => {
       if (!id) return;
       if (storyFinishedIndexUpdate) await storyFinishedIndexUpdate(id);
@@ -128,17 +137,17 @@ export default function Story({
       return;
     }
 
-    let parts = storyElement.current.querySelectorAll(
+    const parts = storyElement.current.querySelectorAll(
       "div.part:not([data-hidden=true])",
     );
-    let last = parts[parts.length - 1];
+    const last = parts[parts.length - 1];
 
     if (!editor) {
       last.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [editor, storyElement, progress]);
 
-  let controls = React.useCallback(() => {
+  const controls = React.useCallback(() => {
     return {
       wrong: wrong,
       right: right_call,
@@ -162,9 +171,9 @@ export default function Story({
     story.learning_language_rtl,
   ])();
 
-  let parts: StoryElement[][] = [];
+  const parts: StoryElement[][] = [];
   let last_id = -1;
-  for (let element of story.elements) {
+  for (const element of story.elements) {
     if (element.trackingProperties === undefined) {
       continue;
     }
@@ -175,7 +184,7 @@ export default function Story({
     parts[parts.length - 1].push(element);
   }
 
-  let finished = progress === parts.length;
+  const finished = progress === parts.length;
 
   React.useEffect(() => {
     if (progress === -1 && audio_loaded) advance_progress();
@@ -198,10 +207,10 @@ export default function Story({
 
     let count = 0;
     const audiosMap: { [key: string]: HTMLAudioElement } = {};
-    for (let url of audio_urls) {
+    for (const url of audio_urls) {
       if (audiosMap[url] === undefined && url !== undefined) {
         count += 1;
-        let a = new Audio();
+        const a = new Audio();
         function loadingFinished() {
           a.removeEventListener("canplaythrough", loadingFinished);
           a.removeEventListener("error", loadingFinished);

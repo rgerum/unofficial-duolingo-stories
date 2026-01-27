@@ -53,13 +53,14 @@ export default function useAudio(element: UseAudioElement, progress: number): Us
       timeouts.push(t);
     }
 
-    setTimeout(
+    const advanceTimeout = setTimeout(
       () => {
         if (controls?.auto_play)
           controls.advance_progress(element.trackingProperties.line_index || 0);
       },
       audioObject.duration * 1000 - 150,
     );
+    timeouts.push(advanceTimeout);
 
     function cancel() {
       for (const t of timeouts) clearTimeout(t);
@@ -74,7 +75,7 @@ export default function useAudio(element: UseAudioElement, progress: number): Us
       (element.trackingProperties.line_index === undefined && progress === -1)
     )
       playAudio();
-  }, [progress, playAudio]);
+  }, [progress, playAudio, element.trackingProperties.line_index]);
 
   if (audio === undefined || !audio?.keypoints || !audio?.url)
     return [audioRange, undefined, ref, undefined];

@@ -29,6 +29,7 @@ export default async function Page() {
           <img
             src="https://opencollective.com/duostories/contribute/button@2x.png?color=blue"
             height="48"
+            alt="Contribute on Open Collective"
           />
         </Link>
         or
@@ -39,6 +40,7 @@ export default async function Page() {
           <img
             src="https://opencollective.com/duostories/donate/button@2x.png?color=blue"
             height="48"
+            alt="Donate on Open Collective"
           />
         </Link>
         <Script src="https://opencollective.com/:collectiveSlug/banner.js"></Script>

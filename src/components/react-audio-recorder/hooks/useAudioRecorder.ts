@@ -104,6 +104,7 @@ const useAudioRecorder: (
     setRecordingBlob,
     onNotAllowedOrFound,
     mediaRecorderOptions,
+    audioTrackConstraints,
   ]);
 
   /**
@@ -136,7 +137,7 @@ const useAudioRecorder: (
       _stopTimer();
       mediaRecorder?.pause();
     }
-  }, [mediaRecorder, setIsPaused, _startTimer, _stopTimer]);
+  }, [isPaused, mediaRecorder, setIsPaused, _startTimer, _stopTimer]);
 
   return {
     startRecording,

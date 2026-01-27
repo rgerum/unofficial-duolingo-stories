@@ -100,7 +100,7 @@ function useArrangeButtons(
       let value = parseInt(e.key) - 1;
       if (value < order.length) click(value);
     },
-    [click],
+    [click, order.length],
   );
   React.useEffect(() => {
     if (active) {

@@ -51,7 +51,8 @@ export async function GET(_request: NextRequest) {
             src={"https://duostories.org/icon192.png"}
             height={"300px"}
             width="300px"
-          ></img>
+            alt=""
+          />
         </div>
       ),
       {
