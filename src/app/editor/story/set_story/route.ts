@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
     });
 
   let answer = await set_story(await req.json(), {
-    username: token.name,
-    user_id: typeof token.id === 'string' ? parseInt(token.id) : token.id,
+    username: token.name ?? "",
+    user_id: typeof token.id === 'string' ? parseInt(token.id) : token.id ?? 0,
   });
 
   if (answer === undefined)

@@ -9,15 +9,15 @@ Unofficial Duolingo Stories (https://duostories.org) - a community-driven platfo
 ## Development Commands
 
 ```bash
-npm run dev          # Development server at http://localhost:3000
-npm run build        # Production build
-npm run lint         # ESLint (uses pnpm exec eslint internally)
-npm run typecheck    # TypeScript type checking (tsc --noEmit)
-npm run init         # Initialize test database with sample data
-npm run init-reset   # Reset test database
-npm run cypress      # Open Cypress E2E test runner
-npm run storybook    # Component development at http://localhost:6006
-npm run new-component # Generate new component from template
+pnpm run dev          # Development server at http://localhost:3000
+pnpm run build        # Production build
+pnpm run lint         # ESLint (uses pnpm exec eslint internally)
+pnpm run typecheck    # TypeScript type checking (tsc --noEmit)
+pnpm run init         # Initialize test database with sample data
+pnpm run init-reset   # Reset test database
+pnpm run cypress      # Open Cypress E2E test runner
+pnpm run storybook    # Component development at http://localhost:6006
+pnpm run new-component # Generate new component from template
 ```
 
 Note: TypeScript build errors are ignored in `next.config.js` (`ignoreBuildErrors: true`), so `npm run build` will succeed even with type errors. Use `npm run typecheck` to check types separately.

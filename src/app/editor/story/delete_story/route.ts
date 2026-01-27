@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       });
 
     let answer = await delete_story(await req.json(), {
-      username: token.name,
+      username: token.name ?? "",
     });
 
     if (answer === undefined)

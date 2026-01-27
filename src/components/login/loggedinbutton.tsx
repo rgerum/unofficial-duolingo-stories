@@ -83,10 +83,10 @@ export function LoggedInButton({
   page: string;
   course_id?: string;
   user?: {
-    name: string;
-    image?: string | null | undefined;
-    role: boolean | null | undefined;
-    admin: boolean | null | undefined;
+    name?: string | null;
+    image?: string | null;
+    role?: boolean | null;
+    admin?: boolean | null;
   };
 }) {
   //const { data: session } = useSession();
@@ -121,7 +121,7 @@ export function LoggedInButton({
         data-cy="user-button"
         style={user?.image ? { backgroundImage: `url('${user?.image}')` } : {}}
       >
-        {user.name.substring(0, 1)}
+        {(user.name ?? "").substring(0, 1)}
       </div>
       <div>
         <Link
