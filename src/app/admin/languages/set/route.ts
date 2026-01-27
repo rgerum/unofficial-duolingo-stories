@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const data: LanguageData = await req.json();
   const token = await getUser();
 
-  if (token?.role !== "admin")
+  if (!token?.admin)
     return new Response("You need to be a registered admin.", {
       status: 401,
     });

@@ -4,11 +4,10 @@ import Facebook from "next-auth/providers/facebook";
 import Google from "next-auth/providers/google";
 import Discord from "next-auth/providers/discord";
 
-import PostgresAdapter from "@auth/pg-adapter";
-import { Pool } from "@neondatabase/serverless";
 import Credentials from "next-auth/providers/credentials";
 
 import { authorizeUser } from "@/authorize";
+import MyAdapter from "@/lib/database_adapter";
 
 declare module "next-auth" {
   /**
@@ -37,12 +36,9 @@ declare module "next-auth" {
   }
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth(() => {
-  // Create a `Pool` inside the request handler.
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  // @ts-ignore
-  return {
-    adapter: PostgresAdapter(pool),
+export const { handlers, auth, signIn, signOut } = NextAuth({
+    // @ts-ignore - adapter type mismatch between @auth/core versions
+    adapter: MyAdapter(),
     session: { strategy: "jwt" },
     callbacks: {
       jwt({ token, user }) {
@@ -86,5 +82,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => {
         authorize: authorizeUser,
       }),
     ],
-  };
 });

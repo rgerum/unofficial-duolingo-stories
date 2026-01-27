@@ -7,7 +7,7 @@ import type { Voice } from "../_lib/audio/types";
 export async function GET(_req: NextRequest) {
   const token = await getUser();
 
-  if (token?.role !== "admin")
+  if (!token?.admin)
     return new Response("You need to be a registered admin.", { status: 401 });
 
   let voices: Voice[] = [];

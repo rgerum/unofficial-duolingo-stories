@@ -85,7 +85,7 @@ export function LoggedInButton({
   user?: {
     name: string;
     image?: string | null | undefined;
-    role: string | null | undefined;
+    role: boolean | null | undefined;
     admin: boolean | null | undefined;
   };
 }) {
@@ -111,8 +111,8 @@ export function LoggedInButton({
       </Button>
     );
 
-  const isContributor = user.role == "contributor" || user.role == "admin";
-  const isAdmin = user.role == "admin";
+  const isContributor = !!user.role;
+  const isAdmin = !!user.admin;
 
   return (
     <Dropdown>
