@@ -7,10 +7,8 @@ import React, { useEffect, useState } from "react";
 import Dropdown from "../layout/dropdown";
 import { signIn, signOut } from "next-auth/react";
 import Link from "next/link";
-import { useRouter, useSelectedLayoutSegments } from "next/navigation";
+import { useSelectedLayoutSegments } from "next/navigation";
 import Button from "../layout/button";
-import { getUser } from "@/lib/userInterface";
-import { authClient } from "@/lib/authClient";
 
 function themeToLightOrDark(
   theme: string | null,
@@ -71,7 +69,7 @@ function useDarkLight() {
 
 export function LogInButton() {
   return (
-    <Button as={Link} href={"/auth/signin"} data-cy="login-button">
+    <Button onClick={() => signIn()} data-cy="login-button">
       Log in
     </Button>
   );
@@ -91,7 +89,6 @@ export function LoggedInButton({
     admin: boolean | null | undefined;
   };
 }) {
-  const router = useRouter();
   //const { data: session } = useSession();
   const controls = useDarkLight();
 
@@ -187,15 +184,7 @@ export function LoggedInButton({
         ) : null}
         <div
           className={styles.profile_dropdown_button}
-          onClick={async () => {
-            await authClient.signOut({
-              fetchOptions: {
-                onSuccess: () => {
-                  router.push("/login"); // redirect to login page
-                },
-              },
-            });
-          }}
+          onClick={() => signOut()}
           data-cy="user-logout"
         >
           Log out

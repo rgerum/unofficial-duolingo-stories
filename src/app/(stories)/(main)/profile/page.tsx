@@ -3,10 +3,7 @@ import Header from "../header";
 import Profile from "./profile";
 import getUserId from "@/lib/getUserId";
 import { getUser } from "@/lib/userInterface";
-import { authClient } from "@/lib/authClient";
 import { Metadata } from "next";
-import { auth } from "@/auth";
-import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   alternates: {
@@ -55,12 +52,9 @@ async function getLinkedProviders() {
 }
 
 export default async function Page() {
-  //const providers = await getLinkedProviders();
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const providers = await getLinkedProviders();
 
-  if (!session) {
+  if (providers === undefined) {
     return (
       <Header>
         <p data-cy="profile-error">Not Logged in</p>
@@ -71,15 +65,7 @@ export default async function Page() {
 
   return (
     <>
-      <Profile
-        providers={{
-          providers: [],
-          name: "",
-          email: "",
-          role: [],
-          provider_linked: {},
-        }}
-      />
+      <Profile providers={providers} />
     </>
   );
 }

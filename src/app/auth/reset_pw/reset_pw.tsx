@@ -3,10 +3,9 @@ import React from "react";
 import styles from "../register.module.css";
 import Link from "next/link";
 import { useInput } from "@/lib/hooks";
+import sendPasswordAction from "./sendPasswordAction";
 import Button from "@/components/layout/button";
 import Input from "@/components/layout/Input";
-import { authClient } from "@/lib/authClient";
-import { z } from "zod";
 
 export default function ResetPassword() {
   const [state, setState] = React.useState(0);
@@ -17,7 +16,7 @@ export default function ResetPassword() {
 
   async function register_button() {
     const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-    if (!z.email().safeParse(emailInput).success) {
+    if (!emailValidation.test(emailInput)) {
       let msg = "Not a valid email, please try again.";
       setError(msg);
       setState(-1);
@@ -26,16 +25,8 @@ export default function ResetPassword() {
 
     setState(1);
     try {
-      const { data, error } = await authClient.requestPasswordReset({
-        email: emailInput, // required
-        redirectTo: "/auth/reset_pw/reset",
-      });
-      if (error) {
-        setState(-1);
-        setError("An Error occurred." + error.message);
-      } else {
-        setState(1);
-      }
+      await sendPasswordAction(emailInput);
+      setState(1);
     } catch (e) {
       setState(-1);
       setError("An Error occurred." + e);
@@ -45,6 +36,12 @@ export default function ResetPassword() {
     );
     setState(2);
   }
+  const handleKeypressSignup = (e: React.KeyboardEvent) => {
+    // listens for enter key
+    if (e.keyCode === 13) {
+      register_button();
+    }
+  };
 
   return (
     <>
@@ -74,7 +71,7 @@ export default function ResetPassword() {
       )}
       <p className={styles.P}>
         Already have an account?{" "}
-        <Link className={styles.link} href="/auth/signin">
+        <Link className={styles.link} href="/api/auth/signin">
           LOG IN
         </Link>
       </p>

@@ -1,5 +1,5 @@
 import React from "react";
-import { getUser } from "@/lib/userInterface";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 interface LayoutProps {
@@ -7,9 +7,9 @@ interface LayoutProps {
 }
 
 export default async function Layout({ children }: LayoutProps) {
-  const user = await getUser();
+  const session = await auth();
 
-  if (user?.role === "admin" || user?.role === "editor") redirect("/editor");
+  if (session?.user?.admin) redirect("/editor");
 
   return <>{children}</>;
 }

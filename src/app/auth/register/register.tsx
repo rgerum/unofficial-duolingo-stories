@@ -7,8 +7,37 @@ import { useInput } from "@/lib/hooks";
 import Button from "@/components/layout/button";
 import Input from "@/components/layout/Input";
 
-import { z } from "zod";
-import { authClient } from "@/lib/authClient";
+export async function fetch_post(url: string, data: Record<string, string>) {
+  let req = new Request(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+    mode: "cors",
+    credentials: "include",
+  });
+  return fetch(req);
+}
+
+export async function register(data: Record<string, string>): Promise<[boolean, string]> {
+  let response;
+  try {
+    response = await fetch_post(`/auth/register/send`, data);
+  } catch (e) {
+    console.log(e);
+    return [false, "Something went wrong."];
+  }
+
+  if (response.status === 403) {
+    let text = await response.text();
+    return [false, text];
+  } else if (response.status !== 200) {
+    return [false, "Something went wrong."];
+  }
+
+  return [true, ""];
+}
 
 export default function Register() {
   const [state, setState] = React.useState(0);
@@ -30,7 +59,7 @@ export default function Register() {
       return false;
     }
 
-    if (!z.email().safeParse(emailInput).success) {
+    if (!emailValidation.test(emailInput)) {
       setError("Not a valid email, please try again.");
       return false;
     }
@@ -52,40 +81,14 @@ export default function Register() {
     }
 
     setState(1);
-
-    const { data, error } = await authClient.signUp.email(
-      {
-        email: emailInput, // user email address
-        password: passwordInput, // user password -> min 8 characters by default
-        name: usernameInput, // user display name
-        //image, // User image URL (optional)
-        callbackURL: "/", // A URL to redirect to after the user verifies their email (optional)
-        username: usernameInput,
-      },
-      {
-        onRequest: (ctx) => {
-          //show loading
-        },
-        onSuccess: (ctx) => {
-          //redirect to the dashboard or sign in page
-        },
-        onError: (ctx) => {
-          // display the error message
-          alert(ctx.error.message);
-        },
-      },
-    );
-
-    console.log(data, error);
-    /*
     const [success, msg] = await register({
       name: usernameInput,
       password: passwordInput,
       email: emailInput,
-    });*/
+    });
 
-    if (error) {
-      setError(error.message || "Something went wrong.");
+    if (!success) {
+      setError(msg || "Something went wrong.");
       setState(-1);
     } else {
       setState(2);
@@ -153,7 +156,7 @@ export default function Register() {
       )}
       <p className={styles.P}>
         Already have an account?{" "}
-        <Link className={styles.link} href="/auth/signin">
+        <Link className={styles.link} href="/api/auth/signin">
           LOG IN
         </Link>
       </p>

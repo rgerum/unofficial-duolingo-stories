@@ -1,6 +1,6 @@
 "use client";
 import styles from "./learn.module.css";
-import { signIn } from "@/lib/authClient";
+import { signIn } from "next-auth/react";
 import styles2 from "../../auth/register.module.css";
 import Link from "next/link";
 import React from "react";

@@ -1,10 +1,9 @@
+import { auth, signIn } from "@/auth";
+
 import React from "react";
 import { redirect } from "next/navigation";
 import { LoginOptions } from "./login_options";
 import { CallbackRouteError } from "@auth/core/errors";
-import { authClient } from "@/lib/authClient";
-import { auth } from "@/auth";
-import { headers } from "next/headers";
 
 export interface ProviderProps {
   id: string;
@@ -16,11 +15,7 @@ export interface ProviderProps {
 }
 
 export default async function Page({}) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  console.log("data", session);
+  const session = await auth();
 
   // If the user is already logged in, redirect.
   // Note: Make sure not to redirect to the same page
@@ -29,7 +24,31 @@ export default async function Page({}) {
     redirect("/");
   }
 
-  const providers: ProviderProps[] = [
+  const signin_action = async (
+    state: { error: string | null },
+    formData: FormData,
+  ): Promise<{ error: string | null }> => {
+    "use server";
+    try {
+      await signIn("credentials", formData);
+      return { error: null };
+    } catch (error) {
+      if ((error as CallbackRouteError)["cause"]) {
+        return {
+          error:
+            (error as CallbackRouteError)["cause"]?.err?.message ||
+            "Sign in error.",
+        };
+      }
+      if ((error as Error).message === "NEXT_REDIRECT") {
+        redirect("/");
+      }
+
+      return { error: "Unknown error" };
+    }
+  };
+
+  let providers: ProviderProps[] = [
     {
       id: "facebook",
       name: "Facebook",
@@ -38,7 +57,7 @@ export default async function Page({}) {
       callbackUrl: "http://localhost:3000/api/auth/callback/facebook",
       action: async () => {
         "use server";
-        await authClient.signIn.social({ provider: "facebook" });
+        await signIn("facebook");
       },
     },
     {
@@ -49,7 +68,7 @@ export default async function Page({}) {
       callbackUrl: "http://localhost:3000/api/auth/callback/github",
       action: async () => {
         "use server";
-        await authClient.signIn.social({ provider: "github" });
+        await signIn("github");
       },
     },
     {
@@ -60,7 +79,7 @@ export default async function Page({}) {
       callbackUrl: "http://localhost:3000/api/auth/callback/discord",
       action: async () => {
         "use server";
-        await authClient.signIn.social({ provider: "discord" });
+        await signIn("discord");
       },
     },
     {
@@ -71,10 +90,10 @@ export default async function Page({}) {
       callbackUrl: "http://localhost:3000/api/auth/callback/google",
       action: async () => {
         "use server";
-        await authClient.signIn.social({ provider: "google" });
+        await signIn("google");
       },
     },
     //"credentials":{"id":"credentials","name":"Credentials","type":"credentials","signinUrl":"http://localhost:3000/api/auth/signin/credentials","callbackUrl":"http://localhost:3000/api/auth/callback/credentials"}
   ];
-  return <LoginOptions providers={providers} />;
+  return <LoginOptions providers={providers} signin_action={signin_action} />;
 }
