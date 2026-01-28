@@ -81,7 +81,7 @@
     "prettier": "^3.5.2",
     "smtp-tester": "^2.1.0",
     "sqlite3": "^5.1.7",
-    "storybook": "^8.5.8",
+    "storybook": "^8.6.15",
     "typescript": "^5.7.3"
   }
 }
