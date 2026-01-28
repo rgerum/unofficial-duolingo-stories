@@ -15,7 +15,6 @@ pnpm run lint         # ESLint (uses pnpm exec eslint internally)
 pnpm run typecheck    # TypeScript type checking (tsc --noEmit)
 pnpm run init         # Initialize test database with sample data
 pnpm run init-reset   # Reset test database
-pnpm run cypress      # Open Cypress E2E test runner
 pnpm run storybook    # Component development at http://localhost:6006
 pnpm run new-component # Generate new component from template
 ```
@@ -48,7 +47,7 @@ Test credentials: user/test (normal), editor/test (editor access), admin/test (a
   - `audio/` - Audio processing endpoints
 - `src/components/` - Reusable React components
 - `src/lib/` - Server utilities, database helpers, auth
-- `database/` - SQL schema (`schema.sql`), test data, story JSON files, Cypress config
+- `database/` - SQL schema (`schema.sql`), test data, story JSON files
 
 ### Key Files
 - `src/auth.ts` - Better Auth server configuration (JWT sessions, OAuth providers, email verification)
@@ -80,10 +79,6 @@ Direct SQL queries via `postgres` library using tagged template literals (`sql`)
 ## Story Workflow
 
 Stories have a status workflow: draft → feedback → finished. Stories belong to courses, which link a learning language to a base language.
-
-## Testing
-
-Cypress E2E tests live in `cypress/e2e/`. The Cypress config is at `database/cypress.config.js` (not the project root). Tests cover login, registration, password reset, navigation, and story reading. The Cypress setup includes a local SMTP server (port 7777) for testing email flows.
 
 ## Audio/TTS
 

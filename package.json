@@ -9,7 +9,6 @@
     "init": "node database/db_create_test.mjs",
     "init-build": "node database/init_build.js",
     "init-reset": "node database/db_test_reset.mjs",
-    "cypress": "cypress open",
     "storybook": "storybook dev -p 6006",
     "new-component": "node new_component.mjs",
     "build-storybook": "storybook build"
@@ -82,11 +81,9 @@
     "@types/node": "^25.0.3",
     "@types/pg": "^8.16.0",
     "@types/react": "^19.2.7",
-    "cypress": "^15.8.1",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.1.1",
     "prettier": "^3.7.4",
-    "smtp-tester": "^2.1.0",
     "sqlite3": "^5.1.7",
     "storybook": "^10.1.11",
     "typescript": "^5.9.3"
