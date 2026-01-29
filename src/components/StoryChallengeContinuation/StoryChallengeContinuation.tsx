@@ -29,7 +29,11 @@ function StoryChallengeContinuation({
   if (settings.hide_questions) {
     if (active) setButtonStatus("continue");
     return (
-      <FadeGlideIn key={`${id}-1`} hidden={hidden}>
+      <FadeGlideIn
+        key={`${id}-1`}
+        hidden={hidden}
+        disableScroll={settings.show_all}
+      >
         <StoryTextLine active={active} element={parts[1]} settings={settings} />
       </FadeGlideIn>
     );
@@ -41,10 +45,15 @@ function StoryChallengeContinuation({
         key={`${id}-1`}
         show={active || settings.show_all}
         hidden={hidden}
+        disableScroll={settings.show_all}
       >
         <StoryQuestionPrompt question={parts[0].prompt} lang={parts[0].lang} />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-2`} hidden={hidden}>
+      <FadeGlideIn
+        key={`${id}-2`}
+        hidden={hidden}
+        disableScroll={settings.show_all}
+      >
         <StoryTextLine
           active={active}
           element={parts[1]}
@@ -56,6 +65,7 @@ function StoryChallengeContinuation({
         key={`${id}-3`}
         show={active || settings.show_all}
         hidden={hidden}
+        disableScroll={settings.show_all}
       >
         <StoryQuestionMultipleChoice
           element={parts[2]}

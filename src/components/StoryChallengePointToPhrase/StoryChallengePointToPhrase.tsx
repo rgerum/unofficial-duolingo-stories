@@ -39,7 +39,11 @@ function StoryChallengePointToPhrase({
 
   if (settings.hide_questions) {
     return (
-      <FadeGlideIn key={`${id}-1`} hidden={hidden}>
+      <FadeGlideIn
+        key={`${id}-1`}
+        hidden={hidden}
+        disableScroll={settings.show_all}
+      >
         <StoryTextLine
           active={active}
           element={parts[0] as StoryElementLine}
@@ -51,7 +55,12 @@ function StoryChallengePointToPhrase({
 
   return (
     <>
-      <FadeGlideIn key={`${id}-1`} show={!show_question} hidden={hidden}>
+      <FadeGlideIn
+        key={`${id}-1`}
+        show={!show_question}
+        hidden={hidden}
+        disableScroll={settings.show_all}
+      >
         <StoryTextLine
           element={parts[0] as StoryElementLine}
           settings={settings}
@@ -62,6 +71,7 @@ function StoryChallengePointToPhrase({
         key={`${id}-2`}
         show={show_question || settings.show_all}
         hidden={hidden}
+        disableScroll={settings.show_all}
       >
         <StoryQuestionPointToPhrase
           active={active}

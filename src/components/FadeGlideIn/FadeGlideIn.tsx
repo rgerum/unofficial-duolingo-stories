@@ -6,12 +6,14 @@ function FadeGlideIn({
   children,
   show = true,
   hidden,
+  disableScroll,
 }: {
   children: React.ReactNode;
   show?: boolean;
   hidden?: boolean;
+  disableScroll?: boolean;
 }) {
-  const ref = useScrollIntoView(show && !hidden);
+  const ref = useScrollIntoView(show && !hidden && !disableScroll);
 
   return (
     <div
