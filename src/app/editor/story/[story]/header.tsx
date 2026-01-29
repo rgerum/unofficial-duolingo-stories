@@ -49,7 +49,7 @@ export function StoryEditorHeader({
   async function Save() {
     try {
       set_save_text("Saving...");
-      func_save();
+      await func_save();
     } catch (e) {
       //console.log("error save", e);
       window.alert("Story could not be saved.");
@@ -68,7 +68,7 @@ export function StoryEditorHeader({
       ) as HTMLSpanElement;
       if (deleteButton) deleteButton.innerText = "Deleting";
       try {
-        func_delete();
+        await func_delete();
       } catch (e) {
         //console.log("error delete", e);
         const deleteButton = document.querySelector(

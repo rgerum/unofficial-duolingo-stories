@@ -102,6 +102,9 @@ export async function setStory(data: {
   todo_count: number;
 }) {
   const res = await fetch_post(`/editor/story/set_story`, data);
+  if (!res.ok) {
+    throw new Error(`setStory failed: ${res.status} ${res.statusText}`);
+  }
   return await res.text();
 }
 
@@ -112,6 +115,9 @@ export async function deleteStory(data: {
   name: string | undefined;
 }) {
   let res = await fetch_post(`/editor/story/delete_story`, data);
+  if (!res.ok) {
+    throw new Error(`deleteStory failed: ${res.status} ${res.statusText}`);
+  }
   return await res.text();
 }
 
