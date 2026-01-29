@@ -4,21 +4,30 @@ import useAudio from "./use-audio.hook";
 import StoryLineHints from "../StoryLineHints";
 import PlayAudio from "../PlayAudio";
 import StoryTextLineSimple from "../StoryTextLineSimple";
+import EditorSSMLDisplay from "../EditorSSMLDisplay";
 import { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor";
+import { useEditorHook, type EditorProps } from "../story/useEditorHook";
 
 function StoryTextLine({
   active,
   element,
   unhide = 999999,
   settings,
+  editorState,
 }: {
   active: boolean;
   element: StoryElementLine;
   unhide?: number;
   settings: StorySettings;
+  editorState?: EditorStateType;
 }) {
-  const onClick = undefined;
+  const editorProps: EditorProps = {
+    editorState,
+    editorBlock: element.editor,
+  };
+  const { onClick } = useEditorHook(editorProps);
   const [audioRange, playAudio, ref, url] = useAudio(element, active);
 
   if (element.line === undefined) return <></>;
@@ -50,6 +59,7 @@ function StoryTextLine({
       <div
         key={element.trackingProperties.line_index}
         className={styles.title + " " + element.lang}
+        onClick={onClick}
         data-lineno={element?.editor?.block_start_no}
       >
         <span className={styles.title}>
@@ -61,6 +71,7 @@ function StoryTextLine({
             audioRange={audioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             content={element.line.content}
+            editorState={editorState}
           />
         </span>
       </div>
@@ -87,7 +98,16 @@ function StoryTextLine({
             hideRangesForChallenge={hideRangesForChallenge}
             unhide={unhide}
             content={element.line.content}
+            editorState={editorState}
           />
+          {editorState && element.line.content.audio && (
+            <EditorSSMLDisplay
+              ssml={element.line.content.audio.ssml}
+              audio={element.line.content.audio}
+              element={element}
+              editor={editorState}
+            />
+          )}
         </span>
       </div>
     );
@@ -96,6 +116,7 @@ function StoryTextLine({
       <div
         key={element.trackingProperties.line_index}
         className={styles.phrase + " " + element.lang}
+        onClick={onClick}
         data-lineno={element?.editor?.block_start_no}
       >
         <span>
@@ -108,7 +129,16 @@ function StoryTextLine({
             hideRangesForChallenge={hideRangesForChallenge}
             unhide={unhide}
             content={element.line.content}
+            editorState={editorState}
           />
+          {editorState && element.line.content.audio && (
+            <EditorSSMLDisplay
+              ssml={element.line.content.audio.ssml}
+              audio={element.line.content.audio}
+              element={element}
+              editor={editorState}
+            />
+          )}
         </span>
       </div>
     );
