@@ -16,14 +16,16 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         status: 401,
       });
 
-    let answer = await language({ language_id });
+    const answer = await language({ language_id });
 
     if (answer === undefined)
       return new Response("Error not found.", { status: 404 });
 
     return NextResponse.json(answer);
   } catch (err) {
-    return new Response(err instanceof Error ? err.message : String(err), { status: 500 });
+    return new Response(err instanceof Error ? err.message : String(err), {
+      status: 500,
+    });
   }
 }
 

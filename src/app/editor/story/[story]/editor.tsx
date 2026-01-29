@@ -70,20 +70,19 @@ const LanguageSchema = z.object({
   name: z.string(),
   short: z.string(),
   flag: z.number(),
-  flag_file: z.string(),
-  speaker: z.string(),
+  flag_file: z.string().nullable(),
+  speaker: z.string().nullable(),
   default_text: z.string(),
-  tts_replace: z.string(),
+  tts_replace: z.string().nullable(),
   public: z.boolean(),
   rtl: z.boolean(),
 });
 type LanguageData = z.infer<typeof LanguageSchema>;
 export async function getLanguageName(id: number) {
   try {
-    let response = await fetch(`/editor/story/get_language/${id}`, {
+    const response = await fetch(`/editor/story/get_language/${id}`, {
       credentials: "include",
     });
-    console.log("getLanguageName", id, await response.json());
     return LanguageSchema.parse(await response.json());
   } catch (e) {
     return undefined;
@@ -172,8 +171,8 @@ export default function Editor({
   React.useEffect(() => {
     async function loadLanguageData() {
       if (!story_data) return () => {};
-      let language_data = await getLanguageName(story_data.learning_language);
-      let language_data2 = await getLanguageName(story_data.from_language);
+      const language_data = await getLanguageName(story_data.learning_language);
+      const language_data2 = await getLanguageName(story_data.from_language);
       set_language_data(language_data);
       set_language_data2(language_data2);
       return () => {};
