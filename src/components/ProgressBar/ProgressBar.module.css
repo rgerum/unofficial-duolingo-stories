@@ -1,30 +1,30 @@
 .progress {
-    background: var(--progress-back);
+  background: var(--progress-back);
 
-    --height: 16px;
-    border-radius: calc(var(--height) / 2);
-    height: var(--height);
-    overflow: hidden;
-    width: 100%;
+  --height: 16px;
+  border-radius: calc(var(--height) / 2);
+  height: var(--height);
+  overflow: hidden;
+  width: 100%;
 }
 
 .progress_inside {
-    position: relative;
-    width: var(--width);
-    height: var(--height);
-    background: var(--progress-inside);
-    border-radius: calc(var(--height) / 2);
-    transition: width 0.2s;
+  position: relative;
+  width: var(--width);
+  height: var(--height);
+  background: var(--progress-inside);
+  border-radius: calc(var(--height) / 2);
+  transition: width 0.2s;
 }
 
 .progress_highlight {
-    position: absolute;
-    top: 25%;
-    left: calc(var(--height) / 2);
-    right: calc(var(--height) / 2);
-    height: 30%;
+  position: absolute;
+  top: 25%;
+  left: calc(var(--height) / 2);
+  right: calc(var(--height) / 2);
+  height: 30%;
 
-    background: var(--progress-highlight);
-    border-radius: inherit;
-    opacity: 0.2;
+  background: var(--progress-highlight);
+  border-radius: inherit;
+  opacity: 0.2;
 }

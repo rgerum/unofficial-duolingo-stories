@@ -59,7 +59,7 @@ export function LoginOptions(props: {
         </Button>
       </form>
       <p className={styles.P}>
-        Don't have an account?{" "}
+        {"Don't have an account? "}
         <Link
           href="/auth/register"
           data-cy="register-button"

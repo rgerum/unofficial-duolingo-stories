@@ -54,38 +54,37 @@ const AudioRecorder: (props: Props) => ReactElement = ({
     useAudioRecorder(
       audioTrackConstraints,
       onNotAllowedOrFound,
-      mediaRecorderOptions
+      mediaRecorderOptions,
     );
 
   const [shouldSave, setShouldSave] = useState(false);
 
   const stopAudioRecorder: (save?: boolean) => void = (
-    save: boolean = true
+    save: boolean = true,
   ) => {
     setShouldSave(save);
     stopRecording();
   };
 
   const convertToDownloadFileExtension = async (
-    webmBlob: Blob
+    webmBlob: Blob,
   ): Promise<Blob> => {
-    const FFmpeg = await import("@ffmpeg/ffmpeg");
-    const ffmpeg = FFmpeg.createFFmpeg({ log: false });
+    const { FFmpeg } = await import("@ffmpeg/ffmpeg");
+    const ffmpeg = new FFmpeg();
     await ffmpeg.load();
 
     const inputName = "input.webm";
     const outputName = `output.${downloadFileExtension}`;
 
-    ffmpeg.FS(
-      "writeFile",
+    await ffmpeg.writeFile(
       inputName,
-      new Uint8Array(await webmBlob.arrayBuffer())
+      new Uint8Array(await webmBlob.arrayBuffer()),
     );
 
-    await ffmpeg.run("-i", inputName, outputName);
+    await ffmpeg.exec(["-i", inputName, outputName]);
 
-    const outputData = ffmpeg.FS("readFile", outputName);
-    const outputBlob = new Blob([outputData.buffer], {
+    const outputData = await ffmpeg.readFile(outputName);
+    const outputBlob = new Blob([new Uint8Array(outputData as Uint8Array)], {
       type: `audio/${downloadFileExtension}`,
     });
 
@@ -95,7 +94,7 @@ const AudioRecorder: (props: Props) => ReactElement = ({
   const downloadBlob = async (blob: Blob): Promise<void> => {
     if (!crossOriginIsolated && downloadFileExtension !== "webm") {
       console.warn(
-        `This website is not "cross-origin isolated". Audio will be downloaded in webm format, since mp3/wav encoding requires cross origin isolation. Please visit https://web.dev/cross-origin-isolation-guide/ and https://web.dev/coop-coep/ for information on how to make your website "cross-origin isolated"`
+        `This website is not "cross-origin isolated". Audio will be downloaded in webm format, since mp3/wav encoding requires cross origin isolation. Please visit https://web.dev/cross-origin-isolation-guide/ and https://web.dev/coop-coep/ for information on how to make your website "cross-origin isolated"`,
       );
     }
 
@@ -125,6 +124,7 @@ const AudioRecorder: (props: Props) => ReactElement = ({
         void downloadBlob(recordingBlob);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recordingBlob]);
 
   return (
@@ -142,6 +142,7 @@ const AudioRecorder: (props: Props) => ReactElement = ({
         onClick={isRecording ? () => stopAudioRecorder() : startRecording}
         data-testid="ar_mic"
         title={isRecording ? "Save recording" : "Start recording"}
+        alt={isRecording ? "Save recording" : "Start recording"}
       />
       <span
         className={`audio-recorder-timer ${
@@ -191,6 +192,7 @@ const AudioRecorder: (props: Props) => ReactElement = ({
         } ${classes?.AudioRecorderPauseResumeClass ?? ""}`}
         onClick={togglePauseResume}
         title={isPaused ? "Resume recording" : "Pause recording"}
+        alt={isPaused ? "Resume recording" : "Pause recording"}
         data-testid="ar_pause"
       />
       <img
@@ -200,6 +202,7 @@ const AudioRecorder: (props: Props) => ReactElement = ({
         } ${classes?.AudioRecorderDiscardClass ?? ""}`}
         onClick={() => stopAudioRecorder(false)}
         title="Discard Recording"
+        alt="Discard Recording"
         data-testid="ar_cancel"
       />
     </div>

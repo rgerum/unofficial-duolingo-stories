@@ -20,7 +20,7 @@
 .admin_table tr:nth-child(2n) {
   background-color: var(--body-background-faint);
 }
-.admin_table tr:nth-child(2n+1) {
+.admin_table tr:nth-child(2n + 1) {
   background-color: var(--body-background);
 }
 

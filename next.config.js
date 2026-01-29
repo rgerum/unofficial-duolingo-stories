@@ -1,14 +1,7 @@
-const withPWA = require("next-pwa")({
-  dest: "public",
-});
-
-module.exports = withPWA({
+module.exports = {
   // next.js config
   compiler: {
     styledComponents: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
@@ -35,4 +28,4 @@ module.exports = withPWA({
       },
     ],
   },
-});
+};

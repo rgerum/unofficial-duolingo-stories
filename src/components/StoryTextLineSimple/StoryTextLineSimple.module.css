@@ -1,25 +1,25 @@
 .wrapper {
-    display: flex;
-    align-items: first baseline;
-    margin: 16px 0;
-    gap: 16px;
+  display: flex;
+  align-items: first baseline;
+  margin: 16px 0;
+  gap: 16px;
 }
 .text {
-    flex: 1
+  flex: 1;
 }
 .highlight {
-    background: #e6f484;
-    -webkit-print-color-adjust:exact !important;
-    print-color-adjust:exact !important;
+  background: #e6f484;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
 }
 .speaker_name {
-    font-weight: 700;
-    width: 100px;
-    display: inline-block;
-    text-align: right;
+  font-weight: 700;
+  width: 100px;
+  display: inline-block;
+  text-align: right;
 }
 .id {
-    font-family: monospace;
-    font-weight: 700;
-    text-align: right;
+  font-family: monospace;
+  font-weight: 700;
+  text-align: right;
 }

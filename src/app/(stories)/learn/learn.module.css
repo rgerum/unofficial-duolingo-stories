@@ -1,20 +1,18 @@
-
-
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 0 15px;
-    height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+  height: 100vh;
 }
 
-.container>div {
-    display: block;
-    text-align: center;
-    margin: 20px;
+.container > div {
+  display: block;
+  text-align: center;
+  margin: 20px;
 }
 
 .button_alt {
-    color: var(--text-color);
+  color: var(--text-color);
 }

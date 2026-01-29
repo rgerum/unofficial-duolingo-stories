@@ -13,15 +13,15 @@
   /*width: 100%;*/
   /*height: 60px;*/
   border-bottom: 2px solid var(--header-border);
-/*  background: var(--body-background);*/
+  /*  background: var(--body-background);*/
   /*z-index: 1;
   box-sizing: border-box;*/
   display: flex;
   flex-direction: row;
   align-items: center;
-/*  position: fixed; */
+  /*  position: fixed; */
   padding: 0 20px;
-/*  top: 0; */
+  /*  top: 0; */
 }
 
 .main_overview {

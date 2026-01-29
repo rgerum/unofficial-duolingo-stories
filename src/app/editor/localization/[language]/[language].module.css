@@ -241,7 +241,6 @@
   }
 }
 
-
 .table th {
   padding: 5px 8px;
   text-align: left;
@@ -250,7 +249,7 @@
 }
 
 .table tr:nth-child(2n) {
-  background-color:var(--body-background-faint)
+  background-color: var(--body-background-faint);
 }
 
 .table td {
@@ -270,7 +269,6 @@
   background: #eef8fc;
 }
 
-
 .tag {
   background: var(--editor-ssml);
   border-radius: 10px;
@@ -279,11 +277,11 @@
 }
 
 .table textarea {
-  border:1px solid var(--input-border);
-  background:var(--input-background);
-  color:var(--text-color);
-  border-radius:5px;
-  padding:5px;
+  border: 1px solid var(--input-border);
+  background: var(--input-background);
+  color: var(--text-color);
+  border-radius: 5px;
+  padding: 5px;
   font-size: 17px;
   width: 100%;
 }

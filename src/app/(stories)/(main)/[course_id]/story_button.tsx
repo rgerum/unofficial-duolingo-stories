@@ -1,3 +1,4 @@
+"use client";
 import styles from "./story_button.module.css";
 import Link from "next/link";
 import Image from "next/image";
@@ -33,6 +34,14 @@ export default function StoryButton({
       data-cy={"story_button_" + story.id}
       className={styles.button_story_parent}
       href={`/story/${story.id}`}
+      onClick={() => {
+        if (typeof window !== "undefined") {
+          window.sessionStorage.setItem(
+            "story_autoplay_ts",
+            String(Date.now()),
+          );
+        }
+      }}
     >
       <div
         className={styles.button_story_img}

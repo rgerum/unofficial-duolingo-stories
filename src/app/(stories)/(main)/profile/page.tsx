@@ -3,8 +3,9 @@ import Header from "../header";
 import Profile from "./profile";
 import getUserId from "@/lib/getUserId";
 import { getUser } from "@/lib/userInterface";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   alternates: {
     canonical: "https://duostories.org/profile",
   },

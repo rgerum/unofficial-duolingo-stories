@@ -27,7 +27,7 @@ function LanguageButtonSmall({
       <Flag
         iso={flag_data?.short}
         width={40}
-        flag_file={flag_data?.flag_file}
+        flag_file={flag_data?.flag_file ?? undefined}
       />
       <span>{course.name}</span>
     </Link>
@@ -78,7 +78,7 @@ export default function CourseDropdown({
         }
         flag_file={
           course?.learning_language
-            ? flag_data[course?.learning_language]?.flag_file
+            ? (flag_data[course?.learning_language]?.flag_file ?? undefined)
             : undefined
         }
         className={styles.trigger}

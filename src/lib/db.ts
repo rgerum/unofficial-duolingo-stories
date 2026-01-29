@@ -5,7 +5,7 @@ if (!process.env.POSTGRES_URL2) throw new Error("Missing POSTGRES_URL");
 // will use psql environment variables
 export const sql = postgres(process.env.POSTGRES_URL2, {
   /* options */
-  //debug: console.log,
+  //debug: //console.log,
   ssl:
     process.env?.POSTGRES_URL2.indexOf("localhost") !== -1 ? false : "require",
 });
