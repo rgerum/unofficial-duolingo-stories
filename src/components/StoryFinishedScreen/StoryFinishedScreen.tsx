@@ -4,9 +4,15 @@ import useScrollIntoView from "@/hooks/use-scroll-into-view.hook";
 import { useLocalisation } from "../LocalisationProvider/LocalisationProviderContext";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 
-function StoryFinishedScreen({ story }: { story: StoryData }) {
+function StoryFinishedScreen({
+  story,
+  disableScroll,
+}: {
+  story: StoryData;
+  disableScroll?: boolean;
+}) {
   const localisation = useLocalisation();
-  const ref = useScrollIntoView(true);
+  const ref = useScrollIntoView(!disableScroll);
 
   return (
     <div

@@ -30,29 +30,40 @@ export default function Cast(props: {
         <p>
           {no_speaker_count} characters do not have a speaker voice assigned. Go
           to the{" "}
-          <a target="_blank" href={"/editor/language/" + props.short}>
+          <Link target="_blank" href={"/editor/language/" + props.short}>
             Character-Editor
-          </a>{" "}
+          </Link>{" "}
           to add the voices.
         </p>
       ) : (
         <p>
           To change voices or names go to the{" "}
-          <a target="_blank" href={"/editor/language/" + props.short}>
+          <Link target="_blank" href={"/editor/language/" + props.short}>
             Character-Editor
-          </a>
+          </Link>
           .
         </p>
       )}
       <p>
         Use these links to share this story with other contributors to{" "}
-        <Link href={`/story/${props.id}`}>test</Link> or{" "}
-        <Link href={`/story/${props.id}/test`}>review</Link> the story. (or
-        review{" "}
-        <Link href={`/story/${props.id}/test?hide_questions=true`}>
+        <Link href={`/story/${props.id}`} target={"_blank"}>
+          test
+        </Link>{" "}
+        or{" "}
+        <Link href={`/story/${props.id}/test`} target={"_blank"}>
+          review
+        </Link>{" "}
+        the story. (or review{" "}
+        <Link
+          href={`/story/${props.id}/test?hide_questions=true`}
+          target={"_blank"}
+        >
           without the exercises
         </Link>
-        ) <Link href={`/story/${props.id}/script`}>Story Script</Link>
+        ){" "}
+        <Link href={`/story/${props.id}/script`} target={"_blank"}>
+          Story Script
+        </Link>
       </p>
     </div>
   );

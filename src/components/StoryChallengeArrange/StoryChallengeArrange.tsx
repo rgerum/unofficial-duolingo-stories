@@ -41,7 +41,7 @@ function StoryChallengeArrange({
     if (active) setButtonStatus("continue");
 
     return (
-      <FadeGlideIn key={`${id}-1`}>
+      <FadeGlideIn key={`${id}-1`} disableScroll={settings.show_all}>
         <StoryTextLine
           active={active}
           element={parts[1] as StoryElementLine}
@@ -57,10 +57,15 @@ function StoryChallengeArrange({
         key={`${id}-1`}
         show={active || settings.show_all}
         hidden={hidden}
+        disableScroll={settings.show_all}
       >
         <StoryQuestionPrompt question={part_one.prompt} lang={part_one.lang} />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-2`} hidden={hidden}>
+      <FadeGlideIn
+        key={`${id}-2`}
+        hidden={hidden}
+        disableScroll={settings.show_all}
+      >
         <StoryTextLine
           active={active}
           element={parts[1] as StoryElementLine}
@@ -72,6 +77,7 @@ function StoryChallengeArrange({
         key={`${id}-3`}
         show={active || settings.show_all}
         hidden={hidden}
+        disableScroll={settings.show_all}
       >
         <StoryQuestionArrange
           element={parts[2]}

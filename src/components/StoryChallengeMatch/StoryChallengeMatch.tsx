@@ -26,6 +26,7 @@ function StoryChallengeMatch({
       key={`${id}-1`}
       show={active || settings.show_all}
       hidden={hidden}
+      disableScroll={settings.show_all}
     >
       <StoryQuestionMatch
         element={parts[0]}

@@ -64,7 +64,7 @@ function Header({
   }, [active, setButtonStatus]);
 
   return (
-    <FadeGlideIn hidden={hidden}>
+    <FadeGlideIn hidden={hidden} disableScroll={settings.show_all}>
       <StoryHeader
         active={active}
         element={parts[0] as StoryElementHeader}
@@ -93,7 +93,7 @@ function Line({
   const element = parts[0];
   if (element.type === "LINE") {
     return (
-      <FadeGlideIn hidden={hidden}>
+      <FadeGlideIn hidden={hidden} disableScroll={settings.show_all}>
         <StoryTextLine active={active} element={element} settings={settings} />
       </FadeGlideIn>
     );
@@ -273,7 +273,7 @@ function StoryProgress({
           </AnimatePresence>
           <div className={styles.spacer}></div>
           {storyProgress === parts_list.length && (
-            <StoryFinishedScreen story={story} />
+            <StoryFinishedScreen story={story} disableScroll={settings.show_all} />
           )}
         </div>
         {!settings.show_all && storyProgress !== -1 && (
