@@ -12,7 +12,7 @@ async function mkdir(folderName: string): Promise<void> {
         reject(err);
       } else {
         resolve();
-        console.log(`Folder '${folderName}' created successfully`);
+        //console.log(`Folder '${folderName}' created successfully`);
       }
     });
   });

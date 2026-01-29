@@ -58,7 +58,7 @@ export async function getPageData(path: string) {
     metadata.link = path;
     return metadata;
   } catch (e) {
-    console.log("getPageDate", path, e);
+    //console.log("getPageDate", path, e);
   }
 }
 

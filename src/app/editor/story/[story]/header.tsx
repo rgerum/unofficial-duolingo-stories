@@ -51,7 +51,7 @@ export function StoryEditorHeader({
       set_save_text("Saving...");
       func_save();
     } catch (e) {
-      console.log("error save", e);
+      //console.log("error save", e);
       window.alert("Story could not be saved.");
     }
     set_save_text("Save");
@@ -70,7 +70,7 @@ export function StoryEditorHeader({
       try {
         func_delete();
       } catch (e) {
-        console.log("error delete", e);
+        //console.log("error delete", e);
         const deleteButton = document.querySelector(
           "#button_delete span",
         ) as HTMLSpanElement;

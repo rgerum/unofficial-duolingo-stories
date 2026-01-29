@@ -15,7 +15,7 @@ export default function StoryWrapper({
 }) {
   const [highlight_name, setHighlightName] = React.useState<string[]>([]);
   const [hideNonHighlighted, setHideNonHighlighted] = React.useState(false);
-  console.log("highlight_nameX", highlight_name);
+  //console.log("highlight_nameX", highlight_name);
   return (
     <>
       <StoryProgress

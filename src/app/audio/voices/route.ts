@@ -15,7 +15,7 @@ export async function GET(_req: NextRequest) {
     try {
       voices = voices.concat(await engine.getVoices());
     } catch (e) {
-      console.log("error", engine.name);
+      //console.log("error", engine.name);
     }
   }
 
@@ -25,7 +25,7 @@ export async function GET(_req: NextRequest) {
         REPLACE INTO speaker (language_id, speaker, gender, type, service)
          VALUES ((SELECT id FROM language WHERE short = ${v.locale} OR short = ${v.language} LIMIT 1), ${v.name}, ${v.gender}, ${v.type}, ${v.service});`;
     } catch (e) {
-      console.log("unknown language", v?.language, v);
+      //console.log("unknown language", v?.language, v);
     }
   }
 

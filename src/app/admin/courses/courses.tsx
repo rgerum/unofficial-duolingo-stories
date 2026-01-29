@@ -203,16 +203,16 @@ function EditCourse({
       tags: tags,
       about: about,
     };
-    console.log("send", data);
+    //console.log("send", data);
 
     try {
       let res = await fetch_post(`/admin/courses/set`, data);
       let new_data = await res.json();
-      console.log("new_data", new_data);
+      //console.log("new_data", new_data);
       setOpen(false);
       updateCourse(new_data);
     } catch (e) {
-      console.log("error", e);
+      //console.log("error", e);
       setError("An error occurred. Please report in Discord.");
     }
   }
@@ -347,7 +347,7 @@ function TableRow({
 
     for (let i = 0; i < attributes.length; i++) {
       if (!check_equal(attributes[i])) {
-        console.log(
+        //console.log(
           "update",
           attributes[i],
           new_course[attributes[i]],

@@ -61,8 +61,8 @@ export async function get_story(story_id: number) {
 
     course_short: res[0]["learning_language"] + "-" + res[0]["from_language"],
   });
-  console.log(data);
-  console.log(additional_data);
+  //console.log(data);
+  //console.log(additional_data);
   return { ...data2, ...additional_data };
 }
 

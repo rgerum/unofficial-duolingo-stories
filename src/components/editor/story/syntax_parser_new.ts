@@ -1151,8 +1151,8 @@ export function processStoryFile(
   const audio_insert_lines = meta.audio_insert_lines;
   //delete meta.audio_insert_lines;
 
-  console.log(story);
-  console.log(meta);
+  //console.log(story);
+  //console.log(meta);
 
   return [
     { ...story, meta: undefined },

@@ -80,7 +80,7 @@ async function set_course(data: CourseData) {
     revalidatePath(`/${response_course_id[0].short}`);
     revalidatePath(`/`);
   } catch (e) {
-    console.log("revalidate error", e);
+    //console.log("revalidate error", e);
   }
   return data_new[0];
 }

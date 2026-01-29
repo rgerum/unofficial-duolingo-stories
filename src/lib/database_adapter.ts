@@ -1,5 +1,11 @@
 import { sql } from "./db";
-import type { Adapter, AdapterUser, AdapterAccount, AdapterSession, VerificationToken } from "@auth/core/adapters";
+import type {
+  Adapter,
+  AdapterUser,
+  AdapterAccount,
+  AdapterSession,
+  VerificationToken,
+} from "@auth/core/adapters";
 
 // Extended user type with custom fields used in this app
 interface ExtendedAdapterUser extends AdapterUser {
@@ -44,7 +50,13 @@ export default function MyAdapter(): Adapter {
         return null;
       }
     },
-    async getUserByAccount({ providerAccountId, provider }: { providerAccountId: string; provider: string }): Promise<AdapterUser | null> {
+    async getUserByAccount({
+      providerAccountId,
+      provider,
+    }: {
+      providerAccountId: string;
+      provider: string;
+    }): Promise<AdapterUser | null> {
       //console.log("getUserByAccount", providerAccountId, provider);
       let result = await sql`
 SELECT 
@@ -56,9 +68,12 @@ LIMIT 1;`;
       //console.log("return", result.length !== 0 ? result[0] : null);
       return result.length !== 0 ? (result[0] as AdapterUser) : null;
     },
-    async updateUser(user: Partial<AdapterUser> & Pick<AdapterUser, "id">): Promise<AdapterUser> {
+    async updateUser(
+      user: Partial<AdapterUser> & Pick<AdapterUser, "id">,
+    ): Promise<AdapterUser> {
       //console.log("updateUser", user);
-      const extUser = user as Partial<ExtendedAdapterUser> & Pick<AdapterUser, "id">;
+      const extUser = user as Partial<ExtendedAdapterUser> &
+        Pick<AdapterUser, "id">;
       let query1 = await sql`SELECT * FROM "users" WHERE id = ${extUser.id}`;
       let oldUser = query1[0];
 
@@ -105,11 +120,21 @@ LIMIT 1;`;
       return result[0] as AdapterAccount;
       //return insert("account", account, mapping_account);
     },
-    async unlinkAccount({ providerAccountId, provider }: { providerAccountId: string; provider: string }): Promise<void> {
+    async unlinkAccount({
+      providerAccountId,
+      provider,
+    }: {
+      providerAccountId: string;
+      provider: string;
+    }): Promise<void> {
       //console.log("unlinkAccount", providerAccountId, provider);
       await sql`DELETE FROM accounts WHERE "providerAccountId" = ${providerAccountId} AND provider = ${provider}`;
     },
-    async createSession(session: { sessionToken: string; userId: string; expires: Date }): Promise<AdapterSession> {
+    async createSession(session: {
+      sessionToken: string;
+      userId: string;
+      expires: Date;
+    }): Promise<AdapterSession> {
       //console.log("createSession", session);
       return (
         await sql`INSERT INTO sessions ${sql({
@@ -120,7 +145,9 @@ LIMIT 1;`;
       )[0] as AdapterSession;
       //return insert("session", session, mapping_session);
     },
-    async getSessionAndUser(sessionToken: string): Promise<{ session: AdapterSession; user: AdapterUser } | null> {
+    async getSessionAndUser(
+      sessionToken: string,
+    ): Promise<{ session: AdapterSession; user: AdapterUser } | null> {
       //console.log("getSessionAndUser", sessionToken);
       if (sessionToken === undefined) return null;
       const session = (
@@ -143,7 +170,9 @@ LIMIT 1;`;
       )[0];
       return { session: session as AdapterSession, user: user as AdapterUser };
     },
-    async updateSession(session: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">): Promise<AdapterSession | null | undefined> {
+    async updateSession(
+      session: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">,
+    ): Promise<AdapterSession | null | undefined> {
       //console.log("updateSession", session);
       let sessionOld = (
         await sql`SELECT * FROM sessions WHERE "sessionToken" = ${session.sessionToken}`
@@ -160,7 +189,9 @@ LIMIT 1;`;
       //console.log("deleteSession", sessionToken);
       await sql`DELETE FROM sessions WHERE "sessionToken" = ${sessionToken}`;
     },
-    async createVerificationToken(verificationToken: VerificationToken): Promise<VerificationToken> {
+    async createVerificationToken(
+      verificationToken: VerificationToken,
+    ): Promise<VerificationToken> {
       //console.log("createVerificationToken", verificationToken);
       const { identifier, expires, token } = verificationToken;
       await sql`INSERT INTO verification_token ${sql({
@@ -170,7 +201,13 @@ LIMIT 1;`;
       })} RETURNING id`;
       return verificationToken;
     },
-    async useVerificationToken({ identifier, token }: { identifier: string; token: string }): Promise<VerificationToken | null> {
+    async useVerificationToken({
+      identifier,
+      token,
+    }: {
+      identifier: string;
+      token: string;
+    }): Promise<VerificationToken | null> {
       //console.log("useVerificationToken", identifier, token);
       const result = await sql`DELETE FROM verification_token
       where identifier = ${identifier} and token = ${token}

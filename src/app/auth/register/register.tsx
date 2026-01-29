@@ -20,12 +20,14 @@ export async function fetch_post(url: string, data: Record<string, string>) {
   return fetch(req);
 }
 
-export async function register(data: Record<string, string>): Promise<[boolean, string]> {
+export async function register(
+  data: Record<string, string>,
+): Promise<[boolean, string]> {
   let response;
   try {
     response = await fetch_post(`/auth/register/send`, data);
   } catch (e) {
-    console.log(e);
+    //console.log(e);
     return [false, "Something went wrong."];
   }
 

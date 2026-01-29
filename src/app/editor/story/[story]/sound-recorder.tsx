@@ -227,7 +227,7 @@ export default function SoundRecorder({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    console.log("file", file);
+    //console.log("file", file);
     setFile(file);
     setUploaded(false);
     let url = URL.createObjectURL(file);
@@ -259,7 +259,7 @@ export default function SoundRecorder({
         return;
       }
     }
-    console.log(timingText);
+    //console.log(timingText);
     if (
       filename.startsWith(
         "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/",
@@ -272,7 +272,7 @@ export default function SoundRecorder({
     if (filename.startsWith("audio/")) {
       filename = filename.substring("audio/".length);
     }
-    console.log("filename", filename);
+    //console.log("filename", filename);
     onSave(filename, timingText);
   };
 
@@ -308,7 +308,7 @@ export function SoundRecorderX() {
   const waveformRef = useRef<HTMLDivElement>(null);
   const wavesurfer = useRef<WaveSurfer | null>(null);
 
-  console.log("Duration Current", duration + "s");
+  //console.log("Duration Current", duration + "s");
 
   let [audioRange, setAudioRange] = React.useState(99999);
 
@@ -336,7 +336,7 @@ export function SoundRecorderX() {
   if (wavesurfer.current) {
     /** On audio position change, fires continuously during playback */
     wavesurfer.current.on("timeupdate", (currentTime: number) => {
-      console.log(
+      //console.log(
         "Time",
         currentTime + "s",
         content.text.length * (currentTime / duration),
@@ -361,7 +361,7 @@ export function SoundRecorderX() {
 
     /** When the audio is both decoded and can play */
     wavesurfer.current.on("ready", (new_duration: number) => {
-      console.log("Duration New", new_duration + "s");
+      //console.log("Duration New", new_duration + "s");
       setDuration(new_duration);
     });
   };
@@ -377,7 +377,7 @@ export function SoundRecorderX() {
         },
       })
       .then((response) => {
-        console.log(response.data);
+        //console.log(response.data);
         // Handle success
       })
       .catch((error) => {

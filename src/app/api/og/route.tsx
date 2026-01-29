@@ -15,46 +15,44 @@ export async function GET(_request: NextRequest) {
     let text2 = `${counts.count_stories} stories in ${counts.count_courses} courses and counting!`;
 
     return new ImageResponse(
-      (
+      <div
+        style={{
+          backgroundColor: "white",
+          backgroundSize: "150px 150px",
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          textAlign: "center",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "row",
+          flexWrap: "nowrap",
+          gap: "50px",
+        }}
+      >
         <div
           style={{
-            backgroundColor: "white",
-            backgroundSize: "150px 150px",
-            height: "100%",
-            width: "100%",
             display: "flex",
-            textAlign: "center",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "row",
-            flexWrap: "nowrap",
-            gap: "50px",
+            alignItems: "flex-start",
+            justifyContent: "flex-start",
+            justifyItems: "left",
+            flexDirection: "column",
+            backgroundColor: "white",
+            fontSize: 40,
+            width: "60%",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "flex-start",
-              justifyItems: "left",
-              flexDirection: "column",
-              backgroundColor: "white",
-              fontSize: 40,
-              width: "60%",
-            }}
-          >
-            <div style={{ fontWeight: "bold", fontSize: 80 }}>Duostories</div>
-            <div style={{ textAlign: "left" }}>{text}</div>
-            <div style={{ textAlign: "left" }}>{text2}</div>
-          </div>
-          <img
-            src={"https://duostories.org/icon192.png"}
-            height={"300px"}
-            width="300px"
-            alt=""
-          />
+          <div style={{ fontWeight: "bold", fontSize: 80 }}>Duostories</div>
+          <div style={{ textAlign: "left" }}>{text}</div>
+          <div style={{ textAlign: "left" }}>{text2}</div>
         </div>
-      ),
+        <img
+          src={"https://duostories.org/icon192.png"}
+          height={"300px"}
+          width="300px"
+          alt=""
+        />
+      </div>,
       {
         width: 1200,
         height: 630,
@@ -68,7 +66,7 @@ export async function GET(_request: NextRequest) {
       },
     );
   } catch (e) {
-    console.log(`${e instanceof Error ? e.message : String(e)}`);
+    //console.log(`${e instanceof Error ? e.message : String(e)}`);
     return new Response(`Failed to generate the image`, {
       status: 500,
     });

@@ -1,5 +1,10 @@
 // Load the AWS SDK for Node.js
-import { Polly, SynthesizeSpeechInput, SynthesizeSpeechOutput, DescribeVoicesOutput } from "@aws-sdk/client-polly";
+import {
+  Polly,
+  SynthesizeSpeechInput,
+  SynthesizeSpeechOutput,
+  DescribeVoicesOutput,
+} from "@aws-sdk/client-polly";
 import { put } from "@vercel/blob";
 import { sql } from "@/lib/db";
 import type { SynthesisResult, Voice, TTSEngine, SpeakerData } from "./types";
@@ -15,13 +20,16 @@ async function synthesizeSpeechCall(
   params: SynthesizeSpeechInput,
 ): Promise<SynthesizeSpeechOutput> {
   return new Promise((resolve, reject) => {
-    polly.synthesizeSpeech(params, function (err: Error | null, data?: SynthesizeSpeechOutput) {
-      if (err) {
-        reject(err);
-        console.log("err", err, err.stack);
-      }
-      resolve(data!);
-    });
+    polly.synthesizeSpeech(
+      params,
+      function (err: Error | null, data?: SynthesizeSpeechOutput) {
+        if (err) {
+          reject(err);
+          //console.log("err", err, err.stack);
+        }
+        resolve(data!);
+      },
+    );
   });
 }
 
@@ -131,24 +139,30 @@ async function synthesizeSpeechPolly(
 async function getVoices(): Promise<Voice[]> {
   return new Promise((resolve, reject) => {
     const polly = new Polly(config);
-    polly.describeVoices({}, (err: Error | null, data?: DescribeVoicesOutput) => {
-      if (err) {
-        reject(err);
-      } else {
-        const voices_result: Voice[] = [];
-        for (const voice of data?.Voices ?? []) {
-          voices_result.push({
-            language: voice.LanguageCode?.split("-")[0] ?? "",
-            locale: voice.LanguageCode ?? "",
-            name: voice.Id ?? "",
-            gender: (voice.Gender?.toUpperCase() ?? "MALE") as "MALE" | "FEMALE",
-            type: voice.SupportedEngines?.[0] === "neural" ? "NEURAL" : "NORMAL",
-            service: "Amazon Polly",
-          });
+    polly.describeVoices(
+      {},
+      (err: Error | null, data?: DescribeVoicesOutput) => {
+        if (err) {
+          reject(err);
+        } else {
+          const voices_result: Voice[] = [];
+          for (const voice of data?.Voices ?? []) {
+            voices_result.push({
+              language: voice.LanguageCode?.split("-")[0] ?? "",
+              locale: voice.LanguageCode ?? "",
+              name: voice.Id ?? "",
+              gender: (voice.Gender?.toUpperCase() ?? "MALE") as
+                | "MALE"
+                | "FEMALE",
+              type:
+                voice.SupportedEngines?.[0] === "neural" ? "NEURAL" : "NORMAL",
+              service: "Amazon Polly",
+            });
+          }
+          resolve(voices_result);
         }
-        resolve(voices_result);
-      }
-    });
+      },
+    );
   });
 }
 
@@ -157,7 +171,9 @@ function isValidVoice(voice: string): boolean {
 }
 
 async function getVoiceData(voice: string): Promise<SpeakerData | undefined> {
-  return (await sql`SELECT * FROM speaker WHERE speaker = ${voice}`)[0] as SpeakerData | undefined;
+  return (await sql`SELECT * FROM speaker WHERE speaker = ${voice}`)[0] as
+    | SpeakerData
+    | undefined;
 }
 
 const pollyEngine: TTSEngine = {

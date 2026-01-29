@@ -18,13 +18,12 @@ async function user_properties(id: string) {
       await sql`SELECT id, name, email, regdate, activated, role FROM "users" WHERE id = ${id} LIMIT 1;`
     )[0];
     return row ? UserSchema.parse(row) : undefined;
-  } else
-    {
-      const row = (
-        await sql`SELECT id, name, email, regdate, activated, role FROM "users" WHERE REPLACE(name, ' ', '') = ${id.replace("%20", "")} LIMIT 1;`
-      )[0];
-      return row ? UserSchema.parse(row) : undefined;
-    }
+  } else {
+    const row = (
+      await sql`SELECT id, name, email, regdate, activated, role FROM "users" WHERE REPLACE(name, ' ', '') = ${id.replace("%20", "")} LIMIT 1;`
+    )[0];
+    return row ? UserSchema.parse(row) : undefined;
+  }
 }
 
 export default async function Page({
@@ -33,7 +32,7 @@ export default async function Page({
   params: Promise<{ user_id: string }>;
 }) {
   const user = await user_properties((await params).user_id);
-  console.log(user);
+  //console.log(user);
 
   if (user === undefined) notFound();
 

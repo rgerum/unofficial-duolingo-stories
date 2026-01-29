@@ -72,7 +72,7 @@ export default function UserDisplay({ user }: { user: AdminUser }) {
 
   async function Delete() {
     if (window.confirm("Are you sure you want to delete this user?")) {
-      console.log("delete", user_);
+      //console.log("delete", user_);
       await setUserDelete({ id: user_.id });
     }
   }

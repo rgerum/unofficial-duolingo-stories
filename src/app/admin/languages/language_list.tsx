@@ -76,16 +76,16 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
       speaker: speaker,
       rtl: rtl,
     };
-    console.log("send", data);
+    //console.log("send", data);
 
     try {
       let res = await fetch_post(`/admin/languages/set`, data);
       let new_data = await res.json();
-      console.log("new_data", new_data);
+      //console.log("new_data", new_data);
       setOpen(false);
       updateLanguage(new_data);
     } catch (e) {
-      console.log("error", e);
+      //console.log("error", e);
       setError("An error occurred. Please report in Discord.");
     }
   }
@@ -191,7 +191,9 @@ function TableRow({ lang, updateLanguage }: TableRowProps) {
     ];
 
     function check_equal(attribute: string) {
-      const newVal = (new_course as unknown as Record<string, unknown>)[attribute];
+      const newVal = (new_course as unknown as Record<string, unknown>)[
+        attribute
+      ];
       const oldVal = (lang as unknown as Record<string, unknown>)[attribute];
       return newVal === oldVal;
     }

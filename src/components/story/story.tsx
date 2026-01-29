@@ -40,7 +40,7 @@ export default function Story({
   hide_questions?: boolean;
   localization?: LocalisationFunc;
 }) {
-  console.log("Story", story);
+  //console.log("Story", story);
   const router = useRouter();
 
   const storyElement = React.useRef<HTMLDivElement>(null);

@@ -200,7 +200,7 @@ export default function Editor({
   const [audio_editor_data, setAudioEditorData] = React.useState<
     StoryElementLine | StoryElementHeader | undefined
   >(undefined);
-  console.log("audio_editor_data", audio_editor_data);
+  //console.log("audio_editor_data", audio_editor_data);
 
   const [unsaved_changes, set_unsaved_changes] = React.useState(false);
 

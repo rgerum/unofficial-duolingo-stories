@@ -74,7 +74,7 @@ async function set_approve({
         count_published++;
       }
     }
-    console.log("published", count_published);
+    //console.log("published", count_published);
     if (count_published) {
       await sql`UPDATE course
 SET count = (

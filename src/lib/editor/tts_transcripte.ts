@@ -24,7 +24,10 @@ function splitTextTokens(text, keep_tilde=true) {
 }
 */
 
-export function splitTextTokens(text: string, keep_tilde: boolean = true): string[] {
+export function splitTextTokens(
+  text: string,
+  keep_tilde: boolean = true,
+): string[] {
   if (!text) return [];
   //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
   if (keep_tilde)
@@ -389,7 +392,10 @@ interface TranscribeConfig {
   };
 }
 
-export function transcribe_text(text: string, dataYaml: string): [string, number[]] {
+export function transcribe_text(
+  text: string,
+  dataYaml: string,
+): [string, number[]] {
   const config = jsyaml.load(dataYaml) as TranscribeConfig;
 
   const mapping: number[] = [];
@@ -403,8 +409,7 @@ export function transcribe_text(text: string, dataYaml: string): [string, number
       for (let i = 0; i < text.length; i++) {
         if (sectionData[text[i]]) {
           text2 += sectionData[text[i]];
-          for (let j = 0; j < sectionData[text[i]].length; j++)
-            mapping.push(i);
+          for (let j = 0; j < sectionData[text[i]].length; j++) mapping.push(i);
         } else {
           text2 += text[i];
           mapping.push(i);
@@ -415,7 +420,9 @@ export function transcribe_text(text: string, dataYaml: string): [string, number
     if (section.toUpperCase() === "FRAGMENTS") {
       const sectionData = config[section];
       for (const frag in sectionData) {
-        let match: (RegExpMatchArray & { index?: number }) | null = text.match(new RegExp(frag, "i"));
+        let match: (RegExpMatchArray & { index?: number }) | null = text.match(
+          new RegExp(frag, "i"),
+        );
         let counter = 0;
         while (match && match.index !== undefined && counter < 100) {
           let matchIndex = match.index;
@@ -544,6 +551,6 @@ let words = "a akesi ala alasa ale anpa ante anu awen e en esun ijo ike ilo insa
 for(let word of words.split(" ").sort((a, b) => b.length - a.length)) {
     //console.log(word)
     if(word.length > 1)
-        console.log(`    (\\[[^\\]]*?)(${word})([^\\]]*?\\]): ${word.substring(0, 1).toUpperCase()}`)
+        //console.log(`    (\\[[^\\]]*?)(${word})([^\\]]*?\\]): ${word.substring(0, 1).toUpperCase()}`)
 }
 */
