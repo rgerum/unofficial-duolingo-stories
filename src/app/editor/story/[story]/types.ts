@@ -60,8 +60,8 @@ export interface HeaderProps {
   unsaved_changes: boolean;
   language_data: LanguageData | undefined;
   language_data2: LanguageData | undefined;
-  func_save: () => void;
-  func_delete: () => void;
+  func_save: () => Promise<void>;
+  func_delete: () => Promise<void>;
   show_trans: boolean;
   set_show_trans: (value: boolean) => void;
   show_ssml: boolean;

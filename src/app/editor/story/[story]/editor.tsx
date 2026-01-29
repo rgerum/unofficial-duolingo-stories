@@ -102,6 +102,9 @@ export async function setStory(data: {
   todo_count: number;
 }) {
   const res = await fetch_post(`/editor/story/set_story`, data);
+  if (!res.ok) {
+    throw new Error(`setStory failed: ${res.status} ${res.statusText}`);
+  }
   return await res.text();
 }
 
@@ -112,6 +115,9 @@ export async function deleteStory(data: {
   name: string | undefined;
 }) {
   let res = await fetch_post(`/editor/story/delete_story`, data);
+  if (!res.ok) {
+    throw new Error(`deleteStory failed: ${res.status} ${res.statusText}`);
+  }
   return await res.text();
 }
 
@@ -194,8 +200,8 @@ export default function Editor({
   >();
   const [view, set_view] = React.useState<EditorView | undefined>();
 
-  const [func_save, set_func_save] = React.useState(() => () => {});
-  const [func_delete, set_func_delete] = React.useState(() => () => {});
+  const [func_save, set_func_save] = React.useState(() => async () => {});
+  const [func_delete, set_func_delete] = React.useState(() => async () => {});
 
   const [audio_editor_data, setAudioEditorData] = React.useState<
     StoryElementLine | StoryElementHeader | undefined
@@ -285,8 +291,11 @@ export default function Editor({
 
     async function Save() {
       try {
-        if (story_meta === undefined || story_data === undefined) return;
-        let data = {
+        if (story_meta === undefined || story_data === undefined) {
+          console.error("Save error: story_meta or story_data is undefined");
+          return;
+        }
+        const data = {
           id: story_data.id,
           duo_id: story_data.duo_id,
           name: story_meta.fromLanguageName,
@@ -302,6 +311,7 @@ export default function Editor({
         await setStory(data);
         set_unsaved_changes(false);
       } catch (e) {
+        console.error("Save error", e);
         set_save_error(true);
       }
     }
@@ -315,7 +325,7 @@ export default function Editor({
         text: editor_text,
         name: story_meta.from_language_name,
       });
-      await navigate(`/editor/course/${story_data.course_id}`);
+      navigate(`/editor/course/${story_data.course_id}`);
     }
     set_func_delete(() => Delete);
 
@@ -347,6 +357,8 @@ export default function Editor({
           from_language: language_data2?.short,
           learning_language: language_data?.short,
         };
+
+        story_meta = story_meta2;
 
         if (editor_state)
           set_editor_state({

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Editor from "./editor";
 
 import { sql } from "@/lib/db";
+import { Metadata } from "next";
 
 export type StoryData = {
   id: number;
@@ -69,7 +70,7 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ story: number }>;
-}) {
+}): Promise<Metadata> {
   const story = (await params).story;
   const story_data = await get_story({ id: story });
 
