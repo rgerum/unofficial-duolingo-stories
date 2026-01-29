@@ -117,6 +117,7 @@ export function Breadcrumbs({
     lang1?: BreadcrumbLanguage;
     lang2?: BreadcrumbLanguage;
     name?: string | undefined;
+    data?: any;
   }[];
 }) {
   let link;
