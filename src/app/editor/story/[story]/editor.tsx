@@ -200,8 +200,8 @@ export default function Editor({
   >();
   const [view, set_view] = React.useState<EditorView | undefined>();
 
-  const [func_save, set_func_save] = React.useState(() => () => {});
-  const [func_delete, set_func_delete] = React.useState(() => () => {});
+  const [func_save, set_func_save] = React.useState(() => async () => {});
+  const [func_delete, set_func_delete] = React.useState(() => async () => {});
 
   const [audio_editor_data, setAudioEditorData] = React.useState<
     StoryElementLine | StoryElementHeader | undefined
@@ -311,7 +311,7 @@ export default function Editor({
         set_save_error(true);
       }
     }
-    set_func_save(() => Save);
+    set_func_save(Save);
 
     async function Delete() {
       if (story_meta === undefined || story_data === undefined) return;
@@ -321,9 +321,9 @@ export default function Editor({
         text: editor_text,
         name: story_meta.from_language_name,
       });
-      await navigate(`/editor/course/${story_data.course_id}`);
+      navigate(`/editor/course/${story_data.course_id}`);
     }
-    set_func_delete(() => Delete);
+    set_func_delete(Delete);
 
     async function updateDisplay() {
       if (stateX === undefined || story_data === undefined) return;
