@@ -51,7 +51,7 @@ export function StoryEditorHeader({
       set_save_text("Saving...");
       await func_save();
     } catch (e) {
-      //console.log("error save", e);
+      console.log("error save", e);
       window.alert("Story could not be saved.");
     }
     set_save_text("Save");

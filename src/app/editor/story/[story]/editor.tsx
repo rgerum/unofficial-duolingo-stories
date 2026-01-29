@@ -291,8 +291,11 @@ export default function Editor({
 
     async function Save() {
       try {
-        if (story_meta === undefined || story_data === undefined) return;
-        let data = {
+        if (story_meta === undefined || story_data === undefined) {
+          console.error("Save error: story_meta or story_data is undefined");
+          return;
+        }
+        const data = {
           id: story_data.id,
           duo_id: story_data.duo_id,
           name: story_meta.fromLanguageName,
@@ -308,10 +311,11 @@ export default function Editor({
         await setStory(data);
         set_unsaved_changes(false);
       } catch (e) {
+        console.error("Save error", e);
         set_save_error(true);
       }
     }
-    set_func_save(Save);
+    set_func_save(() => Save);
 
     async function Delete() {
       if (story_meta === undefined || story_data === undefined) return;
@@ -323,7 +327,7 @@ export default function Editor({
       });
       navigate(`/editor/course/${story_data.course_id}`);
     }
-    set_func_delete(Delete);
+    set_func_delete(() => Delete);
 
     async function updateDisplay() {
       if (stateX === undefined || story_data === undefined) return;
@@ -353,6 +357,8 @@ export default function Editor({
           from_language: language_data2?.short,
           learning_language: language_data?.short,
         };
+
+        story_meta = story_meta2;
 
         if (editor_state)
           set_editor_state({
