@@ -12,7 +12,7 @@ export interface EditorProps {
   editorBlock?: EditorBlock;
 }
 
-export function useEditorHook(editorProps?: EditorProps): {
+export function getEditorHandlers(editorProps?: EditorProps): {
   isEditorMode: boolean;
   forceVisible: boolean;
   onClick: (() => void) | undefined;

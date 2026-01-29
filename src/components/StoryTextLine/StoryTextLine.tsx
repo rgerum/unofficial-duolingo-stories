@@ -8,7 +8,7 @@ import EditorSSMLDisplay from "../EditorSSMLDisplay";
 import { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor";
-import { useEditorHook, type EditorProps } from "../story/useEditorHook";
+import { getEditorHandlers, type EditorProps } from "../story/editorHandlers";
 
 function StoryTextLine({
   active,
@@ -27,7 +27,7 @@ function StoryTextLine({
     editorState,
     editorBlock: element.editor,
   };
-  const { onClick } = useEditorHook(editorProps);
+  const { onClick } = getEditorHandlers(editorProps);
   const [audioRange, playAudio, ref, url] = useAudio(element, active);
 
   if (element.line === undefined) return <></>;

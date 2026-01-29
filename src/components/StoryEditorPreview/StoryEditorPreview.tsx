@@ -18,7 +18,7 @@ import type {
   StoryElementMultipleChoice,
   StoryElementChallengePrompt,
 } from "@/components/editor/story/syntax_parser_types";
-import { useEditorHook, type EditorProps } from "../story/useEditorHook";
+import { getEditorHandlers, type EditorProps } from "../story/editorHandlers";
 
 interface StoryEditorPreviewProps {
   story: StoryType & { learning_language_rtl?: boolean };
@@ -211,7 +211,7 @@ function EditorQuestionWrapper({
     editorState,
     editorBlock: element.editor,
   };
-  const { onClick } = useEditorHook(editorProps);
+  const { onClick } = getEditorHandlers(editorProps);
 
   return (
     <div onClick={onClick} data-lineno={element.editor?.block_start_no}>
@@ -233,7 +233,7 @@ function EditorChallengePrompt({
     editorState,
     editorBlock: element.editor,
   };
-  const { onClick } = useEditorHook(editorProps);
+  const { onClick } = getEditorHandlers(editorProps);
 
   return (
     <div
