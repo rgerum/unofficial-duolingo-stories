@@ -45,7 +45,7 @@ function StoryTextLine({
     );
   }
 
-  /*if (element.line.type === "TITLE")
+  if (element.line.type === "TITLE")
     return (
       <div
         key={element.trackingProperties.line_index}
@@ -65,7 +65,10 @@ function StoryTextLine({
         </span>
       </div>
     );
-  else if (element.line.avatarUrl)
+  else if (
+    element.line.type === "CHARACTER" &&
+    element.line.avatarUrl != undefined
+  )
     return (
       <div
         key={element.trackingProperties.line_index}
@@ -85,32 +88,30 @@ function StoryTextLine({
             unhide={unhide}
             content={element.line.content}
           />
-          {}
         </span>
       </div>
     );
-  else*/
-  return (
-    <div
-      key={element.trackingProperties.line_index}
-      className={styles.phrase + " " + element.lang}
-      data-lineno={element?.editor?.block_start_no}
-    >
-      <span>
-        <audio ref={ref}>
-          <source src={url} type="audio/mp3" />
-        </audio>
-        <PlayAudio onClick={playAudio} />
-        <StoryLineHints
-          audioRange={audioRange}
-          hideRangesForChallenge={hideRangesForChallenge}
-          unhide={unhide}
-          content={element.line.content}
-        />
-        {}
-      </span>
-    </div>
-  );
+  else
+    return (
+      <div
+        key={element.trackingProperties.line_index}
+        className={styles.phrase + " " + element.lang}
+        data-lineno={element?.editor?.block_start_no}
+      >
+        <span>
+          <audio ref={ref}>
+            <source src={url} type="audio/mp3" />
+          </audio>
+          <PlayAudio onClick={playAudio} />
+          <StoryLineHints
+            audioRange={audioRange}
+            hideRangesForChallenge={hideRangesForChallenge}
+            unhide={unhide}
+            content={element.line.content}
+          />
+        </span>
+      </div>
+    );
 }
 
 export default StoryTextLine;
