@@ -24,11 +24,18 @@ function StoryFooter({
 }) {
   const localisation = useLocalisation();
 
+  const onContinueClick = React.useCallback(() => {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem("story_autoplay_ts", String(Date.now()));
+    }
+    onClick();
+  }, [onClick]);
+
   if (buttonStatus === "...") {
     return (
       <div className={styles.footer}>
         <div className={styles.width_wrapper}>
-          <Button key={"c"} onClick={onClick}>
+          <Button key={"c"} onClick={onContinueClick}>
             {"..."}
           </Button>
         </div>
@@ -40,7 +47,7 @@ function StoryFooter({
     return (
       <div className={styles.footer}>
         <div className={styles.width_wrapper}>
-          <Button key={"c"} onClick={onClick}>
+          <Button key={"c"} onClick={onContinueClick}>
             {localisation("button_finished") || "finished"}
           </Button>
         </div>
@@ -52,7 +59,7 @@ function StoryFooter({
     return (
       <div className={styles.footer}>
         <div className={styles.width_wrapper}>
-          <Button key={"c"} disabled onClick={onClick}>
+          <Button key={"c"} disabled onClick={onContinueClick}>
             {localisation("button_continue") || "continue"}
           </Button>
         </div>
@@ -63,7 +70,7 @@ function StoryFooter({
     return (
       <div className={styles.footer}>
         <div className={styles.width_wrapper}>
-          <Button key={"c"} onClick={onClick}>
+          <Button key={"c"} onClick={onContinueClick}>
             {localisation("button_continue") || "continue"}
           </Button>
         </div>
@@ -79,7 +86,7 @@ function StoryFooter({
             {localisation("story_correct") || "You are correct"}
           </Message>
         </div>
-        <Button key={"c"} onClick={onClick}>
+        <Button key={"c"} onClick={onContinueClick}>
           {localisation("button_continue") || "continue"}
         </Button>
       </div>

@@ -18,7 +18,10 @@ import {
   SpeakersType,
   CourseStudSchema,
 } from "@/app/editor/language/[language]/queries";
-import { StoryElement, StoryElementLine } from "@/components/editor/story/syntax_parser_types";
+import {
+  StoryElement,
+  StoryElementLine,
+} from "@/components/editor/story/syntax_parser_types";
 import type { z } from "zod";
 
 type CourseStudType = z.infer<typeof CourseStudSchema>;
@@ -175,7 +178,8 @@ FRAGMENTS:
     element.line.lang = language.short;
      */
     if (element.audio) element.audio.keypoints = keypoints;
-    if (element.line.content.audio) element.line.content.audio.keypoints = keypoints;
+    if (element.line.content.audio)
+      element.line.content.audio.keypoints = keypoints;
 
     //let audioObject = ref.current;
     //audioObject.src = audio.src;
@@ -257,7 +261,12 @@ FRAGMENTS:
                 </thead>
                 <tbody>
                   {speakers?.map((speaker, index) => (
-                    <SpeakerEntry key={index} speaker={speaker} play={play2} copyText={() => {}} />
+                    <SpeakerEntry
+                      key={index}
+                      speaker={speaker}
+                      play={play2}
+                      copyText={() => {}}
+                    />
                   ))}
                   <tr>
                     <td>
@@ -289,7 +298,11 @@ FRAGMENTS:
             <h2>Input Text</h2>
             <textarea
               defaultValue={text}
-              onChange={(e) => setText({ target: { value: e.target.value } } as React.ChangeEvent<HTMLInputElement>)}
+              onChange={(e) =>
+                setText({
+                  target: { value: e.target.value },
+                } as React.ChangeEvent<HTMLInputElement>)
+              }
               style={{ width: "100%" }}
             />
             <br />

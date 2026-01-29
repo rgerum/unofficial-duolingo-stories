@@ -1,12 +1,7 @@
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 import * as fs from "fs";
 import { put } from "@vercel/blob";
-import type {
-  AudioMark,
-  SynthesisResult,
-  Voice,
-  TTSEngine,
-} from "./types";
+import type { AudioMark, SynthesisResult, Voice, TTSEngine } from "./types";
 
 function get_raw(text: string): string {
   text = text.replace(/ +/g, " ");
@@ -39,12 +34,16 @@ async function synthesizeSpeechAzure(
     );
     speechConfig.speechSynthesisOutputFormat = 5;
     // create the speech synthesizer.
-    let synthesizer: sdk.SpeechSynthesizer | undefined = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+    let synthesizer: sdk.SpeechSynthesizer | undefined =
+      new sdk.SpeechSynthesizer(speechConfig, audioConfig);
 
     let last_pos = 0;
     const marks: AudioMark[] = [];
 
-    synthesizer.wordBoundary = (_w: unknown, v: sdk.SpeechSynthesisWordBoundaryEventArgs) => {
+    synthesizer.wordBoundary = (
+      _w: unknown,
+      v: sdk.SpeechSynthesisWordBoundaryEventArgs,
+    ) => {
       last_pos = text2.substring(last_pos).search(v.text) + last_pos;
       const data: AudioMark = {
         time: Math.round(v.audioOffset / 10000),

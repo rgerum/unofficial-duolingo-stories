@@ -129,7 +129,7 @@ async function getVoices(): Promise<Voice[]> {
   );
 
   if (response.ok) {
-    const { voices } = await response.json() as { voices: GoogleVoice[] };
+    const { voices } = (await response.json()) as { voices: GoogleVoice[] };
     const voices_result: Voice[] = [];
     for (const voice of voices) {
       voices_result.push({

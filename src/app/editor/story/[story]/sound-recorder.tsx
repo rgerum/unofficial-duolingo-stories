@@ -20,7 +20,11 @@ interface Region {
 
 interface RegionsPlugin {
   regions: Region[];
-  addRegion: (options: { start: number; content: string; color: string }) => void;
+  addRegion: (options: {
+    start: number;
+    content: string;
+    color: string;
+  }) => void;
   on: (event: string, callback: (region: Region) => void) => void;
 }
 
@@ -57,7 +61,10 @@ function cumulativeSums(values: number[]): number[] {
   return sums;
 }
 
-async function uploadAudio(file: File | null, story_id: number): Promise<Response | undefined> {
+async function uploadAudio(
+  file: File | null,
+  story_id: number,
+): Promise<Response | undefined> {
   if (!file) return;
 
   try {
@@ -141,7 +148,8 @@ export default function SoundRecorder({
           )
         : [];
 
-      const regionsPlugin = (wavesurfer as unknown as { plugins: unknown[] }).plugins[0] as RegionsPlugin;
+      const regionsPlugin = (wavesurfer as unknown as { plugins: unknown[] })
+        .plugins[0] as RegionsPlugin;
       for (let i = 0; i < parts2.length; i++) {
         if (i >= regionsPlugin.regions.length)
           regionsPlugin.addRegion({
@@ -161,7 +169,8 @@ export default function SoundRecorder({
   );
   const onTimeUpdate = useCallback(
     (wavesurfer: WaveSurfer, currentTime: number) => {
-      const regionsPlugin = (wavesurfer as unknown as { plugins: unknown[] }).plugins[0] as RegionsPlugin;
+      const regionsPlugin = (wavesurfer as unknown as { plugins: unknown[] })
+        .plugins[0] as RegionsPlugin;
       const regions = regionsPlugin.regions.sort(
         (a: Region, b: Region) => a.start - b.start,
       );
@@ -178,7 +187,9 @@ export default function SoundRecorder({
   );
   const onRegionUpdated = useCallback(
     (regionsPlugin: RegionsPlugin, region: Region) => {
-      const regions = regionsPlugin.regions.sort((a: Region, b: Region) => a.start - b.start);
+      const regions = regionsPlugin.regions.sort(
+        (a: Region, b: Region) => a.start - b.start,
+      );
       for (let i = 0; i < regions.length; i++) {
         if (regions[i].content !== undefined && parts2[i] !== undefined)
           regions[i].content!.innerText = parts2[i].text; //+ " " + parts2[i].pos;
@@ -217,10 +228,10 @@ export default function SoundRecorder({
     wavesurfer.on("timeupdate", (currentTime) =>
       onTimeUpdate(wavesurfer, currentTime),
     );
-    const plugins = (wavesurfer as unknown as { plugins: RegionsPlugin[] }).plugins;
+    const plugins = (wavesurfer as unknown as { plugins: RegionsPlugin[] })
+      .plugins;
     plugins[0].on("region-updated", (region: Region) => {
-      if (plugins[0])
-        onRegionUpdated(plugins[0], region);
+      if (plugins[0]) onRegionUpdated(plugins[0], region);
     });
   }
 
@@ -336,13 +347,13 @@ export function SoundRecorderX() {
   if (wavesurfer.current) {
     /** On audio position change, fires continuously during playback */
     wavesurfer.current.on("timeupdate", (currentTime: number) => {
-      //console.log(
+      /*console.log(
         "Time",
         currentTime + "s",
         content.text.length * (currentTime / duration),
         duration,
         content.text.length,
-      );
+      );*/
       if (duration === 0) return;
       setAudioRange(content.text.length * (currentTime / duration));
     });

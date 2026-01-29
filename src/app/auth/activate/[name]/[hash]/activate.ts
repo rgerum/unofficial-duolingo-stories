@@ -12,7 +12,10 @@ interface ErrorResult {
 
 type CheckUsernameResult = UserCheckResult | ErrorResult | true;
 
-async function check_username(name: string, existing: boolean): Promise<CheckUsernameResult> {
+async function check_username(
+  name: string,
+  existing: boolean,
+): Promise<CheckUsernameResult> {
   const result =
     await sql`SELECT id, email FROM "users" WHERE LOWER(name) = LOWER(${name})`;
 
@@ -32,7 +35,8 @@ async function check_username(name: string, existing: boolean): Promise<CheckUse
 export async function activate({ name, hash }: { name: string; hash: string }) {
   // check username
   const username_check = await check_username(name, true);
-  if (typeof username_check === "object" && "status" in username_check) return username_check;
+  if (typeof username_check === "object" && "status" in username_check)
+    return username_check;
   // activate the user
   await sql`UPDATE "users" SET activated = true WHERE name = ${name} AND activation_link = ${hash};`;
 

@@ -12,4 +12,10 @@ const audio_engines: (TTSEngine | ElevenLabsEngine)[] = [
 ];
 
 export { audio_engines };
-export type { TTSEngine, ElevenLabsEngine, Voice, SynthesisResult, AudioMark } from "./types";
+export type {
+  TTSEngine,
+  ElevenLabsEngine,
+  Voice,
+  SynthesisResult,
+  AudioMark,
+} from "./types";

@@ -12,7 +12,7 @@ export const StorySchema = z.object({
         id: z.number(),
         date: z.date(),
         name: z.string(),
-      })
+      }),
     )
     .default([]),
 });

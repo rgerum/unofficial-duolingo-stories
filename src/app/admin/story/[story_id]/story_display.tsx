@@ -3,7 +3,10 @@ import Switch from "@/components/layout/switch";
 import { useState } from "react";
 import Link from "next/link";
 import type { Story } from "./page";
-import { togglePublished, removeApproval as removeApprovalAction } from "./actions";
+import {
+  togglePublished,
+  removeApproval as removeApprovalAction,
+} from "./actions";
 
 export default function StoryDisplay({ story }: { story: Story }) {
   const [story_, setStory] = useState<Story>(story);

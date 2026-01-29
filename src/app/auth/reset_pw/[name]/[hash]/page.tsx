@@ -9,7 +9,10 @@ function isValidUUIDv4(uuid: string): boolean {
   return uuidV4Regex.test(uuid);
 }
 
-async function changePasswordAction(password: string, user_id: number): Promise<void> {
+async function changePasswordAction(
+  password: string,
+  user_id: number,
+): Promise<void> {
   const password_hashed = await phpbb_hash(password);
 
   // set the new password
@@ -21,7 +24,10 @@ interface CheckLinkResult {
   error?: { title: string; text?: string };
 }
 
-async function check_link(name: string, hash: string): Promise<CheckLinkResult> {
+async function check_link(
+  name: string,
+  hash: string,
+): Promise<CheckLinkResult> {
   let user_id = parseInt(name);
   let result = !isNaN(user_id)
     ? await sql`SELECT id, email FROM "users" WHERE id = ${user_id}`

@@ -18,7 +18,11 @@ import StoryFinishedScreen from "../StoryFinishedScreen";
 import StoryTitlePage from "../StoryTitlePage";
 import VisuallyHidden from "../VisuallyHidden";
 import { StoryType } from "@/components/editor/story/syntax_parser_new";
-import { StoryElement, StoryElementHeader, StoryElementLine } from "@/components/editor/story/syntax_parser_types";
+import {
+  StoryElement,
+  StoryElementHeader,
+  StoryElementLine,
+} from "@/components/editor/story/syntax_parser_types";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 
 function getComponent(parts: StoryElement[]) {
@@ -55,11 +59,17 @@ function Header({
   setButtonStatus: (status: string) => void;
   settings: StorySettings;
 }) {
-  if (active) setButtonStatus("continue");
+  React.useEffect(() => {
+    if (active) setButtonStatus("continue");
+  }, [active, setButtonStatus]);
 
   return (
     <FadeGlideIn hidden={hidden}>
-      <StoryHeader active={active} element={parts[0] as StoryElementHeader} settings={settings} />
+      <StoryHeader
+        active={active}
+        element={parts[0] as StoryElementHeader}
+        settings={settings}
+      />
     </FadeGlideIn>
   );
 }
@@ -77,7 +87,9 @@ function Line({
   setButtonStatus: (status: string) => void;
   settings: StorySettings;
 }) {
-  if (active) setButtonStatus("continue");
+  React.useEffect(() => {
+    if (active) setButtonStatus("continue");
+  }, [active, setButtonStatus]);
   const element = parts[0];
   if (element.type === "LINE") {
     return (

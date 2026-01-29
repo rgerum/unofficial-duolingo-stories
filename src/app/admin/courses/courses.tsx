@@ -347,12 +347,12 @@ function TableRow({
 
     for (let i = 0; i < attributes.length; i++) {
       if (!check_equal(attributes[i])) {
-        //console.log(
+        /*console.log(
           "update",
           attributes[i],
           new_course[attributes[i]],
           course[attributes[i]],
-        );
+        );*/
         if (refRow.current)
           refRow.current.children[i].animate(frames, {
             duration: 1000,

@@ -7,16 +7,16 @@ const OkSchema = z.literal("ok");
 
 const SetActivatedInput = z.object({
   id: z.number(),
-  activated: z.union([z.boolean(), z.number()]).transform((v) =>
-    typeof v === "number" ? v !== 0 : v
-  ),
+  activated: z
+    .union([z.boolean(), z.number()])
+    .transform((v) => (typeof v === "number" ? v !== 0 : v)),
 });
 
 const SetWriteInput = z.object({
   id: z.number(),
-  write: z.union([z.boolean(), z.number()]).transform((v) =>
-    typeof v === "number" ? v !== 0 : v
-  ),
+  write: z
+    .union([z.boolean(), z.number()])
+    .transform((v) => (typeof v === "number" ? v !== 0 : v)),
 });
 
 const DeleteUserInput = z.object({ id: z.number() });

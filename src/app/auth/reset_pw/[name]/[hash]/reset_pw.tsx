@@ -8,7 +8,9 @@ interface ResetPasswordProps {
   callchangePasswordAction: (password: string) => Promise<void>;
 }
 
-export default function ResetPassword({ callchangePasswordAction }: ResetPasswordProps) {
+export default function ResetPassword({
+  callchangePasswordAction,
+}: ResetPasswordProps) {
   let [state, setState] = React.useState(0);
   let [error, setError] = React.useState("");
 

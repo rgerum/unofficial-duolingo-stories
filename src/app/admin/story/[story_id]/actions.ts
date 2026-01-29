@@ -24,7 +24,7 @@ async function story_properties(id: number): Promise<Story> {
 
 export async function togglePublished(
   id: number,
-  currentPublic: boolean
+  currentPublic: boolean,
 ): Promise<Story> {
   await sql`UPDATE story SET ${sql({ public: !currentPublic }, "public")} WHERE id = ${id};`;
 
@@ -43,7 +43,7 @@ SET count = (
 
 export async function removeApproval(
   id: number,
-  approval_id: number
+  approval_id: number,
 ): Promise<Story> {
   await sql`DELETE FROM story_approval WHERE id = ${approval_id};`;
   return await story_properties(id);

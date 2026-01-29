@@ -39,6 +39,9 @@ export default function useAudio(element: UseAudioElement, active: boolean) {
       audioObject.currentTime = 0;
       await audioObject.play();
     } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") {
+        return;
+      }
       console.error("Failed to play audio:", e);
       return;
     }
@@ -76,9 +79,19 @@ export default function useAudio(element: UseAudioElement, active: boolean) {
   }, [audio]);
 
   React.useEffect(() => {
-    if (active) {
-      playAudio();
-    }
+    if (!active) return;
+    if (typeof window === "undefined") return;
+
+    if (element.type !== "HEADER" && element.type !== "LINE") return;
+
+    const raw = window.sessionStorage.getItem("story_autoplay_ts");
+    if (!raw) return;
+    const ts = Number(raw);
+    if (!Number.isFinite(ts)) return;
+    if (Date.now() - ts > 10_000) return;
+
+    window.sessionStorage.removeItem("story_autoplay_ts");
+    playAudio();
 
     return () => {
       // Clean up any pending timeouts if component unmounts
@@ -86,7 +99,7 @@ export default function useAudio(element: UseAudioElement, active: boolean) {
         window.playing_audio.forEach((cancel) => cancel());
       }
     };
-  }, [active, playAudio]);
+  }, [active, element.type, playAudio]);
 
   if (!audio?.keypoints?.length || !audio?.url) {
     return [audioRange, undefined, ref, undefined] as const;
