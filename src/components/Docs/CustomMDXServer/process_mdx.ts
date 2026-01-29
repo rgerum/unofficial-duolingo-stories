@@ -7,22 +7,26 @@ import rehypeKatex from "rehype-katex";
 //import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 
-import {
-  Nodes as HastNodes,
-  Root as HastRoot,
-  Parent as HastNode,
-  Parent,
-} from "hast";
 //import { Nodes as MdastNodes, Root as MdastRoot } from "mdast";
 
 //import { PluggableList } from "@mdx-js/mdx/lib/core";
 
+interface TreeNode {
+  type: string;
+  value?: string;
+  position?: {
+    start: { line: number };
+    end: { line: number };
+  };
+  children?: TreeNode[];
+}
+
 export default async function process_mdx(
   value: string,
-  show = "hast",
-  offset = 0,
-  positions = true,
-) {
+  show: string = "hast",
+  offset: number = 0,
+  positions: boolean = true,
+): Promise<any> {
   const development = false;
   const generateJsx = false;
   const outputFormatFunctionBody = false;
@@ -53,7 +57,7 @@ export default async function process_mdx(
   //if (show === "esast") recmaPlugins.push([captureEsast]);
   //if (show === "hast") rehypePlugins.push([captureHast]);
   //if (show === "mdast") remarkPlugins.push([captureMdast]);
-  let ast: HastNode | null = null;
+  let ast: TreeNode | null = null;
 
   await compile(file, {
     development: show === "result" ? false : development,
@@ -72,28 +76,29 @@ export default async function process_mdx(
       Fragment,
       jsx,
       jsxs,
-      baseUrl: window.location.href,
+      baseUrl: typeof window !== "undefined" ? window.location.href : "",
     });
   }
 
-  function addOffset(tree: any) {
+  function addOffset(tree: TreeNode): void {
     if (tree.position) {
       tree.position.start.line += offset;
       tree.position.end.line += offset;
     }
-    if (tree.children)
+    if (tree.children) {
       for (const i of tree.children || []) {
         addOffset(i);
       }
+    }
   }
   if (ast) {
     if (offset) addOffset(ast);
     return ast;
   }
 
-  return {} as HastNode;
+  return {};
 
-  function clean(tree: any) {
+  function clean(tree: TreeNode): void {
     delete tree.position;
     for (const i of tree.children || []) {
       clean(i);
@@ -101,13 +106,15 @@ export default async function process_mdx(
   }
 
   function captureHast() {
-    return function (tree: HastRoot) {
+    return function (tree: TreeNode) {
       let clone = structuredClone(tree);
       if (!positions) clean(clone);
       // delete text nodes with "\n"
-      clone.children = clone.children.filter(
-        (i) => i.type !== "text" || i.value !== "\n",
-      );
+      if (clone.children) {
+        clone.children = clone.children.filter(
+          (i) => i.type !== "text" || i.value !== "\n",
+        );
+      }
       ast = clone;
     };
   }

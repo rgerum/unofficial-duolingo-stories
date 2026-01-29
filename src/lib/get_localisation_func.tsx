@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
 
+export type LocalisationFunc = ReturnType<typeof get_localisation_func>;
+
 export default function get_localisation_func(data: Record<string, string>) {
   function apply(
     tag: string,

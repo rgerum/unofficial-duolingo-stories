@@ -1,9 +1,9 @@
 .blur2 {
-    display: block;
-    background: var(--docs-background);
-    opacity: 0.8;
-    width: 100vw;
-    height: 100vh;
-    position: fixed;
-    z-index: 6;
+  display: block;
+  background: var(--docs-background);
+  opacity: 0.8;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  z-index: 6;
 }

@@ -7,8 +7,8 @@ export default function Flag(props: {
   width?: number | undefined;
   height?: number | undefined;
   iso?: string;
-  flag_file?: string;
-  flag?: number;
+  flag_file?: string | null;
+  flag?: number | null;
   className?: string;
 }) {
   /**
@@ -106,6 +106,13 @@ export default function Flag(props: {
   );
 }
 
+// Flexible language type for flags - only requires the fields used
+interface DoubleFlagLanguage {
+  short?: string;
+  flag?: number | null;
+  flag_file?: string | null;
+}
+
 export function DoubleFlag({
   lang1,
   lang2,
@@ -113,10 +120,10 @@ export function DoubleFlag({
   onClick,
   className,
 }: {
-  lang1: LanguageProps;
-  lang2: LanguageProps;
-  width: number;
-  onClick: Function;
+  lang1: DoubleFlagLanguage;
+  lang2?: DoubleFlagLanguage;
+  width?: number;
+  onClick?: () => void;
   className?: string;
 }) {
   if (!lang2) {
@@ -147,7 +154,7 @@ export function DoubleFlag({
         iso={lang2?.short}
         flag={lang2?.flag}
         flag_file={lang2?.flag_file}
-        width={width * 0.9}
+        width={(width ?? 88) * 0.9}
         //onClick={onClick}
         className={className + " " + styles.flag_sub}
       />
