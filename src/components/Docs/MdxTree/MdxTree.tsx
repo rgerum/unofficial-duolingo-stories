@@ -1,3 +1,4 @@
+"use no memo";
 import React from "react";
 import { Fragment } from "react/jsx-runtime";
 
@@ -247,7 +248,7 @@ function MdxTree({
   }
 
   if (Element === Fragment) {
-    console.log("Unknown Element", tagName, name, properties);
+    //console.log("Unknown Element", tagName, name, properties);
   }
   if (Element === Fragment) properties = {};
 

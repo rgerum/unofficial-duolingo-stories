@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db.ts";
+import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { getUser } from "@/lib/userInterface";
@@ -74,7 +74,7 @@ async function set_approve({
         count_published++;
       }
     }
-    console.log("published", count_published);
+    //console.log("published", count_published);
     if (count_published) {
       await sql`UPDATE course
 SET count = (
@@ -82,8 +82,8 @@ SET count = (
     FROM story
     WHERE story.course_id = course.id AND story.public AND NOT story.deleted
 ) WHERE id = (SELECT course_id FROM story WHERE id = ${res3[0].id});`;
-      revalidateTag("course_data");
-      revalidateTag("story_data");
+      revalidateTag("course_data", "day");
+      revalidateTag("story_data", "day");
     }
     // update contributor list
     await sql`UPDATE course

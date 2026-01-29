@@ -29,6 +29,7 @@ export default async function Page() {
           <img
             src="https://opencollective.com/duostories/contribute/button@2x.png?color=blue"
             height="48"
+            alt="Contribute on Open Collective"
           />
         </Link>
         or
@@ -39,6 +40,7 @@ export default async function Page() {
           <img
             src="https://opencollective.com/duostories/donate/button@2x.png?color=blue"
             height="48"
+            alt="Donate on Open Collective"
           />
         </Link>
         <Script src="https://opencollective.com/:collectiveSlug/banner.js"></Script>
@@ -195,8 +197,10 @@ export default async function Page() {
 
       <h2>Who runs this website?</h2>
       <p>
-        The website was developed by me, "randrian". You can find me on{" "}
-        <Link href="https://www.duolingo.com/profile/Randriano">Duolingo</Link>{" "}
+        {`The website was developed by me, "randrian". You can find me on `}
+        <Link href="https://www.duolingo.com/profile/Randriano">
+          Duolingo
+        </Link>{" "}
         or on <Link href="https://github.com/rgerum">Github</Link>. Some people
         did minor contributions to the website, see the Github repository. You
         are welcome to be part of them.

@@ -1,8 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import FooterLinks from "../footer_links";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Duostories FAQ",
   description: "Information about the duostories project.",
   alternates: {
@@ -21,11 +22,11 @@ export default async function Page() {
 
       <h2>Welcome to duostories.org!</h2>
       <p>
-        Your privacy is critically important to us. At duostories.org, we are
+        {`Your privacy is critically important to us. At duostories.org, we are
         committed to protecting your personal data and ensuring transparency
         about how it's used. This Privacy Policy outlines the types of
         information we collect, how it's used, and the measures we take to
-        protect it. If you have any questions, contact us on{" "}
+        protect it. If you have any questions, contact us on `}
         <Link href="https://discord.gg/4NGVScARR3">Discord</Link>.
       </p>
 
@@ -93,7 +94,7 @@ export default async function Page() {
       <p>
         We may update this Privacy Policy from time to time. We will notify you
         of any changes by posting the new Privacy Policy on this page and
-        updating the "Effective Date" at the top.
+        updating the &quot;Effective Date&quot; at the top.
       </p>
 
       <h3>7. Contact Information:</h3>

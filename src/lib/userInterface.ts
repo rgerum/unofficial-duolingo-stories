@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
 import { NextRequest } from "next/server";
 
 export async function getUser(
@@ -9,12 +9,9 @@ export async function getUser(
 ) {
   if (typeof req !== "undefined" && typeof response !== "undefined") {
     const session = await auth();
-    //console.log("sessionAPI", session);
-
     return session?.user;
   }
   const session = await auth();
-  //console.log("sessionHTML", session);
   return session?.user;
 }
 

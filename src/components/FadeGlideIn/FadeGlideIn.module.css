@@ -1,40 +1,40 @@
 .fadeGlideIn {
-    animation: fadeIn 400ms ease-out, glideIn 400ms ease-out;
+  animation:
+    fadeIn 400ms ease-out,
+    glideIn 400ms ease-out;
 }
 
 .fadeGlideIn[data-hidden="true"] {
-    display: none;
-    animation: none;
+  display: none;
+  animation: none;
 }
 
 .fadeGlideIn[data-show="false"] {
-    display: none;
-    opacity: 0;
-    transition: opacity 10000ms;
+  display: none;
+  opacity: 0;
+  transition: opacity 10000ms;
 }
 
 @keyframes fadeIn {
-    /* _1X5ik */
-    0% {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+  /* _1X5ik */
+  0% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes glideIn {
-    /* _2Q5Dx */
-    0% {
-        transform: translateY(20px);
-    }
-    to {
-        transform: translateY(0);
-    }
+  /* _2Q5Dx */
+  0% {
+    transform: translateY(20px);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .fadeGlideOut {
-    opacity: 0;
-    transition: opacity 10000ms;
+  opacity: 0;
+  transition: opacity 10000ms;
 }
-
-
