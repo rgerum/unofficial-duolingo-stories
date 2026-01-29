@@ -65,7 +65,10 @@ function StoryTextLine({
         </span>
       </div>
     );
-  else if (element.line.type === "CHARACTER")
+  else if (
+    element.line.type === "CHARACTER" &&
+    element.line.avatarUrl != undefined
+  )
     return (
       <div
         key={element.trackingProperties.line_index}
@@ -85,7 +88,6 @@ function StoryTextLine({
             unhide={unhide}
             content={element.line.content}
           />
-          {}
         </span>
       </div>
     );
