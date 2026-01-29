@@ -109,7 +109,6 @@ function StoryTextLine({
             unhide={unhide}
             content={element.line.content}
           />
-          {}
         </span>
       </div>
     );
