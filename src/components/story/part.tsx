@@ -14,7 +14,10 @@ import QuestionMultipleChoice from "./questions/question_multiple_choice";
 import QuestionPointToPhrase from "./questions/question_point_to_phrase";
 import QuestionSelectPhrase from "./questions/question_select_phrase";
 import { EditorContext, StoryContext } from "./story";
-import type { StoryElement, StoryElementChallengePrompt } from "@/components/editor/story/syntax_parser_types";
+import type {
+  StoryElement,
+  StoryElementChallengePrompt,
+} from "@/components/editor/story/syntax_parser_types";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor";
 import type { StoryControls } from "./types";
 
@@ -28,7 +31,10 @@ interface PartProps {
 
 export default function Part(props: PartProps) {
   const lastElement = props.part[props.part.length - 1];
-  const trackingProps = lastElement.trackingProperties as { challenge_type?: string; line_index: number };
+  const trackingProps = lastElement.trackingProperties as {
+    challenge_type?: string;
+    line_index: number;
+  };
   let challenge_type = trackingProps.challenge_type;
   let [unhide, setUnhide] = React.useState(0);
   let is_hidden = props.progress < props.part[0].trackingProperties.line_index;

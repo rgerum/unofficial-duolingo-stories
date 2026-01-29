@@ -44,8 +44,9 @@ export default function EditList({
             starts as &quot;✍️ draft&quot;.
           </li>
           <li>
-            When you have finished working on the story, click the &quot;👍&quot;
-            icon to approve it and change the status to &quot;🗨 feedback&quot;.
+            When you have finished working on the story, click the
+            &quot;👍&quot; icon to approve it and change the status to &quot;🗨
+            feedback&quot;.
           </li>
           <li>
             Now tell contributors on Discord to check the story. When one or

@@ -10,8 +10,8 @@ export default function useChoiceButtons(
   active: boolean,
 ): [ButtonState[], (index: number) => void] {
   // create a list with one state for each button
-  const [buttonState, setButtonState] = React.useState<ButtonState[]>(
-    () => new Array(count).fill(undefined),
+  const [buttonState, setButtonState] = React.useState<ButtonState[]>(() =>
+    new Array(count).fill(undefined),
   );
 
   const click = React.useCallback(

@@ -26,7 +26,10 @@ interface QuestionPointToPhraseProps {
   element: StoryElementPointToPhrase;
 }
 
-export default function QuestionPointToPhrase({ progress, element }: QuestionPointToPhraseProps) {
+export default function QuestionPointToPhrase({
+  progress,
+  element,
+}: QuestionPointToPhraseProps) {
   const controls = React.useContext(StoryContext);
   const editor = React.useContext(EditorContext);
 

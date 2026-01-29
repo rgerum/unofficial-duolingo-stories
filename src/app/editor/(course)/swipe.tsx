@@ -14,7 +14,11 @@ interface SwiperSideBarProps {
   children: React.ReactNode;
 }
 
-export default function SwiperSideBar({ courses, languages, children }: SwiperSideBarProps) {
+export default function SwiperSideBar({
+  courses,
+  languages,
+  children,
+}: SwiperSideBarProps) {
   const segment = useSelectedLayoutSegments()[1];
 
   // Render data...

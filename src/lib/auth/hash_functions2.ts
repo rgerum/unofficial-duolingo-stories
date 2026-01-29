@@ -93,7 +93,10 @@ function _hash_encode64(input: Buffer | string, count: number): string {
   return output;
 }
 
-function _hash_gensalt_private(input: string, iteration_count_log2: number = 6): string {
+function _hash_gensalt_private(
+  input: string,
+  iteration_count_log2: number = 6,
+): string {
   let output = "$H$";
   output += itoa64[Math.min(iteration_count_log2 + 5, 30)];
   output += _hash_encode64(input, 6);

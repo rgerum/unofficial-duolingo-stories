@@ -17,19 +17,22 @@ function useKeypress(
     targetKey = key.substring(5).toLowerCase();
   }
 
-  React.useEffect(() => {
-    function listen(event: KeyboardEvent) {
-      if (requireCtrl && !event.ctrlKey) return;
-      if (targetKey === "number" && NUMBERS.includes(event.key)) {
-        return callback(parseInt(event.key));
-      } else if (event.code === targetKey || event.key === targetKey) {
-        return callback(event);
+  React.useEffect(
+    () => {
+      function listen(event: KeyboardEvent) {
+        if (requireCtrl && !event.ctrlKey) return;
+        if (targetKey === "number" && NUMBERS.includes(event.key)) {
+          return callback(parseInt(event.key));
+        } else if (event.code === targetKey || event.key === targetKey) {
+          return callback(event);
+        }
       }
-    }
-    window.addEventListener(actualEventType, listen);
-    return () => window.removeEventListener(actualEventType, listen);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps ?? [targetKey, callback]);
+      window.addEventListener(actualEventType, listen);
+      return () => window.removeEventListener(actualEventType, listen);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    deps ?? [targetKey, callback],
+  );
 }
 
 export default useKeypress;

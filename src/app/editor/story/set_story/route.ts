@@ -29,7 +29,8 @@ export async function POST(req: NextRequest) {
 
   let answer = await set_story(await req.json(), {
     username: token.name ?? "",
-    user_id: typeof token.id === 'string' ? parseInt(token.id) : token.id ?? 0,
+    user_id:
+      typeof token.id === "string" ? parseInt(token.id) : (token.id ?? 0),
   });
 
   if (answer === undefined)
@@ -38,7 +39,10 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(answer);
 }
 
-async function set_story(data: StoryData, { username, user_id }: { username: string; user_id: number }) {
+async function set_story(
+  data: StoryData,
+  { username, user_id }: { username: string; user_id: number },
+) {
   data["api"] = 2;
   data["change_date"] = new Date().toISOString();
   data["author_change"] = user_id;

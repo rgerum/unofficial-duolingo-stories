@@ -8,12 +8,20 @@ interface DataWithId {
   [key: string]: unknown;
 }
 
- 
-export async function update_query(_table_name: string, _data: DataWithId): Promise<unknown> {
-  throw new Error("DEPRECATED: update_query uses MySQL syntax and is not compatible with postgres.js");
+export async function update_query(
+  _table_name: string,
+  _data: DataWithId,
+): Promise<unknown> {
+  throw new Error(
+    "DEPRECATED: update_query uses MySQL syntax and is not compatible with postgres.js",
+  );
 }
 
- 
-export async function insert_query(_table_name: string, _data: Record<string, unknown>): Promise<number> {
-  throw new Error("DEPRECATED: insert_query uses MySQL syntax and is not compatible with postgres.js");
+export async function insert_query(
+  _table_name: string,
+  _data: Record<string, unknown>,
+): Promise<number> {
+  throw new Error(
+    "DEPRECATED: insert_query uses MySQL syntax and is not compatible with postgres.js",
+  );
 }

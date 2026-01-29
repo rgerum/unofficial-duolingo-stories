@@ -25,7 +25,11 @@ interface QuestionArrangeProps {
   element: StoryElementArrange;
 }
 
-export default function QuestionArrange({ setUnhide, progress, element }: QuestionArrangeProps) {
+export default function QuestionArrange({
+  setUnhide,
+  progress,
+  element,
+}: QuestionArrangeProps) {
   const controls = React.useContext(StoryContext);
   const editor = React.useContext(EditorContext);
 
@@ -49,7 +53,8 @@ export default function QuestionArrange({ setUnhide, progress, element }: Questi
     () => controls?.wrong(),
     (i: number) => {
       setDone(true);
-      if (!editor && element.characterPositions) setUnhide(element.characterPositions[i]);
+      if (!editor && element.characterPositions)
+        setUnhide(element.characterPositions[i]);
     },
     active,
   );

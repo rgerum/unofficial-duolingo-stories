@@ -36,7 +36,10 @@ export default function StoryButton({
       href={`/story/${story.id}`}
       onClick={() => {
         if (typeof window !== "undefined") {
-          window.sessionStorage.setItem("story_autoplay_ts", String(Date.now()));
+          window.sessionStorage.setItem(
+            "story_autoplay_ts",
+            String(Date.now()),
+          );
         }
       }}
     >

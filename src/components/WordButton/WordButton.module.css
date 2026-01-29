@@ -1,175 +1,174 @@
 .word_order {
-    line-height: 1.45;
-    color: var(--color_base_color);
-    border-width: 0;
-    border-radius: 14px;
-    display: inline-block;
-    font-size: 19px;
-    margin: 4px;
-    padding: 0;
-    --button-background: var(--color_base_background);
-    --button-border: var(--color_base_border);
-    --button-offset: -2px;
-    background-color: var(--button-border);
+  line-height: 1.45;
+  color: var(--color_base_color);
+  border-width: 0;
+  border-radius: 14px;
+  display: inline-block;
+  font-size: 19px;
+  margin: 4px;
+  padding: 0;
+  --button-background: var(--color_base_background);
+  --button-border: var(--color_base_border);
+  --button-offset: -2px;
+  background-color: var(--button-border);
 }
 
 .word_inner {
-    display: block;
-    border: 2px solid var(--button-border);
-    background: var(--button-background);
-    border-radius: inherit;
-    padding: 8px 15px;
-    transform: translateY(var(--button-offset));
+  display: block;
+  border: 2px solid var(--button-border);
+  background: var(--button-background);
+  border-radius: inherit;
+  padding: 8px 15px;
+  transform: translateY(var(--button-offset));
 
-    transition: transform 500ms, background-color 500ms;
+  transition:
+    transform 500ms,
+    background-color 500ms;
 }
 
 .word_order[data-status="off"] {
-    --button-background: var(--color_base_border);
-    color: transparent;
-    cursor: auto;
+  --button-background: var(--color_base_border);
+  color: transparent;
+  cursor: auto;
 }
 
 .word_order[data-status="selected"] {
-    --button-background: var(--color_selected_background);
-    --button-border: var(--color_selected_border-color);
-    color: var(--color_selected_color);
+  --button-background: var(--color_selected_background);
+  --button-border: var(--color_selected_border-color);
+  color: var(--color_selected_color);
 }
 
 .word_order[data-status="wrong"] {
-    animation: wrong_shake 0.8s;
+  animation: wrong_shake 0.8s;
 }
 
 @keyframes wrong_shake {
-    0%,
-    to {
-        background-color: var(--button-border);
-        color: #4b4b4b;
-        left: 0;
-    }
-    12.5%,
-    37.5%,
-    62.5%,
-    87.5% {
-        background: var(--color_false_border-color);
-        color: var(--color_false_color);
-        transform: translateX(-4px);
-    }
-    25%,
-    50%,
-    75% {
-        background: var(--color_false_border-color);
-        color: var(--color_false_color);
-        transform: translateX(4px);
-    }
+  0%,
+  to {
+    background-color: var(--button-border);
+    color: #4b4b4b;
+    left: 0;
+  }
+  12.5%,
+  37.5%,
+  62.5%,
+  87.5% {
+    background: var(--color_false_border-color);
+    color: var(--color_false_color);
+    transform: translateX(-4px);
+  }
+  25%,
+  50%,
+  75% {
+    background: var(--color_false_border-color);
+    color: var(--color_false_color);
+    transform: translateX(4px);
+  }
 }
 
 .word_order[data-status="wrong"] .word_inner {
-    animation: wrong_shake_inner 0.8s;
+  animation: wrong_shake_inner 0.8s;
 }
 
 @keyframes wrong_shake_inner {
-    0%,
-    to {
-        background-color: transparent;
-        color: #4b4b4b;
-        left: 0;
-    }
-    12.5%,
-    37.5%,
-    62.5%,
-    87.5% {
-        background: var(--color_false_background);
-        border-color: var(--color_false_border-color);
-        color: var(--color_false_color);
-    }
-    25%,
-    50%,
-    75% {
-        background: var(--color_false_background);
-        border-color: var(--color_false_border-color);
-        color: var(--color_false_color);
-    }
+  0%,
+  to {
+    background-color: transparent;
+    color: #4b4b4b;
+    left: 0;
+  }
+  12.5%,
+  37.5%,
+  62.5%,
+  87.5% {
+    background: var(--color_false_background);
+    border-color: var(--color_false_border-color);
+    color: var(--color_false_color);
+  }
+  25%,
+  50%,
+  75% {
+    background: var(--color_false_background);
+    border-color: var(--color_false_border-color);
+    color: var(--color_false_color);
+  }
 }
 
-
-
 .word_order[data-status="right"] {
-    animation: right_to_disabled 1.5s linear both;
+  animation: right_to_disabled 1.5s linear both;
 }
 
 @keyframes right_to_disabled {
-    0%,
-    66% {
-        background-color: var(--color_right_border-color);
-        color: var(--color_right_color);
-    }
-    to {
-        background-color: var(--color_disabled_border-color);
-        color: var(--color_disabled_color);
-    }
+  0%,
+  66% {
+    background-color: var(--color_right_border-color);
+    color: var(--color_right_color);
+  }
+  to {
+    background-color: var(--color_disabled_border-color);
+    color: var(--color_disabled_color);
+  }
 }
 
 .word_order[data-status="right"] .word_inner {
-    animation: right_to_disabled_inner 1.5s linear both;
+  animation: right_to_disabled_inner 1.5s linear both;
 }
 @keyframes right_to_disabled_inner {
-    0%,
-    66% {
-        background-color:  var(--color_right_background);
-        border-color: var(--color_right_border-color);
-        transform: translateY(-2px);
-    }
-    to {
-        background-color: var(--color_disabled_background);
-        border-color: var(--color_disabled_border-color);
-        transform: translateY(0px);
-    }
+  0%,
+  66% {
+    background-color: var(--color_right_background);
+    border-color: var(--color_right_border-color);
+    transform: translateY(-2px);
+  }
+  to {
+    background-color: var(--color_disabled_background);
+    border-color: var(--color_disabled_border-color);
+    transform: translateY(0px);
+  }
 }
 
 .word_order[data-status="false"] {
-    animation: false_to_disabled 1.5s both;
+  animation: false_to_disabled 1.5s both;
 }
 
 @keyframes false_to_disabled {
-    0%,
-    66% {
-        background: var(--color_false_border-color);
-        color: var(--color_false_color);
-    }
-    to {
-        background: var(--color_disabled_border-color);
-        color: var(--color_disabled_color);
-    }
+  0%,
+  66% {
+    background: var(--color_false_border-color);
+    color: var(--color_false_color);
+  }
+  to {
+    background: var(--color_disabled_border-color);
+    color: var(--color_disabled_color);
+  }
 }
 
 .word_order[data-status="false"] .word_inner {
-    animation: false_to_disabled_inner 1.5s both;
+  animation: false_to_disabled_inner 1.5s both;
 }
 
 @keyframes false_to_disabled_inner {
-    0%,
-    66% {
-        background: var(--color_false_background);
-        border-color: var(--color_false_border-color);
-        transform: translateY(var(--button-offset));
-    }
-    to {
-        background: var(--color_disabled_background);
-        border-color: var(--color_disabled_border-color);
-        transform: translateY(0px);
-    }
+  0%,
+  66% {
+    background: var(--color_false_background);
+    border-color: var(--color_false_border-color);
+    transform: translateY(var(--button-offset));
+  }
+  to {
+    background: var(--color_disabled_background);
+    border-color: var(--color_disabled_border-color);
+    transform: translateY(0px);
+  }
 }
 
-
 .word_order[data-status="done"] {
-    --button-background: var(--color_disabled_background);
-    --button-border: var(--color_disabled_border-color);
-    color: var(--color_disabled_color);
+  --button-background: var(--color_disabled_background);
+  --button-border: var(--color_disabled_border-color);
+  color: var(--color_disabled_color);
 }
 
 .word_order[data-status="right-stay"] {
-    --button-background: var(--color_right_background);
-    --button-border: var(--color_right_border-color);
-    color: var(--color_right_color);
+  --button-background: var(--color_right_background);
+  --button-border: var(--color_right_border-color);
+  color: var(--color_right_color);
 }

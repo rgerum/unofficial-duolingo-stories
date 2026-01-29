@@ -63,7 +63,13 @@ export default function QuestionMultipleChoice({
         controls?.block_next();
       }
     }
-  }, [active1, active, done, controls, element.trackingProperties.challenge_type]);
+  }, [
+    active1,
+    active,
+    done,
+    controls,
+    element.trackingProperties.challenge_type,
+  ]);
 
   // whether this part is already shown
   let hidden2 = !active ? styles_common.hidden : "";
@@ -133,7 +139,13 @@ export default function QuestionMultipleChoice({
                 get_color_text(buttonState[index])
               }
             >
-              <HintLineContent content={typeof answer === "string" ? { text: answer, hintMap: [] } : answer} />
+              <HintLineContent
+                content={
+                  typeof answer === "string"
+                    ? { text: answer, hintMap: [] }
+                    : answer
+                }
+              />
             </div>
           </li>
         ))}

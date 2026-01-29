@@ -16,13 +16,13 @@ export const Normal = {
         correctAnswerIndex: 2,
         trackingProperties: {
           line_index: 0,
-          challenge_type: "select-phrases"
+          challenge_type: "select-phrases",
         },
         lang: "es",
         editor: {
           start_no: 0,
-          end_no: 0
-        }
+          end_no: 0,
+        },
       }}
       active={true}
       advance={() => {}}

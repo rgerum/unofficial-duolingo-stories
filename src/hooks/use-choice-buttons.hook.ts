@@ -42,7 +42,8 @@ export function useChoiceButtons(
   useKeypress(
     "number",
     (value: KeyboardEvent | number) => {
-      if (typeof value === "number" && active && value <= count) click(value - 1);
+      if (typeof value === "number" && active && value <= count)
+        click(value - 1);
     },
     [click],
   );

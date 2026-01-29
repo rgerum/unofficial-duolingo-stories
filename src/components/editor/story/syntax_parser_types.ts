@@ -53,7 +53,10 @@ export type LineElementTitle = {
   type: "TITLE";
   content: ContentWithHints;
 };
-export type LineElement = LineElementCharacter | LineElementProse | LineElementTitle;
+export type LineElement =
+  | LineElementCharacter
+  | LineElementProse
+  | LineElementTitle;
 
 export type StoryElementHeader = {
   type: "HEADER";

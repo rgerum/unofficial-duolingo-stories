@@ -8,7 +8,10 @@ import EditorSSMLDisplay from "./audio_edit";
 import AudioPlay from "./audio_play";
 import useAudio from "./use_audio";
 import { EditorContext, StoryContext } from "../story";
-import type { StoryElementLine, StoryElement } from "@/components/editor/story/syntax_parser_types";
+import type {
+  StoryElementLine,
+  StoryElement,
+} from "@/components/editor/story/syntax_parser_types";
 
 interface TextLineProps {
   progress: number;
@@ -17,7 +20,12 @@ interface TextLineProps {
   part: StoryElement[];
 }
 
-export default function TextLine({ progress, unhide, element, part }: TextLineProps) {
+export default function TextLine({
+  progress,
+  unhide,
+  element,
+  part,
+}: TextLineProps) {
   const editor = React.useContext(EditorContext);
   const controls = React.useContext(StoryContext);
 

@@ -1,9 +1,9 @@
 .languages {
   grid-area: nav;
-/*  height: calc(100vh - 64px);
+  /*  height: calc(100vh - 64px);
   width: 515px;*/
   border-right: 1px solid var(--header-border);
-/*  background-color: var(--body-background);*/
+  /*  background-color: var(--body-background);*/
 }
 
 .search {
@@ -111,7 +111,7 @@
     width: 0;
     position: relative;
   }
-  .languages[data-show="true"] .languages_wrapper  {
+  .languages[data-show="true"] .languages_wrapper {
     transform: translateX(0);
     transition: transform 700ms 100ms ease-out;
   }

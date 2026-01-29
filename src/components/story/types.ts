@@ -20,7 +20,13 @@ export interface StoryControls {
 /**
  * Button click state for question components
  */
-export type ButtonState = "right" | "wrong" | "selected" | "done" | "false" | undefined;
+export type ButtonState =
+  | "right"
+  | "wrong"
+  | "selected"
+  | "done"
+  | "false"
+  | undefined;
 
 /**
  * Match question clicked state

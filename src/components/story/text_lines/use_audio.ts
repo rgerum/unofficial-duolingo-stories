@@ -1,7 +1,11 @@
 "use no memo";
 import React from "react";
 import { StoryContext } from "../story";
-import type { StoryElementLine, StoryElementHeader, Audio } from "@/components/editor/story/syntax_parser_types";
+import type {
+  StoryElementLine,
+  StoryElementHeader,
+  Audio,
+} from "@/components/editor/story/syntax_parser_types";
 
 // Extend window for playing_audio
 declare global {
@@ -11,13 +15,22 @@ declare global {
 }
 
 type UseAudioElement = StoryElementLine | StoryElementHeader;
-type UseAudioReturn = [number, (() => Promise<void>) | undefined, React.RefObject<HTMLAudioElement | null>, string | undefined];
+type UseAudioReturn = [
+  number,
+  (() => Promise<void>) | undefined,
+  React.RefObject<HTMLAudioElement | null>,
+  string | undefined,
+];
 
-export default function useAudio(element: UseAudioElement, progress: number): UseAudioReturn {
+export default function useAudio(
+  element: UseAudioElement,
+  progress: number,
+): UseAudioReturn {
   const [audioRange, setAudioRange] = React.useState(99999);
-  let audio: Audio | undefined = element.type === "LINE"
-    ? element?.line?.content?.audio
-    : element?.learningLanguageTitleContent?.audio;
+  let audio: Audio | undefined =
+    element.type === "LINE"
+      ? element?.line?.content?.audio
+      : element?.learningLanguageTitleContent?.audio;
   const ref = React.useRef<HTMLAudioElement>(null);
 
   const controls = React.useContext(StoryContext);

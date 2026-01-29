@@ -1,7 +1,10 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 
-export default function useSearchParamsState(name: string, default_value: string): [string, (value: string) => void] {
+export default function useSearchParamsState(
+  name: string,
+  default_value: string,
+): [string, (value: string) => void] {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

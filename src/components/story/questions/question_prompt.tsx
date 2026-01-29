@@ -8,9 +8,14 @@ interface QuestionPromptProps {
   lang?: string;
 }
 
-export default function QuestionPrompt({ question, lang }: QuestionPromptProps) {
+export default function QuestionPrompt({
+  question,
+  lang,
+}: QuestionPromptProps) {
   if (typeof question === "string")
-    return <div className={styles.question + " " + (lang ?? "")}>{question}</div>;
+    return (
+      <div className={styles.question + " " + (lang ?? "")}>{question}</div>
+    );
   return (
     <div className={styles.question + " " + (lang ?? "")}>
       <HintLineContent content={question} />

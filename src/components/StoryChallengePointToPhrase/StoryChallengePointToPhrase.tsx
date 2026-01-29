@@ -4,7 +4,10 @@ import StoryTextLine from "../StoryTextLine";
 import StoryQuestionPointToPhrase from "../StoryQuestionPointToPhrase";
 import FadeGlideIn from "../FadeGlideIn";
 import { motion } from "framer-motion";
-import { StoryElement, StoryElementLine } from "@/components/editor/story/syntax_parser_types";
+import {
+  StoryElement,
+  StoryElementLine,
+} from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
 
 function StoryChallengePointToPhrase({
@@ -37,7 +40,11 @@ function StoryChallengePointToPhrase({
   if (settings.hide_questions) {
     return (
       <FadeGlideIn key={`${id}-1`} hidden={hidden}>
-        <StoryTextLine active={active} element={parts[0] as StoryElementLine} settings={settings} />
+        <StoryTextLine
+          active={active}
+          element={parts[0] as StoryElementLine}
+          settings={settings}
+        />
       </FadeGlideIn>
     );
   }

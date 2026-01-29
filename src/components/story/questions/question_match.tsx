@@ -27,7 +27,10 @@ interface QuestionMatchProps {
   element: StoryElementMatch;
 }
 
-export default function QuestionMatch({ progress, element }: QuestionMatchProps) {
+export default function QuestionMatch({
+  progress,
+  element,
+}: QuestionMatchProps) {
   const controls = React.useContext(StoryContext);
   const editor = React.useContext(EditorContext);
 
@@ -46,7 +49,9 @@ export default function QuestionMatch({ progress, element }: QuestionMatchProps)
   const [orderA, setOrderA] = useState<number[]>([]);
   const [orderB, setOrderB] = useState<number[]>([]);
   const [clicked, setClicked] = useState<MatchClickedState[]>([]);
-  const [last_clicked, setLastClicked] = useState<number | undefined>(undefined);
+  const [last_clicked, setLastClicked] = useState<number | undefined>(
+    undefined,
+  );
 
   let order = orderB.concat(orderA);
 
@@ -80,7 +85,7 @@ export default function QuestionMatch({ progress, element }: QuestionMatchProps)
       // select the word
       if (
         last_clicked === undefined ||
-        (idx >= orderB.length) === (last_clicked >= orderB.length)
+        idx >= orderB.length === last_clicked >= orderB.length
       ) {
         newClicked[idx] = "selected";
         if (last_clicked !== undefined) newClicked[last_clicked] = undefined;
@@ -99,7 +104,9 @@ export default function QuestionMatch({ progress, element }: QuestionMatchProps)
         newClicked[last_clicked] = "right";
         setLastClicked(undefined);
         setClicked(newClicked);
-        const right_count = newClicked.filter((item) => item === "right").length;
+        const right_count = newClicked.filter(
+          (item) => item === "right",
+        ).length;
         if (right_count >= newClicked.length) {
           setDone(true);
           controls?.right();
@@ -116,13 +123,23 @@ export default function QuestionMatch({ progress, element }: QuestionMatchProps)
           setClicked((prev) => {
             const updated = [...prev];
             if (updated[idx] === "wrong") updated[idx] = undefined;
-            if (updated[last_clicked_old] === "wrong") updated[last_clicked_old] = undefined;
+            if (updated[last_clicked_old] === "wrong")
+              updated[last_clicked_old] = undefined;
             return updated;
           });
         }, 1500);
       }
     },
-    [clicked, last_clicked, orderB, setLastClicked, setClicked, setDone, order, controls],
+    [
+      clicked,
+      last_clicked,
+      orderB,
+      setLastClicked,
+      setClicked,
+      setDone,
+      order,
+      controls,
+    ],
   );
 
   const key_event_handler = React.useCallback(

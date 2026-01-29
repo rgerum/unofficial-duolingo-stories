@@ -7,7 +7,11 @@ interface TextEditProps {
   set_localization: (tag: string, text: string) => Promise<unknown>;
 }
 
-export default function TextEdit({ tag, text, set_localization }: TextEditProps) {
+export default function TextEdit({
+  tag,
+  text,
+  set_localization,
+}: TextEditProps) {
   let [current_text, setText] = useState(text || "");
   return (
     <>

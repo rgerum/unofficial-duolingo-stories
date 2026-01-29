@@ -16,7 +16,11 @@ interface CourseType {
   short?: string;
 }
 
-export default function LocalizationEditor({ language, language2, course }: {
+export default function LocalizationEditor({
+  language,
+  language2,
+  course,
+}: {
   language: LanguageType;
   language2: LanguageType | undefined;
   course: CourseType | undefined;
@@ -34,7 +38,12 @@ export default function LocalizationEditor({ language, language2, course }: {
   );
 }
 
-export function Layout({ children, language_data, language2, course }: {
+export function Layout({
+  children,
+  language_data,
+  language2,
+  course,
+}: {
   children: React.ReactNode;
   language_data: LanguageType;
   language2: LanguageType | undefined;
@@ -64,7 +73,10 @@ export function Layout({ children, language_data, language2, course }: {
   );
 } //                 <Login page={"editor"}/>
 
-async function ListLocalizations({ language_id, language_name }: {
+async function ListLocalizations({
+  language_id,
+  language_name,
+}: {
   language_id: number;
   language_name: string;
 }) {

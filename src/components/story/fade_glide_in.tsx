@@ -8,7 +8,12 @@ interface FadeGlideInProps {
   element?: { editor?: { block_start_no?: number } };
 }
 
-export default function FadeGlideIn({ children, hidden2, onClick, element }: FadeGlideInProps) {
+export default function FadeGlideIn({
+  children,
+  hidden2,
+  onClick,
+  element,
+}: FadeGlideInProps) {
   return (
     <div
       className={styles.fadeGlideIn + " " + (hidden2 || "")}

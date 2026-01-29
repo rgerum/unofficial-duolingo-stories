@@ -28,7 +28,11 @@ interface QuestionSelectPhraseProps {
   element: StoryElementSelectPhrase;
 }
 
-export default function QuestionSelectPhrase({ setUnhide, progress, element }: QuestionSelectPhraseProps) {
+export default function QuestionSelectPhrase({
+  setUnhide,
+  progress,
+  element,
+}: QuestionSelectPhraseProps) {
   const controls = React.useContext(StoryContext);
   const editor = React.useContext(EditorContext);
 

@@ -25,11 +25,11 @@
 
 /* rtl */
 
-.story p[data-rtl=true] {
+.story p[data-rtl="true"] {
   direction: rtl;
 }
 
-.phrase[data-rtl=true] {
+.phrase[data-rtl="true"] {
   direction: rtl;
 }
 

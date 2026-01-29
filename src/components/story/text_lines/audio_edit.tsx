@@ -6,7 +6,11 @@ import {
   insert_audio_line,
 } from "./audio_edit_tools";
 import { useSearchParams } from "next/navigation";
-import type { Audio, StoryElementLine, StoryElementHeader } from "@/components/editor/story/syntax_parser_types";
+import type {
+  Audio,
+  StoryElementLine,
+  StoryElementHeader,
+} from "@/components/editor/story/syntax_parser_types";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor";
 
 // Extend window for open_recoder
@@ -28,7 +32,12 @@ interface EditorSSMLDisplayProps {
   editor: EditorStateType;
 }
 
-export default function EditorSSMLDisplay({ ssml, element, audio, editor }: EditorSSMLDisplayProps) {
+export default function EditorSSMLDisplay({
+  ssml,
+  element,
+  audio,
+  editor,
+}: EditorSSMLDisplayProps) {
   //let urlParams = new URLSearchParams(window.location.search);
   const beta = false;
 
@@ -104,7 +113,9 @@ export default function EditorSSMLDisplay({ ssml, element, audio, editor }: Edit
       )}
       {beta ? (
         <a
-          onClick={() => window.open_recoder?.({ ssml, element, audio, editor })}
+          onClick={() =>
+            window.open_recoder?.({ ssml, element, audio, editor })
+          }
           style={{ cursor: "pointer" }}
         >
           🎤

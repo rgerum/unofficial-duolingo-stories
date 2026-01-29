@@ -19,11 +19,19 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(answer);
   } catch (err) {
-    return new Response(err instanceof Error ? err.message : String(err), { status: 500 });
+    return new Response(err instanceof Error ? err.message : String(err), {
+      status: 500,
+    });
   }
 }
 
-async function set_tts_replace({ id, tts_replace }: { id: number; tts_replace: string }) {
+async function set_tts_replace({
+  id,
+  tts_replace,
+}: {
+  id: number;
+  tts_replace: string;
+}) {
   return sql`
   UPDATE language SET ${sql({ tts_replace })}
   WHERE id = ${id}

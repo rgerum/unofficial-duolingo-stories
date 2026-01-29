@@ -1,5 +1,9 @@
 import React from "react";
-import type { StoryElementLine, StoryElementHeader, Audio } from "@/components/editor/story/syntax_parser_types";
+import type {
+  StoryElementLine,
+  StoryElementHeader,
+  Audio,
+} from "@/components/editor/story/syntax_parser_types";
 
 declare global {
   interface Window {
@@ -16,9 +20,10 @@ type UseAudioElement = StoryElementLine | StoryElementHeader;
 
 export default function useAudio(element: UseAudioElement, active: boolean) {
   const [audioRange, setAudioRange] = React.useState(99999);
-  const audio: Audio | undefined = element.type === "LINE"
-    ? element.line?.content?.audio
-    : element.learningLanguageTitleContent?.audio;
+  const audio: Audio | undefined =
+    element.type === "LINE"
+      ? element.line?.content?.audio
+      : element.learningLanguageTitleContent?.audio;
   const ref = React.useRef<HTMLAudioElement>(null);
 
   const playAudio = React.useCallback(async () => {

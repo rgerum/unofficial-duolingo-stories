@@ -2,7 +2,10 @@ import React from "react";
 import StoryTextLine from "../StoryTextLine";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
 import FadeGlideIn from "../FadeGlideIn";
-import { StoryElement, StoryElementLine } from "@/components/editor/story/syntax_parser_types";
+import {
+  StoryElement,
+  StoryElementLine,
+} from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
 
 function StoryChallengeMultipleChoice({
@@ -27,7 +30,13 @@ function StoryChallengeMultipleChoice({
     if (active && partProgress === 0 && parts.length > 1) {
       setButtonStatus(settings.hide_questions ? "continue" : "idle");
     }
-  }, [active, partProgress, parts.length, setButtonStatus, settings.hide_questions]);
+  }, [
+    active,
+    partProgress,
+    parts.length,
+    setButtonStatus,
+    settings.hide_questions,
+  ]);
 
   const id = React.useId();
 
@@ -38,7 +47,11 @@ function StoryChallengeMultipleChoice({
     if (parts.length === 1) return null;
     return (
       <FadeGlideIn key={`${id}-1`} hidden={hidden}>
-        <StoryTextLine active={active} element={part_one as StoryElementLine} settings={settings} />
+        <StoryTextLine
+          active={active}
+          element={part_one as StoryElementLine}
+          settings={settings}
+        />
       </FadeGlideIn>
     );
   }

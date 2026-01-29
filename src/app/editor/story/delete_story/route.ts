@@ -21,11 +21,16 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(answer);
   } catch (err) {
-    return new Response(err instanceof Error ? err.message : String(err), { status: 500 });
+    return new Response(err instanceof Error ? err.message : String(err), {
+      status: 500,
+    });
   }
 }
 
-async function delete_story({ id }: { id: number }, { username }: { username: string }) {
+async function delete_story(
+  { id }: { id: number },
+  { username }: { username: string },
+) {
   await sql`UPDATE story SET deleted = true, public = false WHERE id = ${id};`;
   let data = (await sql`SELECT * FROM story WHERE id = ${id};`)[0];
   await upload_github(

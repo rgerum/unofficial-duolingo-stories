@@ -2,12 +2,14 @@ import React, { useRef, ReactNode } from "react";
 import styles from "./line_hints.module.css";
 
 import { EditorContext } from "../story";
-import type { ContentWithHints, HideRange } from "@/components/editor/story/syntax_parser_types";
+import type {
+  ContentWithHints,
+  HideRange,
+} from "@/components/editor/story/syntax_parser_types";
 
 function splitTextTokens(text: string, keep_tilde = true): string[] {
   if (!text) return [];
-  if (keep_tilde)
-    return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}]+)/);
+  if (keep_tilde) return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}]+)/);
   else return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}~]+)/);
 }
 
@@ -27,7 +29,9 @@ function Tooltip({ className, children }: TooltipProps) {
 
     let offset = 0;
     if (tooltipElement.style.left.split(" ").length >= 2) {
-      offset = parseInt(tooltipElement.style.left.split(" ")[2].split("px)")[0]);
+      offset = parseInt(
+        tooltipElement.style.left.split(" ")[2].split("px)")[0],
+      );
     }
     // Check if the tooltip would be cut off on the right
     if (tooltipRect.right + offset > window.innerWidth) {
@@ -79,7 +83,12 @@ export default function HintLineContent({
 
   const show_trans = editor?.show_trans;
 
-  function getOverlap(start1: number, end1: number, start2?: number, end2?: number): boolean {
+  function getOverlap(
+    start1: number,
+    end1: number,
+    start2?: number,
+    end2?: number,
+  ): boolean {
     if (start2 === end2) return false;
     if (start2 === undefined || end2 === undefined) return false;
     if (start1 <= start2 && start2 < end1) return true;
