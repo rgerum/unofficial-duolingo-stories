@@ -46,7 +46,11 @@ function StoryChallengeMultipleChoice({
   if (settings.hide_questions) {
     if (parts.length === 1) return null;
     return (
-      <FadeGlideIn key={`${id}-1`} hidden={hidden}>
+      <FadeGlideIn
+        key={`${id}-1`}
+        hidden={hidden}
+        disableScroll={settings.show_all}
+      >
         <StoryTextLine
           active={active}
           element={part_one as StoryElementLine}
@@ -65,6 +69,7 @@ function StoryChallengeMultipleChoice({
           key={`${id}-1`}
           show={show_question || settings.show_all}
           hidden={hidden}
+          disableScroll={settings.show_all}
         >
           <StoryQuestionMultipleChoice
             element={part_one}
@@ -83,7 +88,7 @@ function StoryChallengeMultipleChoice({
 
   return (
     <>
-      <FadeGlideIn key={`${id}-1`} hidden={hidden}>
+      <FadeGlideIn key={`${id}-1`} hidden={hidden} disableScroll={settings.show_all}>
         <StoryTextLine
           key={part_one.trackingProperties.line_index}
           active={active && partProgress === 0}
@@ -95,6 +100,7 @@ function StoryChallengeMultipleChoice({
         key={`${id}-2`}
         show={show_question || settings.show_all}
         hidden={hidden}
+        disableScroll={settings.show_all}
       >
         <StoryQuestionMultipleChoice
           element={part_two}

@@ -37,7 +37,11 @@ function StoryChallengeSelectPhrases({
   if (settings.hide_questions) {
     if (active) setButtonStatus("continue");
     return (
-      <FadeGlideIn key={`${id}-1`} hidden={hidden}>
+      <FadeGlideIn
+        key={`${id}-1`}
+        hidden={hidden}
+        disableScroll={settings.show_all}
+      >
         <StoryTextLine
           active={active}
           element={parts[1] as StoryElementLine}
@@ -53,10 +57,15 @@ function StoryChallengeSelectPhrases({
         key={`${id}-1`}
         show={active || settings.show_all}
         hidden={hidden}
+        disableScroll={settings.show_all}
       >
         <StoryQuestionPrompt question={part_one.prompt} />
       </FadeGlideIn>
-      <FadeGlideIn key={`${id}-2`} hidden={hidden}>
+      <FadeGlideIn
+        key={`${id}-2`}
+        hidden={hidden}
+        disableScroll={settings.show_all}
+      >
         <StoryTextLine
           active={active}
           element={parts[1] as StoryElementLine}
@@ -68,6 +77,7 @@ function StoryChallengeSelectPhrases({
         key={`${id}-3`}
         show={active || settings.show_all}
         hidden={hidden}
+        disableScroll={settings.show_all}
       >
         <StoryQuestionSelectPhrase
           element={parts[2]}

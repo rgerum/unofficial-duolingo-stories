@@ -31,6 +31,7 @@ export default function Story({
   auto_play,
   hide_questions,
   localization,
+  show_all,
 }: {
   story: StoryTypeExtended;
   id?: number;
@@ -39,6 +40,7 @@ export default function Story({
   auto_play?: boolean;
   hide_questions?: boolean;
   localization?: LocalisationFunc;
+  show_all?: boolean;
 }) {
   //console.log("Story", story);
   const router = useRouter();
@@ -55,6 +57,9 @@ export default function Story({
   const [progressStep, setProgressStep] = useState(1);
 
   const [audio_loaded, setAudioLoaded] = useState(0);
+  const [audios, setAudios] = useState<
+    { [key: string]: HTMLAudioElement } | undefined
+  >(undefined);
 
   const [show_title_page, setShowTitlePage] = useState(0);
 
@@ -142,7 +147,7 @@ export default function Story({
     );
     const last = parts[parts.length - 1];
 
-    if (!editor) {
+    if (!editor && last) {
       last.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [editor, storyElement, progress]);
@@ -202,11 +207,18 @@ export default function Story({
   }, [editor, story.elements]);
 
   const audio_base_path = "https://carex.uber.space/stories/";
-  const audios = React.useMemo(() => {
-    if (editor || audio_loaded) return undefined;
+
+  React.useEffect(() => {
+    if (editor || audio_loaded) return;
+
+    if (typeof window === "undefined" || typeof Audio === "undefined") {
+      setAudioLoaded(1);
+      return;
+    }
 
     let count = 0;
     const audiosMap: { [key: string]: HTMLAudioElement } = {};
+
     for (const url of audio_urls) {
       if (audiosMap[url] === undefined && url !== undefined) {
         count += 1;
@@ -224,10 +236,9 @@ export default function Story({
         a.load();
       }
     }
-    if (count === 0) {
-      setAudioLoaded(1);
-    }
-    return audiosMap;
+
+    setAudios(audiosMap);
+    if (count === 0) setAudioLoaded(1);
   }, [editor, audio_loaded, audio_urls]);
 
   const key_event_handler = React.useCallback(
