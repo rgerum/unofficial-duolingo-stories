@@ -22,7 +22,11 @@ import type { z } from "zod";
 import type { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 
 type CourseStudType = z.infer<typeof CourseStudSchema>;
-type PlayFn = (e: React.MouseEvent, text: string, name: string) => Promise<void>;
+type PlayFn = (
+  e: React.MouseEvent,
+  text: string,
+  name: string,
+) => Promise<void>;
 
 export default function LanguageEditor({
   language,
@@ -484,7 +488,13 @@ function AvatarNames({
     return play(e, id, text, name, speakText2);
   }
 
-  async function play(e: React.MouseEvent, id: string, text: string, name: string, speakText: string) {
+  async function play(
+    e: React.MouseEvent,
+    id: string,
+    text: string,
+    name: string,
+    speakText: string,
+  ) {
     if (stored[id] === undefined) {
       //let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
       //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
@@ -555,7 +565,6 @@ function AvatarNames({
           audioRange={audioRange}
           content={element.line.content}
         />
-
         <div>
           <textarea
             className={styles.textarea}
@@ -571,7 +580,6 @@ function AvatarNames({
             type="button"
           />
         </div>
-
         <div className={styles.slidecontainer}>
           Pitch:{" "}
           <input
