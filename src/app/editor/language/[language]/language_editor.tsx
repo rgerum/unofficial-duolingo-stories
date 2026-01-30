@@ -1,14 +1,13 @@
 "use client";
 "use no memo";
 import React, { useState } from "react";
-import { useInput } from "@/lib/hooks";
 import { SpinnerBlue } from "@/components/layout/spinner";
 import { fetch_post } from "@/lib/fetch_post";
 import styles from "./[language].module.css";
 
-import AudioPlay from "@/components/story/text_lines/audio_play";
-import HintLineContent from "@/components/story/text_lines/line_hints";
-import useAudio from "@/components/story/text_lines/use_audio";
+import PlayAudio from "@/components/PlayAudio";
+import StoryLineHints from "@/components/StoryLineHints";
+import useAudio from "@/components/StoryTextLine/use-audio.hook";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
 import EditorButton from "../../editor_button";
 import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
@@ -544,7 +543,7 @@ function AvatarNames({
     e.preventDefault();
   }
 
-  let [audioRange, playAudio, ref, url] = useAudio(element, 1);
+  let [audioRange, playAudio, ref, url] = useAudio(element, true);
 
   //if(avatars === undefined || speakers === undefined || language === undefined)
   //    return <Spinner/>
@@ -560,8 +559,8 @@ function AvatarNames({
         <audio ref={ref}>
           <source src={url} type="audio/mp3" />
         </audio>
-        <AudioPlay onClick={playAudio} />
-        <HintLineContent
+        <PlayAudio onClick={playAudio} />
+        <StoryLineHints
           audioRange={audioRange}
           content={element.line.content}
         />

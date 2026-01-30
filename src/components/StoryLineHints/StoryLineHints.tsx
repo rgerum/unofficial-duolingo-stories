@@ -1,8 +1,7 @@
 import React, { CSSProperties } from "react";
 import styles from "./StoryLineHints.module.css";
 import { ContentWithHints } from "@/components/editor/story/syntax_parser_types";
-
-//import { EditorContext } from "../story";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor";
 
 function splitTextTokens(text: string, keep_tilde = true) {
   if (!text) return [];
@@ -59,11 +58,13 @@ function StoryLineHints({
   audioRange,
   hideRangesForChallenge,
   unhide,
+  editorState,
 }: {
   content: ContentWithHints;
   audioRange?: number;
   hideRangesForChallenge?: { start: number; end: number }[];
   unhide?: number;
+  editorState?: EditorStateType;
 }) {
   if (!content) return <>Empty</>;
   let hideRangesForChallengeEntry = hideRangesForChallenge
@@ -78,11 +79,9 @@ function StoryLineHints({
         end: Math.max(hideRangesForChallengeEntry.end, unhide),
       };
   }
-  const editor = null; // React.useContext(EditorContext);
+  const editor = editorState;
 
-  let show_trans = undefined; // editor?.show_trans;
-  //var [show_trans, set_show_trans] = useState(0); //TODO window.editorShowTranslations);
-  //useEventListener("editorShowTranslations", (e) => { set_show_trans(e.detail.show); })
+  let show_trans = editor?.show_trans;
 
   function getOverlap(
     start1: number,

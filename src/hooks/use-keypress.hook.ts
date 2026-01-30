@@ -29,7 +29,6 @@ function useKeypress(
       }
       window.addEventListener(actualEventType, listen);
       return () => window.removeEventListener(actualEventType, listen);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
     deps ?? [targetKey, callback],
   );
