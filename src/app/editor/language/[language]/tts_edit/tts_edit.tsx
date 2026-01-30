@@ -10,10 +10,9 @@ import {
   generate_audio_line,
   content_to_audio,
 } from "@/components/story/text_lines/audio_edit_tools";
-import TextLine from "@/components/story/text_lines/text_line";
+import StoryTextLine from "@/components/StoryTextLine";
 import jsyaml from "js-yaml";
 import {
-  AvatarNamesType,
   LanguageType,
   SpeakersType,
   CourseStudSchema,
@@ -310,11 +309,22 @@ FRAGMENTS:
             <span>{text2}</span>
             <h2>Final Text</h2>
             <span className={language.short}>
-              <TextLine
-                progress={1}
+              <StoryTextLine
+                active={true}
                 unhide={999999}
                 element={element}
-                part={[]}
+                settings={{
+                  hide_questions: false,
+                  show_all: true,
+                  show_names: false,
+                  rtl: false,
+                  highlight_name: [],
+                  hideNonHighlighted: false,
+                  setHighlightName: () => {},
+                  setHideNonHighlighted: () => {},
+                  id: 0,
+                  show_title_page: false,
+                }}
               />
             </span>
 
