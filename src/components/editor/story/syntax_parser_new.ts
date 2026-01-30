@@ -1,7 +1,7 @@
 import {
   generate_ssml_line,
   text_to_keypoints,
-} from "../../story/text_lines/audio_edit_tools";
+} from "@/lib/editor/audio/audio_edit_tools";
 import { Avatar } from "@/app/editor/story/[story]/page";
 import {
   Audio,
@@ -70,8 +70,7 @@ function getButtons(content: ContentWithHints): [string[], number[]] {
     );
   }
   let characterPositions = [];
-  let pos1 = content.text.indexOf("(");
-  pos1 = content.text.indexOf(")");
+  let pos1 = content.text.indexOf(")");
   while (pos1 !== -1) {
     hintsShift(content, pos1);
     pos1 = content.text.indexOf(")");
@@ -276,32 +275,6 @@ function getInputStringText(text: string) {
   text = text.replace(/(\s)\s+/g, "$1");
   //
   return text; //.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
-}
-
-function getInputStringSpeechText(text: string, hide: boolean) {
-  if (hide) {
-    text = text.replace("[", '<prosody volume="silent">');
-    text = text.replace("]", "</prosody>");
-  }
-  //text = text.replace(/(\.\.\.|…)/g, '<sub alias=" ">$1</sub><break/>');
-  //text = text.replace(/\(\+/g, "");
-  //text = text.replace(/\(/g, "");
-  //text = text.replace(/\)/g, "");
-  //text = text.replace(/\[/g, "");
-  //text = text.replace(/\]/g, "");
-  return text;
-  return (
-    "<speak>" +
-    text
-      .replace(
-        /([^-|~ ,;.:_?!…]*)\{([^\}:]*):([^\}]*)\}/g,
-        '<phoneme alphabet="$3" ph="$2">$1</phoneme>',
-      )
-      .replace(/([^-|~ ,;.:_?!…]*)\{([^\}]*)\}/g, '<sub alias="$2">$1</sub>')
-      .replace(/~/g, " ")
-      .replace(/\|/g, "⁠") +
-    "</speak>"
-  );
 }
 
 function speaker_text_trans(
@@ -1069,7 +1042,6 @@ type AvatarOverwrites = {
   speaker: string;
   name: string;
 };
-type Cast = { id: string; link: string; speaker: string; name: string };
 
 type StoryLanguages = {
   learning_language: string;

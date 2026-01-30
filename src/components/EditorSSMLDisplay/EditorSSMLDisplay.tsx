@@ -1,10 +1,11 @@
+"use client";
 import React from "react";
-import styles from "./audio_edit.module.css";
+import styles from "./EditorSSMLDisplay.module.css";
 import {
   generate_audio_line,
   timings_to_text,
   insert_audio_line,
-} from "./audio_edit_tools";
+} from "@/lib/editor/audio/audio_edit_tools";
 import { useSearchParams } from "next/navigation";
 import type {
   Audio,
@@ -38,7 +39,6 @@ export default function EditorSSMLDisplay({
   audio,
   editor,
 }: EditorSSMLDisplayProps) {
-  //let urlParams = new URLSearchParams(window.location.search);
   const beta = false;
 
   let [loading, setLoading] = React.useState(false);

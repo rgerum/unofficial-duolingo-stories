@@ -9,11 +9,10 @@ import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 import {
   generate_audio_line,
   content_to_audio,
-} from "@/components/story/text_lines/audio_edit_tools";
-import TextLine from "@/components/story/text_lines/text_line";
+} from "@/lib/editor/audio/audio_edit_tools";
+import StoryTextLine from "@/components/StoryTextLine";
 import jsyaml from "js-yaml";
 import {
-  AvatarNamesType,
   LanguageType,
   SpeakersType,
   CourseStudSchema,
@@ -161,8 +160,8 @@ FRAGMENTS:
     //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
 
     //new_element.line.content.audio.ssml = generate_ssml_line(new_element.line.content.audio.ssml, data, new_element.hideRangesForChallenge)
-    if (!new_element.audio?.ssml?.text) return;
-    setText2(new_element.audio.ssml.text);
+    if (!new_element.line.content.audio?.ssml?.text) return;
+    setText2(new_element.line.content.audio.ssml.text);
     if (!new_element.line.content.audio?.ssml) return;
     let { keypoints, content } = await generate_audio_line(
       new_element.line.content.audio.ssml,
@@ -310,11 +309,22 @@ FRAGMENTS:
             <span>{text2}</span>
             <h2>Final Text</h2>
             <span className={language.short}>
-              <TextLine
-                progress={1}
+              <StoryTextLine
+                active={true}
                 unhide={999999}
                 element={element}
-                part={[]}
+                settings={{
+                  hide_questions: false,
+                  show_all: true,
+                  show_names: false,
+                  rtl: false,
+                  highlight_name: [],
+                  hideNonHighlighted: false,
+                  setHighlightName: () => {},
+                  setHideNonHighlighted: () => {},
+                  id: 0,
+                  show_title_page: false,
+                }}
               />
             </span>
 

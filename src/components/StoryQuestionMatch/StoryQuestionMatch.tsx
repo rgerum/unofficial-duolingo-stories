@@ -1,14 +1,9 @@
 import React from "react";
 import { produce } from "immer";
 import styles from "./StoryQuestionMatch.module.css";
-//import {EditorContext, StoryContext} from "../story/story";
-//import styles_common from "../story/common.module.css";
-//import {shuffle} from "../story/includes";
-import { shuffle } from "../story/includes";
-//import {EditorHook} from "../story/editor_hooks";
+import { shuffle } from "@/lib/shuffle";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import WordButton from "../WordButton";
-import QuestionPrompt from "../story/questions/question_prompt";
 import { StoryElement } from "@/components/editor/story/syntax_parser_types";
 
 type WordState = "idle" | "selected" | "right" | "wrong";
@@ -105,11 +100,9 @@ function shuffle_lists(state: State) {
 
 function StoryQuestionMatch({
   /*progress,*/ element,
-  active,
   setDone,
 }: {
   element: StoryElement;
-  active: boolean;
   setDone: () => void;
 }) {
   if (element.type !== "MATCH") throw new Error("not the right element");
@@ -140,7 +133,10 @@ function StoryQuestionMatch({
 
   return (
     <div>
-      <QuestionPrompt question={element.prompt} lang={element.lang_question} />
+      <StoryQuestionPrompt
+        question={element.prompt}
+        lang={element.lang_question}
+      />
       <div className={styles.match_container}>
         {state.lists.map((list, listIndex) => (
           <div key={listIndex} className={styles.match_col}>

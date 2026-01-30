@@ -10,7 +10,7 @@ import { example, highlightStyle } from "@/components/editor/story/parser";
 import useScrollLinking from "@/components/editor/story/scroll_linking";
 import useResizeEditor from "@/components/editor/story/editor-resize";
 //import {SoundRecorder} from "./sound-recorder";
-import Story, { EditorContext } from "@/components/story/story";
+import StoryEditorPreview from "@/components/StoryEditorPreview";
 import Cast from "@/components/editor/story/cast";
 
 import {
@@ -29,7 +29,7 @@ import SoundRecorder from "./sound-recorder";
 import {
   insert_audio_line,
   timings_to_text,
-} from "@/components/story/text_lines/audio_edit_tools";
+} from "@/lib/editor/audio/audio_edit_tools";
 import { Avatar, StoryData } from "@/app/editor/story/[story]/page";
 import { z } from "zod";
 
@@ -539,9 +539,10 @@ export default function Editor({
               />
             ) : null}
             {story_state ? (
-              <EditorContext.Provider value={editor_state2}>
-                <Story editor={editor_state} story={story_state} />
-              </EditorContext.Provider>
+              <StoryEditorPreview
+                story={story_state}
+                editorState={editor_state2}
+              />
             ) : null}
           </div>
         </div>

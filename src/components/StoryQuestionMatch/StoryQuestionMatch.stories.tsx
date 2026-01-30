@@ -28,7 +28,6 @@ export const Normal = {
         lang_question: "en",
         editor: {},
       }}
-      active={true}
       setDone={() => {}}
     ></StoryQuestionMatch>
   ),
