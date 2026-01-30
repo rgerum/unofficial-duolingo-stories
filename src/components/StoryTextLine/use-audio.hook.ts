@@ -27,7 +27,7 @@ export default function useAudio(element: UseAudioElement, active: boolean) {
   const ref = React.useRef<HTMLAudioElement>(null);
 
   const playAudio = React.useCallback(async () => {
-    if (!audio?.keypoints?.length || !audio?.url || !ref.current) return;
+    if (!audio?.url || !ref.current) return;
 
     const audioObject = ref.current;
 
@@ -53,8 +53,8 @@ export default function useAudio(element: UseAudioElement, active: boolean) {
 
     const timeouts: NodeJS.Timeout[] = [];
 
-    // Set up keypoint timeouts
-    audio.keypoints.forEach((keypoint) => {
+    // Set up keypoint timeouts (if available for word highlighting)
+    audio.keypoints?.forEach((keypoint) => {
       const timeout = setTimeout(() => {
         setAudioRange(keypoint.rangeEnd);
       }, keypoint.audioStart);
@@ -106,7 +106,7 @@ export default function useAudio(element: UseAudioElement, active: boolean) {
     };
   }, [active, element.type, playAudio]);
 
-  if (!audio?.keypoints?.length || !audio?.url) {
+  if (!audio?.url) {
     return [audioRange, undefined, ref, undefined] as const;
   }
 
