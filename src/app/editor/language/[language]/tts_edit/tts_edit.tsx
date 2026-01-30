@@ -160,8 +160,8 @@ FRAGMENTS:
     //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
 
     //new_element.line.content.audio.ssml = generate_ssml_line(new_element.line.content.audio.ssml, data, new_element.hideRangesForChallenge)
-    if (!new_element.audio?.ssml?.text) return;
-    setText2(new_element.audio.ssml.text);
+    if (!new_element.line.content.audio?.ssml?.text) return;
+    setText2(new_element.line.content.audio.ssml.text);
     if (!new_element.line.content.audio?.ssml) return;
     let { keypoints, content } = await generate_audio_line(
       new_element.line.content.audio.ssml,
