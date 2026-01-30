@@ -63,10 +63,10 @@ export async function POST(req: NextRequest) {
         console.log(`[Audio] Using engine: ${engine.name} for speaker: ${speaker}`);
         answer = await engine.synthesizeSpeech(filename, speaker, text);
         answer.engine = engine.name;
+        break;
       } catch (e) {
         console.error(`[Audio] Engine ${engine.name} failed:`, e);
-        const errorMessage = e instanceof Error ? e.message : "Unknown error";
-        return new Response(`TTS Error (${engine.name}): ${errorMessage}`, { status: 500 });
+        // Continue to next engine instead of returning
       }
       break;
     }
