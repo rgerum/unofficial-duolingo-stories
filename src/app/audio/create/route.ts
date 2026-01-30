@@ -59,8 +59,15 @@ export async function POST(req: NextRequest) {
   let answer: SynthesisResult | undefined;
   for (const engine of audio_engines) {
     if (await engine.isValidVoice(speaker)) {
-      answer = await engine.synthesizeSpeech(filename, speaker, text);
-      answer.engine = engine.name;
+      try {
+        console.log(`[Audio] Using engine: ${engine.name} for speaker: ${speaker}`);
+        answer = await engine.synthesizeSpeech(filename, speaker, text);
+        answer.engine = engine.name;
+      } catch (e) {
+        console.error(`[Audio] Engine ${engine.name} failed:`, e);
+        const errorMessage = e instanceof Error ? e.message : "Unknown error";
+        return new Response(`TTS Error (${engine.name}): ${errorMessage}`, { status: 500 });
+      }
       break;
     }
   }
