@@ -29,7 +29,7 @@ import SoundRecorder from "./sound-recorder";
 import {
   insert_audio_line,
   timings_to_text,
-} from "@/components/story/text_lines/audio_edit_tools";
+} from "@/lib/editor/audio/audio_edit_tools";
 import { Avatar, StoryData } from "@/app/editor/story/[story]/page";
 import { z } from "zod";
 

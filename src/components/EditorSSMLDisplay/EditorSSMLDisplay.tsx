@@ -5,7 +5,7 @@ import {
   generate_audio_line,
   timings_to_text,
   insert_audio_line,
-} from "../story/text_lines/audio_edit_tools";
+} from "@/lib/editor/audio/audio_edit_tools";
 import { useSearchParams } from "next/navigation";
 import type {
   Audio,

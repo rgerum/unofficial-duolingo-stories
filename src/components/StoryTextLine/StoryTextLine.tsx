@@ -8,7 +8,7 @@ import EditorSSMLDisplay from "../EditorSSMLDisplay";
 import { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor";
-import { getEditorHandlers, type EditorProps } from "../story/editorHandlers";
+import { getEditorHandlers, type EditorProps } from "@/lib/editor/editorHandlers";
 
 function StoryTextLine({
   active,

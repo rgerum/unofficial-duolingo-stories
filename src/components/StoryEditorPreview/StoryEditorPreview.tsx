@@ -18,7 +18,10 @@ import type {
   StoryElementMultipleChoice,
   StoryElementChallengePrompt,
 } from "@/components/editor/story/syntax_parser_types";
-import { getEditorHandlers, type EditorProps } from "../story/editorHandlers";
+import {
+  getEditorHandlers,
+  type EditorProps,
+} from "@/lib/editor/editorHandlers";
 
 interface StoryEditorPreviewProps {
   story: StoryType & { learning_language_rtl?: boolean };
@@ -50,7 +53,9 @@ export default function StoryEditorPreview({
   return (
     <div
       className={
-        styles.story + " " + (story.learning_language_rtl ? styles.story_rtl : "")
+        styles.story +
+        " " +
+        (story.learning_language_rtl ? styles.story_rtl : "")
       }
     >
       {parts.map((part, i) => (
@@ -175,7 +180,7 @@ function EditorElement({ element, editorState }: EditorElementProps) {
   if (element.type === "MATCH") {
     return (
       <EditorQuestionWrapper element={element} editorState={editorState}>
-        <StoryQuestionMatch element={element} active={false} setDone={() => {}} />
+        <StoryQuestionMatch element={element} setDone={() => {}} />
       </EditorQuestionWrapper>
     );
   }
