@@ -2,14 +2,12 @@
 import styles from "./sound-recorder.module.css";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
-import { AudioRecorder } from "@/components/react-audio-recorder";
-import HintLineContent from "@/components/story/text_lines/line_hints";
+import StoryLineHints from "@/components/StoryLineHints";
 import { splitTextTokens } from "@/lib/editor/tts_transcripte";
 
 import { useWavesurfer } from "@wavesurfer/react";
-import Timeline from "wavesurfer.js/dist/plugins/timeline.js";
 import Regions from "wavesurfer.js/dist/plugins/regions.js";
-import AudioPlay from "@/components/story/text_lines/audio_play";
+import PlayAudio from "@/components/PlayAudio";
 import type { ContentWithHints } from "@/components/editor/story/syntax_parser_types";
 
 interface Region {
@@ -45,11 +43,6 @@ interface Part {
   text: string;
   pos: number;
 }
-
-const formatTime = (seconds: number): string =>
-  [seconds / 60, seconds % 60]
-    .map((v) => `0${Math.floor(v)}`.slice(-2))
-    .join(":");
 
 function cumulativeSums(values: number[]): number[] {
   let total = 0;
@@ -100,10 +93,8 @@ export default function SoundRecorder({
   const containerRef = useRef(null);
   const [urlIndex, setUrlIndex] = useState(url);
   const [audioRange, setAudioRange] = React.useState(99999);
-  const [uploaded, setUploaded] = React.useState(url ? true : false);
+  const [uploaded, setUploaded] = React.useState(!!url);
   const [file, setFile] = React.useState<File | null>(null);
-
-  const [duration, setDuration] = useState(0);
 
   const [timingText, setTimingText] = useState(initialTimingText);
 
@@ -199,7 +190,7 @@ export default function SoundRecorder({
     [parts2],
   );
 
-  const { wavesurfer, isPlaying, currentTime } = useWavesurfer({
+  const { wavesurfer } = useWavesurfer({
     container: containerRef,
     height: 60,
     waveColor: "#1cb0f6",
@@ -294,8 +285,8 @@ export default function SoundRecorder({
         X
       </button>
       <input type="file" onChange={handleFileChange} accept="audio/*" />
-      <AudioPlay onClick={onPlayPause} />
-      <HintLineContent
+      <PlayAudio onClick={onPlayPause} />
+      <StoryLineHints
         audioRange={audioRange}
         hideRangesForChallenge={[]}
         content={content}
@@ -308,140 +299,6 @@ export default function SoundRecorder({
         <button onClick={soundRecorderNext}>Next</button>
         {current_index + 1} / {total_index}
       </div>
-    </div>
-  );
-}
-
-export function SoundRecorderX() {
-  const [audioFile, setAudioFile] = useState<File | Blob | null>(null);
-  const [audioObject, setAudioObject] = useState<HTMLAudioElement | null>(null);
-  const [duration, setDuration] = useState(0);
-  const waveformRef = useRef<HTMLDivElement>(null);
-  const wavesurfer = useRef<WaveSurfer | null>(null);
-
-  //console.log("Duration Current", duration + "s");
-
-  let [audioRange, setAudioRange] = React.useState(99999);
-
-  const content: ContentWithHints = { text: "This is a test.", hintMap: [] };
-  let parts = splitTextTokens(content.text);
-  if (parts[0] === "") parts.splice(0, 1);
-  if (parts[parts.length - 1] === "") parts.pop();
-
-  function setNewFile(file: File | Blob) {
-    const url = URL.createObjectURL(file);
-    const audio = document.createElement("audio");
-    audio.src = url;
-    document.body.appendChild(audio);
-
-    setAudioFile(file);
-    setAudioObject(audio);
-    loadWaveform(url);
-  }
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) setNewFile(file);
-  };
-
-  if (wavesurfer.current) {
-    /** On audio position change, fires continuously during playback */
-    wavesurfer.current.on("timeupdate", (currentTime: number) => {
-      /*console.log(
-        "Time",
-        currentTime + "s",
-        content.text.length * (currentTime / duration),
-        duration,
-        content.text.length,
-      );*/
-      if (duration === 0) return;
-      setAudioRange(content.text.length * (currentTime / duration));
-    });
-  }
-
-  const loadWaveform = (url: string) => {
-    if (wavesurfer.current) {
-      wavesurfer.current.destroy();
-    }
-    wavesurfer.current = WaveSurfer.create({
-      container: waveformRef.current!,
-      waveColor: "violet",
-      progressColor: "purple",
-    });
-    wavesurfer.current.load(url);
-
-    /** When the audio is both decoded and can play */
-    wavesurfer.current.on("ready", (new_duration: number) => {
-      //console.log("Duration New", new_duration + "s");
-      setDuration(new_duration);
-    });
-  };
-
-  const uploadAudio = () => {
-    const formData = new FormData();
-    if (audioFile) formData.append("file", audioFile);
-    /*
-    axios
-      .post("YOUR_ENDPOINT_URL", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        // Handle success
-      })
-      .catch((error) => {
-        console.error(error);
-        // Handle error
-      });*/
-  };
-
-  const addAudioElement = (blob: Blob) => {
-    setNewFile(blob);
-  };
-
-  // Play button
-  //const button = container.appendChild(document.createElement('button'))
-  //button.textContent = 'Play'
-  //button.onclick = () => wavesurfer.playPause()
-  //wavesurfer.on('pause', () => (button.textContent = 'Play'))
-  //wavesurfer.on('play', () => (button.textContent = 'Pause'))
-
-  return (
-    <div>
-      <button onClick={uploadAudio} disabled={!audioFile}>
-        Upload
-      </button>
-      <AudioRecorder
-        onRecordingComplete={addAudioElement}
-        audioTrackConstraints={{
-          noiseSuppression: true,
-          echoCancellation: true,
-          // autoGainControl,
-          // channelCount,
-          // deviceId,
-          // groupId,
-          // sampleRate,
-          // sampleSize,
-        }}
-        onNotAllowedOrFound={(err) => console.table(err)}
-        downloadOnSavePress={false}
-        downloadFileExtension="webm"
-        mediaRecorderOptions={{
-          audioBitsPerSecond: 128000,
-        }}
-        showVisualizer={true}
-      />
-
-      <div id="waveform" ref={waveformRef}></div>
-      <input type="file" onChange={handleFileChange} accept="audio/*" />
-      <button onClick={() => wavesurfer.current?.playPause()}>Play</button>
-      <HintLineContent
-        audioRange={audioRange}
-        hideRangesForChallenge={[]}
-        content={content}
-      />
     </div>
   );
 }
