@@ -24,8 +24,8 @@ async function synthesizeSpeechCall(
       params,
       function (err: Error | null, data?: SynthesizeSpeechOutput) {
         if (err) {
-          reject(err);
-          //console.log("err", err, err.stack);
+          console.error("[Polly] synthesizeSpeech error:", err.message);
+          return reject(err);
         }
         resolve(data!);
       },
@@ -72,6 +72,8 @@ async function synthesizeSpeechPolly(
   voice_id: string,
   text: string,
 ): Promise<SynthesisResult> {
+  console.log("[Polly] Starting synthesis for voice:", voice_id);
+
   // Create an instance of the Polly service object
   const polly = new Polly(config);
 
@@ -80,6 +82,7 @@ async function synthesizeSpeechPolly(
   text = text.replace(/pitch="medium"/, "");
 
   const voice_data = await getVoiceData(voice_id);
+  console.log("[Polly] Voice data from DB:", voice_data);
 
   // Set the parameters for the synthesis request
   const params: SynthesizeSpeechInput = {
@@ -89,16 +92,21 @@ async function synthesizeSpeechPolly(
     TextType: "ssml",
     Engine: voice_data?.type === "NEURAL" ? "neural" : "standard",
   };
+  console.log("[Polly] Synthesis params:", { ...params, Text: params.Text?.substring(0, 100) + "..." });
 
   // Call the synthesizeSpeech method to generate the audio
   let data: SynthesizeSpeechOutput;
   try {
     data = await synthesizeSpeechCall(polly, params);
+    console.log("[Polly] Synthesis successful");
   } catch (e) {
+    console.error("[Polly] Initial synthesis failed:", e instanceof Error ? e.message : e);
     if (e instanceof Error && e.message.indexOf("feature") !== -1) {
+      console.log("[Polly] Retrying without pitch attribute");
       params.Text = params.Text!.replace(/pitch="[^"]*"/, "");
       data = await synthesizeSpeechCall(polly, params);
     } else {
+      console.log("[Polly] Retrying with standard engine");
       params.Engine = "standard";
       data = await synthesizeSpeechCall(polly, params);
     }
