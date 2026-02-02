@@ -1,9 +1,10 @@
 import React from "react";
 import styles from "./[language].module.css";
 
-import { LoggedInButton, LogInButton } from "@/components/login/loggedinbutton";
+import { LoggedInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
-import { sql } from "@/lib/db";
+import { fetchQuery, fetchMutation } from "convex/nextjs";
+import { api } from "../../../../../convex/_generated/api";
 import TextEdit from "./text_edit";
 
 interface LanguageType {
@@ -71,7 +72,7 @@ export function Layout({
       <div className={styles.main_index}>{children}</div>
     </>
   );
-} //                 <Login page={"editor"}/>
+}
 
 async function ListLocalizations({
   language_id,
@@ -80,17 +81,17 @@ async function ListLocalizations({
   language_id: number;
   language_name: string;
 }) {
-  let data = await sql`SELECT l.tag, l.text AS text_en, l2.text
-FROM localization l
-LEFT JOIN localization l2 ON l.tag = l2.tag AND l2.language_id = ${language_id}
-WHERE l.language_id = 1;`;
+  const data = await fetchQuery(api.editor.getLocalizations, {
+    languageLegacyId: language_id,
+  });
 
   async function set_localization(tag: string, text: string) {
     "use server";
-    return sql`INSERT INTO localization (tag, text, language_id)
-    VALUES (${tag}, ${text}, ${language_id})
-    ON CONFLICT (tag, language_id)
-    DO UPDATE SET text = EXCLUDED.text`;
+    return fetchMutation(api.editor.setLocalization, {
+      languageLegacyId: language_id,
+      tag,
+      text,
+    });
   }
 
   return (

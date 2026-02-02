@@ -3,7 +3,7 @@ import React from "react";
 import {
   get_course_list_data,
   get_language_list_data,
-} from "./db_get_course_editor";
+} from "./db_get_course_editor_convex";
 
 import SwiperSideBar from "./swipe";
 import LayoutFlag from "./layout_flag";

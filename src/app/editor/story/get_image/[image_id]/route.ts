@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
-import { sql } from "@/lib/db";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "../../../../../../convex/_generated/api";
 import { getUser } from "@/lib/userInterface";
 
 interface RouteParams {
@@ -16,9 +17,11 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         status: 401,
       });
 
-    let answer = await get_image({ image_id });
+    const answer = await fetchQuery(api.editor.getImage, {
+      imageLegacyId: image_id,
+    });
 
-    if (answer === undefined)
+    if (answer === null)
       return new Response("Error not found.", { status: 404 });
 
     return NextResponse.json(answer);
@@ -27,8 +30,4 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       status: 500,
     });
   }
-}
-
-async function get_image({ image_id }: { image_id: string }) {
-  return (await sql`SELECT * FROM image WHERE id = ${image_id}`)[0];
 }

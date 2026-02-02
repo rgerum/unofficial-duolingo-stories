@@ -91,7 +91,7 @@ export async function getLanguageName(id: number) {
 
 export async function setStory(data: {
   id: number;
-  duo_id: number;
+  duo_id: string;
   name: string;
   image: string | undefined;
   set_id: number;

@@ -1,5 +1,5 @@
 import React from "react";
-import { get_story } from "../getStory";
+import { get_story } from "../getStory_convex";
 import StoryWrapper from "./story_wrapper";
 import { notFound } from "next/navigation";
 

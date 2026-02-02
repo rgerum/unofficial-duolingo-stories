@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   CourseImportProps,
   CourseProps,
-} from "@/app/editor/(course)/db_get_course_editor";
+} from "@/app/editor/(course)/db_get_course_editor_convex";
 
 export async function setImport(id: number, course_id: number) {
   let response_json = await fetch(

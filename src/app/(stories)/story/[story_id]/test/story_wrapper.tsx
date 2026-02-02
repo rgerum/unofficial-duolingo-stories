@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import { StoryData } from "@/app/(stories)/story/[story_id]/getStory_convex";
 import StoryProgress from "@/components/StoryProgress";
 
 export default function StoryWrapper({ story }: { story: StoryData }) {

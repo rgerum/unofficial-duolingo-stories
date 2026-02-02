@@ -1,5 +1,6 @@
-import { sql } from "@/lib/db";
 import { NextResponse, NextRequest } from "next/server";
+import { fetchMutation } from "convex/nextjs";
+import { api } from "../../../../../convex/_generated/api";
 import { getUser } from "@/lib/userInterface";
 
 export async function POST(req: NextRequest) {
@@ -12,10 +13,10 @@ export async function POST(req: NextRequest) {
         status: 401,
       });
 
-    let answer = await set_tts_replace({ id, tts_replace });
-
-    if (answer === undefined)
-      return new Response("Error not found.", { status: 404 });
+    const answer = await fetchMutation(api.editor.updateLanguageTtsReplace, {
+      languageLegacyId: id,
+      tts_replace,
+    });
 
     return NextResponse.json(answer);
   } catch (err) {
@@ -23,17 +24,4 @@ export async function POST(req: NextRequest) {
       status: 500,
     });
   }
-}
-
-async function set_tts_replace({
-  id,
-  tts_replace,
-}: {
-  id: number;
-  tts_replace: string;
-}) {
-  return sql`
-  UPDATE language SET ${sql({ tts_replace })}
-  WHERE id = ${id}
-`;
 }

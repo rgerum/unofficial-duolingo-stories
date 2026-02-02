@@ -4,7 +4,7 @@ import {
   get_course_list_data,
   get_language_list_data,
   CourseProps,
-} from "../../../../db_get_course_editor";
+} from "../../../../db_get_course_editor_convex";
 import ImportList from "./import_list";
 import { notFound } from "next/navigation";
 import Link from "next/link";

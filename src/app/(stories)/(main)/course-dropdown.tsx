@@ -4,8 +4,8 @@ import Link from "next/link";
 import Flag from "@/components/layout/flag";
 import Dropdown from "@/components/layout/dropdown";
 import { useSelectedLayoutSegment } from "next/navigation";
-import { CourseData } from "@/app/(stories)/(main)/get_course_data";
-import { LanguageProps } from "@/app/editor/(course)/db_get_course_editor";
+import { CourseData } from "@/app/(stories)/(main)/get_course_data_convex";
+import { LanguageProps } from "@/app/editor/(course)/db_get_course_editor_convex";
 
 function LanguageButtonSmall({
   course,

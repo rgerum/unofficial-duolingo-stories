@@ -2,7 +2,7 @@
 import styles from "./story_button.module.css";
 import Link from "next/link";
 import Image from "next/image";
-import { StoryData } from "@/app/(stories)/(main)/[course_id]/get_story_data";
+import { StoryData } from "@/app/(stories)/(main)/[course_id]/get_story_data_convex";
 
 export default function StoryButton({
   story,

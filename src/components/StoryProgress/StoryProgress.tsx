@@ -23,7 +23,7 @@ import {
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
-import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import { StoryData } from "@/app/(stories)/story/[story_id]/getStory_convex";
 
 function getComponent(parts: StoryElement[]) {
   const last_part = parts[parts.length - 1];

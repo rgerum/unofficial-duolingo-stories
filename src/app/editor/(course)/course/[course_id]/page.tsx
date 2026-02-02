@@ -1,4 +1,4 @@
-import { get_course_data, get_story_list } from "../../db_get_course_editor";
+import { get_course_data, get_story_list } from "../../db_get_course_editor_convex";
 import { notFound, redirect } from "next/navigation";
 import EditList from "../../edit_list";
 import { getUser } from "@/lib/userInterface";

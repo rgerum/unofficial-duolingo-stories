@@ -3,12 +3,11 @@ import Header from "./header";
 import { CourseListInner } from "./course_list";
 import Icons from "./icons";
 import React from "react";
-import { get_counts } from "./get_course_data";
+import { get_counts } from "./get_course_data_convex";
 
 export default async function Page({}) {
   const counts = await get_counts();
 
-  // Render data...
   return (
     <>
       <Header>

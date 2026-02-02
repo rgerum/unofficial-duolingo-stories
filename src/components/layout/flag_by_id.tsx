@@ -1,7 +1,7 @@
 import React from "react";
 import { sql, cache } from "@/lib/db";
 import Flag from "./flag";
-import { LanguageProps } from "@/app/editor/(course)/db_get_course_editor";
+import { LanguageProps } from "@/app/editor/(course)/db_get_course_editor_convex";
 
 export const get_flag_data = cache(
   async () => {

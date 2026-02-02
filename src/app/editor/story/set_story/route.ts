@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
-import { sql } from "@/lib/db";
+import { fetchMutation } from "convex/nextjs";
+import { api } from "../../../../../convex/_generated/api";
 import { upload_github } from "@/lib/editor/upload_github";
 import { getUser } from "@/lib/userInterface";
 
@@ -14,9 +15,6 @@ interface StoryData {
   text: string;
   json: string;
   todo_count: number;
-  api?: number;
-  change_date?: string;
-  author_change?: number;
 }
 
 export async function POST(req: NextRequest) {
@@ -27,64 +25,37 @@ export async function POST(req: NextRequest) {
       status: 401,
     });
 
-  let answer = await set_story(await req.json(), {
-    username: token.name ?? "",
-    user_id:
-      typeof token.id === "string" ? parseInt(token.id) : (token.id ?? 0),
-  });
+  const data: StoryData = await req.json();
+  const userId = typeof token.id === "string" ? parseInt(token.id) : (token.id ?? 0);
 
-  if (answer === undefined)
-    return new Response("Error not found.", { status: 404 });
+  try {
+    const result = await fetchMutation(api.editor.updateStory, {
+      storyLegacyId: data.id,
+      duo_id: data.duo_id,
+      name: data.name,
+      image: data.image,
+      set_id: data.set_id,
+      set_index: data.set_index,
+      courseLegacyId: data.course_id,
+      text: data.text,
+      json: JSON.parse(data.json),
+      todo_count: data.todo_count,
+      userLegacyId: userId,
+    });
 
-  return NextResponse.json(answer);
-}
+    if (result.success && data.id !== undefined) {
+      await upload_github(
+        data.id,
+        data.course_id,
+        data.text,
+        token.name ?? "",
+        `updated ${data.name} in course ${data.course_id}`,
+      );
+    }
 
-async function set_story(
-  data: StoryData,
-  { username, user_id }: { username: string; user_id: number },
-) {
-  data["api"] = 2;
-  data["change_date"] = new Date().toISOString();
-  data["author_change"] = user_id;
-
-  // if no id is given we look for one
-  if (data["id"] === undefined) {
-    let res =
-      await sql`SELECT id FROM story WHERE duo_id = ${data["duo_id"]} AND course_id = ${data["course_id"]} LIMIT 1;`;
-    if (res.length) data["id"] = res[0]["id"] as number;
+    return NextResponse.json("done");
+  } catch (error) {
+    console.error("Error saving story:", error);
+    return new Response("Error saving story.", { status: 500 });
   }
-
-  // Ensure we have a valid id before updating
-  if (data.id === undefined) {
-    return undefined;
-  }
-
-  await sql`
-  UPDATE story SET ${sql(data, [
-    "duo_id",
-    "name",
-    "image",
-    "change_date",
-    "author_change",
-    "set_id",
-    "set_index",
-    "course_id",
-    "text",
-    "json",
-    "todo_count",
-  ])}
-  WHERE id = ${data.id}
-`;
-  await sql`UPDATE course SET todo_count = (SELECT SUM(todo_count) FROM story WHERE course_id = ${data["course_id"]}) WHERE id = ${data["course_id"]}`;
-
-  if (data["id"] !== undefined) {
-    await upload_github(
-      data["id"],
-      data["course_id"],
-      data["text"],
-      username,
-      `updated ${data["name"]} in course ${data["course_id"]}`,
-    );
-  }
-  return "done";
 }

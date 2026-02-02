@@ -1,8 +1,18 @@
 import React from "react";
 
-import { get_stats, StatsCourseProps, StatsLanguageProps } from "./db_query";
+import { get_stats as get_stats_pg, StatsCourseProps, StatsLanguageProps } from "./db_query";
+import { get_stats as get_stats_convex, has_stats } from "./db_query_convex";
 import StatsElement from "./stats_element";
 import StatsElement2 from "./stats_element2";
+
+// Try Convex first, fall back to PostgreSQL if no stats exist
+async function get_stats(year: number, month: number) {
+  const hasConvexStats = await has_stats(year, month);
+  if (hasConvexStats) {
+    return get_stats_convex(year, month);
+  }
+  return get_stats_pg(year, month);
+}
 
 function DataGroup({
   title,

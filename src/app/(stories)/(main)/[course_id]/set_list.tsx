@@ -1,8 +1,8 @@
 import styles from "./set_list.module.css";
 import StoryButton from "./story_button";
 import SetListClient from "./set_list_client";
-import { get_course_sets } from "./get_story_data";
-import { get_course } from "../get_course_data";
+import { get_course_sets } from "./get_story_data_convex";
+import { get_course } from "../get_course_data_convex";
 
 export default async function SetList({ course_id }: { course_id?: string }) {
   if (!course_id) {
@@ -35,7 +35,7 @@ export default async function SetList({ course_id }: { course_id?: string }) {
   return (
     <SetListClient
       course_data={course_data}
-      course_id={course_data.id}
+      course_short={course_id}
       course={course}
       about={course_data.about}
     />

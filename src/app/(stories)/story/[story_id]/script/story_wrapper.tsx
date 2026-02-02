@@ -2,7 +2,7 @@
 import React from "react";
 
 import StoryProgress from "@/components/StoryProgress";
-import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import { StoryData } from "@/app/(stories)/story/[story_id]/getStory_convex";
 
 export default function StoryWrapper({
   story,

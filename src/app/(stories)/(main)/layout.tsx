@@ -4,7 +4,7 @@ import { sql, cache } from "@/lib/db";
 import styles from "./layout.module.css";
 import CourseDropdown from "./course-dropdown";
 import { get_flag_data } from "@/components/layout/flag_by_id";
-import { get_course_data } from "./get_course_data";
+import { get_course_data } from "./get_course_data_convex";
 import getUserId from "@/lib/getUserId";
 import styles0 from "./layout.module.css";
 import FooterLinks from "./footer_links";

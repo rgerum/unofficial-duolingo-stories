@@ -1,11 +1,11 @@
-import { sql } from "@/lib/db";
-import { upload_github } from "@/lib/editor/upload_github";
 import { NextResponse } from "next/server";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
+import { api } from "../../../../../../../../../convex/_generated/api";
+import { upload_github } from "@/lib/editor/upload_github";
 import { getUser } from "@/lib/userInterface";
 
 export async function GET(
   req: Request,
-
   { params }: { params: Promise<{ course_id: string; story_id: string }> },
 ) {
   const token = await getUser();
@@ -15,49 +15,44 @@ export async function GET(
       status: 401,
     });
 
-  let answer = await set_import(
-    { id: (await params).story_id, course_id: (await params).course_id },
-    { user_id: token.id, username: token.name },
-  );
+  const { course_id, story_id } = await params;
 
-  if (answer === undefined)
-    return new Response("Error: not found.", { status: 403 });
+  try {
+    // Get target course legacy ID
+    const course = await fetchQuery(api.editor.getCourse, { id: course_id });
+    if (!course) {
+      return new Response("Course not found.", { status: 404 });
+    }
 
-  return NextResponse.json(answer);
-}
+    const result = await fetchMutation(api.editor.importStory, {
+      sourceStoryLegacyId: parseInt(story_id),
+      targetCourseLegacyId: course.id,
+      userLegacyId: parseInt(token.id),
+    });
 
-async function set_import(
-  { id, course_id }: { id: string; course_id: string },
-  { user_id, username }: { user_id: string; username: string },
-) {
-  let data = (
-    await sql`SELECT duo_id, name, image, set_id, set_index, text, json FROM story WHERE id = ${id};`
-  )[0];
+    if (!result.success) {
+      return new Response(result.error || "Import failed.", { status: 400 });
+    }
 
-  data["author"] = user_id;
-  data["course_id"] = course_id;
+    // Get source story data for GitHub upload
+    const storyData = await fetchQuery(api.editor.getStoryForEditor, {
+      storyLegacyId: parseInt(story_id),
+    });
 
-  let data2 = (
-    await sql`INSERT INTO story ${sql(data, [
-      "duo_id",
-      "name",
-      "author",
-      "image",
-      "set_id",
-      "set_index",
-      "course_id",
-      "text",
-      "json",
-    ])} RETURNING id, text, name, course_id;`
-  )[0];
+    if (storyData && result.newLegacyId) {
+      await upload_github(
+        result.newLegacyId,
+        course.id,
+        storyData.text,
+        token.name,
+        `added ${storyData.name} in course ${course.id}`,
+      );
+    }
 
-  await upload_github(
-    data2["id"],
-    data2["course_id"],
-    data2["text"],
-    username,
-    `added ${data["name"]} in course ${data["course_id"]}`,
-  );
-
-  return { id: data2.id };
+    // Return the new story's legacy ID for the frontend to redirect
+    return NextResponse.json({ id: result.newLegacyId });
+  } catch (error) {
+    console.error("Error importing story:", error);
+    return new Response("Error: import failed.", { status: 500 });
+  }
 }

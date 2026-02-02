@@ -3,7 +3,7 @@ import get_localisation from "@/lib/get_localisation";
 import LanguageButton from "./language_button";
 
 import styles from "./course_list.module.css";
-import { get_course_groups, get_courses_in_group } from "./get_course_data";
+import { get_course_groups, get_courses_in_group } from "./get_course_data_convex";
 
 async function LanguageGroup({ name, id }: { name: string; id: number }) {
   let courses_list = await get_courses_in_group(id);

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import {
   CourseProps,
   StoryListDataProps,
-} from "@/app/editor/(course)/db_get_course_editor";
+} from "@/app/editor/(course)/db_get_course_editor_convex";
 
 export default function EditList({
   stories,
@@ -169,7 +169,7 @@ function pad(x: number) {
   return x.toString();
 }
 
-function formatDate(datetime: string | Date) {
+function formatDate(datetime: string | Date | number) {
   let d = new Date(datetime);
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
     d.getHours(),

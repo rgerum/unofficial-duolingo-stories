@@ -6,7 +6,7 @@ import { useSwipeable } from "react-swipeable";
 import styles from "./course/[course_id]/index.module.css";
 import CourseList from "./course_list";
 import { useSelectedLayoutSegments } from "next/navigation";
-import type { CourseProps, LanguageProps } from "./db_get_course_editor";
+import type { CourseProps, LanguageProps } from "./db_get_course_editor_convex";
 
 interface SwiperSideBarProps {
   courses: CourseProps[] | undefined;

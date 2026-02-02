@@ -4,7 +4,7 @@ import React from "react";
 import { useSelectedLayoutSegments } from "next/navigation";
 import EditorButton from "../editor_button";
 import { Breadcrumbs } from "../_components/breadcrumbs";
-import type { CourseProps, LanguageProps } from "./db_get_course_editor";
+import type { CourseProps, LanguageProps } from "./db_get_course_editor_convex";
 
 interface BreadcrumbPath {
   type: string;

@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./StoryFinishedScreen.module.css";
 import useScrollIntoView from "@/hooks/use-scroll-into-view.hook";
 import { useLocalisation } from "../LocalisationProvider/LocalisationProviderContext";
-import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import { StoryData } from "@/app/(stories)/story/[story_id]/getStory_convex";
 
 function StoryFinishedScreen({
   story,

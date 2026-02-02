@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
-import { sql } from "@/lib/db";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "../../../../../../convex/_generated/api";
 import { getUser } from "@/lib/userInterface";
 
 interface RouteParams {
@@ -16,9 +17,11 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         status: 401,
       });
 
-    const answer = await language({ language_id });
+    const answer = await fetchQuery(api.editor.getLanguage, {
+      languageLegacyId: parseInt(language_id),
+    });
 
-    if (answer === undefined)
+    if (answer === null)
       return new Response("Error not found.", { status: 404 });
 
     return NextResponse.json(answer);
@@ -27,8 +30,4 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       status: 500,
     });
   }
-}
-
-async function language({ language_id }: { language_id: string }) {
-  return (await sql`SELECT * FROM language WHERE id = ${language_id}`)[0];
 }

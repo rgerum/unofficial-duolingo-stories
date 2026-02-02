@@ -1,4 +1,5 @@
-import { sql, cache } from "@/lib/db";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "../../../../convex/_generated/api";
 
 export interface CourseData {
   id: number;
@@ -12,27 +13,19 @@ export interface CourseData {
   learning_language_name: string;
 }
 
-export const get_course_data = cache(
-  async () => {
-    return sql`
-SELECT id, short, COALESCE(NULLIF(name, ''), learning_language_name) AS name, count, about,
-from_language, from_language_name,
-learning_language, learning_language_name
-FROM
-    course c
-WHERE
-    c.public
-ORDER BY
-    from_language_name, name;
-` as Promise<CourseData[]>;
-  },
-  ["get_course_data"],
-  { tags: ["course_data"], revalidate: 3600 },
-);
+/**
+ * Fetch all public courses from Convex
+ * This replaces the PostgreSQL query in get_course_data.ts
+ */
+export async function get_course_data(): Promise<CourseData[]> {
+  const courses = await fetchQuery(api.courses.listPublicForComparison);
+  return courses;
+}
 
 export async function get_counts() {
+  const courses = await get_course_data();
   let data = { count_courses: 0, count_stories: 0 };
-  for (let course of await get_course_data()) {
+  for (let course of courses) {
     data.count_courses += 1;
     data.count_stories += course.count;
   }
@@ -40,9 +33,11 @@ export async function get_counts() {
 }
 
 export async function get_course_groups() {
+  const courses = await get_course_data();
   let course_groups = [{ from_language_name: "English", from_language: 1 }];
-  let last_group = null;
-  for (let course of await get_course_data()) {
+  let last_group: CourseData | null = null;
+
+  for (let course of courses) {
     if (course.from_language !== last_group?.from_language) {
       if (course.from_language_name !== "English")
         course_groups.push({

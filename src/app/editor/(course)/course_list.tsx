@@ -5,7 +5,7 @@ import styles from "./course_list.module.css";
 import { useInput } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/layout/spinner";
-import type { CourseProps, LanguageProps } from "./db_get_course_editor";
+import type { CourseProps, LanguageProps } from "./db_get_course_editor_convex";
 
 interface CourseListProps {
   courses: CourseProps[] | undefined;

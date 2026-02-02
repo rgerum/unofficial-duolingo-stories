@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { sql } from "@/lib/db";
+import { fetchMutation } from "convex/nextjs";
+import { api } from "../../../../../convex/_generated/api";
 import { getUser } from "@/lib/userInterface";
 import { z } from "zod";
 
@@ -13,7 +14,7 @@ const AvatarSetSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const { id, name, speaker, language_id, avatar_id } = AvatarSetSchema.parse(
+    const { name, speaker, language_id, avatar_id } = AvatarSetSchema.parse(
       await req.json(),
     );
     const token = await getUser();
@@ -23,16 +24,12 @@ export async function POST(req: Request) {
         status: 401,
       });
 
-    let answer = await set_avatar({
-      id,
+    const answer = await fetchMutation(api.editor.setAvatarSpeaker, {
+      avatarLegacyId: avatar_id,
+      languageLegacyId: language_id,
       name,
       speaker,
-      language_id,
-      avatar_id,
     });
-
-    if (answer === undefined)
-      return new Response("Error not found.", { status: 404 });
 
     return NextResponse.json(answer);
   } catch (err) {
@@ -40,34 +37,4 @@ export async function POST(req: Request) {
       status: 500,
     });
   }
-}
-
-async function set_avatar({
-  id,
-  name,
-  speaker,
-  language_id,
-  avatar_id,
-}: {
-  id?: number;
-  name: string;
-  speaker: string;
-  language_id: number;
-  avatar_id: number;
-}) {
-  let res =
-    await sql`SELECT id FROM avatar_mapping WHERE language_id = ${language_id} AND avatar_id = ${avatar_id};`;
-
-  if (res.length) {
-    const existingId = res[0].id as number;
-    return sql`UPDATE avatar_mapping SET ${sql({ name, speaker, language_id, avatar_id })} WHERE id = ${existingId}`;
-  }
-  return (
-    await sql`INSERT INTO avatar_mapping ${sql({
-      name,
-      speaker,
-      language_id,
-      avatar_id,
-    })} RETURNING id;`
-  )[0];
 }

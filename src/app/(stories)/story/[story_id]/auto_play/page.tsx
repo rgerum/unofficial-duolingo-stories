@@ -1,5 +1,5 @@
 import React from "react";
-import { get_story } from "../getStory";
+import { get_story } from "../getStory_convex";
 import StoryWrapper from "./story_wrapper";
 import { get_localisation_dict } from "@/lib/get_localisation";
 import { notFound } from "next/navigation";

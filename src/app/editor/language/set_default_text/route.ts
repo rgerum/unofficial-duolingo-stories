@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { sql } from "@/lib/db";
+import { fetchMutation } from "convex/nextjs";
+import { api } from "../../../../../convex/_generated/api";
 import { getUser } from "@/lib/userInterface";
 import { z } from "zod";
 
@@ -18,10 +19,10 @@ export async function POST(req: Request) {
         status: 401,
       });
 
-    let answer = await set_default_text({ id, default_text });
-
-    if (answer === undefined)
-      return new Response("Error not found.", { status: 404 });
+    const answer = await fetchMutation(api.editor.updateLanguageDefaultText, {
+      languageLegacyId: id,
+      default_text,
+    });
 
     return NextResponse.json(answer);
   } catch (err) {
@@ -29,17 +30,4 @@ export async function POST(req: Request) {
       status: 500,
     });
   }
-}
-
-async function set_default_text({
-  id,
-  default_text,
-}: {
-  id: number;
-  default_text: string;
-}) {
-  return sql`
-  UPDATE language SET ${sql({ default_text })}
-  WHERE id = ${id}
-`;
 }
