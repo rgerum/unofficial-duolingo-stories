@@ -1,6 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import FooterLinks from "../footer_links";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -149,7 +148,6 @@ export default async function Page() {
         protecting your privacy and creating a safe and enjoyable experience for
         all of our users.
       </p>
-      <FooterLinks />
     </div>
   );
 }
