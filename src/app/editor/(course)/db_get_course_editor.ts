@@ -71,7 +71,7 @@ export const StoryListDataSchema = z.object({
   status: z.string(),
   public: z.boolean(),
   todo_count: z.number(),
-  approvals: z.nullable(z.array(z.number())),
+  approvals: z.array(z.number()),
   author: z.string(),
   author_change: z.nullable(z.string()),
 });
