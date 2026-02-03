@@ -1,8 +1,7 @@
 import { getUser } from "@/lib/userInterface";
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
 
-export async function generateMetadata({}) {
+export async function generateMetadata({}): Promise<Metadata> {
   return {
     title: `Duostories Editor`,
     alternates: {

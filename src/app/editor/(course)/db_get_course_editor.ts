@@ -96,7 +96,9 @@ export const get_story_list_data = cache(async () => {
         ORDER BY
             course_id, set_id, set_index
         `;
-  const data2 = data.filter((x) => !Number.isNaN(x.approvals[0]));
+  const data2 = data.map((x) => {
+    return { ...x, approvals: x.approvals ? x.approvals.filter((y: number) => !Number.isNaN(y)) : [] };
+  });
   const look_up: Record<number, StoryListDataProps[]> = {};
   for (const story of z.array(StoryListDataSchema).parse(data2)) {
     if (!look_up[story.course_id]) look_up[story.course_id] = [];
