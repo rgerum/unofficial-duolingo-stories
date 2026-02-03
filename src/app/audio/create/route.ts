@@ -4,6 +4,7 @@ import fs from "fs";
 import { audio_engines } from "../_lib/audio";
 import { getUser } from "@/lib/userInterface";
 import type { SynthesisResult } from "../_lib/audio/types";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 async function mkdir(folderName: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -71,6 +72,19 @@ export async function POST(req: NextRequest) {
   if (id !== 0) {
     answer.output_file = `${id}/` + file;
   }
+
+  // Track audio created event
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: token.name ?? "unknown",
+    event: "audio_created",
+    properties: {
+      story_id: id,
+      speaker: speaker,
+      tts_engine: answer.engine,
+      text_length: text?.length ?? 0,
+    },
+  });
 
   return NextResponse.json(answer);
 }

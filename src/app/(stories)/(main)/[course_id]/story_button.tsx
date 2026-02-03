@@ -3,6 +3,7 @@ import styles from "./story_button.module.css";
 import Link from "next/link";
 import Image from "next/image";
 import { StoryData } from "@/app/(stories)/(main)/[course_id]/get_story_data";
+import posthog from "posthog-js";
 
 export default function StoryButton({
   story,
@@ -41,6 +42,12 @@ export default function StoryButton({
             String(Date.now()),
           );
         }
+        // Track story started event
+        posthog.capture("story_started", {
+          story_id: story.id,
+          story_name: story.name,
+          already_completed: done,
+        });
       }}
     >
       <div

@@ -2,6 +2,7 @@ import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { getUser } from "@/lib/userInterface";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function GET(
   request: Request,
@@ -117,6 +118,20 @@ SET contributors_past = (SELECT COALESCE(array_agg(name), '{}')
                                ORDER BY MAX(sa.date) DESC) AS contributors
                          WHERE NOT active);`;
   }
+
+  // Track story approval event
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: String(user_id),
+    event: "story_approved",
+    properties: {
+      story_id: story_id,
+      approval_action: action,
+      approval_count: count,
+      new_status: status,
+      stories_published: published.length,
+    },
+  });
 
   return {
     count: count,

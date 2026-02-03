@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
 import { getUser } from "@/lib/userInterface";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 interface StoryData {
   id?: number;
@@ -86,5 +87,19 @@ async function set_story(
       `updated ${data["name"]} in course ${data["course_id"]}`,
     );
   }
+
+  // Track story saved event
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: username,
+    event: "story_saved",
+    properties: {
+      story_id: data.id,
+      story_name: data.name,
+      course_id: data.course_id,
+      todo_count: data.todo_count,
+    },
+  });
+
   return "done";
 }

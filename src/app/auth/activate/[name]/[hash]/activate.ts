@@ -1,4 +1,5 @@
 import { sql } from "@/lib/db";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 interface UserCheckResult {
   id: number;
@@ -44,6 +45,24 @@ export async function activate({ name, hash }: { name: string; hash: string }) {
   let result2 =
     await sql`SELECT activated FROM "users" WHERE name = ${name} AND activation_link = ${hash};`;
 
-  if (result2[0].activated) return "done";
+  if (result2[0].activated) {
+    // Track successful account activation
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: name,
+      event: "user_account_activated",
+      properties: {
+        username: name,
+      },
+    });
+    posthog.identify({
+      distinctId: name,
+      properties: {
+        username: name,
+        activated: true,
+      },
+    });
+    return "done";
+  }
   return { status: 403, message: "Username or activation link do not exist." };
 }

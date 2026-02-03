@@ -6,6 +6,7 @@ import Dropdown from "@/components/layout/dropdown";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { CourseData } from "@/app/(stories)/(main)/get_course_data";
 import { LanguageProps } from "@/app/editor/(course)/db_get_course_editor";
+import posthog from "posthog-js";
 
 function LanguageButtonSmall({
   course,
@@ -23,6 +24,14 @@ function LanguageButtonSmall({
       className={styles.language_select_item}
       href={`/${course.short}`}
       data-cy="button_lang_dropdown"
+      onClick={() => {
+        // Track course selection
+        posthog.capture("course_selected", {
+          course_id: course.id,
+          course_name: course.name,
+          course_short: course.short,
+        });
+      }}
     >
       <Flag
         iso={flag_data?.short}

@@ -7,6 +7,7 @@ import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
 import { revalidateTag } from "next/cache";
 import LocalisationProvider from "@/components/LocalisationProvider";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 async function get_story_meta(course_id: number) {
   const course_query = await sql`SELECT
@@ -59,6 +60,7 @@ export default async function Page({
   const story = await get_story(story_id);
   if (!story) notFound();
   const course_id = story.course_id;
+  const story_name = story.from_language_name;
 
   const user_id = await getUserId();
 
@@ -66,8 +68,21 @@ export default async function Page({
 
   async function setStoryDoneAction() {
     "use server";
+    const posthog = getPostHogClient();
+
     if (!user_id) {
       await sql`INSERT INTO story_done (story_id) VALUES(${story_id})`;
+      // Track story completion for anonymous user
+      posthog.capture({
+        distinctId: "anonymous",
+        event: "story_completed",
+        properties: {
+          story_id: story_id,
+          story_name: story_name,
+          course_id: course_id,
+          is_authenticated: false,
+        },
+      });
       return {
         message: "done",
         story_id: story_id,
@@ -75,6 +90,17 @@ export default async function Page({
     }
     await sql`INSERT INTO story_done (user_id, story_id) VALUES(${user_id}, ${story_id})`;
     revalidateTag(`course_done_${course_id}_${user_id}`, "max");
+    // Track story completion for authenticated user
+    posthog.capture({
+      distinctId: String(user_id),
+      event: "story_completed",
+      properties: {
+        story_id: story_id,
+        story_name: story_name,
+        course_id: course_id,
+        is_authenticated: true,
+      },
+    });
     return {
       message: "done",
       story_id: story_id,

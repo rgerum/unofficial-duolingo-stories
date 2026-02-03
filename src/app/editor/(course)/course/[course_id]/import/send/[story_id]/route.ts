@@ -2,6 +2,7 @@ import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/userInterface";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function GET(
   req: Request,
@@ -58,6 +59,19 @@ async function set_import(
     username,
     `added ${data["name"]} in course ${data["course_id"]}`,
   );
+
+  // Track story imported event
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: username,
+    event: "story_imported",
+    properties: {
+      source_story_id: id,
+      new_story_id: data2.id,
+      story_name: data2.name,
+      target_course_id: course_id,
+    },
+  });
 
   return { id: data2.id };
 }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useInput } from "@/lib/hooks";
 import Button from "@/components/layout/button";
 import Input from "@/components/layout/Input";
+import posthog from "posthog-js";
 
 export async function fetch_post(url: string, data: Record<string, string>) {
   let req = new Request(url, {
@@ -92,11 +93,23 @@ export default function Register() {
     if (!success) {
       setError(msg || "Something went wrong.");
       setState(-1);
+      // Track registration failure
+      posthog.capture("user_registration_failed", {
+        error_message: msg || "Something went wrong.",
+      });
     } else {
       setState(2);
       setMessage(
         "Your account has been registered. An e-mail with an activation link has been sent to you. Please click on the link in the e-mail to proceed. You may need to look into your spam folder.",
       );
+      // Track successful registration and identify user
+      posthog.identify(usernameInput, {
+        username: usernameInput,
+        email: emailInput,
+      });
+      posthog.capture("user_registered", {
+        username: usernameInput,
+      });
     }
   }
 

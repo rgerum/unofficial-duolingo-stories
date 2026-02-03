@@ -4,6 +4,7 @@ import React from "react";
 import { redirect } from "next/navigation";
 import { LoginOptions } from "./login_options";
 import { CallbackRouteError } from "@auth/core/errors";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export interface ProviderProps {
   id: string;
@@ -29,11 +30,37 @@ export default async function Page({}) {
     formData: FormData,
   ): Promise<{ error: string | null }> => {
     "use server";
+    const username = formData.get("username") as string;
     try {
       await signIn("credentials", formData);
+
+      // Track successful login event on server
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: username,
+        event: "user_signed_in",
+        properties: {
+          auth_method: "credentials",
+          username: username,
+        },
+      });
+
       return { error: null };
     } catch (error) {
       if ((error as CallbackRouteError)["cause"]) {
+        // Track failed login attempt
+        const posthog = getPostHogClient();
+        posthog.capture({
+          distinctId: username || "anonymous",
+          event: "user_sign_in_failed",
+          properties: {
+            auth_method: "credentials",
+            error_message:
+              (error as CallbackRouteError)["cause"]?.err?.message ||
+              "Sign in error.",
+          },
+        });
+
         return {
           error:
             (error as CallbackRouteError)["cause"]?.err?.message ||

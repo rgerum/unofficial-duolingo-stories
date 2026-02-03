@@ -6,6 +6,7 @@ import { useInput } from "@/lib/hooks";
 import sendPasswordAction from "./sendPasswordAction";
 import Button from "@/components/layout/button";
 import Input from "@/components/layout/Input";
+import posthog from "posthog-js";
 
 export default function ResetPassword() {
   const [state, setState] = React.useState(0);
@@ -35,6 +36,10 @@ export default function ResetPassword() {
       "If the account exists an email was sent out with a link to reset the password.",
     );
     setState(2);
+    // Track password reset request
+    posthog.capture("password_reset_requested", {
+      email_provided: true,
+    });
   }
   const handleKeypressSignup = (e: React.KeyboardEvent) => {
     // listens for enter key

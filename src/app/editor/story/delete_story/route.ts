@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
 import { getUser } from "@/lib/userInterface";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,5 +42,18 @@ async function delete_story(
     `delete ${data["name"]} from course ${data["course_id"]}`,
     true,
   );
+
+  // Track story deleted event
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: username,
+    event: "story_deleted",
+    properties: {
+      story_id: id,
+      story_name: data["name"],
+      course_id: data["course_id"],
+    },
+  });
+
   return "done";
 }

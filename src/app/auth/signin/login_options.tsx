@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { useInput } from "@/lib/hooks";
+import posthog from "posthog-js";
 
 import styles from "../register.module.css";
 import { GetIcon } from "@/components/icons";
@@ -19,9 +20,34 @@ export function LoginOptions(props: {
 }) {
   const { providers, signin_action } = props;
 
-  const [state, formAction, isPending] = React.useActionState(signin_action, {
-    error: null,
-  });
+  // Wrap signin_action to identify user on successful login
+  const wrappedSigninAction = async (
+    state: { error: string | null },
+    formData: FormData,
+  ): Promise<{ error: string | null }> => {
+    const username = formData.get("username") as string;
+    const result = await signin_action(state, formData);
+
+    // If login was successful (no error), identify the user
+    if (!result.error && username) {
+      posthog.identify(username, {
+        username: username,
+      });
+      posthog.capture("user_signed_in", {
+        auth_method: "credentials",
+        username: username,
+      });
+    }
+
+    return result;
+  };
+
+  const [state, formAction, isPending] = React.useActionState(
+    wrappedSigninAction,
+    {
+      error: null,
+    },
+  );
 
   const [usernameInput, usernameInputSetValue] = useInput("");
   const [passwordInput, passwordInputSetValue] = useInput("");
