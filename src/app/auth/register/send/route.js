@@ -3,6 +3,7 @@ const { phpbb_hash } = require("lib/auth/hash_functions2");
 import { v4 as uuid } from "uuid";
 import { NextResponse } from "next/server";
 import transporter from "@/lib/emailer";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function POST(req) {
   const res = await req.json();
@@ -53,5 +54,27 @@ async function register({ name, password, email }) {
             Happy learning.
         `,
   });
+
+  // Track server-side user registration event
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: name,
+    event: "user_registered_server",
+    properties: {
+      username: name,
+      registration_method: "email",
+    },
+  });
+  // Identify user on server side
+  posthog.identify({
+    distinctId: name,
+    properties: {
+      username: name,
+      email: email,
+      createdAt: new Date().toISOString(),
+    },
+  });
+  await posthog.shutdown();
+
   return "done";
 }

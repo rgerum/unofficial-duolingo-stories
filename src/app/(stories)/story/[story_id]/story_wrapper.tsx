@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import StoryProgress from "@/components/StoryProgress";
 import { useNavigationMode } from "@/components/NavigationModeProvider";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import posthog from "posthog-js";
 
 export default function StoryWrapper({
   story,
@@ -29,7 +30,32 @@ export default function StoryWrapper({
   const [highlight_name, setHighlightName] = React.useState<string[]>([]);
   const [hideNonHighlighted, setHideNonHighlighted] = React.useState(false);
 
+  // Track story started on component mount
+  React.useEffect(() => {
+    posthog.capture("story_started", {
+      story_id: story.id,
+      story_name: story.from_language_name,
+      course_id: story.course_id,
+      course_short: story.course_short,
+      learning_language: story.learning_language_long,
+    });
+  }, [
+    story.id,
+    story.from_language_name,
+    story.course_id,
+    story.course_short,
+    story.learning_language_long,
+  ]);
+
   async function onEnd() {
+    // Track story completed
+    posthog.capture("story_completed", {
+      story_id: story.id,
+      story_name: story.from_language_name,
+      course_id: story.course_id,
+      course_short: story.course_short,
+      learning_language: story.learning_language_long,
+    });
     await storyFinishedIndexUpdate();
     router.push(`/${story.course_short}`);
   }
