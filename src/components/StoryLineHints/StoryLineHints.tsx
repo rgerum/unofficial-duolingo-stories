@@ -59,12 +59,14 @@ function StoryLineHints({
   hideRangesForChallenge,
   unhide,
   editorState,
+  splitPositions,
 }: {
   content: ContentWithHints;
   audioRange?: number;
   hideRangesForChallenge?: { start: number; end: number }[];
   unhide?: number;
   editorState?: EditorStateType;
+  splitPositions?: number[];
 }) {
   if (!content) return <>Empty</>;
   let hideRangesForChallengeEntry = hideRangesForChallenge
@@ -111,7 +113,7 @@ function StoryLineHints({
     //TODO
     //if(is_hidden && window.view)
     //    style.color = "#afafaf";
-    if (audioRange && audioRange < start) style.opacity = 0.5;
+    if (audioRange !== undefined && audioRange < start) style.opacity = 0.5;
 
     let returns = [
       <span
@@ -130,6 +132,17 @@ function StoryLineHints({
   }
 
   function addSplitWord(start: number, end: number) {
+    if (splitPositions && splitPositions.length > 0) {
+      const points = splitPositions
+        .filter((p) => p > start && p < end)
+        .sort((a, b) => a - b);
+      const segments = [start, ...points, end];
+      let elements = [];
+      for (let i = 0; i < segments.length - 1; i++) {
+        for (let w of addWord2(segments[i], segments[i + 1])) elements.push(w);
+      }
+      return elements;
+    }
     let parts = splitTextTokens(content.text.substring(start, end));
     if (parts[0] === "") parts.splice(0, 1);
     if (parts[parts.length - 1] === "") parts.pop();

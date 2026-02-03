@@ -252,7 +252,7 @@ export default function SoundRecorder({
   const lastSavedKeyRef = useRef<string | null>(null);
   const isSavingRef = useRef(false);
   const [urlIndex, setUrlIndex] = useState(url);
-  const [audioRange, setAudioRange] = React.useState(99999);
+  const [audioRange, setAudioRange] = React.useState(-1);
   const [uploaded, setUploaded] = React.useState(!!url);
   const [file, setFile] = React.useState<File | null>(null);
 
@@ -331,6 +331,7 @@ export default function SoundRecorder({
 
   const onDecode = useCallback(
     (wavesurfer: WaveSurfer, duration: number) => {
+      setAudioRange(-1);
       // Extract timing portion only (strips markers prefix if present)
       const timingPortion = getTimingPortion(initialTimingText);
       const timings = timingPortion
@@ -367,7 +368,7 @@ export default function SoundRecorder({
       const regions = regionsPlugin.regions.sort(
         (a: Region, b: Region) => a.start - b.start,
       );
-      let pos = 0;
+      let pos = -1;
       for (let i = 0; i < regions.length; i++) {
         if (regions[i].start < currentTime && parts2[i] !== undefined)
           pos = parts2[i].pos;
@@ -421,6 +422,12 @@ export default function SoundRecorder({
     wavesurfer.on("timeupdate", (currentTime) =>
       onTimeUpdate(wavesurfer, currentTime),
     );
+    wavesurfer.on("play", () => {
+      setAudioRange(-1);
+    });
+    wavesurfer.on("finish", () => {
+      setAudioRange(Number.MAX_SAFE_INTEGER);
+    });
     const plugins = (wavesurfer as unknown as { plugins: RegionsPlugin[] })
       .plugins;
     plugins[0].on("region-updated", (region: Region) => {
@@ -484,8 +491,10 @@ export default function SoundRecorder({
 
   const computeTimingTextFromRegions = useCallback(() => {
     if (!wavesurfer) return timingText;
-    const regionsPlugin = (wavesurfer as unknown as { plugins: unknown[] })
-      .plugins[0] as RegionsPlugin;
+    const plugins = (wavesurfer as unknown as { plugins?: unknown[] }).plugins;
+    if (!plugins || plugins.length === 0) return timingText;
+    const regionsPlugin = plugins[0] as RegionsPlugin | undefined;
+    if (!regionsPlugin || !regionsPlugin.regions) return timingText;
     const regions = regionsPlugin.regions.sort(
       (a: Region, b: Region) => a.start - b.start,
     );
@@ -716,6 +725,7 @@ export default function SoundRecorder({
         audioRange={audioRange}
         hideRangesForChallenge={[]}
         content={content}
+        splitPositions={manualMarkers.length > 0 ? manualMarkers : undefined}
       />
       <p className={styles.timingText}>{timingText}</p>
       <div ref={containerRef} />
