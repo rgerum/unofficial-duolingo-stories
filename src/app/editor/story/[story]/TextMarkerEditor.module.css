@@ -1,0 +1,105 @@
+.container {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.textEditor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 8px 4px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  min-height: 40px;
+  gap: 0;
+}
+
+.char {
+  font-size: 20px;
+  line-height: 1.4;
+  padding: 2px 0;
+  user-select: none;
+}
+
+.gap {
+  width: 12px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0 -2px;
+  position: relative;
+  transition: background-color 0.15s;
+}
+
+.gap:hover {
+  background: rgba(28, 176, 246, 0.15);
+  border-radius: 3px;
+}
+
+.gapLine {
+  width: 2px;
+  height: 20px;
+  background: transparent;
+  border-radius: 1px;
+  transition: background-color 0.15s;
+}
+
+.gap:hover .gapLine {
+  background: rgba(28, 176, 246, 0.5);
+}
+
+.activeGap {
+  background: rgba(224, 108, 117, 0.1);
+}
+
+.activeGap .gapLine {
+  background: #e06c75;
+  width: 3px;
+  height: 24px;
+}
+
+.activeGap:hover {
+  background: rgba(224, 108, 117, 0.2);
+}
+
+.activeGap:hover .gapLine {
+  background: #c45a63;
+}
+
+.preview {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.previewLabel {
+  font-size: 12px;
+  color: #888;
+  margin-right: 4px;
+}
+
+.segment {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #e8f4fd;
+  border: 1px solid #1cb0f6;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #0a5f83;
+}

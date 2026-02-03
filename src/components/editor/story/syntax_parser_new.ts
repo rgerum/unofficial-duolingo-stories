@@ -438,9 +438,12 @@ function line_to_audio(
   };
   if (line) {
     line = line.substring(1);
-    let [filename, keypoints] = text_to_keypoints(line);
+    let [filename, keypoints, markers] = text_to_keypoints(line);
     audio.url = "audio/" + filename;
     audio.keypoints = keypoints;
+    if (markers && markers.length > 0) {
+      audio.markers = markers;
+    }
   }
   return audio;
 }

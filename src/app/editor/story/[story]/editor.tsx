@@ -186,8 +186,36 @@ export default function Editor({
     loadLanguageData();
   }, [story_data]);
 
+  React.useEffect(() => {
+    if (!story_data) return;
+    const key = `audio-edit-mode:${story_data.id}`;
+    const stored =
+      typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
+    if (stored === "auto" || stored === "manual") {
+      setAudioEditMode(stored);
+    } else {
+      setAudioEditMode("auto");
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(key, "auto");
+      }
+    }
+  }, [story_data]);
+
+  const handleAudioEditModeChange = React.useCallback(
+    (mode: "auto" | "manual") => {
+      setAudioEditMode(mode);
+      if (story_data && typeof window !== "undefined") {
+        window.localStorage.setItem(`audio-edit-mode:${story_data.id}`, mode);
+      }
+    },
+    [story_data],
+  );
+
   const [show_trans, set_show_trans] = React.useState(false);
   const [show_ssml, set_show_ssml] = React.useState(false);
+  const [audioEditMode, setAudioEditMode] = React.useState<
+    "auto" | "manual" | undefined
+  >(undefined);
 
   const [editor_state, set_editor_state] = React.useState<
     EditorStateType | undefined
@@ -498,6 +526,7 @@ export default function Editor({
               initialTimingText={timings_to_text({
                 filename: audio_editor_data.audio.url ?? "",
                 keypoints: audio_editor_data.audio.keypoints ?? [],
+                markers: audio_editor_data.audio.markers,
               })}
               url={
                 "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/" +
@@ -506,6 +535,8 @@ export default function Editor({
               story_id={story_data.id}
               onClose={() => setAudioEditorData(undefined)}
               onSave={onAudioSave}
+              editMode={audioEditMode}
+              onEditModeChange={handleAudioEditModeChange}
               soundRecorderNext={soundRecorderNext}
               soundRecorderPrevious={soundRecorderPrevious}
               total_index={getMax(

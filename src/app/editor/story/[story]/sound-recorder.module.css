@@ -14,3 +14,67 @@
   top: 0;
   right: 0;
 }
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.modeToggle {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-left: auto;
+}
+
+.modeButton {
+  padding: 6px 12px;
+  border: none;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-size: 13px;
+  color: #666;
+  transition: all 0.15s;
+}
+
+.modeButton:first-child {
+  border-right: 1px solid #ddd;
+}
+
+.modeButton:hover {
+  background: #e8e8e8;
+}
+
+.modeButtonActive {
+  background: #1cb0f6;
+  color: white;
+}
+
+.modeButtonActive:hover {
+  background: #14a0e0;
+}
+
+.timingText {
+  font-size: 11px;
+  color: #888;
+  word-break: break-all;
+  margin: 8px 0;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pageInfo {
+  margin-left: 8px;
+  font-size: 13px;
+  color: #666;
+}

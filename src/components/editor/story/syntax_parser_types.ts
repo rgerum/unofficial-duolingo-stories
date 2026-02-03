@@ -10,6 +10,7 @@ export type Audio = {
   };
   url: undefined | string;
   keypoints: undefined | { rangeEnd: number; audioStart: number }[];
+  markers?: number[];
 };
 
 // Core Types

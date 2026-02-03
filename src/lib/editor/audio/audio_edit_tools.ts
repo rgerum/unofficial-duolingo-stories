@@ -280,11 +280,17 @@ export function content_to_audio(content: string) {
 export function timings_to_text({
   filename,
   keypoints,
+  markers,
 }: {
   filename: string;
   keypoints: { rangeEnd: number; audioStart: number }[];
+  markers?: number[];
 }) {
   let text = filename ? "$" + filename : "";
+  // Add markers segment (semicolon-delimited) if present
+  if (markers && markers.length > 0) {
+    text += ";m=" + markers.join(",");
+  }
   let last_end = 0;
   let last_time = 0;
   if (keypoints) {
@@ -302,7 +308,37 @@ export function timings_to_text({
 
 export function text_to_keypoints(line: string) {
   const parts = line.split(";");
-  const filename = parts.splice(0, 1)[0];
+  let filenameSection = parts.splice(0, 1)[0];
+
+  // Extract markers if present (legacy: $filename#marker1,marker2)
+  let markers: number[] = [];
+  const hashIndex = filenameSection.indexOf("#");
+  if (hashIndex !== -1) {
+    const markerStr = filenameSection.substring(hashIndex + 1);
+    filenameSection = filenameSection.substring(0, hashIndex);
+    let markerStrRest = markerStr;
+    if (markerStrRest.startsWith("m:") || markerStrRest.startsWith("a:")) {
+      markerStrRest = markerStrRest.substring(2);
+    }
+    if (markerStrRest) {
+      markers = markerStrRest
+        .split(",")
+        .map((s) => parseInt(s, 10))
+        .filter((n) => !isNaN(n));
+    }
+  }
+  // New format: first timing segment may be markers (m=1,2 or m:1,2)
+  if (parts.length > 0 && (parts[0].startsWith("m=") || parts[0].startsWith("m:"))) {
+    const markerSegment = parts.shift() as string;
+    const markerStr = markerSegment.substring(2);
+    if (markerStr) {
+      markers = markerStr
+        .split(",")
+        .map((s) => parseInt(s, 10))
+        .filter((n) => !isNaN(n));
+    }
+  }
+
   const keypoints: { rangeEnd: number; audioStart: number }[] = [];
   let last_end = 0;
   let last_time = 0;
@@ -310,14 +346,16 @@ export function text_to_keypoints(line: string) {
     const [start0, duration0] = part.split(",");
     const start = parseInt(start0);
     const duration = parseInt(duration0);
-    keypoints.push({
-      rangeEnd: last_end + start,
-      audioStart: last_time + duration,
-    });
-    last_end += start;
-    last_time += duration;
+    if (!isNaN(start) && !isNaN(duration)) {
+      keypoints.push({
+        rangeEnd: last_end + start,
+        audioStart: last_time + duration,
+      });
+      last_end += start;
+      last_time += duration;
+    }
   }
-  return [filename, keypoints] as const;
+  return [filenameSection, keypoints, markers] as const;
 }
 
 export function insert_audio_line(
