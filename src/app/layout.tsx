@@ -5,6 +5,7 @@ import Script from "next/script";
 import StyledComponentsRegistry from "@/lib/registry";
 import NavigationModeProvider from "@/components/NavigationModeProvider";
 import { SessionProvider } from "next-auth/react";
+import PostHogProviderWrapper from "@/components/PostHogProvider";
 
 // If loading a variable font, you don't need to specify the font weight
 const nunito = Nunito({
@@ -26,9 +27,11 @@ export default function RootLayout({
       </head>
       <body>
         <SessionProvider>
-          <NavigationModeProvider>
-            <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
-          </NavigationModeProvider>
+          <PostHogProviderWrapper>
+            <NavigationModeProvider>
+              <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+            </NavigationModeProvider>
+          </PostHogProviderWrapper>
           {/*<AnalyticsTracker />*/}
         </SessionProvider>
       </body>
