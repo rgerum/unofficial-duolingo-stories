@@ -26,9 +26,9 @@ export default function RootLayout({
       </head>
       <body>
         <SessionProvider>
-          <NavigationModeProvider>
-            <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
-          </NavigationModeProvider>
+            <NavigationModeProvider>
+              <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+            </NavigationModeProvider>
           {/*<AnalyticsTracker />*/}
         </SessionProvider>
       </body>
