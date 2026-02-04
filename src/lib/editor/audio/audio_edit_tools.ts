@@ -132,9 +132,6 @@ export function generate_ssml_line(
       `</voice></speak>`,
       speak_text.text.length,
     );
-    // TODO make sure this is text and not textx
-    speak_text.text = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
-    <voice name="en-US-JennyNeural">Enjoy <break/> speech </voice> </speak>`;
   } else {
     speak_text = replace_with_mapping(speak_text, `<speak>`, 0);
     speak_text = replace_with_mapping(
