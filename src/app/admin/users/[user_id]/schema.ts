@@ -7,6 +7,7 @@ export const UserSchema = z.object({
   regdate: z.coerce.date(),
   activated: z.coerce.boolean(),
   role: z.coerce.boolean(),
+  admin: z.coerce.boolean(),
 });
 
 export type AdminUser = z.infer<typeof UserSchema>;
