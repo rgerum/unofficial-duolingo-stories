@@ -1,3 +1,4 @@
+"use no memo";
 import { useState, useCallback } from "react";
 
 export interface recorderControls {
@@ -41,17 +42,18 @@ export type MediaAudioTrackConstraints = Pick<
 const useAudioRecorder: (
   audioTrackConstraints?: MediaAudioTrackConstraints,
   onNotAllowedOrFound?: (exception: DOMException) => any,
-  mediaRecorderOptions?: MediaRecorderOptions
+  mediaRecorderOptions?: MediaRecorderOptions,
 ) => recorderControls = (
   audioTrackConstraints,
   onNotAllowedOrFound,
-  mediaRecorderOptions
+  mediaRecorderOptions,
 ) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>();
-  const [timerInterval, setTimerInterval] = useState<NodeJS.Timer>();
+  const [timerInterval, setTimerInterval] =
+    useState<ReturnType<typeof setInterval>>();
   const [recordingBlob, setRecordingBlob] = useState<Blob>();
 
   const _startTimer: () => void = useCallback(() => {
@@ -78,7 +80,7 @@ const useAudioRecorder: (
         setIsRecording(true);
         const recorder: MediaRecorder = new MediaRecorder(
           stream,
-          mediaRecorderOptions
+          mediaRecorderOptions,
         );
         setMediaRecorder(recorder);
         recorder.start();
@@ -91,7 +93,7 @@ const useAudioRecorder: (
         });
       })
       .catch((err: DOMException) => {
-        console.log(err.name, err.message, err.cause);
+        //console.log(err.name, err.message, err.cause);
         onNotAllowedOrFound?.(err);
       });
   }, [
@@ -102,6 +104,7 @@ const useAudioRecorder: (
     setRecordingBlob,
     onNotAllowedOrFound,
     mediaRecorderOptions,
+    audioTrackConstraints,
   ]);
 
   /**
@@ -134,7 +137,7 @@ const useAudioRecorder: (
       _stopTimer();
       mediaRecorder?.pause();
     }
-  }, [mediaRecorder, setIsPaused, _startTimer, _stopTimer]);
+  }, [isPaused, mediaRecorder, setIsPaused, _startTimer, _stopTimer]);
 
   return {
     startRecording,

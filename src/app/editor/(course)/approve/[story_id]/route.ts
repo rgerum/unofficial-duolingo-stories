@@ -1,7 +1,8 @@
-import { sql } from "@/lib/db.ts";
+import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { getUser } from "@/lib/userInterface";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function GET(
   request: Request,
@@ -74,7 +75,7 @@ async function set_approve({
         count_published++;
       }
     }
-    console.log("published", count_published);
+    //console.log("published", count_published);
     if (count_published) {
       await sql`UPDATE course
 SET count = (
@@ -82,8 +83,8 @@ SET count = (
     FROM story
     WHERE story.course_id = course.id AND story.public AND NOT story.deleted
 ) WHERE id = (SELECT course_id FROM story WHERE id = ${res3[0].id});`;
-      revalidateTag("course_data");
-      revalidateTag("story_data");
+      revalidateTag("course_data", "day");
+      revalidateTag("story_data", "day");
     }
     // update contributor list
     await sql`UPDATE course
@@ -117,6 +118,22 @@ SET contributors_past = (SELECT COALESCE(array_agg(name), '{}')
                                ORDER BY MAX(sa.date) DESC) AS contributors
                          WHERE NOT active);`;
   }
+
+  // Track story approval event server-side
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: `user_${user_id}`,
+    event: "story_approved",
+    properties: {
+      story_id: story_id,
+      action: action,
+      approval_count: count,
+      story_status: status,
+      finished_in_set: res3.length,
+      stories_published: published.length,
+    },
+  });
+  await posthog.shutdown();
 
   return {
     count: count,

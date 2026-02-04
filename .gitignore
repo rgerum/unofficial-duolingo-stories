@@ -59,3 +59,4 @@ old/
 .vercel
 
 *storybook.log
+next-env.d.ts

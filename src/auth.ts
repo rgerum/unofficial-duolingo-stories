@@ -4,11 +4,10 @@ import Facebook from "next-auth/providers/facebook";
 import Google from "next-auth/providers/google";
 import Discord from "next-auth/providers/discord";
 
-import PostgresAdapter from "@auth/pg-adapter";
-import { Pool } from "@neondatabase/serverless";
 import Credentials from "next-auth/providers/credentials";
 
 import { authorizeUser } from "@/authorize";
+import MyAdapter from "@/lib/database_adapter";
 
 declare module "next-auth" {
   /**
@@ -37,54 +36,50 @@ declare module "next-auth" {
   }
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth(() => {
-  // Create a `Pool` inside the request handler.
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  // @ts-ignore
-  return {
-    adapter: PostgresAdapter(pool),
-    session: { strategy: "jwt" },
-    callbacks: {
-      jwt({ token, user }) {
-        if (user) {
-          token.admin = user.admin;
-          token.role = user.role;
-          token.id = user.id;
-        }
-        return token;
-      },
-      session({ session, token }) {
-        if (!token) return session;
-        session.user.admin = token.admin as boolean;
-        session.user.role = token.role as boolean;
-        session.user.id = token.id as string;
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  // @ts-ignore - adapter type mismatch between @auth/core versions
+  adapter: MyAdapter(),
+  session: { strategy: "jwt" },
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) {
+        token.admin = user.admin;
+        token.role = user.role;
+        token.id = user.id;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (!token) return session;
+      session.user.admin = token.admin as boolean;
+      session.user.role = token.role as boolean;
+      session.user.id = token.id as string;
 
-        return session;
-      },
+      return session;
     },
-    pages: {
-      signIn: "/auth/signin",
-      //signOut: '/auth/signout',
-      //error: '/auth/error',
-      //verifyRequest: '/auth/verify-request',
-      //newUser: '/auth/new-user'
-    },
-    providers: [
-      GitHub,
-      Facebook,
-      Google,
-      Discord,
-      Credentials({
-        credentials: {
-          username: {
-            label: "Username",
-            type: "text",
-            placeholder: "username",
-          },
-          password: { label: "Password", type: "password" },
+  },
+  pages: {
+    signIn: "/auth/signin",
+    //signOut: '/auth/signout',
+    //error: '/auth/error',
+    //verifyRequest: '/auth/verify-request',
+    //newUser: '/auth/new-user'
+  },
+  providers: [
+    GitHub,
+    Facebook,
+    Google,
+    Discord,
+    Credentials({
+      credentials: {
+        username: {
+          label: "Username",
+          type: "text",
+          placeholder: "username",
         },
-        authorize: authorizeUser,
-      }),
-    ],
-  };
+        password: { label: "Password", type: "password" },
+      },
+      authorize: authorizeUser,
+    }),
+  ],
 });

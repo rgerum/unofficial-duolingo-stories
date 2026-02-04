@@ -1,18 +1,26 @@
-const withPWA = require("next-pwa")({
-  dest: "public",
-});
-
-module.exports = withPWA({
+module.exports = {
   // next.js config
   compiler: {
     styledComponents: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
+  // PostHog reverse proxy to avoid ad blockers
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://us.i.posthog.com/:path*",
+      },
+    ];
+  },
+  // Required for PostHog trailing slash API requests
+  skipTrailingSlashRedirect: true,
   images: {
     remotePatterns: [
       {
@@ -35,4 +43,4 @@ module.exports = withPWA({
       },
     ],
   },
-});
+};

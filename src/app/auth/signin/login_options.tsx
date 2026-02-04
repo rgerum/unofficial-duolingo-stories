@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { useInput } from "@/lib/hooks";
+import posthog from "posthog-js";
 
 import styles from "../register.module.css";
 import { GetIcon } from "@/components/icons";
@@ -25,6 +26,29 @@ export function LoginOptions(props: {
 
   const [usernameInput, usernameInputSetValue] = useInput("");
   const [passwordInput, passwordInputSetValue] = useInput("");
+
+  // Track successful sign-in when state changes from pending to no error
+  React.useEffect(() => {
+    if (state.error === null && usernameInput && !isPending) {
+      // Identify user in PostHog
+      posthog.identify(usernameInput, {
+        username: usernameInput,
+      });
+      // Capture sign-in event
+      posthog.capture("user_signed_in", {
+        username: usernameInput,
+        method: "credentials",
+      });
+    }
+  }, [state.error, usernameInput, isPending]);
+
+  const handleOAuthProviderClick = (provider: ProviderProps) => {
+    posthog.capture("oauth_provider_clicked", {
+      provider: provider.id,
+      provider_name: provider.name,
+    });
+    provider.action();
+  };
 
   return (
     <>
@@ -59,7 +83,7 @@ export function LoginOptions(props: {
         </Button>
       </form>
       <p className={styles.P}>
-        Don't have an account?{" "}
+        {"Don't have an account? "}
         <Link
           href="/auth/register"
           data-cy="register-button"
@@ -83,7 +107,7 @@ export function LoginOptions(props: {
           <button
             key={provider.id}
             className={styles.button2}
-            onClick={provider.action}
+            onClick={() => handleOAuthProviderClick(provider)}
           >
             <GetIcon name={provider.id} />
             <span>{provider.name}</span>
