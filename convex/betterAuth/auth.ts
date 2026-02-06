@@ -3,10 +3,12 @@ import { convex } from "@convex-dev/better-auth/plugins";
 import type { GenericCtx } from "@convex-dev/better-auth/utils";
 import type { BetterAuthOptions } from "better-auth";
 import { betterAuth } from "better-auth";
-import { username } from "better-auth/plugins";
+import { admin, username } from "better-auth/plugins";
+import { defaultRoles, userAc } from "better-auth/plugins/admin/access";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import authConfig from "../auth.config";
+import { phpbbCheckHash, phpbbHash } from "../lib/phpbb";
 import schema from "./schema";
 
 // Better Auth Component
@@ -27,8 +29,23 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
+      password: {
+        hash: async (password) => phpbbHash(password),
+        verify: async ({ password, hash }) => phpbbCheckHash(password, hash),
+      },
     },
-    plugins: [convex({ authConfig }), username()],
+    plugins: [
+      convex({ authConfig }),
+      username(),
+      admin({
+        adminRoles: ["admin"],
+        roles: {
+          ...defaultRoles,
+          editor: userAc,
+          contributor: userAc,
+        },
+      }),
+    ],
   } satisfies BetterAuthOptions;
 };
 

@@ -2,18 +2,30 @@ import { redirect } from "next/navigation";
 import { fetchAuthQuery, isAuthenticated } from "@/lib/auth-server";
 import { anyApi } from "convex/server";
 
-const toAppUser = (
-  user: {
-    role?: string | null;
-    [key: string]: unknown;
-  } | null,
-) => {
+type AuthUser = {
+  id?: string;
+  name?: string;
+  email?: string;
+  image?: string | null;
+  username?: string | null;
+  displayUsername?: string | null;
+  role?: string | null;
+};
+
+export type AppUser = Omit<AuthUser, "role"> & {
+  rawRole?: string | null;
+  role: boolean;
+  admin: boolean;
+};
+
+const toAppUser = (user: AuthUser | null): AppUser | null => {
   if (!user) return null;
 
   const roleValue = typeof user.role === "string" ? user.role : "";
 
   return {
     ...user,
+    rawRole: user.role ?? null,
     role: Boolean(roleValue && roleValue !== "user"),
     admin: roleValue === "admin",
   };
@@ -22,7 +34,7 @@ const toAppUser = (
 export async function getUser(
   req?: unknown,
   response?: unknown,
-) {
+): Promise<AppUser | null> {
   const debugAuth = process.env.DEBUG_AUTH === "true";
   const authed = await isAuthenticated();
 
@@ -33,7 +45,7 @@ export async function getUser(
   if (!authed) return null;
 
   try {
-    const user = await fetchAuthQuery(anyApi.auth.getAuthUser);
+    const user = (await fetchAuthQuery(anyApi.auth.getAuthUser)) as AuthUser | null;
     if (debugAuth) {
       console.log("[auth] getAuthUser result:", user);
     }
