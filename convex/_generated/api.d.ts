@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as authFunctions from "../authFunctions.js";
 import type * as http from "../http.js";
 import type * as lib_phpbb from "../lib/phpbb.js";
 import type * as roles from "../roles.js";
@@ -21,6 +22,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  authFunctions: typeof authFunctions;
   http: typeof http;
   "lib/phpbb": typeof lib_phpbb;
   roles: typeof roles;
@@ -1072,9 +1074,6 @@ export declare const components: {
         },
         any
       >;
-    };
-    auth_old: {
-      getAuthUser: FunctionReference<"query", "internal", {}, any>;
     };
   };
 };

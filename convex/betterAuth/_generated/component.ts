@@ -1049,7 +1049,4 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
     };
-    auth_old: {
-      getAuthUser: FunctionReference<"query", "internal", {}, any, Name>;
-    };
   };

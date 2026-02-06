@@ -5,7 +5,7 @@ import type { BetterAuthOptions } from "better-auth";
 import { betterAuth } from "better-auth";
 import { admin, username } from "better-auth/plugins";
 import { defaultRoles, userAc } from "better-auth/plugins/admin/access";
-import { components } from "../_generated/api";
+import { components, internal } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import authConfig from "../auth.config";
 import { phpbbCheckHash, phpbbHash } from "../lib/phpbb";
@@ -75,13 +75,21 @@ const sendEmail = async ({
 };
 
 // Better Auth Component
-export const authComponent = createClient<DataModel, typeof schema>(
-  components.betterAuth,
-  {
-    local: { schema },
-    verbose: false,
+export const authComponent: ReturnType<typeof createClient> = createClient<
+  DataModel,
+  typeof schema
+>(components.betterAuth, {
+  local: { schema },
+  verbose: false,
+  authFunctions: {
+    onCreate: internal.authFunctions.onCreate,
   },
-);
+  triggers: {
+    user: {
+      onCreate: async () => {},
+    },
+  },
+});
 
 // Better Auth Options
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {

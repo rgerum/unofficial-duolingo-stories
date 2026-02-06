@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import { fetchAuthQuery, isAuthenticated } from "@/lib/auth-server";
-import { anyApi } from "convex/server";
+import { api } from "@convex/_generated/api";
 
 type AuthUser = {
   id?: string;
+  userId?: string | null;
   name?: string;
   email?: string;
   image?: string | null;
@@ -45,7 +46,9 @@ export async function getUser(
   if (!authed) return null;
 
   try {
-    const user = (await fetchAuthQuery(anyApi.auth.getAuthUser)) as AuthUser | null;
+    const user = (await fetchAuthQuery(
+      api.auth.getAuthUser,
+    )) as AuthUser | null;
     if (debugAuth) {
       console.log("[auth] getAuthUser result:", user);
     }

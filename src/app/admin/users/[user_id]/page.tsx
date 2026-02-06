@@ -1,29 +1,47 @@
 import { notFound } from "next/navigation";
 import UserDisplay from "./user_display";
-import { sql } from "@/lib/db";
 import { UserSchema } from "./schema";
+import { fetchAuthQuery } from "@/lib/auth-server";
+import { components } from "@convex/_generated/api";
 
 async function user_properties(id: string) {
-  const isNumeric = (value: string) =>
-    value.length !== 0 && [...value].every((c) => c >= "0" && c <= "9");
-  if (isNumeric(id)) {
-    // if it is a discord ID
-    if (id.length >= 10) {
-      const row = (
-        await sql`SELECT id, name, email, regdate, activated, role FROM users WHERE id = (SELECT "userId" FROM accounts where "providerAccountId" = ${id})`
-      )[0];
-      return row ? UserSchema.parse(row) : undefined;
+  const response = await fetchAuthQuery(
+    components.betterAuth.adapter.findMany,
+    {
+      model: "user",
+      where: [],
+      paginationOpts: { cursor: null, numItems: 1000 },
+    },
+  );
+
+  const users = response.page as Array<{
+    _id: string;
+    userId?: string | null;
+    name?: string;
+    email?: string;
+    createdAt?: number;
+    role?: string | null;
+  }>;
+
+  const match = users.find((user) => {
+    if (user.userId === id) return true;
+    if (user.name && user.name.replace(/\s+/g, "") === id.replace("%20", "")) {
+      return true;
     }
-    const row = (
-      await sql`SELECT id, name, email, regdate, activated, role FROM "users" WHERE id = ${id} LIMIT 1;`
-    )[0];
-    return row ? UserSchema.parse(row) : undefined;
-  } else {
-    const row = (
-      await sql`SELECT id, name, email, regdate, activated, role FROM "users" WHERE REPLACE(name, ' ', '') = ${id.replace("%20", "")} LIMIT 1;`
-    )[0];
-    return row ? UserSchema.parse(row) : undefined;
-  }
+    return false;
+  });
+
+  if (!match) return undefined;
+
+  return UserSchema.parse({
+    id: match.userId ? Number(match.userId) : 0,
+    name: match.name ?? "",
+    email: match.email ?? "",
+    regdate: match.createdAt ? new Date(match.createdAt) : undefined,
+    activated: true,
+    role: match.role === "contributor" || match.role === "editor",
+    admin: match.role === "admin",
+  });
 }
 
 export default async function Page({
