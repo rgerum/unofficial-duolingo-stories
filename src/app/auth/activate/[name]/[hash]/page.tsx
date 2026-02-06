@@ -25,7 +25,7 @@ export default async function Page({ params }: PageProps) {
           <p className={styles.P} id="login_form">
             {/* Use of absolute link because relative links would only be relative to carex.uber.space */}
             You can now{" "}
-            <Link href="/api/auth/signin" data-cy="log-in">
+            <Link href="/auth/signin" data-cy="log-in">
               log in
             </Link>
             .

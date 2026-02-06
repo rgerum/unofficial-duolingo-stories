@@ -42,6 +42,38 @@ const socialProviders = Object.fromEntries(
   }).filter(([, value]) => value),
 );
 
+const sendEmail = async ({
+  to,
+  subject,
+  html,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+}) => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is not set");
+  }
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "Unofficial Duolingo Stories <register@duostories.org>",
+      to,
+      subject,
+      html,
+    }),
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Resend email failed: ${response.status} ${text}`);
+  }
+};
+
 // Better Auth Component
 export const authComponent = createClient<DataModel, typeof schema>(
   components.betterAuth,
@@ -61,9 +93,37 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
+      sendResetPassword: async ({ user, url }) => {
+        await sendEmail({
+          to: user.email,
+          subject: "[Unofficial Duolingo Stories] Reset Password",
+          html: `Hey ${user.name ?? "there"},<br/>
+            <br/>
+            You have requested to reset your password for 'Unofficial Duolingo Stories'.<br/>
+            Use the following link to reset your password.<br/>
+            <a href='${url}'>Reset Password</a>
+            <br/><br/>
+            Happy learning.`,
+        });
+      },
       password: {
         hash: async (password) => phpbbHash(password),
         verify: async ({ password, hash }) => phpbbCheckHash(password, hash),
+      },
+    },
+    emailVerification: {
+      sendOnSignUp: true,
+      sendVerificationEmail: async ({ user, url }) => {
+        await sendEmail({
+          to: user.email,
+          subject: "[Unofficial Duolingo Stories] Verify Email",
+          html: `Hey ${user.name ?? "there"},<br/>
+            <br/>
+            Please verify your email address by clicking the link below.<br/>
+            <a href='${url}'>Verify Email</a>
+            <br/><br/>
+            Happy learning.`,
+        });
       },
     },
     plugins: [

@@ -7,40 +7,7 @@ import { useInput } from "@/lib/hooks";
 import Button from "@/components/layout/button";
 import Input from "@/components/layout/Input";
 import posthog from "posthog-js";
-
-export async function fetch_post(url: string, data: Record<string, string>) {
-  let req = new Request(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-    mode: "cors",
-    credentials: "include",
-  });
-  return fetch(req);
-}
-
-export async function register(
-  data: Record<string, string>,
-): Promise<[boolean, string]> {
-  let response;
-  try {
-    response = await fetch_post(`/auth/register/send`, data);
-  } catch (e) {
-    //console.log(e);
-    return [false, "Something went wrong."];
-  }
-
-  if (response.status === 403) {
-    let text = await response.text();
-    return [false, text];
-  } else if (response.status !== 200) {
-    return [false, "Something went wrong."];
-  }
-
-  return [true, ""];
-}
+import { authClient } from "@/lib/auth-client";
 
 export default function Register() {
   const [state, setState] = React.useState(0);
@@ -84,19 +51,21 @@ export default function Register() {
     }
 
     setState(1);
-    const [success, msg] = await register({
+    const { error: signUpError } = await authClient.signUp.email({
       name: usernameInput,
-      password: passwordInput,
       email: emailInput,
+      password: passwordInput,
+      username: usernameInput,
+      displayUsername: usernameInput,
     });
 
-    if (!success) {
-      setError(msg || "Something went wrong.");
+    if (signUpError) {
+      setError(signUpError?.message || "Something went wrong.");
       setState(-1);
     } else {
       setState(2);
       setMessage(
-        "Your account has been registered. An e-mail with an activation link has been sent to you. Please click on the link in the e-mail to proceed. You may need to look into your spam folder.",
+        "Your account has been registered. An e-mail with a verification link has been sent to you. Please click on the link in the e-mail to proceed. You may need to look into your spam folder.",
       );
       // Identify user in PostHog and capture sign-up event
       posthog.identify(usernameInput, {
@@ -167,7 +136,7 @@ export default function Register() {
       )}
       <p className={styles.P}>
         Already have an account?{" "}
-        <Link className={styles.link} href="/api/auth/signin">
+        <Link className={styles.link} href="/auth/signin">
           LOG IN
         </Link>
       </p>
