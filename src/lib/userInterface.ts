@@ -1,18 +1,49 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import { NextApiResponse } from "next";
-import { NextRequest } from "next/server";
+import { fetchAuthQuery, isAuthenticated } from "@/lib/auth-server";
+import { anyApi } from "convex/server";
+
+const toAppUser = (
+  user: {
+    role?: string | null;
+    [key: string]: unknown;
+  } | null,
+) => {
+  if (!user) return null;
+
+  const roleValue = typeof user.role === "string" ? user.role : "";
+
+  return {
+    ...user,
+    role: Boolean(roleValue && roleValue !== "user"),
+    admin: roleValue === "admin",
+  };
+};
 
 export async function getUser(
-  req?: NextRequest | undefined,
-  response?: NextApiResponse | undefined,
+  req?: unknown,
+  response?: unknown,
 ) {
-  if (typeof req !== "undefined" && typeof response !== "undefined") {
-    const session = await auth();
-    return session?.user;
+  const debugAuth = process.env.DEBUG_AUTH === "true";
+  const authed = await isAuthenticated();
+
+  if (debugAuth) {
+    console.log("[auth] isAuthenticated:", authed);
   }
-  const session = await auth();
-  return session?.user;
+
+  if (!authed) return null;
+
+  try {
+    const user = await fetchAuthQuery(anyApi.auth.getAuthUser);
+    if (debugAuth) {
+      console.log("[auth] getAuthUser result:", user);
+    }
+    return toAppUser(user);
+  } catch (error) {
+    if (debugAuth) {
+      console.log("[auth] getAuthUser error:", error);
+    }
+    return null;
+  }
 }
 
 export async function requireAdmin() {

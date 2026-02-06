@@ -2,13 +2,12 @@
 "use no memo";
 
 import styles from "./loggedinbutton.module.css";
-import styles2 from "./login.module.css";
 import React, { useEffect, useState } from "react";
 import Dropdown from "../layout/dropdown";
-import { signIn, signOut } from "next-auth/react";
 import Link from "next/link";
-import { useSelectedLayoutSegments } from "next/navigation";
+import { useRouter, useSelectedLayoutSegments } from "next/navigation";
 import Button from "../layout/button";
+import { authClient } from "@/lib/auth-client";
 
 function themeToLightOrDark(
   theme: string | null,
@@ -68,8 +67,9 @@ function useDarkLight() {
 }
 
 export function LogInButton() {
+  const router = useRouter();
   return (
-    <Button onClick={() => signIn()} data-cy="login-button">
+    <Button onClick={() => router.push("/auth/signin")} data-cy="login-button">
       Log in
     </Button>
   );
@@ -91,6 +91,7 @@ export function LoggedInButton({
 }) {
   //const { data: session } = useSession();
   const controls = useDarkLight();
+  const router = useRouter();
 
   const segment = useSelectedLayoutSegments();
   if (course_id === "segment") {
@@ -106,7 +107,7 @@ export function LoggedInButton({
 
   if (user === undefined)
     return (
-      <Button onClick={() => signIn()} data-cy="login-button">
+      <Button onClick={() => router.push("/auth/signin")} data-cy="login-button">
         Log in
       </Button>
     );
@@ -184,7 +185,10 @@ export function LoggedInButton({
         ) : null}
         <div
           className={styles.profile_dropdown_button}
-          onClick={() => signOut()}
+          onClick={async () => {
+            await authClient.signOut();
+            window.location.href = "/";
+          }}
           data-cy="user-logout"
         >
           Log out

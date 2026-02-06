@@ -1,21 +1,26 @@
-import { auth, signIn } from "@/auth";
-
 import React from "react";
 import { redirect } from "next/navigation";
 import { LoginOptions } from "./login_options";
-import { CallbackRouteError } from "@auth/core/errors";
+import { isAuthenticated } from "@/lib/auth-server";
 
 export interface ProviderProps {
   id: string;
   name: string;
-  type: string;
-  signinUrl: string;
-  callbackUrl: string;
-  action: () => void;
 }
 
-export default async function Page({}) {
-  const session = await auth();
+const getEnv = (...keys: string[]) =>
+  keys.map((key) => process.env[key]).find((value) => value);
+
+const hasProvider = (idKeys: string[], secretKeys: string[]) =>
+  Boolean(getEnv(...idKeys) && getEnv(...secretKeys));
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: Promise<{ callbackUrl?: string | string[] }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const session = await isAuthenticated();
 
   // If the user is already logged in, redirect.
   // Note: Make sure not to redirect to the same page
@@ -24,76 +29,47 @@ export default async function Page({}) {
     redirect("/");
   }
 
-  const signin_action = async (
-    state: { error: string | null },
-    formData: FormData,
-  ): Promise<{ error: string | null }> => {
-    "use server";
-    try {
-      await signIn("credentials", formData);
-      return { error: null };
-    } catch (error) {
-      if ((error as CallbackRouteError)["cause"]) {
-        return {
-          error:
-            (error as CallbackRouteError)["cause"]?.err?.message ||
-            "Sign in error.",
-        };
-      }
-      if ((error as Error).message === "NEXT_REDIRECT") {
-        redirect("/");
-      }
+  const providers: ProviderProps[] = [];
 
-      return { error: "Unknown error" };
-    }
-  };
+  if (
+    hasProvider(
+      ["FACEBOOK_CLIENT_ID", "AUTH_FACEBOOK_ID"],
+      ["FACEBOOK_CLIENT_SECRET", "AUTH_FACEBOOK_SECRET"],
+    )
+  ) {
+    providers.push({ id: "facebook", name: "Facebook" });
+  }
 
-  let providers: ProviderProps[] = [
-    {
-      id: "facebook",
-      name: "Facebook",
-      type: "oauth",
-      signinUrl: "http://localhost:3000/api/auth/signin/facebook",
-      callbackUrl: "http://localhost:3000/api/auth/callback/facebook",
-      action: async () => {
-        "use server";
-        await signIn("facebook");
-      },
-    },
-    {
-      id: "github",
-      name: "GitHub",
-      type: "oauth",
-      signinUrl: "http://localhost:3000/api/auth/signin/github",
-      callbackUrl: "http://localhost:3000/api/auth/callback/github",
-      action: async () => {
-        "use server";
-        await signIn("github");
-      },
-    },
-    {
-      id: "discord",
-      name: "Discord",
-      type: "oauth",
-      signinUrl: "http://localhost:3000/api/auth/signin/discord",
-      callbackUrl: "http://localhost:3000/api/auth/callback/discord",
-      action: async () => {
-        "use server";
-        await signIn("discord");
-      },
-    },
-    {
-      id: "google",
-      name: "Google",
-      type: "oauth",
-      signinUrl: "http://localhost:3000/api/auth/signin/google",
-      callbackUrl: "http://localhost:3000/api/auth/callback/google",
-      action: async () => {
-        "use server";
-        await signIn("google");
-      },
-    },
-    //"credentials":{"id":"credentials","name":"Credentials","type":"credentials","signinUrl":"http://localhost:3000/api/auth/signin/credentials","callbackUrl":"http://localhost:3000/api/auth/callback/credentials"}
-  ];
-  return <LoginOptions providers={providers} signin_action={signin_action} />;
+  if (
+    hasProvider(
+      ["GITHUB_CLIENT_ID", "GITHUB_ID", "AUTH_GITHUB_ID"],
+      ["GITHUB_CLIENT_SECRET", "GITHUB_SECRET", "AUTH_GITHUB_SECRET"],
+    )
+  ) {
+    providers.push({ id: "github", name: "GitHub" });
+  }
+
+  if (
+    hasProvider(
+      ["DISCORD_CLIENT_ID", "AUTH_DISCORD_CLIENT_ID"],
+      ["DISCORD_CLIENT_SECRET", "AUTH_DISCORD_CLIENT_SECRET"],
+    )
+  ) {
+    providers.push({ id: "discord", name: "Discord" });
+  }
+
+  if (
+    hasProvider(
+      ["GOOGLE_CLIENT_ID", "AUTH_GOOGLE_ID"],
+      ["GOOGLE_CLIENT_SECRET", "AUTH_GOOGLE_SECRET"],
+    )
+  ) {
+    providers.push({ id: "google", name: "Google" });
+  }
+
+  const callbackUrl = Array.isArray(resolvedSearchParams?.callbackUrl)
+    ? resolvedSearchParams?.callbackUrl[0]
+    : resolvedSearchParams?.callbackUrl || "/";
+
+  return <LoginOptions providers={providers} callbackUrl={callbackUrl} />;
 }

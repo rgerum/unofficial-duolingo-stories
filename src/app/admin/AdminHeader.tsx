@@ -2,7 +2,7 @@ import styles from "./layout.module.css";
 import Link from "next/link";
 import React from "react";
 import { requireAdmin } from "@/lib/userInterface";
-import { LoggedInButtonWrapped } from "@/components/login/LoggedInButtonWrappedServer";
+import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 
 function AdminButton({
   children,
@@ -34,7 +34,7 @@ export default async function AdminHeader() {
       <AdminButton href="/admin/story">Story</AdminButton>
 
       <div style={{ marginLeft: "auto" }}></div>
-      <LoggedInButtonWrapped page={"admin"} />
+      <LoggedInButtonWrappedClient page={"admin"} />
     </nav>
   );
 }

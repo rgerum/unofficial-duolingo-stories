@@ -32,7 +32,7 @@ export default async function sendPasswordAction(email) {
             <br/>
             You have requested to reset your password for 'Unofficial Duolingo Stories'.<br/>
             Use the following link to reset your password.<br/>
-            <a href='${process.env.NEXTAUTH_URL}/auth/reset_pw/${result[0].id}/${identifier}'>Reset Password</a>
+            <a href='${process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL}/auth/reset_pw/${result[0].id}/${identifier}'>Reset Password</a>
             <br/><br/>
             Happy learning.
         `,

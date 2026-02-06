@@ -8,6 +8,9 @@ export async function LoggedInButtonWrapped(props: {
 }) {
   const { course_id, page } = props;
   const user = await getUser();
+  if (process.env.DEBUG_AUTH === "true") {
+    console.log("[auth] LoggedInButtonWrapped user:", user);
+  }
 
   return (
     <>

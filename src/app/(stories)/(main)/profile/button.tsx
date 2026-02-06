@@ -1,8 +1,8 @@
 "use client";
 import styles from "./profile.module.css";
-import { signIn } from "next-auth/react";
 import { GetIcon } from "@/components/icons";
 import React from "react";
+import { authClient } from "@/lib/auth-client";
 
 export default function ProviderButton({
   d,
@@ -11,6 +11,21 @@ export default function ProviderButton({
   d: string;
   value: boolean;
 }) {
+  const handleLink = async () => {
+    const { data, error } = await authClient.linkSocial({
+      provider: d,
+      callbackURL: window.location.href,
+    });
+
+    if (error) {
+      return;
+    }
+
+    if (data?.url) {
+      window.location.href = data.url;
+    }
+  };
+
   return (
     <div className={styles.account}>
       <GetIcon name={d} />
@@ -19,7 +34,7 @@ export default function ProviderButton({
         {value ? (
           <span className={styles.linkedd}>Linked</span>
         ) : (
-          <span className={styles.link} onClick={() => signIn(d)}>
+          <span className={styles.link} onClick={handleLink}>
             Link
           </span>
         )}

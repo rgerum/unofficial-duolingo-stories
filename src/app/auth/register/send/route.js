@@ -49,7 +49,7 @@ async function register({ name, password, email }) {
             <br/>
             You have registered on 'Unofficial Duolingo Stories'.<br/>
             To complete your registration click on the following link.<br/>
-            <a href='${process.env.NEXTAUTH_URL}/auth/activate/${name}/${activation_link}'>Activate account</a>
+            <a href='${process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL}/auth/activate/${name}/${activation_link}'>Activate account</a>
             <br/><br/>
             Happy learning.
         `,
