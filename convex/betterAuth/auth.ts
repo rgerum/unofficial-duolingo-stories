@@ -3,6 +3,7 @@ import { convex } from "@convex-dev/better-auth/plugins";
 import type { GenericCtx } from "@convex-dev/better-auth/utils";
 import type { BetterAuthOptions } from "better-auth";
 import { betterAuth } from "better-auth";
+import { username } from "better-auth/plugins";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import authConfig from "../auth.config";
@@ -27,7 +28,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     emailAndPassword: {
       enabled: true,
     },
-    plugins: [convex({ authConfig })],
+    plugins: [convex({ authConfig }), username()],
   } satisfies BetterAuthOptions;
 };
 
