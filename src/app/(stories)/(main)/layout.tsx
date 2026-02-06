@@ -10,7 +10,7 @@ import styles0 from "./layout.module.css";
 import FooterLinks from "./footer_links";
 import Legal from "@/components/layout/legal";
 import Image from "next/image";
-import { LoggedInButtonWrapped } from "@/components/login/LoggedInButtonWrappedServer";
+import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 
 export const metadata = {
   title:
@@ -89,7 +89,7 @@ export default async function Layout({
               course_data={course_data}
               flag_data={flag_data}
             />
-            <LoggedInButtonWrapped page={"stories"} course_id={"segment"} />
+            <LoggedInButtonWrappedClient page={"stories"} course_id={"segment"} />
           </nav>
         </div>
         <main className={styles0.main_index}>{children}</main>

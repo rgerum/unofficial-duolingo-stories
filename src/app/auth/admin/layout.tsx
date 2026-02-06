@@ -1,15 +1,15 @@
 import React from "react";
-import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { getUser } from "@/lib/userInterface";
 
 export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const user = await getUser();
 
-  if (session?.user?.admin) redirect("/admin");
+  if (user?.admin) redirect("/admin");
 
   return <>{children}</>;
 }

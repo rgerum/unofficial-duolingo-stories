@@ -1,15 +1,35 @@
-import { useSession } from "next-auth/react";
+"use client";
+
 import React from "react";
 import { LogInButton, LoggedInButton } from "@/components/login/loggedinbutton";
+import { authClient } from "@/lib/auth-client";
 
 export function LoggedInButtonWrappedClient(props: {
   course_id?: string;
   page: string;
 }) {
   const { course_id, page } = props;
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
 
-  const user = session?.user;
+  const sessionUser = session?.user as
+    | {
+        role?: string;
+        name?: string | null;
+        image?: string | null;
+      }
+    | undefined;
+
+  const user = sessionUser
+    ? (() => {
+        const roleValue =
+          typeof sessionUser.role === "string" ? sessionUser.role : "";
+        return {
+          ...sessionUser,
+          role: Boolean(roleValue && roleValue !== "user"),
+          admin: roleValue === "admin",
+        };
+      })()
+    : undefined;
 
   return (
     <>

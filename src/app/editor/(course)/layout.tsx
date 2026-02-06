@@ -7,7 +7,7 @@ import {
 
 import SwiperSideBar from "./swipe";
 import LayoutFlag from "./layout_flag";
-import { LoggedInButtonWrapped } from "@/components/login/LoggedInButtonWrappedServer";
+import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 
 export default async function Layout({
   children,
@@ -22,7 +22,7 @@ export default async function Layout({
       <nav className={styles.header_index}>
         <LayoutFlag courses={courses} languages={languages} />
 
-        <LoggedInButtonWrapped page={"editor"} course_id={"segment"} />
+        <LoggedInButtonWrappedClient page={"editor"} course_id={"segment"} />
       </nav>
       <div className={styles.main_overview}>{children}</div>
     </SwiperSideBar>

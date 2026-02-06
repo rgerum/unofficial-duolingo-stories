@@ -10,19 +10,18 @@ import Button from "@/components/layout/button";
 import Input from "@/components/layout/Input";
 import { SpinnerBlue } from "@/components/layout/spinner";
 import { ProviderProps } from "@/app/auth/signin/page";
+import { authClient } from "@/lib/auth-client";
 
 export function LoginOptions(props: {
   providers: ProviderProps[];
-  signin_action: (
-    state: { error: string | null },
-    data: FormData,
-  ) => Promise<{ error: string | null }>;
+  callbackUrl: string;
 }) {
-  const { providers, signin_action } = props;
+  const { providers, callbackUrl } = props;
 
-  const [state, formAction, isPending] = React.useActionState(signin_action, {
+  const [state, setState] = React.useState<{ error: string | null }>({
     error: null,
   });
+  const [isPending, setIsPending] = React.useState(false);
 
   const [usernameInput, usernameInputSetValue] = useInput("");
   const [passwordInput, passwordInputSetValue] = useInput("");
@@ -42,12 +41,42 @@ export function LoginOptions(props: {
     }
   }, [state.error, usernameInput, isPending]);
 
-  const handleOAuthProviderClick = (provider: ProviderProps) => {
+  const handleOAuthProviderClick = async (provider: ProviderProps) => {
     posthog.capture("oauth_provider_clicked", {
       provider: provider.id,
       provider_name: provider.name,
     });
-    provider.action();
+    const { data, error } = await authClient.signIn.social({
+      provider: provider.id,
+      callbackURL: callbackUrl,
+    });
+    if (error) {
+      setState({ error: error.message ?? "Sign in error." });
+      return;
+    }
+    if (data?.url) {
+      window.location.href = data.url;
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsPending(true);
+    setState({ error: null });
+
+    const { error } = await authClient.signIn.username({
+      username: usernameInput,
+      password: passwordInput,
+      callbackURL: callbackUrl,
+    });
+
+    if (error) {
+      setState({ error: error.message ?? "Sign in error." });
+      setIsPending(false);
+      return;
+    }
+
+    window.location.href = callbackUrl;
   };
 
   return (
@@ -61,7 +90,7 @@ export function LoginOptions(props: {
         an independent project.
       </p>
       {state.error && <span className={styles.error}>{state.error}</span>}
-      <form className={styles.Form} action={formAction}>
+      <form className={styles.Form} onSubmit={handleSubmit}>
         <Input
           data-cy="username"
           value={usernameInput}

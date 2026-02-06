@@ -1,3 +1,5 @@
+"use node";
+
 import crypto from "crypto";
 import { createHash } from "node:crypto";
 
