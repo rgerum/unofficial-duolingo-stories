@@ -11,6 +11,37 @@ import authConfig from "../auth.config";
 import { phpbbCheckHash, phpbbHash } from "../lib/phpbb";
 import schema from "./schema";
 
+const getEnv = (...keys: string[]) =>
+  keys.map((key) => process.env[key]).find((value) => value);
+
+const getSocialProvider = (idKeys: string[], secretKeys: string[]) => {
+  const clientId = getEnv(...idKeys);
+  const clientSecret = getEnv(...secretKeys);
+  if (!clientId || !clientSecret) return undefined;
+  return { clientId, clientSecret };
+};
+
+const socialProviders = Object.fromEntries(
+  Object.entries({
+    github: getSocialProvider(
+      ["GITHUB_CLIENT_ID", "GITHUB_ID", "AUTH_GITHUB_ID"],
+      ["GITHUB_CLIENT_SECRET", "GITHUB_SECRET", "AUTH_GITHUB_SECRET"],
+    ),
+    google: getSocialProvider(
+      ["GOOGLE_CLIENT_ID", "AUTH_GOOGLE_ID"],
+      ["GOOGLE_CLIENT_SECRET", "AUTH_GOOGLE_SECRET"],
+    ),
+    discord: getSocialProvider(
+      ["DISCORD_CLIENT_ID", "AUTH_DISCORD_CLIENT_ID"],
+      ["DISCORD_CLIENT_SECRET", "AUTH_DISCORD_CLIENT_SECRET"],
+    ),
+    facebook: getSocialProvider(
+      ["FACEBOOK_CLIENT_ID", "AUTH_FACEBOOK_ID"],
+      ["FACEBOOK_CLIENT_SECRET", "AUTH_FACEBOOK_SECRET"],
+    ),
+  }).filter(([, value]) => value),
+);
+
 // Better Auth Component
 export const authComponent = createClient<DataModel, typeof schema>(
   components.betterAuth,
@@ -23,9 +54,10 @@ export const authComponent = createClient<DataModel, typeof schema>(
 // Better Auth Options
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
   return {
-    appName: "My App",
+    appName: "Duostories",
     baseURL: process.env.SITE_URL,
     secret: process.env.BETTER_AUTH_SECRET,
+    socialProviders,
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
