@@ -12,17 +12,25 @@ export const onCreate = internalMutation({
     const doc = args.doc as { _id: string; userId?: string | null };
     if (doc.userId) return;
 
-    const page = await ctx.runQuery(components.betterAuth.adapter.findMany, {
-      model: "user",
-      where: [],
-      paginationOpts: { cursor: null, numItems: 1000 },
-    });
-
     let maxId = 0;
-    for (const user of page.page) {
-      const parsed = Number.parseInt((user as any).userId, 10);
-      if (!Number.isNaN(parsed) && parsed > maxId) maxId = parsed;
-    }
+    let cursor: string | null = null;
+    do {
+      const page = (await ctx.runQuery(
+        components.betterAuth.adapter.findMany as any,
+        {
+        model: "user",
+        where: [],
+        paginationOpts: { cursor, numItems: 1000 },
+        },
+      )) as any;
+
+      for (const user of page.page as Array<{ userId?: string | null }>) {
+        const parsed = Number.parseInt(user.userId ?? "", 10);
+        if (!Number.isNaN(parsed) && parsed > maxId) maxId = parsed;
+      }
+
+      cursor = page.isDone ? null : page.continueCursor ?? null;
+    } while (cursor);
 
     const nextId = maxId + 1;
     await ctx.runMutation(components.betterAuth.adapter.updateOne, {

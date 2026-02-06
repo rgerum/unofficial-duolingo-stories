@@ -15,16 +15,19 @@ async function story_properties(id: string) {
     await sql`SELECT a.id, a.date, a.user_id FROM story_approval a WHERE a.story_id = ${id};`;
 
   if (approvals.length) {
-    const authUsers = await fetchAuthQuery(
-      components.betterAuth.adapter.findMany,
+    const authUsers = (await fetchAuthQuery(
+      components.betterAuth.adapter.findMany as any,
       {
         model: "user",
         where: [],
         paginationOpts: { cursor: null, numItems: 1000 },
       },
-    );
-    const userById = new Map(
-      authUsers.page.map((user: any) => [Number(user.userId), user]),
+    )) as any;
+    const userById = new Map<number, { name?: string }>(
+      authUsers.page.map((user: { userId?: string | null; name?: string }) => [
+        Number(user.userId),
+        user,
+      ]),
     );
     story.approvals = approvals.map((row: any) => ({
       id: row.id,

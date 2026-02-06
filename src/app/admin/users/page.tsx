@@ -50,14 +50,14 @@ export default async function Page({
   const targetEnd = offset + PER_PAGE;
 
   while (true) {
-    const response = await fetchAuthQuery(
-      components.betterAuth.adapter.findMany,
+    const response = (await fetchAuthQuery(
+      components.betterAuth.adapter.findMany as any,
       {
         model: "user",
         where: [],
         paginationOpts: { cursor, numItems: batchSize },
       },
-    );
+    )) as any;
 
     const batch = response.page as Array<{
       _id: string;

@@ -5,14 +5,14 @@ import { fetchAuthQuery } from "@/lib/auth-server";
 import { components } from "@convex/_generated/api";
 
 async function user_properties(id: string) {
-  const response = await fetchAuthQuery(
-    components.betterAuth.adapter.findMany,
+  const response = (await fetchAuthQuery(
+    components.betterAuth.adapter.findMany as any,
     {
       model: "user",
       where: [],
       paginationOpts: { cursor: null, numItems: 1000 },
     },
-  );
+  )) as any;
 
   const users = response.page as Array<{
     _id: string;
