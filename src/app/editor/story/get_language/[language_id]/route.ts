@@ -11,6 +11,11 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     const { language_id } = await params;
     const token = await getUser();
 
+    if (!token)
+      return new Response("You need to be logged in.", {
+        status: 401,
+      });
+
     if (!isContributor(token))
       return new Response("You need to be a registered contributor.", {
         status: 401,

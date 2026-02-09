@@ -13,6 +13,11 @@ export async function POST(req: Request) {
     const { id, default_text } = DefaultTextSchema.parse(await req.json());
     const token = await getUser();
 
+    if (!token)
+      return new Response("You need to be logged in.", {
+        status: 401,
+      });
+
     if (!isContributor(token))
       return new Response("You need to be a registered contributor.", {
         status: 401,

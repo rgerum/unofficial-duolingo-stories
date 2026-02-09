@@ -141,7 +141,6 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
         adminRoles: ["admin"],
         roles: {
           ...defaultRoles,
-          editor: userAc,
           contributor: userAc,
         },
       }),
