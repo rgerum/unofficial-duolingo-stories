@@ -1,4 +1,4 @@
-import { getUser } from "@/lib/userInterface";
+import { getUser, isContributor } from "@/lib/userInterface";
 import { Metadata } from "next";
 
 export async function generateMetadata({}): Promise<Metadata> {
@@ -16,7 +16,7 @@ export default async function Page({}) {
   if (!user) {
     //redirect("/editor/login")
   }
-  if (!user?.role) {
+  if (!isContributor(user)) {
     //redirect("/editor/not_allowed")
   }
 

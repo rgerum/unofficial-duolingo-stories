@@ -1,14 +1,14 @@
 import { NextResponse, NextRequest } from "next/server";
 import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isContributor } from "@/lib/userInterface";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function POST(req: NextRequest) {
   try {
     const token = await getUser();
 
-    if (!token?.role)
+    if (!token || !isContributor(token))
       return new Response("You need to be a registered contributor.", {
         status: 401,
       });

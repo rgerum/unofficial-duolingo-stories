@@ -1,6 +1,6 @@
 import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isAdmin } from "@/lib/userInterface";
 
 interface LanguageData {
   id?: number;
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const data: LanguageData = await req.json();
   const token = await getUser();
 
-  if (!token?.admin)
+  if (!isAdmin(token))
     return new Response("You need to be a registered admin.", {
       status: 401,
     });

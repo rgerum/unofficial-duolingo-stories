@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter, useSelectedLayoutSegments } from "next/navigation";
 import Button from "../layout/button";
 import { authClient } from "@/lib/auth-client";
+import { isAdmin, isContributor } from "@/lib/userInterface";
 
 function themeToLightOrDark(
   theme: string | null,
@@ -85,7 +86,7 @@ export function LoggedInButton({
   user?: {
     name?: string | null;
     image?: string | null;
-    role?: boolean | null;
+    role?: boolean | string | null;
     admin?: boolean | null;
   };
 }) {
@@ -112,8 +113,8 @@ export function LoggedInButton({
       </Button>
     );
 
-  const isContributor = !!user.role;
-  const isAdmin = !!user.admin;
+  const canContribute = isContributor(user ?? null);
+  const isAdminUser = isAdmin(user ?? null);
 
   return (
     <Dropdown>
@@ -147,7 +148,7 @@ export function LoggedInButton({
                 : "Light/Dark"}
           </div>
         }
-        {isContributor && page !== "stories" ? (
+        {canContribute && page !== "stories" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={stories_link}
@@ -156,7 +157,7 @@ export function LoggedInButton({
             Stories
           </Link>
         ) : null}
-        {isContributor && page !== "editor" ? (
+        {canContribute && page !== "editor" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={editor_link}
@@ -165,7 +166,7 @@ export function LoggedInButton({
             Editor
           </Link>
         ) : null}
-        {isContributor && page !== "docs" ? (
+        {canContribute && page !== "docs" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={"/docs"}
@@ -174,7 +175,7 @@ export function LoggedInButton({
             Docs
           </Link>
         ) : null}
-        {isAdmin && page !== "admin" ? (
+        {isAdminUser && page !== "admin" ? (
           <Link
             className={styles.profile_dropdown_button}
             href={"/admin"}

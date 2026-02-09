@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuid } from "uuid";
 import fs from "fs";
 import { put } from "@vercel/blob";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isContributor } from "@/lib/userInterface";
 
 async function mkdir(folderName: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -32,7 +32,7 @@ async function exists(filename: string): Promise<boolean> {
 export async function POST(req: NextRequest) {
   const token = await getUser();
 
-  if (!token?.role)
+  if (!isContributor(token))
     return new Response("You need to be a registered contributor.", {
       status: 401,
     });

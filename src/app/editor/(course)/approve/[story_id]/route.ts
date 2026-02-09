@@ -1,7 +1,7 @@
 import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isContributor } from "@/lib/userInterface";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function GET(
@@ -10,12 +10,12 @@ export async function GET(
 ) {
   const token = await getUser();
 
-  if (!token || !token.role || !token.id)
+  if (!token || !isContributor(token))
     return new Response("Error not allowed", { status: 401 });
 
   let answer = await set_approve({
     story_id: parseInt((await params).story_id),
-    user_id: parseInt(token.id),
+    user_id: token.userId,
   });
 
   if (answer === undefined)

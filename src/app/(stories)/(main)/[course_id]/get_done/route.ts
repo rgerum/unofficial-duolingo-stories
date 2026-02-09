@@ -7,14 +7,14 @@ export async function GET(
   { params }: { params: Promise<{ course_id: string }> },
 ) {
   const token = await getUser();
-  if (!token || !token?.id)
+  if (!token)
     return new Response("Error not found", {
       status: 404,
     });
 
   let answer = await get_course_done({
     course_id: (await params).course_id,
-    user_id: token.id,
+    user_id: token.userId,
   });
 
   if (answer === undefined)
@@ -30,7 +30,7 @@ async function get_course_done({
   user_id,
 }: {
   course_id: string;
-  user_id: string;
+  user_id: number;
 }) {
   // (SELECT id FROM course WHERE short = ? LIMIT 1)
   const done_query = await sql`SELECT s.id FROM story_done 

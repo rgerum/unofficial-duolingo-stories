@@ -1,13 +1,13 @@
 import { sql } from "@/lib/db";
 import { NextResponse, NextRequest } from "next/server";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isContributor } from "@/lib/userInterface";
 
 export async function POST(req: NextRequest) {
   try {
     const { id, tts_replace } = await req.json();
     const token = await getUser();
 
-    if (!token?.role)
+    if (!isContributor(token))
       return new Response("You need to be a registered contributor.", {
         status: 401,
       });

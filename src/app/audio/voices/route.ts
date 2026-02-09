@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { audio_engines } from "../_lib/audio";
 import { sql } from "@/lib/db";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isAdmin } from "@/lib/userInterface";
 import type { Voice } from "../_lib/audio/types";
 
 export async function GET(_req: NextRequest) {
   const token = await getUser();
 
-  if (!token?.admin)
+  if (!isAdmin(token))
     return new Response("You need to be a registered admin.", { status: 401 });
 
   let voices: Voice[] = [];

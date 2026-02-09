@@ -1,6 +1,6 @@
 import React from "react";
-import { getUser } from "@/lib/userInterface";
-import {redirect} from "next/navigation";
+import { getUser, isContributor } from "@/lib/userInterface";
+import { redirect } from "next/navigation";
 
 export default async function Layout({
   children,
@@ -9,7 +9,7 @@ export default async function Layout({
 }) {
   const user = await getUser();
 
-  if (!user?.role) redirect("/auth/editor");
+  if (!isContributor(user)) redirect("/auth/editor");
 
   return <>{children}</>;
 }

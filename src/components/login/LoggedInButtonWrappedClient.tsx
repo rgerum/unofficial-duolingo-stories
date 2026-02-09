@@ -19,17 +19,7 @@ export function LoggedInButtonWrappedClient(props: {
       }
     | undefined;
 
-  const user = sessionUser
-    ? (() => {
-        const roleValue =
-          typeof sessionUser.role === "string" ? sessionUser.role : "";
-        return {
-          ...sessionUser,
-          role: Boolean(roleValue && roleValue !== "user"),
-          admin: roleValue === "admin",
-        };
-      })()
-    : undefined;
+  const user = sessionUser ? sessionUser : undefined;
 
   return (
     <>
