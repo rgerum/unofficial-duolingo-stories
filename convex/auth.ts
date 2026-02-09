@@ -5,6 +5,16 @@ import { components } from "./_generated/api";
 
 export const { getAuthUser } = authComponent.clientApi();
 
+async function requireContributorOrAdmin(ctx: any) {
+  const identity = (await ctx.auth.getUserIdentity()) as
+    | { role?: string | null }
+    | null;
+  const role = identity?.role ?? null;
+  if (role !== "contributor" && role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+}
+
 export const getCurrentUser = query({
   args: {},
   handler: async (ctx) => {
@@ -18,14 +28,18 @@ export const getCurrentUser = query({
   },
 });
 
-export const getLinkedProvidersByEmail = query({
-  args: {
-    email: v.string(),
-  },
-  handler: async (ctx, args) => {
+export const getLinkedProvidersForCurrentUser = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = (await ctx.auth.getUserIdentity()) as
+      | { email?: string | null }
+      | null;
+    const email = identity?.email?.toLowerCase();
+    if (!email) return [] as string[];
+
     const authUser = await ctx.runQuery(components.betterAuth.adapter.findOne, {
       model: "user",
-      where: [{ field: "email", value: args.email.toLowerCase() }],
+      where: [{ field: "email", value: email }],
     });
 
     if (!authUser?._id) return [] as string[];
@@ -49,6 +63,8 @@ export const getUserNamesByLegacyIds = query({
     legacyIds: v.array(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
+
     const uniqueIds = Array.from(new Set(args.legacyIds));
     if (!uniqueIds.length) return [] as Array<{ legacyId: number; name: string }>;
 

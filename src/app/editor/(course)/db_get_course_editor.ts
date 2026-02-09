@@ -96,7 +96,10 @@ async function getAuthNamesByLegacyId(ids: number[]) {
 export const get_story_list = cache(async (course_id: number) => {
   const data = await sql`
         SELECT s.id, s.name, course_id, s.image, set_id, set_index, s.date, change_date, status, public, todo_count,
-            ARRAY_AGG(a.user_id) AS approvals,
+            COALESCE(
+              ARRAY_AGG(a.user_id) FILTER (WHERE a.user_id IS NOT NULL),
+              ARRAY[]::integer[]
+            ) AS approvals,
             s.author as author_id,
             s.author_change AS author_change_id
         FROM
@@ -131,7 +134,7 @@ export const get_story_list = cache(async (course_id: number) => {
     return {
       ...x,
       approvals: x.approvals
-        ? x.approvals.filter((y: number) => !Number.isNaN(y))
+        ? x.approvals.filter((y: unknown): y is number => typeof y === "number")
         : [],
       author:
         author ||

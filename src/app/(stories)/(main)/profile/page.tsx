@@ -26,10 +26,8 @@ async function getLinkedProviders() {
   if (!user.email) throw new Error("No user email available");
 
   const providersFromAuth = (await fetchAuthQuery(
-    api.auth.getLinkedProvidersByEmail,
-    {
-      email: user.email,
-    },
+    api.auth.getLinkedProvidersForCurrentUser,
+    {},
   )) as string[];
 
   let provider_linked: Record<string, boolean> = {};
