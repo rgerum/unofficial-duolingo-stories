@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isContributor } from "@/lib/userInterface";
 import { z } from "zod";
 
 const AvatarSetSchema = z.object({
@@ -18,7 +18,12 @@ export async function POST(req: Request) {
     );
     const token = await getUser();
 
-    if (!token?.role)
+    if (!token)
+      return new Response("You need to be logged in.", {
+        status: 401,
+      });
+
+    if (!isContributor(token))
       return new Response("You need to be a registered contributor.", {
         status: 401,
       });

@@ -3,6 +3,7 @@ import UserDisplay from "./user_display";
 import { UserSchema } from "./schema";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import { components } from "@convex/_generated/api";
+import { isAdmin, isContributor } from "@/lib/userInterface";
 
 async function user_properties(id: string) {
   const response = (await fetchAuthQuery(
@@ -39,8 +40,8 @@ async function user_properties(id: string) {
     email: match.email ?? "",
     regdate: match.createdAt ? new Date(match.createdAt) : undefined,
     activated: true,
-    role: match.role === "contributor" || match.role === "editor",
-    admin: match.role === "admin",
+    role: isContributor({ role: match.role ?? null }),
+    admin: isAdmin({ role: match.role ?? null }),
   });
 }
 

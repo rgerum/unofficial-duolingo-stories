@@ -1,5 +1,6 @@
 import UserList, { type AdminUserList } from "./user_list";
 import { fetchAuthQuery } from "@/lib/auth-server";
+import { isAdmin, isContributor } from "@/lib/userInterface";
 import { components } from "@convex/_generated/api";
 
 const PER_PAGE = 50;
@@ -86,14 +87,14 @@ export default async function Page({
         if (activatedFilter === "no" && activated) continue;
       }
       if (roleFilter !== "all") {
-        const hasRole = Boolean(user.role && user.role !== "user");
+        const hasRole = isContributor({ role: user.role ?? null });
         if (roleFilter === "yes" && !hasRole) continue;
         if (roleFilter === "no" && hasRole) continue;
       }
       if (adminFilter !== "all") {
-        const isAdmin = user.role === "admin";
-        if (adminFilter === "yes" && !isAdmin) continue;
-        if (adminFilter === "no" && isAdmin) continue;
+        const isAdminUser = isAdmin({ role: user.role ?? null });
+        if (adminFilter === "yes" && !isAdminUser) continue;
+        if (adminFilter === "no" && isAdminUser) continue;
       }
 
       if (total >= targetStart && total < targetEnd) {
@@ -112,8 +113,8 @@ export default async function Page({
     email: user.email ?? "",
     regdate: user.createdAt ? new Date(user.createdAt) : new Date(),
     activated: Boolean(user.emailVerified),
-    role: user.role === "contributor" || user.role === "editor",
-    admin: user.role === "admin",
+    role: isContributor({ role: user.role ?? null }),
+    admin: isAdmin({ role: user.role ?? null }),
   }));
 
   return (

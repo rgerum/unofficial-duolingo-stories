@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
-import { getUser } from "@/lib/userInterface";
+import {getUser, isContributor} from "@/lib/userInterface";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 interface StoryData {
@@ -23,15 +23,14 @@ interface StoryData {
 export async function POST(req: NextRequest) {
   const token = await getUser();
 
-  if (!token?.role)
+  if (!token || !isContributor(token))
     return new Response("You need to be a registered contributor.", {
       status: 401,
     });
 
   let answer = await set_story(await req.json(), {
     username: token.name ?? "",
-    user_id:
-      typeof token.id === "string" ? parseInt(token.id) : (token.id ?? 0),
+    user_id: token.userId,
   });
 
   if (answer === undefined)

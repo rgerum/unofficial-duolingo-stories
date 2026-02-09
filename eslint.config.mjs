@@ -13,6 +13,9 @@ const eslintConfig = defineConfig([
     // Generated service worker files
     "public/sw.js",
     "public/workbox-*.js",
+    // Convex generated files
+    "convex/_generated/**",
+    "convex/**/_generated/**",
   ]),
   {
     rules: {

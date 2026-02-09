@@ -1,6 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isAdmin } from "@/lib/userInterface";
 
 export default async function Layout({
   children,
@@ -9,7 +9,7 @@ export default async function Layout({
 }) {
   const user = await getUser();
 
-  if (user?.admin) redirect("/admin");
+  if (isAdmin(user)) redirect("/admin");
 
   return <>{children}</>;
 }

@@ -1,7 +1,7 @@
 import { sql } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isAdmin } from "@/lib/userInterface";
 
 interface CourseData {
   id?: number;
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   const data: CourseData = await req.json();
   const token = await getUser();
 
-  if (!token?.admin)
+  if (!isAdmin(token))
     return new Response("You need to be a registered admin.", { status: 401 });
 
   const answer = await set_course(data);

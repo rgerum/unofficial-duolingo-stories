@@ -2,7 +2,7 @@ import { sql } from "@/lib/db";
 import Header from "../header";
 import Profile from "./profile";
 import getUserId from "@/lib/getUserId";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isAdmin, isContributor } from "@/lib/userInterface";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -39,8 +39,8 @@ async function getLinkedProviders() {
     provider_linked[p.provider] = true;
   }
   let role = [];
-  if (user.admin) role.push("Admin");
-  if (user.role) role.push("Contributor");
+  if (isAdmin(user)) role.push("Admin");
+  if (isContributor(user)) role.push("Contributor");
 
   return {
     providers,

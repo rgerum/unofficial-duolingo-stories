@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuid } from "uuid";
 import fs from "fs";
 import { audio_engines } from "../_lib/audio";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isContributor } from "@/lib/userInterface";
 import type { SynthesisResult } from "../_lib/audio/types";
 import { getPostHogClient } from "@/lib/posthog-server";
 
@@ -34,7 +34,7 @@ async function exists(filename: string): Promise<boolean> {
 export async function POST(req: NextRequest) {
   const token = await getUser();
 
-  if (!token?.role)
+  if (!token || !isContributor(token))
     return new Response("You need to be a registered contributor.", {
       status: 401,
     });
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
   // Track audio creation event server-side
   const posthog = getPostHogClient();
   posthog.capture({
-    distinctId: token.name || `user_${token.id}`,
+    distinctId: token.name || `user_${token.userId}`,
     event: "audio_created",
     properties: {
       story_id: id,

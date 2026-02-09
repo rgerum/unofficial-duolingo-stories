@@ -1,7 +1,7 @@
 import { get_course_data, get_story_list } from "../../db_get_course_editor";
 import { notFound, redirect } from "next/navigation";
 import EditList from "../../edit_list";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isContributor } from "@/lib/userInterface";
 import { Metadata } from "next";
 
 export async function generateMetadata({
@@ -31,7 +31,7 @@ export default async function Page({
   if (!user) {
     //redirect("/editor/login");
   }
-  if (!user?.role) {
+  if (!isContributor(user)) {
     //redirect("/editor/not_allowed");
   }
 

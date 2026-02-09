@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { sql } from "@/lib/db";
-import { getUser } from "@/lib/userInterface";
+import { getUser, isContributor } from "@/lib/userInterface";
 
 interface RouteParams {
   params: Promise<{ image_id: string }>;
@@ -11,7 +11,12 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     const { image_id } = await params;
     const token = await getUser();
 
-    if (!token?.role)
+    if (!token)
+      return new Response("You need to be logged in.", {
+        status: 401,
+      });
+
+    if (!isContributor(token))
       return new Response("You need to be a registered contributor.", {
         status: 401,
       });
