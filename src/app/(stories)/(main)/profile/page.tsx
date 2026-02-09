@@ -1,8 +1,8 @@
-import { sql } from "@/lib/db";
 import Header from "../header";
 import Profile from "./profile";
-import getUserId from "@/lib/getUserId";
+import { fetchAuthQuery } from "@/lib/auth-server";
 import { getUser, isAdmin, isContributor } from "@/lib/userInterface";
+import { api } from "@convex/_generated/api";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -23,20 +23,23 @@ async function getLinkedProviders() {
   let providers_base = ["facebook", "github", "google", "discord"];
   const user = await getUser();
   if (!user) return undefined;
-  let user_id = await getUserId();
-  if (!user_id) throw new Error("No user id provided");
+  if (!user.email) throw new Error("No user email available");
 
-  const req2 =
-    await sql`SELECT provider FROM accounts WHERE "userId" = ${user_id}`;
+  const providersFromAuth = (await fetchAuthQuery(
+    api.auth.getLinkedProvidersByEmail,
+    {
+      email: user.email,
+    },
+  )) as string[];
 
   let provider_linked: Record<string, boolean> = {};
   for (let p of providers_base) {
     provider_linked[p] = false;
   }
   let providers: string[] = [];
-  for (let p of req2) {
-    providers.push(p.provider as string);
-    provider_linked[p.provider] = true;
+  for (let provider of providersFromAuth) {
+    providers.push(provider);
+    provider_linked[provider] = true;
   }
   let role = [];
   if (isAdmin(user)) role.push("Admin");
