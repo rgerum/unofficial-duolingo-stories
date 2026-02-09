@@ -1,5 +1,7 @@
 import { cache } from "react";
 import { sql } from "@/lib/db";
+import { fetchAuthQuery } from "@/lib/auth-server";
+import { api } from "@convex/_generated/api";
 import { z } from "zod";
 
 export const LanguageSchema = z.object({
@@ -77,39 +79,75 @@ export const StoryListDataSchema = z.object({
 });
 export type StoryListDataProps = z.infer<typeof StoryListDataSchema>;
 
-export const get_story_list_data = cache(async () => {
+async function getAuthNamesByLegacyId(ids: number[]) {
+  const authorMap = new Map<number, string>();
+  if (!ids.length) return authorMap;
+
+  const rows = (await fetchAuthQuery(api.auth.getUserNamesByLegacyIds, {
+    legacyIds: ids,
+  })) as Array<{ legacyId: number; name: string }>;
+
+  for (const row of rows) {
+    authorMap.set(row.legacyId, row.name);
+  }
+  return authorMap;
+}
+
+export const get_story_list = cache(async (course_id: number) => {
   const data = await sql`
         SELECT s.id, s.name, course_id, s.image, set_id, set_index, s.date, change_date, status, public, todo_count,
-            ARRAY_AGG(a.user_id) AS approvals,
-            u1.name as author,
-            u2.name AS author_change
+            COALESCE(
+              ARRAY_AGG(a.user_id) FILTER (WHERE a.user_id IS NOT NULL),
+              ARRAY[]::integer[]
+            ) AS approvals,
+            s.author as author_id,
+            s.author_change AS author_change_id
         FROM
             story s
-        LEFT JOIN users u1 ON s.author = u1.id
-        LEFT JOIN users u2 ON s.author_change = u2.id
         LEFT JOIN
             story_approval a ON s.id = a.story_id
         WHERE
-            not deleted
+            not deleted AND course_id = ${course_id}
         GROUP BY
-            s.id, u1.name, u2.name
+            s.id
         ORDER BY
-            course_id, set_id, set_index
+            set_id, set_index
         `;
-  const data2 = data.map((x) => {
-    return { ...x, approvals: x.approvals ? x.approvals.filter((y: number) => !Number.isNaN(y)) : [] };
-  });
-  const look_up: Record<number, StoryListDataProps[]> = {};
-  for (const story of z.array(StoryListDataSchema).parse(data2)) {
-    if (!look_up[story.course_id]) look_up[story.course_id] = [];
-    look_up[story.course_id].push(story);
-  }
-  return look_up;
-});
 
-export const get_story_list = cache(async (course_id: number) => {
-  const data = await get_story_list_data();
-  return data[course_id] || [];
+  const authorIds = Array.from(
+    new Set(
+      data
+        .flatMap((row) => [row.author_id, row.author_change_id])
+        .filter((id): id is number => typeof id === "number"),
+    ),
+  );
+  const authNames = await getAuthNamesByLegacyId(authorIds);
+
+  const stories = data.map((x) => {
+    const author =
+      typeof x.author_id === "number" ? authNames.get(x.author_id) : undefined;
+    const authorChange =
+      typeof x.author_change_id === "number"
+        ? authNames.get(x.author_change_id)
+        : null;
+
+    return {
+      ...x,
+      approvals: x.approvals
+        ? x.approvals.filter((y: unknown): y is number => typeof y === "number")
+        : [],
+      author:
+        author ||
+        (typeof x.author_id === "number" ? `User ${x.author_id}` : "Unknown"),
+      author_change:
+        authorChange ||
+        (typeof x.author_change_id === "number"
+          ? `User ${x.author_change_id}`
+          : null),
+    };
+  });
+
+  return z.array(StoryListDataSchema).parse(stories);
 });
 
 export const CourseImportSchema = z.object({
