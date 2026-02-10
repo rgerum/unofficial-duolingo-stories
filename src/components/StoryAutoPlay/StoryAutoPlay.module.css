@@ -1,0 +1,27 @@
+.container {
+  /* Container for the auto-play story */
+}
+
+.main {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.story {
+  padding-top: 85px;
+  user-select: none;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.story_rtl {
+  direction: rtl;
+}
+
+.spacer_small_top {
+  height: 10vh;
+}
+
+.spacer_small {
+  height: 20vh;
+}

@@ -1,7 +1,10 @@
 .row:hover {
   background: var(--body-background);
   filter: brightness(0.9);
-  transition: filter .1s ease-in,color .1s ease-in,background-color .1s ease-in;
+  transition:
+    filter 0.1s ease-in,
+    color 0.1s ease-in,
+    background-color 0.1s ease-in;
 }
 
 .warning {
@@ -11,7 +14,6 @@
   margin: 10px 10px;
   background: var(--button-inactive-background);
 }
-
 
 @media (max-width: 1000px) {
   .thead {

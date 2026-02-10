@@ -1,0 +1,20 @@
+.story {
+  padding-top: 85px;
+  user-select: none;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.story_rtl {
+  direction: rtl;
+}
+
+.error {
+  color: red;
+  padding: 8px;
+  margin: 8px 0;
+}
+
+.challenge_prompt {
+  margin: 16px 0;
+}

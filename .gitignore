@@ -59,3 +59,5 @@ old/
 .vercel
 
 *storybook.log
+next-env.d.ts
+tsconfig.tsbuildinfo

@@ -21,6 +21,7 @@
   margin-top: 7px;
   text-transform: none;
   overflow-y: auto;
+  z-index: 1;
 }
 
 @media (max-width: 1080px) {
@@ -29,7 +30,7 @@
   }
 }
 
-.dropdown > :last-child > {
+.dropdown > :last-child > * {
   height: 39px;
 }
 
