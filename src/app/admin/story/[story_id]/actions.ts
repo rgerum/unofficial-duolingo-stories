@@ -3,7 +3,7 @@
 import { sql } from "@/lib/db";
 import { revalidateTag } from "next/cache";
 import { StorySchema, type Story } from "./schema";
-import { mirrorCourse } from "@/lib/lookupTableMirror";
+import { mirrorCourse, mirrorStory } from "@/lib/lookupTableMirror";
 import { getUser, isAdmin } from "@/lib/userInterface";
 
 async function requireAdmin() {
@@ -38,6 +38,10 @@ export async function togglePublished(
   await requireAdmin();
 
   await sql`UPDATE story SET ${sql({ public: !currentPublic }, "public")} WHERE id = ${id};`;
+  const storyRow = (await sql`SELECT * FROM story WHERE id = ${id} LIMIT 1`)[0];
+  if (storyRow) {
+    await mirrorStory(storyRow, `story:${storyRow.id}:toggle_published`);
+  }
 
   await sql`UPDATE course
 SET count = (

@@ -10,6 +10,8 @@ Scope:
 - `localization`
 - `course`
 - `avatar_mapping`
+- `story`
+- `story_content`
 
 Status values:
 - `Yes`: Runtime write path includes Convex mirror call.
@@ -32,6 +34,13 @@ Status values:
 | `course` | `src/app/editor/story/set_story/route.ts` | `UPDATE course todo_count` | Story save recalculates aggregate TODO count for the course. | `mirrorCourse(...)` | Yes |
 | `course` | `src/app/editor/(course)/approve/[story_id]/route.ts` | `UPDATE course count/contributors/contributors_past` | Approval flow updates publication totals and active/past contributor lists for the affected course. | `mirrorCourse(...)` | Yes |
 | `course` | `src/app/admin/story/[story_id]/actions.ts` | `UPDATE course count` | Admin publish toggle recalculates public story count for the story's course. | `mirrorCourse(...)` | Yes |
+| `story` | `src/app/editor/story/set_story/route.ts` | `UPDATE story` | Contributor saves story metadata and content (`text`, `json`) and updates status-related fields. | `mirrorStory(...)` | Yes |
+| `story` | `src/app/editor/story/delete_story/route.ts` | `UPDATE story deleted/public` | Contributor soft-deletes story and unpublishes it. | `mirrorStory(...)` | Yes |
+| `story` | `src/app/editor/(course)/course/[course_id]/import/send/[story_id]/route.ts` | `INSERT INTO story` | Contributor imports an existing story into another course. | `mirrorStory(...)` | Yes |
+| `story` | `src/app/editor/(course)/approve/[story_id]/route.ts` | `UPDATE story status/public/date_published` | Approval toggles update review status and auto-publish completed set stories. | `mirrorStory(...)` | Yes |
+| `story` | `src/app/admin/story/[story_id]/actions.ts` | `UPDATE story public` | Admin publish toggle directly flips visibility. | `mirrorStory(...)` | Yes |
+| `story_content` | `src/app/editor/story/set_story/route.ts` | _Not yet split in SQL_ | Mirrors heavy story payload (`text`, `json`) into Convex `story_content`. | `mirrorStory(..., { mirrorContent: true })` | Yes |
+| `story_content` | `src/app/editor/(course)/course/[course_id]/import/send/[story_id]/route.ts` | _Not yet split in SQL_ | Mirrors imported story payload into Convex `story_content`. | `mirrorStory(..., { mirrorContent: true })` | Yes |
 
 ## Backfill Paths
 
@@ -44,6 +53,8 @@ Status values:
 | `localization` | `scripts/migrate-lookup-tables.ts` | Backfill | Bulk copy from Postgres `localization` to Convex. | `api.lookupTables.upsertLocalization` | Backfill |
 | `course` | `scripts/migrate-lookup-tables.ts` | Backfill | Bulk copy from Postgres `course` to Convex. | `api.lookupTables.upsertCourse` | Backfill |
 | `avatar_mapping` | `scripts/migrate-lookup-tables.ts` | Backfill | Bulk copy from Postgres `avatar_mapping` to Convex. | `api.lookupTables.upsertAvatarMapping` | Backfill |
+| `story` | `scripts/migrate-story-tables.ts` | Backfill | Bulk copy story metadata from Postgres `story` to Convex `stories`. | `api.storyTables.upsertStory` | Backfill |
+| `story_content` | `scripts/migrate-story-tables.ts` | Backfill | Bulk copy heavy payload (`text`, `json`) from Postgres `story` to Convex `story_content`. | `api.storyTables.upsertStoryContent` | Backfill |
 
 ## Notes
 

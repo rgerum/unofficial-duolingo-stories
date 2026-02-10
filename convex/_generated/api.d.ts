@@ -15,6 +15,7 @@ import type * as http from "../http.js";
 import type * as lib_phpbb from "../lib/phpbb.js";
 import type * as lookupTables from "../lookupTables.js";
 import type * as roles from "../roles.js";
+import type * as storyTables from "../storyTables.js";
 
 import type {
   ApiFromModules,
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   "lib/phpbb": typeof lib_phpbb;
   lookupTables: typeof lookupTables;
   roles: typeof roles;
+  storyTables: typeof storyTables;
 }>;
 
 /**

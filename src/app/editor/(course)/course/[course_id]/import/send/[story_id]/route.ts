@@ -2,6 +2,7 @@ import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
 import { NextResponse } from "next/server";
 import { getUser, isContributor } from "@/lib/userInterface";
+import { mirrorStory } from "@/lib/lookupTableMirror";
 
 export async function GET(
   req: Request,
@@ -43,7 +44,7 @@ async function set_import(
   data["author"] = user_id;
   data["course_id"] = courseId;
 
-  let data2 = (
+  const data2 = (
     await sql`INSERT INTO story ${sql(data, [
       "duo_id",
       "name",
@@ -54,8 +55,12 @@ async function set_import(
       "course_id",
       "text",
       "json",
-    ])} RETURNING id, text, name, course_id;`
+    ])} RETURNING *;`
   )[0];
+
+  if (data2) {
+    await mirrorStory(data2, `story:${data2.id}:import`, { mirrorContent: true });
+  }
 
   try {
     await upload_github(

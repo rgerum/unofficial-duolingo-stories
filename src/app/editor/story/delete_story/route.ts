@@ -3,6 +3,7 @@ import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { mirrorStory } from "@/lib/lookupTableMirror";
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,6 +35,9 @@ async function delete_story(
 ) {
   await sql`UPDATE story SET deleted = true, public = false WHERE id = ${id};`;
   let data = (await sql`SELECT * FROM story WHERE id = ${id};`)[0];
+  if (data) {
+    await mirrorStory(data, `story:${data.id}:delete`);
+  }
   await upload_github(
     data["id"],
     data["course_id"],
