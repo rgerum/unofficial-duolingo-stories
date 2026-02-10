@@ -1,4 +1,5 @@
 import { mutation } from "./_generated/server";
+import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 
 const storyValidator = {
@@ -14,11 +15,9 @@ const storyValidator = {
   date: v.optional(v.number()),
   change_date: v.optional(v.number()),
   date_published: v.optional(v.number()),
-  text: v.string(),
   public: v.boolean(),
   legacyImageId: v.optional(v.string()),
   legacyCourseId: v.number(),
-  json: v.optional(v.any()),
   status: v.union(v.literal("draft"), v.literal("feedback"), v.literal("finished")),
   deleted: v.boolean(),
   todo_count: v.number(),
@@ -78,11 +77,9 @@ export const upsertStory = mutation({
       date: args.story.date,
       change_date: args.story.change_date,
       date_published: args.story.date_published,
-      text: args.story.text,
       public: args.story.public,
       imageId: image?._id,
       courseId: course._id,
-      json: args.story.json,
       status: args.story.status,
       deleted: args.story.deleted,
       todo_count: args.story.todo_count,
@@ -139,5 +136,36 @@ export const upsertStoryContent = mutation({
 
     const docId = await ctx.db.insert("story_content", doc);
     return { inserted: true, docId };
+  },
+});
+
+export const stripStoryHeavyFieldsBatch = mutation({
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  returns: v.object({
+    updated: v.number(),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const page = await ctx.db
+      .query("stories")
+      .order("asc")
+      .paginate(args.paginationOpts);
+
+    let updated = 0;
+    for (const row of page.page) {
+      if (!("text" in row) && !("json" in row)) continue;
+      const { _id, _creationTime, text, json, ...rest } = row as any;
+      await ctx.db.replace(_id, rest);
+      updated += 1;
+    }
+
+    return {
+      updated,
+      isDone: page.isDone,
+      continueCursor: page.continueCursor,
+    };
   },
 });

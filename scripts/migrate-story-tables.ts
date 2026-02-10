@@ -93,7 +93,16 @@ function toTimestampMs(value: string | Date | null): number | undefined {
 function parseJsonLike(value: unknown): unknown {
   if (typeof value !== "string") return value;
   try {
-    return JSON.parse(value);
+    const parsed = JSON.parse(value);
+    // Some legacy rows were stored double-encoded (JSON string of JSON string).
+    if (typeof parsed === "string") {
+      try {
+        return JSON.parse(parsed);
+      } catch {
+        return parsed;
+      }
+    }
+    return parsed;
   } catch {
     return value;
   }
@@ -111,14 +120,9 @@ function mapStoryMutation(row: StoryRow | StoryContentRow) {
     date: toTimestampMs(row.date),
     change_date: toTimestampMs(row.change_date),
     date_published: toTimestampMs(row.date_published),
-    text: row.text ?? "",
     public: row.public ?? false,
     legacyImageId: optionalString(row.image),
     legacyCourseId: row.course_id as number,
-    json:
-      row.json === null || row.json === undefined
-        ? undefined
-        : parseJsonLike(row.json),
     status: row.status ?? "draft",
     deleted: row.deleted ?? false,
     todo_count: row.todo_count ?? 0,
@@ -173,6 +177,10 @@ async function migrateStoryContent() {
     `;
     if (!rows.length) break;
     for (const row of rows) {
+      // Ensure parent story exists before content write to avoid expected
+      // "Missing story" errors when running content-only backfills.
+      await upsertStoryRow(row);
+
       const parsedJson = parseJsonLike(row.json);
       if (parsedJson === undefined || parsedJson === null) continue;
       try {
@@ -182,22 +190,34 @@ async function migrateStoryContent() {
             text: row.text ?? "",
             json: parsedJson,
             lastUpdated:
-              toTimestampMs(row.change_date) ?? toTimestampMs(row.date) ?? Date.now(),
+            toTimestampMs(row.change_date) ?? toTimestampMs(row.date) ?? Date.now(),
           },
         });
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        if (!message.includes(`Missing story for legacy id ${row.id}`)) throw error;
+        // Be resilient to any content write failure by ensuring parent story exists
+        // and then retrying once.
+        const firstError = error instanceof Error ? error.message : String(error);
+        console.warn(
+          `upsertStoryContent failed for story ${row.id}; attempting metadata repair + retry: ${firstError}`,
+        );
         await upsertStoryRow(row);
-        await client.mutation(api.storyTables.upsertStoryContent, {
-          storyContent: {
-            legacyStoryId: row.id,
-            text: row.text ?? "",
-            json: parsedJson,
-            lastUpdated:
-              toTimestampMs(row.change_date) ?? toTimestampMs(row.date) ?? Date.now(),
-          },
-        });
+        try {
+          await client.mutation(api.storyTables.upsertStoryContent, {
+            storyContent: {
+              legacyStoryId: row.id,
+              text: row.text ?? "",
+              json: parsedJson,
+              lastUpdated:
+                toTimestampMs(row.change_date) ?? toTimestampMs(row.date) ?? Date.now(),
+            },
+          });
+        } catch (retryError) {
+          const retryMessage =
+            retryError instanceof Error ? retryError.message : String(retryError);
+          throw new Error(
+            `story_content upsert failed for legacy story ${row.id} after metadata repair. first=${firstError} retry=${retryMessage}`,
+          );
+        }
       }
     }
     total += rows.length;
