@@ -27,11 +27,7 @@ if (!convexUrl) {
 const convex = new ConvexHttpClient(convexUrl);
 
 export const get_course_data = unstable_cache(
-  async () =>
-    (await convex.query(
-      (api as any).landing.getPublicCourseList,
-      {},
-    )) as CourseData[],
+  async () => await convex.query(api.landing.getPublicCourseList, {}),
   ["get_course_data_v2_convex_ids"],
   { tags: ["course_data"], revalidate: 3600 },
 );

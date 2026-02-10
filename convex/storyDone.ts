@@ -1,12 +1,15 @@
 import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 
+const storyDoneInputValidator = v.object({
+  legacyStoryId: v.number(),
+  legacyUserId: v.optional(v.number()),
+  time: v.optional(v.number()),
+});
+
 export const recordStoryDone = mutation({
-  args: {
-    legacyStoryId: v.number(),
-    legacyUserId: v.optional(v.number()),
-    time: v.optional(v.number()),
-  },
+  args: storyDoneInputValidator.fields,
   returns: v.object({
     inserted: v.boolean(),
     docId: v.id("story_done"),
@@ -20,28 +23,58 @@ export const recordStoryDone = mutation({
       throw new Error(`Missing story for legacy id ${args.legacyStoryId}`);
     }
 
-    // Keep one done row per (user, story) for logged-in users.
-    if (typeof args.legacyUserId === "number") {
-      const existing = await ctx.db
-        .query("story_done")
-        .withIndex("by_user_and_story", (q) =>
-          q.eq("legacyUserId", args.legacyUserId).eq("storyId", story._id),
-        )
-        .unique();
-      if (existing) {
-        await ctx.db.patch(existing._id, {
-          time: args.time ?? Date.now(),
-        });
-        return { inserted: false, docId: existing._id };
-      }
-    }
-
     const docId = await ctx.db.insert("story_done", {
       storyId: story._id,
       legacyUserId: args.legacyUserId,
       time: args.time ?? Date.now(),
     });
     return { inserted: true, docId };
+  },
+});
+
+export const recordStoryDoneBatch = mutation({
+  args: {
+    rows: v.array(v.object(storyDoneInputValidator.fields)),
+  },
+  returns: v.object({
+    inserted: v.number(),
+    missingStories: v.array(v.number()),
+  }),
+  handler: async (ctx, args) => {
+    const uniqueLegacyStoryIds = Array.from(
+      new Set(args.rows.map((row) => row.legacyStoryId)),
+    );
+
+    const storyByLegacyId = new Map<number, Id<"stories">>();
+    for (const legacyStoryId of uniqueLegacyStoryIds) {
+      const story = await ctx.db
+        .query("stories")
+        .withIndex("by_legacy_id", (q) => q.eq("legacyId", legacyStoryId))
+        .unique();
+      if (!story) continue;
+      storyByLegacyId.set(legacyStoryId, story._id);
+    }
+
+    let inserted = 0;
+    const missingStories: Array<number> = [];
+    for (const row of args.rows) {
+      const storyId = storyByLegacyId.get(row.legacyStoryId);
+      if (!storyId) {
+        missingStories.push(row.legacyStoryId);
+        continue;
+      }
+      await ctx.db.insert("story_done", {
+        storyId,
+        legacyUserId: row.legacyUserId,
+        time: row.time ?? Date.now(),
+      });
+      inserted += 1;
+    }
+
+    return {
+      inserted,
+      missingStories: Array.from(new Set(missingStories)),
+    };
   },
 });
 
@@ -58,19 +91,23 @@ export const getDoneStoryIdsForCourse = query({
       .unique();
     if (!course) return [];
 
+    const courseStories = await ctx.db
+      .query("stories")
+      .withIndex("by_course", (q) => q.eq("courseId", course._id))
+      .collect();
+
     const doneRows = await ctx.db
       .query("story_done")
       .withIndex("by_user", (q) => q.eq("legacyUserId", args.legacyUserId))
       .collect();
+    const doneStoryIds = new Set(doneRows.map((row) => row.storyId));
 
-    const result = new Set<number>();
-    for (const row of doneRows) {
-      const story = await ctx.db.get(row.storyId);
-      if (!story) continue;
-      if (story.courseId !== course._id) continue;
+    const result: Array<number> = [];
+    for (const story of courseStories) {
+      if (!doneStoryIds.has(story._id)) continue;
       if (typeof story.legacyId !== "number") continue;
-      result.add(story.legacyId);
+      result.push(story.legacyId);
     }
-    return Array.from(result.values());
+    return result;
   },
 });

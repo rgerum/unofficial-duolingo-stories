@@ -313,14 +313,17 @@ export async function mirrorStory(
     row.status === "draft" || row.status === "feedback" || row.status === "finished"
       ? row.status
       : "draft";
+  const legacyStoryId = row.id;
+  const storyName = row.name;
+  const legacyCourseId = row.course_id;
 
   await retryMirror(
     () =>
-      fetchAuthMutation((api as any).storyTables.upsertStory, {
+      fetchAuthMutation(api.storyTables.upsertStory, {
         story: {
-          legacyId: row.id,
+          legacyId: legacyStoryId,
           duo_id: optionalString(row.duo_id),
-          name: row.name,
+          name: storyName,
           set_id: optionalNumber(row.set_id),
           set_index: optionalNumber(row.set_index),
           authorId: optionalNumber(row.author),
@@ -330,7 +333,7 @@ export async function mirrorStory(
           date_published: optionalTimestampMs(row.date_published),
           public: row.public ?? false,
           legacyImageId: optionalString(row.image),
-          legacyCourseId: row.course_id,
+          legacyCourseId,
           status,
           deleted: row.deleted ?? false,
           todo_count: row.todo_count ?? 0,
@@ -356,13 +359,15 @@ export async function mirrorStoryContent(row: StoryRow, operationKey: string) {
       `Convex mirror rejected missing story content json for ${operationKey}`,
     );
   }
+  const legacyStoryId = row.id;
+  const storyText = row.text;
 
   return retryMirror(
     () =>
-      fetchAuthMutation((api as any).storyTables.upsertStoryContent, {
+      fetchAuthMutation(api.storyTables.upsertStoryContent, {
         storyContent: {
-          legacyStoryId: row.id,
-          text: row.text,
+          legacyStoryId,
+          text: storyText,
           json: jsonValue,
           lastUpdated:
             optionalTimestampMs(row.change_date) ??
@@ -387,10 +392,11 @@ export async function mirrorStoryDone(
     throw new Error(`Convex mirror rejected invalid story_done row for ${operationKey}`);
   }
 
+  const legacyStoryId = row.story_id;
   return retryMirror(
     () =>
-      fetchAuthMutation((api as any).storyDone.recordStoryDone, {
-        legacyStoryId: row.story_id,
+      fetchAuthMutation(api.storyDone.recordStoryDone, {
+        legacyStoryId,
         legacyUserId: optionalNumber(row.user_id),
         time: optionalTimestampMs(row.time),
       }),

@@ -29,6 +29,7 @@ const sql = postgres(POSTGRES_URL, {
 const client = new ConvexHttpClient(CONVEX_URL);
 
 const BATCH_SIZE = Number(process.env.STORY_DONE_MIGRATION_BATCH_SIZE ?? "500");
+const CONVEX_BATCH_SIZE = Number(process.env.STORY_DONE_CONVEX_BATCH_SIZE ?? "200");
 const START_ID = Number(process.env.STORY_DONE_MIGRATION_START_ID ?? "1");
 const END_ID_RAW = process.env.STORY_DONE_MIGRATION_END_ID;
 const END_ID = END_ID_RAW ? Number(END_ID_RAW) : undefined;
@@ -47,9 +48,50 @@ function toTimestampMs(value: string | Date | null): number | undefined {
 }
 
 async function migrateStoryDone() {
-  console.log("Migrating story_done...");
+  console.log(
+    `Migrating story_done (append-only, all rows). sqlBatchSize=${BATCH_SIZE} convexBatchSize=${CONVEX_BATCH_SIZE}`,
+  );
   let total = 0;
   let lastId = START_ID - 1;
+  let failed = 0;
+
+  const retryDelaysMs = [100, 300, 800] as const;
+  async function recordWithRetry(row: StoryDoneRow) {
+    let lastError: unknown;
+    for (const delay of retryDelaysMs) {
+      try {
+        await client.mutation(api.storyDone.recordStoryDone, {
+          legacyStoryId: row.story_id,
+          legacyUserId: row.user_id ?? undefined,
+          time: toTimestampMs(row.time),
+        });
+        return;
+      } catch (error) {
+        lastError = error;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+    throw lastError instanceof Error ? lastError : new Error(String(lastError));
+  }
+
+  async function recordBatchWithRetry(rows: StoryDoneRow[]) {
+    let lastError: unknown;
+    for (const delay of retryDelaysMs) {
+      try {
+        return await client.mutation(api.storyDone.recordStoryDoneBatch, {
+          rows: rows.map((row) => ({
+            legacyStoryId: row.story_id,
+            legacyUserId: row.user_id ?? undefined,
+            time: toTimestampMs(row.time),
+          })),
+        });
+      } catch (error) {
+        lastError = error;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+    throw lastError instanceof Error ? lastError : new Error(String(lastError));
+  }
 
   for (;;) {
     const rows = await sql<StoryDoneRow[]>`
@@ -62,20 +104,43 @@ async function migrateStoryDone() {
     `;
     if (!rows.length) break;
 
-    for (const row of rows) {
-      await client.mutation((api as any).storyDone.recordStoryDone, {
-        legacyStoryId: row.story_id,
-        legacyUserId: row.user_id ?? undefined,
-        time: toTimestampMs(row.time),
-      });
+    for (let i = 0; i < rows.length; i += CONVEX_BATCH_SIZE) {
+      const slice = rows.slice(i, i + CONVEX_BATCH_SIZE);
+      try {
+        const result = await recordBatchWithRetry(slice);
+        if (result.missingStories.length > 0) {
+          console.warn(
+            `story_done batch missing parent stories: count=${result.missingStories.length} sample=${result.missingStories.slice(0, 5).join(",")}`,
+          );
+        }
+      } catch (batchError) {
+        console.error(
+          `story_done batch failed (size=${slice.length}); falling back to row-by-row: ${batchError instanceof Error ? batchError.message : String(batchError)}`,
+        );
+        for (const row of slice) {
+          try {
+            await recordWithRetry(row);
+          } catch (rowError) {
+            failed += 1;
+            console.error(
+              `story_done row failed id=${row.id} story_id=${row.story_id} user_id=${row.user_id ?? "null"}: ${rowError instanceof Error ? rowError.message : String(rowError)}`,
+            );
+          }
+        }
+      }
     }
 
     total += rows.length;
     lastId = rows[rows.length - 1].id;
-    console.log(`Processed ${total} rows so far (last id=${lastId})...`);
+    console.log(
+      `Processed ${total} rows so far (last id=${lastId}, failed=${failed})...`,
+    );
   }
 
   console.log(`Story_done migration complete: ${total} rows`);
+  if (failed > 0) {
+    throw new Error(`Story_done migration completed with ${failed} failed rows`);
+  }
 }
 
 migrateStoryDone()
