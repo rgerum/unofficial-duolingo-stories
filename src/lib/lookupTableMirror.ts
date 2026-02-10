@@ -374,3 +374,26 @@ export async function mirrorStoryContent(row: StoryRow, operationKey: string) {
     operationKey,
   );
 }
+
+export async function mirrorStoryDone(
+  row: {
+    story_id?: number | null;
+    user_id?: number | null;
+    time?: Date | string | number | null;
+  },
+  operationKey: string,
+) {
+  if (typeof row.story_id !== "number") {
+    throw new Error(`Convex mirror rejected invalid story_done row for ${operationKey}`);
+  }
+
+  return retryMirror(
+    () =>
+      fetchAuthMutation((api as any).storyDone.recordStoryDone, {
+        legacyStoryId: row.story_id,
+        legacyUserId: optionalNumber(row.user_id),
+        time: optionalTimestampMs(row.time),
+      }),
+    operationKey,
+  );
+}
