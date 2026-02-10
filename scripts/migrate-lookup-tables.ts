@@ -3,7 +3,7 @@ dotenv.config({ path: ".env.local" });
 
 import postgres from "postgres";
 import { ConvexHttpClient } from "convex/browser";
-import { anyApi } from "convex/server";
+import { api } from "../convex/_generated/api";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL;
 const POSTGRES_URL = process.env.POSTGRES_URL2 || process.env.POSTGRES_URL || process.env.DATABASE_URL;
@@ -91,7 +91,7 @@ async function migrateLanguages() {
       public: row.public,
       rtl: row.rtl,
     }));
-    await client.mutation((anyApi as any).lookupTables.upsertLanguagesBatch, {
+    await client.mutation(api.lookupTables.upsertLanguagesBatch, {
       languages,
     });
   });
@@ -116,7 +116,7 @@ async function migrateImages() {
       active_lip: row.active_lip,
       gilded_lip: row.gilded_lip,
     }));
-    await client.mutation((anyApi as any).lookupTables.upsertImagesBatch, {
+    await client.mutation(api.lookupTables.upsertImagesBatch, {
       images,
     });
   });
@@ -138,7 +138,7 @@ async function migrateAvatars() {
       link: row.link,
       name: optionalString(row.name),
     }));
-    await client.mutation((anyApi as any).lookupTables.upsertAvatarsBatch, {
+    await client.mutation(api.lookupTables.upsertAvatarsBatch, {
       avatars,
     });
   });

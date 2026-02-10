@@ -29,7 +29,6 @@ export const tables = {
   })
     .index("email_name", ["email", "name"])
     .index("name", ["name"])
-    .index("role", ["role"])
     .index("userId", ["userId"])
     .index("username", ["username"]),
   session: defineTable({
@@ -62,7 +61,6 @@ export const tables = {
   })
     .index("accountId", ["accountId"])
     .index("accountId_providerId", ["accountId", "providerId"])
-    .index("accountId_providerId_userId", ["accountId", "providerId", "userId"])
     .index("providerId_userId", ["providerId", "userId"])
     .index("userId", ["userId"]),
   verification: defineTable({
