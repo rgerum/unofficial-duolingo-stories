@@ -7,6 +7,7 @@ import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
 import { revalidateTag } from "next/cache";
 import LocalisationProvider from "@/components/LocalisationProvider";
+import { mirrorStoryDone } from "@/lib/lookupTableMirror";
 
 async function get_story_meta(course_id: number) {
   const course_query = await sql`SELECT
@@ -68,12 +69,20 @@ export default async function Page({
     "use server";
     if (!user_id) {
       await sql`INSERT INTO story_done (story_id) VALUES(${story_id})`;
+      await mirrorStoryDone(
+        { story_id: story_id, time: Date.now() },
+        `story_done:${story_id}:anonymous`,
+      );
       return {
         message: "done",
         story_id: story_id,
       };
     }
     await sql`INSERT INTO story_done (user_id, story_id) VALUES(${user_id}, ${story_id})`;
+    await mirrorStoryDone(
+      { story_id: story_id, user_id: user_id, time: Date.now() },
+      `story_done:${story_id}:user:${user_id}`,
+    );
     revalidateTag(`course_done_${course_id}_${user_id}`, "max");
     return {
       message: "done",

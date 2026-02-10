@@ -12,6 +12,7 @@ Scope:
 - `avatar_mapping`
 - `story`
 - `story_content`
+- `story_done`
 
 Status values:
 - `Yes`: Runtime write path includes Convex mirror call.
@@ -41,6 +42,8 @@ Status values:
 | `story` | `src/app/admin/story/[story_id]/actions.ts` | `UPDATE story public` | Admin publish toggle directly flips visibility. | `mirrorStory(...)` | Yes |
 | `story_content` | `src/app/editor/story/set_story/route.ts` | _Not yet split in SQL_ | Mirrors heavy story payload (`text`, `json`) into Convex `story_content`. | `mirrorStory(..., { mirrorContent: true })` | Yes |
 | `story_content` | `src/app/editor/(course)/course/[course_id]/import/send/[story_id]/route.ts` | _Not yet split in SQL_ | Mirrors imported story payload into Convex `story_content`. | `mirrorStory(..., { mirrorContent: true })` | Yes |
+| `story_done` | `src/app/(stories)/story/[story_id]/page.tsx` | `INSERT INTO story_done` | Reader completion event in default story player. | `mirrorStoryDone(...)` | Yes |
+| `story_done` | `src/app/(stories)/story/[story_id]/script/page.tsx` | `INSERT INTO story_done` | Reader completion event in script-mode story player. | `mirrorStoryDone(...)` | Yes |
 
 ## Backfill Paths
 
@@ -56,6 +59,7 @@ Status values:
 | `story` | `scripts/migrate-story-tables.ts` | Backfill | Bulk copy story metadata from Postgres `story` to Convex `stories`. | `api.storyTables.upsertStory` | Backfill |
 | `story_content` | `scripts/migrate-story-tables.ts` | Backfill | Bulk copy heavy payload (`text`, `json`) from Postgres `story` to Convex `story_content`. | `api.storyTables.upsertStoryContent` | Backfill |
 | `story` | `scripts/remove-story-heavy-fields.ts` | Cleanup migration | Strip deprecated heavy fields (`text`, `json`) from existing Convex `stories` documents after `story_content` backfill. | `api.storyTables.stripStoryHeavyFieldsBatch` | Backfill |
+| `story_done` | `scripts/migrate-story-done.ts` | Backfill | Bulk copy user/story completion records from Postgres `story_done`. | `api.storyDone.recordStoryDone` | Backfill |
 
 ## Notes
 

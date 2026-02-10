@@ -70,9 +70,7 @@ export default defineSchema({
     legacyId: v.optional(v.number()),
     languageId: v.id("languages"),
     tag: v.string(),
-    // Temporary migration compatibility for pre-existing story docs missing `text`.
-    // TODO(post-migration): make required again after backfill normalization.
-    text: v.optional(v.string()),
+    text: v.string(),
     mirrorUpdatedAt: v.optional(v.number()),
     lastOperationKey: v.optional(v.string()),
   })
@@ -156,4 +154,13 @@ export default defineSchema({
   })
     .index("by_story", ["storyId"])
     .index("by_updated", ["lastUpdated"]),
+
+  story_done: defineTable({
+    storyId: v.id("stories"),
+    legacyUserId: v.optional(v.number()),
+    time: v.number(),
+  })
+    .index("by_story", ["storyId"])
+    .index("by_user", ["legacyUserId"])
+    .index("by_user_and_story", ["legacyUserId", "storyId"]),
 });

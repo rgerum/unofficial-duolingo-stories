@@ -36,10 +36,9 @@ const convex = new ConvexHttpClient(convexUrl);
 
 const get_localisation_entries_by_convex_language_id = unstable_cache(
   async (langId: Id<"languages">) =>
-    (await convex.query(
-      (api as any).localization.getLocalizationWithEnglishFallback,
-      { languageId: langId },
-    )) as Array<{ tag: string; text: string }>,
+    await convex.query(api.localization.getLocalizationWithEnglishFallback, {
+      languageId: langId,
+    }),
   ["localisation_dict_convex"],
   { tags: ["localisation"], revalidate: 3600 },
 );
@@ -67,12 +66,12 @@ export default async function get_localisation(lang: number) {
       ...data,
     };
   }
-  return get_localisation_func(data) as LocalisationFunc;
+  return get_localisation_func(data);
 }
 
 export async function get_localisation_by_convex_language_id(
   langId: Id<"languages">,
 ) {
   const data = await get_localisation_dict_by_convex_language_id(langId);
-  return get_localisation_func(data) as LocalisationFunc;
+  return get_localisation_func(data);
 }

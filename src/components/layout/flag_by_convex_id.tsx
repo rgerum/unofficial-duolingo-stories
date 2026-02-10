@@ -13,11 +13,9 @@ const convex = new ConvexHttpClient(convexUrl);
 
 const getLanguageFlag = unstable_cache(
   async (languageId: Id<"languages">) =>
-    (await convex.query((api as any).localization.getLanguageFlagById, {
+    await convex.query(api.localization.getLanguageFlagById, {
       languageId,
-    })) as
-      | { short: string; flag?: number; flag_file?: string }
-      | null,
+    }),
   ["get_langs_short_convex"],
   { tags: ["lang"], revalidate: 3600 },
 );

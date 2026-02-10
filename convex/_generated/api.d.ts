@@ -17,6 +17,7 @@ import type * as lib_phpbb from "../lib/phpbb.js";
 import type * as localization from "../localization.js";
 import type * as lookupTables from "../lookupTables.js";
 import type * as roles from "../roles.js";
+import type * as storyDone from "../storyDone.js";
 import type * as storyTables from "../storyTables.js";
 
 import type {
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   localization: typeof localization;
   lookupTables: typeof lookupTables;
   roles: typeof roles;
+  storyDone: typeof storyDone;
   storyTables: typeof storyTables;
 }>;
 
