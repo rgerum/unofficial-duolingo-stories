@@ -3,6 +3,7 @@
 import { sql } from "@/lib/db";
 import { revalidateTag } from "next/cache";
 import { StorySchema, type Story } from "./schema";
+import { mirrorCourse } from "@/lib/lookupTableMirror";
 
 async function story_properties(id: number): Promise<Story> {
   let data = await sql`
@@ -34,6 +35,12 @@ SET count = (
     FROM story
     WHERE story.course_id = course.id AND story.public AND NOT story.deleted
 ) WHERE id = (SELECT course_id FROM story WHERE id = ${id});`;
+  const course = (
+    await sql`SELECT c.* FROM course c JOIN story s ON s.course_id = c.id WHERE s.id = ${id} LIMIT 1`
+  )[0];
+  if (course) {
+    await mirrorCourse(course, `course:${course.id}:toggle_published`);
+  }
 
   revalidateTag("course_data", "max");
   revalidateTag("story_data", "max");
