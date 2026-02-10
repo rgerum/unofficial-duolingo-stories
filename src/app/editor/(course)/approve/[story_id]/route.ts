@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { getPostHogClient } from "@/lib/posthog-server";
-import { mirrorCourse } from "@/lib/lookupTableMirror";
+import { mirrorCourse, mirrorStory } from "@/lib/lookupTableMirror";
 
 export async function GET(
   request: Request,
@@ -74,6 +74,12 @@ async function set_approve({
   if (count >= 2) status = "finished";
 
   await set_status({ status: status, id: story_id });
+  const updatedStatusStory = (
+    await sql`SELECT * FROM story WHERE id = ${story_id} LIMIT 1`
+  )[0];
+  if (updatedStatusStory) {
+    await mirrorStory(updatedStatusStory, `story:${updatedStatusStory.id}:approve_status`);
+  }
 
   // get the number of finished stories in this set
   let res3 =
@@ -87,6 +93,15 @@ async function set_approve({
     for (let story of res3) {
       if (!story.public) {
         await sql`UPDATE story SET public = true, date_published = ${date_published} WHERE id = ${story.id};`;
+        const updatedPublishedStory = (
+          await sql`SELECT * FROM story WHERE id = ${story.id} LIMIT 1`
+        )[0];
+        if (updatedPublishedStory) {
+          await mirrorStory(
+            updatedPublishedStory,
+            `story:${updatedPublishedStory.id}:approve_publish`,
+          );
+        }
         published.push(story.id);
         count_published++;
       }

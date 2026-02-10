@@ -255,3 +255,127 @@ export async function mirrorAvatarMapping(
     operationKey,
   );
 }
+
+type StoryRow = {
+  id?: number;
+  duo_id?: string | null;
+  name?: string | null;
+  set_id?: number | null;
+  set_index?: number | null;
+  author?: number | null;
+  author_change?: number | null;
+  date?: Date | string | number | null;
+  change_date?: Date | string | number | null;
+  date_published?: Date | string | number | null;
+  text?: string | null;
+  public?: boolean | null;
+  image?: string | null;
+  course_id?: number | null;
+  json?: unknown;
+  status?: "draft" | "feedback" | "finished" | string | null;
+  deleted?: boolean | null;
+  todo_count?: number | null;
+};
+
+function optionalTimestampMs(
+  value: Date | string | number | null | undefined,
+): number | undefined {
+  if (value === null || value === undefined) return undefined;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  const timestamp =
+    value instanceof Date ? value.getTime() : Date.parse(String(value));
+  return Number.isFinite(timestamp) ? timestamp : undefined;
+}
+
+function parseJsonLike(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
+export async function mirrorStory(
+  row: StoryRow,
+  operationKey: string,
+  options?: { mirrorContent?: boolean },
+) {
+  if (
+    typeof row.id !== "number" ||
+    typeof row.name !== "string" ||
+    typeof row.course_id !== "number"
+  ) {
+    throw new Error(`Convex mirror rejected invalid story row for ${operationKey}`);
+  }
+
+  const status =
+    row.status === "draft" || row.status === "feedback" || row.status === "finished"
+      ? row.status
+      : "draft";
+
+  await retryMirror(
+    () =>
+      fetchAuthMutation((api as any).storyTables.upsertStory, {
+        story: {
+          legacyId: row.id,
+          duo_id: optionalString(row.duo_id),
+          name: row.name,
+          set_id: optionalNumber(row.set_id),
+          set_index: optionalNumber(row.set_index),
+          authorId: optionalNumber(row.author),
+          authorChangeId: optionalNumber(row.author_change),
+          date: optionalTimestampMs(row.date),
+          change_date: optionalTimestampMs(row.change_date),
+          date_published: optionalTimestampMs(row.date_published),
+          text: typeof row.text === "string" ? row.text : "",
+          public: row.public ?? false,
+          legacyImageId: optionalString(row.image),
+          legacyCourseId: row.course_id,
+          json:
+            row.json === null || row.json === undefined
+              ? undefined
+              : parseJsonLike(row.json),
+          status,
+          deleted: row.deleted ?? false,
+          todo_count: row.todo_count ?? 0,
+        },
+        operationKey,
+      }),
+    operationKey,
+  );
+
+  if (!options?.mirrorContent) return;
+  await mirrorStoryContent(row, `${operationKey}:content`);
+}
+
+export async function mirrorStoryContent(row: StoryRow, operationKey: string) {
+  if (typeof row.id !== "number" || typeof row.text !== "string") {
+    throw new Error(
+      `Convex mirror rejected invalid story content row for ${operationKey}`,
+    );
+  }
+  const jsonValue = parseJsonLike(row.json);
+  if (jsonValue === undefined) {
+    throw new Error(
+      `Convex mirror rejected missing story content json for ${operationKey}`,
+    );
+  }
+
+  return retryMirror(
+    () =>
+      fetchAuthMutation((api as any).storyTables.upsertStoryContent, {
+        storyContent: {
+          legacyStoryId: row.id,
+          text: row.text,
+          json: jsonValue,
+          lastUpdated:
+            optionalTimestampMs(row.change_date) ??
+            optionalTimestampMs(row.date) ??
+            Date.now(),
+        },
+        operationKey,
+      }),
+    operationKey,
+  );
+}

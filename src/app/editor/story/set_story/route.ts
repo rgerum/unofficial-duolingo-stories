@@ -1,9 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
 import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
-import {getUser, isContributor} from "@/lib/userInterface";
+import { getUser, isContributor } from "@/lib/userInterface";
 import { getPostHogClient } from "@/lib/posthog-server";
-import { mirrorCourse } from "@/lib/lookupTableMirror";
+import { mirrorCourse, mirrorStory } from "@/lib/lookupTableMirror";
 
 interface StoryData {
   id?: number;
@@ -76,6 +76,12 @@ async function set_story(
   ])}
   WHERE id = ${data.id}
 `;
+  const updatedStory = (await sql`SELECT * FROM story WHERE id = ${data.id} LIMIT 1`)[0];
+  if (updatedStory) {
+    await mirrorStory(updatedStory, `story:${updatedStory.id}:set_story`, {
+      mirrorContent: true,
+    });
+  }
   await sql`UPDATE course SET todo_count = (SELECT SUM(todo_count) FROM story WHERE course_id = ${data["course_id"]}) WHERE id = ${data["course_id"]}`;
   const updatedCourse = (
     await sql`SELECT * FROM course WHERE id = ${data["course_id"]} LIMIT 1`

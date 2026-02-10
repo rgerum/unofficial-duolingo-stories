@@ -7,11 +7,12 @@ Migrate application data from Postgres to Convex with a low-risk transition peri
 - Cut over reads table-by-table behind flags.
 - Remove Postgres writes once parity is proven.
 
-## Current Status (as of 2026-02-09)
+## Current Status (as of 2026-02-10)
 - Better Auth data exists in Convex (`user`, `account`, `session`, etc.).
 - Runtime Postgres auth reads were removed from profile and editor paths.
 - Legacy auth tables (`users`, `accounts`, `sessions`, `verification_token`) are out of migration scope.
 - Remaining migration focus is app/domain tables in `database/schema.sql`.
+- Story-table schema split is planned: lightweight metadata in `stories`, heavy payload in `story_content`.
 
 ## Postgres Table Dependency Graph
 Note: `users` dependencies below refer to author/actor linkage semantics. The legacy `users` table itself is not in migration scope.
@@ -113,9 +114,17 @@ Table:
 Actions:
 - Dual-write story set/update/delete/approve/import routes.
 - Ensure status and publish transitions are mirrored atomically.
+- Keep `text` and `json` in `stories` temporarily for backward compatibility while introducing `story_content`.
+- Write heavy content updates to `story_content` keyed by `storyId`.
+- Update story list reads to avoid loading heavy content payloads.
+- Temporary compatibility: `stories.authorId` / `stories.authorChangeId` accept both `number` (legacy Postgres user IDs) and `string` (existing Better Auth component IDs already present in Convex).
+- Temporary compatibility: `stories.text` is optional to tolerate pre-existing Convex documents missing this field.
+- Post-cutover cleanup task: normalize author identity fields to one type and remove union validators.
+- Post-cutover cleanup task: backfill missing story `text` values and make `stories.text` required again.
 
 Exit criteria:
 - Story CRUD and publication workflows match in parity checks.
+- Story metadata list queries no longer depend on heavy content fields.
 
 ## Phase 4: Approval/Event Tables
 Tables:

@@ -6,7 +6,10 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL;
-const POSTGRES_URL = process.env.POSTGRES_URL2 || process.env.POSTGRES_URL || process.env.DATABASE_URL;
+const POSTGRES_URL =
+  process.env.POSTGRES_URL2 ||
+  process.env.POSTGRES_URL ||
+  process.env.DATABASE_URL;
 
 if (!CONVEX_URL) {
   console.error("Error: CONVEX_URL is not set");
@@ -20,7 +23,9 @@ if (!POSTGRES_URL) {
 
 const sql = postgres(POSTGRES_URL, {
   max: 5,
-  ssl: POSTGRES_URL.includes("localhost") ? false : { rejectUnauthorized: false },
+  ssl: POSTGRES_URL.includes("localhost")
+    ? false
+    : { rejectUnauthorized: false },
 });
 const client = new ConvexHttpClient(CONVEX_URL);
 
@@ -109,7 +114,9 @@ async function runBatch<T>(items: T[], fn: (chunk: T[]) => Promise<void>) {
   for (let i = 0; i < items.length; i += BATCH_SIZE) {
     const chunk = items.slice(i, i + BATCH_SIZE);
     await fn(chunk);
-    console.log(`Processed ${Math.min(i + BATCH_SIZE, items.length)}/${items.length}`);
+    console.log(
+      `Processed ${Math.min(i + BATCH_SIZE, items.length)}/${items.length}`,
+    );
   }
 }
 
@@ -293,15 +300,21 @@ async function migrateAvatarMappings() {
 
   await runBatch(rows, async (chunk) => {
     for (const row of chunk) {
-      await client.mutation(api.lookupTables.upsertAvatarMapping, {
-        avatarMapping: {
-          legacyId: row.id,
-          legacyAvatarId: row.avatar_id,
-          legacyLanguageId: row.language_id,
-          name: optionalString(row.name),
-          speaker: optionalString(row.speaker),
-        },
-      });
+      try {
+        await client.mutation(api.lookupTables.upsertAvatarMapping, {
+          avatarMapping: {
+            legacyId: row.id,
+            legacyAvatarId: row.avatar_id,
+            legacyLanguageId: row.language_id,
+            name: optionalString(row.name),
+            speaker: optionalString(row.speaker),
+          },
+        });
+      } catch (error) {
+        throw new Error(
+          `avatar_mapping migration failed at row id=${row.id} avatar_id=${row.avatar_id} language_id=${row.language_id}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
     }
   });
 
@@ -309,6 +322,15 @@ async function migrateAvatarMappings() {
 }
 
 async function main() {
+  const only = process.env.LOOKUP_MIGRATION_ONLY;
+  if (only === "language") return void (await migrateLanguages());
+  if (only === "image") return void (await migrateImages());
+  if (only === "avatar") return void (await migrateAvatars());
+  if (only === "speaker") return void (await migrateSpeakers());
+  if (only === "localization") return void (await migrateLocalizations());
+  if (only === "course") return void (await migrateCourses());
+  if (only === "avatar_mapping") return void (await migrateAvatarMappings());
+
   await migrateLanguages();
   await migrateImages();
   await migrateAvatars();
