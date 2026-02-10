@@ -100,7 +100,8 @@ export default defineSchema({
     lastOperationKey: v.optional(v.string()),
   })
     .index("by_id_value", ["legacyId"])
-    .index("by_short", ["short"]),
+    .index("by_short", ["short"])
+    .index("by_public", ["public"]),
 
   avatar_mappings: defineTable({
     legacyId: v.optional(v.number()),
@@ -128,15 +129,13 @@ export default defineSchema({
     date: v.optional(v.number()),
     change_date: v.optional(v.number()),
     date_published: v.optional(v.number()),
-    // Temporary migration compatibility for pre-existing story docs missing `text`.
-    // TODO(post-migration): make required again after backfill normalization.
-    text: v.optional(v.string()),
     public: v.boolean(),
     imageId: v.optional(v.id("images")),
     courseId: v.id("courses"),
-    json: v.optional(v.any()),
     status: v.union(
-      v.literal("draft"), v.literal("feedback"), v.literal("finished"),
+      v.literal("draft"),
+      v.literal("feedback"),
+      v.literal("finished"),
     ),
     deleted: v.boolean(),
     todo_count: v.number(),

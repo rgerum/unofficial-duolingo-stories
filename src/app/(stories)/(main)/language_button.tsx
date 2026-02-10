@@ -1,7 +1,9 @@
 import Link from "next/link";
 import styles from "./language_button.module.css";
-import get_localisation from "@/lib/get_localisation";
-import FlagById from "@/components/layout/flag_by_id";
+import {
+  get_localisation_by_convex_language_id,
+} from "@/lib/get_localisation";
+import FlagByConvexId from "@/components/layout/flag_by_convex_id";
 import { get_course } from "./get_course_data";
 
 export default async function LanguageButton({
@@ -27,7 +29,9 @@ export default async function LanguageButton({
   if (!course) {
     return null;
   }
-  let localisation = await get_localisation(course.from_language);
+  let localisation = await get_localisation_by_convex_language_id(
+    course.fromLanguageId,
+  );
 
   return (
     <Link
@@ -35,7 +39,7 @@ export default async function LanguageButton({
       className={styles.language_select_button}
       href={`/${course.short}`}
     >
-      <FlagById id={course.learning_language} />
+      <FlagByConvexId id={course.learningLanguageId} />
       <span className={styles.language_select_button_text}>{course.name}</span>
       <span className={styles.language_story_count}>
         {localisation("n_stories", { $count: `${course.count}` })}
