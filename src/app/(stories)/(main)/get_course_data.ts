@@ -1,4 +1,7 @@
-import { sql, cache } from "@/lib/db";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@convex/_generated/api";
+import { unstable_cache } from "next/cache";
+import type { Id } from "@convex/_generated/dataModel";
 
 export interface CourseData {
   id: number;
@@ -7,26 +10,29 @@ export interface CourseData {
   count: number;
   about: string;
   from_language: number;
+  fromLanguageId: Id<"languages">;
   from_language_name: string;
   learning_language: number;
+  learningLanguageId: Id<"languages">;
   learning_language_name: string;
 }
 
-export const get_course_data = cache(
-  async () => {
-    return sql`
-SELECT id, short, COALESCE(NULLIF(name, ''), learning_language_name) AS name, count, about,
-from_language, from_language_name,
-learning_language, learning_language_name
-FROM
-    course c
-WHERE
-    c.public
-ORDER BY
-    from_language_name, name;
-` as Promise<CourseData[]>;
-  },
-  ["get_course_data"],
+const convexUrl =
+  process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
+
+if (!convexUrl) {
+  throw new Error("Missing NEXT_PUBLIC_CONVEX_URL/CONVEX_URL");
+}
+
+const convex = new ConvexHttpClient(convexUrl);
+
+export const get_course_data = unstable_cache(
+  async () =>
+    (await convex.query(
+      (api as any).landing.getPublicCourseList,
+      {},
+    )) as CourseData[],
+  ["get_course_data_v2_convex_ids"],
   { tags: ["course_data"], revalidate: 3600 },
 );
 
@@ -40,24 +46,38 @@ export async function get_counts() {
 }
 
 export async function get_course_groups() {
-  let course_groups = [{ from_language_name: "English", from_language: 1 }];
+  const course_groups: Array<{
+    from_language_name: string;
+    fromLanguageId: Id<"languages">;
+  }> = [];
+  let englishGroup:
+    | { from_language_name: string; fromLanguageId: Id<"languages"> }
+    | null = null;
   let last_group = null;
   for (let course of await get_course_data()) {
-    if (course.from_language !== last_group?.from_language) {
-      if (course.from_language_name !== "English")
-        course_groups.push({
-          from_language_name: course.from_language_name,
-          from_language: course.from_language,
-        });
+    if (!course.fromLanguageId) continue;
+    if (course.fromLanguageId !== last_group?.fromLanguageId) {
+      const group = {
+        from_language_name: course.from_language_name,
+        fromLanguageId: course.fromLanguageId,
+      };
+      if (course.from_language_name === "English") {
+        englishGroup = group;
+      } else {
+        course_groups.push(group);
+      }
       last_group = course;
     }
+  }
+  if (englishGroup) {
+    return [englishGroup, ...course_groups];
   }
   return course_groups;
 }
 
-export async function get_courses_in_group(from_language: number) {
+export async function get_courses_in_group(fromLanguageId: Id<"languages">) {
   let courses = await get_course_data();
-  return courses.filter((course) => course.from_language === from_language);
+  return courses.filter((course) => course.fromLanguageId === fromLanguageId);
 }
 
 export async function get_course(short: string) {

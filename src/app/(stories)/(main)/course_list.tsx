@@ -1,14 +1,21 @@
 import React, { Suspense } from "react";
-import get_localisation from "@/lib/get_localisation";
+import { get_localisation_by_convex_language_id } from "@/lib/get_localisation";
 import LanguageButton from "./language_button";
+import type { Id } from "@convex/_generated/dataModel";
 
 import styles from "./course_list.module.css";
 import { get_course_groups, get_courses_in_group } from "./get_course_data";
 
-async function LanguageGroup({ name, id }: { name: string; id: number }) {
+async function LanguageGroup({
+  name,
+  id,
+}: {
+  name: string;
+  id: Id<"languages">;
+}) {
   let courses_list = await get_courses_in_group(id);
 
-  let localisation = await get_localisation(id);
+  let localisation = await get_localisation_by_convex_language_id(id);
 
   if (!courses_list) return <>no list {name}</>;
 
@@ -58,9 +65,9 @@ export async function CourseListInner({
     <>
       {course_groups?.map((group) => (
         <LanguageGroup
-          key={group.from_language}
+          key={group.fromLanguageId}
           name={group.from_language_name}
-          id={group.from_language}
+          id={group.fromLanguageId}
         />
       ))}
     </>
