@@ -9,11 +9,13 @@ export const listLegacyUsersForRoleSync = query({
     cursor: v.optional(v.string()),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, args) => {
-    return await ctx.db.query("users").paginate({
-      cursor: args.cursor ?? null,
-      numItems: args.limit ?? PAGE_SIZE,
-    });
+  handler: async () => {
+    // Legacy users table has been removed from app schema.
+    return {
+      page: [],
+      isDone: true,
+      continueCursor: null,
+    };
   },
 });
 

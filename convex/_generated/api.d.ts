@@ -13,6 +13,7 @@ import type * as authFunctions from "../authFunctions.js";
 import type * as authMigration from "../authMigration.js";
 import type * as http from "../http.js";
 import type * as lib_phpbb from "../lib/phpbb.js";
+import type * as lookupTables from "../lookupTables.js";
 import type * as roles from "../roles.js";
 
 import type {
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   authMigration: typeof authMigration;
   http: typeof http;
   "lib/phpbb": typeof lib_phpbb;
+  lookupTables: typeof lookupTables;
   roles: typeof roles;
 }>;
 

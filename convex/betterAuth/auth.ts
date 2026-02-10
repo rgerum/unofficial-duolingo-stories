@@ -6,7 +6,6 @@ import { betterAuth } from "better-auth";
 import { admin, username } from "better-auth/plugins";
 import { defaultRoles, userAc } from "better-auth/plugins/admin/access";
 import { components, internal } from "../_generated/api";
-import type { DataModel } from "../_generated/dataModel";
 import authConfig from "../auth.config";
 import { phpbbCheckHash, phpbbHash } from "../lib/phpbb";
 import schema from "./schema";
@@ -75,10 +74,9 @@ const sendEmail = async ({
 };
 
 // Better Auth Component
-export const authComponent: ReturnType<typeof createClient> = createClient<
-  DataModel,
-  typeof schema
->(components.betterAuth, {
+export const authComponent: ReturnType<typeof createClient> = createClient(
+  components.betterAuth,
+  {
   local: { schema },
   verbose: false,
   authFunctions: {
@@ -92,7 +90,7 @@ export const authComponent: ReturnType<typeof createClient> = createClient<
 });
 
 // Better Auth Options
-export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
+export const createAuthOptions = (ctx: GenericCtx<any>) => {
   return {
     appName: "Duostories",
     baseURL: process.env.SITE_URL,
@@ -149,9 +147,9 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 };
 
 // For `@better-auth/cli`
-export const options = createAuthOptions({} as GenericCtx<DataModel>);
+export const options = createAuthOptions({} as GenericCtx<any>);
 
 // Better Auth Instance
-export const createAuth = (ctx: GenericCtx<DataModel>) => {
+export const createAuth = (ctx: GenericCtx<any>) => {
   return betterAuth(createAuthOptions(ctx));
 };

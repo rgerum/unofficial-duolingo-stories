@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { z } from "zod";
+import { mirrorLanguage } from "@/lib/lookupTableMirror";
 
 const DefaultTextSchema = z.object({
   id: z.number(),
@@ -43,8 +44,17 @@ async function set_default_text({
   id: number;
   default_text: string;
 }) {
-  return sql`
+  const language = (
+    await sql`
   UPDATE language SET ${sql({ default_text })}
   WHERE id = ${id}
-`;
+  RETURNING *
+`
+  )[0];
+
+  if (language?.id) {
+    await mirrorLanguage(language, `language:${language.id}:default_text`);
+  }
+
+  return language;
 }
