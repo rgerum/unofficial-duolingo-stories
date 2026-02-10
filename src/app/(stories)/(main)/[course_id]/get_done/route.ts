@@ -1,6 +1,14 @@
-import { sql } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/userInterface";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@convex/_generated/api";
+
+const convexUrl =
+  process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
+if (!convexUrl) {
+  throw new Error("Missing NEXT_PUBLIC_CONVEX_URL/CONVEX_URL");
+}
+const convex = new ConvexHttpClient(convexUrl);
 
 export async function GET(
   req: Request,
@@ -32,12 +40,15 @@ async function get_course_done({
   course_id: string;
   user_id: number;
 }) {
-  // (SELECT id FROM course WHERE short = ? LIMIT 1)
-  const done_query = await sql`SELECT s.id FROM story_done 
-JOIN story s on s.id = story_done.story_id WHERE user_id = ${user_id} AND s.course_id = ${course_id} GROUP BY s.id`;
+  const numericCourseId = Number.parseInt(course_id, 10);
+  if (!Number.isFinite(numericCourseId)) return {};
+  const done_query = await convex.query(api.storyDone.getDoneStoryIdsForCourse, {
+    legacyCourseId: numericCourseId,
+    legacyUserId: user_id,
+  });
   const done: Record<number, boolean> = {};
-  for (let d of done_query) {
-    done[d.id] = true;
+  for (let storyId of done_query) {
+    done[storyId] = true;
   }
 
   return done;

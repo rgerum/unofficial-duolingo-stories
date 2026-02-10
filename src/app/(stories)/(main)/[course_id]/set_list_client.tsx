@@ -2,10 +2,19 @@
 import styles from "./set_list.module.css";
 import StoryButton from "./story_button";
 import getUserId from "@/lib/getUserId";
-import { sql, cache } from "@/lib/db";
+import { cache } from "@/lib/db";
 import get_localisation, { LocalisationFunc } from "@/lib/get_localisation";
 import { CourseData } from "@/app/(stories)/(main)/get_course_data";
 import { StoryData } from "@/app/(stories)/(main)/[course_id]/get_story_data";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@convex/_generated/api";
+
+const convexUrl =
+  process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
+if (!convexUrl) {
+  throw new Error("Missing NEXT_PUBLIC_CONVEX_URL/CONVEX_URL");
+}
+const convex = new ConvexHttpClient(convexUrl);
 
 function About({ about }: { about: string }) {
   if (!about) return <></>;
@@ -50,12 +59,13 @@ async function get_course_done({
   return cache(
     async ({ course_id, user_id }) => {
       if (!user_id) return {};
-      const done_query = await sql`
-SELECT s.id FROM story_done 
-JOIN story s on s.id = story_done.story_id WHERE user_id = ${user_id} AND s.course_id = ${course_id} GROUP BY s.id`;
+      const done_query = await convex.query(api.storyDone.getDoneStoryIdsForCourse, {
+        legacyCourseId: course_id,
+        legacyUserId: user_id,
+      });
       const done: Record<number, boolean> = {};
-      for (let d of done_query) {
-        done[d.id] = true;
+      for (let storyId of done_query) {
+        done[storyId] = true;
       }
 
       return done;

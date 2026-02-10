@@ -51,11 +51,15 @@ export async function generateMetadata(
 }
 
 export async function generateStaticParams() {
-  const courses = await get_course_data();
-
-  return courses.map((course) => ({
-    course_id: course.short,
-  }));
+  try {
+    const courses = await get_course_data();
+    return courses.map((course) => ({
+      course_id: course.short,
+    }));
+  } catch (error) {
+    console.error("generateStaticParams failed for /[course_id]:", error);
+    return [];
+  }
 }
 
 export default async function Page({
