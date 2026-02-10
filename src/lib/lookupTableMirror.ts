@@ -2,17 +2,25 @@ import { fetchAuthMutation } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 
 type LanguageRow = {
-  id?: number | null;
-  name?: string | null;
-  short?: string | null;
+  id?: number;
+  name?: string;
+  short?: string;
   flag?: number | null;
   flag_file?: string | null;
   speaker?: string | null;
   default_text?: string | null;
   tts_replace?: string | null;
-  public?: boolean | null;
-  rtl?: boolean | null;
+  public?: boolean;
+  rtl?: boolean;
 };
+
+function optionalString(value: string | null | undefined): string | undefined {
+  return value ?? undefined;
+}
+
+function optionalNumber(value: number | null | undefined): number | undefined {
+  return value ?? undefined;
+}
 
 const RETRY_DELAYS_MS = [150, 500, 1200] as const;
 
@@ -39,7 +47,7 @@ async function retryMirror<T>(fn: () => Promise<T>, operationKey: string) {
     error: lastError instanceof Error ? lastError.message : String(lastError),
   });
 
-  return null;
+  throw new Error(`Convex mirror failed for ${operationKey}`);
 }
 
 export async function mirrorLanguage(row: LanguageRow, operationKey: string) {
@@ -48,11 +56,14 @@ export async function mirrorLanguage(row: LanguageRow, operationKey: string) {
     typeof row.name !== "string" ||
     typeof row.short !== "string"
   ) {
-    console.error("[mirror.lookup.skip.invalid_language_row]", {
+    const details = {
       operationKey,
       row,
-    });
-    return null;
+    };
+    console.error("[mirror.lookup.skip.invalid_language_row]", details);
+    throw new Error(
+      `Convex mirror rejected invalid language row for ${operationKey}`,
+    );
   }
 
   return retryMirror(
@@ -62,11 +73,11 @@ export async function mirrorLanguage(row: LanguageRow, operationKey: string) {
           legacyId: row.id,
           name: row.name,
           short: row.short,
-          flag: row.flag ?? null,
-          flag_file: row.flag_file ?? null,
-          speaker: row.speaker ?? null,
-          default_text: row.default_text ?? null,
-          tts_replace: row.tts_replace ?? null,
+          flag: optionalNumber(row.flag),
+          flag_file: optionalString(row.flag_file),
+          speaker: optionalString(row.speaker),
+          default_text: optionalString(row.default_text),
+          tts_replace: optionalString(row.tts_replace),
           public: Boolean(row.public),
           rtl: Boolean(row.rtl),
         },

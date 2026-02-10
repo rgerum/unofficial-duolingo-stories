@@ -54,6 +54,14 @@ type AvatarRow = {
   name: string | null;
 };
 
+function optionalString(value: string | null): string | undefined {
+  return value ?? undefined;
+}
+
+function optionalNumber(value: number | null): number | undefined {
+  return value ?? undefined;
+}
+
 async function runBatch<T>(items: T[], fn: (chunk: T[]) => Promise<void>) {
   for (let i = 0; i < items.length; i += BATCH_SIZE) {
     const chunk = items.slice(i, i + BATCH_SIZE);
@@ -71,8 +79,20 @@ async function migrateLanguages() {
   `;
 
   await runBatch(rows, async (chunk) => {
+    const languages = chunk.map((row) => ({
+      legacyId: row.id,
+      name: row.name,
+      short: row.short,
+      flag: optionalNumber(row.flag),
+      flag_file: optionalString(row.flag_file),
+      speaker: optionalString(row.speaker),
+      default_text: optionalString(row.default_text),
+      tts_replace: optionalString(row.tts_replace),
+      public: row.public,
+      rtl: row.rtl,
+    }));
     await client.mutation((anyApi as any).lookupTables.upsertLanguagesBatch, {
-      languages: chunk,
+      languages,
     });
   });
 
@@ -88,8 +108,16 @@ async function migrateImages() {
   `;
 
   await runBatch(rows, async (chunk) => {
+    const images = chunk.map((row) => ({
+      legacyId: row.id,
+      active: row.active,
+      gilded: row.gilded,
+      locked: row.locked,
+      active_lip: row.active_lip,
+      gilded_lip: row.gilded_lip,
+    }));
     await client.mutation((anyApi as any).lookupTables.upsertImagesBatch, {
-      images: chunk,
+      images,
     });
   });
 
@@ -105,8 +133,13 @@ async function migrateAvatars() {
   `;
 
   await runBatch(rows, async (chunk) => {
+    const avatars = chunk.map((row) => ({
+      legacyId: row.id,
+      link: row.link,
+      name: optionalString(row.name),
+    }));
     await client.mutation((anyApi as any).lookupTables.upsertAvatarsBatch, {
-      avatars: chunk,
+      avatars,
     });
   });
 

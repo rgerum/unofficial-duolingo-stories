@@ -25,8 +25,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(answer);
   } catch (err) {
-    return new Response(err instanceof Error ? err.message : String(err), {
-      status: 500,
+    const message = err instanceof Error ? err.message : String(err);
+    const isMirrorFailure = message.includes("Convex mirror");
+    return new Response(message, {
+      status: isMirrorFailure ? 502 : 500,
     });
   }
 }

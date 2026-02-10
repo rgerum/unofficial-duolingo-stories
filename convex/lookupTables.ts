@@ -5,11 +5,11 @@ const languageValidator = {
   legacyId: v.number(),
   name: v.string(),
   short: v.string(),
-  flag: v.optional(v.union(v.null(), v.number())),
-  flag_file: v.optional(v.union(v.null(), v.string())),
-  speaker: v.optional(v.union(v.null(), v.string())),
-  default_text: v.optional(v.union(v.null(), v.string())),
-  tts_replace: v.optional(v.union(v.null(), v.string())),
+  flag: v.optional(v.number()),
+  flag_file: v.optional(v.string()),
+  speaker: v.optional(v.string()),
+  default_text: v.optional(v.string()),
+  tts_replace: v.optional(v.string()),
   public: v.boolean(),
   rtl: v.boolean(),
 };
@@ -26,7 +26,7 @@ const imageValidator = {
 const avatarValidator = {
   legacyId: v.number(),
   link: v.string(),
-  name: v.optional(v.union(v.null(), v.string())),
+  name: v.optional(v.string()),
 };
 
 export const upsertLanguage = mutation({
@@ -43,16 +43,15 @@ export const upsertLanguage = mutation({
       .query("languages")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.language.legacyId))
       .unique();
-    console.log("upsertLanguage", existing)
 
     const doc = {
       ...args.language,
       mirrorUpdatedAt: Date.now(),
-      lastOperationKey: args.operationKey ?? null,
+      lastOperationKey: args.operationKey,
     };
 
     if (existing) {
-      await ctx.db.patch(existing._id, doc);
+      await ctx.db.replace(existing._id, doc);
       return { inserted: false, docId: existing._id };
     }
 
@@ -81,16 +80,16 @@ export const upsertLanguagesBatch = mutation({
         .unique();
 
       if (existing) {
-        await ctx.db.patch(existing._id, {
+        await ctx.db.replace(existing._id, {
           ...language,
           mirrorUpdatedAt: Date.now(),
-        } );
+        });
         updated += 1;
       } else {
         await ctx.db.insert("languages", {
           ...language,
           mirrorUpdatedAt: Date.now(),
-        } );
+        });
         inserted += 1;
       }
     }
@@ -117,15 +116,15 @@ export const upsertImage = mutation({
     const doc = {
       ...args.image,
       mirrorUpdatedAt: Date.now(),
-      lastOperationKey: args.operationKey ?? null,
+      lastOperationKey: args.operationKey,
     };
 
     if (existing) {
-      await ctx.db.patch(existing._id, doc);
+      await ctx.db.replace(existing._id, doc);
       return { inserted: false, docId: existing._id };
     }
 
-    const docId = await ctx.db.insert("images", doc );
+    const docId = await ctx.db.insert("images", doc);
     return { inserted: true, docId };
   },
 });
@@ -150,16 +149,16 @@ export const upsertImagesBatch = mutation({
         .unique();
 
       if (existing) {
-        await ctx.db.patch(existing._id, {
+        await ctx.db.replace(existing._id, {
           ...image,
           mirrorUpdatedAt: Date.now(),
-        } );
+        });
         updated += 1;
       } else {
         await ctx.db.insert("images", {
           ...image,
           mirrorUpdatedAt: Date.now(),
-        } );
+        });
         inserted += 1;
       }
     }
@@ -186,11 +185,11 @@ export const upsertAvatar = mutation({
     const doc = {
       ...args.avatar,
       mirrorUpdatedAt: Date.now(),
-      lastOperationKey: args.operationKey ?? null,
+      lastOperationKey: args.operationKey,
     };
 
     if (existing) {
-      await ctx.db.patch(existing._id, doc);
+      await ctx.db.replace(existing._id, doc);
       return { inserted: false, docId: existing._id };
     }
 
@@ -219,16 +218,16 @@ export const upsertAvatarsBatch = mutation({
         .unique();
 
       if (existing) {
-        await ctx.db.patch(existing._id, {
+        await ctx.db.replace(existing._id, {
           ...avatar,
           mirrorUpdatedAt: Date.now(),
-        } );
+        });
         updated += 1;
       } else {
         await ctx.db.insert("avatars", {
           ...avatar,
           mirrorUpdatedAt: Date.now(),
-        } );
+        });
         inserted += 1;
       }
     }

@@ -10,20 +10,16 @@ Migrate application data from Postgres to Convex with a low-risk transition peri
 ## Current Status (as of 2026-02-09)
 - Better Auth data exists in Convex (`user`, `account`, `session`, etc.).
 - Runtime Postgres auth reads were removed from profile and editor paths.
+- Legacy auth tables (`users`, `accounts`, `sessions`, `verification_token`) are out of migration scope.
 - Remaining migration focus is app/domain tables in `database/schema.sql`.
 
 ## Postgres Table Dependency Graph
+Note: `users` dependencies below refer to author/actor linkage semantics. The legacy `users` table itself is not in migration scope.
 
 ### Roots (no foreign-key dependencies)
 - `image`
 - `language`
 - `avatar`
-- `users` (legacy/auth legacy)
-- `verification_token`
-
-### Depends on `users`
-- `accounts`
-- `sessions`
 
 ### Depends on `language`
 - `speaker`
