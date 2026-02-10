@@ -3,7 +3,8 @@ import { query } from "./_generated/server";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
 
-export const { getAuthUser } = authComponent.clientApi();
+const authClientApi = authComponent.clientApi();
+export const getAuthUser = authClientApi.getAuthUser;
 
 async function requireContributorOrAdmin(ctx: any) {
   const identity = (await ctx.auth.getUserIdentity()) as

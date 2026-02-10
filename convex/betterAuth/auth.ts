@@ -2,14 +2,16 @@ import { createClient } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import type { GenericCtx } from "@convex-dev/better-auth/utils";
 import type { BetterAuthOptions } from "better-auth";
+import type { DataModel } from "./_generated/dataModel";
 import { betterAuth } from "better-auth";
 import { admin, username } from "better-auth/plugins";
 import { defaultRoles, userAc } from "better-auth/plugins/admin/access";
 import { components, internal } from "../_generated/api";
-import type { DataModel } from "../_generated/dataModel";
 import authConfig from "../auth.config";
 import { phpbbCheckHash, phpbbHash } from "../lib/phpbb";
 import schema from "./schema";
+
+const typedCreateClient = createClient<DataModel, typeof schema>;
 
 const getEnv = (...keys: string[]) =>
   keys.map((key) => process.env[key]).find((value) => value);
@@ -75,10 +77,9 @@ const sendEmail = async ({
 };
 
 // Better Auth Component
-export const authComponent: ReturnType<typeof createClient> = createClient<
-  DataModel,
-  typeof schema
->(components.betterAuth, {
+export const authComponent: ReturnType<typeof typedCreateClient> = typedCreateClient(
+  components.betterAuth,
+  {
   local: { schema },
   verbose: false,
   authFunctions: {
