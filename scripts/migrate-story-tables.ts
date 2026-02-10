@@ -57,6 +57,19 @@ type StoryRow = {
 
 type StoryContentRow = {
   id: number;
+  duo_id: string | null;
+  name: string | null;
+  set_id: number | null;
+  set_index: number | null;
+  author: number | null;
+  author_change: number | null;
+  date_published: string | Date | null;
+  public: boolean | null;
+  image: string | null;
+  course_id: number | null;
+  status: "draft" | "feedback" | "finished" | null;
+  deleted: boolean | null;
+  todo_count: number | null;
   text: string | null;
   json: unknown;
   change_date: string | Date | null;
@@ -86,6 +99,41 @@ function parseJsonLike(value: unknown): unknown {
   }
 }
 
+function mapStoryMutation(row: StoryRow | StoryContentRow) {
+  return {
+    legacyId: row.id,
+    duo_id: optionalString(row.duo_id),
+    name: row.name ?? "",
+    set_id: optionalNumber(row.set_id),
+    set_index: optionalNumber(row.set_index),
+    authorId: optionalNumber(row.author),
+    authorChangeId: optionalNumber(row.author_change),
+    date: toTimestampMs(row.date),
+    change_date: toTimestampMs(row.change_date),
+    date_published: toTimestampMs(row.date_published),
+    text: row.text ?? "",
+    public: row.public ?? false,
+    legacyImageId: optionalString(row.image),
+    legacyCourseId: row.course_id as number,
+    json:
+      row.json === null || row.json === undefined
+        ? undefined
+        : parseJsonLike(row.json),
+    status: row.status ?? "draft",
+    deleted: row.deleted ?? false,
+    todo_count: row.todo_count ?? 0,
+  };
+}
+
+async function upsertStoryRow(row: StoryRow | StoryContentRow) {
+  if (typeof row.course_id !== "number") {
+    throw new Error(`story id=${row.id} missing course_id`);
+  }
+  await client.mutation(api.storyTables.upsertStory, {
+    story: mapStoryMutation(row),
+  });
+}
+
 async function migrateStories() {
   console.log("Migrating story metadata -> stories...");
   let total = 0;
@@ -101,34 +149,7 @@ async function migrateStories() {
     `;
     if (!rows.length) break;
     for (const row of rows) {
-      if (typeof row.course_id !== "number") {
-        throw new Error(`story id=${row.id} missing course_id`);
-      }
-      await client.mutation(api.storyTables.upsertStory, {
-        story: {
-          legacyId: row.id,
-          duo_id: optionalString(row.duo_id),
-          name: row.name ?? "",
-          set_id: optionalNumber(row.set_id),
-          set_index: optionalNumber(row.set_index),
-          authorId: optionalNumber(row.author),
-          authorChangeId: optionalNumber(row.author_change),
-          date: toTimestampMs(row.date),
-          change_date: toTimestampMs(row.change_date),
-          date_published: toTimestampMs(row.date_published),
-          text: row.text ?? "",
-          public: row.public ?? false,
-          legacyImageId: optionalString(row.image),
-          legacyCourseId: row.course_id,
-          json:
-            row.json === null || row.json === undefined
-              ? undefined
-              : parseJsonLike(row.json),
-          status: row.status ?? "draft",
-          deleted: row.deleted ?? false,
-          todo_count: row.todo_count ?? 0,
-        },
-      });
+      await upsertStoryRow(row);
     }
     total += rows.length;
     lastId = rows[rows.length - 1].id;
@@ -143,7 +164,7 @@ async function migrateStoryContent() {
   let lastId = START_ID - 1;
   for (;;) {
     const rows = await sql<StoryContentRow[]>`
-      SELECT id, text, json, change_date, date
+      SELECT id, duo_id, name, set_id, set_index, author, author_change, date_published, public, image, course_id, status, deleted, todo_count, text, json, change_date, date
       FROM story
       WHERE id > ${lastId}
       ${END_ID !== undefined ? sql`AND id <= ${END_ID}` : sql``}
@@ -154,15 +175,30 @@ async function migrateStoryContent() {
     for (const row of rows) {
       const parsedJson = parseJsonLike(row.json);
       if (parsedJson === undefined || parsedJson === null) continue;
-      await client.mutation(api.storyTables.upsertStoryContent, {
-        storyContent: {
-          legacyStoryId: row.id,
-          text: row.text ?? "",
-          json: parsedJson,
-          lastUpdated:
-            toTimestampMs(row.change_date) ?? toTimestampMs(row.date) ?? Date.now(),
-        },
-      });
+      try {
+        await client.mutation(api.storyTables.upsertStoryContent, {
+          storyContent: {
+            legacyStoryId: row.id,
+            text: row.text ?? "",
+            json: parsedJson,
+            lastUpdated:
+              toTimestampMs(row.change_date) ?? toTimestampMs(row.date) ?? Date.now(),
+          },
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (!message.includes(`Missing story for legacy id ${row.id}`)) throw error;
+        await upsertStoryRow(row);
+        await client.mutation(api.storyTables.upsertStoryContent, {
+          storyContent: {
+            legacyStoryId: row.id,
+            text: row.text ?? "",
+            json: parsedJson,
+            lastUpdated:
+              toTimestampMs(row.change_date) ?? toTimestampMs(row.date) ?? Date.now(),
+          },
+        });
+      }
     }
     total += rows.length;
     lastId = rows[rows.length - 1].id;
