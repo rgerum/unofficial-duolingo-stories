@@ -5,6 +5,8 @@ import { LoggedInButton, LogInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
 import { sql } from "@/lib/db";
 import TextEdit from "./text_edit";
+import { mirrorLocalization } from "@/lib/lookupTableMirror";
+import { getUser, isContributor } from "@/lib/userInterface";
 
 interface LanguageType {
   id: number;
@@ -87,10 +89,19 @@ WHERE l.language_id = 1;`;
 
   async function set_localization(tag: string, text: string) {
     "use server";
-    return sql`INSERT INTO localization (tag, text, language_id)
+    const token = await getUser();
+    if (!token || !isContributor(token)) {
+      throw new Error("You need to be a registered contributor.");
+    }
+    const row = (
+      await sql`INSERT INTO localization (tag, text, language_id)
     VALUES (${tag}, ${text}, ${language_id})
     ON CONFLICT (tag, language_id)
-    DO UPDATE SET text = EXCLUDED.text`;
+    DO UPDATE SET text = EXCLUDED.text
+    RETURNING id, language_id, tag, text`
+    )[0];
+    await mirrorLocalization(row, `localization:${row.language_id}:${row.tag}:set`);
+    return row;
   }
 
   return (

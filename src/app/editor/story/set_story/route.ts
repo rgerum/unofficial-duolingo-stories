@@ -3,6 +3,7 @@ import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
 import {getUser, isContributor} from "@/lib/userInterface";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { mirrorCourse } from "@/lib/lookupTableMirror";
 
 interface StoryData {
   id?: number;
@@ -76,6 +77,12 @@ async function set_story(
   WHERE id = ${data.id}
 `;
   await sql`UPDATE course SET todo_count = (SELECT SUM(todo_count) FROM story WHERE course_id = ${data["course_id"]}) WHERE id = ${data["course_id"]}`;
+  const updatedCourse = (
+    await sql`SELECT * FROM course WHERE id = ${data["course_id"]} LIMIT 1`
+  )[0];
+  if (updatedCourse) {
+    await mirrorCourse(updatedCourse, `course:${updatedCourse.id}:set_story`);
+  }
 
   if (data["id"] !== undefined) {
     await upload_github(

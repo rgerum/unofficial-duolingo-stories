@@ -3,6 +3,15 @@
 import { sql } from "@/lib/db";
 import { revalidateTag } from "next/cache";
 import { StorySchema, type Story } from "./schema";
+import { mirrorCourse } from "@/lib/lookupTableMirror";
+import { getUser, isAdmin } from "@/lib/userInterface";
+
+async function requireAdmin() {
+  const token = await getUser();
+  if (!isAdmin(token)) {
+    throw new Error("You need to be a registered admin.");
+  }
+}
 
 async function story_properties(id: number): Promise<Story> {
   let data = await sql`
@@ -26,6 +35,8 @@ export async function togglePublished(
   id: number,
   currentPublic: boolean,
 ): Promise<Story> {
+  await requireAdmin();
+
   await sql`UPDATE story SET ${sql({ public: !currentPublic }, "public")} WHERE id = ${id};`;
 
   await sql`UPDATE course
@@ -34,6 +45,12 @@ SET count = (
     FROM story
     WHERE story.course_id = course.id AND story.public AND NOT story.deleted
 ) WHERE id = (SELECT course_id FROM story WHERE id = ${id});`;
+  const course = (
+    await sql`SELECT c.* FROM course c JOIN story s ON s.course_id = c.id WHERE s.id = ${id} LIMIT 1`
+  )[0];
+  if (course) {
+    await mirrorCourse(course, `course:${course.id}:toggle_published`);
+  }
 
   revalidateTag("course_data", "max");
   revalidateTag("story_data", "max");
@@ -45,6 +62,8 @@ export async function removeApproval(
   id: number,
   approval_id: number,
 ): Promise<Story> {
+  await requireAdmin();
+
   await sql`DELETE FROM story_approval WHERE id = ${approval_id};`;
   return await story_properties(id);
 }

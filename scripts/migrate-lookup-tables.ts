@@ -54,6 +54,49 @@ type AvatarRow = {
   name: string | null;
 };
 
+type SpeakerRow = {
+  id: number;
+  language_id: number;
+  speaker: string;
+  gender: string;
+  type: string;
+  service: string;
+};
+
+type LocalizationRow = {
+  id: number;
+  language_id: number;
+  tag: string;
+  text: string;
+};
+
+type CourseRow = {
+  id: number;
+  short: string | null;
+  learning_language: number | null;
+  from_language: number | null;
+  public: boolean;
+  official: boolean;
+  name: string | null;
+  about: string | null;
+  conlang: boolean | null;
+  tags: string[] | null;
+  count: number | null;
+  learning_language_name: string | null;
+  from_language_name: string | null;
+  contributors: string[] | null;
+  contributors_past: string[] | null;
+  todo_count: number | null;
+};
+
+type AvatarMappingRow = {
+  id: number;
+  avatar_id: number;
+  language_id: number;
+  name: string | null;
+  speaker: string | null;
+};
+
 function optionalString(value: string | null): string | undefined {
   return value ?? undefined;
 }
@@ -146,10 +189,133 @@ async function migrateAvatars() {
   console.log(`Avatar done: ${rows.length}`);
 }
 
+async function migrateSpeakers() {
+  console.log("Migrating speaker table...");
+  const rows = await sql<SpeakerRow[]>`
+    SELECT id, language_id, speaker, gender, type, service
+    FROM speaker
+    ORDER BY id
+  `;
+
+  await runBatch(rows, async (chunk) => {
+    const speakers = chunk.map((row) => ({
+      legacyId: row.id,
+      legacyLanguageId: row.language_id,
+      speaker: row.speaker,
+      gender: row.gender,
+      type: row.type,
+      service: row.service,
+    }));
+    for (const speaker of speakers) {
+      await client.mutation(api.lookupTables.upsertSpeaker, { speaker });
+    }
+  });
+
+  console.log(`Speaker done: ${rows.length}`);
+}
+
+async function migrateLocalizations() {
+  console.log("Migrating localization table...");
+  const rows = await sql<LocalizationRow[]>`
+    SELECT id, language_id, tag, text
+    FROM localization
+    ORDER BY id
+  `;
+
+  await runBatch(rows, async (chunk) => {
+    for (const row of chunk) {
+      await client.mutation(api.lookupTables.upsertLocalization, {
+        localization: {
+          legacyId: row.id,
+          legacyLanguageId: row.language_id,
+          tag: row.tag,
+          text: row.text,
+        },
+      });
+    }
+  });
+
+  console.log(`Localization done: ${rows.length}`);
+}
+
+async function migrateCourses() {
+  console.log("Migrating course table...");
+  const rows = await sql<CourseRow[]>`
+    SELECT id, short, learning_language, from_language, public, official, name, about, conlang, tags, count, learning_language_name, from_language_name, contributors, contributors_past, todo_count
+    FROM course
+    ORDER BY id
+  `;
+
+  await runBatch(rows, async (chunk) => {
+    for (const row of chunk) {
+      if (
+        typeof row.learning_language !== "number" ||
+        typeof row.from_language !== "number"
+      ) {
+        throw new Error(
+          `Course ${row.id} missing language references (learning_language/from_language)`,
+        );
+      }
+
+      await client.mutation(api.lookupTables.upsertCourse, {
+        course: {
+          legacyId: row.id,
+          short: optionalString(row.short),
+          legacyLearningLanguageId: row.learning_language,
+          legacyFromLanguageId: row.from_language,
+          public: row.public,
+          official: row.official,
+          name: optionalString(row.name),
+          about: optionalString(row.about),
+          conlang: row.conlang ?? undefined,
+          tags: row.tags ?? undefined,
+          count: optionalNumber(row.count),
+          learning_language_name: optionalString(row.learning_language_name),
+          from_language_name: optionalString(row.from_language_name),
+          contributors: row.contributors ?? undefined,
+          contributors_past: row.contributors_past ?? undefined,
+          todo_count: optionalNumber(row.todo_count),
+        },
+      });
+    }
+  });
+
+  console.log(`Course done: ${rows.length}`);
+}
+
+async function migrateAvatarMappings() {
+  console.log("Migrating avatar_mapping table...");
+  const rows = await sql<AvatarMappingRow[]>`
+    SELECT id, avatar_id, language_id, name, speaker
+    FROM avatar_mapping
+    ORDER BY id
+  `;
+
+  await runBatch(rows, async (chunk) => {
+    for (const row of chunk) {
+      await client.mutation(api.lookupTables.upsertAvatarMapping, {
+        avatarMapping: {
+          legacyId: row.id,
+          legacyAvatarId: row.avatar_id,
+          legacyLanguageId: row.language_id,
+          name: optionalString(row.name),
+          speaker: optionalString(row.speaker),
+        },
+      });
+    }
+  });
+
+  console.log(`Avatar mapping done: ${rows.length}`);
+}
+
 async function main() {
   await migrateLanguages();
   await migrateImages();
   await migrateAvatars();
+  await migrateSpeakers();
+  await migrateLocalizations();
+  await migrateCourses();
+  await migrateAvatarMappings();
   console.log("Lookup table migration complete");
 }
 

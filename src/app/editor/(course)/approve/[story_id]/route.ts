@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { mirrorCourse } from "@/lib/lookupTableMirror";
 
 export async function GET(
   request: Request,
@@ -38,6 +39,21 @@ async function set_approve({
   story_id: number;
   user_id: number;
 }) {
+  const mirroredCourseIds = new Set<number>();
+  const mirrorCourseById = async (courseId: number, operation: string) => {
+    if (mirroredCourseIds.has(courseId)) return;
+    const course = (
+      await sql`SELECT * FROM course WHERE id = ${courseId} LIMIT 1`
+    )[0];
+    if (!course) return;
+    await mirrorCourse(course, `course:${course.id}:${operation}`);
+    mirroredCourseIds.add(courseId);
+  };
+  const storyCourseId = Number(
+    (await sql`SELECT course_id FROM story WHERE id = ${story_id} LIMIT 1`)[0]
+      ?.course_id,
+  );
+
   let res =
     await sql`SELECT id FROM story_approval WHERE story_id = ${story_id} AND user_id = ${user_id};`;
   let action;
@@ -83,6 +99,14 @@ SET count = (
     FROM story
     WHERE story.course_id = course.id AND story.public AND NOT story.deleted
 ) WHERE id = (SELECT course_id FROM story WHERE id = ${res3[0].id});`;
+      const publishedCourseId = Number(
+        (
+          await sql`SELECT course_id FROM story WHERE id = ${res3[0].id} LIMIT 1`
+        )[0]?.course_id,
+      );
+      if (Number.isFinite(publishedCourseId)) {
+        await mirrorCourseById(publishedCourseId, "approve_publish_count");
+      }
       revalidateTag("course_data", "day");
       revalidateTag("story_data", "day");
     }
@@ -101,7 +125,11 @@ SET contributors = (SELECT COALESCE(array_agg(name), '{}')
                                WHERE course_id = course.id
                                GROUP BY u.id, c.id, c.short, u.name
                                ORDER BY MAX(sa.date) DESC) AS contributors
-                         WHERE active);`;
+                         WHERE active)
+WHERE id = ${storyCourseId};`;
+    if (Number.isFinite(storyCourseId)) {
+      await mirrorCourseById(storyCourseId, "approve_contributors");
+    }
     await sql`UPDATE course
 SET contributors_past = (SELECT COALESCE(array_agg(name), '{}')
                          FROM (SELECT u.name                                           AS name,
@@ -116,7 +144,11 @@ SET contributors_past = (SELECT COALESCE(array_agg(name), '{}')
                                WHERE course_id = course.id
                                GROUP BY u.id, c.id, c.short, u.name
                                ORDER BY MAX(sa.date) DESC) AS contributors
-                         WHERE NOT active);`;
+                         WHERE NOT active)
+WHERE id = ${storyCourseId};`;
+    if (Number.isFinite(storyCourseId)) {
+      await mirrorCourseById(storyCourseId, "approve_contributors_past");
+    }
   }
 
   // Track story approval event server-side
