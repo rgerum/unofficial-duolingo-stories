@@ -55,6 +55,7 @@ Status values:
 | `avatar_mapping` | `scripts/migrate-lookup-tables.ts` | Backfill | Bulk copy from Postgres `avatar_mapping` to Convex. | `api.lookupTables.upsertAvatarMapping` | Backfill |
 | `story` | `scripts/migrate-story-tables.ts` | Backfill | Bulk copy story metadata from Postgres `story` to Convex `stories`. | `api.storyTables.upsertStory` | Backfill |
 | `story_content` | `scripts/migrate-story-tables.ts` | Backfill | Bulk copy heavy payload (`text`, `json`) from Postgres `story` to Convex `story_content`. | `api.storyTables.upsertStoryContent` | Backfill |
+| `story` | `scripts/remove-story-heavy-fields.ts` | Cleanup migration | Strip deprecated heavy fields (`text`, `json`) from existing Convex `stories` documents after `story_content` backfill. | `api.storyTables.stripStoryHeavyFieldsBatch` | Backfill |
 
 ## Notes
 

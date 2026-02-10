@@ -328,14 +328,9 @@ export async function mirrorStory(
           date: optionalTimestampMs(row.date),
           change_date: optionalTimestampMs(row.change_date),
           date_published: optionalTimestampMs(row.date_published),
-          text: typeof row.text === "string" ? row.text : "",
           public: row.public ?? false,
           legacyImageId: optionalString(row.image),
           legacyCourseId: row.course_id,
-          json:
-            row.json === null || row.json === undefined
-              ? undefined
-              : parseJsonLike(row.json),
           status,
           deleted: row.deleted ?? false,
           todo_count: row.todo_count ?? 0,
