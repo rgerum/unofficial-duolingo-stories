@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { z } from "zod";
+import { mirrorAvatarMapping } from "@/lib/lookupTableMirror";
 
 const AvatarSetSchema = z.object({
   id: z.number().optional(),
@@ -41,8 +42,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json(answer);
   } catch (err) {
-    return new Response(err instanceof Error ? err.message : String(err), {
-      status: 500,
+    const message = err instanceof Error ? err.message : String(err);
+    const isMirrorFailure = message.includes("Convex mirror");
+    return new Response(message, {
+      status: isMirrorFailure ? 502 : 500,
     });
   }
 }
@@ -65,14 +68,21 @@ async function set_avatar({
 
   if (res.length) {
     const existingId = res[0].id as number;
-    return sql`UPDATE avatar_mapping SET ${sql({ name, speaker, language_id, avatar_id })} WHERE id = ${existingId}`;
+    await sql`UPDATE avatar_mapping SET ${sql({ name, speaker, language_id, avatar_id })} WHERE id = ${existingId}`;
+    const updated = (
+      await sql`SELECT id, avatar_id, language_id, name, speaker FROM avatar_mapping WHERE id = ${existingId} LIMIT 1`
+    )[0];
+    await mirrorAvatarMapping(updated, `avatar_mapping:${existingId}:set`);
+    return updated;
   }
-  return (
+  const inserted = (
     await sql`INSERT INTO avatar_mapping ${sql({
       name,
       speaker,
       language_id,
       avatar_id,
-    })} RETURNING id;`
+    })} RETURNING id, avatar_id, language_id, name, speaker;`
   )[0];
+  await mirrorAvatarMapping(inserted, `avatar_mapping:${inserted.id}:set`);
+  return inserted;
 }

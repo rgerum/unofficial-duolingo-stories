@@ -2,6 +2,7 @@ import { sql } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { getUser, isAdmin } from "@/lib/userInterface";
+import { mirrorCourse } from "@/lib/lookupTableMirror";
 
 interface CourseData {
   id?: number;
@@ -19,18 +20,26 @@ interface CourseData {
 }
 
 export async function POST(req: NextRequest) {
-  const data: CourseData = await req.json();
-  const token = await getUser();
+  try {
+    const data: CourseData = await req.json();
+    const token = await getUser();
 
-  if (!isAdmin(token))
-    return new Response("You need to be a registered admin.", { status: 401 });
+    if (!isAdmin(token))
+      return new Response("You need to be a registered admin.", { status: 401 });
 
-  const answer = await set_course(data);
+    const answer = await set_course(data);
 
-  if (answer === undefined)
-    return new Response("Error not found.", { status: 404 });
+    if (answer === undefined)
+      return new Response("Error not found.", { status: 404 });
 
-  return NextResponse.json(answer);
+    return NextResponse.json(answer);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const isMirrorFailure = message.includes("Convex mirror");
+    return new Response(message, {
+      status: isMirrorFailure ? 502 : 500,
+    });
+  }
 }
 
 async function set_course(data: CourseData) {
@@ -82,5 +91,6 @@ async function set_course(data: CourseData) {
   } catch (e) {
     //console.log("revalidate error", e);
   }
+  await mirrorCourse(data_new[0], `course:${id}:admin_set`);
   return data_new[0];
 }
