@@ -352,9 +352,7 @@ export const upsertLocalization = mutation({
     const existing = await ctx.db
       .query("localizations")
       .withIndex("by_language_id_and_tag", (q) =>
-        q
-          .eq("languageId", language._id)
-          .eq("tag", args.localization.tag),
+        q.eq("languageId", language._id).eq("tag", args.localization.tag),
       )
       .unique();
 
@@ -453,7 +451,7 @@ export const upsertAvatarMapping = mutation({
   },
   returns: v.object({
     inserted: v.boolean(),
-    docId: v.id("avatarMappings"),
+    docId: v.id("avatar_mappings"),
   }),
   handler: async (ctx, args) => {
     const avatar = await ctx.db
@@ -480,11 +478,9 @@ export const upsertAvatarMapping = mutation({
     }
 
     const existing = await ctx.db
-      .query("avatarMappings")
+      .query("avatar_mappings")
       .withIndex("by_avatar_id_and_language_id", (q) =>
-        q
-          .eq("avatarId", avatar._id)
-          .eq("languageId", language._id),
+        q.eq("avatarId", avatar._id).eq("languageId", language._id),
       )
       .unique();
 
@@ -503,7 +499,7 @@ export const upsertAvatarMapping = mutation({
       return { inserted: false, docId: existing._id };
     }
 
-    const docId = await ctx.db.insert("avatarMappings", doc);
+    const docId = await ctx.db.insert("avatar_mappings", doc);
     return { inserted: true, docId };
   },
 });

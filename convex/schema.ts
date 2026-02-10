@@ -100,15 +100,10 @@ export default defineSchema({
     .index("by_id_value", ["legacyId"])
     .index("by_short", ["short"]),
 
-  avatarMappings: defineTable({
-    legacyId: v.optional(v.number()),
+  avatar_mappings: defineTable({
     avatarId: v.id("avatars"),
     languageId: v.id("languages"),
     name: v.optional(v.string()),
     speaker: v.optional(v.string()),
-    mirrorUpdatedAt: v.optional(v.number()),
-    lastOperationKey: v.optional(v.string()),
-  })
-    .index("by_id_value", ["legacyId"])
-    .index("by_avatar_id_and_language_id", ["avatarId", "languageId"]),
+  }).index("by_avatar_id_and_language_id", ["avatarId", "languageId"]),
 });
