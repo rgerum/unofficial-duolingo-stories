@@ -6,6 +6,7 @@ import { Breadcrumbs } from "../../_components/breadcrumbs";
 import { sql } from "@/lib/db";
 import TextEdit from "./text_edit";
 import { mirrorLocalization } from "@/lib/lookupTableMirror";
+import { getUser, isContributor } from "@/lib/userInterface";
 
 interface LanguageType {
   id: number;
@@ -88,6 +89,10 @@ WHERE l.language_id = 1;`;
 
   async function set_localization(tag: string, text: string) {
     "use server";
+    const token = await getUser();
+    if (!token || !isContributor(token)) {
+      throw new Error("You need to be a registered contributor.");
+    }
     const row = (
       await sql`INSERT INTO localization (tag, text, language_id)
     VALUES (${tag}, ${text}, ${language_id})
