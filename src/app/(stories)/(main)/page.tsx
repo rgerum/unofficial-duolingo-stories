@@ -3,11 +3,9 @@ import Header from "./header";
 import { CourseListInner } from "./course_list";
 import Icons from "./icons";
 import React from "react";
-import { get_counts } from "./get_course_data";
+import LandingStatsClient from "./landing_stats_client";
 
-export default async function Page({}) {
-  const counts = await get_counts();
-
+export default function Page({}) {
   // Render data...
   return (
     <>
@@ -18,8 +16,7 @@ export default async function Page({}) {
           <Link href="https://www.duolingo.com/stories">Duolingo Stories</Link>{" "}
           to new languages.
           <br />
-          {counts.count_stories} stories in {counts.count_courses} courses and
-          counting!
+          <LandingStatsClient />
         </p>
         <p>
           If you want to contribute or discuss the stories, meet us on{" "}

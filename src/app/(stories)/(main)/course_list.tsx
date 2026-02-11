@@ -1,34 +1,58 @@
-import React, { Suspense } from "react";
-import { get_localisation_by_convex_language_id } from "@/lib/get_localisation";
+"use client";
+
+import React from "react";
 import LanguageButton from "./language_button";
 import type { Id } from "@convex/_generated/dataModel";
+import type { CourseData } from "./get_course_data";
+import { api } from "@convex/_generated/api";
+import { useQuery } from "convex/react";
 
 import styles from "./course_list.module.css";
-import { get_course_groups, get_courses_in_group } from "./get_course_data";
 
-async function LanguageGroup({
+function getCourseGroups(courses: CourseData[]) {
+  const english = courses.find((course) => course.from_language_name === "English");
+  const otherIds = Array.from(
+    new Set(
+      courses
+        .filter((course) => course.from_language_name !== "English")
+        .map((course) => course.fromLanguageId),
+    ),
+  );
+  const englishIds = english ? [english.fromLanguageId] : [];
+  return [...englishIds, ...otherIds];
+}
+
+function LanguageGroup({
   name,
   id,
+  courses,
 }: {
   name: string;
   id: Id<"languages">;
+  courses: CourseData[];
 }) {
-  let courses_list = await get_courses_in_group(id);
+  const localisationRows = useQuery(api.localization.getLocalizationWithEnglishFallback, {
+    languageId: id,
+  });
+  const storiesFor =
+    localisationRows?.find((entry) => entry.tag === "stories_for")?.text ?? "Stories for";
+  const nStoriesTemplate =
+    localisationRows?.find((entry) => entry.tag === "n_stories")?.text ?? "$count stories";
 
-  let localisation = await get_localisation_by_convex_language_id(id);
+  if (!courses) return <>no list {name}</>;
 
-  if (!courses_list) return <>no list {name}</>;
+  const coursesList = courses.filter((course) => course.fromLanguageId === id);
 
   return (
     <div className={styles.course_list}>
       <hr />
       <div className={styles.course_group_name}>
-        {localisation("stories_for")}
+        {storiesFor}
       </div>
       <ol className={styles.course_list_ol}>
-        {courses_list?.map((course) => (
+        {coursesList.map((course) => (
           <li key={course.id}>
-            <LanguageButton course_id={course.short} />
+            <LanguageButton course={course} storiesTemplate={nStoriesTemplate} />
           </li>
         ))}
       </ol>
@@ -36,13 +60,15 @@ async function LanguageGroup({
   );
 }
 
-export async function CourseListInner({
+export function CourseListInner({
   tag,
   loading,
 }: {
   tag?: string;
   loading?: boolean | undefined;
 }) {
+  const courses = useQuery(api.landing.getPublicCourseList, {});
+
   if (loading) {
     return (
       <div className={styles.course_list}>
@@ -51,7 +77,7 @@ export async function CourseListInner({
           <span className={styles.loading}>Stories for English Speakers</span>
         </div>
         <ol className={styles.course_list_ol}>
-          {[...Array(10)].map((d, i) => (
+          {[...Array(10)].map((_, i) => (
             <li key={i}>
               <LanguageButton loading={true} />
             </li>
@@ -60,24 +86,29 @@ export async function CourseListInner({
       </div>
     );
   }
-  let course_groups = await get_course_groups();
+
+  if (!courses) return <CourseListInner loading={true} tag={tag} />;
+
+  const courseGroups = getCourseGroups(courses);
+
   return (
     <>
-      {course_groups?.map((group) => (
+      {courseGroups.map((groupId) => {
+        const groupCourse = courses.find((course) => course.fromLanguageId === groupId);
+        if (!groupCourse) return null;
+        return (
         <LanguageGroup
-          key={group.fromLanguageId}
-          name={group.from_language_name}
-          id={group.fromLanguageId}
+          key={groupId}
+          name={groupCourse.from_language_name}
+          id={groupId}
+          courses={courses}
         />
-      ))}
+        );
+      })}
     </>
   );
 }
 
-export default async function CourseList({ tag }: { tag: string }) {
-  return (
-    <Suspense fallback={<CourseListInner loading={true} />}>
-      <CourseListInner tag={tag} />
-    </Suspense>
-  );
+export default function CourseList({ tag }: { tag: string }) {
+  return <CourseListInner tag={tag} />;
 }

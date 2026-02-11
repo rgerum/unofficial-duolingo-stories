@@ -1,16 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import styles from "./language_button.module.css";
-import {
-  get_localisation_by_convex_language_id,
-} from "@/lib/get_localisation";
-import FlagByConvexId from "@/components/layout/flag_by_convex_id";
-import { get_course } from "./get_course_data";
+import Flag from "@/components/layout/flag";
+import { api } from "@convex/_generated/api";
+import { useQuery } from "convex/react";
+import type { CourseData } from "./get_course_data";
 
-export default async function LanguageButton({
-  course_id,
+export default function LanguageButton({
+  course,
+  storiesTemplate,
   loading,
 }: {
-  course_id?: string;
+  course?: Pick<CourseData, "short" | "name" | "count" | "learningLanguageId">;
+  storiesTemplate?: string;
   loading?: boolean;
 }) {
   if (loading) {
@@ -22,16 +25,12 @@ export default async function LanguageButton({
       ></div>
     );
   }
-  if (!course_id) {
-    return null;
-  }
-  let course = await get_course(course_id);
-  if (!course) {
-    return null;
-  }
-  let localisation = await get_localisation_by_convex_language_id(
-    course.fromLanguageId,
-  );
+
+  if (!course) return null;
+
+  const language = useQuery(api.localization.getLanguageFlagById, {
+    languageId: course.learningLanguageId,
+  });
 
   return (
     <Link
@@ -39,10 +38,21 @@ export default async function LanguageButton({
       className={styles.language_select_button}
       href={`/${course.short}`}
     >
-      <FlagByConvexId id={course.learningLanguageId} />
+      <Flag
+        iso={language?.short}
+        flag={
+          typeof language?.flag === "number"
+            ? language.flag
+            : Number.isFinite(Number(language?.flag))
+              ? Number(language?.flag)
+              : undefined
+        }
+        flag_file={language?.flag_file ?? undefined}
+      />
       <span className={styles.language_select_button_text}>{course.name}</span>
       <span className={styles.language_story_count}>
-        {localisation("n_stories", { $count: `${course.count}` })}
+        {storiesTemplate?.replaceAll("$count", `${course.count}`) ??
+          `${course.count} stories`}
       </span>
     </Link>
   );
