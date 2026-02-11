@@ -9,6 +9,8 @@ export default function Flag(props: {
   iso?: string;
   flag_file?: string | null;
   flag?: number | null;
+  priority?: boolean;
+  loading?: "lazy" | "eager";
   className?: string;
 }) {
   /**
@@ -93,14 +95,15 @@ export default function Flag(props: {
         }
         width={style.width}
         height={style.height}
-        priority={true}
+        priority={props.priority === true}
+        loading={props.loading}
         className={styles.flag_image2 + " " + (props.className || "")}
         src={
           props.flag_file
-            ? `https://carex.uber.space/stories/flags/${props.flag_file}`
+            ? `/flags/${props.flag_file}`
             : "https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
         }
-        alt={`${props.iso} flag`}
+        alt={props.iso ? `${props.iso} flag` : "Language flag"}
       />
     </>
   );

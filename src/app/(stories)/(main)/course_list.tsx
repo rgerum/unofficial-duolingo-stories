@@ -26,10 +26,12 @@ function LanguageGroup({
   name,
   id,
   courses,
+  startIndex,
 }: {
   name: string;
   id: Id<"languages">;
   courses: CourseData[];
+  startIndex: number;
 }) {
   const localisationRows = useQuery(api.localization.getLocalizationWithEnglishFallback, {
     languageId: id,
@@ -50,9 +52,13 @@ function LanguageGroup({
         {storiesFor}
       </div>
       <ol className={styles.course_list_ol}>
-        {coursesList.map((course) => (
+        {coursesList.map((course, index) => (
           <li key={course.id}>
-            <LanguageButton course={course} storiesTemplate={nStoriesTemplate} />
+            <LanguageButton
+              course={course}
+              storiesTemplate={nStoriesTemplate}
+              eagerFlagImage={startIndex + index < 8}
+            />
           </li>
         ))}
       </ol>
@@ -90,19 +96,42 @@ export function CourseListInner({
   if (!courses) return <CourseListInner loading={true} tag={tag} />;
 
   const courseGroups = getCourseGroups(courses);
+  let startIndex = 0;
+  const groups = courseGroups
+    .map((groupId) => {
+      const groupCourse = courses.find(
+        (course) => course.fromLanguageId === groupId,
+      );
+      if (!groupCourse) return null;
+      const groupCount = courses.filter(
+        (course) => course.fromLanguageId === groupId,
+      ).length;
+      const currentStartIndex = startIndex;
+      startIndex += groupCount;
+
+      return {
+        groupId,
+        groupCourse,
+        startIndex: currentStartIndex,
+      };
+    })
+    .filter(Boolean) as {
+    groupId: Id<"languages">;
+    groupCourse: CourseData;
+    startIndex: number;
+  }[];
 
   return (
     <>
-      {courseGroups.map((groupId) => {
-        const groupCourse = courses.find((course) => course.fromLanguageId === groupId);
-        if (!groupCourse) return null;
+      {groups.map(({ groupId, groupCourse, startIndex }) => {
         return (
-        <LanguageGroup
-          key={groupId}
-          name={groupCourse.from_language_name}
-          id={groupId}
-          courses={courses}
-        />
+          <LanguageGroup
+            key={groupId}
+            name={groupCourse.from_language_name}
+            id={groupId}
+            courses={courses}
+            startIndex={startIndex}
+          />
         );
       })}
     </>

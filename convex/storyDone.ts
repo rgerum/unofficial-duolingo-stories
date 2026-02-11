@@ -111,3 +111,33 @@ export const getDoneStoryIdsForCourse = query({
     return result;
   },
 });
+
+export const getDoneCourseIdsForUser = query({
+  args: {
+    legacyUserId: v.number(),
+  },
+  returns: v.array(v.number()),
+  handler: async (ctx, args) => {
+    const doneRows = await ctx.db
+      .query("story_done")
+      .withIndex("by_user", (q) => q.eq("legacyUserId", args.legacyUserId))
+      .collect();
+    if (doneRows.length === 0) return [];
+
+    const latestDoneAtByCourse = new Map<number, number>();
+    for (const doneRow of doneRows) {
+      const story = await ctx.db.get(doneRow.storyId);
+      if (!story || !story.courseId) continue;
+      const course = await ctx.db.get(story.courseId);
+      if (!course || typeof course.legacyId !== "number") continue;
+      const existing = latestDoneAtByCourse.get(course.legacyId) ?? 0;
+      if (doneRow.time > existing) {
+        latestDoneAtByCourse.set(course.legacyId, doneRow.time);
+      }
+    }
+
+    return Array.from(latestDoneAtByCourse.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([legacyCourseId]) => legacyCourseId);
+  },
+});

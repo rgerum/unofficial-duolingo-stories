@@ -6,6 +6,7 @@
     "start": "next start",
     "lint": "pnpm exec eslint .",
     "typecheck": "tsc --noEmit",
+    "optimize:flags": "pnpm dlx svgo -f flags --multipass",
     "init": "node database/db_create_test.mjs",
     "init-build": "node database/init_build.js",
     "init-reset": "node database/db_test_reset.mjs"

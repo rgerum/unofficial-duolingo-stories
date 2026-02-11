@@ -11,11 +11,18 @@ export default function LanguageButton({
   course,
   storiesTemplate,
   loading,
+  eagerFlagImage,
 }: {
   course?: Pick<CourseData, "short" | "name" | "count" | "learningLanguageId">;
   storiesTemplate?: string;
   loading?: boolean;
+  eagerFlagImage?: boolean;
 }) {
+  const language = useQuery(
+    api.localization.getLanguageFlagById,
+    course ? { languageId: course.learningLanguageId } : "skip",
+  );
+
   if (loading) {
     return (
       <div
@@ -28,15 +35,12 @@ export default function LanguageButton({
 
   if (!course) return null;
 
-  const language = useQuery(api.localization.getLanguageFlagById, {
-    languageId: course.learningLanguageId,
-  });
-
   return (
     <Link
       data-cy={"language_button_big_" + course.short}
       className={styles.language_select_button}
       href={`/${course.short}`}
+      prefetch={false}
     >
       <Flag
         iso={language?.short}
@@ -48,6 +52,7 @@ export default function LanguageButton({
               : undefined
         }
         flag_file={language?.flag_file ?? undefined}
+        loading={eagerFlagImage ? "eager" : "lazy"}
       />
       <span className={styles.language_select_button_text}>{course.name}</span>
       <span className={styles.language_story_count}>

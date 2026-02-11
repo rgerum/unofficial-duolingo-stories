@@ -144,6 +144,13 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_public", ["public", "deleted"])
     .index("by_set", ["courseId", "set_id", "set_index"])
+    .index("by_course_public_deleted_set", [
+      "courseId",
+      "public",
+      "deleted",
+      "set_id",
+      "set_index",
+    ])
     .index("by_legacy_id", ["legacyId"]),
 
   story_content: defineTable({
