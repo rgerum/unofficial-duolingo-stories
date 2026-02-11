@@ -1,7 +1,9 @@
 "use client";
 "use no memo";
 import React, { useState } from "react";
-import { SpinnerBlue } from "@/components/layout/spinner";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { Spinner, SpinnerBlue } from "@/components/layout/spinner";
 import { fetch_post } from "@/lib/fetch_post";
 import styles from "./[language].module.css";
 
@@ -15,12 +17,9 @@ import {
   LanguageType,
   SpeakersType,
   AvatarNamesType,
-  CourseStudSchema,
-} from "@/app/editor/language/[language]/queries";
-import type { z } from "zod";
+  CourseStudType,
+} from "@/app/editor/language/[language]/types";
 import type { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
-
-type CourseStudType = z.infer<typeof CourseStudSchema>;
 type PlayFn = (
   e: React.MouseEvent,
   text: string,
@@ -28,18 +27,42 @@ type PlayFn = (
 ) => Promise<void>;
 
 export default function LanguageEditor({
-  language,
-  language2,
-  speakers,
-  avatar_names,
-  course,
+  identifier,
 }: {
-  language: LanguageType;
-  language2: LanguageType | undefined;
-  speakers: SpeakersType[];
-  avatar_names: AvatarNamesType[];
-  course: CourseStudType | undefined;
+  identifier: string;
 }) {
+  const resolved = useQuery(api.editorRead.resolveEditorLanguage, {
+    identifier,
+  });
+
+  const speakers = useQuery(
+    api.editorRead.getEditorSpeakersByLanguageLegacyId,
+    resolved?.language ? { languageLegacyId: resolved.language.id } : "skip",
+  );
+
+  const avatarNames = useQuery(
+    api.editorRead.getEditorAvatarNamesByLanguageLegacyId,
+    resolved?.language ? { languageLegacyId: resolved.language.id } : "skip",
+  );
+
+  if (
+    resolved === undefined ||
+    speakers === undefined ||
+    avatarNames === undefined
+  ) {
+    return <Spinner />;
+  }
+
+  if (!resolved?.language) {
+    return <p>Language not found.</p>;
+  }
+
+  const language = resolved.language as LanguageType;
+  const language2 = (resolved.language2 ?? undefined) as
+    | LanguageType
+    | undefined;
+  const course = (resolved.course ?? undefined) as CourseStudType | undefined;
+
   // Render data...
   return (
     <>
@@ -52,8 +75,8 @@ export default function LanguageEditor({
         <div className={styles.root + " " + styles.characterEditorContent}>
           <AvatarNames
             language={language}
-            speakers={speakers}
-            avatar_names={avatar_names}
+            speakers={(speakers ?? []) as SpeakersType[]}
+            avatar_names={(avatarNames ?? []) as AvatarNamesType[]}
           />
         </div>
       </Layout>
@@ -179,13 +202,24 @@ function Avatar(props: {
   play: PlayFn;
 }) {
   const avatar = props.avatar;
-  const [name, setName] = useState(avatar.name);
-  const [speaker, setSpeaker] = useState(avatar.speaker);
-  const [inputName, inputNameSetValue] = useState(name || "");
-  const [inputSpeaker, inputSpeakerSetValue] = useState(speaker || "");
+  const [savedName, setSavedName] = useState(avatar.name || "");
+  const [savedSpeaker, setSavedSpeaker] = useState(avatar.speaker || "");
+  const [inputName, inputNameSetValue] = useState(savedName);
+  const [inputSpeaker, inputSpeakerSetValue] = useState(savedSpeaker);
 
   const unsavedChanged =
-    inputName !== (name || "") || inputSpeaker !== (speaker || "");
+    inputName !== savedName || inputSpeaker !== savedSpeaker;
+
+  React.useEffect(() => {
+    // Keep UI in sync with reactive Convex updates while preserving local edits.
+    if (unsavedChanged) return;
+    const nextSavedName = avatar.name || "";
+    const nextSavedSpeaker = avatar.speaker || "";
+    setSavedName(nextSavedName);
+    setSavedSpeaker(nextSavedSpeaker);
+    inputNameSetValue(nextSavedName);
+    inputSpeakerSetValue(nextSavedSpeaker);
+  }, [avatar.name, avatar.speaker, unsavedChanged]);
 
   const language_id = props.language_id;
   async function save() {
@@ -198,8 +232,8 @@ function Avatar(props: {
       avatar_id: avatar.avatar_id,
     };
     await setAvatarSpeaker(data);
-    setName(name);
-    setSpeaker(speaker);
+    setSavedName(name);
+    setSavedSpeaker(speaker);
   }
   if (avatar.avatar_id === -1) {
     return (

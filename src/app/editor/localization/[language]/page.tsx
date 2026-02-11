@@ -1,8 +1,9 @@
 import React from "react";
 import { cache } from "react";
-import { sql } from "@/lib/db";
 import { notFound } from "next/navigation";
-import LocalizationEditor from "./localization_editor";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@convex/_generated/api";
+import LocalizationPageClient from "./page_client";
 
 interface LanguageType {
   id: number;
@@ -20,49 +21,17 @@ interface PageProps {
   params: Promise<{ language: string }>;
 }
 
-const get_language = cache(
-  async (
-    id: string,
-  ): Promise<
-    [LanguageType | undefined, CourseType | undefined, LanguageType | undefined]
-  > => {
-    const isNumeric = (value: string) =>
-      value.length !== 0 && [...value].every((c) => c >= "0" && c <= "9");
-    if (isNumeric(id)) {
-      return [
-        (await sql`SELECT * FROM language WHERE id = ${id} LIMIT 1`)[0] as
-          | LanguageType
-          | undefined,
-        undefined,
-        undefined,
-      ];
-    } else {
-      let course = (
-        await sql`SELECT learning_language, from_language, short FROM course WHERE short = ${id} LIMIT 1`
-      )[0] as CourseType | undefined;
-      if (course) {
-        const langId = course.learning_language;
-        let id2 = course.from_language;
-        return [
-          (
-            await sql`SELECT * FROM language WHERE id = ${langId} LIMIT 1`
-          )[0] as LanguageType | undefined,
-          course,
-          (await sql`SELECT * FROM language WHERE id = ${id2} LIMIT 1`)[0] as
-            | LanguageType
-            | undefined,
-        ];
-      }
-      return [
-        (await sql`SELECT * FROM language WHERE short = ${id} LIMIT 1`)[0] as
-          | LanguageType
-          | undefined,
-        undefined,
-        undefined,
-      ];
-    }
-  },
-);
+const get_language = cache(async (id: string) => {
+  const resolved = await fetchQuery(api.editorRead.resolveEditorLanguage, {
+    identifier: id,
+  });
+  if (!resolved?.language) return [undefined, undefined, undefined] as const;
+  return [
+    resolved.language as LanguageType,
+    (resolved.course ?? undefined) as CourseType | undefined,
+    (resolved.language2 ?? undefined) as LanguageType | undefined,
+  ] as const;
+});
 
 export async function generateMetadata({ params }: PageProps) {
   let [language, course, language2] = await get_language(
@@ -89,22 +58,5 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function Page({ params }: PageProps) {
-  let [language, course, language2] = await get_language(
-    (await params).language,
-  );
-
-  if (!language) {
-    notFound();
-  }
-
-  // Render data...
-  return (
-    <>
-      <LocalizationEditor
-        language={language}
-        language2={language2}
-        course={course}
-      />
-    </>
-  );
+  return <LocalizationPageClient identifier={(await params).language} />;
 }

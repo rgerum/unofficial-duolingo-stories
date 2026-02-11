@@ -2,7 +2,7 @@ import {
   generate_ssml_line,
   text_to_keypoints,
 } from "@/lib/editor/audio/audio_edit_tools";
-import { Avatar } from "@/app/editor/story/[story]/page";
+import { Avatar } from "@/app/editor/story/[story]/types";
 import {
   Audio,
   ContentWithHints,

@@ -26,11 +26,13 @@ import { useRouter } from "next/navigation";
 import { StoryEditorHeader } from "./header";
 import { fetch_post } from "@/lib/fetch_post";
 import SoundRecorder from "./sound-recorder";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 import {
   insert_audio_line,
   timings_to_text,
 } from "@/lib/editor/audio/audio_edit_tools";
-import { Avatar, StoryData } from "@/app/editor/story/[story]/page";
+import { Avatar, StoryData } from "@/app/editor/story/[story]/types";
 import { z } from "zod";
 
 let images_cached: Record<string, z.infer<typeof ImageSchema>> = {};
@@ -69,7 +71,7 @@ const LanguageSchema = z.object({
   id: z.number(),
   name: z.string(),
   short: z.string(),
-  flag: z.number(),
+  flag: z.number().nullable(),
   flag_file: z.string().nullable(),
   speaker: z.string().nullable(),
   default_text: z.string(),
@@ -78,16 +80,6 @@ const LanguageSchema = z.object({
   rtl: z.boolean(),
 });
 type LanguageData = z.infer<typeof LanguageSchema>;
-export async function getLanguageName(id: number) {
-  try {
-    const response = await fetch(`/editor/story/get_language/${id}`, {
-      credentials: "include",
-    });
-    return LanguageSchema.parse(await response.json());
-  } catch (e) {
-    return undefined;
-  }
-}
 
 export async function setStory(data: {
   id: number;
@@ -168,23 +160,34 @@ export default function Editor({
   const margin = React.useRef<SVGSVGElement>(null);
   const svg_parent = React.useRef<SVGSVGElement>(null);
 
-  const [language_data, set_language_data] = React.useState<
-    LanguageData | undefined
-  >();
-  const [language_data2, set_language_data2] = React.useState<
-    LanguageData | undefined
-  >();
+  const language_data =
+    (useQuery(api.editorRead.getEditorLanguageByLegacyId, {
+      legacyLanguageId: story_data.learning_language,
+    }) ?? undefined) as LanguageData | undefined;
+  const language_data2 =
+    (useQuery(api.editorRead.getEditorLanguageByLegacyId, {
+      legacyLanguageId: story_data.from_language,
+    }) ?? undefined) as LanguageData | undefined;
+  const storyDataRef = React.useRef(story_data);
+  const avatarNamesRef = React.useRef(avatar_names);
+  const languageDataRef = React.useRef<LanguageData | undefined>(language_data);
+  const languageData2Ref = React.useRef<LanguageData | undefined>(language_data2);
+
   React.useEffect(() => {
-    async function loadLanguageData() {
-      if (!story_data) return () => {};
-      const language_data = await getLanguageName(story_data.learning_language);
-      const language_data2 = await getLanguageName(story_data.from_language);
-      set_language_data(language_data);
-      set_language_data2(language_data2);
-      return () => {};
-    }
-    loadLanguageData();
+    storyDataRef.current = story_data;
   }, [story_data]);
+
+  React.useEffect(() => {
+    avatarNamesRef.current = avatar_names;
+  }, [avatar_names]);
+
+  React.useEffect(() => {
+    languageDataRef.current = language_data;
+  }, [language_data]);
+
+  React.useEffect(() => {
+    languageData2Ref.current = language_data2;
+  }, [language_data2]);
 
   const [show_trans, set_show_trans] = React.useState(false);
   const [show_ssml, set_show_ssml] = React.useState(false);
@@ -275,7 +278,6 @@ export default function Editor({
   }, [unsaved_changes, beforeunload]);
 
   React.useEffect(() => {
-    if (!story_data || !avatar_names) return undefined;
     let createScrollLookUp = () => {
       window.dispatchEvent(new CustomEvent("resize"));
     };
@@ -291,18 +293,19 @@ export default function Editor({
 
     async function Save() {
       try {
-        if (story_meta === undefined || story_data === undefined) {
+        const currentStoryData = storyDataRef.current;
+        if (story_meta === undefined || currentStoryData === undefined) {
           console.error("Save error: story_meta or story_data is undefined");
           return;
         }
         const data = {
-          id: story_data.id,
-          duo_id: story_data.duo_id,
+          id: currentStoryData.id,
+          duo_id: currentStoryData.duo_id,
           name: story_meta.fromLanguageName,
           image: story_meta.icon,
           set_id: story_meta.set_id,
           set_index: story_meta.set_index,
-          course_id: story_data.course_id,
+          course_id: currentStoryData.course_id,
           text: editor_text ?? "",
           json: story,
           todo_count: story_meta.todo_count,
@@ -318,31 +321,35 @@ export default function Editor({
     set_func_save(() => Save);
 
     async function Delete() {
-      if (story_meta === undefined || story_data === undefined) return;
+      const currentStoryData = storyDataRef.current;
+      if (story_meta === undefined || currentStoryData === undefined) return;
       await deleteStory({
-        id: story_data.id,
-        course_id: story_data.course_id,
+        id: currentStoryData.id,
+        course_id: currentStoryData.course_id,
         text: editor_text,
         name: story_meta.from_language_name,
       });
-      navigate(`/editor/course/${story_data.course_id}`);
+      navigate(`/editor/course/${currentStoryData.course_id}`);
     }
     set_func_delete(() => Delete);
 
     async function updateDisplay() {
-      if (stateX === undefined || story_data === undefined) return;
+      const currentStoryData = storyDataRef.current;
+      if (stateX === undefined || currentStoryData === undefined) return;
       if (story === undefined) {
         last_lineno = lineno;
         editor_text = stateX.doc.toString();
+        const learningLanguage = languageDataRef.current;
+        const fromLanguage = languageData2Ref.current;
         const [story2, story_meta2, audio_insert_lines2] = processStoryFile(
           editor_text ?? "",
-          story_data.id,
-          avatar_names,
+          currentStoryData.id,
+          avatarNamesRef.current,
           {
-            learning_language: language_data?.short ?? "",
-            from_language: language_data2?.short ?? "",
+            learning_language: learningLanguage?.short ?? "",
+            from_language: fromLanguage?.short ?? "",
           },
-          language_data?.tts_replace ?? "",
+          learningLanguage?.tts_replace ?? "",
         );
         const image = await getImage(story_meta2.icon);
         story = {
@@ -352,10 +359,10 @@ export default function Editor({
             gilded: image?.gilded,
             locked: image?.locked,
           },
-          learning_language_rtl: language_data?.rtl ?? false,
-          from_language_rtl: language_data2?.rtl ?? false,
-          from_language: language_data2?.short,
-          learning_language: language_data?.short,
+          learning_language_rtl: learningLanguage?.rtl ?? false,
+          from_language_rtl: fromLanguage?.rtl ?? false,
+          from_language: fromLanguage?.short,
+          learning_language: learningLanguage?.short,
         };
 
         story_meta = story_meta2;
@@ -422,7 +429,7 @@ export default function Editor({
     });
 
     const state = EditorState.create({
-      doc: story_data.text || "",
+      doc: storyDataRef.current.text || "",
       extensions: [basicSetup, sync, theme, example(), highlightStyle],
     });
     const view = new EditorView({ state, parent: editor.current ?? undefined });
@@ -441,7 +448,7 @@ export default function Editor({
       document.removeEventListener("keydown", key_pressed);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [story_data, avatar_names, language_data, language_data2]);
+  }, [story_data.id]);
 
   //             <!--<div id="toolbar">--!
   //<nav className={styles.header_index}>

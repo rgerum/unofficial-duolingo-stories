@@ -1,13 +1,13 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./edit_list.module.css";
 import { SpinnerBlue } from "@/components/layout/spinner";
 import { useRouter } from "next/navigation";
 import {
   CourseProps,
   StoryListDataProps,
-} from "@/app/editor/(course)/db_get_course_editor";
+} from "@/app/editor/(course)/types";
 
 export default function EditList({
   stories,
@@ -169,7 +169,7 @@ function pad(x: number) {
   return x.toString();
 }
 
-function formatDate(datetime: string | Date) {
+function formatDate(datetime: string | number | Date) {
   let d = new Date(datetime);
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
     d.getHours(),
@@ -198,7 +198,20 @@ function DropDownStatus(props: {
   let [loading, setLoading] = useState(0);
   let [status, set_status] = useState(props.status);
   let [count, setCount] = useState(props.count);
+  let [isPublic, setIsPublic] = useState(props.public);
   const router = useRouter();
+
+  useEffect(() => {
+    set_status(props.status);
+  }, [props.status]);
+
+  useEffect(() => {
+    setCount(props.count);
+  }, [props.count]);
+
+  useEffect(() => {
+    setIsPublic(props.public);
+  }, [props.public]);
 
   if (props.official) return <></>;
 
@@ -210,6 +223,12 @@ function DropDownStatus(props: {
         let count = parseInt(response.count);
         setCount(count);
         if (response.published.length) {
+          if (
+            Array.isArray(response.published) &&
+            response.published.includes(props.id)
+          ) {
+            setIsPublic(true);
+          }
           router.refresh();
         }
         set_status(response.story_status);
@@ -235,7 +254,7 @@ function DropDownStatus(props: {
     <div className={styles.status_field}>
       {
         <span className={styles.status_text}>
-          {status_wrapper(status, props.public)}
+          {status_wrapper(status, isPublic)}
         </span>
       }{" "}
       {loading === 1 ? (

@@ -12,6 +12,7 @@ import type * as adminData from "../adminData.js";
 import type * as auth from "../auth.js";
 import type * as authFunctions from "../authFunctions.js";
 import type * as authMigration from "../authMigration.js";
+import type * as editorRead from "../editorRead.js";
 import type * as http from "../http.js";
 import type * as landing from "../landing.js";
 import type * as lib_phpbb from "../lib/phpbb.js";
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   authFunctions: typeof authFunctions;
   authMigration: typeof authMigration;
+  editorRead: typeof editorRead;
   http: typeof http;
   landing: typeof landing;
   "lib/phpbb": typeof lib_phpbb;

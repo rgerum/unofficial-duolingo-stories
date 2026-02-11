@@ -1,76 +1,23 @@
-export interface StoryElement {
-  type: string;
-  trackingProperties: {
-    line_index: number;
-  };
-  content?: string;
-  learningLanguageTitleContent?: string;
-}
-
-export interface StoryState {
-  elements: StoryElement[];
-}
-
-export interface EditorState {
-  view: any;
-  audio_insert_lines: any;
-}
-
-export interface AudioEditorData {
-  trackingProperties: {
-    line_index: number;
-  };
-  line?: {
-    content: string;
-  };
-  learningLanguageTitleContent?: string;
-  audio: {
-    ssml: string;
-    url: string;
-    keypoints: Array<{
-      rangeEnd: number;
-      audioStart: number;
-    }>;
-  };
-}
-
-export interface LanguageData {
+export type StoryData = {
+  id: number;
+  official: boolean;
+  course_id: number;
+  duo_id: number;
+  image: string;
+  name: string;
+  set_id: number;
+  set_index: number;
+  text: string;
   short: string;
-  rtl: boolean;
-  tts_replace: any;
-}
+  learning_language: number;
+  from_language: number;
+};
 
-export interface StoryMeta {
-  fromLanguageName: string;
-  icon: number;
-  set_id: string;
-  set_index: string;
-  todo_count: number;
-  from_language_name: string;
-  cast: Array<{
-    id: number;
-    link: string;
-    speaker: string;
-    name: string;
-  }>;
-}
-
-export interface HeaderProps {
-  story_data: any;
-  unsaved_changes: boolean;
-  language_data: LanguageData | undefined;
-  language_data2: LanguageData | undefined;
-  func_save: () => Promise<void>;
-  func_delete: () => Promise<void>;
-  show_trans: boolean;
-  set_show_trans: (value: boolean) => void;
-  show_ssml: boolean;
-  set_show_ssml: (value: boolean) => void;
-}
-
-declare global {
-  interface Window {
-    editorShowTranslations: boolean;
-    editorShowSsml: boolean;
-  }
-}
+export type Avatar = {
+  id: number | null;
+  avatar_id: number;
+  language_id: number;
+  name: string;
+  link: string;
+  speaker: string;
+};

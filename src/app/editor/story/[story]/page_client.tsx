@@ -1,0 +1,32 @@
+"use client";
+
+import React from "react";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { Spinner } from "@/components/layout/spinner";
+import Editor from "./editor";
+import type { Avatar, StoryData } from "./types";
+
+export default function StoryEditorPageClient({
+  storyId,
+}: {
+  storyId: number;
+}) {
+  const data = useQuery(api.editorRead.getEditorStoryPageData, { storyId });
+
+  if (data === undefined) return <Spinner />;
+  if (!data) return <p>Story not found.</p>;
+
+  const avatarNames: Record<number, Avatar> = {};
+  for (const avatar of data.avatar_names as Avatar[]) {
+    avatarNames[avatar.avatar_id] = avatar;
+  }
+
+  return (
+    <Editor
+      story_data={data.story_data as StoryData}
+      avatar_names={avatarNames}
+    />
+  );
+}
+

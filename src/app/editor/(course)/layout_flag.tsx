@@ -2,9 +2,11 @@
 import styles from "./layout.module.css";
 import React from "react";
 import { useSelectedLayoutSegments } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 import EditorButton from "../editor_button";
 import { Breadcrumbs } from "../_components/breadcrumbs";
-import type { CourseProps, LanguageProps } from "./db_get_course_editor";
+import type { CourseProps, LanguageProps } from "./types";
 
 interface BreadcrumbPath {
   type: string;
@@ -24,12 +26,16 @@ interface BreadcrumbPath {
   };
 }
 
-interface LayoutFlagProps {
-  courses: CourseProps[];
-  languages: Record<string | number, LanguageProps>;
-}
+export default function LayoutFlag() {
+  const data = useQuery(api.editorRead.getEditorSidebarData, {});
+  const courses = (data?.courses ?? []) as CourseProps[];
+  const languagesArray = (data?.languages ?? []) as LanguageProps[];
+  const languages: Record<string | number, LanguageProps> = {};
+  for (const language of languagesArray) {
+    languages[language.id] = language;
+    languages[language.short] = language;
+  }
 
-export default function LayoutFlag({ courses, languages }: LayoutFlagProps) {
   const segment = useSelectedLayoutSegments();
   let import_id = segment[3];
   let course: CourseProps | undefined = undefined;
@@ -43,13 +49,8 @@ export default function LayoutFlag({ courses, languages }: LayoutFlagProps) {
       course_import = c;
     }
   }
-  function toggleShow() {
-    const event = new Event("toggleSidebar");
-    window.dispatchEvent(event);
-  }
-  // onClick={toggleShow}
   let path: BreadcrumbPath[] = [{ type: "Editor" }];
-  if (course) {
+  if (course && languages[course.learning_language] && languages[course.from_language]) {
     path = [
       { type: "Editor", href: `/editor` },
       { type: "sep" },
@@ -70,7 +71,13 @@ export default function LayoutFlag({ courses, languages }: LayoutFlagProps) {
       },
     ];
   }
-  if (import_id && course && course_import) {
+  if (
+    import_id &&
+    course &&
+    course_import &&
+    languages[course_import.learning_language] &&
+    languages[course_import.from_language]
+  ) {
     path[path.length - 1].href = `/editor/course/${course.short}`;
     path.push({ type: "sep" });
     path.push({

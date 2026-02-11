@@ -6,19 +6,12 @@ import { useSwipeable } from "react-swipeable";
 import styles from "./course/[course_id]/index.module.css";
 import CourseList from "./course_list";
 import { useSelectedLayoutSegments } from "next/navigation";
-import type { CourseProps, LanguageProps } from "./db_get_course_editor";
 
 interface SwiperSideBarProps {
-  courses: CourseProps[] | undefined;
-  languages: Record<string | number, LanguageProps>;
   children: React.ReactNode;
 }
 
-export default function SwiperSideBar({
-  courses,
-  languages,
-  children,
-}: SwiperSideBarProps) {
+export default function SwiperSideBar({ children }: SwiperSideBarProps) {
   const segment = useSelectedLayoutSegments()[1];
 
   // Render data...
@@ -51,8 +44,6 @@ export default function SwiperSideBar({
     <>
       <div {...handlers} className={styles.root}>
         <CourseList
-          courses={courses}
-          languages={languages}
           course_id={segment}
           showList={showList}
           toggleShow={toggleShow}

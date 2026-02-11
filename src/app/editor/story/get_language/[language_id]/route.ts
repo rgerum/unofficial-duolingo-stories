@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
-import { sql } from "@/lib/db";
 import { getUser, isContributor } from "@/lib/userInterface";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@convex/_generated/api";
 
 interface RouteParams {
   params: Promise<{ language_id: string }>;
@@ -35,5 +36,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 }
 
 async function language({ language_id }: { language_id: string }) {
-  return (await sql`SELECT * FROM language WHERE id = ${language_id}`)[0];
+  return await fetchQuery(api.editorRead.getEditorLanguageByLegacyId, {
+    legacyLanguageId: Number(language_id),
+  });
 }

@@ -1,7 +1,13 @@
 import React from "react";
 import { sql, cache } from "@/lib/db";
 import Flag from "./flag";
-import { LanguageProps } from "@/app/editor/(course)/db_get_course_editor";
+
+type LanguageProps = {
+  id: number;
+  short: string;
+  flag_file: string | null;
+  flag: number | null;
+};
 
 export const get_flag_data = cache(
   async () => {

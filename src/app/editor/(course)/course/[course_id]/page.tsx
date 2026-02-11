@@ -1,15 +1,18 @@
-import { get_course_data, get_story_list } from "../../db_get_course_editor";
-import { notFound, redirect } from "next/navigation";
-import EditList from "../../edit_list";
+import { notFound } from "next/navigation";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { Metadata } from "next";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@convex/_generated/api";
+import CourseEditorPageClient from "./page_client";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ course_id: number }>;
+  params: Promise<{ course_id: string }>;
 }): Promise<Metadata> {
-  let course = await get_course_data((await params).course_id);
+  const course = await fetchQuery(api.editorRead.getEditorCourseByIdentifier, {
+    identifier: (await params).course_id,
+  });
 
   if (!course) notFound();
 
@@ -24,7 +27,7 @@ export async function generateMetadata({
 export default async function Page({
   params,
 }: {
-  params: Promise<{ course_id: number }>;
+  params: Promise<{ course_id: string }>;
 }) {
   const user = await getUser();
 
@@ -35,15 +38,5 @@ export default async function Page({
     //redirect("/editor/not_allowed");
   }
 
-  const course = await get_course_data((await params).course_id);
-  if (!course) notFound();
-
-  const stories = await get_story_list(course.id);
-
-  //function sleep(ms) {
-  //    return new Promise(resolve => setTimeout(resolve, ms));
-  //}
-  //await sleep(2000);
-
-  return <EditList stories={stories} course={course} />;
+  return <CourseEditorPageClient courseId={(await params).course_id} />;
 }

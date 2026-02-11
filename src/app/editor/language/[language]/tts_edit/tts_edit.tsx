@@ -15,15 +15,12 @@ import jsyaml from "js-yaml";
 import {
   LanguageType,
   SpeakersType,
-  CourseStudSchema,
-} from "@/app/editor/language/[language]/queries";
+  CourseStudType,
+} from "@/app/editor/language/[language]/types";
 import {
   StoryElement,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
-import type { z } from "zod";
-
-type CourseStudType = z.infer<typeof CourseStudSchema>;
 
 const element_init: StoryElementLine = {
   trackingProperties: {
