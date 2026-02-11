@@ -19,6 +19,7 @@ import type * as lookupTables from "../lookupTables.js";
 import type * as roles from "../roles.js";
 import type * as storyApproval from "../storyApproval.js";
 import type * as storyDone from "../storyDone.js";
+import type * as storyRead from "../storyRead.js";
 import type * as storyTables from "../storyTables.js";
 
 import type {
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   roles: typeof roles;
   storyApproval: typeof storyApproval;
   storyDone: typeof storyDone;
+  storyRead: typeof storyRead;
   storyTables: typeof storyTables;
 }>;
 
