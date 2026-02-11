@@ -85,9 +85,7 @@ export async function get_course(short: string) {
   return null;
 }
 
-export async function get_done_course_ids_for_user(legacyUserId?: number) {
-  if (!legacyUserId) return [];
-  return await convex.query(api.storyDone.getDoneCourseIdsForUser, {
-    legacyUserId,
-  });
+export async function get_done_course_ids_for_user() {
+  const result = await convex.query(api.storyDone.getDoneCourseIdsForUser, {});
+  return result ?? [];
 }

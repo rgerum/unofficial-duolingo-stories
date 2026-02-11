@@ -113,14 +113,26 @@ export const getDoneStoryIdsForCourse = query({
 });
 
 export const getDoneCourseIdsForUser = query({
-  args: {
-    legacyUserId: v.number(),
-  },
-  returns: v.array(v.number()),
-  handler: async (ctx, args) => {
+  args: {},
+  returns: v.union(v.array(v.number()), v.null()),
+  handler: async (ctx) => {
+    const identity = (await ctx.auth.getUserIdentity()) as
+      | { userId?: string | number | null }
+      | null;
+
+    const rawLegacyUserId = identity?.userId;
+    const legacyUserId =
+      typeof rawLegacyUserId === "number"
+        ? rawLegacyUserId
+        : Number.isFinite(Number(rawLegacyUserId))
+          ? Number(rawLegacyUserId)
+          : NaN;
+
+    if (!Number.isFinite(legacyUserId)) return null;
+
     const doneRows = await ctx.db
       .query("story_done")
-      .withIndex("by_user", (q) => q.eq("legacyUserId", args.legacyUserId))
+      .withIndex("by_user", (q) => q.eq("legacyUserId", legacyUserId))
       .collect();
     if (doneRows.length === 0) return [];
 

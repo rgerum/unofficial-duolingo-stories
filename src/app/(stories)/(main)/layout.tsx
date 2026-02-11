@@ -2,8 +2,6 @@ import Link from "next/link";
 import React from "react";
 import styles from "./layout.module.css";
 import CourseDropdown from "./course-dropdown";
-import { get_course_data, get_done_course_ids_for_user } from "./get_course_data";
-import getUserId from "@/lib/getUserId";
 import styles0 from "./layout.module.css";
 import FooterLinks from "./footer_links";
 import Legal from "@/components/layout/legal";
@@ -40,9 +38,6 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const course_data = await get_course_data();
-  const active_courses = await get_done_course_ids_for_user(await getUserId());
-
   return (
     <>
       <div className={styles.all_wrapper}>
@@ -61,10 +56,7 @@ export default async function Layout({
               />
             </Link>
             <div style={{ marginLeft: "auto" }}></div>
-            <CourseDropdown
-              course_data_active={active_courses}
-              course_data={course_data}
-            />
+            <CourseDropdown />
             <LoggedInButtonWrappedClient page={"stories"} course_id={"segment"} />
           </nav>
         </div>
