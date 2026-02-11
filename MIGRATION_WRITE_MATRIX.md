@@ -13,6 +13,7 @@ Scope:
 - `story`
 - `story_content`
 - `story_done`
+- `story_approval`
 
 Status values:
 - `Yes`: Runtime write path includes Convex mirror call.
@@ -44,6 +45,8 @@ Status values:
 | `story_content` | `src/app/editor/(course)/course/[course_id]/import/send/[story_id]/route.ts` | _Not yet split in SQL_ | Mirrors imported story payload into Convex `story_content`. | `mirrorStory(..., { mirrorContent: true })` | Yes |
 | `story_done` | `src/app/(stories)/story/[story_id]/page.tsx` | `INSERT INTO story_done` | Reader completion event in default story player. | `mirrorStoryDone(...)` | Yes |
 | `story_done` | `src/app/(stories)/story/[story_id]/script/page.tsx` | `INSERT INTO story_done` | Reader completion event in script-mode story player. | `mirrorStoryDone(...)` | Yes |
+| `story_approval` | `src/app/editor/(course)/approve/[story_id]/route.ts` | `INSERT/DELETE story_approval` | Contributor toggles approval for a story; status/publication logic depends on approval count. | `mirrorStoryApprovalUpsert(...)` / `mirrorStoryApprovalDelete(...)` | Yes |
+| `story_approval` | `src/app/admin/story/[story_id]/actions.ts` | `DELETE story_approval` | Admin removes a specific approval entry from a story. | `mirrorStoryApprovalDeleteByLegacyId(...)` | Yes |
 
 ## Backfill Paths
 
@@ -60,6 +63,7 @@ Status values:
 | `story_content` | `scripts/migrate-story-tables.ts` | Backfill | Bulk copy heavy payload (`text`, `json`) from Postgres `story` to Convex `story_content`. | `api.storyTables.upsertStoryContent` | Backfill |
 | `story` | `scripts/remove-story-heavy-fields.ts` | Cleanup migration | Strip deprecated heavy fields (`text`, `json`) from existing Convex `stories` documents after `story_content` backfill. | `api.storyTables.stripStoryHeavyFieldsBatch` | Backfill |
 | `story_done` | `scripts/migrate-story-done.ts` | Backfill | Bulk copy user/story completion records from Postgres `story_done`. | `api.storyDone.recordStoryDone` | Backfill |
+| `story_approval` | `scripts/migrate-story-approval.ts` | Backfill | Bulk copy story approval records from Postgres `story_approval`. | `api.storyApproval.upsertStoryApprovalBatch` | Backfill |
 
 ## Notes
 

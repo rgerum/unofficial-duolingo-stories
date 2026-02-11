@@ -403,3 +403,76 @@ export async function mirrorStoryDone(
     operationKey,
   );
 }
+
+export async function mirrorStoryApprovalUpsert(
+  row: {
+    id?: number | null;
+    story_id?: number | null;
+    user_id?: number | null;
+    date?: Date | string | number | null;
+  },
+  operationKey: string,
+) {
+  if (typeof row.story_id !== "number" || typeof row.user_id !== "number") {
+    throw new Error(
+      `Convex mirror rejected invalid story_approval row for ${operationKey}`,
+    );
+  }
+  const legacyStoryId = row.story_id;
+  const legacyUserId = row.user_id;
+
+  return retryMirror(
+    () =>
+      fetchAuthMutation(api.storyApproval.upsertStoryApproval, {
+        legacyStoryId,
+        legacyUserId,
+        date: optionalTimestampMs(row.date),
+        legacyApprovalId: optionalNumber(row.id),
+      }),
+    operationKey,
+  );
+}
+
+export async function mirrorStoryApprovalDelete(
+  row: {
+    story_id?: number | null;
+    user_id?: number | null;
+  },
+  operationKey: string,
+) {
+  if (typeof row.story_id !== "number" || typeof row.user_id !== "number") {
+    throw new Error(
+      `Convex mirror rejected invalid story_approval delete row for ${operationKey}`,
+    );
+  }
+  const legacyStoryId = row.story_id;
+  const legacyUserId = row.user_id;
+
+  return retryMirror(
+    () =>
+      fetchAuthMutation(api.storyApproval.deleteStoryApproval, {
+        legacyStoryId,
+        legacyUserId,
+      }),
+    operationKey,
+  );
+}
+
+export async function mirrorStoryApprovalDeleteByLegacyId(
+  legacyApprovalId: number,
+  operationKey: string,
+) {
+  if (!Number.isFinite(legacyApprovalId)) {
+    throw new Error(
+      `Convex mirror rejected invalid story_approval legacy id for ${operationKey}`,
+    );
+  }
+
+  return retryMirror(
+    () =>
+      fetchAuthMutation(api.storyApproval.deleteStoryApprovalByLegacyId, {
+        legacyApprovalId,
+      }),
+    operationKey,
+  );
+}

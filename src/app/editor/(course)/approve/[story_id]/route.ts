@@ -3,7 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { getPostHogClient } from "@/lib/posthog-server";
-import { mirrorCourse, mirrorStory } from "@/lib/lookupTableMirror";
+import {
+  mirrorCourse,
+  mirrorStory,
+  mirrorStoryApprovalDelete,
+  mirrorStoryApprovalUpsert,
+} from "@/lib/lookupTableMirror";
 
 export async function GET(
   request: Request,
@@ -59,9 +64,25 @@ async function set_approve({
   let action;
   if (res.length) {
     await sql`DELETE FROM story_approval WHERE story_id = ${story_id} AND user_id = ${user_id};`;
+    await mirrorStoryApprovalDelete(
+      {
+        story_id,
+        user_id,
+      },
+      `story_approval:${story_id}:user:${user_id}:delete`,
+    );
     action = "deleted";
   } else {
     await sql`INSERT INTO story_approval (story_id, user_id) VALUES (${story_id}, ${user_id});`;
+    const insertedApproval = (
+      await sql`SELECT id, story_id, user_id, date FROM story_approval WHERE story_id = ${story_id} AND user_id = ${user_id} LIMIT 1`
+    )[0];
+    if (insertedApproval) {
+      await mirrorStoryApprovalUpsert(
+        insertedApproval,
+        `story_approval:${story_id}:user:${user_id}:upsert`,
+      );
+    }
     action = "added";
   }
   let res2 = (

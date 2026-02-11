@@ -3,7 +3,11 @@
 import { sql } from "@/lib/db";
 import { revalidateTag } from "next/cache";
 import { StorySchema, type Story } from "./schema";
-import { mirrorCourse, mirrorStory } from "@/lib/lookupTableMirror";
+import {
+  mirrorCourse,
+  mirrorStory,
+  mirrorStoryApprovalDeleteByLegacyId,
+} from "@/lib/lookupTableMirror";
 import { getUser, isAdmin } from "@/lib/userInterface";
 
 async function requireAdmin() {
@@ -69,5 +73,9 @@ export async function removeApproval(
   await requireAdmin();
 
   await sql`DELETE FROM story_approval WHERE id = ${approval_id};`;
+  await mirrorStoryApprovalDeleteByLegacyId(
+    approval_id,
+    `story_approval:${approval_id}:admin_delete`,
+  );
   return await story_properties(id);
 }

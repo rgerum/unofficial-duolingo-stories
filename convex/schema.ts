@@ -163,4 +163,15 @@ export default defineSchema({
     .index("by_story", ["storyId"])
     .index("by_user", ["legacyUserId"])
     .index("by_user_and_story", ["legacyUserId", "storyId"]),
+
+  story_approval: defineTable({
+    storyId: v.id("stories"),
+    legacyUserId: v.optional(v.number()),
+    date: v.number(),
+    legacyId: v.optional(v.number()),
+  })
+    .index("by_story", ["storyId"])
+    .index("by_user", ["legacyUserId"])
+    .index("by_story_and_user", ["storyId", "legacyUserId"])
+    .index("by_legacy_id", ["legacyId"]),
 });
