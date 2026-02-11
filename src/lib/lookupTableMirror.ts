@@ -176,6 +176,8 @@ type CourseRow = {
   conlang?: boolean | null;
   tags?: string[] | null;
   count?: number | null;
+  // Legacy denormalized fields kept only for Postgres-compat migration.
+  // TODO(postgres-sunset): stop sending these and delete the target columns.
   learning_language_name?: string | null;
   from_language_name?: string | null;
   contributors?: string[] | null;

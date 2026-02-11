@@ -1,24 +1,27 @@
 "use client";
 import Switch from "@/components/layout/switch";
-import { useState } from "react";
 import Link from "next/link";
-import type { Story } from "./page";
 import {
   togglePublished,
   removeApproval as removeApprovalAction,
 } from "./actions";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 
-export default function StoryDisplay({ story }: { story: Story }) {
-  const [story_, setStory] = useState<Story>(story);
+export default function StoryDisplay({ storyId }: { storyId: number }) {
+  const story = useQuery(api.adminData.getAdminStoryByLegacyId, {
+    legacyStoryId: storyId,
+  });
 
-  // Render data...
+  if (story === undefined) return <div>Loading...</div>;
+  if (!story) return <div>Story not found.</div>;
+  const storyData = story;
+
   async function changePublished() {
-    const updated = await togglePublished(story_.id, story_.public);
-    setStory(updated);
+    await togglePublished(storyData.id, storyData.public);
   }
   async function deleteApproval(approval_id: number) {
-    const updated = await removeApprovalAction(story_.id, approval_id);
-    setStory(updated);
+    await removeApprovalAction(storyData.id, approval_id);
   }
   return (
     <div
@@ -26,17 +29,17 @@ export default function StoryDisplay({ story }: { story: Story }) {
     >
       <img
         alt="story image"
-        src={"https://stories-cdn.duolingo.com/image/" + story_.image + ".svg"}
+        src={"https://stories-cdn.duolingo.com/image/" + storyData.image + ".svg"}
         width={"200px"}
       />
-      <h1>{story_.name}</h1>
+      <h1>{storyData.name}</h1>
       <p>
-        Published <Switch checked={story_.public} onClick={changePublished} />
+        Published <Switch checked={storyData.public} onClick={changePublished} />
       </p>
-      <Link href={`/editor/course/${story_.short}`}>Course {story_.short}</Link>
+      <Link href={`/editor/course/${storyData.short}`}>Course {storyData.short}</Link>
       <h2>Approvals</h2>
       <ul>
-        {story_.approvals.map((d) => (
+        {storyData.approvals.map((d) => (
           <li key={d.id}>
             {`${d.date}`} {d.name}{" "}
             <span

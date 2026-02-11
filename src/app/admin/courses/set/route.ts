@@ -62,6 +62,7 @@ async function set_course(data: CourseData) {
   data["short"] = `${learning_language.short}-${from_language.short}`;
   data["from_language_name"] = from_language.name;
   data["learning_language_name"] = learning_language.name;
+  // TODO(postgres-sunset): remove denormalized course language-name writes.
   if (data.id === undefined) {
     id = (await sql`INSERT INTO course ${sql(data)} RETURNING id`)[0].id;
   } else {
