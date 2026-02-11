@@ -1,7 +1,7 @@
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
 import { unstable_cache } from "next/cache";
 import type { Id } from "@convex/_generated/dataModel";
+import { fetchQuery } from "convex/nextjs";
 
 export interface CourseData {
   id: number;
@@ -17,17 +17,8 @@ export interface CourseData {
   learning_language_name: string;
 }
 
-const convexUrl =
-  process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
-
-if (!convexUrl) {
-  throw new Error("Missing NEXT_PUBLIC_CONVEX_URL/CONVEX_URL");
-}
-
-const convex = new ConvexHttpClient(convexUrl);
-
 export const get_course_data = unstable_cache(
-  async () => await convex.query(api.landing.getPublicCourseList, {}),
+  async () => await fetchQuery(api.landing.getPublicCourseList, {}),
   ["get_course_data_v2_convex_ids"],
   { tags: ["course_data"], revalidate: 3600 },
 );
@@ -86,6 +77,6 @@ export async function get_course(short: string) {
 }
 
 export async function get_done_course_ids_for_user() {
-  const result = await convex.query(api.storyDone.getDoneCourseIdsForUser, {});
+  const result = await fetchQuery(api.storyDone.getDoneCourseIdsForUser, {});
   return result ?? [];
 }

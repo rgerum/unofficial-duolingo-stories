@@ -2,7 +2,14 @@
 import styles from "./story_button.module.css";
 import Link from "next/link";
 import Image from "next/image";
-import { StoryData } from "@/app/(stories)/(main)/[course_id]/get_story_data";
+
+interface StoryData {
+  id: number;
+  name: string;
+  active: string;
+  gilded: string;
+  active_lip: string;
+}
 
 export default function StoryButton({
   story,
