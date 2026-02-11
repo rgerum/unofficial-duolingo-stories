@@ -1,7 +1,6 @@
 import React, { CSSProperties } from "react";
 import styles from "./flag.module.css";
 import Image from "next/image";
-import { LanguageProps } from "@/app/editor/(course)/db_get_course_editor";
 
 export default function Flag(props: {
   width?: number | undefined;

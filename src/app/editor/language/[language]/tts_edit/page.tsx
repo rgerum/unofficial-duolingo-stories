@@ -1,22 +1,24 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import Tts_edit from "./tts_edit";
 import { getUser } from "@/lib/userInterface";
 import { Metadata } from "next";
-import {
-  get_avatar_names,
-  get_language,
-  get_speakers,
-} from "@/app/editor/language/[language]/queries";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@convex/_generated/api";
+import LanguageTtsEditorPageClient from "./page_client";
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ language: string }>;
 }): Promise<Metadata> {
-  const [language, course, language2] = await get_language(
-    (await params).language,
-  );
+  const resolved = await fetchQuery(api.editorRead.resolveEditorLanguage, {
+    identifier: (await params).language,
+  });
+  const language = resolved?.language;
+  const course = resolved?.course;
+  const language2 = resolved?.language2;
+
+  if (!language) notFound();
 
   if (!language2) {
     return {
@@ -43,26 +45,6 @@ export default async function Page({
   params: Promise<{ language: string }>;
 }) {
   const user = await getUser();
-
-  const [language, course, language2] = await get_language(
-    (await params).language,
-  );
-
-  if (!language) {
-    notFound();
-  }
-
-  const speakers = await get_speakers(language.id);
-
-  // Render data...
-  return (
-    <>
-      <Tts_edit
-        language={language}
-        language2={language2}
-        speakers={speakers}
-        course={course}
-      />
-    </>
-  );
+  void user;
+  return <LanguageTtsEditorPageClient identifier={(await params).language} />;
 }

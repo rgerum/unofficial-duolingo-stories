@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
-import { sql } from "@/lib/db";
 import { getUser, isContributor } from "@/lib/userInterface";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@convex/_generated/api";
 
 interface RouteParams {
   params: Promise<{ image_id: string }>;
@@ -35,5 +36,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 }
 
 async function get_image({ image_id }: { image_id: string }) {
-  return (await sql`SELECT * FROM image WHERE id = ${image_id}`)[0];
+  return await fetchQuery(api.editorRead.getEditorImageByLegacyId, {
+    legacyImageId: image_id,
+  });
 }

@@ -1,42 +1,68 @@
+"use client";
+
 import React from "react";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { Spinner } from "@/components/layout/spinner";
 import styles from "./[language].module.css";
-
-import { LoggedInButton, LogInButton } from "@/components/login/loggedinbutton";
+import { LoggedInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
-import { sql } from "@/lib/db";
 import TextEdit from "./text_edit";
-import { mirrorLocalization } from "@/lib/lookupTableMirror";
-import { getUser, isContributor } from "@/lib/userInterface";
 
-interface LanguageType {
+type LanguageType = {
   id: number;
   name: string;
   short: string;
-}
+};
 
-interface CourseType {
+type CourseType = {
   short?: string;
-}
+};
+
+type LocalizationRow = {
+  tag: string;
+  text_en: string;
+  text: string | null;
+};
 
 export default function LocalizationEditor({
-  language,
-  language2,
-  course,
+  identifier,
 }: {
-  language: LanguageType;
-  language2: LanguageType | undefined;
-  course: CourseType | undefined;
+  identifier: string;
 }) {
-  // Render data...
+  const resolved = useQuery(api.editorRead.resolveEditorLanguage, {
+    identifier,
+  });
+
+  const localizationRows = useQuery(
+    api.editorRead.getEditorLocalizationRowsByLanguageLegacyId,
+    resolved?.language
+      ? {
+          languageLegacyId: resolved.language2?.id ?? resolved.language.id,
+        }
+      : "skip",
+  );
+
+  if (resolved === undefined || localizationRows === undefined) {
+    return <Spinner />;
+  }
+
+  if (!resolved?.language) {
+    return <p>Language not found.</p>;
+  }
+
+  const language = resolved.language as LanguageType;
+  const language2 = (resolved.language2 ?? undefined) as LanguageType | undefined;
+  const course = (resolved.course ?? undefined) as CourseType | undefined;
+
   return (
-    <>
-      <Layout language_data={language} language2={language2} course={course}>
-        <ListLocalizations
-          language_id={language2?.id || language.id}
-          language_name={language2?.name || language.name}
-        ></ListLocalizations>
-      </Layout>
-    </>
+    <Layout language_data={language} language2={language2} course={course}>
+      <ListLocalizations
+        language_id={language2?.id || language.id}
+        language_name={language2?.name || language.name}
+        rows={localizationRows as LocalizationRow[]}
+      />
+    </Layout>
   );
 }
 
@@ -51,7 +77,7 @@ export function Layout({
   language2: LanguageType | undefined;
   course: CourseType | undefined;
 }) {
-  let crumbs = [
+  const crumbs = [
     { type: "Editor", href: `/editor` },
     { type: "sep" },
     {
@@ -73,35 +99,44 @@ export function Layout({
       <div className={styles.main_index}>{children}</div>
     </>
   );
-} //                 <Login page={"editor"}/>
+}
 
-async function ListLocalizations({
+async function setLocalization({
+  tag,
+  text,
+  language_id,
+}: {
+  tag: string;
+  text: string;
+  language_id: number;
+}) {
+  const response = await fetch("/editor/localization/set", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ tag, text, language_id }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await response.text());
+  }
+
+  return await response.json();
+}
+
+function ListLocalizations({
   language_id,
   language_name,
+  rows,
 }: {
   language_id: number;
   language_name: string;
+  rows: LocalizationRow[];
 }) {
-  let data = await sql`SELECT l.tag, l.text AS text_en, l2.text
-FROM localization l
-LEFT JOIN localization l2 ON l.tag = l2.tag AND l2.language_id = ${language_id}
-WHERE l.language_id = 1;`;
-
   async function set_localization(tag: string, text: string) {
-    "use server";
-    const token = await getUser();
-    if (!token || !isContributor(token)) {
-      throw new Error("You need to be a registered contributor.");
-    }
-    const row = (
-      await sql`INSERT INTO localization (tag, text, language_id)
-    VALUES (${tag}, ${text}, ${language_id})
-    ON CONFLICT (tag, language_id)
-    DO UPDATE SET text = EXCLUDED.text
-    RETURNING id, language_id, tag, text`
-    )[0];
-    await mirrorLocalization(row, `localization:${row.language_id}:${row.tag}:set`);
-    return row;
+    await setLocalization({ tag, text, language_id });
   }
 
   return (
@@ -122,19 +157,19 @@ WHERE l.language_id = 1;`;
           </tr>
         </thead>
         <tbody>
-          {data.map((l) => (
-            <tr key={l.tag}>
+          {rows.map((row) => (
+            <tr key={row.tag}>
               <td>
-                <span className={styles.tag}>{l.tag}</span>
+                <span className={styles.tag}>{row.tag}</span>
               </td>
               <td className={styles.edit_td}>
                 <TextEdit
-                  tag={l.tag}
-                  text={l.text}
+                  tag={row.tag}
+                  text={row.text}
                   set_localization={set_localization}
                 />
               </td>
-              <td>{l.text_en}</td>
+              <td>{row.text_en}</td>
             </tr>
           ))}
         </tbody>

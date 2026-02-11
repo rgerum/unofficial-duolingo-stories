@@ -1,27 +1,34 @@
 "use client";
 import Link from "next/link";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 import Flag from "@/components/layout/flag";
 import styles from "./course_list.module.css";
 import { useInput } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/layout/spinner";
-import type { CourseProps, LanguageProps } from "./db_get_course_editor";
+import type { CourseProps, LanguageProps } from "./types";
 
 interface CourseListProps {
-  courses: CourseProps[] | undefined;
-  languages: Record<string | number, LanguageProps>;
   course_id: string | undefined;
   showList: boolean;
   toggleShow: () => void;
 }
 
 export default function CourseList({
-  courses,
-  languages,
   course_id,
   showList,
   toggleShow,
 }: CourseListProps) {
+  const data = useQuery(api.editorRead.getEditorSidebarData, {});
+  const courses = data?.courses as CourseProps[] | undefined;
+  const languagesArray = (data?.languages ?? []) as LanguageProps[];
+  const languages: Record<string | number, LanguageProps> = {};
+  for (const language of languagesArray) {
+    languages[language.id] = language;
+    languages[language.short] = language;
+  }
+
   const [search, setSearch] = useInput("");
   const router = useRouter();
 

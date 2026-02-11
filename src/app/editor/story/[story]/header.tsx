@@ -3,7 +3,49 @@ import styles from "./header.module.css";
 import EditorButton from "../../editor_button";
 import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
-import { HeaderProps } from "./types";
+import type { StoryData } from "./types";
+
+declare global {
+  interface Window {
+    editorShowTranslations?: boolean;
+    editorShowSsml?: boolean;
+  }
+}
+
+type HeaderProps = {
+  story_data: StoryData;
+  unsaved_changes: boolean;
+  language_data?: {
+    id: number;
+    name: string;
+    short: string;
+    flag: number | null;
+    flag_file: string | null;
+    speaker: string | null;
+    default_text: string;
+    tts_replace: string | null;
+    public: boolean;
+    rtl: boolean;
+  };
+  language_data2?: {
+    id: number;
+    name: string;
+    short: string;
+    flag: number | null;
+    flag_file: string | null;
+    speaker: string | null;
+    default_text: string;
+    tts_replace: string | null;
+    public: boolean;
+    rtl: boolean;
+  };
+  func_save: () => Promise<void>;
+  func_delete: () => Promise<void>;
+  show_trans: boolean;
+  set_show_trans: (show: boolean) => void;
+  show_ssml: boolean;
+  set_show_ssml: (show: boolean) => void;
+};
 
 export function StoryEditorHeader({
   story_data,
