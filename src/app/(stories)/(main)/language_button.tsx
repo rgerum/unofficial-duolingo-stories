@@ -18,6 +18,11 @@ export default function LanguageButton({
   loading?: boolean;
   eagerFlagImage?: boolean;
 }) {
+  const language = useQuery(
+    api.localization.getLanguageFlagById,
+    course ? { languageId: course.learningLanguageId } : "skip",
+  );
+
   if (loading) {
     return (
       <div
@@ -29,10 +34,6 @@ export default function LanguageButton({
   }
 
   if (!course) return null;
-
-  const language = useQuery(api.localization.getLanguageFlagById, {
-    languageId: course.learningLanguageId,
-  });
 
   return (
     <Link

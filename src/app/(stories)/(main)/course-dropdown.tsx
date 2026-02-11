@@ -16,10 +16,13 @@ function LanguageButtonSmall({
   /**
    * A button in the language drop down menu (flag + name)
    */
+  const language = useQuery(
+    api.localization.getLanguageFlagById,
+    course ? { languageId: course.learningLanguageId } : "skip",
+  );
+
   if (!course) return null;
-  const language = useQuery(api.localization.getLanguageFlagById, {
-    languageId: course.learningLanguageId,
-  });
+
   return (
     <Link
       className={styles.language_select_item}
