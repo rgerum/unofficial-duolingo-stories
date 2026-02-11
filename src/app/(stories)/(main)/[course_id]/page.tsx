@@ -1,9 +1,8 @@
 import React from "react";
 import { notFound } from "next/navigation";
 
-import CourseTitle from "./course_title";
-import SetList from "./set_list";
-import get_localisation from "@/lib/get_localisation";
+import CoursePageClient from "./course_page_client";
+import { get_localisation_by_convex_language_id } from "@/lib/get_localisation";
 import { get_course_data, get_course } from "../get_course_data";
 import { ResolvingMetadata } from "next";
 
@@ -20,7 +19,9 @@ export async function generateMetadata(
   }
   const course = await get_course(params0.course_id);
   if (!course) notFound();
-  const localization = await get_localisation(course.from_language);
+  const localization = await get_localisation_by_convex_language_id(
+    course.fromLanguageId,
+  );
 
   const meta = await parent;
 
@@ -76,9 +77,6 @@ export default async function Page({
   }
 
   return (
-    <>
-      <CourseTitle course_id={params0.course_id} />
-      <SetList course_id={params0.course_id} />
-    </>
+    <CoursePageClient courseId={params0.course_id} />
   );
 }

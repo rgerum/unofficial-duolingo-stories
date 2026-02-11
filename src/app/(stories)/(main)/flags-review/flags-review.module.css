@@ -1,0 +1,136 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 0 40px;
+}
+
+.title {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: 8px 0 16px;
+  color: var(--text-color-dim);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.summaryBox {
+  border: 2px solid var(--input-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--input-background);
+}
+
+.summaryLabel {
+  font-size: 0.8rem;
+  color: var(--text-color-dim);
+}
+
+.summaryValue {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.item {
+  border: 2px solid var(--input-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--body-background);
+}
+
+.itemHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--input-border);
+  background: var(--input-background);
+}
+
+.name {
+  font-weight: 700;
+}
+
+.stats {
+  display: flex;
+  gap: 12px;
+  color: var(--text-color-dim);
+  font-size: 0.9rem;
+}
+
+.views {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.view {
+  padding: 10px;
+}
+
+.view + .view {
+  border-left: 2px solid var(--input-border);
+}
+
+.viewTitle {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-color-dim);
+}
+
+.imageWrap {
+  min-height: 84px;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(45deg, #f6f8fa 25%, transparent 25%),
+    linear-gradient(-45deg, #f6f8fa 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #f6f8fa 75%),
+    linear-gradient(-45deg, transparent 75%, #f6f8fa 75%);
+  background-size: 14px 14px;
+  background-position:
+    0 0,
+    0 7px,
+    7px -7px,
+    -7px 0;
+}
+
+.image {
+  max-width: 100%;
+  max-height: 140px;
+}
+
+@media (max-width: 900px) {
+  .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .views {
+    grid-template-columns: 1fr;
+  }
+
+  .view + .view {
+    border-left: 0;
+    border-top: 2px solid var(--input-border);
+  }
+}

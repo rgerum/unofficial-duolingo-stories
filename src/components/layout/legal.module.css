@@ -1,7 +1,7 @@
 .legal {
   margin-top: 20px;
   text-align: center;
-  color: rgb(128, 128, 128);
+  color: rgb(102, 102, 102);
   font-size: 0.8em;
   display: block;
   direction: ltr;
@@ -9,5 +9,5 @@
 }
 
 .legal a {
-  color: rgb(128, 128, 128);
+  color: rgb(102, 102, 102);
 }

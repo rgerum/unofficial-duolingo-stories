@@ -5,19 +5,21 @@ import Flag from "@/components/layout/flag";
 import Dropdown from "@/components/layout/dropdown";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { CourseData } from "@/app/(stories)/(main)/get_course_data";
-import { LanguageProps } from "@/app/editor/(course)/db_get_course_editor";
+import { api } from "@convex/_generated/api";
+import { useQuery } from "convex/react";
 
 function LanguageButtonSmall({
   course,
-  flag_data,
 }: {
   course?: CourseData;
-  flag_data?: LanguageProps;
 }) {
   /**
    * A button in the language drop down menu (flag + name)
    */
   if (!course) return null;
+  const language = useQuery(api.localization.getLanguageFlagById, {
+    languageId: course.learningLanguageId,
+  });
   return (
     <Link
       className={styles.language_select_item}
@@ -25,9 +27,16 @@ function LanguageButtonSmall({
       data-cy="button_lang_dropdown"
     >
       <Flag
-        iso={flag_data?.short}
+        iso={language?.short}
         width={40}
-        flag_file={flag_data?.flag_file ?? undefined}
+        flag_file={language?.flag_file ?? undefined}
+        flag={
+          typeof language?.flag === "number"
+            ? language.flag
+            : Number.isFinite(Number(language?.flag))
+              ? Number(language?.flag)
+              : undefined
+        }
       />
       <span>{course.name}</span>
     </Link>
@@ -37,22 +46,15 @@ function LanguageButtonSmall({
 export default function CourseDropdown({
   course_data_active,
   course_data,
-  flag_data,
 }: {
   course_data_active: number[];
   course_data?: CourseData[];
-  flag_data: Record<number, LanguageProps>;
 }) {
   function get_course_by_id(id: number) {
     if (!course_data) return undefined;
     for (let course of course_data) {
       if (course.id === id) return course;
     }
-  }
-  function get_flag_by_id(id: number) {
-    const course = get_course_by_id(id);
-    if (!course) return undefined;
-    return flag_data[course.learning_language];
   }
   function get_course_by_short(short: string) {
     if (!course_data) return undefined;
@@ -63,6 +65,10 @@ export default function CourseDropdown({
 
   const segment = useSelectedLayoutSegment();
   let course = get_course_by_short(segment || "");
+  const activeCourseLanguage = useQuery(
+    api.localization.getLanguageFlagById,
+    course ? { languageId: course.learningLanguageId } : "skip",
+  );
 
   if (!course_data_active || course_data_active?.length === 0)
     return <div></div>;
@@ -71,15 +77,14 @@ export default function CourseDropdown({
     <Dropdown>
       <Flag
         width={40}
-        iso={
-          course?.learning_language
-            ? flag_data[course?.learning_language]?.short
-            : undefined
-        }
-        flag_file={
-          course?.learning_language
-            ? (flag_data[course?.learning_language]?.flag_file ?? undefined)
-            : undefined
+        iso={activeCourseLanguage?.short}
+        flag_file={activeCourseLanguage?.flag_file ?? undefined}
+        flag={
+          typeof activeCourseLanguage?.flag === "number"
+            ? activeCourseLanguage.flag
+            : Number.isFinite(Number(activeCourseLanguage?.flag))
+              ? Number(activeCourseLanguage?.flag)
+              : undefined
         }
         className={styles.trigger}
       />
@@ -88,7 +93,6 @@ export default function CourseDropdown({
           <LanguageButtonSmall
             key={id}
             course={get_course_by_id(id)}
-            flag_data={get_flag_by_id(id)}
           />
         ))}
       </nav>
