@@ -241,6 +241,9 @@ export default function LanguageList({ all_languages }: LanguageListProps) {
   const [search, setSearch] = useInput("");
 
   const [my_langs, setMyLangs] = useState<Language[]>(all_languages);
+  React.useEffect(() => {
+    setMyLangs(all_languages);
+  }, [all_languages]);
 
   function updateLanguage(course: Language) {
     setMyLangs(my_langs.map((c) => (c.id === course.id ? course : c)));

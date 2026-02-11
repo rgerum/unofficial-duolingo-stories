@@ -57,6 +57,8 @@ const courseValidator = {
   conlang: v.optional(v.boolean()),
   tags: v.optional(v.array(v.string())),
   count: v.optional(v.number()),
+  // Legacy denormalized fields kept only for Postgres-compat migration.
+  // TODO(postgres-sunset): drop from mirror payload and schema.
   learning_language_name: v.optional(v.string()),
   from_language_name: v.optional(v.string()),
   contributors: v.optional(v.array(v.string())),

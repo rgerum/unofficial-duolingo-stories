@@ -11,7 +11,32 @@ import Button from "@/components/layout/button";
 import Tag from "@/components/layout/tag";
 import Input from "@/components/layout/Input";
 import FlagName from "../FlagName";
-import { AdminLanguageProps, CourseProps } from "@/app/admin/courses/page";
+
+export interface CourseProps {
+  id: number;
+  learning_language: number;
+  from_language: number;
+  public: boolean;
+  official: boolean;
+  name: string | null;
+  about: string | null;
+  conlang: boolean;
+  short: string | null;
+  tags: string[];
+}
+
+export interface AdminLanguageProps {
+  id: number;
+  name: string;
+  short: string;
+  flag: number;
+  flag_file: string;
+  speaker: string;
+  default_text: string;
+  tts_replace: string;
+  public: boolean;
+  rtl: boolean;
+}
 
 function InputLanguage({
   name,
@@ -405,6 +430,9 @@ export function CourseList({
 }) {
   const [search, setSearch] = React.useState("");
   const [my_courses, setMyCourses] = React.useState(all_courses);
+  React.useEffect(() => {
+    setMyCourses(all_courses);
+  }, [all_courses]);
 
   function updateCourse(course: CourseProps) {
     setMyCourses(my_courses.map((c) => (c.id === course.id ? course : c)));

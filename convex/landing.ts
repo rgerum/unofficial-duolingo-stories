@@ -37,14 +37,21 @@ export const getPublicCourseList = query({
       })),
     );
     const legacyLanguageIdByConvexId = new Map<Id<"languages">, number>();
+    const languageNameByConvexId = new Map<Id<"languages">, string>();
     for (const row of languageRows) {
       if (!row.language) continue;
       legacyLanguageIdByConvexId.set(row.languageId, row.language.legacyId);
+      languageNameByConvexId.set(row.languageId, row.language.name);
     }
 
     return courses
       .map((course) => {
         if (!course.short) return null;
+
+        const fromLanguageName =
+          languageNameByConvexId.get(course.fromLanguageId) ?? "";
+        const learningLanguageName =
+          languageNameByConvexId.get(course.learningLanguageId) ?? "";
 
         return {
           id: course.legacyId,
@@ -52,16 +59,16 @@ export const getPublicCourseList = query({
           name:
             course.name && course.name.trim().length > 0
               ? course.name
-              : (course.learning_language_name ?? ""),
+              : learningLanguageName,
           count: course.count ?? 0,
           about: course.about ?? "",
           from_language: legacyLanguageIdByConvexId.get(course.fromLanguageId) ?? 0,
           fromLanguageId: course.fromLanguageId as Id<"languages">,
-          from_language_name: course.from_language_name ?? "",
+          from_language_name: fromLanguageName,
           learning_language:
             legacyLanguageIdByConvexId.get(course.learningLanguageId) ?? 0,
           learningLanguageId: course.learningLanguageId as Id<"languages">,
-          learning_language_name: course.learning_language_name ?? "",
+          learning_language_name: learningLanguageName,
         };
       })
       .filter(
@@ -133,8 +140,11 @@ export const getPublicCoursePageData = query({
       ctx.db.get(course.learningLanguageId),
     ]);
     const fromLanguage = languageRows[0];
+    const learningLanguage = languageRows[1];
     const legacyFromLanguageId = fromLanguage?.legacyId ?? 0;
-    const legacyLearningLanguageId = languageRows[1]?.legacyId ?? 0;
+    const legacyLearningLanguageId = learningLanguage?.legacyId ?? 0;
+    const fromLanguageName = fromLanguage?.name ?? "";
+    const learningLanguageName = learningLanguage?.name ?? "";
 
     const publicStories = await ctx.db
       .query("stories")
@@ -236,15 +246,15 @@ export const getPublicCoursePageData = query({
       name:
         course.name && course.name.trim().length > 0
           ? course.name
-          : (course.learning_language_name ?? ""),
+          : learningLanguageName,
       count: course.count ?? 0,
       about: course.about ?? "",
       from_language: legacyFromLanguageId,
       fromLanguageId: course.fromLanguageId as Id<"languages">,
-      from_language_name: course.from_language_name ?? "",
+      from_language_name: fromLanguageName,
       learning_language: legacyLearningLanguageId,
       learningLanguageId: course.learningLanguageId as Id<"languages">,
-      learning_language_name: course.learning_language_name ?? "",
+      learning_language_name: learningLanguageName,
       stories: mappedStories,
       localization: Array.from(localizationMap.entries()).map(([tag, text]) => ({
         tag,
