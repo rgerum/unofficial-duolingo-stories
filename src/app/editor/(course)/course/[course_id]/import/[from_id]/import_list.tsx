@@ -51,12 +51,14 @@ export default function ImportList({
     return <p>Course not found.</p>;
   }
 
+  const courseLegacyId = course.id;
+
   async function do_import(id: number) {
     // prevent clicking the button twice
     if (importing) return;
     setImporting(id);
 
-    let id2 = await setImport(id, course.id);
+    let id2 = await setImport(id, courseLegacyId);
     await router.push("/editor/story/" + id2);
   }
 
