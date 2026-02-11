@@ -1,11 +1,15 @@
 "use client";
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 import StoryProgress from "@/components/StoryProgress";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 
-export default function StoryWrapper({ story }: { story: StoryData }) {
+export default function StoryWrapper({ storyId }: { storyId: number }) {
   const hide_questions = useSearchParams().get("hide_questions");
+  const story = useQuery(api.storyRead.getStoryByLegacyId, { storyId });
+  if (story === undefined) return null;
+  if (story === null) return <p>Story not found.</p>;
 
   return (
     <>

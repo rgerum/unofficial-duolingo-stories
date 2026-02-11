@@ -1,13 +1,23 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { sql } from "@/lib/db";
 import getUserId from "@/lib/getUserId";
 import { get_localisation_dict } from "@/lib/get_localisation";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
-import { revalidateTag } from "next/cache";
 import LocalisationProvider from "@/components/LocalisationProvider";
-import { mirrorStoryDone } from "@/lib/lookupTableMirror";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@convex/_generated/api";
+import { fetchAuthMutation } from "@/lib/auth-server";
+import { sql } from "@/lib/db";
+
+const convexUrl =
+  process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
+
+if (!convexUrl) {
+  throw new Error("Missing NEXT_PUBLIC_CONVEX_URL/CONVEX_URL");
+}
+
+const convex = new ConvexHttpClient(convexUrl);
 
 async function get_story_meta(course_id: number) {
   const course_query = await sql`SELECT
@@ -68,22 +78,20 @@ export default async function Page({
   async function setStoryDoneAction() {
     "use server";
     if (!user_id) {
-      await sql`INSERT INTO story_done (story_id) VALUES(${story_id})`;
-      await mirrorStoryDone(
-        { story_id: story_id, time: Date.now() },
-        `story_done:${story_id}:anonymous`,
-      );
+      await convex.mutation(api.storyDone.recordStoryDone, {
+        legacyStoryId: story_id,
+        time: Date.now(),
+      });
       return {
         message: "done",
         story_id: story_id,
       };
     }
-    await sql`INSERT INTO story_done (user_id, story_id) VALUES(${user_id}, ${story_id})`;
-    await mirrorStoryDone(
-      { story_id: story_id, user_id: user_id, time: Date.now() },
-      `story_done:${story_id}:user:${user_id}`,
-    );
-    revalidateTag(`course_done_${course_id}_${user_id}`, "max");
+    await fetchAuthMutation(api.storyDone.recordStoryDone, {
+      legacyStoryId: story_id,
+      legacyUserId: user_id,
+      time: Date.now(),
+    });
     return {
       message: "done",
       story_id: story_id,
