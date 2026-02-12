@@ -18,7 +18,7 @@ export default function CourseEditorPageClient({
 
   const stories = useQuery(
     api.editorRead.getEditorStoriesByCourseLegacyId,
-    course ? { courseLegacyId: course.id } : "skip",
+    { identifier: courseId },
   );
 
   if (course === undefined || stories === undefined) {
@@ -36,4 +36,3 @@ export default function CourseEditorPageClient({
     />
   );
 }
-

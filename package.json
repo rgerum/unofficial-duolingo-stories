@@ -9,7 +9,9 @@
     "optimize:flags": "pnpm dlx svgo -f flags --multipass",
     "init": "node database/db_create_test.mjs",
     "init-build": "node database/init_build.js",
-    "init-reset": "node database/db_test_reset.mjs"
+    "init-reset": "node database/db_test_reset.mjs",
+    "migrate:story-authors": "pnpm tsx scripts/migrate-story-author-ids.ts",
+    "backfill:story-approval-counts": "pnpm tsx scripts/backfill-story-approval-counts.ts"
   },
   "dependencies": {
     "@aws-sdk/client-polly": "^3.978.0",

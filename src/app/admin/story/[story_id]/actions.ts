@@ -67,6 +67,8 @@ export async function removeApproval(
   await sql`UPDATE story SET status = ${nextStatus} WHERE id = ${storyId};`;
   const storyRow = (await sql`SELECT * FROM story WHERE id = ${storyId} LIMIT 1`)[0];
   if (storyRow) {
-    await mirrorStory(storyRow, `story:${storyRow.id}:admin_remove_approval`);
+    await mirrorStory(storyRow, `story:${storyRow.id}:admin_remove_approval`, {
+      approvalCount: count,
+    });
   }
 }

@@ -141,7 +141,7 @@ export default function EditList({
                 <DropDownStatus
                   id={story.id}
                   name={story.name}
-                  count={story.approvals?.length ?? 0}
+                  count={story.approvalCount ?? 0}
                   status={story.status}
                   public={story.public}
                   official={course.official}

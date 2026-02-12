@@ -171,3 +171,81 @@ export const stripStoryHeavyFieldsBatch = mutation({
     };
   },
 });
+
+export const patchStoryAuthorsBatch = mutation({
+  args: {
+    rows: v.array(
+      v.object({
+        legacyStoryId: v.number(),
+        authorId: v.optional(v.number()),
+        authorChangeId: v.optional(v.number()),
+      }),
+    ),
+  },
+  returns: v.object({
+    updated: v.number(),
+    missingStories: v.array(v.number()),
+  }),
+  handler: async (ctx, args) => {
+    let updated = 0;
+    const missingStories: number[] = [];
+
+    for (const row of args.rows) {
+      const story = await ctx.db
+        .query("stories")
+        .withIndex("by_legacy_id", (q) => q.eq("legacyId", row.legacyStoryId))
+        .unique();
+
+      if (!story) {
+        missingStories.push(row.legacyStoryId);
+        continue;
+      }
+
+      await ctx.db.patch(story._id, {
+        authorId: row.authorId,
+        authorChangeId: row.authorChangeId,
+      });
+      updated += 1;
+    }
+
+    return {
+      updated,
+      missingStories,
+    };
+  },
+});
+
+export const backfillStoryApprovalCountsBatch = mutation({
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  returns: v.object({
+    updated: v.number(),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const page = await ctx.db
+      .query("stories")
+      .order("asc")
+      .paginate(args.paginationOpts);
+
+    let updated = 0;
+    for (const story of page.page) {
+      const approvals = await ctx.db
+        .query("story_approval")
+        .withIndex("by_story", (q) => q.eq("storyId", story._id))
+        .collect();
+      const approvalCount = approvals.length;
+      if ((story.approvalCount ?? 0) === approvalCount) continue;
+      await ctx.db.patch(story._id, { approvalCount });
+      updated += 1;
+    }
+
+    return {
+      updated,
+      isDone: page.isDone,
+      continueCursor: page.continueCursor,
+    };
+  },
+});

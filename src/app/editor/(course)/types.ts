@@ -33,7 +33,7 @@ export type StoryListDataProps = {
   status: string;
   public: boolean;
   todo_count: number;
-  approvals: number[];
+  approvalCount: number;
   author: string;
   author_change: string | null;
 };
