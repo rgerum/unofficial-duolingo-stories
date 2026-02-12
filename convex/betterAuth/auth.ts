@@ -135,6 +135,25 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
         });
       },
     },
+    user: {
+      changeEmail: {
+        enabled: true,
+        updateEmailWithoutVerification: false,
+        sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+          await sendEmail({
+            to: user.email,
+            subject: "[Unofficial Duolingo Stories] Confirm Email Change",
+            html: `Hey ${user.name ?? "there"},<br/>
+              <br/>
+              You requested to change your account email to <b>${newEmail}</b>.<br/>
+              Confirm this change using the link below.<br/>
+              <a href='${url}'>Confirm Email Change</a>
+              <br/><br/>
+              If this was not you, you can ignore this email.`,
+          });
+        },
+      },
+    },
     plugins: [
       convex({ authConfig }),
       username(),
