@@ -1,7 +1,6 @@
 import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
-import type { MutationCtx } from "./_generated/server";
 
 function toLegacyLanguageResponse(row: {
   legacyId: number;
@@ -34,28 +33,6 @@ function toLegacyLanguageResponse(row: {
   };
 }
 
-async function getLanguageByLegacyId(ctx: MutationCtx, legacyLanguageId: number) {
-  return await ctx.db
-    .query("languages")
-    .withIndex("by_id_value", (q) => q.eq("legacyId", legacyLanguageId))
-    .unique();
-}
-
-async function getLanguageByShort(ctx: MutationCtx, short?: string | null) {
-  if (!short) return null;
-  return await ctx.db
-    .query("languages")
-    .withIndex("by_short", (q) => q.eq("short", short))
-    .unique();
-}
-
-async function getAvatarByLegacyId(ctx: MutationCtx, legacyAvatarId: number) {
-  return await ctx.db
-    .query("avatars")
-    .withIndex("by_id_value", (q) => q.eq("legacyId", legacyAvatarId))
-    .unique();
-}
-
 export const setDefaultText = mutation({
   args: {
     legacyLanguageId: v.number(),
@@ -75,7 +52,10 @@ export const setDefaultText = mutation({
     rtl: v.boolean(),
   }),
   handler: async (ctx, args) => {
-    const language = await getLanguageByLegacyId(ctx, args.legacyLanguageId);
+    const language = await ctx.db
+      .query("languages")
+      .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyLanguageId))
+      .unique();
 
     if (!language) {
       throw new Error(`Language ${args.legacyLanguageId} not found`);
@@ -127,7 +107,10 @@ export const setTtsReplace = mutation({
     rtl: v.boolean(),
   }),
   handler: async (ctx, args) => {
-    const language = await getLanguageByLegacyId(ctx, args.legacyLanguageId);
+    const language = await ctx.db
+      .query("languages")
+      .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyLanguageId))
+      .unique();
 
     if (!language) {
       throw new Error(`Language ${args.legacyLanguageId} not found`);
@@ -143,15 +126,11 @@ export const setTtsReplace = mutation({
       lastOperationKey: operationKey,
     });
 
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorLanguageTtsReplace,
-      {
-        legacyLanguageId: args.legacyLanguageId,
-        tts_replace: args.tts_replace,
-        operationKey,
-      },
-    );
+    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorLanguageTtsReplace, {
+      legacyLanguageId: args.legacyLanguageId,
+      tts_replace: args.tts_replace,
+      operationKey,
+    });
 
     return toLegacyLanguageResponse({
       ...language,
@@ -177,8 +156,14 @@ export const setAvatarSpeaker = mutation({
   }),
   handler: async (ctx, args) => {
     const [language, avatar] = await Promise.all([
-      getLanguageByLegacyId(ctx, args.legacyLanguageId),
-      getAvatarByLegacyId(ctx, args.legacyAvatarId),
+      ctx.db
+        .query("languages")
+        .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyLanguageId))
+        .unique(),
+      ctx.db
+        .query("avatars")
+        .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyAvatarId))
+        .unique(),
     ]);
 
     if (!language) {
@@ -217,17 +202,13 @@ export const setAvatarSpeaker = mutation({
       });
     }
 
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAvatarMappingUpsert,
-      {
-        legacyLanguageId: args.legacyLanguageId,
-        legacyAvatarId: args.legacyAvatarId,
-        name: args.name,
-        speaker: args.speaker,
-        operationKey,
-      },
-    );
+    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorAvatarMappingUpsert, {
+      legacyLanguageId: args.legacyLanguageId,
+      legacyAvatarId: args.legacyAvatarId,
+      name: args.name,
+      speaker: args.speaker,
+      operationKey,
+    });
 
     return {
       id: existing?.legacyId ?? null,
@@ -235,86 +216,6 @@ export const setAvatarSpeaker = mutation({
       language_id: args.legacyLanguageId,
       name: args.name,
       speaker: args.speaker,
-    };
-  },
-});
-
-export const upsertSpeakerFromVoice = mutation({
-  args: {
-    localeShort: v.optional(v.string()),
-    languageShort: v.optional(v.string()),
-    speaker: v.string(),
-    gender: v.string(),
-    type: v.string(),
-    service: v.string(),
-    operationKey: v.optional(v.string()),
-  },
-  returns: v.union(
-    v.null(),
-    v.object({
-      legacyLanguageId: v.number(),
-      speaker: v.string(),
-      gender: v.string(),
-      type: v.string(),
-      service: v.string(),
-    }),
-  ),
-  handler: async (ctx, args) => {
-    const language =
-      (await getLanguageByShort(ctx, args.localeShort)) ??
-      (await getLanguageByShort(ctx, args.languageShort));
-
-    if (!language || language.legacyId === undefined) {
-      return null;
-    }
-
-    const existing = (
-      await ctx.db
-        .query("speakers")
-        .withIndex("by_speaker", (q) => q.eq("speaker", args.speaker))
-        .collect()
-    )[0];
-
-    const operationKey =
-      args.operationKey ?? `speaker:${args.speaker}:upsert:${Date.now()}`;
-
-    if (existing) {
-      await ctx.db.patch(existing._id, {
-        languageId: language._id,
-        speaker: args.speaker,
-        gender: args.gender,
-        type: args.type,
-        service: args.service,
-        mirrorUpdatedAt: Date.now(),
-        lastOperationKey: operationKey,
-      });
-    } else {
-      await ctx.db.insert("speakers", {
-        languageId: language._id,
-        speaker: args.speaker,
-        gender: args.gender,
-        type: args.type,
-        service: args.service,
-        mirrorUpdatedAt: Date.now(),
-        lastOperationKey: operationKey,
-      });
-    }
-
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorSpeakerUpsert, {
-      legacyLanguageId: language.legacyId,
-      speaker: args.speaker,
-      gender: args.gender,
-      type: args.type,
-      service: args.service,
-      operationKey,
-    });
-
-    return {
-      legacyLanguageId: language.legacyId,
-      speaker: args.speaker,
-      gender: args.gender,
-      type: args.type,
-      service: args.service,
     };
   },
 });
