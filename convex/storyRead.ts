@@ -24,6 +24,16 @@ const storyReadResultValidator = v.union(
   v.null(),
 );
 
+const storyMetaResultValidator = v.union(
+  v.object({
+    from_language_name: v.string(),
+    image: v.string(),
+    from_language_long: v.string(),
+    learning_language_long: v.string(),
+  }),
+  v.null(),
+);
+
 export const getStoryByLegacyId = query({
   args: {
     storyId: v.number(),
@@ -82,6 +92,38 @@ export const getStoryByLegacyId = query({
         active: String(illustrations.active ?? ""),
         locked: String(illustrations.locked ?? ""),
       },
+    };
+  },
+});
+
+export const getStoryMetaByLegacyId = query({
+  args: {
+    storyId: v.number(),
+  },
+  returns: storyMetaResultValidator,
+  handler: async (ctx, args) => {
+    const story = await ctx.db
+      .query("stories")
+      .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.storyId))
+      .unique();
+    if (!story || story.deleted) return null;
+
+    const course = await ctx.db.get(story.courseId);
+    if (!course) return null;
+
+    const [fromLanguage, learningLanguage, image] = await Promise.all([
+      ctx.db.get(course.fromLanguageId),
+      ctx.db.get(course.learningLanguageId),
+      story.imageId ? ctx.db.get(story.imageId) : Promise.resolve(null),
+    ]);
+
+    if (!fromLanguage || !learningLanguage) return null;
+
+    return {
+      from_language_name: story.name,
+      image: image?.legacyId ?? "",
+      from_language_long: fromLanguage.name,
+      learning_language_long: learningLanguage.name,
     };
   },
 });

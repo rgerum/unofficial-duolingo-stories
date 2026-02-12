@@ -1,30 +1,7 @@
 import React from "react";
-import { sql, cache } from "@/lib/db";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@convex/_generated/api";
 import Flag from "./flag";
-
-type LanguageProps = {
-  id: number;
-  short: string;
-  flag_file: string | null;
-  flag: number | null;
-};
-
-export const get_flag_data = cache(
-  async () => {
-    let langs = await sql`SELECT id, short, flag_file, flag FROM language`;
-    let lang_list: Record<number, LanguageProps> = {};
-    for (let lang of langs) {
-      lang_list[lang.id] = lang as LanguageProps;
-    }
-    return lang_list;
-  },
-  ["get_langs_short_xx"],
-  { tags: ["lang"], revalidate: 3600 },
-);
-
-let get_lang = cache(async (id: number) => {
-  return (await get_flag_data())[id];
-});
 
 export default async function FlagById({
   id,
@@ -35,7 +12,12 @@ export default async function FlagById({
   width?: number;
   height?: number;
 }) {
-  const { short, flag_file, flag } = await get_lang(id);
+  const language = await fetchQuery(api.localization.getLanguageFlagByLegacyId, {
+    legacyLanguageId: id,
+  });
+  if (!language) return null;
+
+  const { short, flag_file, flag } = language;
   return (
     <Flag
       iso={short}
