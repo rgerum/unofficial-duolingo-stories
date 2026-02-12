@@ -2,6 +2,8 @@ import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { getUser, isAdmin } from "@/lib/userInterface";
 import { mirrorLanguage } from "@/lib/lookupTableMirror";
+import { fetchAuthMutation } from "@/lib/auth-server";
+import { api } from "@convex/_generated/api";
 
 interface LanguageData {
   id?: number;
@@ -39,19 +41,20 @@ export async function POST(req: NextRequest) {
 }
 
 async function set_language(data: LanguageData) {
-  const language =
-    data.id === undefined
-      ? (await sql`INSERT INTO language ${sql(data)} RETURNING *`)[0]
-      : (
-          await sql`UPDATE language SET ${sql(data, [
-            "name",
-            "short",
-            "flag",
-            "flag_file",
-            "rtl",
-            "speaker",
-          ])} WHERE id = ${data.id} RETURNING *`
-        )[0];
+  if (data.id !== undefined) {
+    return await fetchAuthMutation(api.adminWrite.updateAdminLanguage, {
+      id: data.id,
+      name: data.name,
+      short: data.short,
+      flag: data.flag,
+      flag_file: data.flag_file,
+      speaker: data.speaker,
+      rtl: data.rtl,
+      operationKey: `language:${data.id}:admin_set:route`,
+    });
+  }
+
+  const language = (await sql`INSERT INTO language ${sql(data)} RETURNING *`)[0];
 
   if (language?.id) {
     await mirrorLanguage(language, `language:${language.id}:admin_set`);

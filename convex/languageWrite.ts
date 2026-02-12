@@ -219,3 +219,93 @@ export const setAvatarSpeaker = mutation({
     };
   },
 });
+
+export const upsertSpeakerFromVoice = mutation({
+  args: {
+    localeShort: v.optional(v.string()),
+    languageShort: v.optional(v.string()),
+    speaker: v.string(),
+    gender: v.string(),
+    type: v.string(),
+    service: v.string(),
+    operationKey: v.optional(v.string()),
+  },
+  returns: v.union(
+    v.null(),
+    v.object({
+      legacyLanguageId: v.number(),
+      speaker: v.string(),
+      gender: v.string(),
+      type: v.string(),
+      service: v.string(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const language =
+      (args.localeShort
+        ? await ctx.db
+            .query("languages")
+            .withIndex("by_short", (q) => q.eq("short", args.localeShort!))
+            .unique()
+        : null) ??
+      (args.languageShort
+        ? await ctx.db
+            .query("languages")
+            .withIndex("by_short", (q) => q.eq("short", args.languageShort!))
+            .unique()
+        : null);
+
+    if (!language || language.legacyId === undefined) {
+      return null;
+    }
+
+    const existing = (
+      await ctx.db
+        .query("speakers")
+        .withIndex("by_speaker", (q) => q.eq("speaker", args.speaker))
+        .collect()
+    )[0];
+
+    const operationKey =
+      args.operationKey ?? `speaker:${args.speaker}:upsert:${Date.now()}`;
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        languageId: language._id,
+        speaker: args.speaker,
+        gender: args.gender,
+        type: args.type,
+        service: args.service,
+        mirrorUpdatedAt: Date.now(),
+        lastOperationKey: operationKey,
+      });
+    } else {
+      await ctx.db.insert("speakers", {
+        languageId: language._id,
+        speaker: args.speaker,
+        gender: args.gender,
+        type: args.type,
+        service: args.service,
+        mirrorUpdatedAt: Date.now(),
+        lastOperationKey: operationKey,
+      });
+    }
+
+    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorSpeakerUpsert, {
+      legacyLanguageId: language.legacyId,
+      speaker: args.speaker,
+      gender: args.gender,
+      type: args.type,
+      service: args.service,
+      operationKey,
+    });
+
+    return {
+      legacyLanguageId: language.legacyId,
+      speaker: args.speaker,
+      gender: args.gender,
+      type: args.type,
+      service: args.service,
+    };
+  },
+});

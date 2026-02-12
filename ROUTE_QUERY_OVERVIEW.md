@@ -47,12 +47,12 @@ This maps URL routes to the data queries/mutations they execute today.
 
 | Route Handler | Query/Mutation Calls | Backend |
 |---|---|---|
-| `POST /admin/courses/set` | `SELECT language`; `INSERT/UPDATE course`; `SELECT course`; mirror via `mirrorCourse` | SQL + Convex mirror |
-| `POST /admin/languages/set` | `INSERT/UPDATE language`; mirror via `mirrorLanguage` | SQL + Convex mirror |
+| `POST /admin/courses/set` | update path: `api.adminWrite.updateAdminCourse` + `internal.postgresMirror.mirrorAdminCourseUpdate`; create path fallback: SQL insert + `mirrorCourse` | Mixed (Convex-first updates, SQL create fallback) |
+| `POST /admin/languages/set` | update path: `api.adminWrite.updateAdminLanguage` + `internal.postgresMirror.mirrorAdminLanguageUpdate`; create path fallback: SQL insert + `mirrorLanguage` | Mixed (Convex-first updates, SQL create fallback) |
 | `GET/POST /api/auth/[...all]` | delegated to `handler` from `src/lib/auth-server.ts` | Better Auth/Convex adapter |
 | `POST /audio/create` | no DB query (TTS providers + filesystem) | External APIs/filesystem |
 | `POST /audio/upload` | no DB query (blob upload + filesystem) | Vercel Blob/filesystem |
-| `GET /audio/voices` | `REPLACE INTO speaker`; `SELECT speaker`; mirror via `mirrorSpeaker` | SQL + Convex mirror |
+| `GET /audio/voices` | `api.languageWrite.upsertSpeakerFromVoice`; internal action `internal.postgresMirror.mirrorSpeakerUpsert` | Convex mutation + Postgres mirror action |
 | `GET /editor/story/get_image/:image_id` | `api.editorRead.getEditorImageByLegacyId` | Convex |
 | `GET /editor/story/get_language/:language_id` | `api.editorRead.getEditorLanguageByLegacyId` | Convex |
 | `POST /editor/localization/set` | `api.localizationWrite.setLocalization`; internal action `internal.postgresMirror.mirrorLocalizationUpsert` | Convex mutation + Postgres mirror action |
@@ -61,7 +61,7 @@ This maps URL routes to the data queries/mutations they execute today.
 | `POST /editor/language/save_tts_replace` | `api.languageWrite.setTtsReplace`; internal action `internal.postgresMirror.mirrorLanguageTtsReplace` | Convex mutation + Postgres mirror action |
 | `POST /editor/story/set_story` | `api.storyWrite.setStory`; internal action `internal.postgresMirror.mirrorStorySet` | Convex mutation + Postgres mirror action |
 | `POST /editor/story/delete_story` | `api.storyWrite.deleteStory`; internal action `internal.postgresMirror.mirrorStoryDelete` | Convex mutation + Postgres mirror action |
-| `GET /editor/course/:course_id/import/send/:story_id` | `SELECT source story`; `INSERT cloned story`; mirror via `mirrorStory` | SQL + Convex mirror |
+| `GET /editor/course/:course_id/import/send/:story_id` | `api.storyWrite.importStory`; internal action `internal.postgresMirror.mirrorStoryImport` | Convex mutation + Postgres mirror action |
 | `GET /editor/approve/:story_id` | toggles `story_approval`; updates `story.status`, `story.public`, `course.count`, contributor lists; mirrors approval/story/course | SQL + Convex mirror |
 
 ## Core Convex Query Modules (what many routes depend on)

@@ -9,6 +9,7 @@
  */
 
 import type * as adminData from "../adminData.js";
+import type * as adminWrite from "../adminWrite.js";
 import type * as audioRead from "../audioRead.js";
 import type * as auth from "../auth.js";
 import type * as authFunctions from "../authFunctions.js";
@@ -37,6 +38,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   adminData: typeof adminData;
+  adminWrite: typeof adminWrite;
   audioRead: typeof audioRead;
   auth: typeof auth;
   authFunctions: typeof authFunctions;
