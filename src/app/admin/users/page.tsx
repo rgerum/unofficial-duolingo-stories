@@ -1,7 +1,6 @@
 import UserList, { type AdminUserList } from "./user_list";
 import { fetchAuthQuery } from "@/lib/auth-server";
-import { isAdmin, isContributor } from "@/lib/userInterface";
-import { components } from "@convex/_generated/api";
+import { api } from "@convex/_generated/api";
 
 const PER_PAGE = 50;
 
@@ -29,92 +28,22 @@ export default async function Page({
   const query = rawQuery.trim();
   const pageRaw = normalizeQuery(resolvedSearchParams?.page);
   const page = Math.max(1, Number.parseInt(pageRaw || "1", 10) || 1);
-  const offset = (page - 1) * PER_PAGE;
   const activatedFilter = normalizeFilter(resolvedSearchParams?.activated);
   const roleFilter = normalizeFilter(resolvedSearchParams?.role);
   const adminFilter = normalizeFilter(resolvedSearchParams?.admin);
 
-  const batchSize = 200;
-  let cursor: string | null = null;
-  let total = 0;
-  const pageUsers: Array<{
-    _id: string;
-    name?: string;
-    email?: string;
-    createdAt?: number;
-    userId?: string | null;
-    role?: string | null;
-    emailVerified?: boolean;
-  }> = [];
+  const response = await fetchAuthQuery(api.adminData.getAdminUsersPage, {
+    query,
+    page,
+    perPage: PER_PAGE,
+    activatedFilter,
+    roleFilter,
+    adminFilter,
+  });
 
-  const targetStart = offset;
-  const targetEnd = offset + PER_PAGE;
-
-  while (true) {
-    const response = (await fetchAuthQuery(
-      components.betterAuth.adapter.findMany as any,
-      {
-        model: "user",
-        where: [],
-        paginationOpts: { cursor, numItems: batchSize },
-      },
-    )) as any;
-
-    const batch = response.page as Array<{
-      _id: string;
-      name?: string;
-      email?: string;
-      createdAt?: number;
-      userId?: string | null;
-      role?: string | null;
-      emailVerified?: boolean;
-    }>;
-
-    for (const user of batch) {
-      const name = user.name ?? "";
-      const email = user.email ?? "";
-      const id = user.userId ?? "";
-      if (query) {
-        const matches =
-          name.toLowerCase().includes(query.toLowerCase()) ||
-          email.toLowerCase().includes(query.toLowerCase()) ||
-          id === query;
-        if (!matches) continue;
-      }
-      if (activatedFilter !== "all") {
-        const activated = Boolean(user.emailVerified);
-        if (activatedFilter === "yes" && !activated) continue;
-        if (activatedFilter === "no" && activated) continue;
-      }
-      if (roleFilter !== "all") {
-        const hasRole = isContributor({ role: user.role ?? null });
-        if (roleFilter === "yes" && !hasRole) continue;
-        if (roleFilter === "no" && hasRole) continue;
-      }
-      if (adminFilter !== "all") {
-        const isAdminUser = isAdmin({ role: user.role ?? null });
-        if (adminFilter === "yes" && !isAdminUser) continue;
-        if (adminFilter === "no" && isAdminUser) continue;
-      }
-
-      if (total >= targetStart && total < targetEnd) {
-        pageUsers.push(user);
-      }
-      total += 1;
-    }
-
-    if (response.isDone) break;
-    cursor = response.continueCursor ?? null;
-  }
-
-  const users: AdminUserList[] = pageUsers.map((user) => ({
-    id: user.userId ? Number(user.userId) : 0,
-    name: user.name ?? "",
-    email: user.email ?? "",
-    regdate: user.createdAt ? new Date(user.createdAt) : new Date(),
-    activated: Boolean(user.emailVerified),
-    role: isContributor({ role: user.role ?? null }),
-    admin: isAdmin({ role: user.role ?? null }),
+  const users: AdminUserList[] = response.users.map((user) => ({
+    ...user,
+    regdate: user.regdate ? new Date(user.regdate) : undefined,
   }));
 
   return (
@@ -123,7 +52,8 @@ export default async function Page({
       query={query}
       page={page}
       perPage={PER_PAGE}
-      total={total}
+      hasPrevPage={response.hasPrevPage}
+      hasNextPage={response.hasNextPage}
       activatedFilter={activatedFilter}
       roleFilter={roleFilter}
       adminFilter={adminFilter}

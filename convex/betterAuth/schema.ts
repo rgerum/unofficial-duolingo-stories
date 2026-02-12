@@ -29,6 +29,8 @@ export const tables = {
   })
     .index("email_name", ["email", "name"])
     .index("name", ["name"])
+    .index("role", ["role"])
+    .index("role_createdAt", ["role", "createdAt"])
     .index("userId", ["userId"])
     .index("username", ["username"]),
   session: defineTable({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition, type KeyboardEvent } from "react";
+import { useState, useTransition, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styled from "styled-components";
@@ -10,7 +10,7 @@ import { SpinnerBlue } from "@/components/layout/spinner";
 import styles from "../index.module.css";
 import type { AdminUser } from "./[user_id]/schema";
 
-export type AdminUserList = AdminUser & { admin?: boolean };
+export type AdminUserList = AdminUser & { admin?: boolean; rowKey?: string };
 
 type FilterValue = "all" | "yes" | "no";
 
@@ -19,7 +19,8 @@ interface UserListProps {
   query: string;
   page: number;
   perPage: number;
-  total: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
   activatedFilter: FilterValue;
   roleFilter: FilterValue;
   adminFilter: FilterValue;
@@ -45,7 +46,8 @@ export default function UserList({
   query,
   page,
   perPage,
-  total,
+  hasPrevPage,
+  hasNextPage,
   activatedFilter,
   roleFilter,
   adminFilter,
@@ -57,13 +59,8 @@ export default function UserList({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const totalPages = useMemo(() => {
-    if (total <= 0) return 1;
-    return Math.max(1, Math.ceil(total / perPage));
-  }, [total, perPage]);
-
-  const start = total === 0 ? 0 : (page - 1) * perPage + 1;
-  const end = Math.min(total, page * perPage);
+  const start = users.length === 0 ? 0 : (page - 1) * perPage + 1;
+  const end = users.length === 0 ? 0 : start + users.length - 1;
 
   function submitSearch(nextPage = 1) {
     startTransition(() => {
@@ -162,7 +159,7 @@ export default function UserList({
       </Header>
       <Meta>
         <MetaLeft>
-          Showing {start}-{end} of {total}
+          {users.length === 0 ? "No users found." : `Showing ${start}-${end}`}
           <SpinnerInline aria-live="polite" data-active={isPending}>
             <SpinnerBlue />
           </SpinnerInline>
@@ -170,16 +167,14 @@ export default function UserList({
         <Pagination>
           <Button
             onClick={() => submitSearch(Math.max(1, page - 1))}
-            disabled={page <= 1}
+            disabled={!hasPrevPage}
           >
             Prev
           </Button>
-          <PageStatus>
-            Page {page} of {totalPages}
-          </PageStatus>
+          <PageStatus>Page {page}</PageStatus>
           <Button
-            onClick={() => submitSearch(Math.min(totalPages, page + 1))}
-            disabled={page >= totalPages}
+            onClick={() => submitSearch(page + 1)}
+            disabled={!hasNextPage}
           >
             Next
           </Button>
@@ -204,8 +199,8 @@ export default function UserList({
               <td colSpan={8}>No users found.</td>
             </tr>
           ) : (
-            users.map((user) => (
-              <tr key={user.id}>
+            users.map((user, index) => (
+              <tr key={user.rowKey ?? `${user.id}-${index}`}>
                 <td>{user.id}</td>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
