@@ -1,6 +1,7 @@
 import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import type { MutationCtx } from "./_generated/server";
 
 function toLegacyLanguageResponse(row: {
   legacyId: number;
@@ -33,6 +34,28 @@ function toLegacyLanguageResponse(row: {
   };
 }
 
+async function getLanguageByLegacyId(ctx: MutationCtx, legacyLanguageId: number) {
+  return await ctx.db
+    .query("languages")
+    .withIndex("by_id_value", (q) => q.eq("legacyId", legacyLanguageId))
+    .unique();
+}
+
+async function getLanguageByShort(ctx: MutationCtx, short?: string | null) {
+  if (!short) return null;
+  return await ctx.db
+    .query("languages")
+    .withIndex("by_short", (q) => q.eq("short", short))
+    .unique();
+}
+
+async function getAvatarByLegacyId(ctx: MutationCtx, legacyAvatarId: number) {
+  return await ctx.db
+    .query("avatars")
+    .withIndex("by_id_value", (q) => q.eq("legacyId", legacyAvatarId))
+    .unique();
+}
+
 export const setDefaultText = mutation({
   args: {
     legacyLanguageId: v.number(),
@@ -52,10 +75,7 @@ export const setDefaultText = mutation({
     rtl: v.boolean(),
   }),
   handler: async (ctx, args) => {
-    const language = await ctx.db
-      .query("languages")
-      .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyLanguageId))
-      .unique();
+    const language = await getLanguageByLegacyId(ctx, args.legacyLanguageId);
 
     if (!language) {
       throw new Error(`Language ${args.legacyLanguageId} not found`);
@@ -107,10 +127,7 @@ export const setTtsReplace = mutation({
     rtl: v.boolean(),
   }),
   handler: async (ctx, args) => {
-    const language = await ctx.db
-      .query("languages")
-      .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyLanguageId))
-      .unique();
+    const language = await getLanguageByLegacyId(ctx, args.legacyLanguageId);
 
     if (!language) {
       throw new Error(`Language ${args.legacyLanguageId} not found`);
@@ -126,11 +143,15 @@ export const setTtsReplace = mutation({
       lastOperationKey: operationKey,
     });
 
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorLanguageTtsReplace, {
-      legacyLanguageId: args.legacyLanguageId,
-      tts_replace: args.tts_replace,
-      operationKey,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.postgresMirror.mirrorLanguageTtsReplace,
+      {
+        legacyLanguageId: args.legacyLanguageId,
+        tts_replace: args.tts_replace,
+        operationKey,
+      },
+    );
 
     return toLegacyLanguageResponse({
       ...language,
@@ -156,14 +177,8 @@ export const setAvatarSpeaker = mutation({
   }),
   handler: async (ctx, args) => {
     const [language, avatar] = await Promise.all([
-      ctx.db
-        .query("languages")
-        .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyLanguageId))
-        .unique(),
-      ctx.db
-        .query("avatars")
-        .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyAvatarId))
-        .unique(),
+      getLanguageByLegacyId(ctx, args.legacyLanguageId),
+      getAvatarByLegacyId(ctx, args.legacyAvatarId),
     ]);
 
     if (!language) {
@@ -202,13 +217,17 @@ export const setAvatarSpeaker = mutation({
       });
     }
 
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorAvatarMappingUpsert, {
-      legacyLanguageId: args.legacyLanguageId,
-      legacyAvatarId: args.legacyAvatarId,
-      name: args.name,
-      speaker: args.speaker,
-      operationKey,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.postgresMirror.mirrorAvatarMappingUpsert,
+      {
+        legacyLanguageId: args.legacyLanguageId,
+        legacyAvatarId: args.legacyAvatarId,
+        name: args.name,
+        speaker: args.speaker,
+        operationKey,
+      },
+    );
 
     return {
       id: existing?.legacyId ?? null,
@@ -242,18 +261,8 @@ export const upsertSpeakerFromVoice = mutation({
   ),
   handler: async (ctx, args) => {
     const language =
-      (args.localeShort
-        ? await ctx.db
-            .query("languages")
-            .withIndex("by_short", (q) => q.eq("short", args.localeShort!))
-            .unique()
-        : null) ??
-      (args.languageShort
-        ? await ctx.db
-            .query("languages")
-            .withIndex("by_short", (q) => q.eq("short", args.languageShort!))
-            .unique()
-        : null);
+      (await getLanguageByShort(ctx, args.localeShort)) ??
+      (await getLanguageByShort(ctx, args.languageShort));
 
     if (!language || language.legacyId === undefined) {
       return null;
