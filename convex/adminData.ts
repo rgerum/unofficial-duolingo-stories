@@ -168,75 +168,42 @@ export const getAdminUsersPage = query({
       where.push({ field: "emailVerified", operator: "eq", value: false });
     }
 
-    const matchesRoleFilters = (role: string | null | undefined) => {
-      const normalizedRole = role ?? "user";
-      const isAdminRole = normalizedRole === "admin";
-      const isContributorRole =
-        normalizedRole === "contributor" || normalizedRole === "admin";
-
-      if (args.adminFilter === "yes" && !isAdminRole) return false;
-      if (args.adminFilter === "no" && isAdminRole) return false;
-      if (args.roleFilter === "yes" && !isContributorRole) return false;
-      if (args.roleFilter === "no" && isContributorRole) return false;
-      return true;
-    };
-
-    const batchSize = Math.max(200, perPage + 1);
-    const collected: Array<{
-      _id?: string;
-      userId?: string | null;
-      name?: string | null;
-      email?: string | null;
-      createdAt?: number | null;
-      role?: string | null;
-      emailVerified?: boolean | null;
-    }> = [];
-    let matchedCount = 0;
-    let cursor: string | null = null;
-    let hasMore = true;
-
-    while (hasMore && collected.length < perPage + 1) {
-      const response = (await ctx.runQuery(
-        components.betterAuth.adapter.findMany,
-        {
-          model: "user",
-          where,
-          paginationOpts: { cursor, numItems: batchSize },
-          sortBy: { field: "createdAt", direction: "desc" },
-        },
-      )) as {
-        page: Array<{
-          _id?: string;
-          userId?: string | null;
-          name?: string | null;
-          email?: string | null;
-          createdAt?: number | null;
-          role?: string | null;
-          emailVerified?: boolean | null;
-        }>;
-        isDone?: boolean;
-        continueCursor?: string | null;
-      };
-
-      for (const user of response.page) {
-        if (!matchesRoleFilters(user.role)) continue;
-
-        if (matchedCount >= offset && collected.length < perPage + 1) {
-          collected.push(user);
-        }
-        matchedCount += 1;
-
-        if (collected.length >= perPage + 1) break;
-      }
-
-      hasMore = !(response.isDone ?? true);
-      cursor = response.continueCursor ?? null;
-      if (!cursor) hasMore = false;
+    // Apply role/admin filters at query time to keep pagination consistent.
+    // `role` is nullable for many legacy users, so the "no contributor/admin"
+    // cases are modeled with negative predicates.
+    if (args.adminFilter === "yes" && args.roleFilter === "no") {
+      return { users: [], hasPrevPage: page > 1, hasNextPage: false };
     }
 
-    const response = {
-      page: collected,
-    } as {
+    if (args.adminFilter === "yes") {
+      where.push({ field: "role", operator: "eq", value: "admin" });
+    } else if (args.roleFilter === "yes") {
+      if (args.adminFilter === "no") {
+        where.push({ field: "role", operator: "eq", value: "contributor" });
+      } else {
+        where.push({
+          field: "role",
+          operator: "in",
+          value: ["admin", "contributor"],
+        });
+      }
+    } else if (args.roleFilter === "no") {
+      where.push({
+        field: "role",
+        operator: "not_in",
+        value: ["admin", "contributor"],
+      });
+    } else if (args.adminFilter === "no") {
+      where.push({ field: "role", operator: "ne", value: "admin" });
+    }
+
+    const response = (await ctx.runQuery(components.betterAuth.adapter.findMany, {
+      model: "user",
+      where,
+      offset,
+      paginationOpts: { cursor: null, numItems: perPage + 1 },
+      sortBy: { field: "createdAt", direction: "desc" },
+    })) as {
       page: Array<{
         _id?: string;
         userId?: string | null;
@@ -249,9 +216,8 @@ export const getAdminUsersPage = query({
     };
 
     const hasNextPage = response.page.length > perPage;
-    const users = (hasNextPage ? response.page.slice(0, perPage) : response.page).map(
-      toAdminUser,
-    );
+    const users = (hasNextPage ? response.page.slice(0, perPage) : response.page)
+      .map(toAdminUser);
 
     return {
       users,
