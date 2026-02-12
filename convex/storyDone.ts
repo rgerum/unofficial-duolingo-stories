@@ -153,3 +153,27 @@ export const getDoneCourseIdsForUser = query({
       .map(([legacyCourseId]) => legacyCourseId);
   },
 });
+
+export const getLastDoneCourseShortForLegacyUser = query({
+  args: {
+    legacyUserId: v.number(),
+  },
+  returns: v.union(v.string(), v.null()),
+  handler: async (ctx, args) => {
+    const doneRows = await ctx.db
+      .query("story_done")
+      .withIndex("by_user_time", (q) => q.eq("legacyUserId", args.legacyUserId))
+      .order("desc")
+      .take(20);
+
+    for (const doneRow of doneRows) {
+      const story = await ctx.db.get(doneRow.storyId);
+      if (!story || story.deleted) continue;
+      const course = await ctx.db.get(story.courseId);
+      if (!course?.short) continue;
+      return course.short;
+    }
+
+    return null;
+  },
+});

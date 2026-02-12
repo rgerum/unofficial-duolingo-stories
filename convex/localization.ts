@@ -78,3 +78,37 @@ export const getLanguageFlagById = query({
     };
   },
 });
+
+export const getLanguageFlagByLegacyId = query({
+  args: {
+    legacyLanguageId: v.number(),
+  },
+  returns: v.union(
+    v.object({
+      short: v.string(),
+      flag: v.optional(v.union(v.number(), v.string())),
+      flag_file: v.optional(v.string()),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const language = await ctx.db
+      .query("languages")
+      .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyLanguageId))
+      .unique();
+    if (!language) return null;
+
+    const numericFlag =
+      typeof language.flag === "number"
+        ? language.flag
+        : Number.isFinite(Number(language.flag))
+          ? Number(language.flag)
+          : undefined;
+
+    return {
+      short: language.short,
+      flag: numericFlag,
+      flag_file: language.flag_file,
+    };
+  },
+});

@@ -1,14 +1,13 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import getUserId from "@/lib/getUserId";
-import { get_localisation_dict } from "@/lib/get_localisation";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
 import LocalisationProvider from "@/components/LocalisationProvider";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
 import { fetchAuthMutation } from "@/lib/auth-server";
-import { sql } from "@/lib/db";
+import { fetchQuery } from "convex/nextjs";
 
 const convexUrl =
   process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
@@ -19,28 +18,15 @@ if (!convexUrl) {
 
 const convex = new ConvexHttpClient(convexUrl);
 
-async function get_story_meta(course_id: number) {
-  const course_query = await sql`SELECT
-        story.name AS from_language_name,
-        story.image,
-        l1.name AS from_language_long,
-        l2.name AS learning_language_long
-    FROM story 
-    JOIN course c on story.course_id = c.id 
-    LEFT JOIN language l1 ON l1.id = c.from_language
-    LEFT JOIN language l2 ON l2.id = c.learning_language 
-    WHERE story.id = ${course_id};`;
-  if (course_query.length === 0) return undefined;
-  return Object.assign({}, course_query[0]);
-}
-
 export async function generateMetadata({
   params,
 }: {
   params: { story_id: string };
 }) {
   const story_id = parseInt((await params).story_id);
-  const story = await get_story_meta(story_id);
+  const story = await fetchQuery(api.storyRead.getStoryMetaByLegacyId, {
+    storyId: story_id,
+  });
 
   if (!story) notFound();
 
@@ -72,8 +58,6 @@ export default async function Page({
   const course_id = story.course_id;
 
   const user_id = await getUserId();
-
-  const localization = await get_localisation_dict(story.from_language_id);
 
   async function setStoryDoneAction() {
     "use server";

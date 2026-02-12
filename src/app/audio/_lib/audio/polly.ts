@@ -6,7 +6,8 @@ import {
   DescribeVoicesOutput,
 } from "@aws-sdk/client-polly";
 import { put } from "@vercel/blob";
-import { sql } from "@/lib/db";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@convex/_generated/api";
 import type { SynthesisResult, Voice, TTSEngine, SpeakerData } from "./types";
 import type { Readable } from "stream";
 
@@ -14,6 +15,11 @@ import type { Readable } from "stream";
 const config = {
   region: "eu-central-1",
 };
+
+const convexUrl =
+  process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
+
+const convex = convexUrl ? new ConvexHttpClient(convexUrl) : null;
 
 async function synthesizeSpeechCall(
   polly: Polly,
@@ -179,9 +185,22 @@ function isValidVoice(voice: string): boolean {
 }
 
 async function getVoiceData(voice: string): Promise<SpeakerData | undefined> {
-  return (await sql`SELECT * FROM speaker WHERE speaker = ${voice}`)[0] as
-    | SpeakerData
-    | undefined;
+  if (!convex) return undefined;
+  const speaker = await convex.query(api.audioRead.getSpeakerByName, {
+    speaker: voice,
+  });
+  if (!speaker) return undefined;
+
+  return {
+    id: speaker.id,
+    speaker: speaker.speaker,
+    type:
+      speaker.type === "NEURAL" || speaker.type === "NORMAL"
+        ? speaker.type
+        : "NORMAL",
+    gender: speaker.gender,
+    service: speaker.service,
+  };
 }
 
 const pollyEngine: TTSEngine = {

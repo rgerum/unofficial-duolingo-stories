@@ -172,7 +172,8 @@ export default defineSchema({
   })
     .index("by_story", ["storyId"])
     .index("by_user", ["legacyUserId"])
-    .index("by_user_and_story", ["legacyUserId", "storyId"]),
+    .index("by_user_and_story", ["legacyUserId", "storyId"])
+    .index("by_user_time", ["legacyUserId", "time"]),
 
   story_approval: defineTable({
     storyId: v.id("stories"),
