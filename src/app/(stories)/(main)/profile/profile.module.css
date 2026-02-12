@@ -34,6 +34,18 @@
   flex-wrap: wrap;
 }
 
+.resetError {
+  color: var(--error-red);
+  display: block;
+  margin-top: 8px;
+}
+
+.resetMessage {
+  color: var(--green);
+  display: block;
+  margin-top: 8px;
+}
+
 .account {
   display: flex;
   align-items: center;
