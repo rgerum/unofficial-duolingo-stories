@@ -38,7 +38,10 @@ function toLanguage(language: LanguageDoc) {
   };
 }
 
-function toCourse(course: CourseDoc, languageById: Map<Id<"languages">, LanguageDoc>) {
+function toCourse(
+  course: CourseDoc,
+  languageById: Map<Id<"languages">, LanguageDoc>,
+) {
   const learningLanguage = languageById.get(course.learningLanguageId);
   const fromLanguage = languageById.get(course.fromLanguageId);
 
@@ -114,10 +117,20 @@ async function getUserNameByAuthDocId(ctx: any, authDocIds: string[]) {
 
   const results = await Promise.all(
     uniqueAuthDocIds.map(async (authDocId) => {
-      const user = (await ctx.runQuery(components.betterAuth.adapter.findOne, {
-        model: "user",
-        where: [{ field: "_id", value: authDocId }],
-      })) as { name?: string | null } | null;
+      const byUnderscoreId = (await ctx.runQuery(
+        components.betterAuth.adapter.findOne,
+        {
+          model: "user",
+          where: [{ field: "_id", value: authDocId }],
+        },
+      )) as { name?: string | null } | null;
+
+      const user =
+        byUnderscoreId ??
+        ((await ctx.runQuery(components.betterAuth.adapter.findOne, {
+          model: "user",
+          where: [{ field: "userId", value: authDocId }],
+        })) as { name?: string | null } | null);
 
       return {
         authDocId,
@@ -179,7 +192,8 @@ export const getEditorSidebarData = query({
     ]);
 
     const languageById = new Map<Id<"languages">, LanguageDoc>();
-    for (const language of languageRows) languageById.set(language._id, language);
+    for (const language of languageRows)
+      languageById.set(language._id, language);
 
     const languages = languageRows
       .map((language) => ({
@@ -213,7 +227,8 @@ export const getEditorCourseByIdentifier = query({
     if (!course) return null;
 
     const languageById = new Map<Id<"languages">, LanguageDoc>();
-    for (const language of languageRows) languageById.set(language._id, language);
+    for (const language of languageRows)
+      languageById.set(language._id, language);
 
     return toCourse(course, languageById);
   },
@@ -271,7 +286,10 @@ export const getEditorStoriesByCourseLegacyId = query({
     const authorLegacyIds = Array.from(
       new Set(
         stories
-          .flatMap((story) => [toNumber(story.authorId), toNumber(story.authorChangeId)])
+          .flatMap((story) => [
+            toNumber(story.authorId),
+            toNumber(story.authorChangeId),
+          ])
           .filter((id): id is number => id !== undefined),
       ),
     );
@@ -281,7 +299,9 @@ export const getEditorStoriesByCourseLegacyId = query({
           .flatMap((story) => [story.authorId, story.authorChangeId])
           .filter(
             (id): id is string =>
-              typeof id === "string" && id.trim().length > 0 && toNumber(id) === undefined,
+              typeof id === "string" &&
+              id.trim().length > 0 &&
+              toNumber(id) === undefined,
           ),
       ),
     );
@@ -295,7 +315,9 @@ export const getEditorStoriesByCourseLegacyId = query({
       const authorId = toNumber(story.authorId);
       const authorChangeId = toNumber(story.authorChangeId);
       const rawAuthorId =
-        typeof story.authorId === "string" ? story.authorId.trim() : story.authorId;
+        typeof story.authorId === "string"
+          ? story.authorId.trim()
+          : story.authorId;
       const rawAuthorChangeId =
         typeof story.authorChangeId === "string"
           ? story.authorChangeId.trim()
@@ -323,16 +345,18 @@ export const getEditorStoriesByCourseLegacyId = query({
         approvals,
         author:
           typeof authorId === "number"
-            ? nameByLegacyId.get(authorId) ?? `User ${authorId}`
+            ? (nameByLegacyId.get(authorId) ?? `User ${authorId}`)
             : typeof rawAuthorId === "string" && rawAuthorId.length > 0
-              ? nameByAuthDocId.get(rawAuthorId) ?? `User ${rawAuthorId}`
-            : "Unknown",
+              ? (nameByAuthDocId.get(rawAuthorId) ?? `User ${rawAuthorId}`)
+              : "Unknown",
         author_change:
           typeof authorChangeId === "number"
-            ? nameByLegacyId.get(authorChangeId) ?? `User ${authorChangeId}`
-            : typeof rawAuthorChangeId === "string" && rawAuthorChangeId.length > 0
-              ? nameByAuthDocId.get(rawAuthorChangeId) ?? `User ${rawAuthorChangeId}`
-            : null,
+            ? (nameByLegacyId.get(authorChangeId) ?? `User ${authorChangeId}`)
+            : typeof rawAuthorChangeId === "string" &&
+                rawAuthorChangeId.length > 0
+              ? (nameByAuthDocId.get(rawAuthorChangeId) ??
+                `User ${rawAuthorChangeId}`)
+              : null,
       };
     });
   },
@@ -512,10 +536,15 @@ export const getEditorLocalizationRowsByLanguageLegacyId = query({
   args: { languageLegacyId: v.number() },
   handler: async (ctx, args) => {
     const [englishLanguage, targetLanguage] = await Promise.all([
-      ctx.db.query("languages").withIndex("by_short", (q) => q.eq("short", "en")).unique(),
       ctx.db
         .query("languages")
-        .withIndex("by_id_value", (q) => q.eq("legacyId", args.languageLegacyId))
+        .withIndex("by_short", (q) => q.eq("short", "en"))
+        .unique(),
+      ctx.db
+        .query("languages")
+        .withIndex("by_id_value", (q) =>
+          q.eq("legacyId", args.languageLegacyId),
+        )
         .unique(),
     ]);
 
@@ -523,7 +552,9 @@ export const getEditorLocalizationRowsByLanguageLegacyId = query({
 
     const englishRows = await ctx.db
       .query("localizations")
-      .withIndex("by_language_id_and_tag", (q) => q.eq("languageId", englishLanguage._id))
+      .withIndex("by_language_id_and_tag", (q) =>
+        q.eq("languageId", englishLanguage._id),
+      )
       .collect();
 
     const targetRows =
@@ -531,7 +562,9 @@ export const getEditorLocalizationRowsByLanguageLegacyId = query({
         ? englishRows
         : await ctx.db
             .query("localizations")
-            .withIndex("by_language_id_and_tag", (q) => q.eq("languageId", targetLanguage._id))
+            .withIndex("by_language_id_and_tag", (q) =>
+              q.eq("languageId", targetLanguage._id),
+            )
             .collect();
 
     const targetByTag = new Map<string, string>();

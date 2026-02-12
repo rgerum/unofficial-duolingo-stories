@@ -610,6 +610,7 @@ export declare const components: {
         },
         any
       >;
+      get: FunctionReference<"query", "internal", { id: string }, any>;
       updateMany: FunctionReference<
         "mutation",
         "internal",
