@@ -64,8 +64,9 @@ function toCourse(
 }
 
 async function getCourseByIdentifier(ctx: any, identifier: string) {
-  const numeric = toNumber(identifier);
-  if (numeric !== undefined) {
+  const isNumericIdentifier = /^\d+$/.test(identifier);
+  if (isNumericIdentifier) {
+    const numeric = Number(identifier);
     const byId = await ctx.db
       .query("courses")
       .withIndex("by_id_value", (q: any) => q.eq("legacyId", numeric))
@@ -83,27 +84,20 @@ async function getUserNameByLegacyId(ctx: any, legacyIds: number[]) {
   const uniqueLegacyIds = Array.from(new Set(legacyIds));
   if (!uniqueLegacyIds.length) return new Map<number, string>();
 
+  const userIds = uniqueLegacyIds.map((legacyId) => String(legacyId));
+  const users = (await ctx.runQuery(components.betterAuth.adapter.findMany, {
+    model: "user",
+    where: [{ field: "userId", operator: "in", value: userIds }],
+    paginationOpts: { cursor: null, numItems: userIds.length + 10 },
+  })) as {
+    page: Array<{ userId?: string | null; name?: string | null }>;
+  };
+
   const map = new Map<number, string>();
-
-  // The adapter `in` filter can be inconsistent across environments.
-  // Resolve by exact `userId` lookups to avoid dropping valid names.
-  const results = await Promise.all(
-    uniqueLegacyIds.map(async (legacyId) => {
-      const user = (await ctx.runQuery(components.betterAuth.adapter.findOne, {
-        model: "user",
-        where: [{ field: "userId", value: String(legacyId) }],
-      })) as { name?: string | null } | null;
-
-      return {
-        legacyId,
-        name: user?.name ?? null,
-      };
-    }),
-  );
-
-  for (const result of results) {
-    if (!result.name) continue;
-    map.set(result.legacyId, result.name);
+  for (const user of users.page) {
+    const legacyId = Number.parseInt(user.userId ?? "", 10);
+    if (!Number.isFinite(legacyId) || !user.name) continue;
+    map.set(legacyId, user.name);
   }
 
   return map;
@@ -115,34 +109,41 @@ async function getUserNameByAuthDocId(ctx: any, authDocIds: string[]) {
   );
   if (!uniqueAuthDocIds.length) return new Map<string, string>();
 
-  const results = await Promise.all(
-    uniqueAuthDocIds.map(async (authDocId) => {
-      const byUnderscoreId = (await ctx.runQuery(
-        components.betterAuth.adapter.findOne,
-        {
-          model: "user",
-          where: [{ field: "_id", value: authDocId }],
-        },
-      )) as { name?: string | null } | null;
+  const map = new Map<string, string>();
+  const byUserId = (await ctx.runQuery(components.betterAuth.adapter.findMany, {
+    model: "user",
+    where: [{ field: "userId", operator: "in", value: uniqueAuthDocIds }],
+    paginationOpts: { cursor: null, numItems: uniqueAuthDocIds.length + 10 },
+  })) as {
+    page: Array<{ userId?: string | null; name?: string | null }>;
+  };
 
-      const user =
-        byUnderscoreId ??
-        ((await ctx.runQuery(components.betterAuth.adapter.findOne, {
-          model: "user",
-          where: [{ field: "userId", value: authDocId }],
-        })) as { name?: string | null } | null);
+  for (const user of byUserId.page) {
+    const userId = user.userId?.trim();
+    if (!userId || !user.name) continue;
+    map.set(userId, user.name);
+  }
 
-      return {
-        authDocId,
-        name: user?.name ?? null,
-      };
+  const unresolvedIds = uniqueAuthDocIds.filter((id) => !map.has(id));
+  if (!unresolvedIds.length) return map;
+
+  // Fallback for legacy rows that still store Better Auth document IDs.
+  const byDocId = await Promise.all(
+    unresolvedIds.map(async (id) => {
+      try {
+        const user = (await ctx.runQuery(components.betterAuth.adapter.get, {
+          id,
+        })) as { name?: string | null } | null;
+        return { id, name: user?.name ?? null };
+      } catch {
+        return { id, name: null };
+      }
     }),
   );
 
-  const map = new Map<string, string>();
-  for (const result of results) {
+  for (const result of byDocId) {
     if (!result.name) continue;
-    map.set(result.authDocId, result.name);
+    map.set(result.id, result.name);
   }
 
   return map;
@@ -220,55 +221,61 @@ export const getEditorSidebarData = query({
 export const getEditorCourseByIdentifier = query({
   args: { identifier: v.string() },
   handler: async (ctx, args) => {
-    const [course, languageRows] = await Promise.all([
-      getCourseByIdentifier(ctx, args.identifier),
-      ctx.db.query("languages").collect(),
-    ]);
+    const course = await getCourseByIdentifier(ctx, args.identifier);
     if (!course) return null;
 
-    const languageById = new Map<Id<"languages">, LanguageDoc>();
-    for (const language of languageRows)
-      languageById.set(language._id, language);
+    const [learningLanguage, fromLanguage] = await Promise.all([
+      ctx.db.get(course.learningLanguageId) as Promise<LanguageDoc | null>,
+      ctx.db.get(course.fromLanguageId) as Promise<LanguageDoc | null>,
+    ]);
 
-    return toCourse(course, languageById);
+    return {
+      id: course.legacyId,
+      short: course.short ?? null,
+      about: course.about ?? null,
+      official: course.official,
+      count: course.count ?? 0,
+      public: course.public,
+      from_language: fromLanguage?.legacyId ?? 0,
+      from_language_name: fromLanguage?.name ?? course.from_language_name ?? "",
+      learning_language: learningLanguage?.legacyId ?? 0,
+      learning_language_name:
+        learningLanguage?.name ?? course.learning_language_name ?? "",
+      contributors: course.contributors ?? [],
+      contributors_past: course.contributors_past ?? [],
+      todo_count: course.todo_count ?? 0,
+    };
   },
 });
 
 export const getEditorStoriesByCourseLegacyId = query({
-  args: { courseLegacyId: v.number() },
+  args: { identifier: v.string() },
   handler: async (ctx, args) => {
-    const course = await ctx.db
-      .query("courses")
-      .withIndex("by_id_value", (q) => q.eq("legacyId", args.courseLegacyId))
-      .unique();
-    if (!course) return [];
+    const timerBase = `editorRead:getEditorStoriesByCourseLegacyId:course:${args.identifier}`;
+    const storiesTimer = `${timerBase}:stories`;
+    const imagesTimer = `${timerBase}:images`;
+    const authorsTimer = `${timerBase}:authors`;
+    console.time(timerBase);
 
-    const [storyRows, approvalsRows] = await Promise.all([
-      ctx.db
-        .query("stories")
-        .withIndex("by_course", (q) => q.eq("courseId", course._id))
-        .collect(),
-      ctx.db.query("story_approval").collect(),
-    ]);
-
-    const stories = storyRows
-      .filter((story) => !story.deleted)
-      .sort((a, b) => {
-        const setA = a.set_id ?? 0;
-        const setB = b.set_id ?? 0;
-        if (setA !== setB) return setA - setB;
-        return (a.set_index ?? 0) - (b.set_index ?? 0);
-      });
-
-    const approvalsByStory = new Map<Id<"stories">, number[]>();
-    for (const approval of approvalsRows) {
-      const userId = toNumber(approval.legacyUserId);
-      if (userId === undefined) continue;
-      const list = approvalsByStory.get(approval.storyId) ?? [];
-      list.push(userId);
-      approvalsByStory.set(approval.storyId, list);
+    const course = await getCourseByIdentifier(ctx, args.identifier);
+    if (!course) {
+      console.timeEnd(timerBase);
+      console.log(
+        `[editorRead:getEditorStoriesByCourseLegacyId] course=${args.identifier} not_found`,
+      );
+      return [];
     }
 
+    console.time(storiesTimer);
+    const storyRows = await ctx.db
+      .query("stories")
+      .withIndex("by_set", (q) => q.eq("courseId", course._id))
+      .collect();
+    console.timeEnd(storiesTimer);
+
+    const stories = storyRows.filter((story) => !story.deleted);
+
+    console.time(imagesTimer);
     const imageIds = Array.from(
       new Set(
         stories
@@ -282,7 +289,9 @@ export const getEditorStoriesByCourseLegacyId = query({
       if (!image) return;
       imageById.set(image._id, image);
     });
+    console.timeEnd(imagesTimer);
 
+    console.time(authorsTimer);
     const authorLegacyIds = Array.from(
       new Set(
         stories
@@ -310,8 +319,9 @@ export const getEditorStoriesByCourseLegacyId = query({
       getUserNameByLegacyId(ctx, authorLegacyIds),
       getUserNameByAuthDocId(ctx, authorAuthDocIds),
     ]);
+    console.timeEnd(authorsTimer);
 
-    return stories.map((story: StoryDoc) => {
+    const result = stories.map((story: StoryDoc) => {
       const authorId = toNumber(story.authorId);
       const authorChangeId = toNumber(story.authorChangeId);
       const rawAuthorId =
@@ -323,17 +333,19 @@ export const getEditorStoriesByCourseLegacyId = query({
           ? story.authorChangeId.trim()
           : story.authorChangeId;
       const image = story.imageId ? imageById.get(story.imageId) : undefined;
-      const approvals = approvalsByStory.get(story._id) ?? [];
+      const approvalCount = story.approvalCount;
       const derivedStatus =
-        approvals.length === 0
-          ? "draft"
-          : approvals.length === 1
-            ? "feedback"
-            : "finished";
+        approvalCount === undefined
+          ? story.status
+          : approvalCount === 0
+            ? "draft"
+            : approvalCount === 1
+              ? "feedback"
+              : "finished";
       return {
         id: story.legacyId ?? 0,
         name: story.name,
-        course_id: args.courseLegacyId,
+        course_id: course.legacyId,
         image: image?.legacyId ?? "",
         set_id: story.set_id ?? 0,
         set_index: story.set_index ?? 0,
@@ -342,7 +354,7 @@ export const getEditorStoriesByCourseLegacyId = query({
         status: derivedStatus,
         public: story.public,
         todo_count: story.todo_count ?? 0,
-        approvals,
+        approvalCount: approvalCount ?? 0,
         author:
           typeof authorId === "number"
             ? (nameByLegacyId.get(authorId) ?? `User ${authorId}`)
@@ -359,6 +371,13 @@ export const getEditorStoriesByCourseLegacyId = query({
               : null,
       };
     });
+
+    console.timeEnd(timerBase);
+    console.log(
+      `[editorRead:getEditorStoriesByCourseLegacyId] course=${args.identifier} totalStories=${storyRows.length} visibleStories=${stories.length} uniqueImages=${imageIds.length} uniqueLegacyAuthors=${authorLegacyIds.length} uniqueAuthDocAuthors=${authorAuthDocIds.length}`,
+    );
+
+    return result;
   },
 });
 

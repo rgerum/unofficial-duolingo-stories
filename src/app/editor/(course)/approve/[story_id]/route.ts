@@ -99,7 +99,9 @@ async function set_approve({
     await sql`SELECT * FROM story WHERE id = ${story_id} LIMIT 1`
   )[0];
   if (updatedStatusStory) {
-    await mirrorStory(updatedStatusStory, `story:${updatedStatusStory.id}:approve_status`);
+    await mirrorStory(updatedStatusStory, `story:${updatedStatusStory.id}:approve_status`, {
+      approvalCount: count,
+    });
   }
 
   // get the number of finished stories in this set

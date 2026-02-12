@@ -275,6 +275,7 @@ type StoryRow = {
   course_id?: number | null;
   json?: unknown;
   status?: "draft" | "feedback" | "finished" | string | null;
+  approval_count?: number | null;
   deleted?: boolean | null;
   todo_count?: number | null;
 };
@@ -301,7 +302,7 @@ function parseJsonLike(value: unknown): unknown {
 export async function mirrorStory(
   row: StoryRow,
   operationKey: string,
-  options?: { mirrorContent?: boolean },
+  options?: { mirrorContent?: boolean; approvalCount?: number },
 ) {
   if (
     typeof row.id !== "number" ||
@@ -337,6 +338,7 @@ export async function mirrorStory(
           legacyImageId: optionalString(row.image),
           legacyCourseId,
           status,
+          approvalCount: options?.approvalCount ?? optionalNumber(row.approval_count),
           deleted: row.deleted ?? false,
           todo_count: row.todo_count ?? 0,
         },

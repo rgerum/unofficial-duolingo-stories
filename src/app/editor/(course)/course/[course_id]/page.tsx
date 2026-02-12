@@ -29,14 +29,5 @@ export default async function Page({
 }: {
   params: Promise<{ course_id: string }>;
 }) {
-  const user = await getUser();
-
-  if (!user) {
-    //redirect("/editor/login");
-  }
-  if (!isContributor(user)) {
-    //redirect("/editor/not_allowed");
-  }
-
   return <CourseEditorPageClient courseId={(await params).course_id} />;
 }
