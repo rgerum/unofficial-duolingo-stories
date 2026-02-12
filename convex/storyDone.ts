@@ -162,24 +162,18 @@ export const getLastDoneCourseShortForLegacyUser = query({
   handler: async (ctx, args) => {
     const doneRows = await ctx.db
       .query("story_done")
-      .withIndex("by_user", (q) => q.eq("legacyUserId", args.legacyUserId))
-      .collect();
-    if (!doneRows.length) return null;
-
-    let lastTime = -1;
-    let lastCourseShort: string | null = null;
+      .withIndex("by_user_time", (q) => q.eq("legacyUserId", args.legacyUserId))
+      .order("desc")
+      .take(20);
 
     for (const doneRow of doneRows) {
-      if (doneRow.time <= lastTime) continue;
       const story = await ctx.db.get(doneRow.storyId);
       if (!story || story.deleted) continue;
       const course = await ctx.db.get(story.courseId);
       if (!course?.short) continue;
-
-      lastTime = doneRow.time;
-      lastCourseShort = course.short;
+      return course.short;
     }
 
-    return lastCourseShort;
+    return null;
   },
 });
