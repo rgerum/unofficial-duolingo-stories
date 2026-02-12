@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { sql } from "@/lib/db";
 import { getUser, isContributor } from "@/lib/userInterface";
-import { mirrorLocalization } from "@/lib/lookupTableMirror";
+import { fetchAuthMutation } from "@/lib/auth-server";
+import { api } from "@convex/_generated/api";
 
 const payloadSchema = z.object({
   tag: z.string().min(1),
@@ -25,15 +25,12 @@ export async function POST(req: NextRequest) {
 
   const { tag, text, language_id } = parsed.data;
 
-  const row = (
-    await sql`INSERT INTO localization (tag, text, language_id)
-      VALUES (${tag}, ${text}, ${language_id})
-      ON CONFLICT (tag, language_id)
-      DO UPDATE SET text = EXCLUDED.text
-      RETURNING id, language_id, tag, text`
-  )[0];
-
-  await mirrorLocalization(row, `localization:${row.language_id}:${row.tag}:set`);
+  const row = await fetchAuthMutation(api.localizationWrite.setLocalization, {
+    legacyLanguageId: language_id,
+    tag,
+    text,
+    operationKey: `localization:${language_id}:${tag}:route`,
+  });
 
   return NextResponse.json(row);
 }

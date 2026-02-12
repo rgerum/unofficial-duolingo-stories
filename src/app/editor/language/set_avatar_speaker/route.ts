@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { sql } from "@/lib/db";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { z } from "zod";
-import { mirrorAvatarMapping } from "@/lib/lookupTableMirror";
+import { fetchAuthMutation } from "@/lib/auth-server";
+import { api } from "@convex/_generated/api";
 
 const AvatarSetSchema = z.object({
   id: z.number().optional(),
@@ -14,7 +14,7 @@ const AvatarSetSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const { id, name, speaker, language_id, avatar_id } = AvatarSetSchema.parse(
+    const { name, speaker, language_id, avatar_id } = AvatarSetSchema.parse(
       await req.json(),
     );
     const token = await getUser();
@@ -30,7 +30,6 @@ export async function POST(req: Request) {
       });
 
     let answer = await set_avatar({
-      id,
       name,
       speaker,
       language_id,
@@ -51,38 +50,21 @@ export async function POST(req: Request) {
 }
 
 async function set_avatar({
-  id,
   name,
   speaker,
   language_id,
   avatar_id,
 }: {
-  id?: number;
   name: string;
   speaker: string;
   language_id: number;
   avatar_id: number;
 }) {
-  let res =
-    await sql`SELECT id FROM avatar_mapping WHERE language_id = ${language_id} AND avatar_id = ${avatar_id};`;
-
-  if (res.length) {
-    const existingId = res[0].id as number;
-    await sql`UPDATE avatar_mapping SET ${sql({ name, speaker, language_id, avatar_id })} WHERE id = ${existingId}`;
-    const updated = (
-      await sql`SELECT id, avatar_id, language_id, name, speaker FROM avatar_mapping WHERE id = ${existingId} LIMIT 1`
-    )[0];
-    await mirrorAvatarMapping(updated, `avatar_mapping:${existingId}:set`);
-    return updated;
-  }
-  const inserted = (
-    await sql`INSERT INTO avatar_mapping ${sql({
-      name,
-      speaker,
-      language_id,
-      avatar_id,
-    })} RETURNING id, avatar_id, language_id, name, speaker;`
-  )[0];
-  await mirrorAvatarMapping(inserted, `avatar_mapping:${inserted.id}:set`);
-  return inserted;
+  return await fetchAuthMutation(api.languageWrite.setAvatarSpeaker, {
+    legacyLanguageId: language_id,
+    legacyAvatarId: avatar_id,
+    name,
+    speaker,
+    operationKey: `avatar_mapping:${language_id}:${avatar_id}:route`,
+  });
 }

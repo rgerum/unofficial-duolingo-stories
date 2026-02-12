@@ -1,9 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
-import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { getPostHogClient } from "@/lib/posthog-server";
-import { mirrorStory } from "@/lib/lookupTableMirror";
+import { fetchAuthMutation } from "@/lib/auth-server";
+import { api } from "@convex/_generated/api";
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,17 +33,20 @@ async function delete_story(
   { id }: { id: number },
   { username }: { username: string },
 ) {
-  await sql`UPDATE story SET deleted = true, public = false WHERE id = ${id};`;
-  let data = (await sql`SELECT * FROM story WHERE id = ${id};`)[0];
-  if (data) {
-    await mirrorStory(data, `story:${data.id}:delete`);
+  const data = await fetchAuthMutation(api.storyWrite.deleteStory, {
+    legacyStoryId: id,
+    operationKey: `story:${id}:delete:route`,
+  });
+  if (!data) {
+    return undefined;
   }
+
   await upload_github(
-    data["id"],
-    data["course_id"],
-    data["text"],
+    data.id,
+    data.course_id,
+    data.text,
     username,
-    `delete ${data["name"]} from course ${data["course_id"]}`,
+    `delete ${data.name} from course ${data.course_id}`,
     true,
   );
 
@@ -54,8 +57,8 @@ async function delete_story(
     event: "story_deleted",
     properties: {
       story_id: id,
-      story_name: data["name"],
-      course_id: data["course_id"],
+      story_name: data.name,
+      course_id: data.course_id,
       editor_username: username,
     },
   });

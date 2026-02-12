@@ -1,9 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
-import { sql } from "@/lib/db";
 import { upload_github } from "@/lib/editor/upload_github";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { getPostHogClient } from "@/lib/posthog-server";
-import { mirrorCourse, mirrorStory } from "@/lib/lookupTableMirror";
+import { fetchAuthMutation } from "@/lib/auth-server";
+import { api } from "@convex/_generated/api";
 
 interface StoryData {
   id?: number;
@@ -47,58 +47,33 @@ async function set_story(
   data["api"] = 2;
   data["change_date"] = new Date().toISOString();
   data["author_change"] = user_id;
+  const updatedStory = await fetchAuthMutation(api.storyWrite.setStory, {
+    legacyStoryId: data.id,
+    duo_id: String(data.duo_id ?? ""),
+    name: data.name,
+    image: data.image ?? "",
+    set_id: data.set_id,
+    set_index: data.set_index,
+    legacyCourseId: data.course_id,
+    text: data.text,
+    json: data.json,
+    todo_count: data.todo_count,
+    author_change: user_id,
+    change_date: data.change_date,
+    operationKey: `story:${data.id ?? "duo"}:set_story:route`,
+  });
 
-  // if no id is given we look for one
-  if (data["id"] === undefined) {
-    let res =
-      await sql`SELECT id FROM story WHERE duo_id = ${data["duo_id"]} AND course_id = ${data["course_id"]} LIMIT 1;`;
-    if (res.length) data["id"] = res[0]["id"] as number;
-  }
-
-  // Ensure we have a valid id before updating
-  if (data.id === undefined) {
+  if (!updatedStory) {
     return undefined;
   }
 
-  await sql`
-  UPDATE story SET ${sql(data, [
-    "duo_id",
-    "name",
-    "image",
-    "change_date",
-    "author_change",
-    "set_id",
-    "set_index",
-    "course_id",
-    "text",
-    "json",
-    "todo_count",
-  ])}
-  WHERE id = ${data.id}
-`;
-  const updatedStory = (await sql`SELECT * FROM story WHERE id = ${data.id} LIMIT 1`)[0];
-  if (updatedStory) {
-    await mirrorStory(updatedStory, `story:${updatedStory.id}:set_story`, {
-      mirrorContent: true,
-    });
-  }
-  await sql`UPDATE course SET todo_count = (SELECT SUM(todo_count) FROM story WHERE course_id = ${data["course_id"]}) WHERE id = ${data["course_id"]}`;
-  const updatedCourse = (
-    await sql`SELECT * FROM course WHERE id = ${data["course_id"]} LIMIT 1`
-  )[0];
-  if (updatedCourse) {
-    await mirrorCourse(updatedCourse, `course:${updatedCourse.id}:set_story`);
-  }
-
-  if (data["id"] !== undefined) {
-    await upload_github(
-      data["id"],
-      data["course_id"],
-      data["text"],
-      username,
-      `updated ${data["name"]} in course ${data["course_id"]}`,
-    );
-  }
+  await upload_github(
+    updatedStory.id,
+    updatedStory.course_id,
+    updatedStory.text,
+    username,
+    `updated ${updatedStory.name} in course ${updatedStory.course_id}`,
+  );
 
   // Track story saved event server-side
   const posthog = getPostHogClient();
@@ -106,10 +81,10 @@ async function set_story(
     distinctId: username || `user_${user_id}`,
     event: "story_saved",
     properties: {
-      story_id: data.id,
-      story_name: data.name,
-      course_id: data.course_id,
-      todo_count: data.todo_count,
+      story_id: updatedStory.id,
+      story_name: updatedStory.name,
+      course_id: updatedStory.course_id,
+      todo_count: updatedStory.todo_count,
       editor_username: username,
     },
   });
