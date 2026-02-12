@@ -11,11 +11,31 @@ import { authClient } from "@/lib/auth-client";
 
 export default function Profile({ providers }: { providers: ProfileData }) {
   let [username, setUsername] = useInput(providers.name);
-  let [email, setEmail] = useInput(providers.email);
+  const [newEmail, setNewEmail] = useInput("");
   const [resetState, setResetState] = React.useState<
     "idle" | "pending" | "success" | "error"
   >("idle");
   const [resetError, setResetError] = React.useState("");
+  const [emailState, setEmailState] = React.useState<
+    "idle" | "pending" | "success" | "error"
+  >("idle");
+  const [emailError, setEmailError] = React.useState("");
+  const [pendingEmailChange, setPendingEmailChange] = React.useState("");
+
+  React.useEffect(() => {
+    const storedPendingEmail = window.localStorage.getItem(
+      "profile_pending_email_change",
+    );
+    if (!storedPendingEmail) return;
+
+    if (storedPendingEmail.toLowerCase() === providers.email.toLowerCase()) {
+      window.localStorage.removeItem("profile_pending_email_change");
+      setPendingEmailChange("");
+      return;
+    }
+
+    setPendingEmailChange(storedPendingEmail);
+  }, [providers.email]);
 
   async function requestPasswordReset() {
     setResetState("pending");
@@ -33,6 +53,36 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     }
   }
 
+  async function requestEmailChange() {
+    const emailValidation = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailValidation.test(newEmail)) {
+      setEmailState("error");
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+
+    if (newEmail.toLowerCase() === providers.email.toLowerCase()) {
+      setEmailState("error");
+      setEmailError("This is already your current email address.");
+      return;
+    }
+
+    setEmailState("pending");
+    setEmailError("");
+    const { error } = await authClient.changeEmail({
+      newEmail,
+      callbackURL: `${window.location.origin}/profile`,
+    });
+    if (error) {
+      setEmailState("error");
+      setEmailError(error.message || "Could not start email change.");
+      return;
+    }
+    window.localStorage.setItem("profile_pending_email_change", newEmail);
+    setPendingEmailChange(newEmail);
+    setEmailState("success");
+  }
+
   return (
     <>
       <Header>
@@ -44,7 +94,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
           Username: <input value={username} onChange={setUsername} />
         </div>
         <div>
-          Email: <input value={email} onChange={setEmail} />
+          Email: <input value={providers.email} readOnly />
         </div>
         <div className={styles.roles}>
           {providers.role.length ? (
@@ -56,7 +106,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
 
         <h2>Linked Accounts</h2>
         <span>
-          When you have liked your account to a login provider you can use these
+          When you have linked your account to a login provider you can use these
           providers instead of login in with username and password or email.
         </span>
         <div className={styles.links}>
@@ -86,6 +136,42 @@ export default function Profile({ providers }: { providers: ProfileData }) {
           disabled={resetState === "pending"}
         >
           {resetState === "pending" ? "Sending..." : "Send Password Reset Link"}
+        </Button>
+
+        <h2>Change Email</h2>
+        <p>
+          Enter your new email address. For safety, email changes are processed
+          in two steps.
+        </p>
+        {pendingEmailChange && (
+          <span className={styles.resetMessage} data-cy="profile-email-pending">
+            Current email: {providers.email}. Pending change: {pendingEmailChange}
+            . Confirm the link sent to your new email to complete the update.
+          </span>
+        )}
+        <input
+          type="email"
+          value={newEmail}
+          onChange={setNewEmail}
+          placeholder="New email address"
+          data-cy="profile-new-email"
+        />
+        {emailState === "error" && (
+          <span className={styles.resetError}>{emailError}</span>
+        )}
+        {emailState === "success" && (
+          <span className={styles.resetMessage} data-cy="profile-email-message">
+            Check your current email, then your new email for confirmation links.
+          </span>
+        )}
+        <Button
+          type="button"
+          primary={true}
+          data-cy="profile-change-email"
+          onClick={requestEmailChange}
+          disabled={emailState === "pending"}
+        >
+          {emailState === "pending" ? "Sending..." : "Request Email Change"}
         </Button>
 
         <h2>Delete Account</h2>
