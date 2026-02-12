@@ -80,19 +80,58 @@ async function getUserNameByLegacyId(ctx: any, legacyIds: number[]) {
   const uniqueLegacyIds = Array.from(new Set(legacyIds));
   if (!uniqueLegacyIds.length) return new Map<number, string>();
 
-  const userIds = uniqueLegacyIds.map((id) => String(id));
-  const users = await ctx.runQuery(components.betterAuth.adapter.findMany, {
-    model: "user",
-    where: [{ field: "userId", operator: "in", value: userIds }],
-    paginationOpts: { cursor: null, numItems: userIds.length + 10 },
-  });
-
   const map = new Map<number, string>();
-  for (const user of users.page as Array<{ userId?: string | null; name?: string | null }>) {
-    const id = Number.parseInt(user.userId ?? "", 10);
-    if (!Number.isFinite(id) || !user.name) continue;
-    map.set(id, user.name);
+
+  // The adapter `in` filter can be inconsistent across environments.
+  // Resolve by exact `userId` lookups to avoid dropping valid names.
+  const results = await Promise.all(
+    uniqueLegacyIds.map(async (legacyId) => {
+      const user = (await ctx.runQuery(components.betterAuth.adapter.findOne, {
+        model: "user",
+        where: [{ field: "userId", value: String(legacyId) }],
+      })) as { name?: string | null } | null;
+
+      return {
+        legacyId,
+        name: user?.name ?? null,
+      };
+    }),
+  );
+
+  for (const result of results) {
+    if (!result.name) continue;
+    map.set(result.legacyId, result.name);
   }
+
+  return map;
+}
+
+async function getUserNameByAuthDocId(ctx: any, authDocIds: string[]) {
+  const uniqueAuthDocIds = Array.from(
+    new Set(authDocIds.map((id) => id.trim()).filter(Boolean)),
+  );
+  if (!uniqueAuthDocIds.length) return new Map<string, string>();
+
+  const results = await Promise.all(
+    uniqueAuthDocIds.map(async (authDocId) => {
+      const user = (await ctx.runQuery(components.betterAuth.adapter.findOne, {
+        model: "user",
+        where: [{ field: "_id", value: authDocId }],
+      })) as { name?: string | null } | null;
+
+      return {
+        authDocId,
+        name: user?.name ?? null,
+      };
+    }),
+  );
+
+  const map = new Map<string, string>();
+  for (const result of results) {
+    if (!result.name) continue;
+    map.set(result.authDocId, result.name);
+  }
+
   return map;
 }
 
@@ -236,12 +275,39 @@ export const getEditorStoriesByCourseLegacyId = query({
           .filter((id): id is number => id !== undefined),
       ),
     );
-    const nameByLegacyId = await getUserNameByLegacyId(ctx, authorLegacyIds);
+    const authorAuthDocIds = Array.from(
+      new Set(
+        stories
+          .flatMap((story) => [story.authorId, story.authorChangeId])
+          .filter(
+            (id): id is string =>
+              typeof id === "string" && id.trim().length > 0 && toNumber(id) === undefined,
+          ),
+      ),
+    );
+
+    const [nameByLegacyId, nameByAuthDocId] = await Promise.all([
+      getUserNameByLegacyId(ctx, authorLegacyIds),
+      getUserNameByAuthDocId(ctx, authorAuthDocIds),
+    ]);
 
     return stories.map((story: StoryDoc) => {
       const authorId = toNumber(story.authorId);
       const authorChangeId = toNumber(story.authorChangeId);
+      const rawAuthorId =
+        typeof story.authorId === "string" ? story.authorId.trim() : story.authorId;
+      const rawAuthorChangeId =
+        typeof story.authorChangeId === "string"
+          ? story.authorChangeId.trim()
+          : story.authorChangeId;
       const image = story.imageId ? imageById.get(story.imageId) : undefined;
+      const approvals = approvalsByStory.get(story._id) ?? [];
+      const derivedStatus =
+        approvals.length === 0
+          ? "draft"
+          : approvals.length === 1
+            ? "feedback"
+            : "finished";
       return {
         id: story.legacyId ?? 0,
         name: story.name,
@@ -251,17 +317,21 @@ export const getEditorStoriesByCourseLegacyId = query({
         set_index: story.set_index ?? 0,
         date: story.date ?? 0,
         change_date: story.change_date ?? 0,
-        status: story.status,
+        status: derivedStatus,
         public: story.public,
         todo_count: story.todo_count ?? 0,
-        approvals: approvalsByStory.get(story._id) ?? [],
+        approvals,
         author:
           typeof authorId === "number"
             ? nameByLegacyId.get(authorId) ?? `User ${authorId}`
+            : typeof rawAuthorId === "string" && rawAuthorId.length > 0
+              ? nameByAuthDocId.get(rawAuthorId) ?? `User ${rawAuthorId}`
             : "Unknown",
         author_change:
           typeof authorChangeId === "number"
             ? nameByLegacyId.get(authorChangeId) ?? `User ${authorChangeId}`
+            : typeof rawAuthorChangeId === "string" && rawAuthorChangeId.length > 0
+              ? nameByAuthDocId.get(rawAuthorChangeId) ?? `User ${rawAuthorChangeId}`
             : null,
       };
     });

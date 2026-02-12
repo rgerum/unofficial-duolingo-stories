@@ -46,7 +46,7 @@ SET count = (
 }
 
 export async function removeApproval(
-  _id: number,
+  storyId: number,
   approval_id: number,
 ): Promise<void> {
   await requireAdmin();
@@ -56,4 +56,17 @@ export async function removeApproval(
     approval_id,
     `story_approval:${approval_id}:admin_delete`,
   );
+
+  const row = (
+    await sql`SELECT COUNT(id)::int AS count FROM story_approval WHERE story_id = ${storyId};`
+  )[0] as { count: number };
+  const count = Number(row?.count ?? 0);
+  const nextStatus =
+    count === 0 ? "draft" : count === 1 ? "feedback" : "finished";
+
+  await sql`UPDATE story SET status = ${nextStatus} WHERE id = ${storyId};`;
+  const storyRow = (await sql`SELECT * FROM story WHERE id = ${storyId} LIMIT 1`)[0];
+  if (storyRow) {
+    await mirrorStory(storyRow, `story:${storyRow.id}:admin_remove_approval`);
+  }
 }
