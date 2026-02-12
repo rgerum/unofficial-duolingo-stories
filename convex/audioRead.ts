@@ -10,8 +10,6 @@ export const getSpeakerByName = query({
       id: v.number(),
       speaker: v.string(),
       type: v.string(),
-      language: v.optional(v.string()),
-      locale: v.optional(v.string()),
       gender: v.optional(v.string()),
       service: v.optional(v.string()),
     }),
