@@ -36,8 +36,10 @@ async function getLinkedProviders() {
   }
   let providers: string[] = [];
   for (let provider of providersFromAuth) {
-    providers.push(provider);
-    provider_linked[provider] = true;
+    if (provider in provider_linked) {
+      providers.push(provider);
+      provider_linked[provider] = true;
+    }
   }
   let role = [];
   if (isAdmin(user)) role.push("Admin");
