@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { getUser, isContributor } from "@/lib/userInterface";
 import { Metadata } from "next";
 import { fetchQuery } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
@@ -29,14 +28,5 @@ export default async function Page({
 }: {
   params: Promise<{ course_id: string }>;
 }) {
-  const user = await getUser();
-
-  if (!user) {
-    //redirect("/editor/login");
-  }
-  if (!isContributor(user)) {
-    //redirect("/editor/not_allowed");
-  }
-
   return <CourseEditorPageClient courseId={(await params).course_id} />;
 }

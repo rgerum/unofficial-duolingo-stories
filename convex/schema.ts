@@ -137,6 +137,7 @@ export default defineSchema({
       v.literal("feedback"),
       v.literal("finished"),
     ),
+    approvalCount: v.optional(v.number()),
     deleted: v.boolean(),
     todo_count: v.number(),
     legacyId: v.optional(v.number()),

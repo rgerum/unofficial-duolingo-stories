@@ -19,6 +19,7 @@ const storyValidator = {
   legacyImageId: v.optional(v.string()),
   legacyCourseId: v.number(),
   status: v.union(v.literal("draft"), v.literal("feedback"), v.literal("finished")),
+  approvalCount: v.optional(v.number()),
   deleted: v.boolean(),
   todo_count: v.number(),
 };
@@ -81,6 +82,7 @@ export const upsertStory = mutation({
       imageId: image?._id,
       courseId: course._id,
       status: args.story.status,
+      approvalCount: args.story.approvalCount ?? existing?.approvalCount ?? 0,
       deleted: args.story.deleted,
       todo_count: args.story.todo_count,
     };
