@@ -2,46 +2,24 @@ import { notFound } from "next/navigation";
 import UserDisplay from "./user_display";
 import { UserSchema } from "./schema";
 import { fetchAuthQuery } from "@/lib/auth-server";
-import { components } from "@convex/_generated/api";
-import { isAdmin, isContributor } from "@/lib/userInterface";
+import { api } from "@convex/_generated/api";
 
 async function user_properties(id: string) {
-  const response = (await fetchAuthQuery(
-    components.betterAuth.adapter.findMany as any,
-    {
-      model: "user",
-      where: [],
-      paginationOpts: { cursor: null, numItems: 1000 },
-    },
-  )) as any;
-
-  const users = response.page as Array<{
-    _id: string;
-    userId?: string | null;
-    name?: string;
-    email?: string;
-    createdAt?: number;
-    role?: string | null;
-  }>;
-
-  const match = users.find((user) => {
-    if (user.userId === id) return true;
-    if (user.name && user.name.replace(/\s+/g, "") === id.replace("%20", "")) {
-      return true;
-    }
-    return false;
+  const parsedId = Number.parseInt(id, 10);
+  if (!Number.isFinite(parsedId)) return undefined;
+  const match = await fetchAuthQuery(api.adminData.getAdminUserByLegacyId, {
+    id: parsedId,
   });
-
   if (!match) return undefined;
 
   return UserSchema.parse({
-    id: match.userId ? Number(match.userId) : 0,
-    name: match.name ?? "",
-    email: match.email ?? "",
-    regdate: match.createdAt ? new Date(match.createdAt) : undefined,
-    activated: true,
-    role: isContributor({ role: match.role ?? null }),
-    admin: isAdmin({ role: match.role ?? null }),
+    id: match.id,
+    name: match.name,
+    email: match.email,
+    regdate: match.regdate ? new Date(match.regdate) : undefined,
+    activated: match.activated,
+    role: match.role,
+    admin: match.admin,
   });
 }
 

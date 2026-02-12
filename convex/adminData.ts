@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { components } from "./_generated/api";
@@ -49,6 +49,293 @@ const adminStoryValidator = v.object({
   public: v.boolean(),
   short: v.string(),
   approvals: v.array(adminApprovalValidator),
+});
+
+const adminFilterValidator = v.union(
+  v.literal("all"),
+  v.literal("yes"),
+  v.literal("no"),
+);
+
+const adminUserValidator = v.object({
+  rowKey: v.string(),
+  id: v.number(),
+  name: v.string(),
+  email: v.string(),
+  regdate: v.union(v.number(), v.null()),
+  activated: v.boolean(),
+  role: v.boolean(),
+  admin: v.boolean(),
+});
+
+async function findAuthUserByLegacyId(ctx: any, legacyId: number) {
+  return (await ctx.runQuery(components.betterAuth.adapter.findOne, {
+    model: "user",
+    where: [{ field: "userId", operator: "eq", value: String(legacyId) }],
+  })) as
+    | {
+        _id: string;
+        userId?: string | null;
+        name?: string | null;
+        email?: string | null;
+        createdAt?: number | null;
+        role?: string | null;
+        emailVerified?: boolean | null;
+      }
+    | null;
+}
+
+function toAdminUser(user: {
+  _id?: string;
+  userId?: string | null;
+  name?: string | null;
+  email?: string | null;
+  createdAt?: number | null;
+  role?: string | null;
+  emailVerified?: boolean | null;
+}) {
+  const numericId = Number.parseInt(user.userId ?? "", 10);
+  const role = user.role ?? null;
+  return {
+    rowKey:
+      user._id ??
+      `${user.userId ?? ""}-${user.email ?? ""}-${user.createdAt ?? 0}`,
+    id: Number.isFinite(numericId) ? numericId : 0,
+    name: user.name ?? "",
+    email: user.email ?? "",
+    regdate: typeof user.createdAt === "number" ? user.createdAt : null,
+    activated: Boolean(user.emailVerified),
+    role: role === "contributor" || role === "admin",
+    admin: role === "admin",
+  };
+}
+
+export const getAdminUsersPage = query({
+  args: {
+    query: v.string(),
+    page: v.number(),
+    perPage: v.number(),
+    activatedFilter: adminFilterValidator,
+    roleFilter: adminFilterValidator,
+    adminFilter: adminFilterValidator,
+  },
+  returns: v.object({
+    users: v.array(adminUserValidator),
+    hasPrevPage: v.boolean(),
+    hasNextPage: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    if (!(await isAdmin(ctx))) {
+      return { users: [], hasPrevPage: false, hasNextPage: false };
+    }
+
+    const page = Math.max(1, Math.floor(args.page));
+    const perPage = Math.max(1, Math.min(200, Math.floor(args.perPage)));
+    const offset = (page - 1) * perPage;
+    const searchLower = args.query.trim().toLowerCase();
+    const where: Array<{
+      connector?: "AND" | "OR";
+      field: string;
+      operator?:
+        | "lt"
+        | "lte"
+        | "gt"
+        | "gte"
+        | "eq"
+        | "in"
+        | "not_in"
+        | "ne"
+        | "contains"
+        | "starts_with"
+        | "ends_with";
+      value: string | number | boolean | Array<string> | Array<number> | null;
+    }> = [];
+
+    if (searchLower.length > 0) {
+      const isNumericId = /^\d+$/.test(searchLower);
+      if (isNumericId) {
+        where.push({ field: "userId", operator: "eq", value: searchLower });
+      } else if (searchLower.includes("@")) {
+        where.push({ field: "email", operator: "contains", value: searchLower });
+      } else {
+        where.push({ field: "name", operator: "contains", value: searchLower });
+      }
+    }
+
+    if (args.activatedFilter === "yes") {
+      where.push({ field: "emailVerified", operator: "eq", value: true });
+    } else if (args.activatedFilter === "no") {
+      where.push({ field: "emailVerified", operator: "eq", value: false });
+    }
+
+    const matchesRoleFilters = (role: string | null | undefined) => {
+      const normalizedRole = role ?? "user";
+      const isAdminRole = normalizedRole === "admin";
+      const isContributorRole =
+        normalizedRole === "contributor" || normalizedRole === "admin";
+
+      if (args.adminFilter === "yes" && !isAdminRole) return false;
+      if (args.adminFilter === "no" && isAdminRole) return false;
+      if (args.roleFilter === "yes" && !isContributorRole) return false;
+      if (args.roleFilter === "no" && isContributorRole) return false;
+      return true;
+    };
+
+    const batchSize = Math.max(200, perPage + 1);
+    const collected: Array<{
+      _id?: string;
+      userId?: string | null;
+      name?: string | null;
+      email?: string | null;
+      createdAt?: number | null;
+      role?: string | null;
+      emailVerified?: boolean | null;
+    }> = [];
+    let matchedCount = 0;
+    let cursor: string | null = null;
+    let hasMore = true;
+
+    while (hasMore && collected.length < perPage + 1) {
+      const response = (await ctx.runQuery(
+        components.betterAuth.adapter.findMany,
+        {
+          model: "user",
+          where,
+          paginationOpts: { cursor, numItems: batchSize },
+          sortBy: { field: "createdAt", direction: "desc" },
+        },
+      )) as {
+        page: Array<{
+          _id?: string;
+          userId?: string | null;
+          name?: string | null;
+          email?: string | null;
+          createdAt?: number | null;
+          role?: string | null;
+          emailVerified?: boolean | null;
+        }>;
+        isDone?: boolean;
+        continueCursor?: string | null;
+      };
+
+      for (const user of response.page) {
+        if (!matchesRoleFilters(user.role)) continue;
+
+        if (matchedCount >= offset && collected.length < perPage + 1) {
+          collected.push(user);
+        }
+        matchedCount += 1;
+
+        if (collected.length >= perPage + 1) break;
+      }
+
+      hasMore = !(response.isDone ?? true);
+      cursor = response.continueCursor ?? null;
+      if (!cursor) hasMore = false;
+    }
+
+    const response = {
+      page: collected,
+    } as {
+      page: Array<{
+        _id?: string;
+        userId?: string | null;
+        name?: string | null;
+        email?: string | null;
+        createdAt?: number | null;
+        role?: string | null;
+        emailVerified?: boolean | null;
+      }>;
+    };
+
+    const hasNextPage = response.page.length > perPage;
+    const users = (hasNextPage ? response.page.slice(0, perPage) : response.page).map(
+      toAdminUser,
+    );
+
+    return {
+      users,
+      hasPrevPage: page > 1,
+      hasNextPage,
+    };
+  },
+});
+
+export const getAdminUserByLegacyId = query({
+  args: {
+    id: v.number(),
+  },
+  returns: v.union(adminUserValidator, v.null()),
+  handler: async (ctx, args) => {
+    if (!(await isAdmin(ctx))) return null;
+    const user = await findAuthUserByLegacyId(ctx, args.id);
+    if (!user?._id) return null;
+    return toAdminUser(user);
+  },
+});
+
+export const setAdminUserActivated = mutation({
+  args: {
+    id: v.number(),
+    activated: v.boolean(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    if (!(await isAdmin(ctx))) return null;
+    const user = await findAuthUserByLegacyId(ctx, args.id);
+    if (!user?._id) return null;
+
+    await ctx.runMutation(components.betterAuth.adapter.updateOne, {
+      input: {
+        model: "user",
+        where: [{ field: "_id", value: user._id }],
+        update: { emailVerified: args.activated },
+      },
+    });
+    return null;
+  },
+});
+
+export const setAdminUserWrite = mutation({
+  args: {
+    id: v.number(),
+    write: v.boolean(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    if (!(await isAdmin(ctx))) return null;
+    const user = await findAuthUserByLegacyId(ctx, args.id);
+    if (!user?._id) return null;
+
+    await ctx.runMutation(components.betterAuth.adapter.updateOne, {
+      input: {
+        model: "user",
+        where: [{ field: "_id", value: user._id }],
+        update: { role: args.write ? "contributor" : "user" },
+      },
+    });
+    return null;
+  },
+});
+
+export const setAdminUserDelete = mutation({
+  args: {
+    id: v.number(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    if (!(await isAdmin(ctx))) return null;
+    const user = await findAuthUserByLegacyId(ctx, args.id);
+    if (!user?._id) return null;
+
+    await ctx.runMutation(components.betterAuth.adapter.deleteOne, {
+      input: {
+        model: "user",
+        where: [{ field: "_id", value: user._id }],
+      },
+    });
+    return null;
+  },
 });
 
 export const getAdminLanguages = query({
