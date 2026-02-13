@@ -3,6 +3,8 @@ import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { getUser, isAdmin } from "@/lib/userInterface";
 import { mirrorCourse } from "@/lib/lookupTableMirror";
+import { fetchAuthMutation } from "@/lib/auth-server";
+import { api } from "@convex/_generated/api";
 
 interface CourseData {
   id?: number;
@@ -44,7 +46,13 @@ export async function POST(req: NextRequest) {
 
 async function set_course(data: CourseData) {
   if (data["official"] === undefined) data["official"] = 0;
-  let id;
+  let id: number;
+  let updatedResponse:
+    | {
+        id: number;
+        short: string | null;
+      }
+    | undefined;
   let tag_list = data["tags"] || "";
 
   if (typeof tag_list === "string") {
@@ -53,45 +61,49 @@ async function set_course(data: CourseData) {
     );
   }
   //data["public"] = data["public"] == 1 || data["public"] === "true";
-  const from_language = (
-    await sql`SELECT name, short FROM language WHERE id = ${data["from_language"]};`
-  )[0];
-  const learning_language = (
-    await sql`SELECT name, short FROM language WHERE id = ${data["learning_language"]};`
-  )[0];
-  data["short"] = `${learning_language.short}-${from_language.short}`;
-  data["from_language_name"] = from_language.name;
-  data["learning_language_name"] = learning_language.name;
-  // TODO(postgres-sunset): remove denormalized course language-name writes.
   if (data.id === undefined) {
+    const from_language = (
+      await sql`SELECT name, short FROM language WHERE id = ${data["from_language"]};`
+    )[0];
+    const learning_language = (
+      await sql`SELECT name, short FROM language WHERE id = ${data["learning_language"]};`
+    )[0];
+    data["short"] = `${learning_language.short}-${from_language.short}`;
+    data["from_language_name"] = from_language.name;
+    data["learning_language_name"] = learning_language.name;
+    // TODO(postgres-sunset): remove denormalized course language-name writes.
     id = (await sql`INSERT INTO course ${sql(data)} RETURNING id`)[0].id;
+    let data_new = await sql`SELECT * FROM course WHERE id = ${id}`;
+    await mirrorCourse(data_new[0], `course:${id}:admin_set`);
   } else {
-    await sql`UPDATE course SET ${sql(data, [
-      "learning_language",
-      "learning_language_name",
-      "from_language",
-      "from_language_name",
-      "public",
-      "name",
-      //"official",
-      "conlang",
-      "tags",
-      "short",
-      "about",
-    ])} WHERE id = ${data.id}`;
-    id = data["id"];
+    updatedResponse = await fetchAuthMutation(api.adminWrite.updateAdminCourse, {
+      id: data.id,
+      learning_language: data.learning_language,
+      from_language: data.from_language,
+      public: data.public,
+      name: data.name ?? undefined,
+      conlang: data.conlang ?? undefined,
+      tags: (data.tags as string[]) ?? undefined,
+      about: data.about ?? undefined,
+      operationKey: `course:${data.id}:admin_set:route`,
+    });
+    id = updatedResponse.id;
   }
-  let data_new = await sql`SELECT * FROM course WHERE id = ${id}`;
 
   // revalidate the page
-  let response_course_id =
-    await sql`SELECT short FROM course WHERE course.id = ${id}`;
+  const response_short =
+    updatedResponse?.short ??
+    (await sql`SELECT short FROM course WHERE course.id = ${id}`)[0]?.short;
   try {
-    revalidatePath(`/${response_course_id[0].short}`);
+    if (response_short) {
+      revalidatePath(`/${response_short}`);
+    }
     revalidatePath(`/`);
   } catch (e) {
     //console.log("revalidate error", e);
   }
-  await mirrorCourse(data_new[0], `course:${id}:admin_set`);
-  return data_new[0];
+  if (updatedResponse) return updatedResponse;
+
+  const created = await sql`SELECT * FROM course WHERE id = ${id}`;
+  return created[0];
 }

@@ -9,6 +9,7 @@
  */
 
 import type * as adminData from "../adminData.js";
+import type * as adminWrite from "../adminWrite.js";
 import type * as audioRead from "../audioRead.js";
 import type * as auth from "../auth.js";
 import type * as authFunctions from "../authFunctions.js";
@@ -16,14 +17,18 @@ import type * as authMigration from "../authMigration.js";
 import type * as editorRead from "../editorRead.js";
 import type * as http from "../http.js";
 import type * as landing from "../landing.js";
+import type * as languageWrite from "../languageWrite.js";
 import type * as lib_phpbb from "../lib/phpbb.js";
 import type * as localization from "../localization.js";
+import type * as localizationWrite from "../localizationWrite.js";
 import type * as lookupTables from "../lookupTables.js";
+import type * as postgresMirror from "../postgresMirror.js";
 import type * as roles from "../roles.js";
 import type * as storyApproval from "../storyApproval.js";
 import type * as storyDone from "../storyDone.js";
 import type * as storyRead from "../storyRead.js";
 import type * as storyTables from "../storyTables.js";
+import type * as storyWrite from "../storyWrite.js";
 
 import type {
   ApiFromModules,
@@ -33,6 +38,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   adminData: typeof adminData;
+  adminWrite: typeof adminWrite;
   audioRead: typeof audioRead;
   auth: typeof auth;
   authFunctions: typeof authFunctions;
@@ -40,14 +46,18 @@ declare const fullApi: ApiFromModules<{
   editorRead: typeof editorRead;
   http: typeof http;
   landing: typeof landing;
+  languageWrite: typeof languageWrite;
   "lib/phpbb": typeof lib_phpbb;
   localization: typeof localization;
+  localizationWrite: typeof localizationWrite;
   lookupTables: typeof lookupTables;
+  postgresMirror: typeof postgresMirror;
   roles: typeof roles;
   storyApproval: typeof storyApproval;
   storyDone: typeof storyDone;
   storyRead: typeof storyRead;
   storyTables: typeof storyTables;
+  storyWrite: typeof storyWrite;
 }>;
 
 /**
