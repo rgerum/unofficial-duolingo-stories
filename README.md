@@ -11,6 +11,24 @@ It is hosted at https://duostories.org and reproduces the story experience from 
 
 The app is based on Next.js with React. It is currently in `next/next-all`.
 
+## Architecture snapshot (2026 migration baseline)
+
+- App/UI: Next.js 16 + React 19 (`src/app`, `src/components`)
+- Canonical app data access: Convex queries/mutations (`convex/*`)
+- External SQL mirror: Convex internal actions in `convex/postgresMirror.ts`
+- Write-side side effects (GitHub/PostHog): Convex internal actions in `convex/editorSideEffects.ts`
+- Remaining Next route handlers are intentionally server-only:
+  - Auth entrypoint (`src/app/api/auth/[...all]/route.ts`)
+  - Audio endpoints (`src/app/audio/*/route.ts`)
+
+### Write flow
+
+Client component -> Convex mutation -> schedule internal actions:
+- `postgresMirror.*` for SQL mirror writes
+- `editorSideEffects.*` for GitHub/PostHog side effects
+
+This keeps write authorization, mutation semantics, and side effects centralized in Convex.
+
 ## How to run locally
 
 First you need to set up a PostgreSQL server.
@@ -54,29 +72,54 @@ psql -U postgres -h localhost -d duostories_test_db -f database/schema.sql
 psql -U postgres -h localhost -d duostories_test_db -c \\dt
 ```
 
-Now you need to create a file called `.env.local` in the base folder of the project and add the following 
-environment variable containing the URL for the Postgres database:
+Now create `.env.local` in the project root.
+
+Minimum local values:
 
 ```
-POSTGRES_URL=postgresql://postgres:postgres@localhost:5432/duostories_test_db
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/duostories_test_db
+POSTGRES_URL2=postgresql://postgres:postgres@localhost:5432/duostories_test_db
+NEXT_PUBLIC_CONVEX_URL=<your_convex_dev_url>
+CONVEX_URL=<your_convex_dev_url>
+BETTER_AUTH_SECRET=<your_secret>
+SITE_URL=http://localhost:3000
 ```
 
-Install the npm packages
+Convex runtime env (set via `pnpm exec convex env set ...`) should include:
 
 ```
-npm install
+POSTGRES_URL2=postgresql://postgres:postgres@localhost:5432/duostories_test_db
+GITHUB_REPO_TOKEN=<optional_for_side_effect_sync>
+POSTHOG_KEY=<optional_for_server_tracking>
+POSTHOG_HOST=<optional_for_server_tracking>
+RESEND_API_KEY=<optional_for_email_flows>
+SITE_URL=http://localhost:3000
+BETTER_AUTH_SECRET=<must_match_auth_setup>
 ```
 
-Create fill the database with test data
+Install dependencies
 
 ```
-npm run init
+pnpm install
+```
+
+Fill the database with test data
+
+```
+pnpm run init
 ```
 
 To develop you can then run and visit http://localhost:3000
 
 ```
-npm run dev
+pnpm run dev
+```
+
+Recommended checks:
+
+```
+pnpm run typecheck
+pnpm run lint
 ```
 
 The test database contains three uses to test the login process:
@@ -104,5 +147,12 @@ then follow the following steps:
 Please make sure to only commit changes to files that are necessary to the issue.
 Try to not commit accidentally other changes, e.g. package-lock.json files.
 This makes it harder to review and merge the pull request.
+
+### Contribution rules for new backend work
+
+- New app writes should be direct Convex mutations from the client or server action.
+- Avoid adding pass-through Next route handlers for simple reads/writes.
+- Server side effects should be scheduled from Convex mutations via internal actions.
+- Include an `operationKey` for mutation calls that can be retried.
 
 If everything is fine, I will accept the pull request and I will soon upload it to the website.
