@@ -1,7 +1,5 @@
-import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { getUser, isAdmin } from "@/lib/userInterface";
-import { mirrorLanguage } from "@/lib/lookupTableMirror";
 import { fetchAuthMutation } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 
@@ -54,11 +52,13 @@ async function set_language(data: LanguageData) {
     });
   }
 
-  const language = (await sql`INSERT INTO language ${sql(data)} RETURNING *`)[0];
-
-  if (language?.id) {
-    await mirrorLanguage(language, `language:${language.id}:admin_set`);
-  }
-
-  return language;
+  return await fetchAuthMutation(api.adminWrite.createAdminLanguage, {
+    name: data.name,
+    short: data.short,
+    flag: data.flag,
+    flag_file: data.flag_file,
+    speaker: data.speaker,
+    rtl: data.rtl,
+    operationKey: `language:create:${data.short}:route`,
+  });
 }

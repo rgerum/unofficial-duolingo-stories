@@ -1,5 +1,6 @@
 import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
+import type { MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
 
 function toLegacyLanguageResponse(row: {
@@ -33,6 +34,22 @@ function toLegacyLanguageResponse(row: {
   };
 }
 
+async function getNextLegacyId(ctx: MutationCtx, table: "languages" | "courses") {
+  const page = await ctx.db.query(table).order("desc").take(1);
+  const current = Number(page[0]?.legacyId ?? 0);
+  return Math.max(1, current + 1);
+}
+
+async function getLanguageByLegacyId(
+  ctx: MutationCtx,
+  legacyId: number,
+) {
+  return await ctx.db
+    .query("languages")
+    .withIndex("by_id_value", (q) => q.eq("legacyId", legacyId))
+    .unique();
+}
+
 export const updateAdminLanguage = mutation({
   args: {
     id: v.number(),
@@ -57,10 +74,7 @@ export const updateAdminLanguage = mutation({
     rtl: v.boolean(),
   }),
   handler: async (ctx, args) => {
-    const language = await ctx.db
-      .query("languages")
-      .withIndex("by_id_value", (q) => q.eq("legacyId", args.id))
-      .unique();
+    const language = await getLanguageByLegacyId(ctx, args.id);
 
     if (!language) {
       throw new Error(`Language ${args.id} not found`);
@@ -102,6 +116,77 @@ export const updateAdminLanguage = mutation({
   },
 });
 
+export const createAdminLanguage = mutation({
+  args: {
+    name: v.string(),
+    short: v.string(),
+    flag: v.number(),
+    flag_file: v.string(),
+    speaker: v.string(),
+    rtl: v.boolean(),
+    operationKey: v.optional(v.string()),
+  },
+  returns: v.object({
+    id: v.number(),
+    name: v.string(),
+    short: v.string(),
+    flag: v.number(),
+    flag_file: v.string(),
+    speaker: v.string(),
+    default_text: v.string(),
+    tts_replace: v.string(),
+    public: v.boolean(),
+    rtl: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const legacyId = await getNextLegacyId(ctx, "languages");
+    const operationKey =
+      args.operationKey ?? `language:${legacyId}:admin_create:${Date.now()}`;
+
+    await ctx.db.insert("languages", {
+      legacyId,
+      name: args.name,
+      short: args.short,
+      flag: args.flag,
+      flag_file: args.flag_file,
+      speaker: args.speaker,
+      default_text: "",
+      tts_replace: "",
+      public: false,
+      rtl: args.rtl,
+      mirrorUpdatedAt: Date.now(),
+      lastOperationKey: operationKey,
+    });
+
+    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorAdminLanguageInsert, {
+      id: legacyId,
+      name: args.name,
+      short: args.short,
+      flag: args.flag,
+      flag_file: args.flag_file,
+      speaker: args.speaker,
+      default_text: "",
+      tts_replace: "",
+      public: false,
+      rtl: args.rtl,
+      operationKey,
+    });
+
+    return {
+      id: legacyId,
+      name: args.name,
+      short: args.short,
+      flag: args.flag,
+      flag_file: args.flag_file,
+      speaker: args.speaker,
+      default_text: "",
+      tts_replace: "",
+      public: false,
+      rtl: args.rtl,
+    };
+  },
+});
+
 export const updateAdminCourse = mutation({
   args: {
     id: v.number(),
@@ -132,14 +217,8 @@ export const updateAdminCourse = mutation({
         .query("courses")
         .withIndex("by_id_value", (q) => q.eq("legacyId", args.id))
         .unique(),
-      ctx.db
-        .query("languages")
-        .withIndex("by_id_value", (q) => q.eq("legacyId", args.learning_language))
-        .unique(),
-      ctx.db
-        .query("languages")
-        .withIndex("by_id_value", (q) => q.eq("legacyId", args.from_language))
-        .unique(),
+      getLanguageByLegacyId(ctx, args.learning_language),
+      getLanguageByLegacyId(ctx, args.from_language),
     ]);
 
     if (!course) throw new Error(`Course ${args.id} not found`);
@@ -206,6 +285,98 @@ export const updateAdminCourse = mutation({
       from_language: args.from_language,
       public: nextPublic,
       official: course.official,
+      name: nextName,
+      about: nextAbout,
+      conlang: nextConlang,
+      short,
+      tags: nextTags,
+    };
+  },
+});
+
+export const createAdminCourse = mutation({
+  args: {
+    learning_language: v.number(),
+    from_language: v.number(),
+    public: v.optional(v.boolean()),
+    name: v.optional(v.string()),
+    official: v.optional(v.number()),
+    conlang: v.optional(v.boolean()),
+    tags: v.optional(v.array(v.string())),
+    about: v.optional(v.string()),
+    operationKey: v.optional(v.string()),
+  },
+  returns: v.object({
+    id: v.number(),
+    learning_language: v.number(),
+    from_language: v.number(),
+    public: v.boolean(),
+    official: v.boolean(),
+    name: v.union(v.string(), v.null()),
+    about: v.union(v.string(), v.null()),
+    conlang: v.boolean(),
+    short: v.union(v.string(), v.null()),
+    tags: v.array(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    const [learningLanguage, fromLanguage] = await Promise.all([
+      getLanguageByLegacyId(ctx, args.learning_language),
+      getLanguageByLegacyId(ctx, args.from_language),
+    ]);
+    if (!learningLanguage || !fromLanguage) {
+      throw new Error("Course languages not found");
+    }
+
+    const legacyId = await getNextLegacyId(ctx, "courses");
+    const short = `${learningLanguage.short}-${fromLanguage.short}`;
+    const nextPublic = args.public ?? false;
+    const nextOfficial = args.official ?? 0;
+    const nextName = args.name ?? null;
+    const nextConlang = args.conlang ?? false;
+    const nextTags = args.tags ?? [];
+    const nextAbout = args.about ?? null;
+    const operationKey =
+      args.operationKey ?? `course:${legacyId}:admin_create:${Date.now()}`;
+
+    await ctx.db.insert("courses", {
+      legacyId,
+      short,
+      learningLanguageId: learningLanguage._id,
+      fromLanguageId: fromLanguage._id,
+      public: nextPublic,
+      official: nextOfficial !== 0,
+      name: nextName ?? undefined,
+      about: nextAbout ?? undefined,
+      conlang: nextConlang,
+      tags: nextTags,
+      learning_language_name: learningLanguage.name,
+      from_language_name: fromLanguage.name,
+      mirrorUpdatedAt: Date.now(),
+      lastOperationKey: operationKey,
+    });
+
+    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorAdminCourseInsert, {
+      id: legacyId,
+      learning_language: args.learning_language,
+      learning_language_name: learningLanguage.name,
+      from_language: args.from_language,
+      from_language_name: fromLanguage.name,
+      short,
+      public: nextPublic,
+      official: nextOfficial,
+      name: nextName,
+      conlang: nextConlang,
+      tags: nextTags,
+      about: nextAbout,
+      operationKey,
+    });
+
+    return {
+      id: legacyId,
+      learning_language: args.learning_language,
+      from_language: args.from_language,
+      public: nextPublic,
+      official: nextOfficial !== 0,
       name: nextName,
       about: nextAbout,
       conlang: nextConlang,
