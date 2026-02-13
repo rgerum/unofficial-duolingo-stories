@@ -16,6 +16,7 @@ import type * as auth from "../auth.js";
 import type * as authFunctions from "../authFunctions.js";
 import type * as authMigration from "../authMigration.js";
 import type * as editorRead from "../editorRead.js";
+import type * as editorSideEffects from "../editorSideEffects.js";
 import type * as http from "../http.js";
 import type * as landing from "../landing.js";
 import type * as languageWrite from "../languageWrite.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   authFunctions: typeof authFunctions;
   authMigration: typeof authMigration;
   editorRead: typeof editorRead;
+  editorSideEffects: typeof editorSideEffects;
   http: typeof http;
   landing: typeof landing;
   languageWrite: typeof languageWrite;

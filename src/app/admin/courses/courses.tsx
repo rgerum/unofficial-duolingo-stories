@@ -3,7 +3,6 @@ import Link from "next/link";
 import styles from "../index.module.css";
 import { Spinner } from "@/components/layout/spinner";
 import Flag from "@/components/layout/flag";
-import { fetch_post } from "@/lib/fetch_post";
 import * as EditDialog from "../edit_dialog";
 import React, { useState } from "react";
 import styled from "styled-components";
@@ -11,6 +10,8 @@ import Button from "@/components/layout/button";
 import Tag from "@/components/layout/tag";
 import Input from "@/components/layout/Input";
 import FlagName from "../FlagName";
+import { useMutation } from "convex/react";
+import { api } from "@convex/_generated/api";
 
 interface CourseProps {
   id: number;
@@ -202,6 +203,8 @@ function EditCourse({
 }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const createCourseMutation = useMutation(api.adminWrite.createAdminCourse);
+  const updateCourseMutation = useMutation(api.adminWrite.updateAdminCourse);
 
   const [short, setShort] = useState(obj.short || "");
   const [fromLanguage, setFromLanguage] = useState(obj.from_language || 0);
@@ -212,27 +215,51 @@ function EditCourse({
   const [name, setName] = useState(obj.name || "");
   const [published, setPublished] = useState(obj.public || false);
   const [conlang, setConlang] = useState(obj.conlang || false);
-  const [tags, setTags] = useState(obj.tags || "");
+  const [tags, setTags] = useState<string[]>(obj.tags || []);
   const [about, setAbout] = useState(obj.about || "");
 
   async function Send(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const tagList = tags.map((t) => t.trim().toLowerCase()).filter(Boolean);
+
     const data = {
       id: obj.id,
-      short: short,
       from_language: fromLanguage,
       learning_language: learningLanguage,
       name: name,
       public: published,
       conlang: conlang,
-      tags: tags,
+      tags: tagList,
       about: about,
     };
     //console.log("send", data);
 
     try {
-      let res = await fetch_post(`/admin/courses/set`, data);
-      let new_data = await res.json();
+      let new_data;
+      if (is_new) {
+        new_data = await createCourseMutation({
+          learning_language: data.learning_language,
+          from_language: data.from_language,
+          public: data.public,
+          name: data.name,
+          conlang: data.conlang,
+          tags: data.tags,
+          about: data.about,
+          operationKey: `course:create:${data.learning_language}:${data.from_language}:client`,
+        });
+      } else {
+        new_data = await updateCourseMutation({
+          id: data.id,
+          learning_language: data.learning_language,
+          from_language: data.from_language,
+          public: data.public,
+          name: data.name,
+          conlang: data.conlang,
+          tags: data.tags,
+          about: data.about,
+          operationKey: `course:${data.id}:admin_set:client`,
+        });
+      }
       //console.log("new_data", new_data);
       setOpen(false);
       updateCourse(new_data);

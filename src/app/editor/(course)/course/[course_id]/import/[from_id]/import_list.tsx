@@ -1,7 +1,7 @@
 "use client";
 import styles from "../../../../edit_list.module.css";
 import React from "react";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { SpinnerBlue } from "@/components/layout/spinner";
 import { Spinner } from "@/components/layout/spinner";
@@ -9,15 +9,6 @@ import { useRouter } from "next/navigation";
 import {
   CourseImportProps,
 } from "@/app/editor/(course)/types";
-
-async function setImport(id: number, course_id: number) {
-  let response_json = await fetch(
-    `/editor/course/${course_id}/import/send/${id}`,
-    { credentials: "include" },
-  );
-  let data = await response_json.json();
-  return data.id;
-}
 
 export default function ImportList({
   courseId,
@@ -41,6 +32,7 @@ export default function ImportList({
   const [importing, setImporting] = React.useState<number | undefined>(
     undefined,
   );
+  const importStoryMutation = useMutation(api.storyWrite.importStory);
   const router = useRouter();
 
   if (course === undefined || courseFrom === undefined || imports === undefined) {
@@ -58,7 +50,16 @@ export default function ImportList({
     if (importing) return;
     setImporting(id);
 
-    let id2 = await setImport(id, courseLegacyId);
+    const response = await importStoryMutation({
+      sourceLegacyStoryId: id,
+      targetLegacyCourseId: courseLegacyId,
+      operationKey: `story:${id}:import_to:${courseLegacyId}:client`,
+    });
+    if (!response) {
+      setImporting(undefined);
+      return;
+    }
+    const id2 = response.id;
     await router.push("/editor/story/" + id2);
   }
 

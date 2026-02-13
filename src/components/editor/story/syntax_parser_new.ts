@@ -1126,9 +1126,9 @@ export function processStoryFile(
   //console.log(story);
   //console.log(meta);
 
-  return [
-    { ...story, meta: undefined },
-    { ...meta, audio_insert_lines: undefined },
-    audio_insert_lines,
-  ] as const;
+  const { meta: _removedMeta, ...storyWithoutMeta } = story;
+  const { audio_insert_lines: _removedAudioInsertLines, ...metaWithoutAudioInsertLines } =
+    meta;
+
+  return [storyWithoutMeta, metaWithoutAudioInsertLines, audio_insert_lines] as const;
 }

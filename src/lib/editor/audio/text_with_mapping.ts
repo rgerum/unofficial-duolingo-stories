@@ -23,10 +23,23 @@ export function replace_with_mapping(
   let length = end - start;
   //console.log("replace_with_mapping", {text, mapping}, replace, start, end, length)
 
-  let new_indices = [];
+  let new_indices: number[] = [];
+  const fallbackIndex =
+    mapping[start] ??
+    mapping[start - 1] ??
+    (mapping.length > 0 ? mapping[mapping.length - 1] : 0);
   for (let j = 0; j < replace.length; j++) {
-    if (j < length) new_indices.push(mapping[start + j]);
-    else new_indices.push(mapping[start + length - 1]);
+    const fromExisting =
+      j < length
+        ? mapping[start + j]
+        : length > 0
+          ? mapping[start + length - 1]
+          : fallbackIndex;
+    new_indices.push(
+      typeof fromExisting === "number" && Number.isFinite(fromExisting)
+        ? fromExisting
+        : fallbackIndex,
+    );
   }
   mapping.splice(start, length, ...new_indices);
   text = text.substring(0, start) + replace + text.substring(end);
