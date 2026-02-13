@@ -73,7 +73,6 @@ export default async function Page({
     }
     await fetchAuthMutation(api.storyDone.recordStoryDone, {
       legacyStoryId: story_id,
-      legacyUserId: user_id,
       time: Date.now(),
     });
     return {

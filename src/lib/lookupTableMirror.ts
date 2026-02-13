@@ -401,7 +401,6 @@ export async function mirrorStoryDone(
     () =>
       fetchAuthMutation(api.storyDone.recordStoryDone, {
         legacyStoryId,
-        legacyUserId: optionalNumber(row.user_id),
         time: optionalTimestampMs(row.time),
       }),
     operationKey,
@@ -423,13 +422,10 @@ export async function mirrorStoryApprovalUpsert(
     );
   }
   const legacyStoryId = row.story_id;
-  const legacyUserId = row.user_id;
-
   return retryMirror(
     () =>
       fetchAuthMutation(api.storyApproval.upsertStoryApproval, {
         legacyStoryId,
-        legacyUserId,
         date: optionalTimestampMs(row.date),
         legacyApprovalId: optionalNumber(row.id),
       }),
@@ -450,13 +446,10 @@ export async function mirrorStoryApprovalDelete(
     );
   }
   const legacyStoryId = row.story_id;
-  const legacyUserId = row.user_id;
-
   return retryMirror(
     () =>
       fetchAuthMutation(api.storyApproval.deleteStoryApproval, {
         legacyStoryId,
-        legacyUserId,
       }),
     operationKey,
   );

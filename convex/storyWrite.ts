@@ -1,6 +1,10 @@
 import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import {
+  requireContributorOrAdmin,
+  requireSessionLegacyUserId,
+} from "./lib/authorization";
 
 export const setStory = mutation({
   args: {
@@ -14,7 +18,6 @@ export const setStory = mutation({
     text: v.string(),
     json: v.any(),
     todo_count: v.number(),
-    author_change: v.number(),
     change_date: v.string(),
     operationKey: v.optional(v.string()),
   },
@@ -29,6 +32,8 @@ export const setStory = mutation({
     }),
   ),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
+    const authorChangeLegacyUserId = await requireSessionLegacyUserId(ctx);
     const course = await ctx.db
       .query("courses")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyCourseId))
@@ -78,7 +83,7 @@ export const setStory = mutation({
       change_date: Number.isFinite(changeDateMillis)
         ? changeDateMillis
         : Date.now(),
-      authorChangeId: args.author_change,
+      authorChangeId: authorChangeLegacyUserId,
       set_id: args.set_id,
       set_index: args.set_index,
       courseId: course._id,
@@ -121,7 +126,7 @@ export const setStory = mutation({
       name: args.name,
       image: args.image,
       change_date: args.change_date,
-      author_change: args.author_change,
+      author_change: authorChangeLegacyUserId,
       set_id: args.set_id,
       set_index: args.set_index,
       course_id: args.legacyCourseId,
@@ -156,6 +161,7 @@ export const deleteStory = mutation({
     }),
   ),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const story = await ctx.db
       .query("stories")
       .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.legacyStoryId))
@@ -198,11 +204,12 @@ export const importStory = mutation({
   args: {
     sourceLegacyStoryId: v.number(),
     targetLegacyCourseId: v.number(),
-    authorLegacyUserId: v.number(),
     operationKey: v.optional(v.string()),
   },
   returns: v.union(v.null(), v.object({ id: v.number(), course_id: v.number(), text: v.string(), name: v.string() })),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
+    const authorLegacyUserId = await requireSessionLegacyUserId(ctx);
     const [sourceStory, targetCourse] = await Promise.all([
       ctx.db
         .query("stories")
@@ -235,7 +242,7 @@ export const importStory = mutation({
       name: sourceStory.name,
       set_id: sourceStory.set_id,
       set_index: sourceStory.set_index,
-      authorId: args.authorLegacyUserId,
+      authorId: authorLegacyUserId,
       public: false,
       imageId: sourceStory.imageId,
       courseId: targetCourse._id,
@@ -266,7 +273,7 @@ export const importStory = mutation({
       image: imageLegacyId,
       set_id: sourceStory.set_id ?? 0,
       set_index: sourceStory.set_index ?? 0,
-      author: args.authorLegacyUserId,
+      author: authorLegacyUserId,
       course_id: args.targetLegacyCourseId,
       text: sourceContent.text,
       json: sourceContent.json,

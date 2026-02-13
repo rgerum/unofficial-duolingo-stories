@@ -1,10 +1,13 @@
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
+import {
+  requireContributorOrAdmin,
+  requireSessionLegacyUserId,
+} from "./lib/authorization";
 
 const storyApprovalInputValidator = {
   legacyStoryId: v.number(),
-  legacyUserId: v.number(),
   date: v.optional(v.number()),
   legacyApprovalId: v.optional(v.number()),
 };
@@ -16,6 +19,8 @@ export const upsertStoryApproval = mutation({
     docId: v.id("story_approval"),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
+    const legacyUserId = await requireSessionLegacyUserId(ctx);
     const story = await ctx.db
       .query("stories")
       .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.legacyStoryId))
@@ -27,13 +32,13 @@ export const upsertStoryApproval = mutation({
     const existing = await ctx.db
       .query("story_approval")
       .withIndex("by_story_and_user", (q) =>
-        q.eq("storyId", story._id).eq("legacyUserId", args.legacyUserId),
+        q.eq("storyId", story._id).eq("legacyUserId", legacyUserId),
       )
       .unique();
 
     const doc = {
       storyId: story._id,
-      legacyUserId: args.legacyUserId,
+      legacyUserId,
       date: args.date ?? Date.now(),
       legacyId: args.legacyApprovalId,
     };
@@ -51,12 +56,13 @@ export const upsertStoryApproval = mutation({
 export const deleteStoryApproval = mutation({
   args: {
     legacyStoryId: v.number(),
-    legacyUserId: v.number(),
   },
   returns: v.object({
     deleted: v.boolean(),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
+    const legacyUserId = await requireSessionLegacyUserId(ctx);
     const story = await ctx.db
       .query("stories")
       .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.legacyStoryId))
@@ -68,7 +74,7 @@ export const deleteStoryApproval = mutation({
     const existing = await ctx.db
       .query("story_approval")
       .withIndex("by_story_and_user", (q) =>
-        q.eq("storyId", story._id).eq("legacyUserId", args.legacyUserId),
+        q.eq("storyId", story._id).eq("legacyUserId", legacyUserId),
       )
       .unique();
     if (!existing) return { deleted: false };
@@ -86,6 +92,7 @@ export const deleteStoryApprovalByLegacyId = mutation({
     deleted: v.boolean(),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const existing = await ctx.db
       .query("story_approval")
       .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.legacyApprovalId))
@@ -93,63 +100,6 @@ export const deleteStoryApprovalByLegacyId = mutation({
     if (!existing) return { deleted: false };
     await ctx.db.delete(existing._id);
     return { deleted: true };
-  },
-});
-
-export const upsertStoryApprovalBatch = mutation({
-  args: {
-    rows: v.array(v.object(storyApprovalInputValidator)),
-  },
-  returns: v.object({
-    upserted: v.number(),
-    missingStories: v.array(v.number()),
-  }),
-  handler: async (ctx, args) => {
-    const uniqueLegacyStoryIds = Array.from(
-      new Set(args.rows.map((row) => row.legacyStoryId)),
-    );
-    const storyIdByLegacyStoryId = new Map<number, Id<"stories">>();
-    for (const legacyStoryId of uniqueLegacyStoryIds) {
-      const story = await ctx.db
-        .query("stories")
-        .withIndex("by_legacy_id", (q) => q.eq("legacyId", legacyStoryId))
-        .unique();
-      if (!story) continue;
-      storyIdByLegacyStoryId.set(legacyStoryId, story._id);
-    }
-
-    let upserted = 0;
-    const missingStories: Array<number> = [];
-    for (const row of args.rows) {
-      const storyId = storyIdByLegacyStoryId.get(row.legacyStoryId);
-      if (!storyId) {
-        missingStories.push(row.legacyStoryId);
-        continue;
-      }
-      const existing = await ctx.db
-        .query("story_approval")
-        .withIndex("by_story_and_user", (q) =>
-          q.eq("storyId", storyId).eq("legacyUserId", row.legacyUserId),
-        )
-        .unique();
-      const doc = {
-        storyId,
-        legacyUserId: row.legacyUserId,
-        date: row.date ?? Date.now(),
-        legacyId: row.legacyApprovalId,
-      };
-      if (existing) {
-        await ctx.db.replace(existing._id, doc);
-      } else {
-        await ctx.db.insert("story_approval", doc);
-      }
-      upserted += 1;
-    }
-
-    return {
-      upserted,
-      missingStories: Array.from(new Set(missingStories)),
-    };
   },
 });
 

@@ -2,6 +2,7 @@ import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin } from "./lib/authorization";
 
 function toLegacyLanguageResponse(row: {
   legacyId: number;
@@ -74,6 +75,7 @@ export const updateAdminLanguage = mutation({
     rtl: v.boolean(),
   }),
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const language = await getLanguageByLegacyId(ctx, args.id);
 
     if (!language) {
@@ -139,6 +141,7 @@ export const createAdminLanguage = mutation({
     rtl: v.boolean(),
   }),
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const legacyId = await getNextLegacyId(ctx, "languages");
     const operationKey =
       args.operationKey ?? `language:${legacyId}:admin_create:${Date.now()}`;
@@ -212,6 +215,7 @@ export const updateAdminCourse = mutation({
     tags: v.array(v.string()),
   }),
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const [course, learningLanguage, fromLanguage] = await Promise.all([
       ctx.db
         .query("courses")
@@ -319,6 +323,7 @@ export const createAdminCourse = mutation({
     tags: v.array(v.string()),
   }),
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const [learningLanguage, fromLanguage] = await Promise.all([
       getLanguageByLegacyId(ctx, args.learning_language),
       getLanguageByLegacyId(ctx, args.from_language),

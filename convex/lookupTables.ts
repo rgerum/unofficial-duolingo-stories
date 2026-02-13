@@ -1,5 +1,6 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireContributorOrAdmin } from "./lib/authorization";
 
 const languageValidator = {
   legacyId: v.number(),
@@ -84,6 +85,7 @@ export const upsertLanguage = mutation({
     docId: v.id("languages"),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const existing = await ctx.db
       .query("languages")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.language.legacyId))
@@ -105,44 +107,6 @@ export const upsertLanguage = mutation({
   },
 });
 
-export const upsertLanguagesBatch = mutation({
-  args: {
-    languages: v.array(v.object(languageValidator)),
-  },
-  returns: v.object({
-    inserted: v.number(),
-    updated: v.number(),
-    total: v.number(),
-  }),
-  handler: async (ctx, args) => {
-    let inserted = 0;
-    let updated = 0;
-
-    for (const language of args.languages) {
-      const existing = await ctx.db
-        .query("languages")
-        .withIndex("by_id_value", (q) => q.eq("legacyId", language.legacyId))
-        .unique();
-
-      if (existing) {
-        await ctx.db.replace(existing._id, {
-          ...language,
-          mirrorUpdatedAt: Date.now(),
-        });
-        updated += 1;
-      } else {
-        await ctx.db.insert("languages", {
-          ...language,
-          mirrorUpdatedAt: Date.now(),
-        });
-        inserted += 1;
-      }
-    }
-
-    return { inserted, updated, total: args.languages.length };
-  },
-});
-
 export const upsertImage = mutation({
   args: {
     image: v.object(imageValidator),
@@ -153,6 +117,7 @@ export const upsertImage = mutation({
     docId: v.id("images"),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const existing = await ctx.db
       .query("images")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.image.legacyId))
@@ -174,44 +139,6 @@ export const upsertImage = mutation({
   },
 });
 
-export const upsertImagesBatch = mutation({
-  args: {
-    images: v.array(v.object(imageValidator)),
-  },
-  returns: v.object({
-    inserted: v.number(),
-    updated: v.number(),
-    total: v.number(),
-  }),
-  handler: async (ctx, args) => {
-    let inserted = 0;
-    let updated = 0;
-
-    for (const image of args.images) {
-      const existing = await ctx.db
-        .query("images")
-        .withIndex("by_id_value", (q) => q.eq("legacyId", image.legacyId))
-        .unique();
-
-      if (existing) {
-        await ctx.db.replace(existing._id, {
-          ...image,
-          mirrorUpdatedAt: Date.now(),
-        });
-        updated += 1;
-      } else {
-        await ctx.db.insert("images", {
-          ...image,
-          mirrorUpdatedAt: Date.now(),
-        });
-        inserted += 1;
-      }
-    }
-
-    return { inserted, updated, total: args.images.length };
-  },
-});
-
 export const upsertAvatar = mutation({
   args: {
     avatar: v.object(avatarValidator),
@@ -222,6 +149,7 @@ export const upsertAvatar = mutation({
     docId: v.id("avatars"),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const existing = await ctx.db
       .query("avatars")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.avatar.legacyId))
@@ -243,44 +171,6 @@ export const upsertAvatar = mutation({
   },
 });
 
-export const upsertAvatarsBatch = mutation({
-  args: {
-    avatars: v.array(v.object(avatarValidator)),
-  },
-  returns: v.object({
-    inserted: v.number(),
-    updated: v.number(),
-    total: v.number(),
-  }),
-  handler: async (ctx, args) => {
-    let inserted = 0;
-    let updated = 0;
-
-    for (const avatar of args.avatars) {
-      const existing = await ctx.db
-        .query("avatars")
-        .withIndex("by_id_value", (q) => q.eq("legacyId", avatar.legacyId))
-        .unique();
-
-      if (existing) {
-        await ctx.db.replace(existing._id, {
-          ...avatar,
-          mirrorUpdatedAt: Date.now(),
-        });
-        updated += 1;
-      } else {
-        await ctx.db.insert("avatars", {
-          ...avatar,
-          mirrorUpdatedAt: Date.now(),
-        });
-        inserted += 1;
-      }
-    }
-
-    return { inserted, updated, total: args.avatars.length };
-  },
-});
-
 export const upsertSpeaker = mutation({
   args: {
     speaker: v.object(speakerValidator),
@@ -291,6 +181,7 @@ export const upsertSpeaker = mutation({
     docId: v.id("speakers"),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const language = await ctx.db
       .query("languages")
       .withIndex("by_id_value", (q) =>
@@ -339,6 +230,7 @@ export const upsertLocalization = mutation({
     docId: v.id("localizations"),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const language = await ctx.db
       .query("languages")
       .withIndex("by_id_value", (q) =>
@@ -387,6 +279,7 @@ export const upsertCourse = mutation({
     docId: v.id("courses"),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const learningLanguage = await ctx.db
       .query("languages")
       .withIndex("by_id_value", (q) =>
@@ -456,6 +349,7 @@ export const upsertAvatarMapping = mutation({
     docId: v.id("avatar_mappings"),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const avatar = await ctx.db
       .query("avatars")
       .withIndex("by_id_value", (q) =>

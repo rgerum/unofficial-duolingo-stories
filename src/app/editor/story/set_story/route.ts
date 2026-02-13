@@ -18,7 +18,6 @@ interface StoryData {
   todo_count: number;
   api?: number;
   change_date?: string;
-  author_change?: number;
 }
 
 export async function POST(req: NextRequest) {
@@ -46,7 +45,6 @@ async function set_story(
 ) {
   data["api"] = 2;
   data["change_date"] = new Date().toISOString();
-  data["author_change"] = user_id;
   const updatedStory = await fetchAuthMutation(api.storyWrite.setStory, {
     legacyStoryId: data.id,
     duo_id: String(data.duo_id ?? ""),
@@ -58,7 +56,6 @@ async function set_story(
     text: data.text,
     json: data.json,
     todo_count: data.todo_count,
-    author_change: user_id,
     change_date: data.change_date,
     operationKey: `story:${data.id ?? "duo"}:set_story:route`,
   });
