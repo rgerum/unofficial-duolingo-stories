@@ -38,7 +38,7 @@ export async function requireSessionLegacyUserId(ctx: AuthCtx) {
       ? rawUserId
       : Number.parseInt(String(rawUserId ?? ""), 10);
 
-  if (!Number.isFinite(legacyUserId)) {
+  if (!Number.isFinite(legacyUserId) || legacyUserId <= 0 || !Number.isInteger(legacyUserId)) {
     throw new Error("Unauthorized");
   }
 
