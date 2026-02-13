@@ -392,7 +392,7 @@ interface TranscribeConfig {
   };
 }
 
-export function transcribe_text(
+function transcribe_text(
   text: string,
   dataYaml: string,
 ): [string, number[]] {

@@ -11,11 +11,6 @@ declare global {
   }
 }
 
-export type AudioKeypoint = {
-  rangeEnd: number;
-  audioStart: number;
-};
-
 type UseAudioElement = StoryElementLine | StoryElementHeader;
 
 export default function useAudio(element: UseAudioElement, active: boolean) {

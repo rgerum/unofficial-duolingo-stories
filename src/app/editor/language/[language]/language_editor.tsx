@@ -168,7 +168,7 @@ export function Layout({
   );
 } //                 <Login page={"editor"}/>
 
-export async function setAvatarSpeaker(data: {
+async function setAvatarSpeaker(data: {
   name: string;
   speaker: string;
   language_id: number;
@@ -179,7 +179,7 @@ export async function setAvatarSpeaker(data: {
   throw "error";
 }
 
-export async function setDefaultText(data: {
+async function setDefaultText(data: {
   id: number;
   default_text: string;
 }) {

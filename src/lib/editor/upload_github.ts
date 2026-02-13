@@ -2,7 +2,7 @@ import { Octokit } from "@octokit/rest";
 
 const octokit = new Octokit({ auth: process.env.GITHUB_REPO_TOKEN });
 
-export async function uploadWithDiffToGithub(
+async function uploadWithDiffToGithub(
   repository: string,
   content: string | undefined,
   dst: string,

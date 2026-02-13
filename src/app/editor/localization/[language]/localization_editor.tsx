@@ -66,7 +66,7 @@ export default function LocalizationEditor({
   );
 }
 
-export function Layout({
+function Layout({
   children,
   language_data,
   language2,

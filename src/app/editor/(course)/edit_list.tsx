@@ -176,7 +176,7 @@ function formatDate(datetime: string | number | Date) {
   )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
-export async function setApproval(data: { story_id: number }, name: string) {
+async function setApproval(data: { story_id: number }, name: string) {
   if (
     window.confirm(
       `Did you check the story "${name}" and think it is ready to be published? If you want to give your approval click "ok".\n\nIn case you already gave an approval. "ok" will remove it.`,

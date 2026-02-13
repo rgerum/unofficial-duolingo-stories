@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 
-export type LocalisationFunc = ReturnType<typeof get_localisation_func>;
+type LocalisationFunc = ReturnType<typeof get_localisation_func>;
 
 export default function get_localisation_func(data: Record<string, string>) {
   function apply(
@@ -36,7 +36,7 @@ function insetWithNewlines(text: string) {
   );
 }
 
-export function replaceLinks(text: string, links: string[]) {
+function replaceLinks(text: string, links: string[]) {
   return (
     <>
       {text.split(/[{}]/).map((t, i) => (
@@ -52,7 +52,7 @@ export function replaceLinks(text: string, links: string[]) {
   );
 }
 
-export function replaceTags(text: string, tags: Record<string, string>) {
+function replaceTags(text: string, tags: Record<string, string>) {
   for (let tag in tags) {
     text = text.replaceAll(tag, tags[tag]);
   }

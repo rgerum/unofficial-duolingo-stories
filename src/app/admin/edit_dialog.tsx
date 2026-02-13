@@ -22,7 +22,7 @@ export function Content({ children }: { children: React.ReactNode }) {
 export const Root = Dialog.Root;
 export const Trigger = Dialog.Trigger;
 
-export function EditDialog() {
+function EditDialog() {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
@@ -180,7 +180,7 @@ export const Input = styled.input`
   flex: 1;
 `;
 
-export const InputArea = styled.textarea`
+const InputArea = styled.textarea`
   background: var(--input-background);
   color: var(--text-color);
   border: 2px solid var(--input-border);

@@ -8,7 +8,7 @@ dotenv.config({ path: ".env.local" });
 
 import postgres from "postgres";
 import { ConvexHttpClient } from "convex/browser";
-import { api } from "../convex/_generated/api";
+import { api } from "../../convex/_generated/api";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL;
 const POSTGRES_URL = process.env.POSTGRES_URL || process.env.DATABASE_URL;
@@ -421,6 +421,6 @@ MIGRATE_PAGE_SIZE=1000 \
 MIGRATE_LOAD_BATCH=5000 \
 MIGRATE_CONCURRENCY=4 \
 MIGRATE_START_DATE=2026-02-03T00:00:00Z \
-pnpm exec tsx scripts/migrate-better-auth-users.ts
+pnpm exec tsx scripts/archive/migrate-better-auth-users.ts
 
 */

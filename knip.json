@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "ignore": [
+    ".storybook/**",
+    "convex/betterAuth/_generated/**",
+    "database/**",
+    "import_tools/**",
+    "public/docs/**",
+    "public/sw.js",
+    "public/darklight.js"
+  ],
+  "ignoreIssues": {
+    "convex/betterAuth/auth.ts": [
+      "exports"
+    ]
+  }
+}

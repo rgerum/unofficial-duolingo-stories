@@ -14,7 +14,7 @@ type AuthUser = {
   role?: string | null;
 };
 
-export type AppUser = Omit<AuthUser, "role" | "userId"> & {
+type AppUser = Omit<AuthUser, "role" | "userId"> & {
   userId: number;
   rawRole?: string | null;
   role: boolean;

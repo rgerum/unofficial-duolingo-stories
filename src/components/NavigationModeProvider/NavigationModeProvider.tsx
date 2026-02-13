@@ -2,7 +2,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 
-export const navigationModeContext = React.createContext({
+const navigationModeContext = React.createContext({
   type: "hard" as "hard" | "soft",
 });
 

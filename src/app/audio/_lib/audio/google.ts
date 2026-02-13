@@ -3,7 +3,7 @@ import type { SynthesisResult, Voice, TTSEngine } from "./types";
 
 const apiKey = process.env.GITHUB_APIKEY;
 
-export async function synthesizeSpeechGoogle(
+async function synthesizeSpeechGoogle(
   filename: string | undefined,
   voice_id: string,
   text: string,

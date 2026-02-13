@@ -4,7 +4,7 @@
 
 let random_seed = 1234;
 
-export function setSeed(seed: number) {
+function setSeed(seed: number) {
   random_seed = seed;
 }
 

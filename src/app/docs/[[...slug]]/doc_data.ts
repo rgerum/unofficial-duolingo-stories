@@ -22,14 +22,7 @@ export async function getPageData(path: string) {
   }
 }
 
-export interface DocDataRaw {
-  navigation: {
-    group: string;
-    pages: string[];
-  }[];
-}
-
-export interface DocData {
+interface DocData {
   navigation: {
     group: string;
     pages: { slug: string; title: string }[];

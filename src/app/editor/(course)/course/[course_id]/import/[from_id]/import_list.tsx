@@ -10,7 +10,7 @@ import {
   CourseImportProps,
 } from "@/app/editor/(course)/types";
 
-export async function setImport(id: number, course_id: number) {
+async function setImport(id: number, course_id: number) {
   let response_json = await fetch(
     `/editor/course/${course_id}/import/send/${id}`,
     { credentials: "include" },
