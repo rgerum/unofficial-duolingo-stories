@@ -227,6 +227,60 @@ export const mirrorSpeakerUpsert = internalAction({
   },
 });
 
+export const mirrorAdminLanguageInsert = internalAction({
+  args: {
+    id: v.number(),
+    name: v.string(),
+    short: v.string(),
+    flag: v.number(),
+    flag_file: v.string(),
+    speaker: v.string(),
+    default_text: v.string(),
+    tts_replace: v.string(),
+    public: v.boolean(),
+    rtl: v.boolean(),
+    operationKey: v.string(),
+  },
+  returns: v.object({
+    inserted: v.boolean(),
+  }),
+  handler: async (_ctx, args) => {
+    const sql = getSqlClient();
+    await sql`INSERT INTO language (id, name, short, flag, flag_file, speaker, default_text, tts_replace, public, rtl)
+      VALUES (${args.id}, ${args.name}, ${args.short}, ${args.flag}, ${args.flag_file}, ${args.speaker}, ${args.default_text}, ${args.tts_replace}, ${args.public}, ${args.rtl})`;
+    await sql`SELECT setval(pg_get_serial_sequence('language', 'id'), (SELECT COALESCE(MAX(id), 1) FROM language))`;
+    return { inserted: true };
+  },
+});
+
+export const mirrorAdminCourseInsert = internalAction({
+  args: {
+    id: v.number(),
+    learning_language: v.number(),
+    learning_language_name: v.string(),
+    from_language: v.number(),
+    from_language_name: v.string(),
+    short: v.string(),
+    public: v.boolean(),
+    official: v.number(),
+    name: v.union(v.string(), v.null()),
+    conlang: v.boolean(),
+    tags: v.array(v.string()),
+    about: v.union(v.string(), v.null()),
+    operationKey: v.string(),
+  },
+  returns: v.object({
+    inserted: v.boolean(),
+  }),
+  handler: async (_ctx, args) => {
+    const sql = getSqlClient();
+    await sql`INSERT INTO course (id, learning_language, learning_language_name, from_language, from_language_name, public, official, name, conlang, tags, short, about)
+      VALUES (${args.id}, ${args.learning_language}, ${args.learning_language_name}, ${args.from_language}, ${args.from_language_name}, ${args.public}, ${args.official}, ${args.name}, ${args.conlang}, ${args.tags}, ${args.short}, ${args.about})`;
+    await sql`SELECT setval(pg_get_serial_sequence('course', 'id'), (SELECT COALESCE(MAX(id), 1) FROM course))`;
+    return { inserted: true };
+  },
+});
+
 export const mirrorStoryImport = internalAction({
   args: {
     storyId: v.number(),

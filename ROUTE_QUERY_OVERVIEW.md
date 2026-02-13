@@ -47,8 +47,8 @@ This maps URL routes to the data queries/mutations they execute today.
 
 | Route Handler | Query/Mutation Calls | Backend |
 |---|---|---|
-| `POST /admin/courses/set` | update path: `api.adminWrite.updateAdminCourse` + `internal.postgresMirror.mirrorAdminCourseUpdate`; create path fallback: SQL insert + `mirrorCourse` | Mixed (Convex-first updates, SQL create fallback) |
-| `POST /admin/languages/set` | update path: `api.adminWrite.updateAdminLanguage` + `internal.postgresMirror.mirrorAdminLanguageUpdate`; create path fallback: SQL insert + `mirrorLanguage` | Mixed (Convex-first updates, SQL create fallback) |
+| `POST /admin/courses/set` | create/update via `api.adminWrite.createAdminCourse` / `api.adminWrite.updateAdminCourse`; mirrored by `internal.postgresMirror.mirrorAdminCourseInsert` / `internal.postgresMirror.mirrorAdminCourseUpdate` | Convex mutation + Postgres mirror action |
+| `POST /admin/languages/set` | create/update via `api.adminWrite.createAdminLanguage` / `api.adminWrite.updateAdminLanguage`; mirrored by `internal.postgresMirror.mirrorAdminLanguageInsert` / `internal.postgresMirror.mirrorAdminLanguageUpdate` | Convex mutation + Postgres mirror action |
 | `GET/POST /api/auth/[...all]` | delegated to `handler` from `src/lib/auth-server.ts` | Better Auth/Convex adapter |
 | `POST /audio/create` | no DB query (TTS providers + filesystem) | External APIs/filesystem |
 | `POST /audio/upload` | no DB query (blob upload + filesystem) | Vercel Blob/filesystem |
