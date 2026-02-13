@@ -24,7 +24,7 @@ Note: TypeScript build errors are ignored in `next.config.js` (`ignoreBuildError
 ## Database Setup
 
 Requires PostgreSQL. The app uses two database connections:
-- `POSTGRES_URL2` - used by `src/lib/db.ts` (via `postgres` library) for all application SQL queries
+- `POSTGRES_URL2` - used by Convex internal mirror actions in `convex/postgresMirror.ts`
 - `DATABASE_URL` - used by `src/auth.ts` (via `@neondatabase/serverless` Pool) for Better Auth
 
 For local development, set both in `.env.local`:
@@ -52,13 +52,13 @@ Test credentials: user/test (normal), editor/test (editor access), admin/test (a
 ### Key Files
 - `src/auth.ts` - Better Auth server configuration (JWT sessions, OAuth providers, email verification)
 - `src/lib/authClient.ts` - Client-side auth client (`signIn`, `signOut`, `useSession` exports)
-- `src/lib/db.ts` - PostgreSQL connection (`sql` export) and `cache()` wrapper for Next.js caching
+- `convex/postgresMirror.ts` - Postgres mirror writes from Convex internal actions
 
 ### Authentication
 Uses Better Auth with JWT sessions (5-minute cookie cache). Supports email/password and OAuth (GitHub, Google, Facebook, Discord). Custom table names map to legacy schema (e.g., `user_better_auth`, `session_better_auth`). User model has custom `role` and `admin` fields.
 
 ### Database Access
-Direct SQL queries via `postgres` library using tagged template literals (`sql`). Use `cache()` wrapper from db.ts for Next.js request deduplication/caching. Set `NO_CACHE=true` to disable caching.
+Application reads/writes should go through Convex queries/mutations. Postgres writes are mirrored via Convex internal actions in `convex/postgresMirror.ts`.
 
 ### Component Pattern
 ```
@@ -74,7 +74,7 @@ Direct SQL queries via `postgres` library using tagged template literals (`sql`)
 - Global styles in `src/styles/global.css`
 
 ### Path Alias
-`@/` maps to `src/` (tsconfig baseUrl is `src`, paths `@/*` → `./*`). Example: `import { sql } from "@/lib/db"` resolves to `src/lib/db`.
+`@/` maps to `src/` (tsconfig baseUrl is `src`, paths `@/*` → `./*`).
 
 ## Story Workflow
 

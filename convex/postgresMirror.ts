@@ -306,3 +306,96 @@ export const mirrorStoryImport = internalAction({
     return { inserted: true };
   },
 });
+
+export const mirrorStoryApprovalToggle = internalAction({
+  args: {
+    storyId: v.number(),
+    legacyUserId: v.number(),
+    action: v.union(v.literal("added"), v.literal("deleted")),
+    storyStatus: v.union(v.literal("draft"), v.literal("feedback"), v.literal("finished")),
+    approvalCount: v.number(),
+    finishedInSet: v.number(),
+    publishedStoryIds: v.array(v.number()),
+    datePublishedMs: v.union(v.number(), v.null()),
+    courseId: v.id("courses"),
+    courseCount: v.union(v.number(), v.null()),
+    contributors: v.array(v.string()),
+    contributorsPast: v.array(v.string()),
+    operationKey: v.string(),
+  },
+  returns: v.object({
+    updated: v.boolean(),
+  }),
+  handler: async (_ctx, args) => {
+    const sql = getSqlClient();
+
+    if (args.action === "deleted") {
+      await sql`DELETE FROM story_approval WHERE story_id = ${args.storyId} AND user_id = ${args.legacyUserId}`;
+    } else {
+      const existing =
+        await sql`SELECT id FROM story_approval WHERE story_id = ${args.storyId} AND user_id = ${args.legacyUserId} LIMIT 1`;
+      if (!existing.length) {
+        await sql`INSERT INTO story_approval (story_id, user_id) VALUES (${args.storyId}, ${args.legacyUserId})`;
+      }
+    }
+
+    await sql`UPDATE story SET status = ${args.storyStatus}, approval_count = ${args.approvalCount} WHERE id = ${args.storyId}`;
+
+    if (args.publishedStoryIds.length > 0 && args.datePublishedMs !== null) {
+      const publishedAtIso = new Date(args.datePublishedMs).toISOString();
+      await sql`UPDATE story
+        SET public = true, date_published = ${publishedAtIso}
+        WHERE id = ANY(${args.publishedStoryIds})`;
+    }
+
+    if (args.courseCount !== null) {
+      await sql`UPDATE course SET count = ${args.courseCount} WHERE id = (SELECT course_id FROM story WHERE id = ${args.storyId} LIMIT 1)`;
+    }
+
+    await sql`UPDATE course
+      SET contributors = ${args.contributors}, contributors_past = ${args.contributorsPast}
+      WHERE id = (SELECT course_id FROM story WHERE id = ${args.storyId} LIMIT 1)`;
+
+    return { updated: true };
+  },
+});
+
+export const mirrorStoryPublishedToggle = internalAction({
+  args: {
+    storyId: v.number(),
+    public: v.boolean(),
+    courseLegacyId: v.number(),
+    courseCount: v.number(),
+    operationKey: v.string(),
+  },
+  returns: v.object({
+    updated: v.boolean(),
+  }),
+  handler: async (_ctx, args) => {
+    const sql = getSqlClient();
+    const storyRows =
+      await sql`UPDATE story SET public = ${args.public} WHERE id = ${args.storyId} RETURNING id`;
+    await sql`UPDATE course SET count = ${args.courseCount} WHERE id = ${args.courseLegacyId}`;
+    return { updated: storyRows.length > 0 };
+  },
+});
+
+export const mirrorAdminApprovalDelete = internalAction({
+  args: {
+    storyId: v.number(),
+    legacyApprovalId: v.number(),
+    storyStatus: v.union(v.literal("draft"), v.literal("feedback"), v.literal("finished")),
+    approvalCount: v.number(),
+    operationKey: v.string(),
+  },
+  returns: v.object({
+    updated: v.boolean(),
+  }),
+  handler: async (_ctx, args) => {
+    const sql = getSqlClient();
+    await sql`DELETE FROM story_approval WHERE id = ${args.legacyApprovalId}`;
+    const storyRows =
+      await sql`UPDATE story SET status = ${args.storyStatus}, approval_count = ${args.approvalCount} WHERE id = ${args.storyId} RETURNING id`;
+    return { updated: storyRows.length > 0 };
+  },
+});

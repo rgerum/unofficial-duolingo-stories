@@ -50,6 +50,28 @@ export const getLocalizationWithEnglishFallback = query({
   },
 });
 
+export const getLocalizationByLegacyLanguageId = query({
+  args: {
+    legacyLanguageId: v.number(),
+  },
+  returns: v.array(localizationEntryValidator),
+  handler: async (ctx, args) => {
+    const language = await ctx.db
+      .query("languages")
+      .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyLanguageId))
+      .unique();
+    if (!language) return [];
+
+    const rows = await ctx.db
+      .query("localizations")
+      .withIndex("by_language_id_and_tag", (q) => q.eq("languageId", language._id))
+      .collect();
+    return rows
+      .filter((row) => Boolean(row.tag) && Boolean(row.text))
+      .map((row) => ({ tag: row.tag, text: row.text }));
+  },
+});
+
 export const getLanguageFlagById = query({
   args: {
     languageId: v.id("languages"),
