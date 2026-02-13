@@ -5,10 +5,14 @@ const NUMBERS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
 function useKeypress(
   key: string,
   callback: (event: KeyboardEvent | number) => void,
-  deps?: React.DependencyList,
   eventType: "keypress" | "keydown" = "keypress",
 ) {
   const actualEventType = key === "Escape" ? "keydown" : eventType;
+  const callbackRef = React.useRef(callback);
+
+  React.useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
 
   let requireCtrl = false;
   let targetKey = key;
@@ -17,21 +21,18 @@ function useKeypress(
     targetKey = key.substring(5).toLowerCase();
   }
 
-  React.useEffect(
-    () => {
-      function listen(event: KeyboardEvent) {
-        if (requireCtrl && !event.ctrlKey) return;
-        if (targetKey === "number" && NUMBERS.includes(event.key)) {
-          return callback(parseInt(event.key));
-        } else if (event.code === targetKey || event.key === targetKey) {
-          return callback(event);
-        }
+  React.useEffect(() => {
+    function listen(event: KeyboardEvent) {
+      if (requireCtrl && !event.ctrlKey) return;
+      if (targetKey === "number" && NUMBERS.includes(event.key)) {
+        return callbackRef.current(Number.parseInt(event.key, 10));
+      } else if (event.code === targetKey || event.key === targetKey) {
+        return callbackRef.current(event);
       }
-      window.addEventListener(actualEventType, listen);
-      return () => window.removeEventListener(actualEventType, listen);
-    },
-    deps ?? [targetKey, callback],
-  );
+    }
+    window.addEventListener(actualEventType, listen);
+    return () => window.removeEventListener(actualEventType, listen);
+  }, [actualEventType, requireCtrl, targetKey]);
 }
 
 export default useKeypress;

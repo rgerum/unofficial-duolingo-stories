@@ -1,9 +1,10 @@
 "use client";
 import React from "react";
+import { useMutation } from "convex/react";
+import { api } from "@convex/_generated/api";
 import styles from "../[language].module.css";
 import { useInput } from "@/lib/hooks";
 import { PlayButton, SpeakerEntry } from "../language_editor";
-import { fetch_post } from "@/lib/fetch_post";
 import { Layout } from "../language_editor";
 import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 import {
@@ -100,6 +101,7 @@ FRAGMENTS:
   const [speed, setSpeed] = React.useState(2);
 
   const [element, setElement] = React.useState(element_init);
+  const saveTtsReplaceMutation = useMutation(api.languageWrite.setTtsReplace);
 
   const [yamlError, setYamlError] = React.useState(false);
 
@@ -114,9 +116,11 @@ FRAGMENTS:
     } catch (e) {
       return;
     }
-    const response = await fetch_post(`/editor/language/save_tts_replace`, d);
-    if (response.status === 200) return await response.json();
-    throw "error";
+    return await saveTtsReplaceMutation({
+      legacyLanguageId: d.id,
+      tts_replace: d.tts_replace,
+      operationKey: `language:${d.id}:tts_replace:client`,
+    });
   }
 
   async function play2(e: React.MouseEvent, speaker: string, name: string) {

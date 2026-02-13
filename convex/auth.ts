@@ -2,19 +2,10 @@ import { authComponent } from "./betterAuth/auth";
 import { query } from "./_generated/server";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
+import { requireContributorOrAdmin } from "./lib/authorization";
 
 const authClientApi = authComponent.clientApi();
 export const getAuthUser = authClientApi.getAuthUser;
-
-async function requireContributorOrAdmin(ctx: any) {
-  const identity = (await ctx.auth.getUserIdentity()) as
-    | { role?: string | null }
-    | null;
-  const role = identity?.role ?? null;
-  if (role !== "contributor" && role !== "admin") {
-    throw new Error("Unauthorized");
-  }
-}
 
 export const getCurrentUser = query({
   args: {},

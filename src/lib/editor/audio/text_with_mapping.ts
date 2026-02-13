@@ -300,37 +300,51 @@ function apply_fragment_replacements(
 
 function apply_group(
   mapped_text: { text: string; mapping: number[] },
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   options: { in_brackets?: number },
 ) {
+  const asRecord = (value: unknown) =>
+    value && typeof value === "object"
+      ? (value as Record<string, unknown>)
+      : null;
+
   for (const section in data) {
     if (section.toUpperCase() === "OPTIONS") {
-      options = { ...options, ...data[section] } as { in_brackets?: number };
+      const optionRecord = asRecord(data[section]);
+      if (optionRecord) {
+        options = { ...options, ...optionRecord } as { in_brackets?: number };
+      }
     }
   }
 
   for (const section in data) {
+    const sectionRecord = asRecord(data[section]);
     if (section.toUpperCase().startsWith("GROUP")) {
-      mapped_text = apply_group(mapped_text, data[section], options);
+      if (sectionRecord) {
+        mapped_text = apply_group(mapped_text, sectionRecord, options);
+      }
     }
     if (section.toUpperCase() === "LETTERS") {
+      if (!sectionRecord) continue;
       mapped_text = apply_letter_replacements(
         mapped_text,
-        data[section],
+        sectionRecord as Record<string, string>,
         //options,
       );
     }
     if (section.toUpperCase() === "FRAGMENTS") {
+      if (!sectionRecord) continue;
       mapped_text = apply_fragment_replacements(
         mapped_text,
-        data[section],
+        sectionRecord as Record<string, string>,
         //options,
       );
     }
     if (section.toUpperCase() === "WORDS") {
+      if (!sectionRecord) continue;
       mapped_text = apply_word_replacements(
         mapped_text,
-        data[section],
+        sectionRecord as Record<string, string>,
         options,
       );
     }
@@ -342,7 +356,7 @@ export function transcribe_text(
   mapped_text: { text: string; mapping: number[] },
   data: TranscribeData,
 ) {
-  const data2 = jsyaml.load(data) as Record<string, any>;
+  const data2 = jsyaml.load(data) as Record<string, unknown>;
 
   mapped_text = apply_group(mapped_text, data2, {});
 

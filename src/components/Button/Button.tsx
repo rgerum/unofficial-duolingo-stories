@@ -5,13 +5,14 @@ export default function Button({
   children,
   disabled,
   primary = false,
+  variant: _variant,
   ...delegated
 }: {
   children: React.ReactNode;
   disabled?: boolean;
   primary?: boolean;
-  [key: string]: any;
-}) {
+  variant?: string;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const className = primary
     ? `${styles.ButtonStyled} ${styles.ButtonBlueStyled}`
     : styles.ButtonStyled;

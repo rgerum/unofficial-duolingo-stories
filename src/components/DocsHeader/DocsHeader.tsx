@@ -14,7 +14,6 @@ function DocsHeader() {
     setShowSearch(value);
     setSearchText("");
   }
-  //useKeypress("ctrl+k", () => !showSearch && doShow(true), [showSearch]);
   useKeypress(
     "ctrl+k",
     (e: KeyboardEvent | number) => {
@@ -23,7 +22,6 @@ function DocsHeader() {
         !showSearch && doShow(true);
       }
     },
-    [showSearch],
     "keydown",
   );
 

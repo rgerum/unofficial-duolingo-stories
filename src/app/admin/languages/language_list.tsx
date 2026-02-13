@@ -3,10 +3,11 @@ import styles from "../index.module.css";
 import { useInput } from "@/lib/hooks";
 import { Spinner } from "@/components/layout/spinner";
 import Flag from "@/components/layout/flag";
-import { fetch_post } from "@/lib/fetch_post";
 import styled from "styled-components";
 import Input from "@/components/layout/Input";
 import React, { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@convex/_generated/api";
 import * as EditDialog from "../edit_dialog";
 import Button from "@/components/layout/button";
 
@@ -18,11 +19,6 @@ interface Language {
   flag_file: string;
   speaker: string;
   rtl: boolean;
-}
-
-async function setLanguage(data: Language): Promise<string> {
-  const res = await fetch_post(`/admin/languages/set`, data);
-  return await res.text();
 }
 
 interface ChangeAbleValueProps {
@@ -58,6 +54,8 @@ interface EditLanguageProps {
 function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const createLanguageMutation = useMutation(api.adminWrite.createAdminLanguage);
+  const updateLanguageMutation = useMutation(api.adminWrite.updateAdminLanguage);
 
   const [name, setName] = useState(obj.name);
   const [short, setShort] = useState(obj.short);
@@ -79,8 +77,29 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
     //console.log("send", data);
 
     try {
-      let res = await fetch_post(`/admin/languages/set`, data);
-      let new_data = await res.json();
+      let new_data;
+      if (data.id !== undefined) {
+        new_data = await updateLanguageMutation({
+          id: data.id,
+          name: data.name,
+          short: data.short,
+          flag: data.flag,
+          flag_file: data.flag_file,
+          speaker: data.speaker,
+          rtl: data.rtl,
+          operationKey: `language:${data.id}:admin_set:client`,
+        });
+      } else {
+        new_data = await createLanguageMutation({
+          name: data.name,
+          short: data.short,
+          flag: data.flag,
+          flag_file: data.flag_file,
+          speaker: data.speaker,
+          rtl: data.rtl,
+          operationKey: `language:create:${data.short}:client`,
+        });
+      }
       //console.log("new_data", new_data);
       setOpen(false);
       updateLanguage(new_data);

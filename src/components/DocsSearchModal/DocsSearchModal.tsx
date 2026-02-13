@@ -128,7 +128,7 @@ function DocsSearchModal({
     | undefined
   >([]);
   // close on Escape if open
-  useKeypress("Escape", () => showSearch && setShowSearch(false), [showSearch]);
+  useKeypress("Escape", () => showSearch && setShowSearch(false));
 
   React.useEffect(() => {
     if (showSearch) {

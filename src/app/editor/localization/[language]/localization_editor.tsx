@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Spinner } from "@/components/layout/spinner";
 import styles from "./[language].module.css";
@@ -101,31 +101,6 @@ function Layout({
   );
 }
 
-async function setLocalization({
-  tag,
-  text,
-  language_id,
-}: {
-  tag: string;
-  text: string;
-  language_id: number;
-}) {
-  const response = await fetch("/editor/localization/set", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({ tag, text, language_id }),
-  });
-
-  if (!response.ok) {
-    throw new Error(await response.text());
-  }
-
-  return await response.json();
-}
-
 function ListLocalizations({
   language_id,
   language_name,
@@ -135,8 +110,15 @@ function ListLocalizations({
   language_name: string;
   rows: LocalizationRow[];
 }) {
+  const setLocalizationMutation = useMutation(api.localizationWrite.setLocalization);
+
   async function set_localization(tag: string, text: string) {
-    await setLocalization({ tag, text, language_id });
+    await setLocalizationMutation({
+      legacyLanguageId: language_id,
+      tag,
+      text,
+      operationKey: `localization:${language_id}:${tag}:client`,
+    });
   }
 
   return (

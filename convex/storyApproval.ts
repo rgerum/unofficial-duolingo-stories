@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, type MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { components, internal } from "./_generated/api";
@@ -13,7 +13,7 @@ const storyApprovalInputValidator = {
   legacyApprovalId: v.optional(v.number()),
 };
 
-async function getUserNamesByLegacyIds(ctx: any, legacyUserIds: number[]) {
+async function getUserNamesByLegacyIds(ctx: MutationCtx, legacyUserIds: number[]) {
   const uniqueIds = Array.from(new Set(legacyUserIds.filter(Number.isFinite)));
   if (uniqueIds.length === 0) return new Map<number, string>();
 
@@ -35,19 +35,19 @@ async function getUserNamesByLegacyIds(ctx: any, legacyUserIds: number[]) {
 }
 
 async function recomputeCourseContributors(
-  ctx: any,
+  ctx: MutationCtx,
   courseId: Id<"courses">,
 ): Promise<{ contributors: string[]; contributors_past: string[] }> {
   const courseStories = await ctx.db
     .query("stories")
-    .withIndex("by_course", (q: any) => q.eq("courseId", courseId))
+    .withIndex("by_course", (q) => q.eq("courseId", courseId))
     .collect();
 
   const latestApprovalByUser = new Map<number, number>();
   for (const story of courseStories) {
     const approvals = await ctx.db
       .query("story_approval")
-      .withIndex("by_story", (q: any) => q.eq("storyId", story._id))
+      .withIndex("by_story", (q) => q.eq("storyId", story._id))
       .collect();
     for (const approval of approvals) {
       if (typeof approval.legacyUserId !== "number") continue;
