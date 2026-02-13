@@ -169,7 +169,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 };
 
 // For `@better-auth/cli`
-export const options = createAuthOptions({} as GenericCtx<DataModel>);
+const options = createAuthOptions({} as GenericCtx<DataModel>);
 
 // Better Auth Instance
 export const createAuth = (ctx: GenericCtx<DataModel>) => {

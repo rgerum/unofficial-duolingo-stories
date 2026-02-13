@@ -21,7 +21,7 @@ function node_to_string(children: any) {
   return value;
 }
 
-export function save_tag(tag: string) {
+function save_tag(tag: string) {
   try {
     tag = node_to_string(tag);
     return tag.trim().toLowerCase().replace(/\s+/g, "-");

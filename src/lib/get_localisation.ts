@@ -37,7 +37,7 @@ const get_localisation_entries_by_legacy_language_id = unstable_cache(
   { tags: ["localisation"], revalidate: 3600 },
 );
 
-export const get_localisation_dict_by_convex_language_id = async (
+const get_localisation_dict_by_convex_language_id = async (
   langId: Id<"languages">,
 ) => {
   const rows = await get_localisation_entries_by_convex_language_id(langId);
@@ -46,13 +46,13 @@ export const get_localisation_dict_by_convex_language_id = async (
   return data;
 };
 
-export type LocalisationFunc = (
+type LocalisationFunc = (
   tag: string,
   replacements?: Record<string, string>,
   links?: string[],
 ) => string | React.JSX.Element | undefined;
 
-export default async function get_localisation(lang: number) {
+async function get_localisation(lang: number) {
   let data = await get_localisation_dict(lang);
   if (lang !== 1) {
     data = {

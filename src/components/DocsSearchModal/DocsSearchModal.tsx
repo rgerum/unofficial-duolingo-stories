@@ -7,7 +7,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 // https://beta.duostories.org/docs/story-creation/import.mdx
 const basefolder = "/docs";
 
-export async function getPageData(path: string) {
+async function getPageData(path: string) {
   try {
     const res = await (await fetch(basefolder + "/" + path + ".mdx")).text();
     let data = res.split("---");

@@ -12,7 +12,7 @@ import Tag from "@/components/layout/tag";
 import Input from "@/components/layout/Input";
 import FlagName from "../FlagName";
 
-export interface CourseProps {
+interface CourseProps {
   id: number;
   learning_language: number;
   from_language: number;
@@ -25,7 +25,7 @@ export interface CourseProps {
   tags: string[];
 }
 
-export interface AdminLanguageProps {
+interface AdminLanguageProps {
   id: number;
   name: string;
   short: string;

@@ -249,7 +249,7 @@ function splitTextTokens(text, keep_tilde=true) {
 }
 */
 
-export function splitTextTokens(text: string, keep_tilde = true) {
+function splitTextTokens(text: string, keep_tilde = true) {
   if (!text) return [];
   //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
   if (keep_tilde)
@@ -1002,7 +1002,7 @@ function line_iterator(lines: LineTuple[]) {
 }
 type LineIterator = ReturnType<typeof line_iterator>;
 
-export type StoryWithMeta = StoryType & {
+type StoryWithMeta = StoryType & {
   meta: Meta;
 };
 export type StoryType = {
@@ -1010,7 +1010,7 @@ export type StoryType = {
   from_language_name?: string | undefined;
 };
 
-export type Meta = {
+type Meta = {
   audio_insert_lines: [number | undefined, number][];
   line_index: number;
   story_id: number;
@@ -1050,7 +1050,7 @@ type StoryLanguages = {
 
 export type TranscribeData = string;
 
-export type LineTuple = [number, string];
+type LineTuple = [number, string];
 
 //window.audio_insert_lines = []
 export function processStoryFile(

@@ -7,21 +7,21 @@ import {
   setUserDeleteAction,
 } from "./actions";
 
-export async function setUserActivated(data: {
+async function setUserActivated(data: {
   id: number;
   activated: 0 | 1 | boolean;
 }) {
   return await setUserActivatedAction(data);
 }
 
-export async function setUserWrite(data: {
+async function setUserWrite(data: {
   id: number;
   write: 0 | 1 | boolean;
 }) {
   return await setUserWriteAction(data);
 }
 
-export async function setUserDelete(data: { id: number }) {
+async function setUserDelete(data: { id: number }) {
   return await setUserDeleteAction(data);
 }
 

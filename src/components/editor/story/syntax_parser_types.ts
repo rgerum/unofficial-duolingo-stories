@@ -49,7 +49,7 @@ export type LineElementProse = {
   type: "PROSE";
   content: ContentWithHints;
 };
-export type LineElementTitle = {
+type LineElementTitle = {
   type: "TITLE";
   content: ContentWithHints;
 };

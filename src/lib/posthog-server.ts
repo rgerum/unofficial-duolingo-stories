@@ -24,7 +24,7 @@ export function getPostHogClient(): PostHogLike {
   return posthogClient;
 }
 
-export async function shutdownPostHog() {
+async function shutdownPostHog() {
   if (posthogClient) {
     await posthogClient.shutdown();
   }

@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import * as EditDialog from "../edit_dialog";
 import Button from "@/components/layout/button";
 
-export interface Language {
+interface Language {
   id?: number;
   name: string;
   short: string;
@@ -20,7 +20,7 @@ export interface Language {
   rtl: boolean;
 }
 
-export async function setLanguage(data: Language): Promise<string> {
+async function setLanguage(data: Language): Promise<string> {
   const res = await fetch_post(`/admin/languages/set`, data);
   return await res.text();
 }

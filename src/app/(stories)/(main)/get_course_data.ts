@@ -23,7 +23,7 @@ export const get_course_data = unstable_cache(
   { tags: ["course_data"], revalidate: 3600 },
 );
 
-export async function get_counts() {
+async function get_counts() {
   let data = { count_courses: 0, count_stories: 0 };
   for (let course of await get_course_data()) {
     data.count_courses += 1;
@@ -32,7 +32,7 @@ export async function get_counts() {
   return data;
 }
 
-export async function get_course_groups() {
+async function get_course_groups() {
   const course_groups: Array<{
     from_language_name: string;
     fromLanguageId: Id<"languages">;
@@ -62,7 +62,7 @@ export async function get_course_groups() {
   return course_groups;
 }
 
-export async function get_courses_in_group(fromLanguageId: Id<"languages">) {
+async function get_courses_in_group(fromLanguageId: Id<"languages">) {
   let courses = await get_course_data();
   return courses.filter((course) => course.fromLanguageId === fromLanguageId);
 }
@@ -76,7 +76,7 @@ export async function get_course(short: string) {
   return null;
 }
 
-export async function get_done_course_ids_for_user() {
+async function get_done_course_ids_for_user() {
   const result = await fetchQuery(api.storyDone.getDoneCourseIdsForUser, {});
   return result ?? [];
 }

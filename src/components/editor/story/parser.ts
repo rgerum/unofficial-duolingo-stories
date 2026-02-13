@@ -61,7 +61,7 @@ const color_even = "#009623",
 import { tags } from "@lezer/highlight";
 import { HighlightStyle } from "@codemirror/language";
 
-export let myHighlightStyle = HighlightStyle.define([
+let myHighlightStyle = HighlightStyle.define([
   // STATE_TRANS_EVEN
   {
     tag: tags.propertyName,
@@ -690,7 +690,7 @@ type State = {
   bracket: boolean;
 };
 
-export const exampleLanguage = StreamLanguage.define({
+const exampleLanguage = StreamLanguage.define({
   token: parserWithMetadata,
   startState() {
     return {

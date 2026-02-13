@@ -106,7 +106,7 @@ export function IconTwitter() {
   );
 }
 
-export function IconFacebook() {
+function IconFacebook() {
   return (
     <svg
       height="32px"
@@ -126,7 +126,7 @@ export function IconFacebook() {
   );
 }
 
-export function IconGoogle() {
+function IconGoogle() {
   return (
     <svg
       height="32px"

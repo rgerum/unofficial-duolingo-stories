@@ -36,7 +36,7 @@ import { Avatar, StoryData } from "@/app/editor/story/[story]/types";
 import { z } from "zod";
 
 let images_cached: Record<string, z.infer<typeof ImageSchema>> = {};
-export async function getImage(id: string | undefined) {
+async function getImage(id: string | undefined) {
   if (!id) return null;
   if (images_cached[id] !== undefined) {
     return images_cached[id];
@@ -54,7 +54,7 @@ const ImageSchema = z.object({
   gilded_lip: z.string(),
 });
 
-export async function getImageAsync(id: string) {
+async function getImageAsync(id: string) {
   try {
     let response_json = await fetch(`/editor/story/get_image/${id}`, {
       credentials: "include",
@@ -81,7 +81,7 @@ const LanguageSchema = z.object({
 });
 type LanguageData = z.infer<typeof LanguageSchema>;
 
-export async function setStory(data: {
+async function setStory(data: {
   id: number;
   duo_id: number;
   name: string;
@@ -100,7 +100,7 @@ export async function setStory(data: {
   return await res.text();
 }
 
-export async function deleteStory(data: {
+async function deleteStory(data: {
   id: number;
   course_id: number;
   text: string | undefined;
@@ -122,7 +122,7 @@ function getMax<T>(list: T[], callback: (obj: T) => number) {
   return max;
 }
 
-export type StoryTypeExtended = StoryType & {
+type StoryTypeExtended = StoryType & {
   illustrations: {
     active: string | undefined;
     gilded: string | undefined;

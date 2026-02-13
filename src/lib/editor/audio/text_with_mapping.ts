@@ -178,7 +178,7 @@ function iter_word_replacements(
   return mapped_text;
 }
 
-export function apply_word_replacements(
+function apply_word_replacements(
   mapped_text: { text: string; mapping: number[] },
   replacements: Record<string, string>,
   options: { in_brackets?: number },
