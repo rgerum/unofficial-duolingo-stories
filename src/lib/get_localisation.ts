@@ -3,28 +3,13 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { unstable_cache } from "next/cache";
-import { sql, cache } from "./db";
-
-export const get_localisation_dict_all = cache(
-  async () => {
-    let result = await sql`SELECT tag, text, language_id FROM localization`;
-    let data: Record<number, Record<string, string>> = {};
-    for (let d of result) {
-      if (data[d.language_id] === undefined) {
-        data[d.language_id] = {};
-      }
-      data[d.language_id][d.tag] = d.text;
-    }
-    return data;
-  },
-  ["localisation_dict_all"],
-  { tags: ["localisation"] },
-);
 
 export const get_localisation_dict = async (lang: number) => {
   if (!lang) return {};
-  let data = await get_localisation_dict_all();
-  return data[lang];
+  const rows = await get_localisation_entries_by_legacy_language_id(lang);
+  const data: Record<string, string> = {};
+  for (const row of rows) data[row.tag] = row.text;
+  return data;
 };
 
 const convexUrl =
@@ -40,6 +25,15 @@ const get_localisation_entries_by_convex_language_id = unstable_cache(
       languageId: langId,
     }),
   ["localisation_dict_convex"],
+  { tags: ["localisation"], revalidate: 3600 },
+);
+
+const get_localisation_entries_by_legacy_language_id = unstable_cache(
+  async (legacyLanguageId: number) =>
+    await convex.query(api.localization.getLocalizationByLegacyLanguageId, {
+      legacyLanguageId,
+    }),
+  ["localisation_dict_legacy"],
   { tags: ["localisation"], revalidate: 3600 },
 );
 
