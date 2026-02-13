@@ -411,12 +411,11 @@ export async function mirrorStoryApprovalUpsert(
   row: {
     id?: number | null;
     story_id?: number | null;
-    user_id?: number | null;
     date?: Date | string | number | null;
   },
   operationKey: string,
 ) {
-  if (typeof row.story_id !== "number" || typeof row.user_id !== "number") {
+  if (typeof row.story_id !== "number") {
     throw new Error(
       `Convex mirror rejected invalid story_approval row for ${operationKey}`,
     );
@@ -436,11 +435,10 @@ export async function mirrorStoryApprovalUpsert(
 export async function mirrorStoryApprovalDelete(
   row: {
     story_id?: number | null;
-    user_id?: number | null;
   },
   operationKey: string,
 ) {
-  if (typeof row.story_id !== "number" || typeof row.user_id !== "number") {
+  if (typeof row.story_id !== "number") {
     throw new Error(
       `Convex mirror rejected invalid story_approval delete row for ${operationKey}`,
     );
