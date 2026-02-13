@@ -13,6 +13,20 @@ interface BreadcrumbLanguage {
   id?: number;
 }
 
+interface BreadcrumbStoryData {
+  image?: string | number | null;
+  name?: string;
+}
+
+interface BreadcrumbPartData {
+  type: string;
+  href?: string;
+  lang1?: BreadcrumbLanguage;
+  lang2?: BreadcrumbLanguage;
+  name?: string;
+  data?: BreadcrumbStoryData;
+}
+
 function MyLink({
   href,
   children,
@@ -35,14 +49,7 @@ function BreadcrumbPart({
   part,
   hide,
 }: {
-  part: {
-    type: string;
-    href?: string;
-    lang1?: any;
-    lang2?: any;
-    name?: string;
-    data?: any;
-  };
+  part: BreadcrumbPartData;
   hide: boolean;
 }) {
   let class_name = styles.part;
@@ -60,7 +67,11 @@ function BreadcrumbPart({
     if (!part.lang2) {
       return (
         <MyLink className={class_name} href={part.href}>
-          <DoubleFlag width={40} lang1={part.lang1} className={styles.flag} />
+          <DoubleFlag
+            width={40}
+            lang1={part.lang1 ?? {}}
+            className={styles.flag}
+          />
           {part.lang1?.name ? (
             <span className={styles.name}>{`${
               part?.name || part.lang1?.name
@@ -73,7 +84,7 @@ function BreadcrumbPart({
       <MyLink className={class_name} href={part.href}>
         <DoubleFlag
           width={40}
-          lang1={part.lang1}
+          lang1={part.lang1 ?? {}}
           lang2={part.lang2}
           className={styles.flag}
         />
@@ -111,14 +122,7 @@ function BreadcrumbPart({
 export function Breadcrumbs({
   path,
 }: {
-  path: {
-    type: string;
-    href?: string | undefined;
-    lang1?: BreadcrumbLanguage;
-    lang2?: BreadcrumbLanguage;
-    name?: string | undefined;
-    data?: any;
-  }[];
+  path: BreadcrumbPartData[];
 }) {
   let link;
   let hide = path.length > 3;

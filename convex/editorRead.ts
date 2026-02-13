@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -63,24 +63,24 @@ function toCourse(
   };
 }
 
-async function getCourseByIdentifier(ctx: any, identifier: string) {
+async function getCourseByIdentifier(ctx: QueryCtx, identifier: string) {
   const isNumericIdentifier = /^\d+$/.test(identifier);
   if (isNumericIdentifier) {
     const numeric = Number(identifier);
     const byId = await ctx.db
       .query("courses")
-      .withIndex("by_id_value", (q: any) => q.eq("legacyId", numeric))
+      .withIndex("by_id_value", (q) => q.eq("legacyId", numeric))
       .unique();
     if (byId) return byId;
   }
 
   return await ctx.db
     .query("courses")
-    .withIndex("by_short", (q: any) => q.eq("short", identifier))
+    .withIndex("by_short", (q) => q.eq("short", identifier))
     .unique();
 }
 
-async function getUserNameByLegacyId(ctx: any, legacyIds: number[]) {
+async function getUserNameByLegacyId(ctx: QueryCtx, legacyIds: number[]) {
   const uniqueLegacyIds = Array.from(new Set(legacyIds));
   if (!uniqueLegacyIds.length) return new Map<number, string>();
 
@@ -103,7 +103,7 @@ async function getUserNameByLegacyId(ctx: any, legacyIds: number[]) {
   return map;
 }
 
-async function getUserNameByAuthDocId(ctx: any, authDocIds: string[]) {
+async function getUserNameByAuthDocId(ctx: QueryCtx, authDocIds: string[]) {
   const uniqueAuthDocIds = Array.from(
     new Set(authDocIds.map((id) => id.trim()).filter(Boolean)),
   );
@@ -150,7 +150,7 @@ async function getUserNameByAuthDocId(ctx: any, authDocIds: string[]) {
 }
 
 async function buildAvatarRows(
-  ctx: any,
+  ctx: QueryCtx,
   language: LanguageDoc,
   avatars?: AvatarDoc[],
   mappings?: AvatarMappingDoc[],

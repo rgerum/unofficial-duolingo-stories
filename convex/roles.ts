@@ -46,15 +46,17 @@ export const setBetterAuthRolesBatch = action({
           input: {
             model: "user",
             where: [{ field: "_id", value: authUser._id }],
-            update: { role: user.role } as any,
+            update: { role: user.role },
           },
         });
 
         updated += 1;
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : String(error);
         errors.push({
           email,
-          message: String(error?.message || error),
+          message,
         });
       }
     }

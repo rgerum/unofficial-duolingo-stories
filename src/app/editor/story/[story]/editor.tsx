@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 import { StoryEditorHeader } from "./header";
 import { fetch_post } from "@/lib/fetch_post";
 import SoundRecorder from "./sound-recorder";
-import { useQuery } from "convex/react";
+import { useConvex, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import {
   insert_audio_line,
@@ -36,14 +36,6 @@ import { Avatar, StoryData } from "@/app/editor/story/[story]/types";
 import { z } from "zod";
 
 let images_cached: Record<string, z.infer<typeof ImageSchema>> = {};
-async function getImage(id: string | undefined) {
-  if (!id) return null;
-  if (images_cached[id] !== undefined) {
-    return images_cached[id];
-  }
-  return await getImageAsync(id);
-  //return {}
-}
 
 const ImageSchema = z.object({
   id: z.string(),
@@ -53,19 +45,6 @@ const ImageSchema = z.object({
   active_lip: z.string(),
   gilded_lip: z.string(),
 });
-
-async function getImageAsync(id: string) {
-  try {
-    let response_json = await fetch(`/editor/story/get_image/${id}`, {
-      credentials: "include",
-    });
-    const image = ImageSchema.parse(await response_json.json());
-    images_cached[id] = image;
-    return image;
-  } catch (e) {
-    return undefined;
-  }
-}
 
 const LanguageSchema = z.object({
   id: z.number(),
@@ -144,7 +123,7 @@ export type EditorStateType = {
   select: (line: string, scroll: boolean) => void;
   audio_insert_lines: AudioInsertLinesType | undefined;
   show_trans: boolean;
-  show_audio_editor: (data: any) => void;
+  show_audio_editor: (data: StoryElementLine | StoryElementHeader) => void;
   show_ssml: boolean;
 };
 
@@ -155,6 +134,7 @@ export default function Editor({
   story_data: StoryData;
   avatar_names: Record<number, Avatar>;
 }) {
+  const convex = useConvex();
   const editor = React.useRef<HTMLDivElement>(null);
   const preview = React.useRef<HTMLDivElement>(null);
   const margin = React.useRef<SVGSVGElement>(null);
@@ -214,6 +194,27 @@ export default function Editor({
   const [unsaved_changes, set_unsaved_changes] = React.useState(false);
 
   const [save_error, set_save_error] = React.useState(false);
+
+  const getImage = React.useCallback(
+    async (id: string | undefined) => {
+      if (!id) return null;
+      if (images_cached[id] !== undefined) {
+        return images_cached[id];
+      }
+      try {
+        const image = ImageSchema.parse(
+          await convex.query(api.editorRead.getEditorImageByLegacyId, {
+            legacyImageId: id,
+          }),
+        );
+        images_cached[id] = image;
+        return image;
+      } catch {
+        return undefined;
+      }
+    },
+    [convex],
+  );
 
   function soundRecorderNext() {
     if (!story_state) return;

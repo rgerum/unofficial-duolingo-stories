@@ -1,7 +1,7 @@
 "use client";
 "use no memo";
 import React, { useState } from "react";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Spinner, SpinnerBlue } from "@/components/layout/spinner";
 import { fetch_post } from "@/lib/fetch_post";
@@ -168,26 +168,6 @@ export function Layout({
   );
 } //                 <Login page={"editor"}/>
 
-async function setAvatarSpeaker(data: {
-  name: string;
-  speaker: string;
-  language_id: number;
-  avatar_id: number;
-}) {
-  let response = await fetch_post(`/editor/language/set_avatar_speaker`, data);
-  if (response.status === 200) return await response.json();
-  throw "error";
-}
-
-async function setDefaultText(data: {
-  id: number;
-  default_text: string;
-}) {
-  let response = await fetch_post(`/editor/language/set_default_text`, data);
-  if (response.status === 200) return await response.json();
-  throw "error";
-}
-
 interface AvatarData {
   name: string | null;
   speaker: string | null;
@@ -222,6 +202,7 @@ function Avatar(props: {
   }, [avatar.name, avatar.speaker, unsavedChanged]);
 
   const language_id = props.language_id;
+  const saveAvatarSpeakerMutation = useMutation(api.languageWrite.setAvatarSpeaker);
   async function save() {
     const name = inputName;
     const speaker = inputSpeaker;
@@ -231,7 +212,13 @@ function Avatar(props: {
       language_id: language_id.id,
       avatar_id: avatar.avatar_id,
     };
-    await setAvatarSpeaker(data);
+    await saveAvatarSpeakerMutation({
+      legacyLanguageId: data.language_id,
+      legacyAvatarId: data.avatar_id,
+      name: data.name,
+      speaker: data.speaker,
+      operationKey: `avatar_mapping:${data.language_id}:${data.avatar_id}:client`,
+    });
     setSavedName(name);
     setSavedSpeaker(speaker);
   }
@@ -446,6 +433,7 @@ function AvatarNames({
 
   const [pitch, setPitch] = useState(2);
   const [speed, setSpeed] = useState(2);
+  const saveDefaultTextMutation = useMutation(api.languageWrite.setDefaultText);
 
   let [element, setElement] = useState(element_init);
 
@@ -462,7 +450,11 @@ function AvatarNames({
 
   async function saveText() {
     try {
-      await setDefaultText({ default_text: speakText, id: language.id });
+      await saveDefaultTextMutation({
+        legacyLanguageId: language.id,
+        default_text: speakText,
+        operationKey: `language:${language.id}:default_text:client`,
+      });
       setSpeakTextDefault(speakText);
     } catch (e) {
       window.alert("could not be saved");

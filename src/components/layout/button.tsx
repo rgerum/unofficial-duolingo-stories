@@ -3,12 +3,13 @@ import styled from "styled-components";
 export default function Button({
   children,
   primary = false,
+  variant: _variant,
   ...delegated
 }: {
   children: React.ReactNode;
   primary?: boolean;
-  [key: string]: any;
-}) {
+  variant?: string;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const ButtonComponent = primary ? ButtonBlueStyled : ButtonStyled;
 
   return (

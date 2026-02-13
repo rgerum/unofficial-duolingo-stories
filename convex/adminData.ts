@@ -1,9 +1,16 @@
-import { mutation, query } from "./_generated/server";
+import {
+  mutation,
+  query,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { components } from "./_generated/api";
 
-async function isAdmin(ctx: any) {
+type AuthCtx = MutationCtx | QueryCtx;
+
+async function isAdmin(ctx: AuthCtx) {
   const identity = (await ctx.auth.getUserIdentity()) as
     | { role?: string | null }
     | null;
@@ -68,7 +75,7 @@ const adminUserValidator = v.object({
   admin: v.boolean(),
 });
 
-async function findAuthUserByLegacyId(ctx: any, legacyId: number) {
+async function findAuthUserByLegacyId(ctx: AuthCtx, legacyId: number) {
   return (await ctx.runQuery(components.betterAuth.adapter.findOne, {
     model: "user",
     where: [{ field: "userId", operator: "eq", value: String(legacyId) }],

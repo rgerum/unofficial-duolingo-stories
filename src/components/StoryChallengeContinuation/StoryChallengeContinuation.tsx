@@ -5,6 +5,12 @@ import StoryTextLine from "../StoryTextLine";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
 import FadeGlideIn from "../FadeGlideIn";
 import { StorySettings } from "@/components/StoryProgress";
+import type {
+  StoryElement,
+  StoryElementChallengePrompt,
+  StoryElementLine,
+  StoryElementMultipleChoice,
+} from "@/components/editor/story/syntax_parser_types";
 
 function StoryChallengeContinuation({
   parts,
@@ -13,7 +19,7 @@ function StoryChallengeContinuation({
   hidden,
   settings,
 }: {
-  parts: any[];
+  parts: StoryElement[];
   setButtonStatus: (status: string) => void;
   active: boolean;
   hidden: boolean;
@@ -21,6 +27,9 @@ function StoryChallengeContinuation({
 }) {
   const [unhide, setUnhide] = React.useState(0);
   const id = React.useId();
+  const prompt = parts[0] as StoryElementChallengePrompt;
+  const line = parts[1] as StoryElementLine;
+  const choice = parts[2] as StoryElementMultipleChoice;
 
   function advance() {
     setUnhide(-1);
@@ -34,7 +43,7 @@ function StoryChallengeContinuation({
         hidden={hidden}
         disableScroll={settings.show_all}
       >
-        <StoryTextLine active={active} element={parts[1]} settings={settings} />
+        <StoryTextLine active={active} element={line} settings={settings} />
       </FadeGlideIn>
     );
   }
@@ -47,7 +56,7 @@ function StoryChallengeContinuation({
         hidden={hidden}
         disableScroll={settings.show_all}
       >
-        <StoryQuestionPrompt question={parts[0].prompt} lang={parts[0].lang} />
+        <StoryQuestionPrompt question={prompt.prompt} lang={prompt.lang} />
       </FadeGlideIn>
       <FadeGlideIn
         key={`${id}-2`}
@@ -56,7 +65,7 @@ function StoryChallengeContinuation({
       >
         <StoryTextLine
           active={active}
-          element={parts[1]}
+          element={line}
           unhide={unhide}
           settings={settings}
         />
@@ -68,7 +77,7 @@ function StoryChallengeContinuation({
         disableScroll={settings.show_all}
       >
         <StoryQuestionMultipleChoice
-          element={parts[2]}
+          element={choice}
           active={active}
           advance={advance}
         />

@@ -3,6 +3,10 @@ import styles from "./StoryChallengeMatch.module.css";
 import StoryQuestionMatch from "../StoryQuestionMatch";
 import FadeGlideIn from "../FadeGlideIn";
 import { StorySettings } from "@/components/StoryProgress";
+import type {
+  StoryElement,
+  StoryElementMatch,
+} from "@/components/editor/story/syntax_parser_types";
 
 function StoryChallengeMatch({
   parts,
@@ -11,13 +15,14 @@ function StoryChallengeMatch({
   setButtonStatus,
   settings,
 }: {
-  parts: any[];
+  parts: StoryElement[];
   active: boolean;
   hidden: boolean;
   setButtonStatus: (status: string) => void;
   settings: StorySettings;
 }) {
   const id = React.useId();
+  const element = parts[0] as StoryElementMatch;
   if (settings.hide_questions) {
     return null;
   }
@@ -29,7 +34,7 @@ function StoryChallengeMatch({
       disableScroll={settings.show_all}
     >
       <StoryQuestionMatch
-        element={parts[0]}
+        element={element}
         setDone={() => setButtonStatus("right")}
       />
     </FadeGlideIn>

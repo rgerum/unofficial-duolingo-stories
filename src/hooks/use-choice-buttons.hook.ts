@@ -45,7 +45,6 @@ export function useChoiceButtons(
       if (typeof value === "number" && active && value <= count)
         click(value - 1);
     },
-    [click],
   );
 
   // return button states and click callback
