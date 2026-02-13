@@ -151,10 +151,22 @@ export function generate_ssml_line(
 
      */
 
+  const normalizedMapping: number[] = [];
+  let lastValid = 0;
+  for (let i = 0; i < speak_text.mapping.length; i++) {
+    const value = speak_text.mapping[i];
+    if (typeof value === "number" && Number.isFinite(value)) {
+      lastValid = value;
+      normalizedMapping.push(value);
+    } else {
+      normalizedMapping.push(lastValid);
+    }
+  }
+
   return {
     ...ssml,
     text: speak_text.text,
-    mapping: speak_text.mapping,
+    mapping: normalizedMapping,
     speaker: speaker,
   };
 }

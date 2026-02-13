@@ -87,6 +87,10 @@ export const upsertStoryApproval = mutation({
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
     const legacyUserId = await requireSessionLegacyUserId(ctx);
+    const identity = (await ctx.auth.getUserIdentity()) as
+      | { name?: string | null }
+      | null;
+    const actorName = identity?.name?.trim() || `user_${legacyUserId}`;
     const story = await ctx.db
       .query("stories")
       .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.legacyStoryId))
@@ -184,6 +188,10 @@ export const toggleStoryApproval = mutation({
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
     const legacyUserId = await requireSessionLegacyUserId(ctx);
+    const identity = (await ctx.auth.getUserIdentity()) as
+      | { name?: string | null }
+      | null;
+    const actorName = identity?.name?.trim() || `user_${legacyUserId}`;
 
     const story = await ctx.db
       .query("stories")
@@ -289,6 +297,18 @@ export const toggleStoryApproval = mutation({
       contributors,
       contributorsPast: contributors_past,
       operationKey,
+    });
+
+    await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStoryApprovalToggled, {
+      operationKey,
+      storyId: story.legacyId,
+      action,
+      count,
+      storyStatus: story_status,
+      finishedInSet: finished_in_set,
+      publishedCount: published.length,
+      actorName,
+      actorLegacyUserId: legacyUserId,
     });
 
     return {

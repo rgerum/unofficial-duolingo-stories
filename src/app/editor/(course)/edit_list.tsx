@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import styles from "./edit_list.module.css";
 import { SpinnerBlue } from "@/components/layout/spinner";
 import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "@convex/_generated/api";
 import {
   CourseProps,
   StoryListDataProps,
@@ -176,17 +178,6 @@ function formatDate(datetime: string | number | Date) {
   )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
-async function setApproval(data: { story_id: number }, name: string) {
-  if (
-    window.confirm(
-      `Did you check the story "${name}" and think it is ready to be published? If you want to give your approval click "ok".\n\nIn case you already gave an approval. "ok" will remove it.`,
-    )
-  ) {
-    let response = await fetch(`/editor/approve/${data.story_id}`);
-    return await response.json();
-  }
-}
-
 function DropDownStatus(props: {
   id: number;
   name: string;
@@ -199,6 +190,7 @@ function DropDownStatus(props: {
   let [status, set_status] = useState(props.status);
   let [count, setCount] = useState(props.count);
   let [isPublic, setIsPublic] = useState(props.public);
+  const toggleApprovalMutation = useMutation(api.storyApproval.toggleStoryApproval);
   const router = useRouter();
 
   useEffect(() => {
@@ -216,11 +208,19 @@ function DropDownStatus(props: {
   if (props.official) return <></>;
 
   async function addApproval() {
+    const confirmed = window.confirm(
+      `Did you check the story "${props.name}" and think it is ready to be published? If you want to give your approval click "ok".\n\nIn case you already gave an approval. "ok" will remove it.`,
+    );
+    if (!confirmed) return;
+
     setLoading(1);
     try {
-      let response = await setApproval({ story_id: props.id }, props.name);
+      const response = await toggleApprovalMutation({
+        legacyStoryId: props.id,
+        operationKey: `story_approval:${props.id}:toggle:client`,
+      });
       if (response?.count !== undefined) {
-        let count = parseInt(response.count);
+        const count = response.count;
         setCount(count);
         if (response.published.length) {
           if (

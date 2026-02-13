@@ -24,9 +24,8 @@ import {
 
 import { useRouter } from "next/navigation";
 import { StoryEditorHeader } from "./header";
-import { fetch_post } from "@/lib/fetch_post";
 import SoundRecorder from "./sound-recorder";
-import { useConvex, useQuery } from "convex/react";
+import { useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import {
   insert_audio_line,
@@ -60,38 +59,6 @@ const LanguageSchema = z.object({
 });
 type LanguageData = z.infer<typeof LanguageSchema>;
 
-async function setStory(data: {
-  id: number;
-  duo_id: number;
-  name: string;
-  image: string | undefined;
-  set_id: number;
-  set_index: number;
-  course_id: number;
-  text: string;
-  json: StoryTypeExtended | undefined;
-  todo_count: number;
-}) {
-  const res = await fetch_post(`/editor/story/set_story`, data);
-  if (!res.ok) {
-    throw new Error(`setStory failed: ${res.status} ${res.statusText}`);
-  }
-  return await res.text();
-}
-
-async function deleteStory(data: {
-  id: number;
-  course_id: number;
-  text: string | undefined;
-  name: string | undefined;
-}) {
-  let res = await fetch_post(`/editor/story/delete_story`, data);
-  if (!res.ok) {
-    throw new Error(`deleteStory failed: ${res.status} ${res.statusText}`);
-  }
-  return await res.text();
-}
-
 function getMax<T>(list: T[], callback: (obj: T) => number) {
   let max = -Infinity;
   for (let obj of list) {
@@ -117,6 +84,19 @@ type StoryMetaType = ReturnType<typeof processStoryFile>[1];
 
 type AudioInsertLinesType = ReturnType<typeof processStoryFile>[2];
 
+function toConvexValue(value: unknown): unknown {
+  if (value === undefined) return null;
+  if (Array.isArray(value)) return value.map((item) => toConvexValue(item));
+  if (value && typeof value === "object") {
+    const result: Record<string, unknown> = {};
+    for (const [key, item] of Object.entries(value)) {
+      result[key] = toConvexValue(item);
+    }
+    return result;
+  }
+  return value;
+}
+
 export type EditorStateType = {
   line_no: number;
   view: EditorView;
@@ -135,6 +115,8 @@ export default function Editor({
   avatar_names: Record<number, Avatar>;
 }) {
   const convex = useConvex();
+  const setStoryMutation = useMutation(api.storyWrite.setStory);
+  const deleteStoryMutation = useMutation(api.storyWrite.deleteStory);
   const editor = React.useRef<HTMLDivElement>(null);
   const preview = React.useRef<HTMLDivElement>(null);
   const margin = React.useRef<SVGSVGElement>(null);
@@ -312,7 +294,23 @@ export default function Editor({
           todo_count: story_meta.todo_count,
         };
 
-        await setStory(data);
+        const result = await setStoryMutation({
+          legacyStoryId: data.id,
+          duo_id: String(data.duo_id ?? ""),
+          name: data.name,
+          image: data.image ?? "",
+          set_id: data.set_id,
+          set_index: data.set_index,
+          legacyCourseId: data.course_id,
+          text: data.text,
+          json: toConvexValue(data.json),
+          todo_count: data.todo_count,
+          change_date: new Date().toISOString(),
+          operationKey: `story:${data.id}:set_story:client`,
+        });
+        if (!result) {
+          throw new Error(`Story ${data.id} not found`);
+        }
         set_unsaved_changes(false);
       } catch (e) {
         console.error("Save error", e);
@@ -324,12 +322,13 @@ export default function Editor({
     async function Delete() {
       const currentStoryData = storyDataRef.current;
       if (story_meta === undefined || currentStoryData === undefined) return;
-      await deleteStory({
-        id: currentStoryData.id,
-        course_id: currentStoryData.course_id,
-        text: editor_text,
-        name: story_meta.from_language_name,
+      const result = await deleteStoryMutation({
+        legacyStoryId: currentStoryData.id,
+        operationKey: `story:${currentStoryData.id}:delete:client`,
       });
+      if (!result) {
+        throw new Error(`Story ${currentStoryData.id} not found`);
+      }
       navigate(`/editor/course/${currentStoryData.course_id}`);
     }
     set_func_delete(() => Delete);

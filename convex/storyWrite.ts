@@ -34,6 +34,10 @@ export const setStory = mutation({
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
     const authorChangeLegacyUserId = await requireSessionLegacyUserId(ctx);
+    const identity = (await ctx.auth.getUserIdentity()) as
+      | { name?: string | null }
+      | null;
+    const actorName = identity?.name?.trim() || `user_${authorChangeLegacyUserId}`;
     const course = await ctx.db
       .query("courses")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyCourseId))
@@ -136,6 +140,17 @@ export const setStory = mutation({
       operationKey,
     });
 
+    await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStorySaved, {
+      operationKey,
+      storyId: story.legacyId,
+      storyName: args.name,
+      courseId: args.legacyCourseId,
+      text: args.text,
+      todoCount: args.todo_count,
+      actorName,
+      actorLegacyUserId: authorChangeLegacyUserId,
+    });
+
     return {
       id: story.legacyId,
       name: args.name,
@@ -162,6 +177,11 @@ export const deleteStory = mutation({
   ),
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
+    const actorLegacyUserId = await requireSessionLegacyUserId(ctx);
+    const identity = (await ctx.auth.getUserIdentity()) as
+      | { name?: string | null }
+      | null;
+    const actorName = identity?.name?.trim() || `user_${actorLegacyUserId}`;
     const story = await ctx.db
       .query("stories")
       .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.legacyStoryId))
@@ -191,6 +211,15 @@ export const deleteStory = mutation({
       operationKey,
     });
 
+    await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStoryDeleted, {
+      operationKey,
+      storyId: story.legacyId,
+      storyName: story.name,
+      courseId: course.legacyId,
+      actorName,
+      actorLegacyUserId,
+    });
+
     return {
       id: story.legacyId,
       name: story.name,
@@ -210,6 +239,10 @@ export const importStory = mutation({
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
     const authorLegacyUserId = await requireSessionLegacyUserId(ctx);
+    const identity = (await ctx.auth.getUserIdentity()) as
+      | { name?: string | null }
+      | null;
+    const actorName = identity?.name?.trim() || `user_${authorLegacyUserId}`;
     const [sourceStory, targetCourse] = await Promise.all([
       ctx.db
         .query("stories")
@@ -278,6 +311,16 @@ export const importStory = mutation({
       text: sourceContent.text,
       json: sourceContent.json,
       operationKey,
+    });
+
+    await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStoryImported, {
+      operationKey,
+      storyId: newLegacyId,
+      storyName: sourceStory.name,
+      courseId: args.targetLegacyCourseId,
+      text: sourceContent.text,
+      actorName,
+      actorLegacyUserId: authorLegacyUserId,
     });
 
     return {
