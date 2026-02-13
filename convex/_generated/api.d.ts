@@ -18,6 +18,7 @@ import type * as editorRead from "../editorRead.js";
 import type * as http from "../http.js";
 import type * as landing from "../landing.js";
 import type * as languageWrite from "../languageWrite.js";
+import type * as lib_authorization from "../lib/authorization.js";
 import type * as lib_phpbb from "../lib/phpbb.js";
 import type * as localization from "../localization.js";
 import type * as localizationWrite from "../localizationWrite.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   landing: typeof landing;
   languageWrite: typeof languageWrite;
+  "lib/authorization": typeof lib_authorization;
   "lib/phpbb": typeof lib_phpbb;
   localization: typeof localization;
   localizationWrite: typeof localizationWrite;

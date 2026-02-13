@@ -1,6 +1,6 @@
 import { mutation } from "./_generated/server";
-import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { requireContributorOrAdmin } from "./lib/authorization";
 
 const storyValidator = {
   legacyId: v.number(),
@@ -41,6 +41,7 @@ export const upsertStory = mutation({
     docId: v.id("stories"),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const course = await ctx.db
       .query("courses")
       .withIndex("by_id_value", (q) =>
@@ -107,6 +108,7 @@ export const upsertStoryContent = mutation({
     docId: v.id("story_content"),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const story = await ctx.db
       .query("stories")
       .withIndex("by_legacy_id", (q) =>
@@ -138,114 +140,5 @@ export const upsertStoryContent = mutation({
 
     const docId = await ctx.db.insert("story_content", doc);
     return { inserted: true, docId };
-  },
-});
-
-export const stripStoryHeavyFieldsBatch = mutation({
-  args: {
-    paginationOpts: paginationOptsValidator,
-  },
-  returns: v.object({
-    updated: v.number(),
-    isDone: v.boolean(),
-    continueCursor: v.string(),
-  }),
-  handler: async (ctx, args) => {
-    const page = await ctx.db
-      .query("stories")
-      .order("asc")
-      .paginate(args.paginationOpts);
-
-    let updated = 0;
-    for (const row of page.page) {
-      if (!("text" in row) && !("json" in row)) continue;
-      const { _id, _creationTime, text, json, ...rest } = row as any;
-      await ctx.db.replace(_id, rest);
-      updated += 1;
-    }
-
-    return {
-      updated,
-      isDone: page.isDone,
-      continueCursor: page.continueCursor,
-    };
-  },
-});
-
-export const patchStoryAuthorsBatch = mutation({
-  args: {
-    rows: v.array(
-      v.object({
-        legacyStoryId: v.number(),
-        authorId: v.optional(v.number()),
-        authorChangeId: v.optional(v.number()),
-      }),
-    ),
-  },
-  returns: v.object({
-    updated: v.number(),
-    missingStories: v.array(v.number()),
-  }),
-  handler: async (ctx, args) => {
-    let updated = 0;
-    const missingStories: number[] = [];
-
-    for (const row of args.rows) {
-      const story = await ctx.db
-        .query("stories")
-        .withIndex("by_legacy_id", (q) => q.eq("legacyId", row.legacyStoryId))
-        .unique();
-
-      if (!story) {
-        missingStories.push(row.legacyStoryId);
-        continue;
-      }
-
-      await ctx.db.patch(story._id, {
-        authorId: row.authorId,
-        authorChangeId: row.authorChangeId,
-      });
-      updated += 1;
-    }
-
-    return {
-      updated,
-      missingStories,
-    };
-  },
-});
-
-export const backfillStoryApprovalCountsBatch = mutation({
-  args: {
-    paginationOpts: paginationOptsValidator,
-  },
-  returns: v.object({
-    updated: v.number(),
-    isDone: v.boolean(),
-    continueCursor: v.string(),
-  }),
-  handler: async (ctx, args) => {
-    const page = await ctx.db
-      .query("stories")
-      .order("asc")
-      .paginate(args.paginationOpts);
-
-    let updated = 0;
-    for (const story of page.page) {
-      const approvals = await ctx.db
-        .query("story_approval")
-        .withIndex("by_story", (q) => q.eq("storyId", story._id))
-        .collect();
-      const approvalCount = approvals.length;
-      if ((story.approvalCount ?? 0) === approvalCount) continue;
-      await ctx.db.patch(story._id, { approvalCount });
-      updated += 1;
-    }
-
-    return {
-      updated,
-      isDone: page.isDone,
-      continueCursor: page.continueCursor,
-    };
   },
 });

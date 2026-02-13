@@ -18,7 +18,7 @@ export async function GET(
 
   let answer = await set_import(
     { id: (await params).story_id, course_id: (await params).course_id },
-    { user_id: token.userId, username: token.name ?? "unknown" },
+    { username: token.name ?? "unknown" },
   );
 
   if (answer === undefined)
@@ -29,7 +29,7 @@ export async function GET(
 
 async function set_import(
   { id, course_id }: { id: string; course_id: string },
-  { user_id, username }: { user_id: number; username: string },
+  { username }: { username: string },
 ) {
   const sourceLegacyId = Number.parseInt(id, 10);
   const courseId = Number.parseInt(course_id, 10);
@@ -38,7 +38,6 @@ async function set_import(
   const data2 = await fetchAuthMutation(api.storyWrite.importStory, {
     sourceLegacyStoryId: sourceLegacyId,
     targetLegacyCourseId: courseId,
-    authorLegacyUserId: user_id,
     operationKey: `story:${sourceLegacyId}:import_to:${courseId}:route`,
   });
   if (!data2) return undefined;

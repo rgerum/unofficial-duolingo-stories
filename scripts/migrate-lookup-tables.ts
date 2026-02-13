@@ -129,21 +129,22 @@ async function migrateLanguages() {
   `;
 
   await runBatch(rows, async (chunk) => {
-    const languages = chunk.map((row) => ({
-      legacyId: row.id,
-      name: row.name,
-      short: row.short,
-      flag: optionalNumber(row.flag),
-      flag_file: optionalString(row.flag_file),
-      speaker: optionalString(row.speaker),
-      default_text: optionalString(row.default_text),
-      tts_replace: optionalString(row.tts_replace),
-      public: row.public,
-      rtl: row.rtl,
-    }));
-    await client.mutation(api.lookupTables.upsertLanguagesBatch, {
-      languages,
-    });
+    for (const row of chunk) {
+      await client.mutation(api.lookupTables.upsertLanguage, {
+        language: {
+          legacyId: row.id,
+          name: row.name,
+          short: row.short,
+          flag: optionalNumber(row.flag),
+          flag_file: optionalString(row.flag_file),
+          speaker: optionalString(row.speaker),
+          default_text: optionalString(row.default_text),
+          tts_replace: optionalString(row.tts_replace),
+          public: row.public,
+          rtl: row.rtl,
+        },
+      });
+    }
   });
 
   console.log(`Language done: ${rows.length}`);
@@ -158,17 +159,18 @@ async function migrateImages() {
   `;
 
   await runBatch(rows, async (chunk) => {
-    const images = chunk.map((row) => ({
-      legacyId: row.id,
-      active: row.active,
-      gilded: row.gilded,
-      locked: row.locked,
-      active_lip: row.active_lip,
-      gilded_lip: row.gilded_lip,
-    }));
-    await client.mutation(api.lookupTables.upsertImagesBatch, {
-      images,
-    });
+    for (const row of chunk) {
+      await client.mutation(api.lookupTables.upsertImage, {
+        image: {
+          legacyId: row.id,
+          active: row.active,
+          gilded: row.gilded,
+          locked: row.locked,
+          active_lip: row.active_lip,
+          gilded_lip: row.gilded_lip,
+        },
+      });
+    }
   });
 
   console.log(`Image done: ${rows.length}`);
@@ -183,14 +185,15 @@ async function migrateAvatars() {
   `;
 
   await runBatch(rows, async (chunk) => {
-    const avatars = chunk.map((row) => ({
-      legacyId: row.id,
-      link: row.link,
-      name: optionalString(row.name),
-    }));
-    await client.mutation(api.lookupTables.upsertAvatarsBatch, {
-      avatars,
-    });
+    for (const row of chunk) {
+      await client.mutation(api.lookupTables.upsertAvatar, {
+        avatar: {
+          legacyId: row.id,
+          link: row.link,
+          name: optionalString(row.name),
+        },
+      });
+    }
   });
 
   console.log(`Avatar done: ${rows.length}`);

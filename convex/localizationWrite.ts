@@ -1,6 +1,7 @@
 import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireContributorOrAdmin } from "./lib/authorization";
 
 export const setLocalization = mutation({
   args: {
@@ -16,6 +17,7 @@ export const setLocalization = mutation({
     text: v.string(),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const language = await ctx.db
       .query("languages")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyLanguageId))

@@ -2,6 +2,7 @@ import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import type { MutationCtx } from "./_generated/server";
+import { requireAdmin, requireContributorOrAdmin } from "./lib/authorization";
 
 function toLegacyLanguageResponse(row: {
   legacyId: number;
@@ -75,6 +76,7 @@ export const setDefaultText = mutation({
     rtl: v.boolean(),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const language = await getLanguageByLegacyId(ctx, args.legacyLanguageId);
 
     if (!language) {
@@ -127,6 +129,7 @@ export const setTtsReplace = mutation({
     rtl: v.boolean(),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const language = await getLanguageByLegacyId(ctx, args.legacyLanguageId);
 
     if (!language) {
@@ -176,6 +179,7 @@ export const setAvatarSpeaker = mutation({
     speaker: v.string(),
   }),
   handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
     const [language, avatar] = await Promise.all([
       getLanguageByLegacyId(ctx, args.legacyLanguageId),
       getAvatarByLegacyId(ctx, args.legacyAvatarId),
@@ -260,6 +264,7 @@ export const upsertSpeakerFromVoice = mutation({
     }),
   ),
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const language =
       (await getLanguageByShort(ctx, args.localeShort)) ??
       (await getLanguageByShort(ctx, args.languageShort));

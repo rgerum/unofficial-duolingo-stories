@@ -67,7 +67,6 @@ async function set_approve({
     await mirrorStoryApprovalDelete(
       {
         story_id,
-        user_id,
       },
       `story_approval:${story_id}:user:${user_id}:delete`,
     );
