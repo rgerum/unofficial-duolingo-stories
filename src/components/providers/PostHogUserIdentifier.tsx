@@ -4,6 +4,9 @@ import React from "react";
 import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
 
+const PENDING_SIGNIN_STORAGE_KEY = "posthog_pending_signin";
+const PENDING_SIGNIN_TTL_MS = 10 * 60 * 1000;
+
 type SessionUser = {
   id?: string;
   email?: string | null;
@@ -11,10 +14,29 @@ type SessionUser = {
   username?: string | null;
 };
 
+type PendingSignInPayload = {
+  method?: string;
+  provider?: string;
+  startedAt?: number;
+};
+
 export default function PostHogUserIdentifier() {
   const { data: session } = authClient.useSession();
   const user = (session?.user ?? null) as SessionUser | null;
   const identifiedUserId = React.useRef<string | null>(null);
+  const trackedSignInUserId = React.useRef<string | null>(null);
+
+  const readPendingSignIn = React.useCallback((): PendingSignInPayload | null => {
+    if (typeof window === "undefined") return null;
+    const value = window.sessionStorage.getItem(PENDING_SIGNIN_STORAGE_KEY);
+    if (!value) return null;
+    try {
+      return JSON.parse(value) as PendingSignInPayload;
+    } catch {
+      window.sessionStorage.removeItem(PENDING_SIGNIN_STORAGE_KEY);
+      return null;
+    }
+  }, []);
 
   React.useEffect(() => {
     if (!user?.id) return;
@@ -27,6 +49,32 @@ export default function PostHogUserIdentifier() {
     });
     identifiedUserId.current = user.id;
   }, [user?.id, user?.email, user?.name, user?.username]);
+
+  React.useEffect(() => {
+    if (!user?.id) return;
+    if (trackedSignInUserId.current === user.id) return;
+
+    const pending = readPendingSignIn();
+    if (!pending) return;
+    if (
+      typeof pending.startedAt === "number" &&
+      Date.now() - pending.startedAt > PENDING_SIGNIN_TTL_MS
+    ) {
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem(PENDING_SIGNIN_STORAGE_KEY);
+      }
+      return;
+    }
+
+    posthog.capture("user_signed_in", {
+      method: pending.method ?? "unknown",
+      provider: pending.provider ?? undefined,
+    });
+    trackedSignInUserId.current = user.id;
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem(PENDING_SIGNIN_STORAGE_KEY);
+    }
+  }, [readPendingSignIn, user?.id]);
 
   return null;
 }
