@@ -9,6 +9,7 @@ import { useRouter, useSelectedLayoutSegments } from "next/navigation";
 import Button from "../layout/button";
 import { authClient } from "@/lib/auth-client";
 import { isAdmin, isContributor } from "@/lib/userInterface";
+import posthog from "posthog-js";
 
 function themeToLightOrDark(
   theme: string | null,
@@ -188,6 +189,7 @@ export function LoggedInButton({
           className={styles.profile_dropdown_button}
           onClick={async () => {
             await authClient.signOut();
+            posthog.reset();
             window.location.href = "/";
           }}
           data-cy="user-logout"
