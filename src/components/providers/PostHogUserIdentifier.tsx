@@ -5,7 +5,6 @@ import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
 
 const PENDING_SIGNIN_STORAGE_KEY = "posthog_pending_signin";
-const PENDING_SIGNIN_TTL_MS = 10 * 60 * 1000;
 
 type SessionUser = {
   id?: string;
@@ -17,7 +16,6 @@ type SessionUser = {
 type PendingSignInPayload = {
   method?: string;
   provider?: string;
-  startedAt?: number;
 };
 
 export default function PostHogUserIdentifier() {
@@ -56,15 +54,6 @@ export default function PostHogUserIdentifier() {
 
     const pending = readPendingSignIn();
     if (!pending) return;
-    if (
-      typeof pending.startedAt === "number" &&
-      Date.now() - pending.startedAt > PENDING_SIGNIN_TTL_MS
-    ) {
-      if (typeof window !== "undefined") {
-        window.sessionStorage.removeItem(PENDING_SIGNIN_STORAGE_KEY);
-      }
-      return;
-    }
 
     posthog.capture("user_signed_in", {
       method: pending.method ?? "unknown",

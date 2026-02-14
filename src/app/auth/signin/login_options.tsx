@@ -35,7 +35,6 @@ export function LoginOptions(props: {
         JSON.stringify({
           method: "oauth",
           provider: provider.id,
-          startedAt: Date.now(),
         }),
       );
     }
@@ -70,7 +69,6 @@ export function LoginOptions(props: {
         PENDING_SIGNIN_STORAGE_KEY,
         JSON.stringify({
           method: "credentials",
-          startedAt: Date.now(),
         }),
       );
     }
