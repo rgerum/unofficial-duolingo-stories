@@ -14,7 +14,7 @@ export function generate_ssml_line(
   ssml: { speaker: string; text: string },
   transcribe_data: TranscribeData,
   hideRanges: HideRange[],
-  ipa_replacements: string[] & { index: number }[],
+  ipa_replacements: (RegExpMatchArray & { index: number })[],
 ) {
   // foo{bar:ipa} replacement
   hideRanges = JSON.parse(JSON.stringify(hideRanges));
@@ -33,6 +33,7 @@ export function generate_ssml_line(
     offset += insert.length;
   }
   for (let match of ipa_replacements) {
+    if (!match[1] || !match[2]) continue;
     let new_words = [`<sub alias="${match[2]}">`, `</sub>`];
     if (match[3]) {
       new_words = [
