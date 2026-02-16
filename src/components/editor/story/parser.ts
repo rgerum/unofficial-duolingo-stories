@@ -315,8 +315,15 @@ function parseBlockHeader(stream: StringStream, state: State) {
       startLine(state, 1, true, "text", true);
       return STATE_DEFAULT;
     }
-    if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, 1, false, "trans", true);
+    const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
+    if (hintPrefix) {
+      startLine(
+        state,
+        1,
+        true,
+        hintPrefix === "~" ? "trans" : "pron",
+        true,
+      );
       return STATE_DEFAULT;
     }
     if (state.block.allow_audio && stream.eat("$")) {
@@ -327,7 +334,7 @@ function parseBlockHeader(stream: StringStream, state: State) {
   }
   if (state.block.line_type === "text")
     return parserTextWithTranslation(stream, state);
-  if (state.block.line_type === "trans")
+  if (state.block.line_type === "trans" || state.block.line_type === "pron")
     return parserTranslation(stream, state);
 
   stream.skipToEnd();
@@ -344,8 +351,15 @@ function parseBlockLine(stream: StringStream, state: State) {
       startLine(state, 1, true, "text", true);
       return STATE_SPEAKER_TYPE;
     }
-    if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, 1, false, "trans", true);
+    const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
+    if (hintPrefix) {
+      startLine(
+        state,
+        1,
+        true,
+        hintPrefix === "~" ? "trans" : "pron",
+        true,
+      );
       return STATE_DEFAULT;
     }
     if (state.block.allow_audio && stream.eat("$")) {
@@ -359,7 +373,7 @@ function parseBlockLine(stream: StringStream, state: State) {
   }
   if (state.block.line_type === "text")
     return parserTextWithTranslation(stream, state);
-  if (state.block.line_type === "trans")
+  if (state.block.line_type === "trans" || state.block.line_type === "pron")
     return parserTranslation(stream, state);
 
   stream.skipToEnd();
@@ -394,8 +408,15 @@ function parseBlockSelectPhrase(stream: StringStream, state: State) {
       startLine(state, 1, true, "text");
       return STATE_DEFAULT;
     }
-    if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans", true);
+    const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
+    if (hintPrefix) {
+      startLine(
+        state,
+        undefined,
+        true,
+        hintPrefix === "~" ? "trans" : "pron",
+        true,
+      );
       return STATE_DEFAULT;
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
@@ -428,7 +449,7 @@ function parseBlockSelectPhrase(stream: StringStream, state: State) {
   }
   if (state.block.line_type === "text")
     return parserTextWithTranslation(stream, state, state.block.line === 2);
-  if (state.block.line_type === "trans")
+  if (state.block.line_type === "trans" || state.block.line_type === "pron")
     return parserTranslation(stream, state);
 
   stream.skipToEnd();
@@ -441,8 +462,15 @@ function parseBlockContinuation(stream: StringStream, state: State) {
       startLine(state, 1, true, "text");
       return STATE_DEFAULT;
     }
-    if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans", true);
+    const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
+    if (hintPrefix) {
+      startLine(
+        state,
+        undefined,
+        true,
+        hintPrefix === "~" ? "trans" : "pron",
+        true,
+      );
       return STATE_DEFAULT;
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
@@ -473,7 +501,7 @@ function parseBlockContinuation(stream: StringStream, state: State) {
   }
   if (state.block.line_type === "text")
     return parserTextWithTranslation(stream, state, state.block.line === 2);
-  if (state.block.line_type === "trans")
+  if (state.block.line_type === "trans" || state.block.line_type === "pron")
     return parserTranslation(stream, state);
 
   stream.skipToEnd();
@@ -486,8 +514,15 @@ function parseBlockMultipleChoice(stream: StringStream, state: State) {
       startLine(state, 1, true, "text");
       return STATE_DEFAULT;
     }
-    if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans", true);
+    const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
+    if (hintPrefix) {
+      startLine(
+        state,
+        undefined,
+        true,
+        hintPrefix === "~" ? "trans" : "pron",
+        true,
+      );
       return STATE_DEFAULT;
     }
     if (state.block.line >= 1 && stream.eat("+")) {
@@ -504,7 +539,7 @@ function parseBlockMultipleChoice(stream: StringStream, state: State) {
   }
   if (state.block.line_type === "text")
     return parserTextWithTranslation(stream, state);
-  if (state.block.line_type === "trans")
+  if (state.block.line_type === "trans" || state.block.line_type === "pron")
     return parserTranslation(stream, state);
 
   stream.skipToEnd();
@@ -517,8 +552,15 @@ function parseBlockArrange(stream: StringStream, state: State) {
       startLine(state, 1, true, "text");
       return STATE_DEFAULT;
     }
-    if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans", true);
+    const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
+    if (hintPrefix) {
+      startLine(
+        state,
+        undefined,
+        true,
+        hintPrefix === "~" ? "trans" : "pron",
+        true,
+      );
       return STATE_DEFAULT;
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
@@ -545,7 +587,7 @@ function parseBlockArrange(stream: StringStream, state: State) {
       state.block.line === 2,
       state.block.line === 2 ? 1 : 0,
     );
-  if (state.block.line_type === "trans")
+  if (state.block.line_type === "trans" || state.block.line_type === "pron")
     return parserTranslation(stream, state);
 
   stream.skipToEnd();
@@ -558,8 +600,15 @@ function parseBlockPointToPhrase(stream: StringStream, state: State) {
       startLine(state, 1, true, "text", true);
       return STATE_DEFAULT;
     }
-    if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans", true);
+    const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
+    if (hintPrefix) {
+      startLine(
+        state,
+        undefined,
+        true,
+        hintPrefix === "~" ? "trans" : "pron",
+        true,
+      );
       return STATE_DEFAULT;
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
@@ -586,7 +635,7 @@ function parseBlockPointToPhrase(stream: StringStream, state: State) {
       state.block.line === 2,
       state.block.line === 2 ? 2 : 0,
     );
-  if (state.block.line_type === "trans")
+  if (state.block.line_type === "trans" || state.block.line_type === "pron")
     return parserTranslation(stream, state);
 
   stream.skipToEnd();
@@ -599,8 +648,15 @@ function parseBlockMatch(stream: StringStream, state: State) {
       startLine(state, 1, true, "text");
       return STATE_DEFAULT;
     }
-    if (state.block.allow_trans && stream.eat("~")) {
-      startLine(state, undefined, false, "trans", true);
+    const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
+    if (hintPrefix) {
+      startLine(
+        state,
+        undefined,
+        true,
+        hintPrefix === "~" ? "trans" : "pron",
+        true,
+      );
       return STATE_DEFAULT;
     }
     if (state.block.line === 1 && stream.eat("-")) {
@@ -613,7 +669,7 @@ function parseBlockMatch(stream: StringStream, state: State) {
   }
   if (state.block.line_type === "text")
     return parserTextWithTranslation(stream, state);
-  if (state.block.line_type === "trans")
+  if (state.block.line_type === "trans" || state.block.line_type === "pron")
     return parserTranslation(stream, state);
   if (state.block.line_type === "pair") return parserPair(stream, state);
 

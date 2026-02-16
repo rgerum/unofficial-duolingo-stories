@@ -8,14 +8,18 @@ import {
 } from "./text_with_mapping";
 import { EditorView } from "codemirror";
 import { HideRange } from "@/components/editor/story/syntax_parser_types";
-import { TranscribeData } from "@/components/editor/story/syntax_parser_new";
+import {
+  IpaReplacement,
+  TranscribeData,
+} from "@/components/editor/story/syntax_parser_new";
 
 export function generate_ssml_line(
   ssml: { speaker: string; text: string },
   transcribe_data: TranscribeData,
   hideRanges: HideRange[],
-  ipa_replacements: (RegExpMatchArray & { index: number })[],
+  ipa_replacements: IpaReplacement[],
 ) {
+
   // foo{bar:ipa} replacement
   hideRanges = JSON.parse(JSON.stringify(hideRanges));
 
@@ -33,17 +37,18 @@ export function generate_ssml_line(
     offset += insert.length;
   }
   for (let match of ipa_replacements) {
-    if (!match[1] || !match[2]) continue;
-    let new_words = [`<sub alias="${match[2]}">`, `</sub>`];
-    if (match[3]) {
-      new_words = [
-        `<phoneme alphabet="${match[3].substring(1)}" ph="${match[2]}">`,
-        `</phoneme>`,
-      ];
-    }
-    insert(new_words[0], match.index);
-    insert(new_words[1], match.index + match[1].length);
+  if (!match.word || !match.alias) continue;
+  let new_words = [`<sub alias="${match.alias}">`, `</sub>`];
+  if (match.alphabet) {
+    new_words = [
+      `<phoneme alphabet="${match.alphabet}" ph="${match.alias}">`,
+      `</phoneme>`,
+    ];
   }
+  insert(new_words[0], match.index);
+  insert(new_words[1], match.index + match.word.length);
+}
+
 
   for (let range of hideRanges) {
     if (speaker.split("-").length === 3)

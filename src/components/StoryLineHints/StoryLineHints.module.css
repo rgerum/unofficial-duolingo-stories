@@ -161,3 +161,36 @@
 .hidden {
   display: none;
 }
+
+.hint_pronunciation {
+  display: block;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.ruby_word {
+  position: relative;
+  display: inline-block;
+  ruby-position: over;
+}
+
+.ruby_text {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 4px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  font-size: 0.62em;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.tooltip:not([data-hidden="true"]):hover .ruby_text,
+.tooltip_editor:hover .ruby_text,
+.ruby_word:hover .ruby_text {
+  visibility: visible;
+  opacity: 0.95;
+}

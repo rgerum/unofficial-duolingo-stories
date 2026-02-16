@@ -22,9 +22,11 @@ interface HintMapItem {
 export interface HintMapResult {
   hintMap: HintMapItem[];
   hints: string[];
+  hints_pronunciation?: string[];
   text: string;
   audio?: Audio;
   lang_hints?: string;
+  lang_hints_pronunciation?: string;
 }
 
 export interface ContentWithHints {

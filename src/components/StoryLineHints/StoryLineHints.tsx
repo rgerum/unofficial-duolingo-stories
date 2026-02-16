@@ -22,7 +22,8 @@ function Tooltip({
   const ref = React.useRef<HTMLSpanElement>(null);
   function onMouseEnter() {
     if (!ref.current) return;
-    let tooltipElement = ref.current.children[1] as HTMLElement;
+    const tooltipElement = ref.current.children[1];
+    if (!(tooltipElement instanceof HTMLElement)) return;
 
     // Calculate the position of the tooltip
     const tooltipRect = tooltipElement.getBoundingClientRect();
@@ -169,26 +170,53 @@ function StoryLineHints({
         ? true
         : undefined;
     if (editor) is_hidden = false;
+    const hint_translation = content.hints?.[hint.hintIndex];
+    const hint_pronunciation = content.hints_pronunciation?.[hint.hintIndex];
+    const has_any_hint = Boolean(hint_translation || hint_pronunciation);
+    const has_translation_hint = Boolean(hint_translation);
+    const word_content = hint_pronunciation ? (
+      <ruby className={styles.ruby_word}>
+        <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
+        <rt className={styles.ruby_text}>{hint_pronunciation}</rt>
+      </ruby>
+    ) : (
+      <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
+    );
+    const hint_container_class =
+      is_hidden
+        ? ""
+        : show_trans
+          ? has_any_hint
+            ? styles.tooltip_editor
+            : ""
+          : has_translation_hint
+            ? styles.tooltip
+            : "";
+    const hint_text_class =
+      (show_trans ? styles.tooltiptext_editor : styles.tooltiptext) +
+      " " +
+      content.lang_hints;
 
     elements.push(
       <Tooltip
         key={hint.rangeFrom + " " + hint.rangeTo + 1}
-        className={
-          styles.word +
-          " " +
-          (is_hidden ? "" : show_trans ? styles.tooltip_editor : styles.tooltip)
-        }
+        className={styles.word + " " + hint_container_class}
       >
-        <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
-        <span
-          className={
-            (show_trans ? styles.tooltiptext_editor : styles.tooltiptext) +
-            " " +
-            content.lang_hints
-          }
-        >
-          {content.hints[hint.hintIndex]}
-        </span>
+        {word_content}
+        {show_trans ? (
+          has_any_hint ? (
+            <span className={hint_text_class}>
+              {hint_translation ? <span>{hint_translation}</span> : null}
+              {hint_pronunciation ? (
+                <span className={styles.hint_pronunciation}>{hint_pronunciation}</span>
+              ) : null}
+            </span>
+          ) : null
+        ) : has_translation_hint ? (
+          <span className={hint_text_class}>
+            <span>{hint_translation}</span>
+          </span>
+        ) : null}
       </Tooltip>,
     );
     //addSplitWord(dom.append("span").attr("class", "word tooltip"), hint.rangeFrom, hint.rangeTo+1)
