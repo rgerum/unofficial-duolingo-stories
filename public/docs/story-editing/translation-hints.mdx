@@ -72,6 +72,14 @@ The `^` line uses the same alignment rules as translation hints:
 - use `~` to join words/tokens,
 - use `|` to split words/tokens.
 
+You can also attach pronunciation inline to a translation token by adding `{...}` in the `~` line:
+
+```
+~ ... sit~and~{いー~or~うぃー} ...
+```
+
+This keeps the translation hint as `sit and` and sets the pronunciation hint for that same mapped phrase to `いー or うぃー`.
+
 Token alignment is shared with the main text, so each text token can have:
 - a translation hint from `~`,
 - a pronunciation hint from `^`,

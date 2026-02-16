@@ -21,11 +21,30 @@ import {
   StoryElementSelectPhrase,
 } from "@/components/editor/story/syntax_parser_types";
 
+export type IpaReplacement = {
+  index: number;
+  word: string;
+  alias: string;
+  alphabet?: string;
+};
+
 function generateHintMap(
   text: string = "",
   translation: string = "",
   pronunciation: string = "",
 ): HintMapResult {
+  function parseInlinePronunciationHint(token: string): {
+    translation: string;
+    pronunciation: string;
+  } {
+    const match = token.match(/^(.*)\{([^}]*)\}\s*$/);
+    if (!match) return { translation: token, pronunciation: "" };
+    return {
+      translation: (match[1] ?? "").replace(/~+$/, "").trimEnd(),
+      pronunciation: (match[2] ?? "").trim(),
+    };
+  }
+
   if (!text) text = "";
   text = text.replace(/\|/g, "⁠");
   let text_list = splitTextTokens(text);
@@ -47,8 +66,18 @@ function generateHintMap(
     }
     const trans_value = trans_list[i];
     const pron_value = pron_list[i];
-    const has_trans_hint = trans_value && trans_value !== "~";
-    const has_pron_hint = pron_value && pron_value !== "~";
+    const {
+      translation: trans_value_clean,
+      pronunciation: trans_inline_pron_value,
+    } =
+      trans_value && trans_value !== "~"
+        ? parseInlinePronunciationHint(trans_value)
+        : { translation: "", pronunciation: "" };
+
+    const has_trans_hint = Boolean(trans_value && trans_value !== "~");
+    const has_pron_hint = Boolean(
+      (pron_value && pron_value !== "~") || trans_inline_pron_value,
+    );
     if (i % 2 === 0 && (has_trans_hint || has_pron_hint)) {
       hintMap.push({
         hintIndex: hints.length,
@@ -56,10 +85,19 @@ function generateHintMap(
         rangeTo: text_pos + text_list[i].length - 1,
       });
       hints.push(
-        has_trans_hint ? trans_value.replace(/~/g, " ").replace(/\|/g, "⁠") : "",
+        has_trans_hint
+          ? trans_value_clean.replace(/~/g, " ").replace(/\|/g, "⁠")
+          : "",
       );
       hints_pronunciation.push(
-        has_pron_hint ? pron_value.replace(/~/g, " ").replace(/\|/g, "⁠") : "",
+        has_pron_hint
+          ? (pron_value && pron_value !== "~"
+              ? pron_value
+              : trans_inline_pron_value
+            )
+              .replace(/~/g, " ")
+              .replace(/\|/g, "⁠")
+          : "",
       );
     }
     text_pos += text_list[i].length;
@@ -314,11 +352,16 @@ function speaker_text_trans(
   const pronunciation = data.pron?.match(/\s*\^\s*(\S.*\S|\S)\s*/)?.[1] || "";
 
   getInputStringText(text);
-  const ipa_replacements: string[] & { index: number }[] = [];
+  const ipa_replacements: IpaReplacement[] = [];
   let ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
 
   while (ipa_match && ipa_match.index !== undefined) {
-    ipa_replacements.push({ index: ipa_match.index });
+    ipa_replacements.push({
+      index: ipa_match.index,
+      word: ipa_match[1] ?? "",
+      alias: ipa_match[2] ?? "",
+      alphabet: ipa_match[3] ? ipa_match[3].substring(1) : undefined,
+    });
     text =
       text.substring(0, ipa_match.index + ipa_match[1].length) +
       text.substring(ipa_match.index + ipa_match[0].length);
@@ -427,7 +470,7 @@ function line_to_audio(
   story_id: number,
   hideRanges: HideRange[],
   transcribe_data: TranscribeData,
-  ipa_replacements: string[] & { index: number }[],
+  ipa_replacements: IpaReplacement[],
   ssml_payload: {
     inser_index: number;
     plan_text?: string | undefined;
