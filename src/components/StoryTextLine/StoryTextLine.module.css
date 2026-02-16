@@ -11,6 +11,8 @@
 
 .phrase {
   display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
   margin: 20px 0;
 }
 
@@ -19,6 +21,7 @@
   margin-right: 18px;
   width: 50px;
   display: flex;
+  flex: 0 0 50px;
 }
 
 div[data-rtl="true"] .head {

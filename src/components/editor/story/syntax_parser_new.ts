@@ -24,6 +24,7 @@ import {
 function generateHintMap(
   text: string = "",
   translation: string = "",
+  pronunciation: string = "",
 ): HintMapResult {
   if (!text) text = "";
   text = text.replace(/\|/g, "⁠");
@@ -31,25 +32,43 @@ function generateHintMap(
   text = text.replace(/~/g, " "); //
   if (!translation) translation = "";
   translation = translation.replace(/\|/g, "⁠");
+  if (!pronunciation) pronunciation = "";
+  pronunciation = pronunciation.replace(/\|/g, "⁠");
   let trans_list = splitTextTokens2(translation);
+  let pron_list = splitTextTokens2(pronunciation);
   let hints = [];
+  let hints_pronunciation = [];
   let hintMap = [];
   let text_pos = 0;
   for (let i = 0; i < text_list.length; i++) {
     if (i === 0 && text_list[i] === "") {
       trans_list.unshift("", "");
+      pron_list.unshift("", "");
     }
-    if (i % 2 === 0 && trans_list[i] && trans_list[i] !== "~") {
+    const trans_value = trans_list[i];
+    const pron_value = pron_list[i];
+    const has_trans_hint = trans_value && trans_value !== "~";
+    const has_pron_hint = pron_value && pron_value !== "~";
+    if (i % 2 === 0 && (has_trans_hint || has_pron_hint)) {
       hintMap.push({
         hintIndex: hints.length,
         rangeFrom: text_pos,
         rangeTo: text_pos + text_list[i].length - 1,
       });
-      hints.push(trans_list[i].replace(/~/g, " ").replace(/\|/g, "⁠"));
+      hints.push(
+        has_trans_hint ? trans_value.replace(/~/g, " ").replace(/\|/g, "⁠") : "",
+      );
+      hints_pronunciation.push(
+        has_pron_hint ? pron_value.replace(/~/g, " ").replace(/\|/g, "⁠") : "",
+      );
     }
     text_pos += text_list[i].length;
   }
-  return { hintMap: hintMap, hints: hints, text: text.trim() };
+  const result: HintMapResult = { hintMap: hintMap, hints: hints, text: text.trim() };
+  if (hints_pronunciation.some((hint) => hint !== "")) {
+    result.hints_pronunciation = hints_pronunciation;
+  }
+  return result;
 }
 
 function hintsShift(content: ContentWithHints, pos: number): void {
@@ -292,6 +311,7 @@ function speaker_text_trans(
   let text = text_match?.[2] || "";
 
   const translation = data.trans?.match(/\s*~\s*(\S.*\S|\S)\s*/)?.[1] || "";
+  const pronunciation = data.pron?.match(/\s*\^\s*(\S.*\S|\S)\s*/)?.[1] || "";
 
   getInputStringText(text);
   const ipa_replacements: string[] & { index: number }[] = [];
@@ -306,7 +326,7 @@ function speaker_text_trans(
   }
   //text = text.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
 
-  let content = generateHintMap(text, translation);
+  let content = generateHintMap(text, translation, pronunciation);
 
   let selectablePhrases, characterPositions;
   if (use_buttons)
@@ -463,6 +483,7 @@ function get_avatar(
 type Speaker = {
   text: undefined | string;
   trans: undefined | string;
+  pron: undefined | string;
   allow_audio?: undefined | boolean;
   audio_line_inset?: undefined | number;
   audio?: undefined | string;
@@ -478,6 +499,7 @@ function getText(
   let speaker: Speaker = {
     text: undefined,
     trans: undefined,
+    pron: undefined,
     allow_audio: undefined,
     audio_line_inset: undefined,
     audio: undefined,
@@ -488,9 +510,15 @@ function getText(
   if (line.startsWith(">") || (allow_speaker && line.match(/\w*:/))) {
     speaker.text = line;
     line = line_iter.advance(1);
-    if (line?.startsWith("~") && allow_trans) {
-      speaker.trans = line;
-      line = line_iter.advance();
+    if (allow_trans) {
+      while (line?.startsWith("~") || line?.startsWith("^")) {
+        if (line.startsWith("~")) {
+          speaker.trans = line;
+        } else if (line.startsWith("^")) {
+          speaker.pron = line;
+        }
+        line = line_iter.advance();
+      }
     }
     if (allow_audio) {
       speaker.allow_audio = allow_audio;
@@ -517,11 +545,21 @@ function getAnswers(
     if (!line) break;
     if (line.startsWith("+") || line.startsWith("-")) {
       if (line.startsWith("+")) correct_answer = answers.length;
-      const answer = { text: line, trans: undefined as string | undefined };
+      const answer = {
+        text: line,
+        trans: undefined as string | undefined,
+        pron: undefined as string | undefined,
+      };
       line = line_iter.advance();
-      if (line && line.startsWith("~") && allow_trans) {
-        answer.trans = line;
-        line = line_iter.advance();
+      if (allow_trans) {
+        while (line && (line.startsWith("~") || line.startsWith("^"))) {
+          if (line.startsWith("~")) {
+            answer.trans = line;
+          } else if (line.startsWith("^")) {
+            answer.pron = line;
+          }
+          line = line_iter.advance();
+        }
       }
       if (allow_trans) {
         const data_text = speaker_text_trans(answer);

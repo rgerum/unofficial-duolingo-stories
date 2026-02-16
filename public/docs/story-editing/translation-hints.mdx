@@ -54,3 +54,28 @@ With a click on the ![hints](/docs/story-editing/hints_button.png "Hints") butto
 directly below each word. Especially when reviewing stories this is a great tool.
 
 ![Example of hints display](/docs/story-editing/hint.png "Hints")
+
+### Pronunciation Hints
+
+You can add an optional pronunciation hint line using `^` directly below the text (or below `~` if both are present).
+This works for pinyin and other pronunciation systems.
+
+```
+[LINE]
+Speaker560: 我的|钥匙|在哪里？
+~           my  keys (are)~where
+^           wǒ~de yào~shi zài~nǎ~lǐ
+```
+
+The `^` line uses the same alignment rules as translation hints:
+- use spaces to align tokens,
+- use `~` to join words/tokens,
+- use `|` to split words/tokens.
+
+Token alignment is shared with the main text, so each text token can have:
+- a translation hint from `~`,
+- a pronunciation hint from `^`,
+- both, or neither (`~` can still be used to suppress a hint for one token).
+
+Pronunciation hints from `^` are shown directly above the words.
+Translation hints from `~` keep the existing hint behavior (hover in story mode, inline in editor hint mode).

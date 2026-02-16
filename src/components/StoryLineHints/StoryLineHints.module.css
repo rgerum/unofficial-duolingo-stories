@@ -161,3 +161,16 @@
 .hidden {
   display: none;
 }
+
+.ruby_word {
+  ruby-position: over;
+  ruby-align: center;
+}
+
+.ruby_text {
+  font-size: 0.62em;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  opacity: 0.95;
+  user-select: none;
+}

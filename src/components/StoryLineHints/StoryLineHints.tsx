@@ -169,6 +169,18 @@ function StoryLineHints({
         ? true
         : undefined;
     if (editor) is_hidden = false;
+    const hint_translation = content.hints?.[hint.hintIndex];
+    const hint_pronunciation = content.hints_pronunciation?.[hint.hintIndex];
+    const has_translation_hint = Boolean(hint_translation);
+    const show_pronunciation_above = Boolean(hint_pronunciation) && !is_hidden;
+    const word_content = show_pronunciation_above ? (
+      <ruby className={styles.ruby_word}>
+        <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
+        <rt className={styles.ruby_text}>{hint_pronunciation}</rt>
+      </ruby>
+    ) : (
+      <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
+    );
 
     elements.push(
       <Tooltip
@@ -176,10 +188,16 @@ function StoryLineHints({
         className={
           styles.word +
           " " +
-          (is_hidden ? "" : show_trans ? styles.tooltip_editor : styles.tooltip)
+          (is_hidden
+            ? ""
+            : has_translation_hint
+              ? show_trans
+                ? styles.tooltip_editor
+                : styles.tooltip
+              : "")
         }
       >
-        <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
+        {word_content}
         <span
           className={
             (show_trans ? styles.tooltiptext_editor : styles.tooltiptext) +
@@ -187,7 +205,7 @@ function StoryLineHints({
             content.lang_hints
           }
         >
-          {content.hints[hint.hintIndex]}
+          {hint_translation ? <span>{hint_translation}</span> : null}
         </span>
       </Tooltip>,
     );
