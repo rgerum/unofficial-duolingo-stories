@@ -12,6 +12,8 @@ import { SpinnerBlue } from "@/components/layout/spinner";
 import { ProviderProps } from "@/app/auth/signin/page";
 import { authClient } from "@/lib/auth-client";
 
+const PENDING_SIGNIN_STORAGE_KEY = "posthog_pending_signin";
+
 export function LoginOptions(props: {
   providers: ProviderProps[];
   callbackUrl: string;
@@ -26,22 +28,17 @@ export function LoginOptions(props: {
   const [usernameInput, usernameInputSetValue] = useInput("");
   const [passwordInput, passwordInputSetValue] = useInput("");
 
-  // Track successful sign-in when state changes from pending to no error
-  React.useEffect(() => {
-    if (state.error === null && usernameInput && !isPending) {
-      // Identify user in PostHog
-      posthog.identify(usernameInput, {
-        username: usernameInput,
-      });
-      // Capture sign-in event
-      posthog.capture("user_signed_in", {
-        username: usernameInput,
-        method: "credentials",
-      });
-    }
-  }, [state.error, usernameInput, isPending]);
-
   const handleOAuthProviderClick = async (provider: ProviderProps) => {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem(
+        PENDING_SIGNIN_STORAGE_KEY,
+        JSON.stringify({
+          method: "oauth",
+          provider: provider.id,
+        }),
+      );
+    }
+
     posthog.capture("oauth_provider_clicked", {
       provider: provider.id,
       provider_name: provider.name,
@@ -51,6 +48,9 @@ export function LoginOptions(props: {
       callbackURL: callbackUrl,
     });
     if (error) {
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem(PENDING_SIGNIN_STORAGE_KEY);
+      }
       setState({ error: error.message ?? "Sign in error." });
       return;
     }
@@ -64,6 +64,15 @@ export function LoginOptions(props: {
     setIsPending(true);
     setState({ error: null });
 
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem(
+        PENDING_SIGNIN_STORAGE_KEY,
+        JSON.stringify({
+          method: "credentials",
+        }),
+      );
+    }
+
     const { error } = await authClient.signIn.username({
       username: usernameInput,
       password: passwordInput,
@@ -71,6 +80,9 @@ export function LoginOptions(props: {
     });
 
     if (error) {
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem(PENDING_SIGNIN_STORAGE_KEY);
+      }
       setState({ error: error.message ?? "Sign in error." });
       setIsPending(false);
       return;

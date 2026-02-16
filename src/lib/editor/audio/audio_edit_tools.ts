@@ -19,6 +19,7 @@ export function generate_ssml_line(
   hideRanges: HideRange[],
   ipa_replacements: IpaReplacement[],
 ) {
+
   // foo{bar:ipa} replacement
   hideRanges = JSON.parse(JSON.stringify(hideRanges));
 
@@ -36,17 +37,18 @@ export function generate_ssml_line(
     offset += insert.length;
   }
   for (let match of ipa_replacements) {
-    if (!match.word || !match.alias) continue;
-    let new_words = [`<sub alias="${match.alias}">`, `</sub>`];
-    if (match.alphabet) {
-      new_words = [
-        `<phoneme alphabet="${match.alphabet}" ph="${match.alias}">`,
-        `</phoneme>`,
-      ];
-    }
-    insert(new_words[0], match.index);
-    insert(new_words[1], match.index + match.word.length);
+  if (!match.word || !match.alias) continue;
+  let new_words = [`<sub alias="${match.alias}">`, `</sub>`];
+  if (match.alphabet) {
+    new_words = [
+      `<phoneme alphabet="${match.alphabet}" ph="${match.alias}">`,
+      `</phoneme>`,
+    ];
   }
+  insert(new_words[0], match.index);
+  insert(new_words[1], match.index + match.word.length);
+}
+
 
   for (let range of hideRanges) {
     if (speaker.split("-").length === 3)
