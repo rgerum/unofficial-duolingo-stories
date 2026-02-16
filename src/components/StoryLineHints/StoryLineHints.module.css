@@ -162,15 +162,27 @@
   display: none;
 }
 
+.hint_pronunciation {
+  display: block;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
 .ruby_word {
   ruby-position: over;
-  ruby-align: center;
 }
 
 .ruby_text {
+  visibility: hidden;
+  opacity: 0;
   font-size: 0.62em;
-  line-height: 1.1;
-  letter-spacing: 0.01em;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.tooltip:not([data-hidden="true"]):hover .ruby_text,
+.tooltip_editor:hover .ruby_text,
+.ruby_word:hover .ruby_text {
+  visibility: visible;
   opacity: 0.95;
-  user-select: none;
 }
