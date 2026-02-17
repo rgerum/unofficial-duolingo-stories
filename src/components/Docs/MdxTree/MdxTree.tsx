@@ -49,16 +49,32 @@ const components: MDXComponents = {
   em: "em",
   h1: "h1",
   h2: (props: any) => (
-    <h2 {...props} id={save_tag(props.children)}>
+    <h2
+      {...props}
+      id={save_tag(props.children)}
+      className={`mt-10 mb-4 scroll-mt-28 text-[1.65rem] leading-[1.25] font-bold ${props.className ?? ""}`}
+    >
       {props.children}
     </h2>
   ),
   h3: (props: any) => (
-    <h3 {...props} id={save_tag(props.children)}>
+    <h3
+      {...props}
+      id={save_tag(props.children)}
+      className={`mt-8 mb-3 scroll-mt-28 text-[1.3rem] leading-[1.3] font-bold ${props.className ?? ""}`}
+    >
       {props.children}
     </h3>
   ),
-  h4: "h4",
+  h4: (props: any) => (
+    <h4
+      {...props}
+      id={save_tag(props.children)}
+      className={`mt-6 mb-2 scroll-mt-28 text-[1.12rem] leading-[1.35] font-bold ${props.className ?? ""}`}
+    >
+      {props.children}
+    </h4>
+  ),
   h5: "h5",
   h6: "h6",
   hr: "hr",

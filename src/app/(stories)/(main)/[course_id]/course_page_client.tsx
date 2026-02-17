@@ -10,12 +10,14 @@ import { authClient } from "@/lib/auth-client";
 
 function SetTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-2 flex w-full items-center justify-center gap-4 px-[8vw] text-center text-[calc(27/16*1rem)] font-bold max-[1200px]:px-10 max-[480px]:px-0 max-[480px]:text-[calc(22/16*1rem)]">
-      <span className="h-[2px] flex-1 bg-[var(--overview-hr)] max-[480px]:hidden" />
-      <span>{children}</span>
-      <span className="h-[2px] flex-1 bg-[var(--overview-hr)] max-[480px]:hidden" />
+    <div className="col-[1/-1] w-full overflow-x-hidden text-center text-[calc(27/16*1rem)] font-bold flex before:flex-1 after:flex-1 items-center before:relative before:right-4 before:-ml-1/2 before:inline-block before:h-[2px] before:w-1/2 before:align-middle before:bg-[var(--overview-hr)] before:content-[''] after:relative after:left-4 after:-mr-1/2 after:inline-block after:h-[2px] after:w-1/2 after:align-middle after:bg-[var(--overview-hr)] after:content-[''] max-[480px]:text-[calc(22/16*1rem)]">
+      {children}
     </div>
   );
+}
+
+function SetList({ children }: { children: React.ReactNode }) {
+  return <div>{children}</div>;
 }
 
 function SetGrid({
@@ -26,12 +28,10 @@ function SetGrid({
   children: React.ReactNode;
 }) {
   return (
-    <div className="w-full">
+    <ol className="m-0 mx-auto grid max-w-[720px] list-none grid-cols-[repeat(auto-fill,clamp(140px,50%,180px))] justify-center justify-items-center p-0">
       <SetTitle>{setName}</SetTitle>
-      <ol className="mx-auto mb-[14px] grid max-w-[720px] list-none grid-cols-[repeat(auto-fill,clamp(140px,50%,180px))] justify-center justify-items-center gap-0 p-0">
-        {children}
-      </ol>
-    </div>
+      {children}
+    </ol>
   );
 }
 
@@ -88,7 +88,9 @@ function About({ about }: { about: string }) {
 }
 
 export default function CoursePageClient({ courseId }: { courseId: string }) {
-  const course = useQuery(api.landing.getPublicCoursePageData, { short: courseId });
+  const course = useQuery(api.landing.getPublicCoursePageData, {
+    short: courseId,
+  });
   const localizationMap = React.useMemo(() => {
     const data: Record<string, string> = {};
     for (const row of course?.localization ?? []) data[row.tag] = row.text;
@@ -100,7 +102,8 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
   );
 
   const { data: session } = authClient.useSession();
-  const rawUserId = (session?.user as { userId?: string | number } | undefined)?.userId;
+  const rawUserId = (session?.user as { userId?: string | number } | undefined)
+    ?.userId;
   const legacyUserId =
     typeof rawUserId === "number"
       ? rawUserId
@@ -172,12 +175,15 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
           ])}
         </p>
       </Header>
-      <div className="mt-6 flex flex-col gap-[18px]">
+      <SetList>
         {course.about ? <About about={course.about} /> : null}
         {storiesBySet.map((set) => (
           <SetGrid
             key={set.setId}
-            setName={localization("set_n", { $count: `${set.setId}` }) ?? `Set ${set.setId}`}
+            setName={
+              localization("set_n", { $count: `${set.setId}` }) ??
+              `Set ${set.setId}`
+            }
           >
             {set.stories.map((story) => (
               <li key={story.id}>
@@ -186,7 +192,7 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
             ))}
           </SetGrid>
         ))}
-      </div>
+      </SetList>
     </>
   );
 }

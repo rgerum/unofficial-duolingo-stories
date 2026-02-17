@@ -162,6 +162,7 @@
   margin-bottom: 0;
 }
 
+
 .main h3 {
   margin: 32px 0 16px 0;
 }
@@ -249,6 +250,7 @@
     max-width: calc(100% - 288px);
   }
 }
+
 .search_modal {
   display: none;
   position: fixed;

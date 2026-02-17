@@ -4,10 +4,8 @@ import StoryButton from "./story_button";
 
 function SetTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-2 flex w-full items-center justify-center gap-4 px-[8vw] text-center text-[calc(27/16*1rem)] font-bold max-[1200px]:px-10 max-[480px]:px-0 max-[480px]:text-[calc(22/16*1rem)]">
-      <span className="h-[2px] flex-1 bg-[var(--overview-hr)] max-[480px]:hidden" />
-      <span>{children}</span>
-      <span className="h-[2px] flex-1 bg-[var(--overview-hr)] max-[480px]:hidden" />
+    <div className="col-[1/-1] w-full overflow-x-hidden text-center text-[calc(27/16*1rem)] font-bold before:relative before:right-4 before:-ml-1/2 before:inline-block before:h-[2px] before:w-1/2 before:align-middle before:bg-[var(--overview-hr)] before:content-[''] after:relative after:left-4 after:-mr-1/2 after:inline-block after:h-[2px] after:w-1/2 after:align-middle after:bg-[var(--overview-hr)] after:content-[''] max-[480px]:text-[calc(22/16*1rem)]">
+      {children}
     </div>
   );
 }
@@ -27,18 +25,19 @@ export default function Loading() {
           </span>
         </p>
       </Header>
-      <div className="mt-6 flex flex-col gap-[18px]">
+      <div>
         {[...Array(2)].map((_, i) => (
-          <div key={i} className="w-full">
+          <ol
+            key={i}
+            className="m-0 mx-auto grid max-w-[720px] list-none grid-cols-[repeat(auto-fill,clamp(140px,50%,180px))] justify-center justify-items-center p-0"
+          >
             <SetTitle>Set {i + 1}</SetTitle>
-            <ol className="mx-auto mb-[14px] grid max-w-[720px] list-none grid-cols-[repeat(auto-fill,clamp(140px,50%,180px))] justify-center justify-items-center gap-0 p-0">
-              {[...Array(4)].map((_, j) => (
-                <li key={j}>
-                  <StoryButton />
-                </li>
-              ))}
-            </ol>
-          </div>
+            {[...Array(4)].map((_, j) => (
+              <li key={j}>
+                <StoryButton />
+              </li>
+            ))}
+          </ol>
         ))}
       </div>
     </>
