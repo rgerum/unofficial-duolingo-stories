@@ -3,7 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LanguageList from "./language_list";
-import { Spinner } from "@/components/layout/spinner";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function LanguageListClient() {
   const languages = useQuery(api.adminData.getAdminLanguages, {});

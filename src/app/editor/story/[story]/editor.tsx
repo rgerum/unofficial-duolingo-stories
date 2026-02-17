@@ -1,6 +1,5 @@
 "use client";
 "use no memo";
-import styles from "./[story].module.css";
 
 import React from "react";
 
@@ -465,17 +464,17 @@ export default function Editor({
 
   return (
     <>
-      <div id="body" className={styles.body}>
+      <div id="body" className="flex h-full flex-col">
         {save_error && (
           <>
             <div
-              className={styles.error_modal_background}
+              className="fixed inset-0 z-[1999] bg-[rgba(0,0,0,0.5)]"
               onClick={() => set_save_error(false)}
             />
-            <div className={styles.save_error}>
+            <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-[#f44336] p-[10px] text-center text-white">
               There was an error saving.{" "}
               <div
-                className={styles.close}
+                className="absolute right-[10px] top-0"
                 onClick={() => set_save_error(false)}
               >
                 X
@@ -524,20 +523,28 @@ export default function Editor({
               }
             />
           )}
-        <div className={styles.root}>
-          <svg className={styles.margin} ref={svg_parent}>
-            <path d=""></path>
+        <div className="flex h-[100px] grow">
+          <svg
+            className="pointer-events-none fixed z-[-1] h-full w-full float-left"
+            ref={svg_parent}
+          >
+            <path className="fill-[var(--svg-fill)] stroke-[var(--svg-stroke)]" d=""></path>
           </svg>
           <div
             className={
-              styles.editor +
-              " " +
-              (language_data?.rtl ? styles.editor_rtl : "")
+              "w-[100px] grow [scroll-behavior:auto] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full " +
+              (language_data?.rtl ? "[direction:rtl]" : "")
             }
             ref={editor}
           ></div>
-          <svg className={styles.margin2} ref={margin}></svg>
-          <div className={styles.preview} ref={preview}>
+          <svg
+            className="h-[calc(100vh-64px)] w-[2%] cursor-col-resize overflow-scroll float-left"
+            ref={margin}
+          ></svg>
+          <div
+            className="w-[100px] grow overflow-scroll [scroll-behavior:auto] max-[975px]:absolute max-[975px]:top-[calc((100vh-64px)/2+64px)] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full"
+            ref={preview}
+          >
             {story_meta && story_data ? (
               <Cast
                 id={story_data.id}

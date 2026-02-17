@@ -1,127 +1,38 @@
-import styled, { keyframes } from "styled-components";
-
+import styled from "styled-components";
 import React from "react";
-import * as Dialog from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription as UiDialogDescription,
+  DialogTitle as UiDialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+export const Root = Dialog;
+export const Trigger = DialogTrigger;
 
 export function Content({ children }: { children: React.ReactNode }) {
   return (
-    <Dialog.Portal>
-      <DialogOverlay />
-      <DialogContent>
+    <DialogContent showCloseButton={false}>
+      <ContentInner>
         {children}
-        <Dialog.Close asChild>
+        <DialogClose asChild>
           <IconButton aria-label="Close">
             <X />
           </IconButton>
-        </Dialog.Close>
-      </DialogContent>
-    </Dialog.Portal>
+        </DialogClose>
+      </ContentInner>
+    </DialogContent>
   );
 }
 
-export const Root = Dialog.Root;
-export const Trigger = Dialog.Trigger;
-
-function EditDialog() {
-  return (
-    <Dialog.Root>
-      <Dialog.Trigger asChild>
-        <Button>Edit profile</Button>
-      </Dialog.Trigger>
-      <Content>
-        <DialogTitle>Edit profile</DialogTitle>
-        <DialogDescription>
-          {`Make changes to your profile here. Click save when you're done.`}
-        </DialogDescription>
-        <Fieldset>
-          <Label className="Label" htmlFor="name">
-            Name
-          </Label>
-          <Input className="Input" id="name" defaultValue="Pedro Duarte" />
-        </Fieldset>
-        <Fieldset>
-          <Label className="Label" htmlFor="username">
-            Username
-          </Label>
-          <Input className="Input" id="username" defaultValue="@peduarte" />
-        </Fieldset>
-        <div
-          style={{
-            display: "flex",
-            marginTop: 25,
-            justifyContent: "flex-end",
-          }}
-        >
-          <Dialog.Close asChild>
-            <Button className="Button green">Save changes</Button>
-          </Dialog.Close>
-        </div>
-      </Content>
-    </Dialog.Root>
-  );
-}
-
-const overlayShow = keyframes`
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+export const DialogTitle = styled(UiDialogTitle)`
+  margin: 0 0 16px;
 `;
 
-const contentShow = keyframes`
-    from {
-        opacity: 0;
-        transform: translate(-50%, -48%) scale(0.96);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-`;
-
-const DialogOverlay = styled(Dialog.Overlay)`
-  background-color: hsl(0deg 0% 0% / 0.8);
-  position: fixed;
-  inset: 0;
-  animation: ${overlayShow} 150ms cubic-bezier(0.16, 1, 0.3, 1);
-`;
-
-const DialogContent = styled(Dialog.Content)`
-  background-color: var(--body-background);
-  border-radius: 6px;
-  box-shadow:
-    hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
-    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90vw;
-  max-width: 450px;
-  max-height: 85vh;
-  padding: 25px;
-  animation: ${contentShow} 150ms cubic-bezier(0.16, 1, 0.3, 1);
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-export const DialogTitle = styled(Dialog.Title)`
-  margin-left: 0;
-  font-weight: 500;
-  font-size: calc(21 / 16 * 1rem);
-
-  margin-top: -16px;
-  margin-bottom: 16px;
-`;
-
-export const DialogDescription = styled(Dialog.Description)`
+export const DialogDescription = styled(UiDialogDescription)`
   margin: 10px 0 20px;
-  font-size: calc(16 / 16 * 1rem);
-  line-height: 1.5;
 `;
 
 export const Button = styled.button`
@@ -138,6 +49,16 @@ export const Button = styled.button`
   border-bottom: 4px solid var(--button-border);
 `;
 
+const ContentInner = styled.div`
+  position: relative;
+  padding: 25px;
+  overflow-x: hidden;
+
+  @media (max-width: 700px) {
+    padding: 16px;
+  }
+`;
+
 const IconButton = styled.button`
   background: none;
   border: none;
@@ -148,25 +69,38 @@ const IconButton = styled.button`
   right: 0;
   padding: 8px;
   margin: 8px;
-  /* border radius for the focus */
   border-radius: 100vw;
 `;
+
 export const Fieldset = styled.fieldset`
-  display: flex;
-  gap: 20px;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 8px;
+  align-items: center;
   border: 0;
   width: 100%;
+  padding: 0;
+  margin: 0 0 10px;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+    margin-bottom: 10px;
+  }
 `;
 
 export const Label = styled.label`
   font-size: calc(16 / 16 * 1rem);
-  width: 90px;
   text-align: right;
 
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+
+  @media (max-width: 700px) {
+    text-align: left;
+  }
 `;
 
 export const Input = styled.input`
@@ -178,6 +112,16 @@ export const Input = styled.input`
   font: revert;
   font-size: calc(16 / 16 * 1rem);
   flex: 1;
+  width: 100%;
+  min-width: 0;
+
+  &[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    padding: 0;
+    justify-self: start;
+  }
 `;
 
 const InputArea = styled.textarea`
@@ -188,6 +132,8 @@ const InputArea = styled.textarea`
   padding: 10px 17px;
   flex: 1;
   font-size: 1rem;
+  width: 100%;
+  min-width: 0;
 `;
 
 const X = styled.div`
@@ -213,11 +159,8 @@ export function InputText({
 }) {
   return (
     <Fieldset>
-      <Label className="Label" htmlFor={label}>
-        {name}
-      </Label>
+      <Label htmlFor={label}>{name}</Label>
       <Input
-        className="Input"
         id={label}
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -239,9 +182,7 @@ export function InputTextArea({
 }) {
   return (
     <Fieldset>
-      <Label className="Label" htmlFor={label}>
-        {name}
-      </Label>
+      <Label htmlFor={label}>{name}</Label>
       <InputArea
         id={label}
         value={value}
@@ -264,14 +205,11 @@ export function InputBool({
 }) {
   return (
     <Fieldset>
-      <Label className="Label" htmlFor={label}>
-        {name}
-      </Label>
+      <Label htmlFor={label}>{name}</Label>
       <Input
-        className="Input"
-        type={"checkbox"}
+        type="checkbox"
         id={label}
-        defaultChecked={value}
+        checked={value}
         onChange={(e) => setValue(e.target.checked)}
       />
     </Fieldset>

@@ -3,9 +3,8 @@
 import React, { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Spinner, SpinnerBlue } from "@/components/layout/spinner";
+import { Spinner, SpinnerBlue } from "@/components/ui/spinner";
 import { fetch_post } from "@/lib/fetch_post";
-import styles from "./[language].module.css";
 
 import PlayAudio from "@/components/PlayAudio";
 import StoryLineHints from "@/components/StoryLineHints";
@@ -72,7 +71,7 @@ export default function LanguageEditor({
         course={course}
         use_edit={false}
       >
-        <div className={styles.root + " " + styles.characterEditorContent}>
+        <div className="flex flex-col leading-normal min-[560px]:flex-row max-[600px]:block">
           <AvatarNames
             language={language}
             speakers={(speakers ?? []) as SpeakersType[]}
@@ -142,7 +141,7 @@ export function Layout({
   }
   return (
     <>
-      <nav className={styles.header_index}>
+      <nav className="fixed top-0 z-[1] box-border flex h-[60px] w-full items-center border-b-2 border-[var(--header-border)] bg-[var(--body-background)] px-5">
         <Breadcrumbs path={crumbs} />
         <div style={{ marginLeft: "auto" }}></div>
         {use_edit ? (
@@ -163,7 +162,7 @@ export function Layout({
           course_id={course?.short}
         />
       </nav>
-      <div className={styles.main_index}>{children}</div>
+      <div className="mt-[60px]">{children}</div>
     </>
   );
 } //                 <Login page={"editor"}/>
@@ -224,18 +223,19 @@ function Avatar(props: {
   }
   if (avatar.avatar_id === -1) {
     return (
-      <div className={styles.avatar}>
-        <p>
+      <div className="m-[10px] flex flex-col items-center rounded-[5px] border border-[var(--header-border)] p-[5px] max-[600px]:m-0">
+        <p className="m-0">
           {avatar.avatar_id}
           <span>{unsavedChanged ? "*" : ""}</span>
         </p>
-        <p style={{ height: "50px" }}>
+        <p className="m-0 h-[50px]">
           <img alt="avatar" src={avatar.link} style={{ height: "50px" }} />
         </p>
 
-        <p>{inputName}</p>
-        <p>
+        <p className="m-0">{inputName}</p>
+        <p className="m-0">
           <input
+            className="w-[102px] rounded-[5px] border border-[var(--input-border)] bg-[var(--input-background)] p-[5px] text-[var(--text-color)]"
             value={inputSpeaker}
             onChange={(e) => inputSpeakerSetValue(e.target.value)}
             type="text"
@@ -243,18 +243,19 @@ function Avatar(props: {
           />
         </p>
         <span
-          className={styles.copy_button}
+          className="inline-flex cursor-pointer items-center justify-center pr-[5px]"
           title="play audio"
           onClick={(e) => props.play(e, inputSpeaker, "Duo")}
         >
           <img
+            className="w-5"
             alt="play"
             src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
           />
         </span>
-        <p>
+        <p className="m-0">
           <input
-            className={styles.saveBtn}
+            className="mt-[6px] cursor-pointer rounded-[8px] border border-[var(--input-border)] bg-[var(--input-background)] px-[10px] py-[4px] text-[var(--text-color)] disabled:cursor-default disabled:opacity-70"
             value="save"
             onClick={save}
             disabled={!unsavedChanged}
@@ -265,17 +266,18 @@ function Avatar(props: {
     );
   }
   return (
-    <div className={styles.avatar}>
-      <p>
+    <div className="m-[10px] flex flex-col items-center rounded-[5px] border border-[var(--header-border)] p-[5px] max-[600px]:m-0">
+      <p className="m-0">
         {avatar.avatar_id}
         <span>{unsavedChanged ? "*" : ""}</span>
       </p>
-      <p>
+      <p className="m-0">
         <img alt="avatar" src={avatar.link} style={{ height: "50px" }} />
       </p>
 
-      <p>
+      <p className="m-0">
         <input
+          className="w-[102px] rounded-[5px] border border-[var(--input-border)] bg-[var(--input-background)] p-[5px] text-[var(--text-color)]"
           value={inputName}
           disabled={avatar.avatar_id === 0}
           onChange={(e) => inputNameSetValue(e.target.value)}
@@ -283,8 +285,9 @@ function Avatar(props: {
           placeholder="Name"
         />
       </p>
-      <p>
+      <p className="m-0">
         <input
+          className="w-[102px] rounded-[5px] border border-[var(--input-border)] bg-[var(--input-background)] p-[5px] text-[var(--text-color)]"
           value={inputSpeaker}
           onChange={(e) => inputSpeakerSetValue(e.target.value)}
           type="text"
@@ -297,10 +300,10 @@ function Avatar(props: {
         speaker={inputSpeaker}
         name={avatar.avatar_id === 0 ? "Duo" : inputName}
       />
-      <p>
+      <p className="m-0">
         <input
           value="save"
-          className={styles.saveBtn}
+          className="mt-[6px] cursor-pointer rounded-[8px] border border-[var(--input-border)] bg-[var(--input-background)] px-[10px] py-[4px] text-[var(--text-color)] disabled:cursor-default disabled:opacity-70"
           onClick={save}
           disabled={!unsavedChanged}
           type="button"
@@ -337,12 +340,13 @@ export function PlayButton(props: PlayButtonProps) {
 
   return (
     <span
-      className={styles.play_button}
+      className="inline-flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center"
       title="play audio"
       onClick={(e) => do_play(e, speaker || "", name)}
     >
       {loading === 0 ? (
         <img
+          className="h-5 w-5"
           alt="play"
           src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
         />
@@ -371,15 +375,17 @@ export function SpeakerEntry(props: {
 
   return (
     <tr>
-      <td className={styles.speakerEntryCopy}>
+      <td className="flex items-center gap-1.5 whitespace-nowrap">
         <PlayButton play={props.play} speaker={speaker.speaker} name="Duo" />
-        <span className={styles.ssml_speaker}>{speaker.speaker}</span>
+        <span className="mr-[3px] rounded bg-[var(--editor-ssml)] px-[5px] py-[2px] text-[0.8em]">
+          {speaker.speaker}
+        </span>
         <span
-          className={styles.copy_button}
+          className="inline-flex cursor-pointer items-center justify-center"
           title="copy to clipboard"
           onClick={(e) => copyText(e, speaker.speaker)}
         >
-          <img alt="copy" src="/editor/icons/copy.svg" />
+          <img className="w-5" alt="copy" src="/editor/icons/copy.svg" />
         </span>
       </td>
       <td>{speaker.gender}</td>
@@ -577,9 +583,8 @@ function AvatarNames({
     <>
       <div
         className={
-          styles.speaker_list +
-          " " +
-          (speakers?.length > 0 ? "" : styles.noVoices)
+          "h-[calc(100vh-64px)] w-full overflow-y-scroll max-[600px]:h-auto min-[560px]:w-[400px] " +
+          (speakers?.length > 0 ? "" : "hidden")
         }
       >
         <audio ref={ref}>
@@ -592,20 +597,19 @@ function AvatarNames({
         />
         <div>
           <textarea
-            className={styles.textarea}
+            className="w-full rounded-[5px] border border-[var(--input-border)] bg-[var(--input-background)] text-[var(--text-color)]"
             value={speakText}
             onChange={doSetSpeakText}
-            style={{ width: "100%" }}
           />
           <input
-            className={styles.saveBtn}
+            className="mt-[6px] cursor-pointer rounded-[8px] border border-[var(--input-border)] bg-[var(--input-background)] px-[10px] py-[4px] text-[var(--text-color)] disabled:cursor-default disabled:opacity-70"
             value={"save" + (speakText !== speakTextDefault ? "*" : "")}
             onClick={saveText}
             disabled={speakText === speakTextDefault}
             type="button"
           />
         </div>
-        <div className={styles.slidecontainer}>
+        <div className="mt-2">
           Pitch:{" "}
           <input
             type="range"
@@ -616,7 +620,7 @@ function AvatarNames({
             onChange={(e) => setPitch(parseInt(e.target.value))}
           />
         </div>
-        <div className={styles.slidecontainer}>
+        <div className="mt-2">
           Speed:{" "}
           <input
             type="range"
@@ -627,9 +631,9 @@ function AvatarNames({
             onChange={(e) => setSpeed(parseInt(e.target.value))}
           />
         </div>
-        <div className={styles.tablecontainer}>
+        <div className="h-[calc(100%-110px)] overflow-y-scroll max-[600px]:h-[calc(50vh-140px)]">
           <table
-            className={styles.story_list + " " + styles.voice_list}
+            className="mt-4 w-full border-collapse [&_td]:px-[6px] [&_td]:py-[6px] [&_td]:leading-[1.25] [&_th]:sticky [&_th]:top-0 [&_th]:bg-[var(--button-background)] [&_th]:px-2 [&_th]:py-[5px] [&_th]:text-left [&_th]:font-bold [&_th]:leading-[1.25] [&_th]:text-[var(--button-color)] [&_tr:nth-child(2n)]:bg-[var(--body-background-faint)]"
             data-cy="voice_list"
             data-js-sort-table="true"
           >
@@ -665,17 +669,15 @@ function AvatarNames({
       </div>
       <div
         className={
-          styles.avatar_editor +
-          " " +
-          (speakers?.length > 0 ? "" : styles.noVoices)
+          "ml-2 h-[calc(100vh-64px)] w-full overflow-y-scroll max-[600px]:m-0 max-[600px]:h-[calc(50vh-30px)] " +
+          (speakers?.length > 0 ? "min-[560px]:w-[calc(100vw-400px)]" : "hidden")
         }
-        style={{ overflowY: "scroll" }}
       >
-        <p>
+        <p className="my-4">
           These characters are the default cast of duolingo. Their names should
           be kept as close to the original as possible.
         </p>
-        <div className={styles.avatar_editor_group} data-cy="avatar_list1">
+        <div className="flex flex-wrap gap-[5px] p-[5px] min-[601px]:gap-0 min-[601px]:p-0" data-cy="avatar_list1">
           {avatars_new_important.map((avatar, index) => (
             <Avatar
               key={index}
@@ -685,8 +687,8 @@ function AvatarNames({
             />
           ))}
         </div>
-        <p>These characters just appear in a couple of stories.</p>
-        <div className={styles.avatar_editor_group} data-cy="avatar_list2">
+        <p className="my-4">These characters just appear in a couple of stories.</p>
+        <div className="flex flex-wrap gap-[5px] p-[5px] min-[601px]:gap-0 min-[601px]:p-0" data-cy="avatar_list2">
           {avatars_new.map((avatar, index) => (
             <Avatar
               key={index}

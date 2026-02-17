@@ -1,5 +1,4 @@
 "use client";
-import styles from "./layout.module.css";
 import React from "react";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { useQuery } from "convex/react";
@@ -104,7 +103,7 @@ export default function LayoutFlag() {
       {course ? (
         <>
           {course.official ? (
-            <span className={styles.official} data-cy="label_official">
+            <span className="pr-[15px]" data-cy="label_official">
               <i>official</i>
             </span>
           ) : !import_id ? (
@@ -128,7 +127,7 @@ export default function LayoutFlag() {
       ) : (
         ""
       )}
-      <div className={styles.spacer}></div>
+      <div className="ml-[50px] max-[1120px]:ml-0"></div>
     </>
   );
 }

@@ -3,7 +3,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
-import styles from "./course/[course_id]/index.module.css";
 import CourseList from "./course_list";
 import { useSelectedLayoutSegments } from "next/navigation";
 
@@ -42,7 +41,10 @@ export default function SwiperSideBar({ children }: SwiperSideBarProps) {
 
   return (
     <>
-      <div {...handlers} className={styles.root}>
+      <div
+        {...handlers}
+        className="grid h-full overflow-hidden [grid-template-areas:'header_header''nav_main'] [grid-template-columns:400px_1fr] [grid-template-rows:auto_1fr] max-[1250px]:[grid-template-columns:0_1fr]"
+      >
         <CourseList
           course_id={segment}
           showList={showList}

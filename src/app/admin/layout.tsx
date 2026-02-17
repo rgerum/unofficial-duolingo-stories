@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./layout.module.css";
 import AdminHeader from "./AdminHeader";
 
 export default async function Layout({
@@ -10,7 +9,7 @@ export default async function Layout({
   return (
     <div>
       <AdminHeader />
-      <div className={styles.main_index}>{children}</div>
+      <div className="overflow-x-hidden">{children}</div>
     </div>
   );
 }

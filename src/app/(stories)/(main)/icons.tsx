@@ -6,12 +6,11 @@ import {
   IconOpenCollective,
   IconTwitter,
 } from "components/icons";
-import styles from "./layout.module.css";
 import { IconPlayStore } from "@/components/icons";
 
 export default function Icons() {
   return (
-    <p className={styles.icons}>
+    <p className="m-0 mt-[-8px] flex justify-center gap-0 leading-[0.5] [&>a]:p-2">
       <Link href="https://discord.gg/4NGVScARR3">
         <IconDiscord />
       </Link>

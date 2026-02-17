@@ -141,10 +141,14 @@ export default async function Page({
   return (
     <>
       <div className={styles.main}>
-        <header id="header">
-          <div>{data.group}</div>
-          <h1>{data.title}</h1>
-          <div>{data.description}</div>
+        <header id="header" className="mb-7 max-[640px]:mb-5">
+          <div className="mb-2 text-[0.95rem] font-bold tracking-[0.01em] text-gray-500">
+            {data.group}
+          </div>
+          <h1 className="m-0">{data.title}</h1>
+          <p className="mt-2.5 mb-0 max-w-[70ch] text-gray-600 max-[640px]:mt-2">
+            {data.description}
+          </p>
         </header>
         <CustomMDXServer source={data.body} />
         {/*<CustomMDX source={data.body} />*/}

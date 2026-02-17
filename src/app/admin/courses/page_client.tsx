@@ -3,7 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { CourseList } from "./courses";
-import { Spinner } from "@/components/layout/spinner";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function CourseListClient() {
   const data = useQuery(api.adminData.getAdminCourses, {});

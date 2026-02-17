@@ -1,14 +1,13 @@
 "use client";
 import Link from "next/link";
-import styles from "../index.module.css";
-import { Spinner } from "@/components/layout/spinner";
-import Flag from "@/components/layout/flag";
+import { Spinner } from "@/components/ui/spinner";
+import Flag from "@/components/ui/flag";
 import * as EditDialog from "../edit_dialog";
 import React, { useState } from "react";
 import styled from "styled-components";
-import Button from "@/components/layout/button";
-import Tag from "@/components/layout/tag";
-import Input from "@/components/layout/Input";
+import Button from "@/components/ui/button";
+import Tag from "@/components/ui/badge";
+import Input from "@/components/ui/input";
 import FlagName from "../FlagName";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -38,6 +37,11 @@ interface AdminLanguageProps {
   public: boolean;
   rtl: boolean;
 }
+
+const statusYesClass =
+  "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#21c55d_22%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#0a6b2d]";
+const statusNoClass =
+  "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#ef4444_20%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#9b1c1c]";
 
 function InputLanguage({
   name,
@@ -336,14 +340,14 @@ function EditCourse({
             value={about}
             setValue={setAbout}
           />
-          <div
-            style={{
-              display: "flex",
-              marginTop: 25,
-              justifyContent: "space-between",
-            }}
-          >
-            {error ? <Error>An error occurred.</Error> : <div></div>}
+          <div className="mt-[25px] flex flex-wrap justify-between gap-2">
+            {error ? (
+              <div className="rounded-[10px] bg-[var(--error-red)] p-2.5 text-white">
+                An error occurred.
+              </div>
+            ) : (
+              <div></div>
+            )}
             <Button className="Button green">Save changes</Button>
           </div>
         </form>
@@ -351,13 +355,6 @@ function EditCourse({
     </EditDialog.Root>
   );
 }
-
-const Error = styled.div`
-  color: #fff;
-  border-radius: 10px;
-  padding: 10px;
-  background: var(--error-red);
-`;
 
 function TableRow({
   course,
@@ -416,27 +413,42 @@ function TableRow({
   }
 
   return (
-    <tr ref={refRow}>
-      <td>{course.id}</td>
-      <td>{<Link href={"/" + course.short}>{course.short}</Link>}</td>
-      <td>
+    <tr
+      ref={refRow}
+      className="odd:bg-[var(--body-background)] even:bg-[color:color-mix(in_srgb,var(--body-background-faint)_74%,transparent)] hover:brightness-95"
+    >
+      <td className="px-4 py-2.5">{course.id}</td>
+      <td className="px-3 py-2.5">{<Link href={"/" + course.short}>{course.short}</Link>}</td>
+      <td className="px-3 py-2.5">
         <FlagName lang={course.learning_language} languages={languages} />
       </td>
-      <td>
+      <td className="px-3 py-2.5">
         <FlagName lang={course.from_language} languages={languages} />
       </td>
-      <td style={{ textAlign: "center" }}>{course.public ? "✅" : "❌"}</td>
-      <td>{course.name}</td>
-      <td style={{ textAlign: "center" }}>{course.conlang ? "✅" : "❌"}</td>
-      <td>
-        {course.tags.map((d) => (
-          <Tag key={d}>{d}</Tag>
-        ))}
+      <td className="px-3 py-2.5 text-center">
+        <span className={course.public ? statusYesClass : statusNoClass}>
+          {course.public ? "Yes" : "No"}
+        </span>
       </td>
-      <td>
-        <AboutWrapper>{course.about}</AboutWrapper>
+      <td className="px-3 py-2.5">{course.name}</td>
+      <td className="px-3 py-2.5 text-center">
+        <span className={course.conlang ? statusYesClass : statusNoClass}>
+          {course.conlang ? "Yes" : "No"}
+        </span>
       </td>
-      <td>
+      <td className="px-3 py-2.5">
+        <div className="flex flex-wrap gap-1.5">
+          {course.tags.map((d) => (
+            <Tag key={d}>{d}</Tag>
+          ))}
+        </div>
+      </td>
+      <td className="px-3 py-2.5">
+        <div className="max-w-[260px] overflow-hidden text-ellipsis whitespace-nowrap">
+          {course.about}
+        </div>
+      </td>
+      <td className="sticky right-0 z-[2] min-w-[138px] bg-inherit px-4 py-2.5 text-right whitespace-nowrap">
         <EditCourse
           obj={course}
           languages={languages}
@@ -489,8 +501,8 @@ export function CourseList({
   }
 
   return (
-    <Wrapper>
-      <SearchBar>
+    <div className="relative isolate mx-auto my-6 mb-9 box-border w-full max-w-[min(1240px,calc(100vw-48px))] rounded-[18px] border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-[18px] shadow-[0_18px_42px_color-mix(in_srgb,#000_14%,transparent)]">
+      <div className="flex flex-wrap items-end justify-between gap-4 px-0.5 pb-3">
         <Input
           label={"Search"}
           value={search}
@@ -513,57 +525,40 @@ export function CourseList({
           languages={languages_id}
           updateCourse={updateCourse}
         />
-      </SearchBar>
-      <table
-        id="story_list"
-        data-cy="story_list"
-        className={"js-sort-table js-sort-5 js-sort-desc " + styles.admin_table}
-        data-js-sort-table="true"
-      >
-        <thead>
-          <tr>
-            <th></th>
-            <th></th>
-            <th data-js-sort-colnum="0">learning_language</th>
-            <th data-js-sort-colnum="1">from_language</th>
-            <th data-js-sort-colnum="1">public</th>
-            <th data-js-sort-colnum="2">name</th>
-            <th data-js-sort-colnum="2">conlang</th>
-            <th data-js-sort-colnum="2">tags</th>
-            <th data-js-sort-colnum="3">about</th>
-            <th data-js-sort-colnum="4"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered_courses.map((course) => (
-            <TableRow
-              course={course}
-              key={course.id}
-              languages={languages_id}
-              updateCourse={updateCourse}
-            />
-          ))}
-        </tbody>
-      </table>
-    </Wrapper>
+      </div>
+      <div className="relative isolate overflow-auto rounded-[14px] border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]">
+        <table
+          id="story_list"
+          data-cy="story_list"
+          className="js-sort-table js-sort-5 js-sort-desc w-full min-w-[980px] border-collapse"
+          data-js-sort-table="true"
+        >
+          <thead>
+            <tr>
+              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"></th>
+              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"></th>
+              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="0">learning_language</th>
+              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="1">from_language</th>
+              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="1">public</th>
+              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="2">name</th>
+              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="2">conlang</th>
+              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="2">tags</th>
+              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="3">about</th>
+              <th className="sticky top-0 right-0 z-[3] min-w-[138px] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="4"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered_courses.map((course) => (
+              <TableRow
+                course={course}
+                key={course.id}
+                languages={languages_id}
+                updateCourse={updateCourse}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
-
-const Wrapper = styled.div`
-  width: fit-content;
-  margin: 0 auto;
-`;
-
-const SearchBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 16px;
-`;
-
-const AboutWrapper = styled.div`
-  white-space: nowrap;
-  overflow: hidden;
-  width: 200px;
-  text-overflow: ellipsis;
-`;

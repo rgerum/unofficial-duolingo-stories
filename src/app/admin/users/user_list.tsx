@@ -3,11 +3,9 @@
 import { useState, useTransition, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import styled from "styled-components";
-import Input from "@/components/layout/Input";
-import Button from "@/components/layout/button";
-import { SpinnerBlue } from "@/components/layout/spinner";
-import styles from "../index.module.css";
+import Input from "@/components/ui/input";
+import Button from "@/components/ui/button";
+import { SpinnerBlue } from "@/components/ui/spinner";
 import type { AdminUser } from "./[user_id]/schema";
 
 export type AdminUserList = AdminUser & { admin?: boolean; rowKey?: string };
@@ -26,6 +24,19 @@ interface UserListProps {
   adminFilter: FilterValue;
 }
 
+function formatRegistered(value: Date | string | undefined) {
+  if (!value) return "-";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
 function buildQueryString(
   query: string,
   page: number,
@@ -40,6 +51,11 @@ function buildQueryString(
   const qs = params.toString();
   return qs.length ? `?${qs}` : "";
 }
+
+const statusYesClass =
+  "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#21c55d_22%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#0a6b2d]";
+const statusNoClass =
+  "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#ef4444_20%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#9b1c1c]";
 
 export default function UserList({
   users,
@@ -97,9 +113,9 @@ export default function UserList({
   }
 
   return (
-    <Wrapper>
-      <Header>
-        <SearchControls>
+    <div className="relative isolate mx-auto my-6 mb-9 box-border w-full max-w-[min(1240px,calc(100vw-48px))] rounded-[18px] border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-[18px] shadow-[0_18px_42px_color-mix(in_srgb,#000_14%,transparent)]">
+      <div className="flex flex-wrap items-end justify-between gap-4 px-0.5 pb-3">
+        <div className="flex flex-wrap items-center gap-3.5">
           <Input
             label="Search"
             placeholder="Username or ID"
@@ -107,10 +123,11 @@ export default function UserList({
             onChange={(event) => setSearch(event.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <FilterGroup>
-            <label>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <label className="inline-flex items-center gap-2 text-[0.95rem] text-[var(--text-color-dim)]">
               Activated
               <select
+                className="min-w-[90px] rounded-xl border-2 border-[var(--input-border)] bg-[var(--input-background)] px-2.5 py-1.5 text-[var(--text-color)]"
                 value={activated}
                 onChange={(event) => {
                   const next = event.target.value as FilterValue;
@@ -123,9 +140,10 @@ export default function UserList({
                 <option value="no">No</option>
               </select>
             </label>
-            <label>
+            <label className="inline-flex items-center gap-2 text-[0.95rem] text-[var(--text-color-dim)]">
               Contributor
               <select
+                className="min-w-[90px] rounded-xl border-2 border-[var(--input-border)] bg-[var(--input-background)] px-2.5 py-1.5 text-[var(--text-color)]"
                 value={role}
                 onChange={(event) => {
                   const next = event.target.value as FilterValue;
@@ -138,9 +156,10 @@ export default function UserList({
                 <option value="no">No</option>
               </select>
             </label>
-            <label>
+            <label className="inline-flex items-center gap-2 text-[0.95rem] text-[var(--text-color-dim)]">
               Admin
               <select
+                className="min-w-[90px] rounded-xl border-2 border-[var(--input-border)] bg-[var(--input-background)] px-2.5 py-1.5 text-[var(--text-color)]"
                 value={admin}
                 onChange={(event) => {
                   const next = event.target.value as FilterValue;
@@ -153,152 +172,106 @@ export default function UserList({
                 <option value="no">No</option>
               </select>
             </label>
-          </FilterGroup>
-        </SearchControls>
+          </div>
+        </div>
         <Button onClick={() => submitSearch(1)}>Search</Button>
-      </Header>
-      <Meta>
-        <MetaLeft>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 px-0.5 py-3.5">
+        <div className="inline-flex items-center gap-2 text-[var(--text-color-dim)]">
           {users.length === 0 ? "No users found." : `Showing ${start}-${end}`}
-          <SpinnerInline aria-live="polite" data-active={isPending}>
+          <span
+            className={`inline-flex h-5 w-5 items-center ${isPending ? "visible" : "invisible"}`}
+            aria-live="polite"
+          >
             <SpinnerBlue />
-          </SpinnerInline>
-        </MetaLeft>
-        <Pagination>
+          </span>
+        </div>
+        <div className="inline-flex items-center gap-2.5">
           <Button
             onClick={() => submitSearch(Math.max(1, page - 1))}
             disabled={!hasPrevPage}
           >
             Prev
           </Button>
-          <PageStatus>Page {page}</PageStatus>
-          <Button
-            onClick={() => submitSearch(page + 1)}
-            disabled={!hasNextPage}
-          >
+          <div className="min-w-[60px] text-center font-bold">Page {page}</div>
+          <Button onClick={() => submitSearch(page + 1)} disabled={!hasNextPage}>
             Next
           </Button>
-        </Pagination>
-      </Meta>
-      <table className={styles.admin_table}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Registered</th>
-            <th>Activated</th>
-            <th>Contributor</th>
-            <th>Admin</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.length === 0 ? (
+        </div>
+      </div>
+
+      <div className="relative isolate overflow-auto rounded-[14px] border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]">
+        <table className="w-full min-w-[980px] border-collapse">
+          <thead>
             <tr>
-              <td colSpan={8}>No users found.</td>
+              {[
+                "ID",
+                "Name",
+                "Email",
+                "Registered",
+                "Activated",
+                "Contributor",
+                "Admin",
+                "",
+              ].map((header) => (
+                <th
+                  key={header || "actions"}
+                  className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                >
+                  {header}
+                </th>
+              ))}
             </tr>
-          ) : (
-            users.map((user, index) => (
-              <tr key={user.rowKey ?? `${user.id}-${index}`}>
-                <td>{user.id}</td>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>{`${user.regdate}`}</td>
-                <td>{user.activated ? "Yes" : "No"}</td>
-                <td>{user.role ? "Yes" : "No"}</td>
-                <td>{user.admin ? "Yes" : "No"}</td>
-                <td>
-                  <Link href={`/admin/users/${user.id}`}>Open</Link>
+          </thead>
+          <tbody>
+            {users.length === 0 ? (
+              <tr className="bg-[var(--body-background)]">
+                <td colSpan={8} className="px-4 py-2.5">
+                  No users found.
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </Wrapper>
+            ) : (
+              users.map((user, index) => (
+                <tr
+                  key={user.rowKey ?? `${user.id}-${index}`}
+                  className={`${index % 2 === 0 ? "bg-[var(--body-background)]" : "bg-[color:color-mix(in_srgb,var(--body-background-faint)_74%,transparent)]"} hover:brightness-95`}
+                >
+                  <td className="px-4 py-2.5">{user.id}</td>
+                  <td className="px-3 py-2.5">{user.name}</td>
+                  <td className="px-3 py-2.5">{user.email}</td>
+                  <td className="px-3 py-2.5 whitespace-nowrap text-[0.95rem] tabular-nums">
+                    {formatRegistered(user.regdate)}
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <span className={user.activated ? statusYesClass : statusNoClass}>
+                      {user.activated ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <span className={user.role ? statusYesClass : statusNoClass}>
+                      {user.role ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <span className={user.admin ? statusYesClass : statusNoClass}>
+                      {user.admin ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 text-right whitespace-nowrap">
+                    <Link
+                      className="inline-flex min-w-[82px] items-center justify-center rounded-[10px] border-b-[3px] border-[var(--button-border)] bg-[var(--button-background)] px-3 py-1.5 font-bold text-[var(--button-color)] no-underline"
+                      href={`/admin/users/${user.id}`}
+                    >
+                      Open
+                    </Link>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
-
-const Wrapper = styled.div`
-  width: min(1200px, 95vw);
-  margin: 0 auto;
-`;
-
-const Header = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 8px 16px;
-`;
-
-const SearchControls = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-`;
-
-const FilterGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  label {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  select {
-    background: var(--input-background);
-    border: 2px solid var(--input-border);
-    color: var(--text-color);
-    border-radius: 12px;
-    padding: 6px 10px;
-    font: revert;
-    font-size: calc(16 / 16 * 1rem);
-  }
-`;
-
-const Meta = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px 12px;
-  color: var(--text-color);
-`;
-
-const MetaLeft = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const Pagination = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-`;
-
-const PageStatus = styled.div`
-  font-weight: 600;
-`;
-
-const SpinnerInline = styled.span`
-  display: inline-flex;
-  align-items: center;
-  width: 20px;
-  height: 20px;
-  visibility: hidden;
-
-  &[data-active="true"] {
-    visibility: visible;
-  }
-
-  .spinner {
-    width: 20px;
-    height: 20px;
-  }
-`;

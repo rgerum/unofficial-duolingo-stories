@@ -9,6 +9,7 @@
 }
 
 .header_index {
+  box-sizing: border-box;
   width: 100%;
   height: 60px;
   border-bottom: 2px solid var(--header-border);
@@ -19,6 +20,19 @@
   position: sticky;
   padding: 0 20px;
   top: 0;
+  z-index: 200;
+  max-width: 100vw;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.header_index::-webkit-scrollbar {
+  display: none;
+}
+
+.header_index > * {
+  flex: 0 0 auto;
 }
 @media (max-width: 1040px) {
   .header_index {
@@ -26,6 +40,7 @@
   }
 }
 .main_index {
+  overflow-x: hidden;
 }
 
 .flag_sub {

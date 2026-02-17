@@ -1,7 +1,7 @@
 "use client";
 import styles from "../register.module.css";
 import React from "react";
-import Button from "@/components/layout/button";
+import Button from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 export default function Page({}) {

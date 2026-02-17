@@ -6,9 +6,9 @@ import posthog from "posthog-js";
 
 import styles from "../register.module.css";
 import { GetIcon } from "@/components/icons";
-import Button from "@/components/layout/button";
-import Input from "@/components/layout/Input";
-import { SpinnerBlue } from "@/components/layout/spinner";
+import Button from "@/components/ui/button";
+import Input from "@/components/ui/input";
+import { SpinnerBlue } from "@/components/ui/spinner";
 import { ProviderProps } from "@/app/auth/signin/page";
 import { authClient } from "@/lib/auth-client";
 
