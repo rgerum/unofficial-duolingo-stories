@@ -1,5 +1,5 @@
 .container {
-  /* Container for the auto-play story */
+  min-height: 100vh;
 }
 
 .main {
@@ -7,11 +7,61 @@
   margin: 0 auto;
 }
 
+.timelineControls {
+  position: sticky;
+  top: 60px;
+  z-index: 11;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  background: var(--story-background, #fff);
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.playPauseButton {
+  border: 1px solid #d3d3d3;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.playPauseButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.timelineSlider {
+  width: 100%;
+}
+
+.timelineTime {
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+}
+
 .story {
   padding-top: 85px;
   user-select: none;
   padding-left: 16px;
   padding-right: 16px;
+}
+
+.autoPlayItem {
+  transition: background-color 160ms ease;
+  border-radius: 12px;
+}
+
+.autoPlayItemActive {
+  background: rgba(120, 200, 0, 0.12);
 }
 
 .story_rtl {
@@ -24,4 +74,15 @@
 
 .spacer_small {
   height: 20vh;
+}
+
+@media (max-width: 760px) {
+  .timelineControls {
+    top: 50px;
+    grid-template-columns: 1fr;
+  }
+
+  .timelineTime {
+    justify-self: end;
+  }
 }

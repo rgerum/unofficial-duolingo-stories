@@ -16,11 +16,15 @@ function StoryHeader({
   element,
   settings,
   editorState,
+  audioRangeOverride,
+  hideAudioButton = false,
 }: {
   active: boolean;
   element: StoryElementHeader;
   settings: StorySettings;
   editorState?: EditorStateType;
+  audioRangeOverride?: number;
+  hideAudioButton?: boolean;
 }) {
   const editorProps: EditorProps = {
     editorState,
@@ -28,6 +32,7 @@ function StoryHeader({
   };
   const { onClick } = getEditorHandlers(editorProps);
   const [audioRange, playAudio, ref, url] = useAudio(element, active);
+  const effectiveAudioRange = audioRangeOverride ?? audioRange;
 
   const hideRangesForChallenge = undefined;
 
@@ -64,9 +69,9 @@ function StoryHeader({
         <audio ref={ref}>
           <source src={url} type="audio/mp3" />
         </audio>
-        <PlayAudio onClick={playAudio} />
+        {!hideAudioButton && <PlayAudio onClick={playAudio} />}
         <StoryLineHints
-          audioRange={audioRange}
+          audioRange={effectiveAudioRange}
           hideRangesForChallenge={hideRangesForChallenge}
           content={element.learningLanguageTitleContent}
           editorState={editorState}
