@@ -389,10 +389,14 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     const headerElement = timelineElements.find(
       (item) => item.element.type === "HEADER",
     )?.element;
+    const mediaTitle =
+      headerElement && headerElement.type === "HEADER"
+        ? headerElement.title || headerElement.learningLanguageTitleContent.text
+        : "Story Autoplay";
 
     if (typeof MediaMetadata !== "undefined") {
       mediaSession.metadata = new MediaMetadata({
-        title: story.title || "Story Autoplay",
+        title: mediaTitle,
         artist: `${story.learning_language ?? ""} -> ${story.from_language ?? ""}`,
         album: "Duolingo Stories",
         artwork:
@@ -444,7 +448,6 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     globalProgressSeconds,
     story.from_language,
     story.learning_language,
-    story.title,
     timelineElements,
     totalDurationSeconds,
   ]);
