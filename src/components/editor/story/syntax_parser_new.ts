@@ -33,15 +33,49 @@ function generateHintMap(
   translation: string = "",
   pronunciation: string = "",
 ): HintMapResult {
+  function unescapeBraces(value: string): string {
+    return value.replace(/\\([{}])/g, "$1");
+  }
+
+  function isEscapedAt(value: string, index: number): boolean {
+    let backslashes = 0;
+    for (let i = index - 1; i >= 0 && value[i] === "\\"; i -= 1) {
+      backslashes += 1;
+    }
+    return backslashes % 2 === 1;
+  }
+
+  function lastUnescapedIndexOf(value: string, char: string, end: number): number {
+    for (let i = end; i >= 0; i -= 1) {
+      if (value[i] === char && !isEscapedAt(value, i)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   function parseInlinePronunciationHint(token: string): {
     translation: string;
     pronunciation: string;
   } {
-    const match = token.match(/^(.*)\{([^}]*)\}\s*$/);
-    if (!match) return { translation: token, pronunciation: "" };
+    const end = token.length - 1;
+    const closeIndex = lastUnescapedIndexOf(token, "}", end);
+    if (closeIndex === -1) {
+      return { translation: unescapeBraces(token), pronunciation: "" };
+    }
+    const trailing = token.substring(closeIndex + 1);
+    if (trailing.trim() !== "") {
+      return { translation: unescapeBraces(token), pronunciation: "" };
+    }
+    const openIndex = lastUnescapedIndexOf(token, "{", closeIndex - 1);
+    if (openIndex === -1) {
+      return { translation: unescapeBraces(token), pronunciation: "" };
+    }
     return {
-      translation: (match[1] ?? "").replace(/~+$/, "").trimEnd(),
-      pronunciation: (match[2] ?? "").trim(),
+      translation: unescapeBraces(
+        token.substring(0, openIndex).replace(/~+$/, "").trimEnd(),
+      ),
+      pronunciation: unescapeBraces(token.substring(openIndex + 1, closeIndex).trim()),
     };
   }
 
