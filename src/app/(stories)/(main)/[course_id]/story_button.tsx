@@ -14,9 +14,11 @@ interface StoryData {
 export default function StoryButton({
   story,
   done,
+  listeningMode = false,
 }: {
   story?: StoryData;
   done?: boolean;
+  listeningMode?: boolean;
 }) {
   if (!story) {
     return (
@@ -40,8 +42,9 @@ export default function StoryButton({
     <Link
       data-cy={"story_button_" + story.id}
       className={styles.button_story_parent}
-      href={`/story/${story.id}`}
+      href={listeningMode ? `/story/${story.id}/auto_play` : `/story/${story.id}`}
       onClick={() => {
+        if (listeningMode) return;
         if (typeof window !== "undefined") {
           window.sessionStorage.setItem(
             "story_autoplay_ts",
@@ -55,6 +58,16 @@ export default function StoryButton({
         data-done={done}
         style={done ? {} : { background: "#" + story.active_lip }}
       >
+        {listeningMode ? (
+          <span className={styles.audio_badge} aria-label="Listening mode">
+            <img
+              src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
+              alt=""
+              aria-hidden="true"
+              className={styles.audio_badge_icon}
+            />
+          </span>
+        ) : null}
         <Image
           src={done ? story.gilded : story.active}
           alt=""

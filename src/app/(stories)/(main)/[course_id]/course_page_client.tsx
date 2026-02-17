@@ -9,6 +9,7 @@ import setListStyles from "./set_list.module.css";
 import skeletonStyles from "./story_button.module.css";
 import get_localisation_func from "@/lib/get_localisation_func";
 import { authClient } from "@/lib/auth-client";
+import Switch from "@/components/layout/switch";
 
 function LoadingTitle() {
   return (
@@ -66,6 +67,27 @@ function About({ about }: { about: string }) {
 }
 
 export default function CoursePageClient({ courseId }: { courseId: string }) {
+  const listeningStorageKey = React.useMemo(
+    () => `course_listening_mode:${courseId}`,
+    [courseId],
+  );
+  const [listeningMode, setListeningMode] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    setListeningMode(window.localStorage.getItem(listeningStorageKey) === "1");
+  }, [listeningStorageKey]);
+
+  const toggleListeningMode = React.useCallback(() => {
+    setListeningMode((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(listeningStorageKey, next ? "1" : "0");
+      }
+      return next;
+    });
+  }, [listeningStorageKey]);
+
   const course = useQuery(api.landing.getPublicCoursePageData, { short: courseId });
   const localizationMap = React.useMemo(() => {
     const data: Record<string, string> = {};
@@ -151,6 +173,17 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
         </p>
       </Header>
       <div className={setListStyles.story_list}>
+        <div className={setListStyles.mode_toggle}>
+          <div>
+            <div className={setListStyles.mode_toggle_label}>
+              Listening mode (skip questions)
+            </div>
+            <div className={setListStyles.mode_toggle_help}>
+              Opens stories in autoplay and skips interactive questions.
+            </div>
+          </div>
+          <Switch checked={listeningMode} onClick={toggleListeningMode} />
+        </div>
         {course.about ? <About about={course.about} /> : null}
         {storiesBySet.map((set) => (
           <ol key={set.setId} className={setListStyles.set_content} aria-label={`Set ${set.setId}`}>
@@ -159,7 +192,11 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
             </div>
             {set.stories.map((story) => (
               <li key={story.id}>
-                <StoryButton story={story} done={doneMap[story.id]} />
+                <StoryButton
+                  story={story}
+                  done={doneMap[story.id]}
+                  listeningMode={listeningMode}
+                />
               </li>
             ))}
           </ol>

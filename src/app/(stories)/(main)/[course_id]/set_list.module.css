@@ -1,6 +1,27 @@
 .story_list {
 }
 
+.mode_toggle {
+  max-width: 720px;
+  margin: 0 auto 24px;
+  padding: 12px 16px;
+  border: 1px solid var(--overview-hr);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mode_toggle_label {
+  font-weight: 700;
+}
+
+.mode_toggle_help {
+  font-size: calc(13 / 16 * 1rem);
+  color: var(--text-color-dim);
+}
+
 .set_title {
   font-size: calc(27 / 16 * 1rem);
   font-weight: 700;
