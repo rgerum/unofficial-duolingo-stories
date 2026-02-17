@@ -168,6 +168,12 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   const [globalProgressSeconds, setGlobalProgressSeconds] = React.useState(0);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [activeAudioRange, setActiveAudioRange] = React.useState(99999);
+  const playCallbackRef = React.useRef<(() => Promise<void>) | null>(null);
+  const pauseCallbackRef = React.useRef<(() => void) | null>(null);
+  const stopCallbackRef = React.useRef<(() => void) | null>(null);
+  const seekToCallbackRef = React.useRef<
+    ((value: number) => Promise<void>) | null
+  >(null);
 
   React.useEffect(() => {
     setDurationsByIndex(
@@ -298,6 +304,39 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     timelineElements.length,
   ]);
 
+  const playFromCurrentPosition = React.useCallback(async () => {
+    if (timelineElements.length === 0) return;
+    const safeTime = clamp(globalProgressSeconds, 0, totalDurationSeconds);
+    const targetSegment = findSegmentIndexByTime(segmentStarts, safeTime);
+    const offset = Math.max(0, safeTime - (segmentStarts[targetSegment] ?? 0));
+    await startSegmentPlayback(targetSegment, offset, true);
+  }, [
+    globalProgressSeconds,
+    segmentStarts,
+    startSegmentPlayback,
+    timelineElements.length,
+    totalDurationSeconds,
+  ]);
+
+  const pausePlayback = React.useCallback(() => {
+    const audioElement = audioRef.current;
+    if (!audioElement) return;
+    audioElement.pause();
+    setIsPlaying(false);
+    syncGlobalProgressWithCurrentAudio();
+  }, [syncGlobalProgressWithCurrentAudio]);
+
+  const stopPlayback = React.useCallback(() => {
+    const audioElement = audioRef.current;
+    if (!audioElement) return;
+    audioElement.pause();
+    audioElement.currentTime = 0;
+    setIsPlaying(false);
+    setGlobalProgressSeconds(0);
+    setCurrentSegmentIndex(0);
+    setActiveAudioRange(99999);
+  }, []);
+
   const handleSeek = React.useCallback(
     async (nextGlobalSeconds: number) => {
       if (timelineElements.length === 0) return;
@@ -325,6 +364,107 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     },
     [handleSeek],
   );
+
+  React.useEffect(() => {
+    playCallbackRef.current = playFromCurrentPosition;
+    pauseCallbackRef.current = pausePlayback;
+    stopCallbackRef.current = stopPlayback;
+    seekToCallbackRef.current = handleSeek;
+  }, [handleSeek, pausePlayback, playFromCurrentPosition, stopPlayback]);
+
+  React.useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) {
+      return;
+    }
+    const mediaSession = navigator.mediaSession;
+    mediaSession.playbackState = isPlaying ? "playing" : "paused";
+  }, [isPlaying]);
+
+  React.useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) {
+      return;
+    }
+
+    const mediaSession = navigator.mediaSession;
+    const headerElement = timelineElements.find(
+      (item) => item.element.type === "HEADER",
+    )?.element;
+
+    if (typeof MediaMetadata !== "undefined") {
+      mediaSession.metadata = new MediaMetadata({
+        title: story.title || "Story Autoplay",
+        artist: `${story.learning_language ?? ""} -> ${story.from_language ?? ""}`,
+        album: "Duolingo Stories",
+        artwork:
+          headerElement && headerElement.type === "HEADER"
+            ? [{ src: headerElement.illustrationUrl, sizes: "512x512", type: "image/png" }]
+            : undefined,
+      });
+    }
+
+    mediaSession.setActionHandler("play", () => {
+      void playCallbackRef.current?.();
+    });
+    mediaSession.setActionHandler("pause", () => {
+      pauseCallbackRef.current?.();
+    });
+    mediaSession.setActionHandler("stop", () => {
+      stopCallbackRef.current?.();
+    });
+    mediaSession.setActionHandler("seekto", (details) => {
+      if (typeof details.seekTime !== "number") return;
+      void seekToCallbackRef.current?.(details.seekTime);
+    });
+    mediaSession.setActionHandler("seekbackward", (details) => {
+      const step = details.seekOffset ?? 10;
+      void seekToCallbackRef.current?.(Math.max(0, globalProgressSeconds - step));
+    });
+    mediaSession.setActionHandler("seekforward", (details) => {
+      const step = details.seekOffset ?? 10;
+      void seekToCallbackRef.current?.(Math.min(totalDurationSeconds, globalProgressSeconds + step));
+    });
+    mediaSession.setActionHandler("previoustrack", () => {
+      void seekToCallbackRef.current?.(Math.max(0, globalProgressSeconds - 10));
+    });
+    mediaSession.setActionHandler("nexttrack", () => {
+      void seekToCallbackRef.current?.(Math.min(totalDurationSeconds, globalProgressSeconds + 10));
+    });
+
+    return () => {
+      mediaSession.setActionHandler("play", null);
+      mediaSession.setActionHandler("pause", null);
+      mediaSession.setActionHandler("stop", null);
+      mediaSession.setActionHandler("seekto", null);
+      mediaSession.setActionHandler("seekbackward", null);
+      mediaSession.setActionHandler("seekforward", null);
+      mediaSession.setActionHandler("previoustrack", null);
+      mediaSession.setActionHandler("nexttrack", null);
+    };
+  }, [
+    globalProgressSeconds,
+    story.from_language,
+    story.learning_language,
+    story.title,
+    timelineElements,
+    totalDurationSeconds,
+  ]);
+
+  React.useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) {
+      return;
+    }
+    const mediaSession = navigator.mediaSession;
+    if (typeof mediaSession.setPositionState !== "function") return;
+    try {
+      mediaSession.setPositionState({
+        duration: Math.max(totalDurationSeconds, 0.1),
+        playbackRate: 1,
+        position: clamp(globalProgressSeconds, 0, Math.max(totalDurationSeconds, 0)),
+      });
+    } catch (error) {
+      // Some browsers throw when duration is unknown or zero.
+    }
+  }, [globalProgressSeconds, totalDurationSeconds]);
 
   const onAudioLoadedMetadata = React.useCallback(() => {
     const audioElement = audioRef.current;
