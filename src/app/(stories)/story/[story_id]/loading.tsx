@@ -1,7 +1,7 @@
 import React from "react";
 
 import StoryHeaderProgress from "@/components/StoryHeaderProgress";
-import { Spinner } from "@/components/layout/spinner";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function Loading() {
   return (

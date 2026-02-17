@@ -3,7 +3,7 @@ version = 1
 name = "unofficial-duolingo-stories"
 
 [setup]
-script = ""
+script = "pnpm i"
 
 [[actions]]
 name = "Run"

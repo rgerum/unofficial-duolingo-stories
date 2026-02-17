@@ -2,11 +2,11 @@
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import Flag from "@/components/layout/flag";
+import Flag from "@/components/ui/flag";
 import styles from "./course_list.module.css";
 import { useInput } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
-import { Spinner } from "@/components/layout/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import type { CourseProps, LanguageProps } from "./types";
 
 interface CourseListProps {

@@ -4,10 +4,10 @@ import React from "react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { DoubleFlag } from "@/components/layout/flag";
+import { DoubleFlag } from "@/components/ui/flag";
 import ImportList from "./import_list";
 import styles from "./import_list.module.css";
-import { Spinner } from "@/components/layout/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import type {
   CourseProps,
   LanguageProps,

@@ -6,7 +6,7 @@ import styles from "./profile.module.css";
 import ProviderButton from "./button";
 import Link from "next/link";
 import { ProfileData } from "@/app/(stories)/(main)/profile/page";
-import Button from "@/components/layout/button";
+import Button from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
 export default function Profile({ providers }: { providers: ProfileData }) {

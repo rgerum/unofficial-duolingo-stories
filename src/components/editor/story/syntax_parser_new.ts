@@ -294,11 +294,21 @@ function speaker_text_trans(
   const translation = data.trans?.match(/\s*~\s*(\S.*\S|\S)\s*/)?.[1] || "";
 
   getInputStringText(text);
-  const ipa_replacements: string[] & { index: number }[] = [];
+  const ipa_replacements: {
+    index: number;
+    baseText: string;
+    alias: string;
+    phoneme?: string;
+  }[] = [];
   let ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
 
   while (ipa_match && ipa_match.index !== undefined) {
-    ipa_replacements.push({ index: ipa_match.index });
+    ipa_replacements.push({
+      index: ipa_match.index,
+      baseText: ipa_match[1] ?? "",
+      alias: ipa_match[2] ?? "",
+      phoneme: ipa_match[3],
+    });
     text =
       text.substring(0, ipa_match.index + ipa_match[1].length) +
       text.substring(ipa_match.index + ipa_match[0].length);
@@ -407,7 +417,12 @@ function line_to_audio(
   story_id: number,
   hideRanges: HideRange[],
   transcribe_data: TranscribeData,
-  ipa_replacements: string[] & { index: number }[],
+  ipa_replacements: {
+    index: number;
+    baseText: string;
+    alias: string;
+    phoneme?: string;
+  }[],
   ssml_payload: {
     inser_index: number;
     plan_text?: string | undefined;

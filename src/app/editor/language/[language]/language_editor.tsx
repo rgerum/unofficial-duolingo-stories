@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Spinner, SpinnerBlue } from "@/components/layout/spinner";
+import { Spinner, SpinnerBlue } from "@/components/ui/spinner";
 import { fetch_post } from "@/lib/fetch_post";
 import styles from "./[language].module.css";
 

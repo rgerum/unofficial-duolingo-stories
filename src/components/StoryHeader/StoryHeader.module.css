@@ -5,6 +5,8 @@
   margin: 0;
 }
 .title_img {
+  display: block;
   height: 175px;
+  margin: 0 auto;
   width: 175px;
 }

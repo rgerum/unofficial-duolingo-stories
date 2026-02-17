@@ -4,8 +4,8 @@ import React from "react";
 import styles from "../register.module.css";
 import Link from "next/link";
 import { useInput } from "@/lib/hooks";
-import Button from "@/components/layout/button";
-import Input from "@/components/layout/Input";
+import Button from "@/components/ui/button";
+import Input from "@/components/ui/input";
 import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
 

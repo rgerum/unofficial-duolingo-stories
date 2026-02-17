@@ -3,7 +3,7 @@
 import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Spinner } from "@/components/layout/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import Tts_edit from "./tts_edit";
 import type { CourseStudType, LanguageType, SpeakersType } from "../types";
 

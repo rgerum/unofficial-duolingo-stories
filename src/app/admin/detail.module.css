@@ -1,0 +1,183 @@
+.shell {
+  width: min(860px, calc(100vw - 32px));
+  margin: 24px auto 40px;
+}
+
+.card {
+  border: 1px solid color-mix(in srgb, var(--header-border) 70%, transparent);
+  border-radius: 18px;
+  background: var(--body-background);
+  box-shadow: 0 16px 38px color-mix(in srgb, #000 14%, transparent);
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.title {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.15;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.storySearchRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.storySearchLabel {
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.storySearchInput {
+  width: min(320px, 100%);
+  flex: 0 1 320px;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.image {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--header-border) 70%, transparent);
+  background: color-mix(in srgb, var(--body-background-faint) 85%, transparent);
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 8px 12px;
+  margin: 14px 0 20px;
+}
+
+.metaLabel {
+  color: var(--text-color-dim);
+  text-align: right;
+}
+
+.metaValue {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.secondaryAction {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.subTitle {
+  margin: 20px 0 10px;
+  font-size: 1.2rem;
+}
+
+.approvals {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid color-mix(in srgb, var(--header-border) 70%, transparent);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.approvalRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--body-background);
+}
+
+.approvalRow:nth-child(2n) {
+  background: color-mix(in srgb, var(--body-background-faint) 72%, transparent);
+}
+
+.inlineSwitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.link {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.danger {
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #9b1c1c;
+  background: color-mix(in srgb, #ef4444 20%, transparent);
+}
+
+@media (max-width: 700px) {
+  .shell {
+    width: calc(100vw - 16px);
+    margin: 12px auto 24px;
+  }
+
+  .card {
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .storySearchRow {
+    width: 100%;
+  }
+
+  .topRow,
+  .header {
+    flex-wrap: wrap;
+  }
+
+  .meta {
+    grid-template-columns: 1fr;
+  }
+
+  .metaLabel {
+    text-align: left;
+    font-weight: 700;
+  }
+}

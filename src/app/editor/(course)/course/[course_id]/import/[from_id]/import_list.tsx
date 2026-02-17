@@ -3,8 +3,8 @@ import styles from "../../../../edit_list.module.css";
 import React from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { SpinnerBlue } from "@/components/layout/spinner";
-import { Spinner } from "@/components/layout/spinner";
+import { SpinnerBlue } from "@/components/ui/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import {
   CourseImportProps,
