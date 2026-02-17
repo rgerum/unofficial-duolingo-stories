@@ -4,7 +4,6 @@ import React from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Spinner } from "@/components/ui/spinner";
-import styles from "./[language].module.css";
 import { LoggedInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
 import TextEdit from "./text_edit";
@@ -91,12 +90,12 @@ function Layout({
   ];
   return (
     <>
-      <nav className={styles.header_index}>
+      <nav className="fixed top-0 z-[1] box-border flex h-[60px] w-full items-center border-b-2 border-[var(--header-border)] bg-[var(--body-background)] px-5">
         <Breadcrumbs path={crumbs} />
         <div style={{ marginLeft: "auto" }}></div>
         <LoggedInButton page={"editor"} course_id={course?.short} />
       </nav>
-      <div className={styles.main_index}>{children}</div>
+      <div className="mt-[60px]">{children}</div>
     </>
   );
 }
@@ -130,7 +129,7 @@ function ListLocalizations({
         course. If multiple courses share the same base language, these texts
         only need to be translated once.
       </p>
-      <table className={styles.table}>
+      <table className="w-full [&_td]:p-[5px] [&_td]:align-top [&_th]:bg-[var(--button-background)] [&_th]:px-2 [&_th]:py-[5px] [&_th]:text-left [&_th]:text-[var(--button-color)] [&_th:nth-child(2)]:min-w-[45%] [&_th:nth-child(3)]:min-w-[43%] [&_tr:nth-child(2n)]:bg-[var(--body-background-faint)]">
         <thead>
           <tr>
             <th>Tag</th>
@@ -142,9 +141,11 @@ function ListLocalizations({
           {rows.map((row) => (
             <tr key={row.tag}>
               <td>
-                <span className={styles.tag}>{row.tag}</span>
+                <span className="whitespace-nowrap rounded-[10px] bg-[var(--editor-ssml)] px-[5px] py-[2px]">
+                  {row.tag}
+                </span>
               </td>
-              <td className={styles.edit_td}>
+              <td className="hover:bg-[#eef8fc]">
                 <TextEdit
                   tag={row.tag}
                   text={row.text}

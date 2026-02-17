@@ -1,5 +1,4 @@
 "use client";
-import styles from "../../../../edit_list.module.css";
 import React from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -70,7 +69,7 @@ export default function ImportList({
         {courseFrom.from_language_name}).
       </div>
       <table
-        className={styles.story_list + " js-sort-table js-sort-5 js-sort-desc"}
+        className="story_list js-sort-table js-sort-5 js-sort-desc mb-[100px] w-full border-collapse [&_a]:font-bold [&_a]:text-[var(--text-color)] [&_th]:bg-[var(--button-background)] [&_th]:px-[5px] [&_th]:pb-[5px] [&_th]:pt-[5px] [&_th]:text-left [&_th]:text-[var(--button-color)] [&_td]:px-[5px] [&_td]:py-[5px] [&_td:nth-child(2)]:w-[44px] [&_td:nth-child(2)]:min-w-[44px] [&_td:nth-child(2)]:max-w-[44px] [&_td:nth-child(2)_img]:h-[40px] [&_td:nth-child(2)_img]:w-[44px] [&_td:nth-child(2)_img]:max-w-none [&_tr:nth-child(2n)]:bg-[var(--body-background-faint)]"
         data-cy="story_list"
         data-js-sort-table="true"
       >
@@ -93,14 +92,15 @@ export default function ImportList({
                   <b>{pad(story.set_id)}</b>&nbsp;-&nbsp;{pad(story.set_index)}
                 </span>
               </td>
-              <td width="44px">
+              <td className="w-[44px] min-w-[44px] max-w-[44px]">
                 <img
                   alt={"story title"}
                   src={
                     parseInt(story.copies) > 0 ? story.image_done : story.image
                   }
-                  width="44px"
-                  height={"40px"}
+                  width={44}
+                  height={40}
+                  className="block h-[40px] w-[44px] max-w-none"
                 />
               </td>
               <td style={{ width: "100%" }}>
@@ -112,7 +112,10 @@ export default function ImportList({
                   <a
                     href={`#`}
                     title={story.name}
-                    onClick={() => do_import(story.id)}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      void do_import(story.id);
+                    }}
                   >
                     {story.name}
                   </a>
