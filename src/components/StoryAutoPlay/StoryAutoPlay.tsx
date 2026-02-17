@@ -143,6 +143,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const seekTargetRef = React.useRef<null | { segmentIndex: number; offset: number }>(null);
   const lineRefs = React.useRef<Record<number, HTMLDivElement | null>>({});
+  const autoStartAttemptedRef = React.useRef(false);
 
   const settings = {
     ...autoPlaySettings,
@@ -201,6 +202,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   >(null);
 
   React.useEffect(() => {
+    autoStartAttemptedRef.current = false;
     setDurationsByIndex(
       Array.from(
         { length: timelineElements.length },
@@ -342,6 +344,13 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     timelineElements.length,
     totalDurationSeconds,
   ]);
+
+  React.useEffect(() => {
+    if (timelineElements.length === 0) return;
+    if (autoStartAttemptedRef.current) return;
+    autoStartAttemptedRef.current = true;
+    void startSegmentPlayback(0, 0, true);
+  }, [startSegmentPlayback, timelineElements.length, timelineKey]);
 
   const pausePlayback = React.useCallback(() => {
     const audioElement = audioRef.current;
