@@ -196,6 +196,10 @@ function StoryLineHints({
       (show_trans ? styles.tooltiptext_editor : styles.tooltiptext) +
       " " +
       content.lang_hints;
+    const tooltip_extra_class =
+      !show_trans && hint_translation && hint_pronunciation
+        ? ` ${styles.tooltiptext_with_pronunciation}`
+        : "";
 
     elements.push(
       <Tooltip
@@ -213,7 +217,7 @@ function StoryLineHints({
             </span>
           ) : null
         ) : has_translation_hint ? (
-          <span className={hint_text_class}>
+          <span className={hint_text_class + tooltip_extra_class}>
             <span>{hint_translation}</span>
           </span>
         ) : null}
