@@ -541,8 +541,17 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
           className={styles.playPauseButton}
           onClick={handlePlayPause}
           disabled={timelineElements.length === 0}
+          aria-label={isPlaying ? "Pause story playback" : "Play story playback"}
+          title={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? "Pause" : "Play"}
+          {isPlaying ? (
+            <span className={styles.pauseIcon} aria-hidden="true">
+              <span className={styles.pauseIconBar} />
+              <span className={styles.pauseIconBar} />
+            </span>
+          ) : (
+            <span className={styles.playIcon} aria-hidden="true" />
+          )}
         </button>
         <input
           className={styles.timelineSlider}

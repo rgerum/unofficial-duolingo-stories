@@ -25,10 +25,12 @@
 .playPauseButton {
   border: 1px solid #d3d3d3;
   border-radius: 9999px;
-  padding: 6px 14px;
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 20px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: #fff;
   cursor: pointer;
 }
@@ -40,6 +42,27 @@
 
 .timelineSlider {
   width: 100%;
+}
+
+.playIcon {
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 11px solid #3f3f3f;
+}
+
+.pauseIcon {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.pauseIconBar {
+  width: 4px;
+  height: 14px;
+  border-radius: 1px;
+  background: #3f3f3f;
 }
 
 .timelineTime {
