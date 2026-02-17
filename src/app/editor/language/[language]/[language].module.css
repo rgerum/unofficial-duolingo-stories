@@ -1,5 +1,6 @@
 .root {
   display: flex;
+  line-height: normal;
 }
 
 .avatar_editor {
@@ -52,6 +53,7 @@
   border: 1px solid var(--input-border);
   background: var(--input-background);
   color: var(--text-color);
+  border-radius: 5px;
 }
 
 .avatar {
@@ -77,22 +79,6 @@
   padding: 5px;
 }
 
-.copy_button img {
-  width: 20px;
-}
-.copy_button {
-  cursor: pointer;
-  padding-right: 5px;
-}
-.play_button {
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-  padding-right: 5px;
-}
-.play_button img {
-  width: 20px;
-}
 
 .AvatarEditorHeader b {
   padding-right: 10px;
@@ -103,27 +89,23 @@
 }
 
 .saveBtn {
+  border: 1px solid var(--input-border);
+  background: var(--input-background);
+  color: var(--text-color);
+  border-radius: 8px;
+  padding: 4px 10px;
+  margin-top: 6px;
+  cursor: pointer;
+}
+
+.saveBtn:disabled {
+  opacity: 0.7;
+  cursor: default;
 }
 .AvatarEditorHeaderFlagName {
 }
 .slidecontainer {
-}
-
-.copy_button {
-  cursor: pointer;
-  padding-right: 5px;
-}
-
-.copy_button img {
-  width: 20px;
-}
-
-.ssml_speaker {
-  background: var(--editor-ssml);
-  padding: 2px 5px;
-  border-radius: 5px;
-  margin-right: 3px;
-  font-size: 0.8em;
+  margin-top: 8px;
 }
 
 /* table */
@@ -146,6 +128,7 @@
 
 .story_list td {
   padding: 6px;
+  line-height: 1.25;
 }
 
 .story_list th {
@@ -153,6 +136,8 @@
   text-align: left;
   background-color: var(--button-background);
   color: var(--button-color);
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 .story_list tr:nth-child(2n) {
@@ -216,6 +201,10 @@
 
 .main_index {
   margin-top: 60px;
+}
+
+.avatar_editor > p {
+  margin: 16px 0;
 }
 
 @media (max-width: 600px) {

@@ -40,7 +40,7 @@ export default function EditList({
             public.
           </div>
         ) : null}
-        <ul>
+        <ul className="my-4 list-disc pl-10">
           <li>
             To create a new story click the &quot;Import&quot; button. The story
             starts as &quot;✍️ draft&quot;.
@@ -61,28 +61,31 @@ export default function EditList({
           </li>
         </ul>
       </div>
-      <p>
+      <p className="my-4">
         To set character voices, go to the{" "}
-        <Link href={`/editor/language/${course.short}`}>Character Editor</Link>.
+        <Link className="underline" href={`/editor/language/${course.short}`}>
+          Character Editor
+        </Link>
+        .
       </p>
       {course.from_language_name !== "English" && (
-        <p>
+        <p className="my-4">
           For language localization settings (for the base language of this
           course), head to the{" "}
-          <Link href={`/editor/localization/${course.short}`}>
+          <Link className="underline" href={`/editor/localization/${course.short}`}>
             Localization Editor
           </Link>
           .
         </p>
       )}
-      <p style={{ fontWeight: "bold" }}>
+      <p className="my-4 font-bold">
         Active Contributors:{" "}
         {course.contributors.map((d, i) => (
           <span key={i}>{d}, </span>
         ))}{" "}
         {course.contributors.length === 0 ? "No Contributors" : ""}
       </p>
-      <p>
+      <p className="my-4">
         Past Contributors:{" "}
         {course.contributors_past.map((d, i) => (
           <span key={i}>{d}, </span>

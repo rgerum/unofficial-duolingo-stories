@@ -243,11 +243,12 @@ function Avatar(props: {
           />
         </p>
         <span
-          className={styles.copy_button}
+          className="inline-flex cursor-pointer items-center justify-center pr-[5px]"
           title="play audio"
           onClick={(e) => props.play(e, inputSpeaker, "Duo")}
         >
           <img
+            className="w-5"
             alt="play"
             src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
           />
@@ -337,12 +338,13 @@ export function PlayButton(props: PlayButtonProps) {
 
   return (
     <span
-      className={styles.play_button}
+      className="inline-flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center"
       title="play audio"
       onClick={(e) => do_play(e, speaker || "", name)}
     >
       {loading === 0 ? (
         <img
+          className="h-5 w-5"
           alt="play"
           src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
         />
@@ -371,15 +373,17 @@ export function SpeakerEntry(props: {
 
   return (
     <tr>
-      <td className={styles.speakerEntryCopy}>
+      <td className="flex items-center gap-1.5 whitespace-nowrap">
         <PlayButton play={props.play} speaker={speaker.speaker} name="Duo" />
-        <span className={styles.ssml_speaker}>{speaker.speaker}</span>
+        <span className="mr-[3px] rounded bg-[var(--editor-ssml)] px-[5px] py-[2px] text-[0.8em]">
+          {speaker.speaker}
+        </span>
         <span
-          className={styles.copy_button}
+          className="inline-flex cursor-pointer items-center justify-center"
           title="copy to clipboard"
           onClick={(e) => copyText(e, speaker.speaker)}
         >
-          <img alt="copy" src="/editor/icons/copy.svg" />
+          <img className="w-5" alt="copy" src="/editor/icons/copy.svg" />
         </span>
       </td>
       <td>{speaker.gender}</td>
