@@ -17,12 +17,7 @@ export function generate_ssml_line(
   ssml: { speaker: string; text: string },
   transcribe_data: TranscribeData,
   hideRanges: HideRange[],
-  ipa_replacements: {
-    index: number;
-    baseText?: string;
-    alias?: string;
-    phoneme?: string;
-  }[],
+  ipa_replacements: IpaReplacement[],
 ) {
 
   // foo{bar:ipa} replacement
