@@ -4,105 +4,142 @@ icon=783305780a6dad8e0e4eb34109d948e6a5fc2c35
 set=1|1
 
 [HEADER]
-> Buenos~días 
+> 早上好 
 ~ good~morning
+^ zǎo~shang~hǎo
+$989/9a5413ae.mp3;3,50
 
 [LINE]
-Speaker593: ¡Buenos~días,  Priti!
+Speaker593: 早上好，|普丽提！
 ~            good~morning  Priti 
+^            zǎo~shang~hǎo Pǔ~lì~tí
+$6252/510799dc.mp3;2,50;2,362;4,525
 
 [LINE]
-Speaker560: Buenos~días,  mi amor.
-~           good~morning  my love 
+Speaker560: 早上好，|亲爱的。
+~           good~morning  darling 
+^           zǎo~shang~hǎo qīn~ài~de
+$6252/7a0ca48a.mp3;2,50;2,362;3,488;2,425
 
 [LINE]
-Speaker560: ¿Dónde están mis llaves?
-~            where are   my  keys   
+Speaker560: 我的|钥匙|在哪里？
+~           my  keys (are)~where
+^           wǒ~de yào~shi zài~nǎ~lǐ
+$6252/9827ee98.mp3;1,50;2,187;3,100;2,463;3,162
 
 [LINE]
-Speaker593: ¿Tus  llaves?
+Speaker593: 你的|钥匙？
 ~            your keys   
+^            nǐ~de yào~shi
+$989/53efd362.mp3;1,50;2,162;3,63
 
 [MULTIPLE_CHOICE]
 > Priti can't find her keys.
-+ Yes, that's right.
-- No, that's wrong.
++ Yes，that's right.
+- No，that's wrong.
 
 [LINE]
-Speaker560: Sí,  necesito ir    al trabajo.
-~           yes  I~need   to~go to work    
+Speaker560: 对，|我|需要|去上班。
+~           yes  I need   to~go~to~work    
+^           duì wǒ xū~yào qù~shàng~bān
+$6252/ec77e1c4.mp3;1,50;2,512;3,138;2,300;3,137
 
 [ARRANGE]
 > Tap what you hear
-Speaker560: ¡[(Necesito) (las~llaves) (de) (mi) (carro)!]
-~              I~need     the~keys     of   my   car     
+Speaker560: [(我|需要)​(我的|车)​(钥匙)！]
+~              I need my car keys    
+^              wǒ~xū~yào wǒ~de chē yào~shi
+$6252/2d6bc2fe.mp3;1,50;3,162;2,300;2,113;2,100;3,200
 
 [LINE]
-Speaker593: ¡Ja, ja! ¡Priti, tus  llaves están aquí en la  mesa!  ¡Ja, ja, ja!
-~            ha  ha   Priti  your keys   are   here on the table   ha  ha  ha 
+Speaker593: 普丽提！|你的|钥匙|在这儿，|在桌子上！
+~          　Priti your keys (are)~here on~the~table
+^            Pǔ~lì~tí nǐ~de yào~shi zài~zhèr zài~zhuō~zi~shàng
+$6252/c6326dbc.mp3;3,50;2,1150;2,162;3,75;2,325;3,150;2,500;3,163;2,337
 
 [POINT_TO_PHRASE]
 > Choose the option that means "tired."
-Speaker560: (Perdón), mi amor, (estoy) (+cansada). ¡(Trabajo) mucho!
-~            sorry    my love   I~am     tired       I~work   a~lot 
+Speaker560: (对不起)，​(亲爱的)。​(我​很)(+累)。​我​(工作)​(很忙)！
+~            sorry darling I (am)~tired I (at)~work (am)~very~busy
+^            duì~bu~qǐ qīn~ài~de wǒ~hěn lèi wǒ gōng~zuò hěn~máng
+$6252/251e4b84.mp3;3,50;3,725;2,462;2,713;2,150;2,200;2,800;3,162;2,338;2,175
 
 [LINE]
-Speaker593: ¿Quieres     café?  
-~            do~you~want coffee 
+Speaker593: 你|想|喝|咖啡|吗？
+~           you want to~drink coffee (question~marker)
+^           nǐ xiǎng hē kā~fēi ma
+$6252/1db91224.mp3;1,50;2,150;2,187;3,125;2,363
 
 [LINE]
-Speaker560: ¡Sí,  por~favor!
-~            yes  please    
+Speaker560: 好，|谢谢。
+~            yes  thanks  
+^            hǎo xiè~xie
+$6252/239d1c4e.mp3;1,50;3,512
 
 [LINE]
-Speaker593: Aquí está,  mi amor.
-~           here it~is  my love 
+Speaker593: 好了，|这儿|给|你，|亲爱的。
+~           OK this (is)~for you darling
+^           hǎo~le zhèr gěi nǐ qīn~ài~de
+$6252/3f5aff8c.mp3;1,50;2,212;3,525;2,150;2,150;3,475;2,325
 
 [LINE]
-Speaker560: ¿Dónde está el  azúcar? Ah, aquí está. 
-~            where is   the sugar   oh  here it~is 
+Speaker560: 糖|~在哪里？|哦，|在这儿。 
+~  sugar (is)~where oh (it's)~here  
+^  táng zài~nǎ~lǐ ó zài~zhèr
+$6252/f24875a2.mp3;1,50;2,237;3,138;2,975;2,237;3,175
 
 [MULTIPLE_CHOICE]
-> Hmm… what is Priti doing?
+> Hmm... what is Priti doing?
 - pouring her coffee on the table
 - putting sugar on her keys
 + looking for some sugar for her coffee
 
 [LINE]
-> Ella bebe   su  café.  
-~ she  drinks her coffee 
+> 普丽提|喝|她的|咖啡。 
+~ Priti drinks her coffee
+^ Pǔ~lì~tí hē tā~de kā~fēi
+$6252/80ea594a.mp3;3,50;2,987;2,225;2,150;3,100
 
 [LINE]
-Speaker560: ¡Ay, no!
-~            oh  no 
+Speaker560: 呸！
+~           yuck
+^           pēi
+$6252/73a88754.mp3;1,50
 
 [LINE]
-Speaker593: ¿Qué? 
-~            what 
+Speaker593: 怎么了？
+~            what's~wrong
+^            zěn~me~le
+$6252/7eff02b8.mp3;2,50;2,225
 
 [LINE]
-Speaker560: ¡Eso  es sal! 
-~            that is salt 
+Speaker560: 这|不是|糖，|是|盐！
+~           this isn't sugar it's salt
+^           zhè bú~shì táng shì yán
+$6252/b08af1e8.mp3;1,50;3,162;2,263;2,475;2,212
 
 [LINE]
-Speaker593: ¡Priti, estás   muy  cansada!
-~            Priti  you~are very tired   
+Speaker593: 普丽提，|你|的确|是|累|坏了！
+~            Priti  you indeed are tired to~the~extreme   
+^            Pǔ~lì~tí nǐ dí~què shì lèi huài~le
+$6252/f09a9af4.mp3;3,50;2,900;3,137;2,363;3,112;2,425
 
 [LINE]
-Speaker560: Sí,  necesito más  café…   ¡con  azúcar, no  con  sal! 
-~           yes  I~need   more coffee   with sugar   not with salt 
+Speaker560: 对，|我|需要|一杯新的|咖啡，|加糖的，|而|不加盐！
+~           yes  I need  a~new~cup~of coffee with~sugar and without~salt 
+^           duì wǒ xū~yào yì~bēi~xīn~de kā~fēi jiā~táng~de ér bù~jiā~yán
+$6252/3b467ce4.mp3;1,50;2,512;3,150;2,300;2,113;2,162;2,175;3,88;3,662;2,438;2,437;2,125;2,113;2,200
 
 [MULTIPLE_CHOICE]
-> Priti was so tired that…
-- …she fell asleep in the kitchen.
-+ …she put salt in her coffee.
-- …she put her keys in her coffee.
+> Priti was so tired that...
+- ...she fell asleep in the kitchen.
++ ...she put salt in her coffee.
+- ...she put her keys in her coffee.
 
 [MATCH]
 > Tap the pairs
-- estás <> you are
-- mucho <> a lot
-- es <> is
-- las llaves <> the keys
-- la <> the
-
+- 需要 <> need
+- 亲爱的 <> darling
+- 咖啡 <> coffee
+- 钥匙 <> keys
+- 糖 <> sugar

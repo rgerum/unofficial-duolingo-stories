@@ -97,6 +97,24 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
   return {
     appName: "Duostories",
     baseURL: process.env.SITE_URL,
+    trustedOrigins: async (req) => {
+      const host =
+        req?.headers.get("x-forwarded-host") ?? req?.headers.get("host");
+      const proto = req?.headers.get("x-forwarded-proto") ?? "https";
+      const origin = host ? `${proto}://${host}` : null;
+
+      const allowed = [
+        "http://localhost:3000",
+        process.env.SITE_URL,
+        "https://*-duostories-team.vercel.app",
+      ].filter(Boolean) as string[];
+
+      if (host?.endsWith("-duostories-team.vercel.app") && origin) {
+        allowed.push(origin);
+      }
+
+      return allowed;
+    },
     secret: process.env.BETTER_AUTH_SECRET,
     socialProviders,
     database: authComponent.adapter(ctx),

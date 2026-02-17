@@ -60,6 +60,7 @@ function clearHints(element: StoryElement): StoryElement {
         content: {
           ...element.line.content,
           hintMap: [],
+          hints_pronunciation: [],
         },
       },
     };
@@ -70,6 +71,7 @@ function clearHints(element: StoryElement): StoryElement {
       learningLanguageTitleContent: {
         ...element.learningLanguageTitleContent,
         hintMap: [],
+        hints_pronunciation: [],
       },
     };
   }

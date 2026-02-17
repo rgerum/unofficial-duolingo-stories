@@ -67,13 +67,9 @@ export default function Register() {
       setMessage(
         "Your account has been registered. An e-mail with a verification link has been sent to you. Please click on the link in the e-mail to proceed. You may need to look into your spam folder.",
       );
-      // Identify user in PostHog and capture sign-up event
-      posthog.identify(usernameInput, {
-        username: usernameInput,
-        email: emailInput,
-      });
       posthog.capture("user_signed_up", {
         username: usernameInput,
+        email: emailInput,
       });
     }
   }

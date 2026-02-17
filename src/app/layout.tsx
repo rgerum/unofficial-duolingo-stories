@@ -5,6 +5,7 @@ import Script from "next/script";
 import StyledComponentsRegistry from "@/lib/registry";
 import NavigationModeProvider from "@/components/NavigationModeProvider";
 import ConvexClientProvider from "@/components/providers/ConvexClientProvider";
+import PostHogUserIdentifier from "@/components/providers/PostHogUserIdentifier";
 
 // If loading a variable font, you don't need to specify the font weight
 const nunito = Nunito({
@@ -26,6 +27,7 @@ export default function RootLayout({
       </head>
       <body>
         <ConvexClientProvider>
+          <PostHogUserIdentifier />
           <NavigationModeProvider>
             <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
           </NavigationModeProvider>
