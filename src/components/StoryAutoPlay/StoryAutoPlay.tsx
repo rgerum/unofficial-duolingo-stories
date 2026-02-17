@@ -84,6 +84,31 @@ function findSegmentIndexByTime(starts: number[], targetSeconds: number): number
   return index;
 }
 
+function getLanguageDisplayName(languageCode?: string): string {
+  if (!languageCode) return "Unknown";
+  try {
+    const normalized = languageCode.replace("_", "-");
+    const displayNames = new Intl.DisplayNames(["en"], { type: "language" });
+    return displayNames.of(normalized) || languageCode;
+  } catch {
+    return languageCode;
+  }
+}
+
+function toAbsoluteMediaUrl(src: string, origin: string): string {
+  if (/^(https?:|data:|blob:)/.test(src)) return src;
+  return `${origin}/${src.replace(/^\/+/, "")}`;
+}
+
+function getArtworkMimeType(src: string): string | undefined {
+  const cleanSrc = src.split("?")[0].toLowerCase();
+  if (cleanSrc.endsWith(".png")) return "image/png";
+  if (cleanSrc.endsWith(".jpg") || cleanSrc.endsWith(".jpeg")) return "image/jpeg";
+  if (cleanSrc.endsWith(".webp")) return "image/webp";
+  if (cleanSrc.endsWith(".svg")) return "image/svg+xml";
+  return undefined;
+}
+
 function clearHints(element: StoryElement): StoryElement {
   // Deep clone and clear hints for auto_play mode
   if (element.type === "LINE") {
@@ -389,20 +414,57 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     const headerElement = timelineElements.find(
       (item) => item.element.type === "HEADER",
     )?.element;
+    const origin = window.location.origin;
+    const languageName = getLanguageDisplayName(story.learning_language);
     const mediaTitle =
       headerElement && headerElement.type === "HEADER"
         ? headerElement.title || headerElement.learningLanguageTitleContent.text
         : "Story Autoplay";
+    const artworkSources: Array<{
+      src: string;
+      sizes?: string;
+      type?: string;
+    }> = [];
+    if (headerElement && headerElement.type === "HEADER") {
+      artworkSources.push({
+        src: toAbsoluteMediaUrl(headerElement.illustrationUrl, origin),
+        // Story artwork can be non-square; do not claim fixed square dimensions.
+        sizes: "any",
+        type: getArtworkMimeType(headerElement.illustrationUrl),
+      });
+    }
+    artworkSources.push(
+      {
+        src: `${origin}/icon512.png`,
+        sizes: "512x512",
+        type: "image/png",
+      },
+      {
+        src: `${origin}/icon192.png`,
+        sizes: "192x192",
+        type: "image/png",
+      },
+    );
+
+    const seenSources = new Set<string>();
+    const artwork = artworkSources
+      .filter((entry) => {
+        if (seenSources.has(entry.src)) return false;
+        seenSources.add(entry.src);
+        return true;
+      })
+      .map((entry) => ({
+        src: entry.src,
+        sizes: entry.sizes,
+        type: entry.type ?? getArtworkMimeType(entry.src),
+      }));
 
     if (typeof MediaMetadata !== "undefined") {
       mediaSession.metadata = new MediaMetadata({
         title: mediaTitle,
-        artist: `${story.learning_language ?? ""} -> ${story.from_language ?? ""}`,
-        album: "Duolingo Stories",
-        artwork:
-          headerElement && headerElement.type === "HEADER"
-            ? [{ src: headerElement.illustrationUrl, sizes: "512x512", type: "image/png" }]
-            : undefined,
+        artist: `${languageName} - Duostories`,
+        album: "Duostories",
+        artwork,
       });
     }
 
