@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./cast.module.css";
 import Link from "next/link";
 
 export default function Cast(props: {
@@ -17,9 +16,9 @@ export default function Cast(props: {
     if (!props.cast[id].speaker) no_speaker_count += 1;
   }
   return (
-    <div className={styles.cast_element}>
-      <h2>Cast</h2>
-      <table className={styles.cast}>
+    <section>
+      <h2 className="my-[0.83em] text-[1.5em] font-bold leading-[1.2]">Cast</h2>
+      <table className="border-collapse">
         <tbody>
           {cast.map((character, i) => (
             <Character key={i} character={character} />
@@ -27,7 +26,7 @@ export default function Cast(props: {
         </tbody>
       </table>
       {no_speaker_count ? (
-        <p>
+        <p className="my-[1em] leading-[1.2]">
           {no_speaker_count} characters do not have a speaker voice assigned. Go
           to the{" "}
           <Link target="_blank" href={"/editor/language/" + props.short}>
@@ -36,7 +35,7 @@ export default function Cast(props: {
           to add the voices.
         </p>
       ) : (
-        <p>
+        <p className="my-[1em] leading-[1.2]">
           To change voices or names go to the{" "}
           <Link target="_blank" href={"/editor/language/" + props.short}>
             Character-Editor
@@ -44,7 +43,7 @@ export default function Cast(props: {
           .
         </p>
       )}
-      <p>
+      <p className="my-[1em] leading-[1.2]">
         Use these links to share this story with other contributors to{" "}
         <Link href={`/story/${props.id}`} target={"_blank"}>
           test
@@ -65,7 +64,7 @@ export default function Cast(props: {
           Story Script
         </Link>
       </p>
-    </div>
+    </section>
   );
 }
 
@@ -74,18 +73,18 @@ function Character(props: {
 }) {
   let character = props.character;
   return (
-    <tr className={styles.character}>
-      <td style={{ textAlign: "right" }}>{character.id}</td>
-      <td>
-        <img
-          alt={"speaker head"}
-          className={styles.head}
-          src={character.link}
-        />
+    <tr className="align-middle">
+      <td className="py-1 pr-2 text-right align-middle leading-[1.2]">
+        {character.id}
       </td>
-      <td>{character.name}</td>
-      <td>
-        <span className={styles.ssml_speaker}>{character.speaker}</span>
+      <td className="py-1 pr-3 align-middle">
+        <img alt={"speaker head"} className="h-[50px] w-[50px]" src={character.link} />
+      </td>
+      <td className="py-1 pr-3 align-middle leading-[1.2]">{character.name}</td>
+      <td className="py-1 align-middle">
+        <span className="mr-[3px] inline-block rounded bg-[var(--editor-ssml)] px-[5px] py-[2px] text-[0.8em]">
+          {character.speaker}
+        </span>
       </td>
     </tr>
   );

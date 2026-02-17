@@ -2,7 +2,6 @@
 import React from "react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import styles from "../[language].module.css";
 import { useInput } from "@/lib/hooks";
 import { PlayButton, SpeakerEntry } from "../language_editor";
 import { Layout } from "../language_editor";
@@ -104,6 +103,7 @@ FRAGMENTS:
   const saveTtsReplaceMutation = useMutation(api.languageWrite.setTtsReplace);
 
   const [yamlError, setYamlError] = React.useState(false);
+  const hasVoices = (speakers?.length ?? 0) > 0;
 
   async function save() {
     const d = {
@@ -206,15 +206,14 @@ FRAGMENTS:
         course={course}
         use_edit={true}
       >
-        <div className={styles.root + " " + styles.characterEditorContent}>
+        <div className="flex leading-normal max-[600px]:block">
           <div
             className={
-              styles.speaker_list +
-              " " +
-              ((speakers?.length ?? 0) > 0 ? "" : styles.noVoices)
+              "h-[calc(100vh-64px)] w-full overflow-y-auto max-[600px]:h-auto sm:w-[400px] " +
+              (hasVoices ? "" : "hidden")
             }
           >
-            <div className={styles.slidecontainer}>
+            <div className="mt-2">
               Pitch:{" "}
               <input
                 type="range"
@@ -225,7 +224,7 @@ FRAGMENTS:
                 onChange={(e) => setPitch(parseInt(e.target.value))}
               />
             </div>
-            <div className={styles.slidecontainer}>
+            <div className="mt-2">
               Speed:{" "}
               <input
                 type="range"
@@ -236,23 +235,28 @@ FRAGMENTS:
                 onChange={(e) => setSpeed(parseInt(e.target.value))}
               />
             </div>
-            <div className={styles.tablecontainer}>
+            <div className="h-[calc(100%-110px)] overflow-y-auto max-[600px]:h-[calc(50vh-140px)]">
               <table
-                className={styles.story_list + " " + styles.voice_list}
+                className="mt-4 w-full border-collapse [&_td]:px-[6px] [&_td]:py-[6px] [&_td]:leading-[1.25] [&_tr:nth-child(2n)]:bg-[var(--body-background-faint)]"
                 data-cy="voice_list"
                 data-js-sort-table="true"
               >
                 <thead>
                   <tr>
                     <th
-                      style={{ borderRadius: "10px 0 0 0" }}
+                      className="sticky top-0 rounded-tl-[10px] bg-[var(--button-background)] px-2 py-[5px] text-left font-bold leading-[1.25] text-[var(--button-color)]"
                       data-js-sort-colnum="0"
                     >
                       Name
                     </th>
-                    <th data-js-sort-colnum="1">Gender</th>
                     <th
-                      style={{ borderRadius: "0 10px 0 0" }}
+                      className="sticky top-0 bg-[var(--button-background)] px-2 py-[5px] text-left font-bold leading-[1.25] text-[var(--button-color)]"
+                      data-js-sort-colnum="1"
+                    >
+                      Gender
+                    </th>
+                    <th
+                      className="sticky top-0 rounded-tr-[10px] bg-[var(--button-background)] px-2 py-[5px] text-left font-bold leading-[1.25] text-[var(--button-color)]"
                       data-js-sort-colnum="2"
                     >
                       Type
@@ -269,19 +273,20 @@ FRAGMENTS:
                     />
                   ))}
                   <tr>
-                    <td>
+                    <td className="px-[6px] py-[6px] leading-[1.25]">
                       <PlayButton
                         play={play2}
                         speaker={customSpeaker}
                         name="Duo"
                       />
                       <input
+                        className="ml-2 rounded-md border border-[var(--input-border)] bg-[var(--input-background)] px-2 py-1 text-[var(--text-color)]"
                         value={customSpeaker}
                         onChange={setCustomSpeaker}
                       />
                     </td>
-                    <td></td>
-                    <td></td>
+                    <td className="px-[6px] py-[6px] leading-[1.25]"></td>
+                    <td className="px-[6px] py-[6px] leading-[1.25]"></td>
                   </tr>
                 </tbody>
               </table>
@@ -289,26 +294,25 @@ FRAGMENTS:
           </div>
           <div
             className={
-              styles.avatar_editor +
-              " " +
-              ((speakers?.length ?? 0) > 0 ? "" : styles.noVoices)
+              "h-[calc(100vh-64px)] w-full overflow-y-auto " +
+              (hasVoices
+                ? "ml-2 sm:w-[calc(100vw-400px)]"
+                : "sm:w-full")
             }
-            style={{ overflowY: "scroll" }}
           >
-            <h2>Input Text</h2>
+            <h2 className="mb-4 text-[1.5em] font-bold">Input Text</h2>
             <textarea
+              className="min-h-[110px] w-full rounded border border-[var(--input-border)] bg-[var(--input-background)] p-1 text-[var(--text-color)]"
               defaultValue={text}
               onChange={(e) =>
                 setText({
                   target: { value: e.target.value },
                 } as React.ChangeEvent<HTMLInputElement>)
               }
-              style={{ width: "100%" }}
             />
-            <br />
-            <h2>Transcribed Text</h2>
-            <span>{text2}</span>
-            <h2>Final Text</h2>
+            <h2 className="mb-4 mt-8 text-[1.5em] font-bold">Transcribed Text</h2>
+            <span className="block">{text2}</span>
+            <h2 className="mb-4 mt-8 text-[1.5em] font-bold">Final Text</h2>
             <span className={language.short}>
               <StoryTextLine
                 active={true}
@@ -329,23 +333,30 @@ FRAGMENTS:
               />
             </span>
 
-            <br />
+            <div className="h-6" />
             <textarea
+              className="w-full rounded border border-[var(--input-border)] p-1"
               defaultValue={data}
               onChange={setDataValidated}
               rows={20}
               cols={40}
               style={{
-                width: "100%",
                 background: yamlError ? "#ffd4d4" : "none",
               }}
             />
-            <br />
-            <button onClick={process} disabled={yamlError}>
+            <div className="mt-4">
+              <button
+                className="rounded-lg border border-[var(--input-border)] bg-[var(--input-background)] px-[10px] py-1 text-[var(--text-color)] disabled:cursor-default disabled:opacity-70"
+                onClick={process}
+                disabled={yamlError}
+              >
               save
-            </button>
+              </button>
+            </div>
             {yamlError ? (
-              <span>The text box does not contain valid yaml syntax.</span>
+              <span className="mt-2 inline-block text-red-700">
+                The text box does not contain valid yaml syntax.
+              </span>
             ) : (
               <></>
             )}

@@ -1,8 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import styles from "./edit_list.module.css";
-import { SpinnerBlue } from "@/components/layout/spinner";
+import { SpinnerBlue } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -33,14 +32,14 @@ export default function EditList({
     <>
       <div>
         {!course.public && story_published_count ? (
-          <div className={styles.warning}>
+          <div className="mx-[10px] my-[10px] rounded-[10px] border-2 bg-[var(--button-inactive-background)] p-[10px]">
             {`⚠ This course is not public, but has ${story_published_count} stories set to "public".`}
             <br />
             Please ask a moderator on discord to check the course and make it
             public.
           </div>
         ) : null}
-        <ul>
+        <ul className="my-4 list-disc pl-10">
           <li>
             To create a new story click the &quot;Import&quot; button. The story
             starts as &quot;✍️ draft&quot;.
@@ -61,63 +60,66 @@ export default function EditList({
           </li>
         </ul>
       </div>
-      <p>
+      <p className="my-4">
         To set character voices, go to the{" "}
-        <Link href={`/editor/language/${course.short}`}>Character Editor</Link>.
+        <Link className="underline" href={`/editor/language/${course.short}`}>
+          Character Editor
+        </Link>
+        .
       </p>
       {course.from_language_name !== "English" && (
-        <p>
+        <p className="my-4">
           For language localization settings (for the base language of this
           course), head to the{" "}
-          <Link href={`/editor/localization/${course.short}`}>
+          <Link className="underline" href={`/editor/localization/${course.short}`}>
             Localization Editor
           </Link>
           .
         </p>
       )}
-      <p style={{ fontWeight: "bold" }}>
+      <p className="my-4 font-bold">
         Active Contributors:{" "}
         {course.contributors.map((d, i) => (
           <span key={i}>{d}, </span>
         ))}{" "}
         {course.contributors.length === 0 ? "No Contributors" : ""}
       </p>
-      <p>
+      <p className="my-4">
         Past Contributors:{" "}
         {course.contributors_past.map((d, i) => (
           <span key={i}>{d}, </span>
         ))}
       </p>
-      <div className={styles.table}>
-        <div className={styles.thead}>
-          <div className={styles.row}>
-            <div data-js-sort-colnum="0">Set</div>
-            <div></div>
-            <div data-js-sort-colnum="1">Name</div>
-            <div data-js-sort-colnum="2">Status</div>
-            <div data-js-sort-colnum="4">Author</div>
-            <div data-js-sort-colnum="5" className="js-sort-active">
-              Created
-            </div>
-            <div data-js-sort-colnum="6">Author</div>
-            <div data-js-sort-colnum="7">Updated</div>
+      <div className="mb-[100px] w-full min-[1000px]:table min-[1000px]:border-collapse min-[1000px]:align-middle">
+        <div className="hidden min-[1000px]:table-header-group">
+          <div className="min-[1000px]:table-row">
+            <div className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell" data-js-sort-colnum="0">Set</div>
+            <div className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"></div>
+            <div className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell" data-js-sort-colnum="1">Name</div>
+            <div className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell" data-js-sort-colnum="2">Status</div>
+            <div className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell" data-js-sort-colnum="4">Author</div>
+            <div className="js-sort-active bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell" data-js-sort-colnum="5">Created</div>
+            <div className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell" data-js-sort-colnum="6">Author</div>
+            <div className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell" data-js-sort-colnum="7">Updated</div>
           </div>
         </div>
-        <div className={styles.tbody}>
+        <div className="min-[1000px]:table-row-group">
           {stories.map((story, i) => (
             <div
               className={
-                styles.row + " " + (set_ends[i] ? styles.set_start : "")
+                "items-center py-[5px] transition-[filter,color,background-color] duration-100 ease-in hover:bg-[var(--body-background)] hover:brightness-90 max-[1000px]:flex max-[1000px]:flex-wrap min-[1000px]:table-row " +
+                (i % 2 === 1 ? "bg-[var(--body-background-faint)] " : "") +
+                (set_ends[i] ? "border-t-[3px] border-[var(--button-background)] " : "")
               }
               key={story.id}
             >
-              <div>
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[60px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
                 <span>
                   <b>{pad_space(story.set_id)}</b>&nbsp;-&nbsp;
                   {pad_space(story.set_index)}
                 </span>
               </div>
-              <div style={{ width: "44px" }}>
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[45px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
                 <img
                   alt={"story title"}
                   src={
@@ -129,7 +131,7 @@ export default function EditList({
                   height={"40px"}
                 />
               </div>
-              <div>
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] max-[1000px]:w-[calc(100vw-60px-45px-180px)] max-[500px]:w-[calc(100vw-60px-45px-85px)] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
                 <Link href={`/editor/story/${story.id}`}>{story.name}</Link>
                 {story.todo_count ? (
                   <img
@@ -139,7 +141,7 @@ export default function EditList({
                   />
                 ) : null}
               </div>
-              <div>
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-right max-[1000px]:w-[180px] max-[500px]:w-[85px] max-[500px]:[&>div]:flex max-[500px]:overflow-hidden min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
                 <DropDownStatus
                   id={story.id}
                   name={story.name}
@@ -149,10 +151,10 @@ export default function EditList({
                   official={course.official}
                 />
               </div>
-              <div>{story.author}</div>
-              <div>{formatDate(story.date)}</div>
-              <div>{story.author_change}</div>
-              <div>{formatDate(story.change_date)}</div>
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Created:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">{story.author}</div>
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">{formatDate(story.date)}</div>
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Changed:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">{story.author_change}</div>
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">{formatDate(story.change_date)}</div>
             </div>
           ))}
         </div>
@@ -251,9 +253,9 @@ function DropDownStatus(props: {
   }
 
   return (
-    <div className={styles.status_field}>
+    <div className="whitespace-nowrap">
       {
-        <span className={styles.status_text}>
+        <span className="whitespace-nowrap rounded-[10px] bg-[var(--editor-ssml)] px-[5px] py-[2px]">
           {status_wrapper(status, isPublic)}
         </span>
       }{" "}
@@ -271,7 +273,10 @@ function DropDownStatus(props: {
       {props.official ? (
         <></>
       ) : (
-        <span className={styles.approval} onClick={addApproval}>
+        <span
+          className="cursor-pointer whitespace-nowrap rounded-[10px] bg-[var(--editor-ssml)] px-[5px] py-[2px] hover:brightness-90"
+          onClick={addApproval}
+        >
           {"👍 " + count}
         </span>
       )}

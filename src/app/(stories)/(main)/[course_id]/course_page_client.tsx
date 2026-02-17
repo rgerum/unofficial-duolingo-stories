@@ -5,30 +5,55 @@ import { api } from "@convex/_generated/api";
 import { useQuery } from "convex/react";
 import Header from "../header";
 import StoryButton from "./story_button";
-import setListStyles from "./set_list.module.css";
-import skeletonStyles from "./story_button.module.css";
 import get_localisation_func from "@/lib/get_localisation_func";
 import { authClient } from "@/lib/auth-client";
+
+function SetTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="col-[1/-1] w-full overflow-x-hidden text-center text-[calc(27/16*1rem)] font-bold flex before:flex-1 after:flex-1 items-center before:relative before:right-4 before:-ml-1/2 before:inline-block before:h-[2px] before:w-1/2 before:align-middle before:bg-[var(--overview-hr)] before:content-[''] after:relative after:left-4 after:-mr-1/2 after:inline-block after:h-[2px] after:w-1/2 after:align-middle after:bg-[var(--overview-hr)] after:content-[''] max-[480px]:text-[calc(22/16*1rem)]">
+      {children}
+    </div>
+  );
+}
+
+function SetList({ children }: { children: React.ReactNode }) {
+  return <div>{children}</div>;
+}
+
+function SetGrid({
+  setName,
+  children,
+}: {
+  setName: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <ol className="m-0 mx-auto grid max-w-[720px] list-none grid-cols-[repeat(auto-fill,clamp(140px,50%,180px))] justify-center justify-items-center p-0">
+      <SetTitle>{setName}</SetTitle>
+      {children}
+    </ol>
+  );
+}
 
 function LoadingTitle() {
   return (
     <Header>
       <h1>
-        <span className={skeletonStyles.animated_background}>
+        <span className="inline-block animate-pulse rounded bg-slate-200 px-3 text-transparent">
           Unofficial Language Duolingo Stories
         </span>
       </h1>
       <p>
-        <span className={skeletonStyles.animated_background}>
+        <span className="inline-block animate-pulse rounded bg-slate-200 px-3 text-transparent">
           Learn Language with 000 community translated Duolingo Stories.
         </span>
       </p>
       <p>
-        <span className={skeletonStyles.animated_background}>
+        <span className="inline-block animate-pulse rounded bg-slate-200 px-3 text-transparent">
           If you want to contribute or discuss the stories, meet us on Discord
         </span>
         <br />
-        <span className={skeletonStyles.animated_background}>
+        <span className="inline-block animate-pulse rounded bg-slate-200 px-3 text-transparent">
           or learn more about the project in our FAQ.
         </span>
       </p>
@@ -38,18 +63,15 @@ function LoadingTitle() {
 
 function LoadingSetList() {
   return (
-    <div className={setListStyles.story_list}>
+    <div className="mt-6 flex flex-col gap-[18px]">
       {[...Array(2)].map((_, i) => (
-        <ol key={i} className={setListStyles.set_content} aria-label={`Set ${i + 1}`}>
-          <div className={setListStyles.set_title} tabIndex={-1} aria-hidden={true}>
-            Set {i + 1}
-          </div>
+        <SetGrid key={i} setName={`Set ${i + 1}`}>
           {[...Array(4)].map((_, j) => (
             <li key={j}>
               <StoryButton />
             </li>
           ))}
-        </ol>
+        </SetGrid>
       ))}
     </div>
   );
@@ -58,15 +80,17 @@ function LoadingSetList() {
 function About({ about }: { about: string }) {
   if (!about) return <></>;
   return (
-    <div className={setListStyles.set_list_about}>
-      <div className={setListStyles.set_title}>About</div>
+    <div className="mx-auto max-w-[720px]">
+      <SetTitle>About</SetTitle>
       <p>{about}</p>
     </div>
   );
 }
 
 export default function CoursePageClient({ courseId }: { courseId: string }) {
-  const course = useQuery(api.landing.getPublicCoursePageData, { short: courseId });
+  const course = useQuery(api.landing.getPublicCoursePageData, {
+    short: courseId,
+  });
   const localizationMap = React.useMemo(() => {
     const data: Record<string, string> = {};
     for (const row of course?.localization ?? []) data[row.tag] = row.text;
@@ -78,7 +102,8 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
   );
 
   const { data: session } = authClient.useSession();
-  const rawUserId = (session?.user as { userId?: string | number } | undefined)?.userId;
+  const rawUserId = (session?.user as { userId?: string | number } | undefined)
+    ?.userId;
   const legacyUserId =
     typeof rawUserId === "number"
       ? rawUserId
@@ -150,21 +175,24 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
           ])}
         </p>
       </Header>
-      <div className={setListStyles.story_list}>
+      <SetList>
         {course.about ? <About about={course.about} /> : null}
         {storiesBySet.map((set) => (
-          <ol key={set.setId} className={setListStyles.set_content} aria-label={`Set ${set.setId}`}>
-            <div className={setListStyles.set_title} aria-hidden={true}>
-              {localization("set_n", { $count: `${set.setId}` }) ?? `Set ${set.setId}`}
-            </div>
+          <SetGrid
+            key={set.setId}
+            setName={
+              localization("set_n", { $count: `${set.setId}` }) ??
+              `Set ${set.setId}`
+            }
+          >
             {set.stories.map((story) => (
               <li key={story.id}>
                 <StoryButton story={story} done={doneMap[story.id]} />
               </li>
             ))}
-          </ol>
+          </SetGrid>
         ))}
-      </div>
+      </SetList>
     </>
   );
 }

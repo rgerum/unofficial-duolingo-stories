@@ -3,7 +3,10 @@ version = 1
 name = "unofficial-duolingo-stories"
 
 [setup]
-script = ""
+script = '''
+pnpm i
+cp /Users/richard/WebstormProjects/unofficial-duolingo-stories_bugfixes/.env.local .
+'''
 
 [[actions]]
 name = "Run"

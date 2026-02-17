@@ -1,6 +1,5 @@
-import styles from "./breadcrumbs.module.css";
 import React from "react";
-import { DoubleFlag } from "@/components/layout/flag";
+import { DoubleFlag } from "@/components/ui/flag";
 import Link from "next/link";
 import EditorButton from "../editor_button";
 
@@ -36,9 +35,10 @@ function MyLink({
   children: React.ReactNode;
   className: string;
 }) {
+  const linkClassName = `${className} opacity-70 hover:brightness-90 hover:opacity-100 hover:text-[var(--text-color)]`;
   if (href !== undefined)
     return (
-      <Link href={href} className={className + " " + styles.part_link}>
+      <Link href={href} className={linkClassName}>
         {children}
       </Link>
     );
@@ -52,9 +52,10 @@ function BreadcrumbPart({
   part: BreadcrumbPartData;
   hide: boolean;
 }) {
-  let class_name = styles.part;
+  let class_name =
+    "flex h-[50px] items-center overflow-hidden rounded-[14px] border-0 bg-[var(--body-background)] px-[5px] py-[5px] no-underline [&_img]:mb-[5px] [&_img]:mr-[5px] [&_img]:pl-0";
   if (hide) {
-    class_name += " " + styles.part_hide;
+    class_name += " max-[460px]:hidden";
   }
   if (part.type === "sep") {
     return (
@@ -70,10 +71,10 @@ function BreadcrumbPart({
           <DoubleFlag
             width={40}
             lang1={part.lang1 ?? {}}
-            className={styles.flag}
+            className="m-0"
           />
           {part.lang1?.name ? (
-            <span className={styles.name}>{`${
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap">{`${
               part?.name || part.lang1?.name
             }`}</span>
           ) : null}
@@ -81,18 +82,18 @@ function BreadcrumbPart({
       );
     }
     return (
-      <MyLink className={class_name} href={part.href}>
-        <DoubleFlag
-          width={40}
-          lang1={part.lang1 ?? {}}
-          lang2={part.lang2}
-          className={styles.flag}
-        />
-        {part.lang1?.name && part.lang2?.name ? (
-          <span className={styles.name}>
-            {part?.name || `${part.lang1?.name} (from ${part.lang2?.name})`}
-          </span>
-        ) : null}
+        <MyLink className={class_name} href={part.href}>
+          <DoubleFlag
+            width={40}
+            lang1={part.lang1 ?? {}}
+            lang2={part.lang2}
+            className="m-0"
+          />
+          {part.lang1?.name && part.lang2?.name ? (
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+              {part?.name || `${part.lang1?.name} (from ${part.lang2?.name})`}
+            </span>
+          ) : null}
       </MyLink>
     );
   }
@@ -101,20 +102,24 @@ function BreadcrumbPart({
       <MyLink className={class_name} href={part.href}>
         {part.data?.image ? (
           <img
-            style={{ height: "36px" }}
+            className="h-9"
             alt="story title"
             src={`https://stories-cdn.duolingo.com/image/${part.data?.image}.svg`}
           />
         ) : (
           <img alt="story title" src={`/icons/empty_title.svg`} />
         )}
-        <span className={styles.name}>{part.data?.name}</span>
+        <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+          {part.data?.name}
+        </span>
       </MyLink>
     );
   }
   return (
     <MyLink className={class_name} href={part.href}>
-      <span className={styles.name}>{part.type}</span>
+      <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+        {part.type}
+      </span>
     </MyLink>
   );
 }
@@ -132,7 +137,7 @@ export function Breadcrumbs({
   return (
     <>
       {hide ? (
-        <div className={styles.back}>
+        <div className="hidden max-[460px]:inline">
           <EditorButton
             id="button_back"
             href={link}

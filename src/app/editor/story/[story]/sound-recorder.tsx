@@ -1,5 +1,4 @@
 "use no memo";
-import styles from "./sound-recorder.module.css";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import StoryLineHints from "@/components/StoryLineHints";
@@ -280,8 +279,8 @@ export default function SoundRecorder({
 
   //return <></>;
   return (
-    <div className={styles.container}>
-      <button className={styles.close} onClick={onClose}>
+    <div className="absolute top-[58px] z-[2] block w-full border-2 border-[var(--color_base_border)] bg-[var(--body-background)] p-[25px]">
+      <button className="absolute right-0 top-0" onClick={onClose}>
         X
       </button>
       <input type="file" onChange={handleFileChange} accept="audio/*" />
@@ -293,7 +292,7 @@ export default function SoundRecorder({
       />
       <p>{timingText}</p>
       <div ref={containerRef} />
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      <div className="flex justify-end">
         <button onClick={soundRecorderPrevious}>Previous</button>
         <button onClick={onSaveX}>Save</button>
         <button onClick={soundRecorderNext}>Next</button>

@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./header.module.css";
 import EditorButton from "../../editor_button";
 import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
@@ -124,8 +123,8 @@ export function StoryEditorHeader({
 
   return (
     <>
-      <div className={styles.toolbar}>
-        <div className={styles.AvatarEditorHeader}>
+      <div className="flex h-[60px] border-b-2 border-[var(--header-border)]">
+        <div className="flex w-full items-center px-5 max-[975px]:[&>div:last-child]:hidden">
           <Breadcrumbs
             path={[
               { type: "Editor", href: `/editor` },

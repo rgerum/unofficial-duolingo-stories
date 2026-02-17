@@ -7,8 +7,6 @@ import type { CourseData } from "./get_course_data";
 import { api } from "@convex/_generated/api";
 import { useQuery } from "convex/react";
 
-import styles from "./course_list.module.css";
-
 function getCourseGroups(courses: CourseData[]) {
   const english = courses.find((course) => course.from_language_name === "English");
   const otherIds = Array.from(
@@ -46,12 +44,10 @@ function LanguageGroup({
   const coursesList = courses.filter((course) => course.fromLanguageId === id);
 
   return (
-    <div className={styles.course_list}>
-      <hr />
-      <div className={styles.course_group_name}>
-        {storiesFor}
-      </div>
-      <ol className={styles.course_list_ol}>
+    <div className="flex flex-col">
+      <hr className="my-0 mt-[30px] mb-[22px] h-0 w-full border-0 border-t-2 border-[var(--overview-hr)]" />
+      <div className="mb-[14px] w-full pl-[5px] text-[calc(24/16*1rem)] font-bold">{storiesFor}</div>
+      <ol className="grid w-full list-none grid-cols-[repeat(auto-fill,minmax(min(190px,calc(50%-12px)),1fr))] gap-3 p-0">
         {coursesList.map((course, index) => (
           <li key={course.id}>
             <LanguageButton
@@ -77,12 +73,14 @@ export function CourseListInner({
 
   if (loading) {
     return (
-      <div className={styles.course_list}>
-        <hr />
-        <div className={styles.course_group_name}>
-          <span className={styles.loading}>Stories for English Speakers</span>
+      <div className="flex flex-col">
+        <hr className="my-0 mt-[30px] mb-[22px] h-0 w-full border-0 border-t-2 border-[var(--overview-hr)]" />
+        <div className="mb-[14px] w-full pl-[5px] text-[calc(24/16*1rem)] font-bold">
+          <span className="inline-block w-full max-w-[320px] animate-pulse rounded bg-slate-200/90 text-transparent">
+            Stories for English speakers
+          </span>
         </div>
-        <ol className={styles.course_list_ol}>
+        <ol className="grid w-full list-none grid-cols-[repeat(auto-fill,minmax(min(190px,calc(50%-12px)),1fr))] gap-3 p-0">
           {[...Array(10)].map((_, i) => (
             <li key={i}>
               <LanguageButton loading={true} />

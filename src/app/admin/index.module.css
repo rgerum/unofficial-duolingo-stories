@@ -1,13 +1,19 @@
 .admin_table th {
   position: sticky;
-  top: 60px;
+  top: 0;
   text-align: left;
-  background-color: var(--button-background);
+  background-color: color-mix(in srgb, var(--button-background) 88%, #fff);
   color: var(--button-color);
-  padding: 5px 10px;
+  padding: 10px 12px;
+  font-size: 0.84rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  z-index: 1;
 }
 .admin_table {
   border-collapse: collapse;
+  width: 100%;
+  min-width: 820px;
 }
 
 .admin_table td:first-child {
@@ -18,10 +24,19 @@
 }
 
 .admin_table tr:nth-child(2n) {
-  background-color: var(--body-background-faint);
+  background-color: color-mix(
+    in srgb,
+    var(--body-background-faint) 74%,
+    transparent
+  );
 }
 .admin_table tr:nth-child(2n + 1) {
   background-color: var(--body-background);
+}
+
+.admin_table td {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .admin_table td input {
@@ -29,7 +44,21 @@
 }
 
 .admin_table tbody tr:hover {
-  filter: brightness(0.9);
+  filter: brightness(0.95);
+}
+
+.actionCol {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  min-width: 138px;
+  background-color: inherit;
+  text-align: right;
+}
+
+.admin_table th.actionCol {
+  z-index: 3;
+  background-color: color-mix(in srgb, var(--button-background) 88%, #fff);
 }
 
 .dropdown:hover .dropdownContent {

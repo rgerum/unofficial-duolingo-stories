@@ -4,7 +4,7 @@ import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import EditList from "../../edit_list";
-import { Spinner } from "@/components/layout/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import type { CourseProps, StoryListDataProps } from "@/app/editor/(course)/types";
 
 export default function CourseEditorPageClient({

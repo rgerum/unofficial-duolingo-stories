@@ -6,7 +6,7 @@ import styles from "./profile.module.css";
 import ProviderButton from "./button";
 import Link from "next/link";
 import { ProfileData } from "@/app/(stories)/(main)/profile/page";
-import Button from "@/components/layout/button";
+import Button from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
 export default function Profile({ providers }: { providers: ProfileData }) {
@@ -104,7 +104,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
           )}
         </div>
 
-        <h2>Linked Accounts</h2>
+        <h2 className={styles.sectionHeading}>Linked Accounts</h2>
         <span>
           When you have linked your account to a login provider you can use these
           providers instead of login in with username and password or email.
@@ -115,7 +115,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
           ))}
         </div>
 
-        <h2>Change Password</h2>
+        <h2 className={styles.sectionHeading}>Change Password</h2>
         <p>
           For security, we will email you a password reset link instead of
           changing your password directly here.
@@ -138,7 +138,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
           {resetState === "pending" ? "Sending..." : "Send Password Reset Link"}
         </Button>
 
-        <h2>Change Email</h2>
+        <h2 className={styles.sectionHeading}>Change Email</h2>
         <p>
           Enter your new email address. For safety, email changes are processed
           in two steps.
@@ -174,7 +174,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
           {emailState === "pending" ? "Sending..." : "Request Email Change"}
         </Button>
 
-        <h2>Delete Account</h2>
+        <h2 className={styles.sectionHeading}>Delete Account</h2>
         <p>
           If you want to delete your account, please contact use on{" "}
           <Link href="https://discord.gg/4NGVScARR3">Discord</Link>. We will

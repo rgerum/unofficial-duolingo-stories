@@ -1,6 +1,21 @@
 .profile {
 }
 
+.sectionHeading {
+  margin: 28px 0 10px;
+  font-size: calc(28 / 16 * 1rem);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: left;
+}
+
+@media (max-width: 480px) {
+  .sectionHeading {
+    margin-top: 22px;
+    font-size: calc(24 / 16 * 1rem);
+  }
+}
+
 .profile div input {
   align-items: center;
   background: var(--input-background);

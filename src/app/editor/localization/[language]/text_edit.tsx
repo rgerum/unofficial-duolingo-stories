@@ -18,11 +18,11 @@ export default function TextEdit({
       <textarea
         value={current_text}
         onChange={(e) => setText(e.target.value)}
-        className="text"
+        className="w-full rounded-[5px] border border-[var(--input-border)] bg-[var(--input-background)] p-[5px] text-[17px] text-[var(--text-color)]"
       ></textarea>
       <button
         onClick={() => set_localization(tag, current_text)}
-        className="button"
+        className="mt-2 rounded-lg border border-[var(--input-border)] bg-[var(--input-background)] px-3 py-1"
       >
         Save
       </button>

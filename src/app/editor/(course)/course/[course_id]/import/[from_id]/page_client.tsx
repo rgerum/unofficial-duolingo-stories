@@ -4,10 +4,9 @@ import React from "react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { DoubleFlag } from "@/components/layout/flag";
+import { DoubleFlag } from "@/components/ui/flag";
 import ImportList from "./import_list";
-import styles from "./import_list.module.css";
-import { Spinner } from "@/components/layout/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import type {
   CourseProps,
   LanguageProps,
@@ -63,19 +62,18 @@ export default function ImportPageClient({
 
   return (
     <>
-      <div className={styles.lang_selector}>
+      <div className="flex gap-3 overflow-scroll whitespace-nowrap p-1">
         {courseSelection.map((item, index) => (
           <Link
             key={index}
             href={`/editor/course/${course.short}/import/${item.short}`}
           >
-            <span className={styles.import_lang}>
-              <span className={styles.double_flag}>
+            <span className="flex items-center flex-col rounded-lg bg-[var(--body-background)] px-2 py-1 hover:brightness-90">
+              <span className="flex [&_img:nth-child(2)]:ml-[-28px] [&_img:nth-child(2)]:mt-[10px]">
                 <DoubleFlag
                   width={40}
                   lang1={languages[item.learning_language]}
                   lang2={languages[item.from_language]}
-                  className={styles.flag}
                 />
               </span>
               <span>
