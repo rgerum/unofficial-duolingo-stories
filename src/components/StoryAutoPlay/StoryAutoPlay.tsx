@@ -550,9 +550,17 @@ export default function StoryAutoPlay({
       );
     });
     mediaSession.setActionHandler("previoustrack", () => {
+      if (onPrev && canGoPrev) {
+        onPrev();
+        return;
+      }
       void seekToCallbackRef.current?.(Math.max(0, globalProgressSeconds - 10));
     });
     mediaSession.setActionHandler("nexttrack", () => {
+      if (onNext && canGoNext) {
+        onNext();
+        return;
+      }
       void seekToCallbackRef.current?.(
         Math.min(totalDurationSeconds, globalProgressSeconds + 10),
       );
@@ -569,7 +577,11 @@ export default function StoryAutoPlay({
       mediaSession.setActionHandler("nexttrack", null);
     };
   }, [
+    canGoNext,
+    canGoPrev,
     globalProgressSeconds,
+    onNext,
+    onPrev,
     story.from_language,
     story.learning_language,
     timelineElements,
