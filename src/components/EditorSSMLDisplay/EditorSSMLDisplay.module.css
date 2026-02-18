@@ -26,11 +26,6 @@
   }
 }
 
-.ssml {
-  font-size: 0.8em;
-  margin: 0;
-  font-family: monospace;
-}
 .ssml_speaker {
   background: var(--editor-ssml);
   padding: 2px 5px;
