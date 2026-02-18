@@ -54,12 +54,16 @@ export const setLocalization = mutation({
       });
     }
 
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorLocalizationUpsert, {
-      legacyLanguageId: args.legacyLanguageId,
-      tag: args.tag,
-      text: args.text,
-      operationKey,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.postgresMirror.mirrorLocalizationUpsert,
+      {
+        legacyLanguageId: args.legacyLanguageId,
+        tag: args.tag,
+        text: args.text,
+        operationKey,
+      },
+    );
 
     return {
       id: existing?.legacyId ?? null,

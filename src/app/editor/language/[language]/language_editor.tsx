@@ -25,11 +25,7 @@ type PlayFn = (
   name: string,
 ) => Promise<void>;
 
-export default function LanguageEditor({
-  identifier,
-}: {
-  identifier: string;
-}) {
+export default function LanguageEditor({ identifier }: { identifier: string }) {
   const resolved = useQuery(api.editorRead.resolveEditorLanguage, {
     identifier,
   });
@@ -201,7 +197,9 @@ function Avatar(props: {
   }, [avatar.name, avatar.speaker, unsavedChanged]);
 
   const language_id = props.language_id;
-  const saveAvatarSpeakerMutation = useMutation(api.languageWrite.setAvatarSpeaker);
+  const saveAvatarSpeakerMutation = useMutation(
+    api.languageWrite.setAvatarSpeaker,
+  );
   async function save() {
     const name = inputName;
     const speaker = inputSpeaker;
@@ -670,14 +668,19 @@ function AvatarNames({
       <div
         className={
           "ml-2 h-[calc(100vh-64px)] w-full overflow-y-scroll max-[600px]:m-0 max-[600px]:h-[calc(50vh-30px)] " +
-          (speakers?.length > 0 ? "min-[560px]:w-[calc(100vw-400px)]" : "hidden")
+          (speakers?.length > 0
+            ? "min-[560px]:w-[calc(100vw-400px)]"
+            : "hidden")
         }
       >
         <p className="my-4">
           These characters are the default cast of duolingo. Their names should
           be kept as close to the original as possible.
         </p>
-        <div className="flex flex-wrap gap-[5px] p-[5px] min-[601px]:gap-0 min-[601px]:p-0" data-cy="avatar_list1">
+        <div
+          className="flex flex-wrap gap-[5px] p-[5px] min-[601px]:gap-0 min-[601px]:p-0"
+          data-cy="avatar_list1"
+        >
           {avatars_new_important.map((avatar, index) => (
             <Avatar
               key={index}
@@ -687,8 +690,13 @@ function AvatarNames({
             />
           ))}
         </div>
-        <p className="my-4">These characters just appear in a couple of stories.</p>
-        <div className="flex flex-wrap gap-[5px] p-[5px] min-[601px]:gap-0 min-[601px]:p-0" data-cy="avatar_list2">
+        <p className="my-4">
+          These characters just appear in a couple of stories.
+        </p>
+        <div
+          className="flex flex-wrap gap-[5px] p-[5px] min-[601px]:gap-0 min-[601px]:p-0"
+          data-cy="avatar_list2"
+        >
           {avatars_new.map((avatar, index) => (
             <Avatar
               key={index}

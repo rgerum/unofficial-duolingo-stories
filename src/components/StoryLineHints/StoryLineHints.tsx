@@ -182,16 +182,15 @@ function StoryLineHints({
     ) : (
       <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
     );
-    const hint_container_class =
-      is_hidden
-        ? ""
-        : show_trans
-          ? has_any_hint
-            ? styles.tooltip_editor
-            : ""
-          : has_translation_hint
-            ? styles.tooltip
-            : "";
+    const hint_container_class = is_hidden
+      ? ""
+      : show_trans
+        ? has_any_hint
+          ? styles.tooltip_editor
+          : ""
+        : has_translation_hint
+          ? styles.tooltip
+          : "";
     const hint_text_class =
       (show_trans ? styles.tooltiptext_editor : styles.tooltiptext) +
       " " +
@@ -212,7 +211,9 @@ function StoryLineHints({
             <span className={hint_text_class}>
               {hint_translation ? <span>{hint_translation}</span> : null}
               {hint_pronunciation ? (
-                <span className={styles.hint_pronunciation}>{hint_pronunciation}</span>
+                <span className={styles.hint_pronunciation}>
+                  {hint_pronunciation}
+                </span>
               ) : null}
             </span>
           ) : null

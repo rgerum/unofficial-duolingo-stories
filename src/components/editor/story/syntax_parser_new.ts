@@ -45,7 +45,11 @@ function generateHintMap(
     return backslashes % 2 === 1;
   }
 
-  function lastUnescapedIndexOf(value: string, char: string, end: number): number {
+  function lastUnescapedIndexOf(
+    value: string,
+    char: string,
+    end: number,
+  ): number {
     for (let i = end; i >= 0; i -= 1) {
       if (value[i] === char && !isEscapedAt(value, i)) {
         return i;
@@ -75,7 +79,9 @@ function generateHintMap(
       translation: unescapeBraces(
         token.substring(0, openIndex).replace(/~+$/, "").trimEnd(),
       ),
-      pronunciation: unescapeBraces(token.substring(openIndex + 1, closeIndex).trim()),
+      pronunciation: unescapeBraces(
+        token.substring(openIndex + 1, closeIndex).trim(),
+      ),
     };
   }
 
@@ -136,7 +142,11 @@ function generateHintMap(
     }
     text_pos += text_list[i].length;
   }
-  const result: HintMapResult = { hintMap: hintMap, hints: hints, text: text.trim() };
+  const result: HintMapResult = {
+    hintMap: hintMap,
+    hints: hints,
+    text: text.trim(),
+  };
   if (hints_pronunciation.some((hint) => hint !== "")) {
     result.hints_pronunciation = hints_pronunciation;
   }
@@ -1242,8 +1252,14 @@ export function processStoryFile(
   //console.log(meta);
 
   const { meta: _removedMeta, ...storyWithoutMeta } = story;
-  const { audio_insert_lines: _removedAudioInsertLines, ...metaWithoutAudioInsertLines } =
-    meta;
+  const {
+    audio_insert_lines: _removedAudioInsertLines,
+    ...metaWithoutAudioInsertLines
+  } = meta;
 
-  return [storyWithoutMeta, metaWithoutAudioInsertLines, audio_insert_lines] as const;
+  return [
+    storyWithoutMeta,
+    metaWithoutAudioInsertLines,
+    audio_insert_lines,
+  ] as const;
 }

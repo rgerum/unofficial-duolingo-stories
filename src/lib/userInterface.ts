@@ -93,9 +93,7 @@ export function isAdmin(user: RoleLike) {
 export function isContributor(user: RoleLike) {
   if (!user) return false;
   if (typeof (user as AppUser).role === "boolean")
-    return (
-      (user as AppUser).role || (user as AppUser).admin === true
-    );
+    return (user as AppUser).role || (user as AppUser).admin === true;
   const role = (user as UserIdentity).role;
   return role === "contributor" || role === "admin";
 }

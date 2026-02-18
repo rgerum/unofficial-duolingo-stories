@@ -64,7 +64,9 @@ export const getLocalizationByLegacyLanguageId = query({
 
     const rows = await ctx.db
       .query("localizations")
-      .withIndex("by_language_id_and_tag", (q) => q.eq("languageId", language._id))
+      .withIndex("by_language_id_and_tag", (q) =>
+        q.eq("languageId", language._id),
+      )
       .collect();
     return rows
       .filter((row) => Boolean(row.tag) && Boolean(row.text))

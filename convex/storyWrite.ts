@@ -34,10 +34,11 @@ export const setStory = mutation({
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
     const authorChangeLegacyUserId = await requireSessionLegacyUserId(ctx);
-    const identity = (await ctx.auth.getUserIdentity()) as
-      | { name?: string | null }
-      | null;
-    const actorName = identity?.name?.trim() || `user_${authorChangeLegacyUserId}`;
+    const identity = (await ctx.auth.getUserIdentity()) as {
+      name?: string | null;
+    } | null;
+    const actorName =
+      identity?.name?.trim() || `user_${authorChangeLegacyUserId}`;
     const course = await ctx.db
       .query("courses")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyCourseId))
@@ -50,20 +51,22 @@ export const setStory = mutation({
       args.legacyStoryId !== undefined
         ? await ctx.db
             .query("stories")
-            .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.legacyStoryId!))
+            .withIndex("by_legacy_id", (q) =>
+              q.eq("legacyId", args.legacyStoryId!),
+            )
             .unique()
         : null;
 
     const storyByDuoId =
       !storyById && args.duo_id
-        ? (
+        ? ((
             await ctx.db
-            .query("stories")
-            .withIndex("by_duo_id_course", (q) =>
-              q.eq("duo_id", args.duo_id).eq("courseId", course._id),
-            )
-            .collect()
-          )[0] ?? null
+              .query("stories")
+              .withIndex("by_duo_id_course", (q) =>
+                q.eq("duo_id", args.duo_id).eq("courseId", course._id),
+              )
+              .collect()
+          )[0] ?? null)
         : null;
 
     const story = storyById ?? storyByDuoId;
@@ -178,9 +181,9 @@ export const deleteStory = mutation({
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
     const actorLegacyUserId = await requireSessionLegacyUserId(ctx);
-    const identity = (await ctx.auth.getUserIdentity()) as
-      | { name?: string | null }
-      | null;
+    const identity = (await ctx.auth.getUserIdentity()) as {
+      name?: string | null;
+    } | null;
     const actorName = identity?.name?.trim() || `user_${actorLegacyUserId}`;
     const story = await ctx.db
       .query("stories")
@@ -205,7 +208,8 @@ export const deleteStory = mutation({
       public: false,
     });
 
-    const operationKey = args.operationKey ?? `story:${story.legacyId}:delete:${Date.now()}`;
+    const operationKey =
+      args.operationKey ?? `story:${story.legacyId}:delete:${Date.now()}`;
     await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorStoryDelete, {
       storyId: story.legacyId,
       operationKey,
@@ -235,22 +239,34 @@ export const importStory = mutation({
     targetLegacyCourseId: v.number(),
     operationKey: v.optional(v.string()),
   },
-  returns: v.union(v.null(), v.object({ id: v.number(), course_id: v.number(), text: v.string(), name: v.string() })),
+  returns: v.union(
+    v.null(),
+    v.object({
+      id: v.number(),
+      course_id: v.number(),
+      text: v.string(),
+      name: v.string(),
+    }),
+  ),
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
     const authorLegacyUserId = await requireSessionLegacyUserId(ctx);
-    const identity = (await ctx.auth.getUserIdentity()) as
-      | { name?: string | null }
-      | null;
+    const identity = (await ctx.auth.getUserIdentity()) as {
+      name?: string | null;
+    } | null;
     const actorName = identity?.name?.trim() || `user_${authorLegacyUserId}`;
     const [sourceStory, targetCourse] = await Promise.all([
       ctx.db
         .query("stories")
-        .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.sourceLegacyStoryId))
+        .withIndex("by_legacy_id", (q) =>
+          q.eq("legacyId", args.sourceLegacyStoryId),
+        )
         .unique(),
       ctx.db
         .query("courses")
-        .withIndex("by_id_value", (q) => q.eq("legacyId", args.targetLegacyCourseId))
+        .withIndex("by_id_value", (q) =>
+          q.eq("legacyId", args.targetLegacyCourseId),
+        )
         .unique(),
     ]);
 
@@ -292,8 +308,9 @@ export const importStory = mutation({
       lastUpdated: Date.now(),
     });
 
-    const imageLegacyId =
-      sourceStory.imageId ? (await ctx.db.get(sourceStory.imageId))?.legacyId ?? "" : "";
+    const imageLegacyId = sourceStory.imageId
+      ? ((await ctx.db.get(sourceStory.imageId))?.legacyId ?? "")
+      : "";
 
     const operationKey =
       args.operationKey ??
@@ -313,15 +330,19 @@ export const importStory = mutation({
       operationKey,
     });
 
-    await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStoryImported, {
-      operationKey,
-      storyId: newLegacyId,
-      storyName: sourceStory.name,
-      courseId: args.targetLegacyCourseId,
-      text: sourceContent.text,
-      actorName,
-      actorLegacyUserId: authorLegacyUserId,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.editorSideEffects.onStoryImported,
+      {
+        operationKey,
+        storyId: newLegacyId,
+        storyName: sourceStory.name,
+        courseId: args.targetLegacyCourseId,
+        text: sourceContent.text,
+        actorName,
+        actorLegacyUserId: authorLegacyUserId,
+      },
+    );
 
     return {
       id: newLegacyId,

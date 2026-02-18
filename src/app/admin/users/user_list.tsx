@@ -195,7 +195,10 @@ export default function UserList({
             Prev
           </Button>
           <div className="min-w-[60px] text-center font-bold">Page {page}</div>
-          <Button onClick={() => submitSearch(page + 1)} disabled={!hasNextPage}>
+          <Button
+            onClick={() => submitSearch(page + 1)}
+            disabled={!hasNextPage}
+          >
             Next
           </Button>
         </div>
@@ -244,17 +247,25 @@ export default function UserList({
                     {formatRegistered(user.regdate)}
                   </td>
                   <td className="px-3 py-2.5">
-                    <span className={user.activated ? statusYesClass : statusNoClass}>
+                    <span
+                      className={
+                        user.activated ? statusYesClass : statusNoClass
+                      }
+                    >
                       {user.activated ? "Yes" : "No"}
                     </span>
                   </td>
                   <td className="px-3 py-2.5">
-                    <span className={user.role ? statusYesClass : statusNoClass}>
+                    <span
+                      className={user.role ? statusYesClass : statusNoClass}
+                    >
                       {user.role ? "Yes" : "No"}
                     </span>
                   </td>
                   <td className="px-3 py-2.5">
-                    <span className={user.admin ? statusYesClass : statusNoClass}>
+                    <span
+                      className={user.admin ? statusYesClass : statusNoClass}
+                    >
                       {user.admin ? "Yes" : "No"}
                     </span>
                   </td>

@@ -24,17 +24,18 @@ export default function PostHogUserIdentifier() {
   const identifiedUserId = React.useRef<string | null>(null);
   const trackedSignInUserId = React.useRef<string | null>(null);
 
-  const readPendingSignIn = React.useCallback((): PendingSignInPayload | null => {
-    if (typeof window === "undefined") return null;
-    const value = window.sessionStorage.getItem(PENDING_SIGNIN_STORAGE_KEY);
-    if (!value) return null;
-    try {
-      return JSON.parse(value) as PendingSignInPayload;
-    } catch {
-      window.sessionStorage.removeItem(PENDING_SIGNIN_STORAGE_KEY);
-      return null;
-    }
-  }, []);
+  const readPendingSignIn =
+    React.useCallback((): PendingSignInPayload | null => {
+      if (typeof window === "undefined") return null;
+      const value = window.sessionStorage.getItem(PENDING_SIGNIN_STORAGE_KEY);
+      if (!value) return null;
+      try {
+        return JSON.parse(value) as PendingSignInPayload;
+      } catch {
+        window.sessionStorage.removeItem(PENDING_SIGNIN_STORAGE_KEY);
+        return null;
+      }
+    }, []);
 
   React.useEffect(() => {
     if (!user?.id) return;

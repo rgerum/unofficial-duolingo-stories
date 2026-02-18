@@ -317,13 +317,7 @@ function parseBlockHeader(stream: StringStream, state: State) {
     }
     const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
     if (hintPrefix) {
-      startLine(
-        state,
-        1,
-        true,
-        hintPrefix === "~" ? "trans" : "pron",
-        true,
-      );
+      startLine(state, 1, true, hintPrefix === "~" ? "trans" : "pron", true);
       return STATE_DEFAULT;
     }
     if (state.block.allow_audio && stream.eat("$")) {
@@ -353,13 +347,7 @@ function parseBlockLine(stream: StringStream, state: State) {
     }
     const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
     if (hintPrefix) {
-      startLine(
-        state,
-        1,
-        true,
-        hintPrefix === "~" ? "trans" : "pron",
-        true,
-      );
+      startLine(state, 1, true, hintPrefix === "~" ? "trans" : "pron", true);
       return STATE_DEFAULT;
     }
     if (state.block.allow_audio && stream.eat("$")) {

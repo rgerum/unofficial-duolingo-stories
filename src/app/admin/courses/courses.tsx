@@ -418,7 +418,9 @@ function TableRow({
       className="odd:bg-[var(--body-background)] even:bg-[color:color-mix(in_srgb,var(--body-background-faint)_74%,transparent)] hover:brightness-95"
     >
       <td className="px-4 py-2.5">{course.id}</td>
-      <td className="px-3 py-2.5">{<Link href={"/" + course.short}>{course.short}</Link>}</td>
+      <td className="px-3 py-2.5">
+        {<Link href={"/" + course.short}>{course.short}</Link>}
+      </td>
       <td className="px-3 py-2.5">
         <FlagName lang={course.learning_language} languages={languages} />
       </td>
@@ -537,14 +539,52 @@ export function CourseList({
             <tr>
               <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"></th>
               <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"></th>
-              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="0">learning_language</th>
-              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="1">from_language</th>
-              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="1">public</th>
-              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="2">name</th>
-              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="2">conlang</th>
-              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="2">tags</th>
-              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="3">about</th>
-              <th className="sticky top-0 right-0 z-[3] min-w-[138px] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]" data-js-sort-colnum="4"></th>
+              <th
+                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                data-js-sort-colnum="0"
+              >
+                learning_language
+              </th>
+              <th
+                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                data-js-sort-colnum="1"
+              >
+                from_language
+              </th>
+              <th
+                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                data-js-sort-colnum="1"
+              >
+                public
+              </th>
+              <th
+                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                data-js-sort-colnum="2"
+              >
+                name
+              </th>
+              <th
+                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                data-js-sort-colnum="2"
+              >
+                conlang
+              </th>
+              <th
+                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                data-js-sort-colnum="2"
+              >
+                tags
+              </th>
+              <th
+                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                data-js-sort-colnum="3"
+              >
+                about
+              </th>
+              <th
+                className="sticky top-0 right-0 z-[3] min-w-[138px] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                data-js-sort-colnum="4"
+              ></th>
             </tr>
           </thead>
           <tbody>

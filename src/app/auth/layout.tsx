@@ -32,7 +32,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           backgroundPosition: "-373px -154px",
         }}
       />
-      <div className="m-5 flex w-[375px] flex-col gap-2 text-center">{children}</div>
+      <div className="m-5 flex w-[375px] flex-col gap-2 text-center">
+        {children}
+      </div>
     </div>
   );
 }

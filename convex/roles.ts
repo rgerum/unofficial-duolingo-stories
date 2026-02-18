@@ -52,8 +52,7 @@ export const setBetterAuthRolesBatch = action({
 
         updated += 1;
       } catch (error: unknown) {
-        const message =
-          error instanceof Error ? error.message : String(error);
+        const message = error instanceof Error ? error.message : String(error);
         errors.push({
           email,
           message,

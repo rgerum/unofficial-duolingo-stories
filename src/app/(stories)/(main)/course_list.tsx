@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
-import LanguageButton, { type LandingCourseButtonData } from "./language_button";
+import LanguageButton, {
+  type LandingCourseButtonData,
+} from "./language_button";
 import { api } from "@convex/_generated/api";
 import { type Preloaded, usePreloadedQuery } from "convex/react";
 import type { Id } from "@convex/_generated/dataModel";

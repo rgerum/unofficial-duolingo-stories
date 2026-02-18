@@ -61,7 +61,9 @@ export async function POST(req: NextRequest) {
   for (const engine of audio_engines) {
     if (await engine.isValidVoice(speaker)) {
       try {
-        console.log(`[Audio] Using engine: ${engine.name} for speaker: ${speaker}`);
+        console.log(
+          `[Audio] Using engine: ${engine.name} for speaker: ${speaker}`,
+        );
         answer = await engine.synthesizeSpeech(filename, speaker, text);
         answer.engine = engine.name;
         break;

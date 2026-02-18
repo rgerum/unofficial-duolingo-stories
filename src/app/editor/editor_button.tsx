@@ -39,7 +39,12 @@ export default function EditorButton({
         }}
       >
         <label className="relative my-[9px] inline-block h-[17px] w-[30px]">
-          <input type="checkbox" checked={checked} readOnly className="peer sr-only" />
+          <input
+            type="checkbox"
+            checked={checked}
+            readOnly
+            className="peer sr-only"
+          />
           <span className="absolute inset-0 cursor-pointer rounded-[17px] bg-[var(--overview-hr)] transition-all peer-checked:bg-[var(--button-background)] peer-focus:shadow-[0_0_1px_var(--button-border)]" />
           <span className="pointer-events-none absolute bottom-[2px] left-[2px] h-[13px] w-[13px] rounded-full bg-[var(--body-background)] transition-transform peer-checked:translate-x-[13px]" />
         </label>
@@ -57,19 +62,18 @@ export default function EditorButton({
         onClick={onClick}
       >
         <div className={iconWrapClassName}>
-          <img className={iconClassName} alt={alt} src={`/editor/icons/${img}`} />
+          <img
+            className={iconClassName}
+            alt={alt}
+            src={`/editor/icons/${img}`}
+          />
         </div>
         <span className={textClassName}>{text}</span>
       </Link>
     );
   }
   return (
-    <div
-      style={style}
-      id={id}
-      className={baseClassName}
-      onClick={onClick}
-    >
+    <div style={style} id={id} className={baseClassName} onClick={onClick}>
       <div className={iconWrapClassName}>
         <img className={iconClassName} alt={alt} src={`/editor/icons/${img}`} />
       </div>

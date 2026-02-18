@@ -29,7 +29,11 @@ export default function Cast(props: {
         <p className="my-[1em] leading-[1.2]">
           {no_speaker_count} characters do not have a speaker voice assigned. Go
           to the{" "}
-          <Link className="underline underline-offset-2" target="_blank" href={"/editor/language/" + props.short}>
+          <Link
+            className="underline underline-offset-2"
+            target="_blank"
+            href={"/editor/language/" + props.short}
+          >
             Character-Editor
           </Link>{" "}
           to add the voices.
@@ -37,7 +41,11 @@ export default function Cast(props: {
       ) : (
         <p className="my-[1em] leading-[1.2]">
           To change voices or names go to the{" "}
-          <Link className="underline underline-offset-2" target="_blank" href={"/editor/language/" + props.short}>
+          <Link
+            className="underline underline-offset-2"
+            target="_blank"
+            href={"/editor/language/" + props.short}
+          >
             Character-Editor
           </Link>
           .
@@ -45,11 +53,19 @@ export default function Cast(props: {
       )}
       <p className="my-[1em] leading-[1.2]">
         Use these links to share this story with other contributors to{" "}
-        <Link className="underline underline-offset-2" href={`/story/${props.id}`} target={"_blank"}>
+        <Link
+          className="underline underline-offset-2"
+          href={`/story/${props.id}`}
+          target={"_blank"}
+        >
           test
         </Link>{" "}
         or{" "}
-        <Link className="underline underline-offset-2" href={`/story/${props.id}/test`} target={"_blank"}>
+        <Link
+          className="underline underline-offset-2"
+          href={`/story/${props.id}/test`}
+          target={"_blank"}
+        >
           review
         </Link>{" "}
         the story. (or review{" "}
@@ -61,7 +77,11 @@ export default function Cast(props: {
           without the exercises
         </Link>
         ){" "}
-        <Link className="underline underline-offset-2" href={`/story/${props.id}/script`} target={"_blank"}>
+        <Link
+          className="underline underline-offset-2"
+          href={`/story/${props.id}/script`}
+          target={"_blank"}
+        >
           Story Script
         </Link>
       </p>
@@ -79,7 +99,11 @@ function Character(props: {
         {character.id}
       </td>
       <td className="py-1 pr-3 align-middle">
-        <img alt={"speaker head"} className="h-[50px] w-[50px]" src={character.link} />
+        <img
+          alt={"speaker head"}
+          className="h-[50px] w-[50px]"
+          src={character.link}
+        />
       </td>
       <td className="py-1 pr-3 align-middle leading-[1.2]">{character.name}</td>
       <td className="py-1 align-middle">

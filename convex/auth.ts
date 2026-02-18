@@ -23,9 +23,9 @@ export const getCurrentUser = query({
 export const getLinkedProvidersForCurrentUser = query({
   args: {},
   handler: async (ctx) => {
-    const identity = (await ctx.auth.getUserIdentity()) as
-      | { email?: string | null }
-      | null;
+    const identity = (await ctx.auth.getUserIdentity()) as {
+      email?: string | null;
+    } | null;
     const email = identity?.email?.toLowerCase();
     if (!email) return [] as string[];
 
@@ -36,11 +36,14 @@ export const getLinkedProvidersForCurrentUser = query({
 
     if (!authUser?._id) return [] as string[];
 
-    const accounts = await ctx.runQuery(components.betterAuth.adapter.findMany, {
-      model: "account",
-      where: [{ field: "userId", value: authUser._id }],
-      paginationOpts: { cursor: null, numItems: 100 },
-    });
+    const accounts = await ctx.runQuery(
+      components.betterAuth.adapter.findMany,
+      {
+        model: "account",
+        where: [{ field: "userId", value: authUser._id }],
+        paginationOpts: { cursor: null, numItems: 100 },
+      },
+    );
 
     const providers = (accounts.page as Array<{ providerId?: string | null }>)
       .map((account) => account.providerId)
@@ -58,7 +61,8 @@ export const getUserNamesByLegacyIds = query({
     await requireContributorOrAdmin(ctx);
 
     const uniqueIds = Array.from(new Set(args.legacyIds));
-    if (!uniqueIds.length) return [] as Array<{ legacyId: number; name: string }>;
+    if (!uniqueIds.length)
+      return [] as Array<{ legacyId: number; name: string }>;
 
     const userIds = uniqueIds.map((id) => String(id));
     const users = await ctx.runQuery(components.betterAuth.adapter.findMany, {
@@ -67,7 +71,9 @@ export const getUserNamesByLegacyIds = query({
       paginationOpts: { cursor: null, numItems: userIds.length + 10 },
     });
 
-    return (users.page as Array<{ userId?: string | null; name?: string | null }>)
+    return (
+      users.page as Array<{ userId?: string | null; name?: string | null }>
+    )
       .map((user) => {
         const legacyId = Number.parseInt(user.userId ?? "", 10);
         if (!Number.isFinite(legacyId) || !user.name) return null;

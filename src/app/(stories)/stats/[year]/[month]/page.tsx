@@ -29,8 +29,8 @@ export default async function Page({
         Report {monthLabel} {year}
       </h1>
       <p>
-        Statistics pages are temporarily deprecated while we migrate reporting to a
-        dedicated aggregate pipeline.
+        Statistics pages are temporarily deprecated while we migrate reporting
+        to a dedicated aggregate pipeline.
       </p>
     </div>
   );

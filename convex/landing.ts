@@ -116,7 +116,8 @@ export const getPublicCourseList = query({
               : learningLanguageName,
           count: course.count ?? 0,
           about: course.about ?? "",
-          from_language: legacyLanguageIdByConvexId.get(course.fromLanguageId) ?? 0,
+          from_language:
+            legacyLanguageIdByConvexId.get(course.fromLanguageId) ?? 0,
           fromLanguageId: course.fromLanguageId as Id<"languages">,
           from_language_name: fromLanguageName,
           learning_language:
@@ -143,7 +144,9 @@ export const getPublicCourseList = query({
         } => course !== null,
       )
       .sort((a, b) => {
-        const fromCmp = a.from_language_name.localeCompare(b.from_language_name);
+        const fromCmp = a.from_language_name.localeCompare(
+          b.from_language_name,
+        );
         if (fromCmp !== 0) return fromCmp;
         return a.name.localeCompare(b.name);
       });
@@ -179,7 +182,10 @@ export const getPublicLandingPageData = query({
         language: await ctx.db.get(languageId),
       })),
     );
-    const languageById = new Map<Id<"languages">, (typeof languageRows)[number]["language"]>();
+    const languageById = new Map<
+      Id<"languages">,
+      (typeof languageRows)[number]["language"]
+    >();
     for (const row of languageRows) {
       if (!row.language) continue;
       languageById.set(row.languageId, row.language);
@@ -202,7 +208,10 @@ export const getPublicLandingPageData = query({
     const fromLanguageIds = Array.from(
       new Set(courses.map((course) => course.fromLanguageId)),
     );
-    const localizationByFromLanguageId = new Map<Id<"languages">, Map<string, string>>();
+    const localizationByFromLanguageId = new Map<
+      Id<"languages">,
+      Map<string, string>
+    >();
     await Promise.all(
       fromLanguageIds.map(async (fromLanguageId) => {
         const targetRows =
@@ -223,7 +232,10 @@ export const getPublicLandingPageData = query({
       }),
     );
 
-    const coursesByFromLanguageId = new Map<Id<"languages">, LandingCourseItem[]>();
+    const coursesByFromLanguageId = new Map<
+      Id<"languages">,
+      LandingCourseItem[]
+    >();
     for (const course of courses) {
       if (!course.short) continue;
       const fromLanguage = languageById.get(course.fromLanguageId);
@@ -272,7 +284,8 @@ export const getPublicLandingPageData = query({
     const groups = orderedGroupIds
       .map((fromLanguageId) => {
         const fromLanguage = languageById.get(fromLanguageId);
-        const coursesInGroup = coursesByFromLanguageId.get(fromLanguageId) ?? [];
+        const coursesInGroup =
+          coursesByFromLanguageId.get(fromLanguageId) ?? [];
         if (!fromLanguage || coursesInGroup.length === 0) return null;
         const localization = localizationByFromLanguageId.get(fromLanguageId);
 
@@ -281,7 +294,8 @@ export const getPublicLandingPageData = query({
           fromLanguageName: fromLanguage.name,
           labels: {
             storiesFor: localization?.get("stories_for") ?? "Stories for",
-            nStoriesTemplate: localization?.get("n_stories") ?? "$count stories",
+            nStoriesTemplate:
+              localization?.get("n_stories") ?? "$count stories",
           },
           courses: coursesInGroup,
         };
@@ -297,7 +311,10 @@ export const getPublicLandingPageData = query({
 
     return {
       stats: {
-        courseCount: groups.reduce((count, group) => count + group.courses.length, 0),
+        courseCount: groups.reduce(
+          (count, group) => count + group.courses.length,
+          0,
+        ),
         storyCount,
       },
       groups,
@@ -375,7 +392,10 @@ export const getPublicCoursePageData = query({
         image: await ctx.db.get(imageId),
       })),
     );
-    const imageById = new Map<Id<"images">, (typeof imageRows)[number]["image"]>();
+    const imageById = new Map<
+      Id<"images">,
+      (typeof imageRows)[number]["image"]
+    >();
     for (const row of imageRows) imageById.set(row.imageId, row.image);
 
     const englishLanguage = await ctx.db
@@ -465,10 +485,12 @@ export const getPublicCoursePageData = query({
       learningLanguageId: course.learningLanguageId as Id<"languages">,
       learning_language_name: learningLanguageName,
       stories: mappedStories,
-      localization: Array.from(localizationMap.entries()).map(([tag, text]) => ({
-        tag,
-        text,
-      })),
+      localization: Array.from(localizationMap.entries()).map(
+        ([tag, text]) => ({
+          tag,
+          text,
+        }),
+      ),
     };
   },
 });

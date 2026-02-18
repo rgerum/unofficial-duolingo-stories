@@ -5,9 +5,7 @@ import { api } from "@convex/_generated/api";
 import { SpinnerBlue } from "@/components/ui/spinner";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
-import {
-  CourseImportProps,
-} from "@/app/editor/(course)/types";
+import { CourseImportProps } from "@/app/editor/(course)/types";
 
 export default function ImportList({
   courseId,
@@ -34,7 +32,11 @@ export default function ImportList({
   const importStoryMutation = useMutation(api.storyWrite.importStory);
   const router = useRouter();
 
-  if (course === undefined || courseFrom === undefined || imports === undefined) {
+  if (
+    course === undefined ||
+    courseFrom === undefined ||
+    imports === undefined
+  ) {
     return <Spinner />;
   }
 

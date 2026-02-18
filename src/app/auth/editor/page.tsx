@@ -17,10 +17,7 @@ export default function Page() {
         You might need to login and out again after you got access to the
         editor.
       </p>
-      <Link
-        href="/auth/signin"
-        className={authPrimaryBlueActionClass}
-      >
+      <Link href="/auth/signin" className={authPrimaryBlueActionClass}>
         Log In
       </Link>
     </>

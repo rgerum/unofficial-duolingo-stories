@@ -39,9 +39,7 @@ export default function Button({
 
   return (
     <button className={`${baseClass}${primaryClass}`} {...delegated}>
-      <span className={`${wrapperClass}${wrapperToneClass}`}>
-        {children}
-      </span>
+      <span className={`${wrapperClass}${wrapperToneClass}`}>{children}</span>
     </button>
   );
 }

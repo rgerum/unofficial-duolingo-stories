@@ -18,7 +18,11 @@ const storyValidator = {
   public: v.boolean(),
   legacyImageId: v.optional(v.string()),
   legacyCourseId: v.number(),
-  status: v.union(v.literal("draft"), v.literal("feedback"), v.literal("finished")),
+  status: v.union(
+    v.literal("draft"),
+    v.literal("feedback"),
+    v.literal("finished"),
+  ),
   approvalCount: v.optional(v.number()),
   deleted: v.boolean(),
   todo_count: v.number(),

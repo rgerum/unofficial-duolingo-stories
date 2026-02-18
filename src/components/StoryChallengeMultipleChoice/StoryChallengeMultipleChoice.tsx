@@ -88,7 +88,11 @@ function StoryChallengeMultipleChoice({
 
   return (
     <>
-      <FadeGlideIn key={`${id}-1`} hidden={hidden} disableScroll={settings.show_all}>
+      <FadeGlideIn
+        key={`${id}-1`}
+        hidden={hidden}
+        disableScroll={settings.show_all}
+      >
         <StoryTextLine
           key={part_one.trackingProperties.line_index}
           active={active && partProgress === 0}

@@ -58,7 +58,9 @@ function hashCryptPrivate(password: string, setting: string): string {
     return output;
   }
 
-  let hash = md5Bytes(concatBytes(encoder.encode(salt), encoder.encode(password)));
+  let hash = md5Bytes(
+    concatBytes(encoder.encode(salt), encoder.encode(password)),
+  );
 
   do {
     hash = md5Bytes(concatBytes(hash, encoder.encode(password)));

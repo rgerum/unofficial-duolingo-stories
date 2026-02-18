@@ -68,11 +68,7 @@ function BreadcrumbPart({
     if (!part.lang2) {
       return (
         <MyLink className={class_name} href={part.href}>
-          <DoubleFlag
-            width={40}
-            lang1={part.lang1 ?? {}}
-            className="m-0"
-          />
+          <DoubleFlag width={40} lang1={part.lang1 ?? {}} className="m-0" />
           {part.lang1?.name ? (
             <span className="overflow-hidden text-ellipsis whitespace-nowrap">{`${
               part?.name || part.lang1?.name
@@ -82,18 +78,18 @@ function BreadcrumbPart({
       );
     }
     return (
-        <MyLink className={class_name} href={part.href}>
-          <DoubleFlag
-            width={40}
-            lang1={part.lang1 ?? {}}
-            lang2={part.lang2}
-            className="m-0"
-          />
-          {part.lang1?.name && part.lang2?.name ? (
-            <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-              {part?.name || `${part.lang1?.name} (from ${part.lang2?.name})`}
-            </span>
-          ) : null}
+      <MyLink className={class_name} href={part.href}>
+        <DoubleFlag
+          width={40}
+          lang1={part.lang1 ?? {}}
+          lang2={part.lang2}
+          className="m-0"
+        />
+        {part.lang1?.name && part.lang2?.name ? (
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+            {part?.name || `${part.lang1?.name} (from ${part.lang2?.name})`}
+          </span>
+        ) : null}
       </MyLink>
     );
   }
@@ -124,11 +120,7 @@ function BreadcrumbPart({
   );
 }
 
-export function Breadcrumbs({
-  path,
-}: {
-  path: BreadcrumbPartData[];
-}) {
+export function Breadcrumbs({ path }: { path: BreadcrumbPartData[] }) {
   let link;
   let hide = path.length > 3;
   for (let part of path) {

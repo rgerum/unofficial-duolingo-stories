@@ -295,9 +295,7 @@ FRAGMENTS:
           <div
             className={
               "h-[calc(100vh-64px)] w-full overflow-y-auto " +
-              (hasVoices
-                ? "ml-2 sm:w-[calc(100vw-400px)]"
-                : "sm:w-full")
+              (hasVoices ? "ml-2 sm:w-[calc(100vw-400px)]" : "sm:w-full")
             }
           >
             <h2 className="mb-4 text-[1.5em] font-bold">Input Text</h2>
@@ -310,7 +308,9 @@ FRAGMENTS:
                 } as React.ChangeEvent<HTMLInputElement>)
               }
             />
-            <h2 className="mb-4 mt-8 text-[1.5em] font-bold">Transcribed Text</h2>
+            <h2 className="mb-4 mt-8 text-[1.5em] font-bold">
+              Transcribed Text
+            </h2>
             <span className="block">{text2}</span>
             <h2 className="mb-4 mt-8 text-[1.5em] font-bold">Final Text</h2>
             <span className={language.short}>
@@ -350,7 +350,7 @@ FRAGMENTS:
                 onClick={process}
                 disabled={yamlError}
               >
-              save
+                save
               </button>
             </div>
             {yamlError ? (

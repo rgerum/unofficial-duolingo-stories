@@ -48,7 +48,11 @@ export const getDoneStoryIdsForCourse = query({
       .unique();
     if (!course) return [];
 
-    return await getDoneStoryIdsForCourseIdAndUser(ctx, course._id, args.legacyUserId);
+    return await getDoneStoryIdsForCourseIdAndUser(
+      ctx,
+      course._id,
+      args.legacyUserId,
+    );
   },
 });
 
@@ -67,7 +71,11 @@ export const getDoneStoryIdsForCurrentUserInCourse = query({
       .unique();
     if (!course) return [];
 
-    return await getDoneStoryIdsForCourseIdAndUser(ctx, course._id, legacyUserId);
+    return await getDoneStoryIdsForCourseIdAndUser(
+      ctx,
+      course._id,
+      legacyUserId,
+    );
   },
 });
 

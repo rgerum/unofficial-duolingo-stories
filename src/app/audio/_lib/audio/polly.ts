@@ -98,7 +98,10 @@ async function synthesizeSpeechPolly(
     TextType: "ssml",
     Engine: voice_data?.type === "NEURAL" ? "neural" : "standard",
   };
-  console.log("[Polly] Synthesis params:", { ...params, Text: params.Text?.substring(0, 100) + "..." });
+  console.log("[Polly] Synthesis params:", {
+    ...params,
+    Text: params.Text?.substring(0, 100) + "...",
+  });
 
   // Call the synthesizeSpeech method to generate the audio
   let data: SynthesizeSpeechOutput;
@@ -106,7 +109,10 @@ async function synthesizeSpeechPolly(
     data = await synthesizeSpeechCall(polly, params);
     console.log("[Polly] Synthesis successful");
   } catch (e) {
-    console.error("[Polly] Initial synthesis failed:", e instanceof Error ? e.message : e);
+    console.error(
+      "[Polly] Initial synthesis failed:",
+      e instanceof Error ? e.message : e,
+    );
     if (e instanceof Error && e.message.indexOf("feature") !== -1) {
       console.log("[Polly] Retrying without pitch attribute");
       params.Text = params.Text!.replace(/pitch="[^"]*"/, "");

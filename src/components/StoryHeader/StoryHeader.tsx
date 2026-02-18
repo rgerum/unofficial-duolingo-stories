@@ -9,7 +9,10 @@ import EditorSSMLDisplay from "../EditorSSMLDisplay";
 import { StoryElementHeader } from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor";
-import { getEditorHandlers, type EditorProps } from "@/lib/editor/editorHandlers";
+import {
+  getEditorHandlers,
+  type EditorProps,
+} from "@/lib/editor/editorHandlers";
 
 function StoryHeader({
   active,

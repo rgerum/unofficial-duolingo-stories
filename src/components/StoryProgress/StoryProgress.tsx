@@ -273,7 +273,10 @@ function StoryProgress({
           </AnimatePresence>
           <div className={styles.spacer}></div>
           {storyProgress === parts_list.length && (
-            <StoryFinishedScreen story={story} disableScroll={settings.show_all} />
+            <StoryFinishedScreen
+              story={story}
+              disableScroll={settings.show_all}
+            />
           )}
         </div>
         {!settings.show_all && storyProgress !== -1 && (

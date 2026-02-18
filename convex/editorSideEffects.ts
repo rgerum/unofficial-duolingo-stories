@@ -234,7 +234,11 @@ export const onStoryApprovalToggled = internalAction({
     storyId: v.number(),
     action: v.union(v.literal("added"), v.literal("deleted")),
     count: v.number(),
-    storyStatus: v.union(v.literal("draft"), v.literal("feedback"), v.literal("finished")),
+    storyStatus: v.union(
+      v.literal("draft"),
+      v.literal("feedback"),
+      v.literal("finished"),
+    ),
     finishedInSet: v.number(),
     publishedCount: v.number(),
     actorName: v.string(),

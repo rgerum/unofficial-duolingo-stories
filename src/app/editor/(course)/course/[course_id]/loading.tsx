@@ -12,7 +12,7 @@ export default function Loading() {
   return (
     <div className="flex min-h-[calc(100vh-300px)] flex-col">
       <div className="mb-[-75px] text-center text-[30px]">Loading</div>
-        <Spinner />
+      <Spinner />
     </div>
   );
 }

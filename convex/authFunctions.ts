@@ -18,9 +18,9 @@ export const onCreate = internalMutation({
       const page = (await ctx.runQuery(
         components.betterAuth.adapter.findMany as any,
         {
-        model: "user",
-        where: [],
-        paginationOpts: { cursor, numItems: 1000 },
+          model: "user",
+          where: [],
+          paginationOpts: { cursor, numItems: 1000 },
         },
       )) as any;
 
@@ -29,7 +29,7 @@ export const onCreate = internalMutation({
         if (!Number.isNaN(parsed) && parsed > maxId) maxId = parsed;
       }
 
-      cursor = page.isDone ? null : page.continueCursor ?? null;
+      cursor = page.isDone ? null : (page.continueCursor ?? null);
     } while (cursor);
 
     const nextId = maxId + 1;

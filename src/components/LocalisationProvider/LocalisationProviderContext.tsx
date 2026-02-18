@@ -2,9 +2,7 @@
 import React from "react";
 import get_localisation_func from "@/lib/get_localisation_func";
 
-const localisationContext = React.createContext(
-  {} as Record<string, string>,
-);
+const localisationContext = React.createContext({} as Record<string, string>);
 
 export function useLocalisation() {
   const data = React.useContext(localisationContext);

@@ -121,18 +121,18 @@ export default function Editor({
   const margin = React.useRef<SVGSVGElement>(null);
   const svg_parent = React.useRef<SVGSVGElement>(null);
 
-  const language_data =
-    (useQuery(api.editorRead.getEditorLanguageByLegacyId, {
-      legacyLanguageId: story_data.learning_language,
-    }) ?? undefined) as LanguageData | undefined;
-  const language_data2 =
-    (useQuery(api.editorRead.getEditorLanguageByLegacyId, {
-      legacyLanguageId: story_data.from_language,
-    }) ?? undefined) as LanguageData | undefined;
+  const language_data = (useQuery(api.editorRead.getEditorLanguageByLegacyId, {
+    legacyLanguageId: story_data.learning_language,
+  }) ?? undefined) as LanguageData | undefined;
+  const language_data2 = (useQuery(api.editorRead.getEditorLanguageByLegacyId, {
+    legacyLanguageId: story_data.from_language,
+  }) ?? undefined) as LanguageData | undefined;
   const storyDataRef = React.useRef(story_data);
   const avatarNamesRef = React.useRef(avatar_names);
   const languageDataRef = React.useRef<LanguageData | undefined>(language_data);
-  const languageData2Ref = React.useRef<LanguageData | undefined>(language_data2);
+  const languageData2Ref = React.useRef<LanguageData | undefined>(
+    language_data2,
+  );
 
   React.useEffect(() => {
     storyDataRef.current = story_data;
@@ -528,7 +528,10 @@ export default function Editor({
             className="pointer-events-none fixed z-[-1] h-full w-full float-left"
             ref={svg_parent}
           >
-            <path className="fill-[var(--svg-fill)] stroke-[var(--svg-stroke)]" d=""></path>
+            <path
+              className="fill-[var(--svg-fill)] stroke-[var(--svg-stroke)]"
+              d=""
+            ></path>
           </svg>
           <div
             className={

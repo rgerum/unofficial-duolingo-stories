@@ -29,8 +29,12 @@ interface EditLanguageProps {
 function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
-  const createLanguageMutation = useMutation(api.adminWrite.createAdminLanguage);
-  const updateLanguageMutation = useMutation(api.adminWrite.updateAdminLanguage);
+  const createLanguageMutation = useMutation(
+    api.adminWrite.createAdminLanguage,
+  );
+  const updateLanguageMutation = useMutation(
+    api.adminWrite.updateAdminLanguage,
+  );
 
   const [name, setName] = useState(obj.name);
   const [short, setShort] = useState(obj.short);
@@ -97,9 +101,24 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
             ? "Add a new language. Click save when you're done."
             : "Make changes to a language. Click save when you're done."}
         </EditDialog.DialogDescription>
-        <EditDialog.InputText name="Name" label="name" value={name} setValue={setName} />
-        <EditDialog.InputText name="Short" label="short" value={short} setValue={setShort} />
-        <EditDialog.InputText name="Flag" label="flag" value={flag} setValue={setFlag} />
+        <EditDialog.InputText
+          name="Name"
+          label="name"
+          value={name}
+          setValue={setName}
+        />
+        <EditDialog.InputText
+          name="Short"
+          label="short"
+          value={short}
+          setValue={setShort}
+        />
+        <EditDialog.InputText
+          name="Flag"
+          label="flag"
+          value={flag}
+          setValue={setFlag}
+        />
         <EditDialog.InputText
           name="Flag File"
           label="flag_file"
@@ -112,7 +131,12 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
           value={speaker}
           setValue={setSpeaker}
         />
-        <EditDialog.InputBool name="RTL" label="rtl" value={rtl} setValue={setRTL} />
+        <EditDialog.InputBool
+          name="RTL"
+          label="rtl"
+          value={rtl}
+          setValue={setRTL}
+        />
         <div className="mt-[25px] flex flex-wrap justify-between gap-2">
           {error ? (
             <div className="rounded-[10px] bg-[var(--error-red)] p-2.5 text-white">
@@ -143,10 +167,21 @@ function TableRow({ lang, updateLanguage }: TableRowProps) {
       { opacity: 0, filter: "blur(10px) saturate(0)" },
       { opacity: 1, filter: "" },
     ];
-    const attributes = ["id", "", "name", "short", "flag", "flag_file", "speaker", "rtl"];
+    const attributes = [
+      "id",
+      "",
+      "name",
+      "short",
+      "flag",
+      "flag_file",
+      "speaker",
+      "rtl",
+    ];
 
     function checkEqual(attribute: string) {
-      const newVal = (newCourse as unknown as Record<string, unknown>)[attribute];
+      const newVal = (newCourse as unknown as Record<string, unknown>)[
+        attribute
+      ];
       const oldVal = (lang as unknown as Record<string, unknown>)[attribute];
       return newVal === oldVal;
     }
@@ -163,10 +198,18 @@ function TableRow({ lang, updateLanguage }: TableRowProps) {
   }
 
   return (
-    <tr ref={refRow} className="odd:bg-[var(--body-background)] even:bg-[color:color-mix(in_srgb,var(--body-background-faint)_74%,transparent)] hover:brightness-95">
+    <tr
+      ref={refRow}
+      className="odd:bg-[var(--body-background)] even:bg-[color:color-mix(in_srgb,var(--body-background-faint)_74%,transparent)] hover:brightness-95"
+    >
       <td className="px-4 py-2.5">{lang.id}</td>
       <td className="px-3 py-2.5">
-        <Flag iso={lang.short} width={40} flag={lang.flag} flag_file={lang.flag_file} />
+        <Flag
+          iso={lang.short}
+          width={40}
+          flag={lang.flag}
+          flag_file={lang.flag_file}
+        />
       </td>
       <td className="px-3 py-2.5">{lang.name}</td>
       <td className="px-3 py-2.5">{lang.short}</td>
@@ -224,19 +267,32 @@ export default function LanguageList({ all_languages }: LanguageListProps) {
         />
       </div>
       <div className="relative isolate overflow-auto rounded-[14px] border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]">
-        <table id="story_list" data-cy="story_list" className="w-full min-w-[940px] border-collapse" data-js-sort-table="true">
+        <table
+          id="story_list"
+          data-cy="story_list"
+          className="w-full min-w-[940px] border-collapse"
+          data-js-sort-table="true"
+        >
           <thead>
             <tr>
-              {["ID", "", "Name", "ISO", "Duo Flag", "Flag File", "Default Voice", "RTL", ""].map(
-                (header, idx) => (
-                  <th
-                    key={`${header}-${idx}`}
-                    className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                  >
-                    {header}
-                  </th>
-                ),
-              )}
+              {[
+                "ID",
+                "",
+                "Name",
+                "ISO",
+                "Duo Flag",
+                "Flag File",
+                "Default Voice",
+                "RTL",
+                "",
+              ].map((header, idx) => (
+                <th
+                  key={`${header}-${idx}`}
+                  className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                >
+                  {header}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>

@@ -108,7 +108,10 @@ export function LoggedInButton({
 
   if (user === undefined)
     return (
-      <Button onClick={() => router.push("/auth/signin")} data-cy="login-button">
+      <Button
+        onClick={() => router.push("/auth/signin")}
+        data-cy="login-button"
+      >
         Log in
       </Button>
     );
@@ -128,7 +131,11 @@ export function LoggedInButton({
         {(user.name ?? "").substring(0, 1)}
       </div>
       <div>
-        <Link className={dropdownButtonClass} href={"/profile"} data-cy="user-profile">
+        <Link
+          className={dropdownButtonClass}
+          href={"/profile"}
+          data-cy="user-profile"
+        >
           Profile
         </Link>
         {
@@ -147,22 +154,38 @@ export function LoggedInButton({
           </div>
         }
         {canContribute && page !== "stories" ? (
-          <Link className={dropdownButtonClass} href={stories_link} data-cy="user-stories">
+          <Link
+            className={dropdownButtonClass}
+            href={stories_link}
+            data-cy="user-stories"
+          >
             Stories
           </Link>
         ) : null}
         {canContribute && page !== "editor" ? (
-          <Link className={dropdownButtonClass} href={editor_link} data-cy="user-editor">
+          <Link
+            className={dropdownButtonClass}
+            href={editor_link}
+            data-cy="user-editor"
+          >
             Editor
           </Link>
         ) : null}
         {canContribute && page !== "docs" ? (
-          <Link className={dropdownButtonClass} href={"/docs"} data-cy="user-docs">
+          <Link
+            className={dropdownButtonClass}
+            href={"/docs"}
+            data-cy="user-docs"
+          >
             Docs
           </Link>
         ) : null}
         {isAdminUser && page !== "admin" ? (
-          <Link className={dropdownButtonClass} href={"/admin"} data-cy="user-admin">
+          <Link
+            className={dropdownButtonClass}
+            href={"/admin"}
+            data-cy="user-admin"
+          >
             Admin
           </Link>
         ) : null}

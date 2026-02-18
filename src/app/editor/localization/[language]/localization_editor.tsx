@@ -51,7 +51,9 @@ export default function LocalizationEditor({
   }
 
   const language = resolved.language as LanguageType;
-  const language2 = (resolved.language2 ?? undefined) as LanguageType | undefined;
+  const language2 = (resolved.language2 ?? undefined) as
+    | LanguageType
+    | undefined;
   const course = (resolved.course ?? undefined) as CourseType | undefined;
 
   return (
@@ -109,7 +111,9 @@ function ListLocalizations({
   language_name: string;
   rows: LocalizationRow[];
 }) {
-  const setLocalizationMutation = useMutation(api.localizationWrite.setLocalization);
+  const setLocalizationMutation = useMutation(
+    api.localizationWrite.setLocalization,
+  );
 
   async function set_localization(tag: string, text: string) {
     await setLocalizationMutation({

@@ -68,8 +68,7 @@ export const mirrorLocalizationUpsert = internalAction({
   }),
   handler: async (_ctx, args) => {
     const sql = getSqlClient();
-    const rows =
-      await sql`INSERT INTO localization (tag, text, language_id)
+    const rows = await sql`INSERT INTO localization (tag, text, language_id)
       VALUES (${args.tag}, ${args.text}, ${args.legacyLanguageId})
       ON CONFLICT (tag, language_id)
       DO UPDATE SET text = EXCLUDED.text
@@ -312,7 +311,11 @@ export const mirrorStoryApprovalToggle = internalAction({
     storyId: v.number(),
     legacyUserId: v.number(),
     action: v.union(v.literal("added"), v.literal("deleted")),
-    storyStatus: v.union(v.literal("draft"), v.literal("feedback"), v.literal("finished")),
+    storyStatus: v.union(
+      v.literal("draft"),
+      v.literal("feedback"),
+      v.literal("finished"),
+    ),
     approvalCount: v.number(),
     finishedInSet: v.number(),
     publishedStoryIds: v.array(v.number()),
@@ -384,7 +387,11 @@ export const mirrorAdminApprovalDelete = internalAction({
   args: {
     storyId: v.number(),
     legacyApprovalId: v.number(),
-    storyStatus: v.union(v.literal("draft"), v.literal("feedback"), v.literal("finished")),
+    storyStatus: v.union(
+      v.literal("draft"),
+      v.literal("feedback"),
+      v.literal("finished"),
+    ),
     approvalCount: v.number(),
     operationKey: v.string(),
   },

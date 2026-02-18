@@ -77,20 +77,19 @@ const sendEmail = async ({
 };
 
 // Better Auth Component
-export const authComponent: ReturnType<typeof typedCreateClient> = typedCreateClient(
-  components.betterAuth,
-  {
-  local: { schema },
-  verbose: false,
-  authFunctions: {
-    onCreate: internal.authFunctions.onCreate,
-  },
-  triggers: {
-    user: {
-      onCreate: async () => {},
+export const authComponent: ReturnType<typeof typedCreateClient> =
+  typedCreateClient(components.betterAuth, {
+    local: { schema },
+    verbose: false,
+    authFunctions: {
+      onCreate: internal.authFunctions.onCreate,
     },
-  },
-});
+    triggers: {
+      user: {
+        onCreate: async () => {},
+      },
+    },
+  });
 
 // Better Auth Options
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {

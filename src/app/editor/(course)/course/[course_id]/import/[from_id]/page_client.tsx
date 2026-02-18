@@ -7,10 +7,7 @@ import { api } from "@convex/_generated/api";
 import { DoubleFlag } from "@/components/ui/flag";
 import ImportList from "./import_list";
 import { Spinner } from "@/components/ui/spinner";
-import type {
-  CourseProps,
-  LanguageProps,
-} from "@/app/editor/(course)/types";
+import type { CourseProps, LanguageProps } from "@/app/editor/(course)/types";
 
 function buildLanguageLookup(
   languages: Array<LanguageProps>,
@@ -84,10 +81,7 @@ export default function ImportPageClient({
           </Link>
         ))}
       </div>
-      <ImportList
-        courseId={courseId}
-        fromId={fromId}
-      />
+      <ImportList courseId={courseId} fromId={fromId} />
     </>
   );
 }

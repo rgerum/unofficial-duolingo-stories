@@ -39,13 +39,9 @@ export function useChoiceButtons(
     [buttonState, callRight, callWrong, rightIndex],
   );
 
-  useKeypress(
-    "number",
-    (value: KeyboardEvent | number) => {
-      if (typeof value === "number" && active && value <= count)
-        click(value - 1);
-    },
-  );
+  useKeypress("number", (value: KeyboardEvent | number) => {
+    if (typeof value === "number" && active && value <= count) click(value - 1);
+  });
 
   // return button states and click callback
   return [buttonState, click] as const;

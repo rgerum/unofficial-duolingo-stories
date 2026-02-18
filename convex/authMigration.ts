@@ -216,10 +216,7 @@ export const migrateLegacyUsersToBetterAuth = action({
       const username = `${baseUsername}${suffix}`;
 
       if (!dryRun) {
-        let newUser:
-          | { _id: string }
-          | null
-          | undefined = undefined;
+        let newUser: { _id: string } | null | undefined = undefined;
 
         try {
           newUser = await ctx.runMutation(
@@ -251,10 +248,12 @@ export const migrateLegacyUsersToBetterAuth = action({
 
         const newUserId =
           (newUser as { _id?: string } | null | undefined)?._id ??
-          (await ctx.runQuery(components.betterAuth.adapter.findOne, {
-            model: "user",
-            where: [{ field: "email", value: email }],
-          }))?._id;
+          (
+            await ctx.runQuery(components.betterAuth.adapter.findOne, {
+              model: "user",
+              where: [{ field: "email", value: email }],
+            })
+          )?._id;
 
         if (!newUserId) {
           skipped += 1;
@@ -428,15 +427,18 @@ export const importBetterAuthUsersBatch = action({
             },
           );
           if (!existing?._id) {
-            existing = await ctx.runQuery(components.betterAuth.adapter.findOne, {
-              model: "user",
-              where: [
-                {
-                  field: "userId",
-                  value: String(user.legacyId),
-                },
-              ],
-            });
+            existing = await ctx.runQuery(
+              components.betterAuth.adapter.findOne,
+              {
+                model: "user",
+                where: [
+                  {
+                    field: "userId",
+                    value: String(user.legacyId),
+                  },
+                ],
+              },
+            );
           }
           if (existing?._id) {
             newUserId = existing._id;
@@ -593,18 +595,15 @@ export const importBetterAuthAccountsBatch = action({
         skipped += 1;
         continue;
       }
-      let authUser = await ctx.runQuery(
-        components.betterAuth.adapter.findOne,
-        {
-          model: "user",
-          where: [
-            {
-              field: "userId",
-              value: String(account.legacyUserId),
-            },
-          ],
-        },
-      );
+      let authUser = await ctx.runQuery(components.betterAuth.adapter.findOne, {
+        model: "user",
+        where: [
+          {
+            field: "userId",
+            value: String(account.legacyUserId),
+          },
+        ],
+      });
 
       if (!authUser?._id) {
         missingUser += 1;

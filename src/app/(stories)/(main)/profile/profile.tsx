@@ -106,8 +106,9 @@ export default function Profile({ providers }: { providers: ProfileData }) {
 
         <h2 className={styles.sectionHeading}>Linked Accounts</h2>
         <span>
-          When you have linked your account to a login provider you can use these
-          providers instead of login in with username and password or email.
+          When you have linked your account to a login provider you can use
+          these providers instead of login in with username and password or
+          email.
         </span>
         <div className={styles.links}>
           {Object.entries(providers.provider_linked).map(([key, value]) => (
@@ -145,8 +146,9 @@ export default function Profile({ providers }: { providers: ProfileData }) {
         </p>
         {pendingEmailChange && (
           <span className={styles.resetMessage} data-cy="profile-email-pending">
-            Current email: {providers.email}. Pending change: {pendingEmailChange}
-            . Confirm the link sent to your new email to complete the update.
+            Current email: {providers.email}. Pending change:{" "}
+            {pendingEmailChange}. Confirm the link sent to your new email to
+            complete the update.
           </span>
         )}
         <input
@@ -161,7 +163,8 @@ export default function Profile({ providers }: { providers: ProfileData }) {
         )}
         {emailState === "success" && (
           <span className={styles.resetMessage} data-cy="profile-email-message">
-            Check your current email, then your new email for confirmation links.
+            Check your current email, then your new email for confirmation
+            links.
           </span>
         )}
         <Button

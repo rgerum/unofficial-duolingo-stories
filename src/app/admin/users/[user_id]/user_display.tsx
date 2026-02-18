@@ -11,7 +11,10 @@ import {
   setUserDeleteAction,
 } from "./actions";
 
-async function setUserActivated(data: { id: number; activated: 0 | 1 | boolean }) {
+async function setUserActivated(data: {
+  id: number;
+  activated: 0 | 1 | boolean;
+}) {
   return await setUserActivatedAction(data);
 }
 
@@ -76,7 +79,10 @@ export default function UserDisplay({ user }: { user: AdminUser }) {
     <div className="mx-auto my-6 mb-10 w-[min(860px,calc(100vw-32px))]">
       <div className="rounded-2xl border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-5 shadow-[0_16px_38px_color-mix(in_srgb,#000_14%,transparent)]">
         <div className="mb-3.5 flex flex-wrap items-center justify-between gap-3">
-          <Link className="whitespace-nowrap underline underline-offset-2" href="/admin/users">
+          <Link
+            className="whitespace-nowrap underline underline-offset-2"
+            href="/admin/users"
+          >
             Back to Users
           </Link>
           <Button onClick={removeUser}>Delete User</Button>
@@ -87,27 +93,41 @@ export default function UserDisplay({ user }: { user: AdminUser }) {
         </div>
 
         <div className="mt-3 mb-5 grid grid-cols-1 gap-x-3 gap-y-2 md:grid-cols-[160px_minmax(0,1fr)]">
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">User ID</div>
+          <div className="text-left text-[var(--text-color-dim)] md:text-right">
+            User ID
+          </div>
           <div className="min-w-0 break-words">{userData.id}</div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">Email</div>
+          <div className="text-left text-[var(--text-color-dim)] md:text-right">
+            Email
+          </div>
           <div className="min-w-0 break-words">{userData.email}</div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">Registered</div>
+          <div className="text-left text-[var(--text-color-dim)] md:text-right">
+            Registered
+          </div>
           <div className="min-w-0 break-words">{`${userData.regdate}`}</div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">Activated</div>
+          <div className="text-left text-[var(--text-color-dim)] md:text-right">
+            Activated
+          </div>
           <div className="min-w-0 break-words">
             <Activate user={user} />
           </div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">Contributor</div>
+          <div className="text-left text-[var(--text-color-dim)] md:text-right">
+            Contributor
+          </div>
           <div className="min-w-0 break-words">
             <Write user={user} />
           </div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">Admin</div>
-          <div className="min-w-0 break-words">{userData.admin ? "Yes" : "No"}</div>
+          <div className="text-left text-[var(--text-color-dim)] md:text-right">
+            Admin
+          </div>
+          <div className="min-w-0 break-words">
+            {userData.admin ? "Yes" : "No"}
+          </div>
         </div>
       </div>
     </div>

@@ -11,9 +11,9 @@ import { components } from "./_generated/api";
 type AuthCtx = MutationCtx | QueryCtx;
 
 async function isAdmin(ctx: AuthCtx) {
-  const identity = (await ctx.auth.getUserIdentity()) as
-    | { role?: string | null }
-    | null;
+  const identity = (await ctx.auth.getUserIdentity()) as {
+    role?: string | null;
+  } | null;
   return identity?.role === "admin";
 }
 
@@ -79,17 +79,15 @@ async function findAuthUserByLegacyId(ctx: AuthCtx, legacyId: number) {
   return (await ctx.runQuery(components.betterAuth.adapter.findOne, {
     model: "user",
     where: [{ field: "userId", operator: "eq", value: String(legacyId) }],
-  })) as
-    | {
-        _id: string;
-        userId?: string | null;
-        name?: string | null;
-        email?: string | null;
-        createdAt?: number | null;
-        role?: string | null;
-        emailVerified?: boolean | null;
-      }
-    | null;
+  })) as {
+    _id: string;
+    userId?: string | null;
+    name?: string | null;
+    email?: string | null;
+    createdAt?: number | null;
+    role?: string | null;
+    emailVerified?: boolean | null;
+  } | null;
 }
 
 function toAdminUser(user: {
@@ -163,7 +161,11 @@ export const getAdminUsersPage = query({
       if (isNumericId) {
         where.push({ field: "userId", operator: "eq", value: searchLower });
       } else if (searchLower.includes("@")) {
-        where.push({ field: "email", operator: "contains", value: searchLower });
+        where.push({
+          field: "email",
+          operator: "contains",
+          value: searchLower,
+        });
       } else {
         where.push({ field: "name", operator: "contains", value: searchLower });
       }
@@ -204,13 +206,16 @@ export const getAdminUsersPage = query({
       where.push({ field: "role", operator: "ne", value: "admin" });
     }
 
-    const response = (await ctx.runQuery(components.betterAuth.adapter.findMany, {
-      model: "user",
-      where,
-      offset,
-      paginationOpts: { cursor: null, numItems: perPage + 1 },
-      sortBy: { field: "createdAt", direction: "desc" },
-    })) as {
+    const response = (await ctx.runQuery(
+      components.betterAuth.adapter.findMany,
+      {
+        model: "user",
+        where,
+        offset,
+        paginationOpts: { cursor: null, numItems: perPage + 1 },
+        sortBy: { field: "createdAt", direction: "desc" },
+      },
+    )) as {
       page: Array<{
         _id?: string;
         userId?: string | null;
@@ -223,8 +228,9 @@ export const getAdminUsersPage = query({
     };
 
     const hasNextPage = response.page.length > perPage;
-    const users = (hasNextPage ? response.page.slice(0, perPage) : response.page)
-      .map(toAdminUser);
+    const users = (
+      hasNextPage ? response.page.slice(0, perPage) : response.page
+    ).map(toAdminUser);
 
     return {
       users,
@@ -429,13 +435,21 @@ export const getAdminStoryByLegacyId = query({
       .map((approval) => approval.legacyUserId)
       .filter((id): id is number => typeof id === "number");
 
-    const authUsers = await ctx.runQuery(components.betterAuth.adapter.findMany, {
-      model: "user",
-      where: [{ field: "userId", operator: "in", value: legacyIds.map(String) }],
-      paginationOpts: { cursor: null, numItems: legacyIds.length + 10 },
-    });
+    const authUsers = await ctx.runQuery(
+      components.betterAuth.adapter.findMany,
+      {
+        model: "user",
+        where: [
+          { field: "userId", operator: "in", value: legacyIds.map(String) },
+        ],
+        paginationOpts: { cursor: null, numItems: legacyIds.length + 10 },
+      },
+    );
     const userNameByLegacyId = new Map<number, string>();
-    for (const user of (authUsers.page as Array<{ userId?: string | null; name?: string | null }>)) {
+    for (const user of authUsers.page as Array<{
+      userId?: string | null;
+      name?: string | null;
+    }>) {
       const legacyId = Number.parseInt(user.userId ?? "", 10);
       if (!Number.isFinite(legacyId) || !user.name) continue;
       userNameByLegacyId.set(legacyId, user.name);
@@ -444,7 +458,9 @@ export const getAdminStoryByLegacyId = query({
     return {
       id: story.legacyId,
       name: story.name,
-      image: story.imageId ? (await ctx.db.get(story.imageId))?.legacyId ?? "" : "",
+      image: story.imageId
+        ? ((await ctx.db.get(story.imageId))?.legacyId ?? "")
+        : "",
       public: story.public,
       short: course.short,
       approvals: approvals
@@ -453,7 +469,7 @@ export const getAdminStoryByLegacyId = query({
           date: approval.date,
           name:
             typeof approval.legacyUserId === "number"
-              ? userNameByLegacyId.get(approval.legacyUserId) ?? "Unknown"
+              ? (userNameByLegacyId.get(approval.legacyUserId) ?? "Unknown")
               : "Unknown",
         }))
         .filter((approval) => approval.id > 0),

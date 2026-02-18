@@ -13,7 +13,10 @@ const storyApprovalInputValidator = {
   legacyApprovalId: v.optional(v.number()),
 };
 
-async function getUserNamesByLegacyIds(ctx: MutationCtx, legacyUserIds: number[]) {
+async function getUserNamesByLegacyIds(
+  ctx: MutationCtx,
+  legacyUserIds: number[],
+) {
   const uniqueIds = Array.from(new Set(legacyUserIds.filter(Number.isFinite)));
   if (uniqueIds.length === 0) return new Map<number, string>();
 
@@ -74,7 +77,9 @@ async function recomputeCourseContributors(
 
   return {
     contributors: ranked.filter((row) => row.active).map((row) => row.name),
-    contributors_past: ranked.filter((row) => !row.active).map((row) => row.name),
+    contributors_past: ranked
+      .filter((row) => !row.active)
+      .map((row) => row.name),
   };
 }
 
@@ -87,9 +92,9 @@ export const upsertStoryApproval = mutation({
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
     const legacyUserId = await requireSessionLegacyUserId(ctx);
-    const identity = (await ctx.auth.getUserIdentity()) as
-      | { name?: string | null }
-      | null;
+    const identity = (await ctx.auth.getUserIdentity()) as {
+      name?: string | null;
+    } | null;
     const actorName = identity?.name?.trim() || `user_${legacyUserId}`;
     const story = await ctx.db
       .query("stories")
@@ -180,7 +185,11 @@ export const toggleStoryApproval = mutation({
   },
   returns: v.object({
     count: v.number(),
-    story_status: v.union(v.literal("draft"), v.literal("feedback"), v.literal("finished")),
+    story_status: v.union(
+      v.literal("draft"),
+      v.literal("feedback"),
+      v.literal("finished"),
+    ),
     finished_in_set: v.number(),
     action: v.union(v.literal("added"), v.literal("deleted")),
     published: v.array(v.number()),
@@ -188,9 +197,9 @@ export const toggleStoryApproval = mutation({
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
     const legacyUserId = await requireSessionLegacyUserId(ctx);
-    const identity = (await ctx.auth.getUserIdentity()) as
-      | { name?: string | null }
-      | null;
+    const identity = (await ctx.auth.getUserIdentity()) as {
+      name?: string | null;
+    } | null;
     const actorName = identity?.name?.trim() || `user_${legacyUserId}`;
 
     const story = await ctx.db
@@ -265,16 +274,16 @@ export const toggleStoryApproval = mutation({
 
     let courseCount: number | null = null;
     if (published.length > 0) {
-      courseCount = storiesInCourse.filter((row) => row.public && !row.deleted).length;
+      courseCount = storiesInCourse.filter(
+        (row) => row.public && !row.deleted,
+      ).length;
       await ctx.db.patch(story.courseId, {
         count: courseCount,
       });
     }
 
-    const { contributors, contributors_past } = await recomputeCourseContributors(
-      ctx,
-      story.courseId,
-    );
+    const { contributors, contributors_past } =
+      await recomputeCourseContributors(ctx, story.courseId);
     await ctx.db.patch(story.courseId, {
       contributors,
       contributors_past,
@@ -283,33 +292,41 @@ export const toggleStoryApproval = mutation({
     const operationKey =
       args.operationKey ??
       `story_approval:${story.legacyId}:user:${legacyUserId}:toggle:${Date.now()}`;
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorStoryApprovalToggle, {
-      storyId: story.legacyId,
-      legacyUserId,
-      action,
-      storyStatus: story_status,
-      approvalCount: count,
-      finishedInSet: finished_in_set,
-      publishedStoryIds: published,
-      datePublishedMs,
-      courseId: story.courseId,
-      courseCount,
-      contributors,
-      contributorsPast: contributors_past,
-      operationKey,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.postgresMirror.mirrorStoryApprovalToggle,
+      {
+        storyId: story.legacyId,
+        legacyUserId,
+        action,
+        storyStatus: story_status,
+        approvalCount: count,
+        finishedInSet: finished_in_set,
+        publishedStoryIds: published,
+        datePublishedMs,
+        courseId: story.courseId,
+        courseCount,
+        contributors,
+        contributorsPast: contributors_past,
+        operationKey,
+      },
+    );
 
-    await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStoryApprovalToggled, {
-      operationKey,
-      storyId: story.legacyId,
-      action,
-      count,
-      storyStatus: story_status,
-      finishedInSet: finished_in_set,
-      publishedCount: published.length,
-      actorName,
-      actorLegacyUserId: legacyUserId,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.editorSideEffects.onStoryApprovalToggled,
+      {
+        operationKey,
+        storyId: story.legacyId,
+        action,
+        count,
+        storyStatus: story_status,
+        finishedInSet: finished_in_set,
+        publishedCount: published.length,
+        actorName,
+        actorLegacyUserId: legacyUserId,
+      },
+    );
 
     return {
       count,

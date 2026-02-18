@@ -28,9 +28,7 @@ export default function LanguageButton({
 }) {
   if (loading) {
     return (
-      <div
-        className="flex h-[210px] cursor-default flex-col items-center justify-center rounded-2xl border-2 border-[var(--overview-hr)] bg-[var(--body-background)] p-0 text-center"
-      >
+      <div className="flex h-[210px] cursor-default flex-col items-center justify-center rounded-2xl border-2 border-[var(--overview-hr)] bg-[var(--body-background)] p-0 text-center">
         <div className="h-full w-full animate-pulse rounded-2xl bg-slate-200/80" />
       </div>
     );

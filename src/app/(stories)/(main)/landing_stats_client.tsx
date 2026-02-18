@@ -45,7 +45,9 @@ export default function LandingStatsClient({
 }) {
   if (preloadedLandingData) {
     return (
-      <LandingStatsClientPreloaded preloadedLandingData={preloadedLandingData} />
+      <LandingStatsClientPreloaded
+        preloadedLandingData={preloadedLandingData}
+      />
     );
   }
   return <LandingStatsClientQuery />;

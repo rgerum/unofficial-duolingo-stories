@@ -40,8 +40,17 @@ export default async function Layout({
     <div className="relative isolate mx-auto flex min-h-full w-full max-w-[1000px] flex-col px-4">
       <div className="sticky top-0 z-[1] w-full bg-[var(--body-background)] after:absolute after:left-1/2 after:w-screen after:-translate-x-1/2 after:border-b-2 after:border-[var(--header-border)] after:content-['']">
         <nav className="mx-auto flex max-w-[1000px] items-center px-5 py-1.5">
-          <Link href="/" className="block text-[29px] font-bold text-[var(--duostories-title)] no-underline" data-cy="logo">
-            <Image src="/Duostories.svg" alt="Duostories" height={25} width={150} />
+          <Link
+            href="/"
+            className="block text-[29px] font-bold text-[var(--duostories-title)] no-underline"
+            data-cy="logo"
+          >
+            <Image
+              src="/Duostories.svg"
+              alt="Duostories"
+              height={25}
+              width={150}
+            />
           </Link>
           <div className="ml-auto" />
           <CourseDropdown />

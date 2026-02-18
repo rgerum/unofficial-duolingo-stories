@@ -13,7 +13,9 @@ export default function Switch({
       onClick={onClick}
       className={[
         "relative inline-flex h-[32px] w-[56px] items-center rounded-full border border-transparent transition-colors",
-        checked ? "bg-[var(--button-background)]" : "bg-[var(--button-inactive-background)]",
+        checked
+          ? "bg-[var(--button-background)]"
+          : "bg-[var(--button-inactive-background)]",
       ].join(" ")}
     >
       <span

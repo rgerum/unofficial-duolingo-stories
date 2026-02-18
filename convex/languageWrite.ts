@@ -35,7 +35,10 @@ function toLegacyLanguageResponse(row: {
   };
 }
 
-async function getLanguageByLegacyId(ctx: MutationCtx, legacyLanguageId: number) {
+async function getLanguageByLegacyId(
+  ctx: MutationCtx,
+  legacyLanguageId: number,
+) {
   return await ctx.db
     .query("languages")
     .withIndex("by_id_value", (q) => q.eq("legacyId", legacyLanguageId))
@@ -305,14 +308,18 @@ export const upsertSpeakerFromVoice = mutation({
       });
     }
 
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorSpeakerUpsert, {
-      legacyLanguageId: language.legacyId,
-      speaker: args.speaker,
-      gender: args.gender,
-      type: args.type,
-      service: args.service,
-      operationKey,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.postgresMirror.mirrorSpeakerUpsert,
+      {
+        legacyLanguageId: language.legacyId,
+        speaker: args.speaker,
+        gender: args.gender,
+        type: args.type,
+        service: args.service,
+        operationKey,
+      },
+    );
 
     return {
       legacyLanguageId: language.legacyId,

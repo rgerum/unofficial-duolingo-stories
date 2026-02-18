@@ -49,7 +49,11 @@ export default function LayoutFlag() {
     }
   }
   let path: BreadcrumbPath[] = [{ type: "Editor" }];
-  if (course && languages[course.learning_language] && languages[course.from_language]) {
+  if (
+    course &&
+    languages[course.learning_language] &&
+    languages[course.from_language]
+  ) {
     path = [
       { type: "Editor", href: `/editor` },
       { type: "sep" },

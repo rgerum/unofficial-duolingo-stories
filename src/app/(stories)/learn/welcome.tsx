@@ -10,14 +10,20 @@ export default function Page() {
         <h1>Welcome to Duostories</h1>
         <img src={"icon192.png"} alt="icon" />
         <p>Log in to proceed</p>
-        <Link href={`/auth/signin?callbackUrl=/`} className={authPrimaryBlueActionClass}>
+        <Link
+          href={`/auth/signin?callbackUrl=/`}
+          className={authPrimaryBlueActionClass}
+        >
           Sign in
         </Link>
         <Link href="/auth/register" className={authPrimaryBlueActionClass}>
           Register
         </Link>
         <hr />
-        <Link href={"/"} className={`${authPrimaryBlueActionClass} text-[var(--text-color)]`}>
+        <Link
+          href={"/"}
+          className={`${authPrimaryBlueActionClass} text-[var(--text-color)]`}
+        >
           Anonymous
         </Link>
       </div>

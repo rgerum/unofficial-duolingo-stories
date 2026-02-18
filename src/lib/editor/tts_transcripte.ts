@@ -392,10 +392,7 @@ interface TranscribeConfig {
   };
 }
 
-function transcribe_text(
-  text: string,
-  dataYaml: string,
-): [string, number[]] {
+function transcribe_text(text: string, dataYaml: string): [string, number[]] {
   const config = jsyaml.load(dataYaml) as TranscribeConfig;
 
   const mapping: number[] = [];

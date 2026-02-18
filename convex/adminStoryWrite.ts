@@ -32,18 +32,25 @@ export const togglePublished = mutation({
       .query("stories")
       .withIndex("by_course", (q) => q.eq("courseId", story.courseId))
       .collect();
-    const courseCount = storiesInCourse.filter((row) => row.public && !row.deleted).length;
+    const courseCount = storiesInCourse.filter(
+      (row) => row.public && !row.deleted,
+    ).length;
     await ctx.db.patch(course._id, { count: courseCount });
 
     const operationKey =
-      args.operationKey ?? `story:${story.legacyId}:toggle_published:${Date.now()}`;
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorStoryPublishedToggle, {
-      storyId: story.legacyId,
-      public: nextPublic,
-      courseLegacyId: course.legacyId,
-      courseCount,
-      operationKey,
-    });
+      args.operationKey ??
+      `story:${story.legacyId}:toggle_published:${Date.now()}`;
+    await ctx.scheduler.runAfter(
+      0,
+      internal.postgresMirror.mirrorStoryPublishedToggle,
+      {
+        storyId: story.legacyId,
+        public: nextPublic,
+        courseLegacyId: course.legacyId,
+        courseCount,
+        operationKey,
+      },
+    );
 
     return null;
   },
@@ -87,7 +94,11 @@ export const removeApproval = mutation({
       .collect();
     const approvalCount = approvals.length;
     const storyStatus: "draft" | "feedback" | "finished" =
-      approvalCount === 0 ? "draft" : approvalCount === 1 ? "feedback" : "finished";
+      approvalCount === 0
+        ? "draft"
+        : approvalCount === 1
+          ? "feedback"
+          : "finished";
     await ctx.db.patch(story._id, {
       status: storyStatus,
       approvalCount,
@@ -96,13 +107,17 @@ export const removeApproval = mutation({
     const operationKey =
       args.operationKey ??
       `story_approval:${args.legacyApprovalId}:admin_delete:${Date.now()}`;
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorAdminApprovalDelete, {
-      storyId: story.legacyId,
-      legacyApprovalId: args.legacyApprovalId,
-      storyStatus,
-      approvalCount,
-      operationKey,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.postgresMirror.mirrorAdminApprovalDelete,
+      {
+        storyId: story.legacyId,
+        legacyApprovalId: args.legacyApprovalId,
+        storyStatus,
+        approvalCount,
+        operationKey,
+      },
+    );
 
     return null;
   },

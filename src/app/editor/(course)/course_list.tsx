@@ -85,9 +85,7 @@ export default function CourseList({
               <Link
                 className={
                   "flex items-center border-b border-[var(--header-border)] bg-[var(--body-background)] text-[var(--text-color)] no-underline outline-offset-[-2px] hover:brightness-90 focus:brightness-90 " +
-                  (course_id === course.short
-                    ? "brightness-90"
-                    : "")
+                  (course_id === course.short ? "brightness-90" : "")
                 }
                 href={`/editor/course/${course.short}`}
                 onClick={() => {

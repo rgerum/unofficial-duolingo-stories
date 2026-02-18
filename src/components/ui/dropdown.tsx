@@ -14,13 +14,13 @@ export default function Dropdown({ children }: { children: React.ReactNode }) {
   const menuBaseClassName =
     "absolute left-[-32px] z-[1] mt-[7px] hidden w-[118px] overflow-y-auto rounded-[15px] border border-[var(--header-border)] bg-[var(--body-background)] text-[18px] font-bold text-[var(--text-color)] [text-transform:none] group-hover:block max-[1080px]:left-[-50px]";
 
-  const menuWithClasses = React.isValidElement<{ className?: string }>(menu)
-    ? React.cloneElement(menu, {
-        className: `${menuBaseClassName} ${menu.props.className ?? ""}`.trim(),
-      })
-    : (
-        <div className={menuBaseClassName}>{menu}</div>
-      );
+  const menuWithClasses = React.isValidElement<{ className?: string }>(menu) ? (
+    React.cloneElement(menu, {
+      className: `${menuBaseClassName} ${menu.props.className ?? ""}`.trim(),
+    })
+  ) : (
+    <div className={menuBaseClassName}>{menu}</div>
+  );
 
   return (
     <div className="group relative">

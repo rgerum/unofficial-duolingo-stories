@@ -37,9 +37,10 @@ async function get_course_groups() {
     from_language_name: string;
     fromLanguageId: Id<"languages">;
   }> = [];
-  let englishGroup:
-    | { from_language_name: string; fromLanguageId: Id<"languages"> }
-    | null = null;
+  let englishGroup: {
+    from_language_name: string;
+    fromLanguageId: Id<"languages">;
+  } | null = null;
   let last_group = null;
   for (let course of await get_course_data()) {
     if (!course.fromLanguageId) continue;
