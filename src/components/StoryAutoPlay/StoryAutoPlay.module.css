@@ -2,24 +2,115 @@
   min-height: 100vh;
 }
 
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  max-width: 500px;
+  margin: 0 auto;
+  background: var(--story-background, #fff);
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.queueControls {
+  padding: 8px 16px 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.queueMeta {
+  min-width: 0;
+  flex: 1;
+}
+
+.queueLabel {
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.queueSubLabel {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queueButtons {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.smallButton {
+  border: 1px solid #d3d3d3;
+  border-radius: 8px;
+  padding: 4px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  background: #fff;
+  cursor: pointer;
+}
+
+.backButton {
+  border: 1px solid #d3d3d3;
+  border-radius: 8px;
+  width: 30px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  text-decoration: none;
+  color: #4b5563;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.smallButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.iconButton {
+  border: 1px solid #d3d3d3;
+  border-radius: 8px;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  cursor: pointer;
+  color: #4b5563;
+}
+
+.iconButtonActive {
+  color: #111827;
+  border-color: #99cc33;
+  background: rgba(120, 200, 0, 0.14);
+}
+
+.iconButtonInactive {
+  opacity: 0.55;
+}
+
 .main {
   max-width: 500px;
   margin: 0 auto;
 }
 
 .timelineControls {
-  position: sticky;
-  top: 60px;
-  z-index: 11;
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 10px 16px;
+  padding: 8px 16px 10px;
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 10px;
   align-items: center;
-  background: var(--story-background, #fff);
-  border-bottom: 1px solid #e5e5e5;
 }
 
 .playPauseButton {
@@ -72,7 +163,7 @@
 }
 
 .story {
-  padding-top: 85px;
+  padding-top: 24px;
   user-select: none;
   padding-left: 16px;
   padding-right: 16px;
@@ -100,12 +191,28 @@
 }
 
 @media (max-width: 760px) {
+  .queueControls {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+  }
+
+  .queueMeta {
+    align-self: center;
+  }
+
+  .queueButtons {
+    grid-column: 1 / -1;
+    width: auto;
+    flex-wrap: wrap;
+  }
+
   .timelineControls {
-    top: 50px;
-    grid-template-columns: 1fr;
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
   }
 
   .timelineTime {
-    justify-self: end;
+    justify-self: start;
   }
 }
