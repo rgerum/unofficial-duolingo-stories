@@ -1,9 +1,10 @@
 "use client";
 import React from "react";
 import styles from "./StoryAutoPlay.module.css";
+import { Repeat, Repeat1, Shuffle } from "lucide-react";
+import Link from "next/link";
 import StoryTextLine from "../StoryTextLine";
 import StoryHeader from "../StoryHeader";
-import StoryHeaderProgress from "../StoryHeaderProgress";
 import Legal from "../layout/legal";
 import type { StoryType } from "@/components/editor/story/syntax_parser_new";
 import type {
@@ -19,6 +20,18 @@ interface StoryAutoPlayProps {
     learning_language?: string;
     from_language?: string;
   };
+  onFinished?: () => void;
+  queueLabel?: string;
+  queueSubLabel?: string;
+  canGoPrev?: boolean;
+  canGoNext?: boolean;
+  onPrev?: () => void;
+  onNext?: () => void;
+  shuffleEnabled?: boolean;
+  onToggleShuffle?: () => void;
+  loopMode?: "off" | "all" | "one";
+  onToggleLoop?: () => void;
+  courseOverviewHref?: string;
 }
 
 type AutoPlayableElement = StoryElementHeader | StoryElementLine;
@@ -141,9 +154,22 @@ function clearHints(element: StoryElement): StoryElement {
   return element;
 }
 
-export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
+export default function StoryAutoPlay({
+  story,
+  onFinished,
+  queueLabel,
+  queueSubLabel,
+  canGoPrev = false,
+  canGoNext = false,
+  onPrev,
+  onNext,
+  shuffleEnabled = false,
+  onToggleShuffle,
+  loopMode = "off",
+  onToggleLoop,
+  courseOverviewHref,
+}: StoryAutoPlayProps) {
   const parts = React.useMemo(() => GetParts(story), [story]);
-  const course = `${story.learning_language}-${story.from_language}`;
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const seekTargetRef = React.useRef<null | {
     segmentIndex: number;
@@ -626,11 +652,13 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     if (nextSegment >= timelineElements.length) {
       setIsPlaying(false);
       setGlobalProgressSeconds(totalDurationSeconds);
+      onFinished?.();
       return;
     }
     await startSegmentPlayback(nextSegment, 0, true);
   }, [
     currentSegmentIndex,
+    onFinished,
     startSegmentPlayback,
     timelineElements.length,
     totalDurationSeconds,
@@ -638,11 +666,109 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
 
   return (
     <div className={styles.container}>
-      <StoryHeaderProgress
-        course={course}
-        progress={Math.min(currentSegmentIndex + 1, timelineElements.length)}
-        length={Math.max(timelineElements.length, 1)}
-      />
+      <div className={styles.stickyHeader}>
+        <div className={styles.queueControls}>
+          {courseOverviewHref ? (
+            <Link
+              href={courseOverviewHref}
+              className={styles.backButton}
+              aria-label="Back to course overview"
+              title="Back to course"
+            >
+              ←
+            </Link>
+          ) : null}
+          <div className={styles.queueMeta}>
+            {queueLabel ? <div className={styles.queueLabel}>{queueLabel}</div> : null}
+            {queueSubLabel ? (
+              <div className={styles.queueSubLabel}>{queueSubLabel}</div>
+            ) : null}
+          </div>
+          <div className={styles.queueButtons}>
+            <button
+              type="button"
+              className={styles.smallButton}
+              onClick={onPrev}
+              disabled={!canGoPrev}
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              className={styles.smallButton}
+              onClick={onNext}
+              disabled={!canGoNext}
+            >
+              Next
+            </button>
+            <button
+              type="button"
+              className={
+                shuffleEnabled
+                  ? `${styles.iconButton} ${styles.iconButtonActive}`
+                  : `${styles.iconButton} ${styles.iconButtonInactive}`
+              }
+              onClick={onToggleShuffle}
+              aria-label={shuffleEnabled ? "Disable shuffle" : "Enable shuffle"}
+              title={shuffleEnabled ? "Shuffle on" : "Shuffle off"}
+            >
+              <Shuffle size={16} />
+            </button>
+            <button
+              type="button"
+              className={
+                loopMode === "off"
+                  ? `${styles.iconButton} ${styles.iconButtonInactive}`
+                  : `${styles.iconButton} ${styles.iconButtonActive}`
+              }
+              onClick={onToggleLoop}
+              aria-label={`Loop mode: ${loopMode}`}
+              title={`Loop: ${loopMode}`}
+            >
+              {loopMode === "one" ? <Repeat1 size={16} /> : <Repeat size={16} />}
+            </button>
+          </div>
+        </div>
+        <div className={styles.timelineControls}>
+          <button
+            className={styles.playPauseButton}
+            onClick={handlePlayPause}
+            disabled={timelineElements.length === 0}
+            aria-label={
+              isPlaying ? "Pause story playback" : "Play story playback"
+            }
+            title={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? (
+              <span className={styles.pauseIcon} aria-hidden="true">
+                <span className={styles.pauseIconBar} />
+                <span className={styles.pauseIconBar} />
+              </span>
+            ) : (
+              <span className={styles.playIcon} aria-hidden="true" />
+            )}
+          </button>
+          <input
+            className={styles.timelineSlider}
+            type="range"
+            min={0}
+            max={Math.max(totalDurationSeconds, 0)}
+            step={0.01}
+            value={clamp(
+              globalProgressSeconds,
+              0,
+              Math.max(totalDurationSeconds, 0),
+            )}
+            onChange={onSeekInput}
+            disabled={timelineElements.length === 0}
+            aria-label="Story playback timeline"
+          />
+          <div className={styles.timelineTime}>
+            {Math.floor(globalProgressSeconds)}s /{" "}
+            {Math.floor(totalDurationSeconds)}s
+          </div>
+        </div>
+      </div>
       <audio
         ref={audioRef}
         onLoadedMetadata={onAudioLoadedMetadata}
@@ -650,45 +776,6 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
         onEnded={onAudioEnded}
         preload="metadata"
       />
-      <div className={styles.timelineControls}>
-        <button
-          className={styles.playPauseButton}
-          onClick={handlePlayPause}
-          disabled={timelineElements.length === 0}
-          aria-label={
-            isPlaying ? "Pause story playback" : "Play story playback"
-          }
-          title={isPlaying ? "Pause" : "Play"}
-        >
-          {isPlaying ? (
-            <span className={styles.pauseIcon} aria-hidden="true">
-              <span className={styles.pauseIconBar} />
-              <span className={styles.pauseIconBar} />
-            </span>
-          ) : (
-            <span className={styles.playIcon} aria-hidden="true" />
-          )}
-        </button>
-        <input
-          className={styles.timelineSlider}
-          type="range"
-          min={0}
-          max={Math.max(totalDurationSeconds, 0)}
-          step={0.01}
-          value={clamp(
-            globalProgressSeconds,
-            0,
-            Math.max(totalDurationSeconds, 0),
-          )}
-          onChange={onSeekInput}
-          disabled={timelineElements.length === 0}
-          aria-label="Story playback timeline"
-        />
-        <div className={styles.timelineTime}>
-          {Math.floor(globalProgressSeconds)}s /{" "}
-          {Math.floor(totalDurationSeconds)}s
-        </div>
-      </div>
       <div className={styles.main}>
         <div
           className={
