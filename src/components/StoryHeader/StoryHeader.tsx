@@ -83,7 +83,6 @@ function StoryHeader({
           <EditorSSMLDisplay
             ssml={element.audio.ssml}
             element={element}
-            audio={element.audio}
             editor={editorState}
           />
         )}

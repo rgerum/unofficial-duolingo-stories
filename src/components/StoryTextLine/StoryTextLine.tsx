@@ -111,7 +111,6 @@ function StoryTextLine({
           {editorState && element.line.content.audio && (
             <EditorSSMLDisplay
               ssml={element.line.content.audio.ssml}
-              audio={element.line.content.audio}
               element={element}
               editor={editorState}
             />
@@ -142,7 +141,6 @@ function StoryTextLine({
           {editorState && element.line.content.audio && (
             <EditorSSMLDisplay
               ssml={element.line.content.audio.ssml}
-              audio={element.line.content.audio}
               element={element}
               editor={editorState}
             />

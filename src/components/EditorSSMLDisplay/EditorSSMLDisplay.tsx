@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
+import { MicIcon } from "lucide-react";
 import styles from "./EditorSSMLDisplay.module.css";
 import {
   generate_audio_line,
   timings_to_text,
   insert_audio_line,
 } from "@/lib/editor/audio/audio_edit_tools";
-import { useSearchParams } from "next/navigation";
 import type {
   Audio,
   StoryElementLine,
@@ -14,33 +14,17 @@ import type {
 } from "@/components/editor/story/syntax_parser_types";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor";
 
-// Extend window for open_recoder
-declare global {
-  interface Window {
-    open_recoder?: (data: {
-      ssml: Audio["ssml"];
-      element: StoryElementLine | StoryElementHeader;
-      audio: Audio;
-      editor: EditorStateType;
-    }) => void;
-  }
-}
-
 interface EditorSSMLDisplayProps {
   ssml: Audio["ssml"];
   element: StoryElementLine | StoryElementHeader;
-  audio: Audio;
   editor: EditorStateType;
 }
 
 export default function EditorSSMLDisplay({
   ssml,
   element,
-  audio,
   editor,
 }: EditorSSMLDisplayProps) {
-  const beta = false;
-
   let [loading, setLoading] = React.useState(false);
   let [error, setError] = React.useState<boolean>(false);
   let line_id = "ssml" + ssml.id;
@@ -62,23 +46,19 @@ export default function EditorSSMLDisplay({
     setLoading(false);
   }
 
-  const searchParams = useSearchParams();
-
   if (!show_audio) return <></>;
   return (
     <>
       <br />
       <span className={styles.ssml_speaker + " en"}>{ssml.speaker}</span>
-      <span className={styles.ssml}>{ssml.text}</span>
-      {searchParams.get("beta") !== null && (
-        <span
-          onClick={() => editor.show_audio_editor(element)}
-          style={{ cursor: "pointer" }}
-        >
-          {" "}
-          🎤{" "}
-        </span>
-      )}
+      <span
+        onClick={() => editor.show_audio_editor(element)}
+        className={styles.audio_editor_button}
+        title="Open sound editor"
+        aria-label="Open sound editor"
+      >
+        <MicIcon className={styles.audio_editor_icon} />
+      </span>
       {ssml.speaker ? (
         error ? (
           <span>
@@ -110,18 +90,6 @@ export default function EditorSSMLDisplay({
             src="/editor/icons/error.svg"
           />
         </span>
-      )}
-      {beta ? (
-        <a
-          onClick={() =>
-            window.open_recoder?.({ ssml, element, audio, editor })
-          }
-          style={{ cursor: "pointer" }}
-        >
-          🎤
-        </a>
-      ) : (
-        <></>
       )}
     </>
   );

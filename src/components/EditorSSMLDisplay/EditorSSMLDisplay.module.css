@@ -40,3 +40,19 @@
 }
 .ssml_reload {
 }
+
+.audio_editor_icon {
+  width: 20px;
+  height: 20px;
+}
+
+.audio_editor_button {
+  display: inline-flex;
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
