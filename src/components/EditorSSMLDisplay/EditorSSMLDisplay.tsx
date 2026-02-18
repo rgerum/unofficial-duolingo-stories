@@ -51,14 +51,15 @@ export default function EditorSSMLDisplay({
     <>
       <br />
       <span className={styles.ssml_speaker + " en"}>{ssml.speaker}</span>
-      <span
+      <button
         onClick={() => editor.show_audio_editor(element)}
         className={styles.audio_editor_button}
         title="Open sound editor"
         aria-label="Open sound editor"
+        type="button"
       >
         <MicIcon className={styles.audio_editor_icon} />
-      </span>
+      </button>
       {ssml.speaker ? (
         error ? (
           <span>
