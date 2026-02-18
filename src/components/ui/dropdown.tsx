@@ -11,15 +11,24 @@ export default function Dropdown({ children }: { children: React.ReactNode }) {
     return <div className="relative">{children}</div>;
   }
 
+  const menuBaseClassName =
+    "absolute left-[-32px] z-[1] mt-[7px] hidden w-[118px] overflow-y-auto rounded-[15px] border border-[var(--header-border)] bg-[var(--body-background)] text-[18px] font-bold text-[var(--text-color)] [text-transform:none] group-hover:block max-[1080px]:left-[-50px]";
+
+  const menuWithClasses = React.isValidElement<{ className?: string }>(menu)
+    ? React.cloneElement(menu, {
+        className: `${menuBaseClassName} ${menu.props.className ?? ""}`.trim(),
+      })
+    : (
+        <div className={menuBaseClassName}>{menu}</div>
+      );
+
   return (
     <div className="group relative">
       {trigger}
       <div className="absolute bottom-[-8px] left-[calc(50%-12px)] z-[2] hidden h-[10px] w-[25px] overflow-hidden group-hover:block">
         <div className="absolute left-[2.5px] top-[2.5px] z-[2] h-[15px] w-[15px] rotate-45 rounded-[3px] border border-[var(--header-border)] bg-[var(--body-background)]"></div>
       </div>
-      <div className="absolute left-[-32px] z-[1] mt-[7px] hidden w-[118px] overflow-y-auto rounded-[15px] border border-[var(--header-border)] bg-[var(--body-background)] text-[18px] font-bold text-[var(--text-color)] [text-transform:none] group-hover:block max-[1080px]:left-[-50px]">
-        {menu}
-      </div>
+      {menuWithClasses}
     </div>
   );
 }

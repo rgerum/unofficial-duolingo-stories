@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { authPrimaryBlueActionClass } from "@/components/auth/styles";
 
 export default function Page() {
   return (
@@ -18,7 +19,7 @@ export default function Page() {
       </p>
       <Link
         href="/auth/signin"
-        className="mt-2 mb-2 inline-block w-full cursor-pointer rounded-[15px] border-[var(--button-blue-border)] border-b-4 [border-left-width:var(--button-side-border)] [border-right-width:var(--button-side-border)] [border-top-width:var(--button-side-border)] bg-[var(--button-blue-background)] px-[30px] py-[13px] pr-0 text-center text-[1rem] font-bold uppercase text-[var(--button-blue-color)] no-underline transition-[box-shadow,transform] duration-100 hover:brightness-110"
+        className={authPrimaryBlueActionClass}
       >
         Log In
       </Link>

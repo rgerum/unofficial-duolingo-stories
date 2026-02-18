@@ -10,6 +10,7 @@ import Input from "@/components/ui/input";
 import { SpinnerBlue } from "@/components/ui/spinner";
 import { ProviderProps } from "@/app/auth/signin/page";
 import { authClient } from "@/lib/auth-client";
+import { authInlineLinkClass } from "@/components/auth/styles";
 
 const PENDING_SIGNIN_STORAGE_KEY = "posthog_pending_signin";
 
@@ -19,8 +20,6 @@ export function LoginOptions(props: {
 }) {
   const paragraphClass = "m-0";
   const headingClass = "m-0 text-[calc(24/16*1rem)]";
-  const linkClass =
-    "m-0 w-auto cursor-pointer border-none bg-transparent text-[1em] font-bold text-[var(--link-blue)] no-underline";
   const alertErrorClass =
     "block w-full rounded-[10px] bg-[var(--error-red)] p-[10px] text-white";
   const providersClass = "grid grid-cols-2 gap-x-4";
@@ -137,7 +136,7 @@ export function LoginOptions(props: {
         <Link
           href="/auth/register"
           data-cy="register-button"
-          className={linkClass}
+          className={authInlineLinkClass}
         >
           Sign Up
         </Link>
@@ -146,7 +145,7 @@ export function LoginOptions(props: {
         <Link
           href="/auth/reset_pw"
           data-cy="reset-button"
-          className={linkClass}
+          className={authInlineLinkClass}
         >
           Reset
         </Link>

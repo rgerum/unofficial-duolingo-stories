@@ -7,12 +7,11 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
+import { authInlineLinkClass } from "@/components/auth/styles";
 
 export default function Register() {
   const headingClass = "m-0 text-[calc(24/16*1rem)]";
   const paragraphClass = "m-0";
-  const linkClass =
-    "m-0 w-auto cursor-pointer border-none bg-transparent text-[1em] font-bold text-[var(--link-blue)] no-underline";
   const alertErrorClass =
     "block w-full rounded-[10px] bg-[var(--error-red)] p-[10px] text-white";
   const alertMessageClass =
@@ -140,7 +139,7 @@ export default function Register() {
       )}
       <p className={paragraphClass}>
         Already have an account?{" "}
-        <Link className={linkClass} href="/auth/signin">
+        <Link className={authInlineLinkClass} href="/auth/signin">
           LOG IN
         </Link>
       </p>
