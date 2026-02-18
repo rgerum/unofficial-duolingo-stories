@@ -48,9 +48,9 @@ export default function StoryWrapper({ storyId }: { storyId: number }) {
     api.landing.getPublicCoursePageData,
     story ? { short: story.course_short } : "skip",
   );
-  const [customPlaylists, setCustomPlaylists] = React.useState<CustomStoryPlaylist[]>(
-    [],
-  );
+  const [customPlaylists, setCustomPlaylists] = React.useState<
+    CustomStoryPlaylist[]
+  >([]);
 
   React.useEffect(() => {
     if (!story?.course_short) return;
@@ -118,7 +118,8 @@ export default function StoryWrapper({ storyId }: { storyId: number }) {
 
   const canGoPrev = queue.length > 1 && (loopMode === "all" || queueIndex > 0);
   const canGoNext =
-    queue.length > 1 && (loopMode === "all" || loopMode === "one" || queueIndex < queue.length - 1);
+    queue.length > 1 &&
+    (loopMode === "all" || loopMode === "one" || queueIndex < queue.length - 1);
 
   function buildSearchParams(
     next: Partial<{
@@ -151,7 +152,10 @@ export default function StoryWrapper({ storyId }: { storyId: number }) {
     return params;
   }
 
-  function goToStory(nextStoryId: number, updates: Parameters<typeof buildSearchParams>[0] = {}) {
+  function goToStory(
+    nextStoryId: number,
+    updates: Parameters<typeof buildSearchParams>[0] = {},
+  ) {
     const params = buildSearchParams(updates);
     router.push(`/story/${nextStoryId}/auto_play?${params.toString()}`);
   }

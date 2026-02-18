@@ -133,7 +133,8 @@ export default function CoursePageClient({
   }, [course_id, refreshPlaylists]);
 
   const selectedPlaylist = React.useMemo(
-    () => playlists.find((playlist) => playlist.id === selectedPlaylistId) ?? null,
+    () =>
+      playlists.find((playlist) => playlist.id === selectedPlaylistId) ?? null,
     [playlists, selectedPlaylistId],
   );
 
@@ -195,105 +196,112 @@ export default function CoursePageClient({
             <Switch checked={listeningMode} onClick={toggleListeningMode} />
           </div>
         </div>
-        <div className="mx-auto mb-6 flex w-full max-w-[720px] flex-col gap-3 rounded-xl border border-[var(--overview-hr)] px-4 py-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <div className="font-bold">Custom playlists</div>
-              <div className="text-[calc(13/16*1rem)] text-[var(--text-color-dim)]">
-                Build your own queue and play it in auto-play mode.
+        {listeningMode ? (
+          <div className="mx-auto mb-6 flex w-full max-w-[720px] flex-col gap-3 rounded-xl border border-[var(--overview-hr)] px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <div className="font-bold">Custom playlists</div>
+                <div className="text-[calc(13/16*1rem)] text-[var(--text-color-dim)]">
+                  Build your own queue and play it in auto-play mode.
+                </div>
               </div>
+              {course.stories[0] ? (
+                <Link
+                  href={`/story/${course.stories[0].id}/auto_play?mode=course&loop=off&shuffle=0`}
+                  className="rounded border border-[var(--overview-hr)] px-3 py-1.5 text-[calc(13/16*1rem)] font-bold no-underline hover:bg-black/5"
+                >
+                  Auto-play whole course
+                </Link>
+              ) : null}
             </div>
-            {course.stories[0] ? (
-              <Link
-                href={`/story/${course.stories[0].id}/auto_play?mode=course&loop=off&shuffle=0`}
-                className="rounded border border-[var(--overview-hr)] px-3 py-1.5 text-[calc(13/16*1rem)] font-bold no-underline hover:bg-black/5"
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                value={newPlaylistName}
+                onChange={(event) => setNewPlaylistName(event.target.value)}
+                placeholder="New playlist name"
+                className="min-w-[220px] flex-1 rounded border border-[var(--overview-hr)] px-3 py-2 text-[calc(14/16*1rem)]"
+              />
+              <button
+                type="button"
+                className="rounded border border-[var(--overview-hr)] px-3 py-2 text-[calc(13/16*1rem)] font-bold hover:bg-black/5"
+                onClick={() => {
+                  const created = createCustomStoryPlaylist(
+                    course_id,
+                    newPlaylistName,
+                  );
+                  if (!created) return;
+                  setNewPlaylistName("");
+                  refreshPlaylists(course_id);
+                  setSelectedPlaylistId(created.id);
+                }}
               >
-                Auto-play whole course
-              </Link>
-            ) : null}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              value={newPlaylistName}
-              onChange={(event) => setNewPlaylistName(event.target.value)}
-              placeholder="New playlist name"
-              className="min-w-[220px] flex-1 rounded border border-[var(--overview-hr)] px-3 py-2 text-[calc(14/16*1rem)]"
-            />
-            <button
-              type="button"
-              className="rounded border border-[var(--overview-hr)] px-3 py-2 text-[calc(13/16*1rem)] font-bold hover:bg-black/5"
-              onClick={() => {
-                const created = createCustomStoryPlaylist(course_id, newPlaylistName);
-                if (!created) return;
-                setNewPlaylistName("");
-                refreshPlaylists(course_id);
-                setSelectedPlaylistId(created.id);
-              }}
-            >
-              Create playlist
-            </button>
-          </div>
-          {playlists.length > 0 ? (
-            <div className="flex flex-col gap-2">
-              {playlists.map((playlist) => {
-                const firstStoryId = playlist.storyIds.find((storyId) =>
-                  course.stories.some((story) => story.id === storyId),
-                );
-                const selected = playlist.id === selectedPlaylistId;
-                return (
-                  <div
-                    key={playlist.id}
-                    className={
-                      "flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2 " +
-                      (selected ? "border-emerald-400 bg-emerald-50/60" : "border-[var(--overview-hr)]")
-                    }
-                  >
-                    <button
-                      type="button"
-                      className="text-left text-[calc(14/16*1rem)] font-bold"
-                      onClick={() => setSelectedPlaylistId(playlist.id)}
+                Create playlist
+              </button>
+            </div>
+            {playlists.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                {playlists.map((playlist) => {
+                  const firstStoryId = playlist.storyIds.find((storyId) =>
+                    course.stories.some((story) => story.id === storyId),
+                  );
+                  const selected = playlist.id === selectedPlaylistId;
+                  return (
+                    <div
+                      key={playlist.id}
+                      className={
+                        "flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2 " +
+                        (selected
+                          ? "border-emerald-400 bg-emerald-50/60"
+                          : "border-[var(--overview-hr)]")
+                      }
                     >
-                      {playlist.name} ({playlist.storyIds.length})
-                    </button>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {firstStoryId ? (
-                        <Link
-                          href={`/story/${firstStoryId}/auto_play?mode=custom&playlistId=${playlist.id}&loop=off&shuffle=0`}
-                          className="rounded border border-[var(--overview-hr)] px-2 py-1 text-[calc(12/16*1rem)] font-bold no-underline hover:bg-black/5"
-                        >
-                          Play
-                        </Link>
-                      ) : (
-                        <span className="text-[calc(12/16*1rem)] text-[var(--text-color-dim)]">
-                          Empty
-                        </span>
-                      )}
                       <button
                         type="button"
-                        className="rounded border border-red-300 px-2 py-1 text-[calc(12/16*1rem)] font-bold text-red-700 hover:bg-red-50"
-                        onClick={() => {
-                          deleteCustomStoryPlaylist(playlist.id);
-                          refreshPlaylists(course_id);
-                        }}
+                        className="text-left text-[calc(14/16*1rem)] font-bold"
+                        onClick={() => setSelectedPlaylistId(playlist.id)}
                       >
-                        Delete
+                        {playlist.name} ({playlist.storyIds.length})
                       </button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {firstStoryId ? (
+                          <Link
+                            href={`/story/${firstStoryId}/auto_play?mode=custom&playlistId=${playlist.id}&loop=off&shuffle=0`}
+                            className="rounded border border-[var(--overview-hr)] px-2 py-1 text-[calc(12/16*1rem)] font-bold no-underline hover:bg-black/5"
+                          >
+                            Play
+                          </Link>
+                        ) : (
+                          <span className="text-[calc(12/16*1rem)] text-[var(--text-color-dim)]">
+                            Empty
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          className="rounded border border-red-300 px-2 py-1 text-[calc(12/16*1rem)] font-bold text-red-700 hover:bg-red-50"
+                          onClick={() => {
+                            deleteCustomStoryPlaylist(playlist.id);
+                            refreshPlaylists(course_id);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-[calc(13/16*1rem)] text-[var(--text-color-dim)]">
-              No playlists yet. Create one, then add stories below.
-            </div>
-          )}
-          {selectedPlaylist ? (
-            <div className="text-[calc(12/16*1rem)] text-[var(--text-color-dim)]">
-              Editing playlist: <strong>{selectedPlaylist.name}</strong>
-            </div>
-          ) : null}
-        </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-[calc(13/16*1rem)] text-[var(--text-color-dim)]">
+                No playlists yet. Create one, then add stories below.
+              </div>
+            )}
+            {selectedPlaylist ? (
+              <div className="text-[calc(12/16*1rem)] text-[var(--text-color-dim)]">
+                Editing playlist: <strong>{selectedPlaylist.name}</strong>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
         {course.about ? <About about={course.about} /> : null}
         {storiesBySet.map((set) => (
           <SetGrid
@@ -304,7 +312,7 @@ export default function CoursePageClient({
                   {localization("set_n", { $count: `${set.setId}` }) ??
                     `Set ${set.setId}`}
                 </span>
-                {set.stories[0] ? (
+                {listeningMode && set.stories[0] ? (
                   <Link
                     href={`/story/${set.stories[0].id}/auto_play?mode=set&setId=${set.setId}&loop=off&shuffle=0`}
                     className="rounded border border-[var(--overview-hr)] px-2 py-1 text-[calc(12/16*1rem)] font-bold no-underline hover:bg-black/5"
@@ -322,13 +330,16 @@ export default function CoursePageClient({
                   done={doneMap[story.id]}
                   listeningMode={listeningMode}
                 />
-                {selectedPlaylist ? (
+                {listeningMode && selectedPlaylist ? (
                   <div className="mt-1 text-center">
                     <button
                       type="button"
                       className="rounded border border-[var(--overview-hr)] px-2 py-1 text-[calc(12/16*1rem)] font-bold hover:bg-black/5"
                       onClick={() => {
-                        toggleStoryInCustomPlaylist(selectedPlaylist.id, story.id);
+                        toggleStoryInCustomPlaylist(
+                          selectedPlaylist.id,
+                          story.id,
+                        );
                         refreshPlaylists(course_id);
                       }}
                     >

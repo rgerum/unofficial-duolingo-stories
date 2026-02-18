@@ -15,7 +15,9 @@ interface PlaylistStoreV1 {
 const STORAGE_KEY = "duostories_custom_playlists_v1";
 
 function canUseStorage() {
-  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+  return (
+    typeof window !== "undefined" && typeof window.localStorage !== "undefined"
+  );
 }
 
 function normalizePlaylist(input: unknown): CustomStoryPlaylist | null {
@@ -35,7 +37,9 @@ function normalizePlaylist(input: unknown): CustomStoryPlaylist | null {
     id: row.id,
     name: row.name,
     courseShort: row.courseShort,
-    storyIds: row.storyIds.filter((item): item is number => typeof item === "number"),
+    storyIds: row.storyIds.filter(
+      (item): item is number => typeof item === "number",
+    ),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -54,7 +58,9 @@ function loadStore(): PlaylistStoreV1 {
       version: 1,
       playlists: parsed.playlists
         .map(normalizePlaylist)
-        .filter((playlist): playlist is CustomStoryPlaylist => playlist !== null),
+        .filter(
+          (playlist): playlist is CustomStoryPlaylist => playlist !== null,
+        ),
     };
   } catch {
     return { version: 1, playlists: [] };
@@ -92,7 +98,9 @@ export function createCustomStoryPlaylist(courseShort: string, name: string) {
 
 export function deleteCustomStoryPlaylist(playlistId: string) {
   const store = loadStore();
-  const filtered = store.playlists.filter((playlist) => playlist.id !== playlistId);
+  const filtered = store.playlists.filter(
+    (playlist) => playlist.id !== playlistId,
+  );
   if (filtered.length === store.playlists.length) return;
   saveStore({ version: 1, playlists: filtered });
 }
@@ -109,7 +117,10 @@ export function renameCustomStoryPlaylist(playlistId: string, name: string) {
   saveStore({ version: 1, playlists: next });
 }
 
-export function toggleStoryInCustomPlaylist(playlistId: string, storyId: number) {
+export function toggleStoryInCustomPlaylist(
+  playlistId: string,
+  storyId: number,
+) {
   const store = loadStore();
   const now = Date.now();
   const next = store.playlists.map((playlist) => {
@@ -127,5 +138,7 @@ export function toggleStoryInCustomPlaylist(playlistId: string, storyId: number)
 }
 
 export function getCustomStoryPlaylist(playlistId: string) {
-  return loadStore().playlists.find((playlist) => playlist.id === playlistId) ?? null;
+  return (
+    loadStore().playlists.find((playlist) => playlist.id === playlistId) ?? null
+  );
 }

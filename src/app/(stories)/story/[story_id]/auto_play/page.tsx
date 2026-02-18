@@ -5,8 +5,8 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
 
 export async function generateMetadata({
-                                         params,
-                                       }: {
+  params,
+}: {
   params: { story_id: string };
 }) {
   const story_id = parseInt((await params).story_id);
