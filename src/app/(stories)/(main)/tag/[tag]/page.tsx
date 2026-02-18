@@ -1,12 +1,20 @@
 import Link from "next/link";
 import Header from "../../header";
 import CourseList from "../../course_list";
+import { preloadQuery } from "convex/nextjs";
+import { api } from "@convex/_generated/api";
 
 export default async function Page({
-  params,
+  params: _params,
 }: {
   params: Promise<{ tag: string }>;
 }) {
+  await _params;
+  const preloadedLandingData = await preloadQuery(
+    api.landing.getPublicLandingPageData,
+    {},
+  );
+
   // Render data...
   return (
     <>
@@ -25,7 +33,7 @@ export default async function Page({
         </p>
       </Header>
       <div>
-        <CourseList tag={(await params).tag} />
+        <CourseList preloadedLandingData={preloadedLandingData} />
       </div>
     </>
   );

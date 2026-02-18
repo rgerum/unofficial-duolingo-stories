@@ -2,9 +2,18 @@
 
 import Link from "next/link";
 import Flag from "@/components/ui/flag";
-import { api } from "@convex/_generated/api";
-import { useQuery } from "convex/react";
-import type { CourseData } from "./get_course_data";
+
+export interface LandingCourseButtonData {
+  id: number;
+  short: string;
+  name: string;
+  count: number;
+  learningLanguage: {
+    short: string;
+    flag?: number | string;
+    flag_file?: string;
+  };
+}
 
 export default function LanguageButton({
   course,
@@ -12,16 +21,11 @@ export default function LanguageButton({
   loading,
   eagerFlagImage,
 }: {
-  course?: Pick<CourseData, "short" | "name" | "count" | "learningLanguageId">;
+  course?: LandingCourseButtonData;
   storiesTemplate?: string;
   loading?: boolean;
   eagerFlagImage?: boolean;
 }) {
-  const language = useQuery(
-    api.localization.getLanguageFlagById,
-    course ? { languageId: course.learningLanguageId } : "skip",
-  );
-
   if (loading) {
     return (
       <div
@@ -42,15 +46,15 @@ export default function LanguageButton({
       prefetch={false}
     >
       <Flag
-        iso={language?.short}
+        iso={course.learningLanguage.short}
         flag={
-          typeof language?.flag === "number"
-            ? language.flag
-            : Number.isFinite(Number(language?.flag))
-              ? Number(language?.flag)
+          typeof course.learningLanguage.flag === "number"
+            ? course.learningLanguage.flag
+            : Number.isFinite(Number(course.learningLanguage.flag))
+              ? Number(course.learningLanguage.flag)
               : undefined
         }
-        flag_file={language?.flag_file ?? undefined}
+        flag_file={course.learningLanguage.flag_file ?? undefined}
         loading={eagerFlagImage ? "eager" : "lazy"}
       />
       <span className="mt-[10px] block text-[calc(19/16*1rem)] font-bold text-[var(--text-color-dim)]">

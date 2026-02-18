@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import type { QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { getSessionLegacyUserId } from "./lib/authorization";
 
@@ -41,40 +42,71 @@ export const getDoneStoryIdsForCourse = query({
   },
   returns: v.array(v.number()),
   handler: async (ctx, args) => {
-    const course = await ctx.db
-      .query("courses")
-      .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyCourseId))
-      .unique();
-    if (!course) return [];
-
-    const courseStories = await ctx.db
-      .query("stories")
-      .withIndex("by_course", (q) => q.eq("courseId", course._id))
-      .collect();
-
-    const doneRows = await ctx.db
-      .query("story_done")
-      .withIndex("by_user", (q) => q.eq("legacyUserId", args.legacyUserId))
-      .collect();
-    const doneStoryIds = new Set(doneRows.map((row) => row.storyId));
-
-    const result: Array<number> = [];
-    for (const story of courseStories) {
-      if (!doneStoryIds.has(story._id)) continue;
-      if (typeof story.legacyId !== "number") continue;
-      result.push(story.legacyId);
-    }
-    return result;
+    return await getDoneStoryIdsForCourseAndUser(
+      ctx,
+      args.legacyCourseId,
+      args.legacyUserId,
+    );
   },
 });
+
+export const getDoneStoryIdsForCurrentUserInCourse = query({
+  args: {
+    courseShort: v.string(),
+  },
+  returns: v.array(v.number()),
+  handler: async (ctx, args) => {
+    const legacyUserId = await getSessionLegacyUserId(ctx);
+    if (!legacyUserId) return [];
+
+    const course = await ctx.db
+      .query("courses")
+      .withIndex("by_short", (q) => q.eq("short", args.courseShort))
+      .unique();
+    if (!course || typeof course.legacyId !== "number") return [];
+
+    return await getDoneStoryIdsForCourseAndUser(ctx, course.legacyId, legacyUserId);
+  },
+});
+
+async function getDoneStoryIdsForCourseAndUser(
+  ctx: QueryCtx,
+  legacyCourseId: number,
+  legacyUserId: number,
+) {
+  const course = await ctx.db
+    .query("courses")
+    .withIndex("by_id_value", (q) => q.eq("legacyId", legacyCourseId))
+    .unique();
+  if (!course) return [];
+
+  const courseStories = await ctx.db
+    .query("stories")
+    .withIndex("by_course", (q) => q.eq("courseId", course._id))
+    .collect();
+
+  const doneRows = await ctx.db
+    .query("story_done")
+    .withIndex("by_user", (q) => q.eq("legacyUserId", legacyUserId))
+    .collect();
+  const doneStoryIds = new Set(doneRows.map((row) => row.storyId));
+
+  const result: Array<number> = [];
+  for (const story of courseStories) {
+    if (!doneStoryIds.has(story._id)) continue;
+    if (typeof story.legacyId !== "number") continue;
+    result.push(story.legacyId);
+  }
+  return result;
+}
 
 export const getDoneCourseIdsForUser = query({
   args: {},
   returns: v.union(v.array(v.number()), v.null()),
   handler: async (ctx) => {
-    const identity = (await ctx.auth.getUserIdentity()) as
-      | { userId?: string | number | null }
-      | null;
+    const identity = (await ctx.auth.getUserIdentity()) as {
+      userId?: string | number | null;
+    } | null;
 
     const rawLegacyUserId = identity?.userId;
     const legacyUserId =
