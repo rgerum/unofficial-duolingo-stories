@@ -11,14 +11,14 @@ export default function Page({}) {
     <>
       <Header>
         <h1>Unofficial Duolingo Stories</h1>
-        <p>
+        <p className="[&_a]:underline [&_a]:underline-offset-2">
           A community project to bring the original{" "}
           <Link href="https://www.duolingo.com/stories">Duolingo Stories</Link>{" "}
           to new languages.
           <br />
           <LandingStatsClient />
         </p>
-        <p>
+        <p className="[&_a]:underline [&_a]:underline-offset-2">
           If you want to contribute or discuss the stories, meet us on{" "}
           <Link href="https://discord.gg/4NGVScARR3">Discord</Link>
           <br />

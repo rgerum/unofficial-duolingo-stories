@@ -168,7 +168,7 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
           }) ??
             `Learn ${course.learning_language_name} with ${course.count} stories.`}
         </p>
-        <p>
+        <p className="[&_a]:underline [&_a]:underline-offset-2">
           {localization("course_page_discuss", {}, [
             "https://discord.gg/4NGVScARR3",
             "/faq",

@@ -1,13 +1,12 @@
 import React from "react";
-import styles from "@/components/layout/spinner.module.css";
 
 export function Spinner() {
   return (
-    <div className={styles.spinner}>
-      <div className={styles.spinner_parent}>
-        <div className={styles.spinner_point + " " + styles.spinner_p1} />
-        <div className={styles.spinner_point + " " + styles.spinner_p2} />
-        <div className={styles.spinner_point + " " + styles.spinner_p3} />
+    <div className="relative h-[200px] w-full">
+      <div className="absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 grid-cols-3 gap-3">
+        <div className="h-[18px] w-[18px] animate-[spinnerFade1_1.2s_ease-in-out_infinite] rounded-full bg-[#e5e5e5]" />
+        <div className="h-[18px] w-[18px] animate-[spinnerFade2_1.2s_ease-in-out_infinite] rounded-full bg-[#e5e5e5]" />
+        <div className="h-[18px] w-[18px] animate-[spinnerFade3_1.2s_ease-in-out_infinite] rounded-full bg-[#e5e5e5]" />
       </div>
     </div>
   );
@@ -15,35 +14,11 @@ export function Spinner() {
 
 export function SpinnerBlue() {
   return (
-    <div className={styles.spinner + " " + styles.spinner_blue}>
-      <div className={styles.spinner_parent + " " + styles.spinner_blue_parent}>
-        <div
-          className={
-            styles.spinner_point +
-            " " +
-            styles.spinner_p1 +
-            " " +
-            styles.spinner_blue_point
-          }
-        />
-        <div
-          className={
-            styles.spinner_point +
-            " " +
-            styles.spinner_p2 +
-            " " +
-            styles.spinner_blue_point
-          }
-        />
-        <div
-          className={
-            styles.spinner_point +
-            " " +
-            styles.spinner_p3 +
-            " " +
-            styles.spinner_blue_point
-          }
-        />
+    <div className="relative inline-block h-5 w-5">
+      <div className="absolute left-1/2 top-[70%] grid -translate-x-1/2 -translate-y-1/2 grid-cols-3 gap-[2px]">
+        <div className="h-1 w-1 animate-[spinnerFade1_1.2s_ease-in-out_infinite] rounded-full bg-[#0089e5]" />
+        <div className="h-1 w-1 animate-[spinnerFade2_1.2s_ease-in-out_infinite] rounded-full bg-[#0089e5]" />
+        <div className="h-1 w-1 animate-[spinnerFade3_1.2s_ease-in-out_infinite] rounded-full bg-[#0089e5]" />
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 "use client";
-import styles from "./course-dropdown.module.css";
 import Link from "next/link";
 import Flag from "@/components/ui/flag";
 import Dropdown from "@/components/ui/dropdown";
@@ -21,7 +20,7 @@ function LanguageButtonSmall({ course }: { course?: CourseData }) {
 
   return (
     <Link
-      className={styles.language_select_item}
+      className="flex h-[42px] items-center overflow-hidden whitespace-nowrap border-b border-[var(--header-border)] px-[10px] py-[5px] text-ellipsis no-underline hover:bg-[var(--language-selector-hover-background)]"
       href={`/${course.short}`}
       data-cy="button_lang_dropdown"
     >
@@ -37,7 +36,7 @@ function LanguageButtonSmall({ course }: { course?: CourseData }) {
               : undefined
         }
       />
-      <span>{course.name}</span>
+      <span className="pl-[10px] text-[18px] font-bold">{course.name}</span>
     </Link>
   );
 }
@@ -84,9 +83,9 @@ export default function CourseDropdown() {
               ? Number(activeCourseLanguage?.flag)
               : undefined
         }
-        className={styles.trigger}
+        className="mx-4"
       />
-      <nav className={styles.header_lang_selector}>
+      <nav className="!left-[-120px] !w-[300px] max-h-[calc(100vh-55px)]">
         {course_data_active.map((id) => (
           <LanguageButtonSmall key={id} course={get_course_by_id(id)} />
         ))}

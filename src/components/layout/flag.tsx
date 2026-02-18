@@ -1,5 +1,4 @@
-import React, { CSSProperties } from "react";
-import styles from "./flag.module.css";
+import React from "react";
 import Image from "next/image";
 
 export default function Flag(props: {
@@ -72,31 +71,35 @@ export default function Flag(props: {
       if (order[i] === (props.iso || "world")) flag = parseInt(i);
     }
   }
-  const flag1 = flag;
   if (flag === 0 && !props.flag_file && props.iso !== "en") {
     // Check if there's a valid flag index, fall back to "world" flag if not
     flag = props.flag && props.flag > 0 && props.flag < 48 ? props.flag : 37; // "world"
   }
 
-  let style = {
-    width: props.width || 88,
-    height: (66 / 82) * (props.width || 88),
-    minWidth: props.width || 88,
+  const width = props.width || 88;
+  const scale = width / 82;
+  const height = (66 / 82) * width;
+  const flagImageStyle: React.CSSProperties = {
+    width,
+    height,
+    minWidth: width,
+    objectFit: "cover",
+    objectPosition: `0 ${-66 * scale * flag}px`,
+    outline: `${5 * scale}px solid var(--body-background)`,
+    outlineOffset: `${-6 * scale}px`,
+    borderRadius: `${16 * scale}px`,
+    display: "block",
+    flexShrink: 0,
   };
   return (
     <>
       <Image
-        style={
-          {
-            "--flag-scale": (props.width || 88) / 82,
-            "--flag_offset": flag,
-          } as CSSProperties
-        }
-        width={style.width}
-        height={style.height}
+        style={flagImageStyle}
+        width={width}
+        height={height}
         priority={props.priority === true}
         loading={props.loading}
-        className={styles.flag_image2 + " " + (props.className || "")}
+        className={props.className || ""}
         src={
           props.flag_file
             ? `/flags/${props.flag_file}`
@@ -158,7 +161,7 @@ export function DoubleFlag({
         flag_file={lang2?.flag_file}
         width={(width ?? 88) * 0.9}
         //onClick={onClick}
-        className={className + " " + styles.flag_sub}
+        className={(className || "") + " ml-[-32px] mt-[18px]"}
       />
     </>
   );

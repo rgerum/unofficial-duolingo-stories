@@ -305,6 +305,60 @@ select {
   font-size: inherit;
 }
 
+@keyframes spinnerFade1 {
+  0% {
+    opacity: 1;
+  }
+  33.33333% {
+    opacity: 0.25;
+  }
+  66.66667% {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spinnerFade2 {
+  0% {
+    opacity: 0.5;
+  }
+  33.33333% {
+    opacity: 1;
+  }
+  66.66667% {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spinnerFade3 {
+  0% {
+    opacity: 0.25;
+  }
+  33.33333% {
+    opacity: 0.5;
+  }
+  66.66667% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.25;
+  }
+}
+
+@keyframes placeholderShimmer {
+  0% {
+    background-position: -800px 0;
+  }
+  100% {
+    background-position: 800px 0;
+  }
+}
+
 /* language specifics */
 
 .en {
