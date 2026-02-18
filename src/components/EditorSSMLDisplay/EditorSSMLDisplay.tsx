@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import { MicIcon } from "lucide-react";
-import styles from "./EditorSSMLDisplay.module.css";
 import {
   generate_audio_line,
   timings_to_text,
@@ -50,15 +49,17 @@ export default function EditorSSMLDisplay({
   return (
     <>
       <br />
-      <span className={styles.ssml_speaker + " en"}>{ssml.speaker}</span>
+      <span className="en mr-[3px] rounded-[5px] bg-[var(--editor-ssml)] px-[5px] py-[2px] text-[0.8em]">
+        {ssml.speaker}
+      </span>
       <button
         onClick={() => editor.show_audio_editor(element)}
-        className={styles.audio_editor_button}
+        className="inline-flex h-[25px] w-[25px] shrink-0 items-center justify-center align-middle"
         title="Open sound editor"
         aria-label="Open sound editor"
         type="button"
       >
-        <MicIcon className={styles.audio_editor_icon} />
+        <MicIcon className="h-5 w-5" />
       </button>
       {ssml.speaker ? (
         error ? (
@@ -74,12 +75,14 @@ export default function EditorSSMLDisplay({
             title={loading ? "generating audio..." : "regenerate audio"}
             id={line_id}
             className={
-              styles.ssml_reload +
-              " " +
-              styles.audio_reload +
-              " " +
-              (loading ? styles.audio_reload_spin : "")
+              "inline-block h-[25px] w-[25px] cursor-pointer bg-contain bg-center bg-no-repeat transition-transform " +
+              (loading ? "animate-[spin_2s_linear_infinite]" : "")
             }
+            style={{
+              backgroundImage:
+                'url("https://carex.uber.space/stories/old/refresh.png")',
+              transitionDuration: "1s",
+            }}
             onClick={reload}
           />
         )
