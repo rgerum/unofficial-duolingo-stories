@@ -6,6 +6,7 @@ import { Preloaded, usePreloadedQuery, useQuery } from "convex/react";
 import Header from "../header";
 import StoryButton from "./story_button";
 import get_localisation_func from "@/lib/get_localisation_func";
+import Switch from "@/components/layout/switch";
 
 function SetTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -47,6 +48,27 @@ export default function CoursePageClient({
   course_id: string;
   preloadedCourse: Preloaded<typeof api.landing.getPublicCoursePageData>;
 }) {
+  const listeningStorageKey = React.useMemo(
+    () => `course_listening_mode:${course_id}`,
+    [course_id],
+  );
+  const [listeningMode, setListeningMode] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    setListeningMode(window.localStorage.getItem(listeningStorageKey) === "1");
+  }, [listeningStorageKey]);
+
+  const toggleListeningMode = React.useCallback(() => {
+    setListeningMode((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(listeningStorageKey, next ? "1" : "0");
+      }
+      return next;
+    });
+  }, [listeningStorageKey]);
+
   const course = usePreloadedQuery(preloadedCourse);
   const localizationMap = React.useMemo(() => {
     const data: Record<string, string> = {};
@@ -114,6 +136,33 @@ export default function CoursePageClient({
         </p>
       </Header>
       <div>
+        <div
+          className="mx-auto mb-6 flex w-full max-w-[720px] cursor-pointer items-center justify-between gap-3 rounded-xl border border-[var(--overview-hr)] px-4 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--overview-hr)]"
+          role="button"
+          tabIndex={0}
+          aria-pressed={listeningMode}
+          onClick={toggleListeningMode}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              toggleListeningMode();
+            }
+          }}
+        >
+          <div>
+            <div className="font-bold">Listening mode (skip questions)</div>
+            <div className="text-[calc(13/16*1rem)] text-[var(--text-color-dim)]">
+              Opens stories in autoplay and skips interactive questions.
+            </div>
+          </div>
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <Switch checked={listeningMode} onClick={toggleListeningMode} />
+          </div>
+        </div>
         {course.about ? <About about={course.about} /> : null}
         {storiesBySet.map((set) => (
           <SetGrid
@@ -125,7 +174,11 @@ export default function CoursePageClient({
           >
             {set.stories.map((story) => (
               <li key={story.id}>
-                <StoryButton story={story} done={doneMap[story.id]} />
+                <StoryButton
+                  story={story}
+                  done={doneMap[story.id]}
+                  listeningMode={listeningMode}
+                />
               </li>
             ))}
           </SetGrid>

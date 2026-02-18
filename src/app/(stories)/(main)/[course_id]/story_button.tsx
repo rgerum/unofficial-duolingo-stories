@@ -14,9 +14,11 @@ interface StoryData {
 export default function StoryButton({
   story,
   done,
+  listeningMode = false,
 }: {
   story?: StoryData;
   done?: boolean;
+  listeningMode?: boolean;
 }) {
   if (!story) {
     return (
@@ -31,8 +33,9 @@ export default function StoryButton({
     <Link
       data-cy={"story_button_" + story.id}
       className="group my-[7px] mr-[17px] mb-[10px] ml-[17px] inline-block w-[134px] cursor-pointer rounded-[5px] text-center no-underline outline-offset-[5px] max-[335px]:m-0 max-[268px]:mx-auto"
-      href={`/story/${story.id}`}
+      href={listeningMode ? `/story/${story.id}/auto_play` : `/story/${story.id}`}
       onClick={() => {
+        if (listeningMode) return;
         if (typeof window !== "undefined") {
           window.sessionStorage.setItem(
             "story_autoplay_ts",
@@ -46,6 +49,19 @@ export default function StoryButton({
         data-done={done}
         style={done ? {} : { background: "#" + story.active_lip }}
       >
+        {listeningMode ? (
+          <span
+            className="pointer-events-none absolute top-[5px] right-[5px] z-[2] inline-flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[rgba(255,255,255,0.92)] shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
+            aria-label="Listening mode"
+          >
+            <img
+              src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
+              alt=""
+              aria-hidden="true"
+              className="h-[13px] w-4"
+            />
+          </span>
+        ) : null}
         <Image
           src={done ? story.gilded : story.active}
           alt=""

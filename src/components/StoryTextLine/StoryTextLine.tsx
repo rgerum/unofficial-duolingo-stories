@@ -16,12 +16,16 @@ function StoryTextLine({
   unhide = 999999,
   settings,
   editorState,
+  audioRangeOverride,
+  hideAudioButton = false,
 }: {
   active: boolean;
   element: StoryElementLine;
   unhide?: number;
   settings: StorySettings;
   editorState?: EditorStateType;
+  audioRangeOverride?: number;
+  hideAudioButton?: boolean;
 }) {
   const editorProps: EditorProps = {
     editorState,
@@ -29,6 +33,7 @@ function StoryTextLine({
   };
   const { onClick } = getEditorHandlers(editorProps);
   const [audioRange, playAudio, ref, url] = useAudio(element, active);
+  const effectiveAudioRange = audioRangeOverride ?? audioRange;
 
   if (element.line === undefined) return <></>;
 
@@ -66,9 +71,9 @@ function StoryTextLine({
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />
           </audio>
-          <PlayAudio onClick={playAudio} />
+          {!hideAudioButton && <PlayAudio onClick={playAudio} />}
           <StoryLineHints
-            audioRange={audioRange}
+            audioRange={effectiveAudioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             content={element.line.content}
             editorState={editorState}
@@ -92,9 +97,9 @@ function StoryTextLine({
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />
           </audio>
-          <PlayAudio onClick={playAudio} />
+          {!hideAudioButton && <PlayAudio onClick={playAudio} />}
           <StoryLineHints
-            audioRange={audioRange}
+            audioRange={effectiveAudioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             unhide={unhide}
             content={element.line.content}
@@ -123,9 +128,9 @@ function StoryTextLine({
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />
           </audio>
-          <PlayAudio onClick={playAudio} />
+          {!hideAudioButton && <PlayAudio onClick={playAudio} />}
           <StoryLineHints
-            audioRange={audioRange}
+            audioRange={effectiveAudioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             unhide={unhide}
             content={element.line.content}
