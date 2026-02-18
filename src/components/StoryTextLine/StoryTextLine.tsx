@@ -71,9 +71,11 @@ function StoryTextLine({
         data-lineno={element?.editor?.block_start_no}
       >
         <span className={styles.title}>
-          <audio ref={ref}>
-            <source src={url} type="audio/mp3" />
-          </audio>
+          {url && (
+            <audio ref={ref}>
+              <source src={url} type="audio/mp3" />
+            </audio>
+          )}
           {!hideAudioButton && <PlayAudio onClick={playAudio} />}
           <StoryLineHints
             audioRange={effectiveAudioRange}
@@ -97,9 +99,11 @@ function StoryTextLine({
       >
         <img className={styles.head} src={element.line.avatarUrl} alt="head" />
         <span className={styles.bubble}>
-          <audio ref={ref}>
-            <source src={url} type="audio/mp3" />
-          </audio>
+          {url && (
+            <audio ref={ref}>
+              <source src={url} type="audio/mp3" />
+            </audio>
+          )}
           {!hideAudioButton && <PlayAudio onClick={playAudio} />}
           <StoryLineHints
             audioRange={effectiveAudioRange}
@@ -128,9 +132,11 @@ function StoryTextLine({
         data-lineno={element?.editor?.block_start_no}
       >
         <span>
-          <audio ref={ref}>
-            <source src={url} type="audio/mp3" />
-          </audio>
+          {url && (
+            <audio ref={ref}>
+              <source src={url} type="audio/mp3" />
+            </audio>
+          )}
           {!hideAudioButton && <PlayAudio onClick={playAudio} />}
           <StoryLineHints
             audioRange={effectiveAudioRange}
