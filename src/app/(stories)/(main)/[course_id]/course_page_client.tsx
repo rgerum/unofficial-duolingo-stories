@@ -2,11 +2,10 @@
 
 import React from "react";
 import { api } from "@convex/_generated/api";
-import { useQuery } from "convex/react";
+import { Preloaded, usePreloadedQuery, useQuery } from "convex/react";
 import Header from "../header";
 import StoryButton from "./story_button";
 import get_localisation_func from "@/lib/get_localisation_func";
-import { authClient } from "@/lib/auth-client";
 
 function SetTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -14,10 +13,6 @@ function SetTitle({ children }: { children: React.ReactNode }) {
       {children}
     </div>
   );
-}
-
-function SetList({ children }: { children: React.ReactNode }) {
-  return <div>{children}</div>;
 }
 
 function SetGrid({
@@ -35,48 +30,6 @@ function SetGrid({
   );
 }
 
-function LoadingTitle() {
-  return (
-    <Header>
-      <h1>
-        <span className="inline-block animate-pulse rounded bg-slate-200 px-3 text-transparent">
-          Unofficial Language Duolingo Stories
-        </span>
-      </h1>
-      <p>
-        <span className="inline-block animate-pulse rounded bg-slate-200 px-3 text-transparent">
-          Learn Language with 000 community translated Duolingo Stories.
-        </span>
-      </p>
-      <p>
-        <span className="inline-block animate-pulse rounded bg-slate-200 px-3 text-transparent">
-          If you want to contribute or discuss the stories, meet us on Discord
-        </span>
-        <br />
-        <span className="inline-block animate-pulse rounded bg-slate-200 px-3 text-transparent">
-          or learn more about the project in our FAQ.
-        </span>
-      </p>
-    </Header>
-  );
-}
-
-function LoadingSetList() {
-  return (
-    <div className="mt-6 flex flex-col gap-[18px]">
-      {[...Array(2)].map((_, i) => (
-        <SetGrid key={i} setName={`Set ${i + 1}`}>
-          {[...Array(4)].map((_, j) => (
-            <li key={j}>
-              <StoryButton />
-            </li>
-          ))}
-        </SetGrid>
-      ))}
-    </div>
-  );
-}
-
 function About({ about }: { about: string }) {
   if (!about) return <></>;
   return (
@@ -87,10 +40,14 @@ function About({ about }: { about: string }) {
   );
 }
 
-export default function CoursePageClient({ courseId }: { courseId: string }) {
-  const course = useQuery(api.landing.getPublicCoursePageData, {
-    short: courseId,
-  });
+export default function CoursePageClient({
+  course_id,
+  preloadedCourse,
+}: {
+  course_id: string;
+  preloadedCourse: Preloaded<typeof api.landing.getPublicCoursePageData>;
+}) {
+  const course = usePreloadedQuery(preloadedCourse);
   const localizationMap = React.useMemo(() => {
     const data: Record<string, string> = {};
     for (const row of course?.localization ?? []) data[row.tag] = row.text;
@@ -101,19 +58,9 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
     [localizationMap],
   );
 
-  const { data: session } = authClient.useSession();
-  const rawUserId = (session?.user as { userId?: string | number } | undefined)
-    ?.userId;
-  const legacyUserId =
-    typeof rawUserId === "number"
-      ? rawUserId
-      : Number.parseInt(rawUserId ?? "", 10);
-
   const doneStoryIds = useQuery(
-    api.storyDone.getDoneStoryIdsForCourse,
-    course && Number.isFinite(legacyUserId)
-      ? { legacyCourseId: course.id, legacyUserId }
-      : "skip",
+    api.storyDone.getDoneStoryIdsForCurrentUserInCourse,
+    { courseShort: course_id },
   );
   const doneMap = React.useMemo(() => {
     const done: Record<number, boolean> = {};
@@ -135,15 +82,6 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
       }))
       .sort((a, b) => a.setId - b.setId);
   }, [course]);
-
-  if (course === undefined) {
-    return (
-      <>
-        <LoadingTitle />
-        <LoadingSetList />
-      </>
-    );
-  }
 
   if (!course) {
     return (
@@ -175,7 +113,7 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
           ])}
         </p>
       </Header>
-      <SetList>
+      <div>
         {course.about ? <About about={course.about} /> : null}
         {storiesBySet.map((set) => (
           <SetGrid
@@ -192,7 +130,7 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
             ))}
           </SetGrid>
         ))}
-      </SetList>
+      </div>
     </>
   );
 }
