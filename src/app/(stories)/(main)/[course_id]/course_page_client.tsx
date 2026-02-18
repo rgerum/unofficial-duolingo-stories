@@ -198,14 +198,32 @@ export default function CoursePageClient({ courseId }: { courseId: string }) {
         </p>
       </Header>
       <SetList>
-        <div className="mx-auto mb-6 flex w-full max-w-[720px] items-center justify-between gap-3 rounded-xl border border-[var(--overview-hr)] px-4 py-3">
+        <div
+          className="mx-auto mb-6 flex w-full max-w-[720px] cursor-pointer items-center justify-between gap-3 rounded-xl border border-[var(--overview-hr)] px-4 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--overview-hr)]"
+          role="button"
+          tabIndex={0}
+          aria-pressed={listeningMode}
+          onClick={toggleListeningMode}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              toggleListeningMode();
+            }
+          }}
+        >
           <div>
             <div className="font-bold">Listening mode (skip questions)</div>
             <div className="text-[calc(13/16*1rem)] text-[var(--text-color-dim)]">
               Opens stories in autoplay and skips interactive questions.
             </div>
           </div>
-          <Switch checked={listeningMode} onClick={toggleListeningMode} />
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <Switch checked={listeningMode} onClick={toggleListeningMode} />
+          </div>
         </div>
         {course.about ? <About about={course.about} /> : null}
         {storiesBySet.map((set) => (
