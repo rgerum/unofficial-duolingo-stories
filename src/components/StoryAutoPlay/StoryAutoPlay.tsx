@@ -24,6 +24,8 @@ interface StoryAutoPlayProps {
 
 const BLOB_PUBLIC_BASE =
   "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/";
+const FETCH_RETRIES = 2;
+const LARGE_MERGE_SEGMENT_THRESHOLD = 60;
 
 const autoPlaySettings = {
   hide_questions: true,
@@ -141,12 +143,41 @@ function formatTime(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+async function fetchArrayBufferWithRetry(url: string): Promise<ArrayBuffer> {
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt <= FETCH_RETRIES; attempt++) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Could not download audio (${response.status}).`);
+      }
+      return await response.arrayBuffer();
+    } catch (error) {
+      lastError = error;
+      if (attempt === FETCH_RETRIES) break;
+      await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Could not download audio after retries.");
+}
+
 function mergeBuffersToWav(buffers: AudioBuffer[]): Blob {
   if (!buffers.length) {
     return new Blob([], { type: "audio/wav" });
   }
 
   const sampleRate = buffers[0].sampleRate;
+  for (let i = 1; i < buffers.length; i++) {
+    if (buffers[i].sampleRate !== sampleRate) {
+      throw new Error(
+        `Mixed sample rates are not supported (${sampleRate} vs ${buffers[i].sampleRate}).`,
+      );
+    }
+  }
   const channels = Math.max(...buffers.map((b) => b.numberOfChannels));
   const totalFrames = buffers.reduce((sum, b) => sum + b.length, 0);
 
@@ -181,6 +212,7 @@ function mergeBuffersToWav(buffers: AudioBuffer[]): Blob {
   };
 
   writeStr("RIFF");
+  // WAV/RIFF numeric fields are little-endian by specification.
   view.setUint32(offset, 36 + dataSize, true);
   offset += 4;
   writeStr("WAVE");
@@ -265,6 +297,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   const [duration, setDuration] = React.useState(0);
   const [currentTime, setCurrentTime] = React.useState(0);
   const [activeAudioRange, setActiveAudioRange] = React.useState(99999);
+  const [showLargeMergeWarning, setShowLargeMergeWarning] = React.useState(false);
 
   const buildMergedAudio = React.useCallback(async () => {
     if (!timelineSegments.length) {
@@ -283,12 +316,8 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       let start = 0;
 
       for (const segment of timelineSegments) {
-        const response = await fetch(segment.audioUrl);
-        if (!response.ok) {
-          throw new Error(`Could not download audio (${response.status}).`);
-        }
-        const arrayBuffer = await response.arrayBuffer();
-        const decoded = await decodeCtx.decodeAudioData(arrayBuffer.slice(0));
+        const arrayBuffer = await fetchArrayBufferWithRetry(segment.audioUrl);
+        const decoded = await decodeCtx.decodeAudioData(arrayBuffer);
         decodedBuffers.push(decoded);
         meta.push({
           lineIndex: segment.lineIndex,
@@ -311,6 +340,12 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       setCurrentTime(0);
       setMergeState("ready");
       return nextSrc;
+    } catch (error) {
+      setMergeState("error");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to build merged audio.",
+      );
+      return null;
     } finally {
       void decodeCtx.close();
     }
@@ -323,6 +358,9 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     setDuration(0);
     setCurrentTime(0);
     setActiveAudioRange(99999);
+    setShowLargeMergeWarning(
+      timelineSegments.length >= LARGE_MERGE_SEGMENT_THRESHOLD,
+    );
     setMergedSrc((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -512,6 +550,11 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
           <div className={styles.timelineTime}>
             {formatTime(currentTime)} / {formatTime(duration)}
           </div>
+          {showLargeMergeWarning && mergeState === "idle" && (
+            <div className={styles.timelineStatus}>
+              Large story: first play may take longer while audio is merged.
+            </div>
+          )}
           {mergeState === "error" && (
             <div className={styles.timelineError}>
               Could not build merged audio: {errorMessage}
