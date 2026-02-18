@@ -5,6 +5,8 @@ import CoursePageClient from "./course_page_client";
 import { get_localisation_by_convex_language_id } from "@/lib/get_localisation";
 import { get_course_data, get_course } from "../get_course_data";
 import { ResolvingMetadata } from "next";
+import { preloadQuery } from "convex/nextjs";
+import { api } from "@convex/_generated/api";
 
 export async function generateMetadata(
   { params }: { params: Promise<{ course_id: string }> },
@@ -68,15 +70,19 @@ export default async function Page({
 }: {
   params: Promise<{ course_id: string }>;
 }) {
-  const params0 = await params;
-  if (
-    params0.course_id.indexOf("-") === -1 ||
-    params0.course_id.indexOf(".") !== -1
-  ) {
+  const course_id = (await params).course_id;
+  if (course_id.indexOf("-") === -1 || course_id.indexOf(".") !== -1) {
     return notFound();
   }
 
+  const preloadedCourse = await preloadQuery(
+    api.landing.getPublicCoursePageData,
+    {
+      short: course_id,
+    },
+  );
+
   return (
-    <CoursePageClient courseId={params0.course_id} />
+    <CoursePageClient course_id={course_id} preloadedCourse={preloadedCourse} />
   );
 }

@@ -29,7 +29,7 @@ export default function Cast(props: {
         <p className="my-[1em] leading-[1.2]">
           {no_speaker_count} characters do not have a speaker voice assigned. Go
           to the{" "}
-          <Link target="_blank" href={"/editor/language/" + props.short}>
+          <Link className="underline underline-offset-2" target="_blank" href={"/editor/language/" + props.short}>
             Character-Editor
           </Link>{" "}
           to add the voices.
@@ -37,7 +37,7 @@ export default function Cast(props: {
       ) : (
         <p className="my-[1em] leading-[1.2]">
           To change voices or names go to the{" "}
-          <Link target="_blank" href={"/editor/language/" + props.short}>
+          <Link className="underline underline-offset-2" target="_blank" href={"/editor/language/" + props.short}>
             Character-Editor
           </Link>
           .
@@ -45,22 +45,23 @@ export default function Cast(props: {
       )}
       <p className="my-[1em] leading-[1.2]">
         Use these links to share this story with other contributors to{" "}
-        <Link href={`/story/${props.id}`} target={"_blank"}>
+        <Link className="underline underline-offset-2" href={`/story/${props.id}`} target={"_blank"}>
           test
         </Link>{" "}
         or{" "}
-        <Link href={`/story/${props.id}/test`} target={"_blank"}>
+        <Link className="underline underline-offset-2" href={`/story/${props.id}/test`} target={"_blank"}>
           review
         </Link>{" "}
         the story. (or review{" "}
         <Link
+          className="underline underline-offset-2"
           href={`/story/${props.id}/test?hide_questions=true`}
           target={"_blank"}
         >
           without the exercises
         </Link>
         ){" "}
-        <Link href={`/story/${props.id}/script`} target={"_blank"}>
+        <Link className="underline underline-offset-2" href={`/story/${props.id}/script`} target={"_blank"}>
           Story Script
         </Link>
       </p>

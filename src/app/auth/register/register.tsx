@@ -1,15 +1,22 @@
 "use client";
 import Head from "next/head";
 import React from "react";
-import styles from "../register.module.css";
 import Link from "next/link";
 import { useInput } from "@/lib/hooks";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
+import { authInlineLinkClass } from "@/components/auth/styles";
 
 export default function Register() {
+  const headingClass = "m-0 text-[calc(24/16*1rem)]";
+  const paragraphClass = "m-0";
+  const alertErrorClass =
+    "block w-full rounded-[10px] bg-[var(--error-red)] p-[10px] text-white";
+  const alertMessageClass =
+    "block w-full rounded-[10px] bg-[var(--button-blue-background)] p-[10px] text-white";
+
   const [state, setState] = React.useState(0);
   const [error, setError] = React.useState("");
   const [message, setMessage] = React.useState("");
@@ -81,22 +88,22 @@ export default function Register() {
         <link rel="canonical" href={`https://duostories.org/login`} />
       </Head>
 
-      <h1 className={styles.H1}>Sign up</h1>
-      <p className={styles.P}>
+      <h1 className={headingClass}>Sign up</h1>
+      <p className={paragraphClass}>
         If you register you can keep track of the stories you have already
         finished.
       </p>
-      <p className={styles.P}>
+      <p className={paragraphClass}>
         Registration is optional, stories can be accessed even without login.
       </p>
-      {state === -1 && <span className={styles.error}>{error}</span>}
+      {state === -1 && <span className={alertErrorClass}>{error}</span>}
       {state === 2 && (
-        <span className={styles.message} data-cy="message-confirm">
+        <span className={alertMessageClass} data-cy="message-confirm">
           {message}
         </span>
       )}
       {state !== 2 && (
-        <form onSubmit={register_button} className={styles.Form}>
+        <form onSubmit={register_button} className="flex flex-col gap-2">
           <Input
             data-cy="username"
             value={usernameInput}
@@ -130,9 +137,9 @@ export default function Register() {
           </Button>
         </form>
       )}
-      <p className={styles.P}>
+      <p className={paragraphClass}>
         Already have an account?{" "}
-        <Link className={styles.link} href="/auth/signin">
+        <Link className={authInlineLinkClass} href="/auth/signin">
           LOG IN
         </Link>
       </p>

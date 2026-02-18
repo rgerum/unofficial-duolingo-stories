@@ -16,6 +16,60 @@ const courseListItemValidator = v.object({
   learning_language_name: v.string(),
 });
 
+const landingCourseItemValidator = v.object({
+  id: v.number(),
+  short: v.string(),
+  name: v.string(),
+  count: v.number(),
+  learningLanguage: v.object({
+    id: v.id("languages"),
+    short: v.string(),
+    flag: v.optional(v.union(v.number(), v.string())),
+    flag_file: v.optional(v.string()),
+  }),
+});
+
+const landingGroupValidator = v.object({
+  fromLanguageId: v.id("languages"),
+  fromLanguageName: v.string(),
+  labels: v.object({
+    storiesFor: v.string(),
+    nStoriesTemplate: v.string(),
+  }),
+  courses: v.array(landingCourseItemValidator),
+});
+
+const landingPageDataValidator = v.object({
+  stats: v.object({
+    courseCount: v.number(),
+    storyCount: v.number(),
+  }),
+  groups: v.array(landingGroupValidator),
+});
+
+type LandingCourseItem = {
+  id: number;
+  short: string;
+  name: string;
+  count: number;
+  learningLanguage: {
+    id: Id<"languages">;
+    short: string;
+    flag: number | string | undefined;
+    flag_file: string | undefined;
+  };
+};
+
+type LandingGroup = {
+  fromLanguageId: Id<"languages">;
+  fromLanguageName: string;
+  labels: {
+    storiesFor: string;
+    nStoriesTemplate: string;
+  };
+  courses: LandingCourseItem[];
+};
+
 export const getPublicCourseList = query({
   args: {},
   returns: v.array(courseListItemValidator),
@@ -93,6 +147,161 @@ export const getPublicCourseList = query({
         if (fromCmp !== 0) return fromCmp;
         return a.name.localeCompare(b.name);
       });
+  },
+});
+
+export const getPublicLandingPageData = query({
+  args: {},
+  returns: landingPageDataValidator,
+  handler: async (ctx) => {
+    const courses = await ctx.db
+      .query("courses")
+      .withIndex("by_public", (q) => q.eq("public", true))
+      .collect();
+
+    const englishLanguage = await ctx.db
+      .query("languages")
+      .withIndex("by_short", (q) => q.eq("short", "en"))
+      .unique();
+
+    const languageIds = new Set<Id<"languages">>();
+    for (const course of courses) {
+      languageIds.add(course.fromLanguageId);
+      languageIds.add(course.learningLanguageId);
+    }
+    if (englishLanguage?._id) {
+      languageIds.add(englishLanguage._id);
+    }
+
+    const languageRows = await Promise.all(
+      Array.from(languageIds).map(async (languageId) => ({
+        languageId,
+        language: await ctx.db.get(languageId),
+      })),
+    );
+    const languageById = new Map<Id<"languages">, (typeof languageRows)[number]["language"]>();
+    for (const row of languageRows) {
+      if (!row.language) continue;
+      languageById.set(row.languageId, row.language);
+    }
+
+    const englishRows = englishLanguage
+      ? await ctx.db
+          .query("localizations")
+          .withIndex("by_language_id_and_tag", (q) =>
+            q.eq("languageId", englishLanguage._id),
+          )
+          .collect()
+      : [];
+    const englishLocalization = new Map<string, string>();
+    for (const row of englishRows) {
+      if (!row.tag || !row.text) continue;
+      englishLocalization.set(row.tag, row.text);
+    }
+
+    const fromLanguageIds = Array.from(
+      new Set(courses.map((course) => course.fromLanguageId)),
+    );
+    const localizationByFromLanguageId = new Map<Id<"languages">, Map<string, string>>();
+    await Promise.all(
+      fromLanguageIds.map(async (fromLanguageId) => {
+        const targetRows =
+          englishLanguage?._id === fromLanguageId
+            ? englishRows
+            : await ctx.db
+                .query("localizations")
+                .withIndex("by_language_id_and_tag", (q) =>
+                  q.eq("languageId", fromLanguageId),
+                )
+                .collect();
+        const merged = new Map<string, string>(englishLocalization);
+        for (const row of targetRows) {
+          if (!row.tag || !row.text) continue;
+          merged.set(row.tag, row.text);
+        }
+        localizationByFromLanguageId.set(fromLanguageId, merged);
+      }),
+    );
+
+    const coursesByFromLanguageId = new Map<Id<"languages">, LandingCourseItem[]>();
+    for (const course of courses) {
+      if (!course.short) continue;
+      const fromLanguage = languageById.get(course.fromLanguageId);
+      const learningLanguage = languageById.get(course.learningLanguageId);
+      if (!fromLanguage || !learningLanguage) continue;
+
+      const mappedCourse = {
+        id: course.legacyId,
+        short: course.short,
+        name:
+          course.name && course.name.trim().length > 0
+            ? course.name
+            : learningLanguage.name,
+        count: course.count ?? 0,
+        learningLanguage: {
+          id: course.learningLanguageId as Id<"languages">,
+          short: learningLanguage.short,
+          flag: learningLanguage.flag,
+          flag_file: learningLanguage.flag_file,
+        },
+      };
+
+      const list = coursesByFromLanguageId.get(course.fromLanguageId) ?? [];
+      list.push(mappedCourse);
+      coursesByFromLanguageId.set(course.fromLanguageId, list);
+    }
+
+    for (const [, groupCourses] of coursesByFromLanguageId) {
+      groupCourses.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    const englishGroup = englishLanguage?._id
+      ? coursesByFromLanguageId.get(englishLanguage._id)
+        ? [englishLanguage._id]
+        : []
+      : [];
+    const otherGroupIds = Array.from(coursesByFromLanguageId.keys())
+      .filter((languageId) => languageId !== englishLanguage?._id)
+      .sort((a, b) => {
+        const nameA = languageById.get(a)?.name ?? "";
+        const nameB = languageById.get(b)?.name ?? "";
+        return nameA.localeCompare(nameB);
+      });
+    const orderedGroupIds = [...englishGroup, ...otherGroupIds];
+
+    const groups = orderedGroupIds
+      .map((fromLanguageId) => {
+        const fromLanguage = languageById.get(fromLanguageId);
+        const coursesInGroup = coursesByFromLanguageId.get(fromLanguageId) ?? [];
+        if (!fromLanguage || coursesInGroup.length === 0) return null;
+        const localization = localizationByFromLanguageId.get(fromLanguageId);
+
+        return {
+          fromLanguageId,
+          fromLanguageName: fromLanguage.name,
+          labels: {
+            storiesFor: localization?.get("stories_for") ?? "Stories for",
+            nStoriesTemplate: localization?.get("n_stories") ?? "$count stories",
+          },
+          courses: coursesInGroup,
+        };
+      })
+      .filter((group): group is LandingGroup => group !== null);
+
+    let storyCount = 0;
+    for (const group of groups) {
+      for (const course of group.courses) {
+        storyCount += course.count;
+      }
+    }
+
+    return {
+      stats: {
+        courseCount: groups.reduce((count, group) => count + group.courses.length, 0),
+        storyCount,
+      },
+      groups,
+    };
   },
 });
 
