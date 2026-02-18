@@ -74,7 +74,10 @@ function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-function findSegmentIndexByTime(starts: number[], targetSeconds: number): number {
+function findSegmentIndexByTime(
+  starts: number[],
+  targetSeconds: number,
+): number {
   if (!starts.length) return 0;
   let index = 0;
   for (let i = 0; i < starts.length; i++) {
@@ -103,7 +106,8 @@ function toAbsoluteMediaUrl(src: string, origin: string): string {
 function getArtworkMimeType(src: string): string | undefined {
   const cleanSrc = src.split("?")[0].toLowerCase();
   if (cleanSrc.endsWith(".png")) return "image/png";
-  if (cleanSrc.endsWith(".jpg") || cleanSrc.endsWith(".jpeg")) return "image/jpeg";
+  if (cleanSrc.endsWith(".jpg") || cleanSrc.endsWith(".jpeg"))
+    return "image/jpeg";
   if (cleanSrc.endsWith(".webp")) return "image/webp";
   if (cleanSrc.endsWith(".svg")) return "image/svg+xml";
   return undefined;
@@ -141,7 +145,10 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   const parts = React.useMemo(() => GetParts(story), [story]);
   const course = `${story.learning_language}-${story.from_language}`;
   const audioRef = React.useRef<HTMLAudioElement>(null);
-  const seekTargetRef = React.useRef<null | { segmentIndex: number; offset: number }>(null);
+  const seekTargetRef = React.useRef<null | {
+    segmentIndex: number;
+    offset: number;
+  }>(null);
   const lineRefs = React.useRef<Record<number, HTMLDivElement | null>>({});
   const autoStartAttemptedRef = React.useRef(false);
 
@@ -158,7 +165,10 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     for (const part of parts) {
       for (const entry of part) {
         const processedEntry = clearHints(entry);
-        if (processedEntry.type !== "HEADER" && processedEntry.type !== "LINE") {
+        if (
+          processedEntry.type !== "HEADER" &&
+          processedEntry.type !== "LINE"
+        ) {
           continue;
         }
         const audioUrl = getElementAudioUrl(processedEntry);
@@ -237,7 +247,8 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   }, [durationsByIndex]);
 
   const activeLineIndex =
-    timelineElements[currentSegmentIndex]?.element.trackingProperties.line_index;
+    timelineElements[currentSegmentIndex]?.element.trackingProperties
+      .line_index;
 
   React.useEffect(() => {
     if (activeLineIndex === undefined) return;
@@ -265,7 +276,11 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   }, [currentSegmentIndex, segmentStarts, totalDurationSeconds]);
 
   const startSegmentPlayback = React.useCallback(
-    async (segmentIndex: number, offsetSeconds: number, shouldPlay: boolean) => {
+    async (
+      segmentIndex: number,
+      offsetSeconds: number,
+      shouldPlay: boolean,
+    ) => {
       const audioElement = audioRef.current;
       const segment = timelineElements[segmentIndex];
       if (!audioElement || !segment) return;
@@ -275,7 +290,10 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       setActiveAudioRange(99999);
 
       if (loadNewSource) {
-        seekTargetRef.current = { segmentIndex, offset: Math.max(0, offsetSeconds) };
+        seekTargetRef.current = {
+          segmentIndex,
+          offset: Math.max(0, offsetSeconds),
+        };
         audioElement.src = segment.audioUrl;
         audioElement.load();
       } else {
@@ -316,7 +334,10 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       return;
     }
 
-    const targetSegment = findSegmentIndexByTime(segmentStarts, globalProgressSeconds);
+    const targetSegment = findSegmentIndexByTime(
+      segmentStarts,
+      globalProgressSeconds,
+    );
     const offset = Math.max(
       0,
       globalProgressSeconds - (segmentStarts[targetSegment] ?? 0),
@@ -492,17 +513,23 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     });
     mediaSession.setActionHandler("seekbackward", (details) => {
       const step = details.seekOffset ?? 10;
-      void seekToCallbackRef.current?.(Math.max(0, globalProgressSeconds - step));
+      void seekToCallbackRef.current?.(
+        Math.max(0, globalProgressSeconds - step),
+      );
     });
     mediaSession.setActionHandler("seekforward", (details) => {
       const step = details.seekOffset ?? 10;
-      void seekToCallbackRef.current?.(Math.min(totalDurationSeconds, globalProgressSeconds + step));
+      void seekToCallbackRef.current?.(
+        Math.min(totalDurationSeconds, globalProgressSeconds + step),
+      );
     });
     mediaSession.setActionHandler("previoustrack", () => {
       void seekToCallbackRef.current?.(Math.max(0, globalProgressSeconds - 10));
     });
     mediaSession.setActionHandler("nexttrack", () => {
-      void seekToCallbackRef.current?.(Math.min(totalDurationSeconds, globalProgressSeconds + 10));
+      void seekToCallbackRef.current?.(
+        Math.min(totalDurationSeconds, globalProgressSeconds + 10),
+      );
     });
 
     return () => {
@@ -533,7 +560,11 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       mediaSession.setPositionState({
         duration: Math.max(totalDurationSeconds, 0.1),
         playbackRate: 1,
-        position: clamp(globalProgressSeconds, 0, Math.max(totalDurationSeconds, 0)),
+        position: clamp(
+          globalProgressSeconds,
+          0,
+          Math.max(totalDurationSeconds, 0),
+        ),
       });
     } catch (error) {
       // Some browsers throw when duration is unknown or zero.
@@ -584,7 +615,11 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       }
     }
     syncGlobalProgressWithCurrentAudio();
-  }, [currentSegmentIndex, syncGlobalProgressWithCurrentAudio, timelineElements]);
+  }, [
+    currentSegmentIndex,
+    syncGlobalProgressWithCurrentAudio,
+    timelineElements,
+  ]);
 
   const onAudioEnded = React.useCallback(async () => {
     const nextSegment = currentSegmentIndex + 1;
@@ -594,7 +629,12 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       return;
     }
     await startSegmentPlayback(nextSegment, 0, true);
-  }, [currentSegmentIndex, startSegmentPlayback, timelineElements.length, totalDurationSeconds]);
+  }, [
+    currentSegmentIndex,
+    startSegmentPlayback,
+    timelineElements.length,
+    totalDurationSeconds,
+  ]);
 
   return (
     <div className={styles.container}>
@@ -615,7 +655,9 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
           className={styles.playPauseButton}
           onClick={handlePlayPause}
           disabled={timelineElements.length === 0}
-          aria-label={isPlaying ? "Pause story playback" : "Play story playback"}
+          aria-label={
+            isPlaying ? "Pause story playback" : "Play story playback"
+          }
           title={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? (
@@ -633,13 +675,18 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
           min={0}
           max={Math.max(totalDurationSeconds, 0)}
           step={0.01}
-          value={clamp(globalProgressSeconds, 0, Math.max(totalDurationSeconds, 0))}
+          value={clamp(
+            globalProgressSeconds,
+            0,
+            Math.max(totalDurationSeconds, 0),
+          )}
           onChange={onSeekInput}
           disabled={timelineElements.length === 0}
           aria-label="Story playback timeline"
         />
         <div className={styles.timelineTime}>
-          {Math.floor(globalProgressSeconds)}s / {Math.floor(totalDurationSeconds)}s
+          {Math.floor(globalProgressSeconds)}s /{" "}
+          {Math.floor(totalDurationSeconds)}s
         </div>
       </div>
       <div className={styles.main}>

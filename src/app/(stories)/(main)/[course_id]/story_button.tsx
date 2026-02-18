@@ -33,7 +33,9 @@ export default function StoryButton({
     <Link
       data-cy={"story_button_" + story.id}
       className="group my-[7px] mr-[17px] mb-[10px] ml-[17px] inline-block w-[134px] cursor-pointer rounded-[5px] text-center no-underline outline-offset-[5px] max-[335px]:m-0 max-[268px]:mx-auto"
-      href={listeningMode ? `/story/${story.id}/auto_play` : `/story/${story.id}`}
+      href={
+        listeningMode ? `/story/${story.id}/auto_play` : `/story/${story.id}`
+      }
       onClick={() => {
         if (listeningMode) return;
         if (typeof window !== "undefined") {
