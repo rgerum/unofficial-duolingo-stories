@@ -42,11 +42,13 @@ export const getDoneStoryIdsForCourse = query({
   },
   returns: v.array(v.number()),
   handler: async (ctx, args) => {
-    return await getDoneStoryIdsForCourseAndUser(
-      ctx,
-      args.legacyCourseId,
-      args.legacyUserId,
-    );
+    const course = await ctx.db
+      .query("courses")
+      .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyCourseId))
+      .unique();
+    if (!course) return [];
+
+    return await getDoneStoryIdsForCourseIdAndUser(ctx, course._id, args.legacyUserId);
   },
 });
 
@@ -63,26 +65,20 @@ export const getDoneStoryIdsForCurrentUserInCourse = query({
       .query("courses")
       .withIndex("by_short", (q) => q.eq("short", args.courseShort))
       .unique();
-    if (!course || typeof course.legacyId !== "number") return [];
+    if (!course) return [];
 
-    return await getDoneStoryIdsForCourseAndUser(ctx, course.legacyId, legacyUserId);
+    return await getDoneStoryIdsForCourseIdAndUser(ctx, course._id, legacyUserId);
   },
 });
 
-async function getDoneStoryIdsForCourseAndUser(
+async function getDoneStoryIdsForCourseIdAndUser(
   ctx: QueryCtx,
-  legacyCourseId: number,
+  courseId: Id<"courses">,
   legacyUserId: number,
 ) {
-  const course = await ctx.db
-    .query("courses")
-    .withIndex("by_id_value", (q) => q.eq("legacyId", legacyCourseId))
-    .unique();
-  if (!course) return [];
-
   const courseStories = await ctx.db
     .query("stories")
-    .withIndex("by_course", (q) => q.eq("courseId", course._id))
+    .withIndex("by_course", (q) => q.eq("courseId", courseId))
     .collect();
 
   const doneRows = await ctx.db
