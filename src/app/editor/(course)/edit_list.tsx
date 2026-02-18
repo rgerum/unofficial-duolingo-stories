@@ -132,7 +132,9 @@ export default function EditList({
                 />
               </div>
               <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] max-[1000px]:w-[calc(100vw-60px-45px-180px)] max-[500px]:w-[calc(100vw-60px-45px-85px)] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
-                <Link href={`/editor/story/${story.id}`}>{story.name}</Link>
+                <Link className="underline underline-offset-2" href={`/editor/story/${story.id}`}>
+                  {story.name}
+                </Link>
                 {story.todo_count ? (
                   <img
                     title={`This story has ${story.todo_count} TODOs.`}

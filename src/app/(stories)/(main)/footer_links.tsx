@@ -1,13 +1,12 @@
 import Link from "next/link";
-import styles from "./footer_links.module.css";
 import React from "react";
 import Image from "next/image";
 
 export default async function FooterLinks({}) {
   return (
     <>
-      <footer className={styles.footer}>
-        <div className={styles.footer_buttons}>
+      <footer className="mt-auto">
+        <div className="mt-[50px] flex justify-end px-[10px]">
           <Link
             href="https://opencollective.com/duostories/contribute"
             target="_blank"
@@ -20,7 +19,7 @@ export default async function FooterLinks({}) {
             />
           </Link>
         </div>
-        <div className={styles.footer_links}>
+        <div className="mb-[50px] grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] justify-around border-t-2 border-[var(--overview-hr)] text-[calc(16/16*1rem)] opacity-60 [&_figcaption]:mb-0 [&_figcaption]:font-bold [&_li]:list-none [&_li]:before:content-['•_'] [&_ul]:m-0 [&_ul]:pl-0 [@media(pointer:coarse)]:[&_li_a]:leading-[calc(48/16*1rem)]">
           <figure>
             <figcaption>Social</figcaption>
             <nav>

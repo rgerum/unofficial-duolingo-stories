@@ -1,14 +1,21 @@
 "use client";
 import React from "react";
-import styles from "../register.module.css";
 import Link from "next/link";
 import { useInput } from "@/lib/hooks";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { authInlineLinkClass } from "@/components/auth/styles";
 
 export default function ResetPassword() {
+  const headingClass = "m-0 text-[calc(24/16*1rem)]";
+  const paragraphClass = "m-0";
+  const alertErrorClass =
+    "block w-full rounded-[10px] bg-[var(--error-red)] p-[10px] text-white";
+  const alertMessageClass =
+    "block w-full rounded-[10px] bg-[var(--button-blue-background)] p-[10px] text-white";
+
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const errorParam = searchParams.get("error");
@@ -78,28 +85,28 @@ export default function ResetPassword() {
 
   return (
     <>
-      <h1 className={styles.H1}>Reset Password</h1>
-      <p className={styles.P}>
+      <h1 className={headingClass}>Reset Password</h1>
+      <p className={paragraphClass}>
         {token
           ? "Enter your new password."
           : "You forgot your password? We can send you a link to reset it."}
       </p>
       {errorParam && (
-        <span className={styles.error}>
+        <span className={alertErrorClass}>
           {errorParam === "INVALID_TOKEN"
             ? "This reset link is invalid or expired."
             : errorParam}
         </span>
       )}
-      {state === -1 && <span className={styles.error}>{error}</span>}
+      {state === -1 && <span className={alertErrorClass}>{error}</span>}
       {state === 2 ? (
-        <span className={styles.message} data-cy="message-confirm">
+        <span className={alertMessageClass} data-cy="message-confirm">
           {message}
         </span>
       ) : (
         <form
           action={token ? resetPassword : requestReset}
-          className={styles.Form}
+          className="flex flex-col gap-2"
         >
           {token ? (
             <Input
@@ -127,9 +134,9 @@ export default function ResetPassword() {
           </Button>
         </form>
       )}
-      <p className={styles.P}>
+      <p className={paragraphClass}>
         Already have an account?{" "}
-        <Link className={styles.link} href="/auth/signin">
+        <Link className={authInlineLinkClass} href="/auth/signin">
           LOG IN
         </Link>
       </p>

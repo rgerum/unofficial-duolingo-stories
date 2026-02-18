@@ -1,5 +1,3 @@
-import styles from "@/components/layout/switch.module.css";
-
 export default function Switch({
   checked,
   onClick,
@@ -8,15 +6,22 @@ export default function Switch({
   onClick: () => void;
 }) {
   return (
-    <label
-      className={styles.switch}
-      onClick={(e) => {
-        e.preventDefault();
-        onClick();
-      }}
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={onClick}
+      className={[
+        "relative inline-flex h-[32px] w-[56px] items-center rounded-full border border-transparent transition-colors",
+        checked ? "bg-[var(--button-background)]" : "bg-[var(--button-inactive-background)]",
+      ].join(" ")}
     >
-      <input type="checkbox" checked={checked} readOnly />
-      <span className={styles.slider + " " + styles.round} />
-    </label>
+      <span
+        className={[
+          "inline-block h-[26px] w-[26px] transform rounded-full bg-white shadow transition-transform",
+          checked ? "translate-x-[26px]" : "translate-x-[3px]",
+        ].join(" ")}
+      />
+    </button>
   );
 }

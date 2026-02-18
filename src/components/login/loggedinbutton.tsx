@@ -1,7 +1,6 @@
 "use client";
 "use no memo";
 
-import styles from "./loggedinbutton.module.css";
 import React, { useEffect, useState } from "react";
 import Dropdown from "../layout/dropdown";
 import Link from "next/link";
@@ -116,27 +115,25 @@ export function LoggedInButton({
 
   const canContribute = isContributor(user ?? null);
   const isAdminUser = isAdmin(user ?? null);
+  const dropdownButtonClass =
+    "block h-[39px] cursor-pointer overflow-hidden border-b border-[var(--header-border)] p-[5px] text-center text-[18px] font-bold text-[var(--text-color)] no-underline [text-overflow:ellipsis] [text-transform:none] whitespace-nowrap hover:bg-[var(--language-selector-hover-background)] hover:text-[var(--link-hover)]";
 
   return (
     <Dropdown>
       <div
-        className={styles.round}
+        className="h-[50px] w-[50px] min-w-[50px] rounded-[30px] bg-[var(--profile-background)] pt-1 text-center text-[28px] uppercase text-[var(--profile-text)]"
         data-cy="user-button"
         style={user?.image ? { backgroundImage: `url('${user?.image}')` } : {}}
       >
         {(user.name ?? "").substring(0, 1)}
       </div>
       <div>
-        <Link
-          className={styles.profile_dropdown_button}
-          href={"/profile"}
-          data-cy="user-profile"
-        >
+        <Link className={dropdownButtonClass} href={"/profile"} data-cy="user-profile">
           Profile
         </Link>
         {
           <div
-            className={styles.profile_dropdown_button + "  button_dark_mode"}
+            className={`${dropdownButtonClass} button_dark_mode`}
             data-cy="user-lightdark"
             onClick={() => {
               controls.toggle();
@@ -150,43 +147,27 @@ export function LoggedInButton({
           </div>
         }
         {canContribute && page !== "stories" ? (
-          <Link
-            className={styles.profile_dropdown_button}
-            href={stories_link}
-            data-cy="user-stories"
-          >
+          <Link className={dropdownButtonClass} href={stories_link} data-cy="user-stories">
             Stories
           </Link>
         ) : null}
         {canContribute && page !== "editor" ? (
-          <Link
-            className={styles.profile_dropdown_button}
-            href={editor_link}
-            data-cy="user-editor"
-          >
+          <Link className={dropdownButtonClass} href={editor_link} data-cy="user-editor">
             Editor
           </Link>
         ) : null}
         {canContribute && page !== "docs" ? (
-          <Link
-            className={styles.profile_dropdown_button}
-            href={"/docs"}
-            data-cy="user-docs"
-          >
+          <Link className={dropdownButtonClass} href={"/docs"} data-cy="user-docs">
             Docs
           </Link>
         ) : null}
         {isAdminUser && page !== "admin" ? (
-          <Link
-            className={styles.profile_dropdown_button}
-            href={"/admin"}
-            data-cy="user-admin"
-          >
+          <Link className={dropdownButtonClass} href={"/admin"} data-cy="user-admin">
             Admin
           </Link>
         ) : null}
         <div
-          className={styles.profile_dropdown_button}
+          className={dropdownButtonClass}
           onClick={async () => {
             await authClient.signOut();
             posthog.reset();

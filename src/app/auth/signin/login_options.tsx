@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useInput } from "@/lib/hooks";
 import posthog from "posthog-js";
 
-import styles from "../register.module.css";
 import { GetIcon } from "@/components/icons";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { SpinnerBlue } from "@/components/ui/spinner";
 import { ProviderProps } from "@/app/auth/signin/page";
 import { authClient } from "@/lib/auth-client";
+import { authInlineLinkClass } from "@/components/auth/styles";
 
 const PENDING_SIGNIN_STORAGE_KEY = "posthog_pending_signin";
 
@@ -18,6 +18,14 @@ export function LoginOptions(props: {
   providers: ProviderProps[];
   callbackUrl: string;
 }) {
+  const paragraphClass = "m-0";
+  const headingClass = "m-0 text-[calc(24/16*1rem)]";
+  const alertErrorClass =
+    "block w-full rounded-[10px] bg-[var(--error-red)] p-[10px] text-white";
+  const providersClass = "grid grid-cols-2 gap-x-4";
+  const oauthButtonClass =
+    "mt-2 mb-2 flex w-full cursor-pointer items-center rounded-[15px] border-[var(--overview-hr)] border-b-4 border-l-2 border-r-2 border-t-2 bg-[var(--body-background)] px-[30px] py-[13px] pr-0 text-[1rem] font-bold uppercase text-[var(--text-color)] transition-[box-shadow,transform] duration-100 hover:brightness-90";
+
   const { providers, callbackUrl } = props;
 
   const [state, setState] = React.useState<{ error: string | null }>({
@@ -93,16 +101,16 @@ export function LoginOptions(props: {
 
   return (
     <>
-      <h1 className={styles.H1}>Log in</h1>
-      <p className={styles.P}>
+      <h1 className={headingClass}>Log in</h1>
+      <p className={paragraphClass}>
         Attention, you cannot login with your Duolingo account.
       </p>
-      <p className={styles.P}>
+      <p className={paragraphClass}>
         You have to register for the unofficial stories separately, as they are
         an independent project.
       </p>
-      {state.error && <span className={styles.error}>{state.error}</span>}
-      <form className={styles.Form} onSubmit={handleSubmit}>
+      {state.error && <span className={alertErrorClass}>{state.error}</span>}
+      <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
         <Input
           data-cy="username"
           value={usernameInput}
@@ -123,12 +131,12 @@ export function LoginOptions(props: {
           {isPending ? <SpinnerBlue /> : "Log in"}
         </Button>
       </form>
-      <p className={styles.P}>
+      <p className={paragraphClass}>
         {"Don't have an account? "}
         <Link
           href="/auth/register"
           data-cy="register-button"
-          className={styles.link}
+          className={authInlineLinkClass}
         >
           Sign Up
         </Link>
@@ -137,21 +145,21 @@ export function LoginOptions(props: {
         <Link
           href="/auth/reset_pw"
           data-cy="reset-button"
-          className={styles.link}
+          className={authInlineLinkClass}
         >
           Reset
         </Link>
       </p>
-      <hr />
-      <div className={styles.providers}>
+      <hr className="relative h-0 w-full overflow-visible border-0 border-t-2 border-[var(--input-border)] before:relative before:top-[calc(-1em+2px)] before:bg-[var(--body-background)] before:px-[0.4em] before:text-[var(--input-border)] before:content-['or']" />
+      <div className={providersClass}>
         {providers.map((provider) => (
           <button
             key={provider.id}
-            className={styles.button2}
+            className={oauthButtonClass}
             onClick={() => handleOAuthProviderClick(provider)}
           >
             <GetIcon name={provider.id} />
-            <span>{provider.name}</span>
+            <span className="ml-[10px]">{provider.name}</span>
           </button>
         ))}
       </div>

@@ -1,11 +1,9 @@
 import React from "react";
 import Link from "next/link";
 
-import styles from "./legal.module.css";
-
 export default function Legal({ language_name }: { language_name?: string }) {
   return (
-    <small className={styles.legal}>
+    <small className="mt-5 block px-[10px] pb-[10px] text-center text-[0.8em] text-[#666] [direction:ltr] [&_a]:text-[#666]">
       These stories are owned by Duolingo, Inc. and are used under license from
       Duolingo.
       <br />
