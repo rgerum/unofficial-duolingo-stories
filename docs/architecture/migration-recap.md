@@ -23,7 +23,6 @@ This document summarizes the recent migration from mixed Next route writes to di
   - auth entrypoint
   - audio endpoints/upload integration
 - Write side effects are scheduled from Convex mutations via:
-  - `convex/postgresMirror.ts`
   - `convex/editorSideEffects.ts`
 
 ## Implemented patterns
