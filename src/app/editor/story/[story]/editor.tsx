@@ -174,6 +174,10 @@ export default function Editor({
 
   const [unsaved_changes, set_unsaved_changes] = React.useState(false);
   const [is_saving, set_is_saving] = React.useState(false);
+  const [is_deleting, set_is_deleting] = React.useState(false);
+  const [last_saved_at, set_last_saved_at] = React.useState<number | null>(
+    null,
+  );
 
   const [save_error, set_save_error] = React.useState(false);
   const [save_error_message, set_save_error_message] = React.useState(
@@ -181,6 +185,7 @@ export default function Editor({
   );
   const revisionRef = React.useRef(0);
   const isSavingRef = React.useRef(false);
+  const isDeletingRef = React.useRef(false);
 
   const getImage = React.useCallback(
     async (id: string | undefined) => {
@@ -280,7 +285,7 @@ export default function Editor({
     let editor_text: string | undefined = undefined;
 
     async function Save() {
-      if (isSavingRef.current) return;
+      if (isSavingRef.current || isDeletingRef.current) return;
       isSavingRef.current = true;
       set_is_saving(true);
       const saveStartRevision = revisionRef.current;
@@ -360,6 +365,7 @@ export default function Editor({
         if (!result) {
           throw new Error(`Story ${data.id} not found`);
         }
+        set_last_saved_at(Date.now());
         set_save_error_message("There was an error saving.");
         set_save_error(false);
         if (revisionRef.current === saveStartRevision) {
@@ -368,9 +374,12 @@ export default function Editor({
       } catch (e) {
         console.error("Save error", e);
         const rawMessage = e instanceof Error ? e.message : "";
-        const friendlyMessage =
-          rawMessage.includes("Unauthorized") ||
-          rawMessage.toLowerCase().includes("unauthorized")
+        const isOffline =
+          typeof window !== "undefined" && window.navigator.onLine === false;
+        const friendlyMessage = isOffline
+          ? "You are offline. Reconnect to the internet and retry saving."
+          : rawMessage.includes("Unauthorized") ||
+              rawMessage.toLowerCase().includes("unauthorized")
             ? "Your session expired or your account no longer has editor access. Please sign in again and retry."
             : "There was an error saving.";
         set_save_error_message(friendlyMessage);
@@ -384,16 +393,40 @@ export default function Editor({
     set_func_save(() => Save);
 
     async function Delete() {
+      if (isSavingRef.current || isDeletingRef.current) return;
+      isDeletingRef.current = true;
+      set_is_deleting(true);
       const currentStoryData = storyDataRef.current;
-      if (story_meta === undefined || currentStoryData === undefined) return;
-      const result = await deleteStoryMutation({
-        legacyStoryId: currentStoryData.id,
-        operationKey: `story:${currentStoryData.id}:delete:client`,
-      });
-      if (!result) {
-        throw new Error(`Story ${currentStoryData.id} not found`);
+      try {
+        if (!currentStoryData) {
+          throw new Error("Story is not loaded.");
+        }
+        const result = await deleteStoryMutation({
+          legacyStoryId: currentStoryData.id,
+          operationKey: `story:${currentStoryData.id}:delete:client:${Date.now()}`,
+        });
+        if (!result) {
+          throw new Error(`Story ${currentStoryData.id} not found`);
+        }
+        navigate(`/editor/course/${currentStoryData.course_id}`);
+      } catch (e) {
+        console.error("Delete error", e);
+        const rawMessage = e instanceof Error ? e.message : "";
+        const isOffline =
+          typeof window !== "undefined" && window.navigator.onLine === false;
+        const friendlyMessage = isOffline
+          ? "You are offline. Reconnect to the internet and retry deleting."
+          : rawMessage.includes("Unauthorized") ||
+              rawMessage.toLowerCase().includes("unauthorized")
+            ? "Your session expired or your account no longer has editor access. Please sign in again and retry."
+            : "Story could not be deleted.";
+        set_save_error_message(friendlyMessage);
+        set_save_error(true);
+        throw new Error(friendlyMessage);
+      } finally {
+        isDeletingRef.current = false;
+        set_is_deleting(false);
       }
-      navigate(`/editor/course/${currentStoryData.course_id}`);
     }
     set_func_delete(() => Delete);
 
@@ -503,7 +536,7 @@ export default function Editor({
     async function key_pressed(e: KeyboardEvent) {
       if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
-        if (isSavingRef.current) return;
+        if (isSavingRef.current || isDeletingRef.current) return;
         await Save();
       }
     }
@@ -543,7 +576,7 @@ export default function Editor({
               {save_error_message}{" "}
               <button
                 className="ml-2 rounded border border-white/60 px-2 py-0.5 text-[0.85rem] hover:bg-white/15 disabled:cursor-default disabled:opacity-70"
-                disabled={is_saving}
+                disabled={is_saving || is_deleting}
                 onClick={() => {
                   void func_save();
                 }}
@@ -565,6 +598,8 @@ export default function Editor({
           func_save={func_save}
           func_delete={func_delete}
           is_saving={is_saving}
+          is_deleting={is_deleting}
+          last_saved_at={last_saved_at}
           show_trans={show_trans}
           set_show_trans={set_show_trans}
           show_ssml={show_ssml}
