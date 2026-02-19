@@ -26,6 +26,7 @@ import type {
 import { useStoryEditorModel } from "./use_story_editor_model";
 
 type LanguageData = {
+  languageId: string;
   id: number;
   name: string;
   short: string;
