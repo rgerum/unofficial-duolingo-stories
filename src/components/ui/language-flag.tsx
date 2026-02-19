@@ -3,7 +3,7 @@
 import type { Id } from "@convex/_generated/dataModel";
 import { api } from "@convex/_generated/api";
 import { useQuery } from "convex/react";
-import type { ComponentProps } from "react";
+import { useMemo, type ComponentProps } from "react";
 import Flag from "./flag";
 
 type FlagProps = ComponentProps<typeof Flag>;
