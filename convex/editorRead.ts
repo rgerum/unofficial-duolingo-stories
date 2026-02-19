@@ -634,7 +634,7 @@ export const getEditorStoryPageData = query({
         id: story.legacyId ?? 0,
         official: course.official,
         course_id: course.legacyId,
-        duo_id: toNumber(story.duo_id) ?? 0,
+        duo_id: story.duo_id ?? "",
         image: image?.legacyId ?? "",
         name: story.name,
         set_id: story.set_id ?? 0,

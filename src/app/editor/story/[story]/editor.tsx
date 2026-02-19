@@ -173,8 +173,19 @@ export default function Editor({
   //console.log("audio_editor_data", audio_editor_data);
 
   const [unsaved_changes, set_unsaved_changes] = React.useState(false);
+  const [is_saving, set_is_saving] = React.useState(false);
+  const [is_deleting, set_is_deleting] = React.useState(false);
+  const [last_saved_at, set_last_saved_at] = React.useState<number | null>(
+    null,
+  );
 
   const [save_error, set_save_error] = React.useState(false);
+  const [save_error_message, set_save_error_message] = React.useState(
+    "There was an error saving.",
+  );
+  const revisionRef = React.useRef(0);
+  const isSavingRef = React.useRef(false);
+  const isDeletingRef = React.useRef(false);
 
   const getImage = React.useCallback(
     async (id: string | undefined) => {
@@ -274,28 +285,72 @@ export default function Editor({
     let editor_text: string | undefined = undefined;
 
     async function Save() {
+      if (isSavingRef.current || isDeletingRef.current) return;
+      isSavingRef.current = true;
+      set_is_saving(true);
+      const saveStartRevision = revisionRef.current;
       try {
         const currentStoryData = storyDataRef.current;
-        if (story_meta === undefined || currentStoryData === undefined) {
-          console.error("Save error: story_meta or story_data is undefined");
-          return;
+        const currentViewState = stateX ?? view?.state;
+        if (!currentStoryData || !currentViewState) {
+          throw new Error("Save failed: editor state is not ready.");
         }
+        const currentText = currentViewState.doc.toString();
+        const learningLanguage = languageDataRef.current;
+        const fromLanguage = languageData2Ref.current;
+        const [parsedStory, parsedMeta, parsedAudioInsertLines] =
+          processStoryFile(
+            currentText,
+            currentStoryData.id,
+            avatarNamesRef.current,
+            {
+              learning_language: learningLanguage?.short ?? "",
+              from_language: fromLanguage?.short ?? "",
+            },
+            learningLanguage?.tts_replace ?? "",
+          );
+        const image = await getImage(parsedMeta.icon);
+
+        story = {
+          ...parsedStory,
+          illustrations: {
+            active: image?.active,
+            gilded: image?.gilded,
+            locked: image?.locked,
+          },
+          learning_language_rtl: learningLanguage?.rtl ?? false,
+          from_language_rtl: fromLanguage?.rtl ?? false,
+          from_language: fromLanguage?.short,
+          learning_language: learningLanguage?.short,
+        };
+        story_meta = parsedMeta;
+        audio_insert_lines = parsedAudioInsertLines;
+        editor_text = currentText;
+
+        set_story_meta(parsedMeta);
+        if (editor_state) {
+          set_editor_state({
+            ...editor_state,
+            audio_insert_lines: parsedAudioInsertLines,
+          });
+        }
+
         const data = {
           id: currentStoryData.id,
           duo_id: currentStoryData.duo_id,
-          name: story_meta.fromLanguageName,
-          image: story_meta.icon,
-          set_id: story_meta.set_id,
-          set_index: story_meta.set_index,
+          name: parsedMeta.fromLanguageName,
+          image: parsedMeta.icon,
+          set_id: parsedMeta.set_id,
+          set_index: parsedMeta.set_index,
           course_id: currentStoryData.course_id,
-          text: editor_text ?? "",
-          json: story,
-          todo_count: story_meta.todo_count,
+          text: currentText,
+          json: parsedStory,
+          todo_count: parsedMeta.todo_count,
         };
 
         const result = await setStoryMutation({
           legacyStoryId: data.id,
-          duo_id: String(data.duo_id ?? ""),
+          duo_id: data.duo_id ?? "",
           name: data.name,
           image: data.image ?? "",
           set_id: data.set_id,
@@ -305,30 +360,73 @@ export default function Editor({
           json: toConvexValue(data.json),
           todo_count: data.todo_count,
           change_date: new Date().toISOString(),
-          operationKey: `story:${data.id}:set_story:client`,
+          operationKey: `story:${data.id}:set_story:client:${Date.now()}:${saveStartRevision}`,
         });
         if (!result) {
           throw new Error(`Story ${data.id} not found`);
         }
-        set_unsaved_changes(false);
+        set_last_saved_at(Date.now());
+        set_save_error_message("There was an error saving.");
+        set_save_error(false);
+        if (revisionRef.current === saveStartRevision) {
+          set_unsaved_changes(false);
+        }
       } catch (e) {
         console.error("Save error", e);
+        const rawMessage = e instanceof Error ? e.message : "";
+        const isOffline =
+          typeof window !== "undefined" && window.navigator.onLine === false;
+        const friendlyMessage = isOffline
+          ? "You are offline. Reconnect to the internet and retry saving."
+          : rawMessage.includes("Unauthorized") ||
+              rawMessage.toLowerCase().includes("unauthorized")
+            ? "Your session expired or your account no longer has editor access. Please sign in again and retry."
+            : "There was an error saving.";
+        set_save_error_message(friendlyMessage);
         set_save_error(true);
+        throw new Error(friendlyMessage);
+      } finally {
+        isSavingRef.current = false;
+        set_is_saving(false);
       }
     }
     set_func_save(() => Save);
 
     async function Delete() {
+      if (isSavingRef.current || isDeletingRef.current) return;
+      isDeletingRef.current = true;
+      set_is_deleting(true);
       const currentStoryData = storyDataRef.current;
-      if (story_meta === undefined || currentStoryData === undefined) return;
-      const result = await deleteStoryMutation({
-        legacyStoryId: currentStoryData.id,
-        operationKey: `story:${currentStoryData.id}:delete:client`,
-      });
-      if (!result) {
-        throw new Error(`Story ${currentStoryData.id} not found`);
+      try {
+        if (!currentStoryData) {
+          throw new Error("Story is not loaded.");
+        }
+        const result = await deleteStoryMutation({
+          legacyStoryId: currentStoryData.id,
+          operationKey: `story:${currentStoryData.id}:delete:client:${Date.now()}`,
+        });
+        if (!result) {
+          throw new Error(`Story ${currentStoryData.id} not found`);
+        }
+        navigate(`/editor/course/${currentStoryData.course_id}`);
+      } catch (e) {
+        console.error("Delete error", e);
+        const rawMessage = e instanceof Error ? e.message : "";
+        const isOffline =
+          typeof window !== "undefined" && window.navigator.onLine === false;
+        const friendlyMessage = isOffline
+          ? "You are offline. Reconnect to the internet and retry deleting."
+          : rawMessage.includes("Unauthorized") ||
+              rawMessage.toLowerCase().includes("unauthorized")
+            ? "Your session expired or your account no longer has editor access. Please sign in again and retry."
+            : "Story could not be deleted.";
+        set_save_error_message(friendlyMessage);
+        set_save_error(true);
+        throw new Error(friendlyMessage);
+      } finally {
+        isDeletingRef.current = false;
+        set_is_deleting(false);
       }
-      navigate(`/editor/course/${currentStoryData.course_id}`);
     }
     set_func_delete(() => Delete);
 
@@ -380,7 +478,7 @@ export default function Editor({
       }
     }
 
-    window.setInterval(updateDisplay, 1000);
+    const displayInterval = window.setInterval(updateDisplay, 1000);
 
     let last_event_lineno: number | undefined;
     let sync = EditorView.updateListener.of((v) => {
@@ -415,6 +513,7 @@ export default function Editor({
       };
       stateX = v.state;
       if (v.docChanged) {
+        revisionRef.current += 1;
         set_unsaved_changes(true);
         story = undefined;
         last_lineno = undefined;
@@ -437,12 +536,14 @@ export default function Editor({
     async function key_pressed(e: KeyboardEvent) {
       if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
+        if (isSavingRef.current || isDeletingRef.current) return;
         await Save();
       }
     }
     document.addEventListener("keydown", key_pressed);
 
     return () => {
+      window.clearInterval(displayInterval);
       view.destroy();
       document.removeEventListener("keydown", key_pressed);
     };
@@ -472,7 +573,16 @@ export default function Editor({
               onClick={() => set_save_error(false)}
             />
             <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-[#f44336] p-[10px] text-center text-white">
-              There was an error saving.{" "}
+              {save_error_message}{" "}
+              <button
+                className="ml-2 rounded border border-white/60 px-2 py-0.5 text-[0.85rem] hover:bg-white/15 disabled:cursor-default disabled:opacity-70"
+                disabled={is_saving || is_deleting}
+                onClick={() => {
+                  void func_save();
+                }}
+              >
+                {is_saving ? "Saving..." : "Retry"}
+              </button>
               <div
                 className="absolute right-[10px] top-0"
                 onClick={() => set_save_error(false)}
@@ -487,6 +597,9 @@ export default function Editor({
           unsaved_changes={unsaved_changes}
           func_save={func_save}
           func_delete={func_delete}
+          is_saving={is_saving}
+          is_deleting={is_deleting}
+          last_saved_at={last_saved_at}
           show_trans={show_trans}
           set_show_trans={set_show_trans}
           show_ssml={show_ssml}

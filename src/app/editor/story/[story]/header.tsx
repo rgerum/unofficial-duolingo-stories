@@ -40,6 +40,9 @@ type HeaderProps = {
   };
   func_save: () => Promise<void>;
   func_delete: () => Promise<void>;
+  is_saving: boolean;
+  is_deleting: boolean;
+  last_saved_at: number | null;
   show_trans: boolean;
   set_show_trans: (show: boolean) => void;
   show_ssml: boolean;
@@ -53,6 +56,9 @@ export function StoryEditorHeader({
   language_data2,
   func_save,
   func_delete,
+  is_saving,
+  is_deleting,
+  last_saved_at,
   show_trans,
   set_show_trans,
   show_ssml,
@@ -85,38 +91,22 @@ export function StoryEditorHeader({
     );
   }
 
-  const [save_text, set_save_text] = React.useState("Save");
-
   async function Save() {
+    if (is_saving || is_deleting) return;
     try {
-      set_save_text("Saving...");
       await func_save();
     } catch (e) {
       console.log("error save", e);
-      window.alert("Story could not be saved.");
     }
-    set_save_text("Save");
-    const saveButton = document.querySelector(
-      "#button_save span",
-    ) as HTMLSpanElement;
-    if (saveButton) saveButton.innerText = "Save";
   }
 
   async function Delete() {
+    if (is_saving || is_deleting) return;
     if (confirm("Are you sure that you want to delete this story?")) {
-      const deleteButton = document.querySelector(
-        "#button_delete span",
-      ) as HTMLSpanElement;
-      if (deleteButton) deleteButton.innerText = "Deleting";
       try {
         await func_delete();
       } catch (e) {
-        //console.log("error delete", e);
-        const deleteButton = document.querySelector(
-          "#button_delete span",
-        ) as HTMLSpanElement;
-        if (deleteButton) deleteButton.innerText = "Delete";
-        window.alert("Story could not be deleted");
+        console.log("error delete", e);
       }
     }
   }
@@ -145,7 +135,8 @@ export function StoryEditorHeader({
             id="button_delete"
             onClick={Delete}
             img={"delete.svg"}
-            text={"Delete"}
+            text={is_deleting ? "Deleting..." : "Delete"}
+            disabled={is_saving || is_deleting}
           />
           <EditorButton
             onClick={do_set_show_trans}
@@ -162,8 +153,19 @@ export function StoryEditorHeader({
             id="button_save"
             onClick={Save}
             img={"save.svg"}
-            text={save_text + (unsaved_changes ? "*" : "")}
+            text={
+              (is_saving ? "Saving..." : "Save") + (unsaved_changes ? "*" : "")
+            }
+            disabled={is_saving || is_deleting}
           />
+          <div className="px-2 text-[0.8rem] text-[var(--text-color-dim)]">
+            {last_saved_at
+              ? `Saved at ${new Date(last_saved_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}`
+              : ""}
+          </div>
           <LoggedInButtonWrappedClient
             page={"editor"}
             course_id={story_data?.short}
