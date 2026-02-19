@@ -462,15 +462,6 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   }, [duration, timelineMeta]);
 
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    const raw = window.sessionStorage.getItem("story_autoplay_ts");
-    if (!raw) return;
-
-    const ts = Number(raw);
-    if (!Number.isFinite(ts)) return;
-    if (Date.now() - ts > 10_000) return;
-
-    window.sessionStorage.removeItem("story_autoplay_ts");
     void ensureMergedAndPlay();
   }, [ensureMergedAndPlay]);
 
