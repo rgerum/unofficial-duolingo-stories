@@ -11,7 +11,7 @@ type FlagProps = ComponentProps<typeof Flag>;
 type LanguageFlagEntry = {
   languageId: Id<"languages">;
   short: string;
-  flag?: number | string;
+  flag?: number;
   flag_file?: string;
 };
 
@@ -33,18 +33,12 @@ export default function LanguageFlag({
   languageId?: Id<"languages">;
 } & Omit<FlagProps, "iso" | "flag" | "flag_file">) {
   const language = useLanguageFlag(languageId);
-  const numericFlag =
-    typeof language?.flag === "number"
-      ? language.flag
-      : Number.isFinite(Number(language?.flag))
-        ? Number(language?.flag)
-        : undefined;
 
   return (
     <Flag
       {...props}
       iso={language?.short}
-      flag={numericFlag}
+      flag={language?.flag}
       flag_file={language?.flag_file ?? undefined}
     />
   );

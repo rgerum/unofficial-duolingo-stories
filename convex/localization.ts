@@ -77,7 +77,7 @@ export const getLocalizationByLegacyLanguageId = query({
 const languageFlagValidator = v.object({
   languageId: v.id("languages"),
   short: v.string(),
-  flag: v.optional(v.union(v.number(), v.string())),
+  flag: v.optional(v.number()),
   flag_file: v.optional(v.string()),
 });
 
