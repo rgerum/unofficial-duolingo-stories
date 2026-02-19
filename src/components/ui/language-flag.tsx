@@ -19,11 +19,15 @@ export function useLanguageFlag(languageId?: Id<"languages">) {
   const languageFlags = useQuery(api.localization.getAllLanguageFlags, {});
   if (!languageId || !languageFlags) return undefined;
 
-  for (const language of languageFlags as LanguageFlagEntry[]) {
-    if (language.languageId === languageId) {
-      return language;
+  const languageFlagMap = useMemo(() => {
+    const map = new Map<Id<"languages">, LanguageFlagEntry>();
+    for (const language of languageFlags as LanguageFlagEntry[]) {
+      map.set(language.languageId, language);
     }
-  }
+    return map;
+  }, [languageFlags]);
+
+  return languageFlagMap.get(languageId);
 }
 
 export default function LanguageFlag({
