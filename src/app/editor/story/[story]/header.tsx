@@ -40,6 +40,7 @@ type HeaderProps = {
   };
   func_save: () => Promise<void>;
   func_delete: () => Promise<void>;
+  is_saving: boolean;
   show_trans: boolean;
   set_show_trans: (show: boolean) => void;
   show_ssml: boolean;
@@ -53,6 +54,7 @@ export function StoryEditorHeader({
   language_data2,
   func_save,
   func_delete,
+  is_saving,
   show_trans,
   set_show_trans,
   show_ssml,
@@ -85,25 +87,13 @@ export function StoryEditorHeader({
     );
   }
 
-  const [save_text, set_save_text] = React.useState("Save");
-
   async function Save() {
+    if (is_saving) return;
     try {
-      set_save_text("Saving...");
       await func_save();
     } catch (e) {
       console.log("error save", e);
-      const message =
-        e instanceof Error && e.message
-          ? e.message
-          : "Story could not be saved.";
-      window.alert(message);
     }
-    set_save_text("Save");
-    const saveButton = document.querySelector(
-      "#button_save span",
-    ) as HTMLSpanElement;
-    if (saveButton) saveButton.innerText = "Save";
   }
 
   async function Delete() {
@@ -166,7 +156,10 @@ export function StoryEditorHeader({
             id="button_save"
             onClick={Save}
             img={"save.svg"}
-            text={save_text + (unsaved_changes ? "*" : "")}
+            text={
+              (is_saving ? "Saving..." : "Save") + (unsaved_changes ? "*" : "")
+            }
+            disabled={is_saving}
           />
           <LoggedInButtonWrappedClient
             page={"editor"}

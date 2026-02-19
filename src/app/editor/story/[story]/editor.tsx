@@ -173,11 +173,14 @@ export default function Editor({
   //console.log("audio_editor_data", audio_editor_data);
 
   const [unsaved_changes, set_unsaved_changes] = React.useState(false);
+  const [is_saving, set_is_saving] = React.useState(false);
 
   const [save_error, set_save_error] = React.useState(false);
   const [save_error_message, set_save_error_message] = React.useState(
     "There was an error saving.",
   );
+  const revisionRef = React.useRef(0);
+  const isSavingRef = React.useRef(false);
 
   const getImage = React.useCallback(
     async (id: string | undefined) => {
@@ -277,6 +280,10 @@ export default function Editor({
     let editor_text: string | undefined = undefined;
 
     async function Save() {
+      if (isSavingRef.current) return;
+      isSavingRef.current = true;
+      set_is_saving(true);
+      const saveStartRevision = revisionRef.current;
       try {
         const currentStoryData = storyDataRef.current;
         const currentViewState = stateX ?? view?.state;
@@ -297,13 +304,14 @@ export default function Editor({
             },
             learningLanguage?.tts_replace ?? "",
           );
+        const image = await getImage(parsedMeta.icon);
 
         story = {
           ...parsedStory,
-          illustrations: story?.illustrations ?? {
-            active: undefined,
-            gilded: undefined,
-            locked: undefined,
+          illustrations: {
+            active: image?.active,
+            gilded: image?.gilded,
+            locked: image?.locked,
           },
           learning_language_rtl: learningLanguage?.rtl ?? false,
           from_language_rtl: fromLanguage?.rtl ?? false,
@@ -347,14 +355,16 @@ export default function Editor({
           json: toConvexValue(data.json),
           todo_count: data.todo_count,
           change_date: new Date().toISOString(),
-          operationKey: `story:${data.id}:set_story:client`,
+          operationKey: `story:${data.id}:set_story:client:${Date.now()}:${saveStartRevision}`,
         });
         if (!result) {
           throw new Error(`Story ${data.id} not found`);
         }
         set_save_error_message("There was an error saving.");
         set_save_error(false);
-        set_unsaved_changes(false);
+        if (revisionRef.current === saveStartRevision) {
+          set_unsaved_changes(false);
+        }
       } catch (e) {
         console.error("Save error", e);
         const rawMessage = e instanceof Error ? e.message : "";
@@ -366,6 +376,9 @@ export default function Editor({
         set_save_error_message(friendlyMessage);
         set_save_error(true);
         throw new Error(friendlyMessage);
+      } finally {
+        isSavingRef.current = false;
+        set_is_saving(false);
       }
     }
     set_func_save(() => Save);
@@ -467,6 +480,7 @@ export default function Editor({
       };
       stateX = v.state;
       if (v.docChanged) {
+        revisionRef.current += 1;
         set_unsaved_changes(true);
         story = undefined;
         last_lineno = undefined;
@@ -489,6 +503,7 @@ export default function Editor({
     async function key_pressed(e: KeyboardEvent) {
       if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
+        if (isSavingRef.current) return;
         await Save();
       }
     }
@@ -526,6 +541,15 @@ export default function Editor({
             />
             <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-[#f44336] p-[10px] text-center text-white">
               {save_error_message}{" "}
+              <button
+                className="ml-2 rounded border border-white/60 px-2 py-0.5 text-[0.85rem] hover:bg-white/15 disabled:cursor-default disabled:opacity-70"
+                disabled={is_saving}
+                onClick={() => {
+                  void func_save();
+                }}
+              >
+                {is_saving ? "Saving..." : "Retry"}
+              </button>
               <div
                 className="absolute right-[10px] top-0"
                 onClick={() => set_save_error(false)}
@@ -540,6 +564,7 @@ export default function Editor({
           unsaved_changes={unsaved_changes}
           func_save={func_save}
           func_delete={func_delete}
+          is_saving={is_saving}
           show_trans={show_trans}
           set_show_trans={set_show_trans}
           show_ssml={show_ssml}
