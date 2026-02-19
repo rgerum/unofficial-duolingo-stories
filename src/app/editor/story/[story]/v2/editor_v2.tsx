@@ -84,7 +84,7 @@ export default function EditorV2({
     setRevision(0);
     setLineNo(1);
     setAudioEditorData(undefined);
-  }, [story_data.id, story_data.text]);
+  }, [story_data.id]);
 
   const model = useStoryEditorModel({
     storyData: story_data,
@@ -128,7 +128,22 @@ export default function EditorV2({
       viewRef.current = null;
       setView(undefined);
     };
-  }, [story_data.id, story_data.text]);
+  }, [story_data.id]);
+
+  React.useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    if (model.dirty) return;
+
+    const remoteText = story_data.text ?? "";
+    const localText = view.state.doc.toString();
+    if (localText === remoteText) return;
+
+    model.markServerSynced(remoteText);
+    view.dispatch({
+      changes: { from: 0, to: view.state.doc.length, insert: remoteText },
+    });
+  }, [model.dirty, model.markServerSynced, story_data.text]);
 
   React.useEffect(() => {
     const warningMessage =

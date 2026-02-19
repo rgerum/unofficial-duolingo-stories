@@ -66,6 +66,7 @@ export type EditorModel = {
   clearSaveError: () => void;
   lastSavedAt: number | null;
   dirty: boolean;
+  markServerSynced: (text: string) => void;
 };
 
 export function useStoryEditorModel({
@@ -272,6 +273,10 @@ export function useStoryEditorModel({
     toFriendlyError,
   ]);
 
+  const markServerSynced = React.useCallback((text: string) => {
+    setLastSavedText(text);
+  }, []);
+
   return {
     parsedStory,
     parsedMeta,
@@ -285,5 +290,6 @@ export function useStoryEditorModel({
     clearSaveError: () => setSaveError(false),
     lastSavedAt,
     dirty: docText !== lastSavedText,
+    markServerSynced,
   };
 }
