@@ -1,8 +1,9 @@
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
-import type { QueryCtx } from "./_generated/server";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
-import { getSessionLegacyUserId } from "./lib/authorization";
+import { paginationOptsValidator } from "convex/server";
+import { getSessionLegacyUserId, requireAdmin } from "./lib/authorization";
 
 const storyDoneInputValidator = v.object({
   legacyStoryId: v.number(),
@@ -26,11 +27,37 @@ export const recordStoryDone = mutation({
       throw new Error(`Missing story for legacy id ${args.legacyStoryId}`);
     }
 
+    const doneAt = args.time ?? Date.now();
     const docId = await ctx.db.insert("story_done", {
       storyId: story._id,
       legacyUserId: legacyUserId ?? undefined,
-      time: args.time ?? Date.now(),
+      time: doneAt,
     });
+
+    if (typeof legacyUserId === "number") {
+      const course = await ctx.db.get(story.courseId);
+      if (
+        course &&
+        typeof course.legacyId === "number" &&
+        typeof story.legacyId === "number"
+      ) {
+        await upsertStoryDoneState(ctx, {
+          legacyUserId,
+          storyId: story._id,
+          courseId: story.courseId,
+          legacyStoryId: story.legacyId,
+          legacyCourseId: course.legacyId,
+          lastDoneAt: doneAt,
+        });
+        await upsertCourseActivity(ctx, {
+          legacyUserId,
+          courseId: story.courseId,
+          legacyCourseId: course.legacyId,
+          lastDoneAt: doneAt,
+        });
+      }
+    }
+
     return { inserted: true, docId };
   },
 });
@@ -84,6 +111,32 @@ async function getDoneStoryIdsForCourseIdAndUser(
   courseId: Id<"courses">,
   legacyUserId: number,
 ) {
+  const doneStateRows = await ctx.db
+    .query("story_done_state")
+    .withIndex("by_user_and_course", (q) =>
+      q.eq("legacyUserId", legacyUserId).eq("courseId", courseId),
+    )
+    .collect();
+  if (doneStateRows.length > 0) {
+    const storyIds = new Set<number>();
+    for (const row of doneStateRows) {
+      storyIds.add(row.legacyStoryId);
+    }
+    return Array.from(storyIds);
+  }
+
+  return await getDoneStoryIdsForCourseIdAndUserFromLog(
+    ctx,
+    courseId,
+    legacyUserId,
+  );
+}
+
+async function getDoneStoryIdsForCourseIdAndUserFromLog(
+  ctx: QueryCtx,
+  courseId: Id<"courses">,
+  legacyUserId: number,
+) {
   const courseStories = await ctx.db
     .query("stories")
     .withIndex("by_course", (q) => q.eq("courseId", courseId))
@@ -108,41 +161,28 @@ export const getDoneCourseIdsForUser = query({
   args: {},
   returns: v.union(v.array(v.number()), v.null()),
   handler: async (ctx) => {
-    const identity = (await ctx.auth.getUserIdentity()) as {
-      userId?: string | number | null;
-    } | null;
+    const legacyUserId = await getCurrentIdentityLegacyUserId(ctx);
+    if (!legacyUserId) return null;
 
-    const rawLegacyUserId = identity?.userId;
-    const legacyUserId =
-      typeof rawLegacyUserId === "number"
-        ? rawLegacyUserId
-        : Number.isFinite(Number(rawLegacyUserId))
-          ? Number(rawLegacyUserId)
-          : NaN;
-
-    if (!Number.isFinite(legacyUserId)) return null;
-
-    const doneRows = await ctx.db
-      .query("story_done")
-      .withIndex("by_user", (q) => q.eq("legacyUserId", legacyUserId))
+    const activityRows = await ctx.db
+      .query("course_activity")
+      .withIndex("by_user_and_last_done_at", (q) =>
+        q.eq("legacyUserId", legacyUserId),
+      )
+      .order("desc")
       .collect();
-    if (doneRows.length === 0) return [];
-
-    const latestDoneAtByCourse = new Map<number, number>();
-    for (const doneRow of doneRows) {
-      const story = await ctx.db.get(doneRow.storyId);
-      if (!story || !story.courseId) continue;
-      const course = await ctx.db.get(story.courseId);
-      if (!course || typeof course.legacyId !== "number") continue;
-      const existing = latestDoneAtByCourse.get(course.legacyId) ?? 0;
-      if (doneRow.time > existing) {
-        latestDoneAtByCourse.set(course.legacyId, doneRow.time);
+    if (activityRows.length > 0) {
+      const uniqueCourseIds = new Set<number>();
+      const result: Array<number> = [];
+      for (const row of activityRows) {
+        if (uniqueCourseIds.has(row.legacyCourseId)) continue;
+        uniqueCourseIds.add(row.legacyCourseId);
+        result.push(row.legacyCourseId);
       }
+      return result;
     }
 
-    return Array.from(latestDoneAtByCourse.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([legacyCourseId]) => legacyCourseId);
+    return await getDoneCourseIdsForUserFromLog(ctx, legacyUserId);
   },
 });
 
@@ -152,20 +192,214 @@ export const getLastDoneCourseShortForLegacyUser = query({
   },
   returns: v.union(v.string(), v.null()),
   handler: async (ctx, args) => {
-    const doneRows = await ctx.db
-      .query("story_done")
-      .withIndex("by_user_time", (q) => q.eq("legacyUserId", args.legacyUserId))
+    const activityRows = await ctx.db
+      .query("course_activity")
+      .withIndex("by_user_and_last_done_at", (q) =>
+        q.eq("legacyUserId", args.legacyUserId),
+      )
       .order("desc")
       .take(20);
 
-    for (const doneRow of doneRows) {
-      const story = await ctx.db.get(doneRow.storyId);
-      if (!story || story.deleted) continue;
-      const course = await ctx.db.get(story.courseId);
+    for (const row of activityRows) {
+      const course = await ctx.db.get(row.courseId);
       if (!course?.short) continue;
       return course.short;
     }
 
-    return null;
+    return await getLastDoneCourseShortForLegacyUserFromLog(
+      ctx,
+      args.legacyUserId,
+    );
   },
 });
+
+export const backfillDoneStateFromLogBatch = mutation({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    dryRun: v.optional(v.boolean()),
+    apiKey: v.optional(v.string()),
+  },
+  returns: v.object({
+    processed: v.number(),
+    continueCursor: v.union(v.string(), v.null()),
+    isDone: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const configuredApiKey = process.env.STORY_DONE_BACKFILL_API_KEY;
+    const providedApiKey = args.apiKey;
+    const hasValidApiKey =
+      typeof configuredApiKey === "string" &&
+      configuredApiKey.length > 0 &&
+      providedApiKey === configuredApiKey;
+
+    if (!hasValidApiKey) {
+      await requireAdmin(ctx);
+    }
+
+    const page = await ctx.db
+      .query("story_done")
+      .order("asc")
+      .paginate(args.paginationOpts);
+    const dryRun = args.dryRun ?? false;
+
+    for (const doneRow of page.page) {
+      if (typeof doneRow.legacyUserId !== "number") continue;
+
+      const story = await ctx.db.get(doneRow.storyId);
+      if (!story || typeof story.legacyId !== "number") continue;
+
+      const course = await ctx.db.get(story.courseId);
+      if (!course || typeof course.legacyId !== "number") continue;
+
+      if (!dryRun) {
+        await upsertStoryDoneState(ctx, {
+          legacyUserId: doneRow.legacyUserId,
+          storyId: story._id,
+          courseId: story.courseId,
+          legacyStoryId: story.legacyId,
+          legacyCourseId: course.legacyId,
+          lastDoneAt: doneRow.time,
+        });
+        await upsertCourseActivity(ctx, {
+          legacyUserId: doneRow.legacyUserId,
+          courseId: story.courseId,
+          legacyCourseId: course.legacyId,
+          lastDoneAt: doneRow.time,
+        });
+      }
+    }
+
+    return {
+      processed: page.page.length,
+      continueCursor: page.continueCursor,
+      isDone: page.isDone,
+    };
+  },
+});
+
+async function upsertStoryDoneState(
+  ctx: MutationCtx,
+  args: {
+    storyId: Id<"stories">;
+    courseId: Id<"courses">;
+    legacyStoryId: number;
+    legacyCourseId: number;
+    legacyUserId: number;
+    lastDoneAt: number;
+  },
+) {
+  const existingRows = await ctx.db
+    .query("story_done_state")
+    .withIndex("by_user_and_story", (q) =>
+      q.eq("legacyUserId", args.legacyUserId).eq("storyId", args.storyId),
+    )
+    .collect();
+  if (existingRows.length === 0) {
+    await ctx.db.insert("story_done_state", args);
+    return;
+  }
+
+  for (const row of existingRows) {
+    await ctx.db.patch(row._id, {
+      courseId: args.courseId,
+      legacyStoryId: args.legacyStoryId,
+      legacyCourseId: args.legacyCourseId,
+      lastDoneAt: Math.max(row.lastDoneAt, args.lastDoneAt),
+    });
+  }
+}
+
+async function upsertCourseActivity(
+  ctx: MutationCtx,
+  args: {
+    courseId: Id<"courses">;
+    legacyCourseId: number;
+    legacyUserId: number;
+    lastDoneAt: number;
+  },
+) {
+  const existingRows = await ctx.db
+    .query("course_activity")
+    .withIndex("by_user_and_course", (q) =>
+      q.eq("legacyUserId", args.legacyUserId).eq("courseId", args.courseId),
+    )
+    .collect();
+  if (existingRows.length === 0) {
+    await ctx.db.insert("course_activity", args);
+    return;
+  }
+
+  for (const row of existingRows) {
+    await ctx.db.patch(row._id, {
+      legacyCourseId: args.legacyCourseId,
+      lastDoneAt: Math.max(row.lastDoneAt, args.lastDoneAt),
+    });
+  }
+}
+
+async function getCurrentIdentityLegacyUserId(
+  ctx: QueryCtx,
+): Promise<number | null> {
+  const identity = (await ctx.auth.getUserIdentity()) as {
+    userId?: string | number | null;
+  } | null;
+  const rawLegacyUserId = identity?.userId;
+  if (typeof rawLegacyUserId === "number" && Number.isFinite(rawLegacyUserId)) {
+    return rawLegacyUserId;
+  }
+  if (
+    typeof rawLegacyUserId === "string" &&
+    Number.isFinite(Number(rawLegacyUserId))
+  ) {
+    return Number(rawLegacyUserId);
+  }
+  return null;
+}
+
+async function getDoneCourseIdsForUserFromLog(
+  ctx: QueryCtx,
+  legacyUserId: number,
+) {
+  const doneRows = await ctx.db
+    .query("story_done")
+    .withIndex("by_user", (q) => q.eq("legacyUserId", legacyUserId))
+    .collect();
+  if (doneRows.length === 0) return [];
+
+  const latestDoneAtByCourse = new Map<number, number>();
+  for (const doneRow of doneRows) {
+    const story = await ctx.db.get(doneRow.storyId);
+    if (!story || !story.courseId) continue;
+    const course = await ctx.db.get(story.courseId);
+    if (!course || typeof course.legacyId !== "number") continue;
+    const existing = latestDoneAtByCourse.get(course.legacyId) ?? 0;
+    if (doneRow.time > existing) {
+      latestDoneAtByCourse.set(course.legacyId, doneRow.time);
+    }
+  }
+
+  return Array.from(latestDoneAtByCourse.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([legacyCourseId]) => legacyCourseId);
+}
+
+async function getLastDoneCourseShortForLegacyUserFromLog(
+  ctx: QueryCtx,
+  legacyUserId: number,
+) {
+  const doneRows = await ctx.db
+    .query("story_done")
+    .withIndex("by_user_time", (q) => q.eq("legacyUserId", legacyUserId))
+    .order("desc")
+    .take(20);
+
+  for (const doneRow of doneRows) {
+    const story = await ctx.db.get(doneRow.storyId);
+    if (!story || story.deleted) continue;
+    const course = await ctx.db.get(story.courseId);
+    if (!course?.short) continue;
+    return course.short;
+  }
+
+  return null;
+}
