@@ -1,4 +1,3 @@
-import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./lib/authorization";
@@ -36,21 +35,6 @@ export const togglePublished = mutation({
       (row) => row.public && !row.deleted,
     ).length;
     await ctx.db.patch(course._id, { count: courseCount });
-
-    const operationKey =
-      args.operationKey ??
-      `story:${story.legacyId}:toggle_published:${Date.now()}`;
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorStoryPublishedToggle,
-      {
-        storyId: story.legacyId,
-        public: nextPublic,
-        courseLegacyId: course.legacyId,
-        courseCount,
-        operationKey,
-      },
-    );
 
     return null;
   },
@@ -103,21 +87,6 @@ export const removeApproval = mutation({
       status: storyStatus,
       approvalCount,
     });
-
-    const operationKey =
-      args.operationKey ??
-      `story_approval:${args.legacyApprovalId}:admin_delete:${Date.now()}`;
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAdminApprovalDelete,
-      {
-        storyId: story.legacyId,
-        legacyApprovalId: args.legacyApprovalId,
-        storyStatus,
-        approvalCount,
-        operationKey,
-      },
-    );
 
     return null;
   },

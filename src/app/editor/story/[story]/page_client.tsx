@@ -13,12 +13,16 @@ export default function StoryEditorPageClient({
   storyId: number;
 }) {
   const data = useQuery(api.editorRead.getEditorStoryPageData, { storyId });
+  const avatarRows = useQuery(
+    api.editorRead.getEditorAvatarNamesByLanguageLegacyId,
+    data ? { languageLegacyId: data.story_data.learning_language } : "skip",
+  );
 
   if (data === undefined) return <Spinner />;
   if (!data) return <p>Story not found.</p>;
 
   const avatarNames: Record<number, Avatar> = {};
-  for (const avatar of data.avatar_names as Avatar[]) {
+  for (const avatar of (avatarRows ?? []) as Avatar[]) {
     avatarNames[avatar.avatar_id] = avatar;
   }
 

@@ -15,7 +15,6 @@ The app is based on Next.js with React. It is currently in `next/next-all`.
 
 - App/UI: Next.js 16 + React 19 (`src/app`, `src/components`)
 - Canonical app data access: Convex queries/mutations (`convex/*`)
-- External SQL mirror: Convex internal actions in `convex/postgresMirror.ts`
 - Write-side side effects (GitHub/PostHog): Convex internal actions in `convex/editorSideEffects.ts`
 - Remaining Next route handlers are intentionally server-only:
   - Auth entrypoint (`src/app/api/auth/[...all]/route.ts`)
@@ -24,61 +23,20 @@ The app is based on Next.js with React. It is currently in `next/next-all`.
 ### Write flow
 
 Client component -> Convex mutation -> schedule internal actions:
-- `postgresMirror.*` for SQL mirror writes
 - `editorSideEffects.*` for GitHub/PostHog side effects
 
 This keeps write authorization, mutation semantics, and side effects centralized in Convex.
 
+Legacy Postgres mirror decommission steps are documented in `docs/architecture/postgres-sunset-checklist.md`.
+Post-cutover checks are in `docs/architecture/postgres-post-cutover-verification.md`.
+
 ## How to run locally
-
-First you need to set up a PostgreSQL server.
-
-If you are on Linux you can use the following commands to install Postgres:
-
-Ubuntu:
-
-```
-sudo apt install postgresql
-```
-
-Fedora:
-
-```
-# Install and initialize PostgreSQL
-sudo dnf install postgresql-server postgresql-contrib
-sudo postgresql-setup --initdb --unit postgresql
-
-# If you get ident errors when running the psql lines below, try switching to md5
-# And don't forget to restart the service!
-sudo sed -i -e 's/ident/md5/g' /var/lib/pgsql/data/pg_hba.conf
-
-# To start postgresql server by default when booting up
-sudo systemctl enable postgresql
-```
-
-To set it up:
-
-```
-sudo systemctl restart postgresql.service
-sudo -u postgres psql -c "ALTER USER postgres with encrypted password 'postgres';"
-export PGPASSWORD=postgres
-```
-
-Then you need to initialize the database
-
-```
-sudo -u postgres psql -c "CREATE DATABASE duostories_test_db;"
-psql -U postgres -h localhost -d duostories_test_db -f database/schema.sql
-psql -U postgres -h localhost -d duostories_test_db -c \\dt
-```
 
 Now create `.env.local` in the project root.
 
 Minimum local values:
 
 ```
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/duostories_test_db
-POSTGRES_URL2=postgresql://postgres:postgres@localhost:5432/duostories_test_db
 NEXT_PUBLIC_CONVEX_URL=<your_convex_dev_url>
 CONVEX_URL=<your_convex_dev_url>
 BETTER_AUTH_SECRET=<your_secret>
@@ -88,7 +46,6 @@ SITE_URL=http://localhost:3000
 Convex runtime env (set via `pnpm exec convex env set ...`) should include:
 
 ```
-POSTGRES_URL2=postgresql://postgres:postgres@localhost:5432/duostories_test_db
 GITHUB_REPO_TOKEN=<optional_for_side_effect_sync>
 POSTHOG_KEY=<optional_for_server_tracking>
 POSTHOG_HOST=<optional_for_server_tracking>
@@ -108,6 +65,8 @@ Fill the database with test data
 ```
 pnpm run init
 ```
+
+`pnpm run init` is a legacy Postgres seed path for older tooling. The main app write/read path is Convex.
 
 To develop you can then run and visit http://localhost:3000
 
