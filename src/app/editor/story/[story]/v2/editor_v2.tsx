@@ -14,6 +14,15 @@ import Cast from "@/components/editor/story/cast";
 import { StoryEditorHeader } from "@/app/editor/story/[story]/header";
 import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
+import SoundRecorder from "@/app/editor/story/[story]/sound-recorder";
+import {
+  insert_audio_line,
+  timings_to_text,
+} from "@/lib/editor/audio/audio_edit_tools";
+import type {
+  StoryElementHeader,
+  StoryElementLine,
+} from "@/components/editor/story/syntax_parser_types";
 import { useStoryEditorModel } from "./use_story_editor_model";
 
 type LanguageData = {
@@ -28,6 +37,15 @@ type LanguageData = {
   public: boolean;
   rtl: boolean;
 };
+
+function getMax<T>(list: T[], callback: (obj: T) => number) {
+  let max = -Infinity;
+  for (const obj of list) {
+    const v = callback(obj);
+    if (v > max) max = v;
+  }
+  return max;
+}
 
 export default function EditorV2({
   story_data,
@@ -56,11 +74,15 @@ export default function EditorV2({
   const [lineNo, setLineNo] = React.useState(1);
   const [show_trans, set_show_trans] = React.useState(false);
   const [show_ssml, set_show_ssml] = React.useState(false);
+  const [audioEditorData, setAudioEditorData] = React.useState<
+    StoryElementLine | StoryElementHeader | undefined
+  >(undefined);
 
   React.useEffect(() => {
     setDocText(story_data.text ?? "");
     setRevision(0);
     setLineNo(1);
+    setAudioEditorData(undefined);
   }, [story_data.id, story_data.text]);
 
   const model = useStoryEditorModel({
@@ -180,6 +202,49 @@ export default function EditorV2({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [model.isDeleting, model.isSaving, model.save]);
 
+  const onAudioSave = React.useCallback(
+    (filename: string, timingText: string) => {
+      const view = viewRef.current;
+      if (!view || !audioEditorData?.audio) return;
+      if (!model.audioInsertLines) return;
+      insert_audio_line(
+        `$${filename}${timingText}`,
+        audioEditorData.audio.ssml,
+        view,
+        model.audioInsertLines,
+      );
+    },
+    [audioEditorData, model.audioInsertLines],
+  );
+
+  const soundRecorderNext = React.useCallback(() => {
+    if (!audioEditorData) return;
+    const index = audioEditorData.trackingProperties.line_index || 0;
+    for (const element of model.parsedStory.elements) {
+      if (
+        element.type === "LINE" &&
+        (element.trackingProperties?.line_index ?? 0) > index
+      ) {
+        setAudioEditorData(element);
+        break;
+      }
+    }
+  }, [audioEditorData, model.parsedStory.elements]);
+
+  const soundRecorderPrevious = React.useCallback(() => {
+    if (!audioEditorData) return;
+    const index = audioEditorData.trackingProperties.line_index || 0;
+    for (const element of [...model.parsedStory.elements].reverse()) {
+      if (
+        (element.type === "LINE" || element.type === "HEADER") &&
+        (element.trackingProperties?.line_index ?? 0) < index
+      ) {
+        setAudioEditorData(element);
+        break;
+      }
+    }
+  }, [audioEditorData, model.parsedStory.elements]);
+
   const editorStateForPreview: EditorStateType | undefined =
     React.useMemo(() => {
       const view = viewRef.current;
@@ -201,9 +266,14 @@ export default function EditorV2({
         audio_insert_lines: model.audioInsertLines,
         show_trans,
         show_ssml,
-        show_audio_editor: (_data) => {},
+        show_audio_editor: (data) => setAudioEditorData(data),
       };
     }, [lineNo, model.audioInsertLines, show_ssml, show_trans]);
+
+  const audioEditorDataContent =
+    (audioEditorData?.type === "LINE" && audioEditorData.line.content) ||
+    (audioEditorData?.type === "HEADER" &&
+      audioEditorData.learningLanguageTitleContent);
 
   return (
     <div id="body" className="flex h-full flex-col">
@@ -252,6 +322,33 @@ export default function EditorV2({
         language_data={language_data}
         language_data2={language_data2}
       />
+      {audioEditorData &&
+        audioEditorData.audio &&
+        audioEditorDataContent &&
+        model.parsedStory && (
+          <SoundRecorder
+            key={audioEditorData.trackingProperties.line_index}
+            content={audioEditorDataContent}
+            initialTimingText={timings_to_text({
+              filename: audioEditorData.audio.url ?? "",
+              keypoints: audioEditorData.audio.keypoints ?? [],
+            })}
+            url={
+              "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/" +
+              audioEditorData.audio.url
+            }
+            story_id={story_data.id}
+            onClose={() => setAudioEditorData(undefined)}
+            onSave={onAudioSave}
+            soundRecorderNext={soundRecorderNext}
+            soundRecorderPrevious={soundRecorderPrevious}
+            total_index={getMax(
+              model.parsedStory.elements,
+              (elem) => elem.trackingProperties.line_index || 0,
+            )}
+            current_index={audioEditorData.trackingProperties.line_index || 0}
+          />
+        )}
 
       <div className="flex h-[100px] grow">
         <svg
