@@ -1,12 +1,11 @@
 "use client";
 import React from "react";
-import styles from "./EditorSSMLDisplay.module.css";
+import { MicIcon } from "lucide-react";
 import {
   generate_audio_line,
   timings_to_text,
   insert_audio_line,
 } from "@/lib/editor/audio/audio_edit_tools";
-import { useSearchParams } from "next/navigation";
 import type {
   Audio,
   StoryElementLine,
@@ -14,33 +13,17 @@ import type {
 } from "@/components/editor/story/syntax_parser_types";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor";
 
-// Extend window for open_recoder
-declare global {
-  interface Window {
-    open_recoder?: (data: {
-      ssml: Audio["ssml"];
-      element: StoryElementLine | StoryElementHeader;
-      audio: Audio;
-      editor: EditorStateType;
-    }) => void;
-  }
-}
-
 interface EditorSSMLDisplayProps {
   ssml: Audio["ssml"];
   element: StoryElementLine | StoryElementHeader;
-  audio: Audio;
   editor: EditorStateType;
 }
 
 export default function EditorSSMLDisplay({
   ssml,
   element,
-  audio,
   editor,
 }: EditorSSMLDisplayProps) {
-  const beta = false;
-
   let [loading, setLoading] = React.useState(false);
   let [error, setError] = React.useState<boolean>(false);
   let line_id = "ssml" + ssml.id;
@@ -62,23 +45,22 @@ export default function EditorSSMLDisplay({
     setLoading(false);
   }
 
-  const searchParams = useSearchParams();
-
   if (!show_audio) return <></>;
   return (
     <>
       <br />
-      <span className={styles.ssml_speaker + " en"}>{ssml.speaker}</span>
-      <span className={styles.ssml}>{ssml.text}</span>
-      {searchParams.get("beta") !== null && (
-        <span
-          onClick={() => editor.show_audio_editor(element)}
-          style={{ cursor: "pointer" }}
-        >
-          {" "}
-          🎤{" "}
-        </span>
-      )}
+      <span className="en mr-[3px] rounded-[5px] bg-[var(--editor-ssml)] px-[5px] py-[2px] text-[0.8em]">
+        {ssml.speaker}
+      </span>
+      <button
+        onClick={() => editor.show_audio_editor(element)}
+        className="inline-flex h-[25px] w-[25px] shrink-0 items-center justify-center align-middle"
+        title="Open sound editor"
+        aria-label="Open sound editor"
+        type="button"
+      >
+        <MicIcon className="h-5 w-5" />
+      </button>
       {ssml.speaker ? (
         error ? (
           <span>
@@ -93,12 +75,14 @@ export default function EditorSSMLDisplay({
             title={loading ? "generating audio..." : "regenerate audio"}
             id={line_id}
             className={
-              styles.ssml_reload +
-              " " +
-              styles.audio_reload +
-              " " +
-              (loading ? styles.audio_reload_spin : "")
+              "inline-block h-[25px] w-[25px] cursor-pointer bg-contain bg-center bg-no-repeat transition-transform " +
+              (loading ? "animate-[spin_2s_linear_infinite]" : "")
             }
+            style={{
+              backgroundImage:
+                'url("https://carex.uber.space/stories/old/refresh.png")',
+              transitionDuration: "1s",
+            }}
             onClick={reload}
           />
         )
@@ -110,18 +94,6 @@ export default function EditorSSMLDisplay({
             src="/editor/icons/error.svg"
           />
         </span>
-      )}
-      {beta ? (
-        <a
-          onClick={() =>
-            window.open_recoder?.({ ssml, element, audio, editor })
-          }
-          style={{ cursor: "pointer" }}
-        >
-          🎤
-        </a>
-      ) : (
-        <></>
       )}
     </>
   );
