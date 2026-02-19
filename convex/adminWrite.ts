@@ -1,4 +1,3 @@
-import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
@@ -96,21 +95,6 @@ export const updateAdminLanguage = mutation({
       lastOperationKey: operationKey,
     });
 
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAdminLanguageUpdate,
-      {
-        id: args.id,
-        name: args.name,
-        short: args.short,
-        flag: args.flag,
-        flag_file: args.flag_file,
-        speaker: args.speaker,
-        rtl: args.rtl,
-        operationKey,
-      },
-    );
-
     return toLegacyLanguageResponse({
       ...language,
       name: args.name,
@@ -165,24 +149,6 @@ export const createAdminLanguage = mutation({
       mirrorUpdatedAt: Date.now(),
       lastOperationKey: operationKey,
     });
-
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAdminLanguageInsert,
-      {
-        id: legacyId,
-        name: args.name,
-        short: args.short,
-        flag: args.flag,
-        flag_file: args.flag_file,
-        speaker: args.speaker,
-        default_text: "",
-        tts_replace: "",
-        public: false,
-        rtl: args.rtl,
-        operationKey,
-      },
-    );
 
     return {
       id: legacyId,
@@ -278,25 +244,6 @@ export const updateAdminCourse = mutation({
 
     await ctx.db.patch(course._id, patchData);
 
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAdminCourseUpdate,
-      {
-        id: args.id,
-        learning_language: args.learning_language,
-        learning_language_name: learningLanguage.name,
-        from_language: args.from_language,
-        from_language_name: fromLanguage.name,
-        short,
-        public: nextPublic,
-        name: nextName,
-        conlang: nextConlang,
-        tags: nextTags,
-        about: nextAbout,
-        operationKey,
-      },
-    );
-
     return {
       id: args.id,
       learning_language: args.learning_language,
@@ -373,26 +320,6 @@ export const createAdminCourse = mutation({
       mirrorUpdatedAt: Date.now(),
       lastOperationKey: operationKey,
     });
-
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAdminCourseInsert,
-      {
-        id: legacyId,
-        learning_language: args.learning_language,
-        learning_language_name: learningLanguage.name,
-        from_language: args.from_language,
-        from_language_name: fromLanguage.name,
-        short,
-        public: nextPublic,
-        official: nextOfficial,
-        name: nextName,
-        conlang: nextConlang,
-        tags: nextTags,
-        about: nextAbout,
-        operationKey,
-      },
-    );
 
     return {
       id: legacyId,

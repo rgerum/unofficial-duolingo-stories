@@ -294,26 +294,6 @@ export const toggleStoryApproval = mutation({
       `story_approval:${story.legacyId}:user:${legacyUserId}:toggle:${Date.now()}`;
     await ctx.scheduler.runAfter(
       0,
-      internal.postgresMirror.mirrorStoryApprovalToggle,
-      {
-        storyId: story.legacyId,
-        legacyUserId,
-        action,
-        storyStatus: story_status,
-        approvalCount: count,
-        finishedInSet: finished_in_set,
-        publishedStoryIds: published,
-        datePublishedMs,
-        courseId: story.courseId,
-        courseCount,
-        contributors,
-        contributorsPast: contributors_past,
-        operationKey,
-      },
-    );
-
-    await ctx.scheduler.runAfter(
-      0,
       internal.editorSideEffects.onStoryApprovalToggled,
       {
         operationKey,

@@ -127,22 +127,6 @@ export const setStory = mutation({
     );
     await ctx.db.patch(course._id, { todo_count: courseTodoCount });
 
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorStorySet, {
-      storyId: story.legacyId,
-      duo_id: args.duo_id,
-      name: args.name,
-      image: args.image,
-      change_date: args.change_date,
-      author_change: authorChangeLegacyUserId,
-      set_id: args.set_id,
-      set_index: args.set_index,
-      course_id: args.legacyCourseId,
-      text: args.text,
-      json: args.json,
-      todo_count: args.todo_count,
-      operationKey,
-    });
-
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStorySaved, {
       operationKey,
       storyId: story.legacyId,
@@ -210,11 +194,6 @@ export const deleteStory = mutation({
 
     const operationKey =
       args.operationKey ?? `story:${story.legacyId}:delete:${Date.now()}`;
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorStoryDelete, {
-      storyId: story.legacyId,
-      operationKey,
-    });
-
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStoryDeleted, {
       operationKey,
       storyId: story.legacyId,
@@ -308,27 +287,9 @@ export const importStory = mutation({
       lastUpdated: Date.now(),
     });
 
-    const imageLegacyId = sourceStory.imageId
-      ? ((await ctx.db.get(sourceStory.imageId))?.legacyId ?? "")
-      : "";
-
     const operationKey =
       args.operationKey ??
       `story:${newLegacyId}:import:${args.targetLegacyCourseId}:${Date.now()}`;
-
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorStoryImport, {
-      storyId: newLegacyId,
-      duo_id: sourceStory.duo_id ?? "",
-      name: sourceStory.name,
-      image: imageLegacyId,
-      set_id: sourceStory.set_id ?? 0,
-      set_index: sourceStory.set_index ?? 0,
-      author: authorLegacyUserId,
-      course_id: args.targetLegacyCourseId,
-      text: sourceContent.text,
-      json: sourceContent.json,
-      operationKey,
-    });
 
     await ctx.scheduler.runAfter(
       0,
