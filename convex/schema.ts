@@ -175,6 +175,27 @@ export default defineSchema({
     .index("by_user_and_story", ["legacyUserId", "storyId"])
     .index("by_user_time", ["legacyUserId", "time"]),
 
+  story_done_state: defineTable({
+    storyId: v.id("stories"),
+    courseId: v.id("courses"),
+    legacyStoryId: v.number(),
+    legacyCourseId: v.number(),
+    legacyUserId: v.number(),
+    lastDoneAt: v.number(),
+  })
+    .index("by_user_and_story", ["legacyUserId", "storyId"])
+    .index("by_user_and_course", ["legacyUserId", "courseId"])
+    .index("by_user_and_last_done_at", ["legacyUserId", "lastDoneAt"]),
+
+  course_activity: defineTable({
+    courseId: v.id("courses"),
+    legacyCourseId: v.number(),
+    legacyUserId: v.number(),
+    lastDoneAt: v.number(),
+  })
+    .index("by_user_and_course", ["legacyUserId", "courseId"])
+    .index("by_user_and_last_done_at", ["legacyUserId", "lastDoneAt"]),
+
   story_approval: defineTable({
     storyId: v.id("stories"),
     legacyUserId: v.optional(v.number()),
