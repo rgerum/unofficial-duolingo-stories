@@ -11,7 +11,7 @@ This maps URL routes to the data queries/mutations they execute today.
 
 | Route | Query/Mutation Calls | Backend |
 |---|---|---|
-| `/` | `api.landing.getPublicCourseList`; `api.localization.getLocalizationWithEnglishFallback`; `api.localization.getAllLanguageFlags` | Convex |
+| `/` | `api.landing.getPublicLandingPageData`; `api.landing.getPublicCourseList`; `api.storyDone.getDoneCourseIdsForUser`; `api.localization.getAllLanguageFlags` | Convex |
 | `/:course_id` | `api.landing.getPublicCoursePageData`; `api.storyDone.getDoneStoryIdsForCourse` | Convex |
 | `/story/:story_id` | `api.storyRead.getStoryByLegacyId`; `api.storyRead.getStoryMetaByLegacyId`; `api.storyDone.recordStoryDone` | Convex |
 | `/story/:story_id/script` | `api.storyRead.getStoryByLegacyId`; `api.storyRead.getStoryMetaByLegacyId` | Convex |

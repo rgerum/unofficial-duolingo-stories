@@ -17,11 +17,10 @@ export type SpeakersType = {
 };
 
 export type LanguageType = {
+  languageId: string;
   id: number;
   name: string;
   short: string;
-  flag: number | null;
-  flag_file: string | null;
   speaker: string | null;
   default_text: string;
   tts_replace: string | null;

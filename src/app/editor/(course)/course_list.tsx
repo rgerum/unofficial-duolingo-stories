@@ -2,11 +2,11 @@
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import Flag from "@/components/ui/flag";
+import LanguageFlag from "@/components/ui/language-flag";
 import { useInput } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
-import type { CourseProps, LanguageProps } from "./types";
+import type { CourseProps } from "./types";
 
 interface CourseListProps {
   course_id: string | undefined;
@@ -21,12 +21,6 @@ export default function CourseList({
 }: CourseListProps) {
   const data = useQuery(api.editorRead.getEditorSidebarData, {});
   const courses = data?.courses as CourseProps[] | undefined;
-  const languagesArray = (data?.languages ?? []) as LanguageProps[];
-  const languages: Record<string | number, LanguageProps> = {};
-  for (const language of languagesArray) {
-    languages[language.id] = language;
-    languages[language.short] = language;
-  }
 
   const [search, setSearch] = useInput("");
   const router = useRouter();
@@ -96,15 +90,14 @@ export default function CourseList({
                 <span className="w-[45px] text-right text-[var(--text-color-dim)]">
                   {course.count}
                 </span>
-                <Flag
+                <LanguageFlag
                   className="m-1 ml-4"
-                  iso={languages[course.learning_language].short}
+                  languageId={course.learningLanguageId}
                   width={40}
-                  flag_file={languages[course.learning_language].flag_file}
                 />
                 <span className="overflow-hidden text-ellipsis whitespace-nowrap">{`${
                   course.learning_language_name
-                } [${languages[course.from_language].short}] `}</span>
+                } [${course.from_language_short}] `}</span>
                 <span className="grow whitespace-nowrap pr-[10px] text-right">
                   {course.todo_count ? (
                     <img

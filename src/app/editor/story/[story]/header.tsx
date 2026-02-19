@@ -15,11 +15,10 @@ type HeaderProps = {
   story_data: StoryData;
   unsaved_changes: boolean;
   language_data?: {
+    languageId: string;
     id: number;
     name: string;
     short: string;
-    flag: number | null;
-    flag_file: string | null;
     speaker: string | null;
     default_text: string;
     tts_replace: string | null;
@@ -27,11 +26,10 @@ type HeaderProps = {
     rtl: boolean;
   };
   language_data2?: {
+    languageId: string;
     id: number;
     name: string;
     short: string;
-    flag: number | null;
-    flag_file: string | null;
     speaker: string | null;
     default_text: string;
     tts_replace: string | null;
