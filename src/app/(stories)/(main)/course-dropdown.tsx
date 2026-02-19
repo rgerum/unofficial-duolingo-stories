@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import Flag from "@/components/ui/flag";
+import LanguageFlag from "@/components/ui/language-flag";
 import Dropdown from "@/components/ui/dropdown";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { CourseData } from "@/app/(stories)/(main)/get_course_data";
@@ -11,11 +11,6 @@ function LanguageButtonSmall({ course }: { course?: CourseData }) {
   /**
    * A button in the language drop down menu (flag + name)
    */
-  const language = useQuery(
-    api.localization.getLanguageFlagById,
-    course ? { languageId: course.learningLanguageId } : "skip",
-  );
-
   if (!course) return null;
 
   return (
@@ -24,18 +19,7 @@ function LanguageButtonSmall({ course }: { course?: CourseData }) {
       href={`/${course.short}`}
       data-cy="button_lang_dropdown"
     >
-      <Flag
-        iso={language?.short}
-        width={40}
-        flag_file={language?.flag_file ?? undefined}
-        flag={
-          typeof language?.flag === "number"
-            ? language.flag
-            : Number.isFinite(Number(language?.flag))
-              ? Number(language?.flag)
-              : undefined
-        }
-      />
+      <LanguageFlag languageId={course.learningLanguageId} width={40} />
       <span className="pl-[10px] text-[18px] font-bold">{course.name}</span>
     </Link>
   );
@@ -63,26 +47,14 @@ export default function CourseDropdown() {
 
   const segment = useSelectedLayoutSegment();
   let course = get_course_by_short(segment || "");
-  const activeCourseLanguage = useQuery(
-    api.localization.getLanguageFlagById,
-    course ? { languageId: course.learningLanguageId } : "skip",
-  );
 
   if (!course_data_active || course_data_active.length === 0) return null;
 
   return (
     <Dropdown>
-      <Flag
+      <LanguageFlag
+        languageId={course?.learningLanguageId}
         width={40}
-        iso={activeCourseLanguage?.short}
-        flag_file={activeCourseLanguage?.flag_file ?? undefined}
-        flag={
-          typeof activeCourseLanguage?.flag === "number"
-            ? activeCourseLanguage.flag
-            : Number.isFinite(Number(activeCourseLanguage?.flag))
-              ? Number(activeCourseLanguage?.flag)
-              : undefined
-        }
         className="mx-4"
       />
       <nav className="!left-[-120px] !w-[300px] max-h-[calc(100vh-55px)]">

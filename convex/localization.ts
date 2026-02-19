@@ -74,32 +74,33 @@ export const getLocalizationByLegacyLanguageId = query({
   },
 });
 
-export const getLanguageFlagById = query({
-  args: {
-    languageId: v.id("languages"),
-  },
-  returns: v.union(
-    v.object({
-      short: v.string(),
-      flag: v.optional(v.union(v.number(), v.string())),
-      flag_file: v.optional(v.string()),
-    }),
-    v.null(),
-  ),
-  handler: async (ctx, args) => {
-    const language = await ctx.db.get(args.languageId);
-    if (!language) return null;
-    const numericFlag =
-      typeof language.flag === "number"
-        ? language.flag
-        : Number.isFinite(Number(language.flag))
-          ? Number(language.flag)
-          : undefined;
-    return {
-      short: language.short,
-      flag: numericFlag,
-      flag_file: language.flag_file,
-    };
+const languageFlagValidator = v.object({
+  languageId: v.id("languages"),
+  short: v.string(),
+  flag: v.optional(v.number()),
+  flag_file: v.optional(v.string()),
+});
+
+export const getAllLanguageFlags = query({
+  args: {},
+  returns: v.array(languageFlagValidator),
+  handler: async (ctx) => {
+    const languages = await ctx.db.query("languages").collect();
+    return languages.map((language) => {
+      const numericFlag =
+        typeof language.flag === "number"
+          ? language.flag
+          : Number.isFinite(Number(language.flag))
+            ? Number(language.flag)
+            : undefined;
+
+      return {
+        languageId: language._id,
+        short: language.short,
+        flag: numericFlag,
+        flag_file: language.flag_file,
+      };
+    });
   },
 });
 
