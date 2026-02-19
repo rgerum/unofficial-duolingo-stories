@@ -297,7 +297,8 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   const [duration, setDuration] = React.useState(0);
   const [currentTime, setCurrentTime] = React.useState(0);
   const [activeAudioRange, setActiveAudioRange] = React.useState(99999);
-  const [showLargeMergeWarning, setShowLargeMergeWarning] = React.useState(false);
+  const [showLargeMergeWarning, setShowLargeMergeWarning] =
+    React.useState(false);
 
   const buildMergedAudio = React.useCallback(async () => {
     if (!timelineSegments.length) {
@@ -343,7 +344,9 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     } catch (error) {
       setMergeState("error");
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to build merged audio.",
+        error instanceof Error
+          ? error.message
+          : "Failed to build merged audio.",
       );
       return null;
     } finally {
@@ -406,16 +409,19 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     await ensureMergedAndPlay();
   }, [ensureMergedAndPlay, isPlaying, pause]);
 
-  const onSeek = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const next = Number(event.target.value);
-    if (!Number.isFinite(next)) return;
-    const clamped = Math.max(0, Math.min(next, duration));
-    if (audioRef.current) {
-      audioRef.current.currentTime = clamped;
-    }
-    setCurrentTime(clamped);
-    setActiveAudioRange(99999);
-  }, [duration]);
+  const onSeek = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const next = Number(event.target.value);
+      if (!Number.isFinite(next)) return;
+      const clamped = Math.max(0, Math.min(next, duration));
+      if (audioRef.current) {
+        audioRef.current.currentTime = clamped;
+      }
+      setCurrentTime(clamped);
+      setActiveAudioRange(99999);
+    },
+    [duration],
+  );
 
   React.useEffect(() => {
     const audio = audioRef.current;
@@ -524,9 +530,15 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
             onClick={() => {
               void togglePlayPause();
             }}
-            disabled={mergeState === "building" || timelineSegments.length === 0}
+            disabled={
+              mergeState === "building" || timelineSegments.length === 0
+            }
           >
-            {mergeState === "building" ? "Building..." : isPlaying ? "Pause" : "Play"}
+            {mergeState === "building"
+              ? "Building..."
+              : isPlaying
+                ? "Pause"
+                : "Play"}
           </button>
           <input
             className={styles.timelineSlider}
