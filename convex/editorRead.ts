@@ -157,7 +157,11 @@ async function buildAvatarRows(
 ) {
   const avatarRows = avatars ?? (await ctx.db.query("avatars").collect());
   const mappingRows =
-    mappings ?? (await ctx.db.query("avatar_mappings").collect());
+    mappings ??
+    (await ctx.db
+      .query("avatar_mappings")
+      .withIndex("by_language_id", (q) => q.eq("languageId", language._id))
+      .collect());
 
   const mappingByAvatar = new Map<Id<"avatars">, AvatarMappingDoc>();
   for (const mapping of mappingRows) {
@@ -627,8 +631,6 @@ export const getEditorStoryPageData = query({
     ]);
     if (!learningLanguage || !fromLanguage) return null;
 
-    const avatarNames = await buildAvatarRows(ctx, learningLanguage);
-
     return {
       story_data: {
         id: story.legacyId ?? 0,
@@ -644,7 +646,6 @@ export const getEditorStoryPageData = query({
         learning_language: learningLanguage.legacyId,
         from_language: fromLanguage.legacyId,
       },
-      avatar_names: avatarNames,
     };
   },
 });

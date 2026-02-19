@@ -129,6 +129,7 @@ export default function Editor({
   }) ?? undefined) as LanguageData | undefined;
   const storyDataRef = React.useRef(story_data);
   const avatarNamesRef = React.useRef(avatar_names);
+  const avatarVersionRef = React.useRef(0);
   const languageDataRef = React.useRef<LanguageData | undefined>(language_data);
   const languageData2Ref = React.useRef<LanguageData | undefined>(
     language_data2,
@@ -140,6 +141,7 @@ export default function Editor({
 
   React.useEffect(() => {
     avatarNamesRef.current = avatar_names;
+    avatarVersionRef.current += 1;
   }, [avatar_names]);
 
   React.useEffect(() => {
@@ -280,6 +282,7 @@ export default function Editor({
     let audio_insert_lines: AudioInsertLinesType | undefined = undefined;
     let last_lineno: number | undefined = undefined;
     let lineno: number | undefined = undefined;
+    let lastAvatarVersion = avatarVersionRef.current;
     let editor_state: EditorStateType | undefined = undefined;
     let stateX: EditorState | undefined = undefined;
     let editor_text: string | undefined = undefined;
@@ -433,6 +436,10 @@ export default function Editor({
     async function updateDisplay() {
       const currentStoryData = storyDataRef.current;
       if (stateX === undefined || currentStoryData === undefined) return;
+      if (lastAvatarVersion !== avatarVersionRef.current) {
+        lastAvatarVersion = avatarVersionRef.current;
+        story = undefined;
+      }
       if (story === undefined) {
         last_lineno = lineno;
         editor_text = stateX.doc.toString();
