@@ -69,9 +69,11 @@ function StoryHeader({
         />
       </div>
       <h1 className={styles.title}>
-        <audio ref={ref}>
-          <source src={url} type="audio/mp3" />
-        </audio>
+        {url && (
+          <audio ref={ref}>
+            <source src={url} type="audio/mp3" />
+          </audio>
+        )}
         {!hideAudioButton && <PlayAudio onClick={playAudio} />}
         <StoryLineHints
           audioRange={effectiveAudioRange}
