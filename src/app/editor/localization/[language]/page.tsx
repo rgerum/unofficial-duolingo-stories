@@ -6,6 +6,7 @@ import { api } from "@convex/_generated/api";
 import LocalizationPageClient from "./page_client";
 
 interface LanguageType {
+  languageId: string;
   id: number;
   name: string;
   short: string;
