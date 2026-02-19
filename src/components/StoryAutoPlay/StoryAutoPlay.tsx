@@ -71,7 +71,7 @@ function getParts(story: StoryType) {
 }
 
 function toAbsoluteAudioUrl(url: string): string | null {
-  if (url.startsWith("blob:")) return null;
+  if (url.startsWith("blob:")) return url;
   if (/^https?:\/\//.test(url)) return url;
   return `${BLOB_PUBLIC_BASE}${url.replace(/^\/+/, "")}`;
 }
@@ -350,7 +350,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       );
       return null;
     } finally {
-      void decodeCtx.close();
+      await decodeCtx.close();
     }
   }, [timelineSegments]);
 
