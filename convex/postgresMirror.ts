@@ -5,13 +5,17 @@ import { v } from "convex/values";
 import postgres from "postgres";
 
 let sqlClient: ReturnType<typeof postgres> | null = null;
+const noopSqlClient = (async () => []) as unknown as ReturnType<
+  typeof postgres
+>;
 
 function getSqlClient() {
   if (sqlClient) return sqlClient;
 
   const url = process.env.POSTGRES_URL2;
   if (!url) {
-    throw new Error("POSTGRES_URL2 is not configured in Convex environment");
+    sqlClient = noopSqlClient;
+    return sqlClient;
   }
 
   sqlClient = postgres(url, {
