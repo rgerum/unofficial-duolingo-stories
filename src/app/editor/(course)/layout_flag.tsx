@@ -5,35 +5,26 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import EditorButton from "../editor_button";
 import { Breadcrumbs } from "../_components/breadcrumbs";
-import type { CourseProps, LanguageProps } from "./types";
+import type { Id } from "@convex/_generated/dataModel";
+import type { CourseProps } from "./types";
 
 interface BreadcrumbPath {
   type: string;
   href?: string;
   name?: string;
   lang1?: {
-    short: string;
+    languageId?: Id<"languages">;
     name: string;
-    flag: number | null;
-    flag_file: string | null;
   };
   lang2?: {
-    short: string;
+    languageId?: Id<"languages">;
     name: string;
-    flag: number | null;
-    flag_file: string | null;
   };
 }
 
 export default function LayoutFlag() {
   const data = useQuery(api.editorRead.getEditorSidebarData, {});
   const courses = (data?.courses ?? []) as CourseProps[];
-  const languagesArray = (data?.languages ?? []) as LanguageProps[];
-  const languages: Record<string | number, LanguageProps> = {};
-  for (const language of languagesArray) {
-    languages[language.id] = language;
-    languages[language.short] = language;
-  }
 
   const segment = useSelectedLayoutSegments();
   let import_id = segment[3];
@@ -49,54 +40,36 @@ export default function LayoutFlag() {
     }
   }
   let path: BreadcrumbPath[] = [{ type: "Editor" }];
-  if (
-    course &&
-    languages[course.learning_language] &&
-    languages[course.from_language]
-  ) {
+  if (course) {
     path = [
       { type: "Editor", href: `/editor` },
       { type: "sep" },
       {
         type: "course",
         lang1: {
-          short: languages[course.learning_language].short,
+          languageId: course.learningLanguageId,
           name: course.learning_language_name,
-          flag: languages[course.learning_language].flag,
-          flag_file: languages[course.learning_language].flag_file,
         },
         lang2: {
-          short: languages[course.from_language].short,
+          languageId: course.fromLanguageId,
           name: course.from_language_name,
-          flag: languages[course.from_language].flag,
-          flag_file: languages[course.from_language].flag_file,
         },
       },
     ];
   }
-  if (
-    import_id &&
-    course &&
-    course_import &&
-    languages[course_import.learning_language] &&
-    languages[course_import.from_language]
-  ) {
+  if (import_id && course && course_import) {
     path[path.length - 1].href = `/editor/course/${course.short}`;
     path.push({ type: "sep" });
     path.push({
       type: "course",
       name: "Import",
       lang1: {
-        short: languages[course_import.learning_language].short,
+        languageId: course_import.learningLanguageId,
         name: course_import.learning_language_name,
-        flag: languages[course_import.learning_language].flag,
-        flag_file: languages[course_import.learning_language].flag_file,
       },
       lang2: {
-        short: languages[course_import.from_language].short,
+        languageId: course_import.fromLanguageId,
         name: course_import.from_language_name,
-        flag: languages[course_import.from_language].flag,
-        flag_file: languages[course_import.from_language].flag_file,
       },
     });
   }

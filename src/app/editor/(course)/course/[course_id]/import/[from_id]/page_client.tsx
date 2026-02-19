@@ -4,21 +4,10 @@ import React from "react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { DoubleFlag } from "@/components/ui/flag";
+import LanguageFlag from "@/components/ui/language-flag";
 import ImportList from "./import_list";
 import { Spinner } from "@/components/ui/spinner";
-import type { CourseProps, LanguageProps } from "@/app/editor/(course)/types";
-
-function buildLanguageLookup(
-  languages: Array<LanguageProps>,
-): Record<string | number, LanguageProps> {
-  const lookup: Record<string | number, LanguageProps> = {};
-  for (const language of languages) {
-    lookup[language.id] = language;
-    lookup[language.short] = language;
-  }
-  return lookup;
-}
+import type { CourseProps } from "@/app/editor/(course)/types";
 
 export default function ImportPageClient({
   courseId,
@@ -41,8 +30,6 @@ export default function ImportPageClient({
   }
 
   const courses = (sidebarData.courses ?? []) as CourseProps[];
-  const languagesList = (sidebarData.languages ?? []) as LanguageProps[];
-  const languages = buildLanguageLookup(languagesList);
 
   const courseSelection: CourseProps[] = [];
   for (const item of courses) {
@@ -67,15 +54,11 @@ export default function ImportPageClient({
           >
             <span className="flex items-center flex-col rounded-lg bg-[var(--body-background)] px-2 py-1 hover:brightness-90">
               <span className="flex [&_img:nth-child(2)]:ml-[-28px] [&_img:nth-child(2)]:mt-[10px]">
-                <DoubleFlag
-                  width={40}
-                  lang1={languages[item.learning_language]}
-                  lang2={languages[item.from_language]}
-                />
+                <LanguageFlag languageId={item.learningLanguageId} width={40} />
+                <LanguageFlag languageId={item.fromLanguageId} width={36} />
               </span>
               <span>
-                {languages[item.from_language]?.short}-
-                {languages[item.learning_language]?.short}
+                {item.from_language_short}-{item.learning_language_short}
               </span>
             </span>
           </Link>

@@ -1,9 +1,4 @@
-export type LanguageProps = {
-  id: number;
-  short: string;
-  flag: number | null;
-  flag_file: string | null;
-};
+import type { Id } from "@convex/_generated/dataModel";
 
 export type CourseProps = {
   id: number;
@@ -12,9 +7,13 @@ export type CourseProps = {
   official: boolean;
   count: number;
   public: boolean;
+  fromLanguageId: Id<"languages">;
   from_language: number;
+  from_language_short: string;
   from_language_name: string;
+  learningLanguageId: Id<"languages">;
   learning_language: number;
+  learning_language_short: string;
   learning_language_name: string;
   contributors: string[];
   contributors_past: string[];

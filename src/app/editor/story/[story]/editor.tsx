@@ -45,11 +45,10 @@ const ImageSchema = z.object({
 });
 
 const LanguageSchema = z.object({
+  languageId: z.string(),
   id: z.number(),
   name: z.string(),
   short: z.string(),
-  flag: z.number().nullable(),
-  flag_file: z.string().nullable(),
   speaker: z.string().nullable(),
   default_text: z.string(),
   tts_replace: z.string().nullable(),

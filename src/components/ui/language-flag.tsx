@@ -30,9 +30,9 @@ export default function LanguageFlag({
   languageId,
   ...props
 }: {
-  languageId?: Id<"languages">;
+  languageId?: Id<"languages"> | string;
 } & Omit<FlagProps, "iso" | "flag" | "flag_file">) {
-  const language = useLanguageFlag(languageId);
+  const language = useLanguageFlag(languageId as Id<"languages"> | undefined);
 
   return (
     <Flag

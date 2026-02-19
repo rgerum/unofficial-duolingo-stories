@@ -20,16 +20,10 @@ function toNumber(value: unknown): number | undefined {
 
 function toLanguage(language: LanguageDoc) {
   return {
+    languageId: language._id,
     id: language.legacyId,
     name: language.name,
     short: language.short,
-    flag:
-      typeof language.flag === "number"
-        ? language.flag
-        : Number.isFinite(Number(language.flag))
-          ? Number(language.flag)
-          : null,
-    flag_file: language.flag_file ?? null,
     speaker: language.speaker ?? null,
     default_text: language.default_text ?? "",
     tts_replace: language.tts_replace ?? null,
@@ -52,9 +46,13 @@ function toCourse(
     official: course.official,
     count: course.count ?? 0,
     public: course.public,
+    fromLanguageId: course.fromLanguageId,
     from_language: fromLanguage?.legacyId ?? 0,
+    from_language_short: fromLanguage?.short ?? "",
     from_language_name: fromLanguage?.name ?? course.from_language_name ?? "",
+    learningLanguageId: course.learningLanguageId,
     learning_language: learningLanguage?.legacyId ?? 0,
+    learning_language_short: learningLanguage?.short ?? "",
     learning_language_name:
       learningLanguage?.name ?? course.learning_language_name ?? "",
     contributors: course.contributors ?? [],
@@ -156,13 +154,21 @@ async function buildAvatarRows(
   mappings?: AvatarMappingDoc[],
 ) {
   const avatarRows = avatars ?? (await ctx.db.query("avatars").collect());
-  const mappingRows =
-    mappings ?? (await ctx.db.query("avatar_mappings").collect());
 
   const mappingByAvatar = new Map<Id<"avatars">, AvatarMappingDoc>();
-  for (const mapping of mappingRows) {
-    if (mapping.languageId !== language._id) continue;
-    mappingByAvatar.set(mapping.avatarId, mapping);
+  if (mappings) {
+    for (const mapping of mappings) {
+      if (mapping.languageId !== language._id) continue;
+      mappingByAvatar.set(mapping.avatarId, mapping);
+    }
+  } else {
+    const mappingRows = await ctx.db
+      .query("avatar_mappings")
+      .withIndex("by_language_id", (q) => q.eq("languageId", language._id))
+      .collect();
+    for (const mapping of mappingRows) {
+      mappingByAvatar.set(mapping.avatarId, mapping);
+    }
   }
 
   return avatarRows
@@ -187,34 +193,28 @@ async function buildAvatarRows(
 export const getEditorSidebarData = query({
   args: {},
   handler: async (ctx) => {
-    const [languageRows, courseRows] = await Promise.all([
-      ctx.db.query("languages").collect(),
-      ctx.db.query("courses").collect(),
-    ]);
+    const courseRows = await ctx.db.query("courses").collect();
 
+    const languageIds = new Set<Id<"languages">>();
+    for (const course of courseRows) {
+      languageIds.add(course.learningLanguageId);
+      languageIds.add(course.fromLanguageId);
+    }
+
+    const languageRows = await Promise.all(
+      Array.from(languageIds).map((languageId) => ctx.db.get(languageId)),
+    );
     const languageById = new Map<Id<"languages">, LanguageDoc>();
-    for (const language of languageRows)
+    for (const language of languageRows) {
+      if (!language) continue;
       languageById.set(language._id, language);
-
-    const languages = languageRows
-      .map((language) => ({
-        id: language.legacyId,
-        short: language.short,
-        flag:
-          typeof language.flag === "number"
-            ? language.flag
-            : Number.isFinite(Number(language.flag))
-              ? Number(language.flag)
-              : null,
-        flag_file: language.flag_file ?? null,
-      }))
-      .sort((a, b) => a.id - b.id);
+    }
 
     const courses = courseRows
       .map((course) => toCourse(course, languageById))
       .sort((a, b) => b.count - a.count);
 
-    return { courses, languages };
+    return { courses };
   },
 });
 
@@ -236,9 +236,13 @@ export const getEditorCourseByIdentifier = query({
       official: course.official,
       count: course.count ?? 0,
       public: course.public,
+      fromLanguageId: course.fromLanguageId,
       from_language: fromLanguage?.legacyId ?? 0,
+      from_language_short: fromLanguage?.short ?? "",
       from_language_name: fromLanguage?.name ?? course.from_language_name ?? "",
+      learningLanguageId: course.learningLanguageId,
       learning_language: learningLanguage?.legacyId ?? 0,
+      learning_language_short: learningLanguage?.short ?? "",
       learning_language_name:
         learningLanguage?.name ?? course.learning_language_name ?? "",
       contributors: course.contributors ?? [],

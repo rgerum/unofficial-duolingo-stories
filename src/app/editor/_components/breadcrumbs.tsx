@@ -1,14 +1,12 @@
 import React from "react";
-import { DoubleFlag } from "@/components/ui/flag";
+import LanguageFlag from "@/components/ui/language-flag";
 import Link from "next/link";
 import EditorButton from "../editor_button";
 
 // Flexible type that accepts various language data shapes
 interface BreadcrumbLanguage {
-  short?: string;
+  languageId?: string;
   name?: string;
-  flag?: number | null;
-  flag_file?: string | null;
   id?: number;
 }
 
@@ -68,7 +66,11 @@ function BreadcrumbPart({
     if (!part.lang2) {
       return (
         <MyLink className={class_name} href={part.href}>
-          <DoubleFlag width={40} lang1={part.lang1 ?? {}} className="m-0" />
+          <LanguageFlag
+            languageId={part.lang1?.languageId}
+            width={40}
+            className="m-0"
+          />
           {part.lang1?.name ? (
             <span className="overflow-hidden text-ellipsis whitespace-nowrap">{`${
               part?.name || part.lang1?.name
@@ -79,12 +81,18 @@ function BreadcrumbPart({
     }
     return (
       <MyLink className={class_name} href={part.href}>
-        <DoubleFlag
-          width={40}
-          lang1={part.lang1 ?? {}}
-          lang2={part.lang2}
-          className="m-0"
-        />
+        <span className="flex [&_img:nth-child(2)]:ml-[-28px] [&_img:nth-child(2)]:mt-[10px]">
+          <LanguageFlag
+            languageId={part.lang1?.languageId}
+            width={40}
+            className="m-0"
+          />
+          <LanguageFlag
+            languageId={part.lang2?.languageId}
+            width={36}
+            className="m-0"
+          />
+        </span>
         {part.lang1?.name && part.lang2?.name ? (
           <span className="overflow-hidden text-ellipsis whitespace-nowrap">
             {part?.name || `${part.lang1?.name} (from ${part.lang2?.name})`}

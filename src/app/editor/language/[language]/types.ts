@@ -1,3 +1,5 @@
+import type { Id } from "@convex/_generated/dataModel";
+
 export type AvatarNamesType = {
   id: number | null;
   avatar_id: number;
@@ -17,11 +19,10 @@ export type SpeakersType = {
 };
 
 export type LanguageType = {
+  languageId: Id<"languages">;
   id: number;
   name: string;
   short: string;
-  flag: number | null;
-  flag_file: string | null;
   speaker: string | null;
   default_text: string;
   tts_replace: string | null;

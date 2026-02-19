@@ -113,7 +113,8 @@ export default defineSchema({
     lastOperationKey: v.optional(v.string()),
   })
     .index("by_id_value", ["legacyId"])
-    .index("by_avatar_id_and_language_id", ["avatarId", "languageId"]),
+    .index("by_avatar_id_and_language_id", ["avatarId", "languageId"])
+    .index("by_language_id", ["languageId"]),
 
   stories: defineTable({
     duo_id: v.optional(v.string()),

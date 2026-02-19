@@ -11,7 +11,7 @@ This maps URL routes to the data queries/mutations they execute today.
 
 | Route | Query/Mutation Calls | Backend |
 |---|---|---|
-| `/` | `api.landing.getPublicCourseList`; `api.localization.getLocalizationWithEnglishFallback`; `api.localization.getAllLanguageFlags` | Convex |
+| `/` | `api.landing.getPublicLandingPageData`; `api.landing.getPublicCourseList`; `api.storyDone.getDoneCourseIdsForUser`; `api.localization.getAllLanguageFlags` | Convex |
 | `/:course_id` | `api.landing.getPublicCoursePageData`; `api.storyDone.getDoneStoryIdsForCourse` | Convex |
 | `/story/:story_id` | `api.storyRead.getStoryByLegacyId`; `api.storyRead.getStoryMetaByLegacyId`; `api.storyDone.recordStoryDone` | Convex |
 | `/story/:story_id/script` | `api.storyRead.getStoryByLegacyId`; `api.storyRead.getStoryMetaByLegacyId` | Convex |
@@ -26,9 +26,10 @@ This maps URL routes to the data queries/mutations they execute today.
 
 | Route | Query/Mutation Calls | Backend |
 |---|---|---|
-| `/editor/course/:course_id` | `api.editorRead.getEditorCourseByIdentifier`; `api.editorRead.getEditorStoriesByCourseLegacyId` | Convex |
+| `/editor` | `api.editorRead.getEditorSidebarData` (via `(course)` layout: sidebar + breadcrumb header) | Convex |
+| `/editor/course/:course_id` | `api.editorRead.getEditorSidebarData` (via `(course)` layout); `api.editorRead.getEditorCourseByIdentifier`; `api.editorRead.getEditorStoriesByCourseLegacyId` | Convex |
 | `/editor/course/:course_id/import/:from_id` | `api.editorRead.getEditorSidebarData`; `api.editorRead.getEditorCourseByIdentifier`; `api.editorRead.getEditorCourseImport` | Convex |
-| `/editor/story/:story` | `api.editorRead.getEditorStoryPageData`; `api.editorRead.getEditorLanguageByLegacyId` | Convex |
+| `/editor/story/:story` | `api.editorRead.getEditorStoryPageData`; `api.editorRead.getEditorLanguageByLegacyId`; `api.editorRead.getEditorImageByLegacyId` (editor image hydration) | Convex |
 | `/editor/language/:language` | `api.editorRead.resolveEditorLanguage`; `api.editorRead.getEditorSpeakersByLanguageLegacyId`; `api.editorRead.getEditorAvatarNamesByLanguageLegacyId` | Convex |
 | `/editor/language/:language/tts_edit` | `api.editorRead.resolveEditorLanguage`; `api.editorRead.getEditorSpeakersByLanguageLegacyId` | Convex |
 | `/editor/localization/:language` | `api.editorRead.resolveEditorLanguage`; `api.editorRead.getEditorLocalizationRowsByLanguageLegacyId` | Convex |
