@@ -31,7 +31,7 @@ export async function generateMetadata({
   if (!story) notFound();
 
   return {
-    title: `Duostories ${story.learning_language_long} from ${story.from_language_long}: ${story.from_language_name}`,
+    title: `${story.from_language_name} - Duostories ${story.learning_language_long} from ${story.from_language_long}`,
     alternates: {
       canonical: `https://duostories.org/story/${story_id}`,
     },

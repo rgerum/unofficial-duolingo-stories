@@ -93,7 +93,11 @@ export function StoryEditorHeader({
       await func_save();
     } catch (e) {
       console.log("error save", e);
-      window.alert("Story could not be saved.");
+      const message =
+        e instanceof Error && e.message
+          ? e.message
+          : "Story could not be saved.";
+      window.alert(message);
     }
     set_save_text("Save");
     const saveButton = document.querySelector(
