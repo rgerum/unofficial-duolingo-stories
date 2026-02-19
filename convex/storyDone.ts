@@ -2,8 +2,7 @@ import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
-import { paginationOptsValidator } from "convex/server";
-import { getSessionLegacyUserId, requireAdmin } from "./lib/authorization";
+import { getSessionLegacyUserId } from "./lib/authorization";
 
 const storyDoneInputValidator = v.object({
   legacyStoryId: v.number(),
@@ -122,39 +121,9 @@ async function getDoneStoryIdsForCourseIdAndUser(
     for (const row of doneStateRows) {
       storyIds.add(row.legacyStoryId);
     }
-    return Array.from(storyIds);
+    return Array.from(storyIds.values());
   }
-
-  return await getDoneStoryIdsForCourseIdAndUserFromLog(
-    ctx,
-    courseId,
-    legacyUserId,
-  );
-}
-
-async function getDoneStoryIdsForCourseIdAndUserFromLog(
-  ctx: QueryCtx,
-  courseId: Id<"courses">,
-  legacyUserId: number,
-) {
-  const courseStories = await ctx.db
-    .query("stories")
-    .withIndex("by_course", (q) => q.eq("courseId", courseId))
-    .collect();
-
-  const doneRows = await ctx.db
-    .query("story_done")
-    .withIndex("by_user", (q) => q.eq("legacyUserId", legacyUserId))
-    .collect();
-  const doneStoryIds = new Set(doneRows.map((row) => row.storyId));
-
-  const result: Array<number> = [];
-  for (const story of courseStories) {
-    if (!doneStoryIds.has(story._id)) continue;
-    if (typeof story.legacyId !== "number") continue;
-    result.push(story.legacyId);
-  }
-  return result;
+  return [];
 }
 
 export const getDoneCourseIdsForUser = query({
@@ -171,18 +140,14 @@ export const getDoneCourseIdsForUser = query({
       )
       .order("desc")
       .collect();
-    if (activityRows.length > 0) {
-      const uniqueCourseIds = new Set<number>();
-      const result: Array<number> = [];
-      for (const row of activityRows) {
-        if (uniqueCourseIds.has(row.legacyCourseId)) continue;
-        uniqueCourseIds.add(row.legacyCourseId);
-        result.push(row.legacyCourseId);
-      }
-      return result;
+    const uniqueCourseIds = new Set<number>();
+    const result: Array<number> = [];
+    for (const row of activityRows) {
+      if (uniqueCourseIds.has(row.legacyCourseId)) continue;
+      uniqueCourseIds.add(row.legacyCourseId);
+      result.push(row.legacyCourseId);
     }
-
-    return await getDoneCourseIdsForUserFromLog(ctx, legacyUserId);
+    return result;
   },
 });
 
@@ -205,75 +170,7 @@ export const getLastDoneCourseShortForLegacyUser = query({
       if (!course?.short) continue;
       return course.short;
     }
-
-    return await getLastDoneCourseShortForLegacyUserFromLog(
-      ctx,
-      args.legacyUserId,
-    );
-  },
-});
-
-export const backfillDoneStateFromLogBatch = mutation({
-  args: {
-    paginationOpts: paginationOptsValidator,
-    dryRun: v.optional(v.boolean()),
-    apiKey: v.optional(v.string()),
-  },
-  returns: v.object({
-    processed: v.number(),
-    continueCursor: v.union(v.string(), v.null()),
-    isDone: v.boolean(),
-  }),
-  handler: async (ctx, args) => {
-    const configuredApiKey = process.env.STORY_DONE_BACKFILL_API_KEY;
-    const providedApiKey = args.apiKey;
-    const hasValidApiKey =
-      typeof configuredApiKey === "string" &&
-      configuredApiKey.length > 0 &&
-      providedApiKey === configuredApiKey;
-
-    if (!hasValidApiKey) {
-      await requireAdmin(ctx);
-    }
-
-    const page = await ctx.db
-      .query("story_done")
-      .order("asc")
-      .paginate(args.paginationOpts);
-    const dryRun = args.dryRun ?? false;
-
-    for (const doneRow of page.page) {
-      if (typeof doneRow.legacyUserId !== "number") continue;
-
-      const story = await ctx.db.get(doneRow.storyId);
-      if (!story || typeof story.legacyId !== "number") continue;
-
-      const course = await ctx.db.get(story.courseId);
-      if (!course || typeof course.legacyId !== "number") continue;
-
-      if (!dryRun) {
-        await upsertStoryDoneState(ctx, {
-          legacyUserId: doneRow.legacyUserId,
-          storyId: story._id,
-          courseId: story.courseId,
-          legacyStoryId: story.legacyId,
-          legacyCourseId: course.legacyId,
-          lastDoneAt: doneRow.time,
-        });
-        await upsertCourseActivity(ctx, {
-          legacyUserId: doneRow.legacyUserId,
-          courseId: story.courseId,
-          legacyCourseId: course.legacyId,
-          lastDoneAt: doneRow.time,
-        });
-      }
-    }
-
-    return {
-      processed: page.page.length,
-      continueCursor: page.continueCursor,
-      isDone: page.isDone,
-    };
+    return null;
   },
 });
 
@@ -353,53 +250,5 @@ async function getCurrentIdentityLegacyUserId(
   ) {
     return Number(rawLegacyUserId);
   }
-  return null;
-}
-
-async function getDoneCourseIdsForUserFromLog(
-  ctx: QueryCtx,
-  legacyUserId: number,
-) {
-  const doneRows = await ctx.db
-    .query("story_done")
-    .withIndex("by_user", (q) => q.eq("legacyUserId", legacyUserId))
-    .collect();
-  if (doneRows.length === 0) return [];
-
-  const latestDoneAtByCourse = new Map<number, number>();
-  for (const doneRow of doneRows) {
-    const story = await ctx.db.get(doneRow.storyId);
-    if (!story || !story.courseId) continue;
-    const course = await ctx.db.get(story.courseId);
-    if (!course || typeof course.legacyId !== "number") continue;
-    const existing = latestDoneAtByCourse.get(course.legacyId) ?? 0;
-    if (doneRow.time > existing) {
-      latestDoneAtByCourse.set(course.legacyId, doneRow.time);
-    }
-  }
-
-  return Array.from(latestDoneAtByCourse.entries())
-    .sort((a, b) => b[1] - a[1])
-    .map(([legacyCourseId]) => legacyCourseId);
-}
-
-async function getLastDoneCourseShortForLegacyUserFromLog(
-  ctx: QueryCtx,
-  legacyUserId: number,
-) {
-  const doneRows = await ctx.db
-    .query("story_done")
-    .withIndex("by_user_time", (q) => q.eq("legacyUserId", legacyUserId))
-    .order("desc")
-    .take(20);
-
-  for (const doneRow of doneRows) {
-    const story = await ctx.db.get(doneRow.storyId);
-    if (!story || story.deleted) continue;
-    const course = await ctx.db.get(story.courseId);
-    if (!course?.short) continue;
-    return course.short;
-  }
-
   return null;
 }
