@@ -7,7 +7,7 @@ import StoryTextLineSimple from "../StoryTextLineSimple";
 import EditorSSMLDisplay from "../EditorSSMLDisplay";
 import { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
-import type { EditorStateType } from "@/app/editor/story/[story]/editor";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import {
   getEditorHandlers,
   type EditorProps,
