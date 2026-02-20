@@ -11,7 +11,7 @@ import type {
   StoryElementLine,
   StoryElementHeader,
 } from "@/components/editor/story/syntax_parser_types";
-import type { EditorStateType } from "@/app/editor/story/[story]/editor";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 
 interface EditorSSMLDisplayProps {
   ssml: Audio["ssml"];

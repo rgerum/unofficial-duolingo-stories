@@ -4,7 +4,7 @@ import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Spinner } from "@/components/ui/spinner";
-import Editor from "./editor";
+import EditorV2 from "./v2/editor_v2";
 import type { Avatar, StoryData } from "./types";
 
 export default function StoryEditorPageClient({
@@ -27,7 +27,7 @@ export default function StoryEditorPageClient({
   }
 
   return (
-    <Editor
+    <EditorV2
       story_data={data.story_data as StoryData}
       avatar_names={avatarNames}
     />

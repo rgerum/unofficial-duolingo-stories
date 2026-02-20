@@ -1,4 +1,4 @@
-import type { EditorStateType } from "@/app/editor/story/[story]/editor";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 
 export interface EditorBlock {
   block_start_no?: number;

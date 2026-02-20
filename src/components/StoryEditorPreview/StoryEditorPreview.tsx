@@ -9,7 +9,7 @@ import StoryQuestionPointToPhrase from "../StoryQuestionPointToPhrase";
 import StoryQuestionSelectPhrase from "../StoryQuestionSelectPhrase";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
-import type { EditorStateType } from "@/app/editor/story/[story]/editor";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import type { StoryType } from "@/components/editor/story/syntax_parser_new";
 import type {
   StoryElement,
