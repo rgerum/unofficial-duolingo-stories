@@ -30,6 +30,10 @@ type UseStoryEditorModelArgs = {
   fromLanguage?: LanguageLike;
 };
 
+function normalizeDocText(text: string): string {
+  return text.replace(/\r\n/g, "\n");
+}
+
 function toConvexValue(value: unknown): unknown {
   if (value === undefined) return null;
   if (Array.isArray(value)) return value.map((item) => toConvexValue(item));
@@ -89,7 +93,7 @@ export function useStoryEditorModel({
   );
   const [lastSavedAt, setLastSavedAt] = React.useState<number | null>(null);
   const [lastSavedText, setLastSavedText] = React.useState(
-    storyData.text ?? "",
+    normalizeDocText(storyData.text ?? ""),
   );
   const [image, setImage] = React.useState<ImageLike | null>(null);
 
@@ -99,7 +103,7 @@ export function useStoryEditorModel({
     setSaveError(false);
     setSaveErrorMessage("There was an error saving.");
     setLastSavedAt(null);
-    setLastSavedText(storyData.text ?? "");
+    setLastSavedText(normalizeDocText(storyData.text ?? ""));
   }, [storyData.id]);
 
   const [parsedStoryBase, parsedMeta, audioInsertLines] = React.useMemo(
@@ -219,7 +223,7 @@ export function useStoryEditorModel({
         throw new Error(`Story ${storyData.id} not found`);
       }
       setLastSavedAt(Date.now());
-      setLastSavedText(docText);
+      setLastSavedText(normalizeDocText(docText));
       setSaveError(false);
       setSaveErrorMessage("There was an error saving.");
     } catch (error) {
@@ -274,7 +278,7 @@ export function useStoryEditorModel({
   ]);
 
   const markServerSynced = React.useCallback((text: string) => {
-    setLastSavedText(text);
+    setLastSavedText(normalizeDocText(text));
   }, []);
 
   return {
@@ -289,7 +293,7 @@ export function useStoryEditorModel({
     saveErrorMessage,
     clearSaveError: () => setSaveError(false),
     lastSavedAt,
-    dirty: docText !== lastSavedText,
+    dirty: normalizeDocText(docText) !== lastSavedText,
     markServerSynced,
   };
 }

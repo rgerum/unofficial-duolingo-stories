@@ -48,6 +48,10 @@ function getMax<T>(list: T[], callback: (obj: T) => number) {
   return max;
 }
 
+function normalizeDocText(text: string): string {
+  return text.replace(/\r\n/g, "\n");
+}
+
 export default function EditorV2({
   story_data,
   avatar_names,
@@ -80,7 +84,7 @@ export default function EditorV2({
   >(undefined);
 
   React.useEffect(() => {
-    setDocText(story_data.text ?? "");
+    setDocText(normalizeDocText(story_data.text ?? ""));
     setRevision(0);
     setLineNo(1);
     setAudioEditorData(undefined);
@@ -112,7 +116,7 @@ export default function EditorV2({
     });
 
     const state = EditorState.create({
-      doc: story_data.text || "",
+      doc: normalizeDocText(story_data.text || ""),
       extensions: [basicSetup, sync, example(), highlightStyle],
     });
 
@@ -135,7 +139,7 @@ export default function EditorV2({
     if (!view) return;
     if (model.dirty) return;
 
-    const remoteText = story_data.text ?? "";
+    const remoteText = normalizeDocText(story_data.text ?? "");
     const localText = view.state.doc.toString();
     if (localText === remoteText) return;
 
