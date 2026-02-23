@@ -238,12 +238,32 @@ function parserTextWithTranslation(
     }
   }
   if (allow_buttons === 2)
-    if (stream.match(/\(\+[^()]*\)/)) {
+    if (
+      state.in_button &&
+      state.button_right &&
+      stream.match(/[^ |$\]\[()]+/)
+    ) {
       return STATE_TEXT_BUTTON_RIGHT_EVEN;
     }
-  if (allow_buttons)
-    if (stream.match(/\([^()]*\)/)) {
-      if (state.bracket) {
+  if (allow_buttons) {
+    if (!state.in_button && stream.eat("(")) {
+      state.in_button = true;
+      state.button_right = allow_buttons === 2 && Boolean(stream.eat("+"));
+      return STATE_DEFAULT;
+    }
+    if (state.in_button && stream.eat(")")) {
+      state.in_button = false;
+      state.button_right = false;
+      return STATE_DEFAULT;
+    }
+  }
+
+  if (
+    (!allow_buttons && stream.match(/[^ |$\]\[]+/)) ||
+    (allow_buttons && stream.match(/[^ |$\]\[()]+/))
+  ) {
+    if (allow_buttons && state.in_button) {
+      if (state.bracket && allow_hide) {
         if (state.odd) return STATE_TEXT_HIDE_BUTTON_ODD;
         return STATE_TEXT_HIDE_BUTTON_EVEN;
       }
@@ -251,10 +271,6 @@ function parserTextWithTranslation(
       return STATE_TEXT_BUTTON_EVEN;
     }
 
-  if (
-    (!allow_buttons && stream.match(/[^ |$\]\[]+/)) ||
-    (allow_buttons && stream.match(/[^ |$\]\[()]+/))
-  ) {
     if (state.bracket && allow_hide) {
       if (state.odd) return STATE_TEXT_HIDE_ODD;
       return STATE_TEXT_HIDE_EVEN;
@@ -732,24 +748,56 @@ type State = {
   odd: boolean;
   func: any;
   bracket: boolean;
+  in_button: boolean;
+  button_right: boolean;
 };
+
+function createStartState(): State {
+  return {
+    pos: "default",
+    block: {
+      name: "",
+      line: 0,
+      line_type: "",
+      allow_trans: false,
+      allow_audio: false,
+    },
+    odd: false,
+    func: null,
+    bracket: false,
+    in_button: false,
+    button_right: false,
+  };
+}
+
+export function __testTokenizeLines(
+  text: string,
+): Array<Array<{ text: string; style: string }>> {
+  const state = createStartState();
+  return text.split("\n").map((line) => {
+    const stream = new StringStream(line, 2, 2);
+    const tokens: Array<{ text: string; style: string }> = [];
+
+    while (!stream.eol()) {
+      stream.start = stream.pos;
+      const style = parserWithMetadata(stream, state) ?? STATE_DEFAULT;
+      if (stream.pos === stream.start) {
+        stream.next();
+      }
+      tokens.push({
+        text: line.slice(stream.start, stream.pos),
+        style,
+      });
+    }
+
+    return tokens;
+  });
+}
 
 const exampleLanguage = StreamLanguage.define({
   token: parserWithMetadata,
   startState() {
-    return {
-      pos: "default",
-      block: {
-        name: "",
-        line: 0,
-        line_type: "",
-        allow_trans: false,
-        allow_audio: false,
-      },
-      odd: false,
-      func: null,
-      bracket: false,
-    };
+    return createStartState();
   },
 });
 
