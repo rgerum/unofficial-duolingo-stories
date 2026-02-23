@@ -248,7 +248,7 @@ function parserTextWithTranslation(
   if (allow_buttons) {
     if (!state.in_button && stream.eat("(")) {
       state.in_button = true;
-      state.button_right = allow_buttons === 2 && stream.eat("+");
+      state.button_right = allow_buttons === 2 && Boolean(stream.eat("+"));
       return STATE_DEFAULT;
     }
     if (state.in_button && stream.eat(")")) {
