@@ -21,7 +21,7 @@ export const metadata = {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex min-h-full w-full items-center justify-center text-[calc(19/16*1rem)]">
+    <div className="relative flex min-h-full w-full items-center justify-center">
       <Link
         href="/"
         aria-label="Close"
