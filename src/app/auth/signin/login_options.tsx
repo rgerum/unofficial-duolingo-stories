@@ -19,12 +19,12 @@ export function LoginOptions(props: {
   callbackUrl: string;
 }) {
   const paragraphClass = "m-0";
-  const headingClass = "m-0 text-[calc(24/16*1rem)]";
+  const headingClass = "m-0 text-[calc(32/16*1rem)] font-bold";
   const alertErrorClass =
     "block w-full rounded-[10px] bg-[var(--error-red)] p-[10px] text-white";
   const providersClass = "grid grid-cols-2 gap-x-4";
   const oauthButtonClass =
-    "mt-2 mb-2 flex w-full cursor-pointer items-center rounded-[15px] border-[var(--overview-hr)] border-b-4 border-l-2 border-r-2 border-t-2 bg-[var(--body-background)] px-[30px] py-[13px] pr-0 text-[1rem] font-bold uppercase text-[var(--text-color)] transition-[box-shadow,transform] duration-100 hover:brightness-90";
+    "mt-2 mb-2 flex min-w-0 w-full cursor-pointer items-center justify-center gap-2 rounded-[15px] border-[var(--overview-hr)] border-b-4 border-l-2 border-r-2 border-t-2 bg-[var(--body-background)] px-4 py-[13px] font-bold uppercase text-[var(--text-color)] transition-[box-shadow,transform] duration-100 hover:brightness-90";
 
   const { providers, callbackUrl } = props;
 
@@ -156,10 +156,11 @@ export function LoginOptions(props: {
           <button
             key={provider.id}
             className={oauthButtonClass}
+            style={{ fontSize: "1rem" }}
             onClick={() => handleOAuthProviderClick(provider)}
           >
             <GetIcon name={provider.id} />
-            <span className="ml-[10px]">{provider.name}</span>
+            <span className="truncate max-sm:hidden">{provider.name}</span>
           </button>
         ))}
       </div>

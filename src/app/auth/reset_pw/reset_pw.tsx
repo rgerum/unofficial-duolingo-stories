@@ -9,7 +9,7 @@ import { authClient } from "@/lib/auth-client";
 import { authInlineLinkClass } from "@/components/auth/styles";
 
 export default function ResetPassword() {
-  const headingClass = "m-0 text-[calc(24/16*1rem)]";
+  const headingClass = "m-0 text-[calc(32/16*1rem)] font-bold";
   const paragraphClass = "m-0";
   const alertErrorClass =
     "block w-full rounded-[10px] bg-[var(--error-red)] p-[10px] text-white";
@@ -137,7 +137,7 @@ export default function ResetPassword() {
       <p className={paragraphClass}>
         Already have an account?{" "}
         <Link className={authInlineLinkClass} href="/auth/signin">
-          LOG IN
+          Log in
         </Link>
       </p>
     </>
