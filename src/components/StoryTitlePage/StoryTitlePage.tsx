@@ -19,7 +19,7 @@ function StoryTitlePage({
 
   return (
     <div className={styles.story_title_page}>
-      <div>
+      <div className={styles.story_title_page_image}>
         <img width="180" src={header.illustrationUrl} alt={"title image"} />
       </div>
       <div className={styles.story_title_page_title}>

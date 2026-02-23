@@ -15,6 +15,11 @@
   width: 100%;
 }
 
+.story_title_page_image img {
+  display: block;
+  margin-inline: auto;
+}
+
 .story_title_page_title {
   font-weight: 700;
   color: #4b4b4b;
