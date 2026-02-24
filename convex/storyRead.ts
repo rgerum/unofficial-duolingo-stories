@@ -4,6 +4,7 @@ import { v } from "convex/values";
 const storyReadResultValidator = v.union(
   v.object({
     id: v.number(),
+    set_id: v.number(),
     course_id: v.number(),
     from_language: v.string(),
     from_language_id: v.number(),
@@ -76,6 +77,7 @@ export const getStoryByLegacyId = query({
 
     return {
       id: story.legacyId,
+      set_id: story.set_id ?? 0,
       course_id: course.legacyId,
       from_language: fromLanguage.short,
       from_language_id: fromLanguage.legacyId,

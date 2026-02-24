@@ -57,7 +57,8 @@ export default function StoryWrapper({
       learning_language: story.learning_language_long,
     });
     await storyFinishedIndexUpdate();
-    router.push(`/${story.course_short}`);
+    const setHash = story.set_id > 0 ? `#${story.set_id}` : "";
+    router.push(`/${story.course_short}${setHash}`);
   }
 
   return (

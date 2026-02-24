@@ -17,14 +17,20 @@ function SetTitle({ children }: { children: React.ReactNode }) {
 }
 
 function SetGrid({
+  setId,
   setName,
   children,
 }: {
+  setId: number;
   setName: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <ol className="m-0 mx-auto grid max-w-[720px] list-none grid-cols-[repeat(auto-fill,clamp(140px,50%,180px))] justify-center justify-items-center p-0">
+    <ol
+      id={`${setId}`}
+      style={{ scrollMarginTop: "3.5rem" }}
+      className="m-0 mx-auto grid max-w-[720px] list-none grid-cols-[repeat(auto-fill,clamp(140px,50%,180px))] justify-center justify-items-center p-0"
+    >
       <SetTitle>{setName}</SetTitle>
       {children}
     </ol>
@@ -167,6 +173,7 @@ export default function CoursePageClient({
         {storiesBySet.map((set) => (
           <SetGrid
             key={set.setId}
+            setId={set.setId}
             setName={
               localization("set_n", { $count: `${set.setId}` }) ??
               `Set ${set.setId}`
