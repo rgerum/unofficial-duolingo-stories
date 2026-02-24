@@ -1,7 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import Script from "next/script";
-import FooterLinks from "../footer_links";
 
 export const metadata = {
   title: "Duostories FAQ",
@@ -13,8 +11,10 @@ export const metadata = {
 
 export default async function Page() {
   return (
-    <div>
-      <h1>Frequently Asked Questions</h1>
+    <div className="mx-auto w-full max-w-[900px] px-4 py-6 text-[calc(19/16*1rem)] leading-[1.6] [&_a]:underline [&_a]:underline-offset-2 [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:text-[calc(28/16*1rem)] [&_h2]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:ml-[30px] [&_h3]:text-[calc(22/16*1rem)] [&_h3]:font-bold [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:ml-[30px] [&_ul]:list-disc [&_ul]:pl-6">
+      <h1 className="mb-6 text-[calc(36/16*1rem)] font-bold">
+        Frequently Asked Questions
+      </h1>
       <h2>Can I support this project financially?</h2>
       <p>
         Yes, we have a page on{" "}
@@ -22,28 +22,11 @@ export default async function Page() {
           OpenCollective
         </Link>
         . We use the money to cover the hosting costs and for the TTS services.
-        <Link
-          href="https://opencollective.com/duostories/contribute"
-          target="_blank"
-        >
-          <img
-            src="https://opencollective.com/duostories/contribute/button@2x.png?color=blue"
-            height="48"
-            alt="Contribute on Open Collective"
-          />
+        {" You can "}
+        <Link href="https://opencollective.com/duostories/contribute">
+          contribute
         </Link>
-        or
-        <Link
-          href="https://opencollective.com/duostories/donate"
-          target="_blank"
-        >
-          <img
-            src="https://opencollective.com/duostories/donate/button@2x.png?color=blue"
-            height="48"
-            alt="Donate on Open Collective"
-          />
-        </Link>
-        <Script src="https://opencollective.com/:collectiveSlug/banner.js"></Script>
+        .
       </p>
       <h2>Is this website open source?</h2>
       <p>
@@ -93,17 +76,15 @@ export default async function Page() {
         <Link href="https://discord.gg/4NGVScARR3">Discord</Link> server.
       </p>
 
-      <h3 style={{ marginLeft: "30px" }}>
-        What about a dialect or regionally-specific language?
-      </h3>
-      <p style={{ marginLeft: "30px" }}>
+      <h3>What about a dialect or regionally-specific language?</h3>
+      <p className="ml-[30px]">
         We are hesitant to support languages that are too regionally-specific
         because at times they are not well-defined enough that a course would
         even make sense to learners. Applications for dialects/regional
         languages will be considered against a set of factors on a case-by-case
         basis. It might be a “yes” if your language:
       </p>
-      <ul style={{ marginLeft: "30px" }}>
+      <ul>
         <li>Is classified as an “endangered” language</li>
         <li>Has a well-defined written form and spelling</li>
         <li>Has an ISO code</li>
@@ -111,11 +92,11 @@ export default async function Page() {
         <li>Has a broad body of published literature</li>
       </ul>
 
-      <h3 style={{ marginLeft: "30px" }}>
+      <h3>
         What about a constructed language (conlang) or auxiliary language
         (auxlang)?
       </h3>
-      <p style={{ marginLeft: "30px" }}>
+      <p className="ml-[30px]">
         While the primary focus of this project is to feature natural languages,
         we acknowledge that some conlangs/auxlangs are used to a similar extent
         as some minor natural languages. Esperanto is a well-known example with
@@ -123,12 +104,12 @@ export default async function Page() {
         Duolingo, it makes sense to include it here.{" "}
       </p>
 
-      <p style={{ marginLeft: "30px" }}>
+      <p className="ml-[30px]">
         In order to maximize the benefits to learners, we will be more
         interested in featuring a conlang/auxlang when we see some of these
         factors, so please be sure to discuss them in your application.
       </p>
-      <ul style={{ marginLeft: "30px" }}>
+      <ul>
         <li>
           There are a significant number of speakers/learners of the language
           (e.g. &gt; 100)
@@ -155,7 +136,7 @@ export default async function Page() {
           ) and/or an ISO code (e.g. Esperanto, “epo”)
         </li>
       </ul>
-      <p style={{ marginLeft: "30px" }}>
+      <p className="ml-[30px]">
         If your language is a personal conlang/auxlang project or a very new
         project from a small group, we are hesitant to support the language as
         we do not see clear value for our community of learners. When we do

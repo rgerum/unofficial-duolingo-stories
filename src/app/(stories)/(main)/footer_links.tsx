@@ -1,6 +1,5 @@
 import Link from "next/link";
 import React from "react";
-import Image from "next/image";
 
 export default async function FooterLinks({}) {
   return (
@@ -10,13 +9,10 @@ export default async function FooterLinks({}) {
           <Link
             href="https://opencollective.com/duostories/contribute"
             target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block rounded-[999px] border-[var(--button-blue-border)] border-b-4 border-l-2 border-r-2 border-t-2 bg-[var(--button-blue-background)] px-6 py-2 text-[calc(14/16*1rem)] font-bold uppercase tracking-[0.12em] text-[var(--button-blue-color)] no-underline transition-[filter] duration-100 hover:brightness-110"
           >
-            <Image
-              src="https://opencollective.com/duostories/contribute/button@2x.png?color=blue"
-              height="48"
-              width="334"
-              alt={"Contribute to our collective"}
-            />
+            Contribute to our collective
           </Link>
         </div>
         <div className="mb-[50px] grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] justify-around border-t-2 border-[var(--overview-hr)] text-[calc(16/16*1rem)] opacity-60 [&_figcaption]:mb-0 [&_figcaption]:font-bold [&_li]:list-none [&_li]:before:content-['•_'] [&_ul]:m-0 [&_ul]:pl-0 [@media(pointer:coarse)]:[&_li_a]:leading-[calc(48/16*1rem)]">
@@ -45,11 +41,6 @@ export default async function FooterLinks({}) {
                 <li>
                   <Link href="https://opencollective.com/duostories/contribute">
                     Contribute
-                  </Link>
-                </li>
-                <li>
-                  <Link href="https://opencollective.com/duostories/donate">
-                    Donate
                   </Link>
                 </li>
                 <li>
