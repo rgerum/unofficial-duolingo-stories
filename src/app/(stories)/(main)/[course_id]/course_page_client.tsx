@@ -166,6 +166,7 @@ export default function CoursePageClient({
         </p>
       </Header>
       <div>
+        {showNoNativeWarning ? <NoNativeWarning /> : null}
         <div
           className="mx-auto mb-6 flex w-full max-w-[720px] cursor-pointer items-center justify-between gap-3 rounded-xl border border-[var(--overview-hr)] px-4 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--overview-hr)]"
           role="button"
@@ -194,7 +195,6 @@ export default function CoursePageClient({
           </div>
         </div>
         {course.about ? <About about={course.about} /> : null}
-        {showNoNativeWarning ? <NoNativeWarning /> : null}
         {storiesBySet.map((set) => (
           <SetGrid
             key={set.setId}
