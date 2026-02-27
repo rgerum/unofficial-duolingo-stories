@@ -205,7 +205,7 @@ export default function UserList({
       </div>
 
       <div className="relative isolate overflow-auto rounded-[14px] border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]">
-        <table className="w-full min-w-[980px] border-collapse">
+        <table className="w-max min-w-full border-collapse">
           <thead>
             <tr>
               {[
@@ -241,8 +241,16 @@ export default function UserList({
                   className={`${index % 2 === 0 ? "bg-[var(--body-background)]" : "bg-[color:color-mix(in_srgb,var(--body-background-faint)_74%,transparent)]"} hover:brightness-95`}
                 >
                   <td className="px-4 py-2.5">{user.id}</td>
-                  <td className="px-3 py-2.5">{user.name}</td>
-                  <td className="px-3 py-2.5">{user.email}</td>
+                  <td className="max-w-[220px] px-3 py-2.5">
+                    <span className="block overflow-hidden text-ellipsis whitespace-nowrap">
+                      {user.name}
+                    </span>
+                  </td>
+                  <td className="max-w-[280px] px-3 py-2.5">
+                    <span className="block overflow-hidden text-ellipsis whitespace-nowrap">
+                      {user.email}
+                    </span>
+                  </td>
                   <td className="px-3 py-2.5 whitespace-nowrap text-[0.95rem] tabular-nums">
                     {formatRegistered(user.regdate)}
                   </td>
