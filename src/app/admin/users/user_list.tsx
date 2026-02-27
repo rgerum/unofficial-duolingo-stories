@@ -279,8 +279,9 @@ export default function UserList({
                   </td>
                   <td className="px-4 py-2.5 text-right whitespace-nowrap">
                     <Link
-                      className="inline-flex min-w-[82px] items-center justify-center rounded-[10px] border-b-[3px] border-[var(--button-border)] bg-[var(--button-background)] px-3 py-1.5 font-bold text-[var(--button-color)] no-underline"
+                      className="inline-flex min-w-[82px] items-center justify-center rounded-[10px] border-b-[3px] border-[var(--button-border)] bg-[var(--button-background)] px-3 py-1.5 font-bold no-underline"
                       href={`/admin/users/${user.id}`}
+                      style={{ color: "#fff" }}
                     >
                       Open
                     </Link>
