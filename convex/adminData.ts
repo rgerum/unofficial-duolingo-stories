@@ -124,6 +124,21 @@ function matchesActivatedFilter(
   return filter === "yes" ? activated : !activated;
 }
 
+function matchesUserSearch(
+  user: {
+    userId?: string | null;
+    name?: string | null;
+    email?: string | null;
+  },
+  searchLower: string,
+): boolean {
+  if (searchLower.length === 0) return true;
+  if (/^\d+$/.test(searchLower)) return (user.userId ?? "") === searchLower;
+  if (searchLower.includes("@"))
+    return (user.email ?? "").toLowerCase().includes(searchLower);
+  return (user.name ?? "").toLowerCase().includes(searchLower);
+}
+
 export const getAdminUsersPage = query({
   args: {
     query: v.string(),
@@ -164,19 +179,8 @@ export const getAdminUsersPage = query({
       value: string | number | boolean | Array<string> | Array<number> | null;
     }> = [];
 
-    if (searchLower.length > 0) {
-      const isNumericId = /^\d+$/.test(searchLower);
-      if (isNumericId) {
-        where.push({ field: "userId", operator: "eq", value: searchLower });
-      } else if (searchLower.includes("@")) {
-        where.push({
-          field: "email",
-          operator: "contains",
-          value: searchLower,
-        });
-      } else {
-        where.push({ field: "name", operator: "contains", value: searchLower });
-      }
+    if (/^\d+$/.test(searchLower)) {
+      where.push({ field: "userId", operator: "eq", value: searchLower });
     }
 
     // Apply role/admin filters at query time to keep pagination consistent.
@@ -247,6 +251,10 @@ export const getAdminUsersPage = query({
       };
 
       for (const user of response.page) {
+        if (!matchesUserSearch(user, searchLower)) {
+          continue;
+        }
+
         if (!matchesActivatedFilter(user.emailVerified, args.activatedFilter)) {
           continue;
         }
