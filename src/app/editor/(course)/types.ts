@@ -25,8 +25,8 @@ export type StoryListDataProps = {
   image: string;
   set_id: number;
   set_index: number;
-  date: number | string | Date;
-  change_date: number | string | Date;
+  date?: number | string | Date;
+  change_date?: number | string | Date;
   status: string;
   public: boolean;
   todo_count: number;

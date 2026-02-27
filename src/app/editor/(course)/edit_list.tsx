@@ -223,8 +223,14 @@ function pad(x: number) {
   return x.toString();
 }
 
-function formatDate(datetime: string | number | Date) {
-  let d = new Date(datetime);
+function formatDate(datetime: string | number | Date | undefined) {
+  if (datetime === undefined || datetime === null || datetime === "") {
+    return "-";
+  }
+  const d = new Date(datetime);
+  if (Number.isNaN(d.getTime())) {
+    return "-";
+  }
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
     d.getHours(),
   )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;

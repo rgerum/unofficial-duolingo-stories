@@ -264,6 +264,8 @@ export const importStory = mutation({
       .take(1);
     const newLegacyId = Math.max(1, Number(last[0]?.legacyId ?? 0) + 1);
 
+    const now = Date.now();
+
     const newStoryId = await ctx.db.insert("stories", {
       legacyId: newLegacyId,
       duo_id: sourceStory.duo_id,
@@ -271,6 +273,9 @@ export const importStory = mutation({
       set_id: sourceStory.set_id,
       set_index: sourceStory.set_index,
       authorId: authorLegacyUserId,
+      authorChangeId: authorLegacyUserId,
+      date: now,
+      change_date: now,
       public: false,
       imageId: sourceStory.imageId,
       courseId: targetCourse._id,
