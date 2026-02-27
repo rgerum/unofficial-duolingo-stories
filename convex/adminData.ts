@@ -97,7 +97,7 @@ function toAdminUser(user: {
   email?: string | null;
   createdAt?: number | null;
   role?: string | null;
-  emailVerified?: boolean | null;
+  emailVerified?: unknown;
 }) {
   const numericId = Number.parseInt(user.userId ?? "", 10);
   const role = user.role ?? null;
@@ -113,6 +113,15 @@ function toAdminUser(user: {
     role: role === "contributor" || role === "admin",
     admin: role === "admin",
   };
+}
+
+function matchesActivatedFilter(
+  value: unknown,
+  filter: "all" | "yes" | "no",
+): boolean {
+  if (filter === "all") return true;
+  const activated = Boolean(value);
+  return filter === "yes" ? activated : !activated;
 }
 
 export const getAdminUsersPage = query({
@@ -136,7 +145,6 @@ export const getAdminUsersPage = query({
 
     const page = Math.max(1, Math.floor(args.page));
     const perPage = Math.max(1, Math.min(200, Math.floor(args.perPage)));
-    const offset = (page - 1) * perPage;
     const searchLower = args.query.trim().toLowerCase();
     const where: Array<{
       connector?: "AND" | "OR";
@@ -171,12 +179,6 @@ export const getAdminUsersPage = query({
       }
     }
 
-    if (args.activatedFilter === "yes") {
-      where.push({ field: "emailVerified", operator: "eq", value: true });
-    } else if (args.activatedFilter === "no") {
-      where.push({ field: "emailVerified", operator: "eq", value: false });
-    }
-
     // Apply role/admin filters at query time to keep pagination consistent.
     // `role` is nullable for many legacy users, so the "no contributor/admin"
     // cases are modeled with negative predicates.
@@ -206,34 +208,72 @@ export const getAdminUsersPage = query({
       where.push({ field: "role", operator: "ne", value: "admin" });
     }
 
-    const response = (await ctx.runQuery(
-      components.betterAuth.adapter.findMany,
-      {
-        model: "user",
-        where,
-        offset,
-        paginationOpts: { cursor: null, numItems: perPage + 1 },
-        sortBy: { field: "createdAt", direction: "desc" },
-      },
-    )) as {
-      page: Array<{
-        _id?: string;
-        userId?: string | null;
-        name?: string | null;
-        email?: string | null;
-        createdAt?: number | null;
-        role?: string | null;
-        emailVerified?: boolean | null;
-      }>;
-    };
+    const targetStartIndex = (page - 1) * perPage;
+    const pageUsers: Array<{
+      _id?: string;
+      userId?: string | null;
+      name?: string | null;
+      email?: string | null;
+      createdAt?: number | null;
+      role?: string | null;
+      emailVerified?: boolean | number | string | null;
+    }> = [];
+    let matchingSeen = 0;
+    let hasNextPage = false;
+    let cursor: string | null = null;
+    const batchSize = Math.min(200, Math.max(100, perPage * 2));
 
-    const hasNextPage = response.page.length > perPage;
-    const users = (
-      hasNextPage ? response.page.slice(0, perPage) : response.page
-    ).map(toAdminUser);
+    while (true) {
+      const response = (await ctx.runQuery(
+        components.betterAuth.adapter.findMany,
+        {
+          model: "user",
+          where,
+          paginationOpts: { cursor, numItems: batchSize },
+          sortBy: { field: "createdAt", direction: "desc" },
+        },
+      )) as {
+        page: Array<{
+          _id?: string;
+          userId?: string | null;
+          name?: string | null;
+          email?: string | null;
+          createdAt?: number | null;
+          role?: string | null;
+          emailVerified?: boolean | number | string | null;
+        }>;
+        isDone?: boolean;
+        continueCursor?: string | null;
+      };
+
+      for (const user of response.page) {
+        if (!matchesActivatedFilter(user.emailVerified, args.activatedFilter)) {
+          continue;
+        }
+
+        if (matchingSeen < targetStartIndex) {
+          matchingSeen += 1;
+          continue;
+        }
+
+        if (pageUsers.length < perPage) {
+          pageUsers.push(user);
+          matchingSeen += 1;
+          continue;
+        }
+
+        hasNextPage = true;
+        break;
+      }
+
+      if (hasNextPage) break;
+      if (response.isDone) break;
+      cursor = response.continueCursor ?? null;
+      if (!cursor) break;
+    }
 
     return {
-      users,
+      users: pageUsers.map(toAdminUser),
       hasPrevPage: page > 1,
       hasNextPage,
     };

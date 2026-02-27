@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type KeyboardEvent } from "react";
+import { useRef, useState, useTransition, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Input from "@/components/ui/input";
@@ -24,6 +24,12 @@ interface UserListProps {
   adminFilter: FilterValue;
 }
 
+type AdminFilters = {
+  activated: FilterValue;
+  role: FilterValue;
+  admin: FilterValue;
+};
+
 function formatRegistered(value: Date | string | undefined) {
   if (!value) return "-";
   const date = value instanceof Date ? value : new Date(value);
@@ -37,11 +43,7 @@ function formatRegistered(value: Date | string | undefined) {
   }).format(date);
 }
 
-function buildQueryString(
-  query: string,
-  page: number,
-  filters: { activated: FilterValue; role: FilterValue; admin: FilterValue },
-) {
+function buildQueryString(query: string, page: number, filters: AdminFilters) {
   const params = new URLSearchParams();
   if (query.trim().length > 0) params.set("q", query.trim());
   if (page > 1) params.set("page", String(page));
@@ -69,9 +71,12 @@ export default function UserList({
   adminFilter,
 }: UserListProps) {
   const [search, setSearch] = useState(query);
-  const [activated, setActivated] = useState<FilterValue>(activatedFilter);
-  const [role, setRole] = useState<FilterValue>(roleFilter);
-  const [admin, setAdmin] = useState<FilterValue>(adminFilter);
+  const [filters, setFilters] = useState<AdminFilters>({
+    activated: activatedFilter,
+    role: roleFilter,
+    admin: adminFilter,
+  });
+  const filtersRef = useRef(filters);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -82,19 +87,15 @@ export default function UserList({
     startTransition(() => {
       router.push(
         `/admin/users${buildQueryString(search, nextPage, {
-          activated,
-          role,
-          admin,
+          activated: filters.activated,
+          role: filters.role,
+          admin: filters.admin,
         })}`,
       );
     });
   }
 
-  function submitFilters(nextFilters: {
-    activated: FilterValue;
-    role: FilterValue;
-    admin: FilterValue;
-  }) {
+  function submitFilters(nextFilters: AdminFilters) {
     startTransition(() => {
       router.push(
         `/admin/users${buildQueryString(search, 1, {
@@ -104,6 +105,13 @@ export default function UserList({
         })}`,
       );
     });
+  }
+
+  function updateFilter(key: keyof AdminFilters, value: FilterValue) {
+    const nextFilters = { ...filtersRef.current, [key]: value };
+    filtersRef.current = nextFilters;
+    setFilters(nextFilters);
+    submitFilters(nextFilters);
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -128,12 +136,10 @@ export default function UserList({
               Activated
               <select
                 className="min-w-[90px] rounded-xl border-2 border-[var(--input-border)] bg-[var(--input-background)] px-2.5 py-1.5 text-[var(--text-color)]"
-                value={activated}
-                onChange={(event) => {
-                  const next = event.target.value as FilterValue;
-                  setActivated(next);
-                  submitFilters({ activated: next, role, admin });
-                }}
+                value={filters.activated}
+                onChange={(event) =>
+                  updateFilter("activated", event.target.value as FilterValue)
+                }
               >
                 <option value="all">All</option>
                 <option value="yes">Yes</option>
@@ -144,12 +150,10 @@ export default function UserList({
               Contributor
               <select
                 className="min-w-[90px] rounded-xl border-2 border-[var(--input-border)] bg-[var(--input-background)] px-2.5 py-1.5 text-[var(--text-color)]"
-                value={role}
-                onChange={(event) => {
-                  const next = event.target.value as FilterValue;
-                  setRole(next);
-                  submitFilters({ activated, role: next, admin });
-                }}
+                value={filters.role}
+                onChange={(event) =>
+                  updateFilter("role", event.target.value as FilterValue)
+                }
               >
                 <option value="all">All</option>
                 <option value="yes">Yes</option>
@@ -160,12 +164,10 @@ export default function UserList({
               Admin
               <select
                 className="min-w-[90px] rounded-xl border-2 border-[var(--input-border)] bg-[var(--input-background)] px-2.5 py-1.5 text-[var(--text-color)]"
-                value={admin}
-                onChange={(event) => {
-                  const next = event.target.value as FilterValue;
-                  setAdmin(next);
-                  submitFilters({ activated, role, admin: next });
-                }}
+                value={filters.admin}
+                onChange={(event) =>
+                  updateFilter("admin", event.target.value as FilterValue)
+                }
               >
                 <option value="all">All</option>
                 <option value="yes">Yes</option>
