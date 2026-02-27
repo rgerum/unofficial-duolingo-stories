@@ -49,7 +49,7 @@ function About({ about }: { about: string }) {
 
 function NoNativeWarning() {
   return (
-    <div className="mx-auto mt-4 max-w-[720px] rounded-xl border border-yellow-700/50 bg-yellow-50 px-4 py-3 text-yellow-900">
+    <div className="mx-auto mt-4 mb-4 max-w-[720px] rounded-xl border border-yellow-700/50 bg-yellow-50 px-4 py-3 text-yellow-900">
       <p className="font-bold">Course quality note</p>
       <p className="mt-1">
         This course does not currently have a native speaker translator or
