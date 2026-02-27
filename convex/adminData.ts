@@ -115,6 +115,50 @@ function toAdminUser(user: {
   };
 }
 
+type BetterAuthWhereClause = {
+  connector?: "AND" | "OR";
+  field: string;
+  operator?:
+    | "lt"
+    | "lte"
+    | "gt"
+    | "gte"
+    | "eq"
+    | "in"
+    | "not_in"
+    | "ne"
+    | "contains"
+    | "starts_with"
+    | "ends_with";
+  value: string | number | boolean | Array<string> | Array<number> | null;
+};
+
+type BetterAuthUserRow = {
+  _id?: string;
+  userId?: string | null;
+  name?: string | null;
+  email?: string | null;
+  createdAt?: number | null;
+  role?: string | null;
+  emailVerified?: boolean | null;
+};
+
+function matchesAdminUserSearch(user: BetterAuthUserRow, query: string) {
+  const searchQuery = query.trim();
+  if (searchQuery.length === 0) return true;
+
+  if (/^\d+$/.test(searchQuery)) {
+    return (user.userId ?? "") === searchQuery;
+  }
+
+  const searchLower = searchQuery.toLowerCase();
+  if (searchQuery.includes("@")) {
+    return (user.email ?? "").toLowerCase().includes(searchLower);
+  }
+
+  return (user.name ?? "").toLowerCase().includes(searchLower);
+}
+
 export const getAdminUsersPage = query({
   args: {
     query: v.string(),
@@ -137,39 +181,7 @@ export const getAdminUsersPage = query({
     const page = Math.max(1, Math.floor(args.page));
     const perPage = Math.max(1, Math.min(200, Math.floor(args.perPage)));
     const offset = (page - 1) * perPage;
-    const searchLower = args.query.trim().toLowerCase();
-    const where: Array<{
-      connector?: "AND" | "OR";
-      field: string;
-      operator?:
-        | "lt"
-        | "lte"
-        | "gt"
-        | "gte"
-        | "eq"
-        | "in"
-        | "not_in"
-        | "ne"
-        | "contains"
-        | "starts_with"
-        | "ends_with";
-      value: string | number | boolean | Array<string> | Array<number> | null;
-    }> = [];
-
-    if (searchLower.length > 0) {
-      const isNumericId = /^\d+$/.test(searchLower);
-      if (isNumericId) {
-        where.push({ field: "userId", operator: "eq", value: searchLower });
-      } else if (searchLower.includes("@")) {
-        where.push({
-          field: "email",
-          operator: "contains",
-          value: searchLower,
-        });
-      } else {
-        where.push({ field: "name", operator: "contains", value: searchLower });
-      }
-    }
+    const where: Array<BetterAuthWhereClause> = [];
 
     if (args.activatedFilter === "yes") {
       where.push({ field: "emailVerified", operator: "eq", value: true });
@@ -206,30 +218,44 @@ export const getAdminUsersPage = query({
       where.push({ field: "role", operator: "ne", value: "admin" });
     }
 
-    const response = (await ctx.runQuery(
-      components.betterAuth.adapter.findMany,
-      {
-        model: "user",
-        where,
-        offset,
-        paginationOpts: { cursor: null, numItems: perPage + 1 },
-        sortBy: { field: "createdAt", direction: "desc" },
-      },
-    )) as {
-      page: Array<{
-        _id?: string;
-        userId?: string | null;
-        name?: string | null;
-        email?: string | null;
-        createdAt?: number | null;
-        role?: string | null;
-        emailVerified?: boolean | null;
-      }>;
-    };
+    const pageSize = Math.min(200, Math.max(perPage * 2, 50));
+    const matchedRows: Array<BetterAuthUserRow> = [];
+    let cursor: string | null = null;
+    let done = false;
+    let matchedCount = 0;
 
-    const hasNextPage = response.page.length > perPage;
+    while (!done && matchedRows.length < perPage + 1) {
+      const response = (await ctx.runQuery(
+        components.betterAuth.adapter.findMany,
+        {
+          model: "user",
+          where,
+          paginationOpts: { cursor, numItems: pageSize },
+          sortBy: { field: "createdAt", direction: "desc" },
+        },
+      )) as {
+        page: Array<BetterAuthUserRow>;
+        continueCursor?: string | null;
+        isDone?: boolean;
+      };
+
+      for (const row of response.page) {
+        if (!matchesAdminUserSearch(row, args.query)) continue;
+
+        if (matchedCount >= offset && matchedRows.length < perPage + 1) {
+          matchedRows.push(row);
+        }
+        matchedCount += 1;
+        if (matchedRows.length >= perPage + 1) break;
+      }
+
+      cursor = response.continueCursor ?? null;
+      done = Boolean(response.isDone) || cursor === null;
+    }
+
+    const hasNextPage = matchedRows.length > perPage;
     const users = (
-      hasNextPage ? response.page.slice(0, perPage) : response.page
+      hasNextPage ? matchedRows.slice(0, perPage) : matchedRows
     ).map(toAdminUser);
 
     return {
