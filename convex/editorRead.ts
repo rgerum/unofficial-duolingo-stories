@@ -351,7 +351,7 @@ export const getEditorStoriesByCourseLegacyId = query({
         image: image?.legacyId ?? "",
         set_id: story.set_id ?? 0,
         set_index: story.set_index ?? 0,
-        date: story.date,
+        date: story.date ?? story._creationTime,
         change_date: story.change_date,
         status: derivedStatus,
         public: story.public,
