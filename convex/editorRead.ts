@@ -423,6 +423,7 @@ export const getEditorCourseImport = query({
 
     const targetCountByDuoId = new Map<string, number>();
     for (const story of targetStories) {
+      if (story.deleted) continue;
       if (!story.duo_id) continue;
       targetCountByDuoId.set(
         story.duo_id,
