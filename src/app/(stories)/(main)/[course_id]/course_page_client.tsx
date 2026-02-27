@@ -47,6 +47,28 @@ function About({ about }: { about: string }) {
   );
 }
 
+function NoNativeWarning() {
+  return (
+    <div className="mx-auto mt-4 max-w-[720px] rounded-xl border border-yellow-700/50 bg-yellow-50 px-4 py-3 text-yellow-900">
+      <p className="font-bold">Course quality note</p>
+      <p className="mt-1">
+        This course does not currently have a native speaker translator or
+        proofreader, so some stories may not be 100% correct. If you are a
+        native speaker and want to help improve this course, please join our{" "}
+        <a
+          className="underline underline-offset-2"
+          href="https://discord.gg/4NGVScARR3"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Discord server
+        </a>
+        .
+      </p>
+    </div>
+  );
+}
+
 export default function CoursePageClient({
   course_id,
   preloadedCourse,
@@ -110,7 +132,6 @@ export default function CoursePageClient({
       }))
       .sort((a, b) => a.setId - b.setId);
   }, [course]);
-
   if (!course) {
     return (
       <Header>
@@ -118,6 +139,9 @@ export default function CoursePageClient({
       </Header>
     );
   }
+  const rawTags = course.tags ?? [];
+  const normalizedTags = rawTags.map((tag) => tag.trim().toLowerCase());
+  const showNoNativeWarning = normalizedTags.includes("no-native");
 
   return (
     <>
@@ -170,6 +194,7 @@ export default function CoursePageClient({
           </div>
         </div>
         {course.about ? <About about={course.about} /> : null}
+        {showNoNativeWarning ? <NoNativeWarning /> : null}
         {storiesBySet.map((set) => (
           <SetGrid
             key={set.setId}

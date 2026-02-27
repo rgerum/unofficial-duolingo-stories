@@ -9,6 +9,7 @@ export interface CourseData {
   name: string;
   count: number;
   about: string;
+  tags: string[];
   from_language: number;
   fromLanguageId: Id<"languages">;
   from_language_name: string;

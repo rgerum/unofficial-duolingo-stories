@@ -11,3 +11,4 @@
 
 ## Convex
 - Follow `./convex/convex_rules.md` when making changes in `convex/`.
+- Always deploy Convex after changing files in `convex/` (for example with `pnpm convex deploy`).
