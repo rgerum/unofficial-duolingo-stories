@@ -629,6 +629,32 @@ export declare const components: {
         any
       >;
       get: FunctionReference<"query", "internal", { id: string }, any>;
+      searchUsersByEmailPrefix: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          adminFilter: "all" | "yes" | "no";
+          limit: number;
+          offset: number;
+          prefix: string;
+          roleFilter: "all" | "yes" | "no";
+        },
+        { hasMore: boolean; page: Array<any> }
+      >;
+      searchUsersByUsernamePrefix: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          adminFilter: "all" | "yes" | "no";
+          limit: number;
+          offset: number;
+          prefix: string;
+          roleFilter: "all" | "yes" | "no";
+        },
+        { hasMore: boolean; page: Array<any> }
+      >;
       updateMany: FunctionReference<
         "mutation",
         "internal",

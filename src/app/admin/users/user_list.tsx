@@ -126,7 +126,7 @@ export default function UserList({
         <div className="flex flex-wrap items-center gap-3.5">
           <Input
             label="Search"
-            placeholder="Username or ID"
+            placeholder="Username, email, or ID"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             onKeyDown={handleKeyDown}

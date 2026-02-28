@@ -128,6 +128,7 @@ function matchesUserSearch(
   user: {
     userId?: string | null;
     name?: string | null;
+    username?: string | null;
     email?: string | null;
   },
   searchLower: string,
@@ -136,7 +137,25 @@ function matchesUserSearch(
   if (/^\d+$/.test(searchLower)) return (user.userId ?? "") === searchLower;
   if (searchLower.includes("@"))
     return (user.email ?? "").toLowerCase().includes(searchLower);
-  return (user.name ?? "").toLowerCase().includes(searchLower);
+  return (user.username ?? "").toLowerCase().includes(searchLower);
+}
+
+function matchesRoleAndAdminFilters(
+  role: string | null | undefined,
+  roleFilter: "all" | "yes" | "no",
+  adminFilter: "all" | "yes" | "no",
+): boolean {
+  const normalizedRole = role ?? null;
+  if (adminFilter === "yes") return normalizedRole === "admin";
+  if (roleFilter === "yes") {
+    if (adminFilter === "no") return normalizedRole === "contributor";
+    return normalizedRole === "contributor" || normalizedRole === "admin";
+  }
+  if (roleFilter === "no") {
+    return normalizedRole !== "contributor" && normalizedRole !== "admin";
+  }
+  if (adminFilter === "no") return normalizedRole !== "admin";
+  return true;
 }
 
 export const getAdminUsersPage = query({
@@ -160,7 +179,16 @@ export const getAdminUsersPage = query({
 
     const page = Math.max(1, Math.floor(args.page));
     const perPage = Math.max(1, Math.min(200, Math.floor(args.perPage)));
-    const searchLower = args.query.trim().toLowerCase();
+    const searchTerm = args.query.trim();
+    const searchLower = searchTerm.toLowerCase();
+    const searchMode =
+      searchTerm.length === 0
+        ? "none"
+        : /^\d+$/.test(searchLower)
+          ? "id"
+          : searchTerm.includes("@")
+            ? "email"
+            : "username";
     const where: Array<{
       connector?: "AND" | "OR";
       field: string;
@@ -179,7 +207,7 @@ export const getAdminUsersPage = query({
       value: string | number | boolean | Array<string> | Array<number> | null;
     }> = [];
 
-    if (/^\d+$/.test(searchLower)) {
+    if (searchMode === "id") {
       where.push({ field: "userId", operator: "eq", value: searchLower });
     }
 
@@ -190,38 +218,81 @@ export const getAdminUsersPage = query({
       return { users: [], hasPrevPage: page > 1, hasNextPage: false };
     }
 
-    if (args.adminFilter === "yes") {
-      where.push({ field: "role", operator: "eq", value: "admin" });
-    } else if (args.roleFilter === "yes") {
-      if (args.adminFilter === "no") {
-        where.push({ field: "role", operator: "eq", value: "contributor" });
-      } else {
+    if (searchMode !== "email" && searchMode !== "username") {
+      if (args.adminFilter === "yes") {
+        where.push({ field: "role", operator: "eq", value: "admin" });
+      } else if (args.roleFilter === "yes") {
+        if (args.adminFilter === "no") {
+          where.push({ field: "role", operator: "eq", value: "contributor" });
+        } else {
+          where.push({
+            field: "role",
+            operator: "in",
+            value: ["admin", "contributor"],
+          });
+        }
+      } else if (args.roleFilter === "no") {
         where.push({
           field: "role",
-          operator: "in",
+          operator: "not_in",
           value: ["admin", "contributor"],
         });
+      } else if (args.adminFilter === "no") {
+        where.push({ field: "role", operator: "ne", value: "admin" });
       }
-    } else if (args.roleFilter === "no") {
-      where.push({
-        field: "role",
-        operator: "not_in",
-        value: ["admin", "contributor"],
-      });
-    } else if (args.adminFilter === "no") {
-      where.push({ field: "role", operator: "ne", value: "admin" });
     }
 
-    const targetStartIndex = (page - 1) * perPage;
-    const pageUsers: Array<{
+    type AdminAuthUser = {
       _id?: string;
       userId?: string | null;
       name?: string | null;
+      username?: string | null;
       email?: string | null;
       createdAt?: number | null;
       role?: string | null;
       emailVerified?: boolean | number | string | null;
-    }> = [];
+    };
+    type UserPageResponse = {
+      page: AdminAuthUser[];
+      isDone?: boolean;
+      continueCursor?: string | null;
+    };
+    const targetStartIndex = (page - 1) * perPage;
+
+    if (searchMode === "email" || searchMode === "username") {
+      const searchResponse =
+        searchMode === "email"
+          ? ((await ctx.runQuery(
+              components.betterAuth.adapter.searchUsersByEmailPrefix,
+              {
+                prefix: searchTerm,
+                offset: targetStartIndex,
+                limit: perPage,
+                activatedFilter: args.activatedFilter,
+                roleFilter: args.roleFilter,
+                adminFilter: args.adminFilter,
+              },
+            )) as { page: AdminAuthUser[]; hasMore: boolean })
+          : ((await ctx.runQuery(
+              components.betterAuth.adapter.searchUsersByUsernamePrefix,
+              {
+                prefix: searchTerm,
+                offset: targetStartIndex,
+                limit: perPage,
+                activatedFilter: args.activatedFilter,
+                roleFilter: args.roleFilter,
+                adminFilter: args.adminFilter,
+              },
+            )) as { page: AdminAuthUser[]; hasMore: boolean });
+
+      return {
+        users: searchResponse.page.map(toAdminUser),
+        hasPrevPage: page > 1,
+        hasNextPage: searchResponse.hasMore,
+      };
+    }
+
+    const pageUsers: AdminAuthUser[] = [];
     let matchingSeen = 0;
     let hasNextPage = false;
     let cursor: string | null = null;
@@ -236,40 +307,24 @@ export const getAdminUsersPage = query({
           paginationOpts: { cursor, numItems: batchSize },
           sortBy: { field: "createdAt", direction: "desc" },
         },
-      )) as {
-        page: Array<{
-          _id?: string;
-          userId?: string | null;
-          name?: string | null;
-          email?: string | null;
-          createdAt?: number | null;
-          role?: string | null;
-          emailVerified?: boolean | number | string | null;
-        }>;
-        isDone?: boolean;
-        continueCursor?: string | null;
-      };
+      )) as UserPageResponse;
 
       for (const user of response.page) {
         if (!matchesUserSearch(user, searchLower)) {
           continue;
         }
-
         if (!matchesActivatedFilter(user.emailVerified, args.activatedFilter)) {
           continue;
         }
-
         if (matchingSeen < targetStartIndex) {
           matchingSeen += 1;
           continue;
         }
-
         if (pageUsers.length < perPage) {
           pageUsers.push(user);
           matchingSeen += 1;
           continue;
         }
-
         hasNextPage = true;
         break;
       }
