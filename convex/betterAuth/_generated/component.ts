@@ -566,15 +566,29 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
       searchUsersByEmailPrefix: FunctionReference<
         "query",
         "internal",
-        { prefix: string },
-        any,
+        {
+          activatedFilter: "all" | "yes" | "no";
+          adminFilter: "all" | "yes" | "no";
+          limit: number;
+          offset: number;
+          prefix: string;
+          roleFilter: "all" | "yes" | "no";
+        },
+        { hasMore: boolean; page: Array<any> },
         Name
       >;
       searchUsersByUsernamePrefix: FunctionReference<
         "query",
         "internal",
-        { prefix: string },
-        any,
+        {
+          activatedFilter: "all" | "yes" | "no";
+          adminFilter: "all" | "yes" | "no";
+          limit: number;
+          offset: number;
+          prefix: string;
+          roleFilter: "all" | "yes" | "no";
+        },
+        { hasMore: boolean; page: Array<any> },
         Name
       >;
       updateMany: FunctionReference<

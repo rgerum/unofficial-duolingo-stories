@@ -632,14 +632,28 @@ export declare const components: {
       searchUsersByEmailPrefix: FunctionReference<
         "query",
         "internal",
-        { prefix: string },
-        any
+        {
+          activatedFilter: "all" | "yes" | "no";
+          adminFilter: "all" | "yes" | "no";
+          limit: number;
+          offset: number;
+          prefix: string;
+          roleFilter: "all" | "yes" | "no";
+        },
+        { hasMore: boolean; page: Array<any> }
       >;
       searchUsersByUsernamePrefix: FunctionReference<
         "query",
         "internal",
-        { prefix: string },
-        any
+        {
+          activatedFilter: "all" | "yes" | "no";
+          adminFilter: "all" | "yes" | "no";
+          limit: number;
+          offset: number;
+          prefix: string;
+          roleFilter: "all" | "yes" | "no";
+        },
+        { hasMore: boolean; page: Array<any> }
       >;
       updateMany: FunctionReference<
         "mutation",

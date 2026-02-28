@@ -260,44 +260,35 @@ export const getAdminUsersPage = query({
     const targetStartIndex = (page - 1) * perPage;
 
     if (searchMode === "email" || searchMode === "username") {
-      const searchUsers =
+      const searchResponse =
         searchMode === "email"
           ? ((await ctx.runQuery(
               components.betterAuth.adapter.searchUsersByEmailPrefix,
               {
                 prefix: searchTerm,
+                offset: targetStartIndex,
+                limit: perPage,
+                activatedFilter: args.activatedFilter,
+                roleFilter: args.roleFilter,
+                adminFilter: args.adminFilter,
               },
-            )) as AdminAuthUser[])
+            )) as { page: AdminAuthUser[]; hasMore: boolean })
           : ((await ctx.runQuery(
               components.betterAuth.adapter.searchUsersByUsernamePrefix,
               {
                 prefix: searchTerm,
+                offset: targetStartIndex,
+                limit: perPage,
+                activatedFilter: args.activatedFilter,
+                roleFilter: args.roleFilter,
+                adminFilter: args.adminFilter,
               },
-            )) as AdminAuthUser[]);
-
-      const filteredUsers = searchUsers.filter((user) => {
-        if (
-          !matchesRoleAndAdminFilters(
-            user.role,
-            args.roleFilter,
-            args.adminFilter,
-          )
-        ) {
-          return false;
-        }
-        if (!matchesUserSearch(user, searchLower)) return false;
-        return matchesActivatedFilter(user.emailVerified, args.activatedFilter);
-      });
-
-      const pageUsers = filteredUsers.slice(
-        targetStartIndex,
-        targetStartIndex + perPage,
-      );
+            )) as { page: AdminAuthUser[]; hasMore: boolean });
 
       return {
-        users: pageUsers.map(toAdminUser),
+        users: searchResponse.page.map(toAdminUser),
         hasPrevPage: page > 1,
-        hasNextPage: filteredUsers.length > targetStartIndex + perPage,
+        hasNextPage: searchResponse.hasMore,
       };
     }
 
