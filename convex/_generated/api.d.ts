@@ -629,31 +629,29 @@ export declare const components: {
         any
       >;
       get: FunctionReference<"query", "internal", { id: string }, any>;
+      searchUsersAll: FunctionReference<
+        "query",
+        "internal",
+        { limit: number; role?: string },
+        any
+      >;
       searchUsersByEmailPrefix: FunctionReference<
         "query",
         "internal",
-        {
-          activatedFilter: "all" | "yes" | "no";
-          adminFilter: "all" | "yes" | "no";
-          limit: number;
-          offset: number;
-          prefix: string;
-          roleFilter: "all" | "yes" | "no";
-        },
-        { hasMore: boolean; page: Array<any> }
+        { limit: number; prefix: string; role?: string },
+        any
+      >;
+      searchUsersById: FunctionReference<
+        "query",
+        "internal",
+        { id: string },
+        any
       >;
       searchUsersByUsernamePrefix: FunctionReference<
         "query",
         "internal",
-        {
-          activatedFilter: "all" | "yes" | "no";
-          adminFilter: "all" | "yes" | "no";
-          limit: number;
-          offset: number;
-          prefix: string;
-          roleFilter: "all" | "yes" | "no";
-        },
-        { hasMore: boolean; page: Array<any> }
+        { limit: number; prefix: string; role?: string },
+        any
       >;
       updateMany: FunctionReference<
         "mutation",

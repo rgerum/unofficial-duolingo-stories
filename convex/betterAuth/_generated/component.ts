@@ -563,32 +563,32 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
       get: FunctionReference<"query", "internal", { id: string }, any, Name>;
+      searchUsersAll: FunctionReference<
+        "query",
+        "internal",
+        { limit: number; role?: string },
+        any,
+        Name
+      >;
       searchUsersByEmailPrefix: FunctionReference<
         "query",
         "internal",
-        {
-          activatedFilter: "all" | "yes" | "no";
-          adminFilter: "all" | "yes" | "no";
-          limit: number;
-          offset: number;
-          prefix: string;
-          roleFilter: "all" | "yes" | "no";
-        },
-        { hasMore: boolean; page: Array<any> },
+        { limit: number; prefix: string; role?: string },
+        any,
+        Name
+      >;
+      searchUsersById: FunctionReference<
+        "query",
+        "internal",
+        { id: string },
+        any,
         Name
       >;
       searchUsersByUsernamePrefix: FunctionReference<
         "query",
         "internal",
-        {
-          activatedFilter: "all" | "yes" | "no";
-          adminFilter: "all" | "yes" | "no";
-          limit: number;
-          offset: number;
-          prefix: string;
-          roleFilter: "all" | "yes" | "no";
-        },
-        { hasMore: boolean; page: Array<any> },
+        { limit: number; prefix: string; role?: string },
+        any,
         Name
       >;
       updateMany: FunctionReference<

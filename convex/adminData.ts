@@ -58,10 +58,16 @@ const adminStoryValidator = v.object({
   approvals: v.array(adminApprovalValidator),
 });
 
-const adminFilterValidator = v.union(
+const yesNoAllFilterValidator = v.union(
   v.literal("all"),
   v.literal("yes"),
   v.literal("no"),
+);
+const roleFilterValidator = v.union(
+  v.literal("all"),
+  v.literal("user"),
+  v.literal("contributor"),
+  v.literal("admin"),
 );
 
 const adminUserValidator = v.object({
@@ -124,61 +130,36 @@ function matchesActivatedFilter(
   return filter === "yes" ? activated : !activated;
 }
 
-function matchesUserSearch(
-  user: {
-    userId?: string | null;
-    name?: string | null;
-    username?: string | null;
-    email?: string | null;
-  },
-  searchLower: string,
-): boolean {
-  if (searchLower.length === 0) return true;
-  if (/^\d+$/.test(searchLower)) return (user.userId ?? "") === searchLower;
-  if (searchLower.includes("@"))
-    return (user.email ?? "").toLowerCase().includes(searchLower);
-  return (user.username ?? "").toLowerCase().includes(searchLower);
-}
-
-function matchesRoleAndAdminFilters(
+function matchesRoleFilter(
   role: string | null | undefined,
-  roleFilter: "all" | "yes" | "no",
-  adminFilter: "all" | "yes" | "no",
+  roleFilter: "all" | "user" | "contributor" | "admin",
 ): boolean {
-  const normalizedRole = role ?? null;
-  if (adminFilter === "yes") return normalizedRole === "admin";
-  if (roleFilter === "yes") {
-    if (adminFilter === "no") return normalizedRole === "contributor";
-    return normalizedRole === "contributor" || normalizedRole === "admin";
-  }
-  if (roleFilter === "no") {
+  if (roleFilter === "all") return true;
+  const normalizedRole = role ?? "user";
+  if (roleFilter === "user") {
     return normalizedRole !== "contributor" && normalizedRole !== "admin";
   }
-  if (adminFilter === "no") return normalizedRole !== "admin";
-  return true;
+  return normalizedRole === roleFilter;
 }
 
 export const getAdminUsersPage = query({
   args: {
     query: v.string(),
-    page: v.number(),
-    perPage: v.number(),
-    activatedFilter: adminFilterValidator,
-    roleFilter: adminFilterValidator,
-    adminFilter: adminFilterValidator,
+    limit: v.number(),
+    activatedFilter: yesNoAllFilterValidator,
+    roleFilter: roleFilterValidator,
   },
   returns: v.object({
     users: v.array(adminUserValidator),
-    hasPrevPage: v.boolean(),
-    hasNextPage: v.boolean(),
+    hasMore: v.boolean(),
   }),
   handler: async (ctx, args) => {
     if (!(await isAdmin(ctx))) {
-      return { users: [], hasPrevPage: false, hasNextPage: false };
+      return { users: [], hasMore: false };
     }
 
-    const page = Math.max(1, Math.floor(args.page));
-    const perPage = Math.max(1, Math.min(200, Math.floor(args.perPage)));
+    const limit = Math.max(1, Math.min(500, Math.floor(args.limit)));
+    const queryLimit = limit + 1;
     const searchTerm = args.query.trim();
     const searchLower = searchTerm.toLowerCase();
     const searchMode =
@@ -189,157 +170,47 @@ export const getAdminUsersPage = query({
           : searchTerm.includes("@")
             ? "email"
             : "username";
-    const where: Array<{
-      connector?: "AND" | "OR";
-      field: string;
-      operator?:
-        | "lt"
-        | "lte"
-        | "gt"
-        | "gte"
-        | "eq"
-        | "in"
-        | "not_in"
-        | "ne"
-        | "contains"
-        | "starts_with"
-        | "ends_with";
-      value: string | number | boolean | Array<string> | Array<number> | null;
-    }> = [];
 
-    if (searchMode === "id") {
-      where.push({ field: "userId", operator: "eq", value: searchLower });
-    }
+    const indexedRole =
+      args.roleFilter === "admin" || args.roleFilter === "contributor"
+        ? args.roleFilter
+        : undefined;
 
-    // Apply role/admin filters at query time to keep pagination consistent.
-    // `role` is nullable for many legacy users, so the "no contributor/admin"
-    // cases are modeled with negative predicates.
-    if (args.adminFilter === "yes" && args.roleFilter === "no") {
-      return { users: [], hasPrevPage: page > 1, hasNextPage: false };
-    }
-
-    if (searchMode !== "email" && searchMode !== "username") {
-      if (args.adminFilter === "yes") {
-        where.push({ field: "role", operator: "eq", value: "admin" });
-      } else if (args.roleFilter === "yes") {
-        if (args.adminFilter === "no") {
-          where.push({ field: "role", operator: "eq", value: "contributor" });
-        } else {
-          where.push({
-            field: "role",
-            operator: "in",
-            value: ["admin", "contributor"],
-          });
-        }
-      } else if (args.roleFilter === "no") {
-        where.push({
-          field: "role",
-          operator: "not_in",
-          value: ["admin", "contributor"],
-        });
-      } else if (args.adminFilter === "no") {
-        where.push({ field: "role", operator: "ne", value: "admin" });
-      }
-    }
-
-    type AdminAuthUser = {
-      _id?: string;
-      userId?: string | null;
-      name?: string | null;
-      username?: string | null;
-      email?: string | null;
-      createdAt?: number | null;
-      role?: string | null;
-      emailVerified?: boolean | number | string | null;
-    };
-    type UserPageResponse = {
-      page: AdminAuthUser[];
-      isDone?: boolean;
-      continueCursor?: string | null;
-    };
-    const targetStartIndex = (page - 1) * perPage;
-
-    if (searchMode === "email" || searchMode === "username") {
-      const searchResponse =
-        searchMode === "email"
-          ? ((await ctx.runQuery(
+    const matchedUsers =
+      searchMode === "id"
+        ? await ctx.runQuery(components.betterAuth.adapter.searchUsersById, {
+            id: searchTerm,
+          })
+        : searchMode === "email"
+          ? await ctx.runQuery(
               components.betterAuth.adapter.searchUsersByEmailPrefix,
               {
+                role: indexedRole,
+                limit: queryLimit,
                 prefix: searchTerm,
-                offset: targetStartIndex,
-                limit: perPage,
-                activatedFilter: args.activatedFilter,
-                roleFilter: args.roleFilter,
-                adminFilter: args.adminFilter,
               },
-            )) as { page: AdminAuthUser[]; hasMore: boolean })
-          : ((await ctx.runQuery(
-              components.betterAuth.adapter.searchUsersByUsernamePrefix,
-              {
-                prefix: searchTerm,
-                offset: targetStartIndex,
-                limit: perPage,
-                activatedFilter: args.activatedFilter,
-                roleFilter: args.roleFilter,
-                adminFilter: args.adminFilter,
-              },
-            )) as { page: AdminAuthUser[]; hasMore: boolean });
+            )
+          : searchMode === "username"
+            ? await ctx.runQuery(
+                components.betterAuth.adapter.searchUsersByUsernamePrefix,
+                {
+                  role: indexedRole,
+                  limit: queryLimit,
+                  prefix: searchTerm,
+                },
+              )
+            : await ctx.runQuery(components.betterAuth.adapter.searchUsersAll, {
+                role: indexedRole,
+                limit: queryLimit,
+              });
 
-      return {
-        users: searchResponse.page.map(toAdminUser),
-        hasPrevPage: page > 1,
-        hasNextPage: searchResponse.hasMore,
-      };
-    }
-
-    const pageUsers: AdminAuthUser[] = [];
-    let matchingSeen = 0;
-    let hasNextPage = false;
-    let cursor: string | null = null;
-    const batchSize = Math.min(200, Math.max(100, perPage * 2));
-
-    while (true) {
-      const response = (await ctx.runQuery(
-        components.betterAuth.adapter.findMany,
-        {
-          model: "user",
-          where,
-          paginationOpts: { cursor, numItems: batchSize },
-          sortBy: { field: "createdAt", direction: "desc" },
-        },
-      )) as UserPageResponse;
-
-      for (const user of response.page) {
-        if (!matchesUserSearch(user, searchLower)) {
-          continue;
-        }
-        if (!matchesActivatedFilter(user.emailVerified, args.activatedFilter)) {
-          continue;
-        }
-        if (matchingSeen < targetStartIndex) {
-          matchingSeen += 1;
-          continue;
-        }
-        if (pageUsers.length < perPage) {
-          pageUsers.push(user);
-          matchingSeen += 1;
-          continue;
-        }
-        hasNextPage = true;
-        break;
-      }
-
-      if (hasNextPage) break;
-      if (response.isDone) break;
-      cursor = response.continueCursor ?? null;
-      if (!cursor) break;
-    }
-
-    return {
-      users: pageUsers.map(toAdminUser),
-      hasPrevPage: page > 1,
-      hasNextPage,
-    };
+    const filteredUsers = matchedUsers.filter(
+      (user: { emailVerified?: unknown; role?: string | null }) =>
+        matchesActivatedFilter(user.emailVerified, args.activatedFilter) &&
+        matchesRoleFilter(user.role, args.roleFilter),
+    );
+    const users = filteredUsers.slice(0, limit).map(toAdminUser);
+    return { users, hasMore: filteredUsers.length > limit };
   },
 });
 
