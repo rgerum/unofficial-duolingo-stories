@@ -27,12 +27,21 @@ const tables = {
     banReason: v.optional(v.union(v.null(), v.string())),
     banExpires: v.optional(v.union(v.null(), v.number())),
   })
+    .index("email", ["email"])
     .index("email_name", ["email", "name"])
     .index("name", ["name"])
     .index("role", ["role"])
     .index("role_createdAt", ["role", "createdAt"])
     .index("userId", ["userId"])
-    .index("username", ["username"]),
+    .index("username", ["username"])
+    .searchIndex("search_email", {
+      searchField: "email",
+      filterFields: ["role", "emailVerified"],
+    })
+    .searchIndex("search_username", {
+      searchField: "username",
+      filterFields: ["role", "emailVerified"],
+    }),
   session: defineTable({
     expiresAt: v.number(),
     token: v.string(),

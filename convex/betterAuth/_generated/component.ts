@@ -563,6 +563,20 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
       get: FunctionReference<"query", "internal", { id: string }, any, Name>;
+      searchUsersByEmailPrefix: FunctionReference<
+        "query",
+        "internal",
+        { prefix: string },
+        any,
+        Name
+      >;
+      searchUsersByUsernamePrefix: FunctionReference<
+        "query",
+        "internal",
+        { prefix: string },
+        any,
+        Name
+      >;
       updateMany: FunctionReference<
         "mutation",
         "internal",

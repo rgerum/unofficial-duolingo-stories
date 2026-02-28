@@ -13,6 +13,36 @@ export const get = query({
   },
 });
 
+export const searchUsersByEmailPrefix = query({
+  args: {
+    prefix: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const search = args.prefix.trim();
+    if (search.length === 0) return [];
+
+    return await ctx.db
+      .query("user")
+      .withSearchIndex("search_email", (q) => q.search("email", search))
+      .collect();
+  },
+});
+
+export const searchUsersByUsernamePrefix = query({
+  args: {
+    prefix: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const search = args.prefix.trim();
+    if (search.length === 0) return [];
+
+    return await ctx.db
+      .query("user")
+      .withSearchIndex("search_username", (q) => q.search("username", search))
+      .collect();
+  },
+});
+
 export const {
   create,
   findOne,

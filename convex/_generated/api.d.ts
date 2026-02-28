@@ -629,6 +629,18 @@ export declare const components: {
         any
       >;
       get: FunctionReference<"query", "internal", { id: string }, any>;
+      searchUsersByEmailPrefix: FunctionReference<
+        "query",
+        "internal",
+        { prefix: string },
+        any
+      >;
+      searchUsersByUsernamePrefix: FunctionReference<
+        "query",
+        "internal",
+        { prefix: string },
+        any
+      >;
       updateMany: FunctionReference<
         "mutation",
         "internal",
