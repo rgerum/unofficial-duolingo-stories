@@ -10,7 +10,7 @@ import Button from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
 export default function Profile({ providers }: { providers: ProfileData }) {
-  let [username, setUsername] = useInput(providers.name);
+  let [username, setUsername] = useInput(providers.username || providers.name);
   const [newEmail, setNewEmail] = useInput("");
   const [resetState, setResetState] = React.useState<
     "idle" | "pending" | "success" | "error"
@@ -21,6 +21,13 @@ export default function Profile({ providers }: { providers: ProfileData }) {
   >("idle");
   const [emailError, setEmailError] = React.useState("");
   const [pendingEmailChange, setPendingEmailChange] = React.useState("");
+  const [usernameState, setUsernameState] = React.useState<
+    "idle" | "pending" | "success" | "error"
+  >("idle");
+  const [usernameError, setUsernameError] = React.useState("");
+  const [savedUsername, setSavedUsername] = React.useState(
+    providers.username || providers.name,
+  );
 
   React.useEffect(() => {
     const storedPendingEmail = window.localStorage.getItem(
@@ -83,6 +90,55 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     setEmailState("success");
   }
 
+  async function saveUsername() {
+    const normalizedUsername = username.trim();
+    const usernameValidation = /^[a-zA-Z0-9_-]{3,20}$/;
+
+    if (!usernameValidation.test(normalizedUsername)) {
+      setUsernameState("error");
+      setUsernameError(
+        "Username must be 3-20 characters and use only letters, numbers, _ or -.",
+      );
+      return;
+    }
+
+    if (normalizedUsername === savedUsername) {
+      setUsernameState("success");
+      setUsernameError("");
+      return;
+    }
+
+    setUsernameState("pending");
+    setUsernameError("");
+
+    const { error } = await authClient.updateUser({
+      username: normalizedUsername,
+      name: normalizedUsername,
+    });
+
+    if (error) {
+      setUsernameState("error");
+      const errorCode =
+        typeof (error as { code?: unknown })?.code === "string"
+          ? (error as { code: string }).code
+          : "";
+      const errorMessage =
+        typeof error.message === "string" ? error.message : "";
+      const isUsernameTaken =
+        errorCode === "USERNAME_IS_ALREADY_TAKEN" ||
+        errorMessage.toLowerCase().includes("username is already taken");
+      setUsernameError(
+        isUsernameTaken
+          ? "That username is already taken. Please choose another one."
+          : errorMessage || "Could not update username.",
+      );
+      return;
+    }
+
+    setSavedUsername(normalizedUsername);
+    setUsernameState("success");
+  }
+
   return (
     <>
       <Header>
@@ -92,6 +148,22 @@ export default function Profile({ providers }: { providers: ProfileData }) {
       <div className={styles.profile}>
         <div>
           Username: <input value={username} onChange={setUsername} />
+          {usernameState === "error" && (
+            <span className={styles.resetError}>{usernameError}</span>
+          )}
+          {usernameState === "success" && (
+            <span className={styles.resetMessage}>Username saved.</span>
+          )}
+          <Button
+            type="button"
+            primary={true}
+            onClick={saveUsername}
+            disabled={
+              usernameState === "pending" || username.trim() === savedUsername
+            }
+          >
+            {usernameState === "pending" ? "Saving..." : "Save Username"}
+          </Button>
         </div>
         <div>
           Email: <input value={providers.email} readOnly />

@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 export interface ProfileData {
   providers: string[];
   name: string;
+  username: string;
   email: string;
   role: string[];
   provider_linked: Record<string, boolean>;
@@ -48,6 +49,7 @@ async function getLinkedProviders() {
   return {
     providers,
     name: user.name,
+    username: user.username ?? user.name,
     email: user.email,
     role: role,
     provider_linked,
