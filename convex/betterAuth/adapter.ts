@@ -66,25 +66,25 @@ export const searchUsersByEmailPrefix = query({
   handler: async (ctx, args) => {
     const search = args.prefix.trim();
     if (search.length === 0) return [];
-    let query = ctx.db
-      .query("user")
-      .withSearchIndex("search_email", (q) => q.search("email", search));
-    if (args.roleFilter === "admin") {
-      query = query.filter((q) => q.eq(q.field("role"), "admin"));
-    } else if (args.roleFilter === "contributor") {
-      query = query.filter((q) => q.eq(q.field("role"), "contributor"));
-    } else if (args.roleFilter === "user") {
+    let query = ctx.db.query("user").withSearchIndex("search_email", (q) => {
+      let built = q.search("email", search);
+      if (args.roleFilter === "admin" || args.roleFilter === "contributor") {
+        built = built.eq("role", args.roleFilter);
+      }
+      if (args.activatedFilter === "yes") {
+        built = built.eq("emailVerified", true);
+      } else if (args.activatedFilter === "no") {
+        built = built.eq("emailVerified", false);
+      }
+      return built;
+    });
+    if (args.roleFilter === "user") {
       query = query.filter((q) =>
         q.and(
           q.neq(q.field("role"), "admin"),
           q.neq(q.field("role"), "contributor"),
         ),
       );
-    }
-    if (args.activatedFilter === "yes") {
-      query = query.filter((q) => q.eq(q.field("emailVerified"), true));
-    } else if (args.activatedFilter === "no") {
-      query = query.filter((q) => q.eq(q.field("emailVerified"), false));
     }
     return query.take(args.limit);
   },
@@ -100,25 +100,25 @@ export const searchUsersByUsernamePrefix = query({
   handler: async (ctx, args) => {
     const search = args.prefix.trim();
     if (search.length === 0) return [];
-    let query = ctx.db
-      .query("user")
-      .withSearchIndex("search_username", (q) => q.search("username", search));
-    if (args.roleFilter === "admin") {
-      query = query.filter((q) => q.eq(q.field("role"), "admin"));
-    } else if (args.roleFilter === "contributor") {
-      query = query.filter((q) => q.eq(q.field("role"), "contributor"));
-    } else if (args.roleFilter === "user") {
+    let query = ctx.db.query("user").withSearchIndex("search_username", (q) => {
+      let built = q.search("username", search);
+      if (args.roleFilter === "admin" || args.roleFilter === "contributor") {
+        built = built.eq("role", args.roleFilter);
+      }
+      if (args.activatedFilter === "yes") {
+        built = built.eq("emailVerified", true);
+      } else if (args.activatedFilter === "no") {
+        built = built.eq("emailVerified", false);
+      }
+      return built;
+    });
+    if (args.roleFilter === "user") {
       query = query.filter((q) =>
         q.and(
           q.neq(q.field("role"), "admin"),
           q.neq(q.field("role"), "contributor"),
         ),
       );
-    }
-    if (args.activatedFilter === "yes") {
-      query = query.filter((q) => q.eq(q.field("emailVerified"), true));
-    } else if (args.activatedFilter === "no") {
-      query = query.filter((q) => q.eq(q.field("emailVerified"), false));
     }
     return query.take(args.limit);
   },
