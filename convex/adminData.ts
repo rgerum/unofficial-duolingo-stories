@@ -121,27 +121,6 @@ function toAdminUser(user: {
   };
 }
 
-function matchesActivatedFilter(
-  value: unknown,
-  filter: "all" | "yes" | "no",
-): boolean {
-  if (filter === "all") return true;
-  const activated = Boolean(value);
-  return filter === "yes" ? activated : !activated;
-}
-
-function matchesRoleFilter(
-  role: string | null | undefined,
-  roleFilter: "all" | "user" | "contributor" | "admin",
-): boolean {
-  if (roleFilter === "all") return true;
-  const normalizedRole = role ?? "user";
-  if (roleFilter === "user") {
-    return normalizedRole !== "contributor" && normalizedRole !== "admin";
-  }
-  return normalizedRole === roleFilter;
-}
-
 export const getAdminUsersPage = query({
   args: {
     query: v.string(),
@@ -171,46 +150,40 @@ export const getAdminUsersPage = query({
             ? "email"
             : "username";
 
-    const indexedRole =
-      args.roleFilter === "admin" || args.roleFilter === "contributor"
-        ? args.roleFilter
-        : undefined;
-
     const matchedUsers =
       searchMode === "id"
         ? await ctx.runQuery(components.betterAuth.adapter.searchUsersById, {
+            activatedFilter: args.activatedFilter,
+            roleFilter: args.roleFilter,
             id: searchTerm,
           })
         : searchMode === "email"
           ? await ctx.runQuery(
               components.betterAuth.adapter.searchUsersByEmailPrefix,
               {
-                role: indexedRole,
-                limit: queryLimit,
+                activatedFilter: args.activatedFilter,
+                roleFilter: args.roleFilter,
                 prefix: searchTerm,
+                limit: queryLimit,
               },
             )
           : searchMode === "username"
             ? await ctx.runQuery(
                 components.betterAuth.adapter.searchUsersByUsernamePrefix,
                 {
-                  role: indexedRole,
-                  limit: queryLimit,
+                  activatedFilter: args.activatedFilter,
+                  roleFilter: args.roleFilter,
                   prefix: searchTerm,
+                  limit: queryLimit,
                 },
               )
             : await ctx.runQuery(components.betterAuth.adapter.searchUsersAll, {
-                role: indexedRole,
+                activatedFilter: args.activatedFilter,
+                roleFilter: args.roleFilter,
                 limit: queryLimit,
               });
-
-    const filteredUsers = matchedUsers.filter(
-      (user: { emailVerified?: unknown; role?: string | null }) =>
-        matchesActivatedFilter(user.emailVerified, args.activatedFilter) &&
-        matchesRoleFilter(user.role, args.roleFilter),
-    );
-    const users = filteredUsers.slice(0, limit).map(toAdminUser);
-    return { users, hasMore: filteredUsers.length > limit };
+    const users = matchedUsers.slice(0, limit).map(toAdminUser);
+    return { users, hasMore: matchedUsers.length > limit };
   },
 });
 

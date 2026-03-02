@@ -17,6 +17,7 @@ interface UserListProps {
   users: AdminUserList[];
   query: string;
   limit: number;
+  hasMore: boolean;
   loadStep: number;
   activatedFilter: FilterValue;
   roleFilter: RoleFilterValue;
@@ -65,6 +66,7 @@ export default function UserList({
   users,
   query,
   limit,
+  hasMore,
   loadStep,
   activatedFilter,
   roleFilter,
@@ -172,7 +174,7 @@ export default function UserList({
             <SpinnerBlue />
           </span>
         </div>
-        {users.length === limit ? (
+        {hasMore ? (
           <Button onClick={() => submitSearch(limit + loadStep)}>
             Load more
           </Button>

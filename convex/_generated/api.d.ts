@@ -632,25 +632,43 @@ export declare const components: {
       searchUsersAll: FunctionReference<
         "query",
         "internal",
-        { limit: number; role?: string },
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
         any
       >;
       searchUsersByEmailPrefix: FunctionReference<
         "query",
         "internal",
-        { limit: number; prefix: string; role?: string },
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          prefix: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
         any
       >;
       searchUsersById: FunctionReference<
         "query",
         "internal",
-        { id: string },
+        {
+          activatedFilter: "all" | "yes" | "no";
+          id: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
         any
       >;
       searchUsersByUsernamePrefix: FunctionReference<
         "query",
         "internal",
-        { limit: number; prefix: string; role?: string },
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          prefix: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
         any
       >;
       updateMany: FunctionReference<

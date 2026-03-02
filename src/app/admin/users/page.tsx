@@ -61,6 +61,7 @@ export default async function Page({
       users={users}
       query={query}
       limit={limit}
+      hasMore={response.hasMore}
       loadStep={LOAD_STEP}
       activatedFilter={activatedFilter}
       roleFilter={roleFilter}

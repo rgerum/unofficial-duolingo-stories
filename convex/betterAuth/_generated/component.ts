@@ -566,28 +566,46 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
       searchUsersAll: FunctionReference<
         "query",
         "internal",
-        { limit: number; role?: string },
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
         any,
         Name
       >;
       searchUsersByEmailPrefix: FunctionReference<
         "query",
         "internal",
-        { limit: number; prefix: string; role?: string },
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          prefix: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
         any,
         Name
       >;
       searchUsersById: FunctionReference<
         "query",
         "internal",
-        { id: string },
+        {
+          activatedFilter: "all" | "yes" | "no";
+          id: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
         any,
         Name
       >;
       searchUsersByUsernamePrefix: FunctionReference<
         "query",
         "internal",
-        { limit: number; prefix: string; role?: string },
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          prefix: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
         any,
         Name
       >;
