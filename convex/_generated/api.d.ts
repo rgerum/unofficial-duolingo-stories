@@ -629,31 +629,47 @@ export declare const components: {
         any
       >;
       get: FunctionReference<"query", "internal", { id: string }, any>;
+      searchUsersAll: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any
+      >;
       searchUsersByEmailPrefix: FunctionReference<
         "query",
         "internal",
         {
           activatedFilter: "all" | "yes" | "no";
-          adminFilter: "all" | "yes" | "no";
           limit: number;
-          offset: number;
           prefix: string;
-          roleFilter: "all" | "yes" | "no";
+          roleFilter: "all" | "user" | "contributor" | "admin";
         },
-        { hasMore: boolean; page: Array<any> }
+        any
+      >;
+      searchUsersById: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          id: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any
       >;
       searchUsersByUsernamePrefix: FunctionReference<
         "query",
         "internal",
         {
           activatedFilter: "all" | "yes" | "no";
-          adminFilter: "all" | "yes" | "no";
           limit: number;
-          offset: number;
           prefix: string;
-          roleFilter: "all" | "yes" | "no";
+          roleFilter: "all" | "user" | "contributor" | "admin";
         },
-        { hasMore: boolean; page: Array<any> }
+        any
       >;
       updateMany: FunctionReference<
         "mutation",

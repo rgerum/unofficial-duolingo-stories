@@ -563,18 +563,38 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
       get: FunctionReference<"query", "internal", { id: string }, any, Name>;
+      searchUsersAll: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any,
+        Name
+      >;
       searchUsersByEmailPrefix: FunctionReference<
         "query",
         "internal",
         {
           activatedFilter: "all" | "yes" | "no";
-          adminFilter: "all" | "yes" | "no";
           limit: number;
-          offset: number;
           prefix: string;
-          roleFilter: "all" | "yes" | "no";
+          roleFilter: "all" | "user" | "contributor" | "admin";
         },
-        { hasMore: boolean; page: Array<any> },
+        any,
+        Name
+      >;
+      searchUsersById: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          id: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any,
         Name
       >;
       searchUsersByUsernamePrefix: FunctionReference<
@@ -582,13 +602,11 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         {
           activatedFilter: "all" | "yes" | "no";
-          adminFilter: "all" | "yes" | "no";
           limit: number;
-          offset: number;
           prefix: string;
-          roleFilter: "all" | "yes" | "no";
+          roleFilter: "all" | "user" | "contributor" | "admin";
         },
-        { hasMore: boolean; page: Array<any> },
+        any,
         Name
       >;
       updateMany: FunctionReference<
