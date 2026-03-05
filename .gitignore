@@ -50,6 +50,7 @@ publishX.sh
 # next.js
 .next/
 out/
+tmp/
 
 # misc
 .env*

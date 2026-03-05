@@ -35,16 +35,16 @@ const storyMetaResultValidator = v.union(
   v.null(),
 );
 
+function nonEmptyString(value: unknown) {
+  return typeof value === "string" && value.trim().length > 0 ? value : "";
+}
+
 export const getStoryByLegacyId = query({
   args: {
     storyId: v.number(),
   },
   returns: storyReadResultValidator,
   handler: async (ctx, args) => {
-    function nonEmptyString(value: unknown) {
-      return typeof value === "string" && value.trim().length > 0 ? value : "";
-    }
-
     const story = await ctx.db
       .query("stories")
       .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.storyId))
