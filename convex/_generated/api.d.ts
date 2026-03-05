@@ -15,6 +15,8 @@ import type * as audioRead from "../audioRead.js";
 import type * as auth from "../auth.js";
 import type * as authFunctions from "../authFunctions.js";
 import type * as authMigration from "../authMigration.js";
+import type * as discordBot from "../discordBot.js";
+import type * as discordData from "../discordData.js";
 import type * as editorRead from "../editorRead.js";
 import type * as editorSideEffects from "../editorSideEffects.js";
 import type * as http from "../http.js";
@@ -47,6 +49,8 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   authFunctions: typeof authFunctions;
   authMigration: typeof authMigration;
+  discordBot: typeof discordBot;
+  discordData: typeof discordData;
   editorRead: typeof editorRead;
   editorSideEffects: typeof editorSideEffects;
   http: typeof http;

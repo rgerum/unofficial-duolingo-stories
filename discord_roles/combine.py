@@ -1,58 +1,105 @@
-import psycopg
-import pandas as pd
+import json
 from pathlib import Path
+from urllib import error, request
 
-params = Path(__file__).parent / ".env.local"
-params = {f.split("=")[0]:f.split("=")[1] for f in params.read_text().split("\n") if f != ''}
-PG_URL = params['POSTGRES_URL']
+import pandas as pd
+
+
+def parse_env_file(path):
+    values = {}
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        values[key] = value
+    return values
+
+
+params = parse_env_file(Path(__file__).parent / ".env.local")
+CONVEX_DISCORD_COMBINE_URL = params["CONVEX_DISCORD_COMBINE_URL"]
+DISCORD_ROLE_SYNC_SECRET = params["DISCORD_ROLE_SYNC_SECRET"]
+_combine_data_cache = None
+
+
+def fetch_combine_data():
+    global _combine_data_cache
+    if isinstance(_combine_data_cache, dict):
+        return _combine_data_cache
+
+    payload = {"secret": DISCORD_ROLE_SYNC_SECRET}
+    req = request.Request(
+        CONVEX_DISCORD_COMBINE_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    try:
+        with request.urlopen(req, timeout=20) as resp:
+            body = json.loads(resp.read().decode("utf-8"))
+    except error.HTTPError as err:
+        details = err.read().decode("utf-8")
+        raise RuntimeError(
+            f"convex combine data failed: HTTP {err.code}: {details}"
+        ) from err
+    except Exception as err:
+        raise RuntimeError(f"convex combine data failed: {err}") from err
+
+    if not isinstance(body, dict) or not body.get("ok"):
+        raise RuntimeError(f"convex combine data returned invalid response: {body}")
+
+    _combine_data_cache = body
+    return _combine_data_cache
+
 
 def get_user_to_discord_mapping():
-    with psycopg.connect(PG_URL) as conn:
-        # Open a cursor to perform database operations
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT u.name, a.\"providerAccountId\" FROM users u JOIN accounts a on u.id = a.\"userId\" WHERE a.provider = 'discord'")
+    data = fetch_combine_data()
+    mapping = data.get("user_to_discord_mapping", {})
+    if not isinstance(mapping, dict):
+        return {}
+    return {
+        str(k): str(v)
+        for k, v in mapping.items()
+        if isinstance(k, str) and isinstance(v, str)
+    }
 
-            user_discord_id = {}
-            for user in cur:
-                user_discord_id[user[0]] = user[1]
-    return user_discord_id
 
 def get_user_approval_count():
-    with psycopg.connect(PG_URL) as conn:
-        # Open a cursor to perform database operations
-        with conn.cursor() as cur:
+    data = fetch_combine_data()
+    approvals = data.get("approvals", [])
+    if not isinstance(approvals, list):
+        approvals = []
 
-            cur.execute("""
-            SELECT users.name, story_approval.story_id, story_approval.date, s.public FROM story_approval
-                    JOIN users ON users.id = story_approval.user_id
-                    JOIN story s on s.id = story_approval.story_id
-                    order by story_approval.story_id, story_approval.date""")
-
-            myresult = cur.fetchall()
-
-
-    last_id = None
-    count = 0
-    data_approval = []
-    for x in myresult:
-        if x[1] != last_id:
-            last_id = x[1]
-            count = 0
-        count += 1
-
-        if count > 2:
+    rows = []
+    for row in approvals:
+        if not isinstance(row, dict):
             continue
-            #print(x, "---------")
-        else:
-            #print(x)
-            data_approval.append(dict(author=x[0], story_id=x[1], approval=1, public=int(x[-1])))
-    data_approval = pd.DataFrame(data_approval)
-    return data_approval
+        author = row.get("author")
+        story_id = row.get("story_id")
+        approval_date = row.get("date")
+        public = row.get("public")
+        if not isinstance(author, str):
+            continue
+        if not isinstance(story_id, int) or not isinstance(approval_date, int):
+            continue
+        public_int = 1 if bool(public) else 0
+        rows.append(
+            {
+                "author": author,
+                "story_id": story_id,
+                "date": approval_date,
+                "approval": 1,
+                "public": public_int,
+            }
+        )
+
+    return pd.DataFrame(rows)
 
 
 def join_and_group_data():
     from blame import update_output_csv
+
     update_output_csv()
     data = pd.read_csv("output.csv")
     data["story_id"] = [int(str(file).split("/")[1][:-4]) for file in data["filename"]]
@@ -62,11 +109,11 @@ def join_and_group_data():
     data = data[data.lines >= 3]
 
     data = pd.concat([get_user_approval_count(), data])
-    #data = data[data.story_id == 1854]
 
     data = data.sort_values("story_id", ascending=False)
-    #print(data)
-    data = data.groupby(["story_id", "author"]).max(["number", "story_id", "percentage", "lines"])
+    data = data.groupby(["story_id", "author"]).max(
+        ["number", "story_id", "percentage", "lines"]
+    )
     data = data.reset_index().sort_values("story_id", ascending=False)
 
     data = data[data.public == 1]
@@ -75,6 +122,7 @@ def join_and_group_data():
     data = data.groupby("author").max().sort_values("number", ascending=False)
     return data, data0
 
+
 def get_milestone_grouped():
     data, data0 = join_and_group_data()
     milestones = [4, 8, 20, 40, 80, 120]
@@ -82,15 +130,21 @@ def get_milestone_grouped():
     user_discord_id = get_user_to_discord_mapping()
     user_roles = []
     for mile in milestones[::-1]:
-        print("----", mile, 'stories', "----")
+        print("----", mile, "stories", "----")
         d = data[data.number >= mile]
         for i, author in d.iterrows():
-            print(i, author.number, f"({len(data0[data0.author == i])})", user_discord_id.get(i, "none"))
+            print(
+                i,
+                author.number,
+                f"({len(data0[data0.author == i])})",
+                user_discord_id.get(i, "none"),
+            )
             if user_discord_id.get(i, None):
                 user_roles.append([user_discord_id.get(i), mile])
         data = data[data.number < mile]
     print(user_roles)
     return user_roles
+
 
 def get_milestone_grouped2():
     data, data0 = join_and_group_data()
@@ -99,15 +153,21 @@ def get_milestone_grouped2():
     user_discord_id = get_user_to_discord_mapping()
     user_roles = []
     for mile in milestones[::-1]:
-        print("----", mile, 'stories', "----")
+        print("----", mile, "stories", "----")
         d = data[data.number >= mile]
         for i, author in d.iterrows():
-            print(i, author.number, f"({len(data0[data0.author == i])})", user_discord_id.get(i, "none"))
+            print(
+                i,
+                author.number,
+                f"({len(data0[data0.author == i])})",
+                user_discord_id.get(i, "none"),
+            )
             if not user_discord_id.get(i, None):
                 user_roles.append([i, mile])
         data = data[data.number < mile]
     print(user_roles)
     return user_roles
+
 
 if __name__ == "__main__":
     get_milestone_grouped()
