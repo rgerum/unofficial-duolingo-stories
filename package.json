@@ -30,7 +30,6 @@
     "base64-arraybuffer": "^1.0.2",
     "better-auth": "1.4.9",
     "bufferutil": "^4.1.0",
-    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "codemirror": "^6.0.2",
     "convex": "^1.32.0",
