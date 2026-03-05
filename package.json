@@ -13,7 +13,8 @@
     "optimize:flags": "pnpm dlx svgo -f flags --multipass",
     "init": "node database/db_create_test.mjs",
     "init-build": "node database/init_build.js",
-    "init-reset": "node database/db_test_reset.mjs"
+    "init-reset": "node database/db_test_reset.mjs",
+    "audit:missing-story-images": "pnpm exec tsx scripts/find-missing-story-images.ts"
   },
   "dependencies": {
     "@aws-sdk/client-polly": "^3.995.0",
