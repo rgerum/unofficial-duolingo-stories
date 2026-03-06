@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import StoryProgress from "@/components/StoryProgress";
 import { useNavigationMode } from "@/components/NavigationModeProvider";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import { getStoryCourseReturnHref } from "@/lib/story-course-return-href";
 import posthog from "posthog-js";
 
 export default function StoryWrapper({
@@ -57,8 +58,7 @@ export default function StoryWrapper({
       learning_language: story.learning_language_long,
     });
     await storyFinishedIndexUpdate();
-    const setHash = story.set_id > 0 ? `#${story.set_id}` : "";
-    router.push(`/${story.course_short}${setHash}`);
+    router.push(getStoryCourseReturnHref(story));
   }
 
   return (

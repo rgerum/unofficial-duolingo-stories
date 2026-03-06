@@ -24,6 +24,7 @@ import {
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import { getStoryCourseReturnHref } from "@/lib/story-course-return-href";
 
 function getComponent(parts: StoryElement[]) {
   const last_part = parts[parts.length - 1];
@@ -228,7 +229,7 @@ function StoryProgress({
       <div>
         {!settings.show_all && (
           <HeaderProgress
-            course_short={story.course_short}
+            courseReturnHref={getStoryCourseReturnHref(story)}
             progress={storyProgress}
             length={storyProgress === -1 ? undefined : parts_list.length}
           />
@@ -288,11 +289,11 @@ function StoryProgress({
 }
 
 function HeaderProgress({
-  course_short,
+  courseReturnHref,
   progress,
   length,
 }: {
-  course_short: string;
+  courseReturnHref: string;
   progress: number;
   length?: number;
 }) {
@@ -301,7 +302,7 @@ function HeaderProgress({
       <Link
         className={styles.header_close}
         data-cy="quit"
-        href={`/${course_short}`}
+        href={courseReturnHref}
       >
         <VisuallyHidden>Back to Course Page</VisuallyHidden>
       </Link>
