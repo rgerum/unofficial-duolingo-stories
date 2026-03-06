@@ -6,10 +6,11 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
 
 export const metadata = {
-  title: "Duostories FAQ",
-  description: "Information about the duostories project.",
+  title: "Learn with Duostories",
+  description:
+    "Sign in to track your progress or continue anonymously and learn with Duostories.",
   alternates: {
-    canonical: "https://duostories.org/faq",
+    canonical: "https://duostories.org/learn",
   },
 };
 
