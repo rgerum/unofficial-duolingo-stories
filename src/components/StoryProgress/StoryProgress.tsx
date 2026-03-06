@@ -229,6 +229,7 @@ function StoryProgress({
         {!settings.show_all && (
           <HeaderProgress
             course_short={story.course_short}
+            set_id={story.set_id}
             progress={storyProgress}
             length={storyProgress === -1 ? undefined : parts_list.length}
           />
@@ -289,20 +290,21 @@ function StoryProgress({
 
 function HeaderProgress({
   course_short,
+  set_id,
   progress,
   length,
 }: {
   course_short: string;
+  set_id: number;
   progress: number;
   length?: number;
 }) {
+  const courseHref =
+    set_id > 0 ? `/${course_short}#${set_id}` : `/${course_short}`;
+
   return (
     <div className={styles.header}>
-      <Link
-        className={styles.header_close}
-        data-cy="quit"
-        href={`/${course_short}`}
-      >
+      <Link className={styles.header_close} data-cy="quit" href={courseHref}>
         <VisuallyHidden>Back to Course Page</VisuallyHidden>
       </Link>
       {length !== undefined && (
