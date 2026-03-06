@@ -2,12 +2,19 @@
 import React from "react";
 import { useInput } from "@/lib/hooks";
 import Header from "../header";
-import styles from "./profile.module.css";
 import ProviderButton from "./button";
 import Link from "next/link";
 import { ProfileData } from "@/app/(stories)/(main)/profile/page";
 import Button from "@/components/ui/button";
+import Input from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+
+const sectionHeadingClass =
+  "mt-7 mb-2.5 text-left text-[calc(28/16*1rem)] font-bold leading-[1.2] max-[480px]:mt-[22px] max-[480px]:text-[calc(24/16*1rem)]";
+const successMessageClass = "mt-2 block text-[var(--button-border)]";
+const errorMessageClass = "mt-2 block text-[var(--error-red)]";
+const roleBadgeClass =
+  "mx-[5px] rounded-[10px] bg-[var(--header-border)] px-[10px] py-[5px]";
 
 export default function Profile({ providers }: { providers: ProfileData }) {
   let [username, setUsername] = useInput(providers.username || providers.name);
@@ -145,14 +152,21 @@ export default function Profile({ providers }: { providers: ProfileData }) {
         <h1>Profile</h1>
         <p>Your user profile, its assigned roles and linked login accounts.</p>
       </Header>
-      <div className={styles.profile}>
+      <div>
         <div>
-          Username: <input value={username} onChange={setUsername} />
+          <label className="block">
+            <span>Username:</span>
+            <Input
+              className="mt-2 max-w-full"
+              value={username}
+              onChange={setUsername}
+            />
+          </label>
           {usernameState === "error" && (
-            <span className={styles.resetError}>{usernameError}</span>
+            <span className={errorMessageClass}>{usernameError}</span>
           )}
           {usernameState === "success" && (
-            <span className={styles.resetMessage}>Username saved.</span>
+            <span className={successMessageClass}>Username saved.</span>
           )}
           <Button
             type="button"
@@ -166,38 +180,49 @@ export default function Profile({ providers }: { providers: ProfileData }) {
           </Button>
         </div>
         <div>
-          Email: <input value={providers.email} readOnly />
+          <label className="block">
+            <span>Email:</span>
+            <Input
+              className="mt-2 max-w-full"
+              value={providers.email}
+              readOnly
+            />
+          </label>
         </div>
-        <div className={styles.roles}>
+        <div className="mt-2.5">
           {providers.role.length ? (
-            providers.role.map((d, i) => <span key={i}>{d}</span>)
+            providers.role.map((d, i) => (
+              <span key={i} className={roleBadgeClass}>
+                {d}
+              </span>
+            ))
           ) : (
             <></>
           )}
         </div>
 
-        <h2 className={styles.sectionHeading}>Linked Accounts</h2>
+        <h2 className={sectionHeadingClass}>Linked Accounts</h2>
         <span>
           When you have linked your account to a login provider you can use
           these providers instead of login in with username and password or
           email.
         </span>
-        <div className={styles.links}>
+        <div className="mt-2.5 flex flex-wrap items-center justify-center">
           {Object.entries(providers.provider_linked).map(([key, value]) => (
             <ProviderButton key={key} d={key} value={value} />
           ))}
         </div>
 
-        <h2 className={styles.sectionHeading}>Change Password</h2>
+        <h2 className={sectionHeadingClass}>Change Password</h2>
         <p>
           For security, we will email you a password reset link instead of
           changing your password directly here.
         </p>
         {resetState === "error" && (
-          <span className={styles.resetError}>{resetError}</span>
+          <span className={errorMessageClass}>{resetError}</span>
         )}
         {resetState === "success" && (
-          <span className={styles.resetMessage} data-cy="profile-reset-message">
+          <span className={successMessageClass} data-cy="profile-reset-message">
             Check your email for the password reset link.
           </span>
         )}
@@ -211,19 +236,20 @@ export default function Profile({ providers }: { providers: ProfileData }) {
           {resetState === "pending" ? "Sending..." : "Send Password Reset Link"}
         </Button>
 
-        <h2 className={styles.sectionHeading}>Change Email</h2>
+        <h2 className={sectionHeadingClass}>Change Email</h2>
         <p>
           Enter your new email address. For safety, email changes are processed
           in two steps.
         </p>
         {pendingEmailChange && (
-          <span className={styles.resetMessage} data-cy="profile-email-pending">
+          <span className={successMessageClass} data-cy="profile-email-pending">
             Current email: {providers.email}. Pending change:{" "}
             {pendingEmailChange}. Confirm the link sent to your new email to
             complete the update.
           </span>
         )}
-        <input
+        <Input
+          className="mt-2 max-w-full"
           type="email"
           value={newEmail}
           onChange={setNewEmail}
@@ -231,10 +257,10 @@ export default function Profile({ providers }: { providers: ProfileData }) {
           data-cy="profile-new-email"
         />
         {emailState === "error" && (
-          <span className={styles.resetError}>{emailError}</span>
+          <span className={errorMessageClass}>{emailError}</span>
         )}
         {emailState === "success" && (
-          <span className={styles.resetMessage} data-cy="profile-email-message">
+          <span className={successMessageClass} data-cy="profile-email-message">
             Check your current email, then your new email for confirmation
             links.
           </span>
@@ -249,7 +275,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
           {emailState === "pending" ? "Sending..." : "Request Email Change"}
         </Button>
 
-        <h2 className={styles.sectionHeading}>Delete Account</h2>
+        <h2 className={sectionHeadingClass}>Delete Account</h2>
         <p>
           If you want to delete your account, please contact use on{" "}
           <Link href="https://discord.gg/4NGVScARR3">Discord</Link>. We will

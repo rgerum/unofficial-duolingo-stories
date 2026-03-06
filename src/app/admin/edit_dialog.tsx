@@ -1,4 +1,3 @@
-import styled from "styled-components";
 import React from "react";
 import {
   Dialog,
@@ -8,6 +7,7 @@ import {
   DialogTitle as UiDialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 export const Root = Dialog;
 export const Trigger = DialogTrigger;
@@ -15,136 +15,138 @@ export const Trigger = DialogTrigger;
 export function Content({ children }: { children: React.ReactNode }) {
   return (
     <DialogContent showCloseButton={false}>
-      <ContentInner>
+      <div className="relative overflow-x-hidden p-[25px] max-[700px]:p-4">
         {children}
         <DialogClose asChild>
-          <IconButton aria-label="Close">
-            <X />
-          </IconButton>
+          <button
+            aria-label="Close"
+            className="absolute right-0 top-0 m-2 grid place-content-center rounded-full bg-transparent p-2"
+          >
+            <span
+              aria-hidden="true"
+              className="inline-block h-[18px] w-[18px] align-middle"
+              style={{
+                backgroundImage:
+                  "url(//d35aaqx5ub95lt.cloudfront.net/images/icon-sprite8.svg)",
+                backgroundPosition: "-373px -154px",
+              }}
+            />
+          </button>
         </DialogClose>
-      </ContentInner>
+      </div>
     </DialogContent>
   );
 }
 
-export const DialogTitle = styled(UiDialogTitle)`
-  margin: 0 0 16px;
-`;
+export function DialogTitle({
+  className,
+  ...props
+}: React.ComponentProps<typeof UiDialogTitle>) {
+  return <UiDialogTitle className={cn("mb-4", className)} {...props} />;
+}
 
-export const DialogDescription = styled(UiDialogDescription)`
-  margin: 10px 0 20px;
-`;
+export function DialogDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof UiDialogDescription>) {
+  return (
+    <UiDialogDescription
+      className={cn("my-[10px] mb-5", className)}
+      {...props}
+    />
+  );
+}
 
-export const Button = styled.button`
-  text-transform: uppercase;
-  padding: 13px 30px;
-  background: var(--button-background);
-  border-radius: 15px;
-  font-weight: 700;
-  font-size: 1rem;
+export function Button({
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      className={cn(
+        "rounded-[15px] border-none border-b-4 border-[var(--button-border)] bg-[var(--button-background)] px-[30px] py-[13px] text-[1rem] font-bold uppercase text-[var(--button-color)]",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 
-  color: var(--button-color);
-  border-color: var(--button-border);
-  border: none;
-  border-bottom: 4px solid var(--button-border);
-`;
+export function Fieldset({
+  className,
+  ...props
+}: React.FieldsetHTMLAttributes<HTMLFieldSetElement>) {
+  return (
+    <fieldset
+      className={cn(
+        "mb-[10px] grid w-full grid-cols-[110px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 border-0 p-0 max-[700px]:grid-cols-1 max-[700px]:gap-y-1.5",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 
-const ContentInner = styled.div`
-  position: relative;
-  padding: 25px;
-  overflow-x: hidden;
+export function Label({
+  className,
+  ...props
+}: React.LabelHTMLAttributes<HTMLLabelElement>) {
+  return (
+    <label
+      className={cn(
+        "overflow-hidden text-right text-[calc(16/16*1rem)] whitespace-nowrap text-ellipsis max-[700px]:text-left",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 
-  @media (max-width: 700px) {
-    padding: 16px;
+const dialogInputClassName =
+  "w-full min-w-0 rounded-[16px] border-2 border-[var(--input-border)] bg-[var(--input-background)] px-[17px] py-[10px] text-[calc(16/16*1rem)] text-[var(--text-color)] outline-none";
+
+export const Input = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(function Input({ className, type, ...props }, ref) {
+  if (type === "checkbox") {
+    return (
+      <input
+        ref={ref}
+        type="checkbox"
+        className={cn(
+          "h-5 w-5 min-w-5 justify-self-start rounded border-2 border-[var(--input-border)] bg-[var(--input-background)] p-0",
+          className,
+        )}
+        {...props}
+      />
+    );
   }
-`;
 
-const IconButton = styled.button`
-  background: none;
-  border: none;
-  display: grid;
-  place-content: center;
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 8px;
-  margin: 8px;
-  border-radius: 100vw;
-`;
+  return (
+    <input
+      ref={ref}
+      type={type}
+      className={cn(dialogInputClassName, className)}
+      {...props}
+    />
+  );
+});
 
-export const Fieldset = styled.fieldset`
-  display: grid;
-  grid-template-columns: 110px minmax(0, 1fr);
-  column-gap: 16px;
-  row-gap: 8px;
-  align-items: center;
-  border: 0;
-  width: 100%;
-  padding: 0;
-  margin: 0 0 10px;
-
-  @media (max-width: 700px) {
-    grid-template-columns: 1fr;
-    row-gap: 6px;
-    margin-bottom: 10px;
-  }
-`;
-
-export const Label = styled.label`
-  font-size: calc(16 / 16 * 1rem);
-  text-align: right;
-
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-
-  @media (max-width: 700px) {
-    text-align: left;
-  }
-`;
-
-export const Input = styled.input`
-  background: var(--input-background);
-  border: 2px solid var(--input-border);
-  color: var(--text-color);
-  border-radius: 16px;
-  padding: 10px 17px;
-  font: revert;
-  font-size: calc(16 / 16 * 1rem);
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-
-  &[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    padding: 0;
-    justify-self: start;
-  }
-`;
-
-const InputArea = styled.textarea`
-  background: var(--input-background);
-  color: var(--text-color);
-  border: 2px solid var(--input-border);
-  border-radius: 16px;
-  padding: 10px 17px;
-  flex: 1;
-  font-size: 1rem;
-  width: 100%;
-  min-width: 0;
-`;
-
-const X = styled.div`
-  background-image: url(//d35aaqx5ub95lt.cloudfront.net/images/icon-sprite8.svg);
-  background-position: -373px -154px;
-  cursor: pointer;
-  display: inline-block;
-  height: 18px;
-  vertical-align: middle;
-  width: 18px;
-`;
+function InputArea({
+  className,
+  ...props
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      className={cn(
+        "w-full min-w-0 rounded-[16px] border-2 border-[var(--input-border)] bg-[var(--input-background)] px-[17px] py-[10px] text-[1rem] text-[var(--text-color)] outline-none",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 
 export function InputText({
   name,

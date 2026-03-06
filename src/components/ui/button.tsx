@@ -1,66 +1,52 @@
-import styled from "styled-components";
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-export default function Button({
-  children,
-  primary = false,
-  variant: _variant,
-  ...delegated
-}: {
+type ButtonProps = {
   children: React.ReactNode;
   primary?: boolean;
   variant?: string;
-} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  const ButtonComponent = primary ? ButtonBlueStyled : ButtonStyled;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
+
+export default React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    children,
+    primary = false,
+    variant: _variant,
+    className,
+    disabled,
+    ...props
+  },
+  ref,
+) {
+  const isDisabled = Boolean(disabled);
 
   return (
-    <ButtonComponent {...delegated}>
-      <Wrapper>{children}</Wrapper>
-    </ButtonComponent>
+    <button
+      ref={ref}
+      className={cn(
+        "mt-1 rounded-[15px] p-0 transition-[filter,transform] duration-100",
+        primary
+          ? "bg-[var(--button-blue-border)] text-[var(--button-blue-color)]"
+          : "bg-[var(--button-border)] text-[var(--button-color)]",
+        isDisabled &&
+          "cursor-not-allowed bg-[var(--button-inactive-background)] text-[var(--button-inactive-color)]",
+        className,
+      )}
+      disabled={disabled}
+      {...props}
+    >
+      <span
+        className={cn(
+          "block rounded-[inherit] px-[30px] py-[10px] text-[1rem] font-bold uppercase transition-transform duration-100",
+          isDisabled
+            ? "bg-[var(--button-inactive-background)] translate-y-0"
+            : primary
+              ? "bg-[var(--button-blue-background)] -translate-y-1 hover:-translate-y-[5px] active:-translate-y-0.5"
+              : "bg-[var(--button-background)] -translate-y-1 hover:-translate-y-[5px] active:-translate-y-0.5",
+        )}
+      >
+        {children}
+      </span>
+    </button>
   );
-}
-
-const ButtonStyled = styled.button`
-  border: 0;
-  padding: 0;
-  margin-top: 4px;
-  border-radius: 15px;
-  transition:
-    0.1s box-shadow,
-    0.1s transform;
-  color: var(--button-color);
-
-  background-color: var(--button-border);
-  --foreground-color: var(--button-background);
-`;
-
-const Wrapper = styled.span`
-  display: block;
-
-  padding: 10px 30px;
-  border-radius: inherit;
-
-  text-transform: uppercase;
-  font-weight: 700;
-  font-size: 1rem;
-
-  background: var(--foreground-color);
-
-  transform: translateY(-4px);
-  transition: transform 500ms ease-out;
-
-  ${ButtonStyled}:hover & {
-    filter: brightness(1.1);
-    transform: translateY(-5px);
-    transition: transform 100ms;
-  }
-  ${ButtonStyled}:active & {
-    transform: translateY(-2px);
-    transition: transform 50ms ease-out;
-  }
-`;
-
-const ButtonBlueStyled = styled(ButtonStyled)`
-  --foreground-color: var(--button-blue-background);
-  color: var(--button-blue-color);
-  background-color: var(--button-blue-border);
-`;
+});

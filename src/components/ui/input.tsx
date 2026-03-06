@@ -1,35 +1,27 @@
-import styled from "styled-components";
-import React from "react";
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-export default function Input({
-  label = "",
-  ...delegated
-}: { label?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
-  if (label) {
-    return (
-      <Label>
-        <span>{label}</span>
-        <InputField {...delegated} />
-      </Label>
-    );
-  }
-  return <InputField {...delegated} />;
-}
+type InputProps = {
+  label?: string;
+} & React.InputHTMLAttributes<HTMLInputElement>;
 
-const Label = styled.label`
-  display: inline-flex;
-  flex-direction: row;
-  gap: 8px;
-  align-items: baseline;
-`;
+const inputClassName =
+  "w-full rounded-[16px] border-2 border-[var(--input-border)] bg-[var(--input-background)] px-[17px] py-[10px] text-[calc(16/16*1rem)] text-[var(--text-color)] outline-none transition focus:border-[color:color-mix(in_srgb,var(--link-blue)_45%,var(--input-border))] focus:ring-2 focus:ring-[color:color-mix(in_srgb,var(--link-blue)_12%,transparent)]";
 
-const InputField = styled.input`
-  background: var(--input-background);
-  border: 2px solid var(--input-border);
-  color: var(--text-color);
-  border-radius: 16px;
-  padding: 10px 17px;
-  font: revert;
-  font-size: calc(16 / 16 * 1rem);
-  flex: 1;
-`;
+export default React.forwardRef<HTMLInputElement, InputProps>(function Input(
+  { label = "", className, ...props },
+  ref,
+) {
+  const input = (
+    <input ref={ref} className={cn(inputClassName, className)} {...props} />
+  );
+
+  if (!label) return input;
+
+  return (
+    <label className="inline-flex items-baseline gap-2">
+      <span>{label}</span>
+      {input}
+    </label>
+  );
+});

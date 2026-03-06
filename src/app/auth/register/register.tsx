@@ -7,16 +7,15 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
-import { authInlineLinkClass } from "@/components/auth/styles";
+import {
+  authAlertErrorClass,
+  authAlertInfoClass,
+  authHeadingClass,
+  authInlineLinkClass,
+  authParagraphClass,
+} from "@/components/auth/styles";
 
 export default function Register() {
-  const headingClass = "m-0 text-[calc(32/16*1rem)] font-bold";
-  const paragraphClass = "m-0";
-  const alertErrorClass =
-    "block w-full rounded-[10px] bg-[var(--error-red)] p-[10px] text-white";
-  const alertMessageClass =
-    "block w-full rounded-[10px] bg-[var(--button-blue-background)] p-[10px] text-white";
-
   const [state, setState] = React.useState(0);
   const [error, setError] = React.useState("");
   const [message, setMessage] = React.useState("");
@@ -88,17 +87,17 @@ export default function Register() {
         <link rel="canonical" href={`https://duostories.org/login`} />
       </Head>
 
-      <h1 className={headingClass}>Sign up</h1>
-      <p className={paragraphClass}>
+      <h1 className={authHeadingClass}>Sign up</h1>
+      <p className={authParagraphClass}>
         If you register you can keep track of the stories you have already
         finished.
       </p>
-      <p className={paragraphClass}>
+      <p className={authParagraphClass}>
         Registration is optional, stories can be accessed even without login.
       </p>
-      {state === -1 && <span className={alertErrorClass}>{error}</span>}
+      {state === -1 && <span className={authAlertErrorClass}>{error}</span>}
       {state === 2 && (
-        <span className={alertMessageClass} data-cy="message-confirm">
+        <span className={authAlertInfoClass} data-cy="message-confirm">
           {message}
         </span>
       )}
@@ -137,7 +136,7 @@ export default function Register() {
           </Button>
         </form>
       )}
-      <p className={paragraphClass}>
+      <p className={authParagraphClass}>
         Already have an account?{" "}
         <Link className={authInlineLinkClass} href="/auth/signin">
           Log in

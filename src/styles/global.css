@@ -5,40 +5,45 @@
 ---break---*/
 @custom-variant dark (&:is(.dark *));
 
-html {
-  height: 100%;
-}
-body {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  min-height: 100%;
-  height: 100%;
-  line-height: 1.6;
+@layer base {
+  html {
+    height: 100%;
+  }
 
-  font-family: var(--font-nunito);
-}
+  body {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    min-height: 100%;
+    height: 100%;
+    line-height: 1.6;
+    font-family: var(--font-nunito);
+    color: var(--text-color);
+    background: var(--body-background);
+    font-size: calc(19 / 16 * 1rem);
+  }
 
-* {
-  box-sizing: border-box;
-}
+  * {
+    box-sizing: border-box;
+  }
 
-a {
-  color: var(--text-color);
-}
+  a {
+    color: var(--text-color);
+  }
 
-a:hover {
-  color: var(--link-hover);
-}
+  a:hover {
+    color: var(--link-hover);
+  }
 
-h1 {
-  width: 100%;
-  text-align: center;
-}
+  h1 {
+    width: 100%;
+    text-align: center;
+  }
 
-hr {
-  border: 0;
-  border-top: 2px solid var(--overview-hr);
+  hr {
+    border: 0;
+    border-top: 2px solid var(--overview-hr);
+  }
 }
 
 .duostories_title {
@@ -49,12 +54,6 @@ hr {
   font-weight: bold;
   font-size: 29px;
   text-decoration: none;
-}
-
-body {
-  color: var(--text-color);
-  background: var(--body-background);
-  font-size: calc(19 / 16 * 1rem);
 }
 /*
 outline-width: 2px;
