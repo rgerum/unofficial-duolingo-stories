@@ -15,7 +15,8 @@
     "init-build": "node database/init_build.js",
     "init-reset": "node database/db_test_reset.mjs",
     "download:story-images": "pnpm exec tsx scripts/download-story-images.ts",
-    "download:avatar-images": "pnpm exec tsx scripts/download-avatar-images.ts"
+    "download:avatar-images": "pnpm exec tsx scripts/download-avatar-images.ts",
+    "audit:missing-story-images": "pnpm exec tsx scripts/find-missing-story-images.ts"
   },
   "dependencies": {
     "@aws-sdk/client-polly": "^3.995.0",

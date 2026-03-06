@@ -4,39 +4,17 @@ import schema from "./schema";
 import { query } from "./_generated/server";
 import { v } from "convex/values";
 
-const adminFilterValidator = v.union(
+const activatedFilterValidator = v.union(
   v.literal("all"),
   v.literal("yes"),
   v.literal("no"),
 );
-
-type FilterValue = "all" | "yes" | "no";
-
-function matchesRoleAndAdminFilters(
-  role: string | null | undefined,
-  roleFilter: FilterValue,
-  adminFilter: FilterValue,
-): boolean {
-  const normalizedRole = role ?? null;
-  if (adminFilter === "yes") return normalizedRole === "admin";
-  if (roleFilter === "yes") {
-    if (adminFilter === "no") return normalizedRole === "contributor";
-    return normalizedRole === "contributor" || normalizedRole === "admin";
-  }
-  if (roleFilter === "no") {
-    return normalizedRole !== "contributor" && normalizedRole !== "admin";
-  }
-  if (adminFilter === "no") return normalizedRole !== "admin";
-  return true;
-}
-
-function matchesActivatedFilter(value: unknown, filter: FilterValue): boolean {
-  if (filter === "all") return true;
-  const activated = Boolean(value);
-  return filter === "yes" ? activated : !activated;
-}
-
-const SEARCH_FETCH_CAP = 1000;
+const roleFilterValidator = v.union(
+  v.literal("all"),
+  v.literal("user"),
+  v.literal("contributor"),
+  v.literal("admin"),
+);
 
 export const get = query({
   args: {
@@ -47,111 +25,139 @@ export const get = query({
   },
 });
 
+export const searchUsersById = query({
+  args: {
+    activatedFilter: activatedFilterValidator,
+    roleFilter: roleFilterValidator,
+    id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db
+      .query("user")
+      .withIndex("userId", (q) => q.eq("userId", args.id));
+    if (args.roleFilter === "admin") {
+      query = query.filter((q) => q.eq(q.field("role"), "admin"));
+    } else if (args.roleFilter === "contributor") {
+      query = query.filter((q) => q.eq(q.field("role"), "contributor"));
+    } else if (args.roleFilter === "user") {
+      query = query.filter((q) =>
+        q.and(
+          q.neq(q.field("role"), "admin"),
+          q.neq(q.field("role"), "contributor"),
+        ),
+      );
+    }
+    if (args.activatedFilter === "yes") {
+      query = query.filter((q) => q.eq(q.field("emailVerified"), true));
+    } else if (args.activatedFilter === "no") {
+      query = query.filter((q) => q.eq(q.field("emailVerified"), false));
+    }
+    return query.take(1);
+  },
+});
+
 export const searchUsersByEmailPrefix = query({
   args: {
-    prefix: v.string(),
-    offset: v.number(),
+    activatedFilter: activatedFilterValidator,
+    roleFilter: roleFilterValidator,
     limit: v.number(),
-    activatedFilter: adminFilterValidator,
-    roleFilter: adminFilterValidator,
-    adminFilter: adminFilterValidator,
+    prefix: v.string(),
   },
-  returns: v.object({
-    page: v.array(v.any()),
-    hasMore: v.boolean(),
-  }),
   handler: async (ctx, args) => {
     const search = args.prefix.trim();
-    if (search.length === 0) return { page: [], hasMore: false };
-
-    const offset = Math.max(0, Math.floor(args.offset));
-    const limit = Math.max(1, Math.min(200, Math.floor(args.limit)));
-    const fetchLimit = Math.min(SEARCH_FETCH_CAP, offset + limit + 200);
-    const searchRows = await ctx.db
-      .query("user")
-      .withSearchIndex("search_email", (q) => {
-        let built = q.search("email", search);
-        if (args.adminFilter === "yes") {
-          built = built.eq("role", "admin");
-        } else if (args.roleFilter === "yes" && args.adminFilter === "no") {
-          built = built.eq("role", "contributor");
-        }
-        if (args.activatedFilter === "yes") {
-          built = built.eq("emailVerified", true);
-        } else if (args.activatedFilter === "no") {
-          built = built.eq("emailVerified", false);
-        }
-        return built;
-      })
-      .take(fetchLimit);
-
-    const filtered = searchRows.filter(
-      (user) =>
-        matchesRoleAndAdminFilters(
-          user.role,
-          args.roleFilter,
-          args.adminFilter,
-        ) && matchesActivatedFilter(user.emailVerified, args.activatedFilter),
-    );
-    const page = filtered.slice(offset, offset + limit);
-    const hasMore =
-      filtered.length > offset + limit || searchRows.length === fetchLimit;
-
-    return { page, hasMore };
+    if (search.length === 0) return [];
+    let query = ctx.db.query("user").withSearchIndex("search_email", (q) => {
+      let built = q.search("email", search);
+      if (args.roleFilter === "admin" || args.roleFilter === "contributor") {
+        built = built.eq("role", args.roleFilter);
+      }
+      if (args.activatedFilter === "yes") {
+        built = built.eq("emailVerified", true);
+      } else if (args.activatedFilter === "no") {
+        built = built.eq("emailVerified", false);
+      }
+      return built;
+    });
+    if (args.roleFilter === "user") {
+      query = query.filter((q) =>
+        q.and(
+          q.neq(q.field("role"), "admin"),
+          q.neq(q.field("role"), "contributor"),
+        ),
+      );
+    }
+    return query.take(args.limit);
   },
 });
 
 export const searchUsersByUsernamePrefix = query({
   args: {
-    prefix: v.string(),
-    offset: v.number(),
+    activatedFilter: activatedFilterValidator,
+    roleFilter: roleFilterValidator,
     limit: v.number(),
-    activatedFilter: adminFilterValidator,
-    roleFilter: adminFilterValidator,
-    adminFilter: adminFilterValidator,
+    prefix: v.string(),
   },
-  returns: v.object({
-    page: v.array(v.any()),
-    hasMore: v.boolean(),
-  }),
   handler: async (ctx, args) => {
     const search = args.prefix.trim();
-    if (search.length === 0) return { page: [], hasMore: false };
+    if (search.length === 0) return [];
+    let query = ctx.db.query("user").withSearchIndex("search_username", (q) => {
+      let built = q.search("username", search);
+      if (args.roleFilter === "admin" || args.roleFilter === "contributor") {
+        built = built.eq("role", args.roleFilter);
+      }
+      if (args.activatedFilter === "yes") {
+        built = built.eq("emailVerified", true);
+      } else if (args.activatedFilter === "no") {
+        built = built.eq("emailVerified", false);
+      }
+      return built;
+    });
+    if (args.roleFilter === "user") {
+      query = query.filter((q) =>
+        q.and(
+          q.neq(q.field("role"), "admin"),
+          q.neq(q.field("role"), "contributor"),
+        ),
+      );
+    }
+    return query.take(args.limit);
+  },
+});
 
-    const offset = Math.max(0, Math.floor(args.offset));
-    const limit = Math.max(1, Math.min(200, Math.floor(args.limit)));
-    const fetchLimit = Math.min(SEARCH_FETCH_CAP, offset + limit + 200);
-    const searchRows = await ctx.db
-      .query("user")
-      .withSearchIndex("search_username", (q) => {
-        let built = q.search("username", search);
-        if (args.adminFilter === "yes") {
-          built = built.eq("role", "admin");
-        } else if (args.roleFilter === "yes" && args.adminFilter === "no") {
-          built = built.eq("role", "contributor");
-        }
-        if (args.activatedFilter === "yes") {
-          built = built.eq("emailVerified", true);
-        } else if (args.activatedFilter === "no") {
-          built = built.eq("emailVerified", false);
-        }
-        return built;
-      })
-      .take(fetchLimit);
-
-    const filtered = searchRows.filter(
-      (user) =>
-        matchesRoleAndAdminFilters(
-          user.role,
-          args.roleFilter,
-          args.adminFilter,
-        ) && matchesActivatedFilter(user.emailVerified, args.activatedFilter),
-    );
-    const page = filtered.slice(offset, offset + limit);
-    const hasMore =
-      filtered.length > offset + limit || searchRows.length === fetchLimit;
-
-    return { page, hasMore };
+export const searchUsersAll = query({
+  args: {
+    activatedFilter: activatedFilterValidator,
+    roleFilter: roleFilterValidator,
+    limit: v.number(),
+  },
+  handler: async (ctx, args) => {
+    if (args.roleFilter === "admin" || args.roleFilter === "contributor") {
+      let query = ctx.db
+        .query("user")
+        .withIndex("role", (q) => q.eq("role", args.roleFilter))
+        .order("desc");
+      if (args.activatedFilter === "yes") {
+        query = query.filter((q) => q.eq(q.field("emailVerified"), true));
+      } else if (args.activatedFilter === "no") {
+        query = query.filter((q) => q.eq(q.field("emailVerified"), false));
+      }
+      return query.take(args.limit);
+    }
+    let query = ctx.db.query("user").order("desc");
+    if (args.roleFilter === "user") {
+      query = query.filter((q) =>
+        q.and(
+          q.neq(q.field("role"), "admin"),
+          q.neq(q.field("role"), "contributor"),
+        ),
+      );
+    }
+    if (args.activatedFilter === "yes") {
+      query = query.filter((q) => q.eq(q.field("emailVerified"), true));
+    } else if (args.activatedFilter === "no") {
+      query = query.filter((q) => q.eq(q.field("emailVerified"), false));
+    }
+    return query.take(args.limit);
   },
 });
 
