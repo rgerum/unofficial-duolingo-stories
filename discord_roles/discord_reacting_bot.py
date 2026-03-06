@@ -1,44 +1,49 @@
-import discord
+i```mport discord
+import json
+from urllib import error, request
 from pathlib import Path
 
-import mysql.connector
-import pandas as pd
-import psycopg
+def parse_env_file(path):
+    values = {}
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        values[key] = value
+    return values
 
 
-def get_duostories_id(discord_id):
-    # Connect to an existing database
-    with psycopg.connect(PG_URL) as conn:
-        # Open a cursor to perform database operations
-        with conn.cursor() as cur:
-            # Query the database and obtain data as Python objects.
-            cur.execute("SELECT \"userId\" FROM accounts WHERE provider = 'discord' AND \"providerAccountId\" = %s LIMIT 1", [str(discord_id)])
-            if cur:
-                return cur.fetchone()[0]
+def sync_user_role(discord_id, write=None):
+    payload = {
+        "secret": CONVEX_DISCORD_SYNC_SECRET,
+        "discordAccountId": str(discord_id),
+        "write": write if write is None else bool(write),
+    }
+    req = request.Request(
+        CONVEX_DISCORD_SYNC_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
 
-def set_user_role(discord_id, role):
-    # Connect to an existing database
-    with psycopg.connect(PG_URL) as conn:
-        # Open a cursor to perform database operations
-        with conn.cursor() as cur:
-            cur.execute("UPDATE users SET role = %s WHERE users.id = (SELECT \"userId\" FROM accounts WHERE provider = 'discord' AND \"providerAccountId\" = %s LIMIT 1);", [role == 1, str(discord_id)])
-            conn.commit()
-
-        # Open a cursor to perform database operations
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT \"userId\", users.name, role FROM accounts JOIN users ON \"userId\" = users.id WHERE provider = 'discord' AND \"providerAccountId\" = %s LIMIT 1",
-                [str(discord_id)])
-            if cur:
-                return cur.fetchone()
+    try:
+        with request.urlopen(req, timeout=10) as resp:
+            body = json.loads(resp.read().decode("utf-8"))
+            return body
+    except error.HTTPError as err:
+        details = err.read().decode("utf-8")
+        raise RuntimeError(f"convex sync failed: HTTP {err.code}: {details}") from err
+    except Exception as err:
+        raise RuntimeError(f"convex sync failed: {err}") from err
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token obtained from the Discord Developer Portal.
 params = Path(__file__).parent / ".env.local"
-params = {f.split("=")[0]:f.split("=")[1] for f in params.read_text().split("\n") if f != ''}
-
-PG_URL = params['POSTGRES_URL']
+params = parse_env_file(params)
 
 TOKEN = params['DISCORD_TOKEN']
+CONVEX_DISCORD_SYNC_URL = params['CONVEX_DISCORD_SYNC_URL']
+CONVEX_DISCORD_SYNC_SECRET = params['DISCORD_ROLE_SYNC_SECRET']
 CHANNEL_CONTRIBUTOR_REQUEST = 1132747276234792980
 #CHANNEL_CONTRIBUTOR_REQUEST = 1133167220109877280  # test channel
 CHANNEL_BOT_LOG = 1133529323396145172
@@ -61,8 +66,8 @@ class MyClient(discord.Client):
             first_message = await channel.fetch_message(channel.id)
 
             # check if they are connected
-            duostories_id = get_duostories_id(first_message.author.id)
-            if duostories_id:
+            result = sync_user_role(first_message.author.id, None)
+            if result.get("linked"):
                 await first_message.add_reaction('🔗')
                 await first_message.remove_reaction('✖️', client.user)
                 await first_message.remove_reaction('❌', client.user)
@@ -118,8 +123,8 @@ class MyClient(discord.Client):
                 await self.log(f"🧑‍💻️ I gave {user.name} the role {role_to_give.name}.")
                 print(f"Gave {user.name} the role: {role_to_give.name}")
 
-                duostories_id = get_duostories_id(user.id)
-                if duostories_id:
+                result = sync_user_role(user.id, None)
+                if result.get("linked"):
                     await message.channel.send("I gave you the **Contributor** role and activated your account on Duostories.\nIf you are currently logged in on <https://duostories.org>, please log out and in again for the changes to take effect.\nYou can then access the editor at <https://duostories.org/editor>.")
                 else:
                     await message.channel.send("I gave you the **Contributor** role and but I could not activate your account on Duostories as you haven't connected your duostories account to discord.")
@@ -138,9 +143,13 @@ class MyClient(discord.Client):
                 if role.id == ROLE_CONTRIBUTOR:
                     print("update database")
                     try:
-                        result = set_user_role(after.id, 1)
-                        if result is not None:
-                            await self.log(f"📝 added write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]} <https://duostories.org/admin/users/{result[0]}>")
+                        result = sync_user_role(after.id, True)
+                        user_data = result.get("user") if isinstance(result, dict) else None
+                        if result.get("linked") and user_data:
+                            role_name = user_data.get("role", "unknown")
+                            user_id = user_data.get("id")
+                            username = user_data.get("name", "")
+                            await self.log(f"📝 added write permissions for {after.name}. Duostories id={user_id} username={username} role={role_name} <https://duostories.org/admin/users/{user_id}>")
                         else:
                             await self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
@@ -156,9 +165,13 @@ class MyClient(discord.Client):
                 if role.id == ROLE_CONTRIBUTOR:
                     print("update database")
                     try:
-                        result = set_user_role(after.id, 0)
-                        if result is not None:
-                            await self.log(f"❌ removed write permissions for {after.name}. Duostories id={result[0]} username={result[1]} write={result[2]} <https://duostories.org/admin/users/{result[0]}>")
+                        result = sync_user_role(after.id, False)
+                        user_data = result.get("user") if isinstance(result, dict) else None
+                        if result.get("linked") and user_data:
+                            role_name = user_data.get("role", "unknown")
+                            user_id = user_data.get("id")
+                            username = user_data.get("name", "")
+                            await self.log(f"❌ removed write permissions for {after.name}. Duostories id={user_id} username={username} role={role_name} <https://duostories.org/admin/users/{user_id}>")
                         else:
                             await self.log(f"⚠️ could not remove write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
