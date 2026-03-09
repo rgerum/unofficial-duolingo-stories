@@ -1,4 +1,4 @@
-i```mport discord
+import discord
 import json
 from urllib import error, request
 from pathlib import Path
