@@ -66,16 +66,20 @@ class MyClient(discord.Client):
             first_message = await channel.fetch_message(channel.id)
 
             # check if they are connected
-            result = sync_user_role(first_message.author.id, None)
-            if result.get("linked"):
-                await first_message.add_reaction('🔗')
-                await first_message.remove_reaction('✖️', client.user)
-                await first_message.remove_reaction('❌', client.user)
-            else:
-                await first_message.add_reaction('❌')
-                await first_message.remove_reaction('🔗', client.user)
-                if message.id == first_message.id:
-                    await message.channel.send("Please connect your Duostories account to your Discord account (on <https://duostories.org/profile>). Then post another message here and I will check again.")
+            try:
+                result = sync_user_role(first_message.author.id, None)
+                if result.get("linked"):
+                    await first_message.add_reaction('🔗')
+                    await first_message.remove_reaction('✖️', client.user)
+                    await first_message.remove_reaction('❌', client.user)
+                else:
+                    await first_message.add_reaction('❌')
+                    await first_message.remove_reaction('🔗', client.user)
+                    if message.id == first_message.id:
+                        await message.channel.send("Please connect your Duostories account to your Discord account (on <https://duostories.org/profile>). Then post another message here and I will check again.")
+            except Exception as err:
+                print(err)
+                await self.log(f"⚠️ could not check Duostories account linkage for {first_message.author.name}, a database error occurred.")
 
     async def check_reaction(self, reaction):
         # Check if the reacting user is a moderator
