@@ -1,4 +1,4 @@
-i```mport discord
+import discord
 import json
 from urllib import error, request
 from pathlib import Path
@@ -123,11 +123,21 @@ class MyClient(discord.Client):
                 await self.log(f"🧑‍💻️ I gave {user.name} the role {role_to_give.name}.")
                 print(f"Gave {user.name} the role: {role_to_give.name}")
 
-                result = sync_user_role(user.id, None)
-                if result.get("linked"):
-                    await message.channel.send("I gave you the **Contributor** role and activated your account on Duostories.\nIf you are currently logged in on <https://duostories.org>, please log out and in again for the changes to take effect.\nYou can then access the editor at <https://duostories.org/editor>.")
-                else:
-                    await message.channel.send("I gave you the **Contributor** role and but I could not activate your account on Duostories as you haven't connected your duostories account to discord.")
+                try:
+                    result = sync_user_role(user.id, True)
+                    user_data = result.get("user") if isinstance(result, dict) else None
+                    if result.get("linked") and user_data:
+                        role_name = user_data.get("role", "unknown")
+                        user_id = user_data.get("id")
+                        username = user_data.get("name", "")
+                        await self.log(f"📝 added write permissions for {user.name}. Duostories id={user_id} username={username} role={role_name} <https://duostories.org/admin/users/{user_id}>")
+                        await message.channel.send("I gave you the **Contributor** role and activated your account on Duostories.\nIf you are currently logged in on <https://duostories.org>, please log out and in again for the changes to take effect.\nYou can then access the editor at <https://duostories.org/editor>.")
+                    else:
+                        await message.channel.send("I gave you the **Contributor** role but I could not activate your account on Duostories because you haven't connected your Duostories account to Discord.")
+                except Exception as err:
+                    print(err)
+                    await self.log(f"⚠️ could not add write permissions for {user.name}, a database error occurred.")
+                    await message.channel.send("I gave you the **Contributor** role, but I could not activate your account on Duostories because a database error occurred.")
 
     async def on_raw_reaction_remove(self, reaction):
         if message := await self.check_reaction(reaction):
@@ -145,12 +155,12 @@ class MyClient(discord.Client):
                     try:
                         result = sync_user_role(after.id, True)
                         user_data = result.get("user") if isinstance(result, dict) else None
-                        if result.get("linked") and user_data:
+                        if result.get("linked") and user_data and result.get("updated"):
                             role_name = user_data.get("role", "unknown")
                             user_id = user_data.get("id")
                             username = user_data.get("name", "")
                             await self.log(f"📝 added write permissions for {after.name}. Duostories id={user_id} username={username} role={role_name} <https://duostories.org/admin/users/{user_id}>")
-                        else:
+                        elif not result.get("linked"):
                             await self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
                         print(err)
