@@ -1,8 +1,9 @@
 import discord
 from pathlib import Path
+from env_utils import load_env_file
 
 params = Path(__file__).parent / ".env.local"
-params = {f.split("=")[0]:f.split("=")[1] for f in params.read_text().split("\n") if f != ''}
+params = load_env_file(params)
 
 CHANNEL_BOT_LOG = 1133529323396145172
 

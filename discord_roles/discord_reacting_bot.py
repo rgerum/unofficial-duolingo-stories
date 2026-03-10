@@ -2,16 +2,7 @@ import discord
 import json
 from urllib import error, request
 from pathlib import Path
-
-def parse_env_file(path):
-    values = {}
-    for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        values[key] = value
-    return values
+from env_utils import load_env_file
 
 
 def sync_user_role(discord_id, write=None):
@@ -39,7 +30,7 @@ def sync_user_role(discord_id, write=None):
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token obtained from the Discord Developer Portal.
 params = Path(__file__).parent / ".env.local"
-params = parse_env_file(params)
+params = load_env_file(params)
 
 TOKEN = params['DISCORD_TOKEN']
 CONVEX_DISCORD_SYNC_URL = params['CONVEX_DISCORD_SYNC_URL']

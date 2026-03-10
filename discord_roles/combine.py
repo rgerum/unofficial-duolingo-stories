@@ -3,31 +3,30 @@ from pathlib import Path
 from urllib import error, request
 
 import pandas as pd
+from env_utils import load_env_file
 
 
-def parse_env_file(path):
-    values = {}
-    for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        values[key] = value
-    return values
-
-
-params = parse_env_file(Path(__file__).parent / ".env.local")
+params = load_env_file(Path(__file__).parent / ".env.local")
 CONVEX_DISCORD_COMBINE_URL = params["CONVEX_DISCORD_COMBINE_URL"]
 DISCORD_ROLE_SYNC_SECRET = params["DISCORD_ROLE_SYNC_SECRET"]
-_combine_data_cache = None
+CACHE_DIR = Path(__file__).parent / ".cache"
+APPROVAL_CACHE_FILE = CACHE_DIR / "approvals_cache.csv"
+APPROVAL_CACHE_COLUMNS = ["approval_id", "legacy_user_id", "story_id", "date"]
+_contributor_users_cache = None
+_public_story_ids_cache = None
 
 
-def fetch_combine_data():
-    global _combine_data_cache
-    if isinstance(_combine_data_cache, dict):
-        return _combine_data_cache
+def fetch_combine_resource(kind, *, cursor=None, num_items=200, since_date=None):
+    payload = {
+        "secret": DISCORD_ROLE_SYNC_SECRET,
+        "kind": kind,
+        "numItems": num_items,
+    }
+    if cursor is not None:
+        payload["cursor"] = cursor
+    if since_date is not None:
+        payload["sinceDate"] = int(since_date)
 
-    payload = {"secret": DISCORD_ROLE_SYNC_SECRET}
     req = request.Request(
         CONVEX_DISCORD_COMBINE_URL,
         data=json.dumps(payload).encode("utf-8"),
@@ -49,52 +48,194 @@ def fetch_combine_data():
     if not isinstance(body, dict) or not body.get("ok"):
         raise RuntimeError(f"convex combine data returned invalid response: {body}")
 
-    _combine_data_cache = body
-    return _combine_data_cache
+    return body
 
 
-def get_user_to_discord_mapping():
-    data = fetch_combine_data()
-    mapping = data.get("user_to_discord_mapping", {})
-    if not isinstance(mapping, dict):
-        return {}
-    return {
-        str(k): str(v)
-        for k, v in mapping.items()
-        if isinstance(k, str) and isinstance(v, str)
-    }
+def fetch_contributor_users():
+    global _contributor_users_cache
+    if isinstance(_contributor_users_cache, list):
+        return _contributor_users_cache
 
-
-def get_user_approval_count():
-    data = fetch_combine_data()
-    approvals = data.get("approvals", [])
-    if not isinstance(approvals, list):
-        approvals = []
-
-    rows = []
-    for row in approvals:
+    data = fetch_combine_resource("users")
+    rows = data.get("users", [])
+    users = []
+    for row in rows:
         if not isinstance(row, dict):
             continue
+        legacy_user_id = row.get("legacyUserId")
         author = row.get("author")
-        story_id = row.get("story_id")
-        approval_date = row.get("date")
-        public = row.get("public")
-        if not isinstance(author, str):
+        discord_account_id = row.get("discordAccountId")
+        if not isinstance(legacy_user_id, int):
             continue
-        if not isinstance(story_id, int) or not isinstance(approval_date, int):
+        if not isinstance(author, str) or not isinstance(discord_account_id, str):
             continue
-        public_int = 1 if bool(public) else 0
-        rows.append(
+        users.append(
             {
+                "legacy_user_id": legacy_user_id,
                 "author": author,
-                "story_id": story_id,
-                "date": approval_date,
-                "approval": 1,
-                "public": public_int,
+                "discord_account_id": discord_account_id,
             }
         )
 
-    return pd.DataFrame(rows)
+    _contributor_users_cache = users
+    return _contributor_users_cache
+
+
+def fetch_public_story_ids():
+    global _public_story_ids_cache
+    if isinstance(_public_story_ids_cache, set):
+        return _public_story_ids_cache
+
+    story_ids = set()
+    cursor = None
+    while True:
+        data = fetch_combine_resource("publicStories", cursor=cursor)
+        for story_id in data.get("page", []):
+            if isinstance(story_id, int):
+                story_ids.add(story_id)
+
+        if data.get("isDone"):
+            break
+
+        cursor = data.get("continueCursor")
+        if not isinstance(cursor, str) or cursor == "":
+            break
+
+    _public_story_ids_cache = story_ids
+    return _public_story_ids_cache
+
+
+def load_approval_cache():
+    CACHE_DIR.mkdir(exist_ok=True)
+    if not APPROVAL_CACHE_FILE.exists():
+        return pd.DataFrame(columns=APPROVAL_CACHE_COLUMNS)
+
+    data = pd.read_csv(
+        APPROVAL_CACHE_FILE,
+        dtype={
+            "approval_id": "string",
+            "legacy_user_id": "Int64",
+            "story_id": "Int64",
+            "date": "Int64",
+        },
+    )
+    for column in APPROVAL_CACHE_COLUMNS:
+        if column not in data.columns:
+            data[column] = pd.Series(dtype="object")
+    return data[APPROVAL_CACHE_COLUMNS]
+
+
+def save_approval_cache(data):
+    CACHE_DIR.mkdir(exist_ok=True)
+    normalized = data.copy()
+    if normalized.empty:
+        normalized = pd.DataFrame(columns=APPROVAL_CACHE_COLUMNS)
+    else:
+        normalized = normalized.sort_values(["date", "approval_id"]).reset_index(
+            drop=True
+        )
+    normalized.to_csv(APPROVAL_CACHE_FILE, index=False)
+
+
+def update_approval_cache():
+    cache = load_approval_cache()
+    existing_ids = set(cache["approval_id"].dropna().astype(str))
+    since_date = None
+    if not cache.empty:
+        since_date = int(cache["date"].dropna().max())
+
+    new_rows = []
+    cursor = None
+    while True:
+        data = fetch_combine_resource(
+            "approvals",
+            cursor=cursor,
+            since_date=since_date,
+        )
+
+        for row in data.get("page", []):
+            if not isinstance(row, dict):
+                continue
+
+            approval_id = row.get("id")
+            legacy_user_id = row.get("legacyUserId")
+            story_id = row.get("storyId")
+            date = row.get("date")
+
+            if not isinstance(approval_id, str):
+                continue
+            if approval_id in existing_ids:
+                continue
+            if not isinstance(legacy_user_id, int) or not isinstance(story_id, int):
+                continue
+            if not isinstance(date, int):
+                continue
+
+            existing_ids.add(approval_id)
+            new_rows.append(
+                {
+                    "approval_id": approval_id,
+                    "legacy_user_id": legacy_user_id,
+                    "story_id": story_id,
+                    "date": date,
+                }
+            )
+
+        if data.get("isDone"):
+            break
+
+        cursor = data.get("continueCursor")
+        if not isinstance(cursor, str) or cursor == "":
+            break
+
+    if new_rows:
+        cache = pd.concat([cache, pd.DataFrame(new_rows)], ignore_index=True)
+        save_approval_cache(cache)
+
+    return cache
+
+
+def get_user_to_discord_mapping():
+    user_discord_id = {}
+    for user in fetch_contributor_users():
+        user_discord_id[user["author"]] = user["discord_account_id"]
+    return user_discord_id
+
+
+def get_user_approval_count():
+    contributor_users = fetch_contributor_users()
+    author_by_legacy_user_id = {
+        user["legacy_user_id"]: user["author"] for user in contributor_users
+    }
+    public_story_ids = fetch_public_story_ids()
+    approvals = update_approval_cache()
+    if approvals.empty:
+        return pd.DataFrame(columns=["author", "story_id", "approval", "public"])
+
+    approvals = approvals.dropna(
+        subset=["approval_id", "legacy_user_id", "story_id", "date"]
+    ).copy()
+    approvals["legacy_user_id"] = approvals["legacy_user_id"].astype(int)
+    approvals["story_id"] = approvals["story_id"].astype(int)
+    approvals["date"] = approvals["date"].astype(int)
+    approvals["author"] = approvals["legacy_user_id"].map(author_by_legacy_user_id)
+
+    approvals = approvals.dropna(subset=["author"])
+    approvals = approvals[approvals["story_id"].isin(public_story_ids)]
+    approvals = approvals.sort_values(["story_id", "date", "approval_id"])
+
+    # The cache is append-only, so revokes/re-approvals can duplicate a user/story
+    # pair over time. Keep the earliest approval we have seen for milestone credit.
+    approvals = approvals.drop_duplicates(
+        subset=["story_id", "legacy_user_id"],
+        keep="first",
+    )
+    approvals["approval_rank"] = approvals.groupby("story_id").cumcount() + 1
+    approvals = approvals[approvals["approval_rank"] <= 2]
+    approvals["approval"] = 1
+    approvals["public"] = 1
+
+    return approvals[["author", "story_id", "approval", "public"]]
 
 
 def join_and_group_data():
