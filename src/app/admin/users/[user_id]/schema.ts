@@ -8,6 +8,8 @@ export const UserSchema = z.object({
   activated: z.coerce.boolean().optional(),
   role: z.coerce.boolean().optional(),
   admin: z.coerce.boolean().optional(),
+  discordLinked: z.coerce.boolean().optional(),
+  discordAccountId: z.string().nullable().optional(),
 });
 
 export type AdminUser = z.infer<typeof UserSchema>;

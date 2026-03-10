@@ -55,6 +55,8 @@ const statusYesClass =
   "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#21c55d_22%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#0a6b2d]";
 const statusNoClass =
   "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#ef4444_20%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#9b1c1c]";
+const statusInfoClass =
+  "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#3b82f6_18%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#124f9c]";
 
 function getRoleLabel(user: AdminUserList) {
   if (user.admin) return "Admin";
@@ -192,6 +194,7 @@ export default function UserList({
                 "Registered",
                 "Activated",
                 "Role",
+                "Discord",
                 "",
               ].map((header) => (
                 <th
@@ -206,7 +209,7 @@ export default function UserList({
           <tbody>
             {users.length === 0 ? (
               <tr className="bg-[var(--body-background)]">
-                <td colSpan={7} className="px-4 py-2.5">
+                <td colSpan={8} className="px-4 py-2.5">
                   No users found.
                 </td>
               </tr>
@@ -240,6 +243,20 @@ export default function UserList({
                     </span>
                   </td>
                   <td className="px-3 py-2.5">{getRoleLabel(user)}</td>
+                  <td className="px-3 py-2.5">
+                    <span
+                      className={
+                        user.discordLinked ? statusInfoClass : statusNoClass
+                      }
+                      title={
+                        user.discordLinked && user.discordAccountId
+                          ? `Discord account ID: ${user.discordAccountId}`
+                          : "No linked Discord account"
+                      }
+                    >
+                      {user.discordLinked ? "Linked" : "No"}
+                    </span>
+                  </td>
                   <td className="px-4 py-2.5 text-right whitespace-nowrap">
                     <Link
                       className="inline-flex min-w-[82px] items-center justify-center rounded-[10px] border-b-[3px] border-[var(--button-border)] bg-[var(--button-background)] px-3 py-1.5 font-bold no-underline"

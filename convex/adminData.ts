@@ -79,6 +79,8 @@ const adminUserValidator = v.object({
   activated: v.boolean(),
   role: v.boolean(),
   admin: v.boolean(),
+  discordLinked: v.boolean(),
+  discordAccountId: v.union(v.string(), v.null()),
 });
 
 async function findAuthUserByLegacyId(ctx: AuthCtx, legacyId: number) {
@@ -96,15 +98,18 @@ async function findAuthUserByLegacyId(ctx: AuthCtx, legacyId: number) {
   } | null;
 }
 
-function toAdminUser(user: {
-  _id?: string;
-  userId?: string | null;
-  name?: string | null;
-  email?: string | null;
-  createdAt?: number | null;
-  role?: string | null;
-  emailVerified?: unknown;
-}) {
+function toAdminUser(
+  user: {
+    _id?: string;
+    userId?: string | null;
+    name?: string | null;
+    email?: string | null;
+    createdAt?: number | null;
+    role?: string | null;
+    emailVerified?: unknown;
+  },
+  discordAccountId?: string | null,
+) {
   const numericId = Number.parseInt(user.userId ?? "", 10);
   const role = user.role ?? null;
   return {
@@ -118,7 +123,42 @@ function toAdminUser(user: {
     activated: Boolean(user.emailVerified),
     role: role === "contributor" || role === "admin",
     admin: role === "admin",
+    discordLinked:
+      typeof discordAccountId === "string" && discordAccountId.length > 0,
+    discordAccountId:
+      typeof discordAccountId === "string" && discordAccountId.length > 0
+        ? discordAccountId
+        : null,
   };
+}
+
+async function getDiscordAccountIdsByAuthUserIds(
+  ctx: AuthCtx,
+  authUserIds: string[],
+) {
+  const uniqueAuthUserIds = Array.from(
+    new Set(authUserIds.filter((value) => value.length > 0)),
+  );
+  if (uniqueAuthUserIds.length === 0) return new Map<string, string>();
+
+  const response = await ctx.runQuery(components.betterAuth.adapter.findMany, {
+    model: "account",
+    where: [
+      { field: "providerId", operator: "eq", value: "discord" },
+      { field: "userId", operator: "in", value: uniqueAuthUserIds },
+    ],
+    paginationOpts: { cursor: null, numItems: uniqueAuthUserIds.length + 20 },
+  });
+
+  const discordAccountIdByAuthUserId = new Map<string, string>();
+  for (const account of response.page as Array<{
+    userId?: string | null;
+    accountId?: string | null;
+  }>) {
+    if (!account.userId || !account.accountId) continue;
+    discordAccountIdByAuthUserId.set(account.userId, account.accountId);
+  }
+  return discordAccountIdByAuthUserId;
 }
 
 export const getAdminUsersPage = query({
@@ -182,7 +222,30 @@ export const getAdminUsersPage = query({
                 roleFilter: args.roleFilter,
                 limit: queryLimit,
               });
-    const users = matchedUsers.slice(0, limit).map(toAdminUser);
+    const pageUsers = matchedUsers.slice(0, limit) as Array<{
+      _id?: string;
+      userId?: string | null;
+      name?: string | null;
+      email?: string | null;
+      createdAt?: number | null;
+      role?: string | null;
+      emailVerified?: unknown;
+    }>;
+    const discordAccountIdByAuthUserId =
+      await getDiscordAccountIdsByAuthUserIds(
+        ctx,
+        pageUsers
+          .map((user) => user._id)
+          .filter((value): value is string => typeof value === "string"),
+      );
+    const users = pageUsers.map((user) =>
+      toAdminUser(
+        user,
+        typeof user._id === "string"
+          ? (discordAccountIdByAuthUserId.get(user._id) ?? null)
+          : null,
+      ),
+    );
     return { users, hasMore: matchedUsers.length > limit };
   },
 });
@@ -196,7 +259,12 @@ export const getAdminUserByLegacyId = query({
     if (!(await isAdmin(ctx))) return null;
     const user = await findAuthUserByLegacyId(ctx, args.id);
     if (!user?._id) return null;
-    return toAdminUser(user);
+    const discordAccountIdByAuthUserId =
+      await getDiscordAccountIdsByAuthUserIds(ctx, [user._id]);
+    return toAdminUser(
+      user,
+      discordAccountIdByAuthUserId.get(user._id) ?? null,
+    );
   },
 });
 

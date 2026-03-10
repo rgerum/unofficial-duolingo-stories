@@ -51,9 +51,10 @@ export default async function Page({
     roleFilter,
   });
 
-  const users: AdminUserList[] = response.users.map((user: AdminUserList) => ({
+  const users: AdminUserList[] = response.users.map((user) => ({
     ...user,
-    regdate: user.regdate ? new Date(user.regdate) : undefined,
+    regdate:
+      typeof user.regdate === "number" ? new Date(user.regdate) : undefined,
   }));
 
   return (
