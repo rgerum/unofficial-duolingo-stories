@@ -23,35 +23,48 @@ def get_author_percentages(filename, ignore_rev=None):
         base_file = [l.strip() for l in subprocess.run(["git", "show", ignore_rev+":"+str(filename)], capture_output=True, text=True).stdout.split("\n")]
     else:
         base_file = []
-    #print(" ".join(["git", "blame", "-w", filename]))
-    a = subprocess.run(["git", "blame", "-w", filename], capture_output=True, text=True)
-    authors = {}
-    count = 0
-    for i, line in enumerate(a.stdout.split("\n")):
-        try:
-            line_content = line.split(")", 1)[1].strip()
-            author = line.split(" ")[1][1:]
-            if line_content == "":
-                continue
-            found = False
-            for l in base_file:
-                if line_content == l:
-                    found = True
-                    break
-            if found:
-                #print(found, author, line_content, l)
-                continue
-            #print(False, author, line_content)
 
-            if author not in authors:
-                authors[author] = 0
-            authors[author] += 1
-            count += 1
-        except IndexError:
-            pass
+    a = subprocess.run(
+        ["git", "blame", "--line-porcelain", "-w", filename],
+        capture_output=True,
+        text=True,
+    )
+    authors, count = parse_blame_porcelain(a.stdout, base_file)
     #for author in authors:
     #    authors[author] /= count
     print("---------", filename, authors)
+    return authors, count
+
+
+def parse_blame_porcelain(output, base_file):
+    authors = {}
+    count = 0
+    current_author = None
+    for line in output.splitlines():
+        if line.startswith("author "):
+            current_author = line[len("author "):]
+            continue
+
+        if not line.startswith("\t"):
+            continue
+
+        line_content = line[1:].strip()
+        if line_content == "" or not current_author:
+            continue
+
+        found = False
+        for l in base_file:
+            if line_content == l:
+                found = True
+                break
+        if found:
+            continue
+
+        if current_author not in authors:
+            authors[current_author] = 0
+        authors[current_author] += 1
+        count += 1
+        current_author = None
     return authors, count
 
 if 0:
