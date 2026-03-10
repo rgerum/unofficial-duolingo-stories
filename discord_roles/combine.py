@@ -263,8 +263,12 @@ def join_and_group_data():
     data = data[data.public == 1]
     print(data)
     data.to_csv("joined.csv")
-    data = data.groupby("author").max().sort_values("number", ascending=False)
-    return data, data0
+    author_story_counts = (
+        data.groupby("author")
+        .agg(story_count=("story_id", "count"))
+        .sort_values("story_count", ascending=False)
+    )
+    return author_story_counts, data0
 
 
 def get_milestone_grouped():
@@ -281,7 +285,7 @@ def get_stories_role_sync_rows():
     milestones = [4, 8, 20, 40, 80, 120]
     milestone_by_author = {}
     for author, row in data.iterrows():
-        story_count = int(row.number)
+        story_count = int(row.story_count)
         milestone = None
         for candidate in milestones[::-1]:
             if story_count >= candidate:
@@ -312,17 +316,17 @@ def get_milestone_grouped_debug_missing_links():
     user_roles = []
     for mile in milestones[::-1]:
         print("----", mile, "stories", "----")
-        d = data[data.number >= mile]
+        d = data[data.story_count >= mile]
         for i, author in d.iterrows():
             print(
                 i,
-                author.number,
+                author.story_count,
                 f"({len(data0[data0.author == i])})",
                 user_discord_id.get(i, "none"),
             )
             if user_discord_id.get(i, None):
                 user_roles.append([user_discord_id.get(i), mile])
-        data = data[data.number < mile]
+        data = data[data.story_count < mile]
     print(user_roles)
     return user_roles
 
@@ -335,17 +339,17 @@ def get_milestone_grouped2():
     user_roles = []
     for mile in milestones[::-1]:
         print("----", mile, "stories", "----")
-        d = data[data.number >= mile]
+        d = data[data.story_count >= mile]
         for i, author in d.iterrows():
             print(
                 i,
-                author.number,
+                author.story_count,
                 f"({len(data0[data0.author == i])})",
                 user_discord_id.get(i, "none"),
             )
             if not user_discord_id.get(i, None):
                 user_roles.append([i, mile])
-        data = data[data.number < mile]
+        data = data[data.story_count < mile]
     print(user_roles)
     return user_roles
 
