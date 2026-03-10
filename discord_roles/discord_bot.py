@@ -1,3 +1,4 @@
+import asyncio
 import discord
 import json
 import time
@@ -141,8 +142,13 @@ def set_user_roles(sync_rows):
                     continue
                 if member is None:
                     print('Member not found')
-                    await bot.close()
-                    return
+                    snapshots.append(
+                        get_snapshot_row(
+                            row,
+                            sync_status="member_not_found",
+                        )
+                    )
+                    continue
 
                 print(member.roles)
                 role_max = max([0]+[int(role.name[:-len(" Stories")]) for role in member.roles if "Stories" in role.name])
@@ -185,7 +191,8 @@ def set_user_roles(sync_rows):
                         )
                     )
 
-            sync_stories_role_status(snapshots)
+            if snapshots:
+                await asyncio.to_thread(sync_stories_role_status, snapshots)
 
             await bot.close()
 
@@ -201,6 +208,4 @@ if __name__ == "__main__":
     from combine import get_stories_role_sync_rows
 
     sync_rows = get_stories_role_sync_rows()
-    print(sync_rows)
     set_user_roles(sync_rows)
-    print(sync_rows)

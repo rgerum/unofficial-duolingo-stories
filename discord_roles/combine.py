@@ -273,7 +273,6 @@ def get_milestone_grouped():
         if row["milestone_stories"] is None or not row["discord_account_id"]:
             continue
         user_roles.append([row["discord_account_id"], row["milestone_stories"]])
-    print(user_roles)
     return user_roles
 
 

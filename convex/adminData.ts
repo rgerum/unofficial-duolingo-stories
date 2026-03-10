@@ -222,7 +222,6 @@ async function getStoriesRoleSnapshotsByLegacyUserIds(
     >();
   }
 
-  const rows = await ctx.db.query("discord_stories_role_sync").collect();
   const snapshotByLegacyUserId = new Map<
     number,
     {
@@ -239,7 +238,19 @@ async function getStoriesRoleSnapshotsByLegacyUserIds(
     }
   >();
 
+  const rows = await Promise.all(
+    Array.from(wantedIds).map((legacyUserId) =>
+      ctx.db
+        .query("discord_stories_role_sync")
+        .withIndex("by_legacy_user_id", (q) =>
+          q.eq("legacyUserId", legacyUserId),
+        )
+        .unique(),
+    ),
+  );
+
   for (const row of rows) {
+    if (!row) continue;
     if (!wantedIds.has(row.legacyUserId)) continue;
     snapshotByLegacyUserId.set(row.legacyUserId, row);
   }
