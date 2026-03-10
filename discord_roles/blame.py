@@ -64,6 +64,7 @@ def parse_blame_porcelain(output, base_file):
             authors[current_author] = 0
         authors[current_author] += 1
         count += 1
+        current_author = None
     return authors, count
 
 if 0:
