@@ -204,6 +204,7 @@ export default defineSchema({
     legacyId: v.optional(v.number()),
   })
     .index("by_story", ["storyId"])
+    .index("by_date", ["date"])
     .index("by_user", ["legacyUserId"])
     .index("by_story_and_user", ["storyId", "legacyUserId"])
     .index("by_legacy_id", ["legacyId"]),

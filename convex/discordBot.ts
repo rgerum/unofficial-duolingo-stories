@@ -1,5 +1,5 @@
-import { httpAction } from "./_generated/server";
 import { components, internal } from "./_generated/api";
+import { httpAction } from "./_generated/server";
 
 type Role = "user" | "contributor" | "admin";
 
@@ -41,6 +41,20 @@ async function requireDiscordSyncSecret(req: Request) {
   }
 
   return { ok: true, body } as const;
+}
+
+type CombineKind = "users" | "publicStories" | "approvals";
+
+function parseNumItems(value: unknown) {
+  if (typeof value !== "number" || !Number.isInteger(value)) return 200;
+  return Math.max(1, Math.min(500, value));
+}
+
+function parseKind(value: unknown): CombineKind | null {
+  if (value === "users" || value === "publicStories" || value === "approvals") {
+    return value;
+  }
+  return null;
 }
 
 export const setContributorWriteByDiscordAccountId = httpAction(
@@ -133,13 +147,61 @@ export const getDiscordCombineData = httpAction(async (ctx, req) => {
   const auth = await requireDiscordSyncSecret(req);
   if (!auth.ok) return auth.response;
 
-  const combineData = await ctx.runQuery(
-    internal.discordData.getCombineData,
-    {},
-  );
+  const body = auth.body as {
+    kind?: unknown;
+    cursor?: unknown;
+    numItems?: unknown;
+    sinceDate?: unknown;
+  };
 
-  return json({
-    ok: true,
-    ...combineData,
-  });
+  const kind = parseKind(body.kind);
+  if (!kind) {
+    return json(
+      {
+        ok: false,
+        error: "kind must be one of users, publicStories, or approvals",
+      },
+      400,
+    );
+  }
+
+  const paginationOpts = {
+    cursor: typeof body.cursor === "string" ? body.cursor : null,
+    numItems: parseNumItems(body.numItems),
+  };
+
+  if (kind === "users") {
+    const users = await ctx.runQuery(
+      (internal as any).discordData.getContributorDiscordLinks,
+      {},
+    );
+    return json({ ok: true, users });
+  }
+
+  if (kind === "publicStories") {
+    const page = await ctx.runQuery(
+      (internal as any).discordData.getPublicStoryIdsPage,
+      {
+        paginationOpts,
+      },
+    );
+    return json({ ok: true, ...page });
+  }
+
+  if (
+    body.sinceDate !== undefined &&
+    (typeof body.sinceDate !== "number" || !Number.isInteger(body.sinceDate))
+  ) {
+    return json({ ok: false, error: "sinceDate must be an integer" }, 400);
+  }
+
+  const page = await ctx.runQuery(
+    (internal as any).discordData.getApprovalPage,
+    {
+      paginationOpts,
+      sinceDate:
+        typeof body.sinceDate === "number" ? body.sinceDate : undefined,
+    },
+  );
+  return json({ ok: true, ...page });
 });
