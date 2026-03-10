@@ -128,6 +128,15 @@ export default function UserDisplay({ user }: { user: AdminUser }) {
           <div className="min-w-0 break-words">
             {userData.admin ? "Yes" : "No"}
           </div>
+
+          <div className="text-left text-[var(--text-color-dim)] md:text-right">
+            Discord
+          </div>
+          <div className="min-w-0 break-words">
+            {userData.discordLinked
+              ? `Linked${userData.discordAccountId ? ` (${userData.discordAccountId})` : ""}`
+              : "Not linked"}
+          </div>
         </div>
       </div>
     </div>
