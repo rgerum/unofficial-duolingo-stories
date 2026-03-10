@@ -172,7 +172,7 @@ export const getDiscordCombineData = httpAction(async (ctx, req) => {
 
   if (kind === "users") {
     const users = await ctx.runQuery(
-      (internal as any).discordData.getContributorDiscordLinks,
+      internal.discordData.getContributorDiscordLinks,
       {},
     );
     return json({ ok: true, users });
@@ -180,7 +180,7 @@ export const getDiscordCombineData = httpAction(async (ctx, req) => {
 
   if (kind === "publicStories") {
     const page = await ctx.runQuery(
-      (internal as any).discordData.getPublicStoryIdsPage,
+      internal.discordData.getPublicStoryIdsPage,
       {
         paginationOpts,
       },
@@ -195,13 +195,9 @@ export const getDiscordCombineData = httpAction(async (ctx, req) => {
     return json({ ok: false, error: "sinceDate must be an integer" }, 400);
   }
 
-  const page = await ctx.runQuery(
-    (internal as any).discordData.getApprovalPage,
-    {
-      paginationOpts,
-      sinceDate:
-        typeof body.sinceDate === "number" ? body.sinceDate : undefined,
-    },
-  );
+  const page = await ctx.runQuery(internal.discordData.getApprovalPage, {
+    paginationOpts,
+    sinceDate: typeof body.sinceDate === "number" ? body.sinceDate : undefined,
+  });
   return json({ ok: true, ...page });
 });
