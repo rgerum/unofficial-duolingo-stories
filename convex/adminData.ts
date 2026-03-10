@@ -81,6 +81,17 @@ const adminUserValidator = v.object({
   admin: v.boolean(),
   discordLinked: v.boolean(),
   discordAccountId: v.union(v.string(), v.null()),
+  discordStoriesRole: v.union(v.string(), v.null()),
+  discordStoriesSyncStatus: v.union(
+    v.literal("assigned"),
+    v.literal("up_to_date"),
+    v.literal("no_milestone"),
+    v.literal("not_linked"),
+    v.literal("member_not_found"),
+    v.literal("error"),
+    v.null(),
+  ),
+  discordStoriesLastSyncedAt: v.union(v.number(), v.null()),
 });
 
 async function findAuthUserByLegacyId(ctx: AuthCtx, legacyId: number) {
@@ -109,9 +120,25 @@ function toAdminUser(
     emailVerified?: unknown;
   },
   discordAccountId?: string | null,
+  storiesRoleSnapshot?: {
+    assignedStoriesCount?: number | null;
+    syncStatus?:
+      | "assigned"
+      | "up_to_date"
+      | "no_milestone"
+      | "not_linked"
+      | "member_not_found"
+      | "error"
+      | null;
+    lastSyncedAt?: number | null;
+  } | null,
 ) {
   const numericId = Number.parseInt(user.userId ?? "", 10);
   const role = user.role ?? null;
+  const assignedStoriesCount =
+    typeof storiesRoleSnapshot?.assignedStoriesCount === "number"
+      ? storiesRoleSnapshot.assignedStoriesCount
+      : null;
   return {
     rowKey:
       user._id ??
@@ -128,6 +155,15 @@ function toAdminUser(
     discordAccountId:
       typeof discordAccountId === "string" && discordAccountId.length > 0
         ? discordAccountId
+        : null,
+    discordStoriesRole:
+      typeof assignedStoriesCount === "number" && assignedStoriesCount > 0
+        ? `${assignedStoriesCount} Stories`
+        : null,
+    discordStoriesSyncStatus: storiesRoleSnapshot?.syncStatus ?? null,
+    discordStoriesLastSyncedAt:
+      typeof storiesRoleSnapshot?.lastSyncedAt === "number"
+        ? storiesRoleSnapshot.lastSyncedAt
         : null,
   };
 }
@@ -159,6 +195,55 @@ async function getDiscordAccountIdsByAuthUserIds(
     discordAccountIdByAuthUserId.set(account.userId, account.accountId);
   }
   return discordAccountIdByAuthUserId;
+}
+
+async function getStoriesRoleSnapshotsByLegacyUserIds(
+  ctx: AuthCtx,
+  legacyUserIds: number[],
+) {
+  const wantedIds = new Set(
+    legacyUserIds.filter((legacyUserId) => Number.isFinite(legacyUserId)),
+  );
+  if (wantedIds.size === 0) {
+    return new Map<
+      number,
+      {
+        assignedStoriesCount?: number | null;
+        syncStatus?:
+          | "assigned"
+          | "up_to_date"
+          | "no_milestone"
+          | "not_linked"
+          | "member_not_found"
+          | "error"
+          | null;
+        lastSyncedAt?: number | null;
+      }
+    >();
+  }
+
+  const rows = await ctx.db.query("discord_stories_role_sync").collect();
+  const snapshotByLegacyUserId = new Map<
+    number,
+    {
+      assignedStoriesCount?: number | null;
+      syncStatus?:
+        | "assigned"
+        | "up_to_date"
+        | "no_milestone"
+        | "not_linked"
+        | "member_not_found"
+        | "error"
+        | null;
+      lastSyncedAt?: number | null;
+    }
+  >();
+
+  for (const row of rows) {
+    if (!wantedIds.has(row.legacyUserId)) continue;
+    snapshotByLegacyUserId.set(row.legacyUserId, row);
+  }
+  return snapshotByLegacyUserId;
 }
 
 export const getAdminUsersPage = query({
@@ -238,12 +323,25 @@ export const getAdminUsersPage = query({
           .map((user) => user._id)
           .filter((value): value is string => typeof value === "string"),
       );
+    const storiesRoleSnapshotByLegacyUserId =
+      await getStoriesRoleSnapshotsByLegacyUserIds(
+        ctx,
+        pageUsers
+          .map((user) => Number.parseInt(user.userId ?? "", 10))
+          .filter((value) => Number.isFinite(value)),
+      );
     const users = pageUsers.map((user) =>
       toAdminUser(
         user,
         typeof user._id === "string"
           ? (discordAccountIdByAuthUserId.get(user._id) ?? null)
           : null,
+        (() => {
+          const legacyUserId = Number.parseInt(user.userId ?? "", 10);
+          return Number.isFinite(legacyUserId)
+            ? (storiesRoleSnapshotByLegacyUserId.get(legacyUserId) ?? null)
+            : null;
+        })(),
       ),
     );
     return { users, hasMore: matchedUsers.length > limit };
@@ -261,9 +359,12 @@ export const getAdminUserByLegacyId = query({
     if (!user?._id) return null;
     const discordAccountIdByAuthUserId =
       await getDiscordAccountIdsByAuthUserIds(ctx, [user._id]);
+    const storiesRoleSnapshotByLegacyUserId =
+      await getStoriesRoleSnapshotsByLegacyUserIds(ctx, [args.id]);
     return toAdminUser(
       user,
       discordAccountIdByAuthUserId.get(user._id) ?? null,
+      storiesRoleSnapshotByLegacyUserId.get(args.id) ?? null,
     );
   },
 });

@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server";
 import {
   getDiscordCombineData,
+  setStoriesRoleSyncStatus,
   setContributorWriteByDiscordAccountId,
 } from "./discordBot";
 import { authComponent, createAuth } from "./betterAuth/auth";
@@ -17,6 +18,11 @@ http.route({
   path: "/discord/combine-data",
   method: "POST",
   handler: getDiscordCombineData,
+});
+http.route({
+  path: "/discord/set-stories-role-status",
+  method: "POST",
+  handler: setStoriesRoleSyncStatus,
 });
 
 export default http;

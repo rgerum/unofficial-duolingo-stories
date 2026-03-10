@@ -7,7 +7,7 @@ import type { Id } from "./_generated/dataModel";
 const contributorUserValidator = v.object({
   legacyUserId: v.number(),
   author: v.string(),
-  discordAccountId: v.string(),
+  discordAccountId: v.union(v.string(), v.null()),
 });
 
 const publicStoriesPageValidator = v.object({
@@ -136,7 +136,7 @@ export const getContributorDiscordLinks = internalQuery({
       .map((authUserId) => {
         const user = usersByAuthId.get(authUserId);
         const discordAccountId = discordAccountIdByUserId.get(authUserId);
-        if (!user || !discordAccountId || typeof user.name !== "string") {
+        if (!user || typeof user.name !== "string") {
           return null;
         }
 
@@ -148,7 +148,8 @@ export const getContributorDiscordLinks = internalQuery({
         return {
           legacyUserId,
           author: user.name,
-          discordAccountId,
+          discordAccountId:
+            typeof discordAccountId === "string" ? discordAccountId : null,
         };
       })
       .filter(
@@ -157,7 +158,7 @@ export const getContributorDiscordLinks = internalQuery({
         ): user is {
           legacyUserId: number;
           author: string;
-          discordAccountId: string;
+          discordAccountId: string | null;
         } => user !== null,
       );
   },

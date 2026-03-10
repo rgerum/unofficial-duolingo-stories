@@ -55,6 +55,10 @@ export default async function Page({
     ...user,
     regdate:
       typeof user.regdate === "number" ? new Date(user.regdate) : undefined,
+    discordStoriesLastSyncedAt:
+      typeof user.discordStoriesLastSyncedAt === "number"
+        ? new Date(user.discordStoriesLastSyncedAt)
+        : undefined,
   }));
 
   return (

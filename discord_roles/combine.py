@@ -67,13 +67,15 @@ def fetch_contributor_users():
         discord_account_id = row.get("discordAccountId")
         if not isinstance(legacy_user_id, int):
             continue
-        if not isinstance(author, str) or not isinstance(discord_account_id, str):
+        if not isinstance(author, str):
             continue
         users.append(
             {
                 "legacy_user_id": legacy_user_id,
                 "author": author,
-                "discord_account_id": discord_account_id,
+                "discord_account_id": discord_account_id
+                if isinstance(discord_account_id, str)
+                else None,
             }
         )
 
@@ -198,7 +200,8 @@ def update_approval_cache():
 def get_user_to_discord_mapping():
     user_discord_id = {}
     for user in fetch_contributor_users():
-        user_discord_id[user["author"]] = user["discord_account_id"]
+        if isinstance(user["discord_account_id"], str):
+            user_discord_id[user["author"]] = user["discord_account_id"]
     return user_discord_id
 
 
@@ -265,6 +268,44 @@ def join_and_group_data():
 
 
 def get_milestone_grouped():
+    user_roles = []
+    for row in get_stories_role_sync_rows():
+        if row["milestone_stories"] is None or not row["discord_account_id"]:
+            continue
+        user_roles.append([row["discord_account_id"], row["milestone_stories"]])
+    print(user_roles)
+    return user_roles
+
+
+def get_stories_role_sync_rows():
+    data, data0 = join_and_group_data()
+    milestones = [4, 8, 20, 40, 80, 120]
+    milestone_by_author = {}
+    for author, row in data.iterrows():
+        story_count = int(row.number)
+        milestone = None
+        for candidate in milestones[::-1]:
+            if story_count >= candidate:
+                milestone = candidate
+                break
+        milestone_by_author[author] = milestone
+
+    rows = []
+    for user in fetch_contributor_users():
+        milestone = milestone_by_author.get(user["author"])
+        rows.append(
+            {
+                "legacy_user_id": user["legacy_user_id"],
+                "author": user["author"],
+                "discord_account_id": user["discord_account_id"],
+                "milestone_stories": milestone,
+            }
+        )
+
+    return rows
+
+
+def get_milestone_grouped_debug_missing_links():
     data, data0 = join_and_group_data()
     milestones = [4, 8, 20, 40, 80, 120]
 

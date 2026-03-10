@@ -17,6 +17,7 @@ import type * as authFunctions from "../authFunctions.js";
 import type * as authMigration from "../authMigration.js";
 import type * as discordBot from "../discordBot.js";
 import type * as discordData from "../discordData.js";
+import type * as discordRoleSync from "../discordRoleSync.js";
 import type * as editorRead from "../editorRead.js";
 import type * as editorSideEffects from "../editorSideEffects.js";
 import type * as http from "../http.js";
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   authMigration: typeof authMigration;
   discordBot: typeof discordBot;
   discordData: typeof discordData;
+  discordRoleSync: typeof discordRoleSync;
   editorRead: typeof editorRead;
   editorSideEffects: typeof editorSideEffects;
   http: typeof http;
