@@ -44,6 +44,29 @@ async function requireDiscordSyncSecret(req: Request) {
 }
 
 type CombineKind = "users" | "publicStories" | "approvals";
+type StoriesRoleSyncStatus =
+  | "assigned"
+  | "up_to_date"
+  | "no_milestone"
+  | "not_linked"
+  | "member_not_found"
+  | "error";
+
+function parseStoriesRoleSyncStatus(
+  value: unknown,
+): StoriesRoleSyncStatus | null {
+  if (
+    value === "assigned" ||
+    value === "up_to_date" ||
+    value === "no_milestone" ||
+    value === "not_linked" ||
+    value === "member_not_found" ||
+    value === "error"
+  ) {
+    return value;
+  }
+  return null;
+}
 
 function parseNumItems(value: unknown) {
   if (typeof value !== "number" || !Number.isInteger(value)) return 200;
@@ -200,4 +223,135 @@ export const getDiscordCombineData = httpAction(async (ctx, req) => {
     sinceDate: typeof body.sinceDate === "number" ? body.sinceDate : undefined,
   });
   return json({ ok: true, ...page });
+});
+
+export const setStoriesRoleSyncStatus = httpAction(async (ctx, req) => {
+  if (req.method !== "POST") {
+    return json({ ok: false, error: "Method not allowed" }, 405);
+  }
+
+  const auth = await requireDiscordSyncSecret(req);
+  if (!auth.ok) return auth.response;
+
+  const body = auth.body as {
+    snapshots?: unknown;
+  };
+
+  if (!Array.isArray(body.snapshots)) {
+    return json({ ok: false, error: "snapshots must be an array" }, 400);
+  }
+
+  const snapshots: Array<{
+    legacyUserId: number;
+    discordAccountId: string | null;
+    eligibleStoriesCount: number | null;
+    assignedStoriesCount: number | null;
+    syncStatus: StoriesRoleSyncStatus;
+    lastSyncedAt: number;
+    lastError: string | null;
+  }> = [];
+
+  for (const snapshot of body.snapshots) {
+    if (!snapshot || typeof snapshot !== "object") {
+      return json(
+        { ok: false, error: "snapshot entries must be objects" },
+        400,
+      );
+    }
+
+    const parsed = snapshot as {
+      legacyUserId?: unknown;
+      discordAccountId?: unknown;
+      eligibleStoriesCount?: unknown;
+      assignedStoriesCount?: unknown;
+      syncStatus?: unknown;
+      lastSyncedAt?: unknown;
+      lastError?: unknown;
+    };
+    const syncStatus = parseStoriesRoleSyncStatus(parsed.syncStatus);
+    if (
+      typeof parsed.legacyUserId !== "number" ||
+      !Number.isInteger(parsed.legacyUserId)
+    ) {
+      return json({ ok: false, error: "legacyUserId must be an integer" }, 400);
+    }
+    if (
+      parsed.discordAccountId !== null &&
+      parsed.discordAccountId !== undefined &&
+      typeof parsed.discordAccountId !== "string"
+    ) {
+      return json(
+        { ok: false, error: "discordAccountId must be a string or null" },
+        400,
+      );
+    }
+    if (
+      parsed.eligibleStoriesCount !== null &&
+      parsed.eligibleStoriesCount !== undefined &&
+      (typeof parsed.eligibleStoriesCount !== "number" ||
+        !Number.isInteger(parsed.eligibleStoriesCount))
+    ) {
+      return json(
+        { ok: false, error: "eligibleStoriesCount must be an integer or null" },
+        400,
+      );
+    }
+    if (
+      parsed.assignedStoriesCount !== null &&
+      parsed.assignedStoriesCount !== undefined &&
+      (typeof parsed.assignedStoriesCount !== "number" ||
+        !Number.isInteger(parsed.assignedStoriesCount))
+    ) {
+      return json(
+        { ok: false, error: "assignedStoriesCount must be an integer or null" },
+        400,
+      );
+    }
+    if (!syncStatus) {
+      return json({ ok: false, error: "syncStatus is invalid" }, 400);
+    }
+    if (
+      typeof parsed.lastSyncedAt !== "number" ||
+      !Number.isInteger(parsed.lastSyncedAt)
+    ) {
+      return json({ ok: false, error: "lastSyncedAt must be an integer" }, 400);
+    }
+    if (
+      parsed.lastError !== null &&
+      parsed.lastError !== undefined &&
+      typeof parsed.lastError !== "string"
+    ) {
+      return json(
+        { ok: false, error: "lastError must be a string or null" },
+        400,
+      );
+    }
+
+    snapshots.push({
+      legacyUserId: parsed.legacyUserId,
+      discordAccountId:
+        typeof parsed.discordAccountId === "string"
+          ? parsed.discordAccountId
+          : null,
+      eligibleStoriesCount:
+        typeof parsed.eligibleStoriesCount === "number"
+          ? parsed.eligibleStoriesCount
+          : null,
+      assignedStoriesCount:
+        typeof parsed.assignedStoriesCount === "number"
+          ? parsed.assignedStoriesCount
+          : null,
+      syncStatus,
+      lastSyncedAt: parsed.lastSyncedAt,
+      lastError: typeof parsed.lastError === "string" ? parsed.lastError : null,
+    });
+  }
+
+  await ctx.runMutation(
+    internal.discordRoleSync.replaceStoriesRoleSyncSnapshots,
+    {
+      snapshots,
+    },
+  );
+  return json({ ok: true, count: snapshots.length });
 });

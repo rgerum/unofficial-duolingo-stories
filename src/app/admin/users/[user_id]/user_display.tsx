@@ -137,6 +137,16 @@ export default function UserDisplay({ user }: { user: AdminUser }) {
               ? `Linked${userData.discordAccountId ? ` (${userData.discordAccountId})` : ""}`
               : "Not linked"}
           </div>
+
+          <div className="text-left text-[var(--text-color-dim)] md:text-right">
+            Stories role
+          </div>
+          <div className="min-w-0 break-words">
+            {userData.discordStoriesRole ?? "None"}
+            {userData.discordStoriesSyncStatus
+              ? ` (${userData.discordStoriesSyncStatus})`
+              : ""}
+          </div>
         </div>
       </div>
     </div>

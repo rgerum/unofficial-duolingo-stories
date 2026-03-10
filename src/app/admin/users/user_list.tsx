@@ -64,6 +64,19 @@ function getRoleLabel(user: AdminUserList) {
   return "User";
 }
 
+function getStoriesRoleTitle(user: AdminUserList) {
+  const parts: string[] = [];
+  if (user.discordStoriesSyncStatus) {
+    parts.push(`Sync status: ${user.discordStoriesSyncStatus}`);
+  }
+  if (user.discordStoriesLastSyncedAt) {
+    parts.push(
+      `Last synced: ${formatRegistered(user.discordStoriesLastSyncedAt)}`,
+    );
+  }
+  return parts.join("\n");
+}
+
 export default function UserList({
   users,
   query,
@@ -195,6 +208,7 @@ export default function UserList({
                 "Activated",
                 "Role",
                 "Discord",
+                "Stories",
                 "",
               ].map((header) => (
                 <th
@@ -209,7 +223,7 @@ export default function UserList({
           <tbody>
             {users.length === 0 ? (
               <tr className="bg-[var(--body-background)]">
-                <td colSpan={8} className="px-4 py-2.5">
+                <td colSpan={9} className="px-4 py-2.5">
                   No users found.
                 </td>
               </tr>
@@ -255,6 +269,18 @@ export default function UserList({
                       }
                     >
                       {user.discordLinked ? "Linked" : "No"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <span
+                      className={
+                        user.discordStoriesRole
+                          ? statusInfoClass
+                          : statusNoClass
+                      }
+                      title={getStoriesRoleTitle(user)}
+                    >
+                      {user.discordStoriesRole ?? "None"}
                     </span>
                   </td>
                   <td className="px-4 py-2.5 text-right whitespace-nowrap">

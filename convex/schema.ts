@@ -208,4 +208,23 @@ export default defineSchema({
     .index("by_user", ["legacyUserId"])
     .index("by_story_and_user", ["storyId", "legacyUserId"])
     .index("by_legacy_id", ["legacyId"]),
+
+  discord_stories_role_sync: defineTable({
+    legacyUserId: v.number(),
+    discordAccountId: v.union(v.string(), v.null()),
+    eligibleStoriesCount: v.union(v.number(), v.null()),
+    assignedStoriesCount: v.union(v.number(), v.null()),
+    syncStatus: v.union(
+      v.literal("assigned"),
+      v.literal("up_to_date"),
+      v.literal("no_milestone"),
+      v.literal("not_linked"),
+      v.literal("member_not_found"),
+      v.literal("error"),
+    ),
+    lastSyncedAt: v.number(),
+    lastError: v.union(v.string(), v.null()),
+  })
+    .index("by_legacy_user_id", ["legacyUserId"])
+    .index("by_sync_status", ["syncStatus"]),
 });
