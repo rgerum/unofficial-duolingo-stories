@@ -402,7 +402,7 @@ function speaker_text_trans(
   while (ipa_match && ipa_match.index !== undefined) {
     ipa_replacements.push({
       index: ipa_match.index,
-      word: ipa_match[1] ?? "",
+      word: (ipa_match[1] ?? "").replace(/~/g, " "),
       alias: (ipa_match[2] ?? "").replace(/~/g, " "),
       alphabet: ipa_match[3] ? ipa_match[3].substring(1) : undefined,
     });
