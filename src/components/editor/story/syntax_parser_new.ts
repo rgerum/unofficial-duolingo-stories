@@ -411,8 +411,6 @@ function speaker_text_trans(
       text.substring(ipa_match.index + ipa_match[0].length);
     ipa_match = text.match(/([^-| ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
   }
-  //text = text.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
-
   let content = generateHintMap(text, translation, pronunciation);
 
   let selectablePhrases, characterPositions;
