@@ -397,22 +397,20 @@ function speaker_text_trans(
 
   getInputStringText(text);
   const ipa_replacements: IpaReplacement[] = [];
-  let ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
+  let ipa_match = text.match(/([^-| ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
 
   while (ipa_match && ipa_match.index !== undefined) {
     ipa_replacements.push({
       index: ipa_match.index,
-      word: ipa_match[1] ?? "",
-      alias: ipa_match[2] ?? "",
+      word: (ipa_match[1] ?? "").replace(/~/g, " "),
+      alias: (ipa_match[2] ?? "").replace(/~/g, " "),
       alphabet: ipa_match[3] ? ipa_match[3].substring(1) : undefined,
     });
     text =
       text.substring(0, ipa_match.index + ipa_match[1].length) +
       text.substring(ipa_match.index + ipa_match[0].length);
-    ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
+    ipa_match = text.match(/([^-| ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
   }
-  //text = text.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
-
   let content = generateHintMap(text, translation, pronunciation);
 
   let selectablePhrases, characterPositions;
