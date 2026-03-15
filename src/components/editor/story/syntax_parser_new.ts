@@ -378,6 +378,21 @@ function getInputStringText(text: string) {
   return text; //.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
 }
 
+function validateInlineTtsReplacements(text: string, lineNumber?: number) {
+  const punctuationWithoutBraces = punctuation_chars.replace(/[{}]/g, "");
+  const parts = text.split(
+    new RegExp(`[\\s${punctuationWithoutBraces}\\[\\]]+`),
+  );
+  for (const token of parts) {
+    if (!token || (!token.includes("{") && !token.includes("}"))) continue;
+    if (/^[^{}]+{[^}:]+(?::[^}]+)?}$/.test(token)) continue;
+    const prefix = lineNumber ? `Line ${lineNumber}: ` : "";
+    throw new Error(
+      `${prefix}Invalid inline TTS replacement "${token}". Use at most one {...} at the end of a token, for example "word{spoken}".`,
+    );
+  }
+}
+
 function speaker_text_trans(
   data: Speaker,
   meta?: Meta,
@@ -395,6 +410,7 @@ function speaker_text_trans(
   const translation = data.trans?.match(/\s*~\s*(\S.*\S|\S)\s*/)?.[1] || "";
   const pronunciation = data.pron?.match(/\s*\^\s*(\S.*\S|\S)\s*/)?.[1] || "";
 
+  validateInlineTtsReplacements(text, data.text_lineno);
   getInputStringText(text);
   const ipa_replacements: IpaReplacement[] = [];
   let ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
@@ -571,6 +587,7 @@ type Speaker = {
   text: undefined | string;
   trans: undefined | string;
   pron: undefined | string;
+  text_lineno?: undefined | number;
   allow_audio?: undefined | boolean;
   audio_line_inset?: undefined | number;
   audio?: undefined | string;
@@ -596,6 +613,7 @@ function getText(
   if (!line) return speaker;
   if (line.startsWith(">") || (allow_speaker && line.match(/\w*:/))) {
     speaker.text = line;
+    speaker.text_lineno = line_iter.get_lineno();
     line = line_iter.advance(1);
     if (allow_trans) {
       while (line?.startsWith("~") || line?.startsWith("^")) {
@@ -618,6 +636,41 @@ function getText(
     }
   }
   return speaker;
+}
+
+function pushStoryError(story: StoryWithMeta, message: string) {
+  story.elements.push({
+    type: "ERROR",
+    text: message,
+    trackingProperties: {
+      line_index: story.meta.line_index,
+      challenge_type: "error",
+    },
+  });
+  story.meta.line_index += 1;
+}
+
+function toErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) return error.message;
+  return "Invalid story syntax.";
+}
+
+function safeSpeakerTextTrans(
+  story: StoryWithMeta,
+  data: Speaker,
+  ...args: Parameters<typeof speaker_text_trans> extends [
+    Speaker,
+    ...infer Rest,
+  ]
+    ? Rest
+    : never
+) {
+  try {
+    return speaker_text_trans(data, ...args);
+  } catch (error) {
+    pushStoryError(story, toErrorMessage(error));
+    return undefined;
+  }
 }
 
 function getAnswers(
@@ -717,10 +770,11 @@ function processBlockHeader(
   lang: string,
   story_languages: StoryLanguages,
 ) {
-  const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const data = getText(line_iter, false, true, true);
-  const data_text = speaker_text_trans(data, story.meta);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta);
+  if (!data_text) return false;
+  const start_no = line_iter.get_lineno(-1);
+  const start_no1 = data.text_lineno;
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -749,10 +803,11 @@ function processBlockLine(
   lang: string,
   story_languages: StoryLanguages,
 ) {
-  const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const data = getText(line_iter, true, true, true);
-  const data_text = speaker_text_trans(data, story.meta);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta);
+  if (!data_text) return false;
+  const start_no = line_iter.get_lineno(-1);
+  const start_no1 = data.text_lineno;
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -782,10 +837,11 @@ function processBlockMultipleChoice(
   lang: string,
   story_languages: StoryLanguages,
 ) {
-  const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const data = getText(line_iter, false, true, false);
-  const data_text = speaker_text_trans(data, story.meta);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta);
+  if (!data_text) return false;
+  const start_no = line_iter.get_lineno(-1);
+  const start_no1 = data.text_lineno;
 
   const [answers, correct_answer] = getAnswers(line_iter, true);
   story.elements.push({
@@ -816,13 +872,19 @@ function processBlockSelectPhrase(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const question_data = getText(line_iter, false, true, false);
-  const question_data_text = speaker_text_trans(question_data, story.meta);
+  const question_data_text = safeSpeakerTextTrans(
+    story,
+    question_data,
+    story.meta,
+  );
+  if (!question_data_text) return false;
+  const start_no1 = question_data.text_lineno;
 
   const start_no2 = line_iter.get_lineno(0);
   const data = getText(line_iter, true, true, true);
-  const data_text = speaker_text_trans(data, story.meta);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta);
+  if (!data_text) return false;
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -875,13 +937,19 @@ function processBlockContinuation(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const question_data = getText(line_iter, false, true, false);
-  const question_data_text = speaker_text_trans(question_data, story.meta);
+  const question_data_text = safeSpeakerTextTrans(
+    story,
+    question_data,
+    story.meta,
+  );
+  if (!question_data_text) return false;
+  const start_no1 = question_data.text_lineno;
 
   const start_no2 = line_iter.get_lineno();
   const data = getText(line_iter, true, true, true);
-  const data_text = speaker_text_trans(data, story.meta, false, true);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta, false, true);
+  if (!data_text) return false;
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -939,13 +1007,19 @@ function processBlockArrange(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const question_data = getText(line_iter, false, true, false);
-  const question_data_text = speaker_text_trans(question_data, story.meta);
+  const question_data_text = safeSpeakerTextTrans(
+    story,
+    question_data,
+    story.meta,
+  );
+  if (!question_data_text) return false;
+  const start_no1 = question_data.text_lineno;
 
   const start_no2 = line_iter.get_lineno();
   const data = getText(line_iter, true, true, true);
-  const data_text = speaker_text_trans(data, story.meta, true);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta, true);
+  if (!data_text) return false;
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -1000,13 +1074,19 @@ function processBlockPointToPhrase(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const question_data = getText(line_iter, false, true, false);
-  const question_data_text = speaker_text_trans(question_data, story.meta);
+  const question_data_text = safeSpeakerTextTrans(
+    story,
+    question_data,
+    story.meta,
+  );
+  if (!question_data_text) return false;
+  const start_no1 = question_data.text_lineno;
 
   const start_no2 = line_iter.get_lineno();
   const data = getText(line_iter, true, true, true);
-  const data_text = speaker_text_trans(data, story.meta, true);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta, true);
+  if (!data_text) return false;
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -1053,9 +1133,14 @@ function processBlockMatch(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const question_data = getText(line_iter, false, true, false);
-  const question_data_text = speaker_text_trans(question_data, story.meta);
+  const question_data_text = safeSpeakerTextTrans(
+    story,
+    question_data,
+    story.meta,
+  );
+  if (!question_data_text) return false;
+  const start_no1 = question_data.text_lineno;
 
   const answers = [];
   while (line_iter.get()) {
@@ -1227,18 +1312,11 @@ export function processStoryFile(
         }
       } catch (e) {
         console.error(e);
+        pushStoryError(story, toErrorMessage(e));
+        continue;
       }
     }
-    story.elements.push({
-      type: "ERROR",
-      text: line,
-      trackingProperties: {
-        line_index: story.meta.line_index,
-        challenge_type: "error",
-      },
-      // "editor": {"start_no": group.start_no, "end_no": group.end_no}
-    });
-    story.meta.line_index += 1;
+    pushStoryError(story, line);
     //console.log("error", lineno, line)
     line_iter.advance();
   }
