@@ -182,7 +182,7 @@ export default function EditList({
                     <span
                       title={`This story has ${story.todo_count} TODOs.`}
                       aria-label={`${story.todo_count} TODOs`}
-                      className="ml-[6px] inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-amber-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-amber-900"
+                      className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-amber-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-amber-900"
                     >
                       <span aria-hidden="true">📝 {story.todo_count}</span>
                     </span>

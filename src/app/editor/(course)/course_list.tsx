@@ -101,7 +101,7 @@ export default function CourseList({
                 <span className="flex grow items-center justify-end gap-[6px] whitespace-nowrap pr-[10px]">
                   {course.todo_count ? (
                     <span
-                      className="inline-flex h-7 shrink-0 items-center justify-center rounded-full bg-amber-100 px-[8px] text-[13px] leading-none font-bold text-amber-900"
+                      className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-amber-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-amber-900"
                       title={`This course has ${course.todo_count} TODOs.`}
                       aria-label={`${course.todo_count} TODOs`}
                     >
