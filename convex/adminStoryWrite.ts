@@ -1,6 +1,7 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./lib/authorization";
+import { recomputeCoursePublishedCount } from "./lib/courseCounts";
 
 export const togglePublished = mutation({
   args: {
@@ -26,15 +27,7 @@ export const togglePublished = mutation({
 
     const nextPublic = !story.public;
     await ctx.db.patch(story._id, { public: nextPublic });
-
-    const storiesInCourse = await ctx.db
-      .query("stories")
-      .withIndex("by_course", (q) => q.eq("courseId", story.courseId))
-      .collect();
-    const courseCount = storiesInCourse.filter(
-      (row) => row.public && !row.deleted,
-    ).length;
-    await ctx.db.patch(course._id, { count: courseCount });
+    await recomputeCoursePublishedCount(ctx, course._id);
 
     return null;
   },

@@ -5,6 +5,7 @@ import {
   requireContributorOrAdmin,
   requireSessionLegacyUserId,
 } from "./lib/authorization";
+import { recomputeCoursePublishedCount } from "./lib/courseCounts";
 
 export const setStory = mutation({
   args: {
@@ -82,6 +83,9 @@ export const setStory = mutation({
     const changeDateMillis = Date.parse(args.change_date);
     const operationKey =
       args.operationKey ?? `story:${story.legacyId}:set_story:${Date.now()}`;
+    const previousCourseId = story.courseId;
+    const movedPublishedStory =
+      previousCourseId !== course._id && story.public && !story.deleted;
 
     await ctx.db.patch(story._id, {
       duo_id: args.duo_id,
@@ -126,6 +130,10 @@ export const setStory = mutation({
       0,
     );
     await ctx.db.patch(course._id, { todo_count: courseTodoCount });
+    if (movedPublishedStory) {
+      await recomputeCoursePublishedCount(ctx, previousCourseId);
+      await recomputeCoursePublishedCount(ctx, course._id);
+    }
 
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStorySaved, {
       operationKey,
@@ -191,6 +199,9 @@ export const deleteStory = mutation({
       deleted: true,
       public: false,
     });
+    if (story.public) {
+      await recomputeCoursePublishedCount(ctx, story.courseId);
+    }
 
     const operationKey =
       args.operationKey ?? `story:${story.legacyId}:delete:${Date.now()}`;

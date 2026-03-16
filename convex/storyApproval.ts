@@ -6,6 +6,7 @@ import {
   requireContributorOrAdmin,
   requireSessionLegacyUserId,
 } from "./lib/authorization";
+import { recomputeCoursePublishedCount } from "./lib/courseCounts";
 
 const storyApprovalInputValidator = {
   legacyStoryId: v.number(),
@@ -274,12 +275,7 @@ export const toggleStoryApproval = mutation({
 
     let courseCount: number | null = null;
     if (published.length > 0) {
-      courseCount = storiesInCourse.filter(
-        (row) => row.public && !row.deleted,
-      ).length;
-      await ctx.db.patch(story.courseId, {
-        count: courseCount,
-      });
+      courseCount = await recomputeCoursePublishedCount(ctx, story.courseId);
     }
 
     const { contributors, contributors_past } =
