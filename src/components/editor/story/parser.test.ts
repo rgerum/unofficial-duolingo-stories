@@ -106,7 +106,6 @@ Speaker414: [(Nej)… (Du~har) (mange)]`);
   assert.ok(!tokenTexts.includes("Du"));
   assert.ok(!tokenTexts.includes("har"));
 });
-
 test("LINE syntax highlighting marks invalid inline TTS replacements", () => {
   const lines = __testTokenizeLines(`[LINE]
 Speaker414: foo{} bar`);
@@ -344,4 +343,60 @@ $8275/8e8657d3.mp3;5,50;2,550;1,438;7,162;0,525`);
     end_no: 15,
     active_no: 12,
   });
+});
+
+test("curly brace TTS override keeps the full tilde-connected phrase", () => {
+  const [story] = processStoryFile(
+    `[DATA]
+icon_0=test
+speaker_0=en-US-Test
+
+[LINE]
+Speaker0: show~word{speak~word}`,
+    0,
+    {},
+    {
+      learning_language: "en",
+      from_language: "fr",
+    },
+    "",
+  );
+
+  const line = story.elements[0];
+  assert.equal(line?.type, "LINE");
+  if (line?.type !== "LINE") return;
+
+  assert.equal(line.line.content.text, "show word");
+  assert.match(
+    line.line.content.audio?.ssml.text ?? "",
+    /<sub alias="speak word">show word<\/sub>/,
+  );
+});
+
+test("curly brace TTS override still works for single words", () => {
+  const [story] = processStoryFile(
+    `[DATA]
+icon_0=test
+speaker_0=en-US-Test
+
+[LINE]
+Speaker0: foo{bar}`,
+    0,
+    {},
+    {
+      learning_language: "en",
+      from_language: "fr",
+    },
+    "",
+  );
+
+  const line = story.elements[0];
+  assert.equal(line?.type, "LINE");
+  if (line?.type !== "LINE") return;
+
+  assert.equal(line.line.content.text, "foo");
+  assert.match(
+    line.line.content.audio?.ssml.text ?? "",
+    /<sub alias="bar">foo<\/sub>/,
+  );
 });

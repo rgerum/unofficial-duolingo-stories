@@ -199,8 +199,8 @@ export function scanInlineTts(text: string) {
 
     replacements.push({
       index: normalizedText.length,
-      word,
-      alias,
+      word: word.replace(/~/g, " "),
+      alias: alias.replace(/~/g, " "),
       alphabet,
     });
     normalizedText += word + segment.substring(closeIndex + 1);

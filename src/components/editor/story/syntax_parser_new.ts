@@ -404,7 +404,6 @@ function speaker_text_trans(
   }
   text = inlineTtsData.normalizedText;
   const ipa_replacements = inlineTtsData.replacements;
-
   let content = generateHintMap(text, translation, pronunciation);
 
   let selectablePhrases, characterPositions;
