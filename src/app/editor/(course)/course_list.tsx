@@ -98,26 +98,33 @@ export default function CourseList({
                 <span className="overflow-hidden text-ellipsis whitespace-nowrap">{`${
                   course.learning_language_name
                 } [${course.from_language_short}] `}</span>
-                <span className="grow whitespace-nowrap pr-[10px] text-right">
+                <span className="flex grow items-center justify-end gap-[6px] whitespace-nowrap pr-[10px]">
                   {course.todo_count ? (
-                    <img
+                    <span
+                      className="inline-flex h-7 shrink-0 items-center justify-center rounded-full bg-amber-100 px-[8px] text-[13px] leading-none font-bold text-amber-900"
                       title={`This course has ${course.todo_count} TODOs.`}
-                      alt="TODO"
-                      src="/editor/icons/error.svg"
-                    />
+                      aria-label={`${course.todo_count} TODOs`}
+                    >
+                      <span aria-hidden="true">📝 {course.todo_count}</span>
+                    </span>
                   ) : null}
                   {course.official ? (
-                    <span className="ml-[5px] h-7">
+                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center">
                       <img
                         src="https://d35aaqx5ub95lt.cloudfront.net/vendor/b3ede3d53c932ee30d981064671c8032.svg"
                         title="official"
                         alt="👑"
+                        className="block h-6 w-6 object-contain"
                       />
                     </span>
                   ) : course.contributors.length ? (
-                    `🧑 ${course.contributors.length}`
+                    <span className="inline-flex items-center leading-none">
+                      {`🧑 ${course.contributors.length}`}
+                    </span>
                   ) : (
-                    "💤"
+                    <span className="inline-flex items-center leading-none">
+                      💤
+                    </span>
                   )}
                 </span>
               </Link>
