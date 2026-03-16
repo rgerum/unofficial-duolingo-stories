@@ -15,6 +15,9 @@ export type InlineTtsError = {
 const punctuationChars =
   "\\/¡!\"'`#$%&*,.:;<=>¿?@^_`{|}…" + "。、，！？；：（）～—·《…》〈…〉﹏……——";
 const inlineTtsBoundaryPunctuation = punctuationChars.replace(/[{}]/g, "");
+const inlineTtsBoundaryRegex = new RegExp(
+  `[\\s${inlineTtsBoundaryPunctuation}]`,
+);
 
 function isInlineTtsSegmentBoundary(char: string | undefined) {
   return (
@@ -22,7 +25,7 @@ function isInlineTtsSegmentBoundary(char: string | undefined) {
     char === "|" ||
     char === "[" ||
     char === "]" ||
-    char.match(new RegExp(`[\\s${inlineTtsBoundaryPunctuation}]`)) !== null
+    char.match(inlineTtsBoundaryRegex) !== null
   );
 }
 
