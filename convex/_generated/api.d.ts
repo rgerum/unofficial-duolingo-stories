@@ -15,6 +15,7 @@ import type * as audioRead from "../audioRead.js";
 import type * as auth from "../auth.js";
 import type * as authFunctions from "../authFunctions.js";
 import type * as authMigration from "../authMigration.js";
+import type * as courseWrite from "../courseWrite.js";
 import type * as discordBot from "../discordBot.js";
 import type * as discordData from "../discordData.js";
 import type * as discordRoleSync from "../discordRoleSync.js";
@@ -24,6 +25,7 @@ import type * as http from "../http.js";
 import type * as landing from "../landing.js";
 import type * as languageWrite from "../languageWrite.js";
 import type * as lib_authorization from "../lib/authorization.js";
+import type * as lib_courseCounts from "../lib/courseCounts.js";
 import type * as lib_phpbb from "../lib/phpbb.js";
 import type * as localization from "../localization.js";
 import type * as localizationWrite from "../localizationWrite.js";
@@ -50,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   authFunctions: typeof authFunctions;
   authMigration: typeof authMigration;
+  courseWrite: typeof courseWrite;
   discordBot: typeof discordBot;
   discordData: typeof discordData;
   discordRoleSync: typeof discordRoleSync;
@@ -59,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   landing: typeof landing;
   languageWrite: typeof languageWrite;
   "lib/authorization": typeof lib_authorization;
+  "lib/courseCounts": typeof lib_courseCounts;
   "lib/phpbb": typeof lib_phpbb;
   localization: typeof localization;
   localizationWrite: typeof localizationWrite;
@@ -574,6 +578,7 @@ export declare const components: {
             maximumRowsRead?: number;
             numItems: number;
           };
+          select?: Array<string>;
           sortBy?: { direction: "asc" | "desc"; field: string };
           where?: Array<{
             connector?: "AND" | "OR";

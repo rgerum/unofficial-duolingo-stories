@@ -20,7 +20,7 @@ export interface CourseData {
 
 export const get_course_data = unstable_cache(
   async () => await fetchQuery(api.landing.getPublicCourseList, {}),
-  ["get_course_data_v2_convex_ids"],
+  ["get_course_data_v3_story_counts"],
   { tags: ["course_data"], revalidate: 3600 },
 );
 
