@@ -90,59 +90,59 @@ export default function EditList({
           <span key={i}>{d}, </span>
         ))}
       </p>
-      <div className="mb-[100px] w-full min-[1000px]:table min-[1000px]:border-collapse min-[1000px]:align-middle">
-        <div className="hidden min-[1000px]:table-header-group">
-          <div className="min-[1000px]:table-row">
+      <div className="mb-[100px] w-full">
+        <div className="hidden min-[1000px]:block">
+          <div className="min-[1000px]:grid min-[1000px]:grid-cols-[84px_56px_minmax(0,1fr)_210px_120px_150px_120px_150px] min-[1000px]:items-center">
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="0"
             >
-              Set
+              <span className="my-auto">Set</span>
             </div>
-            <div className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"></div>
+            <div className="self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"></div>
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="1"
             >
-              Name
+              <span className="my-auto">Name</span>
             </div>
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="2"
             >
-              Status
+              <span className="my-auto">Status</span>
             </div>
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="4"
             >
-              Author
+              <span className="my-auto">Author</span>
             </div>
             <div
-              className="js-sort-active bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="js-sort-active flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="5"
             >
-              Created
+              <span className="my-auto">Created</span>
             </div>
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="6"
             >
-              Author
+              <span className="my-auto">Author</span>
             </div>
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="7"
             >
-              Updated
+              <span className="my-auto">Updated</span>
             </div>
           </div>
         </div>
-        <div className="min-[1000px]:table-row-group">
+        <div>
           {stories.map((story, i) => (
             <div
               className={
-                "items-center py-[5px] transition-[filter,color,background-color] duration-100 ease-in hover:bg-[var(--body-background)] hover:brightness-90 max-[1000px]:flex max-[1000px]:flex-wrap min-[1000px]:table-row " +
+                "items-center py-[5px] transition-[filter,color,background-color] duration-100 ease-in hover:bg-[var(--body-background)] hover:brightness-90 max-[1000px]:flex max-[1000px]:flex-wrap min-[1000px]:grid min-[1000px]:grid-cols-[84px_56px_minmax(0,1fr)_210px_120px_150px_120px_150px] min-[1000px]:items-center " +
                 (i % 2 === 1 ? "bg-[var(--body-background-faint)] " : "") +
                 (set_ends[i]
                   ? "border-t-[3px] border-[var(--button-background)] "
@@ -150,13 +150,13 @@ export default function EditList({
               }
               key={story.id}
             >
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[60px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[60px] min-[1000px]:px-[5px]">
                 <span>
                   <b>{pad_space(story.set_id)}</b>&nbsp;-&nbsp;
                   {pad_space(story.set_index)}
                 </span>
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[45px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[45px] min-[1000px]:px-[5px]">
                 <img
                   alt={"story title"}
                   src={
@@ -166,24 +166,30 @@ export default function EditList({
                   }
                   width="44px"
                   height={"40px"}
+                  className="block min-w-[44px]"
                 />
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] max-[1000px]:w-[calc(100vw-60px-45px-180px)] max-[500px]:w-[calc(100vw-60px-45px-85px)] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
-                <Link
-                  className="underline underline-offset-2"
-                  href={`/editor/story/${story.id}`}
-                >
-                  {story.name}
-                </Link>
-                {story.todo_count ? (
-                  <img
-                    title={`This story has ${story.todo_count} TODOs.`}
-                    alt="error"
-                    src="/editor/icons/error.svg"
-                  />
-                ) : null}
+              <div className="overflow-hidden pl-[5px] max-[1000px]:w-[calc(100vw-60px-45px-180px)] max-[500px]:w-[calc(100vw-60px-45px-85px)] min-[1000px]:min-w-0 min-[1000px]:px-[5px]">
+                <div className="flex min-w-0 items-center gap-[6px]">
+                  <Link
+                    className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap underline underline-offset-2"
+                    href={`/editor/story/${story.id}`}
+                    title={story.name}
+                  >
+                    {story.name}
+                  </Link>
+                  {story.todo_count ? (
+                    <span
+                      title={`This story has ${story.todo_count} TODOs.`}
+                      aria-label={`${story.todo_count} TODOs`}
+                      className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-amber-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-amber-900"
+                    >
+                      <span aria-hidden="true">📝 {story.todo_count}</span>
+                    </span>
+                  ) : null}
+                </div>
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-right max-[1000px]:w-[180px] max-[500px]:w-[85px] max-[500px]:[&>div]:flex max-[500px]:overflow-hidden min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-right max-[1000px]:w-[180px] max-[500px]:w-[85px] max-[500px]:[&>div]:flex max-[500px]:overflow-hidden min-[1000px]:px-[5px]">
                 <DropDownStatus
                   id={story.id}
                   name={story.name}
@@ -193,16 +199,16 @@ export default function EditList({
                   official={course.official}
                 />
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Created:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Created:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:min-w-0 min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">
                 {story.author}
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">
                 {formatDate(story.date)}
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Changed:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Changed:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:min-w-0 min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">
                 {story.author_change}
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">
                 {formatDate(story.change_date)}
               </div>
             </div>
