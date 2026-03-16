@@ -190,6 +190,16 @@ export type StoryElementMatch = {
 export type StoryElementError = {
   type: "ERROR";
   text: string;
+  errorKind?: "parse" | "unknown_block" | "invalid_line";
+  sourceLine?: string;
+  lineNumber?: number;
+  details?: string;
+  editor?: {
+    block_start_no?: number;
+    start_no?: number;
+    end_no?: number;
+    active_no?: number;
+  };
   trackingProperties: {
     line_index: number;
     challenge_type: "error";

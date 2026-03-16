@@ -3,6 +3,7 @@ This parser does the syntax highlighting for the editor
  */
 
 import { StreamLanguage, StringStream } from "@codemirror/language";
+import { scanInlineTts } from "./inline_tts";
 
 // Ideally this should be proper tag definitions instead of mapping them to arbitrary tag symbols
 // I just did not find out yet how to define custom tag symbols
@@ -262,6 +263,10 @@ function parserTextWithTranslation(
     (!allow_buttons && stream.match(/[^ |$\]\[]+/)) ||
     (allow_buttons && stream.match(/[^ |$\]\[()]+/))
   ) {
+    if (hasInlineTtsHighlightError(state, stream.start, stream.pos)) {
+      return STATE_ERROR;
+    }
+
     if (allow_buttons && state.in_button) {
       if (state.bracket && allow_hide) {
         if (state.odd) return STATE_TEXT_HIDE_BUTTON_ODD;
@@ -329,6 +334,7 @@ function parseBlockHeader(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
@@ -355,10 +361,12 @@ function parseBlockLine(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     if (state.block.line === 0 && stream.match(/\S+:/)) {
       startLine(state, 1, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_SPEAKER_TYPE;
     }
     const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
@@ -404,12 +412,36 @@ function startLine(
   state.odd = false;
   block.line_type = line_type;
   state.block = block;
+  state.inline_tts_invalid_ranges = [];
+}
+
+function setInlineTtsHighlightRanges(
+  stream: StringStream,
+  state: State,
+  enabled: boolean,
+) {
+  if (!enabled) {
+    state.inline_tts_invalid_ranges = [];
+    return;
+  }
+  const { errors } = scanInlineTts(stream.string.slice(stream.pos));
+  state.inline_tts_invalid_ranges = errors.map((error) => ({
+    start: error.start + stream.pos,
+    end: error.end + stream.pos,
+  }));
+}
+
+function hasInlineTtsHighlightError(state: State, start: number, end: number) {
+  return state.inline_tts_invalid_ranges.some(
+    (range) => start < range.end && end > range.start,
+  );
 }
 
 function parseBlockSelectPhrase(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
@@ -425,10 +457,12 @@ function parseBlockSelectPhrase(stream: StringStream, state: State) {
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
       startLine(state, 2, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_SPEAKER_TYPE;
     }
     if (state.block.line === 1 && stream.eat(/>/)) {
       startLine(state, 2, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     if (state.block.allow_audio && stream.eat("$")) {
@@ -464,6 +498,7 @@ function parseBlockContinuation(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
@@ -479,10 +514,12 @@ function parseBlockContinuation(stream: StringStream, state: State) {
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
       startLine(state, 2, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_SPEAKER_TYPE;
     }
     if (state.block.line === 1 && stream.eat(">")) {
       startLine(state, 2, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     if (state.block.allow_audio && stream.eat("$")) {
@@ -516,6 +553,7 @@ function parseBlockMultipleChoice(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
@@ -531,10 +569,12 @@ function parseBlockMultipleChoice(stream: StringStream, state: State) {
     }
     if (state.block.line >= 1 && stream.eat("+")) {
       startLine(state, 2, true, "text");
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     if (state.block.line >= 1 && stream.eat("-")) {
       startLine(state, 2, true, "text");
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
 
@@ -554,6 +594,7 @@ function parseBlockArrange(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
@@ -569,10 +610,12 @@ function parseBlockArrange(stream: StringStream, state: State) {
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
       startLine(state, 2, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_SPEAKER_TYPE;
     }
     if (state.block.line === 1 && stream.eat(">")) {
       startLine(state, 2, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     if (state.block.allow_audio && stream.eat("$")) {
@@ -602,6 +645,7 @@ function parseBlockPointToPhrase(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
@@ -617,10 +661,12 @@ function parseBlockPointToPhrase(stream: StringStream, state: State) {
     }
     if (state.block.line === 1 && stream.match(/\S+:/)) {
       startLine(state, 2, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_SPEAKER_TYPE;
     }
     if (state.block.line === 1 && stream.eat(">")) {
       startLine(state, 2, true, "text", true);
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     if (state.block.allow_audio && stream.eat("$")) {
@@ -650,6 +696,7 @@ function parseBlockMatch(stream: StringStream, state: State) {
   if (stream.sol()) {
     if (state.block.line === 0 && stream.eat(">")) {
       startLine(state, 1, true, "text");
+      setInlineTtsHighlightRanges(stream, state, true);
       return STATE_DEFAULT;
     }
     const hintPrefix = state.block.allow_trans && stream.eat(/[~^]/);
@@ -750,6 +797,7 @@ type State = {
   bracket: boolean;
   in_button: boolean;
   button_right: boolean;
+  inline_tts_invalid_ranges: Array<{ start: number; end: number }>;
 };
 
 function createStartState(): State {
@@ -767,6 +815,7 @@ function createStartState(): State {
     bracket: false,
     in_button: false,
     button_right: false,
+    inline_tts_invalid_ranges: [],
   };
 }
 
