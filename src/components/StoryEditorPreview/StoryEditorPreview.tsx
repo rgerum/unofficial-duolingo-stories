@@ -13,6 +13,7 @@ import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import type { StoryType } from "@/components/editor/story/syntax_parser_new";
 import type {
   StoryElement,
+  StoryElementError,
   StoryElementHeader,
   StoryElementLine,
   StoryElementMultipleChoice,
@@ -195,10 +196,52 @@ function EditorElement({ element, editorState }: EditorElementProps) {
   }
 
   if (element.type === "ERROR") {
-    return <div className={styles.error}>{element.text}</div>;
+    return <EditorError element={element} editorState={editorState} />;
   }
 
   return null;
+}
+
+function EditorError({
+  element,
+  editorState,
+}: {
+  element: StoryElementError;
+  editorState?: EditorStateType;
+}) {
+  const editorProps: EditorProps = {
+    editorState,
+    editorBlock: element.editor,
+  };
+  const { onClick } = getEditorHandlers(editorProps);
+  const title =
+    element.errorKind === "unknown_block"
+      ? "Unknown Block"
+      : element.errorKind === "invalid_line"
+        ? "Unexpected Line"
+        : "Parse Error";
+
+  return (
+    <div
+      className={styles.error}
+      onClick={onClick}
+      data-lineno={element.editor?.block_start_no}
+    >
+      <div className={styles.errorHeader}>
+        <span className={styles.errorTitle}>{title}</span>
+        {element.lineNumber ? (
+          <span className={styles.errorLine}>Line {element.lineNumber}</span>
+        ) : null}
+      </div>
+      <div className={styles.errorMessage}>{element.text}</div>
+      {element.sourceLine ? (
+        <code className={styles.errorSource}>{element.sourceLine}</code>
+      ) : null}
+      {element.details ? (
+        <div className={styles.errorDetails}>{element.details}</div>
+      ) : null}
+    </div>
+  );
 }
 
 interface EditorQuestionWrapperProps {

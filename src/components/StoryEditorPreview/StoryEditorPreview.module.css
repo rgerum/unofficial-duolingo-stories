@@ -10,9 +10,60 @@
 }
 
 .error {
-  color: red;
-  padding: 8px;
-  margin: 8px 0;
+  margin: 12px 0;
+  border: 1px solid #d97706;
+  border-left: 5px solid #b45309;
+  border-radius: 10px;
+  background: #fff7ed;
+  padding: 12px 14px;
+  color: #7c2d12;
+  cursor: pointer;
+}
+
+.errorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.errorTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.errorLine {
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #fed7aa;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.errorMessage {
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.errorSource {
+  display: block;
+  overflow-x: auto;
+  margin-top: 10px;
+  border-radius: 8px;
+  background: #ffedd5;
+  padding: 8px 10px;
+  color: #9a3412;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+
+.errorDetails {
+  margin-top: 8px;
+  font-size: 0.9rem;
 }
 
 .challenge_prompt {
