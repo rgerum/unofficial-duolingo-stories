@@ -613,10 +613,6 @@ function getText(
   return speaker;
 }
 
-function pushStoryError(story: StoryWithMeta, message: string) {
-  pushStoryErrorData(story, { message });
-}
-
 function pushStoryErrorData(
   story: StoryWithMeta,
   error: {
