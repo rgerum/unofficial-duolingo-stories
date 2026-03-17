@@ -7,6 +7,17 @@ import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { CourseProps, StoryListDataProps } from "@/app/editor/(course)/types";
 
+type StoryState = "draft" | "feedback" | "finished" | "published";
+type StoryFilter = "all" | StoryState;
+
+const STORY_FILTER_ORDER: StoryFilter[] = [
+  "all",
+  "draft",
+  "feedback",
+  "finished",
+  "published",
+];
+
 export default function EditList({
   stories,
   course,
@@ -14,15 +25,46 @@ export default function EditList({
   stories: StoryListDataProps[];
   course: CourseProps;
 }) {
-  if (stories === undefined) stories = [];
+  const [storyList, setStoryList] = useState<StoryListDataProps[]>(
+    stories ?? [],
+  );
+  const [activeFilter, setActiveFilter] = useState<StoryFilter>("all");
+
+  useEffect(() => {
+    setStoryList(stories ?? []);
+  }, [stories]);
+
+  const counts = storyList.reduce<Record<StoryFilter, number>>(
+    (acc, story) => {
+      acc.all += 1;
+      acc[getStoryState(story)] += 1;
+      return acc;
+    },
+    {
+      all: 0,
+      draft: 0,
+      feedback: 0,
+      finished: 0,
+      published: 0,
+    },
+  );
+
+  const filteredStories =
+    activeFilter === "all"
+      ? storyList
+      : storyList.filter((story) => getStoryState(story) === activeFilter);
+
   let set_ends = [];
-  let last_set = 1;
+  let last_set = filteredStories[0]?.set_id;
   let story_published_count = 0;
-  for (let story of stories) {
+  for (let story of storyList) {
+    story_published_count += story.public ? 1 : 0;
+  }
+
+  for (let story of filteredStories) {
     if (story.set_id === last_set) set_ends.push(0);
     else set_ends.push(1);
     last_set = story.set_id;
-    story_published_count += story.public ? 1 : 0;
   }
 
   return (
@@ -90,6 +132,37 @@ export default function EditList({
           <span key={i}>{d}, </span>
         ))}
       </p>
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
+        {STORY_FILTER_ORDER.map((filter) => {
+          const isActive = activeFilter === filter;
+          return (
+            <button
+              key={filter}
+              type="button"
+              className={
+                "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 " +
+                (isActive
+                  ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
+                  : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
+              }
+              onClick={() => setActiveFilter(filter)}
+              aria-pressed={isActive}
+            >
+              <span>{getFilterLabel(filter)}</span>
+              <span
+                className={
+                  "rounded-full px-2 py-[3px] text-[12px] font-bold " +
+                  (isActive
+                    ? "bg-[color:rgba(255,255,255,0.18)] text-[var(--button-color)]"
+                    : "bg-[var(--body-background)] text-[var(--text-color-dim)]")
+                }
+              >
+                {counts[filter]}
+              </span>
+            </button>
+          );
+        })}
+      </div>
       <div className="mb-[100px] w-full">
         <div className="hidden min-[1000px]:block">
           <div className="min-[1000px]:grid min-[1000px]:grid-cols-[84px_56px_minmax(0,1fr)_210px_120px_150px_120px_150px] min-[1000px]:items-center">
@@ -139,7 +212,7 @@ export default function EditList({
           </div>
         </div>
         <div>
-          {stories.map((story, i) => (
+          {filteredStories.map((story, i) => (
             <div
               className={
                 "items-center py-[5px] transition-[filter,color,background-color] duration-100 ease-in hover:bg-[var(--body-background)] hover:brightness-90 max-[1000px]:flex max-[1000px]:flex-wrap min-[1000px]:grid min-[1000px]:grid-cols-[84px_56px_minmax(0,1fr)_210px_120px_150px_120px_150px] min-[1000px]:items-center " +
@@ -197,6 +270,15 @@ export default function EditList({
                   status={story.status}
                   public={story.public}
                   official={course.official}
+                  onStoryStateChange={(nextStoryState) => {
+                    setStoryList((currentStories) =>
+                      currentStories.map((currentStory) =>
+                        currentStory.id === story.id
+                          ? { ...currentStory, ...nextStoryState }
+                          : currentStory,
+                      ),
+                    );
+                  }}
                 />
               </div>
               <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Created:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:min-w-0 min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">
@@ -213,10 +295,30 @@ export default function EditList({
               </div>
             </div>
           ))}
+          {filteredStories.length === 0 ? (
+            <div className="rounded-[12px] border border-dashed border-[var(--header-border)] bg-[var(--body-background-faint)] px-4 py-6 text-center text-[var(--text-color-dim)]">
+              No stories match the selected state.
+            </div>
+          ) : null}
         </div>
       </div>
     </>
   );
+}
+
+function getStoryState(story: Pick<StoryListDataProps, "status" | "public">) {
+  if (story.public || story.status === "published") return "published";
+  if (story.status === "feedback") return "feedback";
+  if (story.status === "finished") return "finished";
+  return "draft";
+}
+
+function getFilterLabel(filter: StoryFilter) {
+  if (filter === "all") return "All";
+  if (filter === "draft") return "✍️ Draft";
+  if (filter === "feedback") return "🗨️ Feedback";
+  if (filter === "finished") return "✅ Finished";
+  return "📢 Published";
 }
 
 function pad_space(x: number) {
@@ -249,6 +351,12 @@ function DropDownStatus(props: {
   status: string;
   public: boolean;
   official: boolean;
+  onStoryStateChange: (
+    nextStoryState: Pick<
+      StoryListDataProps,
+      "status" | "public" | "approvalCount"
+    >,
+  ) => void;
 }) {
   let [loading, setLoading] = useState(0);
   let [status, set_status] = useState(props.status);
@@ -287,14 +395,19 @@ function DropDownStatus(props: {
       });
       if (response?.count !== undefined) {
         const count = response.count;
+        const nextIsPublic =
+          Array.isArray(response.published) &&
+          response.published.includes(props.id)
+            ? true
+            : isPublic;
         setCount(count);
+        setIsPublic(nextIsPublic);
+        props.onStoryStateChange({
+          status: response.story_status,
+          public: nextIsPublic,
+          approvalCount: count,
+        });
         if (response.published.length) {
-          if (
-            Array.isArray(response.published) &&
-            response.published.includes(props.id)
-          ) {
-            setIsPublic(true);
-          }
           router.refresh();
         }
         set_status(response.story_status);
