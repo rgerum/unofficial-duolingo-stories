@@ -400,6 +400,10 @@ function DropDownStatus(props: {
       });
       if (response?.count !== undefined) {
         const count = response.count;
+        // Approval toggles can promote stories to published, but they do not
+        // automatically unpublish them again. Reverting `public` is an admin-only
+        // action, so we preserve the existing public state unless the mutation
+        // explicitly reports this story as newly published.
         const nextIsPublic =
           Array.isArray(response.published) &&
           response.published.includes(props.id)
