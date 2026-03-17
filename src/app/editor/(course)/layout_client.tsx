@@ -16,7 +16,7 @@ export default function EditorLayoutClient({
         <LayoutFlag />
         <LoggedInButtonWrappedClient page={"editor"} course_id={"segment"} />
       </nav>
-      <div className="[grid-area:main] overflow-x-hidden overflow-y-scroll">
+      <div className="[grid-area:main] min-h-0 min-w-0 overflow-auto">
         {children}
       </div>
     </SwiperSideBar>

@@ -57,14 +57,14 @@ export default function CourseList({
 
   return (
     <div
-      className="group [grid-area:nav] border-r border-[var(--header-border)] max-[1250px]:relative max-[1250px]:w-0"
+      className="group relative [grid-area:nav] min-h-0 min-w-0 border-r border-[var(--header-border)] max-[1250px]:w-0"
       data-show={!course_id ? true : showList}
     >
       <div
-        className="pointer-events-none absolute h-full w-screen bg-black opacity-0 transition-opacity duration-500 ease-[ease] max-[1250px]:block max-[1250px]:group-data-[show=true]:pointer-events-auto max-[1250px]:group-data-[show=true]:opacity-50"
+        className="pointer-events-none hidden bg-black opacity-0 transition-opacity duration-500 ease-[ease] max-[1250px]:absolute max-[1250px]:inset-0 max-[1250px]:block max-[1250px]:h-full max-[1250px]:w-screen max-[1250px]:group-data-[show=true]:pointer-events-auto max-[1250px]:group-data-[show=true]:opacity-50"
         onClick={() => toggleShow()}
       ></div>
-      <div className="h-[calc(100vh-50px)] overflow-scroll max-[1250px]:absolute max-[1250px]:h-full max-[1250px]:w-[min(100vw,400px)] max-[1250px]:translate-x-[calc(-100%-10px)] max-[1250px]:bg-[var(--body-background)] max-[1250px]:shadow-[2px_19px_10px_hsl(20deg_10%_10%_/_0.5)] max-[1250px]:transition-transform max-[1250px]:duration-500 max-[1250px]:ease-in max-[1250px]:group-data-[show=true]:translate-x-0 max-[1250px]:group-data-[show=true]:duration-700 max-[1250px]:group-data-[show=true]:ease-out">
+      <div className="h-full min-h-0 overflow-auto max-[1250px]:absolute max-[1250px]:top-0 max-[1250px]:left-0 max-[1250px]:h-full max-[1250px]:w-[min(100vw,400px)] max-[1250px]:translate-x-[calc(-100%-10px)] max-[1250px]:bg-[var(--body-background)] max-[1250px]:shadow-[2px_19px_10px_hsl(20deg_10%_10%_/_0.5)] max-[1250px]:transition-transform max-[1250px]:duration-500 max-[1250px]:ease-in max-[1250px]:group-data-[show=true]:translate-x-0 max-[1250px]:group-data-[show=true]:duration-700 max-[1250px]:group-data-[show=true]:ease-out">
         <div className="sticky top-0 flex h-10 items-center border-b border-[var(--header-border)] bg-[var(--body-background)] pr-[10px]">
           <span className="px-[10px]">Search</span>
           <input

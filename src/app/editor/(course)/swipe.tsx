@@ -43,7 +43,7 @@ export default function SwiperSideBar({ children }: SwiperSideBarProps) {
     <>
       <div
         {...handlers}
-        className="grid h-full overflow-hidden [grid-template-areas:'header_header''nav_main'] [grid-template-columns:400px_1fr] [grid-template-rows:auto_1fr] max-[1250px]:[grid-template-columns:0_1fr]"
+        className="grid h-[100dvh] min-h-0 w-full overflow-hidden [grid-template-areas:'header_header''nav_main'] [grid-template-columns:400px_minmax(0,1fr)] [grid-template-rows:auto_minmax(0,1fr)] max-[1250px]:[grid-template-columns:0_minmax(0,1fr)]"
       >
         <CourseList
           course_id={segment}
