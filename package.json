@@ -14,7 +14,8 @@
     "init": "node database/db_create_test.mjs",
     "init-build": "node database/init_build.js",
     "init-reset": "node database/db_test_reset.mjs",
-    "audit:missing-story-images": "pnpm exec tsx scripts/find-missing-story-images.ts"
+    "audit:missing-story-images": "pnpm exec tsx scripts/find-missing-story-images.ts",
+    "backfill:discord-avatars": "pnpm exec tsx scripts/backfill-discord-avatars.ts"
   },
   "dependencies": {
     "@aws-sdk/client-polly": "^3.1008.0",

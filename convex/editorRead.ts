@@ -2,12 +2,40 @@ import { query, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
+import {
+  courseContributorValidator,
+  getRankedCourseContributors,
+  partitionCourseContributors,
+} from "./lib/courseContributors";
 
 type LanguageDoc = Doc<"languages">;
 type CourseDoc = Doc<"courses">;
 type StoryDoc = Doc<"stories">;
 type AvatarDoc = Doc<"avatars">;
 type AvatarMappingDoc = Doc<"avatar_mappings">;
+
+const editorCourseValidator = v.union(
+  v.object({
+    id: v.number(),
+    short: v.union(v.string(), v.null()),
+    about: v.union(v.string(), v.null()),
+    official: v.boolean(),
+    count: v.number(),
+    public: v.boolean(),
+    fromLanguageId: v.id("languages"),
+    from_language: v.number(),
+    from_language_short: v.string(),
+    from_language_name: v.string(),
+    learningLanguageId: v.id("languages"),
+    learning_language: v.number(),
+    learning_language_short: v.string(),
+    learning_language_name: v.string(),
+    contributors: v.array(courseContributorValidator),
+    contributors_past: v.array(courseContributorValidator),
+    todo_count: v.number(),
+  }),
+  v.null(),
+);
 
 function toNumber(value: unknown): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -218,6 +246,7 @@ export const getEditorSidebarData = query({
 
 export const getEditorCourseByIdentifier = query({
   args: { identifier: v.string() },
+  returns: editorCourseValidator,
   handler: async (ctx, args) => {
     const course = await getCourseByIdentifier(ctx, args.identifier);
     if (!course) return null;
@@ -226,6 +255,9 @@ export const getEditorCourseByIdentifier = query({
       ctx.db.get(course.learningLanguageId) as Promise<LanguageDoc | null>,
       ctx.db.get(course.fromLanguageId) as Promise<LanguageDoc | null>,
     ]);
+    const contributorLists = partitionCourseContributors(
+      await getRankedCourseContributors(ctx, course._id),
+    );
 
     return {
       id: course.legacyId,
@@ -243,8 +275,8 @@ export const getEditorCourseByIdentifier = query({
       learning_language_short: learningLanguage?.short ?? "",
       learning_language_name:
         learningLanguage?.name ?? course.learning_language_name ?? "",
-      contributors: course.contributors ?? [],
-      contributors_past: course.contributors_past ?? [],
+      contributors: contributorLists.contributors,
+      contributors_past: contributorLists.contributors_past,
       todo_count: course.todo_count ?? 0,
     };
   },

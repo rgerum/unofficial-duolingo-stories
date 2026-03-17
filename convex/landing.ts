@@ -1,6 +1,11 @@
 import { query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
+import {
+  courseContributorValidator,
+  getRankedCourseContributors,
+  partitionCourseContributors,
+} from "./lib/courseContributors";
 
 const courseListItemValidator = v.object({
   id: v.number(),
@@ -346,6 +351,8 @@ const localizationEntryValidator = v.object({
 const publicCoursePageValidator = v.union(
   v.object({
     ...courseListItemValidator.fields,
+    contributors: v.array(courseContributorValidator),
+    contributors_past: v.array(courseContributorValidator),
     stories: v.array(publicStoryListItemValidator),
     localization: v.array(localizationEntryValidator),
   }),
@@ -471,6 +478,9 @@ export const getPublicCoursePageData = query({
         if (setCmp !== 0) return setCmp;
         return a.set_index - b.set_index;
       });
+    const contributorLists = partitionCourseContributors(
+      await getRankedCourseContributors(ctx, course._id),
+    );
 
     return {
       id: course.legacyId,
@@ -488,6 +498,8 @@ export const getPublicCoursePageData = query({
       learning_language: legacyLearningLanguageId,
       learningLanguageId: course.learningLanguageId as Id<"languages">,
       learning_language_name: learningLanguageName,
+      contributors: contributorLists.contributors,
+      contributors_past: contributorLists.contributors_past,
       stories: mappedStories,
       localization: Array.from(localizationMap.entries()).map(
         ([tag, text]) => ({

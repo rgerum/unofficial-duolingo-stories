@@ -5,6 +5,7 @@ import {
   setContributorWriteByDiscordAccountId,
 } from "./discordBot";
 import { authComponent, createAuth } from "./betterAuth/auth";
+import { backfillDiscordUserImagesHttp as backfillDiscordUserImagesHandler } from "./discordAvatarSync";
 
 const http = httpRouter();
 
@@ -23,6 +24,11 @@ http.route({
   path: "/discord/set-stories-role-status",
   method: "POST",
   handler: setStoriesRoleSyncStatus,
+});
+http.route({
+  path: "/admin/backfill-discord-avatars",
+  method: "POST",
+  handler: backfillDiscordUserImagesHandler,
 });
 
 export default http;
