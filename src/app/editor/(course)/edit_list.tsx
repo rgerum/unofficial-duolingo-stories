@@ -297,7 +297,7 @@ export default function EditList({
           ))}
           {filteredStories.length === 0 ? (
             <div className="rounded-[12px] border border-dashed border-[var(--header-border)] bg-[var(--body-background-faint)] px-4 py-6 text-center text-[var(--text-color-dim)]">
-              No stories match the selected state.
+              {getEmptyStateMessage(activeFilter)}
             </div>
           ) : null}
         </div>
@@ -319,6 +319,11 @@ function getFilterLabel(filter: StoryFilter) {
   if (filter === "feedback") return "🗨️ Feedback";
   if (filter === "finished") return "✅ Finished";
   return "📢 Published";
+}
+
+function getEmptyStateMessage(filter: StoryFilter) {
+  if (filter === "all") return "No stories yet.";
+  return "No stories match the selected state.";
 }
 
 function pad_space(x: number) {
