@@ -55,6 +55,8 @@ export default function EditList({
       : storyList.filter((story) => getStoryState(story) === activeFilter);
 
   let set_ends = [];
+  // Seed with the first visible story's set so the first rendered row does not
+  // get a divider; only transitions between sets should add the border.
   let last_set = filteredStories[0]?.set_id;
   let story_published_count = 0;
   for (let story of storyList) {
