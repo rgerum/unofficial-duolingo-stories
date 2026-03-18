@@ -2,7 +2,6 @@ import get_localisation_func from "@/lib/get_localisation_func";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { unstable_cache } from "next/cache";
 
 export const get_localisation_dict = async (lang: number) => {
   if (!lang) return {};
@@ -19,23 +18,27 @@ if (!convexUrl) {
 }
 const convex = new ConvexHttpClient(convexUrl);
 
-const get_localisation_entries_by_convex_language_id = unstable_cache(
-  async (langId: Id<"languages">) =>
-    await convex.query(api.localization.getLocalizationWithEnglishFallback, {
+async function get_localisation_entries_by_convex_language_id(
+  langId: Id<"languages">,
+) {
+  return await convex.query(
+    api.localization.getLocalizationWithEnglishFallback,
+    {
       languageId: langId,
-    }),
-  ["localisation_dict_convex"],
-  { tags: ["localisation"], revalidate: 3600 },
-);
+    },
+  );
+}
 
-const get_localisation_entries_by_legacy_language_id = unstable_cache(
-  async (legacyLanguageId: number) =>
-    await convex.query(api.localization.getLocalizationByLegacyLanguageId, {
+async function get_localisation_entries_by_legacy_language_id(
+  legacyLanguageId: number,
+) {
+  return await convex.query(
+    api.localization.getLocalizationByLegacyLanguageId,
+    {
       legacyLanguageId,
-    }),
-  ["localisation_dict_legacy"],
-  { tags: ["localisation"], revalidate: 3600 },
-);
+    },
+  );
+}
 
 const get_localisation_dict_by_convex_language_id = async (
   langId: Id<"languages">,
@@ -45,23 +48,6 @@ const get_localisation_dict_by_convex_language_id = async (
   for (const row of rows) data[row.tag] = row.text;
   return data;
 };
-
-type LocalisationFunc = (
-  tag: string,
-  replacements?: Record<string, string>,
-  links?: string[],
-) => string | React.JSX.Element | undefined;
-
-async function get_localisation(lang: number) {
-  let data = await get_localisation_dict(lang);
-  if (lang !== 1) {
-    data = {
-      ...(await get_localisation_dict(1)),
-      ...data,
-    };
-  }
-  return get_localisation_func(data);
-}
 
 export async function get_localisation_by_convex_language_id(
   langId: Id<"languages">,

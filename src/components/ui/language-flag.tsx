@@ -15,7 +15,7 @@ type LanguageFlagEntry = {
   flag_file?: string;
 };
 
-export function useLanguageFlag(languageId?: Id<"languages"> | string) {
+function useLanguageFlag(languageId?: Id<"languages"> | string) {
   const languageFlags = useQuery(api.localization.getAllLanguageFlags, {});
   if (!languageId || !languageFlags) return undefined;
 

@@ -47,7 +47,7 @@ function toConvexValue(value: unknown): unknown {
   return value;
 }
 
-export type EditorModel = {
+type EditorModel = {
   parsedStory: StoryType & {
     learning_language_rtl?: boolean;
     from_language_rtl?: boolean;
