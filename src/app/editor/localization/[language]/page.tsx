@@ -1,5 +1,4 @@
 import React from "react";
-import { cache } from "react";
 import { notFound } from "next/navigation";
 import { fetchQuery } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
@@ -22,7 +21,7 @@ interface PageProps {
   params: Promise<{ language: string }>;
 }
 
-const get_language = cache(async (id: string) => {
+async function get_language(id: string) {
   const resolved = await fetchQuery(api.editorRead.resolveEditorLanguage, {
     identifier: id,
   });
@@ -32,7 +31,7 @@ const get_language = cache(async (id: string) => {
     (resolved.course ?? undefined) as CourseType | undefined,
     (resolved.language2 ?? undefined) as LanguageType | undefined,
   ] as const;
-});
+}
 
 export async function generateMetadata({ params }: PageProps) {
   let [language, course, language2] = await get_language(
