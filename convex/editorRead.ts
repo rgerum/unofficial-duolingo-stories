@@ -2,11 +2,7 @@ import { query, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
-import {
-  courseContributorValidator,
-  getRankedCourseContributors,
-  partitionCourseContributors,
-} from "./lib/courseContributors";
+import { courseContributorValidator } from "./lib/courseContributors";
 
 type LanguageDoc = Doc<"languages">;
 type CourseDoc = Doc<"courses">;
@@ -255,9 +251,10 @@ export const getEditorCourseByIdentifier = query({
       ctx.db.get(course.learningLanguageId) as Promise<LanguageDoc | null>,
       ctx.db.get(course.fromLanguageId) as Promise<LanguageDoc | null>,
     ]);
-    const contributorLists = partitionCourseContributors(
-      await getRankedCourseContributors(ctx, course._id),
-    );
+    const contributorLists = {
+      contributors: course.contributorDetails ?? [],
+      contributors_past: course.contributorDetailsPast ?? [],
+    };
 
     return {
       id: course.legacyId,

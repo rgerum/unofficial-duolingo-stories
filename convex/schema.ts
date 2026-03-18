@@ -1,6 +1,13 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+const courseContributorDetailsValidator = v.object({
+  legacyUserId: v.number(),
+  name: v.string(),
+  image: v.union(v.string(), v.null()),
+  discordLinked: v.boolean(),
+});
+
 export default defineSchema({
   languages: defineTable({
     legacyId: v.number(),
@@ -95,6 +102,10 @@ export default defineSchema({
     from_language_name: v.optional(v.string()),
     contributors: v.optional(v.array(v.string())),
     contributors_past: v.optional(v.array(v.string())),
+    contributorDetails: v.optional(v.array(courseContributorDetailsValidator)),
+    contributorDetailsPast: v.optional(
+      v.array(courseContributorDetailsValidator),
+    ),
     todo_count: v.optional(v.number()),
     mirrorUpdatedAt: v.optional(v.number()),
     lastOperationKey: v.optional(v.string()),

@@ -77,6 +77,12 @@ const sendEmail = async ({
   }
 };
 
+function normalizeExpiresAt(value: number | Date | null | undefined) {
+  if (typeof value === "number") return value;
+  if (value instanceof Date) return value.getTime();
+  return null;
+}
+
 async function syncDiscordAccountAvatarFromHook(
   account: {
     id?: string;
@@ -129,7 +135,10 @@ async function syncDiscordAccountAvatarFromHook(
     if (result.refreshToken !== account.refreshToken) {
       accountUpdate.refreshToken = result.refreshToken;
     }
-    if (result.accessTokenExpiresAt !== account.accessTokenExpiresAt) {
+    if (
+      result.accessTokenExpiresAt !==
+      normalizeExpiresAt(account.accessTokenExpiresAt)
+    ) {
       accountUpdate.accessTokenExpiresAt = result.accessTokenExpiresAt;
     }
     if (result.scope !== account.scope) {

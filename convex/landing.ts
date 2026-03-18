@@ -1,11 +1,7 @@
 import { query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
-import {
-  courseContributorValidator,
-  getRankedCourseContributors,
-  partitionCourseContributors,
-} from "./lib/courseContributors";
+import { courseContributorValidator } from "./lib/courseContributors";
 
 const courseListItemValidator = v.object({
   id: v.number(),
@@ -478,9 +474,10 @@ export const getPublicCoursePageData = query({
         if (setCmp !== 0) return setCmp;
         return a.set_index - b.set_index;
       });
-    const contributorLists = partitionCourseContributors(
-      await getRankedCourseContributors(ctx, course._id),
-    );
+    const contributorLists = {
+      contributors: course.contributorDetails ?? [],
+      contributors_past: course.contributorDetailsPast ?? [],
+    };
 
     return {
       id: course.legacyId,

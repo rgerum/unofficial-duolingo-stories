@@ -1,4 +1,5 @@
 import { httpRouter } from "convex/server";
+import { backfillCourseContributorDetailsHttp } from "./courseContributorBackfill";
 import {
   getDiscordCombineData,
   setStoriesRoleSyncStatus,
@@ -29,6 +30,11 @@ http.route({
   path: "/admin/backfill-discord-avatars",
   method: "POST",
   handler: backfillDiscordUserImagesHandler,
+});
+http.route({
+  path: "/admin/backfill-course-contributors",
+  method: "POST",
+  handler: backfillCourseContributorDetailsHttp,
 });
 
 export default http;

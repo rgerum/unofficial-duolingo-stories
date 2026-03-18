@@ -7,7 +7,10 @@ import {
   requireSessionLegacyUserId,
 } from "./lib/authorization";
 import { recomputeCoursePublishedCount } from "./lib/courseCounts";
-import { getRankedCourseContributors } from "./lib/courseContributors";
+import {
+  getRankedCourseContributors,
+  partitionCourseContributors,
+} from "./lib/courseContributors";
 
 const storyApprovalInputValidator = {
   legacyStoryId: v.number(),
@@ -18,14 +21,32 @@ const storyApprovalInputValidator = {
 async function recomputeCourseContributors(
   ctx: MutationCtx,
   courseId: Id<"courses">,
-): Promise<{ contributors: string[]; contributors_past: string[] }> {
+): Promise<{
+  contributors: string[];
+  contributors_past: string[];
+  contributorDetails: Array<{
+    legacyUserId: number;
+    name: string;
+    image: string | null;
+    discordLinked: boolean;
+  }>;
+  contributorDetailsPast: Array<{
+    legacyUserId: number;
+    name: string;
+    image: string | null;
+    discordLinked: boolean;
+  }>;
+}> {
   const ranked = await getRankedCourseContributors(ctx, courseId);
+  const contributorLists = partitionCourseContributors(ranked);
 
   return {
-    contributors: ranked.filter((row) => row.active).map((row) => row.name),
-    contributors_past: ranked
-      .filter((row) => !row.active)
-      .map((row) => row.name),
+    contributors: contributorLists.contributors.map((row) => row.name),
+    contributors_past: contributorLists.contributors_past.map(
+      (row) => row.name,
+    ),
+    contributorDetails: contributorLists.contributors,
+    contributorDetailsPast: contributorLists.contributors_past,
   };
 }
 
@@ -223,11 +244,17 @@ export const toggleStoryApproval = mutation({
       courseCount = await recomputeCoursePublishedCount(ctx, story.courseId);
     }
 
-    const { contributors, contributors_past } =
-      await recomputeCourseContributors(ctx, story.courseId);
+    const {
+      contributors,
+      contributors_past,
+      contributorDetails,
+      contributorDetailsPast,
+    } = await recomputeCourseContributors(ctx, story.courseId);
     await ctx.db.patch(story.courseId, {
       contributors,
       contributors_past,
+      contributorDetails,
+      contributorDetailsPast,
     });
 
     const operationKey =

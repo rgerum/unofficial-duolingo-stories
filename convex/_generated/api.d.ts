@@ -15,6 +15,7 @@ import type * as audioRead from "../audioRead.js";
 import type * as auth from "../auth.js";
 import type * as authFunctions from "../authFunctions.js";
 import type * as authMigration from "../authMigration.js";
+import type * as courseContributorBackfill from "../courseContributorBackfill.js";
 import type * as courseWrite from "../courseWrite.js";
 import type * as discordAvatarSync from "../discordAvatarSync.js";
 import type * as discordBot from "../discordBot.js";
@@ -55,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   authFunctions: typeof authFunctions;
   authMigration: typeof authMigration;
+  courseContributorBackfill: typeof courseContributorBackfill;
   courseWrite: typeof courseWrite;
   discordAvatarSync: typeof discordAvatarSync;
   discordBot: typeof discordBot;
