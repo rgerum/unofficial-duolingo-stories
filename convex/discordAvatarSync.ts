@@ -1,4 +1,9 @@
-import { action, httpAction, internalAction } from "./_generated/server";
+import {
+  action,
+  httpAction,
+  internalAction,
+  type ActionCtx,
+} from "./_generated/server";
 import { v } from "convex/values";
 import { components, internal } from "./_generated/api";
 import { syncDiscordAvatarFromAccount } from "./lib/discordAvatarSync";
@@ -112,7 +117,7 @@ function dedupeAccounts(accounts: AuthAccountRow[]) {
 }
 
 async function findManyPage<T>(
-  ctx: any,
+  ctx: ActionCtx,
   model: "account",
   where: AdapterWhere,
   cursor: string | null,
@@ -126,7 +131,7 @@ async function findManyPage<T>(
 }
 
 async function runDiscordAvatarBackfill(
-  ctx: any,
+  ctx: ActionCtx,
   args: BackfillArgs,
 ): Promise<BackfillResult> {
   const batchSize = normalizeBatchSize(args.batchSize);
