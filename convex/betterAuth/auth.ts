@@ -8,6 +8,7 @@ import { admin, username } from "better-auth/plugins";
 import { defaultRoles, userAc } from "better-auth/plugins/admin/access";
 import { components, internal } from "../_generated/api";
 import authConfig from "../auth.config";
+import { syncDiscordAvatarFromAccount } from "../lib/discordAvatarSync";
 import { phpbbCheckHash, phpbbHash } from "../lib/phpbb";
 import schema from "./schema";
 
@@ -76,6 +77,85 @@ const sendEmail = async ({
   }
 };
 
+function normalizeExpiresAt(value: number | Date | null | undefined) {
+  if (typeof value === "number") return value;
+  if (value instanceof Date) return value.getTime();
+  return null;
+}
+
+async function syncDiscordAccountAvatarFromHook(
+  account: {
+    id?: string;
+    userId?: string | null;
+    providerId?: string | null;
+    accountId?: string | null;
+    accessToken?: string | null;
+    refreshToken?: string | null;
+    accessTokenExpiresAt?: number | Date | null;
+    scope?: string | null;
+  } | null,
+  hookContext?: {
+    context: {
+      internalAdapter: {
+        updateUser: (
+          userId: string,
+          update: Record<string, string | number | null>,
+        ) => Promise<unknown>;
+        updateAccount: (
+          accountId: string,
+          update: Record<string, string | number | null>,
+        ) => Promise<unknown>;
+      };
+      logger: {
+        error: (message: string, error?: unknown) => void;
+      };
+    };
+  } | null,
+) {
+  if (!account?.userId || !account.providerId || !hookContext) {
+    return;
+  }
+
+  try {
+    const result = await syncDiscordAvatarFromAccount(account);
+    if (!result.ok) return;
+
+    if (result.imageUrl) {
+      await hookContext.context.internalAdapter.updateUser(account.userId, {
+        image: result.imageUrl,
+      });
+    }
+
+    if (!account.id) return;
+
+    const accountUpdate: Record<string, string | number | null> = {};
+    if (result.accessToken !== account.accessToken) {
+      accountUpdate.accessToken = result.accessToken;
+    }
+    if (result.refreshToken !== account.refreshToken) {
+      accountUpdate.refreshToken = result.refreshToken;
+    }
+    if (
+      result.accessTokenExpiresAt !==
+      normalizeExpiresAt(account.accessTokenExpiresAt)
+    ) {
+      accountUpdate.accessTokenExpiresAt = result.accessTokenExpiresAt;
+    }
+    if (result.scope !== account.scope) {
+      accountUpdate.scope = result.scope;
+    }
+
+    if (Object.keys(accountUpdate).length > 0) {
+      await hookContext.context.internalAdapter.updateAccount(
+        account.id,
+        accountUpdate,
+      );
+    }
+  } catch (error) {
+    hookContext.context.logger.error("Failed to sync Discord avatar", error);
+  }
+}
+
 // Better Auth Component
 export const authComponent: ReturnType<typeof typedCreateClient> =
   typedCreateClient(components.betterAuth, {
@@ -117,6 +197,20 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     secret: process.env.BETTER_AUTH_SECRET,
     socialProviders,
     database: authComponent.adapter(ctx),
+    databaseHooks: {
+      account: {
+        create: {
+          after: async (account, hookContext) => {
+            await syncDiscordAccountAvatarFromHook(account, hookContext);
+          },
+        },
+        update: {
+          after: async (account, hookContext) => {
+            await syncDiscordAccountAvatarFromHook(account, hookContext);
+          },
+        },
+      },
+    },
     emailAndPassword: {
       enabled: true,
       sendResetPassword: async ({ user, url }) => {

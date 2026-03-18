@@ -5,7 +5,11 @@ import { SpinnerBlue } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { CourseProps, StoryListDataProps } from "@/app/editor/(course)/types";
+import ContributorList from "@/components/ContributorList";
+import type {
+  DetailedCourseProps,
+  StoryListDataProps,
+} from "@/app/editor/(course)/types";
 
 type StoryState = "draft" | "feedback" | "finished" | "published";
 type StoryFilter = "all" | StoryState;
@@ -23,7 +27,7 @@ export default function EditList({
   course,
 }: {
   stories: StoryListDataProps[];
-  course: CourseProps;
+  course: DetailedCourseProps;
 }) {
   const [storyList, setStoryList] = useState<StoryListDataProps[]>(
     stories ?? [],
@@ -121,19 +125,25 @@ export default function EditList({
           .
         </p>
       )}
-      <p className="my-4 font-bold">
-        Active Contributors:{" "}
-        {course.contributors.map((d, i) => (
-          <span key={i}>{d}, </span>
-        ))}{" "}
-        {course.contributors.length === 0 ? "No Contributors" : ""}
-      </p>
-      <p className="my-4">
-        Past Contributors:{" "}
-        {course.contributors_past.map((d, i) => (
-          <span key={i}>{d}, </span>
-        ))}
-      </p>
+      <div className="my-6 space-y-4">
+        <div>
+          <p className="mb-2 font-bold">Active Contributors</p>
+          <ContributorList
+            contributors={course.contributors}
+            emptyLabel="No contributors"
+            size="sm"
+          />
+        </div>
+        <div>
+          <p className="mb-2">Past Contributors</p>
+          <ContributorList
+            contributors={course.contributors_past}
+            emptyLabel="No past contributors"
+            muted
+            size="sm"
+          />
+        </div>
+      </div>
       <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
         {STORY_FILTER_ORDER.map((filter) => {
           const isActive = activeFilter === filter;

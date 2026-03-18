@@ -6,7 +6,7 @@ import { api } from "@convex/_generated/api";
 import EditList from "../../edit_list";
 import { Spinner } from "@/components/ui/spinner";
 import type {
-  CourseProps,
+  DetailedCourseProps,
   StoryListDataProps,
 } from "@/app/editor/(course)/types";
 
@@ -60,7 +60,7 @@ export default function CourseEditorPageClient({
   return (
     <EditList
       stories={(stories ?? []) as StoryListDataProps[]}
-      course={course as CourseProps}
+      course={course as DetailedCourseProps}
     />
   );
 }
