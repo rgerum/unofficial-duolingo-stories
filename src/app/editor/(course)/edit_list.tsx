@@ -127,7 +127,7 @@ export default function EditList({
       )}
       <div className="my-6 space-y-4">
         <div>
-          <p className="mb-2 font-bold">Active Contributors</p>
+          <h2 className="mb-2 font-bold">Active Contributors</h2>
           <ContributorList
             contributors={course.contributors}
             emptyLabel="No contributors"
@@ -135,7 +135,7 @@ export default function EditList({
           />
         </div>
         <div>
-          <p className="mb-2">Past Contributors</p>
+          <h2 className="mb-2 font-bold">Past Contributors</h2>
           <ContributorList
             contributors={course.contributors_past}
             emptyLabel="No past contributors"
