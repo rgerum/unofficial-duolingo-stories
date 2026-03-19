@@ -1,10 +1,12 @@
 import { httpRouter } from "convex/server";
+import { backfillCourseContributorDetailsHttp } from "./courseContributorBackfill";
 import {
   getDiscordCombineData,
   setStoriesRoleSyncStatus,
   setContributorWriteByDiscordAccountId,
 } from "./discordBot";
 import { authComponent, createAuth } from "./betterAuth/auth";
+import { backfillDiscordUserImagesHttp as backfillDiscordUserImagesHandler } from "./discordAvatarSync";
 
 const http = httpRouter();
 
@@ -23,6 +25,16 @@ http.route({
   path: "/discord/set-stories-role-status",
   method: "POST",
   handler: setStoriesRoleSyncStatus,
+});
+http.route({
+  path: "/admin/backfill-discord-avatars",
+  method: "POST",
+  handler: backfillDiscordUserImagesHandler,
+});
+http.route({
+  path: "/admin/backfill-course-contributors",
+  method: "POST",
+  handler: backfillCourseContributorDetailsHttp,
 });
 
 export default http;

@@ -1,1 +1,1 @@
-export { default, DoubleFlag } from "../layout/flag";
+export { default } from "../layout/flag";

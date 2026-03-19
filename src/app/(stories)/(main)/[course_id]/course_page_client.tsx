@@ -7,6 +7,7 @@ import Header from "../header";
 import StoryButton from "./story_button";
 import get_localisation_func from "@/lib/get_localisation_func";
 import Switch from "@/components/layout/switch";
+import ContributorList from "@/components/ContributorList";
 
 function SetTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -43,6 +44,50 @@ function About({ about }: { about: string }) {
     <div className="mx-auto max-w-[720px]">
       <SetTitle>About</SetTitle>
       <p>{about}</p>
+    </div>
+  );
+}
+
+function Contributors({
+  contributors,
+  contributorsPast,
+}: {
+  contributors: Array<{
+    legacyUserId: number;
+    name: string;
+    image: string | null;
+    discordLinked: boolean;
+  }>;
+  contributorsPast: Array<{
+    legacyUserId: number;
+    name: string;
+    image: string | null;
+    discordLinked: boolean;
+  }>;
+}) {
+  if (contributors.length === 0 && contributorsPast.length === 0) return null;
+
+  return (
+    <div className="mx-auto max-w-[720px]">
+      <SetTitle>Contributors</SetTitle>
+      <div className="space-y-4">
+        <div>
+          <p className="mb-2 font-bold">Active contributors</p>
+          <ContributorList
+            contributors={contributors}
+            emptyLabel="No active contributors yet."
+            size="md"
+          />
+        </div>
+        {contributorsPast.length ? (
+          <div>
+            <p className="mb-2 text-[var(--text-color-dim)]">
+              Past contributors
+            </p>
+            <ContributorList contributors={contributorsPast} muted size="sm" />
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -195,6 +240,10 @@ export default function CoursePageClient({
           </div>
         </div>
         {course.about ? <About about={course.about} /> : null}
+        <Contributors
+          contributors={course.contributors}
+          contributorsPast={course.contributors_past}
+        />
         {storiesBySet.map((set) => (
           <SetGrid
             key={set.setId}

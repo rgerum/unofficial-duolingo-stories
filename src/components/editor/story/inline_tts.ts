@@ -5,7 +5,7 @@ export type InlineTtsReplacement = {
   alphabet?: string;
 };
 
-export type InlineTtsError = {
+type InlineTtsError = {
   message: string;
   segment: string;
   start: number;

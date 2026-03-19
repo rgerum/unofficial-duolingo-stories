@@ -18,6 +18,21 @@ export type CourseProps = {
   todo_count: number;
 };
 
+export type ContributorSummaryProps = {
+  legacyUserId: number;
+  name: string;
+  image: string | null;
+  discordLinked: boolean;
+};
+
+export type DetailedCourseProps = Omit<
+  CourseProps,
+  "contributors" | "contributors_past"
+> & {
+  contributors: ContributorSummaryProps[];
+  contributors_past: ContributorSummaryProps[];
+};
+
 export type StoryListDataProps = {
   id: number;
   name: string;

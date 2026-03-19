@@ -118,7 +118,7 @@ interface DoubleFlagLanguage {
   flag_file?: string | null;
 }
 
-export function DoubleFlag({
+function DoubleFlag({
   lang1,
   lang2,
   width,

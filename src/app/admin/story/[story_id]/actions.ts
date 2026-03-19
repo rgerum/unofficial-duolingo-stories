@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
 import { getUser, isAdmin } from "@/lib/userInterface";
 import { fetchAuthMutation } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
@@ -22,9 +21,6 @@ export async function togglePublished(
     legacyStoryId: id,
     operationKey: `story:${id}:admin_toggle_published:action`,
   });
-
-  revalidateTag("course_data", "max");
-  revalidateTag("story_data", "max");
 }
 
 export async function removeApproval(
@@ -38,6 +34,4 @@ export async function removeApproval(
     legacyApprovalId: approval_id,
     operationKey: `story_approval:${approval_id}:admin_delete:action`,
   });
-
-  revalidateTag("story_data", "max");
 }
