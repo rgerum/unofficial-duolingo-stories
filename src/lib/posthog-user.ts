@@ -1,6 +1,7 @@
 "use client";
 
 import posthog from "posthog-js";
+import { authClient } from "@/lib/auth-client";
 
 export type PostHogUser = {
   id?: string;
@@ -9,22 +10,27 @@ export type PostHogUser = {
   username?: string | null;
 };
 
-let identifiedUserId: string | null = null;
-
 export function identifyPostHogUser(user: PostHogUser | null | undefined) {
   if (!user?.id) return false;
-  if (identifiedUserId === user.id) return true;
 
   posthog.identify(user.id, {
     email: user.email ?? undefined,
     name: user.name ?? undefined,
     username: user.username ?? undefined,
   });
-  identifiedUserId = user.id;
   return true;
 }
 
+export async function getCurrentPostHogUser() {
+  try {
+    const { data } = await authClient.getSession();
+    const user = (data?.user ?? null) as PostHogUser | null;
+    return user?.id ? user : null;
+  } catch {
+    return null;
+  }
+}
+
 export function resetPostHogUser() {
-  identifiedUserId = null;
   posthog.reset();
 }

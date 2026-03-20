@@ -5,7 +5,6 @@ import type { UserIdentity } from "convex/server";
 
 type AuthUser = {
   _id: string;
-  subject?: string;
   userId: string;
   name?: string;
   email?: string;
