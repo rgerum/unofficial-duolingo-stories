@@ -1,6 +1,5 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import getUserId from "@/lib/getUserId";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
 import LocalisationProvider from "@/components/LocalisationProvider";
@@ -8,6 +7,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
 import { fetchAuthMutation } from "@/lib/auth-server";
 import { fetchQuery } from "convex/nextjs";
+import { getUser } from "@/lib/userInterface";
 
 const convexUrl =
   process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
@@ -57,7 +57,16 @@ export default async function Page({
   if (!story) notFound();
   const course_id = story.course_id;
 
-  const user_id = await getUserId();
+  const user = await getUser();
+  const user_id = user?.userId;
+  const posthogUser = user?.subject
+    ? {
+        id: user.subject,
+        email: user.email ?? null,
+        name: user.name ?? null,
+        username: user.username ?? null,
+      }
+    : null;
 
   async function setStoryDoneAction() {
     "use server";
@@ -86,6 +95,7 @@ export default async function Page({
     <>
       <LocalisationProvider lang={story.from_language_id}>
         <StoryWrapper
+          posthogUser={posthogUser}
           story={story}
           storyFinishedIndexUpdate={setStoryDoneAction}
           //localization={localization}

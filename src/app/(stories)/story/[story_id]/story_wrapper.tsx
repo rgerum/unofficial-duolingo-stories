@@ -6,11 +6,14 @@ import StoryProgress from "@/components/StoryProgress";
 import { useNavigationMode } from "@/components/NavigationModeProvider";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 import posthog from "posthog-js";
+import { identifyPostHogUser, type PostHogUser } from "@/lib/posthog-user";
 
 export default function StoryWrapper({
+  posthogUser,
   story,
   storyFinishedIndexUpdate,
 }: {
+  posthogUser?: PostHogUser | null;
   story: StoryData;
   storyFinishedIndexUpdate: () => Promise<
     | {
@@ -32,6 +35,7 @@ export default function StoryWrapper({
 
   // Track story started on component mount
   React.useEffect(() => {
+    identifyPostHogUser(posthogUser);
     posthog.capture("story_started", {
       story_id: story.id,
       story_name: story.from_language_name,
@@ -41,6 +45,7 @@ export default function StoryWrapper({
     });
   }, [
     story.id,
+    posthogUser?.id,
     story.from_language_name,
     story.course_id,
     story.course_short,
@@ -49,6 +54,7 @@ export default function StoryWrapper({
 
   async function onEnd() {
     // Track story completed
+    identifyPostHogUser(posthogUser);
     posthog.capture("story_completed", {
       story_id: story.id,
       story_name: story.from_language_name,
