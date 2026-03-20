@@ -307,7 +307,6 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     window.localStorage.setItem("profile_pending_email_change", newEmail);
     setPendingEmailChange(newEmail);
     setEmailState("success");
-    closeEmailEditor();
   }
 
   async function saveUsername() {
@@ -325,7 +324,6 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     if (normalizedUsername === savedUsername) {
       setUsernameState("success");
       setUsernameError("");
-      closeUsernameEditor();
       return;
     }
 
@@ -358,7 +356,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
 
     setSavedUsername(normalizedUsername);
     setUsernameState("success");
-    closeUsernameEditor();
+    setUsernameError("");
   }
 
   return (
