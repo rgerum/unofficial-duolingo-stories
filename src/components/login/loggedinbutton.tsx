@@ -2,13 +2,19 @@
 "use no memo";
 
 import React, { useEffect, useState } from "react";
-import Dropdown from "../layout/dropdown";
 import Link from "next/link";
 import { useRouter, useSelectedLayoutSegments } from "next/navigation";
 import Button from "../layout/button";
 import { authClient } from "@/lib/auth-client";
 import { isAdmin, isContributor } from "@/lib/userInterface";
 import { resetPostHogUser } from "@/lib/posthog-user";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/shadcn";
 
 function themeToLightOrDark(
   theme: string | null,
@@ -119,88 +125,125 @@ export function LoggedInButton({
   const canContribute = isContributor(user ?? null);
   const isAdminUser = isAdmin(user ?? null);
   const dropdownButtonClass =
-    "block h-[39px] cursor-pointer overflow-hidden border-b border-[var(--header-border)] p-[5px] text-center text-[18px] font-bold text-[var(--text-color)] no-underline [text-overflow:ellipsis] [text-transform:none] whitespace-nowrap hover:bg-[var(--language-selector-hover-background)] hover:text-[var(--link-hover)]";
+    "w-full overflow-hidden text-left text-[var(--text-color)] no-underline [text-overflow:ellipsis] whitespace-nowrap";
 
   return (
-    <Dropdown>
-      <div
-        className="h-[50px] w-[50px] min-w-[50px] rounded-[30px] bg-[var(--profile-background)] pt-1 text-center text-[28px] uppercase text-[var(--profile-text)]"
-        data-cy="user-button"
-        style={user?.image ? { backgroundImage: `url('${user?.image}')` } : {}}
-      >
-        {(user.name ?? "").substring(0, 1)}
-      </div>
-      <div>
-        <Link
-          className={dropdownButtonClass}
-          href={"/profile"}
-          data-cy="user-profile"
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex h-[50px] w-[50px] min-w-[50px] items-center justify-center rounded-[30px] bg-[var(--profile-background)] p-0 text-center text-[28px] leading-none uppercase text-[var(--profile-text)] outline-none transition hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[var(--button-background)] focus-visible:ring-offset-2"
+          data-cy="user-button"
+          aria-label="Open user menu"
+          style={
+            user?.image ? { backgroundImage: `url('${user?.image}')` } : {}
+          }
         >
-          Profile
-        </Link>
-        {
-          <div
-            className={`${dropdownButtonClass} button_dark_mode`}
-            data-cy="user-lightdark"
-            onClick={() => {
-              controls.toggle();
-            }}
+          {(user.name ?? "").substring(0, 1)}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="w-[180px] overflow-visible"
+        sideOffset={10}
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-[12px] right-[11px] h-[13px] w-[28px] overflow-hidden"
+        >
+          <svg
+            viewBox="0 0 28 13"
+            className="absolute inset-0 h-[13px] w-[28px]"
+            aria-hidden="true"
           >
-            {controls.value === "light"
-              ? "Dark Mode"
-              : controls.value === "dark"
-                ? "Light Mode"
-                : "Light/Dark"}
-          </div>
-        }
-        {canContribute && page !== "stories" ? (
+            <path
+              d="M14 0.5 Q15.5 0.5 16.5 1.7 L28 13 H0 L11.5 1.7 Q12.5 0.5 14 0.5 Z"
+              fill="var(--header-border)"
+            />
+            <path
+              d="M14 1.5 Q15 1.5 15.8 2.4 L26 13 H2 L12.2 2.4 Q13 1.5 14 1.5 Z"
+              fill="var(--body-background)"
+            />
+          </svg>
+        </div>
+        <DropdownMenuItem asChild>
           <Link
             className={dropdownButtonClass}
-            href={stories_link}
-            data-cy="user-stories"
+            href={"/profile"}
+            data-cy="user-profile"
           >
-            Stories
+            Profile
           </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="button_dark_mode"
+          data-cy="user-lightdark"
+          onSelect={() => {
+            controls.toggle();
+          }}
+        >
+          {controls.value === "light"
+            ? "Dark Mode"
+            : controls.value === "dark"
+              ? "Light Mode"
+              : "Light/Dark"}
+        </DropdownMenuItem>
+        {canContribute && page !== "stories" ? (
+          <DropdownMenuItem asChild>
+            <Link
+              className={dropdownButtonClass}
+              href={stories_link}
+              data-cy="user-stories"
+            >
+              Stories
+            </Link>
+          </DropdownMenuItem>
         ) : null}
         {canContribute && page !== "editor" ? (
-          <Link
-            className={dropdownButtonClass}
-            href={editor_link}
-            data-cy="user-editor"
-          >
-            Editor
-          </Link>
+          <DropdownMenuItem asChild>
+            <Link
+              className={dropdownButtonClass}
+              href={editor_link}
+              data-cy="user-editor"
+            >
+              Editor
+            </Link>
+          </DropdownMenuItem>
         ) : null}
         {canContribute && page !== "docs" ? (
-          <Link
-            className={dropdownButtonClass}
-            href={"/docs"}
-            data-cy="user-docs"
-          >
-            Docs
-          </Link>
+          <DropdownMenuItem asChild>
+            <Link
+              className={dropdownButtonClass}
+              href={"/docs"}
+              data-cy="user-docs"
+            >
+              Docs
+            </Link>
+          </DropdownMenuItem>
         ) : null}
         {isAdminUser && page !== "admin" ? (
-          <Link
-            className={dropdownButtonClass}
-            href={"/admin"}
-            data-cy="user-admin"
-          >
-            Admin
-          </Link>
+          <DropdownMenuItem asChild>
+            <Link
+              className={dropdownButtonClass}
+              href={"/admin"}
+              data-cy="user-admin"
+            >
+              Admin
+            </Link>
+          </DropdownMenuItem>
         ) : null}
-        <div
-          className={dropdownButtonClass}
-          onClick={async () => {
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          data-cy="user-logout"
+          onSelect={async () => {
             await authClient.signOut();
             resetPostHogUser();
             window.location.href = "/";
           }}
-          data-cy="user-logout"
         >
           Log out
-        </div>
-      </div>
-    </Dropdown>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
