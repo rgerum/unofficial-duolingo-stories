@@ -60,11 +60,13 @@ function StatusText({
 function SettingRow({
   label,
   value,
+  helper,
   action,
   children,
 }: {
   label: string;
   value: React.ReactNode;
+  helper?: React.ReactNode;
   action?: React.ReactNode;
   children?: React.ReactNode;
 }) {
@@ -74,6 +76,11 @@ function SettingRow({
         <div className="min-w-0 flex-1">
           <p className={labelClass}>{label}</p>
           <div className="text-[1rem] font-bold">{value}</div>
+          {helper ? (
+            <div className="mt-1 text-[0.92rem] text-[var(--title-color-dim)]">
+              {helper}
+            </div>
+          ) : null}
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}
       </div>
@@ -93,40 +100,51 @@ function LinkedAccountRow({
   provider: string;
   linked: boolean;
 }) {
+  const [linkError, setLinkError] = React.useState<string | null>(null);
+
   const handleLink = async () => {
+    setLinkError(null);
     const { data, error } = await authClient.linkSocial({
       provider,
       callbackURL: window.location.href,
     });
 
-    if (error) return;
+    if (error) {
+      setLinkError(error.message || "Could not link account.");
+      return;
+    }
     if (data?.url) window.location.href = data.url;
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-[18px] border border-[color:color-mix(in_srgb,var(--header-border)_40%,transparent)] bg-[color:color-mix(in_srgb,var(--body-background)_72%,var(--body-background-faint))] p-4 sm:flex-row sm:items-center">
-      <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[color:color-mix(in_srgb,var(--body-background)_82%,white)]">
-        <GetIcon name={provider} />
+    <div className="rounded-[18px] border border-[color:color-mix(in_srgb,var(--header-border)_40%,transparent)] bg-[color:color-mix(in_srgb,var(--body-background)_72%,var(--body-background-faint))] p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[color:color-mix(in_srgb,var(--body-background)_82%,white)]">
+          <GetIcon name={provider} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-[1rem] font-bold capitalize">{provider}</p>
+          <p className="m-0 text-[0.9rem] text-[var(--title-color-dim)]">
+            {linked ? "Linked for sign in." : "Available to link."}
+          </p>
+        </div>
+        {linked ? (
+          <span className="inline-flex rounded-full border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)] px-3 py-1.5 text-[0.78rem] font-bold uppercase tracking-[0.08em]">
+            Linked
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={handleLink}
+            className="inline-flex rounded-full border border-[var(--button-blue-border)] bg-[var(--button-blue-background)] px-4 py-2 text-[0.78rem] font-bold uppercase tracking-[0.08em] text-[var(--button-blue-color)] transition hover:brightness-105"
+          >
+            Link
+          </button>
+        )}
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="m-0 text-[1rem] font-bold capitalize">{provider}</p>
-        <p className="m-0 text-[0.9rem] text-[var(--title-color-dim)]">
-          {linked ? "Linked for sign in." : "Available to link."}
-        </p>
-      </div>
-      {linked ? (
-        <span className="inline-flex rounded-full border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)] px-3 py-1.5 text-[0.78rem] font-bold uppercase tracking-[0.08em]">
-          Linked
-        </span>
-      ) : (
-        <button
-          type="button"
-          onClick={handleLink}
-          className="inline-flex rounded-full border border-[var(--button-blue-border)] bg-[var(--button-blue-background)] px-4 py-2 text-[0.78rem] font-bold uppercase tracking-[0.08em] text-[var(--button-blue-color)] transition hover:brightness-105"
-        >
-          Link
-        </button>
-      )}
+      {linkError ? (
+        <span className={errorMessageClass}>{linkError}</span>
+      ) : null}
     </div>
   );
 }
@@ -139,16 +157,28 @@ function ProfileAvatar({
   username: string;
 }) {
   const initial = username.slice(0, 1).toUpperCase();
-  const showImage = typeof image === "string" && image.length > 0;
+  const [imageFailed, setImageFailed] = React.useState(false);
+  const showImage =
+    typeof image === "string" && image.length > 0 && !imageFailed;
+
+  if (showImage) {
+    return (
+      <img
+        src={image}
+        alt={`${username} profile`}
+        className="h-[72px] w-[72px] shrink-0 rounded-full object-cover"
+        onError={() => setImageFailed(true)}
+      />
+    );
+  }
 
   return (
     <div
-      className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-[var(--profile-background)] bg-cover bg-center p-0 text-center text-[40px] leading-none uppercase text-[var(--profile-text)]"
-      style={showImage ? { backgroundImage: `url('${image}')` } : {}}
+      className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-[var(--profile-background)] p-0 text-center text-[40px] leading-none uppercase text-[var(--profile-text)]"
       aria-label={`${username} profile`}
       role="img"
     >
-      {!showImage ? <span>{initial}</span> : null}
+      <span>{initial}</span>
     </div>
   );
 }
@@ -395,6 +425,11 @@ export default function Profile({ providers }: { providers: ProfileData }) {
             <SettingRow
               label="Email"
               value={providers.email}
+              helper={
+                pendingEmailChange
+                  ? `Pending change to ${pendingEmailChange}.`
+                  : undefined
+              }
               action={
                 <Button
                   type="button"
