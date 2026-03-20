@@ -73,7 +73,7 @@ export default function CourseDropdown() {
       <DropdownMenuContent
         align="center"
         sideOffset={10}
-        className="w-[240px] max-h-[calc(100vh-55px)] overflow-visible"
+        className="w-[240px] overflow-visible"
       >
         <div
           aria-hidden="true"
@@ -94,7 +94,7 @@ export default function CourseDropdown() {
             />
           </svg>
         </div>
-        <nav>
+        <nav className="max-h-[calc(100vh-55px)] overflow-y-auto">
           {course_data_active.map((id) => (
             <LanguageButtonSmall key={id} course={get_course_by_id(id)} />
           ))}
