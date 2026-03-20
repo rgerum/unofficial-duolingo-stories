@@ -75,6 +75,7 @@ const adminUserValidator = v.object({
   id: v.number(),
   name: v.string(),
   email: v.string(),
+  image: v.union(v.string(), v.null()),
   regdate: v.union(v.number(), v.null()),
   activated: v.boolean(),
   role: v.boolean(),
@@ -103,6 +104,7 @@ async function findAuthUserByLegacyId(ctx: AuthCtx, legacyId: number) {
     userId?: string | null;
     name?: string | null;
     email?: string | null;
+    image?: string | null;
     createdAt?: number | null;
     role?: string | null;
     emailVerified?: boolean | null;
@@ -115,6 +117,7 @@ function toAdminUser(
     userId?: string | null;
     name?: string | null;
     email?: string | null;
+    image?: string | null;
     createdAt?: number | null;
     role?: string | null;
     emailVerified?: unknown;
@@ -146,6 +149,10 @@ function toAdminUser(
     id: Number.isFinite(numericId) ? numericId : 0,
     name: user.name ?? "",
     email: user.email ?? "",
+    image:
+      typeof user.image === "string" && user.image.length > 0
+        ? user.image
+        : null,
     regdate: typeof user.createdAt === "number" ? user.createdAt : null,
     activated: Boolean(user.emailVerified),
     role: role === "contributor" || role === "admin",
@@ -323,6 +330,7 @@ export const getAdminUsersPage = query({
       userId?: string | null;
       name?: string | null;
       email?: string | null;
+      image?: string | null;
       createdAt?: number | null;
       role?: string | null;
       emailVerified?: unknown;

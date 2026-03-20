@@ -1,6 +1,12 @@
 "use client";
 
-import { useRef, useState, useTransition, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  type KeyboardEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Input from "@/components/ui/input";
@@ -27,6 +33,8 @@ type AdminFilters = {
   activated: FilterValue;
   role: RoleFilterValue;
 };
+
+type PendingAction = "search" | "filters" | "loadMore" | null;
 
 function formatRegistered(value: Date | string | undefined) {
   if (!value) return "-";
@@ -77,6 +85,79 @@ function getStoriesRoleTitle(user: AdminUserList) {
   return parts.join("\n");
 }
 
+const tableHeaders: Array<{ label: string; title?: string; key: string }> = [
+  { key: "id", label: "ID" },
+  { key: "name", label: "Name" },
+  { key: "email", label: "Email" },
+  { key: "activated", label: "", title: "Activated" },
+  { key: "role", label: "Role" },
+  { key: "discord", label: "", title: "Discord" },
+  { key: "stories", label: "Stories" },
+  { key: "actions", label: "", title: "Actions" },
+];
+
+function ActivatedStatus({ activated }: { activated: boolean | undefined }) {
+  if (!activated) {
+    return (
+      <span
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,#ef4444_16%,transparent)] text-[1rem] font-bold text-[#9b1c1c]"
+        title="Not activated"
+      >
+        -
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,#21c55d_18%,transparent)] text-[1.05rem] font-bold text-[#0a6b2d]"
+      title="Activated"
+    >
+      ✓
+    </span>
+  );
+}
+
+function DiscordAvatar({ user }: { user: AdminUserList }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const showImage =
+    user.discordLinked &&
+    typeof user.image === "string" &&
+    user.image.length > 0 &&
+    !imageFailed;
+  const initial = user.name.trim().charAt(0).toUpperCase() || "?";
+
+  if (!user.discordLinked) {
+    return (
+      <span className={statusNoClass} title="No linked Discord account">
+        No
+      </span>
+    );
+  }
+
+  return (
+    <div
+      className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[var(--profile-background)] font-bold text-[var(--profile-text)]"
+      title={
+        user.discordAccountId
+          ? `Discord account ID: ${user.discordAccountId}`
+          : "Linked Discord account"
+      }
+    >
+      {showImage ? (
+        <img
+          alt=""
+          src={user.image ?? undefined}
+          className="h-full w-full object-cover"
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        initial
+      )}
+    </div>
+  );
+}
+
 export default function UserList({
   users,
   query,
@@ -91,22 +172,35 @@ export default function UserList({
     activated: activatedFilter,
     role: roleFilter,
   });
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const filtersRef = useRef(filters);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  function submitSearch(nextLimit = loadStep) {
+  useEffect(() => {
+    setPendingAction(null);
+  }, [query, limit, activatedFilter, roleFilter]);
+
+  function submitSearch(
+    nextLimit = loadStep,
+    options?: { action?: PendingAction; scroll?: boolean },
+  ) {
+    const action = options?.action ?? "search";
+    const scroll = options?.scroll ?? true;
+    setPendingAction(action);
     startTransition(() => {
       router.push(
         `/admin/users${buildQueryString(search, nextLimit, {
           activated: filters.activated,
           role: filters.role,
         })}`,
+        { scroll },
       );
     });
   }
 
   function submitFilters(nextFilters: AdminFilters) {
+    setPendingAction("filters");
     startTransition(() => {
       router.push(
         `/admin/users${buildQueryString(search, loadStep, {
@@ -189,33 +283,19 @@ export default function UserList({
             <SpinnerBlue />
           </span>
         </div>
-        {hasMore ? (
-          <Button onClick={() => submitSearch(limit + loadStep)}>
-            Load more
-          </Button>
-        ) : null}
       </div>
 
       <div className="relative isolate overflow-auto rounded-[14px] border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]">
         <table className="w-max min-w-full border-collapse">
           <thead>
             <tr>
-              {[
-                "ID",
-                "Name",
-                "Email",
-                "Registered",
-                "Activated",
-                "Role",
-                "Discord",
-                "Stories",
-                "",
-              ].map((header) => (
+              {tableHeaders.map((header) => (
                 <th
-                  key={header || "actions"}
+                  key={header.key}
                   className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                  title={header.title}
                 >
-                  {header}
+                  {header.label}
                 </th>
               ))}
             </tr>
@@ -223,7 +303,7 @@ export default function UserList({
           <tbody>
             {users.length === 0 ? (
               <tr className="bg-[var(--body-background)]">
-                <td colSpan={9} className="px-4 py-2.5">
+                <td colSpan={8} className="px-4 py-2.5">
                   No users found.
                 </td>
               </tr>
@@ -244,32 +324,12 @@ export default function UserList({
                       {user.email}
                     </span>
                   </td>
-                  <td className="px-3 py-2.5 whitespace-nowrap text-[0.95rem] tabular-nums">
-                    {formatRegistered(user.regdate)}
-                  </td>
                   <td className="px-3 py-2.5">
-                    <span
-                      className={
-                        user.activated ? statusYesClass : statusNoClass
-                      }
-                    >
-                      {user.activated ? "Yes" : "No"}
-                    </span>
+                    <ActivatedStatus activated={user.activated} />
                   </td>
                   <td className="px-3 py-2.5">{getRoleLabel(user)}</td>
                   <td className="px-3 py-2.5">
-                    <span
-                      className={
-                        user.discordLinked ? statusInfoClass : statusNoClass
-                      }
-                      title={
-                        user.discordLinked && user.discordAccountId
-                          ? `Discord account ID: ${user.discordAccountId}`
-                          : "No linked Discord account"
-                      }
-                    >
-                      {user.discordLinked ? "Linked" : "No"}
-                    </span>
+                    <DiscordAvatar user={user} />
                   </td>
                   <td className="px-3 py-2.5">
                     <span
@@ -298,6 +358,29 @@ export default function UserList({
           </tbody>
         </table>
       </div>
+
+      {hasMore ? (
+        <div className="flex justify-center pt-4">
+          <Button
+            disabled={isPending && pendingAction === "loadMore"}
+            onClick={() =>
+              submitSearch(limit + loadStep, {
+                action: "loadMore",
+                scroll: false,
+              })
+            }
+          >
+            <span className="inline-flex items-center gap-2">
+              {isPending && pendingAction === "loadMore" ? (
+                <span className="inline-flex h-4 w-4 items-center">
+                  <SpinnerBlue />
+                </span>
+              ) : null}
+              Load more
+            </span>
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }
