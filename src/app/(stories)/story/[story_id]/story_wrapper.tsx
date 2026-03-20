@@ -57,6 +57,7 @@ export default function StoryWrapper({
       sessionUser?.email,
       sessionUser?.name,
       sessionUser?.username,
+      sessionUser?.role,
       story.id,
       story.from_language_name,
       story.course_id,

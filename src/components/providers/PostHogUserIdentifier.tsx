@@ -12,6 +12,7 @@ type SessionUser = {
   email?: string | null;
   name?: string | null;
   username?: string | null;
+  role?: string | null;
 };
 
 type PendingSignInPayload = {
@@ -40,7 +41,7 @@ export default function PostHogUserIdentifier() {
   React.useEffect(() => {
     if (!user?.id) return;
     identifyPostHogUser(user);
-  }, [user?.id, user?.email, user?.name, user?.username]);
+  }, [user?.id, user?.email, user?.name, user?.username, user?.role]);
 
   React.useEffect(() => {
     if (!user?.id) return;

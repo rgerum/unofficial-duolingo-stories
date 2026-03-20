@@ -8,15 +8,26 @@ export type PostHogUser = {
   email?: string | null;
   name?: string | null;
   username?: string | null;
+  role?: string | null;
 };
 
 export function identifyPostHogUser(user: PostHogUser | null | undefined) {
   if (!user?.id) return false;
 
+  const role = typeof user.role === "string" ? user.role : undefined;
+  const isAdmin = role === "admin";
+  const isContributor = role === "contributor" || isAdmin;
   posthog.identify(user.id, {
     email: user.email ?? undefined,
     name: user.name ?? undefined,
     username: user.username ?? undefined,
+    ...(role !== undefined
+      ? {
+          role,
+          is_admin: isAdmin,
+          is_contributor: isContributor,
+        }
+      : {}),
   });
   return true;
 }
