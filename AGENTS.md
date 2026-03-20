@@ -12,3 +12,11 @@
 ## Convex
 - Follow `./convex/convex_rules.md` when making changes in `convex/`.
 - Always deploy Convex after changing files in `convex/` to the dev deployment (for example with `pnpm convex dev --once`), not prod.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# Next.js: ALWAYS read docs before coding
+
+Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
+
+<!-- END:nextjs-agent-rules -->
