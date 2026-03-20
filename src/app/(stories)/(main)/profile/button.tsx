@@ -10,19 +10,26 @@ export default function ProviderButton({
   d: string;
   value: boolean;
 }) {
+  const [linkError, setLinkError] = React.useState<string | null>(null);
+
   const handleLink = async () => {
+    setLinkError(null);
     const { data, error } = await authClient.linkSocial({
       provider: d,
       callbackURL: window.location.href,
     });
 
     if (error) {
+      setLinkError(error.message || "Could not link account.");
       return;
     }
 
     if (data?.url) {
       window.location.href = data.url;
+      return;
     }
+
+    window.location.reload();
   };
 
   return (
@@ -43,6 +50,9 @@ export default function ProviderButton({
             Link
           </button>
         )}
+        {linkError ? (
+          <span className="ml-2 text-[var(--error-red)]">{linkError}</span>
+        ) : null}
       </div>
     </div>
   );
