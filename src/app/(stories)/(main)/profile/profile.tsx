@@ -6,7 +6,6 @@ import Header from "../header";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { GetIcon } from "@/components/icons";
-import { useInput } from "@/lib/hooks";
 import { authClient } from "@/lib/auth-client";
 import type { ProfileData } from "./data";
 
@@ -113,7 +112,12 @@ function LinkedAccountRow({
       setLinkError(error.message || "Could not link account.");
       return;
     }
-    if (data?.url) window.location.href = data.url;
+    if (data?.url) {
+      window.location.href = data.url;
+      return;
+    }
+
+    window.location.reload();
   };
 
   return (
@@ -191,10 +195,9 @@ export default function Profile({ providers }: { providers: ProfileData }) {
         image?: string | null;
       }
     | undefined;
-  const [username, setUsername] = useInput(
-    providers.username || providers.name,
-  );
-  const [newEmail, setNewEmail] = useInput("");
+  const initialUsername = providers.username || providers.name;
+  const [username, setUsername] = React.useState(initialUsername);
+  const [newEmail, setNewEmail] = React.useState("");
   const [resetState, setResetState] = React.useState<
     "idle" | "pending" | "success" | "error"
   >("idle");
@@ -208,9 +211,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     "idle" | "pending" | "success" | "error"
   >("idle");
   const [usernameError, setUsernameError] = React.useState("");
-  const [savedUsername, setSavedUsername] = React.useState(
-    providers.username || providers.name,
-  );
+  const [savedUsername, setSavedUsername] = React.useState(initialUsername);
   const [isEditingUsername, setIsEditingUsername] = React.useState(false);
   const [isEditingEmail, setIsEditingEmail] = React.useState(false);
   const [isShowingPasswordReset, setIsShowingPasswordReset] =
@@ -233,6 +234,34 @@ export default function Profile({ providers }: { providers: ProfileData }) {
 
     setPendingEmailChange(storedPendingEmail);
   }, [providers.email]);
+
+  function openUsernameEditor() {
+    setUsername(savedUsername);
+    setUsernameState("idle");
+    setUsernameError("");
+    setIsEditingUsername(true);
+  }
+
+  function closeUsernameEditor() {
+    setUsername(savedUsername);
+    setUsernameState("idle");
+    setUsernameError("");
+    setIsEditingUsername(false);
+  }
+
+  function openEmailEditor() {
+    setNewEmail("");
+    setEmailState("idle");
+    setEmailError("");
+    setIsEditingEmail(true);
+  }
+
+  function closeEmailEditor() {
+    setNewEmail("");
+    setEmailState("idle");
+    setEmailError("");
+    setIsEditingEmail(false);
+  }
 
   async function requestPasswordReset() {
     setResetState("pending");
@@ -278,7 +307,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     window.localStorage.setItem("profile_pending_email_change", newEmail);
     setPendingEmailChange(newEmail);
     setEmailState("success");
-    setIsEditingEmail(false);
+    closeEmailEditor();
   }
 
   async function saveUsername() {
@@ -296,7 +325,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     if (normalizedUsername === savedUsername) {
       setUsernameState("success");
       setUsernameError("");
-      setIsEditingUsername(false);
+      closeUsernameEditor();
       return;
     }
 
@@ -329,7 +358,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
 
     setSavedUsername(normalizedUsername);
     setUsernameState("success");
-    setIsEditingUsername(false);
+    closeUsernameEditor();
   }
 
   return (
@@ -381,9 +410,11 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                   type="button"
                   className="mt-0 min-w-[120px]"
                   onClick={() => {
-                    setUsernameState("idle");
-                    setUsernameError("");
-                    setIsEditingUsername((current) => !current);
+                    if (isEditingUsername) {
+                      closeUsernameEditor();
+                    } else {
+                      openUsernameEditor();
+                    }
                   }}
                 >
                   {isEditingUsername ? "Close" : "Edit"}
@@ -392,7 +423,10 @@ export default function Profile({ providers }: { providers: ProfileData }) {
             >
               {isEditingUsername ? (
                 <div className="space-y-3">
-                  <Input value={username} onChange={setUsername} />
+                  <Input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
                   <StatusText
                     state={usernameState}
                     error={usernameError}
@@ -413,7 +447,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                     <Button
                       type="button"
                       className="mt-0 min-w-[120px]"
-                      onClick={() => setIsEditingUsername(false)}
+                      onClick={closeUsernameEditor}
                     >
                       Cancel
                     </Button>
@@ -435,9 +469,11 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                   type="button"
                   className="mt-0 min-w-[120px]"
                   onClick={() => {
-                    setEmailState("idle");
-                    setEmailError("");
-                    setIsEditingEmail((current) => !current);
+                    if (isEditingEmail) {
+                      closeEmailEditor();
+                    } else {
+                      openEmailEditor();
+                    }
                   }}
                 >
                   {isEditingEmail ? "Close" : "Edit"}
@@ -449,7 +485,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                   <Input
                     type="email"
                     value={newEmail}
-                    onChange={setNewEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
                     placeholder="New email address"
                     data-cy="profile-new-email"
                   />
@@ -483,7 +519,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                     <Button
                       type="button"
                       className="mt-0 min-w-[120px]"
-                      onClick={() => setIsEditingEmail(false)}
+                      onClick={closeEmailEditor}
                     >
                       Cancel
                     </Button>

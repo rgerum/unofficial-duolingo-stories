@@ -3,7 +3,6 @@ import { getUser, isAdmin, isContributor } from "@/lib/userInterface";
 import { api } from "@convex/_generated/api";
 
 export interface ProfileData {
-  providers: string[];
   name: string;
   username: string;
   email: string;
@@ -27,10 +26,8 @@ export async function getProfileData() {
     providersBase.map((provider) => [provider, false]),
   ) as Record<string, boolean>;
 
-  const providers: string[] = [];
   for (const provider of providersFromAuth) {
     if (provider in providerLinked) {
-      providers.push(provider);
       providerLinked[provider] = true;
     }
   }
@@ -43,7 +40,6 @@ export async function getProfileData() {
   const username = user.username ?? displayName;
 
   return {
-    providers,
     name: displayName,
     username,
     email: user.email,

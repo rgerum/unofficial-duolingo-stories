@@ -26,7 +26,10 @@ export default function ProviderButton({
 
     if (data?.url) {
       window.location.href = data.url;
+      return;
     }
+
+    window.location.reload();
   };
 
   return (
