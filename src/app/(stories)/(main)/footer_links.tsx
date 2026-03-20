@@ -15,7 +15,8 @@ export default async function FooterLinks({}) {
             Contribute to our collective
           </Link>
         </div>
-        <div className="mb-[50px] grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] justify-around border-t-2 border-[var(--overview-hr)] text-[calc(16/16*1rem)] opacity-60 [&_figcaption]:mb-0 [&_figcaption]:font-bold [&_li]:list-none [&_li]:before:content-['•_'] [&_ul]:m-0 [&_ul]:pl-0 [@media(pointer:coarse)]:[&_li_a]:leading-[calc(48/16*1rem)]">
+        <div className="mt-5 mb-3 border-t-2 border-[var(--overview-hr)]" />
+        <div className="mb-5 grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] justify-around text-[calc(16/16*1rem)] opacity-60 [&_figcaption]:mb-0 [&_figcaption]:font-bold [&_li]:list-none [&_li]:before:content-['???_'] [&_ul]:m-0 [&_ul]:pl-0 [@media(pointer:coarse)]:[&_li_a]:leading-[calc(48/16*1rem)]">
           <figure>
             <figcaption>Social</figcaption>
             <nav>
