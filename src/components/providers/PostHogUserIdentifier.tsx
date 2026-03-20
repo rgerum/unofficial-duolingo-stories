@@ -3,6 +3,7 @@
 import React from "react";
 import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
+import { identifyPostHogUser } from "@/lib/posthog-user";
 
 const PENDING_SIGNIN_STORAGE_KEY = "posthog_pending_signin";
 
@@ -21,7 +22,6 @@ type PendingSignInPayload = {
 export default function PostHogUserIdentifier() {
   const { data: session } = authClient.useSession();
   const user = (session?.user ?? null) as SessionUser | null;
-  const identifiedUserId = React.useRef<string | null>(null);
   const trackedSignInUserId = React.useRef<string | null>(null);
 
   const readPendingSignIn =
@@ -39,14 +39,7 @@ export default function PostHogUserIdentifier() {
 
   React.useEffect(() => {
     if (!user?.id) return;
-    if (identifiedUserId.current === user.id) return;
-
-    posthog.identify(user.id, {
-      email: user.email ?? undefined,
-      name: user.name ?? undefined,
-      username: user.username ?? undefined,
-    });
-    identifiedUserId.current = user.id;
+    identifyPostHogUser(user);
   }, [user?.id, user?.email, user?.name, user?.username]);
 
   React.useEffect(() => {
