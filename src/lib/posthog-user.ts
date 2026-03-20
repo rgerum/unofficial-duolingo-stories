@@ -17,7 +17,6 @@ export function identifyPostHogUser(user: PostHogUser | null | undefined) {
   const role = typeof user.role === "string" ? user.role : null;
   const isAdmin = role === "admin";
   const isContributor = role === "contributor" || isAdmin;
-
   posthog.identify(user.id, {
     email: user.email ?? undefined,
     name: user.name ?? undefined,

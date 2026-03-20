@@ -112,7 +112,7 @@ export default function ContributorList({
       {normalizedContributors.map((contributor, index) => (
         <li
           key={`${contributor.legacyUserId}-${contributor.name}-${index}`}
-          className={`inline-flex items-center gap-2 rounded-full border px-2 py-1 ${
+          className={`inline-flex items-center gap-2 rounded-full border p-1 pr-3 ${
             muted
               ? "border-[var(--overview-hr)] bg-[var(--body-background-faint)] text-[var(--text-color-dim)]"
               : "border-[var(--overview-hr)] bg-[var(--body-background)] text-[var(--text-color)]"
