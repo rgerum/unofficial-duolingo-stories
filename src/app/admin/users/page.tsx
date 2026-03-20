@@ -1,6 +1,5 @@
 import UserList, { type AdminUserList } from "./user_list";
 import { fetchAuthQuery } from "@/lib/auth-server";
-import { resolveDiscordAvatarUrl } from "@/lib/discordAvatar";
 import { api } from "@convex/_generated/api";
 
 const LOAD_STEP = 50;
@@ -52,22 +51,15 @@ export default async function Page({
     roleFilter,
   });
 
-  const users: AdminUserList[] = await Promise.all(
-    response.users.map(async (user) => ({
-      ...user,
-      image:
-        user.image ??
-        (user.discordLinked
-          ? await resolveDiscordAvatarUrl(user.discordAccountId)
-          : null),
-      regdate:
-        typeof user.regdate === "number" ? new Date(user.regdate) : undefined,
-      discordStoriesLastSyncedAt:
-        typeof user.discordStoriesLastSyncedAt === "number"
-          ? new Date(user.discordStoriesLastSyncedAt)
-          : undefined,
-    })),
-  );
+  const users: AdminUserList[] = response.users.map((user) => ({
+    ...user,
+    regdate:
+      typeof user.regdate === "number" ? new Date(user.regdate) : undefined,
+    discordStoriesLastSyncedAt:
+      typeof user.discordStoriesLastSyncedAt === "number"
+        ? new Date(user.discordStoriesLastSyncedAt)
+        : undefined,
+  }));
 
   return (
     <UserList
