@@ -24,18 +24,7 @@ import {
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
-
-function isTypingTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) return false;
-  const tagName = target.tagName;
-  return (
-    target.isContentEditable ||
-    tagName === "INPUT" ||
-    tagName === "TEXTAREA" ||
-    tagName === "SELECT" ||
-    tagName === "BUTTON"
-  );
-}
+import { isTypingTarget } from "@/lib/is-typing-target";
 
 function getComponent(parts: StoryElement[]) {
   const last_part = parts[parts.length - 1];
@@ -205,7 +194,11 @@ function StoryProgress({
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key !== " " || event.repeat || isTypingTarget(event.target)) {
+      if (
+        event.key !== " " ||
+        event.repeat ||
+        isTypingTarget(event.target, { includeButtons: true })
+      ) {
         return;
       }
 

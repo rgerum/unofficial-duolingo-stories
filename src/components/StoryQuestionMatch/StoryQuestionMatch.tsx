@@ -2,6 +2,7 @@ import React from "react";
 import { produce } from "immer";
 import styles from "./StoryQuestionMatch.module.css";
 import { shuffle } from "@/lib/shuffle";
+import { isTypingTarget } from "@/lib/is-typing-target";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import WordButton from "../WordButton";
 import { StoryElement } from "@/components/editor/story/syntax_parser_types";
@@ -103,18 +104,6 @@ function getNumberIndex(key: string) {
   const parsed = Number.parseInt(key, 10);
   if (Number.isNaN(parsed) || parsed < 1 || parsed > 9) return undefined;
   return parsed - 1;
-}
-
-function isTypingTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) return false;
-  const tagName = target.tagName;
-  return (
-    target.isContentEditable ||
-    tagName === "INPUT" ||
-    tagName === "TEXTAREA" ||
-    tagName === "SELECT" ||
-    tagName === "BUTTON"
-  );
 }
 
 function StoryQuestionMatch({
