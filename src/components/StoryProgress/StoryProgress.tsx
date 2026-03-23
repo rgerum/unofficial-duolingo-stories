@@ -17,6 +17,7 @@ import StoryFooter from "../StoryFooter";
 import StoryFinishedScreen from "../StoryFinishedScreen";
 import StoryTitlePage from "../StoryTitlePage";
 import VisuallyHidden from "../VisuallyHidden";
+import { playSoundEffect } from "@/lib/sound-effects";
 import { StoryType } from "@/components/editor/story/syntax_parser_new";
 import {
   StoryElement,
@@ -171,6 +172,15 @@ function StoryProgress({
   const [buttonStatus, setButtonStatus] = React.useState(
     storyProgress === -1 ? "continue" : "wait",
   );
+  const previousButtonStatus = React.useRef(buttonStatus);
+
+  React.useEffect(() => {
+    if (previousButtonStatus.current !== buttonStatus) {
+      if (buttonStatus === "right") playSoundEffect("right");
+      if (buttonStatus === "finished") playSoundEffect("done");
+    }
+    previousButtonStatus.current = buttonStatus;
+  }, [buttonStatus]);
 
   if (!story || !parts_list) return null;
 

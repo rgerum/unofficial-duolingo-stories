@@ -2,6 +2,7 @@ import React from "react";
 import { produce } from "immer";
 import styles from "./StoryQuestionMatch.module.css";
 import { shuffle } from "@/lib/shuffle";
+import { playSoundEffect } from "@/lib/sound-effects";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import WordButton from "../WordButton";
 import { StoryElement } from "@/components/editor/story/syntax_parser_types";
@@ -101,9 +102,11 @@ function shuffle_lists(state: State) {
 function StoryQuestionMatch({
   /*progress,*/ element,
   setDone,
+  onWrong,
 }: {
   element: StoryElement;
   setDone: () => void;
+  onWrong?: () => void;
 }) {
   if (element.type !== "MATCH") throw new Error("not the right element");
   const [state, dispatch]: [State, React.Dispatch<Action>] = React.useReducer(
@@ -131,6 +134,36 @@ function StoryQuestionMatch({
     if (all_right) setDone();
   }, [state, setDone]);
 
+  const handleSelect = React.useCallback(
+    (listIndex: number, wordIndex: number) => {
+      const otherListIndex = [1, 0][listIndex];
+      const selectedWord = state.lists[otherListIndex].find(
+        (word) => word.state === "selected",
+      );
+      const selectedWordSame = state.lists[listIndex].find(
+        (word) => word.state === "selected",
+      );
+      const newSelectedWord = state.lists[listIndex][wordIndex];
+
+      if (
+        selectedWord &&
+        selectedWordSame?.index !== newSelectedWord.index &&
+        selectedWord.index !== newSelectedWord.index
+      ) {
+        playSoundEffect("wrong");
+        onWrong?.();
+      }
+
+      dispatch({
+        type: "select",
+        listIndex,
+        wordIndex,
+        key: crypto.randomUUID(),
+      });
+    },
+    [onWrong, state.lists],
+  );
+
   return (
     <div>
       <StoryQuestionPrompt
@@ -144,14 +177,7 @@ function StoryQuestionMatch({
               <WordButton
                 key={word.key}
                 status={word.state}
-                onClick={() =>
-                  dispatch({
-                    type: "select",
-                    listIndex,
-                    wordIndex,
-                    key: crypto.randomUUID(),
-                  })
-                }
+                onClick={() => handleSelect(listIndex, wordIndex)}
               >
                 {word.value}
               </WordButton>
