@@ -172,6 +172,7 @@ body[data-theme="light"] {
   --accent-foreground: var(--text-color);
   --border: var(--header-border);
   --input: var(--input-border);
+  /* Focus rings track the blue CTA styling in light mode. */
   --ring: var(--button-blue-background);
 }
 
@@ -243,6 +244,9 @@ body[data-theme="dark"] {
   --text-color: #f1f7fb;
   --text-color-dim: #f1f7fb;
   --body-background: #131f22;
+
+  /* Keep the Duostories primary action green in dark mode. */
+  --button-background: #58cc02;
 
   --language-selector-hover-background: #626b70;
 
@@ -322,6 +326,7 @@ body[data-theme="dark"] {
   --accent-foreground: var(--text-color);
   --border: var(--header-border);
   --input: var(--input-border);
+  /* In dark mode, use the blue foreground token so focus rings stay visible. */
   --ring: var(--button-blue-color);
 }
 

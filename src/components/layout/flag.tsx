@@ -80,8 +80,9 @@ export default function Flag(props: {
   const scale = width / 82;
   const height = (66 / 82) * width;
   const isCustomFlag = Boolean(props.flag_file);
-  const outlineWidth = isCustomFlag ? 7 : 5 * scale;
-  const outlineOffset = isCustomFlag ? -6 : -6 * scale;
+  const customScale = width / 88;
+  const outlineWidth = isCustomFlag ? 7 * customScale : 5 * scale;
+  const outlineOffset = isCustomFlag ? -6 * customScale : -6 * scale;
   const flagImageStyle: React.CSSProperties = {
     width,
     height,
