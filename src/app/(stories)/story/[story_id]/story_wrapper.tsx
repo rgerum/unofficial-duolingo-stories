@@ -109,7 +109,13 @@ export default function StoryWrapper({
     };
 
     update();
-    posthog.onFeatureFlags(update);
+    const unsubscribe = posthog.onFeatureFlags(update);
+
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const finishedLabel = showNextStoryAction
@@ -121,9 +127,18 @@ export default function StoryWrapper({
   async function completeStoryOnce() {
     if (completionInFlight.current) return false;
     completionInFlight.current = true;
-    await captureStoryEvent("story_completed");
-    await storyFinishedIndexUpdate();
-    return true;
+    let succeeded = false;
+
+    try {
+      await captureStoryEvent("story_completed");
+      await storyFinishedIndexUpdate();
+      succeeded = true;
+      return true;
+    } finally {
+      if (!succeeded) {
+        completionInFlight.current = false;
+      }
+    }
   }
 
   async function goToOverview() {
@@ -153,6 +168,11 @@ export default function StoryWrapper({
     navigateToOverview();
   }
 
+  const shouldShowDefaultFinishedButton =
+    !sessionUser?.id || nextStep === undefined || nextStep === null;
+  const showFinishedPrimaryAction =
+    shouldShowDefaultFinishedButton || Boolean(finishedLabel);
+
   return (
     <>
       <StoryProgress
@@ -173,7 +193,7 @@ export default function StoryWrapper({
         onBackToOverview={goToOverview}
         finishedLabel={finishedLabel}
         nextStoryPreview={nextStoryPreview}
-        showFinishedPrimaryAction={Boolean(finishedLabel)}
+        showFinishedPrimaryAction={showFinishedPrimaryAction}
       />
     </>
   );
