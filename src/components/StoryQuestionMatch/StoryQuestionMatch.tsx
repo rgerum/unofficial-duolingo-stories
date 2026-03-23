@@ -179,7 +179,6 @@ function StoryQuestionMatch({
     const all_right = state.lists[0].every((word) => word.state === "right");
     if (all_right) setDone();
   }, [state, setDone]);
-
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.repeat || !active || isTypingTarget(event.target)) return;
