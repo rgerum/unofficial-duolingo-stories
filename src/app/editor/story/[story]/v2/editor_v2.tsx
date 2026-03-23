@@ -88,7 +88,7 @@ export default function EditorV2({
     setRevision(0);
     setLineNo(1);
     setAudioEditorData(undefined);
-  }, [story_data.id]);
+  }, [story_data.id, story_data.text]);
 
   const model = useStoryEditorModel({
     storyData: story_data,
@@ -98,6 +98,15 @@ export default function EditorV2({
     learningLanguage: language_data,
     fromLanguage: language_data2,
   });
+  const {
+    audioInsertLines,
+    dirty,
+    isDeleting,
+    isSaving,
+    markServerSynced,
+    parsedStory,
+    save,
+  } = model;
 
   useResizeEditor(editorRef.current, previewRef.current, marginRef.current);
   useScrollLinking(view, previewRef.current, svgParentRef.current);
@@ -132,35 +141,35 @@ export default function EditorV2({
       viewRef.current = null;
       setView(undefined);
     };
-  }, [story_data.id]);
+  }, [story_data.id, story_data.text]);
 
   React.useEffect(() => {
     const view = viewRef.current;
     if (!view) return;
-    if (model.dirty) return;
+    if (dirty) return;
 
     const remoteText = normalizeDocText(story_data.text ?? "");
     const localText = view.state.doc.toString();
     if (localText === remoteText) return;
 
-    model.markServerSynced(remoteText);
+    markServerSynced(remoteText);
     view.dispatch({
       changes: { from: 0, to: view.state.doc.length, insert: remoteText },
     });
-  }, [model.dirty, model.markServerSynced, story_data.text]);
+  }, [dirty, markServerSynced, story_data.text]);
 
   React.useEffect(() => {
     const warningMessage =
       "You have unsaved changes. Are you sure you want to leave this page?";
 
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!model.dirty) return;
+      if (!dirty) return;
       event.preventDefault();
       event.returnValue = warningMessage;
     };
 
     const onDocumentClick = (event: MouseEvent) => {
-      if (!model.dirty) return;
+      if (!dirty) return;
       if (event.defaultPrevented) return;
       if (event.button !== 0) return;
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
@@ -193,7 +202,7 @@ export default function EditorV2({
     };
 
     const onPopState = () => {
-      if (!model.dirty) return;
+      if (!dirty) return;
       const shouldLeave = window.confirm(warningMessage);
       if (shouldLeave) return;
       window.history.pushState(null, "", window.location.href);
@@ -207,40 +216,40 @@ export default function EditorV2({
       document.removeEventListener("click", onDocumentClick, true);
       window.removeEventListener("popstate", onPopState);
     };
-  }, [model.dirty]);
+  }, [dirty]);
 
   React.useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() !== "s") return;
       if (!event.ctrlKey && !event.metaKey) return;
       event.preventDefault();
-      if (model.isSaving || model.isDeleting) return;
-      void model.save();
+      if (isSaving || isDeleting) return;
+      void save();
     };
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [model.isDeleting, model.isSaving, model.save]);
+  }, [isDeleting, isSaving, save]);
 
   const onAudioSave = React.useCallback(
     (filename: string, timingText: string) => {
       const view = viewRef.current;
       if (!view || !audioEditorData?.audio) return;
-      if (!model.audioInsertLines) return;
+      if (!audioInsertLines) return;
       insert_audio_line(
         `$${filename}${timingText}`,
         audioEditorData.audio.ssml,
         view,
-        model.audioInsertLines,
+        audioInsertLines,
       );
     },
-    [audioEditorData, model.audioInsertLines],
+    [audioEditorData, audioInsertLines],
   );
 
   const soundRecorderNext = React.useCallback(() => {
     if (!audioEditorData) return;
     const index = audioEditorData.trackingProperties.line_index || 0;
-    for (const element of model.parsedStory.elements) {
+    for (const element of parsedStory.elements) {
       if (
         element.type === "LINE" &&
         (element.trackingProperties?.line_index ?? 0) > index
@@ -249,12 +258,12 @@ export default function EditorV2({
         break;
       }
     }
-  }, [audioEditorData, model.parsedStory.elements]);
+  }, [audioEditorData, parsedStory.elements]);
 
   const soundRecorderPrevious = React.useCallback(() => {
     if (!audioEditorData) return;
     const index = audioEditorData.trackingProperties.line_index || 0;
-    for (const element of [...model.parsedStory.elements].reverse()) {
+    for (const element of [...parsedStory.elements].reverse()) {
       if (
         (element.type === "LINE" || element.type === "HEADER") &&
         (element.trackingProperties?.line_index ?? 0) < index
@@ -263,7 +272,7 @@ export default function EditorV2({
         break;
       }
     }
-  }, [audioEditorData, model.parsedStory.elements]);
+  }, [audioEditorData, parsedStory.elements]);
 
   const editorStateForPreview: EditorStateType | undefined =
     React.useMemo(() => {
@@ -283,12 +292,12 @@ export default function EditorV2({
             }),
           );
         },
-        audio_insert_lines: model.audioInsertLines,
+        audio_insert_lines: audioInsertLines,
         show_trans,
         show_ssml,
         show_audio_editor: (data) => setAudioEditorData(data),
       };
-    }, [lineNo, model.audioInsertLines, show_ssml, show_trans]);
+    }, [audioInsertLines, lineNo, show_ssml, show_trans]);
 
   const audioEditorDataContent =
     (audioEditorData?.type === "LINE" && audioEditorData.line.content) ||

@@ -2,6 +2,7 @@ import React from "react";
 import { produce } from "immer";
 import styles from "./StoryQuestionMatch.module.css";
 import { shuffle } from "@/lib/shuffle";
+import { isTypingTarget } from "@/lib/is-typing-target";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import WordButton from "../WordButton";
 import { StoryElement } from "@/components/editor/story/syntax_parser_types";
@@ -98,11 +99,20 @@ function shuffle_lists(state: State) {
   return { lists: state.lists.map((element) => shuffle(element)) };
 }
 
+function getNumberIndex(key: string) {
+  if (key === "0") return 9;
+  const parsed = Number.parseInt(key, 10);
+  if (Number.isNaN(parsed) || parsed < 1 || parsed > 9) return undefined;
+  return parsed - 1;
+}
+
 function StoryQuestionMatch({
   /*progress,*/ element,
+  active,
   setDone,
 }: {
   element: StoryElement;
+  active: boolean;
   setDone: () => void;
 }) {
   if (element.type !== "MATCH") throw new Error("not the right element");
@@ -126,10 +136,49 @@ function StoryQuestionMatch({
     },
     shuffle_lists,
   );
+
+  const selectWord = React.useCallback(
+    (listIndex: number, wordIndex: number) => {
+      dispatch({
+        type: "select",
+        listIndex,
+        wordIndex,
+        key: crypto.randomUUID(),
+      });
+    },
+    [dispatch],
+  );
+
   React.useEffect(() => {
     const all_right = state.lists[0].every((word) => word.state === "right");
     if (all_right) setDone();
   }, [state, setDone]);
+
+  React.useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.repeat || !active || isTypingTarget(event.target)) return;
+
+      const wordIndex = getNumberIndex(event.key);
+      if (wordIndex === undefined) return;
+
+      const selectedLeft = state.lists[0].some(
+        (word) => word.state === "selected",
+      );
+      const selectedRight = state.lists[1].some(
+        (word) => word.state === "selected",
+      );
+      const listIndex = selectedLeft && !selectedRight ? 1 : 0;
+      const word = state.lists[listIndex][wordIndex];
+
+      if (!word || word.state === "right") return;
+
+      event.preventDefault();
+      selectWord(listIndex, wordIndex);
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [active, selectWord, state]);
 
   return (
     <div>
@@ -144,14 +193,7 @@ function StoryQuestionMatch({
               <WordButton
                 key={word.key}
                 status={word.state}
-                onClick={() =>
-                  dispatch({
-                    type: "select",
-                    listIndex,
-                    wordIndex,
-                    key: crypto.randomUUID(),
-                  })
-                }
+                onClick={() => selectWord(listIndex, wordIndex)}
               >
                 {word.value}
               </WordButton>
