@@ -155,6 +155,24 @@ body[data-theme="light"] {
   --svg-stroke: #eee;
 
   --editor-hints-background: whitesmoke;
+
+  --background: var(--body-background);
+  --foreground: var(--text-color);
+  --card: var(--body-background);
+  --card-foreground: var(--text-color);
+  --popover: var(--body-background);
+  --popover-foreground: var(--text-color);
+  --primary: var(--button-background);
+  --primary-foreground: var(--button-color);
+  --secondary: var(--body-background-faint);
+  --secondary-foreground: var(--text-color);
+  --muted: var(--body-background-faint);
+  --muted-foreground: var(--text-color-dim);
+  --accent: var(--language-selector-hover-background);
+  --accent-foreground: var(--text-color);
+  --border: var(--header-border);
+  --input: var(--input-border);
+  --ring: var(--button-blue-background);
 }
 
 body[data-theme="dark"] .ͼ2 .cm-gutters {
@@ -287,6 +305,24 @@ body[data-theme="dark"] {
   --editor-hints-background: #313131;
 
   --finished-star-gold: #ffc800;
+
+  --background: var(--body-background);
+  --foreground: var(--text-color);
+  --card: var(--body-background);
+  --card-foreground: var(--text-color);
+  --popover: var(--body-background);
+  --popover-foreground: var(--text-color);
+  --primary: var(--button-background);
+  --primary-foreground: var(--button-color);
+  --secondary: var(--body-background-faint);
+  --secondary-foreground: var(--text-color);
+  --muted: var(--body-background-faint);
+  --muted-foreground: var(--text-color-dim);
+  --accent: var(--language-selector-hover-background);
+  --accent-foreground: var(--text-color);
+  --border: var(--header-border);
+  --input: var(--input-border);
+  --ring: var(--button-blue-color);
 }
 
 .cm-editor {

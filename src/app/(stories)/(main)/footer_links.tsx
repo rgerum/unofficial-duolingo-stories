@@ -5,7 +5,7 @@ export default async function FooterLinks({}) {
   return (
     <>
       <footer className="mt-auto">
-        <div className="mt-[50px] flex justify-end px-[10px]">
+        <div className="mx-auto mt-[50px] flex w-full max-w-[1000px] justify-end px-4">
           <Link
             href="https://opencollective.com/duostories/contribute"
             target="_blank"
@@ -16,7 +16,7 @@ export default async function FooterLinks({}) {
           </Link>
         </div>
         <div className="mt-5 mb-3 border-t-2 border-[var(--overview-hr)]" />
-        <div className="mb-5 grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] justify-around text-[calc(16/16*1rem)] opacity-60 [&_figcaption]:mb-0 [&_figcaption]:font-bold [&_li]:list-none [&_li]:before:content-['•_'] [&_ul]:m-0 [&_ul]:pl-0 [@media(pointer:coarse)]:[&_li_a]:leading-[calc(48/16*1rem)]">
+        <div className="mx-auto mb-5 grid w-full max-w-[1000px] grid-cols-[repeat(auto-fit,minmax(140px,1fr))] justify-around px-4 text-[calc(16/16*1rem)] opacity-60 [&_figcaption]:mb-0 [&_figcaption]:font-bold [&_li]:list-none [&_li]:before:content-['•_'] [&_ul]:m-0 [&_ul]:pl-0 [@media(pointer:coarse)]:[&_li_a]:leading-[calc(48/16*1rem)]">
           <figure>
             <figcaption>Social</figcaption>
             <nav>
