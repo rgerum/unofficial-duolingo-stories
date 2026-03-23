@@ -25,6 +25,7 @@ import {
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import { isTypingTarget } from "@/lib/is-typing-target";
 
 function getComponent(parts: StoryElement[]) {
   const last_part = parts[parts.length - 1];
@@ -181,10 +182,7 @@ function StoryProgress({
     }
     previousButtonStatus.current = buttonStatus;
   }, [buttonStatus]);
-
-  if (!story || !parts_list) return null;
-
-  async function next() {
+  const next = React.useCallback(async () => {
     if (!parts_list) return;
     if (buttonStatus === "finished") {
       setButtonStatus("...");
@@ -202,7 +200,27 @@ function StoryProgress({
       if (storyProgress === parts_list.length - 1) setButtonStatus("finished");
       else setButtonStatus("wait");
     }
-  }
+  }, [buttonStatus, onEnd, partProgress, parts_list, storyProgress]);
+
+  React.useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (
+        event.key !== " " ||
+        event.repeat ||
+        isTypingTarget(event.target, { includeButtons: true })
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      void next();
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [next]);
+
+  if (!story || !parts_list) return null;
 
   function getIndex(parts: StoryElement[]) {
     return parts[0].trackingProperties.line_index || 0;

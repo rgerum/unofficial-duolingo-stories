@@ -181,7 +181,11 @@ function EditorElement({ element, editorState }: EditorElementProps) {
   if (element.type === "MATCH") {
     return (
       <EditorQuestionWrapper element={element} editorState={editorState}>
-        <StoryQuestionMatch element={element} setDone={() => {}} />
+        <StoryQuestionMatch
+          active={false}
+          element={element}
+          setDone={() => {}}
+        />
       </EditorQuestionWrapper>
     );
   }

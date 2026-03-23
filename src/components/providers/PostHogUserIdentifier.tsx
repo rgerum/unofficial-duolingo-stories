@@ -41,7 +41,7 @@ export default function PostHogUserIdentifier() {
   React.useEffect(() => {
     if (!user?.id) return;
     identifyPostHogUser(user);
-  }, [user?.id, user?.email, user?.name, user?.username, user?.role]);
+  }, [user]);
 
   React.useEffect(() => {
     if (!user?.id) return;

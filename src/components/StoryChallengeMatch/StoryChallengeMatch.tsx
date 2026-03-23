@@ -34,6 +34,7 @@ function StoryChallengeMatch({
       disableScroll={settings.show_all}
     >
       <StoryQuestionMatch
+        active={active}
         element={element}
         setDone={() => setButtonStatus("right")}
       />

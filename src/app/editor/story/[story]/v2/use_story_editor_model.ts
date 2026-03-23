@@ -104,7 +104,7 @@ export function useStoryEditorModel({
     setSaveErrorMessage("There was an error saving.");
     setLastSavedAt(null);
     setLastSavedText(normalizeDocText(storyData.text ?? ""));
-  }, [storyData.id]);
+  }, [storyData.id, storyData.text]);
 
   const [parsedStoryBase, parsedMeta, audioInsertLines] = React.useMemo(
     () =>
