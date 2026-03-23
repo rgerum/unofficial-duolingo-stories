@@ -1,6 +1,7 @@
 import React from "react";
 import WordButton from "../WordButton";
 import { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import { playSoundEffect } from "@/lib/sound-effects";
 
 /*
 The ARRANGE question
@@ -89,6 +90,7 @@ function useArrangeButtons(
         setButtonState((buttonState) =>
           buttonState.map((v, i) => (i === index ? 2 : v)),
         );
+        playSoundEffect("wrong");
         callWrong();
       }
     },

@@ -2,6 +2,7 @@ import React from "react";
 import { produce } from "immer";
 import styles from "./StoryQuestionMatch.module.css";
 import { shuffle } from "@/lib/shuffle";
+import { playSoundEffect } from "@/lib/sound-effects";
 import { isTypingTarget } from "@/lib/is-typing-target";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import WordButton from "../WordButton";
@@ -18,6 +19,13 @@ interface Word {
 
 interface State {
   lists: Word[][];
+}
+
+type SelectionOutcome = "noop" | "selected" | "right" | "wrong";
+
+interface SelectionResult {
+  nextState: State;
+  outcome: SelectionOutcome;
 }
 
 type Action = {
@@ -40,8 +48,10 @@ It consists of two columns of buttons. The learner needs to find the right pars.
 - la <> the
  */
 
-function reducer(currentState: State, action: Action) {
-  return produce(currentState, (draftState) => {
+function applySelection(currentState: State, action: Action): SelectionResult {
+  let outcome: SelectionOutcome = "noop";
+
+  const nextState = produce(currentState, (draftState) => {
     switch (action.type) {
       case "select": {
         // the word in the other group
@@ -49,9 +59,9 @@ function reducer(currentState: State, action: Action) {
           (word) => word.state === "selected",
         );
         // the selected word in the current group
-        const selectedWord_same = draftState.lists[
-          [0, 1][action.listIndex]
-        ].find((word) => word.state === "selected");
+        const selectedWordSame = draftState.lists[action.listIndex].find(
+          (word) => word.state === "selected",
+        );
         // the newly selected word
         const newSelectedWord =
           draftState.lists[action.listIndex][action.wordIndex];
@@ -62,12 +72,12 @@ function reducer(currentState: State, action: Action) {
         }
 
         // if there is a word selected in the current group, we change the selection
-        if (selectedWord_same) {
+        if (selectedWordSame) {
           // unselect the old word
-          selectedWord_same.state = "idle";
+          selectedWordSame.state = "idle";
 
           // if it's the same word, return
-          if (selectedWord_same?.index === newSelectedWord?.index) {
+          if (selectedWordSame.index === newSelectedWord.index) {
             return;
           }
         }
@@ -75,11 +85,13 @@ function reducer(currentState: State, action: Action) {
         // if it's the only selected word, select it
         if (!selectedWord) {
           newSelectedWord.state = "selected";
+          outcome = "selected";
         }
         // if the words match
         else if (selectedWord.index === newSelectedWord.index) {
           selectedWord.state = "right";
           newSelectedWord.state = "right";
+          outcome = "right";
         }
         // if the words do not match
         else {
@@ -87,12 +99,19 @@ function reducer(currentState: State, action: Action) {
           selectedWord.key = action.key;
           newSelectedWord.state = "wrong";
           newSelectedWord.key = action.key;
+          outcome = "wrong";
         }
 
         break;
       }
     }
   });
+
+  return { nextState, outcome };
+}
+
+function reducer(currentState: State, action: Action) {
+  return applySelection(currentState, action).nextState;
 }
 
 function shuffle_lists(state: State) {
@@ -139,21 +158,27 @@ function StoryQuestionMatch({
 
   const selectWord = React.useCallback(
     (listIndex: number, wordIndex: number) => {
-      dispatch({
+      const action = {
         type: "select",
         listIndex,
         wordIndex,
         key: crypto.randomUUID(),
-      });
+      } as const;
+      const { outcome } = applySelection(state, action);
+
+      if (outcome === "wrong") {
+        playSoundEffect("wrong");
+      }
+
+      dispatch(action);
     },
-    [dispatch],
+    [state],
   );
 
   React.useEffect(() => {
     const all_right = state.lists[0].every((word) => word.state === "right");
     if (all_right) setDone();
   }, [state, setDone]);
-
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.repeat || !active || isTypingTarget(event.target)) return;
