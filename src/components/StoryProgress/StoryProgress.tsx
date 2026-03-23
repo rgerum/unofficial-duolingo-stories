@@ -183,10 +183,7 @@ function StoryProgress({
   const [buttonStatus, setButtonStatus] = React.useState(
     storyProgress === -1 ? "continue" : "wait",
   );
-
-  if (!story || !parts_list) return null;
-
-  async function next() {
+  const next = React.useCallback(async () => {
     if (!parts_list) return;
     if (buttonStatus === "finished") {
       setButtonStatus("...");
@@ -204,7 +201,7 @@ function StoryProgress({
       if (storyProgress === parts_list.length - 1) setButtonStatus("finished");
       else setButtonStatus("wait");
     }
-  }
+  }, [buttonStatus, onEnd, partProgress, parts_list, storyProgress]);
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -218,7 +215,9 @@ function StoryProgress({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [buttonStatus, partProgress, parts_list, storyProgress]);
+  }, [next]);
+
+  if (!story || !parts_list) return null;
 
   function getIndex(parts: StoryElement[]) {
     return parts[0].trackingProperties.line_index || 0;
