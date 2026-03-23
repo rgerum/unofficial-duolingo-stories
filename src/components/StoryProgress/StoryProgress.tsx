@@ -25,6 +25,18 @@ import {
 } from "@/components/editor/story/syntax_parser_types";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 
+function isTypingTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  const tagName = target.tagName;
+  return (
+    target.isContentEditable ||
+    tagName === "INPUT" ||
+    tagName === "TEXTAREA" ||
+    tagName === "SELECT" ||
+    tagName === "BUTTON"
+  );
+}
+
 function getComponent(parts: StoryElement[]) {
   const last_part = parts[parts.length - 1];
   if (parts[0].type === "HEADER") return Header;
@@ -193,6 +205,20 @@ function StoryProgress({
       else setButtonStatus("wait");
     }
   }
+
+  React.useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== " " || event.repeat || isTypingTarget(event.target)) {
+        return;
+      }
+
+      event.preventDefault();
+      void next();
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [buttonStatus, partProgress, parts_list, storyProgress]);
 
   function getIndex(parts: StoryElement[]) {
     return parts[0].trackingProperties.line_index || 0;
