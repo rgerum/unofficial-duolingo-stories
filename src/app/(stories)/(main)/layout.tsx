@@ -37,8 +37,8 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative isolate mx-auto flex min-h-full w-full max-w-[1000px] flex-col px-4">
-      <div className="sticky top-0 z-[1] w-full bg-[var(--body-background)] after:absolute after:left-1/2 after:w-screen after:-translate-x-1/2 after:border-b-2 after:border-[var(--header-border)] after:content-['']">
+    <div className="relative isolate mx-auto flex min-h-full w-full flex-col">
+      <div className="sticky top-0 z-[1] w-full bg-[var(--body-background)] after:absolute after:left-1/2 after:w-full after:-translate-x-1/2 after:border-b-2 after:border-[var(--header-border)] after:content-['']">
         <nav className="mx-auto flex max-w-[1000px] items-center px-5 py-1.5">
           <Link
             href="/"
@@ -57,7 +57,9 @@ export default async function Layout({
           <LoggedInButtonWrappedClient page={"stories"} course_id={"segment"} />
         </nav>
       </div>
-      <main className="isolate flex flex-col">{children}</main>
+      <main className="isolate flex flex-col max-w-[1000px] w-full mx-auto px-4">
+        {children}
+      </main>
       <FooterLinks />
       <Legal language_name={undefined} />
     </div>
