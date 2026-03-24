@@ -105,7 +105,7 @@ export default function useAudio(element: UseAudioElement, active: boolean) {
     return [audioRange, undefined, ref, undefined] as const;
   }
 
-  const audioUrl = audio.url.startsWith("blob")
+  const audioUrl = audio.url.startsWith("blob") || audio.url.startsWith("http")
     ? audio.url
     : `https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/${audio.url}`;
 
