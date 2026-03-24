@@ -70,9 +70,28 @@ class MyClient(discord.Client):
                         await message.channel.send("Please connect your Duostories account to your Discord account (on <https://duostories.org/profile>). Then post another message here and I will check again.")
             except Exception as err:
                 print(err)
-                await self.log(f"⚠️ could not check Duostories account linkage for {first_message.author.name}, a database error occurred.")
+                await self.log(f"⚠️ could not check Duostories account linkage for {first_message.author.name}, a database error occurred.\n```{err}```")
+
+    def _is_contributor_request_channel(self, channel):
+        """Check if the channel is a thread in the contributor request forum."""
+        try:
+            return channel.parent.id == CHANNEL_CONTRIBUTOR_REQUEST
+        except AttributeError:
+            return False
+
+    async def _get_first_message_if_match(self, channel, message_id):
+        """Return the first message in the thread if message_id matches it, else None.
+        A thread's ID equals its starter message's ID, so we can skip the API call
+        when they don't match."""
+        if message_id != channel.id:
+            return None
+        return await channel.fetch_message(channel.id)
 
     async def check_reaction(self, reaction):
+        # reaction.member is None for reaction remove events
+        if reaction.member is None:
+            return None
+
         # Check if the reacting user is a moderator
         is_moderator = discord.utils.get(reaction.member.roles, id=ROLE_MODERATOR)
 
@@ -84,23 +103,10 @@ class MyClient(discord.Client):
             # Get the channel where the reaction occurred
             channel = client.get_channel(reaction.channel_id)
 
-            is_contributor_request_channel = False
-            try:
-                if channel.parent.id == CHANNEL_CONTRIBUTOR_REQUEST:
-                    is_contributor_request_channel = True
-            except AttributeError:
-                is_contributor_request_channel = False
-
-            if is_contributor_request_channel is False:
+            if not self._is_contributor_request_channel(channel):
                 return None
 
-            # Fetch the message using the message_id from the payload
-            message = await channel.fetch_message(reaction.message_id)
-
-            first_message = await channel.fetch_message(channel.id)
-
-            if message == first_message:
-                return message
+            return await self._get_first_message_if_match(channel, reaction.message_id)
         return None
 
     async def on_raw_reaction_add(self, reaction):
@@ -131,11 +137,27 @@ class MyClient(discord.Client):
                         await message.channel.send("I gave you the **Contributor** role but I could not activate your account on Duostories because you haven't connected your Duostories account to Discord.")
                 except Exception as err:
                     print(err)
-                    await self.log(f"⚠️ could not add write permissions for {user.name}, a database error occurred.")
+                    await self.log(f"⚠️ could not add write permissions for {user.name}, a database error occurred.\n```{err}```")
                     await message.channel.send("I gave you the **Contributor** role, but I could not activate your account on Duostories because a database error occurred.")
 
     async def on_raw_reaction_remove(self, reaction):
-        if message := await self.check_reaction(reaction):
+        if reaction.emoji.name != '✅':
+            return
+        channel = client.get_channel(reaction.channel_id)
+        if not self._is_contributor_request_channel(channel):
+            return
+        # reaction.member is None for remove events; fetch to verify moderator status
+        guild = client.get_guild(reaction.guild_id)
+        if guild is None:
+            return
+        try:
+            member = await guild.fetch_member(reaction.user_id)
+        except discord.NotFound:
+            return
+        if not discord.utils.get(member.roles, id=ROLE_MODERATOR):
+            return
+        message = await self._get_first_message_if_match(channel, reaction.message_id)
+        if message:
             await message.remove_reaction('✅', client.user)
 
     async def on_member_update(self, before, after):
@@ -159,7 +181,7 @@ class MyClient(discord.Client):
                             await self.log(f"⚠️ could not add write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
                         print(err)
-                        await self.log(f"⚠️ could not added write permissions for {after.name}, a database error occurred.")
+                        await self.log(f"⚠️ could not add write permissions for {after.name}, a database error occurred.\n```{err}```")
                 print(f"User {after.name} has been given the role: {role.name}")
 
             # Add your reaction logic here for when roles are added to a user.
@@ -181,7 +203,7 @@ class MyClient(discord.Client):
                             await self.log(f"⚠️ could not remove write permissions for {after.name}, account is not linked to duostories.")
                     except Exception as err:
                         print(err)
-                        await self.log(f"⚠️ could not remove write permissions for {after.name}, a database error occurred.")
+                        await self.log(f"⚠️ could not remove write permissions for {after.name}, a database error occurred.\n```{err}```")
                 print(f"User {after.name} has lost the role: {role.name}")
 
             # Add your reaction logic here for when roles are removed from a user.
