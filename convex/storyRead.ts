@@ -35,6 +35,16 @@ const storyMetaResultValidator = v.union(
   v.null(),
 );
 
+const storyPreviewResultValidator = v.union(
+  v.object({
+    id: v.number(),
+    title: v.string(),
+    active: v.string(),
+    gilded: v.string(),
+  }),
+  v.null(),
+);
+
 function nonEmptyString(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 ? value : "";
 }
@@ -139,6 +149,50 @@ export const getStoryMetaByLegacyId = query({
       image: image?.legacyId ?? "",
       from_language_long: fromLanguage.name,
       learning_language_long: learningLanguage.name,
+    };
+  },
+});
+
+export const getStoryPreviewByLegacyId = query({
+  args: {
+    storyId: v.number(),
+  },
+  returns: storyPreviewResultValidator,
+  handler: async (ctx, args) => {
+    const story = await ctx.db
+      .query("stories")
+      .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.storyId))
+      .unique();
+    if (!story || story.deleted || typeof story.legacyId !== "number") {
+      return null;
+    }
+
+    const storyContent = await ctx.db
+      .query("story_content")
+      .withIndex("by_story", (q) => q.eq("storyId", story._id))
+      .unique();
+    const image = story.imageId ? await ctx.db.get(story.imageId) : null;
+
+    let parsedJson = storyContent?.json;
+    if (typeof parsedJson === "string") {
+      try {
+        parsedJson = JSON.parse(parsedJson);
+      } catch {
+        parsedJson = null;
+      }
+    }
+
+    const illustrations = parsedJson?.illustrations ?? {};
+    const active =
+      nonEmptyString(illustrations.active) || (image?.active ?? "");
+    const gilded =
+      nonEmptyString(illustrations.gilded) || (image?.gilded ?? active);
+
+    return {
+      id: story.legacyId,
+      title: story.name,
+      active,
+      gilded,
     };
   },
 });

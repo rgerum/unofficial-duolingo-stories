@@ -157,11 +157,24 @@ function StoryProgress({
   parts_list,
   settings,
   onEnd,
+  onBackToOverview,
+  finishedLabel,
+  nextStoryPreview,
+  showFinishedPrimaryAction,
 }: {
   story?: StoryData;
   parts_list?: StoryElement[][];
   settings: StorySettings;
   onEnd: () => void;
+  onBackToOverview?: () => void | Promise<void>;
+  finishedLabel?: string;
+  nextStoryPreview?: {
+    id: number;
+    title: string;
+    active: string;
+    gilded: string;
+  } | null;
+  showFinishedPrimaryAction?: boolean;
 }) {
   if (story) {
     parts_list = GetParts(story);
@@ -309,7 +322,15 @@ function StoryProgress({
           )}
         </div>
         {!settings.show_all && storyProgress !== -1 && (
-          <StoryFooter buttonStatus={buttonStatus} onClick={next} />
+          <StoryFooter
+            buttonStatus={buttonStatus}
+            onClick={next}
+            onBackToOverview={onBackToOverview}
+            finishedLabel={finishedLabel}
+            nextStoryPreview={nextStoryPreview}
+            learningLanguageName={story.learning_language_long}
+            showFinishedPrimaryAction={showFinishedPrimaryAction}
+          />
         )}
       </div>
     </>

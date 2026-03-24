@@ -1,16 +1,23 @@
 /* finished end */
 .page_finished {
-  height: calc(100vh - 100px);
+  min-height: calc(100vh - 100px);
   margin-bottom: 100px;
   width: 100%;
   border-top: 2px solid var(--overview-hr);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 32px 16px 24px;
+  box-sizing: border-box;
 }
 
 .page_finished div {
   text-align: center;
+}
+
+.page_finished > div {
+  max-width: 420px;
+  width: 100%;
 }
 
 .finished_image_container {
@@ -114,5 +121,16 @@
   to {
     opacity: 0.5;
     transform: rotate(-45deg) scale(1);
+  }
+}
+
+@media (max-width: 500px) {
+  .page_finished {
+    padding-top: 24px;
+  }
+
+  .finished_image_container {
+    height: 170px;
+    width: 170px;
   }
 }

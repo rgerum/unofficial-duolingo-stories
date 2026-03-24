@@ -9,6 +9,23 @@ const storyDoneInputValidator = v.object({
   time: v.optional(v.number()),
 });
 
+const dashboardCourseValidator = v.object({
+  short: v.string(),
+  name: v.string(),
+  learningLanguageName: v.string(),
+  learningLanguageShort: v.string(),
+  learningLanguageFlag: v.optional(v.union(v.number(), v.string())),
+  learningLanguageFlagFile: v.optional(v.string()),
+});
+
+const nextStepValidator = v.object({
+  course: dashboardCourseValidator,
+  completedCount: v.number(),
+  totalCount: v.number(),
+  nextStoryId: v.union(v.number(), v.null()),
+  reviewStoryId: v.union(v.number(), v.null()),
+});
+
 export const recordStoryDone = mutation({
   args: storyDoneInputValidator.fields,
   returns: v.object({
@@ -174,6 +191,30 @@ export const getLastDoneCourseShortForLegacyUser = query({
   },
 });
 
+export const getNextStoryForCurrentUserInCourse = query({
+  args: {
+    courseShort: v.string(),
+    currentStoryId: v.optional(v.number()),
+  },
+  returns: v.union(nextStepValidator, v.null()),
+  handler: async (ctx, args) => {
+    const legacyUserId = await getCurrentIdentityLegacyUserId(ctx);
+    if (!legacyUserId) return null;
+
+    const course = await ctx.db
+      .query("courses")
+      .withIndex("by_short", (q) => q.eq("short", args.courseShort))
+      .unique();
+    if (!course) return null;
+
+    return await getNextStepForCourse(ctx, {
+      courseId: course._id,
+      legacyUserId,
+      currentStoryId: args.currentStoryId,
+    });
+  },
+});
+
 async function upsertStoryDoneState(
   ctx: MutationCtx,
   args: {
@@ -204,6 +245,94 @@ async function upsertStoryDoneState(
       lastDoneAt: Math.max(row.lastDoneAt, args.lastDoneAt),
     });
   }
+}
+
+async function getNextStepForCourse(
+  ctx: QueryCtx,
+  args: {
+    courseId: Id<"courses">;
+    legacyUserId: number;
+    currentStoryId?: number;
+  },
+) {
+  const course = await ctx.db.get(args.courseId);
+  if (!course?.public || !course.short) return null;
+
+  const learningLanguage = await ctx.db.get(course.learningLanguageId);
+  if (!learningLanguage) return null;
+
+  const publicStories = await ctx.db
+    .query("stories")
+    .withIndex("by_course_public_deleted_set", (q) =>
+      q.eq("courseId", args.courseId).eq("public", true).eq("deleted", false),
+    )
+    .collect();
+
+  const orderedStories = publicStories
+    .filter(
+      (story): story is typeof story & { legacyId: number } =>
+        typeof story.legacyId === "number",
+    )
+    .sort((a, b) => {
+      const setCmp = (a.set_id ?? 0) - (b.set_id ?? 0);
+      if (setCmp !== 0) return setCmp;
+      return (a.set_index ?? 0) - (b.set_index ?? 0);
+    });
+  if (orderedStories.length === 0) return null;
+
+  const doneStoryIds = new Set<number>(
+    await getDoneStoryIdsForCourseIdAndUser(
+      ctx,
+      args.courseId,
+      args.legacyUserId,
+    ),
+  );
+  if (typeof args.currentStoryId === "number") {
+    doneStoryIds.add(args.currentStoryId);
+  }
+
+  const totalCount = orderedStories.length;
+  const completedCount = orderedStories.reduce(
+    (count, story) => count + (doneStoryIds.has(story.legacyId) ? 1 : 0),
+    0,
+  );
+
+  const currentIndex =
+    typeof args.currentStoryId === "number"
+      ? orderedStories.findIndex(
+          (story) => story.legacyId === args.currentStoryId,
+        )
+      : -1;
+
+  let nextStory =
+    currentIndex >= 0
+      ? orderedStories
+          .slice(currentIndex + 1)
+          .find((story) => !doneStoryIds.has(story.legacyId))
+      : undefined;
+  if (!nextStory) {
+    nextStory = orderedStories.find(
+      (story) => !doneStoryIds.has(story.legacyId),
+    );
+  }
+
+  return {
+    course: {
+      short: course.short,
+      name:
+        course.name && course.name.trim().length > 0
+          ? course.name
+          : learningLanguage.name,
+      learningLanguageName: learningLanguage.name,
+      learningLanguageShort: learningLanguage.short,
+      learningLanguageFlag: learningLanguage.flag,
+      learningLanguageFlagFile: learningLanguage.flag_file,
+    },
+    completedCount,
+    totalCount,
+    nextStoryId: nextStory?.legacyId ?? null,
+    reviewStoryId: orderedStories[0]?.legacyId ?? null,
+  };
 }
 
 async function upsertCourseActivity(
