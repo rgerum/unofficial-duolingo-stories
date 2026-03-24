@@ -80,11 +80,12 @@ class MyClient(discord.Client):
             return False
 
     async def _get_first_message_if_match(self, channel, message_id):
-        """Return the first message in the thread if message_id matches it, else None."""
-        first_message = await channel.fetch_message(channel.id)
-        if first_message.id == message_id:
-            return first_message
-        return None
+        """Return the first message in the thread if message_id matches it, else None.
+        A thread's ID equals its starter message's ID, so we can skip the API call
+        when they don't match."""
+        if message_id != channel.id:
+            return None
+        return await channel.fetch_message(channel.id)
 
     async def check_reaction(self, reaction):
         # reaction.member is None for reaction remove events
@@ -144,6 +145,16 @@ class MyClient(discord.Client):
             return
         channel = client.get_channel(reaction.channel_id)
         if not self._is_contributor_request_channel(channel):
+            return
+        # reaction.member is None for remove events; fetch to verify moderator status
+        guild = client.get_guild(reaction.guild_id)
+        if guild is None:
+            return
+        try:
+            member = await guild.fetch_member(reaction.user_id)
+        except discord.NotFound:
+            return
+        if not discord.utils.get(member.roles, id=ROLE_MODERATOR):
             return
         message = await self._get_first_message_if_match(channel, reaction.message_id)
         if message:
