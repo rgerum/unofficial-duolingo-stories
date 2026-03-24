@@ -644,7 +644,9 @@ export default function StoryAutoPlay({
             </Link>
           ) : null}
           <div className={styles.queueMeta}>
-            {queueLabel ? <div className={styles.queueLabel}>{queueLabel}</div> : null}
+            {queueLabel ? (
+              <div className={styles.queueLabel}>{queueLabel}</div>
+            ) : null}
             {queueSubLabel ? (
               <div className={styles.queueSubLabel}>{queueSubLabel}</div>
             ) : null}
@@ -690,7 +692,11 @@ export default function StoryAutoPlay({
               aria-label={`Loop mode: ${loopMode}`}
               title={`Loop: ${loopMode}`}
             >
-              {loopMode === "one" ? <Repeat1 size={16} /> : <Repeat size={16} />}
+              {loopMode === "one" ? (
+                <Repeat1 size={16} />
+              ) : (
+                <Repeat size={16} />
+              )}
             </button>
           </div>
         </div>
