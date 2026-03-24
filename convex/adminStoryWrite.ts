@@ -1,7 +1,7 @@
-import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./lib/authorization";
+import { recomputeCoursePublishedCount } from "./lib/courseCounts";
 
 export const togglePublished = mutation({
   args: {
@@ -27,30 +27,7 @@ export const togglePublished = mutation({
 
     const nextPublic = !story.public;
     await ctx.db.patch(story._id, { public: nextPublic });
-
-    const storiesInCourse = await ctx.db
-      .query("stories")
-      .withIndex("by_course", (q) => q.eq("courseId", story.courseId))
-      .collect();
-    const courseCount = storiesInCourse.filter(
-      (row) => row.public && !row.deleted,
-    ).length;
-    await ctx.db.patch(course._id, { count: courseCount });
-
-    const operationKey =
-      args.operationKey ??
-      `story:${story.legacyId}:toggle_published:${Date.now()}`;
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorStoryPublishedToggle,
-      {
-        storyId: story.legacyId,
-        public: nextPublic,
-        courseLegacyId: course.legacyId,
-        courseCount,
-        operationKey,
-      },
-    );
+    await recomputeCoursePublishedCount(ctx, course._id);
 
     return null;
   },
@@ -103,21 +80,6 @@ export const removeApproval = mutation({
       status: storyStatus,
       approvalCount,
     });
-
-    const operationKey =
-      args.operationKey ??
-      `story_approval:${args.legacyApprovalId}:admin_delete:${Date.now()}`;
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAdminApprovalDelete,
-      {
-        storyId: story.legacyId,
-        legacyApprovalId: args.legacyApprovalId,
-        storyStatus,
-        approvalCount,
-        operationKey,
-      },
-    );
 
     return null;
   },

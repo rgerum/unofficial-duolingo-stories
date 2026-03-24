@@ -24,17 +24,14 @@ Note: TypeScript build errors are ignored in `next.config.js` (`ignoreBuildError
 
 ## Environment Setup
 
-Requires PostgreSQL and Convex.
+Requires Convex.
 
 Next.js `.env.local` typically includes:
-- `DATABASE_URL` - Better Auth DB connection
-- `POSTGRES_URL2` - mirrors local Postgres for Convex mirror actions
 - `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_URL`
 - `BETTER_AUTH_SECRET`
 - `SITE_URL`
 
 Convex env (`pnpm exec convex env set ...`) typically includes:
-- `POSTGRES_URL2` - used by `convex/postgresMirror.ts`
 - `GITHUB_REPO_TOKEN` - used by `convex/editorSideEffects.ts`
 - `POSTHOG_KEY` and `POSTHOG_HOST` - used by `convex/editorSideEffects.ts`
 - `RESEND_API_KEY`, `SITE_URL`, `BETTER_AUTH_SECRET`
@@ -58,7 +55,6 @@ Test credentials: user/test (normal), editor/test (editor access), admin/test (a
 ### Key Files
 - `src/auth.ts` - Better Auth server configuration (JWT sessions, OAuth providers, email verification)
 - `src/lib/auth-client.ts` - Client-side Better Auth client
-- `convex/postgresMirror.ts` - Postgres mirror writes from Convex internal actions
 - `convex/editorSideEffects.ts` - GitHub/PostHog side effects scheduled by write mutations
 - `convex/lib/authorization.ts` - shared auth guard helpers for Convex functions
 
@@ -66,7 +62,7 @@ Test credentials: user/test (normal), editor/test (editor access), admin/test (a
 Uses Better Auth with JWT sessions (5-minute cookie cache). Supports email/password and OAuth (GitHub, Google, Facebook, Discord). Custom table names map to legacy schema (e.g., `user_better_auth`, `session_better_auth`). User model has custom `role` and `admin` fields.
 
 ### Database Access
-Application reads/writes should go through Convex queries/mutations. Postgres writes are mirrored via Convex internal actions in `convex/postgresMirror.ts`.
+Application reads/writes should go through Convex queries/mutations.
 
 ### Write-path Rules
 

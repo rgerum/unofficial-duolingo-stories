@@ -20,6 +20,14 @@ async function user_properties(id: string) {
     activated: match.activated,
     role: match.role,
     admin: match.admin,
+    discordLinked: match.discordLinked,
+    discordAccountId: match.discordAccountId,
+    discordStoriesRole: match.discordStoriesRole,
+    discordStoriesSyncStatus: match.discordStoriesSyncStatus,
+    discordStoriesLastSyncedAt:
+      typeof match.discordStoriesLastSyncedAt === "number"
+        ? new Date(match.discordStoriesLastSyncedAt)
+        : undefined,
   });
 }
 

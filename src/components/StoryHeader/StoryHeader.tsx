@@ -8,7 +8,7 @@ import StoryTextLineSimple from "../StoryTextLineSimple";
 import EditorSSMLDisplay from "../EditorSSMLDisplay";
 import { StoryElementHeader } from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
-import type { EditorStateType } from "@/app/editor/story/[story]/editor";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import {
   getEditorHandlers,
   type EditorProps,
@@ -69,9 +69,11 @@ function StoryHeader({
         />
       </div>
       <h1 className={styles.title}>
-        <audio ref={ref}>
-          <source src={url} type="audio/mp3" />
-        </audio>
+        {url && (
+          <audio ref={ref}>
+            <source src={url} type="audio/mp3" />
+          </audio>
+        )}
         {!hideAudioButton && <PlayAudio onClick={playAudio} />}
         <StoryLineHints
           audioRange={effectiveAudioRange}
@@ -83,7 +85,6 @@ function StoryHeader({
           <EditorSSMLDisplay
             ssml={element.audio.ssml}
             element={element}
-            audio={element.audio}
             editor={editorState}
           />
         )}

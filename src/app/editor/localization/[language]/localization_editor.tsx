@@ -9,6 +9,7 @@ import { Breadcrumbs } from "../../_components/breadcrumbs";
 import TextEdit from "./text_edit";
 
 type LanguageType = {
+  languageId: string;
   id: number;
   name: string;
   short: string;

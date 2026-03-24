@@ -89,11 +89,19 @@ export default function SoundRecorder({
   total_index,
   current_index,
 }: SoundRecorderProps) {
+  const fileInputId = React.useId();
+  const actionButtonClassName =
+    "inline-flex h-9 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]";
+  const primaryButtonClassName =
+    "inline-flex h-9 items-center justify-center rounded-md border border-[#0f5f83] bg-[#1cb0f6] px-3 text-sm font-semibold leading-none text-white transition-colors hover:bg-[#1598d7]";
+
   const containerRef = useRef(null);
   const [urlIndex, setUrlIndex] = useState(url);
   const [audioRange, setAudioRange] = React.useState(99999);
   const [uploaded, setUploaded] = React.useState(!!url);
   const [file, setFile] = React.useState<File | null>(null);
+  const [selectedFileName, setSelectedFileName] =
+    React.useState("No file selected.");
 
   const [timingText, setTimingText] = useState(initialTimingText);
 
@@ -230,6 +238,7 @@ export default function SoundRecorder({
     if (!file) return;
     //console.log("file", file);
     setFile(file);
+    setSelectedFileName(file.name);
     setUploaded(false);
     let url = URL.createObjectURL(file);
     setUrlIndex(url);
@@ -280,10 +289,28 @@ export default function SoundRecorder({
   //return <></>;
   return (
     <div className="absolute top-[58px] z-[2] block w-full border-2 border-[var(--color_base_border)] bg-[var(--body-background)] p-[25px]">
-      <button className="absolute right-0 top-0" onClick={onClose}>
+      <button
+        className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] text-xl leading-none"
+        onClick={onClose}
+        aria-label="Close sound recorder"
+      >
         X
       </button>
-      <input type="file" onChange={handleFileChange} accept="audio/*" />
+      <div className="mb-3 flex items-center gap-3">
+        <label htmlFor={fileInputId} className={actionButtonClassName}>
+          Upload audio
+        </label>
+        <span className="max-w-[40ch] truncate text-sm">
+          {selectedFileName}
+        </span>
+        <input
+          id={fileInputId}
+          className="sr-only"
+          type="file"
+          onChange={handleFileChange}
+          accept="audio/*"
+        />
+      </div>
       <PlayAudio onClick={onPlayPause} />
       <StoryLineHints
         audioRange={audioRange}
@@ -292,11 +319,22 @@ export default function SoundRecorder({
       />
       <p>{timingText}</p>
       <div ref={containerRef} />
-      <div className="flex justify-end">
-        <button onClick={soundRecorderPrevious}>Previous</button>
-        <button onClick={onSaveX}>Save</button>
-        <button onClick={soundRecorderNext}>Next</button>
-        {current_index + 1} / {total_index}
+      <div className="mt-3 flex items-center justify-end gap-2">
+        <button
+          className={actionButtonClassName}
+          onClick={soundRecorderPrevious}
+        >
+          Previous
+        </button>
+        <button className={primaryButtonClassName} onClick={onSaveX}>
+          Save
+        </button>
+        <button className={actionButtonClassName} onClick={soundRecorderNext}>
+          Next
+        </button>
+        <span className="ml-2 text-sm">
+          {current_index + 1} / {total_index}
+        </span>
       </div>
     </div>
   );

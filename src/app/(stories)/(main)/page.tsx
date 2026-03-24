@@ -3,9 +3,9 @@ import Header from "./header";
 import CourseList from "./course_list";
 import Icons from "./icons";
 import React from "react";
-import LandingStatsClient from "./landing_stats_client";
 import { preloadQuery } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
+import LandingStatsClient from "./landing_stats_client";
 
 export default async function Page({}) {
   const preloadedLandingData = await preloadQuery(
@@ -13,7 +13,6 @@ export default async function Page({}) {
     {},
   );
 
-  // Render data...
   return (
     <>
       <Header>
@@ -29,7 +28,7 @@ export default async function Page({}) {
           If you want to contribute or discuss the stories, meet us on{" "}
           <Link href="https://discord.gg/4NGVScARR3">Discord</Link>
           <br />
-          or learn more about the project in our <Link href={"/faq"}>FAQ</Link>.
+          or learn more about the project in our <Link href="/faq">FAQ</Link>.
         </p>
         <Icons />
       </Header>

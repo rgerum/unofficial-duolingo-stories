@@ -2,7 +2,7 @@ export type StoryData = {
   id: number;
   official: boolean;
   course_id: number;
-  duo_id: number;
+  duo_id: string;
   image: string;
   name: string;
   set_id: number;

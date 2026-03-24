@@ -58,10 +58,16 @@ const adminStoryValidator = v.object({
   approvals: v.array(adminApprovalValidator),
 });
 
-const adminFilterValidator = v.union(
+const yesNoAllFilterValidator = v.union(
   v.literal("all"),
   v.literal("yes"),
   v.literal("no"),
+);
+const roleFilterValidator = v.union(
+  v.literal("all"),
+  v.literal("user"),
+  v.literal("contributor"),
+  v.literal("admin"),
 );
 
 const adminUserValidator = v.object({
@@ -69,10 +75,24 @@ const adminUserValidator = v.object({
   id: v.number(),
   name: v.string(),
   email: v.string(),
+  image: v.union(v.string(), v.null()),
   regdate: v.union(v.number(), v.null()),
   activated: v.boolean(),
   role: v.boolean(),
   admin: v.boolean(),
+  discordLinked: v.boolean(),
+  discordAccountId: v.union(v.string(), v.null()),
+  discordStoriesRole: v.union(v.string(), v.null()),
+  discordStoriesSyncStatus: v.union(
+    v.literal("assigned"),
+    v.literal("up_to_date"),
+    v.literal("no_milestone"),
+    v.literal("not_linked"),
+    v.literal("member_not_found"),
+    v.literal("error"),
+    v.null(),
+  ),
+  discordStoriesLastSyncedAt: v.union(v.number(), v.null()),
 });
 
 async function findAuthUserByLegacyId(ctx: AuthCtx, legacyId: number) {
@@ -84,23 +104,44 @@ async function findAuthUserByLegacyId(ctx: AuthCtx, legacyId: number) {
     userId?: string | null;
     name?: string | null;
     email?: string | null;
+    image?: string | null;
     createdAt?: number | null;
     role?: string | null;
     emailVerified?: boolean | null;
   } | null;
 }
 
-function toAdminUser(user: {
-  _id?: string;
-  userId?: string | null;
-  name?: string | null;
-  email?: string | null;
-  createdAt?: number | null;
-  role?: string | null;
-  emailVerified?: boolean | null;
-}) {
+function toAdminUser(
+  user: {
+    _id?: string;
+    userId?: string | null;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    createdAt?: number | null;
+    role?: string | null;
+    emailVerified?: unknown;
+  },
+  discordAccountId?: string | null,
+  storiesRoleSnapshot?: {
+    assignedStoriesCount?: number | null;
+    syncStatus?:
+      | "assigned"
+      | "up_to_date"
+      | "no_milestone"
+      | "not_linked"
+      | "member_not_found"
+      | "error"
+      | null;
+    lastSyncedAt?: number | null;
+  } | null,
+) {
   const numericId = Number.parseInt(user.userId ?? "", 10);
   const role = user.role ?? null;
+  const assignedStoriesCount =
+    typeof storiesRoleSnapshot?.assignedStoriesCount === "number"
+      ? storiesRoleSnapshot.assignedStoriesCount
+      : null;
   return {
     rowKey:
       user._id ??
@@ -108,135 +149,221 @@ function toAdminUser(user: {
     id: Number.isFinite(numericId) ? numericId : 0,
     name: user.name ?? "",
     email: user.email ?? "",
+    image:
+      typeof user.image === "string" && user.image.length > 0
+        ? user.image
+        : null,
     regdate: typeof user.createdAt === "number" ? user.createdAt : null,
     activated: Boolean(user.emailVerified),
     role: role === "contributor" || role === "admin",
     admin: role === "admin",
+    discordLinked:
+      typeof discordAccountId === "string" && discordAccountId.length > 0,
+    discordAccountId:
+      typeof discordAccountId === "string" && discordAccountId.length > 0
+        ? discordAccountId
+        : null,
+    discordStoriesRole:
+      typeof assignedStoriesCount === "number" && assignedStoriesCount > 0
+        ? `${assignedStoriesCount} Stories`
+        : null,
+    discordStoriesSyncStatus: storiesRoleSnapshot?.syncStatus ?? null,
+    discordStoriesLastSyncedAt:
+      typeof storiesRoleSnapshot?.lastSyncedAt === "number"
+        ? storiesRoleSnapshot.lastSyncedAt
+        : null,
   };
+}
+
+async function getDiscordAccountIdsByAuthUserIds(
+  ctx: AuthCtx,
+  authUserIds: string[],
+) {
+  const uniqueAuthUserIds = Array.from(
+    new Set(authUserIds.filter((value) => value.length > 0)),
+  );
+  if (uniqueAuthUserIds.length === 0) return new Map<string, string>();
+
+  const response = await ctx.runQuery(components.betterAuth.adapter.findMany, {
+    model: "account",
+    where: [
+      { field: "providerId", operator: "eq", value: "discord" },
+      { field: "userId", operator: "in", value: uniqueAuthUserIds },
+    ],
+    paginationOpts: { cursor: null, numItems: uniqueAuthUserIds.length + 20 },
+  });
+
+  const discordAccountIdByAuthUserId = new Map<string, string>();
+  for (const account of response.page as Array<{
+    userId?: string | null;
+    accountId?: string | null;
+  }>) {
+    if (!account.userId || !account.accountId) continue;
+    discordAccountIdByAuthUserId.set(account.userId, account.accountId);
+  }
+  return discordAccountIdByAuthUserId;
+}
+
+async function getStoriesRoleSnapshotsByLegacyUserIds(
+  ctx: AuthCtx,
+  legacyUserIds: number[],
+) {
+  const wantedIds = new Set(
+    legacyUserIds.filter((legacyUserId) => Number.isFinite(legacyUserId)),
+  );
+  if (wantedIds.size === 0) {
+    return new Map<
+      number,
+      {
+        assignedStoriesCount?: number | null;
+        syncStatus?:
+          | "assigned"
+          | "up_to_date"
+          | "no_milestone"
+          | "not_linked"
+          | "member_not_found"
+          | "error"
+          | null;
+        lastSyncedAt?: number | null;
+      }
+    >();
+  }
+
+  const snapshotByLegacyUserId = new Map<
+    number,
+    {
+      assignedStoriesCount?: number | null;
+      syncStatus?:
+        | "assigned"
+        | "up_to_date"
+        | "no_milestone"
+        | "not_linked"
+        | "member_not_found"
+        | "error"
+        | null;
+      lastSyncedAt?: number | null;
+    }
+  >();
+
+  const rows = await Promise.all(
+    Array.from(wantedIds).map((legacyUserId) =>
+      ctx.db
+        .query("discord_stories_role_sync")
+        .withIndex("by_legacy_user_id", (q) =>
+          q.eq("legacyUserId", legacyUserId),
+        )
+        .unique(),
+    ),
+  );
+
+  for (const row of rows) {
+    if (!row) continue;
+    if (!wantedIds.has(row.legacyUserId)) continue;
+    snapshotByLegacyUserId.set(row.legacyUserId, row);
+  }
+  return snapshotByLegacyUserId;
 }
 
 export const getAdminUsersPage = query({
   args: {
     query: v.string(),
-    page: v.number(),
-    perPage: v.number(),
-    activatedFilter: adminFilterValidator,
-    roleFilter: adminFilterValidator,
-    adminFilter: adminFilterValidator,
+    limit: v.number(),
+    activatedFilter: yesNoAllFilterValidator,
+    roleFilter: roleFilterValidator,
   },
   returns: v.object({
     users: v.array(adminUserValidator),
-    hasPrevPage: v.boolean(),
-    hasNextPage: v.boolean(),
+    hasMore: v.boolean(),
   }),
   handler: async (ctx, args) => {
     if (!(await isAdmin(ctx))) {
-      return { users: [], hasPrevPage: false, hasNextPage: false };
+      return { users: [], hasMore: false };
     }
 
-    const page = Math.max(1, Math.floor(args.page));
-    const perPage = Math.max(1, Math.min(200, Math.floor(args.perPage)));
-    const offset = (page - 1) * perPage;
-    const searchLower = args.query.trim().toLowerCase();
-    const where: Array<{
-      connector?: "AND" | "OR";
-      field: string;
-      operator?:
-        | "lt"
-        | "lte"
-        | "gt"
-        | "gte"
-        | "eq"
-        | "in"
-        | "not_in"
-        | "ne"
-        | "contains"
-        | "starts_with"
-        | "ends_with";
-      value: string | number | boolean | Array<string> | Array<number> | null;
-    }> = [];
+    const limit = Math.max(1, Math.min(500, Math.floor(args.limit)));
+    const queryLimit = limit + 1;
+    const searchTerm = args.query.trim();
+    const searchLower = searchTerm.toLowerCase();
+    const searchMode =
+      searchTerm.length === 0
+        ? "none"
+        : /^\d+$/.test(searchLower)
+          ? "id"
+          : searchTerm.includes("@")
+            ? "email"
+            : "username";
 
-    if (searchLower.length > 0) {
-      const isNumericId = /^\d+$/.test(searchLower);
-      if (isNumericId) {
-        where.push({ field: "userId", operator: "eq", value: searchLower });
-      } else if (searchLower.includes("@")) {
-        where.push({
-          field: "email",
-          operator: "contains",
-          value: searchLower,
-        });
-      } else {
-        where.push({ field: "name", operator: "contains", value: searchLower });
-      }
-    }
-
-    if (args.activatedFilter === "yes") {
-      where.push({ field: "emailVerified", operator: "eq", value: true });
-    } else if (args.activatedFilter === "no") {
-      where.push({ field: "emailVerified", operator: "eq", value: false });
-    }
-
-    // Apply role/admin filters at query time to keep pagination consistent.
-    // `role` is nullable for many legacy users, so the "no contributor/admin"
-    // cases are modeled with negative predicates.
-    if (args.adminFilter === "yes" && args.roleFilter === "no") {
-      return { users: [], hasPrevPage: page > 1, hasNextPage: false };
-    }
-
-    if (args.adminFilter === "yes") {
-      where.push({ field: "role", operator: "eq", value: "admin" });
-    } else if (args.roleFilter === "yes") {
-      if (args.adminFilter === "no") {
-        where.push({ field: "role", operator: "eq", value: "contributor" });
-      } else {
-        where.push({
-          field: "role",
-          operator: "in",
-          value: ["admin", "contributor"],
-        });
-      }
-    } else if (args.roleFilter === "no") {
-      where.push({
-        field: "role",
-        operator: "not_in",
-        value: ["admin", "contributor"],
-      });
-    } else if (args.adminFilter === "no") {
-      where.push({ field: "role", operator: "ne", value: "admin" });
-    }
-
-    const response = (await ctx.runQuery(
-      components.betterAuth.adapter.findMany,
-      {
-        model: "user",
-        where,
-        offset,
-        paginationOpts: { cursor: null, numItems: perPage + 1 },
-        sortBy: { field: "createdAt", direction: "desc" },
-      },
-    )) as {
-      page: Array<{
-        _id?: string;
-        userId?: string | null;
-        name?: string | null;
-        email?: string | null;
-        createdAt?: number | null;
-        role?: string | null;
-        emailVerified?: boolean | null;
-      }>;
-    };
-
-    const hasNextPage = response.page.length > perPage;
-    const users = (
-      hasNextPage ? response.page.slice(0, perPage) : response.page
-    ).map(toAdminUser);
-
-    return {
-      users,
-      hasPrevPage: page > 1,
-      hasNextPage,
-    };
+    const matchedUsers =
+      searchMode === "id"
+        ? await ctx.runQuery(components.betterAuth.adapter.searchUsersById, {
+            activatedFilter: args.activatedFilter,
+            roleFilter: args.roleFilter,
+            id: searchTerm,
+          })
+        : searchMode === "email"
+          ? await ctx.runQuery(
+              components.betterAuth.adapter.searchUsersByEmailPrefix,
+              {
+                activatedFilter: args.activatedFilter,
+                roleFilter: args.roleFilter,
+                prefix: searchTerm,
+                limit: queryLimit,
+              },
+            )
+          : searchMode === "username"
+            ? await ctx.runQuery(
+                components.betterAuth.adapter.searchUsersByUsernamePrefix,
+                {
+                  activatedFilter: args.activatedFilter,
+                  roleFilter: args.roleFilter,
+                  prefix: searchTerm,
+                  limit: queryLimit,
+                },
+              )
+            : await ctx.runQuery(components.betterAuth.adapter.searchUsersAll, {
+                activatedFilter: args.activatedFilter,
+                roleFilter: args.roleFilter,
+                limit: queryLimit,
+              });
+    const pageUsers = matchedUsers.slice(0, limit) as Array<{
+      _id?: string;
+      userId?: string | null;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      createdAt?: number | null;
+      role?: string | null;
+      emailVerified?: unknown;
+    }>;
+    const discordAccountIdByAuthUserId =
+      await getDiscordAccountIdsByAuthUserIds(
+        ctx,
+        pageUsers
+          .map((user) => user._id)
+          .filter((value): value is string => typeof value === "string"),
+      );
+    const storiesRoleSnapshotByLegacyUserId =
+      await getStoriesRoleSnapshotsByLegacyUserIds(
+        ctx,
+        pageUsers
+          .map((user) => Number.parseInt(user.userId ?? "", 10))
+          .filter((value) => Number.isFinite(value)),
+      );
+    const users = pageUsers.map((user) =>
+      toAdminUser(
+        user,
+        typeof user._id === "string"
+          ? (discordAccountIdByAuthUserId.get(user._id) ?? null)
+          : null,
+        (() => {
+          const legacyUserId = Number.parseInt(user.userId ?? "", 10);
+          return Number.isFinite(legacyUserId)
+            ? (storiesRoleSnapshotByLegacyUserId.get(legacyUserId) ?? null)
+            : null;
+        })(),
+      ),
+    );
+    return { users, hasMore: matchedUsers.length > limit };
   },
 });
 
@@ -249,7 +376,15 @@ export const getAdminUserByLegacyId = query({
     if (!(await isAdmin(ctx))) return null;
     const user = await findAuthUserByLegacyId(ctx, args.id);
     if (!user?._id) return null;
-    return toAdminUser(user);
+    const discordAccountIdByAuthUserId =
+      await getDiscordAccountIdsByAuthUserIds(ctx, [user._id]);
+    const storiesRoleSnapshotByLegacyUserId =
+      await getStoriesRoleSnapshotsByLegacyUserIds(ctx, [args.id]);
+    return toAdminUser(
+      user,
+      discordAccountIdByAuthUserId.get(user._id) ?? null,
+      storiesRoleSnapshotByLegacyUserId.get(args.id) ?? null,
+    );
   },
 });
 

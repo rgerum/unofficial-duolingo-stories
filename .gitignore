@@ -50,6 +50,7 @@ publishX.sh
 # next.js
 .next/
 out/
+tmp/
 
 # misc
 .env*
@@ -61,3 +62,7 @@ old/
 *storybook.log
 next-env.d.ts
 tsconfig.tsbuildinfo
+discord_roles/.cache/
+
+*/skills/*
+skills/*

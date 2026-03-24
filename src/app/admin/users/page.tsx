@@ -2,7 +2,7 @@ import UserList, { type AdminUserList } from "./user_list";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 
-const PER_PAGE = 50;
+const LOAD_STEP = 50;
 
 function normalizeQuery(value: string | string[] | undefined) {
   if (!value) return "";
@@ -11,10 +11,20 @@ function normalizeQuery(value: string | string[] | undefined) {
 }
 
 type FilterValue = "all" | "yes" | "no";
+type RoleFilterValue = "all" | "user" | "contributor" | "admin";
 
 function normalizeFilter(value: string | string[] | undefined): FilterValue {
   const raw = normalizeQuery(value).toLowerCase();
   if (raw === "yes" || raw === "no") return raw;
+  return "all";
+}
+
+function normalizeRoleFilter(
+  value: string | string[] | undefined,
+): RoleFilterValue {
+  const raw = normalizeQuery(value).toLowerCase();
+  if (raw === "contributior") return "contributor";
+  if (raw === "user" || raw === "contributor" || raw === "admin") return raw;
   return "all";
 }
 
@@ -26,37 +36,40 @@ export default async function Page({
   const resolvedSearchParams = await searchParams;
   const rawQuery = normalizeQuery(resolvedSearchParams?.q);
   const query = rawQuery.trim();
-  const pageRaw = normalizeQuery(resolvedSearchParams?.page);
-  const page = Math.max(1, Number.parseInt(pageRaw || "1", 10) || 1);
+  const limitRaw = normalizeQuery(resolvedSearchParams?.limit);
+  const limit = Math.max(
+    1,
+    Number.parseInt(limitRaw || String(LOAD_STEP), 10) || LOAD_STEP,
+  );
   const activatedFilter = normalizeFilter(resolvedSearchParams?.activated);
-  const roleFilter = normalizeFilter(resolvedSearchParams?.role);
-  const adminFilter = normalizeFilter(resolvedSearchParams?.admin);
+  const roleFilter = normalizeRoleFilter(resolvedSearchParams?.role);
 
   const response = await fetchAuthQuery(api.adminData.getAdminUsersPage, {
     query,
-    page,
-    perPage: PER_PAGE,
+    limit,
     activatedFilter,
     roleFilter,
-    adminFilter,
   });
 
   const users: AdminUserList[] = response.users.map((user) => ({
     ...user,
-    regdate: user.regdate ? new Date(user.regdate) : undefined,
+    regdate:
+      typeof user.regdate === "number" ? new Date(user.regdate) : undefined,
+    discordStoriesLastSyncedAt:
+      typeof user.discordStoriesLastSyncedAt === "number"
+        ? new Date(user.discordStoriesLastSyncedAt)
+        : undefined,
   }));
 
   return (
     <UserList
       users={users}
       query={query}
-      page={page}
-      perPage={PER_PAGE}
-      hasPrevPage={response.hasPrevPage}
-      hasNextPage={response.hasNextPage}
+      limit={limit}
+      hasMore={response.hasMore}
+      loadStep={LOAD_STEP}
       activatedFilter={activatedFilter}
       roleFilter={roleFilter}
-      adminFilter={adminFilter}
     />
   );
 }

@@ -500,6 +500,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             maximumRowsRead?: number;
             numItems: number;
           };
+          select?: Array<string>;
           sortBy?: { direction: "asc" | "desc"; field: string };
           where?: Array<{
             connector?: "AND" | "OR";
@@ -563,6 +564,52 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
       get: FunctionReference<"query", "internal", { id: string }, any, Name>;
+      searchUsersAll: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any,
+        Name
+      >;
+      searchUsersByEmailPrefix: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          prefix: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any,
+        Name
+      >;
+      searchUsersById: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          id: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any,
+        Name
+      >;
+      searchUsersByUsernamePrefix: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          prefix: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any,
+        Name
+      >;
       updateMany: FunctionReference<
         "mutation",
         "internal",

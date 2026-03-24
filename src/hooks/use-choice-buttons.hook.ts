@@ -1,5 +1,6 @@
 import React from "react";
 import useKeypress from "./use-keypress.hook";
+import { playSoundEffect } from "@/lib/sound-effects";
 
 export function useChoiceButtons(
   count: number,
@@ -33,6 +34,7 @@ export function useChoiceButtons(
           buttonState.map((v, i) => (i === index ? "false" : v)),
         );
         // callback for clicking the wrong button
+        playSoundEffect("wrong");
         callWrong();
       }
     },

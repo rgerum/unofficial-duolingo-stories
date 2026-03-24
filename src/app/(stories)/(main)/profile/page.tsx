@@ -1,9 +1,7 @@
 import Header from "../header";
 import Profile from "./profile";
-import { fetchAuthQuery } from "@/lib/auth-server";
-import { getUser, isAdmin, isContributor } from "@/lib/userInterface";
-import { api } from "@convex/_generated/api";
 import { Metadata } from "next";
+import { getProfileData } from "./data";
 
 export const metadata: Metadata = {
   alternates: {
@@ -11,51 +9,8 @@ export const metadata: Metadata = {
   },
 };
 
-export interface ProfileData {
-  providers: string[];
-  name: string;
-  email: string;
-  role: string[];
-  provider_linked: Record<string, boolean>;
-}
-
-async function getLinkedProviders() {
-  let providers_base = ["facebook", "github", "google", "discord"];
-  const user = await getUser();
-  if (!user) return undefined;
-  if (!user.email) throw new Error("No user email available");
-
-  const providersFromAuth = (await fetchAuthQuery(
-    api.auth.getLinkedProvidersForCurrentUser,
-    {},
-  )) as string[];
-
-  let provider_linked: Record<string, boolean> = {};
-  for (let p of providers_base) {
-    provider_linked[p] = false;
-  }
-  let providers: string[] = [];
-  for (let provider of providersFromAuth) {
-    if (provider in provider_linked) {
-      providers.push(provider);
-      provider_linked[provider] = true;
-    }
-  }
-  let role = [];
-  if (isAdmin(user)) role.push("Admin");
-  if (isContributor(user)) role.push("Contributor");
-
-  return {
-    providers,
-    name: user.name,
-    email: user.email,
-    role: role,
-    provider_linked,
-  } as ProfileData;
-}
-
 export default async function Page() {
-  const providers = await getLinkedProviders();
+  const providers = await getProfileData();
 
   if (providers === undefined) {
     return (

@@ -5,24 +5,72 @@ import { SpinnerBlue } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { CourseProps, StoryListDataProps } from "@/app/editor/(course)/types";
+import ContributorList from "@/components/ContributorList";
+import type {
+  DetailedCourseProps,
+  StoryListDataProps,
+} from "@/app/editor/(course)/types";
+
+type StoryState = "draft" | "feedback" | "finished" | "published";
+type StoryFilter = "all" | StoryState;
+
+const STORY_FILTER_ORDER: StoryFilter[] = [
+  "all",
+  "draft",
+  "feedback",
+  "finished",
+  "published",
+];
 
 export default function EditList({
   stories,
   course,
 }: {
   stories: StoryListDataProps[];
-  course: CourseProps;
+  course: DetailedCourseProps;
 }) {
-  if (stories === undefined) stories = [];
+  const [storyList, setStoryList] = useState<StoryListDataProps[]>(
+    stories ?? [],
+  );
+  const [activeFilter, setActiveFilter] = useState<StoryFilter>("all");
+
+  useEffect(() => {
+    setStoryList(stories ?? []);
+  }, [stories]);
+
+  const counts = storyList.reduce<Record<StoryFilter, number>>(
+    (acc, story) => {
+      acc.all += 1;
+      acc[getStoryState(story)] += 1;
+      return acc;
+    },
+    {
+      all: 0,
+      draft: 0,
+      feedback: 0,
+      finished: 0,
+      published: 0,
+    },
+  );
+
+  const filteredStories =
+    activeFilter === "all"
+      ? storyList
+      : storyList.filter((story) => getStoryState(story) === activeFilter);
+
   let set_ends = [];
-  let last_set = 1;
+  // Seed with the first visible story's set so the first rendered row does not
+  // get a divider; only transitions between sets should add the border.
+  let last_set = filteredStories[0]?.set_id;
   let story_published_count = 0;
-  for (let story of stories) {
+  for (let story of storyList) {
+    story_published_count += story.public ? 1 : 0;
+  }
+
+  for (let story of filteredStories) {
     if (story.set_id === last_set) set_ends.push(0);
     else set_ends.push(1);
     last_set = story.set_id;
-    story_published_count += story.public ? 1 : 0;
   }
 
   return (
@@ -77,72 +125,109 @@ export default function EditList({
           .
         </p>
       )}
-      <p className="my-4 font-bold">
-        Active Contributors:{" "}
-        {course.contributors.map((d, i) => (
-          <span key={i}>{d}, </span>
-        ))}{" "}
-        {course.contributors.length === 0 ? "No Contributors" : ""}
-      </p>
-      <p className="my-4">
-        Past Contributors:{" "}
-        {course.contributors_past.map((d, i) => (
-          <span key={i}>{d}, </span>
-        ))}
-      </p>
-      <div className="mb-[100px] w-full min-[1000px]:table min-[1000px]:border-collapse min-[1000px]:align-middle">
-        <div className="hidden min-[1000px]:table-header-group">
-          <div className="min-[1000px]:table-row">
+      <div className="my-6 space-y-4">
+        <div>
+          <h2 className="mb-2 font-bold">Active Contributors</h2>
+          <ContributorList
+            contributors={course.contributors}
+            emptyLabel="No contributors"
+            size="sm"
+          />
+        </div>
+        <div>
+          <h2 className="mb-2 font-bold">Past Contributors</h2>
+          <ContributorList
+            contributors={course.contributors_past}
+            emptyLabel="No past contributors"
+            muted
+            size="sm"
+          />
+        </div>
+      </div>
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
+        {STORY_FILTER_ORDER.map((filter) => {
+          const isActive = activeFilter === filter;
+          return (
+            <button
+              key={filter}
+              type="button"
+              className={
+                "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 " +
+                (isActive
+                  ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
+                  : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
+              }
+              onClick={() => setActiveFilter(filter)}
+              aria-pressed={isActive}
+            >
+              <span>{getFilterLabel(filter)}</span>
+              <span
+                className={
+                  "rounded-full px-2 py-[3px] text-[12px] font-bold " +
+                  (isActive
+                    ? "bg-[color:rgba(255,255,255,0.18)] text-[var(--button-color)]"
+                    : "bg-[var(--body-background)] text-[var(--text-color-dim)]")
+                }
+              >
+                {counts[filter]}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="mb-[100px] w-full">
+        <div className="hidden min-[1000px]:block">
+          <div className="min-[1000px]:grid min-[1000px]:grid-cols-[84px_56px_minmax(0,1fr)_210px_120px_150px_120px_150px] min-[1000px]:items-center">
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="0"
             >
-              Set
+              <span className="my-auto">Set</span>
             </div>
-            <div className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"></div>
+            <div className="self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"></div>
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="1"
             >
-              Name
+              <span className="my-auto">Name</span>
             </div>
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="2"
             >
-              Status
+              <span className="my-auto">Status</span>
             </div>
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="4"
             >
-              Author
+              <span className="my-auto">Author</span>
             </div>
             <div
-              className="js-sort-active bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="js-sort-active flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="5"
             >
-              Created
+              <span className="my-auto">Created</span>
             </div>
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="6"
             >
-              Author
+              <span className="my-auto">Author</span>
             </div>
             <div
-              className="bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)] min-[1000px]:table-cell"
+              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
               data-js-sort-colnum="7"
             >
-              Updated
+              <span className="my-auto">Updated</span>
             </div>
           </div>
         </div>
-        <div className="min-[1000px]:table-row-group">
-          {stories.map((story, i) => (
+        <div>
+          {filteredStories.map((story, i) => (
             <div
               className={
-                "items-center py-[5px] transition-[filter,color,background-color] duration-100 ease-in hover:bg-[var(--body-background)] hover:brightness-90 max-[1000px]:flex max-[1000px]:flex-wrap min-[1000px]:table-row " +
+                "items-center py-[5px] transition-[filter,color,background-color] duration-100 ease-in hover:bg-[var(--body-background)] hover:brightness-90 max-[1000px]:flex max-[1000px]:flex-wrap min-[1000px]:grid min-[1000px]:grid-cols-[84px_56px_minmax(0,1fr)_210px_120px_150px_120px_150px] min-[1000px]:items-center " +
                 (i % 2 === 1 ? "bg-[var(--body-background-faint)] " : "") +
                 (set_ends[i]
                   ? "border-t-[3px] border-[var(--button-background)] "
@@ -150,13 +235,13 @@ export default function EditList({
               }
               key={story.id}
             >
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[60px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[60px] min-[1000px]:px-[5px]">
                 <span>
                   <b>{pad_space(story.set_id)}</b>&nbsp;-&nbsp;
                   {pad_space(story.set_index)}
                 </span>
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[45px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[45px] min-[1000px]:px-[5px]">
                 <img
                   alt={"story title"}
                   src={
@@ -166,24 +251,30 @@ export default function EditList({
                   }
                   width="44px"
                   height={"40px"}
+                  className="block min-w-[44px]"
                 />
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] max-[1000px]:w-[calc(100vw-60px-45px-180px)] max-[500px]:w-[calc(100vw-60px-45px-85px)] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
-                <Link
-                  className="underline underline-offset-2"
-                  href={`/editor/story/${story.id}`}
-                >
-                  {story.name}
-                </Link>
-                {story.todo_count ? (
-                  <img
-                    title={`This story has ${story.todo_count} TODOs.`}
-                    alt="error"
-                    src="/editor/icons/error.svg"
-                  />
-                ) : null}
+              <div className="overflow-hidden pl-[5px] max-[1000px]:w-[calc(100vw-60px-45px-180px)] max-[500px]:w-[calc(100vw-60px-45px-85px)] min-[1000px]:min-w-0 min-[1000px]:px-[5px]">
+                <div className="flex min-w-0 items-center gap-[6px]">
+                  <Link
+                    className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap underline underline-offset-2"
+                    href={`/editor/story/${story.id}`}
+                    title={story.name}
+                  >
+                    {story.name}
+                  </Link>
+                  {story.todo_count ? (
+                    <span
+                      title={`This story has ${story.todo_count} TODOs.`}
+                      aria-label={`${story.todo_count} TODOs`}
+                      className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-amber-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-amber-900"
+                    >
+                      <span aria-hidden="true">📝 {story.todo_count}</span>
+                    </span>
+                  ) : null}
+                </div>
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-right max-[1000px]:w-[180px] max-[500px]:w-[85px] max-[500px]:[&>div]:flex max-[500px]:overflow-hidden min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-right max-[1000px]:w-[180px] max-[500px]:w-[85px] max-[500px]:[&>div]:flex max-[500px]:overflow-hidden min-[1000px]:px-[5px]">
                 <DropDownStatus
                   id={story.id}
                   name={story.name}
@@ -191,26 +282,60 @@ export default function EditList({
                   status={story.status}
                   public={story.public}
                   official={course.official}
+                  onStoryStateChange={(nextStoryState) => {
+                    setStoryList((currentStories) =>
+                      currentStories.map((currentStory) =>
+                        currentStory.id === story.id
+                          ? { ...currentStory, ...nextStoryState }
+                          : currentStory,
+                      ),
+                    );
+                  }}
                 />
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Created:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Created:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:min-w-0 min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">
                 {story.author}
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">
                 {formatDate(story.date)}
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Changed:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Changed:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:min-w-0 min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">
                 {story.author_change}
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:table-cell min-[1000px]:align-middle min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">
                 {formatDate(story.change_date)}
               </div>
             </div>
           ))}
+          {filteredStories.length === 0 ? (
+            <div className="rounded-[12px] border border-dashed border-[var(--header-border)] bg-[var(--body-background-faint)] px-4 py-6 text-center text-[var(--text-color-dim)]">
+              {getEmptyStateMessage(activeFilter)}
+            </div>
+          ) : null}
         </div>
       </div>
     </>
   );
+}
+
+function getStoryState(story: Pick<StoryListDataProps, "status" | "public">) {
+  if (story.public || story.status === "published") return "published";
+  if (story.status === "feedback") return "feedback";
+  if (story.status === "finished") return "finished";
+  return "draft";
+}
+
+function getFilterLabel(filter: StoryFilter) {
+  if (filter === "all") return "All";
+  if (filter === "draft") return "✍️ Draft";
+  if (filter === "feedback") return "🗨️ Feedback";
+  if (filter === "finished") return "✅ Finished";
+  return "📢 Published";
+}
+
+function getEmptyStateMessage(filter: StoryFilter) {
+  if (filter === "all") return "No stories yet.";
+  return "No stories match the selected state.";
 }
 
 function pad_space(x: number) {
@@ -223,8 +348,14 @@ function pad(x: number) {
   return x.toString();
 }
 
-function formatDate(datetime: string | number | Date) {
-  let d = new Date(datetime);
+function formatDate(datetime: string | number | Date | undefined) {
+  if (datetime === undefined || datetime === null || datetime === "") {
+    return "-";
+  }
+  const d = new Date(datetime);
+  if (Number.isNaN(d.getTime())) {
+    return "-";
+  }
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
     d.getHours(),
   )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
@@ -237,6 +368,12 @@ function DropDownStatus(props: {
   status: string;
   public: boolean;
   official: boolean;
+  onStoryStateChange: (
+    nextStoryState: Pick<
+      StoryListDataProps,
+      "status" | "public" | "approvalCount"
+    >,
+  ) => void;
 }) {
   let [loading, setLoading] = useState(0);
   let [status, set_status] = useState(props.status);
@@ -275,14 +412,23 @@ function DropDownStatus(props: {
       });
       if (response?.count !== undefined) {
         const count = response.count;
+        // Approval toggles can promote stories to published, but they do not
+        // automatically unpublish them again. Reverting `public` is an admin-only
+        // action, so we preserve the existing public state unless the mutation
+        // explicitly reports this story as newly published.
+        const nextIsPublic =
+          Array.isArray(response.published) &&
+          response.published.includes(props.id)
+            ? true
+            : isPublic;
         setCount(count);
+        setIsPublic(nextIsPublic);
+        props.onStoryStateChange({
+          status: response.story_status,
+          public: nextIsPublic,
+          approvalCount: count,
+        });
         if (response.published.length) {
-          if (
-            Array.isArray(response.published) &&
-            response.published.includes(props.id)
-          ) {
-            setIsPublic(true);
-          }
           router.refresh();
         }
         set_status(response.story_status);

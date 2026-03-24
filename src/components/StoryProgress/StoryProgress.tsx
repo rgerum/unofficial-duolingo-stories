@@ -17,6 +17,7 @@ import StoryFooter from "../StoryFooter";
 import StoryFinishedScreen from "../StoryFinishedScreen";
 import StoryTitlePage from "../StoryTitlePage";
 import VisuallyHidden from "../VisuallyHidden";
+import { playSoundEffect } from "@/lib/sound-effects";
 import { StoryType } from "@/components/editor/story/syntax_parser_new";
 import {
   StoryElement,
@@ -24,6 +25,7 @@ import {
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import { isTypingTarget } from "@/lib/is-typing-target";
 
 function getComponent(parts: StoryElement[]) {
   const last_part = parts[parts.length - 1];
@@ -155,11 +157,24 @@ function StoryProgress({
   parts_list,
   settings,
   onEnd,
+  onBackToOverview,
+  finishedLabel,
+  nextStoryPreview,
+  showFinishedPrimaryAction,
 }: {
   story?: StoryData;
   parts_list?: StoryElement[][];
   settings: StorySettings;
   onEnd: () => void;
+  onBackToOverview?: () => void | Promise<void>;
+  finishedLabel?: string;
+  nextStoryPreview?: {
+    id: number;
+    title: string;
+    active: string;
+    gilded: string;
+  } | null;
+  showFinishedPrimaryAction?: boolean;
 }) {
   if (story) {
     parts_list = GetParts(story);
@@ -171,10 +186,16 @@ function StoryProgress({
   const [buttonStatus, setButtonStatus] = React.useState(
     storyProgress === -1 ? "continue" : "wait",
   );
+  const previousButtonStatus = React.useRef(buttonStatus);
 
-  if (!story || !parts_list) return null;
-
-  async function next() {
+  React.useEffect(() => {
+    if (previousButtonStatus.current !== buttonStatus) {
+      if (buttonStatus === "right") playSoundEffect("right");
+      if (buttonStatus === "finished") playSoundEffect("done");
+    }
+    previousButtonStatus.current = buttonStatus;
+  }, [buttonStatus]);
+  const next = React.useCallback(async () => {
     if (!parts_list) return;
     if (buttonStatus === "finished") {
       setButtonStatus("...");
@@ -192,7 +213,27 @@ function StoryProgress({
       if (storyProgress === parts_list.length - 1) setButtonStatus("finished");
       else setButtonStatus("wait");
     }
-  }
+  }, [buttonStatus, onEnd, partProgress, parts_list, storyProgress]);
+
+  React.useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (
+        event.key !== " " ||
+        event.repeat ||
+        isTypingTarget(event.target, { includeButtons: true })
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      void next();
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [next]);
+
+  if (!story || !parts_list) return null;
 
   function getIndex(parts: StoryElement[]) {
     return parts[0].trackingProperties.line_index || 0;
@@ -229,6 +270,7 @@ function StoryProgress({
         {!settings.show_all && (
           <HeaderProgress
             course_short={story.course_short}
+            set_id={story.set_id}
             progress={storyProgress}
             length={storyProgress === -1 ? undefined : parts_list.length}
           />
@@ -280,7 +322,15 @@ function StoryProgress({
           )}
         </div>
         {!settings.show_all && storyProgress !== -1 && (
-          <StoryFooter buttonStatus={buttonStatus} onClick={next} />
+          <StoryFooter
+            buttonStatus={buttonStatus}
+            onClick={next}
+            onBackToOverview={onBackToOverview}
+            finishedLabel={finishedLabel}
+            nextStoryPreview={nextStoryPreview}
+            learningLanguageName={story.learning_language_long}
+            showFinishedPrimaryAction={showFinishedPrimaryAction}
+          />
         )}
       </div>
     </>
@@ -289,20 +339,21 @@ function StoryProgress({
 
 function HeaderProgress({
   course_short,
+  set_id,
   progress,
   length,
 }: {
   course_short: string;
+  set_id: number;
   progress: number;
   length?: number;
 }) {
+  const courseHref =
+    set_id > 0 ? `/${course_short}#${set_id}` : `/${course_short}`;
+
   return (
     <div className={styles.header}>
-      <Link
-        className={styles.header_close}
-        data-cy="quit"
-        href={`/${course_short}`}
-      >
+      <Link className={styles.header_close} data-cy="quit" href={courseHref}>
         <VisuallyHidden>Back to Course Page</VisuallyHidden>
       </Link>
       {length !== undefined && (

@@ -8,6 +8,7 @@ import Header from "../header";
 import StoryButton from "./story_button";
 import get_localisation_func from "@/lib/get_localisation_func";
 import Switch from "@/components/layout/switch";
+import ContributorList from "@/components/ContributorList";
 import {
   createCustomStoryPlaylist,
   deleteCustomStoryPlaylist,
@@ -25,14 +26,20 @@ function SetTitle({ children }: { children: React.ReactNode }) {
 }
 
 function SetGrid({
+  setId,
   setName,
   children,
 }: {
+  setId: number;
   setName: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <ol className="m-0 mx-auto grid max-w-[720px] list-none grid-cols-[repeat(auto-fill,clamp(140px,50%,180px))] justify-center justify-items-center p-0">
+    <ol
+      id={`${setId}`}
+      style={{ scrollMarginTop: "3.5rem" }}
+      className="m-0 mx-auto grid max-w-[720px] list-none grid-cols-[repeat(auto-fill,clamp(140px,50%,180px))] justify-center justify-items-center p-0"
+    >
       <SetTitle>{setName}</SetTitle>
       {children}
     </ol>
@@ -45,6 +52,67 @@ function About({ about }: { about: string }) {
     <div className="mx-auto max-w-[720px]">
       <SetTitle>About</SetTitle>
       <p>{about}</p>
+    </div>
+  );
+}
+
+function Contributors({
+  contributors,
+  contributorsPast,
+}: {
+  contributors: Array<{
+    legacyUserId: number;
+    name: string;
+    image: string | null;
+    discordLinked: boolean;
+  }>;
+  contributorsPast: Array<{
+    legacyUserId: number;
+    name: string;
+    image: string | null;
+    discordLinked: boolean;
+  }>;
+}) {
+  const allContributors = [...contributors, ...contributorsPast].filter(
+    (contributor, index, list) =>
+      index ===
+      list.findIndex(
+        (candidate) =>
+          candidate.legacyUserId === contributor.legacyUserId &&
+          candidate.name === contributor.name,
+      ),
+  );
+
+  if (allContributors.length === 0) return null;
+
+  return (
+    <div className="mx-auto max-w-[720px]">
+      <SetTitle>Contributors</SetTitle>
+      <div className="mt-4">
+        <ContributorList contributors={allContributors} size="md" />
+      </div>
+    </div>
+  );
+}
+
+function NoNativeWarning() {
+  return (
+    <div className="mx-auto mt-4 mb-4 max-w-[720px] rounded-xl border border-yellow-700/50 bg-yellow-50 px-4 py-3 text-yellow-900">
+      <p className="font-bold">Course quality note</p>
+      <p className="mt-1">
+        This course does not currently have a native speaker translator or
+        proofreader, so some stories may not be 100% correct. If you are a
+        native speaker and want to help improve this course, please join our{" "}
+        <a
+          className="underline underline-offset-2"
+          href="https://discord.gg/4NGVScARR3"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Discord server
+        </a>
+        .
+      </p>
     </div>
   );
 }
@@ -137,7 +205,6 @@ export default function CoursePageClient({
       playlists.find((playlist) => playlist.id === selectedPlaylistId) ?? null,
     [playlists, selectedPlaylistId],
   );
-
   if (!course) {
     return (
       <Header>
@@ -145,6 +212,9 @@ export default function CoursePageClient({
       </Header>
     );
   }
+  const rawTags = course.tags ?? [];
+  const normalizedTags = rawTags.map((tag) => tag.trim().toLowerCase());
+  const showNoNativeWarning = normalizedTags.includes("no-native");
 
   return (
     <>
@@ -169,6 +239,7 @@ export default function CoursePageClient({
         </p>
       </Header>
       <div>
+        {showNoNativeWarning ? <NoNativeWarning /> : null}
         <div
           className="mx-auto mb-6 flex w-full max-w-[720px] cursor-pointer items-center justify-between gap-3 rounded-xl border border-[var(--overview-hr)] px-4 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--overview-hr)]"
           role="button"
@@ -303,9 +374,14 @@ export default function CoursePageClient({
           </div>
         ) : null}
         {course.about ? <About about={course.about} /> : null}
+        <Contributors
+          contributors={course.contributors}
+          contributorsPast={course.contributors_past}
+        />
         {storiesBySet.map((set) => (
           <SetGrid
             key={set.setId}
+            setId={set.setId}
             setName={
               <span className="inline-flex items-center gap-3">
                 <span>

@@ -1,4 +1,3 @@
-import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import type { MutationCtx } from "./_generated/server";
@@ -96,16 +95,6 @@ export const setDefaultText = mutation({
       lastOperationKey: operationKey,
     });
 
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorLanguageDefaultText,
-      {
-        legacyLanguageId: args.legacyLanguageId,
-        default_text: args.default_text,
-        operationKey,
-      },
-    );
-
     return toLegacyLanguageResponse({
       ...language,
       default_text: args.default_text,
@@ -148,16 +137,6 @@ export const setTtsReplace = mutation({
       mirrorUpdatedAt: Date.now(),
       lastOperationKey: operationKey,
     });
-
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorLanguageTtsReplace,
-      {
-        legacyLanguageId: args.legacyLanguageId,
-        tts_replace: args.tts_replace,
-        operationKey,
-      },
-    );
 
     return toLegacyLanguageResponse({
       ...language,
@@ -223,18 +202,6 @@ export const setAvatarSpeaker = mutation({
         lastOperationKey: operationKey,
       });
     }
-
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAvatarMappingUpsert,
-      {
-        legacyLanguageId: args.legacyLanguageId,
-        legacyAvatarId: args.legacyAvatarId,
-        name: args.name,
-        speaker: args.speaker,
-        operationKey,
-      },
-    );
 
     return {
       id: existing?.legacyId ?? null,
@@ -307,19 +274,6 @@ export const upsertSpeakerFromVoice = mutation({
         lastOperationKey: operationKey,
       });
     }
-
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorSpeakerUpsert,
-      {
-        legacyLanguageId: language.legacyId,
-        speaker: args.speaker,
-        gender: args.gender,
-        type: args.type,
-        service: args.service,
-        operationKey,
-      },
-    );
 
     return {
       legacyLanguageId: language.legacyId,

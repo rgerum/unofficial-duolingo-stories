@@ -1,6 +1,13 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+const courseContributorDetailsValidator = v.object({
+  legacyUserId: v.number(),
+  name: v.string(),
+  image: v.union(v.string(), v.null()),
+  discordLinked: v.boolean(),
+});
+
 export default defineSchema({
   languages: defineTable({
     legacyId: v.number(),
@@ -95,6 +102,10 @@ export default defineSchema({
     from_language_name: v.optional(v.string()),
     contributors: v.optional(v.array(v.string())),
     contributors_past: v.optional(v.array(v.string())),
+    contributorDetails: v.optional(v.array(courseContributorDetailsValidator)),
+    contributorDetailsPast: v.optional(
+      v.array(courseContributorDetailsValidator),
+    ),
     todo_count: v.optional(v.number()),
     mirrorUpdatedAt: v.optional(v.number()),
     lastOperationKey: v.optional(v.string()),
@@ -113,6 +124,7 @@ export default defineSchema({
     lastOperationKey: v.optional(v.string()),
   })
     .index("by_id_value", ["legacyId"])
+    .index("by_language_id", ["languageId"])
     .index("by_avatar_id_and_language_id", ["avatarId", "languageId"]),
 
   stories: defineTable({
@@ -175,6 +187,27 @@ export default defineSchema({
     .index("by_user_and_story", ["legacyUserId", "storyId"])
     .index("by_user_time", ["legacyUserId", "time"]),
 
+  story_done_state: defineTable({
+    storyId: v.id("stories"),
+    courseId: v.id("courses"),
+    legacyStoryId: v.number(),
+    legacyCourseId: v.number(),
+    legacyUserId: v.number(),
+    lastDoneAt: v.number(),
+  })
+    .index("by_user_and_story", ["legacyUserId", "storyId"])
+    .index("by_user_and_course", ["legacyUserId", "courseId"])
+    .index("by_user_and_last_done_at", ["legacyUserId", "lastDoneAt"]),
+
+  course_activity: defineTable({
+    courseId: v.id("courses"),
+    legacyCourseId: v.number(),
+    legacyUserId: v.number(),
+    lastDoneAt: v.number(),
+  })
+    .index("by_user_and_course", ["legacyUserId", "courseId"])
+    .index("by_user_and_last_done_at", ["legacyUserId", "lastDoneAt"]),
+
   story_approval: defineTable({
     storyId: v.id("stories"),
     legacyUserId: v.optional(v.number()),
@@ -182,7 +215,27 @@ export default defineSchema({
     legacyId: v.optional(v.number()),
   })
     .index("by_story", ["storyId"])
+    .index("by_date", ["date"])
     .index("by_user", ["legacyUserId"])
     .index("by_story_and_user", ["storyId", "legacyUserId"])
     .index("by_legacy_id", ["legacyId"]),
+
+  discord_stories_role_sync: defineTable({
+    legacyUserId: v.number(),
+    discordAccountId: v.union(v.string(), v.null()),
+    eligibleStoriesCount: v.union(v.number(), v.null()),
+    assignedStoriesCount: v.union(v.number(), v.null()),
+    syncStatus: v.union(
+      v.literal("assigned"),
+      v.literal("up_to_date"),
+      v.literal("no_milestone"),
+      v.literal("not_linked"),
+      v.literal("member_not_found"),
+      v.literal("error"),
+    ),
+    lastSyncedAt: v.number(),
+    lastError: v.union(v.string(), v.null()),
+  })
+    .index("by_legacy_user_id", ["legacyUserId"])
+    .index("by_sync_status", ["syncStatus"]),
 });

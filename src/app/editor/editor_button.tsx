@@ -10,6 +10,7 @@ export default function EditorButton({
   text,
   href,
   checked,
+  disabled,
 }: {
   style?: React.CSSProperties;
   onClick?: () => void;
@@ -19,9 +20,12 @@ export default function EditorButton({
   text?: string;
   href?: string;
   checked?: boolean;
+  disabled?: boolean;
 }) {
   const baseClassName =
     "flex cursor-pointer items-center text-[var(--text-color-dim)] no-underline transition-all hover:text-[var(--text-color)] hover:brightness-[0.7] hover:contrast-[2.5] max-[800px]:px-[10px] max-[800px]:py-[14px] max-[1120px]:w-auto max-[1120px]:flex-col px-[34px] py-[14px]";
+  const disabledClassName =
+    "cursor-default opacity-60 hover:text-[var(--text-color-dim)] hover:brightness-100 hover:contrast-100";
   const iconWrapClassName =
     "flex items-center max-[1120px]:h-8 max-[1120px]:p-0";
   const iconClassName = "w-9 max-[1120px]:mr-0";
@@ -32,8 +36,9 @@ export default function EditorButton({
     if (onClick === undefined) throw new Error();
     return (
       <div
-        className={baseClassName}
+        className={baseClassName + (disabled ? ` ${disabledClassName}` : "")}
         onClick={(e) => {
+          if (disabled) return;
           e.preventDefault();
           onClick();
         }}
@@ -53,6 +58,25 @@ export default function EditorButton({
     );
   }
   if (href) {
+    if (disabled) {
+      return (
+        <div
+          style={style}
+          id={id}
+          className={baseClassName + " " + disabledClassName}
+          aria-disabled="true"
+        >
+          <div className={iconWrapClassName}>
+            <img
+              className={iconClassName}
+              alt={alt}
+              src={`/editor/icons/${img}`}
+            />
+          </div>
+          <span className={textClassName}>{text}</span>
+        </div>
+      );
+    }
     return (
       <Link
         href={href}
@@ -73,7 +97,13 @@ export default function EditorButton({
     );
   }
   return (
-    <div style={style} id={id} className={baseClassName} onClick={onClick}>
+    <div
+      style={style}
+      id={id}
+      className={baseClassName + (disabled ? ` ${disabledClassName}` : "")}
+      onClick={disabled ? undefined : onClick}
+      aria-disabled={disabled ? "true" : undefined}
+    >
       <div className={iconWrapClassName}>
         <img className={iconClassName} alt={alt} src={`/editor/icons/${img}`} />
       </div>

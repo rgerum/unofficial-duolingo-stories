@@ -7,7 +7,7 @@ import StoryTextLineSimple from "../StoryTextLineSimple";
 import EditorSSMLDisplay from "../EditorSSMLDisplay";
 import { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
-import type { EditorStateType } from "@/app/editor/story/[story]/editor";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import {
   getEditorHandlers,
   type EditorProps,
@@ -71,9 +71,11 @@ function StoryTextLine({
         data-lineno={element?.editor?.block_start_no}
       >
         <span className={styles.title}>
-          <audio ref={ref}>
-            <source src={url} type="audio/mp3" />
-          </audio>
+          {url && (
+            <audio ref={ref}>
+              <source src={url} type="audio/mp3" />
+            </audio>
+          )}
           {!hideAudioButton && <PlayAudio onClick={playAudio} />}
           <StoryLineHints
             audioRange={effectiveAudioRange}
@@ -97,9 +99,11 @@ function StoryTextLine({
       >
         <img className={styles.head} src={element.line.avatarUrl} alt="head" />
         <span className={styles.bubble}>
-          <audio ref={ref}>
-            <source src={url} type="audio/mp3" />
-          </audio>
+          {url && (
+            <audio ref={ref}>
+              <source src={url} type="audio/mp3" />
+            </audio>
+          )}
           {!hideAudioButton && <PlayAudio onClick={playAudio} />}
           <StoryLineHints
             audioRange={effectiveAudioRange}
@@ -111,7 +115,6 @@ function StoryTextLine({
           {editorState && element.line.content.audio && (
             <EditorSSMLDisplay
               ssml={element.line.content.audio.ssml}
-              audio={element.line.content.audio}
               element={element}
               editor={editorState}
             />
@@ -128,9 +131,11 @@ function StoryTextLine({
         data-lineno={element?.editor?.block_start_no}
       >
         <span>
-          <audio ref={ref}>
-            <source src={url} type="audio/mp3" />
-          </audio>
+          {url && (
+            <audio ref={ref}>
+              <source src={url} type="audio/mp3" />
+            </audio>
+          )}
           {!hideAudioButton && <PlayAudio onClick={playAudio} />}
           <StoryLineHints
             audioRange={effectiveAudioRange}
@@ -142,7 +147,6 @@ function StoryTextLine({
           {editorState && element.line.content.audio && (
             <EditorSSMLDisplay
               ssml={element.line.content.audio.ssml}
-              audio={element.line.content.audio}
               element={element}
               editor={editorState}
             />

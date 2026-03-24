@@ -5,6 +5,7 @@ import {
   requireContributorOrAdmin,
   requireSessionLegacyUserId,
 } from "./lib/authorization";
+import { recomputeCoursePublishedCount } from "./lib/courseCounts";
 
 export const setStory = mutation({
   args: {
@@ -82,6 +83,9 @@ export const setStory = mutation({
     const changeDateMillis = Date.parse(args.change_date);
     const operationKey =
       args.operationKey ?? `story:${story.legacyId}:set_story:${Date.now()}`;
+    const previousCourseId = story.courseId;
+    const movedPublishedStory =
+      previousCourseId !== course._id && story.public && !story.deleted;
 
     await ctx.db.patch(story._id, {
       duo_id: args.duo_id,
@@ -126,22 +130,10 @@ export const setStory = mutation({
       0,
     );
     await ctx.db.patch(course._id, { todo_count: courseTodoCount });
-
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorStorySet, {
-      storyId: story.legacyId,
-      duo_id: args.duo_id,
-      name: args.name,
-      image: args.image,
-      change_date: args.change_date,
-      author_change: authorChangeLegacyUserId,
-      set_id: args.set_id,
-      set_index: args.set_index,
-      course_id: args.legacyCourseId,
-      text: args.text,
-      json: args.json,
-      todo_count: args.todo_count,
-      operationKey,
-    });
+    if (movedPublishedStory) {
+      await recomputeCoursePublishedCount(ctx, previousCourseId);
+      await recomputeCoursePublishedCount(ctx, course._id);
+    }
 
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStorySaved, {
       operationKey,
@@ -207,14 +199,12 @@ export const deleteStory = mutation({
       deleted: true,
       public: false,
     });
+    if (story.public) {
+      await recomputeCoursePublishedCount(ctx, story.courseId);
+    }
 
     const operationKey =
       args.operationKey ?? `story:${story.legacyId}:delete:${Date.now()}`;
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorStoryDelete, {
-      storyId: story.legacyId,
-      operationKey,
-    });
-
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStoryDeleted, {
       operationKey,
       storyId: story.legacyId,
@@ -285,6 +275,8 @@ export const importStory = mutation({
       .take(1);
     const newLegacyId = Math.max(1, Number(last[0]?.legacyId ?? 0) + 1);
 
+    const now = Date.now();
+
     const newStoryId = await ctx.db.insert("stories", {
       legacyId: newLegacyId,
       duo_id: sourceStory.duo_id,
@@ -292,6 +284,9 @@ export const importStory = mutation({
       set_id: sourceStory.set_id,
       set_index: sourceStory.set_index,
       authorId: authorLegacyUserId,
+      authorChangeId: authorLegacyUserId,
+      date: now,
+      change_date: now,
       public: false,
       imageId: sourceStory.imageId,
       courseId: targetCourse._id,
@@ -308,27 +303,9 @@ export const importStory = mutation({
       lastUpdated: Date.now(),
     });
 
-    const imageLegacyId = sourceStory.imageId
-      ? ((await ctx.db.get(sourceStory.imageId))?.legacyId ?? "")
-      : "";
-
     const operationKey =
       args.operationKey ??
       `story:${newLegacyId}:import:${args.targetLegacyCourseId}:${Date.now()}`;
-
-    await ctx.scheduler.runAfter(0, internal.postgresMirror.mirrorStoryImport, {
-      storyId: newLegacyId,
-      duo_id: sourceStory.duo_id ?? "",
-      name: sourceStory.name,
-      image: imageLegacyId,
-      set_id: sourceStory.set_id ?? 0,
-      set_index: sourceStory.set_index ?? 0,
-      author: authorLegacyUserId,
-      course_id: args.targetLegacyCourseId,
-      text: sourceContent.text,
-      json: sourceContent.json,
-      operationKey,
-    });
 
     await ctx.scheduler.runAfter(
       0,

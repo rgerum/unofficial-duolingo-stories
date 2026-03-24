@@ -1,43 +1,36 @@
 "use client";
 import Link from "next/link";
-import Flag from "@/components/ui/flag";
-import Dropdown from "@/components/ui/dropdown";
+import LanguageFlag from "@/components/ui/language-flag";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { CourseData } from "@/app/(stories)/(main)/get_course_data";
 import { api } from "@convex/_generated/api";
 import { useQuery } from "convex/react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/shadcn";
 
 function LanguageButtonSmall({ course }: { course?: CourseData }) {
   /**
    * A button in the language drop down menu (flag + name)
    */
-  const language = useQuery(
-    api.localization.getLanguageFlagById,
-    course ? { languageId: course.learningLanguageId } : "skip",
-  );
-
   if (!course) return null;
 
   return (
-    <Link
-      className="flex h-[42px] items-center overflow-hidden whitespace-nowrap border-b border-[var(--header-border)] px-[10px] py-[5px] text-ellipsis no-underline hover:bg-[var(--language-selector-hover-background)]"
-      href={`/${course.short}`}
-      data-cy="button_lang_dropdown"
-    >
-      <Flag
-        iso={language?.short}
-        width={40}
-        flag_file={language?.flag_file ?? undefined}
-        flag={
-          typeof language?.flag === "number"
-            ? language.flag
-            : Number.isFinite(Number(language?.flag))
-              ? Number(language?.flag)
-              : undefined
-        }
-      />
-      <span className="pl-[10px] text-[18px] font-bold">{course.name}</span>
-    </Link>
+    <DropdownMenuItem asChild>
+      <Link
+        className="flex h-[42px] items-center overflow-hidden whitespace-nowrap px-[10px] py-[5px] no-underline"
+        href={`/${course.short}`}
+        data-cy="button_lang_dropdown"
+      >
+        <LanguageFlag languageId={course.learningLanguageId} width={40} />
+        <span className="min-w-0 pl-[10px] overflow-hidden text-ellipsis text-[18px] font-bold whitespace-nowrap">
+          {course.name}
+        </span>
+      </Link>
+    </DropdownMenuItem>
   );
 }
 
@@ -63,33 +56,50 @@ export default function CourseDropdown() {
 
   const segment = useSelectedLayoutSegment();
   let course = get_course_by_short(segment || "");
-  const activeCourseLanguage = useQuery(
-    api.localization.getLanguageFlagById,
-    course ? { languageId: course.learningLanguageId } : "skip",
-  );
 
   if (!course_data_active || course_data_active.length === 0) return null;
 
   return (
-    <Dropdown>
-      <Flag
-        width={40}
-        iso={activeCourseLanguage?.short}
-        flag_file={activeCourseLanguage?.flag_file ?? undefined}
-        flag={
-          typeof activeCourseLanguage?.flag === "number"
-            ? activeCourseLanguage.flag
-            : Number.isFinite(Number(activeCourseLanguage?.flag))
-              ? Number(activeCourseLanguage?.flag)
-              : undefined
-        }
-        className="mx-4"
-      />
-      <nav className="!left-[-120px] !w-[300px] max-h-[calc(100vh-55px)]">
-        {course_data_active.map((id) => (
-          <LanguageButtonSmall key={id} course={get_course_by_id(id)} />
-        ))}
-      </nav>
-    </Dropdown>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="mx-4 flex items-center justify-center rounded-[14px] p-0 outline-none transition hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[var(--button-background)] focus-visible:ring-offset-2"
+          aria-label="Open language menu"
+        >
+          <LanguageFlag languageId={course?.learningLanguageId} width={40} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="center"
+        sideOffset={10}
+        className="w-[240px] overflow-visible"
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-[12px] left-1/2 h-[13px] w-[28px] -translate-x-1/2 overflow-hidden"
+        >
+          <svg
+            viewBox="0 0 28 13"
+            className="absolute inset-0 h-[13px] w-[28px]"
+            aria-hidden="true"
+          >
+            <path
+              d="M14 0.5 Q15.5 0.5 16.5 1.7 L28 13 H0 L11.5 1.7 Q12.5 0.5 14 0.5 Z"
+              fill="var(--header-border)"
+            />
+            <path
+              d="M14 1.5 Q15 1.5 15.8 2.4 L26 13 H2 L12.2 2.4 Q13 1.5 14 1.5 Z"
+              fill="var(--body-background)"
+            />
+          </svg>
+        </div>
+        <nav className="max-h-[calc(100vh-55px)] overflow-y-auto">
+          {course_data_active.map((id) => (
+            <LanguageButtonSmall key={id} course={get_course_by_id(id)} />
+          ))}
+        </nav>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

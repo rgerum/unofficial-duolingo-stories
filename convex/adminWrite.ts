@@ -1,4 +1,3 @@
-import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
@@ -39,9 +38,28 @@ async function getNextLegacyId(
   ctx: MutationCtx,
   table: "languages" | "courses",
 ) {
-  const page = await ctx.db.query(table).order("desc").take(1);
-  const current = Number(page[0]?.legacyId ?? 0);
+  const rows = await ctx.db.query(table).collect();
+  const current = rows.reduce((max, row) => {
+    const legacyId = Number(row.legacyId ?? 0);
+    return legacyId > max ? legacyId : max;
+  }, 0);
   return Math.max(1, current + 1);
+}
+
+async function getNextUnusedLegacyId(
+  ctx: MutationCtx,
+  table: "languages" | "courses",
+) {
+  let candidate = await getNextLegacyId(ctx, table);
+  for (let attempts = 0; attempts < 1000; attempts += 1) {
+    const existing = await ctx.db
+      .query(table)
+      .withIndex("by_id_value", (q) => q.eq("legacyId", candidate))
+      .unique();
+    if (!existing) return candidate;
+    candidate += 1;
+  }
+  throw new Error(`Failed to allocate unique ${table} legacy ID`);
 }
 
 async function getLanguageByLegacyId(ctx: MutationCtx, legacyId: number) {
@@ -96,21 +114,6 @@ export const updateAdminLanguage = mutation({
       lastOperationKey: operationKey,
     });
 
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAdminLanguageUpdate,
-      {
-        id: args.id,
-        name: args.name,
-        short: args.short,
-        flag: args.flag,
-        flag_file: args.flag_file,
-        speaker: args.speaker,
-        rtl: args.rtl,
-        operationKey,
-      },
-    );
-
     return toLegacyLanguageResponse({
       ...language,
       name: args.name,
@@ -147,7 +150,7 @@ export const createAdminLanguage = mutation({
   }),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    const legacyId = await getNextLegacyId(ctx, "languages");
+    const legacyId = await getNextUnusedLegacyId(ctx, "languages");
     const operationKey =
       args.operationKey ?? `language:${legacyId}:admin_create:${Date.now()}`;
 
@@ -165,24 +168,6 @@ export const createAdminLanguage = mutation({
       mirrorUpdatedAt: Date.now(),
       lastOperationKey: operationKey,
     });
-
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAdminLanguageInsert,
-      {
-        id: legacyId,
-        name: args.name,
-        short: args.short,
-        flag: args.flag,
-        flag_file: args.flag_file,
-        speaker: args.speaker,
-        default_text: "",
-        tts_replace: "",
-        public: false,
-        rtl: args.rtl,
-        operationKey,
-      },
-    );
 
     return {
       id: legacyId,
@@ -278,25 +263,6 @@ export const updateAdminCourse = mutation({
 
     await ctx.db.patch(course._id, patchData);
 
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAdminCourseUpdate,
-      {
-        id: args.id,
-        learning_language: args.learning_language,
-        learning_language_name: learningLanguage.name,
-        from_language: args.from_language,
-        from_language_name: fromLanguage.name,
-        short,
-        public: nextPublic,
-        name: nextName,
-        conlang: nextConlang,
-        tags: nextTags,
-        about: nextAbout,
-        operationKey,
-      },
-    );
-
     return {
       id: args.id,
       learning_language: args.learning_language,
@@ -346,7 +312,7 @@ export const createAdminCourse = mutation({
       throw new Error("Course languages not found");
     }
 
-    const legacyId = await getNextLegacyId(ctx, "courses");
+    const legacyId = await getNextUnusedLegacyId(ctx, "courses");
     const short = `${learningLanguage.short}-${fromLanguage.short}`;
     const nextPublic = args.public ?? false;
     const nextOfficial = args.official ?? 0;
@@ -373,26 +339,6 @@ export const createAdminCourse = mutation({
       mirrorUpdatedAt: Date.now(),
       lastOperationKey: operationKey,
     });
-
-    await ctx.scheduler.runAfter(
-      0,
-      internal.postgresMirror.mirrorAdminCourseInsert,
-      {
-        id: legacyId,
-        learning_language: args.learning_language,
-        learning_language_name: learningLanguage.name,
-        from_language: args.from_language,
-        from_language_name: fromLanguage.name,
-        short,
-        public: nextPublic,
-        official: nextOfficial,
-        name: nextName,
-        conlang: nextConlang,
-        tags: nextTags,
-        about: nextAbout,
-        operationKey,
-      },
-    );
 
     return {
       id: legacyId,

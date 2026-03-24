@@ -4,6 +4,7 @@ import { v } from "convex/values";
 const storyReadResultValidator = v.union(
   v.object({
     id: v.number(),
+    set_id: v.number(),
     course_id: v.number(),
     from_language: v.string(),
     from_language_id: v.number(),
@@ -34,6 +35,20 @@ const storyMetaResultValidator = v.union(
   v.null(),
 );
 
+const storyPreviewResultValidator = v.union(
+  v.object({
+    id: v.number(),
+    title: v.string(),
+    active: v.string(),
+    gilded: v.string(),
+  }),
+  v.null(),
+);
+
+function nonEmptyString(value: unknown) {
+  return typeof value === "string" && value.trim().length > 0 ? value : "";
+}
+
 export const getStoryByLegacyId = query({
   args: {
     storyId: v.number(),
@@ -56,8 +71,11 @@ export const getStoryByLegacyId = query({
     const course = await ctx.db.get(story.courseId);
     if (!course) return null;
 
-    const fromLanguage = await ctx.db.get(course.fromLanguageId);
-    const learningLanguage = await ctx.db.get(course.learningLanguageId);
+    const [fromLanguage, learningLanguage, image] = await Promise.all([
+      ctx.db.get(course.fromLanguageId),
+      ctx.db.get(course.learningLanguageId),
+      story.imageId ? ctx.db.get(story.imageId) : Promise.resolve(null),
+    ]);
     if (!fromLanguage || !learningLanguage) return null;
 
     let parsedJson = storyContent.json;
@@ -73,9 +91,16 @@ export const getStoryByLegacyId = query({
       ? parsedJson.elements
       : [];
     const illustrations = parsedJson?.illustrations ?? {};
+    const active =
+      nonEmptyString(illustrations.active) || (image?.active ?? "");
+    const gilded =
+      nonEmptyString(illustrations.gilded) || (image?.gilded ?? "");
+    const locked =
+      nonEmptyString(illustrations.locked) || (image?.locked ?? "");
 
     return {
       id: story.legacyId,
+      set_id: story.set_id ?? 0,
       course_id: course.legacyId,
       from_language: fromLanguage.short,
       from_language_id: fromLanguage.legacyId,
@@ -88,9 +113,9 @@ export const getStoryByLegacyId = query({
       course_short: `${learningLanguage.short}-${fromLanguage.short}`,
       elements,
       illustrations: {
-        gilded: String(illustrations.gilded ?? ""),
-        active: String(illustrations.active ?? ""),
-        locked: String(illustrations.locked ?? ""),
+        gilded,
+        active,
+        locked,
       },
     };
   },
@@ -124,6 +149,50 @@ export const getStoryMetaByLegacyId = query({
       image: image?.legacyId ?? "",
       from_language_long: fromLanguage.name,
       learning_language_long: learningLanguage.name,
+    };
+  },
+});
+
+export const getStoryPreviewByLegacyId = query({
+  args: {
+    storyId: v.number(),
+  },
+  returns: storyPreviewResultValidator,
+  handler: async (ctx, args) => {
+    const story = await ctx.db
+      .query("stories")
+      .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.storyId))
+      .unique();
+    if (!story || story.deleted || typeof story.legacyId !== "number") {
+      return null;
+    }
+
+    const storyContent = await ctx.db
+      .query("story_content")
+      .withIndex("by_story", (q) => q.eq("storyId", story._id))
+      .unique();
+    const image = story.imageId ? await ctx.db.get(story.imageId) : null;
+
+    let parsedJson = storyContent?.json;
+    if (typeof parsedJson === "string") {
+      try {
+        parsedJson = JSON.parse(parsedJson);
+      } catch {
+        parsedJson = null;
+      }
+    }
+
+    const illustrations = parsedJson?.illustrations ?? {};
+    const active =
+      nonEmptyString(illustrations.active) || (image?.active ?? "");
+    const gilded =
+      nonEmptyString(illustrations.gilded) || (image?.gilded ?? active);
+
+    return {
+      id: story.legacyId,
+      title: story.name,
+      active,
+      gilded,
     };
   },
 });

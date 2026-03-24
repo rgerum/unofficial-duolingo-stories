@@ -15,12 +15,21 @@ import type * as audioRead from "../audioRead.js";
 import type * as auth from "../auth.js";
 import type * as authFunctions from "../authFunctions.js";
 import type * as authMigration from "../authMigration.js";
+import type * as courseContributorBackfill from "../courseContributorBackfill.js";
+import type * as courseWrite from "../courseWrite.js";
+import type * as discordAvatarSync from "../discordAvatarSync.js";
+import type * as discordBot from "../discordBot.js";
+import type * as discordData from "../discordData.js";
+import type * as discordRoleSync from "../discordRoleSync.js";
 import type * as editorRead from "../editorRead.js";
 import type * as editorSideEffects from "../editorSideEffects.js";
 import type * as http from "../http.js";
 import type * as landing from "../landing.js";
 import type * as languageWrite from "../languageWrite.js";
 import type * as lib_authorization from "../lib/authorization.js";
+import type * as lib_courseContributors from "../lib/courseContributors.js";
+import type * as lib_courseCounts from "../lib/courseCounts.js";
+import type * as lib_discordAvatarSync from "../lib/discordAvatarSync.js";
 import type * as lib_phpbb from "../lib/phpbb.js";
 import type * as localization from "../localization.js";
 import type * as localizationWrite from "../localizationWrite.js";
@@ -47,12 +56,21 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   authFunctions: typeof authFunctions;
   authMigration: typeof authMigration;
+  courseContributorBackfill: typeof courseContributorBackfill;
+  courseWrite: typeof courseWrite;
+  discordAvatarSync: typeof discordAvatarSync;
+  discordBot: typeof discordBot;
+  discordData: typeof discordData;
+  discordRoleSync: typeof discordRoleSync;
   editorRead: typeof editorRead;
   editorSideEffects: typeof editorSideEffects;
   http: typeof http;
   landing: typeof landing;
   languageWrite: typeof languageWrite;
   "lib/authorization": typeof lib_authorization;
+  "lib/courseContributors": typeof lib_courseContributors;
+  "lib/courseCounts": typeof lib_courseCounts;
+  "lib/discordAvatarSync": typeof lib_discordAvatarSync;
   "lib/phpbb": typeof lib_phpbb;
   localization: typeof localization;
   localizationWrite: typeof localizationWrite;
@@ -568,6 +586,7 @@ export declare const components: {
             maximumRowsRead?: number;
             numItems: number;
           };
+          select?: Array<string>;
           sortBy?: { direction: "asc" | "desc"; field: string };
           where?: Array<{
             connector?: "AND" | "OR";
@@ -629,6 +648,48 @@ export declare const components: {
         any
       >;
       get: FunctionReference<"query", "internal", { id: string }, any>;
+      searchUsersAll: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any
+      >;
+      searchUsersByEmailPrefix: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          prefix: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any
+      >;
+      searchUsersById: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          id: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any
+      >;
+      searchUsersByUsernamePrefix: FunctionReference<
+        "query",
+        "internal",
+        {
+          activatedFilter: "all" | "yes" | "no";
+          limit: number;
+          prefix: string;
+          roleFilter: "all" | "user" | "contributor" | "admin";
+        },
+        any
+      >;
       updateMany: FunctionReference<
         "mutation",
         "internal",

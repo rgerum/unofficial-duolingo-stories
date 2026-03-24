@@ -1,6 +1,7 @@
 import { query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
+import { courseContributorValidator } from "./lib/courseContributors";
 
 const courseListItemValidator = v.object({
   id: v.number(),
@@ -8,6 +9,7 @@ const courseListItemValidator = v.object({
   name: v.string(),
   count: v.number(),
   about: v.string(),
+  tags: v.array(v.string()),
   from_language: v.number(),
   fromLanguageId: v.id("languages"),
   from_language_name: v.string(),
@@ -116,6 +118,7 @@ export const getPublicCourseList = query({
               : learningLanguageName,
           count: course.count ?? 0,
           about: course.about ?? "",
+          tags: course.tags ?? [],
           from_language:
             legacyLanguageIdByConvexId.get(course.fromLanguageId) ?? 0,
           fromLanguageId: course.fromLanguageId as Id<"languages">,
@@ -135,6 +138,7 @@ export const getPublicCourseList = query({
           name: string;
           count: number;
           about: string;
+          tags: string[];
           from_language: number;
           fromLanguageId: Id<"languages">;
           from_language_name: string;
@@ -343,6 +347,8 @@ const localizationEntryValidator = v.object({
 const publicCoursePageValidator = v.union(
   v.object({
     ...courseListItemValidator.fields,
+    contributors: v.array(courseContributorValidator),
+    contributors_past: v.array(courseContributorValidator),
     stories: v.array(publicStoryListItemValidator),
     localization: v.array(localizationEntryValidator),
   }),
@@ -468,6 +474,10 @@ export const getPublicCoursePageData = query({
         if (setCmp !== 0) return setCmp;
         return a.set_index - b.set_index;
       });
+    const contributorLists = {
+      contributors: course.contributorDetails ?? [],
+      contributors_past: course.contributorDetailsPast ?? [],
+    };
 
     return {
       id: course.legacyId,
@@ -478,12 +488,15 @@ export const getPublicCoursePageData = query({
           : learningLanguageName,
       count: course.count ?? 0,
       about: course.about ?? "",
+      tags: course.tags ?? [],
       from_language: legacyFromLanguageId,
       fromLanguageId: course.fromLanguageId as Id<"languages">,
       from_language_name: fromLanguageName,
       learning_language: legacyLearningLanguageId,
       learningLanguageId: course.learningLanguageId as Id<"languages">,
       learning_language_name: learningLanguageName,
+      contributors: contributorLists.contributors,
+      contributors_past: contributorLists.contributors_past,
       stories: mappedStories,
       localization: Array.from(localizationMap.entries()).map(
         ([tag, text]) => ({

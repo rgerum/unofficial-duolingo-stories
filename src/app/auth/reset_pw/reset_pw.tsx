@@ -6,16 +6,15 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { authInlineLinkClass } from "@/components/auth/styles";
+import {
+  authAlertErrorClass,
+  authAlertInfoClass,
+  authHeadingClass,
+  authInlineLinkClass,
+  authParagraphClass,
+} from "@/components/auth/styles";
 
 export default function ResetPassword() {
-  const headingClass = "m-0 text-[calc(24/16*1rem)]";
-  const paragraphClass = "m-0";
-  const alertErrorClass =
-    "block w-full rounded-[10px] bg-[var(--error-red)] p-[10px] text-white";
-  const alertMessageClass =
-    "block w-full rounded-[10px] bg-[var(--button-blue-background)] p-[10px] text-white";
-
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const errorParam = searchParams.get("error");
@@ -85,22 +84,22 @@ export default function ResetPassword() {
 
   return (
     <>
-      <h1 className={headingClass}>Reset Password</h1>
-      <p className={paragraphClass}>
+      <h1 className={authHeadingClass}>Reset Password</h1>
+      <p className={authParagraphClass}>
         {token
           ? "Enter your new password."
           : "You forgot your password? We can send you a link to reset it."}
       </p>
       {errorParam && (
-        <span className={alertErrorClass}>
+        <span className={authAlertErrorClass}>
           {errorParam === "INVALID_TOKEN"
             ? "This reset link is invalid or expired."
             : errorParam}
         </span>
       )}
-      {state === -1 && <span className={alertErrorClass}>{error}</span>}
+      {state === -1 && <span className={authAlertErrorClass}>{error}</span>}
       {state === 2 ? (
-        <span className={alertMessageClass} data-cy="message-confirm">
+        <span className={authAlertInfoClass} data-cy="message-confirm">
           {message}
         </span>
       ) : (
@@ -134,10 +133,10 @@ export default function ResetPassword() {
           </Button>
         </form>
       )}
-      <p className={paragraphClass}>
+      <p className={authParagraphClass}>
         Already have an account?{" "}
         <Link className={authInlineLinkClass} href="/auth/signin">
-          LOG IN
+          Log in
         </Link>
       </p>
     </>

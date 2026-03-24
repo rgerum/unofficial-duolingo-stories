@@ -5,40 +5,45 @@
 ---break---*/
 @custom-variant dark (&:is(.dark *));
 
-html {
-  height: 100%;
-}
-body {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  min-height: 100%;
-  height: 100%;
-  line-height: 1.6;
+@layer base {
+  html {
+    height: 100%;
+  }
 
-  font-family: var(--font-nunito);
-}
+  body {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    min-height: 100%;
+    height: 100%;
+    line-height: 1.6;
+    font-family: var(--font-nunito);
+    color: var(--text-color);
+    background: var(--body-background);
+    font-size: calc(19 / 16 * 1rem);
+  }
 
-* {
-  box-sizing: border-box;
-}
+  * {
+    box-sizing: border-box;
+  }
 
-a {
-  color: var(--text-color);
-}
+  a {
+    color: var(--text-color);
+  }
 
-a:hover {
-  color: var(--link-hover);
-}
+  a:hover {
+    color: var(--link-hover);
+  }
 
-h1 {
-  width: 100%;
-  text-align: center;
-}
+  h1 {
+    width: 100%;
+    text-align: center;
+  }
 
-hr {
-  border: 0;
-  border-top: 2px solid var(--overview-hr);
+  hr {
+    border: 0;
+    border-top: 2px solid var(--overview-hr);
+  }
 }
 
 .duostories_title {
@@ -49,12 +54,6 @@ hr {
   font-weight: bold;
   font-size: 29px;
   text-decoration: none;
-}
-
-body {
-  color: var(--text-color);
-  background: var(--body-background);
-  font-size: calc(19 / 16 * 1rem);
 }
 /*
 outline-width: 2px;
@@ -156,6 +155,25 @@ body[data-theme="light"] {
   --svg-stroke: #eee;
 
   --editor-hints-background: whitesmoke;
+
+  --background: var(--body-background);
+  --foreground: var(--text-color);
+  --card: var(--body-background);
+  --card-foreground: var(--text-color);
+  --popover: var(--body-background);
+  --popover-foreground: var(--text-color);
+  --primary: var(--button-background);
+  --primary-foreground: var(--button-color);
+  --secondary: var(--body-background-faint);
+  --secondary-foreground: var(--text-color);
+  --muted: var(--body-background-faint);
+  --muted-foreground: var(--text-color-dim);
+  --accent: var(--language-selector-hover-background);
+  --accent-foreground: var(--text-color);
+  --border: var(--header-border);
+  --input: var(--input-border);
+  /* Focus rings track the blue CTA styling in light mode. */
+  --ring: var(--button-blue-background);
 }
 
 body[data-theme="dark"] .ͼ2 .cm-gutters {
@@ -227,6 +245,9 @@ body[data-theme="dark"] {
   --text-color-dim: #f1f7fb;
   --body-background: #131f22;
 
+  /* Keep the Duostories primary action green in dark mode. */
+  --button-background: #58cc02;
+
   --language-selector-hover-background: #626b70;
 
   --button-color: #131f22;
@@ -288,6 +309,25 @@ body[data-theme="dark"] {
   --editor-hints-background: #313131;
 
   --finished-star-gold: #ffc800;
+
+  --background: var(--body-background);
+  --foreground: var(--text-color);
+  --card: var(--body-background);
+  --card-foreground: var(--text-color);
+  --popover: var(--body-background);
+  --popover-foreground: var(--text-color);
+  --primary: var(--button-background);
+  --primary-foreground: var(--button-color);
+  --secondary: var(--body-background-faint);
+  --secondary-foreground: var(--text-color);
+  --muted: var(--body-background-faint);
+  --muted-foreground: var(--text-color-dim);
+  --accent: var(--language-selector-hover-background);
+  --accent-foreground: var(--text-color);
+  --border: var(--header-border);
+  --input: var(--input-border);
+  /* In dark mode, use the blue foreground token so focus rings stay visible. */
+  --ring: var(--button-blue-color);
 }
 
 .cm-editor {

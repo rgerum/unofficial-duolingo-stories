@@ -26,7 +26,7 @@ export async function generateMetadata({
       images: [
         `/api/og-story?title=${story.from_language_name}&image=${story.image}&name=${story.learning_language_long}`,
       ],
-      url: `https://duostories.org/story/${story_id}`,
+      url: `https://duostories.org/story/${story_id}/auto_play`,
       type: "website",
     },
   };

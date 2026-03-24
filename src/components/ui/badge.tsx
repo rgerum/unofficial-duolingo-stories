@@ -1,9 +1,17 @@
-import styled from "styled-components";
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-const Badge = styled.span`
-  background: var(--editor-ssml);
-  border-radius: 10px;
-  padding: 5px 10px;
-`;
-
-export default Badge;
+export default function Badge({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement>) {
+  return (
+    <span
+      className={cn(
+        "rounded-[10px] bg-[var(--editor-ssml)] px-[10px] py-[5px]",
+        className,
+      )}
+      {...props}
+    />
+  );
+}

@@ -2,12 +2,36 @@ import { query, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
+import { courseContributorValidator } from "./lib/courseContributors";
 
 type LanguageDoc = Doc<"languages">;
 type CourseDoc = Doc<"courses">;
 type StoryDoc = Doc<"stories">;
 type AvatarDoc = Doc<"avatars">;
 type AvatarMappingDoc = Doc<"avatar_mappings">;
+
+const editorCourseValidator = v.union(
+  v.object({
+    id: v.number(),
+    short: v.union(v.string(), v.null()),
+    about: v.union(v.string(), v.null()),
+    official: v.boolean(),
+    count: v.number(),
+    public: v.boolean(),
+    fromLanguageId: v.id("languages"),
+    from_language: v.number(),
+    from_language_short: v.string(),
+    from_language_name: v.string(),
+    learningLanguageId: v.id("languages"),
+    learning_language: v.number(),
+    learning_language_short: v.string(),
+    learning_language_name: v.string(),
+    contributors: v.array(courseContributorValidator),
+    contributors_past: v.array(courseContributorValidator),
+    todo_count: v.number(),
+  }),
+  v.null(),
+);
 
 function toNumber(value: unknown): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -20,16 +44,10 @@ function toNumber(value: unknown): number | undefined {
 
 function toLanguage(language: LanguageDoc) {
   return {
+    languageId: language._id,
     id: language.legacyId,
     name: language.name,
     short: language.short,
-    flag:
-      typeof language.flag === "number"
-        ? language.flag
-        : Number.isFinite(Number(language.flag))
-          ? Number(language.flag)
-          : null,
-    flag_file: language.flag_file ?? null,
     speaker: language.speaker ?? null,
     default_text: language.default_text ?? "",
     tts_replace: language.tts_replace ?? null,
@@ -52,9 +70,13 @@ function toCourse(
     official: course.official,
     count: course.count ?? 0,
     public: course.public,
+    fromLanguageId: course.fromLanguageId,
     from_language: fromLanguage?.legacyId ?? 0,
+    from_language_short: fromLanguage?.short ?? "",
     from_language_name: fromLanguage?.name ?? course.from_language_name ?? "",
+    learningLanguageId: course.learningLanguageId,
     learning_language: learningLanguage?.legacyId ?? 0,
+    learning_language_short: learningLanguage?.short ?? "",
     learning_language_name:
       learningLanguage?.name ?? course.learning_language_name ?? "",
     contributors: course.contributors ?? [],
@@ -157,11 +179,14 @@ async function buildAvatarRows(
 ) {
   const avatarRows = avatars ?? (await ctx.db.query("avatars").collect());
   const mappingRows =
-    mappings ?? (await ctx.db.query("avatar_mappings").collect());
+    mappings ??
+    (await ctx.db
+      .query("avatar_mappings")
+      .withIndex("by_language_id", (q) => q.eq("languageId", language._id))
+      .collect());
 
   const mappingByAvatar = new Map<Id<"avatars">, AvatarMappingDoc>();
   for (const mapping of mappingRows) {
-    if (mapping.languageId !== language._id) continue;
     mappingByAvatar.set(mapping.avatarId, mapping);
   }
 
@@ -187,39 +212,37 @@ async function buildAvatarRows(
 export const getEditorSidebarData = query({
   args: {},
   handler: async (ctx) => {
-    const [languageRows, courseRows] = await Promise.all([
-      ctx.db.query("languages").collect(),
-      ctx.db.query("courses").collect(),
-    ]);
+    const courseRows = await ctx.db.query("courses").collect();
+
+    const referencedLanguageIds = Array.from(
+      new Set(
+        courseRows.flatMap((course) => [
+          course.learningLanguageId,
+          course.fromLanguageId,
+        ]),
+      ),
+    );
+    const languageRows = await Promise.all(
+      referencedLanguageIds.map((languageId) => ctx.db.get(languageId)),
+    );
 
     const languageById = new Map<Id<"languages">, LanguageDoc>();
-    for (const language of languageRows)
+    for (const language of languageRows) {
+      if (!language) continue;
       languageById.set(language._id, language);
-
-    const languages = languageRows
-      .map((language) => ({
-        id: language.legacyId,
-        short: language.short,
-        flag:
-          typeof language.flag === "number"
-            ? language.flag
-            : Number.isFinite(Number(language.flag))
-              ? Number(language.flag)
-              : null,
-        flag_file: language.flag_file ?? null,
-      }))
-      .sort((a, b) => a.id - b.id);
+    }
 
     const courses = courseRows
       .map((course) => toCourse(course, languageById))
       .sort((a, b) => b.count - a.count);
 
-    return { courses, languages };
+    return { courses };
   },
 });
 
 export const getEditorCourseByIdentifier = query({
   args: { identifier: v.string() },
+  returns: editorCourseValidator,
   handler: async (ctx, args) => {
     const course = await getCourseByIdentifier(ctx, args.identifier);
     if (!course) return null;
@@ -228,6 +251,10 @@ export const getEditorCourseByIdentifier = query({
       ctx.db.get(course.learningLanguageId) as Promise<LanguageDoc | null>,
       ctx.db.get(course.fromLanguageId) as Promise<LanguageDoc | null>,
     ]);
+    const contributorLists = {
+      contributors: course.contributorDetails ?? [],
+      contributors_past: course.contributorDetailsPast ?? [],
+    };
 
     return {
       id: course.legacyId,
@@ -236,13 +263,17 @@ export const getEditorCourseByIdentifier = query({
       official: course.official,
       count: course.count ?? 0,
       public: course.public,
+      fromLanguageId: course.fromLanguageId,
       from_language: fromLanguage?.legacyId ?? 0,
+      from_language_short: fromLanguage?.short ?? "",
       from_language_name: fromLanguage?.name ?? course.from_language_name ?? "",
+      learningLanguageId: course.learningLanguageId,
       learning_language: learningLanguage?.legacyId ?? 0,
+      learning_language_short: learningLanguage?.short ?? "",
       learning_language_name:
         learningLanguage?.name ?? course.learning_language_name ?? "",
-      contributors: course.contributors ?? [],
-      contributors_past: course.contributors_past ?? [],
+      contributors: contributorLists.contributors,
+      contributors_past: contributorLists.contributors_past,
       todo_count: course.todo_count ?? 0,
     };
   },
@@ -349,8 +380,8 @@ export const getEditorStoriesByCourseLegacyId = query({
         image: image?.legacyId ?? "",
         set_id: story.set_id ?? 0,
         set_index: story.set_index ?? 0,
-        date: story.date ?? 0,
-        change_date: story.change_date ?? 0,
+        date: story.date ?? story._creationTime,
+        change_date: story.change_date,
         status: derivedStatus,
         public: story.public,
         todo_count: story.todo_count ?? 0,
@@ -421,6 +452,7 @@ export const getEditorCourseImport = query({
 
     const targetCountByDuoId = new Map<string, number>();
     for (const story of targetStories) {
+      if (story.deleted) continue;
       if (!story.duo_id) continue;
       targetCountByDuoId.set(
         story.duo_id,
@@ -627,14 +659,12 @@ export const getEditorStoryPageData = query({
     ]);
     if (!learningLanguage || !fromLanguage) return null;
 
-    const avatarNames = await buildAvatarRows(ctx, learningLanguage);
-
     return {
       story_data: {
         id: story.legacyId ?? 0,
         official: course.official,
         course_id: course.legacyId,
-        duo_id: toNumber(story.duo_id) ?? 0,
+        duo_id: story.duo_id ?? "",
         image: image?.legacyId ?? "",
         name: story.name,
         set_id: story.set_id ?? 0,
@@ -644,7 +674,6 @@ export const getEditorStoryPageData = query({
         learning_language: learningLanguage.legacyId,
         from_language: fromLanguage.legacyId,
       },
-      avatar_names: avatarNames,
     };
   },
 });

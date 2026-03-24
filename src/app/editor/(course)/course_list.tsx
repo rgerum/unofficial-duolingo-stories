@@ -2,11 +2,11 @@
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import Flag from "@/components/ui/flag";
+import LanguageFlag from "@/components/ui/language-flag";
 import { useInput } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
-import type { CourseProps, LanguageProps } from "./types";
+import type { CourseProps } from "./types";
 
 interface CourseListProps {
   course_id: string | undefined;
@@ -21,12 +21,6 @@ export default function CourseList({
 }: CourseListProps) {
   const data = useQuery(api.editorRead.getEditorSidebarData, {});
   const courses = data?.courses as CourseProps[] | undefined;
-  const languagesArray = (data?.languages ?? []) as LanguageProps[];
-  const languages: Record<string | number, LanguageProps> = {};
-  for (const language of languagesArray) {
-    languages[language.id] = language;
-    languages[language.short] = language;
-  }
 
   const [search, setSearch] = useInput("");
   const router = useRouter();
@@ -63,14 +57,14 @@ export default function CourseList({
 
   return (
     <div
-      className="group [grid-area:nav] border-r border-[var(--header-border)] max-[1250px]:relative max-[1250px]:w-0"
+      className="group relative [grid-area:nav] min-h-0 min-w-0 border-r border-[var(--header-border)] max-[1250px]:w-0"
       data-show={!course_id ? true : showList}
     >
       <div
-        className="pointer-events-none absolute h-full w-screen bg-black opacity-0 transition-opacity duration-500 ease-[ease] max-[1250px]:block max-[1250px]:group-data-[show=true]:pointer-events-auto max-[1250px]:group-data-[show=true]:opacity-50"
+        className="pointer-events-none hidden bg-black opacity-0 transition-opacity duration-500 ease-[ease] max-[1250px]:absolute max-[1250px]:inset-0 max-[1250px]:block max-[1250px]:h-full max-[1250px]:w-screen max-[1250px]:group-data-[show=true]:pointer-events-auto max-[1250px]:group-data-[show=true]:opacity-50"
         onClick={() => toggleShow()}
       ></div>
-      <div className="h-[calc(100vh-50px)] overflow-scroll max-[1250px]:absolute max-[1250px]:h-full max-[1250px]:w-[min(100vw,400px)] max-[1250px]:translate-x-[calc(-100%-10px)] max-[1250px]:bg-[var(--body-background)] max-[1250px]:shadow-[2px_19px_10px_hsl(20deg_10%_10%_/_0.5)] max-[1250px]:transition-transform max-[1250px]:duration-500 max-[1250px]:ease-in max-[1250px]:group-data-[show=true]:translate-x-0 max-[1250px]:group-data-[show=true]:duration-700 max-[1250px]:group-data-[show=true]:ease-out">
+      <div className="h-full min-h-0 overflow-auto max-[1250px]:absolute max-[1250px]:top-0 max-[1250px]:left-0 max-[1250px]:h-full max-[1250px]:w-[min(100vw,400px)] max-[1250px]:translate-x-[calc(-100%-10px)] max-[1250px]:bg-[var(--body-background)] max-[1250px]:shadow-[2px_19px_10px_hsl(20deg_10%_10%_/_0.5)] max-[1250px]:transition-transform max-[1250px]:duration-500 max-[1250px]:ease-in max-[1250px]:group-data-[show=true]:translate-x-0 max-[1250px]:group-data-[show=true]:duration-700 max-[1250px]:group-data-[show=true]:ease-out">
         <div className="sticky top-0 flex h-10 items-center border-b border-[var(--header-border)] bg-[var(--body-background)] pr-[10px]">
           <span className="px-[10px]">Search</span>
           <input
@@ -96,35 +90,41 @@ export default function CourseList({
                 <span className="w-[45px] text-right text-[var(--text-color-dim)]">
                   {course.count}
                 </span>
-                <Flag
+                <LanguageFlag
                   className="m-1 ml-4"
-                  iso={languages[course.learning_language].short}
+                  languageId={course.learningLanguageId}
                   width={40}
-                  flag_file={languages[course.learning_language].flag_file}
                 />
                 <span className="overflow-hidden text-ellipsis whitespace-nowrap">{`${
                   course.learning_language_name
-                } [${languages[course.from_language].short}] `}</span>
-                <span className="grow whitespace-nowrap pr-[10px] text-right">
+                } [${course.from_language_short}] `}</span>
+                <span className="flex grow items-center justify-end gap-[6px] whitespace-nowrap pr-[10px]">
                   {course.todo_count ? (
-                    <img
+                    <span
+                      className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-amber-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-amber-900"
                       title={`This course has ${course.todo_count} TODOs.`}
-                      alt="TODO"
-                      src="/editor/icons/error.svg"
-                    />
+                      aria-label={`${course.todo_count} TODOs`}
+                    >
+                      <span aria-hidden="true">📝 {course.todo_count}</span>
+                    </span>
                   ) : null}
                   {course.official ? (
-                    <span className="ml-[5px] h-7">
+                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center">
                       <img
                         src="https://d35aaqx5ub95lt.cloudfront.net/vendor/b3ede3d53c932ee30d981064671c8032.svg"
                         title="official"
                         alt="👑"
+                        className="block h-6 w-6 object-contain"
                       />
                     </span>
                   ) : course.contributors.length ? (
-                    `🧑 ${course.contributors.length}`
+                    <span className="inline-flex items-center leading-none">
+                      {`🧑 ${course.contributors.length}`}
+                    </span>
                   ) : (
-                    "💤"
+                    <span className="inline-flex items-center leading-none">
+                      💤
+                    </span>
                   )}
                 </span>
               </Link>

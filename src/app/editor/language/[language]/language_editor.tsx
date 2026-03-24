@@ -579,12 +579,7 @@ function AvatarNames({
   //    return <Spinner/>
   return (
     <>
-      <div
-        className={
-          "h-[calc(100vh-64px)] w-full overflow-y-scroll max-[600px]:h-auto min-[560px]:w-[400px] " +
-          (speakers?.length > 0 ? "" : "hidden")
-        }
-      >
+      <div className="h-[calc(100vh-64px)] w-full overflow-y-scroll max-[600px]:h-auto min-[560px]:w-[400px]">
         <audio ref={ref}>
           <source src={url} type="audio/mp3" />
         </audio>
@@ -665,14 +660,7 @@ function AvatarNames({
           </table>
         </div>
       </div>
-      <div
-        className={
-          "ml-2 h-[calc(100vh-64px)] w-full overflow-y-scroll max-[600px]:m-0 max-[600px]:h-[calc(50vh-30px)] " +
-          (speakers?.length > 0
-            ? "min-[560px]:w-[calc(100vw-400px)]"
-            : "hidden")
-        }
-      >
+      <div className="ml-2 h-[calc(100vh-64px)] w-full overflow-y-scroll max-[600px]:m-0 max-[600px]:h-[calc(50vh-30px)] min-[560px]:w-[calc(100vw-400px)]">
         <p className="my-4">
           These characters are the default cast of duolingo. Their names should
           be kept as close to the original as possible.

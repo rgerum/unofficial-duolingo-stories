@@ -1,10 +1,3 @@
-export type LanguageProps = {
-  id: number;
-  short: string;
-  flag: number | null;
-  flag_file: string | null;
-};
-
 export type CourseProps = {
   id: number;
   short: string | null;
@@ -12,13 +5,32 @@ export type CourseProps = {
   official: boolean;
   count: number;
   public: boolean;
+  fromLanguageId: string;
   from_language: number;
+  from_language_short: string;
   from_language_name: string;
+  learningLanguageId: string;
   learning_language: number;
+  learning_language_short: string;
   learning_language_name: string;
   contributors: string[];
   contributors_past: string[];
   todo_count: number;
+};
+
+export type ContributorSummaryProps = {
+  legacyUserId: number;
+  name: string;
+  image: string | null;
+  discordLinked: boolean;
+};
+
+export type DetailedCourseProps = Omit<
+  CourseProps,
+  "contributors" | "contributors_past"
+> & {
+  contributors: ContributorSummaryProps[];
+  contributors_past: ContributorSummaryProps[];
 };
 
 export type StoryListDataProps = {
@@ -28,8 +40,8 @@ export type StoryListDataProps = {
   image: string;
   set_id: number;
   set_index: number;
-  date: number | string | Date;
-  change_date: number | string | Date;
+  date?: number | string | Date;
+  change_date?: number | string | Date;
   status: string;
   public: boolean;
   todo_count: number;

@@ -20,13 +20,13 @@ import {
   StoryElementPointToPhrase,
   StoryElementSelectPhrase,
 } from "@/components/editor/story/syntax_parser_types";
+import {
+  formatInlineTtsError,
+  scanInlineTts,
+  type InlineTtsReplacement,
+} from "@/components/editor/story/inline_tts";
 
-export type IpaReplacement = {
-  index: number;
-  word: string;
-  alias: string;
-  alphabet?: string;
-};
+export type IpaReplacement = InlineTtsReplacement;
 
 function generateHintMap(
   text: string = "",
@@ -396,23 +396,14 @@ function speaker_text_trans(
   const pronunciation = data.pron?.match(/\s*\^\s*(\S.*\S|\S)\s*/)?.[1] || "";
 
   getInputStringText(text);
-  const ipa_replacements: IpaReplacement[] = [];
-  let ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
-
-  while (ipa_match && ipa_match.index !== undefined) {
-    ipa_replacements.push({
-      index: ipa_match.index,
-      word: ipa_match[1] ?? "",
-      alias: ipa_match[2] ?? "",
-      alphabet: ipa_match[3] ? ipa_match[3].substring(1) : undefined,
-    });
-    text =
-      text.substring(0, ipa_match.index + ipa_match[1].length) +
-      text.substring(ipa_match.index + ipa_match[0].length);
-    ipa_match = text.match(/([^-|~ ,、，;.。:：_?!…]*){([^}:]*)(:[^}]*)?}/);
+  const inlineTtsData = scanInlineTts(text);
+  if (inlineTtsData.errors.length > 0) {
+    throw new Error(
+      formatInlineTtsError(inlineTtsData.errors[0], data.text_lineno),
+    );
   }
-  //text = text.replace(/([^-|~ ,、，;.。:：_?!…]*){([^}]*)}/g, "$1");
-
+  text = inlineTtsData.normalizedText;
+  const ipa_replacements = inlineTtsData.replacements;
   let content = generateHintMap(text, translation, pronunciation);
 
   let selectablePhrases, characterPositions;
@@ -571,6 +562,7 @@ type Speaker = {
   text: undefined | string;
   trans: undefined | string;
   pron: undefined | string;
+  text_lineno?: undefined | number;
   allow_audio?: undefined | boolean;
   audio_line_inset?: undefined | number;
   audio?: undefined | string;
@@ -596,6 +588,7 @@ function getText(
   if (!line) return speaker;
   if (line.startsWith(">") || (allow_speaker && line.match(/\w*:/))) {
     speaker.text = line;
+    speaker.text_lineno = line_iter.get_lineno();
     line = line_iter.advance(1);
     if (allow_trans) {
       while (line?.startsWith("~") || line?.startsWith("^")) {
@@ -618,6 +611,72 @@ function getText(
     }
   }
   return speaker;
+}
+
+function pushStoryErrorData(
+  story: StoryWithMeta,
+  error: {
+    message: string;
+    errorKind?: "parse" | "unknown_block" | "invalid_line";
+    sourceLine?: string;
+    lineNumber?: number;
+    details?: string;
+    editor?: {
+      block_start_no?: number;
+      start_no?: number;
+      end_no?: number;
+      active_no?: number;
+    };
+  },
+) {
+  story.elements.push({
+    type: "ERROR",
+    text: error.message,
+    errorKind: error.errorKind,
+    sourceLine: error.sourceLine,
+    lineNumber: error.lineNumber,
+    details: error.details,
+    editor: error.editor,
+    trackingProperties: {
+      line_index: story.meta.line_index,
+      challenge_type: "error",
+    },
+  });
+  story.meta.line_index += 1;
+}
+
+function toErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) return error.message;
+  return "Invalid story syntax.";
+}
+
+function safeSpeakerTextTrans(
+  story: StoryWithMeta,
+  data: Speaker,
+  ...args: Parameters<typeof speaker_text_trans> extends [
+    Speaker,
+    ...infer Rest,
+  ]
+    ? Rest
+    : never
+) {
+  try {
+    return speaker_text_trans(data, ...args);
+  } catch (error) {
+    pushStoryErrorData(story, {
+      message: toErrorMessage(error),
+      errorKind: "parse",
+      sourceLine: data.text,
+      lineNumber: data.text_lineno,
+      editor: {
+        block_start_no: data.text_lineno,
+        start_no: data.text_lineno,
+        end_no: data.audio_line ?? data.audio_line_inset ?? data.text_lineno,
+        active_no: data.text_lineno,
+      },
+    });
+    return undefined;
+  }
 }
 
 function getAnswers(
@@ -718,9 +777,13 @@ function processBlockHeader(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const data = getText(line_iter, false, true, true);
-  const data_text = speaker_text_trans(data, story.meta);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta);
+  if (!data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
+  const start_no1 = data.text_lineno;
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -750,9 +813,13 @@ function processBlockLine(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const data = getText(line_iter, true, true, true);
-  const data_text = speaker_text_trans(data, story.meta);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta);
+  if (!data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
+  const start_no1 = data.text_lineno;
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -783,9 +850,13 @@ function processBlockMultipleChoice(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const data = getText(line_iter, false, true, false);
-  const data_text = speaker_text_trans(data, story.meta);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta);
+  if (!data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
+  const start_no1 = data.text_lineno;
 
   const [answers, correct_answer] = getAnswers(line_iter, true);
   story.elements.push({
@@ -816,13 +887,25 @@ function processBlockSelectPhrase(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const question_data = getText(line_iter, false, true, false);
-  const question_data_text = speaker_text_trans(question_data, story.meta);
+  const question_data_text = safeSpeakerTextTrans(
+    story,
+    question_data,
+    story.meta,
+  );
+  if (!question_data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
+  const start_no1 = question_data.text_lineno;
 
   const start_no2 = line_iter.get_lineno(0);
   const data = getText(line_iter, true, true, true);
-  const data_text = speaker_text_trans(data, story.meta);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta);
+  if (!data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -875,13 +958,25 @@ function processBlockContinuation(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const question_data = getText(line_iter, false, true, false);
-  const question_data_text = speaker_text_trans(question_data, story.meta);
+  const question_data_text = safeSpeakerTextTrans(
+    story,
+    question_data,
+    story.meta,
+  );
+  if (!question_data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
+  const start_no1 = question_data.text_lineno;
 
   const start_no2 = line_iter.get_lineno();
   const data = getText(line_iter, true, true, true);
-  const data_text = speaker_text_trans(data, story.meta, false, true);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta, false, true);
+  if (!data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -939,13 +1034,25 @@ function processBlockArrange(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const question_data = getText(line_iter, false, true, false);
-  const question_data_text = speaker_text_trans(question_data, story.meta);
+  const question_data_text = safeSpeakerTextTrans(
+    story,
+    question_data,
+    story.meta,
+  );
+  if (!question_data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
+  const start_no1 = question_data.text_lineno;
 
   const start_no2 = line_iter.get_lineno();
   const data = getText(line_iter, true, true, true);
-  const data_text = speaker_text_trans(data, story.meta, true);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta, true);
+  if (!data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -1000,13 +1107,25 @@ function processBlockPointToPhrase(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const question_data = getText(line_iter, false, true, false);
-  const question_data_text = speaker_text_trans(question_data, story.meta);
+  const question_data_text = safeSpeakerTextTrans(
+    story,
+    question_data,
+    story.meta,
+  );
+  if (!question_data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
+  const start_no1 = question_data.text_lineno;
 
   const start_no2 = line_iter.get_lineno();
   const data = getText(line_iter, true, true, true);
-  const data_text = speaker_text_trans(data, story.meta, true);
+  const data_text = safeSpeakerTextTrans(story, data, story.meta, true);
+  if (!data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
 
   data_text.line.content.lang_hints = story_languages.from_language;
 
@@ -1053,9 +1172,17 @@ function processBlockMatch(
   story_languages: StoryLanguages,
 ) {
   const start_no = line_iter.get_lineno(-1);
-  const start_no1 = line_iter.get_lineno();
   const question_data = getText(line_iter, false, true, false);
-  const question_data_text = speaker_text_trans(question_data, story.meta);
+  const question_data_text = safeSpeakerTextTrans(
+    story,
+    question_data,
+    story.meta,
+  );
+  if (!question_data_text) {
+    skipToNextBlock(line_iter);
+    return false;
+  }
+  const start_no1 = question_data.text_lineno;
 
   const answers = [];
   while (line_iter.get()) {
@@ -1177,6 +1304,41 @@ export type TranscribeData = string;
 
 type LineTuple = [number, string];
 
+function isBlockHeaderLine(line: string | undefined) {
+  return Boolean(line?.match(/\[([^\]]*)\](<(.+)>)?$/));
+}
+
+function consumeUnknownBlock(
+  line_iter: LineIterator,
+  headerLineNumber: number | undefined,
+) {
+  let endLineNumber = headerLineNumber;
+  const bodyLines: string[] = [];
+
+  while (line_iter.get()) {
+    const line = line_iter.get();
+    if (!line || isBlockHeaderLine(line)) break;
+    endLineNumber = line_iter.get_lineno();
+    bodyLines.push(line);
+    line_iter.advance();
+  }
+
+  return { endLineNumber, bodyLines };
+}
+
+function skipToNextBlock(line_iter: LineIterator) {
+  let endLineNumber = line_iter.get_lineno(-1);
+
+  while (line_iter.get()) {
+    const line = line_iter.get();
+    if (!line || isBlockHeaderLine(line)) break;
+    endLineNumber = line_iter.get_lineno();
+    line_iter.advance();
+  }
+
+  return endLineNumber;
+}
+
 //window.audio_insert_lines = []
 export function processStoryFile(
   text: string,
@@ -1210,6 +1372,7 @@ export function processStoryFile(
   const line_iter = line_iterator(lines);
   while (line_iter.get()) {
     const line = line_iter.get();
+    const currentLineNumber = line_iter.get_lineno();
     if (!line) break;
     const match = line.match(/\[([^\]]*)\](<(.+)>)?$/);
     if (match !== null) {
@@ -1225,20 +1388,56 @@ export function processStoryFile(
           );
           continue;
         }
+        const { endLineNumber, bodyLines } = consumeUnknownBlock(
+          line_iter,
+          currentLineNumber,
+        );
+        pushStoryErrorData(story, {
+          message: `Unknown block type "${current_block}"`,
+          errorKind: "unknown_block",
+          sourceLine: line,
+          lineNumber: currentLineNumber,
+          details:
+            bodyLines.length > 0
+              ? `Ignored ${bodyLines.length} line${bodyLines.length === 1 ? "" : "s"} until the next block.`
+              : undefined,
+          editor: {
+            block_start_no: currentLineNumber,
+            start_no: currentLineNumber,
+            end_no: endLineNumber,
+            active_no: currentLineNumber,
+          },
+        });
+        continue;
       } catch (e) {
         console.error(e);
+        pushStoryErrorData(story, {
+          message: toErrorMessage(e),
+          errorKind: "parse",
+          sourceLine: line,
+          lineNumber: currentLineNumber,
+          editor: {
+            block_start_no: currentLineNumber,
+            start_no: currentLineNumber,
+            end_no: line_iter.get_lineno(-1) ?? currentLineNumber,
+            active_no: currentLineNumber,
+          },
+        });
+        continue;
       }
     }
-    story.elements.push({
-      type: "ERROR",
-      text: line,
-      trackingProperties: {
-        line_index: story.meta.line_index,
-        challenge_type: "error",
+    pushStoryErrorData(story, {
+      message: "Unexpected line outside a recognized block",
+      errorKind: "invalid_line",
+      sourceLine: line,
+      lineNumber: currentLineNumber,
+      editor: {
+        block_start_no: currentLineNumber,
+        start_no: currentLineNumber,
+        end_no: currentLineNumber,
+        active_no: currentLineNumber,
       },
-      // "editor": {"start_no": group.start_no, "end_no": group.end_no}
     });
-    story.meta.line_index += 1;
     //console.log("error", lineno, line)
     line_iter.advance();
   }

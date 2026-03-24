@@ -1,7 +1,7 @@
 import React, { CSSProperties } from "react";
 import styles from "./StoryLineHints.module.css";
 import { ContentWithHints } from "@/components/editor/story/syntax_parser_types";
-import type { EditorStateType } from "@/app/editor/story/[story]/editor";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 
 function splitTextTokens(text: string, keep_tilde = true) {
   if (!text) return [];
