@@ -69,14 +69,14 @@ export const getAvailableDates = query({
   args: { language: v.string() },
   returns: v.any(),
   handler: async (ctx, args) => {
-    // Fetch all stories for this language and extract unique dates
-    const allStories = await ctx.db.query("news_stories").collect();
+    const stories = await ctx.db
+      .query("news_stories")
+      .withIndex("by_language", (q) => q.eq("language", args.language))
+      .collect();
 
     const dates = new Set<string>();
-    for (const story of allStories) {
-      if (story.language === args.language) {
-        dates.add(story.date);
-      }
+    for (const story of stories) {
+      dates.add(story.date);
     }
     return Array.from(dates).sort().reverse();
   },

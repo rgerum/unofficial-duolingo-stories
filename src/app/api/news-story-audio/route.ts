@@ -11,8 +11,17 @@ import type { SynthesisResult } from "@/app/audio/_lib/audio/types";
  *
  * Body: { text: string, voice: string }
  * Response: { content: string, marks?: AudioMark[], timepoints?: Timepoint[] }
+ *
+ * Disabled in production — only available in preview/development deployments.
  */
 export async function POST(request: Request) {
+  if (process.env.VERCEL_ENV === "production") {
+    return NextResponse.json(
+      { error: "This endpoint is disabled in production" },
+      { status: 403 },
+    );
+  }
+
   const body = await request.json();
   const { text, voice } = body as { text: string; voice: string };
 
@@ -42,8 +51,8 @@ export async function POST(request: Request) {
         break;
       } catch (e) {
         console.error(`[news-story-audio] Engine ${engine.name} failed:`, e);
+        // Continue to next engine for fallback
       }
-      break;
     }
   }
 

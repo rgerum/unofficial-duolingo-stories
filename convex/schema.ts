@@ -232,7 +232,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_date_and_language", ["date", "language"])
-    .index("by_date_and_language_and_level", ["date", "language", "level"]),
+    .index("by_date_and_language_and_level", ["date", "language", "level"])
+    .index("by_language", ["language"]),
 
   news_story_content: defineTable({
     newsStoryId: v.id("news_stories"),

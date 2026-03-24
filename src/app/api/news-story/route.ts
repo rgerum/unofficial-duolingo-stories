@@ -96,8 +96,6 @@ function convertInlineStory(inlineStory: string): string {
 
       result.push(prefix + converted.text);
       result.push("~ " + hintPadding + converted.hint);
-      // Debug: keep original inline line as comment
-      result.push("# INLINE: " + line);
     } else {
       result.push(line);
     }
@@ -403,7 +401,15 @@ STRUCTURE RULES:
 
 // ---- POST handler ----
 
+// Disabled in production — only available in preview/development deployments.
 export async function POST(request: Request) {
+  if (process.env.VERCEL_ENV === "production") {
+    return NextResponse.json(
+      { error: "This endpoint is disabled in production" },
+      { status: 403 },
+    );
+  }
+
   console.log("[news-story] POST request received");
 
   if (!OPENROUTER_API_KEY) {
@@ -413,10 +419,7 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
-  console.log(
-    "[news-story] API key found (starts with:",
-    OPENROUTER_API_KEY.substring(0, 8) + "...)",
-  );
+  console.log("[news-story] API key found");
 
   const body = await request.json();
   const learningLanguage = body.learningLanguage ?? "Spanish";
