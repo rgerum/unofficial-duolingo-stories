@@ -14,7 +14,11 @@ import type { Avatar } from "@/app/editor/story/[story]/types";
 import type { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 
 // Simple newspaper SVG as placeholder illustration
-const NEWS_ILLUSTRATION = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="16" fill="#e8f4fd"/><rect x="20" y="18" width="80" height="84" rx="6" fill="white" stroke="#1cb0f6" stroke-width="2"/><rect x="30" y="28" width="60" height="10" rx="2" fill="#1cb0f6"/><rect x="30" y="46" width="35" height="4" rx="1" fill="#ccc"/><rect x="30" y="54" width="60" height="4" rx="1" fill="#ccc"/><rect x="30" y="62" width="50" height="4" rx="1" fill="#ccc"/><rect x="30" y="70" width="55" height="4" rx="1" fill="#ccc"/><rect x="30" y="78" width="40" height="4" rx="1" fill="#ccc"/><rect x="30" y="86" width="60" height="4" rx="1" fill="#ccc"/></svg>`);
+const NEWS_ILLUSTRATION =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="16" fill="#e8f4fd"/><rect x="20" y="18" width="80" height="84" rx="6" fill="white" stroke="#1cb0f6" stroke-width="2"/><rect x="30" y="28" width="60" height="10" rx="2" fill="#1cb0f6"/><rect x="30" y="46" width="35" height="4" rx="1" fill="#ccc"/><rect x="30" y="54" width="60" height="4" rx="1" fill="#ccc"/><rect x="30" y="62" width="50" height="4" rx="1" fill="#ccc"/><rect x="30" y="70" width="55" height="4" rx="1" fill="#ccc"/><rect x="30" y="78" width="40" height="4" rx="1" fill="#ccc"/><rect x="30" y="86" width="60" height="4" rx="1" fill="#ccc"/></svg>`,
+  );
 
 const DEFAULT_STORY = `[DATA]
 fromLanguageName=The News
@@ -25,15 +29,69 @@ fromLanguageName=The News
 `;
 
 const LANGUAGE_PAIRS = [
-  { learning: "Spanish", from: "English", short: "es", fromShort: "en", label: "Spanish → English" },
-  { learning: "French", from: "English", short: "fr", fromShort: "en", label: "French → English" },
-  { learning: "German", from: "English", short: "de", fromShort: "en", label: "German → English" },
-  { learning: "Italian", from: "English", short: "it", fromShort: "en", label: "Italian → English" },
-  { learning: "Portuguese", from: "English", short: "pt", fromShort: "en", label: "Portuguese → English" },
-  { learning: "Dutch", from: "English", short: "nl", fromShort: "en", label: "Dutch → English" },
-  { learning: "Japanese", from: "English", short: "ja", fromShort: "en", label: "Japanese → English" },
-  { learning: "Korean", from: "English", short: "ko", fromShort: "en", label: "Korean → English" },
-  { learning: "Mandarin Chinese", from: "English", short: "zh", fromShort: "en", label: "Chinese → English" },
+  {
+    learning: "Spanish",
+    from: "English",
+    short: "es",
+    fromShort: "en",
+    label: "Spanish → English",
+  },
+  {
+    learning: "French",
+    from: "English",
+    short: "fr",
+    fromShort: "en",
+    label: "French → English",
+  },
+  {
+    learning: "German",
+    from: "English",
+    short: "de",
+    fromShort: "en",
+    label: "German → English",
+  },
+  {
+    learning: "Italian",
+    from: "English",
+    short: "it",
+    fromShort: "en",
+    label: "Italian → English",
+  },
+  {
+    learning: "Portuguese",
+    from: "English",
+    short: "pt",
+    fromShort: "en",
+    label: "Portuguese → English",
+  },
+  {
+    learning: "Dutch",
+    from: "English",
+    short: "nl",
+    fromShort: "en",
+    label: "Dutch → English",
+  },
+  {
+    learning: "Japanese",
+    from: "English",
+    short: "ja",
+    fromShort: "en",
+    label: "Japanese → English",
+  },
+  {
+    learning: "Korean",
+    from: "English",
+    short: "ko",
+    fromShort: "en",
+    label: "Korean → English",
+  },
+  {
+    learning: "Mandarin Chinese",
+    from: "English",
+    short: "zh",
+    fromShort: "en",
+    label: "Chinese → English",
+  },
 ];
 
 type ViewMode = "editor" | "play";
@@ -53,7 +111,13 @@ type Keypoint = { rangeEnd: number; audioStart: number };
 
 /** Build keypoints array from TTS timing marks */
 function buildKeypoints(
-  marks?: { time: number; type: string; start: number; end: number; value: string }[],
+  marks?: {
+    time: number;
+    type: string;
+    start: number;
+    end: number;
+    value: string;
+  }[],
   timepoints?: { markName: string; timeSeconds: number }[],
 ): Keypoint[] {
   const keypoints: Keypoint[] = [];
@@ -88,7 +152,9 @@ export default function NewsTestPage() {
   const [isGeneratingAudio, setIsGeneratingAudio] = React.useState(false);
   const [audioProgress, setAudioProgress] = React.useState<string | null>(null);
   // Map from line_index → generated audio data (persists across re-parses)
-  const [audioMap, setAudioMap] = React.useState<Record<number, AudioEntry>>({});
+  const [audioMap, setAudioMap] = React.useState<Record<number, AudioEntry>>(
+    {},
+  );
   const [error, setError] = React.useState<string | null>(null);
   const [headlines, setHeadlines] = React.useState<string[]>([]);
   const [selectedPair, setSelectedPair] = React.useState(0);
@@ -114,7 +180,9 @@ export default function NewsTestPage() {
       for (const avatar of avatarRows as Avatar[]) {
         map[avatar.avatar_id] = avatar;
       }
-      console.log(`[news-test] Loaded ${Object.keys(map).length} avatars for language "${languageShort}"`);
+      console.log(
+        `[news-test] Loaded ${Object.keys(map).length} avatars for language "${languageShort}"`,
+      );
     }
     return map;
   }, [avatarRows, languageShort]);
@@ -237,8 +305,12 @@ export default function NewsTestPage() {
     setStatus("Fetching news headlines...");
 
     try {
-      console.log(`[news-test] Requesting story: ${pair.learning} → ${pair.from} (${selectedLevel})`);
-      setStatus(`Generating ${selectedLevel} ${pair.learning} story from today's news... (this takes ~15-30s)`);
+      console.log(
+        `[news-test] Requesting story: ${pair.learning} → ${pair.from} (${selectedLevel})`,
+      );
+      setStatus(
+        `Generating ${selectedLevel} ${pair.learning} story from today's news... (this takes ~15-30s)`,
+      );
 
       const startTime = Date.now();
       const res = await fetch("/api/news-story", {
@@ -269,7 +341,9 @@ export default function NewsTestPage() {
       setHeadlines(data.headlines ?? []);
       setModelUsed(data.model ?? null);
       if (data.repaired) {
-        console.log(`[news-test] Hints were repaired (${data.hintMismatches} mismatches fixed)`);
+        console.log(
+          `[news-test] Hints were repaired (${data.hintMismatches} mismatches fixed)`,
+        );
       }
       setStatus(null);
 
@@ -317,7 +391,9 @@ export default function NewsTestPage() {
           const text = el.learningLanguageTitleContent?.text;
           if (!text?.trim()) continue;
           // For header/narrator lines, try to find a default voice from any avatar
-          const firstAvatarWithVoice = Object.values(avatarNames).find((a) => a.speaker);
+          const firstAvatarWithVoice = Object.values(avatarNames).find(
+            (a) => a.speaker,
+          );
           if (!firstAvatarWithVoice?.speaker) continue;
           jobs.push({
             lineIndex: el.trackingProperties.line_index,
@@ -334,22 +410,27 @@ export default function NewsTestPage() {
           let speakerId: number | null = null;
 
           if (el.line.type === "CHARACTER") {
-            speakerId = typeof el.line.characterId === "number"
-              ? el.line.characterId
-              : parseInt(String(el.line.characterId), 10) || null;
+            speakerId =
+              typeof el.line.characterId === "number"
+                ? el.line.characterId
+                : parseInt(String(el.line.characterId), 10) || null;
             if (speakerId && avatarNames[speakerId]?.speaker) {
               voice = avatarNames[speakerId].speaker;
             }
           } else {
             // PROSE line — use first available voice
-            const firstAvatarWithVoice = Object.values(avatarNames).find((a) => a.speaker);
+            const firstAvatarWithVoice = Object.values(avatarNames).find(
+              (a) => a.speaker,
+            );
             if (firstAvatarWithVoice?.speaker) {
               voice = firstAvatarWithVoice.speaker;
             }
           }
 
           if (!voice) {
-            console.log(`[news-test] No voice for element ${el.trackingProperties.line_index}: "${plainText.substring(0, 40)}..."`);
+            console.log(
+              `[news-test] No voice for element ${el.trackingProperties.line_index}: "${plainText.substring(0, 40)}..."`,
+            );
             continue;
           }
 
@@ -367,7 +448,9 @@ export default function NewsTestPage() {
 
       console.log(`[news-test] Found ${jobs.length} lines that need audio`);
       if (jobs.length === 0) {
-        setAudioProgress("No lines with valid speaker voices found (or all already have audio).");
+        setAudioProgress(
+          "No lines with valid speaker voices found (or all already have audio).",
+        );
         setIsGeneratingAudio(false);
         return;
       }
@@ -378,8 +461,12 @@ export default function NewsTestPage() {
 
       for (const job of jobs) {
         completed++;
-        setAudioProgress(`Generating audio ${completed}/${jobs.length}: "${job.plainText.substring(0, 30)}..."`);
-        console.log(`[news-test] Audio ${completed}/${jobs.length}: voice=${job.voice}, text="${job.plainText.substring(0, 50)}"`);
+        setAudioProgress(
+          `Generating audio ${completed}/${jobs.length}: "${job.plainText.substring(0, 30)}..."`,
+        );
+        console.log(
+          `[news-test] Audio ${completed}/${jobs.length}: voice=${job.voice}, text="${job.plainText.substring(0, 50)}"`,
+        );
 
         try {
           const res = await fetch("/api/news-story-audio", {
@@ -390,14 +477,19 @@ export default function NewsTestPage() {
 
           if (!res.ok) {
             const errData = await res.json();
-            console.warn(`[news-test] Audio failed for element ${job.lineIndex}:`, errData.error);
+            console.warn(
+              `[news-test] Audio failed for element ${job.lineIndex}:`,
+              errData.error,
+            );
             failed++;
             continue;
           }
 
           const data = await res.json();
           if (!data.content) {
-            console.warn(`[news-test] No audio content returned for element ${job.lineIndex}`);
+            console.warn(
+              `[news-test] No audio content returned for element ${job.lineIndex}`,
+            );
             failed++;
             continue;
           }
@@ -406,9 +498,14 @@ export default function NewsTestPage() {
           const keypoints = buildKeypoints(data.marks, data.timepoints);
 
           newAudioEntries[job.lineIndex] = { blobUrl, keypoints };
-          console.log(`[news-test] Audio ready for element ${job.lineIndex} (${data.engine}, ${keypoints.length} keypoints)`);
+          console.log(
+            `[news-test] Audio ready for element ${job.lineIndex} (${data.engine}, ${keypoints.length} keypoints)`,
+          );
         } catch (e) {
-          console.warn(`[news-test] Audio generation failed for element ${job.lineIndex}:`, e);
+          console.warn(
+            `[news-test] Audio generation failed for element ${job.lineIndex}:`,
+            e,
+          );
           failed++;
         }
       }
@@ -417,7 +514,9 @@ export default function NewsTestPage() {
       setAudioMap((prev) => ({ ...prev, ...newAudioEntries }));
 
       const successCount = Object.keys(newAudioEntries).length;
-      setAudioProgress(`Done! Generated ${successCount} audio clips${failed > 0 ? ` (${failed} failed)` : ""}. Press ▶ Play to listen.`);
+      setAudioProgress(
+        `Done! Generated ${successCount} audio clips${failed > 0 ? ` (${failed} failed)` : ""}. Press ▶ Play to listen.`,
+      );
       setTimeout(() => setAudioProgress(null), 5000);
     } catch (e) {
       console.error("[news-test] Audio generation error:", e);
@@ -507,9 +606,7 @@ export default function NewsTestPage() {
           </button>
         </div>
 
-        {error && (
-          <span className="text-sm text-red-500">{error}</span>
-        )}
+        {error && <span className="text-sm text-red-500">{error}</span>}
 
         {status && (
           <span className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
@@ -528,22 +625,21 @@ export default function NewsTestPage() {
         )}
 
         {modelUsed && (
-          <span className="ml-auto text-xs text-gray-400">
-            via {modelUsed}
-          </span>
+          <span className="ml-auto text-xs text-gray-400">via {modelUsed}</span>
         )}
       </div>
 
       {/* Headlines banner */}
       {headlines.length > 0 && (
         <div className="border-b border-gray-100 bg-gray-50 px-4 py-1.5 text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-          <strong>Today&apos;s headlines:</strong>{" "}
-          {headlines.join(" • ")}
+          <strong>Today&apos;s headlines:</strong> {headlines.join(" • ")}
         </div>
       )}
 
       {/* Main content — editor is always mounted to preserve CodeMirror state */}
-      <div className={`flex min-h-0 flex-1 ${viewMode !== "editor" ? "hidden" : ""}`}>
+      <div
+        className={`flex min-h-0 flex-1 ${viewMode !== "editor" ? "hidden" : ""}`}
+      >
         {/* Left: CodeMirror editor */}
         <div
           ref={editorRef}

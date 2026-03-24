@@ -349,7 +349,8 @@ export const generateAndStore = internalAction({
     const openRouterKey = process.env.OPENROUTER_API_KEY;
     const googleTTSKey = process.env.GOOGLE_TTS_API_KEY;
 
-    if (!openRouterKey) throw new Error("OPENROUTER_API_KEY not set in Convex env");
+    if (!openRouterKey)
+      throw new Error("OPENROUTER_API_KEY not set in Convex env");
 
     const learningLanguage = LANG_NAMES[args.language] ?? args.language;
     const fromLanguage = LANG_NAMES[args.fromLanguage] ?? args.fromLanguage;
@@ -373,7 +374,12 @@ export const generateAndStore = internalAction({
     }
 
     // 2. Generate story via OpenRouter
-    const prompt = buildPrompt(headlines, learningLanguage, fromLanguage, args.level);
+    const prompt = buildPrompt(
+      headlines,
+      learningLanguage,
+      fromLanguage,
+      args.level,
+    );
     console.log(`[newsStories] Calling OpenRouter (${prompt.length} chars)...`);
 
     const result = await callOpenRouter(openRouterKey, [
@@ -545,11 +551,7 @@ async function generateAndStoreAudio(
     );
 
     try {
-      const audioBase64 = await generateTTSAudio(
-        googleTTSKey,
-        voice,
-        job.text,
-      );
+      const audioBase64 = await generateTTSAudio(googleTTSKey, voice, job.text);
 
       const audioBuffer = Buffer.from(audioBase64, "base64");
       const blob = new Blob([audioBuffer], { type: "audio/mpeg" });
@@ -593,16 +595,11 @@ export const generateDailyStories = internalAction({
           date,
         });
       } catch (e) {
-        console.error(
-          `[newsStories] Failed to generate ${level} story:`,
-          e,
-        );
+        console.error(`[newsStories] Failed to generate ${level} story:`, e);
       }
     }
 
-    console.log(
-      `[newsStories] Daily generation complete for ${args.language}`,
-    );
+    console.log(`[newsStories] Daily generation complete for ${args.language}`);
     return null;
   },
 });

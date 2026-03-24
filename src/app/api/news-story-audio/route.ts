@@ -23,7 +23,9 @@ export async function POST(request: Request) {
     );
   }
 
-  console.log(`[news-story-audio] Generating audio: voice="${voice}", text="${text.substring(0, 60)}..."`);
+  console.log(
+    `[news-story-audio] Generating audio: voice="${voice}", text="${text.substring(0, 60)}..."`,
+  );
 
   let result: SynthesisResult | undefined;
   for (const engine of audio_engines) {
@@ -31,7 +33,11 @@ export async function POST(request: Request) {
       try {
         console.log(`[news-story-audio] Using engine: ${engine.name}`);
         // Pass undefined as filename → engine returns base64 content instead of saving to blob
-        result = await engine.synthesizeSpeech(undefined as unknown as string, voice, text);
+        result = await engine.synthesizeSpeech(
+          undefined as unknown as string,
+          voice,
+          text,
+        );
         result.engine = engine.name;
         break;
       } catch (e) {

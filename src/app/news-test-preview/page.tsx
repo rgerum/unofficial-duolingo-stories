@@ -16,7 +16,10 @@ const NEWS_ILLUSTRATION =
   );
 
 const LEVELS = ["A1", "A2", "B1", "B2"] as const;
-const LEVEL_LABELS: Record<string, { label: string; color: string; description: string }> = {
+const LEVEL_LABELS: Record<
+  string,
+  { label: string; color: string; description: string }
+> = {
   A1: { label: "A1", color: "#58cc02", description: "Beginner" },
   A2: { label: "A2", color: "#1cb0f6", description: "Elementary" },
   B1: { label: "B1", color: "#ff9600", description: "Intermediate" },
@@ -42,7 +45,9 @@ type ViewState =
   | { mode: "play"; storyId: Id<"news_stories">; level: string; date: string };
 
 export default function NewsPreviewPage() {
-  const [viewState, setViewState] = React.useState<ViewState>({ mode: "browse" });
+  const [viewState, setViewState] = React.useState<ViewState>({
+    mode: "browse",
+  });
   const [selectedDate, setSelectedDate] = React.useState(getTodayDate());
   const language = "fr";
   const fromLanguage = "en";
@@ -88,9 +93,15 @@ export default function NewsPreviewPage() {
     );
   }
 
-  const storiesByLevel: Record<string, { _id: Id<"news_stories">; level: string }> = {};
+  const storiesByLevel: Record<
+    string,
+    { _id: Id<"news_stories">; level: string }
+  > = {};
   if (storiesForDate) {
-    for (const story of storiesForDate as Array<{ _id: Id<"news_stories">; level: string }>) {
+    for (const story of storiesForDate as Array<{
+      _id: Id<"news_stories">;
+      level: string;
+    }>) {
       storiesByLevel[story.level] = story;
     }
   }
@@ -223,7 +234,9 @@ function StoryPlayer({
   avatarNames: Record<number, Avatar>;
   onBack: () => void;
 }) {
-  const content = useQuery(api.newsStories.getContent, { newsStoryId: storyId });
+  const content = useQuery(api.newsStories.getContent, {
+    newsStoryId: storyId,
+  });
   const [highlightName, setHighlightName] = React.useState<string[]>([]);
   const [hideNonHighlighted, setHideNonHighlighted] = React.useState(false);
 
@@ -315,7 +328,10 @@ function StoryPlayer({
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
         <p className="text-gray-500">Story content could not be loaded.</p>
-        <button onClick={onBack} className="mt-4 text-[#1cb0f6] hover:underline">
+        <button
+          onClick={onBack}
+          className="mt-4 text-[#1cb0f6] hover:underline"
+        >
           ← Back
         </button>
       </div>

@@ -150,7 +150,8 @@ function validateHintAlignment(storyText: string): HintMismatch[] {
       textContent = textContent.substring(1).trim();
     } else {
       const colonIdx = textContent.indexOf(":");
-      if (colonIdx >= 0) textContent = textContent.substring(colonIdx + 1).trim();
+      if (colonIdx >= 0)
+        textContent = textContent.substring(colonIdx + 1).trim();
     }
 
     const hintContent = nextLine.substring(1);
@@ -243,35 +244,51 @@ type LevelConfig = {
 const LEVEL_CONFIGS: Record<string, LevelConfig> = {
   A1: {
     description: "Complete beginner",
-    vocabulary: "Use only the most basic, high-frequency words (100-500 word range). Stick to concrete nouns, simple verbs (be, have, go, want, like, eat, drink), basic adjectives (big, small, good, bad, new, old), numbers, colors, and common greetings.",
-    grammar: "Use ONLY present tense. Simple subject-verb-object sentences. No subordinate clauses. No subjunctive or conditional. Avoid idioms entirely.",
+    vocabulary:
+      "Use only the most basic, high-frequency words (100-500 word range). Stick to concrete nouns, simple verbs (be, have, go, want, like, eat, drink), basic adjectives (big, small, good, bad, new, old), numbers, colors, and common greetings.",
+    grammar:
+      "Use ONLY present tense. Simple subject-verb-object sentences. No subordinate clauses. No subjunctive or conditional. Avoid idioms entirely.",
     lineCount: "Include 12-16 [LINE] blocks",
-    questionCount: "Include 2 [MULTIPLE_CHOICE] blocks and 1 [MATCH] block with 4 pairs",
-    sentenceLength: "Keep sentences very short (3-6 words). One simple idea per sentence.",
+    questionCount:
+      "Include 2 [MULTIPLE_CHOICE] blocks and 1 [MATCH] block with 4 pairs",
+    sentenceLength:
+      "Keep sentences very short (3-6 words). One simple idea per sentence.",
   },
   A2: {
     description: "Elementary",
-    vocabulary: "Use common everyday vocabulary (500-1500 word range). Include basic verbs in past tense, common expressions, simple connectors (and, but, because, then).",
-    grammar: "Use present and simple past tense. Allow simple compound sentences with 'and', 'but', 'because'. No complex relative clauses. Keep structures predictable.",
+    vocabulary:
+      "Use common everyday vocabulary (500-1500 word range). Include basic verbs in past tense, common expressions, simple connectors (and, but, because, then).",
+    grammar:
+      "Use present and simple past tense. Allow simple compound sentences with 'and', 'but', 'because'. No complex relative clauses. Keep structures predictable.",
     lineCount: "Include 14-18 [LINE] blocks",
-    questionCount: "Include 2 [MULTIPLE_CHOICE] blocks and 1 [MATCH] block with 5 pairs",
-    sentenceLength: "Sentences can be 4-8 words. Two ideas can be connected with a simple connector.",
+    questionCount:
+      "Include 2 [MULTIPLE_CHOICE] blocks and 1 [MATCH] block with 5 pairs",
+    sentenceLength:
+      "Sentences can be 4-8 words. Two ideas can be connected with a simple connector.",
   },
   B1: {
     description: "Intermediate",
-    vocabulary: "Use a solid intermediate vocabulary (1500-3500 word range). Include common idiomatic expressions, phrasal verbs, and topic-specific vocabulary related to the news themes.",
-    grammar: "Use all common tenses including future and conditional. Allow relative clauses, reported speech, and passive voice. Some complex sentence structures are fine.",
+    vocabulary:
+      "Use a solid intermediate vocabulary (1500-3500 word range). Include common idiomatic expressions, phrasal verbs, and topic-specific vocabulary related to the news themes.",
+    grammar:
+      "Use all common tenses including future and conditional. Allow relative clauses, reported speech, and passive voice. Some complex sentence structures are fine.",
     lineCount: "Include 16-22 [LINE] blocks",
-    questionCount: "Include 3 [MULTIPLE_CHOICE] blocks and 1 [MATCH] block with 5 pairs",
-    sentenceLength: "Sentences can be 5-12 words. Mix simple and compound sentences naturally.",
+    questionCount:
+      "Include 3 [MULTIPLE_CHOICE] blocks and 1 [MATCH] block with 5 pairs",
+    sentenceLength:
+      "Sentences can be 5-12 words. Mix simple and compound sentences naturally.",
   },
   B2: {
     description: "Upper intermediate",
-    vocabulary: "Use rich, nuanced vocabulary (3500-6000 word range). Include less common words, abstract concepts, idiomatic expressions, colloquialisms, and subtle word choices.",
-    grammar: "Use all tenses freely, including subjunctive and complex conditionals. Use relative clauses, passive constructions, indirect speech, and nuanced connectors (nevertheless, whereas, although).",
+    vocabulary:
+      "Use rich, nuanced vocabulary (3500-6000 word range). Include less common words, abstract concepts, idiomatic expressions, colloquialisms, and subtle word choices.",
+    grammar:
+      "Use all tenses freely, including subjunctive and complex conditionals. Use relative clauses, passive constructions, indirect speech, and nuanced connectors (nevertheless, whereas, although).",
     lineCount: "Include 20-26 [LINE] blocks",
-    questionCount: "Include 3 [MULTIPLE_CHOICE] blocks and 1 [MATCH] block with 6 pairs",
-    sentenceLength: "Sentences can be 6-16 words. Use varied sentence structures. Natural conversational flow with interruptions, hesitations, and colloquial phrasing.",
+    questionCount:
+      "Include 3 [MULTIPLE_CHOICE] blocks and 1 [MATCH] block with 6 pairs",
+    sentenceLength:
+      "Sentences can be 6-16 words. Use varied sentence structures. Natural conversational flow with interruptions, hesitations, and colloquial phrasing.",
   },
 };
 
@@ -396,13 +413,18 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
-  console.log("[news-story] API key found (starts with:", OPENROUTER_API_KEY.substring(0, 8) + "...)");
+  console.log(
+    "[news-story] API key found (starts with:",
+    OPENROUTER_API_KEY.substring(0, 8) + "...)",
+  );
 
   const body = await request.json();
   const learningLanguage = body.learningLanguage ?? "Spanish";
   const fromLanguage = body.fromLanguage ?? "English";
   const level = body.level ?? "B1";
-  console.log(`[news-story] Language pair: ${learningLanguage} → ${fromLanguage}, Level: ${level}`);
+  console.log(
+    `[news-story] Language pair: ${learningLanguage} → ${fromLanguage}, Level: ${level}`,
+  );
 
   // Fetch headlines
   let headlines: string[];
@@ -426,7 +448,9 @@ export async function POST(request: Request) {
   console.log("[news-story] === END PROMPT ===");
 
   // Step 1: Generate story in inline bracket format
-  console.log("[news-story] Step 1: Generating story (inline bracket format) via OpenRouter...");
+  console.log(
+    "[news-story] Step 1: Generating story (inline bracket format) via OpenRouter...",
+  );
   const startTime = Date.now();
   let result;
   try {
@@ -441,7 +465,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: msg }, { status: 502 });
   }
   const genElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-  console.log(`[news-story] Story generated in ${genElapsed}s (${result.content.length} chars)`);
+  console.log(
+    `[news-story] Story generated in ${genElapsed}s (${result.content.length} chars)`,
+  );
   console.log("[news-story] Model:", result.model);
   console.log("[news-story] Usage:", result.usage);
   console.log("[news-story] === RAW LLM OUTPUT ===");
@@ -449,15 +475,21 @@ export async function POST(request: Request) {
   console.log("[news-story] === END RAW OUTPUT ===");
 
   // Step 2: Convert inline bracket format → Duolingo tilde format
-  console.log("[news-story] Step 2: Converting inline brackets → Duolingo format...");
+  console.log(
+    "[news-story] Step 2: Converting inline brackets → Duolingo format...",
+  );
   const storyText = convertInlineStory(result.content);
 
   // Step 3: Validate final Duolingo format alignment
   const mismatches = validateHintAlignment(storyText);
-  console.log(`[news-story] Step 3: Final validation: ${mismatches.length} hint mismatches`);
+  console.log(
+    `[news-story] Step 3: Final validation: ${mismatches.length} hint mismatches`,
+  );
   if (mismatches.length > 0) {
     for (const m of mismatches) {
-      console.warn(`[news-story]   Line ${m.lineNumber}: text=${m.textTokenCount} tokens, hint=${m.hintTokenCount} tokens`);
+      console.warn(
+        `[news-story]   Line ${m.lineNumber}: text=${m.textTokenCount} tokens, hint=${m.hintTokenCount} tokens`,
+      );
       console.warn(`[news-story]     Text: ${m.textLine}`);
       console.warn(`[news-story]     Hint: ${m.hintLine}`);
     }
