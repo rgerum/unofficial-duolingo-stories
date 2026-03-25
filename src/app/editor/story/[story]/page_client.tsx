@@ -15,13 +15,12 @@ export default function StoryEditorPageClient({
   const data = useQuery(api.editorRead.getEditorStoryPageData, {
     storyId,
   }) as StoryEditorPageData | null | undefined;
-  const currentUser = useQuery(api.auth.getCurrentUser);
   const avatarRows = useQuery(
     api.editorRead.getEditorAvatarNamesByLanguageLegacyId,
     data ? { languageLegacyId: data.story_data.learning_language } : "skip",
   );
 
-  if (data === undefined || currentUser === undefined) return <Spinner />;
+  if (data === undefined) return <Spinner />;
   if (!data) return <p>Story not found.</p>;
 
   const avatarNames: Record<number, Avatar> = {};
@@ -31,7 +30,7 @@ export default function StoryEditorPageClient({
 
   return (
     <EditorV2
-      isAdmin={currentUser?.role === "admin"}
+      isAdmin={data.isAdmin}
       story_data={data.story_data}
       avatar_names={avatarNames}
     />

@@ -223,7 +223,7 @@ export function useStoryEditorModel({
         "Official stories cannot be overwritten unless you are an admin.";
       setSaveError(true);
       setSaveErrorMessage(message);
-      throw new Error(message);
+      return;
     }
     if (storyData.official && !confirmOfficialOverwrite) {
       return;
