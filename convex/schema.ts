@@ -220,6 +220,36 @@ export default defineSchema({
     .index("by_story_and_user", ["storyId", "legacyUserId"])
     .index("by_legacy_id", ["legacyId"]),
 
+  // ---- AI News Stories ----
+
+  news_stories: defineTable({
+    date: v.string(), // "2026-03-24"
+    language: v.string(), // "fr"
+    fromLanguage: v.string(), // "en"
+    level: v.string(), // "A1" | "A2" | "B1" | "B2"
+    headlines: v.array(v.string()),
+    model: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_date_and_language", ["date", "language"])
+    .index("by_date_and_language_and_level", ["date", "language", "level"])
+    .index("by_language", ["language"]),
+
+  news_story_content: defineTable({
+    newsStoryId: v.id("news_stories"),
+    storyText: v.string(), // Duolingo format (converted)
+    rawOutput: v.string(), // Raw LLM output (inline bracket format)
+    // Audio: map from element line_index → Convex storage ID
+    audioFiles: v.optional(
+      v.array(
+        v.object({
+          lineIndex: v.number(),
+          storageId: v.id("_storage"),
+        }),
+      ),
+    ),
+  }).index("by_news_story", ["newsStoryId"]),
+
   discord_stories_role_sync: defineTable({
     legacyUserId: v.number(),
     discordAccountId: v.union(v.string(), v.null()),
