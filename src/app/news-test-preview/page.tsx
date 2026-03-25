@@ -42,7 +42,33 @@ function getTodayDate(): string {
 
 type ViewState =
   | { mode: "browse" }
-  | { mode: "play"; storyId: Id<"news_stories">; level: string; date: string };
+  | {
+      mode: "play";
+      storyId: Id<"news_stories">;
+      level: string;
+      date: string;
+      topic: string;
+      topicKey?: string;
+      topicSummary?: string;
+    };
+
+type NewsStoryListItem = {
+  _id: Id<"news_stories">;
+  level: string;
+  topic?: string;
+  topicKey?: string;
+  topicIndex?: number;
+  topicSummary?: string;
+  headlines?: string[];
+};
+
+type TopicGroup = {
+  topic: string;
+  topicKey: string;
+  topicIndex: number;
+  topicSummary?: string;
+  storiesByLevel: Partial<Record<(typeof LEVELS)[number], NewsStoryListItem>>;
+};
 
 export default function NewsPreviewPage() {
   const [viewState, setViewState] = React.useState<ViewState>({
@@ -85,6 +111,8 @@ export default function NewsPreviewPage() {
         storyId={viewState.storyId}
         level={viewState.level}
         date={viewState.date}
+        topic={viewState.topic}
+        topicSummary={viewState.topicSummary}
         language={language}
         fromLanguage={fromLanguage}
         avatarNames={avatarNames}
@@ -93,18 +121,39 @@ export default function NewsPreviewPage() {
     );
   }
 
-  const storiesByLevel: Record<
-    string,
-    { _id: Id<"news_stories">; level: string }
-  > = {};
+  const topicGroups = new Map<string, TopicGroup>();
   if (storiesForDate) {
-    for (const story of storiesForDate as Array<{
-      _id: Id<"news_stories">;
-      level: string;
-    }>) {
-      storiesByLevel[story.level] = story;
+    for (const story of storiesForDate as NewsStoryListItem[]) {
+      const topic = story.topic ?? story.headlines?.[0] ?? "Untitled topic";
+      const topicKey = story.topicKey ?? topic;
+      const existing = topicGroups.get(topicKey);
+      if (existing) {
+        existing.storiesByLevel[story.level as (typeof LEVELS)[number]] = story;
+        if (!existing.topicSummary && story.topicSummary) {
+          existing.topicSummary = story.topicSummary;
+        }
+        if (existing.topicIndex === Number.MAX_SAFE_INTEGER) {
+          existing.topicIndex = story.topicIndex ?? Number.MAX_SAFE_INTEGER;
+        }
+        continue;
+      }
+
+      topicGroups.set(topicKey, {
+        topic,
+        topicKey,
+        topicIndex: story.topicIndex ?? Number.MAX_SAFE_INTEGER,
+        topicSummary: story.topicSummary,
+        storiesByLevel: {
+          [story.level]: story,
+        },
+      });
     }
   }
+
+  const groupedTopics = Array.from(topicGroups.values()).sort((a, b) => {
+    if (a.topicIndex !== b.topicIndex) return a.topicIndex - b.topicIndex;
+    return a.topic.localeCompare(b.topic);
+  });
 
   const isToday = selectedDate === getTodayDate();
 
@@ -132,55 +181,79 @@ export default function NewsPreviewPage() {
             {isToday ? "Today's Stories" : formatDate(selectedDate)}
           </h2>
 
-          {/* Level buttons */}
-          <div className="grid grid-cols-2 gap-4">
-            {LEVELS.map((level) => {
-              const info = LEVEL_LABELS[level];
-              const story = storiesByLevel[level];
-              const isAvailable = !!story;
+          <div className="space-y-5">
+            {groupedTopics.map((group) => (
+              <section
+                key={group.topicKey}
+                className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800"
+              >
+                <div className="mb-4">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                    {group.topic}
+                  </h3>
+                  {group.topicSummary && (
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      {group.topicSummary}
+                    </p>
+                  )}
+                </div>
 
-              return (
-                <button
-                  key={level}
-                  onClick={() => {
-                    if (story) {
-                      setViewState({
-                        mode: "play",
-                        storyId: story._id,
-                        level,
-                        date: selectedDate,
-                      });
-                    }
-                  }}
-                  disabled={!isAvailable}
-                  className={`rounded-xl border-2 p-6 text-left transition-all ${
-                    isAvailable
-                      ? "cursor-pointer border-gray-200 bg-white hover:border-gray-300 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500"
-                      : "cursor-not-allowed border-gray-100 bg-gray-50 opacity-50 dark:border-gray-700 dark:bg-gray-900"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white"
-                      style={{ backgroundColor: info.color }}
-                    >
-                      {info.label}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-gray-800 dark:text-gray-100">
-                        {info.description}
-                      </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {isAvailable ? "Tap to play" : "Not yet generated"}
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+                <div className="grid grid-cols-2 gap-4">
+                  {LEVELS.map((level) => {
+                    const info = LEVEL_LABELS[level];
+                    const story = group.storiesByLevel[level];
+                    const isAvailable = !!story;
+
+                    return (
+                      <button
+                        key={`${group.topicKey}-${level}`}
+                        onClick={() => {
+                          if (story) {
+                            setViewState({
+                              mode: "play",
+                              storyId: story._id,
+                              level,
+                              date: selectedDate,
+                              topic: group.topic,
+                              topicKey: group.topicKey,
+                              topicSummary: group.topicSummary,
+                            });
+                          }
+                        }}
+                        disabled={!isAvailable}
+                        className={`rounded-xl border-2 p-4 text-left transition-all ${
+                          isAvailable
+                            ? "cursor-pointer border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white hover:shadow-md dark:border-gray-600 dark:bg-gray-900 dark:hover:border-gray-500 dark:hover:bg-gray-800"
+                            : "cursor-not-allowed border-gray-100 bg-gray-50 opacity-50 dark:border-gray-700 dark:bg-gray-900"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white"
+                            style={{ backgroundColor: info.color }}
+                          >
+                            {info.label}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-gray-800 dark:text-gray-100">
+                              {info.description}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {isAvailable
+                                ? "Tap to play"
+                                : "Not yet generated"}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
           </div>
 
-          {storiesForDate && storiesForDate.length === 0 && (
+          {storiesForDate && groupedTopics.length === 0 && (
             <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
               No stories generated for this date yet.
             </p>
@@ -221,6 +294,8 @@ function StoryPlayer({
   storyId,
   level,
   date,
+  topic,
+  topicSummary,
   language,
   fromLanguage,
   avatarNames,
@@ -229,6 +304,8 @@ function StoryPlayer({
   storyId: Id<"news_stories">;
   level: string;
   date: string;
+  topic: string;
+  topicSummary?: string;
   language: string;
   fromLanguage: string;
   avatarNames: Record<number, Avatar>;
@@ -341,16 +418,26 @@ function StoryPlayer({
   return (
     <div className="flex h-screen flex-col">
       {/* Minimal header with back button */}
-      <div className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900">
-        <button
-          onClick={onBack}
-          className="rounded px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-        >
-          ← Back
-        </button>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          {date} · {LEVEL_LABELS[level]?.description ?? level}
-        </span>
+      <div className="border-b border-gray-200 bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-900">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="rounded px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            ← Back
+          </button>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {date} · {LEVEL_LABELS[level]?.description ?? level}
+          </span>
+          <span className="truncate text-sm text-gray-400 dark:text-gray-500">
+            {topic}
+          </span>
+        </div>
+        {topicSummary && (
+          <p className="mt-2 pl-16 text-sm text-gray-500 dark:text-gray-400">
+            {topicSummary}
+          </p>
+        )}
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto">

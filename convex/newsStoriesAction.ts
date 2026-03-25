@@ -4,6 +4,10 @@ import { internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
+import {
+  getGrammarFocus,
+  buildGrammarInstruction,
+} from "./curriculum/weekResolver";
 
 // ---- Inline bracket → Duolingo format converter ----
 
@@ -74,6 +78,72 @@ type LevelConfig = {
   sentenceLength: string;
 };
 
+type NewsTopic = {
+  title: string;
+  summary?: string;
+};
+
+type StoryPlan = {
+  setting: string;
+  situation: string;
+  tone: string;
+  concreteFacts: string[];
+  sourceTermsToMention: string[];
+  characters: string[];
+  openingHook: string;
+  targetVocabulary: string[];
+  targetGrammar: string[];
+  comprehensionGoals: string[];
+  questionPlan: string[];
+};
+
+type OpenRouterUsage = {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+};
+
+const OPENROUTER_PRICING_USD_PER_MILLION = {
+  input: 3,
+  output: 15,
+} as const;
+
+const FALLBACK_TOPICS: NewsTopic[] = [
+  {
+    title: "Global climate summit reaches new agreement",
+    summary:
+      "World leaders discuss emissions targets, funding, and implementation timelines.",
+  },
+  {
+    title: "Technology companies report record earnings",
+    summary:
+      "Major firms cite strong demand, AI spending, and improving investor confidence.",
+  },
+  {
+    title: "International space station celebrates anniversary",
+    summary:
+      "Officials highlight scientific research, international cooperation, and future missions.",
+  },
+  {
+    title: "Scientists report progress on renewable energy storage",
+    summary:
+      "Researchers describe better battery performance and possible effects on clean energy adoption.",
+  },
+  {
+    title: "Global health agencies coordinate new vaccination campaign",
+    summary:
+      "Officials describe supply planning, regional priorities, and efforts to reach vulnerable communities.",
+  },
+];
+
+function topicToKey(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
 const LEVEL_CONFIGS: Record<string, LevelConfig> = {
   A1: {
     description: "Complete beginner",
@@ -126,24 +196,67 @@ const LEVEL_CONFIGS: Record<string, LevelConfig> = {
 };
 
 function buildPrompt(
-  headlines: string[],
+  topic: NewsTopic,
+  plan: StoryPlan,
   learningLanguage: string,
   fromLanguage: string,
   level: string,
+  grammarInstruction: string | null,
 ): string {
   const config = LEVEL_CONFIGS[level] ?? LEVEL_CONFIGS["B1"];
+  const topicContext = [
+    `Headline: ${topic.title}`,
+    topic.summary ? `Summary: ${topic.summary}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const grammarSection = grammarInstruction
+    ? `\n${grammarInstruction}\n`
+    : `\n${config.grammar}\n`;
 
   return `You are a language-learning story writer for Duolingo-style stories.
 
 CEFR LEVEL: ${level} (${config.description})
 ${config.vocabulary}
+
+LEVEL GRAMMAR CONSTRAINTS:
 ${config.grammar}
+${grammarSection}
 ${config.sentenceLength}
 
-Given these real news headlines from today:
-${headlines.map((h, i) => `${i + 1}. ${h}`).join("\n")}
+Given this real news topic from today:
+${topicContext}
 
-Write a conversational story in ${learningLanguage} (with ${fromLanguage} translations) inspired by one or more of these headlines. Adapt the complexity to ${level} level.
+Write a conversational story in ${learningLanguage} (with ${fromLanguage} translations) inspired by this news topic only. Adapt the complexity to ${level} level.
+Focus on a single clear topic. Do not blend in other unrelated headlines or side stories.
+Use the summary details when they help, but do not invent specific facts beyond the topic context above.
+If the topic context mentions a location, country, or region, name it clearly in the story instead of referring only to vague places like "there" or "the villages".
+
+Use this approved story plan:
+- Setting: ${plan.setting}
+- Situation: ${plan.situation}
+- Tone: ${plan.tone}
+- Opening hook: ${plan.openingHook}
+- Concrete facts to include:
+${plan.concreteFacts.map((fact) => `  - ${fact}`).join("\n")}
+- Source terms to mention clearly when natural:
+${plan.sourceTermsToMention.map((term) => `  - ${term}`).join("\n")}
+- Characters / roles:
+${plan.characters.map((character) => `  - ${character}`).join("\n")}
+- Target vocabulary to teach and repeat:
+${plan.targetVocabulary.map((item) => `  - ${item}`).join("\n")}
+- Target grammar to practice:
+${plan.targetGrammar.map((item) => `  - ${item}`).join("\n")}
+- Comprehension goals:
+${plan.comprehensionGoals.map((item) => `  - ${item}`).join("\n")}
+- Question plan:
+${plan.questionPlan.map((item) => `  - ${item}`).join("\n")}
+
+Keep the story specific. Avoid generic "they are watching the news" filler unless the plan actually calls for it.
+Use the target vocabulary multiple times across the story and questions.
+Make the comprehension questions test the comprehension goals instead of random details.
+Make the [MATCH] pairs come primarily from the target vocabulary.
 
 You MUST use INLINE BRACKET notation for translation hints.
 Each word or word-group in the learning language is immediately followed by its ${fromLanguage} translation in square brackets.
@@ -234,24 +347,415 @@ STRUCTURE RULES:
 
 // ---- API helpers ----
 
-async function fetchNewsHeadlines(): Promise<string[]> {
+function decodeXmlEntities(text: string): string {
+  return text
+    .replace(/<!\[CDATA\[(.*?)\]\]>/g, "$1")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+}
+
+function extractTag(item: string, tagName: string): string | undefined {
+  const match = item.match(new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`));
+  const value = match?.[1]?.trim();
+  if (!value) return undefined;
+  return (
+    decodeXmlEntities(value)
+      .replace(/<[^>]+>/g, "")
+      .trim() || undefined
+  );
+}
+
+async function fetchNewsTopics(): Promise<NewsTopic[]> {
   const res = await fetch("https://feeds.bbci.co.uk/news/world/rss.xml");
   const xml = await res.text();
   const items = xml.split("<item>");
-  const headlines: Array<string> = [];
-  for (let i = 1; i < items.length && headlines.length < 5; i++) {
-    const titleMatch = items[i].match(/<title><!\[CDATA\[(.*?)\]\]>/);
-    const titleMatch2 = items[i].match(/<title>(.*?)<\/title>/);
-    const title = titleMatch?.[1] ?? titleMatch2?.[1];
-    if (title) headlines.push(title);
+  const topics: Array<NewsTopic> = [];
+  for (let i = 1; i < items.length && topics.length < 5; i++) {
+    const item = items[i];
+    const title = extractTag(item, "title");
+    if (!title) continue;
+
+    topics.push({
+      title,
+      summary: extractTag(item, "description"),
+    });
   }
-  return headlines;
+  return topics;
+}
+
+function ensureTopicPool(topics: NewsTopic[], count: number): NewsTopic[] {
+  const deduped: NewsTopic[] = [];
+  const seen = new Set<string>();
+
+  for (const topic of [...topics, ...FALLBACK_TOPICS]) {
+    const key = topicToKey(topic.title);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(topic);
+    if (deduped.length === count) break;
+  }
+
+  return deduped;
+}
+
+function normalizeUsage(usage: unknown): Required<OpenRouterUsage> {
+  if (!usage || typeof usage !== "object") {
+    return { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+  }
+
+  const candidate = usage as OpenRouterUsage;
+  const prompt_tokens = candidate.prompt_tokens ?? 0;
+  const completion_tokens = candidate.completion_tokens ?? 0;
+  const total_tokens =
+    candidate.total_tokens ?? prompt_tokens + completion_tokens;
+
+  return { prompt_tokens, completion_tokens, total_tokens };
+}
+
+function estimateCostUsd(usage: Required<OpenRouterUsage>): number {
+  return (
+    (usage.prompt_tokens / 1_000_000) *
+      OPENROUTER_PRICING_USD_PER_MILLION.input +
+    (usage.completion_tokens / 1_000_000) *
+      OPENROUTER_PRICING_USD_PER_MILLION.output
+  );
+}
+
+function extractSourceTerms(topic: NewsTopic): string[] {
+  const source = [topic.title, topic.summary].filter(Boolean).join(" ");
+  const matches = source.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b/g) ?? [];
+  const blacklist = new Set(["Headline", "Summary", "The", "A", "An", "Today"]);
+  const unique = new Set<string>();
+  for (const match of matches) {
+    if (blacklist.has(match)) continue;
+    unique.add(match.trim());
+  }
+  return Array.from(unique).slice(0, 6);
+}
+
+function buildPlanPrompt(
+  topic: NewsTopic,
+  learningLanguage: string,
+  fromLanguage: string,
+  level: string,
+): string {
+  const sourceTerms = extractSourceTerms(topic);
+  const topicContext = [
+    `Headline: ${topic.title}`,
+    topic.summary ? `Summary: ${topic.summary}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return `You are designing a high-quality Duolingo-style story before writing it.
+
+Target language: ${learningLanguage}
+Translation language: ${fromLanguage}
+CEFR level: ${level}
+
+Source topic:
+${topicContext}
+
+Important source terms to preserve if relevant:
+${sourceTerms.map((term) => `- ${term}`).join("\n") || "- none"}
+
+Create a concise JSON plan for a story that feels specific, grounded, and not generic.
+The story must avoid vague filler and must include concrete details from the source topic.
+If the source topic names a place, country, organization, or person, include it in sourceTermsToMention.
+
+Return ONLY valid JSON with this exact shape:
+{
+  "setting": "short description of where the story happens",
+  "situation": "one sentence summary of the specific situation",
+  "tone": "tone descriptor",
+  "concreteFacts": ["fact 1", "fact 2", "fact 3"],
+  "sourceTermsToMention": ["term 1", "term 2"],
+  "characters": ["character 1 role", "character 2 role"],
+  "openingHook": "short opening idea",
+  "targetVocabulary": ["word or phrase 1", "word or phrase 2", "word or phrase 3", "word or phrase 4", "word or phrase 5"],
+  "targetGrammar": ["grammar target 1", "grammar target 2"],
+  "comprehensionGoals": ["goal 1", "goal 2"],
+  "questionPlan": ["literal comprehension", "vocabulary in context", "inference or grammar-sensitive check"]
+}
+
+Requirements:
+- concreteFacts must have 3 items
+- characters must have 2 or 3 items
+- targetVocabulary must have 5 items and should be useful, reusable learner-facing words or phrases
+- targetGrammar must have 1 or 2 items appropriate for ${level}
+- comprehensionGoals must have 2 items
+- questionPlan must have 3 items
+- sourceTermsToMention must include at least 1 item when the source topic contains named places, countries, organizations, or people
+- Keep everything tightly tied to the source topic
+- Do not write the story yet`;
+}
+
+function parseJsonObject<T>(raw: string): T {
+  const trimmed = raw.trim();
+  const cleaned = trimmed
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/, "");
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start < 0 || end < start) {
+    throw new Error("No JSON object found in model output");
+  }
+  return JSON.parse(cleaned.slice(start, end + 1)) as T;
+}
+
+function validateStoryPlan(topic: NewsTopic, plan: StoryPlan): StoryPlan {
+  if (!plan.setting?.trim()) throw new Error("Plan missing setting");
+  if (!plan.situation?.trim()) throw new Error("Plan missing situation");
+  if (!plan.tone?.trim()) throw new Error("Plan missing tone");
+  if (!plan.openingHook?.trim()) throw new Error("Plan missing opening hook");
+  if (!Array.isArray(plan.concreteFacts) || plan.concreteFacts.length < 3) {
+    throw new Error("Plan needs at least 3 concrete facts");
+  }
+  if (!Array.isArray(plan.characters) || plan.characters.length < 2) {
+    throw new Error("Plan needs at least 2 characters");
+  }
+  if (
+    !Array.isArray(plan.targetVocabulary) ||
+    plan.targetVocabulary.length < 5
+  ) {
+    throw new Error("Plan needs 5 target vocabulary items");
+  }
+  if (
+    !Array.isArray(plan.targetGrammar) ||
+    plan.targetGrammar.length < 1 ||
+    plan.targetGrammar.length > 2
+  ) {
+    throw new Error("Plan needs 1 or 2 target grammar items");
+  }
+  if (
+    !Array.isArray(plan.comprehensionGoals) ||
+    plan.comprehensionGoals.length < 2
+  ) {
+    throw new Error("Plan needs 2 comprehension goals");
+  }
+  if (!Array.isArray(plan.questionPlan) || plan.questionPlan.length < 3) {
+    throw new Error("Plan needs 3 question plan items");
+  }
+  if (!Array.isArray(plan.sourceTermsToMention)) {
+    throw new Error("Plan sourceTermsToMention must be an array");
+  }
+
+  const sourceTerms = extractSourceTerms(topic);
+  if (
+    sourceTerms.length > 0 &&
+    plan.sourceTermsToMention.filter((term) => term.trim().length > 0)
+      .length === 0
+  ) {
+    throw new Error("Plan did not preserve any source terms");
+  }
+
+  const combinedFacts = [
+    plan.setting,
+    plan.situation,
+    plan.openingHook,
+    ...plan.concreteFacts,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (
+    topic.summary &&
+    !topic.summary
+      .split(/\W+/)
+      .filter((word) => word.length > 5)
+      .some((word) => combinedFacts.includes(word.toLowerCase()))
+  ) {
+    throw new Error("Plan facts are too detached from the topic summary");
+  }
+
+  return {
+    setting: plan.setting.trim(),
+    situation: plan.situation.trim(),
+    tone: plan.tone.trim(),
+    concreteFacts: plan.concreteFacts
+      .map((fact) => fact.trim())
+      .filter(Boolean),
+    sourceTermsToMention: plan.sourceTermsToMention
+      .map((term) => term.trim())
+      .filter(Boolean),
+    characters: plan.characters
+      .map((character) => character.trim())
+      .filter(Boolean),
+    openingHook: plan.openingHook.trim(),
+    targetVocabulary: plan.targetVocabulary
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 5),
+    targetGrammar: plan.targetGrammar
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 2),
+    comprehensionGoals: plan.comprehensionGoals
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 2),
+    questionPlan: plan.questionPlan
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 3),
+  };
+}
+
+function validateStoryAgainstPlan(storyText: string, plan: StoryPlan): void {
+  const normalizedStory = storyText.toLowerCase();
+  const normalizeVocabItem = (item: string) =>
+    item.split(/[(/]/, 1)[0].trim().toLowerCase();
+
+  const missingVocabulary = plan.targetVocabulary.filter((item) => {
+    const token = normalizeVocabItem(item);
+    return token.length > 0 && !normalizedStory.includes(token);
+  });
+  if (missingVocabulary.length > 2) {
+    throw new Error(
+      `Story missed too much target vocabulary: ${missingVocabulary.join(", ")}`,
+    );
+  }
+
+  const matchTerms = storyText
+    .split("\n")
+    .filter((line) => line.startsWith("- "))
+    .map((line) => line.toLowerCase());
+  const matchedVocabularyCount = plan.targetVocabulary.filter((item) =>
+    matchTerms.some((line) => line.includes(normalizeVocabItem(item))),
+  ).length;
+  if (matchedVocabularyCount < 2) {
+    throw new Error(
+      "Match section does not reinforce enough target vocabulary",
+    );
+  }
+}
+
+async function generateApprovedPlan(
+  apiKey: string,
+  topic: NewsTopic,
+  learningLanguage: string,
+  fromLanguage: string,
+  level: string,
+): Promise<{
+  plan: StoryPlan;
+  model: string;
+  usage: Required<OpenRouterUsage>;
+  estimatedCostUsd: number;
+}> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const prompt = buildPlanPrompt(
+      topic,
+      learningLanguage,
+      fromLanguage,
+      level,
+    );
+    const result = await callOpenRouter(apiKey, [
+      { role: "user", content: prompt },
+    ]);
+    const usage = normalizeUsage(result.usage);
+    const estimatedCostUsd = estimateCostUsd(usage);
+
+    try {
+      const parsed = parseJsonObject<StoryPlan>(result.content);
+      const plan = validateStoryPlan(topic, parsed);
+      return { plan, model: result.model, usage, estimatedCostUsd };
+    } catch (error) {
+      lastError =
+        error instanceof Error ? error : new Error("Plan validation failed");
+      console.warn(
+        `[newsStories] Plan attempt ${attempt} failed: ${lastError.message}`,
+      );
+    }
+  }
+
+  throw lastError ?? new Error("Plan generation failed");
+}
+
+async function generateValidatedStoryFromPlan(
+  apiKey: string,
+  topic: NewsTopic,
+  plan: StoryPlan,
+  learningLanguage: string,
+  fromLanguage: string,
+  level: string,
+  grammarInstruction: string | null,
+): Promise<{
+  result: { content: string; model: string; usage: unknown };
+  storyText: string;
+  usage: Required<OpenRouterUsage>;
+  estimatedCostUsd: number;
+  storyAttemptCount: number;
+}> {
+  let lastError: Error | null = null;
+  let accumulatedPromptTokens = 0;
+  let accumulatedCompletionTokens = 0;
+  let accumulatedTotalTokens = 0;
+  let accumulatedCostUsd = 0;
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const prompt = buildPrompt(
+      topic,
+      plan,
+      learningLanguage,
+      fromLanguage,
+      level,
+      grammarInstruction,
+    );
+    console.log(
+      `[newsStories] Calling OpenRouter for story attempt ${attempt} (${prompt.length} chars)...`,
+    );
+    const result = await callOpenRouter(apiKey, [
+      { role: "user", content: prompt },
+    ]);
+    const usage = normalizeUsage(result.usage);
+    const estimatedCostUsd = estimateCostUsd(usage);
+    accumulatedPromptTokens += usage.prompt_tokens;
+    accumulatedCompletionTokens += usage.completion_tokens;
+    accumulatedTotalTokens += usage.total_tokens;
+    accumulatedCostUsd += estimatedCostUsd;
+
+    console.log(
+      `[newsStories] Story attempt ${attempt}: prompt=${usage.prompt_tokens}, completion=${usage.completion_tokens}, total=${usage.total_tokens}, estCost=$${estimatedCostUsd.toFixed(4)}`,
+    );
+
+    try {
+      const storyText = convertInlineStory(result.content);
+      validateStoryAgainstPlan(storyText, plan);
+      return {
+        result,
+        storyText,
+        usage: {
+          prompt_tokens: accumulatedPromptTokens,
+          completion_tokens: accumulatedCompletionTokens,
+          total_tokens: accumulatedTotalTokens,
+        },
+        estimatedCostUsd: accumulatedCostUsd,
+        storyAttemptCount: attempt,
+      };
+    } catch (error) {
+      lastError =
+        error instanceof Error
+          ? error
+          : new Error("Story validation after generation failed");
+      console.warn(
+        `[newsStories] Story attempt ${attempt} failed validation: ${lastError.message}`,
+      );
+    }
+  }
+
+  throw lastError ?? new Error("Story generation failed");
 }
 
 async function callOpenRouter(
   apiKey: string,
   messages: Array<{ role: string; content: string }>,
-): Promise<{ content: string; model: string }> {
+): Promise<{ content: string; model: string; usage: unknown }> {
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -274,7 +778,7 @@ async function callOpenRouter(
   const data = await res.json();
   let content = data.choices?.[0]?.message?.content ?? "";
   content = content.replace(/^```[\s\S]*?\n/, "").replace(/\n```\s*$/, "");
-  return { content: content.trim(), model: data.model };
+  return { content: content.trim(), model: data.model, usage: data.usage };
 }
 
 async function generateTTSAudio(
@@ -342,8 +846,23 @@ export const generateAndStore = internalAction({
     fromLanguage: v.string(),
     level: v.string(),
     date: v.optional(v.string()),
+    topic: v.optional(v.string()),
+    topicKey: v.optional(v.string()),
+    topicIndex: v.optional(v.number()),
+    topicContext: v.optional(
+      v.object({
+        title: v.string(),
+        summary: v.optional(v.string()),
+      }),
+    ),
   },
-  returns: v.null(),
+  returns: v.object({
+    model: v.string(),
+    promptTokens: v.number(),
+    completionTokens: v.number(),
+    totalTokens: v.number(),
+    estimatedCostUsd: v.number(),
+  }),
   handler: async (ctx, args) => {
     const date = args.date ?? new Date().toISOString().split("T")[0];
     const openRouterKey = process.env.OPENROUTER_API_KEY;
@@ -359,40 +878,73 @@ export const generateAndStore = internalAction({
       `[newsStories] Generating ${args.level} ${learningLanguage} story for ${date}`,
     );
 
-    // 1. Fetch headlines
-    let headlines: Array<string>;
+    // 1. Fetch topics
+    let topics: Array<NewsTopic>;
     try {
-      headlines = await fetchNewsHeadlines();
-      console.log(`[newsStories] Got ${headlines.length} headlines`);
+      topics = await fetchNewsTopics();
+      console.log(`[newsStories] Got ${topics.length} topics`);
     } catch (e) {
       console.warn("[newsStories] RSS fetch failed, using fallback:", e);
-      headlines = [
-        "Global climate summit reaches new agreement",
-        "Technology companies report record earnings",
-        "International space station celebrates anniversary",
-      ];
+      topics = FALLBACK_TOPICS;
     }
 
-    // 2. Generate story via OpenRouter
-    const prompt = buildPrompt(
-      headlines,
+    const topic =
+      args.topicContext ??
+      (args.topic
+        ? topics.find((candidate) => candidate.title === args.topic)
+        : undefined) ??
+      topics[0];
+    if (!topic) {
+      throw new Error("No news topic available for story generation");
+    }
+
+    // 2. Resolve grammar focus from curriculum
+    const grammarFocus = getGrammarFocus(args.language, args.level, date);
+    let grammarInstruction: string | null = null;
+    if (grammarFocus) {
+      grammarInstruction = buildGrammarInstruction(grammarFocus);
+      console.log(
+        `[newsStories] Grammar focus: week ${grammarFocus.weekNumber}/${grammarFocus.cycleLength}, ` +
+          `type=${grammarFocus.week.type}, primary="${grammarFocus.week.primary ?? "review"}"`,
+      );
+    } else {
+      console.log(
+        `[newsStories] No curriculum data for ${args.language}/${args.level}, using default grammar`,
+      );
+    }
+
+    // 3. Generate and validate a grounded story plan first
+    const planResult = await generateApprovedPlan(
+      openRouterKey,
+      topic,
       learningLanguage,
       fromLanguage,
       args.level,
     );
-    console.log(`[newsStories] Calling OpenRouter (${prompt.length} chars)...`);
+    console.log(
+      `[newsStories] Plan approved via ${planResult.model}; prompt=${planResult.usage.prompt_tokens}, completion=${planResult.usage.completion_tokens}, estCost=$${planResult.estimatedCostUsd.toFixed(4)}`,
+    );
 
-    const result = await callOpenRouter(openRouterKey, [
-      { role: "user", content: prompt },
-    ]);
+    // 4. Generate story via OpenRouter from the approved plan
+    const { result, storyText, usage, estimatedCostUsd, storyAttemptCount } =
+      await generateValidatedStoryFromPlan(
+        openRouterKey,
+        topic,
+        planResult.plan,
+        learningLanguage,
+        fromLanguage,
+        args.level,
+        grammarInstruction,
+      );
     console.log(
       `[newsStories] Got ${result.content.length} chars from ${result.model}`,
     );
+    console.log(
+      `[newsStories] Usage: prompt=${usage.prompt_tokens}, completion=${usage.completion_tokens}, total=${usage.total_tokens}, estCost=$${estimatedCostUsd.toFixed(4)}`,
+    );
+    console.log(`[newsStories] Story attempt count: ${storyAttemptCount}`);
 
-    // 3. Convert to Duolingo format
-    const storyText = convertInlineStory(result.content);
-
-    // 4. Store story in database
+    // 5. Store story in database
     const storyId: Id<"news_stories"> = await ctx.runMutation(
       internal.newsStories.createNewsStory,
       {
@@ -400,15 +952,46 @@ export const generateAndStore = internalAction({
         language: args.language,
         fromLanguage: args.fromLanguage,
         level: args.level,
-        headlines,
+        topic: topic.title,
+        topicKey: args.topicKey ?? topicToKey(topic.title),
+        topicIndex: args.topicIndex,
+        topicSummary: topic.summary,
+        headlines: [topic.title],
         model: result.model,
         storyText,
         rawOutput: result.content,
+        // Grammar curriculum metadata
+        grammarFocus: grammarFocus?.week.primary ?? undefined,
+        grammarMode: grammarFocus?.week.primaryMode ?? undefined,
+        grammarWeek: grammarFocus?.weekNumber,
+        grammarCycleLength: grammarFocus?.cycleLength,
+        secondaryGrammar: grammarFocus?.week.secondary ?? undefined,
+        weekType: grammarFocus?.week.type,
       },
     );
     console.log(`[newsStories] Story stored: ${storyId}`);
 
-    // 5. Generate audio (if Google TTS key is available)
+    await ctx.runMutation(internal.newsStories.logGenerationMetric, {
+      scope: "story",
+      date,
+      language: args.language,
+      fromLanguage: args.fromLanguage,
+      level: args.level,
+      topic: topic.title,
+      topicKey: args.topicKey ?? topicToKey(topic.title),
+      topicIndex: args.topicIndex,
+      newsStoryId: storyId,
+      storyCount: 1,
+      model: result.model,
+      promptTokens: planResult.usage.prompt_tokens + usage.prompt_tokens,
+      completionTokens:
+        planResult.usage.completion_tokens + usage.completion_tokens,
+      totalTokens: planResult.usage.total_tokens + usage.total_tokens,
+      estimatedCostUsd: planResult.estimatedCostUsd + estimatedCostUsd,
+      storyAttemptCount,
+    });
+
+    // 6. Generate audio (if Google TTS key is available)
     if (googleTTSKey) {
       console.log("[newsStories] Generating audio...");
       try {
@@ -431,7 +1014,15 @@ export const generateAndStore = internalAction({
     console.log(
       `[newsStories] Done: ${args.level} ${learningLanguage} story for ${date}`,
     );
-    return null;
+    return {
+      model: result.model,
+      promptTokens: planResult.usage.prompt_tokens + usage.prompt_tokens,
+      completionTokens:
+        planResult.usage.completion_tokens + usage.completion_tokens,
+      totalTokens: planResult.usage.total_tokens + usage.total_tokens,
+      estimatedCostUsd: planResult.estimatedCostUsd + estimatedCostUsd,
+      storyAttemptCount,
+    };
   },
 });
 
@@ -572,7 +1163,7 @@ async function generateAndStoreAudio(
   }
 }
 
-/** Generate all 4 levels for a language (called by cron) */
+/** Generate 5 topics x 4 levels for a language (called by cron) */
 export const generateDailyStories = internalAction({
   args: {
     language: v.string(),
@@ -585,21 +1176,78 @@ export const generateDailyStories = internalAction({
       `[newsStories] Starting daily generation for ${args.language} (${date})`,
     );
 
+    let topics: Array<NewsTopic>;
+    try {
+      topics = await fetchNewsTopics();
+      console.log(`[newsStories] Daily topic pool: ${topics.length} topics`);
+    } catch (e) {
+      console.warn("[newsStories] Daily RSS fetch failed, using fallback:", e);
+      topics = FALLBACK_TOPICS;
+    }
+
+    const selectedTopics = ensureTopicPool(topics, 5);
     const levels = ["A1", "A2", "B1", "B2"];
-    for (const level of levels) {
-      try {
-        await ctx.runAction(internal.newsStoriesAction.generateAndStore, {
-          language: args.language,
-          fromLanguage: args.fromLanguage,
-          level,
-          date,
-        });
-      } catch (e) {
-        console.error(`[newsStories] Failed to generate ${level} story:`, e);
+    let totalPromptTokens = 0;
+    let totalCompletionTokens = 0;
+    let totalTokens = 0;
+    let totalEstimatedCostUsd = 0;
+    let totalStoryAttempts = 0;
+    for (const [topicIndex, topicContext] of selectedTopics.entries()) {
+      const topicKey = topicToKey(topicContext.title);
+      for (const level of levels) {
+        try {
+          const result: {
+            model: string;
+            promptTokens: number;
+            completionTokens: number;
+            totalTokens: number;
+            estimatedCostUsd: number;
+            storyAttemptCount: number;
+          } = await ctx.runAction(internal.newsStoriesAction.generateAndStore, {
+            language: args.language,
+            fromLanguage: args.fromLanguage,
+            level,
+            date,
+            topic: topicContext.title,
+            topicKey,
+            topicIndex,
+            topicContext,
+          });
+          totalPromptTokens += result.promptTokens;
+          totalCompletionTokens += result.completionTokens;
+          totalTokens += result.totalTokens;
+          totalEstimatedCostUsd += result.estimatedCostUsd;
+          totalStoryAttempts += result.storyAttemptCount;
+        } catch (e) {
+          console.error(
+            `[newsStories] Failed to generate ${level} story for topic "${topicContext.title}":`,
+            e,
+          );
+        }
       }
     }
 
-    console.log(`[newsStories] Daily generation complete for ${args.language}`);
+    console.log(
+      `[newsStories] Daily generation complete for ${args.language}. prompt=${totalPromptTokens}, completion=${totalCompletionTokens}, total=${totalTokens}, estCost=$${totalEstimatedCostUsd.toFixed(4)}, storyAttempts=${totalStoryAttempts}`,
+    );
+    await ctx.runMutation(internal.newsStories.logGenerationMetric, {
+      scope: "batch",
+      date,
+      language: args.language,
+      fromLanguage: args.fromLanguage,
+      level: undefined,
+      topic: undefined,
+      topicKey: undefined,
+      topicIndex: undefined,
+      newsStoryId: undefined,
+      storyCount: selectedTopics.length * levels.length,
+      model: "anthropic/claude-sonnet-4",
+      promptTokens: totalPromptTokens,
+      completionTokens: totalCompletionTokens,
+      totalTokens,
+      estimatedCostUsd: totalEstimatedCostUsd,
+      storyAttemptCount: totalStoryAttempts,
+    });
     return null;
   },
 });

@@ -230,9 +230,32 @@ export default defineSchema({
     headlines: v.array(v.string()),
     model: v.optional(v.string()),
     createdAt: v.number(),
+    // Topic selection fields (one story per headline)
+    topic: v.optional(v.string()), // selected headline text
+    topicIndex: v.optional(v.number()), // index in headlines array
+    topicKey: v.optional(v.string()), // slug for dedup
+    topicSummary: v.optional(v.string()), // short summary of the topic
+    // Grammar curriculum fields (optional for backward compat)
+    grammarFocus: v.optional(v.string()), // primary grammar topic
+    grammarMode: v.optional(v.string()), // "introduce" | "reinforce" | "deepen"
+    grammarWeek: v.optional(v.number()), // week number in cycle
+    grammarCycleLength: v.optional(v.number()), // total weeks in cycle
+    secondaryGrammar: v.optional(v.string()), // secondary grammar topic
+    weekType: v.optional(v.string()), // "intro" | "review"
   })
     .index("by_date_and_language", ["date", "language"])
     .index("by_date_and_language_and_level", ["date", "language", "level"])
+    .index("by_date_and_language_and_topic_key", [
+      "date",
+      "language",
+      "topicKey",
+    ])
+    .index("by_date_and_language_and_topic_key_and_level", [
+      "date",
+      "language",
+      "topicKey",
+      "level",
+    ])
     .index("by_language", ["language"]),
 
   news_story_content: defineTable({
@@ -249,6 +272,29 @@ export default defineSchema({
       ),
     ),
   }).index("by_news_story", ["newsStoryId"]),
+
+  news_story_generation_metrics: defineTable({
+    scope: v.union(v.literal("story"), v.literal("batch")),
+    date: v.string(),
+    language: v.string(),
+    fromLanguage: v.string(),
+    level: v.optional(v.string()),
+    topic: v.optional(v.string()),
+    topicKey: v.optional(v.string()),
+    topicIndex: v.optional(v.number()),
+    newsStoryId: v.optional(v.id("news_stories")),
+    storyCount: v.number(),
+    model: v.optional(v.string()),
+    promptTokens: v.number(),
+    completionTokens: v.number(),
+    totalTokens: v.number(),
+    estimatedCostUsd: v.number(),
+    storyAttemptCount: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_date_and_language", ["date", "language"])
+    .index("by_scope_and_date", ["scope", "date"])
+    .index("by_news_story", ["newsStoryId"]),
 
   discord_stories_role_sync: defineTable({
     legacyUserId: v.number(),

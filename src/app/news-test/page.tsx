@@ -94,6 +94,13 @@ const LANGUAGE_PAIRS = [
   },
 ];
 
+const MODEL_OPTIONS = [
+  { value: "anthropic/claude-sonnet-4", label: "Claude Sonnet 4" },
+  { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+  { value: "openai/gpt-4.1-mini", label: "GPT-4.1 Mini" },
+  { value: "google/gemini-2.5-flash-lite", label: "Gemini 2.5 Flash-Lite" },
+] as const;
+
 type ViewMode = "editor" | "play";
 
 /** Convert base64 audio to a blob: URL */
@@ -158,7 +165,12 @@ export default function NewsTestPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [headlines, setHeadlines] = React.useState<string[]>([]);
   const [selectedPair, setSelectedPair] = React.useState(0);
+  const [selectedModel, setSelectedModel] = React.useState<string>(
+    MODEL_OPTIONS[0].value,
+  );
   const [modelUsed, setModelUsed] = React.useState<string | null>(null);
+  const [promptUsed, setPromptUsed] = React.useState<string | null>(null);
+  const [showPrompt, setShowPrompt] = React.useState(false);
   const [status, setStatus] = React.useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = React.useState("B1");
   const [viewMode, setViewMode] = React.useState<ViewMode>("editor");
@@ -301,6 +313,7 @@ export default function NewsTestPage() {
     setIsGenerating(true);
     setError(null);
     setModelUsed(null);
+    setPromptUsed(null);
     setAudioMap({}); // Clear audio when generating a new story
     setStatus("Fetching news headlines...");
 
@@ -320,6 +333,7 @@ export default function NewsTestPage() {
           learningLanguage: pair.learning,
           fromLanguage: pair.from,
           level: selectedLevel,
+          model: selectedModel,
         }),
       });
 
@@ -340,6 +354,7 @@ export default function NewsTestPage() {
 
       setHeadlines(data.headlines ?? []);
       setModelUsed(data.model ?? null);
+      setPromptUsed(data.prompt ?? null);
       if (data.repaired) {
         console.log(
           `[news-test] Hints were repaired (${data.hintMismatches} mismatches fixed)`,
@@ -564,6 +579,18 @@ export default function NewsTestPage() {
           <option value="B2">B2 — Upper Intermediate</option>
         </select>
 
+        <select
+          value={selectedModel}
+          onChange={(e) => setSelectedModel(e.target.value)}
+          className="rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-800"
+        >
+          {MODEL_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+
         <button
           onClick={handleGenerate}
           disabled={isGenerating}
@@ -581,6 +608,16 @@ export default function NewsTestPage() {
         </button>
 
         <div className="mx-1 h-6 w-px bg-gray-300 dark:bg-gray-600" />
+
+        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+          <input
+            type="checkbox"
+            checked={showPrompt}
+            onChange={(e) => setShowPrompt(e.target.checked)}
+            className="rounded border-gray-300"
+          />
+          Show prompt
+        </label>
 
         {/* View mode toggle */}
         <div className="flex rounded border border-gray-300 text-sm dark:border-gray-600">
@@ -633,6 +670,22 @@ export default function NewsTestPage() {
       {headlines.length > 0 && (
         <div className="border-b border-gray-100 bg-gray-50 px-4 py-1.5 text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
           <strong>Today&apos;s headlines:</strong> {headlines.join(" • ")}
+        </div>
+      )}
+
+      {showPrompt && promptUsed && (
+        <div className="border-b border-gray-100 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
+          <div className="mb-2 flex items-center justify-between">
+            <strong className="text-sm text-gray-700 dark:text-gray-200">
+              Prompt
+            </strong>
+            {modelUsed && (
+              <span className="text-xs text-gray-400">via {modelUsed}</span>
+            )}
+          </div>
+          <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            {promptUsed}
+          </pre>
         </div>
       )}
 
