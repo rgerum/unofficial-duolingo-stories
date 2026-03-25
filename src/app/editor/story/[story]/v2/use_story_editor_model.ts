@@ -22,6 +22,7 @@ type ImageLike = {
 };
 
 type UseStoryEditorModelArgs = {
+  isAdmin: boolean;
   storyData: StoryData;
   avatarNames: Record<number, Avatar>;
   docText: string;
@@ -74,6 +75,7 @@ type EditorModel = {
 };
 
 export function useStoryEditorModel({
+  isAdmin,
   storyData,
   avatarNames,
   docText,
@@ -197,11 +199,35 @@ export function useStoryEditorModel({
     ) {
       return "Your session expired or your account no longer has editor access. Please sign in again and retry.";
     }
+    if (rawMessage === "Official stories cannot be overwritten.") {
+      return "Official stories cannot be overwritten unless you are an admin.";
+    }
+    if (
+      rawMessage === "Official story overwrite requires explicit confirmation."
+    ) {
+      return "Official story overwrite requires confirmation before saving.";
+    }
     return `There was an error ${verb}.`;
   }, []);
 
   const save = React.useCallback(async () => {
     if (isSaving || isDeleting) return;
+    const confirmOfficialOverwrite =
+      storyData.official && isAdmin
+        ? window.confirm(
+            "This is an official story. Saving will overwrite it. Continue?",
+          )
+        : false;
+    if (storyData.official && !isAdmin) {
+      const message =
+        "Official stories cannot be overwritten unless you are an admin.";
+      setSaveError(true);
+      setSaveErrorMessage(message);
+      throw new Error(message);
+    }
+    if (storyData.official && !confirmOfficialOverwrite) {
+      return;
+    }
     setIsSaving(true);
     const saveStartRevision = revision;
     try {
@@ -217,6 +243,7 @@ export function useStoryEditorModel({
         json: toConvexValue(parsedStoryBase),
         todo_count: parsedMeta.todo_count,
         change_date: new Date().toISOString(),
+        confirmOfficialOverwrite,
         operationKey: `story:${storyData.id}:set_story:v2:${Date.now()}:${saveStartRevision}`,
       });
       if (!result) {
@@ -236,6 +263,7 @@ export function useStoryEditorModel({
     }
   }, [
     docText,
+    isAdmin,
     isDeleting,
     isSaving,
     parsedMeta.fromLanguageName,
@@ -249,6 +277,7 @@ export function useStoryEditorModel({
     storyData.course_id,
     storyData.duo_id,
     storyData.id,
+    storyData.official,
     toFriendlyError,
   ]);
 

@@ -13,6 +13,11 @@ export type StoryData = {
   from_language: number;
 };
 
+export type StoryEditorPageData = {
+  isAdmin: boolean;
+  story_data: StoryData;
+};
+
 export type Avatar = {
   id: number | null;
   avatar_id: number;
