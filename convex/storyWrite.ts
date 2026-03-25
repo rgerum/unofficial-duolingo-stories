@@ -20,6 +20,7 @@ export const setStory = mutation({
     json: v.any(),
     todo_count: v.number(),
     change_date: v.string(),
+    confirmOfficialOverwrite: v.optional(v.boolean()),
     operationKey: v.optional(v.string()),
   },
   returns: v.union(
@@ -37,6 +38,7 @@ export const setStory = mutation({
     const authorChangeLegacyUserId = await requireSessionLegacyUserId(ctx);
     const identity = (await ctx.auth.getUserIdentity()) as {
       name?: string | null;
+      role?: string | null;
     } | null;
     const actorName =
       identity?.name?.trim() || `user_${authorChangeLegacyUserId}`;
@@ -46,6 +48,16 @@ export const setStory = mutation({
       .unique();
     if (!course) {
       throw new Error(`Course ${args.legacyCourseId} not found`);
+    }
+    if (course.official) {
+      if (identity?.role !== "admin") {
+        throw new Error("Official stories cannot be overwritten.");
+      }
+      if (!args.confirmOfficialOverwrite) {
+        throw new Error(
+          "Official story overwrite requires explicit confirmation.",
+        );
+      }
     }
 
     const storyById =
