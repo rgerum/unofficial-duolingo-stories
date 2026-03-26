@@ -5,14 +5,16 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Spinner } from "@/components/ui/spinner";
 import EditorV2 from "./v2/editor_v2";
-import type { Avatar, StoryData } from "./types";
+import type { Avatar, StoryEditorPageData } from "./types";
 
 export default function StoryEditorPageClient({
   storyId,
 }: {
   storyId: number;
 }) {
-  const data = useQuery(api.editorRead.getEditorStoryPageData, { storyId });
+  const data = useQuery(api.editorRead.getEditorStoryPageData, {
+    storyId,
+  }) as StoryEditorPageData | null | undefined;
   const avatarRows = useQuery(
     api.editorRead.getEditorAvatarNamesByLanguageLegacyId,
     data ? { languageLegacyId: data.story_data.learning_language } : "skip",
@@ -28,7 +30,8 @@ export default function StoryEditorPageClient({
 
   return (
     <EditorV2
-      story_data={data.story_data as StoryData}
+      isAdmin={data.isAdmin}
+      story_data={data.story_data}
       avatar_names={avatarNames}
     />
   );

@@ -12,6 +12,7 @@ declare global {
 }
 
 type HeaderProps = {
+  isAdmin: boolean;
   story_data: StoryData;
   unsaved_changes: boolean;
   language_data?: {
@@ -48,6 +49,7 @@ type HeaderProps = {
 };
 
 export function StoryEditorHeader({
+  isAdmin,
   story_data,
   unsaved_changes,
   language_data,
@@ -155,6 +157,11 @@ export function StoryEditorHeader({
               (is_saving ? "Saving..." : "Save") + (unsaved_changes ? "*" : "")
             }
             disabled={is_saving || is_deleting}
+            title={
+              story_data.official && !isAdmin
+                ? "Only admins can overwrite official stories."
+                : undefined
+            }
           />
           <div className="px-2 text-[0.8rem] text-[var(--text-color-dim)]">
             {last_saved_at

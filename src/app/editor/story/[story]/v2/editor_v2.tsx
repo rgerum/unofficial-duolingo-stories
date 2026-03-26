@@ -53,9 +53,11 @@ function normalizeDocText(text: string): string {
 }
 
 export default function EditorV2({
+  isAdmin,
   story_data,
   avatar_names,
 }: {
+  isAdmin: boolean;
   story_data: StoryData;
   avatar_names: Record<number, Avatar>;
 }) {
@@ -91,6 +93,7 @@ export default function EditorV2({
   }, [story_data.id, story_data.text]);
 
   const model = useStoryEditorModel({
+    isAdmin,
     storyData: story_data,
     avatarNames: avatar_names,
     docText,
@@ -334,6 +337,7 @@ export default function EditorV2({
       )}
 
       <StoryEditorHeader
+        isAdmin={isAdmin}
         story_data={story_data}
         unsaved_changes={model.dirty}
         func_save={model.save}

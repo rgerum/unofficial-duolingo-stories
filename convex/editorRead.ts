@@ -650,6 +650,9 @@ export const getEditorLocalizationRowsByLanguageLegacyId = query({
 export const getEditorStoryPageData = query({
   args: { storyId: v.number() },
   handler: async (ctx, args) => {
+    const identity = (await ctx.auth.getUserIdentity()) as {
+      role?: string | null;
+    } | null;
     const story = await ctx.db
       .query("stories")
       .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.storyId))
@@ -673,6 +676,7 @@ export const getEditorStoryPageData = query({
     if (!learningLanguage || !fromLanguage) return null;
 
     return {
+      isAdmin: identity?.role === "admin",
       story_data: {
         id: story.legacyId ?? 0,
         official: course.official,

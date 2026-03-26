@@ -5,6 +5,7 @@ export default function EditorButton({
   style,
   onClick,
   id,
+  title,
   alt,
   img,
   text,
@@ -15,6 +16,7 @@ export default function EditorButton({
   style?: React.CSSProperties;
   onClick?: () => void;
   id?: string;
+  title?: string;
   alt?: string;
   img?: string;
   text?: string;
@@ -63,6 +65,7 @@ export default function EditorButton({
         <div
           style={style}
           id={id}
+          title={title}
           className={baseClassName + " " + disabledClassName}
           aria-disabled="true"
         >
@@ -82,6 +85,7 @@ export default function EditorButton({
         href={href}
         style={style}
         id={id}
+        title={title}
         className={baseClassName}
         onClick={onClick}
       >
@@ -100,6 +104,7 @@ export default function EditorButton({
     <div
       style={style}
       id={id}
+      title={title}
       className={baseClassName + (disabled ? ` ${disabledClassName}` : "")}
       onClick={disabled ? undefined : onClick}
       aria-disabled={disabled ? "true" : undefined}
