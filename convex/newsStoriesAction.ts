@@ -1162,7 +1162,17 @@ async function generateAndStoreAudio(
   }
 }
 
-/** Generate 5 topics x 4 levels for a language (called by cron) */
+/**
+ * Generate 5 topics × 4 levels for a language (called by cron).
+ *
+ * This is a lightweight dispatcher that fetches topics, then schedules each
+ * story generation as an independent action via `ctx.scheduler.runAfter`.
+ * Each scheduled `generateAndStore` action gets its own 600 s timeout, so
+ * the total wall-clock time is no longer bottlenecked by a single action.
+ *
+ * Per-story metrics are logged inside `generateAndStore`; aggregate "batch"
+ * metrics can be computed after the fact from the per-story rows.
+ */
 export const generateDailyStories = internalAction({
   args: {
     language: v.string(),
@@ -1186,24 +1196,15 @@ export const generateDailyStories = internalAction({
 
     const selectedTopics = ensureTopicPool(topics, 5);
     const levels = ["A1", "A2", "B1", "B2"];
-    let totalPromptTokens = 0;
-    let totalCompletionTokens = 0;
-    let totalTokens = 0;
-    let totalEstimatedCostUsd = 0;
-    let totalStoryAttempts = 0;
-    let lastModelUsed: string | undefined;
+
+    let scheduled = 0;
     for (const [topicIndex, topicContext] of selectedTopics.entries()) {
       const topicKey = topicToKey(topicContext.title);
       for (const level of levels) {
-        try {
-          const result: {
-            model: string;
-            promptTokens: number;
-            completionTokens: number;
-            totalTokens: number;
-            estimatedCostUsd: number;
-            storyAttemptCount: number;
-          } = await ctx.runAction(internal.newsStoriesAction.generateAndStore, {
+        await ctx.scheduler.runAfter(
+          0,
+          internal.newsStoriesAction.generateAndStore,
+          {
             language: args.language,
             fromLanguage: args.fromLanguage,
             level,
@@ -1212,43 +1213,15 @@ export const generateDailyStories = internalAction({
             topicKey,
             topicIndex,
             topicContext,
-          });
-          totalPromptTokens += result.promptTokens;
-          totalCompletionTokens += result.completionTokens;
-          totalTokens += result.totalTokens;
-          totalEstimatedCostUsd += result.estimatedCostUsd;
-          totalStoryAttempts += result.storyAttemptCount;
-          lastModelUsed = result.model;
-        } catch (e) {
-          console.error(
-            `[newsStories] Failed to generate ${level} story for topic "${topicContext.title}":`,
-            e,
-          );
-        }
+          },
+        );
+        scheduled++;
       }
     }
 
     console.log(
-      `[newsStories] Daily generation complete for ${args.language}. prompt=${totalPromptTokens}, completion=${totalCompletionTokens}, total=${totalTokens}, estCost=$${totalEstimatedCostUsd.toFixed(4)}, storyAttempts=${totalStoryAttempts}`,
+      `[newsStories] Scheduled ${scheduled} story generation actions for ${args.language} (${date})`,
     );
-    await ctx.runMutation(internal.newsStories.logGenerationMetric, {
-      scope: "batch",
-      date,
-      language: args.language,
-      fromLanguage: args.fromLanguage,
-      level: undefined,
-      topic: undefined,
-      topicKey: undefined,
-      topicIndex: undefined,
-      newsStoryId: undefined,
-      storyCount: selectedTopics.length * levels.length,
-      model: lastModelUsed,
-      promptTokens: totalPromptTokens,
-      completionTokens: totalCompletionTokens,
-      totalTokens,
-      estimatedCostUsd: totalEstimatedCostUsd,
-      storyAttemptCount: totalStoryAttempts,
-    });
     return null;
   },
 });
