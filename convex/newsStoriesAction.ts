@@ -213,7 +213,7 @@ function buildPrompt(
 
   const grammarSection = grammarInstruction
     ? `\n${grammarInstruction}\n`
-    : `\n${config.grammar}\n`;
+    : "";
 
   return `You are a language-learning story writer for Duolingo-style stories.
 
@@ -862,6 +862,7 @@ export const generateAndStore = internalAction({
     completionTokens: v.number(),
     totalTokens: v.number(),
     estimatedCostUsd: v.number(),
+    storyAttemptCount: v.number(),
   }),
   handler: async (ctx, args) => {
     const date = args.date ?? new Date().toISOString().split("T")[0];
@@ -1192,6 +1193,7 @@ export const generateDailyStories = internalAction({
     let totalTokens = 0;
     let totalEstimatedCostUsd = 0;
     let totalStoryAttempts = 0;
+    let lastModelUsed: string | undefined;
     for (const [topicIndex, topicContext] of selectedTopics.entries()) {
       const topicKey = topicToKey(topicContext.title);
       for (const level of levels) {
@@ -1218,6 +1220,7 @@ export const generateDailyStories = internalAction({
           totalTokens += result.totalTokens;
           totalEstimatedCostUsd += result.estimatedCostUsd;
           totalStoryAttempts += result.storyAttemptCount;
+          lastModelUsed = result.model;
         } catch (e) {
           console.error(
             `[newsStories] Failed to generate ${level} story for topic "${topicContext.title}":`,
@@ -1241,7 +1244,7 @@ export const generateDailyStories = internalAction({
       topicIndex: undefined,
       newsStoryId: undefined,
       storyCount: selectedTopics.length * levels.length,
-      model: "anthropic/claude-sonnet-4",
+      model: lastModelUsed,
       promptTokens: totalPromptTokens,
       completionTokens: totalCompletionTokens,
       totalTokens,

@@ -1,7 +1,24 @@
 import { NextResponse } from "next/server";
+import {
+  getGrammarFocus,
+  buildGrammarInstruction,
+} from "@/../convex/curriculum/weekResolver";
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
+
+// Reverse lookup: full language name → short code (for grammar curriculum)
+const LANG_SHORT_CODES: Record<string, string> = {
+  French: "fr",
+  Spanish: "es",
+  German: "de",
+  Italian: "it",
+  Portuguese: "pt",
+  Dutch: "nl",
+  Japanese: "ja",
+  Korean: "ko",
+  "Mandarin Chinese": "zh",
+};
 
 // ---- Inline bracket format → Duolingo format converter ----
 
@@ -389,6 +406,7 @@ function buildPrompt(
   learningLanguage: string,
   fromLanguage: string,
   level: string,
+  grammarInstruction: string | null,
 ): string {
   const config = LEVEL_CONFIGS[level] ?? LEVEL_CONFIGS["B1"];
   const topicContext = [
@@ -398,11 +416,18 @@ function buildPrompt(
     .filter(Boolean)
     .join("\n");
 
+  const grammarSection = grammarInstruction
+    ? `\n${grammarInstruction}\n`
+    : "";
+
   return `You are a language-learning story writer for Duolingo-style stories.
 
 CEFR LEVEL: ${level} (${config.description})
 ${config.vocabulary}
+
+LEVEL GRAMMAR CONSTRAINTS:
 ${config.grammar}
+${grammarSection}
 ${config.sentenceLength}
 
 Given this real news topic from today:
@@ -775,6 +800,7 @@ async function generateValidatedStoryFromPlan(
   fromLanguage: string,
   level: string,
   model: string,
+  grammarInstruction: string | null,
 ): Promise<{
   result: { content: string; model: string; usage: unknown };
   storyText: string;
@@ -795,6 +821,7 @@ async function generateValidatedStoryFromPlan(
       learningLanguage,
       fromLanguage,
       level,
+      grammarInstruction,
     );
     console.log(
       `[news-story] Generating story attempt ${attempt} (${prompt.length} chars)...`,
@@ -909,6 +936,22 @@ export async function POST(request: Request) {
     );
   }
 
+  // Resolve grammar focus from curriculum
+  const languageShort = LANG_SHORT_CODES[learningLanguage];
+  const today = new Date().toISOString().split("T")[0];
+  const grammarFocus = languageShort
+    ? getGrammarFocus(languageShort, level, today)
+    : null;
+  const grammarInstruction = grammarFocus
+    ? buildGrammarInstruction(grammarFocus)
+    : null;
+  if (grammarFocus) {
+    console.log(
+      `[news-story] Grammar focus: week ${grammarFocus.weekNumber}/${grammarFocus.cycleLength}, ` +
+        `type=${grammarFocus.week.type}, primary="${grammarFocus.week.primary ?? "review"}"`,
+    );
+  }
+
   const planResult = await generateApprovedPlan(
     topic,
     learningLanguage,
@@ -926,6 +969,7 @@ export async function POST(request: Request) {
     learningLanguage,
     fromLanguage,
     level,
+    grammarInstruction,
   );
   console.log("[news-story] Prompt length:", prompt.length, "chars");
   console.log("[news-story] === FULL PROMPT ===");
@@ -957,6 +1001,7 @@ export async function POST(request: Request) {
       fromLanguage,
       level,
       model,
+      grammarInstruction,
     ));
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
