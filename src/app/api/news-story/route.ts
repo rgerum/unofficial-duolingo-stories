@@ -416,9 +416,7 @@ function buildPrompt(
     .filter(Boolean)
     .join("\n");
 
-  const grammarSection = grammarInstruction
-    ? `\n${grammarInstruction}\n`
-    : "";
+  const grammarSection = grammarInstruction ? `\n${grammarInstruction}\n` : "";
 
   return `You are a language-learning story writer for Duolingo-style stories.
 
