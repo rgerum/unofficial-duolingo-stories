@@ -30,7 +30,7 @@ export const getByDateAndLevel = query({
           .eq("language", args.language)
           .eq("level", args.level),
       )
-      .unique();
+      .collect();
   },
 });
 
@@ -90,23 +90,37 @@ export const createNewsStory = internalMutation({
     language: v.string(),
     fromLanguage: v.string(),
     level: v.string(),
+    topic: v.optional(v.string()),
+    topicKey: v.optional(v.string()),
+    topicIndex: v.optional(v.number()),
+    topicSummary: v.optional(v.string()),
     headlines: v.array(v.string()),
     model: v.optional(v.string()),
     storyText: v.string(),
     rawOutput: v.string(),
+    // Grammar curriculum fields
+    grammarFocus: v.optional(v.string()),
+    grammarMode: v.optional(v.string()),
+    grammarWeek: v.optional(v.number()),
+    grammarCycleLength: v.optional(v.number()),
+    secondaryGrammar: v.optional(v.string()),
+    weekType: v.optional(v.string()),
   },
   returns: v.id("news_stories"),
   handler: async (ctx, args) => {
-    // Check if story already exists for this date/language/level
-    const existing = await ctx.db
-      .query("news_stories")
-      .withIndex("by_date_and_language_and_level", (q) =>
-        q
-          .eq("date", args.date)
-          .eq("language", args.language)
-          .eq("level", args.level),
-      )
-      .unique();
+    const existing =
+      args.topicKey === undefined
+        ? null
+        : await ctx.db
+            .query("news_stories")
+            .withIndex("by_date_and_language_and_topic_key_and_level", (q) =>
+              q
+                .eq("date", args.date)
+                .eq("language", args.language)
+                .eq("topicKey", args.topicKey)
+                .eq("level", args.level),
+            )
+            .unique();
 
     if (existing) {
       // Delete old content and story
@@ -130,9 +144,19 @@ export const createNewsStory = internalMutation({
       language: args.language,
       fromLanguage: args.fromLanguage,
       level: args.level,
+      topic: args.topic,
+      topicKey: args.topicKey,
+      topicIndex: args.topicIndex,
+      topicSummary: args.topicSummary,
       headlines: args.headlines,
       model: args.model,
       createdAt: Date.now(),
+      grammarFocus: args.grammarFocus,
+      grammarMode: args.grammarMode,
+      grammarWeek: args.grammarWeek,
+      grammarCycleLength: args.grammarCycleLength,
+      secondaryGrammar: args.secondaryGrammar,
+      weekType: args.weekType,
     });
 
     await ctx.db.insert("news_story_content", {
@@ -165,6 +189,35 @@ export const addAudioToStory = internalMutation({
 
     await ctx.db.patch(content._id, {
       audioFiles: args.audioFiles,
+    });
+    return null;
+  },
+});
+
+export const logGenerationMetric = internalMutation({
+  args: {
+    scope: v.union(v.literal("story"), v.literal("batch")),
+    date: v.string(),
+    language: v.string(),
+    fromLanguage: v.string(),
+    level: v.optional(v.string()),
+    topic: v.optional(v.string()),
+    topicKey: v.optional(v.string()),
+    topicIndex: v.optional(v.number()),
+    newsStoryId: v.optional(v.id("news_stories")),
+    storyCount: v.number(),
+    model: v.optional(v.string()),
+    promptTokens: v.number(),
+    completionTokens: v.number(),
+    totalTokens: v.number(),
+    estimatedCostUsd: v.number(),
+    storyAttemptCount: v.optional(v.number()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.insert("news_story_generation_metrics", {
+      ...args,
+      createdAt: Date.now(),
     });
     return null;
   },

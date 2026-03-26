@@ -18,6 +18,8 @@ import type * as authMigration from "../authMigration.js";
 import type * as courseContributorBackfill from "../courseContributorBackfill.js";
 import type * as courseWrite from "../courseWrite.js";
 import type * as crons from "../crons.js";
+import type * as curriculum_frenchSequence from "../curriculum/frenchSequence.js";
+import type * as curriculum_weekResolver from "../curriculum/weekResolver.js";
 import type * as discordAvatarSync from "../discordAvatarSync.js";
 import type * as discordBot from "../discordBot.js";
 import type * as discordData from "../discordData.js";
@@ -62,6 +64,8 @@ declare const fullApi: ApiFromModules<{
   courseContributorBackfill: typeof courseContributorBackfill;
   courseWrite: typeof courseWrite;
   crons: typeof crons;
+  "curriculum/frenchSequence": typeof curriculum_frenchSequence;
+  "curriculum/weekResolver": typeof curriculum_weekResolver;
   discordAvatarSync: typeof discordAvatarSync;
   discordBot: typeof discordBot;
   discordData: typeof discordData;
