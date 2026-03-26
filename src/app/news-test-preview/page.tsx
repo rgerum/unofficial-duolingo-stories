@@ -8,6 +8,11 @@ import StoryProgress from "@/components/StoryProgress";
 import type { Avatar } from "@/app/editor/story/[story]/types";
 import type { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 import type { Id } from "@convex/_generated/dataModel";
+import {
+  getGrammarFocus,
+  type GrammarFocus,
+} from "@convex/curriculum/weekResolver";
+import { FRENCH_SEQUENCES } from "@convex/curriculum/frenchSequence";
 
 const NEWS_ILLUSTRATION =
   "data:image/svg+xml," +
@@ -260,6 +265,9 @@ export default function NewsPreviewPage() {
           )}
         </div>
 
+        {/* Grammar Curriculum Overview */}
+        <GrammarOverview date={selectedDate} language={language} />
+
         {/* Archive */}
         {availableDates && (availableDates as string[]).length > 0 && (
           <div>
@@ -284,6 +292,223 @@ export default function NewsPreviewPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ---- Grammar Curriculum Overview ----
+
+const MODE_LABELS: Record<string, { label: string; color: string }> = {
+  introduce: { label: "New", color: "#58cc02" },
+  reinforce: { label: "Reinforce", color: "#1cb0f6" },
+  deepen: { label: "Deepen", color: "#ce82ff" },
+};
+
+function GrammarOverview({
+  date,
+  language,
+}: {
+  date: string;
+  language: string;
+}) {
+  const [expanded, setExpanded] = React.useState(false);
+
+  const focusByLevel = React.useMemo(() => {
+    const result: Record<string, GrammarFocus | null> = {};
+    for (const level of LEVELS) {
+      result[level] = getGrammarFocus(language, level, date);
+    }
+    return result;
+  }, [date, language]);
+
+  // Don't render if no curriculum data (non-French language)
+  if (Object.values(focusByLevel).every((f) => f === null)) return null;
+
+  return (
+    <div className="mb-8">
+      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+        Grammar Curriculum
+      </h3>
+
+      {/* Current week overview for each level */}
+      <div className="space-y-3">
+        {LEVELS.map((level) => {
+          const focus = focusByLevel[level];
+          if (!focus) return null;
+          const info = LEVEL_LABELS[level];
+          const { week } = focus;
+
+          return (
+            <div
+              key={level}
+              className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white"
+                  style={{ backgroundColor: info.color }}
+                >
+                  {info.label}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                      {week.type === "review"
+                        ? "Review Week"
+                        : (week.primary ?? "—")}
+                    </span>
+                    {week.type === "intro" && week.primaryMode && (
+                      <span
+                        className="rounded-full px-2 py-0.5 text-xs font-medium text-white"
+                        style={{
+                          backgroundColor:
+                            MODE_LABELS[week.primaryMode]?.color ?? "#999",
+                        }}
+                      >
+                        {MODE_LABELS[week.primaryMode]?.label ??
+                          week.primaryMode}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                    Week {focus.weekNumber}/{focus.cycleLength}
+                    {focus.cycleIteration > 0 &&
+                      ` · Cycle ${focus.cycleIteration + 1}`}
+                    {week.type === "intro" && week.secondary && (
+                      <span>
+                        {" "}
+                        · Also:{" "}
+                        <span className="text-gray-600 dark:text-gray-300">
+                          {week.secondary}
+                        </span>
+                        {week.secondaryMode && (
+                          <span className="ml-1 text-gray-400">
+                            ({week.secondaryMode})
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </div>
+                  {week.type === "review" && week.reviewTopics && (
+                    <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      {week.reviewTopics.join(" · ")}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Expandable full sequence */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="mt-3 text-xs font-medium text-[#1cb0f6] hover:underline"
+      >
+        {expanded ? "Hide full sequence ▲" : "Show full sequence ▼"}
+      </button>
+
+      {expanded && (
+        <div className="mt-3 space-y-6">
+          {LEVELS.map((level) => {
+            const sequence = FRENCH_SEQUENCES[level];
+            if (!sequence) return null;
+            const currentFocus = focusByLevel[level];
+            const info = LEVEL_LABELS[level];
+
+            return (
+              <div key={level}>
+                <h4
+                  className="mb-2 text-sm font-semibold"
+                  style={{ color: info.color }}
+                >
+                  {info.label} — {info.description} ({sequence.cycleLength}-week
+                  cycle)
+                </h4>
+                <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="bg-gray-50 text-left dark:bg-gray-800">
+                        <th className="px-3 py-1.5 font-medium text-gray-500 dark:text-gray-400">
+                          Wk
+                        </th>
+                        <th className="px-3 py-1.5 font-medium text-gray-500 dark:text-gray-400">
+                          Primary
+                        </th>
+                        <th className="hidden px-3 py-1.5 font-medium text-gray-500 dark:text-gray-400 sm:table-cell">
+                          Mode
+                        </th>
+                        <th className="hidden px-3 py-1.5 font-medium text-gray-500 dark:text-gray-400 sm:table-cell">
+                          Secondary
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sequence.weeks.map((w) => {
+                        const isCurrent = currentFocus?.weekNumber === w.week;
+                        return (
+                          <tr
+                            key={w.week}
+                            className={
+                              isCurrent
+                                ? "bg-blue-50 font-medium dark:bg-blue-900/30"
+                                : "odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900 dark:even:bg-gray-800/50"
+                            }
+                          >
+                            <td className="px-3 py-1.5 text-gray-600 dark:text-gray-300">
+                              {isCurrent ? `→ ${w.week}` : w.week}
+                            </td>
+                            <td className="px-3 py-1.5 text-gray-800 dark:text-gray-100">
+                              {w.type === "review" ? (
+                                <span className="italic text-gray-500 dark:text-gray-400">
+                                  Review: {w.reviewTopics?.join(", ") ?? "—"}
+                                </span>
+                              ) : (
+                                (w.primary ?? "—")
+                              )}
+                            </td>
+                            <td className="hidden px-3 py-1.5 sm:table-cell">
+                              {w.type === "intro" && w.primaryMode && (
+                                <span
+                                  className="rounded-full px-1.5 py-0.5 text-white"
+                                  style={{
+                                    backgroundColor:
+                                      MODE_LABELS[w.primaryMode]?.color ??
+                                      "#999",
+                                    fontSize: "0.65rem",
+                                  }}
+                                >
+                                  {MODE_LABELS[w.primaryMode]?.label ??
+                                    w.primaryMode}
+                                </span>
+                              )}
+                            </td>
+                            <td className="hidden px-3 py-1.5 text-gray-500 dark:text-gray-400 sm:table-cell">
+                              {w.type === "intro" && w.secondary ? (
+                                <span>
+                                  {w.secondary}
+                                  {w.secondaryMode && (
+                                    <span className="ml-1 text-gray-400">
+                                      ({w.secondaryMode})
+                                    </span>
+                                  )}
+                                </span>
+                              ) : (
+                                ""
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
