@@ -120,7 +120,7 @@ export default function SoundRecorder({
     return parts2;
   }, [content]);
 
-  function updateTimingText(regions: Region[], parts2: Part[]) {
+  const updateTimingText = useCallback((regions: Region[], parts2: Part[]) => {
     let text = "";
 
     for (let i = 0; i < regions.length; i++) {
@@ -134,7 +134,7 @@ export default function SoundRecorder({
           Math.floor(regions[i - 1]?.start * 1000 || 0));
     }
     setTimingText(text);
-  }
+  }, []);
 
   const onDecode = useCallback(
     (wavesurfer: WaveSurfer, duration: number) => {
@@ -194,7 +194,7 @@ export default function SoundRecorder({
       }
       updateTimingText(regions, parts2);
     },
-    [parts2],
+    [parts2, updateTimingText],
   );
 
   const { wavesurfer } = useWavesurfer({

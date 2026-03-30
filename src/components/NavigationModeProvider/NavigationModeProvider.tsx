@@ -19,6 +19,7 @@ export default function NavigationModeProvider({
   const initialRender = React.useRef(true);
   const pathname = usePathname();
   React.useEffect(() => {
+    if (pathname === null) return;
     if (!initialRender.current) {
       setType("soft");
     } else {

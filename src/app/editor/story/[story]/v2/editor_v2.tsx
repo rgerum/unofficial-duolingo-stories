@@ -84,13 +84,22 @@ export default function EditorV2({
   const [audioEditorData, setAudioEditorData] = React.useState<
     StoryElementLine | StoryElementHeader | undefined
   >(undefined);
+  const storySnapshot = React.useMemo(
+    () => ({
+      id: story_data.id,
+      text: story_data.text ?? "",
+    }),
+    [story_data.id, story_data.text],
+  );
+  const storyText = storySnapshot.text;
 
   React.useEffect(() => {
-    setDocText(normalizeDocText(story_data.text ?? ""));
+    // Reset editor-local state when switching stories, even if the text matches.
+    setDocText(normalizeDocText(storySnapshot.text));
     setRevision(0);
     setLineNo(1);
     setAudioEditorData(undefined);
-  }, [story_data.id, story_data.text]);
+  }, [storySnapshot]);
 
   const model = useStoryEditorModel({
     isAdmin,
@@ -128,7 +137,7 @@ export default function EditorV2({
     });
 
     const state = EditorState.create({
-      doc: normalizeDocText(story_data.text || ""),
+      doc: normalizeDocText(storySnapshot.text),
       extensions: [basicSetup, sync, example(), highlightStyle],
     });
 
@@ -144,14 +153,14 @@ export default function EditorV2({
       viewRef.current = null;
       setView(undefined);
     };
-  }, [story_data.id, story_data.text]);
+  }, [storySnapshot]);
 
   React.useEffect(() => {
     const view = viewRef.current;
     if (!view) return;
     if (dirty) return;
 
-    const remoteText = normalizeDocText(story_data.text ?? "");
+    const remoteText = normalizeDocText(storyText);
     const localText = view.state.doc.toString();
     if (localText === remoteText) return;
 
@@ -159,7 +168,7 @@ export default function EditorV2({
     view.dispatch({
       changes: { from: 0, to: view.state.doc.length, insert: remoteText },
     });
-  }, [dirty, markServerSynced, story_data.text]);
+  }, [dirty, markServerSynced, storyText]);
 
   React.useEffect(() => {
     const warningMessage =

@@ -17,12 +17,11 @@ export default function SwiperSideBar({ children }: SwiperSideBarProps) {
   let [showList, setShowList] = useState(segment === null);
   useEffect(() => {
     setShowList(segment === null);
-  }, [segment, setShowList]);
+  }, [segment]);
 
-  let toggleShow = React.useCallback(
-    () => setShowList(!showList),
-    [setShowList, showList],
-  );
+  let toggleShow = React.useCallback(() => {
+    setShowList((value) => !value);
+  }, []);
 
   const handlers = useSwipeable({
     onSwipedRight: () => setShowList(true),
