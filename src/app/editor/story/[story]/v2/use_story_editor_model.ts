@@ -94,19 +94,22 @@ export function useStoryEditorModel({
     "There was an error saving.",
   );
   const [lastSavedAt, setLastSavedAt] = React.useState<number | null>(null);
+  const storyText = storyData.text ?? "";
   const [lastSavedText, setLastSavedText] = React.useState(
-    normalizeDocText(storyData.text ?? ""),
+    normalizeDocText(storyText),
   );
   const [image, setImage] = React.useState<ImageLike | null>(null);
 
   React.useEffect(() => {
+    // Reset editor-save state when switching stories, even if the text matches.
+    void storyData.id;
     setIsSaving(false);
     setIsDeleting(false);
     setSaveError(false);
     setSaveErrorMessage("There was an error saving.");
     setLastSavedAt(null);
-    setLastSavedText(normalizeDocText(storyData.text ?? ""));
-  }, [storyData.id, storyData.text]);
+    setLastSavedText(normalizeDocText(storyText));
+  }, [storyData.id, storyText]);
 
   const [parsedStoryBase, parsedMeta, audioInsertLines] = React.useMemo(
     () =>

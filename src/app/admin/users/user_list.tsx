@@ -177,10 +177,6 @@ export default function UserList({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    setPendingAction(null);
-  }, [query, limit, activatedFilter, roleFilter]);
-
   function submitSearch(
     nextLimit = loadStep,
     options?: { action?: PendingAction; scroll?: boolean },

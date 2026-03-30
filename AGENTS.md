@@ -3,8 +3,9 @@
 ## Formatting
 - Run `pnpm run format` after code edits in this repository.
 - Use `pnpm run format:check` for CI/local validation.
-- Formatting scope is intentionally limited to `src/` and `convex/`.
 - Biome is the default formatter/linter for this repo.
+- Biome checks are intentionally scoped to `src/` and `convex/`.
+- Run `pnpm run lint` before finishing when lint-sensitive files changed.
 
 ## Type Checking
 - Run `pnpm typecheck` after code edits and before finishing.

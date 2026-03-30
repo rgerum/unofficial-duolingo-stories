@@ -222,7 +222,7 @@ function EditCourse({
   const [tags, setTags] = useState<string[]>(obj.tags || []);
   const [about, setAbout] = useState(obj.about || "");
 
-  async function Send(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const tagList = tags.map((t) => t.trim().toLowerCase()).filter(Boolean);
 
@@ -289,7 +289,7 @@ function EditCourse({
             ? "Add a new course. Click save when you're done."
             : "Make changes to a course. Click save when you're done."}
         </EditDialog.DialogDescription>
-        <form onSubmit={Send}>
+        <form onSubmit={handleSubmit}>
           <EditDialog.InputText
             name={"Name"}
             label={"name"}

@@ -84,13 +84,16 @@ export default function EditorV2({
   const [audioEditorData, setAudioEditorData] = React.useState<
     StoryElementLine | StoryElementHeader | undefined
   >(undefined);
+  const storyText = story_data.text ?? "";
 
   React.useEffect(() => {
-    setDocText(normalizeDocText(story_data.text ?? ""));
+    // Reset editor-local state when switching stories, even if the text matches.
+    void story_data.id;
+    setDocText(normalizeDocText(storyText));
     setRevision(0);
     setLineNo(1);
     setAudioEditorData(undefined);
-  }, [story_data.id, story_data.text]);
+  }, [story_data.id, storyText]);
 
   const model = useStoryEditorModel({
     isAdmin,
@@ -115,6 +118,7 @@ export default function EditorV2({
   useScrollLinking(view, previewRef.current, svgParentRef.current);
 
   React.useEffect(() => {
+    void story_data.id;
     const sync = EditorView.updateListener.of((update) => {
       const currentLine = update.state.doc.lineAt(
         update.state.selection.main.from,
@@ -128,7 +132,7 @@ export default function EditorV2({
     });
 
     const state = EditorState.create({
-      doc: normalizeDocText(story_data.text || ""),
+      doc: normalizeDocText(storyText),
       extensions: [basicSetup, sync, example(), highlightStyle],
     });
 
@@ -144,14 +148,14 @@ export default function EditorV2({
       viewRef.current = null;
       setView(undefined);
     };
-  }, [story_data.id, story_data.text]);
+  }, [story_data.id, storyText]);
 
   React.useEffect(() => {
     const view = viewRef.current;
     if (!view) return;
     if (dirty) return;
 
-    const remoteText = normalizeDocText(story_data.text ?? "");
+    const remoteText = normalizeDocText(storyText);
     const localText = view.state.doc.toString();
     if (localText === remoteText) return;
 
@@ -159,7 +163,7 @@ export default function EditorV2({
     view.dispatch({
       changes: { from: 0, to: view.state.doc.length, insert: remoteText },
     });
-  }, [dirty, markServerSynced, story_data.text]);
+  }, [dirty, markServerSynced, storyText]);
 
   React.useEffect(() => {
     const warningMessage =

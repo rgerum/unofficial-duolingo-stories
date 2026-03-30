@@ -54,6 +54,7 @@ export default function StoryButton({
         {listeningMode ? (
           <span
             className="pointer-events-none absolute top-[5px] right-[5px] z-[2] inline-flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[rgba(255,255,255,0.92)] shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
+            role="img"
             aria-label="Listening mode"
           >
             <img

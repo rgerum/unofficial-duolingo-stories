@@ -21,7 +21,7 @@ pnpm run storybook    # Component development at http://localhost:6006
 pnpm run new-component # Generate new component from template
 ```
 
-Note: TypeScript build errors are ignored in `next.config.js` (`ignoreBuildErrors: true`), so `npm run build` will succeed even with type errors. Use `npm run typecheck` to check types separately.
+Note: TypeScript build errors are ignored in `next.config.js` (`ignoreBuildErrors: true`), so `pnpm run build` will succeed even with type errors. Use `pnpm run typecheck` to check types separately.
 
 ## Environment Setup
 

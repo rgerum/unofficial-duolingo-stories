@@ -108,7 +108,7 @@ function useAutoResetRef<T>() {
   const last_scrolled_element_timeout = React.useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
-  function setLastScrolledElement(element: T) {
+  const setLastScrolledElement = React.useCallback((element: T) => {
     last_scrolled_element.current = element;
     if (last_scrolled_element_timeout.current !== null) {
       clearTimeout(last_scrolled_element_timeout.current);
@@ -117,7 +117,7 @@ function useAutoResetRef<T>() {
       last_scrolled_element.current = null;
       last_scrolled_element_timeout.current = null;
     }, 500);
-  }
+  }, []);
   return [last_scrolled_element, setLastScrolledElement] as const;
 }
 
@@ -130,86 +130,88 @@ export default function useScrollLinking(
   const [last_scrolled_element, setLastScrolledElement] = useAutoResetRef<
     "editor" | "preview"
   >();
+  const syncEditorScroll = React.useEffectEvent(() => {
+    if (!editor || !preview) return;
+    if (last_scrolled_element.current === "preview") return;
+    setLastScrolledElement("editor");
+
+    const new_pos = map_side(
+      editor.scrollTop,
+      createScrollLookUp(editor, preview),
+      1,
+      2,
+      editor.getBoundingClientRect().height / 3,
+    );
+    if (new_pos === undefined) return;
+    preview.scrollTo({
+      top: new_pos,
+      behavior: "auto",
+    });
+    update_lines(editor, svg_parent);
+  });
+  const syncPreviewScroll = React.useEffectEvent(() => {
+    if (!editor || !preview) return;
+    if (last_scrolled_element.current === "editor") return;
+    setLastScrolledElement("preview");
+
+    const new_pos = map_side(
+      preview.scrollTop,
+      createScrollLookUp(editor, preview),
+      2,
+      1,
+      editor.getBoundingClientRect().height / 3,
+    );
+    if (new_pos === undefined) return;
+    editor.scrollTo({
+      top: new_pos,
+      behavior: "auto",
+    });
+    update_lines(editor, svg_parent);
+  });
+  const syncResize = React.useEffectEvent(() => {
+    if (!editor || !preview) return;
+    const new_pos = map_side(
+      editor.scrollTop,
+      createScrollLookUp(editor, preview),
+      1,
+      2,
+      editor.getBoundingClientRect().height / 3,
+    );
+    if (new_pos === undefined) return;
+    preview.scrollTo({
+      top: new_pos,
+      behavior: "auto",
+    });
+    update_lines(editor, svg_parent);
+  });
 
   React.useEffect(() => {
     if (!editor) return;
 
     function editor_scroll() {
-      requestAnimationFrame(() => {
-        if (!editor || !preview) return;
-        if (last_scrolled_element.current === "preview") return;
-        setLastScrolledElement("editor");
-
-        const new_pos = map_side(
-          editor.scrollTop,
-          createScrollLookUp(editor, preview),
-          1,
-          2,
-          editor.getBoundingClientRect().height / 3,
-        );
-        if (new_pos === undefined) return;
-        preview.scrollTo({
-          top: new_pos,
-          behavior: "auto",
-        });
-        update_lines(editor, svg_parent);
-      });
+      requestAnimationFrame(() => syncEditorScroll());
     }
     editor.addEventListener("scroll", editor_scroll);
     return () => editor.removeEventListener("scroll", editor_scroll);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor, preview, svg_parent]);
+  }, [editor]);
 
   React.useEffect(() => {
     if (!preview || !editor) return;
     update_lines(editor, svg_parent);
 
     function preview_scroll() {
-      requestAnimationFrame(() => {
-        if (!editor || !preview) return;
-        if (last_scrolled_element.current === "editor") return;
-        setLastScrolledElement("preview");
-
-        const new_pos = map_side(
-          preview.scrollTop,
-          createScrollLookUp(editor, preview),
-          2,
-          1,
-          editor.getBoundingClientRect().height / 3,
-        );
-        if (new_pos === undefined) return;
-        editor.scrollTo({
-          top: new_pos,
-          behavior: "auto",
-        });
-        update_lines(editor, svg_parent);
-      });
+      requestAnimationFrame(() => syncPreviewScroll());
     }
 
     preview.addEventListener("scroll", preview_scroll);
     return () => preview.removeEventListener("scroll", preview_scroll);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, preview, svg_parent]);
 
   React.useEffect(() => {
     function windowResize() {
-      if (!editor || !preview) return;
-      // the same as the scroll editor
-      const new_pos = map_side(
-        editor.scrollTop,
-        createScrollLookUp(editor, preview),
-        1,
-        2,
-        editor.getBoundingClientRect().height / 3,
-      );
-      if (new_pos === undefined) return;
-      preview.scrollTo({
-        top: new_pos,
-        behavior: "auto",
-      });
-      update_lines(editor, svg_parent);
+      syncResize();
     }
     window.addEventListener("resize", windowResize);
     return () => window.removeEventListener("resize", windowResize);
-  }, [editor, preview, svg_parent]);
+  }, []);
 }
