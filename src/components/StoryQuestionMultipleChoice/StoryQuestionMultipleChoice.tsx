@@ -9,52 +9,6 @@ import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import CheckButton from "../CheckButton";
 import { useChoiceButtons } from "@/hooks/use-choice-buttons.hook";
 import { StoryElementMultipleChoice } from "@/components/editor/story/syntax_parser_types";
-import { EditorView } from "codemirror";
-
-// TODO move
-function EditorHook(
-  hidden: string,
-  editor: {
-    block_start_no?: number;
-    start_no: number;
-    end_no: number;
-    active_no?: number;
-  },
-  editor_props: {
-    select: (lineno: number) => void;
-    block_next: () => void;
-    right: () => void;
-    wrong: () => void;
-    view: EditorView;
-    start_no: number;
-    end_no: number;
-    setProgressStep: (step: number) => void;
-  },
-) {
-  let onClick;
-  let view = editor_props?.view;
-
-  if (editor_props) {
-    hidden = "";
-  }
-
-  if (editor && view) {
-    onClick = () => {
-      if (editor.active_no) editor_props.select(editor.active_no);
-      else editor_props.select(editor.start_no);
-    };
-  }
-
-  let [selected, setSelected] = React.useState(false);
-  if (selected) hidden = "story_selection";
-  /*useEventListener("editorLineChanged", (e) =>
-    {
-        let should_be_selected = editor && editor.start_no <= e.detail.lineno && e.detail.lineno < editor.end_no;
-        if (should_be_selected !== selected)
-            setSelected(should_be_selected);
-    })*/ //TODO
-  return [hidden, onClick];
-}
 
 /*
 The MULTIPLE_CHOICE question.

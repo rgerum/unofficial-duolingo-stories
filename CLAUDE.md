@@ -11,7 +11,8 @@ Unofficial Duolingo Stories (https://duostories.org) - a community-driven platfo
 ```bash
 pnpm run dev          # Development server at http://localhost:3000
 pnpm run build        # Production build
-pnpm run lint         # ESLint (uses pnpm exec eslint internally)
+pnpm run format       # Biome formatter on src/ and convex/
+pnpm run lint         # Biome linter (with format check first)
 pnpm run typecheck    # TypeScript type checking (tsc --noEmit)
 pnpm exec convex codegen # Regenerate Convex bindings after adding/changing Convex functions
 pnpm run init         # Initialize test database with sample data
