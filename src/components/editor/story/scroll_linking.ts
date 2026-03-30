@@ -208,6 +208,7 @@ export default function useScrollLinking(
   }, [editor, preview, svg_parent]);
 
   React.useEffect(() => {
+    // `syncResize` is a useEffectEvent, so it reads the latest editor refs.
     function windowResize() {
       syncResize();
     }
