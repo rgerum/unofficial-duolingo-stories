@@ -1,4 +1,4 @@
-import jsyaml from "js-yaml";
+import { parse as parseYaml } from "yaml";
 import { TranscribeData } from "@/components/editor/story/syntax_parser_new";
 
 type Mapping = number[];
@@ -369,7 +369,7 @@ export function transcribe_text(
   mapped_text: { text: string; mapping: number[] },
   data: TranscribeData,
 ) {
-  const data2 = jsyaml.load(data) as Record<string, unknown>;
+  const data2 = parseYaml(data) as Record<string, unknown>;
 
   mapped_text = apply_group(mapped_text, data2, {});
 

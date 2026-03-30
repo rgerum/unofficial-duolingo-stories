@@ -11,7 +11,7 @@ import {
   content_to_audio,
 } from "@/lib/editor/audio/audio_edit_tools";
 import StoryTextLine from "@/components/StoryTextLine";
-import jsyaml from "js-yaml";
+import { parse as parseYaml } from "yaml";
 import {
   LanguageType,
   SpeakersType,
@@ -86,7 +86,7 @@ FRAGMENTS:
   function setDataValidated(e: React.ChangeEvent<HTMLTextAreaElement>) {
     const v = e.target.value;
     try {
-      jsyaml.load(v);
+      parseYaml(v);
       setData(v);
       setYamlError(false);
     } catch (err) {
@@ -112,7 +112,7 @@ FRAGMENTS:
     };
     // test to process the yaml content
     try {
-      jsyaml.load(data);
+      parseYaml(data);
     } catch (e) {
       return;
     }

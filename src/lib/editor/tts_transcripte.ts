@@ -1,4 +1,4 @@
-import jsyaml from "js-yaml";
+import { parse as parseYaml } from "yaml";
 
 let punctuation_chars =
   "\\/¡!\"'`#$%&*,.:;<=>¿?@^_`{|}…" + "。、，！？；：（）～—·《…》〈…〉﹏……——";
@@ -393,7 +393,7 @@ interface TranscribeConfig {
 }
 
 function transcribe_text(text: string, dataYaml: string): [string, number[]] {
-  const config = jsyaml.load(dataYaml) as TranscribeConfig;
+  const config = parseYaml(dataYaml) as TranscribeConfig;
 
   const mapping: number[] = [];
   for (const section in config) {
