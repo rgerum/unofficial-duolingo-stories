@@ -55,6 +55,51 @@
   font-size: 29px;
   text-decoration: none;
 }
+
+@keyframes story-checkbutton-false-to-disabled {
+  0%,
+  66% {
+    background: var(--color_false_background);
+    border-color: var(--color_false_border-color);
+    color: var(--color_false_color);
+  }
+
+  to {
+    background: var(--color_disabled_background);
+    border-color: var(--color_disabled_border-color);
+    color: var(--color_disabled_color);
+  }
+}
+
+@keyframes story-footer-banner-slide {
+  0% {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes story-footer-check-pop {
+  0% {
+    opacity: 0;
+    transform: scale3d(0.7, 0.7, 1);
+  }
+
+  33% {
+    opacity: 1;
+    transform: scale3d(1.1, 1.1, 1);
+  }
+
+  66% {
+    transform: scale3d(0.9, 0.9, 1);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
 /*
 outline-width: 2px;
   outline-offset: 2px;
