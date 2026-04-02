@@ -34,7 +34,6 @@ import type * as lib_phpbb from "../lib/phpbb.js";
 import type * as localization from "../localization.js";
 import type * as localizationWrite from "../localizationWrite.js";
 import type * as lookupTables from "../lookupTables.js";
-import type * as postgresMirror from "../postgresMirror.js";
 import type * as roles from "../roles.js";
 import type * as storyApproval from "../storyApproval.js";
 import type * as storyDone from "../storyDone.js";
@@ -75,7 +74,6 @@ declare const fullApi: ApiFromModules<{
   localization: typeof localization;
   localizationWrite: typeof localizationWrite;
   lookupTables: typeof lookupTables;
-  postgresMirror: typeof postgresMirror;
   roles: typeof roles;
   storyApproval: typeof storyApproval;
   storyDone: typeof storyDone;

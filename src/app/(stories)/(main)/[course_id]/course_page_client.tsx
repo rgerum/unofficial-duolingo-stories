@@ -6,8 +6,8 @@ import { Preloaded, usePreloadedQuery, useQuery } from "convex/react";
 import Header from "../header";
 import StoryButton from "./story_button";
 import get_localisation_func from "@/lib/get_localisation_func";
-import Switch from "@/components/layout/switch";
 import ContributorList from "@/components/ContributorList";
+import Switch from "@/components/ui/switch";
 
 function SetTitle({ children }: { children: React.ReactNode }) {
   return (

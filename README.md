@@ -9,9 +9,9 @@ It is _not_ an official product of Duolingo, nor is there any plan to integrate 
 
 It is hosted at https://duostories.org and reproduces the story experience from the official Duolingo stories.
 
-The app is based on Next.js with React. It is currently in `next/next-all`.
+The app is built with Next.js and React.
 
-## Architecture snapshot (2026 migration baseline)
+## Architecture snapshot
 
 - App/UI: Next.js 16 + React 19 (`src/app`, `src/components`)
 - Canonical app data access: Convex queries/mutations (`convex/*`)
@@ -26,9 +26,6 @@ Client component -> Convex mutation -> schedule internal actions:
 - `editorSideEffects.*` for GitHub/PostHog side effects
 
 This keeps write authorization, mutation semantics, and side effects centralized in Convex.
-
-Legacy Postgres mirror decommission steps are documented in `docs/architecture/postgres-sunset-checklist.md`.
-Post-cutover checks are in `docs/architecture/postgres-post-cutover-verification.md`.
 
 ## How to run locally
 
@@ -60,14 +57,6 @@ Install dependencies
 pnpm install
 ```
 
-Fill the database with test data
-
-```
-pnpm run init
-```
-
-`pnpm run init` is a legacy Postgres seed path for older tooling. The main app write/read path is Convex.
-
 To develop you can then run and visit http://localhost:3000
 
 ```
@@ -80,14 +69,6 @@ Recommended checks:
 pnpm run typecheck
 pnpm run lint
 ```
-
-The test database contains three uses to test the login process:
-
-| Username | Password | Usage                                |
-| -------- | -------- | ------------------------------------ |
-| user     | test     | To test a normal user login          |
-| editor   | test     | To test login to the editor          |
-| admin    | test     | To test login to the admin interface |
 
 ## How to contribute
 

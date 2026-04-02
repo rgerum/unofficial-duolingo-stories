@@ -1,15 +1,32 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": [
+    "scripts/backfill-course-contributors.ts",
+    "scripts/backfill-discord-avatars.ts",
+    "scripts/find-missing-story-images.ts",
+    "convex/convex.config.ts",
+    "convex/betterAuth/convex.config.ts"
+  ],
   "ignore": [
     ".storybook/**",
     "convex/betterAuth/_generated/**",
+    "convex/betterAuth/adapter.ts",
     "database/**",
     "import_tools/**",
     "public/docs/**",
     "public/sw.js",
     "public/darklight.js"
   ],
+  "ignoreBinaries": [
+    "next"
+  ],
+  "ignoreDependencies": [
+    "react-dom"
+  ],
   "ignoreIssues": {
+    "src/components/editor/story/parser.ts": [
+      "exports"
+    ],
     "convex/betterAuth/auth.ts": [
       "exports"
     ]
