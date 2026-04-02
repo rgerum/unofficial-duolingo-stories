@@ -15,10 +15,6 @@ pnpm run format       # Biome formatter on src/ and convex/
 pnpm run lint         # Biome linter (with format check first)
 pnpm run typecheck    # TypeScript type checking (tsc --noEmit)
 pnpm exec convex codegen # Regenerate Convex bindings after adding/changing Convex functions
-pnpm run init         # Initialize test database with sample data
-pnpm run init-reset   # Reset test database
-pnpm run storybook    # Component development at http://localhost:6006
-pnpm run new-component # Generate new component from template
 ```
 
 Note: TypeScript build errors are ignored in `next.config.js` (`ignoreBuildErrors: true`), so `pnpm run build` will succeed even with type errors. Use `pnpm run typecheck` to check types separately.
@@ -48,10 +44,9 @@ Test credentials: user/test (normal), editor/test (editor access), admin/test (a
   - `editor/` - Story editor interface
   - `auth/` - Authentication (signin, register, password reset)
   - `api/` - API routes (auth handler, OG image generation)
-  - `audio/` - Audio processing endpoints
+- `audio/` - Audio processing endpoints
 - `src/components/` - Reusable React components
 - `src/lib/` - Server utilities, database helpers, auth
-- `database/` - SQL schema (`schema.sql`), test data, story JSON files
 
 ### Key Files
 - `src/auth.ts` - Better Auth server configuration (JWT sessions, OAuth providers, email verification)
@@ -93,11 +88,6 @@ Application reads/writes should go through Convex queries/mutations.
 ## Story Workflow
 
 Stories have a status workflow: draft → feedback → finished. Stories belong to courses, which link a learning language to a base language.
-
-## Migration Notes
-
-Recent migration and restructuring recap is documented at:
-- `docs/architecture/migration-recap.md`
 
 ## Audio/TTS
 

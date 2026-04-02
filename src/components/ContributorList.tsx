@@ -3,7 +3,7 @@
 import React from "react";
 import { IconDiscord } from "@/components/icons";
 
-export type ContributorProfile = {
+type ContributorProfile = {
   legacyUserId: number;
   name: string;
   image: string | null;

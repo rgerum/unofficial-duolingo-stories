@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSelectedLayoutSegments } from "next/navigation";
-import Button from "../layout/button";
+import Button from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { isAdmin, isContributor } from "@/lib/userInterface";
 import { resetPostHogUser } from "@/lib/posthog-user";
