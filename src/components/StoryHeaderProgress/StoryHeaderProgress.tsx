@@ -18,7 +18,7 @@ function StoryHeaderProgress({
   progress,
   length,
 }: StoryHeaderProgressProps) {
-  const courseHref = setId && setId > 0 ? `/${course}#${setId}` : `/${course}`;
+  const courseHref = (setId ?? 0) > 0 ? `/${course}#${setId}` : `/${course}`;
 
   return (
     <div className={styles.header}>
