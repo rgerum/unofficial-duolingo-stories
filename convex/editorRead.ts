@@ -583,19 +583,6 @@ export const getEditorAvatarNamesByLanguageLegacyId = query({
   },
 });
 
-export const getEditorAvatarNamesByLanguageShort = query({
-  args: { languageShort: v.string() },
-  handler: async (ctx, args) => {
-    const language = await ctx.db
-      .query("languages")
-      .withIndex("by_short", (q) => q.eq("short", args.languageShort))
-      .unique();
-    if (!language) return [];
-
-    return await buildAvatarRows(ctx, language);
-  },
-});
-
 export const getEditorLocalizationRowsByLanguageLegacyId = query({
   args: { languageLegacyId: v.number() },
   handler: async (ctx, args) => {
