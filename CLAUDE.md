@@ -15,8 +15,6 @@ pnpm run format       # Biome formatter on src/ and convex/
 pnpm run lint         # Biome linter (with format check first)
 pnpm run typecheck    # TypeScript type checking (tsc --noEmit)
 pnpm exec convex codegen # Regenerate Convex bindings after adding/changing Convex functions
-pnpm run storybook    # Component development at http://localhost:6006
-pnpm run new-component # Generate new component from template
 ```
 
 Note: TypeScript build errors are ignored in `next.config.js` (`ignoreBuildErrors: true`), so `pnpm run build` will succeed even with type errors. Use `pnpm run typecheck` to check types separately.
