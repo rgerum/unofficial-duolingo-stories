@@ -1,4 +1,6 @@
 import { put } from "@vercel/blob";
+import { decode } from "base64-arraybuffer";
+import WebSocket from "ws";
 import type {
   AudioMark,
   SynthesisResult,
@@ -6,9 +8,6 @@ import type {
   ElevenLabsEngine,
   ElevenLabsSubscription,
 } from "./types";
-
-const WebSocket = require("ws");
-const { decode } = require("base64-arraybuffer");
 
 const model = "eleven_multilingual_v2";
 
