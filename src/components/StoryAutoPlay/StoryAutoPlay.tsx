@@ -15,6 +15,7 @@ import type {
 interface StoryAutoPlayProps {
   story: StoryType & {
     id: number;
+    set_id?: number;
     learning_language_rtl?: boolean;
     learning_language?: string;
     from_language?: string;
@@ -519,6 +520,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     <div className={styles.container}>
       <StoryHeaderProgress
         course={course}
+        setId={story.set_id}
         progress={currentTime}
         length={duration || 1}
       />
