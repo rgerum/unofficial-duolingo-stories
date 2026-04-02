@@ -1,5 +1,8 @@
 "use client";
+
 import React from "react";
+import { Repeat, Repeat1, Shuffle } from "lucide-react";
+import Link from "next/link";
 import styles from "./StoryAutoPlay.module.css";
 import StoryTextLine from "../StoryTextLine";
 import StoryHeader from "../StoryHeader";
@@ -21,6 +24,18 @@ interface StoryAutoPlayProps {
     from_language?: string;
     course_short?: string;
   };
+  onFinished?: () => void;
+  queueLabel?: string;
+  queueSubLabel?: string;
+  canGoPrev?: boolean;
+  canGoNext?: boolean;
+  onPrev?: () => void;
+  onNext?: () => void;
+  shuffleEnabled?: boolean;
+  onToggleShuffle?: () => void;
+  loopMode?: "off" | "all" | "one";
+  onToggleLoop?: () => void;
+  courseOverviewHref?: string;
 }
 
 const BLOB_PUBLIC_BASE =
@@ -213,7 +228,6 @@ function mergeBuffersToWav(buffers: AudioBuffer[]): Blob {
   };
 
   writeStr("RIFF");
-  // WAV/RIFF numeric fields are little-endian by specification.
   view.setUint32(offset, 36 + dataSize, true);
   offset += 4;
   writeStr("WAVE");
@@ -251,7 +265,21 @@ function mergeBuffersToWav(buffers: AudioBuffer[]): Blob {
   return new Blob([output], { type: "audio/wav" });
 }
 
-export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
+export default function StoryAutoPlay({
+  story,
+  onFinished,
+  queueLabel,
+  queueSubLabel,
+  canGoPrev = false,
+  canGoNext = false,
+  onPrev,
+  onNext,
+  shuffleEnabled = false,
+  onToggleShuffle,
+  loopMode = "off",
+  onToggleLoop,
+  courseOverviewHref,
+}: StoryAutoPlayProps) {
   const parts = React.useMemo(() => getParts(story), [story]);
   const course =
     story.course_short ?? `${story.learning_language}-${story.from_language}`;
@@ -392,7 +420,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     try {
       await audioRef.current.play();
       setIsPlaying(true);
-    } catch (error) {
+    } catch {
       setIsPlaying(false);
     }
   }, [buildMergedAudio, mergedSrc]);
@@ -401,6 +429,28 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     audioRef.current?.pause();
     setIsPlaying(false);
   }, []);
+
+  const stop = React.useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setActiveAudioRange(99999);
+  }, []);
+
+  const seekTo = React.useCallback(
+    (nextTime: number) => {
+      const clamped = Math.max(0, Math.min(nextTime, duration));
+      if (audioRef.current) {
+        audioRef.current.currentTime = clamped;
+      }
+      setCurrentTime(clamped);
+      setActiveAudioRange(99999);
+    },
+    [duration],
+  );
 
   const togglePlayPause = React.useCallback(async () => {
     if (isPlaying) {
@@ -414,14 +464,9 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const next = Number(event.target.value);
       if (!Number.isFinite(next)) return;
-      const clamped = Math.max(0, Math.min(next, duration));
-      if (audioRef.current) {
-        audioRef.current.currentTime = clamped;
-      }
-      setCurrentTime(clamped);
-      setActiveAudioRange(99999);
+      seekTo(next);
     },
-    [duration],
+    [seekTo],
   );
 
   React.useEffect(() => {
@@ -434,6 +479,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       setIsPlaying(false);
       setCurrentTime(duration);
       setActiveAudioRange(99999);
+      onFinished?.();
     };
     const onTimeUpdate = () => {
       const t = audio.currentTime;
@@ -466,7 +512,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("timeupdate", onTimeUpdate);
     };
-  }, [duration, timelineMeta]);
+  }, [duration, onFinished, timelineMeta]);
 
   React.useEffect(() => {
     void ensureMergedAndPlay();
@@ -509,12 +555,74 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     mediaSession.setActionHandler("pause", () => {
       pause();
     });
+    mediaSession.setActionHandler("stop", () => {
+      stop();
+    });
+    mediaSession.setActionHandler("seekto", (details) => {
+      if (typeof details.seekTime !== "number") return;
+      seekTo(details.seekTime);
+    });
+    mediaSession.setActionHandler("seekbackward", (details) => {
+      seekTo(currentTime - (details.seekOffset ?? 10));
+    });
+    mediaSession.setActionHandler("seekforward", (details) => {
+      seekTo(currentTime + (details.seekOffset ?? 10));
+    });
+    mediaSession.setActionHandler("previoustrack", () => {
+      if (onPrev && canGoPrev) {
+        onPrev();
+        return;
+      }
+      seekTo(currentTime - 10);
+    });
+    mediaSession.setActionHandler("nexttrack", () => {
+      if (onNext && canGoNext) {
+        onNext();
+        return;
+      }
+      seekTo(currentTime + 10);
+    });
 
     return () => {
       mediaSession.setActionHandler("play", null);
       mediaSession.setActionHandler("pause", null);
+      mediaSession.setActionHandler("stop", null);
+      mediaSession.setActionHandler("seekto", null);
+      mediaSession.setActionHandler("seekbackward", null);
+      mediaSession.setActionHandler("seekforward", null);
+      mediaSession.setActionHandler("previoustrack", null);
+      mediaSession.setActionHandler("nexttrack", null);
     };
-  }, [ensureMergedAndPlay, isPlaying, pause, story.learning_language]);
+  }, [
+    canGoNext,
+    canGoPrev,
+    currentTime,
+    ensureMergedAndPlay,
+    isPlaying,
+    onNext,
+    onPrev,
+    pause,
+    seekTo,
+    stop,
+    story.learning_language,
+  ]);
+
+  React.useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) {
+      return;
+    }
+    const mediaSession = navigator.mediaSession;
+    if (typeof mediaSession.setPositionState !== "function") return;
+    try {
+      mediaSession.setPositionState({
+        duration: Math.max(duration, 0.1),
+        playbackRate: 1,
+        position: Math.max(0, Math.min(currentTime, Math.max(duration, 0))),
+      });
+    } catch {
+      // Some browsers throw when duration is unknown or zero.
+    }
+  }, [currentTime, duration]);
 
   return (
     <div className={styles.container}>
@@ -525,7 +633,76 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
         length={duration || 1}
       />
       <audio ref={audioRef} className={styles.mediaOutput} playsInline />
-      <div className={styles.main}>
+      <div className={styles.stickyHeader}>
+        <div className={styles.queueControls}>
+          {courseOverviewHref ? (
+            <Link
+              href={courseOverviewHref}
+              className={styles.backButton}
+              aria-label="Back to course overview"
+              title="Back to course"
+            >
+              ←
+            </Link>
+          ) : null}
+          <div className={styles.queueMeta}>
+            {queueLabel ? (
+              <div className={styles.queueLabel}>{queueLabel}</div>
+            ) : null}
+            {queueSubLabel ? (
+              <div className={styles.queueSubLabel}>{queueSubLabel}</div>
+            ) : null}
+          </div>
+          <div className={styles.queueButtons}>
+            <button
+              type="button"
+              className={styles.smallButton}
+              onClick={onPrev}
+              disabled={!canGoPrev}
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              className={styles.smallButton}
+              onClick={onNext}
+              disabled={!canGoNext}
+            >
+              Next
+            </button>
+            <button
+              type="button"
+              className={
+                shuffleEnabled
+                  ? `${styles.iconButton} ${styles.iconButtonActive}`
+                  : `${styles.iconButton} ${styles.iconButtonInactive}`
+              }
+              onClick={onToggleShuffle}
+              aria-label={shuffleEnabled ? "Disable shuffle" : "Enable shuffle"}
+              title={shuffleEnabled ? "Shuffle on" : "Shuffle off"}
+            >
+              <Shuffle size={16} />
+            </button>
+            <button
+              type="button"
+              className={
+                loopMode === "off"
+                  ? `${styles.iconButton} ${styles.iconButtonInactive}`
+                  : `${styles.iconButton} ${styles.iconButtonActive}`
+              }
+              onClick={onToggleLoop}
+              aria-label={`Loop mode: ${loopMode}`}
+              title={`Loop: ${loopMode}`}
+            >
+              {loopMode === "one" ? (
+                <Repeat1 size={16} />
+              ) : (
+                <Repeat size={16} />
+              )}
+            </button>
+          </div>
+        </div>
+
         <div className={styles.audioWrap}>
           <button
             className={styles.playPauseButton}
@@ -566,7 +743,9 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
             </div>
           )}
         </div>
+      </div>
 
+      <div className={styles.main}>
         <div
           className={
             styles.story +
