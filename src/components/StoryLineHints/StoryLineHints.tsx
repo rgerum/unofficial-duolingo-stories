@@ -15,10 +15,11 @@ function splitTextTokens(text: string, keep_tilde = true) {
 function Tooltip({
   className,
   children,
+  ...delegated
 }: {
   className: string;
   children: React.ReactNode;
-}) {
+} & React.HTMLAttributes<HTMLSpanElement>) {
   const ref = React.useRef<HTMLSpanElement>(null);
   function onMouseEnter() {
     if (!ref.current) return;
@@ -48,7 +49,12 @@ function Tooltip({
     }
   }
   return (
-    <span onMouseEnter={onMouseEnter} ref={ref} className={className}>
+    <span
+      onMouseEnter={onMouseEnter}
+      ref={ref}
+      className={className}
+      {...delegated}
+    >
       {children}
     </span>
   );
@@ -97,6 +103,9 @@ function StoryLineHints({
   }
 
   function addWord2(start: number, end: number) {
+    const was_hidden_for_challenge = hideRangesForChallenge?.some((range) =>
+      getOverlap(start, end, range.start, range.end),
+    );
     let is_hidden: boolean | undefined | "editor" =
       hideRangesForChallengeEntry !== undefined &&
       getOverlap(
@@ -120,6 +129,9 @@ function StoryLineHints({
         key={start + " " + end}
         style={style}
         data-hidden={is_hidden}
+        data-revealed={
+          was_hidden_for_challenge && !is_hidden ? true : undefined
+        }
       >
         {content.text.substring(start, end)}
       </span>,
@@ -174,6 +186,9 @@ function StoryLineHints({
     const hint_pronunciation = content.hints_pronunciation?.[hint.hintIndex];
     const has_any_hint = Boolean(hint_translation || hint_pronunciation);
     const has_translation_hint = Boolean(hint_translation);
+    const was_hidden_for_challenge = hideRangesForChallenge?.some((range) =>
+      getOverlap(hint.rangeFrom, hint.rangeTo + 1, range.start, range.end),
+    );
     const word_content = hint_pronunciation ? (
       <ruby className={styles.ruby_word}>
         <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
@@ -204,6 +219,9 @@ function StoryLineHints({
       <Tooltip
         key={hint.rangeFrom + " " + hint.rangeTo + 1}
         className={styles.word + " " + hint_container_class}
+        data-revealed={
+          was_hidden_for_challenge && !is_hidden ? true : undefined
+        }
       >
         {word_content}
         {show_trans ? (

@@ -280,6 +280,7 @@ function StoryProgress({
             "mx-auto max-w-[500px] p-4 print:w-full print:max-w-full",
             settings.rtl && "[direction:rtl]",
           )}
+          data-rtl={settings.rtl ? "true" : undefined}
         >
           {settings.show_names && (
             <>

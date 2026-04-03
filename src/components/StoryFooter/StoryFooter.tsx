@@ -175,7 +175,7 @@ function StoryFooter({
           "justify-between max-[500px]:relative",
         )}
       >
-        <div className="mr-auto flex items-center gap-4 max-[500px]:absolute max-[500px]:-top-[76px] max-[500px]:right-[-16px] max-[500px]:bottom-0 max-[500px]:left-[-16px] max-[500px]:z-[-1] max-[500px]:animate-[story-footer-banner-slide_0.2s_forwards] max-[500px]:items-start max-[500px]:bg-[var(--footer-right-background)] max-[500px]:px-8 max-[500px]:py-4">
+        <div className="mr-auto flex items-center gap-4 max-[500px]:absolute max-[500px]:-top-[76px] max-[500px]:right-[-16px] max-[500px]:bottom-0 max-[500px]:left-[-16px] max-[500px]:z-[-1] max-[500px]:animate-[story-footer-banner-slide_0.2s_cubic-bezier(0.35,1.8,0.35,0.83)_forwards] max-[500px]:items-start max-[500px]:bg-[var(--footer-right-background)] max-[500px]:px-8 max-[500px]:py-4">
           <Check />
           <Message>
             {localisation("story_correct") || "You are correct"}
