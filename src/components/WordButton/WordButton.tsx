@@ -4,10 +4,13 @@ import { cn } from "@/lib/utils";
 function WordButton({
   status,
   children,
+  className,
+  innerClassName,
   ...delegated
 }: {
   status: string;
   children: React.ReactNode;
+  innerClassName?: string;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const isOff = status === "off";
   const outerClassName = cn(
@@ -25,8 +28,9 @@ function WordButton({
       "bg-[var(--color_disabled_border-color)] text-[var(--color_disabled_color)]",
     status === "right-stay" &&
       "bg-[var(--color_right_border-color)] text-[var(--color_right_color)]",
+    className,
   );
-  const innerClassName = cn(
+  const innerSpanClassName = cn(
     "block translate-y-[-2px] rounded-[inherit] border-2 border-[var(--color_base_border)] bg-[var(--color_base_background)] px-[15px] py-2 transition-[transform,background-color,border-color] duration-500",
     status === "off" &&
       "border-[var(--color_base_border)] bg-[var(--color_base_border)]",
@@ -41,6 +45,7 @@ function WordButton({
       "border-[var(--color_disabled_border-color)] bg-[var(--color_disabled_background)]",
     status === "right-stay" &&
       "border-[var(--color_right_border-color)] bg-[var(--color_right_background)]",
+    innerClassName,
   );
 
   return (
@@ -50,7 +55,7 @@ function WordButton({
       className={outerClassName}
       data-status={status}
     >
-      <span className={innerClassName}>{children}</span>
+      <span className={innerSpanClassName}>{children}</span>
     </button>
   );
 }

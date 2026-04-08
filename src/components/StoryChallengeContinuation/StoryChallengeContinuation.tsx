@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./StoryChallengeContinuation.module.css";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import StoryTextLine from "../StoryTextLine";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";

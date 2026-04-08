@@ -2,13 +2,17 @@
 // https://www.joshwcomeau.com/snippets/react-components/visually-hidden/
 
 import React from "react";
-import styles from "./VisuallyHidden.module.css";
+import { cn } from "@/lib/utils";
 
 interface VisuallyHiddenProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: React.ReactNode;
 }
 
-const VisuallyHidden = ({ children, ...delegated }: VisuallyHiddenProps) => {
+const VisuallyHidden = ({
+  children,
+  className,
+  ...delegated
+}: VisuallyHiddenProps) => {
   const [forceShow, setForceShow] = React.useState(false);
   React.useEffect(() => {
     if (process.env.NODE_ENV !== "production") {
@@ -34,7 +38,7 @@ const VisuallyHidden = ({ children, ...delegated }: VisuallyHiddenProps) => {
     return <>{children}</>;
   }
   return (
-    <span className={styles.hidden} {...delegated}>
+    <span className={cn("sr-only", className)} {...delegated}>
       {children}
     </span>
   );

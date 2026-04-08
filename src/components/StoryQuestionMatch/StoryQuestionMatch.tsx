@@ -1,6 +1,5 @@
 import React from "react";
 import { produce } from "immer";
-import styles from "./StoryQuestionMatch.module.css";
 import { shuffle } from "@/lib/shuffle";
 import { playSoundEffect } from "@/lib/sound-effects";
 import { isTypingTarget } from "@/lib/is-typing-target";
@@ -222,12 +221,14 @@ function StoryQuestionMatch({
         question={element.prompt}
         lang={element.lang_question}
       />
-      <div className={styles.match_container}>
+      <div className="flex gap-5">
         {state.lists.map((list, listIndex) => (
-          <div key={listIndex} className={styles.match_col}>
+          <div key={listIndex} className="flex flex-col gap-[10px]">
             {list.map((word, wordIndex) => (
               <WordButton
                 key={word.key}
+                className="m-0 w-full"
+                innerClassName="w-full px-[15px] py-2"
                 status={word.state}
                 onClick={() => selectWord(listIndex, wordIndex)}
               >

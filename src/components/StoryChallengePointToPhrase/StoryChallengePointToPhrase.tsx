@@ -1,9 +1,7 @@
 import React from "react";
-import styles from "./StoryChallengePointToPhrase.module.css";
 import StoryTextLine from "../StoryTextLine";
 import StoryQuestionPointToPhrase from "../StoryQuestionPointToPhrase";
 import FadeGlideIn from "../FadeGlideIn";
-import { motion } from "framer-motion";
 import {
   StoryElement,
   StoryElementLine,
