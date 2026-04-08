@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "../Button";
+import Button from "@/components/ui/button";
 import { useLocalisation } from "../LocalisationProvider/LocalisationProviderContext";
 import { StoryType } from "@/components/editor/story/syntax_parser_new";
 
@@ -30,7 +30,7 @@ function StoryTitlePage({
         {header.learningLanguageTitleContent.text}
       </div>
       <div className="pointer-events-auto w-full text-center">
-        <Button primary onClick={next}>
+        <Button variant="primary" onClick={next}>
           {localisation("button_start_story") || "Start the Story"}
         </Button>
       </div>

@@ -128,7 +128,7 @@ export default function ResetPassword() {
               placeholder="Email"
             />
           )}
-          <Button primary={true} data-cy="submit" type="submit" variant="blue">
+          <Button data-cy="submit" type="submit" variant="primary">
             {state !== 1 ? (token ? "Set Password" : "Send Link") : "..."}
           </Button>
         </form>

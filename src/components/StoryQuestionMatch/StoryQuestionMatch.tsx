@@ -28,12 +28,16 @@ interface SelectionResult {
   outcome: SelectionOutcome;
 }
 
-type Action = {
-  type: "select";
-  listIndex: number;
-  wordIndex: number;
-  key: string;
-};
+type Action =
+  | {
+      type: "select";
+      listIndex: number;
+      wordIndex: number;
+      key: string;
+    }
+  | {
+      type: "shuffle";
+    };
 
 /*
 The MATCH question.
@@ -111,6 +115,9 @@ function applySelection(currentState: State, action: Action): SelectionResult {
 }
 
 function reducer(currentState: State, action: Action) {
+  if (action.type === "shuffle") {
+    return shuffle_lists(currentState);
+  }
   return applySelection(currentState, action).nextState;
 }
 
@@ -135,6 +142,7 @@ function StoryQuestionMatch({
   setDone: () => void;
 }) {
   if (element.type !== "MATCH") throw new Error("not the right element");
+  const animationKeyRef = React.useRef(0);
   const [state, dispatch]: [State, React.Dispatch<Action>] = React.useReducer(
     reducer,
     {
@@ -143,18 +151,21 @@ function StoryQuestionMatch({
           value: e.phrase,
           state: "idle" as const,
           index: i,
-          key: crypto.randomUUID(),
+          key: `left-${i}`,
         })),
         element.fallbackHints.map((e, i) => ({
           value: e.translation,
           state: "idle" as const,
           index: i,
-          key: crypto.randomUUID(),
+          key: `right-${i}`,
         })),
       ],
     },
-    shuffle_lists,
   );
+
+  React.useEffect(() => {
+    dispatch({ type: "shuffle" });
+  }, []);
 
   const selectWord = React.useCallback(
     (listIndex: number, wordIndex: number) => {
@@ -162,7 +173,7 @@ function StoryQuestionMatch({
         type: "select",
         listIndex,
         wordIndex,
-        key: crypto.randomUUID(),
+        key: `interaction-${animationKeyRef.current++}`,
       } as const;
       const { outcome } = applySelection(state, action);
 

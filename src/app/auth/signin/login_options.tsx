@@ -24,8 +24,6 @@ export function LoginOptions(props: {
   callbackUrl: string;
 }) {
   const providersClass = "grid grid-cols-2 gap-x-4";
-  const oauthButtonClass =
-    "mt-2 mb-2 flex min-w-0 w-full cursor-pointer items-center justify-center gap-2 rounded-[15px] border-[var(--overview-hr)] border-b-4 border-l-2 border-r-2 border-t-2 bg-[var(--body-background)] px-4 py-[13px] font-bold uppercase text-[var(--text-color)] transition-[box-shadow,transform] duration-100 hover:brightness-90";
 
   const { providers, callbackUrl } = props;
 
@@ -130,7 +128,7 @@ export function LoginOptions(props: {
           name="password"
           placeholder="Password"
         />
-        <Button data-cy="submit" primary>
+        <Button data-cy="submit" variant="primary">
           {isPending ? <SpinnerBlue /> : "Log in"}
         </Button>
       </form>
@@ -156,15 +154,15 @@ export function LoginOptions(props: {
       <hr className="relative h-0 w-full overflow-visible border-0 border-t-2 border-[var(--input-border)] before:relative before:top-[calc(-1em+2px)] before:bg-[var(--body-background)] before:px-[0.4em] before:text-[var(--input-border)] before:content-['or']" />
       <div className={providersClass}>
         {providers.map((provider) => (
-          <button
+          <Button
             key={provider.id}
-            className={oauthButtonClass}
-            style={{ fontSize: "1rem" }}
+            variant="outline"
+            className="mb-2 flex min-w-0 w-full items-center justify-center gap-2"
             onClick={() => handleOAuthProviderClick(provider)}
           >
             <GetIcon name={provider.id} />
             <span className="truncate max-sm:hidden">{provider.name}</span>
-          </button>
+          </Button>
         ))}
       </div>
     </>

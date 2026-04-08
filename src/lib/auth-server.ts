@@ -7,6 +7,8 @@ export const { handler, isAuthenticated, fetchAuthQuery, fetchAuthMutation } =
     convexSiteUrl:
       process.env.NEXT_PUBLIC_CONVEX_SITE_URL ??
       process.env.NEXT_PUBLIC_SITE_URL ??
+      process.env.BETTER_AUTH_URL ??
+      process.env.NEXTAUTH_URL ??
       process.env.SITE_URL ??
       "",
   });

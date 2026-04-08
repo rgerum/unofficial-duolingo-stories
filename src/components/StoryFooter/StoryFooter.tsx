@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "../Button";
+import Button from "@/components/ui/button";
 import { useLocalisation } from "../LocalisationProvider/LocalisationProviderContext";
 import { cn } from "@/lib/utils";
 
@@ -87,15 +87,16 @@ function StoryFooter({
             "grid justify-stretch gap-4 [grid-template-columns:minmax(170px,220px)_minmax(0,1fr)_minmax(170px,220px)] max-[800px]:grid-cols-1 max-[800px]:gap-3",
           )}
         >
-          <button
+          <Button
             type="button"
-            className="mt-px min-h-14 rounded-[15px] border-0 bg-[#e5e5e5] px-[22px] text-[1rem] font-bold uppercase text-[#585858] shadow-[inset_0_-4px_0_#cfcfcf] transition-[filter] duration-120 ease-in-out hover:brightness-[0.98] max-[800px]:order-1 max-[800px]:w-full"
+            variant="secondary"
+            className="mt-px min-h-14 max-[800px]:order-1 max-[800px]:w-full"
             onClick={() => {
               void onBackToOverview?.();
             }}
           >
             Back to overview
-          </button>
+          </Button>
           <div className="flex min-w-0 items-center justify-center max-[800px]:order-2">
             {nextStoryPreview ? (
               <div className="w-full min-w-0 min-[801px]:relative">

@@ -1,12 +1,12 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { authPrimaryBlueActionClass } from "@/components/auth/styles";
+import {
+  buttonInnerClassName,
+  buttonRootClassName,
+} from "@/components/ui/button";
 
 export default function Page() {
-  const secondaryActionClass =
-    "flex w-full items-center justify-center rounded-[15px] border-2 border-[var(--overview-hr)] bg-[var(--body-background)] px-[30px] py-[13px] text-center text-[1rem] font-bold uppercase text-[var(--text-color)] no-underline transition duration-100 hover:bg-[color:color-mix(in_srgb,var(--link-blue)_8%,var(--body-background))] hover:text-[var(--text-color)]";
-
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,#ddf4ff_0%,#ffffff_45%,#f6fbef_100%)] px-4 py-10">
       <div className="pointer-events-none absolute left-1/2 top-0 h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-[color:color-mix(in_srgb,var(--button-background)_18%,transparent)] blur-3xl" />
@@ -37,12 +37,25 @@ export default function Page() {
         >
           <Link
             href="/auth/signin?callbackUrl=/"
-            className={authPrimaryBlueActionClass}
+            className={buttonRootClassName({
+              className: "block w-full no-underline",
+              variant: "primary",
+            })}
           >
-            Sign in
+            <span className={buttonInnerClassName({ variant: "primary" })}>
+              Sign in
+            </span>
           </Link>
-          <Link href="/auth/register" className={authPrimaryBlueActionClass}>
-            Register
+          <Link
+            href="/auth/register"
+            className={buttonRootClassName({
+              className: "block w-full no-underline",
+              variant: "primary",
+            })}
+          >
+            <span className={buttonInnerClassName({ variant: "primary" })}>
+              Register
+            </span>
           </Link>
         </nav>
 
@@ -52,8 +65,16 @@ export default function Page() {
           <span className="h-px flex-1 bg-[var(--overview-hr)]" />
         </div>
 
-        <Link href="/" className={secondaryActionClass}>
-          Continue anonymously
+        <Link
+          href="/"
+          className={buttonRootClassName({
+            className: "block w-full no-underline",
+            variant: "secondary",
+          })}
+        >
+          <span className={buttonInnerClassName({ variant: "secondary" })}>
+            Continue anonymously
+          </span>
         </Link>
       </main>
     </div>

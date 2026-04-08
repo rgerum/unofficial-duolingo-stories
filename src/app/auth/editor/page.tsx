@@ -1,6 +1,9 @@
 import React from "react";
 import Link from "next/link";
-import { authPrimaryBlueActionClass } from "@/components/auth/styles";
+import {
+  buttonInnerClassName,
+  buttonRootClassName,
+} from "@/components/ui/button";
 
 export default function Page() {
   return (
@@ -17,8 +20,16 @@ export default function Page() {
         You might need to login and out again after you got access to the
         editor.
       </p>
-      <Link href="/auth/signin" className={authPrimaryBlueActionClass}>
-        Log In
+      <Link
+        href="/auth/signin"
+        className={buttonRootClassName({
+          className: "inline-block no-underline",
+          variant: "primary",
+        })}
+      >
+        <span className={buttonInnerClassName({ variant: "primary" })}>
+          Log In
+        </span>
       </Link>
     </>
   );
