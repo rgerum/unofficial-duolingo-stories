@@ -10,8 +10,11 @@ import PlayAudio from "@/components/PlayAudio";
 import StoryLineHints from "@/components/StoryLineHints";
 import useAudio from "@/components/StoryTextLine/use-audio.hook";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
+import {
+  EditorHeaderActions,
+  EditorHeaderBreadcrumbs,
+} from "../../_components/header_context";
 import EditorButton from "../../editor_button";
-import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 import {
   LanguageType,
   SpeakersType,
@@ -25,7 +28,13 @@ type PlayFn = (
   name: string,
 ) => Promise<void>;
 
-export default function LanguageEditor({ identifier }: { identifier: string }) {
+export default function LanguageEditor({
+  identifier,
+  renderHeader = true,
+}: {
+  identifier: string;
+  renderHeader?: boolean;
+}) {
   const resolved = useQuery(api.editorRead.resolveEditorLanguage, {
     identifier,
   });
@@ -66,6 +75,7 @@ export default function LanguageEditor({ identifier }: { identifier: string }) {
         language2={language2}
         course={course}
         use_edit={false}
+        renderHeader={renderHeader}
       >
         <div className="flex flex-col leading-normal min-[560px]:flex-row max-[600px]:block">
           <AvatarNames
@@ -85,12 +95,14 @@ export function Layout({
   language2,
   course,
   use_edit,
+  renderHeader = true,
 }: {
   children: React.ReactNode;
   language_data: LanguageType;
   language2: LanguageType | undefined;
   course: CourseStudType | undefined;
   use_edit: boolean;
+  renderHeader?: boolean;
 }) {
   /*
     <CourseDropdown userdata={userdata} />
@@ -137,28 +149,27 @@ export function Layout({
   }
   return (
     <>
-      <nav className="fixed top-0 z-[1] box-border flex h-[60px] w-full items-center border-b-2 border-[var(--header-border)] bg-[var(--body-background)] px-5">
-        <Breadcrumbs path={crumbs} />
-        <div style={{ marginLeft: "auto" }}></div>
-        {use_edit ? (
-          <></>
-        ) : (
-          <EditorButton
-            id="button_edit"
-            href={`/editor/language/${
-              course?.short || language_data.short
-            }/tts_edit`}
-            data-cy="button_edit"
-            img={"import.svg"}
-            text={"Edit"}
-          />
-        )}
-        <LoggedInButtonWrappedClient
-          page={"editor"}
-          course_id={course?.short}
-        />
-      </nav>
-      <div className="mt-[60px]">{children}</div>
+      {renderHeader ? (
+        <>
+          <EditorHeaderBreadcrumbs>
+            <Breadcrumbs path={crumbs} />
+          </EditorHeaderBreadcrumbs>
+          <EditorHeaderActions>
+            {use_edit ? null : (
+              <EditorButton
+                id="button_edit"
+                href={`/editor/course/${
+                  course?.short || language_data.short
+                }/voices/edit`}
+                data-cy="button_edit"
+                img={"import.svg"}
+                text={"Edit"}
+              />
+            )}
+          </EditorHeaderActions>
+        </>
+      ) : null}
+      <div>{children}</div>
     </>
   );
 } //                 <Login page={"editor"}/>

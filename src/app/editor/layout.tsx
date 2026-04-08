@@ -1,6 +1,7 @@
 import React from "react";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { redirect } from "next/navigation";
+import { EditorHeaderProvider } from "./_components/header_context";
 
 export default async function Layout({
   children,
@@ -11,5 +12,5 @@ export default async function Layout({
 
   if (!isContributor(user)) redirect("/auth/editor");
 
-  return <>{children}</>;
+  return <EditorHeaderProvider>{children}</EditorHeaderProvider>;
 }

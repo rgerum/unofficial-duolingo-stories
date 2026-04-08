@@ -5,6 +5,10 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import EditorButton from "../editor_button";
 import { Breadcrumbs } from "../_components/breadcrumbs";
+import {
+  EditorHeaderActions,
+  EditorHeaderBreadcrumbs,
+} from "../_components/header_context";
 import type { CourseProps } from "./types";
 
 interface BreadcrumbPath {
@@ -26,7 +30,17 @@ export default function LayoutFlag() {
   const courses = (data?.courses ?? []) as CourseProps[];
 
   const segment = useSelectedLayoutSegments();
-  let import_id = segment[3];
+  const nestedRoute = segment[2];
+  const import_id = nestedRoute === "import" ? segment[3] : undefined;
+
+  if (
+    nestedRoute === "story" ||
+    nestedRoute === "voices" ||
+    nestedRoute === "localization"
+  ) {
+    return null;
+  }
+
   let course: CourseProps | undefined = undefined;
   let course_import: CourseProps | undefined = undefined;
 
@@ -74,36 +88,37 @@ export default function LayoutFlag() {
   }
   return (
     <>
-      <Breadcrumbs path={path} />
-      <div style={{ marginLeft: "auto" }}></div>
-      {course ? (
-        <>
-          {course.official ? (
-            <span className="pr-[15px]" data-cy="label_official">
-              <i>official</i>
-            </span>
-          ) : !import_id ? (
-            <EditorButton
-              id="button_import"
-              href={`/editor/course/${course.short}/import/es-en`}
-              data-cy="button_import"
-              img={"import.svg"}
-              text={"Import"}
-            />
-          ) : (
-            <EditorButton
-              id="button_back"
-              href={`/editor/course/${course.short}`}
-              data-cy="button_back"
-              img={"back.svg"}
-              text={"Back"}
-            />
-          )}
-        </>
-      ) : (
-        ""
-      )}
-      <div className="ml-[50px] max-[1120px]:ml-0"></div>
+      <EditorHeaderBreadcrumbs>
+        <Breadcrumbs path={path} />
+      </EditorHeaderBreadcrumbs>
+      <EditorHeaderActions>
+        {course ? (
+          <>
+            {course.official ? (
+              <span className="pr-[15px]" data-cy="label_official">
+                <i>official</i>
+              </span>
+            ) : !import_id ? (
+              <EditorButton
+                id="button_import"
+                href={`/editor/course/${course.short}/import/es-en`}
+                data-cy="button_import"
+                img={"import.svg"}
+                text={"Import"}
+              />
+            ) : (
+              <EditorButton
+                id="button_back"
+                href={`/editor/course/${course.short}`}
+                data-cy="button_back"
+                img={"back.svg"}
+                text={"Back"}
+              />
+            )}
+            <div className="ml-[50px] max-[1120px]:ml-0" />
+          </>
+        ) : null}
+      </EditorHeaderActions>
     </>
   );
 }

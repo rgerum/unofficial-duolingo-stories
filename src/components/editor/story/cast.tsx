@@ -32,7 +32,7 @@ export default function Cast(props: {
           <Link
             className="underline underline-offset-2"
             target="_blank"
-            href={"/editor/language/" + props.short}
+            href={"/editor/course/" + props.short + "/voices"}
           >
             Character-Editor
           </Link>{" "}
@@ -44,7 +44,7 @@ export default function Cast(props: {
           <Link
             className="underline underline-offset-2"
             target="_blank"
-            href={"/editor/language/" + props.short}
+            href={"/editor/course/" + props.short + "/voices"}
           >
             Character-Editor
           </Link>

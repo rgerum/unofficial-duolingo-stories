@@ -4,8 +4,8 @@ import React from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Spinner } from "@/components/ui/spinner";
-import { LoggedInButton } from "@/components/login/loggedinbutton";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
+import { EditorHeaderBreadcrumbs } from "../../_components/header_context";
 import TextEdit from "./text_edit";
 
 type LanguageType = {
@@ -27,8 +27,10 @@ type LocalizationRow = {
 
 export default function LocalizationEditor({
   identifier,
+  renderHeader = true,
 }: {
   identifier: string;
+  renderHeader?: boolean;
 }) {
   const resolved = useQuery(api.editorRead.resolveEditorLanguage, {
     identifier,
@@ -58,7 +60,12 @@ export default function LocalizationEditor({
   const course = (resolved.course ?? undefined) as CourseType | undefined;
 
   return (
-    <Layout language_data={language} language2={language2} course={course}>
+    <Layout
+      language_data={language}
+      language2={language2}
+      course={course}
+      renderHeader={renderHeader}
+    >
       <ListLocalizations
         language_id={language2?.id || language.id}
         language_name={language2?.name || language.name}
@@ -73,11 +80,13 @@ function Layout({
   language_data,
   language2,
   course,
+  renderHeader = true,
 }: {
   children: React.ReactNode;
   language_data: LanguageType;
   language2: LanguageType | undefined;
   course: CourseType | undefined;
+  renderHeader?: boolean;
 }) {
   const crumbs = [
     { type: "Editor", href: `/editor` },
@@ -93,12 +102,12 @@ function Layout({
   ];
   return (
     <>
-      <nav className="fixed top-0 z-[1] box-border flex h-[60px] w-full items-center border-b-2 border-[var(--header-border)] bg-[var(--body-background)] px-5">
-        <Breadcrumbs path={crumbs} />
-        <div style={{ marginLeft: "auto" }}></div>
-        <LoggedInButton page={"editor"} course_id={course?.short} />
-      </nav>
-      <div className="mt-[60px]">{children}</div>
+      {renderHeader ? (
+        <EditorHeaderBreadcrumbs>
+          <Breadcrumbs path={crumbs} />
+        </EditorHeaderBreadcrumbs>
+      ) : null}
+      <div>{children}</div>
     </>
   );
 }
@@ -127,8 +136,10 @@ function ListLocalizations({
 
   return (
     <div>
-      <h1>Localizations {language_name}</h1>
-      <p>
+      <h1 className="mb-4 text-[2rem] leading-[1.15] font-bold">
+        Localizations {language_name}
+      </h1>
+      <p className="mb-5 leading-[1.5]">
         If your course does not have English as a base language, you can adjust
         the texts of the Duostories interface to match the base language of your
         course. If multiple courses share the same base language, these texts

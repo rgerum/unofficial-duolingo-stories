@@ -19,6 +19,7 @@ import {
   insert_audio_line,
   timings_to_text,
 } from "@/lib/editor/audio/audio_edit_tools";
+import type { DetailedCourseProps } from "@/app/editor/(course)/types";
 import type {
   StoryElementHeader,
   StoryElementLine,
@@ -56,10 +57,12 @@ export default function EditorV2({
   isAdmin,
   story_data,
   avatar_names,
+  course_data,
 }: {
   isAdmin: boolean;
   story_data: StoryData;
   avatar_names: Record<number, Avatar>;
+  course_data: DetailedCourseProps;
 }) {
   const navigate = useRouter().push;
   const editorRef = React.useRef<HTMLDivElement>(null);
@@ -317,7 +320,7 @@ export default function EditorV2({
       audioEditorData.learningLanguageTitleContent);
 
   return (
-    <div id="body" className="flex h-full flex-col">
+    <div id="body" className="flex h-full min-h-0 flex-col">
       {model.saveError && (
         <>
           <div
@@ -352,7 +355,7 @@ export default function EditorV2({
         func_save={model.save}
         func_delete={async () => {
           await model.remove();
-          navigate(`/editor/course/${story_data.course_id}`);
+          navigate(`/editor/course/${story_data.short}`);
         }}
         is_saving={model.isSaving}
         is_deleting={model.isDeleting}
@@ -361,8 +364,6 @@ export default function EditorV2({
         set_show_trans={set_show_trans}
         show_ssml={show_ssml}
         set_show_ssml={set_show_ssml}
-        language_data={language_data}
-        language_data2={language_data2}
       />
       {audioEditorData &&
         audioEditorData.audio &&
@@ -392,7 +393,7 @@ export default function EditorV2({
           />
         )}
 
-      <div className="flex h-[100px] grow">
+      <div className="flex min-h-0 flex-1">
         <svg
           className="pointer-events-none fixed z-[-1] h-full w-full float-left"
           ref={svgParentRef}
@@ -405,17 +406,17 @@ export default function EditorV2({
         <div
           ref={editorRef}
           className={
-            "w-[100px] grow [scroll-behavior:auto] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full " +
+            "min-h-0 w-[100px] grow [scroll-behavior:auto] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full " +
             (language_data?.rtl ? "[direction:rtl]" : "")
           }
         />
         <svg
-          className="h-[calc(100vh-64px)] w-[2%] cursor-col-resize overflow-scroll float-left"
+          className="h-full w-[2%] cursor-col-resize overflow-scroll float-left"
           ref={marginRef}
         />
         <div
           ref={previewRef}
-          className="w-[100px] grow overflow-scroll [scroll-behavior:auto] max-[975px]:absolute max-[975px]:top-[calc((100vh-64px)/2+64px)] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full p-3"
+          className="min-h-0 w-[100px] grow overflow-scroll [scroll-behavior:auto] max-[975px]:absolute max-[975px]:top-[calc((100vh-64px)/2+64px)] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full p-3"
         >
           <Cast
             id={story_data.id}

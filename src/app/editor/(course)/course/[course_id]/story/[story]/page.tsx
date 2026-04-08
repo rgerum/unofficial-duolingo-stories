@@ -1,8 +1,9 @@
 import React from "react";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { fetchQuery } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
+import StoryEditorPageClient from "@/app/editor/story/[story]/page_client";
 
 function getCanonicalStoryEditorPath(courseShort: string, storyId: number) {
   return `/editor/course/${courseShort}/story/${storyId}`;
@@ -11,9 +12,10 @@ function getCanonicalStoryEditorPath(courseShort: string, storyId: number) {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ story: number }>;
+  params: Promise<{ course_id: string; story: number }>;
 }): Promise<Metadata> {
-  const storyId = Number((await params).story);
+  const resolvedParams = await params;
+  const storyId = Number(resolvedParams.story);
   const story = await fetchQuery(api.editorRead.getEditorStoryPageData, {
     storyId,
   });
@@ -34,16 +36,15 @@ export async function generateMetadata({
 export default async function Page({
   params,
 }: {
-  params: Promise<{ story: number }>;
+  params: Promise<{ course_id: string; story: number }>;
 }) {
-  const storyId = Number((await params).story);
-  const story = await fetchQuery(api.editorRead.getEditorStoryPageData, {
-    storyId,
-  });
+  const resolvedParams = await params;
+  const storyId = Number(resolvedParams.story);
 
-  if (!story) notFound();
-
-  redirect(
-    getCanonicalStoryEditorPath(story.story_data.short, story.story_data.id),
+  return (
+    <StoryEditorPageClient
+      storyId={storyId}
+      courseId={resolvedParams.course_id}
+    />
   );
 }

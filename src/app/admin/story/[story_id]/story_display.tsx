@@ -69,7 +69,9 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
           >
             Back to Story Search
           </Link>
-          <Link href={`/editor/story/${storyData.id}`}>
+          <Link
+            href={`/editor/course/${storyData.short}/story/${storyData.id}`}
+          >
             <Button>Edit Story</Button>
           </Link>
         </div>

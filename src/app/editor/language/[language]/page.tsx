@@ -1,9 +1,12 @@
 import React from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
 import { fetchQuery } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
-import LanguageEditorPageClient from "./page_client";
+
+function getCanonicalVoicesPath(courseShort: string) {
+  return `/editor/course/${courseShort}/voices`;
+}
 
 export async function generateMetadata({
   params,
@@ -23,7 +26,7 @@ export async function generateMetadata({
     return {
       title: `Voices | ${language.name} | Duostories Editor`,
       alternates: {
-        canonical: `https://duostories.org/editor/language/${language.short}`,
+        canonical: `https://duostories.org${getCanonicalVoicesPath(language.short)}`,
       },
     };
   }
@@ -33,7 +36,7 @@ export async function generateMetadata({
   return {
     title: `Voices | ${language.name} (from ${language2.name}) | Duostories Editor`,
     alternates: {
-      canonical: `https://duostories.org/editor/language/${course.short}`,
+      canonical: `https://duostories.org${getCanonicalVoicesPath(course.short)}`,
     },
   };
 }
@@ -43,5 +46,14 @@ export default async function Page({
 }: {
   params: Promise<{ language: string }>;
 }) {
-  return <LanguageEditorPageClient identifier={(await params).language} />;
+  const resolved = await fetchQuery(api.editorRead.resolveEditorLanguage, {
+    identifier: (await params).language,
+  });
+  const language = resolved?.language;
+  const course = resolved?.course;
+  const language2 = resolved?.language2;
+
+  if (!language) notFound();
+
+  redirect(getCanonicalVoicesPath(course?.short ?? language.short));
 }
