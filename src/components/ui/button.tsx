@@ -83,8 +83,12 @@ export function buttonInnerClassName({
   return cn(
     "block rounded-[inherit] text-[1rem] font-bold uppercase transition-[background-color,border-color,transform] duration-100",
     {
-      default: "bg-[var(--button-background)]",
-      primary: "bg-[var(--button-blue-background)]",
+      default: disabled
+        ? "bg-[var(--button-inactive-background)] text-[var(--button-inactive-color)]"
+        : "bg-[var(--button-background)]",
+      primary: disabled
+        ? "bg-[var(--button-inactive-background)] text-[var(--button-inactive-color)]"
+        : "bg-[var(--button-blue-background)]",
       secondary:
         "border-2 border-[var(--overview-hr)] bg-[var(--body-background)] text-[var(--text-color)] hover:border-[color:color-mix(in_srgb,var(--link-blue)_28%,var(--overview-hr))] hover:bg-[color:color-mix(in_srgb,var(--link-blue)_8%,var(--body-background))]",
       outline:

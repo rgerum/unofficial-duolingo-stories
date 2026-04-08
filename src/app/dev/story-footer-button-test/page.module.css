@@ -158,7 +158,15 @@
   margin-bottom: 18px;
 }
 
+.footerGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+  margin-top: 4px;
+}
+
 .stateCard,
+.footerCard,
 .liveCard {
   background: color-mix(in srgb, var(--body-background) 90%, transparent);
   border: 1px solid color-mix(in srgb, var(--overview-hr) 86%, transparent);
@@ -212,6 +220,20 @@
   padding: 20px;
 }
 
+.footerStage {
+  margin-top: 16px;
+}
+
+.footerFrame {
+  align-items: center;
+  background: var(--body-background);
+  border-top: 2px solid var(--header-border);
+  display: flex;
+  justify-content: flex-end;
+  min-height: 140px;
+  padding: 30px;
+}
+
 .previewHover > span {
   background: color-mix(in srgb, var(--link-blue) 8%, var(--body-background));
   border-color: color-mix(in srgb, var(--link-blue) 28%, var(--overview-hr));
@@ -250,6 +272,11 @@
 
   .variantGrid {
     grid-template-columns: 1fr;
+  }
+
+  .footerFrame {
+    min-height: auto;
+    padding: 18px 16px;
   }
 
   .themeHeader {
