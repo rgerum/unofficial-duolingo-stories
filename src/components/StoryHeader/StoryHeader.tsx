@@ -34,6 +34,7 @@ function StoryHeader({
   const { onClick } = getEditorHandlers(editorProps);
   const [audioRange, playAudio, ref, url] = useAudio(element, active);
   const effectiveAudioRange = audioRangeOverride ?? audioRange;
+  const isRtl = settings.rtl || element.lang === "rtl";
 
   const hideRangesForChallenge = undefined;
 
@@ -72,7 +73,7 @@ function StoryHeader({
             <source src={url} type="audio/mp3" />
           </audio>
         )}
-        {!hideAudioButton && <PlayAudio onClick={playAudio} />}
+        {!hideAudioButton && <PlayAudio onClick={playAudio} rtl={isRtl} />}
         <StoryLineHints
           audioRange={effectiveAudioRange}
           hideRangesForChallenge={hideRangesForChallenge}

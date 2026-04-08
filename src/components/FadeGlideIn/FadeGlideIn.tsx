@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./FadeGlideIn.module.css";
+import { motion } from "framer-motion";
 import useScrollIntoView from "@/hooks/use-scroll-into-view.hook";
 
 function FadeGlideIn({
@@ -14,16 +14,20 @@ function FadeGlideIn({
   disableScroll?: boolean;
 }) {
   const ref = useScrollIntoView(show && !hidden && !disableScroll);
+  if (hidden || !show) return null;
 
   return (
-    <div
-      className={styles.fadeGlideIn}
-      data-show={show}
-      data-hidden={hidden}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      style={{
+        willChange: "opacity, transform",
+      }}
       ref={ref}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
 

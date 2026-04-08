@@ -86,7 +86,7 @@ function StoryTextLine({
               <source src={url} type="audio/mp3" />
             </audio>
           )}
-          {!hideAudioButton && <PlayAudio onClick={playAudio} />}
+          {!hideAudioButton && <PlayAudio onClick={playAudio} rtl={isRtl} />}
           <StoryLineHints
             audioRange={effectiveAudioRange}
             hideRangesForChallenge={hideRangesForChallenge}
@@ -121,7 +121,7 @@ function StoryTextLine({
               <source src={url} type="audio/mp3" />
             </audio>
           )}
-          {!hideAudioButton && <PlayAudio onClick={playAudio} />}
+          {!hideAudioButton && <PlayAudio onClick={playAudio} rtl={isRtl} />}
           <StoryLineHints
             audioRange={effectiveAudioRange}
             hideRangesForChallenge={hideRangesForChallenge}
@@ -153,7 +153,7 @@ function StoryTextLine({
               <source src={url} type="audio/mp3" />
             </audio>
           )}
-          {!hideAudioButton && <PlayAudio onClick={playAudio} />}
+          {!hideAudioButton && <PlayAudio onClick={playAudio} rtl={isRtl} />}
           <StoryLineHints
             audioRange={effectiveAudioRange}
             hideRangesForChallenge={hideRangesForChallenge}

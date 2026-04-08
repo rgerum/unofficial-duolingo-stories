@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import styles from "./StoryEditorPreview.module.css";
 import StoryTextLine from "../StoryTextLine";
 import StoryHeader from "../StoryHeader";
 import StoryQuestionMatch from "../StoryQuestionMatch";
@@ -23,6 +22,7 @@ import {
   getEditorHandlers,
   type EditorProps,
 } from "@/lib/editor/editorHandlers";
+import { cn } from "@/lib/utils";
 
 interface StoryEditorPreviewProps {
   story: StoryType & { learning_language_rtl?: boolean };
@@ -53,14 +53,18 @@ export default function StoryEditorPreview({
 
   return (
     <div
-      className={
-        styles.story +
-        " " +
-        (story.learning_language_rtl ? styles.story_rtl : "")
-      }
+      className={cn(
+        "px-4 pt-[85px] select-none",
+        story.learning_language_rtl && "[direction:rtl]",
+      )}
     >
       {parts.map((part, i) => (
-        <EditorPart key={i} part={part} editorState={editorState} />
+        <EditorPart
+          key={i}
+          part={part}
+          editorState={editorState}
+          rtl={story.learning_language_rtl ?? false}
+        />
       ))}
     </div>
   );
@@ -69,9 +73,10 @@ export default function StoryEditorPreview({
 interface EditorPartProps {
   part: StoryElement[];
   editorState?: EditorStateType;
+  rtl: boolean;
 }
 
-function EditorPart({ part, editorState }: EditorPartProps) {
+function EditorPart({ part, editorState, rtl }: EditorPartProps) {
   const lastElement = part[part.length - 1];
   const trackingProps = lastElement.trackingProperties as {
     challenge_type?: string;
@@ -82,7 +87,12 @@ function EditorPart({ part, editorState }: EditorPartProps) {
   return (
     <div className="part" data-challengetype={challenge_type}>
       {part.map((element, i) => (
-        <EditorElement key={i} element={element} editorState={editorState} />
+        <EditorElement
+          key={i}
+          element={element}
+          editorState={editorState}
+          rtl={rtl}
+        />
       ))}
     </div>
   );
@@ -91,15 +101,16 @@ function EditorPart({ part, editorState }: EditorPartProps) {
 interface EditorElementProps {
   element: StoryElement;
   editorState?: EditorStateType;
+  rtl: boolean;
 }
 
-function EditorElement({ element, editorState }: EditorElementProps) {
+function EditorElement({ element, editorState, rtl }: EditorElementProps) {
   // Dummy settings for editor mode - show everything
   const editorSettings = {
     hide_questions: false,
     show_all: true,
     show_names: false,
-    rtl: false,
+    rtl,
     highlight_name: [],
     hideNonHighlighted: false,
     setHighlightName: () => {},
@@ -195,6 +206,7 @@ function EditorElement({ element, editorState }: EditorElementProps) {
       <EditorChallengePrompt
         element={element as StoryElementChallengePrompt}
         editorState={editorState}
+        rtl={rtl}
       />
     );
   }
@@ -227,22 +239,28 @@ function EditorError({
 
   return (
     <div
-      className={styles.error}
+      className="my-3 cursor-pointer rounded-[10px] border border-[#d97706] border-l-[5px] border-l-[#b45309] bg-[#fff7ed] px-[14px] py-3 text-[#7c2d12]"
       onClick={onClick}
       data-lineno={element.editor?.block_start_no}
     >
-      <div className={styles.errorHeader}>
-        <span className={styles.errorTitle}>{title}</span>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <span className="text-[0.92rem] font-bold tracking-[0.02em] uppercase">
+          {title}
+        </span>
         {element.lineNumber ? (
-          <span className={styles.errorLine}>Line {element.lineNumber}</span>
+          <span className="shrink-0 rounded-full bg-[#fed7aa] px-2 py-[2px] text-[0.8rem] font-semibold">
+            Line {element.lineNumber}
+          </span>
         ) : null}
       </div>
-      <div className={styles.errorMessage}>{element.text}</div>
+      <div className="text-[0.98rem] font-semibold">{element.text}</div>
       {element.sourceLine ? (
-        <code className={styles.errorSource}>{element.sourceLine}</code>
+        <code className="mt-[10px] block overflow-x-auto rounded-lg bg-[#ffedd5] px-[10px] py-2 text-[0.9rem] whitespace-pre-wrap text-[#9a3412]">
+          {element.sourceLine}
+        </code>
       ) : null}
       {element.details ? (
-        <div className={styles.errorDetails}>{element.details}</div>
+        <div className="mt-2 text-[0.9rem]">{element.details}</div>
       ) : null}
     </div>
   );
@@ -275,11 +293,13 @@ function EditorQuestionWrapper({
 interface EditorChallengePromptProps {
   element: StoryElementChallengePrompt;
   editorState?: EditorStateType;
+  rtl: boolean;
 }
 
 function EditorChallengePrompt({
   element,
   editorState,
+  rtl,
 }: EditorChallengePromptProps) {
   const editorProps: EditorProps = {
     editorState,
@@ -289,7 +309,7 @@ function EditorChallengePrompt({
 
   return (
     <div
-      className={styles.challenge_prompt + " " + element.lang}
+      className={cn("my-4", element.lang, rtl && "[direction:rtl]")}
       onClick={onClick}
       data-lineno={element.editor?.block_start_no}
     >
