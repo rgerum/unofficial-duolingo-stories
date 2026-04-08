@@ -19,7 +19,6 @@ import {
   insert_audio_line,
   timings_to_text,
 } from "@/lib/editor/audio/audio_edit_tools";
-import type { DetailedCourseProps } from "@/app/editor/(course)/types";
 import type {
   StoryElementHeader,
   StoryElementLine,
@@ -68,13 +67,11 @@ export default function EditorV2({
   isAdmin,
   story_data,
   avatar_names,
-  course_data,
   story_navigation,
 }: {
   isAdmin: boolean;
   story_data: StoryData;
   avatar_names: Record<number, Avatar>;
-  course_data: DetailedCourseProps;
   story_navigation: StoryNavigation;
 }) {
   const navigate = useRouter().push;

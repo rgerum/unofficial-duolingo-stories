@@ -145,7 +145,6 @@ export default function StoryEditorPageClient({
         isAdmin={data.isAdmin}
         story_data={data.story_data}
         avatar_names={avatarNames}
-        course_data={course}
         story_navigation={{
           previousStory: previousStory
             ? {
