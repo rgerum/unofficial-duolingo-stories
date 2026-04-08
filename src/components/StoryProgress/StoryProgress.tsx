@@ -201,6 +201,11 @@ function StoryProgress({
     window.sessionStorage.setItem("story_autoplay_ts", String(Date.now()));
   }, []);
 
+  const shouldQueueAutoplay =
+    buttonStatus === "continue" ||
+    buttonStatus === "right" ||
+    buttonStatus === "finished";
+
   const next = React.useCallback(async () => {
     if (!parts_list) return;
     if (buttonStatus === "finished") {
@@ -232,13 +237,15 @@ function StoryProgress({
       }
 
       event.preventDefault();
-      queueAutoplayForNextLine();
+      if (shouldQueueAutoplay) {
+        queueAutoplayForNextLine();
+      }
       void next();
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [next, queueAutoplayForNextLine]);
+  }, [next, queueAutoplayForNextLine, shouldQueueAutoplay]);
 
   if (!story || !parts_list) return null;
 
