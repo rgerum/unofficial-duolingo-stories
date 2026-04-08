@@ -1,0 +1,51 @@
+"use client";
+
+import React from "react";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { Spinner } from "@/components/ui/spinner";
+import { Breadcrumbs } from "@/app/editor/_components/breadcrumbs";
+import { EditorHeaderBreadcrumbs } from "@/app/editor/_components/header_context";
+import LocalizationEditor from "@/app/editor/localization/[language]/localization_editor";
+import type { DetailedCourseProps } from "@/app/editor/(course)/types";
+
+export default function CourseLocalizationPageClient({
+  courseId,
+}: {
+  courseId: string;
+}) {
+  const course = useQuery(api.editorRead.getEditorCourseByIdentifier, {
+    identifier: courseId,
+  }) as DetailedCourseProps | null | undefined;
+
+  if (course === undefined) return <Spinner />;
+  if (!course) return <p>Course not found.</p>;
+
+  return (
+    <>
+      <EditorHeaderBreadcrumbs>
+        <Breadcrumbs
+          path={[
+            { type: "Editor", href: `/editor` },
+            { type: "sep" },
+            {
+              type: "course",
+              lang1: {
+                languageId: course.learningLanguageId,
+                name: course.learning_language_name,
+              },
+              lang2: {
+                languageId: course.fromLanguageId,
+                name: course.from_language_name,
+              },
+              href: `/editor/course/${course.short}`,
+            },
+            { type: "sep" },
+            { type: "Localization" },
+          ]}
+        />
+      </EditorHeaderBreadcrumbs>
+      <LocalizationEditor identifier={courseId} renderHeader={false} />
+    </>
+  );
+}

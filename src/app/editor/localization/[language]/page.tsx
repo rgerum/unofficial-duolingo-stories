@@ -1,8 +1,7 @@
 import React from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { fetchQuery } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
-import LocalizationPageClient from "./page_client";
 
 interface LanguageType {
   languageId: string;
@@ -19,6 +18,10 @@ interface CourseType {
 
 interface PageProps {
   params: Promise<{ language: string }>;
+}
+
+function getCanonicalLocalizationPath(courseShort: string) {
+  return `/editor/course/${courseShort}/localization`;
 }
 
 async function get_language(id: string) {
@@ -42,21 +45,25 @@ export async function generateMetadata({ params }: PageProps) {
 
   if (!language2) {
     return {
-      title: `Voices | ${language.name} | Duostories Editor`,
+      title: `Localization | ${language.name} | Duostories Editor`,
       alternates: {
-        canonical: `https://duostories.org/editor/localization/${language.short}`,
+        canonical: `https://duostories.org${getCanonicalLocalizationPath(language.short)}`,
       },
     };
   }
 
   return {
-    title: `Voices | ${language.name} (from ${language2.name}) | Duostories Editor`,
+    title: `Localization | ${language.name} (from ${language2.name}) | Duostories Editor`,
     alternates: {
-      canonical: `https://duostories.org/editor/localization/${course?.short}`,
+      canonical: `https://duostories.org${getCanonicalLocalizationPath(course?.short ?? language.short)}`,
     },
   };
 }
 
 export default async function Page({ params }: PageProps) {
-  return <LocalizationPageClient identifier={(await params).language} />;
+  let [language, course] = await get_language((await params).language);
+
+  if (!language) notFound();
+
+  redirect(getCanonicalLocalizationPath(course?.short ?? language.short));
 }

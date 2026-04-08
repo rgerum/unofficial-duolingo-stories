@@ -3,7 +3,7 @@
 import React from "react";
 import SwiperSideBar from "./swipe";
 import LayoutFlag from "./layout_flag";
-import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
+import EditorHeaderShell from "../_components/header_shell";
 
 export default function EditorLayoutClient({
   children,
@@ -12,10 +12,10 @@ export default function EditorLayoutClient({
 }) {
   return (
     <SwiperSideBar>
-      <nav className="[grid-area:header] flex items-center border-b-2 border-[var(--header-border)] px-5">
+      <div className="[grid-area:header] min-w-0">
+        <EditorHeaderShell />
         <LayoutFlag />
-        <LoggedInButtonWrappedClient page={"editor"} course_id={"segment"} />
-      </nav>
+      </div>
       <div className="[grid-area:main] min-h-0 min-w-0 overflow-auto">
         {children}
       </div>

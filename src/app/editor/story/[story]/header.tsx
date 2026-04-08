@@ -1,7 +1,6 @@
 import React from "react";
 import EditorButton from "../../editor_button";
-import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
-import { Breadcrumbs } from "../../_components/breadcrumbs";
+import { EditorHeaderActions } from "../../_components/header_context";
 import type { StoryData } from "./types";
 
 declare global {
@@ -15,28 +14,6 @@ type HeaderProps = {
   isAdmin: boolean;
   story_data: StoryData;
   unsaved_changes: boolean;
-  language_data?: {
-    languageId: string;
-    id: number;
-    name: string;
-    short: string;
-    speaker: string | null;
-    default_text: string;
-    tts_replace: string | null;
-    public: boolean;
-    rtl: boolean;
-  };
-  language_data2?: {
-    languageId: string;
-    id: number;
-    name: string;
-    short: string;
-    speaker: string | null;
-    default_text: string;
-    tts_replace: string | null;
-    public: boolean;
-    rtl: boolean;
-  };
   func_save: () => Promise<void>;
   func_delete: () => Promise<void>;
   is_saving: boolean;
@@ -52,8 +29,6 @@ export function StoryEditorHeader({
   isAdmin,
   story_data,
   unsaved_changes,
-  language_data,
-  language_data2,
   func_save,
   func_delete,
   is_saving,
@@ -112,71 +87,50 @@ export function StoryEditorHeader({
   }
 
   return (
-    <>
-      <div className="flex h-[60px] border-b-2 border-[var(--header-border)]">
-        <div className="flex w-full items-center px-5 max-[975px]:[&>div:last-child]:hidden">
-          <Breadcrumbs
-            path={[
-              { type: "Editor", href: `/editor` },
-              { type: "sep", href: "#" },
-              {
-                type: "course",
-                lang1: language_data,
-                lang2: language_data2,
-                href: `/editor/course/${story_data?.short}`,
-              },
-              { type: "sep", href: "#" },
-              { type: "story", href: `#`, data: story_data },
-            ]}
-          />
+    <EditorHeaderActions>
+      <div className="flex items-center">
+        <EditorButton
+          style={{ marginLeft: "auto" }}
+          id="button_delete"
+          onClick={Delete}
+          img={"delete.svg"}
+          text={is_deleting ? "Deleting..." : "Delete"}
+          disabled={is_saving || is_deleting}
+        />
+        <EditorButton
+          onClick={do_set_show_trans}
+          checked={show_trans}
+          text={"Hints"}
+        />
+        <EditorButton
+          onClick={do_set_show_ssml}
+          checked={show_ssml}
+          text={"Audio"}
+        />
 
-          <EditorButton
-            style={{ marginLeft: "auto" }}
-            id="button_delete"
-            onClick={Delete}
-            img={"delete.svg"}
-            text={is_deleting ? "Deleting..." : "Delete"}
-            disabled={is_saving || is_deleting}
-          />
-          <EditorButton
-            onClick={do_set_show_trans}
-            checked={show_trans}
-            text={"Hints"}
-          />
-          <EditorButton
-            onClick={do_set_show_ssml}
-            checked={show_ssml}
-            text={"Audio"}
-          />
-
-          <EditorButton
-            id="button_save"
-            onClick={Save}
-            img={"save.svg"}
-            text={
-              (is_saving ? "Saving..." : "Save") + (unsaved_changes ? "*" : "")
-            }
-            disabled={is_saving || is_deleting}
-            title={
-              story_data.official && !isAdmin
-                ? "Only admins can overwrite official stories."
-                : undefined
-            }
-          />
-          <div className="px-2 text-[0.8rem] text-[var(--text-color-dim)]">
-            {last_saved_at
-              ? `Saved at ${new Date(last_saved_at).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}`
-              : ""}
-          </div>
-          <LoggedInButtonWrappedClient
-            page={"editor"}
-            course_id={story_data?.short}
-          />
+        <EditorButton
+          id="button_save"
+          onClick={Save}
+          img={"save.svg"}
+          text={
+            (is_saving ? "Saving..." : "Save") + (unsaved_changes ? "*" : "")
+          }
+          disabled={is_saving || is_deleting}
+          title={
+            story_data.official && !isAdmin
+              ? "Only admins can overwrite official stories."
+              : undefined
+          }
+        />
+        <div className="px-2 text-[0.8rem] text-[var(--text-color-dim)]">
+          {last_saved_at
+            ? `Saved at ${new Date(last_saved_at).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}`
+            : ""}
         </div>
       </div>
-    </>
+    </EditorHeaderActions>
   );
 }

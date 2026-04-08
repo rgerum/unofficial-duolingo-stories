@@ -45,6 +45,7 @@ export default function ImportList({
   }
 
   const courseLegacyId = course.id;
+  const courseShort = course.short;
 
   async function do_import(id: number) {
     // prevent clicking the button twice
@@ -61,7 +62,7 @@ export default function ImportList({
       return;
     }
     const id2 = response.id;
-    await router.push("/editor/story/" + id2);
+    await router.push(`/editor/course/${courseShort}/story/${id2}`);
   }
 
   return (

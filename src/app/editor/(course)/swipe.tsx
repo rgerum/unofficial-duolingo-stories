@@ -11,13 +11,19 @@ interface SwiperSideBarProps {
 }
 
 export default function SwiperSideBar({ children }: SwiperSideBarProps) {
-  const segment = useSelectedLayoutSegments()[1];
+  const segments = useSelectedLayoutSegments();
+  const courseSegment = segments[1];
+  const nestedRoute = segments[2];
+  const showSidebar =
+    nestedRoute !== "story" &&
+    nestedRoute !== "voices" &&
+    nestedRoute !== "localization";
 
   // Render data...
-  let [showList, setShowList] = useState(segment === null);
+  let [showList, setShowList] = useState(courseSegment === null);
   useEffect(() => {
-    setShowList(segment === null);
-  }, [segment]);
+    setShowList(courseSegment === null);
+  }, [courseSegment]);
 
   let toggleShow = React.useCallback(() => {
     setShowList((value) => !value);
@@ -42,13 +48,20 @@ export default function SwiperSideBar({ children }: SwiperSideBarProps) {
     <>
       <div
         {...handlers}
-        className="grid h-[100dvh] min-h-0 w-full overflow-hidden [grid-template-areas:'header_header''nav_main'] [grid-template-columns:400px_minmax(0,1fr)] [grid-template-rows:auto_minmax(0,1fr)] max-[1250px]:[grid-template-columns:0_minmax(0,1fr)]"
+        className={
+          "grid h-[100dvh] min-h-0 w-full overflow-hidden [grid-template-areas:'header_header''nav_main'] [grid-template-rows:auto_minmax(0,1fr)] " +
+          (showSidebar
+            ? "[grid-template-columns:400px_minmax(0,1fr)] max-[1250px]:[grid-template-columns:0_minmax(0,1fr)]"
+            : "[grid-template-columns:0_minmax(0,1fr)]")
+        }
       >
-        <CourseList
-          course_id={segment}
-          showList={showList}
-          toggleShow={toggleShow}
-        />
+        {showSidebar ? (
+          <CourseList
+            course_id={courseSegment}
+            showList={showList}
+            toggleShow={toggleShow}
+          />
+        ) : null}
         {children}
       </div>
     </>

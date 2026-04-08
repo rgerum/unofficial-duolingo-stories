@@ -57,11 +57,13 @@ export default function Tts_edit({
   language2,
   speakers,
   course,
+  renderHeader = true,
 }: {
   language: LanguageType;
   language2: LanguageType | undefined;
   speakers: SpeakersType[];
   course: CourseStudType | undefined;
+  renderHeader?: boolean;
 }) {
   // Render data...                <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
   const [data, setData] = React.useState(
@@ -205,6 +207,7 @@ FRAGMENTS:
         language2={language2}
         course={course}
         use_edit={true}
+        renderHeader={renderHeader}
       >
         <div className="flex leading-normal max-[600px]:block">
           <div

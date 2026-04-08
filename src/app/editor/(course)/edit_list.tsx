@@ -107,7 +107,10 @@ export default function EditList({
       </div>
       <p className="my-4">
         To set character voices, go to the{" "}
-        <Link className="underline" href={`/editor/language/${course.short}`}>
+        <Link
+          className="underline"
+          href={`/editor/course/${course.short}/voices`}
+        >
           Character Editor
         </Link>
         .
@@ -118,7 +121,7 @@ export default function EditList({
           course), head to the{" "}
           <Link
             className="underline"
-            href={`/editor/localization/${course.short}`}
+            href={`/editor/course/${course.short}/localization`}
           >
             Localization Editor
           </Link>
@@ -258,7 +261,7 @@ export default function EditList({
                 <div className="flex min-w-0 items-center gap-[6px]">
                   <Link
                     className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap underline underline-offset-2"
-                    href={`/editor/story/${story.id}`}
+                    href={`/editor/course/${course.short}/story/${story.id}`}
                     title={story.name}
                   >
                     {story.name}
