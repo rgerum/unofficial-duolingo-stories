@@ -94,6 +94,20 @@
 .word {
   user-select: text;
 }
+
+.word[data-revealed="true"] {
+  line-height: 2em;
+  background-image: linear-gradient(
+    to right,
+    var(--underline-dashed) 60%,
+    rgba(255, 255, 255, 0) 0%
+  );
+  background-position: 0 100%;
+  background-repeat: repeat-x;
+  background-size: 5px 2px;
+  padding-bottom: 5px;
+}
+
 .word[data-hidden="true"] {
   color: var(--body-background);
   user-select: none;

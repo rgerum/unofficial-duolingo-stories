@@ -1,8 +1,5 @@
 import React from "react";
 import { AnimatePresence } from "framer-motion";
-import Link from "next/link";
-
-import styles from "./StoryProgress.module.css";
 import StoryChallengeMultipleChoice from "../StoryChallengeMultipleChoice";
 import StoryChallengeContinuation from "../StoryChallengeContinuation";
 import StoryChallengeMatch from "../StoryChallengeMatch";
@@ -12,11 +9,10 @@ import StoryChallengeSelectPhrases from "../StoryChallengeSelectPhrases";
 import FadeGlideIn from "../FadeGlideIn";
 import StoryTextLine from "../StoryTextLine";
 import StoryHeader from "../StoryHeader";
-import ProgressBar from "../ProgressBar";
+import StoryHeaderProgress from "../StoryHeaderProgress";
 import StoryFooter from "../StoryFooter";
 import StoryFinishedScreen from "../StoryFinishedScreen";
 import StoryTitlePage from "../StoryTitlePage";
-import VisuallyHidden from "../VisuallyHidden";
 import { playSoundEffect } from "@/lib/sound-effects";
 import { StoryType } from "@/components/editor/story/syntax_parser_new";
 import {
@@ -26,6 +22,7 @@ import {
 } from "@/components/editor/story/syntax_parser_types";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 import { isTypingTarget } from "@/lib/is-typing-target";
+import { cn } from "@/lib/utils";
 
 function getComponent(parts: StoryElement[]) {
   const last_part = parts[parts.length - 1];
@@ -268,9 +265,9 @@ function StoryProgress({
     <>
       <div>
         {!settings.show_all && (
-          <HeaderProgress
-            course_short={story.course_short}
-            set_id={story.set_id}
+          <StoryHeaderProgress
+            course={story.course_short}
+            setId={story.set_id}
             progress={storyProgress}
             length={storyProgress === -1 ? undefined : parts_list.length}
           />
@@ -278,7 +275,13 @@ function StoryProgress({
         {storyProgress === -1 && !settings.show_all && (
           <StoryTitlePage story={story} next={next} />
         )}
-        <div className={styles.story} data-rtl={settings.rtl}>
+        <div
+          className={cn(
+            "mx-auto max-w-[500px] p-4 print:w-full print:max-w-full",
+            settings.rtl && "[direction:rtl]",
+          )}
+          data-rtl={settings.rtl ? "true" : undefined}
+        >
           {settings.show_names && (
             <>
               <NameButtons
@@ -313,7 +316,7 @@ function StoryProgress({
               },
             )}
           </AnimatePresence>
-          <div className={styles.spacer}></div>
+          <div className="h-[33vh]" />
           {storyProgress === parts_list.length && (
             <StoryFinishedScreen
               story={story}
@@ -337,32 +340,6 @@ function StoryProgress({
   );
 }
 
-function HeaderProgress({
-  course_short,
-  set_id,
-  progress,
-  length,
-}: {
-  course_short: string;
-  set_id: number;
-  progress: number;
-  length?: number;
-}) {
-  const courseHref =
-    set_id > 0 ? `/${course_short}#${set_id}` : `/${course_short}`;
-
-  return (
-    <div className={styles.header}>
-      <Link className={styles.header_close} data-cy="quit" href={courseHref}>
-        <VisuallyHidden>Back to Course Page</VisuallyHidden>
-      </Link>
-      {length !== undefined && (
-        <ProgressBar progress={progress} length={length} />
-      )}
-    </div>
-  );
-}
-
 function NameButtons({
   character_list,
   highlight_name,
@@ -376,7 +353,7 @@ function NameButtons({
 }) {
   return (
     <>
-      <div className={styles.characterSelector}>
+      <div className="print:hidden">
         {character_list.map((character) => (
           <button
             key={character}

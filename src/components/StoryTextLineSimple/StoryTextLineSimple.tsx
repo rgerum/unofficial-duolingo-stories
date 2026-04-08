@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./StoryTextLineSimple.module.css";
+import { cn } from "@/lib/utils";
 
 function StoryTextLineSimple({
   speaker,
@@ -12,15 +12,19 @@ function StoryTextLineSimple({
   id: string;
   children: React.ReactNode;
 }) {
-  const className = highlight
-    ? `${styles.wrapper} ${styles.highlight}`
-    : styles.wrapper;
+  const className = cn(
+    "my-4 flex items-baseline gap-4",
+    highlight &&
+      "bg-[#e6f484] [-webkit-print-color-adjust:exact] [print-color-adjust:exact]",
+  );
 
   return (
     <div className={className}>
-      <span className={styles.speaker_name}>{speaker}:</span>
-      <span className={styles.text}> {children}</span>
-      <span className={styles.id}>{id}</span>
+      <span className="inline-block w-[100px] shrink-0 text-right font-bold">
+        {speaker}:
+      </span>
+      <span className="flex-1"> {children}</span>
+      <span className="text-right font-mono font-bold">{id}</span>
     </div>
   );
 }
