@@ -171,11 +171,16 @@ export const authComponent: ReturnType<typeof typedCreateClient> =
     },
   });
 
+const authBaseUrl =
+  process.env.SITE_URL ??
+  process.env.BETTER_AUTH_URL ??
+  process.env.NEXTAUTH_URL;
+
 // Better Auth Options
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
   return {
     appName: "Duostories",
-    baseURL: process.env.SITE_URL,
+    baseURL: authBaseUrl,
     trustedOrigins: async (req) => {
       const host =
         req?.headers.get("x-forwarded-host") ?? req?.headers.get("host");
@@ -184,7 +189,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 
       const allowed = [
         "http://localhost:3000",
-        process.env.SITE_URL,
+        authBaseUrl,
         "https://*-duostories-team.vercel.app",
       ].filter(Boolean) as string[];
 

@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./StoryFooter.module.css";
-import Button from "../Button";
+import Button from "@/components/ui/button";
 import { useLocalisation } from "../LocalisationProvider/LocalisationProviderContext";
 
 function Message({ children }: { children: React.ReactNode }) {
@@ -64,15 +64,16 @@ function StoryFooter({
         <div
           className={`${styles.width_wrapper} ${styles.width_wrapper_finished}`}
         >
-          <button
+          <Button
             type="button"
+            variant="secondary"
             className={styles.back_button}
             onClick={() => {
               void onBackToOverview?.();
             }}
           >
             Back to overview
-          </button>
+          </Button>
           <div className={styles.finished_center}>
             {nextStoryPreview ? (
               <div className={styles.next_preview}>

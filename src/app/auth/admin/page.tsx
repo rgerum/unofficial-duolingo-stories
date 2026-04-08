@@ -13,7 +13,7 @@ export default function Page({}) {
         You need to be logged in with an account that has an admin role.
       </p>
 
-      <Button primary={true} onClick={() => router.push("/auth/signin")}>
+      <Button variant="primary" onClick={() => router.push("/auth/signin")}>
         Log In
       </Button>
     </>

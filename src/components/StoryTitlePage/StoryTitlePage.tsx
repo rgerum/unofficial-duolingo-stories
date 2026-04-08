@@ -26,7 +26,7 @@ function StoryTitlePage({
         {header.learningLanguageTitleContent.text}
       </div>
       <div className={styles.story_title_page_button}>
-        <Button primary onClick={next}>
+        <Button variant="primary" onClick={next}>
           {localisation("button_start_story") || "Start the Story"}
         </Button>
       </div>

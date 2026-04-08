@@ -131,7 +131,7 @@ export default function Register() {
             minLength={6}
             title="Password must be at least 6 characters long."
           />
-          <Button primary={true} data-cy="submit" variant="blue">
+          <Button data-cy="submit" variant="primary">
             {state !== 1 ? "Sign up" : "..."}
           </Button>
         </form>

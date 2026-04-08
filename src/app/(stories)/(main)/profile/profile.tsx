@@ -137,13 +137,15 @@ function LinkedAccountRow({
             Linked
           </span>
         ) : (
-          <button
+          <Button
             type="button"
+            variant="primary"
+            size="sm"
             onClick={handleLink}
-            className="inline-flex rounded-full border border-[var(--button-blue-border)] bg-[var(--button-blue-background)] px-4 py-2 text-[0.78rem] font-bold uppercase tracking-[0.08em] text-[var(--button-blue-color)] transition hover:brightness-105"
+            className="mt-0 min-w-[120px]"
           >
             Link
-          </button>
+          </Button>
         )}
       </div>
       {linkError ? (
