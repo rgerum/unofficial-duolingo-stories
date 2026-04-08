@@ -78,6 +78,27 @@ const themes = [
   },
 ] as const;
 
+const footerWaitVariants = [
+  {
+    description: "The disabled wait-state footer action.",
+    disabled: true,
+    label: "wait",
+    variant: "default",
+  },
+  {
+    description: "The normal enabled continue action.",
+    disabled: false,
+    label: "continue",
+    variant: "default",
+  },
+  {
+    description: "The blue-toned primary variant in footer framing.",
+    disabled: false,
+    label: "primary",
+    variant: "primary",
+  },
+] as const;
+
 export default function Page() {
   return (
     <main className={styles.page}>
@@ -115,6 +136,30 @@ export default function Page() {
                     </div>
                     <div className={styles.buttonStage}>
                       <Button variant={variant.variant}>Example action</Button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div className={styles.subsectionHeader}>
+                <h3>Disabled variants</h3>
+                <span>Disabled snapshots for every shared button variant.</span>
+              </div>
+
+              <div className={styles.variantGrid}>
+                {variants.map((variant) => (
+                  <article
+                    key={`${theme.label}-${variant.label}-disabled`}
+                    className={styles.stateCard}
+                  >
+                    <div className={styles.stateLabelRow}>
+                      <h3>{variant.label}</h3>
+                      <span>{variant.description}</span>
+                    </div>
+                    <div className={styles.buttonStage}>
+                      <Button disabled variant={variant.variant}>
+                        Example action
+                      </Button>
                     </div>
                   </article>
                 ))}
@@ -159,6 +204,37 @@ export default function Page() {
                     Back to overview
                   </Button>
                 </div>
+              </div>
+
+              <div className={styles.subsectionHeader}>
+                <h3>Footer button state</h3>
+                <span>
+                  Continue-button snapshots inside footer-style framing.
+                </span>
+              </div>
+
+              <div className={styles.footerGrid}>
+                {footerWaitVariants.map((footerVariant) => (
+                  <article
+                    key={`${theme.label}-${footerVariant.label}-footer`}
+                    className={styles.footerCard}
+                  >
+                    <div className={styles.stateLabelRow}>
+                      <h3>{footerVariant.label}</h3>
+                      <span>{footerVariant.description}</span>
+                    </div>
+                    <div className={styles.footerStage}>
+                      <div className={styles.footerFrame}>
+                        <Button
+                          disabled={footerVariant.disabled}
+                          variant={footerVariant.variant}
+                        >
+                          Continue
+                        </Button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
               </div>
             </section>
           ))}
