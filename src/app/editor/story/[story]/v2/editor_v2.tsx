@@ -19,12 +19,22 @@ import {
   insert_audio_line,
   timings_to_text,
 } from "@/lib/editor/audio/audio_edit_tools";
-import type { DetailedCourseProps } from "@/app/editor/(course)/types";
 import type {
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
 import { useStoryEditorModel } from "./use_story_editor_model";
+
+type StoryNavigation = {
+  previousStory: {
+    href: string;
+    name: string;
+  } | null;
+  nextStory: {
+    href: string;
+    name: string;
+  } | null;
+};
 
 type LanguageData = {
   languageId: string;
@@ -57,12 +67,12 @@ export default function EditorV2({
   isAdmin,
   story_data,
   avatar_names,
-  course_data,
+  story_navigation,
 }: {
   isAdmin: boolean;
   story_data: StoryData;
   avatar_names: Record<number, Avatar>;
-  course_data: DetailedCourseProps;
+  story_navigation: StoryNavigation;
 }) {
   const navigate = useRouter().push;
   const editorRef = React.useRef<HTMLDivElement>(null);
@@ -364,6 +374,8 @@ export default function EditorV2({
         set_show_trans={set_show_trans}
         show_ssml={show_ssml}
         set_show_ssml={set_show_ssml}
+        previous_story={story_navigation.previousStory}
+        next_story={story_navigation.nextStory}
       />
       {audioEditorData &&
         audioEditorData.audio &&
