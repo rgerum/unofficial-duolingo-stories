@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./StoryFinishedScreen.module.css";
 import useScrollIntoView from "@/hooks/use-scroll-into-view.hook";
 import { useLocalisation } from "../LocalisationProvider/LocalisationProviderContext";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
@@ -18,24 +17,38 @@ function StoryFinishedScreen({
     <div
       ref={ref}
       id="finishedPage"
-      className={styles.page_finished}
+      className="mb-[100px] flex min-h-[calc(100vh-100px)] w-full items-center justify-center border-t-2 border-t-[var(--overview-hr)] px-4 pt-8 pb-6 max-[500px]:pt-6"
       data-hidden={false}
       data-cy="finished"
     >
-      <div>
-        <div className={styles.finished_image_container}>
+      <div className="w-full max-w-[420px] text-center">
+        <div className="relative inline-block h-[200px] w-[200px] max-[500px]:h-[170px] max-[500px]:w-[170px]">
           {/* add the three blinking stars */}
           <div>
-            <div className={styles.star1} />
-            <div className={styles.star2} />
-            <div className={styles.star3} />
+            <div
+              className="absolute top-5 left-[-30px] h-[20.4px] w-[20.4px] rounded-[3.3px] bg-[var(--finished-star-gold)] opacity-50 [transform:rotate(-45deg)_scale(1)]"
+              style={{ animation: "story-finished-star 2s 0.1s" }}
+            />
+            <div
+              className="absolute right-[-15px] bottom-[-20px] h-[19.2px] w-[19.2px] rounded-[3.3px] bg-[var(--finished-star-gold)] opacity-50 [transform:rotate(-45deg)_scale(1)]"
+              style={{ animation: "story-finished-star 2s 0.3s" }}
+            />
+            <div
+              className="absolute top-[-10px] left-0 h-[12.2px] w-[12.2px] rounded-[3.3px] bg-[var(--finished-star-gold)] opacity-50 [transform:rotate(-45deg)_scale(1)]"
+              style={{ animation: "story-finished-star 2s 0.2s" }}
+            />
           </div>
           {/* the icon of the story which changes from color to golden */}
-          <div className={styles.finished_image}>
-            <img src={story.illustrations.active} alt="" />
+          <div className="relative inline-block h-full w-full overflow-visible p-0">
+            <img
+              src={story.illustrations.active}
+              className="absolute top-0 left-0 h-full w-full"
+              alt=""
+            />
             <img
               src={story.illustrations.gilded}
-              className={styles.image_golden}
+              className="absolute top-0 left-0 h-full w-full opacity-100"
+              style={{ animation: "story-finished-fade-in 2s" }}
               alt=""
             />
           </div>
