@@ -1,7 +1,26 @@
 import React, { CSSProperties } from "react";
-import styles from "./StoryLineHints.module.css";
 import { ContentWithHints } from "@/components/editor/story/syntax_parser_types";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
+import { cn } from "@/lib/utils";
+
+const underlineBaseClass =
+  "bg-[position:0_100%] bg-repeat-x bg-[length:5px_2px] leading-[2em] pb-[5px]";
+const revealedUnderlineStyle: CSSProperties = {
+  backgroundImage:
+    "linear-gradient(to right, var(--underline-dashed) 60%, rgba(255, 255, 255, 0) 0%)",
+};
+const hiddenUnderlineStyle: CSSProperties = {
+  backgroundImage:
+    "linear-gradient(to right, var(--underline-solid) 60%, var(--underline-solid) 60%)",
+};
+const editorHintContainerStyle: CSSProperties = {
+  borderInlineStart: "1px solid #bfbfbf",
+  paddingInlineStart: "5px",
+};
+const editorHintTextStyle: CSSProperties = {
+  marginInlineStart: "-4px",
+  paddingInlineStart: "6px",
+};
 
 function splitTextTokens(text: string, keep_tilde = true) {
   if (!text) return [];
@@ -17,7 +36,7 @@ function Tooltip({
   children,
   ...delegated
 }: {
-  className: string;
+  className?: string;
   children: React.ReactNode;
 } & React.HTMLAttributes<HTMLSpanElement>) {
   const ref = React.useRef<HTMLSpanElement>(null);
@@ -88,7 +107,7 @@ function StoryLineHints({
   }
   const editor = editorState;
 
-  let show_trans = editor?.show_trans;
+  const showTrans = editor?.show_trans;
 
   function getOverlap(
     start1: number,
@@ -117,15 +136,26 @@ function StoryLineHints({
         ? true
         : undefined;
     if (is_hidden && editor) is_hidden = "editor";
-    let style: CSSProperties = {};
+    const style: CSSProperties = {};
     //TODO
     //if(is_hidden && window.view)
     //    style.color = "#afafaf";
     if (audioRange && audioRange < start) style.opacity = 0.5;
+    if (was_hidden_for_challenge && !is_hidden) {
+      Object.assign(style, revealedUnderlineStyle);
+    }
+    if (is_hidden) {
+      Object.assign(style, hiddenUnderlineStyle);
+    }
 
-    let returns = [
+    const returns = [
       <span
-        className={styles.word}
+        className={cn(
+          "select-text",
+          (was_hidden_for_challenge || is_hidden) && underlineBaseClass,
+          is_hidden === true && "select-none text-[var(--body-background)]",
+          is_hidden === "editor" && "opacity-70",
+        )}
         key={start + " " + end}
         style={style}
         data-hidden={is_hidden}
@@ -190,53 +220,73 @@ function StoryLineHints({
       getOverlap(hint.rangeFrom, hint.rangeTo + 1, range.start, range.end),
     );
     const word_content = hint_pronunciation ? (
-      <ruby className={styles.ruby_word}>
+      <ruby className="group/ruby relative inline-block [ruby-position:over]">
         <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
-        <rt className={styles.ruby_text}>{hint_pronunciation}</rt>
+        <rt
+          className={cn(
+            "pointer-events-none invisible absolute bottom-[calc(100%-6px)] left-1/2 -translate-x-1/2 whitespace-nowrap text-[0.62em] leading-none opacity-0 transition-opacity duration-200",
+            !is_hidden &&
+              "group-hover/tooltip:visible group-hover/tooltip:opacity-95",
+            showTrans &&
+              "group-hover/editorhint:visible group-hover/editorhint:opacity-95",
+            "group-hover/ruby:visible group-hover/ruby:opacity-95",
+          )}
+        >
+          {hint_pronunciation}
+        </rt>
       </ruby>
     ) : (
       <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
     );
-    const hint_container_class = is_hidden
+    const hintContainerClassName = is_hidden
       ? ""
-      : show_trans
+      : showTrans
         ? has_any_hint
-          ? styles.tooltip_editor
+          ? "group/editorhint inline-flex grow flex-col"
           : ""
         : has_translation_hint
-          ? styles.tooltip
+          ? cn(
+              "group/tooltip relative",
+              underlineBaseClass,
+              "[--story-hint-underline:var(--underline-dashed)] bg-[image:linear-gradient(to_right,var(--story-hint-underline)_60%,rgba(255,255,255,0)_0%)] hover:[--story-hint-underline:var(--underline-dashed-highlight)]",
+            )
           : "";
-    const hint_text_class =
-      (show_trans ? styles.tooltiptext_editor : styles.tooltiptext) +
-      " " +
-      content.lang_hints;
-    const tooltip_extra_class =
-      !show_trans && hint_translation && hint_pronunciation
-        ? ` ${styles.tooltiptext_with_pronunciation}`
-        : "";
+    const hintTextClassName = showTrans
+      ? cn(
+          "bg-[var(--editor-hints-background)] text-[0.9em] italic opacity-50",
+          content.lang_hints,
+        )
+      : cn(
+          "pointer-events-none invisible absolute bottom-[125%] left-1/2 z-10 mb-[10px] block w-auto -translate-x-1/2 whitespace-nowrap rounded-[14px] border-2 border-[var(--tooltip-border)] bg-[var(--tooltip-backgroud)] px-[17px] pt-[7px] pb-[6px] text-center text-[19px] font-normal not-italic text-[var(--tooltip-color)] opacity-0 transition-opacity duration-300 after:absolute after:top-full after:left-1/2 after:z-10 after:-mt-[6px] after:-ml-[5px] after:h-[10px] after:w-[10px] after:rotate-[-45deg] after:border-[2px] after:border-[transparent_transparent_var(--tooltip-border)_var(--tooltip-border)] after:bg-[var(--tooltip-backgroud)] after:content-[''] group-hover/tooltip:visible group-hover/tooltip:opacity-100",
+          hint_translation &&
+            hint_pronunciation &&
+            "[transform:translate(-50%,-8px)]",
+          content.lang_hints,
+        );
 
     elements.push(
       <Tooltip
         key={hint.rangeFrom + " " + hint.rangeTo + 1}
-        className={styles.word + " " + hint_container_class}
+        className={cn("select-text", hintContainerClassName)}
+        style={showTrans && has_any_hint ? editorHintContainerStyle : undefined}
         data-revealed={
           was_hidden_for_challenge && !is_hidden ? true : undefined
         }
       >
         {word_content}
-        {show_trans ? (
+        {showTrans ? (
           has_any_hint ? (
-            <span className={hint_text_class}>
+            <span className={hintTextClassName} style={editorHintTextStyle}>
               {hint_translation ? <span>{hint_translation}</span> : null}
               {hint_pronunciation ? (
-                <span className={styles.hint_pronunciation}>
+                <span className="mt-0.5 block opacity-90">
                   {hint_pronunciation}
                 </span>
               ) : null}
             </span>
           ) : null
         ) : has_translation_hint ? (
-          <span className={hint_text_class + tooltip_extra_class}>
+          <span className={hintTextClassName}>
             <span>{hint_translation}</span>
           </span>
         ) : null}

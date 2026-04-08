@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import styles from "./StoryAutoPlay.module.css";
 import StoryTextLine from "../StoryTextLine";
 import StoryHeader from "../StoryHeader";
 import StoryHeaderProgress from "../StoryHeaderProgress";
@@ -11,6 +10,7 @@ import type {
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
+import { cn } from "@/lib/utils";
 
 interface StoryAutoPlayProps {
   story: StoryType & {
@@ -100,6 +100,7 @@ function clearHints(element: StoryElement): StoryElement {
   if (element.type === "LINE") {
     return {
       ...element,
+      hideRangesForChallenge: undefined,
       line: {
         ...element.line,
         content: {
@@ -517,18 +518,22 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   }, [ensureMergedAndPlay, isPlaying, pause, story.learning_language]);
 
   return (
-    <div className={styles.container}>
+    <div className="min-h-screen">
       <StoryHeaderProgress
         course={course}
         setId={story.set_id}
         progress={currentTime}
         length={duration || 1}
       />
-      <audio ref={audioRef} className={styles.mediaOutput} playsInline />
-      <div className={styles.main}>
-        <div className={styles.audioWrap}>
+      <audio
+        ref={audioRef}
+        className="pointer-events-none fixed top-[-1000px] left-[-1000px] h-px w-px opacity-0"
+        playsInline
+      />
+      <div className="mx-auto max-w-[500px]">
+        <div className="sticky top-[60px] z-[11] grid grid-cols-[auto_1fr_auto] items-center gap-[10px] border-b border-[var(--overview-hr)] bg-[var(--body-background)] px-4 py-[10px] max-[760px]:grid-cols-1">
           <button
-            className={styles.playPauseButton}
+            className="h-9 min-w-16 cursor-pointer rounded-full border border-[var(--input-border)] bg-[var(--color_base_background)] px-[10px] text-[var(--text-color)] disabled:cursor-not-allowed disabled:text-[var(--color_disabled_color)] disabled:opacity-50"
             onClick={() => {
               void togglePlayPause();
             }}
@@ -543,7 +548,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
                 : "Play"}
           </button>
           <input
-            className={styles.timelineSlider}
+            className="autoplay-slider w-full"
             type="range"
             min={0}
             max={Math.max(duration, 0.01)}
@@ -552,29 +557,28 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
             onChange={onSeek}
             disabled={mergeState !== "ready" || duration <= 0}
           />
-          <div className={styles.timelineTime}>
+          <div className="min-w-[72px] text-right text-[13px] text-[var(--text-color-dim)] max-[760px]:text-left">
             {formatTime(currentTime)} / {formatTime(duration)}
           </div>
           {showLargeMergeWarning && mergeState === "idle" && (
-            <div className={styles.timelineStatus}>
+            <div className="col-span-full text-[12px] text-[var(--text-color-dim)]">
               Large story: first play may take longer while audio is merged.
             </div>
           )}
           {mergeState === "error" && (
-            <div className={styles.timelineError}>
+            <div className="col-span-full text-[12px] text-[#b02a2a]">
               Could not build merged audio: {errorMessage}
             </div>
           )}
         </div>
 
         <div
-          className={
-            styles.story +
-            " " +
-            (story.learning_language_rtl ? styles.storyRtl : "")
-          }
+          className={cn(
+            "select-none px-4 pt-[85px]",
+            story.learning_language_rtl && "[direction:rtl]",
+          )}
         >
-          <div className={styles.spacerSmallTop} />
+          <div className="h-[10vh]" />
           <Legal />
           {parts.map((part, partIndex) => (
             <AutoPlayPart
@@ -587,7 +591,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
             />
           ))}
         </div>
-        <div className={styles.spacerSmall} />
+        <div className="h-[20vh]" />
       </div>
     </div>
   );
@@ -648,9 +652,10 @@ function AutoPlayElement({
   }
 
   const isActive = activeLineIndex === lineIndex;
-  const className = isActive
-    ? `${styles.autoPlayItem} ${styles.autoPlayItemActive}`
-    : styles.autoPlayItem;
+  const className = cn(
+    "rounded-xl transition-colors duration-150 ease-in-out",
+    isActive && "bg-[rgba(120,200,0,0.12)]",
+  );
 
   if (processedElement.type === "HEADER") {
     return (
