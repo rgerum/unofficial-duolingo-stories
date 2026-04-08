@@ -227,7 +227,8 @@ function StoryQuestionMatch({
             {list.map((word, wordIndex) => (
               <WordButton
                 key={word.key}
-                className="m-0 w-full [&>span]:w-full [&>span]:px-[15px] [&>span]:py-2"
+                className="m-0 w-full"
+                innerClassName="w-full px-[15px] py-2"
                 status={word.state}
                 onClick={() => selectWord(listIndex, wordIndex)}
               >

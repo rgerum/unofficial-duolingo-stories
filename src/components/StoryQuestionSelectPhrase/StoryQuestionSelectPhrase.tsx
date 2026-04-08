@@ -58,7 +58,8 @@ function StoryQuestionSelectPhrase({
           /* one answer button */
           <WordButton
             key={index}
-            className="mb-[10px] ml-0 block w-full select-none [&>span]:px-6 [&>span]:pt-[14px] [&>span]:pb-[11px] max-[480px]:[&>span]:px-[15px] max-[480px]:[&>span]:py-2"
+            className="mb-[10px] ml-0 block w-full select-none"
+            innerClassName="px-6 pt-[14px] pb-[11px] max-[480px]:px-[15px] max-[480px]:py-2"
             status={getState(index)}
             data-cy="select-button"
             onClick={() => click(index)}

@@ -71,14 +71,6 @@ function StoryQuestionPointToPhrase({
     () => {}, //controls.wrong,
     active, //active2 && !done,
   );
-  /*
-  function get_color(state) {
-    if (state === "right") return styles.right;
-    if (state === "false") return styles.false;
-    if (state === "done") return styles.done;
-    return styles.default;
-  }
-*/
   return (
     <div>
       {/* display the question */}
@@ -95,7 +87,8 @@ function StoryQuestionPointToPhrase({
               part.selectable ? (
                 /* then display a button */
                 <WordButton
-                  className="relative z-[1] mr-1 ml-0 inline whitespace-nowrap align-top [&>span]:px-3 [&>span]:pt-2 [&>span]:pb-[7px] [&>span]:leading-[3.2]"
+                  className="relative z-[1] mr-1 ml-0 inline whitespace-nowrap align-top"
+                  innerClassName="px-3 pt-2 pb-[7px] leading-[3.2]"
                   status={buttonState[button_indices[index]]}
                   data-cy="point-button"
                   onClick={() => click(button_indices[index])}

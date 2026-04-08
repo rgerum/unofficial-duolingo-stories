@@ -64,7 +64,7 @@ function StoryQuestionMultipleChoice({
           /* on answer field */
           <li
             key={index}
-            className={cn(getColorText(buttonState[index]))}
+            className={getColorText(buttonState[index])}
             onClick={() => click(index)}
           >
             {/* with a button and a text */}
