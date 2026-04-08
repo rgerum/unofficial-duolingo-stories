@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./StoryQuestionSelectPhrase.module.css";
 
 import WordButton from "../WordButton";
 import { useChoiceButtons } from "@/hooks/use-choice-buttons.hook";
@@ -53,12 +52,13 @@ function StoryQuestionSelectPhrase({
   }
   return (
     <div>
-      <div className={styles.group}>
+      <div className="flex flex-col items-stretch">
         {/* display the buttons */}
         {element.answers.map((answer, index) => (
           /* one answer button */
           <WordButton
             key={index}
+            className="mb-[10px] ml-0 block w-full select-none [&>span]:px-6 [&>span]:pt-[14px] [&>span]:pb-[11px] max-[480px]:[&>span]:px-[15px] max-[480px]:[&>span]:py-2"
             status={getState(index)}
             data-cy="select-button"
             onClick={() => click(index)}

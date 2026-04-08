@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./StoryChallengeMatch.module.css";
 import StoryQuestionMatch from "../StoryQuestionMatch";
 import FadeGlideIn from "../FadeGlideIn";
 import { StorySettings } from "@/components/StoryProgress";

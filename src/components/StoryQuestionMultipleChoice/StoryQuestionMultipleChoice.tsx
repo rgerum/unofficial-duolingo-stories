@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./StoryQuestionMultipleChoice.module.css";
 
 //import useChoiceButtons from "./questions_useChoiceButtons";
 //import { EditorHook } from "../editor_hooks";
@@ -9,6 +8,7 @@ import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import CheckButton from "../CheckButton";
 import { useChoiceButtons } from "@/hooks/use-choice-buttons.hook";
 import { StoryElementMultipleChoice } from "@/components/editor/story/syntax_parser_types";
+import { cn } from "@/lib/utils";
 
 /*
 The MULTIPLE_CHOICE question.
@@ -48,10 +48,10 @@ function StoryQuestionMultipleChoice({
     active,
   );
 
-  function get_color_text(state: string) {
+  function getColorText(state: string) {
     if (state === "false" || state === "done")
-      return `${styles.multiple_choice_li} ${styles.disabled}`;
-    return styles.multiple_choice_li;
+      return "my-5 flex items-center gap-[18px] text-[var(--color_disabled_color)]";
+    return "my-5 flex items-center gap-[18px]";
   }
 
   return (
@@ -59,12 +59,12 @@ function StoryQuestionMultipleChoice({
       {/* Display the question if a question is there */}
       {element.question && <StoryQuestionPrompt question={element.question} />}
       {/* Display the answers */}
-      <ul className={styles.multiple_choice_ul}>
+      <ul className="list-none p-0 text-[#4b4b4b]">
         {element.answers.map((answer, index) => (
           /* on answer field */
           <li
             key={index}
-            className={get_color_text(buttonState[index])}
+            className={cn(getColorText(buttonState[index]))}
             onClick={() => click(index)}
           >
             {/* with a button and a text */}

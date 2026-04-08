@@ -1,5 +1,4 @@
 import React, { Fragment } from "react";
-import styles from "./StoryQuestionPointToPhrase.module.css";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import WordButton from "../WordButton";
 import { useChoiceButtons } from "@/hooks/use-choice-buttons.hook";
@@ -96,10 +95,7 @@ function StoryQuestionPointToPhrase({
               part.selectable ? (
                 /* then display a button */
                 <WordButton
-                  className={
-                    styles.word_button + " " /* +
-                    get_color(buttonState[button_indices[index]])*/
-                  }
+                  className="relative z-[1] mr-1 ml-0 inline whitespace-nowrap align-top [&>span]:px-3 [&>span]:pt-2 [&>span]:pb-[7px] [&>span]:leading-[3.2]"
                   status={buttonState[button_indices[index]]}
                   data-cy="point-button"
                   onClick={() => click(button_indices[index])}

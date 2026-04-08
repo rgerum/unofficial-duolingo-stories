@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 function WordButton({
   status,
   children,
+  className,
   ...delegated
 }: {
   status: string;
@@ -25,6 +26,7 @@ function WordButton({
       "bg-[var(--color_disabled_border-color)] text-[var(--color_disabled_color)]",
     status === "right-stay" &&
       "bg-[var(--color_right_border-color)] text-[var(--color_right_color)]",
+    className,
   );
   const innerClassName = cn(
     "block translate-y-[-2px] rounded-[inherit] border-2 border-[var(--color_base_border)] bg-[var(--color_base_background)] px-[15px] py-2 transition-[transform,background-color,border-color] duration-500",
