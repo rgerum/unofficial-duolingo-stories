@@ -1,6 +1,5 @@
 import React from "react";
-import styles from "./StoryTitlePage.module.css";
-import Button from "../Button";
+import Button from "@/components/ui/button";
 import { useLocalisation } from "../LocalisationProvider/LocalisationProviderContext";
 import { StoryType } from "@/components/editor/story/syntax_parser_new";
 
@@ -18,14 +17,19 @@ function StoryTitlePage({
     throw new Error("story needs to start with header");
 
   return (
-    <div className={styles.story_title_page}>
-      <div className={styles.story_title_page_image}>
-        <img width="180" src={header.illustrationUrl} alt={"title image"} />
+    <div className="pointer-events-none fixed inset-0 flex w-full flex-col items-center justify-center">
+      <div className="w-full text-center">
+        <img
+          width="180"
+          className="mx-auto block"
+          src={header.illustrationUrl}
+          alt={"title image"}
+        />
       </div>
-      <div className={styles.story_title_page_title}>
+      <div className="mt-[18px] mb-9 w-full text-center text-[25px] font-bold text-[#4b4b4b]">
         {header.learningLanguageTitleContent.text}
       </div>
-      <div className={styles.story_title_page_button}>
+      <div className="pointer-events-auto w-full text-center">
         <Button variant="primary" onClick={next}>
           {localisation("button_start_story") || "Start the Story"}
         </Button>

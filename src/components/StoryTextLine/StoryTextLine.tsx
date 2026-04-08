@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./StoryTextLine.module.css";
 import useAudio from "./use-audio.hook";
 import StoryLineHints from "../StoryLineHints";
 import PlayAudio from "../PlayAudio";
@@ -12,6 +11,7 @@ import {
   getEditorHandlers,
   type EditorProps,
 } from "@/lib/editor/editorHandlers";
+import { cn } from "@/lib/utils";
 
 function StoryTextLine({
   active,
@@ -37,6 +37,16 @@ function StoryTextLine({
   const { onClick } = getEditorHandlers(editorProps);
   const [audioRange, playAudio, ref, url] = useAudio(element, active);
   const effectiveAudioRange = audioRangeOverride ?? audioRange;
+  const isRtl = settings.rtl || element.lang === "rtl";
+  const titleClassName = "m-0 text-[25px] leading-[34px] font-bold";
+  const phraseClassName = "my-5 flex flex-nowrap items-start";
+  const bubbleClassName = cn(
+    "relative inline-block w-max max-w-[80%] rounded-[0_14px_14px_14px] border-2 border-[var(--color_base_border)] bg-[var(--color_base_background)] px-3 py-[10px]",
+    "before:absolute before:top-[-2px] before:left-[-14px] before:content-[''] before:border-r-[12px] before:border-b-[12px] before:border-r-[var(--color_base_border)] before:border-b-transparent",
+    "after:absolute after:top-0 after:left-[-9px] after:content-[''] after:border-r-[12px] after:border-b-[12px] after:border-r-[var(--color_base_background)] after:border-b-transparent",
+    isRtl &&
+      "rounded-tl-[14px] rounded-tr-none before:left-auto before:right-[-14px] before:border-r-0 before:border-l-[12px] before:border-l-[var(--color_base_border)] after:left-auto after:right-[-9px] after:border-r-0 after:border-l-[12px] after:border-l-[var(--color_base_background)]",
+  );
 
   if (element.line === undefined) return <></>;
 
@@ -66,11 +76,11 @@ function StoryTextLine({
     return (
       <div
         key={element.trackingProperties.line_index}
-        className={styles.title + " " + element.lang}
+        className={`${titleClassName} ${element.lang}`}
         onClick={onClick}
         data-lineno={element?.editor?.block_start_no}
       >
-        <span className={styles.title}>
+        <span className={titleClassName}>
           {url && (
             <audio ref={ref}>
               <source src={url} type="audio/mp3" />
@@ -93,12 +103,19 @@ function StoryTextLine({
     return (
       <div
         key={element.trackingProperties.line_index}
-        className={styles.phrase + " " + element.lang}
+        className={`${phraseClassName} ${element.lang}`}
         onClick={onClick}
         data-lineno={element?.editor?.block_start_no}
       >
-        <img className={styles.head} src={element.line.avatarUrl} alt="head" />
-        <span className={styles.bubble}>
+        <img
+          className={cn(
+            "mr-[18px] flex h-[50px] w-[50px] flex-[0_0_50px]",
+            isRtl && "mr-0 ml-3 scale-x-[-1]",
+          )}
+          src={element.line.avatarUrl}
+          alt="head"
+        />
+        <span className={bubbleClassName}>
           {url && (
             <audio ref={ref}>
               <source src={url} type="audio/mp3" />
@@ -126,7 +143,7 @@ function StoryTextLine({
     return (
       <div
         key={element.trackingProperties.line_index}
-        className={styles.phrase + " " + element.lang}
+        className={`${phraseClassName} ${element.lang}`}
         onClick={onClick}
         data-lineno={element?.editor?.block_start_no}
       >

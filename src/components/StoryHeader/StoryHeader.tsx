@@ -1,6 +1,4 @@
 import React from "react";
-import styles from "./StoryHeader.module.css";
-
 import useAudio from "../StoryTextLine/use-audio.hook";
 import PlayAudio from "../PlayAudio";
 import StoryLineHints from "../StoryLineHints";
@@ -56,7 +54,7 @@ function StoryHeader({
 
   return (
     <div
-      className={styles.title + " " + element.lang}
+      className={`text-center ${element.lang}`}
       style={{ textAlign: "center" }}
       onClick={onClick}
       data-lineno={element?.editor?.block_start_no}
@@ -64,11 +62,11 @@ function StoryHeader({
       <div>
         <img
           alt="title image"
-          className={styles.title_img}
+          className="mx-auto block h-[175px] w-[175px]"
           src={element.illustrationUrl}
         />
       </div>
-      <h1 className={styles.title}>
+      <h1 className="m-0 text-[25px] leading-[34px] font-bold">
         {url && (
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />
