@@ -151,17 +151,23 @@ export function LoginOptions(props: {
           Reset
         </Link>
       </p>
-      <hr className="relative h-0 w-full overflow-visible border-0 border-t-2 border-[var(--input-border)] before:relative before:top-[calc(-1em+2px)] before:bg-[var(--body-background)] before:px-[0.4em] before:text-[var(--input-border)] before:content-['or']" />
+      <hr className="relative my-3 h-0 w-full overflow-visible border-0 border-t-2 border-[var(--input-border)] before:relative before:top-[calc(-1em+2px)] before:bg-[var(--body-background)] before:px-[0.4em] before:text-[var(--input-border)] before:content-['or']" />
       <div className={providersClass}>
         {providers.map((provider) => (
           <Button
             key={provider.id}
             variant="outline"
-            className="mb-2 flex min-w-0 w-full items-center justify-center gap-2"
+            className="mb-2 w-full min-w-0 [&>span]:px-5"
             onClick={() => handleOAuthProviderClick(provider)}
           >
-            <GetIcon name={provider.id} />
-            <span className="truncate max-sm:hidden">{provider.name}</span>
+            <span className="flex w-full min-w-0 items-center justify-center gap-3 whitespace-nowrap leading-none">
+              <span className="inline-flex shrink-0 items-center justify-center">
+                <GetIcon name={provider.id} />
+              </span>
+              <span className="min-w-0 truncate max-sm:hidden">
+                {provider.name}
+              </span>
+            </span>
           </Button>
         ))}
       </div>
