@@ -97,14 +97,16 @@ function StoryHeader({
           content={element.learningLanguageTitleContent}
           editorState={editorState}
         />
-        {settings.show_audio && element.audio && (
-          <EditorSSMLDisplay
-            ssml={element.audio.ssml}
-            element={element}
-            editor={editorState}
-            onOpenAudioEditor={onOpenAudioEditor}
-          />
-        )}
+        {settings.show_audio &&
+          element.audio &&
+          (editorState || onOpenAudioEditor) && (
+            <EditorSSMLDisplay
+              ssml={element.audio.ssml}
+              element={element}
+              editor={editorState}
+              onOpenAudioEditor={onOpenAudioEditor}
+            />
+          )}
       </h1>
     </div>
   );

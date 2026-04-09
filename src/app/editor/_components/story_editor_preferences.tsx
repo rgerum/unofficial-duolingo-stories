@@ -54,11 +54,12 @@ export function StoryEditorPreferencesProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const initialPreferences = React.useRef(readInitialPreferences());
   const [showHints, setShowHints] = React.useState(
-    () => readInitialPreferences().showHints,
+    initialPreferences.current.showHints,
   );
   const [showAudio, setShowAudio] = React.useState(
-    () => readInitialPreferences().showAudio,
+    initialPreferences.current.showAudio,
   );
 
   React.useEffect(() => {

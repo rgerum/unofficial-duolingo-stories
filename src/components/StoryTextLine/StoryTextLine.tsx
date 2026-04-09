@@ -150,14 +150,16 @@ function StoryTextLine({
             content={element.line.content}
             editorState={editorState}
           />
-          {settings.show_audio && element.line.content.audio && (
-            <EditorSSMLDisplay
-              ssml={element.line.content.audio.ssml}
-              element={element}
-              editor={editorState}
-              onOpenAudioEditor={onOpenAudioEditor}
-            />
-          )}
+          {settings.show_audio &&
+            element.line.content.audio &&
+            (editorState || onOpenAudioEditor) && (
+              <EditorSSMLDisplay
+                ssml={element.line.content.audio.ssml}
+                element={element}
+                editor={editorState}
+                onOpenAudioEditor={onOpenAudioEditor}
+              />
+            )}
         </span>
       </div>
     );
@@ -187,14 +189,16 @@ function StoryTextLine({
             content={element.line.content}
             editorState={editorState}
           />
-          {settings.show_audio && element.line.content.audio && (
-            <EditorSSMLDisplay
-              ssml={element.line.content.audio.ssml}
-              element={element}
-              editor={editorState}
-              onOpenAudioEditor={onOpenAudioEditor}
-            />
-          )}
+          {settings.show_audio &&
+            element.line.content.audio &&
+            (editorState || onOpenAudioEditor) && (
+              <EditorSSMLDisplay
+                ssml={element.line.content.audio.ssml}
+                element={element}
+                editor={editorState}
+                onOpenAudioEditor={onOpenAudioEditor}
+              />
+            )}
         </span>
       </div>
     );
