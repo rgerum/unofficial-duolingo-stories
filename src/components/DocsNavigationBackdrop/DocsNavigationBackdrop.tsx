@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import styles from "./DocsNavigationBackdrop.module.css";
+import { docsBackdropClass } from "../Docs/docsClasses";
 
 export const showNavContext = React.createContext({
   show: false,
@@ -12,7 +12,7 @@ function DocsNavigationBackdrop({ children }: { children: React.ReactNode }) {
   return (
     <showNavContext.Provider value={{ show, setShow }}>
       {show && (
-        <div className={styles.blur2} onClick={() => setShow(false)}></div>
+        <div className={docsBackdropClass} onClick={() => setShow(false)}></div>
       )}
 
       {children}

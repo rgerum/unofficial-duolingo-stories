@@ -1,10 +1,18 @@
 "use client";
 import React from "react";
-import styles from "./DocsNavigation.module.css";
 import Link from "next/link";
 import { showNavContext } from "../DocsNavigationBackdrop";
 import { useSelectedLayoutSegment } from "next/navigation";
 import VisuallyHidden from "../VisuallyHidden";
+import {
+  docsNavigationClass,
+  docsNavigationCloseClass,
+  docsNavigationHeadingClass,
+  docsNavigationInnerClass,
+  docsNavigationItemClass,
+  docsNavigationListClass,
+  docsPageLinkClass,
+} from "../Docs/docsClasses";
 
 function DocsNavigation({
   data,
@@ -19,21 +27,23 @@ function DocsNavigation({
 
   return (
     <>
-      <div className={styles.toc} id="toc" data-show={show}>
+      <div className={docsNavigationClass(show)} id="toc" data-show={show}>
         <button
-          className={styles.close}
+          className={docsNavigationCloseClass}
           id="close"
           onClick={() => setShow(false)}
         >
           <VisuallyHidden>Close Menu</VisuallyHidden>×
         </button>
-        <div className={styles.toc_inner}>
+        <div className={docsNavigationInnerClass}>
           {data.navigation.map((item, i) => (
             <div key={i}>
-              {item.group ? <h5>{item.group}</h5> : null}
-              <ul>
+              {item.group ? (
+                <h5 className={docsNavigationHeadingClass}>{item.group}</h5>
+              ) : null}
+              <ul className={docsNavigationListClass}>
                 {item.pages.map((child, i) => (
-                  <li key={i}>
+                  <li className={docsNavigationItemClass} key={i}>
                     <PageLink
                       page={child.slug}
                       title={child.title}
@@ -62,13 +72,10 @@ function PageLink({
   active: boolean;
   setShow: (value: boolean) => void;
 }) {
-  const className = active
-    ? `${styles.pageLink} ${styles.active}`
-    : styles.pageLink;
   return (
     <Link
       href={`/docs/${page}`}
-      className={className}
+      className={docsPageLinkClass(active)}
       onClick={() => setShow(false)}
     >
       {title}

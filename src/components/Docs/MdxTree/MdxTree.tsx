@@ -5,7 +5,13 @@ import { Fragment } from "react/jsx-runtime";
 import Link from "next/link";
 
 import { MDXComponents } from "mdx/types";
-import styles from "@/app/docs/[[...slug]]/layout.module.css";
+import {
+  docsAlertBoxClass,
+  docsChannelLinkClass,
+  docsImageWrapperClass,
+  docsInfoBoxClass,
+  docsWarningBoxClass,
+} from "../docsClasses";
 
 function startsLowerCase(tagName: string) {
   return (
@@ -98,28 +104,28 @@ const components: MDXComponents = {
   span: "span",
 
   Info: (props) => (
-    <p {...props} className={styles.box + " " + styles.info}>
+    <p {...props} className={docsInfoBoxClass}>
       {props.children}
     </p>
   ),
   Warning: (props) => (
-    <p {...props} className={styles.box + " " + styles.warning}>
+    <p {...props} className={docsWarningBoxClass}>
       {props.children}
     </p>
   ),
   Alert: (props) => (
-    <p {...props} className={styles.box + " " + styles.alert}>
+    <p {...props} className={docsAlertBoxClass}>
       {props.children}
     </p>
   ),
   Channel: (props) => (
-    <Link {...props} className={styles.channel_link}>
+    <Link {...props} className={docsChannelLinkClass}>
       {props.children}
     </Link>
   ),
   a: (props) => <Link href={props.href as string}>{props.children}</Link>,
   Image: (props) => (
-    <div className={styles.image_wrapper}>{props.children}</div>
+    <div className={docsImageWrapperClass}>{props.children}</div>
   ),
 };
 
