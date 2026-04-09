@@ -24,7 +24,7 @@ function DocsBreadCrumbNav({
           className={docsUnstyledButtonClass}
           onClick={() => setShow(true)}
         >
-          <VisuallyHidden>Open Menu</VisuallyHidden>
+          <VisuallyHidden>Open documentation navigation</VisuallyHidden>
           <svg
             id="toggle"
             width="30"
