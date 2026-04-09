@@ -37,6 +37,10 @@ const autoPlaySettings = {
   hideNonHighlighted: false,
   setHighlightName: () => {},
   setHideNonHighlighted: () => {},
+  show_hints: true,
+  setShowHints: () => {},
+  show_audio: true,
+  setShowAudio: () => {},
   id: 0,
   show_title_page: false,
 };

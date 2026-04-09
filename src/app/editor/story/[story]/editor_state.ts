@@ -12,7 +12,5 @@ export type EditorStateType = {
   view: EditorView;
   select: (line: string, scroll: boolean) => void;
   audio_insert_lines: AudioInsertLinesType | undefined;
-  show_trans: boolean;
   show_audio_editor: (data: StoryElementLine | StoryElementHeader) => void;
-  show_ssml: boolean;
 };

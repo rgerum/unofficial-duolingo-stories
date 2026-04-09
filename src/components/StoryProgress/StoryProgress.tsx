@@ -145,6 +145,10 @@ export type StorySettings = {
   hideNonHighlighted: boolean;
   setHighlightName: (name: string[]) => void;
   setHideNonHighlighted: React.Dispatch<React.SetStateAction<boolean>>;
+  show_hints: boolean;
+  setShowHints: React.Dispatch<React.SetStateAction<boolean>>;
+  show_audio: boolean;
+  setShowAudio: React.Dispatch<React.SetStateAction<boolean>>;
   id: number;
   show_title_page: boolean;
 };

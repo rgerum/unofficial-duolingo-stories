@@ -15,6 +15,7 @@ import { StoryEditorHeader } from "@/app/editor/story/[story]/header";
 import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import SoundRecorder from "@/app/editor/story/[story]/sound-recorder";
+import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
 import {
   insert_audio_line,
   timings_to_text,
@@ -92,8 +93,12 @@ export default function EditorV2({
   const [docText, setDocText] = React.useState(story_data.text ?? "");
   const [revision, setRevision] = React.useState(0);
   const [lineNo, setLineNo] = React.useState(1);
-  const [show_trans, set_show_trans] = React.useState(false);
-  const [show_ssml, set_show_ssml] = React.useState(false);
+  const {
+    showHints: show_trans,
+    setShowHints: set_show_trans,
+    showAudio: show_ssml,
+    setShowAudio: set_show_ssml,
+  } = useStoryEditorPreferences();
   const [audioEditorData, setAudioEditorData] = React.useState<
     StoryElementLine | StoryElementHeader | undefined
   >(undefined);
@@ -318,11 +323,9 @@ export default function EditorV2({
           );
         },
         audio_insert_lines: audioInsertLines,
-        show_trans,
-        show_ssml,
         show_audio_editor: (data) => setAudioEditorData(data),
       };
-    }, [audioInsertLines, lineNo, show_ssml, show_trans]);
+    }, [audioInsertLines, lineNo]);
 
   const audioEditorDataContent =
     (audioEditorData?.type === "LINE" && audioEditorData.line.content) ||
@@ -438,6 +441,7 @@ export default function EditorV2({
           <StoryEditorPreview
             story={model.parsedStory}
             editorState={editorStateForPreview}
+            onOpenAudioEditor={(data) => setAudioEditorData(data)}
           />
         </div>
       </div>

@@ -4,7 +4,10 @@ import PlayAudio from "../PlayAudio";
 import StoryLineHints from "../StoryLineHints";
 import StoryTextLineSimple from "../StoryTextLineSimple";
 import EditorSSMLDisplay from "../EditorSSMLDisplay";
-import { StoryElementHeader } from "@/components/editor/story/syntax_parser_types";
+import {
+  StoryElementHeader,
+  StoryElementLine,
+} from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import {
@@ -17,6 +20,8 @@ function StoryHeader({
   element,
   settings,
   editorState,
+  editorShowTranslationsOverride,
+  onOpenAudioEditor,
   audioRangeOverride,
   hideAudioButton = false,
 }: {
@@ -24,6 +29,10 @@ function StoryHeader({
   element: StoryElementHeader;
   settings: StorySettings;
   editorState?: EditorStateType;
+  editorShowTranslationsOverride?: boolean;
+  onOpenAudioEditor?: (
+    element: StoryElementLine | StoryElementHeader,
+  ) => void | Promise<void>;
   audioRangeOverride?: number;
   hideAudioButton?: boolean;
 }) {
@@ -32,7 +41,11 @@ function StoryHeader({
     editorBlock: element.editor,
   };
   const { onClick } = getEditorHandlers(editorProps);
-  const [audioRange, playAudio, ref, url] = useAudio(element, active);
+  const [audioRange, playAudio, ref, url] = useAudio(
+    element,
+    active,
+    settings.show_audio,
+  );
   const effectiveAudioRange = audioRangeOverride ?? audioRange;
   const isRtl = settings.rtl || element.lang === "rtl";
 
@@ -73,20 +86,27 @@ function StoryHeader({
             <source src={url} type="audio/mp3" />
           </audio>
         )}
-        {!hideAudioButton && <PlayAudio onClick={playAudio} rtl={isRtl} />}
+        {!hideAudioButton && settings.show_audio && (
+          <PlayAudio onClick={playAudio} rtl={isRtl} />
+        )}
         <StoryLineHints
+          showHints={settings.show_hints}
+          showTranslationsInline={editorShowTranslationsOverride}
           audioRange={effectiveAudioRange}
           hideRangesForChallenge={hideRangesForChallenge}
           content={element.learningLanguageTitleContent}
           editorState={editorState}
         />
-        {editorState && element.audio && (
-          <EditorSSMLDisplay
-            ssml={element.audio.ssml}
-            element={element}
-            editor={editorState}
-          />
-        )}
+        {settings.show_audio &&
+          element.audio &&
+          (editorState || onOpenAudioEditor) && (
+            <EditorSSMLDisplay
+              ssml={element.audio.ssml}
+              element={element}
+              editor={editorState}
+              onOpenAudioEditor={onOpenAudioEditor}
+            />
+          )}
       </h1>
     </div>
   );

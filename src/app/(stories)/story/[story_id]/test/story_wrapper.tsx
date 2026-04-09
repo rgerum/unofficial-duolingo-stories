@@ -25,6 +25,10 @@ export default function StoryWrapper({ storyId }: { storyId: number }) {
           hideNonHighlighted: false,
           setHighlightName: (_name: string[]) => {},
           setHideNonHighlighted: (_value: React.SetStateAction<boolean>) => {},
+          show_hints: true,
+          setShowHints: () => {},
+          show_audio: true,
+          setShowAudio: () => {},
           id: story.id,
           show_title_page: false,
         }}
