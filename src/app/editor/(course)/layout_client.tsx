@@ -16,7 +16,12 @@ export default function EditorLayoutClient({
         <EditorHeaderShell />
         <LayoutFlag />
       </div>
-      <div className="[grid-area:main] min-h-0 min-w-0 overflow-auto">
+      <div
+        className="[grid-area:main] min-h-0 min-w-0 overflow-auto"
+        // This identifies the scroll container used for course list state
+        // restoration when returning from the story editor.
+        data-editor-scroll-container="course-main"
+      >
         {children}
       </div>
     </SwiperSideBar>
