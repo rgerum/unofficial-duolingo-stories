@@ -40,14 +40,12 @@ export function rememberCourseScrollPosition(courseIdentifier: string) {
   );
 }
 
-export function consumeCourseScrollPosition(courseIdentifier: string) {
+export function readCourseScrollPosition(courseIdentifier: string) {
   if (typeof window === "undefined") return null;
 
   const storageKey = getCourseScrollKey(courseIdentifier);
   const storedValue = window.sessionStorage.getItem(storageKey);
   if (storedValue === null) return null;
-
-  window.sessionStorage.removeItem(storageKey);
 
   const scrollPosition = Number(storedValue);
   if (!Number.isFinite(scrollPosition)) return null;
@@ -81,8 +79,8 @@ export function restoreCourseScrollPosition(
   courseIdentifier: string,
   frameCount = 8,
 ) {
-  const storedScrollPosition = consumeCourseScrollPosition(courseIdentifier);
-  if (storedScrollPosition === null) return;
+  const storedScrollPosition = readCourseScrollPosition(courseIdentifier);
+  if (storedScrollPosition === null) return () => {};
 
   const applyScroll = () => {
     const scrollContainer = getCourseScrollContainer();
@@ -99,18 +97,29 @@ export function restoreCourseScrollPosition(
   // Apply immediately so a layout effect can restore before the first paint.
   applyScroll();
 
+  let isCancelled = false;
+  let animationFrameId: number | null = null;
   let remainingFrames = frameCount - 1;
   const keepScrollApplied = () => {
+    if (isCancelled) return;
+
     applyScroll();
     remainingFrames -= 1;
     if (remainingFrames > 0) {
-      window.requestAnimationFrame(keepScrollApplied);
+      animationFrameId = window.requestAnimationFrame(keepScrollApplied);
     }
   };
 
   if (remainingFrames > 0) {
-    window.requestAnimationFrame(keepScrollApplied);
+    animationFrameId = window.requestAnimationFrame(keepScrollApplied);
   }
+
+  return () => {
+    isCancelled = true;
+    if (animationFrameId !== null) {
+      window.cancelAnimationFrame(animationFrameId);
+    }
+  };
 }
 
 function isCourseFilterValue(value: string): value is CourseFilterValue {

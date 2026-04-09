@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SpinnerBlue } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
@@ -39,21 +39,37 @@ export default function EditList({
   const [storyList, setStoryList] = useState<StoryListDataProps[]>(
     stories ?? [],
   );
-  const [activeFilter, setActiveFilter] = useState<StoryFilter>(
-    readCourseFilter(courseStorageKey) ?? "all",
-  );
+  const [activeFilter, setActiveFilter] = useState<StoryFilter>("all");
+  const [isStoredFilterApplied, setIsStoredFilterApplied] = useState(false);
+  const restoredViewKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     setStoryList(stories ?? []);
   }, [stories]);
 
+  useLayoutEffect(() => {
+    restoredViewKeyRef.current = null;
+    setIsStoredFilterApplied(false);
+
+    const storedFilter = readCourseFilter(courseStorageKey) ?? "all";
+    setActiveFilter(storedFilter);
+    setIsStoredFilterApplied(true);
+  }, [courseStorageKey]);
+
   useEffect(() => {
+    if (!isStoredFilterApplied) return;
     rememberCourseFilter(courseStorageKey, activeFilter);
-  }, [activeFilter, courseStorageKey]);
+  }, [activeFilter, courseStorageKey, isStoredFilterApplied]);
 
   useLayoutEffect(() => {
-    restoreCourseScrollPosition(courseStorageKey);
-  }, [courseStorageKey]);
+    if (!isStoredFilterApplied) return;
+
+    const viewKey = `${courseStorageKey}:${activeFilter}`;
+    if (restoredViewKeyRef.current === viewKey) return;
+
+    restoredViewKeyRef.current = viewKey;
+    return restoreCourseScrollPosition(courseStorageKey);
+  }, [activeFilter, courseStorageKey, isStoredFilterApplied]);
 
   const counts = storyList.reduce<Record<StoryFilter, number>>(
     (acc, story) => {
