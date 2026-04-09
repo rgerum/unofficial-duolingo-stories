@@ -1,11 +1,17 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SpinnerBlue } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import ContributorList from "@/components/ContributorList";
+import {
+  readCourseFilter,
+  rememberCourseFilter,
+  rememberCourseScrollPosition,
+  restoreCourseScrollPosition,
+} from "./course_view_memory";
 import type {
   DetailedCourseProps,
   StoryListDataProps,
@@ -29,14 +35,41 @@ export default function EditList({
   stories: StoryListDataProps[];
   course: DetailedCourseProps;
 }) {
+  const courseStorageKey = course.short ?? String(course.id);
   const [storyList, setStoryList] = useState<StoryListDataProps[]>(
     stories ?? [],
   );
   const [activeFilter, setActiveFilter] = useState<StoryFilter>("all");
+  const [isStoredFilterApplied, setIsStoredFilterApplied] = useState(false);
+  const restoredViewKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     setStoryList(stories ?? []);
   }, [stories]);
+
+  useLayoutEffect(() => {
+    restoredViewKeyRef.current = null;
+    setIsStoredFilterApplied(false);
+
+    const storedFilter = readCourseFilter(courseStorageKey) ?? "all";
+    setActiveFilter(storedFilter);
+    setIsStoredFilterApplied(true);
+  }, [courseStorageKey]);
+
+  useEffect(() => {
+    if (!isStoredFilterApplied) return;
+    rememberCourseFilter(courseStorageKey, activeFilter);
+  }, [activeFilter, courseStorageKey, isStoredFilterApplied]);
+
+  useLayoutEffect(() => {
+    if (!isStoredFilterApplied) return;
+
+    const viewKey = `${courseStorageKey}:${activeFilter}`;
+    if (restoredViewKeyRef.current === viewKey) return;
+
+    restoredViewKeyRef.current = viewKey;
+    return restoreCourseScrollPosition(courseStorageKey);
+  }, [activeFilter, courseStorageKey, isStoredFilterApplied]);
 
   const counts = storyList.reduce<Record<StoryFilter, number>>(
     (acc, story) => {
@@ -263,6 +296,9 @@ export default function EditList({
                     className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap underline underline-offset-2"
                     href={`/editor/course/${course.short}/story/${story.id}`}
                     title={story.name}
+                    onClick={() =>
+                      rememberCourseScrollPosition(courseStorageKey)
+                    }
                   >
                     {story.name}
                   </Link>
