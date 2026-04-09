@@ -39,9 +39,13 @@ function DocsNavigation({
       </div>
 
       <Sheet open={show} onOpenChange={setShow}>
-        <SheetContent side="left" className="w-72 p-0">
+        <SheetContent
+          side="left"
+          className="w-[min(18rem,calc(100vw-1.5rem))] p-0"
+          aria-describedby={undefined}
+        >
           <SheetHeader>
-            <SheetTitle>Documentation</SheetTitle>
+            <SheetTitle>Documentation navigation</SheetTitle>
           </SheetHeader>
           <div className={docsMobileNavigationInnerClass}>
             <NavigationContent
