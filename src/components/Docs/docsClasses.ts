@@ -3,8 +3,7 @@ import { cn } from "@/lib/utils";
 export const docsRootClass =
   "[--docs-background:white] [--docs-border:#fbfbfb] [--docs-toc-hover:#f6f6f6] [--docs-toc-active:#eae9eb] bg-[var(--docs-background)] text-black [&_a]:text-black";
 
-export const docsMainContainerClass =
-  "flex justify-center max-[1000px]:mt-[57px]";
+export const docsMainContainerClass = "flex justify-center";
 
 export const docsHeaderBarClass =
   "sticky top-0 z-[2] w-full border-b-2 border-[var(--docs-border)] bg-[var(--docs-background)]";
@@ -58,7 +57,7 @@ export const docsFooterLinkClass = "font-bold no-underline";
 export const docsRightTocClass =
   "sticky top-[84px] h-full w-[304px] shrink-0 max-[1280.98px]:hidden";
 export const docsRightTocInnerClass =
-  "w-[304px] pl-10 text-[16px] leading-[1.6] font-bold";
+  "fixed h-[calc(100vh-70px)] w-[304px] overflow-y-auto pl-10 text-[16px] leading-[1.6] font-bold";
 
 export const docsBoxClass =
   "relative !mt-12 !mb-0 mx-[-16px] rounded-[10px] px-4 py-2 before:absolute before:top-0 before:left-0 before:-translate-y-full before:rounded-t-[10px] before:px-4 before:pt-1 before:font-bold";
@@ -81,7 +80,7 @@ export const docsImageWrapperClass = "mx-[-32px] overflow-auto px-8 [&_p]:m-0";
 export const docsBackdropClass =
   "fixed inset-0 z-[6] bg-[var(--docs-background)] opacity-80 min-[1001px]:hidden";
 export const docsSearchOverlayClass =
-  "fixed inset-0 z-[16] hidden backdrop-blur-[4px] [backdrop-filter:blur(4px)_brightness(0.9)] data-[state=open]:block max-[640px]:bg-black/50 max-[640px]:backdrop-blur-0";
+  "fixed inset-0 z-[16] hidden [backdrop-filter:blur(4px)_brightness(0.9)] data-[state=open]:block max-[640px]:bg-black/50 max-[640px]:[backdrop-filter:none]";
 export const docsSearchModalClass =
   "[--docs-background:white] [--docs-border:#fbfbfb] [--docs-toc-hover:#f6f6f6] [--docs-toc-active:#eae9eb] fixed top-[15%] left-1/2 z-[100] hidden w-[640px] -translate-x-1/2 overflow-hidden rounded-[12px] bg-[var(--docs-background)] text-[16px] leading-[1.6] shadow-[0_0_0_1px_rgba(0,0,0,0.08),0px_1px_1px_rgba(0,0,0,0.02),0px_8px_16px_-4px_rgba(0,0,0,0.04),0px_24px_32px_-8px_rgba(0,0,0,0.06)] outline-none data-[state=open]:block max-[640px]:top-auto max-[640px]:bottom-0 max-[640px]:h-[80%] max-[640px]:w-full max-[640px]:translate-x-[-50%] max-[640px]:rounded-none";
 export const docsSearchTopRowClass =
