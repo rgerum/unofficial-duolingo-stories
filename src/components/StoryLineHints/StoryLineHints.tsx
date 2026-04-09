@@ -81,18 +81,30 @@ function Tooltip({
 
 function StoryLineHints({
   content,
+  showHints = true,
+  showTranslationsInline,
   audioRange,
   hideRangesForChallenge,
   unhide,
   editorState,
 }: {
   content: ContentWithHints;
+  showHints?: boolean;
+  showTranslationsInline?: boolean;
   audioRange?: number;
   hideRangesForChallenge?: { start: number; end: number }[];
   unhide?: number;
   editorState?: EditorStateType;
 }) {
   if (!content) return <>Empty</>;
+  const visibleContent = showHints
+    ? content
+    : {
+        ...content,
+        hintMap: [],
+        hints: undefined,
+        hints_pronunciation: undefined,
+      };
   let hideRangesForChallengeEntry = hideRangesForChallenge
     ? hideRangesForChallenge[0]
     : hideRangesForChallenge;
@@ -107,7 +119,7 @@ function StoryLineHints({
   }
   const editor = editorState;
 
-  const showTrans = editor?.show_trans;
+  const showTrans = showTranslationsInline ?? false;
 
   function getOverlap(
     start1: number,
@@ -163,17 +175,17 @@ function StoryLineHints({
           was_hidden_for_challenge && !is_hidden ? true : undefined
         }
       >
-        {content.text.substring(start, end)}
+        {visibleContent.text.substring(start, end)}
       </span>,
     ];
-    if (content.text.substring(start, end).indexOf("\n") !== -1)
+    if (visibleContent.text.substring(start, end).indexOf("\n") !== -1)
       returns.push(<br key={start + " " + end + " br"} />);
     // add the span and optionally add a line break
     return returns;
   }
 
   function addSplitWord(start: number, end: number) {
-    let parts = splitTextTokens(content.text.substring(start, end));
+    let parts = splitTextTokens(visibleContent.text.substring(start, end));
     if (parts[0] === "") parts.splice(0, 1);
     if (parts[parts.length - 1] === "") parts.pop();
 
@@ -194,7 +206,7 @@ function StoryLineHints({
   let elements = [];
   let text_pos = 0;
   // iterate over all hints
-  for (let hint of content.hintMap) {
+  for (let hint of visibleContent.hintMap) {
     // add the text since the last hint
     if (hint.rangeFrom > text_pos)
       elements.push(addSplitWord(text_pos, hint.rangeFrom));
@@ -212,8 +224,9 @@ function StoryLineHints({
         ? true
         : undefined;
     if (editor) is_hidden = false;
-    const hint_translation = content.hints?.[hint.hintIndex];
-    const hint_pronunciation = content.hints_pronunciation?.[hint.hintIndex];
+    const hint_translation = visibleContent.hints?.[hint.hintIndex];
+    const hint_pronunciation =
+      visibleContent.hints_pronunciation?.[hint.hintIndex];
     const has_any_hint = Boolean(hint_translation || hint_pronunciation);
     const has_translation_hint = Boolean(hint_translation);
     const was_hidden_for_challenge = hideRangesForChallenge?.some((range) =>
@@ -254,14 +267,14 @@ function StoryLineHints({
     const hintTextClassName = showTrans
       ? cn(
           "bg-[var(--editor-hints-background)] text-[0.9em] italic opacity-50",
-          content.lang_hints,
+          visibleContent.lang_hints,
         )
       : cn(
           "pointer-events-none invisible absolute bottom-[125%] left-1/2 z-10 mb-[10px] block w-auto -translate-x-1/2 whitespace-nowrap rounded-[14px] border-2 border-[var(--tooltip-border)] bg-[var(--tooltip-backgroud)] px-[17px] pt-[7px] pb-[6px] text-center text-[19px] font-normal not-italic text-[var(--tooltip-color)] opacity-0 transition-opacity duration-300 after:absolute after:top-full after:left-1/2 after:z-10 after:-mt-[6px] after:-ml-[5px] after:h-[10px] after:w-[10px] after:rotate-[-45deg] after:border-[2px] after:border-[transparent_transparent_var(--tooltip-border)_var(--tooltip-border)] after:bg-[var(--tooltip-backgroud)] after:content-[''] group-hover/tooltip:visible group-hover/tooltip:opacity-100",
           hint_translation &&
             hint_pronunciation &&
             "[transform:translate(-50%,-8px)]",
-          content.lang_hints,
+          visibleContent.lang_hints,
         );
 
     elements.push(
@@ -298,8 +311,8 @@ function StoryLineHints({
     text_pos = hint.rangeTo + 1;
   }
   // add the text after the last hint
-  if (text_pos < content.text.length)
-    elements.push(addSplitWord(text_pos, content.text.length));
+  if (text_pos < visibleContent.text.length)
+    elements.push(addSplitWord(text_pos, visibleContent.text.length));
   //            addSplitWord(dom.append("span").attr("class", "word"), text_pos, content.text.length);
 
   return elements;

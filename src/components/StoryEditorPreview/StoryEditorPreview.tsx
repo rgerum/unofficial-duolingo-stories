@@ -8,6 +8,7 @@ import StoryQuestionPointToPhrase from "../StoryQuestionPointToPhrase";
 import StoryQuestionSelectPhrase from "../StoryQuestionSelectPhrase";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
+import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import type { StoryType } from "@/components/editor/story/syntax_parser_new";
 import type {
@@ -27,6 +28,9 @@ import { cn } from "@/lib/utils";
 interface StoryEditorPreviewProps {
   story: StoryType & { learning_language_rtl?: boolean };
   editorState?: EditorStateType;
+  onOpenAudioEditor?: (
+    element: StoryElementLine | StoryElementHeader,
+  ) => void | Promise<void>;
 }
 
 function GetParts(story: StoryType) {
@@ -48,8 +52,10 @@ function GetParts(story: StoryType) {
 export default function StoryEditorPreview({
   story,
   editorState,
+  onOpenAudioEditor,
 }: StoryEditorPreviewProps) {
   const parts = GetParts(story);
+  const { showHints, showAudio } = useStoryEditorPreferences();
 
   return (
     <div
@@ -64,6 +70,9 @@ export default function StoryEditorPreview({
           part={part}
           editorState={editorState}
           rtl={story.learning_language_rtl ?? false}
+          showHints={showHints}
+          showAudio={showAudio}
+          onOpenAudioEditor={onOpenAudioEditor}
         />
       ))}
     </div>
@@ -74,9 +83,21 @@ interface EditorPartProps {
   part: StoryElement[];
   editorState?: EditorStateType;
   rtl: boolean;
+  showHints: boolean;
+  showAudio: boolean;
+  onOpenAudioEditor?: (
+    element: StoryElementLine | StoryElementHeader,
+  ) => void | Promise<void>;
 }
 
-function EditorPart({ part, editorState, rtl }: EditorPartProps) {
+function EditorPart({
+  part,
+  editorState,
+  rtl,
+  showHints,
+  showAudio,
+  onOpenAudioEditor,
+}: EditorPartProps) {
   const lastElement = part[part.length - 1];
   const trackingProps = lastElement.trackingProperties as {
     challenge_type?: string;
@@ -92,6 +113,9 @@ function EditorPart({ part, editorState, rtl }: EditorPartProps) {
           element={element}
           editorState={editorState}
           rtl={rtl}
+          showHints={showHints}
+          showAudio={showAudio}
+          onOpenAudioEditor={onOpenAudioEditor}
         />
       ))}
     </div>
@@ -102,9 +126,21 @@ interface EditorElementProps {
   element: StoryElement;
   editorState?: EditorStateType;
   rtl: boolean;
+  showHints: boolean;
+  showAudio: boolean;
+  onOpenAudioEditor?: (
+    element: StoryElementLine | StoryElementHeader,
+  ) => void | Promise<void>;
 }
 
-function EditorElement({ element, editorState, rtl }: EditorElementProps) {
+function EditorElement({
+  element,
+  editorState,
+  rtl,
+  showHints,
+  showAudio,
+  onOpenAudioEditor,
+}: EditorElementProps) {
   // Dummy settings for editor mode - show everything
   const editorSettings = {
     hide_questions: false,
@@ -115,6 +151,10 @@ function EditorElement({ element, editorState, rtl }: EditorElementProps) {
     hideNonHighlighted: false,
     setHighlightName: () => {},
     setHideNonHighlighted: () => {},
+    show_hints: showHints,
+    setShowHints: () => {},
+    show_audio: showAudio,
+    setShowAudio: () => {},
     id: 0,
     show_title_page: false,
   };
@@ -126,6 +166,8 @@ function EditorElement({ element, editorState, rtl }: EditorElementProps) {
         element={element as StoryElementHeader}
         settings={editorSettings}
         editorState={editorState}
+        editorShowTranslationsOverride={showHints}
+        onOpenAudioEditor={onOpenAudioEditor}
       />
     );
   }
@@ -137,6 +179,8 @@ function EditorElement({ element, editorState, rtl }: EditorElementProps) {
         element={element as StoryElementLine}
         settings={editorSettings}
         editorState={editorState}
+        editorShowTranslationsOverride={showHints}
+        onOpenAudioEditor={onOpenAudioEditor}
       />
     );
   }

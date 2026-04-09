@@ -4,7 +4,10 @@ import StoryLineHints from "../StoryLineHints";
 import PlayAudio from "../PlayAudio";
 import StoryTextLineSimple from "../StoryTextLineSimple";
 import EditorSSMLDisplay from "../EditorSSMLDisplay";
-import { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
+import {
+  StoryElementHeader,
+  StoryElementLine,
+} from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import {
@@ -19,6 +22,8 @@ function StoryTextLine({
   unhide = 999999,
   settings,
   editorState,
+  editorShowTranslationsOverride,
+  onOpenAudioEditor,
   audioRangeOverride,
   hideAudioButton = false,
 }: {
@@ -27,6 +32,10 @@ function StoryTextLine({
   unhide?: number;
   settings: StorySettings;
   editorState?: EditorStateType;
+  editorShowTranslationsOverride?: boolean;
+  onOpenAudioEditor?: (
+    element: StoryElementLine | StoryElementHeader,
+  ) => void | Promise<void>;
   audioRangeOverride?: number;
   hideAudioButton?: boolean;
 }) {
@@ -35,7 +44,11 @@ function StoryTextLine({
     editorBlock: element.editor,
   };
   const { onClick } = getEditorHandlers(editorProps);
-  const [audioRange, playAudio, ref, url] = useAudio(element, active);
+  const [audioRange, playAudio, ref, url] = useAudio(
+    element,
+    active,
+    settings.show_audio,
+  );
   const effectiveAudioRange = audioRangeOverride ?? audioRange;
   const isRtl = settings.rtl || element.lang === "rtl";
   const titleClassName = "m-0 text-[25px] leading-[34px] font-bold";
@@ -86,8 +99,12 @@ function StoryTextLine({
               <source src={url} type="audio/mp3" />
             </audio>
           )}
-          {!hideAudioButton && <PlayAudio onClick={playAudio} rtl={isRtl} />}
+          {!hideAudioButton && settings.show_audio && (
+            <PlayAudio onClick={playAudio} rtl={isRtl} />
+          )}
           <StoryLineHints
+            showHints={settings.show_hints}
+            showTranslationsInline={editorShowTranslationsOverride}
             audioRange={effectiveAudioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             content={element.line.content}
@@ -121,19 +138,24 @@ function StoryTextLine({
               <source src={url} type="audio/mp3" />
             </audio>
           )}
-          {!hideAudioButton && <PlayAudio onClick={playAudio} rtl={isRtl} />}
+          {!hideAudioButton && settings.show_audio && (
+            <PlayAudio onClick={playAudio} rtl={isRtl} />
+          )}
           <StoryLineHints
+            showHints={settings.show_hints}
+            showTranslationsInline={editorShowTranslationsOverride}
             audioRange={effectiveAudioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             unhide={unhide}
             content={element.line.content}
             editorState={editorState}
           />
-          {editorState && element.line.content.audio && (
+          {settings.show_audio && element.line.content.audio && (
             <EditorSSMLDisplay
               ssml={element.line.content.audio.ssml}
               element={element}
               editor={editorState}
+              onOpenAudioEditor={onOpenAudioEditor}
             />
           )}
         </span>
@@ -153,19 +175,24 @@ function StoryTextLine({
               <source src={url} type="audio/mp3" />
             </audio>
           )}
-          {!hideAudioButton && <PlayAudio onClick={playAudio} rtl={isRtl} />}
+          {!hideAudioButton && settings.show_audio && (
+            <PlayAudio onClick={playAudio} rtl={isRtl} />
+          )}
           <StoryLineHints
+            showHints={settings.show_hints}
+            showTranslationsInline={editorShowTranslationsOverride}
             audioRange={effectiveAudioRange}
             hideRangesForChallenge={hideRangesForChallenge}
             unhide={unhide}
             content={element.line.content}
             editorState={editorState}
           />
-          {editorState && element.line.content.audio && (
+          {settings.show_audio && element.line.content.audio && (
             <EditorSSMLDisplay
               ssml={element.line.content.audio.ssml}
               element={element}
               editor={editorState}
+              onOpenAudioEditor={onOpenAudioEditor}
             />
           )}
         </span>

@@ -2,6 +2,7 @@ import React from "react";
 import { getUser, isContributor } from "@/lib/userInterface";
 import { redirect } from "next/navigation";
 import { EditorHeaderProvider } from "./_components/header_context";
+import { StoryEditorPreferencesProvider } from "./_components/story_editor_preferences";
 
 export default async function Layout({
   children,
@@ -12,5 +13,11 @@ export default async function Layout({
 
   if (!isContributor(user)) redirect("/auth/editor");
 
-  return <EditorHeaderProvider>{children}</EditorHeaderProvider>;
+  return (
+    <EditorHeaderProvider>
+      <StoryEditorPreferencesProvider>
+        {children}
+      </StoryEditorPreferencesProvider>
+    </EditorHeaderProvider>
+  );
 }

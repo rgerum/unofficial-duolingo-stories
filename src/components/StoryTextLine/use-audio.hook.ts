@@ -13,7 +13,11 @@ declare global {
 
 type UseAudioElement = StoryElementLine | StoryElementHeader;
 
-export default function useAudio(element: UseAudioElement, active: boolean) {
+export default function useAudio(
+  element: UseAudioElement,
+  active: boolean,
+  enabled = true,
+) {
   const [audioRange, setAudioRange] = React.useState(99999);
   const audio: Audio | undefined =
     element.type === "LINE"
@@ -22,7 +26,7 @@ export default function useAudio(element: UseAudioElement, active: boolean) {
   const ref = React.useRef<HTMLAudioElement>(null);
 
   const playAudio = React.useCallback(async () => {
-    if (!audio?.url || !ref.current) return;
+    if (!enabled || !audio?.url || !ref.current) return;
 
     const audioObject = ref.current;
 
@@ -76,9 +80,10 @@ export default function useAudio(element: UseAudioElement, active: boolean) {
     window.playing_audio?.push(cancel);
 
     return cancel;
-  }, [audio]);
+  }, [audio, enabled]);
 
   React.useEffect(() => {
+    if (!enabled) return;
     if (!active) return;
     if (typeof window === "undefined") return;
 
@@ -99,7 +104,7 @@ export default function useAudio(element: UseAudioElement, active: boolean) {
         window.playing_audio.forEach((cancel) => cancel());
       }
     };
-  }, [active, element.type, playAudio]);
+  }, [active, element.type, enabled, playAudio]);
 
   if (!audio?.url) {
     return [audioRange, undefined, ref, undefined] as const;

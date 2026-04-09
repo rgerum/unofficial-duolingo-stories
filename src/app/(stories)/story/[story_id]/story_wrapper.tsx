@@ -186,6 +186,10 @@ export default function StoryWrapper({
           hideNonHighlighted: hideNonHighlighted,
           setHighlightName: setHighlightName,
           setHideNonHighlighted: setHideNonHighlighted,
+          show_hints: true,
+          setShowHints: () => {},
+          show_audio: true,
+          setShowAudio: () => {},
           id: story.id,
           show_title_page: mode === "hard",
         }}

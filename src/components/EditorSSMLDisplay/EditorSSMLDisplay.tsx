@@ -16,23 +16,26 @@ import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 interface EditorSSMLDisplayProps {
   ssml: Audio["ssml"];
   element: StoryElementLine | StoryElementHeader;
-  editor: EditorStateType;
+  editor?: EditorStateType;
+  onOpenAudioEditor?: (
+    element: StoryElementLine | StoryElementHeader,
+  ) => void | Promise<void>;
 }
 
 export default function EditorSSMLDisplay({
   ssml,
   element,
   editor,
+  onOpenAudioEditor,
 }: EditorSSMLDisplayProps) {
   let [loading, setLoading] = React.useState(false);
   let [error, setError] = React.useState<boolean>(false);
   let line_id = "ssml" + ssml.id;
 
-  let show_audio = editor.show_ssml;
-
   async function reload() {
     setLoading(true);
     try {
+      if (!editor) return;
       let { filename, keypoints } = await generate_audio_line(ssml);
       let text = timings_to_text({ filename, keypoints });
       if (editor.audio_insert_lines) {
@@ -45,7 +48,6 @@ export default function EditorSSMLDisplay({
     setLoading(false);
   }
 
-  if (!show_audio) return <></>;
   return (
     <>
       <br />
@@ -53,7 +55,9 @@ export default function EditorSSMLDisplay({
         {ssml.speaker}
       </span>
       <button
-        onClick={() => editor.show_audio_editor(element)}
+        onClick={() => {
+          void onOpenAudioEditor?.(element);
+        }}
         className="inline-flex h-[25px] w-[25px] shrink-0 items-center justify-center align-middle"
         title="Open sound editor"
         aria-label="Open sound editor"
@@ -76,14 +80,17 @@ export default function EditorSSMLDisplay({
             id={line_id}
             className={
               "inline-block h-[25px] w-[25px] cursor-pointer bg-contain bg-center bg-no-repeat transition-transform " +
-              (loading ? "animate-[spin_2s_linear_infinite]" : "")
+              (loading ? "animate-[spin_2s_linear_infinite]" : "") +
+              (!editor ? " cursor-default opacity-50" : "")
             }
             style={{
               backgroundImage:
                 'url("https://carex.uber.space/stories/old/refresh.png")',
               transitionDuration: "1s",
             }}
-            onClick={reload}
+            onClick={() => {
+              void reload();
+            }}
           />
         )
       ) : (
