@@ -1,9 +1,12 @@
 "use client";
 import React from "react";
-import styles from "./DocsBreadCrumbNav.module.css";
 import { showNavContext } from "../DocsNavigationBackdrop";
 import { useSelectedLayoutSegment } from "next/navigation";
 import VisuallyHidden from "../VisuallyHidden";
+import {
+  docsMobileBreadcrumbClass,
+  docsUnstyledButtonClass,
+} from "../Docs/docsClasses";
 
 function DocsBreadCrumbNav({
   path_titles,
@@ -16,8 +19,11 @@ function DocsBreadCrumbNav({
 
   return (
     <>
-      <div className={styles.short_nav}>
-        <button className={styles.unstyledButton} onClick={() => setShow(true)}>
+      <div className={docsMobileBreadcrumbClass}>
+        <button
+          className={docsUnstyledButtonClass}
+          onClick={() => setShow(true)}
+        >
           <VisuallyHidden>Open Menu</VisuallyHidden>
           <svg
             id="toggle"

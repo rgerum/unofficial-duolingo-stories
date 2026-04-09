@@ -1,10 +1,13 @@
-import styles from "./[[...slug]]/layout.module.css";
 import DocsHeader from "@/components/DocsHeader";
 import DocsBreadCrumbNav from "@/components/DocsBreadCrumbNav";
 import DocsNavigation from "@/components/DocsNavigation";
 import React from "react";
 import { getDocsData, getPageData } from "./[[...slug]]/doc_data";
 import DocsNavigationBackdrop from "@/components/DocsNavigationBackdrop";
+import {
+  docsMainContainerClass,
+  docsRootClass,
+} from "@/components/Docs/docsClasses";
 
 export default async function Layout({
   children,
@@ -25,12 +28,12 @@ export default async function Layout({
   }
 
   return (
-    <div className={styles.container} id="container">
+    <div className={docsRootClass} id="container">
       <DocsNavigationBackdrop>
         <DocsHeader />
         <DocsBreadCrumbNav path_titles={path_titles} />
 
-        <div className={styles.main_container}>
+        <div className={docsMainContainerClass}>
           <DocsNavigation data={data} />
           {children}
         </div>

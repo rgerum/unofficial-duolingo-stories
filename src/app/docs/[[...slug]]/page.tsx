@@ -4,9 +4,23 @@ import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 
 import { getDocsData, getPageData } from "./doc_data";
-import styles from "./layout.module.css";
 import { MDXComponents } from "mdx/types";
 import CustomMDXServer from "@/components/Docs/CustomMDXServer";
+import {
+  docsAlertBoxClass,
+  docsChannelLinkClass,
+  docsEditButtonClass,
+  docsEditButtonContainerClass,
+  docsFooterClass,
+  docsFooterLinkClass,
+  docsHeaderIntroClass,
+  docsImageWrapperClass,
+  docsInfoBoxClass,
+  docsPageMainClass,
+  docsRightTocClass,
+  docsRightTocInnerClass,
+  docsWarningBoxClass,
+} from "@/components/Docs/docsClasses";
 
 export const dynamic = "force-static";
 export const dynamicParams = true;
@@ -44,28 +58,28 @@ function save_tag(tag: string) {
 
 const components: MDXComponents = {
   Info: (props) => (
-    <p {...props} className={styles.box + " " + styles.info}>
+    <p {...props} className={docsInfoBoxClass}>
       {props.children}
     </p>
   ),
   Warning: (props) => (
-    <p {...props} className={styles.box + " " + styles.warning}>
+    <p {...props} className={docsWarningBoxClass}>
       {props.children}
     </p>
   ),
   Alert: (props) => (
-    <p {...props} className={styles.box + " " + styles.alert}>
+    <p {...props} className={docsAlertBoxClass}>
       {props.children}
     </p>
   ),
   Channel: (props) => (
-    <Link {...props} className={styles.channel_link}>
+    <Link {...props} className={docsChannelLinkClass}>
       {props.children}
     </Link>
   ),
   a: (props) => <Link href={props.href as string}>{props.children}</Link>,
   Image: (props) => (
-    <div className={styles.image_wrapper}>{props.children}</div>
+    <div className={docsImageWrapperClass}>{props.children}</div>
   ),
   h3: (props) => (
     <h3 {...props} id={save_tag(props.children as string)}>
@@ -140,8 +154,8 @@ export default async function Page({
 
   return (
     <>
-      <div className={styles.main}>
-        <header id="header" className="mb-7 max-[640px]:mb-5">
+      <div className={docsPageMainClass}>
+        <header id="header" className={docsHeaderIntroClass}>
           <div className="mb-2 text-[0.95rem] font-bold tracking-[0.01em] text-gray-500">
             {data.group}
           </div>
@@ -152,30 +166,36 @@ export default async function Page({
         </header>
         <CustomMDXServer source={data.body} />
         {/*<CustomMDX source={data.body} />*/}
-        <div className={styles.button_container}>
+        <div className={docsEditButtonContainerClass}>
           <Link
-            className={styles.button}
+            className={docsEditButtonClass}
             href={`https://github.com/${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}/edit/${process.env.VERCEL_GIT_COMMIT_REF}/public/docs${path}.mdx`}
           >
             <small>Suggest edits</small>
           </Link>
         </div>
-        <footer>
+        <footer className={docsFooterClass}>
           {previous ? (
-            <Link href={"/docs/" + previous}>{previousData.title}</Link>
+            <Link className={docsFooterLinkClass} href={"/docs/" + previous}>
+              <span className="mr-[10px]">‹</span>
+              {previousData.title}
+            </Link>
           ) : (
             <span></span>
           )}
           {next ? (
-            <Link href={"/docs/" + next}>{nextData.title}</Link>
+            <Link className={docsFooterLinkClass} href={"/docs/" + next}>
+              {nextData.title}
+              <span className="ml-[10px]">›</span>
+            </Link>
           ) : (
             <span></span>
           )}
         </footer>
         <hr />
       </div>
-      <div className={styles.toc2}>
-        <div className={styles.toc2_inner}>
+      <div className={docsRightTocClass}>
+        <div className={docsRightTocInnerClass}>
           {headings.map((h, i) => (
             <p key={i}>
               <a href={"#" + save_tag(h.text)}>{h.text}</a>

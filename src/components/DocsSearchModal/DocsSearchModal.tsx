@@ -1,8 +1,16 @@
 import React from "react";
-import styles from "./DocsSearchModal.module.css";
 import useKeypress from "@/hooks/use-keypress.hook";
 import Link from "next/link";
 import * as Dialog from "@radix-ui/react-dialog";
+import {
+  docsSearchCloseButtonClass,
+  docsSearchInputClass,
+  docsSearchModalClass,
+  docsSearchOverlayClass,
+  docsSearchResultClass,
+  docsSearchResultsClass,
+  docsSearchTopRowClass,
+} from "../Docs/docsClasses";
 
 // https://beta.duostories.org/docs/story-creation/import.mdx
 const basefolder = "/docs";
@@ -165,14 +173,11 @@ function DocsSearchModal({
   return (
     <>
       <Dialog.Portal>
-        <Dialog.Overlay className={styles.blur} data-show={showSearch} />
-        <Dialog.Content
-          className={styles.search_modal}
-          id="search_modal"
-          data-show={showSearch}
-        >
-          <div>
+        <Dialog.Overlay className={docsSearchOverlayClass} />
+        <Dialog.Content className={docsSearchModalClass} id="search_modal">
+          <div className={docsSearchTopRowClass}>
             <input
+              className={docsSearchInputClass}
               id="search_input"
               ref={ref}
               placeholder=" Search Documentation..."
@@ -180,10 +185,15 @@ function DocsSearchModal({
               onChange={(e) => search(e.target.value)}
             ></input>
             <Dialog.Close asChild={true}>
-              <button onClick={() => setShowSearch(false)}>Esc</button>
+              <button
+                className={docsSearchCloseButtonClass}
+                onClick={() => setShowSearch(false)}
+              >
+                Esc
+              </button>
             </Dialog.Close>
           </div>
-          <div id="search_results">
+          <div className={docsSearchResultsClass} id="search_results">
             {searchResults === undefined && <span>Type to search</span>}
             {searchResults && searchResults.length === 0 && (
               <span>No results</span>
@@ -193,6 +203,7 @@ function DocsSearchModal({
                 <Link
                   key={item.link + "-" + index}
                   href={`/docs/${item.link}`}
+                  className={docsSearchResultClass(item.type as "main" | "sub")}
                   data-type={item.type}
                   onClick={() => setShowSearch(false)}
                 >
