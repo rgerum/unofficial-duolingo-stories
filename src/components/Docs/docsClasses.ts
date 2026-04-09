@@ -17,17 +17,12 @@ export const docsSearchLabelClass =
 export const docsSearchShortcutClass =
   "ml-[50px] rounded-[5px] border border-[var(--docs-border)] bg-[var(--docs-background)] px-[3px] py-[3px]";
 
-export function docsNavigationClass(show: boolean) {
-  return cn(
-    "z-[5] w-72 shrink-0 max-[1000px]:fixed max-[1000px]:top-0 max-[1000px]:left-0 max-[1000px]:z-10 max-[1000px]:h-full max-[1000px]:bg-[var(--docs-background)] max-[1000px]:shadow-[0_0_10px_black] max-[1000px]:transition-transform max-[1000px]:duration-300 max-[1000px]:ease-in-out",
-    show
-      ? "max-[1000px]:translate-x-0"
-      : "max-[1000px]:translate-x-[calc(-100%-10px)]",
-  );
-}
-
-export const docsNavigationInnerClass =
-  "fixed h-[calc(100vh-70px)] w-72 overflow-y-auto bg-[var(--docs-background)] p-4 pb-10 text-[16px] leading-[1.6] max-[1000px]:h-full";
+export const docsDesktopNavigationClass =
+  "hidden w-72 shrink-0 min-[1001px]:block";
+export const docsDesktopNavigationInnerClass =
+  "fixed h-[calc(100vh-70px)] w-72 overflow-y-auto bg-[var(--docs-background)] p-4 pb-10 text-[16px] leading-[1.6]";
+export const docsMobileNavigationInnerClass =
+  "overflow-y-auto bg-[var(--docs-background)] p-4 pb-10 text-[16px] leading-[1.6]";
 export const docsNavigationHeadingClass =
   "m-0 px-4 pt-6 pb-[6px] text-[16px] leading-[1.6] font-bold";
 export const docsNavigationListClass = "m-0 flex w-full list-none flex-col p-0";
@@ -38,8 +33,6 @@ export function docsPageLinkClass(active: boolean) {
     active && "bg-[var(--docs-toc-active)] font-bold",
   );
 }
-export const docsNavigationCloseClass =
-  "absolute top-[10px] right-[10px] z-10 hidden cursor-pointer border-0 bg-transparent text-[1.875rem] max-[1000px]:block";
 
 export const docsMobileBreadcrumbClass =
   "sticky top-20 z-[1] flex h-12 w-full items-center gap-[6px] border-b-2 border-[var(--docs-border)] bg-[var(--docs-background)] px-2 py-2 pl-[26px] text-[15px] leading-6 min-[1001px]:hidden";
@@ -77,8 +70,6 @@ export const docsChannelLinkClass =
   "rounded-[5px] bg-[#b5d9ff] px-1 py-0.5 font-mono no-underline hover:bg-[#89c3ff]";
 export const docsImageWrapperClass = "mx-[-32px] overflow-auto px-8 [&_p]:m-0";
 
-export const docsBackdropClass =
-  "fixed inset-0 z-[6] bg-[var(--docs-background)] opacity-80 min-[1001px]:hidden";
 export const docsSearchOverlayClass =
   "fixed inset-0 z-[16] hidden [backdrop-filter:blur(4px)_brightness(0.9)] data-[state=open]:block max-[640px]:bg-black/50 max-[640px]:[backdrop-filter:none]";
 export const docsSearchModalClass =

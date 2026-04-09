@@ -3,14 +3,19 @@ import React from "react";
 import Link from "next/link";
 import { showNavContext } from "../DocsNavigationBackdrop";
 import { useSelectedLayoutSegment } from "next/navigation";
-import VisuallyHidden from "../VisuallyHidden";
 import {
-  docsNavigationClass,
-  docsNavigationCloseClass,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  docsDesktopNavigationClass,
+  docsDesktopNavigationInnerClass,
   docsNavigationHeadingClass,
-  docsNavigationInnerClass,
   docsNavigationItemClass,
   docsNavigationListClass,
+  docsMobileNavigationInnerClass,
   docsPageLinkClass,
 } from "../Docs/docsClasses";
 
@@ -27,36 +32,62 @@ function DocsNavigation({
 
   return (
     <>
-      <div className={docsNavigationClass(show)} id="toc" data-show={show}>
-        <button
-          className={docsNavigationCloseClass}
-          id="close"
-          onClick={() => setShow(false)}
-        >
-          <VisuallyHidden>Close Menu</VisuallyHidden>×
-        </button>
-        <div className={docsNavigationInnerClass}>
-          {data.navigation.map((item, i) => (
-            <div key={i}>
-              {item.group ? (
-                <h5 className={docsNavigationHeadingClass}>{item.group}</h5>
-              ) : null}
-              <ul className={docsNavigationListClass}>
-                {item.pages.map((child, i) => (
-                  <li className={docsNavigationItemClass} key={i}>
-                    <PageLink
-                      page={child.slug}
-                      title={child.title}
-                      setShow={setShow}
-                      active={child.slug === segment}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+      <div className={docsDesktopNavigationClass} id="toc">
+        <div className={docsDesktopNavigationInnerClass}>
+          <NavigationContent data={data} segment={segment} setShow={setShow} />
         </div>
       </div>
+
+      <Sheet open={show} onOpenChange={setShow}>
+        <SheetContent side="left" className="w-72 p-0">
+          <SheetHeader>
+            <SheetTitle>Documentation</SheetTitle>
+          </SheetHeader>
+          <div className={docsMobileNavigationInnerClass}>
+            <NavigationContent
+              data={data}
+              segment={segment}
+              setShow={setShow}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+}
+
+function NavigationContent({
+  data,
+  segment,
+  setShow,
+}: {
+  data: {
+    navigation: { group: string; pages: { slug: string; title: string }[] }[];
+  };
+  segment: string | null;
+  setShow: (value: boolean) => void;
+}) {
+  return (
+    <>
+      {data.navigation.map((item, i) => (
+        <div key={i}>
+          {item.group ? (
+            <h5 className={docsNavigationHeadingClass}>{item.group}</h5>
+          ) : null}
+          <ul className={docsNavigationListClass}>
+            {item.pages.map((child, i) => (
+              <li className={docsNavigationItemClass} key={i}>
+                <PageLink
+                  page={child.slug}
+                  title={child.title}
+                  setShow={setShow}
+                  active={child.slug === segment}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </>
   );
 }
