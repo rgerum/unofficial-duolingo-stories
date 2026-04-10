@@ -55,11 +55,10 @@ export default function StoryWrapper({
       ? `/editor/course/${story.course_short}/story/${story.id}`
       : undefined;
   const rawLine = searchParams.get("line");
+  const parsedLine = typeof rawLine === "string" ? Number(rawLine) : undefined;
   const initialFocusLine =
-    typeof rawLine === "string" &&
-    Number.isFinite(Number(rawLine)) &&
-    Number(rawLine) > 0
-      ? Number(rawLine)
+    parsedLine !== undefined && Number.isFinite(parsedLine) && parsedLine > 0
+      ? parsedLine
       : undefined;
   const nextStep = useQuery(
     api.storyDone.getNextStoryForCurrentUserInCourse,
