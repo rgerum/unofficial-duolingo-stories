@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import StoryProgress from "@/components/StoryProgress";
 import { useNavigationMode } from "@/components/NavigationModeProvider";
@@ -21,13 +21,9 @@ const HAS_POSTHOG = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
 
 export default function StoryWrapper({
   story,
-  editHrefBase,
-  initialFocusLine,
   storyFinishedIndexUpdate,
 }: {
   story: StoryData;
-  editHrefBase?: string;
-  initialFocusLine?: number;
   storyFinishedIndexUpdate: () => Promise<
     | {
         message: string;
@@ -43,6 +39,7 @@ export default function StoryWrapper({
 }) {
   const mode = useNavigationMode();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [highlight_name, setHighlightName] = React.useState<string[]>([]);
   const [hideNonHighlighted, setHideNonHighlighted] = React.useState(false);
   const trackedStoryStart = React.useRef(false);
@@ -52,6 +49,18 @@ export default function StoryWrapper({
   );
   const { data: session } = authClient.useSession();
   const sessionUser = (session?.user ?? null) as PostHogUser | null;
+  const role = typeof sessionUser?.role === "string" ? sessionUser.role : null;
+  const editHrefBase =
+    role === "contributor" || role === "admin"
+      ? `/editor/course/${story.course_short}/story/${story.id}`
+      : undefined;
+  const rawLine = searchParams.get("line");
+  const initialFocusLine =
+    typeof rawLine === "string" &&
+    Number.isFinite(Number(rawLine)) &&
+    Number(rawLine) > 0
+      ? Number(rawLine)
+      : undefined;
   const nextStep = useQuery(
     api.storyDone.getNextStoryForCurrentUserInCourse,
     sessionUser?.id

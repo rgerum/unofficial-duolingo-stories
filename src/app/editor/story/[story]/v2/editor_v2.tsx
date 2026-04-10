@@ -64,28 +64,9 @@ function normalizeDocText(text: string): string {
   return text.replace(/\r\n/g, "\n");
 }
 
-function isScrollDebugEnabled() {
-  if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("debugScroll") === "1";
-}
-
-function logScrollDebug(message: string, details?: Record<string, unknown>) {
-  if (!isScrollDebugEnabled()) return;
-  console.log("[scroll-debug][editor]", message, details ?? {});
-}
-
 function scrollEditorLineIntoView(view: EditorView, lineNumber: number) {
   const boundedLine = Math.min(Math.max(lineNumber, 1), view.state.doc.lines);
   const pos = view.state.doc.line(boundedLine).from;
-
-  logScrollDebug("scrollEditorLineIntoView:start", {
-    requestedLine: lineNumber,
-    boundedLine,
-    pos,
-    currentScrollTop: view.scrollDOM.scrollTop,
-    clientHeight: view.scrollDOM.clientHeight,
-    docLines: view.state.doc.lines,
-  });
 
   view.dispatch({
     selection: EditorSelection.cursor(pos),
@@ -98,24 +79,12 @@ function scrollEditorLineIntoView(view: EditorView, lineNumber: number) {
         0,
         block.top - view.scrollDOM.clientHeight / 3,
       );
-      logScrollDebug("scrollEditorLineIntoView:measure", {
-        pos,
-        blockTop: block.top,
-        blockBottom: block.bottom,
-        targetTop,
-        currentScrollTop: view.scrollDOM.scrollTop,
-        clientHeight: view.scrollDOM.clientHeight,
-      });
       return targetTop;
     },
     write(targetTop, view) {
       view.scrollDOM.scrollTo({
         top: targetTop,
         behavior: "auto",
-      });
-      logScrollDebug("scrollEditorLineIntoView:write", {
-        targetTop,
-        resultingScrollTop: view.scrollDOM.scrollTop,
       });
       window.dispatchEvent(new Event("resize"));
       view.focus();
@@ -181,11 +150,7 @@ export default function EditorV2({
     setLineNo(1);
     setAudioEditorData(undefined);
     hasAppliedInitialFocusRef.current = false;
-    logScrollDebug("storySnapshot:reset", {
-      storyId: storySnapshot.id,
-      initialFocusLine,
-    });
-  }, [initialFocusLine, storySnapshot]);
+  }, [storySnapshot]);
 
   const model = useStoryEditorModel({
     isAdmin,
@@ -257,16 +222,12 @@ export default function EditorV2({
   }, [dirty, markServerSynced, storyText]);
 
   React.useEffect(() => {
-    const view = viewRef.current;
-    if (!view || !initialFocusLine || hasAppliedInitialFocusRef.current) return;
+    const editorView = viewRef.current ?? view;
+    if (!editorView || !initialFocusLine || hasAppliedInitialFocusRef.current)
+      return;
     hasAppliedInitialFocusRef.current = true;
-    logScrollDebug("initialFocus:apply", {
-      storyId: story_data.id,
-      initialFocusLine,
-      scrollTopBefore: view.scrollDOM.scrollTop,
-    });
-    scrollEditorLineIntoView(view, initialFocusLine);
-  }, [initialFocusLine, story_data.id]);
+    scrollEditorLineIntoView(editorView, initialFocusLine);
+  }, [initialFocusLine, view]);
 
   React.useEffect(() => {
     const warningMessage =

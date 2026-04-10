@@ -50,16 +50,18 @@ export default async function Page({
       : Array.isArray(rawLine)
         ? Number(rawLine[0])
         : undefined;
+  const validatedInitialFocusLine =
+    typeof initialFocusLine === "number" &&
+    Number.isFinite(initialFocusLine) &&
+    initialFocusLine > 0
+      ? initialFocusLine
+      : undefined;
 
   return (
     <StoryEditorPageClient
       storyId={storyId}
       courseId={resolvedParams.course_id}
-      initialFocusLine={
-        Number.isFinite(initialFocusLine) && (initialFocusLine ?? 0) > 0
-          ? initialFocusLine
-          : undefined
-      }
+      initialFocusLine={validatedInitialFocusLine}
     />
   );
 }

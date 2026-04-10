@@ -199,7 +199,11 @@ function getInitialPartProgress({
   const currentParts = partsList[storyProgress];
   if (!currentParts || currentParts.length < 2) return 0;
   const lastPart = currentParts[currentParts.length - 1];
-  if (lastPart.type !== "MULTIPLE_CHOICE") return 0;
+  if (
+    lastPart.type !== "MULTIPLE_CHOICE" &&
+    lastPart.type !== "POINT_TO_PHRASE"
+  )
+    return 0;
 
   return lastPart.editor?.block_start_no === initialFocusLine ? 1 : 0;
 }
@@ -272,13 +276,8 @@ function StoryProgress({
     storyProgress: initialStoryProgress,
   });
   const [partProgress, setPartProgress] = React.useState(initialPartProgress);
-  const [storyProgress, setStoryProgress] = React.useState(() =>
-    getInitialStoryProgress({
-      partsList: parts_list,
-      initialFocusLine,
-      showTitlePage: settings.show_title_page,
-    }),
-  );
+  const [storyProgress, setStoryProgress] =
+    React.useState(initialStoryProgress);
   const [buttonStatus, setButtonStatus] = React.useState(
     initialStoryProgress === -1 ? "continue" : "wait",
   );
@@ -347,7 +346,7 @@ function StoryProgress({
     !parts_list || parts_list.length === 0
       ? undefined
       : storyProgress < 0
-        ? parts_list[0]
+        ? undefined
         : parts_list[Math.min(storyProgress, parts_list.length - 1)];
   const currentEditorLine = getVisibleEditorLine({
     currentPart,
@@ -359,19 +358,24 @@ function StoryProgress({
       : editHrefBase;
 
   React.useEffect(() => {
-    if (typeof window === "undefined" || !story) return;
+    if (
+      typeof window === "undefined" ||
+      !story ||
+      storyProgress < 0 ||
+      currentEditorLine === undefined
+    ) {
+      return;
+    }
 
     const url = new URL(window.location.href);
-    if (currentEditorLine)
-      url.searchParams.set("line", String(currentEditorLine));
-    else url.searchParams.delete("line");
+    url.searchParams.set("line", String(currentEditorLine));
 
     const nextUrl = `${url.pathname}${url.search}${url.hash}`;
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     if (nextUrl === currentUrl) return;
 
     window.history.replaceState(window.history.state, "", nextUrl);
-  }, [currentEditorLine, story]);
+  }, [currentEditorLine, story, storyProgress]);
 
   if (!story || !parts_list) return null;
 

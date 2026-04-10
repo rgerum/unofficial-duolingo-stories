@@ -2,16 +2,6 @@
 import React from "react";
 import { EditorView } from "codemirror";
 
-function isScrollDebugEnabled() {
-  if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("debugScroll") === "1";
-}
-
-function logScrollDebug(message: string, details?: Record<string, unknown>) {
-  if (!isScrollDebugEnabled()) return;
-  console.log("[scroll-debug][link]", message, details ?? {});
-}
-
 function update_lines(editor: HTMLElement, svg_parent: SVGElement | null) {
   const line_element = editor.querySelector(".cm-line");
   if (!editor || !svg_parent || !line_element) return;
@@ -48,7 +38,6 @@ function update_lines(editor: HTMLElement, svg_parent: SVGElement | null) {
       path += `L0,${new_linetop} L ${width1},${new_linetop} C${width1b},${new_linetop} ${width1b},${new_top} ${width2},${new_top} L${width3},${new_top}`;
     else
       path += `L${width3},${new_top} L ${width2},${new_top} C${width1b},${new_top} ${width1b},${new_linetop} ${width1},${new_linetop} L0,${new_linetop}`;
-    element.getBoundingClientRect().top;
     svg_element += 1;
   }
   if (svg_element % 2 === 1) path += `L${width3},${height} L ${0},${height}`;
@@ -77,12 +66,6 @@ function createScrollLookUp(
       10;
     line_map.push([new_lineno, new_line_top, new_top]);
   }
-
-  logScrollDebug("createScrollLookUp", {
-    points: line_map.length,
-    editorScrollTop: editor.scrollTop,
-    previewScrollTop: preview?.scrollTop,
-  });
 
   return line_map;
 }
@@ -150,14 +133,7 @@ export default function useScrollLinking(
     const preview = previewRef.current;
     const svg_parent = svgParentRef.current;
     if (!editor || !preview) return;
-    if (last_scrolled_element.current === "preview") {
-      logScrollDebug("syncEditorScroll:skipped", {
-        reason: "preview-lock",
-        editorScrollTop: editor.scrollTop,
-        previewScrollTop: preview.scrollTop,
-      });
-      return;
-    }
+    if (last_scrolled_element.current === "preview") return;
     setLastScrolledElement("editor");
 
     const new_pos = map_side(
@@ -167,18 +143,7 @@ export default function useScrollLinking(
       2,
       editor.getBoundingClientRect().height / 3,
     );
-    if (new_pos === undefined) {
-      logScrollDebug("syncEditorScroll:no-target", {
-        editorScrollTop: editor.scrollTop,
-        previewScrollTop: preview.scrollTop,
-      });
-      return;
-    }
-    logScrollDebug("syncEditorScroll:apply", {
-      editorScrollTop: editor.scrollTop,
-      previewScrollTopBefore: preview.scrollTop,
-      previewTargetTop: new_pos,
-    });
+    if (new_pos === undefined) return;
     preview.scrollTo({
       top: new_pos,
       behavior: "auto",
@@ -189,14 +154,7 @@ export default function useScrollLinking(
     const preview = previewRef.current;
     const svg_parent = svgParentRef.current;
     if (!editor || !preview) return;
-    if (last_scrolled_element.current === "editor") {
-      logScrollDebug("syncPreviewScroll:skipped", {
-        reason: "editor-lock",
-        editorScrollTop: editor.scrollTop,
-        previewScrollTop: preview.scrollTop,
-      });
-      return;
-    }
+    if (last_scrolled_element.current === "editor") return;
     setLastScrolledElement("preview");
 
     const new_pos = map_side(
@@ -206,18 +164,7 @@ export default function useScrollLinking(
       1,
       editor.getBoundingClientRect().height / 3,
     );
-    if (new_pos === undefined) {
-      logScrollDebug("syncPreviewScroll:no-target", {
-        editorScrollTop: editor.scrollTop,
-        previewScrollTop: preview.scrollTop,
-      });
-      return;
-    }
-    logScrollDebug("syncPreviewScroll:apply", {
-      previewScrollTop: preview.scrollTop,
-      editorScrollTopBefore: editor.scrollTop,
-      editorTargetTop: new_pos,
-    });
+    if (new_pos === undefined) return;
     editor.scrollTo({
       top: new_pos,
       behavior: "auto",
@@ -235,18 +182,7 @@ export default function useScrollLinking(
       2,
       editor.getBoundingClientRect().height / 3,
     );
-    if (new_pos === undefined) {
-      logScrollDebug("syncResize:no-target", {
-        editorScrollTop: editor.scrollTop,
-        previewScrollTop: preview.scrollTop,
-      });
-      return;
-    }
-    logScrollDebug("syncResize:apply", {
-      editorScrollTop: editor.scrollTop,
-      previewScrollTopBefore: preview.scrollTop,
-      previewTargetTop: new_pos,
-    });
+    if (new_pos === undefined) return;
     preview.scrollTo({
       top: new_pos,
       behavior: "auto",
@@ -256,32 +192,20 @@ export default function useScrollLinking(
 
   React.useEffect(() => {
     if (!editor) return;
-    logScrollDebug("effect:editor-bind", {
-      hasEditor: Boolean(editor),
-      hasPreview: Boolean(previewRef.current),
-    });
 
     function editor_scroll() {
       requestAnimationFrame(() => syncEditorScroll());
     }
     editor.addEventListener("scroll", editor_scroll);
     return () => editor.removeEventListener("scroll", editor_scroll);
-  }, [editor, previewRef]);
+  }, [editor]);
 
   React.useEffect(() => {
     const preview = previewRef.current;
     const svg_parent = svgParentRef.current;
     if (!preview || !editor) return;
-    logScrollDebug("effect:preview-bind", {
-      hasEditor: Boolean(editor),
-      hasPreview: Boolean(preview),
-    });
     update_lines(editor, svg_parent);
     requestAnimationFrame(() => {
-      logScrollDebug("effect:initial-sync", {
-        editorScrollTop: editor.scrollTop,
-        previewScrollTop: preview.scrollTop,
-      });
       syncResize();
     });
 
