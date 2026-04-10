@@ -21,9 +21,13 @@ const HAS_POSTHOG = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
 
 export default function StoryWrapper({
   story,
+  editHrefBase,
+  initialFocusLine,
   storyFinishedIndexUpdate,
 }: {
   story: StoryData;
+  editHrefBase?: string;
+  initialFocusLine?: number;
   storyFinishedIndexUpdate: () => Promise<
     | {
         message: string;
@@ -176,7 +180,10 @@ export default function StoryWrapper({
   return (
     <>
       <StoryProgress
+        key={`${story.id}:${initialFocusLine ?? "start"}:${mode}`}
         story={story}
+        editHrefBase={editHrefBase}
+        initialFocusLine={initialFocusLine}
         settings={{
           hide_questions: false,
           show_all: false,

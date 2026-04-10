@@ -8,6 +8,9 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
 import { fetchAuthMutation } from "@/lib/auth-server";
 import { fetchQuery } from "convex/nextjs";
+import { getUser, isContributor } from "@/lib/userInterface";
+
+export const dynamic = "force-dynamic";
 
 const convexUrl =
   process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
@@ -48,14 +51,28 @@ export async function generateMetadata({
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: { story_id: string };
+  searchParams?: Promise<{ line?: string | string[] }>;
 }) {
   const story_id = parseInt((await params).story_id);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const rawLine = resolvedSearchParams?.line;
+  const initialFocusLine =
+    typeof rawLine === "string"
+      ? Number(rawLine)
+      : Array.isArray(rawLine)
+        ? Number(rawLine[0])
+        : undefined;
 
   const story = await get_story(story_id);
   if (!story) notFound();
   const course_id = story.course_id;
+  const user = await getUser();
+  const editHrefBase = isContributor(user)
+    ? `/editor/course/${story.course_short}/story/${story.id}`
+    : undefined;
 
   const user_id = await getUserId();
 
@@ -87,6 +104,12 @@ export default async function Page({
       <LocalisationProvider lang={story.from_language_id}>
         <StoryWrapper
           story={story}
+          editHrefBase={editHrefBase}
+          initialFocusLine={
+            Number.isFinite(initialFocusLine) && (initialFocusLine ?? 0) > 0
+              ? initialFocusLine
+              : undefined
+          }
           storyFinishedIndexUpdate={setStoryDoneAction}
           //localization={localization}
         />

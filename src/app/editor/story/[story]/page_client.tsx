@@ -17,9 +17,11 @@ import { EditorHeaderBreadcrumbs } from "../../_components/header_context";
 export default function StoryEditorPageClient({
   storyId,
   courseId,
+  initialFocusLine,
 }: {
   storyId: number;
   courseId?: string;
+  initialFocusLine?: number;
 }) {
   const convex = useConvex();
   const data = useQuery(api.editorRead.getEditorStoryPageData, {
@@ -145,6 +147,7 @@ export default function StoryEditorPageClient({
         isAdmin={data.isAdmin}
         story_data={data.story_data}
         avatar_names={avatarNames}
+        initialFocusLine={initialFocusLine}
         story_navigation={{
           previousStory: previousStory
             ? {
