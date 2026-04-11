@@ -34,13 +34,16 @@ function splitTextTokens(text: string, keep_tilde = true) {
 function Tooltip({
   className,
   children,
+  interactive = false,
   ...delegated
 }: {
   className?: string;
   children: React.ReactNode;
+  interactive?: boolean;
 } & React.HTMLAttributes<HTMLSpanElement>) {
   const ref = React.useRef<HTMLSpanElement>(null);
-  function onMouseEnter() {
+
+  function positionTooltip() {
     if (!ref.current) return;
     const tooltipElement = ref.current.children[1];
     if (!(tooltipElement instanceof HTMLElement)) return;
@@ -69,9 +72,11 @@ function Tooltip({
   }
   return (
     <span
-      onMouseEnter={onMouseEnter}
+      onMouseEnter={positionTooltip}
+      onFocus={positionTooltip}
       ref={ref}
       className={className}
+      tabIndex={interactive ? 0 : undefined}
       {...delegated}
     >
       {children}
@@ -229,6 +234,7 @@ function StoryLineHints({
       visibleContent.hints_pronunciation?.[hint.hintIndex];
     const has_any_hint = Boolean(hint_translation || hint_pronunciation);
     const has_translation_hint = Boolean(hint_translation);
+    const isInteractive = !is_hidden && !showTrans && has_translation_hint;
     const was_hidden_for_challenge = hideRangesForChallenge?.some((range) =>
       getOverlap(hint.rangeFrom, hint.rangeTo + 1, range.start, range.end),
     );
@@ -240,9 +246,14 @@ function StoryLineHints({
             "pointer-events-none invisible absolute bottom-[calc(100%-6px)] left-1/2 -translate-x-1/2 whitespace-nowrap text-[0.62em] leading-none opacity-0 transition-opacity duration-200",
             !is_hidden &&
               "group-hover/tooltip:visible group-hover/tooltip:opacity-95",
+            !is_hidden &&
+              "group-focus-within/tooltip:visible group-focus-within/tooltip:opacity-95",
             showTrans &&
               "group-hover/editorhint:visible group-hover/editorhint:opacity-95",
+            showTrans &&
+              "group-focus-within/editorhint:visible group-focus-within/editorhint:opacity-95",
             "group-hover/ruby:visible group-hover/ruby:opacity-95",
+            "group-focus-within/ruby:visible group-focus-within/ruby:opacity-95",
           )}
         >
           {hint_pronunciation}
@@ -261,7 +272,7 @@ function StoryLineHints({
           ? cn(
               "group/tooltip relative",
               underlineBaseClass,
-              "[--story-hint-underline:var(--underline-dashed)] bg-[image:linear-gradient(to_right,var(--story-hint-underline)_60%,rgba(255,255,255,0)_0%)] hover:[--story-hint-underline:var(--underline-dashed-highlight)]",
+              "[--story-hint-underline:var(--underline-dashed)] bg-[image:linear-gradient(to_right,var(--story-hint-underline)_60%,rgba(255,255,255,0)_0%)] hover:[--story-hint-underline:var(--underline-dashed-highlight)] focus-within:[--story-hint-underline:var(--underline-dashed-highlight)] focus:outline-none focus-visible:rounded-[4px] focus-visible:outline-2 focus-visible:outline-[var(--tooltip-border)] focus-visible:outline-offset-2",
             )
           : "";
     const hintTextClassName = showTrans
@@ -270,7 +281,7 @@ function StoryLineHints({
           visibleContent.lang_hints,
         )
       : cn(
-          "pointer-events-none invisible absolute bottom-[125%] left-1/2 z-10 mb-[10px] block w-auto -translate-x-1/2 whitespace-nowrap rounded-[14px] border-2 border-[var(--tooltip-border)] bg-[var(--tooltip-backgroud)] px-[17px] pt-[7px] pb-[6px] text-center text-[19px] font-normal not-italic text-[var(--tooltip-color)] opacity-0 transition-opacity duration-300 after:absolute after:top-full after:left-1/2 after:z-10 after:-mt-[6px] after:-ml-[5px] after:h-[10px] after:w-[10px] after:rotate-[-45deg] after:border-[2px] after:border-[transparent_transparent_var(--tooltip-border)_var(--tooltip-border)] after:bg-[var(--tooltip-backgroud)] after:content-[''] group-hover/tooltip:visible group-hover/tooltip:opacity-100",
+          "pointer-events-none invisible absolute bottom-[125%] left-1/2 z-10 mb-[10px] block w-auto -translate-x-1/2 whitespace-nowrap rounded-[14px] border-2 border-[var(--tooltip-border)] bg-[var(--tooltip-backgroud)] px-[17px] pt-[7px] pb-[6px] text-center text-[19px] font-normal not-italic text-[var(--tooltip-color)] opacity-0 transition-opacity duration-300 after:absolute after:top-full after:left-1/2 after:z-10 after:-mt-[6px] after:-ml-[5px] after:h-[10px] after:w-[10px] after:rotate-[-45deg] after:border-[2px] after:border-[transparent_transparent_var(--tooltip-border)_var(--tooltip-border)] after:bg-[var(--tooltip-backgroud)] after:content-[''] group-hover/tooltip:visible group-hover/tooltip:opacity-100 group-focus-within/tooltip:visible group-focus-within/tooltip:opacity-100",
           hint_translation &&
             hint_pronunciation &&
             "[transform:translate(-50%,-8px)]",
@@ -281,6 +292,7 @@ function StoryLineHints({
       <Tooltip
         key={hint.rangeFrom + " " + hint.rangeTo + 1}
         className={cn("select-text", hintContainerClassName)}
+        interactive={isInteractive}
         style={showTrans && has_any_hint ? editorHintContainerStyle : undefined}
         data-revealed={
           was_hidden_for_challenge && !is_hidden ? true : undefined
