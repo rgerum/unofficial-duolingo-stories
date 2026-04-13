@@ -17,10 +17,14 @@ import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import SoundRecorder from "@/app/editor/story/[story]/sound-recorder";
 import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
 import {
-  insert_audio_line,
+  create_audio_insert_anchor,
+  insert_audio_at_anchor,
+  map_audio_insert_anchor,
   timings_to_text,
+  type AudioInsertAnchor,
 } from "@/lib/editor/audio/audio_edit_tools";
 import type {
+  Audio,
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
@@ -64,6 +68,14 @@ function normalizeDocText(text: string): string {
   return text.replace(/\r\n/g, "\n");
 }
 
+function getElementAudio(
+  element: StoryElementLine | StoryElementHeader | undefined,
+): Audio | undefined {
+  if (!element) return undefined;
+  if (element.type === "HEADER") return element.audio;
+  return element.line.content.audio ?? element.audio;
+}
+
 export default function EditorV2({
   isAdmin,
   story_data,
@@ -81,6 +93,13 @@ export default function EditorV2({
   const marginRef = React.useRef<SVGSVGElement>(null);
   const svgParentRef = React.useRef<SVGSVGElement>(null);
   const viewRef = React.useRef<EditorView | null>(null);
+  const trackedAudioAnchorsRef = React.useRef<Set<AudioInsertAnchor>>(
+    new Set(),
+  );
+  const audioEditorAnchorRef = React.useRef<{
+    anchor: AudioInsertAnchor;
+    release: () => void;
+  } | null>(null);
   const [view, setView] = React.useState<EditorView | undefined>(undefined);
 
   const language_data = (useQuery(api.editorRead.getEditorLanguageByLegacyId, {
@@ -111,14 +130,6 @@ export default function EditorV2({
   );
   const storyText = storySnapshot.text;
 
-  React.useEffect(() => {
-    // Reset editor-local state when switching stories, even if the text matches.
-    setDocText(normalizeDocText(storySnapshot.text));
-    setRevision(0);
-    setLineNo(1);
-    setAudioEditorData(undefined);
-  }, [storySnapshot]);
-
   const model = useStoryEditorModel({
     isAdmin,
     storyData: story_data,
@@ -138,6 +149,64 @@ export default function EditorV2({
     save,
   } = model;
 
+  const releaseTrackedAudioEditorAnchor = React.useCallback(() => {
+    audioEditorAnchorRef.current?.release();
+    audioEditorAnchorRef.current = null;
+  }, []);
+
+  const trackAudioInsertAnchor = React.useCallback(
+    (ssml: Audio["ssml"]) => {
+      const view = viewRef.current;
+      if (!view || !audioInsertLines) return undefined;
+      const anchor = create_audio_insert_anchor(ssml, view, audioInsertLines);
+      if (!anchor) return undefined;
+      trackedAudioAnchorsRef.current.add(anchor);
+      return {
+        anchor,
+        release: () => {
+          trackedAudioAnchorsRef.current.delete(anchor);
+        },
+      };
+    },
+    [audioInsertLines],
+  );
+
+  const openAudioEditor = React.useCallback(
+    (data: StoryElementLine | StoryElementHeader | undefined) => {
+      releaseTrackedAudioEditorAnchor();
+      if (!data) {
+        setAudioEditorData(undefined);
+        return;
+      }
+      const audio = getElementAudio(data);
+      const trackedAnchor = audio?.ssml
+        ? trackAudioInsertAnchor(audio.ssml)
+        : undefined;
+      if (trackedAnchor) {
+        audioEditorAnchorRef.current = trackedAnchor;
+      }
+      setAudioEditorData(data);
+    },
+    [releaseTrackedAudioEditorAnchor, trackAudioInsertAnchor],
+  );
+
+  React.useEffect(() => {
+    // Reset editor-local state when switching stories, even if the text matches.
+    setDocText(normalizeDocText(storySnapshot.text));
+    setRevision(0);
+    setLineNo(1);
+    releaseTrackedAudioEditorAnchor();
+    setAudioEditorData(undefined);
+  }, [releaseTrackedAudioEditorAnchor, storySnapshot]);
+
+  React.useEffect(
+    () => () => {
+      releaseTrackedAudioEditorAnchor();
+      trackedAudioAnchorsRef.current.clear();
+    },
+    [releaseTrackedAudioEditorAnchor],
+  );
+
   useResizeEditor(editorRef.current, previewRef.current, marginRef.current);
   useScrollLinking(view, previewRef.current, svgParentRef.current);
 
@@ -149,6 +218,9 @@ export default function EditorV2({
       setLineNo(currentLine);
 
       if (update.docChanged) {
+        for (const anchor of trackedAudioAnchorsRef.current) {
+          map_audio_insert_anchor(anchor, update.changes);
+        }
         setDocText(update.state.doc.toString());
         setRevision((prev) => prev + 1);
       }
@@ -264,16 +336,15 @@ export default function EditorV2({
   const onAudioSave = React.useCallback(
     (filename: string, timingText: string) => {
       const view = viewRef.current;
-      if (!view || !audioEditorData?.audio) return;
-      if (!audioInsertLines) return;
-      insert_audio_line(
+      const trackedAnchor = audioEditorAnchorRef.current;
+      if (!view || !trackedAnchor) return;
+      insert_audio_at_anchor(
         `$${filename}${timingText}`,
-        audioEditorData.audio.ssml,
         view,
-        audioInsertLines,
+        trackedAnchor.anchor,
       );
     },
-    [audioEditorData, audioInsertLines],
+    [],
   );
 
   const soundRecorderNext = React.useCallback(() => {
@@ -284,11 +355,11 @@ export default function EditorV2({
         element.type === "LINE" &&
         (element.trackingProperties?.line_index ?? 0) > index
       ) {
-        setAudioEditorData(element);
+        openAudioEditor(element);
         break;
       }
     }
-  }, [audioEditorData, parsedStory.elements]);
+  }, [audioEditorData, openAudioEditor, parsedStory.elements]);
 
   const soundRecorderPrevious = React.useCallback(() => {
     if (!audioEditorData) return;
@@ -298,15 +369,14 @@ export default function EditorV2({
         (element.type === "LINE" || element.type === "HEADER") &&
         (element.trackingProperties?.line_index ?? 0) < index
       ) {
-        setAudioEditorData(element);
+        openAudioEditor(element);
         break;
       }
     }
-  }, [audioEditorData, parsedStory.elements]);
+  }, [audioEditorData, openAudioEditor, parsedStory.elements]);
 
   const editorStateForPreview: EditorStateType | undefined =
     React.useMemo(() => {
-      const view = viewRef.current;
       if (!view) return undefined;
       return {
         line_no: lineNo,
@@ -323,14 +393,27 @@ export default function EditorV2({
           );
         },
         audio_insert_lines: audioInsertLines,
-        show_audio_editor: (data) => setAudioEditorData(data),
+        create_audio_insert_anchor: (ssml) =>
+          audioInsertLines
+            ? create_audio_insert_anchor(ssml, view, audioInsertLines)
+            : undefined,
+        track_audio_insert_anchor: (anchor) => {
+          trackedAudioAnchorsRef.current.add(anchor);
+          return () => {
+            trackedAudioAnchorsRef.current.delete(anchor);
+          };
+        },
+        insert_audio_at_anchor: (text, anchor) =>
+          insert_audio_at_anchor(text, view, anchor),
+        show_audio_editor: (data) => openAudioEditor(data),
       };
-    }, [audioInsertLines, lineNo]);
+    }, [audioInsertLines, lineNo, openAudioEditor, view]);
 
   const audioEditorDataContent =
     (audioEditorData?.type === "LINE" && audioEditorData.line.content) ||
     (audioEditorData?.type === "HEADER" &&
       audioEditorData.learningLanguageTitleContent);
+  const audioEditorAudio = getElementAudio(audioEditorData);
 
   return (
     <div id="body" className="flex h-full min-h-0 flex-col">
@@ -381,22 +464,19 @@ export default function EditorV2({
         next_story={story_navigation.nextStory}
       />
       {audioEditorData &&
-        audioEditorData.audio &&
+        audioEditorAudio &&
         audioEditorDataContent &&
         model.parsedStory && (
           <SoundRecorder
             key={audioEditorData.trackingProperties.line_index}
             content={audioEditorDataContent}
             initialTimingText={timings_to_text({
-              filename: audioEditorData.audio.url ?? "",
-              keypoints: audioEditorData.audio.keypoints ?? [],
+              filename: audioEditorAudio.url ?? "",
+              keypoints: audioEditorAudio.keypoints ?? [],
             })}
-            url={
-              "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/" +
-              audioEditorData.audio.url
-            }
+            url={`https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/${audioEditorAudio.url}`}
             story_id={story_data.id}
-            onClose={() => setAudioEditorData(undefined)}
+            onClose={() => openAudioEditor(undefined)}
             onSave={onAudioSave}
             soundRecorderNext={soundRecorderNext}
             soundRecorderPrevious={soundRecorderPrevious}
@@ -441,7 +521,7 @@ export default function EditorV2({
           <StoryEditorPreview
             story={model.parsedStory}
             editorState={editorStateForPreview}
-            onOpenAudioEditor={(data) => setAudioEditorData(data)}
+            onOpenAudioEditor={openAudioEditor}
           />
         </div>
       </div>

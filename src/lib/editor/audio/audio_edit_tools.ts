@@ -1,4 +1,5 @@
 import { fetch_post } from "@/lib/fetch_post";
+import type { ChangeDesc } from "@codemirror/state";
 import {
   add_word_marks_replacements,
   find_replace_with_mapping,
@@ -277,6 +278,12 @@ export async function generate_audio_line(ssml: {
   };
 }
 
+export type AudioInsertAnchor = {
+  kind: "replace" | "insert";
+  from: number;
+  to: number;
+};
+
 export function content_to_audio(content: string) {
   let binaryString = window.atob(content);
   let binaryData = new Uint8Array(binaryString.length);
@@ -344,28 +351,76 @@ export function insert_audio_line(
   view: EditorView,
   audio_insert_lines: [number | undefined, number][],
 ) {
-  let [line, line_insert] = audio_insert_lines[ssml.inser_index];
+  const anchor = create_audio_insert_anchor(ssml, view, audio_insert_lines);
+  if (!anchor) return;
+  insert_audio_at_anchor(text, view, anchor);
+}
+
+export function create_audio_insert_anchor(
+  ssml: {
+    inser_index: number;
+  },
+  view: EditorView,
+  audio_insert_lines: [number | undefined, number][],
+): AudioInsertAnchor | undefined {
+  const insertTarget = audio_insert_lines[ssml.inser_index];
+  if (!insertTarget) return undefined;
+
+  const [line, line_insert] = insertTarget;
   if (line !== undefined) {
-    let line_state = view.state.doc.line(line);
-    view.dispatch(
-      view.state.update({
-        changes: {
-          from: line_state.from,
-          to: line_state.to,
-          insert: text,
-        },
-      }),
-    );
-  } else {
-    let line_state = view.state.doc.line(line_insert - 1);
-    view.dispatch(
-      view.state.update({
-        changes: {
-          from: line_state.from,
-          to: line_state.from,
-          insert: text + "\n",
-        },
-      }),
-    );
+    const lineNumber = Math.min(Math.max(1, line), view.state.doc.lines);
+    const line_state = view.state.doc.line(lineNumber);
+    return {
+      kind: "replace",
+      from: line_state.from,
+      to: line_state.to,
+    };
   }
+
+  const lineNumber = Math.min(
+    Math.max(1, line_insert - 1),
+    view.state.doc.lines,
+  );
+  const line_state = view.state.doc.line(lineNumber);
+  return {
+    kind: "insert",
+    from: line_state.from,
+    to: line_state.from,
+  };
+}
+
+export function map_audio_insert_anchor(
+  anchor: AudioInsertAnchor,
+  changes: ChangeDesc,
+) {
+  if (anchor.kind === "replace") {
+    anchor.from = changes.mapPos(anchor.from, 1);
+    anchor.to = changes.mapPos(anchor.to, -1);
+    return;
+  }
+
+  const mapped = changes.mapPos(anchor.from, 1);
+  anchor.from = mapped;
+  anchor.to = mapped;
+}
+
+export function insert_audio_at_anchor(
+  text: string,
+  view: EditorView,
+  anchor: AudioInsertAnchor,
+) {
+  const insertText = anchor.kind === "insert" ? `${text}\n` : text;
+  const from = anchor.from;
+  view.dispatch(
+    view.state.update({
+      changes: {
+        from,
+        to: anchor.to,
+        insert: insertText,
+      },
+    }),
+  );
+  anchor.kind = "replace";
+  anchor.from = from;
+  anchor.to = from + text.length;
 }
