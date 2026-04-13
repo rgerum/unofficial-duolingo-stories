@@ -1,6 +1,6 @@
 import React from "react";
 import LanguageFlag from "@/components/ui/language-flag";
-import Link from "next/link";
+import Link from "@/lib/router";
 import EditorButton from "../editor_button";
 
 interface BreadcrumbLanguage {

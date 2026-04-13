@@ -7,8 +7,8 @@ import {
   useTransition,
   type KeyboardEvent,
 } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "@/lib/router";
+import Link from "@/lib/router";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import { SpinnerBlue } from "@/components/ui/spinner";

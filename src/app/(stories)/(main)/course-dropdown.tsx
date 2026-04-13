@@ -1,8 +1,7 @@
 "use client";
-import Link from "next/link";
+import Link from "@/lib/router";
 import LanguageFlag from "@/components/ui/language-flag";
-import { useSelectedLayoutSegment } from "next/navigation";
-import { CourseData } from "@/app/(stories)/(main)/get_course_data";
+import { useSelectedLayoutSegment } from "@/lib/router";
 import { api } from "@convex/_generated/api";
 import { useQuery } from "convex/react";
 import {
@@ -11,6 +10,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn";
+
+type CourseData = {
+  id: number;
+  short: string;
+  name: string;
+  learningLanguageId: string;
+};
 
 function LanguageButtonSmall({ course }: { course?: CourseData }) {
   /**

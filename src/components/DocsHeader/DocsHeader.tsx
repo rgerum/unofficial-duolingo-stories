@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Link from "next/link";
+import Link from "@/lib/router";
 import DocsSearchModal from "../DocsSearchModal";
 import useKeypress from "@/hooks/use-keypress.hook";
 import * as Dialog from "@radix-ui/react-dialog";

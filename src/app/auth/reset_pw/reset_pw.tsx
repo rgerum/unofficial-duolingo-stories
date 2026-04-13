@@ -1,10 +1,10 @@
 "use client";
 import React from "react";
-import Link from "next/link";
+import Link from "@/lib/router";
 import { useInput } from "@/lib/hooks";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "@/lib/router";
 import { authClient } from "@/lib/auth-client";
 import {
   authAlertErrorClass,

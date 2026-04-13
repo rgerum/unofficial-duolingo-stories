@@ -1,8 +1,8 @@
 "use client";
-import Link from "next/link";
+import Link from "@/lib/router";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SpinnerBlue } from "@/components/ui/spinner";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/router";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import ContributorList from "@/components/ContributorList";

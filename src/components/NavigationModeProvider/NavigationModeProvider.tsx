@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/lib/router";
 
 const navigationModeContext = React.createContext({
   type: "hard" as "hard" | "soft",

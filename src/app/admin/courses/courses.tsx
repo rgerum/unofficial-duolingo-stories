@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/lib/router";
 import { Spinner } from "@/components/ui/spinner";
 import Flag from "@/components/ui/flag";
 import * as EditDialog from "../edit_dialog";

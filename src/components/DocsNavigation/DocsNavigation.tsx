@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
-import Link from "next/link";
+import Link from "@/lib/router";
 import { showNavContext } from "../DocsNavigationBackdrop";
-import { useSelectedLayoutSegment } from "next/navigation";
+import { useSelectedLayoutSegment } from "@/lib/router";
 import {
   Sheet,
   SheetContent,

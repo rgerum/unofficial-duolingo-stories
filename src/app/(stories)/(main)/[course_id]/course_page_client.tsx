@@ -2,7 +2,7 @@
 
 import React from "react";
 import { api } from "@convex/_generated/api";
-import { Preloaded, usePreloadedQuery, useQuery } from "convex/react";
+import { type Preloaded, useQuery } from "convex/react";
 import Header from "../header";
 import StoryButton from "./story_button";
 import get_localisation_func from "@/lib/get_localisation_func";
@@ -111,10 +111,13 @@ function NoNativeWarning() {
 
 export default function CoursePageClient({
   course_id,
-  preloadedCourse,
+  initialCourse,
 }: {
   course_id: string;
-  preloadedCourse: Preloaded<typeof api.landing.getPublicCoursePageData>;
+  preloadedCourse?: Preloaded<typeof api.landing.getPublicCoursePageData>;
+  initialCourse?: ReturnType<
+    typeof useQuery<typeof api.landing.getPublicCoursePageData>
+  >;
 }) {
   const listeningStorageKey = React.useMemo(
     () => `course_listening_mode:${course_id}`,
@@ -137,7 +140,10 @@ export default function CoursePageClient({
     });
   }, [listeningStorageKey]);
 
-  const course = usePreloadedQuery(preloadedCourse);
+  const queriedCourse = useQuery(api.landing.getPublicCoursePageData, {
+    short: course_id,
+  });
+  const course = initialCourse ?? queriedCourse;
   const localizationMap = React.useMemo(() => {
     const data: Record<string, string> = {};
     for (const row of course?.localization ?? []) data[row.tag] = row.text;

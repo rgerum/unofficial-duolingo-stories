@@ -1,5 +1,5 @@
 import Header from "../header";
-import Link from "next/link";
+import Link from "@/lib/router";
 
 export default function NotFound() {
   return (

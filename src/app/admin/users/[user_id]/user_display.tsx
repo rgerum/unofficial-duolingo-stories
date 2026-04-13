@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Link from "@/lib/router";
 import Switch from "@/components/ui/switch";
 import Button from "@/components/ui/button";
 import type { AdminUser } from "./schema";
@@ -15,15 +15,15 @@ async function setUserActivated(data: {
   id: number;
   activated: 0 | 1 | boolean;
 }) {
-  return await setUserActivatedAction(data);
+  return await setUserActivatedAction({ data });
 }
 
 async function setUserWrite(data: { id: number; write: 0 | 1 | boolean }) {
-  return await setUserWriteAction(data);
+  return await setUserWriteAction({ data });
 }
 
 async function setUserDelete(data: { id: number }) {
-  return await setUserDeleteAction(data);
+  return await setUserDeleteAction({ data });
 }
 
 function Activate({ user }: { user: AdminUser }) {

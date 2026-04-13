@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import Link from "@/lib/router";
 import Header from "../header";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";

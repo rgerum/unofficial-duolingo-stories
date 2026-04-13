@@ -10,7 +10,7 @@ export default function ConvexClientProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  const convexUrl = process.env.VITE_CONVEX_URL;
   const convex = React.useMemo(
     () => (convexUrl ? new ConvexReactClient(convexUrl) : null),
     [convexUrl],
@@ -19,7 +19,7 @@ export default function ConvexClientProvider({
   if (!convex) {
     if (process.env.NODE_ENV !== "production") {
       console.warn(
-        "ConvexClientProvider: NEXT_PUBLIC_CONVEX_URL is not set. Auth will be disabled.",
+        "ConvexClientProvider: VITE_CONVEX_URL is not set. Auth will be disabled.",
       );
     }
     return <>{children}</>;

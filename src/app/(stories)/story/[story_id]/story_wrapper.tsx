@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/router";
 import { useQuery } from "convex/react";
 import StoryProgress from "@/components/StoryProgress";
 import { useNavigationMode } from "@/components/NavigationModeProvider";
@@ -16,8 +16,8 @@ import {
 } from "@/lib/posthog-user";
 
 const STORY_END_NEXT_FLAG_KEY =
-  process.env.NEXT_PUBLIC_POSTHOG_STORY_END_NEXT_FLAG_KEY ?? "";
-const HAS_POSTHOG = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
+  process.env.VITE_POSTHOG_STORY_END_NEXT_FLAG_KEY ?? "";
+const HAS_POSTHOG = Boolean(process.env.VITE_POSTHOG_KEY);
 
 export default function StoryWrapper({
   story,

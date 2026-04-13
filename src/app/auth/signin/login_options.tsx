@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Link from "next/link";
+import Link from "@/lib/router";
 import { useInput } from "@/lib/hooks";
 import posthog from "posthog-js";
 
@@ -8,7 +8,6 @@ import { GetIcon } from "@/components/icons";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { SpinnerBlue } from "@/components/ui/spinner";
-import { ProviderProps } from "@/app/auth/signin/page";
 import { authClient } from "@/lib/auth-client";
 import {
   authAlertErrorClass,
@@ -18,6 +17,11 @@ import {
 } from "@/components/auth/styles";
 
 const PENDING_SIGNIN_STORAGE_KEY = "posthog_pending_signin";
+
+export type ProviderProps = {
+  id: string;
+  name: string;
+};
 
 export function LoginOptions(props: {
   providers: ProviderProps[];

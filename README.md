@@ -9,16 +9,16 @@ It is _not_ an official product of Duolingo, nor is there any plan to integrate 
 
 It is hosted at https://duostories.org and reproduces the story experience from the official Duolingo stories.
 
-The app is built with Next.js and React.
+The app is built with TanStack Start and React.
 
 ## Architecture snapshot
 
-- App/UI: Next.js 16 + React 19 (`src/app`, `src/components`)
+- App/UI: TanStack Start + React 19 (`src/routes`, `src/components`)
 - Canonical app data access: Convex queries/mutations (`convex/*`)
 - Write-side side effects (GitHub/PostHog): Convex internal actions in `convex/editorSideEffects.ts`
-- Remaining Next route handlers are intentionally server-only:
-  - Auth entrypoint (`src/app/api/auth/[...all]/route.ts`)
-  - Audio endpoints (`src/app/audio/*/route.ts`)
+- Server routes are exposed through TanStack Start:
+  - Auth entrypoint (`src/routes/api/auth/$.ts`)
+  - Audio endpoints (`src/routes/audio/*.ts`)
 
 ### Write flow
 
@@ -34,7 +34,7 @@ Now create `.env.local` in the project root.
 Minimum local values:
 
 ```
-NEXT_PUBLIC_CONVEX_URL=<your_convex_dev_url>
+VITE_CONVEX_URL=<your_convex_dev_url>
 CONVEX_URL=<your_convex_dev_url>
 BETTER_AUTH_SECRET=<your_secret>
 SITE_URL=http://localhost:3000
@@ -90,8 +90,8 @@ This makes it harder to review and merge the pull request.
 
 ### Contribution rules for new backend work
 
-- New app writes should be direct Convex mutations from the client or server action.
-- Avoid adding pass-through Next route handlers for simple reads/writes.
+- New app writes should be direct Convex mutations from the client or server function.
+- Avoid adding pass-through framework route handlers for simple reads/writes.
 - Server side effects should be scheduled from Convex mutations via internal actions.
 - Include an `operationKey` for mutation calls that can be retried.
 

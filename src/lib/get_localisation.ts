@@ -11,10 +11,9 @@ export const get_localisation_dict = async (lang: number) => {
   return data;
 };
 
-const convexUrl =
-  process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
+const convexUrl = process.env.VITE_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
 if (!convexUrl) {
-  throw new Error("Missing NEXT_PUBLIC_CONVEX_URL/CONVEX_URL");
+  throw new Error("Missing VITE_CONVEX_URL/CONVEX_URL");
 }
 const convex = new ConvexHttpClient(convexUrl);
 

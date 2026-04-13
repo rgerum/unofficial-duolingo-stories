@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Link from "next/link";
+import Link from "@/lib/router";
 import ProgressBar from "../ProgressBar";
 import VisuallyHidden from "../VisuallyHidden";
 

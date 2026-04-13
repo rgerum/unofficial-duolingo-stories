@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/lib/router";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import Switch from "@/components/ui/switch";
@@ -39,11 +39,15 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
   const storyData = story;
 
   async function changePublished() {
-    await togglePublished(storyData.id, storyData.public);
+    await togglePublished({
+      data: { id: storyData.id, currentPublic: storyData.public },
+    });
   }
 
   async function deleteApproval(approvalId: number) {
-    await removeApprovalAction(storyData.id, approvalId);
+    await removeApprovalAction({
+      data: { storyId: storyData.id, approvalId },
+    });
   }
 
   function formatApprovalDate(value: unknown) {

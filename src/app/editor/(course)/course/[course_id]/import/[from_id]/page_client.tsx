@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import Link from "@/lib/router";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LanguageFlag from "@/components/ui/language-flag";

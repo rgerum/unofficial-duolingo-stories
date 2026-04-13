@@ -1,5 +1,5 @@
 import React from "react";
-import { redirect } from "next/navigation";
+import { redirect } from "@/lib/router";
 import { getUser, isAdmin } from "@/lib/userInterface";
 
 interface LayoutProps {

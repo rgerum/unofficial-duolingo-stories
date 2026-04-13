@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "@/lib/router";
 import StoryProgress from "@/components/StoryProgress";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
