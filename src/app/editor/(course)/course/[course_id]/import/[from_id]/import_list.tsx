@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { SpinnerBlue } from "@/components/ui/spinner";
 import { Spinner } from "@/components/ui/spinner";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/router";
 import { CourseImportProps } from "@/app/editor/(course)/types";
 
 export default function ImportList({

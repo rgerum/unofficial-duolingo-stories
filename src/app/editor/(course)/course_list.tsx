@@ -1,10 +1,10 @@
 "use client";
-import Link from "next/link";
+import Link from "@/lib/router";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LanguageFlag from "@/components/ui/language-flag";
 import { useInput } from "@/lib/hooks";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/router";
 import { Spinner } from "@/components/ui/spinner";
 import type { CourseProps } from "./types";
 

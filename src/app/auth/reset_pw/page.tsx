@@ -1,5 +1,5 @@
 import React from "react";
-import { redirect } from "next/navigation";
+import { redirect } from "@/lib/router";
 import ResetPassword from "./reset_pw";
 import { isAuthenticated } from "@/lib/auth-server";
 

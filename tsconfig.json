@@ -4,6 +4,9 @@
       "@/*": [
         "./src/*"
       ],
+      "~/*": [
+        "./src/*"
+      ],
       "@convex/*": [
         "./convex/*"
       ]
@@ -25,25 +28,22 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "incremental": true
   },
   "include": [
     "process.d.ts",
-    "next-env.d.ts",
-    "next-auth.d.ts",
     "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    "**/*.tsx"
   ],
   "exclude": [
     "node_modules",
+    "tmp",
     "**/cypress/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    "src/app/**/page.tsx",
+    "src/app/**/layout.tsx",
+    "src/app/**/loading.tsx",
+    "src/app/**/not-found.tsx",
+    "src/app/**/route.ts",
+    "src/app/**/route.tsx"
   ]
 }

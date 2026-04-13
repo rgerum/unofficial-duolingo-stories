@@ -1,8 +1,7 @@
 import React from "react";
-import Link from "next/link";
-import { Metadata } from "next";
+import Link from "@/lib/router";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Duostories Privacy Policy",
   description: "Privacy information for the duostories project.",
   alternates: {
@@ -10,7 +9,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Page() {
+export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[900px] px-4 py-6 text-[calc(19/16*1rem)] leading-[1.6] [&_a]:underline [&_a]:underline-offset-2 [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:text-[calc(28/16*1rem)] [&_h2]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-[calc(22/16*1rem)] [&_h3]:font-bold [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:ml-[30px] [&_ul]:list-disc [&_ul]:pl-6">
       <h1 className="mb-6 text-[calc(36/16*1rem)] font-bold">

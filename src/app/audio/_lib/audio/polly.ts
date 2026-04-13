@@ -16,8 +16,7 @@ const config = {
   region: "eu-central-1",
 };
 
-const convexUrl =
-  process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
+const convexUrl = process.env.VITE_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
 
 const convex = convexUrl ? new ConvexHttpClient(convexUrl) : null;
 

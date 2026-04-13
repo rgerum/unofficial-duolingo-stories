@@ -4,7 +4,7 @@ import React from "react";
 import { basicSetup, EditorView } from "codemirror";
 import { EditorSelection, EditorState } from "@codemirror/state";
 import { useQuery } from "convex/react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/router";
 import { api } from "@convex/_generated/api";
 import { example, highlightStyle } from "@/components/editor/story/parser";
 import useScrollLinking from "@/components/editor/story/scroll_linking";

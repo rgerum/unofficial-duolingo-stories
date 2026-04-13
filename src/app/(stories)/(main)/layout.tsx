@@ -1,9 +1,9 @@
-import Link from "next/link";
+import Link from "@/lib/router";
 import React from "react";
 import CourseDropdown from "./course-dropdown";
 import FooterLinks from "./footer_links";
 import Legal from "@/components/layout/legal";
-import Image from "next/image";
+import Image from "@/lib/image";
 import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 
 export const metadata = {
@@ -31,11 +31,7 @@ export const metadata = {
   },
 };
 
-export default async function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative isolate mx-auto flex min-h-full w-full flex-col">
       <div className="sticky top-0 z-[1] w-full bg-[var(--body-background)] after:absolute after:left-1/2 after:w-full after:-translate-x-1/2 after:border-b-2 after:border-[var(--header-border)] after:content-['']">

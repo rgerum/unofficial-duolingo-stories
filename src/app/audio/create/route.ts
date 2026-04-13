@@ -1,4 +1,3 @@
-import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuid } from "uuid";
 import fs from "fs";
 import { audio_engines } from "../_lib/audio";
@@ -31,7 +30,7 @@ async function exists(filename: string): Promise<boolean> {
   });
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   const token = await getUser();
 
   if (!token || !isContributor(token))
@@ -96,5 +95,5 @@ export async function POST(req: NextRequest) {
   });
   await posthog.shutdown();
 
-  return NextResponse.json(answer);
+  return Response.json(answer);
 }

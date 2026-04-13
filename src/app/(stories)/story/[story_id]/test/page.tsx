@@ -1,6 +1,6 @@
 import React from "react";
 import StoryWrapper from "./story_wrapper";
-import { notFound } from "next/navigation";
+import { notFound } from "@/lib/router";
 
 export default async function Page({
   params,

@@ -1,4 +1,3 @@
-import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuid } from "uuid";
 import fs from "fs";
 import { put } from "@vercel/blob";
@@ -29,7 +28,7 @@ async function exists(filename: string): Promise<boolean> {
   });
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   const token = await getUser();
 
   if (!token)
@@ -46,7 +45,7 @@ export async function POST(req: NextRequest) {
   const file = data.get("file");
 
   if (!file || typeof file === "string") {
-    return NextResponse.json({ success: false });
+    return Response.json({ success: false });
   }
 
   const bytes = await file.arrayBuffer();
@@ -71,7 +70,7 @@ export async function POST(req: NextRequest) {
       addRandomSuffix: false,
     });
 
-    return NextResponse.json({ success: true, filename: filename });
+    return Response.json({ success: true, filename: filename });
   }
-  return NextResponse.json({ success: false });
+  return Response.json({ success: false });
 }

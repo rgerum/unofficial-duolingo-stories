@@ -1,5 +1,5 @@
 import React from "react";
-import { redirect } from "next/navigation";
+import { redirect } from "@/lib/router";
 import Register from "./register";
 import { isAuthenticated } from "@/lib/auth-server";
 

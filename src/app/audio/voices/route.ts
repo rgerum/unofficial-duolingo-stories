@@ -1,11 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
 import { audio_engines } from "../_lib/audio";
 import { getUser, isAdmin } from "@/lib/userInterface";
 import type { Voice } from "../_lib/audio/types";
 import { fetchAuthMutation } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 
-export async function GET(_req: NextRequest) {
+export async function GET(_req: Request) {
   const token = await getUser();
 
   if (!isAdmin(token))
@@ -36,5 +35,5 @@ export async function GET(_req: NextRequest) {
     }
   }
 
-  return NextResponse.json(voices);
+  return Response.json(voices);
 }

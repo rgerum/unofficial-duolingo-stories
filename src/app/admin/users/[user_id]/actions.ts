@@ -1,5 +1,6 @@
 "use server";
 
+import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { fetchAuthMutation } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
@@ -22,28 +23,31 @@ const SetWriteInput = z.object({
 
 const DeleteUserInput = z.object({ id: z.number() });
 
-export async function setUserActivatedAction(input: unknown) {
-  const parsed = SetActivatedInput.parse(input);
-  await fetchAuthMutation(api.adminData.setAdminUserActivated, {
-    id: parsed.id,
-    activated: parsed.activated,
+export const setUserActivatedAction = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => SetActivatedInput.parse(input))
+  .handler(async ({ data }) => {
+    await fetchAuthMutation(api.adminData.setAdminUserActivated, {
+      id: data.id,
+      activated: data.activated,
+    });
+    return OkSchema.parse("ok");
   });
-  return OkSchema.parse("ok");
-}
 
-export async function setUserWriteAction(input: unknown) {
-  const parsed = SetWriteInput.parse(input);
-  await fetchAuthMutation(api.adminData.setAdminUserWrite, {
-    id: parsed.id,
-    write: parsed.write,
+export const setUserWriteAction = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => SetWriteInput.parse(input))
+  .handler(async ({ data }) => {
+    await fetchAuthMutation(api.adminData.setAdminUserWrite, {
+      id: data.id,
+      write: data.write,
+    });
+    return OkSchema.parse("ok");
   });
-  return OkSchema.parse("ok");
-}
 
-export async function setUserDeleteAction(input: unknown) {
-  const parsed = DeleteUserInput.parse(input);
-  await fetchAuthMutation(api.adminData.setAdminUserDelete, {
-    id: parsed.id,
+export const setUserDeleteAction = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => DeleteUserInput.parse(input))
+  .handler(async ({ data }) => {
+    await fetchAuthMutation(api.adminData.setAdminUserDelete, {
+      id: data.id,
+    });
+    return OkSchema.parse("ok");
   });
-  return OkSchema.parse("ok");
-}

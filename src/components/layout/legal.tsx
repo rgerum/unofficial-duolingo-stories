@@ -1,5 +1,5 @@
 import React from "react";
-import Link from "next/link";
+import Link from "@/lib/router";
 
 export default function Legal({ language_name }: { language_name?: string }) {
   return (

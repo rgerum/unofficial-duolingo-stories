@@ -2,8 +2,8 @@
 "use no memo";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter, useSelectedLayoutSegments } from "next/navigation";
+import Link from "@/lib/router";
+import { useRouter, useSelectedLayoutSegments } from "@/lib/router";
 import Button from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { isAdmin, isContributor } from "@/lib/userInterface";

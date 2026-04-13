@@ -4,7 +4,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import CourseList from "./course_list";
-import { useSelectedLayoutSegments } from "next/navigation";
+import { useSelectedLayoutSegments } from "@/lib/router";
 
 interface SwiperSideBarProps {
   children: React.ReactNode;

@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { showNavContext } from "../DocsNavigationBackdrop";
-import { useSelectedLayoutSegment } from "next/navigation";
+import { useSelectedLayoutSegment } from "@/lib/router";
 import VisuallyHidden from "../VisuallyHidden";
 import {
   docsMobileBreadcrumbClass,

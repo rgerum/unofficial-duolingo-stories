@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Unofficial Duolingo Stories (https://duostories.org) - a community-driven platform that brings Duolingo Stories to new languages through community translation. Built with Next.js 16 (App Router) and React 19, with Convex as the canonical app data layer.
+Unofficial Duolingo Stories (https://duostories.org) - a community-driven platform that brings Duolingo Stories to new languages through community translation. Built with TanStack Start and React 19, with Convex as the canonical app data layer.
 
 ## Development Commands
 
@@ -17,14 +17,14 @@ pnpm run typecheck    # TypeScript type checking (tsc --noEmit)
 pnpm exec convex codegen # Regenerate Convex bindings after adding/changing Convex functions
 ```
 
-Note: TypeScript build errors are ignored in `next.config.js` (`ignoreBuildErrors: true`), so `pnpm run build` will succeed even with type errors. Use `pnpm run typecheck` to check types separately.
+Use `pnpm run typecheck` to validate types separately from the production build.
 
 ## Environment Setup
 
 Requires Convex.
 
-Next.js `.env.local` typically includes:
-- `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_URL`
+`.env.local` typically includes:
+- `VITE_CONVEX_URL` and `CONVEX_URL`
 - `BETTER_AUTH_SECRET`
 - `SITE_URL`
 
@@ -38,12 +38,9 @@ Test credentials: user/test (normal), editor/test (editor access), admin/test (a
 ## Architecture
 
 ### Directory Structure
-- `src/app/` - Next.js App Router pages
-  - `(stories)/` - Main story browsing (route group, includes story reader, course listing, profile, FAQ)
-  - `admin/` - Admin dashboard
-  - `editor/` - Story editor interface
-  - `auth/` - Authentication (signin, register, password reset)
-  - `api/` - API routes (auth handler, OG image generation)
+- `src/routes/` - TanStack Start route tree and HTTP endpoints
+  - story browsing, profile, FAQ, docs, auth, admin, editor, and API endpoints
+- `src/app/` - feature modules reused by routes during the migration
 - `audio/` - Audio processing endpoints
 - `src/components/` - Reusable React components
 - `src/lib/` - Server utilities, database helpers, auth
@@ -63,8 +60,8 @@ Application reads/writes should go through Convex queries/mutations.
 ### Write-path Rules
 
 - Prefer direct client/server-action calls to Convex mutations for app writes.
-- Do not add pass-through Next route handlers for simple reads/writes.
-- Use Next route handlers only for server-only concerns (auth entrypoint, file upload, external secrets/integration boundaries).
+- Do not add pass-through framework route handlers for simple reads/writes.
+- Use TanStack Start server routes only for server-only concerns (auth entrypoint, file upload, external secrets/integration boundaries).
 - Schedule side effects from Convex mutations using `ctx.scheduler.runAfter(..., internal...)`.
 - Include `operationKey` for retriable writes.
 - Keep side effects non-blocking: DB mutation success should not depend on GitHub/PostHog success.
@@ -79,7 +76,7 @@ Application reads/writes should go through Convex queries/mutations.
 
 ### Styling
 - CSS Modules for scoped styles (primary)
-- Styled Components for dynamic styles (compiler enabled in `next.config.js`)
+- Styled Components for dynamic styles where already present
 - Global styles in `src/styles/global.css`
 
 ### Path Alias

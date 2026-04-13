@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
+import Link from "@/lib/router";
+import Image from "@/lib/image";
 
 interface StoryData {
   id: number;

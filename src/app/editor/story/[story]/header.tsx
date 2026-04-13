@@ -1,5 +1,5 @@
 import React from "react";
-import Link from "next/link";
+import Link from "@/lib/router";
 import EditorButton from "../../editor_button";
 import { EditorHeaderActions } from "../../_components/header_context";
 import type { StoryData } from "./types";

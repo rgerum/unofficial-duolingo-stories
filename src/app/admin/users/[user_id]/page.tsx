@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound } from "@/lib/router";
 import UserDisplay from "./user_display";
 import { UserSchema } from "./schema";
 import { fetchAuthQuery } from "@/lib/auth-server";

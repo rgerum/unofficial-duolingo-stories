@@ -1,5 +1,5 @@
 import React from "react";
-import Image from "next/image";
+import Image from "@/lib/image";
 
 export default function Flag(props: {
   width?: number | undefined;

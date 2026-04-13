@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/lib/router";
 import { fetchAuthQuery, isAuthenticated } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 import type { UserIdentity } from "convex/server";

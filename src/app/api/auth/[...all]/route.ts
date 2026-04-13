@@ -1,3 +1,9 @@
 import { handler } from "@/lib/auth-server";
 
-export const { GET, POST } = handler;
+export async function GET(request: Request) {
+  return handler(request);
+}
+
+export async function POST(request: Request) {
+  return handler(request);
+}

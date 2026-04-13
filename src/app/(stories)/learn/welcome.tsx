@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/lib/router";
 import React from "react";
 import {
   buttonInnerClassName,

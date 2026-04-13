@@ -1,6 +1,6 @@
 import React from "react";
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import Link from "@/lib/router";
+import { notFound } from "@/lib/router";
 import { MDXRemote } from "next-mdx-remote/rsc";
 
 import { getDocsData, getPageData } from "./doc_data";

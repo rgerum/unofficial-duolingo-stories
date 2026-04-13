@@ -1,7 +1,6 @@
 "use client";
-import Head from "next/head";
 import React from "react";
-import Link from "next/link";
+import Link from "@/lib/router";
 import { useInput } from "@/lib/hooks";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
@@ -23,6 +22,10 @@ export default function Register() {
   const [usernameInput, usernameInputSetValue] = useInput("");
   const [passwordInput, passwordInputSetValue] = useInput("");
   const [emailInput, emailInputSetValue] = useInput("");
+
+  React.useEffect(() => {
+    document.title = "Duostories Login";
+  }, []);
 
   function validateInputs() {
     const emailValidation = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w+)+$/;
@@ -82,11 +85,6 @@ export default function Register() {
 
   return (
     <>
-      <Head>
-        <title>Duostories Login</title>
-        <link rel="canonical" href={`https://duostories.org/login`} />
-      </Head>
-
       <h1 className={authHeadingClass}>Sign up</h1>
       <p className={authParagraphClass}>
         If you register you can keep track of the stories you have already

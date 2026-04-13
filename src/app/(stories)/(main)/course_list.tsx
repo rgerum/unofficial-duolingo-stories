@@ -5,7 +5,7 @@ import LanguageButton, {
   type LandingCourseButtonData,
 } from "./language_button";
 import { api } from "@convex/_generated/api";
-import { type Preloaded, usePreloadedQuery } from "convex/react";
+import { type Preloaded, useQuery } from "convex/react";
 import type { Id } from "@convex/_generated/dataModel";
 
 interface LandingGroupData {
@@ -49,10 +49,15 @@ function RenderCourseGroups({ groups }: { groups: LandingGroupData[] }) {
 }
 
 export default function CourseList({
-  preloadedLandingData,
+  landingData: landingDataProp,
 }: {
-  preloadedLandingData: Preloaded<typeof api.landing.getPublicLandingPageData>;
+  preloadedLandingData?: Preloaded<typeof api.landing.getPublicLandingPageData>;
+  landingData?: { groups: LandingGroupData[] };
 }) {
-  const landingData = usePreloadedQuery(preloadedLandingData);
+  const landingDataQuery = useQuery(api.landing.getPublicLandingPageData, {});
+  const landingData = landingDataProp ?? landingDataQuery;
+
+  if (!landingData) return null;
+
   return <RenderCourseGroups groups={landingData.groups} />;
 }

@@ -2,7 +2,7 @@
 import React from "react";
 import { Fragment } from "react/jsx-runtime";
 
-import Link from "next/link";
+import Link from "@/lib/router";
 
 import { MDXComponents } from "mdx/types";
 import {
