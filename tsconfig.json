@@ -1,12 +1,19 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": ["./*"],
-      "@convex/*": ["../convex/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@convex/*": [
+        "./convex/*"
+      ]
     },
-    "baseUrl": "src",
     "target": "es2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -34,5 +41,9 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "**/cypress/**/*.ts"]
+  "exclude": [
+    "node_modules",
+    "**/cypress/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ]
 }
