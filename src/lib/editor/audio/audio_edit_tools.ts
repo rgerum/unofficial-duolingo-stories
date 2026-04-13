@@ -394,8 +394,9 @@ export function map_audio_insert_anchor(
   changes: ChangeDesc,
 ) {
   if (anchor.kind === "replace") {
-    anchor.from = changes.mapPos(anchor.from, 1);
-    anchor.to = changes.mapPos(anchor.to, -1);
+    // Keep replacement anchors wrapped around the edited content.
+    anchor.from = changes.mapPos(anchor.from, -1);
+    anchor.to = changes.mapPos(anchor.to, 1);
     return;
   }
 
@@ -410,6 +411,7 @@ export function insert_audio_at_anchor(
   anchor: AudioInsertAnchor,
 ) {
   const insertText = anchor.kind === "insert" ? `${text}\n` : text;
+  const insertedLength = insertText.length;
   const from = anchor.from;
   view.dispatch(
     view.state.update({
@@ -422,5 +424,5 @@ export function insert_audio_at_anchor(
   );
   anchor.kind = "replace";
   anchor.from = from;
-  anchor.to = from + text.length;
+  anchor.to = from + insertedLength;
 }

@@ -336,7 +336,16 @@ export default function EditorV2({
   const onAudioSave = React.useCallback(
     (filename: string, timingText: string) => {
       const view = viewRef.current;
-      const trackedAnchor = audioEditorAnchorRef.current;
+      let trackedAnchor = audioEditorAnchorRef.current;
+      if (!trackedAnchor) {
+        const audio = getElementAudio(audioEditorData);
+        trackedAnchor = audio?.ssml
+          ? (trackAudioInsertAnchor(audio.ssml) ?? null)
+          : null;
+        if (trackedAnchor) {
+          audioEditorAnchorRef.current = trackedAnchor;
+        }
+      }
       if (!view || !trackedAnchor) return;
       insert_audio_at_anchor(
         `$${filename}${timingText}`,
@@ -344,7 +353,7 @@ export default function EditorV2({
         trackedAnchor.anchor,
       );
     },
-    [],
+    [audioEditorData, trackAudioInsertAnchor],
   );
 
   const soundRecorderNext = React.useCallback(() => {
