@@ -4,12 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import Switch from "@/components/ui/switch";
 import Button from "@/components/ui/button";
-import type { AdminUser } from "./schema";
 import {
   adminDetailCardClass,
   adminDetailLabelClass,
   adminDetailPageClass,
-} from "../../adminDetailStyles";
+} from "@/app/admin/adminDetailStyles";
+import type { AdminUser } from "./schema";
 import {
   setUserActivatedAction,
   setUserWriteAction,
