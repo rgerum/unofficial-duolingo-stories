@@ -353,12 +353,14 @@ function BulkAudioRow({
   item,
   draft,
   onChange,
+  autoAllRequest,
 }: {
   item: BulkAudioEditorItem;
   draft: BulkAudioEditorDraft;
   onChange: (
     updater: (draft: BulkAudioEditorDraft) => BulkAudioEditorDraft,
   ) => void;
+  autoAllRequest: number;
 }) {
   const fileInputId = React.useId();
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -373,6 +375,7 @@ function BulkAudioRow({
   const [audioDurationMs, setAudioDurationMs] = React.useState(0);
   const [wordPlaybackHost, setWordPlaybackHost] =
     React.useState<HTMLDivElement | null>(null);
+  const lastHandledAutoAllRequestRef = React.useRef(0);
   const audioUrl = React.useMemo(() => {
     if (draft.localUrl) return draft.localUrl;
     const filename = draft.uploadedFilename || item.existingFilename;
@@ -655,6 +658,15 @@ function BulkAudioRow({
     onRegionUpdated(plugin);
   }, [onRegionUpdated, parts, wavesurfer]);
 
+  React.useEffect(() => {
+    if (autoAllRequest === 0) return;
+    if (lastHandledAutoAllRequestRef.current >= autoAllRequest) return;
+    if (!audioUrl || !waveformReady) return;
+
+    lastHandledAutoAllRequestRef.current = autoAllRequest;
+    onAutoTiming();
+  }, [audioUrl, autoAllRequest, onAutoTiming, waveformReady]);
+
   const onPlayWord = React.useCallback(
     (startMs: number, endMs: number) => {
       if (!wavesurfer) return;
@@ -857,6 +869,7 @@ export default function BulkAudioEditor({
   const [applyError, setApplyError] = React.useState<string | null>(null);
   const [isApplying, setIsApplying] = React.useState(false);
   const [isPreparingFiles, setIsPreparingFiles] = React.useState(false);
+  const [autoAllRequest, setAutoAllRequest] = React.useState(0);
 
   React.useEffect(() => {
     draftsRef.current = drafts;
@@ -877,6 +890,7 @@ export default function BulkAudioEditor({
     setDrafts(nextDrafts);
     setUnmatchedFiles([]);
     setApplyError(null);
+    setAutoAllRequest(0);
     setIsPreparingFiles(false);
   }, [items, open]);
 
@@ -949,10 +963,16 @@ export default function BulkAudioEditor({
       setIsPreparingFiles(true);
       try {
         const expandedFiles = await expandUploadFiles(files);
-        applyMatchedFiles(expandedFiles);
         if (expandedFiles.length === 0 && files.length > 0) {
+          setUnmatchedFiles([]);
           setApplyError("No audio files were found in the selected upload.");
+        } else if (expandedFiles.length !== items.length) {
+          setUnmatchedFiles([]);
+          setApplyError(
+            `Upload has ${expandedFiles.length} audio file${expandedFiles.length === 1 ? "" : "s"}, but this story has ${items.length} line${items.length === 1 ? "" : "s"}. Upload exactly one audio file per line.`,
+          );
         } else {
+          applyMatchedFiles(expandedFiles);
           setApplyError(null);
         }
       } catch (error) {
@@ -965,7 +985,7 @@ export default function BulkAudioEditor({
         setIsPreparingFiles(false);
       }
     },
-    [applyMatchedFiles],
+    [applyMatchedFiles, items.length],
   );
 
   const summary = React.useMemo(() => {
@@ -987,6 +1007,18 @@ export default function BulkAudioEditor({
       changed,
     };
   }, [drafts, items]);
+
+  const canAutoAll = React.useMemo(
+    () =>
+      items.some((item) => {
+        const draft = drafts[item.id];
+        return Boolean(
+          draft &&
+            (draft.localUrl || draft.uploadedFilename || item.existingFilename),
+        );
+      }),
+    [drafts, items],
+  );
 
   const uploadPendingFiles = React.useCallback(async () => {
     const pendingItems = items.filter((item) => {
@@ -1116,6 +1148,19 @@ export default function BulkAudioEditor({
             >
               {isPreparingFiles ? "Preparing..." : "Upload files"}
             </button>
+            <button
+              type="button"
+              className="inline-flex h-9 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-70"
+              onClick={() => setAutoAllRequest((current) => current + 1)}
+              disabled={!canAutoAll}
+              title={
+                canAutoAll
+                  ? "Auto-adjust timing for every loaded row"
+                  : "Load audio first"
+              }
+            >
+              Auto all
+            </button>
             <input
               ref={fileInputRef}
               className="sr-only"
@@ -1151,6 +1196,7 @@ export default function BulkAudioEditor({
                   key={item.id}
                   item={item}
                   draft={draft}
+                  autoAllRequest={autoAllRequest}
                   onChange={(updater) => updateDraft(item.id, updater)}
                 />
               );
