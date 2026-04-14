@@ -9,6 +9,11 @@ import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import * as EditDialog from "../edit_dialog";
 import Button from "@/components/ui/button";
+import AdminDialogTrigger from "../AdminDialogTrigger";
+import {
+  adminTableContainerClass,
+  adminTableHeadCellClass,
+} from "../admin_table_styles";
 
 interface Language {
   id?: number;
@@ -86,12 +91,7 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
   }
 
   return (
-    <EditDialog.Root open={open} onOpenChange={setOpen}>
-      <EditDialog.Trigger asChild>
-        <EditDialog.Button style={{ marginLeft: "auto" }}>
-          {is_new ? "Add" : "Edit"}
-        </EditDialog.Button>
-      </EditDialog.Trigger>
+    <AdminDialogTrigger open={open} setOpen={setOpen} isNew={is_new}>
       <EditDialog.Content>
         <EditDialog.DialogTitle>
           {is_new ? "Add" : "Edit"} Language
@@ -150,7 +150,7 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
           </Button>
         </div>
       </EditDialog.Content>
-    </EditDialog.Root>
+    </AdminDialogTrigger>
   );
 }
 
@@ -266,7 +266,7 @@ export default function LanguageList({ all_languages }: LanguageListProps) {
           updateLanguage={updateLanguage}
         />
       </div>
-      <div className="relative isolate overflow-auto rounded-[14px] border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]">
+      <div className={adminTableContainerClass}>
         <table
           id="story_list"
           data-cy="story_list"
@@ -288,7 +288,7 @@ export default function LanguageList({ all_languages }: LanguageListProps) {
               ].map((header, idx) => (
                 <th
                   key={`${header}-${idx}`}
-                  className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                  className={adminTableHeadCellClass}
                 >
                   {header}
                 </th>

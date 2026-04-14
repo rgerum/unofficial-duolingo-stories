@@ -10,6 +10,11 @@ import {
   togglePublished,
   removeApproval as removeApprovalAction,
 } from "./actions";
+import {
+  adminDetailCardClass,
+  adminDetailLabelClass,
+  adminDetailPageClass,
+} from "../../admin_detail_styles";
 
 export default function StoryDisplay({ storyId }: { storyId: number }) {
   const story = useQuery(api.adminData.getAdminStoryByLegacyId, {
@@ -18,8 +23,8 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
 
   if (story === undefined) {
     return (
-      <div className="mx-auto my-6 mb-10 w-[min(860px,calc(100vw-32px))]">
-        <div className="rounded-2xl border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-5 shadow-[0_16px_38px_color-mix(in_srgb,#000_14%,transparent)]">
+      <div className={adminDetailPageClass}>
+        <div className={adminDetailCardClass}>
           <Spinner />
         </div>
       </div>
@@ -28,10 +33,8 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
 
   if (!story) {
     return (
-      <div className="mx-auto my-6 mb-10 w-[min(860px,calc(100vw-32px))]">
-        <div className="rounded-2xl border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-5 shadow-[0_16px_38px_color-mix(in_srgb,#000_14%,transparent)]">
-          Story not found.
-        </div>
+      <div className={adminDetailPageClass}>
+        <div className={adminDetailCardClass}>Story not found.</div>
       </div>
     );
   }
@@ -60,8 +63,8 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
   }
 
   return (
-    <div className="mx-auto my-6 mb-10 w-[min(860px,calc(100vw-32px))]">
-      <div className="rounded-2xl border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-5 shadow-[0_16px_38px_color-mix(in_srgb,#000_14%,transparent)]">
+    <div className={adminDetailPageClass}>
+      <div className={adminDetailCardClass}>
         <div className="mb-3.5 flex flex-wrap items-center justify-between gap-3">
           <Link
             className="whitespace-nowrap underline underline-offset-2"
@@ -87,17 +90,11 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
           <div>
             <h1 className="m-0 text-[2rem] leading-[1.15]">{storyData.name}</h1>
             <div className="mt-3 mb-5 grid grid-cols-1 gap-x-3 gap-y-2 md:grid-cols-[160px_minmax(0,1fr)]">
-              <div className="text-left text-[var(--text-color-dim)] md:text-right">
-                Story ID
-              </div>
+              <div className={adminDetailLabelClass}>Story ID</div>
               <div className="min-w-0 break-words">{storyData.id}</div>
-              <div className="text-left text-[var(--text-color-dim)] md:text-right">
-                Legacy ID
-              </div>
+              <div className={adminDetailLabelClass}>Legacy ID</div>
               <div className="min-w-0 break-words">{storyId}</div>
-              <div className="text-left text-[var(--text-color-dim)] md:text-right">
-                Published
-              </div>
+              <div className={adminDetailLabelClass}>Published</div>
               <div className="min-w-0 break-words">
                 <span className="inline-flex items-center gap-2">
                   <Switch
@@ -107,9 +104,7 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
                   {storyData.public ? "Yes" : "No"}
                 </span>
               </div>
-              <div className="text-left text-[var(--text-color-dim)] md:text-right">
-                Course
-              </div>
+              <div className={adminDetailLabelClass}>Course</div>
               <div className="min-w-0 break-words">
                 <Link
                   className="underline underline-offset-2"

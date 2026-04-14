@@ -9,6 +9,11 @@ import Button from "@/components/ui/button";
 import Tag from "@/components/ui/badge";
 import Input from "@/components/ui/input";
 import FlagName from "../FlagName";
+import AdminDialogTrigger from "../AdminDialogTrigger";
+import {
+  adminTableContainerClass,
+  adminTableHeadCellClass,
+} from "../admin_table_styles";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 
@@ -274,12 +279,7 @@ function EditCourse({
   }
 
   return (
-    <EditDialog.Root open={open} onOpenChange={setOpen}>
-      <EditDialog.Trigger asChild>
-        <Button style={{ marginLeft: "auto" }}>
-          {is_new ? "Add" : "Edit"}
-        </Button>
-      </EditDialog.Trigger>
+    <AdminDialogTrigger open={open} setOpen={setOpen} isNew={is_new}>
       <EditDialog.Content>
         <EditDialog.DialogTitle>
           {is_new ? "Add" : "Edit"} course
@@ -352,7 +352,7 @@ function EditCourse({
           </div>
         </form>
       </EditDialog.Content>
-    </EditDialog.Root>
+    </AdminDialogTrigger>
   );
 }
 
@@ -528,7 +528,7 @@ export function CourseList({
           updateCourse={updateCourse}
         />
       </div>
-      <div className="relative isolate overflow-auto rounded-[14px] border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]">
+      <div className={adminTableContainerClass}>
         <table
           id="story_list"
           data-cy="story_list"
@@ -537,52 +537,31 @@ export function CourseList({
         >
           <thead>
             <tr>
-              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"></th>
-              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"></th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="0"
-              >
+              <th className={adminTableHeadCellClass}></th>
+              <th className={adminTableHeadCellClass}></th>
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="0">
                 learning_language
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="1"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="1">
                 from_language
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="1"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="1">
                 public
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="2"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="2">
                 name
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="2"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="2">
                 conlang
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="2"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="2">
                 tags
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="3"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="3">
                 about
               </th>
               <th
-                className="sticky top-0 right-0 z-[3] min-w-[138px] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                className={`${adminTableHeadCellClass} right-0 z-[3] min-w-[138px]`}
                 data-js-sort-colnum="4"
               ></th>
             </tr>
