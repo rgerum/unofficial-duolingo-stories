@@ -1,6 +1,6 @@
 import React from "react";
 import { Nunito } from "next/font/google";
-import "styles/global.css";
+import "@/styles/global.css";
 import Script from "next/script";
 import StyledComponentsRegistry from "@/lib/registry";
 import NavigationModeProvider from "@/components/NavigationModeProvider";

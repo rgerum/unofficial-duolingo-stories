@@ -5,7 +5,7 @@ import {
   IconInstagram,
   IconOpenCollective,
   IconTwitter,
-} from "components/icons";
+} from "@/components/icons";
 import { IconPlayStore } from "@/components/icons";
 
 export default function Icons() {
