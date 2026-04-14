@@ -426,3 +426,55 @@ export function insert_audio_at_anchor(
   anchor.from = from;
   anchor.to = from + insertedLength;
 }
+
+export function insert_audio_lines(
+  updates: {
+    text: string;
+    ssml: {
+      text: string;
+      speaker: string;
+      id: number;
+      inser_index: number;
+    };
+  }[],
+  view: EditorView,
+  audio_insert_lines: [number | undefined, number][],
+) {
+  const changes = updates
+    .map((update) => {
+      const insertTarget = audio_insert_lines[update.ssml.inser_index];
+      if (!insertTarget) return undefined;
+
+      const [line, line_insert] = insertTarget;
+      if (line !== undefined) {
+        const lineNumber = Math.min(Math.max(1, line), view.state.doc.lines);
+        const line_state = view.state.doc.line(lineNumber);
+        return {
+          from: line_state.from,
+          to: line_state.to,
+          insert: update.text,
+        };
+      }
+
+      const lineInsertNumber = Math.min(
+        Math.max(1, line_insert - 1),
+        view.state.doc.lines,
+      );
+      const line_state = view.state.doc.line(lineInsertNumber);
+      return {
+        from: line_state.from,
+        to: line_state.from,
+        insert: update.text + "\n",
+      };
+    })
+    .filter((change) => change !== undefined)
+    .sort((a, b) => a.from - b.from || a.to - b.to);
+
+  if (changes.length === 0) return;
+
+  view.dispatch(
+    view.state.update({
+      changes,
+    }),
+  );
+}

@@ -14,17 +14,23 @@ import Cast from "@/components/editor/story/cast";
 import { StoryEditorHeader } from "@/app/editor/story/[story]/header";
 import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
+import BulkAudioEditor, {
+  type BulkAudioEditorItem,
+  type BulkAudioEditorUpdate,
+} from "@/app/editor/story/[story]/bulk-audio-editor";
 import SoundRecorder from "@/app/editor/story/[story]/sound-recorder";
 import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
 import {
   create_audio_insert_anchor,
   insert_audio_at_anchor,
   map_audio_insert_anchor,
+  insert_audio_lines,
   timings_to_text,
   type AudioInsertAnchor,
 } from "@/lib/editor/audio/audio_edit_tools";
 import type {
   Audio,
+  StoryElement,
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
@@ -76,6 +82,47 @@ function getElementAudio(
   return element.line.content.audio ?? element.audio;
 }
 
+function getBulkAudioEditorItems(
+  elements: StoryElement[],
+): BulkAudioEditorItem[] {
+  const items: BulkAudioEditorItem[] = [];
+  let order = 1;
+
+  for (const element of elements) {
+    if (element.type !== "HEADER" && element.type !== "LINE") continue;
+    if (!element.audio) continue;
+
+    const text =
+      element.type === "HEADER"
+        ? element.learningLanguageTitleContent?.text
+        : element.line.content?.text;
+    const content =
+      element.type === "HEADER"
+        ? element.learningLanguageTitleContent
+        : element.line.content;
+
+    if (!text || !content) continue;
+
+    items.push({
+      id: `${element.type}-${element.trackingProperties.line_index}-${element.audio.ssml.inser_index}`,
+      order,
+      lineIndex: element.trackingProperties.line_index || 0,
+      type: element.type,
+      speaker: element.audio.ssml.speaker,
+      content,
+      hideRangesForChallenge:
+        element.type === "LINE" ? element.hideRangesForChallenge : undefined,
+      existingFilename: element.audio.url?.replace(/^audio\//, "") ?? "",
+      existingKeypoints: element.audio.keypoints ?? [],
+      ssml: element.audio.ssml,
+    });
+
+    order += 1;
+  }
+
+  return items;
+}
+
 export default function EditorV2({
   isAdmin,
   story_data,
@@ -121,6 +168,7 @@ export default function EditorV2({
   const [audioEditorData, setAudioEditorData] = React.useState<
     StoryElementLine | StoryElementHeader | undefined
   >(undefined);
+  const [bulkAudioOpen, setBulkAudioOpen] = React.useState(false);
   const storySnapshot = React.useMemo(
     () => ({
       id: story_data.id,
@@ -197,6 +245,7 @@ export default function EditorV2({
     setLineNo(1);
     releaseTrackedAudioEditorAnchor();
     setAudioEditorData(undefined);
+    setBulkAudioOpen(false);
   }, [releaseTrackedAudioEditorAnchor, storySnapshot]);
 
   React.useEffect(
@@ -356,6 +405,23 @@ export default function EditorV2({
     [audioEditorData, trackAudioInsertAnchor],
   );
 
+  const onBulkAudioApply = React.useCallback(
+    (updates: BulkAudioEditorUpdate[]) => {
+      const view = viewRef.current;
+      if (!view) return;
+      if (!audioInsertLines || updates.length === 0) return;
+      insert_audio_lines(
+        updates.map((update) => ({
+          text: update.serializedText,
+          ssml: update.ssml,
+        })),
+        view,
+        audioInsertLines,
+      );
+    },
+    [audioInsertLines],
+  );
+
   const soundRecorderNext = React.useCallback(() => {
     if (!audioEditorData) return;
     const index = audioEditorData.trackingProperties.line_index || 0;
@@ -423,6 +489,10 @@ export default function EditorV2({
     (audioEditorData?.type === "HEADER" &&
       audioEditorData.learningLanguageTitleContent);
   const audioEditorAudio = getElementAudio(audioEditorData);
+  const bulkAudioItems = React.useMemo(
+    () => getBulkAudioEditorItems(model.parsedStory.elements),
+    [model.parsedStory.elements],
+  );
 
   return (
     <div id="body" className="flex h-full min-h-0 flex-col">
@@ -469,8 +539,19 @@ export default function EditorV2({
         set_show_trans={set_show_trans}
         show_ssml={show_ssml}
         set_show_ssml={set_show_ssml}
+        open_bulk_audio={() => {
+          setAudioEditorData(undefined);
+          setBulkAudioOpen(true);
+        }}
         previous_story={story_navigation.previousStory}
         next_story={story_navigation.nextStory}
+      />
+      <BulkAudioEditor
+        open={bulkAudioOpen}
+        onOpenChange={setBulkAudioOpen}
+        storyId={story_data.id}
+        items={bulkAudioItems}
+        onApply={onBulkAudioApply}
       />
       {audioEditorData &&
         audioEditorAudio &&

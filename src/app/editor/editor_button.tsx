@@ -26,6 +26,8 @@ export default function EditorButton({
 }) {
   const baseClassName =
     "flex cursor-pointer items-center text-[var(--text-color-dim)] no-underline transition-all hover:text-[var(--text-color)] hover:brightness-[0.7] hover:contrast-[2.5] max-[800px]:px-[10px] max-[800px]:py-[14px] max-[1120px]:w-auto max-[1120px]:flex-col px-[34px] py-[14px]";
+  const toggleClassName =
+    "flex cursor-pointer items-center text-[var(--text-color-dim)] no-underline transition-all hover:text-[var(--text-color)] hover:brightness-[0.7] hover:contrast-[2.5] max-[800px]:px-[10px] max-[1120px]:w-auto max-[1120px]:flex-col px-[34px] py-0 max-[800px]:py-0";
   const disabledClassName =
     "cursor-default opacity-60 hover:text-[var(--text-color-dim)] hover:brightness-100 hover:contrast-100";
   const iconWrapClassName =
@@ -38,14 +40,14 @@ export default function EditorButton({
     if (onClick === undefined) throw new Error();
     return (
       <div
-        className={baseClassName + (disabled ? ` ${disabledClassName}` : "")}
+        className={toggleClassName + (disabled ? ` ${disabledClassName}` : "")}
         onClick={(e) => {
           if (disabled) return;
           e.preventDefault();
           onClick();
         }}
       >
-        <label className="relative my-[9px] inline-block h-[17px] w-[30px]">
+        <label className="relative my-0 inline-block h-[17px] w-[30px]">
           <input
             type="checkbox"
             checked={checked}
