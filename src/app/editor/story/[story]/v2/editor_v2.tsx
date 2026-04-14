@@ -30,6 +30,7 @@ import {
 } from "@/lib/editor/audio/audio_edit_tools";
 import type {
   Audio,
+  StoryElement,
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
@@ -81,7 +82,9 @@ function getElementAudio(
   return element.line.content.audio ?? element.audio;
 }
 
-function getBulkAudioEditorItems(elements: Array<any>): BulkAudioEditorItem[] {
+function getBulkAudioEditorItems(
+  elements: StoryElement[],
+): BulkAudioEditorItem[] {
   const items: BulkAudioEditorItem[] = [];
   let order = 1;
 
@@ -175,14 +178,6 @@ export default function EditorV2({
   );
   const storyText = storySnapshot.text;
 
-  React.useEffect(() => {
-    // Reset editor-local state when switching stories, even if the text matches.
-    setDocText(normalizeDocText(storySnapshot.text));
-    setRevision(0);
-    setLineNo(1);
-    setAudioEditorData(undefined);
-    setBulkAudioOpen(false);
-  }, [storySnapshot]);
   const model = useStoryEditorModel({
     isAdmin,
     storyData: story_data,
@@ -250,6 +245,7 @@ export default function EditorV2({
     setLineNo(1);
     releaseTrackedAudioEditorAnchor();
     setAudioEditorData(undefined);
+    setBulkAudioOpen(false);
   }, [releaseTrackedAudioEditorAnchor, storySnapshot]);
 
   React.useEffect(

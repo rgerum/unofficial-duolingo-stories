@@ -442,9 +442,13 @@ export function insert_audio_lines(
 ) {
   const changes = updates
     .map((update) => {
-      const [line, line_insert] = audio_insert_lines[update.ssml.inser_index];
+      const insertTarget = audio_insert_lines[update.ssml.inser_index];
+      if (!insertTarget) return undefined;
+
+      const [line, line_insert] = insertTarget;
       if (line !== undefined) {
-        const line_state = view.state.doc.line(line);
+        const lineNumber = Math.min(Math.max(1, line), view.state.doc.lines);
+        const line_state = view.state.doc.line(lineNumber);
         return {
           from: line_state.from,
           to: line_state.to,
@@ -452,13 +456,18 @@ export function insert_audio_lines(
         };
       }
 
-      const line_state = view.state.doc.line(line_insert - 1);
+      const lineInsertNumber = Math.min(
+        Math.max(1, line_insert - 1),
+        view.state.doc.lines,
+      );
+      const line_state = view.state.doc.line(lineInsertNumber);
       return {
         from: line_state.from,
         to: line_state.from,
         insert: update.text + "\n",
       };
     })
+    .filter((change) => change !== undefined)
     .sort((a, b) => a.from - b.from || a.to - b.to);
 
   if (changes.length === 0) return;

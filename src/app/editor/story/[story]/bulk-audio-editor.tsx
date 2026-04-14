@@ -89,6 +89,7 @@ interface RegionsPlugin {
     color: string;
   }) => void;
   on: (event: string, callback: (region: Region) => void) => void;
+  un: (event: string, callback: (region: Region) => void) => void;
 }
 
 interface Part {
@@ -362,7 +363,6 @@ function BulkAudioRow({
   const fileInputId = React.useId();
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
-  const regionsBoundRef = React.useRef(false);
   const parts = React.useMemo(
     () => getParts(item.content.text),
     [item.content.text],
@@ -523,17 +523,16 @@ function BulkAudioRow({
 
     const plugin = (wavesurfer as unknown as { plugins: RegionsPlugin[] })
       .plugins[0];
-    if (plugin && !regionsBoundRef.current) {
-      plugin.on("region-updated", () => {
-        onRegionUpdated(plugin);
-      });
-      regionsBoundRef.current = true;
-    }
+    const onRegionUpdatedEvent = () => {
+      onRegionUpdated(plugin);
+    };
+    plugin?.on("region-updated", onRegionUpdatedEvent);
 
     return () => {
       wavesurfer.un("decode", onDecodeEvent);
       wavesurfer.un("timeupdate", onTimeUpdateEvent);
       wavesurfer.un("ready", onReadyEvent);
+      plugin?.un("region-updated", onRegionUpdatedEvent);
     };
   }, [onDecode, onRegionUpdated, onTimeUpdate, wavesurfer]);
 
