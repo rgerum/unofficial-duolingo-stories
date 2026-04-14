@@ -38,7 +38,6 @@ function update_lines(editor: HTMLElement, svg_parent: SVGElement | null) {
       path += `L0,${new_linetop} L ${width1},${new_linetop} C${width1b},${new_linetop} ${width1b},${new_top} ${width2},${new_top} L${width3},${new_top}`;
     else
       path += `L${width3},${new_top} L ${width2},${new_top} C${width1b},${new_top} ${width1b},${new_linetop} ${width1},${new_linetop} L0,${new_linetop}`;
-    element.getBoundingClientRect().top;
     svg_element += 1;
   }
   if (svg_element % 2 === 1) path += `L${width3},${height} L ${0},${height}`;
@@ -123,14 +122,16 @@ function useAutoResetRef<T>() {
 
 export default function useScrollLinking(
   view: EditorView | undefined,
-  preview: HTMLElement | null,
-  svg_parent: SVGElement | null,
+  previewRef: React.RefObject<HTMLElement | null>,
+  svgParentRef: React.RefObject<SVGElement | null>,
 ) {
   const editor = view?.scrollDOM;
   const [last_scrolled_element, setLastScrolledElement] = useAutoResetRef<
     "editor" | "preview"
   >();
   const syncEditorScroll = React.useEffectEvent(() => {
+    const preview = previewRef.current;
+    const svg_parent = svgParentRef.current;
     if (!editor || !preview) return;
     if (last_scrolled_element.current === "preview") return;
     setLastScrolledElement("editor");
@@ -150,6 +151,8 @@ export default function useScrollLinking(
     update_lines(editor, svg_parent);
   });
   const syncPreviewScroll = React.useEffectEvent(() => {
+    const preview = previewRef.current;
+    const svg_parent = svgParentRef.current;
     if (!editor || !preview) return;
     if (last_scrolled_element.current === "editor") return;
     setLastScrolledElement("preview");
@@ -169,6 +172,8 @@ export default function useScrollLinking(
     update_lines(editor, svg_parent);
   });
   const syncResize = React.useEffectEvent(() => {
+    const preview = previewRef.current;
+    const svg_parent = svgParentRef.current;
     if (!editor || !preview) return;
     const new_pos = map_side(
       editor.scrollTop,
@@ -178,6 +183,7 @@ export default function useScrollLinking(
       editor.getBoundingClientRect().height / 3,
     );
     if (new_pos === undefined) return;
+    setLastScrolledElement("editor");
     preview.scrollTo({
       top: new_pos,
       behavior: "auto",
@@ -191,13 +197,25 @@ export default function useScrollLinking(
     function editor_scroll() {
       requestAnimationFrame(() => syncEditorScroll());
     }
+    function syncPreview() {
+      requestAnimationFrame(() => syncResize());
+    }
     editor.addEventListener("scroll", editor_scroll);
-    return () => editor.removeEventListener("scroll", editor_scroll);
+    editor.addEventListener("story-editor-sync-preview", syncPreview);
+    return () => {
+      editor.removeEventListener("scroll", editor_scroll);
+      editor.removeEventListener("story-editor-sync-preview", syncPreview);
+    };
   }, [editor]);
 
   React.useEffect(() => {
+    const preview = previewRef.current;
+    const svg_parent = svgParentRef.current;
     if (!preview || !editor) return;
     update_lines(editor, svg_parent);
+    requestAnimationFrame(() => {
+      syncResize();
+    });
 
     function preview_scroll() {
       requestAnimationFrame(() => syncPreviewScroll());
@@ -205,7 +223,7 @@ export default function useScrollLinking(
 
     preview.addEventListener("scroll", preview_scroll);
     return () => preview.removeEventListener("scroll", preview_scroll);
-  }, [editor, preview, svg_parent]);
+  }, [editor, previewRef, svgParentRef]);
 
   React.useEffect(() => {
     // `syncResize` is a useEffectEvent, so it reads the latest editor refs.

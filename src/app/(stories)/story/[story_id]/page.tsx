@@ -1,27 +1,16 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
-import getUserId from "@/lib/getUserId";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
 import LocalisationProvider from "@/components/LocalisationProvider";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
 import { fetchAuthMutation } from "@/lib/auth-server";
 import { fetchQuery } from "convex/nextjs";
 
-const convexUrl =
-  process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
-
-if (!convexUrl) {
-  throw new Error("Missing NEXT_PUBLIC_CONVEX_URL/CONVEX_URL");
-}
-
-const convex = new ConvexHttpClient(convexUrl);
-
 export async function generateMetadata({
   params,
 }: {
-  params: { story_id: string };
+  params: Promise<{ story_id: string }>;
 }) {
   const story_id = parseInt((await params).story_id);
   const story = await fetchQuery(api.storyRead.getStoryMetaByLegacyId, {
@@ -49,7 +38,7 @@ export async function generateMetadata({
 export default async function Page({
   params,
 }: {
-  params: { story_id: string };
+  params: Promise<{ story_id: string }>;
 }) {
   const story_id = parseInt((await params).story_id);
 
@@ -57,20 +46,8 @@ export default async function Page({
   if (!story) notFound();
   const course_id = story.course_id;
 
-  const user_id = await getUserId();
-
   async function setStoryDoneAction() {
     "use server";
-    if (!user_id) {
-      await convex.mutation(api.storyDone.recordStoryDone, {
-        legacyStoryId: story_id,
-        time: Date.now(),
-      });
-      return {
-        message: "done",
-        story_id: story_id,
-      };
-    }
     await fetchAuthMutation(api.storyDone.recordStoryDone, {
       legacyStoryId: story_id,
       time: Date.now(),
@@ -85,11 +62,13 @@ export default async function Page({
   return (
     <>
       <LocalisationProvider lang={story.from_language_id}>
-        <StoryWrapper
-          story={story}
-          storyFinishedIndexUpdate={setStoryDoneAction}
-          //localization={localization}
-        />
+        <Suspense fallback={null}>
+          <StoryWrapper
+            story={story}
+            storyFinishedIndexUpdate={setStoryDoneAction}
+            //localization={localization}
+          />
+        </Suspense>
       </LocalisationProvider>
     </>
   );

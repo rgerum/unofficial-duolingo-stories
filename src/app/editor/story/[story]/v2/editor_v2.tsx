@@ -74,6 +74,36 @@ function normalizeDocText(text: string): string {
   return text.replace(/\r\n/g, "\n");
 }
 
+function scrollEditorLineIntoView(view: EditorView, lineNumber: number) {
+  const boundedLine = Math.min(Math.max(lineNumber, 1), view.state.doc.lines);
+  const pos = view.state.doc.line(boundedLine).from;
+
+  view.dispatch({
+    selection: EditorSelection.cursor(pos),
+  });
+
+  view.requestMeasure({
+    read(view) {
+      const block = view.lineBlockAt(pos);
+      const targetTop = Math.max(
+        0,
+        block.top - view.scrollDOM.clientHeight / 3,
+      );
+      return targetTop;
+    },
+    write(targetTop, view) {
+      view.scrollDOM.scrollTo({
+        top: targetTop,
+        behavior: "auto",
+      });
+      view.scrollDOM.dispatchEvent(
+        new CustomEvent("story-editor-sync-preview"),
+      );
+      view.focus();
+    },
+  });
+}
+
 function getElementAudio(
   element: StoryElementLine | StoryElementHeader | undefined,
 ): Audio | undefined {
@@ -127,19 +157,23 @@ export default function EditorV2({
   isAdmin,
   story_data,
   avatar_names,
+  initialFocusLine,
   story_navigation,
 }: {
   isAdmin: boolean;
   story_data: StoryData;
   avatar_names: Record<number, Avatar>;
+  initialFocusLine?: number;
   story_navigation: StoryNavigation;
 }) {
-  const navigate = useRouter().push;
+  const router = useRouter();
+  const navigate = router.push;
   const editorRef = React.useRef<HTMLDivElement>(null);
   const previewRef = React.useRef<HTMLDivElement>(null);
   const marginRef = React.useRef<SVGSVGElement>(null);
   const svgParentRef = React.useRef<SVGSVGElement>(null);
   const viewRef = React.useRef<EditorView | null>(null);
+  const hasAppliedInitialFocusRef = React.useRef(false);
   const trackedAudioAnchorsRef = React.useRef<Set<AudioInsertAnchor>>(
     new Set(),
   );
@@ -177,7 +211,6 @@ export default function EditorV2({
     [story_data.id, story_data.text],
   );
   const storyText = storySnapshot.text;
-
   const model = useStoryEditorModel({
     isAdmin,
     storyData: story_data,
@@ -243,6 +276,7 @@ export default function EditorV2({
     setDocText(normalizeDocText(storySnapshot.text));
     setRevision(0);
     setLineNo(1);
+    hasAppliedInitialFocusRef.current = false;
     releaseTrackedAudioEditorAnchor();
     setAudioEditorData(undefined);
     setBulkAudioOpen(false);
@@ -257,7 +291,7 @@ export default function EditorV2({
   );
 
   useResizeEditor(editorRef.current, previewRef.current, marginRef.current);
-  useScrollLinking(view, previewRef.current, svgParentRef.current);
+  useScrollLinking(view, previewRef, svgParentRef);
 
   React.useEffect(() => {
     const sync = EditorView.updateListener.of((update) => {
@@ -308,6 +342,14 @@ export default function EditorV2({
       changes: { from: 0, to: view.state.doc.length, insert: remoteText },
     });
   }, [dirty, markServerSynced, storyText]);
+
+  React.useEffect(() => {
+    const editorView = viewRef.current ?? view;
+    if (!editorView || !initialFocusLine || hasAppliedInitialFocusRef.current)
+      return;
+    hasAppliedInitialFocusRef.current = true;
+    scrollEditorLineIntoView(editorView, initialFocusLine);
+  }, [initialFocusLine, view]);
 
   React.useEffect(() => {
     const warningMessage =
@@ -459,13 +501,18 @@ export default function EditorV2({
         select: (line: string, scroll: boolean) => {
           const lineNumber = Number.parseInt(line, 10);
           if (!Number.isFinite(lineNumber) || lineNumber <= 0) return;
-          const pos = view.state.doc.line(lineNumber).from;
-          view.dispatch(
-            view.state.update({
-              selection: EditorSelection.cursor(pos),
-              scrollIntoView: scroll,
-            }),
+          if (scroll) {
+            scrollEditorLineIntoView(view, lineNumber);
+            return;
+          }
+          const boundedLine = Math.min(
+            Math.max(lineNumber, 1),
+            view.state.doc.lines,
           );
+          const pos = view.state.doc.line(boundedLine).from;
+          view.dispatch({
+            selection: EditorSelection.cursor(pos),
+          });
         },
         audio_insert_lines: audioInsertLines,
         create_audio_insert_anchor: (ssml) =>

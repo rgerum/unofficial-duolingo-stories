@@ -35,16 +35,33 @@ export async function generateMetadata({
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ course_id: string; story: number }>;
+  searchParams?: Promise<{ line?: string | string[] }>;
 }) {
   const resolvedParams = await params;
   const storyId = Number(resolvedParams.story);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const rawLine = resolvedSearchParams?.line;
+  const initialFocusLine =
+    typeof rawLine === "string"
+      ? Number(rawLine)
+      : Array.isArray(rawLine)
+        ? Number(rawLine[0])
+        : undefined;
+  const validatedInitialFocusLine =
+    typeof initialFocusLine === "number" &&
+    Number.isFinite(initialFocusLine) &&
+    initialFocusLine > 0
+      ? initialFocusLine
+      : undefined;
 
   return (
     <StoryEditorPageClient
       storyId={storyId}
       courseId={resolvedParams.course_id}
+      initialFocusLine={validatedInitialFocusLine}
     />
   );
 }

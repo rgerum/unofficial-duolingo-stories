@@ -153,9 +153,90 @@ export type StorySettings = {
   show_title_page: boolean;
 };
 
+function getInitialStoryProgress({
+  partsList,
+  initialFocusLine,
+  showTitlePage,
+}: {
+  partsList?: StoryElement[][];
+  initialFocusLine?: number;
+  showTitlePage: boolean;
+}) {
+  if (!partsList || partsList.length === 0) {
+    return showTitlePage ? -1 : 0;
+  }
+  if (!initialFocusLine || initialFocusLine <= 0) {
+    return showTitlePage ? -1 : 0;
+  }
+
+  const focusedIndex = partsList.findIndex((parts) =>
+    parts.some(
+      (element) => element.editor?.block_start_no === initialFocusLine,
+    ),
+  );
+
+  return focusedIndex >= 0 ? focusedIndex : showTitlePage ? -1 : 0;
+}
+
+function getInitialPartProgress({
+  partsList,
+  initialFocusLine,
+  storyProgress,
+}: {
+  partsList?: StoryElement[][];
+  initialFocusLine?: number;
+  storyProgress: number;
+}) {
+  if (
+    !partsList ||
+    storyProgress < 0 ||
+    !initialFocusLine ||
+    initialFocusLine <= 0
+  ) {
+    return 0;
+  }
+
+  const currentParts = partsList[storyProgress];
+  if (!currentParts || currentParts.length < 2) return 0;
+  const lastPart = currentParts[currentParts.length - 1];
+  if (
+    lastPart.type !== "MULTIPLE_CHOICE" &&
+    lastPart.type !== "POINT_TO_PHRASE"
+  )
+    return 0;
+
+  return lastPart.editor?.block_start_no === initialFocusLine ? 1 : 0;
+}
+
+function getVisibleEditorLine({
+  currentPart,
+  partProgress,
+}: {
+  currentPart?: StoryElement[];
+  partProgress: number;
+}) {
+  if (!currentPart || currentPart.length === 0) return undefined;
+
+  const lastElement = currentPart[currentPart.length - 1];
+  if (
+    (lastElement.type === "MULTIPLE_CHOICE" ||
+      lastElement.type === "POINT_TO_PHRASE") &&
+    currentPart.length > 1 &&
+    partProgress > 0
+  ) {
+    return lastElement.editor?.block_start_no;
+  }
+
+  return currentPart
+    .map((element) => element.editor?.block_start_no)
+    .find((lineNumber): lineNumber is number => typeof lineNumber === "number");
+}
+
 function StoryProgress({
   story,
-  parts_list,
+  parts_list: providedPartsList,
+  editHrefBase,
+  initialFocusLine,
   settings,
   onEnd,
   onBackToOverview,
@@ -165,6 +246,8 @@ function StoryProgress({
 }: {
   story?: StoryData;
   parts_list?: StoryElement[][];
+  editHrefBase?: string;
+  initialFocusLine?: number;
   settings: StorySettings;
   onEnd: () => void;
   onBackToOverview?: () => void | Promise<void>;
@@ -177,15 +260,26 @@ function StoryProgress({
   } | null;
   showFinishedPrimaryAction?: boolean;
 }) {
-  if (story) {
-    parts_list = GetParts(story);
-  }
-  const [partProgress, setPartProgress] = React.useState(0);
-  const [storyProgress, setStoryProgress] = React.useState(
-    settings?.show_title_page ? -1 : 0,
-  );
+  const parts_list = React.useMemo(() => {
+    if (providedPartsList) return providedPartsList;
+    if (story) return GetParts(story);
+    return undefined;
+  }, [providedPartsList, story]);
+  const initialStoryProgress = getInitialStoryProgress({
+    partsList: parts_list,
+    initialFocusLine,
+    showTitlePage: settings.show_title_page,
+  });
+  const initialPartProgress = getInitialPartProgress({
+    partsList: parts_list,
+    initialFocusLine,
+    storyProgress: initialStoryProgress,
+  });
+  const [partProgress, setPartProgress] = React.useState(initialPartProgress);
+  const [storyProgress, setStoryProgress] =
+    React.useState(initialStoryProgress);
   const [buttonStatus, setButtonStatus] = React.useState(
-    storyProgress === -1 ? "continue" : "wait",
+    initialStoryProgress === -1 ? "continue" : "wait",
   );
   const previousButtonStatus = React.useRef(buttonStatus);
 
@@ -248,6 +342,41 @@ function StoryProgress({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [next, queueAutoplayForNextLine, shouldQueueAutoplay]);
 
+  const currentPart =
+    !parts_list || parts_list.length === 0
+      ? undefined
+      : storyProgress < 0
+        ? undefined
+        : parts_list[Math.min(storyProgress, parts_list.length - 1)];
+  const currentEditorLine = getVisibleEditorLine({
+    currentPart,
+    partProgress,
+  });
+  const editHref =
+    editHrefBase && currentEditorLine
+      ? `${editHrefBase}?line=${currentEditorLine}`
+      : editHrefBase;
+
+  React.useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      !story ||
+      storyProgress < 0 ||
+      currentEditorLine === undefined
+    ) {
+      return;
+    }
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("line", String(currentEditorLine));
+
+    const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (nextUrl === currentUrl) return;
+
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }, [currentEditorLine, story, storyProgress]);
+
   if (!story || !parts_list) return null;
 
   function getIndex(parts: StoryElement[]) {
@@ -288,6 +417,7 @@ function StoryProgress({
             setId={story.set_id}
             progress={storyProgress}
             length={storyProgress === -1 ? undefined : parts_list.length}
+            editHref={editHref}
           />
         )}
         {storyProgress === -1 && !settings.show_all && (
