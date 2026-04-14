@@ -183,6 +183,7 @@ export default function useScrollLinking(
       editor.getBoundingClientRect().height / 3,
     );
     if (new_pos === undefined) return;
+    setLastScrolledElement("editor");
     preview.scrollTo({
       top: new_pos,
       behavior: "auto",
