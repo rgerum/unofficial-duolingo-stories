@@ -29,6 +29,7 @@ type HeaderProps = {
   set_show_trans: (show: boolean) => void;
   show_ssml: boolean;
   set_show_ssml: (show: boolean) => void;
+  open_bulk_audio: () => void;
   previous_story: StoryNavigationTarget | null;
   next_story: StoryNavigationTarget | null;
 };
@@ -46,6 +47,7 @@ export function StoryEditorHeader({
   set_show_trans,
   show_ssml,
   set_show_ssml,
+  open_bulk_audio,
   previous_story,
   next_story,
 }: HeaderProps) {
@@ -124,11 +126,20 @@ export function StoryEditorHeader({
           checked={show_trans}
           text={"Hints"}
         />
-        <EditorButton
-          onClick={do_set_show_ssml}
-          checked={show_ssml}
-          text={"Audio"}
-        />
+        <div className="ml-2 flex shrink-0 flex-col items-center gap-0.5">
+          <EditorButton
+            onClick={do_set_show_ssml}
+            checked={show_ssml}
+            text={"Audio"}
+          />
+          <button
+            type="button"
+            className="inline-flex h-5 max-w-full items-center rounded-full border border-slate-300 bg-white px-1.5 text-[10px] font-semibold leading-none text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+            onClick={open_bulk_audio}
+          >
+            Bulk audio
+          </button>
+        </div>
         <div className="relative">
           <EditorButton
             id="button_save"
@@ -179,12 +190,21 @@ export function StoryEditorHeaderLoading() {
           text={"Hints"}
           disabled={true}
         />
-        <EditorButton
-          onClick={() => {}}
-          checked={false}
-          text={"Audio"}
-          disabled={true}
-        />
+        <div className="ml-2 flex shrink-0 flex-col items-center gap-0.5">
+          <EditorButton
+            onClick={() => {}}
+            checked={false}
+            text={"Audio"}
+            disabled={true}
+          />
+          <button
+            type="button"
+            className="inline-flex h-5 max-w-full items-center rounded-full border border-slate-200 bg-slate-100 px-1.5 text-[10px] font-semibold leading-none text-slate-400"
+            disabled={true}
+          >
+            Bulk audio
+          </button>
+        </div>
         <EditorButton
           id="button_save_loading"
           onClick={() => {}}
