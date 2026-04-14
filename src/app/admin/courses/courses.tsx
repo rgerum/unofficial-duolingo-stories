@@ -5,13 +5,15 @@ import Flag from "@/components/ui/flag";
 import * as EditDialog from "../edit_dialog";
 import React, { useState } from "react";
 import styled from "styled-components";
-import Button, {
-  buttonInnerClassName,
-  buttonRootClassName,
-} from "@/components/ui/button";
+import Button from "@/components/ui/button";
 import Tag from "@/components/ui/badge";
 import Input from "@/components/ui/input";
 import FlagName from "../FlagName";
+import AdminDialogTrigger from "../AdminDialogTrigger";
+import {
+  adminTableContainerClass,
+  adminTableHeadCellClass,
+} from "../adminTableStyles";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 
@@ -45,11 +47,6 @@ const statusYesClass =
   "inline-block min-w-10 rounded-full bg-[color:color-mix(in_srgb,#21c55d_22%,transparent)] px-2.5 py-0.5 text-center text-sm font-bold text-[#0a6b2d]";
 const statusNoClass =
   "inline-block min-w-10 rounded-full bg-[color:color-mix(in_srgb,#ef4444_20%,transparent)] px-2.5 py-0.5 text-center text-sm font-bold text-[#9b1c1c]";
-const adminTableContainerClass =
-  "relative isolate overflow-auto rounded-xl border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]";
-const adminTableHeadCellClass =
-  "sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-sm uppercase tracking-wide text-[var(--button-color)]";
-
 function InputLanguage({
   name,
   label,
@@ -280,20 +277,8 @@ function EditCourse({
     }
   }
 
-  const triggerButtonRootClassName = buttonRootClassName({
-    className: "ml-auto",
-  });
-  const triggerButtonInnerClassName = buttonInnerClassName({});
-
   return (
-    <EditDialog.Root open={open} onOpenChange={setOpen}>
-      <EditDialog.Trigger asChild>
-        <button className={triggerButtonRootClassName} type="button">
-          <span className={triggerButtonInnerClassName}>
-            {is_new ? "Add" : "Edit"}
-          </span>
-        </button>
-      </EditDialog.Trigger>
+    <AdminDialogTrigger open={open} onOpenChange={setOpen} isNew={is_new}>
       <EditDialog.Content>
         <EditDialog.DialogTitle>
           {is_new ? "Add" : "Edit"} course
@@ -366,7 +351,7 @@ function EditCourse({
           </div>
         </form>
       </EditDialog.Content>
-    </EditDialog.Root>
+    </AdminDialogTrigger>
   );
 }
 

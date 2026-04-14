@@ -8,10 +8,12 @@ import React, { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import * as EditDialog from "../edit_dialog";
-import Button, {
-  buttonInnerClassName,
-  buttonRootClassName,
-} from "@/components/ui/button";
+import Button from "@/components/ui/button";
+import AdminDialogTrigger from "../AdminDialogTrigger";
+import {
+  adminTableContainerClass,
+  adminTableHeadCellClass,
+} from "../adminTableStyles";
 
 interface Language {
   id?: number;
@@ -28,11 +30,6 @@ interface EditLanguageProps {
   updateLanguage: (lang: Language) => void;
   is_new?: boolean;
 }
-
-const adminTableContainerClass =
-  "relative isolate overflow-auto rounded-xl border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]";
-const adminTableHeadCellClass =
-  "sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-sm uppercase tracking-wide text-[var(--button-color)]";
 
 function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
   const [open, setOpen] = useState(false);
@@ -93,20 +90,8 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
     }
   }
 
-  const triggerButtonRootClassName = buttonRootClassName({
-    className: "ml-auto",
-  });
-  const triggerButtonInnerClassName = buttonInnerClassName({});
-
   return (
-    <EditDialog.Root open={open} onOpenChange={setOpen}>
-      <EditDialog.Trigger asChild>
-        <button className={triggerButtonRootClassName} type="button">
-          <span className={triggerButtonInnerClassName}>
-            {is_new ? "Add" : "Edit"}
-          </span>
-        </button>
-      </EditDialog.Trigger>
+    <AdminDialogTrigger open={open} onOpenChange={setOpen} isNew={is_new}>
       <EditDialog.Content>
         <EditDialog.DialogTitle>
           {is_new ? "Add" : "Edit"} Language
@@ -163,7 +148,7 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
           <Button onClick={send}>Save changes</Button>
         </div>
       </EditDialog.Content>
-    </EditDialog.Root>
+    </AdminDialogTrigger>
   );
 }
 

@@ -6,17 +6,15 @@ import Switch from "@/components/ui/switch";
 import Button from "@/components/ui/button";
 import type { AdminUser } from "./schema";
 import {
+  adminDetailCardClass,
+  adminDetailLabelClass,
+  adminDetailPageClass,
+} from "../../adminDetailStyles";
+import {
   setUserActivatedAction,
   setUserWriteAction,
   setUserDeleteAction,
 } from "./actions";
-
-const adminDetailPageClass =
-  "mx-auto my-6 mb-10 w-[min(860px,calc(100vw-32px))]";
-const adminDetailCardClass =
-  "rounded-2xl border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-5 shadow-[0_16px_38px_color-mix(in_srgb,#000_14%,transparent)]";
-const adminDetailLabelClass =
-  "text-left text-[var(--text-color-dim)] md:text-right";
 
 async function setUserActivated(data: {
   id: number;

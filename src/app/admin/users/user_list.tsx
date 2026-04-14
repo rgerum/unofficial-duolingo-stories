@@ -15,6 +15,10 @@ import Button, {
 } from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { SpinnerBlue } from "@/components/ui/spinner";
+import {
+  adminTableContainerClass,
+  adminTableHeadCellClass,
+} from "../adminTableStyles";
 import type { AdminUser } from "./[user_id]/schema";
 
 export type AdminUserList = AdminUser & { admin?: boolean; rowKey?: string };
@@ -98,11 +102,6 @@ const tableHeaders: Array<{ label: string; title?: string; key: string }> = [
   { key: "stories", label: "Stories" },
   { key: "actions", label: "", title: "Actions" },
 ];
-
-const adminTableContainerClass =
-  "relative isolate overflow-auto rounded-xl border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]";
-const adminTableHeadCellClass =
-  "sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-sm uppercase tracking-wide text-[var(--button-color)]";
 
 function ActivatedStatus({ activated }: { activated: boolean | undefined }) {
   if (!activated) {
