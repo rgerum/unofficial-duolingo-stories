@@ -151,9 +151,9 @@ function EditorElement({
     hideNonHighlighted: false,
     setHighlightName: () => {},
     setHideNonHighlighted: () => {},
-    show_hints: showHints,
+    show_hints: true,
     setShowHints: () => {},
-    show_audio: showAudio,
+    show_audio: true,
     setShowAudio: () => {},
     id: 0,
     show_title_page: false,
@@ -167,6 +167,7 @@ function EditorElement({
         settings={editorSettings}
         editorState={editorState}
         editorShowTranslationsOverride={showHints}
+        editorShowAudioDetailsOverride={showAudio}
         onOpenAudioEditor={onOpenAudioEditor}
       />
     );
@@ -180,6 +181,7 @@ function EditorElement({
         settings={editorSettings}
         editorState={editorState}
         editorShowTranslationsOverride={showHints}
+        editorShowAudioDetailsOverride={showAudio}
         onOpenAudioEditor={onOpenAudioEditor}
       />
     );

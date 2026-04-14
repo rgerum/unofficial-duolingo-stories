@@ -21,6 +21,7 @@ function StoryHeader({
   settings,
   editorState,
   editorShowTranslationsOverride,
+  editorShowAudioDetailsOverride,
   onOpenAudioEditor,
   audioRangeOverride,
   hideAudioButton = false,
@@ -30,6 +31,7 @@ function StoryHeader({
   settings: StorySettings;
   editorState?: EditorStateType;
   editorShowTranslationsOverride?: boolean;
+  editorShowAudioDetailsOverride?: boolean;
   onOpenAudioEditor?: (
     element: StoryElementLine | StoryElementHeader,
   ) => void | Promise<void>;
@@ -48,6 +50,8 @@ function StoryHeader({
   );
   const effectiveAudioRange = audioRangeOverride ?? audioRange;
   const isRtl = settings.rtl || element.lang === "rtl";
+  const showEditorAudioDetails =
+    editorShowAudioDetailsOverride ?? settings.show_audio;
 
   const hideRangesForChallenge = undefined;
 
@@ -97,7 +101,7 @@ function StoryHeader({
           content={element.learningLanguageTitleContent}
           editorState={editorState}
         />
-        {settings.show_audio &&
+        {showEditorAudioDetails &&
           element.audio &&
           (editorState || onOpenAudioEditor) && (
             <EditorSSMLDisplay
