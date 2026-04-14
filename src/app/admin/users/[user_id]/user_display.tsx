@@ -11,6 +11,13 @@ import {
   setUserDeleteAction,
 } from "./actions";
 
+const adminDetailPageClass =
+  "mx-auto my-6 mb-10 w-[min(860px,calc(100vw-32px))]";
+const adminDetailCardClass =
+  "rounded-2xl border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-5 shadow-[0_16px_38px_color-mix(in_srgb,#000_14%,transparent)]";
+const adminDetailLabelClass =
+  "text-left text-[var(--text-color-dim)] md:text-right";
+
 async function setUserActivated(data: {
   id: number;
   activated: 0 | 1 | boolean;
@@ -76,8 +83,8 @@ export default function UserDisplay({ user }: { user: AdminUser }) {
   }
 
   return (
-    <div className="mx-auto my-6 mb-10 w-[min(860px,calc(100vw-32px))]">
-      <div className="rounded-2xl border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-5 shadow-[0_16px_38px_color-mix(in_srgb,#000_14%,transparent)]">
+    <div className={adminDetailPageClass}>
+      <div className={adminDetailCardClass}>
         <div className="mb-3.5 flex flex-wrap items-center justify-between gap-3">
           <Link
             className="whitespace-nowrap underline underline-offset-2"
@@ -89,58 +96,42 @@ export default function UserDisplay({ user }: { user: AdminUser }) {
         </div>
 
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h1 className="m-0 text-[2rem] leading-[1.15]">{userData.name}</h1>
+          <h1 className="m-0 text-3xl leading-tight">{userData.name}</h1>
         </div>
 
         <div className="mt-3 mb-5 grid grid-cols-1 gap-x-3 gap-y-2 md:grid-cols-[160px_minmax(0,1fr)]">
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">
-            User ID
-          </div>
+          <div className={adminDetailLabelClass}>User ID</div>
           <div className="min-w-0 break-words">{userData.id}</div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">
-            Email
-          </div>
+          <div className={adminDetailLabelClass}>Email</div>
           <div className="min-w-0 break-words">{userData.email}</div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">
-            Registered
-          </div>
+          <div className={adminDetailLabelClass}>Registered</div>
           <div className="min-w-0 break-words">{`${userData.regdate}`}</div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">
-            Activated
-          </div>
+          <div className={adminDetailLabelClass}>Activated</div>
           <div className="min-w-0 break-words">
             <Activate user={user} />
           </div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">
-            Contributor
-          </div>
+          <div className={adminDetailLabelClass}>Contributor</div>
           <div className="min-w-0 break-words">
             <Write user={user} />
           </div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">
-            Admin
-          </div>
+          <div className={adminDetailLabelClass}>Admin</div>
           <div className="min-w-0 break-words">
             {userData.admin ? "Yes" : "No"}
           </div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">
-            Discord
-          </div>
+          <div className={adminDetailLabelClass}>Discord</div>
           <div className="min-w-0 break-words">
             {userData.discordLinked
               ? `Linked${userData.discordAccountId ? ` (${userData.discordAccountId})` : ""}`
               : "Not linked"}
           </div>
 
-          <div className="text-left text-[var(--text-color-dim)] md:text-right">
-            Stories role
-          </div>
+          <div className={adminDetailLabelClass}>Stories role</div>
           <div className="min-w-0 break-words">
             {userData.discordStoriesRole ?? "None"}
             {userData.discordStoriesSyncStatus

@@ -9,8 +9,11 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Button, {
+  buttonInnerClassName,
+  buttonRootClassName,
+} from "@/components/ui/button";
 import Input from "@/components/ui/input";
-import Button from "@/components/ui/button";
 import { SpinnerBlue } from "@/components/ui/spinner";
 import type { AdminUser } from "./[user_id]/schema";
 
@@ -60,11 +63,11 @@ function buildQueryString(query: string, limit: number, filters: AdminFilters) {
 }
 
 const statusYesClass =
-  "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#21c55d_22%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#0a6b2d]";
+  "inline-block min-w-10 rounded-full bg-[color:color-mix(in_srgb,#21c55d_22%,transparent)] px-2.5 py-0.5 text-center text-sm font-bold text-[#0a6b2d]";
 const statusNoClass =
-  "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#ef4444_20%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#9b1c1c]";
+  "inline-block min-w-10 rounded-full bg-[color:color-mix(in_srgb,#ef4444_20%,transparent)] px-2.5 py-0.5 text-center text-sm font-bold text-[#9b1c1c]";
 const statusInfoClass =
-  "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#3b82f6_18%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#124f9c]";
+  "inline-block min-w-10 rounded-full bg-[color:color-mix(in_srgb,#3b82f6_18%,transparent)] px-2.5 py-0.5 text-center text-sm font-bold text-[#124f9c]";
 
 function getRoleLabel(user: AdminUserList) {
   if (user.admin) return "Admin";
@@ -96,11 +99,16 @@ const tableHeaders: Array<{ label: string; title?: string; key: string }> = [
   { key: "actions", label: "", title: "Actions" },
 ];
 
+const adminTableContainerClass =
+  "relative isolate overflow-auto rounded-xl border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]";
+const adminTableHeadCellClass =
+  "sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-sm uppercase tracking-wide text-[var(--button-color)]";
+
 function ActivatedStatus({ activated }: { activated: boolean | undefined }) {
   if (!activated) {
     return (
       <span
-        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,#ef4444_16%,transparent)] text-[1rem] font-bold text-[#9b1c1c]"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,#ef4444_16%,transparent)] text-base font-bold text-[#9b1c1c]"
         title="Not activated"
       >
         -
@@ -110,7 +118,7 @@ function ActivatedStatus({ activated }: { activated: boolean | undefined }) {
 
   return (
     <span
-      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,#21c55d_18%,transparent)] text-[1.05rem] font-bold text-[#0a6b2d]"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,#21c55d_18%,transparent)] text-base font-bold text-[#0a6b2d]"
       title="Activated"
     >
       ✓
@@ -224,7 +232,7 @@ export default function UserList({
   }
 
   return (
-    <div className="relative isolate mx-auto my-6 mb-9 box-border w-full max-w-[min(1240px,calc(100vw-48px))] rounded-[18px] border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-[18px] shadow-[0_18px_42px_color-mix(in_srgb,#000_14%,transparent)]">
+    <div className="relative isolate mx-auto my-6 mb-9 box-border w-full max-w-[min(1240px,calc(100vw-48px))] rounded-2xl border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-5 shadow-[0_16px_38px_color-mix(in_srgb,#000_14%,transparent)]">
       <div className="flex flex-wrap items-end justify-between gap-4 px-0.5 pb-3">
         <div className="flex flex-wrap items-center gap-3.5">
           <Input
@@ -235,7 +243,7 @@ export default function UserList({
             onKeyDown={handleKeyDown}
           />
           <div className="flex flex-wrap items-center gap-2.5">
-            <label className="inline-flex items-center gap-2 text-[0.95rem] text-[var(--text-color-dim)]">
+            <label className="inline-flex items-center gap-2 text-base text-[var(--text-color-dim)]">
               Activated
               <select
                 className="min-w-[90px] rounded-xl border-2 border-[var(--input-border)] bg-[var(--input-background)] px-2.5 py-1.5 text-[var(--text-color)]"
@@ -249,7 +257,7 @@ export default function UserList({
                 <option value="no">No</option>
               </select>
             </label>
-            <label className="inline-flex items-center gap-2 text-[0.95rem] text-[var(--text-color-dim)]">
+            <label className="inline-flex items-center gap-2 text-base text-[var(--text-color-dim)]">
               Role
               <select
                 className="min-w-[120px] rounded-xl border-2 border-[var(--input-border)] bg-[var(--input-background)] px-2.5 py-1.5 text-[var(--text-color)]"
@@ -281,14 +289,14 @@ export default function UserList({
         </div>
       </div>
 
-      <div className="relative isolate overflow-auto rounded-[14px] border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]">
+      <div className={adminTableContainerClass}>
         <table className="w-max min-w-full border-collapse">
           <thead>
             <tr>
               {tableHeaders.map((header) => (
                 <th
                   key={header.key}
-                  className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                  className={adminTableHeadCellClass}
                   title={header.title}
                 >
                   {header.label}
@@ -341,11 +349,14 @@ export default function UserList({
                   </td>
                   <td className="px-4 py-2.5 text-right whitespace-nowrap">
                     <Link
-                      className="inline-flex min-w-[82px] items-center justify-center rounded-[10px] border-b-[3px] border-[var(--button-border)] bg-[var(--button-background)] px-3 py-1.5 font-bold no-underline"
+                      className={buttonRootClassName({
+                        className: "mt-0 inline-block min-w-20 no-underline",
+                      })}
                       href={`/admin/users/${user.id}`}
-                      style={{ color: "#fff" }}
                     >
-                      Open
+                      <span className={buttonInnerClassName({ size: "sm" })}>
+                        Open
+                      </span>
                     </Link>
                   </td>
                 </tr>

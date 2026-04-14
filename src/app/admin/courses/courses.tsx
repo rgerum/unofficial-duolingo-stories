@@ -5,7 +5,10 @@ import Flag from "@/components/ui/flag";
 import * as EditDialog from "../edit_dialog";
 import React, { useState } from "react";
 import styled from "styled-components";
-import Button from "@/components/ui/button";
+import Button, {
+  buttonInnerClassName,
+  buttonRootClassName,
+} from "@/components/ui/button";
 import Tag from "@/components/ui/badge";
 import Input from "@/components/ui/input";
 import FlagName from "../FlagName";
@@ -39,9 +42,13 @@ interface AdminLanguageProps {
 }
 
 const statusYesClass =
-  "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#21c55d_22%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#0a6b2d]";
+  "inline-block min-w-10 rounded-full bg-[color:color-mix(in_srgb,#21c55d_22%,transparent)] px-2.5 py-0.5 text-center text-sm font-bold text-[#0a6b2d]";
 const statusNoClass =
-  "inline-block min-w-[38px] rounded-full bg-[color:color-mix(in_srgb,#ef4444_20%,transparent)] px-2.5 py-0.5 text-center text-[0.82rem] font-bold text-[#9b1c1c]";
+  "inline-block min-w-10 rounded-full bg-[color:color-mix(in_srgb,#ef4444_20%,transparent)] px-2.5 py-0.5 text-center text-sm font-bold text-[#9b1c1c]";
+const adminTableContainerClass =
+  "relative isolate overflow-auto rounded-xl border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]";
+const adminTableHeadCellClass =
+  "sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-sm uppercase tracking-wide text-[var(--button-color)]";
 
 function InputLanguage({
   name,
@@ -273,12 +280,19 @@ function EditCourse({
     }
   }
 
+  const triggerButtonRootClassName = buttonRootClassName({
+    className: "ml-auto",
+  });
+  const triggerButtonInnerClassName = buttonInnerClassName({});
+
   return (
     <EditDialog.Root open={open} onOpenChange={setOpen}>
       <EditDialog.Trigger asChild>
-        <Button style={{ marginLeft: "auto" }}>
-          {is_new ? "Add" : "Edit"}
-        </Button>
+        <button className={triggerButtonRootClassName} type="button">
+          <span className={triggerButtonInnerClassName}>
+            {is_new ? "Add" : "Edit"}
+          </span>
+        </button>
       </EditDialog.Trigger>
       <EditDialog.Content>
         <EditDialog.DialogTitle>
@@ -340,15 +354,15 @@ function EditCourse({
             value={about}
             setValue={setAbout}
           />
-          <div className="mt-[25px] flex flex-wrap justify-between gap-2">
+          <div className="mt-6 flex flex-wrap justify-between gap-2">
             {error ? (
-              <div className="rounded-[10px] bg-[var(--error-red)] p-2.5 text-white">
+              <div className="rounded-lg bg-[var(--error-red)] p-2.5 text-white">
                 An error occurred.
               </div>
             ) : (
               <div></div>
             )}
-            <Button className="Button green">Save changes</Button>
+            <Button>Save changes</Button>
           </div>
         </form>
       </EditDialog.Content>
@@ -450,7 +464,7 @@ function TableRow({
           {course.about}
         </div>
       </td>
-      <td className="sticky right-0 z-[2] min-w-[138px] bg-inherit px-4 py-2.5 text-right whitespace-nowrap">
+      <td className="sticky right-0 z-[2] min-w-36 bg-inherit px-4 py-2.5 text-right whitespace-nowrap">
         <EditCourse
           obj={course}
           languages={languages}
@@ -503,7 +517,7 @@ export function CourseList({
   }
 
   return (
-    <div className="relative isolate mx-auto my-6 mb-9 box-border w-full max-w-[min(1240px,calc(100vw-48px))] rounded-[18px] border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-[18px] shadow-[0_18px_42px_color-mix(in_srgb,#000_14%,transparent)]">
+    <div className="relative isolate mx-auto my-6 mb-9 box-border w-full max-w-[min(1240px,calc(100vw-48px))] rounded-2xl border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-5 shadow-[0_16px_38px_color-mix(in_srgb,#000_14%,transparent)]">
       <div className="flex flex-wrap items-end justify-between gap-4 px-0.5 pb-3">
         <Input
           label={"Search"}
@@ -528,7 +542,7 @@ export function CourseList({
           updateCourse={updateCourse}
         />
       </div>
-      <div className="relative isolate overflow-auto rounded-[14px] border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)]">
+      <div className={adminTableContainerClass}>
         <table
           id="story_list"
           data-cy="story_list"
@@ -537,52 +551,31 @@ export function CourseList({
         >
           <thead>
             <tr>
-              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"></th>
-              <th className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"></th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="0"
-              >
+              <th className={adminTableHeadCellClass}></th>
+              <th className={adminTableHeadCellClass}></th>
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="0">
                 learning_language
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="1"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="1">
                 from_language
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="1"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="1">
                 public
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="2"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="2">
                 name
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="2"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="2">
                 conlang
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="2"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="2">
                 tags
               </th>
-              <th
-                className="sticky top-0 z-[1] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
-                data-js-sort-colnum="3"
-              >
+              <th className={adminTableHeadCellClass} data-js-sort-colnum="3">
                 about
               </th>
               <th
-                className="sticky top-0 right-0 z-[3] min-w-[138px] bg-[color:color-mix(in_srgb,var(--button-background)_88%,#fff)] px-3 py-2 text-left text-[0.84rem] uppercase tracking-[0.03em] text-[var(--button-color)]"
+                className={`${adminTableHeadCellClass} right-0 z-[3] min-w-36`}
                 data-js-sort-colnum="4"
               ></th>
             </tr>
