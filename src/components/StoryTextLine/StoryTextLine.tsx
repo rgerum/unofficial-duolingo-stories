@@ -23,6 +23,7 @@ function StoryTextLine({
   settings,
   editorState,
   editorShowTranslationsOverride,
+  editorShowAudioDetailsOverride,
   onOpenAudioEditor,
   audioRangeOverride,
   hideAudioButton = false,
@@ -33,6 +34,7 @@ function StoryTextLine({
   settings: StorySettings;
   editorState?: EditorStateType;
   editorShowTranslationsOverride?: boolean;
+  editorShowAudioDetailsOverride?: boolean;
   onOpenAudioEditor?: (
     element: StoryElementLine | StoryElementHeader,
   ) => void | Promise<void>;
@@ -51,6 +53,8 @@ function StoryTextLine({
   );
   const effectiveAudioRange = audioRangeOverride ?? audioRange;
   const isRtl = settings.rtl || element.lang === "rtl";
+  const showEditorAudioDetails =
+    editorShowAudioDetailsOverride ?? settings.show_audio;
   const titleClassName = "m-0 text-[25px] leading-[34px] font-bold";
   const phraseClassName = "my-5 flex flex-nowrap items-start";
   const bubbleClassName = cn(
@@ -150,7 +154,7 @@ function StoryTextLine({
             content={element.line.content}
             editorState={editorState}
           />
-          {settings.show_audio &&
+          {showEditorAudioDetails &&
             element.line.content.audio &&
             (editorState || onOpenAudioEditor) && (
               <EditorSSMLDisplay
@@ -189,7 +193,7 @@ function StoryTextLine({
             content={element.line.content}
             editorState={editorState}
           />
-          {settings.show_audio &&
+          {showEditorAudioDetails &&
             element.line.content.audio &&
             (editorState || onOpenAudioEditor) && (
               <EditorSSMLDisplay
