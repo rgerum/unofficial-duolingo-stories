@@ -196,8 +196,15 @@ export default function useScrollLinking(
     function editor_scroll() {
       requestAnimationFrame(() => syncEditorScroll());
     }
+    function syncPreview() {
+      requestAnimationFrame(() => syncResize());
+    }
     editor.addEventListener("scroll", editor_scroll);
-    return () => editor.removeEventListener("scroll", editor_scroll);
+    editor.addEventListener("story-editor-sync-preview", syncPreview);
+    return () => {
+      editor.removeEventListener("scroll", editor_scroll);
+      editor.removeEventListener("story-editor-sync-preview", syncPreview);
+    };
   }, [editor]);
 
   React.useEffect(() => {

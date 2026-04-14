@@ -96,7 +96,9 @@ function scrollEditorLineIntoView(view: EditorView, lineNumber: number) {
         top: targetTop,
         behavior: "auto",
       });
-      window.dispatchEvent(new Event("resize"));
+      view.scrollDOM.dispatchEvent(
+        new CustomEvent("story-editor-sync-preview"),
+      );
       view.focus();
     },
   });
@@ -503,7 +505,11 @@ export default function EditorV2({
             scrollEditorLineIntoView(view, lineNumber);
             return;
           }
-          const pos = view.state.doc.line(lineNumber).from;
+          const boundedLine = Math.min(
+            Math.max(lineNumber, 1),
+            view.state.doc.lines,
+          );
+          const pos = view.state.doc.line(boundedLine).from;
           view.dispatch({
             selection: EditorSelection.cursor(pos),
           });
