@@ -638,7 +638,6 @@ function BulkAudioRow({
     if (!plugin) return;
 
     const autoStarts = getAutoRegionStarts(parts, duration);
-    const nextTimingText = timingTextFromStarts(parts, autoStarts);
     for (let index = 0; index < parts.length; index += 1) {
       if (!plugin.regions[index]) {
         plugin.addRegion({
@@ -653,12 +652,8 @@ function BulkAudioRow({
       }
     }
 
-    onChange((currentDraft) => ({
-      ...currentDraft,
-      timingText: nextTimingText,
-    }));
     onRegionUpdated(plugin);
-  }, [onChange, onRegionUpdated, parts, wavesurfer]);
+  }, [onRegionUpdated, parts, wavesurfer]);
 
   const onPlayWord = React.useCallback(
     (startMs: number, endMs: number) => {
@@ -851,6 +846,7 @@ export default function BulkAudioEditor({
   onApply: (updates: BulkAudioEditorUpdate[]) => void;
 }) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const wasOpenRef = React.useRef(false);
   const draftsRef = React.useRef<Record<string, BulkAudioEditorDraft>>(
     createDraftMap(items),
   );
@@ -860,6 +856,7 @@ export default function BulkAudioEditor({
   const [unmatchedFiles, setUnmatchedFiles] = React.useState<string[]>([]);
   const [applyError, setApplyError] = React.useState<string | null>(null);
   const [isApplying, setIsApplying] = React.useState(false);
+  const [isPreparingFiles, setIsPreparingFiles] = React.useState(false);
 
   React.useEffect(() => {
     draftsRef.current = drafts;
@@ -870,13 +867,17 @@ export default function BulkAudioEditor({
   }, []);
 
   React.useEffect(() => {
-    if (!open) return;
+    const wasOpen = wasOpenRef.current;
+    wasOpenRef.current = open;
+    if (wasOpen || !open) return;
+
     revokeDraftUrls(draftsRef.current);
     const nextDrafts = createDraftMap(items);
     draftsRef.current = nextDrafts;
     setDrafts(nextDrafts);
     setUnmatchedFiles([]);
     setApplyError(null);
+    setIsPreparingFiles(false);
   }, [items, open]);
 
   const updateDraft = React.useCallback(
@@ -945,6 +946,7 @@ export default function BulkAudioEditor({
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(event.target.files ?? []);
       event.target.value = "";
+      setIsPreparingFiles(true);
       try {
         const expandedFiles = await expandUploadFiles(files);
         applyMatchedFiles(expandedFiles);
@@ -959,6 +961,8 @@ export default function BulkAudioEditor({
             ? error.message
             : "Could not read the selected zip file.",
         );
+      } finally {
+        setIsPreparingFiles(false);
       }
     },
     [applyMatchedFiles],
@@ -1108,8 +1112,9 @@ export default function BulkAudioEditor({
               type="button"
               className="inline-flex h-9 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
               onClick={() => fileInputRef.current?.click()}
+              disabled={isPreparingFiles}
             >
-              Upload files
+              {isPreparingFiles ? "Preparing..." : "Upload files"}
             </button>
             <input
               ref={fileInputRef}
@@ -1125,6 +1130,11 @@ export default function BulkAudioEditor({
             <div className="text-sm text-[var(--text-color-dim)]">
               {summary.changed} rows changed
             </div>
+            {isPreparingFiles ? (
+              <div className="text-sm text-[var(--text-color-dim)]">
+                Reading selected audio files...
+              </div>
+            ) : null}
             {unmatchedFiles.length > 0 ? (
               <div className="text-sm text-[#b33b3b]">
                 Unmatched: {unmatchedFiles.join(", ")}
