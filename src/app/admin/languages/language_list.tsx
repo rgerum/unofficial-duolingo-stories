@@ -13,7 +13,7 @@ import AdminDialogTrigger from "../AdminDialogTrigger";
 import {
   adminTableContainerClass,
   adminTableHeadCellClass,
-} from "../admin_table_styles";
+} from "../adminTableStyles";
 
 interface Language {
   id?: number;
@@ -91,7 +91,7 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
   }
 
   return (
-    <AdminDialogTrigger open={open} setOpen={setOpen} isNew={is_new}>
+    <AdminDialogTrigger open={open} onOpenChange={setOpen} isNew={is_new}>
       <EditDialog.Content>
         <EditDialog.DialogTitle>
           {is_new ? "Add" : "Edit"} Language
@@ -137,17 +137,15 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
           value={rtl}
           setValue={setRTL}
         />
-        <div className="mt-[25px] flex flex-wrap justify-between gap-2">
+        <div className="mt-6 flex flex-wrap justify-between gap-2">
           {error ? (
-            <div className="rounded-[10px] bg-[var(--error-red)] p-2.5 text-white">
+            <div className="rounded-lg bg-[var(--error-red)] p-2.5 text-white">
               An error occurred.
             </div>
           ) : (
             <div></div>
           )}
-          <Button className="Button green" onClick={send}>
-            Save changes
-          </Button>
+          <Button onClick={send}>Save changes</Button>
         </div>
       </EditDialog.Content>
     </AdminDialogTrigger>
@@ -250,7 +248,7 @@ export default function LanguageList({ all_languages }: LanguageListProps) {
         );
 
   return (
-    <div className="relative isolate mx-auto my-6 mb-9 box-border w-full max-w-[min(1240px,calc(100vw-48px))] rounded-[18px] border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-[18px] shadow-[0_18px_42px_color-mix(in_srgb,#000_14%,transparent)]">
+    <div className="relative isolate mx-auto my-6 mb-9 box-border w-full max-w-[min(1240px,calc(100vw-48px))] rounded-2xl border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-5 shadow-[0_16px_38px_color-mix(in_srgb,#000_14%,transparent)]">
       <div className="flex flex-wrap items-end justify-between gap-4 px-0.5 pb-3">
         <Input label="Search" value={search} onChange={setSearch} />
         <EditLanguage

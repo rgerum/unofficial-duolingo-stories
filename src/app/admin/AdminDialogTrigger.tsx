@@ -1,29 +1,31 @@
-import type React from "react";
-import * as EditDialog from "./edit_dialog";
+"use client";
+
+import type { ReactNode } from "react";
 import {
   buttonInnerClassName,
   buttonRootClassName,
 } from "@/components/ui/button";
+import * as EditDialog from "./edit_dialog";
 
 interface AdminDialogTriggerProps {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  children: ReactNode;
   isNew?: boolean;
-  children: React.ReactNode;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
 }
 
 export default function AdminDialogTrigger({
-  open,
-  setOpen,
-  isNew = false,
   children,
+  isNew,
+  onOpenChange,
+  open,
 }: AdminDialogTriggerProps) {
   return (
-    <EditDialog.Root open={open} onOpenChange={setOpen}>
+    <EditDialog.Root open={open} onOpenChange={onOpenChange}>
       <EditDialog.Trigger asChild>
         <button
-          type="button"
           className={buttonRootClassName({ className: "ml-auto" })}
+          type="button"
         >
           <span className={buttonInnerClassName({})}>
             {isNew ? "Add" : "Edit"}

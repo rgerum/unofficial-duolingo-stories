@@ -4,17 +4,29 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import Switch from "@/components/ui/switch";
-import Button from "@/components/ui/button";
+import Button, {
+  buttonInnerClassName,
+  buttonRootClassName,
+} from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  togglePublished,
-  removeApproval as removeApprovalAction,
-} from "./actions";
 import {
   adminDetailCardClass,
   adminDetailLabelClass,
   adminDetailPageClass,
-} from "../../admin_detail_styles";
+} from "../../adminDetailStyles";
+import {
+  togglePublished,
+  removeApproval as removeApprovalAction,
+} from "./actions";
+import { cn } from "@/lib/utils";
+const dangerButtonRootClassName = buttonRootClassName({
+  className:
+    "mt-0 cursor-pointer bg-[color:color-mix(in_srgb,#ef4444_36%,transparent)] text-[#9b1c1c]",
+});
+const dangerButtonInnerClassName = cn(
+  buttonInnerClassName({ size: "sm" }),
+  "bg-[color:color-mix(in_srgb,#ef4444_20%,transparent)] text-[#9b1c1c]",
+);
 
 export default function StoryDisplay({ storyId }: { storyId: number }) {
   const story = useQuery(api.adminData.getAdminStoryByLegacyId, {
@@ -88,7 +100,7 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
             height={132}
           />
           <div>
-            <h1 className="m-0 text-[2rem] leading-[1.15]">{storyData.name}</h1>
+            <h1 className="m-0 text-3xl leading-tight">{storyData.name}</h1>
             <div className="mt-3 mb-5 grid grid-cols-1 gap-x-3 gap-y-2 md:grid-cols-[160px_minmax(0,1fr)]">
               <div className={adminDetailLabelClass}>Story ID</div>
               <div className="min-w-0 break-words">{storyData.id}</div>
@@ -117,7 +129,7 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
           </div>
         </div>
 
-        <h2 className="my-5 text-[1.2rem]">Approvals</h2>
+        <h2 className="my-5 text-xl">Approvals</h2>
         {storyData.approvals.length === 0 ? (
           <div>No approvals.</div>
         ) : (
@@ -135,11 +147,11 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
                   {formatApprovalDate(approval.date)} - {approval.name}
                 </span>
                 <button
-                  className="cursor-pointer rounded-[10px] border-none bg-[color:color-mix(in_srgb,#ef4444_20%,transparent)] px-3 py-2 font-bold text-[#9b1c1c]"
+                  className={dangerButtonRootClassName}
                   type="button"
                   onClick={() => deleteApproval(approval.id)}
                 >
-                  Remove
+                  <span className={dangerButtonInnerClassName}>Remove</span>
                 </button>
               </li>
             ))}

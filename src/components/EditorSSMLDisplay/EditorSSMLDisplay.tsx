@@ -4,7 +4,6 @@ import { MicIcon } from "lucide-react";
 import {
   generate_audio_line,
   timings_to_text,
-  insert_audio_line,
 } from "@/lib/editor/audio/audio_edit_tools";
 import type {
   Audio,
@@ -34,18 +33,22 @@ export default function EditorSSMLDisplay({
 
   async function reload() {
     setLoading(true);
+    let releaseAnchor: (() => void) | undefined;
     try {
       if (!editor) return;
+      const anchor = editor.create_audio_insert_anchor(ssml);
+      if (!anchor) return;
+      releaseAnchor = editor.track_audio_insert_anchor(anchor);
       let { filename, keypoints } = await generate_audio_line(ssml);
       let text = timings_to_text({ filename, keypoints });
-      if (editor.audio_insert_lines) {
-        insert_audio_line(text, ssml, editor.view, editor.audio_insert_lines);
-      }
+      editor.insert_audio_at_anchor(text, anchor);
     } catch (e) {
       console.error("error", e);
       setError(true);
+    } finally {
+      releaseAnchor?.();
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

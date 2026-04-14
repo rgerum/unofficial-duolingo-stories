@@ -4,12 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import Switch from "@/components/ui/switch";
 import Button from "@/components/ui/button";
-import type { AdminUser } from "./schema";
 import {
   adminDetailCardClass,
   adminDetailLabelClass,
   adminDetailPageClass,
-} from "../../admin_detail_styles";
+} from "@/app/admin/adminDetailStyles";
+import type { AdminUser } from "./schema";
 import {
   setUserActivatedAction,
   setUserWriteAction,
@@ -94,7 +94,7 @@ export default function UserDisplay({ user }: { user: AdminUser }) {
         </div>
 
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h1 className="m-0 text-[2rem] leading-[1.15]">{userData.name}</h1>
+          <h1 className="m-0 text-3xl leading-tight">{userData.name}</h1>
         </div>
 
         <div className="mt-3 mb-5 grid grid-cols-1 gap-x-3 gap-y-2 md:grid-cols-[160px_minmax(0,1fr)]">
