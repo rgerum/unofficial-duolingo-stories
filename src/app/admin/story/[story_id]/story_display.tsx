@@ -4,10 +4,7 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import Switch from "@/components/ui/switch";
-import Button, {
-  buttonInnerClassName,
-  buttonRootClassName,
-} from "@/components/ui/button";
+import Button from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
   adminDetailCardClass,
@@ -18,15 +15,6 @@ import {
   togglePublished,
   removeApproval as removeApprovalAction,
 } from "./actions";
-import { cn } from "@/lib/utils";
-const dangerButtonRootClassName = buttonRootClassName({
-  className:
-    "mt-0 cursor-pointer bg-[color:color-mix(in_srgb,#ef4444_36%,transparent)] text-[#9b1c1c]",
-});
-const dangerButtonInnerClassName = cn(
-  buttonInnerClassName({ size: "sm" }),
-  "bg-[color:color-mix(in_srgb,#ef4444_20%,transparent)] text-[#9b1c1c]",
-);
 
 export default function StoryDisplay({ storyId }: { storyId: number }) {
   const story = useQuery(api.adminData.getAdminStoryByLegacyId, {
@@ -146,13 +134,15 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
                 <span>
                   {formatApprovalDate(approval.date)} - {approval.name}
                 </span>
-                <button
-                  className={dangerButtonRootClassName}
+                <Button
+                  className="mt-0"
+                  variant="destructive"
+                  size="sm"
                   type="button"
                   onClick={() => deleteApproval(approval.id)}
                 >
-                  <span className={dangerButtonInnerClassName}>Remove</span>
-                </button>
+                  Remove
+                </Button>
               </li>
             ))}
           </ul>

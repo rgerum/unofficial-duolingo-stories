@@ -90,7 +90,9 @@ export default function UserDisplay({ user }: { user: AdminUser }) {
           >
             Back to Users
           </Link>
-          <Button onClick={removeUser}>Delete User</Button>
+          <Button variant="destructive" onClick={removeUser}>
+            Delete User
+          </Button>
         </div>
 
         <div className="mb-4 flex items-center justify-between gap-3">

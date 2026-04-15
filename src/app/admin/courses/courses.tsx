@@ -4,7 +4,6 @@ import { Spinner } from "@/components/ui/spinner";
 import Flag from "@/components/ui/flag";
 import * as EditDialog from "../edit_dialog";
 import React, { useState } from "react";
-import styled from "styled-components";
 import Button from "@/components/ui/button";
 import Tag from "@/components/ui/badge";
 import Input from "@/components/ui/input";
@@ -96,8 +95,8 @@ function InputLanguage({
       <EditDialog.Label className="Label" htmlFor={label}>
         {name}
       </EditDialog.Label>
-      <LangDrowdown>
-        <LangItemMain>
+      <div className="group/lang-dropdown flex-1">
+        <div className="relative flex items-baseline pl-[46px] [&>img]:absolute [&>img]:top-0 [&>img]:bottom-0 [&>img]:left-[-2px] [&>img]:my-auto">
           {valid ? (
             <Flag
               iso={languages[value].short}
@@ -108,16 +107,18 @@ function InputLanguage({
           ) : (
             <Flag width={40} flag={-2736} />
           )}
-          <LangInput
+          <EditDialog.Input
             ref={inputRef}
             id={label}
             value={nameX}
             onChange={edited}
           />
-          <LangDropdownContent>
+          <div className="absolute top-[43px] left-0 z-[1] hidden max-h-[180px] w-full min-w-[160px] overflow-scroll bg-[#f1f1f1] shadow-[0_8px_16px_#0003] group-focus-within/lang-dropdown:block">
             {language_id.map((lang) => (
-              <LangItemButton
+              <button
                 key={languages[lang].id}
+                type="button"
+                className="flex w-full items-center border-0 bg-[var(--body-background)] p-0 outline-offset-[-2px] [&_img]:my-1 [&_img]:mr-2"
                 onClick={() => {
                   edited(languages[lang].name);
                 }}
@@ -129,74 +130,14 @@ function InputLanguage({
                   flag_file={languages[lang].flag_file}
                 />
                 <div>{languages[lang].name}</div>
-              </LangItemButton>
+              </button>
             ))}
-          </LangDropdownContent>
-        </LangItemMain>
-      </LangDrowdown>
+          </div>
+        </div>
+      </div>
     </EditDialog.Fieldset>
   );
 }
-
-const LangDrowdown = styled.div`
-  flex: 1;
-`;
-
-const LangDropdownContent = styled.div`
-  display: none;
-  position: absolute;
-  background-color: #f1f1f1;
-  min-width: 160px;
-  box-shadow: 0 8px 16px #0003;
-  z-index: 1;
-
-  width: 100%;
-  top: 43px;
-  left: 0;
-
-  ${LangDrowdown}:focus-within & {
-    display: block;
-    max-height: 180px;
-    overflow: scroll;
-  }
-
-  & button {
-    width: 100%;
-    border: none;
-  }
-`;
-
-const LangItemButton = styled.button`
-  display: flex;
-  align-items: center;
-  border: none;
-  background: var(--body-background);
-  padding: 0;
-  outline-offset: -2px;
-
-  & img {
-    margin: 4px 8px 4px 0;
-  }
-`;
-
-const LangItemMain = styled.div`
-  display: flex;
-  align-items: baseline;
-  position: relative;
-  padding-left: calc(38px + 8px);
-
-  & > img {
-    position: absolute;
-    top: 0;
-    left: -2px;
-    bottom: 0;
-    margin: auto;
-  }
-`;
-
-const LangInput = styled(EditDialog.Input)`
-  width: 100%;
-`;
 
 function EditCourse({
   obj,
