@@ -1,11 +1,18 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useDeferredValue,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { SpinnerBlue } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import ContributorList from "@/components/ContributorList";
+import Input from "@/components/ui/input";
 import {
   readCourseFilter,
   rememberCourseFilter,
@@ -40,8 +47,10 @@ export default function EditList({
     stories ?? [],
   );
   const [activeFilter, setActiveFilter] = useState<StoryFilter>("all");
+  const [storySearch, setStorySearch] = useState("");
   const [isStoredFilterApplied, setIsStoredFilterApplied] = useState(false);
   const restoredViewKeyRef = useRef<string | null>(null);
+  const deferredStorySearch = useDeferredValue(storySearch);
 
   useEffect(() => {
     setStoryList(stories ?? []);
@@ -86,10 +95,43 @@ export default function EditList({
     },
   );
 
-  const filteredStories =
+  const trimmedStorySearch = deferredStorySearch.trim();
+  const parsedStorySearch = parseStorySearch(trimmedStorySearch);
+
+  const filteredStoriesByState =
     activeFilter === "all"
       ? storyList
       : storyList.filter((story) => getStoryState(story) === activeFilter);
+
+  const filteredStories =
+    parsedStorySearch === null
+      ? filteredStoriesByState
+      : filteredStoriesByState.filter((story) => {
+          if (
+            parsedStorySearch.setId !== null &&
+            story.set_id !== parsedStorySearch.setId
+          ) {
+            return false;
+          }
+
+          if (
+            parsedStorySearch.setIndex !== null &&
+            story.set_index !== parsedStorySearch.setIndex
+          ) {
+            return false;
+          }
+
+          if (
+            parsedStorySearch.nameQuery &&
+            !story.name
+              .toLocaleLowerCase()
+              .includes(parsedStorySearch.nameQuery)
+          ) {
+            return false;
+          }
+
+          return true;
+        });
 
   let set_ends = [];
   // Seed with the first visible story's set so the first rendered row does not
@@ -180,36 +222,49 @@ export default function EditList({
           />
         </div>
       </div>
-      <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
-        {STORY_FILTER_ORDER.map((filter) => {
-          const isActive = activeFilter === filter;
-          return (
-            <button
-              key={filter}
-              type="button"
-              className={
-                "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 " +
-                (isActive
-                  ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
-                  : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
-              }
-              onClick={() => setActiveFilter(filter)}
-              aria-pressed={isActive}
-            >
-              <span>{getFilterLabel(filter)}</span>
-              <span
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="w-full min-w-[220px] flex-1 min-[860px]:max-w-[360px]">
+          <Input
+            id="story-search"
+            type="search"
+            value={storySearch}
+            placeholder="Search story names"
+            aria-label="Search story names"
+            autoComplete="off"
+            onChange={(event) => setStorySearch(event.target.value)}
+          />
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {STORY_FILTER_ORDER.map((filter) => {
+            const isActive = activeFilter === filter;
+            return (
+              <button
+                key={filter}
+                type="button"
                 className={
-                  "rounded-full px-2 py-[3px] text-[12px] font-bold " +
+                  "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 " +
                   (isActive
-                    ? "bg-[color:rgba(255,255,255,0.18)] text-[var(--button-color)]"
-                    : "bg-[var(--body-background)] text-[var(--text-color-dim)]")
+                    ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
+                    : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
                 }
+                onClick={() => setActiveFilter(filter)}
+                aria-pressed={isActive}
               >
-                {counts[filter]}
-              </span>
-            </button>
-          );
-        })}
+                <span>{getFilterLabel(filter)}</span>
+                <span
+                  className={
+                    "rounded-full px-2 py-[3px] text-[12px] font-bold " +
+                    (isActive
+                      ? "bg-[color:rgba(255,255,255,0.18)] text-[var(--button-color)]"
+                      : "bg-[var(--body-background)] text-[var(--text-color-dim)]")
+                  }
+                >
+                  {counts[filter]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
       <div className="mb-[100px] w-full">
         <div className="hidden min-[1000px]:block">
@@ -349,7 +404,7 @@ export default function EditList({
           ))}
           {filteredStories.length === 0 ? (
             <div className="rounded-[12px] border border-dashed border-[var(--header-border)] bg-[var(--body-background-faint)] px-4 py-6 text-center text-[var(--text-color-dim)]">
-              {getEmptyStateMessage(activeFilter)}
+              {getEmptyStateMessage(activeFilter, trimmedStorySearch)}
             </div>
           ) : null}
         </div>
@@ -373,9 +428,54 @@ function getFilterLabel(filter: StoryFilter) {
   return "📢 Published";
 }
 
-function getEmptyStateMessage(filter: StoryFilter) {
+function getEmptyStateMessage(filter: StoryFilter, searchQuery: string) {
+  if (searchQuery) return "No stories match the current search.";
   if (filter === "all") return "No stories yet.";
   return "No stories match the selected state.";
+}
+
+function parseStorySearch(searchQuery: string) {
+  const trimmedQuery = searchQuery.trim();
+  if (!trimmedQuery) return null;
+
+  const setAndIndexMatch = trimmedQuery.match(
+    /^(?<setId>\d+)\s*-\s*(?<setIndex>\d+)(?:\s+(?<nameQuery>.+))?$/,
+  );
+
+  if (setAndIndexMatch?.groups) {
+    return {
+      setId: Number.parseInt(setAndIndexMatch.groups.setId, 10),
+      setIndex: Number.parseInt(setAndIndexMatch.groups.setIndex, 10),
+      nameQuery:
+        setAndIndexMatch.groups.nameQuery?.trim().toLocaleLowerCase() ?? "",
+    };
+  }
+
+  const setAndNameMatch = trimmedQuery.match(
+    /^(?<setId>\d+)(?:\s+(?<nameQuery>.+))$/,
+  );
+
+  if (setAndNameMatch?.groups) {
+    return {
+      setId: Number.parseInt(setAndNameMatch.groups.setId, 10),
+      setIndex: null,
+      nameQuery: setAndNameMatch.groups.nameQuery.trim().toLocaleLowerCase(),
+    };
+  }
+
+  if (/^\d+$/.test(trimmedQuery)) {
+    return {
+      setId: Number.parseInt(trimmedQuery, 10),
+      setIndex: null,
+      nameQuery: "",
+    };
+  }
+
+  return {
+    setId: null,
+    setIndex: null,
+    nameQuery: trimmedQuery.toLocaleLowerCase(),
+  };
 }
 
 function pad_space(x: number) {
