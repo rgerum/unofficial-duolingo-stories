@@ -619,7 +619,7 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                   ? "Enabled, questions will be skipped"
                   : "Disabled, questions are shown as normal"
               }
-              helper="Wether to show the questions in interactive story mode."
+              helper="Whether to show the questions in interactive story mode."
               action={
                 <Switch
                   checked={hideStoryQuestions}
