@@ -208,6 +208,13 @@ export default defineSchema({
     .index("by_user_and_course", ["legacyUserId", "courseId"])
     .index("by_user_and_last_done_at", ["legacyUserId", "lastDoneAt"]),
 
+  user_preferences: defineTable({
+    tokenIdentifier: v.string(),
+    legacyUserId: v.optional(v.number()),
+    hideStoryQuestions: v.boolean(),
+    updatedAt: v.number(),
+  }).index("by_token_identifier", ["tokenIdentifier"]),
+
   story_approval: defineTable({
     storyId: v.id("stories"),
     legacyUserId: v.optional(v.number()),

@@ -1,4 +1,9 @@
+import { cookies } from "next/headers";
 import { fetchAuthQuery } from "@/lib/auth-server";
+import {
+  HIDE_STORY_QUESTIONS_COOKIE,
+  isStoryQuestionsDisabled,
+} from "@/lib/story-preferences";
 import { getUser, isAdmin, isContributor } from "@/lib/userInterface";
 import { api } from "@convex/_generated/api";
 
@@ -9,6 +14,7 @@ export interface ProfileData {
   image: string | null;
   role: string[];
   provider_linked: Record<string, boolean>;
+  hide_story_questions: boolean;
 }
 
 export async function getProfileData() {
@@ -16,11 +22,20 @@ export async function getProfileData() {
   const user = await getUser();
   if (!user) return undefined;
   if (!user.email) throw new Error("No user email available");
+  const cookieStore = await cookies();
 
-  const providersFromAuth = (await fetchAuthQuery(
-    api.auth.getLinkedProvidersForCurrentUser,
-    {},
-  )) as string[];
+  const [providersFromAuth, storyPreferences] = await Promise.all([
+    fetchAuthQuery(api.auth.getLinkedProvidersForCurrentUser, {}) as Promise<
+      string[]
+    >,
+    fetchAuthQuery(
+      api.userPreferences.getCurrentStoryPreferences,
+      {},
+    ) as Promise<{
+      hasSavedPreference: boolean;
+      hideStoryQuestions: boolean;
+    }>,
+  ]);
 
   const providerLinked = Object.fromEntries(
     providersBase.map((provider) => [provider, false]),
@@ -46,5 +61,10 @@ export async function getProfileData() {
     image: user.image ?? null,
     role,
     provider_linked: providerLinked,
+    hide_story_questions: storyPreferences.hasSavedPreference
+      ? storyPreferences.hideStoryQuestions
+      : isStoryQuestionsDisabled(
+          cookieStore.get(HIDE_STORY_QUESTIONS_COOKIE)?.value,
+        ),
   } satisfies ProfileData;
 }

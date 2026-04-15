@@ -136,6 +136,64 @@ function getCharacter(parts: StoryElement[]) {
   }
 }
 
+function shouldSkipStoryPart(
+  parts: StoryElement[],
+  hideQuestions: boolean,
+): boolean {
+  return (
+    hideQuestions &&
+    parts[0].type === "MATCH" &&
+    parts[0].trackingProperties?.challenge_type === "match"
+  );
+}
+
+function getNextVisibleStoryProgress(
+  partsList: StoryElement[][],
+  currentStoryProgress: number,
+  hideQuestions: boolean,
+): number {
+  let nextStoryProgress = currentStoryProgress + 1;
+  while (
+    nextStoryProgress < partsList.length &&
+    shouldSkipStoryPart(partsList[nextStoryProgress], hideQuestions)
+  ) {
+    nextStoryProgress += 1;
+  }
+  return nextStoryProgress;
+}
+
+function getVisibleStoryLength(
+  partsList: StoryElement[][],
+  hideQuestions: boolean,
+): number {
+  let visibleLength = 0;
+  for (const parts of partsList) {
+    if (!shouldSkipStoryPart(parts, hideQuestions)) {
+      visibleLength += 1;
+    }
+  }
+  return visibleLength;
+}
+
+function getVisibleStoryProgress(
+  partsList: StoryElement[][],
+  storyProgress: number,
+  hideQuestions: boolean,
+): number {
+  if (storyProgress >= partsList.length) {
+    return getVisibleStoryLength(partsList, hideQuestions);
+  }
+
+  let visibleProgress = 0;
+  for (let index = 0; index <= storyProgress; index += 1) {
+    if (!shouldSkipStoryPart(partsList[index], hideQuestions)) {
+      visibleProgress += 1;
+    }
+  }
+
+  return Math.max(visibleProgress - 1, 0);
+}
+
 export type StorySettings = {
   hide_questions: boolean;
   show_all: boolean;
@@ -157,16 +215,24 @@ function getInitialStoryProgress({
   partsList,
   initialFocusLine,
   showTitlePage,
+  hideQuestions,
 }: {
   partsList?: StoryElement[][];
   initialFocusLine?: number;
   showTitlePage: boolean;
+  hideQuestions: boolean;
 }) {
   if (!partsList || partsList.length === 0) {
     return showTitlePage ? -1 : 0;
   }
+  const fallbackProgress = showTitlePage ? -1 : 0;
   if (!initialFocusLine || initialFocusLine <= 0) {
-    return showTitlePage ? -1 : 0;
+    if (fallbackProgress < 0) return fallbackProgress;
+    return getNextVisibleStoryProgress(
+      partsList,
+      fallbackProgress - 1,
+      hideQuestions,
+    );
   }
 
   const focusedIndex = partsList.findIndex((parts) =>
@@ -174,8 +240,14 @@ function getInitialStoryProgress({
       (element) => element.editor?.block_start_no === initialFocusLine,
     ),
   );
+  const initialProgress = focusedIndex >= 0 ? focusedIndex : fallbackProgress;
 
-  return focusedIndex >= 0 ? focusedIndex : showTitlePage ? -1 : 0;
+  if (initialProgress < 0) return initialProgress;
+  return getNextVisibleStoryProgress(
+    partsList,
+    initialProgress - 1,
+    hideQuestions,
+  );
 }
 
 function getInitialPartProgress({
@@ -232,6 +304,29 @@ function getVisibleEditorLine({
     .find((lineNumber): lineNumber is number => typeof lineNumber === "number");
 }
 
+function getCurrentVisiblePart({
+  partsList,
+  storyProgress,
+  hideQuestions,
+}: {
+  partsList?: StoryElement[][];
+  storyProgress: number;
+  hideQuestions: boolean;
+}) {
+  if (!partsList || partsList.length === 0 || storyProgress < 0) {
+    return undefined;
+  }
+
+  const maxIndex = Math.min(storyProgress, partsList.length - 1);
+  for (let index = maxIndex; index >= 0; index -= 1) {
+    if (!shouldSkipStoryPart(partsList[index], hideQuestions)) {
+      return partsList[index];
+    }
+  }
+
+  return undefined;
+}
+
 function StoryProgress({
   story,
   parts_list: providedPartsList,
@@ -269,6 +364,7 @@ function StoryProgress({
     partsList: parts_list,
     initialFocusLine,
     showTitlePage: settings.show_title_page,
+    hideQuestions: settings.hide_questions,
   });
   const initialPartProgress = getInitialPartProgress({
     partsList: parts_list,
@@ -278,9 +374,12 @@ function StoryProgress({
   const [partProgress, setPartProgress] = React.useState(initialPartProgress);
   const [storyProgress, setStoryProgress] =
     React.useState(initialStoryProgress);
-  const [buttonStatus, setButtonStatus] = React.useState(
-    initialStoryProgress === -1 ? "continue" : "wait",
-  );
+  const [buttonStatus, setButtonStatus] = React.useState(() => {
+    if (initialStoryProgress === -1) return "continue";
+    if (parts_list && initialStoryProgress >= parts_list.length)
+      return "finished";
+    return "wait";
+  });
   const previousButtonStatus = React.useRef(buttonStatus);
 
   React.useEffect(() => {
@@ -301,6 +400,28 @@ function StoryProgress({
     buttonStatus === "right" ||
     buttonStatus === "finished";
 
+  React.useEffect(() => {
+    if (
+      !parts_list ||
+      storyProgress < 0 ||
+      storyProgress >= parts_list.length ||
+      !shouldSkipStoryPart(parts_list[storyProgress], settings.hide_questions)
+    ) {
+      return;
+    }
+
+    const nextStoryProgress = getNextVisibleStoryProgress(
+      parts_list,
+      storyProgress,
+      settings.hide_questions,
+    );
+    setPartProgress(0);
+    setStoryProgress(nextStoryProgress);
+    setButtonStatus(
+      nextStoryProgress >= parts_list.length ? "finished" : "wait",
+    );
+  }, [parts_list, settings.hide_questions, storyProgress]);
+
   const next = React.useCallback(async () => {
     if (!parts_list) return;
     if (buttonStatus === "finished") {
@@ -314,12 +435,24 @@ function StoryProgress({
       return setPartProgress(partProgress + 1);
     }
     if (buttonStatus === "continue" || buttonStatus === "right") {
+      const nextStoryProgress = getNextVisibleStoryProgress(
+        parts_list,
+        storyProgress,
+        settings.hide_questions,
+      );
       setPartProgress(0);
-      setStoryProgress(storyProgress + 1);
-      if (storyProgress === parts_list.length - 1) setButtonStatus("finished");
+      setStoryProgress(nextStoryProgress);
+      if (nextStoryProgress >= parts_list.length) setButtonStatus("finished");
       else setButtonStatus("wait");
     }
-  }, [buttonStatus, onEnd, partProgress, parts_list, storyProgress]);
+  }, [
+    buttonStatus,
+    onEnd,
+    partProgress,
+    parts_list,
+    settings.hide_questions,
+    storyProgress,
+  ]);
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -342,12 +475,11 @@ function StoryProgress({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [next, queueAutoplayForNextLine, shouldQueueAutoplay]);
 
-  const currentPart =
-    !parts_list || parts_list.length === 0
-      ? undefined
-      : storyProgress < 0
-        ? undefined
-        : parts_list[Math.min(storyProgress, parts_list.length - 1)];
+  const currentPart = getCurrentVisiblePart({
+    partsList: parts_list,
+    storyProgress,
+    hideQuestions: settings.hide_questions,
+  });
   const currentEditorLine = getVisibleEditorLine({
     currentPart,
     partProgress,
@@ -379,6 +511,19 @@ function StoryProgress({
 
   if (!story || !parts_list) return null;
 
+  const visibleStoryLength = getVisibleStoryLength(
+    parts_list,
+    settings.hide_questions,
+  );
+  const visibleStoryProgress =
+    storyProgress === -1
+      ? undefined
+      : getVisibleStoryProgress(
+          parts_list,
+          storyProgress,
+          settings.hide_questions,
+        );
+
   function getIndex(parts: StoryElement[]) {
     return parts[0].trackingProperties.line_index || 0;
   }
@@ -393,12 +538,7 @@ function StoryProgress({
     const hidden = !(storyProgress >= getIndex(parts) || settings.show_all);
     if (1) {
       //storyProgress >= getIndex(parts) || settings.show_all) {
-      if (
-        settings.hide_questions &&
-        parts[0].type === "MATCH" &&
-        parts[0].trackingProperties?.challenge_type === "match"
-      )
-        continue;
+      if (shouldSkipStoryPart(parts, settings.hide_questions)) continue;
       part_list_with_component.push({
         parts,
         id: getIndex(parts),
@@ -415,8 +555,8 @@ function StoryProgress({
           <StoryHeaderProgress
             course={story.course_short}
             setId={story.set_id}
-            progress={storyProgress}
-            length={storyProgress === -1 ? undefined : parts_list.length}
+            progress={visibleStoryProgress}
+            length={storyProgress === -1 ? undefined : visibleStoryLength}
             editHref={editHref}
           />
         )}

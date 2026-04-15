@@ -40,6 +40,7 @@ import type * as storyDone from "../storyDone.js";
 import type * as storyRead from "../storyRead.js";
 import type * as storyTables from "../storyTables.js";
 import type * as storyWrite from "../storyWrite.js";
+import type * as userPreferences from "../userPreferences.js";
 
 import type {
   ApiFromModules,
@@ -80,6 +81,7 @@ declare const fullApi: ApiFromModules<{
   storyRead: typeof storyRead;
   storyTables: typeof storyTables;
   storyWrite: typeof storyWrite;
+  userPreferences: typeof userPreferences;
 }>;
 
 /**

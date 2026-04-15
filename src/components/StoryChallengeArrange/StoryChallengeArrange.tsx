@@ -37,11 +37,20 @@ function StoryChallengeArrange({
       setButtonStatus("right");
     }
   }
-  if (settings.hide_questions) {
-    if (active) setButtonStatus("continue");
 
+  React.useEffect(() => {
+    if (active && settings.hide_questions) {
+      setButtonStatus("continue");
+    }
+  }, [active, setButtonStatus, settings.hide_questions]);
+
+  if (settings.hide_questions) {
     return (
-      <FadeGlideIn key={`${id}-1`} disableScroll={settings.show_all}>
+      <FadeGlideIn
+        key={`${id}-1`}
+        hidden={hidden}
+        disableScroll={settings.show_all}
+      >
         <StoryTextLine
           active={active}
           element={parts[1] as StoryElementLine}

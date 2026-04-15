@@ -1,11 +1,28 @@
 import React, { Suspense } from "react";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { fetchAuthQuery } from "@/lib/auth-server";
+import getUserId from "@/lib/getUserId";
+import {
+  HIDE_STORY_QUESTIONS_COOKIE,
+  isStoryQuestionsDisabled,
+} from "@/lib/story-preferences";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
 import LocalisationProvider from "@/components/LocalisationProvider";
+import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
-import { fetchAuthMutation } from "@/lib/auth-server";
 import { fetchQuery } from "convex/nextjs";
+import { fetchAuthMutation } from "@/lib/auth-server";
+
+const convexUrl =
+  process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
+
+if (!convexUrl) {
+  throw new Error("Missing NEXT_PUBLIC_CONVEX_URL/CONVEX_URL");
+}
+
+const convex = new ConvexHttpClient(convexUrl);
 
 export async function generateMetadata({
   params,
@@ -40,14 +57,42 @@ export default async function Page({
 }: {
   params: Promise<{ story_id: string }>;
 }) {
+  const cookieStore = await cookies();
   const story_id = parseInt((await params).story_id);
 
   const story = await get_story(story_id);
   if (!story) notFound();
   const course_id = story.course_id;
 
+  const user_id = await getUserId();
+  const cookieHideStoryQuestions = isStoryQuestionsDisabled(
+    cookieStore.get(HIDE_STORY_QUESTIONS_COOKIE)?.value,
+  );
+  const savedStoryPreferences = user_id
+    ? ((await fetchAuthQuery(
+        api.userPreferences.getCurrentStoryPreferences,
+        {},
+      )) as {
+        hasSavedPreference: boolean;
+        hideStoryQuestions: boolean;
+      })
+    : null;
+  const hideStoryQuestions =
+    savedStoryPreferences?.hasSavedPreference === true
+      ? savedStoryPreferences.hideStoryQuestions
+      : cookieHideStoryQuestions;
   async function setStoryDoneAction() {
     "use server";
+    if (!user_id) {
+      await convex.mutation(api.storyDone.recordStoryDone, {
+        legacyStoryId: story_id,
+        time: Date.now(),
+      });
+      return {
+        message: "done",
+        story_id: story_id,
+      };
+    }
     await fetchAuthMutation(api.storyDone.recordStoryDone, {
       legacyStoryId: story_id,
       time: Date.now(),
@@ -65,6 +110,7 @@ export default async function Page({
         <Suspense fallback={null}>
           <StoryWrapper
             story={story}
+            hideStoryQuestions={hideStoryQuestions}
             storyFinishedIndexUpdate={setStoryDoneAction}
             //localization={localization}
           />
