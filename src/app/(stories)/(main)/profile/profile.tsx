@@ -8,8 +8,12 @@ import Input from "@/components/ui/input";
 import Switch from "@/components/ui/switch";
 import { GetIcon } from "@/components/icons";
 import { authClient } from "@/lib/auth-client";
+import { resetPostHogUser } from "@/lib/posthog-user";
 import type { ProfileData } from "./data";
-import { setHideStoryQuestionsPreference } from "./actions";
+import {
+  deleteCurrentUserAccount,
+  setHideStoryQuestionsPreference,
+} from "./actions";
 
 const pageShellClass =
   "mx-auto mb-10 max-w-[860px] rounded-[28px] border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)] bg-[color:color-mix(in_srgb,var(--body-background)_94%,white)] p-4 shadow-[0_18px_56px_color-mix(in_srgb,#000_10%,transparent)] sm:p-6";
@@ -227,9 +231,17 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     "idle" | "pending" | "success" | "error"
   >("idle");
   const [storyQuestionsError, setStoryQuestionsError] = React.useState("");
+  const [isShowingDeleteAccount, setIsShowingDeleteAccount] =
+    React.useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = React.useState("");
+  const [deleteState, setDeleteState] = React.useState<
+    "idle" | "pending" | "error"
+  >("idle");
+  const [deleteError, setDeleteError] = React.useState("");
   const avatarName =
     sessionUser?.name?.trim() || savedUsername || providers.name || "U";
   const avatarImage = sessionUser?.image ?? providers.image;
+  const deleteConfirmationTarget = savedUsername.trim() || providers.email;
 
   React.useEffect(() => {
     const storedPendingEmail = window.localStorage.getItem(
@@ -272,6 +284,20 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     setEmailState("idle");
     setEmailError("");
     setIsEditingEmail(false);
+  }
+
+  function openDeleteAccount() {
+    setDeleteConfirmation("");
+    setDeleteState("idle");
+    setDeleteError("");
+    setIsShowingDeleteAccount(true);
+  }
+
+  function closeDeleteAccount() {
+    setDeleteConfirmation("");
+    setDeleteState("idle");
+    setDeleteError("");
+    setIsShowingDeleteAccount(false);
   }
 
   async function requestPasswordReset() {
@@ -389,6 +415,45 @@ export default function Profile({ providers }: { providers: ProfileData }) {
           "Could not update your story question preference.",
       );
     }
+  }
+
+  async function removeAccount() {
+    if (deleteState === "pending") return;
+
+    if (deleteConfirmation.trim() !== deleteConfirmationTarget) {
+      setDeleteState("error");
+      setDeleteError(`Type ${deleteConfirmationTarget} to confirm.`);
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Delete your account now? This will remove your sign-in account and log you out.",
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    setDeleteState("pending");
+    setDeleteError("");
+
+    try {
+      await deleteCurrentUserAccount();
+    } catch (error) {
+      setDeleteState("error");
+      setDeleteError(
+        (error as Error)?.message || "Could not delete your account.",
+      );
+      return;
+    }
+
+    window.localStorage.removeItem("profile_pending_email_change");
+
+    try {
+      await authClient.signOut();
+    } catch {}
+
+    resetPostHogUser();
+    window.location.href = "/";
   }
 
   return (
@@ -664,15 +729,86 @@ export default function Profile({ providers }: { providers: ProfileData }) {
         </section>
 
         <section className={`${cardClass} mt-5`}>
-          <p className={eyebrowClass}>Delete account</p>
-          <h2 className="mt-1 text-[1.45rem] font-bold leading-[1.1]">
-            Manual removal
-          </h2>
-          <p className="mb-0 mt-2 text-[0.96rem] leading-[1.65] text-[var(--title-color-dim)]">
-            If you want to delete your account, contact us on{" "}
-            <Link href="https://discord.gg/4NGVScARR3">Discord</Link>. We
-            typically delete your username and email address upon request.
+          <div className="flex flex-col gap-2 border-b border-[color:color-mix(in_srgb,#e89a9a_35%,transparent)] pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className={eyebrowClass}>Delete account</p>
+              <h2 className="mt-1 text-[1.45rem] font-bold leading-[1.1]">
+                Permanently delete your account
+              </h2>
+            </div>
+            <Button
+              type="button"
+              variant="destructive"
+              className="mt-0 min-w-[180px]"
+              disabled={deleteState === "pending"}
+              onClick={() => {
+                if (deleteState === "pending") {
+                  return;
+                }
+                if (isShowingDeleteAccount) {
+                  closeDeleteAccount();
+                } else {
+                  openDeleteAccount();
+                }
+              }}
+            >
+              {isShowingDeleteAccount ? "Close" : "Delete account"}
+            </Button>
+          </div>
+          <p className="mb-0 mt-3 text-[0.96rem] leading-[1.65] text-[var(--title-color-dim)]">
+            Remove your Duostories account and sign out immediately. This action
+            cannot be undone.
           </p>
+          {isShowingDeleteAccount ? (
+            <div className="mt-4 rounded-[20px] border border-[color:color-mix(in_srgb,#e89a9a_45%,transparent)] bg-[color:color-mix(in_srgb,#f7d7d7_28%,var(--body-background))] p-4">
+              <p className={labelClass}>Confirm deletion</p>
+              <p className="mt-0 text-[0.92rem] text-[var(--title-color-dim)]">
+                Type <strong>{deleteConfirmationTarget}</strong> to confirm that
+                you want to permanently delete this account.
+              </p>
+              <Input
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                placeholder={deleteConfirmationTarget}
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                data-cy="profile-delete-confirmation"
+              />
+              {deleteState === "error" ? (
+                <span
+                  className={errorMessageClass}
+                  data-cy="profile-delete-error"
+                >
+                  {deleteError}
+                </span>
+              ) : null}
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  data-cy="profile-delete-account"
+                  onClick={removeAccount}
+                  disabled={
+                    deleteState === "pending" ||
+                    deleteConfirmation.trim() !== deleteConfirmationTarget
+                  }
+                >
+                  {deleteState === "pending"
+                    ? "Deleting..."
+                    : "Permanently delete my account"}
+                </Button>
+                <Button
+                  type="button"
+                  className="mt-0 min-w-[120px]"
+                  onClick={closeDeleteAccount}
+                  disabled={deleteState === "pending"}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </section>
       </div>
     </>

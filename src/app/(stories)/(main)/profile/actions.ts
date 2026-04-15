@@ -21,3 +21,7 @@ export async function setHideStoryQuestionsPreference(hideQuestions: boolean) {
     secure: process.env.NODE_ENV === "production",
   });
 }
+
+export async function deleteCurrentUserAccount() {
+  await fetchAuthMutation(api.account.deleteCurrentUser, {});
+}
