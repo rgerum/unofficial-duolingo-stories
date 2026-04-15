@@ -16,7 +16,7 @@
     "backfill:course-contributors": "pnpm exec tsx scripts/backfill-course-contributors.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-polly": "^3.1029.0",
+    "@aws-sdk/client-polly": "^3.1030.0",
     "@codemirror/language": "^6.12.3",
     "@codemirror/state": "^6.6.0",
     "@convex-dev/better-auth": "^0.11.4",
@@ -39,7 +39,7 @@
     "microsoft-cognitiveservices-speech-sdk": "^1.49.0",
     "next": "^16.2.3",
     "next-mdx-remote": "^6.0.0",
-    "posthog-js": "^1.367.0",
+    "posthog-js": "^1.369.0",
     "posthog-node": "^5.29.2",
     "radix-ui": "^1.4.3",
     "react": "^19.2.5",
@@ -48,7 +48,6 @@
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
-    "styled-components": "^6.4.0",
     "tailwind-merge": "^3.5.0",
     "uuid": "^13.0.0",
     "vfile": "^6.0.3",
@@ -58,7 +57,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.11",
+    "@biomejs/biome": "2.4.12",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
