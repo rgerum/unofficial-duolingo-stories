@@ -3,6 +3,7 @@
 import React from "react";
 import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 import { useEditorHeaderSlotRef } from "./header_context";
+import EditorCommandPalette from "./editor_command_palette";
 
 export default function EditorHeaderShell() {
   const breadcrumbsRef = useEditorHeaderSlotRef("breadcrumbs");
@@ -15,6 +16,7 @@ export default function EditorHeaderShell() {
         className="flex min-w-0 flex-1 items-center overflow-hidden"
       />
       <div className="ml-auto flex min-w-0 items-center gap-2">
+        <EditorCommandPalette />
         <div
           ref={actionsRef}
           className="flex min-w-0 items-center justify-end max-[975px]:overflow-x-auto"

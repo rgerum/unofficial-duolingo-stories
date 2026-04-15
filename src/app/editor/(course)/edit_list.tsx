@@ -13,6 +13,7 @@ import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import ContributorList from "@/components/ContributorList";
 import Input from "@/components/ui/input";
+import { matchesStorySearch, parseStorySearch } from "@/lib/story-search";
 import {
   readCourseFilter,
   rememberCourseFilter,
@@ -106,32 +107,9 @@ export default function EditList({
   const filteredStories =
     parsedStorySearch === null
       ? filteredStoriesByState
-      : filteredStoriesByState.filter((story) => {
-          if (
-            parsedStorySearch.setId !== null &&
-            story.set_id !== parsedStorySearch.setId
-          ) {
-            return false;
-          }
-
-          if (
-            parsedStorySearch.setIndex !== null &&
-            story.set_index !== parsedStorySearch.setIndex
-          ) {
-            return false;
-          }
-
-          if (
-            parsedStorySearch.nameQuery &&
-            !story.name
-              .toLocaleLowerCase()
-              .includes(parsedStorySearch.nameQuery)
-          ) {
-            return false;
-          }
-
-          return true;
-        });
+      : filteredStoriesByState.filter((story) =>
+          matchesStorySearch(story, parsedStorySearch),
+        );
 
   let set_ends = [];
   // Seed with the first visible story's set so the first rendered row does not
@@ -432,50 +410,6 @@ function getEmptyStateMessage(filter: StoryFilter, searchQuery: string) {
   if (searchQuery) return "No stories match the current search.";
   if (filter === "all") return "No stories yet.";
   return "No stories match the selected state.";
-}
-
-function parseStorySearch(searchQuery: string) {
-  const trimmedQuery = searchQuery.trim();
-  if (!trimmedQuery) return null;
-
-  const setAndIndexMatch = trimmedQuery.match(
-    /^(?<setId>\d+)\s*-\s*(?<setIndex>\d+)(?:\s+(?<nameQuery>.+))?$/,
-  );
-
-  if (setAndIndexMatch?.groups) {
-    return {
-      setId: Number.parseInt(setAndIndexMatch.groups.setId, 10),
-      setIndex: Number.parseInt(setAndIndexMatch.groups.setIndex, 10),
-      nameQuery:
-        setAndIndexMatch.groups.nameQuery?.trim().toLocaleLowerCase() ?? "",
-    };
-  }
-
-  const setAndNameMatch = trimmedQuery.match(
-    /^(?<setId>\d+)(?:\s+(?<nameQuery>.+))$/,
-  );
-
-  if (setAndNameMatch?.groups) {
-    return {
-      setId: Number.parseInt(setAndNameMatch.groups.setId, 10),
-      setIndex: null,
-      nameQuery: setAndNameMatch.groups.nameQuery.trim().toLocaleLowerCase(),
-    };
-  }
-
-  if (/^\d+$/.test(trimmedQuery)) {
-    return {
-      setId: Number.parseInt(trimmedQuery, 10),
-      setIndex: null,
-      nameQuery: "",
-    };
-  }
-
-  return {
-    setId: null,
-    setIndex: null,
-    nameQuery: trimmedQuery.toLocaleLowerCase(),
-  };
 }
 
 function pad_space(x: number) {

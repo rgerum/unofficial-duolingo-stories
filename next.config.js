@@ -1,5 +1,6 @@
 module.exports = {
   // next.js config
+  reactCompiler: true,
   compiler: {
     styledComponents: true,
   },
