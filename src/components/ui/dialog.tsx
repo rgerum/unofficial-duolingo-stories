@@ -32,13 +32,21 @@ function DialogClose({
 
 function DialogOverlay({
   className,
+  disableAnimation = false,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+}: React.ComponentProps<typeof DialogPrimitive.Overlay> & {
+  disableAnimation?: boolean;
+}) {
+  const overlayAnimationClassName = disableAnimation
+    ? "data-[state=closed]:hidden"
+    : "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0";
+
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[1000] bg-black/45 backdrop-blur-[2px]",
+        "fixed inset-0 z-[1000] bg-black/45 backdrop-blur-[2px]",
+        overlayAnimationClassName,
         className,
       )}
       {...props}
@@ -50,17 +58,33 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  showOverlay = true,
+  overlayClassName,
+  disableAnimation = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  showOverlay?: boolean;
+  overlayClassName?: string;
+  disableAnimation?: boolean;
 }) {
+  const contentAnimationClassName = disableAnimation
+    ? "data-[state=closed]:hidden"
+    : "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200";
+
   return (
     <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay />
+      {showOverlay ? (
+        <DialogOverlay
+          className={overlayClassName}
+          disableAnimation={disableAnimation}
+        />
+      ) : null}
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-4 z-[1001] grid w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] gap-4 overflow-auto rounded-2xl border border-slate-200 p-6 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.55)] duration-200 outline-none sm:inset-auto sm:top-[50%] sm:left-[50%] sm:w-full sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%]",
+          "bg-background fixed inset-4 z-[1001] grid w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] gap-4 overflow-auto rounded-2xl border border-slate-200 p-6 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.55)] outline-none sm:inset-auto sm:top-[50%] sm:left-[50%] sm:w-full sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%]",
+          contentAnimationClassName,
           className,
         )}
         {...props}
