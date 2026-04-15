@@ -55,6 +55,9 @@ export default function StoryEditorPreview({
   onOpenAudioEditor,
 }: StoryEditorPreviewProps) {
   const parts = GetParts(story);
+  // In the editor these toggles control editor-only overlays:
+  // `showHints` reveals inline translations and `showAudio` reveals SSML tools.
+  // The base preview should still look like the live story when they are off.
   const { showHints, showAudio } = useStoryEditorPreferences();
 
   return (
@@ -141,7 +144,9 @@ function EditorElement({
   showAudio,
   onOpenAudioEditor,
 }: EditorElementProps) {
-  // Dummy settings for editor mode - show everything
+  // Keep the underlying story rendering aligned with the live experience.
+  // Editor toggles are passed separately as overrides below so they only affect
+  // editor-specific hint/audio details instead of hiding live story UI.
   const editorSettings = {
     hide_questions: false,
     show_all: true,
@@ -151,9 +156,9 @@ function EditorElement({
     hideNonHighlighted: false,
     setHighlightName: () => {},
     setHideNonHighlighted: () => {},
-    show_hints: showHints,
+    show_hints: true,
     setShowHints: () => {},
-    show_audio: showAudio,
+    show_audio: true,
     setShowAudio: () => {},
     id: 0,
     show_title_page: false,
@@ -167,6 +172,7 @@ function EditorElement({
         settings={editorSettings}
         editorState={editorState}
         editorShowTranslationsOverride={showHints}
+        editorShowAudioDetailsOverride={showAudio}
         onOpenAudioEditor={onOpenAudioEditor}
       />
     );
@@ -180,6 +186,7 @@ function EditorElement({
         settings={editorSettings}
         editorState={editorState}
         editorShowTranslationsOverride={showHints}
+        editorShowAudioDetailsOverride={showAudio}
         onOpenAudioEditor={onOpenAudioEditor}
       />
     );

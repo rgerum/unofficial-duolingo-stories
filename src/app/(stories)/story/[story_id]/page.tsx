@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { fetchAuthQuery } from "@/lib/auth-server";
@@ -27,7 +27,7 @@ const convex = new ConvexHttpClient(convexUrl);
 export async function generateMetadata({
   params,
 }: {
-  params: { story_id: string };
+  params: Promise<{ story_id: string }>;
 }) {
   const story_id = parseInt((await params).story_id);
   const story = await fetchQuery(api.storyRead.getStoryMetaByLegacyId, {
@@ -55,7 +55,7 @@ export async function generateMetadata({
 export default async function Page({
   params,
 }: {
-  params: { story_id: string };
+  params: Promise<{ story_id: string }>;
 }) {
   const cookieStore = await cookies();
   const story_id = parseInt((await params).story_id);
@@ -81,7 +81,6 @@ export default async function Page({
     savedStoryPreferences?.hasSavedPreference === true
       ? savedStoryPreferences.hideStoryQuestions
       : cookieHideStoryQuestions;
-
   async function setStoryDoneAction() {
     "use server";
     if (!user_id) {
@@ -108,12 +107,14 @@ export default async function Page({
   return (
     <>
       <LocalisationProvider lang={story.from_language_id}>
-        <StoryWrapper
-          story={story}
-          hideStoryQuestions={hideStoryQuestions}
-          storyFinishedIndexUpdate={setStoryDoneAction}
-          //localization={localization}
-        />
+        <Suspense fallback={null}>
+          <StoryWrapper
+            story={story}
+            hideStoryQuestions={hideStoryQuestions}
+            storyFinishedIndexUpdate={setStoryDoneAction}
+            //localization={localization}
+          />
+        </Suspense>
       </LocalisationProvider>
     </>
   );

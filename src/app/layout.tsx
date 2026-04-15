@@ -1,8 +1,7 @@
 import React from "react";
 import { Nunito } from "next/font/google";
-import "styles/global.css";
+import "@/styles/global.css";
 import Script from "next/script";
-import StyledComponentsRegistry from "@/lib/registry";
 import NavigationModeProvider from "@/components/NavigationModeProvider";
 import ConvexClientProvider from "@/components/providers/ConvexClientProvider";
 import PostHogUserIdentifier from "@/components/providers/PostHogUserIdentifier";
@@ -28,9 +27,7 @@ export default function RootLayout({
       <body>
         <ConvexClientProvider>
           <PostHogUserIdentifier />
-          <NavigationModeProvider>
-            <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
-          </NavigationModeProvider>
+          <NavigationModeProvider>{children}</NavigationModeProvider>
           {/*<AnalyticsTracker />*/}
         </ConvexClientProvider>
       </body>

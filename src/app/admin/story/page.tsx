@@ -17,7 +17,7 @@ export default function Page() {
 
   return (
     <div className="mx-auto my-6 mb-10 w-[min(860px,calc(100vw-32px))]">
-      <div className="relative isolate mx-auto my-6 mb-9 box-border w-full rounded-[18px] border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-[18px] shadow-[0_18px_42px_color-mix(in_srgb,#000_14%,transparent)]">
+      <div className="relative isolate mx-auto my-6 mb-9 box-border w-full rounded-2xl border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] bg-[var(--body-background)] p-5 shadow-[0_16px_38px_color-mix(in_srgb,#000_14%,transparent)]">
         <div className="flex flex-wrap items-end justify-between gap-4 px-0.5 pb-3">
           <div className="flex flex-wrap items-center gap-3">
             <label className="whitespace-nowrap font-bold" htmlFor="story-id">

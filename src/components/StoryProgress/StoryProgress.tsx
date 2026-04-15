@@ -211,9 +211,127 @@ export type StorySettings = {
   show_title_page: boolean;
 };
 
+function getInitialStoryProgress({
+  partsList,
+  initialFocusLine,
+  showTitlePage,
+  hideQuestions,
+}: {
+  partsList?: StoryElement[][];
+  initialFocusLine?: number;
+  showTitlePage: boolean;
+  hideQuestions: boolean;
+}) {
+  if (!partsList || partsList.length === 0) {
+    return showTitlePage ? -1 : 0;
+  }
+  const fallbackProgress = showTitlePage ? -1 : 0;
+  if (!initialFocusLine || initialFocusLine <= 0) {
+    if (fallbackProgress < 0) return fallbackProgress;
+    return getNextVisibleStoryProgress(
+      partsList,
+      fallbackProgress - 1,
+      hideQuestions,
+    );
+  }
+
+  const focusedIndex = partsList.findIndex((parts) =>
+    parts.some(
+      (element) => element.editor?.block_start_no === initialFocusLine,
+    ),
+  );
+  const initialProgress = focusedIndex >= 0 ? focusedIndex : fallbackProgress;
+
+  if (initialProgress < 0) return initialProgress;
+  return getNextVisibleStoryProgress(
+    partsList,
+    initialProgress - 1,
+    hideQuestions,
+  );
+}
+
+function getInitialPartProgress({
+  partsList,
+  initialFocusLine,
+  storyProgress,
+}: {
+  partsList?: StoryElement[][];
+  initialFocusLine?: number;
+  storyProgress: number;
+}) {
+  if (
+    !partsList ||
+    storyProgress < 0 ||
+    !initialFocusLine ||
+    initialFocusLine <= 0
+  ) {
+    return 0;
+  }
+
+  const currentParts = partsList[storyProgress];
+  if (!currentParts || currentParts.length < 2) return 0;
+  const lastPart = currentParts[currentParts.length - 1];
+  if (
+    lastPart.type !== "MULTIPLE_CHOICE" &&
+    lastPart.type !== "POINT_TO_PHRASE"
+  )
+    return 0;
+
+  return lastPart.editor?.block_start_no === initialFocusLine ? 1 : 0;
+}
+
+function getVisibleEditorLine({
+  currentPart,
+  partProgress,
+}: {
+  currentPart?: StoryElement[];
+  partProgress: number;
+}) {
+  if (!currentPart || currentPart.length === 0) return undefined;
+
+  const lastElement = currentPart[currentPart.length - 1];
+  if (
+    (lastElement.type === "MULTIPLE_CHOICE" ||
+      lastElement.type === "POINT_TO_PHRASE") &&
+    currentPart.length > 1 &&
+    partProgress > 0
+  ) {
+    return lastElement.editor?.block_start_no;
+  }
+
+  return currentPart
+    .map((element) => element.editor?.block_start_no)
+    .find((lineNumber): lineNumber is number => typeof lineNumber === "number");
+}
+
+function getCurrentVisiblePart({
+  partsList,
+  storyProgress,
+  hideQuestions,
+}: {
+  partsList?: StoryElement[][];
+  storyProgress: number;
+  hideQuestions: boolean;
+}) {
+  if (!partsList || partsList.length === 0 || storyProgress < 0) {
+    return undefined;
+  }
+
+  const maxIndex = Math.min(storyProgress, partsList.length - 1);
+  for (let index = maxIndex; index >= 0; index -= 1) {
+    if (!shouldSkipStoryPart(partsList[index], hideQuestions)) {
+      return partsList[index];
+    }
+  }
+
+  return undefined;
+}
+
 function StoryProgress({
   story,
-  parts_list,
+  parts_list: providedPartsList,
+  editHrefBase,
+  initialFocusLine,
   settings,
   onEnd,
   onBackToOverview,
@@ -223,6 +341,8 @@ function StoryProgress({
 }: {
   story?: StoryData;
   parts_list?: StoryElement[][];
+  editHrefBase?: string;
+  initialFocusLine?: number;
   settings: StorySettings;
   onEnd: () => void;
   onBackToOverview?: () => void | Promise<void>;
@@ -235,14 +355,23 @@ function StoryProgress({
   } | null;
   showFinishedPrimaryAction?: boolean;
 }) {
-  if (story) {
-    parts_list = GetParts(story);
-  }
-  const initialStoryProgress =
-    parts_list && !settings.show_title_page
-      ? getNextVisibleStoryProgress(parts_list, -1, settings.hide_questions)
-      : -1;
-  const [partProgress, setPartProgress] = React.useState(0);
+  const parts_list = React.useMemo(() => {
+    if (providedPartsList) return providedPartsList;
+    if (story) return GetParts(story);
+    return undefined;
+  }, [providedPartsList, story]);
+  const initialStoryProgress = getInitialStoryProgress({
+    partsList: parts_list,
+    initialFocusLine,
+    showTitlePage: settings.show_title_page,
+    hideQuestions: settings.hide_questions,
+  });
+  const initialPartProgress = getInitialPartProgress({
+    partsList: parts_list,
+    initialFocusLine,
+    storyProgress: initialStoryProgress,
+  });
+  const [partProgress, setPartProgress] = React.useState(initialPartProgress);
   const [storyProgress, setStoryProgress] =
     React.useState(initialStoryProgress);
   const [buttonStatus, setButtonStatus] = React.useState(() => {
@@ -346,6 +475,40 @@ function StoryProgress({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [next, queueAutoplayForNextLine, shouldQueueAutoplay]);
 
+  const currentPart = getCurrentVisiblePart({
+    partsList: parts_list,
+    storyProgress,
+    hideQuestions: settings.hide_questions,
+  });
+  const currentEditorLine = getVisibleEditorLine({
+    currentPart,
+    partProgress,
+  });
+  const editHref =
+    editHrefBase && currentEditorLine
+      ? `${editHrefBase}?line=${currentEditorLine}`
+      : editHrefBase;
+
+  React.useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      !story ||
+      storyProgress < 0 ||
+      currentEditorLine === undefined
+    ) {
+      return;
+    }
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("line", String(currentEditorLine));
+
+    const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (nextUrl === currentUrl) return;
+
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }, [currentEditorLine, story, storyProgress]);
+
   if (!story || !parts_list) return null;
 
   const visibleStoryLength = getVisibleStoryLength(
@@ -394,6 +557,7 @@ function StoryProgress({
             setId={story.set_id}
             progress={visibleStoryProgress}
             length={storyProgress === -1 ? undefined : visibleStoryLength}
+            editHref={editHref}
           />
         )}
         {storyProgress === -1 && !settings.show_all && (

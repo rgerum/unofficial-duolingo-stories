@@ -33,8 +33,10 @@ export async function generateMetadata({
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ story: number }>;
+  searchParams?: Promise<{ line?: string | string[] }>;
 }) {
   const storyId = Number((await params).story);
   const story = await fetchQuery(api.editorRead.getEditorStoryPageData, {
@@ -43,7 +45,16 @@ export default async function Page({
 
   if (!story) notFound();
 
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const lineParam = resolvedSearchParams?.line;
+  const line =
+    typeof lineParam === "string"
+      ? `?line=${encodeURIComponent(lineParam)}`
+      : Array.isArray(lineParam) && typeof lineParam[0] === "string"
+        ? `?line=${encodeURIComponent(lineParam[0])}`
+        : "";
+
   redirect(
-    getCanonicalStoryEditorPath(story.story_data.short, story.story_data.id),
+    `${getCanonicalStoryEditorPath(story.story_data.short, story.story_data.id)}${line}`,
   );
 }

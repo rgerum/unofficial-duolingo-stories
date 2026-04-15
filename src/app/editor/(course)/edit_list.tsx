@@ -277,7 +277,7 @@ export default function EditList({
                   {pad_space(story.set_index)}
                 </span>
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[45px] min-[1000px]:px-[5px]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[45px] max-[1000px]:shrink-0 min-[1000px]:px-[5px]">
                 <img
                   alt={"story title"}
                   src={
@@ -290,7 +290,7 @@ export default function EditList({
                   className="block min-w-[44px]"
                 />
               </div>
-              <div className="overflow-hidden pl-[5px] max-[1000px]:w-[calc(100vw-60px-45px-180px)] max-[500px]:w-[calc(100vw-60px-45px-85px)] min-[1000px]:min-w-0 min-[1000px]:px-[5px]">
+              <div className="overflow-hidden pl-[5px] max-[1000px]:min-w-0 max-[1000px]:flex-1 min-[1000px]:min-w-0 min-[1000px]:px-[5px]">
                 <div className="flex min-w-0 items-center gap-[6px]">
                   <Link
                     className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap underline underline-offset-2"
@@ -314,7 +314,7 @@ export default function EditList({
                   ) : null}
                 </div>
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-right max-[1000px]:w-[180px] max-[500px]:w-[85px] max-[500px]:[&>div]:flex max-[500px]:overflow-hidden min-[1000px]:px-[5px]">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-right max-[1000px]:ml-auto max-[1000px]:shrink-0 max-[500px]:max-w-[85px] max-[500px]:[&>div]:flex max-[500px]:overflow-hidden min-[1000px]:px-[5px]">
                 <DropDownStatus
                   id={story.id}
                   name={story.name}

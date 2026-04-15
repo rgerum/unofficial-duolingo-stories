@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import StoryProgress from "@/components/StoryProgress";
 import { useNavigationMode } from "@/components/NavigationModeProvider";
@@ -41,6 +41,7 @@ export default function StoryWrapper({
 }) {
   const mode = useNavigationMode();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [highlight_name, setHighlightName] = React.useState<string[]>([]);
   const [hideNonHighlighted, setHideNonHighlighted] = React.useState(false);
   const trackedStoryStart = React.useRef(false);
@@ -50,6 +51,17 @@ export default function StoryWrapper({
   );
   const { data: session } = authClient.useSession();
   const sessionUser = (session?.user ?? null) as PostHogUser | null;
+  const role = typeof sessionUser?.role === "string" ? sessionUser.role : null;
+  const editHrefBase =
+    role === "contributor" || role === "admin"
+      ? `/editor/course/${story.course_short}/story/${story.id}`
+      : undefined;
+  const rawLine = searchParams.get("line");
+  const parsedLine = typeof rawLine === "string" ? Number(rawLine) : undefined;
+  const initialFocusLine =
+    parsedLine !== undefined && Number.isFinite(parsedLine) && parsedLine > 0
+      ? parsedLine
+      : undefined;
   const nextStep = useQuery(
     api.storyDone.getNextStoryForCurrentUserInCourse,
     sessionUser?.id
@@ -178,7 +190,10 @@ export default function StoryWrapper({
   return (
     <>
       <StoryProgress
+        key={`${story.id}:${initialFocusLine ?? "start"}:${mode}`}
         story={story}
+        editHrefBase={editHrefBase}
+        initialFocusLine={initialFocusLine}
         settings={{
           hide_questions: hideStoryQuestions,
           show_all: false,
