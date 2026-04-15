@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
+import EditorCommandPalette from "@/app/editor/_components/editor_command_palette";
 import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 import { useEditorHeaderSlotRef } from "./header_context";
-import EditorCommandPalette from "./editor_command_palette";
 
 export default function EditorHeaderShell() {
   const breadcrumbsRef = useEditorHeaderSlotRef("breadcrumbs");

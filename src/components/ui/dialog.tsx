@@ -38,7 +38,7 @@ function DialogOverlay({
   disableAnimation?: boolean;
 }) {
   const overlayAnimationClassName = disableAnimation
-    ? ""
+    ? "data-[state=closed]:hidden"
     : "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0";
 
   return (
@@ -69,7 +69,7 @@ function DialogContent({
   disableAnimation?: boolean;
 }) {
   const contentAnimationClassName = disableAnimation
-    ? ""
+    ? "data-[state=closed]:hidden"
     : "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200";
 
   return (

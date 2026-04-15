@@ -79,7 +79,12 @@ export default function EditorCommandPalette() {
     }
   }
 
-  const storyCourse = selectedCourse ?? currentCourse;
+  const storyCourse =
+    open && selectedCourse
+      ? selectedCourse
+      : open && currentCourse && selectedCourseKey !== null
+        ? currentCourse
+        : null;
   const storyCourseIdentifier = storyCourse
     ? getCourseIdentifier(storyCourse)
     : null;
@@ -339,7 +344,6 @@ export default function EditorCommandPalette() {
       ) : null}
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
-          forceMount
           disableAnimation
           className="overflow-hidden border-[var(--header-border)] bg-[color:color-mix(in_srgb,var(--body-background)_92%,white_8%)] p-0 sm:max-w-[760px]"
           showCloseButton={false}
