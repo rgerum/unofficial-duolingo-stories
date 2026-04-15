@@ -21,9 +21,11 @@ const HAS_POSTHOG = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
 
 export default function StoryWrapper({
   story,
+  hideStoryQuestions,
   storyFinishedIndexUpdate,
 }: {
   story: StoryData;
+  hideStoryQuestions: boolean;
   storyFinishedIndexUpdate: () => Promise<
     | {
         message: string;
@@ -178,7 +180,7 @@ export default function StoryWrapper({
       <StoryProgress
         story={story}
         settings={{
-          hide_questions: false,
+          hide_questions: hideStoryQuestions,
           show_all: false,
           show_names: false,
           rtl: story.learning_language_rtl,

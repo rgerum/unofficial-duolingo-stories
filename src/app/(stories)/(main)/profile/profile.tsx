@@ -5,9 +5,11 @@ import Link from "next/link";
 import Header from "../header";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
+import Switch from "@/components/ui/switch";
 import { GetIcon } from "@/components/icons";
 import { authClient } from "@/lib/auth-client";
 import type { ProfileData } from "./data";
+import { setHideStoryQuestionsPreference } from "./actions";
 
 const pageShellClass =
   "mx-auto mb-10 max-w-[860px] rounded-[28px] border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)] bg-[color:color-mix(in_srgb,var(--body-background)_94%,white)] p-4 shadow-[0_18px_56px_color-mix(in_srgb,#000_10%,transparent)] sm:p-6";
@@ -218,6 +220,13 @@ export default function Profile({ providers }: { providers: ProfileData }) {
   const [isEditingEmail, setIsEditingEmail] = React.useState(false);
   const [isShowingPasswordReset, setIsShowingPasswordReset] =
     React.useState(false);
+  const [hideStoryQuestions, setHideStoryQuestions] = React.useState(
+    providers.hide_story_questions,
+  );
+  const [storyQuestionsState, setStoryQuestionsState] = React.useState<
+    "idle" | "pending" | "success" | "error"
+  >("idle");
+  const [storyQuestionsError, setStoryQuestionsError] = React.useState("");
   const avatarName =
     sessionUser?.name?.trim() || savedUsername || providers.name || "U";
   const avatarImage = sessionUser?.image ?? providers.image;
@@ -359,6 +368,27 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     setSavedUsername(normalizedUsername);
     setUsernameState("success");
     setUsernameError("");
+  }
+
+  async function toggleHideStoryQuestions() {
+    if (storyQuestionsState === "pending") return;
+
+    const nextHideStoryQuestions = !hideStoryQuestions;
+    setHideStoryQuestions(nextHideStoryQuestions);
+    setStoryQuestionsState("pending");
+    setStoryQuestionsError("");
+
+    try {
+      await setHideStoryQuestionsPreference(nextHideStoryQuestions);
+      setStoryQuestionsState("success");
+    } catch (error) {
+      setHideStoryQuestions(!nextHideStoryQuestions);
+      setStoryQuestionsState("error");
+      setStoryQuestionsError(
+        (error as Error)?.message ||
+          "Could not update your story question preference.",
+      );
+    }
   }
 
   return (
@@ -564,6 +594,42 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                   </Button>
                 </div>
               ) : null}
+            </SettingRow>
+          </div>
+        </section>
+
+        <section className={`${cardClass} mt-5`}>
+          <div className="flex flex-col gap-2 border-b border-[color:color-mix(in_srgb,var(--header-border)_30%,transparent)] pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className={eyebrowClass}>Stories</p>
+              <h2 className="mt-1 text-[1.45rem] font-bold leading-[1.1]">
+                Playback preferences
+              </h2>
+            </div>
+            <p className="m-0 text-[0.9rem] text-[var(--title-color-dim)]">
+              Control how standard story pages behave when you open them.
+            </p>
+          </div>
+
+          <div className="mt-5 space-y-4">
+            <SettingRow
+              label="Interactive questions"
+              value={hideStoryQuestions ? "Disabled" : "Enabled"}
+              helper="Skip interactive questions in the normal story player. Autoplay already skips them."
+              action={
+                <Switch
+                  checked={hideStoryQuestions}
+                  onClick={toggleHideStoryQuestions}
+                  disabled={storyQuestionsState === "pending"}
+                  ariaLabel="Disable interactive questions in stories"
+                />
+              }
+            >
+              <StatusText
+                state={storyQuestionsState}
+                error={storyQuestionsError}
+                success="Story preference saved."
+              />
             </SettingRow>
           </div>
         </section>
