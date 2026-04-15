@@ -613,9 +613,13 @@ export default function Profile({ providers }: { providers: ProfileData }) {
 
           <div className="mt-5 space-y-4">
             <SettingRow
-              label="Interactive questions"
-              value={hideStoryQuestions ? "Disabled" : "Enabled"}
-              helper="Skip interactive questions in the normal story player. Autoplay already skips them."
+              label="Skip Questions"
+              value={
+                hideStoryQuestions
+                  ? "Enabled, questions will be skipped"
+                  : "Disabled, questions are shown as normal"
+              }
+              helper="Wether to show the questions in interactive story mode."
               action={
                 <Switch
                   checked={hideStoryQuestions}

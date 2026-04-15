@@ -34,8 +34,13 @@ function StoryChallengeSelectPhrases({
     setButtonStatus("right");
   }
 
+  React.useEffect(() => {
+    if (active && settings.hide_questions) {
+      setButtonStatus("continue");
+    }
+  }, [active, setButtonStatus, settings.hide_questions]);
+
   if (settings.hide_questions) {
-    if (active) setButtonStatus("continue");
     return (
       <FadeGlideIn
         key={`${id}-1`}
