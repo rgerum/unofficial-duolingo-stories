@@ -740,7 +740,11 @@ export default function Profile({ providers }: { providers: ProfileData }) {
               type="button"
               variant="destructive"
               className="mt-0 min-w-[180px]"
+              disabled={deleteState === "pending"}
               onClick={() => {
+                if (deleteState === "pending") {
+                  return;
+                }
                 if (isShowingDeleteAccount) {
                   closeDeleteAccount();
                 } else {
