@@ -354,9 +354,9 @@ export default function LanguageList({ all_languages }: LanguageListProps) {
             </tr>
           </thead>
           <tbody>
-            {filteredLanguages.map((lang, i) => (
+            {filteredLanguages.map((lang) => (
               <TableRow
-                key={i}
+                key={lang.id}
                 lang={lang}
                 updateLanguage={updateLanguage}
                 isShortcutOpen={lang.id === editLanguageId}

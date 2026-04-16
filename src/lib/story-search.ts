@@ -169,9 +169,14 @@ function splitStatusTokens(searchQuery: string): {
 } {
   let statusFilter: StorySearchState | null = null;
   const remainingTokens: string[] = [];
+  const tokens = searchQuery.split(/\s+/).filter(Boolean);
+  const allowBareStatusToken = tokens.length === 1;
 
-  for (const token of searchQuery.split(/\s+/)) {
-    const statusToken = normalizeStorySearchStateToken(token);
+  for (const token of tokens) {
+    const statusToken = normalizeStorySearchStateToken(
+      token,
+      allowBareStatusToken,
+    );
     if (statusToken !== null) {
       statusFilter = statusToken;
       continue;
@@ -187,15 +192,20 @@ function splitStatusTokens(searchQuery: string): {
 
 function normalizeStorySearchStateToken(
   token: string,
+  allowBareStatusToken: boolean,
 ): StorySearchState | null {
   const normalizedToken = token.trim().toLocaleLowerCase();
-  const rawStatus = normalizedToken.startsWith("status:")
+  const hasStatusPrefix = normalizedToken.startsWith("status:");
+  const hasHashPrefix = normalizedToken.startsWith("#");
+  const hasExplicitPrefix = hasStatusPrefix || hasHashPrefix;
+  const rawStatus = hasStatusPrefix
     ? normalizedToken.slice("status:".length)
-    : normalizedToken.startsWith("#")
+    : hasHashPrefix
       ? normalizedToken.slice(1)
       : normalizedToken;
 
   if (!rawStatus) return null;
+  if (!hasExplicitPrefix && !allowBareStatusToken) return null;
 
   if (matchesStatusPrefix(rawStatus, ["d", "dr", "dra", "draf", "draft"])) {
     return "draft";
