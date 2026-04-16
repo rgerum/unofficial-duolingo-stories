@@ -6,6 +6,7 @@ import Flag from "@/components/ui/flag";
 import Input from "@/components/ui/input";
 import React, { useState } from "react";
 import { useMutation } from "convex/react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { api } from "@convex/_generated/api";
 import * as EditDialog from "../edit_dialog";
 import Button from "@/components/ui/button";
@@ -29,9 +30,17 @@ interface EditLanguageProps {
   obj: Language;
   updateLanguage: (lang: Language) => void;
   is_new?: boolean;
+  onShortcutClose?: () => void;
+  shortcutOpen?: boolean;
 }
 
-function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
+function EditLanguage({
+  obj,
+  updateLanguage,
+  is_new,
+  onShortcutClose,
+  shortcutOpen,
+}: EditLanguageProps) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const createLanguageMutation = useMutation(
@@ -47,6 +56,19 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
   const [flag_file, setFlagFile] = useState(obj.flag_file);
   const [speaker, setSpeaker] = useState(obj.speaker);
   const [rtl, setRTL] = useState(obj.rtl);
+
+  React.useEffect(() => {
+    if (shortcutOpen) {
+      setOpen(true);
+    }
+  }, [shortcutOpen]);
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen && shortcutOpen) {
+      onShortcutClose?.();
+    }
+  }
 
   async function send() {
     const data: Language = {
@@ -84,6 +106,9 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
         });
       }
       setOpen(false);
+      if (shortcutOpen) {
+        onShortcutClose?.();
+      }
       updateLanguage(newData);
     } catch {
       setError("An error occurred. Please report in Discord.");
@@ -91,7 +116,11 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
   }
 
   return (
-    <AdminDialogTrigger open={open} onOpenChange={setOpen} isNew={is_new}>
+    <AdminDialogTrigger
+      open={open}
+      onOpenChange={handleOpenChange}
+      isNew={is_new}
+    >
       <EditDialog.Content>
         <EditDialog.DialogTitle>
           {is_new ? "Add" : "Edit"} Language
@@ -155,9 +184,16 @@ function EditLanguage({ obj, updateLanguage, is_new }: EditLanguageProps) {
 interface TableRowProps {
   lang: Language;
   updateLanguage: (lang: Language) => void;
+  isShortcutOpen?: boolean;
+  onShortcutClose?: () => void;
 }
 
-function TableRow({ lang, updateLanguage }: TableRowProps) {
+function TableRow({
+  lang,
+  updateLanguage,
+  isShortcutOpen,
+  onShortcutClose,
+}: TableRowProps) {
   const refRow = React.useRef<HTMLTableRowElement>(null);
 
   function updateLanguageWrapper(newCourse: Language) {
@@ -216,7 +252,12 @@ function TableRow({ lang, updateLanguage }: TableRowProps) {
       <td className="px-3 py-2.5">{lang.speaker}</td>
       <td className="px-3 py-2.5">{String(lang.rtl)}</td>
       <td className="px-4 py-2.5 text-right">
-        <EditLanguage obj={lang} updateLanguage={updateLanguageWrapper} />
+        <EditLanguage
+          obj={lang}
+          updateLanguage={updateLanguageWrapper}
+          shortcutOpen={isShortcutOpen}
+          onShortcutClose={onShortcutClose}
+        />
       </td>
     </tr>
   );
@@ -227,8 +268,25 @@ interface LanguageListProps {
 }
 
 export default function LanguageList({ all_languages }: LanguageListProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [search, setSearch] = useInput("");
   const [myLangs, setMyLangs] = useState<Language[]>(all_languages);
+  const editLanguageValue = searchParams.get("editLanguage");
+  const editLanguageId = editLanguageValue
+    ? Number.parseInt(editLanguageValue, 10)
+    : Number.NaN;
+  const addLanguageShortcut = searchParams.get("addLanguage") === "1";
+
+  function clearShortcut() {
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.delete("editLanguage");
+    nextParams.delete("addLanguage");
+    const nextUrl =
+      nextParams.size > 0 ? `${pathname}?${nextParams}` : pathname;
+    router.replace(nextUrl, { scroll: false });
+  }
 
   React.useEffect(() => {
     setMyLangs(all_languages);
@@ -262,6 +320,8 @@ export default function LanguageList({ all_languages }: LanguageListProps) {
           }}
           is_new={true}
           updateLanguage={updateLanguage}
+          shortcutOpen={addLanguageShortcut}
+          onShortcutClose={clearShortcut}
         />
       </div>
       <div className={adminTableContainerClass}>
@@ -295,7 +355,13 @@ export default function LanguageList({ all_languages }: LanguageListProps) {
           </thead>
           <tbody>
             {filteredLanguages.map((lang, i) => (
-              <TableRow key={i} lang={lang} updateLanguage={updateLanguage} />
+              <TableRow
+                key={i}
+                lang={lang}
+                updateLanguage={updateLanguage}
+                isShortcutOpen={lang.id === editLanguageId}
+                onShortcutClose={clearShortcut}
+              />
             ))}
           </tbody>
         </table>

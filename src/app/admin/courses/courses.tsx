@@ -9,6 +9,7 @@ import Tag from "@/components/ui/badge";
 import Input from "@/components/ui/input";
 import FlagName from "../FlagName";
 import AdminDialogTrigger from "../AdminDialogTrigger";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   adminTableContainerClass,
   adminTableHeadCellClass,
@@ -144,11 +145,15 @@ function EditCourse({
   languages,
   updateCourse,
   is_new,
+  onShortcutClose,
+  shortcutOpen,
 }: {
   obj: CourseProps;
   languages: Record<number, AdminLanguageProps>;
   updateCourse: (course: CourseProps) => void;
   is_new: boolean;
+  onShortcutClose?: () => void;
+  shortcutOpen?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -166,6 +171,19 @@ function EditCourse({
   const [conlang, setConlang] = useState(obj.conlang || false);
   const [tags, setTags] = useState<string[]>(obj.tags || []);
   const [about, setAbout] = useState(obj.about || "");
+
+  React.useEffect(() => {
+    if (shortcutOpen) {
+      setOpen(true);
+    }
+  }, [shortcutOpen]);
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen && shortcutOpen) {
+      onShortcutClose?.();
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -211,6 +229,9 @@ function EditCourse({
       }
       //console.log("new_data", new_data);
       setOpen(false);
+      if (shortcutOpen) {
+        onShortcutClose?.();
+      }
       updateCourse(new_data);
     } catch (e) {
       //console.log("error", e);
@@ -219,7 +240,11 @@ function EditCourse({
   }
 
   return (
-    <AdminDialogTrigger open={open} onOpenChange={setOpen} isNew={is_new}>
+    <AdminDialogTrigger
+      open={open}
+      onOpenChange={handleOpenChange}
+      isNew={is_new}
+    >
       <EditDialog.Content>
         <EditDialog.DialogTitle>
           {is_new ? "Add" : "Edit"} course
@@ -300,10 +325,14 @@ function TableRow({
   course,
   languages,
   updateCourse,
+  isShortcutOpen,
+  onShortcutClose,
 }: {
   course: CourseProps;
   languages: Record<number, AdminLanguageProps>;
   updateCourse: (course: CourseProps) => void;
+  isShortcutOpen?: boolean;
+  onShortcutClose?: () => void;
 }) {
   const refRow = React.useRef<HTMLTableRowElement>(null);
 
@@ -396,6 +425,8 @@ function TableRow({
           languages={languages}
           updateCourse={updateCourseWrapper}
           is_new={false}
+          shortcutOpen={isShortcutOpen}
+          onShortcutClose={onShortcutClose}
         />
       </td>
     </tr>
@@ -409,8 +440,26 @@ export function CourseList({
   all_courses: CourseProps[];
   languages: AdminLanguageProps[];
 }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [search, setSearch] = React.useState("");
   const [my_courses, setMyCourses] = React.useState(all_courses);
+  const editCourseValue = searchParams.get("editCourse");
+  const editCourseId = editCourseValue
+    ? Number.parseInt(editCourseValue, 10)
+    : Number.NaN;
+  const addCourseShortcut = searchParams.get("addCourse") === "1";
+
+  function clearShortcut() {
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.delete("editCourse");
+    nextParams.delete("addCourse");
+    const nextUrl =
+      nextParams.size > 0 ? `${pathname}?${nextParams}` : pathname;
+    router.replace(nextUrl, { scroll: false });
+  }
+
   React.useEffect(() => {
     setMyCourses(all_courses);
   }, [all_courses]);
@@ -466,6 +515,8 @@ export function CourseList({
           is_new={true}
           languages={languages_id}
           updateCourse={updateCourse}
+          shortcutOpen={addCourseShortcut}
+          onShortcutClose={clearShortcut}
         />
       </div>
       <div className={adminTableContainerClass}>
@@ -513,6 +564,8 @@ export function CourseList({
                 key={course.id}
                 languages={languages_id}
                 updateCourse={updateCourse}
+                isShortcutOpen={course.id === editCourseId}
+                onShortcutClose={clearShortcut}
               />
             ))}
           </tbody>

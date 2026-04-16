@@ -4,7 +4,9 @@ import CourseDropdown from "./course-dropdown";
 import FooterLinks from "./footer_links";
 import Legal from "@/components/layout/legal";
 import Image from "next/image";
+import EditorCommandPalette from "@/app/editor/_components/editor_command_palette";
 import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
+import { getUser, isAdmin, isContributor } from "@/lib/userInterface";
 
 export const metadata = {
   title:
@@ -36,6 +38,10 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
+  const user = await getUser();
+  const showCommandPalette = isContributor(user);
+  const canAdmin = isAdmin(user);
+
   return (
     <div className="relative isolate mx-auto flex min-h-full w-full flex-col">
       <div className="sticky top-0 z-[1] w-full bg-[var(--body-background)] after:absolute after:left-1/2 after:w-full after:-translate-x-1/2 after:border-b-2 after:border-[var(--header-border)] after:content-['']">
@@ -52,9 +58,16 @@ export default async function Layout({
               width={150}
             />
           </Link>
-          <div className="ml-auto" />
-          <CourseDropdown />
-          <LoggedInButtonWrappedClient page={"stories"} course_id={"segment"} />
+          <div className="ml-auto flex items-center gap-2">
+            <CourseDropdown />
+            {showCommandPalette ? (
+              <EditorCommandPalette canAdmin={canAdmin} />
+            ) : null}
+            <LoggedInButtonWrappedClient
+              page={"stories"}
+              course_id={"segment"}
+            />
+          </div>
         </nav>
       </div>
       <main className="isolate flex flex-col max-w-[1000px] w-full mx-auto px-4">

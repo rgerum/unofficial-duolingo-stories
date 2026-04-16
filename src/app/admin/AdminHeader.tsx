@@ -1,6 +1,7 @@
 import Link from "next/link";
 import React from "react";
 import { requireAdmin } from "@/lib/userInterface";
+import EditorCommandPalette from "@/app/editor/_components/editor_command_palette";
 import { LoggedInButtonWrappedClient } from "@/components/login/LoggedInButtonWrappedClient";
 
 const adminButtonClassName =
@@ -41,8 +42,10 @@ export default async function AdminHeader() {
       <AdminButton href="/admin/courses">Courses</AdminButton>
       <AdminButton href="/admin/story">Story</AdminButton>
 
-      <div className="ml-auto"></div>
-      <LoggedInButtonWrappedClient page={"admin"} />
+      <div className="ml-auto flex items-center gap-2">
+        <EditorCommandPalette canAdmin />
+        <LoggedInButtonWrappedClient page={"admin"} />
+      </div>
     </nav>
   );
 }
