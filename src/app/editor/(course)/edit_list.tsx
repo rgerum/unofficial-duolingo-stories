@@ -97,7 +97,9 @@ export default function EditList({
   );
 
   const trimmedStorySearch = deferredStorySearch.trim();
-  const parsedStorySearch = parseStorySearch(trimmedStorySearch);
+  const parsedStorySearch = parseStorySearch(trimmedStorySearch, {
+    enableStatusFilters: true,
+  });
 
   const filteredStoriesByState =
     activeFilter === "all"
@@ -206,8 +208,8 @@ export default function EditList({
             id="story-search"
             type="search"
             value={storySearch}
-            placeholder="Search story names"
-            aria-label="Search story names"
+            placeholder="Search story names or status"
+            aria-label="Search story names or status"
             autoComplete="off"
             onChange={(event) => setStorySearch(event.target.value)}
           />

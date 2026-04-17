@@ -2,31 +2,57 @@ export type StorySearchable = {
   name: string;
   set_id: number;
   set_index: number;
+  status?: string;
+  public?: boolean;
 };
+
+export type StorySearchState = "draft" | "feedback" | "finished" | "published";
 
 export type ParsedStorySearch = {
   setId: number | null;
   setIndex: number | null;
   nameQuery: string;
+  statusFilter: StorySearchState | null;
+};
+
+type StorySearchOptions = {
+  enableStatusFilters?: boolean;
 };
 
 export function parseStorySearch(
   searchQuery: string,
+  options?: StorySearchOptions,
 ): ParsedStorySearch | null {
   const trimmedQuery = searchQuery.trim();
   if (!trimmedQuery) return null;
 
-  const setPrefixMatch = trimmedQuery.match(/^(?<setId>\d+)\s*-\s*$/);
+  const enableStatusFilters = options?.enableStatusFilters === true;
+  const statusTokensRemoved = enableStatusFilters
+    ? splitStatusTokens(trimmedQuery)
+    : { remainingQuery: trimmedQuery, statusFilter: null };
+  const normalizedQuery = statusTokensRemoved.remainingQuery.trim();
+
+  if (!normalizedQuery && statusTokensRemoved.statusFilter !== null) {
+    return {
+      setId: null,
+      setIndex: null,
+      nameQuery: "",
+      statusFilter: statusTokensRemoved.statusFilter,
+    };
+  }
+
+  const setPrefixMatch = normalizedQuery.match(/^(?<setId>\d+)\s*-\s*$/);
 
   if (setPrefixMatch?.groups) {
     return {
       setId: Number.parseInt(setPrefixMatch.groups.setId, 10),
       setIndex: null,
       nameQuery: "",
+      statusFilter: statusTokensRemoved.statusFilter,
     };
   }
 
-  const setAndIndexMatch = trimmedQuery.match(
+  const setAndIndexMatch = normalizedQuery.match(
     /^(?<setId>\d+)\s*-\s*(?<setIndex>\d+)(?:\s+(?<nameQuery>.+))?$/,
   );
 
@@ -36,10 +62,11 @@ export function parseStorySearch(
       setIndex: Number.parseInt(setAndIndexMatch.groups.setIndex, 10),
       nameQuery:
         setAndIndexMatch.groups.nameQuery?.trim().toLocaleLowerCase() ?? "",
+      statusFilter: statusTokensRemoved.statusFilter,
     };
   }
 
-  const setAndIndexWithSpaceMatch = trimmedQuery.match(
+  const setAndIndexWithSpaceMatch = normalizedQuery.match(
     /^(?<setId>\d+)\s+(?<setIndex>\d+)(?:\s+(?<nameQuery>.+))?$/,
   );
 
@@ -51,10 +78,11 @@ export function parseStorySearch(
         setAndIndexWithSpaceMatch.groups.nameQuery
           ?.trim()
           .toLocaleLowerCase() ?? "",
+      statusFilter: statusTokensRemoved.statusFilter,
     };
   }
 
-  const setAndNameMatch = trimmedQuery.match(
+  const setAndNameMatch = normalizedQuery.match(
     /^(?<setId>\d+)(?:\s+(?<nameQuery>.+))$/,
   );
 
@@ -63,35 +91,46 @@ export function parseStorySearch(
       setId: Number.parseInt(setAndNameMatch.groups.setId, 10),
       setIndex: null,
       nameQuery: setAndNameMatch.groups.nameQuery.trim().toLocaleLowerCase(),
+      statusFilter: statusTokensRemoved.statusFilter,
     };
   }
 
-  if (/^\d+$/.test(trimmedQuery)) {
+  if (/^\d+$/.test(normalizedQuery)) {
     return {
-      setId: Number.parseInt(trimmedQuery, 10),
+      setId: Number.parseInt(normalizedQuery, 10),
       setIndex: null,
       nameQuery: "",
+      statusFilter: statusTokensRemoved.statusFilter,
     };
   }
 
   return {
     setId: null,
     setIndex: null,
-    nameQuery: trimmedQuery.toLocaleLowerCase(),
+    nameQuery: normalizedQuery.toLocaleLowerCase(),
+    statusFilter: statusTokensRemoved.statusFilter,
   };
 }
 
 export function matchesStorySearch(
   story: StorySearchable,
   searchQuery: ParsedStorySearch | string | null | undefined,
+  options?: StorySearchOptions,
 ) {
   const parsedStorySearch =
     typeof searchQuery === "string"
-      ? parseStorySearch(searchQuery)
+      ? parseStorySearch(searchQuery, options)
       : searchQuery;
 
   if (parsedStorySearch === null || parsedStorySearch === undefined) {
     return true;
+  }
+
+  if (parsedStorySearch.statusFilter !== null) {
+    const storyState = getStorySearchState(story);
+    if (storyState !== parsedStorySearch.statusFilter) {
+      return false;
+    }
   }
 
   if (
@@ -122,4 +161,113 @@ export function formatStorySetLabel(
   story: Pick<StorySearchable, "set_id" | "set_index">,
 ) {
   return `${story.set_id} - ${story.set_index}`;
+}
+
+function splitStatusTokens(searchQuery: string): {
+  remainingQuery: string;
+  statusFilter: StorySearchState | null;
+} {
+  let statusFilter: StorySearchState | null = null;
+  const remainingTokens: string[] = [];
+  const tokens = searchQuery.split(/\s+/).filter(Boolean);
+  const allowBareStatusToken = tokens.length === 1;
+
+  for (const token of tokens) {
+    const statusToken = normalizeStorySearchStateToken(
+      token,
+      allowBareStatusToken,
+    );
+    if (statusToken !== null) {
+      statusFilter = statusToken;
+      continue;
+    }
+    remainingTokens.push(token);
+  }
+
+  return {
+    remainingQuery: remainingTokens.join(" "),
+    statusFilter,
+  };
+}
+
+function normalizeStorySearchStateToken(
+  token: string,
+  allowBareStatusToken: boolean,
+): StorySearchState | null {
+  const normalizedToken = token.trim().toLocaleLowerCase();
+  const hasStatusPrefix = normalizedToken.startsWith("status:");
+  const hasHashPrefix = normalizedToken.startsWith("#");
+  const hasExplicitPrefix = hasStatusPrefix || hasHashPrefix;
+  const rawStatus = hasStatusPrefix
+    ? normalizedToken.slice("status:".length)
+    : hasHashPrefix
+      ? normalizedToken.slice(1)
+      : normalizedToken;
+
+  if (!rawStatus) return null;
+  if (!hasExplicitPrefix && !allowBareStatusToken) return null;
+
+  if (matchesStatusPrefix(rawStatus, ["d", "dr", "dra", "draf", "draft"])) {
+    return "draft";
+  }
+
+  if (
+    matchesStatusPrefix(rawStatus, [
+      "f",
+      "fe",
+      "fee",
+      "feed",
+      "feedb",
+      "feedba",
+      "feedbac",
+      "feedback",
+    ])
+  ) {
+    return "feedback";
+  }
+
+  if (
+    matchesStatusPrefix(rawStatus, [
+      "fi",
+      "fin",
+      "fini",
+      "finis",
+      "finishe",
+      "finished",
+    ])
+  ) {
+    return "finished";
+  }
+
+  if (
+    matchesStatusPrefix(rawStatus, [
+      "p",
+      "pu",
+      "pub",
+      "publ",
+      "publi",
+      "publis",
+      "publish",
+      "published",
+      "public",
+    ])
+  ) {
+    return "published";
+  }
+
+  return null;
+}
+
+function matchesStatusPrefix(rawStatus: string, acceptedValues: string[]) {
+  return acceptedValues.includes(rawStatus);
+}
+
+function getStorySearchState(
+  story: Pick<StorySearchable, "status" | "public">,
+): StorySearchState | null {
+  if (story.public || story.status === "published") return "published";
+  if (story.status === "feedback") return "feedback";
+  if (story.status === "finished") return "finished";
+  if (story.status === "draft") return "draft";
+  return null;
 }
