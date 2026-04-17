@@ -15,10 +15,6 @@ import {
   type PostHogUser,
 } from "@/lib/posthog-user";
 
-const STORY_END_NEXT_FLAG_KEY =
-  process.env.NEXT_PUBLIC_POSTHOG_STORY_END_NEXT_FLAG_KEY ?? "";
-const HAS_POSTHOG = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
-
 export default function StoryWrapper({
   story,
   hideStoryQuestions,
@@ -46,9 +42,6 @@ export default function StoryWrapper({
   const [hideNonHighlighted, setHideNonHighlighted] = React.useState(false);
   const trackedStoryStart = React.useRef(false);
   const completionInFlight = React.useRef(false);
-  const [isNextStoryEnabled, setIsNextStoryEnabled] = React.useState(
-    !HAS_POSTHOG || STORY_END_NEXT_FLAG_KEY.length === 0,
-  );
   const { data: session } = authClient.useSession();
   const sessionUser = (session?.user ?? null) as PostHogUser | null;
   const role = typeof sessionUser?.role === "string" ? sessionUser.role : null;
@@ -71,8 +64,7 @@ export default function StoryWrapper({
         }
       : "skip",
   );
-  const showNextStoryAction =
-    isNextStoryEnabled && Boolean(nextStep?.nextStoryId);
+  const showNextStoryAction = Boolean(nextStep?.nextStoryId);
   const nextStoryPreview = useQuery(
     api.storyRead.getStoryPreviewByLegacyId,
     showNextStoryAction && nextStep?.nextStoryId
@@ -109,28 +101,6 @@ export default function StoryWrapper({
     trackedStoryStart.current = true;
     void captureStoryEvent("story_started");
   }, [captureStoryEvent]);
-
-  React.useEffect(() => {
-    if (!HAS_POSTHOG || STORY_END_NEXT_FLAG_KEY.length === 0) {
-      setIsNextStoryEnabled(true);
-      return;
-    }
-
-    const update = () => {
-      setIsNextStoryEnabled(
-        posthog.isFeatureEnabled(STORY_END_NEXT_FLAG_KEY) === true,
-      );
-    };
-
-    update();
-    const unsubscribe = posthog.onFeatureFlags(update);
-
-    return () => {
-      if (typeof unsubscribe === "function") {
-        unsubscribe();
-      }
-    };
-  }, []);
 
   const finishedLabel = showNextStoryAction
     ? "Next story"
