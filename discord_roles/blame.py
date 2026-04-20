@@ -5,6 +5,12 @@ import time
 import os
 
 
+def decode_git_stdout(result):
+    # Some historical commit metadata is not valid UTF-8; decode replacement
+    # keeps blame parsing working because we only consume author/content lines.
+    return result.stdout.decode("utf-8", errors="replace")
+
+
 def get_commits_per_file(filename):
     a = subprocess.run(["git", "rev-list", "HEAD", "--oneline", filename], capture_output=True)
     out = a.stdout
@@ -27,9 +33,8 @@ def get_author_percentages(filename, ignore_rev=None):
     a = subprocess.run(
         ["git", "blame", "--line-porcelain", "-w", filename],
         capture_output=True,
-        text=True,
     )
-    authors, count = parse_blame_porcelain(a.stdout, base_file)
+    authors, count = parse_blame_porcelain(decode_git_stdout(a), base_file)
     #for author in authors:
     #    authors[author] /= count
     print("---------", filename, authors)
