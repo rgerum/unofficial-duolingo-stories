@@ -50,12 +50,17 @@ async function exposeLamejsGlobals() {
 export async function getLamejsModule() {
   if (!lamejsModulePromise) {
     lamejsModulePromise = (async () => {
-      // The published `lamejs` entrypoint is broken because several internal
-      // modules rely on undeclared globals that only exist in the bundled build.
-      await exposeLamejsGlobals();
-      return unwrapCjsModule(
-        await import("lamejs/src/js/index.js"),
-      ) as LamejsModule;
+      try {
+        // The published `lamejs` entrypoint is broken because several internal
+        // modules rely on undeclared globals that only exist in the bundled build.
+        await exposeLamejsGlobals();
+        return unwrapCjsModule(
+          await import("lamejs/src/js/index.js"),
+        ) as LamejsModule;
+      } catch (error) {
+        lamejsModulePromise = null;
+        throw error;
+      }
     })();
   }
 

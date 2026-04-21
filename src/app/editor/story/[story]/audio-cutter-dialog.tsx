@@ -38,6 +38,10 @@ const SEGMENT_COLOR = "rgba(28,176,246,0.2)";
 const SEGMENT_BORDER_COLOR = "rgba(15,95,131,0.4)";
 const SEGMENT_ACTIVE_BORDER_COLOR = "rgba(28,176,246,0.95)";
 const SEGMENT_TEXT_BACKGROUND = "rgba(15,95,131,0.92)";
+const cachedAudioSegmentation = new WeakMap<
+  AudioBuffer,
+  CachedAudioSegmentation
+>();
 
 type Segment = {
   id: string;
@@ -54,6 +58,21 @@ type MergePreview = {
 type SegmentDraft = {
   start: number;
   end: number;
+};
+
+type AudioSilenceAnalysis = {
+  duration: number;
+  levels: number[];
+  paddingSeconds: number;
+  threshold: number;
+  windowSeconds: number;
+  minSilenceWindows: number;
+  minSpeechWindows: number;
+};
+
+type CachedAudioSegmentation = {
+  analysis: AudioSilenceAnalysis;
+  detectedSegments: SegmentDraft[];
 };
 
 type SegmentRegion = {
@@ -121,6 +140,10 @@ function getFileBaseName(filename: string) {
   return dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
 function createSegmentId() {
   return `segment-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -166,7 +189,7 @@ function overlapsSegment(
   );
 }
 
-function analyzeAudioSilence(buffer: AudioBuffer) {
+function analyzeAudioSilence(buffer: AudioBuffer): AudioSilenceAnalysis {
   const sampleRate = buffer.sampleRate;
   const channelCount = buffer.numberOfChannels;
   const duration = buffer.duration;
@@ -213,6 +236,93 @@ function analyzeAudioSilence(buffer: AudioBuffer) {
   };
 }
 
+function detectSpeechSegmentsFromAnalysis({
+  duration,
+  levels,
+  minSilenceWindows,
+  minSpeechWindows,
+  paddingSeconds,
+  threshold,
+  windowSeconds,
+}: AudioSilenceAnalysis) {
+  if (!Number.isFinite(duration) || duration <= 0) return [];
+
+  const segments: SegmentDraft[] = [];
+  let speechStartWindow: number | null = null;
+  let lastLoudWindow = -1;
+
+  for (let windowIndex = 0; windowIndex < levels.length; windowIndex += 1) {
+    const isLoud = (levels[windowIndex] ?? 0) >= threshold;
+
+    if (isLoud) {
+      if (speechStartWindow === null) {
+        speechStartWindow = windowIndex;
+      }
+      lastLoudWindow = windowIndex;
+      continue;
+    }
+
+    if (speechStartWindow === null) continue;
+    const silentWindows = windowIndex - lastLoudWindow;
+    if (silentWindows < minSilenceWindows) continue;
+
+    if (lastLoudWindow - speechStartWindow + 1 >= minSpeechWindows) {
+      segments.push({
+        start: Math.max(0, speechStartWindow * windowSeconds - paddingSeconds),
+        end: Math.min(
+          duration,
+          lastLoudWindow * windowSeconds + windowSeconds + paddingSeconds,
+        ),
+      });
+    }
+
+    speechStartWindow = null;
+    lastLoudWindow = -1;
+  }
+
+  if (
+    speechStartWindow !== null &&
+    lastLoudWindow - speechStartWindow + 1 >= minSpeechWindows
+  ) {
+    segments.push({
+      start: Math.max(0, speechStartWindow * windowSeconds - paddingSeconds),
+      end: Math.min(
+        duration,
+        lastLoudWindow * windowSeconds + windowSeconds + paddingSeconds,
+      ),
+    });
+  }
+
+  return segments.reduce<SegmentDraft[]>((acc, segment) => {
+    const previous = acc[acc.length - 1];
+    if (!previous) {
+      acc.push(segment);
+      return acc;
+    }
+
+    if (segment.start - previous.end < 0.14) {
+      previous.end = Math.max(previous.end, segment.end);
+      return acc;
+    }
+
+    acc.push(segment);
+    return acc;
+  }, []);
+}
+
+function getCachedAudioSegmentation(buffer: AudioBuffer) {
+  const cached = cachedAudioSegmentation.get(buffer);
+  if (cached) return cached;
+
+  const analysis = analyzeAudioSilence(buffer);
+  const next = {
+    analysis,
+    detectedSegments: detectSpeechSegmentsFromAnalysis(analysis),
+  };
+  cachedAudioSegmentation.set(buffer, next);
+  return next;
+}
+
 function getShrinkWrappedSegment(
   buffer: AudioBuffer,
   segment: { start: number; end: number },
@@ -222,7 +332,8 @@ function getShrinkWrappedSegment(
     return segment;
   }
 
-  const matchingDetectedSegment = detectSpeechSegments(buffer).find(
+  const { analysis, detectedSegments } = getCachedAudioSegmentation(buffer);
+  const matchingDetectedSegment = detectedSegments.find(
     (candidate) =>
       Math.abs(candidate.start - segment.start) <=
         SHRINK_WRAP_STABILITY_EPSILON_SECONDS &&
@@ -233,8 +344,7 @@ function getShrinkWrappedSegment(
     return segment;
   }
 
-  const { levels, paddingSeconds, threshold, windowSeconds } =
-    analyzeAudioSilence(buffer);
+  const { levels, paddingSeconds, threshold, windowSeconds } = analysis;
   if (levels.length === 0) return segment;
 
   const startWindow = clamp(
@@ -486,79 +596,7 @@ function createRegionContent({
 }
 
 function detectSpeechSegments(buffer: AudioBuffer): SegmentDraft[] {
-  const {
-    duration,
-    levels,
-    minSilenceWindows,
-    minSpeechWindows,
-    paddingSeconds,
-    threshold,
-    windowSeconds,
-  } = analyzeAudioSilence(buffer);
-
-  if (!Number.isFinite(duration) || duration <= 0) return [];
-
-  const segments: SegmentDraft[] = [];
-  let speechStartWindow: number | null = null;
-  let lastLoudWindow = -1;
-
-  for (let windowIndex = 0; windowIndex < levels.length; windowIndex += 1) {
-    const isLoud = (levels[windowIndex] ?? 0) >= threshold;
-
-    if (isLoud) {
-      if (speechStartWindow === null) {
-        speechStartWindow = windowIndex;
-      }
-      lastLoudWindow = windowIndex;
-      continue;
-    }
-
-    if (speechStartWindow === null) continue;
-    const silentWindows = windowIndex - lastLoudWindow;
-    if (silentWindows < minSilenceWindows) continue;
-
-    if (lastLoudWindow - speechStartWindow + 1 >= minSpeechWindows) {
-      segments.push({
-        start: Math.max(0, speechStartWindow * windowSeconds - paddingSeconds),
-        end: Math.min(
-          duration,
-          lastLoudWindow * windowSeconds + windowSeconds + paddingSeconds,
-        ),
-      });
-    }
-
-    speechStartWindow = null;
-    lastLoudWindow = -1;
-  }
-
-  if (
-    speechStartWindow !== null &&
-    lastLoudWindow - speechStartWindow + 1 >= minSpeechWindows
-  ) {
-    segments.push({
-      start: Math.max(0, speechStartWindow * windowSeconds - paddingSeconds),
-      end: Math.min(
-        duration,
-        lastLoudWindow * windowSeconds + windowSeconds + paddingSeconds,
-      ),
-    });
-  }
-
-  return segments.reduce<SegmentDraft[]>((acc, segment) => {
-    const previous = acc[acc.length - 1];
-    if (!previous) {
-      acc.push(segment);
-      return acc;
-    }
-
-    if (segment.start - previous.end < 0.14) {
-      previous.end = Math.max(previous.end, segment.end);
-      return acc;
-    }
-
-    acc.push(segment);
-    return acc;
-  }, []);
+  return getCachedAudioSegmentation(buffer).detectedSegments;
 }
 
 function float32ToInt16Sample(sample: number) {
@@ -690,6 +728,7 @@ export default function AudioCutterDialog({
     null,
   );
   const [audioError, setAudioError] = React.useState<string | null>(null);
+  const [exportError, setExportError] = React.useState<string | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = React.useState(false);
   const [isExportingSegments, setIsExportingSegments] = React.useState(false);
   const [segments, setSegments] = React.useState<Segment[]>([]);
@@ -733,6 +772,7 @@ export default function AudioCutterDialog({
     getRegionsPlugin(wavesurfer)?.clearRegions();
     setAudioFile(null);
     setAudioError(null);
+    setExportError(null);
     setAudioBuffer(null);
     setSegments([]);
     setLabelsById({});
@@ -1285,9 +1325,13 @@ export default function AudioCutterDialog({
       event.target.value = "";
       if (!file) return;
 
+      const requestToken = autoDetectRequestRef.current + 1;
+      autoDetectRequestRef.current = requestToken;
       setIsLoadingAudio(true);
       setAudioError(null);
+      setExportError(null);
       setAudioFile(file);
+      setAudioBuffer(null);
       setWaveformReady(false);
       activeDraftRegionIdRef.current = null;
       pendingRegionIdsRef.current.clear();
@@ -1305,17 +1349,18 @@ export default function AudioCutterDialog({
 
       try {
         const decoded = await decodeAudioFile(file);
+        if (requestToken !== autoDetectRequestRef.current) return;
         setAudioBuffer(decoded);
-        autoDetectRequestRef.current += 1;
       } catch (error) {
+        if (requestToken !== autoDetectRequestRef.current) return;
         setAudioBuffer(null);
         setAudioError(
-          error instanceof Error && error.message
-            ? error.message
-            : "Could not read the selected audio file.",
+          getErrorMessage(error, "Could not read the selected audio file."),
         );
       } finally {
-        setIsLoadingAudio(false);
+        if (requestToken === autoDetectRequestRef.current) {
+          setIsLoadingAudio(false);
+        }
       }
     },
     [wavesurfer],
@@ -1376,17 +1421,28 @@ export default function AudioCutterDialog({
     );
 
     const segmentId = createSegmentId();
-    setSegments((current) =>
-      sortSegments([
+    setSegments((current) => {
+      const overlappingSegmentId =
+        sortSegments(
+          current.filter((segment) => overlapsSegment(segment, { start, end })),
+        )[0]?.id ?? null;
+      if (overlappingSegmentId) {
+        setHoveredSegmentId(overlappingSegmentId);
+        setSelectedSegmentId(overlappingSegmentId);
+        return current;
+      }
+
+      setHoveredSegmentId(segmentId);
+      setSelectedSegmentId(segmentId);
+      return sortSegments([
         ...current,
         {
           id: segmentId,
           start,
           end,
         },
-      ]),
-    );
-    setSelectedSegmentId(segmentId);
+      ]);
+    });
   }, [wavesurfer]);
 
   const onClearSegments = React.useCallback(() => {
@@ -1428,6 +1484,7 @@ export default function AudioCutterDialog({
     if (isExportingSegments) return;
 
     setIsExportingSegments(true);
+    setExportError(null);
     try {
       const files = await createSegmentFiles();
       if (!files || files.length === 0) return;
@@ -1451,6 +1508,14 @@ export default function AudioCutterDialog({
       anchor.download = zipName;
       anchor.click();
       URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error("Failed to export segment zip", error);
+      setExportError(
+        `Could not export the segment zip: ${getErrorMessage(
+          error,
+          "Unknown error.",
+        )}`,
+      );
     } finally {
       setIsExportingSegments(false);
     }
@@ -1460,12 +1525,21 @@ export default function AudioCutterDialog({
     if (isExportingSegments) return;
 
     setIsExportingSegments(true);
+    setExportError(null);
     try {
       const files = await createSegmentFiles();
       if (!files || files.length === 0) return;
 
       onUseSegments(files);
       onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to prepare segment cuts", error);
+      setExportError(
+        `Could not prepare MP3 clips for staging: ${getErrorMessage(
+          error,
+          "Unknown error.",
+        )}`,
+      );
     } finally {
       setIsExportingSegments(false);
     }
@@ -1610,6 +1684,9 @@ export default function AudioCutterDialog({
               </div>
               {audioError ? (
                 <p className="mt-3 text-sm text-[#b33b3b]">{audioError}</p>
+              ) : null}
+              {exportError ? (
+                <p className="mt-3 text-sm text-[#b33b3b]">{exportError}</p>
               ) : null}
               <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[var(--text-color-dim)]">
                 <div>
