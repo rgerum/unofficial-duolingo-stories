@@ -167,6 +167,12 @@ function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error && error.message ? error.message : fallback;
 }
 
+function waitForNextAnimationFrame() {
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve());
+  });
+}
+
 function createSegmentId() {
   return `segment-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -1614,13 +1620,21 @@ export default function AudioCutterDialog({
   );
 
   const onNormalizeAudio = React.useCallback(async () => {
-    if (!audioBuffer || isNormalizingAudio) return;
+    if (
+      !audioBuffer ||
+      isNormalizingAudio ||
+      isExportingSegments ||
+      isLoadingAudio
+    ) {
+      return;
+    }
 
     setIsNormalizingAudio(true);
     setAudioError(null);
     setExportError(null);
 
     try {
+      await waitForNextAnimationFrame();
       const normalized = normalizeAudioBufferPeak(audioBuffer);
       if (normalized.changed) {
         updateLoadedAudio(normalized.buffer);
@@ -1632,7 +1646,13 @@ export default function AudioCutterDialog({
     } finally {
       setIsNormalizingAudio(false);
     }
-  }, [audioBuffer, isNormalizingAudio, updateLoadedAudio]);
+  }, [
+    audioBuffer,
+    isExportingSegments,
+    isLoadingAudio,
+    isNormalizingAudio,
+    updateLoadedAudio,
+  ]);
 
   const onPlayPause = React.useCallback(() => {
     wavesurfer?.playPause();
@@ -1851,7 +1871,12 @@ export default function AudioCutterDialog({
           onClick={() => {
             void onNormalizeAudio();
           }}
-          disabled={!audioBuffer || isNormalizingAudio}
+          disabled={
+            !audioBuffer ||
+            isNormalizingAudio ||
+            isExportingSegments ||
+            isLoadingAudio
+          }
           title={
             audioBuffer
               ? "Normalize the loaded source audio"

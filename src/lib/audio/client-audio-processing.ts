@@ -114,7 +114,13 @@ export function normalizeAudioBufferPeak(
     };
   }
 
-  const safeTargetPeak = clamp(targetPeak, 0.01, 0.999);
+  const safeTargetPeak = clamp(
+    Number.isFinite(targetPeak)
+      ? targetPeak
+      : DEFAULT_NORMALIZATION_TARGET_PEAK,
+    0.01,
+    0.999,
+  );
   const gain = safeTargetPeak / peak;
   if (Math.abs(gain - 1) < 0.01) {
     return {
