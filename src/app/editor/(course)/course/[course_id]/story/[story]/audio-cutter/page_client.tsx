@@ -50,8 +50,8 @@ export default function AudioCutterPageClient({
       expectedSegmentCount={transcriptItems.length}
       transcriptItems={transcriptItems}
       onUseSegments={async (files) => {
-        shouldOpenBulkAudioOnReturnRef.current = true;
         await storeAudioCutterOutput(storyId, files);
+        shouldOpenBulkAudioOnReturnRef.current = true;
       }}
     />
   );

@@ -184,6 +184,7 @@ export default function EditorV2({
   const svgParentRef = React.useRef<SVGSVGElement>(null);
   const viewRef = React.useRef<EditorView | null>(null);
   const hasAppliedInitialFocusRef = React.useRef(false);
+  const previousStoryIdRef = React.useRef<number | null>(null);
   const trackedAudioAnchorsRef = React.useRef<Set<AudioInsertAnchor>>(
     new Set(),
   );
@@ -283,6 +284,9 @@ export default function EditorV2({
   );
 
   React.useEffect(() => {
+    const previousStoryId = previousStoryIdRef.current;
+    previousStoryIdRef.current = storySnapshot.id;
+
     // Reset editor-local state when switching stories, even if the text matches.
     setDocText(normalizeDocText(storySnapshot.text));
     setRevision(0);
@@ -290,7 +294,9 @@ export default function EditorV2({
     hasAppliedInitialFocusRef.current = false;
     releaseTrackedAudioEditorAnchor();
     setAudioEditorData(undefined);
-    setBulkAudioOpen(false);
+    if (previousStoryId !== null && previousStoryId !== storySnapshot.id) {
+      setBulkAudioOpen(false);
+    }
   }, [releaseTrackedAudioEditorAnchor, storySnapshot]);
 
   React.useEffect(

@@ -1,5 +1,5 @@
 import React from "react";
-import AudioCutterPageClient from "./page_client";
+import AudioCutterPageClient from "@/app/editor/(course)/course/[course_id]/story/[story]/audio-cutter/page_client";
 
 export default async function Page({
   params,
