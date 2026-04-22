@@ -170,10 +170,6 @@ export async function storeAudioCutterOutput(storyId: number, files: File[]) {
     );
     const store = transaction.objectStore(AUDIO_CUTTER_OUTPUT_STORE);
 
-    for (const previousFile of previousPayload?.files ?? []) {
-      store.delete(previousFile.blobKey);
-    }
-
     for (const [index, file] of files.entries()) {
       store.put(file, nextFiles[index]?.blobKey);
     }
@@ -194,6 +190,10 @@ export async function storeAudioCutterOutput(storyId: number, files: File[]) {
     await deleteStoredOutputBlobs(nextFiles.map((file) => file.blobKey));
     throw error;
   }
+
+  await deleteStoredOutputBlobs(
+    (previousPayload?.files ?? []).map((file) => file.blobKey),
+  );
 }
 
 export async function consumeAudioCutterOutput(storyId: number) {
