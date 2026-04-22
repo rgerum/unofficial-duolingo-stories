@@ -38,18 +38,25 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ course_id: string; story: number }>;
-  searchParams?: Promise<{ line?: string | string[] }>;
+  searchParams?: Promise<{
+    line?: string | string[];
+    bulkAudio?: string | string[];
+  }>;
 }) {
   const resolvedParams = await params;
   const storyId = Number(resolvedParams.story);
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const rawLine = resolvedSearchParams?.line;
+  const rawBulkAudio = resolvedSearchParams?.bulkAudio;
   const initialFocusLine =
     typeof rawLine === "string"
       ? Number(rawLine)
       : Array.isArray(rawLine)
         ? Number(rawLine[0])
         : undefined;
+  const initialBulkAudioOpen =
+    rawBulkAudio === "1" ||
+    (Array.isArray(rawBulkAudio) && rawBulkAudio[0] === "1");
   const validatedInitialFocusLine =
     typeof initialFocusLine === "number" &&
     Number.isFinite(initialFocusLine) &&
@@ -62,6 +69,7 @@ export default async function Page({
       storyId={storyId}
       courseId={resolvedParams.course_id}
       initialFocusLine={validatedInitialFocusLine}
+      initialBulkAudioOpen={initialBulkAudioOpen}
     />
   );
 }

@@ -5,7 +5,6 @@ import { zipSync } from "fflate";
 import { useWavesurfer } from "@wavesurfer/react";
 import {
   DownloadIcon,
-  PlusIcon,
   ScissorsIcon,
   Trash2Icon,
   UploadIcon,
@@ -13,6 +12,7 @@ import {
 } from "lucide-react";
 import Regions from "wavesurfer.js/dist/plugins/regions.js";
 import PlayAudio from "@/components/PlayAudio";
+import Input from "@/components/ui/input";
 import { getLamejsModule } from "@/lib/lamejs-compat";
 import {
   Dialog,
@@ -29,7 +29,9 @@ const DEFAULT_SEGMENT_LENGTH_SECONDS = 1.8;
 const MIN_SEGMENT_LENGTH_SECONDS = 0.25;
 const MIN_PERSISTED_NEW_SEGMENT_SECONDS = 0.1;
 const SILENCE_WINDOW_SECONDS = 0.02;
-const SILENCE_EDGE_PADDING_SECONDS = 0.04;
+const DEFAULT_DETECTION_MIN_SILENCE_SECONDS = 1;
+const DEFAULT_DETECTION_START_BUFFER_SECONDS = 0.04;
+const DEFAULT_DETECTION_END_BUFFER_SECONDS = 0.04;
 const SHRINK_WRAP_STABILITY_EPSILON_SECONDS = 0.01;
 const MP3_BITRATE_KBPS = 128;
 const MP3_SAMPLE_BLOCK_SIZE = 1152;
@@ -38,7 +40,7 @@ const SEGMENT_BORDER_COLOR = "rgba(15,95,131,0.4)";
 const SEGMENT_ACTIVE_BORDER_COLOR = "rgba(28,176,246,0.95)";
 const cachedAudioSegmentation = new WeakMap<
   AudioBuffer,
-  CachedAudioSegmentation
+  Map<string, CachedAudioSegmentation>
 >();
 
 type Segment = {
@@ -46,6 +48,17 @@ type Segment = {
   start: number;
   end: number;
   label?: string;
+};
+
+type TranscriptItem = {
+  id: string;
+  order: number;
+  lineIndex: number;
+  type: "HEADER" | "LINE";
+  speaker: string;
+  content: {
+    text: string;
+  };
 };
 
 type MergePreview = {
@@ -61,16 +74,24 @@ type SegmentDraft = {
 type AudioSilenceAnalysis = {
   duration: number;
   levels: number[];
-  paddingSeconds: number;
+  startPaddingSeconds: number;
+  endPaddingSeconds: number;
   threshold: number;
   windowSeconds: number;
   minSilenceWindows: number;
   minSpeechWindows: number;
+  minSilenceSeconds: number;
 };
 
 type CachedAudioSegmentation = {
   analysis: AudioSilenceAnalysis;
   detectedSegments: SegmentDraft[];
+};
+
+type DetectionSettings = {
+  minSilenceSeconds: number;
+  startBufferSeconds: number;
+  endBufferSeconds: number;
 };
 
 type SegmentRegion = {
@@ -146,6 +167,21 @@ function createSegmentId() {
   return `segment-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function getWaveformScrollElement(
+  wavesurfer: ReturnType<typeof useWavesurfer>["wavesurfer"],
+) {
+  if (!wavesurfer) return null;
+
+  const wrapper = (
+    wavesurfer as unknown as {
+      getWrapper?: () => HTMLElement;
+    }
+  ).getWrapper?.();
+
+  if (!wrapper) return null;
+  return wrapper.parentElement;
+}
+
 function getSegmentsFromPlugin(plugin: RegionsPlugin) {
   return sortSegments(
     plugin.getRegions().map((region) => ({
@@ -187,7 +223,40 @@ function overlapsSegment(
   );
 }
 
-function analyzeAudioSilence(buffer: AudioBuffer): AudioSilenceAnalysis {
+function sanitizeDetectionSettings(
+  settings: Partial<DetectionSettings> | undefined,
+): DetectionSettings {
+  return {
+    minSilenceSeconds: clamp(
+      settings?.minSilenceSeconds ?? DEFAULT_DETECTION_MIN_SILENCE_SECONDS,
+      0.1,
+      5,
+    ),
+    startBufferSeconds: clamp(
+      settings?.startBufferSeconds ?? DEFAULT_DETECTION_START_BUFFER_SECONDS,
+      0,
+      2,
+    ),
+    endBufferSeconds: clamp(
+      settings?.endBufferSeconds ?? DEFAULT_DETECTION_END_BUFFER_SECONDS,
+      0,
+      2,
+    ),
+  };
+}
+
+function getDetectionSettingsCacheKey(settings: DetectionSettings) {
+  return [
+    settings.minSilenceSeconds.toFixed(3),
+    settings.startBufferSeconds.toFixed(3),
+    settings.endBufferSeconds.toFixed(3),
+  ].join(":");
+}
+
+function analyzeAudioSilence(
+  buffer: AudioBuffer,
+  settings: DetectionSettings,
+): AudioSilenceAnalysis {
   const sampleRate = buffer.sampleRate;
   const channelCount = buffer.numberOfChannels;
   const duration = buffer.duration;
@@ -222,15 +291,20 @@ function analyzeAudioSilence(buffer: AudioBuffer): AudioSilenceAnalysis {
   return {
     duration,
     levels,
-    paddingSeconds: SILENCE_EDGE_PADDING_SECONDS,
+    startPaddingSeconds: settings.startBufferSeconds,
+    endPaddingSeconds: settings.endBufferSeconds,
     threshold: clamp(
       Math.max(floorLevel * 3, peakLevel * 0.045, 0.008),
       0.008,
       Math.max(0.015, peakLevel * 0.5),
     ),
     windowSeconds,
-    minSilenceWindows: Math.max(2, Math.round(0.28 / windowSeconds)),
+    minSilenceWindows: Math.max(
+      2,
+      Math.round(settings.minSilenceSeconds / windowSeconds),
+    ),
     minSpeechWindows: Math.max(2, Math.round(0.18 / windowSeconds)),
+    minSilenceSeconds: settings.minSilenceSeconds,
   };
 }
 
@@ -239,7 +313,8 @@ function detectSpeechSegmentsFromAnalysis({
   levels,
   minSilenceWindows,
   minSpeechWindows,
-  paddingSeconds,
+  startPaddingSeconds,
+  endPaddingSeconds,
   threshold,
   windowSeconds,
 }: AudioSilenceAnalysis) {
@@ -266,10 +341,13 @@ function detectSpeechSegmentsFromAnalysis({
 
     if (lastLoudWindow - speechStartWindow + 1 >= minSpeechWindows) {
       segments.push({
-        start: Math.max(0, speechStartWindow * windowSeconds - paddingSeconds),
+        start: Math.max(
+          0,
+          speechStartWindow * windowSeconds - startPaddingSeconds,
+        ),
         end: Math.min(
           duration,
-          lastLoudWindow * windowSeconds + windowSeconds + paddingSeconds,
+          lastLoudWindow * windowSeconds + windowSeconds + endPaddingSeconds,
         ),
       });
     }
@@ -283,10 +361,13 @@ function detectSpeechSegmentsFromAnalysis({
     lastLoudWindow - speechStartWindow + 1 >= minSpeechWindows
   ) {
     segments.push({
-      start: Math.max(0, speechStartWindow * windowSeconds - paddingSeconds),
+      start: Math.max(
+        0,
+        speechStartWindow * windowSeconds - startPaddingSeconds,
+      ),
       end: Math.min(
         duration,
-        lastLoudWindow * windowSeconds + windowSeconds + paddingSeconds,
+        lastLoudWindow * windowSeconds + windowSeconds + endPaddingSeconds,
       ),
     });
   }
@@ -298,7 +379,7 @@ function detectSpeechSegmentsFromAnalysis({
       return acc;
     }
 
-    if (segment.start - previous.end < 0.14) {
+    if (segment.start - previous.end < minSilenceWindows * windowSeconds) {
       previous.end = Math.max(previous.end, segment.end);
       return acc;
     }
@@ -308,29 +389,43 @@ function detectSpeechSegmentsFromAnalysis({
   }, []);
 }
 
-function getCachedAudioSegmentation(buffer: AudioBuffer) {
-  const cached = cachedAudioSegmentation.get(buffer);
+function getCachedAudioSegmentation(
+  buffer: AudioBuffer,
+  settings: DetectionSettings,
+) {
+  let cachedBySettings = cachedAudioSegmentation.get(buffer);
+  if (!cachedBySettings) {
+    cachedBySettings = new Map<string, CachedAudioSegmentation>();
+    cachedAudioSegmentation.set(buffer, cachedBySettings);
+  }
+
+  const cacheKey = getDetectionSettingsCacheKey(settings);
+  const cached = cachedBySettings.get(cacheKey);
   if (cached) return cached;
 
-  const analysis = analyzeAudioSilence(buffer);
+  const analysis = analyzeAudioSilence(buffer, settings);
   const next = {
     analysis,
     detectedSegments: detectSpeechSegmentsFromAnalysis(analysis),
   };
-  cachedAudioSegmentation.set(buffer, next);
+  cachedBySettings.set(cacheKey, next);
   return next;
 }
 
 function getShrinkWrappedSegment(
   buffer: AudioBuffer,
   segment: { start: number; end: number },
+  settings: DetectionSettings,
 ) {
   const duration = segment.end - segment.start;
   if (duration <= MIN_SEGMENT_LENGTH_SECONDS) {
     return segment;
   }
 
-  const { analysis, detectedSegments } = getCachedAudioSegmentation(buffer);
+  const { analysis, detectedSegments } = getCachedAudioSegmentation(
+    buffer,
+    settings,
+  );
   const matchingDetectedSegment = detectedSegments.find(
     (candidate) =>
       Math.abs(candidate.start - segment.start) <=
@@ -342,7 +437,13 @@ function getShrinkWrappedSegment(
     return segment;
   }
 
-  const { levels, paddingSeconds, threshold, windowSeconds } = analysis;
+  const {
+    levels,
+    startPaddingSeconds,
+    endPaddingSeconds,
+    threshold,
+    windowSeconds,
+  } = analysis;
   if (levels.length === 0) return segment;
 
   const startWindow = clamp(
@@ -370,11 +471,11 @@ function getShrinkWrappedSegment(
 
   const rawNextStart = Math.max(
     segment.start,
-    firstActiveWindow * windowSeconds - paddingSeconds,
+    firstActiveWindow * windowSeconds - startPaddingSeconds,
   );
   const rawNextEnd = Math.min(
     segment.end,
-    (lastActiveWindow + 1) * windowSeconds + paddingSeconds,
+    (lastActiveWindow + 1) * windowSeconds + endPaddingSeconds,
   );
   const nextStart =
     Math.abs(rawNextStart - segment.start) <=
@@ -537,8 +638,11 @@ function createRegionContent({
   return wrapper;
 }
 
-function detectSpeechSegments(buffer: AudioBuffer): SegmentDraft[] {
-  return getCachedAudioSegmentation(buffer).detectedSegments;
+function detectSpeechSegments(
+  buffer: AudioBuffer,
+  settings: DetectionSettings,
+): SegmentDraft[] {
+  return getCachedAudioSegmentation(buffer, settings).detectedSegments;
 }
 
 function float32ToInt16Sample(sample: number) {
@@ -554,6 +658,66 @@ function toPlainArrayBuffer(view: Uint8Array | Int8Array) {
     new Uint8Array(view.buffer, view.byteOffset, view.byteLength),
   );
   return arrayBuffer;
+}
+
+function audioBufferToWavBlob(buffer: AudioBuffer) {
+  const channels = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const totalFrames = buffer.length;
+  const bytesPerSample = 2;
+  const blockAlign = channels * bytesPerSample;
+  const byteRate = sampleRate * blockAlign;
+  const dataSize = totalFrames * blockAlign;
+  const output = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(output);
+
+  let offset = 0;
+  const writeString = (value: string) => {
+    for (let index = 0; index < value.length; index += 1) {
+      view.setUint8(offset, value.charCodeAt(index));
+      offset += 1;
+    }
+  };
+
+  writeString("RIFF");
+  view.setUint32(offset, 36 + dataSize, true);
+  offset += 4;
+  writeString("WAVE");
+  writeString("fmt ");
+  view.setUint32(offset, 16, true);
+  offset += 4;
+  view.setUint16(offset, 1, true);
+  offset += 2;
+  view.setUint16(offset, channels, true);
+  offset += 2;
+  view.setUint32(offset, sampleRate, true);
+  offset += 4;
+  view.setUint32(offset, byteRate, true);
+  offset += 4;
+  view.setUint16(offset, blockAlign, true);
+  offset += 2;
+  view.setUint16(offset, 16, true);
+  offset += 2;
+  writeString("data");
+  view.setUint32(offset, dataSize, true);
+  offset += 4;
+
+  for (let frameIndex = 0; frameIndex < totalFrames; frameIndex += 1) {
+    for (let channelIndex = 0; channelIndex < channels; channelIndex += 1) {
+      const sample = Math.max(
+        -1,
+        Math.min(1, buffer.getChannelData(channelIndex)?.[frameIndex] ?? 0),
+      );
+      view.setInt16(
+        offset,
+        sample < 0 ? Math.round(sample * 0x8000) : Math.round(sample * 0x7fff),
+        true,
+      );
+      offset += 2;
+    }
+  }
+
+  return new Blob([output], { type: "audio/wav" });
 }
 
 async function encodeSegmentAsMp3(
@@ -641,17 +805,25 @@ async function decodeAudioFile(file: File) {
 export default function AudioCutterDialog({
   open,
   onOpenChange,
+  renderInDialog = true,
   expectedSegmentCount,
+  transcriptItems,
   onUseSegments,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  renderInDialog?: boolean;
   expectedSegmentCount: number;
-  onUseSegments: (files: File[]) => void;
+  transcriptItems: TranscriptItem[];
+  onUseSegments: (files: File[]) => Promise<void> | void;
 }) {
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const transcriptScrollRef = React.useRef<HTMLDivElement | null>(null);
+  const transcriptRowRefs = React.useRef<
+    Record<number, HTMLButtonElement | null>
+  >({});
   const isSyncingRegionsRef = React.useRef(false);
   const activeDraftRegionIdRef = React.useRef<string | null>(null);
   const pendingRegionIdsRef = React.useRef<Set<string>>(new Set());
@@ -666,6 +838,14 @@ export default function AudioCutterDialog({
   const [exportError, setExportError] = React.useState<string | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = React.useState(false);
   const [isExportingSegments, setIsExportingSegments] = React.useState(false);
+  const [detectDialogOpen, setDetectDialogOpen] = React.useState(false);
+  const [detectionSettings, setDetectionSettings] =
+    React.useState<DetectionSettings>(() =>
+      sanitizeDetectionSettings(undefined),
+    );
+  const [detectionForm, setDetectionForm] = React.useState<DetectionSettings>(
+    () => sanitizeDetectionSettings(undefined),
+  );
   const [segments, setSegments] = React.useState<Segment[]>([]);
   const [labelsById, setLabelsById] = React.useState<Record<string, string>>(
     {},
@@ -676,6 +856,10 @@ export default function AudioCutterDialog({
   const [zoomPxPerSec, setZoomPxPerSec] = React.useState(DEFAULT_WAVEFORM_ZOOM);
   const [waveformReady, setWaveformReady] = React.useState(false);
   const [duration, setDuration] = React.useState(0);
+  const [viewportRange, setViewportRange] = React.useState({
+    start: 0,
+    end: 0,
+  });
   const [hoveredSegmentId, setHoveredSegmentId] = React.useState<string | null>(
     null,
   );
@@ -684,6 +868,10 @@ export default function AudioCutterDialog({
   >(null);
   const regionsPlugin = React.useMemo(() => Regions.create(), []);
   const typedRegionsPlugin = regionsPlugin as unknown as RegionsPlugin;
+  const sortedSegments = React.useMemo(
+    () => sortSegments(segments),
+    [segments],
+  );
 
   const { wavesurfer } = useWavesurfer({
     container: containerRef,
@@ -712,11 +900,13 @@ export default function AudioCutterDialog({
     setExportError(null);
     setIsLoadingAudio(false);
     setIsExportingSegments(false);
+    setDetectDialogOpen(false);
     setAudioBuffer(null);
     setSegments([]);
     setLabelsById({});
     setMergePreview(null);
     setDuration(0);
+    setViewportRange({ start: 0, end: 0 });
     setWaveformReady(false);
     setHoveredSegmentId(null);
     setZoomPxPerSec(DEFAULT_WAVEFORM_ZOOM);
@@ -807,7 +997,11 @@ export default function AudioCutterDialog({
         sortSegments(
           current.map((segment) => {
             if (segment.id !== segmentId) return segment;
-            const nextBounds = getShrinkWrappedSegment(audioBuffer, segment);
+            const nextBounds = getShrinkWrappedSegment(
+              audioBuffer,
+              segment,
+              detectionSettings,
+            );
             return {
               ...segment,
               start: nextBounds.start,
@@ -819,7 +1013,7 @@ export default function AudioCutterDialog({
       setHoveredSegmentId(segmentId);
       setSelectedSegmentId(segmentId);
     },
-    [audioBuffer],
+    [audioBuffer, detectionSettings],
   );
 
   const onShrinkWrapAll = React.useCallback(() => {
@@ -827,7 +1021,11 @@ export default function AudioCutterDialog({
     setSegments((current) =>
       sortSegments(
         current.map((segment) => {
-          const nextBounds = getShrinkWrappedSegment(audioBuffer, segment);
+          const nextBounds = getShrinkWrappedSegment(
+            audioBuffer,
+            segment,
+            detectionSettings,
+          );
           return {
             ...segment,
             start: nextBounds.start,
@@ -836,7 +1034,7 @@ export default function AudioCutterDialog({
         }),
       ),
     );
-  }, [audioBuffer]);
+  }, [audioBuffer, detectionSettings]);
 
   const mergeOverlappingRegions = React.useCallback(
     (plugin: RegionsPlugin, activeId: string, targetId: string) => {
@@ -1026,6 +1224,117 @@ export default function AudioCutterDialog({
       hideScrollbar: false,
     });
   }, [wavesurfer, zoomPxPerSec]);
+
+  const updateViewportRange = React.useCallback(() => {
+    const scrollContainer = getWaveformScrollElement(wavesurfer);
+    if (
+      !scrollContainer ||
+      !waveformReady ||
+      zoomPxPerSec <= 0 ||
+      duration <= 0
+    ) {
+      setViewportRange((current) =>
+        current.start === 0 && current.end === 0
+          ? current
+          : { start: 0, end: 0 },
+      );
+      return;
+    }
+
+    const nextStart = clamp(
+      scrollContainer.scrollLeft / zoomPxPerSec,
+      0,
+      duration,
+    );
+    const nextEnd = clamp(
+      (scrollContainer.scrollLeft + scrollContainer.clientWidth) / zoomPxPerSec,
+      nextStart,
+      duration,
+    );
+
+    setViewportRange((current) => {
+      if (
+        Math.abs(current.start - nextStart) < 0.01 &&
+        Math.abs(current.end - nextEnd) < 0.01
+      ) {
+        return current;
+      }
+      return {
+        start: nextStart,
+        end: nextEnd,
+      };
+    });
+  }, [duration, waveformReady, wavesurfer, zoomPxPerSec]);
+
+  React.useEffect(() => {
+    if (!wavesurfer) return;
+    const scrollContainer = getWaveformScrollElement(wavesurfer);
+    if (!scrollContainer) return;
+
+    const onScroll = () => {
+      updateViewportRange();
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateViewportRange();
+    });
+
+    updateViewportRange();
+    scrollContainer.addEventListener("scroll", onScroll, { passive: true });
+    resizeObserver.observe(scrollContainer);
+
+    return () => {
+      scrollContainer.removeEventListener("scroll", onScroll);
+      resizeObserver.disconnect();
+    };
+  }, [updateViewportRange, wavesurfer]);
+
+  const selectedSegmentIndex = React.useMemo(
+    () =>
+      sortedSegments.findIndex((segment) => segment.id === selectedSegmentId),
+    [selectedSegmentId, sortedSegments],
+  );
+
+  const visibleSegmentIndexes = React.useMemo(() => {
+    const indexes = new Set<number>();
+    if (viewportRange.end <= viewportRange.start) return indexes;
+
+    sortedSegments.forEach((segment, index) => {
+      if (
+        Math.min(segment.end, viewportRange.end) -
+          Math.max(segment.start, viewportRange.start) >
+        0
+      ) {
+        indexes.add(index);
+      }
+    });
+
+    return indexes;
+  }, [sortedSegments, viewportRange.end, viewportRange.start]);
+
+  React.useEffect(() => {
+    const activeIndexes = [...visibleSegmentIndexes].sort(
+      (left, right) => left - right,
+    );
+    const firstActiveIndex = activeIndexes[0];
+    if (firstActiveIndex === undefined) return;
+
+    const transcriptScroll = transcriptScrollRef.current;
+    const transcriptRow = transcriptRowRefs.current[firstActiveIndex];
+    if (!transcriptScroll || !transcriptRow) return;
+
+    const rowTop = transcriptRow.offsetTop;
+    const rowBottom = rowTop + transcriptRow.offsetHeight;
+    const viewportTop = transcriptScroll.scrollTop;
+    const viewportBottom = viewportTop + transcriptScroll.clientHeight;
+
+    if (rowTop >= viewportTop && rowBottom <= viewportBottom) return;
+
+    transcriptRow.scrollIntoView({
+      block: "nearest",
+      behavior: "smooth",
+    });
+  }, [visibleSegmentIndexes]);
 
   React.useEffect(() => {
     syncRegionsFromState(typedRegionsPlugin);
@@ -1239,8 +1548,8 @@ export default function AudioCutterDialog({
 
   const runAutoDetect = React.useCallback(() => {
     if (!audioBuffer) return;
-    replaceSegments(detectSpeechSegments(audioBuffer));
-  }, [audioBuffer, replaceSegments]);
+    replaceSegments(detectSpeechSegments(audioBuffer, detectionSettings));
+  }, [audioBuffer, detectionSettings, replaceSegments]);
 
   React.useEffect(() => {
     if (!audioBuffer || !waveformReady) return;
@@ -1279,13 +1588,17 @@ export default function AudioCutterDialog({
 
       setAudioUrl((currentUrl) => {
         if (currentUrl) URL.revokeObjectURL(currentUrl);
-        return URL.createObjectURL(file);
+        return "";
       });
 
       try {
         const decoded = await decodeAudioFile(file);
         if (requestToken !== autoDetectRequestRef.current) return;
         setAudioBuffer(decoded);
+        setAudioUrl((currentUrl) => {
+          if (currentUrl) URL.revokeObjectURL(currentUrl);
+          return URL.createObjectURL(audioBufferToWavBlob(decoded));
+        });
       } catch (error) {
         if (requestToken !== autoDetectRequestRef.current) return;
         setAudioBuffer(null);
@@ -1338,47 +1651,6 @@ export default function AudioCutterDialog({
       ),
     );
   }, [waveformReady, wavesurfer]);
-
-  const onAddSegment = React.useCallback(() => {
-    if (!wavesurfer) return;
-
-    const currentTime = wavesurfer.getCurrentTime();
-    const maxEnd = wavesurfer.getDuration();
-    const start = clamp(
-      currentTime,
-      0,
-      Math.max(0, maxEnd - DEFAULT_SEGMENT_LENGTH_SECONDS),
-    );
-    const end = clamp(
-      start + DEFAULT_SEGMENT_LENGTH_SECONDS,
-      start + MIN_SEGMENT_LENGTH_SECONDS,
-      maxEnd,
-    );
-
-    const segmentId = createSegmentId();
-    setSegments((current) => {
-      const overlappingSegmentId =
-        sortSegments(
-          current.filter((segment) => overlapsSegment(segment, { start, end })),
-        )[0]?.id ?? null;
-      if (overlappingSegmentId) {
-        setHoveredSegmentId(overlappingSegmentId);
-        setSelectedSegmentId(overlappingSegmentId);
-        return current;
-      }
-
-      setHoveredSegmentId(segmentId);
-      setSelectedSegmentId(segmentId);
-      return sortSegments([
-        ...current,
-        {
-          id: segmentId,
-          start,
-          end,
-        },
-      ]);
-    });
-  }, [wavesurfer]);
 
   const onClearSegments = React.useCallback(() => {
     activeDraftRegionIdRef.current = null;
@@ -1464,7 +1736,7 @@ export default function AudioCutterDialog({
       const files = await createSegmentFiles();
       if (!files || files.length === 0) return;
 
-      onUseSegments(files);
+      await onUseSegments(files);
       onOpenChange(false);
     } catch (error) {
       console.error("Failed to prepare segment cuts", error);
@@ -1482,14 +1754,42 @@ export default function AudioCutterDialog({
   const segmentCountMismatch =
     expectedSegmentCount > 0 && segments.length !== expectedSegmentCount;
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={true}
-        className="inset-3 h-[calc(100vh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-none translate-x-0 translate-y-0 overflow-hidden p-0 sm:top-3 sm:left-3 sm:max-w-none sm:translate-x-0 sm:translate-y-0"
-      >
-        <div className="flex h-full min-w-[1080px] flex-col bg-[var(--body-background)]">
-          <div className="border-b border-[var(--color_base_border)] px-5 py-4">
+  const openDetectDialog = React.useCallback(() => {
+    setDetectionForm(detectionSettings);
+    setDetectDialogOpen(true);
+  }, [detectionSettings]);
+
+  const updateDetectionFormValue = React.useCallback(
+    (key: keyof DetectionSettings, value: string) => {
+      const numericValue = Number(value);
+      setDetectionForm((current) => ({
+        ...current,
+        [key]: Number.isFinite(numericValue) ? numericValue : 0,
+      }));
+    },
+    [],
+  );
+
+  const applyDetectionSettings = React.useCallback(() => {
+    const nextSettings = sanitizeDetectionSettings(detectionForm);
+    setDetectionSettings(nextSettings);
+    setDetectionForm(nextSettings);
+    setDetectDialogOpen(false);
+    if (!audioBuffer) return;
+    replaceSegments(detectSpeechSegments(audioBuffer, nextSettings));
+  }, [audioBuffer, detectionForm, replaceSegments]);
+
+  const content = (
+    <div
+      className={
+        renderInDialog
+          ? "flex h-full min-w-[1080px] flex-col bg-[var(--body-background)]"
+          : "flex min-h-full w-full flex-col bg-[var(--body-background)]"
+      }
+    >
+      <div className="border-b border-[var(--color_base_border)] px-5 py-4">
+        {renderInDialog ? (
+          <>
             <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-[var(--text-color)]">
               <ScissorsIcon className="h-5 w-5 text-[#0f5f83]" />
               Audio cutter
@@ -1499,283 +1799,513 @@ export default function AudioCutterDialog({
               silences, then drag the start and end edges until the cuts line
               up. Drag on the waveform to add extra segments manually.
             </DialogDescription>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-2 text-[1.4rem] font-semibold text-[var(--text-color)]">
+              <ScissorsIcon className="h-6 w-6 text-[#0f5f83]" />
+              <h1>Audio cutter</h1>
+            </div>
+            <p className="mt-1 max-w-[90ch] text-sm text-[var(--text-color-dim)]">
+              Load one long recording, auto-detect speech blocks between
+              silences, then drag the start and end edges until the cuts line
+              up. Drag on the waveform to add extra segments manually.
+            </p>
+          </>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 border-b border-[var(--color_base_border)] px-5 py-3">
+        <button
+          type="button"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-70"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isLoadingAudio}
+        >
+          <UploadIcon className="h-4 w-4" />
+          {isLoadingAudio ? "Reading audio..." : "Upload long audio"}
+        </button>
+        <button
+          type="button"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-70"
+          onClick={openDetectDialog}
+          disabled={!audioBuffer}
+          title={
+            audioBuffer ? "Tune silence detection settings" : "Load audio first"
+          }
+        >
+          <WandSparklesIcon className="h-4 w-4" />
+          Detect silence
+        </button>
+        <button
+          type="button"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-70"
+          onClick={onShrinkWrapAll}
+          disabled={!audioBuffer || segments.length === 0}
+        >
+          Shrink-wrap all
+        </button>
+        <button
+          type="button"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-70"
+          onClick={() => {
+            void onDownloadSegmentZip();
+          }}
+          disabled={
+            !audioBuffer || segments.length === 0 || isExportingSegments
+          }
+        >
+          <DownloadIcon className="h-4 w-4" />
+          {isExportingSegments ? "Encoding MP3..." : "Download zip"}
+        </button>
+        <PlayAudio onClick={audioUrl ? onPlayPause : undefined} />
+        <div className="flex items-center gap-2 text-xs">
+          <button
+            type="button"
+            className="inline-flex h-7 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-2 leading-none transition-colors hover:bg-[var(--color_base_background)]"
+            onClick={onZoomOut}
+          >
+            -
+          </button>
+          <button
+            type="button"
+            className="inline-flex h-7 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-2 leading-none transition-colors hover:bg-[var(--color_base_background)]"
+            onClick={onZoomIn}
+          >
+            +
+          </button>
+          <button
+            type="button"
+            className="inline-flex h-7 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-2 leading-none transition-colors hover:bg-[var(--color_base_background)]"
+            onClick={onZoomFit}
+          >
+            Fit
+          </button>
+        </div>
+        <input
+          ref={fileInputRef}
+          className="sr-only"
+          type="file"
+          accept="audio/*"
+          onChange={onFileChange}
+        />
+        <div className="min-w-0 flex-1 truncate text-sm text-[var(--text-color-dim)]">
+          {audioFile?.name || "No source audio selected."}
+        </div>
+      </div>
+
+      <Dialog open={detectDialogOpen} onOpenChange={setDetectDialogOpen}>
+        <DialogContent className="max-w-[540px]">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-[var(--text-color)]">
+            <WandSparklesIcon className="h-5 w-5 text-[#0f5f83]" />
+            Silence detection
+          </DialogTitle>
+          <DialogDescription className="max-w-[60ch] text-sm text-[var(--text-color-dim)]">
+            Tune how aggressively the cutter splits on silence. Short pauses can
+            stay inside the same segment, and you can add lead-in or tail buffer
+            around each detected block.
+          </DialogDescription>
+
+          <div className="grid gap-4 pt-2">
+            <div className="rounded-[20px] border border-[var(--color_base_border)] bg-[var(--body-background-faint)] p-4">
+              <div className="mb-1 text-sm font-semibold text-[var(--text-color)]">
+                Minimum silence to split
+              </div>
+              <div className="mb-3 text-xs text-[var(--text-color-dim)]">
+                Silences shorter than this stay in the same segment.
+              </div>
+              <Input
+                type="number"
+                min="0.1"
+                max="5"
+                step="0.1"
+                value={detectionForm.minSilenceSeconds}
+                onChange={(event) => {
+                  updateDetectionFormValue(
+                    "minSilenceSeconds",
+                    event.target.value,
+                  );
+                }}
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-[20px] border border-[var(--color_base_border)] bg-[var(--body-background-faint)] p-4">
+                <div className="mb-1 text-sm font-semibold text-[var(--text-color)]">
+                  Start buffer
+                </div>
+                <div className="mb-3 text-xs text-[var(--text-color-dim)]">
+                  Extra audio kept before the detected speech starts.
+                </div>
+                <Input
+                  type="number"
+                  min="0"
+                  max="2"
+                  step="0.01"
+                  value={detectionForm.startBufferSeconds}
+                  onChange={(event) => {
+                    updateDetectionFormValue(
+                      "startBufferSeconds",
+                      event.target.value,
+                    );
+                  }}
+                />
+              </div>
+
+              <div className="rounded-[20px] border border-[var(--color_base_border)] bg-[var(--body-background-faint)] p-4">
+                <div className="mb-1 text-sm font-semibold text-[var(--text-color)]">
+                  End buffer
+                </div>
+                <div className="mb-3 text-xs text-[var(--text-color-dim)]">
+                  Extra audio kept after the detected speech ends.
+                </div>
+                <Input
+                  type="number"
+                  min="0"
+                  max="2"
+                  step="0.01"
+                  value={detectionForm.endBufferSeconds}
+                  onChange={(event) => {
+                    updateDetectionFormValue(
+                      "endBufferSeconds",
+                      event.target.value,
+                    );
+                  }}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 border-b border-[var(--color_base_border)] px-5 py-3">
-            <button
-              type="button"
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-70"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isLoadingAudio}
-            >
-              <UploadIcon className="h-4 w-4" />
-              {isLoadingAudio ? "Reading audio..." : "Upload long audio"}
-            </button>
-            <button
-              type="button"
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-70"
-              onClick={runAutoDetect}
-              disabled={!audioBuffer}
-              title={
-                audioBuffer
-                  ? "Rebuild segments from silence"
-                  : "Load audio first"
-              }
-            >
-              <WandSparklesIcon className="h-4 w-4" />
-              Detect silence
-            </button>
-            <button
-              type="button"
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-70"
-              onClick={onAddSegment}
-              disabled={!waveformReady}
-            >
-              <PlusIcon className="h-4 w-4" />
-              Add segment
-            </button>
-            <button
-              type="button"
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-70"
-              onClick={onShrinkWrapAll}
-              disabled={!audioBuffer || segments.length === 0}
-            >
-              Shrink-wrap all
-            </button>
-            <button
-              type="button"
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-70"
-              onClick={() => {
-                void onDownloadSegmentZip();
-              }}
-              disabled={
-                !audioBuffer || segments.length === 0 || isExportingSegments
-              }
-            >
-              <DownloadIcon className="h-4 w-4" />
-              {isExportingSegments ? "Encoding MP3..." : "Download zip"}
-            </button>
-            <PlayAudio onClick={audioUrl ? onPlayPause : undefined} />
-            <div className="flex items-center gap-2 text-xs">
-              <button
-                type="button"
-                className="inline-flex h-7 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-2 leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                onClick={onZoomOut}
-              >
-                -
-              </button>
-              <button
-                type="button"
-                className="inline-flex h-7 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-2 leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                onClick={onZoomIn}
-              >
-                +
-              </button>
-              <button
-                type="button"
-                className="inline-flex h-7 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-2 leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                onClick={onZoomFit}
-              >
-                Fit
-              </button>
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <div className="text-xs text-[var(--text-color-dim)]">
+              Current: split after {detectionSettings.minSilenceSeconds}s of
+              silence, with +{detectionSettings.startBufferSeconds}s / +
+              {detectionSettings.endBufferSeconds}s buffer.
             </div>
-            <input
-              ref={fileInputRef}
-              className="sr-only"
-              type="file"
-              accept="audio/*"
-              onChange={onFileChange}
-            />
-            <div className="min-w-0 flex-1 truncate text-sm text-[var(--text-color-dim)]">
-              {audioFile?.name || "No source audio selected."}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="inline-flex h-9 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
+                onClick={() => setDetectDialogOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="inline-flex h-9 items-center justify-center rounded-md border border-[#0f5f83] bg-[#1cb0f6] px-3 text-sm font-semibold leading-none text-white transition-colors hover:bg-[#1598d7]"
+                onClick={applyDetectionSettings}
+              >
+                Detect
+              </button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
 
-          <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[minmax(0,1.65fr)_360px]">
-            <div className="min-h-0 border-r border-[var(--color_base_border)] px-5 py-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-sm font-semibold text-[var(--text-color)]">
-                    Waveform
-                  </div>
-                  <div className="text-xs text-[var(--text-color-dim)]">
-                    Drag across the waveform to add a segment. Drag a segment
-                    body to move it. Drag either edge to resize it.
-                  </div>
-                </div>
-                <div className="text-right text-xs text-[var(--text-color-dim)]">
-                  <div>{segments.length} segment(s)</div>
-                  <div>
-                    {duration > 0 ? formatSeconds(duration) : "00:00.000"}
-                  </div>
-                </div>
+      <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[minmax(0,1.65fr)_360px]">
+        <div className="flex min-h-0 flex-col overflow-hidden border-r border-[var(--color_base_border)] px-5 py-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-semibold text-[var(--text-color)]">
+                Waveform
               </div>
-              <div
-                ref={scrollContainerRef}
-                className="h-[320px] overflow-x-auto overflow-y-hidden rounded-xl border border-[var(--color_base_border)] bg-[linear-gradient(180deg,rgba(28,176,246,0.05),rgba(15,95,131,0.02))] p-4"
-              >
-                <div ref={containerRef} />
-              </div>
-              {audioError ? (
-                <p className="mt-3 text-sm text-[#b33b3b]">{audioError}</p>
-              ) : null}
-              {exportError ? (
-                <p className="mt-3 text-sm text-[#b33b3b]">{exportError}</p>
-              ) : null}
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[var(--text-color-dim)]">
-                <div>
-                  {segmentCountMismatch
-                    ? `${segments.length} segments detected for ${expectedSegmentCount} story rows.`
-                    : expectedSegmentCount > 0
-                      ? `${segments.length} / ${expectedSegmentCount} segments ready for staging.`
-                      : `${segments.length} segments ready.`}
-                </div>
-                {segments.length > 0 ? (
-                  <button
-                    type="button"
-                    className="inline-flex h-7 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-2 leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                    onClick={onClearSegments}
-                  >
-                    Clear segments
-                  </button>
-                ) : null}
+              <div className="text-xs text-[var(--text-color-dim)]">
+                Drag across the waveform to add a segment. Drag a segment body
+                to move it. Drag either edge to resize it.
               </div>
             </div>
+            <div className="text-right text-xs text-[var(--text-color-dim)]">
+              <div>{segments.length} segment(s)</div>
+              <div>{duration > 0 ? formatSeconds(duration) : "00:00.000"}</div>
+            </div>
+          </div>
+          <div
+            ref={scrollContainerRef}
+            className="h-fit overflow-x-auto overflow-y-hidden rounded-xl border border-[var(--color_base_border)] bg-[linear-gradient(180deg,rgba(28,176,246,0.05),rgba(15,95,131,0.02))] p-4"
+          >
+            <div ref={containerRef} />
+          </div>
+          {audioError ? (
+            <p className="mt-3 text-sm text-[#b33b3b]">{audioError}</p>
+          ) : null}
+          {exportError ? (
+            <p className="mt-3 text-sm text-[#b33b3b]">{exportError}</p>
+          ) : null}
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[var(--text-color-dim)]">
+            <div>
+              {segmentCountMismatch
+                ? `${segments.length} segments detected for ${expectedSegmentCount} story rows.`
+                : expectedSegmentCount > 0
+                  ? `${segments.length} / ${expectedSegmentCount} segments ready for staging.`
+                  : `${segments.length} segments ready.`}
+            </div>
+            {segments.length > 0 ? (
+              <button
+                type="button"
+                className="inline-flex h-7 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-2 leading-none transition-colors hover:bg-[var(--color_base_background)]"
+                onClick={onClearSegments}
+              >
+                Clear segments
+              </button>
+            ) : null}
+          </div>
 
-            <div className="min-h-0 overflow-y-auto px-5 py-4">
-              <div className="mb-3">
+          <div className="mt-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-[var(--color_base_border)] bg-[var(--body-background-faint)] p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
                 <div className="text-sm font-semibold text-[var(--text-color)]">
-                  Segment list
+                  Transcript
                 </div>
                 <div className="text-xs text-[var(--text-color-dim)]">
-                  Use this list to audition and remove cuts. The order here is
-                  the order that will be staged into the bulk editor.
+                  Highlighted rows are the segments currently visible in the
+                  waveform viewport.
                 </div>
               </div>
+              <div className="text-right text-xs text-[var(--text-color-dim)]">
+                {viewportRange.end > viewportRange.start ? (
+                  <>
+                    <div>{formatSeconds(viewportRange.start)}</div>
+                    <div>{formatSeconds(viewportRange.end)}</div>
+                  </>
+                ) : (
+                  <div>Scroll the waveform</div>
+                )}
+              </div>
+            </div>
 
-              {segments.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-[var(--color_base_border)] bg-[var(--body-background-faint)] p-4 text-sm text-[var(--text-color-dim)]">
-                  Upload a recording to auto-detect cuts, or drag across the
-                  waveform to create them yourself.
+            <div
+              ref={transcriptScrollRef}
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1"
+            >
+              {transcriptItems.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[var(--color_base_border)] bg-[var(--body-background)] p-4 text-sm text-[var(--text-color-dim)]">
+                  Story rows will appear here once the bulk audio editor has
+                  audio-capable lines.
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {segments.map((segment, index) => {
-                    const isSelected = selectedSegmentId === segment.id;
-                    const onPlay = () => onPlaySegment(segment);
-                    const onShrinkWrap = () => onShrinkWrapSegment(segment.id);
-                    const onEditLabel = () => onEditSegmentLabel(segment.id);
-                    const onDelete = () => onRemoveSegment(segment.id);
+                  {transcriptItems.map((item, index) => {
+                    const matchedSegment = sortedSegments[index];
+                    const isVisible = visibleSegmentIndexes.has(index);
+                    const isSelected = selectedSegmentIndex === index;
+
                     return (
-                      <div
-                        key={segment.id}
-                        className={`rounded-xl border p-3 transition-colors ${
-                          isSelected
-                            ? "border-[#1cb0f6] bg-[rgba(28,176,246,0.08)]"
-                            : "border-[var(--color_base_border)] bg-[var(--body-background-faint)]"
+                      <button
+                        key={item.id}
+                        ref={(node) => {
+                          transcriptRowRefs.current[index] = node;
+                        }}
+                        type="button"
+                        className={`block w-full rounded-[20px] border px-4 py-3 text-left transition-colors ${
+                          isVisible
+                            ? "border-[#d7e34f] bg-[#f8fbcf]"
+                            : isSelected
+                              ? "border-[#1cb0f6] bg-[rgba(28,176,246,0.08)]"
+                              : "border-[var(--color_base_border)] bg-[var(--body-background)] hover:bg-[var(--color_base_background)]"
                         }`}
+                        onClick={() => {
+                          if (!matchedSegment) return;
+                          onPlaySegment(matchedSegment);
+                        }}
                         onMouseEnter={() => {
-                          setHoveredSegmentId(segment.id);
-                          setSelectedSegmentId(segment.id);
+                          if (!matchedSegment) return;
+                          setHoveredSegmentId(matchedSegment.id);
+                          setSelectedSegmentId(matchedSegment.id);
                         }}
                       >
-                        <div className="mb-2 flex items-start justify-between gap-3">
-                          <div>
-                            <div className="text-sm font-semibold text-[var(--text-color)]">
-                              Segment {index + 1}
+                        <div className="flex items-start gap-4">
+                          <div
+                            className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-bold ${
+                              isVisible
+                                ? "border-[#c8d339] bg-[#ffffff] text-[#465100]"
+                                : "border-[var(--color_base_border)] bg-[var(--body-background-faint)] text-[var(--text-color)]"
+                            }`}
+                          >
+                            {index + 1}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-col gap-1 md:flex-row md:items-baseline md:gap-4">
+                              <span className="shrink-0 text-[1.05rem] font-bold text-[var(--text-color)] md:min-w-[120px] md:text-right">
+                                {item.speaker || "Narrator"}:
+                              </span>
+                              <span className="text-[1.05rem] leading-8 text-[var(--text-color)]">
+                                {item.content.text}
+                              </span>
                             </div>
-                            {labelsById[segment.id] ? (
-                              <div className="mt-0.5 text-xs font-medium text-[#0f5f83]">
-                                {labelsById[segment.id]}
-                              </div>
-                            ) : null}
-                            <div className="text-xs text-[var(--text-color-dim)]">
-                              {formatSeconds(segment.start)} to{" "}
-                              {formatSeconds(segment.end)}
+                            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--text-color-dim)]">
+                              <span>Story line {item.lineIndex}</span>
+                              {matchedSegment ? (
+                                <span>
+                                  {formatSeconds(matchedSegment.start)} to{" "}
+                                  {formatSeconds(matchedSegment.end)}
+                                </span>
+                              ) : (
+                                <span>No matching segment yet</span>
+                              )}
                             </div>
                           </div>
-                          <div className="text-xs text-[var(--text-color-dim)]">
-                            {formatSeconds(segment.end - segment.start)}
+                          <div className="shrink-0 text-right font-mono text-sm font-bold text-[var(--text-color)]">
+                            #{index + 1}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                            onClick={onPlay}
-                          >
-                            Play
-                          </button>
-                          <button
-                            type="button"
-                            className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                            onClick={onShrinkWrap}
-                          >
-                            Shrink-wrap
-                          </button>
-                          <button
-                            type="button"
-                            className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                            onClick={onEditLabel}
-                            title={
-                              labelsById[segment.id]
-                                ? "Edit label"
-                                : "Add label"
-                            }
-                          >
-                            {labelsById[segment.id]
-                              ? "Edit label"
-                              : "Add label"}
-                          </button>
-                          <button
-                            type="button"
-                            className="inline-flex h-8 items-center justify-center gap-1 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none text-[#b33b3b] transition-colors hover:bg-[#fff5f5]"
-                            onClick={onDelete}
-                          >
-                            <Trash2Icon className="h-3.5 w-3.5" />
-                            Remove
-                          </button>
-                        </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
               )}
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color_base_border)] px-5 py-3">
-            <div className="text-sm text-[var(--text-color-dim)]">
-              {segmentCountMismatch
-                ? "Adjust the cuts until the segment count matches the number of bulk audio rows."
-                : "Stage the generated clips into the bulk editor in top-to-bottom order."}
+        <div className="min-h-0 overflow-y-auto px-5 py-4">
+          <div className="mb-3">
+            <div className="text-sm font-semibold text-[var(--text-color)]">
+              Segment list
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="inline-flex h-9 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                onClick={() => onOpenChange(false)}
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                className="inline-flex h-9 items-center justify-center rounded-md border border-[#0f5f83] bg-[#1cb0f6] px-3 text-sm font-semibold leading-none text-white transition-colors hover:bg-[#1598d7] disabled:cursor-default disabled:opacity-70"
-                onClick={onUseSegmentCuts}
-                disabled={
-                  !audioBuffer ||
-                  segments.length === 0 ||
-                  segmentCountMismatch ||
-                  isExportingSegments
-                }
-              >
-                {isExportingSegments
-                  ? "Preparing MP3 clips..."
-                  : "Use segments in bulk editor"}
-              </button>
+            <div className="text-xs text-[var(--text-color-dim)]">
+              Use this list to audition and remove cuts. The order here is the
+              order that will be staged into the bulk editor.
             </div>
           </div>
+
+          {segments.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[var(--color_base_border)] bg-[var(--body-background-faint)] p-4 text-sm text-[var(--text-color-dim)]">
+              Upload a recording to auto-detect cuts, or drag across the
+              waveform to create them yourself.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {segments.map((segment, index) => {
+                const isSelected = selectedSegmentId === segment.id;
+                const onPlay = () => onPlaySegment(segment);
+                const onShrinkWrap = () => onShrinkWrapSegment(segment.id);
+                const onEditLabel = () => onEditSegmentLabel(segment.id);
+                const onDelete = () => onRemoveSegment(segment.id);
+                return (
+                  <div
+                    key={segment.id}
+                    className={`rounded-xl border p-3 transition-colors ${
+                      isSelected
+                        ? "border-[#1cb0f6] bg-[rgba(28,176,246,0.08)]"
+                        : "border-[var(--color_base_border)] bg-[var(--body-background-faint)]"
+                    }`}
+                    onMouseEnter={() => {
+                      setHoveredSegmentId(segment.id);
+                      setSelectedSegmentId(segment.id);
+                    }}
+                  >
+                    <div className="mb-2 flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold text-[var(--text-color)]">
+                          Segment {index + 1}
+                        </div>
+                        {labelsById[segment.id] ? (
+                          <div className="mt-0.5 text-xs font-medium text-[#0f5f83]">
+                            {labelsById[segment.id]}
+                          </div>
+                        ) : null}
+                        <div className="text-xs text-[var(--text-color-dim)]">
+                          {formatSeconds(segment.start)} to{" "}
+                          {formatSeconds(segment.end)}
+                        </div>
+                      </div>
+                      <div className="text-xs text-[var(--text-color-dim)]">
+                        {formatSeconds(segment.end - segment.start)}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
+                        onClick={onPlay}
+                      >
+                        Play
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
+                        onClick={onShrinkWrap}
+                      >
+                        Shrink-wrap
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
+                        onClick={onEditLabel}
+                        title={
+                          labelsById[segment.id] ? "Edit label" : "Add label"
+                        }
+                      >
+                        {labelsById[segment.id] ? "Edit label" : "Add label"}
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-flex h-8 items-center justify-center gap-1 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none text-[#b33b3b] transition-colors hover:bg-[#fff5f5]"
+                        onClick={onDelete}
+                      >
+                        <Trash2Icon className="h-3.5 w-3.5" />
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color_base_border)] px-5 py-3">
+        <div className="text-sm text-[var(--text-color-dim)]">
+          {segmentCountMismatch
+            ? "Adjust the cuts until the segment count matches the number of bulk audio rows."
+            : "Stage the generated clips into the bulk editor in top-to-bottom order."}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="inline-flex h-9 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
+            onClick={() => onOpenChange(false)}
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            className="inline-flex h-9 items-center justify-center rounded-md border border-[#0f5f83] bg-[#1cb0f6] px-3 text-sm font-semibold leading-none text-white transition-colors hover:bg-[#1598d7] disabled:cursor-default disabled:opacity-70"
+            onClick={onUseSegmentCuts}
+            disabled={
+              !audioBuffer ||
+              segments.length === 0 ||
+              segmentCountMismatch ||
+              isExportingSegments
+            }
+          >
+            {isExportingSegments
+              ? "Preparing MP3 clips..."
+              : "Use segments in bulk editor"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (!renderInDialog) {
+    return (
+      <div className="h-[100dvh] overflow-hidden bg-[var(--body-background)]">
+        <div className="mx-auto flex h-full w-full max-w-[1800px] flex-col">
+          {content}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        showCloseButton={true}
+        className="inset-3 h-[calc(100vh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-none translate-x-0 translate-y-0 overflow-hidden p-0 sm:top-3 sm:left-3 sm:max-w-none sm:translate-x-0 sm:translate-y-0"
+      >
+        {content}
       </DialogContent>
     </Dialog>
   );

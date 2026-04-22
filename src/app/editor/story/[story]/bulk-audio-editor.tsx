@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import WaveSurfer from "wavesurfer.js";
 import { useWavesurfer } from "@wavesurfer/react";
@@ -13,7 +14,6 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import AudioCutterDialog from "@/app/editor/story/[story]/audio-cutter-dialog";
 import PlayAudio from "@/components/PlayAudio";
 import StoryLineHints from "@/components/StoryLineHints";
 import type {
@@ -26,6 +26,11 @@ import {
   timings_to_text,
 } from "@/lib/editor/audio/audio_edit_tools";
 import { splitTextTokens } from "@/lib/editor/tts_transcripte";
+import {
+  consumeAudioCutterOutput,
+  getOutputStorageKey,
+  storeAudioCutterTranscript,
+} from "@/app/editor/story/[story]/audio-cutter-storage";
 
 const PUBLIC_BLOB_BASE_URL =
   "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/";
@@ -849,15 +854,18 @@ export default function BulkAudioEditor({
   open,
   onOpenChange,
   storyId,
+  courseId,
   items,
   onApply,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   storyId: number;
+  courseId: string;
   items: BulkAudioEditorItem[];
   onApply: (updates: BulkAudioEditorUpdate[]) => void;
 }) {
+  const router = useRouter();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const wasOpenRef = React.useRef(false);
   const draftsRef = React.useRef<Record<string, BulkAudioEditorDraft>>(
@@ -871,7 +879,6 @@ export default function BulkAudioEditor({
   const [isApplying, setIsApplying] = React.useState(false);
   const [isPreparingFiles, setIsPreparingFiles] = React.useState(false);
   const [autoAllRequest, setAutoAllRequest] = React.useState(0);
-  const [audioCutterOpen, setAudioCutterOpen] = React.useState(false);
 
   React.useEffect(() => {
     draftsRef.current = drafts;
@@ -894,7 +901,6 @@ export default function BulkAudioEditor({
     setApplyError(null);
     setAutoAllRequest(0);
     setIsPreparingFiles(false);
-    setAudioCutterOpen(false);
   }, [items, open]);
 
   const updateDraft = React.useCallback(
@@ -958,6 +964,47 @@ export default function BulkAudioEditor({
     },
     [items],
   );
+
+  const importStoredCuts = React.useCallback(async () => {
+    const files = consumeAudioCutterOutput(storyId);
+    if (files.length === 0) return;
+
+    setIsPreparingFiles(true);
+    try {
+      applyMatchedFiles(files);
+      setApplyError(null);
+    } finally {
+      setIsPreparingFiles(false);
+    }
+  }, [applyMatchedFiles, storyId]);
+
+  React.useEffect(() => {
+    if (!open) return;
+
+    void importStoredCuts();
+
+    const outputStorageKey = getOutputStorageKey(storyId);
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== outputStorageKey || !event.newValue) return;
+      void importStoredCuts();
+    };
+    const onFocus = () => {
+      void importStoredCuts();
+    };
+
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [importStoredCuts, open, storyId]);
+
+  const openAudioCutterPage = React.useCallback(() => {
+    storeAudioCutterTranscript(storyId, items);
+    router.push(`/editor/course/${courseId}/story/${storyId}/audio-cutter`);
+  }, [courseId, items, router, storyId]);
 
   const onBulkFileChange = React.useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1146,9 +1193,9 @@ export default function BulkAudioEditor({
             <button
               type="button"
               className="inline-flex h-9 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
-              onClick={() => setAudioCutterOpen(true)}
+              onClick={openAudioCutterPage}
             >
-              Cut long audio
+              Open cutter page
             </button>
             <button
               type="button"
@@ -1212,16 +1259,6 @@ export default function BulkAudioEditor({
               );
             })}
           </div>
-
-          <AudioCutterDialog
-            open={audioCutterOpen}
-            onOpenChange={setAudioCutterOpen}
-            expectedSegmentCount={items.length}
-            onUseSegments={(files) => {
-              applyMatchedFiles(files);
-              setApplyError(null);
-            }}
-          />
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color_base_border)] px-4 py-3">
             <div className="text-sm text-[var(--text-color-dim)]">
