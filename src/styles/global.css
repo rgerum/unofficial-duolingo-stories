@@ -111,6 +111,97 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+.audio-cutter-region-content {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  display: flex;
+  max-width: calc(100% - 16px);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.audio-cutter-region-content__top-row {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 6px;
+}
+
+.audio-cutter-region-content__badge {
+  display: inline-flex;
+  min-width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+  border-radius: 9999px;
+  background: rgba(15, 95, 131, 0.92);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.audio-cutter-region-content__controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: auto;
+}
+
+.audio-cutter-region-icon-button {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 9999px;
+  background: rgba(15, 95, 131, 0.9);
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+  pointer-events: auto;
+}
+
+.audio-cutter-region-icon-button--danger {
+  background: rgba(179, 59, 59, 0.9);
+}
+
+.audio-cutter-region-icon-button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.95);
+  outline-offset: 1px;
+}
+
+.audio-cutter-region-content__label,
+.audio-cutter-region-content__join-hint {
+  padding: 2px 8px;
+  border-radius: 9999px;
+  color: #0f5f83;
+  font-size: 11px;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+.audio-cutter-region-content__label {
+  max-width: 120px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.92);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audio-cutter-region-content__join-hint {
+  background: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
 @keyframes story-checkbutton-false-to-disabled {
   0%,
   66% {
