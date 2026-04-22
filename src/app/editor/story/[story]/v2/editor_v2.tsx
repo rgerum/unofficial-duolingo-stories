@@ -130,6 +130,14 @@ function getBulkAudioEditorItems(
       element.type === "HEADER"
         ? element.learningLanguageTitleContent
         : element.line.content;
+    const speaker =
+      element.type === "HEADER"
+        ? "Narrator"
+        : element.line.type === "CHARACTER"
+          ? (element.line.characterName ??
+            element.line.characterId?.toString() ??
+            "Narrator")
+          : "Narrator";
 
     if (!text || !content) continue;
 
@@ -138,7 +146,7 @@ function getBulkAudioEditorItems(
       order,
       lineIndex: element.trackingProperties.line_index || 0,
       type: element.type,
-      speaker: element.audio.ssml.speaker,
+      speaker,
       content,
       hideRangesForChallenge:
         element.type === "LINE" ? element.hideRangesForChallenge : undefined,
@@ -158,12 +166,14 @@ export default function EditorV2({
   story_data,
   avatar_names,
   initialFocusLine,
+  initialBulkAudioOpen = false,
   story_navigation,
 }: {
   isAdmin: boolean;
   story_data: StoryData;
   avatar_names: Record<number, Avatar>;
   initialFocusLine?: number;
+  initialBulkAudioOpen?: boolean;
   story_navigation: StoryNavigation;
 }) {
   const router = useRouter();
@@ -174,6 +184,7 @@ export default function EditorV2({
   const svgParentRef = React.useRef<SVGSVGElement>(null);
   const viewRef = React.useRef<EditorView | null>(null);
   const hasAppliedInitialFocusRef = React.useRef(false);
+  const previousStoryIdRef = React.useRef<number | null>(null);
   const trackedAudioAnchorsRef = React.useRef<Set<AudioInsertAnchor>>(
     new Set(),
   );
@@ -202,7 +213,8 @@ export default function EditorV2({
   const [audioEditorData, setAudioEditorData] = React.useState<
     StoryElementLine | StoryElementHeader | undefined
   >(undefined);
-  const [bulkAudioOpen, setBulkAudioOpen] = React.useState(false);
+  const [bulkAudioOpen, setBulkAudioOpen] =
+    React.useState(initialBulkAudioOpen);
   const storySnapshot = React.useMemo(
     () => ({
       id: story_data.id,
@@ -272,6 +284,9 @@ export default function EditorV2({
   );
 
   React.useEffect(() => {
+    const previousStoryId = previousStoryIdRef.current;
+    previousStoryIdRef.current = storySnapshot.id;
+
     // Reset editor-local state when switching stories, even if the text matches.
     setDocText(normalizeDocText(storySnapshot.text));
     setRevision(0);
@@ -279,7 +294,9 @@ export default function EditorV2({
     hasAppliedInitialFocusRef.current = false;
     releaseTrackedAudioEditorAnchor();
     setAudioEditorData(undefined);
-    setBulkAudioOpen(false);
+    if (previousStoryId !== null && previousStoryId !== storySnapshot.id) {
+      setBulkAudioOpen(false);
+    }
   }, [releaseTrackedAudioEditorAnchor, storySnapshot]);
 
   React.useEffect(
@@ -597,6 +614,7 @@ export default function EditorV2({
         open={bulkAudioOpen}
         onOpenChange={setBulkAudioOpen}
         storyId={story_data.id}
+        courseId={story_data.short}
         items={bulkAudioItems}
         onApply={onBulkAudioApply}
       />

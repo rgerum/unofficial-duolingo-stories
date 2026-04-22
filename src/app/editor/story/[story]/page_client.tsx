@@ -18,10 +18,12 @@ export default function StoryEditorPageClient({
   storyId,
   courseId,
   initialFocusLine,
+  initialBulkAudioOpen,
 }: {
   storyId: number;
   courseId?: string;
   initialFocusLine?: number;
+  initialBulkAudioOpen?: boolean;
 }) {
   const convex = useConvex();
   const data = useQuery(api.editorRead.getEditorStoryPageData, {
@@ -148,6 +150,7 @@ export default function StoryEditorPageClient({
         story_data={data.story_data}
         avatar_names={avatarNames}
         initialFocusLine={initialFocusLine}
+        initialBulkAudioOpen={initialBulkAudioOpen}
         story_navigation={{
           previousStory: previousStory
             ? {
