@@ -827,6 +827,7 @@ export default function AudioCutterDialog({
   const activeDraftRegionIdRef = React.useRef<string | null>(null);
   const pendingRegionIdsRef = React.useRef<Set<string>>(new Set());
   const autoDetectRequestRef = React.useRef(0);
+  const normalizeOperationRef = React.useRef(0);
   const lastHandledAutoDetectRequestRef = React.useRef(0);
   const [audioFile, setAudioFile] = React.useState<File | null>(null);
   const [audioUrl, setAudioUrl] = React.useState("");
@@ -892,6 +893,7 @@ export default function AudioCutterDialog({
   });
 
   const resetState = React.useCallback(() => {
+    normalizeOperationRef.current += 1;
     activeDraftRegionIdRef.current = null;
     pendingRegionIdsRef.current.clear();
     typedRegionsPlugin.clearRegions();
@@ -1580,6 +1582,7 @@ export default function AudioCutterDialog({
 
       const requestToken = autoDetectRequestRef.current + 1;
       autoDetectRequestRef.current = requestToken;
+      normalizeOperationRef.current += 1;
       setIsLoadingAudio(true);
       setAudioError(null);
       setExportError(null);
@@ -1629,22 +1632,31 @@ export default function AudioCutterDialog({
       return;
     }
 
+    const normalizeToken = normalizeOperationRef.current + 1;
+    normalizeOperationRef.current = normalizeToken;
     setIsNormalizingAudio(true);
     setAudioError(null);
     setExportError(null);
 
     try {
       await waitForNextAnimationFrame();
+      if (normalizeToken !== normalizeOperationRef.current) return;
       const normalized = normalizeAudioBufferPeak(audioBuffer);
-      if (normalized.changed) {
+      if (
+        normalized.changed &&
+        normalizeToken === normalizeOperationRef.current
+      ) {
         updateLoadedAudio(normalized.buffer);
       }
     } catch (error) {
+      if (normalizeToken !== normalizeOperationRef.current) return;
       setAudioError(
         getErrorMessage(error, "Could not normalize the loaded audio."),
       );
     } finally {
-      setIsNormalizingAudio(false);
+      if (normalizeToken === normalizeOperationRef.current) {
+        setIsNormalizingAudio(false);
+      }
     }
   }, [
     audioBuffer,
