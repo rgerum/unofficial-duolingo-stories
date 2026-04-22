@@ -14,6 +14,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import AudioCutterDialog from "@/app/editor/story/[story]/audio-cutter-dialog";
 import PlayAudio from "@/components/PlayAudio";
 import StoryLineHints from "@/components/StoryLineHints";
 import type {
@@ -879,6 +880,7 @@ export default function BulkAudioEditor({
   const [isApplying, setIsApplying] = React.useState(false);
   const [isPreparingFiles, setIsPreparingFiles] = React.useState(false);
   const [autoAllRequest, setAutoAllRequest] = React.useState(0);
+  const [audioCutterOpen, setAudioCutterOpen] = React.useState(false);
 
   React.useEffect(() => {
     draftsRef.current = drafts;
@@ -901,6 +903,7 @@ export default function BulkAudioEditor({
     setApplyError(null);
     setAutoAllRequest(0);
     setIsPreparingFiles(false);
+    setAudioCutterOpen(false);
   }, [items, open]);
 
   const updateDraft = React.useCallback(
@@ -1259,6 +1262,17 @@ export default function BulkAudioEditor({
               );
             })}
           </div>
+
+          <AudioCutterDialog
+            open={audioCutterOpen}
+            onOpenChange={setAudioCutterOpen}
+            expectedSegmentCount={items.length}
+            transcriptItems={items}
+            onUseSegments={(files) => {
+              applyMatchedFiles(files);
+              setApplyError(null);
+            }}
+          />
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color_base_border)] px-4 py-3">
             <div className="text-sm text-[var(--text-color-dim)]">
