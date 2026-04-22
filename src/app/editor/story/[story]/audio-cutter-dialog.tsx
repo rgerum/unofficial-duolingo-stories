@@ -11,7 +11,6 @@ import {
   UploadIcon,
   WandSparklesIcon,
 } from "lucide-react";
-import WaveSurfer from "wavesurfer.js";
 import Regions from "wavesurfer.js/dist/plugins/regions.js";
 import PlayAudio from "@/components/PlayAudio";
 import { getLamejsModule } from "@/lib/lamejs-compat";
@@ -37,7 +36,6 @@ const MP3_SAMPLE_BLOCK_SIZE = 1152;
 const SEGMENT_COLOR = "rgba(28,176,246,0.2)";
 const SEGMENT_BORDER_COLOR = "rgba(15,95,131,0.4)";
 const SEGMENT_ACTIVE_BORDER_COLOR = "rgba(28,176,246,0.95)";
-const SEGMENT_TEXT_BACKGROUND = "rgba(15,95,131,0.92)";
 const cachedAudioSegmentation = new WeakMap<
   AudioBuffer,
   CachedAudioSegmentation
@@ -431,21 +429,10 @@ function createIconButton({
   const button = document.createElement("button");
   button.type = "button";
   button.title = title;
-  button.ariaLabel = title;
-  button.style.display = "inline-flex";
-  button.style.alignItems = "center";
-  button.style.justifyContent = "center";
-  button.style.width = "22px";
-  button.style.height = "22px";
-  button.style.borderRadius = "9999px";
-  button.style.border = "1px solid rgba(255,255,255,0.24)";
-  button.style.background = danger
-    ? "rgba(179,59,59,0.9)"
-    : "rgba(15,95,131,0.9)";
-  button.style.color = "#fff";
-  button.style.cursor = "pointer";
-  button.style.padding = "0";
-  button.style.pointerEvents = "auto";
+  button.setAttribute("aria-label", title);
+  button.className = danger
+    ? "audio-cutter-region-icon-button audio-cutter-region-icon-button--danger"
+    : "audio-cutter-region-icon-button";
 
   const stop = (event: Event) => {
     event.preventDefault();
@@ -483,46 +470,20 @@ function createRegionContent({
   onEditLabel: () => void;
 }) {
   const wrapper = document.createElement("div");
-  wrapper.style.position = "absolute";
-  wrapper.style.left = "8px";
-  wrapper.style.top = "6px";
-  wrapper.style.display = "flex";
-  wrapper.style.flexDirection = "column";
-  wrapper.style.alignItems = "flex-start";
-  wrapper.style.gap = "4px";
-  wrapper.style.maxWidth = "calc(100% - 16px)";
-  wrapper.style.pointerEvents = "none";
+  wrapper.className = "audio-cutter-region-content";
 
   const topRow = document.createElement("div");
-  topRow.style.display = "inline-flex";
-  topRow.style.alignItems = "center";
-  topRow.style.gap = "6px";
-  topRow.style.maxWidth = "100%";
+  topRow.className = "audio-cutter-region-content__top-row";
   wrapper.append(topRow);
 
   const badge = document.createElement("div");
   badge.textContent = `${index + 1}`;
-  badge.style.display = "inline-flex";
-  badge.style.alignItems = "center";
-  badge.style.justifyContent = "center";
-  badge.style.minWidth = "22px";
-  badge.style.height = "22px";
-  badge.style.padding = "0 7px";
-  badge.style.borderRadius = "9999px";
-  badge.style.background = SEGMENT_TEXT_BACKGROUND;
-  badge.style.color = "#fff";
-  badge.style.fontSize = "11px";
-  badge.style.fontWeight = "700";
-  badge.style.lineHeight = "1";
-  badge.style.flexShrink = "0";
+  badge.className = "audio-cutter-region-content__badge";
   topRow.append(badge);
 
   if (showControls) {
     const controls = document.createElement("div");
-    controls.style.display = "inline-flex";
-    controls.style.alignItems = "center";
-    controls.style.gap = "4px";
-    controls.style.pointerEvents = "auto";
+    controls.className = "audio-cutter-region-content__controls";
 
     controls.append(
       createIconButton({
@@ -562,33 +523,14 @@ function createRegionContent({
     const labelElement = document.createElement("div");
     labelElement.textContent = label;
     labelElement.title = label;
-    labelElement.style.maxWidth = "120px";
-    labelElement.style.padding = "2px 8px";
-    labelElement.style.borderRadius = "9999px";
-    labelElement.style.background = "rgba(255,255,255,0.92)";
-    labelElement.style.color = "#0f5f83";
-    labelElement.style.fontSize = "11px";
-    labelElement.style.fontWeight = "600";
-    labelElement.style.lineHeight = "1.2";
-    labelElement.style.whiteSpace = "nowrap";
-    labelElement.style.overflow = "hidden";
-    labelElement.style.textOverflow = "ellipsis";
-    labelElement.style.pointerEvents = "none";
+    labelElement.className = "audio-cutter-region-content__label";
     topRow.append(labelElement);
   }
 
   if (showJoinHint) {
     const joinHint = document.createElement("div");
     joinHint.textContent = "join segments";
-    joinHint.style.padding = "2px 8px";
-    joinHint.style.borderRadius = "9999px";
-    joinHint.style.background = "rgba(255,255,255,0.95)";
-    joinHint.style.color = "#0f5f83";
-    joinHint.style.fontSize = "11px";
-    joinHint.style.fontWeight = "700";
-    joinHint.style.lineHeight = "1.2";
-    joinHint.style.textTransform = "lowercase";
-    joinHint.style.pointerEvents = "none";
+    joinHint.className = "audio-cutter-region-content__join-hint";
     wrapper.append(joinHint);
   }
 
@@ -696,13 +638,6 @@ async function decodeAudioFile(file: File) {
   }
 }
 
-function getRegionsPlugin(wavesurfer: WaveSurfer | null | undefined) {
-  return (
-    (wavesurfer as unknown as { plugins?: RegionsPlugin[] } | null)
-      ?.plugins?.[0] ?? null
-  );
-}
-
 export default function AudioCutterDialog({
   open,
   onOpenChange,
@@ -747,6 +682,8 @@ export default function AudioCutterDialog({
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<
     string | null
   >(null);
+  const regionsPlugin = React.useMemo(() => Regions.create(), []);
+  const typedRegionsPlugin = regionsPlugin as unknown as RegionsPlugin;
 
   const { wavesurfer } = useWavesurfer({
     container: containerRef,
@@ -763,16 +700,18 @@ export default function AudioCutterDialog({
     autoScroll: false,
     hideScrollbar: false,
     url: audioUrl || undefined,
-    plugins: React.useMemo(() => [Regions.create()], []),
+    plugins: React.useMemo(() => [regionsPlugin], [regionsPlugin]),
   });
 
   const resetState = React.useCallback(() => {
     activeDraftRegionIdRef.current = null;
     pendingRegionIdsRef.current.clear();
-    getRegionsPlugin(wavesurfer)?.clearRegions();
+    typedRegionsPlugin.clearRegions();
     setAudioFile(null);
     setAudioError(null);
     setExportError(null);
+    setIsLoadingAudio(false);
+    setIsExportingSegments(false);
     setAudioBuffer(null);
     setSegments([]);
     setLabelsById({});
@@ -788,7 +727,7 @@ export default function AudioCutterDialog({
       if (currentUrl) URL.revokeObjectURL(currentUrl);
       return "";
     });
-  }, [wavesurfer]);
+  }, [typedRegionsPlugin]);
 
   React.useEffect(() => {
     if (!open) {
@@ -1089,21 +1028,16 @@ export default function AudioCutterDialog({
   }, [wavesurfer, zoomPxPerSec]);
 
   React.useEffect(() => {
-    const plugin = getRegionsPlugin(wavesurfer);
-    if (!plugin) return;
-    syncRegionsFromState(plugin);
-  }, [syncRegionsFromState, wavesurfer]);
+    syncRegionsFromState(typedRegionsPlugin);
+  }, [syncRegionsFromState, typedRegionsPlugin]);
 
   React.useEffect(() => {
-    const plugin = getRegionsPlugin(wavesurfer);
-    if (!plugin) return;
-    syncRegionAppearance(plugin);
-  }, [syncRegionAppearance, wavesurfer]);
+    syncRegionAppearance(typedRegionsPlugin);
+  }, [syncRegionAppearance, typedRegionsPlugin]);
 
   React.useEffect(() => {
     if (!wavesurfer) return;
-    const plugin = getRegionsPlugin(wavesurfer);
-    if (!plugin) return;
+    const plugin = typedRegionsPlugin;
 
     const refreshRegionUi = () => {
       syncRegionAppearance(plugin);
@@ -1284,6 +1218,7 @@ export default function AudioCutterDialog({
     pendingRegionTouchesCommittedSegment,
     segments,
     syncRegionAppearance,
+    typedRegionsPlugin,
     wavesurfer,
   ]);
 
@@ -1340,7 +1275,7 @@ export default function AudioCutterDialog({
       setLabelsById({});
       setMergePreview(null);
       setDuration(0);
-      getRegionsPlugin(wavesurfer)?.clearRegions();
+      typedRegionsPlugin.clearRegions();
 
       setAudioUrl((currentUrl) => {
         if (currentUrl) URL.revokeObjectURL(currentUrl);
@@ -1363,7 +1298,7 @@ export default function AudioCutterDialog({
         }
       }
     },
-    [wavesurfer],
+    [typedRegionsPlugin],
   );
 
   const onPlayPause = React.useCallback(() => {
@@ -1448,13 +1383,12 @@ export default function AudioCutterDialog({
   const onClearSegments = React.useCallback(() => {
     activeDraftRegionIdRef.current = null;
     pendingRegionIdsRef.current.clear();
-    const plugin = getRegionsPlugin(wavesurfer);
-    plugin?.clearRegions();
+    typedRegionsPlugin.clearRegions();
     setSegments([]);
     setLabelsById({});
     setMergePreview(null);
     setSelectedSegmentId(null);
-  }, [wavesurfer]);
+  }, [typedRegionsPlugin]);
 
   const createSegmentFiles = React.useCallback(async () => {
     if (!audioBuffer || !audioFile || segments.length === 0) return;
@@ -1728,6 +1662,10 @@ export default function AudioCutterDialog({
                 <div className="space-y-3">
                   {segments.map((segment, index) => {
                     const isSelected = selectedSegmentId === segment.id;
+                    const onPlay = () => onPlaySegment(segment);
+                    const onShrinkWrap = () => onShrinkWrapSegment(segment.id);
+                    const onEditLabel = () => onEditSegmentLabel(segment.id);
+                    const onDelete = () => onRemoveSegment(segment.id);
                     return (
                       <div
                         key={segment.id}
@@ -1764,21 +1702,35 @@ export default function AudioCutterDialog({
                           <button
                             type="button"
                             className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                            onClick={() => onPlaySegment(segment)}
+                            onClick={onPlay}
                           >
                             Play
                           </button>
                           <button
                             type="button"
                             className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                            onClick={() => onShrinkWrapSegment(segment.id)}
+                            onClick={onShrinkWrap}
                           >
                             Shrink-wrap
                           </button>
                           <button
                             type="button"
+                            className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
+                            onClick={onEditLabel}
+                            title={
+                              labelsById[segment.id]
+                                ? "Edit label"
+                                : "Add label"
+                            }
+                          >
+                            {labelsById[segment.id]
+                              ? "Edit label"
+                              : "Add label"}
+                          </button>
+                          <button
+                            type="button"
                             className="inline-flex h-8 items-center justify-center gap-1 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none text-[#b33b3b] transition-colors hover:bg-[#fff5f5]"
-                            onClick={() => onRemoveSegment(segment.id)}
+                            onClick={onDelete}
                           >
                             <Trash2Icon className="h-3.5 w-3.5" />
                             Remove
