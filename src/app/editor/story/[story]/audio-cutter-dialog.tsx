@@ -13,6 +13,10 @@ import {
 import Regions from "wavesurfer.js/dist/plugins/regions.js";
 import PlayAudio from "@/components/PlayAudio";
 import Input from "@/components/ui/input";
+import {
+  decodeAudioData,
+  normalizeAudioBufferPeak,
+} from "@/lib/audio/client-audio-processing";
 import { getLamejsModule } from "@/lib/lamejs-compat";
 import {
   Dialog,
@@ -161,6 +165,12 @@ function getFileBaseName(filename: string) {
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error && error.message ? error.message : fallback;
+}
+
+function waitForNextAnimationFrame() {
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve());
+  });
 }
 
 function createSegmentId() {
@@ -791,17 +801,6 @@ async function encodeSegmentAsMp3(
   );
 }
 
-async function decodeAudioFile(file: File) {
-  const audioContext = new AudioContext({ latencyHint: "interactive" });
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-    const decoded = await audioContext.decodeAudioData(arrayBuffer.slice(0));
-    return decoded;
-  } finally {
-    await audioContext.close();
-  }
-}
-
 export default function AudioCutterDialog({
   open,
   onOpenChange,
@@ -828,6 +827,7 @@ export default function AudioCutterDialog({
   const activeDraftRegionIdRef = React.useRef<string | null>(null);
   const pendingRegionIdsRef = React.useRef<Set<string>>(new Set());
   const autoDetectRequestRef = React.useRef(0);
+  const normalizeOperationRef = React.useRef(0);
   const lastHandledAutoDetectRequestRef = React.useRef(0);
   const [audioFile, setAudioFile] = React.useState<File | null>(null);
   const [audioUrl, setAudioUrl] = React.useState("");
@@ -837,6 +837,7 @@ export default function AudioCutterDialog({
   const [audioError, setAudioError] = React.useState<string | null>(null);
   const [exportError, setExportError] = React.useState<string | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = React.useState(false);
+  const [isNormalizingAudio, setIsNormalizingAudio] = React.useState(false);
   const [isExportingSegments, setIsExportingSegments] = React.useState(false);
   const [detectDialogOpen, setDetectDialogOpen] = React.useState(false);
   const [detectionSettings, setDetectionSettings] =
@@ -892,6 +893,7 @@ export default function AudioCutterDialog({
   });
 
   const resetState = React.useCallback(() => {
+    normalizeOperationRef.current += 1;
     activeDraftRegionIdRef.current = null;
     pendingRegionIdsRef.current.clear();
     typedRegionsPlugin.clearRegions();
@@ -899,6 +901,7 @@ export default function AudioCutterDialog({
     setAudioError(null);
     setExportError(null);
     setIsLoadingAudio(false);
+    setIsNormalizingAudio(false);
     setIsExportingSegments(false);
     setDetectDialogOpen(false);
     setAudioBuffer(null);
@@ -1563,6 +1566,14 @@ export default function AudioCutterDialog({
     runAutoDetect();
   }, [audioBuffer, runAutoDetect, waveformReady]);
 
+  const updateLoadedAudio = React.useCallback((nextBuffer: AudioBuffer) => {
+    setAudioBuffer(nextBuffer);
+    setAudioUrl((currentUrl) => {
+      if (currentUrl) URL.revokeObjectURL(currentUrl);
+      return URL.createObjectURL(audioBufferToWavBlob(nextBuffer));
+    });
+  }, []);
+
   const onFileChange = React.useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
@@ -1571,7 +1582,9 @@ export default function AudioCutterDialog({
 
       const requestToken = autoDetectRequestRef.current + 1;
       autoDetectRequestRef.current = requestToken;
+      normalizeOperationRef.current += 1;
       setIsLoadingAudio(true);
+      setIsNormalizingAudio(false);
       setAudioError(null);
       setExportError(null);
       setAudioFile(file);
@@ -1592,13 +1605,9 @@ export default function AudioCutterDialog({
       });
 
       try {
-        const decoded = await decodeAudioFile(file);
+        const decoded = await decodeAudioData(await file.arrayBuffer());
         if (requestToken !== autoDetectRequestRef.current) return;
-        setAudioBuffer(decoded);
-        setAudioUrl((currentUrl) => {
-          if (currentUrl) URL.revokeObjectURL(currentUrl);
-          return URL.createObjectURL(audioBufferToWavBlob(decoded));
-        });
+        updateLoadedAudio(decoded);
       } catch (error) {
         if (requestToken !== autoDetectRequestRef.current) return;
         setAudioBuffer(null);
@@ -1611,8 +1620,52 @@ export default function AudioCutterDialog({
         }
       }
     },
-    [typedRegionsPlugin],
+    [typedRegionsPlugin, updateLoadedAudio],
   );
+
+  const onNormalizeAudio = React.useCallback(async () => {
+    if (
+      !audioBuffer ||
+      isNormalizingAudio ||
+      isExportingSegments ||
+      isLoadingAudio
+    ) {
+      return;
+    }
+
+    const normalizeToken = normalizeOperationRef.current + 1;
+    normalizeOperationRef.current = normalizeToken;
+    setIsNormalizingAudio(true);
+    setAudioError(null);
+    setExportError(null);
+
+    try {
+      await waitForNextAnimationFrame();
+      if (normalizeToken !== normalizeOperationRef.current) return;
+      const normalized = normalizeAudioBufferPeak(audioBuffer);
+      if (
+        normalized.changed &&
+        normalizeToken === normalizeOperationRef.current
+      ) {
+        updateLoadedAudio(normalized.buffer);
+      }
+    } catch (error) {
+      if (normalizeToken !== normalizeOperationRef.current) return;
+      setAudioError(
+        getErrorMessage(error, "Could not normalize the loaded audio."),
+      );
+    } finally {
+      if (normalizeToken === normalizeOperationRef.current) {
+        setIsNormalizingAudio(false);
+      }
+    }
+  }, [
+    audioBuffer,
+    isExportingSegments,
+    isLoadingAudio,
+    isNormalizingAudio,
+    updateLoadedAudio,
+  ]);
 
   const onPlayPause = React.useCallback(() => {
     wavesurfer?.playPause();
@@ -1824,6 +1877,26 @@ export default function AudioCutterDialog({
         >
           <UploadIcon className="h-4 w-4" />
           {isLoadingAudio ? "Reading audio..." : "Upload long audio"}
+        </button>
+        <button
+          type="button"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-70"
+          onClick={() => {
+            void onNormalizeAudio();
+          }}
+          disabled={
+            !audioBuffer ||
+            isNormalizingAudio ||
+            isExportingSegments ||
+            isLoadingAudio
+          }
+          title={
+            audioBuffer
+              ? "Normalize the loaded source audio"
+              : "Load audio first"
+          }
+        >
+          {isNormalizingAudio ? "Normalizing..." : "Normalize audio"}
         </button>
         <button
           type="button"
