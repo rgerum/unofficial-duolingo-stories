@@ -1584,6 +1584,7 @@ export default function AudioCutterDialog({
       autoDetectRequestRef.current = requestToken;
       normalizeOperationRef.current += 1;
       setIsLoadingAudio(true);
+      setIsNormalizingAudio(false);
       setAudioError(null);
       setExportError(null);
       setAudioFile(file);
