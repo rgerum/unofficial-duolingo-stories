@@ -826,6 +826,12 @@ export default function AudioCutterDialog({
   >({});
   const suppressTranscriptAutoScrollRef = React.useRef(false);
   const transcriptAutoScrollLockTimeoutRef = React.useRef<number | null>(null);
+  const transcriptAutoScrollLockContainerRef = React.useRef<HTMLElement | null>(
+    null,
+  );
+  const transcriptAutoScrollLockScrollListenerRef = React.useRef<
+    (() => void) | null
+  >(null);
   const isSyncingRegionsRef = React.useRef(false);
   const activeDraftRegionIdRef = React.useRef<string | null>(null);
   const pendingRegionIdsRef = React.useRef<Set<string>>(new Set());
@@ -895,22 +901,64 @@ export default function AudioCutterDialog({
     plugins: React.useMemo(() => [regionsPlugin], [regionsPlugin]),
   });
 
+  const releaseTranscriptAutoScrollLock = React.useCallback(() => {
+    const lockContainer = transcriptAutoScrollLockContainerRef.current;
+    const lockScrollListener =
+      transcriptAutoScrollLockScrollListenerRef.current;
+
+    if (lockContainer && lockScrollListener) {
+      lockContainer.removeEventListener("scroll", lockScrollListener);
+    }
+
+    transcriptAutoScrollLockContainerRef.current = null;
+    transcriptAutoScrollLockScrollListenerRef.current = null;
+    suppressTranscriptAutoScrollRef.current = false;
+  }, []);
+
+  const scheduleTranscriptAutoScrollUnlock = React.useCallback(() => {
+    if (transcriptAutoScrollLockTimeoutRef.current !== null) {
+      window.clearTimeout(transcriptAutoScrollLockTimeoutRef.current);
+    }
+    transcriptAutoScrollLockTimeoutRef.current = window.setTimeout(() => {
+      transcriptAutoScrollLockTimeoutRef.current = null;
+      releaseTranscriptAutoScrollLock();
+    }, WAVEFORM_TO_TRANSCRIPT_SYNC_LOCK_MS);
+  }, [releaseTranscriptAutoScrollLock]);
+
   const clearTranscriptAutoScrollLock = React.useCallback(() => {
     if (transcriptAutoScrollLockTimeoutRef.current !== null) {
       window.clearTimeout(transcriptAutoScrollLockTimeoutRef.current);
       transcriptAutoScrollLockTimeoutRef.current = null;
     }
-    suppressTranscriptAutoScrollRef.current = false;
-  }, []);
+    releaseTranscriptAutoScrollLock();
+  }, [releaseTranscriptAutoScrollLock]);
 
-  const lockTranscriptAutoScroll = React.useCallback(() => {
-    clearTranscriptAutoScrollLock();
-    suppressTranscriptAutoScrollRef.current = true;
-    transcriptAutoScrollLockTimeoutRef.current = window.setTimeout(() => {
-      suppressTranscriptAutoScrollRef.current = false;
-      transcriptAutoScrollLockTimeoutRef.current = null;
-    }, WAVEFORM_TO_TRANSCRIPT_SYNC_LOCK_MS);
-  }, [clearTranscriptAutoScrollLock]);
+  const lockTranscriptAutoScroll = React.useCallback(
+    (scrollContainer: HTMLElement | null) => {
+      clearTranscriptAutoScrollLock();
+      suppressTranscriptAutoScrollRef.current = true;
+
+      if (scrollContainer) {
+        const extendTranscriptAutoScrollLock = () => {
+          scheduleTranscriptAutoScrollUnlock();
+        };
+
+        transcriptAutoScrollLockContainerRef.current = scrollContainer;
+        transcriptAutoScrollLockScrollListenerRef.current =
+          extendTranscriptAutoScrollLock;
+        scrollContainer.addEventListener(
+          "scroll",
+          extendTranscriptAutoScrollLock,
+          {
+            passive: true,
+          },
+        );
+      }
+
+      scheduleTranscriptAutoScrollUnlock();
+    },
+    [clearTranscriptAutoScrollLock, scheduleTranscriptAutoScrollUnlock],
+  );
 
   const resetState = React.useCallback(() => {
     clearTranscriptAutoScrollLock();
@@ -1735,7 +1783,7 @@ export default function AudioCutterDialog({
         scrollContainer.scrollWidth - scrollContainer.clientWidth,
       );
 
-      lockTranscriptAutoScroll();
+      lockTranscriptAutoScroll(scrollContainer);
       scrollContainer.scrollTo({
         left: clamp(centeredLeftPx, 0, maxScrollLeft),
         behavior: "smooth",
