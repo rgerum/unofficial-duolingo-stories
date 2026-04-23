@@ -154,6 +154,7 @@ type RegionsPlugin = {
 
 type SegmentedPlaybackState = {
   currentRangeIndex: number;
+  didReachRangeEnd: boolean;
   keepRanges: TimeRange[];
 };
 
@@ -1273,6 +1274,7 @@ export default function AudioCutterDialog({
 
       segmentedPlaybackRef.current = {
         currentRangeIndex: 0,
+        didReachRangeEnd: false,
         keepRanges,
       };
       void wavesurfer.play(firstRange.start, firstRange.end);
@@ -1768,7 +1770,7 @@ export default function AudioCutterDialog({
   React.useEffect(() => {
     if (!wavesurfer) return;
 
-    const continueSegmentedPlayback = () => {
+    const markSegmentedRangeEndReached = () => {
       const playbackState = segmentedPlaybackRef.current;
       if (!playbackState) return;
 
@@ -1779,7 +1781,26 @@ export default function AudioCutterDialog({
         return;
       }
 
-      if (wavesurfer.getCurrentTime() + 0.03 < currentRange.end) return;
+      if (playbackState.didReachRangeEnd) return;
+      if (wavesurfer.getCurrentTime() < currentRange.end) return;
+
+      segmentedPlaybackRef.current = {
+        ...playbackState,
+        didReachRangeEnd: true,
+      };
+    };
+
+    const continueSegmentedPlayback = () => {
+      const playbackState = segmentedPlaybackRef.current;
+      if (!playbackState) return;
+      if (!playbackState.didReachRangeEnd) return;
+
+      const currentRange =
+        playbackState.keepRanges[playbackState.currentRangeIndex];
+      if (!currentRange) {
+        segmentedPlaybackRef.current = null;
+        return;
+      }
 
       const nextRangeIndex = playbackState.currentRangeIndex + 1;
       const nextRange = playbackState.keepRanges[nextRangeIndex];
@@ -1791,13 +1812,18 @@ export default function AudioCutterDialog({
       segmentedPlaybackRef.current = {
         ...playbackState,
         currentRangeIndex: nextRangeIndex,
+        didReachRangeEnd: false,
       };
       void wavesurfer.play(nextRange.start, nextRange.end);
     };
 
+    wavesurfer.on("audioprocess", markSegmentedRangeEndReached);
+    wavesurfer.on("pause", continueSegmentedPlayback);
     wavesurfer.on("finish", continueSegmentedPlayback);
 
     return () => {
+      wavesurfer.un("audioprocess", markSegmentedRangeEndReached);
+      wavesurfer.un("pause", continueSegmentedPlayback);
       wavesurfer.un("finish", continueSegmentedPlayback);
     };
   }, [wavesurfer]);
