@@ -37,7 +37,8 @@ const SILENCE_WINDOW_SECONDS = 0.02;
 const DEFAULT_DETECTION_MIN_SILENCE_SECONDS = 1;
 const DEFAULT_DETECTION_START_BUFFER_SECONDS = 0.04;
 const DEFAULT_DETECTION_END_BUFFER_SECONDS = 0.04;
-const DEFAULT_MAX_INTERNAL_SILENCE_SECONDS = 0;
+const DEFAULT_MAX_INTERNAL_SILENCE_SECONDS = 0.3;
+const DETECTION_SETTINGS_STORAGE_KEY = "audio-cutter-detection-settings-v1";
 const SHRINK_WRAP_STABILITY_EPSILON_SECONDS = 0.01;
 const MP3_BITRATE_KBPS = 128;
 const MP3_SAMPLE_BLOCK_SIZE = 1152;
@@ -223,6 +224,18 @@ function getWaveformScrollElement(
   return wrapper.parentElement;
 }
 
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  const tagName = target.tagName;
+  return (
+    target.isContentEditable ||
+    tagName === "INPUT" ||
+    tagName === "TEXTAREA" ||
+    tagName === "SELECT" ||
+    Boolean(target.closest("[contenteditable='true']"))
+  );
+}
+
 function getSegmentsFromPlugin(plugin: RegionsPlugin) {
   return sortSegments(
     plugin.getRegions().map((region) => ({
@@ -372,6 +385,20 @@ function getDetectionSettingsCacheKey(settings: DetectionSettings) {
     settings.endBufferSeconds.toFixed(3),
     settings.maxInternalSilenceSeconds.toFixed(3),
   ].join(":");
+}
+
+function loadPersistedDetectionSettings() {
+  try {
+    const rawSettings = window.localStorage.getItem(
+      DETECTION_SETTINGS_STORAGE_KEY,
+    );
+    if (!rawSettings) return null;
+    return sanitizeDetectionSettings(
+      JSON.parse(rawSettings) as Partial<DetectionSettings>,
+    );
+  } catch {
+    return null;
+  }
 }
 
 function analyzeAudioSilence(
@@ -1096,6 +1123,8 @@ export default function AudioCutterDialog({
   const [isNormalizingAudio, setIsNormalizingAudio] = React.useState(false);
   const [isExportingSegments, setIsExportingSegments] = React.useState(false);
   const [detectDialogOpen, setDetectDialogOpen] = React.useState(false);
+  const [isDragOverAudioDropzone, setIsDragOverAudioDropzone] =
+    React.useState(false);
   const [detectionSettings, setDetectionSettings] =
     React.useState<DetectionSettings>(() =>
       sanitizeDetectionSettings(undefined),
@@ -1137,6 +1166,22 @@ export default function AudioCutterDialog({
     if (regionsPlugin) return;
     setRegionsPlugin(Regions.create());
   }, [regionsPlugin]);
+
+  React.useEffect(() => {
+    const persistedSettings = loadPersistedDetectionSettings();
+    if (!persistedSettings) return;
+    setDetectionSettings(persistedSettings);
+    setDetectionForm(persistedSettings);
+  }, []);
+
+  React.useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        DETECTION_SETTINGS_STORAGE_KEY,
+        JSON.stringify(detectionSettings),
+      );
+    } catch {}
+  }, [detectionSettings]);
 
   const { wavesurfer } = useWavesurfer({
     container: containerRef,
@@ -2065,9 +2110,7 @@ export default function AudioCutterDialog({
   }, []);
 
   const onFileChange = React.useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      event.target.value = "";
+    async (file: File | null) => {
       if (!file) return;
 
       const requestToken = autoDetectRequestRef.current + 1;
@@ -2111,6 +2154,53 @@ export default function AudioCutterDialog({
       }
     },
     [typedRegionsPlugin, updateLoadedAudio],
+  );
+
+  const onFileInputChange = React.useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0] ?? null;
+      event.target.value = "";
+      await onFileChange(file);
+    },
+    [onFileChange],
+  );
+
+  const onAudioDropzoneDragEnter = React.useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      if (!event.dataTransfer.types.includes("Files")) return;
+      event.preventDefault();
+      setIsDragOverAudioDropzone(true);
+    },
+    [],
+  );
+
+  const onAudioDropzoneDragOver = React.useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      if (!event.dataTransfer.types.includes("Files")) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "copy";
+      setIsDragOverAudioDropzone(true);
+    },
+    [],
+  );
+
+  const onAudioDropzoneDragLeave = React.useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+        setIsDragOverAudioDropzone(false);
+      }
+    },
+    [],
+  );
+
+  const onAudioDropzoneDrop = React.useCallback(
+    async (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      setIsDragOverAudioDropzone(false);
+      const file = event.dataTransfer.files?.[0] ?? null;
+      await onFileChange(file);
+    },
+    [onFileChange],
   );
 
   const onNormalizeAudio = React.useCallback(async () => {
@@ -2205,6 +2295,67 @@ export default function AudioCutterDialog({
     },
     [playSegmentAudio, scrollWaveformToSegment],
   );
+
+  const selectSegmentByIndex = React.useCallback(
+    (index: number) => {
+      const segment = sortedSegments[index];
+      if (!segment) return;
+
+      setHoveredSegmentId(segment.id);
+      setSelectedSegmentId(segment.id);
+      scrollWaveformToSegment(segment);
+      transcriptRowRefs.current[index]?.scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      });
+    },
+    [scrollWaveformToSegment, sortedSegments],
+  );
+
+  React.useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (detectDialogOpen) return;
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      if (isEditableTarget(event.target)) return;
+      if (sortedSegments.length === 0) return;
+
+      if (event.code === "Space") {
+        event.preventDefault();
+        const activeSegment =
+          sortedSegments[selectedSegmentIndex] ?? sortedSegments[0];
+        if (!activeSegment) return;
+        onPlaySegment(activeSegment);
+        return;
+      }
+
+      if (event.code === "ArrowLeft" || event.code === "ArrowRight") {
+        event.preventDefault();
+        const delta = event.code === "ArrowRight" ? 1 : -1;
+        const currentIndex =
+          selectedSegmentIndex >= 0 ? selectedSegmentIndex : 0;
+        const nextIndex = clamp(
+          currentIndex + delta,
+          0,
+          sortedSegments.length - 1,
+        );
+        selectSegmentByIndex(nextIndex);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [
+    detectDialogOpen,
+    onPlaySegment,
+    open,
+    selectSegmentByIndex,
+    selectedSegmentIndex,
+    sortedSegments,
+  ]);
 
   const onZoomIn = React.useCallback(() => {
     setZoomPxPerSec((current) =>
@@ -2490,7 +2641,7 @@ export default function AudioCutterDialog({
           className="sr-only"
           type="file"
           accept="audio/*"
-          onChange={onFileChange}
+          onChange={onFileInputChange}
         />
         <div className="min-w-0 flex-1 truncate text-sm text-[var(--text-color-dim)]">
           {audioFile?.name || "No source audio selected."}
@@ -2650,10 +2801,27 @@ export default function AudioCutterDialog({
             </div>
           </div>
           <div
-            ref={scrollContainerRef}
-            className="h-fit overflow-x-auto overflow-y-hidden rounded-xl border border-[var(--color_base_border)] bg-[linear-gradient(180deg,rgba(28,176,246,0.05),rgba(15,95,131,0.02))] p-4"
+            className={`rounded-xl border transition-colors ${
+              isDragOverAudioDropzone
+                ? "border-[#1cb0f6] bg-[rgba(28,176,246,0.08)]"
+                : "border-[var(--color_base_border)] bg-[linear-gradient(180deg,rgba(28,176,246,0.05),rgba(15,95,131,0.02))]"
+            }`}
+            onDragEnter={onAudioDropzoneDragEnter}
+            onDragLeave={onAudioDropzoneDragLeave}
+            onDragOver={onAudioDropzoneDragOver}
+            onDrop={onAudioDropzoneDrop}
           >
-            <div ref={containerRef} />
+            <div
+              ref={scrollContainerRef}
+              className="h-fit overflow-x-auto overflow-y-hidden rounded-xl p-4"
+            >
+              <div ref={containerRef} />
+            </div>
+            <div className="border-t border-[var(--color_base_border)] px-4 py-2 text-xs text-[var(--text-color-dim)]">
+              {isDragOverAudioDropzone
+                ? "Drop audio here to replace the current source file."
+                : "Drop an audio file here, or use Upload long audio."}
+            </div>
           </div>
           {audioError ? (
             <p className="mt-3 text-sm text-[#b33b3b]">{audioError}</p>
