@@ -37,6 +37,7 @@ const SILENCE_WINDOW_SECONDS = 0.02;
 const DEFAULT_DETECTION_MIN_SILENCE_SECONDS = 1;
 const DEFAULT_DETECTION_START_BUFFER_SECONDS = 0.04;
 const DEFAULT_DETECTION_END_BUFFER_SECONDS = 0.04;
+const DEFAULT_MAX_INTERNAL_SILENCE_SECONDS = 0;
 const SHRINK_WRAP_STABILITY_EPSILON_SECONDS = 0.01;
 const MP3_BITRATE_KBPS = 128;
 const MP3_SAMPLE_BLOCK_SIZE = 1152;
@@ -48,11 +49,17 @@ const cachedAudioSegmentation = new WeakMap<
   Map<string, CachedAudioSegmentation>
 >();
 
+type TimeRange = {
+  start: number;
+  end: number;
+};
+
 type Segment = {
   id: string;
   start: number;
   end: number;
   label?: string;
+  skipRanges: TimeRange[];
 };
 
 type TranscriptItem = {
@@ -74,6 +81,7 @@ type MergePreview = {
 type SegmentDraft = {
   start: number;
   end: number;
+  skipRanges?: TimeRange[];
 };
 
 type AudioSilenceAnalysis = {
@@ -97,6 +105,7 @@ type DetectionSettings = {
   minSilenceSeconds: number;
   startBufferSeconds: number;
   endBufferSeconds: number;
+  maxInternalSilenceSeconds: number;
 };
 
 type SegmentRegion = {
@@ -141,6 +150,26 @@ type RegionsPlugin = {
   getRegions: () => SegmentRegion[];
   on: (event: string, callback: (region: SegmentRegion) => void) => void;
   un: (event: string, callback: (region: SegmentRegion) => void) => void;
+};
+
+type SegmentedPlaybackState = {
+  currentRangeIndex: number;
+  keepRanges: TimeRange[];
+};
+
+const EMPTY_REGIONS_PLUGIN: RegionsPlugin = {
+  addRegion: () => ({
+    id: "",
+    start: 0,
+    end: 0,
+    setOptions: () => {},
+    remove: () => {},
+  }),
+  clearRegions: () => {},
+  enableDragSelection: () => () => {},
+  getRegions: () => [],
+  on: () => {},
+  un: () => {},
 };
 
 function sortSegments(segments: Segment[]) {
@@ -199,6 +228,7 @@ function getSegmentsFromPlugin(plugin: RegionsPlugin) {
       id: region.id,
       start: region.start,
       end: region.end,
+      skipRanges: [],
     })),
   );
 }
@@ -234,6 +264,78 @@ function overlapsSegment(
   );
 }
 
+function sortRanges(ranges: TimeRange[]) {
+  return [...ranges].sort((left, right) => left.start - right.start);
+}
+
+function normalizeRanges(
+  ranges: TimeRange[] | undefined,
+  bounds: { start: number; end: number },
+) {
+  const normalized: TimeRange[] = [];
+
+  for (const range of sortRanges(ranges ?? [])) {
+    const start = clamp(range.start, bounds.start, bounds.end);
+    const end = clamp(range.end, start, bounds.end);
+    if (end - start <= 0.001) continue;
+
+    const previous = normalized[normalized.length - 1];
+    if (!previous || start > previous.end) {
+      normalized.push({ start, end });
+      continue;
+    }
+
+    previous.end = Math.max(previous.end, end);
+  }
+
+  return normalized;
+}
+
+function getTotalRangeDuration(ranges: TimeRange[] | undefined) {
+  return (ranges ?? []).reduce(
+    (total, range) => total + Math.max(0, range.end - range.start),
+    0,
+  );
+}
+
+function getEffectiveSegmentDuration(segment: {
+  start: number;
+  end: number;
+  skipRanges?: TimeRange[];
+}) {
+  return Math.max(
+    0,
+    segment.end - segment.start - getTotalRangeDuration(segment.skipRanges),
+  );
+}
+
+function getKeepRanges(bounds: TimeRange, skipRanges: TimeRange[] | undefined) {
+  const normalizedSkipRanges = normalizeRanges(skipRanges, bounds);
+  if (normalizedSkipRanges.length === 0) return [bounds];
+
+  const keepRanges: TimeRange[] = [];
+  let cursor = bounds.start;
+
+  for (const skipRange of normalizedSkipRanges) {
+    if (skipRange.start > cursor) {
+      keepRanges.push({
+        start: cursor,
+        end: skipRange.start,
+      });
+    }
+    cursor = Math.max(cursor, skipRange.end);
+  }
+
+  if (cursor < bounds.end) {
+    keepRanges.push({
+      start: cursor,
+      end: bounds.end,
+    });
+  }
+
+  return keepRanges.filter((range) => range.end - range.start > 0.001);
+}
+
 function sanitizeDetectionSettings(
   settings: Partial<DetectionSettings> | undefined,
 ): DetectionSettings {
@@ -253,6 +355,12 @@ function sanitizeDetectionSettings(
       0,
       2,
     ),
+    maxInternalSilenceSeconds: clamp(
+      settings?.maxInternalSilenceSeconds ??
+        DEFAULT_MAX_INTERNAL_SILENCE_SECONDS,
+      0,
+      3,
+    ),
   };
 }
 
@@ -261,6 +369,7 @@ function getDetectionSettingsCacheKey(settings: DetectionSettings) {
     settings.minSilenceSeconds.toFixed(3),
     settings.startBufferSeconds.toFixed(3),
     settings.endBufferSeconds.toFixed(3),
+    settings.maxInternalSilenceSeconds.toFixed(3),
   ].join(":");
 }
 
@@ -400,6 +509,83 @@ function detectSpeechSegmentsFromAnalysis({
   }, []);
 }
 
+function getSegmentSkipRangesFromAnalysis(
+  analysis: AudioSilenceAnalysis,
+  segment: TimeRange,
+  maxInternalSilenceSeconds: number,
+) {
+  if (maxInternalSilenceSeconds <= 0) return [];
+
+  const { levels, threshold, windowSeconds } = analysis;
+  if (levels.length === 0) return [];
+
+  const startWindow = clamp(
+    Math.floor(segment.start / windowSeconds),
+    0,
+    levels.length - 1,
+  );
+  const endWindowExclusive = clamp(
+    Math.ceil(segment.end / windowSeconds),
+    startWindow + 1,
+    levels.length,
+  );
+
+  let firstLoudWindow = -1;
+  let lastLoudWindow = -1;
+  for (let index = startWindow; index < endWindowExclusive; index += 1) {
+    if ((levels[index] ?? 0) < threshold) continue;
+    if (firstLoudWindow === -1) firstLoudWindow = index;
+    lastLoudWindow = index;
+  }
+
+  if (firstLoudWindow === -1 || lastLoudWindow === -1) return [];
+
+  const skipRanges: TimeRange[] = [];
+  let silentRunStart = -1;
+
+  for (let index = firstLoudWindow; index <= lastLoudWindow + 1; index += 1) {
+    const isLoud = index <= lastLoudWindow && (levels[index] ?? 0) >= threshold;
+
+    if (!isLoud) {
+      if (silentRunStart === -1) {
+        silentRunStart = index;
+      }
+      continue;
+    }
+
+    if (silentRunStart === -1) continue;
+
+    const silentWindowCount = index - silentRunStart;
+    const silentDuration = silentWindowCount * windowSeconds;
+    if (silentDuration > maxInternalSilenceSeconds) {
+      const rawSilenceStart = silentRunStart * windowSeconds;
+      const rawSilenceEnd = index * windowSeconds;
+      const trimDuration = silentDuration - maxInternalSilenceSeconds;
+      const skipStart = clamp(
+        rawSilenceStart + maxInternalSilenceSeconds / 2,
+        segment.start,
+        segment.end,
+      );
+      const skipEnd = clamp(
+        rawSilenceEnd - maxInternalSilenceSeconds / 2,
+        skipStart,
+        segment.end,
+      );
+
+      if (skipEnd - skipStart > 0.001) {
+        skipRanges.push({
+          start: skipStart,
+          end: skipEnd,
+        });
+      }
+    }
+
+    silentRunStart = -1;
+  }
+
+  return normalizeRanges(skipRanges, segment);
+}
+
 function getCachedAudioSegmentation(
   buffer: AudioBuffer,
   settings: DetectionSettings,
@@ -506,6 +692,47 @@ function getShrinkWrappedSegment(
     start: nextStart,
     end: nextEnd,
   };
+}
+
+function syncRegionSkipMarkers(regionElement: HTMLElement, segment: Segment) {
+  const existingLayer = regionElement.querySelector<HTMLElement>(
+    ".audio-cutter-region-skip-layer",
+  );
+  existingLayer?.remove();
+
+  if (segment.skipRanges.length === 0) return;
+
+  const segmentDuration = Math.max(segment.end - segment.start, 0.001);
+  const skipLayer = document.createElement("div");
+  skipLayer.className = "audio-cutter-region-skip-layer";
+  skipLayer.style.position = "absolute";
+  skipLayer.style.inset = "0";
+  skipLayer.style.pointerEvents = "none";
+  skipLayer.style.overflow = "hidden";
+  skipLayer.style.borderRadius = "inherit";
+  skipLayer.style.zIndex = "0";
+
+  for (const skipRange of segment.skipRanges) {
+    const marker = document.createElement("div");
+    const leftPercent =
+      ((skipRange.start - segment.start) / segmentDuration) * 100;
+    const widthPercent =
+      ((skipRange.end - skipRange.start) / segmentDuration) * 100;
+
+    marker.style.position = "absolute";
+    marker.style.left = `${leftPercent}%`;
+    marker.style.top = "0";
+    marker.style.bottom = "0";
+    marker.style.width = `${widthPercent}%`;
+    marker.style.background =
+      "repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0 6px, rgba(15,95,131,0.28) 6px 12px)";
+    marker.style.borderLeft = "1px dashed rgba(15,95,131,0.75)";
+    marker.style.borderRight = "1px dashed rgba(15,95,131,0.75)";
+    skipLayer.append(marker);
+  }
+
+  regionElement.style.overflow = "hidden";
+  regionElement.append(skipLayer);
 }
 
 function createIconSvg(path: string) {
@@ -735,57 +962,70 @@ async function encodeSegmentAsMp3(
   buffer: AudioBuffer,
   startSeconds: number,
   endSeconds: number,
+  skipRanges: TimeRange[] = [],
 ) {
   const { Mp3Encoder } = await getLamejsModule();
   const sampleRate = buffer.sampleRate;
   const channelCount = Math.min(2, Math.max(1, buffer.numberOfChannels));
-  const startFrame = clamp(
-    Math.floor(startSeconds * sampleRate),
-    0,
-    buffer.length,
-  );
-  const endFrame = clamp(
-    Math.ceil(endSeconds * sampleRate),
-    startFrame + 1,
-    buffer.length,
-  );
-  const frameCount = Math.max(1, endFrame - startFrame);
   const encoder = new Mp3Encoder(channelCount, sampleRate, MP3_BITRATE_KBPS);
   const channelData = Array.from({ length: channelCount }, (_, index) =>
     buffer.getChannelData(index),
   );
   const mp3Chunks: Uint8Array[] = [];
+  const keepRanges = getKeepRanges(
+    {
+      start: startSeconds,
+      end: endSeconds,
+    },
+    skipRanges,
+  );
 
-  for (
-    let frameOffset = 0;
-    frameOffset < frameCount;
-    frameOffset += MP3_SAMPLE_BLOCK_SIZE
-  ) {
-    const chunkFrameCount = Math.min(
-      MP3_SAMPLE_BLOCK_SIZE,
-      frameCount - frameOffset,
+  for (const keepRange of keepRanges.length > 0
+    ? keepRanges
+    : [{ start: startSeconds, end: endSeconds }]) {
+    const startFrame = clamp(
+      Math.floor(keepRange.start * sampleRate),
+      0,
+      buffer.length,
     );
-    const leftChunk = new Int16Array(chunkFrameCount);
-    const rightChunk =
-      channelCount > 1 ? new Int16Array(chunkFrameCount) : null;
+    const endFrame = clamp(
+      Math.ceil(keepRange.end * sampleRate),
+      startFrame + 1,
+      buffer.length,
+    );
+    const frameCount = Math.max(1, endFrame - startFrame);
 
-    for (let chunkIndex = 0; chunkIndex < chunkFrameCount; chunkIndex += 1) {
-      const sourceFrameIndex = startFrame + frameOffset + chunkIndex;
-      leftChunk[chunkIndex] = float32ToInt16Sample(
-        channelData[0]?.[sourceFrameIndex] ?? 0,
+    for (
+      let frameOffset = 0;
+      frameOffset < frameCount;
+      frameOffset += MP3_SAMPLE_BLOCK_SIZE
+    ) {
+      const chunkFrameCount = Math.min(
+        MP3_SAMPLE_BLOCK_SIZE,
+        frameCount - frameOffset,
       );
-      if (rightChunk) {
-        rightChunk[chunkIndex] = float32ToInt16Sample(
-          channelData[1]?.[sourceFrameIndex] ?? 0,
-        );
-      }
-    }
+      const leftChunk = new Int16Array(chunkFrameCount);
+      const rightChunk =
+        channelCount > 1 ? new Int16Array(chunkFrameCount) : null;
 
-    const encodedChunk = rightChunk
-      ? encoder.encodeBuffer(leftChunk, rightChunk)
-      : encoder.encodeBuffer(leftChunk);
-    if (encodedChunk.length > 0) {
-      mp3Chunks.push(Uint8Array.from(encodedChunk));
+      for (let chunkIndex = 0; chunkIndex < chunkFrameCount; chunkIndex += 1) {
+        const sourceFrameIndex = startFrame + frameOffset + chunkIndex;
+        leftChunk[chunkIndex] = float32ToInt16Sample(
+          channelData[0]?.[sourceFrameIndex] ?? 0,
+        );
+        if (rightChunk) {
+          rightChunk[chunkIndex] = float32ToInt16Sample(
+            channelData[1]?.[sourceFrameIndex] ?? 0,
+          );
+        }
+      }
+
+      const encodedChunk = rightChunk
+        ? encoder.encodeBuffer(leftChunk, rightChunk)
+        : encoder.encodeBuffer(leftChunk);
+      if (encodedChunk.length > 0) {
+        mp3Chunks.push(Uint8Array.from(encodedChunk));
+      }
     }
   }
 
@@ -838,6 +1078,9 @@ export default function AudioCutterDialog({
   const autoDetectRequestRef = React.useRef(0);
   const normalizeOperationRef = React.useRef(0);
   const lastHandledAutoDetectRequestRef = React.useRef(0);
+  const segmentedPlaybackRef = React.useRef<SegmentedPlaybackState | null>(
+    null,
+  );
   const [audioFile, setAudioFile] = React.useState<File | null>(null);
   const [audioUrl, setAudioUrl] = React.useState("");
   const [audioBuffer, setAudioBuffer] = React.useState<AudioBuffer | null>(
@@ -876,12 +1119,20 @@ export default function AudioCutterDialog({
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<
     string | null
   >(null);
-  const regionsPlugin = React.useMemo(() => Regions.create(), []);
-  const typedRegionsPlugin = regionsPlugin as unknown as RegionsPlugin;
+  const [regionsPlugin, setRegionsPlugin] = React.useState<ReturnType<
+    typeof Regions.create
+  > | null>(null);
+  const typedRegionsPlugin =
+    (regionsPlugin as unknown as RegionsPlugin | null) ?? EMPTY_REGIONS_PLUGIN;
   const sortedSegments = React.useMemo(
     () => sortSegments(segments),
     [segments],
   );
+
+  React.useEffect(() => {
+    if (regionsPlugin) return;
+    setRegionsPlugin(Regions.create());
+  }, [regionsPlugin]);
 
   const { wavesurfer } = useWavesurfer({
     container: containerRef,
@@ -898,8 +1149,46 @@ export default function AudioCutterDialog({
     autoScroll: false,
     hideScrollbar: false,
     url: audioUrl || undefined,
-    plugins: React.useMemo(() => [regionsPlugin], [regionsPlugin]),
+    plugins: React.useMemo(
+      () => (regionsPlugin ? [regionsPlugin] : []),
+      [regionsPlugin],
+    ),
   });
+
+  const applySegmentSkipRanges = React.useCallback(
+    (
+      segment: { start: number; end: number },
+      settingsOverride?: DetectionSettings,
+    ) => {
+      if (!audioBuffer) return [];
+      const effectiveSettings = settingsOverride ?? detectionSettings;
+
+      const { analysis } = getCachedAudioSegmentation(
+        audioBuffer,
+        effectiveSettings,
+      );
+      return getSegmentSkipRangesFromAnalysis(
+        analysis,
+        segment,
+        effectiveSettings.maxInternalSilenceSeconds,
+      );
+    },
+    [audioBuffer, detectionSettings],
+  );
+
+  const buildSegment = React.useCallback(
+    (
+      segment: { id?: string; start: number; end: number; label?: string },
+      settingsOverride?: DetectionSettings,
+    ) => ({
+      id: segment.id ?? createSegmentId(),
+      start: segment.start,
+      end: segment.end,
+      label: segment.label,
+      skipRanges: applySegmentSkipRanges(segment, settingsOverride),
+    }),
+    [applySegmentSkipRanges],
+  );
 
   const releaseTranscriptAutoScrollLock = React.useCallback(() => {
     const lockContainer = transcriptAutoScrollLockContainerRef.current;
@@ -933,6 +1222,10 @@ export default function AudioCutterDialog({
     releaseTranscriptAutoScrollLock();
   }, [releaseTranscriptAutoScrollLock]);
 
+  const cancelSegmentedPlayback = React.useCallback(() => {
+    segmentedPlaybackRef.current = null;
+  }, []);
+
   const lockTranscriptAutoScroll = React.useCallback(
     (scrollContainer: HTMLElement | null) => {
       clearTranscriptAutoScrollLock();
@@ -960,7 +1253,32 @@ export default function AudioCutterDialog({
     [clearTranscriptAutoScrollLock, scheduleTranscriptAutoScrollUnlock],
   );
 
+  const playSegmentAudio = React.useCallback(
+    (segment: Segment) => {
+      if (!wavesurfer) return;
+      cancelSegmentedPlayback();
+
+      const keepRanges = getKeepRanges(
+        {
+          start: segment.start,
+          end: segment.end,
+        },
+        segment.skipRanges,
+      );
+      const firstRange = keepRanges[0];
+      if (!firstRange) return;
+
+      segmentedPlaybackRef.current = {
+        currentRangeIndex: 0,
+        keepRanges,
+      };
+      void wavesurfer.play(firstRange.start, firstRange.end);
+    },
+    [cancelSegmentedPlayback, wavesurfer],
+  );
+
   const resetState = React.useCallback(() => {
+    cancelSegmentedPlayback();
     clearTranscriptAutoScrollLock();
     normalizeOperationRef.current += 1;
     activeDraftRegionIdRef.current = null;
@@ -989,7 +1307,11 @@ export default function AudioCutterDialog({
       if (currentUrl) URL.revokeObjectURL(currentUrl);
       return "";
     });
-  }, [clearTranscriptAutoScrollLock, typedRegionsPlugin]);
+  }, [
+    cancelSegmentedPlayback,
+    clearTranscriptAutoScrollLock,
+    typedRegionsPlugin,
+  ]);
 
   React.useEffect(() => {
     if (!open) {
@@ -999,10 +1321,11 @@ export default function AudioCutterDialog({
 
   React.useEffect(() => {
     return () => {
+      cancelSegmentedPlayback();
       clearTranscriptAutoScrollLock();
       if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
-  }, [audioUrl, clearTranscriptAutoScrollLock]);
+  }, [audioUrl, cancelSegmentedPlayback, clearTranscriptAutoScrollLock]);
 
   React.useEffect(() => {
     setLabelsById((current) => {
@@ -1075,18 +1398,18 @@ export default function AudioCutterDialog({
               segment,
               detectionSettings,
             );
-            return {
+            return buildSegment({
               ...segment,
               start: nextBounds.start,
               end: nextBounds.end,
-            };
+            });
           }),
         ),
       );
       setHoveredSegmentId(segmentId);
       setSelectedSegmentId(segmentId);
     },
-    [audioBuffer, detectionSettings],
+    [audioBuffer, buildSegment, detectionSettings],
   );
 
   const onShrinkWrapAll = React.useCallback(() => {
@@ -1099,15 +1422,15 @@ export default function AudioCutterDialog({
             segment,
             detectionSettings,
           );
-          return {
+          return buildSegment({
             ...segment,
             start: nextBounds.start,
             end: nextBounds.end,
-          };
+          });
         }),
       ),
     );
-  }, [audioBuffer, detectionSettings]);
+  }, [audioBuffer, buildSegment, detectionSettings]);
 
   const mergeOverlappingRegions = React.useCallback(
     (plugin: RegionsPlugin, activeId: string, targetId: string) => {
@@ -1153,17 +1476,19 @@ export default function AudioCutterDialog({
         const next = current.filter(
           (segment) => segment.id !== activeId && segment.id !== targetId,
         );
-        next.push({
-          id: survivingId,
-          start: mergedStart,
-          end: mergedEnd,
-        });
+        next.push(
+          buildSegment({
+            id: survivingId,
+            start: mergedStart,
+            end: mergedEnd,
+          }),
+        );
         return sortSegments(next);
       });
       setHoveredSegmentId(survivingId);
       setSelectedSegmentId(survivingId);
     },
-    [labelsById, segments],
+    [buildSegment, labelsById, segments],
   );
 
   const pendingRegionTouchesCommittedSegment = React.useCallback(
@@ -1199,8 +1524,7 @@ export default function AudioCutterDialog({
               mergePreview?.targetId === segment.id,
             onPlay: () => {
               setSelectedSegmentId(segment.id);
-              if (!wavesurfer) return;
-              void wavesurfer.play(segment.start, segment.end);
+              playSegmentAudio(segment);
             },
             onShrinkWrap: () => {
               onShrinkWrapSegment(segment.id);
@@ -1216,6 +1540,10 @@ export default function AudioCutterDialog({
           region.element.onmouseenter = () => {
             setHoveredSegmentId(segment.id);
           };
+          if (region.content instanceof HTMLElement) {
+            region.content.style.position = "relative";
+            region.content.style.zIndex = "1";
+          }
           region.element.style.border = `1px solid ${
             selectedSegmentId === segment.id
               ? SEGMENT_ACTIVE_BORDER_COLOR
@@ -1226,6 +1554,7 @@ export default function AudioCutterDialog({
             selectedSegmentId === segment.id
               ? "inset 0 0 0 1px rgba(255,255,255,0.26), 0 0 0 1px rgba(28,176,246,0.2)"
               : "inset 0 0 0 1px rgba(255,255,255,0.2)";
+          syncRegionSkipMarkers(region.element, segment);
         }
       });
     },
@@ -1235,11 +1564,11 @@ export default function AudioCutterDialog({
       mergePreview?.targetId,
       onEditSegmentLabel,
       onRemoveSegment,
+      playSegmentAudio,
       onShrinkWrapSegment,
       hoveredSegmentId,
       selectedSegmentId,
       segments,
-      wavesurfer,
     ],
   );
 
@@ -1435,6 +1764,45 @@ export default function AudioCutterDialog({
 
   React.useEffect(() => {
     if (!wavesurfer) return;
+
+    const continueSegmentedPlayback = () => {
+      const playbackState = segmentedPlaybackRef.current;
+      if (!playbackState) return;
+
+      const currentRange =
+        playbackState.keepRanges[playbackState.currentRangeIndex];
+      if (!currentRange) {
+        segmentedPlaybackRef.current = null;
+        return;
+      }
+
+      if (wavesurfer.getCurrentTime() + 0.03 < currentRange.end) return;
+
+      const nextRangeIndex = playbackState.currentRangeIndex + 1;
+      const nextRange = playbackState.keepRanges[nextRangeIndex];
+      if (!nextRange) {
+        segmentedPlaybackRef.current = null;
+        return;
+      }
+
+      segmentedPlaybackRef.current = {
+        ...playbackState,
+        currentRangeIndex: nextRangeIndex,
+      };
+      void wavesurfer.play(nextRange.start, nextRange.end);
+    };
+
+    wavesurfer.on("pause", continueSegmentedPlayback);
+    wavesurfer.on("finish", continueSegmentedPlayback);
+
+    return () => {
+      wavesurfer.un("pause", continueSegmentedPlayback);
+      wavesurfer.un("finish", continueSegmentedPlayback);
+    };
+  }, [wavesurfer]);
+
+  React.useEffect(() => {
+    if (!wavesurfer) return;
     const plugin = typedRegionsPlugin;
 
     const refreshRegionUi = () => {
@@ -1490,11 +1858,11 @@ export default function AudioCutterDialog({
         setSegments((current) =>
           sortSegments([
             ...current,
-            {
+            buildSegment({
               id: region.id,
               start: region.start,
               end: region.end,
-            },
+            }),
           ]),
         );
         setHoveredSegmentId(region.id);
@@ -1560,11 +1928,11 @@ export default function AudioCutterDialog({
           sortSegments(
             current.map((segment) =>
               segment.id === region.id
-                ? {
+                ? buildSegment({
                     ...segment,
                     start: region.start,
                     end: region.end,
-                  }
+                  })
                 : segment,
             ),
           ),
@@ -1612,6 +1980,7 @@ export default function AudioCutterDialog({
       disableDragSelection();
     };
   }, [
+    buildSegment,
     mergeOverlappingRegions,
     pendingRegionTouchesCommittedSegment,
     segments,
@@ -1620,20 +1989,28 @@ export default function AudioCutterDialog({
     wavesurfer,
   ]);
 
-  const replaceSegments = React.useCallback((nextSegments: SegmentDraft[]) => {
-    activeDraftRegionIdRef.current = null;
-    pendingRegionIdsRef.current.clear();
-    setMergePreview(null);
-    const next = sortSegments(
-      nextSegments.map((segment) => ({
-        id: createSegmentId(),
-        start: segment.start,
-        end: segment.end,
-      })),
-    );
-    setSegments(next);
-    setSelectedSegmentId(next[0]?.id ?? null);
-  }, []);
+  const replaceSegments = React.useCallback(
+    (nextSegments: SegmentDraft[], settingsOverride?: DetectionSettings) => {
+      activeDraftRegionIdRef.current = null;
+      pendingRegionIdsRef.current.clear();
+      setMergePreview(null);
+      const next = sortSegments(
+        nextSegments.map((segment) =>
+          buildSegment(
+            {
+              id: createSegmentId(),
+              start: segment.start,
+              end: segment.end,
+            },
+            settingsOverride,
+          ),
+        ),
+      );
+      setSegments(next);
+      setSelectedSegmentId(next[0]?.id ?? null);
+    },
+    [buildSegment],
+  );
 
   const runAutoDetect = React.useCallback(() => {
     if (!audioBuffer) return;
@@ -1754,8 +2131,9 @@ export default function AudioCutterDialog({
   ]);
 
   const onPlayPause = React.useCallback(() => {
+    cancelSegmentedPlayback();
     wavesurfer?.playPause();
-  }, [wavesurfer]);
+  }, [cancelSegmentedPlayback, wavesurfer]);
 
   const scrollWaveformToSegment = React.useCallback(
     (segment: Segment) => {
@@ -1796,10 +2174,9 @@ export default function AudioCutterDialog({
     (segment: Segment) => {
       setSelectedSegmentId(segment.id);
       scrollWaveformToSegment(segment);
-      if (!wavesurfer) return;
-      void wavesurfer.play(segment.start, segment.end);
+      playSegmentAudio(segment);
     },
-    [scrollWaveformToSegment, wavesurfer],
+    [playSegmentAudio, scrollWaveformToSegment],
   );
 
   const onZoomIn = React.useCallback(() => {
@@ -1847,6 +2224,7 @@ export default function AudioCutterDialog({
         audioBuffer,
         segment.start,
         segment.end,
+        segment.skipRanges,
       );
       files.push(
         new File(
@@ -1951,7 +2329,10 @@ export default function AudioCutterDialog({
     setDetectionForm(nextSettings);
     setDetectDialogOpen(false);
     if (!audioBuffer) return;
-    replaceSegments(detectSpeechSegments(audioBuffer, nextSettings));
+    replaceSegments(
+      detectSpeechSegments(audioBuffer, nextSettings),
+      nextSettings,
+    );
   }, [audioBuffer, detectionForm, replaceSegments]);
 
   const content = (
@@ -2098,7 +2479,8 @@ export default function AudioCutterDialog({
           <DialogDescription className="max-w-[60ch] text-sm text-[var(--text-color-dim)]">
             Tune how aggressively the cutter splits on silence. Short pauses can
             stay inside the same segment, and you can add lead-in or tail buffer
-            around each detected block.
+            around each detected block. Longer pauses inside a segment can also
+            be capped with export skip markers.
           </DialogDescription>
 
           <div className="grid gap-4 pt-2">
@@ -2169,13 +2551,39 @@ export default function AudioCutterDialog({
                 />
               </div>
             </div>
+
+            <div className="rounded-[20px] border border-[var(--color_base_border)] bg-[var(--body-background-faint)] p-4">
+              <div className="mb-1 text-sm font-semibold text-[var(--text-color)]">
+                Max silence kept inside segment
+              </div>
+              <div className="mb-3 text-xs text-[var(--text-color-dim)]">
+                Longer pauses stay in the segment but are trimmed from export as
+                internal skip markers. Set to 0 to keep internal pauses as-is.
+              </div>
+              <Input
+                type="number"
+                min="0"
+                max="3"
+                step="0.05"
+                value={detectionForm.maxInternalSilenceSeconds}
+                onChange={(event) => {
+                  updateDetectionFormValue(
+                    "maxInternalSilenceSeconds",
+                    event.target.value,
+                  );
+                }}
+              />
+            </div>
           </div>
 
           <div className="mt-2 flex items-center justify-between gap-3">
             <div className="text-xs text-[var(--text-color-dim)]">
               Current: split after {detectionSettings.minSilenceSeconds}s of
               silence, with +{detectionSettings.startBufferSeconds}s / +
-              {detectionSettings.endBufferSeconds}s buffer.
+              {detectionSettings.endBufferSeconds}s buffer
+              {detectionSettings.maxInternalSilenceSeconds > 0
+                ? `, and cap internal pauses at ${detectionSettings.maxInternalSilenceSeconds}s.`
+                : ", and keep internal pauses untouched."}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -2283,6 +2691,9 @@ export default function AudioCutterDialog({
                     const matchedSegment = sortedSegments[index];
                     const isVisible = visibleSegmentIndexes.has(index);
                     const isSelected = selectedSegmentIndex === index;
+                    const skippedDuration = matchedSegment
+                      ? getTotalRangeDuration(matchedSegment.skipRanges)
+                      : 0;
 
                     return (
                       <button
@@ -2337,6 +2748,15 @@ export default function AudioCutterDialog({
                               ) : (
                                 <span>No matching segment yet</span>
                               )}
+                              {matchedSegment && skippedDuration > 0 ? (
+                                <span>
+                                  trims {formatSeconds(skippedDuration)} across{" "}
+                                  {matchedSegment.skipRanges.length} pause
+                                  {matchedSegment.skipRanges.length === 1
+                                    ? ""
+                                    : "s"}
+                                </span>
+                              ) : null}
                             </div>
                           </div>
                           <div className="shrink-0 text-right font-mono text-sm font-bold text-[var(--text-color)]">
@@ -2376,6 +2796,10 @@ export default function AudioCutterDialog({
                 const onShrinkWrap = () => onShrinkWrapSegment(segment.id);
                 const onEditLabel = () => onEditSegmentLabel(segment.id);
                 const onDelete = () => onRemoveSegment(segment.id);
+                const skippedDuration = getTotalRangeDuration(
+                  segment.skipRanges,
+                );
+                const exportedDuration = getEffectiveSegmentDuration(segment);
                 return (
                   <div
                     key={segment.id}
@@ -2403,9 +2827,17 @@ export default function AudioCutterDialog({
                           {formatSeconds(segment.start)} to{" "}
                           {formatSeconds(segment.end)}
                         </div>
+                        {skippedDuration > 0 ? (
+                          <div className="text-xs text-[var(--text-color-dim)]">
+                            Export trims {formatSeconds(skippedDuration)} across{" "}
+                            {segment.skipRanges.length} internal pause
+                            {segment.skipRanges.length === 1 ? "" : "s"}
+                          </div>
+                        ) : null}
                       </div>
                       <div className="text-xs text-[var(--text-color-dim)]">
-                        {formatSeconds(segment.end - segment.start)}
+                        {formatSeconds(exportedDuration)}
+                        {skippedDuration > 0 ? ` export` : ""}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
