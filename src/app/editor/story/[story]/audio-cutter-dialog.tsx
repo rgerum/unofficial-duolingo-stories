@@ -560,7 +560,6 @@ function getSegmentSkipRangesFromAnalysis(
     if (silentDuration > maxInternalSilenceSeconds) {
       const rawSilenceStart = silentRunStart * windowSeconds;
       const rawSilenceEnd = index * windowSeconds;
-      const trimDuration = silentDuration - maxInternalSilenceSeconds;
       const skipStart = clamp(
         rawSilenceStart + maxInternalSilenceSeconds / 2,
         segment.start,
@@ -731,7 +730,11 @@ function syncRegionSkipMarkers(regionElement: HTMLElement, segment: Segment) {
     skipLayer.append(marker);
   }
 
-  regionElement.style.overflow = "hidden";
+  const existingOverflow = regionElement.style.overflow;
+  const computedOverflow = getComputedStyle(regionElement).overflow;
+  if (!existingOverflow || computedOverflow === "visible") {
+    regionElement.style.overflow = "hidden";
+  }
   regionElement.append(skipLayer);
 }
 
@@ -1792,11 +1795,9 @@ export default function AudioCutterDialog({
       void wavesurfer.play(nextRange.start, nextRange.end);
     };
 
-    wavesurfer.on("pause", continueSegmentedPlayback);
     wavesurfer.on("finish", continueSegmentedPlayback);
 
     return () => {
-      wavesurfer.un("pause", continueSegmentedPlayback);
       wavesurfer.un("finish", continueSegmentedPlayback);
     };
   }, [wavesurfer]);
