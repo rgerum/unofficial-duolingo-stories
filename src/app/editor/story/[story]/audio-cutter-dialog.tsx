@@ -2302,14 +2302,13 @@ export default function AudioCutterDialog({
       if (!segment) return;
 
       setHoveredSegmentId(segment.id);
-      setSelectedSegmentId(segment.id);
-      scrollWaveformToSegment(segment);
+      onPlaySegment(segment);
       transcriptRowRefs.current[index]?.scrollIntoView({
         block: "nearest",
         behavior: "smooth",
       });
     },
-    [scrollWaveformToSegment, sortedSegments],
+    [onPlaySegment, sortedSegments],
   );
 
   React.useEffect(() => {
