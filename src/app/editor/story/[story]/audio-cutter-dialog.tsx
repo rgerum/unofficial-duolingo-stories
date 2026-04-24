@@ -24,6 +24,11 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { AudioMark } from "@/app/audio/_lib/audio/types";
+import type {
+  AudioCutterPreparedSegment,
+  AudioCutterTranscriptItem,
+} from "@/app/editor/story/[story]/audio-cutter-storage";
 
 const DEFAULT_WAVEFORM_ZOOM = 180;
 const MIN_WAVEFORM_ZOOM = 24;
@@ -42,6 +47,7 @@ const DETECTION_SETTINGS_STORAGE_KEY = "audio-cutter-detection-settings-v1";
 const SHRINK_WRAP_STABILITY_EPSILON_SECONDS = 0.01;
 const MP3_BITRATE_KBPS = 128;
 const MP3_SAMPLE_BLOCK_SIZE = 1152;
+const MIN_WORD_MARK_GAP_MS = 20;
 const SEGMENT_COLOR = "rgba(28,176,246,0.2)";
 const SEGMENT_BORDER_COLOR = "rgba(15,95,131,0.4)";
 const SEGMENT_ACTIVE_BORDER_COLOR = "rgba(28,176,246,0.95)";
@@ -61,17 +67,6 @@ type Segment = {
   end: number;
   label?: string;
   skipRanges: TimeRange[];
-};
-
-type TranscriptItem = {
-  id: string;
-  order: number;
-  lineIndex: number;
-  type: "HEADER" | "LINE";
-  speaker: string;
-  content: {
-    text: string;
-  };
 };
 
 type MergePreview = {
@@ -236,6 +231,49 @@ function isEditableTarget(target: EventTarget | null) {
   );
 }
 
+function renderTextWithHighlightedWord(
+  text: string,
+  marks: AudioMark[],
+  activeWordIndex: number,
+  onPlayWord?: (markIndex: number) => void,
+) {
+  if (marks.length === 0) return text;
+
+  const parts: React.ReactNode[] = [];
+  let cursor = 0;
+
+  marks.forEach((mark, index) => {
+    if (mark.start > cursor) {
+      parts.push(text.slice(cursor, mark.start));
+    }
+
+    parts.push(
+      <button
+        key={`${mark.start}-${mark.end}-${index}`}
+        type="button"
+        className={
+          index === activeWordIndex
+            ? "rounded-[8px] bg-[#0f5f83] px-1 py-0.5 font-semibold text-white ring-2 ring-[#d7e34f] shadow-[0_1px_0_rgba(255,255,255,0.2)]"
+            : "rounded-[8px] px-1 py-0.5 transition-colors hover:bg-[rgba(28,176,246,0.12)]"
+        }
+        onClick={(event) => {
+          event.stopPropagation();
+          onPlayWord?.(index);
+        }}
+      >
+        {text.slice(mark.start, mark.end)}
+      </button>,
+    );
+    cursor = mark.end;
+  });
+
+  if (cursor < text.length) {
+    parts.push(text.slice(cursor));
+  }
+
+  return parts;
+}
+
 function getSegmentsFromPlugin(plugin: RegionsPlugin) {
   return sortSegments(
     plugin.getRegions().map((region) => ({
@@ -312,6 +350,14 @@ function getTotalRangeDuration(ranges: TimeRange[] | undefined) {
   );
 }
 
+function getKeepRangeEnd(
+  bounds: TimeRange,
+  skipRanges: TimeRange[] | undefined,
+) {
+  const keepRanges = getKeepRanges(bounds, skipRanges);
+  return keepRanges[keepRanges.length - 1]?.end ?? bounds.end;
+}
+
 function getEffectiveSegmentDuration(segment: {
   start: number;
   end: number;
@@ -348,6 +394,244 @@ function getKeepRanges(bounds: TimeRange, skipRanges: TimeRange[] | undefined) {
   }
 
   return keepRanges.filter((range) => range.end - range.start > 0.001);
+}
+
+function mapPlayableOffsetToAbsoluteTime(
+  keepRanges: TimeRange[],
+  offsetSeconds: number,
+) {
+  if (keepRanges.length === 0) return 0;
+
+  let remaining = Math.max(0, offsetSeconds);
+  for (const range of keepRanges) {
+    const rangeDuration = Math.max(0, range.end - range.start);
+    if (remaining <= rangeDuration) {
+      return range.start + remaining;
+    }
+    remaining -= rangeDuration;
+  }
+
+  return keepRanges[keepRanges.length - 1]?.end ?? 0;
+}
+
+function clampTimeToKeepRanges(timeSeconds: number, keepRanges: TimeRange[]) {
+  if (keepRanges.length === 0) return timeSeconds;
+
+  if (timeSeconds <= keepRanges[0]?.start) {
+    return keepRanges[0]?.start ?? timeSeconds;
+  }
+
+  for (let index = 0; index < keepRanges.length; index += 1) {
+    const range = keepRanges[index];
+    if (!range) continue;
+    if (timeSeconds >= range.start && timeSeconds <= range.end) {
+      return timeSeconds;
+    }
+
+    const nextRange = keepRanges[index + 1];
+    if (!nextRange || timeSeconds >= nextRange.start) continue;
+
+    const previousDistance = Math.abs(timeSeconds - range.end);
+    const nextDistance = Math.abs(nextRange.start - timeSeconds);
+    return previousDistance <= nextDistance ? range.end : nextRange.start;
+  }
+
+  return keepRanges[keepRanges.length - 1]?.end ?? timeSeconds;
+}
+
+function getTranscriptWordTokens(text: string) {
+  return [...text.matchAll(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu)].map(
+    (match) => ({
+      text: match[0],
+      start: match.index ?? 0,
+      end: (match.index ?? 0) + match[0].length,
+    }),
+  );
+}
+
+function getApproximateWordMarks(text: string, segment: Segment): AudioMark[] {
+  const tokens = getTranscriptWordTokens(text);
+  if (tokens.length === 0) return [];
+
+  const keepRanges = getKeepRanges(
+    {
+      start: segment.start,
+      end: segment.end,
+    },
+    segment.skipRanges,
+  );
+  const totalKeepDuration = getTotalRangeDuration(keepRanges);
+  if (keepRanges.length === 0 || totalKeepDuration <= 0) return [];
+
+  const weights = tokens.map((token) =>
+    Math.max(1, Array.from(token.text).length),
+  );
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+  if (totalWeight <= 0) return [];
+
+  let cumulativeWeight = 0;
+  return tokens.map((token, index) => {
+    const startOffsetSeconds =
+      (totalKeepDuration * cumulativeWeight) / totalWeight;
+    cumulativeWeight += weights[index] ?? 0;
+    const startSeconds = mapPlayableOffsetToAbsoluteTime(
+      keepRanges,
+      startOffsetSeconds,
+    );
+
+    return {
+      time: Math.round(startSeconds * 1000),
+      type: "word",
+      start: token.start,
+      end: token.end,
+      value: token.text,
+    };
+  });
+}
+
+function getApproximateWordPlaybackRange(
+  segment: Segment,
+  marks: AudioMark[],
+  markIndex: number,
+) {
+  const mark = marks[markIndex];
+  if (!mark) return null;
+
+  const startSeconds = mark.time / 1000;
+  const nextMark = marks[markIndex + 1];
+  const keepRangeEnd = getKeepRangeEnd(
+    {
+      start: segment.start,
+      end: segment.end,
+    },
+    segment.skipRanges,
+  );
+  const endSeconds = Math.max(
+    startSeconds + 0.06,
+    nextMark ? nextMark.time / 1000 : keepRangeEnd,
+  );
+
+  return {
+    startSeconds,
+    endSeconds,
+  };
+}
+
+function applyWordMarkTimeOverrides(
+  approximateMarks: AudioMark[],
+  timeOverridesMs: number[] | undefined,
+  segment: Segment,
+) {
+  if (approximateMarks.length === 0) return approximateMarks;
+
+  const keepRanges = getKeepRanges(
+    {
+      start: segment.start,
+      end: segment.end,
+    },
+    segment.skipRanges,
+  );
+  if (keepRanges.length === 0) return approximateMarks;
+
+  const keepStartMs = Math.round(
+    (keepRanges[0]?.start ?? segment.start) * 1000,
+  );
+  const keepEndMs = Math.round(
+    getKeepRangeEnd(
+      {
+        start: segment.start,
+        end: segment.end,
+      },
+      segment.skipRanges,
+    ) * 1000,
+  );
+
+  return approximateMarks.map((mark, index) => {
+    const previousTimeMs =
+      index > 0
+        ? (timeOverridesMs?.[index - 1] ??
+          approximateMarks[index - 1]?.time ??
+          keepStartMs)
+        : keepStartMs;
+    const nextTimeMs =
+      timeOverridesMs?.[index + 1] ??
+      approximateMarks[index + 1]?.time ??
+      keepEndMs;
+    const minTimeMs =
+      index === 0 ? keepStartMs : previousTimeMs + MIN_WORD_MARK_GAP_MS;
+    const maxTimeMs =
+      index === approximateMarks.length - 1
+        ? keepEndMs
+        : nextTimeMs - MIN_WORD_MARK_GAP_MS;
+    const boundedTimeMs = clamp(
+      timeOverridesMs?.[index] ?? mark.time,
+      minTimeMs,
+      Math.max(minTimeMs, maxTimeMs),
+    );
+    const clampedTimeSeconds = clampTimeToKeepRanges(
+      boundedTimeMs / 1000,
+      keepRanges,
+    );
+
+    return {
+      ...mark,
+      time: Math.round(clampedTimeSeconds * 1000),
+    };
+  });
+}
+
+function getActiveWordMarkIndex(
+  segment: Segment,
+  marks: AudioMark[],
+  currentTimeSeconds: number,
+) {
+  if (marks.length === 0) return -1;
+  if (currentTimeSeconds < segment.start || currentTimeSeconds > segment.end) {
+    return -1;
+  }
+
+  const keepRangeEnd = getKeepRangeEnd(
+    {
+      start: segment.start,
+      end: segment.end,
+    },
+    segment.skipRanges,
+  );
+
+  for (let index = 0; index < marks.length; index += 1) {
+    const markStartSeconds = (marks[index]?.time ?? 0) / 1000;
+    const nextMarkTime = marks[index + 1]?.time;
+    const nextStartSeconds =
+      nextMarkTime != null ? nextMarkTime / 1000 : keepRangeEnd;
+
+    if (
+      currentTimeSeconds >= markStartSeconds &&
+      currentTimeSeconds < nextStartSeconds
+    ) {
+      return index;
+    }
+  }
+
+  return currentTimeSeconds >= (marks[marks.length - 1]?.time ?? 0) / 1000
+    ? marks.length - 1
+    : -1;
+}
+
+function getKeypointsFromWordMarks(marks: AudioMark[]) {
+  return marks
+    .map((mark) => ({
+      rangeEnd: mark.end,
+      audioStart: mark.time,
+    }))
+    .filter(
+      (point, index, points) =>
+        Number.isFinite(point.rangeEnd) &&
+        Number.isFinite(point.audioStart) &&
+        point.rangeEnd > 0 &&
+        (index === 0 ||
+          point.rangeEnd !== points[index - 1]?.rangeEnd ||
+          point.audioStart !== points[index - 1]?.audioStart),
+    );
 }
 
 function sanitizeDetectionSettings(
@@ -766,6 +1050,58 @@ function syncRegionSkipMarkers(regionElement: HTMLElement, segment: Segment) {
   regionElement.append(skipLayer);
 }
 
+function syncRegionWordMarkers(
+  regionElement: HTMLElement,
+  segment: Segment,
+  wordMarks: AudioMark[],
+  activeWordIndex: number,
+) {
+  const existingLayer = regionElement.querySelector<HTMLElement>(
+    ".audio-cutter-region-word-layer",
+  );
+  existingLayer?.remove();
+
+  if (wordMarks.length === 0) return;
+
+  const segmentDuration = Math.max(segment.end - segment.start, 0.001);
+  const wordLayer = document.createElement("div");
+  wordLayer.className = "audio-cutter-region-word-layer";
+  wordLayer.style.position = "absolute";
+  wordLayer.style.inset = "0";
+  wordLayer.style.pointerEvents = "none";
+  wordLayer.style.overflow = "hidden";
+  wordLayer.style.borderRadius = "inherit";
+  wordLayer.style.zIndex = "0";
+
+  wordMarks.forEach((mark, markIndex) => {
+    const marker = document.createElement("div");
+    const leftPercent =
+      ((mark.time / 1000 - segment.start) / segmentDuration) * 100;
+
+    marker.style.position = "absolute";
+    marker.style.left = `${leftPercent}%`;
+    marker.style.top = markIndex === activeWordIndex ? "8%" : "14%";
+    marker.style.bottom = markIndex === activeWordIndex ? "8%" : "14%";
+    marker.style.width = markIndex === activeWordIndex ? "2px" : "1px";
+    marker.style.background =
+      markIndex === activeWordIndex
+        ? "rgba(215,227,79,0.95)"
+        : "rgba(15,95,131,0.38)";
+    marker.style.boxShadow =
+      markIndex === activeWordIndex
+        ? "0 0 0 1px rgba(70,81,0,0.28)"
+        : "0 0 0 1px rgba(255,255,255,0.18)";
+    wordLayer.append(marker);
+  });
+
+  const existingOverflow = regionElement.style.overflow;
+  const computedOverflow = getComputedStyle(regionElement).overflow;
+  if (!existingOverflow || computedOverflow === "visible") {
+    regionElement.style.overflow = "hidden";
+  }
+  regionElement.append(wordLayer);
+}
+
 function createIconSvg(path: string) {
   const namespace = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(namespace, "svg");
@@ -1080,21 +1416,32 @@ export default function AudioCutterDialog({
   expectedSegmentCount,
   transcriptItems,
   onUseSegments,
+  primaryActionLabel = "Use segments in bulk editor",
+  primaryActionPendingLabel,
+  footerStatusText,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   renderInDialog?: boolean;
   expectedSegmentCount: number;
-  transcriptItems: TranscriptItem[];
-  onUseSegments: (files: File[]) => Promise<void> | void;
+  transcriptItems: AudioCutterTranscriptItem[];
+  onUseSegments: (
+    segments: AudioCutterPreparedSegment[],
+  ) => Promise<boolean | void> | boolean | void;
+  primaryActionLabel?: string;
+  primaryActionPendingLabel?: string;
+  footerStatusText?: string | null;
 }) {
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
   const transcriptScrollRef = React.useRef<HTMLDivElement | null>(null);
-  const transcriptRowRefs = React.useRef<
-    Record<number, HTMLButtonElement | null>
-  >({});
+  const wordTimelineRefs = React.useRef<Record<string, HTMLDivElement | null>>(
+    {},
+  );
+  const transcriptRowRefs = React.useRef<Record<number, HTMLDivElement | null>>(
+    {},
+  );
   const suppressTranscriptAutoScrollRef = React.useRef(false);
   const transcriptAutoScrollLockTimeoutRef = React.useRef<number | null>(null);
   const transcriptAutoScrollLockContainerRef = React.useRef<HTMLElement | null>(
@@ -1123,6 +1470,7 @@ export default function AudioCutterDialog({
   const [isNormalizingAudio, setIsNormalizingAudio] = React.useState(false);
   const [isExportingSegments, setIsExportingSegments] = React.useState(false);
   const [detectDialogOpen, setDetectDialogOpen] = React.useState(false);
+  const [showIntroHelp, setShowIntroHelp] = React.useState(false);
   const [isDragOverAudioDropzone, setIsDragOverAudioDropzone] =
     React.useState(false);
   const [detectionSettings, setDetectionSettings] =
@@ -1149,9 +1497,18 @@ export default function AudioCutterDialog({
   const [hoveredSegmentId, setHoveredSegmentId] = React.useState<string | null>(
     null,
   );
+  const [playbackTimeSeconds, setPlaybackTimeSeconds] = React.useState(0);
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<
     string | null
   >(null);
+  const [
+    wordMarkTimeOverridesBySegmentId,
+    setWordMarkTimeOverridesBySegmentId,
+  ] = React.useState<Record<string, number[]>>({});
+  const [draggingWordMarker, setDraggingWordMarker] = React.useState<{
+    markIndex: number;
+    segmentId: string;
+  } | null>(null);
   const [regionsPlugin, setRegionsPlugin] = React.useState<ReturnType<
     typeof Regions.create
   > | null>(null);
@@ -1161,6 +1518,42 @@ export default function AudioCutterDialog({
     () => sortSegments(segments),
     [segments],
   );
+  const approximateWordMarksBySegmentId = React.useMemo(() => {
+    const next: Record<string, AudioMark[]> = {};
+    sortedSegments.forEach((segment, index) => {
+      next[segment.id] = getApproximateWordMarks(
+        transcriptItems[index]?.content.text ?? "",
+        segment,
+      );
+    });
+    return next;
+  }, [sortedSegments, transcriptItems]);
+  const wordMarksBySegmentId = React.useMemo(() => {
+    const next: Record<string, AudioMark[]> = {};
+    sortedSegments.forEach((segment) => {
+      next[segment.id] = applyWordMarkTimeOverrides(
+        approximateWordMarksBySegmentId[segment.id] ?? [],
+        wordMarkTimeOverridesBySegmentId[segment.id],
+        segment,
+      );
+    });
+    return next;
+  }, [
+    approximateWordMarksBySegmentId,
+    sortedSegments,
+    wordMarkTimeOverridesBySegmentId,
+  ]);
+  const activeWordIndexBySegmentId = React.useMemo(() => {
+    const next: Record<string, number> = {};
+    sortedSegments.forEach((segment) => {
+      next[segment.id] = getActiveWordMarkIndex(
+        segment,
+        wordMarksBySegmentId[segment.id] ?? [],
+        playbackTimeSeconds,
+      );
+    });
+    return next;
+  }, [playbackTimeSeconds, sortedSegments, wordMarksBySegmentId]);
 
   React.useEffect(() => {
     if (regionsPlugin) return;
@@ -1302,6 +1695,33 @@ export default function AudioCutterDialog({
     [clearTranscriptAutoScrollLock, scheduleTranscriptAutoScrollUnlock],
   );
 
+  const scrollTranscriptRowIntoView = React.useCallback(
+    (rowIndex: number, behavior: ScrollBehavior = "smooth") => {
+      const transcriptScroll = transcriptScrollRef.current;
+      const transcriptRow = transcriptRowRefs.current[rowIndex];
+      if (!transcriptScroll || !transcriptRow) return;
+
+      const scrollRect = transcriptScroll.getBoundingClientRect();
+      const rowRect = transcriptRow.getBoundingClientRect();
+      const viewportTop = transcriptScroll.scrollTop;
+      const viewportBottom = viewportTop + transcriptScroll.clientHeight;
+      const rowTop = viewportTop + (rowRect.top - scrollRect.top);
+      const rowBottom = rowTop + rowRect.height;
+
+      const topAligned =
+        Math.abs(transcriptScroll.scrollTop - Math.max(0, rowTop)) <= 1;
+      if (topAligned && rowTop >= viewportTop && rowBottom <= viewportBottom) {
+        return;
+      }
+
+      transcriptScroll.scrollTo({
+        top: Math.max(0, rowTop),
+        behavior,
+      });
+    },
+    [],
+  );
+
   const playSegmentAudio = React.useCallback(
     (segment: Segment) => {
       if (!wavesurfer) return;
@@ -1341,6 +1761,7 @@ export default function AudioCutterDialog({
     setIsNormalizingAudio(false);
     setIsExportingSegments(false);
     setDetectDialogOpen(false);
+    setShowIntroHelp(false);
     setAudioBuffer(null);
     setSegments([]);
     setLabelsById({});
@@ -1349,6 +1770,9 @@ export default function AudioCutterDialog({
     setViewportRange({ start: 0, end: 0 });
     setWaveformReady(false);
     setHoveredSegmentId(null);
+    setPlaybackTimeSeconds(0);
+    setWordMarkTimeOverridesBySegmentId({});
+    setDraggingWordMarker(null);
     setZoomPxPerSec(DEFAULT_WAVEFORM_ZOOM);
     setSelectedSegmentId(null);
     autoDetectRequestRef.current = 0;
@@ -1434,6 +1858,15 @@ export default function AudioCutterDialog({
       }
       return current;
     });
+    setWordMarkTimeOverridesBySegmentId((current) => {
+      if (!(segmentId in current)) return current;
+      const next = { ...current };
+      delete next[segmentId];
+      return next;
+    });
+    setDraggingWordMarker((current) =>
+      current?.segmentId === segmentId ? null : current,
+    );
   }, []);
 
   const onShrinkWrapSegment = React.useCallback(
@@ -1559,6 +1992,8 @@ export default function AudioCutterDialog({
           .getRegions()
           .find((candidate) => candidate.id === segment.id);
         if (!region) return;
+        const wordMarks = wordMarksBySegmentId[segment.id] ?? [];
+        const activeWordIndex = activeWordIndexBySegmentId[segment.id] ?? -1;
 
         region.setOptions({
           color: SEGMENT_COLOR,
@@ -1605,10 +2040,17 @@ export default function AudioCutterDialog({
               ? "inset 0 0 0 1px rgba(255,255,255,0.26), 0 0 0 1px rgba(28,176,246,0.2)"
               : "inset 0 0 0 1px rgba(255,255,255,0.2)";
           syncRegionSkipMarkers(region.element, segment);
+          syncRegionWordMarkers(
+            region.element,
+            segment,
+            wordMarks,
+            activeWordIndex,
+          );
         }
       });
     },
     [
+      activeWordIndexBySegmentId,
       labelsById,
       mergePreview?.activeId,
       mergePreview?.targetId,
@@ -1619,6 +2061,7 @@ export default function AudioCutterDialog({
       hoveredSegmentId,
       selectedSegmentId,
       segments,
+      wordMarksBySegmentId,
     ],
   );
 
@@ -1676,6 +2119,28 @@ export default function AudioCutterDialog({
       hideScrollbar: false,
     });
   }, [wavesurfer, zoomPxPerSec]);
+
+  React.useEffect(() => {
+    if (!wavesurfer) return;
+
+    const updatePlaybackTime = (timeSeconds?: number) => {
+      setPlaybackTimeSeconds(
+        typeof timeSeconds === "number"
+          ? timeSeconds
+          : wavesurfer.getCurrentTime(),
+      );
+    };
+
+    wavesurfer.on("timeupdate", updatePlaybackTime);
+    wavesurfer.on("pause", updatePlaybackTime);
+    wavesurfer.on("finish", updatePlaybackTime);
+
+    return () => {
+      wavesurfer.un("timeupdate", updatePlaybackTime);
+      wavesurfer.un("pause", updatePlaybackTime);
+      wavesurfer.un("finish", updatePlaybackTime);
+    };
+  }, [wavesurfer]);
 
   const updateViewportRange = React.useCallback(() => {
     const scrollContainer = getWaveformScrollElement(wavesurfer);
@@ -1790,19 +2255,8 @@ export default function AudioCutterDialog({
     const transcriptScroll = transcriptScrollRef.current;
     const transcriptRow = transcriptRowRefs.current[firstActiveIndex];
     if (!transcriptScroll || !transcriptRow) return;
-
-    const rowTop = transcriptRow.offsetTop;
-    const rowBottom = rowTop + transcriptRow.offsetHeight;
-    const viewportTop = transcriptScroll.scrollTop;
-    const viewportBottom = viewportTop + transcriptScroll.clientHeight;
-
-    if (rowTop >= viewportTop && rowBottom <= viewportBottom) return;
-
-    transcriptRow.scrollIntoView({
-      block: "nearest",
-      behavior: "smooth",
-    });
-  }, [visibleSegmentIndexes]);
+    scrollTranscriptRowIntoView(firstActiveIndex, "smooth");
+  }, [scrollTranscriptRowIntoView, visibleSegmentIndexes]);
 
   React.useEffect(() => {
     syncRegionsFromState(typedRegionsPlugin);
@@ -2129,6 +2583,9 @@ export default function AudioCutterDialog({
       setSegments([]);
       setLabelsById({});
       setMergePreview(null);
+      setPlaybackTimeSeconds(0);
+      setWordMarkTimeOverridesBySegmentId({});
+      setDraggingWordMarker(null);
       setDuration(0);
       typedRegionsPlugin.clearRegions();
 
@@ -2287,6 +2744,148 @@ export default function AudioCutterDialog({
     [lockTranscriptAutoScroll, waveformReady, wavesurfer, zoomPxPerSec],
   );
 
+  const onPlayApproximateWord = React.useCallback(
+    (segment: Segment, marks: AudioMark[], markIndex: number) => {
+      if (!wavesurfer) return;
+
+      const playbackRange = getApproximateWordPlaybackRange(
+        segment,
+        marks,
+        markIndex,
+      );
+      if (!playbackRange) return;
+
+      cancelSegmentedPlayback();
+      setSelectedSegmentId(segment.id);
+      scrollWaveformToSegment(segment);
+      void wavesurfer.play(
+        playbackRange.startSeconds,
+        playbackRange.endSeconds,
+      );
+    },
+    [cancelSegmentedPlayback, scrollWaveformToSegment, wavesurfer],
+  );
+
+  const updateWordMarkTimeOverride = React.useCallback(
+    (
+      segment: Segment,
+      marks: AudioMark[],
+      markIndex: number,
+      nextTimeMs: number,
+    ) => {
+      const keepRanges = getKeepRanges(
+        {
+          start: segment.start,
+          end: segment.end,
+        },
+        segment.skipRanges,
+      );
+      if (keepRanges.length === 0) return;
+
+      const keepStartMs = Math.round(
+        (keepRanges[0]?.start ?? segment.start) * 1000,
+      );
+      const keepEndMs = Math.round(
+        getKeepRangeEnd(
+          {
+            start: segment.start,
+            end: segment.end,
+          },
+          segment.skipRanges,
+        ) * 1000,
+      );
+      const previousTimeMs =
+        markIndex > 0
+          ? (marks[markIndex - 1]?.time ?? keepStartMs)
+          : keepStartMs;
+      const nextMarkTimeMs =
+        markIndex < marks.length - 1
+          ? (marks[markIndex + 1]?.time ?? keepEndMs)
+          : keepEndMs;
+      const minTimeMs =
+        markIndex === 0 ? keepStartMs : previousTimeMs + MIN_WORD_MARK_GAP_MS;
+      const maxTimeMs =
+        markIndex === marks.length - 1
+          ? keepEndMs
+          : nextMarkTimeMs - MIN_WORD_MARK_GAP_MS;
+      const boundedTimeSeconds = clampTimeToKeepRanges(
+        clamp(nextTimeMs, minTimeMs, Math.max(minTimeMs, maxTimeMs)) / 1000,
+        keepRanges,
+      );
+
+      setWordMarkTimeOverridesBySegmentId((current) => {
+        const segmentOverrides = [...(current[segment.id] ?? [])];
+        segmentOverrides[markIndex] = Math.round(boundedTimeSeconds * 1000);
+        return {
+          ...current,
+          [segment.id]: segmentOverrides,
+        };
+      });
+    },
+    [],
+  );
+
+  const updateDraggedWordMarker = React.useCallback(
+    (segmentId: string, markIndex: number, clientX: number) => {
+      const segment = sortedSegments.find(
+        (candidate) => candidate.id === segmentId,
+      );
+      const marks = wordMarksBySegmentId[segmentId] ?? [];
+      const timeline = wordTimelineRefs.current[segmentId];
+      if (!segment || !timeline || marks.length === 0) return;
+
+      const rect = timeline.getBoundingClientRect();
+      if (rect.width <= 0) return;
+
+      const ratio = clamp((clientX - rect.left) / rect.width, 0, 1);
+      const rawTimeMs = Math.round(
+        (segment.start + (segment.end - segment.start) * ratio) * 1000,
+      );
+      updateWordMarkTimeOverride(segment, marks, markIndex, rawTimeMs);
+    },
+    [sortedSegments, updateWordMarkTimeOverride, wordMarksBySegmentId],
+  );
+
+  const onStartWordMarkerDrag = React.useCallback(
+    (
+      event: React.PointerEvent<HTMLButtonElement>,
+      segmentId: string,
+      markIndex: number,
+    ) => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setHoveredSegmentId(segmentId);
+      setSelectedSegmentId(segmentId);
+      setDraggingWordMarker({ markIndex, segmentId });
+      updateDraggedWordMarker(segmentId, markIndex, event.clientX);
+    },
+    [updateDraggedWordMarker],
+  );
+
+  React.useEffect(() => {
+    if (!draggingWordMarker) return;
+
+    const onPointerMove = (event: PointerEvent) => {
+      updateDraggedWordMarker(
+        draggingWordMarker.segmentId,
+        draggingWordMarker.markIndex,
+        event.clientX,
+      );
+    };
+    const onPointerUp = () => {
+      setDraggingWordMarker(null);
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+    };
+  }, [draggingWordMarker, updateDraggedWordMarker]);
+
   const onPlaySegment = React.useCallback(
     (segment: Segment) => {
       setSelectedSegmentId(segment.id);
@@ -2303,12 +2902,9 @@ export default function AudioCutterDialog({
 
       setHoveredSegmentId(segment.id);
       onPlaySegment(segment);
-      transcriptRowRefs.current[index]?.scrollIntoView({
-        block: "nearest",
-        behavior: "smooth",
-      });
+      scrollTranscriptRowIntoView(index, "smooth");
     },
-    [onPlaySegment, sortedSegments],
+    [onPlaySegment, scrollTranscriptRowIntoView, sortedSegments],
   );
 
   React.useEffect(() => {
@@ -2388,6 +2984,8 @@ export default function AudioCutterDialog({
     setSegments([]);
     setLabelsById({});
     setMergePreview(null);
+    setWordMarkTimeOverridesBySegmentId({});
+    setDraggingWordMarker(null);
     setSelectedSegmentId(null);
   }, [typedRegionsPlugin]);
 
@@ -2466,12 +3064,33 @@ export default function AudioCutterDialog({
       const files = await createSegmentFiles();
       if (!files || files.length === 0) return;
 
-      await onUseSegments(files);
-      onOpenChange(false);
+      const preparedSegments = files.flatMap((file, index) => {
+        const item = transcriptItems[index];
+        const segment = sortedSegments[index];
+        if (!item || !segment) return [];
+
+        return [
+          {
+            file,
+            itemId: item.id,
+            lineIndex: item.lineIndex,
+            ssml: item.ssml,
+            keypoints: getKeypointsFromWordMarks(
+              wordMarksBySegmentId[segment.id] ?? [],
+            ),
+          },
+        ];
+      });
+      if (preparedSegments.length === 0) return;
+
+      const shouldClose = await onUseSegments(preparedSegments);
+      if (shouldClose !== false) {
+        onOpenChange(false);
+      }
     } catch (error) {
       console.error("Failed to prepare segment cuts", error);
       setExportError(
-        `Could not prepare MP3 clips for staging: ${getErrorMessage(
+        `Could not prepare segment audio: ${getErrorMessage(
           error,
           "Unknown error.",
         )}`,
@@ -2479,7 +3098,15 @@ export default function AudioCutterDialog({
     } finally {
       setIsExportingSegments(false);
     }
-  }, [createSegmentFiles, isExportingSegments, onOpenChange, onUseSegments]);
+  }, [
+    createSegmentFiles,
+    isExportingSegments,
+    onOpenChange,
+    onUseSegments,
+    sortedSegments,
+    transcriptItems,
+    wordMarksBySegmentId,
+  ]);
 
   const segmentCountMismatch =
     expectedSegmentCount > 0 && segments.length !== expectedSegmentCount;
@@ -2520,33 +3147,33 @@ export default function AudioCutterDialog({
           : "flex min-h-full w-full flex-col bg-[var(--body-background)]"
       }
     >
-      <div className="border-b border-[var(--color_base_border)] px-5 py-4">
-        {renderInDialog ? (
-          <>
-            <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-[var(--text-color)]">
-              <ScissorsIcon className="h-5 w-5 text-[#0f5f83]" />
-              Audio cutter
-            </DialogTitle>
-            <DialogDescription className="mt-1 max-w-[85ch] text-sm text-[var(--text-color-dim)]">
-              Load one long recording, auto-detect speech blocks between
-              silences, then drag the start and end edges until the cuts line
-              up. Drag on the waveform to add extra segments manually.
+      {renderInDialog ? (
+        <div className="border-b border-[var(--color_base_border)] px-5 py-3">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-[var(--text-color)]">
+            <ScissorsIcon className="h-5 w-5 text-[#0f5f83]" />
+            Audio cutter
+          </DialogTitle>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--text-color-dim)]">
+            <DialogDescription className="m-0 max-w-[85ch] text-sm text-[var(--text-color-dim)]">
+              Load one recording, detect cuts, then fine-tune them in the
+              waveform and transcript.
             </DialogDescription>
-          </>
-        ) : (
-          <>
-            <div className="flex items-center gap-2 text-[1.4rem] font-semibold text-[var(--text-color)]">
-              <ScissorsIcon className="h-6 w-6 text-[#0f5f83]" />
-              <h1>Audio cutter</h1>
-            </div>
-            <p className="mt-1 max-w-[90ch] text-sm text-[var(--text-color-dim)]">
-              Load one long recording, auto-detect speech blocks between
-              silences, then drag the start and end edges until the cuts line
-              up. Drag on the waveform to add extra segments manually.
-            </p>
-          </>
-        )}
-      </div>
+            <button
+              type="button"
+              className="inline-flex h-6 items-center justify-center rounded-full border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-2.5 text-xs font-medium leading-none text-[var(--text-color-dim)] transition-colors hover:bg-[var(--color_base_background)]"
+              onClick={() => setShowIntroHelp((current) => !current)}
+            >
+              {showIntroHelp ? "Hide help" : "Show help"}
+            </button>
+          </div>
+          {showIntroHelp ? (
+            <DialogDescription className="mt-2 max-w-[85ch] text-sm text-[var(--text-color-dim)]">
+              Drag the start and end edges until the cuts line up. Drag on the
+              waveform to add extra segments manually.
+            </DialogDescription>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-3 border-b border-[var(--color_base_border)] px-5 py-3">
         <button
@@ -2782,8 +3409,8 @@ export default function AudioCutterDialog({
         </DialogContent>
       </Dialog>
 
-      <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[minmax(0,1.65fr)_360px]">
-        <div className="flex min-h-0 flex-col overflow-hidden border-r border-[var(--color_base_border)] px-5 py-4">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-5 py-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
               <div className="text-sm font-semibold text-[var(--text-color)]">
@@ -2794,9 +3421,26 @@ export default function AudioCutterDialog({
                 to move it. Drag either edge to resize it.
               </div>
             </div>
-            <div className="text-right text-xs text-[var(--text-color-dim)]">
-              <div>{segments.length} segment(s)</div>
-              <div>{duration > 0 ? formatSeconds(duration) : "00:00.000"}</div>
+            <div className="flex items-center gap-3 text-right text-xs text-[var(--text-color-dim)]">
+              {segments.length > 0 ? (
+                <button
+                  type="button"
+                  className="inline-flex h-7 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-2 leading-none transition-colors hover:bg-[var(--color_base_background)]"
+                  onClick={onClearSegments}
+                >
+                  Clear segments
+                </button>
+              ) : null}
+              <div>
+                <div>
+                  {expectedSegmentCount > 0
+                    ? `${segments.length} segments / ${expectedSegmentCount} expected`
+                    : `${segments.length} segments ready`}
+                </div>
+                <div>
+                  {duration > 0 ? formatSeconds(duration) : "00:00.000"}
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -2828,25 +3472,6 @@ export default function AudioCutterDialog({
           {exportError ? (
             <p className="mt-3 text-sm text-[#b33b3b]">{exportError}</p>
           ) : null}
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[var(--text-color-dim)]">
-            <div>
-              {segmentCountMismatch
-                ? `${segments.length} segments detected for ${expectedSegmentCount} story rows.`
-                : expectedSegmentCount > 0
-                  ? `${segments.length} / ${expectedSegmentCount} segments ready for staging.`
-                  : `${segments.length} segments ready.`}
-            </div>
-            {segments.length > 0 ? (
-              <button
-                type="button"
-                className="inline-flex h-7 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-2 leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                onClick={onClearSegments}
-              >
-                Clear segments
-              </button>
-            ) : null}
-          </div>
-
           <div className="mt-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-[var(--color_base_border)] bg-[var(--body-background-faint)] p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
@@ -2885,79 +3510,193 @@ export default function AudioCutterDialog({
                     const matchedSegment = sortedSegments[index];
                     const isVisible = visibleSegmentIndexes.has(index);
                     const isSelected = selectedSegmentIndex === index;
+                    const wordMarks = matchedSegment
+                      ? (wordMarksBySegmentId[matchedSegment.id] ?? [])
+                      : [];
+                    const activeWordIndex = matchedSegment
+                      ? (activeWordIndexBySegmentId[matchedSegment.id] ?? -1)
+                      : -1;
                     const skippedDuration = matchedSegment
                       ? getTotalRangeDuration(matchedSegment.skipRanges)
                       : 0;
+                    const segmentDuration = matchedSegment
+                      ? Math.max(
+                          matchedSegment.end - matchedSegment.start,
+                          0.001,
+                        )
+                      : 0.001;
+                    const cardClassName = `rounded-[20px] border px-4 py-3 text-left transition-colors ${
+                      isVisible
+                        ? "border-[#d7e34f] bg-[#f8fbcf]"
+                        : isSelected
+                          ? "border-[#1cb0f6] bg-[rgba(28,176,246,0.08)]"
+                          : "border-[var(--color_base_border)] bg-[var(--body-background)]"
+                    }`;
 
                     return (
-                      <button
+                      <div
                         key={item.id}
                         ref={(node) => {
                           transcriptRowRefs.current[index] = node;
                         }}
-                        type="button"
-                        className={`block w-full rounded-[20px] border px-4 py-3 text-left transition-colors ${
-                          isVisible
-                            ? "border-[#d7e34f] bg-[#f8fbcf]"
-                            : isSelected
-                              ? "border-[#1cb0f6] bg-[rgba(28,176,246,0.08)]"
-                              : "border-[var(--color_base_border)] bg-[var(--body-background)] hover:bg-[var(--color_base_background)]"
-                        }`}
-                        onClick={() => {
-                          if (!matchedSegment) return;
-                          onPlaySegment(matchedSegment);
-                        }}
+                        className={cardClassName}
                         onMouseEnter={() => {
                           if (!matchedSegment) return;
                           setHoveredSegmentId(matchedSegment.id);
                           setSelectedSegmentId(matchedSegment.id);
                         }}
                       >
-                        <div className="flex items-start gap-4">
-                          <div
-                            className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-bold ${
-                              isVisible
-                                ? "border-[#c8d339] bg-[#ffffff] text-[#465100]"
-                                : "border-[var(--color_base_border)] bg-[var(--body-background-faint)] text-[var(--text-color)]"
-                            }`}
-                          >
-                            {index + 1}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-col gap-1 md:flex-row md:items-baseline md:gap-4">
-                              <span className="shrink-0 text-[1.05rem] font-bold text-[var(--text-color)] md:min-w-[120px] md:text-right">
-                                {item.speaker || "Narrator"}:
-                              </span>
-                              <span className="text-[1.05rem] leading-8 text-[var(--text-color)]">
-                                {item.content.text}
-                              </span>
+                        <div
+                          className="block w-full text-left"
+                          role="button"
+                          tabIndex={matchedSegment ? 0 : -1}
+                          onClick={() => {
+                            if (!matchedSegment) return;
+                            onPlaySegment(matchedSegment);
+                          }}
+                          onKeyDown={(event) => {
+                            if (!matchedSegment) return;
+                            if (event.key !== "Enter" && event.key !== " ") {
+                              return;
+                            }
+                            event.preventDefault();
+                            onPlaySegment(matchedSegment);
+                          }}
+                        >
+                          <div className="flex items-start gap-4">
+                            <div
+                              className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-bold ${
+                                isVisible
+                                  ? "border-[#c8d339] bg-[#ffffff] text-[#465100]"
+                                  : "border-[var(--color_base_border)] bg-[var(--body-background-faint)] text-[var(--text-color)]"
+                              }`}
+                            >
+                              {index + 1}
                             </div>
-                            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--text-color-dim)]">
-                              <span>Story line {item.lineIndex}</span>
-                              {matchedSegment ? (
-                                <span>
-                                  {formatSeconds(matchedSegment.start)} to{" "}
-                                  {formatSeconds(matchedSegment.end)}
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-col gap-1 md:flex-row md:items-baseline md:gap-4">
+                                <span className="shrink-0 text-[1.05rem] font-bold text-[var(--text-color)] md:min-w-[120px] md:text-right">
+                                  {item.speaker || "Narrator"}:
                                 </span>
-                              ) : (
-                                <span>No matching segment yet</span>
-                              )}
-                              {matchedSegment && skippedDuration > 0 ? (
-                                <span>
-                                  trims {formatSeconds(skippedDuration)} across{" "}
-                                  {matchedSegment.skipRanges.length} pause
-                                  {matchedSegment.skipRanges.length === 1
-                                    ? ""
-                                    : "s"}
+                                <span className="text-[1.05rem] leading-8 text-[var(--text-color)]">
+                                  {renderTextWithHighlightedWord(
+                                    item.content.text,
+                                    wordMarks,
+                                    activeWordIndex,
+                                    matchedSegment
+                                      ? (markIndex) => {
+                                          onPlayApproximateWord(
+                                            matchedSegment,
+                                            wordMarks,
+                                            markIndex,
+                                          );
+                                        }
+                                      : undefined,
+                                  )}
                                 </span>
-                              ) : null}
+                              </div>
+                              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--text-color-dim)]">
+                                <span>Story line {item.lineIndex}</span>
+                                {matchedSegment ? (
+                                  <span>
+                                    {formatSeconds(matchedSegment.start)} to{" "}
+                                    {formatSeconds(matchedSegment.end)}
+                                  </span>
+                                ) : (
+                                  <span>No matching segment yet</span>
+                                )}
+                                {matchedSegment && skippedDuration > 0 ? (
+                                  <span>
+                                    trims {formatSeconds(skippedDuration)}{" "}
+                                    across {matchedSegment.skipRanges.length}{" "}
+                                    pause
+                                    {matchedSegment.skipRanges.length === 1
+                                      ? ""
+                                      : "s"}
+                                  </span>
+                                ) : null}
+                              </div>
                             </div>
-                          </div>
-                          <div className="shrink-0 text-right font-mono text-sm font-bold text-[var(--text-color)]">
-                            #{index + 1}
+                            <div className="shrink-0 text-right font-mono text-sm font-bold text-[var(--text-color)]">
+                              #{index + 1}
+                            </div>
                           </div>
                         </div>
-                      </button>
+                        {matchedSegment && wordMarks.length > 0 ? (
+                          <>
+                            <div className="mt-3 flex items-center justify-between gap-3 text-[11px] text-[var(--text-color-dim)]">
+                              <span>Word timing</span>
+                              <span>
+                                Drag markers or click a word above to play it.
+                              </span>
+                            </div>
+                            <div
+                              ref={(node) => {
+                                wordTimelineRefs.current[matchedSegment.id] =
+                                  node;
+                              }}
+                              className="relative mt-2 h-9 rounded-full border border-[var(--color_base_border)] bg-[var(--body-background)]"
+                            >
+                              {matchedSegment.skipRanges.map(
+                                (skipRange, skipIndex) => {
+                                  const leftPercent =
+                                    ((skipRange.start - matchedSegment.start) /
+                                      segmentDuration) *
+                                    100;
+                                  const widthPercent =
+                                    ((skipRange.end - skipRange.start) /
+                                      segmentDuration) *
+                                    100;
+
+                                  return (
+                                    <div
+                                      key={`${matchedSegment.id}-skip-${skipIndex}`}
+                                      className="pointer-events-none absolute top-0 bottom-0 rounded-full border-x border-dashed border-[rgba(15,95,131,0.65)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.08)_0_6px,rgba(15,95,131,0.18)_6px_12px)]"
+                                      style={{
+                                        left: `${leftPercent}%`,
+                                        width: `${widthPercent}%`,
+                                      }}
+                                    />
+                                  );
+                                },
+                              )}
+                              {wordMarks.map((mark, markIndex) => {
+                                const leftPercent =
+                                  ((mark.time / 1000 - matchedSegment.start) /
+                                    segmentDuration) *
+                                  100;
+
+                                return (
+                                  <button
+                                    key={`${matchedSegment.id}-marker-${mark.start}-${mark.time}`}
+                                    type="button"
+                                    className="absolute top-1/2 h-full w-4 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none"
+                                    style={{
+                                      left: `${leftPercent}%`,
+                                    }}
+                                    onPointerDown={(event) => {
+                                      onStartWordMarkerDrag(
+                                        event,
+                                        matchedSegment.id,
+                                        markIndex,
+                                      );
+                                    }}
+                                    title={`Drag timing marker for "${mark.value}"`}
+                                  >
+                                    <span
+                                      className={`absolute top-[15%] bottom-[15%] left-1/2 -translate-x-1/2 rounded-full ${
+                                        markIndex === activeWordIndex
+                                          ? "w-1 bg-[#d7e34f] shadow-[0_0_0_1px_rgba(70,81,0,0.28)]"
+                                          : "w-px bg-[rgba(15,95,131,0.45)] shadow-[0_0_0_1px_rgba(255,255,255,0.18)]"
+                                      }`}
+                                    />
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </>
+                        ) : null}
+                      </div>
                     );
                   })}
                 </div>
@@ -2965,122 +3704,14 @@ export default function AudioCutterDialog({
             </div>
           </div>
         </div>
-
-        <div className="min-h-0 overflow-y-auto px-5 py-4">
-          <div className="mb-3">
-            <div className="text-sm font-semibold text-[var(--text-color)]">
-              Segment list
-            </div>
-            <div className="text-xs text-[var(--text-color-dim)]">
-              Use this list to audition and remove cuts. The order here is the
-              order that will be staged into the bulk editor.
-            </div>
-          </div>
-
-          {segments.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[var(--color_base_border)] bg-[var(--body-background-faint)] p-4 text-sm text-[var(--text-color-dim)]">
-              Upload a recording to auto-detect cuts, or drag across the
-              waveform to create them yourself.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {segments.map((segment, index) => {
-                const isSelected = selectedSegmentId === segment.id;
-                const onPlay = () => onPlaySegment(segment);
-                const onShrinkWrap = () => onShrinkWrapSegment(segment.id);
-                const onEditLabel = () => onEditSegmentLabel(segment.id);
-                const onDelete = () => onRemoveSegment(segment.id);
-                const skippedDuration = getTotalRangeDuration(
-                  segment.skipRanges,
-                );
-                const exportedDuration = getEffectiveSegmentDuration(segment);
-                return (
-                  <div
-                    key={segment.id}
-                    className={`rounded-xl border p-3 transition-colors ${
-                      isSelected
-                        ? "border-[#1cb0f6] bg-[rgba(28,176,246,0.08)]"
-                        : "border-[var(--color_base_border)] bg-[var(--body-background-faint)]"
-                    }`}
-                    onMouseEnter={() => {
-                      setHoveredSegmentId(segment.id);
-                      setSelectedSegmentId(segment.id);
-                    }}
-                  >
-                    <div className="mb-2 flex items-start justify-between gap-3">
-                      <div>
-                        <div className="text-sm font-semibold text-[var(--text-color)]">
-                          Segment {index + 1}
-                        </div>
-                        {labelsById[segment.id] ? (
-                          <div className="mt-0.5 text-xs font-medium text-[#0f5f83]">
-                            {labelsById[segment.id]}
-                          </div>
-                        ) : null}
-                        <div className="text-xs text-[var(--text-color-dim)]">
-                          {formatSeconds(segment.start)} to{" "}
-                          {formatSeconds(segment.end)}
-                        </div>
-                        {skippedDuration > 0 ? (
-                          <div className="text-xs text-[var(--text-color-dim)]">
-                            Export trims {formatSeconds(skippedDuration)} across{" "}
-                            {segment.skipRanges.length} internal pause
-                            {segment.skipRanges.length === 1 ? "" : "s"}
-                          </div>
-                        ) : null}
-                      </div>
-                      <div className="text-xs text-[var(--text-color-dim)]">
-                        {formatSeconds(exportedDuration)}
-                        {skippedDuration > 0 ? ` export` : ""}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                        onClick={onPlay}
-                      >
-                        Play
-                      </button>
-                      <button
-                        type="button"
-                        className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                        onClick={onShrinkWrap}
-                      >
-                        Shrink-wrap
-                      </button>
-                      <button
-                        type="button"
-                        className="inline-flex h-8 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none transition-colors hover:bg-[var(--color_base_background)]"
-                        onClick={onEditLabel}
-                        title={
-                          labelsById[segment.id] ? "Edit label" : "Add label"
-                        }
-                      >
-                        {labelsById[segment.id] ? "Edit label" : "Add label"}
-                      </button>
-                      <button
-                        type="button"
-                        className="inline-flex h-8 items-center justify-center gap-1 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 text-xs font-medium leading-none text-[#b33b3b] transition-colors hover:bg-[#fff5f5]"
-                        onClick={onDelete}
-                      >
-                        <Trash2Icon className="h-3.5 w-3.5" />
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color_base_border)] px-5 py-3">
         <div className="text-sm text-[var(--text-color-dim)]">
-          {segmentCountMismatch
-            ? "Adjust the cuts until the segment count matches the number of bulk audio rows."
-            : "Stage the generated clips into the bulk editor in top-to-bottom order."}
+          {footerStatusText ??
+            (segmentCountMismatch
+              ? "Adjust the cuts until the segment count matches the number of bulk audio rows."
+              : "Stage the generated clips into the bulk editor in top-to-bottom order.")}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -3102,8 +3733,8 @@ export default function AudioCutterDialog({
             }
           >
             {isExportingSegments
-              ? "Preparing MP3 clips..."
-              : "Use segments in bulk editor"}
+              ? (primaryActionPendingLabel ?? "Preparing MP3 clips...")
+              : primaryActionLabel}
           </button>
         </div>
       </div>
