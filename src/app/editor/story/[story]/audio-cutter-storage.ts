@@ -1,11 +1,28 @@
 "use client";
 
 import type { BulkAudioEditorItem } from "@/app/editor/story/[story]/bulk-audio-editor";
+import type { Audio } from "@/components/editor/story/syntax_parser_types";
 
 export type AudioCutterTranscriptItem = Pick<
   BulkAudioEditorItem,
-  "id" | "order" | "lineIndex" | "type" | "speaker" | "content"
+  | "id"
+  | "order"
+  | "lineIndex"
+  | "type"
+  | "speaker"
+  | "content"
+  | "existingFilename"
+  | "existingKeypoints"
+  | "ssml"
 >;
+
+export type AudioCutterPreparedSegment = {
+  file: File;
+  itemId: string;
+  lineIndex: number;
+  ssml: Audio["ssml"];
+  keypoints: { rangeEnd: number; audioStart: number }[];
+};
 
 type StoredAudioCutterTranscript = {
   items: AudioCutterTranscriptItem[];
