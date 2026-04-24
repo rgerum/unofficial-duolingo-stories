@@ -600,8 +600,9 @@ function getActiveWordMarkIndex(
 
   for (let index = 0; index < marks.length; index += 1) {
     const markStartSeconds = (marks[index]?.time ?? 0) / 1000;
+    const nextMarkTime = marks[index + 1]?.time;
     const nextStartSeconds =
-      (marks[index + 1]?.time ?? 0) / 1000 || keepRangeEnd;
+      nextMarkTime != null ? nextMarkTime / 1000 : keepRangeEnd;
 
     if (
       currentTimeSeconds >= markStartSeconds &&

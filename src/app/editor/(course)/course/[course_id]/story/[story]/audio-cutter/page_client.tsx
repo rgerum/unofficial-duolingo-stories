@@ -274,7 +274,7 @@ export default function AudioCutterPageClient({
           if (!avatarRows) {
             throw new Error("Avatar data is still loading.");
           }
-          if (segments.length === 0) return;
+          if (segments.length === 0) return false;
           if (transcriptItems.some((item) => !item.ssml)) {
             throw new Error(
               "This cutter session is missing story audio anchors. Reopen the cutter from the story editor and try again.",
@@ -500,11 +500,26 @@ async function uploadAudioFile(file: File, storyId: number) {
   const data = new FormData();
   data.set("file", file);
   data.set("story_id", String(storyId));
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => {
+    controller.abort();
+  }, 20_000);
 
-  const response = await fetch("/audio/upload", {
-    method: "POST",
-    body: data,
-  });
+  let response: Response;
+  try {
+    response = await fetch("/audio/upload", {
+      method: "POST",
+      body: data,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Upload timed out. Please try again.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     throw new Error(await response.text());
