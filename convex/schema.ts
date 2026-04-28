@@ -177,6 +177,14 @@ export default defineSchema({
     .index("by_story", ["storyId"])
     .index("by_updated", ["lastUpdated"]),
 
+  story_public_content: defineTable({
+    storyId: v.id("stories"),
+    json: v.any(),
+    lastUpdated: v.number(),
+  })
+    .index("by_story", ["storyId"])
+    .index("by_updated", ["lastUpdated"]),
+
   story_done: defineTable({
     storyId: v.id("stories"),
     legacyUserId: v.optional(v.number()),

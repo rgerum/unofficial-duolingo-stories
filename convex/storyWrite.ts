@@ -6,6 +6,7 @@ import {
   requireSessionLegacyUserId,
 } from "./lib/authorization";
 import { recomputeCoursePublishedCount } from "./lib/courseCounts";
+import { upsertPublicStoryContent } from "./lib/publicStoryContent";
 
 export const setStory = mutation({
   args: {
@@ -118,20 +119,23 @@ export const setStory = mutation({
       .withIndex("by_story", (q) => q.eq("storyId", story._id))
       .unique();
 
+    const lastUpdated = Date.now();
+
     if (existingContent) {
       await ctx.db.patch(existingContent._id, {
         text: args.text,
         json: args.json,
-        lastUpdated: Date.now(),
+        lastUpdated,
       });
     } else {
       await ctx.db.insert("story_content", {
         storyId: story._id,
         text: args.text,
         json: args.json,
-        lastUpdated: Date.now(),
+        lastUpdated,
       });
     }
+    await upsertPublicStoryContent(ctx, story._id, args.json, lastUpdated);
 
     const storiesInCourse = await ctx.db
       .query("stories")
@@ -308,12 +312,20 @@ export const importStory = mutation({
       todo_count: 0,
     });
 
+    const lastUpdated = Date.now();
+
     await ctx.db.insert("story_content", {
       storyId: newStoryId,
       text: sourceContent.text,
       json: sourceContent.json,
-      lastUpdated: Date.now(),
+      lastUpdated,
     });
+    await upsertPublicStoryContent(
+      ctx,
+      newStoryId,
+      sourceContent.json,
+      lastUpdated,
+    );
 
     const operationKey =
       args.operationKey ??
