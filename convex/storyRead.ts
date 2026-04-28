@@ -1,5 +1,6 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
+import { getPublicStoryJson } from "./lib/publicStoryContent";
 
 const storyReadResultValidator = v.union(
   v.object({
@@ -62,11 +63,8 @@ export const getStoryByLegacyId = query({
     if (!story || typeof story.legacyId !== "number") return null;
     if (story.deleted) return null;
 
-    const storyContent = await ctx.db
-      .query("story_content")
-      .withIndex("by_story", (q) => q.eq("storyId", story._id))
-      .unique();
-    if (!storyContent) return null;
+    const storyJson = await getPublicStoryJson(ctx, story._id);
+    if (!storyJson) return null;
 
     const course = await ctx.db.get(story.courseId);
     if (!course) return null;
@@ -78,7 +76,7 @@ export const getStoryByLegacyId = query({
     ]);
     if (!fromLanguage || !learningLanguage) return null;
 
-    let parsedJson = storyContent.json;
+    let parsedJson = storyJson;
     if (typeof parsedJson === "string") {
       try {
         parsedJson = JSON.parse(parsedJson);
@@ -167,13 +165,10 @@ export const getStoryPreviewByLegacyId = query({
       return null;
     }
 
-    const storyContent = await ctx.db
-      .query("story_content")
-      .withIndex("by_story", (q) => q.eq("storyId", story._id))
-      .unique();
+    const storyJson = await getPublicStoryJson(ctx, story._id);
     const image = story.imageId ? await ctx.db.get(story.imageId) : null;
 
-    let parsedJson = storyContent?.json;
+    let parsedJson = storyJson;
     if (typeof parsedJson === "string") {
       try {
         parsedJson = JSON.parse(parsedJson);

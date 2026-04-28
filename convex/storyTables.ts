@@ -1,6 +1,7 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireContributorOrAdmin } from "./lib/authorization";
+import { upsertPublicStoryContent } from "./lib/publicStoryContent";
 
 const storyValidator = {
   legacyId: v.number(),
@@ -139,10 +140,22 @@ export const upsertStoryContent = mutation({
 
     if (existing) {
       await ctx.db.replace(existing._id, doc);
+      await upsertPublicStoryContent(
+        ctx,
+        story._id,
+        args.storyContent.json,
+        args.storyContent.lastUpdated,
+      );
       return { inserted: false, docId: existing._id };
     }
 
     const docId = await ctx.db.insert("story_content", doc);
+    await upsertPublicStoryContent(
+      ctx,
+      story._id,
+      args.storyContent.json,
+      args.storyContent.lastUpdated,
+    );
     return { inserted: true, docId };
   },
 });
