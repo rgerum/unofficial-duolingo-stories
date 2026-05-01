@@ -58,6 +58,38 @@ const adminStoryValidator = v.object({
   approvals: v.array(adminApprovalValidator),
 });
 
+const adminStoryImportRepairSourceValidator = v.object({
+  id: v.number(),
+  name: v.string(),
+  duoId: v.union(v.string(), v.null()),
+  setId: v.union(v.number(), v.null()),
+  setIndex: v.union(v.number(), v.null()),
+});
+
+const adminStoryImportRepairRowValidator = v.object({
+  targetStoryId: v.number(),
+  targetName: v.string(),
+  targetDuoId: v.union(v.string(), v.null()),
+  targetSetId: v.union(v.number(), v.null()),
+  targetSetIndex: v.union(v.number(), v.null()),
+  currentSourceStoryId: v.union(v.number(), v.null()),
+  currentSourceStoryName: v.union(v.string(), v.null()),
+  suggestedSourceStoryId: v.union(v.number(), v.null()),
+  suggestedSourceStoryName: v.union(v.string(), v.null()),
+  status: v.union(
+    v.literal("matched"),
+    v.literal("missing"),
+    v.literal("mismatch"),
+    v.literal("ambiguous"),
+  ),
+  suggestionReason: v.string(),
+});
+
+const adminStoryImportRepairValidator = v.object({
+  sourceStories: v.array(adminStoryImportRepairSourceValidator),
+  rows: v.array(adminStoryImportRepairRowValidator),
+});
+
 const yesNoAllFilterValidator = v.union(
   v.literal("all"),
   v.literal("yes"),
@@ -608,6 +640,179 @@ export const getAdminStoryByLegacyId = query({
               : "Unknown",
         }))
         .filter((approval) => approval.id > 0),
+    };
+  },
+});
+
+export const getAdminStoryImportRepairData = query({
+  args: {
+    sourceCourseLegacyId: v.number(),
+    targetCourseLegacyId: v.number(),
+  },
+  returns: adminStoryImportRepairValidator,
+  handler: async (ctx, args) => {
+    if (!(await isAdmin(ctx))) {
+      return { sourceStories: [], rows: [] };
+    }
+
+    const [sourceCourse, targetCourse] = await Promise.all([
+      ctx.db
+        .query("courses")
+        .withIndex("by_id_value", (q) =>
+          q.eq("legacyId", args.sourceCourseLegacyId),
+        )
+        .unique(),
+      ctx.db
+        .query("courses")
+        .withIndex("by_id_value", (q) =>
+          q.eq("legacyId", args.targetCourseLegacyId),
+        )
+        .unique(),
+    ]);
+    if (!sourceCourse || !targetCourse) {
+      return { sourceStories: [], rows: [] };
+    }
+
+    const [sourceStoriesRaw, targetStoriesRaw] = await Promise.all([
+      ctx.db
+        .query("stories")
+        .withIndex("by_course", (q) => q.eq("courseId", sourceCourse._id))
+        .collect(),
+      ctx.db
+        .query("stories")
+        .withIndex("by_course", (q) => q.eq("courseId", targetCourse._id))
+        .collect(),
+    ]);
+
+    const sourceStories = sourceStoriesRaw
+      .filter(
+        (
+          story,
+        ): story is typeof story & {
+          legacyId: number;
+        } => !story.deleted && typeof story.legacyId === "number",
+      )
+      .sort((a, b) => {
+        const setCompare = (a.set_id ?? 0) - (b.set_id ?? 0);
+        if (setCompare !== 0) return setCompare;
+        return (a.set_index ?? 0) - (b.set_index ?? 0);
+      });
+
+    const targetStories = targetStoriesRaw
+      .filter(
+        (
+          story,
+        ): story is typeof story & {
+          legacyId: number;
+        } => !story.deleted && typeof story.legacyId === "number",
+      )
+      .sort((a, b) => {
+        const setCompare = (a.set_id ?? 0) - (b.set_id ?? 0);
+        if (setCompare !== 0) return setCompare;
+        return (a.set_index ?? 0) - (b.set_index ?? 0);
+      });
+
+    const sourceByDuoId = new Map<string, typeof sourceStories>();
+    const sourceBySetKey = new Map<string, typeof sourceStories>();
+
+    for (const story of sourceStories) {
+      if (story.duo_id) {
+        const storiesForDuoId = sourceByDuoId.get(story.duo_id) ?? [];
+        storiesForDuoId.push(story);
+        sourceByDuoId.set(story.duo_id, storiesForDuoId);
+      }
+      if (
+        typeof story.set_id === "number" &&
+        typeof story.set_index === "number"
+      ) {
+        const setKey = `${story.set_id}:${story.set_index}`;
+        const storiesForSet = sourceBySetKey.get(setKey) ?? [];
+        storiesForSet.push(story);
+        sourceBySetKey.set(setKey, storiesForSet);
+      }
+    }
+
+    const rows = targetStories
+      .map((targetStory) => {
+        const currentMatches = targetStory.duo_id
+          ? (sourceByDuoId.get(targetStory.duo_id) ?? [])
+          : [];
+        const suggestedMatches =
+          typeof targetStory.set_id === "number" &&
+          typeof targetStory.set_index === "number"
+            ? (sourceBySetKey.get(
+                `${targetStory.set_id}:${targetStory.set_index}`,
+              ) ?? [])
+            : [];
+
+        const currentSource =
+          currentMatches.length === 1 ? currentMatches[0] : null;
+        const suggestedSource =
+          suggestedMatches.length === 1 ? suggestedMatches[0] : null;
+
+        let status: "matched" | "missing" | "mismatch" | "ambiguous" =
+          "matched";
+        let suggestionReason =
+          "Current duo_id already matches the source story.";
+
+        if (currentMatches.length > 1) {
+          status = "ambiguous";
+          suggestionReason =
+            "Current duo_id matches multiple source stories. Pick one manually.";
+        } else if (!currentSource && suggestedSource) {
+          status = "missing";
+          suggestionReason =
+            "No unique duo_id match. Suggested via set_id/set_index.";
+        } else if (!currentSource) {
+          status = "missing";
+          suggestionReason =
+            "No unique source match found. Pick the correct story manually.";
+        } else if (
+          suggestedSource &&
+          suggestedSource.legacyId !== currentSource.legacyId
+        ) {
+          status = "mismatch";
+          suggestionReason =
+            "Current duo_id points to a different source than set_id/set_index.";
+        }
+
+        return {
+          targetStoryId: targetStory.legacyId,
+          targetName: targetStory.name,
+          targetDuoId: targetStory.duo_id ?? null,
+          targetSetId: targetStory.set_id ?? null,
+          targetSetIndex: targetStory.set_index ?? null,
+          currentSourceStoryId: currentSource?.legacyId ?? null,
+          currentSourceStoryName: currentSource?.name ?? null,
+          suggestedSourceStoryId: suggestedSource?.legacyId ?? null,
+          suggestedSourceStoryName: suggestedSource?.name ?? null,
+          status,
+          suggestionReason,
+        };
+      })
+      .sort((a, b) => {
+        const statusOrder = {
+          mismatch: 0,
+          ambiguous: 1,
+          missing: 2,
+          matched: 3,
+        } as const;
+        const statusCompare = statusOrder[a.status] - statusOrder[b.status];
+        if (statusCompare !== 0) return statusCompare;
+        const setCompare = (a.targetSetId ?? 0) - (b.targetSetId ?? 0);
+        if (setCompare !== 0) return setCompare;
+        return (a.targetSetIndex ?? 0) - (b.targetSetIndex ?? 0);
+      });
+
+    return {
+      sourceStories: sourceStories.map((story) => ({
+        id: story.legacyId,
+        name: story.name,
+        duoId: story.duo_id ?? null,
+        setId: story.set_id ?? null,
+        setIndex: story.set_index ?? null,
+      })),
+      rows,
     };
   },
 });
