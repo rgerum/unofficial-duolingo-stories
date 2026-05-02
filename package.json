@@ -51,7 +51,7 @@
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
     "tailwind-merge": "^3.5.0",
-    "uuid": "^13.0.0",
+    "uuid": "^14.0.0",
     "vfile": "^6.0.3",
     "wavesurfer.js": "^7.12.6",
     "ws": "^8.20.0",
