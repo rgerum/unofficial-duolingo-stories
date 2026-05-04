@@ -9,6 +9,16 @@ const CONTENT_REPOSITORY = "rgerum/unofficial-duolingo-stories-content";
 
 let octokitClient: Octokit | null = null;
 
+function toBase64Utf8(value: string) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
 function getOctokit() {
   const token = process.env.GITHUB_REPO_TOKEN;
   if (!token) return null;
@@ -69,7 +79,7 @@ async function uploadWithDiffToGithub(args: {
     repo,
     path: args.path,
     message: args.gitMessage,
-    content: Buffer.from(args.content).toString("base64"),
+    content: toBase64Utf8(args.content),
     sha: fileSha,
     committer: author,
     author,
