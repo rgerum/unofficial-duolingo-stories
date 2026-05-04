@@ -5,13 +5,16 @@ import { zipSync } from "fflate";
 import { useWavesurfer } from "@wavesurfer/react";
 import {
   DownloadIcon,
+  HelpCircleIcon,
+  PauseIcon,
+  PlayIcon,
   ScissorsIcon,
+  SquareIcon,
   Trash2Icon,
   UploadIcon,
   WandSparklesIcon,
 } from "lucide-react";
 import Regions from "wavesurfer.js/dist/plugins/regions.js";
-import PlayAudio from "@/components/PlayAudio";
 import Input from "@/components/ui/input";
 import {
   decodeAudioData,
@@ -1470,7 +1473,9 @@ export default function AudioCutterDialog({
   const [isNormalizingAudio, setIsNormalizingAudio] = React.useState(false);
   const [isExportingSegments, setIsExportingSegments] = React.useState(false);
   const [detectDialogOpen, setDetectDialogOpen] = React.useState(false);
+  const [shortcutDialogOpen, setShortcutDialogOpen] = React.useState(false);
   const [showIntroHelp, setShowIntroHelp] = React.useState(false);
+  const [isPlaying, setIsPlaying] = React.useState(false);
   const [isDragOverAudioDropzone, setIsDragOverAudioDropzone] =
     React.useState(false);
   const [detectionSettings, setDetectionSettings] =
@@ -1761,7 +1766,9 @@ export default function AudioCutterDialog({
     setIsNormalizingAudio(false);
     setIsExportingSegments(false);
     setDetectDialogOpen(false);
+    setShortcutDialogOpen(false);
     setShowIntroHelp(false);
+    setIsPlaying(false);
     setAudioBuffer(null);
     setSegments([]);
     setLabelsById({});
@@ -2130,15 +2137,26 @@ export default function AudioCutterDialog({
           : wavesurfer.getCurrentTime(),
       );
     };
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => {
+      updatePlaybackTime();
+      setIsPlaying(false);
+    };
+    const onFinish = () => {
+      updatePlaybackTime();
+      setIsPlaying(false);
+    };
 
     wavesurfer.on("timeupdate", updatePlaybackTime);
-    wavesurfer.on("pause", updatePlaybackTime);
-    wavesurfer.on("finish", updatePlaybackTime);
+    wavesurfer.on("play", onPlay);
+    wavesurfer.on("pause", onPause);
+    wavesurfer.on("finish", onFinish);
 
     return () => {
       wavesurfer.un("timeupdate", updatePlaybackTime);
-      wavesurfer.un("pause", updatePlaybackTime);
-      wavesurfer.un("finish", updatePlaybackTime);
+      wavesurfer.un("play", onPlay);
+      wavesurfer.un("pause", onPause);
+      wavesurfer.un("finish", onFinish);
     };
   }, [wavesurfer]);
 
@@ -2488,6 +2506,7 @@ export default function AudioCutterDialog({
     const onReady = () => {
       setWaveformReady(true);
       setDuration(wavesurfer.getDuration());
+      syncRegionsFromState(plugin);
       refreshRegionUi();
     };
 
@@ -2511,6 +2530,7 @@ export default function AudioCutterDialog({
     pendingRegionTouchesCommittedSegment,
     segments,
     syncRegionAppearance,
+    syncRegionsFromState,
     typedRegionsPlugin,
     wavesurfer,
   ]);
@@ -2555,13 +2575,21 @@ export default function AudioCutterDialog({
     runAutoDetect();
   }, [audioBuffer, runAutoDetect, waveformReady]);
 
-  const updateLoadedAudio = React.useCallback((nextBuffer: AudioBuffer) => {
-    setAudioBuffer(nextBuffer);
-    setAudioUrl((currentUrl) => {
-      if (currentUrl) URL.revokeObjectURL(currentUrl);
-      return URL.createObjectURL(audioBufferToWavBlob(nextBuffer));
-    });
-  }, []);
+  const updateLoadedAudio = React.useCallback(
+    (nextBuffer: AudioBuffer) => {
+      cancelSegmentedPlayback();
+      setWaveformReady(false);
+      setDuration(0);
+      setPlaybackTimeSeconds(0);
+      setIsPlaying(false);
+      setAudioBuffer(nextBuffer);
+      setAudioUrl((currentUrl) => {
+        if (currentUrl) URL.revokeObjectURL(currentUrl);
+        return URL.createObjectURL(audioBufferToWavBlob(nextBuffer));
+      });
+    },
+    [cancelSegmentedPlayback],
+  );
 
   const onFileChange = React.useCallback(
     async (file: File | null) => {
@@ -2597,7 +2625,8 @@ export default function AudioCutterDialog({
       try {
         const decoded = await decodeAudioData(await file.arrayBuffer());
         if (requestToken !== autoDetectRequestRef.current) return;
-        updateLoadedAudio(decoded);
+        const normalized = normalizeAudioBufferPeak(decoded);
+        updateLoadedAudio(normalized.buffer);
       } catch (error) {
         if (requestToken !== autoDetectRequestRef.current) return;
         setAudioBuffer(null);
@@ -2704,10 +2733,48 @@ export default function AudioCutterDialog({
     updateLoadedAudio,
   ]);
 
-  const onPlayPause = React.useCallback(() => {
+  const onPausePlayback = React.useCallback(() => {
     cancelSegmentedPlayback();
-    wavesurfer?.playPause();
+    wavesurfer?.pause();
   }, [cancelSegmentedPlayback, wavesurfer]);
+
+  const onStopPlayback = React.useCallback(() => {
+    cancelSegmentedPlayback();
+    wavesurfer?.pause();
+
+    const selectedSegment = sortedSegments.find(
+      (segment) => segment.id === selectedSegmentId,
+    );
+    wavesurfer?.setTime(selectedSegment?.start ?? 0);
+    setPlaybackTimeSeconds(selectedSegment?.start ?? 0);
+    setIsPlaying(false);
+  }, [cancelSegmentedPlayback, selectedSegmentId, sortedSegments, wavesurfer]);
+
+  const onPlayPause = React.useCallback(() => {
+    if (isPlaying) {
+      onPausePlayback();
+      return;
+    }
+
+    const selectedSegment = sortedSegments.find(
+      (segment) => segment.id === selectedSegmentId,
+    );
+    if (selectedSegment) {
+      playSegmentAudio(selectedSegment);
+      return;
+    }
+
+    cancelSegmentedPlayback();
+    void wavesurfer?.play();
+  }, [
+    cancelSegmentedPlayback,
+    isPlaying,
+    onPausePlayback,
+    playSegmentAudio,
+    selectedSegmentId,
+    sortedSegments,
+    wavesurfer,
+  ]);
 
   const scrollWaveformToSegment = React.useCallback(
     (segment: Segment) => {
@@ -2755,13 +2822,25 @@ export default function AudioCutterDialog({
       );
       if (!playbackRange) return;
 
+      const keepRanges = getKeepRanges(
+        {
+          start: playbackRange.startSeconds,
+          end: playbackRange.endSeconds,
+        },
+        segment.skipRanges,
+      );
+      const firstRange = keepRanges[0];
+      if (!firstRange) return;
+
       cancelSegmentedPlayback();
+      segmentedPlaybackRef.current = {
+        currentRangeIndex: 0,
+        didReachRangeEnd: false,
+        keepRanges,
+      };
       setSelectedSegmentId(segment.id);
       scrollWaveformToSegment(segment);
-      void wavesurfer.play(
-        playbackRange.startSeconds,
-        playbackRange.endSeconds,
-      );
+      void wavesurfer.play(firstRange.start, firstRange.end);
     },
     [cancelSegmentedPlayback, scrollWaveformToSegment, wavesurfer],
   );
@@ -2901,32 +2980,42 @@ export default function AudioCutterDialog({
       if (!segment) return;
 
       setHoveredSegmentId(segment.id);
-      onPlaySegment(segment);
+      setSelectedSegmentId(segment.id);
+      scrollWaveformToSegment(segment);
       scrollTranscriptRowIntoView(index, "smooth");
     },
-    [onPlaySegment, scrollTranscriptRowIntoView, sortedSegments],
+    [scrollTranscriptRowIntoView, scrollWaveformToSegment, sortedSegments],
   );
 
   React.useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (detectDialogOpen) return;
+      if (detectDialogOpen || shortcutDialogOpen) return;
       if (event.altKey || event.ctrlKey || event.metaKey) return;
       if (isEditableTarget(event.target)) return;
-      if (sortedSegments.length === 0) return;
 
       if (event.code === "Space") {
         event.preventDefault();
+        onPlayPause();
+        return;
+      }
+
+      if (sortedSegments.length === 0) return;
+
+      if (event.code === "Enter") {
+        event.preventDefault();
         const activeSegment =
           sortedSegments[selectedSegmentIndex] ?? sortedSegments[0];
-        if (!activeSegment) return;
-        onPlaySegment(activeSegment);
+        if (activeSegment) {
+          onPlaySegment(activeSegment);
+        }
         return;
       }
 
       if (event.code === "ArrowLeft" || event.code === "ArrowRight") {
         event.preventDefault();
+        if (event.repeat) return;
         const delta = event.code === "ArrowRight" ? 1 : -1;
         const currentIndex =
           selectedSegmentIndex >= 0 ? selectedSegmentIndex : 0;
@@ -2945,7 +3034,9 @@ export default function AudioCutterDialog({
     };
   }, [
     detectDialogOpen,
+    shortcutDialogOpen,
     onPlaySegment,
+    onPlayPause,
     open,
     selectSegmentByIndex,
     selectedSegmentIndex,
@@ -3238,7 +3329,30 @@ export default function AudioCutterDialog({
           <DownloadIcon className="h-4 w-4" />
           {isExportingSegments ? "Encoding MP3..." : "Download zip"}
         </button>
-        <PlayAudio onClick={audioUrl ? onPlayPause : undefined} />
+        <div className="flex items-center gap-1 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] p-1">
+          <button
+            type="button"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-[6px] text-[var(--text-color)] transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-50"
+            onClick={onPlayPause}
+            disabled={!audioUrl}
+            title={isPlaying ? "Pause playback" : "Play selected sentence"}
+          >
+            {isPlaying ? (
+              <PauseIcon className="h-4 w-4" />
+            ) : (
+              <PlayIcon className="h-4 w-4" />
+            )}
+          </button>
+          <button
+            type="button"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-[6px] text-[var(--text-color)] transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-50"
+            onClick={onStopPlayback}
+            disabled={!audioUrl}
+            title="Stop playback"
+          >
+            <SquareIcon className="h-3.5 w-3.5" />
+          </button>
+        </div>
         <div className="flex items-center gap-2 text-xs">
           <button
             type="button"
@@ -3262,6 +3376,14 @@ export default function AudioCutterDialog({
             Fit
           </button>
         </div>
+        <button
+          type="button"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] text-[var(--text-color)] transition-colors hover:bg-[var(--color_base_background)]"
+          onClick={() => setShortcutDialogOpen(true)}
+          title="Show keyboard shortcuts"
+        >
+          <HelpCircleIcon className="h-4 w-4" />
+        </button>
         <input
           ref={fileInputRef}
           className="sr-only"
@@ -3405,6 +3527,40 @@ export default function AudioCutterDialog({
                 Detect
               </button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={shortcutDialogOpen} onOpenChange={setShortcutDialogOpen}>
+        <DialogContent className="max-w-[460px]">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-[var(--text-color)]">
+            <HelpCircleIcon className="h-5 w-5 text-[#0f5f83]" />
+            Keyboard shortcuts
+          </DialogTitle>
+          <DialogDescription className="max-w-[58ch] text-sm text-[var(--text-color-dim)]">
+            Use these while focus is outside text fields.
+          </DialogDescription>
+
+          <div className="grid gap-2 pt-2 text-sm">
+            {[
+              ["Left arrow", "Select previous sentence"],
+              ["Right arrow", "Select next sentence"],
+              ["Space", "Play or pause the selected sentence"],
+              ["Enter", "Replay the selected sentence"],
+              ["Mouse click", "Select and play a transcript row"],
+            ].map(([keys, description]) => (
+              <div
+                key={keys}
+                className="grid grid-cols-[130px_1fr] items-center gap-3 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 py-2"
+              >
+                <kbd className="rounded-[6px] border border-[var(--color_base_border)] bg-[var(--body-background)] px-2 py-1 text-center font-mono text-xs font-semibold text-[var(--text-color)]">
+                  {keys}
+                </kbd>
+                <span className="text-[var(--text-color-dim)]">
+                  {description}
+                </span>
+              </div>
+            ))}
           </div>
         </DialogContent>
       </Dialog>
