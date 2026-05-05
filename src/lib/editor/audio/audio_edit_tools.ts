@@ -320,6 +320,12 @@ export function timings_to_text({
   return text;
 }
 
+export function timing_text_without_filename(text: string) {
+  const firstTimingIndex = text.indexOf(";");
+  if (firstTimingIndex === -1) return "";
+  return text.slice(firstTimingIndex);
+}
+
 export function text_to_keypoints(line: string) {
   const parts = line.split(";");
   const filename = parts.splice(0, 1)[0];
