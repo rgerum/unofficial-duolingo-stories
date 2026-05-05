@@ -4,7 +4,7 @@ import test from "node:test";
 import {
   timing_text_without_filename,
   timings_to_text,
-} from "./audio_edit_tools";
+} from "@/lib/editor/audio/audio_edit_tools";
 
 test("timing_text_without_filename keeps only timing deltas", () => {
   assert.equal(
