@@ -3,6 +3,7 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import StoryLineHints from "@/components/StoryLineHints";
 import { splitTextTokens } from "@/lib/editor/tts_transcripte";
+import { timing_text_without_filename } from "@/lib/editor/audio/audio_edit_tools";
 
 import { useWavesurfer } from "@wavesurfer/react";
 import Regions from "wavesurfer.js/dist/plugins/regions.js";
@@ -103,7 +104,9 @@ export default function SoundRecorder({
   const [selectedFileName, setSelectedFileName] =
     React.useState("No file selected.");
 
-  const [timingText, setTimingText] = useState(initialTimingText);
+  const [timingText, setTimingText] = useState(() =>
+    timing_text_without_filename(initialTimingText),
+  );
 
   const parts2 = useMemo(() => {
     const parts = splitTextTokens(content.text);
@@ -283,7 +286,7 @@ export default function SoundRecorder({
       filename = filename.substring("audio/".length);
     }
     //console.log("filename", filename);
-    onSave(filename, timingText);
+    onSave(filename, timing_text_without_filename(timingText));
   };
 
   //return <></>;
