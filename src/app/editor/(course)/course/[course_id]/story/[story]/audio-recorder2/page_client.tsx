@@ -57,6 +57,8 @@ type SpeakerSession = {
   lines: RecordingLine[];
 };
 
+type SessionStatus = "idle" | "listening" | "recording";
+
 type TimeRange = {
   start: number;
   end: number;
@@ -74,6 +76,10 @@ const SILENCE_WINDOW_SECONDS = 0.02;
 const DETECTION_START_BUFFER_SECONDS = 0.04;
 const DETECTION_END_BUFFER_SECONDS = 0.04;
 const MAX_INTERNAL_SILENCE_SECONDS = 0.3;
+const VAD_START_RMS = 0.035;
+const VAD_STOP_RMS = 0.018;
+const VAD_STOP_SILENCE_MS = 720;
+const VAD_MIN_SPEECH_MS = 180;
 
 export default function AudioRecorder2PageClient({
   storyId,
@@ -86,17 +92,30 @@ export default function AudioRecorder2PageClient({
   const [selectedSpeaker, setSelectedSpeaker] = React.useState<string | null>(
     null,
   );
-  const [recordingSpeaker, setRecordingSpeaker] = React.useState<string | null>(
-    null,
-  );
+  const [sessionStatus, setSessionStatus] =
+    React.useState<SessionStatus>("idle");
+  const [activeLineIndex, setActiveLineIndex] = React.useState(0);
   const [recordings, setRecordings] = React.useState<
     Record<string, RecordingDraft>
   >({});
+  const [skippedLineIds, setSkippedLineIds] = React.useState<Set<string>>(
+    () => new Set(),
+  );
   const [recorderError, setRecorderError] = React.useState<string | null>(null);
-  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const lineRecorderRef = React.useRef<MediaRecorder | null>(null);
   const recordingStartedAtRef = React.useRef(0);
   const [liveStream, setLiveStream] = React.useState<MediaStream | null>(null);
   const recordingsRef = React.useRef<Record<string, RecordingDraft>>({});
+  const liveStreamRef = React.useRef<MediaStream | null>(null);
+  const audioContextRef = React.useRef<AudioContext | null>(null);
+  const analyserRef = React.useRef<AnalyserNode | null>(null);
+  const vadFrameRef = React.useRef(0);
+  const lineChunksRef = React.useRef<Blob[]>([]);
+  const speechStartedAtRef = React.useRef(0);
+  const silenceStartedAtRef = React.useRef(0);
+  const selectedSessionRef = React.useRef<SpeakerSession | null>(null);
+  const activeLineIndexRef = React.useRef(0);
+  const autoAdvanceRef = React.useRef(false);
 
   const data = useQuery(api.editorRead.getEditorStoryPageData, {
     storyId,
@@ -200,138 +219,348 @@ export default function AudioRecorder2PageClient({
 
   const selectedSession =
     sessions.find((session) => session.speaker === selectedSpeaker) ?? null;
-  const completedSessionCount = sessions.filter(
-    (session) => recordings[session.speaker],
+  const activeLine = selectedSession?.lines[activeLineIndex];
+  const capturedCount = selectedSession
+    ? selectedSession.lines.filter((line) => recordings[line.id]).length
+    : 0;
+  const skippedCount = selectedSession
+    ? selectedSession.lines.filter((line) => skippedLineIds.has(line.id)).length
+    : 0;
+  const pendingCount = selectedSession
+    ? Math.max(0, selectedSession.lines.length - capturedCount - skippedCount)
+    : 0;
+  const completedSessionCount = sessions.filter((session) =>
+    session.lines.every(
+      (line) => recordings[line.id] || skippedLineIds.has(line.id),
+    ),
   ).length;
+  const sessionProgress =
+    selectedSession && selectedSession.lines.length > 0
+      ? ((capturedCount + skippedCount) / selectedSession.lines.length) * 100
+      : 0;
 
   React.useEffect(() => {
     recordingsRef.current = recordings;
   }, [recordings]);
 
   React.useEffect(() => {
+    selectedSessionRef.current = selectedSession;
+  }, [selectedSession]);
+
+  React.useEffect(() => {
+    activeLineIndexRef.current = activeLineIndex;
+  }, [activeLineIndex]);
+
+  React.useEffect(() => {
     return () => {
-      mediaRecorderRef.current?.stream
+      cancelAnimationFrame(vadFrameRef.current);
+      lineRecorderRef.current?.stream
         .getTracks()
         .forEach((track) => track.stop());
+      lineRecorderRef.current = null;
+      liveStreamRef.current?.getTracks().forEach((track) => track.stop());
+      liveStreamRef.current = null;
+      analyserRef.current?.disconnect();
+      analyserRef.current = null;
+      void audioContextRef.current?.close();
+      audioContextRef.current = null;
       for (const recording of Object.values(recordingsRef.current)) {
         URL.revokeObjectURL(recording.url);
       }
     };
   }, []);
 
-  const startRecording = React.useCallback(async () => {
-    if (!selectedSession || recordingSpeaker) return;
-    setRecorderError(null);
-
-    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-      setRecorderError("This browser does not support in-page recording.");
-      return;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const chunks: Blob[] = [];
-      const recorder = new MediaRecorder(stream);
-      recordingStartedAtRef.current = performance.now();
-      mediaRecorderRef.current = recorder;
-      setLiveStream(stream);
-
-      recorder.addEventListener("dataavailable", (event) => {
-        if (event.data.size > 0) chunks.push(event.data);
+  const storeLineRecording = React.useCallback(
+    (line: RecordingLine, blob: Blob) => {
+      const durationMs = performance.now() - recordingStartedAtRef.current;
+      setRecordings((current) => {
+        const previous = current[line.id];
+        if (previous) URL.revokeObjectURL(previous.url);
+        return {
+          ...current,
+          [line.id]: {
+            blob,
+            url: URL.createObjectURL(blob),
+            durationMs,
+            recordedAt: Date.now(),
+          },
+        };
       });
-      recorder.addEventListener("stop", () => {
-        stream.getTracks().forEach((track) => track.stop());
-        setLiveStream(null);
-        const blob = new Blob(chunks, {
-          type: recorder.mimeType || "audio/webm",
-        });
-        const durationMs = performance.now() - recordingStartedAtRef.current;
-        setRecordings((current) => {
-          const previous = current[selectedSession.speaker];
-          if (previous) URL.revokeObjectURL(previous.url);
-          return {
-            ...current,
-            [selectedSession.speaker]: {
-              blob,
-              url: URL.createObjectURL(blob),
-              durationMs,
-              recordedAt: Date.now(),
-            },
-          };
-        });
-        analyzeRecordingBlob(blob)
-          .then((analysis) => {
-            setRecordings((current) => {
-              const recording = current[selectedSession.speaker];
-              if (!recording || recording.blob !== blob) return current;
-              return {
-                ...current,
-                [selectedSession.speaker]: {
-                  ...recording,
-                  analysis,
-                },
-              };
-            });
-          })
-          .catch(() => {
-            setRecordings((current) => {
-              const recording = current[selectedSession.speaker];
-              if (!recording || recording.blob !== blob) return current;
-              return {
-                ...current,
-                [selectedSession.speaker]: {
-                  ...recording,
-                  analysis: {
-                    duration: durationMs / 1000,
-                    trimRanges: [],
-                    skipRanges: [],
-                  },
-                },
-              };
-            });
+      analyzeRecordingBlob(blob)
+        .then((analysis) => {
+          setRecordings((current) => {
+            const recording = current[line.id];
+            if (!recording || recording.blob !== blob) return current;
+            return {
+              ...current,
+              [line.id]: {
+                ...recording,
+                analysis,
+              },
+            };
           });
-        setRecordingSpeaker(null);
-        mediaRecorderRef.current = null;
-      });
+        })
+        .catch(() => {
+          setRecordings((current) => {
+            const recording = current[line.id];
+            if (!recording || recording.blob !== blob) return current;
+            return {
+              ...current,
+              [line.id]: {
+                ...recording,
+                analysis: {
+                  duration: durationMs / 1000,
+                  trimRanges: [],
+                  skipRanges: [],
+                },
+              },
+            };
+          });
+        });
+    },
+    [],
+  );
 
-      setRecordingSpeaker(selectedSession.speaker);
-      recorder.start();
-    } catch (error) {
-      setLiveStream(null);
-      setRecorderError(
-        error instanceof Error
-          ? error.message
-          : "Microphone permission was not granted.",
-      );
-    }
-  }, [recordingSpeaker, selectedSession]);
-
-  const stopRecording = React.useCallback(() => {
-    if (mediaRecorderRef.current?.state === "recording") {
-      mediaRecorderRef.current.stop();
-    }
+  const finishCurrentLineRecording = React.useCallback(() => {
+    const recorder = lineRecorderRef.current;
+    if (!recorder || recorder.state !== "recording") return;
+    recorder.stop();
   }, []);
 
+  const startLineRecording = React.useCallback(
+    (line: RecordingLine) => {
+      const stream = liveStreamRef.current;
+      if (!stream || lineRecorderRef.current?.state === "recording") return;
+
+      lineChunksRef.current = [];
+      const recorder = new MediaRecorder(stream);
+      lineRecorderRef.current = recorder;
+      recordingStartedAtRef.current = performance.now();
+
+      recorder.addEventListener("dataavailable", (event) => {
+        if (event.data.size > 0) lineChunksRef.current.push(event.data);
+      });
+      recorder.addEventListener("stop", () => {
+        const blob = new Blob(lineChunksRef.current, {
+          type: recorder.mimeType || "audio/webm",
+        });
+        lineChunksRef.current = [];
+        lineRecorderRef.current = null;
+        storeLineRecording(line, blob);
+        setSkippedLineIds((current) => {
+          const next = new Set(current);
+          next.delete(line.id);
+          return next;
+        });
+        if (!autoAdvanceRef.current) {
+          cancelAnimationFrame(vadFrameRef.current);
+          vadFrameRef.current = 0;
+          liveStreamRef.current?.getTracks().forEach((track) => track.stop());
+          liveStreamRef.current = null;
+          setLiveStream(null);
+          analyserRef.current?.disconnect();
+          analyserRef.current = null;
+          void audioContextRef.current?.close();
+          audioContextRef.current = null;
+          setSessionStatus("idle");
+          return;
+        }
+
+        const session = selectedSessionRef.current;
+        const isLastLine =
+          activeLineIndexRef.current >= (session?.lines.length ?? 1) - 1;
+        if (isLastLine) {
+          cancelAnimationFrame(vadFrameRef.current);
+          vadFrameRef.current = 0;
+          liveStreamRef.current?.getTracks().forEach((track) => track.stop());
+          liveStreamRef.current = null;
+          setLiveStream(null);
+          analyserRef.current?.disconnect();
+          analyserRef.current = null;
+          void audioContextRef.current?.close();
+          audioContextRef.current = null;
+          setSessionStatus("idle");
+          return;
+        }
+
+        const nextIndex = activeLineIndexRef.current + 1;
+        activeLineIndexRef.current = nextIndex;
+        setActiveLineIndex(nextIndex);
+        setSessionStatus((status) =>
+          status === "idle" ? status : "listening",
+        );
+      });
+
+      speechStartedAtRef.current = performance.now();
+      silenceStartedAtRef.current = 0;
+      setSessionStatus("recording");
+      recorder.start();
+    },
+    [storeLineRecording],
+  );
+
+  const stopSessionResources = React.useCallback(() => {
+    cancelAnimationFrame(vadFrameRef.current);
+    vadFrameRef.current = 0;
+    if (lineRecorderRef.current?.state === "recording") {
+      lineRecorderRef.current.stop();
+    }
+    liveStreamRef.current?.getTracks().forEach((track) => track.stop());
+    liveStreamRef.current = null;
+    setLiveStream(null);
+    analyserRef.current?.disconnect();
+    analyserRef.current = null;
+    void audioContextRef.current?.close();
+    audioContextRef.current = null;
+    autoAdvanceRef.current = false;
+    setSessionStatus("idle");
+  }, []);
+
+  const runVoiceActivityLoop = React.useCallback(
+    (timestamp: number) => {
+      const analyser = analyserRef.current;
+      const session = selectedSessionRef.current;
+      if (!analyser || !session) return;
+
+      const activeIndex = activeLineIndexRef.current;
+      const line = session.lines[activeIndex];
+      if (!line) {
+        stopSessionResources();
+        return;
+      }
+
+      const rms = getAnalyserRms(analyser);
+      const recorder = lineRecorderRef.current;
+      const isRecordingLine = recorder?.state === "recording";
+
+      if (!isRecordingLine && rms >= VAD_START_RMS) {
+        startLineRecording(line);
+      } else if (isRecordingLine) {
+        if (rms < VAD_STOP_RMS) {
+          if (silenceStartedAtRef.current === 0) {
+            silenceStartedAtRef.current = timestamp;
+          }
+          const speechDuration = timestamp - speechStartedAtRef.current;
+          const silenceDuration = timestamp - silenceStartedAtRef.current;
+          if (
+            speechDuration >= VAD_MIN_SPEECH_MS &&
+            silenceDuration >= VAD_STOP_SILENCE_MS
+          ) {
+            finishCurrentLineRecording();
+          }
+        } else {
+          silenceStartedAtRef.current = 0;
+        }
+      }
+
+      vadFrameRef.current = requestAnimationFrame(runVoiceActivityLoop);
+    },
+    [finishCurrentLineRecording, startLineRecording, stopSessionResources],
+  );
+
+  const startRecording = React.useCallback(
+    async (autoAdvance: boolean) => {
+      if (!selectedSession || sessionStatus !== "idle") return;
+      setRecorderError(null);
+      autoAdvanceRef.current = autoAdvance;
+      setSessionStatus("listening");
+
+      if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+        setSessionStatus("idle");
+        setRecorderError("This browser does not support in-page recording.");
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        const audioContext = new AudioContext();
+        const analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaStreamSource(stream);
+        analyser.fftSize = 1024;
+        source.connect(analyser);
+        audioContextRef.current = audioContext;
+        analyserRef.current = analyser;
+        liveStreamRef.current = stream;
+        setLiveStream(stream);
+        vadFrameRef.current = requestAnimationFrame(runVoiceActivityLoop);
+      } catch (error) {
+        stopSessionResources();
+        setLiveStream(null);
+        setRecorderError(
+          error instanceof Error
+            ? error.message
+            : "Microphone permission was not granted.",
+        );
+      }
+    },
+    [
+      runVoiceActivityLoop,
+      selectedSession,
+      sessionStatus,
+      stopSessionResources,
+    ],
+  );
+
+  const stopRecording = React.useCallback(() => {
+    stopSessionResources();
+  }, [stopSessionResources]);
+
   const resetCurrentRecording = React.useCallback(() => {
-    if (!selectedSession) return;
+    if (!activeLine) return;
     setRecordings((current) => {
-      const existing = current[selectedSession.speaker];
+      const existing = current[activeLine.id];
       if (existing) URL.revokeObjectURL(existing.url);
       const next = { ...current };
-      delete next[selectedSession.speaker];
+      delete next[activeLine.id];
       return next;
     });
-  }, [selectedSession]);
+    setSkippedLineIds((current) => {
+      const next = new Set(current);
+      next.delete(activeLine.id);
+      return next;
+    });
+  }, [activeLine]);
 
-  const activeRecording = selectedSession
-    ? recordings[selectedSession.speaker]
-    : undefined;
-  const isRecordingCurrent = selectedSession?.speaker === recordingSpeaker;
+  const skipActiveLine = React.useCallback(() => {
+    if (!activeLine || !selectedSession) return;
+    setSkippedLineIds((current) => {
+      const next = new Set(current);
+      next.add(activeLine.id);
+      return next;
+    });
+    setActiveLineIndex((index) =>
+      Math.min(index + 1, selectedSession.lines.length - 1),
+    );
+  }, [activeLine, selectedSession]);
+
+  const redoLine = React.useCallback((line: RecordingLine, index: number) => {
+    setActiveLineIndex(index);
+    setSkippedLineIds((current) => {
+      const next = new Set(current);
+      next.delete(line.id);
+      return next;
+    });
+    setRecordings((current) => {
+      const existing = current[line.id];
+      if (existing) URL.revokeObjectURL(existing.url);
+      const next = { ...current };
+      delete next[line.id];
+      return next;
+    });
+  }, []);
+
+  const activeRecording = activeLine ? recordings[activeLine.id] : undefined;
+  const isRecordingCurrent = sessionStatus !== "idle";
   const loading = data === undefined || course === undefined;
   const readyForLines = data && avatarRows && learningLanguage && fromLanguage;
-  const detectedRegionCount = activeRecording?.analysis
-    ? getDetectedSpeechRegionCount(activeRecording.analysis)
-    : null;
+  const statusText =
+    sessionStatus === "idle"
+      ? "Ready"
+      : sessionStatus === "recording"
+        ? "Recording - pause briefly when done."
+        : "Listening - start speaking.";
 
   return (
     <>
@@ -417,13 +646,15 @@ export default function AudioRecorder2PageClient({
                 key={session.speaker}
                 type="button"
                 className={cn(
-                  "h-9 rounded-md border px-3 text-sm font-semibold transition-colors",
+                  "h-9 rounded-md border px-3 text-sm font-semibold transition-colors disabled:cursor-default disabled:opacity-60",
                   selectedSpeaker === session.speaker
                     ? "border-[#0f5f83] bg-[#1cb0f6] text-white"
                     : "border-[var(--overview-hr)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:border-[var(--link-blue)]",
                 )}
+                disabled={sessionStatus !== "idle"}
                 onClick={() => {
                   setSelectedSpeaker(session.speaker);
+                  setActiveLineIndex(0);
                 }}
               >
                 {session.speaker}
@@ -440,37 +671,102 @@ export default function AudioRecorder2PageClient({
                 </div>
               ) : selectedSession ? (
                 <>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-md bg-[var(--editor-ssml)] px-2 py-1 text-xs font-bold uppercase text-[var(--text-color)]">
-                          {selectedSession.speaker}
-                        </span>
-                        <span className="text-sm text-[var(--text-color-dim)]">
-                          {selectedSession.lines.length} lines
-                        </span>
+                  <div className="flex flex-col gap-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded-md bg-[var(--editor-ssml)] px-2 py-1 text-xs font-bold uppercase text-[var(--text-color)]">
+                            {selectedSession.speaker}
+                          </span>
+                          <span className="text-sm text-[var(--text-color-dim)]">
+                            {selectedSession.lines.length} lines
+                          </span>
+                        </div>
+                        <h2 className="mt-5 text-xl font-bold text-[var(--text-color)]">
+                          Recording session
+                        </h2>
+                        <p className="mt-1 text-sm text-[var(--text-color-dim)]">
+                          {capturedCount} captured · {skippedCount} skipped ·{" "}
+                          {pendingCount} pending
+                        </p>
                       </div>
-                      <div className="mt-5 max-h-56 space-y-3 overflow-auto pr-2">
-                        {selectedSession.lines.map((line, index) => (
-                          <div
-                            key={line.id}
-                            className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 rounded-md border border-[var(--overview-hr)] bg-[var(--body-background)] px-3 py-2"
-                          >
-                            <span className="text-sm font-bold text-[var(--text-color-dim)]">
-                              {index + 1}
-                            </span>
-                            <p className="text-base font-semibold leading-snug text-[var(--text-color)]">
-                              {line.text}
-                            </p>
-                          </div>
-                        ))}
+                      <button
+                        type="button"
+                        className="rounded-md border border-[var(--overview-hr)] bg-[var(--body-background)] px-4 py-2 text-sm font-bold text-[var(--text-color-dim)] transition-colors hover:text-[var(--text-color)]"
+                        onClick={stopRecording}
+                        disabled={sessionStatus === "idle"}
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    <div>
+                      <div className="h-2 overflow-hidden rounded-full bg-[var(--overview-hr)]">
+                        <div
+                          className="h-full rounded-full bg-[#1cb0f6] transition-[width]"
+                          style={{ width: `${sessionProgress}%` }}
+                        />
+                      </div>
+                      <p
+                        className={cn(
+                          "mt-3 text-sm font-bold",
+                          sessionStatus === "recording"
+                            ? "text-[#ce1235]"
+                            : "text-[var(--text-color-dim)]",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "mr-2 inline-block h-2.5 w-2.5 rounded-full",
+                            sessionStatus === "idle"
+                              ? "bg-[var(--overview-hr)]"
+                              : sessionStatus === "recording"
+                                ? "bg-[#ce1235]"
+                                : "bg-[#1cb0f6]",
+                          )}
+                        />
+                        {statusText}
+                      </p>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-[150px_minmax(0,1fr)]">
+                      <button
+                        type="button"
+                        className={cn(
+                          "flex min-h-28 items-center justify-center rounded-md border text-xl font-bold transition-colors",
+                          sessionStatus === "idle"
+                            ? "border-[#0f5f83] bg-[#1cb0f6] text-white hover:bg-[#1598d7]"
+                            : "border-[#9b1c1c] bg-[#f7a3a3] text-[#9b1c1c]",
+                        )}
+                        onClick={
+                          sessionStatus === "idle"
+                            ? () => startRecording(false)
+                            : stopRecording
+                        }
+                      >
+                        {sessionStatus === "idle" ? (
+                          <span className="inline-flex items-center gap-2">
+                            <Mic size={24} aria-hidden="true" />
+                            Record
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-2">
+                            <CircleStop size={24} aria-hidden="true" />
+                            Stop
+                          </span>
+                        )}
+                      </button>
+                      <div className="flex min-h-28 flex-col items-center justify-center rounded-md border border-[var(--overview-hr)] bg-[var(--body-background)] px-4 py-5 text-center">
+                        <p className="text-3xl font-bold leading-tight text-[var(--text-color)]">
+                          {activeLine?.text ?? "Done"}
+                        </p>
+                        <p className="mt-3 text-sm text-[var(--text-color-dim)]">
+                          {selectedSession.lines[activeLineIndex + 1]
+                            ? `Next: ${selectedSession.lines[activeLineIndex + 1]?.text}`
+                            : "Last line"}
+                        </p>
                       </div>
                     </div>
-                    {activeRecording ? (
-                      <span className="shrink-0 rounded-md border border-[#58a700] bg-[#ddf4cc] px-2 py-1 text-xs font-bold uppercase text-[#3c7800]">
-                        Recorded
-                      </span>
-                    ) : null}
                   </div>
 
                   <div className="mt-8 flex flex-col gap-4">
@@ -479,8 +775,12 @@ export default function AudioRecorder2PageClient({
                         {recorderError}
                       </div>
                     ) : null}
-                    {isRecordingCurrent && liveStream ? (
-                      <LiveRecordingWaveform stream={liveStream} />
+                    {isRecordingCurrent ? (
+                      <LiveRecordingWaveform
+                        key={activeLine?.id ?? "session"}
+                        stream={liveStream}
+                        status={sessionStatus}
+                      />
                     ) : activeRecording ? (
                       <RecordingWaveform
                         key={activeRecording.url}
@@ -493,42 +793,19 @@ export default function AudioRecorder2PageClient({
                         No session take recorded for this speaker.
                       </div>
                     )}
-                    {detectedRegionCount !== null ? (
-                      <div className="rounded-md border border-[var(--overview-hr)] bg-[var(--body-background)] px-3 py-2 text-sm text-[var(--text-color-dim)]">
-                        {selectedSession.lines.length} expected lines,{" "}
-                        {detectedRegionCount} detected speech regions
-                        {detectedRegionCount === selectedSession.lines.length
-                          ? ". Counts match."
-                          : ". Review before mapping to line clips."}
-                      </div>
-                    ) : null}
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex flex-wrap gap-2">
-                        {isRecordingCurrent ? (
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            onClick={stopRecording}
-                          >
-                            <span className="inline-flex items-center gap-2">
-                              <CircleStop size={18} aria-hidden="true" />
-                              Stop
-                            </span>
-                          </Button>
-                        ) : (
-                          <Button
-                            type="button"
-                            primary
-                            onClick={startRecording}
-                          >
-                            <span className="inline-flex items-center gap-2">
-                              <Mic size={18} aria-hidden="true" />
-                              {activeRecording
-                                ? "Record session again"
-                                : "Record session"}
-                            </span>
-                          </Button>
-                        )}
+                        <Button
+                          type="button"
+                          primary
+                          onClick={() => startRecording(true)}
+                          disabled={sessionStatus !== "idle"}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <Mic size={18} aria-hidden="true" />
+                            Start session
+                          </span>
+                        </Button>
                         <Button
                           type="button"
                           variant="secondary"
@@ -539,6 +816,14 @@ export default function AudioRecorder2PageClient({
                             <RotateCcw size={17} aria-hidden="true" />
                             Clear
                           </span>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={skipActiveLine}
+                          disabled={!activeLine}
+                        >
+                          Skip
                         </Button>
                       </div>
                       {activeRecording ? (
@@ -559,42 +844,83 @@ export default function AudioRecorder2PageClient({
             <aside className="min-h-0 rounded-md border border-[var(--overview-hr)] bg-[var(--body-background-faint)] p-3">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-sm font-bold uppercase text-[var(--text-color-dim)]">
-                  Sessions
+                  Lines
                 </h2>
                 <span className="text-xs text-[var(--text-color-dim)]">
-                  One take per speaker
+                  Auto-advance
                 </span>
               </div>
               <div className="max-h-[520px] space-y-2 overflow-auto pr-1">
-                {sessions.map((session) => (
-                  <button
-                    key={session.speaker}
-                    type="button"
-                    className={cn(
-                      "grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md border p-2 text-left transition-colors",
-                      session.speaker === selectedSpeaker
-                        ? "border-[#1cb0f6] bg-[color:color-mix(in_srgb,#1cb0f6_12%,var(--body-background))]"
-                        : "border-[var(--overview-hr)] bg-[var(--body-background)] hover:border-[var(--link-blue)]",
-                    )}
-                    onClick={() => setSelectedSpeaker(session.speaker)}
-                  >
-                    <span className="text-xs font-bold text-[var(--text-color-dim)]">
-                      {session.lines.length}
-                    </span>
-                    <span className="truncate text-sm font-semibold text-[var(--text-color)]">
-                      {session.speaker}
-                    </span>
-                    {recordings[session.speaker] ? (
-                      <Play
-                        size={15}
-                        className="text-[#58a700]"
-                        aria-label="Recorded"
-                      />
-                    ) : (
-                      <span className="h-2 w-2 rounded-full bg-[var(--overview-hr)]" />
-                    )}
-                  </button>
-                ))}
+                {selectedSession?.lines.map((line, index) => {
+                  const isCaptured = Boolean(recordings[line.id]);
+                  const isSkipped = skippedLineIds.has(line.id);
+                  const isActive = index === activeLineIndex;
+                  return (
+                    <div
+                      key={line.id}
+                      className={cn(
+                        "grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md border p-2 transition-colors",
+                        isActive
+                          ? "border-[#1cb0f6] bg-[color:color-mix(in_srgb,#1cb0f6_12%,var(--body-background))]"
+                          : "border-[var(--overview-hr)] bg-[var(--body-background)]",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
+                          isCaptured
+                            ? "bg-[#ddf4cc] text-[#3c7800]"
+                            : isSkipped
+                              ? "bg-[var(--overview-hr)] text-[var(--text-color-dim)]"
+                              : isActive
+                                ? "bg-[#ce1235] text-white"
+                                : "bg-transparent text-[var(--text-color-dim)]",
+                        )}
+                      >
+                        {isCaptured ? "✓" : isSkipped ? "-" : index + 1}
+                      </span>
+                      <button
+                        type="button"
+                        className="min-w-0 text-left"
+                        onClick={() => setActiveLineIndex(index)}
+                      >
+                        <span className="block truncate text-sm font-semibold text-[var(--text-color)]">
+                          {line.text}
+                        </span>
+                        <span className="block truncate text-xs text-[var(--text-color-dim)]">
+                          {line.speaker}
+                        </span>
+                      </button>
+                      <div className="flex gap-1">
+                        {isCaptured || isSkipped ? (
+                          <button
+                            type="button"
+                            className="rounded-md border border-[var(--overview-hr)] px-2 py-1 text-xs font-semibold text-[var(--text-color-dim)] hover:text-[var(--text-color)]"
+                            onClick={() => redoLine(line, index)}
+                          >
+                            Redo
+                          </button>
+                        ) : null}
+                        {!isCaptured ? (
+                          <button
+                            type="button"
+                            className="rounded-md border border-[var(--overview-hr)] px-2 py-1 text-xs font-semibold text-[var(--text-color-dim)] hover:text-[var(--text-color)]"
+                            onClick={() => {
+                              setActiveLineIndex(index);
+                              setSkippedLineIds((current) => {
+                                const next = new Set(current);
+                                next.add(line.id);
+                                return next;
+                              });
+                            }}
+                          >
+                            Skip
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </aside>
           </section>
@@ -850,12 +1176,22 @@ function RecordingAnalysisSummary({
   );
 }
 
-function LiveRecordingWaveform({ stream }: { stream: MediaStream }) {
+function LiveRecordingWaveform({
+  stream,
+  status,
+}: {
+  stream: MediaStream | null;
+  status: SessionStatus;
+}) {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const [volume, setVolume] = React.useState(0);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !stream) {
+      setVolume(0);
+      return;
+    }
 
     const audioContext = new AudioContext();
     const analyser = audioContext.createAnalyser();
@@ -898,6 +1234,8 @@ function LiveRecordingWaveform({ stream }: { stream: MediaStream }) {
           sum += centered * centered;
         }
         const rms = Math.sqrt(sum / data.length);
+        const normalizedVolume = Math.min(1, rms * 8);
+        setVolume(normalizedVolume);
         samples.push(Math.min(1, rms * 5.5));
         if (samples.length > maxBars) samples.shift();
         lastSampleAt = timestamp;
@@ -908,11 +1246,10 @@ function LiveRecordingWaveform({ stream }: { stream: MediaStream }) {
       context.fillRect(0, 0, width, height);
       context.fillStyle = "#1cb0f6";
 
-      const startX = Math.max(0, width - samples.length * step);
       for (let index = 0; index < samples.length; index += 1) {
         const amplitude = Math.max(0.08, samples[index]);
         const barHeight = amplitude * (height - 16);
-        const x = startX + index * step;
+        const x = index * step;
         const y = (height - barHeight) / 2;
         drawRoundedBar(context, x, y, barWidth, barHeight, 3);
       }
@@ -932,16 +1269,44 @@ function LiveRecordingWaveform({ stream }: { stream: MediaStream }) {
 
   return (
     <div className="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3 overflow-hidden rounded-md border border-[#1cb0f6] bg-[var(--body-background)] p-3">
-      <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[#9b1c1c] bg-[#f7a3a3] text-[#9b1c1c]">
-        <Mic size={18} aria-hidden="true" />
-      </span>
-      <canvas
-        ref={canvasRef}
-        width={900}
-        height={72}
-        className="h-[72px] w-full min-w-0 max-w-full rounded-md bg-[color:color-mix(in_srgb,var(--body-background-faint)_72%,transparent)]"
-        aria-label="Live recording waveform"
-      />
+      <div className="flex flex-col items-center gap-2">
+        <span className="relative flex h-11 w-11 items-center justify-center">
+          <span className="absolute h-11 w-11 animate-ping rounded-full bg-[#ce1235]/25" />
+          <span className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[#9b1c1c] bg-[#f7a3a3] text-[#9b1c1c]">
+            <Mic size={18} aria-hidden="true" />
+          </span>
+        </span>
+        <span className="text-[10px] font-bold uppercase text-[var(--text-color-dim)]">
+          {status === "recording" ? "Rec" : "Armed"}
+        </span>
+      </div>
+      <div className="min-w-0">
+        <div className="mb-2 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2">
+          <span className="text-xs font-bold uppercase text-[var(--text-color-dim)]">
+            Input
+          </span>
+          <div className="h-2 overflow-hidden rounded-full bg-[var(--overview-hr)]">
+            <div
+              className={cn(
+                "h-full rounded-full transition-[width,background-color]",
+                volume > 0.78
+                  ? "bg-[#ce1235]"
+                  : volume > 0.38
+                    ? "bg-[#58a700]"
+                    : "bg-[#1cb0f6]",
+              )}
+              style={{ width: `${Math.max(3, volume * 100)}%` }}
+            />
+          </div>
+        </div>
+        <canvas
+          ref={canvasRef}
+          width={900}
+          height={72}
+          className="h-[72px] w-full min-w-0 max-w-full rounded-md bg-[color:color-mix(in_srgb,var(--body-background-faint)_72%,transparent)]"
+          aria-label="Live recording waveform"
+        />
+      </div>
     </div>
   );
 }
@@ -971,6 +1336,17 @@ function drawRoundedBar(
   context.lineTo(x, y + safeRadius);
   context.quadraticCurveTo(x, y, x + safeRadius, y);
   context.fill();
+}
+
+function getAnalyserRms(analyser: AnalyserNode) {
+  const data = new Uint8Array(analyser.fftSize);
+  analyser.getByteTimeDomainData(data);
+  let sum = 0;
+  for (const value of data) {
+    const centered = (value - 128) / 128;
+    sum += centered * centered;
+  }
+  return Math.sqrt(sum / data.length);
 }
 
 async function analyzeRecordingBlob(blob: Blob): Promise<RecordingAnalysis> {
