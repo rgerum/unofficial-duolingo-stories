@@ -6,9 +6,20 @@ import {
 } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
+import type { Id as AuthId } from "./betterAuth/_generated/dataModel";
 import { components } from "./_generated/api";
 
 type AuthCtx = MutationCtx | QueryCtx;
+type AuthUserRow = {
+  _id: string;
+  userId?: string | null;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  createdAt?: number | null;
+  role?: string | null;
+  emailVerified?: boolean | null;
+};
 
 async function isAdmin(ctx: AuthCtx) {
   const identity = (await ctx.auth.getUserIdentity()) as {
@@ -99,16 +110,49 @@ async function findAuthUserByLegacyId(ctx: AuthCtx, legacyId: number) {
   return (await ctx.runQuery(components.betterAuth.adapter.findOne, {
     model: "user",
     where: [{ field: "userId", operator: "eq", value: String(legacyId) }],
-  })) as {
-    _id: string;
-    userId?: string | null;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-    createdAt?: number | null;
-    role?: string | null;
-    emailVerified?: boolean | null;
-  } | null;
+  })) as AuthUserRow | null;
+}
+
+function authUserMatchesAdminFilters(
+  user: AuthUserRow,
+  activatedFilter: "all" | "yes" | "no",
+  roleFilter: "all" | "user" | "contributor" | "admin",
+) {
+  if (activatedFilter === "yes" && user.emailVerified !== true) return false;
+  if (activatedFilter === "no" && user.emailVerified !== false) return false;
+
+  if (roleFilter === "admin") return user.role === "admin";
+  if (roleFilter === "contributor") return user.role === "contributor";
+  if (roleFilter === "user") {
+    return user.role !== "admin" && user.role !== "contributor";
+  }
+  return true;
+}
+
+async function findAuthUserByDiscordAccountId(
+  ctx: AuthCtx,
+  discordAccountId: string,
+  activatedFilter: "all" | "yes" | "no",
+  roleFilter: "all" | "user" | "contributor" | "admin",
+) {
+  const account = (await ctx.runQuery(components.betterAuth.adapter.findOne, {
+    model: "account",
+    where: [
+      { field: "providerId", operator: "eq", value: "discord" },
+      { field: "accountId", operator: "eq", value: discordAccountId },
+    ],
+  })) as { userId?: string | null } | null;
+
+  if (!account?.userId) return null;
+
+  const user = (await ctx.runQuery(components.betterAuth.adapter.get, {
+    id: account.userId as AuthId<"user">,
+  })) as AuthUserRow | null;
+
+  if (!user) return null;
+  return authUserMatchesAdminFilters(user, activatedFilter, roleFilter)
+    ? user
+    : null;
 }
 
 function toAdminUser(
@@ -295,11 +339,27 @@ export const getAdminUsersPage = query({
 
     const matchedUsers =
       searchMode === "id"
-        ? await ctx.runQuery(components.betterAuth.adapter.searchUsersById, {
-            activatedFilter: args.activatedFilter,
-            roleFilter: args.roleFilter,
-            id: searchTerm,
-          })
+        ? [
+            ...(await ctx.runQuery(
+              components.betterAuth.adapter.searchUsersById,
+              {
+                activatedFilter: args.activatedFilter,
+                roleFilter: args.roleFilter,
+                id: searchTerm,
+              },
+            )),
+            ...[
+              await findAuthUserByDiscordAccountId(
+                ctx,
+                searchTerm,
+                args.activatedFilter,
+                args.roleFilter,
+              ),
+            ].filter((user): user is AuthUserRow => user !== null),
+          ].filter(
+            (user, index, users) =>
+              users.findIndex((other) => other._id === user._id) === index,
+          )
         : searchMode === "email"
           ? await ctx.runQuery(
               components.betterAuth.adapter.searchUsersByEmailPrefix,
