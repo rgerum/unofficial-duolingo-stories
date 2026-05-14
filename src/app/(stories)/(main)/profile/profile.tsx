@@ -138,6 +138,30 @@ function LinkedAccountRow({
     setIsUpdatingLink(true);
     setLinkError(null);
 
+    const { data: accounts, error: accountsError } =
+      await authClient.listAccounts();
+
+    if (accountsError) {
+      setLinkError(accountsError.message || "Could not check sign-in methods.");
+      setIsUpdatingLink(false);
+      return;
+    }
+
+    const authMethods = accounts ?? [];
+    const hasPassword = authMethods.some(
+      (account) => account.providerId === "credential",
+    );
+    const hasOtherProvider = authMethods.some(
+      (account) =>
+        account.providerId !== provider && account.providerId !== "credential",
+    );
+
+    if (!hasPassword && !hasOtherProvider) {
+      setLinkError("Add another sign-in method before unlinking this account.");
+      setIsUpdatingLink(false);
+      return;
+    }
+
     const { error } = await authClient.unlinkAccount({
       providerId: provider,
     });
