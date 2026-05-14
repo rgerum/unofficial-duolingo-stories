@@ -106,8 +106,13 @@ function LinkedAccountRow({
   linked: boolean;
 }) {
   const [linkError, setLinkError] = React.useState<string | null>(null);
+  const [isUpdatingLink, setIsUpdatingLink] = React.useState(false);
+  const [isConfirmingUnlink, setIsConfirmingUnlink] = React.useState(false);
 
   const handleLink = async () => {
+    if (isUpdatingLink) return;
+
+    setIsUpdatingLink(true);
     setLinkError(null);
     const { data, error } = await authClient.linkSocial({
       provider,
@@ -116,10 +121,30 @@ function LinkedAccountRow({
 
     if (error) {
       setLinkError(error.message || "Could not link account.");
+      setIsUpdatingLink(false);
       return;
     }
     if (data?.url) {
       window.location.href = data.url;
+      return;
+    }
+
+    window.location.reload();
+  };
+
+  const handleUnlink = async () => {
+    if (isUpdatingLink) return;
+
+    setIsUpdatingLink(true);
+    setLinkError(null);
+
+    const { error } = await authClient.unlinkAccount({
+      providerId: provider,
+    });
+
+    if (error) {
+      setLinkError(error.message || "Could not unlink account.");
+      setIsUpdatingLink(false);
       return;
     }
 
@@ -139,21 +164,52 @@ function LinkedAccountRow({
           </p>
         </div>
         {linked ? (
-          <span className="inline-flex rounded-full border border-[color:color-mix(in_srgb,var(--header-border)_60%,transparent)] px-3 py-1.5 text-[0.78rem] font-bold uppercase tracking-[0.08em]">
-            Linked
-          </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setLinkError(null);
+              setIsConfirmingUnlink((current) => !current);
+            }}
+            disabled={isUpdatingLink}
+            className="mt-0 min-w-[120px]"
+          >
+            {isConfirmingUnlink ? "Close" : "Unlink"}
+          </Button>
         ) : (
           <Button
             type="button"
             variant="primary"
             size="sm"
             onClick={handleLink}
+            disabled={isUpdatingLink}
             className="mt-0 min-w-[120px]"
           >
-            Link
+            {isUpdatingLink ? "Linking" : "Link"}
           </Button>
         )}
       </div>
+      {linked && isConfirmingUnlink ? (
+        <div className="mt-4 border-t border-[color:color-mix(in_srgb,var(--header-border)_26%,transparent)] pt-4">
+          <div className="space-y-3">
+            <p className="m-0 text-[0.92rem] text-[var(--title-color-dim)]">
+              Unlink {provider} from your account? You will no longer be able to
+              use it to sign in.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleUnlink}
+                disabled={isUpdatingLink}
+              >
+                {isUpdatingLink ? "Unlinking..." : "Unlink Account"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {linkError ? (
         <span className={errorMessageClass}>{linkError}</span>
       ) : null}
