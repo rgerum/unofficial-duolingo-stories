@@ -40,9 +40,11 @@ type StoredAudioCutterOutput = {
 
 const AUDIO_CUTTER_DB_NAME = "audio-cutter";
 const AUDIO_CUTTER_OUTPUT_STORE = "output-files";
+const MAX_STORED_TRANSCRIPTS = 8;
+const TRANSCRIPT_STORAGE_KEY_PREFIX = "audio-cutter:transcript:";
 
 function getTranscriptStorageKey(storyId: number) {
-  return `audio-cutter:transcript:${storyId}`;
+  return `${TRANSCRIPT_STORAGE_KEY_PREFIX}${storyId}`;
 }
 
 export function getOutputStorageKey(storyId: number) {
@@ -57,6 +59,57 @@ function parseStoredAudioCutterOutput(raw: string | null) {
   } catch {
     return null;
   }
+}
+
+function parseStoredAudioCutterTranscript(raw: string | null) {
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as StoredAudioCutterTranscript;
+  } catch {
+    return null;
+  }
+}
+
+function getStoredTranscriptEntries(currentKey?: string) {
+  const entries: { key: string; updatedAt: number }[] = [];
+
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const key = window.localStorage.key(index);
+    if (!key?.startsWith(TRANSCRIPT_STORAGE_KEY_PREFIX)) continue;
+
+    const payload = parseStoredAudioCutterTranscript(
+      window.localStorage.getItem(key),
+    );
+    entries.push({
+      key,
+      updatedAt: typeof payload?.updatedAt === "number" ? payload.updatedAt : 0,
+    });
+  }
+
+  return entries
+    .filter((entry) => entry.key !== currentKey)
+    .sort((left, right) => left.updatedAt - right.updatedAt);
+}
+
+function pruneStoredTranscripts(
+  currentKey?: string,
+  targetCount = MAX_STORED_TRANSCRIPTS,
+) {
+  const staleEntries = getStoredTranscriptEntries(currentKey);
+  const excessCount = Math.max(0, staleEntries.length + 1 - targetCount);
+
+  for (const entry of staleEntries.slice(0, excessCount)) {
+    window.localStorage.removeItem(entry.key);
+  }
+}
+
+function pruneOneStoredTranscript(currentKey: string) {
+  const [oldestEntry] = getStoredTranscriptEntries(currentKey);
+  if (!oldestEntry) return false;
+
+  window.localStorage.removeItem(oldestEntry.key);
+  return true;
 }
 
 function getIndexedDb() {
@@ -139,17 +192,28 @@ export function storeAudioCutterTranscript(
   storyId: number,
   items: AudioCutterTranscriptItem[],
 ) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") return true;
 
+  const storageKey = getTranscriptStorageKey(storyId);
   const payload: StoredAudioCutterTranscript = {
     items,
     updatedAt: Date.now(),
   };
+  const serializedPayload = JSON.stringify(payload);
 
-  window.localStorage.setItem(
-    getTranscriptStorageKey(storyId),
-    JSON.stringify(payload),
-  );
+  pruneStoredTranscripts(storageKey);
+
+  while (true) {
+    try {
+      window.localStorage.setItem(storageKey, serializedPayload);
+      return true;
+    } catch (error) {
+      if (!pruneOneStoredTranscript(storageKey)) {
+        console.warn("Could not store audio cutter transcript.", error);
+        return false;
+      }
+    }
+  }
 }
 
 export function loadAudioCutterTranscript(storyId: number) {
@@ -158,12 +222,8 @@ export function loadAudioCutterTranscript(storyId: number) {
   const raw = window.localStorage.getItem(getTranscriptStorageKey(storyId));
   if (!raw) return [] as AudioCutterTranscriptItem[];
 
-  try {
-    const payload = JSON.parse(raw) as StoredAudioCutterTranscript;
-    return Array.isArray(payload.items) ? payload.items : [];
-  } catch {
-    return [];
-  }
+  const payload = parseStoredAudioCutterTranscript(raw);
+  return Array.isArray(payload?.items) ? payload.items : [];
 }
 
 export async function storeAudioCutterOutput(storyId: number, files: File[]) {
