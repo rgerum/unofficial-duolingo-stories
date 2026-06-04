@@ -17,7 +17,7 @@
       "source": "get-convex/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/convex-migration-helper/SKILL.md",
-      "computedHash": "8da4dee6f36c71b5d899b90ad7bd1d3730cf4dd35118f9ea856075df29809c04"
+      "computedHash": "47ad936c1977eecca736211fe4efb171b53c412b49cffc42267095276a8df36d"
     },
     "convex-performance-audit": {
       "source": "get-convex/agent-skills",
@@ -29,7 +29,7 @@
       "source": "get-convex/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/convex-quickstart/SKILL.md",
-      "computedHash": "8735052585ff81bb6ad4b362a7bb599413288e55d071c8ddf4f798b6d989ebac"
+      "computedHash": "54e5271d5d613cc4c0068baa250613b5abb6e4533df1e67adc26d2e0c7d68ded"
     },
     "convex-setup-auth": {
       "source": "get-convex/agent-skills",
