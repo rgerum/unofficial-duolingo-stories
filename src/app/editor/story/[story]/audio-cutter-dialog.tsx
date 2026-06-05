@@ -32,6 +32,10 @@ import type {
   AudioCutterPreparedSegment,
   AudioCutterTranscriptItem,
 } from "@/app/editor/story/[story]/audio-cutter-storage";
+import {
+  getGraphemeLength,
+  getTranscriptWordTokens,
+} from "@/app/editor/story/[story]/audio-cutter-text";
 
 const DEFAULT_WAVEFORM_ZOOM = 180;
 const MIN_WAVEFORM_ZOOM = 24;
@@ -442,16 +446,6 @@ function clampTimeToKeepRanges(timeSeconds: number, keepRanges: TimeRange[]) {
   return keepRanges[keepRanges.length - 1]?.end ?? timeSeconds;
 }
 
-function getTranscriptWordTokens(text: string) {
-  return [...text.matchAll(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu)].map(
-    (match) => ({
-      text: match[0],
-      start: match.index ?? 0,
-      end: (match.index ?? 0) + match[0].length,
-    }),
-  );
-}
-
 function getApproximateWordMarks(text: string, segment: Segment): AudioMark[] {
   const tokens = getTranscriptWordTokens(text);
   if (tokens.length === 0) return [];
@@ -467,7 +461,7 @@ function getApproximateWordMarks(text: string, segment: Segment): AudioMark[] {
   if (keepRanges.length === 0 || totalKeepDuration <= 0) return [];
 
   const weights = tokens.map((token) =>
-    Math.max(1, Array.from(token.text).length),
+    Math.max(1, getGraphemeLength(token.text)),
   );
   const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
   if (totalWeight <= 0) return [];
