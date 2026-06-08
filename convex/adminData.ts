@@ -630,16 +630,16 @@ export const getAdminStoryByLegacyId = query({
       .map((approval) => approval.legacyUserId)
       .filter((id): id is number => typeof id === "number");
 
-    const authUsers = await ctx.runQuery(
-      components.betterAuth.adapter.findMany,
-      {
-        model: "user",
-        where: [
-          { field: "userId", operator: "in", value: legacyIds.map(String) },
-        ],
-        paginationOpts: { cursor: null, numItems: legacyIds.length + 10 },
-      },
-    );
+    const authUsers =
+      legacyIds.length === 0
+        ? { page: [] }
+        : await ctx.runQuery(components.betterAuth.adapter.findMany, {
+            model: "user",
+            where: [
+              { field: "userId", operator: "in", value: legacyIds.map(String) },
+            ],
+            paginationOpts: { cursor: null, numItems: legacyIds.length + 10 },
+          });
     const userNameByLegacyId = new Map<number, string>();
     for (const user of authUsers.page as Array<{
       userId?: string | null;
