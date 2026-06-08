@@ -8,8 +8,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ShieldIcon } from "lucide-react";
 import { api } from "@convex/_generated/api";
-import Button from "@/components/ui/button";
-import Switch from "@/components/ui/switch";
 import { example, highlightStyle } from "@/components/editor/story/parser";
 import useScrollLinking from "@/components/editor/story/scroll_linking";
 import useResizeEditor from "@/components/editor/story/editor-resize";
@@ -22,10 +20,6 @@ import BulkAudioEditor, {
   type BulkAudioEditorItem,
   type BulkAudioEditorUpdate,
 } from "@/app/editor/story/[story]/bulk-audio-editor";
-import {
-  removeApproval as removeApprovalAction,
-  togglePublished,
-} from "@/app/admin/story/[story_id]/actions";
 import SoundRecorder from "@/app/editor/story/[story]/sound-recorder";
 import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
 import VisuallyHidden from "@/components/VisuallyHidden";
@@ -43,6 +37,7 @@ import type {
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
+import AdminControls from "./admin_controls";
 import { useStoryEditorModel } from "./use_story_editor_model";
 
 type StoryNavigation = {
@@ -68,16 +63,6 @@ type LanguageData = {
   tts_replace: string | null;
   public: boolean;
   rtl: boolean;
-};
-
-type AdminStoryData = {
-  id: number;
-  public: boolean;
-  approvals: Array<{
-    id: number;
-    date: number;
-    name: string;
-  }>;
 };
 
 function getMax<T>(list: T[], callback: (obj: T) => number) {
@@ -219,10 +204,6 @@ export default function EditorV2({
   const language_data2 = (useQuery(api.editorRead.getEditorLanguageByLegacyId, {
     legacyLanguageId: story_data.from_language,
   }) ?? undefined) as LanguageData | undefined;
-  const adminStoryData = useQuery(
-    api.adminData.getAdminStoryByLegacyId,
-    isAdmin ? { legacyStoryId: story_data.id } : "skip",
-  ) as AdminStoryData | null | undefined;
 
   const [docText, setDocText] = React.useState(story_data.text ?? "");
   const [revision, setRevision] = React.useState(0);
@@ -676,13 +657,7 @@ export default function EditorV2({
             d=""
           />
         </svg>
-        <div
-          ref={editorRef}
-          className={
-            "min-h-0 w-[100px] grow [scroll-behavior:auto] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full " +
-            (language_data?.rtl ? "[direction:rtl]" : "")
-          }
-        />
+        <RtlContainer ref={editorRef} rtl={Boolean(language_data?.rtl)} />
         <svg
           className="h-full w-[2%] cursor-col-resize overflow-scroll float-left"
           ref={marginRef}
@@ -700,9 +675,7 @@ export default function EditorV2({
               <VisuallyHidden>Open story in admin panel</VisuallyHidden>
             </Link>
           ) : null}
-          {isAdmin ? (
-            <AdminControls storyId={story_data.id} storyData={adminStoryData} />
-          ) : null}
+          {isAdmin ? <AdminControls storyId={story_data.id} /> : null}
           <Cast
             id={story_data.id}
             cast={model.parsedMeta.cast}
@@ -719,102 +692,14 @@ export default function EditorV2({
   );
 }
 
-function AdminControls({
-  storyId,
-  storyData,
-}: {
-  storyId: number;
-  storyData: AdminStoryData | null | undefined;
-}) {
-  const [isPending, startTransition] = React.useTransition();
-
-  function changePublished() {
-    if (!storyData) return;
-    startTransition(() => {
-      void togglePublished(storyData.id, storyData.public);
-    });
-  }
-
-  function deleteApproval(approvalId: number) {
-    startTransition(() => {
-      void removeApprovalAction(storyId, approvalId);
-    });
-  }
-
-  return (
-    <section className="mb-8 rounded-xl border border-[var(--header-border)] bg-[color:color-mix(in_srgb,var(--body-background)_92%,white_8%)] px-4 py-3">
-      <h2 className="my-0 text-[1.1rem] font-bold leading-[1.2]">
-        Admin Controls
-      </h2>
-      {storyData === undefined ? (
-        <div className="mt-3 text-[0.95rem] text-[var(--text-color-dim)]">
-          Loading admin controls...
-        </div>
-      ) : storyData === null ? (
-        <div className="mt-3 text-[0.95rem] text-[var(--text-color-dim)]">
-          Admin controls unavailable.
-        </div>
-      ) : (
-        <div className="mt-4 space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="font-semibold">Published</span>
-            <Switch
-              checked={storyData.public}
-              disabled={isPending}
-              onClick={changePublished}
-            />
-            <span className="text-[0.95rem] text-[var(--text-color-dim)]">
-              {storyData.public ? "Yes" : "No"}
-            </span>
-          </div>
-          <div>
-            <h3 className="my-0 text-[1rem] font-bold leading-[1.2]">
-              Approvals
-            </h3>
-            {storyData.approvals.length === 0 ? (
-              <div className="mt-2 text-[0.95rem] text-[var(--text-color-dim)]">
-                No approvals.
-              </div>
-            ) : (
-              <ul className="mt-2 mb-0 list-none overflow-hidden rounded-lg border border-[color:color-mix(in_srgb,var(--header-border)_70%,transparent)] p-0">
-                {storyData.approvals.map((approval, index) => (
-                  <li
-                    key={approval.id}
-                    className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 py-2 ${
-                      index % 2 === 0
-                        ? "bg-[var(--body-background)]"
-                        : "bg-[color:color-mix(in_srgb,var(--body-background-faint)_72%,transparent)]"
-                    }`}
-                  >
-                    <span className="min-w-0 text-[0.95rem]">
-                      {formatApprovalDate(approval.date)} - {approval.name}
-                    </span>
-                    <Button
-                      className="mt-0"
-                      variant="destructive"
-                      size="sm"
-                      type="button"
-                      disabled={isPending}
-                      onClick={() => deleteApproval(approval.id)}
-                    >
-                      Remove
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function formatApprovalDate(value: number) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
+const RtlContainer = React.forwardRef<HTMLDivElement, { rtl: boolean }>(
+  function RtlContainer({ rtl }, ref) {
+    return (
+      <div
+        ref={ref}
+        className="min-h-0 w-[100px] grow [scroll-behavior:auto] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full"
+        dir={rtl ? "rtl" : undefined}
+      />
+    );
+  },
+);

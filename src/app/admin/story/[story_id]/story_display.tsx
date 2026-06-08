@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "convex/react";
+import React from "react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import Switch from "@/components/ui/switch";
 import Button from "@/components/ui/button";
@@ -11,15 +12,20 @@ import {
   adminDetailLabelClass,
   adminDetailPageClass,
 } from "../../adminDetailStyles";
-import {
-  togglePublished,
-  removeApproval as removeApprovalAction,
-} from "./actions";
 
 export default function StoryDisplay({ storyId }: { storyId: number }) {
   const story = useQuery(api.adminData.getAdminStoryByLegacyId, {
     legacyStoryId: storyId,
   });
+  const togglePublishedMutation = useMutation(
+    api.adminStoryWrite.togglePublished,
+  );
+  const removeApprovalMutation = useMutation(
+    api.adminStoryWrite.removeApproval,
+  );
+  const [pendingOperation, setPendingOperation] = React.useState<string | null>(
+    null,
+  );
 
   if (story === undefined) {
     return (
@@ -41,12 +47,33 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
 
   const storyData = story;
 
+  const isPending = pendingOperation !== null;
+
   async function changePublished() {
-    await togglePublished(storyData.id, storyData.public);
+    const operationKey = `story:${storyData.id}:admin_toggle_published:story_display`;
+    setPendingOperation(operationKey);
+    try {
+      await togglePublishedMutation({
+        legacyStoryId: storyData.id,
+        operationKey,
+      });
+    } finally {
+      setPendingOperation(null);
+    }
   }
 
   async function deleteApproval(approvalId: number) {
-    await removeApprovalAction(storyData.id, approvalId);
+    const operationKey = `story_approval:${approvalId}:admin_delete:story_display`;
+    setPendingOperation(operationKey);
+    try {
+      await removeApprovalMutation({
+        legacyStoryId: storyData.id,
+        legacyApprovalId: approvalId,
+        operationKey,
+      });
+    } finally {
+      setPendingOperation(null);
+    }
   }
 
   function formatApprovalDate(value: unknown) {
@@ -99,6 +126,7 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
                 <span className="inline-flex items-center gap-2">
                   <Switch
                     checked={storyData.public}
+                    disabled={isPending}
                     onClick={changePublished}
                   />
                   {storyData.public ? "Yes" : "No"}
@@ -139,6 +167,7 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
                   variant="destructive"
                   size="sm"
                   type="button"
+                  disabled={isPending}
                   onClick={() => deleteApproval(approval.id)}
                 >
                   Remove
