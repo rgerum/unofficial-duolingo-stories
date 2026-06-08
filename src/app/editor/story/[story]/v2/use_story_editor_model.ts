@@ -71,7 +71,6 @@ type EditorModel = {
   clearSaveError: () => void;
   lastSavedAt: number | null;
   dirty: boolean;
-  markServerSynced: (text: string) => void;
 };
 
 export function useStoryEditorModel({
@@ -101,21 +100,33 @@ export function useStoryEditorModel({
     }),
     [storyData.id, storyData.text],
   );
+  const storyId = storySnapshot.id;
   const storyText = storySnapshot.text;
+  const storyInitialTextRef = React.useRef({
+    id: storyId,
+    text: storyText,
+  });
+  if (storyInitialTextRef.current.id !== storyId) {
+    storyInitialTextRef.current = {
+      id: storyId,
+      text: storyText,
+    };
+  }
   const [lastSavedText, setLastSavedText] = React.useState(
     normalizeDocText(storyText),
   );
   const [image, setImage] = React.useState<ImageLike | null>(null);
 
   React.useEffect(() => {
+    if (storyInitialTextRef.current.id !== storyId) return;
     // Reset editor-save state when switching stories, even if the text matches.
     setIsSaving(false);
     setIsDeleting(false);
     setSaveError(false);
     setSaveErrorMessage("There was an error saving.");
     setLastSavedAt(null);
-    setLastSavedText(normalizeDocText(storySnapshot.text));
-  }, [storySnapshot]);
+    setLastSavedText(normalizeDocText(storyInitialTextRef.current.text));
+  }, [storyId]);
 
   const [parsedStoryBase, parsedMeta, audioInsertLines] = React.useMemo(
     () =>
@@ -315,10 +326,6 @@ export function useStoryEditorModel({
     toFriendlyError,
   ]);
 
-  const markServerSynced = React.useCallback((text: string) => {
-    setLastSavedText(normalizeDocText(text));
-  }, []);
-
   return {
     parsedStory,
     parsedMeta,
@@ -332,6 +339,5 @@ export function useStoryEditorModel({
     clearSaveError: () => setSaveError(false),
     lastSavedAt,
     dirty: normalizeDocText(docText) !== lastSavedText,
-    markServerSynced,
   };
 }
