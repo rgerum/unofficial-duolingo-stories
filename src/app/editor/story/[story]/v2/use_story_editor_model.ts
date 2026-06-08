@@ -31,6 +31,11 @@ type UseStoryEditorModelArgs = {
   fromLanguage?: LanguageLike;
 };
 
+type StoryInitialText = {
+  id: number;
+  text: string;
+};
+
 function normalizeDocText(text: string): string {
   return text.replace(/\r\n/g, "\n");
 }
@@ -71,6 +76,7 @@ type EditorModel = {
   clearSaveError: () => void;
   lastSavedAt: number | null;
   dirty: boolean;
+  getInitialText: () => StoryInitialText;
 };
 
 export function useStoryEditorModel({
@@ -116,6 +122,10 @@ export function useStoryEditorModel({
     normalizeDocText(storyText),
   );
   const [image, setImage] = React.useState<ImageLike | null>(null);
+  const getInitialText = React.useCallback(
+    () => storyInitialTextRef.current,
+    [],
+  );
 
   React.useEffect(() => {
     if (storyInitialTextRef.current.id !== storyId) return;
@@ -339,5 +349,6 @@ export function useStoryEditorModel({
     clearSaveError: () => setSaveError(false),
     lastSavedAt,
     dirty: normalizeDocText(docText) !== lastSavedText,
+    getInitialText,
   };
 }

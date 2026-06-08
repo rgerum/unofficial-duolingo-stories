@@ -215,25 +215,7 @@ export default function EditorV2({
   >(undefined);
   const [bulkAudioOpen, setBulkAudioOpen] =
     React.useState(initialBulkAudioOpen);
-  const storySnapshot = React.useMemo(
-    () => ({
-      id: story_data.id,
-      text: story_data.text ?? "",
-    }),
-    [story_data.id, story_data.text],
-  );
-  const storyId = storySnapshot.id;
-  const storyText = storySnapshot.text;
-  const storyInitialTextRef = React.useRef({
-    id: storyId,
-    text: storyText,
-  });
-  if (storyInitialTextRef.current.id !== storyId) {
-    storyInitialTextRef.current = {
-      id: storyId,
-      text: storyText,
-    };
-  }
+  const storyId = story_data.id;
   const model = useStoryEditorModel({
     isAdmin,
     storyData: story_data,
@@ -243,8 +225,15 @@ export default function EditorV2({
     learningLanguage: language_data,
     fromLanguage: language_data2,
   });
-  const { audioInsertLines, dirty, isDeleting, isSaving, parsedStory, save } =
-    model;
+  const {
+    audioInsertLines,
+    dirty,
+    getInitialText,
+    isDeleting,
+    isSaving,
+    parsedStory,
+    save,
+  } = model;
 
   const releaseTrackedAudioEditorAnchor = React.useCallback(() => {
     audioEditorAnchorRef.current?.release();
@@ -292,7 +281,7 @@ export default function EditorV2({
     previousStoryIdRef.current = storyId;
 
     // Reset editor-local state when switching stories, even if the text matches.
-    setDocText(normalizeDocText(storyInitialTextRef.current.text));
+    setDocText(normalizeDocText(getInitialText().text));
     setRevision(0);
     setLineNo(1);
     hasAppliedInitialFocusRef.current = false;
@@ -301,7 +290,7 @@ export default function EditorV2({
     if (previousStoryId !== null && previousStoryId !== storyId) {
       setBulkAudioOpen(false);
     }
-  }, [releaseTrackedAudioEditorAnchor, storyId]);
+  }, [getInitialText, releaseTrackedAudioEditorAnchor, storyId]);
 
   React.useEffect(
     () => () => {
@@ -315,7 +304,7 @@ export default function EditorV2({
   useScrollLinking(view, previewRef, svgParentRef);
 
   React.useEffect(() => {
-    const initialStory = storyInitialTextRef.current;
+    const initialStory = getInitialText();
     if (initialStory.id !== storyId) return;
 
     const sync = EditorView.updateListener.of((update) => {
@@ -350,7 +339,7 @@ export default function EditorV2({
       viewRef.current = null;
       setView(undefined);
     };
-  }, [storyId]);
+  }, [getInitialText, storyId]);
 
   React.useEffect(() => {
     const editorView = viewRef.current ?? view;
