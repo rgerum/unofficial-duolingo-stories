@@ -3,18 +3,14 @@
 import React from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import Button from "@/components/ui/button";
 import Switch from "@/components/ui/switch";
-
-type AdminStoryData = {
-  id: number;
-  public: boolean;
-  approvals: Array<{
-    id: number;
-    date: number;
-    name: string;
-  }>;
-};
+import {
+  type AdminStoryData,
+  optimisticallyRemoveApproval,
+  optimisticallyTogglePublished,
+} from "@/app/admin/story/admin_story_optimistic";
 
 export default function AdminControls({ storyId }: { storyId: number }) {
   const storyData = useQuery(api.adminData.getAdminStoryByLegacyId, {
@@ -22,43 +18,41 @@ export default function AdminControls({ storyId }: { storyId: number }) {
   }) as AdminStoryData | null | undefined;
   const togglePublishedMutation = useMutation(
     api.adminStoryWrite.togglePublished,
-  );
+  ).withOptimisticUpdate(optimisticallyTogglePublished);
   const removeApprovalMutation = useMutation(
     api.adminStoryWrite.removeApproval,
-  );
-  const [pendingOperation, setPendingOperation] = React.useState<string | null>(
-    null,
-  );
+  ).withOptimisticUpdate(optimisticallyRemoveApproval);
+  const [publishedPending, setPublishedPending] = React.useState(false);
+  const [pendingApprovalId, setPendingApprovalId] =
+    React.useState<Id<"story_approval"> | null>(null);
 
   async function changePublished() {
     if (!storyData) return;
     const operationKey = `story:${storyData.id}:editor_toggle_published:admin_controls`;
-    setPendingOperation(operationKey);
+    setPublishedPending(true);
     try {
       await togglePublishedMutation({
         legacyStoryId: storyData.id,
         operationKey,
       });
     } finally {
-      setPendingOperation(null);
+      setPublishedPending(false);
     }
   }
 
-  async function deleteApproval(approvalId: number) {
+  async function deleteApproval(approvalId: Id<"story_approval">) {
     const operationKey = `story_approval:${approvalId}:editor_delete:admin_controls`;
-    setPendingOperation(operationKey);
+    setPendingApprovalId(approvalId);
     try {
       await removeApprovalMutation({
         legacyStoryId: storyId,
-        legacyApprovalId: approvalId,
+        approvalId,
         operationKey,
       });
     } finally {
-      setPendingOperation(null);
+      setPendingApprovalId(null);
     }
   }
-
-  const isPending = pendingOperation !== null;
 
   return (
     <section className="mb-8 rounded-xl border border-[var(--header-border)] bg-[color:color-mix(in_srgb,var(--body-background)_92%,white_8%)] px-4 py-3">
@@ -79,7 +73,7 @@ export default function AdminControls({ storyId }: { storyId: number }) {
             <span className="font-semibold">Published</span>
             <Switch
               checked={storyData.public}
-              disabled={isPending}
+              disabled={publishedPending}
               onClick={changePublished}
             />
             <span className="text-[0.95rem] text-[var(--text-color-dim)]">
@@ -106,7 +100,7 @@ export default function AdminControls({ storyId }: { storyId: number }) {
                       variant="destructive"
                       size="sm"
                       type="button"
-                      disabled={isPending}
+                      disabled={pendingApprovalId === approval.id}
                       onClick={() => deleteApproval(approval.id)}
                     >
                       Remove

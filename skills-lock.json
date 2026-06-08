@@ -11,13 +11,13 @@
       "source": "get-convex/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/convex-create-component/SKILL.md",
-      "computedHash": "25b6f56cc6afa4237aa191f5bfa5b86f68b70dc7f1195b86d027bd85346cff41"
+      "computedHash": "a439b068df77964222e2986cb249266e386b268871f28dfda1034e5b50dce171"
     },
     "convex-migration-helper": {
       "source": "get-convex/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/convex-migration-helper/SKILL.md",
-      "computedHash": "47ad936c1977eecca736211fe4efb171b53c412b49cffc42267095276a8df36d"
+      "computedHash": "1ed5ef230d484e9884d881ddbd15158f0070382f8c6097364cb8ed2ec458decd"
     },
     "convex-performance-audit": {
       "source": "get-convex/agent-skills",

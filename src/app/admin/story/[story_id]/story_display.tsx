@@ -4,6 +4,7 @@ import Link from "next/link";
 import React from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import Switch from "@/components/ui/switch";
 import Button from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -12,6 +13,10 @@ import {
   adminDetailLabelClass,
   adminDetailPageClass,
 } from "../../adminDetailStyles";
+import {
+  optimisticallyRemoveApproval,
+  optimisticallyTogglePublished,
+} from "../admin_story_optimistic";
 
 export default function StoryDisplay({ storyId }: { storyId: number }) {
   const story = useQuery(api.adminData.getAdminStoryByLegacyId, {
@@ -19,13 +24,13 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
   });
   const togglePublishedMutation = useMutation(
     api.adminStoryWrite.togglePublished,
-  );
+  ).withOptimisticUpdate(optimisticallyTogglePublished);
   const removeApprovalMutation = useMutation(
     api.adminStoryWrite.removeApproval,
-  );
-  const [pendingOperation, setPendingOperation] = React.useState<string | null>(
-    null,
-  );
+  ).withOptimisticUpdate(optimisticallyRemoveApproval);
+  const [publishedPending, setPublishedPending] = React.useState(false);
+  const [pendingApprovalId, setPendingApprovalId] =
+    React.useState<Id<"story_approval"> | null>(null);
 
   if (story === undefined) {
     return (
@@ -47,32 +52,30 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
 
   const storyData = story;
 
-  const isPending = pendingOperation !== null;
-
   async function changePublished() {
     const operationKey = `story:${storyData.id}:admin_toggle_published:story_display`;
-    setPendingOperation(operationKey);
+    setPublishedPending(true);
     try {
       await togglePublishedMutation({
         legacyStoryId: storyData.id,
         operationKey,
       });
     } finally {
-      setPendingOperation(null);
+      setPublishedPending(false);
     }
   }
 
-  async function deleteApproval(approvalId: number) {
+  async function deleteApproval(approvalId: Id<"story_approval">) {
     const operationKey = `story_approval:${approvalId}:admin_delete:story_display`;
-    setPendingOperation(operationKey);
+    setPendingApprovalId(approvalId);
     try {
       await removeApprovalMutation({
         legacyStoryId: storyData.id,
-        legacyApprovalId: approvalId,
+        approvalId,
         operationKey,
       });
     } finally {
-      setPendingOperation(null);
+      setPendingApprovalId(null);
     }
   }
 
@@ -126,7 +129,7 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
                 <span className="inline-flex items-center gap-2">
                   <Switch
                     checked={storyData.public}
-                    disabled={isPending}
+                    disabled={publishedPending}
                     onClick={changePublished}
                   />
                   {storyData.public ? "Yes" : "No"}
@@ -167,7 +170,7 @@ export default function StoryDisplay({ storyId }: { storyId: number }) {
                   variant="destructive"
                   size="sm"
                   type="button"
-                  disabled={isPending}
+                  disabled={pendingApprovalId === approval.id}
                   onClick={() => deleteApproval(approval.id)}
                 >
                   Remove

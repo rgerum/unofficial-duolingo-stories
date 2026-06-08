@@ -55,7 +55,7 @@ const adminCourseValidator = v.object({
 });
 
 const adminApprovalValidator = v.object({
-  id: v.number(),
+  id: v.id("story_approval"),
   date: v.number(),
   name: v.string(),
 });
@@ -658,16 +658,14 @@ export const getAdminStoryByLegacyId = query({
         : "",
       public: story.public,
       short: course.short,
-      approvals: approvals
-        .map((approval) => ({
-          id: approval.legacyId ?? 0,
-          date: approval.date,
-          name:
-            typeof approval.legacyUserId === "number"
-              ? (userNameByLegacyId.get(approval.legacyUserId) ?? "Unknown")
-              : "Unknown",
-        }))
-        .filter((approval) => approval.id > 0),
+      approvals: approvals.map((approval) => ({
+        id: approval._id,
+        date: approval.date,
+        name:
+          typeof approval.legacyUserId === "number"
+            ? (userNameByLegacyId.get(approval.legacyUserId) ?? "Unknown")
+            : "Unknown",
+      })),
     };
   },
 });

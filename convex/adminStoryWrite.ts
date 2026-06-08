@@ -36,7 +36,7 @@ export const togglePublished = mutation({
 export const removeApproval = mutation({
   args: {
     legacyStoryId: v.number(),
-    legacyApprovalId: v.number(),
+    approvalId: v.id("story_approval"),
     operationKey: v.optional(v.string()),
   },
   returns: v.null(),
@@ -51,10 +51,7 @@ export const removeApproval = mutation({
       throw new Error(`Story ${args.legacyStoryId} not found`);
     }
 
-    const approval = await ctx.db
-      .query("story_approval")
-      .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.legacyApprovalId))
-      .unique();
+    const approval = await ctx.db.get(args.approvalId);
     if (!approval) {
       return null;
     }
