@@ -4,6 +4,9 @@ module.exports = {
   compiler: {
     styledComponents: true,
   },
+  turbopack: {
+    root: __dirname,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },

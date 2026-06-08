@@ -126,25 +126,6 @@ export const deleteStoryApproval = mutation({
   },
 });
 
-export const deleteStoryApprovalByLegacyId = mutation({
-  args: {
-    legacyApprovalId: v.number(),
-  },
-  returns: v.object({
-    deleted: v.boolean(),
-  }),
-  handler: async (ctx, args) => {
-    await requireContributorOrAdmin(ctx);
-    const existing = await ctx.db
-      .query("story_approval")
-      .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.legacyApprovalId))
-      .unique();
-    if (!existing) return { deleted: false };
-    await ctx.db.delete(existing._id);
-    return { deleted: true };
-  },
-});
-
 export const toggleStoryApproval = mutation({
   args: {
     legacyStoryId: v.number(),
