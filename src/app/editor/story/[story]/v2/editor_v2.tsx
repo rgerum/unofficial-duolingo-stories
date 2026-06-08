@@ -215,14 +215,7 @@ export default function EditorV2({
   >(undefined);
   const [bulkAudioOpen, setBulkAudioOpen] =
     React.useState(initialBulkAudioOpen);
-  const storySnapshot = React.useMemo(
-    () => ({
-      id: story_data.id,
-      text: story_data.text ?? "",
-    }),
-    [story_data.id, story_data.text],
-  );
-  const storyText = storySnapshot.text;
+  const storyId = story_data.id;
   const model = useStoryEditorModel({
     isAdmin,
     storyData: story_data,
@@ -235,9 +228,9 @@ export default function EditorV2({
   const {
     audioInsertLines,
     dirty,
+    getInitialText,
     isDeleting,
     isSaving,
-    markServerSynced,
     parsedStory,
     save,
   } = model;
@@ -285,19 +278,19 @@ export default function EditorV2({
 
   React.useEffect(() => {
     const previousStoryId = previousStoryIdRef.current;
-    previousStoryIdRef.current = storySnapshot.id;
+    previousStoryIdRef.current = storyId;
 
     // Reset editor-local state when switching stories, even if the text matches.
-    setDocText(normalizeDocText(storySnapshot.text));
+    setDocText(normalizeDocText(getInitialText().text));
     setRevision(0);
     setLineNo(1);
     hasAppliedInitialFocusRef.current = false;
     releaseTrackedAudioEditorAnchor();
     setAudioEditorData(undefined);
-    if (previousStoryId !== null && previousStoryId !== storySnapshot.id) {
+    if (previousStoryId !== null && previousStoryId !== storyId) {
       setBulkAudioOpen(false);
     }
-  }, [releaseTrackedAudioEditorAnchor, storySnapshot]);
+  }, [getInitialText, releaseTrackedAudioEditorAnchor, storyId]);
 
   React.useEffect(
     () => () => {
@@ -311,6 +304,9 @@ export default function EditorV2({
   useScrollLinking(view, previewRef, svgParentRef);
 
   React.useEffect(() => {
+    const initialStory = getInitialText();
+    if (initialStory.id !== storyId) return;
+
     const sync = EditorView.updateListener.of((update) => {
       const currentLine = update.state.doc.lineAt(
         update.state.selection.main.from,
@@ -327,7 +323,7 @@ export default function EditorV2({
     });
 
     const state = EditorState.create({
-      doc: normalizeDocText(storySnapshot.text),
+      doc: normalizeDocText(initialStory.text),
       extensions: [basicSetup, sync, example(), highlightStyle],
     });
 
@@ -343,22 +339,7 @@ export default function EditorV2({
       viewRef.current = null;
       setView(undefined);
     };
-  }, [storySnapshot]);
-
-  React.useEffect(() => {
-    const view = viewRef.current;
-    if (!view) return;
-    if (dirty) return;
-
-    const remoteText = normalizeDocText(storyText);
-    const localText = view.state.doc.toString();
-    if (localText === remoteText) return;
-
-    markServerSynced(remoteText);
-    view.dispatch({
-      changes: { from: 0, to: view.state.doc.length, insert: remoteText },
-    });
-  }, [dirty, markServerSynced, storyText]);
+  }, [getInitialText, storyId]);
 
   React.useEffect(() => {
     const editorView = viewRef.current ?? view;
