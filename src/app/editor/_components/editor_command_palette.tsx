@@ -21,7 +21,7 @@ import {
   UserIcon,
   UsersIcon,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { api } from "@convex/_generated/api";
 import {
   Dialog,
@@ -165,6 +165,7 @@ export default function EditorCommandPalette({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { data: session } = authClient.useSession();
   const sessionUser = session?.user as { role?: string } | undefined;
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -195,10 +196,19 @@ export default function EditorCommandPalette({
     isEditorRoute && pathSegments[1] === "course"
       ? (pathSegments[2] ?? null)
       : null;
+  const editedAdminCourseId =
+    isAdminRoute && pathSegments[1] === "courses"
+      ? getNumericSearchParam(searchParams, "editCourse")
+      : null;
   const isEditorStoryRoute =
     isEditorRoute &&
     (pathSegments[1] === "story" ||
       (pathSegments[1] === "course" && pathSegments[3] === "story"));
+  const currentStoryId = getCurrentStoryId(pathSegments);
+  const storyShortcut =
+    currentStoryId !== null
+      ? getStoryShortcut(currentStoryId, isAdminRoute)
+      : null;
   const currentAdminList =
     isAdminRoute &&
     (pathSegments[1] === "languages" || pathSegments[1] === "courses")
@@ -312,6 +322,21 @@ export default function EditorCommandPalette({
     api.landing.getPublicCoursePageData,
     publicStoryCourse?.short ? { short: publicStoryCourse.short } : "skip",
   ) as PublicCoursePageData | undefined;
+
+  let editedAdminCourse: AdminCourseItem | null = null;
+  for (const course of adminCourses) {
+    if (course.id === editedAdminCourseId) {
+      editedAdminCourse = course;
+      break;
+    }
+  }
+
+  const courseShortcut = getCourseShortcut({
+    canAdmin,
+    currentCourse,
+    editedAdminCourse,
+    currentStoryId,
+  });
 
   React.useEffect(() => {
     setShortcutLabel(
@@ -442,6 +467,28 @@ export default function EditorCommandPalette({
     ];
 
     if (canAdmin) {
+      if (courseShortcut !== null) {
+        rootItems.unshift({
+          id: `course-shortcut:${courseShortcut.id}`,
+          kind: "admin-route",
+          label: courseShortcut.label,
+          subtitle: courseShortcut.subtitle,
+          icon: courseShortcut.icon,
+          href: courseShortcut.href,
+        });
+      }
+
+      if (storyShortcut !== null) {
+        rootItems.unshift({
+          id: `story-shortcut:${currentStoryId}`,
+          kind: "admin-route",
+          label: storyShortcut.label,
+          subtitle: storyShortcut.subtitle,
+          icon: storyShortcut.icon,
+          href: storyShortcut.href,
+        });
+      }
+
       rootItems.push({
         id: "section:admin",
         kind: "section",
@@ -656,6 +703,32 @@ export default function EditorCommandPalette({
     }
 
     const courseActions: PaletteItem[] = [
+      ...(canAdmin && storyShortcut !== null
+        ? [
+            {
+              id: `course-action:admin-story:${currentStoryId}`,
+              kind: "course-action" as const,
+              label: storyShortcut.label,
+              subtitle: storyShortcut.subtitle,
+              icon: storyShortcut.icon,
+              href: storyShortcut.href,
+              course: selectedCourse,
+            },
+          ]
+        : []),
+      ...(courseShortcut !== null
+        ? [
+            {
+              id: `course-action:course-shortcut:${courseShortcut.id}`,
+              kind: "course-action" as const,
+              label: courseShortcut.label,
+              subtitle: courseShortcut.subtitle,
+              icon: courseShortcut.icon,
+              href: courseShortcut.href,
+              course: selectedCourse,
+            },
+          ]
+        : []),
       {
         id: `course-action:voices:${getCourseKey(selectedCourse)}`,
         kind: "course-action",
@@ -1487,6 +1560,82 @@ function getCourseKey(course: CourseProps) {
 
 function getPublicCourseKey(course: PublicCourseListItem) {
   return course.short;
+}
+
+function getNumericSearchParam(
+  searchParams: Pick<URLSearchParams, "get">,
+  key: string,
+) {
+  const value = searchParams.get(key);
+  if (!value) return null;
+
+  const parsedValue = Number.parseInt(value, 10);
+  return Number.isFinite(parsedValue) ? parsedValue : null;
+}
+
+function getCurrentStoryId(pathSegments: string[]) {
+  const storySegmentIndex = pathSegments.indexOf("story");
+  const storyId =
+    storySegmentIndex >= 0 ? pathSegments[storySegmentIndex + 1] : null;
+
+  if (!storyId) return null;
+
+  return /^\d+$/.test(storyId) ? storyId : null;
+}
+
+function getStoryShortcut(storyId: string, isAdminRoute: boolean) {
+  if (isAdminRoute) {
+    return {
+      label: "Open in editor",
+      subtitle: "Open this story in the editor",
+      icon: "editor" as const,
+      href: `/editor/story/${storyId}`,
+    };
+  }
+
+  return {
+    label: "Open in admin panel",
+    subtitle: "Open this story in the admin story view",
+    icon: "admin" as const,
+    href: `/admin/story/${storyId}`,
+  };
+}
+
+function getCourseShortcut({
+  canAdmin,
+  currentCourse,
+  editedAdminCourse,
+  currentStoryId,
+}: {
+  canAdmin: boolean;
+  currentCourse: CourseProps | null;
+  editedAdminCourse: AdminCourseItem | null;
+  currentStoryId: string | null;
+}) {
+  if (!canAdmin) return null;
+  if (currentStoryId !== null) return null;
+
+  if (editedAdminCourse !== null) {
+    return {
+      id: `editor:${editedAdminCourse.id}`,
+      label: "Open in editor",
+      subtitle: "Open this course in the editor",
+      icon: "editor" as const,
+      href: `/editor/course/${editedAdminCourse.short ?? editedAdminCourse.id}`,
+    };
+  }
+
+  if (currentCourse !== null) {
+    return {
+      id: `admin:${currentCourse.id}`,
+      label: "Open in admin panel",
+      subtitle: "Open this course in the admin course editor",
+      icon: "admin" as const,
+      href: `/admin/courses?editCourse=${currentCourse.id}`,
+    };
+  }
+
+  return null;
 }
 
 function matchesCourseSearch(course: CourseProps, normalizedQuery: string) {

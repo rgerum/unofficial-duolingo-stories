@@ -4,7 +4,9 @@ import React from "react";
 import { basicSetup, EditorView } from "codemirror";
 import { EditorSelection, EditorState } from "@codemirror/state";
 import { useQuery } from "convex/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ShieldIcon } from "lucide-react";
 import { api } from "@convex/_generated/api";
 import { example, highlightStyle } from "@/components/editor/story/parser";
 import useScrollLinking from "@/components/editor/story/scroll_linking";
@@ -20,6 +22,7 @@ import BulkAudioEditor, {
 } from "@/app/editor/story/[story]/bulk-audio-editor";
 import SoundRecorder from "@/app/editor/story/[story]/sound-recorder";
 import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
+import VisuallyHidden from "@/components/VisuallyHidden";
 import {
   create_audio_insert_anchor,
   insert_audio_at_anchor,
@@ -666,8 +669,17 @@ export default function EditorV2({
         />
         <div
           ref={previewRef}
-          className="min-h-0 w-[100px] grow overflow-scroll [scroll-behavior:auto] max-[975px]:absolute max-[975px]:top-[calc((100vh-64px)/2+64px)] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full p-3"
+          className="relative min-h-0 w-[100px] grow overflow-scroll p-3 [scroll-behavior:auto] max-[975px]:absolute max-[975px]:top-[calc((100vh-64px)/2+64px)] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full"
         >
+          {isAdmin ? (
+            <Link
+              href={`/admin/story/${story_data.id}`}
+              className="sticky top-3 right-3 z-10 float-right inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-[var(--header-border)] bg-[var(--body-background)] text-[var(--text-color-dim)] transition-colors duration-100 hover:border-[color:color-mix(in_srgb,var(--link-blue)_22%,var(--header-border))] hover:bg-[color:color-mix(in_srgb,var(--overview-hr)_35%,var(--body-background))] hover:text-[var(--text-color)] active:bg-[color:color-mix(in_srgb,var(--overview-hr)_55%,var(--body-background))]"
+            >
+              <ShieldIcon aria-hidden="true" className="h-6 w-6" />
+              <VisuallyHidden>Open story in admin panel</VisuallyHidden>
+            </Link>
+          ) : null}
           <Cast
             id={story_data.id}
             cast={model.parsedMeta.cast}
