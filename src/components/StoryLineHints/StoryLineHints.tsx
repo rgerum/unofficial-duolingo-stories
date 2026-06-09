@@ -1,4 +1,5 @@
 import React, { CSSProperties } from "react";
+import { keepClosingPunctuationWithWord } from "./text";
 import { ContentWithHints } from "@/components/editor/story/syntax_parser_types";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import { cn } from "@/lib/utils";
@@ -180,7 +181,9 @@ function StoryLineHints({
           was_hidden_for_challenge && !is_hidden ? true : undefined
         }
       >
-        {visibleContent.text.substring(start, end)}
+        {keepClosingPunctuationWithWord(
+          visibleContent.text.substring(start, end),
+        )}
       </span>,
     ];
     if (visibleContent.text.substring(start, end).indexOf("\n") !== -1)
