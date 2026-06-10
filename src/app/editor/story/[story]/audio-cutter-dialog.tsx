@@ -55,6 +55,7 @@ const SHRINK_WRAP_STABILITY_EPSILON_SECONDS = 0.01;
 const MP3_BITRATE_KBPS = 128;
 const MP3_SAMPLE_BLOCK_SIZE = 1152;
 const MIN_WORD_MARK_GAP_MS = 20;
+const SEGMENT_HISTORY_LIMIT = 100;
 const SEGMENT_COLOR = "rgba(28,176,246,0.2)";
 const SEGMENT_BORDER_COLOR = "rgba(15,95,131,0.4)";
 const SEGMENT_ACTIVE_BORDER_COLOR = "rgba(28,176,246,0.95)";
@@ -85,6 +86,11 @@ type SegmentDraft = {
   start: number;
   end: number;
   skipRanges?: TimeRange[];
+};
+
+type SegmentHistory = {
+  past: Segment[][];
+  future: Segment[][];
 };
 
 type AudioSilenceAnalysis = {
@@ -178,6 +184,29 @@ const EMPTY_REGIONS_PLUGIN: RegionsPlugin = {
 
 function sortSegments(segments: Segment[]) {
   return [...segments].sort((left, right) => left.start - right.start);
+}
+
+function areTimeRangesEqual(left: TimeRange[], right: TimeRange[]) {
+  if (left.length !== right.length) return false;
+  return left.every((range, index) => {
+    const other = right[index];
+    return other && range.start === other.start && range.end === other.end;
+  });
+}
+
+function areSegmentsEqual(left: Segment[], right: Segment[]) {
+  if (left.length !== right.length) return false;
+  return left.every((segment, index) => {
+    const other = right[index];
+    return (
+      other &&
+      segment.id === other.id &&
+      segment.start === other.start &&
+      segment.end === other.end &&
+      segment.label === other.label &&
+      areTimeRangesEqual(segment.skipRanges, other.skipRanges)
+    );
+  });
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -1480,6 +1509,11 @@ export default function AudioCutterDialog({
     () => sanitizeDetectionSettings(undefined),
   );
   const [segments, setSegments] = React.useState<Segment[]>([]);
+  const [segmentHistory, setSegmentHistory] = React.useState<SegmentHistory>({
+    past: [],
+    future: [],
+  });
+  const segmentsRef = React.useRef<Segment[]>([]);
   const [labelsById, setLabelsById] = React.useState<Record<string, string>>(
     {},
   );
@@ -1553,6 +1587,79 @@ export default function AudioCutterDialog({
     });
     return next;
   }, [playbackTimeSeconds, sortedSegments, wordMarksBySegmentId]);
+
+  React.useEffect(() => {
+    segmentsRef.current = segments;
+  }, [segments]);
+
+  const commitSegments = React.useCallback(
+    (updater: Segment[] | ((current: Segment[]) => Segment[])) => {
+      const current = segmentsRef.current;
+      const next = typeof updater === "function" ? updater(current) : updater;
+      if (areSegmentsEqual(current, next)) return;
+
+      setSegmentHistory((history) => ({
+        past: [...history.past, current].slice(-SEGMENT_HISTORY_LIMIT),
+        future: [],
+      }));
+      segmentsRef.current = next;
+      setSegments(next);
+    },
+    [],
+  );
+
+  const resetSegmentHistory = React.useCallback(() => {
+    setSegmentHistory({ past: [], future: [] });
+  }, []);
+
+  const applyHistorySegments = React.useCallback((nextSegments: Segment[]) => {
+    activeDraftRegionIdRef.current = null;
+    pendingRegionIdsRef.current.clear();
+    setMergePreview(null);
+    segmentsRef.current = nextSegments;
+    setSegments(nextSegments);
+    setSelectedSegmentId((currentId) =>
+      currentId && nextSegments.some((segment) => segment.id === currentId)
+        ? currentId
+        : (nextSegments[0]?.id ?? null),
+    );
+    setHoveredSegmentId((currentId) =>
+      currentId && nextSegments.some((segment) => segment.id === currentId)
+        ? currentId
+        : null,
+    );
+    setDraggingWordMarker((current) =>
+      current &&
+      nextSegments.some((segment) => segment.id === current.segmentId)
+        ? current
+        : null,
+    );
+  }, []);
+
+  const undoSegmentChange = React.useCallback(() => {
+    const previousSegments = segmentHistory.past.at(-1);
+    if (!previousSegments) return;
+
+    setSegmentHistory({
+      past: segmentHistory.past.slice(0, -1),
+      future: [segments, ...segmentHistory.future].slice(
+        0,
+        SEGMENT_HISTORY_LIMIT,
+      ),
+    });
+    applyHistorySegments(previousSegments);
+  }, [applyHistorySegments, segmentHistory, segments]);
+
+  const redoSegmentChange = React.useCallback(() => {
+    const nextSegments = segmentHistory.future[0];
+    if (!nextSegments) return;
+
+    setSegmentHistory({
+      past: [...segmentHistory.past, segments].slice(-SEGMENT_HISTORY_LIMIT),
+      future: segmentHistory.future.slice(1),
+    });
+    applyHistorySegments(nextSegments);
+  }, [applyHistorySegments, segmentHistory, segments]);
 
   React.useEffect(() => {
     if (regionsPlugin) return;
@@ -1764,7 +1871,9 @@ export default function AudioCutterDialog({
     setShowIntroHelp(false);
     setIsPlaying(false);
     setAudioBuffer(null);
+    segmentsRef.current = [];
     setSegments([]);
+    resetSegmentHistory();
     setLabelsById({});
     setMergePreview(null);
     setDuration(0);
@@ -1785,6 +1894,7 @@ export default function AudioCutterDialog({
   }, [
     cancelSegmentedPlayback,
     clearTranscriptAutoScrollLock,
+    resetSegmentHistory,
     typedRegionsPlugin,
   ]);
 
@@ -1833,47 +1943,53 @@ export default function AudioCutterDialog({
     [labelsById],
   );
 
-  const onRemoveSegment = React.useCallback((segmentId: string) => {
-    if (activeDraftRegionIdRef.current === segmentId) {
-      activeDraftRegionIdRef.current = null;
-    }
-    pendingRegionIdsRef.current.delete(segmentId);
-    setSegments((current) =>
-      current.filter((segment) => segment.id !== segmentId),
-    );
-    setLabelsById((current) => {
-      if (!(segmentId in current)) return current;
-      const next = { ...current };
-      delete next[segmentId];
-      return next;
-    });
-    setSelectedSegmentId((currentId) =>
-      currentId === segmentId ? null : currentId,
-    );
-    setHoveredSegmentId((currentId) =>
-      currentId === segmentId ? null : currentId,
-    );
-    setMergePreview((current) => {
-      if (current?.activeId === segmentId || current?.targetId === segmentId) {
-        return null;
+  const onRemoveSegment = React.useCallback(
+    (segmentId: string) => {
+      if (activeDraftRegionIdRef.current === segmentId) {
+        activeDraftRegionIdRef.current = null;
       }
-      return current;
-    });
-    setWordMarkTimeOverridesBySegmentId((current) => {
-      if (!(segmentId in current)) return current;
-      const next = { ...current };
-      delete next[segmentId];
-      return next;
-    });
-    setDraggingWordMarker((current) =>
-      current?.segmentId === segmentId ? null : current,
-    );
-  }, []);
+      pendingRegionIdsRef.current.delete(segmentId);
+      commitSegments((current) =>
+        current.filter((segment) => segment.id !== segmentId),
+      );
+      setLabelsById((current) => {
+        if (!(segmentId in current)) return current;
+        const next = { ...current };
+        delete next[segmentId];
+        return next;
+      });
+      setSelectedSegmentId((currentId) =>
+        currentId === segmentId ? null : currentId,
+      );
+      setHoveredSegmentId((currentId) =>
+        currentId === segmentId ? null : currentId,
+      );
+      setMergePreview((current) => {
+        if (
+          current?.activeId === segmentId ||
+          current?.targetId === segmentId
+        ) {
+          return null;
+        }
+        return current;
+      });
+      setWordMarkTimeOverridesBySegmentId((current) => {
+        if (!(segmentId in current)) return current;
+        const next = { ...current };
+        delete next[segmentId];
+        return next;
+      });
+      setDraggingWordMarker((current) =>
+        current?.segmentId === segmentId ? null : current,
+      );
+    },
+    [commitSegments],
+  );
 
   const onShrinkWrapSegment = React.useCallback(
     (segmentId: string) => {
       if (!audioBuffer) return;
-      setSegments((current) =>
+      commitSegments((current) =>
         sortSegments(
           current.map((segment) => {
             if (segment.id !== segmentId) return segment;
@@ -1893,12 +2009,12 @@ export default function AudioCutterDialog({
       setHoveredSegmentId(segmentId);
       setSelectedSegmentId(segmentId);
     },
-    [audioBuffer, buildSegment, detectionSettings],
+    [audioBuffer, buildSegment, commitSegments, detectionSettings],
   );
 
   const onShrinkWrapAll = React.useCallback(() => {
     if (!audioBuffer) return;
-    setSegments((current) =>
+    commitSegments((current) =>
       sortSegments(
         current.map((segment) => {
           const nextBounds = getShrinkWrappedSegment(
@@ -1914,7 +2030,7 @@ export default function AudioCutterDialog({
         }),
       ),
     );
-  }, [audioBuffer, buildSegment, detectionSettings]);
+  }, [audioBuffer, buildSegment, commitSegments, detectionSettings]);
 
   const mergeOverlappingRegions = React.useCallback(
     (plugin: RegionsPlugin, activeId: string, targetId: string) => {
@@ -1956,7 +2072,7 @@ export default function AudioCutterDialog({
         delete next[removedId];
         return next;
       });
-      setSegments((current) => {
+      commitSegments((current) => {
         const next = current.filter(
           (segment) => segment.id !== activeId && segment.id !== targetId,
         );
@@ -1972,7 +2088,7 @@ export default function AudioCutterDialog({
       setHoveredSegmentId(survivingId);
       setSelectedSegmentId(survivingId);
     },
-    [buildSegment, labelsById, segments],
+    [buildSegment, commitSegments, labelsById, segments],
   );
 
   const pendingRegionTouchesCommittedSegment = React.useCallback(
@@ -2393,7 +2509,7 @@ export default function AudioCutterDialog({
           setMergePreview(null);
           return;
         }
-        setSegments((current) =>
+        commitSegments((current) =>
           sortSegments([
             ...current,
             buildSegment({
@@ -2462,7 +2578,7 @@ export default function AudioCutterDialog({
         region.remove();
         return;
       } else {
-        setSegments((current) =>
+        commitSegments((current) =>
           sortSegments(
             current.map((segment) =>
               segment.id === region.id
@@ -2520,6 +2636,7 @@ export default function AudioCutterDialog({
     };
   }, [
     buildSegment,
+    commitSegments,
     mergeOverlappingRegions,
     pendingRegionTouchesCommittedSegment,
     segments,
@@ -2546,10 +2663,10 @@ export default function AudioCutterDialog({
           ),
         ),
       );
-      setSegments(next);
+      commitSegments(next);
       setSelectedSegmentId(next[0]?.id ?? null);
     },
-    [buildSegment],
+    [buildSegment, commitSegments],
   );
 
   const runAutoDetect = React.useCallback(() => {
@@ -2602,7 +2719,9 @@ export default function AudioCutterDialog({
       activeDraftRegionIdRef.current = null;
       pendingRegionIdsRef.current.clear();
       setSelectedSegmentId(null);
+      segmentsRef.current = [];
       setSegments([]);
+      resetSegmentHistory();
       setLabelsById({});
       setMergePreview(null);
       setPlaybackTimeSeconds(0);
@@ -2633,7 +2752,7 @@ export default function AudioCutterDialog({
         }
       }
     },
-    [typedRegionsPlugin, updateLoadedAudio],
+    [resetSegmentHistory, typedRegionsPlugin, updateLoadedAudio],
   );
 
   const onFileInputChange = React.useCallback(
@@ -2799,7 +2918,7 @@ export default function AudioCutterDialog({
       lockTranscriptAutoScroll(scrollContainer);
       scrollContainer.scrollTo({
         left: clamp(centeredLeftPx, 0, maxScrollLeft),
-        behavior: "smooth",
+        behavior: "instant",
       });
     },
     [lockTranscriptAutoScroll, waveformReady, wavesurfer, zoomPxPerSec],
@@ -2968,26 +3087,85 @@ export default function AudioCutterDialog({
     [playSegmentAudio, scrollWaveformToSegment],
   );
 
-  const selectSegmentByIndex = React.useCallback(
-    (index: number) => {
-      const segment = sortedSegments[index];
-      if (!segment) return;
+  const joinSelectedSegmentWithNext = React.useCallback(() => {
+    const currentIndex = selectedSegmentIndex >= 0 ? selectedSegmentIndex : 0;
+    const currentSegment = sortedSegments[currentIndex];
+    const nextSegment = sortedSegments[currentIndex + 1];
+    if (!currentSegment || !nextSegment) return;
 
-      setHoveredSegmentId(segment.id);
-      setSelectedSegmentId(segment.id);
-      scrollWaveformToSegment(segment);
-      scrollTranscriptRowIntoView(index, "smooth");
-    },
-    [scrollTranscriptRowIntoView, scrollWaveformToSegment, sortedSegments],
-  );
+    const survivingId = currentSegment.id;
+    const removedId = nextSegment.id;
+    const mergedStart = Math.min(currentSegment.start, nextSegment.start);
+    const mergedEnd = Math.max(currentSegment.end, nextSegment.end);
+    const preservedLabel =
+      labelsById[survivingId] || labelsById[removedId] || "";
+
+    activeDraftRegionIdRef.current = null;
+    pendingRegionIdsRef.current.delete(survivingId);
+    pendingRegionIdsRef.current.delete(removedId);
+    setMergePreview(null);
+    setLabelsById((current) => {
+      const next = { ...current };
+      next[survivingId] = preservedLabel;
+      delete next[removedId];
+      return next;
+    });
+    setWordMarkTimeOverridesBySegmentId((current) => {
+      if (!(removedId in current)) return current;
+      const next = { ...current };
+      delete next[removedId];
+      return next;
+    });
+    setDraggingWordMarker((current) =>
+      current?.segmentId === removedId ? null : current,
+    );
+    commitSegments((current) =>
+      sortSegments([
+        ...current.filter(
+          (segment) =>
+            segment.id !== currentSegment.id && segment.id !== nextSegment.id,
+        ),
+        buildSegment({
+          id: survivingId,
+          start: mergedStart,
+          end: mergedEnd,
+        }),
+      ]),
+    );
+    setHoveredSegmentId(survivingId);
+    setSelectedSegmentId(survivingId);
+  }, [
+    buildSegment,
+    commitSegments,
+    labelsById,
+    selectedSegmentIndex,
+    sortedSegments,
+  ]);
 
   React.useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (detectDialogOpen || shortcutDialogOpen) return;
-      if (event.altKey || event.ctrlKey || event.metaKey) return;
       if (isEditableTarget(event.target)) return;
+
+      if ((event.ctrlKey || event.metaKey) && event.code === "KeyZ") {
+        event.preventDefault();
+        if (event.shiftKey) {
+          redoSegmentChange();
+        } else {
+          undoSegmentChange();
+        }
+        return;
+      }
+
+      if ((event.ctrlKey || event.metaKey) && event.code === "KeyY") {
+        event.preventDefault();
+        redoSegmentChange();
+        return;
+      }
+
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
 
       if (event.code === "Space") {
         event.preventDefault();
@@ -3007,6 +3185,13 @@ export default function AudioCutterDialog({
         return;
       }
 
+      if (event.code === "KeyJ") {
+        event.preventDefault();
+        if (event.repeat) return;
+        joinSelectedSegmentWithNext();
+        return;
+      }
+
       if (event.code === "ArrowLeft" || event.code === "ArrowRight") {
         event.preventDefault();
         if (event.repeat) return;
@@ -3018,7 +3203,11 @@ export default function AudioCutterDialog({
           0,
           sortedSegments.length - 1,
         );
-        selectSegmentByIndex(nextIndex);
+        const nextSegment = sortedSegments[nextIndex];
+        if (nextSegment) {
+          onPlaySegment(nextSegment);
+          scrollTranscriptRowIntoView(nextIndex, "instant");
+        }
       }
     };
 
@@ -3028,13 +3217,16 @@ export default function AudioCutterDialog({
     };
   }, [
     detectDialogOpen,
+    joinSelectedSegmentWithNext,
     shortcutDialogOpen,
     onPlaySegment,
     onPlayPause,
     open,
-    selectSegmentByIndex,
+    redoSegmentChange,
+    scrollTranscriptRowIntoView,
     selectedSegmentIndex,
     sortedSegments,
+    undoSegmentChange,
   ]);
 
   const onZoomIn = React.useCallback(() => {
@@ -3066,13 +3258,13 @@ export default function AudioCutterDialog({
     activeDraftRegionIdRef.current = null;
     pendingRegionIdsRef.current.clear();
     typedRegionsPlugin.clearRegions();
-    setSegments([]);
+    commitSegments([]);
     setLabelsById({});
     setMergePreview(null);
     setWordMarkTimeOverridesBySegmentId({});
     setDraggingWordMarker(null);
     setSelectedSegmentId(null);
-  }, [typedRegionsPlugin]);
+  }, [commitSegments, typedRegionsPlugin]);
 
   const createSegmentFiles = React.useCallback(async () => {
     if (!audioBuffer || !audioFile || segments.length === 0) return;
@@ -3541,6 +3733,9 @@ export default function AudioCutterDialog({
               ["Right arrow", "Select next sentence"],
               ["Space", "Play or pause the selected sentence"],
               ["Enter", "Replay the selected sentence"],
+              ["J", "Join the selected sentence with the next one"],
+              ["Ctrl/Cmd+Z", "Undo segment changes"],
+              ["Ctrl/Cmd+Shift+Z", "Redo segment changes"],
               ["Mouse click", "Select and play a transcript row"],
             ].map(([keys, description]) => (
               <div
