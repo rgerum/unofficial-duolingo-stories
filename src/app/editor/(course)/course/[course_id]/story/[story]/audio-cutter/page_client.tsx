@@ -51,6 +51,8 @@ export default function AudioCutterPageClient({
   const [transcriptItems, setTranscriptItems] = React.useState<
     AudioCutterTranscriptItem[]
   >([]);
+  const [selectedSpeakers, setSelectedSpeakers] = React.useState<string[]>([]);
+  const previousSpeakerKeyRef = React.useRef("");
   const [saveProgress, setSaveProgress] = React.useState<{
     total: number;
     uploaded: number;
@@ -102,6 +104,48 @@ export default function AudioCutterPageClient({
       window.removeEventListener("focus", syncFromStorage);
     };
   }, [storyId]);
+
+  const speakerOptions = React.useMemo(() => {
+    const speakers = new Set<string>();
+    for (const item of transcriptItems) {
+      speakers.add(getTranscriptSpeaker(item));
+    }
+    return [...speakers].sort((left, right) => left.localeCompare(right));
+  }, [transcriptItems]);
+  const speakerKey = speakerOptions.join("\u0000");
+
+  React.useEffect(() => {
+    if (previousSpeakerKeyRef.current === speakerKey) return;
+    previousSpeakerKeyRef.current = speakerKey;
+    setSelectedSpeakers(speakerOptions);
+  }, [speakerKey, speakerOptions]);
+
+  const selectedSpeakerSet = React.useMemo(
+    () => new Set(selectedSpeakers),
+    [selectedSpeakers],
+  );
+  const selectedTranscriptItems = React.useMemo(
+    () =>
+      transcriptItems.filter((item) =>
+        selectedSpeakerSet.has(getTranscriptSpeaker(item)),
+      ),
+    [selectedSpeakerSet, transcriptItems],
+  );
+  const allSpeakersSelected =
+    speakerOptions.length > 0 &&
+    selectedSpeakers.length === speakerOptions.length;
+
+  const toggleSpeaker = React.useCallback((speaker: string) => {
+    setSelectedSpeakers((current) => {
+      if (current.includes(speaker)) {
+        const next = current.filter((item) => item !== speaker);
+        return next.length > 0 ? next : current;
+      }
+      return [...current, speaker].sort((left, right) =>
+        left.localeCompare(right),
+      );
+    });
+  }, []);
 
   const storyIndex =
     stories?.findIndex((story) => story.id === data?.story_data.id) ?? -1;
@@ -259,11 +303,46 @@ export default function AudioCutterPageClient({
             `/editor/course/${coursePathId ?? courseId}/story/${storyId}`,
           );
         }}
-        expectedSegmentCount={transcriptItems.length}
-        transcriptItems={transcriptItems}
+        expectedSegmentCount={selectedTranscriptItems.length}
+        transcriptItems={selectedTranscriptItems}
         primaryActionLabel="Save segments to story"
         primaryActionPendingLabel={saveProgressLabel}
         footerStatusText={footerStatusText}
+        toolbarContent={
+          speakerOptions.length > 1 ? (
+            <div className="flex max-w-full flex-wrap items-center gap-1 border-l border-[var(--color_base_border)] pl-3 text-xs">
+              <button
+                type="button"
+                className={`inline-flex h-7 items-center justify-center rounded-md border px-2 leading-none transition-colors ${
+                  allSpeakersSelected
+                    ? "border-[#0f5f83] bg-[#1cb0f6] font-semibold text-white"
+                    : "border-[var(--color_base_border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--color_base_background)]"
+                }`}
+                onClick={() => setSelectedSpeakers(speakerOptions)}
+              >
+                All
+              </button>
+              {speakerOptions.map((speaker) => {
+                const selected = selectedSpeakerSet.has(speaker);
+                return (
+                  <button
+                    key={speaker}
+                    type="button"
+                    className={`inline-flex h-7 max-w-[160px] items-center justify-center truncate rounded-md border px-2 leading-none transition-colors ${
+                      selected
+                        ? "border-[#0f5f83] bg-[#1cb0f6] font-semibold text-white"
+                        : "border-[var(--color_base_border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--color_base_background)]"
+                    }`}
+                    onClick={() => toggleSpeaker(speaker)}
+                    title={speaker}
+                  >
+                    {speaker}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null
+        }
         onUseSegments={async (segments) => {
           if (!data) {
             throw new Error("Story data is still loading.");
@@ -275,7 +354,7 @@ export default function AudioCutterPageClient({
             throw new Error("Avatar data is still loading.");
           }
           if (segments.length === 0) return false;
-          if (transcriptItems.some((item) => !item.ssml)) {
+          if (selectedTranscriptItems.some((item) => !item.ssml)) {
             throw new Error(
               "This cutter session is missing story audio anchors. Reopen the cutter from the story editor and try again.",
             );
@@ -434,6 +513,10 @@ type LanguageData = {
 type UploadedSegment = AudioCutterPreparedSegment & {
   uploadedFilename: string;
 };
+
+function getTranscriptSpeaker(item: AudioCutterTranscriptItem) {
+  return item.speaker || "Narrator";
+}
 
 function getElementAudio(
   element: StoryElementLine | StoryElementHeader | undefined,

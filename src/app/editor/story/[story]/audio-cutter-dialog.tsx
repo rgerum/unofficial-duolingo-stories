@@ -1445,6 +1445,7 @@ export default function AudioCutterDialog({
   primaryActionLabel = "Use segments in bulk editor",
   primaryActionPendingLabel,
   footerStatusText,
+  toolbarContent,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -1457,6 +1458,7 @@ export default function AudioCutterDialog({
   primaryActionLabel?: string;
   primaryActionPendingLabel?: string;
   footerStatusText?: string | null;
+  toolbarContent?: React.ReactNode;
 }) {
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -1479,6 +1481,7 @@ export default function AudioCutterDialog({
   const isSyncingRegionsRef = React.useRef(false);
   const activeDraftRegionIdRef = React.useRef<string | null>(null);
   const pendingRegionIdsRef = React.useRef<Set<string>>(new Set());
+  const transcriptItemsKeyRef = React.useRef("");
   const autoDetectRequestRef = React.useRef(0);
   const normalizeOperationRef = React.useRef(0);
   const lastHandledAutoDetectRequestRef = React.useRef(0);
@@ -1587,6 +1590,10 @@ export default function AudioCutterDialog({
     });
     return next;
   }, [playbackTimeSeconds, sortedSegments, wordMarksBySegmentId]);
+  const transcriptItemsKey = React.useMemo(
+    () => transcriptItems.map((item) => item.id).join("\u0000"),
+    [transcriptItems],
+  );
 
   React.useEffect(() => {
     segmentsRef.current = segments;
@@ -1903,6 +1910,24 @@ export default function AudioCutterDialog({
       resetState();
     }
   }, [open, resetState]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    if (transcriptItemsKeyRef.current === transcriptItemsKey) return;
+    transcriptItemsKeyRef.current = transcriptItemsKey;
+    activeDraftRegionIdRef.current = null;
+    pendingRegionIdsRef.current.clear();
+    typedRegionsPlugin.clearRegions();
+    segmentsRef.current = [];
+    setSegments([]);
+    resetSegmentHistory();
+    setLabelsById({});
+    setMergePreview(null);
+    setHoveredSegmentId(null);
+    setWordMarkTimeOverridesBySegmentId({});
+    setDraggingWordMarker(null);
+    setSelectedSegmentId(null);
+  }, [open, resetSegmentHistory, transcriptItemsKey, typedRegionsPlugin]);
 
   React.useEffect(() => {
     return () => {
@@ -3580,6 +3605,7 @@ export default function AudioCutterDialog({
         <div className="min-w-0 flex-1 truncate text-sm text-[var(--text-color-dim)]">
           {audioFile?.name || "No source audio selected."}
         </div>
+        {toolbarContent}
       </div>
 
       <Dialog open={detectDialogOpen} onOpenChange={setDetectDialogOpen}>
