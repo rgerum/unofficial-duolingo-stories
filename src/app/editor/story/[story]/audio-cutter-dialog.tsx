@@ -2570,6 +2570,8 @@ export default function AudioCutterDialog({
         return;
       }
       const overlappingRegion = getOverlappingRegion(plugin, region);
+      setHoveredSegmentId(region.id);
+      setSelectedSegmentId(region.id);
       setMergePreview(
         overlappingRegion
           ? { activeId: region.id, targetId: overlappingRegion.id }
@@ -2617,6 +2619,7 @@ export default function AudioCutterDialog({
           ),
         );
         setHoveredSegmentId(region.id);
+        setSelectedSegmentId(region.id);
       }
       setMergePreview(null);
       refreshRegionUi();
