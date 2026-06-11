@@ -3914,7 +3914,6 @@ export default function AudioCutterDialog({
                         onMouseEnter={() => {
                           if (!matchedSegment) return;
                           setHoveredSegmentId(matchedSegment.id);
-                          setSelectedSegmentId(matchedSegment.id);
                         }}
                       >
                         <div
