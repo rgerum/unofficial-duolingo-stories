@@ -57,6 +57,7 @@ const MP3_SAMPLE_BLOCK_SIZE = 1152;
 const MIN_WORD_MARK_GAP_MS = 20;
 const SEGMENT_HISTORY_LIMIT = 100;
 const SEGMENT_COLOR = "rgba(28,176,246,0.2)";
+const SEGMENT_SELECTED_COLOR = "rgba(28,176,246,0.34)";
 const SEGMENT_BORDER_COLOR = "rgba(15,95,131,0.4)";
 const SEGMENT_ACTIVE_BORDER_COLOR = "rgba(28,176,246,0.95)";
 const cachedAudioSegmentation = new WeakMap<
@@ -2136,9 +2137,10 @@ export default function AudioCutterDialog({
         if (!region) return;
         const wordMarks = wordMarksBySegmentId[segment.id] ?? [];
         const activeWordIndex = activeWordIndexBySegmentId[segment.id] ?? -1;
+        const isSelectedSegment = selectedSegmentId === segment.id;
 
         region.setOptions({
-          color: SEGMENT_COLOR,
+          color: isSelectedSegment ? SEGMENT_SELECTED_COLOR : SEGMENT_COLOR,
           drag: false,
           resize: true,
           minLength: MIN_SEGMENT_LENGTH_SECONDS,
@@ -2172,15 +2174,14 @@ export default function AudioCutterDialog({
             region.content.style.zIndex = "1";
           }
           region.element.style.border = `1px solid ${
-            selectedSegmentId === segment.id
+            isSelectedSegment
               ? SEGMENT_ACTIVE_BORDER_COLOR
               : SEGMENT_BORDER_COLOR
           }`;
           region.element.style.borderRadius = "10px";
-          region.element.style.boxShadow =
-            selectedSegmentId === segment.id
-              ? "inset 0 0 0 1px rgba(255,255,255,0.26), 0 0 0 1px rgba(28,176,246,0.2)"
-              : "inset 0 0 0 1px rgba(255,255,255,0.2)";
+          region.element.style.boxShadow = isSelectedSegment
+            ? "inset 0 0 0 2px rgba(255,255,255,0.36), 0 0 0 2px rgba(28,176,246,0.28), 0 8px 20px rgba(15,95,131,0.24)"
+            : "inset 0 0 0 1px rgba(255,255,255,0.2)";
           syncRegionSkipMarkers(region.element, segment);
           syncRegionWordMarkers(
             region.element,
@@ -3882,7 +3883,6 @@ export default function AudioCutterDialog({
                 <div className="space-y-3">
                   {transcriptItems.map((item, index) => {
                     const matchedSegment = sortedSegments[index];
-                    const isVisible = visibleSegmentIndexes.has(index);
                     const isSelected = selectedSegmentIndex === index;
                     const wordMarks = matchedSegment
                       ? (wordMarksBySegmentId[matchedSegment.id] ?? [])
@@ -3900,11 +3900,9 @@ export default function AudioCutterDialog({
                         )
                       : 0.001;
                     const cardClassName = `rounded-[20px] border px-4 py-3 text-left transition-colors ${
-                      isVisible
-                        ? "border-[#d7e34f] bg-[#f8fbcf]"
-                        : isSelected
-                          ? "border-[#1cb0f6] bg-[rgba(28,176,246,0.08)]"
-                          : "border-[var(--color_base_border)] bg-[var(--body-background)]"
+                      isSelected
+                        ? "border-[#1cb0f6] bg-[rgba(28,176,246,0.1)] shadow-[0_0_0_1px_rgba(28,176,246,0.22),0_8px_22px_rgba(15,95,131,0.1)]"
+                        : "border-[var(--color_base_border)] bg-[var(--body-background)]"
                     }`;
 
                     return (
@@ -3939,8 +3937,8 @@ export default function AudioCutterDialog({
                           <div className="flex items-start gap-4">
                             <div
                               className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-bold ${
-                                isVisible
-                                  ? "border-[#c8d339] bg-[#ffffff] text-[#465100]"
+                                isSelected
+                                  ? "border-[#0f5f83] bg-[#1cb0f6] text-white"
                                   : "border-[var(--color_base_border)] bg-[var(--body-background-faint)] text-[var(--text-color)]"
                               }`}
                             >
