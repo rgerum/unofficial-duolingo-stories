@@ -46,6 +46,7 @@ export type StoryListDataProps = {
   public: boolean;
   todo_count: number;
   approvalCount: number;
+  approvedByCurrentUser: boolean;
   author: string;
   author_change: string | null;
 };

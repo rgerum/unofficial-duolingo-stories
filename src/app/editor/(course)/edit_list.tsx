@@ -7,11 +7,16 @@ import {
   useRef,
   useState,
 } from "react";
-import { SpinnerBlue } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import ContributorList from "@/components/ContributorList";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Input from "@/components/ui/input";
 import { matchesStorySearch, parseStorySearch } from "@/lib/story-search";
 import {
@@ -354,6 +359,7 @@ export default function EditList({
                   id={story.id}
                   name={story.name}
                   count={story.approvalCount ?? 0}
+                  approvedByCurrentUser={story.approvedByCurrentUser}
                   status={story.status}
                   public={story.public}
                   official={course.official}
@@ -441,13 +447,14 @@ function DropDownStatus(props: {
   id: number;
   name: string;
   count: number;
+  approvedByCurrentUser: boolean;
   status: string;
   public: boolean;
   official: boolean;
   onStoryStateChange: (
     nextStoryState: Pick<
       StoryListDataProps,
-      "status" | "public" | "approvalCount"
+      "status" | "public" | "approvalCount" | "approvedByCurrentUser"
     >,
   ) => void;
 }) {
@@ -455,6 +462,10 @@ function DropDownStatus(props: {
   let [status, set_status] = useState(props.status);
   let [count, setCount] = useState(props.count);
   let [isPublic, setIsPublic] = useState(props.public);
+  let [approvedByCurrentUser, setApprovedByCurrentUser] = useState(
+    props.approvedByCurrentUser,
+  );
+  let [isConfirmingApproval, setIsConfirmingApproval] = useState(false);
   const toggleApprovalMutation = useMutation(
     api.storyApproval.toggleStoryApproval,
   );
@@ -469,17 +480,26 @@ function DropDownStatus(props: {
   }, [props.count]);
 
   useEffect(() => {
+    setApprovedByCurrentUser(props.approvedByCurrentUser);
+  }, [props.approvedByCurrentUser]);
+
+  useEffect(() => {
     setIsPublic(props.public);
   }, [props.public]);
 
   if (props.official) return <></>;
 
-  async function addApproval() {
-    const confirmed = window.confirm(
-      `Did you check the story "${props.name}" and think it is ready to be published? If you want to give your approval click "ok".\n\nIn case you already gave an approval. "ok" will remove it.`,
-    );
-    if (!confirmed) return;
+  function requestApprovalToggle() {
+    if (loading === 1) return;
+    if (approvedByCurrentUser) {
+      void toggleApproval();
+      return;
+    }
+    setIsConfirmingApproval(true);
+  }
 
+  async function toggleApproval() {
+    setIsConfirmingApproval(false);
     setLoading(1);
     try {
       const response = await toggleApprovalMutation({
@@ -499,10 +519,12 @@ function DropDownStatus(props: {
             : isPublic;
         setCount(count);
         setIsPublic(nextIsPublic);
+        setApprovedByCurrentUser(response.action === "added");
         props.onStoryStateChange({
           status: response.story_status,
           public: nextIsPublic,
           approvalCount: count,
+          approvedByCurrentUser: response.action === "added",
         });
         if (response.published.length) {
           router.refresh();
@@ -533,27 +555,76 @@ function DropDownStatus(props: {
           {status_wrapper(status, isPublic)}
         </span>
       }{" "}
-      {loading === 1 ? (
-        <SpinnerBlue />
-      ) : loading === -1 ? (
-        <img
-          title="an error occurred"
-          alt="error"
-          src="/editor/icons/error.svg"
-        />
-      ) : (
-        <></>
-      )}
       {props.official ? (
         <></>
       ) : (
-        <span
-          className="cursor-pointer whitespace-nowrap rounded-[10px] bg-[var(--editor-ssml)] px-[5px] py-[2px] hover:brightness-90"
-          onClick={addApproval}
+        <button
+          type="button"
+          className={
+            "ml-[4px] inline-flex min-w-[54px] items-center justify-center gap-[4px] whitespace-nowrap rounded-[10px] px-[5px] py-[2px] align-baseline hover:brightness-90 disabled:cursor-wait " +
+            (approvedByCurrentUser
+              ? "bg-[#0089e5] font-bold text-white"
+              : "bg-[var(--editor-ssml)]")
+          }
+          aria-pressed={approvedByCurrentUser}
+          aria-label={
+            approvedByCurrentUser
+              ? `Remove your approval for ${props.name}`
+              : `Approve ${props.name}`
+          }
+          disabled={loading === 1}
+          onClick={requestApprovalToggle}
         >
-          {"👍 " + count}
-        </span>
+          {loading === 1 ? (
+            <span
+              aria-hidden="true"
+              className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+            />
+          ) : loading === -1 ? (
+            <img
+              title="an error occurred"
+              alt="error"
+              src="/editor/icons/error.svg"
+              className="h-4 w-4"
+            />
+          ) : (
+            <span aria-hidden="true">👍</span>
+          )}
+          <span>{count}</span>
+        </button>
       )}
+      <Dialog
+        open={isConfirmingApproval}
+        onOpenChange={setIsConfirmingApproval}
+      >
+        <DialogContent className="max-w-[420px] rounded-[8px] bg-[var(--body-background)] text-left whitespace-normal">
+          <DialogTitle className="text-lg font-bold text-[var(--text-color)]">
+            Approve story?
+          </DialogTitle>
+          <DialogDescription asChild>
+            <p className="text-base leading-relaxed text-[var(--text-color)]">
+              Did you check the story &quot;{props.name}&quot; and think it is
+              ready to be published?
+            </p>
+          </DialogDescription>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              className="rounded-[8px] bg-[var(--editor-ssml)] px-3 py-2 hover:brightness-90"
+              onClick={() => setIsConfirmingApproval(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="rounded-[8px] bg-[#0089e5] px-3 py-2 font-bold text-white hover:brightness-90"
+              onClick={() => void toggleApproval()}
+            >
+              Approve
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

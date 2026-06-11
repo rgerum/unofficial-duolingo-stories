@@ -2,6 +2,7 @@ import { query, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
+import { getSessionLegacyUserId } from "./lib/authorization";
 import { courseContributorValidator } from "./lib/courseContributors";
 
 type LanguageDoc = Doc<"languages">;
@@ -323,6 +324,7 @@ export const getEditorStoriesByCourseLegacyId = query({
     console.timeEnd(imagesTimer);
 
     console.time(authorsTimer);
+    const currentLegacyUserId = await getSessionLegacyUserId(ctx);
     const authorLegacyIds = Array.from(
       new Set(
         stories
@@ -351,6 +353,20 @@ export const getEditorStoriesByCourseLegacyId = query({
       getUserNameByAuthDocId(ctx, authorAuthDocIds),
     ]);
     console.timeEnd(authorsTimer);
+
+    const storyIdsApprovedByCurrentUser = new Set<Id<"stories">>();
+    if (currentLegacyUserId !== null) {
+      const currentUserApprovals = await ctx.db
+        .query("story_approval")
+        .withIndex("by_user", (q) => q.eq("legacyUserId", currentLegacyUserId))
+        .collect();
+      const visibleStoryIds = new Set(stories.map((story) => story._id));
+      for (const approval of currentUserApprovals) {
+        if (visibleStoryIds.has(approval.storyId)) {
+          storyIdsApprovedByCurrentUser.add(approval.storyId);
+        }
+      }
+    }
 
     const result = stories.map((story: StoryDoc) => {
       const authorId = toNumber(story.authorId);
@@ -386,6 +402,7 @@ export const getEditorStoriesByCourseLegacyId = query({
         public: story.public,
         todo_count: story.todo_count ?? 0,
         approvalCount: approvalCount ?? 0,
+        approvedByCurrentUser: storyIdsApprovedByCurrentUser.has(story._id),
         author:
           typeof authorId === "number"
             ? (nameByLegacyId.get(authorId) ?? `User ${authorId}`)
