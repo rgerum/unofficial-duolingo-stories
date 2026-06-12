@@ -13,6 +13,24 @@ declare global {
 
 type UseAudioElement = StoryElementLine | StoryElementHeader;
 
+export function getPlayableKeypoints(
+  keypoints: Audio["keypoints"],
+  durationSeconds: number,
+) {
+  if (!keypoints?.length) return [];
+  if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
+    return keypoints;
+  }
+
+  const durationMs = durationSeconds * 1000;
+  return keypoints.filter(
+    (keypoint) =>
+      Number.isFinite(keypoint.audioStart) &&
+      keypoint.audioStart >= 0 &&
+      keypoint.audioStart <= durationMs,
+  );
+}
+
 export default function useAudio(
   element: UseAudioElement,
   active: boolean,
@@ -50,30 +68,48 @@ export default function useAudio(
       return;
     }
 
-    const timeouts: NodeJS.Timeout[] = [];
+    const timeouts: number[] = [];
+    let completionTimeout: number | undefined;
+
+    const clearScheduledUpdates = () => {
+      timeouts.forEach(clearTimeout);
+      timeouts.length = 0;
+      if (completionTimeout !== undefined) {
+        clearTimeout(completionTimeout);
+        completionTimeout = undefined;
+      }
+    };
+
+    const completePlayback = () => {
+      clearScheduledUpdates();
+      setAudioRange(9999);
+    };
 
     // Set up keypoint timeouts (if available for word highlighting)
-    audio.keypoints?.forEach((keypoint) => {
-      const timeout = setTimeout(() => {
-        setAudioRange(keypoint.rangeEnd);
-      }, keypoint.audioStart);
-      timeouts.push(timeout);
-    });
+    getPlayableKeypoints(audio.keypoints, audioObject.duration).forEach(
+      (keypoint) => {
+        const timeout = window.setTimeout(() => {
+          setAudioRange(keypoint.rangeEnd);
+        }, keypoint.audioStart);
+        timeouts.push(timeout);
+      },
+    );
 
     // Set up completion timeout
-    const completionTimeout = window.setTimeout(
-      () => {
-        setAudioRange(9999);
-        // Auto-advance logic would go here
-      },
-      audioObject.duration * 1000 - 150,
-    );
+    if (Number.isFinite(audioObject.duration) && audioObject.duration > 0) {
+      completionTimeout = window.setTimeout(
+        completePlayback,
+        Math.max(0, audioObject.duration * 1000 - 150),
+      );
+    }
+
+    audioObject.addEventListener("ended", completePlayback, { once: true });
 
     // Cleanup function
     const cancel = () => {
-      timeouts.forEach(clearTimeout);
-      clearTimeout(completionTimeout);
+      clearScheduledUpdates();
       setAudioRange(99999);
+      audioObject.removeEventListener("ended", completePlayback);
       audioObject.pause();
     };
 
