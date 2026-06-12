@@ -32,6 +32,7 @@ import type {
   AudioCutterPreparedSegment,
   AudioCutterTranscriptItem,
 } from "@/app/editor/story/[story]/audio-cutter-storage";
+import { getSegmentRelativeKeypointsFromWordMarks } from "@/app/editor/story/[story]/audio-cutter-keypoints";
 import {
   getGraphemeLength,
   getTranscriptWordTokens,
@@ -642,23 +643,6 @@ function getActiveWordMarkIndex(
   return currentTimeSeconds >= (marks[marks.length - 1]?.time ?? 0) / 1000
     ? marks.length - 1
     : -1;
-}
-
-function getKeypointsFromWordMarks(marks: AudioMark[]) {
-  return marks
-    .map((mark) => ({
-      rangeEnd: mark.end,
-      audioStart: mark.time,
-    }))
-    .filter(
-      (point, index, points) =>
-        Number.isFinite(point.rangeEnd) &&
-        Number.isFinite(point.audioStart) &&
-        point.rangeEnd > 0 &&
-        (index === 0 ||
-          point.rangeEnd !== points[index - 1]?.rangeEnd ||
-          point.audioStart !== points[index - 1]?.audioStart),
-    );
 }
 
 function sanitizeDetectionSettings(
@@ -3381,7 +3365,8 @@ export default function AudioCutterDialog({
             itemId: item.id,
             lineIndex: item.lineIndex,
             ssml: item.ssml,
-            keypoints: getKeypointsFromWordMarks(
+            keypoints: getSegmentRelativeKeypointsFromWordMarks(
+              segment,
               wordMarksBySegmentId[segment.id] ?? [],
             ),
           },
