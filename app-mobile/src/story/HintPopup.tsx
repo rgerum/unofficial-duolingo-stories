@@ -1,0 +1,104 @@
+import React from "react";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { colors } from "../theme";
+
+type HintRequest = {
+  translation: string;
+  pronunciation?: string;
+  x: number;
+  y: number;
+};
+
+type HintPopupApi = {
+  show: (hint: HintRequest) => void;
+  hide: () => void;
+};
+
+export const HintPopupContext = React.createContext<HintPopupApi>({
+  show: () => {},
+  hide: () => {},
+});
+
+/**
+ * Tap-to-translate bubble. The web shows hover tooltips; on mobile a tap on a
+ * hinted word shows this bubble near the touch point for a couple of seconds.
+ */
+export function HintPopupHost({ children }: { children: React.ReactNode }) {
+  const [hint, setHint] = React.useState<HintRequest | null>(null);
+  const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const hide = React.useCallback(() => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    setHint(null);
+  }, []);
+
+  const show = React.useCallback((request: HintRequest) => {
+    if (timer.current) clearTimeout(timer.current);
+    setHint(request);
+    timer.current = setTimeout(() => setHint(null), 2500);
+  }, []);
+
+  const api = React.useMemo(() => ({ show, hide }), [show, hide]);
+  const insets = useSafeAreaInsets();
+
+  const screenWidth = Dimensions.get("window").width;
+  const bubbleLeft = hint
+    ? Math.min(Math.max(hint.x - 70, 8), screenWidth - 148)
+    : 0;
+  // The host fills the modal window, so pageY maps directly; keep the bubble
+  // out of the status-bar area.
+  const bubbleTop = hint ? Math.max(hint.y - 80, insets.top + 8) : 0;
+
+  return (
+    <HintPopupContext.Provider value={api}>
+      <View style={{ flex: 1 }}>
+        {children}
+        {hint && (
+          <View
+            pointerEvents="none"
+            style={[styles.bubble, { left: bubbleLeft, top: bubbleTop }]}
+          >
+            <Text style={styles.translation}>{hint.translation}</Text>
+            {hint.pronunciation ? (
+              <Text style={styles.pronunciation}>{hint.pronunciation}</Text>
+            ) : null}
+          </View>
+        )}
+      </View>
+    </HintPopupContext.Provider>
+  );
+}
+
+const styles = StyleSheet.create({
+  bubble: {
+    position: "absolute",
+    minWidth: 140,
+    maxWidth: 260,
+    backgroundColor: "#ffffff",
+    borderColor: colors.border,
+    borderWidth: 2,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+    zIndex: 100,
+  },
+  translation: {
+    fontSize: 18,
+    color: colors.text,
+    textAlign: "center",
+  },
+  pronunciation: {
+    fontSize: 14,
+    color: colors.textDim,
+    marginTop: 2,
+    textAlign: "center",
+  },
+});
