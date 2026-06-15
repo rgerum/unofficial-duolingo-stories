@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "org.duostories.app"
+      "bundleIdentifier": "org.duostories.app",
+      "icon": "./assets/icon.png"
     },
     "android": {
       "package": "org.duostories.app",
