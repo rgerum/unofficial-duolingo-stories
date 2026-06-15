@@ -43,6 +43,7 @@
   ],
   "exclude": [
     "node_modules",
+    "app-mobile",
     "**/cypress/**/*.ts",
     ".next/dev/types/**/*.ts"
   ]
