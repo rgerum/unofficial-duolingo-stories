@@ -40,11 +40,13 @@ export function Footer({
     // the primary action — all full width.
     return (
       <View style={[styles.root, bottomPadding]}>
-        <Button
-          title="Back to overview"
-          variant="neutral"
-          onPress={onBackToOverview}
-        />
+        {onBackToOverview && (
+          <Button
+            title="Back to overview"
+            variant="neutral"
+            onPress={onBackToOverview}
+          />
+        )}
         {nextStoryPreview && (
           <>
             <Text style={styles.upNext}>Up next</Text>

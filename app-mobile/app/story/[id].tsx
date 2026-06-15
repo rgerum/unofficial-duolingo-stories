@@ -55,7 +55,7 @@ export default function StoryScreen() {
     return () => {
       cancelled = true;
     };
-  }, [story?.course_short, story]);
+  }, [story]);
 
   const nextStory = React.useMemo(() => {
     if (!course || !doneIds) return undefined;

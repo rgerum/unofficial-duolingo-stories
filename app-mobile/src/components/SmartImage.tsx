@@ -23,6 +23,8 @@ export function SmartImage({
 }) {
   if (!uri) return <View style={[{ width, height }, style]} />;
 
+  // Extension-only detection assumes trusted Duolingo/duostories CDN URLs;
+  // switch to content-type checks if untrusted image sources are introduced.
   const isSvg = uri.split("?")[0].toLowerCase().endsWith(".svg");
   return (
     <View style={[{ width, height }, style]}>

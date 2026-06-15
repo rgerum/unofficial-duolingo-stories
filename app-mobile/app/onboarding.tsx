@@ -20,9 +20,11 @@ export default function Onboarding() {
         </Text>
       </View>
       <CoursePicker
-        onSelect={(course) => {
-          setCourseShort(course.short);
-          setHasSeenWelcome(true);
+        onSelect={async (course) => {
+          await Promise.all([
+            setCourseShort(course.short),
+            setHasSeenWelcome(true),
+          ]);
           router.replace("/(tabs)");
         }}
       />

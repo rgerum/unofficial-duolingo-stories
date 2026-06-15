@@ -10,21 +10,21 @@ import {
 type AppState = {
   ready: boolean;
   hasSeenWelcome: boolean;
-  setHasSeenWelcome: (value: boolean) => void;
+  setHasSeenWelcome: (value: boolean) => Promise<void>;
   courseShort: string | null;
-  setCourseShort: (short: string) => void;
+  setCourseShort: (short: string) => Promise<void>;
   hideStoryQuestions: boolean;
-  setHideStoryQuestions: (value: boolean) => void;
+  setHideStoryQuestions: (value: boolean) => Promise<void>;
 };
 
 const AppStateContext = React.createContext<AppState>({
   ready: false,
   hasSeenWelcome: false,
-  setHasSeenWelcome: () => {},
+  setHasSeenWelcome: () => Promise.resolve(),
   courseShort: null,
-  setCourseShort: () => {},
+  setCourseShort: () => Promise.resolve(),
   hideStoryQuestions: false,
-  setHideStoryQuestions: () => {},
+  setHideStoryQuestions: () => Promise.resolve(),
 });
 
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
@@ -57,17 +57,17 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   const setHasSeenWelcome = React.useCallback((value: boolean) => {
     setHasSeenWelcomeState(value);
-    void setBool(STORAGE_KEYS.hasSeenWelcome, value);
+    return setBool(STORAGE_KEYS.hasSeenWelcome, value);
   }, []);
 
   const setCourseShort = React.useCallback((short: string) => {
     setCourseShortState(short);
-    void setString(STORAGE_KEYS.currentCourse, short);
+    return setString(STORAGE_KEYS.currentCourse, short);
   }, []);
 
   const setHideStoryQuestions = React.useCallback((value: boolean) => {
     setHideStoryQuestionsState(value);
-    void setBool(STORAGE_KEYS.hideStoryQuestions, value);
+    return setBool(STORAGE_KEYS.hideStoryQuestions, value);
   }, []);
 
   const value = React.useMemo(

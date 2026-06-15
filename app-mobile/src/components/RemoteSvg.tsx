@@ -21,12 +21,16 @@ function ensureViewBox(xml: string): string {
   if (!rootMatch) return xml;
   const root = rootMatch[0];
   if (/viewBox=/.test(root)) return xml;
-  const width = root.match(/\swidth="([\d.]+)(?:px)?"/);
-  const height = root.match(/\sheight="([\d.]+)(?:px)?"/);
+  const width = root.match(/\swidth="([\d.]+)([a-z%]*)"/i);
+  const height = root.match(/\sheight="([\d.]+)([a-z%]*)"/i);
   if (!width || !height) return xml;
+  if (width[2] === "%" || height[2] === "%") return xml;
+  const widthValue = parseFloat(width[1]);
+  const heightValue = parseFloat(height[1]);
+  if (!Number.isFinite(widthValue) || !Number.isFinite(heightValue)) return xml;
   return xml.replace(
     root,
-    root.replace("<svg", `<svg viewBox="0 0 ${width[1]} ${height[1]}"`),
+    root.replace("<svg", `<svg viewBox="0 0 ${widthValue} ${heightValue}"`),
   );
 }
 
@@ -52,7 +56,13 @@ function fetchSvg(url: string): Promise<string | null> {
     .then((result) => {
       cache.set(url, result);
       pending.delete(url);
-      listeners.get(url)?.forEach((listener) => listener());
+      listeners.get(url)?.forEach((listener) => {
+        try {
+          listener();
+        } catch (error) {
+          console.error("SVG listener failed", { url, error });
+        }
+      });
       listeners.delete(url);
       return result;
     });

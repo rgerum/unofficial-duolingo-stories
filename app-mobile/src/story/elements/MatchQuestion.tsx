@@ -73,8 +73,7 @@ export function MatchQuestion({
 
       if (selectedSame) {
         selectedSame.state = "idle";
-        if (selectedSame.index === newWord.index && selectedSame === newWord)
-          return next;
+        if (selectedSame.index === newWord.index) return next;
       }
 
       if (!selectedOther) {

@@ -20,12 +20,15 @@ export function getParts(elements: StoryElement[]): StoryElement[][] {
       parts.push([]);
     parts[parts.length - 1].push(element);
   }
-  for (let i = 0; i < parts.length; i++) {
-    for (let j = 0; j < parts[i].length; j++) {
-      parts[i][j].trackingProperties.line_index = i;
-    }
-  }
-  return parts;
+  return parts.map((part, i) =>
+    part.map((element) => ({
+      ...element,
+      trackingProperties: {
+        ...element.trackingProperties,
+        line_index: i,
+      },
+    })),
+  );
 }
 
 /** MATCH challenges have no line content, so they vanish in listening mode. */

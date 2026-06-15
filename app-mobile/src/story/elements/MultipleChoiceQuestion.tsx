@@ -64,10 +64,7 @@ export function MultipleChoiceQuestion({
               ) : (
                 <HintText
                   content={answer}
-                  style={[
-                    styles.answerLabel,
-                    ...(dimmed ? [styles.answerDimmed] : []),
-                  ]}
+                  style={[styles.answerLabel, dimmed && styles.answerDimmed]}
                 />
               )}
             </View>

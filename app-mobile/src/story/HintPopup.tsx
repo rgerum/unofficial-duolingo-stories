@@ -20,6 +20,9 @@ export const HintPopupContext = React.createContext<HintPopupApi>({
   hide: () => {},
 });
 
+const BUBBLE_MAX_WIDTH = 260;
+const BUBBLE_EDGE_INSET = 8;
+
 /**
  * Tap-to-translate bubble. The web shows hover tooltips; on mobile a tap on a
  * hinted word shows this bubble near the touch point for a couple of seconds.
@@ -37,7 +40,10 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
   const show = React.useCallback((request: HintRequest) => {
     if (timer.current) clearTimeout(timer.current);
     setHint(request);
-    timer.current = setTimeout(() => setHint(null), 2500);
+    timer.current = setTimeout(() => {
+      setHint(null);
+      timer.current = null;
+    }, 2500);
   }, []);
 
   const api = React.useMemo(() => ({ show, hide }), [show, hide]);
@@ -45,7 +51,10 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
 
   const screenWidth = Dimensions.get("window").width;
   const bubbleLeft = hint
-    ? Math.min(Math.max(hint.x - 70, 8), screenWidth - 148)
+    ? Math.min(
+        Math.max(hint.x - BUBBLE_MAX_WIDTH / 2, BUBBLE_EDGE_INSET),
+        screenWidth - (BUBBLE_MAX_WIDTH + BUBBLE_EDGE_INSET),
+      )
     : 0;
   // The host fills the modal window, so pageY maps directly; keep the bubble
   // out of the status-bar area.
@@ -75,7 +84,7 @@ const styles = StyleSheet.create({
   bubble: {
     position: "absolute",
     minWidth: 140,
-    maxWidth: 260,
+    maxWidth: BUBBLE_MAX_WIDTH,
     backgroundColor: "#ffffff",
     borderColor: colors.border,
     borderWidth: 2,

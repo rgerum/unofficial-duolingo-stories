@@ -20,7 +20,7 @@ export function playSoundEffect(name: SoundEffectName): void {
         if (status.didJustFinish) {
           subscription.remove();
           try {
-            player.remove();
+            player.release();
           } catch {}
         }
       },

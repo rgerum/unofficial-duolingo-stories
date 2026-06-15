@@ -32,7 +32,7 @@ exist and are already public.
 Develop the app inside this repo as a workspace package so it imports the generated
 Convex API directly:
 
-```
+```text
 /app-mobile/              # Expo app (new)
   app/                    # Expo Router routes
   src/
@@ -52,7 +52,7 @@ backend changes — the single biggest payoff of staying in this repo.
 
 ## 2. Information Architecture & Navigation
 
-```
+```text
 Root (tab-less stack)
 ├── Welcome               # app start, signed-out only: Sign in / Register / Continue anonymously
 ├── Onboarding            # after Welcome on first launch: pick base language → course

@@ -2,8 +2,19 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { playSoundEffect } from "../soundEffects";
-import { WordChip } from "../WordChip";
+import { WordChip, type ChipStatus } from "../WordChip";
 import type { StoryElementArrange } from "../types";
+
+type ButtonState = 0 | 1 | 2;
+
+const STATUS_MAP: Record<ButtonState, ChipStatus> = {
+  0: "idle",
+  1: "off",
+  2: "wrong",
+};
+
+// Delay matches the wrong-answer flash animation before the chip resets.
+const WRONG_FLASH_DELAY_MS = 820;
 
 /**
  * Word-bank challenge: tap the phrases in the right order. Ported from the
@@ -20,10 +31,18 @@ export function ArrangeQuestion({
 }) {
   const characterPositions = element.characterPositions;
   // 0 = available, 1 = used, 2 = briefly wrong
-  const [buttonState, setButtonState] = React.useState<number[]>(() =>
+  const [buttonState, setButtonState] = React.useState<ButtonState[]>(() =>
     new Array(element.phraseOrder.length).fill(0),
   );
   const [position, setPosition] = React.useState(0);
+  const resetTimers = React.useRef(new Set<ReturnType<typeof setTimeout>>());
+
+  React.useEffect(() => {
+    return () => {
+      for (const timer of resetTimers.current) clearTimeout(timer);
+      resetTimers.current.clear();
+    };
+  }, []);
 
   const click = (index: number) => {
     if (buttonState[index] === 1) return;
@@ -40,11 +59,13 @@ export function ArrangeQuestion({
       setButtonState((state) =>
         state.map((value, i) => (i === index ? 2 : value)),
       );
-      setTimeout(() => {
+      const timer = setTimeout(() => {
+        resetTimers.current.delete(timer);
         setButtonState((state) =>
           state.map((value, i) => (i === index && value === 2 ? 0 : value)),
         );
-      }, 820);
+      }, WRONG_FLASH_DELAY_MS);
+      resetTimers.current.add(timer);
       playSoundEffect("wrong");
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
@@ -55,7 +76,7 @@ export function ArrangeQuestion({
       {element.selectablePhrases.map((phrase, index) => (
         <WordChip
           key={index}
-          status={(["idle", "off", "wrong"] as const)[buttonState[index]]}
+          status={STATUS_MAP[buttonState[index]]}
           onPress={() => click(index)}
         >
           {phrase}

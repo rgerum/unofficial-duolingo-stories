@@ -19,6 +19,7 @@ export default function CoursesTab() {
         selectedShort={courseShort}
         onSelect={(course) => {
           setCourseShort(course.short);
+          // Navigate back to Learn so the updated story list is visible.
           router.navigate("/(tabs)");
         }}
       />

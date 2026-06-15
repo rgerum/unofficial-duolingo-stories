@@ -20,26 +20,23 @@ export function useChoiceButtons(
 
   const click = React.useCallback(
     (index: number) => {
-      if (buttonState[index] !== undefined) return;
-      if (index === rightIndex) {
-        setButtonState((state) =>
-          state.map((value, i) =>
+      setButtonState((state) => {
+        if (state[index] !== undefined) return state;
+        if (index === rightIndex) {
+          void Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Success,
+          );
+          callRight();
+          return state.map((value, i) =>
             i === index ? "right" : value === "false" ? "false" : "done",
-          ),
-        );
-        void Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success,
-        );
-        callRight();
-      } else {
-        setButtonState((state) =>
-          state.map((value, i) => (i === index ? "false" : value)),
-        );
+          );
+        }
         playSoundEffect("wrong");
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
+        return state.map((value, i) => (i === index ? "false" : value));
+      });
     },
-    [buttonState, callRight, rightIndex],
+    [callRight, rightIndex],
   );
 
   return [buttonState, click];

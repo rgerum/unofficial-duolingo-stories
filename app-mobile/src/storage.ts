@@ -43,7 +43,9 @@ export async function getDoneMap(courseShort: string): Promise<DoneMap> {
   if (!raw) return {};
   try {
     const parsed = JSON.parse(raw);
-    return typeof parsed === "object" && parsed !== null ? parsed : {};
+    return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
+      ? (parsed as Record<string, number>)
+      : {};
   } catch {
     return {};
   }

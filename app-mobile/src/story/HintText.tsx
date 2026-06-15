@@ -1,5 +1,12 @@
 import React from "react";
-import { Pressable, Text, TextStyle, View, ViewStyle } from "react-native";
+import {
+  Pressable,
+  Text,
+  type StyleProp,
+  type TextStyle,
+  View,
+  type ViewStyle,
+} from "react-native";
 import { colors } from "../theme";
 import { HintPopupContext } from "./HintPopup";
 import type { ContentWithHints, HideRange } from "./types";
@@ -57,7 +64,7 @@ export function HintText({
   /** Progressive reveal for arrange/continuation (-1 reveals everything). */
   unhide?: number;
   showHints?: boolean;
-  style?: TextStyle | TextStyle[];
+  style?: StyleProp<TextStyle>;
   containerStyle?: ViewStyle;
   rtl?: boolean;
   centered?: boolean;

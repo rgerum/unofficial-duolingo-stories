@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { WordChip } from "../WordChip";
 import { useChoiceButtons } from "../useChoiceButtons";
 import type { StoryElementSelectPhrase } from "../types";
@@ -18,7 +18,7 @@ export function SelectPhraseQuestion({
   );
 
   return (
-    <View style={{ marginTop: 10 }}>
+    <View style={styles.container}>
       {element.answers.map((answer, index) => {
         const label =
           typeof answer === "string"
@@ -40,3 +40,9 @@ export function SelectPhraseQuestion({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 10,
+  },
+});

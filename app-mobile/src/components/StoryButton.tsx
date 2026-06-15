@@ -9,7 +9,7 @@ export type StoryListItem = {
   name: string;
   active: string;
   gilded: string;
-  active_lip: string;
+  active_lip?: string;
   set_id: number;
   set_index: number;
 };
@@ -46,7 +46,9 @@ export function StoryButton({
           style={[
             styles.tile,
             {
-              backgroundColor: done ? colors.gold : `#${story.active_lip}`,
+              backgroundColor: done
+                ? colors.gold
+                : `#${story.active_lip ?? "000000"}`,
             },
           ]}
         />

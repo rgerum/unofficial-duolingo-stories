@@ -79,7 +79,7 @@ export function playAudio(
     timeouts.forEach(clearTimeout);
     subscription.remove();
     try {
-      player.remove();
+      player.release();
     } catch {}
     if (cancelCurrent === cancel) cancelCurrent = null;
   };

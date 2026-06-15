@@ -31,6 +31,8 @@ function extractSpriteCell(spriteXml: string, index: number): string | null {
 
   const cells: string[] = [];
   // Skip the outer <svg>, then collect each nested <svg>…</svg> block.
+  // This is trusted static CloudFront sprite XML; comments, CDATA, embedded
+  // ">" values, or malformed markup would need a real XML parser.
   let pos = spriteXml.indexOf("<svg", spriteXml.indexOf("<svg") + 1);
   while (pos !== -1) {
     let depth = 0;

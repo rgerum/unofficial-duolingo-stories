@@ -10,21 +10,14 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { api } from "../api";
 import { colors } from "../theme";
 import { Flag } from "./Flag";
 
-type CourseItem = {
-  id: number;
-  short: string;
-  name: string;
-  count: number;
-  learningLanguage: {
-    short: string;
-    flag?: number | string;
-    flag_file?: string;
-  };
-};
+type LandingData = FunctionReturnType<typeof api.landing.getPublicLandingPageData>;
+type LandingGroup = LandingData["groups"][number];
+type CourseItem = LandingGroup["courses"][number];
 
 /**
  * Course list grouped by base language ("Stories for English", …), fed by the
@@ -50,8 +43,8 @@ export function CoursePicker({
 
   const query = search.trim().toLowerCase();
   const sections = data.groups
-    .map((group) => {
-      const courses = (group.courses as CourseItem[]).filter(
+    .map((group: LandingGroup) => {
+      const courses: CourseItem[] = group.courses.filter(
         (course) =>
           !query ||
           course.name.toLowerCase().includes(query) ||
@@ -79,7 +72,7 @@ export function CoursePicker({
           placeholderTextColor={colors.disabled}
           autoCorrect={false}
           autoCapitalize="none"
-          clearButtonMode="while-editing"
+          clearButtonMode="never"
         />
         {search.length > 0 && (
           <Pressable

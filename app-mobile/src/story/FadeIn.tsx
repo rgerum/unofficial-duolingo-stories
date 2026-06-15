@@ -14,7 +14,7 @@ export function FadeIn({
 
   React.useEffect(() => {
     if (!visible) return;
-    Animated.parallel([
+    const animation = Animated.parallel([
       Animated.timing(opacity, {
         toValue: 1,
         duration: 250,
@@ -25,8 +25,10 @@ export function FadeIn({
         duration: 250,
         useNativeDriver: true,
       }),
-    ]).start();
-  }, [visible, opacity, translateY]);
+    ]);
+    animation.start();
+    return () => animation.stop();
+  }, [visible]);
 
   if (!visible) return null;
 

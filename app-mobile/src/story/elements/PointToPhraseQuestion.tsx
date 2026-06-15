@@ -14,16 +14,16 @@ export function PointToPhraseQuestion({
   element: StoryElementPointToPhrase;
   advance: () => void;
 }) {
-  // Map transcript part index -> button index (only selectable parts).
-  const buttonIndices: Record<number, number> = {};
+  // Dense button index -> transcript part index (only selectable parts).
+  const buttonIndices: number[] = [];
   for (let index = 0; index < element.transcriptParts.length; index++) {
-    if (element.transcriptParts[index].selectable)
-      buttonIndices[index] = Object.keys(buttonIndices).length;
+    if (element.transcriptParts[index].selectable) buttonIndices.push(index);
   }
+  const rightIndex = buttonIndices.indexOf(element.correctAnswerIndex);
 
   const [buttonState, click] = useChoiceButtons(
-    element.transcriptParts.length,
-    element.correctAnswerIndex,
+    buttonIndices.length,
+    rightIndex,
     advance,
   );
 
@@ -35,8 +35,8 @@ export function PointToPhraseQuestion({
           part.selectable ? (
             <WordChip
               key={index}
-              status={buttonState[buttonIndices[index]]}
-              onPress={() => click(buttonIndices[index])}
+              status={buttonState[buttonIndices.indexOf(index)]}
+              onPress={() => click(buttonIndices.indexOf(index))}
             >
               {part.text.replace(/\{.*?}/g, "")}
             </WordChip>
