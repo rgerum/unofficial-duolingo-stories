@@ -26,6 +26,13 @@ const nextStepValidator = v.object({
   reviewStoryId: v.union(v.number(), v.null()),
 });
 
+const currentUserProgressValidator = v.array(
+  v.object({
+    courseShort: v.string(),
+    completedCount: v.number(),
+  }),
+);
+
 export const recordStoryDone = mutation({
   args: storyDoneInputValidator.fields,
   returns: v.object({
@@ -119,6 +126,39 @@ export const getDoneStoryIdsForCurrentUserInCourse = query({
       course._id,
       legacyUserId,
     );
+  },
+});
+
+export const getCurrentUserProgress = query({
+  args: {},
+  returns: v.union(currentUserProgressValidator, v.null()),
+  handler: async (ctx) => {
+    const legacyUserId = await getCurrentIdentityLegacyUserId(ctx);
+    if (!legacyUserId) return null;
+
+    const rows = await ctx.db
+      .query("story_done_state")
+      .withIndex("by_user_and_last_done_at", (q) =>
+        q.eq("legacyUserId", legacyUserId),
+      )
+      .collect();
+
+    const countByCourseId = new Map<Id<"courses">, number>();
+    for (const row of rows) {
+      countByCourseId.set(
+        row.courseId,
+        (countByCourseId.get(row.courseId) ?? 0) + 1,
+      );
+    }
+
+    const result: Array<{ courseShort: string; completedCount: number }> = [];
+    for (const [courseId, completedCount] of countByCourseId) {
+      const course = await ctx.db.get(courseId);
+      if (!course?.short) continue;
+      result.push({ courseShort: course.short, completedCount });
+    }
+
+    return result.sort((a, b) => a.courseShort.localeCompare(b.courseShort));
   },
 });
 

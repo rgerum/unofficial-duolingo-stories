@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 import { api } from "../../src/api";
+import { useAuthSession } from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
 import {
   getDoneMap,
@@ -26,14 +27,23 @@ import { colors } from "../../src/theme";
 export default function LearnTab() {
   const router = useRouter();
   const { ready, courseShort } = useAppState();
+  const { data: session } = useAuthSession();
 
   const course = useQuery(
     api.landing.getPublicCoursePageData,
     courseShort ? { short: courseShort } : "skip",
   );
+  const serverDoneIds = useQuery(
+    api.storyDone.getDoneStoryIdsForCurrentUserInCourse,
+    session?.session && courseShort ? { courseShort } : "skip",
+  );
 
   const [doneMap, setDoneMap] = React.useState<DoneMap>({});
   const [listening, setListening] = React.useState(false);
+  const serverDoneSet = React.useMemo(
+    () => new Set(serverDoneIds ?? []),
+    [serverDoneIds],
+  );
 
   // Reload local progress whenever the tab regains focus (e.g. after a story).
   useFocusEffect(
@@ -85,7 +95,9 @@ export default function LearnTab() {
   }
 
   const stories = course.stories as StoryListItem[];
-  const doneCount = stories.filter((story) => doneMap[String(story.id)]).length;
+  const isStoryDone = (storyId: number) =>
+    serverDoneSet.has(storyId) || Boolean(doneMap[String(storyId)]);
+  const doneCount = stories.filter((story) => isStoryDone(story.id)).length;
 
   // Stories arrive sorted by (set_id, set_index); group them into sets.
   const sets: { setId: number; stories: StoryListItem[] }[] = [];
@@ -136,7 +148,7 @@ export default function LearnTab() {
                 <StoryButton
                   key={story.id}
                   story={story}
-                  done={Boolean(doneMap[String(story.id)])}
+                  done={isStoryDone(story.id)}
                   listeningMode={listening}
                   onPress={() =>
                     router.push(

@@ -1,8 +1,9 @@
 import React from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
 import { AppStateProvider } from "../src/app-state";
+import { useConvexBetterAuth } from "../src/auth-client";
 import { configureAudioSession } from "../src/story/audio";
 
 const convex = new ConvexReactClient(
@@ -16,7 +17,7 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ConvexProvider client={convex}>
+    <ConvexProviderWithAuth client={convex} useAuth={useConvexBetterAuth}>
       <AppStateProvider>
         <StatusBar style="dark" />
         <Stack screenOptions={{ headerShown: false }}>
@@ -31,6 +32,6 @@ export default function RootLayout() {
           />
         </Stack>
       </AppStateProvider>
-    </ConvexProvider>
+    </ConvexProviderWithAuth>
   );
 }

@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-polly": "^3.1061.0",
+    "@better-auth/expo": "^1.6.14",
     "@codemirror/language": "^6.12.3",
     "@codemirror/state": "^6.6.0",
     "@convex-dev/better-auth": "^0.12.2",

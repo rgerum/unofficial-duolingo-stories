@@ -13,17 +13,21 @@ pnpm install
 pnpm start          # Expo dev server → press i (iOS simulator) / a (Android)
 ```
 
-Works in Expo Go. `EXPO_PUBLIC_CONVEX_URL` (in `.env`) points at the same
-Convex deployment as the web app.
+Works in Expo Go. `EXPO_PUBLIC_CONVEX_URL` and
+`EXPO_PUBLIC_CONVEX_SITE_URL` (in `.env`) point at the same Convex deployment
+as the web app.
 
 ```bash
 pnpm run typecheck  # tsc --noEmit
 ```
 
-## What's implemented (milestones M1 + M2)
+## What's implemented (milestones M1 + M2, plus account entry)
 
 - **Welcome screen** mirroring the PWA's `/learn` page: Sign in / Register /
-  Continue anonymously. The choice is remembered (`hasSeenWelcome`).
+  Continue anonymously. Anonymous choice is remembered (`hasSeenWelcome`).
+- **Account entry**: Better Auth username/password sign-in and registration
+  backed by the existing Convex auth server, with the mobile session stored in
+  SecureStore.
 - **Course picker** (onboarding + Courses tab) from
   `api.landing.getPublicLandingPageData`, grouped by base language.
 - **Story list** (Learn tab) from `api.landing.getPublicCoursePageData`:
@@ -39,14 +43,13 @@ pnpm run typecheck  # tsc --noEmit
   `{storyId: timestamp}` per course — the same shape `recordStoryDone`
   expects, so first-login sync can replay it. "Next story" after completion
   is computed locally from the course list.
-- **Profile tab**: anonymous card with sign-in/register entry points,
+- **Profile tab**: account card with sign-in/register/sign-out actions,
   "hide story questions" preference, per-course progress stats, reset.
 
 ## Not yet implemented
 
-- **Accounts (M3)**: Better Auth via `@better-auth/expo` — the Sign
-  in/Register buttons currently lead to a "coming soon" screen. Requires the
-  `expo()` plugin + `duostories://` trusted origin on the server.
+- **Accounts (M3)**: cloud progress sync after sign-in, password reset, and
+  social login/Sign in with Apple.
 - **M4 polish**: audio prefetch to disk, dark mode, deep links, offline
   story downloads.
 

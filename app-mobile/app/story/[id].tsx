@@ -7,8 +7,9 @@ import {
   View,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../src/api";
+import { useAuthSession } from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
 import { getDoneMap, markStoryDone } from "../../src/storage";
 import { Reader } from "../../src/story/Reader";
@@ -32,6 +33,8 @@ export default function StoryScreen() {
   const storyId = Number(params.id);
   const listening = params.listening === "1";
   const { hideStoryQuestions } = useAppState();
+  const { data: session } = useAuthSession();
+  const recordStoryDone = useMutation(api.storyDone.recordStoryDone);
 
   const story = useQuery(
     api.storyRead.getStoryByLegacyId,
@@ -43,19 +46,29 @@ export default function StoryScreen() {
     api.landing.getPublicCoursePageData,
     story ? { short: story.course_short } : "skip",
   );
+  const serverDoneIds = useQuery(
+    api.storyDone.getDoneStoryIdsForCurrentUserInCourse,
+    session?.session && story ? { courseShort: story.course_short } : "skip",
+  );
 
-  const [doneIds, setDoneIds] = React.useState<Set<number> | null>(null);
+  const [localDoneIds, setLocalDoneIds] = React.useState<Set<number> | null>(
+    null,
+  );
   React.useEffect(() => {
     if (!story) return;
     let cancelled = false;
     void getDoneMap(story.course_short).then((map) => {
       if (cancelled) return;
-      setDoneIds(new Set(Object.keys(map).map(Number)));
+      setLocalDoneIds(new Set(Object.keys(map).map(Number)));
     });
     return () => {
       cancelled = true;
     };
   }, [story]);
+  const doneIds = React.useMemo(() => {
+    if (!localDoneIds && !serverDoneIds) return null;
+    return new Set([...(localDoneIds ?? []), ...(serverDoneIds ?? [])]);
+  }, [localDoneIds, serverDoneIds]);
 
   const nextStory = React.useMemo(() => {
     if (!course || !doneIds) return undefined;
@@ -76,7 +89,10 @@ export default function StoryScreen() {
   const onFinishedReached = React.useCallback(() => {
     if (!story) return;
     void markStoryDone(story.course_short, story.id);
-  }, [story]);
+    if (session?.session) {
+      void recordStoryDone({ legacyStoryId: story.id });
+    }
+  }, [recordStoryDone, session?.session, story]);
 
   const leave = React.useCallback(() => {
     stopAudio();

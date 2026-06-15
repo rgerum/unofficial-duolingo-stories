@@ -101,7 +101,7 @@ export function Reader({
     if (buttonStatus === "wait" || buttonStatus === "...") return;
     if (buttonStatus === "idle") {
       setButtonStatus("wait");
-      setPartProgress((progress) => progress + 1);
+      setPartProgress(1);
       return;
     }
     if (buttonStatus === "continue" || buttonStatus === "right") {

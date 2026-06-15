@@ -1,5 +1,6 @@
 import { createClient } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
+import { expo } from "@better-auth/expo";
 import type { GenericCtx } from "@convex-dev/better-auth/utils";
 import type { BetterAuthOptions } from "better-auth";
 import type { DataModel } from "./_generated/dataModel";
@@ -191,10 +192,16 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
         "http://localhost:3000",
         authBaseUrl,
         "https://*-duostories-team.vercel.app",
+        "duostories://",
+        "duostories://*",
       ].filter(Boolean) as string[];
 
       if (host?.endsWith("-duostories-team.vercel.app") && origin) {
         allowed.push(origin);
+      }
+
+      if (process.env.NODE_ENV === "development") {
+        allowed.push("exp://", "exp://**");
       }
 
       return allowed;
@@ -271,6 +278,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       },
     },
     plugins: [
+      expo(),
       convex({ authConfig }),
       username(),
       admin({

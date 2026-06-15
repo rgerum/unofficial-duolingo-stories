@@ -31,7 +31,9 @@
     "plugins": [
       "expo-router",
       "expo-image",
-      "expo-audio"
+      "expo-audio",
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "extra": {
       "router": {},
