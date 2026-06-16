@@ -1,6 +1,15 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View, ViewStyle } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
 import { colors } from "../theme";
+import { Text } from "../components/Text";
+import { getLanguageTextStyle } from "./languageStyles";
 
 /**
  * Word-bank / answer chip with the same states as the web's WordButton:
@@ -28,12 +37,16 @@ export function WordChip({
   onPress,
   block = false,
   style,
+  labelLang,
+  labelStyle,
 }: {
   children: React.ReactNode;
   status: ChipStatus;
   onPress?: () => void;
   block?: boolean;
   style?: ViewStyle;
+  labelLang?: string;
+  labelStyle?: StyleProp<TextStyle>;
 }) {
   const normalized =
     status === "false" ? "wrong" : status === "done" ? "off" : status;
@@ -99,7 +112,14 @@ export function WordChip({
               },
             ]}
           >
-            <Text style={[styles.label, { color: palette.text }]}>
+            <Text
+              style={[
+                styles.label,
+                getLanguageTextStyle(labelLang, styles.label),
+                labelStyle,
+                { color: palette.text },
+              ]}
+            >
               {children}
             </Text>
           </View>

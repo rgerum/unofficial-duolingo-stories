@@ -1,6 +1,7 @@
 import React from "react";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Text } from "../components/Text";
 import { colors } from "../theme";
 
 type HintRequest = {

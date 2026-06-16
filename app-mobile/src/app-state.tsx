@@ -3,8 +3,10 @@ import {
   STORAGE_KEYS,
   getBool,
   getString,
+  getStringArray,
   setBool,
   setString,
+  setStringArray,
 } from "./storage";
 
 type AppState = {
@@ -14,6 +16,7 @@ type AppState = {
   hasAcceptedDisclaimer: boolean;
   setHasAcceptedDisclaimer: (value: boolean) => Promise<void>;
   courseShort: string | null;
+  activeCourseShorts: string[];
   setCourseShort: (short: string) => Promise<void>;
   hideStoryQuestions: boolean;
   setHideStoryQuestions: (value: boolean) => Promise<void>;
@@ -26,6 +29,7 @@ const AppStateContext = React.createContext<AppState>({
   hasAcceptedDisclaimer: false,
   setHasAcceptedDisclaimer: () => Promise.resolve(),
   courseShort: null,
+  activeCourseShorts: [],
   setCourseShort: () => Promise.resolve(),
   hideStoryQuestions: false,
   setHideStoryQuestions: () => Promise.resolve(),
@@ -39,23 +43,37 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [courseShort, setCourseShortState] = React.useState<string | null>(
     null,
   );
+  const [activeCourseShorts, setActiveCourseShortsState] = React.useState<
+    string[]
+  >([]);
   const [hideStoryQuestions, setHideStoryQuestionsState] =
     React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [welcome, acceptedDisclaimer, course, hideQuestions] =
-        await Promise.all([
+      const [
+        welcome,
+        acceptedDisclaimer,
+        course,
+        activeCourses,
+        hideQuestions,
+      ] = await Promise.all([
         getBool(STORAGE_KEYS.hasSeenWelcome),
         getBool(STORAGE_KEYS.hasAcceptedDisclaimer),
         getString(STORAGE_KEYS.currentCourse),
+        getStringArray(STORAGE_KEYS.activeCourses),
         getBool(STORAGE_KEYS.hideStoryQuestions),
       ]);
       if (cancelled) return;
       setHasSeenWelcomeState(welcome);
       setHasAcceptedDisclaimerState(acceptedDisclaimer);
       setCourseShortState(course);
+      setActiveCourseShortsState(
+        course && !activeCourses.includes(course)
+          ? [course, ...activeCourses]
+          : activeCourses,
+      );
       setHideStoryQuestionsState(hideQuestions);
       setReady(true);
     })();
@@ -76,6 +94,12 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   const setCourseShort = React.useCallback((short: string) => {
     setCourseShortState(short);
+    setActiveCourseShortsState((current) => {
+      if (current.includes(short)) return current;
+      const next = [short, ...current];
+      void setStringArray(STORAGE_KEYS.activeCourses, next);
+      return next;
+    });
     return setString(STORAGE_KEYS.currentCourse, short);
   }, []);
 
@@ -92,6 +116,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       hasAcceptedDisclaimer,
       setHasAcceptedDisclaimer,
       courseShort,
+      activeCourseShorts,
       setCourseShort,
       hideStoryQuestions,
       setHideStoryQuestions,
@@ -103,6 +128,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       hasAcceptedDisclaimer,
       setHasAcceptedDisclaimer,
       courseShort,
+      activeCourseShorts,
       setCourseShort,
       hideStoryQuestions,
       setHideStoryQuestions,

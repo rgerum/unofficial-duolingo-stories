@@ -1,6 +1,7 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { NUNITO_BOLD_FONT_FAMILY } from "../../src/components/Text";
 import { colors } from "../../src/theme";
 
 export default function TabsLayout() {
@@ -10,7 +11,10 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.blue,
         tabBarInactiveTintColor: colors.disabled,
-        tabBarLabelStyle: { fontWeight: "700" },
+        tabBarLabelStyle: {
+          fontFamily: NUNITO_BOLD_FONT_FAMILY,
+          fontWeight: "400",
+        },
       }}
     >
       <Tabs.Screen

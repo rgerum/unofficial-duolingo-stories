@@ -1,12 +1,12 @@
 import React from "react";
 import {
   Pressable,
-  Text,
   type StyleProp,
   type TextStyle,
   View,
   type ViewStyle,
 } from "react-native";
+import { Text } from "../components/Text";
 import { colors } from "../theme";
 import { HintPopupContext } from "./HintPopup";
 import type { ContentWithHints, HideRange } from "./types";
@@ -116,8 +116,8 @@ export function HintText({
           revealed: wasHidden && !hidden,
           dimmed:
             audioRange !== undefined &&
-            audioRange > 0 &&
-            audioRange < pieceStart,
+            (audioRange === 0 ||
+              (audioRange > 0 && audioRange < pieceStart)),
           hint,
         });
       }

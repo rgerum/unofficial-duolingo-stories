@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "57c57e62-de7f-4322-83f3-6810f9c2b53e"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "org.duostories.twa",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

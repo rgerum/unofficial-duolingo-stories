@@ -25,7 +25,7 @@ type PlayHandlers = {
 
 // Only one line plays at a time — the mobile equivalent of the web's
 // window.playing_audio cancel stack.
-let cancelCurrent: (() => void) | null = null;
+let cancelCurrent: ((resetRange?: boolean) => void) | null = null;
 
 // Listening mode subscribes here to auto-advance when a line finishes.
 type DoneListener = () => void;
@@ -40,8 +40,8 @@ function emitDone() {
   for (const listener of [...doneListeners]) listener();
 }
 
-export function stopAudio(): void {
-  cancelCurrent?.();
+export function stopAudio(resetRange = true): void {
+  cancelCurrent?.(resetRange);
   cancelCurrent = null;
 }
 
@@ -63,7 +63,7 @@ export function playAudio(
       handlers.onDone?.();
       emitDone();
     }, 1200);
-    const cancel = () => clearTimeout(timeout);
+  const cancel = () => clearTimeout(timeout);
     cancelCurrent = cancel;
     return cancel;
   }
@@ -84,8 +84,8 @@ export function playAudio(
     if (cancelCurrent === cancel) cancelCurrent = null;
   };
 
-  const cancel = () => {
-    handlers.onRange?.(99999);
+  const cancel = (resetRange = true) => {
+    if (resetRange) handlers.onRange?.(99999);
     try {
       player.pause();
     } catch {}

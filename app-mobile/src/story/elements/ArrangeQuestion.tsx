@@ -78,6 +78,7 @@ export function ArrangeQuestion({
           key={index}
           status={STATUS_MAP[buttonState[index]]}
           onPress={() => click(index)}
+          labelLang={element.lang}
         >
           {phrase}
         </WordChip>

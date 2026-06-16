@@ -27,6 +27,8 @@ import type {
 export type PartSettings = {
   hideQuestions: boolean;
   rtl: boolean;
+  audioAutoPlay: boolean;
+  audioReplayKey: number;
 };
 
 export type PartProps = {
@@ -47,6 +49,8 @@ function HeaderPart({ parts, active, setButtonStatus, settings }: PartProps) {
         element={parts[0] as StoryElementHeader}
         active={active}
         rtl={settings.rtl}
+        autoPlay={settings.audioAutoPlay}
+        replayKey={settings.audioReplayKey}
       />
     </FadeIn>
   );
@@ -60,7 +64,13 @@ function LinePart({ parts, active, setButtonStatus, settings }: PartProps) {
   if (element.type !== "LINE") return null;
   return (
     <FadeIn>
-      <TextLine element={element} active={active} rtl={settings.rtl} />
+      <TextLine
+        element={element}
+        active={active}
+        rtl={settings.rtl}
+        autoPlay={settings.audioAutoPlay}
+        replayKey={settings.audioReplayKey}
+      />
     </FadeIn>
   );
 }
@@ -98,6 +108,8 @@ function MultipleChoicePart({
           element={partOne as StoryElementLine}
           active={active}
           rtl={settings.rtl}
+          autoPlay={settings.audioAutoPlay}
+          replayKey={settings.audioReplayKey}
         />
       </FadeIn>
     );
@@ -124,6 +136,8 @@ function MultipleChoicePart({
           element={partOne as StoryElementLine}
           active={active && partProgress === 0}
           rtl={settings.rtl}
+          autoPlay={settings.audioAutoPlay}
+          replayKey={settings.audioReplayKey}
         />
       </FadeIn>
       {showQuestion && (
@@ -156,7 +170,13 @@ function ContinuationPart({
   if (settings.hideQuestions) {
     return (
       <FadeIn>
-        <TextLine element={line} active={active} rtl={settings.rtl} />
+        <TextLine
+          element={line}
+          active={active}
+          rtl={settings.rtl}
+          autoPlay={settings.audioAutoPlay}
+          replayKey={settings.audioReplayKey}
+        />
       </FadeIn>
     );
   }
@@ -165,7 +185,7 @@ function ContinuationPart({
     <>
       {active && (
         <FadeIn>
-          <QuestionPrompt question={prompt.prompt} />
+          <QuestionPrompt question={prompt.prompt} lang={prompt.lang} />
         </FadeIn>
       )}
       <FadeIn>
@@ -174,6 +194,8 @@ function ContinuationPart({
           active={active}
           unhide={unhide}
           rtl={settings.rtl}
+          autoPlay={settings.audioAutoPlay}
+          replayKey={settings.audioReplayKey}
         />
       </FadeIn>
       {active && (
@@ -209,7 +231,13 @@ function SelectPhrasesPart({
   if (settings.hideQuestions) {
     return (
       <FadeIn>
-        <TextLine element={line} active={active} rtl={settings.rtl} />
+        <TextLine
+          element={line}
+          active={active}
+          rtl={settings.rtl}
+          autoPlay={settings.audioAutoPlay}
+          replayKey={settings.audioReplayKey}
+        />
       </FadeIn>
     );
   }
@@ -218,7 +246,7 @@ function SelectPhrasesPart({
     <>
       {active && (
         <FadeIn>
-          <QuestionPrompt question={prompt.prompt} />
+          <QuestionPrompt question={prompt.prompt} lang={prompt.lang} />
         </FadeIn>
       )}
       <FadeIn>
@@ -227,6 +255,8 @@ function SelectPhrasesPart({
           active={active}
           unhide={unhide}
           rtl={settings.rtl}
+          autoPlay={settings.audioAutoPlay}
+          replayKey={settings.audioReplayKey}
         />
       </FadeIn>
       {active && (
@@ -257,7 +287,13 @@ function ArrangePart({ parts, setButtonStatus, active, settings }: PartProps) {
   if (settings.hideQuestions || !question) {
     return (
       <FadeIn>
-        <TextLine element={line} active={active} rtl={settings.rtl} />
+        <TextLine
+          element={line}
+          active={active}
+          rtl={settings.rtl}
+          autoPlay={settings.audioAutoPlay}
+          replayKey={settings.audioReplayKey}
+        />
       </FadeIn>
     );
   }
@@ -266,7 +302,7 @@ function ArrangePart({ parts, setButtonStatus, active, settings }: PartProps) {
     <>
       {active && (
         <FadeIn>
-          <QuestionPrompt question={prompt.prompt} />
+          <QuestionPrompt question={prompt.prompt} lang={prompt.lang} />
         </FadeIn>
       )}
       <FadeIn>
@@ -275,6 +311,8 @@ function ArrangePart({ parts, setButtonStatus, active, settings }: PartProps) {
           active={active}
           unhide={unhide}
           rtl={settings.rtl}
+          autoPlay={settings.audioAutoPlay}
+          replayKey={settings.audioReplayKey}
         />
       </FadeIn>
       {active && (
@@ -315,7 +353,13 @@ function PointToPhrasePart({
   if (settings.hideQuestions) {
     return (
       <FadeIn>
-        <TextLine element={line} active={active} rtl={settings.rtl} />
+        <TextLine
+          element={line}
+          active={active}
+          rtl={settings.rtl}
+          autoPlay={settings.audioAutoPlay}
+          replayKey={settings.audioReplayKey}
+        />
       </FadeIn>
     );
   }
@@ -328,6 +372,8 @@ function PointToPhrasePart({
             element={line}
             active={active && partProgress === 0}
             rtl={settings.rtl}
+            autoPlay={settings.audioAutoPlay}
+            replayKey={settings.audioReplayKey}
           />
         </FadeIn>
       )}

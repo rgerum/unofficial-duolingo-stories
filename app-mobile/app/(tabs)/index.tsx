@@ -4,7 +4,6 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  Text,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,6 +20,7 @@ import {
 } from "../../src/storage";
 import { StoryButton, type StoryListItem } from "../../src/components/StoryButton";
 import { Button } from "../../src/components/Button";
+import { Text } from "../../src/components/Text";
 import { colors } from "../../src/theme";
 
 /** Learn tab: the current course's stories, grouped by set. */

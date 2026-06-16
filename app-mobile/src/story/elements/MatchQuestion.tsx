@@ -102,7 +102,7 @@ export function MatchQuestion({
 
   return (
     <View>
-      <QuestionPrompt question={element.prompt} />
+      <QuestionPrompt question={element.prompt} lang={element.lang_question} />
       <View style={styles.columns}>
         {lists.map((list, listIndex) => (
           <View key={listIndex} style={styles.column}>
@@ -110,8 +110,13 @@ export function MatchQuestion({
               <WordChip
                 key={word.key}
                 block
-                status={word.state === "idle" ? undefined : (word.state as ChipStatus)}
+                status={
+                  word.state === "idle" ? undefined : (word.state as ChipStatus)
+                }
                 onPress={() => selectWord(listIndex, wordIndex)}
+                labelLang={
+                  listIndex === 0 ? element.lang : element.lang_question
+                }
               >
                 {word.value}
               </WordChip>

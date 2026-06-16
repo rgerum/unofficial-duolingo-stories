@@ -1,9 +1,10 @@
 import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAppState } from "../src/app-state";
 import { Button } from "../src/components/Button";
+import { Text } from "../src/components/Text";
 import { colors } from "../src/theme";
 
 /**

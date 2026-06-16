@@ -1,14 +1,9 @@
 import React from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme";
+import { Text } from "../components/Text";
 import {
   getInitialButtonStatus,
   getNextVisibleStoryProgress,
@@ -74,12 +69,18 @@ export function Reader({
       ? "finished"
       : getInitialButtonStatus(partsList[initial], hideQuestions);
   });
+  const [listeningPaused, setListeningPaused] = React.useState(false);
+  const [audioReplayKey, setAudioReplayKey] = React.useState(0);
   const scrollRef = React.useRef<ScrollView>(null);
 
   const isFinished = storyProgress >= partsList.length;
 
   // Stop any line audio when the reader unmounts.
   React.useEffect(() => stopAudio, []);
+
+  React.useEffect(() => {
+    if (!listening) setListeningPaused(false);
+  }, [listening]);
 
   // Same cues as the web's StoryProgress: chime on a right answer, fanfare
   // when the story is finished.
@@ -120,6 +121,28 @@ export function Reader({
     }
   }, [buttonStatus, hideQuestions, onEnd, partsList, storyProgress]);
 
+  const pauseListening = React.useCallback(() => {
+    stopAudio(false);
+    setListeningPaused(true);
+  }, []);
+
+  const playListening = React.useCallback(() => {
+    setListeningPaused(false);
+    setAudioReplayKey((key) => key + 1);
+  }, []);
+
+  const replayListening = React.useCallback(() => {
+    stopAudio();
+    setListeningPaused(false);
+    setAudioReplayKey((key) => key + 1);
+  }, []);
+
+  const skipListening = React.useCallback(() => {
+    stopAudio();
+    setListeningPaused(false);
+    void next();
+  }, [next]);
+
   // Record completion exactly once when the end is reached.
   const finishedNotified = React.useRef(false);
   React.useEffect(() => {
@@ -135,11 +158,18 @@ export function Reader({
   nextRef.current = next;
   const buttonStatusRef = React.useRef(buttonStatus);
   buttonStatusRef.current = buttonStatus;
+  const listeningPausedRef = React.useRef(listeningPaused);
+  listeningPausedRef.current = listeningPaused;
   React.useEffect(() => {
     if (!listening) return;
     return onAnyAudioDone(() => {
       setTimeout(() => {
-        if (buttonStatusRef.current === "continue") void nextRef.current();
+        if (
+          !listeningPausedRef.current &&
+          buttonStatusRef.current === "continue"
+        ) {
+          void nextRef.current();
+        }
       }, 500);
     });
   }, [listening]);
@@ -221,7 +251,12 @@ export function Reader({
                 partProgress={partProgress}
                 setButtonStatus={active ? setButtonStatus : noop}
                 active={active}
-                settings={{ hideQuestions, rtl: story.learning_language_rtl }}
+                settings={{
+                  hideQuestions,
+                  rtl: story.learning_language_rtl,
+                  audioAutoPlay: !listeningPaused,
+                  audioReplayKey,
+                }}
               />
             );
           })}
@@ -237,6 +272,11 @@ export function Reader({
           finishedLabel={finishedLabel}
           nextStoryPreview={nextStoryPreview}
           learningLanguageName={learningLanguageName}
+          listeningMode={listening && !isFinished}
+          listeningPaused={listeningPaused}
+          onToggleListening={listeningPaused ? playListening : pauseListening}
+          onReplayListening={replayListening}
+          onSkipListening={skipListening}
         />
       </View>
     </View>

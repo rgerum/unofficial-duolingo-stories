@@ -3,7 +3,13 @@ import { Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../theme";
 
-export function PlayAudioButton({ onPress }: { onPress: () => void }) {
+export function PlayAudioButton({
+  onPress,
+  rtl = false,
+}: {
+  onPress: () => void;
+  rtl?: boolean;
+}) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -12,7 +18,12 @@ export function PlayAudioButton({ onPress }: { onPress: () => void }) {
       hitSlop={8}
       style={({ pressed }) => [styles.root, pressed && { opacity: 0.6 }]}
     >
-      <Ionicons name="volume-medium" size={22} color={colors.blue} />
+      <Ionicons
+        name="volume-medium"
+        size={22}
+        color={colors.blue}
+        style={rtl && styles.iconRtl}
+      />
     </Pressable>
   );
 }
@@ -21,5 +32,8 @@ const styles = StyleSheet.create({
   root: {
     marginRight: 8,
     marginTop: 2,
+  },
+  iconRtl: {
+    transform: [{ scaleX: -1 }],
   },
 });

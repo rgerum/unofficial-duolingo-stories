@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   hasSeenWelcome: "hasSeenWelcome",
   hasAcceptedDisclaimer: "hasAcceptedDisclaimer",
   currentCourse: "currentCourseShort",
+  activeCourses: "activeCourseShorts",
   hideStoryQuestions: "hideStoryQuestions",
 };
 
@@ -26,6 +27,27 @@ export async function setString(key: string, value: string): Promise<void> {
   } catch {
     // best effort — local-only state
   }
+}
+
+export async function getStringArray(key: string): Promise<string[]> {
+  const raw = await getString(key);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed.filter((value): value is string => typeof value === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function setStringArray(
+  key: string,
+  value: string[],
+): Promise<void> {
+  const unique = Array.from(new Set(value.filter(Boolean)));
+  await setString(key, JSON.stringify(unique));
 }
 
 export async function getBool(key: string): Promise<boolean> {

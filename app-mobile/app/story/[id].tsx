@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -16,6 +15,7 @@ import { Reader } from "../../src/story/Reader";
 import { HintPopupHost } from "../../src/story/HintPopup";
 import { stopAudio } from "../../src/story/audio";
 import { Button } from "../../src/components/Button";
+import { Text } from "../../src/components/Text";
 import { colors } from "../../src/theme";
 import type { StoryData } from "../../src/story/types";
 

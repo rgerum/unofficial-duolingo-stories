@@ -5,8 +5,6 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -14,6 +12,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { authClient, notifyAuthChanged } from "../src/auth-client";
 import { useAppState } from "../src/app-state";
 import { Button } from "../src/components/Button";
+import { Text, TextInput } from "../src/components/Text";
 import { colors } from "../src/theme";
 
 type AuthMode = "signin" | "register";

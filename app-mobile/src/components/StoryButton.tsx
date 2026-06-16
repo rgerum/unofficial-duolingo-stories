@@ -1,8 +1,9 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../theme";
 import { SmartImage } from "./SmartImage";
+import { Text } from "./Text";
 
 export type StoryListItem = {
   id: number;

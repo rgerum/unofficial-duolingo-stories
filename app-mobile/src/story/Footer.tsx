@@ -1,9 +1,11 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme";
 import { Button } from "../components/Button";
 import { SmartImage } from "../components/SmartImage";
+import { Text } from "../components/Text";
 
 export type NextStoryPreview = {
   title: string;
@@ -24,6 +26,11 @@ export function Footer({
   finishedLabel,
   nextStoryPreview,
   learningLanguageName,
+  listeningMode = false,
+  listeningPaused = false,
+  onToggleListening,
+  onReplayListening,
+  onSkipListening,
 }: {
   status: string;
   onContinue: () => void;
@@ -31,6 +38,11 @@ export function Footer({
   finishedLabel?: string;
   nextStoryPreview?: NextStoryPreview | null;
   learningLanguageName?: string;
+  listeningMode?: boolean;
+  listeningPaused?: boolean;
+  onToggleListening?: () => void;
+  onReplayListening?: () => void;
+  onSkipListening?: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const bottomPadding = { paddingBottom: Math.max(18, insets.bottom + 10) };
@@ -75,6 +87,59 @@ export function Footer({
   }
 
   const isRight = status === "right";
+  if (listeningMode) {
+    const disabled = status === "wait" || status === "...";
+    return (
+      <View style={[styles.root, styles.listeningRoot, bottomPadding]}>
+        <View style={styles.listeningControls}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={listeningPaused ? "Play line" : "Pause"}
+            disabled={disabled}
+            onPress={onToggleListening}
+            style={({ pressed }) => [
+              styles.primaryControl,
+              disabled && styles.controlDisabled,
+              pressed && !disabled && styles.controlPressed,
+            ]}
+          >
+            <Ionicons
+              name={listeningPaused ? "play" : "pause"}
+              size={28}
+              color="#ffffff"
+            />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Replay line"
+            disabled={disabled}
+            onPress={onReplayListening}
+            style={({ pressed }) => [
+              styles.secondaryControl,
+              disabled && styles.controlDisabled,
+              pressed && !disabled && styles.controlPressed,
+            ]}
+          >
+            <Ionicons name="refresh" size={24} color={colors.blue} />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Next line"
+            disabled={disabled}
+            onPress={onSkipListening}
+            style={({ pressed }) => [
+              styles.secondaryControl,
+              disabled && styles.controlDisabled,
+              pressed && !disabled && styles.controlPressed,
+            ]}
+          >
+            <Ionicons name="play-skip-forward" size={24} color={colors.blue} />
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.root, bottomPadding, isRight && styles.rootRight]}>
       {isRight && <Text style={styles.rightText}>You are correct</Text>}
@@ -99,6 +164,41 @@ const styles = StyleSheet.create({
     backgroundColor: colors.greenLight,
     borderTopColor: colors.greenLight,
     paddingTop: 28,
+  },
+  listeningRoot: {
+    paddingTop: 12,
+  },
+  listeningControls: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 18,
+  },
+  primaryControl: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.green,
+    borderWidth: 2,
+    borderColor: colors.greenDark,
+  },
+  secondaryControl: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ffffff",
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+  controlDisabled: {
+    opacity: 0.45,
+  },
+  controlPressed: {
+    opacity: 0.7,
   },
   rightText: {
     fontSize: 24,

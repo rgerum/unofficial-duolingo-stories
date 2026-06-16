@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { colors, fontSizes } from "../../theme";
 import { HintText } from "../HintText";
+import { getLanguageTextStyle } from "../languageStyles";
 import { useLineAudio } from "../useLineAudio";
 import { PlayAudioButton } from "./PlayAudioButton";
 import type { StoryElementLine } from "../types";
@@ -11,6 +12,33 @@ import type { StoryElementLine } from "../types";
 // corners except where the tail attaches, with a two-triangle tail (border
 // color under background color) pointing at the avatar.
 const TAIL_WIDTH = 12;
+const BUBBLE_HORIZONTAL_PADDING = 24;
+const AUDIO_INLINE_SPACE = 32;
+const MAX_ESTIMATED_BUBBLE_WIDTH = 260;
+
+function getEstimatedTextWidth(text: string, fontSize: number): number {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  let width = 0;
+
+  for (const char of normalized) {
+    if (char === " ") width += fontSize * 0.35;
+    else if (/[,.;:!?'"`]/.test(char)) width += fontSize * 0.28;
+    else width += fontSize * 0.56;
+  }
+
+  return width;
+}
+
+function getBubbleMinWidth(text: string, hasAudio: boolean): number {
+  return Math.min(
+    MAX_ESTIMATED_BUBBLE_WIDTH,
+    Math.ceil(
+      getEstimatedTextWidth(text, fontSizes.body) +
+        BUBBLE_HORIZONTAL_PADDING +
+        (hasAudio ? AUDIO_INLINE_SPACE : 0),
+    ),
+  );
+}
 
 function BubbleTail({ rtl }: { rtl: boolean }) {
   const horizontal = rtl ? { right: 0 } : { left: 0 };
@@ -76,7 +104,7 @@ function LineBody({
     >
       {hasAudio && (
         <View style={[styles.audioButton, rtl ? { right: 0 } : { left: 0 }]}>
-          <PlayAudioButton onPress={onPlay} />
+          <PlayAudioButton onPress={onPlay} rtl={rtl} />
         </View>
       )}
       {children}
@@ -89,14 +117,23 @@ export function TextLine({
   active,
   unhide = 999999,
   rtl,
+  autoPlay = true,
+  replayKey = 0,
 }: {
   element: StoryElementLine;
   active: boolean;
   unhide?: number;
   rtl: boolean;
+  autoPlay?: boolean;
+  replayKey?: number;
 }) {
   const audio = element.line?.content?.audio;
-  const { audioRange, play, hasAudio } = useLineAudio(audio, active, true);
+  const { audioRange, play, hasAudio } = useLineAudio(
+    audio,
+    active,
+    autoPlay,
+    replayKey,
+  );
 
   if (element.line === undefined) return null;
 
@@ -116,7 +153,10 @@ export function TextLine({
             hideRangesForChallenge={hideRanges}
             unhide={unhide}
             rtl={rtl}
-            style={styles.title}
+            style={[
+              styles.title,
+              getLanguageTextStyle(element.lang, styles.title),
+            ]}
           />
         </LineBody>
       </View>
@@ -140,6 +180,13 @@ export function TextLine({
           <View
             style={[
               styles.bubble,
+              {
+                minWidth: getBubbleMinWidth(
+                  element.line.content.text,
+                  hasAudio,
+                ),
+              },
+              rtl && styles.bubbleRtl,
               rtl
                 ? { borderTopRightRadius: 0 }
                 : { borderTopLeftRadius: 0 },
@@ -152,7 +199,10 @@ export function TextLine({
                 hideRangesForChallenge={hideRanges}
                 unhide={unhide}
                 rtl={rtl}
-                style={textStyle}
+                style={[
+                  textStyle,
+                  getLanguageTextStyle(element.lang, textStyle),
+                ]}
               />
             </LineBody>
           </View>
@@ -172,7 +222,7 @@ export function TextLine({
           hideRangesForChallenge={hideRanges}
           unhide={unhide}
           rtl={rtl}
-          style={textStyle}
+          style={[textStyle, getLanguageTextStyle(element.lang, textStyle)]}
         />
       </LineBody>
     </View>
@@ -214,6 +264,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     paddingHorizontal: 12,
     paddingVertical: 10,
+  },
+  bubbleRtl: {
+    alignSelf: "flex-end",
   },
   body: {
     flexShrink: 1,

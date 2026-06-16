@@ -1,7 +1,9 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { colors, fontSizes } from "../../theme";
+import { Text } from "../../components/Text";
 import { WordChip } from "../WordChip";
+import { getLanguageTextStyle } from "../languageStyles";
 import { useChoiceButtons } from "../useChoiceButtons";
 import { QuestionPrompt } from "./QuestionPrompt";
 import type { StoryElementPointToPhrase } from "../types";
@@ -29,7 +31,7 @@ export function PointToPhraseQuestion({
 
   return (
     <View>
-      <QuestionPrompt question={element.question} />
+      <QuestionPrompt question={element.question} lang={element.lang_question} />
       <View style={styles.transcript}>
         {element.transcriptParts.map((part, index) =>
           part.selectable ? (
@@ -37,11 +39,18 @@ export function PointToPhraseQuestion({
               key={index}
               status={buttonState[buttonIndices.indexOf(index)]}
               onPress={() => click(buttonIndices.indexOf(index))}
+              labelLang={element.lang}
             >
               {part.text.replace(/\{.*?}/g, "")}
             </WordChip>
           ) : (
-            <Text key={index} style={styles.plainText}>
+            <Text
+              key={index}
+              style={[
+                styles.plainText,
+                getLanguageTextStyle(element.lang, styles.plainText),
+              ]}
+            >
               {part.text}
             </Text>
           ),

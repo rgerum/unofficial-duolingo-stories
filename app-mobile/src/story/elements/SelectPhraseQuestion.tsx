@@ -32,6 +32,7 @@ export function SelectPhraseQuestion({
             block
             status={status}
             onPress={() => click(index)}
+            labelLang={element.lang}
           >
             {label}
           </WordChip>

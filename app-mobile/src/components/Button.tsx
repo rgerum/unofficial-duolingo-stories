@@ -1,6 +1,7 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View, ViewStyle } from "react-native";
+import { Pressable, StyleSheet, View, ViewStyle } from "react-native";
 import { colors } from "../theme";
+import { Text } from "./Text";
 
 type Variant = "primary" | "secondary" | "neutral" | "danger";
 

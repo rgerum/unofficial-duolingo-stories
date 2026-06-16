@@ -5,7 +5,6 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  Text,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,6 +20,7 @@ import {
 import { useAppState } from "../../src/app-state";
 import { clearAllProgress, getAllProgress } from "../../src/storage";
 import { Button } from "../../src/components/Button";
+import { Text } from "../../src/components/Text";
 import { colors } from "../../src/theme";
 
 export default function ProfileTab() {

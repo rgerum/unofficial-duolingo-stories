@@ -1,8 +1,10 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, fontSizes } from "../../theme";
+import { Text } from "../../components/Text";
 import { HintText } from "../HintText";
+import { getLanguageTextStyle } from "../languageStyles";
 import { useChoiceButtons, type ChoiceState } from "../useChoiceButtons";
 import { QuestionPrompt } from "./QuestionPrompt";
 import type { StoryElementMultipleChoice } from "../types";
@@ -42,10 +44,17 @@ export function MultipleChoiceQuestion({
 
   return (
     <View>
-      {element.question && <QuestionPrompt question={element.question} />}
+      {element.question && (
+        <QuestionPrompt question={element.question} lang={element.lang} />
+      )}
       {element.answers.map((answer, index) => {
         const state = buttonState[index];
         const dimmed = state === "false" || state === "done";
+        const answerStyle = [
+          styles.answerLabel,
+          getLanguageTextStyle(element.lang, styles.answerLabel),
+          dimmed && styles.answerDimmed,
+        ];
         return (
           <Pressable
             key={index}
@@ -56,16 +65,9 @@ export function MultipleChoiceQuestion({
             <CheckCircle state={state} />
             <View style={styles.answerText}>
               {typeof answer === "string" ? (
-                <Text
-                  style={[styles.answerLabel, dimmed && styles.answerDimmed]}
-                >
-                  {answer}
-                </Text>
+                <Text style={answerStyle}>{answer}</Text>
               ) : (
-                <HintText
-                  content={answer}
-                  style={[styles.answerLabel, dimmed && styles.answerDimmed]}
-                />
+                <HintText content={answer} style={answerStyle} />
               )}
             </View>
           </Pressable>

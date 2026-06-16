@@ -4,8 +4,6 @@ import {
   Pressable,
   SectionList,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,6 +12,7 @@ import type { FunctionReturnType } from "convex/server";
 import { api } from "../api";
 import { colors } from "../theme";
 import { Flag } from "./Flag";
+import { Text, TextInput } from "./Text";
 
 type LandingData = FunctionReturnType<typeof api.landing.getPublicLandingPageData>;
 type LandingGroup = LandingData["groups"][number];
