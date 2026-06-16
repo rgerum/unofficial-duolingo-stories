@@ -10,10 +10,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "org.duostories.app",
-      "icon": "./assets/icon.png"
+      "icon": "./assets/icon.png",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
-      "package": "org.duostories.app",
+      "package": "org.duostories.twa",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -31,6 +34,12 @@
       "expo-audio",
       "expo-secure-store",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "26a3f5bd-377b-45e1-865a-94f20f6c7e04"
+      }
+    }
   }
 }
