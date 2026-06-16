@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // table so it can be replayed through `recordStoryDone` once accounts land.
 export const STORAGE_KEYS = {
   hasSeenWelcome: "hasSeenWelcome",
+  hasAcceptedDisclaimer: "hasAcceptedDisclaimer",
   currentCourse: "currentCourseShort",
   hideStoryQuestions: "hideStoryQuestions",
 };

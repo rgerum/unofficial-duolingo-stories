@@ -26,7 +26,8 @@ export default function AuthScreen() {
   const { mode } = useLocalSearchParams<{ mode?: string }>();
   const authMode: AuthMode = mode === "register" ? "register" : "signin";
   const isRegister = authMode === "register";
-  const { setHasSeenWelcome, courseShort } = useAppState();
+  const { hasAcceptedDisclaimer, setHasSeenWelcome, courseShort } =
+    useAppState();
 
   const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -38,8 +39,12 @@ export default function AuthScreen() {
   const finishSignedIn = React.useCallback(async () => {
     await setHasSeenWelcome(true);
     router.dismissAll();
+    if (!hasAcceptedDisclaimer) {
+      router.replace(`/disclaimer?next=${courseShort ? "tabs" : "onboarding"}`);
+      return;
+    }
     router.replace(courseShort ? "/(tabs)" : "/onboarding");
-  }, [courseShort, router, setHasSeenWelcome]);
+  }, [courseShort, hasAcceptedDisclaimer, router, setHasSeenWelcome]);
 
   async function submit() {
     setError(null);
@@ -189,6 +194,14 @@ export default function AuthScreen() {
             onPress={() => {
               void setHasSeenWelcome(true).then(() => {
                 router.dismissAll();
+                if (!hasAcceptedDisclaimer) {
+                  router.replace(
+                    `/disclaimer?action=anonymous&next=${
+                      courseShort ? "tabs" : "onboarding"
+                    }`,
+                  );
+                  return;
+                }
                 router.replace(courseShort ? "/(tabs)" : "/onboarding");
               });
             }}

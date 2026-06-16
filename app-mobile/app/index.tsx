@@ -9,7 +9,8 @@ import { colors } from "../src/theme";
  * the mobile equivalent of the PWA's /learn start URL behavior.
  */
 export default function Index() {
-  const { ready, hasSeenWelcome, courseShort } = useAppState();
+  const { ready, hasSeenWelcome, hasAcceptedDisclaimer, courseShort } =
+    useAppState();
 
   if (!ready) {
     return (
@@ -27,6 +28,7 @@ export default function Index() {
   }
 
   if (!hasSeenWelcome) return <Redirect href="/welcome" />;
+  if (!hasAcceptedDisclaimer) return <Redirect href="/disclaimer" />;
   if (!courseShort) return <Redirect href="/onboarding" />;
   return <Redirect href="/(tabs)" />;
 }
