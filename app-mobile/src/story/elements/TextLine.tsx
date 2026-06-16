@@ -202,10 +202,12 @@ const styles = StyleSheet.create({
     transform: [{ scaleX: -1 }],
   },
   bubbleWrap: {
-    flexShrink: 1,
+    flex: 1,
     alignSelf: "flex-start",
   },
   bubble: {
+    alignSelf: "flex-start",
+    maxWidth: "100%",
     borderWidth: 2,
     borderColor: colors.border,
     borderRadius: 14,

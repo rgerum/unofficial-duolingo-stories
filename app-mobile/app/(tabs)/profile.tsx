@@ -13,6 +13,11 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 import Constants from "expo-constants";
 import { api } from "../../src/api";
+import {
+  authClient,
+  notifyAuthChanged,
+  useAuthSession,
+} from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
 import { clearAllProgress, getAllProgress } from "../../src/storage";
 import { Button } from "../../src/components/Button";
@@ -21,8 +26,13 @@ import { colors } from "../../src/theme";
 export default function ProfileTab() {
   const router = useRouter();
   const { hideStoryQuestions, setHideStoryQuestions } = useAppState();
+  const { data: session, isPending: isSessionPending } = useAuthSession();
   const [progress, setProgress] = React.useState<Record<string, number>>({});
   const courseList = useQuery(api.landing.getPublicCourseList);
+  const serverProgress = useQuery(
+    api.storyDone.getCurrentUserProgress,
+    session?.session ? {} : "skip",
+  );
 
   useFocusEffect(
     React.useCallback(() => {
@@ -44,7 +54,18 @@ export default function ProfileTab() {
     return map;
   }, [courseList]);
 
-  const progressEntries = Object.entries(progress);
+  const progressEntries = React.useMemo(() => {
+    if (serverProgress) {
+      return serverProgress.map((entry) => [
+        entry.courseShort,
+        entry.completedCount,
+      ]) satisfies Array<[string, number]>;
+    }
+    return Object.entries(progress);
+  }, [progress, serverProgress]);
+  const user = session?.user as
+    | { name?: string | null; email?: string | null; username?: string | null }
+    | undefined;
 
   function confirmResetProgress() {
     Alert.alert(
@@ -69,22 +90,50 @@ export default function ProfileTab() {
         <Text style={styles.title}>Profile</Text>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>You're reading anonymously</Text>
-          <Text style={styles.cardBody}>
-            Your progress is saved on this device. Create an account to keep it
-            safe and sync with the web.
-          </Text>
-          <View style={styles.cardActions}>
-            <Button
-              title="Sign in"
-              onPress={() => router.push("/auth?mode=signin")}
-            />
-            <Button
-              title="Register"
-              variant="secondary"
-              onPress={() => router.push("/auth?mode=register")}
-            />
-          </View>
+          {user ? (
+            <>
+              <Text style={styles.cardTitle}>
+                {user.name ?? user.username ?? "Signed in"}
+              </Text>
+              {user.email && <Text style={styles.cardBody}>{user.email}</Text>}
+              <Text style={styles.cardBody}>
+                You're signed in on this device. Cloud progress sync is coming
+                next; local progress is still shown below.
+              </Text>
+              <View style={styles.cardActions}>
+                <Button
+                  title="Sign out"
+                  variant="secondary"
+                  onPress={() => {
+                    void authClient.signOut().then(() => notifyAuthChanged());
+                  }}
+                />
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={styles.cardTitle}>
+                {isSessionPending
+                  ? "Checking account"
+                  : "You're reading anonymously"}
+              </Text>
+              <Text style={styles.cardBody}>
+                Your progress is saved on this device. Create an account to keep
+                it safe and sync with the web.
+              </Text>
+              <View style={styles.cardActions}>
+                <Button
+                  title="Sign in"
+                  onPress={() => router.push("/auth?mode=signin")}
+                />
+                <Button
+                  title="Register"
+                  variant="secondary"
+                  onPress={() => router.push("/auth?mode=register")}
+                />
+              </View>
+            </>
+          )}
         </View>
 
         <Text style={styles.sectionTitle}>Story settings</Text>

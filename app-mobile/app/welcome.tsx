@@ -13,11 +13,10 @@ import { colors } from "../src/theme";
  */
 export default function Welcome() {
   const router = useRouter();
-  const { setHasSeenWelcome, courseShort } = useAppState();
+  const { courseShort } = useAppState();
 
   function continueAnonymously() {
-    setHasSeenWelcome(true);
-    router.replace(courseShort ? "/(tabs)" : "/onboarding");
+    router.push(`/disclaimer?action=anonymous&next=${courseShort ? "tabs" : "onboarding"}`);
   }
 
   return (
@@ -37,11 +36,11 @@ export default function Welcome() {
         <View style={styles.actions}>
           <Button
             title="Sign in"
-            onPress={() => router.push("/auth?mode=signin")}
+            onPress={() => router.push("/disclaimer?action=signin")}
           />
           <Button
             title="Register"
-            onPress={() => router.push("/auth?mode=register")}
+            onPress={() => router.push("/disclaimer?action=register")}
           />
         </View>
 

@@ -17,24 +17,35 @@ export function useChoiceButtons(
   const [buttonState, setButtonState] = React.useState<ChoiceState[]>(() =>
     new Array(count).fill(undefined),
   );
+  const buttonStateRef = React.useRef(buttonState);
+
+  React.useEffect(() => {
+    buttonStateRef.current = buttonState;
+  }, [buttonState]);
 
   const click = React.useCallback(
     (index: number) => {
-      setButtonState((state) => {
-        if (state[index] !== undefined) return state;
-        if (index === rightIndex) {
-          void Haptics.notificationAsync(
-            Haptics.NotificationFeedbackType.Success,
-          );
-          callRight();
-          return state.map((value, i) =>
-            i === index ? "right" : value === "false" ? "false" : "done",
-          );
-        }
-        playSoundEffect("wrong");
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        return state.map((value, i) => (i === index ? "false" : value));
-      });
+      const state = buttonStateRef.current;
+      if (state[index] !== undefined) return;
+
+      if (index === rightIndex) {
+        const nextState = state.map((value, i) =>
+          i === index ? "right" : value === "false" ? "false" : "done",
+        );
+        buttonStateRef.current = nextState;
+        setButtonState(nextState);
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        callRight();
+        return;
+      }
+
+      playSoundEffect("wrong");
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const nextState = state.map((value, i) =>
+        i === index ? "false" : value,
+      );
+      buttonStateRef.current = nextState;
+      setButtonState(nextState);
     },
     [callRight, rightIndex],
   );

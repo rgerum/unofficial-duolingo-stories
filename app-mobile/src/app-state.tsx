@@ -11,6 +11,8 @@ type AppState = {
   ready: boolean;
   hasSeenWelcome: boolean;
   setHasSeenWelcome: (value: boolean) => Promise<void>;
+  hasAcceptedDisclaimer: boolean;
+  setHasAcceptedDisclaimer: (value: boolean) => Promise<void>;
   courseShort: string | null;
   setCourseShort: (short: string) => Promise<void>;
   hideStoryQuestions: boolean;
@@ -21,6 +23,8 @@ const AppStateContext = React.createContext<AppState>({
   ready: false,
   hasSeenWelcome: false,
   setHasSeenWelcome: () => Promise.resolve(),
+  hasAcceptedDisclaimer: false,
+  setHasAcceptedDisclaimer: () => Promise.resolve(),
   courseShort: null,
   setCourseShort: () => Promise.resolve(),
   hideStoryQuestions: false,
@@ -30,6 +34,8 @@ const AppStateContext = React.createContext<AppState>({
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = React.useState(false);
   const [hasSeenWelcome, setHasSeenWelcomeState] = React.useState(false);
+  const [hasAcceptedDisclaimer, setHasAcceptedDisclaimerState] =
+    React.useState(false);
   const [courseShort, setCourseShortState] = React.useState<string | null>(
     null,
   );
@@ -39,13 +45,16 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [welcome, course, hideQuestions] = await Promise.all([
+      const [welcome, acceptedDisclaimer, course, hideQuestions] =
+        await Promise.all([
         getBool(STORAGE_KEYS.hasSeenWelcome),
+        getBool(STORAGE_KEYS.hasAcceptedDisclaimer),
         getString(STORAGE_KEYS.currentCourse),
         getBool(STORAGE_KEYS.hideStoryQuestions),
       ]);
       if (cancelled) return;
       setHasSeenWelcomeState(welcome);
+      setHasAcceptedDisclaimerState(acceptedDisclaimer);
       setCourseShortState(course);
       setHideStoryQuestionsState(hideQuestions);
       setReady(true);
@@ -58,6 +67,11 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const setHasSeenWelcome = React.useCallback((value: boolean) => {
     setHasSeenWelcomeState(value);
     return setBool(STORAGE_KEYS.hasSeenWelcome, value);
+  }, []);
+
+  const setHasAcceptedDisclaimer = React.useCallback((value: boolean) => {
+    setHasAcceptedDisclaimerState(value);
+    return setBool(STORAGE_KEYS.hasAcceptedDisclaimer, value);
   }, []);
 
   const setCourseShort = React.useCallback((short: string) => {
@@ -75,6 +89,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       ready,
       hasSeenWelcome,
       setHasSeenWelcome,
+      hasAcceptedDisclaimer,
+      setHasAcceptedDisclaimer,
       courseShort,
       setCourseShort,
       hideStoryQuestions,
@@ -84,6 +100,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       ready,
       hasSeenWelcome,
       setHasSeenWelcome,
+      hasAcceptedDisclaimer,
+      setHasAcceptedDisclaimer,
       courseShort,
       setCourseShort,
       hideStoryQuestions,

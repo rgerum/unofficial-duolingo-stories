@@ -19,11 +19,11 @@ export function PointToPhraseQuestion({
   for (let index = 0; index < element.transcriptParts.length; index++) {
     if (element.transcriptParts[index].selectable) buttonIndices.push(index);
   }
-  const rightIndex = buttonIndices.indexOf(element.correctAnswerIndex);
 
+  // correctAnswerIndex is already in selectable-button space, not transcript-part space.
   const [buttonState, click] = useChoiceButtons(
     buttonIndices.length,
-    rightIndex,
+    element.correctAnswerIndex,
     advance,
   );
 
