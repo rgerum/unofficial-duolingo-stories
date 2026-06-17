@@ -154,10 +154,11 @@ export function HintText({
         ? UNDERLINE_DASHED
         : undefined;
     const color = token.hidden
-      ? "transparent"
+      ? colors.background
       : token.dimmed
         ? colors.disabled
         : (flatStyle.color ?? colors.text);
+    const hiddenTextStyle = token.hidden ? { opacity: 0 } : undefined;
 
     // Every token gets the same box metrics (text + 3px gap + 2px underline
     // window) so underlined and plain words share a baseline. RN draws
@@ -178,7 +179,9 @@ export function HintText({
         }}
         style={{ marginBottom: 2 }}
       >
-        <Text style={[flatStyle, { color, lineHeight: undefined }]}>
+        <Text
+          style={[flatStyle, { color, lineHeight: undefined }, hiddenTextStyle]}
+        >
           {displayText}
         </Text>
         <View style={{ height: 2, marginTop: 3, overflow: "hidden" }}>
