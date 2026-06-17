@@ -15,6 +15,7 @@ import {
   type EditorProps,
 } from "@/lib/editor/editorHandlers";
 import { cn } from "@/lib/utils";
+import { getStoryLineDirection } from "./text-direction";
 
 function StoryTextLine({
   active,
@@ -52,7 +53,10 @@ function StoryTextLine({
     settings.show_audio,
   );
   const effectiveAudioRange = audioRangeOverride ?? audioRange;
-  const isRtl = settings.rtl || element.lang === "rtl";
+  const isRtl = getStoryLineDirection({
+    storyRtl: settings.rtl,
+    lineLang: element.lang,
+  });
   const showEditorAudioDetails =
     editorShowAudioDetailsOverride ?? settings.show_audio;
   const titleClassName = "m-0 text-[25px] leading-[34px] font-bold";
