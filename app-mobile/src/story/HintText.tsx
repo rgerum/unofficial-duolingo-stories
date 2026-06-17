@@ -197,26 +197,43 @@ export function HintText({
     );
   };
 
-  // Wrapping happens between flex children, so only whitespace may stand
-  // alone: adjacent word/punctuation tokens are glued into one atom — the
-  // browser never breaks between "det" and "?", and neither should we.
+  const fontSize =
+    typeof flatStyle.fontSize === "number" ? flatStyle.fontSize : 19;
+  const collapsedSpaceWidth = Math.ceil(fontSize * 0.35);
+
+  // Wrapping happens between flex children. Adjacent word/punctuation tokens
+  // are glued into one atom — the browser never breaks between "det" and "?"
+  // and neither should we. Whitespace becomes trailing margin on the previous
+  // cluster, so a standalone space cannot wrap to the start of the next line.
   type Atom =
     | { type: "break" }
-    | { type: "space"; token: Token }
-    | { type: "cluster"; tokens: Token[] };
+    | { type: "cluster"; tokens: Token[]; trailingSpaceWidth: number };
   const atoms: Atom[] = [];
+  let afterWhitespace = false;
+  const appendTrailingSpace = (token: Token) => {
+    const last = atoms[atoms.length - 1];
+    if (!last || last.type !== "cluster") return;
+    const collapsedLength = token.text.replace(/\s+/g, " ").length;
+    last.trailingSpaceWidth += collapsedLength * collapsedSpaceWidth;
+    afterWhitespace = true;
+  };
+
   for (const token of tokens) {
     if (token.text.includes("\n")) {
       atoms.push({ type: "break" });
+      afterWhitespace = false;
       continue;
     }
     if (/^\s+$/.test(token.text)) {
-      atoms.push({ type: "space", token });
+      appendTrailingSpace(token);
       continue;
     }
     const last = atoms[atoms.length - 1];
-    if (last && last.type === "cluster") last.tokens.push(token);
-    else atoms.push({ type: "cluster", tokens: [token] });
+    if (last && last.type === "cluster" && !afterWhitespace) {
+      last.tokens.push(token);
+    }
+    else atoms.push({ type: "cluster", tokens: [token], trailingSpaceWidth: 0 });
+    afterWhitespace = false;
   }
 
   return (
@@ -235,11 +252,21 @@ export function HintText({
         if (atom.type === "break") {
           return <View key={index} style={{ width: "100%", height: 0 }} />;
         }
-        if (atom.type === "space") {
-          return renderBox(atom.token, index);
-        }
         if (atom.tokens.length === 1) {
-          return renderBox(atom.tokens[0], index);
+          return (
+            <View
+              key={index}
+              style={
+                atom.trailingSpaceWidth > 0
+                  ? rtl
+                    ? { marginLeft: atom.trailingSpaceWidth }
+                    : { marginRight: atom.trailingSpaceWidth }
+                  : undefined
+              }
+            >
+              {renderBox(atom.tokens[0], index)}
+            </View>
+          );
         }
         return (
           <View
@@ -247,6 +274,11 @@ export function HintText({
             style={{
               flexDirection: rtl ? "row-reverse" : "row",
               alignItems: "flex-end",
+              ...(atom.trailingSpaceWidth > 0
+                ? rtl
+                  ? { marginLeft: atom.trailingSpaceWidth }
+                  : { marginRight: atom.trailingSpaceWidth }
+                : null),
             }}
           >
             {atom.tokens.map((token, tokenIndex) =>

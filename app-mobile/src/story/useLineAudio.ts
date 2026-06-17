@@ -23,24 +23,62 @@ export function useLineAudio(
   const [audioRange, setAudioRange] = React.useState(() =>
     getInitialAudioRange(audio),
   );
+  const cancelRef = React.useRef<((resetRange?: boolean) => void) | null>(null);
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearScheduledPlay = React.useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, []);
+
+  const cancelLineAudio = React.useCallback(
+    (reveal: boolean) => {
+      clearScheduledPlay();
+      cancelRef.current?.(reveal);
+      cancelRef.current = null;
+      if (reveal) setAudioRange(IDLE_AUDIO_RANGE);
+    },
+    [clearScheduledPlay],
+  );
 
   React.useEffect(() => {
+    return () => cancelLineAudio(true);
+  }, [cancelLineAudio]);
+
+  React.useEffect(() => {
+    cancelLineAudio(true);
     setAudioRange(getInitialAudioRange(audio));
-  }, [audio]);
+  }, [audio, cancelLineAudio]);
+
+  React.useEffect(() => {
+    if (!active) cancelLineAudio(true);
+  }, [active, cancelLineAudio]);
 
   const play = React.useCallback(() => {
+    cancelLineAudio(false);
     setAudioRange(getInitialAudioRange(audio));
-    playAudio(audio, { onRange: setAudioRange });
-  }, [audio]);
+    cancelRef.current = playAudio(audio, { onRange: setAudioRange });
+  }, [audio, cancelLineAudio]);
 
   React.useEffect(() => {
     if (!active || !autoPlay) return;
+    cancelLineAudio(false);
     setAudioRange(getInitialAudioRange(audio));
-    const timeout = setTimeout(() => {
-      playAudio(audio, { onRange: setAudioRange });
+    timeoutRef.current = setTimeout(() => {
+      timeoutRef.current = null;
+      cancelRef.current = playAudio(audio, { onRange: setAudioRange });
     }, replayKey > 0 ? 0 : 350);
-    return () => clearTimeout(timeout);
-  }, [active, autoPlay, audio, replayKey]);
+    return clearScheduledPlay;
+  }, [
+    active,
+    autoPlay,
+    audio,
+    replayKey,
+    cancelLineAudio,
+    clearScheduledPlay,
+  ]);
 
   return { audioRange, play, hasAudio: Boolean(audio?.url) };
 }
