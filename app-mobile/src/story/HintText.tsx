@@ -46,6 +46,74 @@ type Token = {
   hint?: { translation: string; pronunciation?: string };
 };
 
+function HintTokenBox({
+  token,
+  displayText,
+  textStyle,
+  hiddenTextStyle,
+  underline,
+  popup,
+}: {
+  token: Token;
+  displayText: string;
+  textStyle: TextStyle;
+  hiddenTextStyle?: { opacity: number };
+  underline?: string;
+  popup: React.ContextType<typeof HintPopupContext>;
+}) {
+  const tokenLayoutRef = React.useRef({ width: 0, height: 0 });
+  const interactive = Boolean(token.hint) && !token.hidden;
+
+  return (
+    <View
+      onLayout={(event) => {
+        tokenLayoutRef.current = {
+          width: event.nativeEvent.layout.width,
+          height: event.nativeEvent.layout.height,
+        };
+      }}
+      style={{ alignSelf: "flex-start", marginBottom: 2 }}
+    >
+      <Pressable
+        disabled={!interactive}
+        onPress={(event) => {
+          if (!token.hint) return;
+          const hint = token.hint;
+          const { locationX, locationY, pageX, pageY } = event.nativeEvent;
+          const { width, height } = tokenLayoutRef.current;
+          const calculatedX =
+            width > 0 ? pageX - locationX + width / 2 : pageX;
+          const calculatedY = height > 0 ? pageY - locationY : pageY;
+          popup.show({
+            translation: hint.translation,
+            pronunciation: hint.pronunciation,
+            x: calculatedX,
+            y: calculatedY,
+          });
+        }}
+      >
+        <Text
+          style={[textStyle, { lineHeight: undefined }, hiddenTextStyle]}
+        >
+          {displayText}
+        </Text>
+        <View style={{ height: 2, marginTop: 3, overflow: "hidden" }}>
+          {underline && (
+            <View
+              style={{
+                height: 8,
+                borderWidth: 2,
+                borderStyle: token.hidden ? "solid" : "dotted",
+                borderColor: underline,
+              }}
+            />
+          )}
+        </View>
+      </Pressable>
+    </View>
+  );
+}
+
 export function HintText({
   content,
   audioRange,
@@ -154,46 +222,22 @@ export function HintText({
         ? UNDERLINE_DASHED
         : undefined;
     const color = token.hidden
-      ? "transparent"
+      ? colors.background
       : token.dimmed
         ? colors.disabled
         : (flatStyle.color ?? colors.text);
+    const hiddenTextStyle = token.hidden ? { opacity: 0 } : undefined;
 
-    // Every token gets the same box metrics (text + 3px gap + 2px underline
-    // window) so underlined and plain words share a baseline. RN draws
-    // dotted borders only on fully-bordered views, so the underline is a
-    // clipped 2px window over one.
     return (
-      <Pressable
+      <HintTokenBox
         key={key}
-        disabled={!interactive}
-        onPress={(event) => {
-          if (!token.hint) return;
-          popup.show({
-            translation: token.hint.translation,
-            pronunciation: token.hint.pronunciation,
-            x: event.nativeEvent.pageX,
-            y: event.nativeEvent.pageY,
-          });
-        }}
-        style={{ marginBottom: 2 }}
-      >
-        <Text style={[flatStyle, { color, lineHeight: undefined }]}>
-          {displayText}
-        </Text>
-        <View style={{ height: 2, marginTop: 3, overflow: "hidden" }}>
-          {underline && (
-            <View
-              style={{
-                height: 8,
-                borderWidth: 2,
-                borderStyle: token.hidden ? "solid" : "dotted",
-                borderColor: underline,
-              }}
-            />
-          )}
-        </View>
-      </Pressable>
+        token={token}
+        displayText={displayText}
+        textStyle={{ ...flatStyle, color }}
+        hiddenTextStyle={hiddenTextStyle}
+        underline={underline}
+        popup={popup}
+      />
     );
   };
 

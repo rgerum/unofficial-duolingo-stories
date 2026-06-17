@@ -22,14 +22,30 @@ export const HintPopupContext = React.createContext<HintPopupApi>({
 });
 
 const BUBBLE_MAX_WIDTH = 260;
+const BUBBLE_MIN_WIDTH = 140;
 const BUBBLE_EDGE_INSET = 8;
+const BUBBLE_HORIZONTAL_PADDING = 32;
+const BUBBLE_DEFAULT_HEIGHT = 46;
+const BUBBLE_VERTICAL_GAP = 8;
+const TRANSLATION_FONT_SIZE = 18;
+const PRONUNCIATION_FONT_SIZE = 14;
+
+function estimatePopupWidth(hint: HintRequest) {
+  const translationWidth = hint.translation.length * TRANSLATION_FONT_SIZE * 0.56;
+  const pronunciationWidth =
+    (hint.pronunciation?.length ?? 0) * PRONUNCIATION_FONT_SIZE * 0.56;
+  return Math.ceil(
+    Math.max(translationWidth, pronunciationWidth) + BUBBLE_HORIZONTAL_PADDING,
+  );
+}
 
 /**
  * Tap-to-translate bubble. The web shows hover tooltips; on mobile a tap on a
- * hinted word shows this bubble near the touch point for a couple of seconds.
+ * hinted word shows this bubble above the word for a couple of seconds.
  */
 export function HintPopupHost({ children }: { children: React.ReactNode }) {
   const [hint, setHint] = React.useState<HintRequest | null>(null);
+  const [bubbleHeight, setBubbleHeight] = React.useState(BUBBLE_DEFAULT_HEIGHT);
   const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const hide = React.useCallback(() => {
@@ -40,6 +56,7 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
 
   const show = React.useCallback((request: HintRequest) => {
     if (timer.current) clearTimeout(timer.current);
+    setBubbleHeight(BUBBLE_DEFAULT_HEIGHT);
     setHint(request);
     timer.current = setTimeout(() => {
       setHint(null);
@@ -51,15 +68,21 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
 
   const screenWidth = Dimensions.get("window").width;
+  const estimatedBubbleWidth = Math.min(
+    BUBBLE_MAX_WIDTH,
+    Math.max(BUBBLE_MIN_WIDTH, hint ? estimatePopupWidth(hint) : BUBBLE_MIN_WIDTH),
+  );
   const bubbleLeft = hint
     ? Math.min(
-        Math.max(hint.x - BUBBLE_MAX_WIDTH / 2, BUBBLE_EDGE_INSET),
-        screenWidth - (BUBBLE_MAX_WIDTH + BUBBLE_EDGE_INSET),
+        Math.max(hint.x - estimatedBubbleWidth / 2, BUBBLE_EDGE_INSET),
+        screenWidth - (estimatedBubbleWidth + BUBBLE_EDGE_INSET),
       )
     : 0;
-  // The host fills the modal window, so pageY maps directly; keep the bubble
-  // out of the status-bar area.
-  const bubbleTop = hint ? Math.max(hint.y - 80, insets.top + 8) : 0;
+  // The host fills the modal window, so pageY maps directly. Keep the popup's
+  // bottom edge just above the word; taller translations grow upward.
+  const bubbleTop = hint
+    ? Math.max(hint.y - bubbleHeight - BUBBLE_VERTICAL_GAP, insets.top + 8)
+    : 0;
 
   return (
     <HintPopupContext.Provider value={api}>
@@ -68,7 +91,16 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
         {hint && (
           <View
             pointerEvents="none"
-            style={[styles.bubble, { left: bubbleLeft, top: bubbleTop }]}
+            onLayout={(event) => {
+              const height = event.nativeEvent.layout.height;
+              if (height > 0 && Math.abs(height - bubbleHeight) > 0.5) {
+                setBubbleHeight(height);
+              }
+            }}
+            style={[
+              styles.bubble,
+              { left: bubbleLeft, top: bubbleTop, width: estimatedBubbleWidth },
+            ]}
           >
             <Text style={styles.translation}>{hint.translation}</Text>
             {hint.pronunciation ? (

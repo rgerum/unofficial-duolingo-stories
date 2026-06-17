@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import * as Haptics from "expo-haptics";
 import { playSoundEffect } from "../soundEffects";
+import { playErrorHaptic, playSelectionHaptic } from "../storyHaptics";
 import { WordChip, type ChipStatus } from "../WordChip";
 import type { StoryElementArrange } from "../types";
 
@@ -54,7 +54,7 @@ export function ArrangeQuestion({
         state.map((value, i) => (i === index ? 1 : value)),
       );
       setPosition(position + 1);
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      playSelectionHaptic();
     } else {
       setButtonState((state) =>
         state.map((value, i) => (i === index ? 2 : value)),
@@ -67,7 +67,7 @@ export function ArrangeQuestion({
       }, WRONG_FLASH_DELAY_MS);
       resetTimers.current.add(timer);
       playSoundEffect("wrong");
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      playErrorHaptic();
     }
   };
 

@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { colors, fontSizes } from "../../theme";
 import { HintText } from "../HintText";
 import { getLanguageTextStyle } from "../languageStyles";
+import { getStoryLineRtl } from "../textDirection";
 import { useLineAudio } from "../useLineAudio";
 import { PlayAudioButton } from "./PlayAudioButton";
 import type { StoryElementLine } from "../types";
@@ -137,6 +138,10 @@ export function TextLine({
 
   if (element.line === undefined) return null;
 
+  const lineRtl = getStoryLineRtl({
+    storyRtl: rtl,
+    lineLang: element.lang,
+  });
   const hideRanges = element.hideRangesForChallenge;
   const textStyle = {
     fontSize: fontSizes.body,
@@ -145,14 +150,14 @@ export function TextLine({
 
   if (element.line.type === "TITLE") {
     return (
-      <View style={[styles.row, rtl && styles.rowRtl]}>
-        <LineBody hasAudio={hasAudio} onPlay={play} rtl={rtl}>
+      <View style={[styles.row, lineRtl && styles.rowRtl]}>
+        <LineBody hasAudio={hasAudio} onPlay={play} rtl={lineRtl}>
           <HintText
             content={element.line.content}
             audioRange={audioRange}
             hideRangesForChallenge={hideRanges}
             unhide={unhide}
-            rtl={rtl}
+            rtl={lineRtl}
             style={[
               styles.title,
               getLanguageTextStyle(element.lang, styles.title),
@@ -165,16 +170,18 @@ export function TextLine({
 
   if (element.line.type === "CHARACTER" && element.line.avatarUrl) {
     return (
-      <View style={[styles.row, styles.characterRow, rtl && styles.rowRtl]}>
+      <View style={[styles.row, styles.characterRow, lineRtl && styles.rowRtl]}>
         <Image
           source={{ uri: element.line.avatarUrl }}
-          style={[styles.avatar, rtl && styles.avatarRtl]}
+          style={[styles.avatar, lineRtl && styles.avatarRtl]}
           contentFit="contain"
         />
         <View
           style={[
             styles.bubbleWrap,
-            rtl ? { paddingRight: TAIL_WIDTH } : { paddingLeft: TAIL_WIDTH },
+            lineRtl
+              ? { paddingRight: TAIL_WIDTH }
+              : { paddingLeft: TAIL_WIDTH },
           ]}
         >
           <View
@@ -186,19 +193,19 @@ export function TextLine({
                   hasAudio,
                 ),
               },
-              rtl && styles.bubbleRtl,
-              rtl
+              lineRtl && styles.bubbleRtl,
+              lineRtl
                 ? { borderTopRightRadius: 0 }
                 : { borderTopLeftRadius: 0 },
             ]}
           >
-            <LineBody hasAudio={hasAudio} onPlay={play} rtl={rtl}>
+            <LineBody hasAudio={hasAudio} onPlay={play} rtl={lineRtl}>
               <HintText
                 content={element.line.content}
                 audioRange={audioRange}
                 hideRangesForChallenge={hideRanges}
                 unhide={unhide}
-                rtl={rtl}
+                rtl={lineRtl}
                 style={[
                   textStyle,
                   getLanguageTextStyle(element.lang, textStyle),
@@ -206,7 +213,7 @@ export function TextLine({
               />
             </LineBody>
           </View>
-          <BubbleTail rtl={rtl} />
+          <BubbleTail rtl={lineRtl} />
         </View>
       </View>
     );
@@ -214,14 +221,14 @@ export function TextLine({
 
   // PROSE (or CHARACTER without avatar)
   return (
-    <View style={[styles.row, rtl && styles.rowRtl]}>
-      <LineBody hasAudio={hasAudio} onPlay={play} rtl={rtl}>
+    <View style={[styles.row, lineRtl && styles.rowRtl]}>
+      <LineBody hasAudio={hasAudio} onPlay={play} rtl={lineRtl}>
         <HintText
           content={element.line.content}
           audioRange={audioRange}
           hideRangesForChallenge={hideRanges}
           unhide={unhide}
-          rtl={rtl}
+          rtl={lineRtl}
           style={[textStyle, getLanguageTextStyle(element.lang, textStyle)]}
         />
       </LineBody>
@@ -270,6 +277,8 @@ const styles = StyleSheet.create({
   },
   body: {
     flexShrink: 1,
+    minWidth: 0,
+    width: "100%",
   },
   bodyPad: {
     paddingLeft: 32,
