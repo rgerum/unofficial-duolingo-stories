@@ -277,6 +277,8 @@ const styles = StyleSheet.create({
   },
   body: {
     flexShrink: 1,
+    minWidth: 0,
+    width: "100%",
   },
   bodyPad: {
     paddingLeft: 32,

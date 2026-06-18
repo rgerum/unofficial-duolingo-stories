@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import * as Haptics from "expo-haptics";
 import { playSoundEffect } from "../soundEffects";
+import { playErrorHaptic, playSelectionHaptic } from "../storyHaptics";
 import { WordChip, type ChipStatus } from "../WordChip";
 import { QuestionPrompt } from "./QuestionPrompt";
 import type { StoryElementMatch } from "../types";
@@ -81,12 +81,12 @@ export function MatchQuestion({
       } else if (selectedOther.index === newWord.index) {
         selectedOther.state = "right";
         newWord.state = "right";
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        playSelectionHaptic();
       } else {
         selectedOther.state = "wrong";
         newWord.state = "wrong";
         playSoundEffect("wrong");
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        playErrorHaptic();
       }
       return next;
     });

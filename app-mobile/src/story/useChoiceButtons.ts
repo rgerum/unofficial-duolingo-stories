@@ -1,5 +1,5 @@
 import React from "react";
-import * as Haptics from "expo-haptics";
+import { playErrorHaptic, playSuccessHaptic } from "./storyHaptics";
 import { playSoundEffect } from "./soundEffects";
 
 export type ChoiceState = "right" | "false" | "done" | undefined;
@@ -34,13 +34,13 @@ export function useChoiceButtons(
         );
         buttonStateRef.current = nextState;
         setButtonState(nextState);
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        playSuccessHaptic();
         callRight();
         return;
       }
 
       playSoundEffect("wrong");
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      playErrorHaptic();
       const nextState = state.map((value, i) =>
         i === index ? "false" : value,
       );
