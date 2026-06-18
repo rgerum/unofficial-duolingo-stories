@@ -1,5 +1,5 @@
 import React from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "../components/Text";
 import { colors } from "../theme";
@@ -86,7 +86,7 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
 
   return (
     <HintPopupContext.Provider value={api}>
-      <View style={{ flex: 1 }}>
+      <Pressable style={{ flex: 1 }} onPress={hide}>
         {children}
         {hint && (
           <View
@@ -108,7 +108,7 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
             ) : null}
           </View>
         )}
-      </View>
+      </Pressable>
     </HintPopupContext.Provider>
   );
 }
