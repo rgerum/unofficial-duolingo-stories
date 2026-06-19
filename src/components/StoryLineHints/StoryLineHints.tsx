@@ -45,7 +45,7 @@ function Tooltip({
 
   function positionTooltip() {
     if (!ref.current) return;
-    const tooltipElement = ref.current.children[1];
+    const tooltipElement = ref.current.querySelector("[data-hint-tooltip]");
     if (!(tooltipElement instanceof HTMLElement)) return;
 
     // Calculate the position of the tooltip
@@ -270,7 +270,7 @@ function StoryLineHints({
           : ""
         : has_translation_hint
           ? cn(
-              "group/tooltip relative",
+              "group/tooltip relative inline-block align-baseline",
               underlineBaseClass,
               "[--story-hint-underline:var(--underline-dashed)] bg-[image:linear-gradient(to_right,var(--story-hint-underline)_60%,rgba(255,255,255,0)_0%)] hover:[--story-hint-underline:var(--underline-dashed-highlight)] focus-within:[--story-hint-underline:var(--underline-dashed-highlight)] focus:outline-none focus-visible:rounded-[4px] focus-visible:outline-2 focus-visible:outline-[var(--tooltip-border)] focus-visible:outline-offset-2",
             )
@@ -282,9 +282,7 @@ function StoryLineHints({
         )
       : cn(
           "pointer-events-none invisible absolute bottom-[125%] left-1/2 z-10 mb-[10px] block w-auto -translate-x-1/2 whitespace-nowrap rounded-[14px] border-2 border-[var(--tooltip-border)] bg-[var(--tooltip-backgroud)] px-[17px] pt-[7px] pb-[6px] text-center text-[19px] font-normal not-italic text-[var(--tooltip-color)] opacity-0 transition-opacity duration-300 after:absolute after:top-full after:left-1/2 after:z-10 after:-mt-[6px] after:-ml-[5px] after:h-[10px] after:w-[10px] after:rotate-[-45deg] after:border-[2px] after:border-[transparent_transparent_var(--tooltip-border)_var(--tooltip-border)] after:bg-[var(--tooltip-backgroud)] after:content-[''] group-hover/tooltip:visible group-hover/tooltip:opacity-100 group-focus-within/tooltip:visible group-focus-within/tooltip:opacity-100",
-          hint_translation &&
-            hint_pronunciation &&
-            "[transform:translate(-50%,-8px)]",
+          hint_translation && hint_pronunciation && "bottom-[calc(125%+8px)]",
           visibleContent.lang_hints,
         );
 
@@ -311,7 +309,7 @@ function StoryLineHints({
             </span>
           ) : null
         ) : has_translation_hint ? (
-          <span className={hintTextClassName}>
+          <span className={hintTextClassName} data-hint-tooltip>
             <span>{hint_translation}</span>
           </span>
         ) : null}
