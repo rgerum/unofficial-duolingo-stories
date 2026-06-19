@@ -229,12 +229,16 @@ export default function ProfileTab() {
           community-built app. Not affiliated with Duolingo.
         </Text>
 
-        <View style={{ height: 12 }} />
-        <Button
-          title="Reset local progress"
-          variant="danger"
-          onPress={confirmResetProgress}
-        />
+        {!user ? (
+          <>
+            <View style={{ height: 12 }} />
+            <Button
+              title="Reset local progress"
+              variant="danger"
+              onPress={confirmResetProgress}
+            />
+          </>
+        ) : null}
         {user ? (
           <>
             <Text style={styles.sectionTitle}>Danger zone</Text>
