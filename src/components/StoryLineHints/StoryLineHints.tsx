@@ -364,7 +364,7 @@ function StoryLineHints({
 
     elements.push(
       <Tooltip
-        key={hint.rangeFrom + " " + hint.rangeTo + 1}
+        key={`${hint.rangeFrom} ${hint.rangeTo + 1}`}
         className={cn("select-text", hintContainerClassName)}
         interactive={isInteractive}
         style={hintContainerStyle}
