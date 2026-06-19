@@ -33,20 +33,20 @@ export default async function Page({
 
   if (
     hasProvider(
-      ["FACEBOOK_CLIENT_ID", "AUTH_FACEBOOK_ID"],
-      ["FACEBOOK_CLIENT_SECRET", "AUTH_FACEBOOK_SECRET"],
+      ["GOOGLE_CLIENT_ID", "AUTH_GOOGLE_ID"],
+      ["GOOGLE_CLIENT_SECRET", "AUTH_GOOGLE_SECRET"],
     )
   ) {
-    providers.push({ id: "facebook", name: "Facebook" });
+    providers.push({ id: "google", name: "Google" });
   }
 
   if (
-    hasProvider(
-      ["GITHUB_CLIENT_ID", "GITHUB_ID", "AUTH_GITHUB_ID"],
-      ["GITHUB_CLIENT_SECRET", "GITHUB_SECRET", "AUTH_GITHUB_SECRET"],
-    )
+    getEnv("APPLE_CLIENT_ID") &&
+    getEnv("APPLE_TEAM_ID") &&
+    getEnv("APPLE_KEY_ID") &&
+    getEnv("APPLE_PRIVATE_KEY")
   ) {
-    providers.push({ id: "github", name: "GitHub" });
+    providers.push({ id: "apple", name: "Apple" });
   }
 
   if (
@@ -60,11 +60,11 @@ export default async function Page({
 
   if (
     hasProvider(
-      ["GOOGLE_CLIENT_ID", "AUTH_GOOGLE_ID"],
-      ["GOOGLE_CLIENT_SECRET", "AUTH_GOOGLE_SECRET"],
+      ["GITHUB_CLIENT_ID", "GITHUB_ID", "AUTH_GITHUB_ID"],
+      ["GITHUB_CLIENT_SECRET", "GITHUB_SECRET", "AUTH_GITHUB_SECRET"],
     )
   ) {
-    providers.push({ id: "google", name: "Google" });
+    providers.push({ id: "github", name: "GitHub" });
   }
 
   const callbackUrl = Array.isArray(resolvedSearchParams?.callbackUrl)

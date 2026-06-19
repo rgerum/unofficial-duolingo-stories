@@ -7,6 +7,7 @@ import type { DataModel } from "./_generated/dataModel";
 import { betterAuth } from "better-auth";
 import { admin, username } from "better-auth/plugins";
 import { defaultRoles, userAc } from "better-auth/plugins/admin/access";
+import { importPKCS8, SignJWT } from "jose";
 import { components, internal } from "../_generated/api";
 import authConfig from "../auth.config";
 import { syncDiscordAvatarFromAccount } from "../lib/discordAvatarSync";
@@ -25,8 +26,50 @@ const getSocialProvider = (idKeys: string[], secretKeys: string[]) => {
   return { clientId, clientSecret };
 };
 
+function getApplePrivateKey() {
+  return getEnv("APPLE_PRIVATE_KEY")?.replace(/\\n/g, "\n");
+}
+
+async function generateAppleClientSecret() {
+  const clientId = getEnv("APPLE_CLIENT_ID");
+  const teamId = getEnv("APPLE_TEAM_ID");
+  const keyId = getEnv("APPLE_KEY_ID");
+  const privateKey = getApplePrivateKey();
+
+  if (!clientId || !teamId || !keyId || !privateKey) {
+    throw new Error("Missing Apple sign-in environment variables");
+  }
+
+  const key = await importPKCS8(privateKey, "ES256");
+  const now = Math.floor(Date.now() / 1000);
+
+  return await new SignJWT({})
+    .setProtectedHeader({ alg: "ES256", kid: keyId })
+    .setIssuer(teamId)
+    .setSubject(clientId)
+    .setAudience("https://appleid.apple.com")
+    .setIssuedAt(now)
+    .setExpirationTime(now + 180 * 24 * 60 * 60)
+    .sign(key);
+}
+
+const getAppleSocialProvider = () => {
+  const clientId = getEnv("APPLE_CLIENT_ID");
+  const teamId = getEnv("APPLE_TEAM_ID");
+  const keyId = getEnv("APPLE_KEY_ID");
+  const privateKey = getApplePrivateKey();
+
+  if (!clientId || !teamId || !keyId || !privateKey) return undefined;
+
+  return async () => ({
+    clientId,
+    clientSecret: await generateAppleClientSecret(),
+  });
+};
+
 const socialProviders = Object.fromEntries(
   Object.entries({
+    apple: getAppleSocialProvider(),
     github: getSocialProvider(
       ["GITHUB_CLIENT_ID", "GITHUB_ID", "AUTH_GITHUB_ID"],
       ["GITHUB_CLIENT_SECRET", "GITHUB_SECRET", "AUTH_GITHUB_SECRET"],
@@ -38,10 +81,6 @@ const socialProviders = Object.fromEntries(
     discord: getSocialProvider(
       ["DISCORD_CLIENT_ID", "AUTH_DISCORD_CLIENT_ID"],
       ["DISCORD_CLIENT_SECRET", "AUTH_DISCORD_CLIENT_SECRET"],
-    ),
-    facebook: getSocialProvider(
-      ["FACEBOOK_CLIENT_ID", "AUTH_FACEBOOK_ID"],
-      ["FACEBOOK_CLIENT_SECRET", "AUTH_FACEBOOK_SECRET"],
     ),
   }).filter(([, value]) => value),
 );
@@ -191,6 +230,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       const allowed = [
         "http://localhost:3000",
         authBaseUrl,
+        "https://appleid.apple.com",
         "https://*-duostories-team.vercel.app",
         "duostories://",
         "duostories://*",
