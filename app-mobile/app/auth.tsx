@@ -1,6 +1,7 @@
 import React from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -9,10 +10,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMutation } from "convex/react";
+import { api } from "../src/api";
 import { authClient, notifyAuthChanged } from "../src/auth-client";
 import { useAppState } from "../src/app-state";
 import { Button } from "../src/components/Button";
 import { Text, TextInput } from "../src/components/Text";
+import { clearAllProgress, getAllDoneStories } from "../src/storage";
 import { colors } from "../src/theme";
 
 type AuthMode = "signin" | "register";
@@ -27,6 +31,7 @@ export default function AuthScreen() {
   const isRegister = authMode === "register";
   const { hasAcceptedDisclaimer, setHasSeenWelcome, courseShort } =
     useAppState();
+  const recordStoryDone = useMutation(api.storyDone.recordStoryDone);
 
   const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -34,6 +39,46 @@ export default function AuthScreen() {
   const [error, setError] = React.useState<string | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
   const [isPending, setIsPending] = React.useState(false);
+
+  const askToImportLocalProgress = React.useCallback((count: number) => {
+    return new Promise<boolean>((resolve) => {
+      Alert.alert(
+        "Copy local progress?",
+        `This device has ${count} completed ${
+          count === 1 ? "story" : "stories"
+        }. Copy this progress into your account?`,
+        [
+          {
+            text: "Not now",
+            style: "cancel",
+            onPress: () => resolve(false),
+          },
+          {
+            text: "Copy progress",
+            onPress: () => resolve(true),
+          },
+        ],
+      );
+    });
+  }, []);
+
+  const importLocalProgress = React.useCallback(async () => {
+    const localDoneStories = await getAllDoneStories();
+    if (localDoneStories.length === 0) return;
+
+    const shouldImport = await askToImportLocalProgress(
+      localDoneStories.length,
+    );
+    if (!shouldImport) return;
+
+    for (const story of localDoneStories) {
+      await recordStoryDone({
+        legacyStoryId: story.storyId,
+        time: story.time,
+      });
+    }
+    await clearAllProgress();
+  }, [askToImportLocalProgress, recordStoryDone]);
 
   const finishSignedIn = React.useCallback(async () => {
     await setHasSeenWelcome(true);
@@ -97,6 +142,14 @@ export default function AuthScreen() {
         return;
       }
       notifyAuthChanged();
+      try {
+        await importLocalProgress();
+      } catch {
+        Alert.alert(
+          "Could not copy progress",
+          "Your account is signed in, but local progress could not be copied. Check your connection and try again later.",
+        );
+      }
       await finishSignedIn();
     } catch {
       setError("Something went wrong. Check your connection and try again.");

@@ -68,6 +68,11 @@ export async function setBool(key: string, value: boolean): Promise<void> {
 
 /** Map of story legacyId -> completion timestamp (ms). */
 export type DoneMap = Record<string, number>;
+export type DoneStoryProgress = {
+  courseShort: string;
+  storyId: number;
+  time: number;
+};
 
 export async function getDoneMap(courseShort: string): Promise<DoneMap> {
   const raw = await getString(doneKey(courseShort));
@@ -115,6 +120,26 @@ export async function getAllProgress(): Promise<Record<string, number>> {
     return result;
   } catch {
     return {};
+  }
+}
+
+export async function getAllDoneStories(): Promise<DoneStoryProgress[]> {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const doneKeys = keys.filter((key) => key.startsWith("doneStories:"));
+    const result: DoneStoryProgress[] = [];
+    for (const key of doneKeys) {
+      const courseShort = key.slice("doneStories:".length);
+      const map = await getDoneMap(courseShort);
+      for (const [storyIdText, time] of Object.entries(map)) {
+        const storyId = Number(storyIdText);
+        if (!Number.isFinite(storyId) || !Number.isFinite(time)) continue;
+        result.push({ courseShort, storyId, time });
+      }
+    }
+    return result;
+  } catch {
+    return [];
   }
 }
 
