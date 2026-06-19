@@ -10,8 +10,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../api";
+import { useNetworkStatus } from "../network";
 import { colors } from "../theme";
 import { Flag } from "./Flag";
+import { OfflineNotice } from "./OfflineNotice";
 import { Text, TextInput } from "./Text";
 
 type LandingData = FunctionReturnType<typeof api.landing.getPublicLandingPageData>;
@@ -30,9 +32,21 @@ export function CoursePicker({
   onSelect: (course: { short: string; name: string }) => void;
 }) {
   const data = useQuery(api.landing.getPublicLandingPageData);
+  const { isOffline } = useNetworkStatus();
   const [search, setSearch] = React.useState("");
 
   if (!data) {
+    if (isOffline) {
+      return (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>You're offline</Text>
+          <Text style={styles.empty}>
+            Connect to the internet to load the course list.
+          </Text>
+        </View>
+      );
+    }
+
     return (
       <View style={styles.loading}>
         <ActivityIndicator color={colors.blue} />
@@ -61,6 +75,11 @@ export function CoursePicker({
 
   return (
     <View style={styles.root}>
+      {isOffline ? (
+        <View style={styles.offlineWrap}>
+          <OfflineNotice detail="Connect to the internet to pick a course." />
+        </View>
+      ) : null}
       <View style={styles.searchBox}>
         <Ionicons name="search" size={18} color={colors.textDim} />
         <TextInput
@@ -102,11 +121,13 @@ export function CoursePicker({
           return (
             <Pressable
               accessibilityRole="button"
+              disabled={isOffline}
               onPress={() => onSelect({ short: item.short, name: item.name })}
               style={({ pressed }) => [
                 styles.row,
                 selected && styles.rowSelected,
-                pressed && { opacity: 0.7 },
+                isOffline && styles.rowDisabled,
+                pressed && !isOffline && { opacity: 0.7 },
               ]}
             >
               <Flag
@@ -144,6 +165,22 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 28,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: colors.text,
+    textAlign: "center",
+  },
+  offlineWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
   },
   searchBox: {
     flexDirection: "row",
@@ -193,6 +230,9 @@ const styles = StyleSheet.create({
   rowSelected: {
     borderColor: colors.blue,
     backgroundColor: colors.blueLight,
+  },
+  rowDisabled: {
+    opacity: 0.55,
   },
   rowText: {
     flex: 1,

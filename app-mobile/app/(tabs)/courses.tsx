@@ -13,8 +13,10 @@ import type { FunctionReturnType } from "convex/server";
 import { api } from "../../src/api";
 import { useAuthSession } from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
+import { useNetworkStatus } from "../../src/network";
 import { Button } from "../../src/components/Button";
 import { Flag } from "../../src/components/Flag";
+import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
 import { getAllProgress } from "../../src/storage";
 import { colors } from "../../src/theme";
@@ -29,6 +31,7 @@ export default function CoursesTab() {
   const router = useRouter();
   const { courseShort, activeCourseShorts, setCourseShort } = useAppState();
   const { data: session } = useAuthSession();
+  const { isOffline } = useNetworkStatus();
   const landingData = useQuery(api.landing.getPublicLandingPageData);
   const serverProgress = useQuery(
     api.storyDone.getCurrentUserProgress,
@@ -90,12 +93,25 @@ export default function CoursesTab() {
           <Text style={styles.title}>Courses</Text>
           <Text style={styles.subtitle}>Your active story courses</Text>
         </View>
-        <Button title="Add course" onPress={() => router.push("/add-course")} />
+        <Button
+          title="Add course"
+          disabled={isOffline}
+          onPress={() => router.push("/add-course")}
+        />
       </View>
       {courses === undefined ? (
-        <View style={styles.loading}>
-          <ActivityIndicator color={colors.blue} />
-        </View>
+        isOffline ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyTitle}>You're offline</Text>
+            <Text style={styles.emptyText}>
+              Connect to the internet to load your course list.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.loading}>
+            <ActivityIndicator color={colors.blue} />
+          </View>
+        )
       ) : courses.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyTitle}>No active courses yet</Text>
@@ -110,6 +126,9 @@ export default function CoursesTab() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.listContent}>
+          {isOffline ? (
+            <OfflineNotice detail="Connect to the internet to switch or add courses." />
+          ) : null}
           {courses.map((course) => {
             const completed = Math.min(
               course.count,
@@ -120,6 +139,7 @@ export default function CoursesTab() {
               <Pressable
                 key={course.short}
                 accessibilityRole="button"
+                disabled={isOffline}
                 onPress={() => {
                   void setCourseShort(course.short).then(() =>
                     router.navigate("/(tabs)"),
@@ -128,7 +148,8 @@ export default function CoursesTab() {
                 style={({ pressed }) => [
                   styles.card,
                   selected && styles.cardSelected,
-                  pressed && { opacity: 0.75 },
+                  isOffline && styles.cardDisabled,
+                  pressed && !isOffline && { opacity: 0.75 },
                 ]}
               >
                 <View style={styles.cardContent}>
@@ -247,6 +268,9 @@ const styles = StyleSheet.create({
   cardSelected: {
     borderColor: colors.blue,
     backgroundColor: colors.blueLight,
+  },
+  cardDisabled: {
+    opacity: 0.55,
   },
   cardContent: {
     flexDirection: "row",

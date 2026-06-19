@@ -12,6 +12,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../src/api";
 import { useAuthSession } from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
+import { useNetworkStatus } from "../../src/network";
 import {
   getDoneMap,
   getListeningMode,
@@ -20,6 +21,7 @@ import {
 } from "../../src/storage";
 import { StoryButton, type StoryListItem } from "../../src/components/StoryButton";
 import { Button } from "../../src/components/Button";
+import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
 import { colors } from "../../src/theme";
 
@@ -28,6 +30,7 @@ export default function LearnTab() {
   const router = useRouter();
   const { ready, courseShort } = useAppState();
   const { data: session } = useAuthSession();
+  const { isOffline } = useNetworkStatus();
 
   const course = useQuery(
     api.landing.getPublicCoursePageData,
@@ -80,7 +83,26 @@ export default function LearnTab() {
     );
   }
 
-  if (course === undefined) return <Centered spinner />;
+  if (course === undefined) {
+    if (isOffline) {
+      return (
+        <Centered>
+          <Text style={styles.emptyTitle}>You're offline</Text>
+          <Text style={styles.emptyText}>
+            Connect to the internet to load this course's story list.
+          </Text>
+          <Button
+            title="Courses"
+            variant="secondary"
+            onPress={() => router.navigate("/(tabs)/courses")}
+            style={{ marginTop: 16, alignSelf: "stretch" }}
+          />
+        </Centered>
+      );
+    }
+
+    return <Centered spinner />;
+  }
   if (course === null) {
     return (
       <Centered>
@@ -110,6 +132,11 @@ export default function LearnTab() {
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        {isOffline ? (
+          <View style={styles.offlineWrap}>
+            <OfflineNotice detail="Connect to the internet to open stories." />
+          </View>
+        ) : null}
         <View style={styles.header}>
           <Text style={styles.title}>{course.name}</Text>
           <Text style={styles.subtitle}>
@@ -150,6 +177,7 @@ export default function LearnTab() {
                   story={story}
                   done={isStoryDone(story.id)}
                   listeningMode={listening}
+                  disabled={isOffline}
                   onPress={() =>
                     router.push(
                       `/story/${story.id}?listening=${listening ? "1" : "0"}`,
@@ -199,8 +227,19 @@ const styles = StyleSheet.create({
     color: colors.text,
     textAlign: "center",
   },
+  emptyText: {
+    marginTop: 8,
+    fontSize: 16,
+    lineHeight: 23,
+    color: colors.textDim,
+    textAlign: "center",
+  },
   scrollContent: {
     paddingHorizontal: 12,
+  },
+  offlineWrap: {
+    paddingHorizontal: 8,
+    paddingTop: 12,
   },
   header: {
     paddingHorizontal: 8,

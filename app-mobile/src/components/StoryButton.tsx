@@ -29,18 +29,25 @@ export function StoryButton({
   done,
   listeningMode,
   onPress,
+  disabled = false,
 }: {
   story: StoryListItem;
   done: boolean;
   listeningMode: boolean;
   onPress: () => void;
+  disabled?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={story.name}
+      disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.root, pressed && { opacity: 0.8 }]}
+      style={({ pressed }) => [
+        styles.root,
+        disabled && styles.disabled,
+        pressed && !disabled && { opacity: 0.8 },
+      ]}
     >
       <View style={styles.artBox}>
         <View
@@ -78,6 +85,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 12,
     marginVertical: 8,
+  },
+  disabled: {
+    opacity: 0.45,
   },
   artBox: {
     width: ART_WIDTH,

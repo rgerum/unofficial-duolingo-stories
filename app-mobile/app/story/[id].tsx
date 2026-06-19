@@ -10,6 +10,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../src/api";
 import { useAuthSession } from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
+import { useNetworkStatus } from "../../src/network";
 import { getDoneMap, markStoryDone } from "../../src/storage";
 import { Reader } from "../../src/story/Reader";
 import { HintPopupHost } from "../../src/story/HintPopup";
@@ -34,6 +35,7 @@ export default function StoryScreen() {
   const listening = params.listening === "1";
   const { hideStoryQuestions } = useAppState();
   const { data: session } = useAuthSession();
+  const { isOffline } = useNetworkStatus();
   const recordStoryDone = useMutation(api.storyDone.recordStoryDone);
 
   const story = useQuery(
@@ -100,6 +102,10 @@ export default function StoryScreen() {
     else router.replace("/(tabs)");
   }, [router]);
 
+  const retry = React.useCallback(() => {
+    router.replace(`/story/${storyId}?listening=${listening ? "1" : "0"}`);
+  }, [listening, router, storyId]);
+
   const onQuit = React.useCallback(() => {
     Alert.alert("Quit story?", "Your place in this story won't be saved.", [
       { text: "Keep reading", style: "cancel" },
@@ -130,6 +136,23 @@ export default function StoryScreen() {
   }
 
   if (story === undefined) {
+    if (isOffline) {
+      return (
+        <View style={styles.root}>
+          <View style={styles.centered}>
+            <Text style={styles.errorTitle}>You're offline</Text>
+            <Text style={styles.errorBody}>
+              Connect to the internet to load this story.
+            </Text>
+            <View style={styles.errorActions}>
+              <Button title="Try again" onPress={retry} />
+              <Button title="Go back" variant="secondary" onPress={leave} />
+            </View>
+          </View>
+        </View>
+      );
+    }
+
     return (
       <View style={styles.root}>
         <View style={styles.centered}>
@@ -179,5 +202,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "800",
     color: colors.text,
+    textAlign: "center",
+  },
+  errorBody: {
+    fontSize: 16,
+    lineHeight: 23,
+    color: colors.textDim,
+    textAlign: "center",
+    marginTop: 8,
+  },
+  errorActions: {
+    alignSelf: "stretch",
+    gap: 12,
+    marginTop: 18,
   },
 });
