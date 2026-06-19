@@ -4,6 +4,7 @@ import {
   getBool,
   getString,
   getStringArray,
+  removeKeys,
   setBool,
   setString,
   setStringArray,
@@ -20,6 +21,7 @@ type AppState = {
   setCourseShort: (short: string) => Promise<void>;
   hideStoryQuestions: boolean;
   setHideStoryQuestions: (value: boolean) => Promise<void>;
+  resetToFirstRun: () => Promise<void>;
 };
 
 const AppStateContext = React.createContext<AppState>({
@@ -33,6 +35,7 @@ const AppStateContext = React.createContext<AppState>({
   setCourseShort: () => Promise.resolve(),
   hideStoryQuestions: false,
   setHideStoryQuestions: () => Promise.resolve(),
+  resetToFirstRun: () => Promise.resolve(),
 });
 
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
@@ -108,6 +111,22 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     return setBool(STORAGE_KEYS.hideStoryQuestions, value);
   }, []);
 
+  const resetToFirstRun = React.useCallback(async () => {
+    setHasSeenWelcomeState(false);
+    setHasAcceptedDisclaimerState(false);
+    setCourseShortState(null);
+    setActiveCourseShortsState([]);
+    setHideStoryQuestionsState(false);
+
+    await removeKeys([
+      STORAGE_KEYS.hasSeenWelcome,
+      STORAGE_KEYS.hasAcceptedDisclaimer,
+      STORAGE_KEYS.currentCourse,
+      STORAGE_KEYS.activeCourses,
+      STORAGE_KEYS.hideStoryQuestions,
+    ]);
+  }, []);
+
   const value = React.useMemo(
     () => ({
       ready,
@@ -120,6 +139,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       setCourseShort,
       hideStoryQuestions,
       setHideStoryQuestions,
+      resetToFirstRun,
     }),
     [
       ready,
@@ -132,6 +152,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       setCourseShort,
       hideStoryQuestions,
       setHideStoryQuestions,
+      resetToFirstRun,
     ],
   );
 

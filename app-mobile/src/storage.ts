@@ -29,6 +29,14 @@ export async function setString(key: string, value: string): Promise<void> {
   }
 }
 
+export async function removeKeys(keys: string[]): Promise<void> {
+  try {
+    await AsyncStorage.multiRemove(keys);
+  } catch {
+    // best effort — local-only state
+  }
+}
+
 export async function getStringArray(key: string): Promise<string[]> {
   const raw = await getString(key);
   if (!raw) return [];

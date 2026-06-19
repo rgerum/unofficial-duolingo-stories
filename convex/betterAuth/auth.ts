@@ -194,14 +194,16 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
         "https://*-duostories-team.vercel.app",
         "duostories://",
         "duostories://*",
+        // Expo Go sends exp/exps origins even when Convex does not expose
+        // NODE_ENV=development inside the function runtime.
+        "exp://",
+        "exp://**",
+        "exps://",
+        "exps://**",
       ].filter(Boolean) as string[];
 
       if (host?.endsWith("-duostories-team.vercel.app") && origin) {
         allowed.push(origin);
-      }
-
-      if (process.env.NODE_ENV === "development") {
-        allowed.push("exp://", "exp://**");
       }
 
       return allowed;

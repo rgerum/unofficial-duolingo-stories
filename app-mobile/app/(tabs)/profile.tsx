@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import Constants from "expo-constants";
 import { api } from "../../src/api";
 import {
@@ -25,10 +25,13 @@ import { colors } from "../../src/theme";
 
 export default function ProfileTab() {
   const router = useRouter();
-  const { hideStoryQuestions, setHideStoryQuestions } = useAppState();
+  const { hideStoryQuestions, resetToFirstRun, setHideStoryQuestions } =
+    useAppState();
   const { data: session, isPending: isSessionPending } = useAuthSession();
   const [progress, setProgress] = React.useState<Record<string, number>>({});
+  const [isDeletingAccount, setIsDeletingAccount] = React.useState(false);
   const courseList = useQuery(api.landing.getPublicCourseList);
+  const deleteCurrentUser = useMutation(api.account.deleteCurrentUser);
   const serverProgress = useQuery(
     api.storyDone.getCurrentUserProgress,
     session?.session ? {} : "skip",
@@ -82,6 +85,48 @@ export default function ProfileTab() {
         },
       ],
     );
+  }
+
+  function confirmDeleteAccount() {
+    if (isDeletingAccount) return;
+
+    Alert.alert(
+      "Delete account",
+      "This permanently deletes your Duostories account and signs you out. This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete account",
+          style: "destructive",
+          onPress: () => {
+            void deleteAccount();
+          },
+        },
+      ],
+    );
+  }
+
+  async function deleteAccount() {
+    setIsDeletingAccount(true);
+    try {
+      await deleteCurrentUser({});
+      try {
+        await authClient.signOut();
+      } catch {}
+      await clearAllProgress();
+      await resetToFirstRun();
+      setProgress({});
+      notifyAuthChanged();
+      router.dismissAll();
+      router.replace("/");
+    } catch (error) {
+      Alert.alert(
+        "Could not delete account",
+        (error as Error)?.message ?? "Check your connection and try again.",
+      );
+    } finally {
+      setIsDeletingAccount(false);
+    }
   }
 
   return (
@@ -190,6 +235,24 @@ export default function ProfileTab() {
           variant="danger"
           onPress={confirmResetProgress}
         />
+        {user ? (
+          <>
+            <Text style={styles.sectionTitle}>Danger zone</Text>
+            <Text style={styles.cardBody}>
+              Delete your Duostories account and sign out of this device. This
+              action cannot be undone.
+            </Text>
+            <View style={{ height: 12 }} />
+            <Button
+              title={
+                isDeletingAccount ? "Deleting account..." : "Delete account"
+              }
+              variant="danger"
+              disabled={isDeletingAccount}
+              onPress={confirmDeleteAccount}
+            />
+          </>
+        ) : null}
         <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
