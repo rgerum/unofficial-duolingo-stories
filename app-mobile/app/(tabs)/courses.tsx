@@ -11,6 +11,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../../src/api";
+import { captureMobileEventLater } from "../../src/analytics";
 import { useAuthSession } from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
 import { useNetworkStatus } from "../../src/network";
@@ -141,6 +142,11 @@ export default function CoursesTab() {
                 accessibilityRole="button"
                 disabled={isOffline}
                 onPress={() => {
+                  captureMobileEventLater("mobile_course_selected", {
+                    course_short: course.short,
+                    course_name: course.name,
+                    from_language: course.fromLanguageName,
+                  });
                   void setCourseShort(course.short).then(() =>
                     router.navigate("/(tabs)"),
                   );

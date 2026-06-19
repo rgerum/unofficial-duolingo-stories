@@ -1,5 +1,12 @@
 import React from "react";
-import { Pressable, StyleSheet, View, ViewStyle } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
 import { colors } from "../theme";
 import { Text } from "./Text";
 
@@ -16,12 +23,14 @@ export function Button({
   variant = "primary",
   disabled = false,
   style,
+  labelStyle,
 }: {
   title: string;
   onPress?: () => void;
   variant?: Variant;
   disabled?: boolean;
   style?: ViewStyle;
+  labelStyle?: StyleProp<TextStyle>;
 }) {
   const palette = {
     primary: {
@@ -78,6 +87,7 @@ export function Button({
               style={[
                 styles.label,
                 { color: disabled ? colors.disabled : palette.text },
+                labelStyle,
               ]}
             >
               {title}
@@ -114,5 +124,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: 0.8,
+    textAlign: "center",
   },
 });

@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
 import { useFonts } from "expo-font";
+import { captureMobileEventLater } from "../src/analytics";
 import { AppStateProvider } from "../src/app-state";
 import { useConvexBetterAuth } from "../src/auth-client";
 import {
@@ -34,6 +35,7 @@ export default function RootLayout() {
 
   React.useEffect(() => {
     void configureAudioSession();
+    captureMobileEventLater("mobile_app_opened");
   }, []);
 
   if (!fontsLoaded && !fontError) return null;

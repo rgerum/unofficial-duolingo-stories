@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
   currentCourse: "currentCourseShort",
   activeCourses: "activeCourseShorts",
   hideStoryQuestions: "hideStoryQuestions",
+  analyticsInstallationId: "analyticsInstallationId",
 };
 
 const doneKey = (courseShort: string) => `doneStories:${courseShort}`;

@@ -15,7 +15,8 @@ pnpm start          # Expo dev server → press i (iOS simulator) / a (Android)
 
 Works in Expo Go. `EXPO_PUBLIC_CONVEX_URL` and
 `EXPO_PUBLIC_CONVEX_SITE_URL` (in `.env`) point at the same Convex deployment
-as the web app.
+as the web app. Analytics are optional; set `EXPO_PUBLIC_POSTHOG_KEY` and
+`EXPO_PUBLIC_POSTHOG_HOST` to send anonymous mobile events to PostHog.
 
 ```bash
 pnpm run typecheck  # tsc --noEmit

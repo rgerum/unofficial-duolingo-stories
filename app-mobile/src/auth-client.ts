@@ -3,7 +3,10 @@ import { convexClient } from "@convex-dev/better-auth/client/plugins";
 import { usernameClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/client";
 import * as SecureStore from "expo-secure-store";
+import * as WebBrowser from "expo-web-browser";
 import React from "react";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const convexSiteUrl =
   process.env.EXPO_PUBLIC_CONVEX_SITE_URL ??
@@ -38,6 +41,15 @@ const sessionListeners = new Set<() => void>();
 
 export function notifyAuthChanged() {
   for (const listener of sessionListeners) listener();
+}
+
+export async function prepareAuthBrowser(): Promise<void> {
+  try {
+    await WebBrowser.warmUpAsync();
+  } catch {
+    // Best effort. iOS auth sessions do not need warmup, but the static import
+    // keeps Metro from loading expo-web-browser only after OAuth starts.
+  }
 }
 
 async function getCurrentSession(): Promise<AuthSession> {

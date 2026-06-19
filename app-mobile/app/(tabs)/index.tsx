@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 import { api } from "../../src/api";
+import { captureMobileEventLater } from "../../src/analytics";
 import { useAuthSession } from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
 import { useNetworkStatus } from "../../src/network";
@@ -160,6 +161,10 @@ export default function LearnTab() {
             value={listening}
             onValueChange={(value) => {
               setListening(value);
+              captureMobileEventLater("mobile_listening_mode_toggled", {
+                course_short: courseShort,
+                enabled: value,
+              });
               void setListeningMode(courseShort, value);
             }}
             trackColor={{ true: colors.blue }}
@@ -185,11 +190,16 @@ export default function LearnTab() {
                   done={isStoryDone(story.id)}
                   listeningMode={listening}
                   disabled={isOffline}
-                  onPress={() =>
+                  onPress={() => {
+                    captureMobileEventLater("story_opened", {
+                      story_id: story.id,
+                      course_short: courseShort,
+                      listening_mode: listening,
+                    });
                     router.push(
                       `/story/${story.id}?listening=${listening ? "1" : "0"}`,
-                    )
-                  }
+                    );
+                  }}
                 />
               ))}
             </View>

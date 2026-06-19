@@ -8,6 +8,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../src/api";
+import { captureMobileEventLater } from "../../src/analytics";
 import { useAuthSession } from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
 import { useNetworkStatus } from "../../src/network";
@@ -37,6 +38,8 @@ export default function StoryScreen() {
   const { data: session } = useAuthSession();
   const { isOffline } = useNetworkStatus();
   const recordStoryDone = useMutation(api.storyDone.recordStoryDone);
+  const trackedStoryStart = React.useRef(false);
+  const trackedStoryCompletion = React.useRef(false);
 
   const story = useQuery(
     api.storyRead.getStoryByLegacyId,
@@ -88,14 +91,42 @@ export default function StoryScreen() {
   }, [course, doneIds, storyId]);
   const nextStoryId = nextStory ? nextStory.id : nextStory;
 
+  const captureStoryEvent = React.useCallback(
+    (eventName: string, extra: Record<string, unknown> = {}) => {
+      if (!story) return;
+      captureMobileEventLater(eventName, {
+        story_id: story.id,
+        story_name: story.from_language_name,
+        course_id: story.course_id,
+        course_short: story.course_short,
+        learning_language: story.learning_language_long,
+        listening_mode: listening,
+        hide_questions: listening || hideStoryQuestions,
+        signed_in: Boolean(session?.session),
+        ...extra,
+      });
+    },
+    [hideStoryQuestions, listening, session?.session, story],
+  );
+
+  React.useEffect(() => {
+    if (!story || trackedStoryStart.current) return;
+    trackedStoryStart.current = true;
+    captureStoryEvent("story_started");
+  }, [captureStoryEvent, story]);
+
   const onFinishedReached = React.useCallback(() => {
     if (!story) return;
+    if (!trackedStoryCompletion.current) {
+      trackedStoryCompletion.current = true;
+      captureStoryEvent("story_completed");
+    }
     if (session?.session) {
       void recordStoryDone({ legacyStoryId: story.id });
     } else {
       void markStoryDone(story.course_short, story.id);
     }
-  }, [recordStoryDone, session?.session, story]);
+  }, [captureStoryEvent, recordStoryDone, session?.session, story]);
 
   const leave = React.useCallback(() => {
     stopAudio();
@@ -110,18 +141,38 @@ export default function StoryScreen() {
   const onQuit = React.useCallback(() => {
     Alert.alert("Quit story?", "Your place in this story won't be saved.", [
       { text: "Keep reading", style: "cancel" },
-      { text: "Quit", style: "destructive", onPress: leave },
+      {
+        text: "Quit",
+        style: "destructive",
+        onPress: () => {
+          captureStoryEvent("story_quit");
+          leave();
+        },
+      },
     ]);
-  }, [leave]);
+  }, [captureStoryEvent, leave]);
 
   const onEnd = React.useCallback(() => {
     if (nextStoryId) {
+      captureStoryEvent("story_end_next_clicked", {
+        story_id: nextStoryId,
+        completed_count: doneIds?.size,
+        total_count: course?.stories.length,
+      });
       stopAudio();
       router.replace(`/story/${nextStoryId}?listening=${listening ? "1" : "0"}`);
       return;
     }
     leave();
-  }, [leave, listening, nextStoryId, router]);
+  }, [
+    captureStoryEvent,
+    course?.stories.length,
+    doneIds?.size,
+    leave,
+    listening,
+    nextStoryId,
+    router,
+  ]);
 
   // Note: SafeAreaView reports zero insets in fullScreenModal screens, so the
   // Reader and Footer apply window insets themselves via useSafeAreaInsets.
