@@ -90,9 +90,10 @@ export default function StoryScreen() {
 
   const onFinishedReached = React.useCallback(() => {
     if (!story) return;
-    void markStoryDone(story.course_short, story.id);
     if (session?.session) {
       void recordStoryDone({ legacyStoryId: story.id });
+    } else {
+      void markStoryDone(story.course_short, story.id);
     }
   }, [recordStoryDone, session?.session, story]);
 

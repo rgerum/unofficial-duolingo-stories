@@ -38,15 +38,15 @@ export default function LearnTab() {
   );
   const serverDoneIds = useQuery(
     api.storyDone.getDoneStoryIdsForCurrentUserInCourse,
-    session?.session && courseShort ? { courseShort } : "skip",
+    courseShort ? { courseShort } : "skip",
   );
 
   const [doneMap, setDoneMap] = React.useState<DoneMap>({});
   const [listening, setListening] = React.useState(false);
-  const serverDoneSet = React.useMemo(
-    () => new Set(serverDoneIds ?? []),
-    [serverDoneIds],
-  );
+  const serverDoneSet = React.useMemo(() => {
+    if (!serverDoneIds) return null;
+    return new Set(serverDoneIds);
+  }, [serverDoneIds]);
 
   // Reload local progress whenever the tab regains focus (e.g. after a story).
   useFocusEffect(
@@ -118,8 +118,12 @@ export default function LearnTab() {
 
   const stories = course.stories as StoryListItem[];
   const isStoryDone = (storyId: number) =>
-    serverDoneSet.has(storyId) || Boolean(doneMap[String(storyId)]);
+    session?.session
+      ? Boolean(serverDoneSet?.has(storyId))
+      : Boolean(doneMap[String(storyId)]);
   const doneCount = stories.filter((story) => isStoryDone(story.id)).length;
+  const isServerProgressPending =
+    Boolean(session?.session) && serverDoneIds === undefined && !isOffline;
 
   // Stories arrive sorted by (set_id, set_index); group them into sets.
   const sets: { setId: number; stories: StoryListItem[] }[] = [];
@@ -134,7 +138,9 @@ export default function LearnTab() {
       <View style={styles.header}>
         <Text style={styles.title}>{course.name}</Text>
         <Text style={styles.subtitle}>
-          {doneCount} / {stories.length} stories completed
+          {isServerProgressPending
+            ? "Loading progress..."
+            : `${doneCount} / ${stories.length} stories completed`}
         </Text>
         <View style={styles.progressTrack}>
           <View

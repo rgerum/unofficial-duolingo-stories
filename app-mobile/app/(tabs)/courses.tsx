@@ -54,12 +54,12 @@ export default function CoursesTab() {
   );
 
   const progressByShort = React.useMemo(() => {
-    const map = { ...localProgress };
+    const map = session?.session ? {} : { ...localProgress };
     for (const entry of serverProgress ?? []) {
       map[entry.courseShort] = entry.completedCount;
     }
     return map;
-  }, [localProgress, serverProgress]);
+  }, [localProgress, serverProgress, session?.session]);
 
   const activeShorts = React.useMemo(() => {
     const shorts = new Set(activeCourseShorts);
