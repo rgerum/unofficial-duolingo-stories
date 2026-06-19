@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { useConvex, useMutation } from "convex/react";
+import { useConvex, useConvexAuth, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import {
   processStoryFile,
   type StoryType,
 } from "@/components/editor/story/syntax_parser_new";
 import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
+import { retryOnceAfterAuthRefresh } from "./save_auth_retry";
 
 type LanguageLike = {
   short: string;
@@ -89,6 +90,7 @@ export function useStoryEditorModel({
   fromLanguage,
 }: UseStoryEditorModelArgs): EditorModel {
   const convex = useConvex();
+  const convexAuth = useConvexAuth();
   const setStoryMutation = useMutation(api.storyWrite.setStory);
   const deleteStoryMutation = useMutation(api.storyWrite.deleteStory);
 
@@ -99,6 +101,11 @@ export function useStoryEditorModel({
     "There was an error saving.",
   );
   const [lastSavedAt, setLastSavedAt] = React.useState<number | null>(null);
+  const isConvexAuthRefreshingRef = React.useRef(convexAuth.isRefreshing);
+  React.useEffect(() => {
+    isConvexAuthRefreshingRef.current = convexAuth.isRefreshing;
+  }, [convexAuth.isRefreshing]);
+
   const storySnapshot = React.useMemo(
     () => ({
       id: storyData.id,
@@ -260,22 +267,29 @@ export function useStoryEditorModel({
     }
     setIsSaving(true);
     const saveStartRevision = revision;
+    const operationKey = `story:${storyData.id}:set_story:v2:${Date.now()}:${saveStartRevision}`;
+    const saveArgs = {
+      legacyStoryId: storyData.id,
+      duo_id: storyData.duo_id ?? "",
+      name: parsedMeta.fromLanguageName,
+      image: parsedMeta.icon ?? "",
+      set_id: parsedMeta.set_id,
+      set_index: parsedMeta.set_index,
+      legacyCourseId: storyData.course_id,
+      text: docText,
+      json: toConvexValue(parsedStoryBase),
+      todo_count: parsedMeta.todo_count,
+      change_date: new Date().toISOString(),
+      confirmOfficialOverwrite,
+      operationKey,
+    };
     try {
-      const result = await setStoryMutation({
-        legacyStoryId: storyData.id,
-        duo_id: storyData.duo_id ?? "",
-        name: parsedMeta.fromLanguageName,
-        image: parsedMeta.icon ?? "",
-        set_id: parsedMeta.set_id,
-        set_index: parsedMeta.set_index,
-        legacyCourseId: storyData.course_id,
-        text: docText,
-        json: toConvexValue(parsedStoryBase),
-        todo_count: parsedMeta.todo_count,
-        change_date: new Date().toISOString(),
-        confirmOfficialOverwrite,
-        operationKey: `story:${storyData.id}:set_story:v2:${Date.now()}:${saveStartRevision}`,
-      });
+      const result = await retryOnceAfterAuthRefresh(
+        () => setStoryMutation(saveArgs),
+        {
+          isRefreshing: () => isConvexAuthRefreshingRef.current,
+        },
+      );
       if (!result) {
         throw new Error(`Story ${storyData.id} not found`);
       }
