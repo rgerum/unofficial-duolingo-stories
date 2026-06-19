@@ -52,8 +52,8 @@ const tooltipContentStyle: CSSProperties = {
 };
 const tooltipContentWithPronunciationStyle: CSSProperties = {
   ...tooltipContentStyle,
-  bottom: "calc(125% + 8px)",
-  marginBottom: "10px",
+  bottom: "calc(115% + 4px)",
+  marginBottom: "8px",
 };
 const tooltipArrowStyle: CSSProperties = {
   position: "absolute",
@@ -309,9 +309,9 @@ function StoryLineHints({
       getOverlap(hint.rangeFrom, hint.rangeTo + 1, range.start, range.end),
     );
     const word_content = hint_pronunciation ? (
-      <ruby className="group/ruby relative inline-block [ruby-position:over]">
+      <span className="group/pronunciation relative inline-block">
         <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
-        <rt
+        <span
           className={cn(
             "pointer-events-none invisible absolute whitespace-nowrap leading-none opacity-0 transition-opacity duration-200",
             !is_hidden &&
@@ -322,14 +322,14 @@ function StoryLineHints({
               "group-hover/editorhint:visible group-hover/editorhint:opacity-95",
             showTrans &&
               "group-focus-within/editorhint:visible group-focus-within/editorhint:opacity-95",
-            "group-hover/ruby:visible group-hover/ruby:opacity-95",
-            "group-focus-within/ruby:visible group-focus-within/ruby:opacity-95",
+            "group-hover/pronunciation:visible group-hover/pronunciation:opacity-95",
+            "group-focus-within/pronunciation:visible group-focus-within/pronunciation:opacity-95",
           )}
           style={pronunciationStyle}
         >
           {hint_pronunciation}
-        </rt>
-      </ruby>
+        </span>
+      </span>
     ) : (
       <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
     );
