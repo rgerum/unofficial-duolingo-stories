@@ -18,7 +18,7 @@ export interface ProfileData {
 }
 
 export async function getProfileData() {
-  const providersBase = ["facebook", "github", "google", "discord"];
+  const providersBase = ["apple", "github", "google", "discord"];
   const user = await getUser();
   if (!user) return undefined;
   if (!user.email) throw new Error("No user email available");

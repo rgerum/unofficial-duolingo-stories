@@ -36,6 +36,7 @@
     "fflate": "^0.8.3",
     "framer-motion": "^12.40.0",
     "immer": "^11.1.8",
+    "jose": "6.2.3",
     "js-md5": "^0.8.3",
     "lamejs": "^1.2.1",
     "lucide-react": "^1.17.0",

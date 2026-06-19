@@ -71,6 +71,9 @@ importers:
       immer:
         specifier: ^11.1.8
         version: 11.1.8
+      jose:
+        specifier: 6.2.3
+        version: 6.2.3
       js-md5:
         specifier: ^0.8.3
         version: 0.8.3
