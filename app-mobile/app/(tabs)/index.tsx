@@ -131,41 +131,42 @@ export default function LearnTab() {
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
+      <View style={styles.header}>
+        <Text style={styles.title}>{course.name}</Text>
+        <Text style={styles.subtitle}>
+          {doneCount} / {stories.length} stories completed
+        </Text>
+        <View style={styles.progressTrack}>
+          <View
+            style={[
+              styles.progressFill,
+              {
+                width: `${
+                  stories.length > 0 ? (doneCount / stories.length) * 100 : 0
+                }%`,
+              },
+            ]}
+          />
+        </View>
+        <View style={styles.listeningRow}>
+          <Text style={styles.listeningLabel}>Listening mode</Text>
+          <Switch
+            value={listening}
+            onValueChange={(value) => {
+              setListening(value);
+              void setListeningMode(courseShort, value);
+            }}
+            trackColor={{ true: colors.blue }}
+          />
+        </View>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {isOffline ? (
           <View style={styles.offlineWrap}>
             <OfflineNotice detail="Connect to the internet to open stories." />
           </View>
         ) : null}
-        <View style={styles.header}>
-          <Text style={styles.title}>{course.name}</Text>
-          <Text style={styles.subtitle}>
-            {doneCount} / {stories.length} stories completed
-          </Text>
-          <View style={styles.progressTrack}>
-            <View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${
-                    stories.length > 0 ? (doneCount / stories.length) * 100 : 0
-                  }%`,
-                },
-              ]}
-            />
-          </View>
-          <View style={styles.listeningRow}>
-            <Text style={styles.listeningLabel}>Listening mode</Text>
-            <Switch
-              value={listening}
-              onValueChange={(value) => {
-                setListening(value);
-                void setListeningMode(courseShort, value);
-              }}
-              trackColor={{ true: colors.blue }}
-            />
-          </View>
-        </View>
 
         {sets.map((set) => (
           <View key={set.setId} style={styles.set}>
@@ -236,14 +237,19 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 12,
+    paddingTop: 8,
   },
   offlineWrap: {
     paddingHorizontal: 8,
     paddingTop: 12,
   },
   header: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 20,
     paddingTop: 10,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 28,
@@ -279,7 +285,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   set: {
-    marginTop: 22,
+    marginTop: 14,
   },
   setTitle: {
     fontSize: 20,
