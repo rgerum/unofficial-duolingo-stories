@@ -1,3 +1,5 @@
+packages:
+  - "."
 allowBuilds:
   bufferutil: false
   core-js: false

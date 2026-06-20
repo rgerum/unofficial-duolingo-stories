@@ -1,5 +1,10 @@
 {
   "private": true,
+  "pnpm": {
+    "overrides": {
+      "kysely": "0.28.17"
+    }
+  },
   "scripts": {
     "dev": "next",
     "build": "next build",
