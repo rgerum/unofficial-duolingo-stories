@@ -1,0 +1,8 @@
+allowBuilds:
+  bufferutil: false
+  core-js: false
+  esbuild: true
+  msw: false
+  sharp: false
+overrides:
+  kysely: 0.28.17

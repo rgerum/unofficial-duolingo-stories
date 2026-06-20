@@ -1,6 +1,7 @@
 import PostHog from "posthog-react-native";
-import type { PostHogEventProperties } from "@posthog/core";
 import { getString, setString, STORAGE_KEYS } from "./storage";
+
+type AnalyticsEventProperties = NonNullable<Parameters<PostHog["capture"]>[1]>;
 
 const posthogKey = process.env.EXPO_PUBLIC_POSTHOG_KEY;
 const posthogHost =
@@ -45,7 +46,7 @@ async function getClient(): Promise<PostHog | null> {
 
 export async function captureMobileEvent(
   eventName: string,
-  properties: PostHogEventProperties = {},
+  properties: AnalyticsEventProperties = {},
 ): Promise<void> {
   try {
     const client = await getClient();
@@ -61,7 +62,7 @@ export async function captureMobileEvent(
 
 export function captureMobileEventLater(
   eventName: string,
-  properties: PostHogEventProperties = {},
+  properties: AnalyticsEventProperties = {},
 ): void {
   void captureMobileEvent(eventName, properties);
 }

@@ -1,0 +1,6 @@
+allowBuilds:
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@posthog/core@1.35.3'
+  - '@posthog/types@1.390.2'
+  - posthog-react-native@4.50.0
