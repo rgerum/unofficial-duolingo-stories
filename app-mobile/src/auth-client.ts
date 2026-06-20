@@ -8,12 +8,14 @@ import React from "react";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const convexSiteUrl =
+const authBaseUrl =
+  process.env.EXPO_PUBLIC_BETTER_AUTH_URL ??
+  process.env.EXPO_PUBLIC_SITE_URL ??
   process.env.EXPO_PUBLIC_CONVEX_SITE_URL ??
   "https://compassionate-chinchilla-392.convex.site";
 
 export const authClient = createAuthClient({
-  baseURL: convexSiteUrl,
+  baseURL: authBaseUrl,
   plugins: [
     expoClient({
       scheme: "duostories",

@@ -13,9 +13,11 @@ pnpm install
 pnpm start          # Expo dev server → press i (iOS simulator) / a (Android)
 ```
 
-Works in Expo Go. `EXPO_PUBLIC_CONVEX_URL` and
-`EXPO_PUBLIC_CONVEX_SITE_URL` (in `.env`) point at the same Convex deployment
-as the web app. Analytics are optional; set `EXPO_PUBLIC_POSTHOG_KEY` and
+Works in Expo Go. `EXPO_PUBLIC_CONVEX_URL` points at the Convex deployment used
+by the web app. `EXPO_PUBLIC_BETTER_AUTH_URL` should point at the public web
+auth origin, such as `https://duostories.org`; if it is not set, the app falls
+back to `EXPO_PUBLIC_SITE_URL` and then `EXPO_PUBLIC_CONVEX_SITE_URL`.
+Analytics are optional; set `EXPO_PUBLIC_POSTHOG_KEY` and
 `EXPO_PUBLIC_POSTHOG_HOST` to send anonymous mobile events to PostHog.
 
 ```bash
