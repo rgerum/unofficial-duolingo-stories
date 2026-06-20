@@ -1,5 +1,6 @@
 {
   "private": true,
+  "packageManager": "pnpm@10.34.4",
   "pnpm": {
     "overrides": {
       "kysely": "0.28.17"
