@@ -1,14 +1,19 @@
 import React from "react";
 import {
+  ActionSheetIOS,
   ActivityIndicator,
+  Alert,
+  Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../../src/api";
 import { captureMobileEventLater } from "../../src/analytics";
@@ -19,7 +24,11 @@ import { Button } from "../../src/components/Button";
 import { Flag } from "../../src/components/Flag";
 import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
-import { getAllCourseProgress, type CourseProgress } from "../../src/storage";
+import {
+  clearDoneMap,
+  getAllCourseProgress,
+  type CourseProgress,
+} from "../../src/storage";
 import { colors } from "../../src/theme";
 
 type LandingData = FunctionReturnType<typeof api.landing.getPublicLandingPageData>;
@@ -30,10 +39,14 @@ type CourseItem = LandingGroup["courses"][number] & {
 
 export default function CoursesTab() {
   const router = useRouter();
-  const { courseShort, activeCourseShorts, setCourseShort } = useAppState();
+  const { courseShort, activeCourseShorts, removeCourseShort, setCourseShort } =
+    useAppState();
   const { data: session } = useAuthSession();
   const { isOffline } = useNetworkStatus();
   const landingData = useQuery(api.landing.getPublicLandingPageData);
+  const deleteCourseProgress = useMutation(
+    api.storyDone.deleteCurrentUserCourseProgress,
+  );
   const serverProgress = useQuery(
     api.storyDone.getCurrentUserProgress,
     session?.session ? {} : "skip",
@@ -41,6 +54,9 @@ export default function CoursesTab() {
   const [localProgress, setLocalProgress] = React.useState<
     Record<string, CourseProgress>
   >({});
+  const [actionCourse, setActionCourse] = React.useState<CourseItem | null>(
+    null,
+  );
 
   useFocusEffect(
     React.useCallback(() => {
@@ -102,6 +118,106 @@ export default function CoursesTab() {
       });
   }, [activeShorts, courseShort, landingData, progressByShort]);
 
+  const removeLocalProgress = React.useCallback((short: string) => {
+    setLocalProgress((current) => {
+      const next = { ...current };
+      delete next[short];
+      return next;
+    });
+  }, []);
+
+  const clearCourseProgress = React.useCallback(
+    async (course: CourseItem) => {
+      if (session?.session) {
+        await deleteCourseProgress({ courseShort: course.short });
+      } else {
+        await clearDoneMap(course.short);
+        removeLocalProgress(course.short);
+      }
+    },
+    [deleteCourseProgress, removeLocalProgress, session?.session],
+  );
+
+  const removeCourse = React.useCallback(
+    async (course: CourseItem) => {
+      await removeCourseShort(course.short);
+    },
+    [removeCourseShort],
+  );
+
+  const confirmDeleteCourseProgress = React.useCallback(
+    (course: CourseItem) => {
+      if (session?.session && isOffline) {
+        Alert.alert(
+          "You're offline",
+          "Connect to the internet to delete progress for this course.",
+        );
+        return;
+      }
+
+      Alert.alert(
+        `Delete progress for ${course.name}?`,
+        "This removes completed story progress for this course. This cannot be undone.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: () => {
+              void clearCourseProgress(course).catch((error) => {
+                Alert.alert(
+                  "Could not delete progress",
+                  (error as Error)?.message ??
+                    "Check your connection and try again.",
+                );
+              });
+            },
+          },
+        ],
+      );
+    },
+    [clearCourseProgress, isOffline, session?.session],
+  );
+
+  const openCourseActions = React.useCallback(
+    (course: CourseItem) => {
+      const completed = progressByShort[course.short]?.completedCount ?? 0;
+      const canDeleteProgress = completed > 0;
+      const canRemoveCourse = completed === 0;
+
+      if (Platform.OS === "ios") {
+        const options = [
+          ...(canDeleteProgress ? ["Delete progress"] : []),
+          ...(canRemoveCourse ? ["Remove course"] : []),
+          "Cancel",
+        ];
+        const destructiveButtonIndex = canDeleteProgress ? 0 : undefined;
+        const removeButtonIndex = canDeleteProgress ? 1 : 0;
+        const cancelButtonIndex = options.length - 1;
+
+        ActionSheetIOS.showActionSheetWithOptions(
+          {
+            options,
+            cancelButtonIndex,
+            destructiveButtonIndex,
+            title: course.name,
+          },
+          (buttonIndex) => {
+            if (canDeleteProgress && buttonIndex === 0) {
+              confirmDeleteCourseProgress(course);
+            } else if (canRemoveCourse && buttonIndex === removeButtonIndex) {
+              void removeCourse(course);
+            }
+          },
+        );
+        return;
+      }
+
+      setActionCourse(course);
+    },
+    [confirmDeleteCourseProgress, progressByShort, removeCourse],
+  );
+
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
       <View style={styles.header}>
@@ -151,6 +267,7 @@ export default function CoursesTab() {
               progressByShort[course.short]?.completedCount ?? 0,
             );
             const selected = course.short === courseShort;
+            const canRemoveCourse = completed === 0;
             return (
               <Pressable
                 key={course.short}
@@ -188,8 +305,33 @@ export default function CoursesTab() {
                           From {course.fromLanguageName}
                         </Text>
                       </View>
-                      {selected && (
-                        <Text style={styles.currentBadge}>Current</Text>
+                      {(selected || completed > 0 || canRemoveCourse) && (
+                        <View style={styles.cardActions}>
+                          {selected && (
+                            <Text style={styles.currentBadge}>Current</Text>
+                          )}
+                          {(completed > 0 || canRemoveCourse) && (
+                            <Pressable
+                              accessibilityRole="button"
+                              accessibilityLabel={`Open actions for ${course.name}`}
+                              hitSlop={10}
+                              onPress={(event) => {
+                                event.stopPropagation();
+                                openCourseActions(course);
+                              }}
+                              style={({ pressed }) => [
+                                styles.cardActionButton,
+                                pressed && { opacity: 0.6 },
+                              ]}
+                            >
+                              <Ionicons
+                                name="ellipsis-horizontal"
+                                size={22}
+                                color={colors.textDim}
+                              />
+                            </Pressable>
+                          )}
+                        </View>
                       )}
                     </View>
                     <View style={styles.progressTrack}>
@@ -219,6 +361,78 @@ export default function CoursesTab() {
           })}
         </ScrollView>
       )}
+      <Modal
+        visible={Platform.OS !== "ios" && Boolean(actionCourse)}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setActionCourse(null)}
+      >
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Close course actions"
+          style={styles.sheetBackdrop}
+          onPress={() => setActionCourse(null)}
+        >
+          <Pressable
+            style={styles.sheet}
+            onPress={(event) => event.stopPropagation()}
+          >
+            <Text style={styles.sheetTitle}>{actionCourse?.name}</Text>
+            {(actionCourse
+              ? (progressByShort[actionCourse.short]?.completedCount ?? 0) > 0
+              : false) && (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => {
+                  const course = actionCourse;
+                  setActionCourse(null);
+                  if (course) confirmDeleteCourseProgress(course);
+                }}
+                style={({ pressed }) => [
+                  styles.sheetAction,
+                  pressed && { opacity: 0.65 },
+                ]}
+              >
+                <Ionicons name="trash-outline" size={22} color={colors.red} />
+                <Text style={styles.sheetDestructiveText}>Delete progress</Text>
+              </Pressable>
+            )}
+            {(actionCourse
+              ? (progressByShort[actionCourse.short]?.completedCount ?? 0) === 0
+              : false) && (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => {
+                  const course = actionCourse;
+                  setActionCourse(null);
+                  if (course) void removeCourse(course);
+                }}
+                style={({ pressed }) => [
+                  styles.sheetAction,
+                  pressed && { opacity: 0.65 },
+                ]}
+              >
+                <Ionicons
+                  name="remove-circle-outline"
+                  size={22}
+                  color={colors.text}
+                />
+                <Text style={styles.sheetActionText}>Remove course</Text>
+              </Pressable>
+            )}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setActionCourse(null)}
+              style={({ pressed }) => [
+                styles.sheetCancel,
+                pressed && { opacity: 0.65 },
+              ]}
+            >
+              <Text style={styles.sheetCancelText}>Cancel</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -310,6 +524,21 @@ const styles = StyleSheet.create({
   cardTitleWrap: {
     flex: 1,
   },
+  cardActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  cardActionButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+  },
   courseName: {
     fontSize: 20,
     fontWeight: "800",
@@ -347,5 +576,55 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textDim,
     marginTop: 8,
+  },
+  sheetBackdrop: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
+  },
+  sheet: {
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 28,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    backgroundColor: colors.background,
+  },
+  sheetTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: colors.text,
+    marginBottom: 12,
+  },
+  sheetAction: {
+    minHeight: 54,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 14,
+  },
+  sheetDestructiveText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: colors.red,
+  },
+  sheetActionText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: colors.text,
+  },
+  sheetCancel: {
+    minHeight: 54,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+  sheetCancelText: {
+    fontSize: 17,
+    fontWeight: "800",
+    color: colors.text,
   },
 });

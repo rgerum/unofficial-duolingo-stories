@@ -2,7 +2,10 @@ import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
-import { getSessionLegacyUserId } from "./lib/authorization";
+import {
+  getSessionLegacyUserId,
+  requireSessionLegacyUserId,
+} from "./lib/authorization";
 
 const storyDoneInputValidator = v.object({
   legacyStoryId: v.number(),
@@ -127,6 +130,49 @@ export const getDoneStoryIdsForCurrentUserInCourse = query({
       course._id,
       legacyUserId,
     );
+  },
+});
+
+export const deleteCurrentUserCourseProgress = mutation({
+  args: {
+    courseShort: v.string(),
+  },
+  returns: v.object({
+    deletedCount: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const legacyUserId = await requireSessionLegacyUserId(ctx);
+    const course = await ctx.db
+      .query("courses")
+      .withIndex("by_short", (q) => q.eq("short", args.courseShort))
+      .unique();
+    if (!course) {
+      throw new Error("Course not found.");
+    }
+
+    let deletedCount = 0;
+    const doneStateRows = await ctx.db
+      .query("story_done_state")
+      .withIndex("by_user_and_course", (q) =>
+        q.eq("legacyUserId", legacyUserId).eq("courseId", course._id),
+      )
+      .collect();
+    for (const row of doneStateRows) {
+      await ctx.db.delete(row._id);
+      deletedCount += 1;
+    }
+
+    const activityRows = await ctx.db
+      .query("course_activity")
+      .withIndex("by_user_and_course", (q) =>
+        q.eq("legacyUserId", legacyUserId).eq("courseId", course._id),
+      )
+      .collect();
+    for (const row of activityRows) {
+      await ctx.db.delete(row._id);
+    }
+
+    return { deletedCount };
   },
 });
 

@@ -19,6 +19,7 @@ type AppState = {
   courseShort: string | null;
   activeCourseShorts: string[];
   setCourseShort: (short: string) => Promise<void>;
+  removeCourseShort: (short: string) => Promise<void>;
   hideStoryQuestions: boolean;
   setHideStoryQuestions: (value: boolean) => Promise<void>;
   resetToFirstRun: () => Promise<void>;
@@ -33,6 +34,7 @@ const AppStateContext = React.createContext<AppState>({
   courseShort: null,
   activeCourseShorts: [],
   setCourseShort: () => Promise.resolve(),
+  removeCourseShort: () => Promise.resolve(),
   hideStoryQuestions: false,
   setHideStoryQuestions: () => Promise.resolve(),
   resetToFirstRun: () => Promise.resolve(),
@@ -106,6 +108,27 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     return setString(STORAGE_KEYS.currentCourse, short);
   }, []);
 
+  const removeCourseShort = React.useCallback(
+    async (short: string) => {
+      const nextActiveCourses = activeCourseShorts.filter(
+        (current) => current !== short,
+      );
+      const nextCourse =
+        courseShort === short ? (nextActiveCourses[0] ?? null) : courseShort;
+
+      setActiveCourseShortsState(nextActiveCourses);
+      setCourseShortState(nextCourse);
+
+      await Promise.all([
+        setStringArray(STORAGE_KEYS.activeCourses, nextActiveCourses),
+        nextCourse
+          ? setString(STORAGE_KEYS.currentCourse, nextCourse)
+          : removeKeys([STORAGE_KEYS.currentCourse]),
+      ]);
+    },
+    [activeCourseShorts, courseShort],
+  );
+
   const setHideStoryQuestions = React.useCallback((value: boolean) => {
     setHideStoryQuestionsState(value);
     return setBool(STORAGE_KEYS.hideStoryQuestions, value);
@@ -137,6 +160,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       courseShort,
       activeCourseShorts,
       setCourseShort,
+      removeCourseShort,
       hideStoryQuestions,
       setHideStoryQuestions,
       resetToFirstRun,
@@ -150,6 +174,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       courseShort,
       activeCourseShorts,
       setCourseShort,
+      removeCourseShort,
       hideStoryQuestions,
       setHideStoryQuestions,
       resetToFirstRun,
