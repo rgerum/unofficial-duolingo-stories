@@ -7,15 +7,38 @@ const SITE_URL = "https://duostories.org";
 
 export const revalidate = 3600;
 
+const EMPTY_DOCS_DATA: Awaited<ReturnType<typeof getDocsData>> = {
+  navigation: [],
+};
+
 function toUrl(path: string) {
   return new URL(path, SITE_URL).toString();
 }
 
+function hasCourseShort(course: unknown): course is { short: string } {
+  return (
+    typeof course === "object" &&
+    course !== null &&
+    "short" in course &&
+    typeof course.short === "string" &&
+    course.short.length > 0
+  );
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [courses, docsData] = await Promise.all([
-    fetchQuery(api.landing.getPublicCourseList, {}),
-    getDocsData(),
-  ]);
+  let courses: Array<{ short: string }> = [];
+  let docsData = EMPTY_DOCS_DATA;
+
+  try {
+    const [fetchedCourses, fetchedDocsData] = await Promise.all([
+      fetchQuery(api.landing.getPublicCourseList, {}),
+      getDocsData(),
+    ]);
+    courses = fetchedCourses.filter(hasCourseShort);
+    docsData = fetchedDocsData;
+  } catch (error) {
+    console.error("Failed to load sitemap data:", error);
+  }
 
   const docsEntries: MetadataRoute.Sitemap = [
     {
