@@ -9,3 +9,5 @@ Disallow: /admin
 # Allow all crawlers
 User-agent: *
 Allow: /
+
+Sitemap: https://duostories.org/sitemap.xml
