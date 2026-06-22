@@ -73,8 +73,13 @@ export function Reader({
   const [listeningPaused, setListeningPaused] = React.useState(false);
   const [audioReplayKey, setAudioReplayKey] = React.useState(0);
   const scrollRef = React.useRef<ScrollView>(null);
+  const scrollOnNextLayoutRef = React.useRef(false);
 
   const isFinished = storyProgress >= partsList.length;
+
+  const requestScrollToNewContent = React.useCallback(() => {
+    scrollOnNextLayoutRef.current = true;
+  }, []);
 
   // Stop any line audio when the reader unmounts.
   React.useEffect(() => stopAudio, []);
@@ -102,6 +107,7 @@ export function Reader({
     }
     if (buttonStatus === "wait" || buttonStatus === "...") return;
     if (buttonStatus === "idle") {
+      requestScrollToNewContent();
       setButtonStatus("wait");
       setPartProgress(1);
       return;
@@ -112,6 +118,7 @@ export function Reader({
         storyProgress,
         hideQuestions,
       );
+      requestScrollToNewContent();
       setPartProgress(0);
       setStoryProgress(nextProgress);
       setButtonStatus(
@@ -120,7 +127,14 @@ export function Reader({
           : getInitialButtonStatus(partsList[nextProgress], hideQuestions),
       );
     }
-  }, [buttonStatus, hideQuestions, onEnd, partsList, storyProgress]);
+  }, [
+    buttonStatus,
+    hideQuestions,
+    onEnd,
+    partsList,
+    requestScrollToNewContent,
+    storyProgress,
+  ]);
 
   const pauseListening = React.useCallback(() => {
     stopAudio(false);
@@ -191,9 +205,12 @@ export function Reader({
     });
   }, [listening]);
 
-  // Keep the newest line in view: onContentSizeChange fires the moment new
-  // content is laid out, so the scroll starts immediately (no fixed delay).
+  // Keep the newest line in view only after an intentional reveal. Text and
+  // bubble measurement can also change content size; those layout passes should
+  // not fight a user who is manually scrolling the transcript.
   const scrollToNewContent = React.useCallback(() => {
+    if (!scrollOnNextLayoutRef.current) return;
+    scrollOnNextLayoutRef.current = false;
     scrollRef.current?.scrollToEnd({ animated: true });
   }, []);
 
@@ -238,50 +255,47 @@ export function Reader({
           </View>
         </View>
 
-        {isFinished ? (
-          // Full-screen takeover, like the web's finished page: the transcript
-          // disappears and the gilded illustration takes center stage.
-          <View style={styles.finished}>
-            <SmartImage
-              uri={story.illustrations?.gilded ?? story.illustrations?.active}
-              width={200}
-              height={200}
-            />
-            <Text style={styles.finishedTitle}>Story completed!</Text>
-            <Text style={styles.finishedSubtitle}>
-              You have finished {story.from_language_name}
-            </Text>
-          </View>
-        ) : (
-          <ScrollView
-            ref={scrollRef}
-            style={styles.scroll}
-            contentContainerStyle={styles.scrollContent}
-            onContentSizeChange={scrollToNewContent}
-          >
-            {revealedParts.map((parts) => {
-              const index = getPartIndex(parts);
-              const active = index === storyProgress;
-              return (
-                <Part
-                  key={index}
-                  parts={parts}
-                  partProgress={partProgress}
-                  setButtonStatus={active ? setButtonStatus : noop}
-                  active={active}
-                  settings={{
-                    hideQuestions,
-                    rtl: story.learning_language_rtl,
-                    audioAutoPlay: !listeningPaused,
-                    audioReplayKey,
-                    onManualAudioPlay: () => handleManualAudioPlay(index),
-                  }}
-                />
-              );
-            })}
-            <View style={{ height: 220 }} />
-          </ScrollView>
-        )}
+        <ScrollView
+          ref={scrollRef}
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          onContentSizeChange={scrollToNewContent}
+        >
+          {revealedParts.map((parts) => {
+            const index = getPartIndex(parts);
+            const active = index === storyProgress;
+            return (
+              <Part
+                key={index}
+                parts={parts}
+                partProgress={partProgress}
+                setButtonStatus={active ? setButtonStatus : noop}
+                active={active}
+                settings={{
+                  hideQuestions,
+                  rtl: story.learning_language_rtl,
+                  audioAutoPlay: !listeningPaused,
+                  audioReplayKey,
+                  onManualAudioPlay: () => handleManualAudioPlay(index),
+                }}
+              />
+            );
+          })}
+          {isFinished && (
+            <View style={styles.finishedInline}>
+              <SmartImage
+                uri={story.illustrations?.gilded ?? story.illustrations?.active}
+                width={96}
+                height={96}
+              />
+              <Text style={styles.finishedTitle}>Story completed!</Text>
+              <Text style={styles.finishedSubtitle}>
+                You have finished {story.from_language_name}
+              </Text>
+            </View>
+          )}
+          <View style={{ height: isFinished ? 340 : 220 }} />
+        </ScrollView>
 
         <View style={styles.footerOverlay}>
           <Footer
@@ -345,23 +359,22 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
-  finished: {
-    flex: 1,
+  finishedInline: {
     alignItems: "center",
-    justifyContent: "center",
     paddingHorizontal: 24,
-    // keep the centered content clear of the taller finished footer
-    paddingBottom: 200,
+    paddingTop: 80,
+    paddingBottom: 80,
   },
   finishedTitle: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "700",
     color: colors.text,
-    marginTop: 28,
+    marginTop: 14,
   },
   finishedSubtitle: {
-    fontSize: 20,
-    color: colors.text,
-    marginTop: 10,
+    fontSize: 17,
+    color: colors.textDim,
+    marginTop: 6,
+    textAlign: "center",
   },
 });

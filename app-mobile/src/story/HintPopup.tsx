@@ -91,34 +91,52 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
 
   return (
     <HintPopupContext.Provider value={api}>
-      <Pressable style={{ flex: 1 }} onPress={hide}>
+      <View style={styles.root}>
         {children}
         {hint && (
-          <View
-            pointerEvents="none"
-            onLayout={(event) => {
-              const height = event.nativeEvent.layout.height;
-              if (height > 0 && Math.abs(height - bubbleHeight) > 0.5) {
-                setBubbleHeight(height);
-              }
-            }}
-            style={[
-              styles.bubble,
-              { left: bubbleLeft, top: bubbleTop, width: estimatedBubbleWidth },
-            ]}
-          >
-            <Text style={styles.translation}>{hint.translation}</Text>
-            {hint.pronunciation ? (
-              <Text style={styles.pronunciation}>{hint.pronunciation}</Text>
-            ) : null}
-          </View>
+          <>
+            <Pressable style={styles.dismissLayer} onPress={hide} />
+            <View
+              pointerEvents="none"
+              onLayout={(event) => {
+                const height = event.nativeEvent.layout.height;
+                if (height > 0 && Math.abs(height - bubbleHeight) > 0.5) {
+                  setBubbleHeight(height);
+                }
+              }}
+              style={[
+                styles.bubble,
+                {
+                  left: bubbleLeft,
+                  top: bubbleTop,
+                  width: estimatedBubbleWidth,
+                },
+              ]}
+            >
+              <Text style={styles.translation}>{hint.translation}</Text>
+              {hint.pronunciation ? (
+                <Text style={styles.pronunciation}>{hint.pronunciation}</Text>
+              ) : null}
+            </View>
+          </>
         )}
-      </Pressable>
+      </View>
     </HintPopupContext.Provider>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  dismissLayer: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 99,
+  },
   bubble: {
     position: "absolute",
     minWidth: 140,
