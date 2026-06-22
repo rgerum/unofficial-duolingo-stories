@@ -164,7 +164,6 @@ function StoryLineHints({
     end2: number,
   ) {
     if (start2 === end2) return false;
-    if (start2 === undefined || end2 === undefined) return false;
     if (start1 <= start2 && start2 < end1) return true;
     return start2 <= start1 && start1 < end2;
   }
@@ -206,7 +205,7 @@ function StoryLineHints({
   }
 
   function buildHintRenderState(hint: ContentWithHints["hintMap"][number]) {
-    const isHidden = getHintHiddenState(hint.rangeFrom, hint.rangeTo);
+    const isHidden = getHintHiddenState(hint.rangeFrom, hint.rangeTo + 1);
     const hintTranslation = visibleContent.hints?.[hint.hintIndex];
     const hintPronunciation =
       visibleContent.hints_pronunciation?.[hint.hintIndex];
@@ -236,6 +235,7 @@ function StoryLineHints({
     const wasHidden = wasHiddenForChallenge(start, end);
     const isHidden = getHiddenState(start, end);
     const segmentText = visibleContent.text.substring(start, end);
+    const segmentLines = segmentText.split("\n");
     const style: CSSProperties = {};
     if (audioRange && audioRange < start) style.opacity = 0.5;
     if (wasHidden && !isHidden) {
@@ -259,11 +259,14 @@ function StoryLineHints({
         data-hidden={isHidden}
         data-revealed={wasHidden && !isHidden ? true : undefined}
       >
-        {segmentText}
+        {segmentLines.map((line, index) => (
+          <React.Fragment key={`${start} ${end} ${index}`}>
+            {index > 0 ? <br /> : null}
+            {line}
+          </React.Fragment>
+        ))}
       </span>,
     ];
-    if (segmentText.includes("\n"))
-      returns.push(<br key={start + " " + end + " br"} />);
     return returns;
   }
 
