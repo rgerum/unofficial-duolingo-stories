@@ -16,7 +16,11 @@ export function PlayAudioButton({
       accessibilityLabel="Play audio"
       onPress={onPress}
       hitSlop={8}
-      style={({ pressed }) => [styles.root, pressed && { opacity: 0.6 }]}
+      style={({ pressed }) => [
+        styles.root,
+        rtl && styles.rootRtl,
+        pressed && { opacity: 0.6 },
+      ]}
     >
       <Ionicons
         name="volume-medium"
@@ -32,6 +36,10 @@ const styles = StyleSheet.create({
   root: {
     marginRight: 8,
     marginTop: 2,
+  },
+  rootRtl: {
+    marginRight: 0,
+    marginLeft: 8,
   },
   iconRtl: {
     transform: [{ scaleX: -1 }],

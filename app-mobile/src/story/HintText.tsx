@@ -1,6 +1,7 @@
 import React from "react";
 import {
   Pressable,
+  Platform,
   type StyleProp,
   type TextStyle,
   View,
@@ -97,7 +98,7 @@ function HintTokenBox({
         >
           {displayText}
         </Text>
-        <View style={{ height: 2, marginTop: 3, overflow: "hidden" }}>
+        <View style={{ height: 2, marginTop: -2, overflow: "hidden" }}>
           {underline && (
             <View
               style={{
@@ -124,6 +125,7 @@ export function HintText({
   containerStyle,
   rtl = false,
   centered = false,
+  fillLineWidth = false,
 }: {
   content: ContentWithHints;
   /** Highest spoken character index during playback (99999 = idle). */
@@ -136,6 +138,7 @@ export function HintText({
   containerStyle?: ViewStyle;
   rtl?: boolean;
   centered?: boolean;
+  fillLineWidth?: boolean;
 }) {
   const popup = React.useContext(HintPopupContext);
 
@@ -280,57 +283,86 @@ export function HintText({
     afterWhitespace = false;
   }
 
+  const androidRtlLineBreakPadding =
+    Platform.OS === "android" && rtl ? Math.ceil(fontSize * 0.) : 0;
+
+  const atomLines = atoms.reduce<Extract<Atom, { type: "cluster" }>[][]>(
+    (lines, atom) => {
+      if (atom.type === "break") lines.push([]);
+      else lines[lines.length - 1]?.push(atom);
+      return lines;
+    },
+    [[]],
+  );
+
+  const renderAtom = (
+    atom: Extract<Atom, { type: "cluster" }>,
+    key: React.Key,
+  ) => {
+    if (atom.tokens.length === 1) {
+      return (
+        <View
+          key={key}
+          style={
+            atom.trailingSpaceWidth > 0
+              ? rtl
+                ? { marginLeft: atom.trailingSpaceWidth }
+                : { marginRight: atom.trailingSpaceWidth }
+              : undefined
+          }
+        >
+          {renderBox(atom.tokens[0], key)}
+        </View>
+      );
+    }
+    return (
+      <View
+        key={key}
+        style={{
+          flexDirection: rtl ? "row-reverse" : "row",
+          alignItems: "flex-end",
+          ...(atom.trailingSpaceWidth > 0
+            ? rtl
+              ? { marginLeft: atom.trailingSpaceWidth }
+              : { marginRight: atom.trailingSpaceWidth }
+            : null),
+        }}
+      >
+        {atom.tokens.map((token, tokenIndex) => renderBox(token, tokenIndex))}
+      </View>
+    );
+  };
+
   return (
     <View
       style={[
         {
-          flexDirection: rtl ? "row-reverse" : "row",
-          flexWrap: "wrap",
-          alignItems: "flex-end",
+          flexDirection: "column",
+          alignItems: fillLineWidth ? "stretch" : "flex-start",
+          paddingBottom: androidRtlLineBreakPadding,
         },
         centered && { justifyContent: "center" },
         containerStyle,
       ]}
     >
-      {atoms.map((atom, index) => {
-        if (atom.type === "break") {
-          return <View key={index} style={{ width: "100%", height: 0 }} />;
-        }
-        if (atom.tokens.length === 1) {
-          return (
-            <View
-              key={index}
-              style={
-                atom.trailingSpaceWidth > 0
-                  ? rtl
-                    ? { marginLeft: atom.trailingSpaceWidth }
-                    : { marginRight: atom.trailingSpaceWidth }
-                  : undefined
-              }
-            >
-              {renderBox(atom.tokens[0], index)}
-            </View>
-          );
-        }
-        return (
-          <View
-            key={index}
-            style={{
-              flexDirection: rtl ? "row-reverse" : "row",
-              alignItems: "flex-end",
-              ...(atom.trailingSpaceWidth > 0
-                ? rtl
-                  ? { marginLeft: atom.trailingSpaceWidth }
-                  : { marginRight: atom.trailingSpaceWidth }
-                : null),
-            }}
-          >
-            {atom.tokens.map((token, tokenIndex) =>
-              renderBox(token, tokenIndex),
-            )}
-          </View>
-        );
-      })}
+      {atomLines.map((lineAtoms, lineIndex) => (
+        <View
+          key={lineIndex}
+          style={{
+            ...(fillLineWidth
+              ? { alignSelf: "stretch", width: "100%" }
+              : null),
+            flexDirection: rtl ? "row-reverse" : "row",
+            flexWrap: "wrap",
+            alignItems: "flex-end",
+            justifyContent: "flex-start",
+          }}
+        >
+          {lineAtoms.map((atom, atomIndex) =>
+            renderAtom(atom, `${lineIndex}:${atomIndex}`),
+          )}
+        </View>
+      ))}
     </View>
   );
 }

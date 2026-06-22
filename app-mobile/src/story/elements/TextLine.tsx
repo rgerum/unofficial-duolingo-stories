@@ -22,6 +22,7 @@ function getEstimatedTextWidth(text: string, fontSize: number): number {
   let width = 0;
 
   for (const char of normalized) {
+    if (/\p{Mark}/u.test(char)) continue;
     if (char === " ") width += fontSize * 0.35;
     else if (/[,.;:!?'"`]/.test(char)) width += fontSize * 0.28;
     else width += fontSize * 0.56;
@@ -89,13 +90,39 @@ function LineBody({
   hasAudio,
   onPlay,
   rtl,
+  inlineAudio = false,
+  naturalWidth = false,
   children,
 }: {
   hasAudio: boolean;
   onPlay: () => void;
   rtl: boolean;
+  inlineAudio?: boolean;
+  naturalWidth?: boolean;
   children: React.ReactNode;
 }) {
+  if (hasAudio && inlineAudio) {
+    return (
+      <View
+        style={[
+          naturalWidth ? styles.bodyNatural : styles.body,
+          styles.bodyInline,
+          rtl && styles.bodyInlineRtl,
+        ]}
+      >
+        <PlayAudioButton onPress={onPlay} rtl={rtl} />
+        <View
+          style={[
+            styles.bodyTextInline,
+            naturalWidth && styles.bodyTextNatural,
+          ]}
+        >
+          {children}
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View
       style={[
@@ -136,8 +163,6 @@ export function TextLine({
     replayKey,
   );
 
-  if (element.line === undefined) return null;
-
   const lineRtl = getStoryLineRtl({
     storyRtl: rtl,
     lineLang: element.lang,
@@ -147,6 +172,19 @@ export function TextLine({
     fontSize: fontSizes.body,
     color: colors.text,
   };
+  const measureKey = element.line
+    ? `${element.line.type}:${element.line.content.text}:${hasAudio}:${lineRtl}`
+    : "";
+  const [measuredCharacterBubble, setMeasuredCharacterBubble] = React.useState<{
+    key: string;
+    width: number;
+  } | null>(null);
+  const measuredWidth =
+    measuredCharacterBubble?.key === measureKey
+      ? measuredCharacterBubble.width
+      : undefined;
+
+  if (element.line === undefined) return null;
 
   if (element.line.type === "TITLE") {
     return (
@@ -169,6 +207,17 @@ export function TextLine({
   }
 
   if (element.line.type === "CHARACTER" && element.line.avatarUrl) {
+    const fallbackWidth = getBubbleMinWidth(
+      element.line.content.text,
+      hasAudio,
+    );
+    const bubbleSizing = lineRtl
+      ? { width: measuredWidth ?? fallbackWidth }
+      : measuredWidth === undefined
+        ? { minWidth: fallbackWidth }
+        : { width: measuredWidth };
+    const measuringCharacterBubble = measuredWidth === undefined;
+
     return (
       <View style={[styles.row, styles.characterRow, lineRtl && styles.rowRtl]}>
         <Image
@@ -184,28 +233,73 @@ export function TextLine({
               : { paddingLeft: TAIL_WIDTH },
           ]}
         >
+          {measuringCharacterBubble && (
+            <View
+              pointerEvents="none"
+              onLayout={(event) => {
+                const width = Math.ceil(event.nativeEvent.layout.width);
+                if (width > 0) {
+                  setMeasuredCharacterBubble({ key: measureKey, width });
+                }
+              }}
+              style={[
+                styles.bubble,
+                lineRtl ? styles.bubblePaddingRtl : styles.bubblePaddingLtr,
+                styles.bubbleMeasureClone,
+                lineRtl && styles.bubbleRtl,
+                lineRtl
+                  ? { borderTopRightRadius: 0 }
+                  : { borderTopLeftRadius: 0 },
+              ]}
+            >
+              <LineBody
+                hasAudio={hasAudio}
+                onPlay={play}
+                rtl={lineRtl}
+                inlineAudio
+                naturalWidth
+              >
+                <HintText
+                  content={element.line.content}
+                  audioRange={audioRange}
+                  hideRangesForChallenge={hideRanges}
+                  unhide={unhide}
+                  rtl={lineRtl}
+                  containerStyle={lineRtl ? styles.rtlBubbleText : undefined}
+                  fillLineWidth={lineRtl}
+                  style={[
+                    textStyle,
+                    getLanguageTextStyle(element.lang, textStyle),
+                  ]}
+                />
+              </LineBody>
+            </View>
+          )}
           <View
             style={[
               styles.bubble,
-              {
-                minWidth: getBubbleMinWidth(
-                  element.line.content.text,
-                  hasAudio,
-                ),
-              },
+              lineRtl ? styles.bubblePaddingRtl : styles.bubblePaddingLtr,
+              bubbleSizing,
               lineRtl && styles.bubbleRtl,
               lineRtl
                 ? { borderTopRightRadius: 0 }
                 : { borderTopLeftRadius: 0 },
             ]}
           >
-            <LineBody hasAudio={hasAudio} onPlay={play} rtl={lineRtl}>
+            <LineBody
+              hasAudio={hasAudio}
+              onPlay={play}
+              rtl={lineRtl}
+              inlineAudio={lineRtl}
+            >
               <HintText
                 content={element.line.content}
                 audioRange={audioRange}
                 hideRangesForChallenge={hideRanges}
                 unhide={unhide}
                 rtl={lineRtl}
+                containerStyle={lineRtl ? styles.rtlBubbleText : undefined}
+                fillLineWidth={lineRtl}
                 style={[
                   textStyle,
                   getLanguageTextStyle(element.lang, textStyle),
@@ -269,8 +363,16 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: 14,
     backgroundColor: colors.background,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  bubblePaddingLtr: {
+    paddingLeft: 10,
+    paddingRight: 15,
+  },
+  bubblePaddingRtl: {
+    paddingRight: 10,
+    paddingLeft: 15,
   },
   bubbleRtl: {
     alignSelf: "flex-end",
@@ -280,11 +382,39 @@ const styles = StyleSheet.create({
     minWidth: 0,
     width: "100%",
   },
+  bodyNatural: {
+    alignSelf: "flex-start",
+    flexShrink: 1,
+    minWidth: 0,
+  },
   bodyPad: {
     paddingLeft: 32,
   },
   bodyPadRtl: {
     paddingRight: 32,
+  },
+  bodyInline: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  bodyInlineRtl: {
+    flexDirection: "row-reverse",
+  },
+  bodyTextInline: {
+    flexShrink: 1,
+    minWidth: 0,
+  },
+  bodyTextNatural: {
+    alignSelf: "flex-start",
+  },
+  rtlBubbleText: {
+    flexShrink: 1,
+    minWidth: 0,
+  },
+  bubbleMeasureClone: {
+    opacity: 0,
+    position: "absolute",
+    zIndex: -1,
   },
   audioButton: {
     position: "absolute",
