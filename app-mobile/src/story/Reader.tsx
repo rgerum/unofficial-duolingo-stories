@@ -143,6 +143,17 @@ export function Reader({
     void next();
   }, [next]);
 
+  const handleManualAudioPlay = React.useCallback(
+    (partIndex: number) => {
+      if (!listening) return;
+      setListeningPaused(false);
+      setPartProgress(0);
+      setStoryProgress(partIndex);
+      setButtonStatus(getInitialButtonStatus(partsList[partIndex], hideQuestions));
+    },
+    [hideQuestions, listening, partsList],
+  );
+
   // Record completion exactly once when the end is reached.
   const finishedNotified = React.useRef(false);
   React.useEffect(() => {
@@ -256,6 +267,7 @@ export function Reader({
                   rtl: story.learning_language_rtl,
                   audioAutoPlay: !listeningPaused,
                   audioReplayKey,
+                  onManualAudioPlay: () => handleManualAudioPlay(index),
                 }}
               />
             );

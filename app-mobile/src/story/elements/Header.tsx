@@ -14,12 +14,14 @@ export function Header({
   rtl,
   autoPlay = true,
   replayKey = 0,
+  onManualAudioPlay,
 }: {
   element: StoryElementHeader;
   active: boolean;
   rtl: boolean;
   autoPlay?: boolean;
   replayKey?: number;
+  onManualAudioPlay?: () => void;
 }) {
   const audio = element.learningLanguageTitleContent?.audio;
   const { audioRange, play, hasAudio } = useLineAudio(
@@ -28,12 +30,16 @@ export function Header({
     autoPlay,
     replayKey,
   );
+  const handlePlay = React.useCallback(() => {
+    onManualAudioPlay?.();
+    play();
+  }, [onManualAudioPlay, play]);
 
   return (
     <View style={styles.root}>
       <SmartImage uri={element.illustrationUrl} width={175} height={175} />
       <View style={[styles.titleRow, rtl && styles.titleRowRtl]}>
-        {hasAudio && <PlayAudioButton onPress={play} rtl={rtl} />}
+        {hasAudio && <PlayAudioButton onPress={handlePlay} rtl={rtl} />}
         <HintText
           content={element.learningLanguageTitleContent}
           audioRange={audioRange}

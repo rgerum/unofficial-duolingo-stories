@@ -25,6 +25,7 @@ export function useLineAudio(
   );
   const cancelRef = React.useRef<((resetRange?: boolean) => void) | null>(null);
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const skipNextAutoPlayRef = React.useRef(false);
 
   const clearScheduledPlay = React.useCallback(() => {
     if (timeoutRef.current) {
@@ -57,13 +58,18 @@ export function useLineAudio(
   }, [active, cancelLineAudio]);
 
   const play = React.useCallback(() => {
+    if (!active) skipNextAutoPlayRef.current = true;
     cancelLineAudio(false);
     setAudioRange(getInitialAudioRange(audio));
     cancelRef.current = playAudio(audio, { onRange: setAudioRange });
-  }, [audio, cancelLineAudio]);
+  }, [active, audio, cancelLineAudio]);
 
   React.useEffect(() => {
     if (!active || !autoPlay) return;
+    if (skipNextAutoPlayRef.current) {
+      skipNextAutoPlayRef.current = false;
+      return;
+    }
     cancelLineAudio(false);
     setAudioRange(getInitialAudioRange(audio));
     timeoutRef.current = setTimeout(() => {

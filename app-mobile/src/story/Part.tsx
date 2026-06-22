@@ -29,6 +29,7 @@ export type PartSettings = {
   rtl: boolean;
   audioAutoPlay: boolean;
   audioReplayKey: number;
+  onManualAudioPlay?: () => void;
 };
 
 export type PartProps = {
@@ -51,6 +52,7 @@ function HeaderPart({ parts, active, setButtonStatus, settings }: PartProps) {
         rtl={settings.rtl}
         autoPlay={settings.audioAutoPlay}
         replayKey={settings.audioReplayKey}
+        onManualAudioPlay={settings.onManualAudioPlay}
       />
     </FadeIn>
   );
@@ -70,6 +72,7 @@ function LinePart({ parts, active, setButtonStatus, settings }: PartProps) {
         rtl={settings.rtl}
         autoPlay={settings.audioAutoPlay}
         replayKey={settings.audioReplayKey}
+        onManualAudioPlay={settings.onManualAudioPlay}
       />
     </FadeIn>
   );
@@ -110,6 +113,7 @@ function MultipleChoicePart({
           rtl={settings.rtl}
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
+          onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>
     );
@@ -138,6 +142,7 @@ function MultipleChoicePart({
           rtl={settings.rtl}
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
+          onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>
       {showQuestion && (
@@ -176,6 +181,7 @@ function ContinuationPart({
           rtl={settings.rtl}
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
+          onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>
     );
@@ -196,6 +202,7 @@ function ContinuationPart({
           rtl={settings.rtl}
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
+          onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>
       {active && (
@@ -237,6 +244,7 @@ function SelectPhrasesPart({
           rtl={settings.rtl}
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
+          onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>
     );
@@ -257,6 +265,7 @@ function SelectPhrasesPart({
           rtl={settings.rtl}
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
+          onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>
       {active && (
@@ -293,6 +302,7 @@ function ArrangePart({ parts, setButtonStatus, active, settings }: PartProps) {
           rtl={settings.rtl}
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
+          onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>
     );
@@ -313,6 +323,7 @@ function ArrangePart({ parts, setButtonStatus, active, settings }: PartProps) {
           rtl={settings.rtl}
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
+          onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>
       {active && (
@@ -359,6 +370,7 @@ function PointToPhrasePart({
           rtl={settings.rtl}
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
+          onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>
     );
@@ -374,6 +386,7 @@ function PointToPhrasePart({
             rtl={settings.rtl}
             autoPlay={settings.audioAutoPlay}
             replayKey={settings.audioReplayKey}
+            onManualAudioPlay={settings.onManualAudioPlay}
           />
         </FadeIn>
       )}

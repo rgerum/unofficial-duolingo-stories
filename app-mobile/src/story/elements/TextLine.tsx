@@ -147,6 +147,7 @@ export function TextLine({
   rtl,
   autoPlay = true,
   replayKey = 0,
+  onManualAudioPlay,
 }: {
   element: StoryElementLine;
   active: boolean;
@@ -154,6 +155,7 @@ export function TextLine({
   rtl: boolean;
   autoPlay?: boolean;
   replayKey?: number;
+  onManualAudioPlay?: () => void;
 }) {
   const audio = element.line?.content?.audio;
   const { audioRange, play, hasAudio } = useLineAudio(
@@ -162,6 +164,10 @@ export function TextLine({
     autoPlay,
     replayKey,
   );
+  const handlePlay = React.useCallback(() => {
+    onManualAudioPlay?.();
+    play();
+  }, [onManualAudioPlay, play]);
 
   const lineRtl = getStoryLineRtl({
     storyRtl: rtl,
@@ -189,7 +195,7 @@ export function TextLine({
   if (element.line.type === "TITLE") {
     return (
       <View style={[styles.row, lineRtl && styles.rowRtl]}>
-        <LineBody hasAudio={hasAudio} onPlay={play} rtl={lineRtl}>
+        <LineBody hasAudio={hasAudio} onPlay={handlePlay} rtl={lineRtl}>
           <HintText
             content={element.line.content}
             audioRange={audioRange}
@@ -254,7 +260,7 @@ export function TextLine({
             >
               <LineBody
                 hasAudio={hasAudio}
-                onPlay={play}
+                onPlay={handlePlay}
                 rtl={lineRtl}
                 inlineAudio
                 naturalWidth
@@ -288,7 +294,7 @@ export function TextLine({
           >
             <LineBody
               hasAudio={hasAudio}
-              onPlay={play}
+              onPlay={handlePlay}
               rtl={lineRtl}
               inlineAudio={lineRtl}
             >
@@ -316,7 +322,7 @@ export function TextLine({
   // PROSE (or CHARACTER without avatar)
   return (
     <View style={[styles.row, lineRtl && styles.rowRtl]}>
-      <LineBody hasAudio={hasAudio} onPlay={play} rtl={lineRtl}>
+      <LineBody hasAudio={hasAudio} onPlay={handlePlay} rtl={lineRtl}>
         <HintText
           content={element.line.content}
           audioRange={audioRange}
