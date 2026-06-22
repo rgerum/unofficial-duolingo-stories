@@ -19,7 +19,7 @@ import { Button } from "../../src/components/Button";
 import { Flag } from "../../src/components/Flag";
 import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
-import { getAllProgress } from "../../src/storage";
+import { getAllCourseProgress, type CourseProgress } from "../../src/storage";
 import { colors } from "../../src/theme";
 
 type LandingData = FunctionReturnType<typeof api.landing.getPublicLandingPageData>;
@@ -39,13 +39,13 @@ export default function CoursesTab() {
     session?.session ? {} : "skip",
   );
   const [localProgress, setLocalProgress] = React.useState<
-    Record<string, number>
+    Record<string, CourseProgress>
   >({});
 
   useFocusEffect(
     React.useCallback(() => {
       let cancelled = false;
-      void getAllProgress().then((progress) => {
+      void getAllCourseProgress().then((progress) => {
         if (!cancelled) setLocalProgress(progress);
       });
       return () => {
@@ -57,7 +57,10 @@ export default function CoursesTab() {
   const progressByShort = React.useMemo(() => {
     const map = session?.session ? {} : { ...localProgress };
     for (const entry of serverProgress ?? []) {
-      map[entry.courseShort] = entry.completedCount;
+      map[entry.courseShort] = {
+        completedCount: entry.completedCount,
+        lastCompletedAt: entry.lastCompletedAt,
+      };
     }
     return map;
   }, [localProgress, serverProgress, session?.session]);
@@ -84,8 +87,20 @@ export default function CoursesTab() {
       .map((short) => byShort.get(short))
       .filter((course): course is NonNullable<typeof course> =>
         Boolean(course),
-      );
-  }, [activeShorts, landingData]);
+      )
+      .sort((a, b) => {
+        if (a.short === courseShort) return -1;
+        if (b.short === courseShort) return 1;
+
+        const aLastCompleted = progressByShort[a.short]?.lastCompletedAt ?? 0;
+        const bLastCompleted = progressByShort[b.short]?.lastCompletedAt ?? 0;
+        if (aLastCompleted !== bLastCompleted) {
+          return bLastCompleted - aLastCompleted;
+        }
+
+        return a.name.localeCompare(b.name);
+      });
+  }, [activeShorts, courseShort, landingData, progressByShort]);
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
@@ -95,7 +110,7 @@ export default function CoursesTab() {
           <Text style={styles.subtitle}>Your active story courses</Text>
         </View>
         <Button
-          title="Add course"
+          title="Add"
           disabled={isOffline}
           onPress={() => router.push("/add-course")}
         />
@@ -120,7 +135,7 @@ export default function CoursesTab() {
             Add a course to start reading stories.
           </Text>
           <Button
-            title="Add course"
+            title="Add"
             onPress={() => router.push("/add-course")}
             style={styles.emptyButton}
           />
@@ -133,7 +148,7 @@ export default function CoursesTab() {
           {courses.map((course) => {
             const completed = Math.min(
               course.count,
-              progressByShort[course.short] ?? 0,
+              progressByShort[course.short]?.completedCount ?? 0,
             );
             const selected = course.short === courseShort;
             return (

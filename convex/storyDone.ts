@@ -30,6 +30,7 @@ const currentUserProgressValidator = v.array(
   v.object({
     courseShort: v.string(),
     completedCount: v.number(),
+    lastCompletedAt: v.number(),
   }),
 );
 
@@ -143,22 +144,37 @@ export const getCurrentUserProgress = query({
       )
       .collect();
 
-    const countByCourseId = new Map<Id<"courses">, number>();
+    const progressByCourseId = new Map<
+      Id<"courses">,
+      { completedCount: number; lastCompletedAt: number }
+    >();
     for (const row of rows) {
-      countByCourseId.set(
-        row.courseId,
-        (countByCourseId.get(row.courseId) ?? 0) + 1,
-      );
+      const current = progressByCourseId.get(row.courseId);
+      progressByCourseId.set(row.courseId, {
+        completedCount: (current?.completedCount ?? 0) + 1,
+        lastCompletedAt: Math.max(
+          current?.lastCompletedAt ?? 0,
+          row.lastDoneAt,
+        ),
+      });
     }
 
-    const result: Array<{ courseShort: string; completedCount: number }> = [];
-    for (const [courseId, completedCount] of countByCourseId) {
+    const result: Array<{
+      courseShort: string;
+      completedCount: number;
+      lastCompletedAt: number;
+    }> = [];
+    for (const [courseId, progress] of progressByCourseId) {
       const course = await ctx.db.get(courseId);
       if (!course?.short) continue;
-      result.push({ courseShort: course.short, completedCount });
+      result.push({ courseShort: course.short, ...progress });
     }
 
-    return result.sort((a, b) => a.courseShort.localeCompare(b.courseShort));
+    return result.sort((a, b) => {
+      const recencyCmp = b.lastCompletedAt - a.lastCompletedAt;
+      if (recencyCmp !== 0) return recencyCmp;
+      return a.courseShort.localeCompare(b.courseShort);
+    });
   },
 });
 
