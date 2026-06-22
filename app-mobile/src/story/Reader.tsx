@@ -43,7 +43,7 @@ export function Reader({
   hideQuestions: boolean;
   /** Listening mode: questions hidden and lines auto-advance after audio. */
   listening: boolean;
-  onQuit: () => void;
+  onQuit: (options: { shouldConfirmQuit: boolean }) => void;
   onEnd: () => void | Promise<void>;
   onBackToOverview: () => void;
   onFinishedReached: () => void;
@@ -203,6 +203,7 @@ export function Reader({
     storyProgress,
     hideQuestions,
   );
+  const shouldConfirmQuit = !isFinished && visibleProgress > 0;
   const revealedParts = partsList.filter(
     (parts) =>
       !shouldSkipStoryPart(parts, hideQuestions) &&
@@ -216,7 +217,7 @@ export function Reader({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Close story"
-            onPress={onQuit}
+            onPress={() => onQuit({ shouldConfirmQuit })}
             hitSlop={10}
           >
             <Ionicons name="close" size={28} color={colors.textDim} />

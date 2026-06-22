@@ -138,19 +138,27 @@ export default function StoryScreen() {
     router.replace(`/story/${storyId}?listening=${listening ? "1" : "0"}`);
   }, [listening, router, storyId]);
 
-  const onQuit = React.useCallback(() => {
-    Alert.alert("Quit story?", "Your place in this story won't be saved.", [
-      { text: "Keep reading", style: "cancel" },
-      {
-        text: "Quit",
-        style: "destructive",
-        onPress: () => {
-          captureStoryEvent("story_quit");
-          leave();
+  const onQuit = React.useCallback(
+    ({ shouldConfirmQuit }: { shouldConfirmQuit: boolean }) => {
+      if (!shouldConfirmQuit) {
+        leave();
+        return;
+      }
+
+      Alert.alert("Quit story?", "Your place in this story won't be saved.", [
+        { text: "Keep reading", style: "cancel" },
+        {
+          text: "Quit",
+          style: "destructive",
+          onPress: () => {
+            captureStoryEvent("story_quit");
+            leave();
+          },
         },
-      },
-    ]);
-  }, [captureStoryEvent, leave]);
+      ]);
+    },
+    [captureStoryEvent, leave],
+  );
 
   const onEnd = React.useCallback(() => {
     if (nextStoryId) {
