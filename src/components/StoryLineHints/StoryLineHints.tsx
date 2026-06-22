@@ -31,6 +31,7 @@ const editorHintTextStyle: CSSProperties = {
 const tooltipContainerStyle = {
   ...underlineBaseStyle,
   "--story-hint-underline": "var(--underline-dashed)",
+  paddingBottom: "5px",
   backgroundImage:
     "linear-gradient(to right, var(--story-hint-underline) 60%, rgba(255, 255, 255, 0) 0%)",
   outlineColor: "var(--tooltip-border)",
@@ -308,9 +309,19 @@ function StoryLineHints({
     const was_hidden_for_challenge = hideRangesForChallenge?.some((range) =>
       getOverlap(hint.rangeFrom, hint.rangeTo + 1, range.start, range.end),
     );
+    const inlineHintUnderlineStyle =
+      !showTrans &&
+      has_translation_hint &&
+      !is_hidden &&
+      !was_hidden_for_challenge
+        ? tooltipContainerStyle
+        : undefined;
+
     const word_content = hint_pronunciation ? (
       <span className="group/pronunciation relative inline-block">
-        <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
+        <span style={inlineHintUnderlineStyle}>
+          {addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}
+        </span>
         <span
           className={cn(
             "pointer-events-none invisible absolute whitespace-nowrap leading-none opacity-0 transition-opacity duration-200",
@@ -331,7 +342,9 @@ function StoryLineHints({
         </span>
       </span>
     ) : (
-      <span>{addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}</span>
+      <span style={inlineHintUnderlineStyle}>
+        {addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}
+      </span>
     );
     const hintContainerClassName = is_hidden
       ? ""
@@ -351,12 +364,10 @@ function StoryLineHints({
           "pointer-events-none invisible absolute block w-auto whitespace-nowrap text-center font-normal not-italic opacity-0 transition-opacity duration-300 group-hover/tooltip:visible group-hover/tooltip:opacity-100 group-focus-within/tooltip:visible group-focus-within/tooltip:opacity-100",
           visibleContent.lang_hints,
         );
+    const hintHasChallengeUnderline =
+      Boolean(was_hidden_for_challenge) || Boolean(is_hidden);
     const hintContainerStyle =
-      showTrans && has_any_hint
-        ? editorHintContainerStyle
-        : !showTrans && has_translation_hint && !is_hidden
-          ? tooltipContainerStyle
-          : undefined;
+      showTrans && has_any_hint ? editorHintContainerStyle : undefined;
     const tooltipStyle =
       hint_translation && hint_pronunciation
         ? tooltipContentWithPronunciationStyle
