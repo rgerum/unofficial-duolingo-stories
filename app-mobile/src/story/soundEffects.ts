@@ -9,11 +9,20 @@ const SOURCES = {
   done: require("../../assets/sounds/sound_done.mp3"),
 } as const;
 
+// Calibrated from ffmpeg loudnorm against sampled story voice lines
+// (voice average about -19.6 LUFS).
+const VOLUMES = {
+  right: 0.67,
+  wrong: 0.86,
+  done: 0.52,
+} as const satisfies Record<keyof typeof SOURCES, number>;
+
 export type SoundEffectName = keyof typeof SOURCES;
 
 export function playSoundEffect(name: SoundEffectName): void {
   try {
     const player = createAudioPlayer(SOURCES[name]);
+    player.volume = VOLUMES[name];
     const subscription = player.addListener(
       "playbackStatusUpdate",
       (status) => {
