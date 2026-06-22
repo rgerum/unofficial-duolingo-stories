@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Text } from "../components/Text";
 import { colors } from "../theme";
-import { HintPopupContext } from "./HintPopup";
+import { HintLookupContext, HintPopupContext } from "./HintPopup";
 import type { ContentWithHints, HideRange } from "./types";
 
 // Web-parity text renderer (StoryLineHints): hinted words get a dashed
@@ -59,6 +59,7 @@ function HintTokenBox({
   underline,
   spaceWidth,
   popup,
+  onLookup,
 }: {
   token: Token;
   displayText: string;
@@ -67,6 +68,7 @@ function HintTokenBox({
   underline?: string;
   spaceWidth?: number;
   popup: React.ContextType<typeof HintPopupContext>;
+  onLookup: () => void;
 }) {
   const tokenLayoutRef = React.useRef({ width: 0, height: 0 });
   const interactive = Boolean(token.hint) && !token.hidden;
@@ -86,6 +88,7 @@ function HintTokenBox({
         onPress={(event) => {
           if (!token.hint) return;
           const hint = token.hint;
+          onLookup();
           const { locationX, locationY, pageX, pageY } = event.nativeEvent;
           const { width, height } = tokenLayoutRef.current;
           const calculatedX =
@@ -132,12 +135,14 @@ function HintPhraseBox({
   rtl,
   collapsedSpaceWidth,
   popup,
+  onLookup,
 }: {
   tokens: Token[];
   textStyle: TextStyle;
   rtl: boolean;
   collapsedSpaceWidth: number;
   popup: React.ContextType<typeof HintPopupContext>;
+  onLookup: () => void;
 }) {
   const phraseLayoutRef = React.useRef({ width: 0, height: 0 });
   const hint = tokens.find((token) => token.hint)?.hint;
@@ -162,6 +167,7 @@ function HintPhraseBox({
         disabled={!interactive}
         onPress={(event) => {
           if (!hint) return;
+          onLookup();
           const { locationX, locationY, pageX, pageY } = event.nativeEvent;
           const { width, height } = phraseLayoutRef.current;
           const calculatedX =
@@ -251,6 +257,7 @@ export function HintText({
   fillLineWidth?: boolean;
 }) {
   const popup = React.useContext(HintPopupContext);
+  const onHintLookup = React.useContext(HintLookupContext);
 
   if (!content) return null;
 
@@ -354,6 +361,7 @@ export function HintText({
           isWhitespace ? displayText.length * collapsedSpaceWidth : undefined
         }
         popup={popup}
+        onLookup={onHintLookup}
       />
     );
   };
@@ -436,6 +444,7 @@ export function HintText({
             rtl={rtl}
             collapsedSpaceWidth={collapsedSpaceWidth}
             popup={popup}
+            onLookup={onHintLookup}
           />
         </View>
       );

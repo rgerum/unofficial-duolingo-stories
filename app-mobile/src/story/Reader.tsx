@@ -17,6 +17,7 @@ import { onAnyAudioDone, stopAudio } from "./audio";
 import { playSoundEffect } from "./soundEffects";
 import { Part } from "./Part";
 import { Footer, type NextStoryPreview } from "./Footer";
+import { HintLookupContext } from "./HintPopup";
 import { SmartImage } from "../components/SmartImage";
 import type { StoryData } from "./types";
 
@@ -126,6 +127,11 @@ export function Reader({
     setListeningPaused(true);
   }, []);
 
+  const handleHintLookup = React.useCallback(() => {
+    stopAudio(false);
+    if (listening) setListeningPaused(true);
+  }, [listening]);
+
   const playListening = React.useCallback(() => {
     setListeningPaused(false);
     setAudioReplayKey((key) => key + 1);
@@ -197,7 +203,6 @@ export function Reader({
     storyProgress,
     hideQuestions,
   );
-
   const revealedParts = partsList.filter(
     (parts) =>
       !shouldSkipStoryPart(parts, hideQuestions) &&
@@ -205,93 +210,95 @@ export function Reader({
   );
 
   return (
-    <View style={styles.root}>
-      <View style={[styles.topBar, { paddingTop: insets.top + 10 }]}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close story"
-          onPress={onQuit}
-          hitSlop={10}
-        >
-          <Ionicons name="close" size={28} color={colors.textDim} />
-        </Pressable>
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              {
-                width: `${
-                  visibleLength > 0
-                    ? Math.min(100, (visibleProgress / visibleLength) * 100)
-                    : 0
-                }%`,
-              },
-            ]}
+    <HintLookupContext.Provider value={handleHintLookup}>
+      <View style={styles.root}>
+        <View style={[styles.topBar, { paddingTop: insets.top + 10 }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Close story"
+            onPress={onQuit}
+            hitSlop={10}
+          >
+            <Ionicons name="close" size={28} color={colors.textDim} />
+          </Pressable>
+          <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${
+                    visibleLength > 0
+                      ? Math.min(100, (visibleProgress / visibleLength) * 100)
+                      : 0
+                  }%`,
+                },
+              ]}
+            />
+          </View>
+        </View>
+
+        {isFinished ? (
+          // Full-screen takeover, like the web's finished page: the transcript
+          // disappears and the gilded illustration takes center stage.
+          <View style={styles.finished}>
+            <SmartImage
+              uri={story.illustrations?.gilded ?? story.illustrations?.active}
+              width={200}
+              height={200}
+            />
+            <Text style={styles.finishedTitle}>Story completed!</Text>
+            <Text style={styles.finishedSubtitle}>
+              You have finished {story.from_language_name}
+            </Text>
+          </View>
+        ) : (
+          <ScrollView
+            ref={scrollRef}
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            onContentSizeChange={scrollToNewContent}
+          >
+            {revealedParts.map((parts) => {
+              const index = getPartIndex(parts);
+              const active = index === storyProgress;
+              return (
+                <Part
+                  key={index}
+                  parts={parts}
+                  partProgress={partProgress}
+                  setButtonStatus={active ? setButtonStatus : noop}
+                  active={active}
+                  settings={{
+                    hideQuestions,
+                    rtl: story.learning_language_rtl,
+                    audioAutoPlay: !listeningPaused,
+                    audioReplayKey,
+                    onManualAudioPlay: () => handleManualAudioPlay(index),
+                  }}
+                />
+              );
+            })}
+            <View style={{ height: 220 }} />
+          </ScrollView>
+        )}
+
+        <View style={styles.footerOverlay}>
+          <Footer
+            status={buttonStatus}
+            onContinue={() => void next()}
+            onBackToOverview={onBackToOverview}
+            finishedLabel={finishedLabel}
+            nextStoryPreview={nextStoryPreview}
+            learningLanguageName={learningLanguageName}
+            listeningMode={listening && !isFinished}
+            listeningPaused={listeningPaused}
+            onToggleListening={listeningPaused ? playListening : pauseListening}
+            onReplayListening={replayListening}
+            onSkipListening={skipListening}
           />
         </View>
       </View>
-
-      {isFinished ? (
-        // Full-screen takeover, like the web's finished page: the transcript
-        // disappears and the gilded illustration takes center stage.
-        <View style={styles.finished}>
-          <SmartImage
-            uri={story.illustrations?.gilded ?? story.illustrations?.active}
-            width={200}
-            height={200}
-          />
-          <Text style={styles.finishedTitle}>Story completed!</Text>
-          <Text style={styles.finishedSubtitle}>
-            You have finished {story.from_language_name}
-          </Text>
-        </View>
-      ) : (
-        <ScrollView
-          ref={scrollRef}
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          onContentSizeChange={scrollToNewContent}
-        >
-          {revealedParts.map((parts) => {
-            const index = getPartIndex(parts);
-            const active = index === storyProgress;
-            return (
-              <Part
-                key={index}
-                parts={parts}
-                partProgress={partProgress}
-                setButtonStatus={active ? setButtonStatus : noop}
-                active={active}
-                settings={{
-                  hideQuestions,
-                  rtl: story.learning_language_rtl,
-                  audioAutoPlay: !listeningPaused,
-                  audioReplayKey,
-                  onManualAudioPlay: () => handleManualAudioPlay(index),
-                }}
-              />
-            );
-          })}
-          <View style={{ height: 220 }} />
-        </ScrollView>
-      )}
-
-      <View style={styles.footerOverlay}>
-        <Footer
-          status={buttonStatus}
-          onContinue={() => void next()}
-          onBackToOverview={onBackToOverview}
-          finishedLabel={finishedLabel}
-          nextStoryPreview={nextStoryPreview}
-          learningLanguageName={learningLanguageName}
-          listeningMode={listening && !isFinished}
-          listeningPaused={listeningPaused}
-          onToggleListening={listeningPaused ? playListening : pauseListening}
-          onReplayListening={replayListening}
-          onSkipListening={skipListening}
-        />
-      </View>
-    </View>
+    </HintLookupContext.Provider>
   );
 }
 

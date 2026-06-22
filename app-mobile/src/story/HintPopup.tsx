@@ -3,6 +3,7 @@ import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "../components/Text";
 import { colors } from "../theme";
+import { stopAudio } from "./audio";
 
 type HintRequest = {
   translation: string;
@@ -19,6 +20,10 @@ type HintPopupApi = {
 export const HintPopupContext = React.createContext<HintPopupApi>({
   show: () => {},
   hide: () => {},
+});
+
+export const HintLookupContext = React.createContext<() => void>(() => {
+  stopAudio(false);
 });
 
 const BUBBLE_MAX_WIDTH = 260;
