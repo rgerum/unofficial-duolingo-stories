@@ -47,12 +47,17 @@ type Token = {
   hint?: { translation: string; pronunciation?: string };
 };
 
+function getDisplayText(token: Token): string {
+  return token.text.replace(/\s+/g, " ");
+}
+
 function HintTokenBox({
   token,
   displayText,
   textStyle,
   hiddenTextStyle,
   underline,
+  spaceWidth,
   popup,
 }: {
   token: Token;
@@ -60,6 +65,7 @@ function HintTokenBox({
   textStyle: TextStyle;
   hiddenTextStyle?: { opacity: number };
   underline?: string;
+  spaceWidth?: number;
   popup: React.ContextType<typeof HintPopupContext>;
 }) {
   const tokenLayoutRef = React.useRef({ width: 0, height: 0 });
@@ -94,7 +100,12 @@ function HintTokenBox({
         }}
       >
         <Text
-          style={[textStyle, { lineHeight: undefined }, hiddenTextStyle]}
+          style={[
+            textStyle,
+            { lineHeight: undefined },
+            spaceWidth !== undefined && { width: spaceWidth },
+            hiddenTextStyle,
+          ]}
         >
           {displayText}
         </Text>
@@ -105,6 +116,105 @@ function HintTokenBox({
                 height: 8,
                 borderWidth: 2,
                 borderStyle: token.hidden ? "solid" : "dotted",
+                borderColor: underline,
+              }}
+            />
+          )}
+        </View>
+      </Pressable>
+    </View>
+  );
+}
+
+function HintPhraseBox({
+  tokens,
+  textStyle,
+  rtl,
+  collapsedSpaceWidth,
+  popup,
+}: {
+  tokens: Token[];
+  textStyle: TextStyle;
+  rtl: boolean;
+  collapsedSpaceWidth: number;
+  popup: React.ContextType<typeof HintPopupContext>;
+}) {
+  const phraseLayoutRef = React.useRef({ width: 0, height: 0 });
+  const hint = tokens.find((token) => token.hint)?.hint;
+  const interactive = Boolean(hint) && !tokens.some((token) => token.hidden);
+  const underline = tokens.some((token) => token.hidden)
+    ? UNDERLINE_SOLID
+    : tokens.some((token) => token.revealed || token.hint)
+      ? UNDERLINE_DASHED
+      : undefined;
+
+  return (
+    <View
+      onLayout={(event) => {
+        phraseLayoutRef.current = {
+          width: event.nativeEvent.layout.width,
+          height: event.nativeEvent.layout.height,
+        };
+      }}
+      style={{ alignSelf: "flex-start", marginBottom: 2 }}
+    >
+      <Pressable
+        disabled={!interactive}
+        onPress={(event) => {
+          if (!hint) return;
+          const { locationX, locationY, pageX, pageY } = event.nativeEvent;
+          const { width, height } = phraseLayoutRef.current;
+          const calculatedX =
+            width > 0 ? pageX - locationX + width / 2 : pageX;
+          const calculatedY = height > 0 ? pageY - locationY : pageY;
+          popup.show({
+            translation: hint.translation,
+            pronunciation: hint.pronunciation,
+            x: calculatedX,
+            y: calculatedY,
+          });
+        }}
+      >
+        <View
+          style={{
+            flexDirection: rtl ? "row-reverse" : "row",
+            alignItems: "flex-end",
+          }}
+        >
+          {tokens.map((token, index) => {
+            const displayText = getDisplayText(token);
+            const isWhitespace = /^\s+$/.test(token.text);
+            const color = token.hidden
+              ? colors.background
+              : token.dimmed
+                ? colors.disabled
+                : (textStyle.color ?? colors.text);
+            return (
+              <Text
+                key={index}
+                style={[
+                  textStyle,
+                  { color, lineHeight: undefined },
+                  isWhitespace && {
+                    width: displayText.length * collapsedSpaceWidth,
+                  },
+                  token.hidden && { opacity: 0 },
+                ]}
+              >
+                {displayText}
+              </Text>
+            );
+          })}
+        </View>
+        <View style={{ height: 2, marginTop: -2, overflow: "hidden" }}>
+          {underline && (
+            <View
+              style={{
+                height: 8,
+                borderWidth: 2,
+                borderStyle: tokens.some((token) => token.hidden)
+                  ? "solid"
+                  : "dotted",
                 borderColor: underline,
               }}
             />
@@ -216,7 +326,8 @@ export function HintText({
   const renderBox = (token: Token, key: React.Key) => {
     // Story texts contain runs of spaces (HTML collapses them, RN
     // doesn't) — collapse for display only; hint indices stay intact.
-    const displayText = token.text.replace(/\s+/g, " ");
+    const displayText = getDisplayText(token);
+    const isWhitespace = /^\s+$/.test(token.text);
 
     const interactive = Boolean(token.hint) && !token.hidden;
     const underline = token.hidden
@@ -239,6 +350,9 @@ export function HintText({
         textStyle={{ ...flatStyle, color }}
         hiddenTextStyle={hiddenTextStyle}
         underline={underline}
+        spaceWidth={
+          isWhitespace ? displayText.length * collapsedSpaceWidth : undefined
+        }
         popup={popup}
       />
     );
@@ -271,7 +385,7 @@ export function HintText({
       afterWhitespace = false;
       continue;
     }
-    if (/^\s+$/.test(token.text)) {
+    if (/^\s+$/.test(token.text) && !token.hint) {
       appendTrailingSpace(token);
       continue;
     }
@@ -299,6 +413,34 @@ export function HintText({
     atom: Extract<Atom, { type: "cluster" }>,
     key: React.Key,
   ) => {
+    const hint = atom.tokens.find((token) => token.hint)?.hint;
+    const isPhraseHint =
+      hint !== undefined &&
+      atom.tokens.length > 1 &&
+      atom.tokens.every((token) => token.hint === hint);
+    if (isPhraseHint) {
+      return (
+        <View
+          key={key}
+          style={
+            atom.trailingSpaceWidth > 0
+              ? rtl
+                ? { marginLeft: atom.trailingSpaceWidth }
+                : { marginRight: atom.trailingSpaceWidth }
+              : undefined
+          }
+        >
+          <HintPhraseBox
+            tokens={atom.tokens}
+            textStyle={flatStyle}
+            rtl={rtl}
+            collapsedSpaceWidth={collapsedSpaceWidth}
+            popup={popup}
+          />
+        </View>
+      );
+    }
+
     if (atom.tokens.length === 1) {
       return (
         <View
