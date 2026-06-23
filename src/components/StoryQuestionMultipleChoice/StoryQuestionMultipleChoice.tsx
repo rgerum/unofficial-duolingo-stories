@@ -3,6 +3,7 @@ import React from "react";
 //import useChoiceButtons from "./questions_useChoiceButtons";
 //import { EditorHook } from "../editor_hooks";
 import StoryLineHints from "../StoryLineHints";
+import { keepClosingPunctuationWithWord } from "../StoryLineHints/text";
 //import { EditorContext, StoryContext } from "../story";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import CheckButton from "../CheckButton";
@@ -71,7 +72,7 @@ function StoryQuestionMultipleChoice({
             <CheckButton type={buttonState[index]} />
             <div>
               {typeof answer == "string" ? (
-                answer
+                keepClosingPunctuationWithWord(answer)
               ) : (
                 <StoryLineHints content={answer} />
               )}
