@@ -20,6 +20,7 @@ import type { ContentWithHints, HideRange } from "./types";
 
 const UNDERLINE_DASHED = "#e5e5e5";
 const UNDERLINE_SOLID = "#7b7b7b";
+const WRAPPED_LINE_GAP = 3;
 
 function splitTextTokens(text: string): string[] {
   if (!text) return [];
@@ -239,6 +240,7 @@ export function HintText({
   showHints = true,
   style,
   containerStyle,
+  leadingElement,
   rtl = false,
   centered = false,
   fillLineWidth = false,
@@ -252,6 +254,7 @@ export function HintText({
   showHints?: boolean;
   style?: StyleProp<TextStyle>;
   containerStyle?: ViewStyle;
+  leadingElement?: React.ReactNode;
   rtl?: boolean;
   centered?: boolean;
   fillLineWidth?: boolean;
@@ -500,15 +503,19 @@ export function HintText({
         <View
           key={lineIndex}
           style={{
+            marginBottom:
+              lineIndex < atomLines.length - 1 ? WRAPPED_LINE_GAP : 3,
             ...(fillLineWidth
               ? { alignSelf: "stretch", width: "100%" }
               : null),
             flexDirection: rtl ? "row-reverse" : "row",
             flexWrap: "wrap",
+            rowGap: WRAPPED_LINE_GAP,
             alignItems: "flex-end",
             justifyContent: "flex-start",
           }}
         >
+          {lineIndex === 0 && leadingElement}
           {lineAtoms.map((atom, atomIndex) =>
             renderAtom(atom, `${lineIndex}:${atomIndex}`),
           )}
