@@ -6,6 +6,7 @@ import { useFonts } from "expo-font";
 import { captureMobileEventLater } from "../src/analytics";
 import { AppStateProvider } from "../src/app-state";
 import { useConvexBetterAuth } from "../src/auth-client";
+import { NetworkStatusProvider } from "../src/network";
 import {
   NUNITO_BOLD_FONT_FAMILY,
   NUNITO_FONT_FAMILY,
@@ -43,19 +44,24 @@ export default function RootLayout() {
   return (
     <ConvexProviderWithAuth client={convex} useAuth={useConvexBetterAuth}>
       <AppStateProvider>
-        <StatusBar style="dark" />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="welcome" options={{ animation: "fade" }} />
-          <Stack.Screen name="auth" options={{ presentation: "modal" }} />
-          <Stack.Screen name="onboarding" />
-          <Stack.Screen name="add-course" />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen
-            name="story/[id]"
-            options={{ presentation: "fullScreenModal", gestureEnabled: false }}
-          />
-        </Stack>
+        <NetworkStatusProvider>
+          <StatusBar style="dark" />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="welcome" options={{ animation: "fade" }} />
+            <Stack.Screen name="auth" options={{ presentation: "modal" }} />
+            <Stack.Screen name="onboarding" />
+            <Stack.Screen name="add-course" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen
+              name="story/[id]"
+              options={{
+                presentation: "fullScreenModal",
+                gestureEnabled: false,
+              }}
+            />
+          </Stack>
+        </NetworkStatusProvider>
       </AppStateProvider>
     </ConvexProviderWithAuth>
   );
