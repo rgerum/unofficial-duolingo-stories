@@ -1,5 +1,6 @@
 import React from "react";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
 import { useFonts } from "expo-font";
@@ -19,6 +20,11 @@ const nunitoFont = require("../assets/fonts/Nunito-Regular.ttf");
 const nunitoBoldFont = require("../assets/fonts/Nunito-Bold.ttf");
 const nunitoLightFont = require("../assets/fonts/Nunito-Light.ttf");
 const sitelenPonaFont = require("../assets/fonts/linjalipamanka-normal.otf");
+
+SplashScreen.setOptions({
+  duration: 300,
+  fade: true,
+});
 
 const convex = new ConvexReactClient(
   process.env.EXPO_PUBLIC_CONVEX_URL ??
