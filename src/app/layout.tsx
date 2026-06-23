@@ -1,4 +1,5 @@
 import React from "react";
+import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "@/styles/global.css";
 import Script from "next/script";
@@ -12,6 +13,23 @@ const nunito = Nunito({
   variable: "--font-nunito",
 });
 
+function getMetadataBase() {
+  const candidate =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.SITE_URL ??
+    "https://duostories.org";
+
+  try {
+    return new URL(candidate);
+  } catch {
+    return new URL("https://duostories.org");
+  }
+}
+
+export const metadata: Metadata = {
+  metadataBase: getMetadataBase(),
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -22,6 +40,9 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1cb0f6" />
+        <Script id="story-js-flag" strategy="beforeInteractive">
+          {`document.documentElement.setAttribute("data-story-js", "true");`}
+        </Script>
         <Script src="/darklight.js"></Script>
       </head>
       <body>

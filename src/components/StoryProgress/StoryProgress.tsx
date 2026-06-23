@@ -63,7 +63,11 @@ function Header({
   }, [active, setButtonStatus]);
 
   return (
-    <FadeGlideIn hidden={hidden} disableScroll={settings.show_all}>
+    <FadeGlideIn
+      hidden={hidden}
+      disableScroll={settings.show_all}
+      keepInDom={true}
+    >
       <StoryHeader
         active={active}
         element={parts[0] as StoryElementHeader}
@@ -92,7 +96,11 @@ function Line({
   const element = parts[0];
   if (element.type === "LINE") {
     return (
-      <FadeGlideIn hidden={hidden} disableScroll={settings.show_all}>
+      <FadeGlideIn
+        hidden={hidden}
+        disableScroll={settings.show_all}
+        keepInDom={true}
+      >
         <StoryTextLine active={active} element={element} settings={settings} />
       </FadeGlideIn>
     );
@@ -551,18 +559,22 @@ function StoryProgress({
   return (
     <>
       <div>
-        {!settings.show_all && (
-          <StoryHeaderProgress
-            course={story.course_short}
-            setId={story.set_id}
-            progress={visibleStoryProgress}
-            length={storyProgress === -1 ? undefined : visibleStoryLength}
-            editHref={editHref}
-          />
-        )}
-        {storyProgress === -1 && !settings.show_all && (
-          <StoryTitlePage story={story} next={next} />
-        )}
+        {!settings.show_all ? (
+          <div data-story-js-only="true">
+            <StoryHeaderProgress
+              course={story.course_short}
+              setId={story.set_id}
+              progress={visibleStoryProgress}
+              length={storyProgress === -1 ? undefined : visibleStoryLength}
+              editHref={editHref}
+            />
+          </div>
+        ) : null}
+        {storyProgress === -1 && !settings.show_all ? (
+          <div data-story-js-only="true">
+            <StoryTitlePage story={story} next={next} />
+          </div>
+        ) : null}
         <div
           className={cn(
             "mx-auto max-w-[500px] p-4 print:w-full print:max-w-full",
@@ -612,17 +624,19 @@ function StoryProgress({
             />
           )}
         </div>
-        {!settings.show_all && storyProgress !== -1 && (
-          <StoryFooter
-            buttonStatus={buttonStatus}
-            onClick={next}
-            onBackToOverview={onBackToOverview}
-            finishedLabel={finishedLabel}
-            nextStoryPreview={nextStoryPreview}
-            learningLanguageName={story.learning_language_long}
-            showFinishedPrimaryAction={showFinishedPrimaryAction}
-          />
-        )}
+        {!settings.show_all && storyProgress !== -1 ? (
+          <div data-story-js-only="true">
+            <StoryFooter
+              buttonStatus={buttonStatus}
+              onClick={next}
+              onBackToOverview={onBackToOverview}
+              finishedLabel={finishedLabel}
+              nextStoryPreview={nextStoryPreview}
+              learningLanguageName={story.learning_language_long}
+              showFinishedPrimaryAction={showFinishedPrimaryAction}
+            />
+          </div>
+        ) : null}
       </div>
     </>
   );

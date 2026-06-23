@@ -7,17 +7,23 @@ function FadeGlideIn({
   show = true,
   hidden,
   disableScroll,
+  keepInDom = false,
 }: {
   children: React.ReactNode;
   show?: boolean;
   hidden?: boolean;
   disableScroll?: boolean;
+  keepInDom?: boolean;
 }) {
   const ref = useScrollIntoView(show && !hidden && !disableScroll);
-  if (hidden || !show) return null;
+  if (hidden || !show) {
+    if (!keepInDom) return null;
+    return <div data-story-future="true">{children}</div>;
+  }
 
   return (
     <motion.div
+      data-story-future="false"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
