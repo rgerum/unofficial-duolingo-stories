@@ -329,6 +329,8 @@ export function TextLine({
           hideRangesForChallenge={hideRanges}
           unhide={unhide}
           rtl={lineRtl}
+          containerStyle={lineRtl ? styles.rtlProseText : undefined}
+          fillLineWidth={lineRtl}
           style={[textStyle, getLanguageTextStyle(element.lang, textStyle)]}
         />
       </LineBody>
@@ -416,6 +418,11 @@ const styles = StyleSheet.create({
   rtlBubbleText: {
     flexShrink: 1,
     minWidth: 0,
+  },
+  rtlProseText: {
+    flexShrink: 1,
+    minWidth: 0,
+    width: "100%",
   },
   bubbleMeasureClone: {
     opacity: 0,
