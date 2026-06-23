@@ -1,9 +1,5 @@
 module.exports = {
   // next.js config
-  allowedDevOrigins: [
-    "ubuntu-4gb-fsn1-1.tailed9e74.ts.net",
-    "*.tailed9e74.ts.net",
-  ],
   reactCompiler: true,
   compiler: {
     styledComponents: true,
