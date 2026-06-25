@@ -9,6 +9,8 @@ import {
 } from "@/lib/story-preferences";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
+import StoryTranscript from "./StoryTranscript";
+import { getStoryDescription } from "./story_seo";
 import LocalisationProvider from "@/components/LocalisationProvider";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
@@ -30,24 +32,32 @@ export async function generateMetadata({
   params: Promise<{ story_id: string }>;
 }) {
   const story_id = parseInt((await params).story_id);
-  const story = await fetchQuery(api.storyRead.getStoryMetaByLegacyId, {
-    storyId: story_id,
-  });
+  const [story, storyMeta] = await Promise.all([
+    get_story(story_id),
+    fetchQuery(api.storyRead.getStoryMetaByLegacyId, {
+      storyId: story_id,
+    }),
+  ]);
 
-  if (!story) notFound();
+  if (!story || !storyMeta) notFound();
 
   return {
-    title: `${story.from_language_name} - Duostories ${story.learning_language_long} from ${story.from_language_long}`,
+    title: `${storyMeta.from_language_name} - Duostories ${storyMeta.learning_language_long} from ${storyMeta.from_language_long}`,
+    description: getStoryDescription(story),
     alternates: {
       canonical: `https://duostories.org/story/${story_id}`,
     },
-    keywords: [story.learning_language_long],
+    keywords: [storyMeta.learning_language_long, storyMeta.from_language_long],
     openGraph: {
       images: [
-        `/api/og-story?title=${story.from_language_name}&image=${story.image}&name=${story.learning_language_long}`,
+        `/api/og-story?title=${storyMeta.from_language_name}&image=${storyMeta.image}&name=${storyMeta.learning_language_long}`,
       ],
       url: `https://duostories.org/story/${story_id}`,
       type: "website",
+      description: getStoryDescription(story),
+    },
+    twitter: {
+      description: getStoryDescription(story),
     },
   };
 }
@@ -107,14 +117,26 @@ export default async function Page({
   return (
     <>
       <LocalisationProvider lang={story.from_language_id}>
-        <Suspense fallback={null}>
-          <StoryWrapper
-            story={story}
-            hideStoryQuestions={hideStoryQuestions}
-            storyFinishedIndexUpdate={setStoryDoneAction}
-            //localization={localization}
-          />
-        </Suspense>
+        <style>{`
+          [data-story-js-only="true"] { display: none; }
+          [data-story-no-js="true"] { display: block; }
+          html[data-story-js="true"] [data-story-js-only="true"] { display: block; }
+          html[data-story-js="true"] [data-story-no-js="true"] { display: none; }
+          html[data-story-js="true"] [data-story-future="true"] { display: none; }
+        `}</style>
+        <div data-story-no-js="true">
+          <StoryTranscript story={story} />
+        </div>
+        <div data-story-js-only="true">
+          <Suspense fallback={null}>
+            <StoryWrapper
+              story={story}
+              hideStoryQuestions={hideStoryQuestions}
+              storyFinishedIndexUpdate={setStoryDoneAction}
+              //localization={localization}
+            />
+          </Suspense>
+        </div>
       </LocalisationProvider>
     </>
   );
