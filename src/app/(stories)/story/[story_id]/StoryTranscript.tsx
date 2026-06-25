@@ -12,6 +12,12 @@ import {
   getSpeakerName,
 } from "./story_seo";
 
+function isRtlLanguage(lang: string) {
+  return ["ar", "fa", "he", "ur", "yi", "ckb", "ps", "dv", "rtl"].includes(
+    lang,
+  );
+}
+
 export default function StoryTranscript({ story }: { story: StoryData }) {
   const transcript = getStoryTranscript(story);
   const description = getStoryDescription(story);
@@ -64,7 +70,7 @@ export default function StoryTranscript({ story }: { story: StoryData }) {
         {header ? (
           <div className="mb-8 text-center">
             <img
-              alt="title image"
+              alt={header.learningLanguageTitleContent.text}
               className="mx-auto block h-[175px] w-[175px]"
               src={header.illustrationUrl}
             />
@@ -99,7 +105,7 @@ export default function StoryTranscript({ story }: { story: StoryData }) {
 }
 
 function ReadOnlyStoryLine({ line }: { line: StoryElementLine }) {
-  const isRtl = line.lang === "rtl";
+  const isRtl = isRtlLanguage(line.lang);
 
   if (line.line.type === "TITLE") {
     return (
