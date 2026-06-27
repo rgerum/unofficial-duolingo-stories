@@ -37,6 +37,12 @@
       "expo-web-browser",
       "expo-localization",
       [
+        "expo-status-bar",
+        {
+          "style": "dark"
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
