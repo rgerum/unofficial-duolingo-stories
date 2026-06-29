@@ -2,6 +2,7 @@ import React from "react";
 import {
   Pressable,
   Platform,
+  StyleSheet,
   type StyleProp,
   type TextStyle,
   View,
@@ -329,9 +330,7 @@ export function HintText({
   }
   if (textPos < visible.text.length) pushRun(textPos, visible.text.length);
 
-  const flatStyle = Array.isArray(style)
-    ? Object.assign({}, ...style)
-    : (style ?? {});
+  const flatStyle = StyleSheet.flatten(style) ?? {};
 
   const renderBox = (token: Token, key: React.Key) => {
     // Story texts contain runs of spaces (HTML collapses them, RN

@@ -10,6 +10,7 @@ import {
 
 export const NUNITO_FONT_FAMILY = "Nunito";
 export const NUNITO_BOLD_FONT_FAMILY = "Nunito-Bold";
+export const NUNITO_EXTRA_BOLD_FONT_FAMILY = "Nunito-ExtraBold";
 export const NUNITO_LIGHT_FONT_FAMILY = "Nunito-Light";
 
 function getNunitoFamily(style: TextProps["style"]): string | undefined {
@@ -20,14 +21,17 @@ function getNunitoFamily(style: TextProps["style"]): string | undefined {
   if (weight === "300" || weight === 300 || weight === "200" || weight === 200)
     return NUNITO_LIGHT_FONT_FAMILY;
   if (
+    weight === "800" ||
+    weight === 800 ||
+    weight === "900" ||
+    weight === 900
+  )
+    return NUNITO_EXTRA_BOLD_FONT_FAMILY;
+  if (
     weight === "600" ||
     weight === 600 ||
     weight === "700" ||
     weight === 700 ||
-    weight === "800" ||
-    weight === 800 ||
-    weight === "900" ||
-    weight === 900 ||
     weight === "bold"
   )
     return NUNITO_BOLD_FONT_FAMILY;
