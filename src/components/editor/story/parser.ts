@@ -223,10 +223,32 @@ function parserTextWithTranslation(
   allow_hide: boolean = false,
   allow_buttons: number = 0,
 ) {
+  const textStyle = () => {
+    if (state.bracket && allow_hide) {
+      if (allow_buttons && state.in_button) {
+        if (state.odd) return STATE_TEXT_HIDE_BUTTON_ODD;
+        return STATE_TEXT_HIDE_BUTTON_EVEN;
+      }
+      if (state.odd) return STATE_TEXT_HIDE_ODD;
+      return STATE_TEXT_HIDE_EVEN;
+    }
+
+    if (allow_buttons && state.in_button) {
+      if (state.odd) return STATE_TEXT_BUTTON_ODD;
+      return STATE_TEXT_BUTTON_EVEN;
+    }
+
+    if (state.odd) return STATE_TEXT_ODD;
+    return STATE_TEXT_EVEN;
+  };
+
   if (stream.match(/[ |]+/)) {
     state.odd = !state.odd;
     if (state.bracket && allow_hide) return STATE_TEXT_HIDE_NEUTRAL;
     return STATE_DEFAULT;
+  }
+  if (stream.match("[[") || stream.match("]]")) {
+    return textStyle();
   }
   if (allow_hide) {
     if (stream.eat("[")) {
@@ -267,22 +289,7 @@ function parserTextWithTranslation(
       return STATE_ERROR;
     }
 
-    if (allow_buttons && state.in_button) {
-      if (state.bracket && allow_hide) {
-        if (state.odd) return STATE_TEXT_HIDE_BUTTON_ODD;
-        return STATE_TEXT_HIDE_BUTTON_EVEN;
-      }
-      if (state.odd) return STATE_TEXT_BUTTON_ODD;
-      return STATE_TEXT_BUTTON_EVEN;
-    }
-
-    if (state.bracket && allow_hide) {
-      if (state.odd) return STATE_TEXT_HIDE_ODD;
-      return STATE_TEXT_HIDE_EVEN;
-    }
-
-    if (state.odd) return STATE_TEXT_ODD;
-    return STATE_TEXT_EVEN;
+    return textStyle();
   }
   stream.skipToEnd();
   return STATE_ERROR;
@@ -349,7 +356,7 @@ function parseBlockHeader(stream: StringStream, state: State) {
     }
   }
   if (state.block.line_type === "text")
-    return parserTextWithTranslation(stream, state);
+    return parserTextWithTranslation(stream, state, true);
   if (state.block.line_type === "trans" || state.block.line_type === "pron")
     return parserTranslation(stream, state);
 
@@ -384,7 +391,7 @@ function parseBlockLine(stream: StringStream, state: State) {
     return STATE_ERROR;
   }
   if (state.block.line_type === "text")
-    return parserTextWithTranslation(stream, state);
+    return parserTextWithTranslation(stream, state, true);
   if (state.block.line_type === "trans" || state.block.line_type === "pron")
     return parserTranslation(stream, state);
 

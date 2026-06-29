@@ -149,6 +149,34 @@ Speaker414: 家{やー}んかい 向かとーん{んかとーん}。`);
   }
 });
 
+test("LINE syntax highlighting accepts escaped literal brackets", () => {
+  const lines = __testTokenizeLines(`[LINE]
+> jan~[[ponaejanante]] li lon tenpo~pi(~alasa~olin) \\nzzzzzzzzzzzzzzzzlon tomo~moku`);
+
+  const textLineTokens = lines[1] ?? [];
+
+  assert.ok(textLineTokens.some((token) => token.text === "[["));
+  assert.ok(textLineTokens.some((token) => token.text === "]]"));
+  assert.ok(textLineTokens.some((token) => token.text.includes("\\nzzzz")));
+  assert.equal(
+    textLineTokens.some((token) => token.style === "deleted"),
+    false,
+  );
+});
+
+test("LINE syntax highlighting accepts hidden text ranges", () => {
+  const lines = __testTokenizeLines(`[LINE]
+Speaker414: This [hidden text] is valid`);
+
+  const textLineTokens = lines[1] ?? [];
+
+  assert.equal(
+    textLineTokens.some((token) => token.style === "deleted"),
+    false,
+  );
+  assert.ok(textLineTokens.some((token) => token.style === "className"));
+});
+
 test("LINE rejects ambiguous inline TTS replacements inside a token", () => {
   const element = parseLine(`[LINE]
 Speaker414: ジュニア! 今日{ちゅー}|や  何{ぬー} 食{か}み欲{ぶ}さん|なー?
