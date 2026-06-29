@@ -1,7 +1,6 @@
 import React from "react";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { StatusBar } from "expo-status-bar";
 import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
 import { useFonts } from "expo-font";
 import { captureMobileEventLater } from "../src/analytics";
@@ -51,7 +50,6 @@ export default function RootLayout() {
     <ConvexProviderWithAuth client={convex} useAuth={useConvexBetterAuth}>
       <AppStateProvider>
         <NetworkStatusProvider>
-          <StatusBar style="dark" />
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="welcome" options={{ animation: "fade" }} />
