@@ -165,19 +165,26 @@ export function MatchQuestion({
       <View style={styles.columns}>
         {lists.map((list, listIndex) => (
           <View key={listIndex} style={styles.column}>
-            {list.map((word, wordIndex) => (
-              <WordChip
-                key={word.key}
-                block
-                status={getChipStatus(word)}
-                onPress={() => selectWord(listIndex, wordIndex)}
-                labelLang={
-                  listIndex === 0 ? element.lang : element.lang_question
-                }
-              >
-                {word.value}
-              </WordChip>
-            ))}
+            {list.map((word, wordIndex) => {
+              const chipStatus = getChipStatus(word);
+              return (
+                <WordChip
+                  key={word.key}
+                  block
+                  status={chipStatus}
+                  onPress={
+                    chipStatus === "right" || chipStatus === "matched"
+                      ? undefined
+                      : () => selectWord(listIndex, wordIndex)
+                  }
+                  labelLang={
+                    listIndex === 0 ? element.lang : element.lang_question
+                  }
+                >
+                  {word.value}
+                </WordChip>
+              );
+            })}
           </View>
         ))}
       </View>
