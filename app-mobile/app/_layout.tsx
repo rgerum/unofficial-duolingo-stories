@@ -29,6 +29,8 @@ SplashScreen.setOptions({
   fade: true,
 });
 
+void SplashScreen.preventAutoHideAsync();
+
 const convex = new ConvexReactClient(
   process.env.EXPO_PUBLIC_CONVEX_URL ??
     "https://compassionate-chinchilla-392.convex.cloud",
@@ -65,7 +67,14 @@ export default function RootLayout() {
 }
 
 function ThemedStack() {
-  const { colors, resolvedTheme } = useTheme();
+  const { colors, ready, resolvedTheme } = useTheme();
+
+  React.useEffect(() => {
+    if (!ready) return;
+    void SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) return null;
 
   return (
     <>

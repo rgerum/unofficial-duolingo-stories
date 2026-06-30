@@ -106,7 +106,7 @@ export default function LearnTab() {
         </View>
       </View>
     ),
-    [courseShort, isOffline, isStoryDone, listening, router],
+    [courseShort, isOffline, isStoryDone, listening, router, styles],
   );
 
   // Reload local progress whenever the tab regains focus (e.g. after a story).

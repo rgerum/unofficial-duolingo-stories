@@ -370,8 +370,6 @@ export default function AuthScreen() {
                     void signInWithProvider(primarySocialProvider.id)
                   }
                   style={styles.primarySocialButton}
-                  styles={styles}
-                  colors={colors}
                 />
               )}
 
@@ -385,8 +383,6 @@ export default function AuthScreen() {
                       disabled={isPending}
                       onPress={() => void signInWithProvider(provider.id)}
                       style={styles.secondarySocialButton}
-                      styles={styles}
-                      colors={colors}
                     />
                   ))}
                 </View>
@@ -440,8 +436,6 @@ function SocialProviderButton({
   disabled,
   onPress,
   style,
-  styles,
-  colors,
 }: {
   provider: SocialProviderId;
   label?: string;
@@ -449,9 +443,10 @@ function SocialProviderButton({
   disabled: boolean;
   onPress: () => void;
   style?: ViewStyle;
-  styles: ReturnType<typeof createStyles>;
-  colors: ThemeColors;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -481,12 +476,7 @@ function SocialProviderButton({
               },
             ]}
           >
-            <SocialProviderIcon
-              provider={provider}
-              disabled={disabled}
-              styles={styles}
-              colors={colors}
-            />
+            <SocialProviderIcon provider={provider} disabled={disabled} />
             {label ? (
               <Text
                 style={[
@@ -507,14 +497,13 @@ function SocialProviderButton({
 function SocialProviderIcon({
   provider,
   disabled,
-  styles,
-  colors,
 }: {
   provider: SocialProviderId;
   disabled: boolean;
-  styles: ReturnType<typeof createStyles>;
-  colors: ThemeColors;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   if (provider === "google") {
     return (
       <Svg

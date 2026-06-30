@@ -118,7 +118,7 @@ function createStyles(colors: ThemeColors) {
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "rgba(255,255,255,0.92)",
+    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
   },

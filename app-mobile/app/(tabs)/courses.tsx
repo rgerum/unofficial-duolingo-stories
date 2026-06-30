@@ -317,12 +317,14 @@ export default function CoursesTab() {
       );
     },
     [
+      colors.textDim,
       courseShort,
       isOffline,
       openCourseActions,
       progressByShort,
       router,
       setCourseShort,
+      styles,
     ],
   );
 

@@ -203,14 +203,14 @@ export default function ProfileTab() {
                 : `Using ${resolvedTheme} mode`}
             </Text>
           </View>
-          <View style={styles.themeOptions}>
+          <View accessibilityRole="radiogroup" style={styles.themeOptions}>
             {(["system", "light", "dark"] satisfies ThemePreference[]).map(
               (option) => (
                 <Pressable
                   key={option}
-                  accessibilityRole="button"
+                  accessibilityRole="radio"
                   accessibilityState={{
-                    selected: themePreference === option,
+                    checked: themePreference === option,
                   }}
                   onPress={() => {
                     void setThemePreference(option);
