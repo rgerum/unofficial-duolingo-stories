@@ -9,7 +9,6 @@ import {
 } from "@/lib/story-preferences";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
-import StoryTranscript from "./StoryTranscript";
 import { getStoryDescription } from "./story_seo";
 import LocalisationProvider from "@/components/LocalisationProvider";
 import { ConvexHttpClient } from "convex/browser";
@@ -119,24 +118,17 @@ export default async function Page({
       <LocalisationProvider lang={story.from_language_id}>
         <style>{`
           [data-story-js-only="true"] { display: none; }
-          [data-story-no-js="true"] { display: block; }
           html[data-story-js="true"] [data-story-js-only="true"] { display: block; }
-          html[data-story-js="true"] [data-story-no-js="true"] { display: none; }
           html[data-story-js="true"] [data-story-future="true"] { display: none; }
         `}</style>
-        <div data-story-no-js="true">
-          <StoryTranscript story={story} />
-        </div>
-        <div data-story-js-only="true">
-          <Suspense fallback={null}>
-            <StoryWrapper
-              story={story}
-              hideStoryQuestions={hideStoryQuestions}
-              storyFinishedIndexUpdate={setStoryDoneAction}
-              //localization={localization}
-            />
-          </Suspense>
-        </div>
+        <Suspense fallback={null}>
+          <StoryWrapper
+            story={story}
+            hideStoryQuestions={hideStoryQuestions}
+            storyFinishedIndexUpdate={setStoryDoneAction}
+            //localization={localization}
+          />
+        </Suspense>
       </LocalisationProvider>
     </>
   );
