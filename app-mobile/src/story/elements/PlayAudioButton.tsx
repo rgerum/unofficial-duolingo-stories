@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../../theme";
+import { useTheme } from "../../theme";
 
 export function PlayAudioButton({
   onPress,
@@ -10,6 +10,8 @@ export function PlayAudioButton({
   onPress: () => void;
   rtl?: boolean;
 }) {
+  const { colors } = useTheme();
+
   return (
     <Pressable
       accessibilityRole="button"

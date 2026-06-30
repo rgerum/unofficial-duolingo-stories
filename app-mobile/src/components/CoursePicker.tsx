@@ -11,7 +11,7 @@ import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../api";
 import { useNetworkStatus } from "../network";
-import { colors } from "../theme";
+import { type ThemeColors, useTheme } from "../theme";
 import { Flag } from "./Flag";
 import { OfflineNotice } from "./OfflineNotice";
 import { Text, TextInput } from "./Text";
@@ -31,6 +31,8 @@ export function CoursePicker({
   selectedShort?: string | null;
   onSelect: (course: { short: string; name: string }) => void;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const data = useQuery(api.landing.getPublicLandingPageData);
   const { isOffline } = useNetworkStatus();
   const [search, setSearch] = React.useState("");
@@ -157,7 +159,8 @@ export function CoursePicker({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
   },
@@ -247,4 +250,5 @@ const styles = StyleSheet.create({
     color: colors.textDim,
     marginTop: 2,
   },
-});
+  });
+}

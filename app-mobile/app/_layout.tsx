@@ -1,5 +1,6 @@
 import React from "react";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
 import { useFonts } from "expo-font";
@@ -7,6 +8,7 @@ import { captureMobileEventLater } from "../src/analytics";
 import { AppStateProvider } from "../src/app-state";
 import { useConvexBetterAuth } from "../src/auth-client";
 import { NetworkStatusProvider } from "../src/network";
+import { ThemeProvider, useTheme } from "../src/theme";
 import {
   NUNITO_BOLD_FONT_FAMILY,
   NUNITO_EXTRA_BOLD_FONT_FAMILY,
@@ -26,6 +28,8 @@ SplashScreen.setOptions({
   duration: 300,
   fade: true,
 });
+
+void SplashScreen.preventAutoHideAsync();
 
 const convex = new ConvexReactClient(
   process.env.EXPO_PUBLIC_CONVEX_URL ??
@@ -51,25 +55,50 @@ export default function RootLayout() {
 
   return (
     <ConvexProviderWithAuth client={convex} useAuth={useConvexBetterAuth}>
-      <AppStateProvider>
-        <NetworkStatusProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="welcome" options={{ animation: "fade" }} />
-            <Stack.Screen name="auth" options={{ presentation: "modal" }} />
-            <Stack.Screen name="onboarding" />
-            <Stack.Screen name="add-course" />
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen
-              name="story/[id]"
-              options={{
-                presentation: "fullScreenModal",
-                gestureEnabled: false,
-              }}
-            />
-          </Stack>
-        </NetworkStatusProvider>
-      </AppStateProvider>
+      <ThemeProvider>
+        <AppStateProvider>
+          <NetworkStatusProvider>
+            <ThemedStack />
+          </NetworkStatusProvider>
+        </AppStateProvider>
+      </ThemeProvider>
     </ConvexProviderWithAuth>
+  );
+}
+
+function ThemedStack() {
+  const { colors, ready, resolvedTheme } = useTheme();
+
+  React.useEffect(() => {
+    if (!ready) return;
+    void SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) return null;
+
+  return (
+    <>
+      <StatusBar style={resolvedTheme === "dark" ? "light" : "dark"} />
+      <Stack
+        screenOptions={{
+          contentStyle: { backgroundColor: colors.background },
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="index" />
+        <Stack.Screen name="welcome" options={{ animation: "fade" }} />
+        <Stack.Screen name="auth" options={{ presentation: "modal" }} />
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="add-course" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="story/[id]"
+          options={{
+            presentation: "fullScreenModal",
+            gestureEnabled: false,
+          }}
+        />
+      </Stack>
+    </>
   );
 }

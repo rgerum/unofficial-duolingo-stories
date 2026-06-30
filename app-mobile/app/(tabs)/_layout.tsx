@@ -2,15 +2,21 @@ import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { NUNITO_BOLD_FONT_FAMILY } from "../../src/components/Text";
-import { colors } from "../../src/theme";
+import { useTheme } from "../../src/theme";
 
 export default function TabsLayout() {
+  const { colors } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.blue,
         tabBarInactiveTintColor: colors.disabled,
+        tabBarStyle: {
+          backgroundColor: colors.background,
+          borderTopColor: colors.border,
+        },
         tabBarLabelStyle: {
           fontFamily: NUNITO_BOLD_FONT_FAMILY,
           fontWeight: "400",

@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAppState } from "../src/app-state";
 import { Button } from "../src/components/Button";
 import { Text } from "../src/components/Text";
-import { colors } from "../src/theme";
+import { type ThemeColors, useTheme } from "../src/theme";
 
 type DisclaimerAction = "anonymous" | "signin" | "register";
 
@@ -28,6 +28,8 @@ function getNextRoute({
 
 export default function DisclaimerScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { action, next } = useLocalSearchParams<{
     action?: DisclaimerAction;
     next?: string;
@@ -65,7 +67,8 @@ export default function DisclaimerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -95,7 +98,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.border,
     borderRadius: 14,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     padding: 18,
     marginBottom: 22,
     gap: 14,
@@ -105,4 +108,5 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: colors.text,
   },
-});
+  });
+}

@@ -2,13 +2,14 @@ import React from "react";
 import { ActivityIndicator, View } from "react-native";
 import { Redirect } from "expo-router";
 import { useAppState } from "../src/app-state";
-import { colors } from "../src/theme";
+import { useTheme } from "../src/theme";
 
 /**
  * Boot gate: Welcome on first launch, otherwise straight into the app —
  * the mobile equivalent of the PWA's /learn start URL behavior.
  */
 export default function Index() {
+  const { colors } = useTheme();
   const { ready, hasSeenWelcome, hasAcceptedDisclaimer, courseShort } =
     useAppState();
 

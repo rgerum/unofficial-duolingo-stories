@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { useAppState } from "../src/app-state";
 import { Button } from "../src/components/Button";
 import { Text } from "../src/components/Text";
-import { colors } from "../src/theme";
+import { type ThemeColors, useTheme } from "../src/theme";
 
 /**
  * App entry screen, mirroring the PWA welcome page (src/app/(stories)/learn/
@@ -14,6 +14,8 @@ import { colors } from "../src/theme";
  */
 export default function Welcome() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { courseShort } = useAppState();
 
   function continueAnonymously() {
@@ -61,7 +63,8 @@ export default function Welcome() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -122,4 +125,5 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     color: colors.textDim,
   },
-});
+  });
+}

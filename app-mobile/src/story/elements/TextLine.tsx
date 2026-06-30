@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
-import { colors, fontSizes } from "../../theme";
+import { fontSizes, type ThemeColors, useTheme } from "../../theme";
 import { HintText } from "../HintText";
 import { getLanguageTextStyle } from "../languageStyles";
 import { getStoryLineRtl } from "../textDirection";
@@ -14,7 +14,15 @@ import type { StoryElementLine } from "../types";
 // color under background color) pointing at the avatar.
 const TAIL_WIDTH = 12;
 
-function BubbleTail({ rtl }: { rtl: boolean }) {
+function BubbleTail({
+  colors,
+  rtl,
+  styles,
+}: {
+  colors: ThemeColors;
+  rtl: boolean;
+  styles: ReturnType<typeof createStyles>;
+}) {
   const horizontal = rtl ? { right: 0 } : { left: 0 };
   const horizontalInner = rtl ? { right: 5 } : { left: 5 };
   const borderSide = rtl
@@ -62,6 +70,7 @@ function LineBody({
   hasAudio,
   onPlay,
   rtl,
+  styles,
   inlineAudio = false,
   naturalWidth = false,
   children,
@@ -69,6 +78,7 @@ function LineBody({
   hasAudio: boolean;
   onPlay: () => void;
   rtl: boolean;
+  styles: ReturnType<typeof createStyles>;
   inlineAudio?: boolean;
   naturalWidth?: boolean;
   children: React.ReactNode;
@@ -129,6 +139,8 @@ export function TextLine({
   replayKey?: number;
   onManualAudioPlay?: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const audio = element.line?.content?.audio;
   const { audioRange, play, hasAudio } = useLineAudio(
     audio,
@@ -156,7 +168,12 @@ export function TextLine({
   if (element.line.type === "TITLE") {
     return (
       <View style={[styles.row, lineRtl && styles.rowRtl]}>
-        <LineBody hasAudio={hasAudio} onPlay={handlePlay} rtl={lineRtl}>
+        <LineBody
+          hasAudio={hasAudio}
+          onPlay={handlePlay}
+          rtl={lineRtl}
+          styles={styles}
+        >
           <HintText
             content={element.line.content}
             audioRange={audioRange}
@@ -203,6 +220,7 @@ export function TextLine({
               hasAudio={false}
               onPlay={handlePlay}
               rtl={lineRtl}
+              styles={styles}
               naturalWidth
             >
               <HintText
@@ -224,7 +242,7 @@ export function TextLine({
               />
             </LineBody>
           </View>
-          <BubbleTail rtl={lineRtl} />
+          <BubbleTail colors={colors} rtl={lineRtl} styles={styles} />
         </View>
       </View>
     );
@@ -233,7 +251,12 @@ export function TextLine({
   // PROSE (or CHARACTER without avatar)
   return (
     <View style={[styles.row, lineRtl && styles.rowRtl]}>
-      <LineBody hasAudio={hasAudio} onPlay={handlePlay} rtl={lineRtl}>
+      <LineBody
+        hasAudio={hasAudio}
+        onPlay={handlePlay}
+        rtl={lineRtl}
+        styles={styles}
+      >
         <HintText
           content={element.line.content}
           audioRange={audioRange}
@@ -249,7 +272,8 @@ export function TextLine({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -352,4 +376,5 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: colors.text,
   },
-});
+  });
+}

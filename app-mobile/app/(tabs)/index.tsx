@@ -25,13 +25,15 @@ import { StoryButton, type StoryListItem } from "../../src/components/StoryButto
 import { Button } from "../../src/components/Button";
 import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
-import { colors } from "../../src/theme";
+import { type ThemeColors, useTheme } from "../../src/theme";
 
 type StorySet = { setId: number; stories: StoryListItem[] };
 
 /** Learn tab: the current course's stories, grouped by set. */
 export default function LearnTab() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { ready, courseShort } = useAppState();
   const { data: session } = useAuthSession();
   const { isOffline } = useNetworkStatus();
@@ -104,7 +106,7 @@ export default function LearnTab() {
         </View>
       </View>
     ),
-    [courseShort, isOffline, isStoryDone, listening, router],
+    [courseShort, isOffline, isStoryDone, listening, router, styles],
   );
 
   // Reload local progress whenever the tab regains focus (e.g. after a story).
@@ -127,7 +129,7 @@ export default function LearnTab() {
     }, [courseShort]),
   );
 
-  if (!ready) return <Centered spinner />;
+  if (!ready) return <Centered spinner styles={styles} colors={colors} />;
 
   if (!courseShort) {
     return (
@@ -160,7 +162,7 @@ export default function LearnTab() {
       );
     }
 
-    return <Centered spinner />;
+    return <Centered spinner styles={styles} colors={colors} />;
   }
   if (course === null) {
     return (
@@ -209,6 +211,7 @@ export default function LearnTab() {
               void setListeningMode(courseShort, value);
             }}
             trackColor={{ true: colors.blue }}
+            thumbColor={colors.surface}
           />
         </View>
       </View>
@@ -238,109 +241,123 @@ export default function LearnTab() {
 
 function Centered({
   children,
+  colors,
   spinner,
+  styles,
 }: {
   children?: React.ReactNode;
+  colors?: ThemeColors;
   spinner?: boolean;
+  styles?: ReturnType<typeof createStyles>;
 }) {
+  const themed = useTheme();
+  const activeColors = colors ?? themed.colors;
+  const activeStyles = styles ?? createStyles(activeColors);
+
   return (
-    <SafeAreaView style={styles.root} edges={["top"]}>
-      <View style={styles.centered}>
-        {spinner ? <ActivityIndicator color={colors.blue} /> : children}
+    <SafeAreaView style={activeStyles.root} edges={["top"]}>
+      <View style={activeStyles.centered}>
+        {spinner ? (
+          <ActivityIndicator color={activeColors.blue} />
+        ) : (
+          children
+        )}
       </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
-    textAlign: "center",
-  },
-  emptyText: {
-    marginTop: 8,
-    fontSize: 16,
-    lineHeight: 23,
-    color: colors.textDim,
-    textAlign: "center",
-  },
-  scrollContent: {
-    paddingHorizontal: 12,
-    paddingTop: 8,
-  },
-  offlineWrap: {
-    paddingHorizontal: 8,
-    paddingTop: 12,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.background,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: colors.text,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: colors.textDim,
-    marginTop: 4,
-  },
-  progressTrack: {
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.border,
-    overflow: "hidden",
-    marginTop: 10,
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: 6,
-    backgroundColor: colors.gold,
-  },
-  listeningRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 14,
-  },
-  listeningLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  set: {
-    marginTop: 14,
-  },
-  setTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
-    paddingHorizontal: 8,
-    marginBottom: 4,
-  },
-  setGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-  },
-  listFooter: {
-    height: 40,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    centered: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 24,
+    },
+    emptyTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: colors.text,
+      textAlign: "center",
+    },
+    emptyText: {
+      marginTop: 8,
+      fontSize: 16,
+      lineHeight: 23,
+      color: colors.textDim,
+      textAlign: "center",
+    },
+    scrollContent: {
+      paddingHorizontal: 12,
+      paddingTop: 8,
+    },
+    offlineWrap: {
+      paddingHorizontal: 8,
+      paddingTop: 12,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      paddingBottom: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      backgroundColor: colors.background,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: "800",
+      color: colors.text,
+    },
+    subtitle: {
+      fontSize: 15,
+      color: colors.textDim,
+      marginTop: 4,
+    },
+    progressTrack: {
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: colors.border,
+      overflow: "hidden",
+      marginTop: 10,
+    },
+    progressFill: {
+      height: "100%",
+      borderRadius: 6,
+      backgroundColor: colors.gold,
+    },
+    listeningRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginTop: 14,
+    },
+    listeningLabel: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    set: {
+      marginTop: 14,
+    },
+    setTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: colors.text,
+      paddingHorizontal: 8,
+      marginBottom: 4,
+    },
+    setGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "center",
+    },
+    listFooter: {
+      height: 40,
+    },
+  });
+}
