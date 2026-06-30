@@ -18,6 +18,10 @@
     },
     "android": {
       "package": "org.duostories.twa",
+      "blockedPermissions": [
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -32,7 +36,12 @@
     "plugins": [
       "expo-router",
       "expo-image",
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": false
+        }
+      ],
       "expo-secure-store",
       "expo-web-browser",
       "expo-localization",
