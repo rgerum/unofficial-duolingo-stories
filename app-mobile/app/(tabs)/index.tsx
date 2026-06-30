@@ -269,95 +269,95 @@ function Centered({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
-    textAlign: "center",
-  },
-  emptyText: {
-    marginTop: 8,
-    fontSize: 16,
-    lineHeight: 23,
-    color: colors.textDim,
-    textAlign: "center",
-  },
-  scrollContent: {
-    paddingHorizontal: 12,
-    paddingTop: 8,
-  },
-  offlineWrap: {
-    paddingHorizontal: 8,
-    paddingTop: 12,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.background,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: colors.text,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: colors.textDim,
-    marginTop: 4,
-  },
-  progressTrack: {
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.border,
-    overflow: "hidden",
-    marginTop: 10,
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: 6,
-    backgroundColor: colors.gold,
-  },
-  listeningRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 14,
-  },
-  listeningLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  set: {
-    marginTop: 14,
-  },
-  setTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
-    paddingHorizontal: 8,
-    marginBottom: 4,
-  },
-  setGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-  },
-  listFooter: {
-    height: 40,
-  },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    centered: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 24,
+    },
+    emptyTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: colors.text,
+      textAlign: "center",
+    },
+    emptyText: {
+      marginTop: 8,
+      fontSize: 16,
+      lineHeight: 23,
+      color: colors.textDim,
+      textAlign: "center",
+    },
+    scrollContent: {
+      paddingHorizontal: 12,
+      paddingTop: 8,
+    },
+    offlineWrap: {
+      paddingHorizontal: 8,
+      paddingTop: 12,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      paddingBottom: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      backgroundColor: colors.background,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: "800",
+      color: colors.text,
+    },
+    subtitle: {
+      fontSize: 15,
+      color: colors.textDim,
+      marginTop: 4,
+    },
+    progressTrack: {
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: colors.border,
+      overflow: "hidden",
+      marginTop: 10,
+    },
+    progressFill: {
+      height: "100%",
+      borderRadius: 6,
+      backgroundColor: colors.gold,
+    },
+    listeningRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginTop: 14,
+    },
+    listeningLabel: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    set: {
+      marginTop: 14,
+    },
+    setTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: colors.text,
+      paddingHorizontal: 8,
+      marginBottom: 4,
+    },
+    setGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "center",
+    },
+    listFooter: {
+      height: 40,
+    },
   });
 }
