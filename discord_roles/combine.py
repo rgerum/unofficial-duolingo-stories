@@ -255,9 +255,9 @@ def join_and_group_data():
     data = pd.concat([get_user_approval_count(), data])
 
     data = data.sort_values("story_id", ascending=False)
-    data = data.groupby(["story_id", "author"]).max(
-        ["number", "story_id", "percentage", "lines"]
-    )
+    data = data.groupby(["story_id", "author"])[
+        ["number", "percentage", "lines", "approval", "public"]
+    ].max()
     data = data.reset_index().sort_values("story_id", ascending=False)
 
     data = data[data.public == 1]
