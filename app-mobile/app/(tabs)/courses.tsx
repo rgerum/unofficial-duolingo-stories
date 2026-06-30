@@ -3,10 +3,10 @@ import {
   ActionSheetIOS,
   ActivityIndicator,
   Alert,
+  FlatList,
   Modal,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   View,
 } from "react-native";
@@ -218,6 +218,112 @@ export default function CoursesTab() {
     [confirmDeleteCourseProgress, progressByShort, removeCourse],
   );
 
+  const renderCourse = React.useCallback(
+    ({ item: course }: { item: CourseItem }) => {
+      const completed = Math.min(
+        course.count,
+        progressByShort[course.short]?.completedCount ?? 0,
+      );
+      const selected = course.short === courseShort;
+      const canRemoveCourse = completed === 0;
+
+      return (
+        <Pressable
+          accessibilityRole="button"
+          disabled={isOffline}
+          onPress={() => {
+            captureMobileEventLater("mobile_course_selected", {
+              course_short: course.short,
+              course_name: course.name,
+              from_language: course.fromLanguageName,
+            });
+            void setCourseShort(course.short).then(() =>
+              router.navigate("/(tabs)"),
+            );
+          }}
+          style={({ pressed }) => [
+            styles.card,
+            selected && styles.cardSelected,
+            isOffline && styles.cardDisabled,
+            pressed && !isOffline && { opacity: 0.75 },
+          ]}
+        >
+          <View style={styles.cardContent}>
+            <Flag
+              iso={course.learningLanguage.short}
+              flag={course.learningLanguage.flag}
+              flag_file={course.learningLanguage.flag_file}
+              width={48}
+            />
+            <View style={styles.cardBody}>
+              <View style={styles.cardTop}>
+                <View style={styles.cardTitleWrap}>
+                  <Text style={styles.courseName}>{course.name}</Text>
+                  <Text style={styles.courseMeta}>
+                    From {course.fromLanguageName}
+                  </Text>
+                </View>
+                {(selected || completed > 0 || canRemoveCourse) && (
+                  <View style={styles.cardActions}>
+                    {selected && (
+                      <Text style={styles.currentBadge}>Current</Text>
+                    )}
+                    {(completed > 0 || canRemoveCourse) && (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Open actions for ${course.name}`}
+                        hitSlop={10}
+                        onPress={(event) => {
+                          event.stopPropagation();
+                          openCourseActions(course);
+                        }}
+                        style={({ pressed }) => [
+                          styles.cardActionButton,
+                          pressed && { opacity: 0.6 },
+                        ]}
+                      >
+                        <Ionicons
+                          name="ellipsis-horizontal"
+                          size={22}
+                          color={colors.textDim}
+                        />
+                      </Pressable>
+                    )}
+                  </View>
+                )}
+              </View>
+              <View style={styles.progressTrack}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    {
+                      width: `${
+                        course.count > 0
+                          ? Math.min(100, (completed / course.count) * 100)
+                          : 0
+                      }%`,
+                    },
+                  ]}
+                />
+              </View>
+              <Text style={styles.progressText}>
+                {completed} / {course.count} stories completed
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+      );
+    },
+    [
+      courseShort,
+      isOffline,
+      openCourseActions,
+      progressByShort,
+      router,
+      setCourseShort,
+    ],
+  );
+
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
       <View style={styles.header}>
@@ -257,109 +363,22 @@ export default function CoursesTab() {
           />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.listContent}>
-          {isOffline ? (
-            <OfflineNotice detail="Connect to the internet to switch or add courses." />
-          ) : null}
-          {courses.map((course) => {
-            const completed = Math.min(
-              course.count,
-              progressByShort[course.short]?.completedCount ?? 0,
-            );
-            const selected = course.short === courseShort;
-            const canRemoveCourse = completed === 0;
-            return (
-              <Pressable
-                key={course.short}
-                accessibilityRole="button"
-                disabled={isOffline}
-                onPress={() => {
-                  captureMobileEventLater("mobile_course_selected", {
-                    course_short: course.short,
-                    course_name: course.name,
-                    from_language: course.fromLanguageName,
-                  });
-                  void setCourseShort(course.short).then(() =>
-                    router.navigate("/(tabs)"),
-                  );
-                }}
-                style={({ pressed }) => [
-                  styles.card,
-                  selected && styles.cardSelected,
-                  isOffline && styles.cardDisabled,
-                  pressed && !isOffline && { opacity: 0.75 },
-                ]}
-              >
-                <View style={styles.cardContent}>
-                  <Flag
-                    iso={course.learningLanguage.short}
-                    flag={course.learningLanguage.flag}
-                    flag_file={course.learningLanguage.flag_file}
-                    width={48}
-                  />
-                  <View style={styles.cardBody}>
-                    <View style={styles.cardTop}>
-                      <View style={styles.cardTitleWrap}>
-                        <Text style={styles.courseName}>{course.name}</Text>
-                        <Text style={styles.courseMeta}>
-                          From {course.fromLanguageName}
-                        </Text>
-                      </View>
-                      {(selected || completed > 0 || canRemoveCourse) && (
-                        <View style={styles.cardActions}>
-                          {selected && (
-                            <Text style={styles.currentBadge}>Current</Text>
-                          )}
-                          {(completed > 0 || canRemoveCourse) && (
-                            <Pressable
-                              accessibilityRole="button"
-                              accessibilityLabel={`Open actions for ${course.name}`}
-                              hitSlop={10}
-                              onPress={(event) => {
-                                event.stopPropagation();
-                                openCourseActions(course);
-                              }}
-                              style={({ pressed }) => [
-                                styles.cardActionButton,
-                                pressed && { opacity: 0.6 },
-                              ]}
-                            >
-                              <Ionicons
-                                name="ellipsis-horizontal"
-                                size={22}
-                                color={colors.textDim}
-                              />
-                            </Pressable>
-                          )}
-                        </View>
-                      )}
-                    </View>
-                    <View style={styles.progressTrack}>
-                      <View
-                        style={[
-                          styles.progressFill,
-                          {
-                            width: `${
-                              course.count > 0
-                                ? Math.min(
-                                    100,
-                                    (completed / course.count) * 100,
-                                  )
-                                : 0
-                            }%`,
-                          },
-                        ]}
-                      />
-                    </View>
-                    <Text style={styles.progressText}>
-                      {completed} / {course.count} stories completed
-                    </Text>
-                  </View>
-                </View>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        <FlatList
+          data={courses}
+          keyExtractor={(course) => course.short}
+          renderItem={renderCourse}
+          contentContainerStyle={styles.listContent}
+          ListHeaderComponent={
+            isOffline ? (
+              <OfflineNotice detail="Connect to the internet to switch or add courses." />
+            ) : null
+          }
+          initialNumToRender={6}
+          maxToRenderPerBatch={4}
+          removeClippedSubviews={Platform.OS === "android"}
+          updateCellsBatchingPeriod={80}
+          windowSize={5}
+        />
       )}
       <Modal
         visible={Platform.OS !== "ios" && Boolean(actionCourse)}
