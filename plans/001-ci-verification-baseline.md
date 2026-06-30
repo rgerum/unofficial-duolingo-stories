@@ -85,11 +85,13 @@ Match the existing indentation (6 spaces for `- name:`).
 
 ### Step 3: Delete the dead workflows
 
+Status: **done 2026-06-30**. Deleted `.github/workflows/build.yml` and `.github/workflows/build_pr.yml` because both referenced retired `ara.uberspace.de` infrastructure and targeted `master`.
+
 Delete `.github/workflows/build.yml` and `.github/workflows/build_pr.yml`.
 
 Before deleting, confirm they are the dead ones: both must contain the string `ara.uberspace.de` and target `master`. If either file does not match that description, STOP.
 
-**Verify**: `ls .github/workflows/` → only `ci.yaml` remains.
+**Verify**: `ls .github/workflows/` → only `ci.yaml` remains. `pnpm typecheck` also passed after deletion.
 
 ### Step 4: Create .env.example
 
