@@ -29,7 +29,7 @@ import {
   getAllCourseProgress,
   type CourseProgress,
 } from "../../src/storage";
-import { colors } from "../../src/theme";
+import { type ThemeColors, useTheme } from "../../src/theme";
 
 type LandingData = FunctionReturnType<typeof api.landing.getPublicLandingPageData>;
 type LandingGroup = LandingData["groups"][number];
@@ -39,6 +39,8 @@ type CourseItem = LandingGroup["courses"][number] & {
 
 export default function CoursesTab() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { courseShort, activeCourseShorts, removeCourseShort, setCourseShort } =
     useAppState();
   const { data: session } = useAuthSession();
@@ -456,7 +458,8 @@ export default function CoursesTab() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -517,7 +520,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     marginTop: 12,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
   cardSelected: {
     borderColor: colors.blue,
@@ -556,7 +559,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 2,
     borderColor: colors.border,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
   courseName: {
     fontSize: 20,
@@ -607,7 +610,7 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
   sheetTitle: {
     fontSize: 18,
@@ -646,4 +649,5 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: colors.text,
   },
-});
+  });
+}

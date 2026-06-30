@@ -7,7 +7,7 @@ import {
   type TextStyle,
   type ViewStyle,
 } from "react-native";
-import { colors } from "../theme";
+import { type ThemeColors, useTheme } from "../theme";
 import { Text } from "../components/Text";
 import { getLanguageTextStyle } from "./languageStyles";
 
@@ -33,9 +33,10 @@ export type ChipStatus =
 const EDGE = 4;
 const MATCHED_FADE_MS = 500;
 
-const PALETTES = {
+function createPalettes(colors: ThemeColors) {
+  return {
   idle: {
-    face: "#ffffff",
+    face: colors.surface,
     border: colors.border,
     edge: colors.border,
     text: colors.text,
@@ -70,7 +71,8 @@ const PALETTES = {
     edge: colors.disabledBackground,
     text: colors.disabled,
   },
-};
+  };
+}
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 
@@ -91,6 +93,9 @@ export function WordChip({
   labelLang?: string;
   labelStyle?: StyleProp<TextStyle>;
 }) {
+  const { colors } = useTheme();
+  const palettes = React.useMemo(() => createPalettes(colors), [colors]);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const normalized =
     status === "false" ? "wrong" : status === "done" ? "off" : status;
   const matchedProgress = React.useRef(
@@ -115,34 +120,34 @@ export function WordChip({
     switch (normalized) {
       case "right":
       case "right-stay":
-        return PALETTES.right;
+        return palettes.right;
       case "wrong":
-        return PALETTES.wrong;
+        return palettes.wrong;
       case "selected":
-        return PALETTES.selected;
+        return palettes.selected;
       case "off":
-        return PALETTES.off;
+        return palettes.off;
       case "matched":
         return {
           face: matchedProgress.interpolate({
             inputRange: [0, 1],
-            outputRange: [PALETTES.right.face, PALETTES.matched.face],
+            outputRange: [palettes.right.face, palettes.matched.face],
           }),
           border: matchedProgress.interpolate({
             inputRange: [0, 1],
-            outputRange: [PALETTES.right.border, PALETTES.matched.border],
+            outputRange: [palettes.right.border, palettes.matched.border],
           }),
           edge: matchedProgress.interpolate({
             inputRange: [0, 1],
-            outputRange: [PALETTES.right.edge, PALETTES.matched.edge],
+            outputRange: [palettes.right.edge, palettes.matched.edge],
           }),
           text: matchedProgress.interpolate({
             inputRange: [0, 1],
-            outputRange: [PALETTES.right.text, PALETTES.matched.text],
+            outputRange: [palettes.right.text, palettes.matched.text],
           }),
         };
       default:
-        return PALETTES.idle;
+        return palettes.idle;
     }
   })();
 
@@ -201,7 +206,8 @@ export function WordChip({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   wrap: {
     paddingBottom: EDGE,
     margin: 4,
@@ -233,4 +239,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.text,
   },
-});
+  });
+}

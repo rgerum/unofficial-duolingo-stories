@@ -25,13 +25,15 @@ import { StoryButton, type StoryListItem } from "../../src/components/StoryButto
 import { Button } from "../../src/components/Button";
 import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
-import { colors } from "../../src/theme";
+import { type ThemeColors, useTheme } from "../../src/theme";
 
 type StorySet = { setId: number; stories: StoryListItem[] };
 
 /** Learn tab: the current course's stories, grouped by set. */
 export default function LearnTab() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { ready, courseShort } = useAppState();
   const { data: session } = useAuthSession();
   const { isOffline } = useNetworkStatus();
@@ -127,7 +129,7 @@ export default function LearnTab() {
     }, [courseShort]),
   );
 
-  if (!ready) return <Centered spinner />;
+  if (!ready) return <Centered spinner styles={styles} colors={colors} />;
 
   if (!courseShort) {
     return (
@@ -160,7 +162,7 @@ export default function LearnTab() {
       );
     }
 
-    return <Centered spinner />;
+    return <Centered spinner styles={styles} colors={colors} />;
   }
   if (course === null) {
     return (
@@ -209,6 +211,7 @@ export default function LearnTab() {
               void setListeningMode(courseShort, value);
             }}
             trackColor={{ true: colors.blue }}
+            thumbColor={colors.surface}
           />
         </View>
       </View>
@@ -238,21 +241,34 @@ export default function LearnTab() {
 
 function Centered({
   children,
+  colors,
   spinner,
+  styles,
 }: {
   children?: React.ReactNode;
+  colors?: ThemeColors;
   spinner?: boolean;
+  styles?: ReturnType<typeof createStyles>;
 }) {
+  const themed = useTheme();
+  const activeColors = colors ?? themed.colors;
+  const activeStyles = styles ?? createStyles(activeColors);
+
   return (
-    <SafeAreaView style={styles.root} edges={["top"]}>
-      <View style={styles.centered}>
-        {spinner ? <ActivityIndicator color={colors.blue} /> : children}
+    <SafeAreaView style={activeStyles.root} edges={["top"]}>
+      <View style={activeStyles.centered}>
+        {spinner ? (
+          <ActivityIndicator color={activeColors.blue} />
+        ) : (
+          children
+        )}
       </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -343,4 +359,5 @@ const styles = StyleSheet.create({
   listFooter: {
     height: 40,
   },
-});
+  });
+}

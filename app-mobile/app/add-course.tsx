@@ -6,10 +6,12 @@ import { useRouter } from "expo-router";
 import { useAppState } from "../src/app-state";
 import { CoursePicker } from "../src/components/CoursePicker";
 import { Text } from "../src/components/Text";
-import { colors } from "../src/theme";
+import { type ThemeColors, useTheme } from "../src/theme";
 
 export default function AddCourseScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { courseShort, setCourseShort } = useAppState();
 
   return (
@@ -44,7 +46,8 @@ export default function AddCourseScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -75,4 +78,5 @@ const styles = StyleSheet.create({
     color: colors.textDim,
     marginTop: 2,
   },
-});
+  });
+}

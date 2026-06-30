@@ -2,7 +2,7 @@ import React from "react";
 import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "../components/Text";
-import { colors } from "../theme";
+import { type ThemeColors, useTheme } from "../theme";
 import { stopAudio } from "./audio";
 
 type HintRequest = {
@@ -49,6 +49,8 @@ function estimatePopupWidth(hint: HintRequest) {
  * hinted word shows this bubble above the word for a couple of seconds.
  */
 export function HintPopupHost({ children }: { children: React.ReactNode }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [hint, setHint] = React.useState<HintRequest | null>(null);
   const [bubbleHeight, setBubbleHeight] = React.useState(BUBBLE_DEFAULT_HEIGHT);
   const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -125,7 +127,8 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
   },
@@ -141,7 +144,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     minWidth: 140,
     maxWidth: BUBBLE_MAX_WIDTH,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderColor: colors.border,
     borderWidth: 2,
     borderRadius: 14,
@@ -166,4 +169,5 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textAlign: "center",
   },
-});
+  });
+}

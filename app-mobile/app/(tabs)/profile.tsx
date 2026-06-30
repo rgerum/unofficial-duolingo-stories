@@ -2,6 +2,7 @@ import React from "react";
 import {
   Alert,
   Linking,
+  Pressable,
   ScrollView,
   StyleSheet,
   Switch,
@@ -21,10 +22,21 @@ import { useAppState } from "../../src/app-state";
 import { clearAllProgress, getAllProgress } from "../../src/storage";
 import { Button } from "../../src/components/Button";
 import { Text } from "../../src/components/Text";
-import { colors } from "../../src/theme";
+import {
+  type ThemeColors,
+  type ThemePreference,
+  useTheme,
+} from "../../src/theme";
 
 export default function ProfileTab() {
   const router = useRouter();
+  const {
+    colors,
+    preference: themePreference,
+    resolvedTheme,
+    setPreference: setThemePreference,
+  } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { hideStoryQuestions, resetToFirstRun, setHideStoryQuestions } =
     useAppState();
   const { data: session, isPending: isSessionPending } = useAuthSession();
@@ -182,8 +194,49 @@ export default function ProfileTab() {
         </View>
 
         <Text style={styles.sectionTitle}>Story settings</Text>
+        <View style={styles.settingBlock}>
+          <View style={styles.settingText}>
+            <Text style={styles.settingLabel}>Theme</Text>
+            <Text style={styles.settingHint}>
+              {themePreference === "system"
+                ? `Following system (${resolvedTheme})`
+                : `Using ${resolvedTheme} mode`}
+            </Text>
+          </View>
+          <View style={styles.themeOptions}>
+            {(["system", "light", "dark"] satisfies ThemePreference[]).map(
+              (option) => (
+                <Pressable
+                  key={option}
+                  accessibilityRole="button"
+                  accessibilityState={{
+                    selected: themePreference === option,
+                  }}
+                  onPress={() => {
+                    void setThemePreference(option);
+                  }}
+                  style={({ pressed }) => [
+                    styles.themeOption,
+                    themePreference === option && styles.themeOptionSelected,
+                    pressed && { opacity: 0.7 },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.themeOptionText,
+                      themePreference === option &&
+                        styles.themeOptionTextSelected,
+                    ]}
+                  >
+                    {option[0].toUpperCase() + option.slice(1)}
+                  </Text>
+                </Pressable>
+              ),
+            )}
+          </View>
+        </View>
         <View style={styles.settingRow}>
-          <View style={{ flex: 1 }}>
+          <View style={styles.settingText}>
             <Text style={styles.settingLabel}>Hide story questions</Text>
             <Text style={styles.settingHint}>
               Read stories without interactive challenges.
@@ -192,7 +245,8 @@ export default function ProfileTab() {
           <Switch
             value={hideStoryQuestions}
             onValueChange={setHideStoryQuestions}
-            trackColor={{ true: colors.blue }}
+            trackColor={{ false: colors.border, true: colors.blue }}
+            thumbColor={colors.surface}
           />
         </View>
 
@@ -263,7 +317,8 @@ export default function ProfileTab() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -310,6 +365,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
+  settingBlock: {
+    gap: 10,
+    marginBottom: 16,
+  },
+  settingText: {
+    flex: 1,
+  },
+  themeOptions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  themeOption: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingVertical: 10,
+  },
+  themeOptionSelected: {
+    borderColor: colors.blue,
+    backgroundColor: colors.blueLight,
+  },
+  themeOptionText: {
+    color: colors.textDim,
+    fontSize: 13,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  themeOptionTextSelected: {
+    color: colors.blue,
+  },
   settingLabel: {
     fontSize: 16,
     fontWeight: "700",
@@ -345,4 +434,5 @@ const styles = StyleSheet.create({
     marginTop: 16,
     lineHeight: 19,
   },
-});
+  });
+}

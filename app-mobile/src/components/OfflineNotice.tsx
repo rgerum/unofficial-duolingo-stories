@@ -1,9 +1,12 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { colors } from "../theme";
+import { type ThemeColors, useTheme } from "../theme";
 import { Text } from "./Text";
 
 export function OfflineNotice({ detail }: { detail?: string }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   return (
     <View style={styles.root}>
       <Text style={styles.title}>You are offline</Text>
@@ -12,7 +15,8 @@ export function OfflineNotice({ detail }: { detail?: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     borderWidth: 2,
     borderColor: colors.border,
@@ -32,4 +36,5 @@ const styles = StyleSheet.create({
     color: colors.textDim,
     marginTop: 2,
   },
-});
+  });
+}

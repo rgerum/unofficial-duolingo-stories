@@ -26,7 +26,7 @@ import { useAppState } from "../src/app-state";
 import { Button } from "../src/components/Button";
 import { Text, TextInput } from "../src/components/Text";
 import { clearAllProgress, getAllDoneStories } from "../src/storage";
-import { colors } from "../src/theme";
+import { type ThemeColors, useTheme } from "../src/theme";
 
 type AuthMode = "signin" | "register";
 type SocialProviderId = "apple" | "google" | "github" | "discord";
@@ -46,6 +46,8 @@ const EMAIL_PATTERN = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w+)+$/;
 
 export default function AuthScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { mode } = useLocalSearchParams<{ mode?: string }>();
   const authMode: AuthMode = mode === "register" ? "register" : "signin";
   const isRegister = authMode === "register";
@@ -368,6 +370,8 @@ export default function AuthScreen() {
                     void signInWithProvider(primarySocialProvider.id)
                   }
                   style={styles.primarySocialButton}
+                  styles={styles}
+                  colors={colors}
                 />
               )}
 
@@ -381,6 +385,8 @@ export default function AuthScreen() {
                       disabled={isPending}
                       onPress={() => void signInWithProvider(provider.id)}
                       style={styles.secondarySocialButton}
+                      styles={styles}
+                      colors={colors}
                     />
                   ))}
                 </View>
@@ -434,6 +440,8 @@ function SocialProviderButton({
   disabled,
   onPress,
   style,
+  styles,
+  colors,
 }: {
   provider: SocialProviderId;
   label?: string;
@@ -441,6 +449,8 @@ function SocialProviderButton({
   disabled: boolean;
   onPress: () => void;
   style?: ViewStyle;
+  styles: ReturnType<typeof createStyles>;
+  colors: ThemeColors;
 }) {
   return (
     <Pressable
@@ -471,7 +481,12 @@ function SocialProviderButton({
               },
             ]}
           >
-            <SocialProviderIcon provider={provider} disabled={disabled} />
+            <SocialProviderIcon
+              provider={provider}
+              disabled={disabled}
+              styles={styles}
+              colors={colors}
+            />
             {label ? (
               <Text
                 style={[
@@ -492,9 +507,13 @@ function SocialProviderButton({
 function SocialProviderIcon({
   provider,
   disabled,
+  styles,
+  colors,
 }: {
   provider: SocialProviderId;
   disabled: boolean;
+  styles: ReturnType<typeof createStyles>;
+  colors: ThemeColors;
 }) {
   if (provider === "google") {
     return (
@@ -546,7 +565,8 @@ function SocialProviderIcon({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -586,7 +606,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     fontSize: 17,
     color: colors.text,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
   },
   error: {
     color: colors.red,
@@ -661,7 +681,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.border,
     borderRadius: 14,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     paddingHorizontal: 14,
   },
   socialButtonDisabled: {
@@ -691,4 +711,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
-});
+  });
+}
