@@ -87,8 +87,7 @@ export default function EditorSSMLDisplay({
               (!editor ? " cursor-default opacity-50" : "")
             }
             style={{
-              backgroundImage:
-                'url("https://carex.uber.space/stories/old/refresh.png")',
+              backgroundImage: 'url("/editor/icons/refresh.png")',
               transitionDuration: "1s",
             }}
             onClick={() => {
