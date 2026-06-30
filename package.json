@@ -18,8 +18,13 @@
     "knip": "pnpm dlx knip --production",
     "optimize:flags": "pnpm dlx svgo -f flags --multipass",
     "audit:missing-story-images": "pnpm exec tsx scripts/find-missing-story-images.ts",
+    "audit:audio-keypoints": "pnpm exec tsx scripts/audit-audio-keypoints.ts",
     "backfill:discord-avatars": "pnpm exec tsx scripts/backfill-discord-avatars.ts",
-    "backfill:course-contributors": "pnpm exec tsx scripts/backfill-course-contributors.ts"
+    "backfill:course-contributors": "pnpm exec tsx scripts/backfill-course-contributors.ts",
+    "forced-align:story": "pnpm exec tsx scripts/forced-align-story-audio.ts",
+    "forced-align:batch": "pnpm exec tsx scripts/run-forced-alignment-batch.ts",
+    "forced-align:drift": "pnpm exec tsx scripts/find-forced-alignment-drift.ts",
+    "forced-align:apply-batch": "pnpm exec tsx scripts/apply-forced-alignments-batch.ts"
   },
   "dependencies": {
     "@aws-sdk/client-polly": "^3.1061.0",
