@@ -13,7 +13,13 @@ type Word = {
   state: WordState;
   index: number;
   key: string;
+  matchKey?: string;
+  settled?: boolean;
+  wrongKey?: string;
 };
+
+const WRONG_FLASH_DELAY_MS = 820;
+const RIGHT_GREEN_HOLD_MS = 1000;
 
 function shuffle<T>(list: T[]): T[] {
   const result = [...list];
@@ -54,6 +60,16 @@ export function MatchQuestion({
     ),
   ]);
   const doneRef = React.useRef(false);
+  const matchAttemptRef = React.useRef(0);
+  const wrongAttemptRef = React.useRef(0);
+  const resetTimers = React.useRef(new Set<ReturnType<typeof setTimeout>>());
+
+  React.useEffect(() => {
+    return () => {
+      for (const timer of resetTimers.current) clearTimeout(timer);
+      resetTimers.current.clear();
+    };
+  }, []);
 
   const selectWord = (listIndex: number, wordIndex: number) => {
     setLists((current) => {
@@ -66,10 +82,13 @@ export function MatchQuestion({
 
       if (newWord.state === "right") return current;
 
-      // wrong-flash words go back to idle on the next interaction
+      // Clear any stale wrong feedback before processing a fresh tap.
       for (const list of next)
         for (const word of list)
-          if (word.state === "wrong") word.state = "idle";
+          if (word.state === "wrong") {
+            word.state = "idle";
+            word.wrongKey = undefined;
+          }
 
       if (selectedSame) {
         selectedSame.state = "idle";
@@ -79,12 +98,46 @@ export function MatchQuestion({
       if (!selectedOther) {
         newWord.state = "selected";
       } else if (selectedOther.index === newWord.index) {
+        const matchKey = `match-${matchAttemptRef.current++}`;
         selectedOther.state = "right";
+        selectedOther.matchKey = matchKey;
+        selectedOther.settled = false;
         newWord.state = "right";
+        newWord.matchKey = matchKey;
+        newWord.settled = false;
+        const timer = setTimeout(() => {
+          resetTimers.current.delete(timer);
+          setLists((state) =>
+            state.map((list) =>
+              list.map((word) =>
+                word.state === "right" && word.matchKey === matchKey
+                  ? { ...word, settled: true }
+                  : word,
+              ),
+            ),
+          );
+        }, RIGHT_GREEN_HOLD_MS);
+        resetTimers.current.add(timer);
         playSelectionHaptic();
       } else {
+        const wrongKey = `wrong-${wrongAttemptRef.current++}`;
         selectedOther.state = "wrong";
+        selectedOther.wrongKey = wrongKey;
         newWord.state = "wrong";
+        newWord.wrongKey = wrongKey;
+        const timer = setTimeout(() => {
+          resetTimers.current.delete(timer);
+          setLists((state) =>
+            state.map((list) =>
+              list.map((word) =>
+                word.state === "wrong" && word.wrongKey === wrongKey
+                  ? { ...word, state: "idle", wrongKey: undefined }
+                  : word,
+              ),
+            ),
+          );
+        }, WRONG_FLASH_DELAY_MS);
+        resetTimers.current.add(timer);
         playSoundEffect("wrong");
         playErrorHaptic();
       }
@@ -100,27 +153,38 @@ export function MatchQuestion({
     }
   }, [lists, setDone]);
 
+  const getChipStatus = (word: Word): ChipStatus => {
+    if (word.state === "idle") return undefined;
+    if (word.state === "right" && word.settled) return "matched";
+    return word.state;
+  };
+
   return (
     <View>
       <QuestionPrompt question={element.prompt} lang={element.lang_question} />
       <View style={styles.columns}>
         {lists.map((list, listIndex) => (
           <View key={listIndex} style={styles.column}>
-            {list.map((word, wordIndex) => (
-              <WordChip
-                key={word.key}
-                block
-                status={
-                  word.state === "idle" ? undefined : (word.state as ChipStatus)
-                }
-                onPress={() => selectWord(listIndex, wordIndex)}
-                labelLang={
-                  listIndex === 0 ? element.lang : element.lang_question
-                }
-              >
-                {word.value}
-              </WordChip>
-            ))}
+            {list.map((word, wordIndex) => {
+              const chipStatus = getChipStatus(word);
+              return (
+                <WordChip
+                  key={word.key}
+                  block
+                  status={chipStatus}
+                  onPress={
+                    chipStatus === "right" || chipStatus === "matched"
+                      ? undefined
+                      : () => selectWord(listIndex, wordIndex)
+                  }
+                  labelLang={
+                    listIndex === 0 ? element.lang : element.lang_question
+                  }
+                >
+                  {word.value}
+                </WordChip>
+              );
+            })}
           </View>
         ))}
       </View>

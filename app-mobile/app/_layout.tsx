@@ -9,6 +9,7 @@ import { useConvexBetterAuth } from "../src/auth-client";
 import { NetworkStatusProvider } from "../src/network";
 import {
   NUNITO_BOLD_FONT_FAMILY,
+  NUNITO_EXTRA_BOLD_FONT_FAMILY,
   NUNITO_FONT_FAMILY,
   NUNITO_LIGHT_FONT_FAMILY,
 } from "../src/components/Text";
@@ -17,6 +18,7 @@ import { SITELEN_PONA_FONT_FAMILY } from "../src/story/languageStyles";
 
 const nunitoFont = require("../assets/fonts/Nunito-Regular.ttf");
 const nunitoBoldFont = require("../assets/fonts/Nunito-Bold.ttf");
+const nunitoExtraBoldFont = require("../assets/fonts/Nunito-ExtraBold.ttf");
 const nunitoLightFont = require("../assets/fonts/Nunito-Light.ttf");
 const sitelenPonaFont = require("../assets/fonts/linjalipamanka-normal.otf");
 
@@ -35,6 +37,7 @@ export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     [NUNITO_FONT_FAMILY]: nunitoFont,
     [NUNITO_BOLD_FONT_FAMILY]: nunitoBoldFont,
+    [NUNITO_EXTRA_BOLD_FONT_FAMILY]: nunitoExtraBoldFont,
     [NUNITO_LIGHT_FONT_FAMILY]: nunitoLightFont,
     [SITELEN_PONA_FONT_FAMILY]: sitelenPonaFont,
   });
