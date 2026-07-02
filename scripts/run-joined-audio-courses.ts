@@ -16,6 +16,7 @@ type CliOptions = {
   force: boolean;
   dryRun: boolean;
   dryRunUpload: boolean;
+  stopOnError: boolean;
   concurrency: number;
   limitCourses?: number;
   contentRepoDir: string;
@@ -47,6 +48,7 @@ Options:
   --force                 Re-run even when local upload summary is complete
   --dry-run               Print commands without running them
   --dry-run-upload        Forward --dry-run to upload
+  --stop-on-error         Stop after the first failed course
   --concurrency <number>  Per-course story generation concurrency (default: 2)
   --limit-courses <num>   Process only the first N selected courses
   --content-repo-dir <dir> Content repo checkout (default: tmp/story-content)
@@ -79,6 +81,7 @@ function parseCliOptions(args: string[]): CliOptions {
   let force = false;
   let dryRun = false;
   let dryRunUpload = false;
+  let stopOnError = false;
   let concurrency = 2;
   let limitCourses: number | undefined;
   let contentRepoDir = path.join("tmp", "story-content");
@@ -117,6 +120,10 @@ function parseCliOptions(args: string[]): CliOptions {
       dryRunUpload = true;
       continue;
     }
+    if (arg === "--stop-on-error") {
+      stopOnError = true;
+      continue;
+    }
     if (arg === "--concurrency") {
       concurrency = parsePositiveInteger(takeValue(args, index, arg), arg);
       index += 1;
@@ -150,6 +157,7 @@ function parseCliOptions(args: string[]): CliOptions {
     force,
     dryRun,
     dryRunUpload,
+    stopOnError,
     concurrency,
     limitCourses,
     contentRepoDir: path.resolve(contentRepoDir),
@@ -221,6 +229,7 @@ async function main() {
   const selectedCourses = options.all ? await listAllCourses() : options.courses;
   const courses = Array.from(new Set(selectedCourses)).slice(0, options.limitCourses);
   const runReport = [];
+  let hasFailures = false;
 
   console.log(`Selected ${courses.length} course(s).`);
   for (const [index, course] of courses.entries()) {
@@ -232,44 +241,57 @@ async function main() {
       continue;
     }
 
-    console.log(`[${index + 1}/${courses.length}] ${course}: generating`);
-    await runCommand(
-      "pnpm",
-      [
-        "audio:join-course",
-        "--",
-        "--course",
-        course,
-        "--sync-content-repo",
-        "--content-repo-dir",
-        options.contentRepoDir,
-        "--out-dir",
-        outDir,
-        "--concurrency",
-        String(options.concurrency),
-      ],
-      options.dryRun,
-    );
-
-    if (options.upload) {
-      console.log(`[${index + 1}/${courses.length}] ${course}: uploading`);
+    try {
+      console.log(`[${index + 1}/${courses.length}] ${course}: generating`);
       await runCommand(
         "pnpm",
         [
-          "audio:upload-joined",
+          "audio:join-course",
           "--",
           "--course",
           course,
-          "--input-dir",
+          "--sync-content-repo",
+          "--content-repo-dir",
+          options.contentRepoDir,
+          "--out-dir",
           outDir,
-          ...(options.overwrite ? ["--overwrite"] : []),
-          ...(options.dryRunUpload ? ["--dry-run"] : []),
+          "--concurrency",
+          String(options.concurrency),
         ],
         options.dryRun,
       );
-    }
 
-    runReport.push({ course, status: "processed", uploaded: options.upload });
+      if (options.upload) {
+        console.log(`[${index + 1}/${courses.length}] ${course}: uploading`);
+        await runCommand(
+          "pnpm",
+          [
+            "audio:upload-joined",
+            "--",
+            "--course",
+            course,
+            "--input-dir",
+            outDir,
+            ...(options.overwrite ? ["--overwrite"] : []),
+            ...(options.dryRunUpload ? ["--dry-run"] : []),
+          ],
+          options.dryRun,
+        );
+      }
+
+      runReport.push({ course, status: "processed", uploaded: options.upload });
+    } catch (error) {
+      hasFailures = true;
+      runReport.push({
+        course,
+        status: "failed",
+        message: error instanceof Error ? error.message : String(error),
+      });
+      if (options.stopOnError) throw error;
+      console.error(
+        `[${index + 1}/${courses.length}] ${course}: failed; continuing`,
+      );
+    }
   }
 
   const reportPath = path.join(options.outRoot, "run-summary.json");
@@ -282,6 +304,7 @@ async function main() {
           upload: options.upload,
           overwrite: options.overwrite,
           force: options.force,
+          stopOnError: options.stopOnError,
           courses: runReport,
         },
         null,
@@ -290,6 +313,7 @@ async function main() {
     );
     console.log(`Wrote ${reportPath}`);
   }
+  if (hasFailures) process.exitCode = 1;
 }
 
 main().catch((error) => {
