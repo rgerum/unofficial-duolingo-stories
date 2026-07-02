@@ -153,6 +153,12 @@ function revokeObjectUrl(src: string | null) {
   if (src?.startsWith("blob:")) URL.revokeObjectURL(src);
 }
 
+class NonRetryableFetchError extends Error {}
+
+function isTerminalClientError(status: number) {
+  return status >= 400 && status < 500 && status !== 408 && status !== 429;
+}
+
 async function fetchJsonWithRetry<T>(url: string): Promise<T> {
   let lastError: unknown = null;
 
@@ -160,10 +166,15 @@ async function fetchJsonWithRetry<T>(url: string): Promise<T> {
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`Could not fetch JSON (${response.status}).`);
+        const message = `Could not fetch JSON (${response.status}).`;
+        if (isTerminalClientError(response.status)) {
+          throw new NonRetryableFetchError(message);
+        }
+        throw new Error(message);
       }
       return (await response.json()) as T;
     } catch (error) {
+      if (error instanceof NonRetryableFetchError) throw error;
       lastError = error;
       if (attempt === FETCH_RETRIES) break;
       await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
