@@ -14,6 +14,7 @@ export function Header({
   rtl,
   autoPlay = true,
   replayKey = 0,
+  audioRangeOverride,
   onManualAudioPlay,
 }: {
   element: StoryElementHeader;
@@ -21,25 +22,27 @@ export function Header({
   rtl: boolean;
   autoPlay?: boolean;
   replayKey?: number;
+  audioRangeOverride?: number;
   onManualAudioPlay?: () => void;
 }) {
   const audio = element.learningLanguageTitleContent?.audio;
-  const { audioRange, play, hasAudio } = useLineAudio(
+  const lineAudio = useLineAudio(
     audio,
     active,
     autoPlay,
     replayKey,
   );
+  const audioRange = audioRangeOverride ?? lineAudio.audioRange;
   const handlePlay = React.useCallback(() => {
     onManualAudioPlay?.();
-    play();
-  }, [onManualAudioPlay, play]);
+    lineAudio.play();
+  }, [lineAudio, onManualAudioPlay]);
 
   return (
     <View style={styles.root}>
       <SmartImage uri={element.illustrationUrl} width={175} height={175} />
       <View style={[styles.titleRow, rtl && styles.titleRowRtl]}>
-        {hasAudio && <PlayAudioButton onPress={handlePlay} rtl={rtl} />}
+        {lineAudio.hasAudio && <PlayAudioButton onPress={handlePlay} rtl={rtl} />}
         <HintText
           content={element.learningLanguageTitleContent}
           audioRange={audioRange}
