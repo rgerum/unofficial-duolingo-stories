@@ -19,6 +19,7 @@ import { Part } from "./Part";
 import { Footer, type NextStoryPreview } from "./Footer";
 import { HintLookupContext } from "./HintPopup";
 import { SmartImage } from "../components/SmartImage";
+import { useStitchedListeningAudio } from "./useStitchedListeningAudio";
 import type { StoryData } from "./types";
 
 const noop = () => {};
@@ -136,6 +137,34 @@ export function Reader({
     storyProgress,
   ]);
 
+  const handleStitchedPartChange = React.useCallback(
+    (partIndex: number) => {
+      const nextPart = partsList[partIndex];
+      if (!nextPart) return;
+      requestScrollToNewContent();
+      setPartProgress(0);
+      setStoryProgress(partIndex);
+      setButtonStatus(getInitialButtonStatus(nextPart, hideQuestions));
+    },
+    [hideQuestions, partsList, requestScrollToNewContent],
+  );
+
+  const handleStitchedFinished = React.useCallback(() => {
+    requestScrollToNewContent();
+    setPartProgress(0);
+    setStoryProgress(partsList.length);
+    setButtonStatus("finished");
+  }, [partsList.length, requestScrollToNewContent]);
+
+  const stitchedAudio = useStitchedListeningAudio({
+    enabled: listening,
+    story,
+    paused: listeningPaused,
+    onPartChange: handleStitchedPartChange,
+    onFinished: handleStitchedFinished,
+  });
+  const useStitchedAudio = listening && stitchedAudio.isReady;
+
   const pauseListening = React.useCallback(() => {
     stopAudio(false);
     setListeningPaused(true);
@@ -154,24 +183,30 @@ export function Reader({
   const replayListening = React.useCallback(() => {
     stopAudio();
     setListeningPaused(false);
+    if (useStitchedAudio) {
+      stitchedAudio.replay();
+      return;
+    }
     setAudioReplayKey((key) => key + 1);
-  }, []);
+  }, [stitchedAudio, useStitchedAudio]);
 
   const skipListening = React.useCallback(() => {
     stopAudio();
     setListeningPaused(false);
+    if (useStitchedAudio && stitchedAudio.skipToNext()) return;
     void next();
-  }, [next]);
+  }, [next, stitchedAudio, useStitchedAudio]);
 
   const handleManualAudioPlay = React.useCallback(
     (partIndex: number) => {
       if (!listening) return;
-      setListeningPaused(false);
+      if (useStitchedAudio) setListeningPaused(true);
+      else setListeningPaused(false);
       setPartProgress(0);
       setStoryProgress(partIndex);
       setButtonStatus(getInitialButtonStatus(partsList[partIndex], hideQuestions));
     },
-    [hideQuestions, listening, partsList],
+    [hideQuestions, listening, partsList, useStitchedAudio],
   );
 
   // Record completion exactly once when the end is reached.
@@ -192,7 +227,7 @@ export function Reader({
   const listeningPausedRef = React.useRef(listeningPaused);
   listeningPausedRef.current = listeningPaused;
   React.useEffect(() => {
-    if (!listening) return;
+    if (!listening || useStitchedAudio) return;
     return onAnyAudioDone(() => {
       setTimeout(() => {
         if (
@@ -203,7 +238,7 @@ export function Reader({
         }
       }, 500);
     });
-  }, [listening]);
+  }, [listening, useStitchedAudio]);
 
   // Keep the newest line in view only after an intentional reveal. Text and
   // bubble measurement can also change content size; those layout passes should
@@ -274,8 +309,10 @@ export function Reader({
                 settings={{
                   hideQuestions,
                   rtl: story.learning_language_rtl,
-                  audioAutoPlay: !listeningPaused,
+                  audioAutoPlay: !listeningPaused && !useStitchedAudio,
                   audioReplayKey,
+                  audioRangeOverride:
+                    useStitchedAudio && active ? stitchedAudio.audioRange : undefined,
                   onManualAudioPlay: () => handleManualAudioPlay(index),
                 }}
               />

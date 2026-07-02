@@ -25,6 +25,7 @@ interface StoryAutoPlayProps {
 
 const BLOB_PUBLIC_BASE =
   "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/";
+const STITCHED_AUDIO_PREFIX = "stitched-audio/v1";
 const FETCH_RETRIES = 2;
 const LARGE_MERGE_SEGMENT_THRESHOLD = 60;
 
@@ -61,6 +62,18 @@ type TimelineMeta = {
   keypoints?: { rangeEnd: number; audioStart: number }[];
 };
 
+type StitchedAudioManifest = {
+  storyId: number;
+  durationMs: number;
+  audio: { filename: string };
+  segments: {
+    partIndex: number;
+    startMs: number;
+    endMs: number;
+    keypoints?: { rangeEnd: number; startMs: number }[];
+  }[];
+};
+
 function getParts(story: StoryType) {
   const parts: StoryElement[][] = [];
   let lastId = -1;
@@ -69,6 +82,13 @@ function getParts(story: StoryType) {
     if (lastId !== element.trackingProperties.line_index) {
       parts.push([]);
       lastId = element.trackingProperties.line_index;
+    }
+    if (
+      element.type === "MULTIPLE_CHOICE" &&
+      (parts.at(-1)?.length ?? 0) > 1 &&
+      element.trackingProperties.challenge_type === "multiple-choice"
+    ) {
+      parts.push([]);
     }
     parts[parts.length - 1].push(element);
   }
@@ -147,6 +167,32 @@ function formatTime(seconds: number): string {
   const m = Math.floor(safe / 60);
   const s = safe % 60;
   return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function revokeObjectUrl(src: string | null) {
+  if (src?.startsWith("blob:")) URL.revokeObjectURL(src);
+}
+
+async function fetchJsonWithRetry<T>(url: string): Promise<T> {
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt <= FETCH_RETRIES; attempt++) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Could not fetch JSON (${response.status}).`);
+      }
+      return (await response.json()) as T;
+    } catch (error) {
+      lastError = error;
+      if (attempt === FETCH_RETRIES) break;
+      await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Could not fetch JSON after retries.");
 }
 
 async function fetchArrayBufferWithRetry(url: string): Promise<ArrayBuffer> {
@@ -260,6 +306,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   const parts = React.useMemo(() => getParts(story), [story]);
   const course =
     story.course_short ?? `${story.learning_language}-${story.from_language}`;
+  const storyId = story.id;
 
   const settings = {
     ...autoPlaySettings,
@@ -268,7 +315,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
 
   const timelineSegments = React.useMemo(() => {
     const entries: TimelineSegment[] = [];
-    for (const part of parts) {
+    for (const [partIndex, part] of parts.entries()) {
       for (const element of part) {
         if (element.type !== "HEADER" && element.type !== "LINE") continue;
 
@@ -280,7 +327,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
         if (processed.type !== "HEADER" && processed.type !== "LINE") continue;
 
         entries.push({
-          lineIndex: processed.trackingProperties.line_index,
+          lineIndex: partIndex,
           audioUrl,
           keypoints,
           displayElement: processed,
@@ -305,6 +352,43 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   const [activeAudioRange, setActiveAudioRange] = React.useState(99999);
   const [showLargeMergeWarning, setShowLargeMergeWarning] =
     React.useState(false);
+
+  const loadStitchedAudio = React.useCallback(async () => {
+    const base = `${BLOB_PUBLIC_BASE}${STITCHED_AUDIO_PREFIX}/${course}/${storyId}`;
+    const manifest = await fetchJsonWithRetry<StitchedAudioManifest>(
+      `${base}/joined.audio.json`,
+    );
+    if (manifest.storyId !== storyId) {
+      throw new Error(
+        `Stitched manifest story mismatch (${manifest.storyId} !== ${storyId}).`,
+      );
+    }
+    if (!manifest.segments.length) {
+      throw new Error("Stitched manifest has no segments.");
+    }
+
+    const meta = manifest.segments.map((segment) => ({
+      lineIndex: segment.partIndex,
+      start: segment.startMs / 1000,
+      duration: Math.max(0, (segment.endMs - segment.startMs) / 1000),
+      keypoints: segment.keypoints?.map((keypoint) => ({
+        rangeEnd: keypoint.rangeEnd,
+        audioStart: Math.max(0, keypoint.startMs - segment.startMs),
+      })),
+    }));
+
+    setTimelineMeta(meta);
+    setMergedSrc((prev) => {
+      revokeObjectUrl(prev);
+      return `${base}/${manifest.audio.filename}`;
+    });
+    setDuration(manifest.durationMs / 1000);
+    setCurrentTime(0);
+    setActiveAudioRange(99999);
+    setMergeState("ready");
+    setShowLargeMergeWarning(false);
+    return `${base}/${manifest.audio.filename}`;
+  }, [course, storyId]);
 
   const buildMergedAudio = React.useCallback(async () => {
     if (!timelineSegments.length) {
@@ -340,7 +424,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
 
       setTimelineMeta(meta);
       setMergedSrc((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
+        revokeObjectUrl(prev);
         return nextSrc;
       });
       setDuration(start);
@@ -371,21 +455,27 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       timelineSegments.length >= LARGE_MERGE_SEGMENT_THRESHOLD,
     );
     setMergedSrc((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
+      revokeObjectUrl(prev);
       return null;
     });
   }, [timelineSegments]);
 
   React.useEffect(() => {
     return () => {
-      if (mergedSrc) URL.revokeObjectURL(mergedSrc);
+      revokeObjectUrl(mergedSrc);
     };
   }, [mergedSrc]);
 
-  const ensureMergedAndPlay = React.useCallback(async () => {
+  const ensureAudioAndPlay = React.useCallback(async () => {
     let src = mergedSrc;
     if (!src) {
-      src = await buildMergedAudio();
+      setMergeState("building");
+      setErrorMessage(null);
+      try {
+        src = await loadStitchedAudio();
+      } catch {
+        src = await buildMergedAudio();
+      }
     }
     if (!src || !audioRef.current) return;
 
@@ -400,7 +490,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     } catch (error) {
       setIsPlaying(false);
     }
-  }, [buildMergedAudio, mergedSrc]);
+  }, [buildMergedAudio, loadStitchedAudio, mergedSrc]);
 
   const pause = React.useCallback(() => {
     audioRef.current?.pause();
@@ -412,8 +502,8 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       pause();
       return;
     }
-    await ensureMergedAndPlay();
-  }, [ensureMergedAndPlay, isPlaying, pause]);
+    await ensureAudioAndPlay();
+  }, [ensureAudioAndPlay, isPlaying, pause]);
 
   const onSeek = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -474,8 +564,8 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   }, [duration, timelineMeta]);
 
   React.useEffect(() => {
-    void ensureMergedAndPlay();
-  }, [ensureMergedAndPlay]);
+    void ensureAudioAndPlay();
+  }, [ensureAudioAndPlay]);
 
   const activeLineIndex = React.useMemo(() => {
     const idx = findSegmentIndexByTime(timelineMeta, currentTime);
@@ -509,7 +599,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     }
 
     mediaSession.setActionHandler("play", () => {
-      void ensureMergedAndPlay();
+      void ensureAudioAndPlay();
     });
     mediaSession.setActionHandler("pause", () => {
       pause();
@@ -519,7 +609,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       mediaSession.setActionHandler("play", null);
       mediaSession.setActionHandler("pause", null);
     };
-  }, [ensureMergedAndPlay, isPlaying, pause, story.learning_language]);
+  }, [ensureAudioAndPlay, isPlaying, pause, story.learning_language]);
 
   return (
     <div className="min-h-screen">
@@ -546,7 +636,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
             }
           >
             {mergeState === "building"
-              ? "Building..."
+              ? "Loading..."
               : isPlaying
                 ? "Pause"
                 : "Play"}
@@ -587,6 +677,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
           {parts.map((part, partIndex) => (
             <AutoPlayPart
               key={partIndex}
+              partIndex={partIndex}
               part={part}
               settings={settings}
               activeLineIndex={activeLineIndex}
@@ -602,6 +693,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
 }
 
 interface AutoPlayPartProps {
+  partIndex: number;
   part: StoryElement[];
   settings: typeof autoPlaySettings & { rtl: boolean };
   activeLineIndex?: number;
@@ -610,6 +702,7 @@ interface AutoPlayPartProps {
 }
 
 function AutoPlayPart({
+  partIndex,
   part,
   settings,
   activeLineIndex,
@@ -621,6 +714,7 @@ function AutoPlayPart({
       {part.map((element, i) => (
         <AutoPlayElement
           key={i}
+          partIndex={partIndex}
           element={element}
           settings={settings}
           activeLineIndex={activeLineIndex}
@@ -633,6 +727,7 @@ function AutoPlayPart({
 }
 
 interface AutoPlayElementProps {
+  partIndex: number;
   element: StoryElement;
   settings: typeof autoPlaySettings & { rtl: boolean };
   activeLineIndex?: number;
@@ -641,6 +736,7 @@ interface AutoPlayElementProps {
 }
 
 function AutoPlayElement({
+  partIndex,
   element,
   settings,
   activeLineIndex,
@@ -648,7 +744,7 @@ function AutoPlayElement({
   activeAudioRange,
 }: AutoPlayElementProps) {
   const processedElement = clearHints(element);
-  const lineIndex = processedElement.trackingProperties?.line_index;
+  const lineIndex = partIndex;
   const visibleUntil = activeLineIndex ?? 0;
 
   if (lineIndex !== undefined && lineIndex > visibleUntil) {

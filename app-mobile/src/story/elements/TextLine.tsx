@@ -119,6 +119,7 @@ export function TextLine({
   rtl,
   autoPlay = true,
   replayKey = 0,
+  audioRangeOverride,
   onManualAudioPlay,
 }: {
   element: StoryElementLine;
@@ -127,19 +128,21 @@ export function TextLine({
   rtl: boolean;
   autoPlay?: boolean;
   replayKey?: number;
+  audioRangeOverride?: number;
   onManualAudioPlay?: () => void;
 }) {
   const audio = element.line?.content?.audio;
-  const { audioRange, play, hasAudio } = useLineAudio(
+  const lineAudio = useLineAudio(
     audio,
     active,
     autoPlay,
     replayKey,
   );
+  const audioRange = audioRangeOverride ?? lineAudio.audioRange;
   const handlePlay = React.useCallback(() => {
     onManualAudioPlay?.();
-    play();
-  }, [onManualAudioPlay, play]);
+    lineAudio.play();
+  }, [lineAudio, onManualAudioPlay]);
 
   const lineRtl = getStoryLineRtl({
     storyRtl: rtl,
@@ -156,7 +159,7 @@ export function TextLine({
   if (element.line.type === "TITLE") {
     return (
       <View style={[styles.row, lineRtl && styles.rowRtl]}>
-        <LineBody hasAudio={hasAudio} onPlay={handlePlay} rtl={lineRtl}>
+        <LineBody hasAudio={lineAudio.hasAudio} onPlay={handlePlay} rtl={lineRtl}>
           <HintText
             content={element.line.content}
             audioRange={audioRange}
@@ -213,7 +216,7 @@ export function TextLine({
                 rtl={lineRtl}
                 containerStyle={lineRtl ? styles.rtlBubbleText : undefined}
                 leadingElement={
-                  hasAudio ? (
+                  lineAudio.hasAudio ? (
                     <PlayAudioButton onPress={handlePlay} rtl={lineRtl} />
                   ) : undefined
                 }
@@ -233,7 +236,7 @@ export function TextLine({
   // PROSE (or CHARACTER without avatar)
   return (
     <View style={[styles.row, lineRtl && styles.rowRtl]}>
-      <LineBody hasAudio={hasAudio} onPlay={handlePlay} rtl={lineRtl}>
+      <LineBody hasAudio={lineAudio.hasAudio} onPlay={handlePlay} rtl={lineRtl}>
         <HintText
           content={element.line.content}
           audioRange={audioRange}
