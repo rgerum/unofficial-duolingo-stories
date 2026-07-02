@@ -398,6 +398,7 @@ function PointToPhrasePart({
             rtl={settings.rtl}
             autoPlay={settings.audioAutoPlay}
             replayKey={settings.audioReplayKey}
+            audioRangeOverride={settings.audioRangeOverride}
             onManualAudioPlay={settings.onManualAudioPlay}
           />
         </FadeIn>

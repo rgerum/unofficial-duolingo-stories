@@ -10,6 +10,7 @@ import type {
   StoryElementHeader,
   StoryElementLine,
 } from "../src/components/editor/story/syntax_parser_types";
+import { splitStoryElementsIntoParts } from "../src/lib/story-parts";
 
 const BLOB_BASE_URL =
   "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com";
@@ -433,27 +434,6 @@ function getPartKind(parts: StoryElement[]) {
   return "line";
 }
 
-function getParts(elements: StoryElement[]) {
-  const parts: StoryElement[][] = [];
-  let lastId = -1;
-  for (const element of elements) {
-    if (element.trackingProperties === undefined) continue;
-    if (lastId !== element.trackingProperties.line_index) {
-      parts.push([]);
-      lastId = element.trackingProperties.line_index;
-    }
-    if (
-      element.type === "MULTIPLE_CHOICE" &&
-      (parts.at(-1)?.length ?? 0) > 1 &&
-      element.trackingProperties.challenge_type === "multiple-choice"
-    ) {
-      parts.push([]);
-    }
-    parts[parts.length - 1].push(element);
-  }
-  return parts;
-}
-
 function audioForHeader(element: StoryElementHeader) {
   return element.audio ?? element.learningLanguageTitleContent.audio;
 }
@@ -600,7 +580,7 @@ async function main() {
     },
     "",
   );
-  const parts = getParts(story.elements);
+  const parts = splitStoryElementsIntoParts(story.elements);
   const spokenSegments = parts
     .map((part, partIndex) => selectListeningSegment(part, partIndex))
     .filter((segment): segment is SpokenSegment => Boolean(segment));

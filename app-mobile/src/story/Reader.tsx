@@ -164,6 +164,8 @@ export function Reader({
     onFinished: handleStitchedFinished,
   });
   const useStitchedAudio = listening && stitchedAudio.isReady;
+  const stitchedAudioRangeOverride =
+    useStitchedAudio && !listeningPaused ? stitchedAudio.audioRange : undefined;
 
   const pauseListening = React.useCallback(() => {
     stopAudio(false);
@@ -311,8 +313,9 @@ export function Reader({
                   rtl: story.learning_language_rtl,
                   audioAutoPlay: !listeningPaused && !useStitchedAudio,
                   audioReplayKey,
-                  audioRangeOverride:
-                    useStitchedAudio && active ? stitchedAudio.audioRange : undefined,
+                  audioRangeOverride: active
+                    ? stitchedAudioRangeOverride
+                    : undefined,
                   onManualAudioPlay: () => handleManualAudioPlay(index),
                 }}
               />

@@ -10,6 +10,7 @@ import type {
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
+import { splitStoryElementsIntoParts } from "@/lib/story-parts";
 import { cn } from "@/lib/utils";
 
 interface StoryAutoPlayProps {
@@ -73,27 +74,6 @@ type StitchedAudioManifest = {
     keypoints?: { rangeEnd: number; startMs: number }[];
   }[];
 };
-
-function getParts(story: StoryType) {
-  const parts: StoryElement[][] = [];
-  let lastId = -1;
-  for (const element of story.elements) {
-    if (element.trackingProperties === undefined) continue;
-    if (lastId !== element.trackingProperties.line_index) {
-      parts.push([]);
-      lastId = element.trackingProperties.line_index;
-    }
-    if (
-      element.type === "MULTIPLE_CHOICE" &&
-      (parts.at(-1)?.length ?? 0) > 1 &&
-      element.trackingProperties.challenge_type === "multiple-choice"
-    ) {
-      parts.push([]);
-    }
-    parts[parts.length - 1].push(element);
-  }
-  return parts;
-}
 
 function toAbsoluteAudioUrl(url: string): string | null {
   if (url.startsWith("blob:")) return url;
@@ -303,7 +283,10 @@ function mergeBuffersToWav(buffers: AudioBuffer[]): Blob {
 }
 
 export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
-  const parts = React.useMemo(() => getParts(story), [story]);
+  const parts = React.useMemo(
+    () => splitStoryElementsIntoParts(story.elements),
+    [story.elements],
+  );
   const course =
     story.course_short ?? `${story.learning_language}-${story.from_language}`;
   const storyId = story.id;
