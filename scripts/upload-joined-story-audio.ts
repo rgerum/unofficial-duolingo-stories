@@ -21,6 +21,13 @@ type CourseSummaryResult = {
   storyId: number;
   status: string;
   outputDir?: string;
+  generatorVersion?: string;
+  source?: {
+    repo?: string;
+    commit?: string;
+    path?: string;
+    sha256?: string;
+  };
   durationMs?: number;
   segments?: number;
 };
@@ -242,6 +249,8 @@ async function main() {
     uploaded.push({
       storyId: story.storyId,
       course: options.course,
+      generatorVersion: story.generatorVersion,
+      source: story.source,
       durationMs: story.durationMs,
       segments: story.segments,
       audio: {

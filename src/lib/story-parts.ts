@@ -1,4 +1,4 @@
-import type { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import type { StoryElement } from "../components/editor/story/syntax_parser_types";
 
 export function splitStoryElementsIntoParts(
   elements: StoryElement[],

@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import { ConvexHttpClient } from "convex/browser";
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -33,6 +34,13 @@ type CliOptions = {
   gapMs: number;
   materializeFromConvex: boolean;
   sourceOutDir: string;
+};
+
+type SourceMetadata = {
+  repo?: string;
+  commit?: string;
+  path?: string;
+  sha256: string;
 };
 
 function usage(exitCode: 0 | 1): never {
@@ -263,6 +271,33 @@ async function syncContentRepo(options: CliOptions) {
   ]);
 }
 
+async function getContentRepoCommit(options: CliOptions) {
+  if (!options.syncContentRepo) return undefined;
+  const { stdout } = await runCommand("git", [
+    "-C",
+    options.contentRepoDir,
+    "rev-parse",
+    "HEAD",
+  ]);
+  return stdout.trim();
+}
+
+async function sourceMetadataForFile(
+  filePath: string,
+  options: CliOptions,
+  contentRepoCommit: string | undefined,
+): Promise<SourceMetadata> {
+  const buffer = await readFile(filePath);
+  return {
+    repo: options.syncContentRepo ? options.contentRepoUrl : undefined,
+    commit: contentRepoCommit,
+    path: options.syncContentRepo
+      ? path.relative(options.contentRepoDir, filePath)
+      : path.relative(process.cwd(), filePath),
+    sha256: createHash("sha256").update(buffer).digest("hex"),
+  };
+}
+
 async function getCourseStories(client: ConvexHttpClient, courseShort: string) {
   const sidebar = await client.query(api.editorRead.getEditorSidebarData, {});
   const course = (sidebar.courses ?? []).find(
@@ -332,6 +367,7 @@ async function mapWithConcurrency<T, R>(
 async function main() {
   const options = parseCliOptions(process.argv.slice(2));
   if (options.syncContentRepo) await syncContentRepo(options);
+  const contentRepoCommit = await getContentRepoCommit(options);
   const client = await getClient();
   const { course, stories } = await getCourseStories(client, options.course);
   const selectedStories = options.limit ? stories.slice(0, options.limit) : stories;
@@ -376,6 +412,11 @@ async function main() {
       );
 
       try {
+        const source = await sourceMetadataForFile(
+          localFile,
+          options,
+          contentRepoCommit,
+        );
         await runCommand("pnpm", [
           "audio:join-story",
           "--",
@@ -387,9 +428,17 @@ async function main() {
           outputDir,
           "--gap-ms",
           String(options.gapMs),
+          "--source-sha256",
+          source.sha256,
+          "--source-path",
+          source.path ?? "",
+          ...(source.repo ? ["--source-repo", source.repo] : []),
+          ...(source.commit ? ["--source-commit", source.commit] : []),
         ]);
         const manifestPath = path.join(outputDir, "joined.audio.json");
         const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+          generatorVersion?: string;
+          source?: SourceMetadata;
           durationMs: number;
           segments: unknown[];
         };
@@ -397,6 +446,8 @@ async function main() {
           storyId: story.id,
           status: "ok" as const,
           outputDir: path.relative(process.cwd(), outputDir),
+          generatorVersion: manifest.generatorVersion,
+          source: manifest.source,
           durationMs: manifest.durationMs,
           segments: manifest.segments.length,
         };
@@ -412,6 +463,8 @@ async function main() {
 
   const summary = {
     course: options.course,
+    sourceRepo: options.syncContentRepo ? options.contentRepoUrl : undefined,
+    sourceCommit: contentRepoCommit,
     generatedAt: new Date().toISOString(),
     elapsedMs: Date.now() - startedAt,
     total: results.length,

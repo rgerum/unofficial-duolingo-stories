@@ -14,6 +14,7 @@ import { splitStoryElementsIntoParts } from "../src/lib/story-parts";
 
 const BLOB_BASE_URL =
   "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com";
+const GENERATOR_VERSION = "joined-story-audio-v1";
 
 type CliOptions = {
   storyFile: string;
@@ -28,6 +29,10 @@ type CliOptions = {
   sampleRate: number;
   normalize: boolean;
   keepTemp: boolean;
+  sourceRepo?: string;
+  sourceCommit?: string;
+  sourcePath?: string;
+  sourceSha256?: string;
 };
 
 type SpokenSegment = {
@@ -61,8 +66,15 @@ type GeneratedSegment = {
 
 type JoinedStoryAudioManifest = {
   version: 1;
+  generatorVersion: string;
   storyId: number;
   sourceStoryFile: string;
+  source?: {
+    repo?: string;
+    commit?: string;
+    path?: string;
+    sha256?: string;
+  };
   generatedAt: string;
   audio: {
     filename: string;
@@ -101,6 +113,10 @@ Options:
   --silence-duration <seconds>     Minimum silence duration (default: 0.05)
   --bitrate <ffmpeg bitrate>       AAC output bitrate (default: 96k)
   --sample-rate <number>           Output sample rate (default: 44100)
+  --source-repo <repo>             Source content repo identifier/url
+  --source-commit <sha>            Source content repo commit SHA
+  --source-path <path>             Source story path inside content repo
+  --source-sha256 <hash>           SHA-256 of the exact source story file
   --no-normalize                   Disable loudnorm on each line
   --keep-temp                      Keep ffmpeg concat list and silence WAV
 `);
@@ -149,6 +165,10 @@ function parseCliOptions(args: string[]): CliOptions {
   let sampleRate = 44100;
   let normalize = true;
   let keepTemp = false;
+  let sourceRepo: string | undefined;
+  let sourceCommit: string | undefined;
+  let sourcePath: string | undefined;
+  let sourceSha256: string | undefined;
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -207,6 +227,26 @@ function parseCliOptions(args: string[]): CliOptions {
       index += 1;
       continue;
     }
+    if (arg === "--source-repo") {
+      sourceRepo = takeValue(args, index, arg);
+      index += 1;
+      continue;
+    }
+    if (arg === "--source-commit") {
+      sourceCommit = takeValue(args, index, arg);
+      index += 1;
+      continue;
+    }
+    if (arg === "--source-path") {
+      sourcePath = takeValue(args, index, arg);
+      index += 1;
+      continue;
+    }
+    if (arg === "--source-sha256") {
+      sourceSha256 = takeValue(args, index, arg);
+      index += 1;
+      continue;
+    }
     if (arg === "--no-normalize") {
       normalize = false;
       continue;
@@ -239,6 +279,10 @@ function parseCliOptions(args: string[]): CliOptions {
     sampleRate,
     normalize,
     keepTemp,
+    sourceRepo,
+    sourceCommit,
+    sourcePath,
+    sourceSha256,
   };
 }
 
@@ -662,8 +706,21 @@ async function main() {
 
   const manifest: JoinedStoryAudioManifest = {
     version: 1,
+    generatorVersion: GENERATOR_VERSION,
     storyId: options.storyId,
     sourceStoryFile: path.relative(process.cwd(), options.storyFile),
+    source:
+      options.sourceRepo ||
+      options.sourceCommit ||
+      options.sourcePath ||
+      options.sourceSha256
+        ? {
+            repo: options.sourceRepo,
+            commit: options.sourceCommit,
+            path: options.sourcePath,
+            sha256: options.sourceSha256,
+          }
+        : undefined,
     generatedAt: new Date().toISOString(),
     audio: {
       filename: audioFilename,
