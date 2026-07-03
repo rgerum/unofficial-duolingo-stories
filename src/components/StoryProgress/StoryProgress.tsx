@@ -323,12 +323,7 @@ function getFeedbackTextForElement(element: StoryElement) {
   }
 
   if (element.type === "LINE") {
-    const speaker =
-      element.line.type === "CHARACTER"
-        ? (element.line.characterName ?? `${element.line.characterId}`)
-        : "";
-    const text = element.line.content.text;
-    return speaker ? `${speaker}: ${text}` : text;
+    return getFeedbackTextForLineElement(element);
   }
 
   if (element.type === "MULTIPLE_CHOICE") {
@@ -373,7 +368,26 @@ function getFeedbackTextForElement(element: StoryElement) {
   return "";
 }
 
-function getFeedbackLineText(currentPart?: StoryElement[]) {
+function getFeedbackTextForLineElement(element: StoryElementLine) {
+  const speaker =
+    element.line.type === "CHARACTER"
+      ? (element.line.characterName ?? `${element.line.characterId}`)
+      : "";
+  const text = element.line.content.text;
+  return speaker ? `${speaker}: ${text}` : text;
+}
+
+function getFeedbackLineText({
+  currentPart,
+  currentLineElement,
+}: {
+  currentPart?: StoryElement[];
+  currentLineElement?: StoryElementLine;
+}) {
+  if (currentLineElement) {
+    return getFeedbackTextForLineElement(currentLineElement);
+  }
+
   if (!currentPart) return "";
 
   return currentPart
@@ -583,10 +597,13 @@ function StoryProgress({
     currentPart,
     partProgress,
   });
-  const currentFeedbackLineText = getFeedbackLineText(currentPart);
   const currentFeedbackLineElement = getFeedbackLineElement({
     currentPart,
     currentEditorLine,
+  });
+  const currentFeedbackLineText = getFeedbackLineText({
+    currentPart,
+    currentLineElement: currentFeedbackLineElement,
   });
   const editHref =
     editHrefBase && currentEditorLine

@@ -160,6 +160,7 @@ function StoryLineHints({
   hideRangesForChallenge,
   unhide,
   editorState,
+  disableTooltips = false,
 }: {
   content: ContentWithHints;
   showHints?: boolean;
@@ -168,6 +169,7 @@ function StoryLineHints({
   hideRangesForChallenge?: { start: number; end: number }[];
   unhide?: number;
   editorState?: EditorStateType;
+  disableTooltips?: boolean;
 }) {
   if (!content) return <>Empty</>;
   const visibleContent = showHints
@@ -305,7 +307,8 @@ function StoryLineHints({
       visibleContent.hints_pronunciation?.[hint.hintIndex];
     const has_any_hint = Boolean(hint_translation || hint_pronunciation);
     const has_translation_hint = Boolean(hint_translation);
-    const isInteractive = !is_hidden && !showTrans && has_translation_hint;
+    const showTooltip = !disableTooltips && !showTrans;
+    const isInteractive = !is_hidden && showTooltip && has_translation_hint;
     const was_hidden_for_challenge = hideRangesForChallenge?.some((range) =>
       getOverlap(hint.rangeFrom, hint.rangeTo + 1, range.start, range.end),
     );
@@ -325,9 +328,11 @@ function StoryLineHints({
         <span
           className={cn(
             "pointer-events-none invisible absolute whitespace-nowrap leading-none opacity-0 transition-opacity duration-200",
-            !is_hidden &&
+            !disableTooltips &&
+              !is_hidden &&
               "group-hover/tooltip:visible group-hover/tooltip:opacity-95",
-            !is_hidden &&
+            !disableTooltips &&
+              !is_hidden &&
               "group-focus-within/tooltip:visible group-focus-within/tooltip:opacity-95",
             showTrans &&
               "group-hover/editorhint:visible group-hover/editorhint:opacity-95",
@@ -352,7 +357,7 @@ function StoryLineHints({
         ? has_any_hint
           ? "group/editorhint inline-flex grow flex-col"
           : ""
-        : has_translation_hint
+        : showTooltip && has_translation_hint
           ? cn(
               "group/tooltip relative inline-block align-baseline",
               "focus:outline-none focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2",
@@ -395,7 +400,7 @@ function StoryLineHints({
               ) : null}
             </span>
           ) : null
-        ) : has_translation_hint ? (
+        ) : showTooltip && has_translation_hint ? (
           <span
             className={hintTextClassName}
             data-hint-tooltip

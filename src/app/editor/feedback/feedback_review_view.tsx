@@ -136,6 +136,7 @@ function FeedbackReportRow({
   onSetStatus: (status: FeedbackStatus) => void | Promise<void>;
 }) {
   const editorHref = getEditorHref(report);
+  const linePreview = getLinePreview(report.lineText);
 
   return (
     <article className="grid gap-4 rounded-[8px] border-2 border-[var(--overview-hr)] bg-[var(--body-background)] p-4 min-[900px]:grid-cols-[minmax(0,1fr)_220px]">
@@ -169,9 +170,9 @@ function FeedbackReportRow({
           <span>{report.userName || report.userEmail || "Anonymous"}</span>
         </div>
 
-        {report.lineText ? (
-          <blockquote className="m-0 mb-3 rounded-[8px] border-l-4 border-[var(--overview-hr)] bg-[var(--body-background-faint)] px-4 py-3 text-[0.95rem] leading-6">
-            {report.lineText}
+        {linePreview ? (
+          <blockquote className="m-0 mb-3 rounded-[8px] border-l-4 border-[var(--overview-hr)] bg-[var(--body-background-faint)] px-4 py-3 text-[0.95rem] leading-6 whitespace-pre-wrap">
+            {linePreview}
           </blockquote>
         ) : null}
 
@@ -255,6 +256,17 @@ function formatDateTime(timestamp: number) {
     timeStyle: "short",
     timeZone: "UTC",
   }).format(new Date(timestamp));
+}
+
+function getLinePreview(lineText?: string) {
+  if (!lineText) return "";
+
+  return (
+    lineText
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .find(Boolean) ?? ""
+  );
 }
 
 function getCategoryClassName(category: FeedbackReport["category"]) {
