@@ -92,7 +92,7 @@ export default function StoryFeedback({
           <span>Feedback</span>
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-[640px] rounded-[18px] bg-[var(--body-background)] text-[var(--text-color)] sm:max-w-[640px]">
+      <DialogContent className="max-w-[640px] overflow-x-hidden rounded-[18px] bg-[var(--body-background)] text-[var(--text-color)] sm:max-w-[640px]">
         <DialogTitle className="text-[1.2rem] font-bold">
           Give feedback
         </DialogTitle>
@@ -100,20 +100,21 @@ export default function StoryFeedback({
           Report a problem with this story line.
         </DialogDescription>
 
-        <div className="rounded-[14px] border-2 border-[var(--overview-hr)] bg-[color:color-mix(in_srgb,var(--body-background)_88%,var(--body-background-faint))] p-4">
+        <div className="min-w-0 overflow-hidden">
           <div className="mb-1 text-[0.76rem] font-bold tracking-[0.1em] text-[var(--title-color-dim)] uppercase">
             Current line
           </div>
           {lineElement ? (
-            <div className="mt-3 rounded-[12px] bg-[var(--body-background)] px-3 py-1 [&_.audio-button]:shrink-0">
+            <div className="mt-3 min-w-0 overflow-hidden [&_.audio-button]:shrink-0">
               <StoryTextLine
                 active={false}
                 element={lineElement}
                 settings={settings}
+                compact
               />
             </div>
           ) : (
-            <p className="mt-3 mb-0 whitespace-pre-wrap rounded-[12px] bg-[var(--body-background)] px-4 py-3 text-[1rem] leading-6">
+            <p className="mt-3 mb-0 whitespace-pre-wrap text-[1rem] leading-6">
               {lineText || storyTitle}
             </p>
           )}
@@ -152,7 +153,7 @@ export default function StoryFeedback({
         >
           <div className="grid gap-2">
             <div className="text-[0.92rem] font-bold">Category</div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4">
               {feedbackCategories.map((option) => {
                 const selected = category === option.value;
 
@@ -164,7 +165,7 @@ export default function StoryFeedback({
                     disabled={isSubmitting || isSubmitted}
                     onClick={() => setCategory(option.value)}
                     className={cn(
-                      "min-h-11 rounded-[13px] border-2 px-3 py-2 text-[0.86rem] font-bold whitespace-nowrap transition-[background-color,border-color,color,transform] duration-100 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[color:color-mix(in_srgb,var(--ring)_35%,transparent)]",
+                      "min-h-11 min-w-0 rounded-[13px] border-2 px-2 py-2 text-[0.82rem] font-bold whitespace-nowrap transition-[background-color,border-color,color,transform] duration-100 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[color:color-mix(in_srgb,var(--ring)_35%,transparent)] sm:px-3 sm:text-[0.86rem]",
                       selected
                         ? "border-[var(--button-blue-border)] bg-[var(--button-blue-background)] text-[var(--button-blue-color)]"
                         : "border-[var(--overview-hr)] bg-[var(--body-background)] text-[var(--text-color)] hover:border-[color:color-mix(in_srgb,var(--link-blue)_35%,var(--overview-hr))] hover:bg-[color:color-mix(in_srgb,var(--link-blue)_8%,var(--body-background))]",

@@ -28,6 +28,7 @@ function StoryTextLine({
   onOpenAudioEditor,
   audioRangeOverride,
   hideAudioButton = false,
+  compact = false,
 }: {
   active: boolean;
   element: StoryElementLine;
@@ -41,6 +42,7 @@ function StoryTextLine({
   ) => void | Promise<void>;
   audioRangeOverride?: number;
   hideAudioButton?: boolean;
+  compact?: boolean;
 }) {
   const editorProps: EditorProps = {
     editorState,
@@ -67,6 +69,8 @@ function StoryTextLine({
     "after:absolute after:top-0 after:left-[-9px] after:content-[''] after:border-r-[12px] after:border-b-[12px] after:border-r-[var(--color_base_background)] after:border-b-transparent",
     isRtl &&
       "rounded-tl-[14px] rounded-tr-none before:left-auto before:right-[-14px] before:border-r-0 before:border-l-[12px] before:border-l-[var(--color_base_border)] after:left-auto after:right-[-9px] after:border-r-0 after:border-l-[12px] after:border-l-[var(--color_base_background)]",
+    compact &&
+      "min-w-0 max-w-[calc(100%-68px)] whitespace-normal break-words [overflow-wrap:anywhere]",
   );
 
   if (element.line === undefined) return <></>;
@@ -135,6 +139,7 @@ function StoryTextLine({
         <img
           className={cn(
             "mr-[18px] flex h-[50px] w-[50px] flex-[0_0_50px]",
+            compact && "mr-3 h-10 w-10 flex-[0_0_40px]",
             isRtl && "mr-0 ml-3 scale-x-[-1]",
           )}
           src={element.line.avatarUrl}
