@@ -35,6 +35,20 @@ function Check() {
   );
 }
 
+function FooterShell({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div data-story-footer className={cn(footerBaseClassName, className)}>
+      {children}
+    </div>
+  );
+}
+
 function StoryFooter({
   buttonStatus,
   onClick,
@@ -68,19 +82,19 @@ function StoryFooter({
 
   if (buttonStatus === "...") {
     return (
-      <div className={footerBaseClassName}>
+      <FooterShell>
         <div className={widthWrapperBaseClassName}>
           <Button key={"c"} onClick={onContinueClick}>
             {"..."}
           </Button>
         </div>
-      </div>
+      </FooterShell>
     );
   }
 
   if (buttonStatus === "finished") {
     return (
-      <div className={footerBaseClassName}>
+      <FooterShell>
         <div
           className={cn(
             widthWrapperBaseClassName,
@@ -137,39 +151,34 @@ function StoryFooter({
             <div className="min-h-14 max-[800px]:order-3" />
           )}
         </div>
-      </div>
+      </FooterShell>
     );
   }
 
   if (buttonStatus === "wait") {
     return (
-      <div className={footerBaseClassName}>
+      <FooterShell>
         <div className={widthWrapperBaseClassName}>
           <Button key={"c"} disabled onClick={onContinueClick}>
             {localisation("button_continue") || "continue"}
           </Button>
         </div>
-      </div>
+      </FooterShell>
     );
   }
   if (buttonStatus !== "right") {
     return (
-      <div className={footerBaseClassName}>
+      <FooterShell>
         <div className={widthWrapperBaseClassName}>
           <Button key={"c"} onClick={onContinueClick}>
             {localisation("button_continue") || "continue"}
           </Button>
         </div>
-      </div>
+      </FooterShell>
     );
   }
   return (
-    <div
-      className={cn(
-        footerBaseClassName,
-        "border-[var(--footer-right-background)] bg-[var(--footer-right-background)] text-[var(--footer-right-color)]",
-      )}
-    >
+    <FooterShell className="border-[var(--footer-right-background)] bg-[var(--footer-right-background)] text-[var(--footer-right-color)]">
       <div
         className={cn(
           widthWrapperBaseClassName,
@@ -188,7 +197,7 @@ function StoryFooter({
           </Button>
         </div>
       </div>
-    </div>
+    </FooterShell>
   );
 }
 
