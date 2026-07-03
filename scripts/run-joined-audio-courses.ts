@@ -18,6 +18,7 @@ type CliOptions = {
   dryRunUpload: boolean;
   stopOnError: boolean;
   pruneLocalArtifacts: boolean;
+  skipAttempted: boolean;
   concurrency: number;
   limitCourses?: number;
   contentRepoDir: string;
@@ -51,6 +52,7 @@ Options:
   --dry-run-upload        Forward --dry-run to upload
   --stop-on-error         Stop after the first failed course
   --prune-local-artifacts Delete local story artifact dirs after each course
+  --skip-attempted        Skip courses that already have summary.json
   --concurrency <number>  Per-course story generation concurrency (default: 2)
   --limit-courses <num>   Process only the first N selected courses
   --content-repo-dir <dir> Content repo checkout (default: tmp/story-content)
@@ -85,6 +87,7 @@ function parseCliOptions(args: string[]): CliOptions {
   let dryRunUpload = false;
   let stopOnError = false;
   let pruneLocalArtifacts = false;
+  let skipAttempted = false;
   let concurrency = 2;
   let limitCourses: number | undefined;
   let contentRepoDir = path.join("tmp", "story-content");
@@ -131,6 +134,10 @@ function parseCliOptions(args: string[]): CliOptions {
       pruneLocalArtifacts = true;
       continue;
     }
+    if (arg === "--skip-attempted") {
+      skipAttempted = true;
+      continue;
+    }
     if (arg === "--concurrency") {
       concurrency = parsePositiveInteger(takeValue(args, index, arg), arg);
       index += 1;
@@ -166,6 +173,7 @@ function parseCliOptions(args: string[]): CliOptions {
     dryRunUpload,
     stopOnError,
     pruneLocalArtifacts,
+    skipAttempted,
     concurrency,
     limitCourses,
     contentRepoDir: path.resolve(contentRepoDir),
@@ -261,6 +269,14 @@ async function main() {
   console.log(`Selected ${courses.length} course(s).`);
   for (const [index, course] of courses.entries()) {
     const outDir = path.join(options.outRoot, course);
+    if (
+      options.skipAttempted &&
+      existsSync(path.join(outDir, "summary.json"))
+    ) {
+      console.log(`[${index + 1}/${courses.length}] ${course}: already attempted`);
+      runReport.push({ course, status: "skipped_attempted" });
+      continue;
+    }
     const complete = !options.force && (await isCourseComplete(course, options));
     if (complete) {
       console.log(`[${index + 1}/${courses.length}] ${course}: already complete`);
@@ -337,6 +353,7 @@ async function main() {
           force: options.force,
           stopOnError: options.stopOnError,
           pruneLocalArtifacts: options.pruneLocalArtifacts,
+          skipAttempted: options.skipAttempted,
           courses: runReport,
         },
         null,
