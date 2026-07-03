@@ -235,6 +235,35 @@ export default defineSchema({
     .index("by_story_and_user", ["storyId", "legacyUserId"])
     .index("by_legacy_id", ["legacyId"]),
 
+  story_feedback_reports: defineTable({
+    storyId: v.number(),
+    storyTitle: v.string(),
+    courseShort: v.string(),
+    line: v.optional(v.number()),
+    lineText: v.optional(v.string()),
+    category: v.union(
+      v.literal("Text"),
+      v.literal("Translation hints"),
+      v.literal("Audio"),
+      v.literal("Other"),
+    ),
+    comment: v.string(),
+    userId: v.union(v.string(), v.null()),
+    userName: v.union(v.string(), v.null()),
+    userEmail: v.union(v.string(), v.null()),
+    status: v.union(
+      v.literal("open"),
+      v.literal("reviewed"),
+      v.literal("resolved"),
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_story_id", ["storyId"])
+    .index("by_course_short", ["courseShort"])
+    .index("by_category", ["category"])
+    .index("by_user_id", ["userId"])
+    .index("by_status_and_created_at", ["status", "createdAt"]),
+
   discord_stories_role_sync: defineTable({
     legacyUserId: v.number(),
     discordAccountId: v.union(v.string(), v.null()),
