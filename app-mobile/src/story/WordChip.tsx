@@ -1,8 +1,8 @@
 import React from "react";
 import {
+  Animated,
   Pressable,
   StyleSheet,
-  View,
   type StyleProp,
   type TextStyle,
   type ViewStyle,
@@ -23,6 +23,7 @@ export type ChipStatus =
   | "selected"
   | "right"
   | "right-stay"
+  | "matched"
   | "wrong"
   | "false"
   | "off"
@@ -30,6 +31,48 @@ export type ChipStatus =
   | undefined;
 
 const EDGE = 4;
+const MATCHED_FADE_MS = 500;
+
+const PALETTES = {
+  idle: {
+    face: "#ffffff",
+    border: colors.border,
+    edge: colors.border,
+    text: colors.text,
+  },
+  right: {
+    face: colors.greenLight,
+    border: colors.green,
+    edge: colors.green,
+    text: colors.greenDark,
+  },
+  wrong: {
+    face: colors.redLight,
+    border: colors.red,
+    edge: colors.red,
+    text: colors.red,
+  },
+  selected: {
+    face: colors.blueLight,
+    border: colors.blue,
+    edge: colors.blue,
+    text: colors.blueDark,
+  },
+  off: {
+    face: colors.disabledBackground,
+    border: colors.disabledBackground,
+    edge: colors.disabledBackground,
+    text: colors.disabledBackground,
+  },
+  matched: {
+    face: colors.disabledBackground,
+    border: colors.disabledBackground,
+    edge: colors.disabledBackground,
+    text: colors.disabled,
+  },
+};
+
+const AnimatedText = Animated.createAnimatedComponent(Text);
 
 export function WordChip({
   children,
@@ -50,45 +93,56 @@ export function WordChip({
 }) {
   const normalized =
     status === "false" ? "wrong" : status === "done" ? "off" : status;
+  const matchedProgress = React.useRef(
+    new Animated.Value(normalized === "matched" ? 1 : 0),
+  ).current;
+
+  React.useEffect(() => {
+    if (normalized === "matched") {
+      matchedProgress.setValue(0);
+      const animation = Animated.timing(matchedProgress, {
+        toValue: 1,
+        duration: MATCHED_FADE_MS,
+        useNativeDriver: false,
+      });
+      animation.start();
+      return () => animation.stop();
+    }
+    matchedProgress.setValue(0);
+  }, [matchedProgress, normalized]);
 
   const palette = (() => {
     switch (normalized) {
       case "right":
       case "right-stay":
-        return {
-          face: colors.greenLight,
-          border: colors.green,
-          edge: colors.green,
-          text: colors.greenDark,
-        };
+        return PALETTES.right;
       case "wrong":
-        return {
-          face: colors.redLight,
-          border: colors.red,
-          edge: colors.red,
-          text: colors.red,
-        };
+        return PALETTES.wrong;
       case "selected":
-        return {
-          face: colors.blueLight,
-          border: colors.blue,
-          edge: colors.blue,
-          text: colors.blueDark,
-        };
+        return PALETTES.selected;
       case "off":
+        return PALETTES.off;
+      case "matched":
         return {
-          face: colors.disabledBackground,
-          border: colors.disabledBackground,
-          edge: colors.disabledBackground,
-          text: colors.disabledBackground,
+          face: matchedProgress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [PALETTES.right.face, PALETTES.matched.face],
+          }),
+          border: matchedProgress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [PALETTES.right.border, PALETTES.matched.border],
+          }),
+          edge: matchedProgress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [PALETTES.right.edge, PALETTES.matched.edge],
+          }),
+          text: matchedProgress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [PALETTES.right.text, PALETTES.matched.text],
+          }),
         };
       default:
-        return {
-          face: "#ffffff",
-          border: colors.border,
-          edge: colors.border,
-          text: colors.text,
-        };
+        return PALETTES.idle;
     }
   })();
 
@@ -100,19 +154,37 @@ export function WordChip({
     >
       {({ pressed }) => (
         <>
-          <View style={[styles.edge, { backgroundColor: palette.edge }]} />
-          <View
+          {/*
+            Web matched chips finish pressed down, with the face covering the
+            lower edge. Interpolate that motion together with the grey fade.
+          */}
+          <Animated.View
+            style={[styles.edge, { backgroundColor: palette.edge }]}
+          />
+          <Animated.View
             style={[
               styles.face,
               block && styles.blockFace,
               {
                 backgroundColor: palette.face,
                 borderColor: palette.border,
-                transform: [{ translateY: pressed ? EDGE : 0 }],
+                transform: [
+                  {
+                    translateY:
+                      normalized === "matched"
+                        ? matchedProgress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [pressed ? EDGE : 0, EDGE],
+                          })
+                        : pressed
+                          ? EDGE
+                          : 0,
+                  },
+                ],
               },
             ]}
           >
-            <Text
+            <AnimatedText
               style={[
                 styles.label,
                 getLanguageTextStyle(labelLang, styles.label),
@@ -121,8 +193,8 @@ export function WordChip({
               ]}
             >
               {children}
-            </Text>
-          </View>
+            </AnimatedText>
+          </Animated.View>
         </>
       )}
     </Pressable>

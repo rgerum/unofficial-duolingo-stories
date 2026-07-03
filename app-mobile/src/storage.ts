@@ -74,6 +74,10 @@ export type DoneStoryProgress = {
   storyId: number;
   time: number;
 };
+export type CourseProgress = {
+  completedCount: number;
+  lastCompletedAt: number;
+};
 
 export async function getDoneMap(courseShort: string): Promise<DoneMap> {
   const raw = await getString(doneKey(courseShort));
@@ -117,6 +121,29 @@ export async function getAllProgress(): Promise<Record<string, number>> {
       const map = await getDoneMap(courseShort);
       const count = Object.keys(map).length;
       if (count > 0) result[courseShort] = count;
+    }
+    return result;
+  } catch {
+    return {};
+  }
+}
+
+export async function getAllCourseProgress(): Promise<
+  Record<string, CourseProgress>
+> {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const doneKeys = keys.filter((key) => key.startsWith("doneStories:"));
+    const result: Record<string, CourseProgress> = {};
+    for (const key of doneKeys) {
+      const courseShort = key.slice("doneStories:".length);
+      const map = await getDoneMap(courseShort);
+      const times = Object.values(map).filter(Number.isFinite);
+      if (times.length === 0) continue;
+      result[courseShort] = {
+        completedCount: times.length,
+        lastCompletedAt: Math.max(...times),
+      };
     }
     return result;
   } catch {

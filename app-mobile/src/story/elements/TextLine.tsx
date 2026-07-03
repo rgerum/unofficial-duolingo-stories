@@ -13,34 +13,6 @@ import type { StoryElementLine } from "../types";
 // corners except where the tail attaches, with a two-triangle tail (border
 // color under background color) pointing at the avatar.
 const TAIL_WIDTH = 12;
-const BUBBLE_HORIZONTAL_PADDING = 24;
-const AUDIO_INLINE_SPACE = 32;
-const MAX_ESTIMATED_BUBBLE_WIDTH = 260;
-
-function getEstimatedTextWidth(text: string, fontSize: number): number {
-  const normalized = text.replace(/\s+/g, " ").trim();
-  let width = 0;
-
-  for (const char of normalized) {
-    if (/\p{Mark}/u.test(char)) continue;
-    if (char === " ") width += fontSize * 0.35;
-    else if (/[,.;:!?'"`]/.test(char)) width += fontSize * 0.28;
-    else width += fontSize * 0.56;
-  }
-
-  return width;
-}
-
-function getBubbleMinWidth(text: string, hasAudio: boolean): number {
-  return Math.min(
-    MAX_ESTIMATED_BUBBLE_WIDTH,
-    Math.ceil(
-      getEstimatedTextWidth(text, fontSizes.body) +
-        BUBBLE_HORIZONTAL_PADDING +
-        (hasAudio ? AUDIO_INLINE_SPACE : 0),
-    ),
-  );
-}
 
 function BubbleTail({ rtl }: { rtl: boolean }) {
   const horizontal = rtl ? { right: 0 } : { left: 0 };
@@ -126,7 +98,7 @@ function LineBody({
   return (
     <View
       style={[
-        styles.body,
+        naturalWidth ? styles.bodyNatural : styles.body,
         hasAudio && (rtl ? styles.bodyPadRtl : styles.bodyPad),
       ]}
     >
@@ -147,6 +119,7 @@ export function TextLine({
   rtl,
   autoPlay = true,
   replayKey = 0,
+  audioRangeOverride,
   onManualAudioPlay,
 }: {
   element: StoryElementLine;
@@ -155,19 +128,21 @@ export function TextLine({
   rtl: boolean;
   autoPlay?: boolean;
   replayKey?: number;
+  audioRangeOverride?: number;
   onManualAudioPlay?: () => void;
 }) {
   const audio = element.line?.content?.audio;
-  const { audioRange, play, hasAudio } = useLineAudio(
+  const lineAudio = useLineAudio(
     audio,
     active,
     autoPlay,
     replayKey,
   );
+  const audioRange = audioRangeOverride ?? lineAudio.audioRange;
   const handlePlay = React.useCallback(() => {
     onManualAudioPlay?.();
-    play();
-  }, [onManualAudioPlay, play]);
+    lineAudio.play();
+  }, [lineAudio, onManualAudioPlay]);
 
   const lineRtl = getStoryLineRtl({
     storyRtl: rtl,
@@ -178,24 +153,13 @@ export function TextLine({
     fontSize: fontSizes.body,
     color: colors.text,
   };
-  const measureKey = element.line
-    ? `${element.line.type}:${element.line.content.text}:${hasAudio}:${lineRtl}`
-    : "";
-  const [measuredCharacterBubble, setMeasuredCharacterBubble] = React.useState<{
-    key: string;
-    width: number;
-  } | null>(null);
-  const measuredWidth =
-    measuredCharacterBubble?.key === measureKey
-      ? measuredCharacterBubble.width
-      : undefined;
 
   if (element.line === undefined) return null;
 
   if (element.line.type === "TITLE") {
     return (
       <View style={[styles.row, lineRtl && styles.rowRtl]}>
-        <LineBody hasAudio={hasAudio} onPlay={handlePlay} rtl={lineRtl}>
+        <LineBody hasAudio={lineAudio.hasAudio} onPlay={handlePlay} rtl={lineRtl}>
           <HintText
             content={element.line.content}
             audioRange={audioRange}
@@ -213,17 +177,6 @@ export function TextLine({
   }
 
   if (element.line.type === "CHARACTER" && element.line.avatarUrl) {
-    const fallbackWidth = getBubbleMinWidth(
-      element.line.content.text,
-      hasAudio,
-    );
-    const bubbleSizing = lineRtl
-      ? { width: measuredWidth ?? fallbackWidth }
-      : measuredWidth === undefined
-        ? { minWidth: fallbackWidth }
-        : { width: measuredWidth };
-    const measuringCharacterBubble = measuredWidth === undefined;
-
     return (
       <View style={[styles.row, styles.characterRow, lineRtl && styles.rowRtl]}>
         <Image
@@ -239,53 +192,10 @@ export function TextLine({
               : { paddingLeft: TAIL_WIDTH },
           ]}
         >
-          {measuringCharacterBubble && (
-            <View
-              pointerEvents="none"
-              onLayout={(event) => {
-                const width = Math.ceil(event.nativeEvent.layout.width);
-                if (width > 0) {
-                  setMeasuredCharacterBubble({ key: measureKey, width });
-                }
-              }}
-              style={[
-                styles.bubble,
-                lineRtl ? styles.bubblePaddingRtl : styles.bubblePaddingLtr,
-                styles.bubbleMeasureClone,
-                lineRtl && styles.bubbleRtl,
-                lineRtl
-                  ? { borderTopRightRadius: 0 }
-                  : { borderTopLeftRadius: 0 },
-              ]}
-            >
-              <LineBody
-                hasAudio={hasAudio}
-                onPlay={handlePlay}
-                rtl={lineRtl}
-                inlineAudio
-                naturalWidth
-              >
-                <HintText
-                  content={element.line.content}
-                  audioRange={audioRange}
-                  hideRangesForChallenge={hideRanges}
-                  unhide={unhide}
-                  rtl={lineRtl}
-                  containerStyle={lineRtl ? styles.rtlBubbleText : undefined}
-                  fillLineWidth={lineRtl}
-                  style={[
-                    textStyle,
-                    getLanguageTextStyle(element.lang, textStyle),
-                  ]}
-                />
-              </LineBody>
-            </View>
-          )}
           <View
             style={[
               styles.bubble,
               lineRtl ? styles.bubblePaddingRtl : styles.bubblePaddingLtr,
-              bubbleSizing,
               lineRtl && styles.bubbleRtl,
               lineRtl
                 ? { borderTopRightRadius: 0 }
@@ -293,10 +203,10 @@ export function TextLine({
             ]}
           >
             <LineBody
-              hasAudio={hasAudio}
+              hasAudio={false}
               onPlay={handlePlay}
               rtl={lineRtl}
-              inlineAudio={lineRtl}
+              naturalWidth
             >
               <HintText
                 content={element.line.content}
@@ -305,7 +215,11 @@ export function TextLine({
                 unhide={unhide}
                 rtl={lineRtl}
                 containerStyle={lineRtl ? styles.rtlBubbleText : undefined}
-                fillLineWidth={lineRtl}
+                leadingElement={
+                  lineAudio.hasAudio ? (
+                    <PlayAudioButton onPress={handlePlay} rtl={lineRtl} />
+                  ) : undefined
+                }
                 style={[
                   textStyle,
                   getLanguageTextStyle(element.lang, textStyle),
@@ -322,13 +236,15 @@ export function TextLine({
   // PROSE (or CHARACTER without avatar)
   return (
     <View style={[styles.row, lineRtl && styles.rowRtl]}>
-      <LineBody hasAudio={hasAudio} onPlay={handlePlay} rtl={lineRtl}>
+      <LineBody hasAudio={lineAudio.hasAudio} onPlay={handlePlay} rtl={lineRtl}>
         <HintText
           content={element.line.content}
           audioRange={audioRange}
           hideRangesForChallenge={hideRanges}
           unhide={unhide}
           rtl={lineRtl}
+          containerStyle={lineRtl ? styles.rtlProseText : undefined}
+          fillLineWidth={lineRtl}
           style={[textStyle, getLanguageTextStyle(element.lang, textStyle)]}
         />
       </LineBody>
@@ -370,10 +286,10 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: colors.background,
     paddingTop: 10,
-    paddingBottom: 10,
+    paddingBottom: 9,
   },
   bubblePaddingLtr: {
-    paddingLeft: 10,
+    paddingLeft: 15,
     paddingRight: 15,
   },
   bubblePaddingRtl: {
@@ -417,10 +333,10 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     minWidth: 0,
   },
-  bubbleMeasureClone: {
-    opacity: 0,
-    position: "absolute",
-    zIndex: -1,
+  rtlProseText: {
+    flexShrink: 1,
+    minWidth: 0,
+    width: "100%",
   },
   audioButton: {
     position: "absolute",

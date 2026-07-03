@@ -2,7 +2,10 @@ import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
-import { getSessionLegacyUserId } from "./lib/authorization";
+import {
+  getSessionLegacyUserId,
+  requireSessionLegacyUserId,
+} from "./lib/authorization";
 
 const storyDoneInputValidator = v.object({
   legacyStoryId: v.number(),
@@ -30,6 +33,7 @@ const currentUserProgressValidator = v.array(
   v.object({
     courseShort: v.string(),
     completedCount: v.number(),
+    lastCompletedAt: v.number(),
   }),
 );
 
@@ -129,6 +133,49 @@ export const getDoneStoryIdsForCurrentUserInCourse = query({
   },
 });
 
+export const deleteCurrentUserCourseProgress = mutation({
+  args: {
+    courseShort: v.string(),
+  },
+  returns: v.object({
+    deletedCount: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const legacyUserId = await requireSessionLegacyUserId(ctx);
+    const course = await ctx.db
+      .query("courses")
+      .withIndex("by_short", (q) => q.eq("short", args.courseShort))
+      .unique();
+    if (!course) {
+      throw new Error("Course not found.");
+    }
+
+    let deletedCount = 0;
+    const doneStateRows = await ctx.db
+      .query("story_done_state")
+      .withIndex("by_user_and_course", (q) =>
+        q.eq("legacyUserId", legacyUserId).eq("courseId", course._id),
+      )
+      .collect();
+    for (const row of doneStateRows) {
+      await ctx.db.delete(row._id);
+      deletedCount += 1;
+    }
+
+    const activityRows = await ctx.db
+      .query("course_activity")
+      .withIndex("by_user_and_course", (q) =>
+        q.eq("legacyUserId", legacyUserId).eq("courseId", course._id),
+      )
+      .collect();
+    for (const row of activityRows) {
+      await ctx.db.delete(row._id);
+    }
+
+    return { deletedCount };
+  },
+});
+
 export const getCurrentUserProgress = query({
   args: {},
   returns: v.union(currentUserProgressValidator, v.null()),
@@ -143,22 +190,37 @@ export const getCurrentUserProgress = query({
       )
       .collect();
 
-    const countByCourseId = new Map<Id<"courses">, number>();
+    const progressByCourseId = new Map<
+      Id<"courses">,
+      { completedCount: number; lastCompletedAt: number }
+    >();
     for (const row of rows) {
-      countByCourseId.set(
-        row.courseId,
-        (countByCourseId.get(row.courseId) ?? 0) + 1,
-      );
+      const current = progressByCourseId.get(row.courseId);
+      progressByCourseId.set(row.courseId, {
+        completedCount: (current?.completedCount ?? 0) + 1,
+        lastCompletedAt: Math.max(
+          current?.lastCompletedAt ?? 0,
+          row.lastDoneAt,
+        ),
+      });
     }
 
-    const result: Array<{ courseShort: string; completedCount: number }> = [];
-    for (const [courseId, completedCount] of countByCourseId) {
+    const result: Array<{
+      courseShort: string;
+      completedCount: number;
+      lastCompletedAt: number;
+    }> = [];
+    for (const [courseId, progress] of progressByCourseId) {
       const course = await ctx.db.get(courseId);
       if (!course?.short) continue;
-      result.push({ courseShort: course.short, completedCount });
+      result.push({ courseShort: course.short, ...progress });
     }
 
-    return result.sort((a, b) => a.courseShort.localeCompare(b.courseShort));
+    return result.sort((a, b) => {
+      const recencyCmp = b.lastCompletedAt - a.lastCompletedAt;
+      if (recencyCmp !== 0) return recencyCmp;
+      return a.courseShort.localeCompare(b.courseShort);
+    });
   },
 });
 

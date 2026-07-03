@@ -2,6 +2,31 @@ import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import type { AudioInfo } from "./types";
 
 const BLOB_BASE = "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com";
+const AUDIO_STATUS_UPDATE_INTERVAL_MS = 50;
+const IDLE_AUDIO_RANGE = 99999;
+
+function getPlaybackRange(
+  keypoints: AudioInfo["keypoints"],
+  currentTimeSeconds: number,
+): number | undefined {
+  if (!keypoints?.length) return undefined;
+
+  const currentTimeMs = currentTimeSeconds * 1000;
+  let rangeEnd: number | undefined;
+  let latestAudioStart = Number.NEGATIVE_INFINITY;
+  for (const keypoint of keypoints) {
+    if (
+      Number.isFinite(keypoint.audioStart) &&
+      Number.isFinite(keypoint.rangeEnd) &&
+      keypoint.audioStart <= currentTimeMs &&
+      keypoint.audioStart >= latestAudioStart
+    ) {
+      latestAudioStart = keypoint.audioStart;
+      rangeEnd = keypoint.rangeEnd;
+    }
+  }
+  return rangeEnd;
+}
 
 export function resolveAudioUrl(url: string | undefined): string | undefined {
   if (!url) return undefined;
@@ -46,8 +71,12 @@ export function stopAudio(resetRange = true): void {
 }
 
 /**
- * Plays a line's audio, driving word highlighting through keypoint timeouts
- * (same algorithm as the web's use-audio hook). Returns a cancel function.
+ * Plays a line's audio, driving word highlighting from the native playback
+ * clock. The audio keeps playing when the JS thread is busy; deriving the
+ * range from currentTime lets the next status update catch up instead of
+ * firing stale keypoint timers late.
+ *
+ * Returns a cancel function.
  * Lines without audio emit "done" after a short pause so listening mode
  * still advances.
  */
@@ -63,20 +92,22 @@ export function playAudio(
       handlers.onDone?.();
       emitDone();
     }, 1200);
-  const cancel = () => clearTimeout(timeout);
+    const cancel = () => clearTimeout(timeout);
     cancelCurrent = cancel;
     return cancel;
   }
 
-  const player = createAudioPlayer({ uri: url });
-  const timeouts: ReturnType<typeof setTimeout>[] = [];
+  const player = createAudioPlayer(
+    { uri: url },
+    { updateInterval: AUDIO_STATUS_UPDATE_INTERVAL_MS },
+  );
   let finished = false;
   let cleanedUp = false;
+  let latestRange: number | undefined;
 
   const cleanup = () => {
     if (cleanedUp) return;
     cleanedUp = true;
-    timeouts.forEach(clearTimeout);
     subscription.remove();
     try {
       player.release();
@@ -85,30 +116,34 @@ export function playAudio(
   };
 
   const cancel = (resetRange = true) => {
-    if (resetRange) handlers.onRange?.(99999);
+    if (resetRange) handlers.onRange?.(IDLE_AUDIO_RANGE);
     try {
       player.pause();
     } catch {}
     cleanup();
   };
 
+  const syncRangeToPlaybackTime = (currentTimeSeconds: number) => {
+    const range = getPlaybackRange(audio?.keypoints, currentTimeSeconds);
+    if (range === undefined || range === latestRange) return;
+    latestRange = range;
+    handlers.onRange?.(range);
+  };
+
   const subscription = player.addListener("playbackStatusUpdate", (status) => {
+    syncRangeToPlaybackTime(Math.max(status.currentTime, player.currentTime));
+
     if (status.didJustFinish && !finished) {
       finished = true;
-      handlers.onRange?.(99999);
+      handlers.onRange?.(IDLE_AUDIO_RANGE);
       handlers.onDone?.();
       cleanup();
       emitDone();
     }
   });
 
-  audio?.keypoints?.forEach((keypoint) => {
-    timeouts.push(
-      setTimeout(() => handlers.onRange?.(keypoint.rangeEnd), keypoint.audioStart),
-    );
-  });
-
   player.play();
+  syncRangeToPlaybackTime(0);
   cancelCurrent = cancel;
   return cancel;
 }

@@ -38,12 +38,19 @@ function Check() {
 function FooterShell({
   children,
   className,
+  feedback,
 }: {
   children: React.ReactNode;
   className?: string;
+  feedback?: React.ReactNode;
 }) {
   return (
     <div data-story-footer className={cn(footerBaseClassName, className)}>
+      {feedback ? (
+        <div className="absolute right-6 bottom-[calc(100%+16px)] z-[1] max-[500px]:right-4 max-[500px]:bottom-[calc(100%+12px)]">
+          {feedback}
+        </div>
+      ) : null}
       {children}
     </div>
   );
@@ -57,6 +64,7 @@ function StoryFooter({
   nextStoryPreview,
   learningLanguageName,
   showFinishedPrimaryAction = true,
+  feedback,
 }: {
   buttonStatus: string;
   onClick: () => void;
@@ -70,6 +78,7 @@ function StoryFooter({
   } | null;
   learningLanguageName?: string;
   showFinishedPrimaryAction?: boolean;
+  feedback?: React.ReactNode;
 }) {
   const localisation = useLocalisation();
 
@@ -157,7 +166,7 @@ function StoryFooter({
 
   if (buttonStatus === "wait") {
     return (
-      <FooterShell>
+      <FooterShell feedback={feedback}>
         <div className={widthWrapperBaseClassName}>
           <Button key={"c"} disabled onClick={onContinueClick}>
             {localisation("button_continue") || "continue"}
@@ -168,7 +177,7 @@ function StoryFooter({
   }
   if (buttonStatus !== "right") {
     return (
-      <FooterShell>
+      <FooterShell feedback={feedback}>
         <div className={widthWrapperBaseClassName}>
           <Button key={"c"} onClick={onContinueClick}>
             {localisation("button_continue") || "continue"}
@@ -178,7 +187,10 @@ function StoryFooter({
     );
   }
   return (
-    <FooterShell className="border-[var(--footer-right-background)] bg-[var(--footer-right-background)] text-[var(--footer-right-color)]">
+    <FooterShell
+      className="border-[var(--footer-right-background)] bg-[var(--footer-right-background)] text-[var(--footer-right-color)]"
+      feedback={feedback}
+    >
       <div
         className={cn(
           widthWrapperBaseClassName,

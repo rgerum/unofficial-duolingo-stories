@@ -1,7 +1,8 @@
 import React from "react";
 import {
   ActivityIndicator,
-  ScrollView,
+  FlatList,
+  Platform,
   StyleSheet,
   Switch,
   View,
@@ -26,6 +27,8 @@ import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
 import { colors } from "../../src/theme";
 
+type StorySet = { setId: number; stories: StoryListItem[] };
+
 /** Learn tab: the current course's stories, grouped by set. */
 export default function LearnTab() {
   const router = useRouter();
@@ -48,6 +51,61 @@ export default function LearnTab() {
     if (!serverDoneIds) return null;
     return new Set(serverDoneIds);
   }, [serverDoneIds]);
+  const stories = React.useMemo(
+    () => (course && course !== null ? (course.stories as StoryListItem[]) : []),
+    [course],
+  );
+  const isStoryDone = React.useCallback(
+    (storyId: number) =>
+      session?.session
+        ? Boolean(serverDoneSet?.has(storyId))
+        : Boolean(doneMap[String(storyId)]),
+    [doneMap, serverDoneSet, session?.session],
+  );
+  const doneCount = React.useMemo(
+    () => stories.filter((story) => isStoryDone(story.id)).length,
+    [isStoryDone, stories],
+  );
+  const isServerProgressPending =
+    Boolean(session?.session) && serverDoneIds === undefined && !isOffline;
+  const sets = React.useMemo(() => {
+    const grouped: StorySet[] = [];
+    for (const story of stories) {
+      const last = grouped[grouped.length - 1];
+      if (last && last.setId === story.set_id) last.stories.push(story);
+      else grouped.push({ setId: story.set_id, stories: [story] });
+    }
+    return grouped;
+  }, [stories]);
+  const renderStorySet = React.useCallback(
+    ({ item }: { item: StorySet }) => (
+      <View style={styles.set}>
+        <Text style={styles.setTitle}>Set {item.setId}</Text>
+        <View style={styles.setGrid}>
+          {item.stories.map((story) => (
+            <StoryButton
+              key={story.id}
+              story={story}
+              done={isStoryDone(story.id)}
+              listeningMode={listening}
+              disabled={isOffline}
+              onPress={() => {
+                captureMobileEventLater("story_opened", {
+                  story_id: story.id,
+                  course_short: courseShort,
+                  listening_mode: listening,
+                });
+                router.push(
+                  `/story/${story.id}?listening=${listening ? "1" : "0"}`,
+                );
+              }}
+            />
+          ))}
+        </View>
+      </View>
+    ),
+    [courseShort, isOffline, isStoryDone, listening, router],
+  );
 
   // Reload local progress whenever the tab regains focus (e.g. after a story).
   useFocusEffect(
@@ -117,23 +175,6 @@ export default function LearnTab() {
     );
   }
 
-  const stories = course.stories as StoryListItem[];
-  const isStoryDone = (storyId: number) =>
-    session?.session
-      ? Boolean(serverDoneSet?.has(storyId))
-      : Boolean(doneMap[String(storyId)]);
-  const doneCount = stories.filter((story) => isStoryDone(story.id)).length;
-  const isServerProgressPending =
-    Boolean(session?.session) && serverDoneIds === undefined && !isOffline;
-
-  // Stories arrive sorted by (set_id, set_index); group them into sets.
-  const sets: { setId: number; stories: StoryListItem[] }[] = [];
-  for (const story of stories) {
-    const last = sets[sets.length - 1];
-    if (last && last.setId === story.set_id) last.stories.push(story);
-    else sets.push({ setId: story.set_id, stories: [story] });
-  }
-
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
       <View style={styles.header}>
@@ -172,41 +213,25 @@ export default function LearnTab() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {isOffline ? (
-          <View style={styles.offlineWrap}>
-            <OfflineNotice detail="Connect to the internet to open stories." />
-          </View>
-        ) : null}
-
-        {sets.map((set) => (
-          <View key={set.setId} style={styles.set}>
-            <Text style={styles.setTitle}>Set {set.setId}</Text>
-            <View style={styles.setGrid}>
-              {set.stories.map((story) => (
-                <StoryButton
-                  key={story.id}
-                  story={story}
-                  done={isStoryDone(story.id)}
-                  listeningMode={listening}
-                  disabled={isOffline}
-                  onPress={() => {
-                    captureMobileEventLater("story_opened", {
-                      story_id: story.id,
-                      course_short: courseShort,
-                      listening_mode: listening,
-                    });
-                    router.push(
-                      `/story/${story.id}?listening=${listening ? "1" : "0"}`,
-                    );
-                  }}
-                />
-              ))}
+      <FlatList
+        data={sets}
+        keyExtractor={(set) => String(set.setId)}
+        renderItem={renderStorySet}
+        contentContainerStyle={styles.scrollContent}
+        ListHeaderComponent={
+          isOffline ? (
+            <View style={styles.offlineWrap}>
+              <OfflineNotice detail="Connect to the internet to open stories." />
             </View>
-          </View>
-        ))}
-        <View style={{ height: 40 }} />
-      </ScrollView>
+          ) : null
+        }
+        ListFooterComponent={<View style={styles.listFooter} />}
+        initialNumToRender={3}
+        maxToRenderPerBatch={3}
+        removeClippedSubviews={Platform.OS === "android"}
+        updateCellsBatchingPeriod={80}
+        windowSize={5}
+      />
     </SafeAreaView>
   );
 }
@@ -314,5 +339,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
+  },
+  listFooter: {
+    height: 40,
   },
 });
