@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { ConvexHttpClient } from "convex/browser";
 import { existsSync } from "node:fs";
-import { readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { api } from "../convex/_generated/api";
@@ -17,6 +17,7 @@ type CliOptions = {
   dryRun: boolean;
   dryRunUpload: boolean;
   stopOnError: boolean;
+  pruneLocalArtifacts: boolean;
   concurrency: number;
   limitCourses?: number;
   contentRepoDir: string;
@@ -49,6 +50,7 @@ Options:
   --dry-run               Print commands without running them
   --dry-run-upload        Forward --dry-run to upload
   --stop-on-error         Stop after the first failed course
+  --prune-local-artifacts Delete local story artifact dirs after each course
   --concurrency <number>  Per-course story generation concurrency (default: 2)
   --limit-courses <num>   Process only the first N selected courses
   --content-repo-dir <dir> Content repo checkout (default: tmp/story-content)
@@ -82,6 +84,7 @@ function parseCliOptions(args: string[]): CliOptions {
   let dryRun = false;
   let dryRunUpload = false;
   let stopOnError = false;
+  let pruneLocalArtifacts = false;
   let concurrency = 2;
   let limitCourses: number | undefined;
   let contentRepoDir = path.join("tmp", "story-content");
@@ -124,6 +127,10 @@ function parseCliOptions(args: string[]): CliOptions {
       stopOnError = true;
       continue;
     }
+    if (arg === "--prune-local-artifacts") {
+      pruneLocalArtifacts = true;
+      continue;
+    }
     if (arg === "--concurrency") {
       concurrency = parsePositiveInteger(takeValue(args, index, arg), arg);
       index += 1;
@@ -158,6 +165,7 @@ function parseCliOptions(args: string[]): CliOptions {
     dryRun,
     dryRunUpload,
     stopOnError,
+    pruneLocalArtifacts,
     concurrency,
     limitCourses,
     contentRepoDir: path.resolve(contentRepoDir),
@@ -222,6 +230,25 @@ function runCommand(command: string, args: string[], dryRun: boolean) {
       else reject(new Error(`${printable} failed with exit code ${code}`));
     });
   });
+}
+
+async function pruneLocalArtifacts(courseDir: string, dryRun: boolean) {
+  if (!existsSync(courseDir)) return;
+  const entries = await readdir(courseDir, { withFileTypes: true });
+  const directories = entries.filter((entry) => entry.isDirectory());
+  if (directories.length === 0) return;
+  if (dryRun) {
+    console.log(
+      `[dry-run] prune ${directories.length} local artifact dirs from ${courseDir}`,
+    );
+    return;
+  }
+  await Promise.all(
+    directories.map((entry) =>
+      rm(path.join(courseDir, entry.name), { recursive: true, force: true }),
+    ),
+  );
+  console.log(`Pruned ${directories.length} local artifact dirs from ${courseDir}`);
 }
 
 async function main() {
@@ -291,6 +318,10 @@ async function main() {
       console.error(
         `[${index + 1}/${courses.length}] ${course}: failed; continuing`,
       );
+    } finally {
+      if (options.pruneLocalArtifacts) {
+        await pruneLocalArtifacts(outDir, options.dryRun);
+      }
     }
   }
 
@@ -305,6 +336,7 @@ async function main() {
           overwrite: options.overwrite,
           force: options.force,
           stopOnError: options.stopOnError,
+          pruneLocalArtifacts: options.pruneLocalArtifacts,
           courses: runReport,
         },
         null,
