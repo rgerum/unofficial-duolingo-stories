@@ -55,27 +55,32 @@ function StoryHeaderProgress({
   const courseHref = (setId ?? 0) > 0 ? `/${course}#${setId}` : `/${course}`;
 
   return (
-    <div className="sticky top-0 z-20 mx-auto flex w-full max-w-[1000px] items-center gap-4 bg-[var(--body-background)] px-10 py-10 max-[500px]:px-5 max-[500px]:py-[17px]">
-      <Link
-        className="inline-block h-[18px] w-[18px] shrink-0 align-middle bg-no-repeat"
-        data-cy="quit"
-        href={courseHref}
-        style={closeIconStyle}
-      >
-        <VisuallyHidden>Back to Course Page</VisuallyHidden>
-      </Link>
-      {progress !== undefined && length !== undefined && (
-        <ProgressBar progress={progress} length={length} />
-      )}
-      {editHref ? (
+    <div
+      className="fixed top-0 right-0 left-0 z-20 bg-[var(--body-background)] print:static"
+      data-story-header-progress
+    >
+      <div className="mx-auto flex max-w-[1000px] items-center gap-4 px-10 py-10 max-[500px]:px-5 max-[500px]:py-[17px]">
         <Link
-          href={editHref}
-          className="ml-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--header-border)] bg-[var(--body-background)] text-[var(--text-color-dim)] transition-colors duration-100 hover:border-[color:color-mix(in_srgb,var(--link-blue)_22%,var(--header-border))] hover:bg-[color:color-mix(in_srgb,var(--overview-hr)_35%,var(--body-background))] hover:text-[var(--text-color)] active:bg-[color:color-mix(in_srgb,var(--overview-hr)_55%,var(--body-background))] max-[500px]:h-10 max-[500px]:w-10"
+          className="inline-block h-[18px] w-[18px] shrink-0 align-middle bg-no-repeat"
+          data-cy="quit"
+          href={courseHref}
+          style={closeIconStyle}
         >
-          <PencilIcon />
-          <VisuallyHidden>Edit story</VisuallyHidden>
+          <VisuallyHidden>Back to Course Page</VisuallyHidden>
         </Link>
-      ) : null}
+        {progress !== undefined && length !== undefined && (
+          <ProgressBar progress={progress} length={length} />
+        )}
+        {editHref ? (
+          <Link
+            href={editHref}
+            className="ml-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--header-border)] bg-[var(--body-background)] text-[var(--text-color-dim)] transition-colors duration-100 hover:border-[color:color-mix(in_srgb,var(--link-blue)_22%,var(--header-border))] hover:bg-[color:color-mix(in_srgb,var(--overview-hr)_35%,var(--body-background))] hover:text-[var(--text-color)] active:bg-[color:color-mix(in_srgb,var(--overview-hr)_55%,var(--body-background))] max-[500px]:h-10 max-[500px]:w-10"
+          >
+            <PencilIcon />
+            <VisuallyHidden>Edit story</VisuallyHidden>
+          </Link>
+        ) : null}
+      </div>
     </div>
   );
 }

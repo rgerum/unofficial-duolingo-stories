@@ -654,7 +654,12 @@ function StoryProgress({
 
   return (
     <>
-      <div>
+      <div
+        className={cn(
+          !settings.show_all &&
+            "min-h-screen pt-[126px] pb-[156px] max-[800px]:pb-[104px] max-[500px]:pt-[52px]",
+        )}
+      >
         {!settings.show_all ? (
           <div data-story-js-only="true">
             <StoryHeaderProgress

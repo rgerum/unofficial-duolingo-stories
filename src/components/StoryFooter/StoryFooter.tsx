@@ -35,6 +35,27 @@ function Check() {
   );
 }
 
+function FooterShell({
+  children,
+  className,
+  feedback,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  feedback?: React.ReactNode;
+}) {
+  return (
+    <div data-story-footer className={cn(footerBaseClassName, className)}>
+      {feedback ? (
+        <div className="absolute right-6 bottom-[calc(100%+16px)] z-[1] max-[500px]:right-4 max-[500px]:bottom-[calc(100%+12px)]">
+          {feedback}
+        </div>
+      ) : null}
+      {children}
+    </div>
+  );
+}
+
 function StoryFooter({
   buttonStatus,
   onClick,
@@ -70,19 +91,19 @@ function StoryFooter({
 
   if (buttonStatus === "...") {
     return (
-      <div className={footerBaseClassName}>
+      <FooterShell>
         <div className={widthWrapperBaseClassName}>
           <Button key={"c"} onClick={onContinueClick}>
             {"..."}
           </Button>
         </div>
-      </div>
+      </FooterShell>
     );
   }
 
   if (buttonStatus === "finished") {
     return (
-      <div className={footerBaseClassName}>
+      <FooterShell>
         <div
           className={cn(
             widthWrapperBaseClassName,
@@ -139,54 +160,37 @@ function StoryFooter({
             <div className="min-h-14 max-[800px]:order-3" />
           )}
         </div>
-      </div>
+      </FooterShell>
     );
   }
 
   if (buttonStatus === "wait") {
     return (
-      <div className={footerBaseClassName}>
-        {feedback ? (
-          <div className="absolute right-6 bottom-[calc(100%+16px)] z-[1] max-[500px]:right-4 max-[500px]:bottom-[calc(100%+12px)]">
-            {feedback}
-          </div>
-        ) : null}
+      <FooterShell feedback={feedback}>
         <div className={widthWrapperBaseClassName}>
           <Button key={"c"} disabled onClick={onContinueClick}>
             {localisation("button_continue") || "continue"}
           </Button>
         </div>
-      </div>
+      </FooterShell>
     );
   }
   if (buttonStatus !== "right") {
     return (
-      <div className={footerBaseClassName}>
-        {feedback ? (
-          <div className="absolute right-6 bottom-[calc(100%+16px)] z-[1] max-[500px]:right-4 max-[500px]:bottom-[calc(100%+12px)]">
-            {feedback}
-          </div>
-        ) : null}
+      <FooterShell feedback={feedback}>
         <div className={widthWrapperBaseClassName}>
           <Button key={"c"} onClick={onContinueClick}>
             {localisation("button_continue") || "continue"}
           </Button>
         </div>
-      </div>
+      </FooterShell>
     );
   }
   return (
-    <div
-      className={cn(
-        footerBaseClassName,
-        "border-[var(--footer-right-background)] bg-[var(--footer-right-background)] text-[var(--footer-right-color)]",
-      )}
+    <FooterShell
+      className="border-[var(--footer-right-background)] bg-[var(--footer-right-background)] text-[var(--footer-right-color)]"
+      feedback={feedback}
     >
-      {feedback ? (
-        <div className="absolute right-6 bottom-[calc(100%+16px)] z-[1] max-[500px]:right-4 max-[500px]:bottom-[calc(100%+12px)]">
-          {feedback}
-        </div>
-      ) : null}
       <div
         className={cn(
           widthWrapperBaseClassName,
@@ -205,7 +209,7 @@ function StoryFooter({
           </Button>
         </div>
       </div>
-    </div>
+    </FooterShell>
   );
 }
 
