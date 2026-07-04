@@ -30,6 +30,7 @@ const editorCourseValidator = v.union(
     contributors: v.array(courseContributorValidator),
     contributors_past: v.array(courseContributorValidator),
     todo_count: v.number(),
+    audio_problem_count: v.number(),
   }),
   v.null(),
 );
@@ -83,6 +84,7 @@ function toCourse(
     contributors: course.contributors ?? [],
     contributors_past: course.contributors_past ?? [],
     todo_count: course.todo_count ?? 0,
+    audio_problem_count: course.audio_problem_count ?? 0,
   };
 }
 
@@ -276,6 +278,7 @@ export const getEditorCourseByIdentifier = query({
       contributors: contributorLists.contributors,
       contributors_past: contributorLists.contributors_past,
       todo_count: course.todo_count ?? 0,
+      audio_problem_count: course.audio_problem_count ?? 0,
     };
   },
 });

@@ -23,7 +23,8 @@
     "audio:join-story": "tsx scripts/generate-joined-story-audio.ts",
     "audio:join-course": "tsx scripts/generate-course-joined-audio.ts",
     "audio:upload-joined": "tsx scripts/upload-joined-story-audio.ts",
-    "audio:run-courses": "tsx scripts/run-joined-audio-courses.ts"
+    "audio:run-courses": "tsx scripts/run-joined-audio-courses.ts",
+    "audio:sync-problem-counts": "tsx scripts/sync-audio-problem-counts.ts"
   },
   "dependencies": {
     "@aws-sdk/client-polly": "^3.1061.0",
