@@ -109,6 +109,18 @@ export default function CourseList({
                       <span aria-hidden="true">📝 {course.todo_count}</span>
                     </span>
                   ) : null}
+                  {course.audio_problem_count ? (
+                    <span
+                      className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-sky-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-sky-950"
+                      role="img"
+                      title={`This course has ${course.audio_problem_count} published stories with audio problems.`}
+                      aria-label={`${course.audio_problem_count} audio problems`}
+                    >
+                      <span aria-hidden="true">
+                        🔊 {course.audio_problem_count}
+                      </span>
+                    </span>
+                  ) : null}
                   {course.official ? (
                     <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center">
                       <img

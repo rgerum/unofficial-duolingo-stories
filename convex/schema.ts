@@ -107,6 +107,7 @@ export default defineSchema({
       v.array(courseContributorDetailsValidator),
     ),
     todo_count: v.optional(v.number()),
+    audio_problem_count: v.optional(v.number()),
     mirrorUpdatedAt: v.optional(v.number()),
     lastOperationKey: v.optional(v.string()),
   })
