@@ -6,6 +6,7 @@ import LanguageFlag from "@/components/ui/language-flag";
 import { useInput } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
+import { CountBadge } from "./CountBadge";
 import type { CourseProps } from "./types";
 
 interface CourseListProps {
@@ -99,28 +100,20 @@ export default function CourseList({
                   course.learning_language_name
                 } [${course.from_language_short}] `}</span>
                 <span className="flex grow items-center justify-end gap-[6px] whitespace-nowrap pr-[10px]">
-                  {course.todo_count ? (
-                    <span
-                      className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-amber-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-amber-900"
-                      role="img"
-                      title={`This course has ${course.todo_count} TODOs.`}
-                      aria-label={`${course.todo_count} TODOs`}
-                    >
-                      <span aria-hidden="true">📝 {course.todo_count}</span>
-                    </span>
-                  ) : null}
-                  {course.audio_problem_count ? (
-                    <span
-                      className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-sky-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-sky-950"
-                      role="img"
-                      title={`This course has ${course.audio_problem_count} published stories with audio problems.`}
-                      aria-label={`${course.audio_problem_count} audio problems`}
-                    >
-                      <span aria-hidden="true">
-                        🔊 {course.audio_problem_count}
-                      </span>
-                    </span>
-                  ) : null}
+                  <CountBadge
+                    count={course.todo_count}
+                    icon="📝"
+                    title={`This course has ${course.todo_count} TODOs.`}
+                    label={`${course.todo_count} TODOs`}
+                    className="bg-amber-100 text-amber-900"
+                  />
+                  <CountBadge
+                    count={course.audio_problem_count}
+                    icon="🔊"
+                    title={`This course has ${course.audio_problem_count} published stories with audio problems.`}
+                    label={`${course.audio_problem_count} audio problems`}
+                    className="bg-sky-100 text-sky-950"
+                  />
                   {course.official ? (
                     <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center">
                       <img

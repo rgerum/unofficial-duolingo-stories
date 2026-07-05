@@ -92,6 +92,7 @@ export const upsertStory = mutation({
       deleted: args.story.deleted,
       todo_count: args.story.todo_count,
       audio_problem_count: existing?.audio_problem_count,
+      lastOperationKey: args.operationKey ?? existing?.lastOperationKey,
     };
 
     if (existing) {

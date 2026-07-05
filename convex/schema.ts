@@ -154,6 +154,7 @@ export default defineSchema({
     deleted: v.boolean(),
     todo_count: v.number(),
     audio_problem_count: v.optional(v.number()),
+    lastOperationKey: v.optional(v.string()),
     legacyId: v.optional(v.number()),
   })
     .index("by_course", ["courseId"])

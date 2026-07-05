@@ -25,6 +25,7 @@ import {
   rememberCourseScrollPosition,
   restoreCourseScrollPosition,
 } from "./course_view_memory";
+import { CountBadge } from "./CountBadge";
 import type {
   DetailedCourseProps,
   StoryListDataProps,
@@ -342,26 +343,20 @@ export default function EditList({
                   >
                     {story.name}
                   </Link>
-                  {story.todo_count ? (
-                    <span
-                      title={`This story has ${story.todo_count} TODOs.`}
-                      role="img"
-                      aria-label={`${story.todo_count} TODOs`}
-                      className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-amber-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-amber-900"
-                    >
-                      <span aria-hidden="true">📝 {story.todo_count}</span>
-                    </span>
-                  ) : null}
-                  {story.audio_problem_count ? (
-                    <span
-                      title="This published story has audio problems."
-                      role="img"
-                      aria-label="Audio problem"
-                      className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-sky-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-sky-950"
-                    >
-                      <span aria-hidden="true">🔊</span>
-                    </span>
-                  ) : null}
+                  <CountBadge
+                    count={story.todo_count}
+                    icon="📝"
+                    title={`This story has ${story.todo_count} TODOs.`}
+                    label={`${story.todo_count} TODOs`}
+                    className="bg-amber-100 text-amber-900"
+                  />
+                  <CountBadge
+                    count={story.audio_problem_count}
+                    icon="🔊"
+                    title="This published story has audio problems."
+                    label={`${story.audio_problem_count} audio problems`}
+                    className="bg-sky-100 text-sky-950"
+                  />
                 </div>
               </div>
               <div className="overflow-hidden text-ellipsis whitespace-nowrap text-right max-[1000px]:ml-auto max-[1000px]:shrink-0 max-[500px]:max-w-[85px] max-[500px]:[&>div]:flex max-[500px]:overflow-hidden min-[1000px]:px-[5px]">

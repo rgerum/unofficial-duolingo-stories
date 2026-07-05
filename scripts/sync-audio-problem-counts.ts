@@ -7,7 +7,7 @@ type CliOptions = {
   inputDir: string;
   courses: string[];
   apply: boolean;
-  identity: string;
+  identity: string | null;
 };
 
 type CourseSummary = {
@@ -38,7 +38,7 @@ Options:
   --input-dir <dir>   Course summary root (default: tmp/story-audio/courses)
   --course <short>    Course to sync. Can be repeated. Defaults to all summaries.
   --apply             Apply to Convex. Without this, print the payload only.
-  --identity <json>   Convex run identity (default: {"role":"admin","userId":1})
+  --identity <json>   Convex run identity. Required with --apply.
 `);
   process.exit(exitCode);
 }
@@ -55,7 +55,7 @@ function parseCliOptions(args: string[]): CliOptions {
   const courses: string[] = [];
   let inputDir = path.join("tmp", "story-audio", "courses");
   let apply = false;
-  let identity = JSON.stringify({ role: "admin", userId: 1 });
+  let identity: string | null = null;
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -91,9 +91,70 @@ function parseCliOptions(args: string[]): CliOptions {
   };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function assertNonNegativeInteger(
+  value: unknown,
+  field: string,
+): asserts value is number {
+  if (
+    typeof value !== "number" ||
+    !Number.isInteger(value) ||
+    value < 0
+  ) {
+    throw new Error(`${field} must be a non-negative integer.`);
+  }
+}
+
+function parseCourseSummary(raw: unknown): CourseSummary {
+  if (!isRecord(raw)) {
+    throw new Error("summary must be an object.");
+  }
+  if (typeof raw.course !== "string" || raw.course.length === 0) {
+    throw new Error("summary.course must be a non-empty string.");
+  }
+  assertNonNegativeInteger(raw.missingSource, "summary.missingSource");
+  assertNonNegativeInteger(raw.failed, "summary.failed");
+  if (!Array.isArray(raw.results)) {
+    throw new Error("summary.results must be an array.");
+  }
+
+  const missingSource = raw.missingSource;
+  const failed = raw.failed;
+  return {
+    course: raw.course,
+    missingSource,
+    failed,
+    results: raw.results.map((entry, index) => {
+      if (!isRecord(entry)) {
+        throw new Error(`summary.results[${index}] must be an object.`);
+      }
+      const storyId = entry.storyId;
+      assertNonNegativeInteger(storyId, `summary.results[${index}].storyId`);
+      if (
+        entry.status !== "ok" &&
+        entry.status !== "missing_source" &&
+        entry.status !== "failed"
+      ) {
+        throw new Error(
+          `summary.results[${index}].status must be ok, missing_source, or failed.`,
+        );
+      }
+      return {
+        storyId,
+        status: entry.status,
+      };
+    }),
+  };
+}
+
 async function readCourseSummary(inputDir: string, course: string) {
   const summaryPath = path.join(inputDir, course, "summary.json");
-  const summary = JSON.parse(await readFile(summaryPath, "utf8")) as CourseSummary;
+  const summary = parseCourseSummary(
+    JSON.parse(await readFile(summaryPath, "utf8")),
+  );
   return {
     course: {
       courseShort: course,
@@ -151,16 +212,20 @@ async function main() {
   console.log(JSON.stringify({ ...payload, skipped }, null, 2));
 
   if (!options.apply) return;
+  if (!options.identity) {
+    throw new Error("--identity is required when using --apply.");
+  }
   if (counts.length === 0) {
     console.log("No counts to apply.");
     return;
   }
 
+  const operationKey = `audio-problem-counts:${Date.now()}`;
   await runCommand("pnpm", [
     "convex",
     "run",
     "courseWrite:setAudioProblemCounts",
-    JSON.stringify(payload),
+    JSON.stringify({ ...payload, operationKey }),
     "--identity",
     options.identity,
   ]);

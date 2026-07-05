@@ -34,6 +34,7 @@ export const recomputePublishedCount = mutation({
 
 export const setAudioProblemCounts = mutation({
   args: {
+    operationKey: v.optional(v.string()),
     counts: v.array(
       v.object({
         courseShort: v.optional(v.string()),
@@ -61,6 +62,8 @@ export const setAudioProblemCounts = mutation({
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
 
+    const operationKey =
+      args.operationKey ?? `course:audio_problem_counts:${Date.now()}`;
     let updated = 0;
     let unchanged = 0;
     let updatedStories = 0;
@@ -104,6 +107,7 @@ export const setAudioProblemCounts = mutation({
 
       await ctx.db.patch(course._id, {
         audio_problem_count: entry.audioProblemCount,
+        lastOperationKey: operationKey,
       });
       updated += 1;
     }
@@ -134,6 +138,7 @@ export const setAudioProblemCounts = mutation({
 
       await ctx.db.patch(story._id, {
         audio_problem_count: entry.audioProblemCount,
+        lastOperationKey: operationKey,
       });
       updatedStories += 1;
     }
