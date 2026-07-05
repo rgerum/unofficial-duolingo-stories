@@ -41,10 +41,21 @@ export const setAudioProblemCounts = mutation({
         audioProblemCount: v.number(),
       }),
     ),
+    stories: v.optional(
+      v.array(
+        v.object({
+          legacyStoryId: v.number(),
+          audioProblemCount: v.number(),
+        }),
+      ),
+    ),
   },
   returns: v.object({
     updated: v.number(),
     unchanged: v.number(),
+    updatedStories: v.number(),
+    unchangedStories: v.number(),
+    missingStories: v.array(v.number()),
     missing: v.array(v.string()),
   }),
   handler: async (ctx, args) => {
@@ -52,7 +63,10 @@ export const setAudioProblemCounts = mutation({
 
     let updated = 0;
     let unchanged = 0;
+    let updatedStories = 0;
+    let unchangedStories = 0;
     const missing: string[] = [];
+    const missingStories: number[] = [];
 
     for (const entry of args.counts) {
       if (
@@ -94,6 +108,43 @@ export const setAudioProblemCounts = mutation({
       updated += 1;
     }
 
-    return { updated, unchanged, missing };
+    for (const entry of args.stories ?? []) {
+      if (
+        entry.audioProblemCount < 0 ||
+        !Number.isInteger(entry.audioProblemCount)
+      ) {
+        throw new Error(
+          "story audioProblemCount must be a non-negative integer",
+        );
+      }
+
+      const story = await ctx.db
+        .query("stories")
+        .withIndex("by_legacy_id", (q) => q.eq("legacyId", entry.legacyStoryId))
+        .unique();
+      if (!story) {
+        missingStories.push(entry.legacyStoryId);
+        continue;
+      }
+
+      if ((story.audio_problem_count ?? 0) === entry.audioProblemCount) {
+        unchangedStories += 1;
+        continue;
+      }
+
+      await ctx.db.patch(story._id, {
+        audio_problem_count: entry.audioProblemCount,
+      });
+      updatedStories += 1;
+    }
+
+    return {
+      updated,
+      unchanged,
+      updatedStories,
+      unchangedStories,
+      missingStories,
+      missing,
+    };
   },
 });
