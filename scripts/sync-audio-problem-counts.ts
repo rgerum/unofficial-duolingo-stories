@@ -14,6 +14,20 @@ type CourseSummary = {
   course: string;
   missingSource: number;
   failed: number;
+  results: Array<{
+    storyId: number;
+    status: "ok" | "missing_source" | "failed";
+  }>;
+};
+
+type CourseAudioProblemCount = {
+  courseShort: string;
+  audioProblemCount: number;
+};
+
+type StoryAudioProblemCount = {
+  legacyStoryId: number;
+  audioProblemCount: number;
 };
 
 function usage(exitCode: 0 | 1): never {
@@ -81,8 +95,14 @@ async function readCourseSummary(inputDir: string, course: string) {
   const summaryPath = path.join(inputDir, course, "summary.json");
   const summary = JSON.parse(await readFile(summaryPath, "utf8")) as CourseSummary;
   return {
-    courseShort: course,
-    audioProblemCount: (summary.missingSource ?? 0) + (summary.failed ?? 0),
+    course: {
+      courseShort: course,
+      audioProblemCount: (summary.missingSource ?? 0) + (summary.failed ?? 0),
+    },
+    stories: (summary.results ?? []).map((result) => ({
+      legacyStoryId: result.storyId,
+      audioProblemCount: result.status === "ok" ? 0 : 1,
+    })),
   };
 }
 
@@ -107,7 +127,8 @@ async function main() {
           .map((entry) => entry.name)
           .sort();
 
-  const counts = [];
+  const counts: CourseAudioProblemCount[] = [];
+  const stories: StoryAudioProblemCount[] = [];
   const skipped = [];
   for (const course of selectedCourses) {
     if (!existsSync(path.join(options.inputDir, course, "summary.json"))) {
@@ -115,7 +136,9 @@ async function main() {
       continue;
     }
     try {
-      counts.push(await readCourseSummary(options.inputDir, course));
+      const summary = await readCourseSummary(options.inputDir, course);
+      counts.push(summary.course);
+      stories.push(...summary.stories);
     } catch (error) {
       skipped.push(course);
       console.error(
@@ -124,7 +147,7 @@ async function main() {
     }
   }
 
-  const payload = { counts };
+  const payload = { counts, stories };
   console.log(JSON.stringify({ ...payload, skipped }, null, 2));
 
   if (!options.apply) return;

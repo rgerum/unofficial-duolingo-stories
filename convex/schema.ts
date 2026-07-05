@@ -153,6 +153,7 @@ export default defineSchema({
     approvalCount: v.optional(v.number()),
     deleted: v.boolean(),
     todo_count: v.number(),
+    audio_problem_count: v.optional(v.number()),
     legacyId: v.optional(v.number()),
   })
     .index("by_course", ["courseId"])

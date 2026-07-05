@@ -91,6 +91,7 @@ export const upsertStory = mutation({
       approvalCount: args.story.approvalCount ?? existing?.approvalCount ?? 0,
       deleted: args.story.deleted,
       todo_count: args.story.todo_count,
+      audio_problem_count: existing?.audio_problem_count,
     };
 
     if (existing) {

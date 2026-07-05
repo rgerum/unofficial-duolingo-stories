@@ -404,6 +404,7 @@ export const getEditorStoriesByCourseLegacyId = query({
         status: derivedStatus,
         public: story.public,
         todo_count: story.todo_count ?? 0,
+        audio_problem_count: story.audio_problem_count ?? 0,
         approvalCount: approvalCount ?? 0,
         approvedByCurrentUser: storyIdsApprovedByCurrentUser.has(story._id),
         author:

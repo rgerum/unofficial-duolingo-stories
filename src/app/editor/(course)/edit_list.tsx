@@ -352,6 +352,16 @@ export default function EditList({
                       <span aria-hidden="true">📝 {story.todo_count}</span>
                     </span>
                   ) : null}
+                  {story.audio_problem_count ? (
+                    <span
+                      title="This published story has audio problems."
+                      role="img"
+                      aria-label="Audio problem"
+                      className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-sky-100 px-[8px] py-[5px] text-[14px] leading-none font-bold text-sky-950"
+                    >
+                      <span aria-hidden="true">🔊</span>
+                    </span>
+                  ) : null}
                 </div>
               </div>
               <div className="overflow-hidden text-ellipsis whitespace-nowrap text-right max-[1000px]:ml-auto max-[1000px]:shrink-0 max-[500px]:max-w-[85px] max-[500px]:[&>div]:flex max-[500px]:overflow-hidden min-[1000px]:px-[5px]">
