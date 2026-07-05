@@ -107,6 +107,7 @@ export default defineSchema({
       v.array(courseContributorDetailsValidator),
     ),
     todo_count: v.optional(v.number()),
+    audio_problem_count: v.optional(v.number()),
     mirrorUpdatedAt: v.optional(v.number()),
     lastOperationKey: v.optional(v.string()),
   })
@@ -152,6 +153,8 @@ export default defineSchema({
     approvalCount: v.optional(v.number()),
     deleted: v.boolean(),
     todo_count: v.number(),
+    audio_problem_count: v.optional(v.number()),
+    lastOperationKey: v.optional(v.string()),
     legacyId: v.optional(v.number()),
   })
     .index("by_course", ["courseId"])

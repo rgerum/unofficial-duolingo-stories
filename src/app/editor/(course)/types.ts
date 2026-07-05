@@ -16,6 +16,7 @@ export type CourseProps = {
   contributors: string[];
   contributors_past: string[];
   todo_count: number;
+  audio_problem_count: number;
 };
 
 export type ContributorSummaryProps = {
@@ -45,6 +46,7 @@ export type StoryListDataProps = {
   status: string;
   public: boolean;
   todo_count: number;
+  audio_problem_count: number;
   approvalCount: number;
   approvedByCurrentUser: boolean;
   author: string;
