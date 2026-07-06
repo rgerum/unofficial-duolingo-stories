@@ -107,6 +107,7 @@ export default defineSchema({
       v.array(courseContributorDetailsValidator),
     ),
     todo_count: v.optional(v.number()),
+    audio_problem_count: v.optional(v.number()),
     mirrorUpdatedAt: v.optional(v.number()),
     lastOperationKey: v.optional(v.string()),
   })
@@ -152,6 +153,8 @@ export default defineSchema({
     approvalCount: v.optional(v.number()),
     deleted: v.boolean(),
     todo_count: v.number(),
+    audio_problem_count: v.optional(v.number()),
+    lastOperationKey: v.optional(v.string()),
     legacyId: v.optional(v.number()),
   })
     .index("by_course", ["courseId"])
@@ -234,6 +237,35 @@ export default defineSchema({
     .index("by_user", ["legacyUserId"])
     .index("by_story_and_user", ["storyId", "legacyUserId"])
     .index("by_legacy_id", ["legacyId"]),
+
+  story_feedback_reports: defineTable({
+    storyId: v.number(),
+    storyTitle: v.string(),
+    courseShort: v.string(),
+    line: v.optional(v.number()),
+    lineText: v.optional(v.string()),
+    category: v.union(
+      v.literal("Text"),
+      v.literal("Translation hints"),
+      v.literal("Audio"),
+      v.literal("Other"),
+    ),
+    comment: v.string(),
+    userId: v.union(v.string(), v.null()),
+    userName: v.union(v.string(), v.null()),
+    userEmail: v.union(v.string(), v.null()),
+    status: v.union(
+      v.literal("open"),
+      v.literal("reviewed"),
+      v.literal("resolved"),
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_story_id", ["storyId"])
+    .index("by_course_short", ["courseShort"])
+    .index("by_category", ["category"])
+    .index("by_user_id", ["userId"])
+    .index("by_status_and_created_at", ["status", "createdAt"]),
 
   discord_stories_role_sync: defineTable({
     legacyUserId: v.number(),

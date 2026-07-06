@@ -11,6 +11,7 @@ import StoryTextLine from "../StoryTextLine";
 import StoryHeader from "../StoryHeader";
 import StoryHeaderProgress from "../StoryHeaderProgress";
 import StoryFooter from "../StoryFooter";
+import StoryFeedback from "../StoryFeedback/StoryFeedback";
 import StoryFinishedScreen from "../StoryFinishedScreen";
 import StoryTitlePage from "../StoryTitlePage";
 import { playSoundEffect } from "@/lib/sound-effects";
@@ -312,6 +313,96 @@ function getVisibleEditorLine({
     .find((lineNumber): lineNumber is number => typeof lineNumber === "number");
 }
 
+function getAnswerText(answer: string | { text?: string }) {
+  return typeof answer === "string" ? answer : (answer.text ?? "");
+}
+
+function getFeedbackTextForElement(element: StoryElement) {
+  if (element.type === "HEADER") {
+    return element.learningLanguageTitleContent.text;
+  }
+
+  if (element.type === "LINE") {
+    const speaker =
+      element.line.type === "CHARACTER"
+        ? (element.line.characterName ?? `${element.line.characterId}`)
+        : "";
+    const text = element.line.content.text;
+    return speaker ? `${speaker}: ${text}` : text;
+  }
+
+  if (element.type === "MULTIPLE_CHOICE") {
+    return [
+      element.question?.text,
+      ...element.answers.map(getAnswerText),
+    ].filter(Boolean);
+  }
+
+  if (element.type === "CHALLENGE_PROMPT") {
+    return element.prompt.text;
+  }
+
+  if (element.type === "SELECT_PHRASE") {
+    return element.answers.map(getAnswerText).filter(Boolean);
+  }
+
+  if (element.type === "ARRANGE") {
+    return element.selectablePhrases;
+  }
+
+  if (element.type === "POINT_TO_PHRASE") {
+    return [
+      element.question.text,
+      element.transcriptParts.map((part) => part.text).join(""),
+    ].filter(Boolean);
+  }
+
+  if (element.type === "MATCH") {
+    return [
+      element.prompt,
+      ...element.fallbackHints.map(
+        (hint) => `${hint.phrase} = ${hint.translation}`,
+      ),
+    ].filter(Boolean);
+  }
+
+  if (element.type === "ERROR") {
+    return element.text;
+  }
+
+  return "";
+}
+
+function getFeedbackLineText(currentPart?: StoryElement[]) {
+  if (!currentPart) return "";
+
+  return currentPart
+    .flatMap((element) => getFeedbackTextForElement(element))
+    .filter(Boolean)
+    .join("\n");
+}
+
+function getFeedbackLineElement({
+  currentPart,
+  currentEditorLine,
+}: {
+  currentPart?: StoryElement[];
+  currentEditorLine?: number;
+}) {
+  if (!currentPart) return undefined;
+
+  const lineElements = currentPart.filter(
+    (element): element is StoryElementLine => element.type === "LINE",
+  );
+  if (currentEditorLine !== undefined) {
+    return lineElements.find(
+      (element) => element.editor?.block_start_no === currentEditorLine,
+    );
+  }
+
+  return lineElements[0];
+}
+
 function getCurrentVisiblePart({
   partsList,
   storyProgress,
@@ -492,6 +583,11 @@ function StoryProgress({
     currentPart,
     partProgress,
   });
+  const currentFeedbackLineText = getFeedbackLineText(currentPart);
+  const currentFeedbackLineElement = getFeedbackLineElement({
+    currentPart,
+    currentEditorLine,
+  });
   const editHref =
     editHrefBase && currentEditorLine
       ? `${editHrefBase}?line=${currentEditorLine}`
@@ -558,7 +654,12 @@ function StoryProgress({
 
   return (
     <>
-      <div>
+      <div
+        className={cn(
+          !settings.show_all &&
+            "min-h-screen pt-[126px] pb-[156px] max-[800px]:pb-[104px] max-[500px]:pt-[52px]",
+        )}
+      >
         {!settings.show_all ? (
           <div data-story-js-only="true">
             <StoryHeaderProgress
@@ -634,6 +735,18 @@ function StoryProgress({
               nextStoryPreview={nextStoryPreview}
               learningLanguageName={story.learning_language_long}
               showFinishedPrimaryAction={showFinishedPrimaryAction}
+              feedback={
+                <StoryFeedback
+                  storyId={story.id}
+                  storyTitle={story.from_language_name}
+                  courseShort={story.course_short}
+                  line={currentEditorLine}
+                  lineText={currentFeedbackLineText}
+                  lineElement={currentFeedbackLineElement}
+                  settings={settings}
+                  hidden={buttonStatus === "..."}
+                />
+              }
             />
           </div>
         ) : null}

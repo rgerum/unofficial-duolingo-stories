@@ -63,6 +63,8 @@ old/
 next-env.d.ts
 tsconfig.tsbuildinfo
 discord_roles/.cache/
+discord_roles/output.log
+discord_roles/log-archive/
 
 */skills/*
 skills/*

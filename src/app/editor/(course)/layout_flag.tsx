@@ -33,6 +33,10 @@ export default function LayoutFlag() {
   const nestedRoute = segment[2];
   const import_id = nestedRoute === "import" ? segment[3] : undefined;
 
+  if (segment[0] === "feedback") {
+    return null;
+  }
+
   if (
     nestedRoute === "story" ||
     nestedRoute === "voices" ||
@@ -117,7 +121,15 @@ export default function LayoutFlag() {
             )}
             <div className="ml-[50px] max-[1120px]:ml-0" />
           </>
-        ) : null}
+        ) : (
+          <EditorButton
+            id="button_feedback"
+            href="/editor/feedback"
+            data-cy="button_feedback"
+            img="stories.png"
+            text="Feedback"
+          />
+        )}
       </EditorHeaderActions>
     </>
   );

@@ -35,6 +35,27 @@ function Check() {
   );
 }
 
+function FooterShell({
+  children,
+  className,
+  feedback,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  feedback?: React.ReactNode;
+}) {
+  return (
+    <div data-story-footer className={cn(footerBaseClassName, className)}>
+      {feedback ? (
+        <div className="absolute right-6 bottom-[calc(100%+16px)] z-[1] max-[500px]:right-4 max-[500px]:bottom-[calc(100%+12px)]">
+          {feedback}
+        </div>
+      ) : null}
+      {children}
+    </div>
+  );
+}
+
 function StoryFooter({
   buttonStatus,
   onClick,
@@ -43,6 +64,7 @@ function StoryFooter({
   nextStoryPreview,
   learningLanguageName,
   showFinishedPrimaryAction = true,
+  feedback,
 }: {
   buttonStatus: string;
   onClick: () => void;
@@ -56,6 +78,7 @@ function StoryFooter({
   } | null;
   learningLanguageName?: string;
   showFinishedPrimaryAction?: boolean;
+  feedback?: React.ReactNode;
 }) {
   const localisation = useLocalisation();
 
@@ -68,19 +91,19 @@ function StoryFooter({
 
   if (buttonStatus === "...") {
     return (
-      <div className={footerBaseClassName}>
+      <FooterShell>
         <div className={widthWrapperBaseClassName}>
           <Button key={"c"} onClick={onContinueClick}>
             {"..."}
           </Button>
         </div>
-      </div>
+      </FooterShell>
     );
   }
 
   if (buttonStatus === "finished") {
     return (
-      <div className={footerBaseClassName}>
+      <FooterShell>
         <div
           className={cn(
             widthWrapperBaseClassName,
@@ -137,46 +160,44 @@ function StoryFooter({
             <div className="min-h-14 max-[800px]:order-3" />
           )}
         </div>
-      </div>
+      </FooterShell>
     );
   }
 
   if (buttonStatus === "wait") {
     return (
-      <div className={footerBaseClassName}>
+      <FooterShell feedback={feedback}>
         <div className={widthWrapperBaseClassName}>
           <Button key={"c"} disabled onClick={onContinueClick}>
             {localisation("button_continue") || "continue"}
           </Button>
         </div>
-      </div>
+      </FooterShell>
     );
   }
   if (buttonStatus !== "right") {
     return (
-      <div className={footerBaseClassName}>
+      <FooterShell feedback={feedback}>
         <div className={widthWrapperBaseClassName}>
           <Button key={"c"} onClick={onContinueClick}>
             {localisation("button_continue") || "continue"}
           </Button>
         </div>
-      </div>
+      </FooterShell>
     );
   }
   return (
-    <div
-      className={cn(
-        footerBaseClassName,
-        "border-[var(--footer-right-background)] bg-[var(--footer-right-background)] text-[var(--footer-right-color)]",
-      )}
+    <FooterShell
+      className="border-[var(--footer-right-background)] bg-[var(--footer-right-background)] text-[var(--footer-right-color)]"
+      feedback={feedback}
     >
       <div
         className={cn(
           widthWrapperBaseClassName,
-          "justify-between max-[500px]:relative",
+          "gap-4 justify-between max-[500px]:flex-col max-[500px]:items-stretch",
         )}
       >
-        <div className="mr-auto flex items-center gap-4 max-[500px]:absolute max-[500px]:-top-[76px] max-[500px]:right-[-16px] max-[500px]:bottom-0 max-[500px]:left-[-16px] max-[500px]:z-[-1] max-[500px]:animate-[story-footer-banner-slide_0.2s_cubic-bezier(0.35,1.8,0.35,0.83)_forwards] max-[500px]:items-start max-[500px]:bg-[var(--footer-right-background)] max-[500px]:px-8 max-[500px]:py-4">
+        <div className="mr-auto flex items-center gap-4 max-[500px]:mr-0 max-[500px]:min-h-12 max-[500px]:w-full max-[500px]:justify-start">
           <Check />
           <Message>
             {localisation("story_correct") || "You are correct"}
@@ -188,7 +209,7 @@ function StoryFooter({
           </Button>
         </div>
       </div>
-    </div>
+    </FooterShell>
   );
 }
 

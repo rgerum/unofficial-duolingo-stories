@@ -19,7 +19,11 @@
     "optimize:flags": "pnpm dlx svgo -f flags --multipass",
     "audit:missing-story-images": "pnpm exec tsx scripts/find-missing-story-images.ts",
     "backfill:discord-avatars": "pnpm exec tsx scripts/backfill-discord-avatars.ts",
-    "backfill:course-contributors": "pnpm exec tsx scripts/backfill-course-contributors.ts"
+    "backfill:course-contributors": "pnpm exec tsx scripts/backfill-course-contributors.ts",
+    "audio:join-story": "tsx scripts/generate-joined-story-audio.ts",
+    "audio:join-course": "tsx scripts/generate-course-joined-audio.ts",
+    "audio:upload-joined": "tsx scripts/upload-joined-story-audio.ts",
+    "audio:sync-problem-counts": "tsx scripts/sync-audio-problem-counts.ts"
   },
   "dependencies": {
     "@aws-sdk/client-polly": "^3.1061.0",

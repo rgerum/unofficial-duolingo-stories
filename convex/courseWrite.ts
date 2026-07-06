@@ -31,3 +31,125 @@ export const recomputePublishedCount = mutation({
     };
   },
 });
+
+export const setAudioProblemCounts = mutation({
+  args: {
+    operationKey: v.optional(v.string()),
+    counts: v.array(
+      v.object({
+        courseShort: v.optional(v.string()),
+        legacyCourseId: v.optional(v.number()),
+        audioProblemCount: v.number(),
+      }),
+    ),
+    stories: v.optional(
+      v.array(
+        v.object({
+          legacyStoryId: v.number(),
+          audioProblemCount: v.number(),
+        }),
+      ),
+    ),
+  },
+  returns: v.object({
+    updated: v.number(),
+    unchanged: v.number(),
+    updatedStories: v.number(),
+    unchangedStories: v.number(),
+    missingStories: v.array(v.number()),
+    missing: v.array(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
+
+    const operationKey =
+      args.operationKey ?? `course:audio_problem_counts:${Date.now()}`;
+    let updated = 0;
+    let unchanged = 0;
+    let updatedStories = 0;
+    let unchangedStories = 0;
+    const missing: string[] = [];
+    const missingStories: number[] = [];
+
+    for (const entry of args.counts) {
+      if (
+        entry.audioProblemCount < 0 ||
+        !Number.isInteger(entry.audioProblemCount)
+      ) {
+        throw new Error("audioProblemCount must be a non-negative integer");
+      }
+      if (!entry.courseShort && entry.legacyCourseId === undefined) {
+        throw new Error("Each count needs courseShort or legacyCourseId");
+      }
+
+      const course =
+        entry.legacyCourseId !== undefined
+          ? await ctx.db
+              .query("courses")
+              .withIndex("by_id_value", (q) =>
+                q.eq("legacyId", entry.legacyCourseId!),
+              )
+              .unique()
+          : await ctx.db
+              .query("courses")
+              .withIndex("by_short", (q) => q.eq("short", entry.courseShort))
+              .unique();
+
+      if (!course) {
+        missing.push(entry.courseShort ?? String(entry.legacyCourseId));
+        continue;
+      }
+
+      if ((course.audio_problem_count ?? 0) === entry.audioProblemCount) {
+        unchanged += 1;
+        continue;
+      }
+
+      await ctx.db.patch(course._id, {
+        audio_problem_count: entry.audioProblemCount,
+        lastOperationKey: operationKey,
+      });
+      updated += 1;
+    }
+
+    for (const entry of args.stories ?? []) {
+      if (
+        entry.audioProblemCount < 0 ||
+        !Number.isInteger(entry.audioProblemCount)
+      ) {
+        throw new Error(
+          "story audioProblemCount must be a non-negative integer",
+        );
+      }
+
+      const story = await ctx.db
+        .query("stories")
+        .withIndex("by_legacy_id", (q) => q.eq("legacyId", entry.legacyStoryId))
+        .unique();
+      if (!story) {
+        missingStories.push(entry.legacyStoryId);
+        continue;
+      }
+
+      if ((story.audio_problem_count ?? 0) === entry.audioProblemCount) {
+        unchangedStories += 1;
+        continue;
+      }
+
+      await ctx.db.patch(story._id, {
+        audio_problem_count: entry.audioProblemCount,
+        lastOperationKey: operationKey,
+      });
+      updatedStories += 1;
+    }
+
+    return {
+      updated,
+      unchanged,
+      updatedStories,
+      unchangedStories,
+      missingStories,
+      missing,
+    };
+  },
+});

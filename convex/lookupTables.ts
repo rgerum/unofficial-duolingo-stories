@@ -325,6 +325,7 @@ export const upsertCourse = mutation({
       contributors: args.course.contributors,
       contributors_past: args.course.contributors_past,
       todo_count: args.course.todo_count,
+      audio_problem_count: existing?.audio_problem_count,
       mirrorUpdatedAt: Date.now(),
       lastOperationKey: args.operationKey,
     };

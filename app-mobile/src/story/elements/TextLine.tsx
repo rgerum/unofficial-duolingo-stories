@@ -129,6 +129,7 @@ export function TextLine({
   rtl,
   autoPlay = true,
   replayKey = 0,
+  audioRangeOverride,
   onManualAudioPlay,
 }: {
   element: StoryElementLine;
@@ -137,21 +138,23 @@ export function TextLine({
   rtl: boolean;
   autoPlay?: boolean;
   replayKey?: number;
+  audioRangeOverride?: number;
   onManualAudioPlay?: () => void;
 }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const audio = element.line?.content?.audio;
-  const { audioRange, play, hasAudio } = useLineAudio(
+  const lineAudio = useLineAudio(
     audio,
     active,
     autoPlay,
     replayKey,
   );
+  const audioRange = audioRangeOverride ?? lineAudio.audioRange;
   const handlePlay = React.useCallback(() => {
     onManualAudioPlay?.();
-    play();
-  }, [onManualAudioPlay, play]);
+    lineAudio.play();
+  }, [lineAudio, onManualAudioPlay]);
 
   const lineRtl = getStoryLineRtl({
     storyRtl: rtl,
@@ -169,7 +172,7 @@ export function TextLine({
     return (
       <View style={[styles.row, lineRtl && styles.rowRtl]}>
         <LineBody
-          hasAudio={hasAudio}
+          hasAudio={lineAudio.hasAudio}
           onPlay={handlePlay}
           rtl={lineRtl}
           styles={styles}
@@ -231,7 +234,7 @@ export function TextLine({
                 rtl={lineRtl}
                 containerStyle={lineRtl ? styles.rtlBubbleText : undefined}
                 leadingElement={
-                  hasAudio ? (
+                  lineAudio.hasAudio ? (
                     <PlayAudioButton onPress={handlePlay} rtl={lineRtl} />
                   ) : undefined
                 }
@@ -252,7 +255,7 @@ export function TextLine({
   return (
     <View style={[styles.row, lineRtl && styles.rowRtl]}>
       <LineBody
-        hasAudio={hasAudio}
+        hasAudio={lineAudio.hasAudio}
         onPlay={handlePlay}
         rtl={lineRtl}
         styles={styles}
