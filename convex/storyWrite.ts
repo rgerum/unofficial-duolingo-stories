@@ -5,7 +5,11 @@ import {
   requireContributorOrAdmin,
   requireSessionLegacyUserId,
 } from "./lib/authorization";
-import { recomputeCoursePublishedCount } from "./lib/courseCounts";
+import {
+  loadCourseStories,
+  recomputeCourseAudioProblemCount,
+  recomputeCoursePublishedCount,
+} from "./lib/courseCounts";
 import { upsertPublicStoryContent } from "./lib/publicStoryContent";
 
 export const setStory = mutation({
@@ -20,6 +24,7 @@ export const setStory = mutation({
     text: v.string(),
     json: v.any(),
     todo_count: v.number(),
+    audioProblemCount: v.optional(v.number()),
     change_date: v.string(),
     confirmOfficialOverwrite: v.optional(v.boolean()),
     operationKey: v.optional(v.string()),
@@ -99,6 +104,18 @@ export const setStory = mutation({
     const previousCourseId = story.courseId;
     const movedPublishedStory =
       previousCourseId !== course._id && story.public && !story.deleted;
+    if (
+      args.audioProblemCount !== undefined &&
+      (args.audioProblemCount < 0 || !Number.isInteger(args.audioProblemCount))
+    ) {
+      throw new Error("audioProblemCount must be a non-negative integer");
+    }
+    const nextAudioProblemCount =
+      args.audioProblemCount === undefined
+        ? story.audio_problem_count
+        : story.public && !story.deleted
+          ? args.audioProblemCount
+          : 0;
 
     await ctx.db.patch(story._id, {
       duo_id: args.duo_id,
@@ -112,6 +129,7 @@ export const setStory = mutation({
       set_index: args.set_index,
       courseId: course._id,
       todo_count: args.todo_count,
+      audio_problem_count: nextAudioProblemCount,
     });
 
     const existingContent = await ctx.db
@@ -146,9 +164,23 @@ export const setStory = mutation({
       0,
     );
     await ctx.db.patch(course._id, { todo_count: courseTodoCount });
+    await recomputeCourseAudioProblemCount(ctx, course._id, storiesInCourse);
     if (movedPublishedStory) {
-      await recomputeCoursePublishedCount(ctx, previousCourseId);
-      await recomputeCoursePublishedCount(ctx, course._id);
+      const previousCourseStories = await loadCourseStories(
+        ctx,
+        previousCourseId,
+      );
+      await recomputeCoursePublishedCount(
+        ctx,
+        previousCourseId,
+        previousCourseStories,
+      );
+      await recomputeCoursePublishedCount(ctx, course._id, storiesInCourse);
+      await recomputeCourseAudioProblemCount(
+        ctx,
+        previousCourseId,
+        previousCourseStories,
+      );
     }
 
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStorySaved, {
@@ -216,7 +248,13 @@ export const deleteStory = mutation({
       public: false,
     });
     if (story.public) {
-      await recomputeCoursePublishedCount(ctx, story.courseId);
+      const courseStories = await loadCourseStories(ctx, story.courseId);
+      await recomputeCoursePublishedCount(ctx, story.courseId, courseStories);
+      await recomputeCourseAudioProblemCount(
+        ctx,
+        story.courseId,
+        courseStories,
+      );
     }
 
     const operationKey =

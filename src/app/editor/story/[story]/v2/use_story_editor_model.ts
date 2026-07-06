@@ -9,6 +9,7 @@ import {
 } from "@/components/editor/story/syntax_parser_new";
 import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
 import { retryOnceAfterAuthRefresh } from "./save_auth_retry";
+import { checkStoryLineAudio } from "./audio_problem_check";
 
 type LanguageLike = {
   short: string;
@@ -268,22 +269,24 @@ export function useStoryEditorModel({
     setIsSaving(true);
     const saveStartRevision = revision;
     const operationKey = `story:${storyData.id}:set_story:v2:${Date.now()}:${saveStartRevision}`;
-    const saveArgs = {
-      legacyStoryId: storyData.id,
-      duo_id: storyData.duo_id ?? "",
-      name: parsedMeta.fromLanguageName,
-      image: parsedMeta.icon ?? "",
-      set_id: parsedMeta.set_id,
-      set_index: parsedMeta.set_index,
-      legacyCourseId: storyData.course_id,
-      text: docText,
-      json: toConvexValue(parsedStoryBase),
-      todo_count: parsedMeta.todo_count,
-      change_date: new Date().toISOString(),
-      confirmOfficialOverwrite,
-      operationKey,
-    };
     try {
+      const audioCheck = await checkStoryLineAudio(parsedStoryBase);
+      const saveArgs = {
+        legacyStoryId: storyData.id,
+        duo_id: storyData.duo_id ?? "",
+        name: parsedMeta.fromLanguageName,
+        image: parsedMeta.icon ?? "",
+        set_id: parsedMeta.set_id,
+        set_index: parsedMeta.set_index,
+        legacyCourseId: storyData.course_id,
+        text: docText,
+        json: toConvexValue(parsedStoryBase),
+        todo_count: parsedMeta.todo_count,
+        audioProblemCount: audioCheck.audioProblemCount,
+        change_date: new Date().toISOString(),
+        confirmOfficialOverwrite,
+        operationKey,
+      };
       const result = await retryOnceAfterAuthRefresh(
         () => setStoryMutation(saveArgs),
         {
