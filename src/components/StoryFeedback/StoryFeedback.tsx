@@ -81,7 +81,7 @@ export default function StoryFeedback({
         <button
           type="button"
           className={cn(
-            "inline-flex h-12 items-center gap-2 rounded-full border-2 border-[color:color-mix(in_srgb,var(--link-blue)_34%,var(--overview-hr))] bg-[var(--body-background)] px-4 text-[0.92rem] font-bold text-[var(--text-color)] no-underline shadow-[0_10px_28px_color-mix(in_srgb,#000_18%,transparent)] transition-[background-color,border-color,color,transform,opacity] duration-100 hover:-translate-y-0.5 hover:border-[color:color-mix(in_srgb,var(--link-blue)_58%,var(--overview-hr))] hover:bg-[color:color-mix(in_srgb,var(--link-blue)_10%,var(--body-background))] hover:text-[var(--text-color)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[color:color-mix(in_srgb,var(--ring)_35%,transparent)]",
+            "inline-flex h-12 items-center gap-2 rounded-full border-2 border-[color:color-mix(in_srgb,var(--link-blue)_34%,var(--overview-hr))] bg-[var(--body-background)] px-4 text-[0.92rem] font-bold text-[var(--text-color)] no-underline shadow-[0_4px_12px_color-mix(in_srgb,#000_12%,transparent)] transition-[background-color,border-color,color,transform,opacity] duration-100 hover:-translate-y-0.5 hover:border-[color:color-mix(in_srgb,var(--link-blue)_58%,var(--overview-hr))] hover:bg-[color:color-mix(in_srgb,var(--link-blue)_10%,var(--body-background))] hover:text-[var(--text-color)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[color:color-mix(in_srgb,var(--ring)_35%,transparent)]",
             hidden && "pointer-events-none opacity-0",
             className,
           )}
