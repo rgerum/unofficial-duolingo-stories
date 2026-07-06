@@ -8,6 +8,7 @@ type CliOptions = {
   courses: string[];
   apply: boolean;
   identity: string | null;
+  prod: boolean;
 };
 
 type CourseSummary = {
@@ -30,15 +31,36 @@ type StoryAudioProblemCount = {
   audioProblemCount: number;
 };
 
+type StoryMetadata = {
+  legacyId: number;
+  missing?: boolean;
+  public?: boolean;
+  deleted?: boolean;
+  courseShort?: string | null;
+};
+
+type FilteredStory = {
+  course: string;
+  storyId: number;
+  status: "ok" | "missing_source" | "failed";
+  reason: string;
+};
+
+type CourseProblemPayload = {
+  course: CourseAudioProblemCount;
+  stories: StoryAudioProblemCount[];
+};
+
 function usage(exitCode: 0 | 1): never {
   console.error(`Usage:
-  pnpm audio:sync-problem-counts -- --course da-en --course ca-en --apply
+  pnpm audio:sync-problem-counts -- --course da-en --course ca-en --apply --prod
 
 Options:
   --input-dir <dir>   Course summary root (default: tmp/story-audio/courses)
   --course <short>    Course to sync. Can be repeated. Defaults to all summaries.
   --apply             Apply to Convex. Without this, print the payload only.
   --identity <json>   Convex run identity. Required with --apply.
+  --prod              Target the production Convex deployment.
 `);
   process.exit(exitCode);
 }
@@ -56,6 +78,7 @@ function parseCliOptions(args: string[]): CliOptions {
   let inputDir = path.join("tmp", "story-audio", "courses");
   let apply = false;
   let identity: string | null = null;
+  let prod = false;
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -75,6 +98,10 @@ function parseCliOptions(args: string[]): CliOptions {
       apply = true;
       continue;
     }
+    if (arg === "--prod") {
+      prod = true;
+      continue;
+    }
     if (arg === "--identity") {
       identity = takeValue(args, index, arg);
       index += 1;
@@ -88,6 +115,7 @@ function parseCliOptions(args: string[]): CliOptions {
     courses,
     apply,
     identity,
+    prod,
   };
 }
 
@@ -152,19 +180,9 @@ function parseCourseSummary(raw: unknown): CourseSummary {
 
 async function readCourseSummary(inputDir: string, course: string) {
   const summaryPath = path.join(inputDir, course, "summary.json");
-  const summary = parseCourseSummary(
+  return parseCourseSummary(
     JSON.parse(await readFile(summaryPath, "utf8")),
   );
-  return {
-    course: {
-      courseShort: course,
-      audioProblemCount: (summary.missingSource ?? 0) + (summary.failed ?? 0),
-    },
-    stories: (summary.results ?? []).map((result) => ({
-      legacyStoryId: result.storyId,
-      audioProblemCount: result.status === "ok" ? 0 : 1,
-    })),
-  };
 }
 
 function runCommand(command: string, args: string[]) {
@@ -178,6 +196,81 @@ function runCommand(command: string, args: string[]) {
   });
 }
 
+function runCommandOutput(command: string, args: string[]) {
+  return new Promise<string>((resolve, reject) => {
+    const child = spawn(command, args, { stdio: ["ignore", "pipe", "inherit"] });
+    let stdout = "";
+    child.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) resolve(stdout);
+      else reject(new Error(`${command} ${args.join(" ")} failed with ${code}`));
+    });
+  });
+}
+
+function parseJsonOutput<T>(stdout: string): T {
+  const trimmed = stdout.trim();
+  const jsonStart = Math.min(
+    ...[trimmed.indexOf("{"), trimmed.indexOf("[")].filter((index) => index >= 0),
+  );
+  if (!Number.isFinite(jsonStart)) {
+    throw new Error("Convex command did not print JSON.");
+  }
+  return JSON.parse(trimmed.slice(jsonStart)) as T;
+}
+
+async function readStoryMetadata(storyIds: number[], prod: boolean) {
+  const metadata = new Map<number, StoryMetadata>();
+  const uniqueStoryIds = [...new Set(storyIds)].sort((left, right) => left - right);
+  const batchSize = 400;
+
+  for (let index = 0; index < uniqueStoryIds.length; index += batchSize) {
+    const batch = uniqueStoryIds.slice(index, index + batchSize);
+    const query = `const ids = ${JSON.stringify(batch)};
+const out = [];
+for (const id of ids) {
+  const story = await ctx.db
+    .query("stories")
+    .withIndex("by_legacy_id", (q) => q.eq("legacyId", id))
+    .unique();
+  if (!story) {
+    out.push({ legacyId: id, missing: true });
+    continue;
+  }
+  const course = await ctx.db.get(story.courseId);
+  out.push({
+    legacyId: story.legacyId,
+    public: !!story.public,
+    deleted: !!story.deleted,
+    courseShort: course?.short ?? null,
+  });
+}
+return out;`;
+    const args = ["convex", "run"];
+    if (prod) {
+      args.push("--prod");
+    }
+    args.push("--inline-query", query);
+    const stdout = await runCommandOutput("pnpm", args);
+    for (const story of parseJsonOutput<StoryMetadata[]>(stdout)) {
+      metadata.set(story.legacyId, story);
+    }
+  }
+
+  return metadata;
+}
+
+function filterReason(metadata: StoryMetadata | undefined, course: string) {
+  if (!metadata || metadata.missing) return "missing-prod-story";
+  if (metadata.deleted) return "deleted";
+  if (!metadata.public) return "private";
+  if (metadata.courseShort !== course) return `course-mismatch:${metadata.courseShort}`;
+  return null;
+}
+
 async function main() {
   const options = parseCliOptions(process.argv.slice(2));
   const selectedCourses =
@@ -188,8 +281,7 @@ async function main() {
           .map((entry) => entry.name)
           .sort();
 
-  const counts: CourseAudioProblemCount[] = [];
-  const stories: StoryAudioProblemCount[] = [];
+  const summaries: Array<{ course: string; summary: CourseSummary }> = [];
   const skipped = [];
   for (const course of selectedCourses) {
     if (!existsSync(path.join(options.inputDir, course, "summary.json"))) {
@@ -198,8 +290,7 @@ async function main() {
     }
     try {
       const summary = await readCourseSummary(options.inputDir, course);
-      counts.push(summary.course);
-      stories.push(...summary.stories);
+      summaries.push({ course, summary });
     } catch (error) {
       skipped.push(course);
       console.error(
@@ -208,8 +299,66 @@ async function main() {
     }
   }
 
+  const storyMetadata = await readStoryMetadata(
+    summaries.flatMap(({ summary }) => summary.results.map((result) => result.storyId)),
+    options.prod,
+  );
+  const coursePayloads: CourseProblemPayload[] = [];
+  const filtered: FilteredStory[] = [];
+
+  for (const { course, summary } of summaries) {
+    let audioProblemCount = 0;
+    const courseStories: StoryAudioProblemCount[] = [];
+    for (const result of summary.results) {
+      const metadata = storyMetadata.get(result.storyId);
+      const reason = filterReason(metadata, course);
+      if (reason) {
+        filtered.push({
+          course,
+          storyId: result.storyId,
+          status: result.status,
+          reason,
+        });
+        if (metadata && !metadata.missing) {
+          courseStories.push({
+            legacyStoryId: result.storyId,
+            audioProblemCount: 0,
+          });
+        }
+        continue;
+      }
+
+      const storyAudioProblemCount = result.status === "ok" ? 0 : 1;
+      audioProblemCount += storyAudioProblemCount;
+      courseStories.push({
+        legacyStoryId: result.storyId,
+        audioProblemCount: storyAudioProblemCount,
+      });
+    }
+    coursePayloads.push({
+      course: {
+        courseShort: course,
+        audioProblemCount,
+      },
+      stories: courseStories,
+    });
+  }
+
+  const counts = coursePayloads.map((entry) => entry.course);
+  const stories = coursePayloads.flatMap((entry) => entry.stories);
   const payload = { counts, stories };
-  console.log(JSON.stringify({ ...payload, skipped }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        ...payload,
+        skipped,
+        filtered,
+        filteredCount: filtered.length,
+      },
+      null,
+      2,
+    ),
+  );
 
   if (!options.apply) return;
   if (!options.identity) {
@@ -221,14 +370,31 @@ async function main() {
   }
 
   const operationKey = `audio-problem-counts:${Date.now()}`;
-  await runCommand("pnpm", [
-    "convex",
-    "run",
-    "courseWrite:setAudioProblemCounts",
-    JSON.stringify({ ...payload, operationKey }),
-    "--identity",
-    options.identity,
-  ]);
+  const chunkSize = 20;
+  for (let index = 0; index < coursePayloads.length; index += chunkSize) {
+    const chunk = coursePayloads.slice(index, index + chunkSize);
+    const chunkPayload = {
+      operationKey: `${operationKey}:${Math.floor(index / chunkSize) + 1}`,
+      counts: chunk.map((entry) => entry.course),
+      stories: chunk.flatMap((entry) => entry.stories),
+    };
+    console.log(
+      `Applying chunk ${Math.floor(index / chunkSize) + 1}/${Math.ceil(
+        coursePayloads.length / chunkSize,
+      )}: courses=${chunkPayload.counts.length} stories=${chunkPayload.stories.length}`,
+    );
+    const args = ["convex", "run"];
+    if (options.prod) {
+      args.push("--prod");
+    }
+    args.push(
+      "courseWrite:setAudioProblemCounts",
+      JSON.stringify(chunkPayload),
+      "--identity",
+      options.identity,
+    );
+    await runCommand("pnpm", args);
+  }
 }
 
 main().catch((error) => {
