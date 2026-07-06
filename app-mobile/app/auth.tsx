@@ -365,11 +365,13 @@ export default function AuthScreen() {
                 <SocialProviderButton
                   provider={primarySocialProvider.id}
                   label={`Continue with ${primarySocialProvider.label}`}
+                  colors={colors}
                   disabled={isPending}
                   onPress={() =>
                     void signInWithProvider(primarySocialProvider.id)
                   }
                   style={styles.primarySocialButton}
+                  styles={styles}
                 />
               )}
 
@@ -380,9 +382,11 @@ export default function AuthScreen() {
                       key={provider.id}
                       accessibilityLabel={`Continue with ${provider.label}`}
                       provider={provider.id}
+                      colors={colors}
                       disabled={isPending}
                       onPress={() => void signInWithProvider(provider.id)}
                       style={styles.secondarySocialButton}
+                      styles={styles}
                     />
                   ))}
                 </View>
@@ -433,20 +437,21 @@ function SocialProviderButton({
   provider,
   label,
   accessibilityLabel,
+  colors,
   disabled,
   onPress,
   style,
+  styles,
 }: {
   provider: SocialProviderId;
   label?: string;
   accessibilityLabel?: string;
+  colors: ThemeColors;
   disabled: boolean;
   onPress: () => void;
   style?: ViewStyle;
+  styles: ReturnType<typeof createStyles>;
 }) {
-  const { colors } = useTheme();
-  const styles = React.useMemo(() => createStyles(colors), [colors]);
-
   return (
     <Pressable
       accessibilityRole="button"
@@ -476,7 +481,12 @@ function SocialProviderButton({
               },
             ]}
           >
-            <SocialProviderIcon provider={provider} disabled={disabled} />
+            <SocialProviderIcon
+              provider={provider}
+              colors={colors}
+              disabled={disabled}
+              styles={styles}
+            />
             {label ? (
               <Text
                 style={[
@@ -496,14 +506,15 @@ function SocialProviderButton({
 
 function SocialProviderIcon({
   provider,
+  colors,
   disabled,
+  styles,
 }: {
   provider: SocialProviderId;
+  colors: ThemeColors;
   disabled: boolean;
+  styles: ReturnType<typeof createStyles>;
 }) {
-  const { colors } = useTheme();
-  const styles = React.useMemo(() => createStyles(colors), [colors]);
-
   if (provider === "google") {
     return (
       <Svg
