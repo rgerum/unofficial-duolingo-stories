@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
   currentCourse: "currentCourseShort",
   activeCourses: "activeCourseShorts",
   hideStoryQuestions: "hideStoryQuestions",
+  themePreference: "themePreference",
   analyticsInstallationId: "analyticsInstallationId",
 };
 

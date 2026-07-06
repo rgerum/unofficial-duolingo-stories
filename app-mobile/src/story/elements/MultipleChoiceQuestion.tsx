@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, fontSizes } from "../../theme";
+import { fontSizes, type ThemeColors, useTheme } from "../../theme";
 import { Text } from "../../components/Text";
 import { HintText } from "../HintText";
 import { getLanguageTextStyle } from "../languageStyles";
@@ -9,18 +9,26 @@ import { useChoiceButtons, type ChoiceState } from "../useChoiceButtons";
 import { QuestionPrompt } from "./QuestionPrompt";
 import type { StoryElementMultipleChoice } from "../types";
 
-function CheckCircle({ state }: { state: ChoiceState }) {
+function CheckCircle({
+  colors,
+  state,
+  styles,
+}: {
+  colors: ThemeColors;
+  state: ChoiceState;
+  styles: ReturnType<typeof createStyles>;
+}) {
   if (state === "right") {
     return (
       <View style={[styles.circle, styles.circleRight]}>
-        <Ionicons name="checkmark" size={20} color="#ffffff" />
+        <Ionicons name="checkmark" size={20} color={colors.primaryText} />
       </View>
     );
   }
   if (state === "false") {
     return (
       <View style={[styles.circle, styles.circleWrong]}>
-        <Ionicons name="close" size={20} color="#ffffff" />
+        <Ionicons name="close" size={20} color={colors.primaryText} />
       </View>
     );
   }
@@ -36,6 +44,8 @@ export function MultipleChoiceQuestion({
   element: StoryElementMultipleChoice;
   advance: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [buttonState, click] = useChoiceButtons(
     element.answers.length,
     element.correctAnswerIndex,
@@ -62,7 +72,7 @@ export function MultipleChoiceQuestion({
             onPress={() => click(index)}
             style={styles.answerRow}
           >
-            <CheckCircle state={state} />
+            <CheckCircle colors={colors} state={state} styles={styles} />
             <View style={styles.answerText}>
               {typeof answer === "string" ? (
                 <Text style={answerStyle}>{answer}</Text>
@@ -77,7 +87,8 @@ export function MultipleChoiceQuestion({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   answerRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -115,4 +126,5 @@ const styles = StyleSheet.create({
   circleDone: {
     backgroundColor: colors.disabledBackground,
   },
-});
+  });
+}

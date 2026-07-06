@@ -7,7 +7,7 @@ import {
   type TextStyle,
   type ViewStyle,
 } from "react-native";
-import { colors } from "../theme";
+import { useTheme } from "../theme";
 import { Text } from "./Text";
 
 type Variant = "primary" | "secondary" | "neutral" | "danger";
@@ -32,27 +32,28 @@ export function Button({
   style?: ViewStyle;
   labelStyle?: StyleProp<TextStyle>;
 }) {
+  const { colors } = useTheme();
   const palette = {
     primary: {
       face: colors.green,
       edge: colors.greenDark,
       border: "transparent",
-      text: "#ffffff",
+      text: colors.primaryText,
     },
     secondary: {
-      face: "#ffffff",
+      face: colors.surface,
       edge: colors.border,
       border: colors.border,
       text: colors.blue,
     },
     neutral: {
-      face: "#ffffff",
+      face: colors.surface,
       edge: colors.border,
       border: colors.border,
       text: colors.text,
     },
     danger: {
-      face: "#ffffff",
+      face: colors.surface,
       edge: colors.border,
       border: colors.border,
       text: colors.red,

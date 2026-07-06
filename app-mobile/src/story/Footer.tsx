@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors } from "../theme";
+import { type ThemeColors, useTheme } from "../theme";
 import { Button } from "../components/Button";
 import { SmartImage } from "../components/SmartImage";
 import { Text } from "../components/Text";
@@ -44,6 +44,8 @@ export function Footer({
   onReplayListening?: () => void;
   onSkipListening?: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const bottomPadding = { paddingBottom: Math.max(18, insets.bottom + 10) };
 
@@ -106,7 +108,7 @@ export function Footer({
             <Ionicons
               name={listeningPaused ? "play" : "pause"}
               size={28}
-              color="#ffffff"
+              color={colors.primaryText}
             />
           </Pressable>
           <Pressable
@@ -152,7 +154,8 @@ export function Footer({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     borderTopWidth: 2,
     borderTopColor: colors.border,
@@ -190,7 +193,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: colors.border,
   },
@@ -244,4 +247,5 @@ const styles = StyleSheet.create({
   finishedPrimary: {
     marginTop: 14,
   },
-});
+  });
+}

@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors } from "../theme";
+import { type ThemeColors, useTheme } from "../theme";
 import { Text } from "../components/Text";
 import {
   getInitialButtonStatus,
@@ -52,6 +52,8 @@ export function Reader({
   nextStoryPreview?: NextStoryPreview | null;
   learningLanguageName?: string;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   // SafeAreaView reports zero insets inside fullScreenModal screens, so the
   // reader applies window insets itself.
   const insets = useSafeAreaInsets();
@@ -357,7 +359,8 @@ export function Reader({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -417,4 +420,5 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textAlign: "center",
   },
-});
+  });
+}

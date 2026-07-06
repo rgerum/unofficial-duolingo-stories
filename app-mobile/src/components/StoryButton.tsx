@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../theme";
+import { type ThemeColors, useTheme } from "../theme";
 import { SmartImage } from "./SmartImage";
 import { Text } from "./Text";
 
@@ -37,6 +37,9 @@ export function StoryButton({
   onPress: () => void;
   disabled?: boolean;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -79,7 +82,8 @@ export function StoryButton({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     width: ART_WIDTH,
     alignItems: "center",
@@ -114,7 +118,7 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "rgba(255,255,255,0.92)",
+    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -126,4 +130,5 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: colors.textDim,
   },
-});
+  });
+}

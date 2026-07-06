@@ -18,7 +18,7 @@ import { HintPopupHost } from "../../src/story/HintPopup";
 import { stopAudio } from "../../src/story/audio";
 import { Button } from "../../src/components/Button";
 import { Text } from "../../src/components/Text";
-import { colors } from "../../src/theme";
+import { type ThemeColors, useTheme } from "../../src/theme";
 import type { StoryData } from "../../src/story/types";
 
 type CourseStory = {
@@ -31,6 +31,8 @@ type CourseStory = {
 
 export default function StoryScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const params = useLocalSearchParams<{ id: string; listening?: string }>();
   const storyId = Number(params.id);
   const listening = params.listening === "1";
@@ -247,7 +249,8 @@ export default function StoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -276,4 +279,5 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 18,
   },
-});
+  });
+}

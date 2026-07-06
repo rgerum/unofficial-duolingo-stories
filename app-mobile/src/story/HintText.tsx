@@ -9,7 +9,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { Text } from "../components/Text";
-import { colors } from "../theme";
+import { type ThemeColors, useTheme } from "../theme";
 import { HintLookupContext, HintPopupContext } from "./HintPopup";
 import type { ContentWithHints, HideRange } from "./types";
 
@@ -19,8 +19,6 @@ import type { ContentWithHints, HideRange } from "./types";
 // dashes, so the text is laid out as a wrapping row of word tokens whose
 // underlines are real (dashed) bottom borders.
 
-const UNDERLINE_DASHED = "#e5e5e5";
-const UNDERLINE_SOLID = "#7b7b7b";
 const WRAPPED_LINE_GAP = 3;
 
 function splitTextTokens(text: string): string[] {
@@ -136,6 +134,7 @@ function HintPhraseBox({
   textStyle,
   rtl,
   collapsedSpaceWidth,
+  colors,
   popup,
   onLookup,
 }: {
@@ -143,6 +142,7 @@ function HintPhraseBox({
   textStyle: TextStyle;
   rtl: boolean;
   collapsedSpaceWidth: number;
+  colors: ThemeColors;
   popup: React.ContextType<typeof HintPopupContext>;
   onLookup: () => void;
 }) {
@@ -150,9 +150,9 @@ function HintPhraseBox({
   const hint = tokens.find((token) => token.hint)?.hint;
   const interactive = Boolean(hint) && !tokens.some((token) => token.hidden);
   const underline = tokens.some((token) => token.hidden)
-    ? UNDERLINE_SOLID
+    ? colors.hiddenUnderline
     : tokens.some((token) => token.revealed || token.hint)
-      ? UNDERLINE_DASHED
+      ? colors.border
       : undefined;
 
   return (
@@ -260,6 +260,7 @@ export function HintText({
   centered?: boolean;
   fillLineWidth?: boolean;
 }) {
+  const { colors } = useTheme();
   const popup = React.useContext(HintPopupContext);
   const onHintLookup = React.useContext(HintLookupContext);
 
@@ -340,9 +341,9 @@ export function HintText({
 
     const interactive = Boolean(token.hint) && !token.hidden;
     const underline = token.hidden
-      ? UNDERLINE_SOLID
+      ? colors.hiddenUnderline
       : token.revealed || interactive
-        ? UNDERLINE_DASHED
+        ? colors.border
         : undefined;
     const color = token.hidden
       ? colors.background
@@ -445,6 +446,7 @@ export function HintText({
             textStyle={flatStyle}
             rtl={rtl}
             collapsedSpaceWidth={collapsedSpaceWidth}
+            colors={colors}
             popup={popup}
             onLookup={onHintLookup}
           />

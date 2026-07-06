@@ -26,7 +26,7 @@ import { useAppState } from "../src/app-state";
 import { Button } from "../src/components/Button";
 import { Text, TextInput } from "../src/components/Text";
 import { clearAllProgress, getAllDoneStories } from "../src/storage";
-import { colors } from "../src/theme";
+import { type ThemeColors, useTheme } from "../src/theme";
 
 type AuthMode = "signin" | "register";
 type SocialProviderId = "apple" | "google" | "github" | "discord";
@@ -46,6 +46,8 @@ const EMAIL_PATTERN = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w+)+$/;
 
 export default function AuthScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { mode } = useLocalSearchParams<{ mode?: string }>();
   const authMode: AuthMode = mode === "register" ? "register" : "signin";
   const isRegister = authMode === "register";
@@ -363,11 +365,13 @@ export default function AuthScreen() {
                 <SocialProviderButton
                   provider={primarySocialProvider.id}
                   label={`Continue with ${primarySocialProvider.label}`}
+                  colors={colors}
                   disabled={isPending}
                   onPress={() =>
                     void signInWithProvider(primarySocialProvider.id)
                   }
                   style={styles.primarySocialButton}
+                  styles={styles}
                 />
               )}
 
@@ -378,9 +382,11 @@ export default function AuthScreen() {
                       key={provider.id}
                       accessibilityLabel={`Continue with ${provider.label}`}
                       provider={provider.id}
+                      colors={colors}
                       disabled={isPending}
                       onPress={() => void signInWithProvider(provider.id)}
                       style={styles.secondarySocialButton}
+                      styles={styles}
                     />
                   ))}
                 </View>
@@ -431,16 +437,20 @@ function SocialProviderButton({
   provider,
   label,
   accessibilityLabel,
+  colors,
   disabled,
   onPress,
   style,
+  styles,
 }: {
   provider: SocialProviderId;
   label?: string;
   accessibilityLabel?: string;
+  colors: ThemeColors;
   disabled: boolean;
   onPress: () => void;
   style?: ViewStyle;
+  styles: ReturnType<typeof createStyles>;
 }) {
   return (
     <Pressable
@@ -471,7 +481,12 @@ function SocialProviderButton({
               },
             ]}
           >
-            <SocialProviderIcon provider={provider} disabled={disabled} />
+            <SocialProviderIcon
+              provider={provider}
+              colors={colors}
+              disabled={disabled}
+              styles={styles}
+            />
             {label ? (
               <Text
                 style={[
@@ -491,10 +506,14 @@ function SocialProviderButton({
 
 function SocialProviderIcon({
   provider,
+  colors,
   disabled,
+  styles,
 }: {
   provider: SocialProviderId;
+  colors: ThemeColors;
   disabled: boolean;
+  styles: ReturnType<typeof createStyles>;
 }) {
   if (provider === "google") {
     return (
@@ -546,7 +565,8 @@ function SocialProviderIcon({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -586,7 +606,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     fontSize: 17,
     color: colors.text,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
   },
   error: {
     color: colors.red,
@@ -661,7 +681,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.border,
     borderRadius: 14,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     paddingHorizontal: 14,
   },
   socialButtonDisabled: {
@@ -691,4 +711,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
-});
+  });
+}

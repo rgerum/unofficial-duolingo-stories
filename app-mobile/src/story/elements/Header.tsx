@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { colors, fontSizes } from "../../theme";
+import { fontSizes, type ThemeColors, useTheme } from "../../theme";
 import { SmartImage } from "../../components/SmartImage";
 import { HintText } from "../HintText";
 import { getLanguageTextStyle } from "../languageStyles";
@@ -25,6 +25,8 @@ export function Header({
   audioRangeOverride?: number;
   onManualAudioPlay?: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const audio = element.learningLanguageTitleContent?.audio;
   const lineAudio = useLineAudio(
     audio,
@@ -59,7 +61,8 @@ export function Header({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: {
     alignItems: "center",
     marginTop: 8,
@@ -79,4 +82,5 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: colors.text,
   },
-});
+  });
+}
