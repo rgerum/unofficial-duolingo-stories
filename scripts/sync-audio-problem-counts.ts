@@ -213,13 +213,64 @@ function runCommandOutput(command: string, args: string[]) {
 
 function parseJsonOutput<T>(stdout: string): T {
   const trimmed = stdout.trim();
-  const jsonStart = Math.min(
-    ...[trimmed.indexOf("{"), trimmed.indexOf("[")].filter((index) => index >= 0),
+  const candidateStarts = [...trimmed.matchAll(/[\[{]/g)].map(
+    (match) => match.index,
   );
-  if (!Number.isFinite(jsonStart)) {
+  if (candidateStarts.length === 0) {
     throw new Error("Convex command did not print JSON.");
   }
-  return JSON.parse(trimmed.slice(jsonStart)) as T;
+
+  for (const jsonStart of candidateStarts) {
+    if (jsonStart === undefined) continue;
+    const jsonEnd = findJsonEnd(trimmed, jsonStart);
+    if (jsonEnd === null) continue;
+    try {
+      return JSON.parse(trimmed.slice(jsonStart, jsonEnd)) as T;
+    } catch {
+      // Keep scanning; leading log output can contain bracket-like text.
+    }
+  }
+
+  throw new Error("Convex command did not print valid JSON.");
+}
+
+function findJsonEnd(text: string, start: number) {
+  const stack: string[] = [];
+  let inString = false;
+  let escaped = false;
+
+  for (let index = start; index < text.length; index += 1) {
+    const char = text[index];
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === "\\") {
+        escaped = true;
+      } else if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+    if (char === "{") {
+      stack.push("}");
+      continue;
+    }
+    if (char === "[") {
+      stack.push("]");
+      continue;
+    }
+    if (char === "}" || char === "]") {
+      if (stack.pop() !== char) return null;
+      if (stack.length === 0) return index + 1;
+    }
+  }
+
+  return null;
 }
 
 async function readStoryMetadata(storyIds: number[], prod: boolean) {

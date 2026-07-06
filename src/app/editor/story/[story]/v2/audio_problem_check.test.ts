@@ -88,3 +88,21 @@ test("checkStoryLineAudio falls back to GET when HEAD is unsupported", async () 
   assert.equal(result.audioProblemCount, 0);
   assert.deepEqual(calls, ["HEAD", "GET"]);
 });
+
+test("checkStoryLineAudio falls back to GET when HEAD throws a TypeError", async () => {
+  const calls: string[] = [];
+  globalThis.fetch = async (_url, init) => {
+    calls.push(init?.method ?? "GET");
+    if (init?.method === "HEAD") {
+      throw new TypeError("HEAD request blocked");
+    }
+    return new Response(null, { status: 206 });
+  };
+
+  const result = await checkStoryLineAudio(
+    storyWithAudioUrls(["https://example.com/audio.mp3"]),
+  );
+
+  assert.equal(result.audioProblemCount, 0);
+  assert.deepEqual(calls, ["HEAD", "GET"]);
+});

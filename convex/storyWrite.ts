@@ -6,6 +6,7 @@ import {
   requireSessionLegacyUserId,
 } from "./lib/authorization";
 import {
+  loadCourseStories,
   recomputeCourseAudioProblemCount,
   recomputeCoursePublishedCount,
 } from "./lib/courseCounts";
@@ -163,12 +164,23 @@ export const setStory = mutation({
       0,
     );
     await ctx.db.patch(course._id, { todo_count: courseTodoCount });
-    await recomputeCourseAudioProblemCount(ctx, course._id);
+    await recomputeCourseAudioProblemCount(ctx, course._id, storiesInCourse);
     if (movedPublishedStory) {
-      await recomputeCoursePublishedCount(ctx, previousCourseId);
-      await recomputeCoursePublishedCount(ctx, course._id);
-      await recomputeCourseAudioProblemCount(ctx, previousCourseId);
-      await recomputeCourseAudioProblemCount(ctx, course._id);
+      const previousCourseStories = await loadCourseStories(
+        ctx,
+        previousCourseId,
+      );
+      await recomputeCoursePublishedCount(
+        ctx,
+        previousCourseId,
+        previousCourseStories,
+      );
+      await recomputeCoursePublishedCount(ctx, course._id, storiesInCourse);
+      await recomputeCourseAudioProblemCount(
+        ctx,
+        previousCourseId,
+        previousCourseStories,
+      );
     }
 
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStorySaved, {
@@ -236,8 +248,13 @@ export const deleteStory = mutation({
       public: false,
     });
     if (story.public) {
-      await recomputeCoursePublishedCount(ctx, story.courseId);
-      await recomputeCourseAudioProblemCount(ctx, story.courseId);
+      const courseStories = await loadCourseStories(ctx, story.courseId);
+      await recomputeCoursePublishedCount(ctx, story.courseId, courseStories);
+      await recomputeCourseAudioProblemCount(
+        ctx,
+        story.courseId,
+        courseStories,
+      );
     }
 
     const operationKey =

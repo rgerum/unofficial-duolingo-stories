@@ -45,6 +45,9 @@ async function fetchWithTimeout(
   init: RequestInit,
   timeoutMs: number,
 ) {
+  if (timeoutMs <= 0) {
+    throw new DOMException("Audio request timed out.", "AbortError");
+  }
   const controller = new AbortController();
   const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -57,20 +60,35 @@ async function fetchWithTimeout(
   }
 }
 
+function remainingTime(deadline: number) {
+  return Math.max(0, deadline - Date.now());
+}
+
+function isHeadUnsupportedStatus(status: number) {
+  return status === 405 || status === 501;
+}
+
+function shouldFallbackFromHeadError(error: unknown) {
+  if (error instanceof Error && error.name === "AbortError") return false;
+  return error instanceof TypeError;
+}
+
 async function canLoadAudioUrl(url: string) {
+  const deadline = Date.now() + 10_000;
+  let shouldTryGet = false;
+
   try {
     const headResponse = await fetchWithTimeout(
       url,
       { method: "HEAD", cache: "no-store" },
-      10_000,
+      remainingTime(deadline),
     );
     if (headResponse.ok) return true;
-    if (headResponse.status !== 405 && headResponse.status !== 501) {
-      return false;
-    }
-  } catch {
-    // Fall back to a tiny GET; some object stores do not support HEAD/CORS HEAD.
+    shouldTryGet = isHeadUnsupportedStatus(headResponse.status);
+  } catch (error) {
+    shouldTryGet = shouldFallbackFromHeadError(error);
   }
+  if (!shouldTryGet) return false;
 
   try {
     const getResponse = await fetchWithTimeout(
@@ -80,7 +98,7 @@ async function canLoadAudioUrl(url: string) {
         cache: "no-store",
         headers: { Range: "bytes=0-0" },
       },
-      10_000,
+      remainingTime(deadline),
     );
     return getResponse.ok;
   } catch {
