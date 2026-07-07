@@ -15,7 +15,7 @@ Repo verification gate (used by every plan): `pnpm typecheck && pnpm lint && pnp
 | 003 | Scope storyDone progress queries to the session user | P1 | S | — | TODO |
 | 004 | Surface story save/delete/upload failures to the user | P1 | S | — | TODO |
 | 005 | Fix out-of-bounds in bulk audio editor timing text | P2 | S | — | TODO |
-| 006 | Convex function test harness (convex-test + vitest) | P1 | M | 001 | TODO |
+| 006 | Convex function test harness (convex-test + vitest) | P1 | M | 001 | DONE (16 tests; no bugs found) |
 | 007 | Repo hygiene: tmp/ untrack, @types/pg, kysely note, debug logs | P3 | S | — | TODO |
 | 008 | Harden shared-secret HTTP endpoints; internalize backfills | P3 | S | — | TODO |
 | 009 | Extract pure logic from the 4,135-line audio-cutter dialog | P2 | M–L | 001, 005 | TODO |
