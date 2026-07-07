@@ -68,8 +68,10 @@ async function uploadAudio(
     method: "POST",
     body: data,
   });
-  // handle the error
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text.length < 200 ? text : `Upload failed (${res.status})`);
+  }
   return res;
 }
 
