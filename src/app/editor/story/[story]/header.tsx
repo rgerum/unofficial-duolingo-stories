@@ -83,7 +83,10 @@ export function StoryEditorHeader({
     try {
       await func_save();
     } catch (e) {
-      console.log("error save", e);
+      console.error("error save", e);
+      window.alert(
+        `Saving failed — your changes were NOT saved.\n${e instanceof Error ? e.message : ""}`,
+      );
     }
   }
 
@@ -93,7 +96,10 @@ export function StoryEditorHeader({
       try {
         await func_delete();
       } catch (e) {
-        console.log("error delete", e);
+        console.error("error delete", e);
+        window.alert(
+          `Deleting failed.\n${e instanceof Error ? e.message : ""}`,
+        );
       }
     }
   }
