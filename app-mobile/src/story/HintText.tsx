@@ -8,7 +8,7 @@ import {
   View,
   type ViewStyle,
 } from "react-native";
-import Svg, { Line, Rect } from "react-native-svg";
+import Svg, { Circle, Line, Rect } from "react-native-svg";
 import { Text } from "../components/Text";
 import { type ThemeColors, useTheme } from "../theme";
 import { HintLookupContext, HintPopupContext } from "./HintPopup";
@@ -24,6 +24,8 @@ const WRAPPED_LINE_GAP = 3;
 const NATIVE_TEXT_AUDIO_PADDING = 32;
 const SHOW_NATIVE_HINT_DEBUG = false;
 const UNDERLINE_EDGE_INSET = 2;
+const UNDERLINE_DOT_RADIUS = 1.2;
+const UNDERLINE_DOT_GAP = 7;
 
 type HintTextRenderMode = "auto" | "native" | "tokenized";
 
@@ -555,16 +557,37 @@ function NativeHintText({
         ))}
         {underlineSegments.map((segment) => (
           <React.Fragment key={segment.key}>
-            <Line
-              x1={segment.x1}
-              x2={segment.x2}
-              y1={segment.y}
-              y2={segment.y}
-              stroke={segment.color}
-              strokeWidth={segment.dotted ? 1.5 : 2}
-              strokeLinecap="round"
-              strokeDasharray={segment.dotted ? [1, 4] : undefined}
-            />
+            {segment.dotted ? (
+              Array.from({
+                length: Math.max(
+                  1,
+                  Math.floor((segment.x2 - segment.x1) / UNDERLINE_DOT_GAP) + 1,
+                ),
+              }).map((_, index) => {
+                const cx = Math.min(
+                  segment.x2,
+                  segment.x1 + index * UNDERLINE_DOT_GAP,
+                );
+                return (
+                  <Circle
+                    key={`${segment.key}:${index}`}
+                    cx={cx}
+                    cy={segment.y}
+                    r={UNDERLINE_DOT_RADIUS}
+                    fill={segment.color}
+                  />
+                );
+              })
+            ) : (
+              <Line
+                x1={segment.x1}
+                x2={segment.x2}
+                y1={segment.y}
+                y2={segment.y}
+                stroke={segment.color}
+                strokeWidth={2}
+              />
+            )}
           </React.Fragment>
         ))}
       </Svg>
