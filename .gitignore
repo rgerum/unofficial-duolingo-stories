@@ -54,6 +54,7 @@ tmp/
 
 # misc
 .env*
+!.env.example
 
 old/
 /test.sqlite
