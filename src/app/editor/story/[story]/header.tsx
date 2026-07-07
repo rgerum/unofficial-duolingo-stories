@@ -83,10 +83,10 @@ export function StoryEditorHeader({
     try {
       await func_save();
     } catch (e) {
+      // The failure is surfaced to the user by the model.saveError banner
+      // (with Retry) rendered in editor_v2.tsx; catch here only to log and to
+      // avoid an unhandled promise rejection.
       console.error("error save", e);
-      window.alert(
-        `Saving failed — your changes were NOT saved.\n${e instanceof Error ? e.message : ""}`,
-      );
     }
   }
 
@@ -96,10 +96,8 @@ export function StoryEditorHeader({
       try {
         await func_delete();
       } catch (e) {
+        // Surfaced by the model.saveError banner in editor_v2.tsx; log only.
         console.error("error delete", e);
-        window.alert(
-          `Deleting failed.\n${e instanceof Error ? e.message : ""}`,
-        );
       }
     }
   }
