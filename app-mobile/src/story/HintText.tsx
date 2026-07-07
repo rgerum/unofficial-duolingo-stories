@@ -23,6 +23,7 @@ import type { ContentWithHints, HideRange } from "./types";
 const WRAPPED_LINE_GAP = 3;
 const NATIVE_TEXT_AUDIO_PADDING = 32;
 const SHOW_NATIVE_HINT_DEBUG = false;
+const UNDERLINE_EDGE_INSET = 2;
 
 type HintTextRenderMode = "auto" | "native" | "tokenized";
 
@@ -50,10 +51,12 @@ type Token = {
   revealed: boolean;
   dimmed: boolean;
   hint?: { translation: string; pronunciation?: string };
+  hintGroupKey?: string;
 };
 
 type NativeSegment = Token & {
   key: string;
+  underlineGroupKey?: string;
 };
 
 function getDisplayText(token: Token): string {
@@ -71,28 +74,21 @@ function isWrapAnywhereToken(text: string): boolean {
   );
 }
 
-function isLeadingPunctuationToken(text: string): boolean {
-  const normalized = text.replace(/[\u200b-\u200d\ufeff]/g, "");
-  return /^[,.:;!?%)}\]\u3001\u3002\u30fb\u30fc\uff01\uff1f\uff09\uff0c\uff0e]+$/u.test(
-    normalized,
-  );
-}
-
 function buildNativeSegments(tokens: Token[]): NativeSegment[] {
   const segments: NativeSegment[] = [];
 
   for (const token of tokens) {
     const parts = isWrapAnywhereToken(token.text) ? Array.from(token.text) : [token.text];
     for (const part of parts) {
-      const last = segments[segments.length - 1];
-      if (last && isLeadingPunctuationToken(part)) {
-        last.text += part;
-        continue;
-      }
       segments.push({
         ...token,
         text: part,
         key: `${token.start}:${segments.length}`,
+        underlineGroupKey: token.hidden
+          ? `hidden:${token.start}`
+          : token.revealed
+            ? `revealed:${token.start}`
+            : token.hintGroupKey,
       });
     }
   }
@@ -317,6 +313,7 @@ function buildTokens({
     start: number,
     end: number,
     hint?: Token["hint"],
+    hintGroupKey?: string,
   ): void => {
     const pieces = splitTextTokens(visible.text.substring(start, end));
     let position = start;
@@ -346,6 +343,7 @@ function buildTokens({
             (audioRange === 0 ||
               (audioRange > 0 && audioRange < pieceStart)),
           hint,
+          hintGroupKey,
         });
       }
     }
@@ -356,10 +354,14 @@ function buildTokens({
     if (hint.rangeFrom > textPos) pushRun(textPos, hint.rangeFrom);
     const translation = visible.hints?.[hint.hintIndex];
     const pronunciation = visible.hints_pronunciation?.[hint.hintIndex];
+    const hintGroupKey = translation
+      ? `hint:${hint.rangeFrom}:${hint.rangeTo}:${hint.hintIndex}`
+      : undefined;
     pushRun(
       hint.rangeFrom,
       hint.rangeTo + 1,
       translation ? { translation, pronunciation } : undefined,
+      hintGroupKey,
     );
     textPos = hint.rangeTo + 1;
   }
@@ -402,9 +404,11 @@ function NativeHintText({
       y: number;
       width: number;
       height: number;
+      text: string;
       hidden: boolean;
       revealed: boolean;
       hint?: Token["hint"];
+      underlineGroupKey?: string;
     }> = [];
     let segmentIndex = 0;
 
@@ -424,9 +428,11 @@ function NativeHintText({
           y: textLayout.y + line.y,
           width,
           height: line.height,
+          text: segment.text,
           hidden: segment.hidden,
           revealed: segment.revealed,
           hint: segment.hint,
+          underlineGroupKey: segment.underlineGroupKey,
         });
 
         cursor += width;
@@ -446,6 +452,7 @@ function NativeHintText({
       y: number;
       color: string;
       dotted: boolean;
+      underlineGroupKey?: string;
       debugX: number;
       debugY: number;
       debugWidth: number;
@@ -461,13 +468,16 @@ function NativeHintText({
           ? colors.border
           : undefined;
       if (!underline) continue;
+      if (/^[,.:;!?%)}\]\u3001\u3002\u30fb\u30fc\uff01\uff1f\uff09\uff0c\uff0e\u200b-\u200d\ufeff]+$/u.test(segment.text))
+        continue;
       segmentsToDraw.push({
         key: segment.key,
-        x1: segment.x,
-        x2: segment.x + segment.width,
+        x1: segment.x + UNDERLINE_EDGE_INSET,
+        x2: segment.x + Math.max(segment.width - UNDERLINE_EDGE_INSET, UNDERLINE_EDGE_INSET * 2),
         y: segment.y + segment.height - 6,
         color: underline,
         dotted: !segment.hidden,
+        underlineGroupKey: segment.underlineGroupKey,
         debugX: segment.x,
         debugY: segment.y,
         debugWidth: segment.width,
@@ -488,7 +498,8 @@ function NativeHintText({
         Math.abs(last.y - segment.y) <= 2 &&
         Math.abs(last.x2 - segment.x1) <= 4 &&
         last.color === segment.color &&
-        last.dotted === segment.dotted
+        last.dotted === segment.dotted &&
+        last.underlineGroupKey === segment.underlineGroupKey
       ) {
         last.x2 = segment.x2;
         last.debugWidth = segment.debugX + segment.debugWidth - last.debugX;
