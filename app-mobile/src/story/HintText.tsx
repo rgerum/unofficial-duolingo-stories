@@ -470,6 +470,7 @@ function NativeHintText({
           ? colors.border
           : undefined;
       if (!underline) continue;
+      if (/^\s+$/.test(segment.text)) continue;
       if (/^[,.:;!?%)}\]\u3001\u3002\u30fb\u30fc\uff01\uff1f\uff09\uff0c\uff0e\u200b-\u200d\ufeff]+$/u.test(segment.text))
         continue;
       segmentsToDraw.push({
