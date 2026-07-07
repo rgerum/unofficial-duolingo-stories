@@ -8,6 +8,7 @@ import {
   View,
   type ViewStyle,
 } from "react-native";
+import Svg, { Line, Rect } from "react-native-svg";
 import { Text } from "../components/Text";
 import { type ThemeColors, useTheme } from "../theme";
 import { HintLookupContext, HintPopupContext } from "./HintPopup";
@@ -21,6 +22,7 @@ import type { ContentWithHints, HideRange } from "./types";
 
 const WRAPPED_LINE_GAP = 3;
 const NATIVE_TEXT_AUDIO_PADDING = 32;
+const SHOW_NATIVE_HINT_DEBUG = false;
 
 type HintTextRenderMode = "auto" | "native" | "tokenized";
 
@@ -50,6 +52,10 @@ type Token = {
   hint?: { translation: string; pronunciation?: string };
 };
 
+type NativeSegment = Token & {
+  key: string;
+};
+
 function getDisplayText(token: Token): string {
   return token.text.replace(/\s+/g, " ");
 }
@@ -59,11 +65,39 @@ function shouldUseNativeTextLayout(lang?: string): boolean {
   return /^(ja|zh|ko)(-|$)/i.test(lang);
 }
 
+function isWrapAnywhereToken(text: string): boolean {
+  return /^[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uac00-\ud7af]+$/u.test(
+    text,
+  );
+}
+
 function isLeadingPunctuationToken(text: string): boolean {
   const normalized = text.replace(/[\u200b-\u200d\ufeff]/g, "");
   return /^[,.:;!?%)}\]\u3001\u3002\u30fb\u30fc\uff01\uff1f\uff09\uff0c\uff0e]+$/u.test(
     normalized,
   );
+}
+
+function buildNativeSegments(tokens: Token[]): NativeSegment[] {
+  const segments: NativeSegment[] = [];
+
+  for (const token of tokens) {
+    const parts = isWrapAnywhereToken(token.text) ? Array.from(token.text) : [token.text];
+    for (const part of parts) {
+      const last = segments[segments.length - 1];
+      if (last && isLeadingPunctuationToken(part)) {
+        last.text += part;
+        continue;
+      }
+      segments.push({
+        ...token,
+        text: part,
+        key: `${token.start}:${segments.length}`,
+      });
+    }
+  }
+
+  return segments;
 }
 
 function HintTokenBox({
@@ -354,46 +388,132 @@ function NativeHintText({
   const { colors } = useTheme();
   const popup = React.useContext(HintPopupContext);
   const onHintLookup = React.useContext(HintLookupContext);
+  const segments = React.useMemo(() => buildNativeSegments(tokens), [tokens]);
+  const [textLayout, setTextLayout] = React.useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [lineLayouts, setLineLayouts] = React.useState<
+    { text: string; x: number; y: number; width: number; height: number }[]
+  >([]);
+  const [segmentWidths, setSegmentWidths] = React.useState<Record<string, number>>({});
 
-  type InlineRun = {
-    key: string;
-    text: string;
-    hidden: boolean;
-    revealed: boolean;
-    dimmed: boolean;
-    hint?: Token["hint"];
-  };
+  const computedSegments = React.useMemo(() => {
+    const rects: Array<{
+      key: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      hidden: boolean;
+      revealed: boolean;
+      hint?: Token["hint"];
+    }> = [];
+    let segmentIndex = 0;
 
-  const runs: InlineRun[] = [];
-  for (const token of tokens) {
-    const last = runs[runs.length - 1];
-    const sameHint =
-      last?.hint?.translation === token.hint?.translation &&
-      last?.hint?.pronunciation === token.hint?.pronunciation;
-    const shouldAttachToPrevious =
-      last !== undefined &&
-      !/^\s+$/.test(token.text) &&
-      isLeadingPunctuationToken(token.text);
-    if (
-      last &&
-      (shouldAttachToPrevious ||
-        (sameHint &&
-          last.hidden === token.hidden &&
-          last.revealed === token.revealed &&
-          last.dimmed === token.dimmed))
-    ) {
-      last.text += token.text;
-      continue;
+    for (const line of lineLayouts) {
+      let cursor = line.x;
+      let lineText = line.text;
+
+      while (lineText.length > 0 && segmentIndex < segments.length) {
+        const segment = segments[segmentIndex];
+        const width = segmentWidths[segment.key];
+        if (width === undefined) break;
+        if (!lineText.startsWith(segment.text)) break;
+
+        rects.push({
+          key: segment.key,
+          x: textLayout.x + cursor,
+          y: textLayout.y + line.y,
+          width,
+          height: line.height,
+          hidden: segment.hidden,
+          revealed: segment.revealed,
+          hint: segment.hint,
+        });
+
+        cursor += width;
+        lineText = lineText.slice(segment.text.length);
+        segmentIndex += 1;
+      }
     }
-    runs.push({
-      key: `${token.start}:${runs.length}`,
-      text: token.text,
-      hidden: token.hidden,
-      revealed: token.revealed,
-      dimmed: token.dimmed,
-      hint: token.hint,
+
+    return rects;
+  }, [lineLayouts, segmentWidths, segments, textLayout.x, textLayout.y]);
+
+  const underlineSegments = React.useMemo(() => {
+    type UnderlineSegment = {
+      key: string;
+      x1: number;
+      x2: number;
+      y: number;
+      color: string;
+      dotted: boolean;
+      debugX: number;
+      debugY: number;
+      debugWidth: number;
+      debugHeight: number;
+    };
+
+    const segmentsToDraw: UnderlineSegment[] = [];
+    for (const segment of computedSegments) {
+      const interactive = Boolean(segment.hint) && !segment.hidden;
+      const underline = segment.hidden
+        ? colors.hiddenUnderline
+        : segment.revealed || interactive
+          ? colors.border
+          : undefined;
+      if (!underline) continue;
+      segmentsToDraw.push({
+        key: segment.key,
+        x1: segment.x,
+        x2: segment.x + segment.width,
+        y: segment.y + segment.height - 6,
+        color: underline,
+        dotted: !segment.hidden,
+        debugX: segment.x,
+        debugY: segment.y,
+        debugWidth: segment.width,
+        debugHeight: segment.height,
+      });
+    }
+
+    segmentsToDraw.sort((a, b) => {
+      if (Math.abs(a.y - b.y) > 2) return a.y - b.y;
+      return a.x1 - b.x1;
     });
-  }
+
+    const merged: UnderlineSegment[] = [];
+    for (const segment of segmentsToDraw) {
+      const last = merged[merged.length - 1];
+      if (
+        last &&
+        Math.abs(last.y - segment.y) <= 2 &&
+        Math.abs(last.x2 - segment.x1) <= 4 &&
+        last.color === segment.color &&
+        last.dotted === segment.dotted
+      ) {
+        last.x2 = segment.x2;
+        last.debugWidth = segment.debugX + segment.debugWidth - last.debugX;
+        last.debugHeight = Math.max(last.debugHeight, segment.debugHeight);
+        continue;
+      }
+      merged.push(segment);
+    }
+
+    return merged;
+  }, [colors.border, colors.hiddenUnderline, computedSegments]);
+
+  const debugRects = React.useMemo(
+    () =>
+      SHOW_NATIVE_HINT_DEBUG
+        ? computedSegments.map((segment) => ({
+            key: segment.key,
+            x: segment.x,
+            y: segment.y,
+            width: segment.width,
+            height: segment.height,
+          }))
+        : [],
+    [computedSegments],
+  );
 
   return (
     <View
@@ -406,6 +526,37 @@ function NativeHintText({
         containerStyle,
       ]}
     >
+      <Svg
+        pointerEvents="none"
+        style={StyleSheet.absoluteFill}
+      >
+        {debugRects.map((segment) => (
+          <Rect
+            key={`debug:${segment.key}`}
+            x={segment.x}
+            y={segment.y}
+            width={segment.width}
+            height={segment.height}
+            stroke="#ff4d4f"
+            strokeWidth={1}
+            fill="rgba(255,77,79,0.08)"
+          />
+        ))}
+        {underlineSegments.map((segment) => (
+          <React.Fragment key={segment.key}>
+            <Line
+              x1={segment.x1}
+              x2={segment.x2}
+              y1={segment.y}
+              y2={segment.y}
+              stroke={segment.color}
+              strokeWidth={segment.dotted ? 1.5 : 2}
+              strokeLinecap="round"
+              strokeDasharray={segment.dotted ? [1, 4] : undefined}
+            />
+          </React.Fragment>
+        ))}
+      </Svg>
       {leadingElement && (
         <View
           style={[
@@ -421,6 +572,20 @@ function NativeHintText({
         </View>
       )}
       <Text
+        onLayout={(event) => {
+          setTextLayout(event.nativeEvent.layout);
+        }}
+        onTextLayout={(event) => {
+          setLineLayouts(
+            event.nativeEvent.lines.map((line) => ({
+              text: line.text,
+              x: line.x,
+              y: line.y,
+              width: line.width,
+              height: line.height,
+            })),
+          );
+        }}
         style={[
           flatStyle,
           {
@@ -436,31 +601,26 @@ function NativeHintText({
             : undefined,
         ]}
       >
-        {runs.map((run) => {
-          const interactive = Boolean(run.hint) && !run.hidden;
-          const underline = run.hidden
-            ? colors.hiddenUnderline
-            : run.revealed || interactive
-              ? colors.border
-              : undefined;
-          const color = run.hidden
+        {segments.map((segment) => {
+          const interactive = Boolean(segment.hint) && !segment.hidden;
+          const color = segment.hidden
             ? "transparent"
-            : run.dimmed
+            : segment.dimmed
               ? colors.disabled
               : (flatStyle.color ?? colors.text);
 
           return (
             <Text
-              key={run.key}
+              key={segment.key}
               suppressHighlighting
               onPress={
                 interactive
                   ? (event) => {
-                      if (!run.hint) return;
+                      if (!segment.hint) return;
                       onHintLookup();
                       popup.show({
-                        translation: run.hint.translation,
-                        pronunciation: run.hint.pronunciation,
+                        translation: segment.hint.translation,
+                        pronunciation: segment.hint.pronunciation,
                         x: event.nativeEvent.pageX,
                         y: event.nativeEvent.pageY,
                       });
@@ -471,17 +631,41 @@ function NativeHintText({
                 flatStyle,
                 {
                   color,
-                  textDecorationLine: underline ? "underline" : "none",
-                  textDecorationColor: underline,
-                  textDecorationStyle: run.hidden ? "solid" : "dotted",
                 },
               ]}
             >
-              {run.text}
+              {segment.text}
             </Text>
           );
         })}
       </Text>
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          opacity: 0,
+          left: -10000,
+          top: 0,
+          flexDirection: "row",
+          flexWrap: "nowrap",
+        }}
+      >
+        {segments.map((segment) => (
+          <Text
+            key={`measure:${segment.key}`}
+            onLayout={(event) => {
+              const width = event.nativeEvent.layout.width;
+              setSegmentWidths((current) => {
+                if (current[segment.key] === width) return current;
+                return { ...current, [segment.key]: width };
+              });
+            }}
+            style={[flatStyle, { lineHeight: undefined }]}
+          >
+            {segment.text}
+          </Text>
+        ))}
+      </View>
     </View>
   );
 }
