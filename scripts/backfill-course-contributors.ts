@@ -75,6 +75,19 @@ function resolveConvexRunFlags(): string[] {
   process.exit(1);
 }
 
+// Describe the deployment `convex run` will actually hit, so the startup log
+// never claims "dev" while `CONVEX_DEPLOYMENT` silently points at prod. With
+// `--prod` the target is production; otherwise it is whatever
+// `CONVEX_DEPLOYMENT` resolves to (surfaced verbatim when known).
+function describeConvexTarget(flags: string[]): string {
+  if (flags.includes("--prod")) return "prod (--prod)";
+  const deployment = process.env.CONVEX_DEPLOYMENT?.trim();
+  if (deployment) {
+    return `environment-resolved CONVEX_DEPLOYMENT="${deployment}"`;
+  }
+  return "environment-resolved deployment (CONVEX_DEPLOYMENT unset; set CONVEX_TARGET=prod for production)";
+}
+
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -118,7 +131,7 @@ async function main() {
   let batchNumber = 0;
 
   console.log(
-    `Targeting Convex deployment: ${CONVEX_RUN_FLAGS.includes("--prod") ? "prod" : "default (usually dev)"}`,
+    `Targeting Convex deployment: ${describeConvexTarget(CONVEX_RUN_FLAGS)}`,
   );
 
   while (true) {
