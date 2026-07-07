@@ -496,13 +496,23 @@ function NativeHintText({
     const merged: UnderlineSegment[] = [];
     for (const segment of segmentsToDraw) {
       const last = merged[merged.length - 1];
-      if (
+      const sameGroupOnSameLine =
         last &&
         Math.abs(last.y - segment.y) <= 2 &&
-        Math.abs(last.x2 - segment.x1) <= 4 &&
         last.color === segment.color &&
         last.dotted === segment.dotted &&
-        last.underlineGroupKey === segment.underlineGroupKey
+        last.underlineGroupKey !== undefined &&
+        last.underlineGroupKey === segment.underlineGroupKey;
+      if (
+        sameGroupOnSameLine ||
+        (
+          last &&
+          Math.abs(last.y - segment.y) <= 2 &&
+          Math.abs(last.x2 - segment.x1) <= 4 &&
+          last.color === segment.color &&
+          last.dotted === segment.dotted &&
+          last.underlineGroupKey === segment.underlineGroupKey
+        )
       ) {
         last.x2 = segment.x2;
         last.debugWidth = segment.debugX + segment.debugWidth - last.debugX;
