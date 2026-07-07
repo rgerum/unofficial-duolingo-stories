@@ -2,6 +2,7 @@
   "private": true,
   "packageManager": "pnpm@10.34.4",
   "pnpm": {
+    "//": "kysely is transitive via @better-auth/kysely-adapter; pinned to 0.28.17 for better-auth 1.6.x compatibility (commit 7a311b2f). Re-evaluate when bumping better-auth.",
     "overrides": {
       "kysely": "0.28.17"
     }
@@ -76,7 +77,6 @@
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.9.1",
-    "@types/pg": "^8.20.0",
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
