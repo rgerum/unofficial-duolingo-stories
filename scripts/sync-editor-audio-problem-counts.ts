@@ -15,10 +15,20 @@ type CoursePayload = {
   learningLanguage: string;
   fromLanguage: string;
   ttsReplace: string;
-  stories: Array<{
-    legacyStoryId: number;
-    text: string;
-  }>;
+  stories: StoryPayload[];
+};
+
+type CourseMetadata = Omit<CoursePayload, "stories">;
+
+type StoryPayload = {
+  legacyStoryId: number;
+  text: string;
+};
+
+type CourseStoryPage = {
+  stories: StoryPayload[];
+  continueCursor: string | null;
+  isDone: boolean;
 };
 
 type StoryAudioProblemCount = {
@@ -189,7 +199,7 @@ return courses
   return parseJsonOutput<string[]>(await runCommandOutput("pnpm", args));
 }
 
-async function readCoursePayload(courseShort: string, prod: boolean) {
+async function readCourseMetadata(courseShort: string, prod: boolean) {
   const query = `const course = await ctx.db
   .query("courses")
   .withIndex("by_short", (q) => q.eq("short", ${JSON.stringify(courseShort)}))
@@ -199,12 +209,37 @@ const [learningLanguage, fromLanguage] = await Promise.all([
   ctx.db.get(course.learningLanguageId),
   ctx.db.get(course.fromLanguageId),
 ]);
+return {
+  courseShort: course.short,
+  legacyCourseId: course.legacyId,
+  learningLanguage: learningLanguage?.short ?? "",
+  fromLanguage: fromLanguage?.short ?? "",
+  ttsReplace: learningLanguage?.tts_replace ?? "",
+};`;
+  const args = ["convex", "run"];
+  if (prod) args.push("--prod");
+  args.push("--inline-query", query);
+  return parseJsonOutput<CourseMetadata | null>(
+    await runCommandOutput("pnpm", args),
+  );
+}
+
+async function readCourseStoryPage(
+  courseShort: string,
+  cursor: string | null,
+  prod: boolean,
+) {
+  const query = `const course = await ctx.db
+  .query("courses")
+  .withIndex("by_short", (q) => q.eq("short", ${JSON.stringify(courseShort)}))
+  .unique();
+if (!course || course.deleted) return null;
 const stories = await ctx.db
   .query("stories")
   .withIndex("by_course", (q) => q.eq("courseId", course._id))
-  .collect();
+  .paginate({ cursor: ${JSON.stringify(cursor)}, numItems: 25 });
 const out = [];
-for (const story of stories) {
+for (const story of stories.page) {
   if (!story.public || story.deleted || typeof story.legacyId !== "number") continue;
   const content = await ctx.db
     .query("story_content")
@@ -214,19 +249,33 @@ for (const story of stories) {
   out.push({ legacyStoryId: story.legacyId, text: content.text });
 }
 return {
-  courseShort: course.short,
-  legacyCourseId: course.legacyId,
-  learningLanguage: learningLanguage?.short ?? "",
-  fromLanguage: fromLanguage?.short ?? "",
-  ttsReplace: learningLanguage?.tts_replace ?? "",
   stories: out,
+  continueCursor: stories.continueCursor ?? null,
+  isDone: stories.isDone,
 };`;
   const args = ["convex", "run"];
   if (prod) args.push("--prod");
   args.push("--inline-query", query);
-  return parseJsonOutput<CoursePayload | null>(
+  return parseJsonOutput<CourseStoryPage | null>(
     await runCommandOutput("pnpm", args),
   );
+}
+
+async function readCoursePayload(courseShort: string, prod: boolean) {
+  const metadata = await readCourseMetadata(courseShort, prod);
+  if (!metadata) return null;
+
+  const stories: StoryPayload[] = [];
+  let cursor: string | null = null;
+  do {
+    const page = await readCourseStoryPage(courseShort, cursor, prod);
+    if (!page) return null;
+    stories.push(...page.stories);
+    cursor = page.isDone ? null : page.continueCursor;
+  } while (cursor);
+
+  console.error(`Loaded ${stories.length} published stories for ${courseShort}`);
+  return { ...metadata, stories };
 }
 
 async function buildCourseProblemPayload(course: CoursePayload) {
