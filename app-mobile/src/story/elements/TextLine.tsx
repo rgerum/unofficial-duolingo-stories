@@ -14,6 +14,11 @@ import type { StoryElementLine } from "../types";
 // color under background color) pointing at the avatar.
 const TAIL_WIDTH = 12;
 
+function shouldUseNativeStoryText(lang?: string): boolean {
+  if (!lang) return false;
+  return /^(ja|zh|ko)(-|$)/i.test(lang);
+}
+
 function BubbleTail({
   colors,
   rtl,
@@ -165,6 +170,7 @@ export function TextLine({
     fontSize: fontSizes.body,
     color: colors.text,
   };
+  const preferNativeText = shouldUseNativeStoryText(element.lang);
 
   if (element.line === undefined) return null;
 
@@ -182,6 +188,8 @@ export function TextLine({
             audioRange={audioRange}
             hideRangesForChallenge={hideRanges}
             unhide={unhide}
+            lang={element.lang}
+            renderMode={preferNativeText ? "native" : "tokenized"}
             rtl={lineRtl}
             style={[
               styles.title,
@@ -220,21 +228,23 @@ export function TextLine({
             ]}
           >
             <LineBody
-              hasAudio={false}
+              hasAudio={preferNativeText ? lineAudio.hasAudio : false}
               onPlay={handlePlay}
               rtl={lineRtl}
               styles={styles}
-              naturalWidth
+              naturalWidth={!preferNativeText}
             >
               <HintText
                 content={element.line.content}
                 audioRange={audioRange}
                 hideRangesForChallenge={hideRanges}
                 unhide={unhide}
+                lang={element.lang}
+                renderMode={preferNativeText ? "native" : "tokenized"}
                 rtl={lineRtl}
                 containerStyle={lineRtl ? styles.rtlBubbleText : undefined}
                 leadingElement={
-                  lineAudio.hasAudio ? (
+                  !preferNativeText && lineAudio.hasAudio ? (
                     <PlayAudioButton onPress={handlePlay} rtl={lineRtl} />
                   ) : undefined
                 }
@@ -265,6 +275,8 @@ export function TextLine({
           audioRange={audioRange}
           hideRangesForChallenge={hideRanges}
           unhide={unhide}
+          lang={element.lang}
+          renderMode={preferNativeText ? "native" : "tokenized"}
           rtl={lineRtl}
           containerStyle={lineRtl ? styles.rtlProseText : undefined}
           fillLineWidth={lineRtl}

@@ -1,7 +1,7 @@
 import React from "react";
 import {
-  Pressable,
   Platform,
+  Pressable,
   StyleSheet,
   type StyleProp,
   type TextStyle,
@@ -20,6 +20,9 @@ import type { ContentWithHints, HideRange } from "./types";
 // underlines are real (dashed) bottom borders.
 
 const WRAPPED_LINE_GAP = 3;
+const NATIVE_TEXT_AUDIO_PADDING = 32;
+
+type HintTextRenderMode = "auto" | "native" | "tokenized";
 
 function splitTextTokens(text: string): string[] {
   if (!text) return [];
@@ -49,6 +52,18 @@ type Token = {
 
 function getDisplayText(token: Token): string {
   return token.text.replace(/\s+/g, " ");
+}
+
+function shouldUseNativeTextLayout(lang?: string): boolean {
+  if (!lang) return false;
+  return /^(ja|zh|ko)(-|$)/i.test(lang);
+}
+
+function isLeadingPunctuationToken(text: string): boolean {
+  const normalized = text.replace(/[\u200b-\u200d\ufeff]/g, "");
+  return /^[,.:;!?%)}\]\u3001\u3002\u30fb\u30fc\uff01\uff1f\uff09\uff0c\uff0e]+$/u.test(
+    normalized,
+  );
 }
 
 function HintTokenBox({
@@ -233,42 +248,27 @@ function HintPhraseBox({
   );
 }
 
-export function HintText({
+function buildTokens({
   content,
   audioRange,
   hideRangesForChallenge,
+  showHints,
   unhide,
-  showHints = true,
-  style,
-  containerStyle,
-  leadingElement,
-  rtl = false,
-  centered = false,
-  fillLineWidth = false,
 }: {
   content: ContentWithHints;
-  /** Highest spoken character index during playback (99999 = idle). */
   audioRange?: number;
   hideRangesForChallenge?: HideRange[];
-  /** Progressive reveal for arrange/continuation (-1 reveals everything). */
+  showHints: boolean;
   unhide?: number;
-  showHints?: boolean;
-  style?: StyleProp<TextStyle>;
-  containerStyle?: ViewStyle;
-  leadingElement?: React.ReactNode;
-  rtl?: boolean;
-  centered?: boolean;
-  fillLineWidth?: boolean;
-}) {
-  const { colors } = useTheme();
-  const popup = React.useContext(HintPopupContext);
-  const onHintLookup = React.useContext(HintLookupContext);
-
-  if (!content) return null;
-
+}): Token[] {
   const visible: ContentWithHints = showHints
     ? content
-    : { ...content, hintMap: [], hints: undefined, hints_pronunciation: undefined };
+    : {
+        ...content,
+        hintMap: [],
+        hints: undefined,
+        hints_pronunciation: undefined,
+      };
 
   let entry: HideRange | undefined = hideRangesForChallenge?.[0];
   if (entry) {
@@ -287,7 +287,7 @@ export function HintText({
     const pieces = splitTextTokens(visible.text.substring(start, end));
     let position = start;
     for (const piece of pieces) {
-      // Separate whitespace from punctuation (e.g. ". " → "." + " ") so
+      // Separate whitespace from punctuation (e.g. ". " -> "." + " ") so
       // whitespace alone defines the wrap points.
       for (const sub of piece.split(/(\s+)/)) {
         if (!sub) continue;
@@ -331,7 +331,224 @@ export function HintText({
   }
   if (textPos < visible.text.length) pushRun(textPos, visible.text.length);
 
+  return tokens;
+}
+
+function NativeHintText({
+  tokens,
+  flatStyle,
+  containerStyle,
+  leadingElement,
+  rtl,
+  centered,
+  fillLineWidth,
+}: {
+  tokens: Token[];
+  flatStyle: TextStyle;
+  containerStyle?: ViewStyle;
+  leadingElement?: React.ReactNode;
+  rtl: boolean;
+  centered: boolean;
+  fillLineWidth: boolean;
+}) {
+  const { colors } = useTheme();
+  const popup = React.useContext(HintPopupContext);
+  const onHintLookup = React.useContext(HintLookupContext);
+
+  type InlineRun = {
+    key: string;
+    text: string;
+    hidden: boolean;
+    revealed: boolean;
+    dimmed: boolean;
+    hint?: Token["hint"];
+  };
+
+  const runs: InlineRun[] = [];
+  for (const token of tokens) {
+    const last = runs[runs.length - 1];
+    const sameHint =
+      last?.hint?.translation === token.hint?.translation &&
+      last?.hint?.pronunciation === token.hint?.pronunciation;
+    const shouldAttachToPrevious =
+      last !== undefined &&
+      !/^\s+$/.test(token.text) &&
+      isLeadingPunctuationToken(token.text);
+    if (
+      last &&
+      (shouldAttachToPrevious ||
+        (sameHint &&
+          last.hidden === token.hidden &&
+          last.revealed === token.revealed &&
+          last.dimmed === token.dimmed))
+    ) {
+      last.text += token.text;
+      continue;
+    }
+    runs.push({
+      key: `${token.start}:${runs.length}`,
+      text: token.text,
+      hidden: token.hidden,
+      revealed: token.revealed,
+      dimmed: token.dimmed,
+      hint: token.hint,
+    });
+  }
+
+  return (
+    <View
+      style={[
+        {
+          minWidth: 0,
+          alignSelf: fillLineWidth ? "stretch" : "flex-start",
+          width: fillLineWidth ? "100%" : undefined,
+        },
+        containerStyle,
+      ]}
+    >
+      {leadingElement && (
+        <View
+          style={[
+            {
+              position: "absolute",
+              top: 2,
+              zIndex: 1,
+            },
+            rtl ? { right: 0 } : { left: 0 },
+          ]}
+        >
+          {leadingElement}
+        </View>
+      )}
+      <Text
+        style={[
+          flatStyle,
+          {
+            minWidth: 0,
+            writingDirection: rtl ? "rtl" : "ltr",
+            textAlign: centered ? "center" : "auto",
+            alignSelf: fillLineWidth ? "stretch" : "flex-start",
+          },
+          leadingElement
+            ? rtl
+              ? { paddingRight: NATIVE_TEXT_AUDIO_PADDING }
+              : { paddingLeft: NATIVE_TEXT_AUDIO_PADDING }
+            : undefined,
+        ]}
+      >
+        {runs.map((run) => {
+          const interactive = Boolean(run.hint) && !run.hidden;
+          const underline = run.hidden
+            ? colors.hiddenUnderline
+            : run.revealed || interactive
+              ? colors.border
+              : undefined;
+          const color = run.hidden
+            ? "transparent"
+            : run.dimmed
+              ? colors.disabled
+              : (flatStyle.color ?? colors.text);
+
+          return (
+            <Text
+              key={run.key}
+              suppressHighlighting
+              onPress={
+                interactive
+                  ? (event) => {
+                      if (!run.hint) return;
+                      onHintLookup();
+                      popup.show({
+                        translation: run.hint.translation,
+                        pronunciation: run.hint.pronunciation,
+                        x: event.nativeEvent.pageX,
+                        y: event.nativeEvent.pageY,
+                      });
+                    }
+                  : undefined
+              }
+              style={[
+                flatStyle,
+                {
+                  color,
+                  textDecorationLine: underline ? "underline" : "none",
+                  textDecorationColor: underline,
+                  textDecorationStyle: run.hidden ? "solid" : "dotted",
+                },
+              ]}
+            >
+              {run.text}
+            </Text>
+          );
+        })}
+      </Text>
+    </View>
+  );
+}
+
+export function HintText({
+  content,
+  audioRange,
+  hideRangesForChallenge,
+  unhide,
+  showHints = true,
+  style,
+  containerStyle,
+  leadingElement,
+  lang,
+  rtl = false,
+  centered = false,
+  fillLineWidth = false,
+  renderMode = "auto",
+}: {
+  content: ContentWithHints;
+  /** Highest spoken character index during playback (99999 = idle). */
+  audioRange?: number;
+  hideRangesForChallenge?: HideRange[];
+  /** Progressive reveal for arrange/continuation (-1 reveals everything). */
+  unhide?: number;
+  showHints?: boolean;
+  style?: StyleProp<TextStyle>;
+  containerStyle?: ViewStyle;
+  leadingElement?: React.ReactNode;
+  lang?: string;
+  rtl?: boolean;
+  centered?: boolean;
+  fillLineWidth?: boolean;
+  renderMode?: HintTextRenderMode;
+}) {
+  const { colors } = useTheme();
+  const popup = React.useContext(HintPopupContext);
+  const onHintLookup = React.useContext(HintLookupContext);
+
+  if (!content) return null;
+
   const flatStyle = StyleSheet.flatten(style) ?? {};
+  const tokens = buildTokens({
+    content,
+    audioRange,
+    hideRangesForChallenge,
+    showHints,
+    unhide,
+  });
+  const resolvedRenderMode =
+    renderMode === "auto"
+      ? (shouldUseNativeTextLayout(lang) ? "native" : "tokenized")
+      : renderMode;
+
+  if (resolvedRenderMode === "native") {
+    return (
+      <NativeHintText
+        tokens={tokens}
+        flatStyle={flatStyle}
+        containerStyle={containerStyle}
+        leadingElement={leadingElement}
+        rtl={rtl}
+        centered={centered}
+        fillLineWidth={fillLineWidth}
+      />
+    );
+  }
 
   const renderBox = (token: Token, key: React.Key) => {
     // Story texts contain runs of spaces (HTML collapses them, RN

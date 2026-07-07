@@ -77,7 +77,7 @@ export function MultipleChoiceQuestion({
               {typeof answer === "string" ? (
                 <Text style={answerStyle}>{answer}</Text>
               ) : (
-                <HintText content={answer} style={answerStyle} />
+                <HintText content={answer} lang={element.lang} style={answerStyle} />
               )}
             </View>
           </Pressable>
