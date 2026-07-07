@@ -34,9 +34,33 @@ import type {
 } from "@/app/editor/story/[story]/audio-cutter-storage";
 import { getSegmentRelativeKeypointsFromWordMarks } from "@/app/editor/story/[story]/audio-cutter-keypoints";
 import {
-  getGraphemeLength,
-  getTranscriptWordTokens,
-} from "@/app/editor/story/[story]/audio-cutter-text";
+  clamp,
+  formatSeconds,
+  getErrorMessage,
+  getFileBaseName,
+} from "@/lib/editor/audio/format";
+import {
+  areSegmentsEqual,
+  type AudioSilenceAnalysis,
+  clampTimeToKeepRanges,
+  createSegmentId,
+  detectSpeechSegmentsFromAnalysis,
+  getKeepRangeEnd,
+  getKeepRanges,
+  getSegmentSkipRangesFromAnalysis,
+  getTotalRangeDuration,
+  type Segment,
+  type SegmentDraft,
+  sortSegments,
+  type TimeRange,
+} from "@/lib/editor/audio/segments";
+import {
+  applyWordMarkTimeOverrides,
+  getActiveWordMarkIndex,
+  getApproximateWordMarks,
+  getApproximateWordPlaybackRange,
+  MIN_WORD_MARK_GAP_MS,
+} from "@/lib/editor/audio/word_marks";
 
 const DEFAULT_WAVEFORM_ZOOM = 180;
 const MIN_WAVEFORM_ZOOM = 24;
@@ -55,7 +79,6 @@ const DETECTION_SETTINGS_STORAGE_KEY = "audio-cutter-detection-settings-v1";
 const SHRINK_WRAP_STABILITY_EPSILON_SECONDS = 0.01;
 const MP3_BITRATE_KBPS = 128;
 const MP3_SAMPLE_BLOCK_SIZE = 1152;
-const MIN_WORD_MARK_GAP_MS = 20;
 const SEGMENT_HISTORY_LIMIT = 100;
 const SEGMENT_COLOR = "rgba(28,176,246,0.2)";
 const SEGMENT_SELECTED_COLOR = "rgba(28,176,246,0.34)";
@@ -66,45 +89,14 @@ const cachedAudioSegmentation = new WeakMap<
   Map<string, CachedAudioSegmentation>
 >();
 
-type TimeRange = {
-  start: number;
-  end: number;
-};
-
-type Segment = {
-  id: string;
-  start: number;
-  end: number;
-  label?: string;
-  skipRanges: TimeRange[];
-};
-
 type MergePreview = {
   activeId: string;
   targetId: string;
 };
 
-type SegmentDraft = {
-  start: number;
-  end: number;
-  skipRanges?: TimeRange[];
-};
-
 type SegmentHistory = {
   past: Segment[][];
   future: Segment[][];
-};
-
-type AudioSilenceAnalysis = {
-  duration: number;
-  levels: number[];
-  startPaddingSeconds: number;
-  endPaddingSeconds: number;
-  threshold: number;
-  windowSeconds: number;
-  minSilenceWindows: number;
-  minSpeechWindows: number;
-  minSilenceSeconds: number;
 };
 
 type CachedAudioSegmentation = {
@@ -184,62 +176,10 @@ const EMPTY_REGIONS_PLUGIN: RegionsPlugin = {
   un: () => {},
 };
 
-function sortSegments(segments: Segment[]) {
-  return [...segments].sort((left, right) => left.start - right.start);
-}
-
-function areTimeRangesEqual(left: TimeRange[], right: TimeRange[]) {
-  if (left.length !== right.length) return false;
-  return left.every((range, index) => {
-    const other = right[index];
-    return other && range.start === other.start && range.end === other.end;
-  });
-}
-
-function areSegmentsEqual(left: Segment[], right: Segment[]) {
-  if (left.length !== right.length) return false;
-  return left.every((segment, index) => {
-    const other = right[index];
-    return (
-      other &&
-      segment.id === other.id &&
-      segment.start === other.start &&
-      segment.end === other.end &&
-      segment.label === other.label &&
-      areTimeRangesEqual(segment.skipRanges, other.skipRanges)
-    );
-  });
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
-}
-
-function formatSeconds(value: number) {
-  const totalMs = Math.max(0, Math.round(value * 1000));
-  const minutes = Math.floor(totalMs / 60_000);
-  const seconds = Math.floor((totalMs % 60_000) / 1000);
-  const milliseconds = totalMs % 1000;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(milliseconds).padStart(3, "0")}`;
-}
-
-function getFileBaseName(filename: string) {
-  const dotIndex = filename.lastIndexOf(".");
-  return dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
-}
-
-function getErrorMessage(error: unknown, fallback: string) {
-  return error instanceof Error && error.message ? error.message : fallback;
-}
-
 function waitForNextAnimationFrame() {
   return new Promise<void>((resolve) => {
     requestAnimationFrame(() => resolve());
   });
-}
-
-function createSegmentId() {
-  return `segment-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function getWaveformScrollElement(
@@ -354,297 +294,6 @@ function overlapsSegment(
   );
 }
 
-function sortRanges(ranges: TimeRange[]) {
-  return [...ranges].sort((left, right) => left.start - right.start);
-}
-
-function normalizeRanges(
-  ranges: TimeRange[] | undefined,
-  bounds: { start: number; end: number },
-) {
-  const normalized: TimeRange[] = [];
-
-  for (const range of sortRanges(ranges ?? [])) {
-    const start = clamp(range.start, bounds.start, bounds.end);
-    const end = clamp(range.end, start, bounds.end);
-    if (end - start <= 0.001) continue;
-
-    const previous = normalized[normalized.length - 1];
-    if (!previous || start > previous.end) {
-      normalized.push({ start, end });
-      continue;
-    }
-
-    previous.end = Math.max(previous.end, end);
-  }
-
-  return normalized;
-}
-
-function getTotalRangeDuration(ranges: TimeRange[] | undefined) {
-  return (ranges ?? []).reduce(
-    (total, range) => total + Math.max(0, range.end - range.start),
-    0,
-  );
-}
-
-function getKeepRangeEnd(
-  bounds: TimeRange,
-  skipRanges: TimeRange[] | undefined,
-) {
-  const keepRanges = getKeepRanges(bounds, skipRanges);
-  return keepRanges[keepRanges.length - 1]?.end ?? bounds.end;
-}
-
-function getEffectiveSegmentDuration(segment: {
-  start: number;
-  end: number;
-  skipRanges?: TimeRange[];
-}) {
-  return Math.max(
-    0,
-    segment.end - segment.start - getTotalRangeDuration(segment.skipRanges),
-  );
-}
-
-function getKeepRanges(bounds: TimeRange, skipRanges: TimeRange[] | undefined) {
-  const normalizedSkipRanges = normalizeRanges(skipRanges, bounds);
-  if (normalizedSkipRanges.length === 0) return [bounds];
-
-  const keepRanges: TimeRange[] = [];
-  let cursor = bounds.start;
-
-  for (const skipRange of normalizedSkipRanges) {
-    if (skipRange.start > cursor) {
-      keepRanges.push({
-        start: cursor,
-        end: skipRange.start,
-      });
-    }
-    cursor = Math.max(cursor, skipRange.end);
-  }
-
-  if (cursor < bounds.end) {
-    keepRanges.push({
-      start: cursor,
-      end: bounds.end,
-    });
-  }
-
-  return keepRanges.filter((range) => range.end - range.start > 0.001);
-}
-
-function mapPlayableOffsetToAbsoluteTime(
-  keepRanges: TimeRange[],
-  offsetSeconds: number,
-) {
-  if (keepRanges.length === 0) return 0;
-
-  let remaining = Math.max(0, offsetSeconds);
-  for (const range of keepRanges) {
-    const rangeDuration = Math.max(0, range.end - range.start);
-    if (remaining <= rangeDuration) {
-      return range.start + remaining;
-    }
-    remaining -= rangeDuration;
-  }
-
-  return keepRanges[keepRanges.length - 1]?.end ?? 0;
-}
-
-function clampTimeToKeepRanges(timeSeconds: number, keepRanges: TimeRange[]) {
-  if (keepRanges.length === 0) return timeSeconds;
-
-  if (timeSeconds <= keepRanges[0]?.start) {
-    return keepRanges[0]?.start ?? timeSeconds;
-  }
-
-  for (let index = 0; index < keepRanges.length; index += 1) {
-    const range = keepRanges[index];
-    if (!range) continue;
-    if (timeSeconds >= range.start && timeSeconds <= range.end) {
-      return timeSeconds;
-    }
-
-    const nextRange = keepRanges[index + 1];
-    if (!nextRange || timeSeconds >= nextRange.start) continue;
-
-    const previousDistance = Math.abs(timeSeconds - range.end);
-    const nextDistance = Math.abs(nextRange.start - timeSeconds);
-    return previousDistance <= nextDistance ? range.end : nextRange.start;
-  }
-
-  return keepRanges[keepRanges.length - 1]?.end ?? timeSeconds;
-}
-
-function getApproximateWordMarks(text: string, segment: Segment): AudioMark[] {
-  const tokens = getTranscriptWordTokens(text);
-  if (tokens.length === 0) return [];
-
-  const keepRanges = getKeepRanges(
-    {
-      start: segment.start,
-      end: segment.end,
-    },
-    segment.skipRanges,
-  );
-  const totalKeepDuration = getTotalRangeDuration(keepRanges);
-  if (keepRanges.length === 0 || totalKeepDuration <= 0) return [];
-
-  const weights = tokens.map((token) =>
-    Math.max(1, getGraphemeLength(token.text)),
-  );
-  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
-  if (totalWeight <= 0) return [];
-
-  let cumulativeWeight = 0;
-  return tokens.map((token, index) => {
-    const startOffsetSeconds =
-      (totalKeepDuration * cumulativeWeight) / totalWeight;
-    cumulativeWeight += weights[index] ?? 0;
-    const startSeconds = mapPlayableOffsetToAbsoluteTime(
-      keepRanges,
-      startOffsetSeconds,
-    );
-
-    return {
-      time: Math.round(startSeconds * 1000),
-      type: "word",
-      start: token.start,
-      end: token.end,
-      value: token.text,
-    };
-  });
-}
-
-function getApproximateWordPlaybackRange(
-  segment: Segment,
-  marks: AudioMark[],
-  markIndex: number,
-) {
-  const mark = marks[markIndex];
-  if (!mark) return null;
-
-  const startSeconds = mark.time / 1000;
-  const nextMark = marks[markIndex + 1];
-  const keepRangeEnd = getKeepRangeEnd(
-    {
-      start: segment.start,
-      end: segment.end,
-    },
-    segment.skipRanges,
-  );
-  const endSeconds = Math.max(
-    startSeconds + 0.06,
-    nextMark ? nextMark.time / 1000 : keepRangeEnd,
-  );
-
-  return {
-    startSeconds,
-    endSeconds,
-  };
-}
-
-function applyWordMarkTimeOverrides(
-  approximateMarks: AudioMark[],
-  timeOverridesMs: number[] | undefined,
-  segment: Segment,
-) {
-  if (approximateMarks.length === 0) return approximateMarks;
-
-  const keepRanges = getKeepRanges(
-    {
-      start: segment.start,
-      end: segment.end,
-    },
-    segment.skipRanges,
-  );
-  if (keepRanges.length === 0) return approximateMarks;
-
-  const keepStartMs = Math.round(
-    (keepRanges[0]?.start ?? segment.start) * 1000,
-  );
-  const keepEndMs = Math.round(
-    getKeepRangeEnd(
-      {
-        start: segment.start,
-        end: segment.end,
-      },
-      segment.skipRanges,
-    ) * 1000,
-  );
-
-  return approximateMarks.map((mark, index) => {
-    const previousTimeMs =
-      index > 0
-        ? (timeOverridesMs?.[index - 1] ??
-          approximateMarks[index - 1]?.time ??
-          keepStartMs)
-        : keepStartMs;
-    const nextTimeMs =
-      timeOverridesMs?.[index + 1] ??
-      approximateMarks[index + 1]?.time ??
-      keepEndMs;
-    const minTimeMs =
-      index === 0 ? keepStartMs : previousTimeMs + MIN_WORD_MARK_GAP_MS;
-    const maxTimeMs =
-      index === approximateMarks.length - 1
-        ? keepEndMs
-        : nextTimeMs - MIN_WORD_MARK_GAP_MS;
-    const boundedTimeMs = clamp(
-      timeOverridesMs?.[index] ?? mark.time,
-      minTimeMs,
-      Math.max(minTimeMs, maxTimeMs),
-    );
-    const clampedTimeSeconds = clampTimeToKeepRanges(
-      boundedTimeMs / 1000,
-      keepRanges,
-    );
-
-    return {
-      ...mark,
-      time: Math.round(clampedTimeSeconds * 1000),
-    };
-  });
-}
-
-function getActiveWordMarkIndex(
-  segment: Segment,
-  marks: AudioMark[],
-  currentTimeSeconds: number,
-) {
-  if (marks.length === 0) return -1;
-  if (currentTimeSeconds < segment.start || currentTimeSeconds > segment.end) {
-    return -1;
-  }
-
-  const keepRangeEnd = getKeepRangeEnd(
-    {
-      start: segment.start,
-      end: segment.end,
-    },
-    segment.skipRanges,
-  );
-
-  for (let index = 0; index < marks.length; index += 1) {
-    const markStartSeconds = (marks[index]?.time ?? 0) / 1000;
-    const nextMarkTime = marks[index + 1]?.time;
-    const nextStartSeconds =
-      nextMarkTime != null ? nextMarkTime / 1000 : keepRangeEnd;
-
-    if (
-      currentTimeSeconds >= markStartSeconds &&
-      currentTimeSeconds < nextStartSeconds
-    ) {
-      return index;
-    }
-  }
-
-  return currentTimeSeconds >= (marks[marks.length - 1]?.time ?? 0) / 1000
-    ? marks.length - 1
-    : -1;
-}
-
 function sanitizeDetectionSettings(
   settings: Partial<DetectionSettings> | undefined,
 ): DetectionSettings {
@@ -749,163 +398,6 @@ function analyzeAudioSilence(
     minSpeechWindows: Math.max(2, Math.round(0.18 / windowSeconds)),
     minSilenceSeconds: settings.minSilenceSeconds,
   };
-}
-
-function detectSpeechSegmentsFromAnalysis({
-  duration,
-  levels,
-  minSilenceWindows,
-  minSpeechWindows,
-  startPaddingSeconds,
-  endPaddingSeconds,
-  threshold,
-  windowSeconds,
-}: AudioSilenceAnalysis) {
-  if (!Number.isFinite(duration) || duration <= 0) return [];
-
-  const segments: SegmentDraft[] = [];
-  let speechStartWindow: number | null = null;
-  let lastLoudWindow = -1;
-
-  for (let windowIndex = 0; windowIndex < levels.length; windowIndex += 1) {
-    const isLoud = (levels[windowIndex] ?? 0) >= threshold;
-
-    if (isLoud) {
-      if (speechStartWindow === null) {
-        speechStartWindow = windowIndex;
-      }
-      lastLoudWindow = windowIndex;
-      continue;
-    }
-
-    if (speechStartWindow === null) continue;
-    const silentWindows = windowIndex - lastLoudWindow;
-    if (silentWindows < minSilenceWindows) continue;
-
-    if (lastLoudWindow - speechStartWindow + 1 >= minSpeechWindows) {
-      segments.push({
-        start: Math.max(
-          0,
-          speechStartWindow * windowSeconds - startPaddingSeconds,
-        ),
-        end: Math.min(
-          duration,
-          lastLoudWindow * windowSeconds + windowSeconds + endPaddingSeconds,
-        ),
-      });
-    }
-
-    speechStartWindow = null;
-    lastLoudWindow = -1;
-  }
-
-  if (
-    speechStartWindow !== null &&
-    lastLoudWindow - speechStartWindow + 1 >= minSpeechWindows
-  ) {
-    segments.push({
-      start: Math.max(
-        0,
-        speechStartWindow * windowSeconds - startPaddingSeconds,
-      ),
-      end: Math.min(
-        duration,
-        lastLoudWindow * windowSeconds + windowSeconds + endPaddingSeconds,
-      ),
-    });
-  }
-
-  return segments.reduce<SegmentDraft[]>((acc, segment) => {
-    const previous = acc[acc.length - 1];
-    if (!previous) {
-      acc.push(segment);
-      return acc;
-    }
-
-    if (segment.start - previous.end < minSilenceWindows * windowSeconds) {
-      previous.end = Math.max(previous.end, segment.end);
-      return acc;
-    }
-
-    acc.push(segment);
-    return acc;
-  }, []);
-}
-
-function getSegmentSkipRangesFromAnalysis(
-  analysis: AudioSilenceAnalysis,
-  segment: TimeRange,
-  maxInternalSilenceSeconds: number,
-) {
-  if (maxInternalSilenceSeconds <= 0) return [];
-
-  const { levels, threshold, windowSeconds } = analysis;
-  if (levels.length === 0) return [];
-
-  const startWindow = clamp(
-    Math.floor(segment.start / windowSeconds),
-    0,
-    levels.length - 1,
-  );
-  const endWindowExclusive = clamp(
-    Math.ceil(segment.end / windowSeconds),
-    startWindow + 1,
-    levels.length,
-  );
-
-  let firstLoudWindow = -1;
-  let lastLoudWindow = -1;
-  for (let index = startWindow; index < endWindowExclusive; index += 1) {
-    if ((levels[index] ?? 0) < threshold) continue;
-    if (firstLoudWindow === -1) firstLoudWindow = index;
-    lastLoudWindow = index;
-  }
-
-  if (firstLoudWindow === -1 || lastLoudWindow === -1) return [];
-
-  const skipRanges: TimeRange[] = [];
-  let silentRunStart = -1;
-
-  for (let index = firstLoudWindow; index <= lastLoudWindow + 1; index += 1) {
-    const isLoud = index <= lastLoudWindow && (levels[index] ?? 0) >= threshold;
-
-    if (!isLoud) {
-      if (silentRunStart === -1) {
-        silentRunStart = index;
-      }
-      continue;
-    }
-
-    if (silentRunStart === -1) continue;
-
-    const silentWindowCount = index - silentRunStart;
-    const silentDuration = silentWindowCount * windowSeconds;
-    if (silentDuration > maxInternalSilenceSeconds) {
-      const rawSilenceStart = silentRunStart * windowSeconds;
-      const rawSilenceEnd = index * windowSeconds;
-      const skipStart = clamp(
-        rawSilenceStart + maxInternalSilenceSeconds / 2,
-        segment.start,
-        segment.end,
-      );
-      const skipEnd = clamp(
-        rawSilenceEnd - maxInternalSilenceSeconds / 2,
-        skipStart,
-        segment.end,
-      );
-
-      if (skipEnd - skipStart > 0.001) {
-        skipRanges.push({
-          start: skipStart,
-          end: skipEnd,
-        });
-      }
-    }
-
-    silentRunStart = -1;
-  }
-
-  return normalizeRanges(skipRanges, segment);
 }
 
 function getCachedAudioSegmentation(

@@ -18,7 +18,7 @@ Repo verification gate (used by every plan): `pnpm typecheck && pnpm lint && pnp
 | 006 | Convex function test harness (convex-test + vitest) | P1 | M | 001 | TODO |
 | 007 | Repo hygiene: tmp/ untrack, @types/pg, kysely note, debug logs | P3 | S | — | TODO |
 | 008 | Harden shared-secret HTTP endpoints; internalize backfills | P3 | S | — | TODO |
-| 009 | Extract pure logic from the 4,135-line audio-cutter dialog | P2 | M–L | 001, 005 | TODO |
+| 009 | Extract pure logic from the 4,135-line audio-cutter dialog | P2 | M–L | 001, 005 | DONE |
 | 010 | Design the author-identity + Postgres-sunset schema migrations | P2 | M | 006 | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale).
