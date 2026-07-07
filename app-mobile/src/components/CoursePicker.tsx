@@ -21,8 +21,8 @@ type LandingGroup = LandingData["groups"][number];
 type CourseItem = LandingGroup["courses"][number];
 
 /**
- * Course list grouped by base language ("Stories for English", …), fed by the
- * same landing-page query as the web. English group comes first server-side.
+ * Course list grouped by base language, fed by the same landing-page query as
+ * the web. English group comes first server-side.
  */
 export function CoursePicker({
   selectedShort,
@@ -68,7 +68,7 @@ export function CoursePicker({
       );
       return {
         key: String(group.fromLanguageId),
-        title: `${group.labels.storiesFor} ${group.fromLanguageName}`,
+        title: group.labels.storiesFor,
         template: group.labels.nStoriesTemplate,
         data: courses,
       };
