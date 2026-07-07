@@ -1,5 +1,5 @@
-// The Discord avatar backfill is exposed as an internal action (not an HTTP
-// route) and an admin-gated public action. To run it as an operator, invoke a
+// The Discord avatar backfill is exposed as an internal action only (not an
+// HTTP route and not a public action). To run it as an operator, invoke a
 // single batch with:
 //
 //   pnpm exec convex run discordAvatarSync:backfillDiscordUserImagesInternal '{"dryRun": true}'
@@ -7,7 +7,7 @@
 // then repeat, passing the returned `nextCursor` as `{"cursor": "..."}` until
 // `isDone` is true. The `pnpm run backfill:discord-avatars` script drives this
 // loop automatically.
-import { action, internalAction, type ActionCtx } from "./_generated/server";
+import { internalAction, type ActionCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
 import { syncDiscordAvatarFromAccount } from "./lib/discordAvatarSync";
@@ -230,20 +230,6 @@ export const backfillDiscordUserImagesInternal = internalAction({
   args: backfillArgsValidator,
   returns: backfillReturnsValidator,
   handler: async (ctx, args) => {
-    return await runDiscordAvatarBackfill(ctx, args);
-  },
-});
-
-export const backfillDiscordUserImages = action({
-  args: backfillArgsValidator,
-  returns: backfillReturnsValidator,
-  handler: async (ctx, args) => {
-    const identity = (await ctx.auth.getUserIdentity()) as {
-      role?: string | null;
-    } | null;
-    if (identity?.role !== "admin") {
-      throw new Error("Unauthorized");
-    }
     return await runDiscordAvatarBackfill(ctx, args);
   },
 });

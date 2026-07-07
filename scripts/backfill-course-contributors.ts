@@ -6,8 +6,20 @@ dotenv.config({ path: ".env.local" });
 // The backfill is an internal Convex mutation (no HTTP route / shared secret).
 // This script drives it batch-by-batch via `pnpm exec convex run`, following
 // the returned cursor until the whole `courses` table has been processed.
+//
+// Deployment target: `convex run` uses the deployment resolved from the
+// environment (`CONVEX_DEPLOYMENT` in `.env.local`, typically your dev
+// deployment). To run against production, set `CONVEX_TARGET=prod`, which
+// appends `--prod` to every `convex run` invocation, e.g.:
+//
+//   CONVEX_TARGET=prod pnpm run backfill:course-contributors
+//
+// Underlying invocation:
+//   pnpm exec convex run [--prod] \
+//     courseContributorBackfill:backfillCourseContributorDetailsBatchInternal '{...}'
 const INTERNAL_FUNCTION =
   "courseContributorBackfill:backfillCourseContributorDetailsBatchInternal";
+const CONVEX_RUN_FLAGS = resolveConvexRunFlags();
 const BATCH_SIZE = parsePositiveNumber(
   process.env.COURSE_CONTRIBUTOR_BACKFILL_BATCH_SIZE,
   10,
@@ -50,6 +62,19 @@ function parseBooleanEnv(value: string | undefined, defaultValue: boolean) {
   return defaultValue;
 }
 
+// Explicitly select the Convex deployment so operators never silently backfill
+// the wrong one. Defaults to the environment-resolved (usually dev) deployment;
+// set CONVEX_TARGET=prod to append `--prod`.
+function resolveConvexRunFlags(): string[] {
+  const target = process.env.CONVEX_TARGET?.trim().toLowerCase();
+  if (target === undefined || target === "" || target === "dev") return [];
+  if (target === "prod" || target === "production") return ["--prod"];
+  console.error(
+    `Error: unsupported CONVEX_TARGET "${process.env.CONVEX_TARGET}" (expected "dev" or "prod").`,
+  );
+  process.exit(1);
+}
+
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -72,7 +97,14 @@ function runBatch(cursor: string | null): BackfillResult {
   const args = { batchSize: BATCH_SIZE, cursor, dryRun: DRY_RUN };
   const stdout = execFileSync(
     "pnpm",
-    ["exec", "convex", "run", INTERNAL_FUNCTION, JSON.stringify(args)],
+    [
+      "exec",
+      "convex",
+      "run",
+      ...CONVEX_RUN_FLAGS,
+      INTERNAL_FUNCTION,
+      JSON.stringify(args),
+    ],
     { encoding: "utf8" },
   );
   return extractJson(stdout) as BackfillResult;
@@ -84,6 +116,10 @@ async function main() {
   let updatedCoursesTotal = 0;
   const errors: BackfillResult["errors"] = [];
   let batchNumber = 0;
+
+  console.log(
+    `Targeting Convex deployment: ${CONVEX_RUN_FLAGS.includes("--prod") ? "prod" : "default (usually dev)"}`,
+  );
 
   while (true) {
     batchNumber += 1;
