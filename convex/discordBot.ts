@@ -138,6 +138,13 @@ export const setContributorWriteByDiscordAccountId = httpAction(
       if (!parsed.write && currentRole === "contributor") nextRole = "user";
 
       if (nextRole !== currentRole) {
+        console.log("discord-role-sync: contributor write change", {
+          discordAccountId: parsed.discordAccountId,
+          write: parsed.write,
+          userId: user._id,
+          fromRole: currentRole,
+          toRole: nextRole,
+        });
         await ctx.runMutation(components.betterAuth.adapter.updateOne, {
           input: {
             model: "user",

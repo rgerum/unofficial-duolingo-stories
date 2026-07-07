@@ -1,13 +1,13 @@
+import { execFileSync } from "node:child_process";
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
-const CONVEX_SITE_URL =
-  process.env.NEXT_PUBLIC_CONVEX_SITE_URL ??
-  process.env.CONVEX_SITE_URL ??
-  process.env.NEXT_PUBLIC_CONVEX_URL ??
-  process.env.CONVEX_URL;
-const DISCORD_AVATAR_SYNC_SECRET = process.env.DISCORD_AVATAR_SYNC_SECRET;
+// The backfill is an internal Convex action (no HTTP route / shared secret).
+// This script drives it batch-by-batch via `pnpm exec convex run`, following
+// the returned cursor until every Discord account has been processed.
+const INTERNAL_FUNCTION =
+  "discordAvatarSync:backfillDiscordUserImagesInternal";
 const TOTAL_LIMIT = parseOptionalNumber(process.env.DISCORD_AVATAR_SYNC_LIMIT);
 const BATCH_SIZE = parsePositiveNumber(
   process.env.DISCORD_AVATAR_SYNC_BATCH_SIZE,
@@ -18,18 +18,6 @@ const BATCH_DELAY_MS = parsePositiveNumber(
   0,
 );
 const DRY_RUN = parseBooleanEnv(process.env.DISCORD_AVATAR_SYNC_DRY_RUN, false);
-
-if (!CONVEX_SITE_URL) {
-  console.error(
-    "Error: NEXT_PUBLIC_CONVEX_SITE_URL/CONVEX_SITE_URL/CONVEX_URL is not set.",
-  );
-  process.exit(1);
-}
-
-if (!DISCORD_AVATAR_SYNC_SECRET) {
-  console.error("Error: DISCORD_AVATAR_SYNC_SECRET is not set.");
-  process.exit(1);
-}
 
 type BackfillResult = {
   processed: number;
@@ -77,43 +65,31 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function runBatch(
-  baseUrl: string,
-  cursor: string | null,
-  batchSize: number,
-) {
-  const response = await fetch(`${baseUrl}/admin/backfill-discord-avatars`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      secret: DISCORD_AVATAR_SYNC_SECRET,
-      batchSize,
-      cursor,
-      dryRun: DRY_RUN,
-    }),
-  });
-
-  const text = await response.text();
-  let parsed: unknown = null;
+function extractJson(stdout: string): unknown {
+  const trimmed = stdout.trim();
   try {
-    parsed = JSON.parse(text);
+    return JSON.parse(trimmed);
   } catch {
-    parsed = text;
+    const start = trimmed.indexOf("{");
+    const end = trimmed.lastIndexOf("}");
+    if (start === -1 || end === -1 || end < start) {
+      throw new Error(`Could not parse convex run output:\n${stdout}`);
+    }
+    return JSON.parse(trimmed.slice(start, end + 1));
   }
+}
 
-  if (!response.ok) {
-    throw new Error(
-      `Backfill request failed with ${response.status}: ${JSON.stringify(parsed)}`,
-    );
-  }
-
-  return parsed as BackfillResult;
+function runBatch(cursor: string | null, batchSize: number): BackfillResult {
+  const args = { batchSize, cursor, dryRun: DRY_RUN };
+  const stdout = execFileSync(
+    "pnpm",
+    ["exec", "convex", "run", INTERNAL_FUNCTION, JSON.stringify(args)],
+    { encoding: "utf8" },
+  );
+  return extractJson(stdout) as BackfillResult;
 }
 
 async function main() {
-  const baseUrl = String(CONVEX_SITE_URL).replace(/\/+$/, "");
   let cursor: string | null = null;
   let processedTotal = 0;
   let updatedUsersTotal = 0;
@@ -135,7 +111,7 @@ async function main() {
       `Running batch ${batchNumber} (size=${currentBatchSize}, cursor=${cursor ?? "start"})...`,
     );
 
-    const result = await runBatch(baseUrl, cursor, currentBatchSize);
+    const result = runBatch(cursor, currentBatchSize);
     processedTotal += result.processed;
     updatedUsersTotal += result.updatedUsers;
     updatedAccountsTotal += result.updatedAccounts;

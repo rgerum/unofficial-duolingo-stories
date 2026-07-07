@@ -1,11 +1,15 @@
-import {
-  action,
-  httpAction,
-  internalAction,
-  type ActionCtx,
-} from "./_generated/server";
+// The Discord avatar backfill is exposed as an internal action (not an HTTP
+// route) and an admin-gated public action. To run it as an operator, invoke a
+// single batch with:
+//
+//   pnpm exec convex run discordAvatarSync:backfillDiscordUserImagesInternal '{"dryRun": true}'
+//
+// then repeat, passing the returned `nextCursor` as `{"cursor": "..."}` until
+// `isDone` is true. The `pnpm run backfill:discord-avatars` script drives this
+// loop automatically.
+import { action, internalAction, type ActionCtx } from "./_generated/server";
 import { v } from "convex/values";
-import { components, internal } from "./_generated/api";
+import { components } from "./_generated/api";
 import { syncDiscordAvatarFromAccount } from "./lib/discordAvatarSync";
 
 type AdapterWhere = Array<{
@@ -53,46 +57,6 @@ type BackfillResult = {
 
 const DEFAULT_BATCH_SIZE = 25;
 const MAX_BATCH_SIZE = 100;
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "content-type": "application/json; charset=utf-8" },
-  });
-}
-
-async function requireDiscordAvatarSyncSecret(req: Request) {
-  const expectedSecret = process.env.DISCORD_AVATAR_SYNC_SECRET;
-  if (!expectedSecret) {
-    return {
-      ok: false,
-      response: json(
-        { ok: false, error: "Missing DISCORD_AVATAR_SYNC_SECRET env var" },
-        500,
-      ),
-    } as const;
-  }
-
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return {
-      ok: false,
-      response: json({ ok: false, error: "Invalid JSON body" }, 400),
-    } as const;
-  }
-
-  const parsed = body as { secret?: unknown };
-  if (parsed.secret !== expectedSecret) {
-    return {
-      ok: false,
-      response: json({ ok: false, error: "Unauthorized" }, 401),
-    } as const;
-  }
-
-  return { ok: true, body } as const;
-}
 
 function normalizeBatchSize(value: number | undefined) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
@@ -282,47 +246,4 @@ export const backfillDiscordUserImages = action({
     }
     return await runDiscordAvatarBackfill(ctx, args);
   },
-});
-
-export const backfillDiscordUserImagesHttp = httpAction(async (ctx, req) => {
-  if (req.method !== "POST") {
-    return json({ ok: false, error: "Method not allowed" }, 405);
-  }
-
-  const auth = await requireDiscordAvatarSyncSecret(req);
-  if (!auth.ok) return auth.response;
-
-  const body = auth.body as {
-    batchSize?: unknown;
-    cursor?: unknown;
-    dryRun?: unknown;
-  };
-
-  if (body.batchSize !== undefined && typeof body.batchSize !== "number") {
-    return json({ ok: false, error: "batchSize must be a number" }, 400);
-  }
-  if (
-    body.cursor !== undefined &&
-    body.cursor !== null &&
-    typeof body.cursor !== "string"
-  ) {
-    return json({ ok: false, error: "cursor must be a string or null" }, 400);
-  }
-  if (body.dryRun !== undefined && typeof body.dryRun !== "boolean") {
-    return json({ ok: false, error: "dryRun must be a boolean" }, 400);
-  }
-
-  const result: BackfillResult = await ctx.runAction(
-    internal.discordAvatarSync.backfillDiscordUserImagesInternal,
-    {
-      batchSize:
-        typeof body.batchSize === "number" ? body.batchSize : undefined,
-      cursor:
-        typeof body.cursor === "string" || body.cursor === null
-          ? body.cursor
-          : undefined,
-      dryRun: typeof body.dryRun === "boolean" ? body.dryRun : undefined,
-    },
-  );
-  return json(result);
 });
