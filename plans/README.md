@@ -14,7 +14,7 @@ Repo verification gate (used by every plan): `pnpm typecheck && pnpm lint && pnp
 | 002 | Enforce contributor auth on editor Convex queries | P1 | S | — | TODO |
 | 003 | Scope storyDone progress queries to the session user | P1 | S | — | TODO |
 | 004 | Surface story save/delete/upload failures to the user | P1 | S | — | DONE (Step 4 manual offline-save check skipped — no dev deployment) |
-| 005 | Fix out-of-bounds in bulk audio editor timing text | P2 | S | — | TODO |
+| 005 | Fix out-of-bounds in bulk audio editor timing text | P2 | S | — | DONE |
 | 006 | Convex function test harness (convex-test + vitest) | P1 | M | 001 | TODO |
 | 007 | Repo hygiene: tmp/ untrack, @types/pg, kysely note, debug logs | P3 | S | — | TODO |
 | 008 | Harden shared-secret HTTP endpoints; internalize backfills | P3 | S | — | TODO |
