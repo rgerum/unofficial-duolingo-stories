@@ -295,31 +295,18 @@ export const getEditorStoriesByCourseLegacyId = query({
   handler: async (ctx, args) => {
     if (!(await isContributorOrAdmin(ctx))) return [];
 
-    const timerBase = `editorRead:getEditorStoriesByCourseLegacyId:course:${args.identifier}`;
-    const storiesTimer = `${timerBase}:stories`;
-    const imagesTimer = `${timerBase}:images`;
-    const authorsTimer = `${timerBase}:authors`;
-    console.time(timerBase);
-
     const course = await getCourseByIdentifier(ctx, args.identifier);
     if (!course) {
-      console.timeEnd(timerBase);
-      console.log(
-        `[editorRead:getEditorStoriesByCourseLegacyId] course=${args.identifier} not_found`,
-      );
       return [];
     }
 
-    console.time(storiesTimer);
     const storyRows = await ctx.db
       .query("stories")
       .withIndex("by_set", (q) => q.eq("courseId", course._id))
       .collect();
-    console.timeEnd(storiesTimer);
 
     const stories = storyRows.filter((story) => !story.deleted);
 
-    console.time(imagesTimer);
     const imageIds = Array.from(
       new Set(
         stories
@@ -333,9 +320,7 @@ export const getEditorStoriesByCourseLegacyId = query({
       if (!image) return;
       imageById.set(image._id, image);
     });
-    console.timeEnd(imagesTimer);
 
-    console.time(authorsTimer);
     const currentLegacyUserId = await getSessionLegacyUserId(ctx);
     const authorLegacyIds = Array.from(
       new Set(
@@ -364,7 +349,6 @@ export const getEditorStoriesByCourseLegacyId = query({
       getUserNameByLegacyId(ctx, authorLegacyIds),
       getUserNameByAuthDocId(ctx, authorAuthDocIds),
     ]);
-    console.timeEnd(authorsTimer);
 
     const storyIdsApprovedByCurrentUser = new Set<Id<"stories">>();
     if (currentLegacyUserId !== null) {
@@ -432,11 +416,6 @@ export const getEditorStoriesByCourseLegacyId = query({
               : null,
       };
     });
-
-    console.timeEnd(timerBase);
-    console.log(
-      `[editorRead:getEditorStoriesByCourseLegacyId] course=${args.identifier} totalStories=${storyRows.length} visibleStories=${stories.length} uniqueImages=${imageIds.length} uniqueLegacyAuthors=${authorLegacyIds.length} uniqueAuthDocAuthors=${authorAuthDocIds.length}`,
-    );
 
     return result;
   },
