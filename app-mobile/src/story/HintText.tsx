@@ -235,12 +235,18 @@ function splitIntoGraphemes(text: string): string[] {
   return splitIntoGraphemesFallback(text);
 }
 
+function shouldMeasureTokenAsGraphemes(text: string): boolean {
+  return /[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/u.test(text);
+}
+
 function buildNativeSegments(tokens: Token[]): NativeSegment[] {
   const segments: NativeSegment[] = [];
 
   for (const token of tokens) {
     const displayText = getDisplayText(token);
-    const parts = splitIntoGraphemes(displayText);
+    const parts = shouldMeasureTokenAsGraphemes(displayText)
+      ? splitIntoGraphemes(displayText)
+      : [displayText];
     for (const part of parts) {
       segments.push({
         ...token,
@@ -937,7 +943,7 @@ function NativeHintText({
   tokens: Token[];
   flatStyle: TextStyle;
   containerStyle?: ViewStyle;
-  inlineAudio?: { onPress: () => void; rtl: boolean; color: string };
+  inlineAudio?: { onPress: () => void; color: string };
   rtl: boolean;
   centered: boolean;
   fillLineWidth: boolean;
@@ -1243,7 +1249,7 @@ export function HintText({
   style?: StyleProp<TextStyle>;
   containerStyle?: ViewStyle;
   leadingElement?: React.ReactNode;
-  inlineAudio?: { onPress: () => void; rtl: boolean; color: string };
+  inlineAudio?: { onPress: () => void; color: string };
   lang?: string;
   rtl?: boolean;
   centered?: boolean;

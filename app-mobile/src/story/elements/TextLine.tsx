@@ -191,7 +191,7 @@ export function TextLine({
             renderMode={preferNativeText ? "native" : "tokenized"}
             inlineAudio={
               preferNativeText && lineAudio.hasAudio
-                ? { onPress: handlePlay, rtl: lineRtl, color: colors.blue }
+                ? { onPress: handlePlay, color: colors.blue }
                 : undefined
             }
             rtl={lineRtl}
@@ -247,7 +247,7 @@ export function TextLine({
                 renderMode={preferNativeText ? "native" : "tokenized"}
                 inlineAudio={
                   preferNativeText && lineAudio.hasAudio
-                    ? { onPress: handlePlay, rtl: lineRtl, color: colors.blue }
+                    ? { onPress: handlePlay, color: colors.blue }
                     : undefined
                 }
                 rtl={lineRtl}
@@ -288,7 +288,7 @@ export function TextLine({
           renderMode={preferNativeText ? "native" : "tokenized"}
           inlineAudio={
             preferNativeText && lineAudio.hasAudio
-              ? { onPress: handlePlay, rtl: lineRtl, color: colors.blue }
+              ? { onPress: handlePlay, color: colors.blue }
               : undefined
           }
           rtl={lineRtl}
