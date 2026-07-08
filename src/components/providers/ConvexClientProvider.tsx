@@ -2,8 +2,16 @@
 
 import React from "react";
 import { ConvexReactClient } from "convex/react";
-import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
+import {
+  ConvexBetterAuthProvider,
+  type AuthClient,
+} from "@convex-dev/better-auth/react";
 import { authClient } from "@/lib/auth-client";
+
+// TODO: Revisit when @convex-dev/better-auth updates its AuthClient type for
+// the newer Better Auth client inference. The runtime client has the methods
+// ConvexBetterAuthProvider uses, but the library type currently rejects it.
+const convexAuthClient = authClient as unknown as AuthClient;
 
 export default function ConvexClientProvider({
   children,
@@ -26,7 +34,7 @@ export default function ConvexClientProvider({
   }
 
   return (
-    <ConvexBetterAuthProvider client={convex} authClient={authClient}>
+    <ConvexBetterAuthProvider client={convex} authClient={convexAuthClient}>
       {children}
     </ConvexBetterAuthProvider>
   );
