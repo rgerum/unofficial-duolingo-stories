@@ -45,7 +45,7 @@ function content({
 const lucyAvatar =
   "https://duostories.org/icon192.png";
 const eddyAvatar = "https://duostories.org/icon512.png";
-const blankText = "大学で英語の試験があるの。";
+const blankText = "Potřebuji klíče od svého auta.";
 
 const normalJapaneseLine: StoryElementLine = {
   type: "LINE",
@@ -89,9 +89,9 @@ const normalLatinLine: StoryElementLine = {
 
 const hiddenBlankLine: StoryElementLine = {
   type: "LINE",
-  lang: "ja",
+  lang: "cs",
   trackingProperties: { line_index: 2, challenge_type: "select-phrases" },
-  hideRangesForChallenge: [hiddenRange(blankText, "英語の試験")],
+  hideRangesForChallenge: [hiddenRange(blankText, "klíče od svého auta")],
   line: {
     type: "CHARACTER",
     characterId: "lucy",
@@ -120,9 +120,9 @@ const hiddenLatinLine: StoryElementLine = {
 
 const answers: StoryElementSelectPhrase = {
   type: "SELECT_PHRASE",
-  lang: "ja",
+  lang: "cs",
   trackingProperties: { line_index: 4, challenge_type: "select-phrases" },
-  answers: ["英語の作品", "英語の試験", "映画の試験"],
+  answers: ["auta", "klíče", "svého", "od"],
   correctAnswerIndex: 1,
 };
 

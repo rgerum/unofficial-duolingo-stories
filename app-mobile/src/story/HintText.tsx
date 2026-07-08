@@ -729,6 +729,7 @@ function NativeHintText({
     }
 
     const segmentsToDraw: UnderlineSegment[] = [];
+    const hiddenGroupSpans = new Map<string, UnderlineSegment>();
     for (const segment of computedSegments) {
       const interactive = Boolean(segment.hint) && !segment.hidden;
       const underline = segment.hidden
@@ -737,6 +738,36 @@ function NativeHintText({
           ? colors.border
           : undefined;
       if (!underline) continue;
+
+      if (segment.hidden && segment.underlineGroupKey) {
+        const y = getUnderlineY(segment);
+        const lineKey = `${segment.underlineGroupKey}:${Math.round(y)}`;
+        const existing = hiddenGroupSpans.get(lineKey);
+        if (existing) {
+          const right = Math.max(existing.x2, segment.x + segment.width);
+          existing.x1 = Math.min(existing.x1, segment.x);
+          existing.x2 = right;
+          existing.debugX = Math.min(existing.debugX, segment.x);
+          existing.debugWidth = right - existing.debugX;
+          existing.debugHeight = Math.max(existing.debugHeight, segment.height);
+        } else {
+          hiddenGroupSpans.set(lineKey, {
+            key: lineKey,
+            x1: segment.x,
+            x2: segment.x + segment.width,
+            y,
+            color: underline,
+            dotted: false,
+            underlineGroupKey: segment.underlineGroupKey,
+            debugX: segment.x,
+            debugY: segment.y,
+            debugWidth: segment.width,
+            debugHeight: segment.height,
+          });
+        }
+        continue;
+      }
+
       if (/^\s+$/.test(segment.text) && !segment.underlineGroupKey) continue;
       if (/^[,.:;!?%)}\]\u3001\u3002\u30fb\u30fc\uff01\uff1f\uff09\uff0c\uff0e\u200b-\u200d\ufeff]+$/u.test(segment.text))
         continue;
@@ -752,6 +783,13 @@ function NativeHintText({
         debugY: segment.y,
         debugWidth: segment.width,
         debugHeight: segment.height,
+      });
+    }
+    for (const segment of hiddenGroupSpans.values()) {
+      segmentsToDraw.push({
+        ...segment,
+        x1: segment.x1 + UNDERLINE_EDGE_INSET,
+        x2: segment.x2 - UNDERLINE_EDGE_INSET,
       });
     }
 
