@@ -68,22 +68,21 @@ const normalJapaneseLine: StoryElementLine = {
 
 const normalLatinLine: StoryElementLine = {
   type: "LINE",
-  lang: "sq",
+  lang: "da",
   trackingProperties: { line_index: 1 },
   line: {
     type: "CHARACTER",
     characterId: "eddy",
     avatarUrl: eddyAvatar,
     content: content({
-      text: "Ku janë çelësat e mi?",
+      text: "Hvor   er   mine   nøgler?",
       ranges: [
-        [0, 1, 0],
-        [3, 6, 1],
-        [8, 14, 2],
-        [16, 16, 3],
-        [18, 19, 4],
+        [0, 3, 0],
+        [7, 8, 1],
+        [12, 15, 2],
+        [19, 24, 3],
       ],
-      hints: ["where", "are", "keys", "of", "mine"],
+      hints: ["where", "are", "my", "keys"],
     }),
   },
 };

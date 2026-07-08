@@ -98,7 +98,8 @@ function buildNativeSegments(tokens: Token[]): NativeSegment[] {
   const segments: NativeSegment[] = [];
 
   for (const token of tokens) {
-    const parts = splitIntoGraphemes(token.text);
+    const displayText = getDisplayText(token);
+    const parts = splitIntoGraphemes(displayText);
     for (const part of parts) {
       segments.push({
         ...token,
@@ -903,7 +904,7 @@ function NativeHintText({
                 },
               ]}
             >
-              {token.text}
+              {getDisplayText(token)}
             </Text>
           );
         })}
