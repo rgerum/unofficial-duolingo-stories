@@ -2,7 +2,10 @@ import { query, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
-import { getSessionLegacyUserId } from "./lib/authorization";
+import {
+  getSessionLegacyUserId,
+  isContributorOrAdmin,
+} from "./lib/authorization";
 import { courseContributorValidator } from "./lib/courseContributors";
 
 type LanguageDoc = Doc<"languages">;
@@ -215,6 +218,8 @@ async function buildAvatarRows(
 export const getEditorSidebarData = query({
   args: {},
   handler: async (ctx) => {
+    if (!(await isContributorOrAdmin(ctx))) return { courses: [] };
+
     const courseRows = await ctx.db.query("courses").collect();
 
     const referencedLanguageIds = Array.from(
@@ -247,6 +252,8 @@ export const getEditorCourseByIdentifier = query({
   args: { identifier: v.string() },
   returns: editorCourseValidator,
   handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return null;
+
     const course = await getCourseByIdentifier(ctx, args.identifier);
     if (!course) return null;
 
@@ -286,6 +293,8 @@ export const getEditorCourseByIdentifier = query({
 export const getEditorStoriesByCourseLegacyId = query({
   args: { identifier: v.string() },
   handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return [];
+
     const course = await getCourseByIdentifier(ctx, args.identifier);
     if (!course) {
       return [];
