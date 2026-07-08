@@ -89,27 +89,6 @@ export const recordStoryDone = mutation({
   },
 });
 
-export const getDoneStoryIdsForCourse = query({
-  args: {
-    legacyCourseId: v.number(),
-    legacyUserId: v.number(),
-  },
-  returns: v.array(v.number()),
-  handler: async (ctx, args) => {
-    const course = await ctx.db
-      .query("courses")
-      .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyCourseId))
-      .unique();
-    if (!course) return [];
-
-    return await getDoneStoryIdsForCourseIdAndUser(
-      ctx,
-      course._id,
-      args.legacyUserId,
-    );
-  },
-});
-
 export const getDoneStoryIdsForCurrentUserInCourse = query({
   args: {
     courseShort: v.string(),
@@ -270,16 +249,17 @@ export const getDoneCourseIdsForUser = query({
   },
 });
 
-export const getLastDoneCourseShortForLegacyUser = query({
-  args: {
-    legacyUserId: v.number(),
-  },
+export const getLastDoneCourseShortForCurrentUser = query({
+  args: {},
   returns: v.union(v.string(), v.null()),
-  handler: async (ctx, args) => {
+  handler: async (ctx) => {
+    const legacyUserId = await getSessionLegacyUserId(ctx);
+    if (legacyUserId === null) return null;
+
     const activityRows = await ctx.db
       .query("course_activity")
       .withIndex("by_user_and_last_done_at", (q) =>
-        q.eq("legacyUserId", args.legacyUserId),
+        q.eq("legacyUserId", legacyUserId),
       )
       .order("desc")
       .take(20);

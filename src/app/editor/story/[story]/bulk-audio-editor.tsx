@@ -25,6 +25,7 @@ import {
   text_to_keypoints,
   timings_to_text,
 } from "@/lib/editor/audio/audio_edit_tools";
+import { buildTimingText } from "@/lib/editor/audio/timing_text";
 import { splitTextTokens } from "@/lib/editor/tts_transcripte";
 import {
   consumeAudioCutterOutput,
@@ -447,23 +448,19 @@ function BulkAudioRow({
       const regions = plugin.regions.sort(
         (left, right) => left.start - right.start,
       );
-      let nextTimingText = "";
-      for (let index = 0; index < regions.length; index += 1) {
+      for (
+        let index = 0;
+        index < Math.min(regions.length, parts.length);
+        index += 1
+      ) {
         if (
           regions[index]!.content !== undefined &&
           parts[index] !== undefined
         ) {
           regions[index]!.content!.innerText = parts[index]!.text;
         }
-        nextTimingText +=
-          ";" +
-          (parts[index]!.text.length +
-            parts[index]!.pos -
-            (parts[index - 1]?.text.length + parts[index - 1]?.pos || 0)) +
-          "," +
-          (Math.floor(regions[index]!.start * 1000) -
-            Math.floor(regions[index - 1]?.start * 1000 || 0));
       }
+      const nextTimingText = buildTimingText(parts, regions);
 
       onChange((currentDraft) => ({
         ...currentDraft,

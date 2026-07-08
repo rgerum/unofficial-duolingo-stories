@@ -1,55 +1,74 @@
 import React from "react";
-import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { DynamicColorIOS, Platform } from "react-native";
 import { NUNITO_BOLD_FONT_FAMILY } from "../../src/components/Text";
 import { useTheme } from "../../src/theme";
 
 export default function TabsLayout() {
   const { colors } = useTheme();
+  const glassAdaptiveColor =
+    Platform.OS === "ios"
+      ? DynamicColorIOS({
+          light: "#111827",
+          dark: "#ffffff",
+        })
+      : colors.blue;
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.blue,
-        tabBarInactiveTintColor: colors.disabled,
-        tabBarStyle: {
-          backgroundColor: colors.background,
-          borderTopColor: colors.border,
+    <NativeTabs
+      backgroundColor={Platform.OS === "ios" ? undefined : colors.background}
+      blurEffect="systemDefault"
+      iconColor={{
+        default: colors.disabled,
+        selected: glassAdaptiveColor,
+      }}
+      indicatorColor={colors.blueLight}
+      labelStyle={{
+        default: {
+          color: colors.disabled,
+          fontFamily: NUNITO_BOLD_FONT_FAMILY,
+          fontWeight: "400",
         },
-        tabBarLabelStyle: {
+        selected: {
+          color: glassAdaptiveColor,
           fontFamily: NUNITO_BOLD_FONT_FAMILY,
           fontWeight: "400",
         },
       }}
+      minimizeBehavior="automatic"
+      shadowColor={Platform.OS === "ios" ? "transparent" : colors.border}
+      tintColor={glassAdaptiveColor}
     >
-      <Tabs.Screen
+      <NativeTabs.Trigger
         name="index"
-        options={{
-          title: "Learn",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="book" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
+        contentStyle={{ backgroundColor: colors.background }}
+      >
+        <NativeTabs.Trigger.Icon
+          md="book"
+          sf={{ default: "book", selected: "book.fill" }}
+        />
+        <NativeTabs.Trigger.Label>Learn</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger
         name="courses"
-        options={{
-          title: "Courses",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="globe-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
+        contentStyle={{ backgroundColor: colors.background }}
+      >
+        <NativeTabs.Trigger.Icon
+          md="globe"
+          sf={{ default: "globe", selected: "globe" }}
+        />
+        <NativeTabs.Trigger.Label>Courses</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger
         name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-circle-outline" size={size} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+        contentStyle={{ backgroundColor: colors.background }}
+      >
+        <NativeTabs.Trigger.Icon
+          md="account_circle"
+          sf={{ default: "person.circle", selected: "person.circle.fill" }}
+        />
+        <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

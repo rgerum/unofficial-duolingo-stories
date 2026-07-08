@@ -48,13 +48,16 @@ pnpm run typecheck  # tsc --noEmit
   is computed locally from the course list.
 - **Profile tab**: account card with sign-in/register/sign-out actions,
   "hide story questions" preference, per-course progress stats, reset.
+- **Deep links**: `https://duostories.org/story/{id}` opens the reader and
+  `https://duostories.org/{course_short}` selects the course and opens Learn
+  after first-run gates. Native universal/app-link association currently matches
+  course shorts shaped like `xx-*`, which covers the existing public courses.
 
 ## Not yet implemented
 
 - **Accounts (M3)**: cloud progress sync after sign-in, password reset, and
   social login/Sign in with Apple.
-- **M4 polish**: audio prefetch to disk, dark mode, deep links, offline
-  story downloads.
+- **M4 polish**: audio prefetch to disk, dark mode, offline story downloads.
 
 ## Architecture notes
 

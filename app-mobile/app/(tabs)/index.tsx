@@ -15,6 +15,7 @@ import { captureMobileEventLater } from "../../src/analytics";
 import { useAuthSession } from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
 import { useNetworkStatus } from "../../src/network";
+import { maybeRequestAppReview } from "../../src/reviewPrompt";
 import {
   getDoneMap,
   getListeningMode,
@@ -49,10 +50,15 @@ export default function LearnTab() {
 
   const [doneMap, setDoneMap] = React.useState<DoneMap>({});
   const [listening, setListening] = React.useState(false);
+  const [localProgressLoaded, setLocalProgressLoaded] = React.useState(false);
   const serverDoneSet = React.useMemo(() => {
     if (!serverDoneIds) return null;
     return new Set(serverDoneIds);
   }, [serverDoneIds]);
+  const localDoneSet = React.useMemo(
+    () => new Set(Object.keys(doneMap).map(Number)),
+    [doneMap],
+  );
   const stories = React.useMemo(
     () => (course && course !== null ? (course.stories as StoryListItem[]) : []),
     [course],
@@ -68,6 +74,10 @@ export default function LearnTab() {
     () => stories.filter((story) => isStoryDone(story.id)).length,
     [isStoryDone, stories],
   );
+  const reviewCompletedStoryCount = React.useMemo(() => {
+    const ids = new Set([...(serverDoneSet ?? []), ...localDoneSet]);
+    return stories.filter((story) => ids.has(story.id)).length;
+  }, [localDoneSet, serverDoneSet, stories]);
   const isServerProgressPending =
     Boolean(session?.session) && serverDoneIds === undefined && !isOffline;
   const sets = React.useMemo(() => {
@@ -113,6 +123,7 @@ export default function LearnTab() {
   useFocusEffect(
     React.useCallback(() => {
       let cancelled = false;
+      setLocalProgressLoaded(false);
       if (!courseShort) return;
       void (async () => {
         const [done, listeningMode] = await Promise.all([
@@ -122,12 +133,28 @@ export default function LearnTab() {
         if (cancelled) return;
         setDoneMap(done);
         setListening(listeningMode);
+        setLocalProgressLoaded(true);
       })();
       return () => {
         cancelled = true;
       };
     }, [courseShort]),
   );
+
+  React.useEffect(() => {
+    if (!courseShort || !localProgressLoaded || isServerProgressPending) return;
+    void maybeRequestAppReview({
+      completedStoryCount: reviewCompletedStoryCount,
+      courseShort,
+      signedIn: Boolean(session?.session),
+    });
+  }, [
+    courseShort,
+    isServerProgressPending,
+    localProgressLoaded,
+    reviewCompletedStoryCount,
+    session?.session,
+  ]);
 
   if (!ready) return <Centered spinner styles={styles} colors={colors} />;
 

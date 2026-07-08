@@ -10,6 +10,8 @@ export const STORAGE_KEYS = {
   hideStoryQuestions: "hideStoryQuestions",
   themePreference: "themePreference",
   analyticsInstallationId: "analyticsInstallationId",
+  reviewPromptState: "reviewPromptState",
+  pendingReviewPromptCompletion: "pendingReviewPromptCompletion",
 };
 
 const doneKey = (courseShort: string) => `doneStories:${courseShort}`;

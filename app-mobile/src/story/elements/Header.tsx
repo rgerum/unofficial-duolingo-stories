@@ -48,6 +48,7 @@ export function Header({
         <HintText
           content={element.learningLanguageTitleContent}
           audioRange={audioRange}
+          lang={element.lang}
           rtl={rtl}
           centered
           style={[

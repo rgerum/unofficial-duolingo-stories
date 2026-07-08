@@ -1,5 +1,5 @@
 import React from "react";
-import { Dimensions, Pressable, StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "../components/Text";
 import { type ThemeColors, useTheme } from "../theme";
@@ -93,34 +93,37 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
 
   return (
     <HintPopupContext.Provider value={api}>
-      <View style={styles.root}>
+      <View
+        onStartShouldSetResponderCapture={() => {
+          if (hint) hide();
+          return false;
+        }}
+        style={styles.root}
+      >
         {children}
         {hint && (
-          <>
-            <Pressable style={styles.dismissLayer} onPress={hide} />
-            <View
-              pointerEvents="none"
-              onLayout={(event) => {
-                const height = event.nativeEvent.layout.height;
-                if (height > 0 && Math.abs(height - bubbleHeight) > 0.5) {
-                  setBubbleHeight(height);
-                }
-              }}
-              style={[
-                styles.bubble,
-                {
-                  left: bubbleLeft,
-                  top: bubbleTop,
-                  width: estimatedBubbleWidth,
-                },
-              ]}
-            >
-              <Text style={styles.translation}>{hint.translation}</Text>
-              {hint.pronunciation ? (
-                <Text style={styles.pronunciation}>{hint.pronunciation}</Text>
-              ) : null}
-            </View>
-          </>
+          <View
+            pointerEvents="none"
+            onLayout={(event) => {
+              const height = event.nativeEvent.layout.height;
+              if (height > 0 && Math.abs(height - bubbleHeight) > 0.5) {
+                setBubbleHeight(height);
+              }
+            }}
+            style={[
+              styles.bubble,
+              {
+                left: bubbleLeft,
+                top: bubbleTop,
+                width: estimatedBubbleWidth,
+              },
+            ]}
+          >
+            <Text style={styles.translation}>{hint.translation}</Text>
+            {hint.pronunciation ? (
+              <Text style={styles.pronunciation}>{hint.pronunciation}</Text>
+            ) : null}
+          </View>
         )}
       </View>
     </HintPopupContext.Provider>
@@ -131,14 +134,6 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
   root: {
     flex: 1,
-  },
-  dismissLayer: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    zIndex: 99,
   },
   bubble: {
     position: "absolute",
