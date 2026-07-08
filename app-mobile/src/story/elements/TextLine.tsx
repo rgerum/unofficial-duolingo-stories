@@ -14,6 +14,10 @@ import type { StoryElementLine } from "../types";
 // color under background color) pointing at the avatar.
 const TAIL_WIDTH = 12;
 
+function shouldUseNativeStoryText(lang?: string, rtl = false): boolean {
+  return Boolean(lang) && !rtl;
+}
+
 function BubbleTail({
   colors,
   rtl,
@@ -165,6 +169,7 @@ export function TextLine({
     fontSize: fontSizes.body,
     color: colors.text,
   };
+  const preferNativeText = shouldUseNativeStoryText(element.lang, lineRtl);
 
   if (element.line === undefined) return null;
 
@@ -172,7 +177,7 @@ export function TextLine({
     return (
       <View style={[styles.row, lineRtl && styles.rowRtl]}>
         <LineBody
-          hasAudio={lineAudio.hasAudio}
+          hasAudio={preferNativeText ? false : lineAudio.hasAudio}
           onPlay={handlePlay}
           rtl={lineRtl}
           styles={styles}
@@ -182,6 +187,13 @@ export function TextLine({
             audioRange={audioRange}
             hideRangesForChallenge={hideRanges}
             unhide={unhide}
+            lang={element.lang}
+            renderMode={preferNativeText ? "native" : "tokenized"}
+            inlineAudio={
+              preferNativeText && lineAudio.hasAudio
+                ? { onPress: handlePlay, color: colors.blue }
+                : undefined
+            }
             rtl={lineRtl}
             style={[
               styles.title,
@@ -224,17 +236,24 @@ export function TextLine({
               onPlay={handlePlay}
               rtl={lineRtl}
               styles={styles}
-              naturalWidth
+              naturalWidth={!preferNativeText}
             >
               <HintText
                 content={element.line.content}
                 audioRange={audioRange}
                 hideRangesForChallenge={hideRanges}
                 unhide={unhide}
+                lang={element.lang}
+                renderMode={preferNativeText ? "native" : "tokenized"}
+                inlineAudio={
+                  preferNativeText && lineAudio.hasAudio
+                    ? { onPress: handlePlay, color: colors.blue }
+                    : undefined
+                }
                 rtl={lineRtl}
                 containerStyle={lineRtl ? styles.rtlBubbleText : undefined}
                 leadingElement={
-                  lineAudio.hasAudio ? (
+                  !preferNativeText && lineAudio.hasAudio ? (
                     <PlayAudioButton onPress={handlePlay} rtl={lineRtl} />
                   ) : undefined
                 }
@@ -255,7 +274,7 @@ export function TextLine({
   return (
     <View style={[styles.row, lineRtl && styles.rowRtl]}>
       <LineBody
-        hasAudio={lineAudio.hasAudio}
+        hasAudio={preferNativeText ? false : lineAudio.hasAudio}
         onPlay={handlePlay}
         rtl={lineRtl}
         styles={styles}
@@ -265,6 +284,13 @@ export function TextLine({
           audioRange={audioRange}
           hideRangesForChallenge={hideRanges}
           unhide={unhide}
+          lang={element.lang}
+          renderMode={preferNativeText ? "native" : "tokenized"}
+          inlineAudio={
+            preferNativeText && lineAudio.hasAudio
+              ? { onPress: handlePlay, color: colors.blue }
+              : undefined
+          }
           rtl={lineRtl}
           containerStyle={lineRtl ? styles.rtlProseText : undefined}
           fillLineWidth={lineRtl}

@@ -60,22 +60,19 @@ async function uploadAudio(
 ): Promise<Response | undefined> {
   if (!file) return;
 
-  try {
-    const data = new FormData();
-    data.set("file", file);
-    data.set("story_id", String(story_id));
+  const data = new FormData();
+  data.set("file", file);
+  data.set("story_id", String(story_id));
 
-    const res = await fetch("/audio/upload", {
-      method: "POST",
-      body: data,
-    });
-    // handle the error
-    if (!res.ok) throw new Error(await res.text());
-    return res;
-  } catch (e) {
-    // Handle errors here
-    console.error(e);
+  const res = await fetch("/audio/upload", {
+    method: "POST",
+    body: data,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text.length < 200 ? text : `Upload failed (${res.status})`);
   }
+  return res;
 }
 
 export default function SoundRecorder({
@@ -254,7 +251,14 @@ export default function SoundRecorder({
   const onSaveX = async () => {
     let filename = urlIndex;
     if (!uploaded) {
-      const uploadResult = await uploadAudio(file, story_id);
+      let uploadResult: Response | undefined;
+      try {
+        uploadResult = await uploadAudio(file, story_id);
+      } catch (e) {
+        console.error("error upload", e);
+        window.alert(`Upload failed.\n${e instanceof Error ? e.message : ""}`);
+        return;
+      }
       if (!uploadResult) {
         window.alert("Upload failed.");
         return;

@@ -96,3 +96,10 @@ This makes it harder to review and merge the pull request.
 - Include an `operationKey` for mutation calls that can be retried.
 
 If everything is fine, I will accept the pull request and I will soon upload it to the website.
+
+## Legacy artifacts
+
+- `database/` — story text exports from the pre-Convex (MySQL/Postgres) era. Not used by the app.
+- `import_tools/` — one-off import scripts (Python/Greasemonkey) from the original data migration. Not used by the app.
+
+Both are kept for historical reference and are excluded from dead-code checks (`knip.json`).
