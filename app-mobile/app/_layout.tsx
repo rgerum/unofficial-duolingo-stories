@@ -1,4 +1,6 @@
 import React from "react";
+import { Ionicons } from "@expo/vector-icons";
+import Constants, { ExecutionEnvironment } from "expo-constants";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
@@ -24,10 +26,12 @@ const nunitoExtraBoldFont = require("../assets/fonts/Nunito-ExtraBold.ttf");
 const nunitoLightFont = require("../assets/fonts/Nunito-Light.ttf");
 const sitelenPonaFont = require("../assets/fonts/linjalipamanka-normal.otf");
 
-SplashScreen.setOptions({
-  duration: 300,
-  fade: true,
-});
+if (Constants.executionEnvironment !== ExecutionEnvironment.StoreClient) {
+  SplashScreen.setOptions({
+    duration: 300,
+    fade: true,
+  });
+}
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -44,6 +48,7 @@ export default function RootLayout() {
     [NUNITO_EXTRA_BOLD_FONT_FAMILY]: nunitoExtraBoldFont,
     [NUNITO_LIGHT_FONT_FAMILY]: nunitoLightFont,
     [SITELEN_PONA_FONT_FAMILY]: sitelenPonaFont,
+    ...Ionicons.font,
   });
 
   React.useEffect(() => {
@@ -91,6 +96,7 @@ function ThemedStack() {
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="add-course" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="debug/story-shot" />
         <Stack.Screen
           name="story/[id]"
           options={{
