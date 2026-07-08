@@ -548,13 +548,15 @@ function get_avatar(
   avatar_names: Record<string, Avatar>,
   avatar_overwrites: Record<string, AvatarOverwrites>,
 ) {
-  const id2 = parseInt(id) ?? id;
-  if (avatar_overwrites[id2])
-    return { characterId: id2, avatarUrl: avatar_overwrites[id2]?.link };
+  const parsedId = parseInt(id);
+  const id2 = Number.isNaN(parsedId) ? id : parsedId;
+  const avatar = avatar_names[id2];
+  const override = avatar_overwrites[id2];
+
   return {
     characterId: id2,
-    avatarUrl: avatar_names[id2]?.link,
-    characterName: avatar_names[id2]?.name,
+    avatarUrl: override?.link || avatar?.link,
+    characterName: override?.name || avatar?.name,
   };
 }
 

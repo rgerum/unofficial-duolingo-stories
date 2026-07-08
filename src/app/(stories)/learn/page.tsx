@@ -2,7 +2,7 @@ import React from "react";
 import { redirect } from "next/navigation";
 import Welcome from "./welcome";
 import { getUser } from "@/lib/userInterface";
-import { fetchQuery } from "convex/nextjs";
+import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 
 export const metadata = {
@@ -18,11 +18,8 @@ export default async function Page() {
   const user = await getUser();
 
   if (user?.userId) {
-    const lastCourseShort = await fetchQuery(
-      api.storyDone.getLastDoneCourseShortForLegacyUser,
-      {
-        legacyUserId: user.userId,
-      },
+    const lastCourseShort = await fetchAuthQuery(
+      api.storyDone.getLastDoneCourseShortForCurrentUser,
     );
     if (lastCourseShort) redirect("/" + lastCourseShort);
   }

@@ -24,6 +24,7 @@ export function QuestionPrompt({
     <View style={styles.root}>
       <HintText
         content={content}
+        lang={lang}
         style={[styles.text, getLanguageTextStyle(lang, styles.text)]}
       />
     </View>

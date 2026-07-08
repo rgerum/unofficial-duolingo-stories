@@ -12,6 +12,7 @@ import { captureMobileEventLater } from "../../src/analytics";
 import { useAuthSession } from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
 import { useNetworkStatus } from "../../src/network";
+import { markReviewPromptCompletionPending } from "../../src/reviewPrompt";
 import { getDoneMap, markStoryDone } from "../../src/storage";
 import { Reader } from "../../src/story/Reader";
 import { HintPopupHost } from "../../src/story/HintPopup";
@@ -119,16 +120,33 @@ export default function StoryScreen() {
 
   const onFinishedReached = React.useCallback(() => {
     if (!story) return;
+    const signedIn = Boolean(session?.session);
+    const knownCompletedLocally = Boolean(localDoneIds?.has(story.id));
+    const isServerProgressLoaded = !signedIn || serverDoneIds !== undefined;
+    const wasAlreadyDone = doneIds?.has(story.id) ?? true;
     if (!trackedStoryCompletion.current) {
       trackedStoryCompletion.current = true;
       captureStoryEvent("story_completed");
     }
+    if ((isServerProgressLoaded || knownCompletedLocally) && !wasAlreadyDone) {
+      void markReviewPromptCompletionPending({
+        courseShort: story.course_short,
+        storyId: story.id,
+      });
+    }
+    void markStoryDone(story.course_short, story.id);
     if (session?.session) {
       void recordStoryDone({ legacyStoryId: story.id });
-    } else {
-      void markStoryDone(story.course_short, story.id);
     }
-  }, [captureStoryEvent, recordStoryDone, session?.session, story]);
+  }, [
+    captureStoryEvent,
+    doneIds,
+    localDoneIds,
+    recordStoryDone,
+    serverDoneIds,
+    session?.session,
+    story,
+  ]);
 
   const leave = React.useCallback(() => {
     stopAudio();
