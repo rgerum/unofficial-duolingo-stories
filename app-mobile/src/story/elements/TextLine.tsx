@@ -14,8 +14,8 @@ import type { StoryElementLine } from "../types";
 // color under background color) pointing at the avatar.
 const TAIL_WIDTH = 12;
 
-function shouldUseNativeStoryText(lang?: string): boolean {
-  return Boolean(lang);
+function shouldUseNativeStoryText(lang?: string, rtl = false): boolean {
+  return Boolean(lang) && !rtl;
 }
 
 function BubbleTail({
@@ -169,7 +169,7 @@ export function TextLine({
     fontSize: fontSizes.body,
     color: colors.text,
   };
-  const preferNativeText = shouldUseNativeStoryText(element.lang);
+  const preferNativeText = shouldUseNativeStoryText(element.lang, lineRtl);
 
   if (element.line === undefined) return null;
 

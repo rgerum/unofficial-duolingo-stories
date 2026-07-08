@@ -26,7 +26,10 @@ fi
 
 adb "${adb_args[@]}" reverse tcp:8081 tcp:8081 >/dev/null 2>&1 || true
 
-route="/--/debug/story-shot?case=${case_name}"
+encoded_case_name="$(
+  node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$case_name"
+)"
+route="/--/debug/story-shot?case=${encoded_case_name}"
 uri="exp://${expo_host}${route}"
 
 adb "${adb_args[@]}" shell am start \
