@@ -10,7 +10,7 @@ Repo verification gate (used by every plan): `pnpm typecheck && pnpm lint && pnp
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 001 | CI runs tests; delete dead workflows; add .env.example | P1 | S | — | TODO |
+| 001 | CI runs tests; delete dead workflows; add .env.example | P1 | S | — | DONE |
 | 002 | Enforce contributor auth on editor Convex queries | P1 | S | — | DONE (tests deferred to 006) |
 | 003 | Scope storyDone progress queries to the session user | P1 | S | — | DONE |
 | 004 | Surface story save/delete/upload failures to the user | P1 | S | — | DONE (Step 4 manual offline-save check skipped — no dev deployment) |
