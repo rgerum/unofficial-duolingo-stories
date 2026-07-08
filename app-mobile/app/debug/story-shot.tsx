@@ -56,12 +56,9 @@ const normalJapaneseLine: StoryElementLine = {
     characterId: "lucy",
     avatarUrl: lucyAvatar,
     content: content({
-      text: "レポートをかかないといけないんだ。",
-      ranges: [
-        [0, 3, 0],
-        [5, 13, 1],
-      ],
-      hints: ["report", "have to write"],
+      text: "桜さんはコーヒーを飲みます。",
+      ranges: [[4, 7, 0]],
+      hints: ["coffee"],
     }),
   },
 };
@@ -126,7 +123,13 @@ const answers: StoryElementSelectPhrase = {
   correctAnswerIndex: 1,
 };
 
-function RealisticStoryFixture({ includeLatinBlank }: { includeLatinBlank: boolean }) {
+function RealisticStoryFixture({
+  includeLatinBlank,
+  showRevealedBlank,
+}: {
+  includeLatinBlank: boolean;
+  showRevealedBlank: boolean;
+}) {
   const { colors } = useTheme();
 
   return (
@@ -154,6 +157,15 @@ function RealisticStoryFixture({ includeLatinBlank }: { includeLatinBlank: boole
           autoPlay={false}
         />
       ) : null}
+      {showRevealedBlank ? (
+        <TextLine
+          element={hiddenBlankLine}
+          active={false}
+          unhide={-1}
+          rtl={false}
+          autoPlay={false}
+        />
+      ) : null}
       <SelectPhraseQuestion element={answers} advance={() => {}} />
     </View>
   );
@@ -163,6 +175,8 @@ export default function StoryShotScreen() {
   const { colors } = useTheme();
   const params = useLocalSearchParams<{ case?: string }>();
   const includeLatinBlank = params.case === "all" || params.case === "latin";
+  const showRevealedBlank =
+    params.case === "all" || params.case === "revealed";
 
   return (
     <HintPopupHost>
@@ -170,7 +184,10 @@ export default function StoryShotScreen() {
         style={[styles.screen, { backgroundColor: colors.background }]}
         contentContainerStyle={styles.content}
       >
-        <RealisticStoryFixture includeLatinBlank={includeLatinBlank} />
+        <RealisticStoryFixture
+          includeLatinBlank={includeLatinBlank}
+          showRevealedBlank={showRevealedBlank}
+        />
       </ScrollView>
     </HintPopupHost>
   );
