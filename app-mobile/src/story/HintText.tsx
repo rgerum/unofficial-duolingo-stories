@@ -5,12 +5,18 @@ import {
   StyleSheet,
   type StyleProp,
   type TextStyle,
+  type View as NativeView,
   View,
   type ViewStyle,
 } from "react-native";
-import Svg, { Circle, Line, Rect } from "react-native-svg";
+import Svg, { Circle, Line, Rect, Text as SvgText } from "react-native-svg";
 import { Text } from "../components/Text";
 import { type ThemeColors, useTheme } from "../theme";
+import {
+  PLAY_AUDIO_ICON_FONT_FAMILY,
+  PLAY_AUDIO_ICON_GLYPH,
+  PLAY_AUDIO_ICON_SIZE,
+} from "./elements/PlayAudioButton";
 import { HintLookupContext, HintPopupContext } from "./HintPopup";
 import type { ContentWithHints, HideRange } from "./types";
 
@@ -21,11 +27,13 @@ import type { ContentWithHints, HideRange } from "./types";
 // underlines are real (dashed) bottom borders.
 
 const WRAPPED_LINE_GAP = 3;
-const NATIVE_TEXT_AUDIO_PADDING = 32;
 const SHOW_NATIVE_HINT_DEBUG = false;
 const UNDERLINE_EDGE_INSET = 2;
 const UNDERLINE_DOT_RADIUS = 1.2;
 const UNDERLINE_DOT_GAP = 7;
+const INLINE_AUDIO_SPACE = "\u2002";
+const UNDERLINE_BASELINE_GAP = 2;
+const UNDERLINE_BOTTOM_INSET = 2;
 
 type HintTextRenderMode = "auto" | "native" | "tokenized";
 
@@ -58,7 +66,9 @@ type Token = {
 
 type NativeSegment = Token & {
   key: string;
+  tokenKey: string;
   underlineGroupKey?: string;
+  textStyle?: TextStyle;
 };
 
 function getDisplayText(token: Token): string {
@@ -66,26 +76,34 @@ function getDisplayText(token: Token): string {
 }
 
 function shouldUseNativeTextLayout(lang?: string): boolean {
-  if (!lang) return false;
-  return /^(ja|zh|ko)(-|$)/i.test(lang);
+  return Boolean(lang);
 }
 
-function isWrapAnywhereToken(text: string): boolean {
-  return /^[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uac00-\ud7af]+$/u.test(
-    text,
-  );
+function splitIntoGraphemes(text: string): string[] {
+  if (!text) return [];
+  if (/^\s+$/.test(text)) return [text];
+
+  if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
+    const segmenter = new Intl.Segmenter(undefined, {
+      granularity: "grapheme",
+    });
+    return Array.from(segmenter.segment(text), (part) => part.segment);
+  }
+
+  return Array.from(text);
 }
 
 function buildNativeSegments(tokens: Token[]): NativeSegment[] {
   const segments: NativeSegment[] = [];
 
   for (const token of tokens) {
-    const parts = isWrapAnywhereToken(token.text) ? Array.from(token.text) : [token.text];
+    const parts = splitIntoGraphemes(token.text);
     for (const part of parts) {
       segments.push({
         ...token,
         text: part,
         key: `${token.start}:${segments.length}`,
+        tokenKey: `${token.start}:${token.text}`,
         underlineGroupKey: token.hidden
           ? `hidden:${token.start}`
           : token.revealed
@@ -96,6 +114,26 @@ function buildNativeSegments(tokens: Token[]): NativeSegment[] {
   }
 
   return segments;
+}
+
+function getDebugColor(key?: string): { stroke: string; fill: string } {
+  if (!key) {
+    return {
+      stroke: "#8c8c8c",
+      fill: "rgba(140,140,140,0.12)",
+    };
+  }
+
+  let hash = 0;
+  for (let i = 0; i < key.length; i += 1) {
+    hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  }
+
+  const hue = hash % 360;
+  return {
+    stroke: `hsl(${hue} 80% 45%)`,
+    fill: `hsla(${hue} 80% 55% / 0.16)`,
+  };
 }
 
 function HintTokenBox({
@@ -376,7 +414,7 @@ function NativeHintText({
   tokens,
   flatStyle,
   containerStyle,
-  leadingElement,
+  inlineAudio,
   rtl,
   centered,
   fillLineWidth,
@@ -384,7 +422,7 @@ function NativeHintText({
   tokens: Token[];
   flatStyle: TextStyle;
   containerStyle?: ViewStyle;
-  leadingElement?: React.ReactNode;
+  inlineAudio?: { onPress: () => void; rtl: boolean; color: string };
   rtl: boolean;
   centered: boolean;
   fillLineWidth: boolean;
@@ -392,24 +430,70 @@ function NativeHintText({
   const { colors } = useTheme();
   const popup = React.useContext(HintPopupContext);
   const onHintLookup = React.useContext(HintLookupContext);
-  const segments = React.useMemo(() => buildNativeSegments(tokens), [tokens]);
+  const containerRef = React.useRef<NativeView>(null);
+  const measurementSegments = React.useMemo(() => {
+    const segments = buildNativeSegments(tokens);
+    if (!inlineAudio) return segments;
+
+    const prefix: NativeSegment[] = [
+      {
+        key: "audio:glyph",
+        text: PLAY_AUDIO_ICON_GLYPH,
+        start: -2,
+        hidden: false,
+        revealed: false,
+        dimmed: false,
+        tokenKey: "audio:glyph",
+        textStyle: {
+          fontFamily: PLAY_AUDIO_ICON_FONT_FAMILY,
+          fontSize: PLAY_AUDIO_ICON_SIZE,
+          color: inlineAudio.color,
+        },
+      },
+      {
+        key: "audio:space",
+        text: INLINE_AUDIO_SPACE,
+        start: -1,
+        hidden: false,
+        revealed: false,
+        dimmed: false,
+        tokenKey: "audio:space",
+      },
+    ];
+
+    return prefix.concat(segments);
+  }, [inlineAudio, tokens]);
   const [textLayout, setTextLayout] = React.useState({ x: 0, y: 0, width: 0, height: 0 });
   const [lineLayouts, setLineLayouts] = React.useState<
-    { text: string; x: number; y: number; width: number; height: number }[]
+    {
+      text: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      ascender: number;
+      descender: number;
+      capHeight: number;
+      xHeight: number;
+    }[]
   >([]);
   const [segmentWidths, setSegmentWidths] = React.useState<Record<string, number>>({});
 
   const computedSegments = React.useMemo(() => {
     const rects: Array<{
       key: string;
+      start: number;
       x: number;
       y: number;
       width: number;
       height: number;
+      ascender: number;
+      descender: number;
       text: string;
       hidden: boolean;
       revealed: boolean;
       hint?: Token["hint"];
+      tokenKey: string;
       underlineGroupKey?: string;
     }> = [];
     let segmentIndex = 0;
@@ -418,22 +502,26 @@ function NativeHintText({
       let cursor = line.x;
       let lineText = line.text;
 
-      while (lineText.length > 0 && segmentIndex < segments.length) {
-        const segment = segments[segmentIndex];
+      while (lineText.length > 0 && segmentIndex < measurementSegments.length) {
+        const segment = measurementSegments[segmentIndex];
         const width = segmentWidths[segment.key];
         if (width === undefined) break;
         if (!lineText.startsWith(segment.text)) break;
 
         rects.push({
           key: segment.key,
+          start: segment.start,
           x: textLayout.x + cursor,
           y: textLayout.y + line.y,
           width,
           height: line.height,
+          ascender: line.ascender,
+          descender: line.descender,
           text: segment.text,
           hidden: segment.hidden,
           revealed: segment.revealed,
           hint: segment.hint,
+          tokenKey: segment.tokenKey,
           underlineGroupKey: segment.underlineGroupKey,
         });
 
@@ -444,7 +532,117 @@ function NativeHintText({
     }
 
     return rects;
-  }, [lineLayouts, segmentWidths, segments, textLayout.x, textLayout.y]);
+  }, [lineLayouts, measurementSegments, segmentWidths, textLayout.x, textLayout.y]);
+  const loggedDebugRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!SHOW_NATIVE_HINT_DEBUG || loggedDebugRef.current) return;
+    if (!measurementSegments.some((segment) => segment.text.includes("çel"))) return;
+    if (computedSegments.length === 0) return;
+
+    console.log(
+      "HINT_DEBUG_SEGMENTS",
+      JSON.stringify(
+        computedSegments.map((segment) => ({
+          text: segment.text,
+          group: segment.underlineGroupKey ?? null,
+          x: Math.round(segment.x),
+          width: Math.round(segment.width),
+        })),
+      ),
+    );
+    loggedDebugRef.current = true;
+  }, [computedSegments, measurementSegments]);
+
+  const tokenFragments = React.useMemo(() => {
+    const fragments = new Map<
+      string,
+      Array<{ x1: number; x2: number; y: number; height: number }>
+    >();
+
+    for (const segment of computedSegments) {
+      if (segment.start < 0) continue;
+
+      const list = fragments.get(segment.tokenKey) ?? [];
+      const last = list[list.length - 1];
+      const x1 = segment.x;
+      const x2 = segment.x + segment.width;
+
+      if (
+        last &&
+        Math.abs(last.y - segment.y) <= 2 &&
+        Math.abs(last.x2 - x1) <= 2
+      ) {
+        last.x2 = x2;
+        last.height = Math.max(last.height, segment.height);
+      } else {
+        list.push({
+          x1,
+          x2,
+          y: segment.y,
+          height: segment.height,
+        });
+      }
+
+      fragments.set(segment.tokenKey, list);
+    }
+
+    return fragments;
+  }, [computedSegments]);
+
+  const showMeasuredHint = React.useCallback(
+    (
+      token: Token,
+      tokenKey: string,
+      event: { nativeEvent: { pageX: number; pageY: number } },
+    ) => {
+      if (!token.hint) return;
+
+      const fallbackX = event.nativeEvent.pageX;
+      const fallbackY = event.nativeEvent.pageY;
+      const fragments = tokenFragments.get(tokenKey);
+
+      const showAt = (x: number, y: number) => {
+        onHintLookup();
+        popup.show({
+          translation: token.hint!.translation,
+          pronunciation: token.hint!.pronunciation,
+          x,
+          y,
+        });
+      };
+
+      if (!fragments?.length || !containerRef.current?.measureInWindow) {
+        showAt(fallbackX, fallbackY);
+        return;
+      }
+
+      containerRef.current.measureInWindow((pageLeft, pageTop) => {
+        const localPageY = fallbackY - pageTop;
+        const fragment =
+          fragments.find(
+            (candidate) =>
+              localPageY >= candidate.y &&
+              localPageY <= candidate.y + candidate.height,
+          ) ??
+          fragments.reduce((best, candidate) => {
+            const bestDistance = Math.abs(
+              localPageY - (best.y + best.height / 2),
+            );
+            const candidateDistance = Math.abs(
+              localPageY - (candidate.y + candidate.height / 2),
+            );
+            return candidateDistance < bestDistance ? candidate : best;
+          });
+
+        showAt(
+          pageLeft + (fragment.x1 + fragment.x2) / 2,
+          pageTop + fragment.y,
+        );
+      });
+    },
+    [onHintLookup, popup, tokenFragments],
+  );
 
   const underlineSegments = React.useMemo(() => {
     type UnderlineSegment = {
@@ -460,6 +658,13 @@ function NativeHintText({
       debugWidth: number;
       debugHeight: number;
     };
+
+    function getUnderlineY(segment: (typeof computedSegments)[number]) {
+      const glyphBottom = segment.y + segment.ascender + segment.descender;
+      const preferredY = glyphBottom + UNDERLINE_BASELINE_GAP;
+      const maxY = segment.y + segment.height - UNDERLINE_BOTTOM_INSET;
+      return Math.min(preferredY, maxY);
+    }
 
     const segmentsToDraw: UnderlineSegment[] = [];
     for (const segment of computedSegments) {
@@ -477,7 +682,7 @@ function NativeHintText({
         key: segment.key,
         x1: segment.x + UNDERLINE_EDGE_INSET,
         x2: segment.x + Math.max(segment.width - UNDERLINE_EDGE_INSET, UNDERLINE_EDGE_INSET * 2),
-        y: segment.y + segment.height - 6,
+        y: getUnderlineY(segment),
         color: underline,
         dotted: !segment.hidden,
         underlineGroupKey: segment.underlineGroupKey,
@@ -526,21 +731,37 @@ function NativeHintText({
   }, [colors.border, colors.hiddenUnderline, computedSegments]);
 
   const debugRects = React.useMemo(
-    () =>
-      SHOW_NATIVE_HINT_DEBUG
-        ? computedSegments.map((segment) => ({
-            key: segment.key,
-            x: segment.x,
-            y: segment.y,
-            width: segment.width,
-            height: segment.height,
-          }))
-        : [],
+    () => {
+      if (!SHOW_NATIVE_HINT_DEBUG) return [];
+
+      const groupLabels = new Map<string, string>();
+      let nextGroup = 1;
+
+      return computedSegments.map((segment) => {
+        const groupKey = segment.underlineGroupKey;
+        if (groupKey && !groupLabels.has(groupKey)) {
+          groupLabels.set(groupKey, `g${nextGroup}`);
+          nextGroup += 1;
+        }
+
+        return {
+          key: segment.key,
+          x: segment.x,
+          y: segment.y,
+          width: segment.width,
+          height: segment.height,
+          text: /^\s+$/.test(segment.text) ? "sp" : segment.text,
+          groupLabel: groupKey ? groupLabels.get(groupKey) : undefined,
+          ...getDebugColor(groupKey),
+        };
+      });
+    },
     [computedSegments],
   );
 
   return (
     <View
+      ref={containerRef}
       style={[
         {
           minWidth: 0,
@@ -555,16 +776,33 @@ function NativeHintText({
         style={StyleSheet.absoluteFill}
       >
         {debugRects.map((segment) => (
-          <Rect
-            key={`debug:${segment.key}`}
-            x={segment.x}
-            y={segment.y}
-            width={segment.width}
-            height={segment.height}
-            stroke="#ff4d4f"
-            strokeWidth={1}
-            fill="rgba(255,77,79,0.08)"
-          />
+          <React.Fragment key={`debug:${segment.key}`}>
+            <Rect
+              x={segment.x}
+              y={segment.y}
+              width={segment.width}
+              height={segment.height}
+              stroke={segment.stroke}
+              strokeWidth={1}
+              fill={segment.fill}
+            />
+            <SvgText
+              x={segment.x}
+              y={segment.y - 2}
+              fontSize="10"
+              fill={segment.stroke}
+            >
+              {segment.groupLabel ?? "none"}
+            </SvgText>
+            <SvgText
+              x={segment.x + 1}
+              y={segment.y + segment.height - 10}
+              fontSize="8"
+              fill={segment.stroke}
+            >
+              {segment.text}
+            </SvgText>
+          </React.Fragment>
         ))}
         {underlineSegments.map((segment) => (
           <React.Fragment key={segment.key}>
@@ -602,20 +840,6 @@ function NativeHintText({
           </React.Fragment>
         ))}
       </Svg>
-      {leadingElement && (
-        <View
-          style={[
-            {
-              position: "absolute",
-              top: 2,
-              zIndex: 1,
-            },
-            rtl ? { right: 0 } : { left: 0 },
-          ]}
-        >
-          {leadingElement}
-        </View>
-      )}
       <Text
         onLayout={(event) => {
           setTextLayout(event.nativeEvent.layout);
@@ -628,6 +852,10 @@ function NativeHintText({
               y: line.y,
               width: line.width,
               height: line.height,
+              ascender: line.ascender,
+              descender: line.descender,
+              capHeight: line.capHeight,
+              xHeight: line.xHeight,
             })),
           );
         }}
@@ -639,36 +867,39 @@ function NativeHintText({
             textAlign: centered ? "center" : "auto",
             alignSelf: fillLineWidth ? "stretch" : "flex-start",
           },
-          leadingElement
-            ? rtl
-              ? { paddingRight: NATIVE_TEXT_AUDIO_PADDING }
-              : { paddingLeft: NATIVE_TEXT_AUDIO_PADDING }
-            : undefined,
         ]}
       >
-        {segments.map((segment) => {
-          const interactive = Boolean(segment.hint) && !segment.hidden;
-          const color = segment.hidden
+        {inlineAudio && (
+          <Text
+            suppressHighlighting
+            onPress={inlineAudio.onPress}
+            style={{
+              fontFamily: PLAY_AUDIO_ICON_FONT_FAMILY,
+              fontSize: PLAY_AUDIO_ICON_SIZE,
+              color: inlineAudio.color,
+            }}
+          >
+            {PLAY_AUDIO_ICON_GLYPH}
+          </Text>
+        )}
+        {inlineAudio && <Text>{INLINE_AUDIO_SPACE}</Text>}
+        {tokens.map((token) => {
+          const interactive = Boolean(token.hint) && !token.hidden;
+          const color = token.hidden
             ? "transparent"
-            : segment.dimmed
+            : token.dimmed
               ? colors.disabled
               : (flatStyle.color ?? colors.text);
+          const tokenKey = `${token.start}:${token.text}`;
 
           return (
             <Text
-              key={segment.key}
+              key={`display:${tokenKey}`}
               suppressHighlighting
               onPress={
                 interactive
                   ? (event) => {
-                      if (!segment.hint) return;
-                      onHintLookup();
-                      popup.show({
-                        translation: segment.hint.translation,
-                        pronunciation: segment.hint.pronunciation,
-                        x: event.nativeEvent.pageX,
-                        y: event.nativeEvent.pageY,
-                      });
+                      showMeasuredHint(token, tokenKey, event);
                     }
                   : undefined
               }
@@ -679,7 +910,7 @@ function NativeHintText({
                 },
               ]}
             >
-              {segment.text}
+              {token.text}
             </Text>
           );
         })}
@@ -695,7 +926,7 @@ function NativeHintText({
           flexWrap: "nowrap",
         }}
       >
-        {segments.map((segment) => (
+        {measurementSegments.map((segment) => (
           <Text
             key={`measure:${segment.key}`}
             onLayout={(event) => {
@@ -705,7 +936,7 @@ function NativeHintText({
                 return { ...current, [segment.key]: width };
               });
             }}
-            style={[flatStyle, { lineHeight: undefined }]}
+            style={[flatStyle, { lineHeight: undefined }, segment.textStyle]}
           >
             {segment.text}
           </Text>
@@ -724,6 +955,7 @@ export function HintText({
   style,
   containerStyle,
   leadingElement,
+  inlineAudio,
   lang,
   rtl = false,
   centered = false,
@@ -740,6 +972,7 @@ export function HintText({
   style?: StyleProp<TextStyle>;
   containerStyle?: ViewStyle;
   leadingElement?: React.ReactNode;
+  inlineAudio?: { onPress: () => void; rtl: boolean; color: string };
   lang?: string;
   rtl?: boolean;
   centered?: boolean;
@@ -771,7 +1004,7 @@ export function HintText({
         tokens={tokens}
         flatStyle={flatStyle}
         containerStyle={containerStyle}
-        leadingElement={leadingElement}
+        inlineAudio={inlineAudio}
         rtl={rtl}
         centered={centered}
         fillLineWidth={fillLineWidth}

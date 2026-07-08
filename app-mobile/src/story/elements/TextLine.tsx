@@ -15,8 +15,7 @@ import type { StoryElementLine } from "../types";
 const TAIL_WIDTH = 12;
 
 function shouldUseNativeStoryText(lang?: string): boolean {
-  if (!lang) return false;
-  return /^(ja|zh|ko)(-|$)/i.test(lang);
+  return Boolean(lang);
 }
 
 function BubbleTail({
@@ -178,7 +177,7 @@ export function TextLine({
     return (
       <View style={[styles.row, lineRtl && styles.rowRtl]}>
         <LineBody
-          hasAudio={lineAudio.hasAudio}
+          hasAudio={preferNativeText ? false : lineAudio.hasAudio}
           onPlay={handlePlay}
           rtl={lineRtl}
           styles={styles}
@@ -190,6 +189,11 @@ export function TextLine({
             unhide={unhide}
             lang={element.lang}
             renderMode={preferNativeText ? "native" : "tokenized"}
+            inlineAudio={
+              preferNativeText && lineAudio.hasAudio
+                ? { onPress: handlePlay, rtl: lineRtl, color: colors.blue }
+                : undefined
+            }
             rtl={lineRtl}
             style={[
               styles.title,
@@ -228,7 +232,7 @@ export function TextLine({
             ]}
           >
             <LineBody
-              hasAudio={preferNativeText ? lineAudio.hasAudio : false}
+              hasAudio={false}
               onPlay={handlePlay}
               rtl={lineRtl}
               styles={styles}
@@ -241,6 +245,11 @@ export function TextLine({
                 unhide={unhide}
                 lang={element.lang}
                 renderMode={preferNativeText ? "native" : "tokenized"}
+                inlineAudio={
+                  preferNativeText && lineAudio.hasAudio
+                    ? { onPress: handlePlay, rtl: lineRtl, color: colors.blue }
+                    : undefined
+                }
                 rtl={lineRtl}
                 containerStyle={lineRtl ? styles.rtlBubbleText : undefined}
                 leadingElement={
@@ -265,7 +274,7 @@ export function TextLine({
   return (
     <View style={[styles.row, lineRtl && styles.rowRtl]}>
       <LineBody
-        hasAudio={lineAudio.hasAudio}
+        hasAudio={preferNativeText ? false : lineAudio.hasAudio}
         onPlay={handlePlay}
         rtl={lineRtl}
         styles={styles}
@@ -277,6 +286,11 @@ export function TextLine({
           unhide={unhide}
           lang={element.lang}
           renderMode={preferNativeText ? "native" : "tokenized"}
+          inlineAudio={
+            preferNativeText && lineAudio.hasAudio
+              ? { onPress: handlePlay, rtl: lineRtl, color: colors.blue }
+              : undefined
+          }
           rtl={lineRtl}
           containerStyle={lineRtl ? styles.rtlProseText : undefined}
           fillLineWidth={lineRtl}
