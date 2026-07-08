@@ -1,7 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { fetchQuery } from "convex/nextjs";
+import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 import CourseVoicesEditPageClient from "./page_client";
 
@@ -15,9 +15,12 @@ export async function generateMetadata({
   params: Promise<{ course_id: string }>;
 }): Promise<Metadata> {
   const courseId = (await params).course_id;
-  const course = await fetchQuery(api.editorRead.getEditorCourseByIdentifier, {
-    identifier: courseId,
-  });
+  const course = await fetchAuthQuery(
+    api.editorRead.getEditorCourseByIdentifier,
+    {
+      identifier: courseId,
+    },
+  );
 
   if (!course) notFound();
 
