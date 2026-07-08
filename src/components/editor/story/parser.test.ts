@@ -345,6 +345,53 @@ $8275/8e8657d3.mp3;5,50;2,550;1,438;7,162;0,525`);
   });
 });
 
+test("LINE uses the default avatar link when a speaker override only changes the voice", () => {
+  const avatarLink = "https://stories-cdn.duolingo.com/avatar/speaker-6.svg";
+  const [story, meta] = processStoryFile(
+    `[DATA]
+speaker_6=nl-BE-Wavenet-B
+
+[LINE]
+Speaker6: Waarom niet?`,
+    0,
+    {
+      0: {
+        id: 0,
+        avatar_id: 0,
+        language_id: 0,
+        name: "Narrator",
+        link: "",
+        speaker: "nl-NL-FennaNeural",
+      },
+      6: {
+        id: 6,
+        avatar_id: 6,
+        language_id: 0,
+        name: "Rob",
+        link: avatarLink,
+        speaker: "nl-NL-FennaNeural",
+      },
+    },
+    {
+      learning_language: "nl",
+      from_language: "en",
+    },
+    "",
+  );
+
+  const line = story.elements[0];
+  assert.equal(line?.type, "LINE");
+  if (line?.type !== "LINE") return;
+
+  assert.equal(line.line.type, "CHARACTER");
+  if (line.line.type !== "CHARACTER") return;
+
+  assert.equal(line.line.avatarUrl, avatarLink);
+  assert.equal(line.line.characterName, "Rob");
+  assert.equal(meta.cast["6"]?.link, avatarLink);
+  assert.equal(meta.cast["6"]?.speaker, "nl-BE-Wavenet-B");
+});
+
 test("curly brace TTS override keeps the full tilde-connected phrase", () => {
   const [story] = processStoryFile(
     `[DATA]
