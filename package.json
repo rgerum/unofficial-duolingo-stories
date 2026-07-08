@@ -6,6 +6,7 @@
     "build": "next build",
     "start": "next start",
     "test": "pnpm exec tsx --test src/**/*.test.ts",
+    "test:convex": "vitest run --config vitest.config.ts",
     "format": "pnpm exec biome format src convex --write",
     "format:check": "pnpm exec biome format src convex",
     "lint": "pnpm run format:check && pnpm exec biome lint src convex",
@@ -68,6 +69,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.3",
+    "@edge-runtime/vm": "^5.0.0",
     "@tailwindcss/postcss": "^4.3.2",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.14",
@@ -75,11 +77,14 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
+    "convex-test": "^0.0.54",
     "dotenv": "^17.4.2",
     "shadcn": "^4.13.0",
     "tailwindcss": "^4.3.2",
     "tsx": "^4.23.0",
     "tw-animate-css": "^1.4.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vite": "^8.1.3",
+    "vitest": "^4.1.10"
   }
 }
