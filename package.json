@@ -1,12 +1,6 @@
 {
   "private": true,
   "packageManager": "pnpm@10.34.4",
-  "pnpm": {
-    "//": "kysely is transitive via @better-auth/kysely-adapter; pinned to 0.28.17 for better-auth 1.6.x compatibility (commit 7a311b2f). Re-evaluate when bumping better-auth.",
-    "overrides": {
-      "kysely": "0.28.17"
-    }
-  },
   "scripts": {
     "dev": "next",
     "build": "next build",
