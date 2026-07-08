@@ -67,7 +67,7 @@ Root (tab-less stack)
 - **Welcome** mirrors the PWA's start screen (`src/app/(stories)/learn/welcome.tsx`,
   the PWA `start_url`): see §3.0.
 - **Learn** is the default tab and opens the *last used course* (stored locally;
-  for logged-in users seeded from `storyDone.getLastDoneCourseShortForLegacyUser`).
+  for logged-in users seeded from `storyDone.getLastDoneCourseShortForCurrentUser`).
 - The reader is a full-screen modal with no tab bar — a story is an immersive,
   do-not-interrupt flow, same as Duolingo's apps.
 
