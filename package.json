@@ -18,6 +18,7 @@
     "knip": "pnpm dlx knip --production",
     "optimize:flags": "pnpm dlx svgo -f flags --multipass",
     "audit:missing-story-images": "pnpm exec tsx scripts/find-missing-story-images.ts",
+    "mobile:screenshot": "scripts/mobile-screenshot.sh",
     "backfill:discord-avatars": "pnpm exec tsx scripts/backfill-discord-avatars.ts",
     "backfill:course-contributors": "pnpm exec tsx scripts/backfill-course-contributors.ts",
     "audio:join-story": "tsx scripts/generate-joined-story-audio.ts",

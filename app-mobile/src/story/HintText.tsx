@@ -58,6 +58,7 @@ type Token = {
   text: string;
   start: number;
   hidden: boolean;
+  hiddenGroupKey?: string;
   revealed: boolean;
   dimmed: boolean;
   hint?: { translation: string; pronunciation?: string };
@@ -105,7 +106,7 @@ function buildNativeSegments(tokens: Token[]): NativeSegment[] {
         key: `${token.start}:${segments.length}`,
         tokenKey: `${token.start}:${token.text}`,
         underlineGroupKey: token.hidden
-          ? `hidden:${token.start}`
+          ? token.hiddenGroupKey
           : token.revealed
             ? `revealed:${token.start}`
             : token.hintGroupKey,
@@ -348,6 +349,7 @@ function buildTokens({
   }
 
   const tokens: Token[] = [];
+  const hiddenGroupKey = entry ? `hidden:${entry.start}:${entry.end}` : undefined;
 
   const pushRun = (
     start: number,
@@ -365,26 +367,49 @@ function buildTokens({
         const pieceStart = position;
         const pieceEnd = position + sub.length;
         position = pieceEnd;
-        const hidden =
-          entry !== undefined &&
-          getOverlap(pieceStart, pieceEnd, entry.start, entry.end);
-        const wasHidden = Boolean(
-          hideRangesForChallenge?.some((range) =>
-            getOverlap(pieceStart, pieceEnd, range.start, range.end),
-          ),
-        );
-        tokens.push({
-          text: sub,
-          start: pieceStart,
-          hidden,
-          revealed: wasHidden && !hidden,
-          dimmed:
-            audioRange !== undefined &&
-            (audioRange === 0 ||
-              (audioRange > 0 && audioRange < pieceStart)),
-          hint,
-          hintGroupKey,
-        });
+        const boundaries = new Set([pieceStart, pieceEnd]);
+
+        if (entry) {
+          if (entry.start > pieceStart && entry.start < pieceEnd)
+            boundaries.add(entry.start);
+          if (entry.end > pieceStart && entry.end < pieceEnd)
+            boundaries.add(entry.end);
+        }
+        for (const range of hideRangesForChallenge ?? []) {
+          if (range.start > pieceStart && range.start < pieceEnd)
+            boundaries.add(range.start);
+          if (range.end > pieceStart && range.end < pieceEnd)
+            boundaries.add(range.end);
+        }
+
+        const sortedBoundaries = Array.from(boundaries).sort((a, b) => a - b);
+        for (let index = 0; index < sortedBoundaries.length - 1; index += 1) {
+          const fragmentStart = sortedBoundaries[index];
+          const fragmentEnd = sortedBoundaries[index + 1];
+          if (fragmentStart === undefined || fragmentEnd === undefined) continue;
+
+          const hidden =
+            entry !== undefined &&
+            getOverlap(fragmentStart, fragmentEnd, entry.start, entry.end);
+          const wasHidden = Boolean(
+            hideRangesForChallenge?.some((range) =>
+              getOverlap(fragmentStart, fragmentEnd, range.start, range.end),
+            ),
+          );
+          tokens.push({
+            text: sub.slice(fragmentStart - pieceStart, fragmentEnd - pieceStart),
+            start: fragmentStart,
+            hidden,
+            hiddenGroupKey: hidden ? hiddenGroupKey : undefined,
+            revealed: wasHidden && !hidden,
+            dimmed:
+              audioRange !== undefined &&
+              (audioRange === 0 ||
+                (audioRange > 0 && audioRange < fragmentStart)),
+            hint,
+            hintGroupKey,
+          });
+        }
       }
     }
   };
@@ -590,6 +615,42 @@ function NativeHintText({
     return fragments;
   }, [computedSegments]);
 
+  const hiddenCovers = React.useMemo(() => {
+    type HiddenCover = {
+      key: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+
+    const covers: HiddenCover[] = [];
+    for (const segment of computedSegments) {
+      if (!segment.hidden) continue;
+      const last = covers[covers.length - 1];
+      const x = segment.x - 1;
+      const width = segment.width + 2;
+      if (
+        last &&
+        Math.abs(last.y - segment.y) <= 2 &&
+        Math.abs(last.x + last.width - x) <= 2
+      ) {
+        last.width = x + width - last.x;
+        last.height = Math.max(last.height, segment.height);
+        continue;
+      }
+      covers.push({
+        key: `hidden:${segment.key}`,
+        x,
+        y: segment.y,
+        width,
+        height: segment.height,
+      });
+    }
+
+    return covers;
+  }, [computedSegments]);
+
   const showMeasuredHint = React.useCallback(
     (
       token: Token,
@@ -771,75 +832,6 @@ function NativeHintText({
         containerStyle,
       ]}
     >
-      <Svg
-        pointerEvents="none"
-        style={StyleSheet.absoluteFill}
-      >
-        {debugRects.map((segment) => (
-          <React.Fragment key={`debug:${segment.key}`}>
-            <Rect
-              x={segment.x}
-              y={segment.y}
-              width={segment.width}
-              height={segment.height}
-              stroke={segment.stroke}
-              strokeWidth={1}
-              fill={segment.fill}
-            />
-            <SvgText
-              x={segment.x}
-              y={segment.y - 2}
-              fontSize="10"
-              fill={segment.stroke}
-            >
-              {segment.groupLabel ?? "none"}
-            </SvgText>
-            <SvgText
-              x={segment.x + 1}
-              y={segment.y + segment.height - 10}
-              fontSize="8"
-              fill={segment.stroke}
-            >
-              {segment.text}
-            </SvgText>
-          </React.Fragment>
-        ))}
-        {underlineSegments.map((segment) => (
-          <React.Fragment key={segment.key}>
-            {segment.dotted ? (
-              Array.from({
-                length: Math.max(
-                  1,
-                  Math.floor((segment.x2 - segment.x1) / UNDERLINE_DOT_GAP) + 1,
-                ),
-              }).map((_, index) => {
-                const cx = Math.min(
-                  segment.x2,
-                  segment.x1 + index * UNDERLINE_DOT_GAP,
-                );
-                return (
-                  <Circle
-                    key={`${segment.key}:${index}`}
-                    cx={cx}
-                    cy={segment.y}
-                    r={UNDERLINE_DOT_RADIUS}
-                    fill={segment.color}
-                  />
-                );
-              })
-            ) : (
-              <Line
-                x1={segment.x1}
-                x2={segment.x2}
-                y1={segment.y}
-                y2={segment.y}
-                stroke={segment.color}
-                strokeWidth={2}
-              />
-            )}
-          </React.Fragment>
-        ))}
-      </Svg>
       <Text
         onLayout={(event) => {
           setTextLayout(event.nativeEvent.layout);
@@ -907,6 +899,7 @@ function NativeHintText({
                 flatStyle,
                 {
                   color,
+                  opacity: token.hidden ? 0 : 1,
                 },
               ]}
             >
@@ -915,6 +908,82 @@ function NativeHintText({
           );
         })}
       </Text>
+      <Svg pointerEvents="none" style={StyleSheet.absoluteFill}>
+        {hiddenCovers.map((cover) => (
+          <Rect
+            key={cover.key}
+            x={cover.x}
+            y={cover.y}
+            width={cover.width}
+            height={cover.height}
+            fill={colors.surface}
+          />
+        ))}
+        {debugRects.map((segment) => (
+          <React.Fragment key={`debug:${segment.key}`}>
+            <Rect
+              x={segment.x}
+              y={segment.y}
+              width={segment.width}
+              height={segment.height}
+              stroke={segment.stroke}
+              strokeWidth={1}
+              fill={segment.fill}
+            />
+            <SvgText
+              x={segment.x}
+              y={segment.y - 2}
+              fontSize="10"
+              fill={segment.stroke}
+            >
+              {segment.groupLabel ?? "none"}
+            </SvgText>
+            <SvgText
+              x={segment.x + 1}
+              y={segment.y + segment.height - 10}
+              fontSize="8"
+              fill={segment.stroke}
+            >
+              {segment.text}
+            </SvgText>
+          </React.Fragment>
+        ))}
+        {underlineSegments.map((segment) => (
+          <React.Fragment key={segment.key}>
+            {segment.dotted ? (
+              Array.from({
+                length: Math.max(
+                  1,
+                  Math.floor((segment.x2 - segment.x1) / UNDERLINE_DOT_GAP) + 1,
+                ),
+              }).map((_, index) => {
+                const cx = Math.min(
+                  segment.x2,
+                  segment.x1 + index * UNDERLINE_DOT_GAP,
+                );
+                return (
+                  <Circle
+                    key={`${segment.key}:${index}`}
+                    cx={cx}
+                    cy={segment.y}
+                    r={UNDERLINE_DOT_RADIUS}
+                    fill={segment.color}
+                  />
+                );
+              })
+            ) : (
+              <Line
+                x1={segment.x1}
+                x2={segment.x2}
+                y1={segment.y}
+                y2={segment.y}
+                stroke={segment.color}
+                strokeWidth={2}
+              />
+            )}
+          </React.Fragment>
+        ))}
+      </Svg>
       <View
         pointerEvents="none"
         style={{

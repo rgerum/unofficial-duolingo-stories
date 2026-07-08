@@ -1,4 +1,5 @@
 import React from "react";
+import Constants from "expo-constants";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
@@ -24,10 +25,12 @@ const nunitoExtraBoldFont = require("../assets/fonts/Nunito-ExtraBold.ttf");
 const nunitoLightFont = require("../assets/fonts/Nunito-Light.ttf");
 const sitelenPonaFont = require("../assets/fonts/linjalipamanka-normal.otf");
 
-SplashScreen.setOptions({
-  duration: 300,
-  fade: true,
-});
+if (Constants.appOwnership !== "expo") {
+  SplashScreen.setOptions({
+    duration: 300,
+    fade: true,
+  });
+}
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -91,6 +94,7 @@ function ThemedStack() {
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="add-course" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="debug/story-shot" />
         <Stack.Screen
           name="story/[id]"
           options={{
