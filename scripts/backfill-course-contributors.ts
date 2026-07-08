@@ -1,14 +1,25 @@
+import { execFileSync } from "node:child_process";
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
-const CONVEX_SITE_URL =
-  process.env.NEXT_PUBLIC_CONVEX_SITE_URL ??
-  process.env.CONVEX_SITE_URL ??
-  process.env.NEXT_PUBLIC_CONVEX_URL ??
-  process.env.CONVEX_URL;
-const COURSE_CONTRIBUTOR_BACKFILL_SECRET =
-  process.env.COURSE_CONTRIBUTOR_BACKFILL_SECRET;
+// The backfill is an internal Convex mutation (no HTTP route / shared secret).
+// This script drives it batch-by-batch via `pnpm exec convex run`, following
+// the returned cursor until the whole `courses` table has been processed.
+//
+// Deployment target: `convex run` uses the deployment resolved from the
+// environment (`CONVEX_DEPLOYMENT` in `.env.local`, typically your dev
+// deployment). To run against production, set `CONVEX_TARGET=prod`, which
+// appends `--prod` to every `convex run` invocation, e.g.:
+//
+//   CONVEX_TARGET=prod pnpm run backfill:course-contributors
+//
+// Underlying invocation:
+//   pnpm exec convex run [--prod] \
+//     courseContributorBackfill:backfillCourseContributorDetailsBatchInternal '{...}'
+const INTERNAL_FUNCTION =
+  "courseContributorBackfill:backfillCourseContributorDetailsBatchInternal";
+const CONVEX_RUN_FLAGS = resolveConvexRunFlags();
 const BATCH_SIZE = parsePositiveNumber(
   process.env.COURSE_CONTRIBUTOR_BACKFILL_BATCH_SIZE,
   10,
@@ -21,18 +32,6 @@ const DRY_RUN = parseBooleanEnv(
   process.env.COURSE_CONTRIBUTOR_BACKFILL_DRY_RUN,
   false,
 );
-
-if (!CONVEX_SITE_URL) {
-  console.error(
-    "Error: NEXT_PUBLIC_CONVEX_SITE_URL/CONVEX_SITE_URL/CONVEX_URL is not set.",
-  );
-  process.exit(1);
-}
-
-if (!COURSE_CONTRIBUTOR_BACKFILL_SECRET) {
-  console.error("Error: COURSE_CONTRIBUTOR_BACKFILL_SECRET is not set.");
-  process.exit(1);
-}
 
 type BackfillResult = {
   processed: number;
@@ -63,48 +62,77 @@ function parseBooleanEnv(value: string | undefined, defaultValue: boolean) {
   return defaultValue;
 }
 
+// Explicitly select the Convex deployment so operators never silently backfill
+// the wrong one. Defaults to the environment-resolved (usually dev) deployment;
+// set CONVEX_TARGET=prod to append `--prod`.
+function resolveConvexRunFlags(): string[] {
+  const target = process.env.CONVEX_TARGET?.trim().toLowerCase();
+  if (target === undefined || target === "" || target === "dev") return [];
+  if (target === "prod" || target === "production") return ["--prod"];
+  console.error(
+    `Error: unsupported CONVEX_TARGET "${process.env.CONVEX_TARGET}" (expected "dev" or "prod").`,
+  );
+  process.exit(1);
+}
+
+// Describe the deployment `convex run` will actually hit, so the startup log
+// never claims "dev" while `CONVEX_DEPLOYMENT` silently points at prod. With
+// `--prod` the target is production; otherwise it is whatever
+// `CONVEX_DEPLOYMENT` resolves to (surfaced verbatim when known).
+function describeConvexTarget(flags: string[]): string {
+  if (flags.includes("--prod")) return "prod (--prod)";
+  const deployment = process.env.CONVEX_DEPLOYMENT?.trim();
+  if (deployment) {
+    return `environment-resolved CONVEX_DEPLOYMENT="${deployment}"`;
+  }
+  return "environment-resolved deployment (CONVEX_DEPLOYMENT unset; set CONVEX_TARGET=prod for production)";
+}
+
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function runBatch(baseUrl: string, cursor: string | null) {
-  const response = await fetch(`${baseUrl}/admin/backfill-course-contributors`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      secret: COURSE_CONTRIBUTOR_BACKFILL_SECRET,
-      batchSize: BATCH_SIZE,
-      cursor,
-      dryRun: DRY_RUN,
-    }),
-  });
-
-  const text = await response.text();
-  let parsed: unknown = null;
+function extractJson(stdout: string): unknown {
+  const trimmed = stdout.trim();
   try {
-    parsed = JSON.parse(text);
+    return JSON.parse(trimmed);
   } catch {
-    parsed = text;
+    const start = trimmed.indexOf("{");
+    const end = trimmed.lastIndexOf("}");
+    if (start === -1 || end === -1 || end < start) {
+      throw new Error(`Could not parse convex run output:\n${stdout}`);
+    }
+    return JSON.parse(trimmed.slice(start, end + 1));
   }
+}
 
-  if (!response.ok) {
-    throw new Error(
-      `Backfill request failed with ${response.status}: ${JSON.stringify(parsed)}`,
-    );
-  }
-
-  return parsed as BackfillResult;
+function runBatch(cursor: string | null): BackfillResult {
+  const args = { batchSize: BATCH_SIZE, cursor, dryRun: DRY_RUN };
+  const stdout = execFileSync(
+    "pnpm",
+    [
+      "exec",
+      "convex",
+      "run",
+      ...CONVEX_RUN_FLAGS,
+      INTERNAL_FUNCTION,
+      JSON.stringify(args),
+    ],
+    { encoding: "utf8" },
+  );
+  return extractJson(stdout) as BackfillResult;
 }
 
 async function main() {
-  const baseUrl = String(CONVEX_SITE_URL).replace(/\/+$/, "");
   let cursor: string | null = null;
   let processedTotal = 0;
   let updatedCoursesTotal = 0;
   const errors: BackfillResult["errors"] = [];
   let batchNumber = 0;
+
+  console.log(
+    `Targeting Convex deployment: ${describeConvexTarget(CONVEX_RUN_FLAGS)}`,
+  );
 
   while (true) {
     batchNumber += 1;
@@ -112,7 +140,7 @@ async function main() {
       `Running batch ${batchNumber} (size=${BATCH_SIZE}, cursor=${cursor ?? "start"})...`,
     );
 
-    const result = await runBatch(baseUrl, cursor);
+    const result = runBatch(cursor);
     processedTotal += result.processed;
     updatedCoursesTotal += result.updatedCourses;
     errors.push(...result.errors);
