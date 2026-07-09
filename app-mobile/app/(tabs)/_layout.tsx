@@ -6,6 +6,15 @@ import { useTheme } from "../../src/theme";
 
 export default function TabsLayout() {
   const { colors } = useTheme();
+  const iosMajorVersion =
+    Platform.OS === "ios"
+      ? Number.parseInt(String(Platform.Version), 10)
+      : undefined;
+  const usesLiquidGlassTabs =
+    Platform.OS === "ios" && (iosMajorVersion ?? 0) >= 26;
+  const tabBarBackgroundColor = usesLiquidGlassTabs
+    ? undefined
+    : colors.background;
   const glassAdaptiveColor =
     Platform.OS === "ios"
       ? DynamicColorIOS({
@@ -16,8 +25,11 @@ export default function TabsLayout() {
 
   return (
     <NativeTabs
-      backgroundColor={Platform.OS === "ios" ? undefined : colors.background}
-      blurEffect="systemDefault"
+      backgroundColor={tabBarBackgroundColor}
+      blurEffect={usesLiquidGlassTabs ? "systemDefault" : "none"}
+      disableTransparentOnScrollEdge={
+        Platform.OS === "ios" && !usesLiquidGlassTabs ? true : undefined
+      }
       iconColor={{
         default: colors.disabled,
         selected: glassAdaptiveColor,
@@ -35,7 +47,7 @@ export default function TabsLayout() {
           fontWeight: "400",
         },
       }}
-      minimizeBehavior="automatic"
+      minimizeBehavior={usesLiquidGlassTabs ? "automatic" : undefined}
       shadowColor={Platform.OS === "ios" ? "transparent" : colors.border}
       tintColor={glassAdaptiveColor}
     >
