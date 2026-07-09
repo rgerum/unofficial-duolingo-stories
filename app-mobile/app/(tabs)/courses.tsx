@@ -30,6 +30,7 @@ import {
   type CourseProgress,
 } from "../../src/storage";
 import { type ThemeColors, useTheme } from "../../src/theme";
+import { useTabContentInsets } from "../../src/useTabContentInsets";
 
 type LandingData = FunctionReturnType<typeof api.landing.getPublicLandingPageData>;
 type LandingGroup = LandingData["groups"][number];
@@ -41,6 +42,7 @@ export default function CoursesTab() {
   const router = useRouter();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const tabContentInsets = useTabContentInsets();
   const { courseShort, activeCourseShorts, removeCourseShort, setCourseShort } =
     useAppState();
   const { data: session } = useAuthSession();
@@ -371,7 +373,7 @@ export default function CoursesTab() {
           data={courses}
           keyExtractor={(course) => course.short}
           renderItem={renderCourse}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, tabContentInsets]}
           ListHeaderComponent={
             isOffline ? (
               <OfflineNotice detail="Connect to the internet to switch or add courses." />
@@ -514,7 +516,6 @@ function createStyles(colors: ThemeColors) {
   },
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 30,
   },
   card: {
     borderWidth: 2,

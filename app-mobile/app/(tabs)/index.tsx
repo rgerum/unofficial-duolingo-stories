@@ -27,6 +27,7 @@ import { Button } from "../../src/components/Button";
 import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
 import { type ThemeColors, useTheme } from "../../src/theme";
+import { useTabContentInsets } from "../../src/useTabContentInsets";
 
 type StorySet = { setId: number; stories: StoryListItem[] };
 
@@ -35,6 +36,7 @@ export default function LearnTab() {
   const router = useRouter();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const tabContentInsets = useTabContentInsets();
   const { ready, courseShort } = useAppState();
   const { data: session } = useAuthSession();
   const { isOffline } = useNetworkStatus();
@@ -247,7 +249,7 @@ export default function LearnTab() {
         data={sets}
         keyExtractor={(set) => String(set.setId)}
         renderItem={renderStorySet}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, tabContentInsets]}
         ListHeaderComponent={
           isOffline ? (
             <View style={styles.offlineWrap}>
@@ -255,7 +257,6 @@ export default function LearnTab() {
             </View>
           ) : null
         }
-        ListFooterComponent={<View style={styles.listFooter} />}
         initialNumToRender={3}
         maxToRenderPerBatch={3}
         removeClippedSubviews={Platform.OS === "android"}
@@ -382,9 +383,6 @@ function createStyles(colors: ThemeColors) {
       flexDirection: "row",
       flexWrap: "wrap",
       justifyContent: "center",
-    },
-    listFooter: {
-      height: 40,
     },
   });
 }
