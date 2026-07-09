@@ -27,19 +27,20 @@ import type { ContentWithHints, HideRange } from "./types";
 // underlines are real (dashed) bottom borders.
 
 const WRAPPED_LINE_GAP = 3;
-const SHOW_NATIVE_HINT_DEBUG = false;
 const UNDERLINE_EDGE_INSET = 2;
 const UNDERLINE_DOT_RADIUS = 1.2;
 const UNDERLINE_DOT_GAP = 7;
 const INLINE_AUDIO_SPACE = "\u2002";
-const UNDERLINE_BASELINE_GAP = 2;
+const UNDERLINE_BASELINE_GAP = 4;
 const UNDERLINE_BOTTOM_INSET = 2;
 
 type HintTextRenderMode = "auto" | "native" | "tokenized";
 
 function splitTextTokens(text: string): string[] {
   if (!text) return [];
-  return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}]+)/).filter((p) => p !== "");
+  return text
+    .split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}]+)/)
+    .filter((p) => p !== "");
 }
 
 function getOverlap(
@@ -144,6 +145,16 @@ type DebugRect = {
   fill: string;
 };
 
+type DebugBaseline = {
+  key: string;
+  x1: number;
+  x2: number;
+  baselineY: number;
+  underlineY: number;
+  baselineLabel: string;
+  underlineLabel: string;
+};
+
 function getDisplayText(token: Token): string {
   return token.text.replace(/\s+/g, " ");
 }
@@ -170,7 +181,10 @@ function isCombiningCodePoint(codePoint: number): boolean {
     (codePoint >= 0x1dc0 && codePoint <= 0x1dff) ||
     (codePoint >= 0x20d0 && codePoint <= 0x20ff) ||
     (codePoint >= 0xfe20 && codePoint <= 0xfe2f) ||
-    (codePoint >= 0x3099 && codePoint <= 0x309a)
+    (codePoint >= 0x3099 && codePoint <= 0x309a) ||
+    (codePoint >= 0x0c00 && codePoint <= 0x0c04) ||
+    (codePoint >= 0x0c3c && codePoint <= 0x0c56) ||
+    (codePoint >= 0x0c62 && codePoint <= 0x0c63)
   );
 }
 
@@ -268,8 +282,8 @@ function buildNativeSegments(tokens: Token[]): NativeSegment[] {
 function getDebugColor(key?: string): { stroke: string; fill: string } {
   if (!key) {
     return {
-      stroke: "#8c8c8c",
-      fill: "rgba(140,140,140,0.12)",
+      stroke: "#00e5ff",
+      fill: "rgba(0,229,255,0.16)",
     };
   }
 
@@ -280,8 +294,8 @@ function getDebugColor(key?: string): { stroke: string; fill: string } {
 
   const hue = hash % 360;
   return {
-    stroke: `hsl(${hue} 80% 45%)`,
-    fill: `hsla(${hue} 80% 55% / 0.16)`,
+    stroke: `hsl(${hue} 100% 42%)`,
+    fill: `hsla(${hue} 100% 55% / 0.28)`,
   };
 }
 
@@ -396,11 +410,16 @@ function buildHiddenCovers(computedSegments: ComputedSegment[]): HiddenCover[] {
   return covers;
 }
 
+function getBaselineY(segment: ComputedSegment) {
+  return segment.y + segment.ascender;
+}
+
 function getUnderlineY(segment: ComputedSegment) {
-  const glyphBottom = segment.y + segment.ascender + segment.descender;
-  const preferredY = glyphBottom + UNDERLINE_BASELINE_GAP;
+  const baselineY = getBaselineY(segment);
+  const preferredY = baselineY + UNDERLINE_BASELINE_GAP;
+  const minY = segment.y + UNDERLINE_BOTTOM_INSET;
   const maxY = segment.y + segment.height - UNDERLINE_BOTTOM_INSET;
-  return Math.min(preferredY, maxY);
+  return Math.max(minY, Math.min(preferredY, maxY));
 }
 
 function buildUnderlineSegments({
@@ -462,7 +481,10 @@ function buildUnderlineSegments({
       x1: segment.x + UNDERLINE_EDGE_INSET,
       x2:
         segment.x +
-        Math.max(segment.width - UNDERLINE_EDGE_INSET, UNDERLINE_EDGE_INSET * 2),
+        Math.max(
+          segment.width - UNDERLINE_EDGE_INSET,
+          UNDERLINE_EDGE_INSET * 2,
+        ),
       y: getUnderlineY(segment),
       color: underline,
       dotted: !segment.hidden,
@@ -516,8 +538,11 @@ function buildUnderlineSegments({
   return merged;
 }
 
-function buildDebugRects(computedSegments: ComputedSegment[]): DebugRect[] {
-  if (!SHOW_NATIVE_HINT_DEBUG) return [];
+function buildDebugRects(
+  computedSegments: ComputedSegment[],
+  enabled: boolean,
+): DebugRect[] {
+  if (!enabled) return [];
 
   const groupLabels = new Map<string, string>();
   let nextGroup = 1;
@@ -540,6 +565,36 @@ function buildDebugRects(computedSegments: ComputedSegment[]): DebugRect[] {
       ...getDebugColor(groupKey),
     };
   });
+}
+
+function buildDebugBaselines(
+  computedSegments: ComputedSegment[],
+  enabled: boolean,
+): DebugBaseline[] {
+  if (!enabled) return [];
+
+  const baselines = new Map<string, DebugBaseline>();
+  for (const segment of computedSegments) {
+    const y = getBaselineY(segment);
+    const key = `baseline:${Math.round(y)}`;
+    const existing = baselines.get(key);
+    if (existing) {
+      existing.x1 = Math.min(existing.x1, segment.x - 12);
+      existing.x2 = Math.max(existing.x2, segment.x + segment.width + 12);
+      continue;
+    }
+    baselines.set(key, {
+      key,
+      x1: segment.x - 12,
+      x2: segment.x + segment.width + 12,
+      baselineY: y,
+      underlineY: getUnderlineY(segment),
+      baselineLabel: `BASELINE ${Math.round(y)}`,
+      underlineLabel: `UNDERLINE ${Math.round(getUnderlineY(segment))}`,
+    });
+  }
+
+  return Array.from(baselines.values());
 }
 
 function HintTokenBox({
@@ -582,8 +637,7 @@ function HintTokenBox({
           onLookup();
           const { locationX, locationY, pageX, pageY } = event.nativeEvent;
           const { width, height } = tokenLayoutRef.current;
-          const calculatedX =
-            width > 0 ? pageX - locationX + width / 2 : pageX;
+          const calculatedX = width > 0 ? pageX - locationX + width / 2 : pageX;
           const calculatedY = height > 0 ? pageY - locationY : pageY;
           popup.show({
             translation: hint.translation,
@@ -663,8 +717,7 @@ function HintPhraseBox({
           onLookup();
           const { locationX, locationY, pageX, pageY } = event.nativeEvent;
           const { width, height } = phraseLayoutRef.current;
-          const calculatedX =
-            width > 0 ? pageX - locationX + width / 2 : pageX;
+          const calculatedX = width > 0 ? pageX - locationX + width / 2 : pageX;
           const calculatedY = height > 0 ? pageY - locationY : pageY;
           popup.show({
             translation: hint.translation,
@@ -754,7 +807,9 @@ function buildTokens({
   }
 
   const tokens: Token[] = [];
-  const hiddenGroupKey = entry ? `hidden:${entry.start}:${entry.end}` : undefined;
+  const hiddenGroupKey = entry
+    ? `hidden:${entry.start}:${entry.end}`
+    : undefined;
 
   const pushRun = (
     start: number,
@@ -791,7 +846,8 @@ function buildTokens({
         for (let index = 0; index < sortedBoundaries.length - 1; index += 1) {
           const fragmentStart = sortedBoundaries[index];
           const fragmentEnd = sortedBoundaries[index + 1];
-          if (fragmentStart === undefined || fragmentEnd === undefined) continue;
+          if (fragmentStart === undefined || fragmentEnd === undefined)
+            continue;
 
           const hidden =
             entry !== undefined &&
@@ -802,7 +858,10 @@ function buildTokens({
             ),
           );
           tokens.push({
-            text: sub.slice(fragmentStart - pieceStart, fragmentEnd - pieceStart),
+            text: sub.slice(
+              fragmentStart - pieceStart,
+              fragmentEnd - pieceStart,
+            ),
             start: fragmentStart,
             hidden,
             hiddenGroupKey: hidden ? hiddenGroupKey : undefined,
@@ -843,90 +902,216 @@ function buildTokens({
 function NativeHintOverlay({
   hiddenCovers,
   debugRects,
+  debugBaselines,
   underlineSegments,
   colors,
+  drawCovers = true,
+  drawUnderlines = true,
+  drawRangeDebug = false,
 }: {
   hiddenCovers: HiddenCover[];
   debugRects: DebugRect[];
+  debugBaselines?: DebugBaseline[];
   underlineSegments: UnderlineSegment[];
   colors: ThemeColors;
+  drawCovers?: boolean;
+  drawUnderlines?: boolean;
+  drawRangeDebug?: boolean;
 }) {
   return (
     <Svg pointerEvents="none" style={StyleSheet.absoluteFill}>
-      {hiddenCovers.map((cover) => (
-        <Rect
-          key={cover.key}
-          x={cover.x}
-          y={cover.y}
-          width={cover.width}
-          height={cover.height}
-          fill={colors.surface}
-        />
-      ))}
-      {debugRects.map((segment) => (
-        <React.Fragment key={`debug:${segment.key}`}>
+      {drawCovers &&
+        hiddenCovers.map((cover) => (
           <Rect
-            x={segment.x}
-            y={segment.y}
-            width={segment.width}
-            height={segment.height}
-            stroke={segment.stroke}
-            strokeWidth={1}
-            fill={segment.fill}
+            key={cover.key}
+            x={cover.x}
+            y={cover.y}
+            width={cover.width}
+            height={cover.height}
+            fill={colors.surface}
           />
-          <SvgText
-            x={segment.x}
-            y={segment.y - 2}
-            fontSize="10"
-            fill={segment.stroke}
-          >
-            {segment.groupLabel ?? "none"}
-          </SvgText>
-          <SvgText
-            x={segment.x + 1}
-            y={segment.y + segment.height - 10}
-            fontSize="8"
-            fill={segment.stroke}
-          >
-            {segment.text}
-          </SvgText>
-        </React.Fragment>
-      ))}
-      {underlineSegments.map((segment) => (
-        <React.Fragment key={segment.key}>
-          {segment.dotted ? (
-            Array.from({
-              length: Math.max(
-                1,
-                Math.floor((segment.x2 - segment.x1) / UNDERLINE_DOT_GAP) + 1,
-              ),
-            }).map((_, index) => {
-              const cx = Math.min(
-                segment.x2,
-                segment.x1 + index * UNDERLINE_DOT_GAP,
-              );
-              return (
-                <Circle
-                  key={`${segment.key}:${index}`}
-                  cx={cx}
-                  cy={segment.y}
-                  r={UNDERLINE_DOT_RADIUS}
-                  fill={segment.color}
-                />
-              );
-            })
-          ) : (
+        ))}
+      {drawRangeDebug &&
+        underlineSegments.map((segment) => (
+          <Rect
+            key={`range-debug:${segment.key}`}
+            x={segment.debugX}
+            y={segment.debugY}
+            width={segment.debugWidth}
+            height={segment.debugHeight}
+            stroke="#ff00d4"
+            strokeWidth={3}
+            strokeDasharray="5 4"
+            fill="rgba(255,0,212,0.08)"
+          />
+        ))}
+      {drawCovers &&
+        debugRects.map((segment) => (
+          <React.Fragment key={`debug:${segment.key}`}>
+            <Rect
+              x={segment.x}
+              y={segment.y}
+              width={segment.width}
+              height={segment.height}
+              stroke={segment.stroke}
+              strokeWidth={1}
+              fill={segment.fill}
+            />
+            <SvgText
+              x={segment.x}
+              y={segment.y - 2}
+              fontSize="10"
+              fill={segment.stroke}
+            >
+              {segment.groupLabel ?? "none"}
+            </SvgText>
+            <SvgText
+              x={segment.x + 1}
+              y={segment.y + segment.height - 10}
+              fontSize="8"
+              fill={segment.stroke}
+            >
+              {segment.text}
+            </SvgText>
+          </React.Fragment>
+        ))}
+      {drawCovers &&
+        debugBaselines?.map((baseline) => (
+          <React.Fragment key={baseline.key}>
             <Line
-              x1={segment.x1}
-              x2={segment.x2}
-              y1={segment.y}
-              y2={segment.y}
-              stroke={segment.color}
+              x1={baseline.x1}
+              x2={baseline.x2}
+              y1={baseline.baselineY}
+              y2={baseline.baselineY}
+              stroke="#111111"
+              strokeWidth={5}
+            />
+            <Line
+              x1={baseline.x1}
+              x2={baseline.x2}
+              y1={baseline.baselineY}
+              y2={baseline.baselineY}
+              stroke="#ffff00"
               strokeWidth={2}
             />
-          )}
-        </React.Fragment>
-      ))}
+            <Line
+              x1={baseline.x1}
+              x2={baseline.x2}
+              y1={baseline.underlineY}
+              y2={baseline.underlineY}
+              stroke="#111111"
+              strokeWidth={5}
+              strokeDasharray="8 5"
+            />
+            <Line
+              x1={baseline.x1}
+              x2={baseline.x2}
+              y1={baseline.underlineY}
+              y2={baseline.underlineY}
+              stroke="#ff00d4"
+              strokeWidth={2}
+              strokeDasharray="8 5"
+            />
+            <Line
+              x1={baseline.x1}
+              x2={baseline.x1}
+              y1={baseline.baselineY - 8}
+              y2={baseline.underlineY + 8}
+              stroke="#111111"
+              strokeWidth={5}
+            />
+            <Line
+              x1={baseline.x2}
+              x2={baseline.x2}
+              y1={baseline.baselineY - 8}
+              y2={baseline.underlineY + 8}
+              stroke="#111111"
+              strokeWidth={5}
+            />
+            <Line
+              x1={baseline.x1}
+              x2={baseline.x1}
+              y1={baseline.baselineY - 8}
+              y2={baseline.underlineY + 8}
+              stroke="#ffff00"
+              strokeWidth={2}
+            />
+            <Line
+              x1={baseline.x2}
+              x2={baseline.x2}
+              y1={baseline.baselineY - 8}
+              y2={baseline.underlineY + 8}
+              stroke="#ffff00"
+              strokeWidth={2}
+            />
+            <Rect
+              x={baseline.x1}
+              y={baseline.baselineY - 27}
+              width={108}
+              height={17}
+              fill="#111111"
+            />
+            <SvgText
+              x={baseline.x1 + 4}
+              y={baseline.baselineY - 14}
+              fontSize="11"
+              fill="#ffff00"
+            >
+              {baseline.baselineLabel}
+            </SvgText>
+            <Rect
+              x={baseline.x1}
+              y={baseline.underlineY + 8}
+              width={118}
+              height={17}
+              fill="#111111"
+            />
+            <SvgText
+              x={baseline.x1 + 4}
+              y={baseline.underlineY + 21}
+              fontSize="11"
+              fill="#ff00d4"
+            >
+              {baseline.underlineLabel}
+            </SvgText>
+          </React.Fragment>
+        ))}
+      {drawUnderlines &&
+        underlineSegments.map((segment) => (
+          <React.Fragment key={segment.key}>
+            {segment.dotted ? (
+              Array.from({
+                length: Math.max(
+                  1,
+                  Math.floor((segment.x2 - segment.x1) / UNDERLINE_DOT_GAP) + 1,
+                ),
+              }).map((_, index) => {
+                const cx = Math.min(
+                  segment.x2,
+                  segment.x1 + index * UNDERLINE_DOT_GAP,
+                );
+                return (
+                  <Circle
+                    key={`${segment.key}:${index}`}
+                    cx={cx}
+                    cy={segment.y}
+                    r={UNDERLINE_DOT_RADIUS}
+                    fill={segment.color}
+                  />
+                );
+              })
+            ) : (
+              <Line
+                x1={segment.x1}
+                x2={segment.x2}
+                y1={segment.y}
+                y2={segment.y}
+                stroke={segment.color}
+                strokeWidth={2}
+              />
+            )}
+          </React.Fragment>
+        ))}
     </Svg>
   );
 }
@@ -939,6 +1124,7 @@ function NativeHintText({
   rtl,
   centered,
   fillLineWidth,
+  debugNativeLayout,
 }: {
   tokens: Token[];
   flatStyle: TextStyle;
@@ -947,6 +1133,7 @@ function NativeHintText({
   rtl: boolean;
   centered: boolean;
   fillLineWidth: boolean;
+  debugNativeLayout: boolean;
 }) {
   const { colors } = useTheme();
   const popup = React.useContext(HintPopupContext);
@@ -991,7 +1178,9 @@ function NativeHintText({
     height: 0,
   });
   const [lineLayouts, setLineLayouts] = React.useState<NativeLineLayout[]>([]);
-  const [segmentWidths, setSegmentWidths] = React.useState<Record<string, number>>({});
+  const [segmentWidths, setSegmentWidths] = React.useState<
+    Record<string, number>
+  >({});
 
   const computedSegments = React.useMemo(
     () =>
@@ -1003,27 +1192,6 @@ function NativeHintText({
       }),
     [lineLayouts, measurementSegments, segmentWidths, textLayout],
   );
-  const loggedDebugRef = React.useRef(false);
-
-  React.useEffect(() => {
-    if (!SHOW_NATIVE_HINT_DEBUG || loggedDebugRef.current) return;
-    if (!measurementSegments.some((segment) => segment.text.includes("çel"))) return;
-    if (computedSegments.length === 0) return;
-
-    console.log(
-      "HINT_DEBUG_SEGMENTS",
-      JSON.stringify(
-        computedSegments.map((segment) => ({
-          text: segment.text,
-          group: segment.underlineGroupKey ?? null,
-          x: Math.round(segment.x),
-          width: Math.round(segment.width),
-        })),
-      ),
-    );
-    loggedDebugRef.current = true;
-  }, [computedSegments, measurementSegments]);
-
   const tokenFragments = React.useMemo(
     () => buildTokenFragments(computedSegments),
     [computedSegments],
@@ -1094,8 +1262,13 @@ function NativeHintText({
   );
 
   const debugRects = React.useMemo(
-    () => buildDebugRects(computedSegments),
-    [computedSegments],
+    () => buildDebugRects(computedSegments, debugNativeLayout),
+    [computedSegments, debugNativeLayout],
+  );
+
+  const debugBaselines = React.useMemo(
+    () => buildDebugBaselines(computedSegments, debugNativeLayout),
+    [computedSegments, debugNativeLayout],
   );
 
   return (
@@ -1110,6 +1283,14 @@ function NativeHintText({
         containerStyle,
       ]}
     >
+      <NativeHintOverlay
+        hiddenCovers={[]}
+        debugRects={[]}
+        debugBaselines={[]}
+        underlineSegments={underlineSegments}
+        colors={colors}
+        drawCovers={false}
+      />
       <Text
         onLayout={(event) => {
           setTextLayout(event.nativeEvent.layout);
@@ -1189,8 +1370,11 @@ function NativeHintText({
       <NativeHintOverlay
         hiddenCovers={hiddenCovers}
         debugRects={debugRects}
-        underlineSegments={underlineSegments}
+        debugBaselines={debugBaselines}
+        underlineSegments={debugNativeLayout ? underlineSegments : []}
         colors={colors}
+        drawUnderlines={false}
+        drawRangeDebug={debugNativeLayout}
       />
       <View
         pointerEvents="none"
@@ -1238,6 +1422,7 @@ export function HintText({
   centered = false,
   fillLineWidth = false,
   renderMode = "auto",
+  debugNativeLayout = false,
 }: {
   content: ContentWithHints;
   /** Highest spoken character index during playback (99999 = idle). */
@@ -1255,6 +1440,7 @@ export function HintText({
   centered?: boolean;
   fillLineWidth?: boolean;
   renderMode?: HintTextRenderMode;
+  debugNativeLayout?: boolean;
 }) {
   const { colors } = useTheme();
   const popup = React.useContext(HintPopupContext);
@@ -1272,7 +1458,9 @@ export function HintText({
   });
   const resolvedRenderMode =
     renderMode === "auto"
-      ? (shouldUseNativeTextLayout(lang, rtl) ? "native" : "tokenized")
+      ? shouldUseNativeTextLayout(lang, rtl)
+        ? "native"
+        : "tokenized"
       : renderMode;
 
   if (resolvedRenderMode === "native") {
@@ -1285,6 +1473,7 @@ export function HintText({
         rtl={rtl}
         centered={centered}
         fillLineWidth={fillLineWidth}
+        debugNativeLayout={debugNativeLayout}
       />
     );
   }
@@ -1359,13 +1548,13 @@ export function HintText({
     const last = atoms[atoms.length - 1];
     if (last && last.type === "cluster" && !afterWhitespace) {
       last.tokens.push(token);
-    }
-    else atoms.push({ type: "cluster", tokens: [token], trailingSpaceWidth: 0 });
+    } else
+      atoms.push({ type: "cluster", tokens: [token], trailingSpaceWidth: 0 });
     afterWhitespace = false;
   }
 
   const androidRtlLineBreakPadding =
-    Platform.OS === "android" && rtl ? Math.ceil(fontSize * 0.) : 0;
+    Platform.OS === "android" && rtl ? Math.ceil(fontSize * 0) : 0;
 
   const atomLines = atoms.reduce<Extract<Atom, { type: "cluster" }>[][]>(
     (lines, atom) => {
@@ -1462,9 +1651,7 @@ export function HintText({
           style={{
             marginBottom:
               lineIndex < atomLines.length - 1 ? WRAPPED_LINE_GAP : 3,
-            ...(fillLineWidth
-              ? { alignSelf: "stretch", width: "100%" }
-              : null),
+            ...(fillLineWidth ? { alignSelf: "stretch", width: "100%" } : null),
             flexDirection: rtl ? "row-reverse" : "row",
             flexWrap: "wrap",
             rowGap: WRAPPED_LINE_GAP,
