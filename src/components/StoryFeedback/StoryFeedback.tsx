@@ -111,6 +111,7 @@ export default function StoryFeedback({
                 element={lineElement}
                 settings={settings}
                 compact
+                disableHintTooltips
               />
             </div>
           ) : (

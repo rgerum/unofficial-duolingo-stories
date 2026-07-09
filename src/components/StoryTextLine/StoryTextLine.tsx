@@ -29,6 +29,7 @@ function StoryTextLine({
   audioRangeOverride,
   hideAudioButton = false,
   compact = false,
+  disableHintTooltips = false,
 }: {
   active: boolean;
   element: StoryElementLine;
@@ -43,6 +44,7 @@ function StoryTextLine({
   audioRangeOverride?: number;
   hideAudioButton?: boolean;
   compact?: boolean;
+  disableHintTooltips?: boolean;
 }) {
   const editorProps: EditorProps = {
     editorState,
@@ -121,6 +123,7 @@ function StoryTextLine({
             hideRangesForChallenge={hideRangesForChallenge}
             content={element.line.content}
             editorState={editorState}
+            disableTooltips={disableHintTooltips}
           />
         </span>
       </div>
@@ -162,6 +165,7 @@ function StoryTextLine({
             unhide={unhide}
             content={element.line.content}
             editorState={editorState}
+            disableTooltips={disableHintTooltips}
           />
           {showEditorAudioDetails &&
             element.line.content.audio &&
@@ -201,6 +205,7 @@ function StoryTextLine({
             unhide={unhide}
             content={element.line.content}
             editorState={editorState}
+            disableTooltips={disableHintTooltips}
           />
           {showEditorAudioDetails &&
             element.line.content.audio &&
