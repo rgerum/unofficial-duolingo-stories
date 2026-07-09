@@ -14,7 +14,7 @@ export const TELUGU_FONT_FAMILY = Platform.select({
   default: undefined,
 });
 // Telugu vowel marks can extend below iOS' measured line box.
-const TELUGU_LINE_HEIGHT_MULTIPLIER = 1.9;
+const TELUGU_LINE_HEIGHT_MULTIPLIER = 1.95;
 
 export function getLanguageTextStyle(
   lang?: string,

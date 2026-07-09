@@ -250,7 +250,9 @@ function splitIntoGraphemes(text: string): string[] {
 }
 
 function shouldMeasureTokenAsGraphemes(text: string): boolean {
-  return /[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/u.test(text);
+  return /[\u0c00-\u0c7f\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/u.test(
+    text,
+  );
 }
 
 function buildNativeSegments(tokens: Token[]): NativeSegment[] {
@@ -1260,6 +1262,14 @@ function NativeHintText({
     () => buildUnderlineSegments({ computedSegments, colors }),
     [colors, computedSegments],
   );
+  const visibleUnderlineSegments = React.useMemo(
+    () => underlineSegments.filter((segment) => segment.dotted),
+    [underlineSegments],
+  );
+  const hiddenUnderlineSegments = React.useMemo(
+    () => underlineSegments.filter((segment) => !segment.dotted),
+    [underlineSegments],
+  );
 
   const debugRects = React.useMemo(
     () => buildDebugRects(computedSegments, debugNativeLayout),
@@ -1287,7 +1297,7 @@ function NativeHintText({
         hiddenCovers={[]}
         debugRects={[]}
         debugBaselines={[]}
-        underlineSegments={underlineSegments}
+        underlineSegments={visibleUnderlineSegments}
         colors={colors}
         drawCovers={false}
       />
@@ -1371,9 +1381,11 @@ function NativeHintText({
         hiddenCovers={hiddenCovers}
         debugRects={debugRects}
         debugBaselines={debugBaselines}
-        underlineSegments={debugNativeLayout ? underlineSegments : []}
+        underlineSegments={
+          debugNativeLayout ? underlineSegments : hiddenUnderlineSegments
+        }
         colors={colors}
-        drawUnderlines={false}
+        drawUnderlines
         drawRangeDebug={debugNativeLayout}
       />
       <View
@@ -1541,7 +1553,12 @@ export function HintText({
       afterWhitespace = false;
       continue;
     }
-    if (/^\s+$/.test(token.text) && !token.hint) {
+    if (
+      /^\s+$/.test(token.text) &&
+      !token.hint &&
+      !token.hidden &&
+      !token.revealed
+    ) {
       appendTrailingSpace(token);
       continue;
     }
