@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { fontSizes, type ThemeColors, useTheme } from "../../theme";
 import { HintText } from "../HintText";
 import { getLanguageTextStyle } from "../languageStyles";
+import { shouldUseNativeTextLayout } from "../nativeTextLayout";
 import { getStoryLineRtl } from "../textDirection";
 import { useLineAudio } from "../useLineAudio";
 import { PlayAudioButton } from "./PlayAudioButton";
@@ -13,11 +14,6 @@ import type { StoryElementLine } from "../types";
 // corners except where the tail attaches, with a two-triangle tail (border
 // color under background color) pointing at the avatar.
 const TAIL_WIDTH = 12;
-
-function shouldUseNativeStoryText(lang?: string): boolean {
-  if (!lang) return false;
-  return /^(ja|zh|ko)(-|$)/i.test(lang);
-}
 
 function BubbleTail({
   colors,
@@ -170,7 +166,7 @@ export function TextLine({
     fontSize: fontSizes.body,
     color: colors.text,
   };
-  const preferNativeText = shouldUseNativeStoryText(element.lang);
+  const preferNativeText = shouldUseNativeTextLayout(element.lang);
 
   if (element.line === undefined) return null;
 

@@ -12,6 +12,7 @@ import Svg, { Circle, Line, Rect } from "react-native-svg";
 import { Text } from "../components/Text";
 import { type ThemeColors, useTheme } from "../theme";
 import { HintLookupContext, HintPopupContext } from "./HintPopup";
+import { shouldUseNativeTextLayout } from "./nativeTextLayout";
 import type { ContentWithHints, HideRange } from "./types";
 
 // Web-parity text renderer (StoryLineHints): hinted words get a dashed
@@ -71,22 +72,49 @@ function getDisplayText(token: Token): string {
   return token.text.replace(/\s+/g, " ");
 }
 
-function shouldUseNativeTextLayout(lang?: string): boolean {
-  if (!lang) return false;
-  return /^(ja|zh|ko)(-|$)/i.test(lang);
-}
-
 function isWrapAnywhereToken(text: string): boolean {
   return /^[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uac00-\ud7af]+$/u.test(
     text,
   );
 }
 
+// Thai has no spaces between words and no per-character wrap unit like CJK:
+// combining vowels/tone marks (U+0E31, U+0E34\u20133A, U+0E47\u20134E) stack on the
+// preceding consonant, so splitting by code point (as CJK does) would strip
+// marks off their base and mis-measure them in isolation. Split Thai runs into
+// grapheme clusters (base + following marks) instead: each cluster is a
+// self-contained, correctly-measured unit that never straddles a line break,
+// so the native line-box \u2192 segment matching stays aligned wherever the
+// platform engine chooses to break.
+const THAI_COMBINING_MARK = /[\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/;
+
+function isThaiToken(text: string): boolean {
+  return /[\u0e00-\u0e7f]/.test(text);
+}
+
+function splitThaiClusters(text: string): string[] {
+  const clusters: string[] = [];
+  for (const ch of text) {
+    if (clusters.length > 0 && THAI_COMBINING_MARK.test(ch)) {
+      clusters[clusters.length - 1] += ch;
+    } else {
+      clusters.push(ch);
+    }
+  }
+  return clusters;
+}
+
+function splitLayoutUnits(text: string): string[] {
+  if (isWrapAnywhereToken(text)) return Array.from(text);
+  if (isThaiToken(text)) return splitThaiClusters(text);
+  return [text];
+}
+
 function buildNativeSegments(tokens: Token[]): NativeSegment[] {
   const segments: NativeSegment[] = [];
 
   for (const token of tokens) {
-    const parts = isWrapAnywhereToken(token.text) ? Array.from(token.text) : [token.text];
+    const parts = splitLayoutUnits(token.text);
     for (const part of parts) {
       segments.push({
         ...token,
