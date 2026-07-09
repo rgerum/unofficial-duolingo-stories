@@ -22,15 +22,12 @@ import {
   setListeningMode,
   type DoneMap,
 } from "../../src/storage";
-import {
-  StoryButton,
-  type StoryListItem,
-} from "../../src/components/StoryButton";
+import { StoryButton, type StoryListItem } from "../../src/components/StoryButton";
 import { Button } from "../../src/components/Button";
 import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
-import { TAB_BAR_CONTENT_BOTTOM_INSET } from "../../src/tabBarInsets";
 import { type ThemeColors, useTheme } from "../../src/theme";
+import { useTabContentInsets } from "../../src/useTabContentInsets";
 
 type StorySet = { setId: number; stories: StoryListItem[] };
 
@@ -39,6 +36,7 @@ export default function LearnTab() {
   const router = useRouter();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const tabContentInsets = useTabContentInsets();
   const { ready, courseShort } = useAppState();
   const { data: session } = useAuthSession();
   const { isOffline } = useNetworkStatus();
@@ -64,8 +62,7 @@ export default function LearnTab() {
     [doneMap],
   );
   const stories = React.useMemo(
-    () =>
-      course && course !== null ? (course.stories as StoryListItem[]) : [],
+    () => (course && course !== null ? (course.stories as StoryListItem[]) : []),
     [course],
   );
   const isStoryDone = React.useCallback(
@@ -252,7 +249,7 @@ export default function LearnTab() {
         data={sets}
         keyExtractor={(set) => String(set.setId)}
         renderItem={renderStorySet}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, tabContentInsets]}
         ListHeaderComponent={
           isOffline ? (
             <View style={styles.offlineWrap}>
@@ -260,7 +257,6 @@ export default function LearnTab() {
             </View>
           ) : null
         }
-        ListFooterComponent={<View style={styles.listFooter} />}
         initialNumToRender={3}
         maxToRenderPerBatch={3}
         removeClippedSubviews={Platform.OS === "android"}
@@ -289,7 +285,11 @@ function Centered({
   return (
     <SafeAreaView style={activeStyles.root} edges={["top"]}>
       <View style={activeStyles.centered}>
-        {spinner ? <ActivityIndicator color={activeColors.blue} /> : children}
+        {spinner ? (
+          <ActivityIndicator color={activeColors.blue} />
+        ) : (
+          children
+        )}
       </View>
     </SafeAreaView>
   );
@@ -323,7 +323,6 @@ function createStyles(colors: ThemeColors) {
     scrollContent: {
       paddingHorizontal: 12,
       paddingTop: 8,
-      paddingBottom: TAB_BAR_CONTENT_BOTTOM_INSET,
     },
     offlineWrap: {
       paddingHorizontal: 8,
@@ -384,9 +383,6 @@ function createStyles(colors: ThemeColors) {
       flexDirection: "row",
       flexWrap: "wrap",
       justifyContent: "center",
-    },
-    listFooter: {
-      height: 40,
     },
   });
 }

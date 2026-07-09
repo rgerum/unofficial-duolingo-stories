@@ -1,1 +1,0 @@
-export const TAB_BAR_CONTENT_BOTTOM_INSET = 140;
