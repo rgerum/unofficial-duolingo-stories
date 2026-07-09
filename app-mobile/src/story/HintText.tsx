@@ -86,8 +86,13 @@ function buildNativeSegments(tokens: Token[]): NativeSegment[] {
         ...token,
         text: part,
         key: `${token.start}:${segments.length}`,
+        // All hidden tokens share one group: only hideRangesForChallenge[0]
+        // is ever consumed (see buildTokens), so the hidden phrase is a
+        // single contiguous range and must merge into one continuous solid
+        // line per wrapped line — per-token keys would leak the phrase's
+        // word boundaries as gaps in the underline.
         underlineGroupKey: token.hidden
-          ? `hidden:${token.start}`
+          ? "hidden"
           : token.revealed
             ? `revealed:${token.start}`
             : token.hintGroupKey,
