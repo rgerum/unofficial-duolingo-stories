@@ -648,8 +648,14 @@ function NativeHintText({
       >
         {segments.map((segment) => {
           const interactive = Boolean(segment.hint) && !segment.hidden;
+          // Mirror the tokenized path: unrevealed hide-range glyphs take
+          // layout space but paint in the background color so they blend
+          // away (still measurable, underline geometry unchanged). A fully
+          // transparent color (alpha 0) is dropped by Android's nested-text
+          // renderer and leaves the text readable, so use the opaque
+          // background color like the tokenized HintTokenBox does.
           const color = segment.hidden
-            ? "transparent"
+            ? colors.background
             : segment.dimmed
               ? colors.disabled
               : (flatStyle.color ?? colors.text);
