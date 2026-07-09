@@ -26,10 +26,12 @@ function content({
   text,
   hints = [],
   ranges = [],
+  audio = false,
 }: {
   text: string;
   hints?: string[];
   ranges?: Array<[number, number, number]>;
+  audio?: boolean;
 }): ContentWithHints {
   return {
     text,
@@ -39,6 +41,7 @@ function content({
       hintIndex,
     })),
     hints,
+    ...(audio ? { audio: { url: "debug-audio.mp3" } } : null),
   };
 }
 
@@ -93,6 +96,7 @@ const teluguLine: StoryElementLine = {
     avatarUrl: eddyAvatar,
     content: content({
       text: "నా తాళం చెవులు ఎక్కడ\nఉన్నాయి?",
+      audio: true,
       ranges: [
         [0, 1, 0],
         [3, 6, 1],
@@ -148,10 +152,12 @@ function RealisticStoryFixture({
   includeLatinBlank,
   showRevealedBlank,
   showTeluguLine,
+  debugTeluguLayout,
 }: {
   includeLatinBlank: boolean;
   showRevealedBlank: boolean;
   showTeluguLine: boolean;
+  debugTeluguLayout: boolean;
 }) {
   const { colors } = useTheme();
 
@@ -176,6 +182,7 @@ function RealisticStoryFixture({
           active={false}
           rtl={false}
           autoPlay={false}
+          debugNativeLayout={debugTeluguLayout}
         />
       ) : null}
       <QuestionPrompt
@@ -214,10 +221,11 @@ function RealisticStoryFixture({
 
 export default function StoryShotScreen() {
   const { colors } = useTheme();
-  const params = useLocalSearchParams<{ case?: string }>();
+  const params = useLocalSearchParams<{ case?: string; debug?: string }>();
   const includeLatinBlank = params.case === "all" || params.case === "latin";
   const showRevealedBlank = params.case === "all" || params.case === "revealed";
   const showTeluguLine = params.case === "all" || params.case === "telugu";
+  const debugTeluguLayout = params.debug === "1";
 
   return (
     <HintPopupHost>
@@ -229,6 +237,7 @@ export default function StoryShotScreen() {
           includeLatinBlank={includeLatinBlank}
           showRevealedBlank={showRevealedBlank}
           showTeluguLine={showTeluguLine}
+          debugTeluguLayout={debugTeluguLayout}
         />
       </ScrollView>
     </HintPopupHost>
