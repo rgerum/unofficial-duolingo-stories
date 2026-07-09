@@ -4,7 +4,7 @@ import { colors, fontSizes } from "../../theme";
 import { Text } from "../../components/Text";
 import { WordChip } from "../WordChip";
 import { getLanguageTextStyle } from "../languageStyles";
-import { useChoiceButtons } from "../useChoiceButtons";
+import { useChoiceButtons, type ChoiceState } from "../useChoiceButtons";
 import { QuestionPrompt } from "./QuestionPrompt";
 import type { StoryElementPointToPhrase } from "../types";
 
@@ -12,9 +12,11 @@ import type { StoryElementPointToPhrase } from "../types";
 export function PointToPhraseQuestion({
   element,
   advance,
+  debugInitialState,
 }: {
   element: StoryElementPointToPhrase;
   advance: () => void;
+  debugInitialState?: ChoiceState[];
 }) {
   // Dense button index -> transcript part index (only selectable parts).
   const buttonIndices: number[] = [];
@@ -27,6 +29,7 @@ export function PointToPhraseQuestion({
     buttonIndices.length,
     element.correctAnswerIndex,
     advance,
+    debugInitialState,
   );
 
   return (

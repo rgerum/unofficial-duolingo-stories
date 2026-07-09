@@ -6,7 +6,7 @@ import { WordChip, type ChipStatus } from "../WordChip";
 import { QuestionPrompt } from "./QuestionPrompt";
 import type { StoryElementMatch } from "../types";
 
-type WordState = "idle" | "selected" | "right" | "wrong";
+type WordState = "idle" | "selected" | "right" | "matched" | "wrong";
 
 type Word = {
   value: string;
@@ -21,10 +21,10 @@ type Word = {
 const WRONG_FLASH_DELAY_MS = 820;
 const RIGHT_GREEN_HOLD_MS = 1000;
 
-function shuffle<T>(list: T[]): T[] {
+function shuffle<T>(list: T[], random: () => number): T[] {
   const result = [...list];
   for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random() * (i + 1));
     [result[i], result[j]] = [result[j], result[i]];
   }
   return result;
@@ -37,26 +37,34 @@ function shuffle<T>(list: T[]): T[] {
 export function MatchQuestion({
   element,
   setDone,
+  debugRandom,
+  debugForcedStates,
 }: {
   element: StoryElementMatch;
   setDone: () => void;
+  debugRandom?: () => number;
+  debugForcedStates?: Record<string, WordState>;
 }) {
   const [lists, setLists] = React.useState<Word[][]>(() => [
     shuffle(
       element.fallbackHints.map((hint, i) => ({
         value: hint.phrase,
-        state: "idle" as const,
+        state: debugForcedStates?.[hint.phrase] ?? ("idle" as const),
         index: i,
         key: `left-${i}`,
+        settled: debugForcedStates?.[hint.phrase] === "matched",
       })),
+      debugRandom ?? Math.random,
     ),
     shuffle(
       element.fallbackHints.map((hint, i) => ({
         value: hint.translation,
-        state: "idle" as const,
+        state: debugForcedStates?.[hint.translation] ?? ("idle" as const),
         index: i,
         key: `right-${i}`,
+        settled: debugForcedStates?.[hint.translation] === "matched",
       })),
+      debugRandom ?? Math.random,
     ),
   ]);
   const doneRef = React.useRef(false);
@@ -80,7 +88,9 @@ export function MatchQuestion({
       const selectedSame = sameList.find((w) => w.state === "selected");
       const newWord = sameList[wordIndex];
 
-      if (newWord.state === "right") return current;
+      if (newWord.state === "right" || newWord.state === "matched") {
+        return current;
+      }
 
       // Clear any stale wrong feedback before processing a fresh tap.
       for (const list of next)
@@ -146,7 +156,9 @@ export function MatchQuestion({
   };
 
   React.useEffect(() => {
-    const allRight = lists[0].every((word) => word.state === "right");
+    const allRight = lists[0].every(
+      (word) => word.state === "right" || word.state === "matched",
+    );
     if (allRight && !doneRef.current) {
       doneRef.current = true;
       setDone();
@@ -155,7 +167,9 @@ export function MatchQuestion({
 
   const getChipStatus = (word: Word): ChipStatus => {
     if (word.state === "idle") return undefined;
-    if (word.state === "right" && word.settled) return "matched";
+    if (word.state === "matched" || (word.state === "right" && word.settled)) {
+      return "matched";
+    }
     return word.state;
   };
 

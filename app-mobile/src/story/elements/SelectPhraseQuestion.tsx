@@ -1,20 +1,23 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { WordChip } from "../WordChip";
-import { useChoiceButtons } from "../useChoiceButtons";
+import { useChoiceButtons, type ChoiceState } from "../useChoiceButtons";
 import type { StoryElementSelectPhrase } from "../types";
 
 export function SelectPhraseQuestion({
   element,
   advance,
+  debugInitialState,
 }: {
   element: StoryElementSelectPhrase;
   advance: () => void;
+  debugInitialState?: ChoiceState[];
 }) {
   const [buttonState, click] = useChoiceButtons(
     element.answers.length,
     element.correctAnswerIndex,
     advance,
+    debugInitialState,
   );
 
   return (

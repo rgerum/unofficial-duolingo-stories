@@ -90,6 +90,7 @@ function ThemedStack() {
         <Stack.Screen name="auth" options={{ presentation: "modal" }} />
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="add-course" />
+        <Stack.Screen name="debug/benchmark" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
           name="story/[id]"

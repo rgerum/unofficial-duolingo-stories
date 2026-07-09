@@ -101,9 +101,14 @@ export function WordChip({
   const matchedProgress = React.useRef(
     new Animated.Value(normalized === "matched" ? 1 : 0),
   ).current;
+  const previousNormalized = React.useRef(normalized);
 
   React.useEffect(() => {
     if (normalized === "matched") {
+      if (previousNormalized.current === "matched") {
+        matchedProgress.setValue(1);
+        return;
+      }
       matchedProgress.setValue(0);
       const animation = Animated.timing(matchedProgress, {
         toValue: 1,
@@ -111,9 +116,11 @@ export function WordChip({
         useNativeDriver: false,
       });
       animation.start();
+      previousNormalized.current = normalized;
       return () => animation.stop();
     }
     matchedProgress.setValue(0);
+    previousNormalized.current = normalized;
   }, [matchedProgress, normalized]);
 
   const palette = (() => {

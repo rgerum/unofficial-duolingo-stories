@@ -40,9 +40,11 @@ function CheckCircle({
 export function MultipleChoiceQuestion({
   element,
   advance,
+  debugInitialState,
 }: {
   element: StoryElementMultipleChoice;
   advance: () => void;
+  debugInitialState?: ChoiceState[];
 }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
@@ -50,6 +52,7 @@ export function MultipleChoiceQuestion({
     element.answers.length,
     element.correctAnswerIndex,
     advance,
+    debugInitialState,
   );
 
   return (

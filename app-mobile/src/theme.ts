@@ -70,7 +70,7 @@ type ThemeContextValue = {
   setPreference: (preference: ThemePreference) => Promise<void>;
 };
 
-const ThemeContext = React.createContext<ThemeContextValue>({
+export const ThemeContext = React.createContext<ThemeContextValue>({
   colors: lightColors,
   preference: "system",
   resolvedTheme: "light",

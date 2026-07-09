@@ -13,9 +13,10 @@ export function useChoiceButtons(
   count: number,
   rightIndex: number,
   callRight: () => void,
+  initialState?: ChoiceState[],
 ): [ChoiceState[], (index: number) => void] {
   const [buttonState, setButtonState] = React.useState<ChoiceState[]>(() =>
-    new Array(count).fill(undefined),
+    initialState ?? new Array(count).fill(undefined),
   );
   const buttonStateRef = React.useRef(buttonState);
 

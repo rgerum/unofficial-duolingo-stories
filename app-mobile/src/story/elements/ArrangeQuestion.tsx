@@ -24,17 +24,33 @@ const WRONG_FLASH_DELAY_MS = 820;
 export function ArrangeQuestion({
   element,
   advance,
+  debugPlacedCount,
+  debugWrongIndex,
 }: {
   element: StoryElementArrange;
   /** advance(charPosition, done) — reveals the line text as words are placed */
   advance: (charPosition: number, done: boolean) => void;
+  debugPlacedCount?: number;
+  debugWrongIndex?: number;
 }) {
   const characterPositions = element.characterPositions;
   // 0 = available, 1 = used, 2 = briefly wrong
-  const [buttonState, setButtonState] = React.useState<ButtonState[]>(() =>
-    new Array(element.phraseOrder.length).fill(0),
+  const [buttonState, setButtonState] = React.useState<ButtonState[]>(() => {
+    const placedCount = Math.max(
+      0,
+      Math.min(debugPlacedCount ?? 0, element.phraseOrder.length),
+    );
+    return new Array(element.phraseOrder.length).fill(0).map((_, index) => {
+      if (index === debugWrongIndex) return 2;
+      return element.phraseOrder[index] < placedCount ? 1 : 0;
+    });
+  });
+  const [position, setPosition] = React.useState(() =>
+    Math.max(
+      0,
+      Math.min(debugPlacedCount ?? 0, element.phraseOrder.length),
+    ),
   );
-  const [position, setPosition] = React.useState(0);
   const resetTimers = React.useRef(new Set<ReturnType<typeof setTimeout>>());
 
   React.useEffect(() => {
