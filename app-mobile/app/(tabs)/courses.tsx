@@ -516,7 +516,6 @@ function createStyles(colors: ThemeColors) {
   },
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 30,
   },
   card: {
     borderWidth: 2,
