@@ -42,8 +42,7 @@ function content({
   };
 }
 
-const lucyAvatar =
-  "https://duostories.org/icon192.png";
+const lucyAvatar = "https://duostories.org/icon192.png";
 const eddyAvatar = "https://duostories.org/icon512.png";
 const blankText = "Potřebuji klíče od svého auta.";
 
@@ -84,10 +83,32 @@ const normalLatinLine: StoryElementLine = {
   },
 };
 
+const teluguLine: StoryElementLine = {
+  type: "LINE",
+  lang: "te",
+  trackingProperties: { line_index: 2 },
+  line: {
+    type: "CHARACTER",
+    characterId: "eddy",
+    avatarUrl: eddyAvatar,
+    content: content({
+      text: "నా తాళం చెవులు ఎక్కడ\nఉన్నాయి?",
+      ranges: [
+        [0, 1, 0],
+        [3, 6, 1],
+        [8, 13, 2],
+        [15, 19, 3],
+        [21, 27, 4],
+      ],
+      hints: ["my", "lock", "keys", "where", "are"],
+    }),
+  },
+};
+
 const hiddenBlankLine: StoryElementLine = {
   type: "LINE",
   lang: "cs",
-  trackingProperties: { line_index: 2, challenge_type: "select-phrases" },
+  trackingProperties: { line_index: 3, challenge_type: "select-phrases" },
   hideRangesForChallenge: [hiddenRange(blankText, "klíče od svého auta")],
   line: {
     type: "CHARACTER",
@@ -100,7 +121,7 @@ const hiddenBlankLine: StoryElementLine = {
 const hiddenLatinLine: StoryElementLine = {
   type: "LINE",
   lang: "en",
-  trackingProperties: { line_index: 3, challenge_type: "select-phrases" },
+  trackingProperties: { line_index: 4, challenge_type: "select-phrases" },
   hideRangesForChallenge: [
     hiddenRange(
       "We have a very important language exam tomorrow.",
@@ -118,7 +139,7 @@ const hiddenLatinLine: StoryElementLine = {
 const answers: StoryElementSelectPhrase = {
   type: "SELECT_PHRASE",
   lang: "cs",
-  trackingProperties: { line_index: 4, challenge_type: "select-phrases" },
+  trackingProperties: { line_index: 5, challenge_type: "select-phrases" },
   answers: ["auta", "klíče", "svého", "od"],
   correctAnswerIndex: 1,
 };
@@ -126,17 +147,37 @@ const answers: StoryElementSelectPhrase = {
 function RealisticStoryFixture({
   includeLatinBlank,
   showRevealedBlank,
+  showTeluguLine,
 }: {
   includeLatinBlank: boolean;
   showRevealedBlank: boolean;
+  showTeluguLine: boolean;
 }) {
   const { colors } = useTheme();
 
   return (
     <View style={styles.storyCard}>
       <Text style={[styles.title, { color: colors.text }]}>Story fixture</Text>
-      <TextLine element={normalJapaneseLine} active={false} rtl={false} autoPlay={false} />
-      <TextLine element={normalLatinLine} active={false} rtl={false} autoPlay={false} />
+      <TextLine
+        element={normalJapaneseLine}
+        active={false}
+        rtl={false}
+        autoPlay={false}
+      />
+      <TextLine
+        element={normalLatinLine}
+        active={false}
+        rtl={false}
+        autoPlay={false}
+      />
+      {showTeluguLine ? (
+        <TextLine
+          element={teluguLine}
+          active={false}
+          rtl={false}
+          autoPlay={false}
+        />
+      ) : null}
       <QuestionPrompt
         question={content({ text: "Select the missing phrase" })}
         lang="en"
@@ -175,8 +216,8 @@ export default function StoryShotScreen() {
   const { colors } = useTheme();
   const params = useLocalSearchParams<{ case?: string }>();
   const includeLatinBlank = params.case === "all" || params.case === "latin";
-  const showRevealedBlank =
-    params.case === "all" || params.case === "revealed";
+  const showRevealedBlank = params.case === "all" || params.case === "revealed";
+  const showTeluguLine = params.case === "all" || params.case === "telugu";
 
   return (
     <HintPopupHost>
@@ -187,6 +228,7 @@ export default function StoryShotScreen() {
         <RealisticStoryFixture
           includeLatinBlank={includeLatinBlank}
           showRevealedBlank={showRevealedBlank}
+          showTeluguLine={showTeluguLine}
         />
       </ScrollView>
     </HintPopupHost>
