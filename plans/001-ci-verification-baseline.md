@@ -47,8 +47,8 @@ The repo has a working test suite (`pnpm test`, currently 3 test files, all pass
 
 **In scope** (the only files you should modify):
 - `.github/workflows/ci.yaml` (edit)
-- `.github/workflows/build.yml` (delete)
-- `.github/workflows/build_pr.yml` (delete)
+- `.github/workflows/build.yml` (delete — already done 2026-06-30, commit `ca88e2c8`)
+- `.github/workflows/build_pr.yml` (delete — already done 2026-06-30, commit `ca88e2c8`)
 - `.env.example` (create)
 
 **Out of scope** (do NOT touch, even though they look related):
@@ -68,7 +68,7 @@ The repo has a working test suite (`pnpm test`, currently 3 test files, all pass
 
 Run `pnpm test`.
 
-**Verify**: exit code 0, output lists passing tests from the 3 test files (`parser.test.ts`, `audio_edit_tools.test.ts`, `audio-cutter-text.test.ts`). If any test fails on a clean checkout, STOP — CI must not be wired to a red suite; report which test fails.
+**Verify**: exit code 0, all tests pass (as of 2026-07-09 there are 8 test files under `src/` with 39 passing tests, e.g. `parser.test.ts`, `audio_edit_tools.test.ts`, `audio-cutter-keypoints.test.ts`, `text-direction.test.ts`). If any test fails on a clean checkout, STOP — CI must not be wired to a red suite; report which test fails.
 
 ### Step 2: Add a test step to ci.yaml
 

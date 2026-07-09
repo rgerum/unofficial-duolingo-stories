@@ -62,6 +62,7 @@ The entire Convex backend (~7,500 lines across `convex/*.ts`) has **zero tests**
 - `convex/storyWrite.test.ts` (create)
 - `convex/storyDone.test.ts` (create)
 - `convex/storyApproval.test.ts` (create)
+- `convex/storyFeedback.test.ts` (create — added 2026-07-09: the module shipped after this plan was written; cover the `requireContributorOrAdmin` guard on `listStoryFeedbackReports`/`updateStoryFeedbackStatus`, empty-comment rejection in `submitStoryFeedback`, and one `open→reviewed` status transition)
 - `.github/workflows/ci.yaml` (add the `pnpm test:convex` step — only if plan 001 already landed)
 
 **Out of scope** (do NOT touch):
