@@ -823,9 +823,18 @@ export function HintText({
   // are glued into one atom — the browser never breaks between "det" and "?"
   // and neither should we. Whitespace becomes trailing margin on the previous
   // cluster, so a standalone space cannot wrap to the start of the next line.
+  // A space *inside* a challenge-hidden range is kept as trailing width but
+  // flagged so it renders as an underlined bridge (not a transparent margin),
+  // making the solid hidden underline continuous across the whole phrase while
+  // each word stays a separate, wrappable atom (issue #577).
   type Atom =
     | { type: "break" }
-    | { type: "cluster"; tokens: Token[]; trailingSpaceWidth: number };
+    | {
+        type: "cluster";
+        tokens: Token[];
+        trailingSpaceWidth: number;
+        trailingSpaceHidden: boolean;
+      };
   const atoms: Atom[] = [];
   let afterWhitespace = false;
   const appendTrailingSpace = (token: Token) => {
@@ -833,6 +842,7 @@ export function HintText({
     if (!last || last.type !== "cluster") return;
     const collapsedLength = token.text.replace(/\s+/g, " ").length;
     last.trailingSpaceWidth += collapsedLength * collapsedSpaceWidth;
+    if (token.hidden) last.trailingSpaceHidden = true;
     afterWhitespace = true;
   };
 
@@ -850,7 +860,13 @@ export function HintText({
     if (last && last.type === "cluster" && !afterWhitespace) {
       last.tokens.push(token);
     }
-    else atoms.push({ type: "cluster", tokens: [token], trailingSpaceWidth: 0 });
+    else
+      atoms.push({
+        type: "cluster",
+        tokens: [token],
+        trailingSpaceWidth: 0,
+        trailingSpaceHidden: false,
+      });
     afterWhitespace = false;
   }
 
@@ -866,6 +882,29 @@ export function HintText({
     [[]],
   );
 
+  // A trailing space that sits inside a hidden range renders as a synthetic
+  // hidden whitespace token so it carries the same solid underline as the
+  // words around it, bridging the gap between adjacent hidden atoms.
+  const renderHiddenBridge = (width: number, key: React.Key) => (
+    <HintTokenBox
+      key={key}
+      token={{
+        text: " ",
+        start: -1,
+        hidden: true,
+        revealed: false,
+        dimmed: false,
+      }}
+      displayText=" "
+      textStyle={{ ...flatStyle, color: colors.background }}
+      hiddenTextStyle={{ opacity: 0 }}
+      underline={colors.hiddenUnderline}
+      spaceWidth={width}
+      popup={popup}
+      onLookup={onHintLookup}
+    />
+  );
+
   const renderAtom = (
     atom: Extract<Atom, { type: "cluster" }>,
     key: React.Key,
@@ -875,61 +914,60 @@ export function HintText({
       hint !== undefined &&
       atom.tokens.length > 1 &&
       atom.tokens.every((token) => token.hint === hint);
+
+    // Hidden trailing spaces become an underlined bridge element (so the solid
+    // underline is continuous); every other trailing space stays a transparent
+    // margin that keeps the layout but cannot dangle at a line wrap.
+    const bridge =
+      atom.trailingSpaceHidden && atom.trailingSpaceWidth > 0
+        ? renderHiddenBridge(atom.trailingSpaceWidth, `${key}:bridge`)
+        : null;
+    const trailingMargin =
+      atom.trailingSpaceWidth > 0 && !atom.trailingSpaceHidden
+        ? rtl
+          ? { marginLeft: atom.trailingSpaceWidth }
+          : { marginRight: atom.trailingSpaceWidth }
+        : undefined;
+
+    let core: React.ReactNode;
     if (isPhraseHint) {
-      return (
-        <View
-          key={key}
-          style={
-            atom.trailingSpaceWidth > 0
-              ? rtl
-                ? { marginLeft: atom.trailingSpaceWidth }
-                : { marginRight: atom.trailingSpaceWidth }
-              : undefined
-          }
-        >
-          <HintPhraseBox
-            tokens={atom.tokens}
-            textStyle={flatStyle}
-            rtl={rtl}
-            collapsedSpaceWidth={collapsedSpaceWidth}
-            colors={colors}
-            popup={popup}
-            onLookup={onHintLookup}
-          />
-        </View>
+      core = (
+        <HintPhraseBox
+          tokens={atom.tokens}
+          textStyle={flatStyle}
+          rtl={rtl}
+          collapsedSpaceWidth={collapsedSpaceWidth}
+          colors={colors}
+          popup={popup}
+          onLookup={onHintLookup}
+        />
       );
+    } else if (atom.tokens.length === 1) {
+      core = renderBox(atom.tokens[0], key);
+    } else {
+      core = atom.tokens.map((token, tokenIndex) => renderBox(token, tokenIndex));
     }
 
-    if (atom.tokens.length === 1) {
+    // A row wrapper is needed when the atom holds several boxes or an appended
+    // bridge; a lone box only needs the optional trailing margin.
+    if (bridge || (!isPhraseHint && atom.tokens.length > 1)) {
       return (
         <View
           key={key}
-          style={
-            atom.trailingSpaceWidth > 0
-              ? rtl
-                ? { marginLeft: atom.trailingSpaceWidth }
-                : { marginRight: atom.trailingSpaceWidth }
-              : undefined
-          }
+          style={{
+            flexDirection: rtl ? "row-reverse" : "row",
+            alignItems: "flex-end",
+            ...(trailingMargin ?? null),
+          }}
         >
-          {renderBox(atom.tokens[0], key)}
+          {core}
+          {bridge}
         </View>
       );
     }
     return (
-      <View
-        key={key}
-        style={{
-          flexDirection: rtl ? "row-reverse" : "row",
-          alignItems: "flex-end",
-          ...(atom.trailingSpaceWidth > 0
-            ? rtl
-              ? { marginLeft: atom.trailingSpaceWidth }
-              : { marginRight: atom.trailingSpaceWidth }
-            : null),
-        }}
-      >
-        {atom.tokens.map((token, tokenIndex) => renderBox(token, tokenIndex))}
+      <View key={key} style={trailingMargin}>
+        {core}
       </View>
     );
   };
