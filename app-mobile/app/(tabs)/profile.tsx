@@ -22,6 +22,7 @@ import { useAppState } from "../../src/app-state";
 import { clearAllProgress, getAllProgress } from "../../src/storage";
 import { Button } from "../../src/components/Button";
 import { Text } from "../../src/components/Text";
+import { TAB_BAR_CONTENT_BOTTOM_INSET } from "../../src/tabBarInsets";
 import {
   type ThemeColors,
   type ThemePreference,
@@ -319,120 +320,121 @@ export default function ProfileTab() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: colors.text,
-    marginTop: 8,
-  },
-  card: {
-    backgroundColor: colors.blueLight,
-    borderRadius: 18,
-    padding: 18,
-    marginTop: 16,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: colors.text,
-  },
-  cardBody: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.textDim,
-    marginTop: 6,
-  },
-  cardActions: {
-    marginTop: 14,
-    gap: 10,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
-    marginTop: 28,
-    marginBottom: 10,
-  },
-  settingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  settingBlock: {
-    gap: 10,
-    marginBottom: 16,
-  },
-  settingText: {
-    flex: 1,
-  },
-  themeOptions: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  themeOption: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingVertical: 10,
-  },
-  themeOptionSelected: {
-    borderColor: colors.blue,
-    backgroundColor: colors.blueLight,
-  },
-  themeOptionText: {
-    color: colors.textDim,
-    fontSize: 13,
-    fontWeight: "800",
-    textTransform: "uppercase",
-  },
-  themeOptionTextSelected: {
-    color: colors.blue,
-  },
-  settingLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  settingHint: {
-    fontSize: 13,
-    color: colors.textDim,
-    marginTop: 2,
-  },
-  progressRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  progressCourse: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.text,
-    flexShrink: 1,
-  },
-  progressCount: {
-    fontSize: 15,
-    color: colors.textDim,
-    marginLeft: 10,
-  },
-  version: {
-    fontSize: 13,
-    color: colors.textDim,
-    marginTop: 16,
-    lineHeight: 19,
-  },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: TAB_BAR_CONTENT_BOTTOM_INSET,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: "800",
+      color: colors.text,
+      marginTop: 8,
+    },
+    card: {
+      backgroundColor: colors.blueLight,
+      borderRadius: 18,
+      padding: 18,
+      marginTop: 16,
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: "800",
+      color: colors.text,
+    },
+    cardBody: {
+      fontSize: 15,
+      lineHeight: 22,
+      color: colors.textDim,
+      marginTop: 6,
+    },
+    cardActions: {
+      marginTop: 14,
+      gap: 10,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: colors.text,
+      marginTop: 28,
+      marginBottom: 10,
+    },
+    settingRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+    settingBlock: {
+      gap: 10,
+      marginBottom: 16,
+    },
+    settingText: {
+      flex: 1,
+    },
+    themeOptions: {
+      flexDirection: "row",
+      gap: 8,
+    },
+    themeOption: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      paddingVertical: 10,
+    },
+    themeOptionSelected: {
+      borderColor: colors.blue,
+      backgroundColor: colors.blueLight,
+    },
+    themeOptionText: {
+      color: colors.textDim,
+      fontSize: 13,
+      fontWeight: "800",
+      textTransform: "uppercase",
+    },
+    themeOptionTextSelected: {
+      color: colors.blue,
+    },
+    settingLabel: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    settingHint: {
+      fontSize: 13,
+      color: colors.textDim,
+      marginTop: 2,
+    },
+    progressRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    progressCourse: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: colors.text,
+      flexShrink: 1,
+    },
+    progressCount: {
+      fontSize: 15,
+      color: colors.textDim,
+      marginLeft: 10,
+    },
+    version: {
+      fontSize: 13,
+      color: colors.textDim,
+      marginTop: 16,
+      lineHeight: 19,
+    },
   });
 }
