@@ -18,6 +18,7 @@ export default function TabsLayout() {
     <NativeTabs
       backgroundColor={Platform.OS === "ios" ? undefined : colors.background}
       blurEffect="systemDefault"
+      disableTransparentOnScrollEdge
       iconColor={{
         default: colors.disabled,
         selected: glassAdaptiveColor,
@@ -35,7 +36,7 @@ export default function TabsLayout() {
           fontWeight: "400",
         },
       }}
-      minimizeBehavior="automatic"
+      minimizeBehavior="never"
       shadowColor={Platform.OS === "ios" ? "transparent" : colors.border}
       tintColor={glassAdaptiveColor}
     >

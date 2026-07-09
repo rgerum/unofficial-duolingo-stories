@@ -22,7 +22,7 @@ export function getLanguageTextStyle(
     const flatStyle = StyleSheet.flatten(baseStyle);
     const lineHeight =
       typeof flatStyle?.fontSize === "number"
-        ? { lineHeight: Math.ceil(flatStyle.fontSize * 1.55) }
+        ? { lineHeight: Math.ceil(flatStyle.fontSize * 1.85) }
         : undefined;
 
     return {
