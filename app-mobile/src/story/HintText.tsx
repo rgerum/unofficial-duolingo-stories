@@ -566,41 +566,30 @@ function NativeHintText({
             fill="rgba(255,77,79,0.08)"
           />
         ))}
-        {underlineSegments.map((segment) => (
-          <React.Fragment key={segment.key}>
-            {segment.dotted ? (
-              Array.from({
-                length: Math.max(
-                  1,
-                  Math.floor((segment.x2 - segment.x1) / UNDERLINE_DOT_GAP) + 1,
-                ),
-              }).map((_, index) => {
-                const cx = Math.min(
-                  segment.x2,
-                  segment.x1 + index * UNDERLINE_DOT_GAP,
-                );
-                return (
-                  <Circle
-                    key={`${segment.key}:${index}`}
-                    cx={cx}
-                    cy={segment.y}
-                    r={UNDERLINE_DOT_RADIUS}
-                    fill={segment.color}
-                  />
-                );
-              })
-            ) : (
-              <Line
-                x1={segment.x1}
-                x2={segment.x2}
-                y1={segment.y}
-                y2={segment.y}
-                stroke={segment.color}
-                strokeWidth={2}
-              />
-            )}
-          </React.Fragment>
-        ))}
+        {underlineSegments
+          .filter((segment) => segment.dotted)
+          .map((segment) =>
+            Array.from({
+              length: Math.max(
+                1,
+                Math.floor((segment.x2 - segment.x1) / UNDERLINE_DOT_GAP) + 1,
+              ),
+            }).map((_, index) => {
+              const cx = Math.min(
+                segment.x2,
+                segment.x1 + index * UNDERLINE_DOT_GAP,
+              );
+              return (
+                <Circle
+                  key={`${segment.key}:${index}`}
+                  cx={cx}
+                  cy={segment.y}
+                  r={UNDERLINE_DOT_RADIUS}
+                  fill={segment.color}
+                />
+              );
+            }),
+          )}
       </Svg>
       {leadingElement && (
         <View
@@ -690,6 +679,28 @@ function NativeHintText({
           );
         })}
       </Text>
+      {/* Solid hidden underlines paint AFTER the text: hidden glyphs are
+          drawn in the opaque background color, so a line behind the text
+          would get glyph-shaped bites erased out of it. Dotted hint
+          underlines stay in the pre-text Svg (behind descenders). */}
+      <Svg
+        pointerEvents="none"
+        style={StyleSheet.absoluteFill}
+      >
+        {underlineSegments
+          .filter((segment) => !segment.dotted)
+          .map((segment) => (
+            <Line
+              key={segment.key}
+              x1={segment.x1}
+              x2={segment.x2}
+              y1={segment.y}
+              y2={segment.y}
+              stroke={segment.color}
+              strokeWidth={2}
+            />
+          ))}
+      </Svg>
       <View
         pointerEvents="none"
         style={{
