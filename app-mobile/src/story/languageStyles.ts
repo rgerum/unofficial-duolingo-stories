@@ -13,6 +13,8 @@ export const TELUGU_FONT_FAMILY = Platform.select({
   android: "sans-serif",
   default: undefined,
 });
+// Telugu vowel marks can extend below iOS' measured line box.
+const TELUGU_LINE_HEIGHT_MULTIPLIER = 1.9;
 
 export function getLanguageTextStyle(
   lang?: string,
@@ -22,7 +24,11 @@ export function getLanguageTextStyle(
     const flatStyle = StyleSheet.flatten(baseStyle);
     const lineHeight =
       typeof flatStyle?.fontSize === "number"
-        ? { lineHeight: Math.ceil(flatStyle.fontSize * 1.85) }
+        ? {
+            lineHeight: Math.ceil(
+              flatStyle.fontSize * TELUGU_LINE_HEIGHT_MULTIPLIER,
+            ),
+          }
         : undefined;
 
     return {
