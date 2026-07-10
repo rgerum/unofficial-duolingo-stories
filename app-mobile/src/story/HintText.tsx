@@ -158,12 +158,6 @@ function HintTokenBox({
 }) {
   const tokenLayoutRef = React.useRef({ width: 0, height: 0 });
   const interactive = Boolean(token.hint) && !token.hidden;
-  // A whitespace token's own text box is shorter than the surrounding glyph
-  // boxes (its space glyph often comes from a shorter fallback font). Word
-  // boxes top-align (flex-start), so a shorter, top-aligned space box would
-  // raise its underline above the words'. Bottom-aligning the space box drops
-  // its underline onto the row baseline shared by the words (issue #581).
-  const isWhitespace = spaceWidth !== undefined;
 
   return (
     <View
@@ -174,7 +168,19 @@ function HintTokenBox({
         };
       }}
       style={{
-        alignSelf: isWhitespace ? "flex-end" : "flex-start",
+        // Bottom-align every token box (word, punctuation and whitespace) so
+        // each box's bottom border — where the dotted/solid underline is
+        // drawn — lands on the shared bottom edge of the enclosing row (the
+        // atom and line rows both use alignItems: "flex-end"). This keeps the
+        // underline at one consistent height across a row even when adjacent
+        // boxes differ in height (font-fallback / diacritic metrics, e.g.
+        // Greek), which the earlier mixed flex-start (words) / flex-end
+        // (whitespace) alignment could not (issues #581, #594). Trade-off:
+        // unequal-height boxes now meet at their bottoms rather than their
+        // baselines, so glyph baselines can differ by the fonts' descent gap
+        // at a fallback-run boundary — a smaller, less prominent artefact than
+        // a visibly stepped continuous underline.
+        alignSelf: "flex-end",
         marginBottom: 2,
       }}
     >
