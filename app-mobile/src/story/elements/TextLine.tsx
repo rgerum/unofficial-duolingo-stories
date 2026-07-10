@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { fontSizes, type ThemeColors, useTheme } from "../../theme";
-import { HintText } from "../HintText";
+import { HintText, shouldUseNativeTextLayout } from "../HintText";
 import { getLanguageTextStyle } from "../languageStyles";
 import { getStoryLineRtl } from "../textDirection";
 import { useLineAudio } from "../useLineAudio";
@@ -13,11 +13,6 @@ import type { StoryElementLine } from "../types";
 // corners except where the tail attaches, with a two-triangle tail (border
 // color under background color) pointing at the avatar.
 const TAIL_WIDTH = 12;
-
-function shouldUseNativeStoryText(lang?: string): boolean {
-  if (!lang) return false;
-  return /^(ja|zh|ko)(-|$)/i.test(lang);
-}
 
 function BubbleTail({
   colors,
@@ -136,6 +131,7 @@ export function TextLine({
   replayKey = 0,
   audioRangeOverride,
   onManualAudioPlay,
+  debugNativeLayout = false,
 }: {
   element: StoryElementLine;
   active: boolean;
@@ -145,16 +141,12 @@ export function TextLine({
   replayKey?: number;
   audioRangeOverride?: number;
   onManualAudioPlay?: () => void;
+  debugNativeLayout?: boolean;
 }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const audio = element.line?.content?.audio;
-  const lineAudio = useLineAudio(
-    audio,
-    active,
-    autoPlay,
-    replayKey,
-  );
+  const lineAudio = useLineAudio(audio, active, autoPlay, replayKey);
   const audioRange = audioRangeOverride ?? lineAudio.audioRange;
   const handlePlay = React.useCallback(() => {
     onManualAudioPlay?.();
@@ -170,7 +162,7 @@ export function TextLine({
     fontSize: fontSizes.body,
     color: colors.text,
   };
-  const preferNativeText = shouldUseNativeStoryText(element.lang);
+  const preferNativeText = shouldUseNativeTextLayout(element.lang, lineRtl);
 
   if (element.line === undefined) return null;
 
@@ -178,7 +170,7 @@ export function TextLine({
     return (
       <View style={[styles.row, lineRtl && styles.rowRtl]}>
         <LineBody
-          hasAudio={lineAudio.hasAudio}
+          hasAudio={preferNativeText ? false : lineAudio.hasAudio}
           onPlay={handlePlay}
           rtl={lineRtl}
           styles={styles}
@@ -190,7 +182,13 @@ export function TextLine({
             unhide={unhide}
             lang={element.lang}
             renderMode={preferNativeText ? "native" : "tokenized"}
+            inlineAudio={
+              preferNativeText && lineAudio.hasAudio
+                ? { onPress: handlePlay, color: colors.blue }
+                : undefined
+            }
             rtl={lineRtl}
+            debugNativeLayout={debugNativeLayout}
             style={[
               styles.title,
               getLanguageTextStyle(element.lang, styles.title),
@@ -228,7 +226,7 @@ export function TextLine({
             ]}
           >
             <LineBody
-              hasAudio={preferNativeText ? lineAudio.hasAudio : false}
+              hasAudio={false}
               onPlay={handlePlay}
               rtl={lineRtl}
               styles={styles}
@@ -241,7 +239,13 @@ export function TextLine({
                 unhide={unhide}
                 lang={element.lang}
                 renderMode={preferNativeText ? "native" : "tokenized"}
+                inlineAudio={
+                  preferNativeText && lineAudio.hasAudio
+                    ? { onPress: handlePlay, color: colors.blue }
+                    : undefined
+                }
                 rtl={lineRtl}
+                debugNativeLayout={debugNativeLayout}
                 containerStyle={lineRtl ? styles.rtlBubbleText : undefined}
                 leadingElement={
                   !preferNativeText && lineAudio.hasAudio ? (
@@ -265,7 +269,7 @@ export function TextLine({
   return (
     <View style={[styles.row, lineRtl && styles.rowRtl]}>
       <LineBody
-        hasAudio={lineAudio.hasAudio}
+        hasAudio={preferNativeText ? false : lineAudio.hasAudio}
         onPlay={handlePlay}
         rtl={lineRtl}
         styles={styles}
@@ -277,7 +281,13 @@ export function TextLine({
           unhide={unhide}
           lang={element.lang}
           renderMode={preferNativeText ? "native" : "tokenized"}
+          inlineAudio={
+            preferNativeText && lineAudio.hasAudio
+              ? { onPress: handlePlay, color: colors.blue }
+              : undefined
+          }
           rtl={lineRtl}
+          debugNativeLayout={debugNativeLayout}
           containerStyle={lineRtl ? styles.rtlProseText : undefined}
           fillLineWidth={lineRtl}
           style={[textStyle, getLanguageTextStyle(element.lang, textStyle)]}
@@ -289,107 +299,107 @@ export function TextLine({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginVertical: 10,
-  },
-  rowRtl: {
-    flexDirection: "row-reverse",
-  },
-  characterRow: {
-    marginVertical: 12,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    marginRight: 6,
-  },
-  avatarRtl: {
-    marginRight: 0,
-    marginLeft: 6,
-    transform: [{ scaleX: -1 }],
-  },
-  bubbleWrap: {
-    flex: 1,
-    alignSelf: "flex-start",
-  },
-  bubble: {
-    alignSelf: "flex-start",
-    maxWidth: "100%",
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 14,
-    backgroundColor: colors.background,
-    paddingTop: 10,
-    paddingBottom: 9,
-  },
-  bubblePaddingLtr: {
-    paddingLeft: 15,
-    paddingRight: 15,
-  },
-  bubblePaddingRtl: {
-    paddingRight: 10,
-    paddingLeft: 15,
-  },
-  bubbleRtl: {
-    alignSelf: "flex-end",
-  },
-  body: {
-    flexShrink: 1,
-    minWidth: 0,
-    width: "100%",
-  },
-  bodyNatural: {
-    alignSelf: "flex-start",
-    flexShrink: 1,
-    minWidth: 0,
-  },
-  bodyPad: {
-    paddingLeft: 32,
-  },
-  bodyPadRtl: {
-    paddingRight: 32,
-  },
-  bodyInline: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  bodyInlineRtl: {
-    flexDirection: "row-reverse",
-  },
-  bodyTextInline: {
-    flexShrink: 1,
-    minWidth: 0,
-  },
-  bodyTextNatural: {
-    alignSelf: "flex-start",
-  },
-  rtlBubbleText: {
-    flexShrink: 1,
-    minWidth: 0,
-  },
-  rtlProseText: {
-    flexShrink: 1,
-    minWidth: 0,
-    width: "100%",
-  },
-  audioButton: {
-    position: "absolute",
-    top: 2,
-  },
-  tail: {
-    position: "absolute",
-    width: 0,
-    height: 0,
-    borderBottomWidth: TAIL_WIDTH,
-    borderBottomColor: "transparent",
-    borderStyle: "solid",
-  },
-  title: {
-    fontSize: fontSizes.title,
-    fontWeight: "700",
-    color: colors.text,
-  },
+    row: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      marginVertical: 10,
+    },
+    rowRtl: {
+      flexDirection: "row-reverse",
+    },
+    characterRow: {
+      marginVertical: 12,
+    },
+    avatar: {
+      width: 50,
+      height: 50,
+      marginRight: 6,
+    },
+    avatarRtl: {
+      marginRight: 0,
+      marginLeft: 6,
+      transform: [{ scaleX: -1 }],
+    },
+    bubbleWrap: {
+      flex: 1,
+      alignSelf: "flex-start",
+    },
+    bubble: {
+      alignSelf: "flex-start",
+      maxWidth: "100%",
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 14,
+      backgroundColor: colors.background,
+      paddingTop: 10,
+      paddingBottom: 9,
+    },
+    bubblePaddingLtr: {
+      paddingLeft: 15,
+      paddingRight: 15,
+    },
+    bubblePaddingRtl: {
+      paddingRight: 10,
+      paddingLeft: 15,
+    },
+    bubbleRtl: {
+      alignSelf: "flex-end",
+    },
+    body: {
+      flexShrink: 1,
+      minWidth: 0,
+      width: "100%",
+    },
+    bodyNatural: {
+      alignSelf: "flex-start",
+      flexShrink: 1,
+      minWidth: 0,
+    },
+    bodyPad: {
+      paddingLeft: 32,
+    },
+    bodyPadRtl: {
+      paddingRight: 32,
+    },
+    bodyInline: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+    },
+    bodyInlineRtl: {
+      flexDirection: "row-reverse",
+    },
+    bodyTextInline: {
+      flexShrink: 1,
+      minWidth: 0,
+    },
+    bodyTextNatural: {
+      alignSelf: "flex-start",
+    },
+    rtlBubbleText: {
+      flexShrink: 1,
+      minWidth: 0,
+    },
+    rtlProseText: {
+      flexShrink: 1,
+      minWidth: 0,
+      width: "100%",
+    },
+    audioButton: {
+      position: "absolute",
+      top: 2,
+    },
+    tail: {
+      position: "absolute",
+      width: 0,
+      height: 0,
+      borderBottomWidth: TAIL_WIDTH,
+      borderBottomColor: "transparent",
+      borderStyle: "solid",
+    },
+    title: {
+      fontSize: fontSizes.title,
+      fontWeight: "700",
+      color: colors.text,
+    },
   });
 }

@@ -30,6 +30,11 @@ export async function requireContributorOrAdmin(ctx: AuthCtx) {
   }
 }
 
+export async function isContributorOrAdmin(ctx: AuthCtx) {
+  const role = await getRole(ctx);
+  return role === "contributor" || role === "admin";
+}
+
 export async function requireSessionLegacyUserId(ctx: AuthCtx) {
   const identity = await getIdentity(ctx);
   const rawUserId = identity?.userId;

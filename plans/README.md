@@ -14,16 +14,16 @@ Mobile-touching plans add: `pnpm --dir app-mobile typecheck`.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 001 | CI runs tests; add .env.example (dead workflows: already deleted) | P1 | S | — | TODO (refreshed 2026-07-09; workflow deletion done independently `ca88e2c8`) |
-| 002 | Enforce contributor auth on editor Convex queries | P1 | S | — | TODO (re-verified 2026-07-09; queries now at editorRead.ts:215/246/286) |
-| 003 | Scope storyDone progress queries to the session user | P1 | S | — | TODO (re-verified 2026-07-09; queries now at storyDone.ts:92/273) |
-| 004 | Surface story save/delete/upload failures to the user | P1 | S | — | TODO (re-verified 2026-07-09) |
-| 005 | Fix out-of-bounds in bulk audio editor timing text | P2 | S | — | TODO (re-verified 2026-07-09; onRegionUpdated still at :445) |
-| 006 | Convex function test harness (convex-test + vitest) | P1 | M | 001 | TODO (scope extended 2026-07-09: + storyFeedback.test.ts) |
-| 007 | Repo hygiene: tmp/ untrack, @types/pg, kysely note, debug logs | P3 | S | — | TODO (re-verified 2026-07-09) |
-| 008 | Harden shared-secret HTTP endpoints; internalize backfills | P3 | S | — | TODO (re-verified 2026-07-09; routes unchanged) |
-| 009 | Extract pure logic from the 4,120-line audio-cutter dialog | P2 | M–L | 001, 005 | TODO (re-verified 2026-07-09) |
-| 010 | Design the author-identity + Postgres-sunset schema migrations | P2 | M | 006 | TODO (note: schema gained story_feedback_reports + audio_problem_count since planning) |
+| 001 | CI runs tests; delete dead workflows; add .env.example | P1 | S | — | DONE |
+| 002 | Enforce contributor auth on editor Convex queries | P1 | S | — | DONE (tests deferred to 006) |
+| 003 | Scope storyDone progress queries to the session user | P1 | S | — | DONE |
+| 004 | Surface story save/delete/upload failures to the user | P1 | S | — | DONE (Step 4 manual offline-save check skipped — no dev deployment) |
+| 005 | Fix out-of-bounds in bulk audio editor timing text | P2 | S | — | DONE |
+| 006 | Convex function test harness (convex-test + vitest) | P1 | M | 001 | DONE (16 tests; no bugs found) |
+| 007 | Repo hygiene: tmp/ untrack, @types/pg, kysely note, debug logs | P3 | S | — | DONE |
+| 008 | Harden shared-secret HTTP endpoints; internalize backfills | P3 | S | — | DONE |
+| 009 | Extract pure logic from the 4,135-line audio-cutter dialog | P2 | M–L | 001, 005 | DONE |
+| 010 | Design the author-identity + Postgres-sunset schema migrations | P2 | M | 006 | TODO |
 | 011 | Clear high-severity dep advisories (hono, undici); unpin mobile auth | P1 | S | — | DONE (2026-07-10) |
 | 012 | Make app-mobile visible to CI; truth-up mobile docs | P1 | S | — | TODO |
 | 013 | Bound/validate story-feedback intake; paginate review queue | P1 | M | — | TODO |

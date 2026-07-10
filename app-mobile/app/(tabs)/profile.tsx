@@ -27,6 +27,7 @@ import {
   type ThemePreference,
   useTheme,
 } from "../../src/theme";
+import { useTabContentInsets } from "../../src/useTabContentInsets";
 
 export default function ProfileTab() {
   const router = useRouter();
@@ -37,6 +38,7 @@ export default function ProfileTab() {
     setPreference: setThemePreference,
   } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const tabContentInsets = useTabContentInsets();
   const { hideStoryQuestions, resetToFirstRun, setHideStoryQuestions } =
     useAppState();
   const { data: session, isPending: isSessionPending } = useAuthSession();
@@ -143,7 +145,9 @@ export default function ProfileTab() {
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, tabContentInsets]}
+      >
         <Text style={styles.title}>Profile</Text>
 
         <View style={styles.card}>
