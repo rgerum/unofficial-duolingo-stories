@@ -50,14 +50,22 @@ const statusLabels: Record<FeedbackStatus, string> = {
 export default function FeedbackReviewView({
   status,
   reports,
+  paginationStatus,
   updatingId,
   onStatusChange,
+  onLoadMore,
   onSetReportStatus,
 }: {
   status: FeedbackStatus;
   reports?: FeedbackReport[];
+  paginationStatus?:
+    | "LoadingFirstPage"
+    | "CanLoadMore"
+    | "LoadingMore"
+    | "Exhausted";
   updatingId: Id<"story_feedback_reports"> | null;
   onStatusChange: (status: FeedbackStatus) => void;
+  onLoadMore?: () => void;
   onSetReportStatus: (
     reportId: Id<"story_feedback_reports">,
     status: FeedbackStatus,
@@ -109,18 +117,33 @@ export default function FeedbackReviewView({
           No {statusLabels[status].toLowerCase()} feedback reports.
         </div>
       ) : (
-        <div className="grid gap-3">
-          {reports.map((report) => (
-            <FeedbackReportRow
-              key={report._id}
-              report={report}
-              updating={updatingId === report._id}
-              onSetStatus={(nextStatus) =>
-                onSetReportStatus(report._id, nextStatus)
-              }
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-3">
+            {reports.map((report) => (
+              <FeedbackReportRow
+                key={report._id}
+                report={report}
+                updating={updatingId === report._id}
+                onSetStatus={(nextStatus) =>
+                  onSetReportStatus(report._id, nextStatus)
+                }
+              />
+            ))}
+          </div>
+          {paginationStatus === "CanLoadMore" ||
+          paginationStatus === "LoadingMore" ? (
+            <div className="mt-5 flex justify-center">
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={paginationStatus === "LoadingMore"}
+                onClick={onLoadMore}
+              >
+                {paginationStatus === "LoadingMore" ? "Loading" : "Load more"}
+              </Button>
+            </div>
+          ) : null}
+        </>
       )}
     </main>
   );

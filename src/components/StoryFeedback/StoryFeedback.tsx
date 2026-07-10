@@ -184,6 +184,7 @@ export default function StoryFeedback({
               value={comment}
               onChange={(event) => setComment(event.target.value)}
               rows={5}
+              maxLength={2000}
               required
               disabled={isSubmitting || isSubmitted}
               className="w-full resize-y rounded-[14px] border-2 border-[var(--input-border)] bg-[var(--input-background)] px-4 py-3 text-[1rem] font-normal leading-6 text-[var(--text-color)] outline-none focus:border-[color:color-mix(in_srgb,var(--link-blue)_45%,var(--input-border))]"

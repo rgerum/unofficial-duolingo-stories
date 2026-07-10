@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, usePaginatedQuery } from "convex/react";
 import Link from "next/link";
 import React from "react";
 import { api } from "@convex/_generated/api";
@@ -17,10 +17,15 @@ import FeedbackReviewView, {
 
 export default function StoryFeedbackPageClient() {
   const [status, setStatus] = React.useState<FeedbackStatus>("open");
-  const reports = useQuery(api.storyFeedback.listStoryFeedbackReports, {
-    status,
-    limit: 100,
-  });
+  const {
+    results,
+    status: paginationStatus,
+    loadMore,
+  } = usePaginatedQuery(
+    api.storyFeedback.listStoryFeedbackReports,
+    { status },
+    { initialNumItems: 50 },
+  );
   const updateStatus = useMutation(api.storyFeedback.updateStoryFeedbackStatus);
   const [updatingId, setUpdatingId] =
     React.useState<Id<"story_feedback_reports"> | null>(null);
@@ -59,9 +64,15 @@ export default function StoryFeedbackPageClient() {
 
       <FeedbackReviewView
         status={status}
-        reports={reports as FeedbackReport[] | undefined}
+        reports={
+          paginationStatus === "LoadingFirstPage"
+            ? undefined
+            : (results as FeedbackReport[])
+        }
+        paginationStatus={paginationStatus}
         updatingId={updatingId}
         onStatusChange={setStatus}
+        onLoadMore={() => loadMore(50)}
         onSetReportStatus={setReportStatus}
       />
     </>
