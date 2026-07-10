@@ -14,18 +14,18 @@ Mobile-touching plans add: `pnpm --dir app-mobile typecheck`.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 001 | CI runs tests; add .env.example (dead workflows: already deleted) | P1 | S | — | TODO (refreshed 2026-07-09; workflow deletion done independently `ca88e2c8`) |
-| 002 | Enforce contributor auth on editor Convex queries | P1 | S | — | TODO (re-verified 2026-07-09; queries now at editorRead.ts:215/246/286) |
-| 003 | Scope storyDone progress queries to the session user | P1 | S | — | TODO (re-verified 2026-07-09; queries now at storyDone.ts:92/273) |
-| 004 | Surface story save/delete/upload failures to the user | P1 | S | — | TODO (re-verified 2026-07-09) |
-| 005 | Fix out-of-bounds in bulk audio editor timing text | P2 | S | — | TODO (re-verified 2026-07-09; onRegionUpdated still at :445) |
-| 006 | Convex function test harness (convex-test + vitest) | P1 | M | 001 | TODO (scope extended 2026-07-09: + storyFeedback.test.ts) |
-| 007 | Repo hygiene: tmp/ untrack, @types/pg, kysely note, debug logs | P3 | S | — | TODO (re-verified 2026-07-09) |
-| 008 | Harden shared-secret HTTP endpoints; internalize backfills | P3 | S | — | TODO (re-verified 2026-07-09; routes unchanged) |
-| 009 | Extract pure logic from the 4,120-line audio-cutter dialog | P2 | M–L | 001, 005 | TODO (re-verified 2026-07-09) |
-| 010 | Design the author-identity + Postgres-sunset schema migrations | P2 | M | 006 | TODO (note: schema gained story_feedback_reports + audio_problem_count since planning) |
+| 001 | CI runs tests; delete dead workflows; add .env.example | P1 | S | — | DONE |
+| 002 | Enforce contributor auth on editor Convex queries | P1 | S | — | DONE (tests deferred to 006) |
+| 003 | Scope storyDone progress queries to the session user | P1 | S | — | DONE |
+| 004 | Surface story save/delete/upload failures to the user | P1 | S | — | DONE (Step 4 manual offline-save check skipped — no dev deployment) |
+| 005 | Fix out-of-bounds in bulk audio editor timing text | P2 | S | — | DONE |
+| 006 | Convex function test harness (convex-test + vitest) | P1 | M | 001 | DONE (16 tests; no bugs found) |
+| 007 | Repo hygiene: tmp/ untrack, @types/pg, kysely note, debug logs | P3 | S | — | DONE |
+| 008 | Harden shared-secret HTTP endpoints; internalize backfills | P3 | S | — | DONE |
+| 009 | Extract pure logic from the 4,135-line audio-cutter dialog | P2 | M–L | 001, 005 | DONE |
+| 010 | Design the author-identity + Postgres-sunset schema migrations | P2 | M | 006 | TODO |
 | 011 | Clear high-severity dep advisories (hono, undici); unpin mobile auth | P1 | S | — | TODO |
-| 012 | Make app-mobile visible to CI; truth-up mobile docs | P1 | S | — | TODO |
+| 012 | Make app-mobile visible to CI; truth-up mobile docs | P1 | S | — | DONE (2026-07-10) |
 | 013 | Bound/validate story-feedback intake; paginate review queue | P1 | M | — | DONE (2026-07-10; manual UI check pending) |
 | 014 | Validate recordStoryDone inputs; idempotent progress import | P2 | S | — (not concurrent with 003) | TODO |
 | 015 | Complete account deletion (cascade user data) | P1 | M | — | TODO |
@@ -35,12 +35,12 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
 ## Dependency notes
 
 - **006 requires 001**: the harness's new `pnpm test:convex` only pays off once CI actually runs tests.
-- **009 requires 001 and 005**: 001 gates the new tests in CI; 005 creates the timing-text module 009 reuses.
-- **010 requires 006**: the migration design must specify harness tests per stage.
-- 002 and 003 are independent but share the `fetchAuthQuery` switch pattern — back-to-back is efficient.
+- **009 requires 001 and 005**: 001 gates the new tests in CI; 005 creates `src/lib/editor/audio/timing_text.ts`, which 009 reuses instead of duplicating.
+- **010 requires 006**: the migration design must specify harness tests per stage; without the harness those are fiction.
+- 002 and 003 are independent but share the `fetchAuthQuery` switch pattern — executing them back-to-back is efficient.
 - **003 and 014 edit the same file** (`convex/storyDone.ts`) — execute sequentially in either order, never concurrently.
 - 011/012 are independent quick wins; doing 012 first gives every later mobile-touching plan a CI net.
-- The migration **execution** (a future plan, drafted by 010) must not start before 006 and 010 are DONE and the maintainer signs off.
+- The migration **execution** (a future plan drafted by 010) must not start before 006 and 010 are DONE and the maintainer signs off.
 
 ## Vetted findings not planned this round (2026-07-09)
 
@@ -65,7 +65,7 @@ From the 2026-06-11 audit:
 - **"Attacker-corruptible Discord role-sync snapshots"** (`discordBot.ts:228+`) — requires the same shared secret as everything else on that trust boundary; subsumed by plan 008.
 - **lucide-react / lamejs version lag** — cosmetic / stable-as-is; not worth the regression risk in audio encoding. Revisit only when a concrete need appears.
 - **Validator duplication across `adminData`/`landing`/`editorRead`** — real but low-value consolidation; shapes change rarely. Reconsider if a shared shape changes twice in one quarter.
-- **Minor perf items** — sequential `ctx.db.get` loops (`storyDone.ts` — usually exits on first row; `editorRead.ts` — legacy fallback path), `landing.ts` per-language localization collects (tables are small), `getEditorSidebarData` full-course collect (small table; also gated by plan 002 after it lands). Not worth plans at current data sizes.
+- **Minor perf items** — sequential `ctx.db.get` loops (`storyDone.ts:185-189` — usually exits on first row; `editorRead.ts:154-165` — legacy fallback path), `landing.ts` per-language localization collects (tables are small), `getEditorSidebarData` full-course collect (small table; also gated by plan 002 after it lands). Not worth plans at current data sizes.
 - **Unhandled rejection in `DocsSearchModal.tsx:109`** — plausible but unvetted in depth and low-blast-radius (docs search init). Fix opportunistically when touching that file.
 - **`as any` casts in `convex/authMigration.ts` / `authFunctions.ts`** — migration-era code scheduled to age out with plan 010's outcome; not worth independent cleanup.
 
@@ -82,7 +82,7 @@ Added by the 2026-07-09 re-audit:
 From 2026-06-11:
 
 - **Public story-content API**: `convex/storyPublicContent.ts` + commit #489 suggest an emerging public data surface — decide intent before it ossifies.
-- **Audio cutter as flagship editor tool**: plan 009 is the foundation; a UX/feature design pass could follow.
+- **Audio cutter as flagship editor tool**: 6 of the last 10 commits; plan 009 is the foundation; a UX/feature design pass could follow.
 - **Discord integration scope doc**: four Convex modules + a bot with no written scope; a half-day writeup would de-bus-factor it.
 
 Added 2026-07-09:

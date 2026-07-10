@@ -11,6 +11,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "org.duostories.app",
       "usesAppleSignIn": true,
+      "associatedDomains": ["applinks:duostories.org"],
       "icon": "./assets/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -28,6 +29,25 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "duostories.org",
+              "pathPrefix": "/story/"
+            },
+            {
+              "scheme": "https",
+              "host": "duostories.org",
+              "pathPattern": "/..-.*"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "predictiveBackGestureEnabled": false
     },
     "web": {

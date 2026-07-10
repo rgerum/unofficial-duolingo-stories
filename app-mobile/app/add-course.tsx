@@ -48,35 +48,35 @@ export default function AddCourseScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 12,
-    paddingTop: 8,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerText: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: colors.text,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: colors.textDim,
-    marginTop: 2,
-  },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      paddingHorizontal: 12,
+      paddingTop: 8,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    headerText: {
+      flex: 1,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: "800",
+      color: colors.text,
+    },
+    subtitle: {
+      fontSize: 15,
+      color: colors.textDim,
+      marginTop: 2,
+    },
   });
 }

@@ -423,7 +423,10 @@ function MatchPart({ parts, setButtonStatus, active, settings }: PartProps) {
   }
   return (
     <FadeIn>
-      <MatchQuestion element={element} setDone={() => setButtonStatus("right")} />
+      <MatchQuestion
+        element={element}
+        setDone={() => setButtonStatus("right")}
+      />
     </FadeIn>
   );
 }

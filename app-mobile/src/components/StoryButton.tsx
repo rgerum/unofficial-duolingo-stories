@@ -84,51 +84,51 @@ export function StoryButton({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    width: ART_WIDTH,
-    alignItems: "center",
-    marginHorizontal: 12,
-    marginVertical: 8,
-  },
-  disabled: {
-    opacity: 0.45,
-  },
-  artBox: {
-    width: ART_WIDTH,
-    height: ART_HEIGHT + LIFT,
-  },
-  tile: {
-    position: "absolute",
-    left: TILE_INSET,
-    top: TILE_INSET + LIFT,
-    width: TILE_SIZE,
-    height: TILE_SIZE,
-    borderRadius: 17,
-  },
-  art: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-  },
-  listeningBadge: {
-    position: "absolute",
-    top: TILE_INSET + LIFT + 5,
-    right: TILE_INSET + 5,
-    zIndex: 2,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  name: {
-    marginTop: 12,
-    textAlign: "center",
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: "700",
-    color: colors.textDim,
-  },
+    root: {
+      width: ART_WIDTH,
+      alignItems: "center",
+      marginHorizontal: 12,
+      marginVertical: 8,
+    },
+    disabled: {
+      opacity: 0.45,
+    },
+    artBox: {
+      width: ART_WIDTH,
+      height: ART_HEIGHT + LIFT,
+    },
+    tile: {
+      position: "absolute",
+      left: TILE_INSET,
+      top: TILE_INSET + LIFT,
+      width: TILE_SIZE,
+      height: TILE_SIZE,
+      borderRadius: 17,
+    },
+    art: {
+      position: "absolute",
+      left: 0,
+      top: 0,
+    },
+    listeningBadge: {
+      position: "absolute",
+      top: TILE_INSET + LIFT + 5,
+      right: TILE_INSET + 5,
+      zIndex: 2,
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    name: {
+      marginTop: 12,
+      textAlign: "center",
+      fontSize: 15,
+      lineHeight: 20,
+      fontWeight: "700",
+      color: colors.textDim,
+    },
   });
 }

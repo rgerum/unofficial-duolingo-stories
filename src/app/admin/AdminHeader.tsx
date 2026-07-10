@@ -40,6 +40,9 @@ export default async function AdminHeader() {
       <AdminButton href="/admin/users">Users</AdminButton>
       <AdminButton href="/admin/languages">Languages</AdminButton>
       <AdminButton href="/admin/courses">Courses</AdminButton>
+      <AdminButton href="/admin/unpublished-courses">
+        Hidden Stories
+      </AdminButton>
       <AdminButton href="/admin/story">Story</AdminButton>
 
       <div className="ml-auto flex items-center gap-2">

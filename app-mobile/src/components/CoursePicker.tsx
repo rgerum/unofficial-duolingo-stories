@@ -16,13 +16,15 @@ import { Flag } from "./Flag";
 import { OfflineNotice } from "./OfflineNotice";
 import { Text, TextInput } from "./Text";
 
-type LandingData = FunctionReturnType<typeof api.landing.getPublicLandingPageData>;
+type LandingData = FunctionReturnType<
+  typeof api.landing.getPublicLandingPageData
+>;
 type LandingGroup = LandingData["groups"][number];
 type CourseItem = LandingGroup["courses"][number];
 
 /**
- * Course list grouped by base language ("Stories for English", …), fed by the
- * same landing-page query as the web. English group comes first server-side.
+ * Course list grouped by base language, fed by the same landing-page query as
+ * the web. English group comes first server-side.
  */
 export function CoursePicker({
   selectedShort,
@@ -68,7 +70,7 @@ export function CoursePicker({
       );
       return {
         key: String(group.fromLanguageId),
-        title: `${group.labels.storiesFor} ${group.fromLanguageName}`,
+        title: group.labels.storiesFor,
         template: group.labels.nStoriesTemplate,
         data: courses,
       };
@@ -161,94 +163,94 @@ export function CoursePicker({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  loading: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyState: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 28,
-  },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: colors.text,
-    textAlign: "center",
-  },
-  offlineWrap: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-  },
-  searchBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginHorizontal: 16,
-    marginTop: 12,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: colors.text,
-  },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 30,
-  },
-  empty: {
-    marginTop: 30,
-    textAlign: "center",
-    fontSize: 16,
-    color: colors.textDim,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
-    marginTop: 24,
-    marginBottom: 8,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: "transparent",
-  },
-  rowSelected: {
-    borderColor: colors.blue,
-    backgroundColor: colors.blueLight,
-  },
-  rowDisabled: {
-    opacity: 0.55,
-  },
-  rowText: {
-    flex: 1,
-  },
-  courseName: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  courseCount: {
-    fontSize: 14,
-    color: colors.textDim,
-    marginTop: 2,
-  },
+    root: {
+      flex: 1,
+    },
+    loading: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    emptyState: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 28,
+    },
+    emptyTitle: {
+      fontSize: 22,
+      fontWeight: "800",
+      color: colors.text,
+      textAlign: "center",
+    },
+    offlineWrap: {
+      paddingHorizontal: 16,
+      paddingTop: 12,
+    },
+    searchBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginHorizontal: 16,
+      marginTop: 12,
+      paddingHorizontal: 12,
+      borderRadius: 14,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+    },
+    searchInput: {
+      flex: 1,
+      paddingVertical: 10,
+      fontSize: 16,
+      color: colors.text,
+    },
+    listContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 30,
+    },
+    empty: {
+      marginTop: 30,
+      textAlign: "center",
+      fontSize: 16,
+      color: colors.textDim,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: colors.text,
+      marginTop: 24,
+      marginBottom: 8,
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+      paddingVertical: 12,
+      paddingHorizontal: 12,
+      borderRadius: 14,
+      borderWidth: 2,
+      borderColor: "transparent",
+    },
+    rowSelected: {
+      borderColor: colors.blue,
+      backgroundColor: colors.blueLight,
+    },
+    rowDisabled: {
+      opacity: 0.55,
+    },
+    rowText: {
+      flex: 1,
+    },
+    courseName: {
+      fontSize: 17,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    courseCount: {
+      fontSize: 14,
+      color: colors.textDim,
+      marginTop: 2,
+    },
   });
 }

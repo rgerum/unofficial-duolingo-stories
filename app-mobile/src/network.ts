@@ -38,7 +38,8 @@ export function NetworkStatusProvider({
 
   React.useEffect(() => {
     refreshNetworkState();
-    const networkSubscription = Network.addNetworkStateListener(setNetworkState);
+    const networkSubscription =
+      Network.addNetworkStateListener(setNetworkState);
     const appStateSubscription = NativeAppState.addEventListener(
       "change",
       (nextAppState) => {

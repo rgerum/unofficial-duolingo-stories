@@ -31,7 +31,10 @@ export function PointToPhraseQuestion({
 
   return (
     <View>
-      <QuestionPrompt question={element.question} lang={element.lang_question} />
+      <QuestionPrompt
+        question={element.question}
+        lang={element.lang_question}
+      />
       <View style={styles.transcript}>
         {element.transcriptParts.map((part, index) =>
           part.selectable ? (

@@ -1,9 +1,10 @@
 # Duostories Mobile App — Design Document
 
 > **Implementation status:** M1 + M2 are implemented in [`app-mobile/`](../app-mobile/)
-> (Expo). Accounts (M3) and polish (M4) are still open — the Welcome screen's
-> Sign in / Register buttons lead to a placeholder until then. See
-> `app-mobile/README.md` for how to run it.
+> (Expo). M3 (accounts: email + social sign-in incl. Apple, cloud progress
+> sync, account deletion) has shipped. M4 polish is partially done — dark
+> mode and deep links shipped; audio prefetch and offline downloads remain.
+> See `app-mobile/README.md` for how to run it.
 
 A native iOS/Android app for the public-facing part of duostories.org: course selection,
 story reading, and profile settings. No editor, no admin.
@@ -67,7 +68,7 @@ Root (tab-less stack)
 - **Welcome** mirrors the PWA's start screen (`src/app/(stories)/learn/welcome.tsx`,
   the PWA `start_url`): see §3.0.
 - **Learn** is the default tab and opens the *last used course* (stored locally;
-  for logged-in users seeded from `storyDone.getLastDoneCourseShortForLegacyUser`).
+  for logged-in users seeded from `storyDone.getLastDoneCourseShortForCurrentUser`).
 - The reader is a full-screen modal with no tab bar — a story is an immersive,
   do-not-interrupt flow, same as Duolingo's apps.
 

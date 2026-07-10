@@ -48,10 +48,10 @@
 
   - **Accounts (M3)**: cloud progress sync after sign-in, password reset, and
     social login/Sign in with Apple.
-  - **M4 polish**: audio prefetch to disk, dark mode, deep links, offline
+  - **M4 polish**: audio prefetch to disk, dark mode, offline
     story downloads.
   ```
-  Reality check against code/git: social login incl. Apple exists (`app-mobile/app/auth.tsx` uses `signIn.social` for apple/google/github/discord — commits `3c34500a`, `138c4bfa`), cloud progress sync exists (`ac289a70`, `recordStoryDone` calls in `app-mobile/app/story/[id].tsx:127`), dark mode landed 2026-07-06 (`a29f1246`, PR #538). Still genuinely missing as of today: password reset flow in the app, audio prefetch to disk, deep links, offline story downloads.
+  Reality check against code/git: social login incl. Apple exists (`app-mobile/app/auth.tsx` uses `signIn.social` for apple/google/github/discord — commits `3c34500a`, `138c4bfa`), cloud progress sync exists (`ac289a70`, `recordStoryDone` calls in `app-mobile/app/story/[id].tsx:127`), dark mode landed 2026-07-06 (`a29f1246`, PR #538), and deep links are implemented for stories and courses. Still genuinely missing as of today: password reset flow in the app, audio prefetch to disk, and offline story downloads.
 - `docs/mobile-app-design.md:3-5` — says "Accounts (M3) and polish (M4) are still open — the Welcome screen's Sign in / Register buttons lead to a placeholder until then." The sign-in screen is real now (`app-mobile/app/auth.tsx`).
 - Root `AGENTS.md` / `CLAUDE.md` tell agents to run `pnpm typecheck` / `pnpm lint` with no mention that these skip `app-mobile`. There is also `app-mobile/AGENTS.md` (one line pointing at Expo v56 docs) — leave that file alone.
 - Domain vocabulary (CONTEXT.md): the mobile app serves **Learners** (users who consume stories); use "Learner" not "user" in any prose you write.
@@ -135,7 +135,6 @@ Replace the "Not yet implemented" section body with the actual remaining gaps (v
 
 - Password reset from within the app.
 - Audio prefetch to disk / offline story downloads.
-- Deep links.
 
 Keep this list honest: update it in the same PR that ships one of these items.
 ```
@@ -144,7 +143,7 @@ Keep this list honest: update it in the same PR that ships one of these items.
 
 ### Step 4: Truth-up docs/mobile-app-design.md
 
-Update the stale status sentence ("Accounts (M3) and polish (M4) are still open — the Welcome screen's Sign in / Register buttons lead to a placeholder until then.") to reflect that M3 (accounts: email + social sign-in incl. Apple, cloud progress sync, account deletion) shipped, and M4 is partially done (dark mode shipped; audio prefetch, deep links, offline downloads remain). Keep the edit to the status prose — do not rewrite the design content.
+Update the stale status sentence ("Accounts (M3) and polish (M4) are still open — the Welcome screen's Sign in / Register buttons lead to a placeholder until then.") to reflect that M3 (accounts: email + social sign-in incl. Apple, cloud progress sync, account deletion) shipped, and M4 is partially done (dark mode and deep links shipped; audio prefetch and offline downloads remain). Keep the edit to the status prose — do not rewrite the design content.
 
 **Verify**: `grep -n "placeholder" docs/mobile-app-design.md` → no match.
 

@@ -1,4 +1,7 @@
-import { paginationOptsValidator } from "convex/server";
+import {
+  paginationOptsValidator,
+  paginationResultValidator,
+} from "convex/server";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireContributorOrAdmin } from "./lib/authorization";
@@ -120,11 +123,7 @@ export const listStoryFeedbackReports = query({
     status: feedbackStatusValidator,
     paginationOpts: paginationOptsValidator,
   },
-  returns: v.object({
-    page: v.array(feedbackReportValidator),
-    isDone: v.boolean(),
-    continueCursor: v.string(),
-  }),
+  returns: paginationResultValidator(feedbackReportValidator),
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
 
