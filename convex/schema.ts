@@ -262,6 +262,7 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_story_id", ["storyId"])
+    .index("by_story_and_status", ["storyId", "status"])
     .index("by_course_short", ["courseShort"])
     .index("by_category", ["category"])
     .index("by_user_id", ["userId"])

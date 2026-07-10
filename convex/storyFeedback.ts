@@ -1,3 +1,7 @@
+import {
+  paginationOptsValidator,
+  paginationResultValidator,
+} from "convex/server";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireContributorOrAdmin } from "./lib/authorization";
@@ -50,6 +54,44 @@ export const submitStoryFeedback = mutation({
     if (!comment) {
       throw new Error("Comment is required");
     }
+    if (comment.length > 2000) {
+      throw new Error("Comment is too long");
+    }
+
+    const storyTitle = args.storyTitle.trim();
+    if (storyTitle.length > 200) {
+      throw new Error("Story title is too long");
+    }
+
+    const courseShort = args.courseShort.trim();
+    if (courseShort.length > 20) {
+      throw new Error("Course short is too long");
+    }
+
+    const lineText = args.lineText?.trim();
+    if (lineText !== undefined && lineText.length > 500) {
+      throw new Error("Line text is too long");
+    }
+
+    const story = await ctx.db
+      .query("stories")
+      .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.storyId))
+      .unique();
+    if (!story) {
+      throw new Error("Unknown story");
+    }
+
+    const openReports = await ctx.db
+      .query("story_feedback_reports")
+      .withIndex("by_story_and_status", (q) =>
+        q.eq("storyId", args.storyId).eq("status", "open"),
+      )
+      .take(25);
+    if (openReports.length >= 25) {
+      throw new Error(
+        "This story already has many open reports. Please try again later.",
+      );
+    }
 
     const identity = (await ctx.auth.getUserIdentity()) as {
       tokenIdentifier?: string | null;
@@ -57,11 +99,10 @@ export const submitStoryFeedback = mutation({
       email?: string | null;
     } | null;
 
-    const lineText = args.lineText?.trim();
     const reportId = await ctx.db.insert("story_feedback_reports", {
       storyId: args.storyId,
-      storyTitle: args.storyTitle.trim(),
-      courseShort: args.courseShort.trim(),
+      storyTitle,
+      courseShort,
       ...(args.line !== undefined ? { line: args.line } : {}),
       ...(lineText ? { lineText } : {}),
       category: args.category,
@@ -80,18 +121,17 @@ export const submitStoryFeedback = mutation({
 export const listStoryFeedbackReports = query({
   args: {
     status: feedbackStatusValidator,
-    limit: v.optional(v.number()),
+    paginationOpts: paginationOptsValidator,
   },
-  returns: v.array(feedbackReportValidator),
+  returns: paginationResultValidator(feedbackReportValidator),
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
 
-    const limit = Math.min(Math.max(args.limit ?? 100, 1), 100);
     return await ctx.db
       .query("story_feedback_reports")
       .withIndex("by_status_and_created_at", (q) => q.eq("status", args.status))
       .order("desc")
-      .take(limit);
+      .paginate(args.paginationOpts);
   },
 });
 
