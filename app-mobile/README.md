@@ -48,12 +48,15 @@ pnpm run typecheck  # tsc --noEmit
   is computed locally from the course list.
 - **Profile tab**: account card with sign-in/register/sign-out actions,
   "hide story questions" preference, per-course progress stats, reset.
+- **Deep links**: `https://duostories.org/story/{id}` opens the reader and
+  `https://duostories.org/{course_short}` selects the course and opens Learn
+  after first-run gates. Native universal/app-link association currently matches
+  course shorts shaped like `xx-*`, which covers the existing public courses.
 
 ## Not yet implemented
 
 - Password reset from within the app.
 - Audio prefetch to disk / offline story downloads.
-- Deep links.
 
 Keep this list honest: update it in the same PR that ships one of these items.
 

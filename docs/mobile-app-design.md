@@ -3,7 +3,7 @@
 > **Implementation status:** M1 + M2 are implemented in [`app-mobile/`](../app-mobile/)
 > (Expo). M3 (accounts: email + social sign-in incl. Apple, cloud progress
 > sync, account deletion) has shipped. M4 polish is partially done — dark
-> mode shipped; audio prefetch, deep links, and offline downloads remain.
+> mode and deep links shipped; audio prefetch and offline downloads remain.
 > See `app-mobile/README.md` for how to run it.
 
 A native iOS/Android app for the public-facing part of duostories.org: course selection,
