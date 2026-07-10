@@ -208,7 +208,9 @@ export function Reader({
       else setListeningPaused(false);
       setPartProgress(0);
       setStoryProgress(partIndex);
-      setButtonStatus(getInitialButtonStatus(partsList[partIndex], hideQuestions));
+      setButtonStatus(
+        getInitialButtonStatus(partsList[partIndex], hideQuestions),
+      );
     },
     [hideQuestions, listening, partsList, useStitchedAudio],
   );
@@ -361,64 +363,64 @@ export function Reader({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    paddingHorizontal: 16,
-    paddingBottom: 10,
-  },
-  progressTrack: {
-    flex: 1,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: colors.border,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: 7,
-    backgroundColor: colors.green,
-  },
-  scroll: {
-    flex: 1,
-  },
-  // The footer floats over the scroll area (like the web's fixed footer) so
-  // the "You are correct" banner growing it never shifts the transcript.
-  footerOverlay: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    maxWidth: 560,
-    width: "100%",
-    alignSelf: "center",
-  },
-  finishedInline: {
-    alignItems: "center",
-    paddingHorizontal: 24,
-    paddingTop: 80,
-    paddingBottom: 80,
-  },
-  finishedTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: colors.text,
-    marginTop: 14,
-  },
-  finishedSubtitle: {
-    fontSize: 17,
-    color: colors.textDim,
-    marginTop: 6,
-    textAlign: "center",
-  },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    topBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+      paddingHorizontal: 16,
+      paddingBottom: 10,
+    },
+    progressTrack: {
+      flex: 1,
+      height: 14,
+      borderRadius: 7,
+      backgroundColor: colors.border,
+      overflow: "hidden",
+    },
+    progressFill: {
+      height: "100%",
+      borderRadius: 7,
+      backgroundColor: colors.green,
+    },
+    scroll: {
+      flex: 1,
+    },
+    // The footer floats over the scroll area (like the web's fixed footer) so
+    // the "You are correct" banner growing it never shifts the transcript.
+    footerOverlay: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingTop: 8,
+      maxWidth: 560,
+      width: "100%",
+      alignSelf: "center",
+    },
+    finishedInline: {
+      alignItems: "center",
+      paddingHorizontal: 24,
+      paddingTop: 80,
+      paddingBottom: 80,
+    },
+    finishedTitle: {
+      fontSize: 24,
+      fontWeight: "700",
+      color: colors.text,
+      marginTop: 14,
+    },
+    finishedSubtitle: {
+      fontSize: 17,
+      color: colors.textDim,
+      marginTop: 6,
+      textAlign: "center",
+    },
   });
 }

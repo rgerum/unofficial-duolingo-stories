@@ -22,7 +22,10 @@ import {
   setListeningMode,
   type DoneMap,
 } from "../../src/storage";
-import { StoryButton, type StoryListItem } from "../../src/components/StoryButton";
+import {
+  StoryButton,
+  type StoryListItem,
+} from "../../src/components/StoryButton";
 import { Button } from "../../src/components/Button";
 import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
@@ -62,7 +65,8 @@ export default function LearnTab() {
     [doneMap],
   );
   const stories = React.useMemo(
-    () => (course && course !== null ? (course.stories as StoryListItem[]) : []),
+    () =>
+      course && course !== null ? (course.stories as StoryListItem[]) : [],
     [course],
   );
   const isStoryDone = React.useCallback(
@@ -285,11 +289,7 @@ function Centered({
   return (
     <SafeAreaView style={activeStyles.root} edges={["top"]}>
       <View style={activeStyles.centered}>
-        {spinner ? (
-          <ActivityIndicator color={activeColors.blue} />
-        ) : (
-          children
-        )}
+        {spinner ? <ActivityIndicator color={activeColors.blue} /> : children}
       </View>
     </SafeAreaView>
   );

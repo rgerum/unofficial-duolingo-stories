@@ -52,5 +52,11 @@ jobs:
       - name: Install Dependencies
         run: pnpm --dir app-mobile install --frozen-lockfile
 
+      - name: Format check
+        run: pnpm --dir app-mobile format:check
+
+      - name: Lint
+        run: pnpm --dir app-mobile lint
+
       - name: Typecheck
         run: pnpm --dir app-mobile typecheck

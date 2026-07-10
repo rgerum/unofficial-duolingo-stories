@@ -28,7 +28,7 @@ export function FadeIn({
     ]);
     animation.start();
     return () => animation.stop();
-  }, [visible]);
+  }, [visible, opacity, translateY]);
 
   if (!visible) return null;
 

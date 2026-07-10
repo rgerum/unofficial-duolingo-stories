@@ -17,9 +17,7 @@ export function QuestionPrompt({
 
   if (!question) return null;
   const content: ContentWithHints =
-    typeof question === "string"
-      ? { text: question, hintMap: [] }
-      : question;
+    typeof question === "string" ? { text: question, hintMap: [] } : question;
   return (
     <View style={styles.root}>
       <HintText
@@ -33,14 +31,14 @@ export function QuestionPrompt({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    marginTop: 18,
-    marginBottom: 6,
-  },
-  text: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: colors.textDim,
-  },
+    root: {
+      marginTop: 18,
+      marginBottom: 6,
+    },
+    text: {
+      fontSize: 17,
+      fontWeight: "700",
+      color: colors.textDim,
+    },
   });
 }

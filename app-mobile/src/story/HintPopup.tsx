@@ -36,7 +36,8 @@ const TRANSLATION_FONT_SIZE = 18;
 const PRONUNCIATION_FONT_SIZE = 14;
 
 function estimatePopupWidth(hint: HintRequest) {
-  const translationWidth = hint.translation.length * TRANSLATION_FONT_SIZE * 0.56;
+  const translationWidth =
+    hint.translation.length * TRANSLATION_FONT_SIZE * 0.56;
   const pronunciationWidth =
     (hint.pronunciation?.length ?? 0) * PRONUNCIATION_FONT_SIZE * 0.56;
   return Math.ceil(
@@ -77,7 +78,10 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
   const screenWidth = Dimensions.get("window").width;
   const estimatedBubbleWidth = Math.min(
     BUBBLE_MAX_WIDTH,
-    Math.max(BUBBLE_MIN_WIDTH, hint ? estimatePopupWidth(hint) : BUBBLE_MIN_WIDTH),
+    Math.max(
+      BUBBLE_MIN_WIDTH,
+      hint ? estimatePopupWidth(hint) : BUBBLE_MIN_WIDTH,
+    ),
   );
   const bubbleLeft = hint
     ? Math.min(
@@ -132,37 +136,37 @@ export function HintPopupHost({ children }: { children: React.ReactNode }) {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  bubble: {
-    position: "absolute",
-    minWidth: 140,
-    maxWidth: BUBBLE_MAX_WIDTH,
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 2,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
-    zIndex: 100,
-  },
-  translation: {
-    fontSize: 18,
-    color: colors.text,
-    textAlign: "center",
-  },
-  pronunciation: {
-    fontSize: 14,
-    color: colors.textDim,
-    marginTop: 2,
-    textAlign: "center",
-  },
+    root: {
+      flex: 1,
+    },
+    bubble: {
+      position: "absolute",
+      minWidth: 140,
+      maxWidth: BUBBLE_MAX_WIDTH,
+      backgroundColor: colors.surface,
+      borderColor: colors.border,
+      borderWidth: 2,
+      borderRadius: 14,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 6,
+      zIndex: 100,
+    },
+    translation: {
+      fontSize: 18,
+      color: colors.text,
+      textAlign: "center",
+    },
+    pronunciation: {
+      fontSize: 14,
+      color: colors.textDim,
+      marginTop: 2,
+      textAlign: "center",
+    },
   });
 }

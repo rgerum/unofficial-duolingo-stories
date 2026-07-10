@@ -35,42 +35,42 @@ const MATCHED_FADE_MS = 500;
 
 function createPalettes(colors: ThemeColors) {
   return {
-  idle: {
-    face: colors.surface,
-    border: colors.border,
-    edge: colors.border,
-    text: colors.text,
-  },
-  right: {
-    face: colors.greenLight,
-    border: colors.green,
-    edge: colors.green,
-    text: colors.greenDark,
-  },
-  wrong: {
-    face: colors.redLight,
-    border: colors.red,
-    edge: colors.red,
-    text: colors.red,
-  },
-  selected: {
-    face: colors.blueLight,
-    border: colors.blue,
-    edge: colors.blue,
-    text: colors.blueDark,
-  },
-  off: {
-    face: colors.disabledBackground,
-    border: colors.disabledBackground,
-    edge: colors.disabledBackground,
-    text: colors.disabledBackground,
-  },
-  matched: {
-    face: colors.disabledBackground,
-    border: colors.disabledBackground,
-    edge: colors.disabledBackground,
-    text: colors.disabled,
-  },
+    idle: {
+      face: colors.surface,
+      border: colors.border,
+      edge: colors.border,
+      text: colors.text,
+    },
+    right: {
+      face: colors.greenLight,
+      border: colors.green,
+      edge: colors.green,
+      text: colors.greenDark,
+    },
+    wrong: {
+      face: colors.redLight,
+      border: colors.red,
+      edge: colors.red,
+      text: colors.red,
+    },
+    selected: {
+      face: colors.blueLight,
+      border: colors.blue,
+      edge: colors.blue,
+      text: colors.blueDark,
+    },
+    off: {
+      face: colors.disabledBackground,
+      border: colors.disabledBackground,
+      edge: colors.disabledBackground,
+      text: colors.disabledBackground,
+    },
+    matched: {
+      face: colors.disabledBackground,
+      border: colors.disabledBackground,
+      edge: colors.disabledBackground,
+      text: colors.disabled,
+    },
   };
 }
 
@@ -208,36 +208,36 @@ export function WordChip({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  wrap: {
-    paddingBottom: EDGE,
-    margin: 4,
-    alignSelf: "flex-start",
-  },
-  block: {
-    alignSelf: "stretch",
-    marginHorizontal: 0,
-    marginVertical: 5,
-  },
-  edge: {
-    position: "absolute",
-    top: EDGE,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-  },
-  face: {
-    borderWidth: 2,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  blockFace: {
-    alignItems: "center",
-  },
-  label: {
-    fontSize: 18,
-    color: colors.text,
-  },
+    wrap: {
+      paddingBottom: EDGE,
+      margin: 4,
+      alignSelf: "flex-start",
+    },
+    block: {
+      alignSelf: "stretch",
+      marginHorizontal: 0,
+      marginVertical: 5,
+    },
+    edge: {
+      position: "absolute",
+      top: EDGE,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      borderRadius: 12,
+    },
+    face: {
+      borderWidth: 2,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+    },
+    blockFace: {
+      alignItems: "center",
+    },
+    label: {
+      fontSize: 18,
+      color: colors.text,
+    },
   });
 }
