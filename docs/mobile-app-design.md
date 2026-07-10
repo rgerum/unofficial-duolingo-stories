@@ -1,9 +1,10 @@
 # Duostories Mobile App — Design Document
 
 > **Implementation status:** M1 + M2 are implemented in [`app-mobile/`](../app-mobile/)
-> (Expo). Accounts (M3) and polish (M4) are still open — the Welcome screen's
-> Sign in / Register buttons lead to a placeholder until then. See
-> `app-mobile/README.md` for how to run it.
+> (Expo). M3 (accounts: email + social sign-in incl. Apple, cloud progress
+> sync, account deletion) has shipped. M4 polish is partially done — dark
+> mode shipped; audio prefetch, deep links, and offline downloads remain.
+> See `app-mobile/README.md` for how to run it.
 
 A native iOS/Android app for the public-facing part of duostories.org: course selection,
 story reading, and profile settings. No editor, no admin.

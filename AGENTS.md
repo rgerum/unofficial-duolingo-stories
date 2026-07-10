@@ -9,6 +9,8 @@
 
 ## Type Checking
 - Run `pnpm typecheck` after code edits and before finishing.
+- Note: root `pnpm typecheck` / `pnpm lint` do NOT cover `app-mobile/` — it is
+  a separate pnpm root. For mobile changes run `pnpm --dir app-mobile typecheck`.
 
 ## Convex
 - Follow `./convex/convex_rules.md` when making changes in `convex/`.

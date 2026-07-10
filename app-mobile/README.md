@@ -51,10 +51,11 @@ pnpm run typecheck  # tsc --noEmit
 
 ## Not yet implemented
 
-- **Accounts (M3)**: cloud progress sync after sign-in, password reset, and
-  social login/Sign in with Apple.
-- **M4 polish**: audio prefetch to disk, dark mode, deep links, offline
-  story downloads.
+- Password reset from within the app.
+- Audio prefetch to disk / offline story downloads.
+- Deep links.
+
+Keep this list honest: update it in the same PR that ships one of these items.
 
 ## Architecture notes
 

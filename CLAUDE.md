@@ -19,6 +19,8 @@ pnpm exec convex codegen # Regenerate Convex bindings after adding/changing Conv
 
 Note: TypeScript build errors are ignored in `next.config.js` (`ignoreBuildErrors: true`), so `pnpm run build` will succeed even with type errors. Use `pnpm run typecheck` to check types separately.
 
+Note: root `pnpm typecheck` / `pnpm lint` do NOT cover `app-mobile/` — it is a separate pnpm root. For mobile changes run `pnpm --dir app-mobile typecheck`.
+
 ## Environment Setup
 
 Requires Convex.
