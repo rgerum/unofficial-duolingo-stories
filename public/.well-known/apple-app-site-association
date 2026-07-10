@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "WLCA6C349S.org.duostories.app",
+        "paths": [
+          "/story/*",
+          "/??-*"
+        ]
+      }
+    ]
+  }
+}

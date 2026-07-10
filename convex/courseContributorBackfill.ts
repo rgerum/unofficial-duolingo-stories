@@ -1,6 +1,14 @@
+// Operator-run maintenance backfill. This is an internal function (not an HTTP
+// route) so it is not reachable from the public internet. Run a single batch
+// with:
+//
+//   pnpm exec convex run courseContributorBackfill:backfillCourseContributorDetailsBatchInternal '{"dryRun": true}'
+//
+// then repeat, passing the returned `nextCursor` as `{"cursor": "..."}` until
+// `isDone` is true. The `pnpm run backfill:course-contributors` script drives
+// this loop automatically.
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
-import { httpAction, internalMutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 import {
   getRankedCourseContributors,
   partitionCourseContributors,
@@ -15,49 +23,6 @@ function normalizeBatchSize(value: number | undefined) {
   }
 
   return Math.max(1, Math.min(MAX_BATCH_SIZE, Math.floor(value)));
-}
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "content-type": "application/json; charset=utf-8" },
-  });
-}
-
-async function requireCourseContributorBackfillSecret(req: Request) {
-  const expectedSecret = process.env.COURSE_CONTRIBUTOR_BACKFILL_SECRET;
-  if (!expectedSecret) {
-    return {
-      ok: false,
-      response: json(
-        {
-          ok: false,
-          error: "Missing COURSE_CONTRIBUTOR_BACKFILL_SECRET env var",
-        },
-        500,
-      ),
-    } as const;
-  }
-
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return {
-      ok: false,
-      response: json({ ok: false, error: "Invalid JSON body" }, 400),
-    } as const;
-  }
-
-  const parsed = body as { secret?: unknown };
-  if (parsed.secret !== expectedSecret) {
-    return {
-      ok: false,
-      response: json({ ok: false, error: "Unauthorized" }, 401),
-    } as const;
-  }
-
-  return { ok: true, body } as const;
 }
 
 const backfillResultValidator = v.object({
@@ -126,50 +91,3 @@ export const backfillCourseContributorDetailsBatchInternal = internalMutation({
     };
   },
 });
-
-export const backfillCourseContributorDetailsHttp = httpAction(
-  async (ctx, req) => {
-    if (req.method !== "POST") {
-      return json({ ok: false, error: "Method not allowed" }, 405);
-    }
-
-    const auth = await requireCourseContributorBackfillSecret(req);
-    if (!auth.ok) return auth.response;
-
-    const body = auth.body as {
-      batchSize?: unknown;
-      cursor?: unknown;
-      dryRun?: unknown;
-    };
-
-    if (body.batchSize !== undefined && typeof body.batchSize !== "number") {
-      return json({ ok: false, error: "batchSize must be a number" }, 400);
-    }
-    if (
-      body.cursor !== undefined &&
-      body.cursor !== null &&
-      typeof body.cursor !== "string"
-    ) {
-      return json({ ok: false, error: "cursor must be a string or null" }, 400);
-    }
-    if (body.dryRun !== undefined && typeof body.dryRun !== "boolean") {
-      return json({ ok: false, error: "dryRun must be a boolean" }, 400);
-    }
-
-    const result = await ctx.runMutation(
-      internal.courseContributorBackfill
-        .backfillCourseContributorDetailsBatchInternal,
-      {
-        batchSize:
-          typeof body.batchSize === "number" ? body.batchSize : undefined,
-        cursor:
-          typeof body.cursor === "string" || body.cursor === null
-            ? body.cursor
-            : undefined,
-        dryRun: typeof body.dryRun === "boolean" ? body.dryRun : undefined,
-      },
-    );
-
-    return json(result);
-  },
-);
