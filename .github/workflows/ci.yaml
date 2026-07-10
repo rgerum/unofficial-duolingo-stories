@@ -49,9 +49,14 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: app-mobile/pnpm-lock.yaml
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            app-mobile/pnpm-lock.yaml
 
-      - name: Install Dependencies
+      - name: Install Root Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Mobile Dependencies
         run: pnpm --dir app-mobile install --frozen-lockfile
 
       - name: Format check
