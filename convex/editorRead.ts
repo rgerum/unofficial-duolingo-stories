@@ -34,6 +34,7 @@ const editorCourseValidator = v.union(
     contributors_past: v.array(courseContributorValidator),
     todo_count: v.number(),
     audio_problem_count: v.number(),
+    unresolved_feedback_count: v.number(),
   }),
   v.null(),
 );
@@ -64,6 +65,7 @@ function toLanguage(language: LanguageDoc) {
 function toCourse(
   course: CourseDoc,
   languageById: Map<Id<"languages">, LanguageDoc>,
+  unresolvedFeedbackCount = 0,
 ) {
   const learningLanguage = languageById.get(course.learningLanguageId);
   const fromLanguage = languageById.get(course.fromLanguageId);
@@ -88,7 +90,27 @@ function toCourse(
     contributors_past: course.contributors_past ?? [],
     todo_count: course.todo_count ?? 0,
     audio_problem_count: course.audio_problem_count ?? 0,
+    unresolved_feedback_count: unresolvedFeedbackCount,
   };
+}
+
+async function getUnresolvedFeedbackCountsByCourseShort(ctx: QueryCtx) {
+  const [openReports, reviewedReports] = await Promise.all([
+    ctx.db
+      .query("story_feedback_reports")
+      .withIndex("by_status_and_created_at", (q) => q.eq("status", "open"))
+      .collect(),
+    ctx.db
+      .query("story_feedback_reports")
+      .withIndex("by_status_and_created_at", (q) => q.eq("status", "reviewed"))
+      .collect(),
+  ]);
+
+  const counts = new Map<string, number>();
+  for (const report of [...openReports, ...reviewedReports]) {
+    counts.set(report.courseShort, (counts.get(report.courseShort) ?? 0) + 1);
+  }
+  return counts;
 }
 
 async function getCourseByIdentifier(ctx: QueryCtx, identifier: string) {
@@ -240,8 +262,17 @@ export const getEditorSidebarData = query({
       languageById.set(language._id, language);
     }
 
+    const unresolvedFeedbackCounts =
+      await getUnresolvedFeedbackCountsByCourseShort(ctx);
+
     const courses = courseRows
-      .map((course) => toCourse(course, languageById))
+      .map((course) =>
+        toCourse(
+          course,
+          languageById,
+          course.short ? (unresolvedFeedbackCounts.get(course.short) ?? 0) : 0,
+        ),
+      )
       .sort((a, b) => b.count - a.count);
 
     return { courses };
@@ -286,6 +317,11 @@ export const getEditorCourseByIdentifier = query({
       contributors_past: contributorLists.contributors_past,
       todo_count: course.todo_count ?? 0,
       audio_problem_count: course.audio_problem_count ?? 0,
+      unresolved_feedback_count: course.short
+        ? ((await getUnresolvedFeedbackCountsByCourseShort(ctx)).get(
+            course.short,
+          ) ?? 0)
+        : 0,
     };
   },
 });

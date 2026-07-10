@@ -119,6 +119,15 @@ export default function LayoutFlag() {
                 text={"Back"}
               />
             )}
+            {!import_id ? (
+              <EditorButton
+                id="button_feedback"
+                href={`/editor/course/${course.short}/feedback`}
+                data-cy="button_feedback"
+                img="stories.png"
+                text="Feedback"
+              />
+            ) : null}
             <div className="ml-[50px] max-[1120px]:ml-0" />
           </>
         ) : (

@@ -27,6 +27,7 @@ const feedbackReportValidator = v.object({
   courseShort: v.string(),
   line: v.optional(v.number()),
   lineText: v.optional(v.string()),
+  lineElement: v.optional(v.any()),
   category: feedbackCategoryValidator,
   comment: v.string(),
   userId: v.union(v.string(), v.null()),
@@ -43,6 +44,7 @@ export const submitStoryFeedback = mutation({
     courseShort: v.string(),
     line: v.optional(v.number()),
     lineText: v.optional(v.string()),
+    lineElement: v.optional(v.any()),
     category: feedbackCategoryValidator,
     comment: v.string(),
   },
@@ -71,6 +73,12 @@ export const submitStoryFeedback = mutation({
     const lineText = args.lineText?.trim();
     if (lineText !== undefined && lineText.length > 500) {
       throw new Error("Line text is too long");
+    }
+    if (args.lineElement !== undefined) {
+      const serializedLineElement = JSON.stringify(args.lineElement);
+      if (serializedLineElement.length > 20000) {
+        throw new Error("Line preview is too large");
+      }
     }
 
     const story = await ctx.db
@@ -105,6 +113,9 @@ export const submitStoryFeedback = mutation({
       courseShort,
       ...(args.line !== undefined ? { line: args.line } : {}),
       ...(lineText ? { lineText } : {}),
+      ...(args.lineElement !== undefined
+        ? { lineElement: args.lineElement }
+        : {}),
       category: args.category,
       comment,
       userId: identity?.tokenIdentifier ?? null,
@@ -121,11 +132,23 @@ export const submitStoryFeedback = mutation({
 export const listStoryFeedbackReports = query({
   args: {
     status: feedbackStatusValidator,
+    courseShort: v.optional(v.string()),
     paginationOpts: paginationOptsValidator,
   },
   returns: paginationResultValidator(feedbackReportValidator),
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
+
+    const courseShort = args.courseShort;
+    if (courseShort !== undefined) {
+      return await ctx.db
+        .query("story_feedback_reports")
+        .withIndex("by_course_short_status_created_at", (q) =>
+          q.eq("courseShort", courseShort).eq("status", args.status),
+        )
+        .order("desc")
+        .paginate(args.paginationOpts);
+    }
 
     return await ctx.db
       .query("story_feedback_reports")

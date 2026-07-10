@@ -10,7 +10,9 @@ type FeedbackArgs = {
   storyId: number;
   storyTitle: string;
   courseShort: string;
+  line?: number;
   lineText?: string;
+  lineElement?: unknown;
   category: "Text" | "Translation hints" | "Audio" | "Other";
   comment: string;
 };
@@ -80,6 +82,11 @@ describe("submitStoryFeedback", () => {
       "Course short is too long",
     ],
     ["lineText", { lineText: `${"x".repeat(501)}` }, "Line text is too long"],
+    [
+      "lineElement",
+      { lineElement: { text: `${"x".repeat(20001)}` } },
+      "Line preview is too large",
+    ],
   ])("%s length cap rejects oversized values", async (_field, overrides, error) => {
     const t = convexTest(schema, modules);
     await seedCourseWithStory(t);
@@ -135,6 +142,37 @@ describe("submitStoryFeedback", () => {
     ).rejects.toThrow(
       "This story already has many open reports. Please try again later.",
     );
+  });
+
+  test("stores line preview data for review rendering", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    const lineElement = {
+      type: "LINE",
+      line: {
+        type: "PROSE",
+        content: {
+          text: "Hola",
+          hintMap: [{ hintIndex: 0, rangeFrom: 0, rangeTo: 3 }],
+          hints: ["Hello"],
+        },
+      },
+      trackingProperties: { line_index: 1 },
+      lang: "es",
+      editor: { block_start_no: 12 },
+    };
+
+    await t.mutation(
+      api.storyFeedback.submitStoryFeedback,
+      feedbackArgs({ line: 12, lineElement }),
+    );
+
+    await t.run(async (ctx) => {
+      const [report] = await ctx.db.query("story_feedback_reports").collect();
+      expect(report.line).toBe(12);
+      expect(report.lineElement).toEqual(lineElement);
+    });
   });
 });
 
@@ -210,5 +248,46 @@ describe("listStoryFeedbackReports", () => {
       "Report 100",
     ]);
     expect(secondPage.isDone).toBe(true);
+  });
+
+  test("filters reports by course short", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await t.run(async (ctx) => {
+      for (const [courseShort, createdAt] of [
+        ["es-en", 100],
+        ["fr-en", 200],
+        ["es-en", 300],
+      ] as const) {
+        await ctx.db.insert("story_feedback_reports", {
+          storyId: 10,
+          storyTitle: "Story",
+          courseShort,
+          category: "Text",
+          comment: `${courseShort} report ${createdAt}`,
+          userId: null,
+          userName: null,
+          userEmail: null,
+          status: "open",
+          createdAt,
+        });
+      }
+    });
+
+    const asContributor = t.withIdentity({ role: "contributor", userId: "5" });
+    const page = await asContributor.query(
+      api.storyFeedback.listStoryFeedbackReports,
+      {
+        status: "open",
+        courseShort: "es-en",
+        paginationOpts: { numItems: 10, cursor: null },
+      },
+    );
+
+    expect(page.page.map((report) => report.comment)).toEqual([
+      "es-en report 300",
+      "es-en report 100",
+    ]);
   });
 });

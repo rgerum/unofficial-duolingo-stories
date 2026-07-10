@@ -39,6 +39,43 @@ const feedbackCategories = [
 
 type FeedbackCategory = (typeof feedbackCategories)[number]["value"];
 
+function getFeedbackLinePreview(
+  lineElement?: StoryElementLine,
+): StoryElementLine | undefined {
+  if (!lineElement) return undefined;
+
+  const content = { ...lineElement.line.content };
+  delete content.audio;
+  const base = {
+    type: "LINE" as const,
+    hideRangesForChallenge: lineElement.hideRangesForChallenge,
+    trackingProperties: lineElement.trackingProperties,
+    lang: lineElement.lang,
+    editor: lineElement.editor,
+  };
+
+  if (lineElement.line.type === "CHARACTER") {
+    return {
+      ...base,
+      line: {
+        type: "CHARACTER",
+        avatarUrl: lineElement.line.avatarUrl,
+        characterId: lineElement.line.characterId,
+        characterName: lineElement.line.characterName,
+        content,
+      },
+    };
+  }
+
+  return {
+    ...base,
+    line: {
+      type: lineElement.line.type,
+      content,
+    },
+  };
+}
+
 export default function StoryFeedback({
   storyId,
   storyTitle,
@@ -136,6 +173,7 @@ export default function StoryFeedback({
                 courseShort,
                 line,
                 lineText,
+                lineElement: getFeedbackLinePreview(lineElement),
                 category,
                 comment,
               });

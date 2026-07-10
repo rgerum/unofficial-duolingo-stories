@@ -244,6 +244,7 @@ export default defineSchema({
     courseShort: v.string(),
     line: v.optional(v.number()),
     lineText: v.optional(v.string()),
+    lineElement: v.optional(v.any()),
     category: v.union(
       v.literal("Text"),
       v.literal("Translation hints"),
@@ -264,6 +265,11 @@ export default defineSchema({
     .index("by_story_id", ["storyId"])
     .index("by_story_and_status", ["storyId", "status"])
     .index("by_course_short", ["courseShort"])
+    .index("by_course_short_status_created_at", [
+      "courseShort",
+      "status",
+      "createdAt",
+    ])
     .index("by_category", ["category"])
     .index("by_user_id", ["userId"])
     .index("by_status_and_created_at", ["status", "createdAt"]),

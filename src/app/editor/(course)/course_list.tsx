@@ -114,6 +114,13 @@ export default function CourseList({
                     label={`${course.audio_problem_count} audio problems`}
                     className="bg-sky-100 text-sky-950"
                   />
+                  <CountBadge
+                    count={course.unresolved_feedback_count}
+                    icon="💬"
+                    title={`This course has ${course.unresolved_feedback_count} unresolved feedback reports.`}
+                    label={`${course.unresolved_feedback_count} feedback reports`}
+                    className="bg-emerald-100 text-emerald-950"
+                  />
                   {course.official ? (
                     <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center">
                       <img
