@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { fontSizes, type ThemeColors, useTheme } from "../../theme";
-import { HintText } from "../HintText";
+import { HintText, shouldUseNativeTextLayout } from "../HintText";
 import { getLanguageTextStyle } from "../languageStyles";
 import { getStoryLineRtl } from "../textDirection";
 import { useLineAudio } from "../useLineAudio";
@@ -13,10 +13,6 @@ import type { StoryElementLine } from "../types";
 // corners except where the tail attaches, with a two-triangle tail (border
 // color under background color) pointing at the avatar.
 const TAIL_WIDTH = 12;
-
-function shouldUseNativeStoryText(lang?: string, rtl = false): boolean {
-  return Boolean(lang) && !rtl;
-}
 
 function BubbleTail({
   colors,
@@ -166,7 +162,7 @@ export function TextLine({
     fontSize: fontSizes.body,
     color: colors.text,
   };
-  const preferNativeText = shouldUseNativeStoryText(element.lang, lineRtl);
+  const preferNativeText = shouldUseNativeTextLayout(element.lang, lineRtl);
 
   if (element.line === undefined) return null;
 

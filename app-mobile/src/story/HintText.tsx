@@ -73,6 +73,13 @@ type NativeSegment = Token & {
   textStyle?: TextStyle;
 };
 
+type MeasurementItem = {
+  key: string;
+  text: string;
+  textStyle?: TextStyle;
+  segmentKeys: string[];
+};
+
 type NativeTextLayout = {
   x: number;
   y: number;
@@ -159,7 +166,7 @@ function getDisplayText(token: Token): string {
   return token.text.replace(/\s+/g, " ");
 }
 
-function shouldUseNativeTextLayout(lang?: string, rtl = false): boolean {
+export function shouldUseNativeTextLayout(lang?: string, rtl = false): boolean {
   return Boolean(lang) && !rtl;
 }
 
@@ -277,6 +284,34 @@ function buildNativeSegments(tokens: Token[]): NativeSegment[] {
   }
 
   return segments;
+}
+
+function getMeasurementKey(segment: NativeSegment): string {
+  return `${segment.text}:${JSON.stringify(segment.textStyle ?? {})}`;
+}
+
+function buildMeasurementItems(
+  measurementSegments: NativeSegment[],
+): MeasurementItem[] {
+  const itemByKey = new Map<string, MeasurementItem>();
+
+  for (const segment of measurementSegments) {
+    const key = getMeasurementKey(segment);
+    const existing = itemByKey.get(key);
+    if (existing) {
+      existing.segmentKeys.push(segment.key);
+      continue;
+    }
+
+    itemByKey.set(key, {
+      key,
+      text: segment.text,
+      textStyle: segment.textStyle,
+      segmentKeys: [segment.key],
+    });
+  }
+
+  return Array.from(itemByKey.values());
 }
 
 function getDebugColor(key?: string): { stroke: string; fill: string } {
@@ -1181,6 +1216,10 @@ function NativeHintText({
   const [segmentWidths, setSegmentWidths] = React.useState<
     Record<string, number>
   >({});
+  const measurementItems = React.useMemo(
+    () => buildMeasurementItems(measurementSegments),
+    [measurementSegments],
+  );
 
   const computedSegments = React.useMemo(
     () =>
@@ -1387,19 +1426,24 @@ function NativeHintText({
           flexWrap: "nowrap",
         }}
       >
-        {measurementSegments.map((segment) => (
+        {measurementItems.map((item) => (
           <Text
-            key={`measure:${segment.key}`}
+            key={`measure:${item.key}`}
             onLayout={(event) => {
               const width = event.nativeEvent.layout.width;
               setSegmentWidths((current) => {
-                if (current[segment.key] === width) return current;
-                return { ...current, [segment.key]: width };
+                let next: Record<string, number> | undefined;
+                for (const segmentKey of item.segmentKeys) {
+                  if (current[segmentKey] === width) continue;
+                  next ??= { ...current };
+                  next[segmentKey] = width;
+                }
+                return next ?? current;
               });
             }}
-            style={[flatStyle, { lineHeight: undefined }, segment.textStyle]}
+            style={[flatStyle, { lineHeight: undefined }, item.textStyle]}
           >
-            {segment.text}
+            {item.text}
           </Text>
         ))}
       </View>
