@@ -11,9 +11,10 @@ Text rendering is the highest-risk surface of the reader:
 
 - Android and iOS use different text engines (Minikin vs Core Text) — line
   height, glyph clipping, and underline metrics differ per platform.
-- CJK languages (`ja`, `zh`, `ko`) take a separate native-layout render path
-  (`HintText renderMode="native"`) where hint underlines are drawn as SVG dots
-  from measured text — a path with its own failure modes.
+- No-space scripts — CJK (`ja`, `zh`, `ko`) and Thai (`th`) — take a separate
+  native-layout render path (`HintText renderMode="native"`) where the platform
+  engine does line breaking and hint underlines are drawn as SVG dots from
+  measured text — a path with its own failure modes.
 - Indic scripts (Telugu especially) have a history of vertical clipping in
   this app (see `agent/fix-telugu-*` branches).
 - Hidden-challenge ranges, hint underlines, audio word-dimming, and the chip
@@ -65,7 +66,7 @@ mid-audio word dimming (`audioRangeOverride`).
 | `lines-ko` | Hangul (native path) | syllable blocks | none published (code path exists) |
 | `lines-hi` | Devanagari | conjuncts, matras, headstroke | hi-en |
 | `lines-te` | Telugu | below-base forms, **known clipping regressions** | tel-en |
-| `lines-th` | Thai | no spaces, stacked vowels/tone marks | th-en |
+| `lines-th` | Thai (native path) | no spaces (engine line-breaks), stacked vowels/tone marks | th-en |
 | `lines-dv` | Thaana | RTL non-Arabic script (smoke level) | dv-en |
 | `lines-tok2` | sitelen pona | custom font path in `languageStyles.ts` | tok-en |
 
