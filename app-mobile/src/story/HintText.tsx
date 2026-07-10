@@ -119,6 +119,12 @@ function HintTokenBox({
 }) {
   const tokenLayoutRef = React.useRef({ width: 0, height: 0 });
   const interactive = Boolean(token.hint) && !token.hidden;
+  // A whitespace token's own text box is shorter than the surrounding glyph
+  // boxes (its space glyph often comes from a shorter fallback font). Word
+  // boxes top-align (flex-start), so a shorter, top-aligned space box would
+  // raise its underline above the words'. Bottom-aligning the space box drops
+  // its underline onto the row baseline shared by the words (issue #581).
+  const isWhitespace = spaceWidth !== undefined;
 
   return (
     <View
@@ -128,7 +134,10 @@ function HintTokenBox({
           height: event.nativeEvent.layout.height,
         };
       }}
-      style={{ alignSelf: "flex-start", marginBottom: 2 }}
+      style={{
+        alignSelf: isWhitespace ? "flex-end" : "flex-start",
+        marginBottom: 2,
+      }}
     >
       <Pressable
         disabled={!interactive}
