@@ -21,6 +21,10 @@ type AuthUserRow = {
   emailVerified?: boolean | null;
 };
 
+function isNonNull<T>(value: T | null): value is T {
+  return value !== null;
+}
+
 async function isAdmin(ctx: AuthCtx) {
   const identity = (await ctx.auth.getUserIdentity()) as {
     role?: string | null;
@@ -52,6 +56,17 @@ const adminCourseValidator = v.object({
   conlang: v.boolean(),
   short: v.union(v.string(), v.null()),
   tags: v.array(v.string()),
+});
+
+const adminCourseWithHiddenStoriesValidator = v.object({
+  id: v.number(),
+  short: v.union(v.string(), v.null()),
+  name: v.union(v.string(), v.null()),
+  learning_language_name: v.string(),
+  from_language_name: v.string(),
+  public: v.boolean(),
+  course_count: v.number(),
+  published_story_count: v.number(),
 });
 
 const adminApprovalValidator = v.object({
@@ -601,6 +616,68 @@ export const getAdminCourses = query({
       .sort((a, b) => a.id - b.id);
 
     return { courses, languages };
+  },
+});
+
+export const getAdminCoursesWithHiddenPublishedStories = query({
+  args: {},
+  returns: v.array(adminCourseWithHiddenStoriesValidator),
+  handler: async (ctx) => {
+    if (!(await isAdmin(ctx))) return [];
+
+    const stories = await ctx.db
+      .query("stories")
+      .withIndex("by_public", (q) => q.eq("public", true).eq("deleted", false))
+      .collect();
+
+    const countByCourseId = new Map<Id<"courses">, number>();
+    for (const story of stories) {
+      countByCourseId.set(
+        story.courseId,
+        (countByCourseId.get(story.courseId) ?? 0) + 1,
+      );
+    }
+
+    const courseIds = Array.from(countByCourseId.keys());
+    const courseRows = await Promise.all(
+      courseIds.map((courseId) => ctx.db.get(courseId)),
+    );
+    const languageIds = new Set<Id<"languages">>();
+    for (const course of courseRows) {
+      if (!course || course.public) continue;
+      languageIds.add(course.learningLanguageId);
+      languageIds.add(course.fromLanguageId);
+    }
+
+    const languageRows = await Promise.all(
+      Array.from(languageIds).map((languageId) => ctx.db.get(languageId)),
+    );
+    const languageNameById = new Map<Id<"languages">, string>();
+    for (const language of languageRows) {
+      if (!language) continue;
+      languageNameById.set(language._id, language.name);
+    }
+
+    return courseRows
+      .filter(isNonNull)
+      .filter((course) => !course.public)
+      .map((course) => ({
+        id: course.legacyId,
+        short: course.short ?? null,
+        name: course.name ?? null,
+        learning_language_name:
+          languageNameById.get(course.learningLanguageId) ?? "",
+        from_language_name: languageNameById.get(course.fromLanguageId) ?? "",
+        public: course.public,
+        course_count: course.count ?? 0,
+        published_story_count: countByCourseId.get(course._id) ?? 0,
+      }))
+      .sort((a, b) => {
+        if (b.published_story_count !== a.published_story_count) {
+          return b.published_story_count - a.published_story_count;
+        }
+        return a.learning_language_name.localeCompare(b.learning_language_name);
+      });
   },
 });
 
