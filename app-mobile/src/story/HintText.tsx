@@ -53,6 +53,23 @@ function getOverlap(
   return start2 <= start1 && start1 < end2;
 }
 
+// Resolve the single active hide range after applying progressive reveal:
+// only hideRangesForChallenge[0] is ever consumed. unhide === -1 reveals
+// everything; unhide > start moves the range's start forward (0 is falsy, so
+// unhide === 0 leaves the range untouched — the initial fully-hidden state).
+function resolveHideEntry(
+  hideRangesForChallenge: HideRange[] | undefined,
+  unhide: number | undefined,
+): HideRange | undefined {
+  let entry: HideRange | undefined = hideRangesForChallenge?.[0];
+  if (entry) {
+    if (unhide === -1) entry = undefined;
+    else if (unhide && unhide > entry.start)
+      entry = { start: unhide, end: Math.max(entry.end, unhide) };
+  }
+  return entry;
+}
+
 type Token = {
   text: string;
   start: number;
@@ -110,24 +127,54 @@ function splitLayoutUnits(text: string): string[] {
   return [text];
 }
 
-function buildNativeSegments(tokens: Token[]): NativeSegment[] {
+function buildNativeSegments(
+  tokens: Token[],
+  hideEntry: HideRange | undefined,
+  hideRanges: HideRange[] | undefined,
+): NativeSegment[] {
   const segments: NativeSegment[] = [];
 
   for (const token of tokens) {
     const parts = splitLayoutUnits(token.text);
+    let offset = 0;
     for (const part of parts) {
+      const partStart = token.start + offset;
+      const partEnd = partStart + part.length;
+      offset += part.length;
+      // Recompute hide/reveal per layout unit. A spaceless CJK/Thai run is a
+      // single token spanning the entire hide range, but progressive reveal
+      // (unhide) walks the boundary through the middle of that run — so each
+      // layout unit must reflect its own overlap with the (unhide-adjusted)
+      // range instead of inheriting the whole token's flag (issue #595). For a
+      // single-part Latin/Arabic/Telugu token this reproduces the token's own
+      // flags exactly. A reveal boundary landing inside a Thai grapheme
+      // cluster keeps the whole cluster hidden (getOverlap is true for any
+      // partial overlap), so clusters are never torn or mis-measured.
+      const hidden =
+        hideEntry !== undefined &&
+        getOverlap(partStart, partEnd, hideEntry.start, hideEntry.end);
+      const revealed =
+        !hidden &&
+        Boolean(
+          hideRanges?.some((range) =>
+            getOverlap(partStart, partEnd, range.start, range.end),
+          ),
+        );
       segments.push({
         ...token,
         text: part,
+        hidden,
+        revealed,
         key: `${token.start}:${segments.length}`,
-        // All hidden tokens share one group: only hideRangesForChallenge[0]
-        // is ever consumed (see buildTokens), so the hidden phrase is a
-        // single contiguous range and must merge into one continuous solid
-        // line per wrapped line — per-token keys would leak the phrase's
-        // word boundaries as gaps in the underline.
-        underlineGroupKey: token.hidden
+        // Hidden units share one group so a partially revealed phrase still
+        // merges its remaining hidden units into one continuous solid line;
+        // revealed units share their own group so they merge into one dotted
+        // line. Only hideRangesForChallenge[0] is ever consumed (see
+        // buildTokens), so the hidden run is a single contiguous range —
+        // per-token keys would leak word boundaries as gaps in the underline.
+        underlineGroupKey: hidden
           ? "hidden"
-          : token.revealed
+          : revealed
             ? `revealed:${token.start}`
             : token.hintGroupKey,
       });
@@ -350,12 +397,7 @@ function buildTokens({
         hints_pronunciation: undefined,
       };
 
-  let entry: HideRange | undefined = hideRangesForChallenge?.[0];
-  if (entry) {
-    if (unhide === -1) entry = undefined;
-    else if (unhide && unhide > entry.start)
-      entry = { start: unhide, end: Math.max(entry.end, unhide) };
-  }
+  const entry = resolveHideEntry(hideRangesForChallenge, unhide);
 
   const tokens: Token[] = [];
 
@@ -422,6 +464,8 @@ function buildTokens({
 
 function NativeHintText({
   tokens,
+  hideEntry,
+  hideRanges,
   flatStyle,
   containerStyle,
   leadingElement,
@@ -430,6 +474,8 @@ function NativeHintText({
   fillLineWidth,
 }: {
   tokens: Token[];
+  hideEntry: HideRange | undefined;
+  hideRanges: HideRange[] | undefined;
   flatStyle: TextStyle;
   containerStyle?: ViewStyle;
   leadingElement?: React.ReactNode;
@@ -440,7 +486,10 @@ function NativeHintText({
   const { colors } = useTheme();
   const popup = React.useContext(HintPopupContext);
   const onHintLookup = React.useContext(HintLookupContext);
-  const segments = React.useMemo(() => buildNativeSegments(tokens), [tokens]);
+  const segments = React.useMemo(
+    () => buildNativeSegments(tokens, hideEntry, hideRanges),
+    [tokens, hideEntry, hideRanges],
+  );
   const [textLayout, setTextLayout] = React.useState({ x: 0, y: 0, width: 0, height: 0 });
   const [lineLayouts, setLineLayouts] = React.useState<
     { text: string; x: number; y: number; width: number; height: number }[]
@@ -834,6 +883,8 @@ export function HintText({
     return (
       <NativeHintText
         tokens={tokens}
+        hideEntry={resolveHideEntry(hideRangesForChallenge, unhide)}
+        hideRanges={hideRangesForChallenge}
         flatStyle={flatStyle}
         containerStyle={containerStyle}
         leadingElement={leadingElement}
