@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "../../src/components/Text";
@@ -286,15 +286,22 @@ function HintCase({
   styles: Styles;
 }) {
   const popup = React.useContext(HintPopupContext);
-  const { width } = useWindowDimensions();
 
+  // The line that actually contains the popup's hint word, so the shot is
+  // realistic: the popup anchors on the word's measured position through the
+  // real anchoring math (TextLine -> HintText debugAutoShowHintIndex).
+  const hintIndex = fixture.question.hints?.indexOf(fixture.popupHint[1]) ?? -1;
+
+  // Edge case only: force an x at the screen edge to exercise the popup's
+  // horizontal clamping — this one keeps synthetic coordinates on purpose.
   React.useEffect(() => {
+    if (!edge) return;
     const show = () =>
       popup.show({
         translation: fixture.popupHint[1],
         pronunciation: fixture.popupHint[2],
-        x: edge ? 12 : width / 2,
-        y: 260,
+        x: 12,
+        y: 300,
       });
     // The popup auto-dismisses after 2.5s; re-show so the screenshot
     // driver always catches it regardless of capture timing.
@@ -304,19 +311,22 @@ function HintCase({
       clearTimeout(timer);
       clearInterval(keepAlive);
     };
-  }, [edge, fixture.popupHint, popup, width]);
+  }, [edge, fixture.popupHint, popup]);
 
   return (
     <>
       <Text style={styles.heading}>{fixture.label}</Text>
       <Block caption={edge ? "edge hint popup" : "hint popup"} styles={styles}>
         <TextLine
-          element={characterLine(fixture.lang, fixture.greeting, {
+          element={characterLine(fixture.lang, fixture.question, {
             avatarUrl: AVATAR_URL,
           })}
           active={false}
           rtl={fixture.rtl}
           autoPlay={false}
+          debugAutoShowHintIndex={
+            !edge && hintIndex >= 0 ? hintIndex : undefined
+          }
         />
       </Block>
     </>
