@@ -109,6 +109,26 @@ export async function markStoryDone(
   return map;
 }
 
+export async function removeDoneStory(storyId: number): Promise<void> {
+  try {
+    const storyIdKey = String(storyId);
+    const keys = await AsyncStorage.getAllKeys();
+    const doneKeys = keys.filter((key) => key.startsWith("doneStories:"));
+    for (const key of doneKeys) {
+      const courseShort = key.slice("doneStories:".length);
+      const map = await getDoneMap(courseShort);
+      if (!Object.prototype.hasOwnProperty.call(map, storyIdKey)) continue;
+      delete map[storyIdKey];
+      if (Object.keys(map).length === 0) {
+        await AsyncStorage.removeItem(doneKey(courseShort));
+      } else {
+        await setString(doneKey(courseShort), JSON.stringify(map));
+      }
+      return;
+    }
+  } catch {}
+}
+
 export async function clearDoneMap(courseShort: string): Promise<void> {
   try {
     await AsyncStorage.removeItem(doneKey(courseShort));

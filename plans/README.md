@@ -27,7 +27,7 @@ Mobile-touching plans add: `pnpm --dir app-mobile typecheck`.
 | 011 | Clear high-severity dep advisories (hono, undici); unpin mobile auth | P1 | S | — | TODO |
 | 012 | Make app-mobile visible to CI; truth-up mobile docs | P1 | S | — | DONE (2026-07-10) |
 | 013 | Bound/validate story-feedback intake; paginate review queue | P1 | M | — | DONE (2026-07-10; manual UI check pending) |
-| 014 | Validate recordStoryDone inputs; idempotent progress import | P2 | S | — (not concurrent with 003) | TODO |
+| 014 | Validate recordStoryDone inputs; idempotent progress import | P2 | S | — (not concurrent with 003) | DONE (2026-07-10) |
 | 015 | Complete account deletion (cascade user data) | P1 | M | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale).
