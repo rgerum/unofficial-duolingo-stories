@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../src/api";
@@ -188,7 +183,9 @@ export default function StoryScreen() {
         total_count: course?.stories.length,
       });
       stopAudio();
-      router.replace(`/story/${nextStoryId}?listening=${listening ? "1" : "0"}`);
+      router.replace(
+        `/story/${nextStoryId}?listening=${listening ? "1" : "0"}`,
+      );
       return;
     }
     leave();
@@ -269,33 +266,33 @@ export default function StoryScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-  errorTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
-    textAlign: "center",
-  },
-  errorBody: {
-    fontSize: 16,
-    lineHeight: 23,
-    color: colors.textDim,
-    textAlign: "center",
-    marginTop: 8,
-  },
-  errorActions: {
-    alignSelf: "stretch",
-    gap: 12,
-    marginTop: 18,
-  },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    centered: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 24,
+    },
+    errorTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: colors.text,
+      textAlign: "center",
+    },
+    errorBody: {
+      fontSize: 16,
+      lineHeight: 23,
+      color: colors.textDim,
+      textAlign: "center",
+      marginTop: 8,
+    },
+    errorActions: {
+      alignSelf: "stretch",
+      gap: 12,
+      marginTop: 18,
+    },
   });
 }

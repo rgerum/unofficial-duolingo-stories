@@ -22,7 +22,7 @@
 
 ## Why this matters
 
-The repo has a working test suite (`pnpm test`, currently 3 test files, all passing locally) but CI never runs it — `.github/workflows/ci.yaml` only runs typecheck and lint, so test regressions can land on `main` unnoticed. Two additional workflows (`build.yml`, `build_pr.yml`) are dead: they target the `master` branch (the repo uses `main`), use npm (the repo uses pnpm), and SSH-tunnel to a MySQL database on `ara.uberspace.de` that was retired when the app migrated to Convex. They confuse contributors and would fail silently if ever triggered. Finally, CI contains a step that copies `.env.example` files, but no `.env.example` exists anywhere in the repo — the step is a no-op and onboarding has no env-var template.
+At the original 2026-06-11 baseline, the repo had a working test suite (`pnpm test`, 3 test files, all passing locally), but CI never ran it — `.github/workflows/ci.yaml` only ran typecheck and lint, so test regressions could land on `main` unnoticed. By the 2026-07-09 execution check in Step 1, the suite had grown to 8 test files and 39 passing tests. Two additional workflows (`build.yml`, `build_pr.yml`) were dead: they targeted the `master` branch (the repo uses `main`), used npm (the repo uses pnpm), and SSH-tunneled to a MySQL database on `ara.uberspace.de` that was retired when the app migrated to Convex. They confused contributors and would fail silently if ever triggered. Finally, CI contained a step that copied `.env.example` files, but no `.env.example` existed anywhere in the repo — the step was a no-op and onboarding had no env-var template.
 
 ## Current state
 
@@ -47,8 +47,8 @@ The repo has a working test suite (`pnpm test`, currently 3 test files, all pass
 
 **In scope** (the only files you should modify):
 - `.github/workflows/ci.yaml` (edit)
-- `.github/workflows/build.yml` (delete)
-- `.github/workflows/build_pr.yml` (delete)
+- `.github/workflows/build.yml` (delete — already done 2026-06-30, commit `ca88e2c8`)
+- `.github/workflows/build_pr.yml` (delete — already done 2026-06-30, commit `ca88e2c8`)
 - `.env.example` (create)
 
 **Out of scope** (do NOT touch, even though they look related):
@@ -68,7 +68,7 @@ The repo has a working test suite (`pnpm test`, currently 3 test files, all pass
 
 Run `pnpm test`.
 
-**Verify**: exit code 0, output lists passing tests from the 3 test files (`parser.test.ts`, `audio_edit_tools.test.ts`, `audio-cutter-text.test.ts`). If any test fails on a clean checkout, STOP — CI must not be wired to a red suite; report which test fails.
+**Verify**: exit code 0, all tests pass (as of 2026-07-09 there are 8 test files under `src/` with 39 passing tests, e.g. `parser.test.ts`, `audio_edit_tools.test.ts`, `audio-cutter-keypoints.test.ts`, `text-direction.test.ts`). If any test fails on a clean checkout, STOP — CI must not be wired to a red suite; report which test fails.
 
 ### Step 2: Add a test step to ci.yaml
 

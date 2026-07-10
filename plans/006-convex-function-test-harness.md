@@ -62,6 +62,7 @@ The entire Convex backend (~7,500 lines across `convex/*.ts`) has **zero tests**
 - `convex/storyWrite.test.ts` (create)
 - `convex/storyDone.test.ts` (create)
 - `convex/storyApproval.test.ts` (create)
+- `convex/storyFeedback.test.ts` (create — added 2026-07-09: the module shipped after this plan was written; cover the `requireContributorOrAdmin` guard on `listStoryFeedbackReports`/`updateStoryFeedbackStatus`, empty-comment rejection in `submitStoryFeedback`, and one `open→reviewed` status transition)
 - `.github/workflows/ci.yaml` (add the `pnpm test:convex` step — only if plan 001 already landed)
 
 **Out of scope** (do NOT touch):
@@ -131,10 +132,11 @@ In `convex/storyWrite.test.ts`, seed via `t.run(async (ctx) => {...})`: two `lan
 
 **Verify**: `pnpm test:convex` → all pass.
 
-### Step 4: Characterize recordStoryDone and one approval mutation
+### Step 4: Characterize recordStoryDone, approval, and story feedback
 
 - `convex/storyDone.test.ts`: seed course+story; (1) anonymous completion inserts `story_done` with `legacyUserId: undefined` and does NOT create `course_activity`; (2) identity with `userId: "7"` creates `story_done`, `story_done_state`, and `course_activity` rows; (3) unknown `legacyStoryId` → rejects with "Missing story for legacy id".
 - `convex/storyApproval.test.ts`: read `convex/storyApproval.ts` first; characterize its main mutation's guard (unauthorized rejects) and one happy path (approval row created / story status updated as the code dictates).
+- `convex/storyFeedback.test.ts`: (1) unauthenticated callers are rejected by both `listStoryFeedbackReports` and `updateStoryFeedbackStatus`; (2) `submitStoryFeedback` rejects an empty comment; (3) a contributor can transition a report from `open` to `reviewed`.
 
 **Verify**: `pnpm test:convex` → all pass.
 
@@ -151,13 +153,13 @@ Add to `.github/workflows/ci.yaml` after the `Test` step:
 
 ## Test plan
 
-This plan IS the test plan. Target: ≥12 passing tests across 4 files covering the guard matrix, setStory happy/null/official paths, recordStoryDone variants, and one approval path.
+This plan IS the test plan. Target: ≥15 passing tests across 5 files covering the guard matrix, setStory happy/null/official paths, recordStoryDone variants, one approval path, and the three story-feedback cases in Step 4.
 
 ## Done criteria
 
 Machine-checkable. ALL must hold:
 
-- [ ] `pnpm test:convex` exits 0 with ≥12 tests
+- [ ] `pnpm test:convex` exits 0 with ≥15 tests across 5 files, including `convex/storyFeedback.test.ts`
 - [ ] `pnpm test` (existing suite) exits 0, unchanged
 - [ ] `pnpm typecheck && pnpm lint` exit 0
 - [ ] No file under `convex/` other than new `*.test.ts` files is modified (`git status`)

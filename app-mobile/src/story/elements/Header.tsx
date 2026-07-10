@@ -28,12 +28,7 @@ export function Header({
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const audio = element.learningLanguageTitleContent?.audio;
-  const lineAudio = useLineAudio(
-    audio,
-    active,
-    autoPlay,
-    replayKey,
-  );
+  const lineAudio = useLineAudio(audio, active, autoPlay, replayKey);
   const audioRange = audioRangeOverride ?? lineAudio.audioRange;
   const handlePlay = React.useCallback(() => {
     onManualAudioPlay?.();
@@ -44,7 +39,9 @@ export function Header({
     <View style={styles.root}>
       <SmartImage uri={element.illustrationUrl} width={175} height={175} />
       <View style={[styles.titleRow, rtl && styles.titleRowRtl]}>
-        {lineAudio.hasAudio && <PlayAudioButton onPress={handlePlay} rtl={rtl} />}
+        {lineAudio.hasAudio && (
+          <PlayAudioButton onPress={handlePlay} rtl={rtl} />
+        )}
         <HintText
           content={element.learningLanguageTitleContent}
           audioRange={audioRange}
@@ -64,24 +61,24 @@ export function Header({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 12,
-  },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "center",
-    marginTop: 12,
-  },
-  titleRowRtl: {
-    flexDirection: "row-reverse",
-  },
-  title: {
-    fontSize: fontSizes.title,
-    fontWeight: "700",
-    color: colors.text,
-  },
+    root: {
+      alignItems: "center",
+      marginTop: 8,
+      marginBottom: 12,
+    },
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "center",
+      marginTop: 12,
+    },
+    titleRowRtl: {
+      flexDirection: "row-reverse",
+    },
+    title: {
+      fontSize: fontSizes.title,
+      fontWeight: "700",
+      color: colors.text,
+    },
   });
 }

@@ -20,6 +20,11 @@ Repo verification gate (used by every plan): `pnpm typecheck && pnpm lint && pnp
 | 008 | Harden shared-secret HTTP endpoints; internalize backfills | P3 | S | — | DONE |
 | 009 | Extract pure logic from the 4,135-line audio-cutter dialog | P2 | M–L | 001, 005 | DONE |
 | 010 | Design the author-identity + Postgres-sunset schema migrations | P2 | M | 006 | TODO |
+| 011 | Clear high-severity dep advisories (hono, undici); unpin mobile auth | P1 | S | — | TODO |
+| 012 | Make app-mobile visible to CI; truth-up mobile docs | P1 | S | — | DONE (2026-07-10) |
+| 013 | Bound/validate story-feedback intake; paginate review queue | P1 | M | — | TODO |
+| 014 | Validate recordStoryDone inputs; idempotent progress import | P2 | S | — (not concurrent with 003) | TODO |
+| 015 | Complete account deletion (cascade user data) | P1 | M | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale).
 
@@ -29,7 +34,7 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
 - **009 requires 001 and 005**: 001 gates the new tests in CI; 005 creates `src/lib/editor/audio/timing_text.ts`, which 009 reuses instead of duplicating.
 - **010 requires 006**: the migration design must specify harness tests per stage; without the harness those are fiction.
 - 002 and 003 are independent but share the `fetchAuthQuery` switch pattern — executing them back-to-back is efficient.
-- The migration **execution** (a future plan, drafted by 010 as `plans/011-...`) must not start before 006 and 010 are DONE and the maintainer signs off.
+- The migration **execution** (a future plan drafted by 010) must not start before 006 and 010 are DONE and the maintainer signs off.
 
 ## Findings considered and rejected
 

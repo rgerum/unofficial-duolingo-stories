@@ -32,7 +32,9 @@ import {
 import { type ThemeColors, useTheme } from "../../src/theme";
 import { useTabContentInsets } from "../../src/useTabContentInsets";
 
-type LandingData = FunctionReturnType<typeof api.landing.getPublicLandingPageData>;
+type LandingData = FunctionReturnType<
+  typeof api.landing.getPublicLandingPageData
+>;
 type LandingGroup = LandingData["groups"][number];
 type CourseItem = LandingGroup["courses"][number] & {
   fromLanguageName: string;
@@ -105,9 +107,7 @@ export default function CoursesTab() {
     }
     return activeShorts
       .map((short) => byShort.get(short))
-      .filter((course): course is NonNullable<typeof course> =>
-        Boolean(course),
-      )
+      .filter((course): course is NonNullable<typeof course> => Boolean(course))
       .sort((a, b) => {
         if (a.short === courseShort) return -1;
         if (b.short === courseShort) return 1;
@@ -464,193 +464,193 @@ export default function CoursesTab() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 16,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 10,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: colors.text,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: colors.textDim,
-    marginTop: 2,
-  },
-  loading: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  empty: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 28,
-  },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: colors.text,
-    textAlign: "center",
-  },
-  emptyText: {
-    marginTop: 8,
-    fontSize: 16,
-    color: colors.textDim,
-    textAlign: "center",
-  },
-  emptyButton: {
-    marginTop: 18,
-    alignSelf: "stretch",
-  },
-  listContent: {
-    paddingHorizontal: 16,
-  },
-  card: {
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 14,
-    padding: 16,
-    marginTop: 12,
-    backgroundColor: colors.surface,
-  },
-  cardSelected: {
-    borderColor: colors.blue,
-    backgroundColor: colors.blueLight,
-  },
-  cardDisabled: {
-    opacity: 0.55,
-  },
-  cardContent: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 14,
-  },
-  cardBody: {
-    flex: 1,
-  },
-  cardTop: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  cardTitleWrap: {
-    flex: 1,
-  },
-  cardActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  cardActionButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  courseName: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
-  },
-  courseMeta: {
-    fontSize: 14,
-    color: colors.textDim,
-    marginTop: 2,
-  },
-  currentBadge: {
-    overflow: "hidden",
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    backgroundColor: colors.greenLight,
-    color: colors.greenDark,
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-  },
-  progressTrack: {
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.border,
-    overflow: "hidden",
-    marginTop: 14,
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: 5,
-    backgroundColor: colors.gold,
-  },
-  progressText: {
-    fontSize: 14,
-    color: colors.textDim,
-    marginTop: 8,
-  },
-  sheetBackdrop: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.35)",
-  },
-  sheet: {
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 28,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    backgroundColor: colors.surface,
-  },
-  sheetTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: colors.text,
-    marginBottom: 12,
-  },
-  sheetAction: {
-    minHeight: 54,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderRadius: 14,
-  },
-  sheetDestructiveText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.red,
-  },
-  sheetActionText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  sheetCancel: {
-    minHeight: 54,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: colors.border,
-  },
-  sheetCancelText: {
-    fontSize: 17,
-    fontWeight: "800",
-    color: colors.text,
-  },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 16,
+      paddingHorizontal: 16,
+      paddingTop: 8,
+      paddingBottom: 10,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: "800",
+      color: colors.text,
+    },
+    subtitle: {
+      fontSize: 15,
+      color: colors.textDim,
+      marginTop: 2,
+    },
+    loading: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    empty: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 28,
+    },
+    emptyTitle: {
+      fontSize: 22,
+      fontWeight: "800",
+      color: colors.text,
+      textAlign: "center",
+    },
+    emptyText: {
+      marginTop: 8,
+      fontSize: 16,
+      color: colors.textDim,
+      textAlign: "center",
+    },
+    emptyButton: {
+      marginTop: 18,
+      alignSelf: "stretch",
+    },
+    listContent: {
+      paddingHorizontal: 16,
+    },
+    card: {
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 14,
+      padding: 16,
+      marginTop: 12,
+      backgroundColor: colors.surface,
+    },
+    cardSelected: {
+      borderColor: colors.blue,
+      backgroundColor: colors.blueLight,
+    },
+    cardDisabled: {
+      opacity: 0.55,
+    },
+    cardContent: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 14,
+    },
+    cardBody: {
+      flex: 1,
+    },
+    cardTop: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    cardTitleWrap: {
+      flex: 1,
+    },
+    cardActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    cardActionButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    courseName: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: colors.text,
+    },
+    courseMeta: {
+      fontSize: 14,
+      color: colors.textDim,
+      marginTop: 2,
+    },
+    currentBadge: {
+      overflow: "hidden",
+      borderRadius: 999,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      backgroundColor: colors.greenLight,
+      color: colors.greenDark,
+      fontSize: 12,
+      fontWeight: "800",
+      textTransform: "uppercase",
+    },
+    progressTrack: {
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.border,
+      overflow: "hidden",
+      marginTop: 14,
+    },
+    progressFill: {
+      height: "100%",
+      borderRadius: 5,
+      backgroundColor: colors.gold,
+    },
+    progressText: {
+      fontSize: 14,
+      color: colors.textDim,
+      marginTop: 8,
+    },
+    sheetBackdrop: {
+      flex: 1,
+      justifyContent: "flex-end",
+      backgroundColor: "rgba(0, 0, 0, 0.35)",
+    },
+    sheet: {
+      paddingHorizontal: 20,
+      paddingTop: 18,
+      paddingBottom: 28,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      backgroundColor: colors.surface,
+    },
+    sheetTitle: {
+      fontSize: 18,
+      fontWeight: "800",
+      color: colors.text,
+      marginBottom: 12,
+    },
+    sheetAction: {
+      minHeight: 54,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      borderRadius: 14,
+    },
+    sheetDestructiveText: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: colors.red,
+    },
+    sheetActionText: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    sheetCancel: {
+      minHeight: 54,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 8,
+      borderRadius: 14,
+      borderWidth: 2,
+      borderColor: colors.border,
+    },
+    sheetCancelText: {
+      fontSize: 17,
+      fontWeight: "800",
+      color: colors.text,
+    },
   });
 }

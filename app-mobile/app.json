@@ -11,9 +11,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "org.duostories.app",
       "usesAppleSignIn": true,
-      "associatedDomains": [
-        "applinks:duostories.org"
-      ],
+      "associatedDomains": ["applinks:duostories.org"],
       "icon": "./assets/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -47,10 +45,7 @@
               "pathPattern": "/..-.*"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ],
       "predictiveBackGestureEnabled": false

@@ -69,12 +69,20 @@ async function fetchJson<T>(url: string): Promise<T> {
   }
 }
 
-async function resolveManifest(story: StoryData): Promise<ResolvedManifest | null> {
+async function resolveManifest(
+  story: StoryData,
+): Promise<ResolvedManifest | null> {
   if (!rootUrl) return null;
 
   const summaryCandidates = [
     {
-      url: joinUrl(rootUrl, "story-audio", "courses", story.course_short, "summary.json"),
+      url: joinUrl(
+        rootUrl,
+        "story-audio",
+        "courses",
+        story.course_short,
+        "summary.json",
+      ),
       stripTmp: true,
     },
     {
@@ -94,7 +102,8 @@ async function resolveManifest(story: StoryData): Promise<ResolvedManifest | nul
     try {
       const summary = await fetchJson<CourseSummary>(candidate.url);
       const result = summary.results.find(
-        (item) => item.storyId === story.id && item.status === "ok" && item.outputDir,
+        (item) =>
+          item.storyId === story.id && item.status === "ok" && item.outputDir,
       );
       if (!result?.outputDir) return null;
 
@@ -219,31 +228,35 @@ export function useStitchedListeningAudio({
           cleanup();
         }, PLAYBACK_START_TIMEOUT_MS);
 
-        const subscription = player.addListener("playbackStatusUpdate", (status) => {
-          const manifest = manifestRef.current;
-          if (!manifest) return;
+        const subscription = player.addListener(
+          "playbackStatusUpdate",
+          (status) => {
+            const manifest = manifestRef.current;
+            if (!manifest) return;
 
-          if (!activated && (status.playing || status.currentTime > 0)) {
-            activated = true;
-            clearTimeout(startupTimeout);
-            stopAudio(false);
-            setStatus("ready");
-          }
+            if (!activated && (status.playing || status.currentTime > 0)) {
+              activated = true;
+              clearTimeout(startupTimeout);
+              stopAudio(false);
+              setStatus("ready");
+            }
 
-          const currentTimeMs = Math.max(status.currentTime, player.currentTime) * 1000;
-          const segment = getActiveSegment(manifest.segments, currentTimeMs);
-          if (segment && segment.partIndex !== activePartRef.current) {
-            activePartRef.current = segment.partIndex;
-            onPartChange(segment.partIndex);
-          }
-          setAudioRange(getAudioRange(segment, currentTimeMs));
+            const currentTimeMs =
+              Math.max(status.currentTime, player.currentTime) * 1000;
+            const segment = getActiveSegment(manifest.segments, currentTimeMs);
+            if (segment && segment.partIndex !== activePartRef.current) {
+              activePartRef.current = segment.partIndex;
+              onPartChange(segment.partIndex);
+            }
+            setAudioRange(getAudioRange(segment, currentTimeMs));
 
-          if (status.didJustFinish && !finishedRef.current) {
-            finishedRef.current = true;
-            setAudioRange(undefined);
-            onFinished();
-          }
-        });
+            if (status.didJustFinish && !finishedRef.current) {
+              finishedRef.current = true;
+              setAudioRange(undefined);
+              onFinished();
+            }
+          },
+        );
         subscriptionRef.current = subscription;
         if (!pausedRef.current) player.play();
       })

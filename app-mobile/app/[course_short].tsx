@@ -19,12 +19,8 @@ export default function CourseDeepLinkScreen() {
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const params = useLocalSearchParams<{ course_short?: string | string[] }>();
   const linkedCourseShort = getCourseShortParam(params.course_short);
-  const {
-    ready,
-    hasSeenWelcome,
-    hasAcceptedDisclaimer,
-    setCourseShort,
-  } = useAppState();
+  const { ready, hasSeenWelcome, hasAcceptedDisclaimer, setCourseShort } =
+    useAppState();
   const { isOffline } = useNetworkStatus();
   const landingData = useQuery(api.landing.getPublicLandingPageData);
   const [hasStartedCourseSelection, setHasStartedCourseSelection] =
@@ -48,9 +44,7 @@ export default function CourseDeepLinkScreen() {
 
     setHasStartedCourseSelection(true);
     void setCourseShort(linkedCourse.short).then(() => {
-      router.replace(
-        hasSeenWelcome && hasAcceptedDisclaimer ? "/(tabs)" : "/",
-      );
+      router.replace(hasSeenWelcome && hasAcceptedDisclaimer ? "/(tabs)" : "/");
     });
   }, [
     hasAcceptedDisclaimer,
