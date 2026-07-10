@@ -26,6 +26,12 @@ const SHOW_NATIVE_HINT_DEBUG = false;
 const UNDERLINE_EDGE_INSET = 2;
 const UNDERLINE_DOT_RADIUS = 1.2;
 const UNDERLINE_DOT_GAP = 7;
+// Distance (px) from the measured line-box bottom up to the underline row.
+// The tokenized HintTokenBox draws its dotted/solid border ~1px above the
+// text box bottom, which lands in the descender gap below the glyphs. The
+// native path measures the full line box, so use the same small inset to
+// leave an equivalent gap instead of drawing on the glyph bottoms.
+const UNDERLINE_BOTTOM_OFFSET = 1;
 
 type HintTextRenderMode = "auto" | "native" | "tokenized";
 
@@ -491,7 +497,7 @@ function NativeHintText({
         key: segment.key,
         x1: segment.x + UNDERLINE_EDGE_INSET,
         x2: segment.x + Math.max(segment.width - UNDERLINE_EDGE_INSET, UNDERLINE_EDGE_INSET * 2),
-        y: segment.y + segment.height - 6,
+        y: segment.y + segment.height - UNDERLINE_BOTTOM_OFFSET,
         color: underline,
         dotted: !segment.hidden,
         underlineGroupKey: segment.underlineGroupKey,
