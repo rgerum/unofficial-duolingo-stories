@@ -69,7 +69,7 @@ export function getStoryDescription(story: StoryData) {
     .map((line) => line.text)
     .join(" ");
   const normalizedExcerpt = normalizeWhitespace(excerpt);
-  const baseDescription = `${story.from_language_name} is a Duostories lesson for ${story.learning_language_long} speakers learning ${story.from_language_long}.`;
+  const baseDescription = `${story.from_language_name} is a Duostories lesson for ${story.from_language_long} speakers learning ${story.learning_language_long}.`;
 
   if (!normalizedExcerpt) return baseDescription;
 

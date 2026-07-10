@@ -38,7 +38,7 @@ export default function StoryTranscript({ story }: { story: StoryData }) {
     inLanguage: story.learning_language,
     about: [
       `${story.learning_language_long} learning`,
-      `${story.from_language_long} reading practice`,
+      `${story.learning_language_long} reading practice`,
     ],
     isPartOf: {
       "@type": "WebSite",
