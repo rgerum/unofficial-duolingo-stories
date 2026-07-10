@@ -19,7 +19,9 @@ export default function Welcome() {
   const { courseShort } = useAppState();
 
   function continueAnonymously() {
-    router.push(`/disclaimer?action=anonymous&next=${courseShort ? "tabs" : "onboarding"}`);
+    router.push(
+      `/disclaimer?action=anonymous&next=${courseShort ? "tabs" : "onboarding"}`,
+    );
   }
 
   return (
@@ -65,65 +67,65 @@ export default function Welcome() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 28,
-    gap: 0,
-  },
-  logo: {
-    width: 96,
-    height: 96,
-    borderRadius: 24,
-    alignSelf: "center",
-    marginBottom: 20,
-  },
-  kicker: {
-    textAlign: "center",
-    fontSize: 13,
-    fontWeight: "800",
-    letterSpacing: 2,
-    textTransform: "uppercase",
-    color: colors.blue,
-  },
-  title: {
-    textAlign: "center",
-    fontSize: 34,
-    fontWeight: "800",
-    color: colors.text,
-    marginTop: 10,
-  },
-  subtitle: {
-    textAlign: "center",
-    fontSize: 17,
-    lineHeight: 26,
-    color: colors.textDim,
-    marginTop: 14,
-    marginBottom: 30,
-  },
-  actions: {
-    gap: 12,
-  },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginVertical: 22,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  dividerText: {
-    fontSize: 13,
-    fontWeight: "800",
-    letterSpacing: 1.5,
-    color: colors.textDim,
-  },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      flex: 1,
+      justifyContent: "center",
+      paddingHorizontal: 28,
+      gap: 0,
+    },
+    logo: {
+      width: 96,
+      height: 96,
+      borderRadius: 24,
+      alignSelf: "center",
+      marginBottom: 20,
+    },
+    kicker: {
+      textAlign: "center",
+      fontSize: 13,
+      fontWeight: "800",
+      letterSpacing: 2,
+      textTransform: "uppercase",
+      color: colors.blue,
+    },
+    title: {
+      textAlign: "center",
+      fontSize: 34,
+      fontWeight: "800",
+      color: colors.text,
+      marginTop: 10,
+    },
+    subtitle: {
+      textAlign: "center",
+      fontSize: 17,
+      lineHeight: 26,
+      color: colors.textDim,
+      marginTop: 14,
+      marginBottom: 30,
+    },
+    actions: {
+      gap: 12,
+    },
+    dividerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      marginVertical: 22,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: colors.border,
+    },
+    dividerText: {
+      fontSize: 13,
+      fontWeight: "800",
+      letterSpacing: 1.5,
+      color: colors.textDim,
+    },
   });
 }

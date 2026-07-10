@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { fetchQuery } from "convex/nextjs";
+import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 import CourseEditorPageClient from "./page_client";
 
@@ -9,9 +9,12 @@ export async function generateMetadata({
 }: {
   params: Promise<{ course_id: string }>;
 }): Promise<Metadata> {
-  const course = await fetchQuery(api.editorRead.getEditorCourseByIdentifier, {
-    identifier: (await params).course_id,
-  });
+  const course = await fetchAuthQuery(
+    api.editorRead.getEditorCourseByIdentifier,
+    {
+      identifier: (await params).course_id,
+    },
+  );
 
   if (!course) notFound();
 

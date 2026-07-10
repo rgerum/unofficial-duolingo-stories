@@ -77,7 +77,11 @@ export function MultipleChoiceQuestion({
               {typeof answer === "string" ? (
                 <Text style={answerStyle}>{answer}</Text>
               ) : (
-                <HintText content={answer} lang={element.lang} style={answerStyle} />
+                <HintText
+                  content={answer}
+                  lang={element.lang}
+                  style={answerStyle}
+                />
               )}
             </View>
           </Pressable>
@@ -89,42 +93,42 @@ export function MultipleChoiceQuestion({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  answerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 10,
-    gap: 14,
-  },
-  answerText: {
-    flexShrink: 1,
-  },
-  answerLabel: {
-    fontSize: fontSizes.body,
-    lineHeight: 26,
-    color: colors.text,
-  },
-  answerDimmed: {
-    color: colors.disabled,
-  },
-  circle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  circleRight: {
-    backgroundColor: colors.green,
-    borderColor: colors.green,
-  },
-  circleWrong: {
-    backgroundColor: colors.red,
-    borderColor: colors.red,
-  },
-  circleDone: {
-    backgroundColor: colors.disabledBackground,
-  },
+    answerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginVertical: 10,
+      gap: 14,
+    },
+    answerText: {
+      flexShrink: 1,
+    },
+    answerLabel: {
+      fontSize: fontSizes.body,
+      lineHeight: 26,
+      color: colors.text,
+    },
+    answerDimmed: {
+      color: colors.disabled,
+    },
+    circle: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      borderWidth: 2,
+      borderColor: colors.border,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    circleRight: {
+      backgroundColor: colors.green,
+      borderColor: colors.green,
+    },
+    circleWrong: {
+      backgroundColor: colors.red,
+      borderColor: colors.red,
+    },
+    circleDone: {
+      backgroundColor: colors.disabledBackground,
+    },
   });
 }

@@ -38,7 +38,10 @@ export default function DisclaimerScreen() {
     useAppState();
 
   async function accept() {
-    await Promise.all([setHasSeenWelcome(true), setHasAcceptedDisclaimer(true)]);
+    await Promise.all([
+      setHasSeenWelcome(true),
+      setHasAcceptedDisclaimer(true),
+    ]);
     router.dismissAll();
     router.replace(getNextRoute({ action, next, courseShort }));
   }
@@ -69,44 +72,44 @@ export default function DisclaimerScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 28,
-  },
-  kicker: {
-    textAlign: "center",
-    fontSize: 13,
-    fontWeight: "800",
-    letterSpacing: 2,
-    textTransform: "uppercase",
-    color: colors.blue,
-  },
-  title: {
-    textAlign: "center",
-    fontSize: 30,
-    fontWeight: "800",
-    color: colors.text,
-    marginTop: 10,
-    marginBottom: 24,
-  },
-  notice: {
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 14,
-    backgroundColor: colors.surface,
-    padding: 18,
-    marginBottom: 22,
-    gap: 14,
-  },
-  noticeText: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: colors.text,
-  },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      flex: 1,
+      justifyContent: "center",
+      paddingHorizontal: 28,
+    },
+    kicker: {
+      textAlign: "center",
+      fontSize: 13,
+      fontWeight: "800",
+      letterSpacing: 2,
+      textTransform: "uppercase",
+      color: colors.blue,
+    },
+    title: {
+      textAlign: "center",
+      fontSize: 30,
+      fontWeight: "800",
+      color: colors.text,
+      marginTop: 10,
+      marginBottom: 24,
+    },
+    notice: {
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 14,
+      backgroundColor: colors.surface,
+      padding: 18,
+      marginBottom: 22,
+      gap: 14,
+    },
+    noticeText: {
+      fontSize: 16,
+      lineHeight: 24,
+      color: colors.text,
+    },
   });
 }

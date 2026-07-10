@@ -1,13 +1,25 @@
+import { execFileSync } from "node:child_process";
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
-const CONVEX_SITE_URL =
-  process.env.NEXT_PUBLIC_CONVEX_SITE_URL ??
-  process.env.CONVEX_SITE_URL ??
-  process.env.NEXT_PUBLIC_CONVEX_URL ??
-  process.env.CONVEX_URL;
-const DISCORD_AVATAR_SYNC_SECRET = process.env.DISCORD_AVATAR_SYNC_SECRET;
+// The backfill is an internal Convex action (no HTTP route / shared secret).
+// This script drives it batch-by-batch via `pnpm exec convex run`, following
+// the returned cursor until every Discord account has been processed.
+//
+// Deployment target: `convex run` uses the deployment resolved from the
+// environment (`CONVEX_DEPLOYMENT` in `.env.local`, typically your dev
+// deployment). To run against production, set `CONVEX_TARGET=prod`, which
+// appends `--prod` to every `convex run` invocation, e.g.:
+//
+//   CONVEX_TARGET=prod pnpm run backfill:discord-avatars
+//
+// Underlying invocation:
+//   pnpm exec convex run [--prod] \
+//     discordAvatarSync:backfillDiscordUserImagesInternal '{...}'
+const INTERNAL_FUNCTION =
+  "discordAvatarSync:backfillDiscordUserImagesInternal";
+const CONVEX_RUN_FLAGS = resolveConvexRunFlags();
 const TOTAL_LIMIT = parseOptionalNumber(process.env.DISCORD_AVATAR_SYNC_LIMIT);
 const BATCH_SIZE = parsePositiveNumber(
   process.env.DISCORD_AVATAR_SYNC_BATCH_SIZE,
@@ -18,18 +30,6 @@ const BATCH_DELAY_MS = parsePositiveNumber(
   0,
 );
 const DRY_RUN = parseBooleanEnv(process.env.DISCORD_AVATAR_SYNC_DRY_RUN, false);
-
-if (!CONVEX_SITE_URL) {
-  console.error(
-    "Error: NEXT_PUBLIC_CONVEX_SITE_URL/CONVEX_SITE_URL/CONVEX_URL is not set.",
-  );
-  process.exit(1);
-}
-
-if (!DISCORD_AVATAR_SYNC_SECRET) {
-  console.error("Error: DISCORD_AVATAR_SYNC_SECRET is not set.");
-  process.exit(1);
-}
 
 type BackfillResult = {
   processed: number;
@@ -73,47 +73,68 @@ function parseBooleanEnv(value: string | undefined, defaultValue: boolean) {
   return defaultValue;
 }
 
+// Explicitly select the Convex deployment so operators never silently backfill
+// the wrong one. Defaults to the environment-resolved (usually dev) deployment;
+// set CONVEX_TARGET=prod to append `--prod`.
+function resolveConvexRunFlags(): string[] {
+  const target = process.env.CONVEX_TARGET?.trim().toLowerCase();
+  if (target === undefined || target === "" || target === "dev") return [];
+  if (target === "prod" || target === "production") return ["--prod"];
+  console.error(
+    `Error: unsupported CONVEX_TARGET "${process.env.CONVEX_TARGET}" (expected "dev" or "prod").`,
+  );
+  process.exit(1);
+}
+
+// Describe the deployment `convex run` will actually hit, so the startup log
+// never claims "dev" while `CONVEX_DEPLOYMENT` silently points at prod. With
+// `--prod` the target is production; otherwise it is whatever
+// `CONVEX_DEPLOYMENT` resolves to (surfaced verbatim when known).
+function describeConvexTarget(flags: string[]): string {
+  if (flags.includes("--prod")) return "prod (--prod)";
+  const deployment = process.env.CONVEX_DEPLOYMENT?.trim();
+  if (deployment) {
+    return `environment-resolved CONVEX_DEPLOYMENT="${deployment}"`;
+  }
+  return "environment-resolved deployment (CONVEX_DEPLOYMENT unset; set CONVEX_TARGET=prod for production)";
+}
+
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function runBatch(
-  baseUrl: string,
-  cursor: string | null,
-  batchSize: number,
-) {
-  const response = await fetch(`${baseUrl}/admin/backfill-discord-avatars`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      secret: DISCORD_AVATAR_SYNC_SECRET,
-      batchSize,
-      cursor,
-      dryRun: DRY_RUN,
-    }),
-  });
-
-  const text = await response.text();
-  let parsed: unknown = null;
+function extractJson(stdout: string): unknown {
+  const trimmed = stdout.trim();
   try {
-    parsed = JSON.parse(text);
+    return JSON.parse(trimmed);
   } catch {
-    parsed = text;
+    const start = trimmed.indexOf("{");
+    const end = trimmed.lastIndexOf("}");
+    if (start === -1 || end === -1 || end < start) {
+      throw new Error(`Could not parse convex run output:\n${stdout}`);
+    }
+    return JSON.parse(trimmed.slice(start, end + 1));
   }
+}
 
-  if (!response.ok) {
-    throw new Error(
-      `Backfill request failed with ${response.status}: ${JSON.stringify(parsed)}`,
-    );
-  }
-
-  return parsed as BackfillResult;
+function runBatch(cursor: string | null, batchSize: number): BackfillResult {
+  const args = { batchSize, cursor, dryRun: DRY_RUN };
+  const stdout = execFileSync(
+    "pnpm",
+    [
+      "exec",
+      "convex",
+      "run",
+      ...CONVEX_RUN_FLAGS,
+      INTERNAL_FUNCTION,
+      JSON.stringify(args),
+    ],
+    { encoding: "utf8" },
+  );
+  return extractJson(stdout) as BackfillResult;
 }
 
 async function main() {
-  const baseUrl = String(CONVEX_SITE_URL).replace(/\/+$/, "");
   let cursor: string | null = null;
   let processedTotal = 0;
   let updatedUsersTotal = 0;
@@ -121,6 +142,10 @@ async function main() {
   let skippedTotal = 0;
   const errors: BackfillResult["errors"] = [];
   let batchNumber = 0;
+
+  console.log(
+    `Targeting Convex deployment: ${describeConvexTarget(CONVEX_RUN_FLAGS)}`,
+  );
 
   while (true) {
     const remaining =
@@ -135,7 +160,7 @@ async function main() {
       `Running batch ${batchNumber} (size=${currentBatchSize}, cursor=${cursor ?? "start"})...`,
     );
 
-    const result = await runBatch(baseUrl, cursor, currentBatchSize);
+    const result = runBatch(cursor, currentBatchSize);
     processedTotal += result.processed;
     updatedUsersTotal += result.updatedUsers;
     updatedAccountsTotal += result.updatedAccounts;

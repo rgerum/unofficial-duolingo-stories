@@ -2,7 +2,10 @@ import { query, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
-import { getSessionLegacyUserId } from "./lib/authorization";
+import {
+  getSessionLegacyUserId,
+  isContributorOrAdmin,
+} from "./lib/authorization";
 import { courseContributorValidator } from "./lib/courseContributors";
 
 type LanguageDoc = Doc<"languages">;
@@ -215,6 +218,8 @@ async function buildAvatarRows(
 export const getEditorSidebarData = query({
   args: {},
   handler: async (ctx) => {
+    if (!(await isContributorOrAdmin(ctx))) return { courses: [] };
+
     const courseRows = await ctx.db.query("courses").collect();
 
     const referencedLanguageIds = Array.from(
@@ -247,6 +252,8 @@ export const getEditorCourseByIdentifier = query({
   args: { identifier: v.string() },
   returns: editorCourseValidator,
   handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return null;
+
     const course = await getCourseByIdentifier(ctx, args.identifier);
     if (!course) return null;
 
@@ -286,31 +293,20 @@ export const getEditorCourseByIdentifier = query({
 export const getEditorStoriesByCourseLegacyId = query({
   args: { identifier: v.string() },
   handler: async (ctx, args) => {
-    const timerBase = `editorRead:getEditorStoriesByCourseLegacyId:course:${args.identifier}`;
-    const storiesTimer = `${timerBase}:stories`;
-    const imagesTimer = `${timerBase}:images`;
-    const authorsTimer = `${timerBase}:authors`;
-    console.time(timerBase);
+    if (!(await isContributorOrAdmin(ctx))) return [];
 
     const course = await getCourseByIdentifier(ctx, args.identifier);
     if (!course) {
-      console.timeEnd(timerBase);
-      console.log(
-        `[editorRead:getEditorStoriesByCourseLegacyId] course=${args.identifier} not_found`,
-      );
       return [];
     }
 
-    console.time(storiesTimer);
     const storyRows = await ctx.db
       .query("stories")
       .withIndex("by_set", (q) => q.eq("courseId", course._id))
       .collect();
-    console.timeEnd(storiesTimer);
 
     const stories = storyRows.filter((story) => !story.deleted);
 
-    console.time(imagesTimer);
     const imageIds = Array.from(
       new Set(
         stories
@@ -324,9 +320,7 @@ export const getEditorStoriesByCourseLegacyId = query({
       if (!image) return;
       imageById.set(image._id, image);
     });
-    console.timeEnd(imagesTimer);
 
-    console.time(authorsTimer);
     const currentLegacyUserId = await getSessionLegacyUserId(ctx);
     const authorLegacyIds = Array.from(
       new Set(
@@ -355,7 +349,6 @@ export const getEditorStoriesByCourseLegacyId = query({
       getUserNameByLegacyId(ctx, authorLegacyIds),
       getUserNameByAuthDocId(ctx, authorAuthDocIds),
     ]);
-    console.timeEnd(authorsTimer);
 
     const storyIdsApprovedByCurrentUser = new Set<Id<"stories">>();
     if (currentLegacyUserId !== null) {
@@ -423,11 +416,6 @@ export const getEditorStoriesByCourseLegacyId = query({
               : null,
       };
     });
-
-    console.timeEnd(timerBase);
-    console.log(
-      `[editorRead:getEditorStoriesByCourseLegacyId] course=${args.identifier} totalStories=${storyRows.length} visibleStories=${stories.length} uniqueImages=${imageIds.length} uniqueLegacyAuthors=${authorLegacyIds.length} uniqueAuthDocAuthors=${authorAuthDocIds.length}`,
-    );
 
     return result;
   },

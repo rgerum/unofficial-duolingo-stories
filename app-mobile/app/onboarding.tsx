@@ -37,24 +37,24 @@ export default function Onboarding() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 14,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: colors.text,
-  },
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 23,
-    color: colors.textDim,
-    marginTop: 6,
-  },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 14,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: "800",
+      color: colors.text,
+    },
+    subtitle: {
+      fontSize: 16,
+      lineHeight: 23,
+      color: colors.textDim,
+      marginTop: 6,
+    },
   });
 }

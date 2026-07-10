@@ -3,6 +3,13 @@ import { Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../theme";
 
+export const PLAY_AUDIO_ICON_NAME = "volume-medium";
+export const PLAY_AUDIO_ICON_SIZE = 22;
+export const PLAY_AUDIO_ICON_FONT_FAMILY = "ionicons";
+export const PLAY_AUDIO_ICON_GLYPH = String.fromCodePoint(
+  Number(Ionicons.getRawGlyphMap()[PLAY_AUDIO_ICON_NAME]),
+);
+
 export function PlayAudioButton({
   onPress,
   rtl = false,
@@ -25,8 +32,8 @@ export function PlayAudioButton({
       ]}
     >
       <Ionicons
-        name="volume-medium"
-        size={22}
+        name={PLAY_AUDIO_ICON_NAME}
+        size={PLAY_AUDIO_ICON_SIZE}
         color={colors.blue}
         style={rtl && styles.iconRtl}
       />

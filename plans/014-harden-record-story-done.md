@@ -79,15 +79,18 @@
 | Purpose | Command | Expected on success |
 |-----------|----------------------------------|---------------------|
 | Codegen | `pnpm exec convex codegen` | exit 0 |
+| Format | `pnpm run format` | rewrites in place |
 | Typecheck (web) | `pnpm typecheck` | exit 0 |
 | Lint | `pnpm lint` | exit 0 |
 | Tests | `pnpm test` | all pass |
+| Convex tests | `pnpm test:convex` | storyDone regressions pass |
 | Typecheck (mobile) | `pnpm --dir app-mobile typecheck` | exit 0 |
 
 ## Scope
 
 **In scope** (the only files you should modify):
 - `convex/storyDone.ts` (the `recordStoryDone` handler only)
+- `convex/storyDone.test.ts` (add the Step 5 regression cases)
 - `convex/_generated/**` (via codegen only)
 - `app-mobile/app/auth.tsx` (import loop)
 - `app-mobile/src/storage.ts` (add `removeDoneStory`)
@@ -130,13 +133,15 @@ In `app-mobile/app/auth.tsx`, inside the `for` loop (lines 127-132), call `await
 
 **Verify**: `pnpm --dir app-mobile typecheck` exits 0.
 
-### Step 5: Full verification
+### Step 5: Add recordStoryDone regression tests and fully verify
 
-**Verify**: `pnpm typecheck && pnpm lint && pnpm test` and `pnpm --dir app-mobile typecheck` all exit 0.
+In `convex/storyDone.test.ts`, add coverage that: (1) a future `time` is clamped to the server time; (2) repeating the same signed-in `(user, story, time)` returns `inserted: false` and does not create another `story_done` row; and (3) an anonymous completion still inserts.
+
+**Verify**: `pnpm run format && pnpm typecheck && pnpm lint && pnpm test && pnpm test:convex` and `pnpm --dir app-mobile typecheck` all exit 0.
 
 ## Test plan
 
-No Convex harness exists yet (plan 006). Record in `plans/README.md` that `convex/storyDone.test.ts` (already in plan 006's file list) must add: (a) future `time` is clamped to server now; (b) same signed-in `(user, story, time)` twice → second call returns `inserted: false` and no new row; (c) anonymous completion still inserts. `pnpm test` (web) and both typechecks are the executable gates for this plan.
+The Convex harness from Plan 006 is available. `convex/storyDone.test.ts` must cover: (a) future `time` is clamped to server now; (b) the same signed-in `(user, story, time)` twice returns `inserted: false` without creating a new row; and (c) anonymous completion still inserts. Run the regression file with `pnpm test:convex` alongside the web tests and both typechecks.
 
 ## Done criteria
 
@@ -145,7 +150,8 @@ Machine-checkable. ALL must hold:
 - [ ] `grep -n "Math.min" convex/storyDone.ts` → match inside `recordStoryDone`
 - [ ] `grep -n "inserted: false" convex/storyDone.ts` → match
 - [ ] `grep -n "removeDoneStory" app-mobile/src/storage.ts app-mobile/app/auth.tsx` → both files match
-- [ ] `pnpm typecheck && pnpm lint && pnpm test` exit 0
+- [ ] `convex/storyDone.test.ts` covers future-time clamping, signed-in replay deduplication, and anonymous insertion
+- [ ] `pnpm run format && pnpm typecheck && pnpm lint && pnpm test && pnpm test:convex` exit 0
 - [ ] `pnpm --dir app-mobile typecheck` exits 0
 - [ ] `git status` shows no modified files outside the in-scope list (plus `convex/_generated`)
 - [ ] `plans/README.md` status row updated

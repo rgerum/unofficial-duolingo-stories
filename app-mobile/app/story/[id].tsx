@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../src/api";
@@ -12,6 +7,7 @@ import { captureMobileEventLater } from "../../src/analytics";
 import { useAuthSession } from "../../src/auth-client";
 import { useAppState } from "../../src/app-state";
 import { useNetworkStatus } from "../../src/network";
+import { markReviewPromptCompletionPending } from "../../src/reviewPrompt";
 import { getDoneMap, markStoryDone } from "../../src/storage";
 import { Reader } from "../../src/story/Reader";
 import { HintPopupHost } from "../../src/story/HintPopup";
@@ -119,16 +115,33 @@ export default function StoryScreen() {
 
   const onFinishedReached = React.useCallback(() => {
     if (!story) return;
+    const signedIn = Boolean(session?.session);
+    const knownCompletedLocally = Boolean(localDoneIds?.has(story.id));
+    const isServerProgressLoaded = !signedIn || serverDoneIds !== undefined;
+    const wasAlreadyDone = doneIds?.has(story.id) ?? true;
     if (!trackedStoryCompletion.current) {
       trackedStoryCompletion.current = true;
       captureStoryEvent("story_completed");
     }
+    if ((isServerProgressLoaded || knownCompletedLocally) && !wasAlreadyDone) {
+      void markReviewPromptCompletionPending({
+        courseShort: story.course_short,
+        storyId: story.id,
+      });
+    }
+    void markStoryDone(story.course_short, story.id);
     if (session?.session) {
       void recordStoryDone({ legacyStoryId: story.id });
-    } else {
-      void markStoryDone(story.course_short, story.id);
     }
-  }, [captureStoryEvent, recordStoryDone, session?.session, story]);
+  }, [
+    captureStoryEvent,
+    doneIds,
+    localDoneIds,
+    recordStoryDone,
+    serverDoneIds,
+    session?.session,
+    story,
+  ]);
 
   const leave = React.useCallback(() => {
     stopAudio();
@@ -170,7 +183,9 @@ export default function StoryScreen() {
         total_count: course?.stories.length,
       });
       stopAudio();
-      router.replace(`/story/${nextStoryId}?listening=${listening ? "1" : "0"}`);
+      router.replace(
+        `/story/${nextStoryId}?listening=${listening ? "1" : "0"}`,
+      );
       return;
     }
     leave();
@@ -251,33 +266,33 @@ export default function StoryScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-  errorTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
-    textAlign: "center",
-  },
-  errorBody: {
-    fontSize: 16,
-    lineHeight: 23,
-    color: colors.textDim,
-    textAlign: "center",
-    marginTop: 8,
-  },
-  errorActions: {
-    alignSelf: "stretch",
-    gap: 12,
-    marginTop: 18,
-  },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    centered: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 24,
+    },
+    errorTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: colors.text,
+      textAlign: "center",
+    },
+    errorBody: {
+      fontSize: 16,
+      lineHeight: 23,
+      color: colors.textDim,
+      textAlign: "center",
+      marginTop: 8,
+    },
+    errorActions: {
+      alignSelf: "stretch",
+      gap: 12,
+      marginTop: 18,
+    },
   });
 }
