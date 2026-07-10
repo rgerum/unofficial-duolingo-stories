@@ -61,6 +61,8 @@ type Token = {
   dimmed: boolean;
   hint?: { translation: string; pronunciation?: string };
   hintGroupKey?: string;
+  /** Index into content.hints for hint tokens (used by the debug benchmark). */
+  hintIndex?: number;
 };
 
 type NativeSegment = Token & {
@@ -146,6 +148,7 @@ function HintTokenBox({
   spaceWidth,
   popup,
   onLookup,
+  debugAutoShow,
 }: {
   token: Token;
   displayText: string;
@@ -155,9 +158,38 @@ function HintTokenBox({
   spaceWidth?: number;
   popup: React.ContextType<typeof HintPopupContext>;
   onLookup: () => void;
+  debugAutoShow?: boolean;
 }) {
   const tokenLayoutRef = React.useRef({ width: 0, height: 0 });
+  const boxRef = React.useRef<View>(null);
   const interactive = Boolean(token.hint) && !token.hidden;
+
+  // Benchmark-only: open the popup anchored exactly where a real tap on this
+  // token would (same math as onPress below, with the touch point replaced by
+  // the measured box). Re-shown on an interval because the popup dismisses
+  // itself after 2.5s and the screenshot driver captures later than that.
+  React.useEffect(() => {
+    if (!debugAutoShow || !token.hint) return;
+    const hint = token.hint;
+    const show = () => {
+      // measure() (not measureInWindow) — pageX/pageY are the same
+      // coordinate space the popup host receives from real tap events.
+      boxRef.current?.measure((_x, _y, width, _height, pageX, pageY) => {
+        popup.show({
+          translation: hint.translation,
+          pronunciation: hint.pronunciation,
+          x: pageX + width / 2,
+          y: pageY,
+        });
+      });
+    };
+    const timer = setTimeout(show, 400);
+    const keepAlive = setInterval(show, 1500);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(keepAlive);
+    };
+  }, [debugAutoShow, token.hint, popup]);
   // A whitespace token's own text box is shorter than the surrounding glyph
   // boxes (its space glyph often comes from a shorter fallback font). Word
   // boxes top-align (flex-start), so a shorter, top-aligned space box would
@@ -167,6 +199,7 @@ function HintTokenBox({
 
   return (
     <View
+      ref={boxRef}
       onLayout={(event) => {
         tokenLayoutRef.current = {
           width: event.nativeEvent.layout.width,
@@ -364,6 +397,7 @@ function buildTokens({
     end: number,
     hint?: Token["hint"],
     hintGroupKey?: string,
+    hintIndex?: number,
   ): void => {
     const pieces = splitTextTokens(visible.text.substring(start, end));
     let position = start;
@@ -394,6 +428,7 @@ function buildTokens({
               (audioRange > 0 && audioRange < pieceStart)),
           hint,
           hintGroupKey,
+          hintIndex,
         });
       }
     }
@@ -412,6 +447,7 @@ function buildTokens({
       hint.rangeTo + 1,
       translation ? { translation, pronunciation } : undefined,
       hintGroupKey,
+      hint.hintIndex,
     );
     textPos = hint.rangeTo + 1;
   }
@@ -428,6 +464,7 @@ function NativeHintText({
   rtl,
   centered,
   fillLineWidth,
+  debugAutoShowHintIndex,
 }: {
   tokens: Token[];
   flatStyle: TextStyle;
@@ -436,10 +473,12 @@ function NativeHintText({
   rtl: boolean;
   centered: boolean;
   fillLineWidth: boolean;
+  debugAutoShowHintIndex?: number;
 }) {
   const { colors } = useTheme();
   const popup = React.useContext(HintPopupContext);
   const onHintLookup = React.useContext(HintLookupContext);
+  const containerRef = React.useRef<View>(null);
   const segments = React.useMemo(() => buildNativeSegments(tokens), [tokens]);
   const [textLayout, setTextLayout] = React.useState({ x: 0, y: 0, width: 0, height: 0 });
   const [lineLayouts, setLineLayouts] = React.useState<
@@ -458,6 +497,7 @@ function NativeHintText({
       hidden: boolean;
       revealed: boolean;
       hint?: Token["hint"];
+      hintIndex?: number;
       underlineGroupKey?: string;
     }> = [];
     let segmentIndex = 0;
@@ -482,6 +522,7 @@ function NativeHintText({
           hidden: segment.hidden,
           revealed: segment.revealed,
           hint: segment.hint,
+          hintIndex: segment.hintIndex,
           underlineGroupKey: segment.underlineGroupKey,
         });
 
@@ -493,6 +534,44 @@ function NativeHintText({
 
     return rects;
   }, [lineLayouts, segmentWidths, segments, textLayout.x, textLayout.y]);
+
+  // Benchmark-only: open the popup over the measured bounds of the requested
+  // hint, mirroring where a real tap would anchor it. Uses the hint's segments
+  // on their first line (native segments are per layout unit, so a hint spans
+  // several). Re-shown on an interval because the popup auto-dismisses.
+  React.useEffect(() => {
+    if (debugAutoShowHintIndex === undefined) return;
+    const hintSegments = computedSegments.filter(
+      (segment) =>
+        segment.hint && segment.hintIndex === debugAutoShowHintIndex,
+    );
+    if (hintSegments.length === 0) return;
+    const firstLineY = hintSegments[0].y;
+    const onFirstLine = hintSegments.filter((s) => s.y === firstLineY);
+    const hint = hintSegments[0].hint;
+    if (!hint) return;
+    const x1 = Math.min(...onFirstLine.map((s) => s.x));
+    const x2 = Math.max(...onFirstLine.map((s) => s.x + s.width));
+    const show = () => {
+      // measure() for pageX/pageY — the popup host's coordinate space.
+      containerRef.current?.measure(
+        (_x, _y, _width, _height, pageX, pageY) => {
+          popup.show({
+            translation: hint.translation,
+            pronunciation: hint.pronunciation,
+            x: pageX + (x1 + x2) / 2,
+            y: pageY + firstLineY,
+          });
+        },
+      );
+    };
+    const timer = setTimeout(show, 400);
+    const keepAlive = setInterval(show, 1500);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(keepAlive);
+    };
+  }, [computedSegments, debugAutoShowHintIndex, popup]);
 
   const underlineSegments = React.useMemo(() => {
     type UnderlineSegment = {
@@ -589,6 +668,8 @@ function NativeHintText({
 
   return (
     <View
+      ref={containerRef}
+      collapsable={false}
       style={[
         {
           minWidth: 0,
@@ -794,6 +875,7 @@ export function HintText({
   centered = false,
   fillLineWidth = false,
   renderMode = "auto",
+  debugAutoShowHintIndex,
 }: {
   content: ContentWithHints;
   /** Highest spoken character index during playback (99999 = idle). */
@@ -810,6 +892,12 @@ export function HintText({
   centered?: boolean;
   fillLineWidth?: boolean;
   renderMode?: HintTextRenderMode;
+  /**
+   * Benchmark-only: auto-open the hint popup for this index into
+   * content.hints, anchored on the hint's measured position (exercises the
+   * same anchoring math as a real tap). No effect in production usage.
+   */
+  debugAutoShowHintIndex?: number;
 }) {
   const { colors } = useTheme();
   const popup = React.useContext(HintPopupContext);
@@ -840,6 +928,7 @@ export function HintText({
         rtl={rtl}
         centered={centered}
         fillLineWidth={fillLineWidth}
+        debugAutoShowHintIndex={debugAutoShowHintIndex}
       />
     );
   }
@@ -876,6 +965,10 @@ export function HintText({
         }
         popup={popup}
         onLookup={onHintLookup}
+        debugAutoShow={
+          debugAutoShowHintIndex !== undefined &&
+          token.hintIndex === debugAutoShowHintIndex
+        }
       />
     );
   };

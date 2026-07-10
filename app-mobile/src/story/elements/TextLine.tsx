@@ -132,6 +132,7 @@ export function TextLine({
   replayKey = 0,
   audioRangeOverride,
   onManualAudioPlay,
+  debugAutoShowHintIndex,
 }: {
   element: StoryElementLine;
   active: boolean;
@@ -141,6 +142,8 @@ export function TextLine({
   replayKey?: number;
   audioRangeOverride?: number;
   onManualAudioPlay?: () => void;
+  /** Benchmark-only: forwarded to HintText to auto-open a hint popup. */
+  debugAutoShowHintIndex?: number;
 }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
@@ -184,6 +187,7 @@ export function TextLine({
             audioRange={audioRange}
             hideRangesForChallenge={hideRanges}
             unhide={unhide}
+            debugAutoShowHintIndex={debugAutoShowHintIndex}
             lang={element.lang}
             renderMode={preferNativeText ? "native" : "tokenized"}
             rtl={lineRtl}
@@ -235,6 +239,7 @@ export function TextLine({
                 audioRange={audioRange}
                 hideRangesForChallenge={hideRanges}
                 unhide={unhide}
+            debugAutoShowHintIndex={debugAutoShowHintIndex}
                 lang={element.lang}
                 renderMode={preferNativeText ? "native" : "tokenized"}
                 rtl={lineRtl}
@@ -271,6 +276,7 @@ export function TextLine({
           audioRange={audioRange}
           hideRangesForChallenge={hideRanges}
           unhide={unhide}
+            debugAutoShowHintIndex={debugAutoShowHintIndex}
           lang={element.lang}
           renderMode={preferNativeText ? "native" : "tokenized"}
           rtl={lineRtl}

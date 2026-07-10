@@ -341,7 +341,9 @@ export const LANGUAGE_FIXTURES: LanguageFixture[] = [
       ["中", "inside", "なか"],
     ]),
     hidePhrase: "コートのポケットの中",
-    popupHint: ["鍵", "key", "かぎ"],
+    // Must reference a hint in `question` (the line the popup case renders);
+    // 古い carries a pronunciation so the furigana line shows in the popup.
+    popupHint: ["古い", "old", "ふるい"],
   },
   {
     lang: "zh",
