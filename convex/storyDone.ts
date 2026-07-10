@@ -54,12 +54,38 @@ export const recordStoryDone = mutation({
       throw new Error(`Missing story for legacy id ${args.legacyStoryId}`);
     }
 
-    const doneAt = args.time ?? Date.now();
-    const docId = await ctx.db.insert("story_done", {
-      storyId: story._id,
-      legacyUserId: legacyUserId ?? undefined,
-      time: doneAt,
-    });
+    // Client clocks can lie; Story Completions can never be in the future.
+    const doneAt = Math.min(args.time ?? Date.now(), Date.now());
+    let docId: Id<"story_done">;
+    let inserted: boolean;
+
+    if (typeof legacyUserId === "number") {
+      const existingDone = await ctx.db
+        .query("story_done")
+        .withIndex("by_user_and_story", (q) =>
+          q.eq("legacyUserId", legacyUserId).eq("storyId", story._id),
+        )
+        .filter((q) => q.eq(q.field("time"), doneAt))
+        .first();
+      if (existingDone) {
+        docId = existingDone._id;
+        inserted = false;
+      } else {
+        docId = await ctx.db.insert("story_done", {
+          storyId: story._id,
+          legacyUserId,
+          time: doneAt,
+        });
+        inserted = true;
+      }
+    } else {
+      docId = await ctx.db.insert("story_done", {
+        storyId: story._id,
+        legacyUserId: undefined,
+        time: doneAt,
+      });
+      inserted = true;
+    }
 
     if (typeof legacyUserId === "number") {
       const course = await ctx.db.get(story.courseId);
@@ -85,7 +111,7 @@ export const recordStoryDone = mutation({
       }
     }
 
-    return { inserted: true, docId };
+    return inserted ? { inserted: true, docId } : { inserted: false, docId };
   },
 });
 

@@ -25,7 +25,11 @@ import {
 import { useAppState } from "../src/app-state";
 import { Button } from "../src/components/Button";
 import { Text, TextInput } from "../src/components/Text";
-import { clearAllProgress, getAllDoneStories } from "../src/storage";
+import {
+  clearAllProgress,
+  getAllDoneStories,
+  removeDoneStory,
+} from "../src/storage";
 import { type ThemeColors, useTheme } from "../src/theme";
 
 type AuthMode = "signin" | "register";
@@ -129,6 +133,7 @@ export default function AuthScreen() {
         legacyStoryId: story.storyId,
         time: story.time,
       });
+      await removeDoneStory(story.storyId);
     }
     await clearAllProgress();
     captureMobileEventLater("mobile_local_progress_imported", {
