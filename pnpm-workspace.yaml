@@ -8,3 +8,5 @@ allowBuilds:
   sharp: false
 overrides:
   kysely: 0.28.17
+  hono: ">=4.12.25"
+  undici: ">=6.27.0"

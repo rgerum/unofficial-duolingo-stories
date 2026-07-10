@@ -24,7 +24,7 @@ Mobile-touching plans add: `pnpm --dir app-mobile typecheck`.
 | 008 | Harden shared-secret HTTP endpoints; internalize backfills | P3 | S | — | TODO (re-verified 2026-07-09; routes unchanged) |
 | 009 | Extract pure logic from the 4,120-line audio-cutter dialog | P2 | M–L | 001, 005 | TODO (re-verified 2026-07-09) |
 | 010 | Design the author-identity + Postgres-sunset schema migrations | P2 | M | 006 | TODO (note: schema gained story_feedback_reports + audio_problem_count since planning) |
-| 011 | Clear high-severity dep advisories (hono, undici); unpin mobile auth | P1 | S | — | TODO |
+| 011 | Clear high-severity dep advisories (hono, undici); unpin mobile auth | P1 | S | — | DONE (2026-07-10) |
 | 012 | Make app-mobile visible to CI; truth-up mobile docs | P1 | S | — | TODO |
 | 013 | Bound/validate story-feedback intake; paginate review queue | P1 | M | — | TODO |
 | 014 | Validate recordStoryDone inputs; idempotent progress import | P2 | S | — (not concurrent with 003) | TODO |
