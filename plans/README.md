@@ -28,7 +28,7 @@ Mobile-touching plans add: `pnpm --dir app-mobile typecheck`.
 | 012 | Make app-mobile visible to CI; truth-up mobile docs | P1 | S | — | TODO |
 | 013 | Bound/validate story-feedback intake; paginate review queue | P1 | M | — | TODO |
 | 014 | Validate recordStoryDone inputs; idempotent progress import | P2 | S | — (not concurrent with 003) | TODO |
-| 015 | Complete account deletion (cascade user data) | P1 | M | — | TODO |
+| 015 | Complete account deletion (cascade user data) | P1 | M | — | DONE (2026-07-10; manual e2e deletion check pending) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale).
 
