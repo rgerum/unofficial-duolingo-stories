@@ -28,7 +28,7 @@
 - **hono 4.12.23** (GHSA-88fw-hqm2-52qc — CORS middleware reflects any Origin with credentials; fixed in ≥4.12.25), reached via `@convex-dev/better-auth > convex-helpers > hono`. Reachable: `convex/http.ts` calls `authComponent.registerRoutes(http, createAuth)`, which mounts the Better Auth HTTP routes on this hono instance.
 - **undici 6.26.0** (GHSA-vxpw-j846-p89q — WebSocket client DoS; fixed in ≥6.27.0), reached via `@vercel/blob > undici`. Reachable: `@vercel/blob` is imported in `src/app/audio/upload/route.ts` and the TTS provider modules under `src/app/audio/_lib/audio/`.
 
-Separately, `app-mobile/package.json` exact-pins `@convex-dev/better-auth` to `0.12.2` (the web app uses `^0.12.4`), so auth fixes published in 0.12.x never reach the mobile app automatically. Auth is the one subsystem both apps genuinely share against the same Convex backend.
+Separately, `app-mobile/package.json` exact-pins `@convex-dev/better-auth` to `0.12.5` (the web app uses `^0.12.5`), so auth fixes published in 0.12.x never reach the mobile app automatically. Auth is the one subsystem both apps genuinely share against the same Convex backend.
 
 ## Current state
 
@@ -39,7 +39,7 @@ Separately, `app-mobile/package.json` exact-pins `@convex-dev/better-auth` to `0
   ```
 - Root `package.json` also carries a duplicate `"pnpm": { "overrides": { "kysely": "0.28.17" } }` block. Leave it alone; add new overrides to `pnpm-workspace.yaml` only.
 - `app-mobile/package.json` (its own pnpm root, own `app-mobile/pnpm-lock.yaml`):
-  - `"@convex-dev/better-auth": "0.12.2"` (exact pin, no caret)
+  - `"@convex-dev/better-auth": "0.12.5"` (exact pin, no caret)
   - `"better-auth": "^1.6.14"` and `"@better-auth/expo": "^1.6.14"` (already caret — leave)
 - `pnpm audit --prod` at the repo root currently reports 2 high (hono, undici as above), plus moderates that are out of scope here.
 - CI (`.github/workflows/ci.yaml`) runs `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint` — your lockfile change must keep those green.
@@ -114,18 +114,18 @@ Run `pnpm typecheck && pnpm lint && pnpm test`.
 In `app-mobile/package.json`, change:
 
 ```json
-"@convex-dev/better-auth": "0.12.2"
+"@convex-dev/better-auth": "0.12.5"
 ```
 
 to a caret range matching the web app's floor:
 
 ```json
-"@convex-dev/better-auth": "^0.12.4"
+"@convex-dev/better-auth": "^0.12.5"
 ```
 
 Then run `pnpm --dir app-mobile install`.
 
-**Verify**: exit 0, and `grep '"@convex-dev/better-auth"' app-mobile/package.json` shows `^0.12.4`.
+**Verify**: exit 0, and `grep '"@convex-dev/better-auth"' app-mobile/package.json` shows `^0.12.5`.
 
 ### Step 6: Mobile typecheck
 

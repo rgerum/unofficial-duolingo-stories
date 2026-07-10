@@ -32,3 +32,38 @@ jobs:
 
       - name: Convex tests
         run: pnpm test:convex
+
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            app-mobile/pnpm-lock.yaml
+
+      - name: Install Root Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Mobile Dependencies
+        run: pnpm --dir app-mobile install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm --dir app-mobile format:check
+
+      - name: Lint
+        run: pnpm --dir app-mobile lint
+
+      - name: Typecheck
+        run: pnpm --dir app-mobile typecheck

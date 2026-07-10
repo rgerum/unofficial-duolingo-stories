@@ -25,7 +25,7 @@ Mobile-touching plans add: `pnpm --dir app-mobile typecheck`.
 | 009 | Extract pure logic from the 4,135-line audio-cutter dialog | P2 | M–L | 001, 005 | DONE |
 | 010 | Design the author-identity + Postgres-sunset schema migrations | P2 | M | 006 | TODO |
 | 011 | Clear high-severity dep advisories (hono, undici); unpin mobile auth | P1 | S | — | DONE (2026-07-10) |
-| 012 | Make app-mobile visible to CI; truth-up mobile docs | P1 | S | — | TODO |
+| 012 | Make app-mobile visible to CI; truth-up mobile docs | P1 | S | — | DONE (2026-07-10) |
 | 013 | Bound/validate story-feedback intake; paginate review queue | P1 | M | — | TODO |
 | 014 | Validate recordStoryDone inputs; idempotent progress import | P2 | S | — (not concurrent with 003) | TODO |
 | 015 | Complete account deletion (cascade user data) | P1 | M | — | TODO |

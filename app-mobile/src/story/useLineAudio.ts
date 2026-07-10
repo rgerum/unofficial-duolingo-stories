@@ -72,19 +72,15 @@ export function useLineAudio(
     }
     cancelLineAudio(false);
     setAudioRange(getInitialAudioRange(audio));
-    timeoutRef.current = setTimeout(() => {
-      timeoutRef.current = null;
-      cancelRef.current = playAudio(audio, { onRange: setAudioRange });
-    }, replayKey > 0 ? 0 : 350);
+    timeoutRef.current = setTimeout(
+      () => {
+        timeoutRef.current = null;
+        cancelRef.current = playAudio(audio, { onRange: setAudioRange });
+      },
+      replayKey > 0 ? 0 : 350,
+    );
     return clearScheduledPlay;
-  }, [
-    active,
-    autoPlay,
-    audio,
-    replayKey,
-    cancelLineAudio,
-    clearScheduledPlay,
-  ]);
+  }, [active, autoPlay, audio, replayKey, cancelLineAudio, clearScheduledPlay]);
 
   return { audioRange, play, hasAudio: Boolean(audio?.url) };
 }

@@ -70,12 +70,15 @@
 | Typecheck | `pnpm typecheck` | exit 0 |
 | Lint | `pnpm lint` | exit 0 |
 | Tests | `pnpm test` | all pass |
-| Format | `pnpm format` | rewrites in place |
+| Convex tests | `pnpm test:convex` | all pass |
+| Format | `pnpm run format` | rewrites in place |
+| Format check | `pnpm run format:check` | exit 0, no changes needed |
 
 ## Scope
 
 **In scope** (the only files you should modify):
 - `convex/storyFeedback.ts`
+- `convex/storyFeedback.test.ts` (add regression coverage for validation, report caps, and pagination)
 - `convex/schema.ts` (one new index on `story_feedback_reports` only)
 - `convex/_generated/**` (via codegen only — never hand-edit)
 - `src/components/StoryFeedback/StoryFeedback.tsx` (textarea `maxLength`, and surface the new server errors in its existing error state if it has one — check how line 133's call handles rejection and match that pattern)
@@ -128,13 +131,15 @@ In `StoryFeedback.tsx`: add `maxLength={2000}` to the textarea (lines 183-191). 
 
 ### Step 6: Full verification
 
-Run `pnpm format && pnpm typecheck && pnpm lint && pnpm test`.
+Add `convex/storyFeedback.test.ts` covering: comment/string length-cap rejection, unknown-story rejection, rejection when 25 open reports already exist for the story, and paginated `listStoryFeedbackReports` results across more than one page. Preserve the existing authorization, empty-comment, and status-transition characterization cases from Plan 006.
 
-**Verify**: all exit 0.
+Run `pnpm run format && pnpm run format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm test:convex`.
+
+**Verify**: all exit 0, including the new story-feedback regression tests.
 
 ## Test plan
 
-There is no Convex test harness yet (plan 006, TODO), and `pnpm test` only globs `src/**`, so Convex-side unit tests cannot be added in this plan. Keep validation inline in the mutation and record in `plans/README.md` that `convex/storyFeedback.test.ts` (already added to plan 006's file list) must cover: length-cap rejection, unknown-story rejection, the 25-open-reports cap, and pagination of `listStoryFeedbackReports`. Manual verification for this plan: exercise the feedback dialog once on a local dev story page (`pnpm dev`, open any story, submit feedback; then check the editor queue paginates) and report what you observed.
+The Convex harness from Plan 006 is available. Extend `convex/storyFeedback.test.ts` with length-cap rejection, unknown-story rejection, the 25-open-reports cap, and pagination of `listStoryFeedbackReports`. Run these with `pnpm test:convex`. Also exercise the feedback dialog once on a local dev story page (`pnpm dev`, open any story, submit feedback; then check the editor queue paginates) and report what you observed.
 
 ## Done criteria
 
@@ -143,7 +148,8 @@ Machine-checkable. ALL must hold:
 - [ ] `grep -n "by_story_and_status" convex/schema.ts` → match
 - [ ] `grep -n "maxLength" src/components/StoryFeedback/StoryFeedback.tsx` → match
 - [ ] `grep -n "paginationOpts" convex/storyFeedback.ts` → match; `grep -n '"limit"\|limit:' convex/storyFeedback.ts` → no `limit` arg remains on the list query
-- [ ] `pnpm typecheck && pnpm lint && pnpm test` exit 0
+- [ ] `convex/storyFeedback.test.ts` covers length caps, unknown stories, the 25-open-reports cap, and multi-page report listing
+- [ ] `pnpm run format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm test:convex` exit 0
 - [ ] `git status` shows no modified files outside the in-scope list (plus `convex/_generated` from codegen)
 - [ ] `plans/README.md` status row updated
 
@@ -159,6 +165,6 @@ Stop and report back (do not improvise) if:
 ## Maintenance notes
 
 - The 25-open-reports-per-story cap is a dampener, not real rate limiting. If feedback abuse actually occurs, install `@convex-dev/rate-limiter` and key on identity token (signed-in) with a coarse anonymous bucket — that supersedes the cap.
-- When plan 006's harness lands, the four test cases named in "Test plan" above are the acceptance tests for this module.
+- The four cases named in "Test plan" above are the acceptance tests for this module and must stay in the Plan 006 harness.
 - Reviewer: check the pagination `returns` validator matches what `usePaginatedQuery` expects, and that the status-tab switch resets the page (stale-cursor bugs are the classic mistake here).
 - Related direction idea (maintainer decision, not planned): notify the reporting learner when their feedback is resolved — see "Direction options" in `plans/README.md`.

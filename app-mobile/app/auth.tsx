@@ -181,8 +181,9 @@ export default function AuthScreen() {
     setIsPending(true);
     captureMobileEventLater("oauth_provider_clicked", {
       provider,
-      provider_name: SOCIAL_PROVIDERS.find((item) => item.id === provider)
-        ?.label ?? provider,
+      provider_name:
+        SOCIAL_PROVIDERS.find((item) => item.id === provider)?.label ??
+        provider,
     });
 
     try {
@@ -296,7 +297,9 @@ export default function AuthScreen() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.content}
         >
-          <Text style={styles.title}>{isRegister ? "Create account" : "Sign in"}</Text>
+          <Text style={styles.title}>
+            {isRegister ? "Create account" : "Sign in"}
+          </Text>
           <Text style={styles.body}>
             This is for your Duostories account, not your Duolingo account.
           </Text>
@@ -351,7 +354,9 @@ export default function AuthScreen() {
             onPress={() => void submit()}
             disabled={isPending}
           />
-          {isPending && <ActivityIndicator color={colors.blue} style={styles.spinner} />}
+          {isPending && (
+            <ActivityIndicator color={colors.blue} style={styles.spinner} />
+          )}
 
           {socialProviders.length > 0 && (
             <>
@@ -567,149 +572,149 @@ function SocialProviderIcon({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  keyboard: {
-    flex: 1,
-  },
-  content: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 28,
-    paddingVertical: 28,
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: "800",
-    color: colors.text,
-    textAlign: "center",
-  },
-  body: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: colors.textDim,
-    textAlign: "center",
-    marginTop: 12,
-    marginBottom: 24,
-  },
-  form: {
-    gap: 12,
-    marginBottom: 16,
-  },
-  input: {
-    minHeight: 52,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    fontSize: 17,
-    color: colors.text,
-    backgroundColor: colors.surface,
-  },
-  error: {
-    color: colors.red,
-    fontSize: 15,
-    lineHeight: 21,
-    marginBottom: 14,
-    textAlign: "center",
-  },
-  message: {
-    color: colors.greenDark,
-    backgroundColor: colors.greenLight,
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 15,
-    lineHeight: 21,
-    marginBottom: 14,
-    textAlign: "center",
-  },
-  spinner: {
-    marginTop: 12,
-  },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginTop: 18,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 2,
-    backgroundColor: colors.border,
-  },
-  dividerText: {
-    color: colors.textDim,
-    fontSize: 14,
-    fontWeight: "700",
-    textTransform: "uppercase",
-  },
-  primarySocialButton: {
-    marginTop: 14,
-  },
-  socialGrid: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 10,
-  },
-  secondarySocialButton: {
-    flex: 1,
-  },
-  socialButtonWrap: {
-    minHeight: 54,
-    paddingBottom: SOCIAL_BUTTON_EDGE,
-  },
-  socialButtonEdge: {
-    position: "absolute",
-    top: SOCIAL_BUTTON_EDGE,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 14,
-    backgroundColor: colors.border,
-  },
-  socialButtonEdgeDisabled: {
-    backgroundColor: colors.disabledBackground,
-  },
-  socialButtonFace: {
-    minHeight: 50,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 14,
-    backgroundColor: colors.surface,
-    paddingHorizontal: 14,
-  },
-  socialButtonDisabled: {
-    backgroundColor: colors.disabledBackground,
-    borderColor: colors.disabledBackground,
-  },
-  primarySocialButtonText: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  socialButtonTextDisabled: {
-    color: colors.disabled,
-  },
-  socialIconDisabled: {
-    opacity: 0.45,
-  },
-  switchMode: {
-    alignItems: "center",
-    paddingVertical: 18,
-  },
-  anonymousButtonLabel: {
-    textTransform: "none",
-  },
-  switchText: {
-    color: colors.blue,
-    fontSize: 16,
-    fontWeight: "700",
-  },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    keyboard: {
+      flex: 1,
+    },
+    content: {
+      flexGrow: 1,
+      justifyContent: "center",
+      paddingHorizontal: 28,
+      paddingVertical: 28,
+    },
+    title: {
+      fontSize: 30,
+      fontWeight: "800",
+      color: colors.text,
+      textAlign: "center",
+    },
+    body: {
+      fontSize: 16,
+      lineHeight: 24,
+      color: colors.textDim,
+      textAlign: "center",
+      marginTop: 12,
+      marginBottom: 24,
+    },
+    form: {
+      gap: 12,
+      marginBottom: 16,
+    },
+    input: {
+      minHeight: 52,
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 14,
+      paddingHorizontal: 14,
+      fontSize: 17,
+      color: colors.text,
+      backgroundColor: colors.surface,
+    },
+    error: {
+      color: colors.red,
+      fontSize: 15,
+      lineHeight: 21,
+      marginBottom: 14,
+      textAlign: "center",
+    },
+    message: {
+      color: colors.greenDark,
+      backgroundColor: colors.greenLight,
+      borderRadius: 12,
+      padding: 12,
+      fontSize: 15,
+      lineHeight: 21,
+      marginBottom: 14,
+      textAlign: "center",
+    },
+    spinner: {
+      marginTop: 12,
+    },
+    dividerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      marginTop: 18,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 2,
+      backgroundColor: colors.border,
+    },
+    dividerText: {
+      color: colors.textDim,
+      fontSize: 14,
+      fontWeight: "700",
+      textTransform: "uppercase",
+    },
+    primarySocialButton: {
+      marginTop: 14,
+    },
+    socialGrid: {
+      flexDirection: "row",
+      gap: 8,
+      marginTop: 10,
+    },
+    secondarySocialButton: {
+      flex: 1,
+    },
+    socialButtonWrap: {
+      minHeight: 54,
+      paddingBottom: SOCIAL_BUTTON_EDGE,
+    },
+    socialButtonEdge: {
+      position: "absolute",
+      top: SOCIAL_BUTTON_EDGE,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      borderRadius: 14,
+      backgroundColor: colors.border,
+    },
+    socialButtonEdgeDisabled: {
+      backgroundColor: colors.disabledBackground,
+    },
+    socialButtonFace: {
+      minHeight: 50,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 14,
+      backgroundColor: colors.surface,
+      paddingHorizontal: 14,
+    },
+    socialButtonDisabled: {
+      backgroundColor: colors.disabledBackground,
+      borderColor: colors.disabledBackground,
+    },
+    primarySocialButtonText: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: "800",
+    },
+    socialButtonTextDisabled: {
+      color: colors.disabled,
+    },
+    socialIconDisabled: {
+      opacity: 0.45,
+    },
+    switchMode: {
+      alignItems: "center",
+      paddingVertical: 18,
+    },
+    anonymousButtonLabel: {
+      textTransform: "none",
+    },
+    switchText: {
+      color: colors.blue,
+      fontSize: 16,
+      fontWeight: "700",
+    },
   });
 }

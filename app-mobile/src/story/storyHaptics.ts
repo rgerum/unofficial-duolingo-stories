@@ -28,7 +28,9 @@ export function playSuccessHaptic() {
     return;
   }
 
-  runHaptic(Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success));
+  runHaptic(
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
+  );
 }
 
 export function playErrorHaptic() {

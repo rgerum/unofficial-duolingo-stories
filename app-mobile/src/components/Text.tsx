@@ -20,12 +20,7 @@ function getNunitoFamily(style: TextProps["style"]): string | undefined {
   const weight = flatStyle?.fontWeight;
   if (weight === "300" || weight === 300 || weight === "200" || weight === 200)
     return NUNITO_LIGHT_FONT_FAMILY;
-  if (
-    weight === "800" ||
-    weight === 800 ||
-    weight === "900" ||
-    weight === 900
-  )
+  if (weight === "800" || weight === 800 || weight === "900" || weight === 900)
     return NUNITO_EXTRA_BOLD_FONT_FAMILY;
   if (
     weight === "600" ||

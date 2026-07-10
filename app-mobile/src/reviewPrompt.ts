@@ -21,7 +21,9 @@ function parseJsonObject<T>(raw: string | null): T | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
-    return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
+    return typeof parsed === "object" &&
+      parsed !== null &&
+      !Array.isArray(parsed)
       ? (parsed as T)
       : null;
   } catch {
@@ -69,7 +71,8 @@ function getNextMilestone(
   return (
     PROMPT_MILESTONES.find(
       (milestone) =>
-        completedStoryCount >= milestone && !attemptedMilestones.includes(milestone),
+        completedStoryCount >= milestone &&
+        !attemptedMilestones.includes(milestone),
     ) ?? null
   );
 }
@@ -99,7 +102,8 @@ export async function maybeRequestAppReview({
     state.attemptedMilestones,
   );
   if (!milestone) return;
-  if (state.lastAttemptedAt && now - state.lastAttemptedAt < COOLDOWN_MS) return;
+  if (state.lastAttemptedAt && now - state.lastAttemptedAt < COOLDOWN_MS)
+    return;
 
   const canRequestReview = await canRequestNativeReview();
   if (!canRequestReview) {
@@ -137,7 +141,9 @@ export async function maybeRequestAppReview({
 
 async function canRequestNativeReview(): Promise<boolean> {
   try {
-    return (await StoreReview.isAvailableAsync()) && (await StoreReview.hasAction());
+    return (
+      (await StoreReview.isAvailableAsync()) && (await StoreReview.hasAction())
+    );
   } catch {
     return false;
   }
