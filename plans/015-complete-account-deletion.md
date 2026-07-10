@@ -7,7 +7,7 @@
 > in `plans/README.md` — unless a reviewer dispatched you and told you they
 > maintain the index.
 >
-> **Drift check (run first)**: `git diff --stat 54df8979..HEAD -- convex/account.ts convex/schema.ts app-mobile/app/(tabs)/profile.tsx`
+> **Drift check (run first)**: `git diff --stat 54df8979..HEAD -- convex/account.ts convex/schema.ts 'app-mobile/app/(tabs)/profile.tsx'`
 > If any in-scope file changed since this plan was written, compare the
 > "Current state" excerpts against the live code before proceeding; on a
 > mismatch, treat it as a STOP condition.
@@ -71,22 +71,25 @@ The mobile app's delete-account flow tells the **Learner** it "permanently delet
 1. **Order: app data first, auth record last.** If anything throws, the transaction rolls back as a unit, but keep the auth `deleteOne` as the final statement anyway — it makes the intent readable and keeps the guard (`requireSessionLegacyUserId`) meaningful throughout.
 2. **Anonymize feedback reports, don't delete them**: patch matching `story_feedback_reports` rows (index `by_user_id` on the token identifier) to `{ userId: null, userName: null, userEmail: null }`. The report content is community moderation data about a story, not about the user; stripping attribution satisfies erasure while keeping the moderation queue intact.
 3. **Keep `story_approval` rows and contributor attribution** (maintainer-confirmed 2026-07-09): approvals are editorial workflow records — deleting them would retroactively obscure **Story Status** history (it becomes unclear why a story is **Published** if the **Approvals** that made it **Finished** vanish), breaking the editor flow. They reference only a numeric `legacyUserId` with no name/email. Leave them, and likewise leave the contributor-name attribution embedded in `courses.contributorDetails` (see `courseContributorDetailsValidator`, `convex/schema.ts:4-9`). This is settled — do not scrub either, and do not flag it as an open question.
-4. **Delete sessions/accounts via the adapter, defensively**: after deleting the user model row, attempt `deleteMany` for models `"session"` and `"account"` where their user-reference field matches `user._id`. First **verify the adapter API and the field name** (read `node_modules/@convex-dev/better-auth`'s adapter typings and one of the component's own usages). If `deleteOne(user)` already cascades (check by reading the component source), skip this step and say so in your report.
+4. **Delete sessions/accounts via the adapter, defensively**: before the final user deletion, call `deleteMany` for models `"session"` and `"account"` where their user-reference field matches `user._id`. First **verify the adapter API and the field name** (read `node_modules/@convex-dev/better-auth`'s adapter typings and one of the component's own usages). If `deleteOne(user)` already cascades (check by reading the component source), skip the explicit cleanup and say so in your report. In either case, `deleteOne(user)` remains the final auth operation.
 
 ## Commands you will need
 
 | Purpose | Command | Expected on success |
 |-----------|----------------------------------|---------------------|
 | Codegen | `pnpm exec convex codegen` | exit 0 |
+| Format | `pnpm run format` | rewrites in place |
 | Typecheck | `pnpm typecheck` | exit 0 |
 | Lint | `pnpm lint` | exit 0 |
 | Tests | `pnpm test` | all pass |
+| Convex tests | `pnpm test:convex` | account-deletion regressions pass |
 | Local Convex (manual check) | `pnpm exec convex dev` (background) + exercise deletion with the `user`/`test` account | rows gone |
 
 ## Scope
 
 **In scope** (the only files you should modify):
 - `convex/account.ts`
+- `convex/account.test.ts` (create)
 - `convex/_generated/**` (via codegen only)
 
 **Out of scope** (do NOT touch, even though they look related):
@@ -107,27 +110,33 @@ The mobile app's delete-account flow tells the **Learner** it "permanently delet
 
 (a) Find the writer of `user_preferences` (`grep -rn "user_preferences" convex/`) and confirm which identity field `by_token_identifier` stores. (b) Read the Better Auth adapter typings/usages for `deleteMany` and whether `deleteOne` on `"user"` cascades sessions/accounts (decision 4).
 
-**Verify**: you can state, with `file:line` evidence, (a) the exact identity field, and (b) whether a session/account cleanup call is needed. If either cannot be established, STOP and report.
+**Verify**: you can state, with `file:line` evidence, (a) the exact identity field, and (b) whether explicit session/account cleanup is needed before the final user deletion. If either cannot be established, STOP and report.
 
 ### Step 2: Implement the cascade
 
-Rewrite `deleteCurrentUser`'s handler: resolve `legacyUserId` and `identity` → delete rows from `story_done`, `story_done_state`, `course_activity`, `discord_stories_role_sync` (per-table index loops, exemplar `deleteCurrentUserCourseProgress`) → delete `user_preferences` by token identifier → anonymize `story_feedback_reports` (decision 2) → delete the auth user (existing code) → session/account cleanup if Step 1(b) says it's needed. Return a summary object instead of `v.null()`: `{ deletedRows: v.number(), anonymizedReports: v.number() }` — callers: check both call sites (`grep -rn "deleteCurrentUser" src/ app-mobile/`) and confirm they ignore the return value (the mobile caller does — it awaits and signs out); if any caller destructures the old `null`, keep `returns: v.null()` instead and log the counts with `console.log`.
+Rewrite `deleteCurrentUser`'s handler: resolve `legacyUserId` and `identity` → delete rows from `story_done`, `story_done_state`, `course_activity`, `discord_stories_role_sync` (per-table index loops, exemplar `deleteCurrentUserCourseProgress`) → delete `user_preferences` by token identifier → anonymize `story_feedback_reports` (decision 2) → explicitly delete session/account rows if Step 1(b) says cascade behavior is insufficient → delete the auth user as the final auth operation. Return a summary object instead of `v.null()`: `{ deletedRows: v.number(), anonymizedReports: v.number() }` — callers: check both call sites (`grep -rn "deleteCurrentUser" src/ app-mobile/`) and confirm they ignore the return value (the mobile caller does — it awaits and signs out); if any caller destructures the old `null`, keep `returns: v.null()` instead and log the counts with `console.log`.
 
 **Verify**: `pnpm exec convex codegen && pnpm typecheck && pnpm lint` exit 0.
 
-### Step 3: Manual end-to-end check on the dev deployment
+### Step 3: Add account-deletion regression tests
+
+Create `convex/account.test.ts`. Seed an authenticated user with keyed rows across all six affected data sets: `story_done`, `story_done_state`, `course_activity`, `user_preferences`, `discord_stories_role_sync`, and `story_feedback_reports`. Run `deleteCurrentUser`, then assert that the five deletion tables have no matching rows, the feedback report remains with `userId`, `userName`, and `userEmail` anonymized, and Better Auth session/account rows are removed where explicit cleanup is applicable. Also assert the auth user is deleted last by exercising the authenticated mutation successfully through completion.
+
+**Verify**: `pnpm test:convex` exits 0 and the account-deletion tests pass.
+
+### Step 4: Manual end-to-end check on the dev deployment
 
 With `pnpm exec convex dev` running and the app served locally: sign in as the test user (`user`/`test` — test credential, per CLAUDE.md), complete one story, then run the deletion (either through the mobile app if available, or invoke the mutation directly: `pnpm exec convex run account:deleteCurrentUser` won't carry an identity — so drive it through the UI or a short authenticated script; if neither is feasible in your environment, run the mutation logic against seeded rows via the dashboard and report what you could and couldn't verify).
 
 **Verify**: after deletion, the dashboard (or `pnpm exec convex run` helper queries) shows zero `story_done`/`story_done_state`/`course_activity`/`user_preferences` rows for that user, and any feedback reports it created show null identity fields.
 
-### Step 4: Full verification
+### Step 5: Full verification
 
-**Verify**: `pnpm typecheck && pnpm lint && pnpm test` exit 0.
+**Verify**: `pnpm run format && pnpm typecheck && pnpm lint && pnpm test && pnpm test:convex` exit 0.
 
 ## Test plan
 
-No Convex harness yet (plan 006). Record in `plans/README.md` that `convex/` harness tests must add an `account.test.ts`: seed a user with rows in all six tables → run `deleteCurrentUser` → assert zero remaining keyed rows, anonymized feedback, and (if applicable) no session/account rows. The Step 3 manual check is this plan's acceptance evidence — report exactly what was verified.
+The Convex harness from Plan 006 is available. `convex/account.test.ts` must seed all six affected data sets, run `deleteCurrentUser`, and assert that the five keyed deletion tables are empty, feedback attribution is anonymized, and session/account rows are removed where applicable. The Step 4 manual check remains acceptance evidence for the deployed integration; report exactly what was verified.
 
 ## Done criteria
 
@@ -135,8 +144,9 @@ Machine-checkable. ALL must hold:
 
 - [ ] `grep -c "ctx.db.delete" convex/account.ts` ≥ 4 (one loop per app table)
 - [ ] `grep -n "story_feedback_reports" convex/account.ts` → match (anonymization present)
-- [ ] `pnpm typecheck && pnpm lint && pnpm test` exit 0
-- [ ] Step 3 performed with observations reported (or explicitly reported as not feasible and why)
+- [ ] `convex/account.test.ts` covers all six data sets, feedback anonymization, auth user deletion, and session/account cleanup where applicable
+- [ ] `pnpm run format && pnpm typecheck && pnpm lint && pnpm test && pnpm test:convex` exit 0
+- [ ] Step 4 performed with observations reported (or explicitly reported as not feasible and why)
 - [ ] `git status` shows no modified files outside the in-scope list (plus `convex/_generated`)
 - [ ] `plans/README.md` status row updated
 

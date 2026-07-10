@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
