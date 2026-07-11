@@ -10,6 +10,11 @@ export type StoryTranscriptLine = {
   text: string;
 };
 
+type StoryTitleData = Pick<
+  StoryData,
+  "from_language_name" | "learning_language_long"
+>;
+
 function normalizeWhitespace(text: string) {
   return text.replace(/\s+/g, " ").trim();
 }
@@ -78,4 +83,8 @@ export function getStoryDescription(story: StoryData) {
       ? `${normalizedExcerpt.slice(0, 217).trimEnd()}...`
       : normalizedExcerpt;
   return `${baseDescription} ${trimmedExcerpt}`;
+}
+
+export function getStoryTitle(story: StoryTitleData) {
+  return `${story.from_language_name} - ${story.learning_language_long} Story with Audio | Duostories`;
 }
