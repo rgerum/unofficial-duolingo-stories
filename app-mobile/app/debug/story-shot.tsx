@@ -6,7 +6,10 @@ import { QuestionPrompt } from "../../src/story/elements/QuestionPrompt";
 import { SelectPhraseQuestion } from "../../src/story/elements/SelectPhraseQuestion";
 import { TextLine } from "../../src/story/elements/TextLine";
 import { HintPopupHost } from "../../src/story/HintPopup";
-import { StoryFeedback } from "../../src/story/StoryFeedback";
+import {
+  StoryFeedback,
+  StoryFeedbackFloat,
+} from "../../src/story/StoryFeedback";
 import { Footer } from "../../src/story/Footer";
 import type {
   ContentWithHints,
@@ -231,6 +234,7 @@ export default function StoryShotScreen() {
   const showFeedback = params.case?.startsWith("feedback") ?? false;
   const listeningFeedback = params.case?.includes("listening") ?? false;
   const finishedFeedback = params.case?.includes("finished") ?? false;
+  const correctFeedback = params.case?.includes("correct") ?? false;
   const openFeedback =
     params.case === "feedback" || params.case?.endsWith("-open");
 
@@ -247,20 +251,26 @@ export default function StoryShotScreen() {
         </ScrollView>
         {showFeedback ? (
           <View style={styles.footerFixture}>
+            <StoryFeedbackFloat>
+              <StoryFeedback
+                storyId={1234}
+                lineIndex={1}
+                lineText="Lucy: I think my keys are in the car."
+                initialOpen={openFeedback}
+                submitFeedback={() => Promise.resolve()}
+              />
+            </StoryFeedbackFloat>
             <Footer
-              status={finishedFeedback ? "finished" : "continue"}
+              status={
+                finishedFeedback
+                  ? "finished"
+                  : correctFeedback
+                    ? "right"
+                    : "continue"
+              }
               onContinue={() => {}}
               listeningMode={listeningFeedback}
               listeningPaused={listeningFeedback}
-              feedback={
-                <StoryFeedback
-                  storyId={1234}
-                  lineIndex={1}
-                  lineText="Lucy: I think my keys are in the car."
-                  initialOpen={openFeedback}
-                  submitFeedback={() => Promise.resolve()}
-                />
-              }
             />
           </View>
         ) : null}

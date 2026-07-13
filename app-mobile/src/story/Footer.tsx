@@ -31,7 +31,6 @@ export function Footer({
   onToggleListening,
   onReplayListening,
   onSkipListening,
-  feedback,
 }: {
   status: string;
   onContinue: () => void;
@@ -44,7 +43,6 @@ export function Footer({
   onToggleListening?: () => void;
   onReplayListening?: () => void;
   onSkipListening?: () => void;
-  feedback?: React.ReactNode;
 }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
@@ -81,15 +79,10 @@ export function Footer({
             </View>
           </>
         )}
-        {feedback ? (
-          <View style={[styles.feedbackAbovePrimary, styles.finishedFeedback]}>
-            {feedback}
-          </View>
-        ) : null}
         <Button
           title={finishedLabel ?? "Finished"}
           onPress={onContinue}
-          style={feedback ? undefined : styles.finishedPrimary}
+          style={styles.finishedPrimary}
         />
       </View>
     );
@@ -100,59 +93,50 @@ export function Footer({
     const disabled = status === "wait" || status === "...";
     return (
       <View style={[styles.root, styles.listeningRoot, bottomPadding]}>
-        <View style={styles.listeningStack}>
-          {feedback ? (
-            <View style={styles.feedbackAbovePrimary}>{feedback}</View>
-          ) : null}
-          <View style={styles.listeningControls}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={listeningPaused ? "Play line" : "Pause"}
-              disabled={disabled}
-              onPress={onToggleListening}
-              style={({ pressed }) => [
-                styles.primaryControl,
-                disabled && styles.controlDisabled,
-                pressed && !disabled && styles.controlPressed,
-              ]}
-            >
-              <Ionicons
-                name={listeningPaused ? "play" : "pause"}
-                size={28}
-                color={colors.primaryText}
-              />
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Replay line"
-              disabled={disabled}
-              onPress={onReplayListening}
-              style={({ pressed }) => [
-                styles.secondaryControl,
-                disabled && styles.controlDisabled,
-                pressed && !disabled && styles.controlPressed,
-              ]}
-            >
-              <Ionicons name="refresh" size={24} color={colors.blue} />
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Next line"
-              disabled={disabled}
-              onPress={onSkipListening}
-              style={({ pressed }) => [
-                styles.secondaryControl,
-                disabled && styles.controlDisabled,
-                pressed && !disabled && styles.controlPressed,
-              ]}
-            >
-              <Ionicons
-                name="play-skip-forward"
-                size={24}
-                color={colors.blue}
-              />
-            </Pressable>
-          </View>
+        <View style={styles.listeningControls}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={listeningPaused ? "Play line" : "Pause"}
+            disabled={disabled}
+            onPress={onToggleListening}
+            style={({ pressed }) => [
+              styles.primaryControl,
+              disabled && styles.controlDisabled,
+              pressed && !disabled && styles.controlPressed,
+            ]}
+          >
+            <Ionicons
+              name={listeningPaused ? "play" : "pause"}
+              size={28}
+              color={colors.primaryText}
+            />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Replay line"
+            disabled={disabled}
+            onPress={onReplayListening}
+            style={({ pressed }) => [
+              styles.secondaryControl,
+              disabled && styles.controlDisabled,
+              pressed && !disabled && styles.controlPressed,
+            ]}
+          >
+            <Ionicons name="refresh" size={24} color={colors.blue} />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Next line"
+            disabled={disabled}
+            onPress={onSkipListening}
+            style={({ pressed }) => [
+              styles.secondaryControl,
+              disabled && styles.controlDisabled,
+              pressed && !disabled && styles.controlPressed,
+            ]}
+          >
+            <Ionicons name="play-skip-forward" size={24} color={colors.blue} />
+          </Pressable>
         </View>
       </View>
     );
@@ -161,9 +145,6 @@ export function Footer({
   return (
     <View style={[styles.root, bottomPadding, isRight && styles.rootRight]}>
       {isRight && <Text style={styles.rightText}>You are correct</Text>}
-      {feedback ? (
-        <View style={styles.feedbackAbovePrimary}>{feedback}</View>
-      ) : null}
       <Button
         title={status === "..." ? "..." : "Continue"}
         disabled={status === "wait" || status === "..."}
@@ -195,9 +176,6 @@ function createStyles(colors: ThemeColors) {
       justifyContent: "center",
       alignItems: "center",
       gap: 18,
-    },
-    listeningStack: {
-      alignSelf: "center",
     },
     primaryControl: {
       width: 58,
@@ -231,13 +209,6 @@ function createStyles(colors: ThemeColors) {
       color: colors.greenDark,
       marginBottom: 20,
       marginLeft: 6,
-    },
-    feedbackAbovePrimary: {
-      alignSelf: "flex-end",
-      marginBottom: 12,
-    },
-    finishedFeedback: {
-      marginTop: 14,
     },
     upNext: {
       marginTop: 18,

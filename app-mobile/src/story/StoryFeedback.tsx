@@ -34,6 +34,22 @@ type SubmitFeedback = (args: {
   comment: string;
 }) => Promise<unknown>;
 
+export function StoryFeedbackFloat({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <View style={floatingStyles.root}>{children}</View>;
+}
+
+const floatingStyles = StyleSheet.create({
+  root: {
+    alignItems: "flex-end",
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+});
+
 function createOperationKey(storyId: number) {
   return `mobile-feedback:${storyId}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
 }
