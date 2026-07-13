@@ -1,5 +1,5 @@
 import { fetch_post } from "@/lib/fetch_post";
-import type { ChangeDesc } from "@codemirror/state";
+import type { ChangeDesc, Text } from "@codemirror/state";
 import {
   add_word_marks_replacements,
   find_replace_with_mapping,
@@ -383,16 +383,17 @@ export function create_audio_insert_anchor(
     };
   }
 
-  const lineNumber = Math.min(
-    Math.max(1, line_insert - 1),
-    view.state.doc.lines,
-  );
-  const line_state = view.state.doc.line(lineNumber);
+  const line_state = get_audio_insert_line(view.state.doc, line_insert);
   return {
     kind: "insert",
     from: line_state.from,
     to: line_state.from,
   };
+}
+
+export function get_audio_insert_line(doc: Text, line_insert: number) {
+  const lineNumber = Math.min(Math.max(1, line_insert), doc.lines);
+  return doc.line(lineNumber);
 }
 
 export function map_audio_insert_anchor(
@@ -462,11 +463,7 @@ export function insert_audio_lines(
         };
       }
 
-      const lineInsertNumber = Math.min(
-        Math.max(1, line_insert - 1),
-        view.state.doc.lines,
-      );
-      const line_state = view.state.doc.line(lineInsertNumber);
+      const line_state = get_audio_insert_line(view.state.doc, line_insert);
       return {
         from: line_state.from,
         to: line_state.from,
