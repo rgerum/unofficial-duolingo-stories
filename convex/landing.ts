@@ -337,6 +337,9 @@ const publicStoryListItemValidator = v.object({
   gilded: v.string(),
   active_lip: v.string(),
   gilded_lip: v.string(),
+  // Millisecond timestamps used for sitemap <lastmod>.
+  change_date: v.optional(v.number()),
+  date_published: v.optional(v.number()),
 });
 
 const localizationEntryValidator = v.object({
@@ -451,6 +454,8 @@ export const getPublicCoursePageData = query({
           gilded: image.gilded,
           active_lip: image.active_lip,
           gilded_lip: image.gilded_lip,
+          change_date: story.change_date,
+          date_published: story.date_published,
         };
       })
       .filter(
@@ -467,6 +472,8 @@ export const getPublicCoursePageData = query({
           gilded: string;
           active_lip: string;
           gilded_lip: string;
+          change_date: number | undefined;
+          date_published: number | undefined;
         } => story !== null,
       )
       .sort((a, b) => {

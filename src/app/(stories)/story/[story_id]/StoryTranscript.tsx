@@ -53,7 +53,11 @@ export default function StoryTranscript({ story }: { story: StoryData }) {
     <section aria-labelledby="story-transcript-heading" className="pb-10">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        // Story text is contributor-controlled; escape "<" so no line can
+        // contain "</script>" and terminate this tag.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replaceAll("<", "\\u003c"),
+        }}
       />
       <StoryHeaderProgress
         course={story.course_short}

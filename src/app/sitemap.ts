@@ -64,26 +64,55 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
+  // <lastmod> from story edit/publish timestamps: stories carry their own
+  // date, a course the newest date of its stories, the homepage the newest
+  // date overall. Entries without a known date omit lastmod rather than lie.
+  const storyLastModified = (story: {
+    change_date?: number;
+    date_published?: number;
+  }) => {
+    const timestamp = story.change_date ?? story.date_published;
+    return timestamp ? new Date(timestamp) : undefined;
+  };
+
   const courseEntries: MetadataRoute.Sitemap = coursePages.map(
-    ({ course }) => ({
-      url: toUrl(`/${course.short}`),
-      changeFrequency: "daily",
-      priority: 0.9,
-    }),
+    ({ course, pageData }) => {
+      const dates = (pageData?.stories ?? [])
+        .map((story) => storyLastModified(story)?.getTime())
+        .filter((time): time is number => time !== undefined);
+      return {
+        url: toUrl(`/${course.short}`),
+        lastModified: dates.length ? new Date(Math.max(...dates)) : undefined,
+        changeFrequency: "daily",
+        priority: 0.9,
+      };
+    },
   );
 
   const storyEntries: MetadataRoute.Sitemap = coursePages.flatMap(
     ({ pageData }) =>
       (pageData?.stories ?? []).map((story) => ({
         url: toUrl(`/story/${story.id}`),
+        lastModified: storyLastModified(story),
         changeFrequency: "weekly" as const,
         priority: 0.8,
       })),
   );
 
+  const siteLastModifiedTimes = courseEntries
+    .map((entry) =>
+      entry.lastModified instanceof Date
+        ? entry.lastModified.getTime()
+        : undefined,
+    )
+    .filter((time): time is number => time !== undefined);
+
   return [
     {
       url: toUrl("/"),
+      lastModified: siteLastModifiedTimes.length
+        ? new Date(Math.max(...siteLastModifiedTimes))
+        : undefined,
       changeFrequency: "daily",
       priority: 1,
     },
