@@ -117,6 +117,7 @@ export function StoryFeedback({
   lineText,
   disabled = false,
   initialOpen = false,
+  onOpen,
   submitFeedback: submitFeedbackOverride,
 }: {
   storyId: number;
@@ -124,6 +125,7 @@ export function StoryFeedback({
   lineText?: string;
   disabled?: boolean;
   initialOpen?: boolean;
+  onOpen?: () => void;
   submitFeedback?: SubmitFeedback;
 }) {
   const mutation = useMutation(api.storyFeedback.submitStoryFeedback);
@@ -155,10 +157,11 @@ export function StoryFeedback({
 
   const openSheet = React.useCallback(() => {
     if (disabled) return;
+    onOpen?.();
     setSubmitState("idle");
     setSubmitError(null);
     setOpen(true);
-  }, [disabled]);
+  }, [disabled, onOpen]);
 
   const submit = React.useCallback(async () => {
     if (isSubmitting || comment.trim().length === 0) return;

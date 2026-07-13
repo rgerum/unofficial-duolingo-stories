@@ -228,8 +228,11 @@ export default function StoryShotScreen() {
   const showRevealedBlank = params.case === "all" || params.case === "revealed";
   const showTeluguLine = params.case === "all" || params.case === "telugu";
   const debugTeluguLayout = params.debug === "1";
-  const showFeedback =
-    params.case === "feedback" || params.case === "feedback-trigger";
+  const showFeedback = params.case?.startsWith("feedback") ?? false;
+  const listeningFeedback = params.case?.includes("listening") ?? false;
+  const finishedFeedback = params.case?.includes("finished") ?? false;
+  const openFeedback =
+    params.case === "feedback" || params.case?.endsWith("-open");
 
   return (
     <HintPopupHost>
@@ -245,14 +248,16 @@ export default function StoryShotScreen() {
         {showFeedback ? (
           <View style={styles.footerFixture}>
             <Footer
-              status="continue"
+              status={finishedFeedback ? "finished" : "continue"}
               onContinue={() => {}}
+              listeningMode={listeningFeedback}
+              listeningPaused={listeningFeedback}
               feedback={
                 <StoryFeedback
                   storyId={1234}
                   lineIndex={1}
                   lineText="Lucy: I think my keys are in the car."
-                  initialOpen={params.case === "feedback"}
+                  initialOpen={openFeedback}
                   submitFeedback={() => Promise.resolve()}
                 />
               }

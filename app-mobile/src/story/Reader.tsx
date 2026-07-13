@@ -180,6 +180,11 @@ export function Reader({
     if (listening) setListeningPaused(true);
   }, [listening]);
 
+  const handleFeedbackOpen = React.useCallback(() => {
+    stopAudio(false);
+    if (listening) setListeningPaused(true);
+  }, [listening]);
+
   const playListening = React.useCallback(() => {
     setListeningPaused(false);
     setAudioReplayKey((key) => key + 1);
@@ -363,6 +368,7 @@ export function Reader({
                 lineIndex={feedbackContext.lineIndex}
                 lineText={feedbackContext.lineText}
                 disabled={buttonStatus === "..."}
+                onOpen={handleFeedbackOpen}
               />
             }
           />
