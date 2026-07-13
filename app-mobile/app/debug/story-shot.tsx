@@ -254,8 +254,9 @@ export default function StoryShotScreen() {
             <StoryFeedbackFloat>
               <StoryFeedback
                 storyId={1234}
-                lineIndex={1}
-                lineText="Lucy: I think my keys are in the car."
+                lineIndex={2}
+                lineText="Eddy: నా తాళం చెవులు ఎక్కడ ఉన్నాయి?"
+                lineElement={teluguLine}
                 initialOpen={openFeedback}
                 submitFeedback={() => Promise.resolve()}
               />

@@ -15,6 +15,7 @@ import { api } from "../api";
 import { Button } from "../components/Button";
 import { Text, TextInput } from "../components/Text";
 import { type ThemeColors, useTheme } from "../theme";
+import { TextLine } from "./elements/TextLine";
 import {
   type FeedbackSubmitError,
   getFeedbackSubmitError,
@@ -25,7 +26,7 @@ import {
   submitFeedbackWithTimeout,
   waitForFeedbackConnection,
 } from "./feedbackSubmission";
-import type { StoryElement } from "./types";
+import type { StoryElement, StoryElementLine } from "./types";
 
 const feedbackCategories = [
   { label: "Text", value: "Text" },
@@ -136,6 +137,7 @@ export function getFeedbackContext(
   return {
     ...(lineIndex !== undefined ? { lineIndex } : {}),
     ...(lineText ? { lineText } : {}),
+    ...(visibleElement?.type === "LINE" ? { lineElement: visibleElement } : {}),
   };
 }
 
@@ -143,6 +145,8 @@ export function StoryFeedback({
   storyId,
   lineIndex,
   lineText,
+  lineElement,
+  storyRtl = false,
   disabled = false,
   initialOpen = false,
   onOpen,
@@ -151,6 +155,8 @@ export function StoryFeedback({
   storyId: number;
   lineIndex?: number;
   lineText?: string;
+  lineElement?: StoryElementLine;
+  storyRtl?: boolean;
   disabled?: boolean;
   initialOpen?: boolean;
   onOpen?: () => void;
@@ -316,11 +322,22 @@ export function StoryFeedback({
               </View>
 
               <Text style={styles.eyebrow}>Current line</Text>
-              <View style={styles.linePreview}>
-                <Text style={styles.lineText}>
-                  {lineText || `Story ${storyId}`}
-                </Text>
-              </View>
+              {lineElement ? (
+                <View style={styles.storyLinePreview}>
+                  <TextLine
+                    element={lineElement}
+                    active={false}
+                    rtl={storyRtl}
+                    autoPlay={false}
+                  />
+                </View>
+              ) : (
+                <View style={styles.linePreview}>
+                  <Text style={styles.lineText}>
+                    {lineText || `Story ${storyId}`}
+                  </Text>
+                </View>
+              )}
 
               <Text style={styles.label}>Category</Text>
               <View style={styles.categoryGrid}>
@@ -517,6 +534,7 @@ function createStyles(colors: ThemeColors) {
       paddingVertical: 12,
       marginTop: 7,
     },
+    storyLinePreview: { marginTop: 2 },
     lineText: { color: colors.text, fontSize: 16, lineHeight: 22 },
     label: {
       color: colors.text,
