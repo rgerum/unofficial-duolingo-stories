@@ -126,7 +126,11 @@ export default async function Page({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        // Story names are contributor-controlled; escape "<" so none of them
+        // can contain "</script>" and terminate this tag.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replaceAll("<", "\\u003c"),
+        }}
       />
       <div lang={fromLanguageCode} className="contents">
         <CoursePageClient
