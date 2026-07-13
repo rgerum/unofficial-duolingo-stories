@@ -32,6 +32,7 @@ import type * as languageWrite from "../languageWrite.js";
 import type * as lib_authorization from "../lib/authorization.js";
 import type * as lib_courseContributors from "../lib/courseContributors.js";
 import type * as lib_courseCounts from "../lib/courseCounts.js";
+import type * as lib_courseTags from "../lib/courseTags.js";
 import type * as lib_discordAvatarSync from "../lib/discordAvatarSync.js";
 import type * as lib_phpbb from "../lib/phpbb.js";
 import type * as lib_publicStoryContent from "../lib/publicStoryContent.js";
@@ -79,6 +80,7 @@ declare const fullApi: ApiFromModules<{
   "lib/authorization": typeof lib_authorization;
   "lib/courseContributors": typeof lib_courseContributors;
   "lib/courseCounts": typeof lib_courseCounts;
+  "lib/courseTags": typeof lib_courseTags;
   "lib/discordAvatarSync": typeof lib_discordAvatarSync;
   "lib/phpbb": typeof lib_phpbb;
   "lib/publicStoryContent": typeof lib_publicStoryContent;

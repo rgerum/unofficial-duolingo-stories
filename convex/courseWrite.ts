@@ -2,6 +2,7 @@ import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireContributorOrAdmin } from "./lib/authorization";
 import { recomputeCoursePublishedCount } from "./lib/courseCounts";
+import { hasNoAudioCourseTag } from "./lib/courseTags";
 
 export const recomputePublishedCount = mutation({
   args: {
@@ -100,13 +101,17 @@ export const setAudioProblemCounts = mutation({
         continue;
       }
 
-      if ((course.audio_problem_count ?? 0) === entry.audioProblemCount) {
+      const nextAudioProblemCount = hasNoAudioCourseTag(course.tags)
+        ? 0
+        : entry.audioProblemCount;
+
+      if ((course.audio_problem_count ?? 0) === nextAudioProblemCount) {
         unchanged += 1;
         continue;
       }
 
       await ctx.db.patch(course._id, {
-        audio_problem_count: entry.audioProblemCount,
+        audio_problem_count: nextAudioProblemCount,
         lastOperationKey: operationKey,
       });
       updated += 1;
@@ -130,14 +135,19 @@ export const setAudioProblemCounts = mutation({
         missingStories.push(entry.legacyStoryId);
         continue;
       }
+      const storyCourse = await ctx.db.get(story.courseId);
+      const nextAudioProblemCount =
+        storyCourse && hasNoAudioCourseTag(storyCourse.tags)
+          ? 0
+          : entry.audioProblemCount;
 
-      if ((story.audio_problem_count ?? 0) === entry.audioProblemCount) {
+      if ((story.audio_problem_count ?? 0) === nextAudioProblemCount) {
         unchangedStories += 1;
         continue;
       }
 
       await ctx.db.patch(story._id, {
-        audio_problem_count: entry.audioProblemCount,
+        audio_problem_count: nextAudioProblemCount,
         lastOperationKey: operationKey,
       });
       updatedStories += 1;

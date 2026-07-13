@@ -10,6 +10,7 @@ import {
 import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
 import { retryOnceAfterAuthRefresh } from "./save_auth_retry";
 import { checkStoryLineAudio } from "./audio_problem_check";
+import { hasNoAudioCourseTag } from "@/lib/course-tags";
 
 type LanguageLike = {
   short: string;
@@ -270,7 +271,9 @@ export function useStoryEditorModel({
     const saveStartRevision = revision;
     const operationKey = `story:${storyData.id}:set_story:v2:${Date.now()}:${saveStartRevision}`;
     try {
-      const audioCheck = await checkStoryLineAudio(parsedStoryBase);
+      const audioCheck = hasNoAudioCourseTag(storyData.course_tags)
+        ? { audioProblemCount: 0 as const }
+        : await checkStoryLineAudio(parsedStoryBase);
       const saveArgs = {
         legacyStoryId: storyData.id,
         duo_id: storyData.duo_id ?? "",
@@ -322,6 +325,7 @@ export function useStoryEditorModel({
     revision,
     setStoryMutation,
     storyData.course_id,
+    storyData.course_tags,
     storyData.duo_id,
     storyData.id,
     storyData.official,
