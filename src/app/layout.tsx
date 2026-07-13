@@ -6,6 +6,7 @@ import Script from "next/script";
 import NavigationModeProvider from "@/components/NavigationModeProvider";
 import ConvexClientProvider from "@/components/providers/ConvexClientProvider";
 import PostHogUserIdentifier from "@/components/providers/PostHogUserIdentifier";
+import { APP_STORE_APP_ID } from "@/lib/store_links";
 
 // If loading a variable font, you don't need to specify the font weight
 const nunito = Nunito({
@@ -28,6 +29,10 @@ function getMetadataBase() {
 
 export const metadata: Metadata = {
   metadataBase: getMetadataBase(),
+  // Safari-only Smart App Banner pointing iPhone visitors at the iOS app.
+  itunes: {
+    appId: APP_STORE_APP_ID,
+  },
 };
 
 export default function RootLayout({

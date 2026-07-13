@@ -106,7 +106,7 @@ export function IconTwitter() {
   );
 }
 
-function IconApple() {
+export function IconApple() {
   return (
     <svg
       height="32"
