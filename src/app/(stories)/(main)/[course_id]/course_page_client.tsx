@@ -200,7 +200,8 @@ export default function CoursePageClient({
         <h1>
           {localization("course_page_title", {
             $language: course.name || course.learning_language_name,
-          }) ?? `${course.name || course.learning_language_name} Duolingo Stories`}
+          }) ??
+            `${course.name || course.learning_language_name} Duolingo Stories`}
         </h1>
         <p>
           {localization("course_page_sub_title", {
