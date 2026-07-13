@@ -6,9 +6,6 @@ import {
   IconOpenCollective,
   IconTwitter,
 } from "@/components/icons";
-import { IconApple, IconPlayStore } from "@/components/icons";
-import { APP_STORE_URL, PLAY_STORE_URL } from "@/lib/store_links";
-
 export default function Icons() {
   return (
     <p className="m-0 mt-[-8px] flex justify-center gap-0 leading-[0.5] [&>a]:p-2">
@@ -26,12 +23,6 @@ export default function Icons() {
       </Link>
       <Link href="https://twitter.com/DuostoriesNews">
         <IconTwitter />
-      </Link>
-      <Link href={PLAY_STORE_URL}>
-        <IconPlayStore />
-      </Link>
-      <Link href={APP_STORE_URL}>
-        <IconApple />
       </Link>
     </p>
   );
