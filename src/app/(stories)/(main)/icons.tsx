@@ -6,8 +6,6 @@ import {
   IconOpenCollective,
   IconTwitter,
 } from "@/components/icons";
-import { IconPlayStore } from "@/components/icons";
-
 export default function Icons() {
   return (
     <p className="m-0 mt-[-8px] flex justify-center gap-0 leading-[0.5] [&>a]:p-2">
@@ -25,9 +23,6 @@ export default function Icons() {
       </Link>
       <Link href="https://twitter.com/DuostoriesNews">
         <IconTwitter />
-      </Link>
-      <Link href="https://play.google.com/store/apps/details?id=org.duostories.twa">
-        <IconPlayStore />
       </Link>
     </p>
   );

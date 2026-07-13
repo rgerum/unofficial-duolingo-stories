@@ -6,6 +6,7 @@ import React from "react";
 import { preloadQuery } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
 import LandingStatsClient from "./landing_stats_client";
+import StoreBadges from "./store_badges";
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -44,6 +45,7 @@ export default async function Page({}) {
           <br />
           or learn more about the project in our <Link href="/faq">FAQ</Link>.
         </p>
+        <StoreBadges />
         <Icons />
       </Header>
       <CourseList preloadedLandingData={preloadedLandingData} />

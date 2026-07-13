@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React from "react";
+import { APP_STORE_URL, PLAY_STORE_URL } from "@/lib/store_links";
 
 export default async function FooterLinks({}) {
   return (
@@ -82,9 +83,10 @@ export default async function FooterLinks({}) {
             <nav>
               <ul>
                 <li>
-                  <Link href="https://play.google.com/store/apps/details?id=org.duostories.twa">
-                    Google Play
-                  </Link>
+                  <Link href={PLAY_STORE_URL}>Google Play</Link>
+                </li>
+                <li>
+                  <Link href={APP_STORE_URL}>App Store</Link>
                 </li>
               </ul>
             </nav>
