@@ -287,6 +287,18 @@ describe("course feedback stats", () => {
         status: "reviewed",
         createdAt: 2,
       });
+      await ctx.db.insert("story_feedback_reports", {
+        storyId: 10,
+        storyTitle: "Story",
+        courseShort: "spoofed",
+        category: "Text",
+        comment: "Resolved",
+        userId: null,
+        userName: null,
+        userEmail: null,
+        status: "resolved",
+        createdAt: 3,
+      });
     });
 
     await expect(
@@ -311,6 +323,7 @@ describe("course feedback stats", () => {
 
       const reports = await ctx.db.query("story_feedback_reports").collect();
       expect(reports.map((report) => report.courseShort)).toEqual([
+        "es-en",
         "es-en",
         "es-en",
       ]);

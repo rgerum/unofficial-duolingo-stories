@@ -39,7 +39,6 @@ const feedbackReportValidator = v.object({
 });
 
 type FeedbackStatus = "open" | "reviewed" | "resolved";
-type StoryDoc = Doc<"stories">;
 type CourseDoc = Doc<"courses">;
 type StoryContentDoc = Doc<"story_content">;
 
@@ -375,97 +374,80 @@ export const updateStoryFeedbackStatus = mutation({
 });
 
 export const recomputeCourseFeedbackStats = mutation({
-  args: {},
+  args: {
+    courseCursor: v.optional(v.union(v.string(), v.null())),
+    limit: v.optional(v.number()),
+  },
   returns: v.object({
     coursesUpdated: v.number(),
     reportsCounted: v.number(),
+    nextCursor: v.union(v.string(), v.null()),
+    isDone: v.boolean(),
   }),
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     await requireAdmin(ctx);
 
-    const [courses, existingStats, openReports, reviewedReports] =
-      await Promise.all([
-        ctx.db.query("courses").collect(),
-        ctx.db.query("course_feedback_stats").collect(),
-        ctx.db
-          .query("story_feedback_reports")
-          .withIndex("by_status_and_created_at", (q) => q.eq("status", "open"))
-          .collect(),
-        ctx.db
-          .query("story_feedback_reports")
-          .withIndex("by_status_and_created_at", (q) =>
-            q.eq("status", "reviewed"),
-          )
-          .collect(),
-      ]);
+    const limit = Math.min(Math.max(args.limit ?? 25, 1), 100);
+    const coursePage = await ctx.db
+      .query("courses")
+      .paginate({ cursor: args.courseCursor ?? null, numItems: limit });
 
-    const courseById = new Map(courses.map((course) => [course._id, course]));
-    const storyByLegacyId = new Map<number, StoryDoc>();
-    const reports = [
-      ...openReports.map((report) => ({ report, status: "open" as const })),
-      ...reviewedReports.map((report) => ({
-        report,
-        status: "reviewed" as const,
-      })),
-    ];
-    const counts = new Map<
-      Id<"courses">,
-      { courseShort: string; openCount: number; reviewedCount: number }
-    >();
-
-    for (const { report, status } of reports) {
-      let story = storyByLegacyId.get(report.storyId);
-      if (!story) {
-        story =
-          (await ctx.db
-            .query("stories")
-            .withIndex("by_legacy_id", (q) => q.eq("legacyId", report.storyId))
-            .unique()) ?? undefined;
-        if (story) storyByLegacyId.set(report.storyId, story);
-      }
-      if (!story) continue;
-
-      const course = courseById.get(story.courseId);
-      if (!course) continue;
-
-      const courseShort = getCourseShort(course);
-      if (
-        report.courseShort !== courseShort ||
-        report.storyTitle !== story.name
-      ) {
-        await ctx.db.patch(report._id, {
-          courseShort,
-          storyTitle: story.name,
-        });
-      }
-
-      const existing = counts.get(course._id) ?? {
-        courseShort,
-        openCount: 0,
-        reviewedCount: 0,
-      };
-      if (status === "open") existing.openCount += 1;
-      else existing.reviewedCount += 1;
-      counts.set(course._id, existing);
-    }
-
-    const now = Date.now();
     let coursesUpdated = 0;
-    for (const course of courses) {
-      const next = counts.get(course._id) ?? {
-        courseShort: getCourseShort(course),
-        openCount: 0,
-        reviewedCount: 0,
-      };
-      const current = existingStats.find(
-        (stat) => stat.courseId === course._id,
-      );
+    let reportsCounted = 0;
+
+    for (const course of coursePage.page) {
+      const courseShort = getCourseShort(course);
+      let openCount = 0;
+      let reviewedCount = 0;
+
+      for (const status of ["open", "reviewed", "resolved"] as const) {
+        const stories = ctx.db
+          .query("stories")
+          .withIndex("by_course", (q) => q.eq("courseId", course._id));
+
+        for await (const story of stories) {
+          const legacyStoryId = story.legacyId;
+          if (legacyStoryId === undefined) continue;
+
+          const reports = ctx.db
+            .query("story_feedback_reports")
+            .withIndex("by_story_and_status", (q) =>
+              q.eq("storyId", legacyStoryId).eq("status", status),
+            );
+
+          for await (const report of reports) {
+            if (
+              report.courseShort !== courseShort ||
+              report.storyTitle !== story.name
+            ) {
+              await ctx.db.patch(report._id, {
+                courseShort,
+                storyTitle: story.name,
+              });
+            }
+
+            if (status === "open") {
+              openCount += 1;
+              reportsCounted += 1;
+            } else if (status === "reviewed") {
+              reviewedCount += 1;
+              reportsCounted += 1;
+            }
+          }
+        }
+      }
+
+      const current = await ctx.db
+        .query("course_feedback_stats")
+        .withIndex("by_course", (q) => q.eq("courseId", course._id))
+        .unique();
+      const now = Date.now();
       if (!current) {
         await ctx.db.insert("course_feedback_stats", {
           courseId: course._id,
-          courseShort: next.courseShort,
-          openCount: next.openCount,
-          reviewedCount: next.reviewedCount,
+          courseShort,
+          openCount,
+          reviewedCount,
           updatedAt: now,
         });
         coursesUpdated += 1;
@@ -473,14 +455,19 @@ export const recomputeCourseFeedbackStats = mutation({
       }
 
       await ctx.db.patch(current._id, {
-        courseShort: next.courseShort,
-        openCount: next.openCount,
-        reviewedCount: next.reviewedCount,
+        courseShort,
+        openCount,
+        reviewedCount,
         updatedAt: now,
       });
       coursesUpdated += 1;
     }
 
-    return { coursesUpdated, reportsCounted: reports.length };
+    return {
+      coursesUpdated,
+      reportsCounted,
+      nextCursor: coursePage.isDone ? null : coursePage.continueCursor,
+      isDone: coursePage.isDone,
+    };
   },
 });
