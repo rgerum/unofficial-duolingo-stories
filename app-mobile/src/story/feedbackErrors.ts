@@ -1,4 +1,8 @@
 import type { FeedbackRejectionCode } from "../../../convex/storyFeedback";
+import {
+  FeedbackServerUnavailableError,
+  FeedbackSubmissionTimeoutError,
+} from "./feedbackSubmission";
 
 export type FeedbackSubmitError = {
   message: string;
@@ -64,6 +68,20 @@ function isConnectivityFailure(error: unknown) {
 }
 
 export function getFeedbackSubmitError(error: unknown): FeedbackSubmitError {
+  if (error instanceof FeedbackSubmissionTimeoutError) {
+    return {
+      message:
+        "The server didn’t respond. Try again to confirm your feedback was saved.",
+      canRetry: true,
+    };
+  }
+  if (error instanceof FeedbackServerUnavailableError) {
+    return {
+      message:
+        "Couldn’t reach the server. Check your connection and try again.",
+      canRetry: true,
+    };
+  }
   const code = getServerRejectionCode(error);
   if (
     code &&

@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMutation } from "convex/react";
+import { useConvex, useMutation } from "convex/react";
 import React from "react";
 import {
   KeyboardAvoidingView,
@@ -19,6 +19,12 @@ import {
   type FeedbackSubmitError,
   getFeedbackSubmitError,
 } from "./feedbackErrors";
+import {
+  FEEDBACK_SUBMISSION_TIMEOUT_MS,
+  FeedbackSubmissionTimeoutError,
+  submitFeedbackWithTimeout,
+  waitForFeedbackConnection,
+} from "./feedbackSubmission";
 import type { StoryElement } from "./types";
 
 const feedbackCategories = [
@@ -150,6 +156,7 @@ export function StoryFeedback({
 }) {
   const mutation = useMutation(api.storyFeedback.submitStoryFeedback);
   const submitFeedback = submitFeedbackOverride ?? mutation;
+  const convex = useConvex();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
@@ -157,24 +164,26 @@ export function StoryFeedback({
   const [category, setCategory] = React.useState<FeedbackCategory>("Text");
   const [comment, setComment] = React.useState("");
   const [submitState, setSubmitState] = React.useState<
-    "idle" | "submitting" | "submitted"
+    "idle" | "submitting" | "submitted" | "timedOut"
   >("idle");
   const [submitError, setSubmitError] =
     React.useState<FeedbackSubmitError | null>(null);
   const [operationKey, setOperationKey] = React.useState(() =>
     createOperationKey(storyId),
   );
+  const submissionAttemptRef = React.useRef(0);
   const isSubmitting = submitState === "submitting";
   const isSubmitted = submitState === "submitted";
+  const isTimedOut = submitState === "timedOut";
 
   const close = React.useCallback(() => {
-    if (isSubmitting) return;
+    submissionAttemptRef.current += 1;
     setOpen(false);
     setComment("");
     setSubmitError(null);
     setSubmitState("idle");
     setOperationKey(createOperationKey(storyId));
-  }, [isSubmitting, storyId]);
+  }, [storyId]);
 
   const openSheet = React.useCallback(() => {
     if (disabled) return;
@@ -186,35 +195,52 @@ export function StoryFeedback({
 
   const submit = React.useCallback(async () => {
     if (isSubmitting || comment.trim().length === 0) return;
+    const submissionAttempt = submissionAttemptRef.current + 1;
+    submissionAttemptRef.current = submissionAttempt;
+    const submissionDeadline = Date.now() + FEEDBACK_SUBMISSION_TIMEOUT_MS;
     setSubmitState("submitting");
     setSubmitError(null);
     try {
-      await submitFeedback({
-        storyId,
-        operationKey,
-        lineIndex,
-        lineText,
-        category,
-        comment,
-      });
+      if (submitFeedbackOverride === undefined) {
+        await waitForFeedbackConnection(convex);
+        if (submissionAttemptRef.current !== submissionAttempt) return;
+      }
+      await submitFeedbackWithTimeout(
+        submitFeedback({
+          storyId,
+          operationKey,
+          lineIndex,
+          lineText,
+          category,
+          comment,
+        }),
+        Math.max(1, submissionDeadline - Date.now()),
+      );
+      if (submissionAttemptRef.current !== submissionAttempt) return;
       setComment("");
       setSubmitState("submitted");
     } catch (error) {
-      setSubmitState("idle");
+      if (submissionAttemptRef.current !== submissionAttempt) return;
+      setSubmitState(
+        error instanceof FeedbackSubmissionTimeoutError ? "timedOut" : "idle",
+      );
       setSubmitError(getFeedbackSubmitError(error));
     }
   }, [
     category,
     comment,
+    convex,
     isSubmitting,
     lineIndex,
     lineText,
     operationKey,
     storyId,
     submitFeedback,
+    submitFeedbackOverride,
   ]);
   const terminalRejection = submitError?.canRetry === false;
-  const formLocked = isSubmitting || isSubmitted || terminalRejection;
+  const formLocked =
+    isSubmitting || isSubmitted || isTimedOut || terminalRejection;
   const primaryActionCloses = isSubmitted || terminalRejection;
 
   return (
@@ -273,7 +299,6 @@ export function StoryFeedback({
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Close feedback"
-                  disabled={isSubmitting}
                   hitSlop={10}
                   onPress={close}
                   style={({ pressed }) => [
@@ -365,9 +390,8 @@ export function StoryFeedback({
               <View style={styles.actions}>
                 {!isSubmitted && !terminalRejection ? (
                   <Button
-                    title="Cancel"
+                    title={isSubmitting || isTimedOut ? "Close" : "Cancel"}
                     variant="neutral"
-                    disabled={isSubmitting}
                     onPress={close}
                     style={styles.cancelAction}
                     labelStyle={styles.actionLabel}
@@ -381,7 +405,9 @@ export function StoryFeedback({
                         ? "Close"
                         : isSubmitting
                           ? "Submitting"
-                          : "Submit feedback"
+                          : isTimedOut
+                            ? "Try again"
+                            : "Submit feedback"
                   }
                   disabled={
                     isSubmitting ||

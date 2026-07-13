@@ -1,6 +1,10 @@
 import { ConvexError } from "convex/values";
 import { describe, expect, test } from "vitest";
 import { getFeedbackSubmitError } from "./feedbackErrors";
+import {
+  FeedbackServerUnavailableError,
+  FeedbackSubmissionTimeoutError,
+} from "./feedbackSubmission";
 
 describe("getFeedbackSubmitError", () => {
   test.each([
@@ -43,6 +47,26 @@ describe("getFeedbackSubmitError", () => {
   ])("maps connectivity failures without exposing details", (error) => {
     expect(getFeedbackSubmitError(error)).toEqual({
       message: "Couldn’t connect. Check your connection and try again.",
+      canRetry: true,
+    });
+  });
+
+  test("maps a submission timeout to a retryable server connection error", () => {
+    expect(
+      getFeedbackSubmitError(new FeedbackSubmissionTimeoutError()),
+    ).toEqual({
+      message:
+        "The server didn’t respond. Try again to confirm your feedback was saved.",
+      canRetry: true,
+    });
+  });
+
+  test("maps a known disconnected server to the same retryable error", () => {
+    expect(
+      getFeedbackSubmitError(new FeedbackServerUnavailableError()),
+    ).toEqual({
+      message:
+        "Couldn’t reach the server. Check your connection and try again.",
       canRetry: true,
     });
   });
