@@ -194,17 +194,21 @@ export default function CoursePageClient({
   return (
     <>
       <Header>
+        {/* course.name is the learning language's name in the course's own
+            base language ("Inglese" on an Italian-based course); the English
+            learning_language_name is only a fallback for courses without it. */}
         <h1>
           {localization("course_page_title", {
-            $language: course.learning_language_name,
-          }) ?? `${course.learning_language_name} Duolingo Stories`}
+            $language: course.name || course.learning_language_name,
+          }) ??
+            `${course.name || course.learning_language_name} Duolingo Stories`}
         </h1>
         <p>
           {localization("course_page_sub_title", {
-            $language: course.learning_language_name,
+            $language: course.name || course.learning_language_name,
             $count: `${course.count}`,
           }) ??
-            `Learn ${course.learning_language_name} with ${course.count} stories.`}
+            `Learn ${course.name || course.learning_language_name} with ${course.count} stories.`}
         </p>
         <p className="[&_a]:underline [&_a]:underline-offset-2">
           {localization("course_page_discuss", {}, [
