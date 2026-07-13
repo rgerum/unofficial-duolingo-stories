@@ -10,14 +10,24 @@ import { api } from "@convex/_generated/api";
 
 // Every public course targets a language pair that official Duolingo Stories
 // does not cover (official pairs are never public here), so the metadata can
-// safely lead with that differentiator. Story counts under 10 read as thin, so
-// small courses omit the number.
+// safely lead with that differentiator. English fallback for locales without
+// meta_course_* localization entries; mirrors those strings' $language/$count.
 function courseDescription(language: string, count: number) {
   const inventory =
-    count >= 10
+    count > 0
       ? `${count} free interactive ${language} stories`
       : `free interactive ${language} stories`;
   return `Duolingo doesn't have stories for ${language} — Duostories does: ${inventory} with audio, translated by the community. Read, listen, and practice ${language} online.`;
+}
+
+// courses.name is the learning language's name written in the course's own
+// base language ("Russo" on an Italian-based course); a few courses have it
+// empty, so fall back to the English name.
+function displayLanguageName(course: {
+  name: string;
+  learning_language_name: string;
+}) {
+  return course.name || course.learning_language_name;
 }
 
 export async function generateMetadata(
@@ -38,17 +48,19 @@ export async function generateMetadata(
   );
 
   const meta = await parent;
+  const languageName = displayLanguageName(course);
+  const replacements = {
+    $language: languageName,
+    $count: `${course.count}`,
+  };
 
   return {
     title:
-      localization("meta_course_title", {
-        $language: course.learning_language_name,
-      }) ||
-      `${course.learning_language_name} Duolingo Stories – Learn ${course.learning_language_name} with Audio | Duostories`,
+      localization("meta_course_title", replacements) ||
+      `${languageName} Duolingo Stories – Learn ${languageName} with Audio | Duostories`,
     description:
-      localization("meta_course_description", {
-        $language: course.learning_language_name,
-      }) || courseDescription(course.learning_language_name, course.count),
+      localization("meta_course_description", replacements) ||
+      courseDescription(languageName, course.count),
     alternates: {
       canonical: `https://duostories.org/${params0.course_id}`,
     },
@@ -56,7 +68,7 @@ export async function generateMetadata(
       images: [
         `/api/og-course?lang=${params0.course_id.split("-")[0]}&count=${
           course.count
-        }&name=${course.learning_language_name}`,
+        }&name=${languageName}`,
       ],
       url: `https://duostories.org/${params0.course_id}`,
       type: "website",
@@ -103,9 +115,9 @@ export default async function Page({
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `${courseData.learning_language_name} Duolingo Stories`,
+    name: `${displayLanguageName(courseData)} Duolingo Stories`,
     description: courseDescription(
-      courseData.learning_language_name,
+      displayLanguageName(courseData),
       courseData.count,
     ),
     inLanguage: course_id.split("-")[0],
