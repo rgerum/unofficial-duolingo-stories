@@ -37,6 +37,7 @@ export type LineElement =
 
 type TrackingProperties = {
   line_index: number;
+  source_line_index?: number;
   challenge_type?: string;
   [key: string]: unknown;
 };

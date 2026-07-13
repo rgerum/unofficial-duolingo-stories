@@ -2,7 +2,7 @@ import {
   paginationOptsValidator,
   paginationResultValidator,
 } from "convex/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx } from "./_generated/server";
 import { requireAdmin, requireContributorOrAdmin } from "./lib/authorization";
@@ -43,14 +43,31 @@ type FeedbackStatus = "open" | "reviewed" | "resolved";
 type CourseDoc = Doc<"courses">;
 type StoryContentDoc = Doc<"story_content">;
 
+export type FeedbackRejectionCode =
+  | "FEEDBACK_BLOCKED"
+  | "FEEDBACK_DISABLED"
+  | "FEEDBACK_UNAVAILABLE"
+  | "INVALID_COMMENT"
+  | "INVALID_REQUEST"
+  | "RATE_LIMITED"
+  | "SIGN_IN_REQUIRED"
+  | "STORY_REPORT_LIMIT";
+
+function rejectFeedback(code: FeedbackRejectionCode, reason: string): never {
+  throw new ConvexError({ code, reason });
+}
+
 function normalizeOptionalLineText(value: string | undefined) {
   const text = value?.replace(/\r\n?/g, "\n").trim();
   if (!text) return undefined;
   if (text.length > 500) {
-    throw new Error("Line text is too long");
+    rejectFeedback("INVALID_REQUEST", "Line text is too long");
   }
   if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(text)) {
-    throw new Error("Line text contains unsupported characters");
+    rejectFeedback(
+      "INVALID_REQUEST",
+      "Line text contains unsupported characters",
+    );
   }
   return text;
 }
@@ -116,8 +133,32 @@ function editorLineMatches(
   );
 }
 
-function getLineSnapshotFromStoryJson(storyJson: unknown, lineNumber?: number) {
-  if (lineNumber === undefined) return undefined;
+function trackingLineMatches(
+  element: Record<string, unknown>,
+  lineIndex: number,
+) {
+  const trackingProperties = element.trackingProperties;
+  return (
+    isRecord(trackingProperties) && trackingProperties.line_index === lineIndex
+  );
+}
+
+function getEditorLineFromElement(element: Record<string, unknown>) {
+  const editor = element.editor;
+  if (!isRecord(editor)) return undefined;
+  for (const key of ["block_start_no", "start_no", "active_no"]) {
+    const value = editor[key];
+    if (typeof value === "number") return value;
+  }
+  return undefined;
+}
+
+function getLineSnapshotFromStoryJson(
+  storyJson: unknown,
+  lineNumber?: number,
+  lineIndex?: number,
+) {
+  if (lineNumber === undefined && lineIndex === undefined) return undefined;
   if (!isRecord(storyJson) || !Array.isArray(storyJson.elements)) {
     return undefined;
   }
@@ -126,7 +167,9 @@ function getLineSnapshotFromStoryJson(storyJson: unknown, lineNumber?: number) {
     (candidate) =>
       isRecord(candidate) &&
       candidate.type === "LINE" &&
-      editorLineMatches(candidate, lineNumber),
+      (lineNumber !== undefined
+        ? editorLineMatches(candidate, lineNumber)
+        : lineIndex !== undefined && trackingLineMatches(candidate, lineIndex)),
   );
   if (!isRecord(element)) return undefined;
 
@@ -185,7 +228,7 @@ async function getStoryCourseAndContent(
     .withIndex("by_legacy_id", (q) => q.eq("legacyId", legacyStoryId))
     .unique();
   if (!story) {
-    throw new Error("Unknown story");
+    rejectFeedback("FEEDBACK_UNAVAILABLE", "Unknown story");
   }
 
   const [course, storyContent] = await Promise.all([
@@ -196,7 +239,7 @@ async function getStoryCourseAndContent(
       .unique(),
   ]);
   if (!course) {
-    throw new Error("Unknown course");
+    rejectFeedback("FEEDBACK_UNAVAILABLE", "Unknown course");
   }
 
   return { story, course, storyContent };
@@ -211,6 +254,9 @@ export const submitStoryFeedback = mutation({
     // TODO(remove after 2026-07-20): deprecated; derived server-side.
     courseShort: v.optional(v.string()),
     line: v.optional(v.number()),
+    // Public story content omits editor metadata, so mobile identifies the
+    // active source element by its public tracking index instead.
+    lineIndex: v.optional(v.number()),
     lineText: v.optional(v.string()),
     // TODO(remove after 2026-07-20): deprecated; ignored for trust safety.
     lineElement: v.optional(v.any()),
@@ -223,32 +269,47 @@ export const submitStoryFeedback = mutation({
   handler: async (ctx, args) => {
     const operationKey = args.operationKey.trim();
     if (!operationKey) {
-      throw new Error("Operation key is required");
+      rejectFeedback("INVALID_REQUEST", "Operation key is required");
     }
     if (operationKey.length > 200) {
-      throw new Error("Operation key is too long");
+      rejectFeedback("INVALID_REQUEST", "Operation key is too long");
     }
 
     const comment = args.comment.trim();
     if (!comment) {
-      throw new Error("Comment is required");
+      rejectFeedback("INVALID_COMMENT", "Comment is required");
     }
     if (comment.length > 2000) {
-      throw new Error("Comment is too long");
+      rejectFeedback("INVALID_COMMENT", "Comment is too long");
     }
 
     if (args.storyTitle !== undefined && args.storyTitle.length > 200) {
-      throw new Error("Story title is too long");
+      rejectFeedback("INVALID_REQUEST", "Story title is too long");
     }
     if (args.courseShort !== undefined && args.courseShort.length > 20) {
-      throw new Error("Course short is too long");
+      rejectFeedback("INVALID_REQUEST", "Course short is too long");
     }
 
     const submittedLineText = normalizeOptionalLineText(args.lineText);
+    if (
+      args.line !== undefined &&
+      (!Number.isSafeInteger(args.line) || args.line < 0)
+    ) {
+      rejectFeedback("INVALID_REQUEST", "Line must be a non-negative integer");
+    }
+    if (
+      args.lineIndex !== undefined &&
+      (!Number.isSafeInteger(args.lineIndex) || args.lineIndex < 0)
+    ) {
+      rejectFeedback(
+        "INVALID_REQUEST",
+        "Line index must be a non-negative integer",
+      );
+    }
     if (args.lineElement !== undefined) {
       const serializedLineElement = JSON.stringify(args.lineElement);
       if (serializedLineElement.length > 20000) {
-        throw new Error("Line preview is too large");
+        rejectFeedback("INVALID_REQUEST", "Line preview is too large");
       }
     }
 
@@ -272,7 +333,8 @@ export const submitStoryFeedback = mutation({
       )
       .take(25);
     if (openReports.length >= 25) {
-      throw new Error(
+      rejectFeedback(
+        "STORY_REPORT_LIMIT",
         "This story already has many open reports. Please try again later.",
       );
     }
@@ -284,7 +346,16 @@ export const submitStoryFeedback = mutation({
     } | null;
 
     const storyJson = parseStoryJson(storyContent);
-    const lineElement = getLineSnapshotFromStoryJson(storyJson, args.line);
+    const lineElement = getLineSnapshotFromStoryJson(
+      storyJson,
+      args.line,
+      args.lineIndex,
+    );
+    const line =
+      args.line ??
+      (isRecord(lineElement)
+        ? getEditorLineFromElement(lineElement)
+        : undefined);
     const derivedLineText = isRecord(lineElement)
       ? getLineTextFromElement(lineElement)
       : undefined;
@@ -300,7 +371,7 @@ export const submitStoryFeedback = mutation({
       storyId: args.storyId,
       storyTitle,
       courseShort,
-      ...(args.line !== undefined ? { line: args.line } : {}),
+      ...(line !== undefined ? { line } : {}),
       ...(lineText ? { lineText } : {}),
       ...(lineElement !== undefined ? { lineElement } : {}),
       category: args.category,

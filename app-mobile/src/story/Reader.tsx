@@ -17,6 +17,11 @@ import { onAnyAudioDone, stopAudio } from "./audio";
 import { playSoundEffect } from "./soundEffects";
 import { Part } from "./Part";
 import { Footer, type NextStoryPreview } from "./Footer";
+import {
+  getFeedbackContext,
+  StoryFeedback,
+  StoryFeedbackFloat,
+} from "./StoryFeedback";
 import { HintLookupContext } from "./HintPopup";
 import { SmartImage } from "../components/SmartImage";
 import { useStitchedListeningAudio } from "./useStitchedListeningAudio";
@@ -174,7 +179,7 @@ export function Reader({
     setListeningPaused(true);
   }, []);
 
-  const handleHintLookup = React.useCallback(() => {
+  const pauseForOverlay = React.useCallback(() => {
     stopAudio(false);
     if (listening) setListeningPaused(true);
   }, [listening]);
@@ -267,9 +272,11 @@ export function Reader({
       !shouldSkipStoryPart(parts, hideQuestions) &&
       getPartIndex(parts) <= storyProgress,
   );
+  const currentPart = revealedParts.at(-1);
+  const feedbackContext = getFeedbackContext(currentPart, partProgress);
 
   return (
-    <HintLookupContext.Provider value={handleHintLookup}>
+    <HintLookupContext.Provider value={pauseForOverlay}>
       <View style={styles.root}>
         <View style={[styles.topBar, { paddingTop: insets.top + 10 }]}>
           <Pressable
@@ -342,6 +349,15 @@ export function Reader({
         </ScrollView>
 
         <View style={styles.footerOverlay}>
+          <StoryFeedbackFloat>
+            <StoryFeedback
+              storyId={story.id}
+              lineIndex={feedbackContext.lineIndex}
+              lineText={feedbackContext.lineText}
+              disabled={buttonStatus === "..."}
+              onOpen={pauseForOverlay}
+            />
+          </StoryFeedbackFloat>
           <Footer
             status={buttonStatus}
             onContinue={() => void next()}

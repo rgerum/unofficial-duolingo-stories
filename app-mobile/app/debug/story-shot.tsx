@@ -6,6 +6,11 @@ import { QuestionPrompt } from "../../src/story/elements/QuestionPrompt";
 import { SelectPhraseQuestion } from "../../src/story/elements/SelectPhraseQuestion";
 import { TextLine } from "../../src/story/elements/TextLine";
 import { HintPopupHost } from "../../src/story/HintPopup";
+import {
+  StoryFeedback,
+  StoryFeedbackFloat,
+} from "../../src/story/StoryFeedback";
+import { Footer } from "../../src/story/Footer";
 import type {
   ContentWithHints,
   HideRange,
@@ -226,20 +231,50 @@ export default function StoryShotScreen() {
   const showRevealedBlank = params.case === "all" || params.case === "revealed";
   const showTeluguLine = params.case === "all" || params.case === "telugu";
   const debugTeluguLayout = params.debug === "1";
+  const showFeedback = params.case?.startsWith("feedback") ?? false;
+  const listeningFeedback = params.case?.includes("listening") ?? false;
+  const finishedFeedback = params.case?.includes("finished") ?? false;
+  const correctFeedback = params.case?.includes("correct") ?? false;
+  const openFeedback =
+    params.case === "feedback" || params.case?.endsWith("-open");
 
   return (
     <HintPopupHost>
-      <ScrollView
-        style={[styles.screen, { backgroundColor: colors.background }]}
-        contentContainerStyle={styles.content}
-      >
-        <RealisticStoryFixture
-          includeLatinBlank={includeLatinBlank}
-          showRevealedBlank={showRevealedBlank}
-          showTeluguLine={showTeluguLine}
-          debugTeluguLayout={debugTeluguLayout}
-        />
-      </ScrollView>
+      <View style={[styles.screen, { backgroundColor: colors.background }]}>
+        <ScrollView contentContainerStyle={styles.content}>
+          <RealisticStoryFixture
+            includeLatinBlank={includeLatinBlank}
+            showRevealedBlank={showRevealedBlank}
+            showTeluguLine={showTeluguLine}
+            debugTeluguLayout={debugTeluguLayout}
+          />
+        </ScrollView>
+        {showFeedback ? (
+          <View style={styles.footerFixture}>
+            <StoryFeedbackFloat>
+              <StoryFeedback
+                storyId={1234}
+                lineIndex={1}
+                lineText="Lucy: I think my keys are in the car."
+                initialOpen={openFeedback}
+                submitFeedback={() => Promise.resolve()}
+              />
+            </StoryFeedbackFloat>
+            <Footer
+              status={
+                finishedFeedback
+                  ? "finished"
+                  : correctFeedback
+                    ? "right"
+                    : "continue"
+              }
+              onContinue={() => {}}
+              listeningMode={listeningFeedback}
+              listeningPaused={listeningFeedback}
+            />
+          </View>
+        ) : null}
+      </View>
     </HintPopupHost>
   );
 }
@@ -251,7 +286,7 @@ const styles = StyleSheet.create({
   content: {
     paddingTop: 28,
     paddingHorizontal: 18,
-    paddingBottom: 48,
+    paddingBottom: 150,
   },
   storyCard: {
     gap: 2,
@@ -260,5 +295,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "800",
     marginBottom: 2,
+  },
+  footerFixture: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
 });
