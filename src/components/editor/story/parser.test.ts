@@ -345,6 +345,24 @@ $8275/8e8657d3.mp3;5,50;2,550;1,438;7,162;0,525`);
   });
 });
 
+test("SELECT_PHRASE audio insert anchor stays after the hidden phrase translation", () => {
+  const [, , audioInsertLines] = processStoryFile(
+    `[SELECT_PHRASE]
+> Διαλέξτε τη φράση που λείπει. - Select the missing phrase.
+Speaker856: [Δεν~ξέρω], νομίζω πως~ναι.
+~ I~don't~know  I~think so
++ Δεν ξέρω
+- Δε θέλω
+- Δεν κάνω`,
+    0,
+    testAvatars,
+    { learning_language: "el", from_language: "en" },
+    "",
+  );
+
+  assert.deepEqual(audioInsertLines, [[undefined, 5]]);
+});
+
 test("LINE uses the default avatar link when a speaker override only changes the voice", () => {
   const avatarLink = "https://stories-cdn.duolingo.com/avatar/speaker-6.svg";
   const [story, meta] = processStoryFile(
