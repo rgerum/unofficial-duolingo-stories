@@ -289,12 +289,28 @@ describe("submitStoryFeedback", () => {
     const t = convexTest(schema, modules);
     await seedCourseWithStory(t);
 
-    await expect(
+    await expectFeedbackRejection(
       t.mutation(
         api.storyFeedback.submitStoryFeedback,
         feedbackArgs({ lineIndex: -1 }),
       ),
-    ).rejects.toThrow("Line index must be a non-negative integer");
+      "INVALID_REQUEST",
+      "Line index must be a non-negative integer",
+    );
+  });
+
+  test("rejects an invalid editor line", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await expectFeedbackRejection(
+      t.mutation(
+        api.storyFeedback.submitStoryFeedback,
+        feedbackArgs({ line: -1 }),
+      ),
+      "INVALID_REQUEST",
+      "Line must be a non-negative integer",
+    );
   });
 
   test("stores sanitized text fallback when no line number is available", async () => {

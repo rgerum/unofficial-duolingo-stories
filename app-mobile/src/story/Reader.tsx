@@ -179,12 +179,7 @@ export function Reader({
     setListeningPaused(true);
   }, []);
 
-  const handleHintLookup = React.useCallback(() => {
-    stopAudio(false);
-    if (listening) setListeningPaused(true);
-  }, [listening]);
-
-  const handleFeedbackOpen = React.useCallback(() => {
+  const pauseForOverlay = React.useCallback(() => {
     stopAudio(false);
     if (listening) setListeningPaused(true);
   }, [listening]);
@@ -281,7 +276,7 @@ export function Reader({
   const feedbackContext = getFeedbackContext(currentPart, partProgress);
 
   return (
-    <HintLookupContext.Provider value={handleHintLookup}>
+    <HintLookupContext.Provider value={pauseForOverlay}>
       <View style={styles.root}>
         <View style={[styles.topBar, { paddingTop: insets.top + 10 }]}>
           <Pressable
@@ -360,7 +355,7 @@ export function Reader({
               lineIndex={feedbackContext.lineIndex}
               lineText={feedbackContext.lineText}
               disabled={buttonStatus === "..."}
-              onOpen={handleFeedbackOpen}
+              onOpen={pauseForOverlay}
             />
           </StoryFeedbackFloat>
           <Footer

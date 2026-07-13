@@ -292,6 +292,12 @@ export const submitStoryFeedback = mutation({
 
     const submittedLineText = normalizeOptionalLineText(args.lineText);
     if (
+      args.line !== undefined &&
+      (!Number.isSafeInteger(args.line) || args.line < 0)
+    ) {
+      rejectFeedback("INVALID_REQUEST", "Line must be a non-negative integer");
+    }
+    if (
       args.lineIndex !== undefined &&
       (!Number.isSafeInteger(args.lineIndex) || args.lineIndex < 0)
     ) {

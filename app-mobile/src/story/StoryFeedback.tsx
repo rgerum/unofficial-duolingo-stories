@@ -126,10 +126,12 @@ export function getFeedbackContext(
   const lineIndex =
     visibleElement?.trackingProperties.source_line_index ??
     visibleElement?.trackingProperties.line_index;
-  const lineText = currentPart
-    .flatMap((element) => getFeedbackTextForElement(element))
-    .filter(Boolean)
-    .join("\n");
+  const lineText = visibleElement
+    ? [visibleElement]
+        .flatMap((element) => getFeedbackTextForElement(element))
+        .filter(Boolean)
+        .join("\n")
+    : "";
 
   return {
     ...(lineIndex !== undefined ? { lineIndex } : {}),
@@ -202,7 +204,10 @@ export function StoryFeedback({
     setSubmitError(null);
     try {
       if (submitFeedbackOverride === undefined) {
-        await waitForFeedbackConnection(convex);
+        await waitForFeedbackConnection(
+          convex,
+          Math.max(1, submissionDeadline - Date.now()),
+        );
         if (submissionAttemptRef.current !== submissionAttempt) return;
       }
       await submitFeedbackWithTimeout(
