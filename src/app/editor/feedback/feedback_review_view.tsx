@@ -10,6 +10,9 @@ import {
 import Link from "next/link";
 import React from "react";
 import type { Id } from "@convex/_generated/dataModel";
+import StoryTextLine from "@/components/StoryTextLine";
+import type { StorySettings } from "@/components/StoryProgress";
+import type { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 import Button from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
@@ -23,6 +26,7 @@ export type FeedbackReport = {
   courseShort: string;
   line?: number;
   lineText?: string;
+  lineElement?: unknown;
   category: "Text" | "Translation hints" | "Audio" | "Other";
   comment: string;
   userName: string | null;
@@ -47,10 +51,35 @@ const statusLabels: Record<FeedbackStatus, string> = {
   resolved: "Resolved",
 };
 
+export type FeedbackCourseFilter = {
+  short: string;
+  name: string;
+  unresolvedFeedbackCount: number;
+};
+
+const feedbackPreviewSettings: StorySettings = {
+  hide_questions: false,
+  show_all: true,
+  show_names: false,
+  rtl: false,
+  highlight_name: [],
+  hideNonHighlighted: false,
+  setHighlightName: () => {},
+  setHideNonHighlighted: () => {},
+  show_hints: true,
+  setShowHints: () => {},
+  show_audio: true,
+  setShowAudio: () => {},
+  id: 0,
+  show_title_page: false,
+};
+
 export default function FeedbackReviewView({
   status,
   reports,
   paginationStatus,
+  courses,
+  selectedCourseShort,
   updatingId,
   onStatusChange,
   onLoadMore,
@@ -63,6 +92,8 @@ export default function FeedbackReviewView({
     | "CanLoadMore"
     | "LoadingMore"
     | "Exhausted";
+  courses?: FeedbackCourseFilter[];
+  selectedCourseShort?: string;
   updatingId: Id<"story_feedback_reports"> | null;
   onStatusChange: (status: FeedbackStatus) => void;
   onLoadMore?: () => void;
@@ -80,7 +111,9 @@ export default function FeedbackReviewView({
             Story reports
           </div>
           <h1 className="m-0 text-[1.8rem] leading-tight font-bold">
-            Feedback
+            {selectedCourseShort
+              ? `${selectedCourseShort} feedback`
+              : "Feedback"}
           </h1>
         </div>
 
@@ -109,6 +142,25 @@ export default function FeedbackReviewView({
           })}
         </div>
       </div>
+
+      {courses && courses.length > 0 ? (
+        <nav className="mb-5 flex gap-2 overflow-x-auto pb-1">
+          <CourseFilterLink
+            href="/editor/feedback"
+            selected={selectedCourseShort === undefined}
+            label="All"
+          />
+          {courses.map((course) => (
+            <CourseFilterLink
+              key={course.short}
+              href={`/editor/course/${course.short}/feedback`}
+              selected={selectedCourseShort === course.short}
+              label={course.name}
+              count={course.unresolvedFeedbackCount}
+            />
+          ))}
+        </nav>
+      ) : null}
 
       {reports === undefined ? (
         <Spinner />
@@ -146,6 +198,38 @@ export default function FeedbackReviewView({
         </>
       )}
     </main>
+  );
+}
+
+function CourseFilterLink({
+  href,
+  selected,
+  label,
+  count,
+}: {
+  href: string;
+  selected: boolean;
+  label: string;
+  count?: number;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={selected ? "page" : undefined}
+      className={cn(
+        "inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-[0.9rem] font-bold no-underline transition-colors",
+        selected
+          ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
+          : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]",
+      )}
+    >
+      <span>{label}</span>
+      {count && count > 0 ? (
+        <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,var(--body-background)_85%,transparent)] px-1.5 text-[0.72rem]">
+          {count}
+        </span>
+      ) : null}
+    </Link>
   );
 }
 
@@ -188,11 +272,22 @@ function FeedbackReportRow({
         <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.9rem] text-[var(--text-color-dim)]">
           <span>{report.courseShort}</span>
           <span>Story {report.storyId}</span>
-          {report.line ? <span>Line {report.line}</span> : null}
+          {report.line !== undefined ? <span>Line {report.line}</span> : null}
           <span>{report.userName || report.userEmail || "Anonymous"}</span>
         </div>
 
-        {report.lineText ? (
+        {isStoryElementLine(report.lineElement) ? (
+          <div className="mb-3 min-w-0 overflow-hidden rounded-[8px] border-l-4 border-[var(--overview-hr)] bg-[var(--body-background-faint)] px-4 py-1">
+            <StoryTextLine
+              active={false}
+              element={report.lineElement}
+              settings={feedbackPreviewSettings}
+              editorShowTranslationsOverride={true}
+              editorShowAudioDetailsOverride={false}
+              compact
+            />
+          </div>
+        ) : report.lineText ? (
           <blockquote className="m-0 mb-3 rounded-[8px] border-l-4 border-[var(--overview-hr)] bg-[var(--body-background-faint)] px-4 py-3 text-[0.95rem] leading-6">
             {report.lineText}
           </blockquote>
@@ -241,6 +336,112 @@ function FeedbackReportRow({
       </div>
     </article>
   );
+}
+
+function isStoryElementLine(value: unknown): value is StoryElementLine {
+  if (!isRecord(value) || value.type !== "LINE") return false;
+  if (!isRecord(value.line) || !isRecord(value.editor)) return false;
+  if (!isRecord(value.trackingProperties)) return false;
+  if (typeof value.lang !== "string") return false;
+  if (
+    value.line.type !== "CHARACTER" &&
+    value.line.type !== "PROSE" &&
+    value.line.type !== "TITLE"
+  ) {
+    return false;
+  }
+  if (!isRecord(value.line.content)) return false;
+  if (typeof value.line.content.text !== "string") return false;
+  if (!isValidHintMap(value.line.content.hintMap)) return false;
+  if (
+    value.line.content.hints !== undefined &&
+    !isStringArray(value.line.content.hints)
+  ) {
+    return false;
+  }
+  if (
+    value.line.content.hints_pronunciation !== undefined &&
+    !isStringArray(value.line.content.hints_pronunciation)
+  ) {
+    return false;
+  }
+  if (
+    value.hideRangesForChallenge !== undefined &&
+    !isValidHideRanges(value.hideRangesForChallenge)
+  ) {
+    return false;
+  }
+  if (
+    value.line.content.audio !== undefined &&
+    !isValidLineAudio(value.line.content.audio)
+  ) {
+    return false;
+  }
+  if (value.line.type !== "CHARACTER") return true;
+
+  return (
+    (typeof value.line.characterId === "number" ||
+      typeof value.line.characterId === "string") &&
+    (value.line.avatarUrl === undefined ||
+      typeof value.line.avatarUrl === "string") &&
+    (value.line.characterName === undefined ||
+      typeof value.line.characterName === "string")
+  );
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "string")
+  );
+}
+
+function isValidHintMap(value: unknown) {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        isRecord(item) &&
+        typeof item.hintIndex === "number" &&
+        typeof item.rangeFrom === "number" &&
+        typeof item.rangeTo === "number",
+    )
+  );
+}
+
+function isValidHideRanges(value: unknown) {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        isRecord(item) &&
+        typeof item.start === "number" &&
+        typeof item.end === "number",
+    )
+  );
+}
+
+function isValidLineAudio(value: unknown) {
+  if (!isRecord(value)) return false;
+  if (value.url !== undefined && typeof value.url !== "string") return false;
+  if (
+    value.keypoints !== undefined &&
+    !(
+      Array.isArray(value.keypoints) &&
+      value.keypoints.every(
+        (item) =>
+          isRecord(item) &&
+          typeof item.rangeEnd === "number" &&
+          typeof item.audioStart === "number",
+      )
+    )
+  ) {
+    return false;
+  }
+  return value.ssml === undefined || isRecord(value.ssml);
 }
 
 function StatusButton({

@@ -17,6 +17,7 @@ export type CourseProps = {
   contributors_past: string[];
   todo_count: number;
   audio_problem_count: number;
+  unresolved_feedback_count: number;
   tags: string[];
 };
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { useMutation, usePaginatedQuery } from "convex/react";
-import Link from "next/link";
+import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import React from "react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
@@ -10,25 +9,49 @@ import {
   EditorHeaderActions,
   EditorHeaderBreadcrumbs,
 } from "@/app/editor/_components/header_context";
+import EditorButton from "../../editor_button";
+import type { CourseProps } from "../types";
 import FeedbackReviewView, {
+  type FeedbackCourseFilter,
   type FeedbackReport,
   type FeedbackStatus,
 } from "./feedback_review_view";
 
-export default function StoryFeedbackPageClient() {
+export default function StoryFeedbackPageClient({
+  courseId,
+}: {
+  courseId?: string;
+}) {
   const [status, setStatus] = React.useState<FeedbackStatus>("open");
+  const sidebarData = useQuery(api.editorRead.getEditorSidebarData, {});
+  const course = useQuery(
+    api.editorRead.getEditorCourseByIdentifier,
+    courseId ? { identifier: courseId } : "skip",
+  ) as CourseProps | null | undefined;
+  const selectedCourseShort =
+    courseId === undefined ? undefined : (course?.short ?? courseId);
+  const shouldSkipReports = courseId !== undefined && course === undefined;
   const {
     results,
     status: paginationStatus,
     loadMore,
   } = usePaginatedQuery(
     api.storyFeedback.listStoryFeedbackReports,
-    { status },
+    shouldSkipReports
+      ? "skip"
+      : {
+          status,
+          ...(selectedCourseShort ? { courseShort: selectedCourseShort } : {}),
+        },
     { initialNumItems: 50 },
   );
   const updateStatus = useMutation(api.storyFeedback.updateStoryFeedbackStatus);
   const [updatingId, setUpdatingId] =
     React.useState<Id<"story_feedback_reports"> | null>(null);
+  const courseHref =
+    courseId !== undefined && course
+      ? `/editor/course/${course.short ?? course.id}`
+      : undefined;
 
   async function setReportStatus(
     reportId: Id<"story_feedback_reports">,
@@ -42,34 +65,59 @@ export default function StoryFeedbackPageClient() {
     }
   }
 
+  const breadcrumbPath =
+    course && courseHref
+      ? [
+          { type: "Editor", href: "/editor" },
+          { type: "sep" },
+          {
+            type: "course",
+            href: courseHref,
+            lang1: {
+              languageId: course.learningLanguageId,
+              name: course.learning_language_name,
+            },
+            lang2: {
+              languageId: course.fromLanguageId,
+              name: course.from_language_name,
+            },
+          },
+          { type: "sep" },
+          { type: "Feedback" },
+        ]
+      : [
+          { type: "Editor", href: "/editor" },
+          { type: "sep" },
+          { type: "Feedback" },
+        ];
+
   return (
     <>
       <EditorHeaderBreadcrumbs>
-        <Breadcrumbs
-          path={[
-            { type: "Editor", href: "/editor" },
-            { type: "sep" },
-            { type: "Feedback" },
-          ]}
-        />
+        <Breadcrumbs path={breadcrumbPath} />
       </EditorHeaderBreadcrumbs>
       <EditorHeaderActions>
-        <Link
-          href="/editor"
-          className="inline-flex min-h-10 items-center rounded-[12px] border-2 border-[var(--overview-hr)] bg-[var(--body-background)] px-4 text-[0.92rem] font-bold text-[var(--text-color)] hover:bg-[var(--body-background-faint)]"
-        >
-          Editor
-        </Link>
+        <EditorButton
+          id="button_back"
+          href={courseHref ?? "/editor"}
+          data-cy="button_back"
+          img="back.svg"
+          text={courseHref ? "Back" : "Editor"}
+        />
       </EditorHeaderActions>
 
       <FeedbackReviewView
         status={status}
         reports={
-          paginationStatus === "LoadingFirstPage"
+          paginationStatus === "LoadingFirstPage" || shouldSkipReports
             ? undefined
             : (results as FeedbackReport[])
         }
         paginationStatus={paginationStatus}
+        courses={getCourseFilters(
+          (sidebarData?.courses ?? []) as CourseProps[],
+        )}
+        selectedCourseShort={selectedCourseShort}
         updatingId={updatingId}
         onStatusChange={setStatus}
         onLoadMore={() => loadMore(50)}
@@ -77,4 +125,14 @@ export default function StoryFeedbackPageClient() {
       />
     </>
   );
+}
+
+function getCourseFilters(courses: CourseProps[]): FeedbackCourseFilter[] {
+  return courses
+    .filter((course) => course.short)
+    .map((course) => ({
+      short: course.short ?? "",
+      name: `${course.learning_language_name} [${course.from_language_short}]`,
+      unresolvedFeedbackCount: course.unresolved_feedback_count,
+    }));
 }

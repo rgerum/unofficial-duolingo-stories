@@ -20,8 +20,6 @@ import { cn } from "@/lib/utils";
 
 type StoryFeedbackProps = {
   storyId: number;
-  storyTitle: string;
-  courseShort: string;
   line?: number;
   lineText?: string;
   lineElement?: StoryElementLine;
@@ -41,8 +39,6 @@ type FeedbackCategory = (typeof feedbackCategories)[number]["value"];
 
 export default function StoryFeedback({
   storyId,
-  storyTitle,
-  courseShort,
   line,
   lineText,
   lineElement,
@@ -62,6 +58,9 @@ export default function StoryFeedback({
     "idle" | "submitting" | "submitted"
   >("idle");
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [operationKey, setOperationKey] = React.useState(() =>
+    crypto.randomUUID(),
+  );
   const isSubmitting = submitState === "submitting";
   const isSubmitted = submitState === "submitted";
 
@@ -72,6 +71,7 @@ export default function StoryFeedback({
       setSubmitError(null);
     } else {
       setComment("");
+      setOperationKey(crypto.randomUUID());
     }
   }
 
@@ -115,7 +115,7 @@ export default function StoryFeedback({
             </div>
           ) : (
             <p className="mt-3 mb-0 whitespace-pre-wrap text-[1rem] leading-6">
-              {lineText || storyTitle}
+              {lineText || `Story ${storyId}`}
             </p>
           )}
         </div>
@@ -132,8 +132,7 @@ export default function StoryFeedback({
             try {
               await submitStoryFeedback({
                 storyId,
-                storyTitle,
-                courseShort,
+                operationKey,
                 line,
                 lineText,
                 category,

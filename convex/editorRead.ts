@@ -35,6 +35,7 @@ const editorCourseValidator = v.union(
     contributors_past: v.array(courseContributorValidator),
     todo_count: v.number(),
     audio_problem_count: v.number(),
+    unresolved_feedback_count: v.number(),
     tags: v.array(v.string()),
   }),
   v.null(),
@@ -72,6 +73,7 @@ function deriveAudioProblemCount(course: CourseDoc) {
 function toCourse(
   course: CourseDoc,
   languageById: Map<Id<"languages">, LanguageDoc>,
+  unresolvedFeedbackCount = 0,
 ) {
   const learningLanguage = languageById.get(course.learningLanguageId);
   const fromLanguage = languageById.get(course.fromLanguageId);
@@ -96,8 +98,18 @@ function toCourse(
     contributors_past: course.contributors_past ?? [],
     todo_count: course.todo_count ?? 0,
     audio_problem_count: deriveAudioProblemCount(course),
+    unresolved_feedback_count: unresolvedFeedbackCount,
     tags: course.tags ?? [],
   };
+}
+
+async function getUnresolvedFeedbackCountsByCourseId(ctx: QueryCtx) {
+  const statsRows = await ctx.db.query("course_feedback_stats").collect();
+  const counts = new Map<Id<"courses">, number>();
+  for (const row of statsRows) {
+    counts.set(row.courseId, row.openCount + row.reviewedCount);
+  }
+  return counts;
 }
 
 async function getCourseByIdentifier(ctx: QueryCtx, identifier: string) {
@@ -249,8 +261,17 @@ export const getEditorSidebarData = query({
       languageById.set(language._id, language);
     }
 
+    const unresolvedFeedbackCounts =
+      await getUnresolvedFeedbackCountsByCourseId(ctx);
+
     const courses = courseRows
-      .map((course) => toCourse(course, languageById))
+      .map((course) =>
+        toCourse(
+          course,
+          languageById,
+          unresolvedFeedbackCounts.get(course._id) ?? 0,
+        ),
+      )
       .sort((a, b) => b.count - a.count);
 
     return { courses };
@@ -295,6 +316,14 @@ export const getEditorCourseByIdentifier = query({
       contributors_past: contributorLists.contributors_past,
       todo_count: course.todo_count ?? 0,
       audio_problem_count: deriveAudioProblemCount(course),
+      unresolved_feedback_count:
+        (await ctx.db
+          .query("course_feedback_stats")
+          .withIndex("by_course", (q) => q.eq("courseId", course._id))
+          .unique()
+          .then((stats) =>
+            stats ? stats.openCount + stats.reviewedCount : 0,
+          )) ?? 0,
       tags: course.tags ?? [],
     };
   },

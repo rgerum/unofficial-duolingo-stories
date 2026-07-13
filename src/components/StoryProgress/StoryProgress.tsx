@@ -738,8 +738,6 @@ function StoryProgress({
               feedback={
                 <StoryFeedback
                   storyId={story.id}
-                  storyTitle={story.from_language_name}
-                  courseShort={story.course_short}
                   line={currentEditorLine}
                   lineText={currentFeedbackLineText}
                   lineElement={currentFeedbackLineElement}

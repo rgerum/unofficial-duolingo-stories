@@ -8,11 +8,39 @@ const modules = import.meta.glob("./**/*.ts");
 
 type FeedbackArgs = {
   storyId: number;
-  storyTitle: string;
-  courseShort: string;
+  operationKey: string;
+  storyTitle?: string;
+  courseShort?: string;
+  line?: number;
   lineText?: string;
+  lineElement?: unknown;
   category: "Text" | "Translation hints" | "Audio" | "Other";
   comment: string;
+};
+
+const parsedLineElement = {
+  type: "LINE",
+  line: {
+    type: "PROSE",
+    content: {
+      text: "Hola",
+      hintMap: [{ hintIndex: 0, rangeFrom: 0, rangeTo: 3 }],
+      hints: ["Hello"],
+      audio: {
+        ssml: {
+          text: "Hola",
+          speaker: "es",
+          id: 1,
+          inser_index: 0,
+        },
+        url: "story-line.mp3",
+        keypoints: [{ rangeEnd: 4, audioStart: 120 }],
+      },
+    },
+  },
+  trackingProperties: { line_index: 1 },
+  lang: "es",
+  editor: { block_start_no: 12 },
 };
 
 async function seedCourseWithStory(t: ReturnType<typeof convexTest>) {
@@ -51,6 +79,12 @@ async function seedCourseWithStory(t: ReturnType<typeof convexTest>) {
       deleted: false,
       todo_count: 0,
     });
+    await ctx.db.insert("story_content", {
+      storyId,
+      text: "[Story]\nHola",
+      json: { elements: [parsedLineElement] },
+      lastUpdated: 1,
+    });
     return { courseId, storyId };
   });
 }
@@ -58,8 +92,7 @@ async function seedCourseWithStory(t: ReturnType<typeof convexTest>) {
 function feedbackArgs(overrides: Partial<FeedbackArgs> = {}): FeedbackArgs {
   return {
     storyId: 10,
-    storyTitle: "Story",
-    courseShort: "es-en",
+    operationKey: "feedback-operation-key",
     category: "Text" as const,
     comment: "There is a typo.",
     ...overrides,
@@ -80,6 +113,16 @@ describe("submitStoryFeedback", () => {
       "Course short is too long",
     ],
     ["lineText", { lineText: `${"x".repeat(501)}` }, "Line text is too long"],
+    [
+      "lineElement",
+      { lineElement: { text: `${"x".repeat(20001)}` } },
+      "Line preview is too large",
+    ],
+    [
+      "operationKey",
+      { operationKey: `${"x".repeat(201)}` },
+      "Operation key is too long",
+    ],
   ])("%s length cap rejects oversized values", async (_field, overrides, error) => {
     const t = convexTest(schema, modules);
     await seedCourseWithStory(t);
@@ -135,6 +178,190 @@ describe("submitStoryFeedback", () => {
     ).rejects.toThrow(
       "This story already has many open reports. Please try again later.",
     );
+  });
+
+  test("derives course, title, and line preview data for review rendering", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await t.mutation(
+      api.storyFeedback.submitStoryFeedback,
+      feedbackArgs({
+        storyTitle: "Spoofed title",
+        courseShort: "fr-en",
+        line: 12,
+        lineText: "Spoofed line",
+        lineElement: { type: "LINE", bogus: true },
+      }),
+    );
+
+    await t.run(async (ctx) => {
+      const [report] = await ctx.db.query("story_feedback_reports").collect();
+      expect(report.operationKey).toBe("feedback-operation-key");
+      expect(report.storyTitle).toBe("Story");
+      expect(report.courseShort).toBe("es-en");
+      expect(report.line).toBe(12);
+      expect(report.lineText).toBe("Hola");
+      expect(report.lineElement).toEqual(parsedLineElement);
+    });
+  });
+
+  test("uses operation keys to make repeated submissions idempotent", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    const first = await t.mutation(
+      api.storyFeedback.submitStoryFeedback,
+      feedbackArgs({ operationKey: "feedback:retry:1" }),
+    );
+    const second = await t.mutation(
+      api.storyFeedback.submitStoryFeedback,
+      feedbackArgs({
+        operationKey: "feedback:retry:1",
+        comment: "Retried after success",
+      }),
+    );
+
+    expect(second.reportId).toBe(first.reportId);
+    await t.run(async (ctx) => {
+      const reports = await ctx.db.query("story_feedback_reports").collect();
+      const [stats] = await ctx.db.query("course_feedback_stats").collect();
+      expect(reports).toHaveLength(1);
+      expect(stats.openCount).toBe(1);
+      expect(stats.reviewedCount).toBe(0);
+    });
+  });
+
+  test("stores sanitized text fallback when no line number is available", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await t.mutation(
+      api.storyFeedback.submitStoryFeedback,
+      feedbackArgs({ lineText: "  Seen text\r\nsecond line  " }),
+    );
+
+    await t.run(async (ctx) => {
+      const [report] = await ctx.db.query("story_feedback_reports").collect();
+      expect(report.line).toBeUndefined();
+      expect(report.lineText).toBe("Seen text\nsecond line");
+      expect(report.lineElement).toBeUndefined();
+    });
+  });
+});
+
+describe("course feedback stats", () => {
+  test("submit and status updates maintain unresolved course counts", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await t.mutation(api.storyFeedback.submitStoryFeedback, feedbackArgs());
+
+    await t.run(async (ctx) => {
+      const [stats] = await ctx.db.query("course_feedback_stats").collect();
+      expect(stats.openCount).toBe(1);
+      expect(stats.reviewedCount).toBe(0);
+    });
+
+    const asContributor = t.withIdentity({ role: "contributor", userId: "5" });
+    const reportId = await t.run(async (ctx) => {
+      const [report] = await ctx.db.query("story_feedback_reports").collect();
+      return report._id;
+    });
+
+    await asContributor.mutation(api.storyFeedback.updateStoryFeedbackStatus, {
+      reportId,
+      status: "reviewed",
+    });
+
+    await t.run(async (ctx) => {
+      const [stats] = await ctx.db.query("course_feedback_stats").collect();
+      expect(stats.openCount).toBe(0);
+      expect(stats.reviewedCount).toBe(1);
+    });
+
+    await asContributor.mutation(api.storyFeedback.updateStoryFeedbackStatus, {
+      reportId,
+      status: "resolved",
+    });
+
+    await t.run(async (ctx) => {
+      const [stats] = await ctx.db.query("course_feedback_stats").collect();
+      expect(stats.openCount).toBe(0);
+      expect(stats.reviewedCount).toBe(0);
+    });
+  });
+
+  test("admin recompute rebuilds stats from existing reports", async () => {
+    const t = convexTest(schema, modules);
+    const { courseId } = await seedCourseWithStory(t);
+
+    await t.run(async (ctx) => {
+      await ctx.db.insert("story_feedback_reports", {
+        storyId: 10,
+        storyTitle: "Story",
+        courseShort: "spoofed",
+        category: "Text",
+        comment: "Open",
+        userId: null,
+        userName: null,
+        userEmail: null,
+        status: "open",
+        createdAt: 1,
+      });
+      await ctx.db.insert("story_feedback_reports", {
+        storyId: 10,
+        storyTitle: "Story",
+        courseShort: "spoofed",
+        category: "Text",
+        comment: "Reviewed",
+        userId: null,
+        userName: null,
+        userEmail: null,
+        status: "reviewed",
+        createdAt: 2,
+      });
+      await ctx.db.insert("story_feedback_reports", {
+        storyId: 10,
+        storyTitle: "Story",
+        courseShort: "spoofed",
+        category: "Text",
+        comment: "Resolved",
+        userId: null,
+        userName: null,
+        userEmail: null,
+        status: "resolved",
+        createdAt: 3,
+      });
+    });
+
+    await expect(
+      t
+        .withIdentity({ role: "contributor", userId: "5" })
+        .mutation(api.storyFeedback.recomputeCourseFeedbackStats, {}),
+    ).rejects.toThrow("Unauthorized");
+
+    const result = await t
+      .withIdentity({ role: "admin", userId: "1" })
+      .mutation(api.storyFeedback.recomputeCourseFeedbackStats, {});
+    expect(result.reportsCounted).toBe(2);
+
+    await t.run(async (ctx) => {
+      const stats = await ctx.db
+        .query("course_feedback_stats")
+        .withIndex("by_course", (q) => q.eq("courseId", courseId))
+        .unique();
+      expect(stats?.courseShort).toBe("es-en");
+      expect(stats?.openCount).toBe(1);
+      expect(stats?.reviewedCount).toBe(1);
+
+      const reports = await ctx.db.query("story_feedback_reports").collect();
+      expect(reports.map((report) => report.courseShort)).toEqual([
+        "es-en",
+        "es-en",
+        "es-en",
+      ]);
+    });
   });
 });
 
@@ -210,5 +437,46 @@ describe("listStoryFeedbackReports", () => {
       "Report 100",
     ]);
     expect(secondPage.isDone).toBe(true);
+  });
+
+  test("filters reports by course short", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await t.run(async (ctx) => {
+      for (const [courseShort, createdAt] of [
+        ["es-en", 100],
+        ["fr-en", 200],
+        ["es-en", 300],
+      ] as const) {
+        await ctx.db.insert("story_feedback_reports", {
+          storyId: 10,
+          storyTitle: "Story",
+          courseShort,
+          category: "Text",
+          comment: `${courseShort} report ${createdAt}`,
+          userId: null,
+          userName: null,
+          userEmail: null,
+          status: "open",
+          createdAt,
+        });
+      }
+    });
+
+    const asContributor = t.withIdentity({ role: "contributor", userId: "5" });
+    const page = await asContributor.query(
+      api.storyFeedback.listStoryFeedbackReports,
+      {
+        status: "open",
+        courseShort: "es-en",
+        paginationOpts: { numItems: 10, cursor: null },
+      },
+    );
+
+    expect(page.page.map((report) => report.comment)).toEqual([
+      "es-en report 300",
+      "es-en report 100",
+    ]);
   });
 });

@@ -239,11 +239,13 @@ export default defineSchema({
     .index("by_legacy_id", ["legacyId"]),
 
   story_feedback_reports: defineTable({
+    operationKey: v.optional(v.string()),
     storyId: v.number(),
     storyTitle: v.string(),
     courseShort: v.string(),
     line: v.optional(v.number()),
     lineText: v.optional(v.string()),
+    lineElement: v.optional(v.any()),
     category: v.union(
       v.literal("Text"),
       v.literal("Translation hints"),
@@ -264,9 +266,25 @@ export default defineSchema({
     .index("by_story_id", ["storyId"])
     .index("by_story_and_status", ["storyId", "status"])
     .index("by_course_short", ["courseShort"])
+    .index("by_course_short_status_created_at", [
+      "courseShort",
+      "status",
+      "createdAt",
+    ])
     .index("by_category", ["category"])
     .index("by_user_id", ["userId"])
-    .index("by_status_and_created_at", ["status", "createdAt"]),
+    .index("by_status_and_created_at", ["status", "createdAt"])
+    .index("by_operation_key", ["operationKey"]),
+
+  course_feedback_stats: defineTable({
+    courseId: v.id("courses"),
+    courseShort: v.string(),
+    openCount: v.number(),
+    reviewedCount: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_course", ["courseId"])
+    .index("by_course_short", ["courseShort"]),
 
   discord_stories_role_sync: defineTable({
     legacyUserId: v.number(),
