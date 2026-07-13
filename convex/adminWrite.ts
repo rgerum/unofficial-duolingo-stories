@@ -1,7 +1,11 @@
+import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
-import type { MutationCtx } from "./_generated/server";
+import { internalMutation, type MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./lib/authorization";
+import { hasNoAudioCourseTag } from "./lib/courseTags";
+
+const CLEAR_NO_AUDIO_STORY_AUDIO_PROBLEM_BATCH_SIZE = 100;
 
 function toLegacyLanguageResponse(row: {
   legacyId: number;
@@ -262,6 +266,23 @@ export const updateAdminCourse = mutation({
     patchData.tags = nextTags;
 
     await ctx.db.patch(course._id, patchData);
+    if (hasNoAudioCourseTag(nextTags)) {
+      if ((course.audio_problem_count ?? 0) !== 0) {
+        await ctx.db.patch(course._id, {
+          audio_problem_count: 0,
+          lastOperationKey: operationKey,
+        });
+      }
+      await ctx.scheduler.runAfter(
+        0,
+        internal.adminWrite.clearNoAudioCourseStoryAudioProblems,
+        {
+          courseId: course._id,
+          operationKey,
+          cursor: null,
+        },
+      );
+    }
 
     return {
       id: args.id,
@@ -275,6 +296,46 @@ export const updateAdminCourse = mutation({
       short,
       tags: nextTags,
     };
+  },
+});
+
+export const clearNoAudioCourseStoryAudioProblems = internalMutation({
+  args: {
+    courseId: v.id("courses"),
+    operationKey: v.string(),
+    cursor: v.union(v.string(), v.null()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const page = await ctx.db
+      .query("stories")
+      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
+      .paginate({
+        cursor: args.cursor,
+        numItems: CLEAR_NO_AUDIO_STORY_AUDIO_PROBLEM_BATCH_SIZE,
+      });
+
+    for (const story of page.page) {
+      if ((story.audio_problem_count ?? 0) === 0) continue;
+      await ctx.db.patch(story._id, {
+        audio_problem_count: 0,
+        lastOperationKey: args.operationKey,
+      });
+    }
+
+    if (!page.isDone) {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.adminWrite.clearNoAudioCourseStoryAudioProblems,
+        {
+          courseId: args.courseId,
+          operationKey: args.operationKey,
+          cursor: page.continueCursor,
+        },
+      );
+    }
+
+    return null;
   },
 });
 

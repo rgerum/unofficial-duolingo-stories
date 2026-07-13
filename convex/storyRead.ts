@@ -16,6 +16,7 @@ const storyReadResultValidator = v.union(
     learning_language_long: v.string(),
     learning_language_rtl: v.boolean(),
     course_short: v.string(),
+    course_tags: v.array(v.string()),
     elements: v.array(v.any()),
     illustrations: v.object({
       gilded: v.string(),
@@ -109,6 +110,7 @@ export const getStoryByLegacyId = query({
       learning_language_long: learningLanguage.name,
       learning_language_rtl: learningLanguage.rtl,
       course_short: `${learningLanguage.short}-${fromLanguage.short}`,
+      course_tags: course.tags ?? [],
       elements,
       illustrations: {
         gilded,

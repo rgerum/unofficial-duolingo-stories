@@ -11,6 +11,7 @@ export type StoryData = {
   short: string;
   learning_language: number;
   from_language: number;
+  course_tags: string[];
 };
 
 export type StoryEditorPageData = {

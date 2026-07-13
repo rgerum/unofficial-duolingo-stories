@@ -8,6 +8,7 @@ import StoryButton from "./story_button";
 import get_localisation_func from "@/lib/get_localisation_func";
 import ContributorList from "@/components/ContributorList";
 import Switch from "@/components/ui/switch";
+import { hasNoAudioCourseTag } from "@/lib/course-tags";
 
 function SetTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -121,13 +122,21 @@ export default function CoursePageClient({
     [course_id],
   );
   const [listeningMode, setListeningMode] = React.useState(false);
+  const course = usePreloadedQuery(preloadedCourse);
+  const noAudioCourse = hasNoAudioCourseTag(course?.tags);
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
+    if (noAudioCourse) {
+      setListeningMode(false);
+      window.localStorage.setItem(listeningStorageKey, "0");
+      return;
+    }
     setListeningMode(window.localStorage.getItem(listeningStorageKey) === "1");
-  }, [listeningStorageKey]);
+  }, [listeningStorageKey, noAudioCourse]);
 
   const toggleListeningMode = React.useCallback(() => {
+    if (noAudioCourse) return;
     setListeningMode((prev) => {
       const next = !prev;
       if (typeof window !== "undefined") {
@@ -135,9 +144,8 @@ export default function CoursePageClient({
       }
       return next;
     });
-  }, [listeningStorageKey]);
+  }, [listeningStorageKey, noAudioCourse]);
 
-  const course = usePreloadedQuery(preloadedCourse);
   const localizationMap = React.useMemo(() => {
     const data: Record<string, string> = {};
     for (const row of course?.localization ?? []) data[row.tag] = row.text;
@@ -207,33 +215,35 @@ export default function CoursePageClient({
       </Header>
       <div>
         {showNoNativeWarning ? <NoNativeWarning /> : null}
-        <div
-          className="mx-auto mb-6 flex w-full max-w-[720px] cursor-pointer items-center justify-between gap-3 rounded-xl border border-[var(--overview-hr)] px-4 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--overview-hr)]"
-          role="button"
-          tabIndex={0}
-          aria-pressed={listeningMode}
-          onClick={toggleListeningMode}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              toggleListeningMode();
-            }
-          }}
-        >
-          <div>
-            <div className="font-bold">Listening mode (skip questions)</div>
-            <div className="text-[calc(13/16*1rem)] text-[var(--text-color-dim)]">
-              Opens stories in autoplay and skips interactive questions.
-            </div>
-          </div>
+        {!noAudioCourse ? (
           <div
-            onClick={(e) => {
-              e.stopPropagation();
+            className="mx-auto mb-6 flex w-full max-w-[720px] cursor-pointer items-center justify-between gap-3 rounded-xl border border-[var(--overview-hr)] px-4 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--overview-hr)]"
+            role="button"
+            tabIndex={0}
+            aria-pressed={listeningMode}
+            onClick={toggleListeningMode}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleListeningMode();
+              }
             }}
           >
-            <Switch checked={listeningMode} onClick={toggleListeningMode} />
+            <div>
+              <div className="font-bold">Listening mode (skip questions)</div>
+              <div className="text-[calc(13/16*1rem)] text-[var(--text-color-dim)]">
+                Opens stories in autoplay and skips interactive questions.
+              </div>
+            </div>
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <Switch checked={listeningMode} onClick={toggleListeningMode} />
+            </div>
           </div>
-        </div>
+        ) : null}
         {course.about ? <About about={course.about} /> : null}
         <Contributors
           contributors={course.contributors}

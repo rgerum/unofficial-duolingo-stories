@@ -13,6 +13,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../src/api";
 import { captureMobileEventLater } from "../../src/analytics";
 import { useAuthSession } from "../../src/auth-client";
+import { hasNoAudioCourseTag } from "../../src/course-tags";
 import { useAppState } from "../../src/app-state";
 import { useNetworkStatus } from "../../src/network";
 import { maybeRequestAppReview } from "../../src/reviewPrompt";
@@ -69,6 +70,10 @@ export default function LearnTab() {
       course && course !== null ? (course.stories as StoryListItem[]) : [],
     [course],
   );
+  const noAudioCourse = hasNoAudioCourseTag(
+    course && course !== null ? course.tags : undefined,
+  );
+  const effectiveListening = noAudioCourse ? false : listening;
   const isStoryDone = React.useCallback(
     (storyId: number) =>
       session?.session
@@ -105,16 +110,18 @@ export default function LearnTab() {
               key={story.id}
               story={story}
               done={isStoryDone(story.id)}
-              listeningMode={listening}
+              listeningMode={effectiveListening}
               disabled={isOffline}
               onPress={() => {
                 captureMobileEventLater("story_opened", {
                   story_id: story.id,
                   course_short: courseShort,
-                  listening_mode: listening,
+                  listening_mode: effectiveListening,
                 });
                 router.push(
-                  `/story/${story.id}?listening=${listening ? "1" : "0"}`,
+                  `/story/${story.id}?listening=${
+                    effectiveListening ? "1" : "0"
+                  }`,
                 );
               }}
             />
@@ -122,7 +129,7 @@ export default function LearnTab() {
         </View>
       </View>
     ),
-    [courseShort, isOffline, isStoryDone, listening, router, styles],
+    [courseShort, effectiveListening, isOffline, isStoryDone, router, styles],
   );
 
   // Reload local progress whenever the tab regains focus (e.g. after a story).
@@ -138,14 +145,20 @@ export default function LearnTab() {
         ]);
         if (cancelled) return;
         setDoneMap(done);
-        setListening(listeningMode);
+        setListening(noAudioCourse ? false : listeningMode);
         setLocalProgressLoaded(true);
       })();
       return () => {
         cancelled = true;
       };
-    }, [courseShort]),
+    }, [courseShort, noAudioCourse]),
   );
+
+  React.useEffect(() => {
+    if (!courseShort || !noAudioCourse || !listening) return;
+    setListening(false);
+    void setListeningMode(courseShort, false);
+  }, [courseShort, listening, noAudioCourse]);
 
   React.useEffect(() => {
     if (!courseShort || !localProgressLoaded || isServerProgressPending) return;
@@ -231,22 +244,24 @@ export default function LearnTab() {
             ]}
           />
         </View>
-        <View style={styles.listeningRow}>
-          <Text style={styles.listeningLabel}>Listening mode</Text>
-          <Switch
-            value={listening}
-            onValueChange={(value) => {
-              setListening(value);
-              captureMobileEventLater("mobile_listening_mode_toggled", {
-                course_short: courseShort,
-                enabled: value,
-              });
-              void setListeningMode(courseShort, value);
-            }}
-            trackColor={{ true: colors.blue }}
-            thumbColor={colors.surface}
-          />
-        </View>
+        {!noAudioCourse ? (
+          <View style={styles.listeningRow}>
+            <Text style={styles.listeningLabel}>Listening mode</Text>
+            <Switch
+              value={listening}
+              onValueChange={(value) => {
+                setListening(value);
+                captureMobileEventLater("mobile_listening_mode_toggled", {
+                  course_short: courseShort,
+                  enabled: value,
+                });
+                void setListeningMode(courseShort, value);
+              }}
+              trackColor={{ true: colors.blue }}
+              thumbColor={colors.surface}
+            />
+          </View>
+        ) : null}
       </View>
 
       <FlatList

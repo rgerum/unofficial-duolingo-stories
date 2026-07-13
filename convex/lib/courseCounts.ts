@@ -1,5 +1,6 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
+import { hasNoAudioCourseTag } from "./courseTags";
 
 type CourseStory = Doc<"stories">;
 
@@ -43,6 +44,12 @@ export async function recomputeCourseAudioProblemCount(
   const course = await ctx.db.get(courseId);
   if (!course) {
     throw new Error(`Course ${courseId} not found`);
+  }
+  if (hasNoAudioCourseTag(course.tags)) {
+    if ((course.audio_problem_count ?? 0) !== 0) {
+      await ctx.db.patch(courseId, { audio_problem_count: 0 });
+    }
+    return 0;
   }
 
   const courseStories = stories ?? (await loadCourseStories(ctx, courseId));
