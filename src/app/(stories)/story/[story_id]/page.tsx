@@ -10,7 +10,7 @@ import {
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
 import StoryTranscript from "./StoryTranscript";
-import { getStoryDescription } from "./story_seo";
+import { getStoryDescription, getStoryTitle } from "./story_seo";
 import LocalisationProvider from "@/components/LocalisationProvider";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
@@ -41,9 +41,12 @@ export async function generateMetadata({
 
   if (!story || !storyMeta) notFound();
 
+  const title = getStoryTitle(storyMeta);
+  const description = getStoryDescription(story);
+
   return {
-    title: `${storyMeta.from_language_name} - Duostories ${storyMeta.learning_language_long} from ${storyMeta.from_language_long}`,
-    description: getStoryDescription(story),
+    title,
+    description,
     alternates: {
       canonical: `https://duostories.org/story/${story_id}`,
     },
@@ -54,10 +57,12 @@ export async function generateMetadata({
       ],
       url: `https://duostories.org/story/${story_id}`,
       type: "website",
-      description: getStoryDescription(story),
+      title,
+      description,
     },
     twitter: {
-      description: getStoryDescription(story),
+      title,
+      description,
     },
   };
 }

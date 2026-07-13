@@ -10,6 +10,7 @@ import {
   recomputeCourseAudioProblemCount,
   recomputeCoursePublishedCount,
 } from "./lib/courseCounts";
+import { hasNoAudioCourseTag } from "./lib/courseTags";
 import { upsertPublicStoryContent } from "./lib/publicStoryContent";
 
 export const setStory = mutation({
@@ -110,8 +111,9 @@ export const setStory = mutation({
     ) {
       throw new Error("audioProblemCount must be a non-negative integer");
     }
-    const nextAudioProblemCount =
-      args.audioProblemCount === undefined
+    const nextAudioProblemCount = hasNoAudioCourseTag(course.tags)
+      ? 0
+      : args.audioProblemCount === undefined
         ? story.audio_problem_count
         : story.public && !story.deleted
           ? args.audioProblemCount

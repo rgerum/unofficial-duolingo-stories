@@ -142,6 +142,7 @@ export type StoryData = {
   learning_language_long: string;
   learning_language_rtl: boolean;
   course_short: string;
+  course_tags: string[];
   elements: StoryElement[];
   illustrations?: { gilded?: string; active?: string; locked?: string };
 };

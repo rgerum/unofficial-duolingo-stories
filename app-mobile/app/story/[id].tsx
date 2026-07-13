@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../src/api";
 import { captureMobileEventLater } from "../../src/analytics";
 import { useAuthSession } from "../../src/auth-client";
+import { hasNoAudioCourseTag } from "../../src/course-tags";
 import { useAppState } from "../../src/app-state";
 import { useNetworkStatus } from "../../src/network";
 import { markReviewPromptCompletionPending } from "../../src/reviewPrompt";
@@ -43,6 +44,10 @@ export default function StoryScreen() {
     api.storyRead.getStoryByLegacyId,
     Number.isFinite(storyId) ? { storyId } : "skip",
   ) as StoryData | null | undefined;
+  const effectiveListening =
+    story && story !== null && hasNoAudioCourseTag(story.course_tags)
+      ? false
+      : listening;
 
   // Course story list (anonymous-friendly) to pick the next unread story.
   const course = useQuery(
@@ -98,13 +103,13 @@ export default function StoryScreen() {
         course_id: story.course_id,
         course_short: story.course_short,
         learning_language: story.learning_language_long,
-        listening_mode: listening,
-        hide_questions: listening || hideStoryQuestions,
+        listening_mode: effectiveListening,
+        hide_questions: effectiveListening || hideStoryQuestions,
         signed_in: Boolean(session?.session),
         ...extra,
       });
     },
-    [hideStoryQuestions, listening, session?.session, story],
+    [effectiveListening, hideStoryQuestions, session?.session, story],
   );
 
   React.useEffect(() => {
@@ -150,8 +155,10 @@ export default function StoryScreen() {
   }, [router]);
 
   const retry = React.useCallback(() => {
-    router.replace(`/story/${storyId}?listening=${listening ? "1" : "0"}`);
-  }, [listening, router, storyId]);
+    router.replace(
+      `/story/${storyId}?listening=${effectiveListening ? "1" : "0"}`,
+    );
+  }, [effectiveListening, router, storyId]);
 
   const onQuit = React.useCallback(
     ({ shouldConfirmQuit }: { shouldConfirmQuit: boolean }) => {
@@ -184,7 +191,7 @@ export default function StoryScreen() {
       });
       stopAudio();
       router.replace(
-        `/story/${nextStoryId}?listening=${listening ? "1" : "0"}`,
+        `/story/${nextStoryId}?listening=${effectiveListening ? "1" : "0"}`,
       );
       return;
     }
@@ -194,7 +201,7 @@ export default function StoryScreen() {
     course?.stories.length,
     doneIds?.size,
     leave,
-    listening,
+    effectiveListening,
     nextStoryId,
     router,
   ]);
@@ -245,8 +252,8 @@ export default function StoryScreen() {
         <Reader
           key={story.id}
           story={story}
-          hideQuestions={listening || hideStoryQuestions}
-          listening={listening}
+          hideQuestions={effectiveListening || hideStoryQuestions}
+          listening={effectiveListening}
           onQuit={onQuit}
           onEnd={onEnd}
           onBackToOverview={leave}

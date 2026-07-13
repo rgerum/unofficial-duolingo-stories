@@ -18,6 +18,7 @@ export type CourseProps = {
   todo_count: number;
   audio_problem_count: number;
   unresolved_feedback_count: number;
+  tags: string[];
 };
 
 export type ContributorSummaryProps = {

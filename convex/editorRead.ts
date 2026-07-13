@@ -6,6 +6,7 @@ import {
   getSessionLegacyUserId,
   isContributorOrAdmin,
 } from "./lib/authorization";
+import { hasNoAudioCourseTag } from "./lib/courseTags";
 import { courseContributorValidator } from "./lib/courseContributors";
 
 type LanguageDoc = Doc<"languages">;
@@ -35,6 +36,7 @@ const editorCourseValidator = v.union(
     todo_count: v.number(),
     audio_problem_count: v.number(),
     unresolved_feedback_count: v.number(),
+    tags: v.array(v.string()),
   }),
   v.null(),
 );
@@ -60,6 +62,12 @@ function toLanguage(language: LanguageDoc) {
     public: language.public,
     rtl: language.rtl,
   };
+}
+
+function deriveAudioProblemCount(course: CourseDoc) {
+  return hasNoAudioCourseTag(course.tags)
+    ? 0
+    : (course.audio_problem_count ?? 0);
 }
 
 function toCourse(
@@ -89,8 +97,9 @@ function toCourse(
     contributors: course.contributors ?? [],
     contributors_past: course.contributors_past ?? [],
     todo_count: course.todo_count ?? 0,
-    audio_problem_count: course.audio_problem_count ?? 0,
+    audio_problem_count: deriveAudioProblemCount(course),
     unresolved_feedback_count: unresolvedFeedbackCount,
+    tags: course.tags ?? [],
   };
 }
 
@@ -306,7 +315,7 @@ export const getEditorCourseByIdentifier = query({
       contributors: contributorLists.contributors,
       contributors_past: contributorLists.contributors_past,
       todo_count: course.todo_count ?? 0,
-      audio_problem_count: course.audio_problem_count ?? 0,
+      audio_problem_count: deriveAudioProblemCount(course),
       unresolved_feedback_count:
         (await ctx.db
           .query("course_feedback_stats")
@@ -315,6 +324,7 @@ export const getEditorCourseByIdentifier = query({
           .then((stats) =>
             stats ? stats.openCount + stats.reviewedCount : 0,
           )) ?? 0,
+      tags: course.tags ?? [],
     };
   },
 });
@@ -393,6 +403,7 @@ export const getEditorStoriesByCourseLegacyId = query({
       }
     }
 
+    const noAudioCourse = hasNoAudioCourseTag(course.tags);
     const result = stories.map((story: StoryDoc) => {
       const authorId = toNumber(story.authorId);
       const authorChangeId = toNumber(story.authorChangeId);
@@ -426,7 +437,9 @@ export const getEditorStoriesByCourseLegacyId = query({
         status: derivedStatus,
         public: story.public,
         todo_count: story.todo_count ?? 0,
-        audio_problem_count: story.audio_problem_count ?? 0,
+        audio_problem_count: noAudioCourse
+          ? 0
+          : (story.audio_problem_count ?? 0),
         approvalCount: approvalCount ?? 0,
         approvedByCurrentUser: storyIdsApprovedByCurrentUser.has(story._id),
         author:
@@ -715,6 +728,7 @@ export const getEditorStoryPageData = query({
         short: course.short ?? "",
         learning_language: learningLanguage.legacyId,
         from_language: fromLanguage.legacyId,
+        course_tags: course.tags ?? [],
       },
     };
   },
