@@ -94,21 +94,11 @@ function toCourse(
   };
 }
 
-async function getUnresolvedFeedbackCountsByCourseShort(ctx: QueryCtx) {
-  const [openReports, reviewedReports] = await Promise.all([
-    ctx.db
-      .query("story_feedback_reports")
-      .withIndex("by_status_and_created_at", (q) => q.eq("status", "open"))
-      .collect(),
-    ctx.db
-      .query("story_feedback_reports")
-      .withIndex("by_status_and_created_at", (q) => q.eq("status", "reviewed"))
-      .collect(),
-  ]);
-
-  const counts = new Map<string, number>();
-  for (const report of [...openReports, ...reviewedReports]) {
-    counts.set(report.courseShort, (counts.get(report.courseShort) ?? 0) + 1);
+async function getUnresolvedFeedbackCountsByCourseId(ctx: QueryCtx) {
+  const statsRows = await ctx.db.query("course_feedback_stats").collect();
+  const counts = new Map<Id<"courses">, number>();
+  for (const row of statsRows) {
+    counts.set(row.courseId, row.openCount + row.reviewedCount);
   }
   return counts;
 }
@@ -263,14 +253,14 @@ export const getEditorSidebarData = query({
     }
 
     const unresolvedFeedbackCounts =
-      await getUnresolvedFeedbackCountsByCourseShort(ctx);
+      await getUnresolvedFeedbackCountsByCourseId(ctx);
 
     const courses = courseRows
       .map((course) =>
         toCourse(
           course,
           languageById,
-          course.short ? (unresolvedFeedbackCounts.get(course.short) ?? 0) : 0,
+          unresolvedFeedbackCounts.get(course._id) ?? 0,
         ),
       )
       .sort((a, b) => b.count - a.count);
@@ -317,11 +307,14 @@ export const getEditorCourseByIdentifier = query({
       contributors_past: contributorLists.contributors_past,
       todo_count: course.todo_count ?? 0,
       audio_problem_count: course.audio_problem_count ?? 0,
-      unresolved_feedback_count: course.short
-        ? ((await getUnresolvedFeedbackCountsByCourseShort(ctx)).get(
-            course.short,
-          ) ?? 0)
-        : 0,
+      unresolved_feedback_count:
+        (await ctx.db
+          .query("course_feedback_stats")
+          .withIndex("by_course", (q) => q.eq("courseId", course._id))
+          .unique()
+          .then((stats) =>
+            stats ? stats.openCount + stats.reviewedCount : 0,
+          )) ?? 0,
     };
   },
 });

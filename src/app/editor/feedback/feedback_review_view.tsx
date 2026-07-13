@@ -68,7 +68,7 @@ const feedbackPreviewSettings: StorySettings = {
   setHideNonHighlighted: () => {},
   show_hints: true,
   setShowHints: () => {},
-  show_audio: false,
+  show_audio: true,
   setShowAudio: () => {},
   id: 0,
   show_title_page: false,
@@ -277,14 +277,13 @@ function FeedbackReportRow({
         </div>
 
         {isStoryElementLine(report.lineElement) ? (
-          <div className="mb-3 min-w-0 overflow-hidden rounded-[8px] border-l-4 border-[var(--overview-hr)] bg-[var(--body-background-faint)] px-4 py-1 [&_.audio-button]:hidden">
+          <div className="mb-3 min-w-0 overflow-hidden rounded-[8px] border-l-4 border-[var(--overview-hr)] bg-[var(--body-background-faint)] px-4 py-1">
             <StoryTextLine
               active={false}
               element={report.lineElement}
               settings={feedbackPreviewSettings}
               editorShowTranslationsOverride={true}
               editorShowAudioDetailsOverride={false}
-              hideAudioButton
               compact
             />
           </div>
@@ -353,16 +352,28 @@ function isStoryElementLine(value: unknown): value is StoryElementLine {
   }
   if (!isRecord(value.line.content)) return false;
   if (typeof value.line.content.text !== "string") return false;
-  if (!Array.isArray(value.line.content.hintMap)) return false;
+  if (!isValidHintMap(value.line.content.hintMap)) return false;
   if (
     value.line.content.hints !== undefined &&
-    !Array.isArray(value.line.content.hints)
+    !isStringArray(value.line.content.hints)
   ) {
     return false;
   }
   if (
     value.line.content.hints_pronunciation !== undefined &&
-    !Array.isArray(value.line.content.hints_pronunciation)
+    !isStringArray(value.line.content.hints_pronunciation)
+  ) {
+    return false;
+  }
+  if (
+    value.hideRangesForChallenge !== undefined &&
+    !isValidHideRanges(value.hideRangesForChallenge)
+  ) {
+    return false;
+  }
+  if (
+    value.line.content.audio !== undefined &&
+    !isValidLineAudio(value.line.content.audio)
   ) {
     return false;
   }
@@ -380,6 +391,57 @@ function isStoryElementLine(value: unknown): value is StoryElementLine {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "string")
+  );
+}
+
+function isValidHintMap(value: unknown) {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        isRecord(item) &&
+        typeof item.hintIndex === "number" &&
+        typeof item.rangeFrom === "number" &&
+        typeof item.rangeTo === "number",
+    )
+  );
+}
+
+function isValidHideRanges(value: unknown) {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        isRecord(item) &&
+        typeof item.start === "number" &&
+        typeof item.end === "number",
+    )
+  );
+}
+
+function isValidLineAudio(value: unknown) {
+  if (!isRecord(value)) return false;
+  if (value.url !== undefined && typeof value.url !== "string") return false;
+  if (
+    value.keypoints !== undefined &&
+    !(
+      Array.isArray(value.keypoints) &&
+      value.keypoints.every(
+        (item) =>
+          isRecord(item) &&
+          typeof item.rangeEnd === "number" &&
+          typeof item.audioStart === "number",
+      )
+    )
+  ) {
+    return false;
+  }
+  return value.ssml === undefined || isRecord(value.ssml);
 }
 
 function StatusButton({

@@ -274,6 +274,16 @@ export default defineSchema({
     .index("by_user_id", ["userId"])
     .index("by_status_and_created_at", ["status", "createdAt"]),
 
+  course_feedback_stats: defineTable({
+    courseId: v.id("courses"),
+    courseShort: v.string(),
+    openCount: v.number(),
+    reviewedCount: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_course", ["courseId"])
+    .index("by_course_short", ["courseShort"]),
+
   discord_stories_role_sync: defineTable({
     legacyUserId: v.number(),
     discordAccountId: v.union(v.string(), v.null()),

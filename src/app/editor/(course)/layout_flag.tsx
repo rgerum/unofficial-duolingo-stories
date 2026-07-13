@@ -39,6 +39,7 @@ export default function LayoutFlag() {
 
   if (
     nestedRoute === "story" ||
+    nestedRoute === "feedback" ||
     nestedRoute === "voices" ||
     nestedRoute === "localization"
   ) {

@@ -20,8 +20,6 @@ import { cn } from "@/lib/utils";
 
 type StoryFeedbackProps = {
   storyId: number;
-  storyTitle: string;
-  courseShort: string;
   line?: number;
   lineText?: string;
   lineElement?: StoryElementLine;
@@ -39,47 +37,8 @@ const feedbackCategories = [
 
 type FeedbackCategory = (typeof feedbackCategories)[number]["value"];
 
-function getFeedbackLinePreview(
-  lineElement?: StoryElementLine,
-): StoryElementLine | undefined {
-  if (!lineElement) return undefined;
-
-  const content = { ...lineElement.line.content };
-  delete content.audio;
-  const base = {
-    type: "LINE" as const,
-    hideRangesForChallenge: lineElement.hideRangesForChallenge,
-    trackingProperties: lineElement.trackingProperties,
-    lang: lineElement.lang,
-    editor: lineElement.editor,
-  };
-
-  if (lineElement.line.type === "CHARACTER") {
-    return {
-      ...base,
-      line: {
-        type: "CHARACTER",
-        avatarUrl: lineElement.line.avatarUrl,
-        characterId: lineElement.line.characterId,
-        characterName: lineElement.line.characterName,
-        content,
-      },
-    };
-  }
-
-  return {
-    ...base,
-    line: {
-      type: lineElement.line.type,
-      content,
-    },
-  };
-}
-
 export default function StoryFeedback({
   storyId,
-  storyTitle,
-  courseShort,
   line,
   lineText,
   lineElement,
@@ -152,7 +111,7 @@ export default function StoryFeedback({
             </div>
           ) : (
             <p className="mt-3 mb-0 whitespace-pre-wrap text-[1rem] leading-6">
-              {lineText || storyTitle}
+              {lineText || `Story ${storyId}`}
             </p>
           )}
         </div>
@@ -169,11 +128,8 @@ export default function StoryFeedback({
             try {
               await submitStoryFeedback({
                 storyId,
-                storyTitle,
-                courseShort,
                 line,
                 lineText,
-                lineElement: getFeedbackLinePreview(lineElement),
                 category,
                 comment,
               });
