@@ -1,10 +1,26 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test";
+import { ConvexError } from "convex/values";
 import { describe, expect, test } from "vitest";
 import { api } from "./_generated/api";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
+
+async function expectFeedbackRejection(
+  request: Promise<unknown>,
+  code: string,
+  reason: string,
+) {
+  const rejection = await request.then(
+    () => null,
+    (error: unknown) => error,
+  );
+  expect(rejection).toBeInstanceOf(ConvexError);
+  expect(
+    (rejection as ConvexError<{ code: string; reason: string }>).data,
+  ).toEqual({ code, reason });
+}
 
 type FeedbackArgs = {
   storyId: number;
@@ -102,7 +118,6 @@ function feedbackArgs(overrides: Partial<FeedbackArgs> = {}): FeedbackArgs {
 
 describe("submitStoryFeedback", () => {
   test.each([
-    ["comment", { comment: `${"x".repeat(2001)}` }, "Comment is too long"],
     [
       "storyTitle",
       { storyTitle: `${"x".repeat(201)}` },
@@ -128,24 +143,42 @@ describe("submitStoryFeedback", () => {
     const t = convexTest(schema, modules);
     await seedCourseWithStory(t);
 
-    await expect(
+    await expectFeedbackRejection(
       t.mutation(
         api.storyFeedback.submitStoryFeedback,
         feedbackArgs(overrides),
       ),
-    ).rejects.toThrow(error);
+      "INVALID_REQUEST",
+      error,
+    );
+  });
+
+  test("comment validation returns a correctable rejection", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await expectFeedbackRejection(
+      t.mutation(
+        api.storyFeedback.submitStoryFeedback,
+        feedbackArgs({ comment: "x".repeat(2001) }),
+      ),
+      "INVALID_COMMENT",
+      "Comment is too long",
+    );
   });
 
   test("unknown story rejects before inserting a report", async () => {
     const t = convexTest(schema, modules);
     await seedCourseWithStory(t);
 
-    await expect(
+    await expectFeedbackRejection(
       t.mutation(
         api.storyFeedback.submitStoryFeedback,
         feedbackArgs({ storyId: 999 }),
       ),
-    ).rejects.toThrow("Unknown story");
+      "FEEDBACK_UNAVAILABLE",
+      "Unknown story",
+    );
 
     await t.run(async (ctx) => {
       const reports = await ctx.db.query("story_feedback_reports").collect();
@@ -174,9 +207,9 @@ describe("submitStoryFeedback", () => {
       }
     });
 
-    await expect(
+    await expectFeedbackRejection(
       t.mutation(api.storyFeedback.submitStoryFeedback, feedbackArgs()),
-    ).rejects.toThrow(
+      "STORY_REPORT_LIMIT",
       "This story already has many open reports. Please try again later.",
     );
   });

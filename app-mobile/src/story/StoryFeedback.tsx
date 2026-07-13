@@ -15,6 +15,10 @@ import { api } from "../api";
 import { Button } from "../components/Button";
 import { Text, TextInput } from "../components/Text";
 import { type ThemeColors, useTheme } from "../theme";
+import {
+  type FeedbackSubmitError,
+  getFeedbackSubmitError,
+} from "./feedbackErrors";
 import type { StoryElement } from "./types";
 
 const feedbackCategories = [
@@ -155,7 +159,8 @@ export function StoryFeedback({
   const [submitState, setSubmitState] = React.useState<
     "idle" | "submitting" | "submitted"
   >("idle");
-  const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [submitError, setSubmitError] =
+    React.useState<FeedbackSubmitError | null>(null);
   const [operationKey, setOperationKey] = React.useState(() =>
     createOperationKey(storyId),
   );
@@ -196,9 +201,7 @@ export function StoryFeedback({
       setSubmitState("submitted");
     } catch (error) {
       setSubmitState("idle");
-      setSubmitError(
-        error instanceof Error ? error.message : "Could not submit feedback.",
-      );
+      setSubmitError(getFeedbackSubmitError(error));
     }
   }, [
     category,
@@ -210,6 +213,9 @@ export function StoryFeedback({
     storyId,
     submitFeedback,
   ]);
+  const terminalRejection = submitError?.canRetry === false;
+  const formLocked = isSubmitting || isSubmitted || terminalRejection;
+  const primaryActionCloses = isSubmitted || terminalRejection;
 
   return (
     <>
@@ -296,9 +302,9 @@ export function StoryFeedback({
                       accessibilityRole="button"
                       accessibilityState={{
                         selected,
-                        disabled: isSubmitting || isSubmitted,
+                        disabled: formLocked,
                       }}
-                      disabled={isSubmitting || isSubmitted}
+                      disabled={formLocked}
                       onPress={() => setCategory(option.value)}
                       style={({ pressed }) => [
                         styles.category,
@@ -326,7 +332,7 @@ export function StoryFeedback({
                     accessibilityLabel="Feedback comment"
                     value={comment}
                     onChangeText={setComment}
-                    editable={!isSubmitting}
+                    editable={!formLocked}
                     multiline
                     maxLength={2000}
                     numberOfLines={5}
@@ -340,7 +346,7 @@ export function StoryFeedback({
 
               {submitError ? (
                 <View style={styles.error} accessibilityRole="alert">
-                  <Text style={styles.errorText}>{submitError}</Text>
+                  <Text style={styles.errorText}>{submitError.message}</Text>
                 </View>
               ) : null}
               {isSubmitted ? (
@@ -357,7 +363,7 @@ export function StoryFeedback({
               ) : null}
 
               <View style={styles.actions}>
-                {!isSubmitted ? (
+                {!isSubmitted && !terminalRejection ? (
                   <Button
                     title="Cancel"
                     variant="neutral"
@@ -371,15 +377,19 @@ export function StoryFeedback({
                   title={
                     isSubmitted
                       ? "Done"
-                      : isSubmitting
-                        ? "Submitting"
-                        : "Submit feedback"
+                      : terminalRejection
+                        ? "Close"
+                        : isSubmitting
+                          ? "Submitting"
+                          : "Submit feedback"
                   }
                   disabled={
                     isSubmitting ||
-                    (!isSubmitted && comment.trim().length === 0)
+                    (!isSubmitted &&
+                      !terminalRejection &&
+                      comment.trim().length === 0)
                   }
-                  onPress={isSubmitted ? close : () => void submit()}
+                  onPress={primaryActionCloses ? close : () => void submit()}
                   style={styles.action}
                   labelStyle={styles.actionLabel}
                 />

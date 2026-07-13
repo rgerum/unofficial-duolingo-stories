@@ -17,6 +17,10 @@ import type { StorySettings } from "@/components/StoryProgress";
 import type { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 import { api } from "@convex/_generated/api";
 import { cn } from "@/lib/utils";
+import {
+  type FeedbackSubmitError,
+  getFeedbackSubmitError,
+} from "./feedbackErrors";
 
 type StoryFeedbackProps = {
   storyId: number;
@@ -57,12 +61,15 @@ export default function StoryFeedback({
   const [submitState, setSubmitState] = React.useState<
     "idle" | "submitting" | "submitted"
   >("idle");
-  const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [submitError, setSubmitError] =
+    React.useState<FeedbackSubmitError | null>(null);
   const [operationKey, setOperationKey] = React.useState(() =>
     crypto.randomUUID(),
   );
   const isSubmitting = submitState === "submitting";
   const isSubmitted = submitState === "submitted";
+  const terminalRejection = submitError?.canRetry === false;
+  const formLocked = isSubmitting || isSubmitted || terminalRejection;
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);
@@ -142,11 +149,7 @@ export default function StoryFeedback({
               setComment("");
             } catch (error) {
               setSubmitState("idle");
-              setSubmitError(
-                error instanceof Error
-                  ? error.message
-                  : "Could not submit feedback.",
-              );
+              setSubmitError(getFeedbackSubmitError(error));
             }
           }}
         >
@@ -161,7 +164,7 @@ export default function StoryFeedback({
                     key={option.value}
                     type="button"
                     aria-pressed={selected}
-                    disabled={isSubmitting || isSubmitted}
+                    disabled={formLocked}
                     onClick={() => setCategory(option.value)}
                     className={cn(
                       "min-h-11 min-w-0 rounded-[13px] border-2 px-2 py-2 text-[0.82rem] font-bold whitespace-nowrap transition-[background-color,border-color,color,transform] duration-100 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[color:color-mix(in_srgb,var(--ring)_35%,transparent)] sm:px-3 sm:text-[0.86rem]",
@@ -185,7 +188,7 @@ export default function StoryFeedback({
               rows={5}
               maxLength={2000}
               required
-              disabled={isSubmitting || isSubmitted}
+              disabled={formLocked}
               className="w-full resize-y rounded-[14px] border-2 border-[var(--input-border)] bg-[var(--input-background)] px-4 py-3 text-[1rem] font-normal leading-6 text-[var(--text-color)] outline-none focus:border-[color:color-mix(in_srgb,var(--link-blue)_45%,var(--input-border))]"
               placeholder="What should be fixed?"
             />
@@ -196,7 +199,7 @@ export default function StoryFeedback({
               className="rounded-[12px] border-2 border-[#e66969] bg-[#fff1f1] px-4 py-3 text-[0.95rem] font-bold text-[#9b1c1c]"
               role="alert"
             >
-              {submitError}
+              {submitError.message}
             </div>
           ) : null}
           {isSubmitted ? (
@@ -208,10 +211,10 @@ export default function StoryFeedback({
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <DialogClose asChild>
               <Button type="button" variant="secondary" disabled={isSubmitting}>
-                {isSubmitted ? "Done" : "Cancel"}
+                {isSubmitted ? "Done" : terminalRejection ? "Close" : "Cancel"}
               </Button>
             </DialogClose>
-            {!isSubmitted ? (
+            {!isSubmitted && !terminalRejection ? (
               <Button
                 type="submit"
                 variant="primary"
