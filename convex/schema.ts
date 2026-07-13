@@ -239,6 +239,7 @@ export default defineSchema({
     .index("by_legacy_id", ["legacyId"]),
 
   story_feedback_reports: defineTable({
+    operationKey: v.optional(v.string()),
     storyId: v.number(),
     storyTitle: v.string(),
     courseShort: v.string(),
@@ -272,7 +273,8 @@ export default defineSchema({
     ])
     .index("by_category", ["category"])
     .index("by_user_id", ["userId"])
-    .index("by_status_and_created_at", ["status", "createdAt"]),
+    .index("by_status_and_created_at", ["status", "createdAt"])
+    .index("by_operation_key", ["operationKey"]),
 
   course_feedback_stats: defineTable({
     courseId: v.id("courses"),

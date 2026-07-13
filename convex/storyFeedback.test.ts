@@ -8,6 +8,7 @@ const modules = import.meta.glob("./**/*.ts");
 
 type FeedbackArgs = {
   storyId: number;
+  operationKey: string;
   storyTitle?: string;
   courseShort?: string;
   line?: number;
@@ -91,6 +92,7 @@ async function seedCourseWithStory(t: ReturnType<typeof convexTest>) {
 function feedbackArgs(overrides: Partial<FeedbackArgs> = {}): FeedbackArgs {
   return {
     storyId: 10,
+    operationKey: "feedback-operation-key",
     category: "Text" as const,
     comment: "There is a typo.",
     ...overrides,
@@ -115,6 +117,11 @@ describe("submitStoryFeedback", () => {
       "lineElement",
       { lineElement: { text: `${"x".repeat(20001)}` } },
       "Line preview is too large",
+    ],
+    [
+      "operationKey",
+      { operationKey: `${"x".repeat(201)}` },
+      "Operation key is too long",
     ],
   ])("%s length cap rejects oversized values", async (_field, overrides, error) => {
     const t = convexTest(schema, modules);
@@ -190,11 +197,38 @@ describe("submitStoryFeedback", () => {
 
     await t.run(async (ctx) => {
       const [report] = await ctx.db.query("story_feedback_reports").collect();
+      expect(report.operationKey).toBe("feedback-operation-key");
       expect(report.storyTitle).toBe("Story");
       expect(report.courseShort).toBe("es-en");
       expect(report.line).toBe(12);
       expect(report.lineText).toBe("Hola");
       expect(report.lineElement).toEqual(parsedLineElement);
+    });
+  });
+
+  test("uses operation keys to make repeated submissions idempotent", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    const first = await t.mutation(
+      api.storyFeedback.submitStoryFeedback,
+      feedbackArgs({ operationKey: "feedback:retry:1" }),
+    );
+    const second = await t.mutation(
+      api.storyFeedback.submitStoryFeedback,
+      feedbackArgs({
+        operationKey: "feedback:retry:1",
+        comment: "Retried after success",
+      }),
+    );
+
+    expect(second.reportId).toBe(first.reportId);
+    await t.run(async (ctx) => {
+      const reports = await ctx.db.query("story_feedback_reports").collect();
+      const [stats] = await ctx.db.query("course_feedback_stats").collect();
+      expect(reports).toHaveLength(1);
+      expect(stats.openCount).toBe(1);
+      expect(stats.reviewedCount).toBe(0);
     });
   });
 

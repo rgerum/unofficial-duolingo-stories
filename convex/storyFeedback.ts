@@ -23,6 +23,7 @@ const feedbackStatusValidator = v.union(
 const feedbackReportValidator = v.object({
   _id: v.id("story_feedback_reports"),
   _creationTime: v.number(),
+  operationKey: v.optional(v.string()),
   storyId: v.number(),
   storyTitle: v.string(),
   courseShort: v.string(),
@@ -204,6 +205,7 @@ async function getStoryCourseAndContent(
 export const submitStoryFeedback = mutation({
   args: {
     storyId: v.number(),
+    operationKey: v.string(),
     // TODO(remove after 2026-07-20): deprecated; derived server-side.
     storyTitle: v.optional(v.string()),
     // TODO(remove after 2026-07-20): deprecated; derived server-side.
@@ -219,6 +221,14 @@ export const submitStoryFeedback = mutation({
     reportId: v.id("story_feedback_reports"),
   }),
   handler: async (ctx, args) => {
+    const operationKey = args.operationKey.trim();
+    if (!operationKey) {
+      throw new Error("Operation key is required");
+    }
+    if (operationKey.length > 200) {
+      throw new Error("Operation key is too long");
+    }
+
     const comment = args.comment.trim();
     if (!comment) {
       throw new Error("Comment is required");
@@ -240,6 +250,14 @@ export const submitStoryFeedback = mutation({
       if (serializedLineElement.length > 20000) {
         throw new Error("Line preview is too large");
       }
+    }
+
+    const existingReport = await ctx.db
+      .query("story_feedback_reports")
+      .withIndex("by_operation_key", (q) => q.eq("operationKey", operationKey))
+      .unique();
+    if (existingReport) {
+      return { reportId: existingReport._id };
     }
 
     const { story, course, storyContent } = await getStoryCourseAndContent(
@@ -278,6 +296,7 @@ export const submitStoryFeedback = mutation({
     const courseShort = getCourseShort(course);
 
     const reportId = await ctx.db.insert("story_feedback_reports", {
+      operationKey,
       storyId: args.storyId,
       storyTitle,
       courseShort,
@@ -400,15 +419,15 @@ export const recomputeCourseFeedbackStats = mutation({
       let openCount = 0;
       let reviewedCount = 0;
 
-      for (const status of ["open", "reviewed", "resolved"] as const) {
-        const stories = ctx.db
-          .query("stories")
-          .withIndex("by_course", (q) => q.eq("courseId", course._id));
+      const stories = ctx.db
+        .query("stories")
+        .withIndex("by_course", (q) => q.eq("courseId", course._id));
 
-        for await (const story of stories) {
-          const legacyStoryId = story.legacyId;
-          if (legacyStoryId === undefined) continue;
+      for await (const story of stories) {
+        const legacyStoryId = story.legacyId;
+        if (legacyStoryId === undefined) continue;
 
+        for (const status of ["open", "reviewed", "resolved"] as const) {
           const reports = ctx.db
             .query("story_feedback_reports")
             .withIndex("by_story_and_status", (q) =>
