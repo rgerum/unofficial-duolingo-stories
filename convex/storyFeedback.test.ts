@@ -12,6 +12,7 @@ type FeedbackArgs = {
   storyTitle?: string;
   courseShort?: string;
   line?: number;
+  lineIndex?: number;
   lineText?: string;
   lineElement?: unknown;
   category: "Text" | "Translation hints" | "Audio" | "Other";
@@ -230,6 +231,37 @@ describe("submitStoryFeedback", () => {
       expect(stats.openCount).toBe(1);
       expect(stats.reviewedCount).toBe(0);
     });
+  });
+
+  test("derives the canonical editor line from a public tracking index", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await t.mutation(
+      api.storyFeedback.submitStoryFeedback,
+      feedbackArgs({ lineIndex: 1, lineText: "Spoofed line" }),
+    );
+
+    await t.run(async (ctx) => {
+      const report = await ctx.db.query("story_feedback_reports").unique();
+      expect(report).not.toBeNull();
+      if (!report) return;
+      expect(report.line).toBe(12);
+      expect(report.lineText).toBe("Hola");
+      expect(report.lineElement).toEqual(parsedLineElement);
+    });
+  });
+
+  test("rejects an invalid public tracking index", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await expect(
+      t.mutation(
+        api.storyFeedback.submitStoryFeedback,
+        feedbackArgs({ lineIndex: -1 }),
+      ),
+    ).rejects.toThrow("Line index must be a non-negative integer");
   });
 
   test("stores sanitized text fallback when no line number is available", async () => {

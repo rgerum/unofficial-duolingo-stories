@@ -25,6 +25,9 @@ export function getParts(elements: StoryElement[]): StoryElement[][] {
       ...element,
       trackingProperties: {
         ...element.trackingProperties,
+        source_line_index:
+          element.trackingProperties.source_line_index ??
+          element.trackingProperties.line_index,
         line_index: i,
       },
     })),

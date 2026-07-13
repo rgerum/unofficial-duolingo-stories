@@ -1,0 +1,536 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useMutation } from "convex/react";
+import React from "react";
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { api } from "../api";
+import { Button } from "../components/Button";
+import { Text, TextInput } from "../components/Text";
+import { type ThemeColors, useTheme } from "../theme";
+import type { StoryElement } from "./types";
+
+const feedbackCategories = [
+  { label: "Text", value: "Text" },
+  { label: "Translation", value: "Translation hints" },
+  { label: "Audio", value: "Audio" },
+  { label: "Other", value: "Other" },
+] as const;
+
+type FeedbackCategory = (typeof feedbackCategories)[number]["value"];
+type SubmitFeedback = (args: {
+  storyId: number;
+  operationKey: string;
+  lineIndex?: number;
+  lineText?: string;
+  category: FeedbackCategory;
+  comment: string;
+}) => Promise<unknown>;
+
+function createOperationKey(storyId: number) {
+  return `mobile-feedback:${storyId}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
+}
+
+function getAnswerText(answer: string | { text?: string }) {
+  return typeof answer === "string" ? answer : (answer.text ?? "");
+}
+
+function getFeedbackTextForElement(element: StoryElement) {
+  if (element.type === "HEADER") {
+    return element.learningLanguageTitleContent.text;
+  }
+  if (element.type === "LINE") {
+    const speaker =
+      element.line.type === "CHARACTER"
+        ? (element.line.characterName ?? `${element.line.characterId}`)
+        : "";
+    const text = element.line.content.text;
+    return speaker ? `${speaker}: ${text}` : text;
+  }
+  if (element.type === "MULTIPLE_CHOICE") {
+    return [
+      element.question?.text,
+      ...element.answers.map(getAnswerText),
+    ].filter(Boolean);
+  }
+  if (element.type === "CHALLENGE_PROMPT") return element.prompt.text;
+  if (element.type === "SELECT_PHRASE") {
+    return element.answers.map(getAnswerText).filter(Boolean);
+  }
+  if (element.type === "ARRANGE") return element.selectablePhrases;
+  if (element.type === "POINT_TO_PHRASE") {
+    return [
+      element.question.text,
+      element.transcriptParts.map((part) => part.text).join(""),
+    ].filter(Boolean);
+  }
+  if (element.type === "MATCH") {
+    return [
+      element.prompt,
+      ...element.fallbackHints.map(
+        (hint) => `${hint.phrase} = ${hint.translation}`,
+      ),
+    ].filter(Boolean);
+  }
+  if (element.type === "ERROR") return element.text;
+  return "";
+}
+
+export function getFeedbackContext(
+  currentPart: StoryElement[] | undefined,
+  partProgress: number,
+) {
+  if (!currentPart?.length) return {};
+
+  const lastElement = currentPart.at(-1);
+  const visibleElement =
+    partProgress > 0 &&
+    lastElement &&
+    (lastElement.type === "MULTIPLE_CHOICE" ||
+      lastElement.type === "POINT_TO_PHRASE")
+      ? lastElement
+      : currentPart[0];
+  const lineIndex =
+    visibleElement?.trackingProperties.source_line_index ??
+    visibleElement?.trackingProperties.line_index;
+  const lineText = currentPart
+    .flatMap((element) => getFeedbackTextForElement(element))
+    .filter(Boolean)
+    .join("\n");
+
+  return {
+    ...(lineIndex !== undefined ? { lineIndex } : {}),
+    ...(lineText ? { lineText } : {}),
+  };
+}
+
+export function StoryFeedback({
+  storyId,
+  lineIndex,
+  lineText,
+  disabled = false,
+  initialOpen = false,
+  submitFeedback: submitFeedbackOverride,
+}: {
+  storyId: number;
+  lineIndex?: number;
+  lineText?: string;
+  disabled?: boolean;
+  initialOpen?: boolean;
+  submitFeedback?: SubmitFeedback;
+}) {
+  const mutation = useMutation(api.storyFeedback.submitStoryFeedback);
+  const submitFeedback = submitFeedbackOverride ?? mutation;
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const insets = useSafeAreaInsets();
+  const [open, setOpen] = React.useState(initialOpen);
+  const [category, setCategory] = React.useState<FeedbackCategory>("Text");
+  const [comment, setComment] = React.useState("");
+  const [submitState, setSubmitState] = React.useState<
+    "idle" | "submitting" | "submitted"
+  >("idle");
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [operationKey, setOperationKey] = React.useState(() =>
+    createOperationKey(storyId),
+  );
+  const isSubmitting = submitState === "submitting";
+  const isSubmitted = submitState === "submitted";
+
+  const close = React.useCallback(() => {
+    if (isSubmitting) return;
+    setOpen(false);
+    setComment("");
+    setSubmitError(null);
+    setSubmitState("idle");
+    setOperationKey(createOperationKey(storyId));
+  }, [isSubmitting, storyId]);
+
+  const openSheet = React.useCallback(() => {
+    if (disabled) return;
+    setSubmitState("idle");
+    setSubmitError(null);
+    setOpen(true);
+  }, [disabled]);
+
+  const submit = React.useCallback(async () => {
+    if (isSubmitting || comment.trim().length === 0) return;
+    setSubmitState("submitting");
+    setSubmitError(null);
+    try {
+      await submitFeedback({
+        storyId,
+        operationKey,
+        lineIndex,
+        lineText,
+        category,
+        comment,
+      });
+      setComment("");
+      setSubmitState("submitted");
+    } catch (error) {
+      setSubmitState("idle");
+      setSubmitError(
+        error instanceof Error ? error.message : "Could not submit feedback.",
+      );
+    }
+  }, [
+    category,
+    comment,
+    isSubmitting,
+    lineIndex,
+    lineText,
+    operationKey,
+    storyId,
+    submitFeedback,
+  ]);
+
+  return (
+    <>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Give feedback about this story"
+        disabled={disabled}
+        onPress={openSheet}
+        style={({ pressed }) => [
+          styles.trigger,
+          disabled && styles.triggerDisabled,
+          pressed && !disabled && styles.triggerPressed,
+        ]}
+      >
+        <Ionicons name="chatbubble-outline" size={21} color={colors.text} />
+        <Text style={styles.triggerText}>Feedback</Text>
+      </Pressable>
+
+      <Modal
+        visible={open}
+        transparent
+        animationType="slide"
+        onRequestClose={close}
+        statusBarTranslucent
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={styles.modalRoot}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Close feedback"
+            style={styles.backdrop}
+            onPress={close}
+          />
+          <View
+            style={[
+              styles.sheet,
+              { paddingBottom: Math.max(20, insets.bottom + 12) },
+            ]}
+          >
+            <View style={styles.handle} />
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.sheetContent}
+            >
+              <View style={styles.titleRow}>
+                <View style={styles.titleCopy}>
+                  <Text style={styles.title}>Give feedback</Text>
+                  <Text style={styles.description}>
+                    Report a problem with this story line.
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Close feedback"
+                  disabled={isSubmitting}
+                  hitSlop={10}
+                  onPress={close}
+                  style={({ pressed }) => [
+                    styles.closeButton,
+                    pressed && styles.triggerPressed,
+                  ]}
+                >
+                  <Ionicons name="close" size={24} color={colors.textDim} />
+                </Pressable>
+              </View>
+
+              <Text style={styles.eyebrow}>Current line</Text>
+              <View style={styles.linePreview}>
+                <Text style={styles.lineText}>
+                  {lineText || `Story ${storyId}`}
+                </Text>
+              </View>
+
+              <Text style={styles.label}>Category</Text>
+              <View style={styles.categoryGrid}>
+                {feedbackCategories.map((option) => {
+                  const selected = option.value === category;
+                  return (
+                    <Pressable
+                      key={option.value}
+                      accessibilityRole="button"
+                      accessibilityState={{
+                        selected,
+                        disabled: isSubmitting || isSubmitted,
+                      }}
+                      disabled={isSubmitting || isSubmitted}
+                      onPress={() => setCategory(option.value)}
+                      style={({ pressed }) => [
+                        styles.category,
+                        selected && styles.categorySelected,
+                        pressed && styles.triggerPressed,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.categoryText,
+                          selected && styles.categoryTextSelected,
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {!isSubmitted ? (
+                <>
+                  <Text style={styles.label}>Comment</Text>
+                  <TextInput
+                    accessibilityLabel="Feedback comment"
+                    value={comment}
+                    onChangeText={setComment}
+                    editable={!isSubmitting}
+                    multiline
+                    maxLength={2000}
+                    numberOfLines={5}
+                    placeholder="What should be fixed?"
+                    placeholderTextColor={colors.textDim}
+                    textAlignVertical="top"
+                    style={styles.comment}
+                  />
+                </>
+              ) : null}
+
+              {submitError ? (
+                <View style={styles.error} accessibilityRole="alert">
+                  <Text style={styles.errorText}>{submitError}</Text>
+                </View>
+              ) : null}
+              {isSubmitted ? (
+                <View style={styles.success}>
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={23}
+                    color={colors.greenDark}
+                  />
+                  <Text style={styles.successText}>
+                    Thanks, your feedback was saved.
+                  </Text>
+                </View>
+              ) : null}
+
+              <View style={styles.actions}>
+                {!isSubmitted ? (
+                  <Button
+                    title="Cancel"
+                    variant="neutral"
+                    disabled={isSubmitting}
+                    onPress={close}
+                    style={styles.cancelAction}
+                    labelStyle={styles.actionLabel}
+                  />
+                ) : null}
+                <Button
+                  title={
+                    isSubmitted
+                      ? "Done"
+                      : isSubmitting
+                        ? "Submitting"
+                        : "Submit feedback"
+                  }
+                  disabled={
+                    isSubmitting ||
+                    (!isSubmitted && comment.trim().length === 0)
+                  }
+                  onPress={isSubmitted ? close : () => void submit()}
+                  style={styles.action}
+                  labelStyle={styles.actionLabel}
+                />
+              </View>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </>
+  );
+}
+
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    trigger: {
+      minHeight: 52,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 16,
+      paddingHorizontal: 14,
+      backgroundColor: colors.surface,
+    },
+    triggerDisabled: { opacity: 0 },
+    triggerPressed: { opacity: 0.65 },
+    triggerText: { color: colors.text, fontSize: 15, fontWeight: "800" },
+    modalRoot: { flex: 1, justifyContent: "flex-end" },
+    backdrop: {
+      position: "absolute",
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      backgroundColor: "rgba(0, 0, 0, 0.48)",
+    },
+    sheet: {
+      width: "100%",
+      maxWidth: 640,
+      maxHeight: "92%",
+      alignSelf: "center",
+      backgroundColor: colors.background,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      paddingTop: 9,
+      paddingHorizontal: 20,
+    },
+    handle: {
+      width: 42,
+      height: 5,
+      borderRadius: 3,
+      alignSelf: "center",
+      backgroundColor: colors.border,
+      marginBottom: 12,
+    },
+    sheetContent: { paddingBottom: 4 },
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 14,
+    },
+    titleCopy: { flex: 1 },
+    title: { color: colors.text, fontSize: 23, fontWeight: "800" },
+    description: {
+      color: colors.textDim,
+      fontSize: 15,
+      lineHeight: 21,
+      marginTop: 2,
+    },
+    closeButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.card,
+    },
+    eyebrow: {
+      color: colors.textDim,
+      fontSize: 12,
+      fontWeight: "800",
+      letterSpacing: 1.2,
+      textTransform: "uppercase",
+      marginTop: 20,
+    },
+    linePreview: {
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 14,
+      backgroundColor: colors.card,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      marginTop: 7,
+    },
+    lineText: { color: colors.text, fontSize: 16, lineHeight: 22 },
+    label: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: "800",
+      marginTop: 18,
+      marginBottom: 8,
+    },
+    categoryGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+      rowGap: 9,
+    },
+    category: {
+      width: "48.7%",
+      minHeight: 46,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 13,
+      backgroundColor: colors.surface,
+      paddingHorizontal: 8,
+    },
+    categorySelected: {
+      borderColor: colors.blueDark,
+      backgroundColor: colors.blue,
+    },
+    categoryText: { color: colors.text, fontSize: 15, fontWeight: "800" },
+    categoryTextSelected: { color: colors.primaryText },
+    comment: {
+      minHeight: 112,
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 14,
+      backgroundColor: colors.surface,
+      color: colors.text,
+      fontSize: 16,
+      lineHeight: 22,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+    },
+    error: {
+      borderWidth: 2,
+      borderColor: colors.red,
+      borderRadius: 12,
+      backgroundColor: colors.redLight,
+      paddingHorizontal: 14,
+      paddingVertical: 11,
+      marginTop: 14,
+    },
+    errorText: { color: colors.red, fontSize: 15, fontWeight: "700" },
+    success: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 9,
+      borderWidth: 2,
+      borderColor: colors.green,
+      borderRadius: 12,
+      backgroundColor: colors.greenLight,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      marginTop: 18,
+    },
+    successText: {
+      flex: 1,
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: "700",
+    },
+    actions: { flexDirection: "row", gap: 10, marginTop: 18 },
+    action: { flex: 1.3 },
+    cancelAction: { flex: 0.8 },
+    actionLabel: { fontSize: 14 },
+  });
+}

@@ -116,8 +116,32 @@ function editorLineMatches(
   );
 }
 
-function getLineSnapshotFromStoryJson(storyJson: unknown, lineNumber?: number) {
-  if (lineNumber === undefined) return undefined;
+function trackingLineMatches(
+  element: Record<string, unknown>,
+  lineIndex: number,
+) {
+  const trackingProperties = element.trackingProperties;
+  return (
+    isRecord(trackingProperties) && trackingProperties.line_index === lineIndex
+  );
+}
+
+function getEditorLineFromElement(element: Record<string, unknown>) {
+  const editor = element.editor;
+  if (!isRecord(editor)) return undefined;
+  for (const key of ["block_start_no", "start_no", "active_no"]) {
+    const value = editor[key];
+    if (typeof value === "number") return value;
+  }
+  return undefined;
+}
+
+function getLineSnapshotFromStoryJson(
+  storyJson: unknown,
+  lineNumber?: number,
+  lineIndex?: number,
+) {
+  if (lineNumber === undefined && lineIndex === undefined) return undefined;
   if (!isRecord(storyJson) || !Array.isArray(storyJson.elements)) {
     return undefined;
   }
@@ -126,7 +150,9 @@ function getLineSnapshotFromStoryJson(storyJson: unknown, lineNumber?: number) {
     (candidate) =>
       isRecord(candidate) &&
       candidate.type === "LINE" &&
-      editorLineMatches(candidate, lineNumber),
+      (lineNumber !== undefined
+        ? editorLineMatches(candidate, lineNumber)
+        : lineIndex !== undefined && trackingLineMatches(candidate, lineIndex)),
   );
   if (!isRecord(element)) return undefined;
 
@@ -211,6 +237,9 @@ export const submitStoryFeedback = mutation({
     // TODO(remove after 2026-07-20): deprecated; derived server-side.
     courseShort: v.optional(v.string()),
     line: v.optional(v.number()),
+    // Public story content omits editor metadata, so mobile identifies the
+    // active source element by its public tracking index instead.
+    lineIndex: v.optional(v.number()),
     lineText: v.optional(v.string()),
     // TODO(remove after 2026-07-20): deprecated; ignored for trust safety.
     lineElement: v.optional(v.any()),
@@ -245,6 +274,12 @@ export const submitStoryFeedback = mutation({
     }
 
     const submittedLineText = normalizeOptionalLineText(args.lineText);
+    if (
+      args.lineIndex !== undefined &&
+      (!Number.isSafeInteger(args.lineIndex) || args.lineIndex < 0)
+    ) {
+      throw new Error("Line index must be a non-negative integer");
+    }
     if (args.lineElement !== undefined) {
       const serializedLineElement = JSON.stringify(args.lineElement);
       if (serializedLineElement.length > 20000) {
@@ -284,7 +319,16 @@ export const submitStoryFeedback = mutation({
     } | null;
 
     const storyJson = parseStoryJson(storyContent);
-    const lineElement = getLineSnapshotFromStoryJson(storyJson, args.line);
+    const lineElement = getLineSnapshotFromStoryJson(
+      storyJson,
+      args.line,
+      args.lineIndex,
+    );
+    const line =
+      args.line ??
+      (isRecord(lineElement)
+        ? getEditorLineFromElement(lineElement)
+        : undefined);
     const derivedLineText = isRecord(lineElement)
       ? getLineTextFromElement(lineElement)
       : undefined;
@@ -300,7 +344,7 @@ export const submitStoryFeedback = mutation({
       storyId: args.storyId,
       storyTitle,
       courseShort,
-      ...(args.line !== undefined ? { line: args.line } : {}),
+      ...(line !== undefined ? { line } : {}),
       ...(lineText ? { lineText } : {}),
       ...(lineElement !== undefined ? { lineElement } : {}),
       category: args.category,

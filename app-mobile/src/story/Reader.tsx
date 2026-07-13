@@ -17,6 +17,7 @@ import { onAnyAudioDone, stopAudio } from "./audio";
 import { playSoundEffect } from "./soundEffects";
 import { Part } from "./Part";
 import { Footer, type NextStoryPreview } from "./Footer";
+import { getFeedbackContext, StoryFeedback } from "./StoryFeedback";
 import { HintLookupContext } from "./HintPopup";
 import { SmartImage } from "../components/SmartImage";
 import { useStitchedListeningAudio } from "./useStitchedListeningAudio";
@@ -267,6 +268,8 @@ export function Reader({
       !shouldSkipStoryPart(parts, hideQuestions) &&
       getPartIndex(parts) <= storyProgress,
   );
+  const currentPart = revealedParts.at(-1);
+  const feedbackContext = getFeedbackContext(currentPart, partProgress);
 
   return (
     <HintLookupContext.Provider value={handleHintLookup}>
@@ -354,6 +357,14 @@ export function Reader({
             onToggleListening={listeningPaused ? playListening : pauseListening}
             onReplayListening={replayListening}
             onSkipListening={skipListening}
+            feedback={
+              <StoryFeedback
+                storyId={story.id}
+                lineIndex={feedbackContext.lineIndex}
+                lineText={feedbackContext.lineText}
+                disabled={buttonStatus === "..."}
+              />
+            }
           />
         </View>
       </View>

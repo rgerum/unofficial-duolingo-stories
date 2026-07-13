@@ -31,6 +31,7 @@ export function Footer({
   onToggleListening,
   onReplayListening,
   onSkipListening,
+  feedback,
 }: {
   status: string;
   onContinue: () => void;
@@ -43,6 +44,7 @@ export function Footer({
   onToggleListening?: () => void;
   onReplayListening?: () => void;
   onSkipListening?: () => void;
+  feedback?: React.ReactNode;
 }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
@@ -54,6 +56,9 @@ export function Footer({
     // the primary action — all full width.
     return (
       <View style={[styles.root, bottomPadding]}>
+        {feedback ? (
+          <View style={styles.finishedFeedback}>{feedback}</View>
+        ) : null}
         {onBackToOverview && (
           <Button
             title="Back to overview"
@@ -93,6 +98,9 @@ export function Footer({
     const disabled = status === "wait" || status === "...";
     return (
       <View style={[styles.root, styles.listeningRoot, bottomPadding]}>
+        {feedback ? (
+          <View style={styles.listeningFeedback}>{feedback}</View>
+        ) : null}
         <View style={styles.listeningControls}>
           <Pressable
             accessibilityRole="button"
@@ -145,11 +153,15 @@ export function Footer({
   return (
     <View style={[styles.root, bottomPadding, isRight && styles.rootRight]}>
       {isRight && <Text style={styles.rightText}>You are correct</Text>}
-      <Button
-        title={status === "..." ? "..." : "Continue"}
-        disabled={status === "wait" || status === "..."}
-        onPress={onContinue}
-      />
+      <View style={styles.actionRow}>
+        {feedback}
+        <Button
+          title={status === "..." ? "..." : "Continue"}
+          disabled={status === "wait" || status === "..."}
+          onPress={onContinue}
+          style={styles.continueButton}
+        />
+      </View>
     </View>
   );
 }
@@ -209,6 +221,22 @@ function createStyles(colors: ThemeColors) {
       color: colors.greenDark,
       marginBottom: 20,
       marginLeft: 6,
+    },
+    actionRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 10,
+    },
+    continueButton: {
+      flex: 1,
+    },
+    listeningFeedback: {
+      alignSelf: "center",
+      marginBottom: 12,
+    },
+    finishedFeedback: {
+      alignSelf: "flex-start",
+      marginBottom: 12,
     },
     upNext: {
       marginTop: 18,
