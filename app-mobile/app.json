@@ -12,6 +12,9 @@
       "bundleIdentifier": "org.duostories.app",
       "usesAppleSignIn": true,
       "associatedDomains": ["applinks:duostories.org"],
+      "entitlements": {
+        "com.apple.developer.applesignin": ["Default"]
+      },
       "icon": "./assets/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
