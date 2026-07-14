@@ -1,16 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
+import BottomSheet, {
+  BottomSheetScrollView,
+  BottomSheetView,
+} from "@expo/ui/community/bottom-sheet";
 import { useConvex, useMutation } from "convex/react";
 import React from "react";
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Pressable, StyleSheet, View } from "react-native";
 import { api } from "../api";
 import { Button } from "../components/Button";
 import { Text, TextInput } from "../components/Text";
@@ -167,7 +162,6 @@ export function StoryFeedback({
   const convex = useConvex();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const insets = useSafeAreaInsets();
   const [open, setOpen] = React.useState(initialOpen);
   const [category, setCategory] = React.useState<FeedbackCategory>("Text");
   const [comment, setComment] = React.useState("");
@@ -179,12 +173,15 @@ export function StoryFeedback({
   const [operationKey, setOperationKey] = React.useState(() =>
     createOperationKey(storyId),
   );
+  const sheetOpenRef = React.useRef(initialOpen);
   const submissionAttemptRef = React.useRef(0);
   const isSubmitting = submitState === "submitting";
   const isSubmitted = submitState === "submitted";
   const isTimedOut = submitState === "timedOut";
 
   const close = React.useCallback(() => {
+    if (!sheetOpenRef.current) return;
+    sheetOpenRef.current = false;
     submissionAttemptRef.current += 1;
     setOpen(false);
     setComment("");
@@ -195,6 +192,7 @@ export function StoryFeedback({
 
   const openSheet = React.useCallback(() => {
     if (disabled) return;
+    sheetOpenRef.current = true;
     onOpen?.();
     setSubmitState("idle");
     setSubmitError(null);
@@ -271,181 +269,166 @@ export function StoryFeedback({
         <Text style={styles.triggerText}>Feedback</Text>
       </Pressable>
 
-      <Modal
-        visible={open}
-        transparent
-        animationType="slide"
-        onRequestClose={close}
-        statusBarTranslucent
+      <BottomSheet
+        index={open ? 0 : -1}
+        snapPoints={["90%"]}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        onClose={close}
+        backgroundStyle={{ backgroundColor: colors.background }}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={styles.modalRoot}
-        >
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Close feedback"
-            style={styles.backdrop}
-            onPress={close}
-          />
-          <View
-            style={[
-              styles.sheet,
-              { paddingBottom: Math.max(20, insets.bottom + 12) },
-            ]}
+        <BottomSheetView style={styles.sheet}>
+          <BottomSheetScrollView
+            nestedScrollEnabled
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.sheetContent}
           >
-            <View style={styles.handle} />
-            <ScrollView
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.sheetContent}
-            >
-              <View style={styles.titleRow}>
-                <View style={styles.titleCopy}>
-                  <Text style={styles.title}>Give feedback</Text>
-                  <Text style={styles.description}>
-                    Report a problem with this story line.
-                  </Text>
-                </View>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Close feedback"
-                  hitSlop={10}
-                  onPress={close}
-                  style={({ pressed }) => [
-                    styles.closeButton,
-                    pressed && styles.triggerPressed,
-                  ]}
-                >
-                  <Ionicons name="close" size={24} color={colors.textDim} />
-                </Pressable>
+            <View style={styles.titleRow}>
+              <View style={styles.titleCopy}>
+                <Text style={styles.title}>Give feedback</Text>
+                <Text style={styles.description}>
+                  Report a problem with this story line.
+                </Text>
               </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Close feedback"
+                hitSlop={10}
+                onPress={close}
+                style={({ pressed }) => [
+                  styles.closeButton,
+                  pressed && styles.triggerPressed,
+                ]}
+              >
+                <Ionicons name="close" size={24} color={colors.textDim} />
+              </Pressable>
+            </View>
 
-              <Text style={styles.eyebrow}>Current line</Text>
-              {lineElement ? (
-                <View style={styles.storyLinePreview}>
-                  <TextLine
-                    element={lineElement}
-                    active={false}
-                    rtl={storyRtl}
-                    autoPlay={false}
-                  />
-                </View>
-              ) : (
-                <View style={styles.linePreview}>
-                  <Text style={styles.lineText}>
-                    {lineText || `Story ${storyId}`}
-                  </Text>
-                </View>
-              )}
-
-              <Text style={styles.label}>Category</Text>
-              <View style={styles.categoryGrid}>
-                {feedbackCategories.map((option) => {
-                  const selected = option.value === category;
-                  return (
-                    <Pressable
-                      key={option.value}
-                      accessibilityRole="button"
-                      accessibilityState={{
-                        selected,
-                        disabled: formLocked,
-                      }}
-                      disabled={formLocked}
-                      onPress={() => setCategory(option.value)}
-                      style={({ pressed }) => [
-                        styles.category,
-                        selected && styles.categorySelected,
-                        pressed && styles.triggerPressed,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.categoryText,
-                          selected && styles.categoryTextSelected,
-                        ]}
-                      >
-                        {option.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-
-              {!isSubmitted ? (
-                <>
-                  <Text style={styles.label}>Comment</Text>
-                  <TextInput
-                    accessibilityLabel="Feedback comment"
-                    value={comment}
-                    onChangeText={setComment}
-                    editable={!formLocked}
-                    multiline
-                    maxLength={2000}
-                    numberOfLines={5}
-                    placeholder="What should be fixed?"
-                    placeholderTextColor={colors.textDim}
-                    textAlignVertical="top"
-                    style={styles.comment}
-                  />
-                </>
-              ) : null}
-
-              {submitError ? (
-                <View style={styles.error} accessibilityRole="alert">
-                  <Text style={styles.errorText}>{submitError.message}</Text>
-                </View>
-              ) : null}
-              {isSubmitted ? (
-                <View style={styles.success}>
-                  <Ionicons
-                    name="checkmark-circle"
-                    size={23}
-                    color={colors.greenDark}
-                  />
-                  <Text style={styles.successText}>
-                    Thanks, your feedback was saved.
-                  </Text>
-                </View>
-              ) : null}
-
-              <View style={styles.actions}>
-                {!isSubmitted && !terminalRejection ? (
-                  <Button
-                    title={isSubmitting || isTimedOut ? "Close" : "Cancel"}
-                    variant="neutral"
-                    onPress={close}
-                    style={styles.cancelAction}
-                    labelStyle={styles.actionLabel}
-                  />
-                ) : null}
-                <Button
-                  title={
-                    isSubmitted
-                      ? "Done"
-                      : terminalRejection
-                        ? "Close"
-                        : isSubmitting
-                          ? "Submitting"
-                          : isTimedOut
-                            ? "Try again"
-                            : "Submit feedback"
-                  }
-                  disabled={
-                    isSubmitting ||
-                    (!isSubmitted &&
-                      !terminalRejection &&
-                      comment.trim().length === 0)
-                  }
-                  onPress={primaryActionCloses ? close : () => void submit()}
-                  style={styles.action}
-                  labelStyle={styles.actionLabel}
+            <Text style={styles.eyebrow}>Current line</Text>
+            {lineElement ? (
+              <View style={styles.storyLinePreview}>
+                <TextLine
+                  element={lineElement}
+                  active={false}
+                  rtl={storyRtl}
+                  autoPlay={false}
                 />
               </View>
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+            ) : (
+              <View style={styles.linePreview}>
+                <Text style={styles.lineText}>
+                  {lineText || `Story ${storyId}`}
+                </Text>
+              </View>
+            )}
+
+            <Text style={styles.label}>Category</Text>
+            <View style={styles.categoryGrid}>
+              {feedbackCategories.map((option) => {
+                const selected = option.value === category;
+                return (
+                  <Pressable
+                    key={option.value}
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      selected,
+                      disabled: formLocked,
+                    }}
+                    disabled={formLocked}
+                    onPress={() => setCategory(option.value)}
+                    style={({ pressed }) => [
+                      styles.category,
+                      selected && styles.categorySelected,
+                      pressed && styles.triggerPressed,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.categoryText,
+                        selected && styles.categoryTextSelected,
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {!isSubmitted ? (
+              <>
+                <Text style={styles.label}>Comment</Text>
+                <TextInput
+                  accessibilityLabel="Feedback comment"
+                  value={comment}
+                  onChangeText={setComment}
+                  editable={!formLocked}
+                  multiline
+                  maxLength={2000}
+                  numberOfLines={5}
+                  placeholder="What should be fixed?"
+                  placeholderTextColor={colors.textDim}
+                  textAlignVertical="top"
+                  style={styles.comment}
+                />
+              </>
+            ) : null}
+
+            {submitError ? (
+              <View style={styles.error} accessibilityRole="alert">
+                <Text style={styles.errorText}>{submitError.message}</Text>
+              </View>
+            ) : null}
+            {isSubmitted ? (
+              <View style={styles.success}>
+                <Ionicons
+                  name="checkmark-circle"
+                  size={23}
+                  color={colors.greenDark}
+                />
+                <Text style={styles.successText}>
+                  Thanks, your feedback was saved.
+                </Text>
+              </View>
+            ) : null}
+
+            <View style={styles.actions}>
+              {!isSubmitted && !terminalRejection ? (
+                <Button
+                  title={isSubmitting || isTimedOut ? "Close" : "Cancel"}
+                  variant="neutral"
+                  onPress={close}
+                  style={styles.cancelAction}
+                  labelStyle={styles.actionLabel}
+                />
+              ) : null}
+              <Button
+                title={
+                  isSubmitted
+                    ? "Done"
+                    : terminalRejection
+                      ? "Close"
+                      : isSubmitting
+                        ? "Submitting"
+                        : isTimedOut
+                          ? "Try again"
+                          : "Submit feedback"
+                }
+                disabled={
+                  isSubmitting ||
+                  (!isSubmitted &&
+                    !terminalRejection &&
+                    comment.trim().length === 0)
+                }
+                onPress={primaryActionCloses ? close : () => void submit()}
+                style={styles.action}
+                labelStyle={styles.actionLabel}
+              />
+            </View>
+          </BottomSheetScrollView>
+        </BottomSheetView>
+      </BottomSheet>
     </>
   );
 }
@@ -467,35 +450,11 @@ function createStyles(colors: ThemeColors) {
     triggerDisabled: { opacity: 0 },
     triggerPressed: { opacity: 0.65 },
     triggerText: { color: colors.text, fontSize: 15, fontWeight: "800" },
-    modalRoot: { flex: 1, justifyContent: "flex-end" },
-    backdrop: {
-      position: "absolute",
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      backgroundColor: "rgba(0, 0, 0, 0.48)",
-    },
     sheet: {
-      width: "100%",
-      maxWidth: 640,
-      maxHeight: "92%",
-      alignSelf: "center",
+      flex: 1,
       backgroundColor: colors.background,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      paddingTop: 9,
-      paddingHorizontal: 20,
     },
-    handle: {
-      width: 42,
-      height: 5,
-      borderRadius: 3,
-      alignSelf: "center",
-      backgroundColor: colors.border,
-      marginBottom: 12,
-    },
-    sheetContent: { paddingBottom: 4 },
+    sheetContent: { paddingHorizontal: 20, paddingBottom: 24 },
     titleRow: {
       flexDirection: "row",
       alignItems: "flex-start",
