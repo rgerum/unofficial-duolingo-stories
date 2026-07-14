@@ -354,6 +354,8 @@ export function Reader({
               storyId={story.id}
               lineIndex={feedbackContext.lineIndex}
               lineText={feedbackContext.lineText}
+              lineElement={feedbackContext.lineElement}
+              storyRtl={story.learning_language_rtl}
               disabled={buttonStatus === "..."}
               onOpen={pauseForOverlay}
             />
