@@ -5,7 +5,7 @@ import BottomSheet, {
 } from "@expo/ui/community/bottom-sheet";
 import { useConvex, useMutation } from "convex/react";
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { api } from "../api";
 import { Button } from "../components/Button";
 import { Text, TextInput } from "../components/Text";
@@ -36,6 +36,7 @@ type SubmitFeedback = (args: {
   operationKey: string;
   lineIndex?: number;
   lineText?: string;
+  source: "web" | "android" | "ios";
   category: FeedbackCategory;
   comment: string;
 }) => Promise<unknown>;
@@ -218,6 +219,12 @@ export function StoryFeedback({
         submitFeedback({
           storyId,
           operationKey,
+          source:
+            Platform.OS === "ios"
+              ? "ios"
+              : Platform.OS === "android"
+                ? "android"
+                : "web",
           lineIndex,
           lineText,
           category,

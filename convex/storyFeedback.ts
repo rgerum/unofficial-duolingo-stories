@@ -20,6 +20,12 @@ const feedbackStatusValidator = v.union(
   v.literal("resolved"),
 );
 
+const feedbackSourceValidator = v.union(
+  v.literal("web"),
+  v.literal("android"),
+  v.literal("ios"),
+);
+
 const feedbackReportValidator = v.object({
   _id: v.id("story_feedback_reports"),
   _creationTime: v.number(),
@@ -30,6 +36,7 @@ const feedbackReportValidator = v.object({
   line: v.optional(v.number()),
   lineText: v.optional(v.string()),
   lineElement: v.optional(v.any()),
+  source: v.optional(feedbackSourceValidator),
   category: feedbackCategoryValidator,
   comment: v.string(),
   userId: v.union(v.string(), v.null()),
@@ -258,6 +265,8 @@ export const submitStoryFeedback = mutation({
     // active source element by its public tracking index instead.
     lineIndex: v.optional(v.number()),
     lineText: v.optional(v.string()),
+    // Optional while previously released clients age out.
+    source: v.optional(feedbackSourceValidator),
     // TODO(remove after 2026-07-20): deprecated; ignored for trust safety.
     lineElement: v.optional(v.any()),
     category: feedbackCategoryValidator,
@@ -374,6 +383,7 @@ export const submitStoryFeedback = mutation({
       ...(line !== undefined ? { line } : {}),
       ...(lineText ? { lineText } : {}),
       ...(lineElement !== undefined ? { lineElement } : {}),
+      ...(args.source !== undefined ? { source: args.source } : {}),
       category: args.category,
       comment,
       userId: identity?.tokenIdentifier ?? null,
