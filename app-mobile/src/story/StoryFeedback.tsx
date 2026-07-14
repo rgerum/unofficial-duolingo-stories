@@ -271,8 +271,6 @@ export function StoryFeedback({
 
       <BottomSheet
         index={open ? 0 : -1}
-        snapPoints={["90%"]}
-        enableDynamicSizing={false}
         enablePanDownToClose
         onClose={close}
         backgroundStyle={{ backgroundColor: colors.background }}
