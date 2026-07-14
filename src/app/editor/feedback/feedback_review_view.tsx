@@ -27,6 +27,8 @@ export type FeedbackReport = {
   line?: number;
   lineText?: string;
   lineElement?: unknown;
+  operationKey?: string;
+  source?: "web" | "android" | "ios";
   category: "Text" | "Translation hints" | "Audio" | "Other";
   comment: string;
   userName: string | null;
@@ -50,6 +52,19 @@ const statusLabels: Record<FeedbackStatus, string> = {
   reviewed: "Reviewed",
   resolved: "Resolved",
 };
+
+const sourceLabels = {
+  web: "Web",
+  android: "Android",
+  ios: "iOS",
+} as const;
+
+function getFeedbackSourceLabel(report: FeedbackReport) {
+  if (report.source) return sourceLabels[report.source];
+  return report.operationKey?.startsWith("mobile-feedback:")
+    ? "Mobile (legacy)"
+    : "Web (legacy)";
+}
 
 export type FeedbackCourseFilter = {
   short: string;
@@ -273,6 +288,7 @@ function FeedbackReportRow({
           <span>{report.courseShort}</span>
           <span>Story {report.storyId}</span>
           {report.line !== undefined ? <span>Line {report.line}</span> : null}
+          <span>{getFeedbackSourceLabel(report)}</span>
           <span>{report.userName || report.userEmail || "Anonymous"}</span>
         </div>
 

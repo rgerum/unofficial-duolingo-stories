@@ -31,6 +31,7 @@ type FeedbackArgs = {
   lineIndex?: number;
   lineText?: string;
   lineElement?: unknown;
+  source?: "web" | "android" | "ios";
   category: "Text" | "Translation hints" | "Audio" | "Other";
   comment: string;
 };
@@ -110,6 +111,7 @@ function feedbackArgs(overrides: Partial<FeedbackArgs> = {}): FeedbackArgs {
   return {
     storyId: 10,
     operationKey: "feedback-operation-key",
+    source: "web",
     category: "Text" as const,
     comment: "There is a typo.",
     ...overrides,
@@ -237,6 +239,42 @@ describe("submitStoryFeedback", () => {
       expect(report.line).toBe(12);
       expect(report.lineText).toBe("Hola");
       expect(report.lineElement).toEqual(parsedLineElement);
+      expect(report.source).toBe("web");
+    });
+  });
+
+  test.each([
+    "ios",
+    "android",
+  ] as const)("stores the %s submitting client platform", async (source) => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await t.mutation(
+      api.storyFeedback.submitStoryFeedback,
+      feedbackArgs({ source }),
+    );
+
+    await t.run(async (ctx) => {
+      const report = await ctx.db.query("story_feedback_reports").unique();
+      expect(report).not.toBeNull();
+      if (!report) return;
+      expect(report.source).toBe(source);
+    });
+  });
+
+  test("accepts legacy clients that do not send a platform", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+    const { source: _source, ...legacyArgs } = feedbackArgs();
+
+    await t.mutation(api.storyFeedback.submitStoryFeedback, legacyArgs);
+
+    await t.run(async (ctx) => {
+      const report = await ctx.db.query("story_feedback_reports").unique();
+      expect(report).not.toBeNull();
+      if (!report) return;
+      expect(report.source).toBeUndefined();
     });
   });
 

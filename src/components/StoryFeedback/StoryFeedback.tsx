@@ -140,6 +140,7 @@ export default function StoryFeedback({
               await submitStoryFeedback({
                 storyId,
                 operationKey,
+                source: "web",
                 line,
                 lineText,
                 category,

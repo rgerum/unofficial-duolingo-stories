@@ -246,6 +246,9 @@ export default defineSchema({
     line: v.optional(v.number()),
     lineText: v.optional(v.string()),
     lineElement: v.optional(v.any()),
+    source: v.optional(
+      v.union(v.literal("web"), v.literal("android"), v.literal("ios")),
+    ),
     category: v.union(
       v.literal("Text"),
       v.literal("Translation hints"),
