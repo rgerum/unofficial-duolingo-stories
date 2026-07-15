@@ -11,7 +11,7 @@ export const metadata = {
   title:
     "Duostories: improve your Duolingo learning with community translated Duolingo stories.",
   description:
-    "Supplement your Duolingo course with community-translated Duolingo stories.",
+    "Free interactive stories with audio in 78 languages — including many Duolingo doesn't offer, like Albanian, Quechua, and Toki Pona. Translated by the community, free to read and listen online.",
   alternates: {
     canonical: "https://duostories.org",
   },
@@ -26,7 +26,7 @@ export const metadata = {
   openGraph: {
     title: "Duostories",
     description:
-      "Supplement your Duolingo course with community-translated Duolingo stories.",
+      "Free interactive stories with audio in 78 languages — including many Duolingo doesn't offer, like Albanian, Quechua, and Toki Pona. Translated by the community, free to read and listen online.",
     type: "website",
     url: `https://duostories.org`,
   },
