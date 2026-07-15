@@ -250,7 +250,8 @@ export default function ProfileTab() {
             value={hideStoryQuestions}
             onValueChange={setHideStoryQuestions}
             trackColor={{ false: colors.border, true: colors.blue }}
-            thumbColor={colors.surface}
+            thumbColor={colors.switchThumb}
+            ios_backgroundColor={colors.border}
           />
         </View>
 

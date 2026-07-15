@@ -26,6 +26,7 @@ export const lightColors = {
   disabled: "#afafaf",
   disabledBackground: "#e5e5e5",
   hiddenUnderline: "#4b4b4b",
+  switchThumb: "#ffffff",
 };
 
 export const darkColors: ThemeColors = {
@@ -49,6 +50,7 @@ export const darkColors: ThemeColors = {
   disabled: "#65727a",
   disabledBackground: "#26343a",
   hiddenUnderline: "#f1f7fb",
+  switchThumb: "#ffffff",
 };
 
 export type ThemeColors = typeof lightColors;
