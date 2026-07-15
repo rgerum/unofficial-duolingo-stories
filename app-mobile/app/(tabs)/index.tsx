@@ -257,8 +257,9 @@ export default function LearnTab() {
                 });
                 void setListeningMode(courseShort, value);
               }}
-              trackColor={{ true: colors.blue }}
-              thumbColor={colors.surface}
+              trackColor={{ false: colors.border, true: colors.blue }}
+              thumbColor={colors.switchThumb}
+              ios_backgroundColor={colors.border}
             />
           </View>
         ) : null}
