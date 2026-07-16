@@ -812,7 +812,7 @@ function NativeHintOverlay({
             y={cover.y}
             width={cover.width}
             height={cover.height}
-            fill={colors.surface}
+            fill={colors.background}
           />
         ))}
       {drawRangeDebug &&
@@ -1171,14 +1171,6 @@ function NativeHintText({
         containerStyle,
       ]}
     >
-      <NativeHintOverlay
-        hiddenCovers={[]}
-        debugRects={[]}
-        debugBaselines={[]}
-        underlineSegments={underlineSegments}
-        colors={colors}
-        drawCovers={false}
-      />
       <Text
         onLayout={(event) => {
           setTextLayout(event.nativeEvent.layout);
@@ -1259,9 +1251,8 @@ function NativeHintText({
         hiddenCovers={hiddenCovers}
         debugRects={debugRects}
         debugBaselines={debugBaselines}
-        underlineSegments={debugNativeLayout ? underlineSegments : []}
+        underlineSegments={underlineSegments}
         colors={colors}
-        drawUnderlines={false}
         drawRangeDebug={debugNativeLayout}
       />
       <View

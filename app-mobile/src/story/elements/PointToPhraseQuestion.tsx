@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { colors, fontSizes } from "../../theme";
+import { fontSizes, type ThemeColors, useTheme } from "../../theme";
 import { Text } from "../../components/Text";
 import { WordChip } from "../WordChip";
 import { getLanguageTextStyle } from "../languageStyles";
@@ -16,6 +16,8 @@ export function PointToPhraseQuestion({
   element: StoryElementPointToPhrase;
   advance: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   // Dense button index -> transcript part index (only selectable parts).
   const buttonIndices: number[] = [];
   for (let index = 0; index < element.transcriptParts.length; index++) {
@@ -63,16 +65,18 @@ export function PointToPhraseQuestion({
   );
 }
 
-const styles = StyleSheet.create({
-  transcript: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    marginTop: 6,
-  },
-  plainText: {
-    fontSize: fontSizes.body,
-    lineHeight: 38,
-    color: colors.text,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    transcript: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      alignItems: "center",
+      marginTop: 6,
+    },
+    plainText: {
+      fontSize: fontSizes.body,
+      lineHeight: 38,
+      color: colors.text,
+    },
+  });
+}

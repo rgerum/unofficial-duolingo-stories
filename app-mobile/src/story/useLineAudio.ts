@@ -118,10 +118,10 @@ export function useLineAudio(
       return;
     }
     cancelLineAudio(false);
+    beginHighlight();
     timeoutRef.current = setTimeout(
       () => {
         timeoutRef.current = null;
-        beginHighlight();
         cancelRef.current = playAudio(audio, {
           onRange: handleRange,
         });
