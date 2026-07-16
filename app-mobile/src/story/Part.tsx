@@ -209,6 +209,7 @@ function ContinuationPart({
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
           audioRangeOverride={settings.audioRangeOverride}
+          audioHighlightEnabled={false}
           onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>
@@ -274,6 +275,7 @@ function SelectPhrasesPart({
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
           audioRangeOverride={settings.audioRangeOverride}
+          audioHighlightEnabled={false}
           onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>
@@ -334,6 +336,7 @@ function ArrangePart({ parts, setButtonStatus, active, settings }: PartProps) {
           autoPlay={settings.audioAutoPlay}
           replayKey={settings.audioReplayKey}
           audioRangeOverride={settings.audioRangeOverride}
+          audioHighlightEnabled={false}
           onManualAudioPlay={settings.onManualAudioPlay}
         />
       </FadeIn>

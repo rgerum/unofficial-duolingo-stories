@@ -130,6 +130,7 @@ export function TextLine({
   autoPlay = true,
   replayKey = 0,
   audioRangeOverride,
+  audioHighlightEnabled = true,
   onManualAudioPlay,
   debugNativeLayout = false,
 }: {
@@ -140,6 +141,7 @@ export function TextLine({
   autoPlay?: boolean;
   replayKey?: number;
   audioRangeOverride?: number;
+  audioHighlightEnabled?: boolean;
   onManualAudioPlay?: () => void;
   debugNativeLayout?: boolean;
 }) {
@@ -147,7 +149,9 @@ export function TextLine({
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const audio = element.line?.content?.audio;
   const lineAudio = useLineAudio(audio, active, autoPlay, replayKey);
-  const audioRange = audioRangeOverride ?? lineAudio.audioRange;
+  const audioRange = audioHighlightEnabled
+    ? (audioRangeOverride ?? lineAudio.audioRange)
+    : undefined;
   const handlePlay = React.useCallback(() => {
     onManualAudioPlay?.();
     lineAudio.play();
