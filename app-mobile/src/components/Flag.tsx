@@ -13,6 +13,7 @@ import { useSvgXml } from "./RemoteSvg";
 const SPRITE_URL =
   "https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg";
 const CUSTOM_FLAG_BASE = "https://duostories.org/flags";
+const SQUARE_CUSTOM_FLAG_FILES = new Set(["flag_gsw.svg"]);
 
 const ORDER = [
   "en",
@@ -131,9 +132,14 @@ export function Flag({
 
   if (flag_file) {
     const height = Math.round((width * 62) / 78);
+    const renderedWidth = SQUARE_CUSTOM_FLAG_FILES.has(flag_file)
+      ? height
+      : width;
     return (
-      <View style={{ width, height }}>
-        {customXml && <SvgCss xml={customXml} width={width} height={height} />}
+      <View style={{ width: renderedWidth, height }}>
+        {customXml && (
+          <SvgCss xml={customXml} width={renderedWidth} height={height} />
+        )}
       </View>
     );
   }
