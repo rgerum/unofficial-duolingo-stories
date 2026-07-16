@@ -1,6 +1,8 @@
 import React from "react";
 import Image from "next/image";
 
+const squareCustomFlagFiles = new Set(["flag_gsw.svg"]);
+
 export default function Flag(props: {
   width?: number | undefined;
   height?: number | undefined;
@@ -74,17 +76,26 @@ export default function Flag(props: {
   }
 
   const isCustomFlag = Boolean(props.flag_file);
+  const isSquareCustomFlag =
+    props.flag_file !== null &&
+    props.flag_file !== undefined &&
+    squareCustomFlagFiles.has(props.flag_file);
   const aspectRatio = isCustomFlag ? 62 / 78 : 66 / 82;
   const width = Math.round(props.width ?? 88);
   const scale = width / 82;
   const height = Math.round(props.height ?? width * aspectRatio);
+  const renderedWidth = isSquareCustomFlag ? height : width;
   const customScale = width / 88;
-  const outlineWidth = isCustomFlag ? 7 * customScale : 5 * scale;
-  const outlineOffset = isCustomFlag ? -6 * customScale : -6 * scale;
+  const outlineWidth = isCustomFlag
+      ? 7 * customScale
+      : 5 * scale;
+  const outlineOffset = isCustomFlag
+      ? -6 * customScale
+      : -6 * scale;
   const flagImageStyle: React.CSSProperties = {
-    width,
+    width: renderedWidth,
     height,
-    minWidth: width,
+    minWidth: renderedWidth,
     objectFit: "cover",
     objectPosition: `0 ${-66 * scale * flag}px`,
     outline: `${outlineWidth}px solid var(--body-background)`,
@@ -97,7 +108,7 @@ export default function Flag(props: {
   return (
     <Image
       style={flagImageStyle}
-      width={width}
+      width={renderedWidth}
       height={height}
       priority={props.priority === true}
       loading={props.loading}
