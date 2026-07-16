@@ -1,12 +1,23 @@
 import React from "react";
+import { AppState } from "react-native";
+import {
+  claimAudioHighlight,
+  ownsAudioHighlight,
+  releaseAudioHighlight,
+  subscribeToAudioHighlightOwner,
+} from "./audioHighlightOwner";
 import { playAudio } from "./audio";
 import type { AudioInfo } from "./types";
 
-const IDLE_AUDIO_RANGE = 99999;
 const PENDING_AUDIO_RANGE = 0;
+const IDLE_AUDIO_RANGE = 99999;
 
-function getInitialAudioRange(audio: AudioInfo | undefined) {
-  return audio?.url ? PENDING_AUDIO_RANGE : IDLE_AUDIO_RANGE;
+function canHighlightAudio(audio: AudioInfo | undefined) {
+  return Boolean(audio?.url && audio.keypoints?.length);
+}
+
+function normalizeAudioRange(range: number) {
+  return range >= IDLE_AUDIO_RANGE ? undefined : range;
 }
 
 /**
@@ -20,8 +31,9 @@ export function useLineAudio(
   autoPlay: boolean,
   replayKey = 0,
 ) {
-  const [audioRange, setAudioRange] = React.useState(() =>
-    getInitialAudioRange(audio),
+  const highlightOwnerRef = React.useRef(Symbol("line-audio-highlight"));
+  const [audioRange, setAudioRange] = React.useState<number | undefined>(
+    undefined,
   );
   const cancelRef = React.useRef<((resetRange?: boolean) => void) | null>(null);
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -39,7 +51,8 @@ export function useLineAudio(
       clearScheduledPlay();
       cancelRef.current?.(reveal);
       cancelRef.current = null;
-      if (reveal) setAudioRange(IDLE_AUDIO_RANGE);
+      releaseAudioHighlight(highlightOwnerRef.current);
+      if (reveal) setAudioRange(undefined);
     },
     [clearScheduledPlay],
   );
@@ -50,19 +63,53 @@ export function useLineAudio(
 
   React.useEffect(() => {
     cancelLineAudio(true);
-    setAudioRange(getInitialAudioRange(audio));
+    if (!audio) return;
+    setAudioRange(undefined);
   }, [audio, cancelLineAudio]);
 
   React.useEffect(() => {
     if (!active) cancelLineAudio(true);
   }, [active, cancelLineAudio]);
 
+  React.useEffect(() => {
+    return subscribeToAudioHighlightOwner((owner) => {
+      if (owner !== highlightOwnerRef.current) setAudioRange(undefined);
+    });
+  }, []);
+
+  const beginHighlight = React.useCallback(() => {
+    if (!canHighlightAudio(audio)) {
+      releaseAudioHighlight(highlightOwnerRef.current);
+      setAudioRange(undefined);
+      return;
+    }
+    claimAudioHighlight(highlightOwnerRef.current);
+    setAudioRange(PENDING_AUDIO_RANGE);
+  }, [audio]);
+
+  const handleRange = React.useCallback((range: number) => {
+    if (!ownsAudioHighlight(highlightOwnerRef.current)) return;
+    const nextRange = normalizeAudioRange(range);
+    setAudioRange(nextRange);
+    if (nextRange === undefined)
+      releaseAudioHighlight(highlightOwnerRef.current);
+  }, []);
+
   const play = React.useCallback(() => {
     if (!active) skipNextAutoPlayRef.current = true;
     cancelLineAudio(false);
-    setAudioRange(getInitialAudioRange(audio));
-    cancelRef.current = playAudio(audio, { onRange: setAudioRange });
-  }, [active, audio, cancelLineAudio]);
+    beginHighlight();
+    cancelRef.current = playAudio(audio, {
+      onRange: handleRange,
+    });
+  }, [active, audio, beginHighlight, cancelLineAudio, handleRange]);
+
+  React.useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState !== "active") cancelLineAudio(true);
+    });
+    return () => subscription.remove();
+  }, [cancelLineAudio]);
 
   React.useEffect(() => {
     if (!active || !autoPlay) return;
@@ -71,16 +118,27 @@ export function useLineAudio(
       return;
     }
     cancelLineAudio(false);
-    setAudioRange(getInitialAudioRange(audio));
     timeoutRef.current = setTimeout(
       () => {
         timeoutRef.current = null;
-        cancelRef.current = playAudio(audio, { onRange: setAudioRange });
+        beginHighlight();
+        cancelRef.current = playAudio(audio, {
+          onRange: handleRange,
+        });
       },
       replayKey > 0 ? 0 : 350,
     );
     return clearScheduledPlay;
-  }, [active, autoPlay, audio, replayKey, cancelLineAudio, clearScheduledPlay]);
+  }, [
+    active,
+    autoPlay,
+    audio,
+    replayKey,
+    beginHighlight,
+    cancelLineAudio,
+    clearScheduledPlay,
+    handleRange,
+  ]);
 
   return { audioRange, play, hasAudio: Boolean(audio?.url) };
 }
