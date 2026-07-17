@@ -50,7 +50,10 @@ export default function StoryTranscript({ story }: { story: StoryData }) {
   };
 
   return (
-    <section aria-labelledby="story-transcript-heading" className="pb-10">
+    <section
+      aria-labelledby="story-transcript-heading"
+      className="min-h-screen bg-[var(--body-background)] pb-10 text-[var(--text-color)]"
+    >
       <script
         type="application/ld+json"
         // Story text is contributor-controlled; escape "<" so no line can

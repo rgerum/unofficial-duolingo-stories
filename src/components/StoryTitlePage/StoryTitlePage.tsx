@@ -30,7 +30,7 @@ function StoryTitlePage({
             alt={"title image"}
           />
         </div>
-        <div className="mt-[18px] mb-9 w-full text-center text-[25px] font-bold text-[#4b4b4b]">
+        <div className="mt-[18px] mb-9 w-full text-center text-[25px] font-bold text-[var(--text-color)]">
           {header.learningLanguageTitleContent.text}
         </div>
         <div className="pointer-events-auto w-full text-center">
@@ -41,7 +41,7 @@ function StoryTitlePage({
         {transcript.length > 0 ? (
           <details
             className={cn(
-              "pointer-events-auto mt-8 w-full max-w-[500px] rounded-2xl border-2 border-[#e5e5e5] bg-white px-4 py-3 text-left text-[#4b4b4b]",
+              "pointer-events-auto mt-8 w-full max-w-[500px] rounded-2xl border-2 border-[var(--color_base_border)] bg-[var(--color_base_background)] px-4 py-3 text-left text-[var(--text-color)]",
               story.learning_language_rtl && "[direction:rtl] text-right",
             )}
           >

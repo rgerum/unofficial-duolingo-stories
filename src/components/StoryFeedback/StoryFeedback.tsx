@@ -21,6 +21,7 @@ import {
   type FeedbackSubmitError,
   getFeedbackSubmitError,
 } from "./feedbackErrors";
+import { createOperationKey } from "@/lib/operation-key";
 
 type StoryFeedbackProps = {
   storyId: number;
@@ -63,9 +64,7 @@ export default function StoryFeedback({
   >("idle");
   const [submitError, setSubmitError] =
     React.useState<FeedbackSubmitError | null>(null);
-  const [operationKey, setOperationKey] = React.useState(() =>
-    crypto.randomUUID(),
-  );
+  const [operationKey, setOperationKey] = React.useState(createOperationKey);
   const isSubmitting = submitState === "submitting";
   const isSubmitted = submitState === "submitted";
   const terminalRejection = submitError?.canRetry === false;
@@ -78,7 +77,7 @@ export default function StoryFeedback({
       setSubmitError(null);
     } else {
       setComment("");
-      setOperationKey(crypto.randomUUID());
+      setOperationKey(createOperationKey());
     }
   }
 
