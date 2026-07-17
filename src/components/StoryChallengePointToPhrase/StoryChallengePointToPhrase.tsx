@@ -5,6 +5,7 @@ import FadeGlideIn from "../FadeGlideIn";
 import {
   StoryElement,
   StoryElementLine,
+  StoryElementPointToPhrase,
 } from "@/components/editor/story/syntax_parser_types";
 import { StorySettings } from "@/components/StoryProgress";
 
@@ -23,19 +24,26 @@ function StoryChallengePointToPhrase({
   hidden: boolean;
   settings: StorySettings;
 }) {
+  const question = parts[1] as StoryElementPointToPhrase | undefined;
+  // Broken story data can produce a question with nothing to tap; treat it
+  // like a plain line so the reader is not stuck without a correct answer.
+  const skip_question =
+    settings.hide_questions ||
+    !question?.transcriptParts?.some((part) => part.selectable);
+
   React.useEffect(() => {
     if (!active) return;
-    if (settings.hide_questions) {
+    if (skip_question) {
       setButtonStatus("continue");
       return;
     }
     if (partProgress === 0) setButtonStatus("idle");
-  }, [active, partProgress, setButtonStatus, settings.hide_questions]);
+  }, [active, partProgress, setButtonStatus, skip_question]);
 
   const id = React.useId();
   const show_question = active && partProgress === 1;
 
-  if (settings.hide_questions) {
+  if (skip_question) {
     return (
       <FadeGlideIn
         key={`${id}-1`}
