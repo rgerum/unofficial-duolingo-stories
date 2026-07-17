@@ -25,6 +25,7 @@ import {
   rememberCourseScrollPosition,
   restoreCourseScrollPosition,
 } from "./course_view_memory";
+import styles from "./edit_list.module.css";
 import { CountBadge } from "./CountBadge";
 import type {
   DetailedCourseProps,
@@ -41,7 +42,6 @@ const STORY_FILTER_ORDER: StoryFilter[] = [
   "finished",
   "published",
 ];
-
 export default function EditList({
   stories,
   course,
@@ -252,48 +252,24 @@ export default function EditList({
           })}
         </div>
       </div>
-      <div className="mb-[100px] w-full">
-        <div className="hidden min-[1000px]:block">
-          <div className="min-[1000px]:grid min-[1000px]:grid-cols-[84px_56px_minmax(0,1fr)_210px_120px_150px_120px_150px] min-[1000px]:items-center">
-            <div
-              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
-              data-js-sort-colnum="0"
-            >
+      <div className={styles.storyList}>
+        <div className={styles.header}>
+          <div className={styles.headerRow}>
+            <div className={styles.headerCell} data-js-sort-colnum="0">
               <span className="my-auto">Set</span>
             </div>
-            <div className="self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"></div>
-            <div
-              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
-              data-js-sort-colnum="1"
-            >
+            <div className={styles.headerCell}></div>
+            <div className={styles.headerCell} data-js-sort-colnum="1">
               <span className="my-auto">Name</span>
             </div>
-            <div
-              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
-              data-js-sort-colnum="2"
-            >
+            <div className={styles.headerCell} data-js-sort-colnum="2">
               <span className="my-auto">Status</span>
             </div>
-            <div
-              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
-              data-js-sort-colnum="4"
-            >
-              <span className="my-auto">Author</span>
-            </div>
-            <div
-              className="js-sort-active flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
-              data-js-sort-colnum="5"
-            >
+            <div className={styles.headerCell} data-js-sort-colnum="5">
               <span className="my-auto">Created</span>
             </div>
             <div
-              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
-              data-js-sort-colnum="6"
-            >
-              <span className="my-auto">Author</span>
-            </div>
-            <div
-              className="flex self-stretch bg-[var(--button-background)] px-[5px] pb-[5px] pt-[5px] text-left text-[var(--button-color)]"
+              className={`${styles.headerCell} js-sort-active`}
               data-js-sort-colnum="7"
             >
               <span className="my-auto">Updated</span>
@@ -304,7 +280,7 @@ export default function EditList({
           {filteredStories.map((story, i) => (
             <div
               className={
-                "items-center py-[5px] transition-[filter,color,background-color] duration-100 ease-in hover:bg-[var(--body-background)] hover:brightness-90 max-[1000px]:flex max-[1000px]:flex-wrap min-[1000px]:grid min-[1000px]:grid-cols-[84px_56px_minmax(0,1fr)_210px_120px_150px_120px_150px] min-[1000px]:items-center " +
+                `${styles.row} ` +
                 (i % 2 === 1 ? "bg-[var(--body-background-faint)] " : "") +
                 (set_ends[i]
                   ? "border-t-[3px] border-[var(--button-background)] "
@@ -312,13 +288,13 @@ export default function EditList({
               }
               key={story.id}
             >
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[60px] min-[1000px]:px-[5px]">
+              <div className={styles.setCell}>
                 <span>
                   <b>{pad_space(story.set_id)}</b>&nbsp;-&nbsp;
                   {pad_space(story.set_index)}
                 </span>
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap max-[1000px]:w-[45px] max-[1000px]:shrink-0 min-[1000px]:px-[5px]">
+              <div className={styles.imageCell}>
                 <img
                   alt={"story title"}
                   src={
@@ -331,7 +307,7 @@ export default function EditList({
                   className="block min-w-[44px]"
                 />
               </div>
-              <div className="overflow-hidden pl-[5px] max-[1000px]:min-w-0 max-[1000px]:flex-1 min-[1000px]:min-w-0 min-[1000px]:px-[5px]">
+              <div className={styles.titleCell}>
                 <div className="flex min-w-0 items-center gap-[6px]">
                   <Link
                     className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap underline underline-offset-2"
@@ -359,37 +335,39 @@ export default function EditList({
                   />
                 </div>
               </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-right max-[1000px]:ml-auto max-[1000px]:shrink-0 max-[500px]:max-w-[85px] max-[500px]:[&>div]:flex max-[500px]:overflow-hidden min-[1000px]:px-[5px]">
-                <DropDownStatus
-                  id={story.id}
-                  name={story.name}
-                  count={story.approvalCount ?? 0}
-                  approvedByCurrentUser={story.approvedByCurrentUser}
-                  status={story.status}
-                  public={story.public}
-                  official={course.official}
-                  onStoryStateChange={(nextStoryState) => {
-                    setStoryList((currentStories) =>
-                      currentStories.map((currentStory) =>
-                        currentStory.id === story.id
-                          ? { ...currentStory, ...nextStoryState }
-                          : currentStory,
-                      ),
-                    );
-                  }}
-                />
-              </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Created:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:min-w-0 min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">
-                {story.author}
-              </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">
-                {formatDate(story.date)}
-              </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap pl-[5px] text-[12px] text-[var(--text-color-dim)] before:content-['Changed:_'] max-[1000px]:w-[calc(50%-130px)] max-[500px]:w-[calc(100%-130px)] min-[1000px]:min-w-0 min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)] min-[1000px]:before:content-none">
-                {story.author_change}
-              </div>
-              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-[var(--text-color-dim)] max-[1000px]:w-[130px] min-[1000px]:px-[5px] min-[1000px]:text-[inherit] min-[1000px]:text-[var(--text-color)]">
-                {formatDate(story.change_date)}
+              <div className={styles.secondaryCell}>
+                <div className={styles.statusCell}>
+                  <DropDownStatus
+                    id={story.id}
+                    name={story.name}
+                    count={story.approvalCount ?? 0}
+                    approvedByCurrentUser={story.approvedByCurrentUser}
+                    status={story.status}
+                    public={story.public}
+                    official={course.official}
+                    onStoryStateChange={(nextStoryState) => {
+                      setStoryList((currentStories) =>
+                        currentStories.map((currentStory) =>
+                          currentStory.id === story.id
+                            ? { ...currentStory, ...nextStoryState }
+                            : currentStory,
+                        ),
+                      );
+                    }}
+                  />
+                </div>
+                <div className={styles.metadataGroup}>
+                  <StoryListMetadataCell
+                    label="Created"
+                    author={story.author}
+                    datetime={story.date}
+                  />
+                  <StoryListMetadataCell
+                    label="Updated"
+                    author={story.author_change}
+                    datetime={story.change_date}
+                  />
+                </div>
               </div>
             </div>
           ))}
@@ -435,17 +413,85 @@ function pad(x: number) {
   return x.toString();
 }
 
-function formatDate(datetime: string | number | Date | undefined) {
+function StoryListMetadataCell({
+  label,
+  author,
+  datetime,
+}: {
+  label: string;
+  author: string | null | undefined;
+  datetime: string | number | Date | undefined;
+}) {
+  const fullDate = formatFullDateTime(datetime);
+  const compactDate = formatCompactDate(datetime);
+  const authorLabel = author || "-";
+  const title =
+    fullDate === "-"
+      ? `${label}: ${authorLabel}`
+      : `${label}: ${authorLabel}, ${fullDate}`;
+
+  return (
+    <div className={styles.metadataCell} title={title}>
+      <span className={styles.metadataAuthor}>
+        <span className={styles.metadataLabel}>{label}: </span>
+        {authorLabel}
+      </span>
+      <time
+        className={styles.metadataTime}
+        dateTime={getDateTimeAttribute(datetime)}
+      >
+        {compactDate}
+      </time>
+    </div>
+  );
+}
+
+function getDate(datetime: string | number | Date | undefined) {
   if (datetime === undefined || datetime === null || datetime === "") {
-    return "-";
+    return null;
   }
   const d = new Date(datetime);
   if (Number.isNaN(d.getTime())) {
+    return null;
+  }
+  return d;
+}
+
+function getDateTimeAttribute(datetime: string | number | Date | undefined) {
+  const d = getDate(datetime);
+  return d ? d.toISOString() : undefined;
+}
+
+function formatFullDateTime(datetime: string | number | Date | undefined) {
+  const d = getDate(datetime);
+  if (!d) {
     return "-";
   }
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
     d.getHours(),
   )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function formatCompactDate(datetime: string | number | Date | undefined) {
+  const d = getDate(datetime);
+  if (!d) {
+    return "-";
+  }
+
+  const elapsedMilliseconds = Date.now() - d.getTime();
+  if (elapsedMilliseconds >= 0) {
+    const elapsedMinutes = Math.floor(elapsedMilliseconds / 60_000);
+    if (elapsedMinutes < 1) return "just now";
+    if (elapsedMinutes < 60) return `${elapsedMinutes}m ago`;
+
+    const elapsedHours = Math.floor(elapsedMinutes / 60);
+    if (elapsedHours < 24) return `${elapsedHours}h ago`;
+
+    const elapsedDays = Math.floor(elapsedHours / 24);
+    if (elapsedDays < 7) return `${elapsedDays}d ago`;
+  }
+
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 function DropDownStatus(props: {
@@ -553,11 +599,20 @@ function DropDownStatus(props: {
     return status;
   }
 
+  function status_icon(status: string, public_: boolean) {
+    return status_wrapper(status, public_).split(" ")[0] ?? status;
+  }
+
   return (
-    <div className="whitespace-nowrap">
+    <div className="inline-flex whitespace-nowrap">
       {
         <span className="whitespace-nowrap rounded-[10px] bg-[var(--editor-ssml)] px-[5px] py-[2px]">
-          {status_wrapper(status, isPublic)}
+          <span className="min-[1000px]:hidden" aria-hidden="true">
+            {status_icon(status, isPublic)}
+          </span>
+          <span className="max-[1000px]:sr-only">
+            {status_wrapper(status, isPublic)}
+          </span>
         </span>
       }{" "}
       {props.official ? (
