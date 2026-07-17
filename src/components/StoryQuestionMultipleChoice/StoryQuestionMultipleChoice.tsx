@@ -8,7 +8,6 @@ import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import CheckButton from "../CheckButton";
 import { useChoiceButtons } from "@/hooks/use-choice-buttons.hook";
 import { StoryElementMultipleChoice } from "@/components/editor/story/syntax_parser_types";
-import { cn } from "@/lib/utils";
 
 /*
 The MULTIPLE_CHOICE question.
@@ -59,7 +58,7 @@ function StoryQuestionMultipleChoice({
       {/* Display the question if a question is there */}
       {element.question && <StoryQuestionPrompt question={element.question} />}
       {/* Display the answers */}
-      <ul className="list-none p-0 text-[#4b4b4b]">
+      <ul className="list-none p-0 text-[var(--text-color)]">
         {element.answers.map((answer, index) => (
           /* on answer field */
           <li
