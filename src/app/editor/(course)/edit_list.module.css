@@ -1,0 +1,194 @@
+.storyList {
+  width: 100%;
+  margin-bottom: 100px;
+}
+
+.header {
+  display: none;
+}
+
+.headerRow,
+.row {
+  display: grid;
+}
+
+.headerCell {
+  display: flex;
+  align-self: stretch;
+  padding: 5px;
+  text-align: left;
+  color: var(--button-color);
+  background: var(--button-background);
+}
+
+.row {
+  grid-template-columns: 60px 52px minmax(0, 1fr) 104px;
+  grid-template-areas:
+    "set image title status"
+    "metadata metadata metadata metadata";
+  align-items: center;
+  row-gap: 6px;
+  padding: 8px 0;
+  transition:
+    filter 100ms ease-in,
+    color 100ms ease-in,
+    background-color 100ms ease-in;
+}
+
+.row:hover {
+  background: var(--body-background);
+  filter: brightness(0.9);
+}
+
+.setCell,
+.imageCell,
+.titleCell,
+.statusCell,
+.metadataCell {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.setCell {
+  grid-area: set;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.imageCell {
+  grid-area: image;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.titleCell {
+  grid-area: title;
+  padding-left: 5px;
+}
+
+.secondaryCell {
+  display: contents;
+  min-width: 0;
+}
+
+.statusCell {
+  grid-area: status;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.metadataGroup {
+  grid-area: metadata;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.metadataCell {
+  padding: 0 5px;
+  color: var(--text-color-dim);
+  font-size: 12px;
+}
+
+.metadataAuthor,
+.metadataTime {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.metadataTime {
+  color: var(--text-color-dim);
+}
+
+@media (min-width: 760px) and (max-width: 999px) {
+  .row {
+    grid-template-columns: 64px 56px minmax(110px, 1fr) minmax(440px, 56%);
+    grid-template-areas: "set image title secondary";
+    row-gap: 0;
+  }
+
+  .secondaryCell {
+    grid-area: secondary;
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .statusCell,
+  .metadataGroup {
+    grid-area: auto;
+  }
+
+  .metadataCell {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .metadataLabel {
+    display: none;
+  }
+}
+
+@media (min-width: 1000px) {
+  .header {
+    display: block;
+  }
+
+  .headerRow,
+  .row {
+    grid-template-columns:
+      72px 48px minmax(220px, 1fr) 230px minmax(120px, 140px)
+      minmax(120px, 140px);
+    min-width: 810px;
+    grid-template-areas: "set image title status created updated";
+    align-items: center;
+  }
+
+  .row {
+    row-gap: 0;
+    padding: 5px 0;
+  }
+
+  .setCell,
+  .imageCell,
+  .titleCell,
+  .statusCell,
+  .metadataCell {
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+
+  .secondaryCell,
+  .metadataGroup {
+    display: contents;
+  }
+
+  .statusCell {
+    grid-area: status;
+    text-align: left;
+    text-overflow: ellipsis;
+  }
+
+  .metadataGroup > :first-child {
+    grid-area: created;
+  }
+
+  .metadataGroup > :last-child {
+    grid-area: updated;
+  }
+
+  .metadataCell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: var(--text-color);
+  }
+
+  .metadataLabel {
+    display: none;
+  }
+}

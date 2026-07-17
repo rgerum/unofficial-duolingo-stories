@@ -17,7 +17,7 @@ export default function EditorLayoutClient({
         <LayoutFlag />
       </div>
       <div
-        className="[grid-area:main] min-h-0 min-w-0 overflow-auto"
+        className="[grid-area:main] min-h-0 min-w-0 overflow-x-hidden overflow-y-auto"
         // This identifies the scroll container used for course list state
         // restoration when returning from the story editor.
         data-editor-scroll-container="course-main"
