@@ -312,6 +312,43 @@ Speaker414: 今日{ちゅー} 何{ぬー}?
   assert.equal(story.elements[1]?.line.content.text, "今日 何?");
 });
 
+test("POINT_TO_PHRASE without tappable options emits an error and keeps the line", () => {
+  const story = parseStory(
+    `[POINT_TO_PHRASE]
+> Choose the option that means "help."
+Speaker414: تَمَام أَحْتَاج~إِلَى مُسَاعِدَة
+~             perfect     I~need      help`,
+    "en",
+    "ar",
+  );
+
+  assert.equal(story.elements.length, 2);
+  assert.equal(story.elements[0]?.type, "ERROR");
+  assert.equal(story.elements[0]?.errorKind, "parse");
+  assert.match(story.elements[0]?.text ?? "", /no tappable options/);
+  assert.equal(story.elements[1]?.type, "LINE");
+});
+
+test("POINT_TO_PHRASE with marked options parses into a question", () => {
+  const story = parseStory(
+    `[POINT_TO_PHRASE]
+> Choose the option that means "help."
+Speaker414: (تَمَام) (أَحْتَاج~إِلَى) (+مُسَاعِدَة)
+~             perfect     I~need      help`,
+    "en",
+    "ar",
+  );
+
+  assert.equal(story.elements.length, 2);
+  assert.equal(story.elements[0]?.type, "LINE");
+  assert.equal(story.elements[1]?.type, "POINT_TO_PHRASE");
+  assert.equal(story.elements[1]?.correctAnswerIndex, 2);
+  assert.equal(
+    story.elements[1]?.transcriptParts.filter((part) => part.selectable).length,
+    3,
+  );
+});
+
 test("editor block anchors use the block header line and keep the text line active", () => {
   const story = parseStory(`[DATA]
 fromLanguageName=Good Morning

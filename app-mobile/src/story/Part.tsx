@@ -359,20 +359,26 @@ function PointToPhrasePart({
   active,
   settings,
 }: PartProps) {
+  const line = parts[0] as StoryElementLine;
+  const question = parts[1] as StoryElementPointToPhrase | undefined;
+  // Broken story data can produce a question with nothing to tap; treat it
+  // like a plain line so the reader is not stuck without a correct answer.
+  const skipQuestion =
+    settings.hideQuestions ||
+    !question?.transcriptParts?.some((part) => part.selectable);
+
   React.useEffect(() => {
     if (!active) return;
-    if (settings.hideQuestions) {
+    if (skipQuestion) {
       setButtonStatus("continue");
       return;
     }
     if (partProgress === 0) setButtonStatus("idle");
-  }, [active, partProgress, setButtonStatus, settings.hideQuestions]);
+  }, [active, partProgress, setButtonStatus, skipQuestion]);
 
   const showQuestion = active && partProgress === 1;
-  const line = parts[0] as StoryElementLine;
-  const question = parts[1] as StoryElementPointToPhrase;
 
-  if (settings.hideQuestions) {
+  if (skipQuestion) {
     return (
       <FadeIn>
         <TextLine
@@ -403,7 +409,7 @@ function PointToPhrasePart({
           />
         </FadeIn>
       )}
-      {showQuestion && (
+      {showQuestion && question && (
         <FadeIn>
           <PointToPhraseQuestion
             element={question}

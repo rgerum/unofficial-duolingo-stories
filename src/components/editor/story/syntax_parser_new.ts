@@ -1135,6 +1135,25 @@ function processBlockPointToPhrase(
     data.text ?? "",
   );
 
+  const hasSelectablePart =
+    Array.isArray(transcriptParts) &&
+    transcriptParts.some((part) => part.selectable);
+  if (!hasSelectablePart) {
+    pushStoryErrorData(story, {
+      message:
+        "The [POINT_TO_PHRASE] line has no tappable options. Wrap each option in parentheses and mark the correct one with a plus, e.g. (word) (+correct word).",
+      errorKind: "parse",
+      sourceLine: data.text,
+      lineNumber: data.text_lineno,
+      editor: {
+        block_start_no: start_no,
+        start_no: start_no2,
+        end_no: line_iter.get_lineno(),
+        active_no: data.text_lineno,
+      },
+    });
+  }
+
   story.elements.push({
     type: "LINE",
     hideRangesForChallenge: data_text.hideRanges,
@@ -1151,19 +1170,21 @@ function processBlockPointToPhrase(
       active_no: start_no1,
     },
   } as StoryElementLine);
-  story.elements.push({
-    type: "POINT_TO_PHRASE",
-    correctAnswerIndex: correctAnswerIndex,
-    transcriptParts: transcriptParts,
-    question: question_data_text.content,
-    trackingProperties: {
-      line_index: story.meta.line_index,
-      challenge_type: "point-to-phrase",
-    },
-    lang_question: lang || story_languages.from_language,
-    lang: story_languages.learning_language,
-    editor: { start_no: start_no2, end_no: line_iter.get_lineno() },
-  } as StoryElementPointToPhrase);
+  if (hasSelectablePart) {
+    story.elements.push({
+      type: "POINT_TO_PHRASE",
+      correctAnswerIndex: correctAnswerIndex,
+      transcriptParts: transcriptParts,
+      question: question_data_text.content,
+      trackingProperties: {
+        line_index: story.meta.line_index,
+        challenge_type: "point-to-phrase",
+      },
+      lang_question: lang || story_languages.from_language,
+      lang: story_languages.learning_language,
+      editor: { start_no: start_no2, end_no: line_iter.get_lineno() },
+    } as StoryElementPointToPhrase);
+  }
   story.meta.line_index += 1;
 }
 
