@@ -556,7 +556,7 @@ function get_avatar(
   return {
     characterId: id2,
     avatarUrl: override?.link || avatar?.link,
-    characterName: override?.name || avatar?.name,
+    characterName: override?.name || avatar?.name || `Speaker${id}`,
   };
 }
 

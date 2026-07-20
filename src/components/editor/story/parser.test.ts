@@ -447,6 +447,30 @@ Speaker6: Waarom niet?`,
   assert.equal(meta.cast["6"]?.speaker, "nl-BE-Wavenet-B");
 });
 
+test("LINE names unmapped explicit speakers by speaker id", () => {
+  const [story] = processStoryFile(
+    `[LINE]
+Speaker999: Hello there`,
+    0,
+    testAvatars,
+    {
+      learning_language: "ja",
+      from_language: "en",
+    },
+    "",
+  );
+
+  const line = story.elements[0];
+  assert.equal(line?.type, "LINE");
+  if (line?.type !== "LINE") return;
+
+  assert.equal(line.line.type, "CHARACTER");
+  if (line.line.type !== "CHARACTER") return;
+
+  assert.equal(line.line.characterId, 999);
+  assert.equal(line.line.characterName, "Speaker999");
+});
+
 test("curly brace TTS override keeps the full tilde-connected phrase", () => {
   const [story] = processStoryFile(
     `[DATA]
