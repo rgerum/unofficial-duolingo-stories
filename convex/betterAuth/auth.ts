@@ -181,6 +181,11 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     },
     secret: process.env.BETTER_AUTH_SECRET,
     socialProviders: getSocialProviders(),
+    account: {
+      accountLinking: {
+        allowDifferentEmails: true,
+      },
+    },
     database: authComponent.adapter(ctx),
     databaseHooks: {
       account: {
