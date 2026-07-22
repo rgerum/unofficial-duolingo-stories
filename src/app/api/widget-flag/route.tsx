@@ -52,7 +52,9 @@ const FLAG_ORDER = [
   "la",
   "gd",
   "fi",
-  "yi",
+  // The sprite's Yiddish cell is misaligned; yi uses the custom
+  // flag_yi.svg instead. "yi_old" keeps the later sprite indices intact.
+  "yi_old",
   "ht",
   "tl",
   "zu",
