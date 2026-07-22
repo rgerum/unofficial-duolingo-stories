@@ -70,7 +70,10 @@ function getFlagId(iso: string | null, flag: number | null): number {
     if (found >= 0) index = found;
   }
   if (index === 0 && iso !== "en") {
-    index = flag && flag > 0 && flag < 48 ? flag : 37; // "world" fallback
+    index =
+      flag !== null && Number.isInteger(flag) && flag > 0 && flag < 48
+        ? flag
+        : 37; // "world" fallback
   }
   return index;
 }
