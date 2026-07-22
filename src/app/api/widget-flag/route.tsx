@@ -120,6 +120,8 @@ export async function GET(request: NextRequest) {
       Number.isFinite(flagNumber) ? (flagNumber as number) : null,
     );
 
+    // Satori ignores backgroundPosition offsets, so crop the sprite by
+    // rendering it as a full-height <img> shifted up inside a clipped box.
     return new ImageResponse(
       <div
         style={{
@@ -128,12 +130,22 @@ export async function GET(request: NextRequest) {
           height: CELL_H,
           borderRadius: RADIUS,
           overflow: "hidden",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: `0px -${CELL_H * flagOffset}px`,
-          backgroundSize: `${CELL_W}px ${SPRITE_TOTAL_H}px`,
-          backgroundImage: `url(${SPRITE_URL})`,
+          position: "relative",
         }}
-      />,
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={SPRITE_URL}
+          width={CELL_W}
+          height={SPRITE_TOTAL_H}
+          style={{
+            position: "absolute",
+            left: 0,
+            top: -CELL_H * flagOffset,
+          }}
+          alt=""
+        />
+      </div>,
       { width: CELL_W, height: CELL_H },
     );
   } catch {
