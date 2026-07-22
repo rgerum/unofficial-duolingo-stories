@@ -401,6 +401,28 @@ describe("course feedback stats", () => {
 
     await asContributor.mutation(api.storyFeedback.updateStoryFeedbackStatus, {
       reportId,
+      status: "not_relevant",
+    });
+
+    await t.run(async (ctx) => {
+      const [stats] = await ctx.db.query("course_feedback_stats").collect();
+      expect(stats.openCount).toBe(0);
+      expect(stats.reviewedCount).toBe(0);
+    });
+
+    await asContributor.mutation(api.storyFeedback.updateStoryFeedbackStatus, {
+      reportId,
+      status: "spam",
+    });
+
+    await t.run(async (ctx) => {
+      const [stats] = await ctx.db.query("course_feedback_stats").collect();
+      expect(stats.openCount).toBe(0);
+      expect(stats.reviewedCount).toBe(0);
+    });
+
+    await asContributor.mutation(api.storyFeedback.updateStoryFeedbackStatus, {
+      reportId,
       status: "resolved",
     });
 

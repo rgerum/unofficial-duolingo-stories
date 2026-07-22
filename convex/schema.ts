@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { feedbackStatusValidator } from "./storyFeedbackStatus";
 
 const courseContributorDetailsValidator = v.object({
   legacyUserId: v.number(),
@@ -259,11 +260,7 @@ export default defineSchema({
     userId: v.union(v.string(), v.null()),
     userName: v.union(v.string(), v.null()),
     userEmail: v.union(v.string(), v.null()),
-    status: v.union(
-      v.literal("open"),
-      v.literal("reviewed"),
-      v.literal("resolved"),
-    ),
+    status: feedbackStatusValidator,
     createdAt: v.number(),
   })
     .index("by_story_id", ["storyId"])

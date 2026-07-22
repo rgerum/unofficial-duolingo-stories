@@ -6,18 +6,17 @@ import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx } from "./_generated/server";
 import { requireAdmin, requireContributorOrAdmin } from "./lib/authorization";
+import {
+  type FeedbackStatus,
+  feedbackStatuses,
+  feedbackStatusValidator,
+} from "./storyFeedbackStatus";
 
 const feedbackCategoryValidator = v.union(
   v.literal("Text"),
   v.literal("Translation hints"),
   v.literal("Audio"),
   v.literal("Other"),
-);
-
-const feedbackStatusValidator = v.union(
-  v.literal("open"),
-  v.literal("reviewed"),
-  v.literal("resolved"),
 );
 
 const feedbackSourceValidator = v.union(
@@ -46,7 +45,6 @@ const feedbackReportValidator = v.object({
   createdAt: v.number(),
 });
 
-type FeedbackStatus = "open" | "reviewed" | "resolved";
 type CourseDoc = Doc<"courses">;
 type StoryContentDoc = Doc<"story_content">;
 
@@ -508,7 +506,7 @@ export const recomputeCourseFeedbackStats = mutation({
         const legacyStoryId = story.legacyId;
         if (legacyStoryId === undefined) continue;
 
-        for (const status of ["open", "reviewed", "resolved"] as const) {
+        for (const status of feedbackStatuses) {
           const reports = ctx.db
             .query("story_feedback_reports")
             .withIndex("by_story_and_status", (q) =>
