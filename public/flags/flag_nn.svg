@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="82" height="66" y="1122" viewBox="0 0 82 66"><title>no copy</title><g fill="none" fill-rule="evenodd"><path fill="#ff4b4b" fill-rule="nonzero" stroke="#fff" stroke-width="4" d="M63.437 4H18.563c-4.935 0-6.696.585-8.493 1.545a10.9 10.9 0 0 0-4.525 4.525C4.585 11.867 4 13.628 4 18.563v28.874c0 4.935.585 6.696 1.545 8.493a10.9 10.9 0 0 0 4.525 4.525c1.797.96 3.558 1.545 8.493 1.545h44.874c4.935 0 6.696-.585 8.493-1.545a10.9 10.9 0 0 0 4.525-4.525c.96-1.797 1.545-3.558 1.545-8.493V18.563c0-4.935-.585-6.696-1.545-8.493a10.9 10.9 0 0 0-4.525-4.525C70.133 4.585 68.372 4 63.437 4Z"/><path fill="#fff" fill-rule="nonzero" d="M21 6h14v20h41v14H35v20H21V40H6V26h15z"/><path fill="#1cb0f6" d="M32 29h44v8H32v23h-8V37H6v-8h18V6h8z"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="78" height="62">
+<rect x="4" y="4" width="70" height="54" fill="#ff4b4b"/>
+<path fill="#fff" d="M 19,4 H 33 V 24 H 74 V 38 H 33 V 58 H 19 V 38 H 4 V 24 h 15 z"/>
+<path fill="#1cb0f6" d="m 30,27 h 44 v 8 H 30 V 58 H 22 V 35 H 4 V 27 H 22 V 4 h 8 z"/>
+<rect x="2" y="2" width="74" height="58" rx="10" fill="none" stroke="#fff" stroke-width="4"/>
+</svg>
