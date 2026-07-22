@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Duostories – Widget Mockups Round 3 (rect flag, numbers inline, "Next story")</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Nunito", -apple-system, sans-serif;
+    background: linear-gradient(160deg, #0b1a2e 0%, #143c54 45%, #0e2b3d 100%);
+    color: #f1f7fb;
+    padding: 48px 56px;
+  }
+  h1 { font-weight: 900; font-size: 30px; margin-bottom: 6px; }
+  .subtitle { color: #9fb3c8; margin-bottom: 40px; font-size: 15px; }
+  .concept { display: grid; grid-template-columns: 300px 1fr; gap: 36px; margin-bottom: 60px; align-items: start; }
+  .concept-info h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .concept-info .tag { display:inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; background: rgba(88,204,2,.18); color:#8fe35a; border-radius: 6px; padding: 3px 8px; margin-bottom: 10px;}
+  .concept-info p { font-size: 13.5px; line-height: 1.55; color: #c3d2de; margin-bottom: 8px; }
+  .widgets { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-end; }
+  .widget-wrap { text-align: center; }
+  .widget-wrap .label { margin-top: 10px; font-size: 12px; color: #8aa0b4; }
+
+  .w { border-radius: 44px; overflow: hidden; position: relative; box-shadow: 0 18px 40px rgba(0,0,0,.45); background: #1cb0f6; color: #fff; }
+  .w.small  { width: 340px; height: 340px; }
+  .w.medium { width: 728px; height: 340px; }
+  .w.green { background: #58cc02; }
+
+  .deco { position:absolute; width: 420px; height: 420px; border-radius: 50%; background: rgba(255,255,255,.13); right: -130px; top: -110px; }
+  .deco2 { position:absolute; width: 230px; height: 230px; border-radius: 50%; background: rgba(255,255,255,.09); left: -80px; bottom: -110px; }
+
+  .icon { filter: drop-shadow(0 8px 16px rgba(0,0,0,.25)); z-index: 1; }
+
+  /* Duolingo-style rect flag: 78x62 with big rounded corners */
+  .flag { width: 44px; height: 35px; border-radius: 9px; background: #c8102e; position: relative; overflow: hidden; flex: none; box-shadow: 0 2px 5px rgba(0,0,0,.2); }
+  .flag::before { content:""; position:absolute; left: 13px; top: 0; width: 7px; height: 100%; background: #fff; }
+  .flag::after  { content:""; position:absolute; top: 14px; left: 0; width: 100%; height: 7px; background: #fff; }
+  .flag.sm { width: 36px; height: 29px; border-radius: 7px; }
+  .flag.sm::before { left: 10.5px; width: 6px; }
+  .flag.sm::after { top: 11.5px; height: 6px; }
+
+  .lang-row { display: flex; align-items: center; gap: 12px; z-index: 1; }
+  .lang { font-size: 24px; font-weight: 900; }
+  .count { font-size: 24px; font-weight: 700; opacity: .75; }
+  .kicker { font-size: 19px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; opacity: .8; z-index: 1; }
+  .title { font-weight: 900; line-height: 1.1; z-index: 1; }
+
+  /* J: language header on top, kicker above title */
+  .j-med { position: relative; height: 100%; display: flex; align-items: center; padding: 34px 44px; gap: 16px; }
+  .j-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px; z-index: 1; align-items: flex-start; }
+  .j-med .title { font-size: 47px; }
+  .j-med .icon { width: 205px; height: 205px; flex: none; }
+  .j-med .kicker { margin-bottom: -8px; }
+  .j-sm { position: relative; height: 100%; display: flex; flex-direction: column; padding: 26px 28px; gap: 8px; }
+  .j-sm .lang-row { gap: 9px; }
+  .j-sm .lang, .j-sm .count { font-size: 19px; }
+  .j-sm .icon { width: 142px; height: 142px; align-self: center; margin: 2px 0; }
+  .j-sm .title { font-size: 29px; margin-top: auto; }
+
+  /* K: kicker on top, language row under the title */
+  .k-med { position: relative; height: 100%; display: flex; align-items: center; padding: 34px 44px; gap: 16px; }
+  .k-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; z-index: 1; align-items: flex-start; }
+  .k-med .title { font-size: 47px; margin-top: -4px; }
+  .k-med .icon { width: 205px; height: 205px; flex: none; }
+  .k-sm { position: relative; height: 100%; display: flex; flex-direction: column; padding: 26px 28px; gap: 8px; }
+  .k-sm .kicker { font-size: 16px; }
+  .k-sm .icon { width: 142px; height: 142px; align-self: center; margin: 2px 0; }
+  .k-sm .title { font-size: 29px; margin-top: auto; }
+  .k-sm .lang-row { gap: 9px; }
+  .k-sm .lang, .k-sm .count { font-size: 18px; }
+</style>
+</head>
+<body>
+<h1>Round 3 — rect flag · numbers inline · “Next story”</h1>
+<p class="subtitle">Duolingo-style rounded-rect flag (78×62 shape, same as the app), no bar, no ring. Progress as plain numbers next to the language name. Two arrangements of the same ingredients.</p>
+
+<!-- =============== J =============== -->
+<div class="concept">
+  <div class="concept-info">
+    <div class="tag">Variant J</div>
+    <h2>Language header on top</h2>
+    <p>Top row: flag + <b>Danish</b> · 23/279, one baseline. “NEXT STORY” as a small kicker directly above the title.</p>
+    <p>Reads top-down like a card header → label → headline.</p>
+  </div>
+  <div class="widgets">
+    <div class="widget-wrap">
+      <div class="w small">
+        <div class="deco"></div>
+        <div class="j-sm">
+          <div class="lang-row"><span class="flag sm"></span><span class="lang">Danish</span><span class="count">23/279</span></div>
+          <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          <div class="title">Good Morning</div>
+        </div>
+      </div>
+      <div class="label">Small</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium">
+        <div class="deco"></div><div class="deco2"></div>
+        <div class="j-med">
+          <div class="j-text">
+            <div class="lang-row"><span class="flag"></span><span class="lang">Danish</span><span class="count">23/279</span></div>
+            <div class="kicker">Next story</div>
+            <div class="title">Good Morning</div>
+          </div>
+          <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+        </div>
+      </div>
+      <div class="label">Medium</div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== K =============== -->
+<div class="concept">
+  <div class="concept-info">
+    <div class="tag">Variant K</div>
+    <h2>“Next story” on top</h2>
+    <p>Kicker first, headline in the middle, flag + language + numbers as the footer row. The title gets the most prominent spot; course info reads as metadata.</p>
+    <p>Green version to show the per-story-set color idea.</p>
+  </div>
+  <div class="widgets">
+    <div class="widget-wrap">
+      <div class="w small">
+        <div class="deco"></div>
+        <div class="k-sm">
+          <div class="kicker">Next story</div>
+          <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          <div class="title">Good Morning</div>
+          <div class="lang-row"><span class="flag sm"></span><span class="lang">Danish</span><span class="count">23/279</span></div>
+        </div>
+      </div>
+      <div class="label">Small</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium">
+        <div class="deco"></div><div class="deco2"></div>
+        <div class="k-med">
+          <div class="k-text">
+            <div class="kicker">Next story</div>
+            <div class="title">Good Morning</div>
+            <div class="lang-row"><span class="flag"></span><span class="lang">Danish</span><span class="count">23/279</span></div>
+          </div>
+          <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+        </div>
+      </div>
+      <div class="label">Medium</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium green">
+        <div class="deco"></div><div class="deco2"></div>
+        <div class="k-med">
+          <div class="k-text">
+            <div class="kicker">Next story</div>
+            <div class="title">Good Morning</div>
+            <div class="lang-row"><span class="flag"></span><span class="lang">Danish</span><span class="count">23/279</span></div>
+          </div>
+          <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+        </div>
+      </div>
+      <div class="label">Medium · green</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

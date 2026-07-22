@@ -350,6 +350,11 @@ const localizationEntryValidator = v.object({
 const publicCoursePageValidator = v.union(
   v.object({
     ...courseListItemValidator.fields,
+    // Flag identifiers for the learning language, used by the mobile
+    // next-story widget (which renders the flag server-side as a PNG).
+    learning_language_short: v.string(),
+    learning_language_flag: v.optional(v.union(v.number(), v.string())),
+    learning_language_flag_file: v.optional(v.string()),
     contributors: v.array(courseContributorValidator),
     contributors_past: v.array(courseContributorValidator),
     stories: v.array(publicStoryListItemValidator),
@@ -502,6 +507,9 @@ export const getPublicCoursePageData = query({
       learning_language: legacyLearningLanguageId,
       learningLanguageId: course.learningLanguageId as Id<"languages">,
       learning_language_name: learningLanguageName,
+      learning_language_short: learningLanguage?.short ?? "",
+      learning_language_flag: learningLanguage?.flag,
+      learning_language_flag_file: learningLanguage?.flag_file ?? undefined,
       contributors: contributorLists.contributors,
       contributors_past: contributorLists.contributors_past,
       stories: mappedStories,

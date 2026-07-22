@@ -139,6 +139,9 @@ export default function StoryScreen() {
       completedStoryIds.add(story.id);
       void syncNextStoryWidget({
         courseName: course.name,
+        learningLanguageShort: course.learning_language_short,
+        flag: course.learning_language_flag,
+        flagFile: course.learning_language_flag_file,
         stories: course.stories as CourseStory[],
         doneStoryIds: completedStoryIds,
         listening: effectiveListening,

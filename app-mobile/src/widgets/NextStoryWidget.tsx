@@ -1,14 +1,37 @@
-import { Image, Link, Text, VStack } from "@expo/ui/swift-ui";
+import {
+  Circle,
+  HStack,
+  Image,
+  Link,
+  Text,
+  VStack,
+  ZStack,
+} from "@expo/ui/swift-ui";
 import {
   aspectRatio,
+  clipShape,
   containerBackground,
   font,
   foregroundStyle,
   frame,
   lineLimit,
+  multilineTextAlignment,
+  offset,
+  opacity,
   padding,
+  resizable,
+  shadow,
 } from "@expo/ui/swift-ui/modifiers";
 import { createWidget, type WidgetEnvironment } from "expo-widgets";
+
+// Color Block design (Variant K): full-bleed brand blue, white text, the
+// story character floating with a shadow, and a footer row with the course
+// flag + language + progress numbers. The flag is optional so the layout
+// still reads before the widget-flag endpoint is deployed.
+//
+// NOTE: expo-widgets extracts only this single "widget"-tagged function into
+// the widget runtime, so everything must stay inline — helper components or
+// module-scope references are not available inside the widget.
 
 export type NextStoryWidgetProps =
   | {
@@ -17,6 +40,7 @@ export type NextStoryWidgetProps =
       storyName: string;
       courseName: string;
       imagePath?: string;
+      flagPath?: string;
       listening: boolean;
       completedCount: number;
       totalCount: number;
@@ -30,33 +54,55 @@ function NextStoryWidget(
 ) {
   "widget";
 
-  const background = environment.colorScheme === "dark" ? "#131f22" : "#ffffff";
-  const text = environment.colorScheme === "dark" ? "#f7f7f7" : "#3c3c3c";
+  const BLUE = "#1cb0f6";
+  const WHITE = "#ffffff";
+  const SHADOW = "#00000040";
 
   if (props.state === "empty") {
     return (
       <Link destination="duostories:///add-course">
-        <VStack
-          alignment="leading"
-          spacing={8}
+        <ZStack
+          alignment="topTrailing"
           modifiers={[
-            frame({ maxWidth: 1_000, maxHeight: 1_000, alignment: "center" }),
-            padding({ all: 16 }),
-            containerBackground(background, "widget"),
+            frame({ maxWidth: 1_000, maxHeight: 1_000 }),
+            containerBackground(BLUE, "widget"),
           ]}
         >
-          <Text
+          <Circle
             modifiers={[
-              font({ size: 18, weight: "bold" }),
-              foregroundStyle(text),
+              frame({ width: 260, height: 260 }),
+              foregroundStyle(WHITE),
+              opacity(0.13),
+              offset({ x: 90, y: -110 }),
+            ]}
+          />
+          <VStack
+            alignment="leading"
+            spacing={8}
+            modifiers={[
+              frame({ maxWidth: 1_000, maxHeight: 1_000, alignment: "center" }),
+              padding({ all: 20 }),
             ]}
           >
-            Pick a course
-          </Text>
-          <Text modifiers={[font({ size: 14 }), foregroundStyle("#777777")]}>
-            Choose a language to get your next story.
-          </Text>
-        </VStack>
+            <Text
+              modifiers={[
+                font({ size: 20, weight: "bold" }),
+                foregroundStyle(WHITE),
+              ]}
+            >
+              Pick a course
+            </Text>
+            <Text
+              modifiers={[
+                font({ size: 14 }),
+                foregroundStyle(WHITE),
+                opacity(0.85),
+              ]}
+            >
+              Choose a language to get your next story.
+            </Text>
+          </VStack>
+        </ZStack>
       </Link>
     );
   }
@@ -64,113 +110,232 @@ function NextStoryWidget(
   if (props.state === "complete") {
     return (
       <Link destination="duostories:///">
-        <VStack
-          alignment="leading"
-          spacing={8}
+        <ZStack
+          alignment="topTrailing"
           modifiers={[
-            frame({ maxWidth: 1_000, maxHeight: 1_000, alignment: "center" }),
-            padding({ all: 16 }),
-            containerBackground(background, "widget"),
+            frame({ maxWidth: 1_000, maxHeight: 1_000 }),
+            containerBackground(BLUE, "widget"),
           ]}
         >
-          <Text
+          <Circle
             modifiers={[
-              font({ size: 18, weight: "bold" }),
-              foregroundStyle(text),
+              frame({ width: 260, height: 260 }),
+              foregroundStyle(WHITE),
+              opacity(0.13),
+              offset({ x: 90, y: -110 }),
+            ]}
+          />
+          <VStack
+            alignment="leading"
+            spacing={8}
+            modifiers={[
+              frame({ maxWidth: 1_000, maxHeight: 1_000, alignment: "center" }),
+              padding({ all: 20 }),
             ]}
           >
-            All caught up!
-          </Text>
-          <Text
-            modifiers={[
-              font({ size: 14 }),
-              foregroundStyle("#777777"),
-              lineLimit(2),
-            ]}
-          >
-            You finished every story in {props.courseName}.
-          </Text>
-        </VStack>
+            <Text
+              modifiers={[
+                font({ size: 20, weight: "bold" }),
+                foregroundStyle(WHITE),
+              ]}
+            >
+              All caught up!
+            </Text>
+            <Text
+              modifiers={[
+                font({ size: 14 }),
+                foregroundStyle(WHITE),
+                opacity(0.85),
+                lineLimit(2),
+              ]}
+            >
+              You finished every story in {props.courseName}.
+            </Text>
+          </VStack>
+        </ZStack>
       </Link>
     );
   }
 
   const destination = `duostories:///story/${props.storyId}?listening=${props.listening ? "1" : "0"}`;
+
   if (environment.widgetFamily === "systemSmall") {
     return (
       <Link destination={destination}>
-        <VStack
-          alignment="leading"
-          spacing={6}
+        <ZStack
+          alignment="topTrailing"
           modifiers={[
             frame({ maxWidth: 1_000, maxHeight: 1_000 }),
-            padding({ all: 10 }),
-            containerBackground(background, "widget"),
+            containerBackground(BLUE, "widget"),
           ]}
         >
-          {props.imagePath ? (
-            <Image
-              uiImage={props.imagePath}
-              modifiers={[
-                frame({ maxWidth: 1_000 }),
-                aspectRatio({ ratio: 1.9, contentMode: "fill" }),
-              ]}
-            />
-          ) : null}
-          <Text
+          <Circle
             modifiers={[
-              font({ size: 14, weight: "bold" }),
-              foregroundStyle(text),
-              lineLimit(2),
+              frame({ width: 260, height: 260 }),
+              foregroundStyle(WHITE),
+              opacity(0.13),
+              offset({ x: 90, y: -110 }),
+            ]}
+          />
+          <VStack
+            alignment="center"
+            spacing={5}
+            modifiers={[
+              frame({ maxWidth: 1_000, maxHeight: 1_000 }),
+              padding({ all: 14 }),
             ]}
           >
-            {props.storyName}
-          </Text>
-        </VStack>
+            <Text
+              modifiers={[
+                font({ size: 11, weight: "heavy" }),
+                foregroundStyle(WHITE),
+                opacity(0.85),
+              ]}
+            >
+              NEXT STORY
+            </Text>
+            {props.imagePath ? (
+              <Image
+                uiImage={props.imagePath}
+                modifiers={[
+                  resizable(),
+                  aspectRatio({ contentMode: "fit" }),
+                  frame({ width: 56, height: 52 }),
+                  shadow({ radius: 6, y: 4, color: SHADOW }),
+                ]}
+              />
+            ) : null}
+            <Text
+              modifiers={[
+                font({ size: 15, weight: "bold" }),
+                foregroundStyle(WHITE),
+                multilineTextAlignment("center"),
+                lineLimit(2),
+              ]}
+            >
+              {props.storyName}
+            </Text>
+            <HStack spacing={6}>
+              {props.flagPath ? (
+                <Image
+                  uiImage={props.flagPath}
+                  modifiers={[
+                    resizable(),
+                    frame({ width: 20, height: 16 }),
+                    clipShape("roundedRectangle", 4),
+                  ]}
+                />
+              ) : null}
+              <Text
+                modifiers={[
+                  font({ size: 13, weight: "heavy" }),
+                  foregroundStyle(WHITE),
+                ]}
+              >
+                {props.courseName}
+              </Text>
+              <Text
+                modifiers={[
+                  font({ size: 13, weight: "semibold" }),
+                  foregroundStyle(WHITE),
+                  opacity(0.75),
+                ]}
+              >
+                {props.completedCount}/{props.totalCount}
+              </Text>
+            </HStack>
+          </VStack>
+        </ZStack>
       </Link>
     );
   }
 
   return (
     <Link destination={destination}>
-      <VStack
-        alignment="leading"
-        spacing={7}
+      <ZStack
+        alignment="topTrailing"
         modifiers={[
           frame({ maxWidth: 1_000, maxHeight: 1_000 }),
-          padding({ all: 12 }),
-          containerBackground(background, "widget"),
+          containerBackground(BLUE, "widget"),
         ]}
       >
-        {props.imagePath ? (
-          <Image
-            uiImage={props.imagePath}
-            modifiers={[
-              frame({ maxWidth: 1_000 }),
-              aspectRatio({ ratio: 3.1, contentMode: "fill" }),
-            ]}
-          />
-        ) : null}
-        <Text
+        <Circle
           modifiers={[
-            font({ size: 16, weight: "bold" }),
-            foregroundStyle(text),
-            lineLimit(1),
+            frame({ width: 260, height: 260 }),
+            foregroundStyle(WHITE),
+            opacity(0.13),
+            offset({ x: 90, y: -110 }),
+          ]}
+        />
+        <HStack
+          spacing={12}
+          modifiers={[
+            frame({ maxWidth: 1_000, maxHeight: 1_000 }),
+            padding({ leading: 20, trailing: 12, top: 16, bottom: 16 }),
           ]}
         >
-          {props.storyName}
-        </Text>
-        <Text
-          modifiers={[
-            font({ size: 12 }),
-            foregroundStyle("#777777"),
-            lineLimit(1),
-          ]}
-        >
-          {props.courseName} · {props.completedCount}/{props.totalCount}{" "}
-          complete
-        </Text>
-      </VStack>
+          <VStack alignment="leading" spacing={10}>
+            <Text
+              modifiers={[
+                font({ size: 12, weight: "heavy" }),
+                foregroundStyle(WHITE),
+                opacity(0.85),
+              ]}
+            >
+              NEXT STORY
+            </Text>
+            <Text
+              modifiers={[
+                font({ size: 22, weight: "heavy" }),
+                foregroundStyle(WHITE),
+                lineLimit(2),
+              ]}
+            >
+              {props.storyName}
+            </Text>
+            <HStack spacing={8}>
+              {props.flagPath ? (
+                <Image
+                  uiImage={props.flagPath}
+                  modifiers={[
+                    resizable(),
+                    frame({ width: 26, height: 21 }),
+                    clipShape("roundedRectangle", 5),
+                  ]}
+                />
+              ) : null}
+              <Text
+                modifiers={[
+                  font({ size: 15, weight: "heavy" }),
+                  foregroundStyle(WHITE),
+                ]}
+              >
+                {props.courseName}
+              </Text>
+              <Text
+                modifiers={[
+                  font({ size: 15, weight: "semibold" }),
+                  foregroundStyle(WHITE),
+                  opacity(0.75),
+                ]}
+              >
+                {props.completedCount}/{props.totalCount}
+              </Text>
+            </HStack>
+          </VStack>
+          {props.imagePath ? (
+            <Image
+              uiImage={props.imagePath}
+              modifiers={[
+                resizable(),
+                aspectRatio({ contentMode: "fit" }),
+                frame({ width: 104, height: 96 }),
+                shadow({ radius: 8, y: 6, color: SHADOW }),
+              ]}
+            />
+          ) : null}
+        </HStack>
+      </ZStack>
     </Link>
   );
 }

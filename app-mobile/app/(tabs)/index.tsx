@@ -196,6 +196,9 @@ export default function LearnTab() {
       : localDoneSet;
     void syncNextStoryWidget({
       courseName: course.name,
+      learningLanguageShort: course.learning_language_short,
+      flag: course.learning_language_flag,
+      flagFile: course.learning_language_flag_file,
       stories,
       doneStoryIds,
       listening: effectiveListening,
