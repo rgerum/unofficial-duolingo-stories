@@ -49,7 +49,7 @@ function get_flag_id(iso: string | null): number {
     "la", //41
     "gd", //42
     "fi", //43
-    "yi", //44
+    "yi_old", //44
     "ht", //45
     "tl", //46
     "zu", //47

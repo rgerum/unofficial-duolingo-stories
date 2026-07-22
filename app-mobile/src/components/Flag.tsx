@@ -60,7 +60,7 @@ const ORDER = [
   "la",
   "gd",
   "fi",
-  "yi",
+  "yi_old",
   "ht",
   "tl",
   "zu",

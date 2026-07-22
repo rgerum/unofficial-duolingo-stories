@@ -59,7 +59,7 @@ export default function Flag(props: {
     "la",
     "gd",
     "fi",
-    "yi",
+    "yi_old",
     "ht",
     "tl",
     "zu",
