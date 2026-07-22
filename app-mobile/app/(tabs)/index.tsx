@@ -32,8 +32,14 @@ import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
 import { type ThemeColors, useTheme } from "../../src/theme";
 import { useTabContentInsets } from "../../src/useTabContentInsets";
+import {
+  clearNextStoryWidget,
+  syncNextStoryWidget,
+} from "../../src/widgets/syncNextStoryWidget";
+import type { WidgetStory } from "../../src/widgets/nextStory";
 
-type StorySet = { setId: number; stories: StoryListItem[] };
+type CourseStory = StoryListItem & WidgetStory;
+type StorySet = { setId: number; stories: CourseStory[] };
 
 /** Learn tab: the current course's stories, grouped by set. */
 export default function LearnTab() {
@@ -66,8 +72,7 @@ export default function LearnTab() {
     [doneMap],
   );
   const stories = React.useMemo(
-    () =>
-      course && course !== null ? (course.stories as StoryListItem[]) : [],
+    () => (course && course !== null ? (course.stories as CourseStory[]) : []),
     [course],
   );
   const noAudioCourse = hasNoAudioCourseTag(
@@ -173,6 +178,38 @@ export default function LearnTab() {
     localProgressLoaded,
     reviewCompletedStoryCount,
     session?.session,
+  ]);
+
+  React.useEffect(() => {
+    if (!courseShort) {
+      clearNextStoryWidget();
+      return;
+    }
+    if (course === null) {
+      clearNextStoryWidget();
+      return;
+    }
+    if (!course || !localProgressLoaded || isServerProgressPending) return;
+
+    const doneStoryIds = session?.session
+      ? (serverDoneSet ?? new Set<number>())
+      : localDoneSet;
+    void syncNextStoryWidget({
+      courseName: course.name,
+      stories,
+      doneStoryIds,
+      listening: effectiveListening,
+    });
+  }, [
+    course,
+    courseShort,
+    effectiveListening,
+    isServerProgressPending,
+    localDoneSet,
+    localProgressLoaded,
+    serverDoneSet,
+    session?.session,
+    stories,
   ]);
 
   if (!ready) return <Centered spinner styles={styles} colors={colors} />;

@@ -85,6 +85,22 @@
             "backgroundColor": "#131f22"
           }
         }
+      ],
+      [
+        "expo-widgets",
+        {
+          "widgets": [
+            {
+              "name": "NextStoryWidget",
+              "displayName": "Next Duostory",
+              "description": "Open the next unfinished story in your current course.",
+              "ios": {
+                "contentMarginsDisabled": true,
+                "supportedFamilies": ["systemSmall", "systemMedium"]
+              }
+            }
+          ]
+        }
       ]
     ],
     "extra": {

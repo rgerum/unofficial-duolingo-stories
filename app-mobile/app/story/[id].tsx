@@ -14,17 +14,13 @@ import { Reader } from "../../src/story/Reader";
 import { HintPopupHost } from "../../src/story/HintPopup";
 import { stopAudio } from "../../src/story/audio";
 import { Button } from "../../src/components/Button";
+import type { StoryListItem } from "../../src/components/StoryButton";
 import { Text } from "../../src/components/Text";
 import { type ThemeColors, useTheme } from "../../src/theme";
 import type { StoryData } from "../../src/story/types";
+import { syncNextStoryWidget } from "../../src/widgets/syncNextStoryWidget";
 
-type CourseStory = {
-  id: number;
-  name: string;
-  active: string;
-  set_id: number;
-  set_index: number;
-};
+type CourseStory = StoryListItem & { image: string };
 
 export default function StoryScreen() {
   const router = useRouter();
@@ -138,9 +134,21 @@ export default function StoryScreen() {
     if (session?.session) {
       void recordStoryDone({ legacyStoryId: story.id });
     }
+    if (course && doneIds) {
+      const completedStoryIds = new Set(doneIds);
+      completedStoryIds.add(story.id);
+      void syncNextStoryWidget({
+        courseName: course.name,
+        stories: course.stories as CourseStory[],
+        doneStoryIds: completedStoryIds,
+        listening: effectiveListening,
+      });
+    }
   }, [
     captureStoryEvent,
+    course,
     doneIds,
+    effectiveListening,
     localDoneIds,
     recordStoryDone,
     serverDoneIds,
