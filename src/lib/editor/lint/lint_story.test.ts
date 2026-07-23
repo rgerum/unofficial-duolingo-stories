@@ -51,12 +51,17 @@ function byRule(findings: LintFinding[], rule: string) {
   return findings.filter((finding) => finding.rule === rule);
 }
 
-test("flags a question without a marked correct answer", () => {
+test("flags a question without a marked correct answer as an error", () => {
   const findings = lint(`[MULTIPLE_CHOICE]
 > What happened?
 - Option one
 - Option two`);
-  assert.equal(byRule(findings, "missing-correct-answer").length, 1);
+  const missing = byRule(findings, "missing-correct-answer");
+  assert.equal(missing.length, 1);
+  assert.equal(missing[0].severity, "error");
+  // the first-option fallback is an internal emergency, not something to
+  // mention to contributors
+  assert.doesNotMatch(missing[0].message, /first/i);
 });
 
 test("accepts a question with exactly one correct answer", () => {
@@ -68,12 +73,14 @@ test("accepts a question with exactly one correct answer", () => {
   assert.equal(byRule(findings, "multiple-correct-answers").length, 0);
 });
 
-test("flags multiple correct answers", () => {
+test("flags multiple correct answers as an error", () => {
   const findings = lint(`[MULTIPLE_CHOICE]
 > What happened?
 + Option one
 + Option two`);
-  assert.equal(byRule(findings, "multiple-correct-answers").length, 1);
+  const multi = byRule(findings, "multiple-correct-answers");
+  assert.equal(multi.length, 1);
+  assert.equal(multi[0].severity, "error");
 });
 
 test("flags a question with a single option and duplicates", () => {
@@ -82,11 +89,25 @@ test("flags a question with a single option and duplicates", () => {
 + Option one`);
   assert.equal(byRule(single, "single-answer").length, 1);
 
-  const duplicate = lint(`[MULTIPLE_CHOICE]
+  // a duplicate of the correct answer makes the question unsolvable
+  const duplicateOfCorrect = lint(`[MULTIPLE_CHOICE]
 > What happened?
 + Option one
 - Option one`);
-  assert.equal(byRule(duplicate, "duplicate-answer").length, 1);
+  assert.equal(
+    byRule(duplicateOfCorrect, "duplicate-answer")[0].severity,
+    "error",
+  );
+
+  const duplicateWrong = lint(`[MULTIPLE_CHOICE]
+> What happened?
++ Right answer
+- Option one
+- Option one`);
+  assert.equal(
+    byRule(duplicateWrong, "duplicate-answer")[0].severity,
+    "warning",
+  );
 });
 
 test("flags translation hints that do not align with the text", () => {
@@ -187,7 +208,9 @@ Speaker414: Bonjour le monde.
 ~ hello the world
 + right
 - wrong`);
-  assert.equal(byRule(findings, "missing-hidden-range").length, 1);
+  const missing = byRule(findings, "missing-hidden-range");
+  assert.equal(missing.length, 1);
+  assert.equal(missing[0].severity, "error");
 
   const ok = lint(`[SELECT_PHRASE]
 > Choose the phrase
@@ -224,7 +247,10 @@ test("flags POINT_TO_PHRASE without a (+...) correct option", () => {
 > Which word?
 Speaker414: (Un) (deux) trois.
 ~ one two three`);
-  assert.equal(byRule(findings, "point-to-phrase-no-correct").length, 1);
+  const noCorrect = byRule(findings, "point-to-phrase-no-correct");
+  assert.equal(noCorrect.length, 1);
+  assert.equal(noCorrect[0].severity, "error");
+  assert.doesNotMatch(noCorrect[0].message, /first/i);
 });
 
 test("flags duplicate MATCH words", () => {
@@ -260,6 +286,7 @@ Speaker414: Bonjour [le monde].
   const noAudio = lint(text, { noAudio: true });
   const listening = byRule(noAudio, "listening-question-no-audio");
   assert.equal(listening.length, 2);
+  assert.equal(listening[0].severity, "error");
   assert.match(listening[0].message, /POINT_TO_PHRASE/);
   assert.match(listening[1].message, /CONTINUATION/);
 

@@ -7,7 +7,7 @@ import type { LintFinding, LintSeverity } from "./types";
  */
 
 /** Bump when rules change meaningfully, so old bot replies are attributable. */
-export const LINT_VERSION = 1;
+export const LINT_VERSION = 2;
 
 export type ReviewStoryInfo = {
   id: number;

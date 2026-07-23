@@ -7,8 +7,10 @@ export type LintSeverity = "error" | "warning" | "info";
  * any unfinished state. They are shown in the editor so contributors can fix
  * issues before asking for a review.
  *
- * - "error": will visibly misbehave for learners (e.g. a question without answers)
- * - "warning": almost certainly a mistake; fix before approval
+ * - "error": the story is broken or unsolvable for learners, or only works
+ *   because of an internal emergency fallback that contributors must not
+ *   rely on (e.g. a question without a marked correct answer)
+ * - "warning": almost certainly a mistake; degrades the story but it plays
  * - "info": stylistic or possibly intentional; worth a look
  */
 export type LintFinding = {

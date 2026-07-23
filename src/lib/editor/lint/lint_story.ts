@@ -175,7 +175,8 @@ function lintBlock(
   if (noAudio && LISTENING_BLOCKS[block.type]) {
     findings.push({
       rule: "listening-question-no-audio",
-      severity: "warning",
+      // a listening exercise without audio is unsolvable
+      severity: "error",
       message: `A [${block.type}] is a listening exercise and cannot be solved in a no-audio course. Convert it to [${LISTENING_BLOCKS[block.type]}] — see duostories.org/docs/story-publishing/without_tts.`,
       lineNumber: block.headerLineno,
     });
@@ -189,7 +190,9 @@ function lintBlock(
       if (open !== close) {
         findings.push({
           rule: "unmatched-bracket",
-          severity: "warning",
+          // in SELECT_PHRASE/CONTINUATION a broken bracket means nothing gets
+          // hidden, so the answer is visible to the learner
+          severity: HIDE_RANGE_BLOCKS.has(block.type) ? "error" : "warning",
           message:
             "Unmatched hidden-range bracket. A hidden range needs both '[' and ']'; write '[[' or ']]' for a literal bracket.",
           lineNumber: unit.main.lineno,
@@ -217,8 +220,8 @@ function lintBlock(
         if (open === 0 && close === 0) {
           findings.push({
             rule: "missing-hidden-range",
-            severity: "warning",
-            message: `A [${block.type}] line needs a [...] range around the part the learner has to ${block.type === "SELECT_PHRASE" ? "select" : "continue"}.`,
+            severity: "error",
+            message: `A [${block.type}] line needs a [...] range around the part the learner has to ${block.type === "SELECT_PHRASE" ? "select" : "continue"} — without it the answer is not hidden.`,
             lineNumber: dataUnit.main.lineno,
             sourceLine: dataUnit.main.text,
           });
@@ -247,31 +250,37 @@ function lintBlock(
     if (answerUnits.length > 0 && correct.length === 0) {
       findings.push({
         rule: "missing-correct-answer",
-        severity: "warning",
-        message:
-          "No answer is marked as correct with '+' — the first option will be treated as correct.",
+        severity: "error",
+        message: "No answer is marked as correct with '+'.",
         lineNumber: answerUnits[0].main.lineno,
         sourceLine: answerUnits[0].main.text,
       });
     } else if (correct.length > 1) {
       findings.push({
         rule: "multiple-correct-answers",
-        severity: "warning",
-        message: `${correct.length} answers are marked with '+' — only the last one counts.`,
+        severity: "error",
+        message: `${correct.length} answers are marked with '+' — mark exactly one answer as correct.`,
         lineNumber: correct[correct.length - 1].main.lineno,
       });
     }
+    const answerKey = (unit: TextUnit) =>
+      (unit.main.text.match(LINE_PREFIX_RE)?.[2] ?? "").toLowerCase().trim();
+    const correctKeys = new Set(correct.map(answerKey));
     const seen = new Map<string, RawLine>();
     for (const unit of answerUnits) {
-      const key = (unit.main.text.match(LINE_PREFIX_RE)?.[2] ?? "")
-        .toLowerCase()
-        .trim();
+      const key = answerKey(unit);
       if (!key) continue;
       if (seen.has(key)) {
+        // a duplicate of the correct answer makes the question unsolvable:
+        // the learner cannot tell the correct option from the identical
+        // wrong one
+        const involvesCorrect = correctKeys.has(key);
         findings.push({
           rule: "duplicate-answer",
-          severity: "warning",
-          message: "Duplicate answer option.",
+          severity: involvesCorrect ? "error" : "warning",
+          message: involvesCorrect
+            ? "Duplicate answer option — learners cannot tell the correct option from the identical wrong one."
+            : "Duplicate answer option.",
           lineNumber: unit.main.lineno,
           sourceLine: unit.main.text,
         });
@@ -309,16 +318,15 @@ function lintBlock(
         if (plus === 0) {
           findings.push({
             rule: "point-to-phrase-no-correct",
-            severity: "warning",
-            message:
-              "No option is marked as correct with (+...) — the first option will be treated as correct.",
+            severity: "error",
+            message: "No option is marked as correct with (+...).",
             lineNumber: dataUnit.main.lineno,
             sourceLine: dataUnit.main.text,
           });
         } else if (plus > 1) {
           findings.push({
             rule: "point-to-phrase-multiple-correct",
-            severity: "warning",
+            severity: "error",
             message:
               "Multiple options are marked with (+...) — only one can be correct.",
             lineNumber: dataUnit.main.lineno,
@@ -350,7 +358,7 @@ function lintBlock(
         if (seen.has(key)) {
           findings.push({
             rule: "duplicate-match-word",
-            severity: "warning",
+            severity: "error",
             message: `"${pair[side]}" appears twice in the [MATCH] pairs — learners cannot tell the pairs apart.`,
             lineNumber: pair.line.lineno,
             sourceLine: pair.line.text,
