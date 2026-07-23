@@ -15,6 +15,7 @@ import {
   foregroundStyle,
   frame,
   lineLimit,
+  minimumScaleFactor,
   multilineTextAlignment,
   offset,
   opacity,
@@ -57,6 +58,12 @@ function NextStoryWidget(
   const BLUE = "#1cb0f6";
   const WHITE = "#ffffff";
   const SHADOW = "#00000040";
+  // The decorative circle is a ZStack child, so its frame must stay within
+  // the widget bounds — a larger fixed frame inflates the ZStack's layout
+  // size and makes texts overflow the widget edges.
+  const isSmall = environment.widgetFamily === "systemSmall";
+  const decoSize = isSmall ? 120 : 150;
+  const decoOffset = isSmall ? { x: 45, y: -45 } : { x: 60, y: -55 };
 
   if (props.state === "empty") {
     return (
@@ -70,10 +77,10 @@ function NextStoryWidget(
         >
           <Circle
             modifiers={[
-              frame({ width: 260, height: 260 }),
+              frame({ width: decoSize, height: decoSize }),
               foregroundStyle(WHITE),
               opacity(0.13),
-              offset({ x: 90, y: -110 }),
+              offset(decoOffset),
             ]}
           />
           <VStack
@@ -119,10 +126,10 @@ function NextStoryWidget(
         >
           <Circle
             modifiers={[
-              frame({ width: 260, height: 260 }),
+              frame({ width: decoSize, height: decoSize }),
               foregroundStyle(WHITE),
               opacity(0.13),
-              offset({ x: 90, y: -110 }),
+              offset(decoOffset),
             ]}
           />
           <VStack
@@ -171,10 +178,10 @@ function NextStoryWidget(
         >
           <Circle
             modifiers={[
-              frame({ width: 260, height: 260 }),
+              frame({ width: decoSize, height: decoSize }),
               foregroundStyle(WHITE),
               opacity(0.13),
-              offset({ x: 90, y: -110 }),
+              offset(decoOffset),
             ]}
           />
           <VStack
@@ -230,6 +237,8 @@ function NextStoryWidget(
                 modifiers={[
                   font({ size: 13, weight: "heavy" }),
                   foregroundStyle(WHITE),
+                  lineLimit(1),
+                  minimumScaleFactor(0.7),
                 ]}
               >
                 {props.courseName}
@@ -239,6 +248,7 @@ function NextStoryWidget(
                   font({ size: 13, weight: "semibold" }),
                   foregroundStyle(WHITE),
                   opacity(0.75),
+                  lineLimit(1),
                 ]}
               >
                 {props.completedCount}/{props.totalCount}
@@ -261,10 +271,10 @@ function NextStoryWidget(
       >
         <Circle
           modifiers={[
-            frame({ width: 260, height: 260 }),
+            frame({ width: decoSize, height: decoSize }),
             foregroundStyle(WHITE),
             opacity(0.13),
-            offset({ x: 90, y: -110 }),
+            offset(decoOffset),
           ]}
         />
         <HStack
@@ -308,6 +318,8 @@ function NextStoryWidget(
                 modifiers={[
                   font({ size: 15, weight: "heavy" }),
                   foregroundStyle(WHITE),
+                  lineLimit(1),
+                  minimumScaleFactor(0.7),
                 ]}
               >
                 {props.courseName}
@@ -317,6 +329,7 @@ function NextStoryWidget(
                   font({ size: 15, weight: "semibold" }),
                   foregroundStyle(WHITE),
                   opacity(0.75),
+                  lineLimit(1),
                 ]}
               >
                 {props.completedCount}/{props.totalCount}
