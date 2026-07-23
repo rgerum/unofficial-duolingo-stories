@@ -522,6 +522,7 @@ function syncRegionSkipMarkers(
   segment: Segment,
   onChange: (skipRangeIndex: number, range: TimeRange | null) => void,
   onInteractionStart: () => void,
+  onInteractionEnd: () => void,
 ) {
   const existingLayer = regionElement.querySelector<HTMLElement>(
     ".audio-cutter-region-skip-layer",
@@ -698,6 +699,7 @@ function syncRegionSkipMarkers(
         marker.removeEventListener("pointermove", onPointerMove);
         marker.removeEventListener("pointerup", onPointerUp);
         marker.removeEventListener("pointercancel", onPointerCancel);
+        onInteractionEnd();
         if (!commit) return;
         const nextStart = Number(marker.dataset.nextStart);
         const nextEnd = Number(marker.dataset.nextEnd);
@@ -1137,6 +1139,7 @@ export default function AudioCutterDialog({
   const isSyncingRegionsRef = React.useRef(false);
   const activeDraftRegionIdRef = React.useRef<string | null>(null);
   const pendingRegionIdsRef = React.useRef<Set<string>>(new Set());
+  const activeSkipRangeInteractionRef = React.useRef(false);
   const transcriptItemsKeyRef = React.useRef("");
   const autoDetectRequestRef = React.useRef(0);
   const normalizeOperationRef = React.useRef(0);
@@ -1190,6 +1193,8 @@ export default function AudioCutterDialog({
     null,
   );
   const [playbackTimeSeconds, setPlaybackTimeSeconds] = React.useState(0);
+  const [isSkipRangeInteractionActive, setIsSkipRangeInteractionActive] =
+    React.useState(false);
   const playbackTimeSecondsRef = React.useRef(0);
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<
     string | null
@@ -1535,6 +1540,7 @@ export default function AudioCutterDialog({
     clearTranscriptAutoScrollLock();
     normalizeOperationRef.current += 1;
     activeDraftRegionIdRef.current = null;
+    activeSkipRangeInteractionRef.current = false;
     pendingRegionIdsRef.current.clear();
     typedRegionsPlugin.clearRegions();
     setAudioFile(null);
@@ -1558,6 +1564,7 @@ export default function AudioCutterDialog({
     setWaveformReady(false);
     setHoveredSegmentId(null);
     setPlaybackTimeSeconds(0);
+    setIsSkipRangeInteractionActive(false);
     setWordMarkTimeOverridesBySegmentId({});
     setDraggingWordMarker(null);
     setZoomPxPerSec(DEFAULT_WAVEFORM_ZOOM);
@@ -1784,10 +1791,17 @@ export default function AudioCutterDialog({
     [commitSegments],
   );
 
-  const stopPlaybackForSkipEdit = React.useCallback(() => {
+  const beginSkipRangeInteraction = React.useCallback(() => {
+    activeSkipRangeInteractionRef.current = true;
+    setIsSkipRangeInteractionActive(true);
     cancelSegmentedPlayback();
     wavesurfer?.pause();
   }, [cancelSegmentedPlayback, wavesurfer]);
+
+  const finishSkipRangeInteraction = React.useCallback(() => {
+    activeSkipRangeInteractionRef.current = false;
+    setIsSkipRangeInteractionActive(false);
+  }, []);
 
   const mergeOverlappingRegions = React.useCallback(
     (plugin: RegionsPlugin, activeId: string, targetId: string) => {
@@ -1914,13 +1928,19 @@ export default function AudioCutterDialog({
           region.element.style.boxShadow = isSelectedSegment
             ? "inset 0 0 0 2px rgba(255,255,255,0.36), 0 0 0 2px rgba(28,176,246,0.28), 0 8px 20px rgba(15,95,131,0.24)"
             : "inset 0 0 0 1px rgba(255,255,255,0.2)";
-          syncRegionSkipMarkers(
-            region.element,
-            segment,
-            (index, range) =>
-              onChangeSegmentSkipRange(segment.id, index, range),
-            stopPlaybackForSkipEdit,
-          );
+          if (
+            !isSkipRangeInteractionActive &&
+            !activeSkipRangeInteractionRef.current
+          ) {
+            syncRegionSkipMarkers(
+              region.element,
+              segment,
+              (index, range) =>
+                onChangeSegmentSkipRange(segment.id, index, range),
+              beginSkipRangeInteraction,
+              finishSkipRangeInteraction,
+            );
+          }
           syncRegionWordMarkers(
             region.element,
             segment,
@@ -1942,9 +1962,11 @@ export default function AudioCutterDialog({
       playSegmentAudio,
       onShrinkWrapSegment,
       hoveredSegmentId,
+      isSkipRangeInteractionActive,
       selectedSegmentId,
       segments,
-      stopPlaybackForSkipEdit,
+      finishSkipRangeInteraction,
+      beginSkipRangeInteraction,
       wordMarksBySegmentId,
     ],
   );
