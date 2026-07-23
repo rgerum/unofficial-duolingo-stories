@@ -14,11 +14,8 @@ export function getFeedbackLineIndex(
       lastElement.type === "POINT_TO_PHRASE")
       ? lastElement
       : currentPart[0];
-  const sourceLineIndex = (
-    visibleElement.trackingProperties as {
-      source_line_index?: number;
-    }
-  ).source_line_index;
+  const trackingProperties = visibleElement.trackingProperties;
+  if (!trackingProperties) return undefined;
 
-  return sourceLineIndex ?? visibleElement.trackingProperties.line_index;
+  return trackingProperties.source_line_index ?? trackingProperties.line_index;
 }

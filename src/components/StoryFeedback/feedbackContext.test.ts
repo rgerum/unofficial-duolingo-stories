@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { StoryElement } from "@/components/editor/story/syntax_parser_types";
 import { getParts } from "@/components/StoryProgress/parts";
-import { getFeedbackLineIndex } from "./feedbackContext";
+import { getFeedbackLineIndex } from "@/components/StoryFeedback/feedbackContext";
 
 function storyElement(
   type: StoryElement["type"],
@@ -33,6 +33,15 @@ test("web feedback uses the visible story element tracking index", () => {
   assert.equal(getFeedbackLineIndex(currentPart, 1), 5);
 });
 
+test("web feedback prefers the source index on the visible challenge", () => {
+  const currentPart = [
+    storyElement("LINE", 4),
+    storyElement("MULTIPLE_CHOICE", 5, 2),
+  ];
+
+  assert.equal(getFeedbackLineIndex(currentPart, 1), 2);
+});
+
 test("web feedback prefers the source tracking index used by the backend", () => {
   const parts = getParts([
     storyElement("LINE", 0),
@@ -48,4 +57,10 @@ test("web feedback prefers the source tracking index used by the backend", () =>
 
 test("web feedback omits the tracking index without a visible story element", () => {
   assert.equal(getFeedbackLineIndex(undefined, 0), undefined);
+});
+
+test("web feedback ignores a visible element without tracking metadata", () => {
+  const untrackedElement = { type: "LINE" } as StoryElement;
+
+  assert.equal(getFeedbackLineIndex([untrackedElement], 0), undefined);
 });

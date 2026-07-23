@@ -21,10 +21,7 @@ export function getParts(elements: StoryElement[]): StoryElement[][] {
 
   for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
     for (const element of parts[partIndex]) {
-      const trackingProperties = element.trackingProperties as {
-        line_index: number;
-        source_line_index?: number;
-      };
+      const trackingProperties = element.trackingProperties;
       trackingProperties.source_line_index ??= trackingProperties.line_index;
       trackingProperties.line_index = partIndex;
     }

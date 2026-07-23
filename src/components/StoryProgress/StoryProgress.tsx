@@ -12,10 +12,11 @@ import StoryHeader from "../StoryHeader";
 import StoryHeaderProgress from "../StoryHeaderProgress";
 import StoryFooter from "../StoryFooter";
 import StoryFeedback from "../StoryFeedback/StoryFeedback";
-import { getFeedbackLineIndex } from "../StoryFeedback/feedbackContext";
 import StoryFinishedScreen from "../StoryFinishedScreen";
 import StoryTitlePage from "../StoryTitlePage";
 import { playSoundEffect } from "@/lib/sound-effects";
+import { getFeedbackLineIndex } from "@/components/StoryFeedback/feedbackContext";
+import { getParts } from "@/components/StoryProgress/parts";
 import {
   StoryElement,
   StoryElementHeader,
@@ -24,7 +25,6 @@ import {
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 import { isTypingTarget } from "@/lib/is-typing-target";
 import { cn } from "@/lib/utils";
-import { getParts } from "./parts";
 
 function getComponent(parts: StoryElement[]) {
   const last_part = parts[parts.length - 1];
