@@ -51,16 +51,15 @@ user running the bot.
 
 ## Security notes
 
-- **Run the bot under a dedicated unix user** that cannot read other
-  services' secrets. This is a requirement, not a suggestion: the AI review
-  feeds *untrusted story text* into the Codex CLI. It runs with
-  `--sandbox read-only`, in an empty working directory, and with a prompt
-  instructing it to ignore instructions inside the story — but prompt-level
-  guards are soft, and read-only still means codex can READ any file the
-  unix user can read (including `~/.codex` credentials and the bot's own
-  `.env.local`).
-- Because of that, the Codex account used on the VPS should be a dedicated
-  one with a hard spend cap, not a personal account.
+- The AI review feeds *untrusted story text* into the Codex CLI, so all
+  codex invocations run with `--disable shell_tool`: codex has no
+  command-execution tool at all and cannot read local files, which makes
+  prompt injection in story text unable to exfiltrate anything from the
+  machine. `--sandbox read-only` and an empty working directory remain as
+  additional layers. Because of this, running under a normal user is
+  acceptable; a dedicated unix user is still nice-to-have defense in depth.
+- A spend cap on the Codex account is still recommended as a general
+  abuse backstop.
 - Bot output is scrubbed for every value from `.env.local` before posting,
   all messages are sent with `AllowedMentions.none()` (injected `@everyone`
   cannot ping), and error details only go to the bot log channel.

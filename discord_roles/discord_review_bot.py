@@ -235,6 +235,12 @@ async def run_codex(prompt, timeout, schema=None):
                 "exec",
                 "--sandbox",
                 "read-only",
+                # remove the shell tool entirely: codex physically cannot run
+                # commands or read local files, so prompt injection in story
+                # text cannot exfiltrate anything from this machine (the
+                # review prompts are self-contained and need no tools)
+                "--disable",
+                "shell_tool",
                 # the empty temp dir is not a git repo; without this codex refuses
                 "--skip-git-repo-check",
                 "-m",
