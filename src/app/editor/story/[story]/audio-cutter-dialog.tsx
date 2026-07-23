@@ -645,6 +645,7 @@ function syncRegionSkipMarkers(
       handle.style.background = "rgba(15,95,131,0.42)";
       handle.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.55)";
       handle.style.cursor = "ew-resize";
+      handle.style.zIndex = "3";
       marker.append(handle);
     };
     addHandle("start");
@@ -1147,6 +1148,10 @@ export default function AudioCutterDialog({
   const segmentedPlaybackRef = React.useRef<SegmentedPlaybackState | null>(
     null,
   );
+  const pendingWheelZoomAnchorRef = React.useRef<{
+    offsetX: number;
+    timeSeconds: number;
+  } | null>(null);
   const [audioFile, setAudioFile] = React.useState<File | null>(null);
   const [audioUrl, setAudioUrl] = React.useState("");
   const [audioBuffer, setAudioBuffer] = React.useState<AudioBuffer | null>(
@@ -2024,6 +2029,16 @@ export default function AudioCutterDialog({
       autoScroll: false,
       hideScrollbar: false,
     });
+
+    const zoomAnchor = pendingWheelZoomAnchorRef.current;
+    if (!zoomAnchor) return;
+    pendingWheelZoomAnchorRef.current = null;
+    const scrollContainer = getWaveformScrollElement(wavesurfer);
+    if (!scrollContainer) return;
+    scrollContainer.scrollLeft = Math.max(
+      0,
+      zoomAnchor.timeSeconds * zoomPxPerSec - zoomAnchor.offsetX,
+    );
   }, [wavesurfer, zoomPxPerSec]);
 
   React.useEffect(() => {
@@ -2115,15 +2130,34 @@ export default function AudioCutterDialog({
     const onUserWaveformInteraction = () => {
       clearTranscriptAutoScrollLock();
     };
+    const onWheel = (event: WheelEvent) => {
+      onUserWaveformInteraction();
+      if (!event.ctrlKey || event.deltaY === 0) return;
+      event.preventDefault();
+
+      const nextZoom = clamp(
+        zoomPxPerSec +
+          (event.deltaY < 0 ? WAVEFORM_ZOOM_STEP : -WAVEFORM_ZOOM_STEP),
+        MIN_WAVEFORM_ZOOM,
+        MAX_WAVEFORM_ZOOM,
+      );
+      if (nextZoom === zoomPxPerSec) return;
+
+      const rect = scrollContainer.getBoundingClientRect();
+      const offsetX = clamp(event.clientX - rect.left, 0, rect.width);
+      pendingWheelZoomAnchorRef.current = {
+        offsetX,
+        timeSeconds: (scrollContainer.scrollLeft + offsetX) / zoomPxPerSec,
+      };
+      setZoomPxPerSec(nextZoom);
+    };
 
     updateViewportRange();
     scrollContainer.addEventListener("scroll", onScroll, { passive: true });
     scrollContainer.addEventListener("pointerdown", onUserWaveformInteraction, {
       passive: true,
     });
-    scrollContainer.addEventListener("wheel", onUserWaveformInteraction, {
-      passive: true,
-    });
+    scrollContainer.addEventListener("wheel", onWheel, { passive: false });
     resizeObserver.observe(scrollContainer);
 
     return () => {
@@ -2132,10 +2166,15 @@ export default function AudioCutterDialog({
         "pointerdown",
         onUserWaveformInteraction,
       );
-      scrollContainer.removeEventListener("wheel", onUserWaveformInteraction);
+      scrollContainer.removeEventListener("wheel", onWheel);
       resizeObserver.disconnect();
     };
-  }, [clearTranscriptAutoScrollLock, updateViewportRange, wavesurfer]);
+  }, [
+    clearTranscriptAutoScrollLock,
+    updateViewportRange,
+    wavesurfer,
+    zoomPxPerSec,
+  ]);
 
   const selectedSegmentIndex = React.useMemo(
     () =>
@@ -3530,6 +3569,7 @@ export default function AudioCutterDialog({
               ["J", "Join the selected sentence with the next one"],
               ["Ctrl/Cmd+Z", "Undo segment changes"],
               ["Ctrl/Cmd+Shift+Z", "Redo segment changes"],
+              ["Ctrl+wheel", "Zoom the waveform around the pointer"],
               ["Mouse click", "Select and play a transcript row"],
             ].map(([keys, description]) => (
               <div
