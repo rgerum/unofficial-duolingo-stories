@@ -29,7 +29,8 @@ const SEVERITY_EMOJI: Record<LintSeverity, string> = {
 };
 
 function escapeMarkdown(text: string) {
-  return text.replace(/([\\*_~`|])/g, "\\$1");
+  // brackets included so story names stay valid masked-link text
+  return text.replace(/([\\*_~`|[\]])/g, "\\$1");
 }
 
 function countLabel(findings: LintFinding[]) {

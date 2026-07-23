@@ -62,16 +62,11 @@ export function LintPanel({
             </span>
           </div>
           <ul className="overflow-y-auto px-2 py-1">
-            {findings.map((finding, i) => (
-              <li key={i}>
-                <div
-                  className={cn(
-                    "flex items-baseline gap-2 rounded-lg px-2 py-[6px] text-[0.9rem] text-[var(--text-color)]",
-                    finding.lineNumber !== undefined &&
-                      "cursor-pointer hover:bg-[color:color-mix(in_srgb,var(--overview-hr)_35%,var(--body-background))]",
-                  )}
-                  onClick={() => jumpToLine(finding.lineNumber)}
-                >
+            {findings.map((finding, i) => {
+              const rowClass =
+                "flex items-baseline gap-2 rounded-lg px-2 py-[6px] text-[0.9rem] text-[var(--text-color)]";
+              const content = (
+                <>
                   <span
                     className={cn(
                       "h-2 w-2 shrink-0 self-center rounded-full",
@@ -84,9 +79,27 @@ export function LintPanel({
                       Line {finding.lineNumber}
                     </span>
                   ) : null}
-                </div>
-              </li>
-            ))}
+                </>
+              );
+              return (
+                <li key={i}>
+                  {finding.lineNumber !== undefined ? (
+                    <button
+                      type="button"
+                      className={cn(
+                        rowClass,
+                        "w-full cursor-pointer text-left hover:bg-[color:color-mix(in_srgb,var(--overview-hr)_35%,var(--body-background))]",
+                      )}
+                      onClick={() => jumpToLine(finding.lineNumber)}
+                    >
+                      {content}
+                    </button>
+                  ) : (
+                    <div className={rowClass}>{content}</div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : null}

@@ -127,6 +127,7 @@ export const getStoriesBySets = internalQuery({
         ),
       ].sort((a, b) => a - b);
     }
+    const requestedSetCount = setIds.length;
     setIds = setIds.slice(0, MAX_SETS_PER_REQUEST);
 
     const sets: { setId: number; storyIds: number[] }[] = [];
@@ -147,7 +148,11 @@ export const getStoriesBySets = internalQuery({
           .map((story) => story.legacyId as number),
       });
     }
-    return { courseShort: args.courseShort, sets };
+    return {
+      courseShort: args.courseShort,
+      sets,
+      setsTruncated: requestedSetCount > MAX_SETS_PER_REQUEST,
+    };
   },
 });
 
@@ -193,6 +198,7 @@ export const reviewStoriesForDiscord = httpAction(async (ctx, req) => {
     }
 
     let storyIds: number[];
+    let setsTruncated = false;
     if (typeof parsed.courseShort === "string") {
       const sets = Array.isArray(parsed.sets)
         ? parsed.sets.filter(
@@ -208,6 +214,7 @@ export const reviewStoriesForDiscord = httpAction(async (ctx, req) => {
         return json({ ok: true, unknownCourse: true, stories: [] });
       }
       storyIds = resolution.sets.flatMap((set) => set.storyIds);
+      setsTruncated = resolution.setsTruncated;
     } else {
       if (
         !Array.isArray(parsed.storyIds) ||
@@ -228,6 +235,7 @@ export const reviewStoriesForDiscord = httpAction(async (ctx, req) => {
       storyIds = parsed.storyIds as number[];
     }
 
+    const totalResolved = [...new Set(storyIds)].length;
     storyIds = [...new Set(storyIds)].slice(0, MAX_STORIES_PER_REQUEST);
     if (storyIds.length === 0) {
       return json({ ok: true, stories: [] });
@@ -236,7 +244,9 @@ export const reviewStoriesForDiscord = httpAction(async (ctx, req) => {
       internal.storyReviewLint.lintStoriesForReview,
       { storyIds },
     );
-    return json({ ok: true, stories });
+    // never drop requested content silently: the bot reports partial coverage
+    const truncated = setsTruncated || totalResolved > storyIds.length;
+    return json({ ok: true, stories, truncated, totalResolved });
   } catch (error) {
     console.error("review-stories failed", error);
     return json({ ok: false, error: "Internal error" }, 500);

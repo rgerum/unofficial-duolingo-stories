@@ -345,16 +345,19 @@ class ReviewClient(discord.Client):
                 pass
             return
 
-        texts = [message.channel.name, message.content]
-        if not is_starter:
-            try:
-                starter = await message.channel.fetch_message(message.channel.id)
-                texts.append(starter.content)
-            except discord.NotFound:
-                pass
-
+        # reserve the thread before the first await so a concurrent message
+        # cannot pass the guard above and start a second review
         self.active_threads.add(message.channel.id)
         try:
+            texts = [message.channel.name, message.content]
+            if not is_starter:
+                try:
+                    starter = await message.channel.fetch_message(
+                        message.channel.id
+                    )
+                    texts.append(starter.content)
+                except discord.NotFound:
+                    pass
             await self.handle_request(message.channel, texts, is_starter)
         finally:
             self.active_threads.discard(message.channel.id)
@@ -427,6 +430,15 @@ class ReviewClient(discord.Client):
         if not stories:
             await channel.send(HELP_MESSAGE)
             return
+
+        if result.get("truncated"):
+            total = result.get("totalResolved")
+            await self.safe_send(
+                channel,
+                f"🤖 Note: this request resolves to {total} stories, but I can "
+                "check at most 30 stories (8 sets) per run — the remaining "
+                "ones were skipped.",
+            )
 
         for story in stories:
             if not story.get("found"):

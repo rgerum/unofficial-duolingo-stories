@@ -34,6 +34,15 @@ test("escapes markdown in story names", () => {
   assert.match(message, /To the \\\*Station\\\*!/);
 });
 
+test("escapes brackets so names stay valid masked-link text", () => {
+  const message = formatDiscordReview(
+    { ...story, name: "The [Best] Day" },
+    [],
+    0,
+  );
+  assert.match(message, /The \\\[Best\\\] Day/);
+});
+
 test("orders findings by severity then line", () => {
   const message = formatDiscordReview(
     story,

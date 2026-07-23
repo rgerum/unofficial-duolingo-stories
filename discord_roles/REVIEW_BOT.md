@@ -34,6 +34,7 @@ AI_REVIEW_MAX_STORIES=3          # optional, AI reviews per thread
 AI_REVIEW_TIMEOUT_SECONDS=900    # optional
 AI_REVIEW_CONCURRENCY=1          # optional, simultaneous codex processes
 REVIEW_COOLDOWN_SECONDS=60       # optional, per-user trigger cooldown
+INTENT_TIMEOUT_SECONDS=180       # optional, intent-classification timeout
 ```
 
 Set the matching secret on the Convex prod deployment:
@@ -65,8 +66,8 @@ user running the bot.
   cannot ping), and error details only go to the bot log channel.
 - Abuse limits: one review at a time per thread, a per-user cooldown
   (`REVIEW_COOLDOWN_SECONDS`), at most `AI_REVIEW_CONCURRENCY` codex
-  processes at once, and at most 10 stories per request (also enforced
-  server-side by the Convex endpoint).
+  processes at once, and at most 30 stories (8 sets) per request (also
+  enforced server-side by the Convex endpoint).
 
 ## systemd example
 
