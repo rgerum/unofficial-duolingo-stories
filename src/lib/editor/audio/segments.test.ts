@@ -13,7 +13,9 @@ import {
   getSegmentSkipRangesFromAnalysis,
   getTotalRangeDuration,
   mapPlayableOffsetToAbsoluteTime,
+  moveRangeWithinBounds,
   normalizeRanges,
+  resizeRangeWithinBounds,
   type Segment,
   sortSegments,
 } from "@/lib/editor/audio/segments";
@@ -52,6 +54,36 @@ test("normalizeRanges sorts unsorted input", () => {
 test("normalizeRanges returns empty for empty/undefined input", () => {
   assert.deepEqual(normalizeRanges([], bounds), []);
   assert.deepEqual(normalizeRanges(undefined, bounds), []);
+});
+
+test("moveRangeWithinBounds preserves duration and clamps at both edges", () => {
+  assert.deepEqual(moveRangeWithinBounds({ start: 3, end: 5 }, 2, bounds), {
+    start: 5,
+    end: 7,
+  });
+  assert.deepEqual(moveRangeWithinBounds({ start: 3, end: 5 }, -10, bounds), {
+    start: 0,
+    end: 2,
+  });
+  assert.deepEqual(moveRangeWithinBounds({ start: 3, end: 5 }, 10, bounds), {
+    start: 8,
+    end: 10,
+  });
+});
+
+test("resizeRangeWithinBounds moves one edge and keeps a minimum duration", () => {
+  assert.deepEqual(
+    resizeRangeWithinBounds({ start: 3, end: 5 }, "start", -2, bounds),
+    { start: 1, end: 5 },
+  );
+  assert.deepEqual(
+    resizeRangeWithinBounds({ start: 3, end: 5 }, "end", 10, bounds),
+    { start: 3, end: 10 },
+  );
+  assert.deepEqual(
+    resizeRangeWithinBounds({ start: 3, end: 5 }, "start", 10, bounds, 0.5),
+    { start: 4.5, end: 5 },
+  );
 });
 
 test("getKeepRanges returns the whole bounds with no skips", () => {

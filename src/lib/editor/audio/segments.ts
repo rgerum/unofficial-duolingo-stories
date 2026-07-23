@@ -92,6 +92,52 @@ export function normalizeRanges(
   return normalized;
 }
 
+export function moveRangeWithinBounds(
+  range: TimeRange,
+  deltaSeconds: number,
+  bounds: TimeRange,
+) {
+  const duration = Math.min(
+    Math.max(0, range.end - range.start),
+    Math.max(0, bounds.end - bounds.start),
+  );
+  const start = clamp(
+    range.start + deltaSeconds,
+    bounds.start,
+    bounds.end - duration,
+  );
+  return { start, end: start + duration };
+}
+
+export function resizeRangeWithinBounds(
+  range: TimeRange,
+  edge: "start" | "end",
+  deltaSeconds: number,
+  bounds: TimeRange,
+  minDurationSeconds = 0.02,
+) {
+  const minDuration = Math.min(
+    minDurationSeconds,
+    Math.max(0, bounds.end - bounds.start),
+  );
+
+  if (edge === "start") {
+    return {
+      start: clamp(
+        range.start + deltaSeconds,
+        bounds.start,
+        range.end - minDuration,
+      ),
+      end: range.end,
+    };
+  }
+
+  return {
+    start: range.start,
+    end: clamp(range.end + deltaSeconds, range.start + minDuration, bounds.end),
+  };
+}
+
 export function getTotalRangeDuration(ranges: TimeRange[] | undefined) {
   return (ranges ?? []).reduce(
     (total, range) => total + Math.max(0, range.end - range.start),
