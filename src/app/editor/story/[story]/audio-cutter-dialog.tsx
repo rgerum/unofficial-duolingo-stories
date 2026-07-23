@@ -47,6 +47,9 @@ import {
   detectSpeechSegmentsFromAnalysis,
   getKeepRangeEnd,
   getKeepRanges,
+  moveRangeWithinBounds,
+  normalizeRanges,
+  resizeRangeWithinBounds,
   getSegmentSkipRangesFromAnalysis,
   getTotalRangeDuration,
   type Segment,
@@ -84,6 +87,8 @@ const SEGMENT_COLOR = "rgba(28,176,246,0.2)";
 const SEGMENT_SELECTED_COLOR = "rgba(28,176,246,0.34)";
 const SEGMENT_BORDER_COLOR = "rgba(15,95,131,0.4)";
 const SEGMENT_ACTIVE_BORDER_COLOR = "rgba(28,176,246,0.95)";
+const DEFAULT_NEW_SKIP_RANGE_SECONDS = 0.3;
+const MIN_SKIP_RANGE_SECONDS = 0.02;
 const cachedAudioSegmentation = new WeakMap<
   AudioBuffer,
   Map<string, CachedAudioSegmentation>
@@ -508,7 +513,12 @@ function getShrinkWrappedSegment(
   };
 }
 
-function syncRegionSkipMarkers(regionElement: HTMLElement, segment: Segment) {
+function syncRegionSkipMarkers(
+  regionElement: HTMLElement,
+  segment: Segment,
+  onChange: (skipRangeIndex: number, range: TimeRange | null) => void,
+  onInteractionStart: () => void,
+) {
   const existingLayer = regionElement.querySelector<HTMLElement>(
     ".audio-cutter-region-skip-layer",
   );
@@ -526,7 +536,7 @@ function syncRegionSkipMarkers(regionElement: HTMLElement, segment: Segment) {
   skipLayer.style.borderRadius = "inherit";
   skipLayer.style.zIndex = "0";
 
-  for (const skipRange of segment.skipRanges) {
+  segment.skipRanges.forEach((skipRange, skipRangeIndex) => {
     const marker = document.createElement("div");
     const leftPercent =
       ((skipRange.start - segment.start) / segmentDuration) * 100;
@@ -542,8 +552,85 @@ function syncRegionSkipMarkers(regionElement: HTMLElement, segment: Segment) {
       "repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0 6px, rgba(15,95,131,0.28) 6px 12px)";
     marker.style.borderLeft = "1px dashed rgba(15,95,131,0.75)";
     marker.style.borderRight = "1px dashed rgba(15,95,131,0.75)";
+    marker.style.cursor = "grab";
+    marker.style.pointerEvents = "auto";
+    marker.title =
+      "Drag to move this silence cut; drag an edge to resize; double-click to remove";
+    marker.addEventListener("dblclick", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onChange(skipRangeIndex, null);
+    });
+
+    const addHandle = (edge: "start" | "end") => {
+      const handle = document.createElement("div");
+      handle.dataset.skipRangeEdge = edge;
+      handle.style.position = "absolute";
+      handle.style[edge === "start" ? "left" : "right"] = "-4px";
+      handle.style.top = "0";
+      handle.style.bottom = "0";
+      handle.style.width = "9px";
+      handle.style.cursor = "ew-resize";
+      marker.append(handle);
+    };
+    addHandle("start");
+    addHandle("end");
+
+    marker.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      onInteractionStart();
+      marker.setPointerCapture(event.pointerId);
+      marker.style.cursor = "grabbing";
+
+      const originX = event.clientX;
+      const originRange = { ...skipRange };
+      const edge = (event.target as HTMLElement).dataset.skipRangeEdge as
+        | "start"
+        | "end"
+        | undefined;
+
+      const onPointerMove = (moveEvent: PointerEvent) => {
+        const width = Math.max(regionElement.getBoundingClientRect().width, 1);
+        const deltaSeconds =
+          ((moveEvent.clientX - originX) / width) * segmentDuration;
+        const nextRange = edge
+          ? resizeRangeWithinBounds(
+              originRange,
+              edge,
+              deltaSeconds,
+              segment,
+              MIN_SKIP_RANGE_SECONDS,
+            )
+          : moveRangeWithinBounds(originRange, deltaSeconds, segment);
+        marker.style.left = `${((nextRange.start - segment.start) / segmentDuration) * 100}%`;
+        marker.style.width = `${((nextRange.end - nextRange.start) / segmentDuration) * 100}%`;
+        marker.dataset.nextStart = String(nextRange.start);
+        marker.dataset.nextEnd = String(nextRange.end);
+      };
+
+      const finishPointerInteraction = (commit: boolean) => {
+        marker.style.cursor = "grab";
+        marker.removeEventListener("pointermove", onPointerMove);
+        marker.removeEventListener("pointerup", onPointerUp);
+        marker.removeEventListener("pointercancel", onPointerCancel);
+        if (!commit) return;
+        const nextStart = Number(marker.dataset.nextStart);
+        const nextEnd = Number(marker.dataset.nextEnd);
+        if (Number.isFinite(nextStart) && Number.isFinite(nextEnd)) {
+          onChange(skipRangeIndex, { start: nextStart, end: nextEnd });
+        }
+      };
+      const onPointerUp = () => finishPointerInteraction(true);
+      const onPointerCancel = () => finishPointerInteraction(false);
+
+      marker.addEventListener("pointermove", onPointerMove);
+      marker.addEventListener("pointerup", onPointerUp);
+      marker.addEventListener("pointercancel", onPointerCancel);
+    });
     skipLayer.append(marker);
-  }
+  });
 
   const existingOverflow = regionElement.style.overflow;
   const computedOverflow = getComputedStyle(regionElement).overflow;
@@ -666,6 +753,7 @@ function createRegionContent({
   showJoinHint,
   onPlay,
   onShrinkWrap,
+  onAddSkipRange,
   onDelete,
   onEditLabel,
 }: {
@@ -675,6 +763,7 @@ function createRegionContent({
   showJoinHint: boolean;
   onPlay: () => void;
   onShrinkWrap: () => void;
+  onAddSkipRange: () => void;
   onDelete: () => void;
   onEditLabel: () => void;
 }) {
@@ -694,6 +783,13 @@ function createRegionContent({
     const controls = document.createElement("div");
     controls.className = "audio-cutter-region-content__controls";
 
+    controls.append(
+      createIconButton({
+        title: "Add silence cut",
+        iconPath: "M4 12h4 M16 12h4 M10 8v8 M14 8v8",
+        onClick: onAddSkipRange,
+      }),
+    );
     controls.append(
       createIconButton({
         title: "Play segment",
@@ -1011,6 +1107,7 @@ export default function AudioCutterDialog({
     null,
   );
   const [playbackTimeSeconds, setPlaybackTimeSeconds] = React.useState(0);
+  const playbackTimeSecondsRef = React.useRef(0);
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<
     string | null
   >(null);
@@ -1075,6 +1172,10 @@ export default function AudioCutterDialog({
   React.useEffect(() => {
     segmentsRef.current = segments;
   }, [segments]);
+
+  React.useEffect(() => {
+    playbackTimeSecondsRef.current = playbackTimeSeconds;
+  }, [playbackTimeSeconds]);
 
   const commitSegments = React.useCallback(
     (updater: Segment[] | ((current: Segment[]) => Segment[])) => {
@@ -1210,14 +1311,23 @@ export default function AudioCutterDialog({
 
   const buildSegment = React.useCallback(
     (
-      segment: { id?: string; start: number; end: number; label?: string },
+      segment: {
+        id?: string;
+        start: number;
+        end: number;
+        label?: string;
+        skipRanges?: TimeRange[];
+      },
       settingsOverride?: DetectionSettings,
     ) => ({
       id: segment.id ?? createSegmentId(),
       start: segment.start,
       end: segment.end,
       label: segment.label,
-      skipRanges: applySegmentSkipRanges(segment, settingsOverride),
+      skipRanges:
+        segment.skipRanges === undefined
+          ? applySegmentSkipRanges(segment, settingsOverride)
+          : normalizeRanges(segment.skipRanges, segment),
     }),
     [applySegmentSkipRanges],
   );
@@ -1534,6 +1644,68 @@ export default function AudioCutterDialog({
     );
   }, [audioBuffer, buildSegment, commitSegments, detectionSettings]);
 
+  const onChangeSegmentSkipRange = React.useCallback(
+    (segmentId: string, skipRangeIndex: number, range: TimeRange | null) => {
+      commitSegments((current) =>
+        current.map((segment) =>
+          segment.id === segmentId
+            ? {
+                ...segment,
+                skipRanges: normalizeRanges(
+                  segment.skipRanges.flatMap((candidate, index) =>
+                    index !== skipRangeIndex
+                      ? [candidate]
+                      : range
+                        ? [range]
+                        : [],
+                  ),
+                  segment,
+                ),
+              }
+            : segment,
+        ),
+      );
+      setSelectedSegmentId(segmentId);
+    },
+    [commitSegments],
+  );
+
+  const onAddSegmentSkipRange = React.useCallback(
+    (segmentId: string) => {
+      commitSegments((current) =>
+        current.map((segment) => {
+          if (segment.id !== segmentId) return segment;
+          const duration = Math.min(
+            DEFAULT_NEW_SKIP_RANGE_SECONDS,
+            segment.end - segment.start,
+          );
+          const center = clamp(
+            playbackTimeSecondsRef.current,
+            segment.start + duration / 2,
+            segment.end - duration / 2,
+          );
+          return {
+            ...segment,
+            skipRanges: normalizeRanges(
+              [
+                ...segment.skipRanges,
+                { start: center - duration / 2, end: center + duration / 2 },
+              ],
+              segment,
+            ),
+          };
+        }),
+      );
+      setSelectedSegmentId(segmentId);
+    },
+    [commitSegments],
+  );
+
+  const stopPlaybackForSkipEdit = React.useCallback(() => {
+    cancelSegmentedPlayback();
+    wavesurfer?.pause();
+  }, [cancelSegmentedPlayback, wavesurfer]);
+
   const mergeOverlappingRegions = React.useCallback(
     (plugin: RegionsPlugin, activeId: string, targetId: string) => {
       const activeRegion = plugin
@@ -1634,6 +1806,7 @@ export default function AudioCutterDialog({
             onShrinkWrap: () => {
               onShrinkWrapSegment(segment.id);
             },
+            onAddSkipRange: () => onAddSegmentSkipRange(segment.id),
             onDelete: () => {
               onRemoveSegment(segment.id);
             },
@@ -1658,7 +1831,13 @@ export default function AudioCutterDialog({
           region.element.style.boxShadow = isSelectedSegment
             ? "inset 0 0 0 2px rgba(255,255,255,0.36), 0 0 0 2px rgba(28,176,246,0.28), 0 8px 20px rgba(15,95,131,0.24)"
             : "inset 0 0 0 1px rgba(255,255,255,0.2)";
-          syncRegionSkipMarkers(region.element, segment);
+          syncRegionSkipMarkers(
+            region.element,
+            segment,
+            (index, range) =>
+              onChangeSegmentSkipRange(segment.id, index, range),
+            stopPlaybackForSkipEdit,
+          );
           syncRegionWordMarkers(
             region.element,
             segment,
@@ -1674,12 +1853,15 @@ export default function AudioCutterDialog({
       mergePreview?.activeId,
       mergePreview?.targetId,
       onEditSegmentLabel,
+      onAddSegmentSkipRange,
+      onChangeSegmentSkipRange,
       onRemoveSegment,
       playSegmentAudio,
       onShrinkWrapSegment,
       hoveredSegmentId,
       selectedSegmentId,
       segments,
+      stopPlaybackForSkipEdit,
       wordMarksBySegmentId,
     ],
   );
@@ -3270,7 +3452,9 @@ export default function AudioCutterDialog({
               </div>
               <div className="text-xs text-[var(--text-color-dim)]">
                 Drag across the waveform to add a segment. Drag a segment body
-                to move it. Drag either edge to resize it.
+                to move it. Drag either edge to resize it. Use Add silence cut
+                on a segment to add a striped cut at the playhead, then drag or
+                resize it; double-click a cut to remove it.
               </div>
             </div>
             <div className="flex items-center gap-3 text-right text-xs text-[var(--text-color-dim)]">
@@ -3315,7 +3499,7 @@ export default function AudioCutterDialog({
             <div className="border-t border-[var(--color_base_border)] px-4 py-2 text-xs text-[var(--text-color-dim)]">
               {isDragOverAudioDropzone
                 ? "Drop audio here to replace the current source file."
-                : "Drop an audio file here, or use Upload long audio."}
+                : "Drop an audio file here, or use Upload long audio. Striped silence cuts can be moved or resized."}
             </div>
           </div>
           {audioError ? (
