@@ -36,79 +36,88 @@ export function LintPanel({
 }) {
   const [expanded, setExpanded] = React.useState(false);
 
-  if (findings.length === 0) {
-    return (
-      <div className="my-3 rounded-[10px] border border-[#bbf7d0] bg-[#f0fdf4] px-[14px] py-2 text-[0.9rem] text-[#166534]">
-        ✓ Story checks passed
-      </div>
-    );
-  }
-
   const counts = SEVERITY_ORDER.map((severity) => ({
     severity,
     count: findings.filter((f) => f.severity === severity).length,
   })).filter((entry) => entry.count > 0);
 
+  const jumpToLine = (lineNumber?: number) => {
+    if (lineNumber === undefined || !editorState) return;
+    // scroll the editor to the line, then place the cursor there (the cursor
+    // update also syncs the preview highlight)
+    editorState.select(String(lineNumber), true);
+    editorState.select(String(lineNumber), false);
+  };
+
   return (
-    <div className="my-3 rounded-[10px] border border-[var(--header-border)] bg-[var(--body-background)]">
+    <div className="fixed right-4 bottom-4 z-40 flex flex-col items-end">
+      {expanded && findings.length > 0 ? (
+        <div className="mb-2 flex max-h-[50vh] w-[420px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-[10px] border border-[var(--header-border)] bg-[var(--body-background)] shadow-lg">
+          <div className="flex items-center gap-2 border-b border-[var(--header-border)] px-3 py-2">
+            <span className="text-[0.85rem] font-bold tracking-[0.02em] uppercase text-[var(--text-color)]">
+              Story checks
+            </span>
+            <span className="ml-auto text-[0.8rem] text-[var(--text-color-dim)]">
+              click a finding to jump to its line
+            </span>
+          </div>
+          <ul className="overflow-y-auto px-2 py-1">
+            {findings.map((finding, i) => (
+              <li key={i}>
+                <div
+                  className={cn(
+                    "flex items-baseline gap-2 rounded-lg px-2 py-[6px] text-[0.9rem] text-[var(--text-color)]",
+                    finding.lineNumber !== undefined &&
+                      "cursor-pointer hover:bg-[color:color-mix(in_srgb,var(--overview-hr)_35%,var(--body-background))]",
+                  )}
+                  onClick={() => jumpToLine(finding.lineNumber)}
+                >
+                  <span
+                    className={cn(
+                      "h-2 w-2 shrink-0 self-center rounded-full",
+                      SEVERITY_STYLES[finding.severity].dot,
+                    )}
+                  />
+                  <span className="min-w-0 grow">{finding.message}</span>
+                  {finding.lineNumber !== undefined ? (
+                    <span className="shrink-0 text-[0.8rem] text-[var(--text-color-dim)]">
+                      Line {finding.lineNumber}
+                    </span>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <button
         type="button"
-        className="flex w-full cursor-pointer items-center gap-2 px-[14px] py-2 text-left"
+        className="flex cursor-pointer items-center gap-2 rounded-full border border-[var(--header-border)] bg-[var(--body-background)] px-3 py-[6px] shadow-lg"
         onClick={() => setExpanded((value) => !value)}
+        title={expanded ? "Hide story checks" : "Show story checks"}
       >
-        <span className="text-[0.92rem] font-bold tracking-[0.02em] uppercase text-[var(--text-color)]">
-          Story checks
+        <span className="text-[0.85rem] font-bold tracking-[0.02em] uppercase text-[var(--text-color)]">
+          Checks
         </span>
-        {counts.map(({ severity, count }) => (
-          <span
-            key={severity}
-            className={cn(
-              "rounded-full px-2 py-[2px] text-[0.8rem] font-semibold",
-              SEVERITY_STYLES[severity].chip,
-            )}
-          >
-            {count} {SEVERITY_STYLES[severity].label}
-            {count === 1 ? "" : "s"}
+        {findings.length === 0 ? (
+          <span className="rounded-full bg-[#dcfce7] px-2 py-[2px] text-[0.8rem] font-semibold text-[#166534]">
+            ✓ passed
           </span>
-        ))}
-        <span className="ml-auto text-[0.8rem] text-[var(--text-color-dim)]">
-          {expanded ? "hide" : "show"}
-        </span>
+        ) : (
+          counts.map(({ severity, count }) => (
+            <span
+              key={severity}
+              className={cn(
+                "rounded-full px-2 py-[2px] text-[0.8rem] font-semibold",
+                SEVERITY_STYLES[severity].chip,
+              )}
+            >
+              {count} {SEVERITY_STYLES[severity].label}
+              {count === 1 ? "" : "s"}
+            </span>
+          ))
+        )}
       </button>
-      {expanded ? (
-        <ul className="border-t border-[var(--header-border)] px-2 py-1">
-          {findings.map((finding, i) => (
-            <li key={i}>
-              <div
-                className={cn(
-                  "flex items-baseline gap-2 rounded-lg px-2 py-[6px] text-[0.9rem] text-[var(--text-color)]",
-                  finding.lineNumber !== undefined &&
-                    "cursor-pointer hover:bg-[color:color-mix(in_srgb,var(--overview-hr)_35%,var(--body-background))]",
-                )}
-                onClick={
-                  finding.lineNumber !== undefined
-                    ? () =>
-                        editorState?.select(String(finding.lineNumber), false)
-                    : undefined
-                }
-              >
-                <span
-                  className={cn(
-                    "mt-[2px] h-2 w-2 shrink-0 self-center rounded-full",
-                    SEVERITY_STYLES[finding.severity].dot,
-                  )}
-                />
-                <span className="min-w-0 grow">{finding.message}</span>
-                {finding.lineNumber !== undefined ? (
-                  <span className="shrink-0 text-[0.8rem] text-[var(--text-color-dim)]">
-                    Line {finding.lineNumber}
-                  </span>
-                ) : null}
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : null}
     </div>
   );
 }

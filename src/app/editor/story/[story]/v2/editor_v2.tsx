@@ -663,10 +663,6 @@ export default function EditorV2({
             cast={model.parsedMeta.cast}
             short={story_data.short}
           />
-          <LintPanel
-            findings={model.lintFindings}
-            editorState={editorStateForPreview}
-          />
           <StoryEditorPreview
             story={model.parsedStory}
             editorState={editorStateForPreview}
@@ -674,6 +670,10 @@ export default function EditorV2({
           />
         </div>
       </div>
+      <LintPanel
+        findings={model.lintFindings}
+        editorState={editorStateForPreview}
+      />
     </div>
   );
 }
