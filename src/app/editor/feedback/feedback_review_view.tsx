@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  BanIcon,
   CheckCircle2Icon,
+  CircleOffIcon,
   CircleDotIcon,
   ExternalLinkIcon,
   EyeIcon,
@@ -9,7 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import type { Id } from "@convex/_generated/dataModel";
+import type { Doc, Id } from "@convex/_generated/dataModel";
 import StoryTextLine from "@/components/StoryTextLine";
 import type { StorySettings } from "@/components/StoryProgress";
 import type { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
@@ -17,7 +19,7 @@ import Button from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
-export type FeedbackStatus = "open" | "reviewed" | "resolved";
+export type FeedbackStatus = Doc<"story_feedback_reports">["status"];
 
 export type FeedbackReport = {
   _id: Id<"story_feedback_reports">;
@@ -45,13 +47,9 @@ const statusOptions: Array<{
   { value: "open", label: "Open", icon: CircleDotIcon },
   { value: "reviewed", label: "Reviewed", icon: EyeIcon },
   { value: "resolved", label: "Resolved", icon: CheckCircle2Icon },
+  { value: "not_relevant", label: "Not relevant", icon: CircleOffIcon },
+  { value: "spam", label: "Spam", icon: BanIcon },
 ];
-
-const statusLabels: Record<FeedbackStatus, string> = {
-  open: "Open",
-  reviewed: "Reviewed",
-  resolved: "Resolved",
-};
 
 const sourceLabels = {
   web: "Web",
@@ -181,7 +179,7 @@ export default function FeedbackReviewView({
         <Spinner />
       ) : reports.length === 0 ? (
         <div className="rounded-[8px] border-2 border-[var(--overview-hr)] bg-[var(--body-background-faint)] px-5 py-8 text-center text-[var(--text-color-dim)]">
-          No {statusLabels[status].toLowerCase()} feedback reports.
+          No {getStatusLabel(status).toLowerCase()} feedback reports.
         </div>
       ) : (
         <>
@@ -274,7 +272,7 @@ function FeedbackReportRow({
               : report.category}
           </span>
           <span className="rounded-full bg-[var(--body-background-faint)] px-3 py-1 text-[0.78rem] font-bold text-[var(--text-color-dim)]">
-            {statusLabels[report.status]}
+            {getStatusLabel(report.status)}
           </span>
           <time className="text-[0.82rem] text-[var(--text-color-dim)]">
             {formatDateTime(report.createdAt)}
@@ -324,30 +322,17 @@ function FeedbackReportRow({
         </Link>
 
         <div className="grid grid-cols-2 gap-2 min-[900px]:grid-cols-1">
-          {report.status !== "open" ? (
-            <StatusButton
-              disabled={updating}
-              onClick={() => onSetStatus("open")}
-            >
-              Open
-            </StatusButton>
-          ) : null}
-          {report.status !== "reviewed" ? (
-            <StatusButton
-              disabled={updating}
-              onClick={() => onSetStatus("reviewed")}
-            >
-              Reviewed
-            </StatusButton>
-          ) : null}
-          {report.status !== "resolved" ? (
-            <StatusButton
-              disabled={updating}
-              onClick={() => onSetStatus("resolved")}
-            >
-              Resolved
-            </StatusButton>
-          ) : null}
+          {statusOptions.map((option) =>
+            report.status === option.value ? null : (
+              <StatusButton
+                key={option.value}
+                disabled={updating}
+                onClick={() => onSetStatus(option.value)}
+              >
+                {option.label}
+              </StatusButton>
+            ),
+          )}
         </div>
       </div>
     </article>
@@ -481,6 +466,12 @@ function StatusButton({
     >
       {disabled ? "Updating" : children}
     </Button>
+  );
+}
+
+function getStatusLabel(status: FeedbackStatus) {
+  return (
+    statusOptions.find((option) => option.value === status)?.label ?? status
   );
 }
 

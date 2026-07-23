@@ -43,6 +43,7 @@ import type * as roles from "../roles.js";
 import type * as storyApproval from "../storyApproval.js";
 import type * as storyDone from "../storyDone.js";
 import type * as storyFeedback from "../storyFeedback.js";
+import type * as storyFeedbackStatus from "../storyFeedbackStatus.js";
 import type * as storyPublicContent from "../storyPublicContent.js";
 import type * as storyRead from "../storyRead.js";
 import type * as storyTables from "../storyTables.js";
@@ -91,6 +92,7 @@ declare const fullApi: ApiFromModules<{
   storyApproval: typeof storyApproval;
   storyDone: typeof storyDone;
   storyFeedback: typeof storyFeedback;
+  storyFeedbackStatus: typeof storyFeedbackStatus;
   storyPublicContent: typeof storyPublicContent;
   storyRead: typeof storyRead;
   storyTables: typeof storyTables;
