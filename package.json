@@ -5,7 +5,7 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "test": "pnpm exec tsx --test src/**/*.test.ts",
+    "test": "pnpm exec tsx --test 'src/**/*.test.ts'",
     "test:convex": "vitest run --config vitest.config.ts",
     "test:mobile": "vitest run --config vitest.mobile.config.ts",
     "format": "pnpm exec biome format src convex --write",
