@@ -15,6 +15,7 @@ here never affects role syncing.
 
 import asyncio
 import json
+import os
 import re
 import tempfile
 import time
@@ -224,6 +225,26 @@ Do not use tools or read files; everything you need is in this prompt."""
 
 codex_semaphore = asyncio.Semaphore(AI_REVIEW_CONCURRENCY)
 
+# Codex runs on untrusted story text, so it gets an isolated CODEX_HOME with
+# a minimal config instead of inheriting the user's ~/.codex configuration
+# (which could define MCP servers that reintroduce tools). Only the login
+# token is shared, via a symlink.
+CODEX_HOME = Path(__file__).parent / ".codex_home"
+
+
+def ensure_codex_home():
+    CODEX_HOME.mkdir(exist_ok=True)
+    (CODEX_HOME / "config.toml").write_text(
+        "# Minimal isolated codex config for the review bot.\n"
+        "# Deliberately empty: no MCP servers, no profiles, defaults only.\n",
+        encoding="utf-8",
+    )
+    auth = CODEX_HOME / "auth.json"
+    real_auth = Path.home() / ".codex" / "auth.json"
+    if not auth.exists() and real_auth.exists():
+        auth.symlink_to(real_auth)
+    return CODEX_HOME
+
 
 async def run_codex(prompt, timeout, schema=None):
     """Run the Codex CLI and return its final message (parsed if schema)."""
@@ -235,6 +256,12 @@ async def run_codex(prompt, timeout, schema=None):
                 "exec",
                 "--sandbox",
                 "read-only",
+                # remove the shell tool entirely: codex physically cannot run
+                # commands or read local files, so prompt injection in story
+                # text cannot exfiltrate anything from this machine (the
+                # review prompts are self-contained and need no tools)
+                "--disable",
+                "shell_tool",
                 # the empty temp dir is not a git repo; without this codex refuses
                 "--skip-git-repo-check",
                 "-m",
@@ -250,6 +277,7 @@ async def run_codex(prompt, timeout, schema=None):
             process = await asyncio.create_subprocess_exec(
                 *args,
                 cwd=tmpdir,
+                env={**os.environ, "CODEX_HOME": str(ensure_codex_home())},
                 # codex blocks waiting on a non-tty stdin if one is left open
                 stdin=asyncio.subprocess.DEVNULL,
                 stdout=asyncio.subprocess.PIPE,
