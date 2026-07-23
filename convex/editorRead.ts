@@ -7,6 +7,7 @@ import {
   isContributorOrAdmin,
 } from "./lib/authorization";
 import { hasNoAudioCourseTag } from "./lib/courseTags";
+import { buildAvatarRows } from "./lib/avatarRows";
 import { courseContributorValidator } from "./lib/courseContributors";
 
 type LanguageDoc = Doc<"languages">;
@@ -196,44 +197,6 @@ async function getUserNameByAuthDocId(ctx: QueryCtx, authDocIds: string[]) {
   }
 
   return map;
-}
-
-async function buildAvatarRows(
-  ctx: QueryCtx,
-  language: LanguageDoc,
-  avatars?: AvatarDoc[],
-  mappings?: AvatarMappingDoc[],
-) {
-  const avatarRows = avatars ?? (await ctx.db.query("avatars").collect());
-  const mappingRows =
-    mappings ??
-    (await ctx.db
-      .query("avatar_mappings")
-      .withIndex("by_language_id", (q) => q.eq("languageId", language._id))
-      .collect());
-
-  const mappingByAvatar = new Map<Id<"avatars">, AvatarMappingDoc>();
-  for (const mapping of mappingRows) {
-    mappingByAvatar.set(mapping.avatarId, mapping);
-  }
-
-  return avatarRows
-    .filter((avatar: AvatarDoc) => avatar.link !== "[object Object]")
-    .map((avatar: AvatarDoc) => {
-      const mapping = mappingByAvatar.get(avatar._id);
-      return {
-        id: mapping?.legacyId ?? null,
-        avatar_id: avatar.legacyId,
-        language_id: language.legacyId,
-        name: mapping?.name ?? avatar.name ?? "",
-        link: avatar.link,
-        speaker: mapping?.speaker ?? "",
-      };
-    })
-    .sort(
-      (a: { avatar_id: number }, b: { avatar_id: number }) =>
-        a.avatar_id - b.avatar_id,
-    );
 }
 
 export const getEditorSidebarData = query({
