@@ -55,9 +55,14 @@ user running the bot.
   codex invocations run with `--disable shell_tool`: codex has no
   command-execution tool at all and cannot read local files, which makes
   prompt injection in story text unable to exfiltrate anything from the
-  machine. `--sandbox read-only` and an empty working directory remain as
-  additional layers. Because of this, running under a normal user is
-  acceptable; a dedicated unix user is still nice-to-have defense in depth.
+  machine. Codex also runs with an isolated `CODEX_HOME`
+  (`discord_roles/.codex_home`, created automatically with a minimal config
+  and a symlink to the real `auth.json`), so the user's own
+  `~/.codex/config.toml` — including any MCP servers that would reintroduce
+  tools — is never inherited. `--sandbox read-only` and an empty working
+  directory remain as additional layers. Because of this, running under a
+  normal user is acceptable; a dedicated unix user is still nice-to-have
+  defense in depth.
 - A spend cap on the Codex account is still recommended as a general
   abuse backstop.
 - Bot output is scrubbed for every value from `.env.local` before posting,

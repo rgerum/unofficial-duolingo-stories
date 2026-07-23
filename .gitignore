@@ -70,3 +70,4 @@ discord_roles/log-archive/
 */skills/*
 skills/*
 __pycache__/
+discord_roles/.codex_home/
