@@ -101,6 +101,13 @@ function countWords(tokens: string[]): number {
   return n;
 }
 
+function countAudioWords(text: string): number {
+  // The parser turns "|" into WORD JOINER so adjacent hint tokens remain
+  // separate while TTS reads them as one word. Hint tokenization deliberately
+  // splits on this character, but audio word counting must preserve the join.
+  return countWords(splitTextTokens(text.replace(/\u2060/g, "")));
+}
+
 /** Replicates generateHintMap's positional alignment of text and hint lines. */
 function hintAlignment(text: string, hintLine: string) {
   const textList = splitTextTokens(text.replace(/\|/g, "⁠"));
@@ -465,7 +472,7 @@ function lintAudio(
       lineNumber,
     });
   }
-  const words = countWords(splitTextTokens(content.text));
+  const words = countAudioWords(content.text);
   // only count marks that advance through the text; the ";0,ms" terminal
   // marker (and any repeated position) is not a word mark
   const wordMarks = keypoints.filter(

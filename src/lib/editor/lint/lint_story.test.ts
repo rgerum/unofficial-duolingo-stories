@@ -186,6 +186,14 @@ $audio/x.mp3;7,500;3,200;6,300`);
   assert.equal(byRule(findings, "missing-audio").length, 0);
 });
 
+test("does not count a pipe-joined segment as a separate audio word", () => {
+  const findings = lint(`[LINE]
+> Beawan Linwan huk mikhuna~wasi|man rinku.
+~ Bea~y Lin una restaurante~(casa~de~comida)|a van
+$9795/_fc04951c.mp3;6,0;7,692;4,692;8,345;8,807;6,808`);
+  assert.equal(byRule(findings, "audio-timemark-count").length, 0);
+});
+
 test("flags a line without any translation hints", () => {
   const findings = lint(`[LINE]
 Speaker414: Bonjour le monde.`);
