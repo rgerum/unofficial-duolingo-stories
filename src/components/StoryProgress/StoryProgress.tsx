@@ -15,7 +15,8 @@ import StoryFeedback from "../StoryFeedback/StoryFeedback";
 import StoryFinishedScreen from "../StoryFinishedScreen";
 import StoryTitlePage from "../StoryTitlePage";
 import { playSoundEffect } from "@/lib/sound-effects";
-import { StoryType } from "@/components/editor/story/syntax_parser_new";
+import { getFeedbackLineIndex } from "@/components/StoryFeedback/feedbackContext";
+import { getParts } from "@/components/StoryProgress/parts";
 import {
   StoryElement,
   StoryElementHeader,
@@ -107,33 +108,6 @@ function Line({
     );
   }
   return <div>error</div>;
-}
-
-function GetParts(story: StoryType) {
-  const parts: StoryElement[][] = [];
-  let last_id = -1;
-  for (let element of story.elements) {
-    if (element.trackingProperties === undefined) {
-      continue;
-    }
-    if (last_id !== element.trackingProperties.line_index) {
-      parts.push([]);
-      last_id = element.trackingProperties.line_index;
-    }
-    if (
-      element.type === "MULTIPLE_CHOICE" &&
-      (parts.at(-1)?.length ?? 0) > 1 &&
-      element.trackingProperties.challenge_type === "multiple-choice"
-    )
-      parts.push([]);
-    parts[parts.length - 1].push(element);
-  }
-  for (let i = 0; i < parts.length; i++) {
-    for (let j = 0; j < parts[i].length; j++) {
-      parts[i][j].trackingProperties.line_index = i;
-    }
-  }
-  return parts;
 }
 
 function getCharacter(parts: StoryElement[]) {
@@ -456,7 +430,7 @@ function StoryProgress({
 }) {
   const parts_list = React.useMemo(() => {
     if (providedPartsList) return providedPartsList;
-    if (story) return GetParts(story);
+    if (story) return getParts(story.elements);
     return undefined;
   }, [providedPartsList, story]);
   const initialStoryProgress = getInitialStoryProgress({
@@ -583,6 +557,10 @@ function StoryProgress({
     currentPart,
     partProgress,
   });
+  const currentFeedbackLineIndex = getFeedbackLineIndex(
+    currentPart,
+    partProgress,
+  );
   const currentFeedbackLineText = getFeedbackLineText(currentPart);
   const currentFeedbackLineElement = getFeedbackLineElement({
     currentPart,
@@ -739,6 +717,7 @@ function StoryProgress({
                 <StoryFeedback
                   storyId={story.id}
                   line={currentEditorLine}
+                  lineIndex={currentFeedbackLineIndex}
                   lineText={currentFeedbackLineText}
                   lineElement={currentFeedbackLineElement}
                   settings={settings}

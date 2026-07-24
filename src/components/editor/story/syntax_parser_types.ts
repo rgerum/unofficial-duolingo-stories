@@ -60,12 +60,18 @@ export type LineElement =
   | LineElementProse
   | LineElementTitle;
 
+type TrackingProperties<TLineIndex extends number = number> = {
+  line_index: TLineIndex;
+  source_line_index?: number;
+  [key: string]: unknown;
+};
+
 export type StoryElementHeader = {
   type: "HEADER";
   illustrationUrl: string;
   title: string;
   learningLanguageTitleContent: ContentWithHints;
-  trackingProperties: { line_index: 0 };
+  trackingProperties: TrackingProperties<0>;
   audio?: Audio;
   lang: string;
   editor: {
@@ -80,7 +86,7 @@ export type StoryElementLine = {
   type: "LINE";
   hideRangesForChallenge?: HideRange[];
   line: LineElement;
-  trackingProperties: { line_index: number; [key: string]: any };
+  trackingProperties: TrackingProperties;
   audio?: Audio;
   lang: string;
   editor: {
@@ -96,8 +102,7 @@ export type StoryElementMultipleChoice = {
   answers: (string | HintMapResult)[];
   correctAnswerIndex: number;
   question?: ContentWithHints;
-  trackingProperties: {
-    line_index: number;
+  trackingProperties: TrackingProperties & {
     challenge_type: "multiple-choice" | "continuation";
   };
   lang: string;
@@ -112,8 +117,7 @@ export type StoryElementMultipleChoice = {
 export type StoryElementChallengePrompt = {
   type: "CHALLENGE_PROMPT";
   prompt: ContentWithHints;
-  trackingProperties: {
-    line_index: number;
+  trackingProperties: TrackingProperties & {
     challenge_type: "select-phrases" | "continuation" | "arrange";
   };
   lang: string;
@@ -129,8 +133,7 @@ export type StoryElementSelectPhrase = {
   type: "SELECT_PHRASE";
   answers: (string | HintMapResult)[];
   correctAnswerIndex: number;
-  trackingProperties: {
-    line_index: number;
+  trackingProperties: TrackingProperties & {
     challenge_type: "select-phrases";
   };
   lang: string;
@@ -142,8 +145,7 @@ export type StoryElementArrange = {
   characterPositions?: number[];
   phraseOrder: number[];
   selectablePhrases: string[];
-  trackingProperties: {
-    line_index: number;
+  trackingProperties: TrackingProperties & {
     challenge_type: "arrange";
   };
   lang: string;
@@ -155,8 +157,7 @@ export type StoryElementPointToPhrase = {
   correctAnswerIndex: number;
   transcriptParts: { selectable: boolean; text: string }[];
   question: ContentWithHints;
-  trackingProperties: {
-    line_index: number;
+  trackingProperties: TrackingProperties & {
     challenge_type: "point-to-phrase";
   };
   lang_question: string;
@@ -173,8 +174,7 @@ export type StoryElementMatch = {
   type: "MATCH";
   fallbackHints: { phrase: string; translation: string }[];
   prompt: string;
-  trackingProperties: {
-    line_index: number;
+  trackingProperties: TrackingProperties & {
     challenge_type: "match";
   };
   lang: string;
@@ -200,8 +200,7 @@ export type StoryElementError = {
     end_no?: number;
     active_no?: number;
   };
-  trackingProperties: {
-    line_index: number;
+  trackingProperties: TrackingProperties & {
     challenge_type: "error";
   };
 };

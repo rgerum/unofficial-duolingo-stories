@@ -1,7 +1,7 @@
 import {
   generate_ssml_line,
   text_to_keypoints,
-} from "@/lib/editor/audio/audio_edit_tools";
+} from "@/lib/editor/audio/audio_timing";
 import { Avatar } from "@/app/editor/story/[story]/types";
 import {
   Audio,
@@ -350,7 +350,7 @@ function splitTextTokens(text, keep_tilde=true) {
 }
 */
 
-function splitTextTokens(text: string, keep_tilde = true) {
+export function splitTextTokens(text: string, keep_tilde = true) {
   if (!text) return [];
   //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
   if (keep_tilde)
@@ -362,7 +362,7 @@ function splitTextTokens(text: string, keep_tilde = true) {
   //return text.split(/([\s\\¡!"#$%&*,、，.。\/:：;<=>¿?@^_`{|}…~]*(?:^|\s|$|​)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]*)/)
 }
 
-function splitTextTokens2(text: string, keep_tilde = true) {
+export function splitTextTokens2(text: string, keep_tilde = true) {
   if (!text) return [];
   if (keep_tilde)
     //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)

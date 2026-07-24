@@ -12,6 +12,7 @@ import { example, highlightStyle } from "@/components/editor/story/parser";
 import useScrollLinking from "@/components/editor/story/scroll_linking";
 import useResizeEditor from "@/components/editor/story/editor-resize";
 import StoryEditorPreview from "@/components/StoryEditorPreview";
+import { LintPanel } from "./lint_panel";
 import Cast from "@/components/editor/story/cast";
 import { StoryEditorHeader } from "@/app/editor/story/[story]/header";
 import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
@@ -669,6 +670,10 @@ export default function EditorV2({
           />
         </div>
       </div>
+      <LintPanel
+        findings={model.lintFindings}
+        editorState={editorStateForPreview}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   setContributorWriteByDiscordAccountId,
 } from "./discordBot";
 import { authComponent, createAuth } from "./betterAuth/auth";
+import { reviewStoriesForDiscord } from "./storyReview";
 
 const http = httpRouter();
 
@@ -23,6 +24,11 @@ http.route({
   path: "/discord/set-stories-role-status",
   method: "POST",
   handler: setStoriesRoleSyncStatus,
+});
+http.route({
+  path: "/discord/review-stories",
+  method: "POST",
+  handler: reviewStoriesForDiscord,
 });
 
 export default http;

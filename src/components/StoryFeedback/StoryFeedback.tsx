@@ -26,6 +26,7 @@ import { createOperationKey } from "@/lib/operation-key";
 type StoryFeedbackProps = {
   storyId: number;
   line?: number;
+  lineIndex?: number;
   lineText?: string;
   lineElement?: StoryElementLine;
   settings: StorySettings;
@@ -45,6 +46,7 @@ type FeedbackCategory = (typeof feedbackCategories)[number]["value"];
 export default function StoryFeedback({
   storyId,
   line,
+  lineIndex,
   lineText,
   lineElement,
   settings,
@@ -141,6 +143,7 @@ export default function StoryFeedback({
                 operationKey,
                 source: "web",
                 line,
+                lineIndex,
                 lineText,
                 category,
                 comment,

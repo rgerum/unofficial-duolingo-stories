@@ -11,6 +11,7 @@ import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
 import { retryOnceAfterAuthRefresh } from "./save_auth_retry";
 import { checkStoryLineAudio } from "./audio_problem_check";
 import { hasNoAudioCourseTag } from "@/lib/course-tags";
+import { lintStory, type LintFinding } from "@/lib/editor/lint";
 
 type LanguageLike = {
   short: string;
@@ -70,6 +71,7 @@ type EditorModel = {
   };
   parsedMeta: ReturnType<typeof processStoryFile>[1];
   audioInsertLines: ReturnType<typeof processStoryFile>[2];
+  lintFindings: LintFinding[];
   save: () => Promise<void>;
   remove: () => Promise<void>;
   isSaving: boolean;
@@ -225,6 +227,24 @@ export function useStoryEditorModel({
     ],
   );
 
+  const lintFindings = React.useMemo(
+    () =>
+      lintStory({
+        text: normalizeDocText(docText),
+        story: parsedStoryBase,
+        meta: parsedMeta,
+        learningLanguage: learningLanguage?.short,
+        noAudio: hasNoAudioCourseTag(storyData.course_tags),
+      }),
+    [
+      docText,
+      learningLanguage?.short,
+      parsedMeta,
+      parsedStoryBase,
+      storyData.course_tags,
+    ],
+  );
+
   const toFriendlyError = React.useCallback((error: unknown, verb: string) => {
     const rawMessage = error instanceof Error ? error.message : "";
     const isOffline =
@@ -361,6 +381,7 @@ export function useStoryEditorModel({
     parsedStory,
     parsedMeta,
     audioInsertLines,
+    lintFindings,
     save,
     remove,
     isSaving,
