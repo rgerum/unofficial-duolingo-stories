@@ -26,9 +26,15 @@ export default function StoryScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const params = useLocalSearchParams<{ id: string; listening?: string }>();
+  const params = useLocalSearchParams<{
+    id: string;
+    listening?: string;
+    source?: string;
+  }>();
   const storyId = Number(params.id);
   const listening = params.listening === "1";
+  // Set by the home-screen widget's deep link; anything else is an in-app open.
+  const openSource = params.source === "widget" ? "widget" : "app";
   const { hideStoryQuestions } = useAppState();
   const { data: session } = useAuthSession();
   const { isOffline } = useNetworkStatus();
@@ -102,10 +108,17 @@ export default function StoryScreen() {
         listening_mode: effectiveListening,
         hide_questions: effectiveListening || hideStoryQuestions,
         signed_in: Boolean(session?.session),
+        open_source: openSource,
         ...extra,
       });
     },
-    [effectiveListening, hideStoryQuestions, session?.session, story],
+    [
+      effectiveListening,
+      hideStoryQuestions,
+      openSource,
+      session?.session,
+      story,
+    ],
   );
 
   React.useEffect(() => {

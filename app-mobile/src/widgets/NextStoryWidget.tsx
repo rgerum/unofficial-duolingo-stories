@@ -164,7 +164,9 @@ function NextStoryWidget(
     );
   }
 
-  const destination = `duostories:///story/${props.storyId}?listening=${props.listening ? "1" : "0"}`;
+  // source=widget is read by the story screen so widget-driven opens are
+  // distinguishable from in-app opens in analytics.
+  const destination = `duostories:///story/${props.storyId}?listening=${props.listening ? "1" : "0"}&source=widget`;
 
   if (environment.widgetFamily === "systemSmall") {
     return (
