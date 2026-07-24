@@ -25,4 +25,16 @@ describe("findNextStory", () => {
   it("returns null when every story is finished", () => {
     expect(findNextStory(stories, new Set([1, 2, 3]))).toBeNull();
   });
+
+  it("returns null when the course has no stories", () => {
+    expect(findNextStory([], new Set([1]))).toBeNull();
+  });
+
+  it("ignores done ids that are not part of the course", () => {
+    expect(findNextStory(stories, new Set([99]))).toMatchObject({
+      id: 1,
+      completedCount: 0,
+      totalCount: 3,
+    });
+  });
 });

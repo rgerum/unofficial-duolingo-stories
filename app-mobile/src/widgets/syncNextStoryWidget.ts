@@ -6,9 +6,11 @@ import { findNextStory, type WidgetStory } from "./nextStory";
 
 // Transparent story character PNG, served directly by the Duolingo stories CDN.
 const STORY_ICON_BASE = "https://stories-cdn.duolingo.com/image";
-// Server-rendered flag PNG (matches the app's flags). Deployed with the PR;
-// until then the download fails and the widget renders without the flag.
+// Server-rendered flag PNG, so the widget shows the same flags as the app.
 const WIDGET_FLAG_ENDPOINT = "https://duostories.org/api/widget-flag";
+const STORY_IMAGE_PREFIX = "next-story-";
+
+type WidgetAsset = { fileName: string; url: string };
 
 let syncGeneration = 0;
 
@@ -48,19 +50,40 @@ export async function syncNextStoryWidget({
     completedCount: nextStory.completedCount,
     totalCount: nextStory.totalCount,
   };
-  NextStoryWidget.updateSnapshot(snapshot);
+
+  const directory = openWidgetsDirectory();
+  // Keyed by artwork hash as well as story id, so replaced artwork is fetched
+  // again instead of being served from a stale cache entry.
+  const storyAsset: WidgetAsset = {
+    fileName: `${STORY_IMAGE_PREFIX}${nextStory.id}-${sanitize(nextStory.image)}.png`,
+    url: `${STORY_ICON_BASE}/${nextStory.image}.png`,
+  };
+  const flagAsset = resolveFlagAsset(learningLanguageShort, flag, flagFile);
+
+  // Publish whatever is already on disk first so the widget does not flash
+  // without artwork while the downloads run.
+  const cachedImage = directory && cachedUri(directory, storyAsset.fileName);
+  const cachedFlag =
+    directory && flagAsset && cachedUri(directory, flagAsset.fileName);
+  NextStoryWidget.updateSnapshot({
+    ...snapshot,
+    ...(cachedImage ? { imagePath: cachedImage } : {}),
+    ...(cachedFlag ? { flagPath: cachedFlag } : {}),
+  });
+
+  if (!directory) return;
+  if (cachedImage && (cachedFlag || !flagAsset)) {
+    pruneStaleStoryImages(directory, storyAsset.fileName);
+    return;
+  }
 
   try {
-    const directory = new Directory(widgetsDirectory);
-    if (!directory.exists) directory.create({ intermediates: true });
-
     const [imagePath, flagPath] = await Promise.all([
-      downloadImage(
-        directory,
-        `next-story-${nextStory.id}.png`,
-        `${STORY_ICON_BASE}/${nextStory.image}.png`,
-      ),
-      downloadFlag(directory, learningLanguageShort, flag, flagFile),
+      cachedImage ?? downloadImage(directory, storyAsset),
+      cachedFlag ??
+        (flagAsset
+          ? downloadImage(directory, flagAsset)
+          : Promise.resolve(null)),
     ]);
     if (generation !== syncGeneration) return;
 
@@ -69,45 +92,87 @@ export async function syncNextStoryWidget({
       ...(imagePath ? { imagePath } : {}),
       ...(flagPath ? { flagPath } : {}),
     });
-  } catch {
-    // Keep the last good snapshot if downloading the widget assets fails.
+    pruneStaleStoryImages(directory, storyAsset.fileName);
+  } catch (error) {
+    // Keep the last good snapshot if refreshing the widget assets fails.
+    console.warn("Failed to refresh next-story widget assets", error);
   }
 }
 
-async function downloadFlag(
-  directory: Directory,
+function openWidgetsDirectory(): Directory | null {
+  try {
+    const directory = new Directory(widgetsDirectory as string);
+    if (!directory.exists) directory.create({ intermediates: true });
+    return directory;
+  } catch (error) {
+    console.warn("Widget assets directory unavailable", error);
+    return null;
+  }
+}
+
+function resolveFlagAsset(
   learningLanguageShort: string | undefined,
   flag: number | string | undefined,
   flagFile: string | undefined,
-): Promise<string | null> {
+): WidgetAsset | null {
   const url = new URL(WIDGET_FLAG_ENDPOINT);
   let cacheKey: string;
   if (flagFile) {
     url.searchParams.set("flag_file", flagFile);
-    cacheKey = flagFile.replace(/[^a-z0-9]/gi, "_");
+    cacheKey = sanitize(flagFile);
   } else if (learningLanguageShort || flag !== undefined) {
     if (learningLanguageShort)
       url.searchParams.set("lang", learningLanguageShort);
     if (flag !== undefined) url.searchParams.set("flag", String(flag));
-    cacheKey = learningLanguageShort || `flag-${flag}`;
+    cacheKey = sanitize(learningLanguageShort || `flag-${flag}`);
   } else {
     return null;
   }
-  return downloadImage(directory, `flag-${cacheKey}.png`, url.toString());
+  return { fileName: `flag-${cacheKey}.png`, url: url.toString() };
+}
+
+function cachedUri(directory: Directory, fileName: string): string | null {
+  try {
+    const file = new File(directory, fileName);
+    return file.exists ? file.uri : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Removes artwork for stories the widget no longer shows. */
+function pruneStaleStoryImages(
+  directory: Directory,
+  keepFileName: string,
+): void {
+  try {
+    for (const entry of directory.list()) {
+      if (!(entry instanceof File)) continue;
+      if (!entry.name.startsWith(STORY_IMAGE_PREFIX)) continue;
+      if (entry.name === keepFileName) continue;
+      entry.delete();
+    }
+  } catch (error) {
+    console.warn("Failed to prune stale next-story widget images", error);
+  }
 }
 
 async function downloadImage(
   directory: Directory,
-  fileName: string,
-  url: string,
+  asset: WidgetAsset,
 ): Promise<string | null> {
   try {
-    const file = new File(directory, fileName);
-    await File.downloadFileAsync(url, file, { idempotent: true });
+    const file = new File(directory, asset.fileName);
+    await File.downloadFileAsync(asset.url, file, { idempotent: true });
     return file.uri;
-  } catch {
+  } catch (error) {
+    console.warn(`Failed to download widget asset ${asset.url}`, error);
     return null;
   }
+}
+
+function sanitize(value: string): string {
+  return value.replace(/[^a-z0-9]/gi, "_");
 }
 
 export function clearNextStoryWidget(): void {
