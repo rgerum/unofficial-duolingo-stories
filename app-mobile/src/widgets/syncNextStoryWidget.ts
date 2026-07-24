@@ -121,10 +121,18 @@ function resolveFlagAsset(
     url.searchParams.set("flag_file", flagFile);
     cacheKey = sanitize(flagFile);
   } else if (learningLanguageShort || flag !== undefined) {
-    if (learningLanguageShort)
+    // The key has to cover every parameter that changes the rendered flag,
+    // otherwise two languages sharing an iso would reuse one cached file.
+    const parts: string[] = [];
+    if (learningLanguageShort) {
       url.searchParams.set("lang", learningLanguageShort);
-    if (flag !== undefined) url.searchParams.set("flag", String(flag));
-    cacheKey = sanitize(learningLanguageShort || `flag-${flag}`);
+      parts.push(learningLanguageShort);
+    }
+    if (flag !== undefined) {
+      url.searchParams.set("flag", String(flag));
+      parts.push(`flag-${flag}`);
+    }
+    cacheKey = sanitize(parts.join("-"));
   } else {
     return null;
   }
