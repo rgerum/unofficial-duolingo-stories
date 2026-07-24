@@ -47,6 +47,7 @@ import {
   detectSpeechSegmentsFromAnalysis,
   getKeepRangeEnd,
   getKeepRanges,
+  getJoinedSegmentSkipRanges,
   moveRangeWithinBounds,
   normalizeRanges,
   resizeRangeWithinBounds,
@@ -1828,6 +1829,9 @@ export default function AudioCutterDialog({
           ? targetId
           : activeId;
       const removedId = survivingId === activeId ? targetId : activeId;
+      const joinedSegments = segments.filter(
+        (segment) => segment.id === activeId || segment.id === targetId,
+      );
       const preservedLabel =
         labelsById[survivingId] || labelsById[removedId] || "";
 
@@ -1857,6 +1861,10 @@ export default function AudioCutterDialog({
             id: survivingId,
             start: mergedStart,
             end: mergedEnd,
+            skipRanges: getJoinedSegmentSkipRanges(joinedSegments, {
+              start: mergedStart,
+              end: mergedEnd,
+            }),
           }),
         );
         return sortSegments(next);
@@ -2928,6 +2936,11 @@ export default function AudioCutterDialog({
     const removedId = nextSegment.id;
     const mergedStart = Math.min(currentSegment.start, nextSegment.start);
     const mergedEnd = Math.max(currentSegment.end, nextSegment.end);
+    const joinedSkipRanges = getJoinedSegmentSkipRanges(
+      [currentSegment, nextSegment],
+      { start: mergedStart, end: mergedEnd },
+      true,
+    );
     const preservedLabel =
       labelsById[survivingId] || labelsById[removedId] || "";
 
@@ -2960,6 +2973,7 @@ export default function AudioCutterDialog({
           id: survivingId,
           start: mergedStart,
           end: mergedEnd,
+          skipRanges: joinedSkipRanges,
         }),
       ]),
     );
