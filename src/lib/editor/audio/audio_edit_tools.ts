@@ -7,6 +7,7 @@ import {
   replace_with_mapping,
   transcribe_text,
 } from "./text_with_mapping";
+import { serializeTimingKeypoints } from "./timing_text";
 import { EditorView } from "codemirror";
 import { HideRange } from "@/components/editor/story/syntax_parser_types";
 import {
@@ -310,20 +311,8 @@ export function timings_to_text({
   filename: string;
   keypoints: { rangeEnd: number; audioStart: number }[];
 }) {
-  let text = filename ? "$" + filename : "";
-  let last_end = 0;
-  let last_time = 0;
-  if (keypoints) {
-    for (let point of keypoints) {
-      text += ";";
-      text += Math.round(point.rangeEnd - last_end);
-      text += ",";
-      text += Math.round(point.audioStart - last_time);
-      last_end = point.rangeEnd;
-      last_time = point.audioStart;
-    }
-  }
-  return text;
+  const prefix = filename ? "$" + filename : "";
+  return prefix + serializeTimingKeypoints(keypoints);
 }
 
 export function timing_text_without_filename(text: string) {

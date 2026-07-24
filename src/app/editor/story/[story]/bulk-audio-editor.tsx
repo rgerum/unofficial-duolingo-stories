@@ -155,20 +155,6 @@ function isAudioFilename(filename: string) {
   return AUDIO_EXTENSIONS.has(getFileExtension(filename));
 }
 
-function timingTextFromKeypoints(
-  keypoints: { rangeEnd: number; audioStart: number }[],
-) {
-  let text = "";
-  let lastEnd = 0;
-  let lastTime = 0;
-  for (const point of keypoints) {
-    text += `;${Math.round(point.rangeEnd - lastEnd)},${Math.round(point.audioStart - lastTime)}`;
-    lastEnd = point.rangeEnd;
-    lastTime = point.audioStart;
-  }
-  return text;
-}
-
 function createDraft(item: BulkAudioEditorItem): BulkAudioEditorDraft {
   return {
     file: null,
@@ -177,7 +163,10 @@ function createDraft(item: BulkAudioEditorItem): BulkAudioEditorDraft {
     uploadState: "idle",
     error: null,
     matchSource: item.existingFilename ? "existing" : null,
-    timingText: timingTextFromKeypoints(item.existingKeypoints),
+    timingText: timings_to_text({
+      filename: "",
+      keypoints: item.existingKeypoints,
+    }),
   };
 }
 

@@ -33,6 +33,51 @@ test("timing_text_without_filename prevents duplicate audio filenames on save", 
   assert.equal(savedText, "$1961/_f34f3b72.mp3;2,132768;7,127");
 });
 
+test("timings_to_text supports timing-only output for shared editor use", () => {
+  assert.equal(
+    timings_to_text({
+      filename: "",
+      keypoints: [
+        { rangeEnd: 5, audioStart: 50 },
+        { rangeEnd: 11, audioStart: 488 },
+      ],
+    }),
+    ";5,50;6,438",
+  );
+});
+
+test("timings_to_text rejects non-finite keypoints instead of serializing NaN", () => {
+  assert.throws(
+    () =>
+      timings_to_text({
+        filename: "example.mp3",
+        keypoints: [{ rangeEnd: Number.NaN, audioStart: 10 }],
+      }),
+    {
+      name: "RangeError",
+      message: "Invalid audio keypoint at index 0: rangeEnd=NaN, audioStart=10",
+    },
+  );
+});
+
+test("timings_to_text rejects keypoints that move backward", () => {
+  assert.throws(
+    () =>
+      timings_to_text({
+        filename: "example.mp3",
+        keypoints: [
+          { rangeEnd: 5, audioStart: 50 },
+          { rangeEnd: 4, audioStart: 60 },
+        ],
+      }),
+    {
+      name: "RangeError",
+      message:
+        "Non-monotonic audio keypoint at index 1: rangeEnd=4 after 5, audioStart=60 after 50",
+    },
+  );
+});
+
 test("get_audio_insert_line targets the next syntax line", () => {
   const doc = Text.of([
     "[SELECT_PHRASE]",
