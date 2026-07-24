@@ -83,6 +83,7 @@ the tracked service unit:
 ```sh
 python3 -m venv discord_roles/.venv
 discord_roles/.venv/bin/pip install -r discord_roles/requirements.txt
+chmod 600 discord_roles/.env.local
 
 install -Dm644 \
   discord_roles/systemd/discord-review-bot.service \
@@ -111,5 +112,9 @@ and restart only this bot:
 ```sh
 git pull --ff-only origin main
 discord_roles/.venv/bin/pip install -r discord_roles/requirements.txt
+install -Dm644 \
+  discord_roles/systemd/discord-review-bot.service \
+  ~/.config/systemd/user/discord-review-bot.service
+systemctl --user daemon-reload
 systemctl --user restart discord-review-bot.service
 ```
