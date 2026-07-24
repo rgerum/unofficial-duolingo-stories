@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createAzureWordBoundaryMark } from "./azure_tts";
+import { createAzureWordBoundaryMark } from "@/app/audio/_lib/audio/azure_tts";
 
 test("createAzureWordBoundaryMark preserves valid Azure boundaries", () => {
   assert.deepEqual(

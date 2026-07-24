@@ -1125,6 +1125,7 @@ export default function BulkAudioEditor({
       for (const item of items) {
         const draft = draftsRef.current[item.id];
         if (!draft) continue;
+        if (draft.error) continue;
         const filename =
           uploadedFilenames[item.id] ||
           draft.uploadedFilename ||

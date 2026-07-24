@@ -178,3 +178,52 @@ test("generate_audio_line rejects null numeric values from JSON speech marks", a
     globalThis.fetch = originalFetch;
   }
 });
+
+test("generate_audio_line rejects negative first speech-mark keypoints", async () => {
+  const originalRequest = globalThis.Request;
+  const originalFetch = globalThis.fetch;
+  let marks = [{ time: 0, end: 0, value: "word" }];
+  globalThis.Request = class {} as unknown as typeof Request;
+  globalThis.fetch = (async () => ({
+    json: async () => ({
+      output_file: "example.mp3",
+      marks,
+    }),
+  })) as unknown as typeof fetch;
+
+  try {
+    await assert.rejects(
+      () =>
+        generate_audio_line({
+          speaker: "cs-CZ-AntoninNeural",
+          text: "word",
+          id: 0,
+          mapping: [-1],
+        }),
+      {
+        name: "RangeError",
+        message:
+          "Invalid speech mark at index 0: rangeEnd=-1 after 0, audioStart=0 after 0",
+      },
+    );
+
+    marks = [{ time: -1, end: 0, value: "word" }];
+    await assert.rejects(
+      () =>
+        generate_audio_line({
+          speaker: "cs-CZ-AntoninNeural",
+          text: "word",
+          id: 0,
+          mapping: [0],
+        }),
+      {
+        name: "RangeError",
+        message:
+          "Invalid speech mark at index 0: rangeEnd=0 after 0, audioStart=-1 after 0",
+      },
+    );
+  } finally {
+    globalThis.Request = originalRequest;
+    globalThis.fetch = originalFetch;
+  }
+});

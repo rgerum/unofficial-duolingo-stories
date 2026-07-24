@@ -87,8 +87,8 @@ export async function generate_audio_line(ssml: {
       last_time = Math.round(mark.timeSeconds * 1000);
     }
   } else {
-    let last_time = -Infinity;
-    let last_end = -Infinity;
+    let last_time = 0;
+    let last_end = 0;
     for (const [index, mark] of ssml_response.marks.entries()) {
       if (mark.time === undefined) continue;
       if (!Number.isFinite(mark.end) || !Number.isFinite(mark.time)) {
