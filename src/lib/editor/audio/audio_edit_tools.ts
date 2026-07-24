@@ -89,18 +89,32 @@ export async function generate_audio_line(ssml: {
   } else {
     let last_time = 0;
     let last_end = 0;
-    for (let mark of ssml_response.marks) {
-      if (mark.time === undefined) {
-        last_end += Math.round(mark.value.length);
-        continue;
+    for (const [index, mark] of ssml_response.marks.entries()) {
+      if (mark.time === undefined) continue;
+      if (!Number.isFinite(mark.end) || !Number.isFinite(mark.time)) {
+        throw new RangeError(
+          `Invalid speech mark at index ${index}: end=${mark.end}, time=${mark.time}`,
+        );
       }
+      const rangeEnd = mapping[Math.round(mark.end)];
+      const audioStart = Math.round(mark.time);
+      if (
+        !Number.isFinite(rangeEnd) ||
+        !Number.isFinite(audioStart) ||
+        rangeEnd < last_end ||
+        audioStart < last_time
+      ) {
+        throw new RangeError(
+          `Invalid speech mark at index ${index}: rangeEnd=${rangeEnd} after ${last_end}, audioStart=${audioStart} after ${last_time}`,
+        );
+      }
+
       keypoints.push({
-        rangeEnd: mapping[Math.round(mark.end)],
-        audioStart: Math.round(mark.time),
+        rangeEnd,
+        audioStart,
       });
-      //timings.push([Math.round(mark.value.length) + Math.round(last_end), Math.round(mark.time) - last_time]);
-      last_end += Math.round(mark.value.length);
-      last_time = Math.round(mark.time);
+      last_end = rangeEnd;
+      last_time = audioStart;
     }
   }
 

@@ -3,7 +3,14 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import StoryLineHints from "@/components/StoryLineHints";
 import { splitTextTokens } from "@/lib/editor/tts_transcripte";
-import { timing_text_without_filename } from "@/lib/editor/audio/audio_edit_tools";
+import {
+  text_to_keypoints,
+  timing_text_without_filename,
+} from "@/lib/editor/audio/audio_edit_tools";
+import {
+  buildTimingText,
+  serializeTimingKeypoints,
+} from "@/lib/editor/audio/timing_text";
 
 import { useWavesurfer } from "@wavesurfer/react";
 import Regions from "wavesurfer.js/dist/plugins/regions.js";
@@ -104,6 +111,23 @@ export default function SoundRecorder({
   const [timingText, setTimingText] = useState(() =>
     timing_text_without_filename(initialTimingText),
   );
+  const [timingError, setTimingError] = useState<string | null>(() => {
+    if (!initialTimingText) return null;
+    try {
+      const [, keypoints] = text_to_keypoints(initialTimingText);
+      if (
+        serializeTimingKeypoints(keypoints) !==
+        timing_text_without_filename(initialTimingText)
+      ) {
+        throw new RangeError("Existing audio timings are not canonical.");
+      }
+      return null;
+    } catch (cause) {
+      return cause instanceof Error && cause.message
+        ? cause.message
+        : "Existing audio timings are invalid.";
+    }
+  });
 
   const parts2 = useMemo(() => {
     const parts = splitTextTokens(content.text);
@@ -121,19 +145,16 @@ export default function SoundRecorder({
   }, [content]);
 
   const updateTimingText = useCallback((regions: Region[], parts2: Part[]) => {
-    let text = "";
-
-    for (let i = 0; i < regions.length; i++) {
-      text +=
-        ";" +
-        (parts2[i].text.length +
-          parts2[i].pos -
-          (parts2[i - 1]?.text?.length + parts2[i - 1]?.pos || 0)) +
-        "," +
-        (Math.floor(regions[i].start * 1000) -
-          Math.floor(regions[i - 1]?.start * 1000 || 0));
+    try {
+      setTimingText(buildTimingText(parts2, regions));
+      setTimingError(null);
+    } catch (cause) {
+      setTimingError(
+        cause instanceof Error && cause.message
+          ? cause.message
+          : "Audio timings are invalid.",
+      );
     }
-    setTimingText(text);
   }, []);
 
   const onDecode = useCallback(
@@ -249,6 +270,11 @@ export default function SoundRecorder({
   }, [wavesurfer]);
 
   const onSaveX = async () => {
+    if (timingError) {
+      window.alert(`Cannot save audio timings.\n${timingError}`);
+      return;
+    }
+
     let filename = urlIndex;
     if (!uploaded) {
       let uploadResult: Response | undefined;
@@ -325,6 +351,9 @@ export default function SoundRecorder({
         content={content}
       />
       <p>{timingText}</p>
+      {timingError ? (
+        <p className="text-sm text-[#b33b3b]">{timingError}</p>
+      ) : null}
       <div ref={containerRef} />
       <div className="mt-3 flex items-center justify-end gap-2">
         <button
@@ -333,7 +362,11 @@ export default function SoundRecorder({
         >
           Previous
         </button>
-        <button className={primaryButtonClassName} onClick={onSaveX}>
+        <button
+          className={primaryButtonClassName}
+          onClick={onSaveX}
+          disabled={Boolean(timingError)}
+        >
           Save
         </button>
         <button className={actionButtonClassName} onClick={soundRecorderNext}>

@@ -10,6 +10,7 @@ import type {
   IpaReplacement,
   TranscribeData,
 } from "@/components/editor/story/syntax_parser_new";
+import { serializeTimingKeypoints, type TimingKeypoint } from "./timing_text";
 
 // Pure audio timing/SSML helpers, kept free of CodeMirror and browser
 // dependencies so the story parser (and everything importing it, like the
@@ -166,22 +167,10 @@ export function timings_to_text({
   keypoints,
 }: {
   filename: string;
-  keypoints: { rangeEnd: number; audioStart: number }[];
+  keypoints: readonly TimingKeypoint[];
 }) {
-  let text = filename ? "$" + filename : "";
-  let last_end = 0;
-  let last_time = 0;
-  if (keypoints) {
-    for (let point of keypoints) {
-      text += ";";
-      text += Math.round(point.rangeEnd - last_end);
-      text += ",";
-      text += Math.round(point.audioStart - last_time);
-      last_end = point.rangeEnd;
-      last_time = point.audioStart;
-    }
-  }
-  return text;
+  const prefix = filename ? "$" + filename : "";
+  return prefix + serializeTimingKeypoints(keypoints);
 }
 
 export function timing_text_without_filename(text: string) {
@@ -193,7 +182,7 @@ export function timing_text_without_filename(text: string) {
 export function text_to_keypoints(line: string) {
   const parts = line.split(";");
   const filename = parts.splice(0, 1)[0];
-  const keypoints: { rangeEnd: number; audioStart: number }[] = [];
+  const keypoints: TimingKeypoint[] = [];
   let last_end = 0;
   let last_time = 0;
   for (const part of parts) {
