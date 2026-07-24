@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Duostories – Next Story Widget Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --eel-bg: #131f22;
+    --eel-card: #202f36;
+    --eel-border: #37464f;
+    --text-light: #f1f7fb;
+    --text-dim: #c7d1d8;
+    --green: #58cc02;
+    --green-dark: #58a700;
+    --blue: #1cb0f6;
+    --blue-strong: #49c0f8;
+    --gold: #ffc800;
+    --light-card: #ffffff;
+    --light-text: #3c3c3c;
+    --light-dim: #777777;
+    --light-border: #e5e5e5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Nunito", -apple-system, sans-serif;
+    background: linear-gradient(160deg, #0b1a2e 0%, #143c54 45%, #0e2b3d 100%);
+    color: var(--text-light);
+    padding: 48px 56px;
+  }
+  h1 { font-weight: 900; font-size: 30px; margin-bottom: 6px; }
+  .subtitle { color: #9fb3c8; margin-bottom: 40px; font-size: 15px; }
+  .concept { display: grid; grid-template-columns: 320px 1fr; gap: 36px; margin-bottom: 64px; align-items: start; }
+  .concept-info h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .concept-info .tag { display:inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; background: rgba(88,204,2,.18); color:#8fe35a; border-radius: 6px; padding: 3px 8px; margin-bottom: 10px;}
+  .concept-info p { font-size: 13.5px; line-height: 1.55; color: #c3d2de; margin-bottom: 8px; }
+  .widgets { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-end; }
+  .widget-wrap { text-align: center; }
+  .widget-wrap .label { margin-top: 10px; font-size: 12px; color: #8aa0b4; }
+
+  /* iOS widget frames — 2x scale of pt sizes (small 170pt, medium 364x170pt) */
+  .w { border-radius: 44px; overflow: hidden; position: relative; box-shadow: 0 18px 40px rgba(0,0,0,.45); }
+  .w.small  { width: 340px; height: 340px; }
+  .w.medium { width: 728px; height: 340px; }
+  .w.dark  { background: var(--eel-card); color: var(--text-light); }
+  .w.light { background: var(--light-card); color: var(--light-text); }
+
+  .icon-img { display:block; }
+
+  /* ---------- Concept A: Character Spotlight ---------- */
+  .a-med { display:flex; flex-direction: column; padding: 34px 38px 30px; height:100%; }
+  .a-top { display:flex; flex: 1; gap: 20px; align-items: center; }
+  .a-text { flex: 1; min-width: 0; display:flex; flex-direction:column; gap: 10px; }
+  .chip { display:inline-flex; align-items:center; gap:8px; font-size: 22px; font-weight: 800; color: var(--blue-strong); }
+  .w.light .chip { color: #1899d6; }
+  .flag-da { width: 30px; height: 22px; border-radius: 5px; background: #c8102e; position: relative; overflow:hidden; flex:none;}
+  .flag-da::before { content:""; position:absolute; left:9px; top:0; width:5px; height:100%; background:#fff; }
+  .flag-da::after  { content:""; position:absolute; top:9px; left:0; width:100%; height:5px; background:#fff; }
+  .a-title { font-size: 42px; font-weight: 900; line-height: 1.12; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
+  .a-icon { width: 168px; height: 168px; flex: none; }
+  .bar-row { display:flex; align-items:center; gap: 16px; margin-top: 18px;}
+  .bar { flex:1; height: 16px; border-radius: 8px; background: var(--eel-border); overflow:hidden; }
+  .w.light .bar { background: var(--light-border); }
+  .bar-fill { height:100%; width: 8%; min-width: 16px; border-radius: 8px; background: var(--green); }
+  .bar-label { font-size: 20px; font-weight: 800; color: var(--text-dim); }
+  .w.light .bar-label { color: var(--light-dim); }
+  .a-sm { display:flex; flex-direction:column; padding: 28px; height:100%; }
+  .a-sm .a-icon { width: 128px; height: 128px; align-self: center; margin-top: 2px;}
+  .a-sm .a-title { font-size: 29px; margin-top: 12px; text-align:center;}
+  .a-sm .bar-row { margin-top: auto; }
+
+  /* ---------- Concept B: Progress Ring ---------- */
+  .b-sm { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding: 24px; gap: 12px;}
+  .ring { position: relative; width: 190px; height: 190px; }
+  .ring svg { position:absolute; inset:0; transform: rotate(-90deg); }
+  .ring .icon-img { position:absolute; inset: 26px; width: 138px; height: 138px; border-radius: 50%; background: #17272c; padding: 14px; }
+  .w.light .ring .icon-img { background: #f1f7fb; }
+  .b-name { font-size: 27px; font-weight: 900; text-align: center; }
+  .b-sub { font-size: 19px; font-weight: 700; color: var(--text-dim); }
+  .w.light .b-sub { color: var(--light-dim); }
+  .b-med { display:flex; align-items:center; height: 100%; padding: 30px 40px; gap: 34px;}
+  .b-med .ring { width: 220px; height: 220px; flex:none;}
+  .b-med .ring .icon-img { inset: 30px; width: 160px; height: 160px; }
+  .b-right { flex:1; min-width:0; display:flex; flex-direction:column; gap: 12px; align-items:flex-start;}
+  .b-right .a-title { font-size: 40px; }
+  .pill { display:inline-flex; align-items:center; gap: 10px; background: var(--green); color:#fff; font-weight: 900; font-size: 22px; padding: 12px 26px; border-radius: 999px; box-shadow: 0 4px 0 var(--green-dark); }
+
+  /* ---------- Concept C: Color Block ---------- */
+  .c { background: var(--blue) !important; color: #fff; }
+  .c .deco { position:absolute; width: 420px; height: 420px; border-radius: 50%; background: rgba(255,255,255,.14); right: -130px; top: -110px; }
+  .c .deco2 { position:absolute; width: 220px; height: 220px; border-radius: 50%; background: rgba(255,255,255,.10); right: 130px; bottom: -120px; }
+  .c-med { position:relative; height:100%; display:flex; align-items:center; padding: 34px 44px; gap: 8px;}
+  .c-text { flex: 1; min-width:0; display:flex; flex-direction:column; gap: 10px; z-index:1;}
+  .c-kicker { font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing:.08em; opacity:.85;}
+  .c-title { font-size: 46px; font-weight: 900; line-height:1.1;}
+  .c-progress { font-size: 21px; font-weight: 700; opacity:.9; margin-top: 4px;}
+  .c-icon { width: 200px; height: 200px; z-index: 1; flex:none; filter: drop-shadow(0 8px 16px rgba(0,0,0,.25)); }
+  .c-sm { position:relative; height:100%; display:flex; flex-direction:column; padding: 26px 28px; }
+  .c-sm .c-icon { width: 140px; height: 140px; align-self:center; }
+  .c-sm .c-title { font-size: 30px; margin-top: 10px; }
+  .c-sm .c-progress { font-size: 18px; margin-top:auto;}
+
+  /* ---------- Concept D: Poster Card ---------- */
+  .d-sm, .d-med { display:flex; flex-direction:column; height:100%; }
+  .d-hero { background:#1899d6; flex: 1.5; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;}
+  .d-hero .halo { position:absolute; width: 240px; height:240px; border-radius:50%; background: rgba(255,255,255,.16);}
+  .d-hero .icon-img { width: 150px; height: 150px; z-index:1;}
+  .d-body { flex: 1; padding: 20px 30px 24px; display:flex; flex-direction:column; justify-content:center; gap: 6px;}
+  .d-title { font-size: 30px; font-weight: 900; }
+  .d-sub { font-size: 19px; font-weight: 700; color: var(--text-dim); }
+  .w.light .d-sub { color: var(--light-dim); }
+  .d-med { flex-direction: row; }
+  .d-med .d-hero { flex: 0 0 300px; }
+  .d-med .d-hero .icon-img { width: 190px; height: 190px; }
+  .d-med .d-body { padding: 30px 38px; gap: 10px; }
+  .d-med .d-title { font-size: 40px; }
+  .d-bar { margin-top: 10px; }
+
+  /* ---------- Concept E: Split actions ---------- */
+  .e-med { display:flex; height:100%; }
+  .e-left { flex: 1.35; padding: 32px 30px 32px 40px; display:flex; flex-direction:column; gap: 10px; min-width:0;}
+  .e-left .a-title { font-size: 38px; }
+  .e-icon-row { display:flex; align-items:center; gap: 18px; }
+  .e-icon { width: 120px; height: 120px; flex:none;}
+  .e-actions { flex: 1; display:flex; flex-direction:column; border-left: 2px solid var(--eel-border); }
+  .w.light .e-actions { border-color: var(--light-border); }
+  .e-btn { flex:1; display:flex; align-items:center; justify-content:center; gap: 14px; font-size: 26px; font-weight: 900; }
+  .e-btn + .e-btn { border-top: 2px solid var(--eel-border); }
+  .w.light .e-btn + .e-btn { border-color: var(--light-border); }
+  .e-btn.read { color: var(--green); }
+  .e-btn.listen { color: var(--blue-strong); }
+  .e-emoji { font-size: 34px; }
+</style>
+</head>
+<body>
+<h1>Next Story Widget — design concepts</h1>
+<p class="subtitle">All layouts use only primitives available in expo-widgets / @expo/ui (stacks, images, shapes, progress, flat colors). Story icon comes from the Duolingo stories CDN, rasterized to PNG server-side. Example state: “Good Morning”, Danish, 23/279 stories done.</p>
+
+<!-- =============== A =============== -->
+<div class="concept">
+  <div class="concept-info">
+    <div class="tag">Concept A</div>
+    <h2>Character Spotlight</h2>
+    <p>Keeps the app’s card look. Course chip with flag, big story title, character icon on the right, slim green progress bar pinned to the bottom.</p>
+    <p>Safe default — works in dark and light, information-dense but calm.</p>
+  </div>
+  <div class="widgets">
+    <div class="widget-wrap">
+      <div class="w small dark">
+        <div class="a-sm">
+          <img class="icon-img a-icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          <div class="a-title">Good Morning</div>
+          <div class="bar-row"><div class="bar"><div class="bar-fill"></div></div></div>
+        </div>
+      </div>
+      <div class="label">Small · dark</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium dark">
+        <div class="a-med">
+          <div class="a-top">
+            <div class="a-text">
+              <span class="chip"><span class="flag-da"></span>Danish</span>
+              <div class="a-title">Good Morning</div>
+            </div>
+            <img class="icon-img a-icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          </div>
+          <div class="bar-row">
+            <div class="bar"><div class="bar-fill"></div></div>
+            <span class="bar-label">23 / 279</span>
+          </div>
+        </div>
+      </div>
+      <div class="label">Medium · dark</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium light">
+        <div class="a-med">
+          <div class="a-top">
+            <div class="a-text">
+              <span class="chip"><span class="flag-da"></span>Danish</span>
+              <div class="a-title">Good Morning</div>
+            </div>
+            <img class="icon-img a-icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          </div>
+          <div class="bar-row">
+            <div class="bar"><div class="bar-fill"></div></div>
+            <span class="bar-label">23 / 279</span>
+          </div>
+        </div>
+      </div>
+      <div class="label">Medium · light</div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== B =============== -->
+<div class="concept">
+  <div class="concept-info">
+    <div class="tag">Concept B</div>
+    <h2>Progress Ring</h2>
+    <p>Character sits inside a course-progress ring (SwiftUI <code>Gauge</code>). Fitness-app energy: the ring filling up is the hook to come back.</p>
+    <p>Medium adds a “Continue” pill in brand green — the whole widget is one tap target, the pill is just an affordance.</p>
+  </div>
+  <div class="widgets">
+    <div class="widget-wrap">
+      <div class="w small dark">
+        <div class="b-sm">
+          <div class="ring">
+            <svg viewBox="0 0 190 190">
+              <circle cx="95" cy="95" r="86" fill="none" stroke="#37464f" stroke-width="12"/>
+              <circle cx="95" cy="95" r="86" fill="none" stroke="#58cc02" stroke-width="12" stroke-linecap="round" stroke-dasharray="540" stroke-dashoffset="495"/>
+            </svg>
+            <img class="icon-img" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          </div>
+          <div class="b-name">Good Morning</div>
+        </div>
+      </div>
+      <div class="label">Small · dark</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium dark">
+        <div class="b-med">
+          <div class="ring">
+            <svg viewBox="0 0 220 220">
+              <circle cx="110" cy="110" r="100" fill="none" stroke="#37464f" stroke-width="14"/>
+              <circle cx="110" cy="110" r="100" fill="none" stroke="#58cc02" stroke-width="14" stroke-linecap="round" stroke-dasharray="628" stroke-dashoffset="576"/>
+            </svg>
+            <img class="icon-img" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          </div>
+          <div class="b-right">
+            <span class="chip"><span class="flag-da"></span>Danish · 23 of 279</span>
+            <div class="a-title">Good Morning</div>
+            <span class="pill">Continue ›</span>
+          </div>
+        </div>
+      </div>
+      <div class="label">Medium · dark</div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== C =============== -->
+<div class="concept">
+  <div class="concept-info">
+    <div class="tag">Concept C</div>
+    <h2>Color Block</h2>
+    <p>Full-bleed brand color with soft circle accents (ZStack + Circle shapes) and the character floating with a shadow. Loudest option — pops on any wallpaper.</p>
+    <p>Background color could rotate per story set, so the widget visibly changes as you progress.</p>
+  </div>
+  <div class="widgets">
+    <div class="widget-wrap">
+      <div class="w small c">
+        <div class="deco"></div>
+        <div class="c-sm">
+          <img class="icon-img c-icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          <div class="c-title">Good Morning</div>
+          <div class="c-progress">Danish · 23/279</div>
+        </div>
+      </div>
+      <div class="label">Small</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium c">
+        <div class="deco"></div><div class="deco2"></div>
+        <div class="c-med">
+          <div class="c-text">
+            <div class="c-kicker">Up next in Danish</div>
+            <div class="c-title">Good Morning</div>
+            <div class="c-progress">23 of 279 stories done</div>
+          </div>
+          <img class="icon-img c-icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+        </div>
+      </div>
+      <div class="label">Medium</div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== D =============== -->
+<div class="concept">
+  <div class="concept-info">
+    <div class="tag">Concept D</div>
+    <h2>Poster Card</h2>
+    <p>Book-cover split: colored hero panel with the character on a halo, text panel below/beside. Closest to the story cards inside the app, so the widget feels like a story you’re about to open.</p>
+  </div>
+  <div class="widgets">
+    <div class="widget-wrap">
+      <div class="w small dark">
+        <div class="d-sm">
+          <div class="d-hero">
+            <div class="halo"></div>
+            <img class="icon-img" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          </div>
+          <div class="d-body">
+            <div class="d-title">Good Morning</div>
+            <div class="d-sub">Danish · 23/279</div>
+          </div>
+        </div>
+      </div>
+      <div class="label">Small · dark</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium dark">
+        <div class="d-med">
+          <div class="d-hero">
+            <div class="halo"></div>
+            <img class="icon-img" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          </div>
+          <div class="d-body">
+            <span class="chip"><span class="flag-da"></span>Danish</span>
+            <div class="d-title">Good Morning</div>
+            <div class="bar-row d-bar">
+              <div class="bar"><div class="bar-fill"></div></div>
+              <span class="bar-label">23 / 279</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="label">Medium · dark</div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== E =============== -->
+<div class="concept">
+  <div class="concept-info">
+    <div class="tag">Concept E</div>
+    <h2>Read / Listen Split</h2>
+    <p>Medium-only. Story info on the left; two separate tap zones on the right deep-link straight into reading or listening mode (multiple <code>Link</code>s are allowed in medium widgets).</p>
+    <p>Most functional option — turns the widget into a launcher.</p>
+  </div>
+  <div class="widgets">
+    <div class="widget-wrap">
+      <div class="w medium dark">
+        <div class="e-med">
+          <div class="e-left">
+            <span class="chip"><span class="flag-da"></span>Danish · 23/279</span>
+            <div class="e-icon-row">
+              <img class="icon-img e-icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+              <div class="a-title">Good Morning</div>
+            </div>
+          </div>
+          <div class="e-actions">
+            <div class="e-btn read"><span class="e-emoji">📖</span> Read</div>
+            <div class="e-btn listen"><span class="e-emoji">🎧</span> Listen</div>
+          </div>
+        </div>
+      </div>
+      <div class="label">Medium · dark</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

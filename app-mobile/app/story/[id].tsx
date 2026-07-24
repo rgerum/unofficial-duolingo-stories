@@ -14,25 +14,27 @@ import { Reader } from "../../src/story/Reader";
 import { HintPopupHost } from "../../src/story/HintPopup";
 import { stopAudio } from "../../src/story/audio";
 import { Button } from "../../src/components/Button";
+import type { StoryListItem } from "../../src/components/StoryButton";
 import { Text } from "../../src/components/Text";
 import { type ThemeColors, useTheme } from "../../src/theme";
 import type { StoryData } from "../../src/story/types";
+import { syncNextStoryWidget } from "../../src/widgets/syncNextStoryWidget";
 
-type CourseStory = {
-  id: number;
-  name: string;
-  active: string;
-  set_id: number;
-  set_index: number;
-};
+type CourseStory = StoryListItem & { image: string };
 
 export default function StoryScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const params = useLocalSearchParams<{ id: string; listening?: string }>();
+  const params = useLocalSearchParams<{
+    id: string;
+    listening?: string;
+    source?: string;
+  }>();
   const storyId = Number(params.id);
   const listening = params.listening === "1";
+  // Set by the home-screen widget's deep link; anything else is an in-app open.
+  const openSource = params.source === "widget" ? "widget" : "app";
   const { hideStoryQuestions } = useAppState();
   const { data: session } = useAuthSession();
   const { isOffline } = useNetworkStatus();
@@ -106,10 +108,17 @@ export default function StoryScreen() {
         listening_mode: effectiveListening,
         hide_questions: effectiveListening || hideStoryQuestions,
         signed_in: Boolean(session?.session),
+        open_source: openSource,
         ...extra,
       });
     },
-    [effectiveListening, hideStoryQuestions, session?.session, story],
+    [
+      effectiveListening,
+      hideStoryQuestions,
+      openSource,
+      session?.session,
+      story,
+    ],
   );
 
   React.useEffect(() => {
@@ -138,9 +147,24 @@ export default function StoryScreen() {
     if (session?.session) {
       void recordStoryDone({ legacyStoryId: story.id });
     }
+    if (course && doneIds) {
+      const completedStoryIds = new Set(doneIds);
+      completedStoryIds.add(story.id);
+      void syncNextStoryWidget({
+        courseName: course.name,
+        learningLanguageShort: course.learning_language_short,
+        flag: course.learning_language_flag,
+        flagFile: course.learning_language_flag_file,
+        stories: course.stories as CourseStory[],
+        doneStoryIds: completedStoryIds,
+        listening: effectiveListening,
+      });
+    }
   }, [
     captureStoryEvent,
+    course,
     doneIds,
+    effectiveListening,
     localDoneIds,
     recordStoryDone,
     serverDoneIds,

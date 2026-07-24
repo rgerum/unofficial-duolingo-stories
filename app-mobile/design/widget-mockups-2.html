@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Duostories – Widget Mockups Round 2 (Color Block + flag/language)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #1cb0f6;
+    --blue-deep: #1899d6;
+    --green: #58cc02;
+    --green-deep: #58a700;
+    --gold: #ffc800;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Nunito", -apple-system, sans-serif;
+    background: linear-gradient(160deg, #0b1a2e 0%, #143c54 45%, #0e2b3d 100%);
+    color: #f1f7fb;
+    padding: 48px 56px;
+  }
+  h1 { font-weight: 900; font-size: 30px; margin-bottom: 6px; }
+  .subtitle { color: #9fb3c8; margin-bottom: 40px; font-size: 15px; }
+  .concept { display: grid; grid-template-columns: 300px 1fr; gap: 36px; margin-bottom: 60px; align-items: start; }
+  .concept-info h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .concept-info .tag { display:inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; background: rgba(88,204,2,.18); color:#8fe35a; border-radius: 6px; padding: 3px 8px; margin-bottom: 10px;}
+  .concept-info p { font-size: 13.5px; line-height: 1.55; color: #c3d2de; margin-bottom: 8px; }
+  .widgets { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-end; }
+  .widget-wrap { text-align: center; }
+  .widget-wrap .label { margin-top: 10px; font-size: 12px; color: #8aa0b4; }
+
+  .w { border-radius: 44px; overflow: hidden; position: relative; box-shadow: 0 18px 40px rgba(0,0,0,.45); background: var(--blue); color: #fff; }
+  .w.small  { width: 340px; height: 340px; }
+  .w.medium { width: 728px; height: 340px; }
+  .w.green { background: var(--green); }
+
+  .deco { position:absolute; width: 420px; height: 420px; border-radius: 50%; background: rgba(255,255,255,.13); right: -130px; top: -110px; }
+  .deco2 { position:absolute; width: 230px; height: 230px; border-radius: 50%; background: rgba(255,255,255,.09); left: -80px; bottom: -110px; }
+
+  .icon { filter: drop-shadow(0 8px 16px rgba(0,0,0,.25)); z-index: 1; }
+
+  /* flag badge: circular Danish flag */
+  .flag-badge { width: 46px; height: 46px; border-radius: 50%; background: #c8102e; position: relative; overflow: hidden; flex: none; box-shadow: 0 3px 8px rgba(0,0,0,.25); border: 3px solid rgba(255,255,255,.9); }
+  .flag-badge::before { content:""; position:absolute; left:13px; top:0; width:7px; height:100%; background:#fff; }
+  .flag-badge::after  { content:""; position:absolute; top:16px; left:0; width:100%; height:7px; background:#fff; }
+  .flag-badge.big { width: 58px; height: 58px; }
+  .flag-badge.big::before { left: 17px; width: 9px; }
+  .flag-badge.big::after { top: 21px; height: 9px; }
+
+  .chip { display: inline-flex; align-items: center; gap: 12px; font-size: 23px; font-weight: 900; color: #fff; z-index: 1; }
+  .chip .flag-badge { width: 38px; height: 38px; border-width: 2.5px; }
+  .chip .flag-badge::before { left: 11px; width: 6px; }
+  .chip .flag-badge::after { top: 13px; height: 6px; }
+
+  .title { font-weight: 900; line-height: 1.1; z-index: 1; }
+  .sub { font-weight: 700; opacity: .92; z-index: 1; }
+
+  .wbar { height: 15px; border-radius: 8px; background: rgba(0,0,0,.22); overflow: hidden; z-index:1; }
+  .wbar-fill { height: 100%; width: 8%; min-width: 15px; border-radius: 8px; background: #fff; }
+  .gold .wbar-fill { background: var(--gold); }
+
+  /* ---------- F: flag chip + progress bar ---------- */
+  .f-sm { position: relative; height: 100%; display: flex; flex-direction: column; padding: 26px 28px 26px; gap: 8px; }
+  .f-sm .icon { width: 148px; height: 148px; align-self: center; margin-top: -4px; }
+  .f-sm .title { font-size: 30px; }
+  .f-sm .bar-row { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+  .f-med { position: relative; height: 100%; display: flex; align-items: center; padding: 34px 44px; gap: 16px; }
+  .f-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; z-index: 1; }
+  .f-med .title { font-size: 46px; }
+  .f-med .icon { width: 200px; height: 200px; flex: none; }
+  .f-med .bar-row { display: flex; align-items: center; gap: 16px; margin-top: 6px; }
+  .f-med .wbar { flex: 1; }
+  .bar-count { font-size: 20px; font-weight: 800; opacity: .95; }
+
+  /* ---------- G: ring around flag ---------- */
+  .flag-ring { position: relative; width: 84px; height: 84px; flex: none; z-index: 1; }
+  .flag-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .flag-ring .flag-badge { position: absolute; inset: 13px; width: auto; height: auto; }
+  .flag-ring.small-ring { width: 68px; height: 68px; }
+  .flag-ring.small-ring .flag-badge { inset: 11px; }
+  .g-sm { position: relative; height: 100%; display: flex; flex-direction: column; padding: 24px 28px; }
+  .g-sm .top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .g-sm .icon { width: 136px; height: 136px; margin-top: -30px; }
+  .g-sm .title { font-size: 30px; margin-top: 10px; }
+  .g-sm .sub { font-size: 19px; margin-top: 6px; }
+  .g-med { position: relative; height: 100%; display: flex; align-items: center; padding: 30px 44px; gap: 16px; }
+  .g-med .icon { width: 205px; height: 205px; flex: none; }
+  .g-left { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; z-index: 1; }
+  .g-head { display: flex; align-items: center; gap: 16px; }
+  .g-head .lang { font-size: 24px; font-weight: 900; }
+  .g-head .count { font-size: 19px; font-weight: 700; opacity: .9; }
+  .g-med .title { font-size: 46px; }
+
+  /* ---------- H: ring around story icon ---------- */
+  .story-ring { position: relative; flex: none; z-index: 1; }
+  .story-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .story-ring .icon { position: absolute; border-radius: 50%; background: rgba(255,255,255,.95); }
+  .h-sm { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; padding: 24px; gap: 8px; }
+  .h-sm .story-ring { width: 178px; height: 178px; }
+  .h-sm .story-ring .icon { inset: 22px; padding: 12px; width: 134px; height: 134px; }
+  .h-sm .title { font-size: 28px; text-align: center; }
+  .h-sm .chip { font-size: 19px; }
+  .h-sm .chip .flag-badge { width: 30px; height: 30px; border-width: 2px;}
+  .h-sm .chip .flag-badge::before { left: 8.5px; width: 5px; }
+  .h-sm .chip .flag-badge::after { top: 10px; height: 5px; }
+  .h-med { position: relative; height: 100%; display: flex; align-items: center; padding: 30px 44px; gap: 30px; }
+  .h-med .story-ring { width: 230px; height: 230px; }
+  .h-med .story-ring .icon { inset: 27px; padding: 16px; width: 176px; height: 176px; }
+  .h-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; z-index: 1; }
+  .h-med .title { font-size: 44px; }
+</style>
+</head>
+<body>
+<h1>Round 2 — Color Block + flag &amp; language</h1>
+<p class="subtitle">All variants: full-bleed brand color, white text, story character with drop shadow, Danish flag as a circular badge. Progress shown three ways: bar, ring-around-flag, ring-around-story. Example state: “Good Morning”, Danish, 23/279.</p>
+
+<!-- =============== F =============== -->
+<div class="concept">
+  <div class="concept-info">
+    <div class="tag">Variant F</div>
+    <h2>Flag chip + progress bar</h2>
+    <p>No ring at all. Flag badge + language name as a chip, big title, white progress bar with count. Cleanest read; progress is understated.</p>
+    <p>Shown in blue and green — the color could rotate per story set.</p>
+  </div>
+  <div class="widgets">
+    <div class="widget-wrap">
+      <div class="w small">
+        <div class="deco"></div>
+        <div class="f-sm">
+          <span class="chip"><span class="flag-badge"></span>Danish</span>
+          <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          <div class="bar-row">
+            <div class="title">Good Morning</div>
+            <div class="wbar"><div class="wbar-fill"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="label">Small · blue</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium">
+        <div class="deco"></div><div class="deco2"></div>
+        <div class="f-med">
+          <div class="f-text">
+            <span class="chip"><span class="flag-badge"></span>Danish</span>
+            <div class="title">Good Morning</div>
+            <div class="bar-row">
+              <div class="wbar"><div class="wbar-fill"></div></div>
+              <span class="bar-count">23 / 279</span>
+            </div>
+          </div>
+          <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+        </div>
+      </div>
+      <div class="label">Medium · blue</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium green gold">
+        <div class="deco"></div><div class="deco2"></div>
+        <div class="f-med">
+          <div class="f-text">
+            <span class="chip"><span class="flag-badge"></span>Danish</span>
+            <div class="title">Good Morning</div>
+            <div class="bar-row">
+              <div class="wbar"><div class="wbar-fill"></div></div>
+              <span class="bar-count">23 / 279</span>
+            </div>
+          </div>
+          <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+        </div>
+      </div>
+      <div class="label">Medium · green + gold bar</div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== G =============== -->
+<div class="concept">
+  <div class="concept-info">
+    <div class="tag">Variant G</div>
+    <h2>Progress ring around the flag</h2>
+    <p>The compromise: the ring lives around the flag badge, not the story art. The character stays untouched, and the flag doubles as the course progress meter.</p>
+  </div>
+  <div class="widgets">
+    <div class="widget-wrap">
+      <div class="w small">
+        <div class="deco"></div>
+        <div class="g-sm">
+          <div class="top">
+            <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="" style="margin-top:0">
+            <div class="flag-ring small-ring">
+              <svg viewBox="0 0 68 68">
+                <circle cx="34" cy="34" r="30" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="6"/>
+                <circle cx="34" cy="34" r="30" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="173"/>
+              </svg>
+              <span class="flag-badge"></span>
+            </div>
+          </div>
+          <div class="title">Good Morning</div>
+          <div class="sub">Danish · 23/279</div>
+        </div>
+      </div>
+      <div class="label">Small · blue</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium">
+        <div class="deco"></div><div class="deco2"></div>
+        <div class="g-med">
+          <div class="g-left">
+            <div class="g-head">
+              <div class="flag-ring">
+                <svg viewBox="0 0 84 84">
+                  <circle cx="42" cy="42" r="37" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="7"/>
+                  <circle cx="42" cy="42" r="37" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-dasharray="232.5" stroke-dashoffset="213.4"/>
+                </svg>
+                <span class="flag-badge"></span>
+              </div>
+              <div>
+                <div class="lang">Danish</div>
+                <div class="count">23 of 279</div>
+              </div>
+            </div>
+            <div class="title">Good Morning</div>
+          </div>
+          <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="" style="width:200px;height:200px;">
+        </div>
+      </div>
+      <div class="label">Medium · blue</div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== H =============== -->
+<div class="concept">
+  <div class="concept-info">
+    <div class="tag">Variant H</div>
+    <h2>Ring around the story (for comparison)</h2>
+    <p>The version you were unsure about, on the Color Block background: character in a white circle with the ring around it, flag chip for the language.</p>
+    <p>Downside: the art gets cropped to a circle and shrinks; upside: the ring is bigger and more legible.</p>
+  </div>
+  <div class="widgets">
+    <div class="widget-wrap">
+      <div class="w small">
+        <div class="deco"></div>
+        <div class="h-sm">
+          <div class="story-ring">
+            <svg viewBox="0 0 178 178">
+              <circle cx="89" cy="89" r="80" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="11"/>
+              <circle cx="89" cy="89" r="80" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-dasharray="502.7" stroke-dashoffset="461.2"/>
+            </svg>
+            <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          </div>
+          <div class="title">Good Morning</div>
+          <span class="chip"><span class="flag-badge"></span>Danish · 23/279</span>
+        </div>
+      </div>
+      <div class="label">Small · blue</div>
+    </div>
+    <div class="widget-wrap">
+      <div class="w medium">
+        <div class="deco"></div><div class="deco2"></div>
+        <div class="h-med">
+          <div class="story-ring">
+            <svg viewBox="0 0 230 230">
+              <circle cx="115" cy="115" r="104" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="13"/>
+              <circle cx="115" cy="115" r="104" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round" stroke-dasharray="653.5" stroke-dashoffset="599.6"/>
+            </svg>
+            <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+          </div>
+          <div class="h-right">
+            <span class="chip"><span class="flag-badge"></span>Danish · 23 of 279</span>
+            <div class="title">Good Morning</div>
+          </div>
+        </div>
+      </div>
+      <div class="label">Medium · blue</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

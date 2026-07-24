@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Duostories – Widget Mockups Round 4 (Variant K refined)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Nunito", -apple-system, sans-serif;
+    background: linear-gradient(160deg, #0b1a2e 0%, #143c54 45%, #0e2b3d 100%);
+    color: #f1f7fb;
+    padding: 48px 56px;
+  }
+  h1 { font-weight: 900; font-size: 30px; margin-bottom: 6px; }
+  .subtitle { color: #9fb3c8; margin-bottom: 40px; font-size: 15px; max-width: 1100px; }
+  .row-title { font-size: 15px; font-weight: 800; color: #8fe35a; text-transform: uppercase; letter-spacing: .08em; margin: 8px 0 22px; }
+  .widgets { display: flex; gap: 30px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 52px; }
+  .widget-wrap { text-align: center; }
+  .widget-wrap .label { margin-top: 10px; font-size: 12px; color: #8aa0b4; }
+
+  .w { border-radius: 44px; overflow: hidden; position: relative; box-shadow: 0 18px 40px rgba(0,0,0,.45); background: #1cb0f6; color: #fff; }
+  .w.small  { width: 340px; height: 340px; }
+  .w.medium { width: 728px; height: 340px; }
+  .w.green { background: #58cc02; }
+
+  .deco { position:absolute; width: 420px; height: 420px; border-radius: 50%; background: rgba(255,255,255,.13); right: -130px; top: -110px; }
+  .deco2 { position:absolute; width: 230px; height: 230px; border-radius: 50%; background: rgba(255,255,255,.09); left: -80px; bottom: -110px; }
+
+  .icon { filter: drop-shadow(0 8px 16px rgba(0,0,0,.25)); z-index: 1; }
+
+  /* Duolingo-style rect flag: 78x62 with big rounded corners */
+  .flag { width: 44px; height: 35px; border-radius: 9px; background: #c8102e; position: relative; overflow: hidden; flex: none; box-shadow: 0 2px 5px rgba(0,0,0,.2); }
+  .flag::before { content:""; position:absolute; left: 13px; top: 0; width: 7px; height: 100%; background: #fff; }
+  .flag::after  { content:""; position:absolute; top: 14px; left: 0; width: 100%; height: 7px; background: #fff; }
+  .flag.sm { width: 36px; height: 29px; border-radius: 7px; }
+  .flag.sm::before { left: 10.5px; width: 6px; }
+  .flag.sm::after { top: 11.5px; height: 6px; }
+
+  .lang-row { display: flex; align-items: center; gap: 12px; z-index: 1; }
+  .lang { font-size: 24px; font-weight: 900; }
+  .count { font-size: 24px; font-weight: 700; opacity: .75; }
+  .kicker { font-size: 19px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; opacity: .8; z-index: 1; }
+  .title { font-weight: 900; line-height: 1.12; z-index: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+  /* K medium */
+  .k-med { position: relative; height: 100%; display: flex; align-items: center; padding: 34px 44px; gap: 16px; }
+  .k-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; z-index: 1; align-items: flex-start; }
+  .k-med .title { font-size: 46px; }
+  .k-med .icon { width: 205px; height: 205px; flex: none; }
+
+  /* K small — centered */
+  .k-sm { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px 24px; gap: 8px; }
+  .k-sm .kicker { font-size: 16px; }
+  .k-sm .icon { width: 138px; height: 138px; margin: 2px 0; }
+  .k-sm .title { font-size: 27px; }
+  .k-sm .lang-row { gap: 9px; margin-top: auto; }
+  .k-sm .lang, .k-sm .count { font-size: 18px; }
+</style>
+</head>
+<body>
+<h1>Round 4 — Variant K refined</h1>
+<p class="subtitle">Small widget footer row now centered to match the centered stack. Each size shown with a short title (“Good Morning”) and a long one (“En rejse med toget gennem Jylland”) to confirm 2-line wrapping holds the layout. Title is capped at 2 lines.</p>
+
+<div class="row-title">Short title — “Good Morning”</div>
+<div class="widgets">
+  <div class="widget-wrap">
+    <div class="w small">
+      <div class="deco"></div>
+      <div class="k-sm">
+        <div class="kicker">Next story</div>
+        <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+        <div class="title">Good Morning</div>
+        <div class="lang-row"><span class="flag sm"></span><span class="lang">Danish</span><span class="count">23/279</span></div>
+      </div>
+    </div>
+    <div class="label">Small · centered</div>
+  </div>
+  <div class="widget-wrap">
+    <div class="w medium">
+      <div class="deco"></div><div class="deco2"></div>
+      <div class="k-med">
+        <div class="k-text">
+          <div class="kicker">Next story</div>
+          <div class="title">Good Morning</div>
+          <div class="lang-row"><span class="flag"></span><span class="lang">Danish</span><span class="count">23/279</span></div>
+        </div>
+        <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+      </div>
+    </div>
+    <div class="label">Medium</div>
+  </div>
+</div>
+
+<div class="row-title">Long title — “En rejse med toget gennem Jylland”</div>
+<div class="widgets">
+  <div class="widget-wrap">
+    <div class="w small">
+      <div class="deco"></div>
+      <div class="k-sm">
+        <div class="kicker">Next story</div>
+        <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+        <div class="title">En rejse med toget gennem Jylland</div>
+        <div class="lang-row"><span class="flag sm"></span><span class="lang">Danish</span><span class="count">23/279</span></div>
+      </div>
+    </div>
+    <div class="label">Small · centered</div>
+  </div>
+  <div class="widget-wrap">
+    <div class="w medium">
+      <div class="deco"></div><div class="deco2"></div>
+      <div class="k-med">
+        <div class="k-text">
+          <div class="kicker">Next story</div>
+          <div class="title">En rejse med toget gennem Jylland</div>
+          <div class="lang-row"><span class="flag"></span><span class="lang">Danish</span><span class="count">23/279</span></div>
+        </div>
+        <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+      </div>
+    </div>
+    <div class="label">Medium</div>
+  </div>
+  <div class="widget-wrap">
+    <div class="w medium green">
+      <div class="deco"></div><div class="deco2"></div>
+      <div class="k-med">
+        <div class="k-text">
+          <div class="kicker">Next story</div>
+          <div class="title">En rejse med toget gennem Jylland</div>
+          <div class="lang-row"><span class="flag"></span><span class="lang">Danish</span><span class="count">23/279</span></div>
+        </div>
+        <img class="icon" src="https://stories-cdn.duolingo.com/image/783305780a6dad8e0e4eb34109d948e6a5fc2c35.svg" alt="">
+      </div>
+    </div>
+    <div class="label">Medium · green</div>
+  </div>
+</div>
+
+</body>
+</html>
