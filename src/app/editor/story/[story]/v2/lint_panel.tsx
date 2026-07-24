@@ -64,7 +64,7 @@ export function LintPanel({
           <ul className="overflow-y-auto px-2 py-1">
             {findings.map((finding, i) => {
               const rowClass =
-                "flex items-baseline gap-2 rounded-lg px-2 py-[6px] text-[0.9rem] text-[var(--text-color)]";
+                "flex items-baseline gap-2 rounded-lg px-2 py-[6px] !text-[0.9rem] text-[var(--text-color)]";
               const content = (
                 <>
                   <span

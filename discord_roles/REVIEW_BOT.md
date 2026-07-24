@@ -73,20 +73,43 @@ user running the bot.
   processes at once, and at most 30 stories (8 sets) per request (also
   enforced server-side by the Convex endpoint).
 
-## systemd example
+## Hetzner VPS deployment
 
+The production Discord bots run as user services under the `codex` account on
+the Hetzner VPS. From an up-to-date checkout at
+`/home/codex/unofficial-duolingo-stories`, install the Python environment and
+the tracked service unit:
+
+```sh
+python3 -m venv discord_roles/.venv
+discord_roles/.venv/bin/pip install -r discord_roles/requirements.txt
+
+install -Dm644 \
+  discord_roles/systemd/discord-review-bot.service \
+  ~/.config/systemd/user/discord-review-bot.service
+systemctl --user daemon-reload
+systemctl --user enable --now discord-review-bot.service
 ```
-[Unit]
-Description=Duostories Discord review bot
-After=network-online.target
 
-[Service]
-User=duostories-review-bot
-WorkingDirectory=/home/duostories-review-bot/unofficial-duolingo-stories/discord_roles
-ExecStart=/usr/bin/python3 discord_review_bot.py
-Restart=on-failure
-RestartSec=30
+The account must have lingering enabled so user services start at boot even
+when nobody is logged in. This only needs to be done once:
 
-[Install]
-WantedBy=multi-user.target
+```sh
+sudo loginctl enable-linger "$USER"
+```
+
+Check the process and follow its logs with:
+
+```sh
+systemctl --user status discord-review-bot.service
+journalctl --user -u discord-review-bot.service -f
+```
+
+For later deployments, pull the latest `main`, update the virtual environment,
+and restart only this bot:
+
+```sh
+git pull --ff-only origin main
+discord_roles/.venv/bin/pip install -r discord_roles/requirements.txt
+systemctl --user restart discord-review-bot.service
 ```

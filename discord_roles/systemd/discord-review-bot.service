@@ -1,0 +1,18 @@
+[Unit]
+Description=Duostories Discord review bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/unofficial-duolingo-stories/discord_roles
+ExecStartPre=/usr/bin/test -r %h/unofficial-duolingo-stories/discord_roles/.env.local
+ExecStart=%h/unofficial-duolingo-stories/discord_roles/.venv/bin/python %h/unofficial-duolingo-stories/discord_roles/discord_review_bot.py
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+UMask=0077
+
+[Install]
+WantedBy=default.target
