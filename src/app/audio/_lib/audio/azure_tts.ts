@@ -11,13 +11,31 @@ type AzureWordBoundary = Pick<
 export function createAzureWordBoundaryMark(
   boundary: AzureWordBoundary,
 ): AudioMark | undefined {
-  if (boundary.textOffset < 0) return undefined;
+  const end = boundary.textOffset + boundary.wordLength;
+  const time = Math.round(boundary.audioOffset / 10000);
+  if (
+    !Number.isSafeInteger(boundary.audioOffset) ||
+    !Number.isSafeInteger(boundary.textOffset) ||
+    !Number.isSafeInteger(boundary.wordLength) ||
+    !Number.isSafeInteger(end) ||
+    !Number.isSafeInteger(time) ||
+    boundary.audioOffset < 0 ||
+    boundary.textOffset < 0 ||
+    boundary.wordLength < 0
+  ) {
+    console.warn("[Azure TTS] Ignoring invalid word boundary", {
+      audioOffset: boundary.audioOffset,
+      textOffset: boundary.textOffset,
+      wordLength: boundary.wordLength,
+    });
+    return undefined;
+  }
 
   return {
-    time: Math.round(boundary.audioOffset / 10000),
+    time,
     type: "word",
     start: boundary.textOffset,
-    end: boundary.textOffset + boundary.wordLength,
+    end,
     value: boundary.text,
   };
 }

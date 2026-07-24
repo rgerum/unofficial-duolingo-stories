@@ -48,3 +48,13 @@ test("buildTimingText ignores surplus parts without throwing", () => {
 test("buildTimingText returns empty string for empty inputs", () => {
   assert.equal(buildTimingText([], []), "");
 });
+
+test("buildTimingText reports non-finite region starts", () => {
+  assert.throws(
+    () => buildTimingText([{ text: "word", pos: 0 }], [{ start: Number.NaN }]),
+    {
+      name: "RangeError",
+      message: "Invalid audio keypoint at index 0: rangeEnd=4, audioStart=NaN",
+    },
+  );
+});

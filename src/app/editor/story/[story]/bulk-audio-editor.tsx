@@ -23,9 +23,13 @@ import type {
 } from "@/components/editor/story/syntax_parser_types";
 import {
   text_to_keypoints,
+  timing_text_without_filename,
   timings_to_text,
 } from "@/lib/editor/audio/audio_edit_tools";
-import { buildTimingText } from "@/lib/editor/audio/timing_text";
+import {
+  buildTimingText,
+  type TimingKeypoint,
+} from "@/lib/editor/audio/timing_text";
 import { splitTextTokens } from "@/lib/editor/tts_transcripte";
 import {
   consumeAudioCutterOutput,
@@ -54,6 +58,7 @@ type BulkAudioEditorDraft = {
   error: string | null;
   matchSource: "existing" | "filename" | "order" | "manual" | null;
   timingText: string;
+  initialSerializedText: string | null;
 };
 
 export type BulkAudioEditorItem = {
@@ -65,14 +70,14 @@ export type BulkAudioEditorItem = {
   content: ContentWithHints;
   hideRangesForChallenge?: HideRange[];
   existingFilename: string;
-  existingKeypoints: { rangeEnd: number; audioStart: number }[];
+  existingKeypoints: TimingKeypoint[];
   ssml: Audio["ssml"];
 };
 
 export type BulkAudioEditorUpdate = {
   itemId: string;
   filename: string;
-  keypoints: { rangeEnd: number; audioStart: number }[];
+  keypoints: TimingKeypoint[];
   serializedText: string;
   ssml: Audio["ssml"];
 };
@@ -156,17 +161,31 @@ function isAudioFilename(filename: string) {
 }
 
 function createDraft(item: BulkAudioEditorItem): BulkAudioEditorDraft {
+  let timingText = "";
+  let initialSerializedText: string | null = null;
+  let error: string | null = null;
+  try {
+    initialSerializedText = timings_to_text({
+      filename: item.existingFilename,
+      keypoints: item.existingKeypoints,
+    });
+    timingText = timing_text_without_filename(initialSerializedText);
+  } catch (cause) {
+    error =
+      cause instanceof Error && cause.message
+        ? cause.message
+        : "Existing audio timings are invalid.";
+  }
+
   return {
     file: null,
     localUrl: null,
     uploadedFilename: "",
     uploadState: "idle",
-    error: null,
+    error,
     matchSource: item.existingFilename ? "existing" : null,
-    timingText: timings_to_text({
-      filename: "",
-      keypoints: item.existingKeypoints,
-    }),
+    timingText,
+    initialSerializedText,
   };
 }
 
@@ -191,14 +210,11 @@ const naturalSort = new Intl.Collator(undefined, {
 });
 
 function isChanged(item: BulkAudioEditorItem, draft: BulkAudioEditorDraft) {
+  if (draft.error) return false;
   const filename = draft.uploadedFilename || item.existingFilename;
   if (draft.file) return true;
   if (!filename) return false;
-  const initialText = timings_to_text({
-    filename: item.existingFilename,
-    keypoints: item.existingKeypoints,
-  });
-  return `$${filename}${draft.timingText}` !== initialText;
+  return `$${filename}${draft.timingText}` !== draft.initialSerializedText;
 }
 
 async function uploadAudioFile(file: File, storyId: number) {
@@ -299,24 +315,6 @@ function getAutoRegionStarts(parts: Part[], duration: number) {
     elapsed += sliceDuration;
     return currentStart;
   });
-}
-
-function timingTextFromStarts(parts: Part[], starts: number[]) {
-  let text = "";
-  let previousPos = 0;
-  let previousStart = 0;
-
-  for (let index = 0; index < parts.length; index += 1) {
-    const part = parts[index];
-    if (!part) continue;
-    const nextPos = part.pos + part.text.length;
-    const nextStart = starts[index] ?? 0;
-    text += `;${nextPos - previousPos},${Math.round(nextStart * 1000 - previousStart)}`;
-    previousPos = nextPos;
-    previousStart = Math.round(nextStart * 1000);
-  }
-
-  return text;
 }
 
 function getWordPlaybackSegments(
@@ -449,12 +447,22 @@ function BulkAudioRow({
           regions[index]!.content!.innerText = parts[index]!.text;
         }
       }
-      const nextTimingText = buildTimingText(parts, regions);
-
-      onChange((currentDraft) => ({
-        ...currentDraft,
-        timingText: nextTimingText,
-      }));
+      try {
+        const nextTimingText = buildTimingText(parts, regions);
+        onChange((currentDraft) => ({
+          ...currentDraft,
+          timingText: nextTimingText,
+          error: null,
+        }));
+      } catch (cause) {
+        onChange((currentDraft) => ({
+          ...currentDraft,
+          error:
+            cause instanceof Error && cause.message
+              ? cause.message
+              : "Audio timings are invalid.",
+        }));
+      }
     },
     [onChange, parts],
   );
@@ -1127,12 +1135,7 @@ export default function BulkAudioEditor({
         const [_, keypoints] = text_to_keypoints(
           `${filename}${draft.timingText}`,
         );
-        const initialText = timings_to_text({
-          filename: item.existingFilename,
-          keypoints: item.existingKeypoints,
-        });
-
-        if (serializedText === initialText) continue;
+        if (serializedText === draft.initialSerializedText) continue;
 
         updates.push({
           itemId: item.id,

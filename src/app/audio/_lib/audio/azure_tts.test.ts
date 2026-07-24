@@ -22,13 +22,69 @@ test("createAzureWordBoundaryMark preserves valid Azure boundaries", () => {
 });
 
 test("createAzureWordBoundaryMark rejects negative Azure text offsets", () => {
-  assert.equal(
-    createAzureWordBoundaryMark({
+  const originalWarn = console.warn;
+  const warnings: unknown[][] = [];
+  console.warn = (...args: unknown[]) => warnings.push(args);
+
+  try {
+    assert.equal(
+      createAzureWordBoundaryMark({
+        audioOffset: 20_880_000,
+        text: "ale  .",
+        textOffset: -1,
+        wordLength: 15,
+      }),
+      undefined,
+    );
+    assert.deepEqual(warnings, [
+      [
+        "[Azure TTS] Ignoring invalid word boundary",
+        {
+          audioOffset: 20_880_000,
+          textOffset: -1,
+          wordLength: 15,
+        },
+      ],
+    ]);
+  } finally {
+    console.warn = originalWarn;
+  }
+});
+
+test("createAzureWordBoundaryMark rejects non-finite Azure values", () => {
+  const originalWarn = console.warn;
+  console.warn = () => {};
+
+  try {
+    const baseBoundary = {
       audioOffset: 20_880_000,
       text: "ale  .",
-      textOffset: -1,
+      textOffset: 150,
       wordLength: 15,
-    }),
-    undefined,
-  );
+    };
+
+    assert.equal(
+      createAzureWordBoundaryMark({
+        ...baseBoundary,
+        audioOffset: Number.NaN,
+      }),
+      undefined,
+    );
+    assert.equal(
+      createAzureWordBoundaryMark({
+        ...baseBoundary,
+        textOffset: Number.NaN,
+      }),
+      undefined,
+    );
+    assert.equal(
+      createAzureWordBoundaryMark({
+        ...baseBoundary,
+        wordLength: Number.POSITIVE_INFINITY,
+      }),
+      undefined,
+    );
+  } finally {
+    console.warn = originalWarn;
+  }
 });

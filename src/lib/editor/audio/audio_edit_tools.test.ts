@@ -60,6 +60,21 @@ test("timings_to_text rejects non-finite keypoints instead of serializing NaN", 
   );
 });
 
+test("timings_to_text rejects unsafe integers instead of exponential notation", () => {
+  assert.throws(
+    () =>
+      timings_to_text({
+        filename: "example.mp3",
+        keypoints: [{ rangeEnd: 1e21, audioStart: 10 }],
+      }),
+    {
+      name: "RangeError",
+      message:
+        "Invalid audio keypoint at index 0: rangeEnd=1e+21, audioStart=10",
+    },
+  );
+});
+
 test("timings_to_text rejects keypoints that move backward", () => {
   assert.throws(
     () =>
@@ -93,7 +108,7 @@ test("get_audio_insert_line targets the next syntax line", () => {
   assert.equal(line.text, "+ Δεν ξέρω");
 });
 
-test("generate_audio_line ignores Azure marks that move backward in the source text", async () => {
+test("generate_audio_line reports Azure marks that move backward in the source text", async () => {
   const originalRequest = globalThis.Request;
   const originalFetch = globalThis.fetch;
   const source = "Linda utíká na zastávku autobusu, ale je moc pozdě.";
@@ -122,11 +137,41 @@ test("generate_audio_line ignores Azure marks that move backward in the source t
   })) as unknown as typeof fetch;
 
   try {
-    const generated = await generate_audio_line({ ...ssml, id: 8604 });
+    await assert.rejects(() => generate_audio_line({ ...ssml, id: 8604 }), {
+      name: "RangeError",
+      message:
+        "Invalid speech mark at index 6: rangeEnd=0 after 33, audioStart=2088 after 2063",
+    });
+  } finally {
+    globalThis.Request = originalRequest;
+    globalThis.fetch = originalFetch;
+  }
+});
 
-    assert.equal(
-      timings_to_text(generated),
-      "$8604/951ddb2a.mp3;5,50;6,438;3,425;9,87;9,475;1,588",
+test("generate_audio_line rejects null numeric values from JSON speech marks", async () => {
+  const originalRequest = globalThis.Request;
+  const originalFetch = globalThis.fetch;
+  globalThis.Request = class {} as unknown as typeof Request;
+  globalThis.fetch = (async () => ({
+    json: async () => ({
+      output_file: "example.mp3",
+      marks: [{ time: null, start: null, end: null, value: "word" }],
+    }),
+  })) as unknown as typeof fetch;
+
+  try {
+    await assert.rejects(
+      () =>
+        generate_audio_line({
+          speaker: "cs-CZ-AntoninNeural",
+          text: "word",
+          id: 0,
+          mapping: [0],
+        }),
+      {
+        name: "RangeError",
+        message: "Invalid speech mark at index 0: end=null, time=null",
+      },
     );
   } finally {
     globalThis.Request = originalRequest;

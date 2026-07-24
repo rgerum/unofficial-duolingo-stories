@@ -7,7 +7,7 @@ import {
   replace_with_mapping,
   transcribe_text,
 } from "./text_with_mapping";
-import { serializeTimingKeypoints } from "./timing_text";
+import { serializeTimingKeypoints, type TimingKeypoint } from "./timing_text";
 import { EditorView } from "codemirror";
 import { HideRange } from "@/components/editor/story/syntax_parser_types";
 import {
@@ -257,8 +257,13 @@ export async function generate_audio_line(ssml: {
   } else {
     let last_time = -Infinity;
     let last_end = -Infinity;
-    for (let mark of ssml_response.marks) {
+    for (const [index, mark] of ssml_response.marks.entries()) {
       if (mark.time === undefined) continue;
+      if (!Number.isFinite(mark.end) || !Number.isFinite(mark.time)) {
+        throw new RangeError(
+          `Invalid speech mark at index ${index}: end=${mark.end}, time=${mark.time}`,
+        );
+      }
       const rangeEnd = mapping[Math.round(mark.end)];
       const audioStart = Math.round(mark.time);
       if (
@@ -266,8 +271,11 @@ export async function generate_audio_line(ssml: {
         !Number.isFinite(audioStart) ||
         rangeEnd < last_end ||
         audioStart < last_time
-      )
-        continue;
+      ) {
+        throw new RangeError(
+          `Invalid speech mark at index ${index}: rangeEnd=${rangeEnd} after ${last_end}, audioStart=${audioStart} after ${last_time}`,
+        );
+      }
 
       keypoints.push({
         rangeEnd,
@@ -309,7 +317,7 @@ export function timings_to_text({
   keypoints,
 }: {
   filename: string;
-  keypoints: { rangeEnd: number; audioStart: number }[];
+  keypoints: readonly TimingKeypoint[];
 }) {
   const prefix = filename ? "$" + filename : "";
   return prefix + serializeTimingKeypoints(keypoints);
@@ -324,7 +332,7 @@ export function timing_text_without_filename(text: string) {
 export function text_to_keypoints(line: string) {
   const parts = line.split(";");
   const filename = parts.splice(0, 1)[0];
-  const keypoints: { rangeEnd: number; audioStart: number }[] = [];
+  const keypoints: TimingKeypoint[] = [];
   let last_end = 0;
   let last_time = 0;
   for (const part of parts) {

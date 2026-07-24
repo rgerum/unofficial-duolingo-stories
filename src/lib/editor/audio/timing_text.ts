@@ -10,8 +10,8 @@ export function serializeTimingKeypoints(
   let lastTime = 0;
   for (const [index, point] of keypoints.entries()) {
     if (
-      !Number.isFinite(point.rangeEnd) ||
-      !Number.isFinite(point.audioStart)
+      !Number.isSafeInteger(point.rangeEnd) ||
+      !Number.isSafeInteger(point.audioStart)
     ) {
       throw new RangeError(
         `Invalid audio keypoint at index ${index}: rangeEnd=${point.rangeEnd}, audioStart=${point.audioStart}`,
