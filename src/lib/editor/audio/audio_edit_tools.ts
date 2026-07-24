@@ -254,20 +254,26 @@ export async function generate_audio_line(ssml: {
       last_time = Math.round(mark.timeSeconds * 1000);
     }
   } else {
-    let last_time = 0;
-    let last_end = 0;
+    let last_time = -Infinity;
+    let last_end = -Infinity;
     for (let mark of ssml_response.marks) {
-      if (mark.time === undefined) {
-        last_end += Math.round(mark.value.length);
+      if (mark.time === undefined) continue;
+      const rangeEnd = mapping[Math.round(mark.end)];
+      const audioStart = Math.round(mark.time);
+      if (
+        !Number.isFinite(rangeEnd) ||
+        !Number.isFinite(audioStart) ||
+        rangeEnd < last_end ||
+        audioStart < last_time
+      )
         continue;
-      }
+
       keypoints.push({
-        rangeEnd: mapping[Math.round(mark.end)],
-        audioStart: Math.round(mark.time),
+        rangeEnd,
+        audioStart,
       });
-      //timings.push([Math.round(mark.value.length) + Math.round(last_end), Math.round(mark.time) - last_time]);
-      last_end += Math.round(mark.value.length);
-      last_time = Math.round(mark.time);
+      last_end = rangeEnd;
+      last_time = audioStart;
     }
   }
 

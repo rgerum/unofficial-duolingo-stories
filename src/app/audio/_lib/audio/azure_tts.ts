@@ -3,6 +3,25 @@ import * as fs from "fs";
 import { put } from "@vercel/blob";
 import type { AudioMark, SynthesisResult, Voice, TTSEngine } from "./types";
 
+type AzureWordBoundary = Pick<
+  sdk.SpeechSynthesisWordBoundaryEventArgs,
+  "audioOffset" | "text" | "textOffset" | "wordLength"
+>;
+
+export function createAzureWordBoundaryMark(
+  boundary: AzureWordBoundary,
+): AudioMark | undefined {
+  if (boundary.textOffset < 0) return undefined;
+
+  return {
+    time: Math.round(boundary.audioOffset / 10000),
+    type: "word",
+    start: boundary.textOffset,
+    end: boundary.textOffset + boundary.wordLength,
+    value: boundary.text,
+  };
+}
+
 function get_raw(text: string): string {
   text = text.replace(/ +/g, " ");
   let text2 = "";
@@ -45,14 +64,8 @@ async function synthesizeSpeechAzure(
       v: sdk.SpeechSynthesisWordBoundaryEventArgs,
     ) => {
       last_pos = text2.substring(last_pos).search(v.text) + last_pos;
-      const data: AudioMark = {
-        time: Math.round(v.audioOffset / 10000),
-        type: "word",
-        start: v.textOffset,
-        end: v.textOffset + v.wordLength,
-        value: v.text,
-      };
-      marks.push(data);
+      const mark = createAzureWordBoundaryMark(v);
+      if (mark) marks.push(mark);
     };
 
     //text = text.replace(/^<speak>/, "");
