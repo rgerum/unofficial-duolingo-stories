@@ -1,4 +1,5 @@
 import React from "react";
+import { keepClosingPunctuationWithWord } from "../StoryLineHints/text";
 import { cn } from "@/lib/utils";
 
 function StoryTextLineSimple({
@@ -23,7 +24,12 @@ function StoryTextLineSimple({
       <span className="inline-block w-[100px] shrink-0 text-right font-bold">
         {speaker}:
       </span>
-      <span className="flex-1"> {children}</span>
+      <span className="flex-1">
+        {" "}
+        {typeof children === "string"
+          ? keepClosingPunctuationWithWord(children)
+          : children}
+      </span>
       <span className="text-right font-mono font-bold">{id}</span>
     </div>
   );
