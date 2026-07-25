@@ -10,6 +10,10 @@ import { api } from "@convex/_generated/api";
 import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
 import {
+  HIDE_STORY_QUESTIONS_COOKIE,
+  isStoryQuestionsDisabled,
+} from "@/lib/story-preferences";
+import {
   getCurrentPostHogUser,
   identifyPostHogUser,
   type PostHogUser,
@@ -17,11 +21,9 @@ import {
 
 export default function StoryWrapper({
   story,
-  hideStoryQuestions,
   storyFinishedIndexUpdate,
 }: {
   story: StoryData;
-  hideStoryQuestions: boolean;
   storyFinishedIndexUpdate: () => Promise<
     | {
         message: string;
@@ -40,6 +42,8 @@ export default function StoryWrapper({
   const searchParams = useSearchParams();
   const [highlight_name, setHighlightName] = React.useState<string[]>([]);
   const [hideNonHighlighted, setHideNonHighlighted] = React.useState(false);
+  const [cookieHideStoryQuestions, setCookieHideStoryQuestions] =
+    React.useState(false);
   const trackedStoryStart = React.useRef(false);
   const completionInFlight = React.useRef(false);
   const { data: session } = authClient.useSession();
@@ -64,6 +68,10 @@ export default function StoryWrapper({
         }
       : "skip",
   );
+  const storyPreferences = useQuery(
+    api.userPreferences.getCurrentStoryPreferences,
+    {},
+  );
   const showNextStoryAction = Boolean(nextStep?.nextStoryId);
   const nextStoryPreview = useQuery(
     api.storyRead.getStoryPreviewByLegacyId,
@@ -71,6 +79,23 @@ export default function StoryWrapper({
       ? { storyId: nextStep.nextStoryId }
       : "skip",
   );
+  const hideStoryQuestions =
+    storyPreferences?.hasSavedPreference === true
+      ? storyPreferences.hideStoryQuestions
+      : cookieHideStoryQuestions;
+
+  React.useEffect(() => {
+    setCookieHideStoryQuestions(
+      isStoryQuestionsDisabled(
+        document.cookie
+          .split("; ")
+          .find((cookie) =>
+            cookie.startsWith(`${HIDE_STORY_QUESTIONS_COOKIE}=`),
+          )
+          ?.split("=")[1],
+      ),
+    );
+  }, []);
 
   const captureStoryEvent = React.useCallback(
     async (eventName: "story_started" | "story_completed") => {
