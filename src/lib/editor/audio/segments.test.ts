@@ -10,6 +10,7 @@ import {
   getEffectiveSegmentDuration,
   getKeepRangeEnd,
   getKeepRanges,
+  getJoinedSegmentSkipRanges,
   getSegmentSkipRangesFromAnalysis,
   getTotalRangeDuration,
   mapPlayableOffsetToAbsoluteTime,
@@ -54,6 +55,36 @@ test("normalizeRanges sorts unsorted input", () => {
 test("normalizeRanges returns empty for empty/undefined input", () => {
   assert.deepEqual(normalizeRanges([], bounds), []);
   assert.deepEqual(normalizeRanges(undefined, bounds), []);
+});
+
+const segmentsToJoin: Segment[] = [
+  {
+    id: "first",
+    start: 0,
+    end: 4,
+    skipRanges: [{ start: 1.25, end: 1.75 }],
+  },
+  {
+    id: "second",
+    start: 6,
+    end: 10,
+    skipRanges: [{ start: 8, end: 9 }],
+  },
+];
+
+test("getJoinedSegmentSkipRanges preserves edits without cutting gaps by default", () => {
+  assert.deepEqual(getJoinedSegmentSkipRanges(segmentsToJoin, bounds), [
+    { start: 1.25, end: 1.75 },
+    { start: 8, end: 9 },
+  ]);
+});
+
+test("getJoinedSegmentSkipRanges can cut the gap for an explicit join", () => {
+  assert.deepEqual(getJoinedSegmentSkipRanges(segmentsToJoin, bounds, true), [
+    { start: 1.25, end: 1.75 },
+    { start: 4, end: 6 },
+    { start: 8, end: 9 },
+  ]);
 });
 
 test("moveRangeWithinBounds preserves duration and clamps at both edges", () => {

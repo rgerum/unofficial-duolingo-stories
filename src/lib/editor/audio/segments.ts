@@ -92,6 +92,27 @@ export function normalizeRanges(
   return normalized;
 }
 
+export function getJoinedSegmentSkipRanges(
+  segments: Segment[],
+  bounds: TimeRange,
+  cutGaps = false,
+) {
+  const sorted = sortSegments(segments);
+  const ranges = sorted.flatMap((segment) => segment.skipRanges);
+
+  if (cutGaps) {
+    for (let index = 1; index < sorted.length; index += 1) {
+      const previous = sorted[index - 1];
+      const current = sorted[index];
+      if (previous && current && current.start > previous.end) {
+        ranges.push({ start: previous.end, end: current.start });
+      }
+    }
+  }
+
+  return normalizeRanges(ranges, bounds);
+}
+
 export function moveRangeWithinBounds(
   range: TimeRange,
   deltaSeconds: number,
