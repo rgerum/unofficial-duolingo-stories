@@ -3,6 +3,9 @@ import { ContentWithHints } from "@/components/editor/story/syntax_parser_types"
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import { cn } from "@/lib/utils";
 
+type HiddenState = boolean | undefined | "editor";
+type InlineHintStyle = CSSProperties | undefined;
+
 const underlineBaseStyle: CSSProperties = {
   backgroundPosition: "0 100%",
   backgroundRepeat: "repeat-x",
@@ -18,16 +21,6 @@ const hiddenUnderlineStyle: CSSProperties = {
   backgroundImage:
     "linear-gradient(to right, var(--underline-solid) 60%, var(--underline-solid) 60%)",
 };
-const editorHintContainerStyle: CSSProperties = {
-  borderInlineStart: "1px solid #bfbfbf",
-  paddingInlineStart: "5px",
-};
-const editorHintTextStyle: CSSProperties = {
-  marginInlineStart: "-4px",
-  paddingInlineStart: "6px",
-  backgroundColor: "var(--editor-hints-background)",
-  fontSize: "0.9em",
-};
 const tooltipContainerStyle = {
   ...underlineBaseStyle,
   "--story-hint-underline": "var(--underline-dashed)",
@@ -37,55 +30,33 @@ const tooltipContainerStyle = {
   outlineColor: "var(--tooltip-border)",
 } as CSSProperties;
 const tooltipContentStyle: CSSProperties = {
-  bottom: "100%",
-  left: "50%",
-  zIndex: 10,
-  marginBottom: "4px",
-  transform: "translateX(-50%)",
-  borderRadius: "14px",
-  borderWidth: "2px",
-  borderStyle: "solid",
   borderColor: "var(--tooltip-border)",
   backgroundColor: "var(--tooltip-backgroud)",
-  padding: "7px 17px 6px",
-  fontSize: "19px",
   color: "var(--tooltip-color)",
 };
 const tooltipContentWithPronunciationStyle: CSSProperties = {
   ...tooltipContentStyle,
   bottom: "calc(115% + 4px)",
-  marginBottom: "8px",
 };
 const tooltipArrowStyle: CSSProperties = {
-  position: "absolute",
-  top: "100%",
-  left: "50%",
-  zIndex: 10,
-  marginTop: "-6px",
-  marginLeft: "-5px",
-  width: "10px",
-  height: "10px",
-  transform: "rotate(-45deg)",
-  borderWidth: "2px",
-  borderStyle: "solid",
   borderColor:
     "transparent transparent var(--tooltip-border) var(--tooltip-border)",
   backgroundColor: "var(--tooltip-backgroud)",
 };
-const pronunciationStyle: CSSProperties = {
-  bottom: "calc(100% - 6px)",
-  left: "50%",
-  transform: "translateX(-50%)",
-  fontSize: "0.62em",
-};
 
-function splitTextTokens(text: string, keep_tilde = true) {
+function splitTextTokens(text: string) {
   if (!text) return [];
-  if (keep_tilde)
-    //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
-    return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}]+)/);
-  //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
-  else return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}~]+)/);
+  return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}]+)/);
+}
+
+function getVisibleContent(content: ContentWithHints, showHints: boolean) {
+  if (showHints) return content;
+  return {
+    ...content,
+    hintMap: [],
+    hints: undefined,
+    hints_pronunciation: undefined,
+  };
 }
 
 function Tooltip({
@@ -169,15 +140,7 @@ function StoryLineHints({
   unhide?: number;
   editorState?: EditorStateType;
 }) {
-  if (!content) return <>Empty</>;
-  const visibleContent = showHints
-    ? content
-    : {
-        ...content,
-        hintMap: [],
-        hints: undefined,
-        hints_pronunciation: undefined,
-      };
+  const visibleContent = getVisibleContent(content, showHints);
   let hideRangesForChallengeEntry = hideRangesForChallenge
     ? hideRangesForChallenge[0]
     : hideRangesForChallenge;
@@ -194,25 +157,27 @@ function StoryLineHints({
 
   const showTrans = showTranslationsInline ?? false;
 
-  function getOverlap(
+  function overlaps(
     start1: number,
     end1: number,
     start2: number,
     end2: number,
   ) {
     if (start2 === end2) return false;
-    if (start2 === undefined || end2 === undefined) return false;
     if (start1 <= start2 && start2 < end1) return true;
     return start2 <= start1 && start1 < end2;
   }
 
-  function addWord2(start: number, end: number) {
-    const was_hidden_for_challenge = hideRangesForChallenge?.some((range) =>
-      getOverlap(start, end, range.start, range.end),
+  function wasHiddenForChallenge(start: number, end: number) {
+    return hideRangesForChallenge?.some((range) =>
+      overlaps(start, end, range.start, range.end),
     );
-    let is_hidden: boolean | undefined | "editor" =
+  }
+
+  function getHiddenState(start: number, end: number): HiddenState {
+    let isHidden: HiddenState =
       hideRangesForChallengeEntry !== undefined &&
-      getOverlap(
+      overlaps(
         start,
         end,
         hideRangesForChallengeEntry.start,
@@ -220,16 +185,63 @@ function StoryLineHints({
       )
         ? true
         : undefined;
-    if (is_hidden && editor) is_hidden = "editor";
+    if (isHidden && editor) isHidden = "editor";
+    return isHidden;
+  }
+
+  function getHintHiddenState(start: number, end: number): boolean | undefined {
+    const hiddenState = getHiddenState(start, end);
+    return hiddenState ? true : undefined;
+  }
+
+  function getInlineHintUnderlineStyle(
+    hasTranslationHint: boolean,
+    isHidden: boolean | undefined,
+    wasHidden: boolean | undefined,
+  ): InlineHintStyle {
+    return !showTrans && hasTranslationHint && !isHidden && !wasHidden
+      ? tooltipContainerStyle
+      : undefined;
+  }
+
+  function buildHintRenderState(hint: ContentWithHints["hintMap"][number]) {
+    const isHidden = getHintHiddenState(hint.rangeFrom, hint.rangeTo + 1);
+    const hintTranslation = visibleContent.hints?.[hint.hintIndex];
+    const hintPronunciation =
+      visibleContent.hints_pronunciation?.[hint.hintIndex];
+    const hasAnyHint = Boolean(hintTranslation || hintPronunciation);
+    const hasTranslationHint = Boolean(hintTranslation);
+    const isInteractive = !isHidden && !showTrans && hasTranslationHint;
+    const wasHidden = wasHiddenForChallenge(hint.rangeFrom, hint.rangeTo + 1);
+    const inlineUnderlineStyle = getInlineHintUnderlineStyle(
+      hasTranslationHint,
+      isHidden,
+      wasHidden,
+    );
+
+    return {
+      hasAnyHint,
+      hasTranslationHint,
+      hintPronunciation,
+      hintTranslation,
+      inlineUnderlineStyle,
+      isHidden,
+      isInteractive,
+      wasHidden,
+    };
+  }
+
+  function renderTextSegment(start: number, end: number) {
+    const wasHidden = wasHiddenForChallenge(start, end);
+    const isHidden = getHiddenState(start, end);
+    const segmentText = visibleContent.text.substring(start, end);
+    const segmentLines = segmentText.split("\n");
     const style: CSSProperties = {};
-    //TODO
-    //if(is_hidden && window.view)
-    //    style.color = "#afafaf";
     if (audioRange && audioRange < start) style.opacity = 0.5;
-    if (was_hidden_for_challenge && !is_hidden) {
+    if (wasHidden && !isHidden) {
       Object.assign(style, revealedUnderlineStyle);
     }
-    if (is_hidden) {
+    if (isHidden) {
       Object.assign(style, hiddenUnderlineStyle);
     }
 
@@ -237,97 +249,60 @@ function StoryLineHints({
       <span
         className={cn(
           "select-text",
-          is_hidden === true && "select-none text-[var(--body-background)]",
-          is_hidden === "editor" && "opacity-70",
+          isHidden === true && "select-none text-[var(--body-background)]",
+          isHidden === "editor" && "opacity-70",
         )}
         key={start + " " + end}
         style={
-          was_hidden_for_challenge || is_hidden
-            ? { ...underlineBaseStyle, ...style }
-            : style
+          wasHidden || isHidden ? { ...underlineBaseStyle, ...style } : style
         }
-        data-hidden={is_hidden}
-        data-revealed={
-          was_hidden_for_challenge && !is_hidden ? true : undefined
-        }
+        data-hidden={isHidden}
+        data-revealed={wasHidden && !isHidden ? true : undefined}
       >
-        {visibleContent.text.substring(start, end)}
+        {segmentLines.map((line, index) => (
+          <React.Fragment key={`${start} ${end} ${index}`}>
+            {index > 0 ? <br /> : null}
+            {line}
+          </React.Fragment>
+        ))}
       </span>,
     ];
-    if (visibleContent.text.substring(start, end).indexOf("\n") !== -1)
-      returns.push(<br key={start + " " + end + " br"} />);
-    // add the span and optionally add a line break
     return returns;
   }
 
-  function addSplitWord(start: number, end: number) {
-    let parts = splitTextTokens(visibleContent.text.substring(start, end));
+  function renderSplitText(start: number, end: number) {
+    const text = visibleContent.text.substring(start, end);
+    let parts = splitTextTokens(text);
     if (parts[0] === "") parts.splice(0, 1);
     if (parts[parts.length - 1] === "") parts.pop();
 
     if (parts.length === 1) {
-      return addWord2(start, end);
-      //addWord(dom, start, end);
-      //return dom;
+      return renderTextSegment(start, end);
     }
     let elements = [];
     for (let p of parts) {
-      for (let w of addWord2(start, start + p.length)) elements.push(w);
+      for (let w of renderTextSegment(start, start + p.length))
+        elements.push(w);
       start += p.length;
     }
-    // <span className="word">{content.text.substring(text_pos, hint.rangeFrom)}</span>
     return elements;
   }
 
-  let elements = [];
-  let text_pos = 0;
-  // iterate over all hints
-  for (let hint of visibleContent.hintMap) {
-    // add the text since the last hint
-    if (hint.rangeFrom > text_pos)
-      elements.push(addSplitWord(text_pos, hint.rangeFrom));
-    //addSplitWord(dom.append("span").attr("class", "word"), text_pos, hint.rangeFrom);
-
-    // add the text with the hint
-    let is_hidden =
-      hideRangesForChallengeEntry !== undefined &&
-      getOverlap(
-        hint.rangeFrom,
-        hint.rangeTo,
-        hideRangesForChallengeEntry.start,
-        hideRangesForChallengeEntry.end,
-      )
-        ? true
-        : undefined;
-    if (editor) is_hidden = false;
-    const hint_translation = visibleContent.hints?.[hint.hintIndex];
-    const hint_pronunciation =
-      visibleContent.hints_pronunciation?.[hint.hintIndex];
-    const has_any_hint = Boolean(hint_translation || hint_pronunciation);
-    const has_translation_hint = Boolean(hint_translation);
-    const isInteractive = !is_hidden && !showTrans && has_translation_hint;
-    const was_hidden_for_challenge = hideRangesForChallenge?.some((range) =>
-      getOverlap(hint.rangeFrom, hint.rangeTo + 1, range.start, range.end),
-    );
-    const inlineHintUnderlineStyle =
-      !showTrans &&
-      has_translation_hint &&
-      !is_hidden &&
-      !was_hidden_for_challenge
-        ? tooltipContainerStyle
-        : undefined;
-
-    const word_content = hint_pronunciation ? (
+  function renderPronunciation(
+    hintPronunciation: string,
+    isHidden: boolean | undefined,
+    inlineHintUnderlineStyle: InlineHintStyle,
+    children: React.ReactNode,
+  ) {
+    return (
       <span className="group/pronunciation relative inline-block">
-        <span style={inlineHintUnderlineStyle}>
-          {addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}
-        </span>
+        <span style={inlineHintUnderlineStyle}>{children}</span>
         <span
           className={cn(
-            "pointer-events-none invisible absolute whitespace-nowrap leading-none opacity-0 transition-opacity duration-200",
-            !is_hidden &&
+            "pointer-events-none invisible absolute bottom-[calc(100%-6px)] left-1/2 whitespace-nowrap text-[0.62em] leading-none opacity-0 transition-opacity duration-200",
+            !isHidden &&
               "group-hover/tooltip:visible group-hover/tooltip:opacity-95",
-            !is_hidden &&
+            !isHidden &&
               "group-focus-within/tooltip:visible group-focus-within/tooltip:opacity-95",
             showTrans &&
               "group-hover/editorhint:visible group-hover/editorhint:opacity-95",
@@ -336,23 +311,84 @@ function StoryLineHints({
             "group-hover/pronunciation:visible group-hover/pronunciation:opacity-95",
             "group-focus-within/pronunciation:visible group-focus-within/pronunciation:opacity-95",
           )}
-          style={pronunciationStyle}
+          style={{ transform: "translateX(-50%)" }}
         >
-          {hint_pronunciation}
+          {hintPronunciation}
         </span>
       </span>
-    ) : (
-      <span style={inlineHintUnderlineStyle}>
-        {addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}
+    );
+  }
+
+  function renderTooltip(
+    hintTranslation: string,
+    hintPronunciation: string | undefined,
+    hintTextClassName: string,
+  ) {
+    return (
+      <span
+        className={cn(
+          "bottom-full left-1/2 z-10 mb-1 rounded-[14px] border-2 px-[17px] pt-[7px] pb-[6px] text-center text-[19px]",
+          hintPronunciation && "bottom-[calc(115%+4px)] mb-2",
+          hintTextClassName,
+        )}
+        data-hint-tooltip
+        style={
+          hintPronunciation
+            ? {
+                ...tooltipContentWithPronunciationStyle,
+                transform: "translateX(-50%)",
+              }
+            : {
+                ...tooltipContentStyle,
+                transform: "translateX(-50%)",
+              }
+        }
+      >
+        <span>{hintTranslation}</span>
+        <span
+          aria-hidden={true}
+          className="absolute top-full left-1/2 z-10 mt-[-6px] ml-[-5px] h-[10px] w-[10px] rotate-[-45deg] border-2"
+          style={tooltipArrowStyle}
+        />
       </span>
     );
-    const hintContainerClassName = is_hidden
+  }
+
+  let elements = [];
+  let textPos = 0;
+  for (let hint of visibleContent.hintMap) {
+    if (hint.rangeFrom > textPos) {
+      elements.push(renderSplitText(textPos, hint.rangeFrom));
+    }
+
+    const {
+      hasAnyHint,
+      hasTranslationHint,
+      hintPronunciation,
+      hintTranslation,
+      inlineUnderlineStyle,
+      isHidden,
+      isInteractive,
+      wasHidden,
+    } = buildHintRenderState(hint);
+    const hintText = renderSplitText(hint.rangeFrom, hint.rangeTo + 1);
+    const wordContent = hintPronunciation ? (
+      renderPronunciation(
+        hintPronunciation,
+        isHidden,
+        inlineUnderlineStyle,
+        hintText,
+      )
+    ) : (
+      <span style={inlineUnderlineStyle}>{hintText}</span>
+    );
+    const hintContainerClassName = isHidden
       ? ""
       : showTrans
-        ? has_any_hint
+        ? hasAnyHint
           ? "group/editorhint inline-flex grow flex-col"
           : ""
-        : has_translation_hint
+        : hasTranslationHint
           ? cn(
               "group/tooltip relative inline-block align-baseline",
               "focus:outline-none focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2",
@@ -364,58 +400,45 @@ function StoryLineHints({
           "pointer-events-none invisible absolute block w-auto whitespace-nowrap text-center font-normal not-italic opacity-0 transition-opacity duration-300 group-hover/tooltip:visible group-hover/tooltip:opacity-100 group-focus-within/tooltip:visible group-focus-within/tooltip:opacity-100",
           visibleContent.lang_hints,
         );
-    const hintHasChallengeUnderline =
-      Boolean(was_hidden_for_challenge) || Boolean(is_hidden);
-    const hintContainerStyle =
-      showTrans && has_any_hint ? editorHintContainerStyle : undefined;
-    const tooltipStyle =
-      hint_translation && hint_pronunciation
-        ? tooltipContentWithPronunciationStyle
-        : tooltipContentStyle;
 
     elements.push(
       <Tooltip
         key={`${hint.rangeFrom} ${hint.rangeTo + 1}`}
-        className={cn("select-text", hintContainerClassName)}
+        className={cn(
+          "select-text",
+          showTrans && hasAnyHint && "border-s border-[#bfbfbf] ps-[5px]",
+          hintContainerClassName,
+        )}
         interactive={isInteractive}
-        style={hintContainerStyle}
-        data-revealed={
-          was_hidden_for_challenge && !is_hidden ? true : undefined
-        }
+        data-revealed={wasHidden && !isHidden ? true : undefined}
       >
-        {word_content}
+        {wordContent}
         {showTrans ? (
-          has_any_hint ? (
-            <span className={hintTextClassName} style={editorHintTextStyle}>
-              {hint_translation ? <span>{hint_translation}</span> : null}
-              {hint_pronunciation ? (
+          hasAnyHint ? (
+            <span
+              className={cn(
+                "ms-[-4px] bg-[var(--editor-hints-background)] ps-[6px] text-[0.9em]",
+                hintTextClassName,
+              )}
+            >
+              {hintTranslation ? <span>{hintTranslation}</span> : null}
+              {hintPronunciation ? (
                 <span className="mt-0.5 block opacity-90">
-                  {hint_pronunciation}
+                  {hintPronunciation}
                 </span>
               ) : null}
             </span>
           ) : null
-        ) : has_translation_hint ? (
-          <span
-            className={hintTextClassName}
-            data-hint-tooltip
-            style={tooltipStyle}
-          >
-            <span>{hint_translation}</span>
-            <span aria-hidden={true} style={tooltipArrowStyle} />
-          </span>
+        ) : hasTranslationHint ? (
+          renderTooltip(hintTranslation!, hintPronunciation, hintTextClassName)
         ) : null}
       </Tooltip>,
     );
-    //addSplitWord(dom.append("span").attr("class", "word tooltip"), hint.rangeFrom, hint.rangeTo+1)
-    //    .append("span").attr("class", "tooltiptext").text(content.hints[hint.hintIndex]);
-    // advance the position
-    text_pos = hint.rangeTo + 1;
+    textPos = hint.rangeTo + 1;
   }
-  // add the text after the last hint
-  if (text_pos < visibleContent.text.length)
-    elements.push(addSplitWord(text_pos, visibleContent.text.length));
-  //            addSplitWord(dom.append("span").attr("class", "word"), text_pos, content.text.length);
+  if (textPos < visibleContent.text.length) {
+    elements.push(renderSplitText(textPos, visibleContent.text.length));
+  }
 
   return elements;
 }
