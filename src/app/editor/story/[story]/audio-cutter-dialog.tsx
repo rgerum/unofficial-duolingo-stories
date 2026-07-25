@@ -840,6 +840,7 @@ function createRegionContent({
   showJoinHint,
   onPlay,
   onShrinkWrap,
+  onJoinNext,
   onAddSkipRange,
   onDelete,
   onEditLabel,
@@ -850,6 +851,7 @@ function createRegionContent({
   showJoinHint: boolean;
   onPlay: () => void;
   onShrinkWrap: () => void;
+  onJoinNext?: () => void;
   onAddSkipRange: () => void;
   onDelete: () => void;
   onEditLabel: () => void;
@@ -892,6 +894,15 @@ function createRegionContent({
         onClick: onShrinkWrap,
       }),
     );
+    if (onJoinNext) {
+      controls.append(
+        createIconButton({
+          title: "Join with next segment",
+          iconPath: "M5 12h14 M15 8l4 4-4 4",
+          onClick: onJoinNext,
+        }),
+      );
+    }
     controls.append(
       createIconButton({
         title: label ? "Edit label" : "Add label",
@@ -1886,13 +1897,81 @@ export default function AudioCutterDialog({
     [segments],
   );
 
+  const joinSegmentWithNext = React.useCallback(
+    (segmentId: string) => {
+      const currentIndex = sortedSegments.findIndex(
+        (segment) => segment.id === segmentId,
+      );
+      const currentSegment = sortedSegments[currentIndex];
+      const nextSegment = sortedSegments[currentIndex + 1];
+      if (!currentSegment || !nextSegment) return;
+
+      const survivingId = currentSegment.id;
+      const removedId = nextSegment.id;
+      const mergedStart = Math.min(currentSegment.start, nextSegment.start);
+      const mergedEnd = Math.max(currentSegment.end, nextSegment.end);
+      const joinedSkipRanges = getJoinedSegmentSkipRanges(
+        [currentSegment, nextSegment],
+        { start: mergedStart, end: mergedEnd },
+        true,
+      );
+      const preservedLabel =
+        labelsById[survivingId] || labelsById[removedId] || "";
+
+      activeDraftRegionIdRef.current = null;
+      pendingRegionIdsRef.current.delete(survivingId);
+      pendingRegionIdsRef.current.delete(removedId);
+      setMergePreview(null);
+      setLabelsById((current) => {
+        const next = { ...current };
+        next[survivingId] = preservedLabel;
+        delete next[removedId];
+        return next;
+      });
+      setWordMarkTimeOverridesBySegmentId((current) => {
+        if (!(removedId in current)) return current;
+        const next = { ...current };
+        delete next[removedId];
+        return next;
+      });
+      setDraggingWordMarker((current) =>
+        current?.segmentId === removedId ? null : current,
+      );
+      commitSegments((current) =>
+        sortSegments([
+          ...current.filter(
+            (segment) =>
+              segment.id !== currentSegment.id && segment.id !== nextSegment.id,
+          ),
+          buildSegment({
+            id: survivingId,
+            start: mergedStart,
+            end: mergedEnd,
+            skipRanges: joinedSkipRanges,
+          }),
+        ]),
+      );
+      setHoveredSegmentId(survivingId);
+      setSelectedSegmentId(survivingId);
+    },
+    [buildSegment, commitSegments, labelsById, sortedSegments],
+  );
+
   const syncRegionAppearance = React.useCallback(
-    (plugin: RegionsPlugin) => {
+    (plugin: RegionsPlugin, liveRegion?: SegmentRegion) => {
       sortSegments(segments).forEach((segment, index) => {
         const region = plugin
           .getRegions()
           .find((candidate) => candidate.id === segment.id);
         if (!region) return;
+        const displaySegment =
+          liveRegion?.id === segment.id
+            ? {
+                ...segment,
+                start: liveRegion.start,
+                end: liveRegion.end,
+              }
+            : segment;
         const wordMarks = wordMarksBySegmentId[segment.id] ?? [];
         const activeWordIndex = activeWordIndexBySegmentId[segment.id] ?? -1;
         const isSelectedSegment = selectedSegmentId === segment.id;
@@ -1916,6 +1995,10 @@ export default function AudioCutterDialog({
             onShrinkWrap: () => {
               onShrinkWrapSegment(segment.id);
             },
+            onJoinNext:
+              index < segments.length - 1
+                ? () => joinSegmentWithNext(segment.id)
+                : undefined,
             onAddSkipRange: () => onAddSegmentSkipRange(segment.id),
             onDelete: () => {
               onRemoveSegment(segment.id);
@@ -1947,7 +2030,7 @@ export default function AudioCutterDialog({
           ) {
             syncRegionSkipMarkers(
               region.element,
-              segment,
+              displaySegment,
               (index, range) =>
                 onChangeSegmentSkipRange(segment.id, index, range),
               beginSkipRangeInteraction,
@@ -1956,7 +2039,7 @@ export default function AudioCutterDialog({
           }
           syncRegionWordMarkers(
             region.element,
-            segment,
+            displaySegment,
             wordMarks,
             activeWordIndex,
           );
@@ -1976,6 +2059,7 @@ export default function AudioCutterDialog({
       onShrinkWrapSegment,
       hoveredSegmentId,
       isSkipRangeInteractionActive,
+      joinSegmentWithNext,
       selectedSegmentId,
       segments,
       finishSkipRangeInteraction,
@@ -2295,8 +2379,8 @@ export default function AudioCutterDialog({
     if (!wavesurfer) return;
     const plugin = typedRegionsPlugin;
 
-    const refreshRegionUi = () => {
-      syncRegionAppearance(plugin);
+    const refreshRegionUi = (liveRegion?: SegmentRegion) => {
+      syncRegionAppearance(plugin, liveRegion);
     };
 
     const disableDragSelection = plugin.enableDragSelection(
@@ -2358,7 +2442,7 @@ export default function AudioCutterDialog({
         setHoveredSegmentId(region.id);
       }
       setSelectedSegmentId(region.id);
-      refreshRegionUi();
+      refreshRegionUi(region);
     };
     const onRegionUpdate = (region: SegmentRegion) => {
       if (isSyncingRegionsRef.current) return;
@@ -2388,7 +2472,7 @@ export default function AudioCutterDialog({
           ? { activeId: region.id, targetId: overlappingRegion.id }
           : null,
       );
-      refreshRegionUi();
+      refreshRegionUi(region);
     };
     const onRegionUpdated = (region: SegmentRegion) => {
       if (isSyncingRegionsRef.current) return;
@@ -2929,63 +3013,8 @@ export default function AudioCutterDialog({
   const joinSelectedSegmentWithNext = React.useCallback(() => {
     const currentIndex = selectedSegmentIndex >= 0 ? selectedSegmentIndex : 0;
     const currentSegment = sortedSegments[currentIndex];
-    const nextSegment = sortedSegments[currentIndex + 1];
-    if (!currentSegment || !nextSegment) return;
-
-    const survivingId = currentSegment.id;
-    const removedId = nextSegment.id;
-    const mergedStart = Math.min(currentSegment.start, nextSegment.start);
-    const mergedEnd = Math.max(currentSegment.end, nextSegment.end);
-    const joinedSkipRanges = getJoinedSegmentSkipRanges(
-      [currentSegment, nextSegment],
-      { start: mergedStart, end: mergedEnd },
-      true,
-    );
-    const preservedLabel =
-      labelsById[survivingId] || labelsById[removedId] || "";
-
-    activeDraftRegionIdRef.current = null;
-    pendingRegionIdsRef.current.delete(survivingId);
-    pendingRegionIdsRef.current.delete(removedId);
-    setMergePreview(null);
-    setLabelsById((current) => {
-      const next = { ...current };
-      next[survivingId] = preservedLabel;
-      delete next[removedId];
-      return next;
-    });
-    setWordMarkTimeOverridesBySegmentId((current) => {
-      if (!(removedId in current)) return current;
-      const next = { ...current };
-      delete next[removedId];
-      return next;
-    });
-    setDraggingWordMarker((current) =>
-      current?.segmentId === removedId ? null : current,
-    );
-    commitSegments((current) =>
-      sortSegments([
-        ...current.filter(
-          (segment) =>
-            segment.id !== currentSegment.id && segment.id !== nextSegment.id,
-        ),
-        buildSegment({
-          id: survivingId,
-          start: mergedStart,
-          end: mergedEnd,
-          skipRanges: joinedSkipRanges,
-        }),
-      ]),
-    );
-    setHoveredSegmentId(survivingId);
-    setSelectedSegmentId(survivingId);
-  }, [
-    buildSegment,
-    commitSegments,
-    labelsById,
-    selectedSegmentIndex,
-    sortedSegments,
-  ]);
+    if (currentSegment) joinSegmentWithNext(currentSegment.id);
+  }, [joinSegmentWithNext, selectedSegmentIndex, sortedSegments]);
 
   React.useEffect(() => {
     if (!open) return;
