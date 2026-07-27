@@ -358,16 +358,17 @@ test("keeps audio rules but skips TTS-voice warnings in human-audio courses", ()
     0: { ...testAvatars[0], speaker: "" },
     414: { ...testAvatars[414], speaker: "" },
   };
-  const [story, meta] = processStoryFile(
-    `[LINE]
+  const text = `[LINE]
 Speaker414: Bonjour le monde.
-~ hello the world`,
+~ hello the world`;
+  const [story, meta] = processStoryFile(
+    text,
     0,
     voicelessAvatars,
     { learning_language: "fr", from_language: "en" },
     "",
   );
-  const findings = lintStory({ text: "", story, meta, humanAudio: true });
+  const findings = lintStory({ text, story, meta, humanAudio: true });
   assert.equal(byRule(findings, "no-language-voices").length, 0);
   assert.equal(byRule(findings, "speaker-no-voice").length, 0);
   // audio is still expected, just recorded instead of generated
