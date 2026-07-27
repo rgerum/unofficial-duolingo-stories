@@ -1,42 +1,13 @@
 import { parse as parseYaml } from "yaml";
-
-let punctuation_chars =
-  "\\/¡!\"'`#$%&*,.:;<=>¿?@^_`{|}…" + "。、，！？；：（）～—·《…》〈…〉﹏……——";
-//punctuation_chars = "\\\\¡!\"#$%&*,、，.。\\/:：;<=>¿?@^_`{|}…"
-
-let regex_split_token = new RegExp(
-  `([\\s${punctuation_chars}\\]]*(?:^|\\s|$|​)[\\s${punctuation_chars}]*)`,
-);
-let regex_split_token2 = new RegExp(
-  `([\\s${punctuation_chars}~]*(?:^|\\s|$|​)[\\s${punctuation_chars}~]*)`,
-);
-/*
-function splitTextTokens(text, keep_tilde=true) {
-    if(!text)
-        return [];
-    //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
-    if(keep_tilde)
-        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
-    //return text.split(regex_split_token)
-    else
-        return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
-    //return text.split(regex_split_token2)
-}
-*/
+import { splitAlignedText } from "@/lib/text/tokenization";
 
 export function splitTextTokens(
   text: string,
   keep_tilde: boolean = true,
 ): string[] {
-  if (!text) return [];
-  //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
-  if (keep_tilde)
-    //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
-    return text.split(regex_split_token);
-  //return text.split(/([\s\\¡!"#$%&*,、，.。\/:：;<=>¿?@^_`{|}…\]]*(?:^|\s|$|​)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/)
-  //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
-  else return text.split(regex_split_token2);
-  //return text.split(/([\s\\¡!"#$%&*,、，.。\/:：;<=>¿?@^_`{|}…~]*(?:^|\s|$|​)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]*)/)
+  return splitAlignedText(text, {
+    tilde: keep_tilde ? "join" : "separator",
+  });
 }
 
 let data = `

@@ -1,6 +1,7 @@
 import React, { CSSProperties } from "react";
 import { ContentWithHints } from "@/components/editor/story/syntax_parser_types";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
+import { splitDisplayText } from "@/lib/text/tokenization";
 import { cn } from "@/lib/utils";
 
 const underlineBaseStyle: CSSProperties = {
@@ -78,15 +79,6 @@ const pronunciationStyle: CSSProperties = {
   transform: "translateX(-50%)",
   fontSize: "0.62em",
 };
-
-function splitTextTokens(text: string, keep_tilde = true) {
-  if (!text) return [];
-  if (keep_tilde)
-    //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
-    return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}]+)/);
-  //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
-  else return text.split(/([\s\\¡!"#$%&*,./:;<=>¿?@^_`{|}~]+)/);
-}
 
 function Tooltip({
   className,
@@ -261,7 +253,7 @@ function StoryLineHints({
   }
 
   function addSplitWord(start: number, end: number) {
-    let parts = splitTextTokens(visibleContent.text.substring(start, end));
+    let parts = splitDisplayText(visibleContent.text.substring(start, end));
     if (parts[0] === "") parts.splice(0, 1);
     if (parts[parts.length - 1] === "") parts.pop();
 

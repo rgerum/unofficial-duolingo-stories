@@ -1,3 +1,5 @@
+import { isInlineTtsBoundary } from "@/lib/text/tokenization";
+
 export type InlineTtsReplacement = {
   index: number;
   word: string;
@@ -11,23 +13,6 @@ type InlineTtsError = {
   start: number;
   end: number;
 };
-
-const punctuationChars =
-  "\\/¡!\"'`#$%&*,.:;<=>¿?@^_`{|}…" + "。、，！？；：（）～—·《…》〈…〉﹏……——";
-const inlineTtsBoundaryPunctuation = punctuationChars.replace(/[{}]/g, "");
-const inlineTtsBoundaryRegex = new RegExp(
-  `[\\s${inlineTtsBoundaryPunctuation}]`,
-);
-
-function isInlineTtsSegmentBoundary(char: string | undefined) {
-  return (
-    char === undefined ||
-    char === "|" ||
-    char === "[" ||
-    char === "]" ||
-    char.match(inlineTtsBoundaryRegex) !== null
-  );
-}
 
 function createInlineTtsError(
   message: string,
@@ -54,7 +39,7 @@ export function scanInlineTts(text: string) {
 
   while (i < text.length) {
     const char = text[i];
-    if (isInlineTtsSegmentBoundary(char)) {
+    if (isInlineTtsBoundary(char)) {
       normalizedText += char;
       i += 1;
       continue;
@@ -74,7 +59,7 @@ export function scanInlineTts(text: string) {
         i += 1;
         continue;
       }
-      if (braceDepth === 0 && isInlineTtsSegmentBoundary(currentChar)) {
+      if (braceDepth === 0 && isInlineTtsBoundary(currentChar)) {
         break;
       }
       i += 1;
