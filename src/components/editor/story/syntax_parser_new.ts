@@ -327,7 +327,7 @@ function processBlockData(line_iter: LineIterator, story: StoryWithMeta) {
 }
 
 let punctuation_chars =
-  "\\/¡!\"'`#$%&*,.:;<=>¿?@^_`{|}…" + "。、，！？；：（）～—·《…》〈…〉﹏……——";
+  "\\/¡!\"'`#$%&*,.:;<=>¿?@^_`{|}…" + "。、，！？；：（）～—·《…》〈…〉﹏……——।";
 //punctuation_chars = "\\\\¡!\"#$%&*,、，.。\\/:：;<=>¿?@^_`{|}…"
 
 let regex_split_token = new RegExp(
