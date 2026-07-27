@@ -170,7 +170,7 @@ Speaker414: ジュニア! 今日{ちゅー}|や?
   assert.equal(element?.line.content.text, "ジュニア! 今日⁠や?");
   assert.match(
     element?.audio?.ssml.text ?? "",
-    /<sub alias="ちゅー"><mark name="8"\/>今日<\/sub><mark name="10"\/>⁠や\?/,
+    /<sub alias="ちゅー"><mark name="8"\/>今日<\/sub>⁠<mark name="10"\/>や\?/,
   );
 });
 

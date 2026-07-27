@@ -1,5 +1,6 @@
 import { parse as parseYaml } from "yaml";
 import { TranscribeData } from "@/components/editor/story/syntax_parser_new";
+import { isAudioWordCharacter } from "@/lib/text/tokenization";
 
 type Mapping = number[];
 type MappedText = { text: string; mapping: Mapping };
@@ -145,11 +146,7 @@ function iter_word_replacements(
   for (let i = 0; i < mapped_text.text.length + 1; i++) {
     let char = mapped_text.text[i] || "\n";
     let word;
-    let is_word = false;
-
-    // Check if the character is part of a word
-    if (!["<", ">", "[", "]"].includes(char))
-      is_word = char.match(reg_white) === null;
+    const is_word = isAudioWordCharacter(char);
 
     // Check if a new word starts or ends
     if (!last_char_word && is_word) {
@@ -238,11 +235,6 @@ function apply_word_replacements(
   return mapped_text;
 }
 
-let punctuation_chars =
-  "\\/¡!\"'`#$%&*,.:;<=>¿?@^_`{|}…" + "。、，！？；：（）～—·《…》〈…〉﹏……——";
-//punctuation_chars = "\\\\¡!\"#$%&*,、，.。\\/:：;<=>¿?@^_`{|}…"
-
-let reg_white = new RegExp(`[\\s${punctuation_chars}~]`);
 export function add_word_marks_replacements(mapped_text: {
   text: string;
   mapping: number[];
@@ -257,24 +249,6 @@ export function add_word_marks_replacements(mapped_text: {
     },
   );
   return mapped_text;
-}
-
-let regex_split_token = new RegExp(
-  `([\\s${punctuation_chars}\\]]*(?:^|\\s|$|​)[\\s${punctuation_chars}]*)`,
-);
-let regex_split_token2 = new RegExp(
-  `([\\s${punctuation_chars}~]*(?:^|\\s|$|​)[\\s${punctuation_chars}~]*)`,
-);
-function splitTextTokens(text: string, keep_tilde = true) {
-  if (!text) return [];
-  //console.log(text, text.split(/([\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*(?:^|\s|$)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/))
-  if (keep_tilde)
-    //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}]+)/)
-    return text.split(regex_split_token);
-  //return text.split(/([\s\\¡!"#$%&*,、，.。\/:：;<=>¿?@^_`{|}…\]]*(?:^|\s|$|​)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…]*)/)
-  //return text.split(/([\s\u2000-\u206F\u2E00-\u2E7F\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}~]+)/)
-  else return text.split(regex_split_token2);
-  //return text.split(/([\s\\¡!"#$%&*,、，.。\/:：;<=>¿?@^_`{|}…~]*(?:^|\s|$|​)[\s\\¡!"#$%&*,.\/:;<=>¿?@^_`{|}…~]*)/)
 }
 
 function apply_fragment_replacements(
