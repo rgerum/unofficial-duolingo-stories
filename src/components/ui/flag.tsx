@@ -86,12 +86,8 @@ export default function Flag(props: {
   const height = Math.round(props.height ?? width * aspectRatio);
   const renderedWidth = isSquareCustomFlag ? height : width;
   const customScale = width / 88;
-  const outlineWidth = isCustomFlag
-      ? 7 * customScale
-      : 5 * scale;
-  const outlineOffset = isCustomFlag
-      ? -6 * customScale
-      : -6 * scale;
+  const outlineWidth = isCustomFlag ? 7 * customScale : 5 * scale;
+  const outlineOffset = isCustomFlag ? -6 * customScale : -6 * scale;
   const flagImageStyle: React.CSSProperties = {
     width: renderedWidth,
     height,
