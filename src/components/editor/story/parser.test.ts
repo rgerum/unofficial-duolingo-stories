@@ -263,6 +263,42 @@ Speaker414: hello`);
   assert.equal(element?.text, 'Unknown block type "NOT_A_BLOCK"');
 });
 
+test("LINE treats a spaced danda as sentence punctuation", () => {
+  const element = parseLine(`[LINE]
+Speaker414: କାମକୁ ଯିବାକୁ ପଡିବ ।
+~            to~work is~needed must`);
+
+  assert.equal(element?.type, "LINE");
+  assert.deepEqual(element?.line.content.hints, [
+    "to work",
+    "is needed",
+    "must",
+  ]);
+  assert.deepEqual(
+    element?.line.content.hintMap.map(
+      ({ rangeFrom, rangeTo }: { rangeFrom: number; rangeTo: number }) =>
+        element.line.content.text.slice(rangeFrom, rangeTo + 1),
+    ),
+    ["କାମକୁ", "ଯିବାକୁ", "ପଡିବ"],
+  );
+});
+
+test("LINE does not confuse double danda with danda punctuation", () => {
+  const element = parseLine(`[LINE]
+Speaker414: ଶବ୍ଦ ॥
+~            word marker`);
+
+  assert.equal(element?.type, "LINE");
+  assert.deepEqual(element?.line.content.hints, ["word", "marker"]);
+  assert.deepEqual(
+    element?.line.content.hintMap.map(
+      ({ rangeFrom, rangeTo }: { rangeFrom: number; rangeTo: number }) =>
+        element.line.content.text.slice(rangeFrom, rangeTo + 1),
+    ),
+    ["ଶବ୍ଦ", "॥"],
+  );
+});
+
 test("unknown blocks only emit one error and skip to the next valid block", () => {
   const [story] = processStoryFile(
     `[LINEX]
