@@ -26,7 +26,11 @@ const testAvatars = {
 
 function lint(
   text: string,
-  options: { learningLanguage?: string; noAudio?: boolean } = {},
+  options: {
+    learningLanguage?: string;
+    noAudio?: boolean;
+    humanAudio?: boolean;
+  } = {},
 ) {
   const [story, meta] = processStoryFile(
     text,
@@ -44,6 +48,7 @@ function lint(
     meta,
     learningLanguage: options.learningLanguage ?? "fr",
     noAudio: options.noAudio,
+    humanAudio: options.humanAudio,
   });
 }
 
@@ -346,6 +351,29 @@ Speaker414: Bonjour le monde.
   assert.equal(byRule(findings, "no-language-voices").length, 1);
   assert.equal(byRule(findings, "missing-audio").length, 0);
   assert.equal(byRule(findings, "speaker-no-voice").length, 0);
+});
+
+test("keeps audio rules but skips TTS-voice warnings in human-audio courses", () => {
+  const voicelessAvatars = {
+    0: { ...testAvatars[0], speaker: "" },
+    414: { ...testAvatars[414], speaker: "" },
+  };
+  const [story, meta] = processStoryFile(
+    `[LINE]
+Speaker414: Bonjour le monde.
+~ hello the world`,
+    0,
+    voicelessAvatars,
+    { learning_language: "fr", from_language: "en" },
+    "",
+  );
+  const findings = lintStory({ text: "", story, meta, humanAudio: true });
+  assert.equal(byRule(findings, "no-language-voices").length, 0);
+  assert.equal(byRule(findings, "speaker-no-voice").length, 0);
+  // audio is still expected, just recorded instead of generated
+  const missing = byRule(findings, "missing-audio");
+  assert.equal(missing.length, 1);
+  assert.doesNotMatch(missing[0].message, /generate/i);
 });
 
 test("accepts fromLanguageName and non-Latin sentence punctuation", () => {
