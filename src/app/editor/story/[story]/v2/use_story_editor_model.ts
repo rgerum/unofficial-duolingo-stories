@@ -10,7 +10,7 @@ import {
 import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
 import { retryOnceAfterAuthRefresh } from "./save_auth_retry";
 import { checkStoryLineAudio } from "./audio_problem_check";
-import { hasNoAudioCourseTag } from "@/lib/course-tags";
+import { hasHumanAudioCourseTag, hasNoAudioCourseTag } from "@/lib/course-tags";
 import { lintStory, type LintFinding } from "@/lib/editor/lint";
 
 type LanguageLike = {
@@ -235,6 +235,7 @@ export function useStoryEditorModel({
         meta: parsedMeta,
         learningLanguage: learningLanguage?.short,
         noAudio: hasNoAudioCourseTag(storyData.course_tags),
+        humanAudio: hasHumanAudioCourseTag(storyData.course_tags),
       }),
     [
       docText,

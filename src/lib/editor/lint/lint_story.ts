@@ -567,13 +567,15 @@ function lintElements(
 
   if (missingAudioLines.length > 0) {
     const n = missingAudioLines.length;
+    // in a human-audio course TTS generation is not an option
+    const verb = input.humanAudio ? "Record" : "Record or generate";
     findings.push({
       rule: "missing-audio",
       severity: "warning",
       message:
         n === 1
-          ? "1 line has no audio ('$' line). Record or generate it with the audio tools."
-          : `${n} lines have no audio ('$' lines). Record or generate them with the audio tools.`,
+          ? `1 line has no audio ('$' line). ${verb} it with the audio tools.`
+          : `${n} lines have no audio ('$' lines). ${verb} them with the audio tools.`,
       lineNumber: missingAudioLines[0] || undefined,
     });
   }
@@ -602,7 +604,12 @@ function lintCast(
         message: `Speaker${id} is not a character of this course. Add it to the course characters, or set icon_${id}= and speaker_${id}= in [DATA].`,
       });
     }
-    if (!input.noAudio && languageHasVoices && !member.speaker) {
+    if (
+      !input.noAudio &&
+      !input.humanAudio &&
+      languageHasVoices &&
+      !member.speaker
+    ) {
       findings.push({
         rule: "speaker-no-voice",
         severity: "warning",
@@ -651,11 +658,14 @@ export function lintStory(input: LintInput): LintFinding[] {
 
   // A language with no TTS voices at all cannot generate audio anywhere, so a
   // single story-level finding replaces the per-line and per-speaker ones.
+  // In a human-audio course TTS is not used, so missing voices are expected
+  // and the per-line rules stay active regardless.
   const cast = Object.values(input.meta.cast ?? {});
   const languageHasVoices =
     cast.length === 0 || cast.some((member) => member.speaker);
-  const audioEnabled = !input.noAudio && languageHasVoices;
-  if (!input.noAudio && !languageHasVoices) {
+  const audioEnabled =
+    !input.noAudio && (languageHasVoices || Boolean(input.humanAudio));
+  if (!input.noAudio && !input.humanAudio && !languageHasVoices) {
     findings.push({
       rule: "no-language-voices",
       severity: "warning",

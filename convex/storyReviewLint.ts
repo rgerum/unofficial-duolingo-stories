@@ -9,7 +9,7 @@ import {
   lintStory,
   type LintFinding,
 } from "@/lib/editor/lint";
-import { hasNoAudioCourseTag } from "./lib/courseTags";
+import { hasHumanAudioCourseTag, hasNoAudioCourseTag } from "./lib/courseTags";
 import type { FunctionReturnType } from "convex/server";
 
 // Runs the story parser + lint for the Discord review bot. Lives in the Node
@@ -44,6 +44,7 @@ function lintOne(data: ReviewData, avatars: AvatarRows): ReviewResult {
   const avatarNames: Record<number, AvatarRows[number]> = {};
   for (const row of avatars) avatarNames[row.avatar_id] = row;
   const noAudio = hasNoAudioCourseTag(data.courseTags);
+  const humanAudio = hasHumanAudioCourseTag(data.courseTags);
 
   const [story, meta] = processStoryFile(
     data.text,
@@ -61,6 +62,7 @@ function lintOne(data: ReviewData, avatars: AvatarRows): ReviewResult {
     meta,
     learningLanguage: data.learningLanguageShort,
     noAudio,
+    humanAudio,
   });
   const parserErrors = story.elements.filter(
     (element) => element.type === "ERROR",

@@ -47,4 +47,10 @@ export type LintInput = {
   learningLanguage?: string;
   /** Course has the no-audio tag: skip all audio rules. */
   noAudio?: boolean;
+  /**
+   * Course has the human-audio tag: audio is recorded by humans instead of
+   * generated with TTS, so missing TTS voices are not a problem. Audio itself
+   * is still expected, so the per-line audio rules stay active.
+   */
+  humanAudio?: boolean;
 };
