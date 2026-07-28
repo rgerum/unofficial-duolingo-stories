@@ -12,7 +12,10 @@ import type {
 } from "../src/components/editor/story/syntax_parser_types";
 import type { Avatar } from "../src/app/editor/story/[story]/types";
 import { timings_to_text } from "../src/lib/editor/audio/audio_edit_tools";
-import { findNextMatchingAlignedWord } from "./lib/forced-alignment-safety";
+import {
+  findNextMatchingAlignedWord,
+  keepLexicalAlignedWords,
+} from "./lib/forced-alignment-safety";
 import { getAudioBackedStoryItems } from "./lib/forced-alignment-story-items";
 
 const DEFAULT_AUDIO_BASE_URL =
@@ -281,7 +284,7 @@ async function readAlignedWords(jsonPath: string) {
   const parsed = JSON.parse(raw) as unknown;
   const candidates = collectWordCandidates(parsed);
 
-  return candidates.flatMap((candidate) => {
+  const alignedWords = candidates.flatMap((candidate) => {
     const word = getString(candidate, ["word", "text", "label", "token"]);
     const start = getNumber(candidate, [
       "start",
@@ -301,6 +304,8 @@ async function readAlignedWords(jsonPath: string) {
       },
     ] satisfies AlignedWord[];
   });
+
+  return keepLexicalAlignedWords(alignedWords);
 }
 
 function collectWordCandidates(value: unknown): Record<string, unknown>[] {
