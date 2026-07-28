@@ -2,15 +2,19 @@ import React from "react";
 import Button from "@/components/ui/button";
 import { useLocalisation } from "../LocalisationProvider/LocalisationProviderContext";
 import type { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import type { StoryCrossLinksData } from "@/app/(stories)/story/[story_id]/getStoryCrossLinks";
 import { getStoryTranscript } from "@/app/(stories)/story/[story_id]/story_seo";
+import StoryCrossLinks from "@/components/StoryCrossLinks";
 import { cn } from "@/lib/utils";
 
 function StoryTitlePage({
   story,
   next,
+  crossLinks,
 }: {
   story: StoryData;
   next: () => void;
+  crossLinks?: StoryCrossLinksData | null;
 }) {
   const header = story.elements[0];
   const localisation = useLocalisation();
@@ -57,6 +61,10 @@ function StoryTitlePage({
             </div>
           </details>
         ) : null}
+        <StoryCrossLinks
+          crossLinks={crossLinks ?? null}
+          rtl={story.from_language_rtl}
+        />
       </div>
     </div>
   );

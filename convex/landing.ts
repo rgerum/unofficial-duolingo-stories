@@ -2,6 +2,7 @@ import { query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { courseContributorValidator } from "./lib/courseContributors";
+import { listPublicCourseStories } from "./lib/publicCourseStories";
 
 const courseListItemValidator = v.object({
   id: v.number(),
@@ -386,31 +387,7 @@ export const getPublicCoursePageData = query({
     const fromLanguageName = fromLanguage?.name ?? "";
     const learningLanguageName = learningLanguage?.name ?? "";
 
-    const publicStories = await ctx.db
-      .query("stories")
-      .withIndex("by_course_public_deleted_set", (q) =>
-        q.eq("courseId", course._id).eq("public", true).eq("deleted", false),
-      )
-      .collect();
-
-    const imageIds = Array.from(
-      new Set(
-        publicStories
-          .map((story) => story.imageId)
-          .filter((imageId): imageId is Id<"images"> => !!imageId),
-      ),
-    );
-    const imageRows = await Promise.all(
-      imageIds.map(async (imageId) => ({
-        imageId,
-        image: await ctx.db.get(imageId),
-      })),
-    );
-    const imageById = new Map<
-      Id<"images">,
-      (typeof imageRows)[number]["image"]
-    >();
-    for (const row of imageRows) imageById.set(row.imageId, row.image);
+    const publicStories = await listPublicCourseStories(ctx, course._id);
 
     const englishLanguage = await ctx.db
       .query("languages")
@@ -443,49 +420,24 @@ export const getPublicCoursePageData = query({
       localizationMap.set(row.tag, row.text);
     }
 
-    const mappedStories = publicStories
-      .map((story) => {
-        if (typeof story.legacyId !== "number") return null;
-        const image = story.imageId ? imageById.get(story.imageId) : null;
-        if (!image?.active || !image?.gilded) return null;
-        return {
-          id: story.legacyId,
-          name: story.name,
-          course_id: course.legacyId,
-          image: image.legacyId,
-          set_id: story.set_id ?? 0,
-          set_index: story.set_index ?? 0,
-          active: image.active,
-          gilded: image.gilded,
-          active_lip: image.active_lip,
-          gilded_lip: image.gilded_lip,
-          change_date: story.change_date,
-          date_published: story.date_published,
-        };
-      })
-      .filter(
-        (
-          story,
-        ): story is {
-          id: number;
-          name: string;
-          course_id: number;
-          image: string;
-          set_id: number;
-          set_index: number;
-          active: string;
-          gilded: string;
-          active_lip: string;
-          gilded_lip: string;
-          change_date: number | undefined;
-          date_published: number | undefined;
-        } => story !== null,
-      )
-      .sort((a, b) => {
-        const setCmp = a.set_id - b.set_id;
-        if (setCmp !== 0) return setCmp;
-        return a.set_index - b.set_index;
-      });
+    // `listPublicCourseStories` already applied the public filter and sorted
+    // by (set_id, set_index).
+    const mappedStories = publicStories.map(
+      ({ story, legacyId, image, set_id, set_index }) => ({
+        id: legacyId,
+        name: story.name,
+        course_id: course.legacyId,
+        image: image.legacyId,
+        set_id,
+        set_index,
+        active: image.active,
+        gilded: image.gilded,
+        active_lip: image.active_lip,
+        gilded_lip: image.gilded_lip,
+        change_date: story.change_date,
+        date_published: story.date_published,
+      }),
+    );
     const contributorLists = {
       contributors: course.contributorDetails ?? [],
       contributors_past: course.contributorDetailsPast ?? [],
