@@ -112,21 +112,6 @@ describe("getStoryCrossLinks", () => {
     expect(last?.next).toBeNull();
   });
 
-  test("lists more siblings without repeating the current, previous or next story", async () => {
-    const t = convexTest(schema, modules);
-    await seedCourse(t, linearCourse);
-
-    const result = await t.query(api.storyCrossLinks.getStoryCrossLinks, {
-      storyId: 12,
-    });
-
-    const moreIds = result?.more.map((story) => story.id) ?? [];
-    expect(moreIds).toEqual([10, 14]);
-    expect(moreIds).not.toContain(12);
-    expect(moreIds).not.toContain(11);
-    expect(moreIds).not.toContain(13);
-  });
-
   test("never links to unpublished, deleted or illustration-less stories", async () => {
     const t = convexTest(schema, modules);
     await seedCourse(t, [
@@ -150,12 +135,6 @@ describe("getStoryCrossLinks", () => {
 
     expect(result?.previous).toEqual({ id: 10, name: "One" });
     expect(result?.next).toEqual({ id: 15, name: "Visible" });
-    const linkedIds = [
-      result?.previous?.id,
-      result?.next?.id,
-      ...(result?.more.map((story) => story.id) ?? []),
-    ].filter((id): id is number => typeof id === "number");
-    expect(linkedIds).toEqual([10, 15]);
   });
 
   test("returns null for a story in a non-public course", async () => {
@@ -212,28 +191,16 @@ describe("selectStoryCrossLinks", () => {
     { id: 9, name: "i", set_id: 2, set_index: 3 },
   ];
 
-  test("prefers siblings from the same set before reaching into adjacent sets", () => {
-    const { previous, next, more } = selectStoryCrossLinks(candidates, {
-      id: 3,
-      name: "c",
+  test("picks neighbours across set boundaries", () => {
+    const { previous, next } = selectStoryCrossLinks(candidates, {
+      id: 6,
+      name: "f",
       set_id: 1,
-      set_index: 3,
+      set_index: 6,
     });
 
-    expect(previous?.id).toBe(2);
-    expect(next?.id).toBe(4);
-    // The three remaining stories of set 1 come first; only then is the block
-    // topped up from set 2.
-    expect(more.map((story) => story.id)).toEqual([1, 5, 6, 7]);
-  });
-
-  test("caps the list at the requested size and keeps reading order", () => {
-    const { more } = selectStoryCrossLinks(
-      candidates,
-      { id: 1, name: "a", set_id: 1, set_index: 1 },
-      2,
-    );
-    expect(more.map((story) => story.id)).toEqual([3, 4]);
+    expect(previous?.id).toBe(5);
+    expect(next?.id).toBe(7);
   });
 
   test("returns empty links for a course with a single story", () => {
@@ -241,7 +208,6 @@ describe("selectStoryCrossLinks", () => {
     expect(selectStoryCrossLinks(only, only[0])).toEqual({
       previous: null,
       next: null,
-      more: [],
     });
   });
 });

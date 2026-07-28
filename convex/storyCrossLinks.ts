@@ -20,14 +20,13 @@ const storyCrossLinksValidator = v.union(
     }),
     previous: v.union(crossLinkStoryValidator, v.null()),
     next: v.union(crossLinkStoryValidator, v.null()),
-    more: v.array(crossLinkStoryValidator),
   }),
   v.null(),
 );
 
 /**
  * Internal links shown on a story page: the neighbouring stories of the same
- * course plus a few more siblings.
+ * course.
  *
  * Story pages used to have exactly one inbound internal link (their course
  * page), which left most of them in Search Console's "Discovered - currently
@@ -63,7 +62,7 @@ export const getStoryCrossLinks = query({
       set_index: entry.set_index,
     }));
 
-    const { previous, next, more } = selectStoryCrossLinks(candidates, {
+    const { previous, next } = selectStoryCrossLinks(candidates, {
       // `args.storyId` is the legacy id this story was looked up by.
       id: args.storyId,
       name: story.name,
@@ -82,7 +81,6 @@ export const getStoryCrossLinks = query({
       },
       previous: previous ? { id: previous.id, name: previous.name } : null,
       next: next ? { id: next.id, name: next.name } : null,
-      more: more.map((sibling) => ({ id: sibling.id, name: sibling.name })),
     };
   },
 });

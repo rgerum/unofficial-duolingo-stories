@@ -24,77 +24,39 @@ export default function StoryCrossLinks({
   className?: string;
 }) {
   const localisation = useLocalisation();
-  const headingId = React.useId();
 
   if (!crossLinks) return null;
-  const { course, previous, next, more } = crossLinks;
-  if (!previous && !next && more.length === 0) return null;
+  const { course, previous, next } = crossLinks;
+  if (!previous && !next) return null;
 
   const language = course.learning_language_name || course.name;
-  const heading =
-    localisation("story_more_stories", { $language: language }) ??
-    `More ${language} stories`;
-  const allStories =
-    localisation("story_all_stories", { $language: language }) ??
-    `All ${language} stories`;
   const previousLabel =
     localisation("story_previous_story") ?? "Previous story";
   const nextLabel = localisation("story_next_story") ?? "Next story";
 
   return (
     <nav
-      aria-labelledby={headingId}
+      aria-label={`${language} stories`}
       className={cn(
-        "pointer-events-auto mt-8 w-full max-w-[500px] rounded-2xl border-2 border-[var(--color_base_border)] bg-[var(--color_base_background)] px-4 py-3 text-left",
+        "pointer-events-auto mt-8 w-full max-w-[500px] rounded-2xl border-2 border-[var(--color_base_border)] bg-[var(--color_base_background)] px-3 py-2 text-left",
         rtl && "[direction:rtl] text-right",
         className,
       )}
     >
-      <h2
-        id={headingId}
-        className="m-0 text-xs font-bold tracking-[0.12em] uppercase text-[var(--text-color-dim)]"
-      >
-        {heading}
-      </h2>
-
-      {previous || next ? (
-        <div className="mt-2 grid gap-2 min-[420px]:grid-cols-2">
-          <NeighbourLink
-            story={previous}
-            label={previousLabel}
-            direction="previous"
-            rtl={rtl}
-          />
-          <NeighbourLink
-            story={next}
-            label={nextLabel}
-            direction="next"
-            rtl={rtl}
-          />
-        </div>
-      ) : null}
-
-      {more.length > 0 ? (
-        <ul className="m-0 mt-3 flex list-none flex-col gap-1 p-0">
-          {more.map((story) => (
-            <li key={story.id} className="m-0">
-              <Link
-                href={`/story/${story.id}`}
-                className="block truncate text-[15px] leading-[24px] text-[var(--text-color)] no-underline hover:text-[var(--link-hover)] hover:underline"
-              >
-                {story.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      <Link
-        href={`/${course.short}`}
-        className="mt-3 inline-block text-[13px] font-bold text-[var(--text-color-dim)] no-underline hover:text-[var(--link-hover)] hover:underline"
-      >
-        {allStories}
-      </Link>
+      <div className="grid gap-2 min-[420px]:grid-cols-2">
+        <NeighbourLink
+          story={previous}
+          label={previousLabel}
+          direction="previous"
+          rtl={rtl}
+        />
+        <NeighbourLink
+          story={next}
+          label={nextLabel}
+          direction="next"
+          rtl={rtl}
+        />
+      </div>
     </nav>
   );
 }
