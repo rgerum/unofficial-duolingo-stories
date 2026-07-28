@@ -26,6 +26,24 @@ if (!convexUrl) {
 
 const convex = new ConvexHttpClient(convexUrl);
 
+// Deleted stories 308 to their course page (when the course is public) so
+// accumulated links keep working; unknown ids 404. Shared by generateMetadata
+// and Page — generateMetadata runs first, so it must redirect too or the
+// notFound there would win before Page gets a chance.
+async function resolveStoryMeta(story_id: number) {
+  const storyMeta = await fetchQuery(api.storyRead.getStoryMetaByLegacyId, {
+    storyId: story_id,
+  });
+  if (storyMeta && "deleted" in storyMeta) {
+    if (storyMeta.coursePublic && storyMeta.courseShort) {
+      permanentRedirect(`/${storyMeta.courseShort}`);
+    }
+    notFound();
+  }
+  if (!storyMeta) notFound();
+  return storyMeta;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -34,12 +52,10 @@ export async function generateMetadata({
   const story_id = parseInt((await params).story_id);
   const [story, storyMeta] = await Promise.all([
     get_story(story_id),
-    fetchQuery(api.storyRead.getStoryMetaByLegacyId, {
-      storyId: story_id,
-    }),
+    resolveStoryMeta(story_id),
   ]);
 
-  if (!story || !storyMeta) notFound();
+  if (!story) notFound();
 
   const title = getStoryTitle(storyMeta);
   const description = getStoryDescription(story);
@@ -101,15 +117,7 @@ export default async function Page({
 
   const story = await get_story(story_id);
   if (!story) {
-    const redirectInfo = await fetchQuery(
-      api.storyRead.getDeletedStoryRedirectInfoByLegacyId,
-      {
-        storyId: story_id,
-      },
-    );
-    if (redirectInfo?.coursePublic && redirectInfo.courseShort) {
-      permanentRedirect(`/${redirectInfo.courseShort}`);
-    }
+    await resolveStoryMeta(story_id); // redirects deleted stories, else 404s
     notFound();
   }
   const course_id = story.course_id;
