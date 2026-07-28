@@ -663,7 +663,14 @@ function HintTokenBox({
         >
           {displayText}
         </Text>
-        <View style={{ height: 2, marginTop: -2, overflow: "hidden" }}>
+        <View
+          style={{
+            height: 2,
+            marginHorizontal: UNDERLINE_EDGE_INSET,
+            marginTop: -2,
+            overflow: "hidden",
+          }}
+        >
           {underline && (
             <View
               style={{
@@ -764,7 +771,14 @@ function HintPhraseBox({
             );
           })}
         </View>
-        <View style={{ height: 2, marginTop: -2, overflow: "hidden" }}>
+        <View
+          style={{
+            height: 2,
+            marginHorizontal: UNDERLINE_EDGE_INSET,
+            marginTop: -2,
+            overflow: "hidden",
+          }}
+        >
           {underline && (
             <View
               style={{
