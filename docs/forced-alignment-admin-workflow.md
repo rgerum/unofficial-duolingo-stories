@@ -122,7 +122,7 @@ normalization needs a script tweak.
 
 ## Run A Course Batch
 
-Run public stories in a course serially:
+Run published stories in a course serially:
 
 ```sh
 pnpm forced-align:batch --course da-en --output /home/codex/forced-alignment-batches/da-en-$(date +%Y%m%d)
@@ -133,7 +133,7 @@ Useful options:
 ```sh
 pnpm forced-align:batch --course da-en --story 2448
 pnpm forced-align:batch --course da-en --failed-from /path/to/summary.json
-pnpm forced-align:batch --course da-en --include-private
+pnpm forced-align:batch --course da-en --include-unpublished
 pnpm forced-align:batch --course da-en --concurrency 2
 ```
 
@@ -177,9 +177,11 @@ pnpm forced-align:apply-batch \
 ```
 
 For official stories, Convex still enforces admin-only overwrites. The applier
-uses `storyWrite.setStory`, reparses with the course avatar map, skips rows with
-alignment warnings, skips stories whose text/audio no longer matches the batch
-manifest, and preserves current audio filenames when writing timing lines.
+uses `storyWrite.setStory`, reparses with the course avatar map, and skips the
+entire story if any result has warnings or if the result, manifest, and current
+audio-backed rows do not have exactly matching IDs, text, and audio filenames.
+The single-story aligner only creates review artifacts; the batch applier is the
+only write path.
 
 ## Notes
 

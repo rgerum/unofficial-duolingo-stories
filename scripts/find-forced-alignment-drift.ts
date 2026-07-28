@@ -1,6 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import dotenv from "dotenv";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 import type { Avatar } from "../src/app/editor/story/[story]/types";
@@ -11,16 +10,12 @@ import type {
   StoryElementHeader,
   StoryElementLine,
 } from "../src/components/editor/story/syntax_parser_types";
+import { selectLatestSuccessfulStoryRuns } from "./lib/forced-alignment-safety";
 
-dotenv.config({ path: ".env.local", quiet: true });
-
-const CONVEX_URL =
-  process.env.FORCED_ALIGN_CONVEX_URL ??
-  process.env.NEXT_PUBLIC_CONVEX_URL ??
-  process.env.CONVEX_URL;
+const CONVEX_URL = process.env.FORCED_ALIGN_CONVEX_URL;
 
 if (!CONVEX_URL) {
-  console.error("Error: FORCED_ALIGN_CONVEX_URL/NEXT_PUBLIC_CONVEX_URL/CONVEX_URL is not set.");
+  console.error("Error: FORCED_ALIGN_CONVEX_URL must be set explicitly.");
   process.exit(1);
 }
 
@@ -41,12 +36,16 @@ type CliArgs = {
   storyIds: number[];
   report?: string;
   limit?: number;
-  includePrivate?: boolean;
+  includeUnpublished?: boolean;
 };
 
 type SummaryItem = {
   storyId: number;
-  storyName: string;
+  storyTitle?: string;
+  /** Kept only for reading batches generated before the terminology update. */
+  storyName?: string;
+  published?: boolean;
+  /** Kept only for reading batches generated before the terminology update. */
   public?: boolean;
   status: string;
   runRoot: string;
@@ -65,7 +64,7 @@ type AlignableItem = {
 
 async function main() {
   const stories = (await collectSuccessfulStories(batchDirs))
-    .filter((story) => args.includePrivate || story.public === true)
+    .filter((story) => args.includeUnpublished || isStoryPublished(story))
     .filter(
       (story) => args.storyIds.length === 0 || args.storyIds.includes(story.storyId),
     )
@@ -80,8 +79,8 @@ async function main() {
     if (!data) {
       driftStories.push({
         storyId: story.storyId,
-        storyName: story.storyName,
-        public: story.public === true,
+        storyTitle: getStoryTitle(story),
+        published: isStoryPublished(story),
         status: "missing-current-story",
       });
       continue;
@@ -101,12 +100,15 @@ async function main() {
       },
       learningLanguage?.tts_replace ?? "",
     );
-    const currentById = new Map(
-      getAlignableItems(parsedStory.elements).map((item) => [item.id, item]),
-    );
+    const currentItems = getAlignableItems(parsedStory.elements);
+    const currentById = new Map(currentItems.map((item) => [item.id, item]));
+    const manifestIds = new Set(manifest.items.map((item) => item.id));
 
     const changedRows = [];
     const missingRows = [];
+    const addedRows = currentItems
+      .filter((item) => !manifestIds.has(item.id))
+      .map((item) => item.id);
     const textChangedRows = [];
     for (const manifestItem of manifest.items) {
       const current = currentById.get(manifestItem.id);
@@ -124,15 +126,21 @@ async function main() {
         });
       }
     }
-    if (changedRows.length > 0 || missingRows.length > 0 || textChangedRows.length > 0) {
+    if (
+      changedRows.length > 0 ||
+      missingRows.length > 0 ||
+      addedRows.length > 0 ||
+      textChangedRows.length > 0
+    ) {
       driftStories.push({
         storyId: story.storyId,
-        storyName: story.storyName,
-        public: story.public === true,
+        storyTitle: getStoryTitle(story),
+        published: isStoryPublished(story),
         sourceRun: path.basename(story.runRoot),
         rows: manifest.items.length,
         changedAudioRows: changedRows.length,
         missingRows,
+        addedRows,
         textChangedRows,
         changedRows,
       });
@@ -143,7 +151,7 @@ async function main() {
     generatedAt: new Date().toISOString(),
     convexUrl: CONVEX_URL,
     batchDirs,
-    publicOnly: args.includePrivate !== true,
+    publishedOnly: args.includeUnpublished !== true,
     checkedStories: stories.length,
     driftStoryCount: driftStories.length,
     changedAudioStoryCount: driftStories.filter(
@@ -156,29 +164,31 @@ async function main() {
   console.log(JSON.stringify({ ...report, driftStories: undefined }, null, 2));
   for (const story of driftStories.slice(0, 30)) {
     console.log(
-      `${story.storyId} ${story.storyName}: audio=${story.changedAudioRows ?? 0} ` +
-        `missing=${story.missingRows?.length ?? 0} text=${story.textChangedRows?.length ?? 0}`,
+      `${story.storyId} ${story.storyTitle}: audio=${story.changedAudioRows ?? 0} ` +
+        `missing=${story.missingRows?.length ?? 0} added=${story.addedRows?.length ?? 0} ` +
+        `text=${story.textChangedRows?.length ?? 0}`,
     );
   }
   console.log(`Report: ${outputPath}`);
 }
 
 async function collectSuccessfulStories(runRoots: string[]) {
-  const byStory = new Map<number, SummaryItem>();
+  const runs: SummaryItem[] = [];
   for (const runRoot of runRoots) {
     const summary = await readJson<{ summary?: SummaryItem[] }>(
       path.join(runRoot, "summary.json"),
     );
     for (const item of summary.summary ?? []) {
-      if (item.status !== "done") continue;
-      byStory.set(item.storyId, {
+      runs.push({
         ...item,
         runRoot,
         storyDir: path.join(runRoot, `story-${item.storyId}`),
       });
     }
   }
-  return [...byStory.values()].sort((a, b) => a.storyId - b.storyId);
+  return selectLatestSuccessfulStoryRuns(runs).sort(
+    (left, right) => left.storyId - right.storyId,
+  );
 }
 
 async function getParseContext(
@@ -236,6 +246,14 @@ async function readJson<T>(filePath: string): Promise<T> {
   return JSON.parse(await readFile(filePath, "utf8")) as T;
 }
 
+function getStoryTitle(story: SummaryItem) {
+  return story.storyTitle ?? story.storyName ?? `Story ${story.storyId}`;
+}
+
+function isStoryPublished(story: SummaryItem) {
+  return story.published ?? story.public ?? false;
+}
+
 function resolveBatchDirs(batchDirArgs: string[]) {
   if (batchDirArgs.length > 0) return batchDirArgs;
   return (process.env.FORCED_ALIGN_BATCH_DIRS ?? "")
@@ -252,7 +270,7 @@ function parseArgs(argv: string[]) {
     else if (arg === "--story") parsed.storyIds.push(Number(argv[++index]));
     else if (arg === "--limit") parsed.limit = Number(argv[++index]);
     else if (arg === "--report") parsed.report = argv[++index];
-    else if (arg === "--include-private") parsed.includePrivate = true;
+    else if (arg === "--include-unpublished") parsed.includeUnpublished = true;
     else if (arg === "--help") {
       printHelp();
       process.exit(0);
@@ -278,12 +296,12 @@ Options:
   --story <id>           Restrict to a story id. May be supplied more than once.
   --limit <n>            Process only the first n selected stories.
   --report <path>        Write JSON report to path.
-  --include-private      Include private/unpublished stories.
+  --include-unpublished  Include unpublished stories.
   --help                 Show this help.
 
 Environment:
   FORCED_ALIGN_BATCH_DIRS  ${path.delimiter}-separated batch directories.
-  FORCED_ALIGN_CONVEX_URL / NEXT_PUBLIC_CONVEX_URL / CONVEX_URL
+  FORCED_ALIGN_CONVEX_URL Required explicit Convex deployment URL.
 `);
 }
 

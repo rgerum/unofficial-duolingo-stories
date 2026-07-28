@@ -1,7 +1,6 @@
 import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import dotenv from "dotenv";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 import { processStoryFile } from "../src/components/editor/story/syntax_parser_new";
@@ -13,39 +12,28 @@ import type {
 } from "../src/components/editor/story/syntax_parser_types";
 import type { Avatar } from "../src/app/editor/story/[story]/types";
 import { timings_to_text } from "../src/lib/editor/audio/audio_edit_tools";
-
-dotenv.config({ path: ".env.local", quiet: true });
+import { findNextMatchingAlignedWord } from "./lib/forced-alignment-safety";
 
 const DEFAULT_AUDIO_BASE_URL =
   "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/";
-const CONVEX_URL =
-  process.env.FORCED_ALIGN_CONVEX_URL ??
-  process.env.NEXT_PUBLIC_CONVEX_URL ??
-  process.env.CONVEX_URL;
-const CONVEX_AUTH_TOKEN = process.env.CONVEX_AUTH_TOKEN;
+const CONVEX_URL = process.env.FORCED_ALIGN_CONVEX_URL;
 const AUDIO_BASE_URL =
   process.env.ALIGN_AUDIO_BASE_URL ?? process.env.NEXT_PUBLIC_AUDIO_BASE_URL;
 const ALIGN_COMMAND = process.env.FORCED_ALIGN_COMMAND;
 const ALIGN_TIME_UNIT = process.env.FORCED_ALIGN_TIME_UNIT ?? "seconds";
 
 if (!CONVEX_URL) {
-  console.error("Error: NEXT_PUBLIC_CONVEX_URL/CONVEX_URL is not set.");
+  console.error("Error: FORCED_ALIGN_CONVEX_URL must be set explicitly.");
   process.exit(1);
 }
 
 const args = parseArgs(process.argv.slice(2));
 const storyId = parseRequiredNumber(args.story ?? process.env.FORCED_ALIGN_STORY_ID);
 const shouldAlign = args.align === true || parseBooleanEnv(process.env.FORCED_ALIGN_RUN, false);
-const shouldApply = args.apply === true || parseBooleanEnv(process.env.FORCED_ALIGN_APPLY, false);
 const outputRoot =
   args.output ??
   process.env.FORCED_ALIGN_OUTPUT_DIR ??
   path.join("tmp", "forced-alignment", `story-${storyId}`);
-
-if (shouldApply && !shouldAlign) {
-  console.error("Error: --apply requires --align.");
-  process.exit(1);
-}
 
 if (shouldAlign && !ALIGN_COMMAND) {
   console.error("Error: FORCED_ALIGN_COMMAND is required when using --align.");
@@ -56,15 +44,11 @@ if (shouldAlign && !ALIGN_COMMAND) {
 }
 
 const client = new ConvexHttpClient(CONVEX_URL);
-if (CONVEX_AUTH_TOKEN) {
-  client.setAuth(CONVEX_AUTH_TOKEN);
-}
 
 type CliArgs = {
   story?: string;
   output?: string;
   align?: boolean;
-  apply?: boolean;
 };
 
 type AlignableItem = {
@@ -72,7 +56,7 @@ type AlignableItem = {
   order: number;
   type: "HEADER" | "LINE";
   lineIndex: number;
-  speaker: string;
+  characterName: string;
   text: string;
   audioUrl: string;
   filename: string;
@@ -140,10 +124,10 @@ async function main() {
   await writeJson(path.join(outputRoot, "manifest.json"), {
     generatedAt: new Date().toISOString(),
     storyId,
-    storyName: data.story_data.name,
-    courseShort: data.story_data.short,
-    learningLanguage: learningLanguage?.short ?? "",
-    fromLanguage: fromLanguage?.short ?? "",
+    storyTitle: data.story_data.name,
+    courseSlug: data.story_data.short,
+    learningLanguageCode: learningLanguage?.short ?? "",
+    fromLanguageCode: fromLanguage?.short ?? "",
     alignCommand: ALIGN_COMMAND ?? null,
     items,
   });
@@ -199,43 +183,9 @@ async function main() {
 
   printSummary(results, outputRoot);
 
-  if (!shouldApply) {
-    console.log("Dry run only. Re-run with --apply to save these timings to Convex.");
-    return;
-  }
-
-  if (!CONVEX_AUTH_TOKEN) {
-    throw new Error("CONVEX_AUTH_TOKEN is required for --apply.");
-  }
-
-  const [nextParsedStory, nextParsedMeta] = processStoryFile(
-    patchedText,
-    data.story_data.id,
-    avatarNames,
-    {
-      learning_language: learningLanguage?.short ?? "",
-      from_language: fromLanguage?.short ?? "",
-    },
-    learningLanguage?.tts_replace ?? "",
+  console.log(
+    "Review the artifacts, then use forced-align:apply-batch for a safety-checked write.",
   );
-
-  await client.mutation(api.storyWrite.setStory, {
-    legacyStoryId: data.story_data.id,
-    duo_id: data.story_data.duo_id ?? "",
-    name: data.story_data.name,
-    image: data.story_data.image,
-    set_id: data.story_data.set_id,
-    set_index: data.story_data.set_index,
-    legacyCourseId: data.story_data.course_id,
-    text: patchedText,
-    json: toConvexValue(nextParsedStory),
-    todo_count: nextParsedMeta.todo_count ?? 0,
-    change_date: new Date().toISOString(),
-    confirmOfficialOverwrite: data.story_data.official || undefined,
-    operationKey: `story:${data.story_data.id}:forced-align:${Date.now()}`,
-  });
-
-  console.log(`Saved forced-aligned timings for story ${storyId}.`);
 }
 
 async function getParseContext(
@@ -277,7 +227,7 @@ function getAlignableItems(elements: StoryElement[]) {
       order,
       type: element.type,
       lineIndex: element.trackingProperties.line_index || 0,
-      speaker: getElementSpeaker(element),
+      characterName: getElementCharacterName(element),
       text,
       audioUrl: resolveAudioUrl(audio.url),
       filename: audio.url.replace(/^audio\//, ""),
@@ -302,7 +252,7 @@ function getElementText(element: StoryElementHeader | StoryElementLine) {
   return element.line.content?.text ?? "";
 }
 
-function getElementSpeaker(element: StoryElementHeader | StoryElementLine) {
+function getElementCharacterName(element: StoryElementHeader | StoryElementLine) {
   if (element.type === "HEADER") return "Narrator";
   if (element.line.type === "CHARACTER") {
     return (
@@ -421,7 +371,11 @@ function buildAlignmentResult(item: AlignableItem, alignedWords: AlignedWord[]) 
   let alignedIndex = 0;
 
   for (const token of tokens) {
-    const aligned = findNextAlignedWord(alignedWords, token.normalized, alignedIndex);
+    const aligned = findNextMatchingAlignedWord(
+      alignedWords,
+      token.normalized,
+      alignedIndex,
+    );
     if (!aligned) {
       warnings.push(`No aligned word found for "${token.text}" at ${token.start}.`);
       continue;
@@ -455,22 +409,6 @@ function buildAlignmentResult(item: AlignableItem, alignedWords: AlignedWord[]) 
     }),
     warnings,
   } satisfies AlignmentResult;
-}
-
-function findNextAlignedWord(
-  alignedWords: AlignedWord[],
-  normalizedToken: string,
-  fromIndex: number,
-) {
-  for (let index = fromIndex; index < alignedWords.length; index += 1) {
-    const aligned = alignedWords[index];
-    if (aligned?.normalized === normalizedToken) {
-      return { index, word: aligned };
-    }
-  }
-  const fallback = alignedWords[fromIndex];
-  if (!fallback) return null;
-  return { index: fromIndex, word: fallback };
 }
 
 function getWordTokens(text: string) {
@@ -546,10 +484,13 @@ function parseArgs(argv: string[]) {
     if (arg === "--story") parsed.story = argv[++index];
     else if (arg === "--output") parsed.output = argv[++index];
     else if (arg === "--align") parsed.align = true;
-    else if (arg === "--apply") parsed.apply = true;
     else if (arg === "--help") {
       printHelp();
       process.exit(0);
+    } else {
+      console.error(`Unknown argument: ${arg}`);
+      printHelp();
+      process.exit(1);
     }
   }
   return parsed;
@@ -621,19 +562,6 @@ async function writeJson(filePath: string, value: unknown) {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
-function toConvexValue(value: unknown): unknown {
-  if (value === undefined) return null;
-  if (Array.isArray(value)) return value.map((item) => toConvexValue(item));
-  if (value && typeof value === "object") {
-    const result: Record<string, unknown> = {};
-    for (const [key, item] of Object.entries(value)) {
-      result[key] = toConvexValue(item);
-    }
-    return result;
-  }
-  return value;
-}
-
 function printSummary(results: AlignmentResult[], outputPath: string) {
   const warningCount = results.reduce(
     (total, result) => total + result.warnings.length,
@@ -659,12 +587,9 @@ function printHelp() {
   console.log(`Usage:
   pnpm exec tsx scripts/forced-align-story-audio.ts --story <legacyStoryId>
   pnpm exec tsx scripts/forced-align-story-audio.ts --story <legacyStoryId> --align
-  pnpm exec tsx scripts/forced-align-story-audio.ts --story <legacyStoryId> --align --apply
 
 Environment:
-  NEXT_PUBLIC_CONVEX_URL or CONVEX_URL
-  FORCED_ALIGN_CONVEX_URL            Optional explicit Convex URL override
-  CONVEX_AUTH_TOKEN                  Required for --apply
+  FORCED_ALIGN_CONVEX_URL            Required explicit Convex deployment URL
   ALIGN_AUDIO_BASE_URL               Optional audio blob base URL
   FORCED_ALIGN_COMMAND               Required for --align
   FORCED_ALIGN_MODEL                 Optional command placeholder

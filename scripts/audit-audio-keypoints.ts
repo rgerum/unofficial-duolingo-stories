@@ -2,11 +2,8 @@ import { execFile } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { promisify } from "node:util";
-import dotenv from "dotenv";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
-
-dotenv.config({ path: ".env.local" });
 
 const execFileAsync = promisify(execFile);
 
@@ -17,7 +14,7 @@ type Args = {
   course: string;
   output: string;
   limit: number;
-  publicOnly: boolean;
+  publishedOnly: boolean;
   toleranceMs: number;
 };
 
@@ -28,7 +25,7 @@ type Keypoint = {
 
 type AuditIssue = {
   storyId: number;
-  storyName: string;
+  storyTitle: string;
   lineIndex: number;
   text: string;
   audioUrl: string;
@@ -44,7 +41,7 @@ function parseArgs(): Args {
     course: process.env.AUDIO_KEYPOINT_AUDIT_COURSE ?? "da-en",
     output: process.env.AUDIO_KEYPOINT_AUDIT_OUTPUT ?? DEFAULT_OUTPUT_PATH,
     limit: Number(process.env.AUDIO_KEYPOINT_AUDIT_LIMIT ?? "0"),
-    publicOnly: parseBooleanEnv(
+    publishedOnly: parseBooleanEnv(
       process.env.AUDIO_KEYPOINT_AUDIT_PUBLIC_ONLY,
       true,
     ),
@@ -81,7 +78,7 @@ function parseArgs(): Args {
       continue;
     }
     if (arg === "--all") {
-      parsed.publicOnly = false;
+      parsed.publishedOnly = false;
       continue;
     }
 
@@ -104,10 +101,10 @@ Options:
   --output <path>        JSON output path. Default: ${DEFAULT_OUTPUT_PATH}
   --limit <n>            Limit stories scanned. Default: 0 (no limit)
   --tolerance-ms <n>     Allowed timestamp overrun. Default: 50
-  --all                  Include private/unpublished stories
+  --all                  Include unpublished stories
 
 Env:
-  AUDIO_KEYPOINT_AUDIT_CONVEX_URL overrides NEXT_PUBLIC_CONVEX_URL/CONVEX_URL
+  AUDIO_KEYPOINT_AUDIT_CONVEX_URL is required
   AUDIO_KEYPOINT_AUDIT_CONCURRENCY defaults to 8
 `);
 }
@@ -146,11 +143,7 @@ async function mapWithConcurrency<T, R>(
 }
 
 function resolveConvexUrl() {
-  return (
-    process.env.AUDIO_KEYPOINT_AUDIT_CONVEX_URL ??
-    process.env.NEXT_PUBLIC_CONVEX_URL ??
-    process.env.CONVEX_URL
-  );
+  return process.env.AUDIO_KEYPOINT_AUDIT_CONVEX_URL;
 }
 
 function resolveAudioUrl(url: string) {
@@ -211,7 +204,7 @@ async function main() {
 
   if (!convexUrl) {
     console.error(
-      "Error: AUDIO_KEYPOINT_AUDIT_CONVEX_URL/NEXT_PUBLIC_CONVEX_URL/CONVEX_URL is not set.",
+      "Error: AUDIO_KEYPOINT_AUDIT_CONVEX_URL must be set explicitly.",
     );
     process.exit(1);
   }
@@ -233,14 +226,16 @@ async function main() {
     api.editorRead.getEditorStoriesByCourseLegacyId,
     { identifier: args.course },
   );
-  const publicFiltered = args.publicOnly
+  const publishedFiltered = args.publishedOnly
     ? stories.filter((story) => story.public)
     : stories;
   const selected =
-    args.limit > 0 ? publicFiltered.slice(0, args.limit) : publicFiltered;
+    args.limit > 0
+      ? publishedFiltered.slice(0, args.limit)
+      : publishedFiltered;
 
   console.log(
-    `Scanning ${selected.length}/${stories.length} ${args.publicOnly ? "public " : ""}stories for course ${args.course} with concurrency ${concurrency}...`,
+    `Scanning ${selected.length}/${stories.length} ${args.publishedOnly ? "published " : ""}stories for course ${args.course} with concurrency ${concurrency}...`,
   );
 
   const issues: AuditIssue[] = [];
@@ -285,7 +280,7 @@ async function main() {
 
       issues.push({
         storyId: story.id,
-        storyName: story.name,
+        storyTitle: story.name,
         lineIndex: element.trackingProperties?.line_index ?? 0,
         text: getElementText(element),
         audioUrl: audio.url,
@@ -308,7 +303,7 @@ async function main() {
     generatedAt: new Date().toISOString(),
     convexUrl,
     course: args.course,
-    publicOnly: args.publicOnly,
+    publishedOnly: args.publishedOnly,
     toleranceMs: args.toleranceMs,
     scannedStories: selected.length,
     checkedAudio,
@@ -331,7 +326,7 @@ async function main() {
     console.log("\nWorst rows:");
     for (const issue of issues.slice(0, 20)) {
       console.log(
-        `- story=${issue.storyId} line=${issue.lineIndex} duration=${issue.durationMs}ms max=${issue.maxAudioStart}ms bad=${issue.badCount} name=${JSON.stringify(issue.storyName)}`,
+        `- story=${issue.storyId} line=${issue.lineIndex} duration=${issue.durationMs}ms max=${issue.maxAudioStart}ms bad=${issue.badCount} title=${JSON.stringify(issue.storyTitle)}`,
       );
     }
   }

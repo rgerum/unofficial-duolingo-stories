@@ -1,6 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import dotenv from "dotenv";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 import type { Avatar } from "../src/app/editor/story/[story]/types";
@@ -11,25 +10,24 @@ import type {
   StoryElementHeader,
   StoryElementLine,
 } from "../src/components/editor/story/syntax_parser_types";
-import { validateAlignmentAudioFile } from "../src/lib/editor/audio/forced_alignment_safety";
+import {
+  selectLatestSuccessfulStoryRuns,
+  validateAlignmentAudioFile,
+  validateAlignmentStoryCoverage,
+} from "./lib/forced-alignment-safety";
 
-dotenv.config({ path: ".env.local", quiet: true });
-
-const CONVEX_URL =
-  process.env.FORCED_ALIGN_CONVEX_URL ??
-  process.env.NEXT_PUBLIC_CONVEX_URL ??
-  process.env.CONVEX_URL;
+const CONVEX_URL = process.env.FORCED_ALIGN_CONVEX_URL;
 const CONVEX_AUTH_TOKEN = process.env.CONVEX_AUTH_TOKEN;
 
 if (!CONVEX_URL) {
-  console.error("Error: FORCED_ALIGN_CONVEX_URL/NEXT_PUBLIC_CONVEX_URL/CONVEX_URL is not set.");
+  console.error("Error: FORCED_ALIGN_CONVEX_URL must be set explicitly.");
   process.exit(1);
 }
 
 const args = parseArgs(process.argv.slice(2));
 const batchDirs = resolveBatchDirs(args.batchDir);
 const shouldApply = args.apply === true;
-const publicOnly = args.includePrivate !== true;
+const publishedOnly = args.includeUnpublished !== true;
 const forcedAlignmentComment =
   args.comment ??
   `# Forced alignment: word timings applied ${new Date()
@@ -64,12 +62,16 @@ type CliArgs = {
   report?: string;
   comment?: string;
   apply?: boolean;
-  includePrivate?: boolean;
+  includeUnpublished?: boolean;
 };
 
 type BatchSummaryItem = {
   storyId: number;
-  storyName: string;
+  storyTitle?: string;
+  /** Kept only for reading batches generated before the terminology update. */
+  storyName?: string;
+  published?: boolean;
+  /** Kept only for reading batches generated before the terminology update. */
   public?: boolean;
   status: string;
   warnings?: number;
@@ -80,7 +82,6 @@ type BatchSummaryItem = {
 
 type Manifest = {
   storyId: number;
-  storyName: string;
   items: ManifestItem[];
 };
 
@@ -120,8 +121,8 @@ type AlignableItem = {
 
 type StoryReport = {
   storyId: number;
-  storyName: string;
-  public: boolean;
+  storyTitle: string;
+  published: boolean;
   status: "saved" | "would-save" | "unchanged" | "skipped" | "error";
   reason?: string;
   rowsTotal?: number;
@@ -133,7 +134,7 @@ type StoryReport = {
 async function main() {
   const candidates = await collectSuccessfulStories(batchDirs);
   const selectedStories = candidates
-    .filter((story) => !publicOnly || story.public === true)
+    .filter((story) => !publishedOnly || isStoryPublished(story))
     .filter(
       (story) => args.storyIds.length === 0 || args.storyIds.includes(story.storyId),
     )
@@ -150,20 +151,20 @@ async function main() {
       const report = await processStory(story);
       reports.push(report);
       console.log(
-        `${report.status.padEnd(10)} ${story.storyId} ${story.storyName}` +
+        `${report.status.padEnd(10)} ${story.storyId} ${getStoryTitle(story)}` +
           `${report.reason ? `: ${report.reason}` : ""}`,
       );
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
       reports.push({
         storyId: story.storyId,
-        storyName: story.storyName,
-        public: story.public === true,
+        storyTitle: getStoryTitle(story),
+        published: isStoryPublished(story),
         status: "error",
         reason,
         sourceRun: path.basename(story.runRoot),
       });
-      console.error(`error      ${story.storyId} ${story.storyName}: ${reason}`);
+      console.error(`error      ${story.storyId} ${getStoryTitle(story)}: ${reason}`);
     }
   }
 
@@ -172,7 +173,7 @@ async function main() {
     mode: shouldApply ? "apply" : "dry-run",
     convexUrl: CONVEX_URL,
     batchDirs,
-    publicOnly,
+    publishedOnly,
     selectedStories: selectedStories.length,
     saved: reports.filter((report) => report.status === "saved").length,
     wouldSave: reports.filter((report) => report.status === "would-save").length,
@@ -189,21 +190,22 @@ async function main() {
 }
 
 async function collectSuccessfulStories(runRoots: string[]) {
-  const byStory = new Map<number, BatchSummaryItem>();
+  const runs: BatchSummaryItem[] = [];
   for (const runRoot of runRoots) {
     const summary = await readJson<{ summary?: BatchSummaryItem[] }>(
       path.join(runRoot, "summary.json"),
     );
     for (const item of summary.summary ?? []) {
-      if (item.status !== "done") continue;
-      byStory.set(item.storyId, {
+      runs.push({
         ...item,
         runRoot,
         storyDir: path.join(runRoot, `story-${item.storyId}`),
       });
     }
   }
-  return [...byStory.values()].sort((a, b) => a.storyId - b.storyId);
+  return selectLatestSuccessfulStoryRuns(runs).sort(
+    (left, right) => left.storyId - right.storyId,
+  );
 }
 
 async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
@@ -234,13 +236,25 @@ async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
   );
 
   const currentItems = getAlignableItems(parsedStory.elements);
+  const alignmentResults = resultsFile.results ?? [];
+  const coverageError = validateAlignmentStoryCoverage({
+    resultIds: alignmentResults.map((result) => result.itemId),
+    manifestIds: manifest.items.map((item) => item.id),
+    currentIds: currentItems.map((item) => item.id),
+  });
+  if (coverageError) {
+    return skipped(story, coverageError, {
+      rowsTotal: alignmentResults.length,
+      rowsSkipped: alignmentResults.length,
+    });
+  }
   const currentItemsById = new Map(currentItems.map((item) => [item.id, item]));
   const manifestItemsById = new Map(manifest.items.map((item) => [item.id, item]));
   const updates: { inserIndex: number | undefined; serializedText: string }[] = [];
   const skipReasons = new Map<string, number>();
   let rowsSkipped = 0;
 
-  for (const result of resultsFile.results ?? []) {
+  for (const result of alignmentResults) {
     const manifestItem = manifestItemsById.get(result.itemId);
     const currentItem = currentItemsById.get(result.itemId);
     const validationError = validateResult(result, manifestItem, currentItem);
@@ -282,7 +296,7 @@ async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
       .join("; ");
     return skipped(story, `${rowsSkipped} row(s) failed safety checks`, {
       reason: `${rowsSkipped} row(s) failed safety checks (${reasonSummary})`,
-      rowsTotal: resultsFile.results?.length ?? 0,
+      rowsTotal: alignmentResults.length,
       rowsSkipped,
     });
   }
@@ -290,10 +304,10 @@ async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
   if (updates.length === 0) {
     return {
       storyId: story.storyId,
-      storyName: story.storyName,
-      public: story.public === true,
+      storyTitle: getStoryTitle(story),
+      published: isStoryPublished(story),
       status: "unchanged",
-      rowsTotal: resultsFile.results?.length ?? 0,
+      rowsTotal: alignmentResults.length,
       rowsApplied: 0,
       rowsSkipped,
       sourceRun: path.basename(story.runRoot),
@@ -305,7 +319,7 @@ async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
   );
   if (patchedText === data.story_data.text) {
     return skipped(story, "patch produced no text changes", {
-      rowsTotal: resultsFile.results?.length ?? 0,
+      rowsTotal: alignmentResults.length,
       rowsSkipped,
     });
   }
@@ -341,10 +355,10 @@ async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
 
   return {
     storyId: story.storyId,
-    storyName: story.storyName,
-    public: story.public === true,
+    storyTitle: getStoryTitle(story),
+    published: isStoryPublished(story),
     status: shouldApply ? "saved" : "would-save",
-    rowsTotal: resultsFile.results?.length ?? 0,
+    rowsTotal: alignmentResults.length,
     rowsApplied: updates.length,
     rowsSkipped,
     sourceRun: path.basename(story.runRoot),
@@ -522,6 +536,14 @@ async function readJson<T>(filePath: string): Promise<T> {
   return JSON.parse(await readFile(filePath, "utf8")) as T;
 }
 
+function getStoryTitle(story: BatchSummaryItem) {
+  return story.storyTitle ?? story.storyName ?? `Story ${story.storyId}`;
+}
+
+function isStoryPublished(story: BatchSummaryItem) {
+  return story.published ?? story.public ?? false;
+}
+
 function skipped(
   story: BatchSummaryItem,
   reason: string,
@@ -529,8 +551,8 @@ function skipped(
 ): StoryReport {
   return {
     storyId: story.storyId,
-    storyName: story.storyName,
-    public: story.public === true,
+    storyTitle: getStoryTitle(story),
+    published: isStoryPublished(story),
     status: "skipped",
     reason,
     sourceRun: path.basename(story.runRoot),
@@ -569,7 +591,7 @@ function parseArgs(argv: string[]) {
     else if (arg === "--report") parsed.report = argv[++index];
     else if (arg === "--comment") parsed.comment = argv[++index];
     else if (arg === "--apply") parsed.apply = true;
-    else if (arg === "--include-private") parsed.includePrivate = true;
+    else if (arg === "--include-unpublished") parsed.includeUnpublished = true;
     else if (arg === "--help") {
       printHelp();
       process.exit(0);
@@ -587,7 +609,7 @@ function printHelp() {
   console.log(`Usage: pnpm forced-align:apply-batch [options]
 
 Applies saved forced-alignment result files through storyWrite.setStory.
-Defaults to dry-run and public stories only.
+Defaults to dry-run and published stories only.
 
 Options:
   --batch-dir <dir>      Batch directory containing summary.json and story-* dirs.
@@ -596,13 +618,13 @@ Options:
   --limit <n>            Process only the first n selected stories.
   --report <path>        Write JSON report to path.
   --comment <text>       Story comment inserted above existing story text.
-  --include-private      Include private stories too.
+  --include-unpublished  Include unpublished stories too.
   --apply                Actually write to Convex.
   --help                 Show this help.
 
 Environment:
   FORCED_ALIGN_BATCH_DIRS  ${path.delimiter}-separated batch directories.
-  FORCED_ALIGN_CONVEX_URL / NEXT_PUBLIC_CONVEX_URL / CONVEX_URL
+  FORCED_ALIGN_CONVEX_URL  Required explicit Convex deployment URL.
   CONVEX_AUTH_TOKEN        Required for --apply.
 `);
 }

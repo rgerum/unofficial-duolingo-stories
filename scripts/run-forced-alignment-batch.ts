@@ -1,19 +1,13 @@
 import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import dotenv from "dotenv";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 
-dotenv.config({ path: ".env.local", quiet: true });
-
-const CONVEX_URL =
-  process.env.FORCED_ALIGN_CONVEX_URL ??
-  process.env.NEXT_PUBLIC_CONVEX_URL ??
-  process.env.CONVEX_URL;
+const CONVEX_URL = process.env.FORCED_ALIGN_CONVEX_URL;
 
 if (!CONVEX_URL) {
-  console.error("Error: FORCED_ALIGN_CONVEX_URL/NEXT_PUBLIC_CONVEX_URL/CONVEX_URL is not set.");
+  console.error("Error: FORCED_ALIGN_CONVEX_URL must be set explicitly.");
   process.exit(1);
 }
 
@@ -33,14 +27,14 @@ type CliArgs = {
   failedFrom?: string;
   limit?: number;
   concurrency: number;
-  includePrivate?: boolean;
+  includeUnpublished?: boolean;
   force?: boolean;
 };
 
 type StorySummary = {
   storyId: number;
-  storyName: string;
-  public?: boolean;
+  storyTitle: string;
+  published?: boolean;
   status: "done" | "skipped" | "failed";
   warnings?: number;
   rows?: number;
@@ -61,7 +55,7 @@ async function main() {
   }
   const convexUrl = CONVEX_URL;
   if (!convexUrl) {
-    throw new Error("FORCED_ALIGN_CONVEX_URL/NEXT_PUBLIC_CONVEX_URL/CONVEX_URL is not set.");
+    throw new Error("FORCED_ALIGN_CONVEX_URL must be set explicitly.");
   }
 
   await mkdir(outputRoot, { recursive: true });
@@ -75,7 +69,7 @@ async function main() {
     : new Set<number>();
   const requestedStoryIds = new Set([...args.storyIds, ...failedStoryIds]);
   const selected = stories
-    .filter((story) => args.includePrivate || story.public === true)
+    .filter((story) => args.includeUnpublished || story.public === true)
     .filter((story) => requestedStoryIds.size === 0 || requestedStoryIds.has(story.id))
     .slice(0, args.limit);
 
@@ -99,8 +93,8 @@ async function main() {
     if (existing && !args.force) {
       summary.push({
         storyId: story.id,
-        storyName: story.name,
-        public: story.public,
+        storyTitle: story.name,
+        published: story.public,
         status: "done",
         warnings: countWarnings(existing),
         rows: existing.results?.length ?? 0,
@@ -117,8 +111,8 @@ async function main() {
       const results = await readExistingResult(storyDir);
       summary.push({
         storyId: story.id,
-        storyName: story.name,
-        public: story.public,
+        storyTitle: story.name,
+        published: story.public,
         status: "done",
         warnings: countWarnings(results),
         rows: results?.results?.length ?? 0,
@@ -130,8 +124,8 @@ async function main() {
       const message = error instanceof Error ? error.message : String(error);
       summary.push({
         storyId: story.id,
-        storyName: story.name,
-        public: story.public,
+        storyTitle: story.name,
+        published: story.public,
         status: "failed",
         error: message,
         runRoot: outputRoot,
@@ -270,7 +264,7 @@ function parseArgs(argv: string[]) {
     else if (arg === "--failed-from") parsed.failedFrom = argv[++index];
     else if (arg === "--limit") parsed.limit = Number(argv[++index]);
     else if (arg === "--concurrency") parsed.concurrency = Number(argv[++index]);
-    else if (arg === "--include-private") parsed.includePrivate = true;
+    else if (arg === "--include-unpublished") parsed.includeUnpublished = true;
     else if (arg === "--force") parsed.force = true;
     else if (arg === "--help") {
       printHelp();
@@ -289,7 +283,7 @@ function printHelp() {
   console.log(`Usage: pnpm forced-align:batch [options]
 
 Runs forced alignment for a course by invoking forced-align:story for each
-selected story. Defaults to public stories and serial execution.
+selected story. Defaults to published stories and serial execution.
 
 Options:
   --course <id>          Course identifier or legacy id. Default: da-en
@@ -298,12 +292,12 @@ Options:
   --failed-from <path>   Re-run stories marked failed/error in a previous report.
   --limit <n>            Process only the first n selected stories.
   --concurrency <n>      Number of story alignments to run at once. Default: 1
-  --include-private      Include private/unpublished stories.
+  --include-unpublished  Include unpublished stories.
   --force                Re-run even when story results already exist.
   --help                 Show this help.
 
 Environment:
-  FORCED_ALIGN_CONVEX_URL / NEXT_PUBLIC_CONVEX_URL / CONVEX_URL
+  FORCED_ALIGN_CONVEX_URL Required explicit Convex deployment URL.
   FORCED_ALIGN_COMMAND    Required by forced-align:story.
   FORCED_ALIGN_MODEL      Optional aligner model.
 `);
