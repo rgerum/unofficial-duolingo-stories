@@ -515,7 +515,11 @@ function lintElements(
     if (text.includes('"')) hasStraightQuotes = true;
     if (/[“”„]/.test(text)) hasCurlyQuotes = true;
 
-    if (content.hintMap.length === 0 && countWords(splitTextTokens(text)) > 0) {
+    if (
+      !content.hasTranslationLine &&
+      content.hintMap.length === 0 &&
+      countWords(splitTextTokens(text)) > 0
+    ) {
       findings.push({
         rule: "missing-hints",
         severity: "warning",

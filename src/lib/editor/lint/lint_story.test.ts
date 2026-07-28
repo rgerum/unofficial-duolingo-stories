@@ -205,6 +205,21 @@ Speaker414: Bonjour le monde.`);
   assert.equal(byRule(findings, "missing-hints").length, 1);
 });
 
+test("accepts an explicit placeholder for a line without a translation hint", () => {
+  const findings = lint(`[LINE]
+Speaker414: Grrrr!
+~ ~
+$audio/growl.mp3;5,189`);
+  assert.equal(byRule(findings, "missing-hints").length, 0);
+});
+
+test("does not treat an empty translation line as an explicit placeholder", () => {
+  const findings = lint(`[LINE]
+Speaker414: Grrrr!
+~`);
+  assert.equal(byRule(findings, "missing-hints").length, 1);
+});
+
 test("flags an unknown speaker", () => {
   const findings = lint(`[LINE]
 Speaker999: Bonjour.
