@@ -29,14 +29,6 @@ const editorHintTextStyle: CSSProperties = {
   backgroundColor: "var(--editor-hints-background)",
   fontSize: "0.9em",
 };
-const tooltipContainerStyle = {
-  ...underlineBaseStyle,
-  "--story-hint-underline": "var(--underline-dashed)",
-  paddingBottom: "5px",
-  backgroundImage:
-    "linear-gradient(to right, var(--story-hint-underline) 60%, rgba(255, 255, 255, 0) 0%)",
-  outlineColor: "var(--tooltip-border)",
-} as CSSProperties;
 const tooltipContentStyle: CSSProperties = {
   bottom: "100%",
   left: "50%",
@@ -301,19 +293,17 @@ function StoryLineHints({
     const was_hidden_for_challenge = hideRangesForChallenge?.some((range) =>
       getOverlap(hint.rangeFrom, hint.rangeTo + 1, range.start, range.end),
     );
-    const inlineHintUnderlineStyle =
+    const hintUnderline =
       !showTrans &&
       has_translation_hint &&
       !is_hidden &&
       !was_hidden_for_challenge
-        ? tooltipContainerStyle
+        ? "hint"
         : undefined;
 
     const word_content = hint_pronunciation ? (
       <span className="group/pronunciation relative inline-block">
-        <span style={inlineHintUnderlineStyle}>
-          {addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}
-        </span>
+        {addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}
         <span
           className={cn(
             "pointer-events-none invisible absolute whitespace-nowrap leading-none opacity-0 transition-opacity duration-200",
@@ -334,9 +324,7 @@ function StoryLineHints({
         </span>
       </span>
     ) : (
-      <span style={inlineHintUnderlineStyle}>
-        {addSplitWord(hint.rangeFrom, hint.rangeTo + 1)}
-      </span>
+      addSplitWord(hint.rangeFrom, hint.rangeTo + 1)
     );
     const hintContainerClassName = is_hidden
       ? ""
@@ -347,6 +335,7 @@ function StoryLineHints({
         : has_translation_hint
           ? cn(
               "group/tooltip relative inline-block align-baseline",
+              hintUnderline && "story-hint-underline",
               "focus:outline-none focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2",
             )
           : "";
@@ -356,8 +345,6 @@ function StoryLineHints({
           "pointer-events-none invisible absolute block w-auto whitespace-nowrap text-center font-normal not-italic opacity-0 transition-opacity duration-300 group-hover/tooltip:visible group-hover/tooltip:opacity-100 group-focus-within/tooltip:visible group-focus-within/tooltip:opacity-100",
           visibleContent.lang_hints,
         );
-    const hintHasChallengeUnderline =
-      Boolean(was_hidden_for_challenge) || Boolean(is_hidden);
     const hintContainerStyle =
       showTrans && has_any_hint ? editorHintContainerStyle : undefined;
     const tooltipStyle =

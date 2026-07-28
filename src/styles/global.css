@@ -46,6 +46,32 @@
   }
 }
 
+@layer components {
+  .story-hint-underline {
+    --story-hint-underline: var(--underline-dashed);
+
+    padding-bottom: 5px;
+    outline-color: var(--tooltip-border);
+  }
+
+  .story-hint-underline::after {
+    position: absolute;
+    right: 0.18em;
+    bottom: 5px;
+    left: 0.18em;
+    height: 2px;
+    background-image: linear-gradient(
+      to right,
+      var(--story-hint-underline) 60%,
+      transparent 0%
+    );
+    background-repeat: repeat-x;
+    background-size: 5px 2px;
+    content: "";
+    pointer-events: none;
+  }
+}
+
 .duostories_title {
   width: 160px;
   display: block;
