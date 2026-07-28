@@ -322,7 +322,7 @@ async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
     });
   }
 
-  const [nextParsedStory, nextParsedMeta] = processStoryFile(
+  const [nextParsedStory] = processStoryFile(
     patchedText,
     data.story_data.id,
     avatarNames,
@@ -334,21 +334,14 @@ async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
   );
 
   if (shouldApply) {
-    await client.mutation(api.storyWrite.setStory, {
+    await client.mutation(api.storyWrite.applyForcedAlignment, {
       legacyStoryId: data.story_data.id,
-      duo_id: data.story_data.duo_id ?? "",
-      name: data.story_data.name,
-      image: data.story_data.image,
-      set_id: data.story_data.set_id,
-      set_index: data.story_data.set_index,
-      legacyCourseId: data.story_data.course_id,
+      expectedText: data.story_data.text,
       text: patchedText,
       json: toConvexValue(nextParsedStory),
-      todo_count: nextParsedMeta.todo_count ?? 0,
       change_date: new Date().toISOString(),
       confirmOfficialOverwrite: data.story_data.official || undefined,
       operationKey: `story:${data.story_data.id}:forced-align-bulk:${Date.now()}`,
-      expectedText: data.story_data.text,
     });
   }
 
