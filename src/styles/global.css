@@ -49,6 +49,7 @@
 @layer components {
   .story-hint-underline {
     --story-hint-underline: var(--underline-dashed);
+
     padding-bottom: 5px;
     outline-color: var(--tooltip-border);
   }
