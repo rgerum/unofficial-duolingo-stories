@@ -83,11 +83,12 @@ export async function generateMetadata({
         images: [
           `/api/og-story?title=${storyMeta.from_language_name}&image=${storyMeta.image}&name=${storyMeta.learning_language_long}`,
         ],
-        type: "website",
+        type: "article",
         title,
         description,
       },
       twitter: {
+        card: "summary_large_image",
         title,
         description,
       },
@@ -106,11 +107,12 @@ export async function generateMetadata({
         `/api/og-story?title=${storyMeta.from_language_name}&image=${storyMeta.image}&name=${storyMeta.learning_language_long}`,
       ],
       url: `https://duostories.org/story/${story_id}`,
-      type: "website",
+      type: "article",
       title,
       description,
     },
     twitter: {
+      card: "summary_large_image",
       title,
       description,
     },
