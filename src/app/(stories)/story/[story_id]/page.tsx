@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import getUserId from "@/lib/getUserId";
 import {
@@ -26,23 +26,72 @@ if (!convexUrl) {
 
 const convex = new ConvexHttpClient(convexUrl);
 
+// parseInt would accept alias slugs like "1abc" and serve story 1's content
+// at infinitely many crawlable URLs; only pure integer slugs may resolve.
+function parseStoryId(slug: string) {
+  if (!/^\d+$/.test(slug)) notFound();
+  const story_id = Number(slug);
+  if (!Number.isSafeInteger(story_id)) notFound();
+  return story_id;
+}
+
+// Deleted stories 308 to their course page (when the course is public) so
+// accumulated links keep working; unknown ids 404. Shared by generateMetadata
+// and Page — generateMetadata runs first, so it must redirect too or the
+// notFound there would win before Page gets a chance.
+async function resolveStoryMeta(story_id: number) {
+  const storyMeta = await fetchQuery(api.storyRead.getStoryMetaByLegacyId, {
+    storyId: story_id,
+  });
+  if (storyMeta && "deleted" in storyMeta) {
+    if (storyMeta.coursePublic && storyMeta.courseShort) {
+      permanentRedirect(`/${storyMeta.courseShort}`);
+    }
+    notFound();
+  }
+  if (!storyMeta) notFound();
+  return storyMeta;
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ story_id: string }>;
 }) {
-  const story_id = parseInt((await params).story_id);
+  const story_id = parseStoryId((await params).story_id);
   const [story, storyMeta] = await Promise.all([
     get_story(story_id),
-    fetchQuery(api.storyRead.getStoryMetaByLegacyId, {
-      storyId: story_id,
-    }),
+    resolveStoryMeta(story_id),
   ]);
 
-  if (!story || !storyMeta) notFound();
+  if (!story) notFound();
 
   const title = getStoryTitle(storyMeta);
   const description = getStoryDescription(story);
+
+  if (!storyMeta.public) {
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      keywords: [
+        storyMeta.learning_language_long,
+        storyMeta.from_language_long,
+      ],
+      openGraph: {
+        images: [
+          `/api/og-story?title=${storyMeta.from_language_name}&image=${storyMeta.image}&name=${storyMeta.learning_language_long}`,
+        ],
+        type: "website",
+        title,
+        description,
+      },
+      twitter: {
+        title,
+        description,
+      },
+    };
+  }
 
   return {
     title,
@@ -73,10 +122,13 @@ export default async function Page({
   params: Promise<{ story_id: string }>;
 }) {
   const cookieStore = await cookies();
-  const story_id = parseInt((await params).story_id);
+  const story_id = parseStoryId((await params).story_id);
 
   const story = await get_story(story_id);
-  if (!story) notFound();
+  if (!story) {
+    await resolveStoryMeta(story_id); // redirects deleted stories, else 404s
+    notFound();
+  }
   const course_id = story.course_id;
 
   const user_id = await getUserId();
