@@ -11,6 +11,7 @@ import type {
   StoryElementHeader,
   StoryElementLine,
 } from "../src/components/editor/story/syntax_parser_types";
+import { validateAlignmentAudioFile } from "../src/lib/editor/audio/forced_alignment_safety";
 
 dotenv.config({ path: ".env.local", quiet: true });
 
@@ -382,7 +383,12 @@ function validateResult(
   if (result.warnings.length > 0) return "alignment warnings present";
   if (result.text !== manifestItem.text) return "result text differs from manifest";
   if (currentItem.text !== manifestItem.text) return "current text changed";
-  if (result.filename !== manifestItem.filename) return "result filename differs";
+  const audioFileError = validateAlignmentAudioFile({
+    resultFilename: result.filename,
+    manifestFilename: manifestItem.filename,
+    currentFilename: currentItem.filename,
+  });
+  if (audioFileError) return audioFileError;
 
   const tokenEnds = getWordTokens(currentItem.text).map((token) => token.end);
   if (tokenEnds.length !== result.keypoints.length) {
