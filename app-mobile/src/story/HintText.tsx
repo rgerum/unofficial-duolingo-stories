@@ -19,6 +19,17 @@ import {
 } from "./elements/PlayAudioButton";
 import { HintLookupContext, HintPopupContext } from "./HintPopup";
 import { buildHintTextTokens, type Token } from "./HintTextTokens";
+import {
+  buildUnderlineSegments,
+  HINT_SPLIT_MARKER,
+  splitNativeTokenParts,
+  UNDERLINE_BASELINE_GAP,
+  UNDERLINE_BOTTOM_INSET,
+  UNDERLINE_DOT_GAP,
+  UNDERLINE_DOT_RADIUS,
+  UNDERLINE_EDGE_INSET,
+  type UnderlineSegment,
+} from "./HintTextUnderline";
 import type { ContentWithHints, HideRange } from "./types";
 
 // Web-parity text renderer (StoryLineHints): hinted words get a dashed
@@ -28,12 +39,7 @@ import type { ContentWithHints, HideRange } from "./types";
 // underlines are real (dashed) bottom borders.
 
 const WRAPPED_LINE_GAP = 3;
-const UNDERLINE_EDGE_INSET = 2;
-const UNDERLINE_DOT_RADIUS = 1.2;
-const UNDERLINE_DOT_GAP = 7;
 const INLINE_AUDIO_SPACE = "\u2002";
-const UNDERLINE_BASELINE_GAP = 4;
-const UNDERLINE_BOTTOM_INSET = 2;
 
 type HintTextRenderMode = "auto" | "native" | "tokenized";
 
@@ -95,20 +101,6 @@ type HiddenCover = {
   y: number;
   width: number;
   height: number;
-};
-
-type UnderlineSegment = {
-  key: string;
-  x1: number;
-  x2: number;
-  y: number;
-  color: string;
-  dotted: boolean;
-  underlineGroupKey?: string;
-  debugX: number;
-  debugY: number;
-  debugWidth: number;
-  debugHeight: number;
 };
 
 type DebugRect = {
@@ -236,20 +228,28 @@ function buildNativeSegments(tokens: Token[]): NativeSegment[] {
 
   for (const token of tokens) {
     const displayText = getDisplayText(token);
-    const parts = shouldMeasureTokenAsGraphemes(displayText)
-      ? splitIntoGraphemes(displayText)
-      : [displayText];
+    const parts = splitNativeTokenParts({
+      token,
+      displayText,
+      shouldSplitIntoGraphemes: shouldMeasureTokenAsGraphemes(displayText),
+      splitIntoGraphemes,
+    });
     for (const part of parts) {
       segments.push({
         ...token,
-        text: part,
+        text: part.text,
+        hint: part.hint === null ? undefined : (part.hint ?? token.hint),
         key: `${token.start}:${segments.length}`,
         tokenKey: `${token.start}:${token.text}`,
-        underlineGroupKey: token.hidden
-          ? token.hiddenGroupKey
-          : token.revealed
-            ? `revealed:${token.start}`
-            : token.hintGroupKey,
+        underlineGroupKey:
+          part.underlineGroupKey ??
+          (part.text === HINT_SPLIT_MARKER
+            ? undefined
+            : token.hidden
+              ? token.hiddenGroupKey
+              : token.revealed
+                ? `revealed:${token.start}`
+                : token.hintGroupKey),
       });
     }
   }
@@ -426,122 +426,6 @@ function getUnderlineY(segment: ComputedSegment) {
   const minY = segment.y + UNDERLINE_BOTTOM_INSET;
   const maxY = segment.y + segment.height - UNDERLINE_BOTTOM_INSET;
   return Math.max(minY, Math.min(preferredY, maxY));
-}
-
-function buildUnderlineSegments({
-  computedSegments,
-  colors,
-}: {
-  computedSegments: ComputedSegment[];
-  colors: ThemeColors;
-}): UnderlineSegment[] {
-  const segmentsToDraw: UnderlineSegment[] = [];
-  const hiddenGroupSpans = new Map<string, UnderlineSegment>();
-  for (const segment of computedSegments) {
-    const interactive = Boolean(segment.hint) && !segment.hidden;
-    const underline = segment.hidden
-      ? colors.hiddenUnderline
-      : segment.revealed || interactive
-        ? colors.border
-        : undefined;
-    if (!underline) continue;
-
-    if (segment.hidden && segment.underlineGroupKey) {
-      const y = getUnderlineY(segment);
-      const lineKey = `${segment.underlineGroupKey}:${Math.round(y)}`;
-      const existing = hiddenGroupSpans.get(lineKey);
-      if (existing) {
-        const right = Math.max(existing.x2, segment.x + segment.width);
-        existing.x1 = Math.min(existing.x1, segment.x);
-        existing.x2 = right;
-        existing.debugX = Math.min(existing.debugX, segment.x);
-        existing.debugWidth = right - existing.debugX;
-        existing.debugHeight = Math.max(existing.debugHeight, segment.height);
-      } else {
-        hiddenGroupSpans.set(lineKey, {
-          key: lineKey,
-          x1: segment.x,
-          x2: segment.x + segment.width,
-          y,
-          color: underline,
-          dotted: false,
-          underlineGroupKey: segment.underlineGroupKey,
-          debugX: segment.x,
-          debugY: segment.y,
-          debugWidth: segment.width,
-          debugHeight: segment.height,
-        });
-      }
-      continue;
-    }
-
-    if (/^\s+$/.test(segment.text) && !segment.underlineGroupKey) continue;
-    if (
-      /^[,.:;!?%)}\]\u3001\u3002\u30fb\uff01\uff1f\uff09\uff0c\uff0e\u200b-\u200d\ufeff]+$/u.test(
-        segment.text,
-      )
-    )
-      continue;
-    segmentsToDraw.push({
-      key: segment.key,
-      x1: segment.x + UNDERLINE_EDGE_INSET,
-      x2:
-        segment.x +
-        Math.max(
-          segment.width - UNDERLINE_EDGE_INSET,
-          UNDERLINE_EDGE_INSET * 2,
-        ),
-      y: getUnderlineY(segment),
-      color: underline,
-      dotted: !segment.hidden,
-      underlineGroupKey: segment.underlineGroupKey,
-      debugX: segment.x,
-      debugY: segment.y,
-      debugWidth: segment.width,
-      debugHeight: segment.height,
-    });
-  }
-  for (const segment of hiddenGroupSpans.values()) {
-    segmentsToDraw.push({
-      ...segment,
-      x1: segment.x1 + UNDERLINE_EDGE_INSET,
-      x2: segment.x2 - UNDERLINE_EDGE_INSET,
-    });
-  }
-
-  segmentsToDraw.sort((a, b) => {
-    if (Math.abs(a.y - b.y) > 2) return a.y - b.y;
-    return a.x1 - b.x1;
-  });
-
-  const merged: UnderlineSegment[] = [];
-  for (const segment of segmentsToDraw) {
-    const last = merged[merged.length - 1];
-    const sameGroupOnSameLine =
-      last &&
-      Math.abs(last.y - segment.y) <= 2 &&
-      last.color === segment.color &&
-      last.dotted === segment.dotted &&
-      last.underlineGroupKey !== undefined &&
-      last.underlineGroupKey === segment.underlineGroupKey;
-    if (
-      sameGroupOnSameLine ||
-      (last &&
-        Math.abs(last.y - segment.y) <= 2 &&
-        Math.abs(last.x2 - segment.x1) <= 4 &&
-        last.color === segment.color &&
-        last.dotted === segment.dotted &&
-        last.underlineGroupKey === segment.underlineGroupKey)
-    ) {
-      last.x2 = segment.x2;
-      last.debugWidth = segment.debugX + segment.debugWidth - last.debugX;
-      last.debugHeight = Math.max(last.debugHeight, segment.debugHeight);
-      continue;
-    }
-    merged.push(segment);
-  }
-
-  return merged;
 }
 
 function buildDebugRects(
