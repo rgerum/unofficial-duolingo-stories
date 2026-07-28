@@ -26,6 +26,15 @@ if (!convexUrl) {
 
 const convex = new ConvexHttpClient(convexUrl);
 
+// parseInt would accept alias slugs like "1abc" and serve story 1's content
+// at infinitely many crawlable URLs; only pure integer slugs may resolve.
+function parseStoryId(slug: string) {
+  if (!/^\d+$/.test(slug)) notFound();
+  const story_id = Number(slug);
+  if (!Number.isSafeInteger(story_id)) notFound();
+  return story_id;
+}
+
 // Deleted stories 308 to their course page (when the course is public) so
 // accumulated links keep working; unknown ids 404. Shared by generateMetadata
 // and Page — generateMetadata runs first, so it must redirect too or the
@@ -49,7 +58,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ story_id: string }>;
 }) {
-  const story_id = parseInt((await params).story_id);
+  const story_id = parseStoryId((await params).story_id);
   const [story, storyMeta] = await Promise.all([
     get_story(story_id),
     resolveStoryMeta(story_id),
@@ -113,7 +122,7 @@ export default async function Page({
   params: Promise<{ story_id: string }>;
 }) {
   const cookieStore = await cookies();
-  const story_id = parseInt((await params).story_id);
+  const story_id = parseStoryId((await params).story_id);
 
   const story = await get_story(story_id);
   if (!story) {
