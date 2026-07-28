@@ -5,6 +5,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 
 const CONVEX_URL = process.env.FORCED_ALIGN_CONVEX_URL;
+const CONVEX_AUTH_TOKEN = process.env.CONVEX_AUTH_TOKEN;
 
 if (!CONVEX_URL) {
   console.error("Error: FORCED_ALIGN_CONVEX_URL must be set explicitly.");
@@ -46,7 +47,7 @@ type StorySummary = {
 type StoryListItem = {
   id: number;
   name: string;
-  public?: boolean;
+  published: boolean;
 };
 
 async function main() {
@@ -61,15 +62,13 @@ async function main() {
   await mkdir(outputRoot, { recursive: true });
 
   const client = new ConvexHttpClient(convexUrl);
-  const stories = (await client.query(api.editorRead.getEditorStoriesByCourseLegacyId, {
-    identifier: args.course,
-  })) as StoryListItem[];
+  if (CONVEX_AUTH_TOKEN) client.setAuth(CONVEX_AUTH_TOKEN);
+  const stories = await loadStories(client);
   const failedStoryIds = args.failedFrom
     ? await readFailedStoryIds(args.failedFrom)
     : new Set<number>();
   const requestedStoryIds = new Set([...args.storyIds, ...failedStoryIds]);
   const selected = stories
-    .filter((story) => args.includeUnpublished || story.public === true)
     .filter((story) => requestedStoryIds.size === 0 || requestedStoryIds.has(story.id))
     .slice(0, args.limit);
 
@@ -94,7 +93,7 @@ async function main() {
       summary.push({
         storyId: story.id,
         storyTitle: story.name,
-        published: story.public,
+        published: story.published,
         status: "done",
         warnings: countWarnings(existing),
         rows: existing.results?.length ?? 0,
@@ -112,7 +111,7 @@ async function main() {
       summary.push({
         storyId: story.id,
         storyTitle: story.name,
-        published: story.public,
+        published: story.published,
         status: "done",
         warnings: countWarnings(results),
         rows: results?.results?.length ?? 0,
@@ -125,7 +124,7 @@ async function main() {
       summary.push({
         storyId: story.id,
         storyTitle: story.name,
-        published: story.public,
+        published: story.published,
         status: "failed",
         error: message,
         runRoot: outputRoot,
@@ -150,6 +149,36 @@ async function main() {
   };
   await writeFile(summaryPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
   console.log(JSON.stringify({ ...report, summary: undefined }, null, 2));
+}
+
+async function loadStories(client: ConvexHttpClient) {
+  if (args.includeUnpublished) {
+    if (!CONVEX_AUTH_TOKEN) {
+      throw new Error(
+        "CONVEX_AUTH_TOKEN is required when including unpublished stories.",
+      );
+    }
+    const stories = await client.query(
+      api.editorRead.getEditorStoriesByCourseLegacyId,
+      { identifier: args.course },
+    );
+    return stories.map((story) => ({
+      id: story.id,
+      name: story.name,
+      published: story.public === true,
+    })) satisfies StoryListItem[];
+  }
+
+  const course = await client.query(api.landing.getPublicCoursePageData, {
+    short: args.course,
+  });
+  return (
+    course?.stories.map((story) => ({
+      id: story.id,
+      name: story.name,
+      published: true,
+    })) ?? []
+  ) satisfies StoryListItem[];
 }
 
 async function runStoryAlignment(storyId: number, storyDir: string) {
@@ -298,6 +327,7 @@ Options:
 
 Environment:
   FORCED_ALIGN_CONVEX_URL Required explicit Convex deployment URL.
+  CONVEX_AUTH_TOKEN      Required with --include-unpublished.
   FORCED_ALIGN_COMMAND    Required by forced-align:story.
   FORCED_ALIGN_MODEL      Optional aligner model.
 `);

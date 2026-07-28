@@ -137,6 +137,9 @@ pnpm forced-align:batch --course da-en --include-unpublished
 pnpm forced-align:batch --course da-en --concurrency 2
 ```
 
+Published batches use the public Course Page data and do not need an auth token.
+`--include-unpublished` uses editor data and requires `CONVEX_AUTH_TOKEN`.
+
 Keep `--concurrency 1` on small VPS machines unless CPU and memory are known to
 be available. The batch output contains `summary.json` and one `story-<id>`
 directory per story.
