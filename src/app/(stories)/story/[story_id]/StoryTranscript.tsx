@@ -5,7 +5,9 @@ import type {
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
 import StoryHeaderProgress from "@/components/StoryHeaderProgress";
+import StoryCrossLinks from "@/components/StoryCrossLinks";
 import type { StoryData } from "./getStory";
+import type { StoryCrossLinksData } from "./getStoryCrossLinks";
 import {
   getStoryDescription,
   getStoryTranscript,
@@ -18,7 +20,13 @@ function isRtlLanguage(lang: string) {
   );
 }
 
-export default function StoryTranscript({ story }: { story: StoryData }) {
+export default function StoryTranscript({
+  story,
+  crossLinks,
+}: {
+  story: StoryData;
+  crossLinks?: StoryCrossLinksData | null;
+}) {
   const transcript = getStoryTranscript(story);
   const description = getStoryDescription(story);
   const header = story.elements.find(
@@ -106,6 +114,14 @@ export default function StoryTranscript({ story }: { story: StoryData }) {
             <ReadOnlyStoryLine key={`${story.id}-${index}`} line={line} />
           ))}
         </div>
+      </div>
+      {/* Story titles are written in the from-language, so this block follows
+          the from-language direction rather than the transcript's. */}
+      <div className="mx-auto max-w-[500px] px-4">
+        <StoryCrossLinks
+          crossLinks={crossLinks ?? null}
+          rtl={story.from_language_rtl}
+        />
       </div>
     </section>
   );

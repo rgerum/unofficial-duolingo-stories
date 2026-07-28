@@ -9,6 +9,7 @@ import {
 } from "@/lib/story-preferences";
 import StoryWrapper from "./story_wrapper";
 import { get_story } from "./getStory";
+import { get_story_cross_links } from "./getStoryCrossLinks";
 import StoryTranscript from "./StoryTranscript";
 import { getStoryDescription, getStoryTitle } from "./story_seo";
 import LocalisationProvider from "@/components/LocalisationProvider";
@@ -124,7 +125,10 @@ export default async function Page({
   const cookieStore = await cookies();
   const story_id = parseStoryId((await params).story_id);
 
-  const story = await get_story(story_id);
+  const [story, crossLinks] = await Promise.all([
+    get_story(story_id),
+    get_story_cross_links(story_id),
+  ]);
   if (!story) {
     await resolveStoryMeta(story_id); // redirects deleted stories, else 404s
     notFound();
@@ -171,8 +175,50 @@ export default async function Page({
     };
   }
 
+  // Home > Course > Story, so crawlers see where this page sits in the site
+  // hierarchy. Only emitted for public courses (crossLinks is null otherwise).
+  const breadcrumbs = crossLinks
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Duostories",
+            item: "https://duostories.org",
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: crossLinks.course.name,
+            item: `https://duostories.org/${crossLinks.course.short}`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            // Despite the name, `from_language_name` is the story's own title
+            // as written in the from-language (see `getStoryByLegacyId`, which
+            // maps it from `story.name`) - not the language name.
+            name: story.from_language_name,
+            item: `https://duostories.org/story/${story.id}`,
+          },
+        ],
+      }
+    : null;
+
   return (
     <>
+      {breadcrumbs ? (
+        <script
+          type="application/ld+json"
+          // Course and story names are contributor-controlled; escape "<" so
+          // no name can terminate this tag.
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(breadcrumbs).replaceAll("<", "\\u003c"),
+          }}
+        />
+      ) : null}
       <LocalisationProvider lang={story.from_language_id}>
         <style>{`
           [data-story-js-only="true"] { display: none; }
@@ -182,12 +228,13 @@ export default async function Page({
           html[data-story-js="true"] [data-story-future="true"] { display: none; }
         `}</style>
         <div data-story-no-js="true">
-          <StoryTranscript story={story} />
+          <StoryTranscript story={story} crossLinks={crossLinks} />
         </div>
         <div data-story-js-only="true">
           <Suspense fallback={null}>
             <StoryWrapper
               story={story}
+              crossLinks={crossLinks}
               hideStoryQuestions={hideStoryQuestions}
               storyFinishedIndexUpdate={setStoryDoneAction}
               //localization={localization}

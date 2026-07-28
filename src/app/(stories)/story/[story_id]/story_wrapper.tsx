@@ -6,6 +6,7 @@ import { useQuery } from "convex/react";
 import StoryProgress from "@/components/StoryProgress";
 import { useNavigationMode } from "@/components/NavigationModeProvider";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import type { StoryCrossLinksData } from "@/app/(stories)/story/[story_id]/getStoryCrossLinks";
 import { api } from "@convex/_generated/api";
 import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
@@ -17,10 +18,12 @@ import {
 
 export default function StoryWrapper({
   story,
+  crossLinks,
   hideStoryQuestions,
   storyFinishedIndexUpdate,
 }: {
   story: StoryData;
+  crossLinks?: StoryCrossLinksData | null;
   hideStoryQuestions: boolean;
   storyFinishedIndexUpdate: () => Promise<
     | {
@@ -162,6 +165,7 @@ export default function StoryWrapper({
       <StoryProgress
         key={`${story.id}:${initialFocusLine ?? "start"}:${mode}`}
         story={story}
+        crossLinks={crossLinks}
         editHrefBase={editHrefBase}
         initialFocusLine={initialFocusLine}
         settings={{

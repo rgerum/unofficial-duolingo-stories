@@ -23,6 +23,7 @@ import {
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
+import type { StoryCrossLinksData } from "@/app/(stories)/story/[story_id]/getStoryCrossLinks";
 import { isTypingTarget } from "@/lib/is-typing-target";
 import { cn } from "@/lib/utils";
 
@@ -403,6 +404,7 @@ function getCurrentVisiblePart({
 function StoryProgress({
   story,
   parts_list: providedPartsList,
+  crossLinks,
   editHrefBase,
   initialFocusLine,
   settings,
@@ -414,6 +416,7 @@ function StoryProgress({
 }: {
   story?: StoryData;
   parts_list?: StoryElement[][];
+  crossLinks?: StoryCrossLinksData | null;
   editHrefBase?: string;
   initialFocusLine?: number;
   settings: StorySettings;
@@ -651,7 +654,7 @@ function StoryProgress({
         ) : null}
         {storyProgress === -1 && !settings.show_all ? (
           <div data-story-js-only="true">
-            <StoryTitlePage story={story} next={next} />
+            <StoryTitlePage story={story} next={next} crossLinks={crossLinks} />
           </div>
         ) : null}
         <div
