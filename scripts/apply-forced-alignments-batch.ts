@@ -4,17 +4,16 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 import type { Avatar } from "../src/app/editor/story/[story]/types";
 import { processStoryFile } from "../src/components/editor/story/syntax_parser_new";
-import type {
-  Audio,
-  StoryElement,
-  StoryElementHeader,
-  StoryElementLine,
-} from "../src/components/editor/story/syntax_parser_types";
 import {
   selectLatestSuccessfulStoryRuns,
   validateAlignmentAudioFile,
+  validateAlignmentArtifactStoryIds,
   validateAlignmentStoryCoverage,
 } from "./lib/forced-alignment-safety";
+import {
+  getAudioBackedStoryItems,
+  type AudioBackedStoryItem,
+} from "./lib/forced-alignment-story-items";
 
 const CONVEX_URL = process.env.FORCED_ALIGN_CONVEX_URL;
 const CONVEX_AUTH_TOKEN = process.env.CONVEX_AUTH_TOKEN;
@@ -89,10 +88,10 @@ type ManifestItem = {
   id: string;
   text: string;
   filename: string;
-  ssml?: Audio["ssml"];
 };
 
 type AlignmentResultsFile = {
+  storyId: number;
   results?: AlignmentResult[];
 };
 
@@ -108,16 +107,6 @@ type AlignmentResult = {
 };
 
 type Keypoint = { rangeEnd: number; audioStart: number };
-
-type AlignableItem = {
-  id: string;
-  type: "HEADER" | "LINE";
-  lineIndex: number;
-  text: string;
-  filename: string;
-  ssml: Audio["ssml"];
-  existingKeypoints: Keypoint[];
-};
 
 type StoryReport = {
   storyId: number;
@@ -219,6 +208,15 @@ async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
     return skipped(story, "story not found in Convex");
   }
 
+  const artifactStoryIdError = validateAlignmentArtifactStoryIds({
+    expectedStoryId: story.storyId,
+    manifestStoryId: manifest.storyId,
+    resultsStoryId: resultsFile.storyId,
+  });
+  if (artifactStoryIdError) {
+    return skipped(story, artifactStoryIdError);
+  }
+
   const { learningLanguage, fromLanguage, avatarNames } = await getParseContext(
     data.story_data.learning_language,
     data.story_data.from_language,
@@ -235,7 +233,7 @@ async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
     learningLanguage?.tts_replace ?? "",
   );
 
-  const currentItems = getAlignableItems(parsedStory.elements);
+  const currentItems = getAudioBackedStoryItems(parsedStory.elements);
   const alignmentResults = resultsFile.results ?? [];
   const coverageError = validateAlignmentStoryCoverage({
     resultIds: alignmentResults.map((result) => result.itemId),
@@ -350,6 +348,7 @@ async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
       change_date: new Date().toISOString(),
       confirmOfficialOverwrite: data.story_data.official || undefined,
       operationKey: `story:${data.story_data.id}:forced-align-bulk:${Date.now()}`,
+      expectedText: data.story_data.text,
     });
   }
 
@@ -390,7 +389,7 @@ async function getParseContext(
 function validateResult(
   result: AlignmentResult,
   manifestItem: ManifestItem | undefined,
-  currentItem: AlignableItem | undefined,
+  currentItem: AudioBackedStoryItem | undefined,
 ) {
   if (!manifestItem) return "missing manifest item";
   if (!currentItem) return "current story row missing";
@@ -419,43 +418,6 @@ function validateResult(
     }
   }
   return null;
-}
-
-function getAlignableItems(elements: StoryElement[]) {
-  const items: AlignableItem[] = [];
-
-  for (const element of elements) {
-    if (element.type !== "HEADER" && element.type !== "LINE") continue;
-    const audio = getElementAudio(element);
-    if (!audio?.url || !audio.ssml) continue;
-
-    const text = getElementText(element);
-    if (!text.trim()) continue;
-
-    items.push({
-      id: `${element.type}-${element.trackingProperties.line_index}-${audio.ssml.inser_index}`,
-      type: element.type,
-      lineIndex: element.trackingProperties.line_index || 0,
-      text,
-      filename: audio.url.replace(/^audio\//, ""),
-      ssml: audio.ssml,
-      existingKeypoints: audio.keypoints ?? [],
-    });
-  }
-
-  return items;
-}
-
-function getElementAudio(element: StoryElementHeader | StoryElementLine) {
-  if (element.type === "HEADER") return element.audio;
-  return element.line.content.audio ?? element.audio;
-}
-
-function getElementText(element: StoryElementHeader | StoryElementLine) {
-  if (element.type === "HEADER") {
-    return element.learningLanguageTitleContent?.text ?? "";
-  }
-  return element.line.content?.text ?? "";
 }
 
 function applyTimingUpdates(

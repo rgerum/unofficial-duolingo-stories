@@ -14,6 +14,24 @@ export function validateAlignmentAudioFile({
   return null;
 }
 
+export function validateAlignmentArtifactStoryIds({
+  expectedStoryId,
+  manifestStoryId,
+  resultsStoryId,
+}: {
+  expectedStoryId: number;
+  manifestStoryId: number;
+  resultsStoryId: number;
+}) {
+  if (manifestStoryId !== expectedStoryId) {
+    return "manifest story ID differs from batch story";
+  }
+  if (resultsStoryId !== expectedStoryId) {
+    return "results story ID differs from batch story";
+  }
+  return null;
+}
+
 export function validateAlignmentStoryCoverage({
   resultIds,
   manifestIds,

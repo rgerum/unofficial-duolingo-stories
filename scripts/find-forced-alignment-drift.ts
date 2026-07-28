@@ -4,13 +4,8 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 import type { Avatar } from "../src/app/editor/story/[story]/types";
 import { processStoryFile } from "../src/components/editor/story/syntax_parser_new";
-import type {
-  Audio,
-  StoryElement,
-  StoryElementHeader,
-  StoryElementLine,
-} from "../src/components/editor/story/syntax_parser_types";
 import { selectLatestSuccessfulStoryRuns } from "./lib/forced-alignment-safety";
+import { getAudioBackedStoryItems } from "./lib/forced-alignment-story-items";
 
 const CONVEX_URL = process.env.FORCED_ALIGN_CONVEX_URL;
 
@@ -56,12 +51,6 @@ type Manifest = {
   items: { id: string; text: string; filename: string }[];
 };
 
-type AlignableItem = {
-  id: string;
-  text: string;
-  filename: string;
-};
-
 async function main() {
   const stories = (await collectSuccessfulStories(batchDirs))
     .filter((story) => args.includeUnpublished || isStoryPublished(story))
@@ -100,7 +89,7 @@ async function main() {
       },
       learningLanguage?.tts_replace ?? "",
     );
-    const currentItems = getAlignableItems(parsedStory.elements);
+    const currentItems = getAudioBackedStoryItems(parsedStory.elements);
     const currentById = new Map(currentItems.map((item) => [item.id, item]));
     const manifestIds = new Set(manifest.items.map((item) => item.id));
 
@@ -211,35 +200,6 @@ async function getParseContext(
     avatarNames[avatar.avatar_id] = avatar;
   }
   return { learningLanguage, fromLanguage, avatarNames };
-}
-
-function getAlignableItems(elements: StoryElement[]) {
-  const items: AlignableItem[] = [];
-  for (const element of elements) {
-    if (element.type !== "HEADER" && element.type !== "LINE") continue;
-    const audio = getElementAudio(element);
-    if (!audio?.url || !audio.ssml) continue;
-    const text = getElementText(element);
-    if (!text.trim()) continue;
-    items.push({
-      id: `${element.type}-${element.trackingProperties.line_index}-${audio.ssml.inser_index}`,
-      text,
-      filename: audio.url.replace(/^audio\//, ""),
-    });
-  }
-  return items;
-}
-
-function getElementAudio(element: StoryElementHeader | StoryElementLine): Audio | undefined {
-  if (element.type === "HEADER") return element.audio;
-  return element.line.content.audio ?? element.audio;
-}
-
-function getElementText(element: StoryElementHeader | StoryElementLine) {
-  if (element.type === "HEADER") {
-    return element.learningLanguageTitleContent?.text ?? "";
-  }
-  return element.line.content?.text ?? "";
 }
 
 async function readJson<T>(filePath: string): Promise<T> {

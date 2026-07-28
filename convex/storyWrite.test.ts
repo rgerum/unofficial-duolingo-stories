@@ -151,6 +151,34 @@ describe("setStory", () => {
     });
   });
 
+  test("an expected story text mismatch rejects the save without partial writes", async () => {
+    const t = convexTest(schema, modules);
+    const { storyId } = await seedCourseWithStory(t);
+    const asContributor = t.withIdentity(contributor);
+
+    await expect(
+      asContributor.mutation(
+        api.storyWrite.setStory,
+        setStoryArgs({
+          legacyStoryId: 10,
+          expectedText: "stale story text",
+        }),
+      ),
+    ).rejects.toThrow("Story text changed after alignment validation.");
+
+    await t.run(async (ctx) => {
+      const story = await ctx.db.get(storyId);
+      expect(story?.name).toBe("Original story");
+      expect(story?.todo_count).toBe(3);
+
+      const content = await ctx.db
+        .query("story_content")
+        .withIndex("by_story", (q) => q.eq("storyId", storyId))
+        .unique();
+      expect(content?.text).toBe("old text");
+    });
+  });
+
   test("official course rejects a contributor overwrite", async () => {
     const t = convexTest(schema, modules);
     await seedCourseWithStory(t, { official: true });

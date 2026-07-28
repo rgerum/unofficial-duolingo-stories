@@ -31,7 +31,7 @@ The repo scripts expect an aligner command that writes word-level JSON to
 - `{audio}`: downloaded audio clip path
 - `{text}`: one-line transcript path
 - `{json}`: expected JSON output path
-- `{language}`: story learning-language short code
+- `{language}`: story Learning Language Code
 - `{model}`: optional model name from `FORCED_ALIGN_MODEL`
 
 For `ctc-forced-aligner`, use a small wrapper because its CLI writes JSON next
@@ -176,10 +176,13 @@ pnpm forced-align:apply-batch \
   --apply
 ```
 
-For official stories, Convex still enforces admin-only overwrites. The applier
+For stories from an Official Course, Convex still enforces admin-only
+overwrites. The applier
 uses `storyWrite.setStory`, reparses with the course avatar map, and skips the
 entire story if any result has warnings or if the result, manifest, and current
 audio-backed rows do not have exactly matching IDs, text, and audio filenames.
+The mutation rechecks the expected source Story Text in the same transaction as
+the write, so a concurrent edit cannot be overwritten.
 The single-story aligner only creates review artifacts; the batch applier is the
 only write path.
 

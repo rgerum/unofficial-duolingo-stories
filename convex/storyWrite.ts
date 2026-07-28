@@ -29,6 +29,7 @@ export const setStory = mutation({
     change_date: v.string(),
     confirmOfficialOverwrite: v.optional(v.boolean()),
     operationKey: v.optional(v.string()),
+    expectedText: v.optional(v.string()),
   },
   returns: v.union(
     v.null(),
@@ -92,6 +93,17 @@ export const setStory = mutation({
     const story = storyById ?? storyByDuoId;
     if (!story || story.legacyId === undefined) return null;
 
+    const existingContent = await ctx.db
+      .query("story_content")
+      .withIndex("by_story", (q) => q.eq("storyId", story._id))
+      .unique();
+    if (
+      args.expectedText !== undefined &&
+      existingContent?.text !== args.expectedText
+    ) {
+      throw new Error("Story text changed after alignment validation.");
+    }
+
     const image = args.image
       ? await ctx.db
           .query("images")
@@ -133,11 +145,6 @@ export const setStory = mutation({
       todo_count: args.todo_count,
       audio_problem_count: nextAudioProblemCount,
     });
-
-    const existingContent = await ctx.db
-      .query("story_content")
-      .withIndex("by_story", (q) => q.eq("storyId", story._id))
-      .unique();
 
     const lastUpdated = Date.now();
 

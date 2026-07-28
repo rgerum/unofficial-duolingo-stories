@@ -5,6 +5,7 @@ import {
   findNextMatchingAlignedWord,
   selectLatestSuccessfulStoryRuns,
   validateAlignmentAudioFile,
+  validateAlignmentArtifactStoryIds,
   validateAlignmentStoryCoverage,
 } from "./forced-alignment-safety";
 
@@ -70,5 +71,27 @@ test("a mismatched aligner token is not accepted as a fallback match", () => {
       0,
     ),
     null,
+  );
+});
+
+test("a batch manifest for another story is rejected", () => {
+  assert.equal(
+    validateAlignmentArtifactStoryIds({
+      expectedStoryId: 7799,
+      manifestStoryId: 7800,
+      resultsStoryId: 7799,
+    }),
+    "manifest story ID differs from batch story",
+  );
+});
+
+test("an alignment result file for another story is rejected", () => {
+  assert.equal(
+    validateAlignmentArtifactStoryIds({
+      expectedStoryId: 7799,
+      manifestStoryId: 7799,
+      resultsStoryId: 7800,
+    }),
+    "results story ID differs from batch story",
   );
 });

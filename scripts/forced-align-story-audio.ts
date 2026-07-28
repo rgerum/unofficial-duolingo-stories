@@ -13,6 +13,7 @@ import type {
 import type { Avatar } from "../src/app/editor/story/[story]/types";
 import { timings_to_text } from "../src/lib/editor/audio/audio_edit_tools";
 import { findNextMatchingAlignedWord } from "./lib/forced-alignment-safety";
+import { getAudioBackedStoryItems } from "./lib/forced-alignment-story-items";
 
 const DEFAULT_AUDIO_BASE_URL =
   "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/";
@@ -211,45 +212,14 @@ async function getParseContext(
 }
 
 function getAlignableItems(elements: StoryElement[]) {
-  const items: AlignableItem[] = [];
-  let order = 1;
-
-  for (const element of elements) {
-    if (element.type !== "HEADER" && element.type !== "LINE") continue;
-    const audio = getElementAudio(element);
-    if (!audio?.url || !audio.ssml) continue;
-
-    const text = getElementText(element);
-    if (!text.trim()) continue;
-
-    items.push({
-      id: `${element.type}-${element.trackingProperties.line_index}-${audio.ssml.inser_index}`,
-      order,
-      type: element.type,
-      lineIndex: element.trackingProperties.line_index || 0,
+  return getAudioBackedStoryItems(elements).map(
+    ({ element, audioUrl, ...item }, index) => ({
+      ...item,
+      order: index + 1,
       characterName: getElementCharacterName(element),
-      text,
-      audioUrl: resolveAudioUrl(audio.url),
-      filename: audio.url.replace(/^audio\//, ""),
-      ssml: audio.ssml,
-      existingKeypoints: audio.keypoints ?? [],
-    });
-    order += 1;
-  }
-
-  return items;
-}
-
-function getElementAudio(element: StoryElementHeader | StoryElementLine) {
-  if (element.type === "HEADER") return element.audio;
-  return element.line.content.audio ?? element.audio;
-}
-
-function getElementText(element: StoryElementHeader | StoryElementLine) {
-  if (element.type === "HEADER") {
-    return element.learningLanguageTitleContent?.text ?? "";
-  }
-  return element.line.content?.text ?? "";
+      audioUrl: resolveAudioUrl(audioUrl),
+    }),
+  ) satisfies AlignableItem[];
 }
 
 function getElementCharacterName(element: StoryElementHeader | StoryElementLine) {
