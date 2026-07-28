@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import getUserId from "@/lib/getUserId";
 import {
@@ -44,6 +44,30 @@ export async function generateMetadata({
   const title = getStoryTitle(storyMeta);
   const description = getStoryDescription(story);
 
+  if (!storyMeta.public) {
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      keywords: [
+        storyMeta.learning_language_long,
+        storyMeta.from_language_long,
+      ],
+      openGraph: {
+        images: [
+          `/api/og-story?title=${storyMeta.from_language_name}&image=${storyMeta.image}&name=${storyMeta.learning_language_long}`,
+        ],
+        type: "website",
+        title,
+        description,
+      },
+      twitter: {
+        title,
+        description,
+      },
+    };
+  }
+
   return {
     title,
     description,
@@ -76,7 +100,18 @@ export default async function Page({
   const story_id = parseInt((await params).story_id);
 
   const story = await get_story(story_id);
-  if (!story) notFound();
+  if (!story) {
+    const redirectInfo = await fetchQuery(
+      api.storyRead.getDeletedStoryRedirectInfoByLegacyId,
+      {
+        storyId: story_id,
+      },
+    );
+    if (redirectInfo?.coursePublic && redirectInfo.courseShort) {
+      permanentRedirect(`/${redirectInfo.courseShort}`);
+    }
+    notFound();
+  }
   const course_id = story.course_id;
 
   const user_id = await getUserId();

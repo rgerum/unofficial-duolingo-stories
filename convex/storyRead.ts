@@ -33,6 +33,15 @@ const storyMetaResultValidator = v.union(
     image: v.string(),
     from_language_long: v.string(),
     learning_language_long: v.string(),
+    public: v.boolean(),
+  }),
+  v.null(),
+);
+
+const deletedStoryRedirectInfoResultValidator = v.union(
+  v.object({
+    courseShort: v.string(),
+    coursePublic: v.boolean(),
   }),
   v.null(),
 );
@@ -149,6 +158,29 @@ export const getStoryMetaByLegacyId = query({
       image: image?.legacyId ?? "",
       from_language_long: fromLanguage.name,
       learning_language_long: learningLanguage.name,
+      public: story.public,
+    };
+  },
+});
+
+export const getDeletedStoryRedirectInfoByLegacyId = query({
+  args: {
+    storyId: v.number(),
+  },
+  returns: deletedStoryRedirectInfoResultValidator,
+  handler: async (ctx, args) => {
+    const story = await ctx.db
+      .query("stories")
+      .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.storyId))
+      .unique();
+    if (!story || !story.deleted) return null;
+
+    const course = await ctx.db.get(story.courseId);
+    if (!course) return null;
+
+    return {
+      courseShort: course.short ?? "",
+      coursePublic: course.public,
     };
   },
 });
