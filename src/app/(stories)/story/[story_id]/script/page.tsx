@@ -17,7 +17,7 @@ export async function generateMetadata({
     storyId: story_id,
   });
 
-  if (!story) notFound();
+  if (!story || "deleted" in story) notFound();
 
   return {
     title: `Duostories ${story.learning_language_long} from ${story.from_language_long}: ${story.from_language_name}`,

@@ -23,6 +23,7 @@ export interface HintMapResult {
   hintMap: HintMapItem[];
   hints: string[];
   hints_pronunciation?: string[];
+  hasTranslationLine?: boolean;
   text: string;
   audio?: Audio;
   lang_hints?: string;
@@ -31,6 +32,7 @@ export interface HintMapResult {
 
 export interface ContentWithHints {
   hintMap: HintMapItem[];
+  hasTranslationLine?: boolean;
   text: string;
   [key: string]: any; // For additional properties
 }

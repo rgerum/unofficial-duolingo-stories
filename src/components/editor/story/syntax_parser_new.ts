@@ -376,6 +376,7 @@ function speaker_text_trans(
   text = inlineTtsData.normalizedText;
   const ipa_replacements = inlineTtsData.replacements;
   let content = generateHintMap(text, translation, pronunciation);
+  content.hasTranslationLine = Boolean(data.trans?.slice(1).trim());
 
   let selectablePhrases, characterPositions;
   if (use_buttons)

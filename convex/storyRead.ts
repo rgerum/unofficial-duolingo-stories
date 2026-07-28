@@ -33,6 +33,14 @@ const storyMetaResultValidator = v.union(
     image: v.string(),
     from_language_long: v.string(),
     learning_language_long: v.string(),
+    public: v.boolean(),
+  }),
+  // Deleted stories resolve to their course so the page can 308 there
+  // instead of 404ing; never-existing ids stay null.
+  v.object({
+    deleted: v.literal(true),
+    courseShort: v.string(),
+    coursePublic: v.boolean(),
   }),
   v.null(),
 );
@@ -131,10 +139,18 @@ export const getStoryMetaByLegacyId = query({
       .query("stories")
       .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.storyId))
       .unique();
-    if (!story || story.deleted) return null;
+    if (!story) return null;
 
     const course = await ctx.db.get(story.courseId);
     if (!course) return null;
+
+    if (story.deleted) {
+      return {
+        deleted: true as const,
+        courseShort: course.short ?? "",
+        coursePublic: course.public,
+      };
+    }
 
     const [fromLanguage, learningLanguage, image] = await Promise.all([
       ctx.db.get(course.fromLanguageId),
@@ -149,6 +165,7 @@ export const getStoryMetaByLegacyId = query({
       image: image?.legacyId ?? "",
       from_language_long: fromLanguage.name,
       learning_language_long: learningLanguage.name,
+      public: story.public,
     };
   },
 });
