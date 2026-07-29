@@ -198,6 +198,70 @@ describe("setStory", () => {
 });
 
 describe("applyForcedAlignment", () => {
+  test("official course rejects a contributor overwrite", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t, { official: true });
+    const asContributor = t.withIdentity(contributor);
+
+    await expect(
+      asContributor.mutation(api.storyWrite.applyForcedAlignment, {
+        legacyStoryId: 10,
+        expectedText: "old text",
+        text: "story text with timing data",
+        json: { elements: [] },
+        change_date: new Date("2026-07-28T00:00:00.000Z").toISOString(),
+      }),
+    ).rejects.toThrow("Official stories cannot be overwritten.");
+  });
+
+  test("official course rejects an admin overwrite without explicit confirmation", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t, { official: true });
+    const asAdmin = t.withIdentity(admin);
+
+    await expect(
+      asAdmin.mutation(api.storyWrite.applyForcedAlignment, {
+        legacyStoryId: 10,
+        expectedText: "old text",
+        text: "story text with timing data",
+        json: { elements: [] },
+        change_date: new Date("2026-07-28T00:00:00.000Z").toISOString(),
+      }),
+    ).rejects.toThrow(
+      "Official story overwrite requires explicit confirmation.",
+    );
+  });
+
+  test("official course allows an explicitly confirmed admin overwrite", async () => {
+    const t = convexTest(schema, modules);
+    const { storyId } = await seedCourseWithStory(t, { official: true });
+    const asAdmin = t.withIdentity(admin);
+
+    await asAdmin.mutation(api.storyWrite.applyForcedAlignment, {
+      legacyStoryId: 10,
+      expectedText: "old text",
+      text: "story text with timing data",
+      json: { elements: [{ type: "LINE", audio: { keypoints: [] } }] },
+      change_date: new Date("2026-07-28T00:00:00.000Z").toISOString(),
+      confirmOfficialOverwrite: true,
+    });
+
+    await t.run(async (ctx) => {
+      const story = await ctx.db.get(storyId);
+      expect(story?.name).toBe("Original story");
+      expect(story?.authorChangeId).toBe(5);
+
+      const content = await ctx.db
+        .query("story_content")
+        .withIndex("by_story", (q) => q.eq("storyId", storyId))
+        .unique();
+      expect(content?.text).toBe("story text with timing data");
+      expect(content?.json).toEqual({
+        elements: [{ type: "LINE", audio: { keypoints: [] } }],
+      });
+    });
+  });
+
   test("rejects when story text changed after artifact validation", async () => {
     const t = convexTest(schema, modules);
     const { storyId } = await seedCourseWithStory(t);

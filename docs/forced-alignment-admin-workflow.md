@@ -180,7 +180,9 @@ pnpm forced-align:apply-batch \
 ```
 
 For stories from an Official Course, Convex still enforces admin-only
-overwrites. The applier uses `storyWrite.applyForcedAlignment`, reparses with
+overwrites. An apply run skips those stories unless the operator also passes
+`--confirm-official-overwrite`; dry-runs do not require that flag. The applier
+uses `storyWrite.applyForcedAlignment`, reparses with
 the course avatar map, and skips the entire story if any result has warnings or
 if the result, manifest, and current audio-backed rows do not have exactly
 matching IDs, text, and audio filenames.

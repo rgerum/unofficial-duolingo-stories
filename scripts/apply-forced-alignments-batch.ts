@@ -1,9 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { Avatar } from "@/app/editor/story/[story]/types";
+import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
-import type { Avatar } from "../src/app/editor/story/[story]/types";
-import { processStoryFile } from "../src/components/editor/story/syntax_parser_new";
 import {
   selectLatestSuccessfulStoryRuns,
   validateAlignmentAudioFile,
@@ -14,6 +14,7 @@ import {
   getAudioBackedStoryItems,
   type AudioBackedStoryItem,
 } from "./lib/forced-alignment-story-items";
+import { applyTimingUpdates } from "./lib/forced-alignment-text-updates";
 
 const CONVEX_URL = process.env.FORCED_ALIGN_CONVEX_URL;
 const CONVEX_AUTH_TOKEN = process.env.CONVEX_AUTH_TOKEN;
@@ -62,6 +63,7 @@ type CliArgs = {
   comment?: string;
   apply?: boolean;
   includeUnpublished?: boolean;
+  confirmOfficialOverwrite?: boolean;
 };
 
 type BatchSummaryItem = {
@@ -334,13 +336,24 @@ async function processStory(story: BatchSummaryItem): Promise<StoryReport> {
   );
 
   if (shouldApply) {
+    if (data.story_data.official && !args.confirmOfficialOverwrite) {
+      return skipped(
+        story,
+        "official overwrite requires --confirm-official-overwrite",
+        {
+          rowsTotal: alignmentResults.length,
+          rowsApplied: 0,
+          rowsSkipped,
+        },
+      );
+    }
     await client.mutation(api.storyWrite.applyForcedAlignment, {
       legacyStoryId: data.story_data.id,
       expectedText: data.story_data.text,
       text: patchedText,
       json: toConvexValue(nextParsedStory),
       change_date: new Date().toISOString(),
-      confirmOfficialOverwrite: data.story_data.official || undefined,
+      confirmOfficialOverwrite: args.confirmOfficialOverwrite || undefined,
       operationKey: `story:${data.story_data.id}:forced-align-bulk:${Date.now()}`,
     });
   }
@@ -411,38 +424,6 @@ function validateResult(
     }
   }
   return null;
-}
-
-function applyTimingUpdates(
-  docText: string,
-  updates: { inserIndex: number | undefined; serializedText: string }[],
-  audioInsertLines: [number | undefined, number][],
-) {
-  const lines = docText.split("\n");
-  const lineUpdates = updates
-    .map((update) => {
-      if (update.inserIndex === undefined) return null;
-      const target = audioInsertLines[update.inserIndex];
-      if (!target) return null;
-      return { target, serializedText: update.serializedText };
-    })
-    .filter((update): update is NonNullable<typeof update> => update !== null)
-    .sort((left, right) => getSortLine(right.target) - getSortLine(left.target));
-
-  for (const update of lineUpdates) {
-    const [line, lineInsert] = update.target;
-    if (line !== undefined) {
-      lines[Math.max(0, line - 1)] = update.serializedText;
-      continue;
-    }
-    lines.splice(Math.max(0, lineInsert - 2), 0, update.serializedText);
-  }
-
-  return lines.join("\n");
-}
-
-function getSortLine(target: [number | undefined, number]) {
-  return target[0] ?? target[1];
 }
 
 function addForcedAlignmentComment(docText: string) {
@@ -546,6 +527,9 @@ function parseArgs(argv: string[]) {
     else if (arg === "--report") parsed.report = argv[++index];
     else if (arg === "--comment") parsed.comment = argv[++index];
     else if (arg === "--apply") parsed.apply = true;
+    else if (arg === "--confirm-official-overwrite") {
+      parsed.confirmOfficialOverwrite = true;
+    }
     else if (arg === "--include-unpublished") parsed.includeUnpublished = true;
     else if (arg === "--help") {
       printHelp();
@@ -574,6 +558,8 @@ Options:
   --report <path>        Write JSON report to path.
   --comment <text>       Story comment inserted above existing story text.
   --include-unpublished  Include unpublished stories too.
+  --confirm-official-overwrite
+                         Explicitly allow official-course story writes.
   --apply                Actually write to Convex.
   --help                 Show this help.
 

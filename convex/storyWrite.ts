@@ -2,6 +2,7 @@ import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import {
+  getRole,
   requireContributorOrAdmin,
   requireSessionLegacyUserId,
 } from "./lib/authorization";
@@ -222,9 +223,9 @@ export const applyForcedAlignment = mutation({
     const actorLegacyUserId = await requireSessionLegacyUserId(ctx);
     const identity = (await ctx.auth.getUserIdentity()) as {
       name?: string | null;
-      role?: string | null;
     } | null;
     const actorName = identity?.name?.trim() || `user_${actorLegacyUserId}`;
+    const role = await getRole(ctx);
 
     const story = await ctx.db
       .query("stories")
@@ -239,7 +240,7 @@ export const applyForcedAlignment = mutation({
       throw new Error(`Course missing for story ${args.legacyStoryId}`);
     }
     if (course.official) {
-      if (identity?.role !== "admin") {
+      if (role !== "admin") {
         throw new Error("Official stories cannot be overwritten.");
       }
       if (!args.confirmOfficialOverwrite) {

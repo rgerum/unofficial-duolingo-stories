@@ -46,7 +46,10 @@ export function getAlignmentText(text: string, languageCode = "") {
 
 export function normalizeAlignmentWord(word: string, languageCode = "") {
   const normalizedLanguage = languageCode.toLocaleLowerCase().split(/[-_]/)[0];
-  if (normalizedLanguage === "da" && DANISH_DIGIT_WORDS[word]) {
+  if (
+    normalizedLanguage === "da" &&
+    Object.hasOwn(DANISH_DIGIT_WORDS, word)
+  ) {
     return DANISH_DIGIT_WORDS[word];
   }
 

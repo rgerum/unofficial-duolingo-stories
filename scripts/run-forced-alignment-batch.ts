@@ -20,6 +20,7 @@ const outputRoot =
     "forced-alignment-batches",
     `${args.course}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
   );
+let summaryWriteQueue: Promise<void> = Promise.resolve();
 
 type CliArgs = {
   course: string;
@@ -229,21 +230,21 @@ function countWarnings(results: { results?: { warnings?: string[] }[] } | null) 
 }
 
 async function writeSummary(summaryPath: string, summary: StorySummary[]) {
-  await writeFile(
-    summaryPath,
-    `${JSON.stringify(
-      {
-        generatedAt: new Date().toISOString(),
-        convexUrl: CONVEX_URL,
-        course: args.course,
-        outputRoot,
-        summary,
-      },
-      null,
-      2,
-    )}\n`,
-    "utf8",
+  const content = `${JSON.stringify(
+    {
+      generatedAt: new Date().toISOString(),
+      convexUrl: CONVEX_URL,
+      course: args.course,
+      outputRoot,
+      summary,
+    },
+    null,
+    2,
+  )}\n`;
+  summaryWriteQueue = summaryWriteQueue.then(() =>
+    writeFile(summaryPath, content, "utf8"),
   );
+  await summaryWriteQueue;
 }
 
 async function readFailedStoryIds(reportPath: string) {

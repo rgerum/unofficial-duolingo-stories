@@ -1,9 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { Avatar } from "@/app/editor/story/[story]/types";
+import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
-import type { Avatar } from "../src/app/editor/story/[story]/types";
-import { processStoryFile } from "../src/components/editor/story/syntax_parser_new";
 import { selectLatestSuccessfulStoryRuns } from "./lib/forced-alignment-safety";
 import { getAudioBackedStoryItems } from "./lib/forced-alignment-story-items";
 

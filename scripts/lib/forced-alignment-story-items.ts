@@ -3,7 +3,7 @@ import type {
   StoryElement,
   StoryElementHeader,
   StoryElementLine,
-} from "../../src/components/editor/story/syntax_parser_types";
+} from "@/components/editor/story/syntax_parser_types";
 
 export type AudioBackedStoryItem = {
   id: string;

@@ -22,3 +22,8 @@ test("Danish alignment text expands a spoken digit", () => {
 test("digit expansion is scoped to the alignment language", () => {
   assert.equal(getAlignmentText("Level 2", "en"), "level 2");
 });
+
+test("Danish digit expansion ignores inherited object properties", () => {
+  assert.equal(normalizeAlignmentWord("constructor", "da"), "constructor");
+  assert.equal(normalizeAlignmentWord("__proto__", "da"), "proto");
+});

@@ -1,17 +1,17 @@
 import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { ConvexHttpClient } from "convex/browser";
-import { api } from "../convex/_generated/api";
-import { processStoryFile } from "../src/components/editor/story/syntax_parser_new";
+import type { Avatar } from "@/app/editor/story/[story]/types";
+import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 import type {
   Audio,
   StoryElement,
   StoryElementHeader,
   StoryElementLine,
-} from "../src/components/editor/story/syntax_parser_types";
-import type { Avatar } from "../src/app/editor/story/[story]/types";
-import { timings_to_text } from "../src/lib/editor/audio/audio_edit_tools";
+} from "@/components/editor/story/syntax_parser_types";
+import { timings_to_text } from "@/lib/editor/audio/audio_edit_tools";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "../convex/_generated/api";
 import {
   findNextMatchingAlignedWord,
   keepLexicalAlignedWords,
@@ -22,6 +22,7 @@ import {
   getAlignmentWordTokens,
   normalizeAlignmentWord,
 } from "./lib/forced-alignment-text";
+import { applyTimingUpdates } from "./lib/forced-alignment-text-updates";
 
 const DEFAULT_AUDIO_BASE_URL =
   "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/";
@@ -391,38 +392,6 @@ function buildAlignmentResult(
     }),
     warnings,
   } satisfies AlignmentResult;
-}
-
-function applyTimingUpdates(
-  docText: string,
-  updates: { inserIndex: number | undefined; serializedText: string }[],
-  audioInsertLines: [number | undefined, number][],
-) {
-  const lines = docText.split("\n");
-  const lineUpdates = updates
-    .map((update) => {
-      if (update.inserIndex === undefined) return null;
-      const target = audioInsertLines[update.inserIndex];
-      if (!target) return null;
-      return { target, serializedText: update.serializedText };
-    })
-    .filter((update): update is NonNullable<typeof update> => update !== null)
-    .sort((left, right) => getSortLine(right.target) - getSortLine(left.target));
-
-  for (const update of lineUpdates) {
-    const [line, lineInsert] = update.target;
-    if (line !== undefined) {
-      lines[Math.max(0, line - 1)] = update.serializedText;
-      continue;
-    }
-    lines.splice(Math.max(0, lineInsert - 2), 0, update.serializedText);
-  }
-
-  return lines.join("\n");
-}
-
-function getSortLine(target: [number | undefined, number]) {
-  return target[0] ?? target[1];
 }
 
 function parseArgs(argv: string[]) {
