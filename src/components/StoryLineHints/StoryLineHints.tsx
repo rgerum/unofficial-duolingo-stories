@@ -330,7 +330,7 @@ function StoryLineHints({
       ? ""
       : showTrans
         ? has_any_hint
-          ? "group/editorhint inline-flex grow flex-col"
+          ? "group/editorhint my-0.5 inline-flex grow flex-col whitespace-nowrap"
           : ""
         : has_translation_hint
           ? cn(
@@ -362,7 +362,11 @@ function StoryLineHints({
           was_hidden_for_challenge && !is_hidden ? true : undefined
         }
       >
-        {word_content}
+        {showTrans && has_any_hint ? (
+          <span className="whitespace-nowrap">{word_content}</span>
+        ) : (
+          word_content
+        )}
         {showTrans ? (
           has_any_hint ? (
             <span className={hintTextClassName} style={editorHintTextStyle}>
