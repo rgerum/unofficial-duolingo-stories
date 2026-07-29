@@ -1,5 +1,6 @@
 import { expoClient } from "@better-auth/expo/client";
 import { convexClient } from "@convex-dev/better-auth/client/plugins";
+import type { BetterAuthClientPlugin } from "better-auth";
 import { usernameClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/client";
 import * as SecureStore from "expo-secure-store";
@@ -17,11 +18,15 @@ const authBaseUrl =
 export const authClient = createAuthClient({
   baseURL: authBaseUrl,
   plugins: [
+    // TODO: Remove this cast after upgrading to an @better-auth/expo release
+    // whose expoClient declaration is assignable to BetterAuthClientPlugin.
+    // Version 1.6.25 breaks plugin inference and otherwise hides the username
+    // and Convex client APIs, even though those APIs still work at runtime.
     expoClient({
       scheme: "duostories",
       storagePrefix: "duostories",
       storage: SecureStore,
-    }),
+    }) as BetterAuthClientPlugin,
     convexClient(),
     usernameClient(),
   ],
