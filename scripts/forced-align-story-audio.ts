@@ -17,6 +17,11 @@ import {
   keepLexicalAlignedWords,
 } from "./lib/forced-alignment-safety";
 import { getAudioBackedStoryItems } from "./lib/forced-alignment-story-items";
+import {
+  getAlignmentText,
+  getAlignmentWordTokens,
+  normalizeAlignmentWord,
+} from "./lib/forced-alignment-text";
 
 const DEFAULT_AUDIO_BASE_URL =
   "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/";
@@ -66,13 +71,6 @@ type AlignableItem = {
   filename: string;
   ssml: Audio["ssml"];
   existingKeypoints: { rangeEnd: number; audioStart: number }[];
-};
-
-type WordToken = {
-  text: string;
-  normalized: string;
-  start: number;
-  end: number;
 };
 
 type AlignedWord = {
@@ -125,6 +123,7 @@ async function main() {
   );
 
   const items = getAlignableItems(parsedStory.elements);
+  const alignmentLanguage = learningLanguage?.short ?? "da";
   await writeJson(path.join(outputRoot, "manifest.json"), {
     generatedAt: new Date().toISOString(),
     storyId,
@@ -144,7 +143,11 @@ async function main() {
     const textPath = path.join(outputRoot, "text", safeFileName(item.id, ".txt"));
     const jsonPath = path.join(outputRoot, "aligned", safeFileName(item.id, ".json"));
 
-    await writeFile(textPath, `${getAlignmentText(item.text)}\n`, "utf8");
+    await writeFile(
+      textPath,
+      `${getAlignmentText(item.text, alignmentLanguage)}\n`,
+      "utf8",
+    );
     await downloadFile(item.audioUrl, audioPath);
 
     if (!shouldAlign || !ALIGN_COMMAND) continue;
@@ -154,12 +157,12 @@ async function main() {
       audio: audioPath,
       text: textPath,
       json: jsonPath,
-      language: learningLanguage?.short ?? "da",
+      language: alignmentLanguage,
       model: process.env.FORCED_ALIGN_MODEL ?? "",
     });
 
-    const alignedWords = await readAlignedWords(jsonPath);
-    const result = buildAlignmentResult(item, alignedWords);
+    const alignedWords = await readAlignedWords(jsonPath, alignmentLanguage);
+    const result = buildAlignmentResult(item, alignedWords, alignmentLanguage);
     results.push(result);
   }
 
@@ -279,7 +282,7 @@ async function runAlignCommand(
   });
 }
 
-async function readAlignedWords(jsonPath: string) {
+async function readAlignedWords(jsonPath: string, languageCode: string) {
   const raw = await readFile(jsonPath, "utf8");
   const parsed = JSON.parse(raw) as unknown;
   const candidates = collectWordCandidates(parsed);
@@ -298,7 +301,7 @@ async function readAlignedWords(jsonPath: string) {
     return [
       {
         word,
-        normalized: normalizeWord(word),
+        normalized: normalizeAlignmentWord(word, languageCode),
         startMs: toMilliseconds(start),
         endMs: end === undefined ? undefined : toMilliseconds(end),
       },
@@ -339,8 +342,12 @@ function collectWordCandidates(value: unknown): Record<string, unknown>[] {
   return [];
 }
 
-function buildAlignmentResult(item: AlignableItem, alignedWords: AlignedWord[]) {
-  const tokens = getWordTokens(item.text);
+function buildAlignmentResult(
+  item: AlignableItem,
+  alignedWords: AlignedWord[],
+  languageCode: string,
+) {
+  const tokens = getAlignmentWordTokens(item.text, languageCode);
   const warnings: string[] = [];
   const keypoints: { rangeEnd: number; audioStart: number }[] = [];
   let alignedIndex = 0;
@@ -384,40 +391,6 @@ function buildAlignmentResult(item: AlignableItem, alignedWords: AlignedWord[]) 
     }),
     warnings,
   } satisfies AlignmentResult;
-}
-
-function getWordTokens(text: string) {
-  const tokens: WordToken[] = [];
-  const regex = /[\p{L}\p{N}]+(?:['’.-][\p{L}\p{N}]+)*/gu;
-  for (const match of text.matchAll(regex)) {
-    const word = match[0];
-    const start = match.index ?? 0;
-    const normalized = normalizeWord(word);
-    if (!normalized) continue;
-    tokens.push({
-      text: word,
-      normalized,
-      start,
-      end: start + word.length,
-    });
-  }
-  return tokens;
-}
-
-function getAlignmentText(text: string) {
-  const tokens = getWordTokens(text).map((token) => token.normalized);
-  if (tokens.length > 0) return tokens.join(" ");
-  return normalizeWord(text);
-}
-
-function normalizeWord(word: string) {
-  return word
-    .toLocaleLowerCase("da-DK")
-    .normalize("NFKC")
-    .replace(/æ/g, "ae")
-    .replace(/ø/g, "o")
-    .replace(/å/g, "a")
-    .replace(/[^\p{L}\p{N}]+/gu, "");
 }
 
 function applyTimingUpdates(
