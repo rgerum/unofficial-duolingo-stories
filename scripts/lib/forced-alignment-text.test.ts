@@ -11,3 +11,14 @@ test("alignment normalization preserves Danish letter transliteration", () => {
   assert.equal(normalizeAlignmentWord("RØDGRØD"), "rodgrod");
   assert.equal(normalizeAlignmentWord("æble"), "aeble");
 });
+
+test("Danish alignment text expands a spoken digit", () => {
+  assert.equal(
+    getAlignmentText('Vi skal se "Rumvikingerne 2"!', "da"),
+    "vi skal se rumvikingerne to",
+  );
+});
+
+test("digit expansion is scoped to the alignment language", () => {
+  assert.equal(getAlignmentText("Level 2", "en"), "level 2");
+});

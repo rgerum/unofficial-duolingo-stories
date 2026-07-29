@@ -120,6 +120,7 @@ async function main() {
   );
 
   const items = getAlignableItems(parsedStory.elements);
+  const alignmentLanguage = learningLanguage?.short ?? "da";
   await writeJson(path.join(outputRoot, "manifest.json"), {
     generatedAt: new Date().toISOString(),
     storyId,
@@ -139,7 +140,11 @@ async function main() {
     const textPath = path.join(outputRoot, "text", safeFileName(item.id, ".txt"));
     const jsonPath = path.join(outputRoot, "aligned", safeFileName(item.id, ".json"));
 
-    await writeFile(textPath, `${getAlignmentText(item.text)}\n`, "utf8");
+    await writeFile(
+      textPath,
+      `${getAlignmentText(item.text, alignmentLanguage)}\n`,
+      "utf8",
+    );
     await downloadFile(item.audioUrl, audioPath);
 
     if (!shouldAlign || !ALIGN_COMMAND) continue;
@@ -149,12 +154,12 @@ async function main() {
       audio: audioPath,
       text: textPath,
       json: jsonPath,
-      language: learningLanguage?.short ?? "da",
+      language: alignmentLanguage,
       model: process.env.FORCED_ALIGN_MODEL ?? "",
     });
 
-    const alignedWords = await readAlignedWords(jsonPath);
-    const result = buildAlignmentResult(item, alignedWords);
+    const alignedWords = await readAlignedWords(jsonPath, alignmentLanguage);
+    const result = buildAlignmentResult(item, alignedWords, alignmentLanguage);
     results.push(result);
   }
 
@@ -274,7 +279,7 @@ async function runAlignCommand(
   });
 }
 
-async function readAlignedWords(jsonPath: string) {
+async function readAlignedWords(jsonPath: string, languageCode: string) {
   const raw = await readFile(jsonPath, "utf8");
   const parsed = JSON.parse(raw) as unknown;
   const candidates = collectWordCandidates(parsed);
@@ -293,7 +298,7 @@ async function readAlignedWords(jsonPath: string) {
     return [
       {
         word,
-        normalized: normalizeAlignmentWord(word),
+        normalized: normalizeAlignmentWord(word, languageCode),
         startMs: toMilliseconds(start),
         endMs: end === undefined ? undefined : toMilliseconds(end),
       },
@@ -332,8 +337,12 @@ function collectWordCandidates(value: unknown): Record<string, unknown>[] {
   return [];
 }
 
-function buildAlignmentResult(item: AlignableItem, alignedWords: AlignedWord[]) {
-  const tokens = getAlignmentWordTokens(item.text);
+function buildAlignmentResult(
+  item: AlignableItem,
+  alignedWords: AlignedWord[],
+  languageCode: string,
+) {
+  const tokens = getAlignmentWordTokens(item.text, languageCode);
   const warnings: string[] = [];
   const keypoints: { rangeEnd: number; audioStart: number }[] = [];
   let alignedIndex = 0;
