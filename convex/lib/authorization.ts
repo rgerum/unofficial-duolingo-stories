@@ -11,7 +11,7 @@ async function getIdentity(ctx: AuthCtx) {
   return (await ctx.auth.getUserIdentity()) as RoleIdentity;
 }
 
-async function getRole(ctx: AuthCtx) {
+export async function getRole(ctx: AuthCtx) {
   const identity = await getIdentity(ctx);
   return identity?.role ?? null;
 }

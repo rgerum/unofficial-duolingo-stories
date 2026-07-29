@@ -2,6 +2,7 @@ import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import {
+  getRole,
   requireContributorOrAdmin,
   requireSessionLegacyUserId,
 } from "./lib/authorization";
@@ -203,6 +204,88 @@ export const setStory = mutation({
       text: args.text,
       todo_count: args.todo_count,
     };
+  },
+});
+
+export const applyForcedAlignment = mutation({
+  args: {
+    legacyStoryId: v.number(),
+    expectedText: v.string(),
+    text: v.string(),
+    json: v.any(),
+    change_date: v.string(),
+    confirmOfficialOverwrite: v.optional(v.boolean()),
+    operationKey: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
+    const actorLegacyUserId = await requireSessionLegacyUserId(ctx);
+    const identity = (await ctx.auth.getUserIdentity()) as {
+      name?: string | null;
+    } | null;
+    const actorName = identity?.name?.trim() || `user_${actorLegacyUserId}`;
+    const role = await getRole(ctx);
+
+    const story = await ctx.db
+      .query("stories")
+      .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.legacyStoryId))
+      .unique();
+    if (!story || story.legacyId === undefined) {
+      throw new Error(`Story ${args.legacyStoryId} not found`);
+    }
+
+    const course = await ctx.db.get(story.courseId);
+    if (!course || course.legacyId === undefined) {
+      throw new Error(`Course missing for story ${args.legacyStoryId}`);
+    }
+    if (course.official) {
+      if (role !== "admin") {
+        throw new Error("Official stories cannot be overwritten.");
+      }
+      if (!args.confirmOfficialOverwrite) {
+        throw new Error(
+          "Official story overwrite requires explicit confirmation.",
+        );
+      }
+    }
+
+    const content = await ctx.db
+      .query("story_content")
+      .withIndex("by_story", (q) => q.eq("storyId", story._id))
+      .unique();
+    if (content?.text !== args.expectedText) {
+      throw new Error("Story text changed after alignment validation.");
+    }
+
+    const lastUpdated = Date.now();
+    const changeDateMillis = Date.parse(args.change_date);
+    await ctx.db.patch(story._id, {
+      change_date: Number.isFinite(changeDateMillis)
+        ? changeDateMillis
+        : lastUpdated,
+      authorChangeId: actorLegacyUserId,
+    });
+    await ctx.db.patch(content._id, {
+      text: args.text,
+      json: args.json,
+      lastUpdated,
+    });
+    await upsertPublicStoryContent(ctx, story._id, args.json, lastUpdated);
+
+    await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStorySaved, {
+      operationKey:
+        args.operationKey ??
+        `story:${story.legacyId}:forced_alignment:${Date.now()}`,
+      storyId: story.legacyId,
+      storyName: story.name,
+      courseId: course.legacyId,
+      text: args.text,
+      todoCount: story.todo_count ?? 0,
+      actorName,
+      actorLegacyUserId,
+    });
+    return null;
   },
 });
 
