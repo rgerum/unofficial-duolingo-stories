@@ -141,19 +141,22 @@ describe("submitStoryFeedback", () => {
       { operationKey: `${"x".repeat(201)}` },
       "Operation key is too long",
     ],
-  ])("%s length cap rejects oversized values", async (_field, overrides, error) => {
-    const t = convexTest(schema, modules);
-    await seedCourseWithStory(t);
+  ])(
+    "%s length cap rejects oversized values",
+    async (_field, overrides, error) => {
+      const t = convexTest(schema, modules);
+      await seedCourseWithStory(t);
 
-    await expectFeedbackRejection(
-      t.mutation(
-        api.storyFeedback.submitStoryFeedback,
-        feedbackArgs(overrides),
-      ),
-      "INVALID_REQUEST",
-      error,
-    );
-  });
+      await expectFeedbackRejection(
+        t.mutation(
+          api.storyFeedback.submitStoryFeedback,
+          feedbackArgs(overrides),
+        ),
+        "INVALID_REQUEST",
+        error,
+      );
+    },
+  );
 
   test("comment validation returns a correctable rejection", async () => {
     const t = convexTest(schema, modules);
@@ -243,25 +246,25 @@ describe("submitStoryFeedback", () => {
     });
   });
 
-  test.each([
-    "ios",
-    "android",
-  ] as const)("stores the %s submitting client platform", async (source) => {
-    const t = convexTest(schema, modules);
-    await seedCourseWithStory(t);
+  test.each(["ios", "android"] as const)(
+    "stores the %s submitting client platform",
+    async (source) => {
+      const t = convexTest(schema, modules);
+      await seedCourseWithStory(t);
 
-    await t.mutation(
-      api.storyFeedback.submitStoryFeedback,
-      feedbackArgs({ source }),
-    );
+      await t.mutation(
+        api.storyFeedback.submitStoryFeedback,
+        feedbackArgs({ source }),
+      );
 
-    await t.run(async (ctx) => {
-      const report = await ctx.db.query("story_feedback_reports").unique();
-      expect(report).not.toBeNull();
-      if (!report) return;
-      expect(report.source).toBe(source);
-    });
-  });
+      await t.run(async (ctx) => {
+        const report = await ctx.db.query("story_feedback_reports").unique();
+        expect(report).not.toBeNull();
+        if (!report) return;
+        expect(report.source).toBe(source);
+      });
+    },
+  );
 
   test("accepts legacy clients that do not send a platform", async () => {
     const t = convexTest(schema, modules);
