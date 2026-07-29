@@ -75,6 +75,9 @@ export async function generateMetadata({
       title,
       description,
       robots: { index: false, follow: false },
+      // Explicit null: otherwise the story layout's site-root canonical is
+      // inherited, and noindex pages would claim the homepage as canonical.
+      alternates: { canonical: null },
       keywords: [
         storyMeta.learning_language_long,
         storyMeta.from_language_long,
