@@ -3,7 +3,7 @@ import type { Token } from "./HintTextTokens";
 export const UNDERLINE_EDGE_INSET = 2;
 export const UNDERLINE_DOT_RADIUS = 1.2;
 export const UNDERLINE_DOT_GAP = 7;
-export const UNDERLINE_HINT_EDGE_INSET = UNDERLINE_DOT_GAP;
+export const UNDERLINE_HINT_EDGE_INSET = UNDERLINE_DOT_GAP / 2;
 export const HINT_SPLIT_MARKER = "\u2060";
 export const UNDERLINE_BASELINE_GAP = 4;
 export const UNDERLINE_BOTTOM_INSET = 2;

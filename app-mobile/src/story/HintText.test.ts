@@ -3,6 +3,7 @@ import { buildHintTextTokens } from "./HintTextTokens";
 import {
   buildUnderlineSegments,
   splitNativeTokenParts,
+  UNDERLINE_DOT_GAP,
   UNDERLINE_HINT_EDGE_INSET,
 } from "./HintTextUnderline";
 
@@ -75,7 +76,7 @@ describe("native hint underlines", () => {
     ]);
   });
 
-  test("keeps a visible gap between adjacent hinted native underline pieces", () => {
+  test("keeps a one-dot gap between adjacent hinted native underline pieces", () => {
     const underlines = buildUnderlineSegments({
       computedSegments: [
         hintedSegment({ key: "wasi", x: 100, width: 80, group: "hint:0" }),
@@ -95,9 +96,10 @@ describe("native hint underlines", () => {
     });
 
     expect(underlines).toHaveLength(2);
-    expect(underlines[1]!.x1 - underlines[0]!.x2).toBe(
-      UNDERLINE_HINT_EDGE_INSET * 2,
+    expect(underlines[1]!.x1 - underlines[0]!.x2).toBeCloseTo(
+      UNDERLINE_DOT_GAP,
     );
+    expect(UNDERLINE_HINT_EDGE_INSET * 2).toBe(UNDERLINE_DOT_GAP);
   });
 
   test("keeps hidden challenge native underline pieces continuous", () => {
