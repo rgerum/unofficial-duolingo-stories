@@ -76,3 +76,9 @@ export function findNextMatchingAlignedWord<
   }
   return null;
 }
+
+export function keepLexicalAlignedWords<T extends { normalized: string }>(
+  alignedWords: T[],
+) {
+  return alignedWords.filter((word) => word.normalized.length > 0);
+}

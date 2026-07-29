@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   findNextMatchingAlignedWord,
+  keepLexicalAlignedWords,
   selectLatestSuccessfulStoryRuns,
   validateAlignmentAudioFile,
   validateAlignmentArtifactStoryIds,
@@ -71,6 +72,29 @@ test("a mismatched aligner token is not accepted as a fallback match", () => {
       0,
     ),
     null,
+  );
+});
+
+test("punctuation-only aligner segments are ignored before warning checks", () => {
+  assert.deepEqual(
+    keepLexicalAlignedWords([
+      { word: "dig", normalized: "dig", startMs: 700 },
+      { word: "…", normalized: "", startMs: 800 },
+    ]),
+    [{ word: "dig", normalized: "dig", startMs: 700 }],
+  );
+});
+
+test("lexical aligner segments remain available to mismatch warnings", () => {
+  assert.deepEqual(
+    keepLexicalAlignedWords([
+      { word: "dig", normalized: "dig", startMs: 700 },
+      { word: "ekstra", normalized: "ekstra", startMs: 800 },
+    ]),
+    [
+      { word: "dig", normalized: "dig", startMs: 700 },
+      { word: "ekstra", normalized: "ekstra", startMs: 800 },
+    ],
   );
 });
 
