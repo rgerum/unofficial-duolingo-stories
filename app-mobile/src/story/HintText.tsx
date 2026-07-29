@@ -21,6 +21,7 @@ import { HintLookupContext, HintPopupContext } from "./HintPopup";
 import { buildHintTextTokens, type Token } from "./HintTextTokens";
 import {
   buildUnderlineSegments,
+  getDottedUnderlineDotCenters,
   HINT_SPLIT_MARKER,
   splitNativeTokenParts,
   UNDERLINE_BASELINE_GAP,
@@ -862,16 +863,11 @@ function NativeHintOverlay({
         underlineSegments.map((segment) => (
           <React.Fragment key={segment.key}>
             {segment.dotted ? (
-              Array.from({
-                length: Math.max(
-                  1,
-                  Math.floor((segment.x2 - segment.x1) / UNDERLINE_DOT_GAP) + 1,
-                ),
-              }).map((_, index) => {
-                const cx = Math.min(
-                  segment.x2,
-                  segment.x1 + index * UNDERLINE_DOT_GAP,
-                );
+              getDottedUnderlineDotCenters({
+                x1: segment.x1,
+                x2: segment.x2,
+                dotGap: UNDERLINE_DOT_GAP,
+              }).map((cx, index) => {
                 return (
                   <Circle
                     key={`${segment.key}:${index}`}

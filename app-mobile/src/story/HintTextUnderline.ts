@@ -5,7 +5,7 @@ export const UNDERLINE_DOT_RADIUS = 1.2;
 export const UNDERLINE_DOT_GAP = 7;
 export const UNDERLINE_HINT_EDGE_INSET = UNDERLINE_DOT_GAP / 2;
 export const HINT_SPLIT_MARKER = "\u2060";
-export const UNDERLINE_BASELINE_GAP = 4;
+export const UNDERLINE_BASELINE_GAP = 5;
 export const UNDERLINE_BOTTOM_INSET = 2;
 
 export type NativeTokenPart = {
@@ -46,6 +46,26 @@ export type UnderlineColors = {
   border: string;
   hiddenUnderline: string;
 };
+
+export function getDottedUnderlineDotCenters({
+  x1,
+  x2,
+  dotGap = UNDERLINE_DOT_GAP,
+}: {
+  x1: number;
+  x2: number;
+  dotGap?: number;
+}): number[] {
+  const width = Math.max(0, x2 - x1);
+  const dotCount = Math.max(1, Math.floor(width / dotGap) + 1);
+  const dotSpan = (dotCount - 1) * dotGap;
+  const startX = x1 + (width - dotSpan) / 2;
+
+  return Array.from(
+    { length: dotCount },
+    (_, index) => startX + index * dotGap,
+  );
+}
 
 export function splitNativeTokenParts({
   token,

@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import { buildHintTextTokens } from "./HintTextTokens";
 import {
   buildUnderlineSegments,
+  getDottedUnderlineDotCenters,
   splitNativeTokenParts,
   UNDERLINE_DOT_GAP,
   UNDERLINE_HINT_EDGE_INSET,
@@ -100,6 +101,19 @@ describe("native hint underlines", () => {
       UNDERLINE_DOT_GAP,
     );
     expect(UNDERLINE_HINT_EDGE_INSET * 2).toBe(UNDERLINE_DOT_GAP);
+  });
+
+  test("centers dotted underlines within their drawable span", () => {
+    const dots = getDottedUnderlineDotCenters({
+      x1: 103.5,
+      x2: 176.5,
+      dotGap: UNDERLINE_DOT_GAP,
+    });
+
+    expect(dots).toHaveLength(11);
+    expect(dots[0]).toBeCloseTo(105);
+    expect(dots.at(-1)).toBeCloseTo(175);
+    expect(dots[0]! - 103.5).toBeCloseTo(176.5 - dots.at(-1)!);
   });
 
   test("keeps hidden challenge native underline pieces continuous", () => {
