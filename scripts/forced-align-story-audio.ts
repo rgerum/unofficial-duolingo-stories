@@ -14,6 +14,11 @@ import type { Avatar } from "../src/app/editor/story/[story]/types";
 import { timings_to_text } from "../src/lib/editor/audio/audio_edit_tools";
 import { findNextMatchingAlignedWord } from "./lib/forced-alignment-safety";
 import { getAudioBackedStoryItems } from "./lib/forced-alignment-story-items";
+import {
+  getAlignmentText,
+  getAlignmentWordTokens,
+  normalizeAlignmentWord,
+} from "./lib/forced-alignment-text";
 
 const DEFAULT_AUDIO_BASE_URL =
   "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/";
@@ -63,13 +68,6 @@ type AlignableItem = {
   filename: string;
   ssml: Audio["ssml"];
   existingKeypoints: { rangeEnd: number; audioStart: number }[];
-};
-
-type WordToken = {
-  text: string;
-  normalized: string;
-  start: number;
-  end: number;
 };
 
 type AlignedWord = {
@@ -295,7 +293,7 @@ async function readAlignedWords(jsonPath: string) {
     return [
       {
         word,
-        normalized: normalizeWord(word),
+        normalized: normalizeAlignmentWord(word),
         startMs: toMilliseconds(start),
         endMs: end === undefined ? undefined : toMilliseconds(end),
       },
@@ -335,7 +333,7 @@ function collectWordCandidates(value: unknown): Record<string, unknown>[] {
 }
 
 function buildAlignmentResult(item: AlignableItem, alignedWords: AlignedWord[]) {
-  const tokens = getWordTokens(item.text);
+  const tokens = getAlignmentWordTokens(item.text);
   const warnings: string[] = [];
   const keypoints: { rangeEnd: number; audioStart: number }[] = [];
   let alignedIndex = 0;
@@ -379,40 +377,6 @@ function buildAlignmentResult(item: AlignableItem, alignedWords: AlignedWord[]) 
     }),
     warnings,
   } satisfies AlignmentResult;
-}
-
-function getWordTokens(text: string) {
-  const tokens: WordToken[] = [];
-  const regex = /[\p{L}\p{N}]+(?:['’.-][\p{L}\p{N}]+)*/gu;
-  for (const match of text.matchAll(regex)) {
-    const word = match[0];
-    const start = match.index ?? 0;
-    const normalized = normalizeWord(word);
-    if (!normalized) continue;
-    tokens.push({
-      text: word,
-      normalized,
-      start,
-      end: start + word.length,
-    });
-  }
-  return tokens;
-}
-
-function getAlignmentText(text: string) {
-  const tokens = getWordTokens(text).map((token) => token.normalized);
-  if (tokens.length > 0) return tokens.join(" ");
-  return normalizeWord(text);
-}
-
-function normalizeWord(word: string) {
-  return word
-    .toLocaleLowerCase("da-DK")
-    .normalize("NFKC")
-    .replace(/æ/g, "ae")
-    .replace(/ø/g, "o")
-    .replace(/å/g, "a")
-    .replace(/[^\p{L}\p{N}]+/gu, "");
 }
 
 function applyTimingUpdates(
