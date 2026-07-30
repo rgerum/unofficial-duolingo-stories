@@ -85,23 +85,25 @@ describe("native hint underlines", () => {
           ...hintedSegment({
             key: "joiner",
             x: 180,
-            width: 0,
+            width: 4.5,
             group: undefined,
           }),
           text: "\u2060",
           hint: undefined,
         },
-        hintedSegment({ key: "pim", x: 180, width: 60, group: "hint:1" }),
+        hintedSegment({ key: "pim", x: 184.5, width: 60, group: "hint:1" }),
       ],
       colors: { border: "#ccd6dd", hiddenUnderline: "#ccd6dd" },
     });
 
     expect(underlines).toHaveLength(2);
-    expect(underlines[1]!.x1 - underlines[0]!.x2).toBeCloseTo(
-      UNDERLINE_DOT_GAP,
-    );
     expect(underlines[0]!.dotAnchor).toBe("end");
     expect(underlines[1]!.dotAnchor).toBe("start");
+    expect(underlines[0]!.dotAnchorBoundary).toBe(180);
+    expect(underlines[1]!.dotAnchorBoundary).toBe(180);
+    expect(underlines[1]!.x1 - underlines[0]!.x2).toBeGreaterThan(
+      UNDERLINE_DOT_GAP,
+    );
     expect(UNDERLINE_HINT_EDGE_INSET * 2).toBe(UNDERLINE_DOT_GAP);
   });
 
@@ -112,13 +114,15 @@ describe("native hint underlines", () => {
       dotGap: UNDERLINE_DOT_GAP,
       edgeInset: UNDERLINE_HINT_EDGE_INSET,
       anchor: "end",
+      anchorBoundary: 180,
     });
     const right = getDottedUnderlineDotCenters({
-      x1: 183.5,
-      x2: 236.5,
+      x1: 188,
+      x2: 241,
       dotGap: UNDERLINE_DOT_GAP,
       edgeInset: UNDERLINE_HINT_EDGE_INSET,
       anchor: "start",
+      anchorBoundary: 180,
     });
 
     expect(left.at(-1)).toBeCloseTo(173);

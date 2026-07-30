@@ -872,6 +872,7 @@ function NativeHintOverlay({
                 dotGap: UNDERLINE_DOT_GAP,
                 edgeInset: UNDERLINE_HINT_EDGE_INSET,
                 anchor: segment.dotAnchor,
+                anchorBoundary: segment.dotAnchorBoundary,
               }).map((cx, index) => {
                 return (
                   <Circle
