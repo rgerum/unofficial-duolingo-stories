@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
@@ -222,5 +222,31 @@ describe("getPublicCourseList publicSince", () => {
     const list = await t.query(api.landing.getPublicCourseList, {});
     expect(list).toHaveLength(1);
     expect(list[0].publicSince).toBe(12345);
+  });
+});
+
+describe("backfillPublicSince", () => {
+  test("fills only public courses missing a value; never overwrites", async () => {
+    const t = convexTest(schema, modules);
+    await seedLanguages(t);
+    await seedCourse(t, { isPublic: true }); // es-en, no publicSince
+
+    const result = await t.mutation(internal.adminWrite.backfillPublicSince, {
+      entries: [
+        { short: "es-en", publicSince: 1_600_000_000_000 },
+        { short: "missing-xx", publicSince: 1 },
+      ],
+    });
+    expect(result.updated).toEqual(["es-en"]);
+    expect(result.skipped).toEqual(["missing-xx"]);
+    expect((await getCourse(t)).publicSince).toBe(1_600_000_000_000);
+
+    // Re-running must not overwrite the now-present value.
+    const again = await t.mutation(internal.adminWrite.backfillPublicSince, {
+      entries: [{ short: "es-en", publicSince: 42 }],
+    });
+    expect(again.updated).toEqual([]);
+    expect(again.skipped).toEqual(["es-en"]);
+    expect((await getCourse(t)).publicSince).toBe(1_600_000_000_000);
   });
 });
