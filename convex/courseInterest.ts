@@ -1,10 +1,10 @@
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import {
-  mutation,
-  query,
   type MutationCtx,
+  mutation,
   type QueryCtx,
+  query,
 } from "./_generated/server";
 import {
   getSessionLegacyUserId,
@@ -16,12 +16,9 @@ const ANONYMOUS_ID_PATTERN = /^[a-zA-Z0-9_-]{16,100}$/;
 const BROWSER_SIGNAL_WINDOW_MS = 60 * 60 * 1000;
 const MAX_BROWSER_SIGNALS_PER_COURSE_PER_WINDOW = 30;
 const MAX_COMPLETION_ROWS_PER_COURSE = 500;
-const MAX_LEGACY_SIGNALS_PER_COURSE = 500;
 
 type ReadCtx = QueryCtx | MutationCtx;
 type InterestSignal = Doc<"course_interest_signals">;
-type InterestStats = Doc<"course_interest_stats">;
-type SupporterKind = "browser" | "account";
 
 const learnerInterestValidator = v.union(
   v.object({
@@ -53,15 +50,6 @@ type StatsDelta = {
   completedAll: number;
 };
 
-type NormalizedStats = {
-  document: InterestStats | null;
-  browserCount: number;
-  authenticatedCount: number;
-  completedAllCount: number;
-  browserWindowStartedAt: number;
-  browserAddsInWindow: number;
-};
-
 function anonymousSupporterKey(anonymousId: string) {
   if (!ANONYMOUS_ID_PATTERN.test(anonymousId)) {
     throw new Error("Invalid anonymous supporter identifier.");
@@ -71,20 +59,6 @@ function anonymousSupporterKey(anonymousId: string) {
 
 function accountSupporterKey(legacyUserId: number) {
   return `user:${legacyUserId}`;
-}
-
-function getSignalKind(signal: InterestSignal): SupporterKind {
-  return (
-    signal.supporterKind ??
-    (signal.supporterKey.startsWith("user:") ? "account" : "browser")
-  );
-}
-
-function getSignalCompletedAllAt(signal: InterestSignal) {
-  return (
-    signal.completedAllAvailableStoriesAt ??
-    (signal.completedAllAtSignal ? signal.createdAt : undefined)
-  );
 }
 
 async function getSupporterKeys(
@@ -166,59 +140,12 @@ async function getStats(ctx: ReadCtx, courseId: Id<"courses">) {
     .unique();
 }
 
-async function getNormalizedStats(
-  ctx: ReadCtx,
-  courseId: Id<"courses">,
-): Promise<NormalizedStats> {
-  const document = await getStats(ctx, courseId);
+function assertBrowserSignalAllowance(
+  stats: Doc<"course_interest_stats"> | null,
+  now: number,
+) {
   if (
-    document &&
-    document.browserCount !== undefined &&
-    document.authenticatedCount !== undefined &&
-    document.browserWindowStartedAt !== undefined &&
-    document.browserAddsInWindow !== undefined
-  ) {
-    return {
-      document,
-      browserCount: document.browserCount,
-      authenticatedCount: document.authenticatedCount,
-      completedAllCount: document.completedAllCount,
-      browserWindowStartedAt: document.browserWindowStartedAt,
-      browserAddsInWindow: document.browserAddsInWindow,
-    };
-  }
-
-  const signals = await ctx.db
-    .query("course_interest_signals")
-    .withIndex("by_course_id", (q) => q.eq("courseId", courseId))
-    .take(MAX_LEGACY_SIGNALS_PER_COURSE + 1);
-  if (signals.length > MAX_LEGACY_SIGNALS_PER_COURSE) {
-    throw new Error(
-      `Course ${courseId} has too many legacy interest signals to normalize.`,
-    );
-  }
-
-  let browserCount = 0;
-  let authenticatedCount = 0;
-  let completedAllCount = 0;
-  for (const signal of signals) {
-    if (getSignalKind(signal) === "account") authenticatedCount += 1;
-    else browserCount += 1;
-    if (getSignalCompletedAllAt(signal) !== undefined) completedAllCount += 1;
-  }
-
-  return {
-    document,
-    browserCount,
-    authenticatedCount,
-    completedAllCount,
-    browserWindowStartedAt: document?.updatedAt ?? Date.now(),
-    browserAddsInWindow: 0,
-  };
-}
-
-function assertBrowserSignalAllowance(stats: NormalizedStats, now: number) {
-  if (
+    stats &&
     now - stats.browserWindowStartedAt < BROWSER_SIGNAL_WINDOW_MS &&
     stats.browserAddsInWindow >= MAX_BROWSER_SIGNALS_PER_COURSE_PER_WINDOW
   ) {
@@ -234,36 +161,30 @@ async function applyStatsDelta(
   delta: StatsDelta,
   options: { consumeBrowserAllowance?: boolean } = {},
 ) {
-  const stats = await getNormalizedStats(ctx, courseId);
-  const existing = stats.document;
+  const existing = await getStats(ctx, courseId);
   const now = Date.now();
   if (options.consumeBrowserAllowance) {
-    assertBrowserSignalAllowance(stats, now);
+    assertBrowserSignalAllowance(existing, now);
   }
 
   const windowExpired =
-    now - stats.browserWindowStartedAt >= BROWSER_SIGNAL_WINDOW_MS;
+    !existing ||
+    now - existing.browserWindowStartedAt >= BROWSER_SIGNAL_WINDOW_MS;
   const browserWindowStartedAt = windowExpired
     ? now
-    : stats.browserWindowStartedAt;
+    : existing.browserWindowStartedAt;
   const browserAddsInWindow = options.consumeBrowserAllowance
     ? windowExpired
       ? 1
-      : stats.browserAddsInWindow + 1
-    : stats.browserAddsInWindow;
+      : (existing?.browserAddsInWindow ?? 0) + 1
+    : (existing?.browserAddsInWindow ?? 0);
 
   if (!existing) {
     await ctx.db.insert("course_interest_stats", {
       courseId,
-      browserCount: Math.max(0, stats.browserCount + delta.browser),
-      authenticatedCount: Math.max(
-        0,
-        stats.authenticatedCount + delta.authenticated,
-      ),
-      completedAllCount: Math.max(
-        0,
-        stats.completedAllCount + delta.completedAll,
-      ),
+      browserCount: Math.max(0, delta.browser),
+      authenticatedCount: Math.max(0, delta.authenticated),
+      completedAllCount: Math.max(0, delta.completedAll),
       browserWindowStartedAt,
       browserAddsInWindow,
       updatedAt: now,
@@ -272,14 +193,14 @@ async function applyStatsDelta(
   }
 
   await ctx.db.patch(existing._id, {
-    browserCount: Math.max(0, stats.browserCount + delta.browser),
+    browserCount: Math.max(0, existing.browserCount + delta.browser),
     authenticatedCount: Math.max(
       0,
-      stats.authenticatedCount + delta.authenticated,
+      existing.authenticatedCount + delta.authenticated,
     ),
     completedAllCount: Math.max(
       0,
-      stats.completedAllCount + delta.completedAll,
+      existing.completedAllCount + delta.completedAll,
     ),
     browserWindowStartedAt,
     browserAddsInWindow,
@@ -289,9 +210,9 @@ async function applyStatsDelta(
 
 function signalStatsDelta(signal: InterestSignal, direction: 1 | -1) {
   return {
-    browser: getSignalKind(signal) === "browser" ? direction : 0,
-    authenticated: getSignalKind(signal) === "account" ? direction : 0,
-    completedAll: getSignalCompletedAllAt(signal) !== undefined ? direction : 0,
+    browser: signal.supporterKind === "browser" ? direction : 0,
+    authenticated: signal.supporterKind === "account" ? direction : 0,
+    completedAll: signal.completedAllAvailableStoriesAt ? direction : 0,
   };
 }
 
@@ -305,18 +226,18 @@ export async function maybeQualifyCourseInterestSignal(
     courseId,
     accountSupporterKey(legacyUserId),
   );
-  if (!signal || getSignalCompletedAllAt(signal) !== undefined) return;
+  if (!signal || signal.completedAllAvailableStoriesAt) return;
   if (!(await hasCompletedAllVisibleStories(ctx, courseId, legacyUserId))) {
     return;
   }
 
+  await ctx.db.patch(signal._id, {
+    completedAllAvailableStoriesAt: Date.now(),
+  });
   await applyStatsDelta(ctx, courseId, {
     browser: 0,
     authenticated: 0,
     completedAll: 1,
-  });
-  await ctx.db.patch(signal._id, {
-    completedAllAvailableStoriesAt: Date.now(),
   });
 }
 
@@ -340,7 +261,7 @@ export const getForLearner = query({
     return {
       interested: signal !== null,
       completedAllAvailableStories:
-        signal !== null && getSignalCompletedAllAt(signal) !== undefined,
+        signal?.completedAllAvailableStoriesAt !== undefined,
     };
   },
 });
@@ -371,8 +292,8 @@ export const setForLearner = mutation({
 
     if (!args.interested) {
       for (const signal of existingSignals) {
-        await applyStatsDelta(ctx, course._id, signalStatsDelta(signal, -1));
         await ctx.db.delete(signal._id);
+        await applyStatsDelta(ctx, course._id, signalStatsDelta(signal, -1));
       }
       return {
         interested: false,
@@ -388,39 +309,38 @@ export const setForLearner = mutation({
     if (primarySignal) {
       if (
         completedAllAvailableStories &&
-        getSignalCompletedAllAt(primarySignal) === undefined
+        !primarySignal.completedAllAvailableStoriesAt
       ) {
+        await ctx.db.patch(primarySignal._id, {
+          completedAllAvailableStoriesAt: now,
+        });
         await applyStatsDelta(ctx, course._id, {
           browser: 0,
           authenticated: 0,
           completedAll: 1,
         });
-        await ctx.db.patch(primarySignal._id, {
-          completedAllAvailableStoriesAt: now,
-        });
       }
       if (anonymousSignal) {
+        await ctx.db.delete(anonymousSignal._id);
         await applyStatsDelta(
           ctx,
           course._id,
           signalStatsDelta(anonymousSignal, -1),
         );
-        await ctx.db.delete(anonymousSignal._id);
       }
     } else if (anonymousSignal) {
       const alreadyQualified =
-        getSignalCompletedAllAt(anonymousSignal) !== undefined;
-      await applyStatsDelta(ctx, course._id, {
-        browser: -1,
-        authenticated: 1,
-        completedAll: completedAllAvailableStories && !alreadyQualified ? 1 : 0,
-      });
+        anonymousSignal.completedAllAvailableStoriesAt !== undefined;
       await ctx.db.patch(anonymousSignal._id, {
         supporterKey: keys.primaryKey,
         supporterKind: keys.primaryKind,
         completedAllAvailableStoriesAt:
-          getSignalCompletedAllAt(anonymousSignal) ??
-          (completedAllAvailableStories ? now : undefined),
+          alreadyQualified || completedAllAvailableStories ? now : undefined,
+      });
+      await applyStatsDelta(ctx, course._id, {
+        browser: -1,
+        authenticated: 1,
+        completedAll: completedAllAvailableStories && !alreadyQualified ? 1 : 0,
       });
     } else {
       await applyStatsDelta(
@@ -448,10 +368,8 @@ export const setForLearner = mutation({
       interested: true,
       completedAllAvailableStories:
         completedAllAvailableStories ||
-        (primarySignal !== null &&
-          getSignalCompletedAllAt(primarySignal) !== undefined) ||
-        (anonymousSignal !== null &&
-          getSignalCompletedAllAt(anonymousSignal) !== undefined),
+        primarySignal?.completedAllAvailableStoriesAt !== undefined ||
+        anonymousSignal?.completedAllAvailableStoriesAt !== undefined,
     };
   },
 });
@@ -465,11 +383,11 @@ export const getForEditor = query({
     await requireContributorOrAdmin(ctx);
     const course = await getCourseByShort(ctx, args.courseIdentifier);
     if (!course) return null;
-    const stats = await getNormalizedStats(ctx, course._id);
+    const stats = await getStats(ctx, course._id);
     return {
-      browserCount: stats.browserCount,
-      authenticatedCount: stats.authenticatedCount,
-      completedAllCount: stats.completedAllCount,
+      browserCount: stats?.browserCount ?? 0,
+      authenticatedCount: stats?.authenticatedCount ?? 0,
+      completedAllCount: stats?.completedAllCount ?? 0,
     };
   },
 });

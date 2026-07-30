@@ -226,27 +226,18 @@ export default defineSchema({
   course_interest_signals: defineTable({
     courseId: v.id("courses"),
     supporterKey: v.string(),
-    supporterKind: v.optional(
-      v.union(v.literal("browser"), v.literal("account")),
-    ),
+    supporterKind: v.union(v.literal("browser"), v.literal("account")),
     completedAllAvailableStoriesAt: v.optional(v.number()),
-    // Temporary compatibility with documents created by the first release.
-    completedAllAtSignal: v.optional(v.boolean()),
     createdAt: v.number(),
-  })
-    .index("by_course_id", ["courseId"])
-    .index("by_course_id_and_supporter_key", ["courseId", "supporterKey"]),
+  }).index("by_course_id_and_supporter_key", ["courseId", "supporterKey"]),
 
   course_interest_stats: defineTable({
     courseId: v.id("courses"),
-    browserCount: v.optional(v.number()),
-    authenticatedCount: v.optional(v.number()),
+    browserCount: v.number(),
+    authenticatedCount: v.number(),
     completedAllCount: v.number(),
-    browserWindowStartedAt: v.optional(v.number()),
-    browserAddsInWindow: v.optional(v.number()),
-    // Temporary compatibility with documents created by the first release.
-    totalCount: v.optional(v.number()),
-    lastSignalAt: v.optional(v.union(v.number(), v.null())),
+    browserWindowStartedAt: v.number(),
+    browserAddsInWindow: v.number(),
     updatedAt: v.number(),
   }).index("by_course_id", ["courseId"]),
 
