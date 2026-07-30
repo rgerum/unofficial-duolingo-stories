@@ -31,6 +31,7 @@ import type {
   DetailedCourseProps,
   StoryListDataProps,
 } from "@/app/editor/(course)/types";
+import CourseInterestSummary from "./course_interest_summary";
 
 type StoryState = "draft" | "feedback" | "finished" | "published";
 type StoryFilter = "all" | StoryState;
@@ -208,6 +209,7 @@ export default function EditList({
           />
         </div>
       </div>
+      <CourseInterestSummary courseIdentifier={course.short} />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="w-full min-w-[220px] flex-1 min-[860px]:max-w-[360px]">
           <Input

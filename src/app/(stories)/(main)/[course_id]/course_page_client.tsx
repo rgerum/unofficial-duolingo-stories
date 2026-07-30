@@ -9,6 +9,7 @@ import get_localisation_func from "@/lib/get_localisation_func";
 import ContributorList from "@/components/ContributorList";
 import Switch from "@/components/ui/switch";
 import { hasNoAudioCourseTag } from "@/lib/course-tags";
+import CourseInterestCard from "./course_interest_card";
 
 function SetTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -190,6 +191,10 @@ export default function CoursePageClient({
   const rawTags = course.tags ?? [];
   const normalizedTags = rawTags.map((tag) => tag.trim().toLowerCase());
   const showNoNativeWarning = normalizedTags.includes("no-native");
+  const completedAllStories =
+    course.stories.length > 0 &&
+    course.stories.every((story) => doneMap[story.id] === true);
+  const languageName = course.name || course.learning_language_name;
 
   return (
     <>
@@ -273,6 +278,11 @@ export default function CoursePageClient({
             ))}
           </SetGrid>
         ))}
+        <CourseInterestCard
+          courseShort={course_id}
+          languageName={languageName}
+          completedAll={completedAllStories}
+        />
       </div>
     </>
   );

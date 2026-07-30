@@ -6,6 +6,7 @@ import {
   getSessionLegacyUserId,
   requireSessionLegacyUserId,
 } from "./lib/authorization";
+import { maybeQualifyCourseInterestSignal } from "./courseInterest";
 
 const storyDoneInputValidator = v.object({
   legacyStoryId: v.number(),
@@ -108,6 +109,11 @@ export const recordStoryDone = mutation({
           legacyCourseId: course.legacyId,
           lastDoneAt: doneAt,
         });
+        await maybeQualifyCourseInterestSignal(
+          ctx,
+          story.courseId,
+          legacyUserId,
+        );
       }
     }
 

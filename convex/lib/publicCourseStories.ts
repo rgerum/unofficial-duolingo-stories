@@ -21,7 +21,7 @@ export type PublicCourseStory = {
  * they can never drift apart and start linking to unpublished stories.
  */
 export async function listPublicCourseStories(
-  ctx: QueryCtx,
+  ctx: Pick<QueryCtx, "db">,
   courseId: Id<"courses">,
 ): Promise<PublicCourseStory[]> {
   const stories = await ctx.db

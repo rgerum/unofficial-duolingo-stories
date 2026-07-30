@@ -223,6 +223,24 @@ export default defineSchema({
     .index("by_user_and_course", ["legacyUserId", "courseId"])
     .index("by_user_and_last_done_at", ["legacyUserId", "lastDoneAt"]),
 
+  course_interest_signals: defineTable({
+    courseId: v.id("courses"),
+    supporterKey: v.string(),
+    supporterKind: v.union(v.literal("browser"), v.literal("account")),
+    completedAllAvailableStoriesAt: v.optional(v.number()),
+    createdAt: v.number(),
+  }).index("by_course_id_and_supporter_key", ["courseId", "supporterKey"]),
+
+  course_interest_stats: defineTable({
+    courseId: v.id("courses"),
+    browserCount: v.number(),
+    authenticatedCount: v.number(),
+    completedAllCount: v.number(),
+    browserWindowStartedAt: v.number(),
+    browserAddsInWindow: v.number(),
+    updatedAt: v.number(),
+  }).index("by_course_id", ["courseId"]),
+
   user_preferences: defineTable({
     tokenIdentifier: v.string(),
     legacyUserId: v.optional(v.number()),
