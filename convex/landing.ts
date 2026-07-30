@@ -456,7 +456,9 @@ export const getPublicCoursePageData = query({
       count: course.count ?? 0,
       about: course.about ?? "",
       tags: course.tags ?? [],
-      publicSince: course.publicSince,
+      // publicSince is intentionally NOT returned here: no public UI shows it
+      // (old courses have no value, so a visible date would look inconsistent).
+      // It stays in getPublicCourseList as data-only for the Control Center.
       from_language: legacyFromLanguageId,
       fromLanguageId: course.fromLanguageId as Id<"languages">,
       from_language_name: fromLanguageName,
