@@ -15,6 +15,8 @@ export default function CourseInterestSummary({
   );
 
   if (!courseIdentifier || stats === undefined) return null;
+  const totalCount =
+    (stats?.authenticatedCount ?? 0) + (stats?.browserCount ?? 0);
 
   return (
     <section className="my-6 rounded-2xl border-2 border-[#8fd55c] bg-[#f6ffef] p-5 dark:border-[#416f31] dark:bg-[#20301d]">
@@ -26,12 +28,14 @@ export default function CourseInterestSummary({
           <h2 className="text-[calc(19/16*1rem)] font-bold">
             Learner interest
           </h2>
-          {stats?.totalCount ? (
+          {stats && totalCount > 0 ? (
             <>
               <p className="mt-1 text-[calc(17/16*1rem)]">
-                <strong>{stats.totalCount}</strong>{" "}
-                {stats.totalCount === 1 ? "learner wants" : "learners want"}{" "}
-                more stories in this course.
+                <strong>{stats.authenticatedCount}</strong>{" "}
+                {stats.authenticatedCount === 1
+                  ? "signed-in learner wants"
+                  : "signed-in learners want"}{" "}
+                more stories.
               </p>
               {stats.completedAllCount > 0 ? (
                 <p className="mt-2 flex items-center gap-2 text-[calc(14/16*1rem)] text-[var(--text-color-dim)]">
@@ -40,8 +44,19 @@ export default function CourseInterestSummary({
                     aria-hidden="true"
                   />
                   {stats.completedAllCount}{" "}
-                  {stats.completedAllCount === 1 ? "has" : "have"} completed
-                  every published story.
+                  {stats.completedAllCount === 1
+                    ? "learner finished"
+                    : "learners finished"}{" "}
+                  all available stories before asking for more.
+                </p>
+              ) : null}
+              {stats.browserCount > 0 ? (
+                <p className="mt-2 text-[calc(14/16*1rem)] text-[var(--text-color-dim)]">
+                  Plus {stats.browserCount} additional{" "}
+                  {stats.browserCount === 1
+                    ? "browser signal"
+                    : "browser signals"}
+                  .
                 </p>
               ) : null}
             </>

@@ -37,7 +37,6 @@ export default function CourseInterestCard({
   }, [courseShort]);
 
   const interested = interest?.interested ?? false;
-  const totalCount = interest?.totalCount ?? 0;
 
   async function toggleInterest() {
     if (!anonymousId || isSaving) return;
@@ -97,15 +96,8 @@ export default function CourseInterestCard({
             ? "I’m interested"
             : "I’d love more stories"}
       </button>
-      {totalCount > 0 ? (
-        <p className="mt-4 text-[calc(14/16*1rem)] font-bold text-[#4f861f] dark:text-[#9bdc73]">
-          {interested ? "You’re " : ""}
-          {interested ? `one of ${totalCount}` : totalCount}{" "}
-          {totalCount === 1 ? "learner" : "learners"} hoping for more.
-        </p>
-      ) : null}
       {interested ? (
-        <p className="mt-1 text-[calc(13/16*1rem)] text-[var(--text-color-dim)]">
+        <p className="mt-4 text-[calc(13/16*1rem)] text-[var(--text-color-dim)]">
           We’ll share this interest with the contributor team.
         </p>
       ) : null}
