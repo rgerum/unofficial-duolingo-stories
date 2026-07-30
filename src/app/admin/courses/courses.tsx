@@ -22,6 +22,7 @@ interface CourseProps {
   learning_language: number;
   from_language: number;
   public: boolean;
+  publicSince?: number;
   official: boolean;
   name: string | null;
   about: string | null;
@@ -397,9 +398,21 @@ function TableRow({
         <FlagName lang={course.from_language} languages={languages} />
       </td>
       <td className="px-3 py-2.5 text-center">
-        <span className={course.public ? statusYesClass : statusNoClass}>
+        <span
+          className={course.public ? statusYesClass : statusNoClass}
+          title={
+            course.publicSince !== undefined
+              ? `Public since ${new Date(course.publicSince).toISOString().slice(0, 10)}`
+              : undefined
+          }
+        >
           {course.public ? "Yes" : "No"}
         </span>
+        {course.publicSince !== undefined ? (
+          <div className="mt-1 text-xs opacity-60 whitespace-nowrap">
+            {new Date(course.publicSince).toISOString().slice(0, 10)}
+          </div>
+        ) : null}
       </td>
       <td className="px-3 py-2.5">{course.name}</td>
       <td className="px-3 py-2.5 text-center">

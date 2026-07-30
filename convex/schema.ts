@@ -91,6 +91,9 @@ export default defineSchema({
     learningLanguageId: v.id("languages"),
     fromLanguageId: v.id("languages"),
     public: v.boolean(),
+    // Millis of the most recent private→public transition. Unset for courses
+    // that were already public before this field existed.
+    publicSince: v.optional(v.number()),
     official: v.boolean(),
     name: v.optional(v.string()),
     about: v.optional(v.string()),

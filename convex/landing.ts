@@ -11,6 +11,7 @@ const courseListItemValidator = v.object({
   count: v.number(),
   about: v.string(),
   tags: v.array(v.string()),
+  publicSince: v.optional(v.number()),
   from_language: v.number(),
   fromLanguageId: v.id("languages"),
   from_language_name: v.string(),
@@ -120,6 +121,7 @@ export const getPublicCourseList = query({
           count: course.count ?? 0,
           about: course.about ?? "",
           tags: course.tags ?? [],
+          publicSince: course.publicSince,
           from_language:
             legacyLanguageIdByConvexId.get(course.fromLanguageId) ?? 0,
           fromLanguageId: course.fromLanguageId as Id<"languages">,
@@ -140,6 +142,7 @@ export const getPublicCourseList = query({
           count: number;
           about: string;
           tags: string[];
+          publicSince: number | undefined;
           from_language: number;
           fromLanguageId: Id<"languages">;
           from_language_name: string;
@@ -453,6 +456,9 @@ export const getPublicCoursePageData = query({
       count: course.count ?? 0,
       about: course.about ?? "",
       tags: course.tags ?? [],
+      // publicSince is intentionally NOT returned here: no public UI shows it
+      // (old courses have no value, so a visible date would look inconsistent).
+      // It stays in getPublicCourseList as data-only for the Control Center.
       from_language: legacyFromLanguageId,
       fromLanguageId: course.fromLanguageId as Id<"languages">,
       from_language_name: fromLanguageName,

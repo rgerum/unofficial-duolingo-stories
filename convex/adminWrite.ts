@@ -205,6 +205,7 @@ export const updateAdminCourse = mutation({
     learning_language: v.number(),
     from_language: v.number(),
     public: v.boolean(),
+    publicSince: v.optional(v.number()),
     official: v.boolean(),
     name: v.union(v.string(), v.null()),
     about: v.union(v.string(), v.null()),
@@ -244,6 +245,7 @@ export const updateAdminCourse = mutation({
       from_language_name: string;
       short: string;
       public: boolean;
+      publicSince?: number;
       mirrorUpdatedAt: number;
       lastOperationKey: string;
       name?: string;
@@ -264,6 +266,7 @@ export const updateAdminCourse = mutation({
     if (nextAbout !== null) patchData.about = nextAbout;
     patchData.conlang = nextConlang;
     patchData.tags = nextTags;
+    if (nextPublic && !course.public) patchData.publicSince = Date.now();
 
     await ctx.db.patch(course._id, patchData);
     if (hasNoAudioCourseTag(nextTags)) {
@@ -289,6 +292,7 @@ export const updateAdminCourse = mutation({
       learning_language: args.learning_language,
       from_language: args.from_language,
       public: nextPublic,
+      publicSince: patchData.publicSince ?? course.publicSince,
       official: course.official,
       name: nextName,
       about: nextAbout,
@@ -356,6 +360,7 @@ export const createAdminCourse = mutation({
     learning_language: v.number(),
     from_language: v.number(),
     public: v.boolean(),
+    publicSince: v.optional(v.number()),
     official: v.boolean(),
     name: v.union(v.string(), v.null()),
     about: v.union(v.string(), v.null()),
@@ -384,12 +389,14 @@ export const createAdminCourse = mutation({
     const operationKey =
       args.operationKey ?? `course:${legacyId}:admin_create:${Date.now()}`;
 
+    const publicSince = nextPublic ? Date.now() : undefined;
     await ctx.db.insert("courses", {
       legacyId,
       short,
       learningLanguageId: learningLanguage._id,
       fromLanguageId: fromLanguage._id,
       public: nextPublic,
+      publicSince,
       official: nextOfficial !== 0,
       name: nextName ?? undefined,
       about: nextAbout ?? undefined,
@@ -406,6 +413,7 @@ export const createAdminCourse = mutation({
       learning_language: args.learning_language,
       from_language: args.from_language,
       public: nextPublic,
+      publicSince,
       official: nextOfficial !== 0,
       name: nextName,
       about: nextAbout,

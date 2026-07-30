@@ -314,6 +314,12 @@ export const upsertCourse = mutation({
       learningLanguageId: learningLanguage._id,
       fromLanguageId: fromLanguage._id,
       public: args.course.public,
+      // db.replace below drops omitted fields, so carry publicSince forward;
+      // stamp it only on a private→public transition (or a new public insert).
+      publicSince:
+        args.course.public && !existing?.public
+          ? Date.now()
+          : existing?.publicSince,
       official: args.course.official,
       name: args.course.name,
       about: args.course.about,
