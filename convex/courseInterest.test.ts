@@ -337,4 +337,108 @@ describe("course interest", () => {
       }),
     ).rejects.toThrow("Too many new interest signals");
   });
+
+  test("reads and removes documents created by the first release", async () => {
+    const t = convexTest(schema, modules);
+    const { courseId } = await seedCourse(t);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("course_interest_signals", {
+        courseId,
+        supporterKey: "anonymous:browser_supporter_123456",
+        completedAllAtSignal: false,
+        createdAt: 1_785_358_460_280,
+      });
+      await ctx.db.insert("course_interest_signals", {
+        courseId,
+        supporterKey: "anonymous:another_browser_123456",
+        completedAllAtSignal: false,
+        createdAt: 1_785_358_460_281,
+      });
+      await ctx.db.insert("course_interest_stats", {
+        courseId,
+        totalCount: 2,
+        completedAllCount: 0,
+        lastSignalAt: 1_785_358_460_280,
+        updatedAt: 1_785_358_460_280,
+      });
+    });
+
+    const learnerArgs = {
+      courseShort: "cy-en",
+      anonymousId: "browser_supporter_123456",
+    };
+    expect(
+      await t.query(api.courseInterest.getForLearner, learnerArgs),
+    ).toEqual({
+      interested: true,
+      completedAllAvailableStories: false,
+    });
+
+    const editor = t.withIdentity({ userId: "8", role: "contributor" });
+    expect(
+      await editor.query(api.courseInterest.getForEditor, {
+        courseIdentifier: "cy-en",
+      }),
+    ).toEqual({
+      authenticatedCount: 0,
+      browserCount: 2,
+      completedAllCount: 0,
+    });
+
+    await t.mutation(api.courseInterest.setForLearner, {
+      ...learnerArgs,
+      interested: false,
+    });
+    expect(
+      await editor.query(api.courseInterest.getForEditor, {
+        courseIdentifier: "cy-en",
+      }),
+    ).toEqual({
+      authenticatedCount: 0,
+      browserCount: 1,
+      completedAllCount: 0,
+    });
+  });
+
+  test("preserves legacy signed-in and completion-qualified evidence", async () => {
+    const t = convexTest(schema, modules);
+    const { courseId } = await seedCourse(t);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("course_interest_signals", {
+        courseId,
+        supporterKey: "user:7",
+        completedAllAtSignal: true,
+        createdAt: 1_785_358_460_280,
+      });
+      await ctx.db.insert("course_interest_stats", {
+        courseId,
+        totalCount: 1,
+        completedAllCount: 1,
+        lastSignalAt: 1_785_358_460_280,
+        updatedAt: 1_785_358_460_280,
+      });
+    });
+
+    const learner = t.withIdentity({ userId: "7", role: "user" });
+    expect(
+      await learner.query(api.courseInterest.getForLearner, {
+        courseShort: "cy-en",
+        anonymousId: "another_browser_123456",
+      }),
+    ).toEqual({
+      interested: true,
+      completedAllAvailableStories: true,
+    });
+
+    const editor = t.withIdentity({ userId: "8", role: "contributor" });
+    expect(
+      await editor.query(api.courseInterest.getForEditor, {
+        courseIdentifier: "cy-en",
+      }),
+    ).toEqual({
+      authenticatedCount: 1,
+      browserCount: 0,
+      completedAllCount: 1,
+    });
+  });
 });
