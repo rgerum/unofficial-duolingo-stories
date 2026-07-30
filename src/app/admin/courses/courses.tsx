@@ -401,14 +401,14 @@ function TableRow({
         <span
           className={course.public ? statusYesClass : statusNoClass}
           title={
-            course.publicSince
+            course.publicSince !== undefined
               ? `Public since ${new Date(course.publicSince).toISOString().slice(0, 10)}`
               : undefined
           }
         >
           {course.public ? "Yes" : "No"}
         </span>
-        {course.publicSince ? (
+        {course.publicSince !== undefined ? (
           <div className="mt-1 text-xs opacity-60 whitespace-nowrap">
             {new Date(course.publicSince).toISOString().slice(0, 10)}
           </div>

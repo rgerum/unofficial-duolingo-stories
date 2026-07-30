@@ -70,12 +70,16 @@ describe("updateAdminCourse publicSince", () => {
     await seedCourse(t, { isPublic: false });
 
     const before = Date.now();
-    await asAdmin(t).mutation(api.adminWrite.updateAdminCourse, {
-      id: 100,
-      learning_language: 1,
-      from_language: 2,
-      public: true,
-    });
+    const updated = await asAdmin(t).mutation(
+      api.adminWrite.updateAdminCourse,
+      {
+        id: 100,
+        learning_language: 1,
+        from_language: 2,
+        public: true,
+      },
+    );
+    expect(updated.publicSince).toBeGreaterThanOrEqual(before);
 
     const course = await getCourse(t);
     expect(course.public).toBe(true);
@@ -87,14 +91,18 @@ describe("updateAdminCourse publicSince", () => {
     await seedLanguages(t);
     await seedCourse(t, { isPublic: true, publicSince: 12345 });
 
-    await asAdmin(t).mutation(api.adminWrite.updateAdminCourse, {
-      id: 100,
-      learning_language: 1,
-      from_language: 2,
-      public: true,
-      name: "Renamed",
-    });
+    const updated = await asAdmin(t).mutation(
+      api.adminWrite.updateAdminCourse,
+      {
+        id: 100,
+        learning_language: 1,
+        from_language: 2,
+        public: true,
+        name: "Renamed",
+      },
+    );
 
+    expect(updated.publicSince).toBe(12345);
     expect((await getCourse(t)).publicSince).toBe(12345);
   });
 
@@ -103,21 +111,29 @@ describe("updateAdminCourse publicSince", () => {
     await seedLanguages(t);
     await seedCourse(t, { isPublic: true, publicSince: 12345 });
 
-    await asAdmin(t).mutation(api.adminWrite.updateAdminCourse, {
-      id: 100,
-      learning_language: 1,
-      from_language: 2,
-      public: false,
-    });
+    const unpublished = await asAdmin(t).mutation(
+      api.adminWrite.updateAdminCourse,
+      {
+        id: 100,
+        learning_language: 1,
+        from_language: 2,
+        public: false,
+      },
+    );
+    expect(unpublished.publicSince).toBe(12345);
     expect((await getCourse(t)).publicSince).toBe(12345);
 
     const before = Date.now();
-    await asAdmin(t).mutation(api.adminWrite.updateAdminCourse, {
-      id: 100,
-      learning_language: 1,
-      from_language: 2,
-      public: true,
-    });
+    const republished = await asAdmin(t).mutation(
+      api.adminWrite.updateAdminCourse,
+      {
+        id: 100,
+        learning_language: 1,
+        from_language: 2,
+        public: true,
+      },
+    );
+    expect(republished.publicSince).toBeGreaterThanOrEqual(before);
     expect((await getCourse(t)).publicSince).toBeGreaterThanOrEqual(before);
   });
 });
@@ -136,6 +152,7 @@ describe("createAdminCourse publicSince", () => {
         public: true,
       },
     );
+    expect(created.publicSince).toBeGreaterThanOrEqual(before);
     const publicCourse = await getCourse(t, created.id);
     expect(publicCourse.publicSince).toBeGreaterThanOrEqual(before);
 
@@ -143,6 +160,7 @@ describe("createAdminCourse publicSince", () => {
       api.adminWrite.createAdminCourse,
       { learning_language: 1, from_language: 2 },
     );
+    expect(createdPrivate.publicSince).toBeUndefined();
     expect((await getCourse(t, createdPrivate.id)).publicSince).toBeUndefined();
   });
 });
@@ -173,6 +191,18 @@ describe("lookupTables.upsertCourse publicSince", () => {
     const t = convexTest(schema, modules);
     await seedLanguages(t);
     await seedCourse(t, { isPublic: false });
+
+    const before = Date.now();
+    await asAdmin(t).mutation(api.lookupTables.upsertCourse, {
+      course: mirrorCourse(true),
+    });
+
+    expect((await getCourse(t)).publicSince).toBeGreaterThanOrEqual(before);
+  });
+
+  test("stamps publicSince when the mirror inserts a new public course", async () => {
+    const t = convexTest(schema, modules);
+    await seedLanguages(t);
 
     const before = Date.now();
     await asAdmin(t).mutation(api.lookupTables.upsertCourse, {
