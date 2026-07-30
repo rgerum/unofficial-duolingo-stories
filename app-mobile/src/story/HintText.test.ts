@@ -4,7 +4,6 @@ import {
   buildUnderlineSegments,
   getDottedUnderlineDotCenters,
   splitNativeTokenParts,
-  UNDERLINE_DOT_EDGE_INSET,
   UNDERLINE_DOT_GAP,
   UNDERLINE_HINT_EDGE_INSET,
 } from "./HintTextUnderline";
@@ -101,7 +100,30 @@ describe("native hint underlines", () => {
     expect(underlines[1]!.x1 - underlines[0]!.x2).toBeCloseTo(
       UNDERLINE_DOT_GAP,
     );
+    expect(underlines[0]!.dotAnchor).toBe("end");
+    expect(underlines[1]!.dotAnchor).toBe("start");
     expect(UNDERLINE_HINT_EDGE_INSET * 2).toBe(UNDERLINE_DOT_GAP);
+  });
+
+  test("keeps one skipped dot position between split dotted underlines", () => {
+    const left = getDottedUnderlineDotCenters({
+      x1: 103.5,
+      x2: 176.5,
+      dotGap: UNDERLINE_DOT_GAP,
+      edgeInset: UNDERLINE_HINT_EDGE_INSET,
+      anchor: "end",
+    });
+    const right = getDottedUnderlineDotCenters({
+      x1: 183.5,
+      x2: 236.5,
+      dotGap: UNDERLINE_DOT_GAP,
+      edgeInset: UNDERLINE_HINT_EDGE_INSET,
+      anchor: "start",
+    });
+
+    expect(left.at(-1)).toBeCloseTo(173);
+    expect(right[0]).toBeCloseTo(187);
+    expect(right[0]! - left.at(-1)!).toBeCloseTo(UNDERLINE_DOT_GAP * 2);
   });
 
   test("centers dotted underlines within their drawable span", () => {
@@ -109,14 +131,14 @@ describe("native hint underlines", () => {
       x1: 100,
       x2: 180,
       dotGap: UNDERLINE_DOT_GAP,
-      edgeInset: UNDERLINE_DOT_EDGE_INSET,
+      edgeInset: UNDERLINE_HINT_EDGE_INSET,
     });
 
-    expect(dots).toHaveLength(10);
-    expect(dots[0]).toBeCloseTo(108.5);
-    expect(dots.at(-1)).toBeCloseTo(171.5);
+    expect(dots).toHaveLength(11);
+    expect(dots[0]).toBeCloseTo(105);
+    expect(dots.at(-1)).toBeCloseTo(175);
     expect(dots[0]! - 100).toBeCloseTo(180 - dots.at(-1)!);
-    expect(dots[0]).toBeGreaterThan(100 + UNDERLINE_DOT_EDGE_INSET);
+    expect(dots[0]).toBeGreaterThan(100 + UNDERLINE_HINT_EDGE_INSET);
   });
 
   test("keeps hidden challenge native underline pieces continuous", () => {

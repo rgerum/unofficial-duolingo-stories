@@ -4,7 +4,6 @@ export const UNDERLINE_EDGE_INSET = 2;
 export const UNDERLINE_DOT_RADIUS = 1.2;
 export const UNDERLINE_DOT_GAP = 7;
 export const UNDERLINE_HINT_EDGE_INSET = UNDERLINE_DOT_GAP / 2;
-export const UNDERLINE_DOT_EDGE_INSET = UNDERLINE_DOT_GAP;
 export const HINT_SPLIT_MARKER = "\u2060";
 export const UNDERLINE_BASELINE_GAP = 5;
 export const UNDERLINE_BOTTOM_INSET = 2;
@@ -36,6 +35,7 @@ export type UnderlineSegment = {
   y: number;
   color: string;
   dotted: boolean;
+  dotAnchor?: "start" | "end";
   underlineGroupKey?: string;
   debugX: number;
   debugY: number;
@@ -53,17 +53,24 @@ export function getDottedUnderlineDotCenters({
   x2,
   dotGap = UNDERLINE_DOT_GAP,
   edgeInset = 0,
+  anchor,
 }: {
   x1: number;
   x2: number;
   dotGap?: number;
   edgeInset?: number;
+  anchor?: "start" | "end";
 }): number[] {
   const width = Math.max(0, x2 - x1);
   const drawableWidth = Math.max(0, width - edgeInset * 2);
   const dotCount = Math.max(1, Math.floor(drawableWidth / dotGap) + 1);
   const dotSpan = (dotCount - 1) * dotGap;
-  const startX = x1 + (width - dotSpan) / 2;
+  const startX =
+    anchor === "start"
+      ? x1 + edgeInset
+      : anchor === "end"
+        ? x2 - edgeInset - dotSpan
+        : x1 + (width - dotSpan) / 2;
 
   return Array.from(
     { length: dotCount },
@@ -128,7 +135,8 @@ export function buildUnderlineSegments({
 }): UnderlineSegment[] {
   const segmentsToDraw: UnderlineSegment[] = [];
   const hiddenGroupSpans = new Map<string, UnderlineSegment>();
-  for (const segment of computedSegments) {
+  for (let index = 0; index < computedSegments.length; index += 1) {
+    const segment = computedSegments[index]!;
     const interactive = Boolean(segment.hint) && !segment.hidden;
     const underline = segment.hidden
       ? colors.hiddenUnderline
@@ -156,6 +164,7 @@ export function buildUnderlineSegments({
           y,
           color: underline,
           dotted: false,
+          dotAnchor: undefined,
           underlineGroupKey: segment.underlineGroupKey,
           debugX: segment.x,
           debugY: segment.y,
@@ -176,6 +185,12 @@ export function buildUnderlineSegments({
 
     const dotted = !segment.hidden;
     const edgeInset = dotted ? UNDERLINE_HINT_EDGE_INSET : UNDERLINE_EDGE_INSET;
+    const dotAnchor =
+      computedSegments[index - 1]?.text === HINT_SPLIT_MARKER
+        ? "start"
+        : computedSegments[index + 1]?.text === HINT_SPLIT_MARKER
+          ? "end"
+          : undefined;
     segmentsToDraw.push({
       key: segment.key,
       x1: segment.x + edgeInset,
@@ -183,6 +198,7 @@ export function buildUnderlineSegments({
       y: getUnderlineY(segment),
       color: underline,
       dotted,
+      dotAnchor,
       underlineGroupKey: segment.underlineGroupKey,
       debugX: segment.x,
       debugY: segment.y,

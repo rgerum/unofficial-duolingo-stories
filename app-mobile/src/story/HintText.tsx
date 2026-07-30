@@ -26,10 +26,10 @@ import {
   splitNativeTokenParts,
   UNDERLINE_BASELINE_GAP,
   UNDERLINE_BOTTOM_INSET,
-  UNDERLINE_DOT_EDGE_INSET,
   UNDERLINE_DOT_GAP,
   UNDERLINE_DOT_RADIUS,
   UNDERLINE_EDGE_INSET,
+  UNDERLINE_HINT_EDGE_INSET,
   type UnderlineSegment,
 } from "./HintTextUnderline";
 import type { ContentWithHints, HideRange } from "./types";
@@ -865,10 +865,13 @@ function NativeHintOverlay({
           <React.Fragment key={segment.key}>
             {segment.dotted ? (
               getDottedUnderlineDotCenters({
-                x1: segment.debugX,
-                x2: segment.debugX + segment.debugWidth,
+                x1: segment.dotAnchor ? segment.x1 : segment.debugX,
+                x2: segment.dotAnchor
+                  ? segment.x2
+                  : segment.debugX + segment.debugWidth,
                 dotGap: UNDERLINE_DOT_GAP,
-                edgeInset: UNDERLINE_DOT_EDGE_INSET,
+                edgeInset: UNDERLINE_HINT_EDGE_INSET,
+                anchor: segment.dotAnchor,
               }).map((cx, index) => {
                 return (
                   <Circle
