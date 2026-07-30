@@ -4,6 +4,7 @@ import {
   buildUnderlineSegments,
   getDottedUnderlineDotCenters,
   splitNativeTokenParts,
+  UNDERLINE_DOT_EDGE_INSET,
   UNDERLINE_DOT_GAP,
   UNDERLINE_HINT_EDGE_INSET,
 } from "./HintTextUnderline";
@@ -105,15 +106,17 @@ describe("native hint underlines", () => {
 
   test("centers dotted underlines within their drawable span", () => {
     const dots = getDottedUnderlineDotCenters({
-      x1: 103.5,
-      x2: 176.5,
+      x1: 100,
+      x2: 180,
       dotGap: UNDERLINE_DOT_GAP,
+      edgeInset: UNDERLINE_DOT_EDGE_INSET,
     });
 
-    expect(dots).toHaveLength(11);
-    expect(dots[0]).toBeCloseTo(105);
-    expect(dots.at(-1)).toBeCloseTo(175);
-    expect(dots[0]! - 103.5).toBeCloseTo(176.5 - dots.at(-1)!);
+    expect(dots).toHaveLength(10);
+    expect(dots[0]).toBeCloseTo(108.5);
+    expect(dots.at(-1)).toBeCloseTo(171.5);
+    expect(dots[0]! - 100).toBeCloseTo(180 - dots.at(-1)!);
+    expect(dots[0]).toBeGreaterThan(100 + UNDERLINE_DOT_EDGE_INSET);
   });
 
   test("keeps hidden challenge native underline pieces continuous", () => {

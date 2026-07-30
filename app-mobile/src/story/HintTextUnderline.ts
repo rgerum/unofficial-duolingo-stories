@@ -4,6 +4,7 @@ export const UNDERLINE_EDGE_INSET = 2;
 export const UNDERLINE_DOT_RADIUS = 1.2;
 export const UNDERLINE_DOT_GAP = 7;
 export const UNDERLINE_HINT_EDGE_INSET = UNDERLINE_DOT_GAP / 2;
+export const UNDERLINE_DOT_EDGE_INSET = UNDERLINE_DOT_GAP;
 export const HINT_SPLIT_MARKER = "\u2060";
 export const UNDERLINE_BASELINE_GAP = 5;
 export const UNDERLINE_BOTTOM_INSET = 2;
@@ -51,13 +52,16 @@ export function getDottedUnderlineDotCenters({
   x1,
   x2,
   dotGap = UNDERLINE_DOT_GAP,
+  edgeInset = 0,
 }: {
   x1: number;
   x2: number;
   dotGap?: number;
+  edgeInset?: number;
 }): number[] {
   const width = Math.max(0, x2 - x1);
-  const dotCount = Math.max(1, Math.floor(width / dotGap) + 1);
+  const drawableWidth = Math.max(0, width - edgeInset * 2);
+  const dotCount = Math.max(1, Math.floor(drawableWidth / dotGap) + 1);
   const dotSpan = (dotCount - 1) * dotGap;
   const startX = x1 + (width - dotSpan) / 2;
 
