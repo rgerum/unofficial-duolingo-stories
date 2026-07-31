@@ -163,6 +163,7 @@ export const backfill = mutation({
   args: { paginationOpts: paginationOptsValidator },
   returns: v.object({
     processed: v.number(),
+    skipped: v.number(),
     continueCursor: v.string(),
     isDone: v.boolean(),
   }),
@@ -170,11 +171,15 @@ export const backfill = mutation({
     await requireAdmin(ctx);
     const page = await ctx.db.query("story_done").paginate(args.paginationOpts);
 
+    let skipped = 0;
     for (const completion of page.page) {
       let current = completion;
       if (!current.courseId) {
         const story = await ctx.db.get(current.storyId);
-        if (!story) continue;
+        if (!story) {
+          skipped += 1;
+          continue;
+        }
         await ctx.db.patch(current._id, { courseId: story.courseId });
         current = { ...current, courseId: story.courseId };
       }
@@ -183,6 +188,7 @@ export const backfill = mutation({
 
     return {
       processed: page.page.length,
+      skipped,
       continueCursor: page.continueCursor,
       isDone: page.isDone,
     };

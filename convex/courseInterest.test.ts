@@ -1,20 +1,9 @@
 /// <reference types="vite/client" />
-import { register as registerAggregate } from "@convex-dev/aggregate/test";
-import { convexTest as createConvexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { api } from "./_generated/api";
-import schema from "./schema";
+import { createConvexTest } from "../test/convexTestHarness";
 
-const modules = import.meta.glob("./**/*.ts");
-
-function convexTest(testSchema: typeof schema, testModules: typeof modules) {
-  const t = createConvexTest(testSchema, testModules);
-  registerAggregate(t, "storyReadsByCourse");
-  registerAggregate(t, "readersByCourse");
-  return t;
-}
-
-async function seedCourse(t: ReturnType<typeof convexTest>) {
+async function seedCourse(t: ReturnType<typeof createConvexTest>) {
   return await t.run(async (ctx) => {
     const learningLanguageId = await ctx.db.insert("languages", {
       legacyId: 1,
@@ -73,7 +62,7 @@ async function seedCourse(t: ReturnType<typeof convexTest>) {
 
 describe("course interest", () => {
   test("an anonymous learner can add and remove one signal", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     await seedCourse(t);
     const args = {
       courseShort: "cy-en",
@@ -116,7 +105,7 @@ describe("course interest", () => {
   });
 
   test("marks a signed-in signal when every story is complete", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     const { courseId, firstStoryId, secondStoryId } = await seedCourse(t);
     await t.run(async (ctx) => {
       for (const [storyId, legacyStoryId] of [
@@ -158,7 +147,7 @@ describe("course interest", () => {
   });
 
   test("does not substitute a deleted completion for a visible story", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     const { courseId, firstStoryId, imageId } = await seedCourse(t);
     const deletedStoryId = await t.run(async (ctx) => {
       return await ctx.db.insert("stories", {
@@ -199,7 +188,7 @@ describe("course interest", () => {
   });
 
   test("upgrades an existing signal when the learner finishes the final story", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     await seedCourse(t);
     const learner = t.withIdentity({ userId: "7", role: "user" });
     await learner.mutation(api.storyDone.recordStoryDone, {
@@ -228,7 +217,7 @@ describe("course interest", () => {
   });
 
   test("keeps qualification as a historical achievement after publication", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     const { courseId, firstStoryId, secondStoryId, imageId } =
       await seedCourse(t);
     await t.run(async (ctx) => {
@@ -275,7 +264,7 @@ describe("course interest", () => {
   });
 
   test("merges a browser signal into the signed-in learner", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     await seedCourse(t);
     const args = {
       courseShort: "cy-en",
@@ -300,7 +289,7 @@ describe("course interest", () => {
   });
 
   test("separates browser and authenticated evidence", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     await seedCourse(t);
     await t.mutation(api.courseInterest.setForLearner, {
       courseShort: "cy-en",
@@ -327,7 +316,7 @@ describe("course interest", () => {
   });
 
   test("ranks courses by total learner interest for editors", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     await seedCourse(t);
     await t.run(async (ctx) => {
       const learningLanguageId = await ctx.db.insert("languages", {
@@ -396,7 +385,7 @@ describe("course interest", () => {
   });
 
   test("hides courses whose signals were all withdrawn", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     await seedCourse(t);
     const args = {
       courseShort: "cy-en",
@@ -418,7 +407,7 @@ describe("course interest", () => {
   });
 
   test("rejects the interest ranking for non-contributors", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     await seedCourse(t);
 
     await expect(t.query(api.courseInterest.listForEditor, {})).rejects.toThrow(
@@ -427,7 +416,7 @@ describe("course interest", () => {
   });
 
   test("limits bursts of new browser signals for one course", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     await seedCourse(t);
     for (let index = 0; index < 30; index += 1) {
       await t.mutation(api.courseInterest.setForLearner, {

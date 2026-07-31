@@ -1,20 +1,9 @@
 /// <reference types="vite/client" />
-import { register as registerAggregate } from "@convex-dev/aggregate/test";
-import { convexTest as createConvexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { api } from "./_generated/api";
-import schema from "./schema";
+import { createConvexTest } from "../test/convexTestHarness";
 
-const modules = import.meta.glob("./**/*.ts");
-
-function setupTest() {
-  const t = createConvexTest(schema, modules);
-  registerAggregate(t, "storyReadsByCourse");
-  registerAggregate(t, "readersByCourse");
-  return t;
-}
-
-async function seedCourse(t: ReturnType<typeof setupTest>) {
+async function seedCourse(t: ReturnType<typeof createConvexTest>) {
   return await t.run(async (ctx) => {
     const learningLanguageId = await ctx.db.insert("languages", {
       legacyId: 1,
@@ -54,7 +43,7 @@ async function seedCourse(t: ReturnType<typeof setupTest>) {
 
 describe("course read stats", () => {
   test("counts completions while deduplicating signed-in learners", async () => {
-    const t = setupTest();
+    const t = createConvexTest();
     await seedCourse(t);
     const now = Date.now();
     const learner = t.withIdentity({ userId: "7" });
@@ -86,7 +75,7 @@ describe("course read stats", () => {
   });
 
   test("backfills legacy completions idempotently", async () => {
-    const t = setupTest();
+    const t = createConvexTest();
     const { courseId, storyId } = await seedCourse(t);
     const now = Date.now();
     await t.run(async (ctx) => {
@@ -103,6 +92,7 @@ describe("course read stats", () => {
         paginationOpts: { cursor: null, numItems: 10 },
       });
       expect(result.isDone).toBe(true);
+      expect(result.skipped).toBe(0);
     }
 
     await t.run(async (ctx) => {
@@ -115,5 +105,44 @@ describe("course read stats", () => {
     });
     expect(stats?.totalStoryReads).toBe(1);
     expect(stats?.totalReaders).toBe(1);
+  });
+
+  test("restricts editor stats and clamps the requested period", async () => {
+    const t = createConvexTest();
+    await seedCourse(t);
+
+    expect(
+      await t.query(api.courseReadStats.getForEditor, {
+        courseIdentifier: "es-en",
+      }),
+    ).toBeNull();
+
+    const stats = await t
+      .withIdentity({ role: "contributor" })
+      .query(api.courseReadStats.getForEditor, {
+        courseIdentifier: "es-en",
+        days: 1_000,
+      });
+    expect(stats?.points).toHaveLength(180);
+  });
+
+  test("reports completions whose story no longer exists", async () => {
+    const t = createConvexTest();
+    const { storyId } = await seedCourse(t);
+    await t.run(async (ctx) => {
+      await ctx.db.delete(storyId);
+      await ctx.db.insert("story_done", {
+        storyId,
+        time: Date.now(),
+      });
+    });
+
+    const result = await t
+      .withIdentity({ role: "admin" })
+      .mutation(api.courseReadStats.backfill, {
+        paginationOpts: { cursor: null, numItems: 10 },
+      });
+    expect(result.processed).toBe(1);
+    expect(result.skipped).toBe(1);
   });
 });
