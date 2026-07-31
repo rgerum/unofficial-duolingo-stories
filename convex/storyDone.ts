@@ -7,6 +7,7 @@ import {
   requireSessionLegacyUserId,
 } from "./lib/authorization";
 import { maybeQualifyCourseInterestSignal } from "./courseInterest";
+import { recordCourseReadStats } from "./courseReadStats";
 
 const storyDoneInputValidator = v.object({
   legacyStoryId: v.number(),
@@ -74,6 +75,7 @@ export const recordStoryDone = mutation({
       } else {
         docId = await ctx.db.insert("story_done", {
           storyId: story._id,
+          courseId: story.courseId,
           legacyUserId,
           time: doneAt,
         });
@@ -82,10 +84,17 @@ export const recordStoryDone = mutation({
     } else {
       docId = await ctx.db.insert("story_done", {
         storyId: story._id,
+        courseId: story.courseId,
         legacyUserId: undefined,
         time: doneAt,
       });
       inserted = true;
+    }
+
+    if (inserted) {
+      const done = await ctx.db.get(docId);
+      if (!done) throw new Error("Story completion was not persisted");
+      await recordCourseReadStats(ctx, done);
     }
 
     if (typeof legacyUserId === "number") {

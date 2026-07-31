@@ -1,11 +1,19 @@
 /// <reference types="vite/client" />
-import { convexTest } from "convex-test";
+import { register as registerAggregate } from "@convex-dev/aggregate/test";
+import { convexTest as createConvexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
+
+function convexTest(testSchema: typeof schema, testModules: typeof modules) {
+  const t = createConvexTest(testSchema, testModules);
+  registerAggregate(t, "storyReadsByCourse");
+  registerAggregate(t, "readersByCourse");
+  return t;
+}
 
 async function seedCourseWithStory(t: ReturnType<typeof convexTest>) {
   return await t.run(async (ctx) => {
