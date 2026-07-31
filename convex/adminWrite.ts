@@ -423,3 +423,38 @@ export const createAdminCourse = mutation({
     };
   },
 });
+
+/**
+ * One-time backfill for courses that were public before `publicSince` existed.
+ * Dates are derived offline (Discord release announcements, earliest public
+ * story) and applied via
+ * `npx convex run adminWrite:backfillPublicSince '{"entries": [...]}' --prod`.
+ * Only fills courses that are public AND still missing publicSince — never
+ * overwrites a value the live write paths have already recorded.
+ */
+export const backfillPublicSince = internalMutation({
+  args: {
+    entries: v.array(v.object({ short: v.string(), publicSince: v.number() })),
+  },
+  returns: v.object({
+    updated: v.array(v.string()),
+    skipped: v.array(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    const updated: string[] = [];
+    const skipped: string[] = [];
+    for (const entry of args.entries) {
+      const course = await ctx.db
+        .query("courses")
+        .withIndex("by_short", (q) => q.eq("short", entry.short))
+        .unique();
+      if (!course || !course.public || course.publicSince !== undefined) {
+        skipped.push(entry.short);
+        continue;
+      }
+      await ctx.db.patch(course._id, { publicSince: entry.publicSince });
+      updated.push(entry.short);
+    }
+    return { updated, skipped };
+  },
+});
