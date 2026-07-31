@@ -80,7 +80,6 @@ async function generate(
           `ElevenLabs generation timed out after ${GENERATION_TIMEOUT_MS}ms`,
         ),
       );
-      socket.terminate();
     }, GENERATION_TIMEOUT_MS);
 
     function succeed() {
@@ -95,6 +94,7 @@ async function generate(
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
+      socket.terminate();
       reject(error);
     }
 
@@ -129,7 +129,13 @@ async function generate(
 
     // 5. Handle server responses
     socket.onmessage = function (event: { data: string }) {
-      const response = parseElevenLabsMessage(event.data.toString());
+      let response: ParsedElevenLabsMessage;
+      try {
+        response = parseElevenLabsMessage(event.data.toString());
+      } catch (error) {
+        fail(error instanceof Error ? error : new Error(String(error)));
+        return;
+      }
 
       alignment.push(...response.alignment);
 
@@ -139,8 +145,10 @@ async function generate(
         audioBuffers.push(Buffer.from(audioChunk));
       }
 
-      if (response.error)
+      if (response.error) {
         fail(new Error(`ElevenLabs error: ${response.error}`));
+        return;
+      }
 
       if (response.isFinal) succeed();
     };

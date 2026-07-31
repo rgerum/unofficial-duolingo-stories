@@ -72,7 +72,6 @@ export async function POST(req: NextRequest) {
         console.error(`[Audio] Engine ${engine.name} failed:`, e);
         engineFailure = true;
       }
-      break;
     }
   }
 
