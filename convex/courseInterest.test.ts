@@ -318,6 +318,106 @@ describe("course interest", () => {
     });
   });
 
+  test("ranks courses by total learner interest for editors", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourse(t);
+    await t.run(async (ctx) => {
+      const learningLanguageId = await ctx.db.insert("languages", {
+        legacyId: 3,
+        name: "Gaelic",
+        short: "gd",
+        public: true,
+        rtl: false,
+      });
+      const fromLanguage = await ctx.db
+        .query("languages")
+        .withIndex("by_short", (q) => q.eq("short", "en"))
+        .unique();
+      if (!fromLanguage) throw new Error("Missing seeded English language.");
+      await ctx.db.insert("courses", {
+        legacyId: 101,
+        short: "gd-en",
+        learningLanguageId,
+        fromLanguageId: fromLanguage._id,
+        public: true,
+        official: false,
+        count: 1,
+      });
+    });
+
+    await t.mutation(api.courseInterest.setForLearner, {
+      courseShort: "cy-en",
+      anonymousId: "browser_supporter_123456",
+      interested: true,
+    });
+    await t.mutation(api.courseInterest.setForLearner, {
+      courseShort: "gd-en",
+      anonymousId: "another_browser_123456",
+      interested: true,
+    });
+    const learner = t.withIdentity({ userId: "7", role: "user" });
+    await learner.mutation(api.courseInterest.setForLearner, {
+      courseShort: "gd-en",
+      anonymousId: "signed_in_browser_123456",
+      interested: true,
+    });
+
+    const editor = t.withIdentity({ userId: "8", role: "contributor" });
+    expect(await editor.query(api.courseInterest.listForEditor, {})).toEqual([
+      {
+        courseShort: "gd-en",
+        learningLanguageId: expect.anything(),
+        learningLanguageName: "Gaelic",
+        fromLanguageShort: "en",
+        public: true,
+        storyCount: 1,
+        totalCount: 2,
+        completedAllCount: 0,
+      },
+      {
+        courseShort: "cy-en",
+        learningLanguageId: expect.anything(),
+        learningLanguageName: "Welsh",
+        fromLanguageShort: "en",
+        public: true,
+        storyCount: 2,
+        totalCount: 1,
+        completedAllCount: 0,
+      },
+    ]);
+  });
+
+  test("hides courses whose signals were all withdrawn", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourse(t);
+    const args = {
+      courseShort: "cy-en",
+      anonymousId: "browser_supporter_123456",
+    };
+    await t.mutation(api.courseInterest.setForLearner, {
+      ...args,
+      interested: true,
+    });
+    await t.mutation(api.courseInterest.setForLearner, {
+      ...args,
+      interested: false,
+    });
+
+    const editor = t.withIdentity({ userId: "8", role: "contributor" });
+    expect(await editor.query(api.courseInterest.listForEditor, {})).toEqual(
+      [],
+    );
+  });
+
+  test("rejects the interest ranking for non-contributors", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourse(t);
+
+    await expect(t.query(api.courseInterest.listForEditor, {})).rejects.toThrow(
+      "Unauthorized",
+    );
+  });
+
   test("limits bursts of new browser signals for one course", async () => {
     const t = convexTest(schema, modules);
     await seedCourse(t);
