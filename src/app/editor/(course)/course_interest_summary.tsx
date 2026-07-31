@@ -3,6 +3,7 @@
 import { api } from "@convex/_generated/api";
 import { Heart, Trophy } from "lucide-react";
 import { useQuery } from "convex/react";
+import Link from "next/link";
 
 export default function CourseInterestSummary({
   courseIdentifier,
@@ -31,11 +32,9 @@ export default function CourseInterestSummary({
           {stats && totalCount > 0 ? (
             <>
               <p className="mt-1 text-[calc(17/16*1rem)]">
-                <strong>{stats.authenticatedCount}</strong>{" "}
-                {stats.authenticatedCount === 1
-                  ? "signed-in learner wants"
-                  : "signed-in learners want"}{" "}
-                more stories.
+                <strong>{totalCount}</strong>{" "}
+                {totalCount === 1 ? "learner wants" : "learners want"} more
+                stories.
               </p>
               {stats.completedAllCount > 0 ? (
                 <p className="mt-2 flex items-center gap-2 text-[calc(14/16*1rem)] text-[var(--text-color-dim)]">
@@ -50,15 +49,6 @@ export default function CourseInterestSummary({
                   all available stories before asking for more.
                 </p>
               ) : null}
-              {stats.browserCount > 0 ? (
-                <p className="mt-2 text-[calc(14/16*1rem)] text-[var(--text-color-dim)]">
-                  Plus {stats.browserCount} additional{" "}
-                  {stats.browserCount === 1
-                    ? "browser signal"
-                    : "browser signals"}
-                  .
-                </p>
-              ) : null}
             </>
           ) : (
             <p className="mt-1 text-[var(--text-color-dim)]">
@@ -66,6 +56,11 @@ export default function CourseInterestSummary({
               story list.
             </p>
           )}
+          <p className="mt-2 text-[calc(14/16*1rem)]">
+            <Link className="underline" href="/editor/interest">
+              Compare interest across all courses
+            </Link>
+          </p>
         </div>
       </div>
     </section>

@@ -37,6 +37,17 @@ const editorInterestValidator = v.union(
   v.null(),
 );
 
+const editorInterestCourseValidator = v.object({
+  courseShort: v.union(v.string(), v.null()),
+  learningLanguageId: v.id("languages"),
+  learningLanguageName: v.string(),
+  fromLanguageShort: v.string(),
+  public: v.boolean(),
+  storyCount: v.number(),
+  totalCount: v.number(),
+  completedAllCount: v.number(),
+});
+
 type SupporterKeys = {
   anonymousKey: string;
   legacyUserId: number | null;
@@ -371,6 +382,70 @@ export const setForLearner = mutation({
         primarySignal?.completedAllAvailableStoriesAt !== undefined ||
         anonymousSignal?.completedAllAvailableStoriesAt !== undefined,
     };
+  },
+});
+
+export const listForEditor = query({
+  args: {},
+  returns: v.array(editorInterestCourseValidator),
+  handler: async (ctx) => {
+    await requireContributorOrAdmin(ctx);
+
+    // One row per course that ever received a signal, so this stays bounded
+    // by the number of courses.
+    const statsRows = await ctx.db.query("course_interest_stats").collect();
+    const activeStats = statsRows.filter(
+      (stats) => stats.authenticatedCount + stats.browserCount > 0,
+    );
+
+    const courseById = new Map<Id<"courses">, Doc<"courses">>();
+    for (const course of await Promise.all(
+      activeStats.map((stats) => ctx.db.get(stats.courseId)),
+    )) {
+      if (course) courseById.set(course._id, course);
+    }
+
+    const languageIds = Array.from(
+      new Set(
+        Array.from(courseById.values()).flatMap((course) => [
+          course.learningLanguageId,
+          course.fromLanguageId,
+        ]),
+      ),
+    );
+    const languageById = new Map<Id<"languages">, Doc<"languages">>();
+    for (const language of await Promise.all(
+      languageIds.map((languageId) => ctx.db.get(languageId)),
+    )) {
+      if (language) languageById.set(language._id, language);
+    }
+
+    const rows = [];
+    for (const stats of activeStats) {
+      const course = courseById.get(stats.courseId);
+      if (!course) continue;
+      const learningLanguage = languageById.get(course.learningLanguageId);
+      const fromLanguage = languageById.get(course.fromLanguageId);
+      rows.push({
+        courseShort: course.short ?? null,
+        learningLanguageId: course.learningLanguageId,
+        learningLanguageName:
+          learningLanguage?.name ?? course.learning_language_name ?? "",
+        fromLanguageShort: fromLanguage?.short ?? "",
+        public: course.public,
+        storyCount: course.count ?? 0,
+        totalCount: stats.authenticatedCount + stats.browserCount,
+        completedAllCount: stats.completedAllCount,
+      });
+    }
+
+    rows.sort(
+      (a, b) =>
+        b.totalCount - a.totalCount ||
+        b.completedAllCount - a.completedAllCount ||
+        a.learningLanguageName.localeCompare(b.learningLanguageName),
+    );
+    return rows;
   },
 });
 
