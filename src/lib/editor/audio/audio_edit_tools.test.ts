@@ -148,6 +148,59 @@ test("generate_audio_line reports Azure marks that move backward in the source t
   }
 });
 
+test("generate_audio_line maps Polly UTF-8 byte speech marks to source text", async () => {
+  const originalRequest = globalThis.Request;
+  const originalFetch = globalThis.fetch;
+  const source = "Но,  я   обожаю      овощи      и   особенно   помидоры!";
+  const hiddenStart = source.indexOf("помидоры");
+  const ssml = generate_ssml_line(
+    { speaker: "Tatyana", text: source },
+    undefined as never,
+    [{ start: hiddenStart, end: hiddenStart + "помидоры".length }],
+    [],
+  );
+
+  globalThis.Request = class {} as unknown as typeof Request;
+  globalThis.fetch = (async () => ({
+    json: async () => ({
+      output_file: "900/16a0effa.mp3",
+      engine: "polly",
+      marks: [
+        { time: 6, type: "word", start: 7, end: 11, value: "Но" },
+        { time: 562, type: "word", start: 14, end: 16, value: "я" },
+        { time: 807, type: "word", start: 19, end: 31, value: "обожаю" },
+        { time: 1395, type: "word", start: 37, end: 47, value: "овощи" },
+        { time: 1786, type: "word", start: 53, end: 55, value: "и" },
+        {
+          time: 1811,
+          type: "word",
+          start: 58,
+          end: 74,
+          value: "особенно",
+        },
+        {
+          time: 2240,
+          type: "word",
+          start: 102,
+          end: 118,
+          value: "помидоры",
+        },
+      ],
+    }),
+  })) as unknown as typeof fetch;
+
+  try {
+    const result = await generate_audio_line({ ...ssml, id: 900 });
+    assert.deepEqual(result.keypoints.at(-1), {
+      rangeEnd: hiddenStart + "помидоры".length,
+      audioStart: 2240,
+    });
+  } finally {
+    globalThis.Request = originalRequest;
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("generate_audio_line rejects null numeric values from JSON speech marks", async () => {
   const originalRequest = globalThis.Request;
   const originalFetch = globalThis.fetch;

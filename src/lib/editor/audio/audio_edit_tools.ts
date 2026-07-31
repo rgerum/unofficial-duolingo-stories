@@ -9,6 +9,24 @@ export {
   timings_to_text,
 } from "./audio_timing";
 
+function utf8ByteOffsetToStringIndex(text: string, byteOffset: number) {
+  if (!Number.isSafeInteger(byteOffset) || byteOffset < 0) return undefined;
+  let currentByteOffset = 0;
+  if (byteOffset === 0) return 0;
+
+  for (let index = 0; index < text.length; ) {
+    const codePoint = text.codePointAt(index);
+    if (codePoint === undefined) return undefined;
+    const char = String.fromCodePoint(codePoint);
+    currentByteOffset += new TextEncoder().encode(char).length;
+    index += char.length;
+    if (currentByteOffset === byteOffset) return index;
+    if (currentByteOffset > byteOffset) return undefined;
+  }
+
+  return currentByteOffset === byteOffset ? text.length : undefined;
+}
+
 export async function generate_audio_line(ssml: {
   text: string;
   speaker: string;
@@ -60,6 +78,10 @@ export async function generate_audio_line(ssml: {
     text: speak_text,
   });
   let ssml_response = await response2.json();
+  const markOffsetToTextIndex = (offset: number) =>
+    ssml_response.engine === "polly"
+      ? utf8ByteOffsetToStringIndex(speak_text, offset)
+      : offset;
   let keypoints = [];
   if (ssml_response.timepoints) {
     for (let mark of ssml_response.timepoints) {
@@ -96,9 +118,11 @@ export async function generate_audio_line(ssml: {
           `Invalid speech mark at index ${index}: end=${mark.end}, time=${mark.time}`,
         );
       }
-      const rangeEnd = mapping[Math.round(mark.end)];
+      const textIndex = markOffsetToTextIndex(Math.round(mark.end));
+      const rangeEnd = textIndex === undefined ? undefined : mapping[textIndex];
       const audioStart = Math.round(mark.time);
       if (
+        typeof rangeEnd !== "number" ||
         !Number.isFinite(rangeEnd) ||
         !Number.isFinite(audioStart) ||
         rangeEnd < last_end ||
