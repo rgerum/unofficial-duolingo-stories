@@ -194,6 +194,7 @@ export default defineSchema({
 
   story_done: defineTable({
     storyId: v.id("stories"),
+    courseId: v.optional(v.id("courses")),
     legacyUserId: v.optional(v.number()),
     time: v.number(),
   })
@@ -201,6 +202,13 @@ export default defineSchema({
     .index("by_user", ["legacyUserId"])
     .index("by_user_and_story", ["legacyUserId", "storyId"])
     .index("by_user_time", ["legacyUserId", "time"]),
+
+  course_readers: defineTable({
+    courseId: v.id("courses"),
+    legacyUserId: v.number(),
+    firstReadAt: v.number(),
+    lastReadAt: v.number(),
+  }).index("by_course_id_and_legacy_user_id", ["courseId", "legacyUserId"]),
 
   story_done_state: defineTable({
     storyId: v.id("stories"),

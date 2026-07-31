@@ -1,13 +1,10 @@
 /// <reference types="vite/client" />
-import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import schema from "./schema";
+import { createConvexTest } from "../test/convexTestHarness";
 
-const modules = import.meta.glob("./**/*.ts");
-
-async function seedCourseWithStory(t: ReturnType<typeof convexTest>) {
+async function seedCourseWithStory(t: ReturnType<typeof createConvexTest>) {
   return await t.run(async (ctx) => {
     const learningLanguageId = await ctx.db.insert("languages", {
       legacyId: 1,
@@ -49,7 +46,7 @@ async function seedCourseWithStory(t: ReturnType<typeof convexTest>) {
 
 describe("recordStoryDone", () => {
   test("anonymous completion inserts story_done without a user and no course_activity", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     const { storyId } = await seedCourseWithStory(t);
 
     const result = await t.mutation(api.storyDone.recordStoryDone, {
@@ -75,7 +72,7 @@ describe("recordStoryDone", () => {
   });
 
   test("authenticated completion also creates story_done_state and course_activity", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     const { storyId } = await seedCourseWithStory(t);
     const asUser = t.withIdentity({ userId: "7" });
 
@@ -114,7 +111,7 @@ describe("recordStoryDone", () => {
   });
 
   test("unknown legacyStoryId rejects with Missing story", async () => {
-    const t = convexTest(schema, modules);
+    const t = createConvexTest();
     await seedCourseWithStory(t);
 
     await expect(

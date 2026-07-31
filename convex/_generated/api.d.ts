@@ -20,6 +20,7 @@ import type * as authProviderConfig from "../authProviderConfig.js";
 import type * as authProviders from "../authProviders.js";
 import type * as courseContributorBackfill from "../courseContributorBackfill.js";
 import type * as courseInterest from "../courseInterest.js";
+import type * as courseReadStats from "../courseReadStats.js";
 import type * as courseWrite from "../courseWrite.js";
 import type * as discordAvatarSync from "../discordAvatarSync.js";
 import type * as discordBot from "../discordBot.js";
@@ -76,6 +77,7 @@ declare const fullApi: ApiFromModules<{
   authProviders: typeof authProviders;
   courseContributorBackfill: typeof courseContributorBackfill;
   courseInterest: typeof courseInterest;
+  courseReadStats: typeof courseReadStats;
   courseWrite: typeof courseWrite;
   discordAvatarSync: typeof discordAvatarSync;
   discordBot: typeof discordBot;
@@ -142,4 +144,6 @@ export declare const internal: FilterApi<
 
 export declare const components: {
   betterAuth: import("../betterAuth/_generated/component.js").ComponentApi<"betterAuth">;
+  storyReadsByCourse: import("@convex-dev/aggregate/_generated/component.js").ComponentApi<"storyReadsByCourse">;
+  readersByCourse: import("@convex-dev/aggregate/_generated/component.js").ComponentApi<"readersByCourse">;
 };
