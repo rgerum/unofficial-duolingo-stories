@@ -16,6 +16,53 @@ interface GenerateResult {
   alignment: [string, number][];
 }
 
+interface ParsedElevenLabsMessage {
+  audio?: string;
+  isFinal: boolean;
+  alignment: [string, number][];
+  error?: string;
+}
+
+const GENERATION_TIMEOUT_MS = 30_000;
+
+export function parseElevenLabsMessage(data: string): ParsedElevenLabsMessage {
+  const response = JSON.parse(data) as {
+    alignment?: {
+      chars?: string[];
+      charStartTimesMs?: number[];
+      char_start_times_ms?: number[];
+    };
+    audio?: string;
+    isFinal?: boolean;
+    is_final?: boolean;
+    error?: string | { message?: string };
+  };
+  const chars = response.alignment?.chars ?? [];
+  const startTimes =
+    response.alignment?.char_start_times_ms ??
+    response.alignment?.charStartTimesMs ??
+    [];
+  const alignment: [string, number][] = [];
+
+  for (let i = 0; i < Math.min(chars.length, startTimes.length); i++) {
+    alignment.push([chars[i], startTimes[i]]);
+  }
+
+  let error: string | undefined;
+  if (typeof response.error === "string") {
+    error = response.error;
+  } else if (response.error?.message) {
+    error = response.error.message;
+  }
+
+  return {
+    audio: response.audio,
+    isFinal: response.is_final ?? response.isFinal ?? false,
+    alignment,
+    ...(error ? { error } : {}),
+  };
+}
+
 async function generate(
   voiceId: string,
   text: string,
@@ -26,6 +73,30 @@ async function generate(
 
     const audioBuffers: Buffer[] = [];
     const alignment: [string, number][] = [];
+    let settled = false;
+    const timeout = setTimeout(() => {
+      fail(
+        new Error(
+          `ElevenLabs generation timed out after ${GENERATION_TIMEOUT_MS}ms`,
+        ),
+      );
+      socket.terminate();
+    }, GENERATION_TIMEOUT_MS);
+
+    function succeed() {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      resolve({ audioBuffers, alignment });
+      socket.close();
+    }
+
+    function fail(error: Error) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      reject(error);
+    }
 
     // 2. Initialize the connection by sending the BOS message
     socket.onopen = function (_event: Event) {
@@ -58,21 +129,9 @@ async function generate(
 
     // 5. Handle server responses
     socket.onmessage = function (event: { data: string }) {
-      const response = JSON.parse(event.data) as {
-        alignment?: { chars: string[]; charStartTimesMs: number[] };
-        audio?: string;
-        isFinal?: boolean;
-        normalizedAlignment?: unknown;
-      };
+      const response = parseElevenLabsMessage(event.data.toString());
 
-      if (response.alignment) {
-        for (let i = 0; i < response.alignment.chars.length; i++) {
-          alignment.push([
-            response.alignment.chars[i],
-            response.alignment.charStartTimesMs[i],
-          ]);
-        }
-      }
+      alignment.push(...response.alignment);
 
       if (response.audio) {
         // decode and handle the audio data (e.g., play it)
@@ -80,16 +139,16 @@ async function generate(
         audioBuffers.push(Buffer.from(audioChunk));
       }
 
-      if (response.isFinal) {
-        // the generation is complete
-        resolve({ audioBuffers: audioBuffers, alignment: alignment });
-      }
+      if (response.error)
+        fail(new Error(`ElevenLabs error: ${response.error}`));
+
+      if (response.isFinal) succeed();
     };
 
     // Handle errors
     socket.onerror = function (error: Error) {
       console.error(`WebSocket Error: ${error}`);
-      reject(error);
+      fail(error);
     };
 
     // Handle socket closing
@@ -98,7 +157,13 @@ async function generate(
       code: number;
       reason: string;
     }) {
-      if (event.wasClean) {
+      if (!settled) {
+        fail(
+          new Error(
+            `ElevenLabs connection closed before completion (code=${event.code}, reason=${event.reason || "none"})`,
+          ),
+        );
+      } else if (event.wasClean) {
         console.info(
           `Connection closed cleanly, code=${event.code}, reason=${event.reason}`,
         );

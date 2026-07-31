@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
   }
 
   let answer: SynthesisResult | undefined;
+  let engineFailure = false;
   for (const engine of audio_engines) {
     if (await engine.isValidVoice(speaker)) {
       try {
@@ -69,14 +70,22 @@ export async function POST(req: NextRequest) {
         break;
       } catch (e) {
         console.error(`[Audio] Engine ${engine.name} failed:`, e);
-        // Continue to next engine instead of returning
+        engineFailure = true;
       }
       break;
     }
   }
 
-  if (answer === undefined)
-    return new Response("Error not found.", { status: 404 });
+  if (answer === undefined) {
+    return NextResponse.json(
+      {
+        error: engineFailure
+          ? "Audio generation failed. Please try again."
+          : "No text-to-speech engine recognizes this voice.",
+      },
+      { status: engineFailure ? 502 : 404 },
+    );
+  }
 
   if (id !== 0) {
     answer.output_file = `${id}/` + file;
