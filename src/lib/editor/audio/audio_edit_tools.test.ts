@@ -10,6 +10,32 @@ import {
   timings_to_text,
 } from "@/lib/editor/audio/audio_edit_tools";
 
+test("generate_audio_line reports a failed synthesis response", async () => {
+  const originalRequest = globalThis.Request;
+  const originalFetch = globalThis.fetch;
+  globalThis.Request = class {} as unknown as typeof Request;
+  globalThis.fetch = (async () =>
+    new Response(JSON.stringify({ error: "Audio generation failed." }), {
+      status: 502,
+      headers: { "content-type": "application/json" },
+    })) as typeof fetch;
+
+  try {
+    await assert.rejects(
+      () =>
+        generate_audio_line({
+          speaker: "example-voice",
+          text: "Example",
+          id: 0,
+        }),
+      { message: "Audio generation failed." },
+    );
+  } finally {
+    globalThis.Request = originalRequest;
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("timing_text_without_filename keeps only timing deltas", () => {
   assert.equal(
     timing_text_without_filename("$audio/1961/_f34f3b72.mp3;2,132768;7,127"),

@@ -77,6 +77,15 @@ export async function generate_audio_line(ssml: {
     speaker: speaker,
     text: speak_text,
   });
+  if (response2.ok === false) {
+    const body = await response2.text();
+    let message = body || `Audio generation failed (${response2.status}).`;
+    try {
+      const parsed = JSON.parse(body) as { error?: string };
+      message = parsed.error || message;
+    } catch {}
+    throw new Error(message);
+  }
   let ssml_response = await response2.json();
   const markOffsetToTextIndex = (offset: number) =>
     ssml_response.engine === "polly"
