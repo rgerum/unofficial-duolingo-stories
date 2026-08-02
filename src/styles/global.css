@@ -3,7 +3,7 @@
 @import "shadcn/tailwind.css";
 /*
 ---break---*/
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is([data-theme="dark"], [data-theme="dark"] *));
 
 @layer base {
   html {
