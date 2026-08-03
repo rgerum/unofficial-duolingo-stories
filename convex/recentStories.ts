@@ -24,6 +24,7 @@ const recentStorySetValidator = v.object({
 
 type RecentStory = Infer<typeof recentStoryValidator>;
 type RecentStorySet = Infer<typeof recentStorySetValidator>;
+const MAX_RECENT_SETS = 20;
 
 export const getRecentPublishedStorySets = query({
   args: {},
@@ -59,10 +60,8 @@ export const getRecentPublishedStorySets = query({
     >();
 
     for (const story of stories) {
-      if (
-        sets.size === 20 &&
-        !sets.has(`${story.courseId}:${story.set_id}:${story.date_published}`)
-      ) {
+      const key = `${story.courseId}:${story.set_id}:${story.date_published}`;
+      if (sets.size === MAX_RECENT_SETS && !sets.has(key)) {
         continue;
       }
       if (story.legacyId === undefined || !story.imageId) continue;
@@ -91,7 +90,6 @@ export const getRecentPublishedStorySets = query({
       const image = await ctx.db.get(story.imageId);
       if (!image) continue;
 
-      const key = `${story.courseId}:${story.set_id}:${story.date_published}`;
       const existingSet = sets.get(key);
       const recentStory: RecentStory = {
         id: story.legacyId,
@@ -102,7 +100,7 @@ export const getRecentPublishedStorySets = query({
       };
       if (existingSet) {
         existingSet.stories.push(recentStory);
-      } else if (sets.size < 20) {
+      } else if (sets.size < MAX_RECENT_SETS) {
         sets.set(key, {
           datePublished: story.date_published,
           setId: story.set_id,

@@ -56,7 +56,9 @@ export default async function RecentStoriesPage() {
                       {dateFormatter.format(publishedSet.datePublished)}
                     </time>
                     <h2 className="my-1 text-[calc(22/16*1rem)] leading-tight">
-                      {publishedSet.stories.length} stories published
+                      {publishedSet.stories.length}{" "}
+                      {publishedSet.stories.length === 1 ? "story" : "stories"}{" "}
+                      published
                     </h2>
                   </div>
                   <Link

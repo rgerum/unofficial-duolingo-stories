@@ -106,4 +106,106 @@ describe("getRecentPublishedStorySets", () => {
       "Set 1 story 4",
     ]);
   });
+
+  test("caps results at the 20 newest valid public sets", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      const learningLanguageId = await ctx.db.insert("languages", {
+        legacyId: 10,
+        name: "Spanish",
+        short: "es",
+        public: true,
+        rtl: false,
+      });
+      const fromLanguageId = await ctx.db.insert("languages", {
+        legacyId: 11,
+        name: "English",
+        short: "en",
+        public: true,
+        rtl: false,
+      });
+      const imageId = await ctx.db.insert("images", {
+        legacyId: "valid-image",
+        active: "active.svg",
+        gilded: "gilded.svg",
+        locked: "locked.svg",
+        active_lip: "aabbcc",
+        gilded_lip: "ddeeff",
+      });
+      const validCourseId = await ctx.db.insert("courses", {
+        legacyId: 20,
+        short: "es-en",
+        learningLanguageId,
+        fromLanguageId,
+        public: true,
+        official: false,
+      });
+      const privateCourseId = await ctx.db.insert("courses", {
+        legacyId: 21,
+        short: "private",
+        learningLanguageId,
+        fromLanguageId,
+        public: false,
+        official: false,
+      });
+      const shortlessCourseId = await ctx.db.insert("courses", {
+        legacyId: 22,
+        learningLanguageId,
+        fromLanguageId,
+        public: true,
+        official: false,
+      });
+
+      for (let setId = 1; setId <= 23; setId += 1) {
+        await ctx.db.insert("stories", {
+          legacyId: 100 + setId,
+          name: `Valid set ${setId}`,
+          set_id: setId,
+          set_index: 1,
+          date_published: setId,
+          public: true,
+          deleted: false,
+          imageId,
+          courseId: validCourseId,
+          status: "finished",
+          todo_count: 0,
+        });
+      }
+
+      const invalidStories = [
+        { legacyId: 201, courseId: privateCourseId, imageId },
+        { legacyId: 202, courseId: shortlessCourseId, imageId },
+        { legacyId: undefined, courseId: validCourseId, imageId },
+        { legacyId: 204, courseId: validCourseId, imageId: undefined },
+      ];
+      for (const [index, story] of invalidStories.entries()) {
+        await ctx.db.insert("stories", {
+          legacyId: story.legacyId,
+          name: `Invalid story ${index}`,
+          set_id: 100 + index,
+          set_index: 1,
+          date_published: 1_000 + index,
+          public: true,
+          deleted: false,
+          imageId: story.imageId,
+          courseId: story.courseId,
+          status: "finished",
+          todo_count: 0,
+        });
+      }
+    });
+
+    const result = await t.query(
+      api.recentStories.getRecentPublishedStorySets,
+      {},
+    );
+
+    expect(result).toHaveLength(20);
+    expect(result.map((set) => set.setId)).toEqual(
+      Array.from({ length: 20 }, (_, index) => 23 - index),
+    );
+    expect(
+      result.flatMap((set) => set.stories).map((story) => story.title),
+    ).not.toContain(expect.stringContaining("Invalid story"));
+  });
 });
