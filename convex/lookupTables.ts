@@ -1,6 +1,7 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireContributorOrAdmin } from "./lib/authorization";
+import { schedulePublicationAnnouncement } from "./lib/discordAnnouncements";
 
 const languageValidator = {
   legacyId: v.number(),
@@ -338,10 +339,28 @@ export const upsertCourse = mutation({
 
     if (existing) {
       await ctx.db.replace(existing._id, doc);
+      if (args.course.public && !existing.public && doc.short) {
+        await schedulePublicationAnnouncement(ctx, {
+          eventKey: `course:${doc.legacyId}:published:${doc.publicSince}`,
+          kind: "course_published",
+          learningLanguage: learningLanguage.name,
+          fromLanguage: fromLanguage.name,
+          courseShort: doc.short,
+        });
+      }
       return { inserted: false, docId: existing._id };
     }
 
     const docId = await ctx.db.insert("courses", doc);
+    if (doc.public && doc.short) {
+      await schedulePublicationAnnouncement(ctx, {
+        eventKey: `course:${doc.legacyId}:published:${doc.publicSince}`,
+        kind: "course_published",
+        learningLanguage: learningLanguage.name,
+        fromLanguage: fromLanguage.name,
+        courseShort: doc.short,
+      });
+    }
     return { inserted: true, docId };
   },
 });

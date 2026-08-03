@@ -22,6 +22,7 @@ import type * as courseContributorBackfill from "../courseContributorBackfill.js
 import type * as courseInterest from "../courseInterest.js";
 import type * as courseReadStats from "../courseReadStats.js";
 import type * as courseWrite from "../courseWrite.js";
+import type * as discordAnnouncements from "../discordAnnouncements.js";
 import type * as discordAvatarSync from "../discordAvatarSync.js";
 import type * as discordBot from "../discordBot.js";
 import type * as discordData from "../discordData.js";
@@ -36,6 +37,7 @@ import type * as lib_avatarRows from "../lib/avatarRows.js";
 import type * as lib_courseContributors from "../lib/courseContributors.js";
 import type * as lib_courseCounts from "../lib/courseCounts.js";
 import type * as lib_courseTags from "../lib/courseTags.js";
+import type * as lib_discordAnnouncements from "../lib/discordAnnouncements.js";
 import type * as lib_discordAvatarSync from "../lib/discordAvatarSync.js";
 import type * as lib_phpbb from "../lib/phpbb.js";
 import type * as lib_publicCourseStories from "../lib/publicCourseStories.js";
@@ -79,6 +81,7 @@ declare const fullApi: ApiFromModules<{
   courseInterest: typeof courseInterest;
   courseReadStats: typeof courseReadStats;
   courseWrite: typeof courseWrite;
+  discordAnnouncements: typeof discordAnnouncements;
   discordAvatarSync: typeof discordAvatarSync;
   discordBot: typeof discordBot;
   discordData: typeof discordData;
@@ -93,6 +96,7 @@ declare const fullApi: ApiFromModules<{
   "lib/courseContributors": typeof lib_courseContributors;
   "lib/courseCounts": typeof lib_courseCounts;
   "lib/courseTags": typeof lib_courseTags;
+  "lib/discordAnnouncements": typeof lib_discordAnnouncements;
   "lib/discordAvatarSync": typeof lib_discordAvatarSync;
   "lib/phpbb": typeof lib_phpbb;
   "lib/publicCourseStories": typeof lib_publicCourseStories;

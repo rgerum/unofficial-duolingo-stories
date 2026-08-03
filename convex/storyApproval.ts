@@ -11,6 +11,7 @@ import {
   getRankedCourseContributors,
   partitionCourseContributors,
 } from "./lib/courseContributors";
+import { schedulePublicationAnnouncement } from "./lib/discordAnnouncements";
 
 const storyApprovalInputValidator = {
   legacyStoryId: v.number(),
@@ -202,6 +203,9 @@ export const toggleStoryApproval = mutation({
         row.status === "finished" &&
         !row.deleted,
     );
+    const setWasAlreadyPublic = storiesInCourse.some(
+      (row) => row.set_id === story.set_id && row.public && !row.deleted,
+    );
     const finished_in_set = finishedStoriesInSet.length;
 
     const published: number[] = [];
@@ -223,6 +227,24 @@ export const toggleStoryApproval = mutation({
     let courseCount: number | null = null;
     if (published.length > 0) {
       courseCount = await recomputeCoursePublishedCount(ctx, story.courseId);
+
+      const course = await ctx.db.get(story.courseId);
+      if (course?.public && course.short && !setWasAlreadyPublic) {
+        const [learningLanguage, fromLanguage] = await Promise.all([
+          ctx.db.get(course.learningLanguageId),
+          ctx.db.get(course.fromLanguageId),
+        ]);
+        if (learningLanguage && fromLanguage) {
+          await schedulePublicationAnnouncement(ctx, {
+            eventKey: `course:${course.legacyId}:set:${story.set_id ?? "unknown"}:published:${datePublishedMs}`,
+            kind: "set_published",
+            learningLanguage: learningLanguage.name,
+            fromLanguage: fromLanguage.name,
+            courseShort: course.short,
+            storyCount: published.length,
+          });
+        }
+      }
     }
 
     const {

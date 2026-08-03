@@ -4,6 +4,7 @@ import { internalMutation, type MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./lib/authorization";
 import { hasNoAudioCourseTag } from "./lib/courseTags";
+import { schedulePublicationAnnouncement } from "./lib/discordAnnouncements";
 
 const CLEAR_NO_AUDIO_STORY_AUDIO_PROBLEM_BATCH_SIZE = 100;
 
@@ -269,6 +270,15 @@ export const updateAdminCourse = mutation({
     if (nextPublic && !course.public) patchData.publicSince = Date.now();
 
     await ctx.db.patch(course._id, patchData);
+    if (nextPublic && !course.public) {
+      await schedulePublicationAnnouncement(ctx, {
+        eventKey: `course:${course.legacyId}:published:${patchData.publicSince}`,
+        kind: "course_published",
+        learningLanguage: learningLanguage.name,
+        fromLanguage: fromLanguage.name,
+        courseShort: short,
+      });
+    }
     if (hasNoAudioCourseTag(nextTags)) {
       if ((course.audio_problem_count ?? 0) !== 0) {
         await ctx.db.patch(course._id, {
@@ -407,6 +417,15 @@ export const createAdminCourse = mutation({
       mirrorUpdatedAt: Date.now(),
       lastOperationKey: operationKey,
     });
+    if (nextPublic) {
+      await schedulePublicationAnnouncement(ctx, {
+        eventKey: `course:${legacyId}:published:${publicSince}`,
+        kind: "course_published",
+        learningLanguage: learningLanguage.name,
+        fromLanguage: fromLanguage.name,
+        courseShort: short,
+      });
+    }
 
     return {
       id: legacyId,
