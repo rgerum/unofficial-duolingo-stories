@@ -126,4 +126,63 @@ describe("toggleStoryApproval", () => {
       expect(story?.approvalCount).toBe(1);
     });
   });
+
+  test.each([
+    { coursePublic: true, expectedAnnouncements: 1 },
+    { coursePublic: false, expectedAnnouncements: 0 },
+  ])(
+    "schedules a set announcement only when course public is $coursePublic",
+    async ({ coursePublic, expectedAnnouncements }) => {
+      const t = convexTest(schema, modules);
+      t.registerComponent("betterAuth", betterAuthSchema, betterAuthModules);
+      const { courseId, storyId } = await seedCourseWithStory(t);
+
+      await t.run(async (ctx) => {
+        await ctx.db.patch(courseId as Id<"courses">, {
+          public: coursePublic,
+        });
+        await ctx.db.patch(storyId as Id<"stories">, {
+          status: "feedback",
+          approvalCount: 1,
+        });
+        await ctx.db.insert("story_approval", {
+          storyId: storyId as Id<"stories">,
+          legacyUserId: 6,
+          date: Date.now(),
+        });
+        for (let index = 2; index <= 4; index += 1) {
+          await ctx.db.insert("stories", {
+            legacyId: 9 + index,
+            name: `Story ${index}`,
+            set_id: 1,
+            set_index: index,
+            public: false,
+            courseId: courseId as Id<"courses">,
+            status: "finished",
+            deleted: false,
+            approvalCount: 2,
+            todo_count: 0,
+          });
+        }
+      });
+
+      const result = await t
+        .withIdentity(contributor)
+        .mutation(api.storyApproval.toggleStoryApproval, {
+          legacyStoryId: 10,
+        });
+      expect(result.published).toHaveLength(4);
+
+      const announcementCount = await t.run(async (ctx) => {
+        const scheduled = await ctx.db.system
+          .query("_scheduled_functions")
+          .collect();
+        return scheduled.filter(
+          (row) =>
+            row.name === "discordAnnouncements:postPublicationAnnouncement",
+        ).length;
+      });
+      expect(announcementCount).toBe(expectedAnnouncements);
+    },
+  );
 });
