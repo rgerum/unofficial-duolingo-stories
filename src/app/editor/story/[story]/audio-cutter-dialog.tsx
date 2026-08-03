@@ -1751,6 +1751,73 @@ export default function AudioCutterDialog({
     );
   }, [audioBuffer, buildSegment, commitSegments, detectionSettings]);
 
+  const onSplitSegment = React.useCallback(
+    (segmentId: string, splitTime: number) => {
+      const segment = segmentsRef.current.find(
+        (candidate) => candidate.id === segmentId,
+      );
+      if (!segment) return;
+
+      if (
+        !Number.isFinite(splitTime) ||
+        splitTime - segment.start < MIN_SEGMENT_LENGTH_SECONDS ||
+        segment.end - splitTime < MIN_SEGMENT_LENGTH_SECONDS
+      ) {
+        return;
+      }
+
+      const leftBounds = audioBuffer
+        ? getShrinkWrappedSegment(
+            audioBuffer,
+            { start: segment.start, end: splitTime },
+            detectionSettings,
+          )
+        : { start: segment.start, end: splitTime };
+      const rightBounds = audioBuffer
+        ? getShrinkWrappedSegment(
+            audioBuffer,
+            { start: splitTime, end: segment.end },
+            detectionSettings,
+          )
+        : { start: splitTime, end: segment.end };
+
+      if (
+        leftBounds.end - leftBounds.start < MIN_SEGMENT_LENGTH_SECONDS ||
+        rightBounds.end - rightBounds.start < MIN_SEGMENT_LENGTH_SECONDS
+      ) {
+        return;
+      }
+
+      const rightId = createSegmentId();
+      commitSegments((current) =>
+        sortSegments([
+          ...current.filter((candidate) => candidate.id !== segmentId),
+          buildSegment({
+            ...leftBounds,
+            id: segment.id,
+            label: segment.label,
+            skipRanges: normalizeRanges(segment.skipRanges, leftBounds),
+          }),
+          buildSegment({
+            ...rightBounds,
+            id: rightId,
+            skipRanges: normalizeRanges(segment.skipRanges, rightBounds),
+          }),
+        ]),
+      );
+      setWordMarkTimeOverridesBySegmentId((current) => {
+        if (!(segmentId in current)) return current;
+        const next = { ...current };
+        delete next[segmentId];
+        return next;
+      });
+      setHoveredSegmentId(rightId);
+      setSelectedSegmentId(rightId);
+      setMergePreview(null);
+    },
+    [audioBuffer, buildSegment, commitSegments, detectionSettings],
+  );
+
   const onChangeSegmentSkipRange = React.useCallback(
     (segmentId: string, skipRangeIndex: number, range: TimeRange | null) => {
       commitSegments((current) =>
@@ -2011,6 +2078,32 @@ export default function AudioCutterDialog({
           region.element.onmouseenter = () => {
             setHoveredSegmentId(segment.id);
           };
+          region.element.onclick = (event) => {
+            if (!(event.ctrlKey || event.metaKey)) return;
+            if (
+              event.target instanceof HTMLElement &&
+              event.target.closest(
+                ".audio-cutter-region-content__controls, .audio-cutter-region-skip-layer",
+              )
+            ) {
+              return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            const bounds = region.element?.getBoundingClientRect();
+            if (!bounds || bounds.width <= 0) return;
+            const clickRatio = clamp(
+              (event.clientX - bounds.left) / bounds.width,
+              0,
+              1,
+            );
+            onSplitSegment(
+              segment.id,
+              displaySegment.start +
+                clickRatio * (displaySegment.end - displaySegment.start),
+            );
+          };
           if (region.content instanceof HTMLElement) {
             region.content.style.position = "relative";
             region.content.style.zIndex = "1";
@@ -2057,6 +2150,7 @@ export default function AudioCutterDialog({
       onRemoveSegment,
       playSegmentAudio,
       onShrinkWrapSegment,
+      onSplitSegment,
       hoveredSegmentId,
       isSkipRangeInteractionActive,
       joinSegmentWithNext,
@@ -3613,6 +3707,7 @@ export default function AudioCutterDialog({
               ["Ctrl/Cmd+Z", "Undo segment changes"],
               ["Ctrl/Cmd+Shift+Z", "Redo segment changes"],
               ["Ctrl+wheel", "Zoom the waveform around the pointer"],
+              ["Ctrl/Cmd+click", "Split a sentence and trim silence"],
               ["Mouse click", "Select and play a transcript row"],
             ].map(([keys, description]) => (
               <div
@@ -3641,9 +3736,11 @@ export default function AudioCutterDialog({
               <div className="text-xs text-[var(--text-color-dim)]">
                 Drag across the waveform to add a segment. Drag a segment body
                 to move it. Drag either edge to resize it. Striped areas are cut
-                from preview and export. Use Add audio cut on a segment to add
-                one at the playhead, then drag or resize it. Overlapping cuts
-                join; select one and press Delete, or use its × button.
+                from preview and export. Ctrl/Cmd+click a segment to split it
+                and trim silence around the split. Use Add audio cut on a
+                segment to add one at the playhead, then drag or resize it.
+                Overlapping cuts join; select one and press Delete, or use its ×
+                button.
               </div>
             </div>
             <div className="flex items-center gap-3 text-right text-xs text-[var(--text-color-dim)]">
