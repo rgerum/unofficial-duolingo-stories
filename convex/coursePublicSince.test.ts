@@ -60,6 +60,17 @@ async function getCourse(t: ReturnType<typeof convexTest>, legacyId = 100) {
   });
 }
 
+async function getDiscordAnnouncementCount(t: ReturnType<typeof convexTest>) {
+  return await t.run(async (ctx) => {
+    const scheduled = await ctx.db.system
+      .query("_scheduled_functions")
+      .collect();
+    return scheduled.filter(
+      (row) => row.name === "discordAnnouncements:postPublicationAnnouncement",
+    ).length;
+  });
+}
+
 const asAdmin = (t: ReturnType<typeof convexTest>) =>
   t.withIdentity({ role: "admin", userId: "1" });
 
@@ -84,6 +95,7 @@ describe("updateAdminCourse publicSince", () => {
     const course = await getCourse(t);
     expect(course.public).toBe(true);
     expect(course.publicSince).toBeGreaterThanOrEqual(before);
+    expect(await getDiscordAnnouncementCount(t)).toBe(1);
   });
 
   test("keeps publicSince when a public course is edited", async () => {
@@ -104,6 +116,7 @@ describe("updateAdminCourse publicSince", () => {
 
     expect(updated.publicSince).toBe(12345);
     expect((await getCourse(t)).publicSince).toBe(12345);
+    expect(await getDiscordAnnouncementCount(t)).toBe(0);
   });
 
   test("keeps publicSince when unpublishing, restamps on republish", async () => {
@@ -135,6 +148,7 @@ describe("updateAdminCourse publicSince", () => {
     );
     expect(republished.publicSince).toBeGreaterThanOrEqual(before);
     expect((await getCourse(t)).publicSince).toBeGreaterThanOrEqual(before);
+    expect(await getDiscordAnnouncementCount(t)).toBe(1);
   });
 });
 
@@ -155,6 +169,7 @@ describe("createAdminCourse publicSince", () => {
     expect(created.publicSince).toBeGreaterThanOrEqual(before);
     const publicCourse = await getCourse(t, created.id);
     expect(publicCourse.publicSince).toBeGreaterThanOrEqual(before);
+    expect(await getDiscordAnnouncementCount(t)).toBe(1);
 
     const createdPrivate = await asAdmin(t).mutation(
       api.adminWrite.createAdminCourse,
@@ -162,6 +177,7 @@ describe("createAdminCourse publicSince", () => {
     );
     expect(createdPrivate.publicSince).toBeUndefined();
     expect((await getCourse(t, createdPrivate.id)).publicSince).toBeUndefined();
+    expect(await getDiscordAnnouncementCount(t)).toBe(1);
   });
 });
 
@@ -185,6 +201,7 @@ describe("lookupTables.upsertCourse publicSince", () => {
     });
 
     expect((await getCourse(t)).publicSince).toBe(12345);
+    expect(await getDiscordAnnouncementCount(t)).toBe(0);
   });
 
   test("stamps publicSince on a private→public mirror transition", async () => {
@@ -198,6 +215,7 @@ describe("lookupTables.upsertCourse publicSince", () => {
     });
 
     expect((await getCourse(t)).publicSince).toBeGreaterThanOrEqual(before);
+    expect(await getDiscordAnnouncementCount(t)).toBe(1);
   });
 
   test("stamps publicSince when the mirror inserts a new public course", async () => {
@@ -210,6 +228,7 @@ describe("lookupTables.upsertCourse publicSince", () => {
     });
 
     expect((await getCourse(t)).publicSince).toBeGreaterThanOrEqual(before);
+    expect(await getDiscordAnnouncementCount(t)).toBe(0);
   });
 });
 

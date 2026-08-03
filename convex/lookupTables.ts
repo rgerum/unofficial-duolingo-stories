@@ -352,15 +352,6 @@ export const upsertCourse = mutation({
     }
 
     const docId = await ctx.db.insert("courses", doc);
-    if (doc.public && doc.short) {
-      await schedulePublicationAnnouncement(ctx, {
-        eventKey: `course:${doc.legacyId}:published:${doc.publicSince}`,
-        kind: "course_published",
-        learningLanguage: learningLanguage.name,
-        fromLanguage: fromLanguage.name,
-        courseShort: doc.short,
-      });
-    }
     return { inserted: true, docId };
   },
 });

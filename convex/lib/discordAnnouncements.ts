@@ -1,14 +1,18 @@
 import { internal } from "../_generated/api";
 import type { MutationCtx } from "../_generated/server";
 
-export type PublicationAnnouncement = {
+type SharedPublicationAnnouncement = {
   eventKey: string;
-  kind: "course_published" | "set_published";
   learningLanguage: string;
   fromLanguage: string;
   courseShort: string;
-  storyCount?: number;
 };
+
+export type PublicationAnnouncement = SharedPublicationAnnouncement &
+  (
+    | { kind: "course_published" }
+    | { kind: "set_published"; storyCount: number }
+  );
 
 export function formatPublicationAnnouncement(args: PublicationAnnouncement) {
   const courseUrl = `https://duostories.org/${encodeURIComponent(args.courseShort)}`;
@@ -21,7 +25,7 @@ export function formatPublicationAnnouncement(args: PublicationAnnouncement) {
 
   const storyLabel = args.storyCount === 1 ? "story" : "stories";
   return [
-    `📚 A new set of ${args.storyCount ?? 0} ${args.learningLanguage} ${storyLabel} for ${args.fromLanguage} speakers is now available on DuoStories!`,
+    `📚 A new set of ${args.storyCount} ${args.learningLanguage} ${storyLabel} for ${args.fromLanguage} speakers is now available on DuoStories!`,
     courseUrl,
   ].join("\n");
 }
@@ -33,6 +37,6 @@ export async function schedulePublicationAnnouncement(
   await ctx.scheduler.runAfter(
     0,
     internal.discordAnnouncements.postPublicationAnnouncement,
-    { ...args, attempt: 1 },
+    { announcement: args, attempt: 1 },
   );
 }
