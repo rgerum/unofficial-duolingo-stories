@@ -37,6 +37,16 @@ export default async function FooterLinks({}) {
             </nav>
           </figure>
           <figure>
+            <figcaption>Explore</figcaption>
+            <nav>
+              <ul>
+                <li>
+                  <Link href="/recent">Recently published</Link>
+                </li>
+              </ul>
+            </nav>
+          </figure>
+          <figure>
             <figcaption>Contribute</figcaption>
             <nav>
               <ul>
