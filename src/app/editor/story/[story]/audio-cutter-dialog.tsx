@@ -1801,10 +1801,15 @@ export default function AudioCutterDialog({
           buildSegment({
             ...rightBounds,
             id: rightId,
+            label: segment.label,
             skipRanges: normalizeRanges(segment.skipRanges, rightBounds),
           }),
         ]),
       );
+      setLabelsById((current) => ({
+        ...current,
+        [rightId]: current[segmentId] ?? segment.label ?? "",
+      }));
       setWordMarkTimeOverridesBySegmentId((current) => {
         if (!(segmentId in current)) return current;
         const next = { ...current };
