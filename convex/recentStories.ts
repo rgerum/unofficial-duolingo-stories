@@ -1,24 +1,33 @@
+import type { Id } from "./_generated/dataModel";
 import { query } from "./_generated/server";
-import { v } from "convex/values";
+import { type Infer, v } from "convex/values";
 
 const recentStoryValidator = v.object({
   id: v.number(),
-  name: v.string(),
-  datePublished: v.number(),
-  image: v.string(),
+  title: v.string(),
+  setIndex: v.number(),
   active: v.string(),
   activeLip: v.string(),
+});
+
+const recentStorySetValidator = v.object({
+  datePublished: v.number(),
+  setId: v.number(),
   course: v.object({
-    short: v.string(),
-    name: v.string(),
+    courseSlug: v.string(),
+    seriesTitle: v.optional(v.string()),
     learningLanguageName: v.string(),
     fromLanguageName: v.string(),
   }),
+  stories: v.array(recentStoryValidator),
 });
 
-export const getRecentPublishedStories = query({
+type RecentStory = Infer<typeof recentStoryValidator>;
+type RecentStorySet = Infer<typeof recentStorySetValidator>;
+
+export const getRecentPublishedStorySets = query({
   args: {},
-  returns: v.array(recentStoryValidator),
+  returns: v.array(recentStorySetValidator),
   handler: async (ctx) => {
     const stories = (
       await ctx.db
@@ -29,47 +38,83 @@ export const getRecentPublishedStories = query({
         .collect()
     )
       .filter(
-        (story): story is typeof story & { date_published: number } =>
-          story.date_published !== undefined && story.date_published > 0,
+        (
+          story,
+        ): story is typeof story & {
+          date_published: number;
+          set_id: number;
+          set_index: number;
+        } =>
+          story.date_published !== undefined &&
+          story.date_published > 0 &&
+          story.set_id !== undefined &&
+          story.set_index !== undefined,
       )
       .sort((a, b) => b.date_published - a.date_published);
 
-    const rows = [];
+    const sets = new Map<string, RecentStorySet>();
+    const courseCache = new Map<
+      Id<"courses">,
+      RecentStorySet["course"] | null
+    >();
+
     for (const story of stories) {
-      if (rows.length === 50) break;
+      if (
+        sets.size === 20 &&
+        !sets.has(`${story.courseId}:${story.set_id}:${story.date_published}`)
+      ) {
+        continue;
+      }
       if (story.legacyId === undefined || !story.imageId) continue;
 
-      const [course, image] = await Promise.all([
-        ctx.db.get(story.courseId),
-        ctx.db.get(story.imageId),
-      ]);
-      if (!course?.public || !course.short || !image) continue;
+      let course = courseCache.get(story.courseId);
+      if (course === undefined) {
+        const courseRow = await ctx.db.get(story.courseId);
+        if (!courseRow?.public || !courseRow.short) {
+          courseCache.set(story.courseId, null);
+          continue;
+        }
+        const [learningLanguage, fromLanguage] = await Promise.all([
+          ctx.db.get(courseRow.learningLanguageId),
+          ctx.db.get(courseRow.fromLanguageId),
+        ]);
+        course = {
+          courseSlug: courseRow.short,
+          seriesTitle: courseRow.name || undefined,
+          learningLanguageName: learningLanguage?.name ?? "",
+          fromLanguageName: fromLanguage?.name ?? "",
+        };
+        courseCache.set(story.courseId, course);
+      }
+      if (!course) continue;
 
-      const [learningLanguage, fromLanguage] = await Promise.all([
-        ctx.db.get(course.learningLanguageId),
-        ctx.db.get(course.fromLanguageId),
-      ]);
-      const learningLanguageName = learningLanguage?.name ?? "";
+      const image = await ctx.db.get(story.imageId);
+      if (!image) continue;
 
-      rows.push({
+      const key = `${story.courseId}:${story.set_id}:${story.date_published}`;
+      const existingSet = sets.get(key);
+      const recentStory: RecentStory = {
         id: story.legacyId,
-        name: story.name,
-        datePublished: story.date_published,
-        image: image.legacyId,
+        title: story.name,
+        setIndex: story.set_index,
         active: image.active,
         activeLip: image.active_lip,
-        course: {
-          short: course.short,
-          name:
-            course.name && course.name.trim().length > 0
-              ? course.name
-              : learningLanguageName,
-          learningLanguageName,
-          fromLanguageName: fromLanguage?.name ?? "",
-        },
-      });
+      };
+      if (existingSet) {
+        existingSet.stories.push(recentStory);
+      } else if (sets.size < 20) {
+        sets.set(key, {
+          datePublished: story.date_published,
+          setId: story.set_id,
+          course,
+          stories: [recentStory],
+        });
+      }
     }
 
-    return rows;
+    return Array.from(sets.values()).map((set) => ({
+      ...set,
+      stories: set.stories.sort((a, b) => a.setIndex - b.setIndex),
+    }));
   },
 });

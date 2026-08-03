@@ -6,8 +6,8 @@ import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
 
-describe("getRecentPublishedStories", () => {
-  test("returns newest public stories from public courses", async () => {
+describe("getRecentPublishedStorySets", () => {
+  test("groups published stories into newest-first course and set events", async () => {
     const t = convexTest(schema, modules);
     await t.run(async (ctx) => {
       const learningLanguageId = await ctx.db.insert("languages", {
@@ -32,98 +32,78 @@ describe("getRecentPublishedStories", () => {
         active_lip: "aabbcc",
         gilded_lip: "ddeeff",
       });
-      const publicCourseId = await ctx.db.insert("courses", {
+      const courseId = await ctx.db.insert("courses", {
         legacyId: 10,
         short: "es-en",
-        name: "Español",
+        name: "Cuentos de la comunidad",
         learningLanguageId,
         fromLanguageId,
         public: true,
         official: false,
       });
-      const hiddenCourseId = await ctx.db.insert("courses", {
-        legacyId: 11,
-        short: "hidden",
-        learningLanguageId,
-        fromLanguageId,
-        public: false,
-        official: false,
-      });
 
-      const insertStory = async ({
-        legacyId,
-        name,
-        datePublished,
-        courseId = publicCourseId,
-        isPublic = true,
-        deleted = false,
-      }: {
-        legacyId: number;
-        name: string;
-        datePublished?: number;
-        courseId?: typeof publicCourseId;
-        isPublic?: boolean;
-        deleted?: boolean;
-      }) => {
+      const publishedStories = Array.from({ length: 8 }, (_, index) => ({
+        legacyId: index + 1,
+        name: `Set ${index < 4 ? 1 : 2} story ${(index % 4) + 1}`,
+        setId: index < 4 ? 1 : 2,
+        published: index < 4 ? 100 : 300,
+      }));
+      for (const story of publishedStories) {
         await ctx.db.insert("stories", {
-          legacyId,
-          name,
-          date_published: datePublished,
-          public: isPublic,
-          deleted,
+          legacyId: story.legacyId,
+          name: story.name,
+          set_id: story.setId,
+          set_index: story.legacyId,
+          date_published: story.published,
+          public: true,
+          deleted: false,
           imageId,
           courseId,
           status: "finished",
           todo_count: 0,
         });
-      };
-
-      await insertStory({ legacyId: 1, name: "Older", datePublished: 100 });
-      await insertStory({ legacyId: 2, name: "Newest", datePublished: 300 });
-      await insertStory({ legacyId: 3, name: "Middle", datePublished: 200 });
-      await insertStory({
-        legacyId: 4,
-        name: "Draft",
-        datePublished: 400,
-        isPublic: false,
+      }
+      await ctx.db.insert("stories", {
+        legacyId: 20,
+        name: "Created but unpublished",
+        set_id: 3,
+        set_index: 1,
+        public: false,
+        deleted: false,
+        imageId,
+        courseId,
+        status: "draft",
+        todo_count: 0,
       });
-      await insertStory({
-        legacyId: 5,
-        name: "Deleted",
-        datePublished: 500,
-        deleted: true,
-      });
-      await insertStory({
-        legacyId: 6,
-        name: "Hidden course",
-        datePublished: 600,
-        courseId: hiddenCourseId,
-      });
-      await insertStory({ legacyId: 7, name: "Missing date" });
     });
 
     const result = await t.query(
-      api.recentStories.getRecentPublishedStories,
+      api.recentStories.getRecentPublishedStorySets,
       {},
     );
 
-    expect(result.map((story) => story.name)).toEqual([
-      "Newest",
-      "Middle",
-      "Older",
-    ]);
+    expect(result).toHaveLength(2);
     expect(result[0]).toMatchObject({
-      id: 2,
       datePublished: 300,
-      image: "image-1",
-      active: "active.svg",
-      activeLip: "aabbcc",
+      setId: 2,
       course: {
-        short: "es-en",
-        name: "Español",
+        courseSlug: "es-en",
+        seriesTitle: "Cuentos de la comunidad",
         learningLanguageName: "Spanish",
         fromLanguageName: "English",
       },
+      stories: [
+        { id: 5, title: "Set 2 story 1" },
+        { id: 6, title: "Set 2 story 2" },
+        { id: 7, title: "Set 2 story 3" },
+        { id: 8, title: "Set 2 story 4" },
+      ],
     });
+    expect(result[1]?.stories.map((story) => story.title)).toEqual([
+      "Set 1 story 1",
+      "Set 1 story 2",
+      "Set 1 story 3",
+      "Set 1 story 4",
+    ]);
   });
 });
