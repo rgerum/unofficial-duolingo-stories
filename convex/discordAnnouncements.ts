@@ -13,6 +13,7 @@ const sharedAnnouncementArgs = {
   learningLanguage: v.string(),
   fromLanguage: v.string(),
   courseShort: v.string(),
+  totalStoryCount: v.number(),
 };
 
 const announcementArgs = v.union(

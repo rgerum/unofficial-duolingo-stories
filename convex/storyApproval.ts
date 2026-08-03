@@ -242,6 +242,7 @@ export const toggleStoryApproval = mutation({
             fromLanguage: fromLanguage.name,
             courseShort: course.short,
             storyCount: published.length,
+            totalStoryCount: courseCount,
           });
         }
       }

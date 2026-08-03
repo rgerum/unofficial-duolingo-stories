@@ -10,9 +10,10 @@ describe("formatPublicationAnnouncement", () => {
         learningLanguage: "Spanish",
         fromLanguage: "English",
         courseShort: "es-en",
+        totalStoryCount: 12,
       }),
     ).toBe(
-      "🎉 A new Spanish course for English speakers is now available on DuoStories!\nhttps://duostories.org/es-en",
+      "🎉 A new Spanish course for English speakers is now available on DuoStories!\nThe course now has 12 published stories.\nhttps://duostories.org/es-en",
     );
   });
 
@@ -25,9 +26,10 @@ describe("formatPublicationAnnouncement", () => {
         fromLanguage: "English",
         courseShort: "es-en",
         storyCount: 4,
+        totalStoryCount: 24,
       }),
     ).toBe(
-      "📚 A new set of 4 Spanish stories for English speakers is now available on DuoStories!\nhttps://duostories.org/es-en",
+      "📚 A new set of 4 Spanish stories for English speakers is now available on DuoStories!\nThe course now has 24 published stories.\nhttps://duostories.org/es-en",
     );
   });
 });

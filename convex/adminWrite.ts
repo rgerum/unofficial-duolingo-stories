@@ -5,6 +5,7 @@ import { v } from "convex/values";
 import { requireAdmin } from "./lib/authorization";
 import { hasNoAudioCourseTag } from "./lib/courseTags";
 import { schedulePublicationAnnouncement } from "./lib/discordAnnouncements";
+import { recomputeCoursePublishedCount } from "./lib/courseCounts";
 
 const CLEAR_NO_AUDIO_STORY_AUDIO_PROBLEM_BATCH_SIZE = 100;
 
@@ -271,12 +272,17 @@ export const updateAdminCourse = mutation({
 
     await ctx.db.patch(course._id, patchData);
     if (nextPublic && !course.public) {
+      const totalStoryCount = await recomputeCoursePublishedCount(
+        ctx,
+        course._id,
+      );
       await schedulePublicationAnnouncement(ctx, {
         eventKey: `course:${course.legacyId}:published:${patchData.publicSince}`,
         kind: "course_published",
         learningLanguage: learningLanguage.name,
         fromLanguage: fromLanguage.name,
         courseShort: short,
+        totalStoryCount,
       });
     }
     if (hasNoAudioCourseTag(nextTags)) {
@@ -424,6 +430,7 @@ export const createAdminCourse = mutation({
         learningLanguage: learningLanguage.name,
         fromLanguage: fromLanguage.name,
         courseShort: short,
+        totalStoryCount: 0,
       });
     }
 
