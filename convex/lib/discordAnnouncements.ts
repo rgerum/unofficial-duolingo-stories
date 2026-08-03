@@ -1,19 +1,28 @@
 import { internal } from "../_generated/api";
 import type { MutationCtx } from "../_generated/server";
+import { type Infer, v } from "convex/values";
 
-type SharedPublicationAnnouncement = {
-  eventKey: string;
-  learningLanguage: string;
-  fromLanguage: string;
-  courseShort: string;
-  totalStoryCount: number;
+const sharedAnnouncementArgs = {
+  eventKey: v.string(),
+  learningLanguage: v.string(),
+  fromLanguage: v.string(),
+  courseShort: v.string(),
+  totalStoryCount: v.number(),
 };
 
-export type PublicationAnnouncement = SharedPublicationAnnouncement &
-  (
-    | { kind: "course_published" }
-    | { kind: "set_published"; storyCount: number }
-  );
+export const announcementArgs = v.union(
+  v.object({
+    ...sharedAnnouncementArgs,
+    kind: v.literal("course_published"),
+  }),
+  v.object({
+    ...sharedAnnouncementArgs,
+    kind: v.literal("set_published"),
+    storyCount: v.number(),
+  }),
+);
+
+export type PublicationAnnouncement = Infer<typeof announcementArgs>;
 
 export function formatPublicationAnnouncement(args: PublicationAnnouncement) {
   const courseUrl = `https://duostories.org/${encodeURIComponent(args.courseShort)}`;
@@ -40,6 +49,6 @@ export async function schedulePublicationAnnouncement(
   await ctx.scheduler.runAfter(
     0,
     internal.discordAnnouncements.postPublicationAnnouncement,
-    { announcement: args, attempt: 1 },
+    { announcement: args, attempt: 1, operationKey: args.eventKey },
   );
 }
