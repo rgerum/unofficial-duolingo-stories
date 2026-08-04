@@ -253,6 +253,7 @@ export default defineSchema({
     tokenIdentifier: v.string(),
     legacyUserId: v.optional(v.number()),
     hideStoryQuestions: v.boolean(),
+    confirmStoryApprovals: v.optional(v.boolean()),
     updatedAt: v.number(),
   }).index("by_token_identifier", ["tokenIdentifier"]),
 

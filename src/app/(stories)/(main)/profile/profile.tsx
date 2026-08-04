@@ -12,6 +12,7 @@ import { resetPostHogUser } from "@/lib/posthog-user";
 import type { ProfileData } from "./data";
 import {
   deleteCurrentUserAccount,
+  setConfirmStoryApprovalsPreference,
   setHideStoryQuestionsPreference,
 } from "./actions";
 
@@ -27,6 +28,37 @@ const labelClass =
   "mb-1 block text-[0.82rem] font-bold uppercase tracking-[0.08em] text-[var(--title-color-dim)]";
 const successMessageClass = "mt-2 block text-[var(--button-border)]";
 const errorMessageClass = "mt-2 block text-[var(--error-red)]";
+type PreferenceState = "idle" | "pending" | "success" | "error";
+
+function useBooleanPreference(
+  initialValue: boolean,
+  savePreference: (value: boolean) => Promise<void>,
+  fallbackError: string,
+) {
+  const [value, setValue] = React.useState(initialValue);
+  const [state, setState] = React.useState<PreferenceState>("idle");
+  const [error, setError] = React.useState("");
+
+  const toggle = React.useCallback(async () => {
+    if (state === "pending") return;
+
+    const nextValue = !value;
+    setValue(nextValue);
+    setState("pending");
+    setError("");
+
+    try {
+      await savePreference(nextValue);
+      setState("success");
+    } catch (saveError) {
+      setValue(value);
+      setState("error");
+      setError((saveError as Error)?.message || fallbackError);
+    }
+  }, [fallbackError, savePreference, state, value]);
+
+  return { error, state, toggle, value };
+}
 
 function roleBadgeTone(role: string) {
   if (role === "Admin") {
@@ -304,13 +336,26 @@ export default function Profile({ providers }: { providers: ProfileData }) {
   const [isEditingEmail, setIsEditingEmail] = React.useState(false);
   const [isShowingPasswordReset, setIsShowingPasswordReset] =
     React.useState(false);
-  const [hideStoryQuestions, setHideStoryQuestions] = React.useState(
+  const {
+    value: hideStoryQuestions,
+    state: storyQuestionsState,
+    error: storyQuestionsError,
+    toggle: toggleHideStoryQuestions,
+  } = useBooleanPreference(
     providers.hide_story_questions,
+    setHideStoryQuestionsPreference,
+    "Could not update your story question preference.",
   );
-  const [storyQuestionsState, setStoryQuestionsState] = React.useState<
-    "idle" | "pending" | "success" | "error"
-  >("idle");
-  const [storyQuestionsError, setStoryQuestionsError] = React.useState("");
+  const {
+    value: confirmStoryApprovals,
+    state: storyApprovalsState,
+    error: storyApprovalsError,
+    toggle: toggleConfirmStoryApprovals,
+  } = useBooleanPreference(
+    providers.confirm_story_approvals,
+    setConfirmStoryApprovalsPreference,
+    "Could not update your story approval preference.",
+  );
   const [isShowingDeleteAccount, setIsShowingDeleteAccount] =
     React.useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = React.useState("");
@@ -476,27 +521,6 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     setUsernameError("");
   }
 
-  async function toggleHideStoryQuestions() {
-    if (storyQuestionsState === "pending") return;
-
-    const nextHideStoryQuestions = !hideStoryQuestions;
-    setHideStoryQuestions(nextHideStoryQuestions);
-    setStoryQuestionsState("pending");
-    setStoryQuestionsError("");
-
-    try {
-      await setHideStoryQuestionsPreference(nextHideStoryQuestions);
-      setStoryQuestionsState("success");
-    } catch (error) {
-      setHideStoryQuestions(!nextHideStoryQuestions);
-      setStoryQuestionsState("error");
-      setStoryQuestionsError(
-        (error as Error)?.message ||
-          "Could not update your story question preference.",
-      );
-    }
-  }
-
   async function removeAccount() {
     if (deleteState === "pending") return;
 
@@ -630,7 +654,6 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                 </div>
               ) : null}
             </SettingRow>
-
             <SettingRow
               label="Email"
               value={providers.email}
@@ -778,6 +801,29 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                 state={storyQuestionsState}
                 error={storyQuestionsError}
                 success="Story preference saved."
+              />
+            </SettingRow>
+            <SettingRow
+              label="Confirm Story Approvals"
+              value={
+                confirmStoryApprovals
+                  ? "Enabled, ask before approving"
+                  : "Disabled, approve immediately"
+              }
+              helper="Show a reminder that approval means you checked the story and think it is ready to publish."
+              action={
+                <Switch
+                  checked={confirmStoryApprovals}
+                  onClick={toggleConfirmStoryApprovals}
+                  disabled={storyApprovalsState === "pending"}
+                  ariaLabel="Confirm before approving stories"
+                />
+              }
+            >
+              <StatusText
+                state={storyApprovalsState}
+                error={storyApprovalsError}
+                success="Approval preference saved."
               />
             </SettingRow>
           </div>

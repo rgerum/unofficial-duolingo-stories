@@ -5,6 +5,7 @@ import { getSessionLegacyUserId } from "./lib/authorization";
 const storyPreferencesValidator = v.object({
   hasSavedPreference: v.boolean(),
   hideStoryQuestions: v.boolean(),
+  confirmStoryApprovals: v.boolean(),
 });
 
 export const getCurrentStoryPreferences = query({
@@ -19,6 +20,7 @@ export const getCurrentStoryPreferences = query({
       return {
         hasSavedPreference: false,
         hideStoryQuestions: false,
+        confirmStoryApprovals: true,
       };
     }
 
@@ -32,13 +34,15 @@ export const getCurrentStoryPreferences = query({
     return {
       hasSavedPreference: preference !== null,
       hideStoryQuestions: preference?.hideStoryQuestions ?? false,
+      confirmStoryApprovals: preference?.confirmStoryApprovals ?? true,
     };
   },
 });
 
 export const setCurrentStoryPreferences = mutation({
   args: {
-    hideStoryQuestions: v.boolean(),
+    hideStoryQuestions: v.optional(v.boolean()),
+    confirmStoryApprovals: v.optional(v.boolean()),
   },
   returns: storyPreferencesValidator,
   handler: async (ctx, args) => {
@@ -59,25 +63,36 @@ export const setCurrentStoryPreferences = mutation({
       .unique();
 
     const updatedAt = Date.now();
+    const hideStoryQuestions =
+      args.hideStoryQuestions ??
+      existingPreference?.hideStoryQuestions ??
+      false;
+    const confirmStoryApprovals =
+      args.confirmStoryApprovals ??
+      existingPreference?.confirmStoryApprovals ??
+      true;
 
     if (existingPreference) {
       await ctx.db.patch(existingPreference._id, {
         legacyUserId: legacyUserId ?? undefined,
-        hideStoryQuestions: args.hideStoryQuestions,
+        hideStoryQuestions,
+        confirmStoryApprovals,
         updatedAt,
       });
     } else {
       await ctx.db.insert("user_preferences", {
         tokenIdentifier,
         legacyUserId: legacyUserId ?? undefined,
-        hideStoryQuestions: args.hideStoryQuestions,
+        hideStoryQuestions,
+        confirmStoryApprovals,
         updatedAt,
       });
     }
 
     return {
       hasSavedPreference: true,
-      hideStoryQuestions: args.hideStoryQuestions,
+      hideStoryQuestions,
+      confirmStoryApprovals,
     };
   },
 });

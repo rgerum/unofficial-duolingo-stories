@@ -22,6 +22,14 @@ export async function setHideStoryQuestionsPreference(hideQuestions: boolean) {
   });
 }
 
+export async function setConfirmStoryApprovalsPreference(
+  confirmStoryApprovals: boolean,
+) {
+  await fetchAuthMutation(api.userPreferences.setCurrentStoryPreferences, {
+    confirmStoryApprovals,
+  });
+}
+
 export async function deleteCurrentUserAccount() {
   await fetchAuthMutation(api.account.deleteCurrentUser, {});
 }
