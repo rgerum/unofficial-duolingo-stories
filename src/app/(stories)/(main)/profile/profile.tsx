@@ -12,6 +12,7 @@ import { resetPostHogUser } from "@/lib/posthog-user";
 import type { ProfileData } from "./data";
 import {
   deleteCurrentUserAccount,
+  setConfirmStoryApprovalsPreference,
   setHideStoryQuestionsPreference,
 } from "./actions";
 
@@ -307,10 +308,17 @@ export default function Profile({ providers }: { providers: ProfileData }) {
   const [hideStoryQuestions, setHideStoryQuestions] = React.useState(
     providers.hide_story_questions,
   );
+  const [confirmStoryApprovals, setConfirmStoryApprovals] = React.useState(
+    providers.confirm_story_approvals,
+  );
   const [storyQuestionsState, setStoryQuestionsState] = React.useState<
     "idle" | "pending" | "success" | "error"
   >("idle");
   const [storyQuestionsError, setStoryQuestionsError] = React.useState("");
+  const [storyApprovalsState, setStoryApprovalsState] = React.useState<
+    "idle" | "pending" | "success" | "error"
+  >("idle");
+  const [storyApprovalsError, setStoryApprovalsError] = React.useState("");
   const [isShowingDeleteAccount, setIsShowingDeleteAccount] =
     React.useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = React.useState("");
@@ -497,6 +505,27 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     }
   }
 
+  async function toggleConfirmStoryApprovals() {
+    if (storyApprovalsState === "pending") return;
+
+    const nextConfirmStoryApprovals = !confirmStoryApprovals;
+    setConfirmStoryApprovals(nextConfirmStoryApprovals);
+    setStoryApprovalsState("pending");
+    setStoryApprovalsError("");
+
+    try {
+      await setConfirmStoryApprovalsPreference(nextConfirmStoryApprovals);
+      setStoryApprovalsState("success");
+    } catch (error) {
+      setConfirmStoryApprovals(!nextConfirmStoryApprovals);
+      setStoryApprovalsState("error");
+      setStoryApprovalsError(
+        (error as Error)?.message ||
+          "Could not update your story approval preference.",
+      );
+    }
+  }
+
   async function removeAccount() {
     if (deleteState === "pending") return;
 
@@ -630,7 +659,6 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                 </div>
               ) : null}
             </SettingRow>
-
             <SettingRow
               label="Email"
               value={providers.email}
@@ -778,6 +806,29 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                 state={storyQuestionsState}
                 error={storyQuestionsError}
                 success="Story preference saved."
+              />
+            </SettingRow>
+            <SettingRow
+              label="Confirm Story Approvals"
+              value={
+                confirmStoryApprovals
+                  ? "Enabled, ask before approving"
+                  : "Disabled, approve immediately"
+              }
+              helper="Show a reminder that approval means you checked the story and think it is ready to publish."
+              action={
+                <Switch
+                  checked={confirmStoryApprovals}
+                  onClick={toggleConfirmStoryApprovals}
+                  disabled={storyApprovalsState === "pending"}
+                  ariaLabel="Confirm before approving stories"
+                />
+              }
+            >
+              <StatusText
+                state={storyApprovalsState}
+                error={storyApprovalsError}
+                success="Approval preference saved."
               />
             </SettingRow>
           </div>

@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import ContributorList from "@/components/ContributorList";
 import {
@@ -60,6 +60,9 @@ export default function EditList({
   const [isStoredFilterApplied, setIsStoredFilterApplied] = useState(false);
   const restoredViewKeyRef = useRef<string | null>(null);
   const deferredStorySearch = useDeferredValue(storySearch);
+  const storyPreferences = useQuery(
+    api.userPreferences.getCurrentStoryPreferences,
+  );
 
   useEffect(() => {
     setStoryList(stories ?? []);
@@ -351,6 +354,9 @@ export default function EditList({
                     status={story.status}
                     public={story.public}
                     official={course.official}
+                    confirmStoryApprovals={
+                      storyPreferences?.confirmStoryApprovals ?? true
+                    }
                     onStoryStateChange={(nextStoryState) => {
                       setStoryList((currentStories) =>
                         currentStories.map((currentStory) =>
@@ -508,6 +514,7 @@ function DropDownStatus(props: {
   status: string;
   public: boolean;
   official: boolean;
+  confirmStoryApprovals: boolean;
   onStoryStateChange: (
     nextStoryState: Pick<
       StoryListDataProps,
@@ -523,8 +530,14 @@ function DropDownStatus(props: {
     props.approvedByCurrentUser,
   );
   let [isConfirmingApproval, setIsConfirmingApproval] = useState(false);
+  let [skipFutureApprovalConfirmations, setSkipFutureApprovalConfirmations] =
+    useState(false);
+  const approveButtonRef = useRef<HTMLButtonElement>(null);
   const toggleApprovalMutation = useMutation(
     api.storyApproval.toggleStoryApproval,
+  );
+  const setStoryPreferencesMutation = useMutation(
+    api.userPreferences.setCurrentStoryPreferences,
   );
   const router = useRouter();
 
@@ -552,13 +565,23 @@ function DropDownStatus(props: {
       void toggleApproval();
       return;
     }
-    setIsConfirmingApproval(true);
+    if (props.confirmStoryApprovals) {
+      setSkipFutureApprovalConfirmations(false);
+      setIsConfirmingApproval(true);
+      return;
+    }
+    void toggleApproval();
   }
 
   async function toggleApproval() {
     setIsConfirmingApproval(false);
     setLoading(1);
     try {
+      if (skipFutureApprovalConfirmations) {
+        await setStoryPreferencesMutation({
+          confirmStoryApprovals: false,
+        });
+      }
       const response = await toggleApprovalMutation({
         legacyStoryId: props.id,
         operationKey: `story_approval:${props.id}:toggle:client`,
@@ -663,7 +686,13 @@ function DropDownStatus(props: {
         open={isConfirmingApproval}
         onOpenChange={setIsConfirmingApproval}
       >
-        <DialogContent className="max-w-[420px] rounded-[8px] bg-[var(--body-background)] text-left whitespace-normal">
+        <DialogContent
+          className="max-w-[420px] rounded-[8px] bg-[var(--body-background)] text-left whitespace-normal"
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+            approveButtonRef.current?.focus();
+          }}
+        >
           <DialogTitle className="text-lg font-bold text-[var(--text-color)]">
             Approve story?
           </DialogTitle>
@@ -673,6 +702,16 @@ function DropDownStatus(props: {
               ready to be published?
             </p>
           </DialogDescription>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-[var(--text-color)]">
+            <input
+              type="checkbox"
+              checked={skipFutureApprovalConfirmations}
+              onChange={(event) =>
+                setSkipFutureApprovalConfirmations(event.target.checked)
+              }
+            />
+            Do not ask again
+          </label>
           <div className="flex justify-end gap-2">
             <button
               type="button"
@@ -683,6 +722,7 @@ function DropDownStatus(props: {
             </button>
             <button
               type="button"
+              ref={approveButtonRef}
               className="rounded-[8px] bg-[#0089e5] px-3 py-2 font-bold text-white hover:brightness-90"
               onClick={() => void toggleApproval()}
             >

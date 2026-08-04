@@ -15,6 +15,7 @@ export interface ProfileData {
   role: string[];
   provider_linked: Record<string, boolean>;
   hide_story_questions: boolean;
+  confirm_story_approvals: boolean;
 }
 
 export async function getProfileData() {
@@ -34,6 +35,7 @@ export async function getProfileData() {
     ) as Promise<{
       hasSavedPreference: boolean;
       hideStoryQuestions: boolean;
+      confirmStoryApprovals: boolean;
     }>,
   ]);
 
@@ -66,5 +68,6 @@ export async function getProfileData() {
       : isStoryQuestionsDisabled(
           cookieStore.get(HIDE_STORY_QUESTIONS_COOKIE)?.value,
         ),
+    confirm_story_approvals: storyPreferences.confirmStoryApprovals,
   } satisfies ProfileData;
 }
