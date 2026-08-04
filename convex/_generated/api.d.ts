@@ -60,6 +60,7 @@ import type * as storyReviewLint from "../storyReviewLint.js";
 import type * as storyTables from "../storyTables.js";
 import type * as storyWrite from "../storyWrite.js";
 import type * as userPreferences from "../userPreferences.js";
+import type * as vocabulary from "../vocabulary.js";
 
 import type {
   ApiFromModules,
@@ -120,6 +121,7 @@ declare const fullApi: ApiFromModules<{
   storyTables: typeof storyTables;
   storyWrite: typeof storyWrite;
   userPreferences: typeof userPreferences;
+  vocabulary: typeof vocabulary;
 }>;
 
 /**
