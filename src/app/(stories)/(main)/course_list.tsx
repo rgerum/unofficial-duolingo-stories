@@ -1,15 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import LanguageButton, {
   type LandingCourseButtonData,
 } from "./language_button";
 import { api } from "@convex/_generated/api";
 import { type Preloaded, usePreloadedQuery } from "convex/react";
 import type { Id } from "@convex/_generated/dataModel";
+import Input from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { filterCourseGroups } from "./course_filter";
 
 interface LandingGroupData {
   fromLanguageId: Id<"languages">;
+  fromLanguageName: string;
   labels: {
     storiesFor: string;
     nStoriesTemplate: string;
@@ -54,5 +58,33 @@ export default function CourseList({
   preloadedLandingData: Preloaded<typeof api.landing.getPublicLandingPageData>;
 }) {
   const landingData = usePreloadedQuery(preloadedLandingData);
-  return <RenderCourseGroups groups={landingData.groups} />;
+  const [query, setQuery] = useState("");
+  const filteredGroups = filterCourseGroups(landingData.groups, query);
+
+  return (
+    <section aria-label="Courses" className="pb-6">
+      <div className="relative mx-auto mt-7 w-full max-w-xl">
+        <Search
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-[var(--text-color-dim)] opacity-60"
+        />
+        <Input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search courses"
+          aria-label="Search courses"
+          autoComplete="off"
+          className="pl-12 text-[calc(18/16*1rem)]"
+        />
+      </div>
+      {filteredGroups.length > 0 ? (
+        <RenderCourseGroups groups={filteredGroups} />
+      ) : (
+        <p className="py-16 text-center text-[calc(18/16*1rem)] text-[var(--text-color-dim)]">
+          No courses found for &ldquo;{query.trim()}&rdquo;.
+        </p>
+      )}
+    </section>
+  );
 }
