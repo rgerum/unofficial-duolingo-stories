@@ -10,6 +10,7 @@ import ContributorList from "@/components/ContributorList";
 import Switch from "@/components/ui/switch";
 import { hasNoAudioCourseTag } from "@/lib/course-tags";
 import CourseInterestCard from "./course_interest_card";
+import Link from "next/link";
 
 function SetTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -258,6 +259,21 @@ export default function CoursePageClient({
           contributors={course.contributors}
           contributorsPast={course.contributors_past}
         />
+        {course.stories.length > 0 ? (
+          <div className="mx-auto mb-8 max-w-[720px] rounded-xl border border-[var(--overview-hr)] px-5 py-4">
+            <h2 className="text-lg font-bold">Course vocabulary</h2>
+            <p className="mt-1 text-[var(--text-color-dim)]">
+              See how the course&apos;s unique word list grows from story to
+              story.
+            </p>
+            <Link
+              className="mt-3 inline-block font-bold text-[var(--link-color)] underline underline-offset-2"
+              href={`/${course_id}/vocabulary`}
+            >
+              Explore vocabulary →
+            </Link>
+          </div>
+        ) : null}
         {storiesBySet.map((set) => (
           <SetGrid
             key={set.setId}
