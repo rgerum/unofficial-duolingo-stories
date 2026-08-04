@@ -38,7 +38,11 @@ import type {
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
-import { timings_to_text } from "@/lib/editor/audio/audio_edit_tools";
+import {
+  get_audio_insert_line,
+  timings_to_text,
+} from "@/lib/editor/audio/audio_edit_tools";
+import { fix_audio_line_order } from "@/lib/editor/audio/fix_audio_line_order";
 
 export default function AudioCutterPageClient({
   storyId,
@@ -418,16 +422,18 @@ export default function AudioCutterPageClient({
               learningLanguage.tts_replace ?? "",
             );
 
-            const storyText = applyAudioUpdatesToText(
-              data.story_data.text,
-              uploadedSegments.map((segment) => ({
-                ssml: segment.ssml,
-                serializedText: timings_to_text({
-                  filename: segment.uploadedFilename,
-                  keypoints: segment.keypoints,
-                }),
-              })),
-              audioInsertLines,
+            const storyText = fix_audio_line_order(
+              applyAudioUpdatesToText(
+                data.story_data.text,
+                uploadedSegments.map((segment) => ({
+                  ssml: segment.ssml,
+                  serializedText: timings_to_text({
+                    filename: segment.uploadedFilename,
+                    keypoints: segment.keypoints,
+                  }),
+                })),
+                audioInsertLines,
+              ),
             );
 
             const [nextParsedStoryBase, nextParsedMeta] = processStoryFile(
@@ -642,11 +648,7 @@ function applyAudioUpdatesToText(
         };
       }
 
-      const lineInsertNumber = Math.min(
-        Math.max(1, lineInsert - 1),
-        state.doc.lines,
-      );
-      const lineState = state.doc.line(lineInsertNumber);
+      const lineState = get_audio_insert_line(state.doc, lineInsert);
       return {
         from: lineState.from,
         to: lineState.from,
