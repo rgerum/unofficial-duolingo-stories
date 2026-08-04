@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Header from "./header";
 import CourseList from "./course_list";
-import Icons from "./icons";
 import React from "react";
 import { preloadQuery } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
@@ -46,7 +45,6 @@ export default async function Page({}) {
           or learn more about the project in our <Link href="/faq">FAQ</Link>.
         </p>
         <StoreBadges />
-        <Icons />
       </Header>
       <CourseList preloadedLandingData={preloadedLandingData} />
     </>
