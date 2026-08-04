@@ -63,7 +63,7 @@ export default function CourseList({
 
   return (
     <section aria-label="Courses" className="pb-6">
-      <div className="relative mx-auto mt-7 w-full max-w-xl">
+      <div className="relative mx-auto mt-2 w-full max-w-xl">
         <Search
           aria-hidden="true"
           className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-[var(--text-color-dim)] opacity-60"
