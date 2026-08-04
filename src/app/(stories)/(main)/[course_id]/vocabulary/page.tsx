@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { api } from "@convex/_generated/api";
-import { fetchQuery } from "convex/nextjs";
 
 import Header from "../../header";
 import { analyzeCourseVocabulary } from "@/lib/course-vocabulary";
+import { fetchAuthQuery } from "@/lib/auth-server";
+import { requireAdmin } from "@/lib/userInterface";
 
 export async function generateMetadata({
   params,
@@ -17,6 +18,7 @@ export async function generateMetadata({
     title: `Course vocabulary | Duostories`,
     description: `See how the unique vocabulary grows throughout the ${courseId} Duostories course.`,
     alternates: { canonical: `https://duostories.org/${courseId}/vocabulary` },
+    robots: { index: false, follow: false },
   };
 }
 
@@ -86,8 +88,9 @@ export default async function VocabularyPage({
   const { course_id: courseId } = await params;
   if (!courseId.includes("-") || courseId.includes(".")) notFound();
 
-  const course = await fetchQuery(
-    api.vocabulary.getPublicCourseVocabularySource,
+  await requireAdmin();
+  const course = await fetchAuthQuery(
+    api.vocabulary.getCourseVocabularySourceForAdmin,
     {
       short: courseId,
     },

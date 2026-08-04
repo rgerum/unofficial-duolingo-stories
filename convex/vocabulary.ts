@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 
 import { query } from "./_generated/server";
+import { requireAdmin } from "./lib/authorization";
 import { getPublicStoryJson } from "./lib/publicStoryContent";
 import { listPublicCourseStories } from "./lib/publicCourseStories";
 
@@ -30,7 +31,7 @@ const vocabularyStoryValidator = v.object({
   lines: v.array(v.string()),
 });
 
-export const getPublicCourseVocabularySource = query({
+export const getCourseVocabularySourceForAdmin = query({
   args: { short: v.string() },
   returns: v.union(
     v.object({
@@ -42,6 +43,8 @@ export const getPublicCourseVocabularySource = query({
     v.null(),
   ),
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
     const course = await ctx.db
       .query("courses")
       .withIndex("by_short", (q) => q.eq("short", args.short))

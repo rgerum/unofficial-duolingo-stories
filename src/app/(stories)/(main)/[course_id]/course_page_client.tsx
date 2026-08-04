@@ -11,6 +11,7 @@ import Switch from "@/components/ui/switch";
 import { hasNoAudioCourseTag } from "@/lib/course-tags";
 import CourseInterestCard from "./course_interest_card";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
 
 function SetTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -124,6 +125,9 @@ export default function CoursePageClient({
     [course_id],
   );
   const [listeningMode, setListeningMode] = React.useState(false);
+  const { data: session } = authClient.useSession();
+  const isAdmin =
+    (session?.user as { role?: string } | undefined)?.role === "admin";
   const course = usePreloadedQuery(preloadedCourse);
   const noAudioCourse = hasNoAudioCourseTag(course?.tags);
 
@@ -259,7 +263,7 @@ export default function CoursePageClient({
           contributors={course.contributors}
           contributorsPast={course.contributors_past}
         />
-        {course.stories.length > 0 ? (
+        {isAdmin && course.stories.length > 0 ? (
           <div className="mx-auto mb-8 max-w-[720px] rounded-xl border border-[var(--overview-hr)] px-5 py-4">
             <h2 className="text-lg font-bold">Course vocabulary</h2>
             <p className="mt-1 text-[var(--text-color-dim)]">
