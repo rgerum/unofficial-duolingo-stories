@@ -28,17 +28,15 @@ export function formatPublicationAnnouncement(args: PublicationAnnouncement) {
   const courseUrl = `https://duostories.org/${encodeURIComponent(args.courseShort)}`;
   if (args.kind === "course_published") {
     return [
-      `🎉 A new ${args.learningLanguage} course for ${args.fromLanguage} speakers is now available on DuoStories!`,
-      `The course now has ${args.totalStoryCount} published ${args.totalStoryCount === 1 ? "story" : "stories"}.`,
-      courseUrl,
+      `🎉 A new [${args.learningLanguage} course](${courseUrl}) for ${args.fromLanguage} speakers has just been published!`,
+      `The course now has ${args.totalStoryCount} ${args.totalStoryCount === 1 ? "story" : "stories"}.`,
     ].join("\n");
   }
 
   const storyLabel = args.storyCount === 1 ? "story" : "stories";
   return [
-    `📚 A new set of ${args.storyCount} ${args.learningLanguage} ${storyLabel} for ${args.fromLanguage} speakers is now available on DuoStories!`,
-    `The course now has ${args.totalStoryCount} published ${args.totalStoryCount === 1 ? "story" : "stories"}.`,
-    courseUrl,
+    `📚 A new set of ${args.storyCount} [${args.learningLanguage} ${storyLabel}](${courseUrl}) for ${args.fromLanguage} speakers has just been published!`,
+    `The course now has ${args.totalStoryCount} ${args.totalStoryCount === 1 ? "story" : "stories"}.`,
   ].join("\n");
 }
 
