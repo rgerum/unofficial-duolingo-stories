@@ -28,6 +28,37 @@ const labelClass =
   "mb-1 block text-[0.82rem] font-bold uppercase tracking-[0.08em] text-[var(--title-color-dim)]";
 const successMessageClass = "mt-2 block text-[var(--button-border)]";
 const errorMessageClass = "mt-2 block text-[var(--error-red)]";
+type PreferenceState = "idle" | "pending" | "success" | "error";
+
+function useBooleanPreference(
+  initialValue: boolean,
+  savePreference: (value: boolean) => Promise<void>,
+  fallbackError: string,
+) {
+  const [value, setValue] = React.useState(initialValue);
+  const [state, setState] = React.useState<PreferenceState>("idle");
+  const [error, setError] = React.useState("");
+
+  const toggle = React.useCallback(async () => {
+    if (state === "pending") return;
+
+    const nextValue = !value;
+    setValue(nextValue);
+    setState("pending");
+    setError("");
+
+    try {
+      await savePreference(nextValue);
+      setState("success");
+    } catch (saveError) {
+      setValue(value);
+      setState("error");
+      setError((saveError as Error)?.message || fallbackError);
+    }
+  }, [fallbackError, savePreference, state, value]);
+
+  return { error, state, toggle, value };
+}
 
 function roleBadgeTone(role: string) {
   if (role === "Admin") {
@@ -305,20 +336,26 @@ export default function Profile({ providers }: { providers: ProfileData }) {
   const [isEditingEmail, setIsEditingEmail] = React.useState(false);
   const [isShowingPasswordReset, setIsShowingPasswordReset] =
     React.useState(false);
-  const [hideStoryQuestions, setHideStoryQuestions] = React.useState(
+  const {
+    value: hideStoryQuestions,
+    state: storyQuestionsState,
+    error: storyQuestionsError,
+    toggle: toggleHideStoryQuestions,
+  } = useBooleanPreference(
     providers.hide_story_questions,
+    setHideStoryQuestionsPreference,
+    "Could not update your story question preference.",
   );
-  const [confirmStoryApprovals, setConfirmStoryApprovals] = React.useState(
+  const {
+    value: confirmStoryApprovals,
+    state: storyApprovalsState,
+    error: storyApprovalsError,
+    toggle: toggleConfirmStoryApprovals,
+  } = useBooleanPreference(
     providers.confirm_story_approvals,
+    setConfirmStoryApprovalsPreference,
+    "Could not update your story approval preference.",
   );
-  const [storyQuestionsState, setStoryQuestionsState] = React.useState<
-    "idle" | "pending" | "success" | "error"
-  >("idle");
-  const [storyQuestionsError, setStoryQuestionsError] = React.useState("");
-  const [storyApprovalsState, setStoryApprovalsState] = React.useState<
-    "idle" | "pending" | "success" | "error"
-  >("idle");
-  const [storyApprovalsError, setStoryApprovalsError] = React.useState("");
   const [isShowingDeleteAccount, setIsShowingDeleteAccount] =
     React.useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = React.useState("");
@@ -482,48 +519,6 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     setSavedUsername(normalizedUsername);
     setUsernameState("success");
     setUsernameError("");
-  }
-
-  async function toggleHideStoryQuestions() {
-    if (storyQuestionsState === "pending") return;
-
-    const nextHideStoryQuestions = !hideStoryQuestions;
-    setHideStoryQuestions(nextHideStoryQuestions);
-    setStoryQuestionsState("pending");
-    setStoryQuestionsError("");
-
-    try {
-      await setHideStoryQuestionsPreference(nextHideStoryQuestions);
-      setStoryQuestionsState("success");
-    } catch (error) {
-      setHideStoryQuestions(!nextHideStoryQuestions);
-      setStoryQuestionsState("error");
-      setStoryQuestionsError(
-        (error as Error)?.message ||
-          "Could not update your story question preference.",
-      );
-    }
-  }
-
-  async function toggleConfirmStoryApprovals() {
-    if (storyApprovalsState === "pending") return;
-
-    const nextConfirmStoryApprovals = !confirmStoryApprovals;
-    setConfirmStoryApprovals(nextConfirmStoryApprovals);
-    setStoryApprovalsState("pending");
-    setStoryApprovalsError("");
-
-    try {
-      await setConfirmStoryApprovalsPreference(nextConfirmStoryApprovals);
-      setStoryApprovalsState("success");
-    } catch (error) {
-      setConfirmStoryApprovals(!nextConfirmStoryApprovals);
-      setStoryApprovalsState("error");
-      setStoryApprovalsError(
-        (error as Error)?.message ||
-          "Could not update your story approval preference.",
-      );
-    }
   }
 
   async function removeAccount() {
