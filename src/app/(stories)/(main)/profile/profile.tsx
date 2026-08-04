@@ -803,29 +803,31 @@ export default function Profile({ providers }: { providers: ProfileData }) {
                 success="Story preference saved."
               />
             </SettingRow>
-            <SettingRow
-              label="Confirm Story Approvals"
-              value={
-                confirmStoryApprovals
-                  ? "Enabled, ask before approving"
-                  : "Disabled, approve immediately"
-              }
-              helper="Show a reminder that approval means you checked the story and think it is ready to publish."
-              action={
-                <Switch
-                  checked={confirmStoryApprovals}
-                  onClick={toggleConfirmStoryApprovals}
-                  disabled={storyApprovalsState === "pending"}
-                  ariaLabel="Confirm before approving stories"
+            {providers.can_approve_stories ? (
+              <SettingRow
+                label="Confirm Story Approvals"
+                value={
+                  confirmStoryApprovals
+                    ? "Enabled, ask before approving"
+                    : "Disabled, approve immediately"
+                }
+                helper="Show a reminder that approval means you checked the story and think it is ready to publish."
+                action={
+                  <Switch
+                    checked={confirmStoryApprovals}
+                    onClick={toggleConfirmStoryApprovals}
+                    disabled={storyApprovalsState === "pending"}
+                    ariaLabel="Confirm before approving stories"
+                  />
+                }
+              >
+                <StatusText
+                  state={storyApprovalsState}
+                  error={storyApprovalsError}
+                  success="Approval preference saved."
                 />
-              }
-            >
-              <StatusText
-                state={storyApprovalsState}
-                error={storyApprovalsError}
-                success="Approval preference saved."
-              />
-            </SettingRow>
+              </SettingRow>
+            ) : null}
           </div>
         </section>
 
