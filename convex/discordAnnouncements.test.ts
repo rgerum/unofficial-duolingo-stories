@@ -5,6 +5,8 @@ import {
 } from "./discordAnnouncements";
 import { formatPublicationAnnouncement } from "./lib/discordAnnouncements";
 
+const EXPECTED_DISCORD_MESSAGE_FLAG_SUPPRESS_EMBEDS = 1 << 2;
+
 const announcement = {
   eventKey: "course:100:set:2:published:1722729600000",
   kind: "set_published" as const,
@@ -46,7 +48,7 @@ describe("formatPublicationAnnouncement", () => {
         totalStoryCount: 12,
       }),
     ).toBe(
-      "🎉 A new Spanish course for English speakers is now available on DuoStories!\nThe course now has 12 published stories.\nhttps://duostories.org/es-en",
+      "🎉 A new [Spanish course](https://duostories.org/es-en) for English speakers has just been published!\nThe course now has 12 stories.",
     );
   });
 
@@ -62,7 +64,7 @@ describe("formatPublicationAnnouncement", () => {
         totalStoryCount: 24,
       }),
     ).toBe(
-      "📚 A new set of 4 Spanish stories for English speakers is now available on DuoStories!\nThe course now has 24 published stories.\nhttps://duostories.org/es-en",
+      "📚 A new set of 4 [Spanish stories](https://duostories.org/es-en) for English speakers has just been published!\nThe course now has 24 stories.",
     );
   });
 });
@@ -118,6 +120,7 @@ describe("postPublicationAnnouncement", () => {
       content: formatPublicationAnnouncement(announcement),
       nonce: await deriveDiscordNonce(announcement.eventKey),
       enforce_nonce: true,
+      flags: EXPECTED_DISCORD_MESSAGE_FLAG_SUPPRESS_EMBEDS,
     });
     expect(body.nonce).toHaveLength(24);
     expect(await deriveDiscordNonce(announcement.eventKey)).toBe(body.nonce);

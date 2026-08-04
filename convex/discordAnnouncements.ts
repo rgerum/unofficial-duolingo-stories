@@ -11,6 +11,7 @@ import {
 
 const MAX_ATTEMPTS = 5;
 const DEFAULT_CHANNEL_NAME = "general-everyone";
+const DISCORD_MESSAGE_FLAG_SUPPRESS_EMBEDS = 1 << 2;
 
 type AnnouncementActionArgs = {
   announcement: PublicationAnnouncement;
@@ -66,6 +67,7 @@ export async function handlePublicationAnnouncement(
           content: formatPublicationAnnouncement(announcement),
           nonce: await deriveDiscordNonce(announcement.eventKey),
           enforce_nonce: true,
+          flags: DISCORD_MESSAGE_FLAG_SUPPRESS_EMBEDS,
         }),
       },
     );
