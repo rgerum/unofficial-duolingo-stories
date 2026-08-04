@@ -47,6 +47,15 @@ test("matches course codes and source-language names", () => {
   );
 });
 
+test("matches queries that combine course and source-language names", () => {
+  assert.deepEqual(
+    filterCourseGroups(groups, "French English").flatMap(
+      (group) => group.courses,
+    ),
+    [groups[0].courses[1]],
+  );
+});
+
 test("removes groups with no matching courses", () => {
   assert.deepEqual(filterCourseGroups(groups, "Klingon"), []);
 });

@@ -22,18 +22,15 @@ export function filterCourseGroups<
 >(groups: Group[], query: string): Group[] {
   const normalizedQuery = normalizeSearchText(query);
   if (!normalizedQuery) return groups;
+  const queryTerms = normalizedQuery.split(/\s+/);
 
   return groups.flatMap((group) => {
-    const sourceLanguageMatches = normalizeSearchText(
-      group.fromLanguageName,
-    ).includes(normalizedQuery);
-    const courses = sourceLanguageMatches
-      ? group.courses
-      : group.courses.filter((course) =>
-          normalizeSearchText(`${course.name} ${course.short}`).includes(
-            normalizedQuery,
-          ),
-        );
+    const courses = group.courses.filter((course) => {
+      const searchableText = normalizeSearchText(
+        `${course.name} ${course.short} ${group.fromLanguageName}`,
+      );
+      return queryTerms.every((term) => searchableText.includes(term));
+    });
 
     return courses.length > 0 ? [{ ...group, courses }] : [];
   });
