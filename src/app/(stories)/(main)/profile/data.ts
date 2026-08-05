@@ -16,6 +16,7 @@ export interface ProfileData {
   provider_linked: Record<string, boolean>;
   hide_story_questions: boolean;
   confirm_story_approvals: boolean;
+  can_approve_stories: boolean;
 }
 
 export async function getProfileData() {
@@ -69,5 +70,6 @@ export async function getProfileData() {
           cookieStore.get(HIDE_STORY_QUESTIONS_COOKIE)?.value,
         ),
     confirm_story_approvals: storyPreferences.confirmStoryApprovals,
+    can_approve_stories: isContributor(user),
   } satisfies ProfileData;
 }
