@@ -13,6 +13,8 @@ declare global {
 
 type UseAudioElement = StoryElementLine | StoryElementHeader;
 
+export type PlayingWordRange = { start: number; end: number };
+
 export function getPlayableKeypoints(
   keypoints: Audio["keypoints"],
   durationSeconds: number,
@@ -37,6 +39,8 @@ export default function useAudio(
   enabled = true,
 ) {
   const [audioRange, setAudioRange] = React.useState(99999);
+  const [playingWordRange, setPlayingWordRange] =
+    React.useState<PlayingWordRange | null>(null);
   const audio: Audio | undefined =
     element.type === "LINE"
       ? element.line?.content?.audio
@@ -118,6 +122,101 @@ export default function useAudio(
     return cancel;
   }, [audio, enabled]);
 
+  // Play only the audio segment of the word at character offset `start`,
+  // using the keypoint timestamps: a word's segment runs from its keypoint's
+  // audioStart to the next keypoint's audioStart (or the end of the clip).
+  const playWordAudio = React.useCallback(
+    async (start: number) => {
+      if (!enabled || !audio?.url || !ref.current) return;
+      if (!audio.keypoints?.length) return;
+
+      const audioObject = ref.current;
+
+      // Stop any currently playing audio
+      if (window.playing_audio?.length) {
+        window.playing_audio.forEach((cancel) => cancel());
+      }
+      window.playing_audio = [];
+
+      // Register the cancel handler before awaiting metadata so a newer
+      // click (or full-line play) invalidates this pending request.
+      let cancelled = false;
+      let stopTimeout: number | undefined;
+      const cancel = () => {
+        cancelled = true;
+        if (stopTimeout !== undefined) {
+          clearTimeout(stopTimeout);
+          stopTimeout = undefined;
+        }
+        audioObject.removeEventListener("ended", cancel);
+        audioObject.pause();
+        setPlayingWordRange(null);
+      };
+      window.playing_audio.push(cancel);
+
+      let segmentStart: number;
+      let segmentEnd: number | undefined;
+      let wordRange: PlayingWordRange;
+      try {
+        audioObject.pause();
+        if (audioObject.readyState < HTMLMediaElement.HAVE_METADATA) {
+          audioObject.load();
+          await new Promise<void>((resolve, reject) => {
+            audioObject.addEventListener("loadedmetadata", () => resolve(), {
+              once: true,
+            });
+            audioObject.addEventListener(
+              "error",
+              () => reject(new Error("Audio failed to load")),
+              { once: true },
+            );
+          });
+        }
+        if (cancelled) return;
+
+        const keypoints = getPlayableKeypoints(
+          audio.keypoints,
+          audioObject.duration,
+        );
+        if (!keypoints.length) return;
+        let index = keypoints.findIndex(
+          (keypoint) => keypoint.rangeEnd > start,
+        );
+        if (index === -1) index = keypoints.length - 1;
+        segmentStart = keypoints[index].audioStart;
+        segmentEnd = keypoints[index + 1]?.audioStart;
+        wordRange = {
+          start: keypoints[index - 1]?.rangeEnd ?? 0,
+          end: keypoints[index].rangeEnd,
+        };
+
+        audioObject.currentTime = segmentStart / 1000;
+        await audioObject.play();
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") {
+          return;
+        }
+        console.error("Failed to play audio:", e);
+        return;
+      }
+      if (cancelled) {
+        audioObject.pause();
+        return;
+      }
+
+      setPlayingWordRange(wordRange);
+
+      if (segmentEnd !== undefined) {
+        stopTimeout = window.setTimeout(
+          cancel,
+          Math.max(0, segmentEnd - segmentStart),
+        );
+      }
+      audioObject.addEventListener("ended", cancel, { once: true });
+    },
+    [audio, enabled],
+  );
+
   React.useEffect(() => {
     if (!enabled) return;
     if (!active) return;
@@ -143,7 +242,7 @@ export default function useAudio(
   }, [active, element.type, enabled, playAudio]);
 
   if (!audio?.url) {
-    return [audioRange, undefined, ref, undefined] as const;
+    return [audioRange, undefined, ref, undefined, undefined, null] as const;
   }
 
   const audioUrl =
@@ -151,5 +250,14 @@ export default function useAudio(
       ? audio.url
       : `https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/${audio.url}`;
 
-  return [audioRange, playAudio, ref, audioUrl] as const;
+  const hasWordTimings = (audio.keypoints?.length ?? 0) > 0;
+
+  return [
+    audioRange,
+    playAudio,
+    ref,
+    audioUrl,
+    hasWordTimings ? playWordAudio : undefined,
+    playingWordRange,
+  ] as const;
 }
