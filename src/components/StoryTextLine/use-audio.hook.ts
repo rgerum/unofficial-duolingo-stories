@@ -15,6 +15,16 @@ type UseAudioElement = StoryElementLine | StoryElementHeader;
 
 export type PlayingWordRange = { start: number; end: number };
 
+// Timing keypoints sit earlier than the actual speech in the encoded audio
+// (MP3 encoder delay + TTS speech-mark skew). Measured against energy onsets
+// across several courses, speech runs ~25-200ms (median ~75ms) behind its
+// mark depending on the voice. Shift the playback window right: a small
+// start shift trims the previous word's tail, and a larger end pad keeps
+// word endings from being clipped (bleeding a soft next-word onset is less
+// jarring than a cut-off ending).
+const WORD_AUDIO_START_SHIFT_MS = 30;
+const WORD_AUDIO_END_PAD_MS = 150;
+
 export function getPlayableKeypoints(
   keypoints: Audio["keypoints"],
   durationSeconds: number,
@@ -183,8 +193,12 @@ export default function useAudio(
           (keypoint) => keypoint.rangeEnd > start,
         );
         if (index === -1) index = keypoints.length - 1;
-        segmentStart = keypoints[index].audioStart;
-        segmentEnd = keypoints[index + 1]?.audioStart;
+        segmentStart = keypoints[index].audioStart + WORD_AUDIO_START_SHIFT_MS;
+        const nextStart = keypoints[index + 1]?.audioStart;
+        segmentEnd =
+          nextStart !== undefined
+            ? nextStart + WORD_AUDIO_END_PAD_MS
+            : undefined;
         wordRange = {
           start: keypoints[index - 1]?.rangeEnd ?? 0,
           end: keypoints[index].rangeEnd,
@@ -207,9 +221,11 @@ export default function useAudio(
       setPlayingWordRange(wordRange);
 
       if (segmentEnd !== undefined) {
+        // Base the stop timer on the actual position after seeking, since
+        // MP3 seeks are not sample-exact.
         stopTimeout = window.setTimeout(
           cancel,
-          Math.max(0, segmentEnd - segmentStart),
+          Math.max(0, segmentEnd - audioObject.currentTime * 1000),
         );
       }
       audioObject.addEventListener("ended", cancel, { once: true });
