@@ -96,11 +96,63 @@ export const getCourseListForReview = internalQuery({
           course.from_language_name ??
           ""
         }`,
+        learningLanguage:
+          languageById.get(course.learningLanguageId)?.name ??
+          course.learning_language_name ??
+          "",
+        learningLanguageShort:
+          languageById.get(course.learningLanguageId)?.short ?? "",
       }));
   },
 });
 
 const MAX_SETS_PER_REQUEST = 8;
+
+export const getNextUnpublishedSet = internalQuery({
+  args: { courseShort: v.string() },
+  returns: v.union(
+    v.object({
+      courseShort: v.string(),
+      setId: v.number(),
+      storyIds: v.array(v.number()),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const course = await ctx.db
+      .query("courses")
+      .withIndex("by_short", (q) => q.eq("short", args.courseShort))
+      .unique();
+    if (!course) return null;
+
+    const [nextUnpublished] = await ctx.db
+      .query("stories")
+      .withIndex("by_course_public_deleted_set", (q) =>
+        q
+          .eq("courseId", course._id)
+          .eq("public", false)
+          .eq("deleted", false)
+          .gte("set_id", 0),
+      )
+      .take(1);
+    if (!nextUnpublished) return null;
+
+    const setId = nextUnpublished.set_id ?? 0;
+    const stories = await ctx.db
+      .query("stories")
+      .withIndex("by_set", (q) =>
+        q.eq("courseId", course._id).eq("set_id", setId),
+      )
+      .take(50);
+    return {
+      courseShort: args.courseShort,
+      setId,
+      storyIds: stories
+        .filter((story) => !story.deleted && typeof story.legacyId === "number")
+        .map((story) => story.legacyId as number),
+    };
+  },
+});
 
 // Resolves "course + set numbers" (how contributors actually ask for reviews)
 // to story ids, in set order. An empty sets array means "all sets".
@@ -182,6 +234,7 @@ export const reviewStoriesForDiscord = httpAction(async (ctx, req) => {
     storyIds?: unknown;
     courseShort?: unknown;
     sets?: unknown;
+    nextUnpublished?: unknown;
     listCourses?: unknown;
   };
   if (parsed.secret !== expectedSecret) {
@@ -199,7 +252,25 @@ export const reviewStoriesForDiscord = httpAction(async (ctx, req) => {
 
     let storyIds: number[];
     let setsTruncated = false;
-    if (typeof parsed.courseShort === "string") {
+    let selectedSetId: number | undefined;
+    if (
+      typeof parsed.courseShort === "string" &&
+      parsed.nextUnpublished === true
+    ) {
+      const resolution: {
+        courseShort: string;
+        setId: number;
+        storyIds: number[];
+      } | null = await ctx.runQuery(
+        internal.storyReview.getNextUnpublishedSet,
+        { courseShort: parsed.courseShort },
+      );
+      if (!resolution) {
+        return json({ ok: true, noUnpublished: true, stories: [] });
+      }
+      storyIds = resolution.storyIds;
+      selectedSetId = resolution.setId;
+    } else if (typeof parsed.courseShort === "string") {
       const sets = Array.isArray(parsed.sets)
         ? parsed.sets.filter(
             (setId): setId is number =>
@@ -246,7 +317,13 @@ export const reviewStoriesForDiscord = httpAction(async (ctx, req) => {
     );
     // never drop requested content silently: the bot reports partial coverage
     const truncated = setsTruncated || totalResolved > storyIds.length;
-    return json({ ok: true, stories, truncated, totalResolved });
+    return json({
+      ok: true,
+      stories,
+      truncated,
+      totalResolved,
+      selectedSetId,
+    });
   } catch (error) {
     console.error("review-stories failed", error);
     return json({ ok: false, error: "Internal error" }, 500);
