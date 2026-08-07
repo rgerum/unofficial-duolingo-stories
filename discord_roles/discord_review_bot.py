@@ -215,7 +215,7 @@ def group_by_set(stories):
     return sorted(groups.items())
 
 
-def load_checklists(language_short):
+def load_checklists(language_short, no_audio=False):
     parts = []
     global_file = CHECKLIST_DIR / "global.md"
     if global_file.exists():
@@ -223,6 +223,9 @@ def load_checklists(language_short):
     language_file = CHECKLIST_DIR / "languages" / f"{language_short}.md"
     if language_short and language_file.exists():
         parts.append(language_file.read_text(encoding="utf-8"))
+    no_audio_file = CHECKLIST_DIR / "no-audio.md"
+    if no_audio and no_audio_file.exists():
+        parts.append(no_audio_file.read_text(encoding="utf-8"))
     return "\n\n".join(parts)
 
 
@@ -281,9 +284,15 @@ def format_story_for_ai_review(text):
 
 
 def build_ai_prompt(story):
-    checklists = load_checklists(story.get("learningLanguage") or "")
-    no_audio_note = (
-        "This course is a no-audio course.\n" if story.get("noAudio") else ""
+    no_audio = bool(story.get("noAudio"))
+    checklists = load_checklists(
+        story.get("learningLanguage") or "", no_audio=no_audio
+    )
+    audio_capability_note = (
+        "This course is a no-audio course. Apply the no-audio checklist below."
+        if no_audio
+        else "This course has audio. Do not flag listening challenges such as "
+        "[ARRANGE] or infer that the course is no-audio."
     )
     return f"""You are the automatic reviewer for Duostories, a community project translating Duolingo stories.
 Review ONE story written in the Duostories story DSL (blocks like [LINE], [MULTIPLE_CHOICE]; '$' lines are audio timings; 'SpeakerN:' marks who talks).
@@ -291,7 +300,7 @@ Review ONE story written in the Duostories story DSL (blocks like [LINE], [MULTI
 Translation-hint lines have been expanded from the compact DSL into one `learning-language token = base-language hint` line per hoverable token. These hints are deliberately literal, sentence-specific glosses that show learners what each word or joined phrase does. They are NOT prose translations and do not need to sound natural or follow natural base-language word order. Joined hints retain `~` (for example, `kimaka = le~da~a`). Judge whether each gloss conveys the token's meaning or grammatical function in context; only expect natural base-language phrasing in question text and other prose shown as prose.
 
 Story: #{story["storyId"]} "{story.get("name", "")}" — course {story.get("courseShort", "")}, learning language: {story.get("learningLanguage", "")}.
-{no_audio_note}
+{audio_capability_note}
 Follow this review checklist. A separate mechanical check already covers hint counts, missing audio, and question structure — do NOT repeat those.
 
 {checklists}
