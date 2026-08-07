@@ -20,6 +20,7 @@ import type * as authProviderConfig from "../authProviderConfig.js";
 import type * as authProviders from "../authProviders.js";
 import type * as courseContributorBackfill from "../courseContributorBackfill.js";
 import type * as courseInterest from "../courseInterest.js";
+import type * as coursePins from "../coursePins.js";
 import type * as courseReadStats from "../courseReadStats.js";
 import type * as courseWrite from "../courseWrite.js";
 import type * as discordAnnouncements from "../discordAnnouncements.js";
@@ -81,6 +82,7 @@ declare const fullApi: ApiFromModules<{
   authProviders: typeof authProviders;
   courseContributorBackfill: typeof courseContributorBackfill;
   courseInterest: typeof courseInterest;
+  coursePins: typeof coursePins;
   courseReadStats: typeof courseReadStats;
   courseWrite: typeof courseWrite;
   discordAnnouncements: typeof discordAnnouncements;

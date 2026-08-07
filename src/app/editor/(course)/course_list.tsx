@@ -22,6 +22,7 @@ export default function CourseList({
 }: CourseListProps) {
   const data = useQuery(api.editorRead.getEditorSidebarData, {});
   const courses = data?.courses as CourseProps[] | undefined;
+  const pinnedCourseIds = useQuery(api.coursePins.listCurrentUserPins, {});
 
   const [search, setSearch] = useInput("");
   const router = useRouter();
@@ -41,10 +42,16 @@ export default function CourseList({
     );
   }
 
+  const pinnedCourseIdSet = new Set(pinnedCourseIds ?? []);
+  const sortedCourses = [...courses].sort(
+    (a, b) =>
+      Number(pinnedCourseIdSet.has(b.id)) - Number(pinnedCourseIdSet.has(a.id)),
+  );
+
   let filtered_courses: CourseProps[] = [];
-  if (search === "") filtered_courses = courses;
+  if (search === "") filtered_courses = sortedCourses;
   else {
-    for (let course of courses) {
+    for (let course of sortedCourses) {
       if (
         course.learning_language_name
           .toLowerCase()
@@ -75,8 +82,8 @@ export default function CourseList({
           />
         </div>
         <div>
-          {filtered_courses.map((course, index) => (
-            <div key={index}>
+          {filtered_courses.map((course) => (
+            <div key={course.id}>
               <Link
                 className={
                   "flex items-center border-b border-[var(--header-border)] bg-[var(--body-background)] text-[var(--text-color)] no-underline outline-offset-[-2px] hover:brightness-90 focus:brightness-90 " +

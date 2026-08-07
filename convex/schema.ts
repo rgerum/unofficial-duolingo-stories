@@ -257,6 +257,18 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_token_identifier", ["tokenIdentifier"]),
 
+  user_pinned_courses: defineTable({
+    tokenIdentifier: v.string(),
+    courseId: v.id("courses"),
+    courseLegacyId: v.number(),
+    pinnedAt: v.number(),
+  })
+    .index("by_token_identifier", ["tokenIdentifier"])
+    .index("by_token_identifier_and_course_id", [
+      "tokenIdentifier",
+      "courseId",
+    ]),
+
   story_approval: defineTable({
     storyId: v.id("stories"),
     legacyUserId: v.optional(v.number()),
