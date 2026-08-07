@@ -35,6 +35,7 @@ export type FeedbackReport = {
   comment: string;
   userName: string | null;
   userEmail: string | null;
+  legacyUserId?: number;
   status: FeedbackStatus;
   createdAt: number;
 };
@@ -287,7 +288,17 @@ function FeedbackReportRow({
           <span>Story {report.storyId}</span>
           {report.line !== undefined ? <span>Line {report.line}</span> : null}
           <span>{getFeedbackSourceLabel(report)}</span>
-          <span>{report.userName || report.userEmail || "Anonymous"}</span>
+          {report.legacyUserId === undefined ? (
+            <span>{report.userName || report.userEmail || "Anonymous"}</span>
+          ) : (
+            <Link
+              href={`/admin/users/${report.legacyUserId}`}
+              className="font-bold text-[var(--link-color)] underline underline-offset-2"
+              title={report.userEmail ?? undefined}
+            >
+              {report.userName || report.userEmail || "View user"}
+            </Link>
+          )}
         </div>
 
         {isStoryElementLine(report.lineElement) ? (

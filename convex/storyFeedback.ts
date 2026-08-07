@@ -3,9 +3,14 @@ import {
   paginationResultValidator,
 } from "convex/server";
 import { ConvexError, v } from "convex/values";
+import { components } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx } from "./_generated/server";
-import { requireAdmin, requireContributorOrAdmin } from "./lib/authorization";
+import {
+  getRole,
+  requireAdmin,
+  requireContributorOrAdmin,
+} from "./lib/authorization";
 import {
   type FeedbackStatus,
   feedbackStatuses,
@@ -43,6 +48,10 @@ const feedbackReportValidator = v.object({
   userEmail: v.union(v.string(), v.null()),
   status: feedbackStatusValidator,
   createdAt: v.number(),
+});
+
+const feedbackReportForReviewValidator = feedbackReportValidator.extend({
+  legacyUserId: v.optional(v.number()),
 });
 
 type CourseDoc = Doc<"courses">;
@@ -88,6 +97,15 @@ function normalizeDerivedLineText(value: string | undefined) {
 
 function getCourseShort(course: CourseDoc) {
   return course.short?.trim() || `${course.legacyId}`;
+}
+
+function getAuthUserId(tokenIdentifier: string | null) {
+  if (!tokenIdentifier) return null;
+  const separatorIndex = tokenIdentifier.lastIndexOf("|");
+  if (separatorIndex < 0 || separatorIndex === tokenIdentifier.length - 1) {
+    return null;
+  }
+  return tokenIdentifier.slice(separatorIndex + 1);
 }
 
 function parseStoryJson(storyContent: StoryContentDoc | null) {
@@ -403,26 +421,69 @@ export const listStoryFeedbackReports = query({
     courseShort: v.optional(v.string()),
     paginationOpts: paginationOptsValidator,
   },
-  returns: paginationResultValidator(feedbackReportValidator),
+  returns: paginationResultValidator(feedbackReportForReviewValidator),
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
 
     const courseShort = args.courseShort;
-    if (courseShort !== undefined) {
-      return await ctx.db
-        .query("story_feedback_reports")
-        .withIndex("by_course_short_status_created_at", (q) =>
-          q.eq("courseShort", courseShort).eq("status", args.status),
-        )
-        .order("desc")
-        .paginate(args.paginationOpts);
+    const reports =
+      courseShort !== undefined
+        ? await ctx.db
+            .query("story_feedback_reports")
+            .withIndex("by_course_short_status_created_at", (q) =>
+              q.eq("courseShort", courseShort).eq("status", args.status),
+            )
+            .order("desc")
+            .paginate(args.paginationOpts)
+        : await ctx.db
+            .query("story_feedback_reports")
+            .withIndex("by_status_and_created_at", (q) =>
+              q.eq("status", args.status),
+            )
+            .order("desc")
+            .paginate(args.paginationOpts);
+
+    if ((await getRole(ctx)) !== "admin") return reports;
+
+    const authUserIds = Array.from(
+      new Set(
+        reports.page
+          .map((report) => getAuthUserId(report.userId))
+          .filter((userId): userId is string => userId !== null),
+      ),
+    );
+    if (authUserIds.length === 0) return reports;
+
+    const authUsers = await ctx.runQuery(
+      components.betterAuth.adapter.findMany,
+      {
+        model: "user",
+        where: [{ field: "_id", operator: "in", value: authUserIds }],
+        paginationOpts: { cursor: null, numItems: authUserIds.length + 10 },
+      },
+    );
+    const legacyUserIdByAuthUserId = new Map<string, number>();
+    for (const user of authUsers.page as Array<{
+      _id?: string;
+      userId?: string | null;
+    }>) {
+      const legacyUserId = Number.parseInt(user.userId ?? "", 10);
+      if (!user._id || !Number.isFinite(legacyUserId)) continue;
+      legacyUserIdByAuthUserId.set(user._id, legacyUserId);
     }
 
-    return await ctx.db
-      .query("story_feedback_reports")
-      .withIndex("by_status_and_created_at", (q) => q.eq("status", args.status))
-      .order("desc")
-      .paginate(args.paginationOpts);
+    return {
+      ...reports,
+      page: reports.page.map((report) => {
+        const authUserId = getAuthUserId(report.userId);
+        const legacyUserId = authUserId
+          ? legacyUserIdByAuthUserId.get(authUserId)
+          : undefined;
+        return legacyUserId === undefined
+          ? report
+          : { ...report, legacyUserId };
+      }),
+    };
   },
 });
 
