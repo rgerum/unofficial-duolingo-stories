@@ -32,6 +32,7 @@ import {
   timings_to_text,
   type AudioInsertAnchor,
 } from "@/lib/editor/audio/audio_edit_tools";
+import { fix_audio_line_order } from "@/lib/editor/audio/fix_audio_line_order";
 import type {
   Audio,
   StoryElement,
@@ -76,7 +77,9 @@ function getMax<T>(list: T[], callback: (obj: T) => number) {
 }
 
 function normalizeDocText(text: string): string {
-  return text.replace(/\r\n/g, "\n");
+  // Repair audio lines that older imports placed above the hint lines, so the
+  // loaded document parses cleanly; saving then persists the corrected order.
+  return fix_audio_line_order(text.replace(/\r\n/g, "\n"));
 }
 
 function scrollEditorLineIntoView(view: EditorView, lineNumber: number) {
