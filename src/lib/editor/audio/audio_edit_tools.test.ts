@@ -200,6 +200,22 @@ test("generate_ssml_line sends Azure inline aliases as mapped literal text", () 
   assert.equal(ssml.mapping[ssml.text.indexOf("liili") + 5], 27);
 });
 
+test("generate_ssml_line hides Azure ellipses without sub SSML", () => {
+  const source = "Nikmati mijtootilistli keemaantika ohui…";
+  const ssml = generate_ssml_line(
+    { speaker: "es-ES-ElviraNeural", text: source },
+    undefined as never,
+    [],
+    [],
+  );
+
+  assert.equal(
+    ssml.text,
+    '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="es-ES"><voice name="es-ES-ElviraNeural">Nikmati mijtootilistli keemaantika ohui<break/></voice></speak>',
+  );
+  assert.equal(ssml.mapping[ssml.text.indexOf("<break/>")], 39);
+});
+
 test("generate_audio_line maps Polly UTF-8 byte speech marks to source text", async () => {
   const originalRequest = globalThis.Request;
   const originalFetch = globalThis.fetch;

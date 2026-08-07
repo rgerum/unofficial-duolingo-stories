@@ -94,11 +94,13 @@ export function generate_ssml_line(
   if (transcribe_data)
     speak_text = transcribe_text(speak_text, transcribe_data);
 
-  speak_text = find_replace_with_mapping(
-    speak_text,
-    /(\.\.\.|…)/,
-    '<sub alias=" ">$1</sub><break/>',
-  );
+  speak_text = useLiteralAliases
+    ? find_replace_with_mapping(speak_text, /(?:\.\.\.|…)/, "<break/>")
+    : find_replace_with_mapping(
+        speak_text,
+        /(\.\.\.|…)/,
+        '<sub alias=" ">$1</sub><break/>',
+      );
 
   if (speak_text.text.startsWith("<speak>"))
     speak_text = replace_with_mapping(speak_text, "", 0, "<speak>".length);
