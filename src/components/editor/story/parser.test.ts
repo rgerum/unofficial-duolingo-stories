@@ -531,7 +531,7 @@ Speaker0: show~word{speak~word}`,
   assert.equal(line.line.content.text, "show word");
   assert.match(
     line.line.content.audio?.ssml.text ?? "",
-    /<sub alias="speak word">show word<\/sub>/,
+    /<voice name="en-US-Test">speak word<\/voice>/,
   );
 });
 
@@ -559,6 +559,6 @@ Speaker0: foo{bar}`,
   assert.equal(line.line.content.text, "foo");
   assert.match(
     line.line.content.audio?.ssml.text ?? "",
-    /<sub alias="bar">foo<\/sub>/,
+    /<voice name="en-US-Test">bar<\/voice>/,
   );
 });
