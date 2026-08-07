@@ -43,12 +43,11 @@ function StoryHeader({
     editorBlock: element.editor,
   };
   const { onClick } = getEditorHandlers(editorProps);
-  const [audioRange, playAudio, ref, url] = useAudio(
-    element,
-    active,
-    settings.show_audio,
-  );
+  const [audioRange, playAudio, ref, url, playWordAudio, playingWordRange] =
+    useAudio(element, active, settings.show_audio);
   const effectiveAudioRange = audioRangeOverride ?? audioRange;
+  const onWordClick =
+    !hideAudioButton && settings.show_audio ? playWordAudio : undefined;
   const isRtl = settings.rtl || element.lang === "rtl";
   const showEditorAudioDetails =
     editorShowAudioDetailsOverride ?? settings.show_audio;
@@ -100,6 +99,8 @@ function StoryHeader({
           hideRangesForChallenge={hideRangesForChallenge}
           content={element.learningLanguageTitleContent}
           editorState={editorState}
+          onWordClick={onWordClick}
+          playingWordRange={playingWordRange}
         />
         {showEditorAudioDetails &&
           element.audio &&
