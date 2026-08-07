@@ -4,7 +4,11 @@ from unittest.mock import AsyncMock, patch
 import discord
 
 with patch("pathlib.Path.read_text", return_value=""):
-    from discord_review_bot import ReviewClient, build_ai_prompt, format_story_for_ai_review
+    from discord_review_bot import (
+        ReviewClient,
+        build_ai_prompt,
+        format_story_for_ai_review,
+    )
 
 
 class AiReviewPromptTest(unittest.TestCase):
@@ -42,6 +46,38 @@ Līlih. = Lily""",
         story = "> two words\n~ one"
 
         self.assertEqual(format_story_for_ai_review(story), story)
+
+    def test_audio_course_omits_no_audio_checklist(self):
+        prompt = build_ai_prompt(
+            {
+                "storyId": 9730,
+                "name": "¿Gracias?",
+                "courseShort": "nah-es",
+                "learningLanguage": "nah",
+                "noAudio": False,
+                "text": "[ARRANGE]\n> Escucha y selecciona las palabras",
+            }
+        )
+
+        self.assertIn("This course has audio", prompt)
+        self.assertIn("Do not flag listening challenges", prompt)
+        self.assertNotIn("# No-audio course review checklist", prompt)
+
+    def test_no_audio_course_includes_no_audio_checklist(self):
+        prompt = build_ai_prompt(
+            {
+                "storyId": 1,
+                "name": "Test",
+                "courseShort": "nah-es",
+                "learningLanguage": "nah",
+                "noAudio": True,
+                "text": "[LINE]\n> Test",
+            }
+        )
+
+        self.assertIn("This course is a no-audio course", prompt)
+        self.assertIn("# No-audio course review checklist", prompt)
+        self.assertIn("meaning-based", prompt)
 
 
 class FakeResponse:

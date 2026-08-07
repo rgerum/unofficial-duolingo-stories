@@ -71,10 +71,6 @@ say so briefly — do not invent findings to fill categories.
       pair is also a valid match.
 - [ ] Questions appear at reasonable intervals and test comprehension of what
       was just read.
-- [ ] In no-audio courses: questions converted from listening exercises use
-      meaning-based distractors, not the sound-alikes of the original (the
-      lint already flags remaining `[ARRANGE]`/`[SELECT_PHRASE]` blocks; see
-      docs/story-publishing/without_tts).
 
 ## 4. Story text quality
 
