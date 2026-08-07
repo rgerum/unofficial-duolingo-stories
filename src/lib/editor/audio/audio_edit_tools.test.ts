@@ -216,6 +216,21 @@ test("generate_ssml_line hides Azure ellipses without sub SSML", () => {
   assert.equal(ssml.mapping[ssml.text.indexOf("<break/>")], 39);
 });
 
+test("generate_ssml_line gives Google final-word marks a numeric source offset", () => {
+  const ssml = generate_ssml_line(
+    { speaker: "lt-LT-Wavenet-A", text: "Labai didelė šeima" },
+    undefined as never,
+    [],
+    [],
+  );
+
+  assert.equal(
+    ssml.text,
+    '<speak><mark name="5"/>Labai <mark name="12"/>didelė <mark name="18"/>šeima</speak>',
+  );
+  assert.doesNotMatch(ssml.text, /undefined/);
+});
+
 test("generate_audio_line maps Polly UTF-8 byte speech marks to source text", async () => {
   const originalRequest = globalThis.Request;
   const originalFetch = globalThis.fetch;
