@@ -17,6 +17,14 @@ comments. Optionally an AI review (Codex CLI) follows for the stories of the
 paused set, clearly labeled. Posting `recheck` re-runs everything and
 naturally continues where work is left.
 
+The bot also registers a global `/review` command for language contributor
+channels such as `#nahuatl-contrib`. With no argument it matches the channel's
+language against the course list and reviews the lowest-numbered set containing
+an unpublished story. If that language has courses from multiple base
+languages, the bot replies with a private course picker. An optional target can
+be a set number (`/review target:7`) or one or more Duostories story links; these
+explicit targets take precedence over the next-unpublished default.
+
 It is a separate process from `discord_reacting_bot.py` on purpose: a crash or
 hang here must never affect role syncing.
 
@@ -45,6 +53,10 @@ pnpm exec convex env set DISCORD_REVIEW_SECRET <secret> --prod
 
 The bot reads the review checklists from `../docs/review-checklists/`, so run
 it from an up-to-date checkout of this repository.
+
+The Discord application must be installed with the `applications.commands`
+scope. Global command updates can take a while to appear in every server after
+the service restarts.
 
 For the AI review, the `codex` CLI must be installed and authenticated for the
 user running the bot.

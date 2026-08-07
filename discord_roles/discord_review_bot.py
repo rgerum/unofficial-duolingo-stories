@@ -23,6 +23,7 @@ from pathlib import Path
 from urllib import error, request
 
 import discord
+from discord import app_commands
 from env_utils import load_env_file
 
 params = load_env_file(Path(__file__).parent / ".env.local")
@@ -54,6 +55,7 @@ CHECKLIST_DIR = Path(__file__).resolve().parent.parent / "docs" / "review-checkl
 STORY_LINK_RE = re.compile(
     r"duostories\.org/(?:editor/(?:course/[\w-]+/)?story|story)/(\d+)"
 )
+SET_TARGET_RE = re.compile(r"^(?:set\s*)?(\d+)$", re.I)
 
 # Values that must never appear in anything we post publicly: every
 # credential-looking key from .env.local (public values like URLs stay, so
@@ -106,6 +108,54 @@ def extract_story_ids(*texts):
             if story_id not in ids:
                 ids.append(story_id)
     return ids
+
+
+def normalize_channel_key(value):
+    return re.sub(r"[^a-z0-9]+", "-", (value or "").casefold()).strip("-")
+
+
+def courses_for_contributor_channel(channel_name, courses):
+    key = normalize_channel_key(channel_name)
+    for suffix in ("-contrib", "-contributors"):
+        if key.endswith(suffix):
+            key = key[: -len(suffix)]
+            break
+    return [
+        course
+        for course in courses
+        if key
+        in {
+            normalize_channel_key(course.get("learningLanguage")),
+            normalize_channel_key(course.get("learningLanguageShort")),
+        }
+    ]
+
+
+class CourseSelect(discord.ui.Select):
+    def __init__(self, client, courses, sets):
+        self.review_client = client
+        self.courses = {course["short"]: course for course in courses[:25]}
+        self.sets = sets
+        super().__init__(
+            placeholder="Choose a course",
+            options=[
+                discord.SelectOption(label=course["name"][:100], value=course["short"])
+                for course in courses[:25]
+            ],
+        )
+
+    async def callback(self, interaction):
+        course = self.courses[self.values[0]]
+        await self.review_client.start_slash_review(
+            interaction, course, self.sets
+        )
+        self.view.stop()
+
+
+class CourseSelectView(discord.ui.View):
+    def __init__(self, client, courses, sets):
+        super().__init__(timeout=180)
+        self.add_item(CourseSelect(client, courses, sets))
 
 
 def call_endpoint(payload):
@@ -308,10 +358,18 @@ async def run_codex(prompt, timeout, schema=None):
 class ReviewClient(discord.Client):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.tree = app_commands.CommandTree(self)
+        self.tree.command(
+            name="review",
+            description="Review stories for the course in this contributor channel",
+        )(self.review_command)
         self.active_threads = set()
         self.last_trigger_by_user = {}
         self.course_list = None
         self.course_list_fetched_at = 0.0
+
+    async def setup_hook(self):
+        await self.tree.sync()
 
     async def on_ready(self):
         print(f"Logged on as {self.user}!")
@@ -346,6 +404,82 @@ class ReviewClient(discord.Client):
             self.course_list = result.get("courses", [])
             self.course_list_fetched_at = now
         return self.course_list
+
+    @app_commands.describe(
+        target="Optional set number or one or more Duostories story links"
+    )
+    async def review_command(
+        self, interaction: discord.Interaction, target: str | None = None
+    ):
+        """Handle the global /review command in a contributor channel."""
+        story_ids = extract_story_ids(target or "")
+        if story_ids:
+            await self.start_slash_payload(
+                interaction,
+                {"storyIds": story_ids},
+                "🤖 Starting the requested story review.",
+            )
+            return
+
+        sets = []
+        if target:
+            match = SET_TARGET_RE.fullmatch(target.strip())
+            if not match:
+                await interaction.response.send_message(
+                    "Please provide a set number (for example `7`) or Duostories story links.",
+                    ephemeral=True,
+                )
+                return
+            sets = [int(match.group(1))]
+
+        courses = courses_for_contributor_channel(
+            getattr(interaction.channel, "name", ""), await self.get_course_list()
+        )
+        if not courses:
+            await interaction.response.send_message(
+                "🤖 I could not match this channel to a course. Please include story links, or use `/review` in a language contributor channel.",
+                ephemeral=True,
+            )
+            return
+        if len(courses) > 1:
+            await interaction.response.send_message(
+                "🤖 Which course should I review?",
+                view=CourseSelectView(self, courses, sets),
+                ephemeral=True,
+            )
+            return
+        await self.start_slash_review(interaction, courses[0], sets)
+
+    async def start_slash_review(self, interaction, course, sets):
+        payload = (
+            {"courseShort": course["short"], "sets": sets}
+            if sets
+            else {"courseShort": course["short"], "nextUnpublished": True}
+        )
+        await self.start_slash_payload(
+            interaction,
+            payload,
+            f"🤖 Finding stories to review for **{escape_discord(course['name'])}**.",
+        )
+
+    async def start_slash_payload(self, interaction, payload, announcement):
+        channel = interaction.channel
+        if channel.id in self.active_threads or self._on_cooldown(
+            interaction.user.id
+        ):
+            await interaction.response.send_message(
+                "🤖 A review is already running here, or you just started one. Please try again shortly.",
+                ephemeral=True,
+            )
+            return
+
+        self.active_threads.add(channel.id)
+        try:
+            await interaction.response.defer(thinking=True)
+            await interaction.followup.send(announcement)
+            await self.run_review(channel, payload)
+        finally:
+            self.active_threads.discard(channel.id)
 
     async def on_message(self, message):
         if message.author.bot:
@@ -454,10 +588,21 @@ class ReviewClient(discord.Client):
         if result.get("unknownCourse"):
             await channel.send(HELP_MESSAGE)
             return
+        if result.get("noUnpublished"):
+            await channel.send(
+                "✅ This course has no unpublished stories waiting for review."
+            )
+            return
         stories = result.get("stories", [])
         if not stories:
             await channel.send(HELP_MESSAGE)
             return
+
+        if result.get("selectedSetId") is not None:
+            await self.safe_send(
+                channel,
+                f"🤖 Reviewing set {result['selectedSetId']}, the next unpublished set.",
+            )
 
         if result.get("truncated"):
             total = result.get("totalResolved")
