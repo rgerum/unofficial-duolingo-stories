@@ -242,7 +242,9 @@ export function add_word_marks_replacements(mapped_text: {
   mapped_text = iter_word_replacements(
     mapped_text,
     (mapped_text, word, word_start, i, bracket_start) => {
-      let insert = `<mark name="${mapped_text.mapping[i]}"/>`;
+      const rangeEnd =
+        mapped_text.mapping[i] ?? (mapped_text.mapping[i - 1] ?? -1) + 1;
+      let insert = `<mark name="${rangeEnd}"/>`;
       mapped_text = replace_with_mapping(mapped_text, insert, word_start);
       i += insert.length;
       return [mapped_text, i];
