@@ -2,9 +2,10 @@
 
 Instructions for the reviewing agent. You are reviewing a community-translated
 Duolingo story written in the story DSL (blocks like `[LINE]`,
-`[MULTIPLE_CHOICE]`; `~` lines are translation hints in the course's base
-language; `$` lines are audio). The learning language and base language of the
-course are given to you with the story.
+`[MULTIPLE_CHOICE]`; translation hints are shown as explicit
+`learning-language token = base-language hint` pairs; `$` lines are audio).
+The learning language and base language of the course are given to you with
+the story.
 
 Scope: judgment-based issues only. The mechanical lint already checks hint
 alignment counts, missing audio/timemarks, question structure, and basic
@@ -43,13 +44,18 @@ say so briefly — do not invent findings to fill categories.
 ## 2. Translation hints
 
 - [ ] Hints are in the course's base language.
+- [ ] Treat hints as literal, word-level hover glosses, not prose translations.
+      They should expose what each word does and may deliberately sound
+      unnatural or retain the learning language's word order. Do not suggest a
+      more natural translation merely for fluency.
 - [ ] Each hint translates the word *as used in this sentence*, not its most
-      common dictionary sense.
+      common dictionary sense. A gloss may explain a grammatical function
+      rather than supply a standalone dictionary equivalent.
 - [ ] Multi-word expressions and idioms are hinted as a unit where the DSL
       allows (join with `~`), not word-by-word into nonsense.
-- [ ] No machine-translation artifacts: leftover source words, English word
-      order in a non-English base language, or hints that are just the learning
-      language word copied over.
+- [ ] No actual errors such as untranslated source words or hints that copy the
+      learning-language word without a reason. Literal word order alone is not
+      a machine-translation artifact.
 - [ ] Hidden-range `[...]` passages read as a sensible unit when hidden.
 
 ## 3. Questions

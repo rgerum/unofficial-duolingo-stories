@@ -4,7 +4,44 @@ from unittest.mock import AsyncMock, patch
 import discord
 
 with patch("pathlib.Path.read_text", return_value=""):
-    from discord_review_bot import ReviewClient
+    from discord_review_bot import ReviewClient, build_ai_prompt, format_story_for_ai_review
+
+
+class AiReviewPromptTest(unittest.TestCase):
+    def test_expands_translation_hints_into_explicit_token_pairs(self):
+        story = """[LINE]
+> Sārih kimaka sē kāxah Līlih.
+~ Zari le~da~a una caja Lily"""
+
+        self.assertEqual(
+            format_story_for_ai_review(story),
+            """[LINE]
+> Sārih kimaka sē kāxah Līlih.
+Sārih = Zari
+kimaka = le~da~a
+sē = una
+kāxah = caja
+Līlih. = Lily""",
+        )
+
+    def test_prompt_explains_that_hints_are_literal_glosses(self):
+        prompt = build_ai_prompt(
+            {
+                "storyId": 1,
+                "name": "Test",
+                "courseShort": "nhe-es",
+                "learningLanguage": "nhe",
+                "text": "> nicān\n~ aquí",
+            }
+        )
+
+        self.assertIn("deliberately literal, sentence-specific glosses", prompt)
+        self.assertIn("nicān = aquí", prompt)
+
+    def test_preserves_hint_line_when_it_cannot_be_safely_aligned(self):
+        story = "> two words\n~ one"
+
+        self.assertEqual(format_story_for_ai_review(story), story)
 
 
 class FakeResponse:
