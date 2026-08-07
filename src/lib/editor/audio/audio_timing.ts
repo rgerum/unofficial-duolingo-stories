@@ -28,6 +28,8 @@ export function generate_ssml_line(
   let speaker = ssml["speaker"] || "";
   let speak_text = init_mapping(ssml["text"]);
   let match = speaker.match(/([^(]*)\((.*)\)/);
+  const voice = (match?.[1] ?? speaker).trim();
+  const useLiteralAliases = voice.split("-").length === 3;
 
   let offset = 0;
   function insert(insert: string, pos: number) {
@@ -40,6 +42,18 @@ export function generate_ssml_line(
   }
   for (let match of ipa_replacements) {
     if (!match.word || !match.alias) continue;
+    if (!match.alphabet && useLiteralAliases) {
+      const start = offset + match.index;
+      const end = start + match.word.length;
+      const lengthDelta = match.alias.length - match.word.length;
+      speak_text = replace_with_mapping(speak_text, match.alias, start, end);
+      for (const range of hideRanges) {
+        if (range.end > start) range.end += lengthDelta;
+        if (range.start > start) range.start += lengthDelta;
+      }
+      offset += lengthDelta;
+      continue;
+    }
     let new_words = [`<sub alias="${match.alias}">`, `</sub>`];
     if (match.alphabet) {
       new_words = [

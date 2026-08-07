@@ -174,6 +174,32 @@ test("generate_audio_line reports Azure marks that move backward in the source t
   }
 });
 
+test("generate_ssml_line sends Azure inline aliases as mapped literal text", () => {
+  const source = "Sārih kimaka sē kāxah Līlih.";
+  const replacements = [
+    { word: "Sārih", alias: "saari", index: 0 },
+    { word: "sē", alias: "sehe", index: 13 },
+    { word: "kāxah", alias: "cáachcha", index: 16 },
+    { word: "Līlih", alias: "liili", index: 22 },
+  ];
+
+  const ssml = generate_ssml_line(
+    { speaker: "es-MX-CecilioNeural", text: source },
+    undefined as never,
+    [],
+    replacements,
+  );
+
+  assert.equal(
+    ssml.text,
+    '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="es-MX"><voice name="es-MX-CecilioNeural">saari kimaka sehe cáachcha liili.</voice></speak>',
+  );
+  assert.equal(ssml.mapping[ssml.text.indexOf("kimaka") + 6], 12);
+  assert.equal(ssml.mapping[ssml.text.indexOf("sehe") + 4], 15);
+  assert.equal(ssml.mapping[ssml.text.indexOf("cáachcha") + 8], 21);
+  assert.equal(ssml.mapping[ssml.text.indexOf("liili") + 5], 27);
+});
+
 test("generate_audio_line maps Polly UTF-8 byte speech marks to source text", async () => {
   const originalRequest = globalThis.Request;
   const originalFetch = globalThis.fetch;
