@@ -5,6 +5,7 @@ type AuthCtx = MutationCtx | QueryCtx;
 type RoleIdentity = {
   userId?: string | number | null;
   role?: string | null;
+  tokenIdentifier?: string | null;
 } | null;
 
 async function getIdentity(ctx: AuthCtx) {
@@ -28,6 +29,14 @@ export async function requireContributorOrAdmin(ctx: AuthCtx) {
   if (role !== "contributor" && role !== "admin") {
     throw new Error("Unauthorized");
   }
+}
+
+export async function requireTokenIdentifier(ctx: AuthCtx) {
+  const identity = await getIdentity(ctx);
+  if (!identity?.tokenIdentifier) {
+    throw new Error("Unauthorized");
+  }
+  return identity.tokenIdentifier;
 }
 
 export async function isContributorOrAdmin(ctx: AuthCtx) {

@@ -1,11 +1,8 @@
-import { mutation, type MutationCtx, query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { requireTokenIdentifier } from "./lib/authorization";
 
-async function requireTokenIdentifier(ctx: MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity?.tokenIdentifier) throw new Error("Unauthorized");
-  return identity.tokenIdentifier;
-}
+export const MAX_PINNED_COURSES = 20;
 
 export const listCurrentUserPins = query({
   args: {},
@@ -20,7 +17,7 @@ export const listCurrentUserPins = query({
         q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .order("desc")
-      .take(1_000);
+      .take(MAX_PINNED_COURSES);
 
     return pins.map((pin) => pin.courseLegacyId);
   },
@@ -30,6 +27,7 @@ export const setCurrentUserCoursePin = mutation({
   args: {
     courseLegacyId: v.number(),
     pinned: v.boolean(),
+    operationKey: v.optional(v.string()),
   },
   returns: v.boolean(),
   handler: async (ctx, args) => {
@@ -48,11 +46,25 @@ export const setCurrentUserCoursePin = mutation({
       .unique();
 
     if (args.pinned && !existingPin) {
+      const pinsAtLimit = await ctx.db
+        .query("user_pinned_courses")
+        .withIndex("by_token_identifier", (q) =>
+          q.eq("tokenIdentifier", tokenIdentifier),
+        )
+        .take(MAX_PINNED_COURSES);
+      if (pinsAtLimit.length >= MAX_PINNED_COURSES) {
+        throw new Error(`You can pin up to ${MAX_PINNED_COURSES} courses`);
+      }
+
+      const operationKey =
+        args.operationKey ??
+        `coursePin:${args.courseLegacyId}:${args.pinned}:${Date.now()}`;
       await ctx.db.insert("user_pinned_courses", {
         tokenIdentifier,
         courseId: course._id,
         courseLegacyId: course.legacyId,
         pinnedAt: Date.now(),
+        operationKey,
       });
     } else if (!args.pinned && existingPin) {
       await ctx.db.delete(existingPin._id);

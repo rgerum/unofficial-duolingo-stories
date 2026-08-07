@@ -262,6 +262,7 @@ export default defineSchema({
     courseId: v.id("courses"),
     courseLegacyId: v.number(),
     pinnedAt: v.number(),
+    operationKey: v.optional(v.string()),
   })
     .index("by_token_identifier", ["tokenIdentifier"])
     .index("by_token_identifier_and_course_id", [
