@@ -33,6 +33,7 @@ import type {
 } from "@/app/editor/(course)/types";
 import CourseInterestSummary from "./course_interest_summary";
 import CourseActivityChart from "./course_activity_chart";
+import { Pin } from "lucide-react";
 
 type StoryState = "draft" | "feedback" | "finished" | "published";
 type StoryFilter = "all" | StoryState;
@@ -63,6 +64,23 @@ export default function EditList({
   const storyPreferences = useQuery(
     api.userPreferences.getCurrentStoryPreferences,
   );
+  const pinnedCourseIds = useQuery(api.coursePins.listCurrentUserPins, {});
+  const setCoursePin = useMutation(api.coursePins.setCurrentUserCoursePin);
+  const [isUpdatingPin, setIsUpdatingPin] = useState(false);
+  const isCoursePinned = pinnedCourseIds?.includes(course.id) ?? false;
+
+  async function toggleCoursePin() {
+    if (isUpdatingPin) return;
+    setIsUpdatingPin(true);
+    try {
+      await setCoursePin({
+        courseLegacyId: course.id,
+        pinned: !isCoursePinned,
+      });
+    } finally {
+      setIsUpdatingPin(false);
+    }
+  }
 
   useEffect(() => {
     setStoryList(stories ?? []);
@@ -196,7 +214,27 @@ export default function EditList({
       )}
       <div className="my-6 space-y-4">
         <div>
-          <h2 className="mb-2 font-bold">Active Contributors</h2>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h2 className="font-bold">Active Contributors</h2>
+            <button
+              type="button"
+              className={
+                "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 " +
+                (isCoursePinned
+                  ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
+                  : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
+              }
+              aria-pressed={isCoursePinned}
+              disabled={pinnedCourseIds === undefined || isUpdatingPin}
+              onClick={() => void toggleCoursePin()}
+            >
+              <Pin
+                className="size-4"
+                fill={isCoursePinned ? "currentColor" : "none"}
+              />
+              {isCoursePinned ? "Unpin course" : "Pin course"}
+            </button>
+          </div>
           <ContributorList
             contributors={course.contributors}
             emptyLabel="No contributors"
