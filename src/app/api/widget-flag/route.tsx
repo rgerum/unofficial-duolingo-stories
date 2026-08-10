@@ -2,8 +2,6 @@ import React from "react";
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 
-export const runtime = "edge";
-
 // Order of flags in the Duolingo CloudFront sprite sheet. Mirrors the
 // client Flag components (src/components/ui/flag.tsx, app-mobile Flag.tsx)
 // and the og-course route so the widget flag matches the rest of the site.

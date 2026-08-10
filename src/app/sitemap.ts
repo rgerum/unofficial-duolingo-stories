@@ -5,7 +5,7 @@ import { getDocsData } from "./docs/[[...slug]]/doc_data";
 
 const SITE_URL = "https://duostories.org";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 const EMPTY_DOCS_DATA: Awaited<ReturnType<typeof getDocsData>> = {
   navigation: [],

@@ -1,7 +1,6 @@
 import React from "react";
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
-export const runtime = "edge";
 
 function get_flag_id(iso: string | null): number {
   const order = [
