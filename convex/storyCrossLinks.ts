@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
-import { listPublicCourseStories } from "./lib/publicCourseStories";
+import { listNearbyPublicCourseStories } from "./lib/publicCourseStories";
 import {
   type CrossLinkCandidate,
   selectStoryCrossLinks,
@@ -33,8 +33,8 @@ const storyCrossLinksValidator = v.union(
  * not indexed" bucket. These links give every story several crawl paths.
  *
  * Only publicly listed stories of public courses are ever returned - the
- * candidates come from `listPublicCourseStories`, the same helper the public
- * course page listing uses.
+ * candidates are restricted to the current and immediately adjacent sets so
+ * this query does not load an entire course for every story page.
  */
 export const getStoryCrossLinks = query({
   args: {
@@ -54,7 +54,11 @@ export const getStoryCrossLinks = query({
     const learningLanguage = await ctx.db.get(course.learningLanguageId);
     const learningLanguageName = learningLanguage?.name ?? "";
 
-    const siblings = await listPublicCourseStories(ctx, course._id);
+    const siblings = await listNearbyPublicCourseStories(
+      ctx,
+      course._id,
+      story.set_id ?? 0,
+    );
     const candidates: CrossLinkCandidate[] = siblings.map((entry) => ({
       id: entry.legacyId,
       name: entry.story.name,
