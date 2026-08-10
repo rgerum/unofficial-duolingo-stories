@@ -199,6 +199,7 @@ function EditorElement({
           element={element as StoryElementMultipleChoice}
           active={false}
           advance={() => {}}
+          showTranslationsInline={showHints}
         />
       </EditorQuestionWrapper>
     );

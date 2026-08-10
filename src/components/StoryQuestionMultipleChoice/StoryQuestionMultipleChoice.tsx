@@ -28,10 +28,12 @@ function StoryQuestionMultipleChoice({
   element,
   active,
   advance,
+  showTranslationsInline,
 }: {
   element: StoryElementMultipleChoice;
   active: boolean;
   advance: () => void;
+  showTranslationsInline?: boolean;
 }) {
   //const [done, setDone] = React.useState(false);
 
@@ -56,7 +58,12 @@ function StoryQuestionMultipleChoice({
   return (
     <div className={element.lang}>
       {/* Display the question if a question is there */}
-      {element.question && <StoryQuestionPrompt question={element.question} />}
+      {element.question && (
+        <StoryQuestionPrompt
+          question={element.question}
+          showTranslationsInline={showTranslationsInline}
+        />
+      )}
       {/* Display the answers */}
       <ul className="list-none p-0 text-[var(--text-color)]">
         {element.answers.map((answer, index) => (
@@ -72,7 +79,10 @@ function StoryQuestionMultipleChoice({
               {typeof answer == "string" ? (
                 answer
               ) : (
-                <StoryLineHints content={answer} />
+                <StoryLineHints
+                  content={answer}
+                  showTranslationsInline={showTranslationsInline}
+                />
               )}
             </div>
           </li>
