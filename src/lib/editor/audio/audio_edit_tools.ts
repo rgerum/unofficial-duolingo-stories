@@ -223,7 +223,10 @@ export function create_audio_insert_anchor(
 }
 
 export function get_audio_insert_line(doc: Text, line_insert: number) {
-  const lineNumber = Math.min(Math.max(1, line_insert), doc.lines);
+  let lineNumber = Math.min(Math.max(1, line_insert), doc.lines);
+  while (lineNumber > 1 && doc.line(lineNumber - 1).text.trim() === "") {
+    lineNumber -= 1;
+  }
   return doc.line(lineNumber);
 }
 
