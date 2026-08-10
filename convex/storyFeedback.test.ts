@@ -61,6 +61,19 @@ const parsedLineElement = {
   editor: { block_start_no: 12 },
 };
 
+const parsedHeaderElement = {
+  type: "HEADER",
+  illustrationUrl: "story.svg",
+  title: "Sunrise",
+  learningLanguageTitleContent: {
+    text: "Amanecer",
+    hintMap: [],
+  },
+  trackingProperties: { line_index: 0 },
+  lang: "es",
+  editor: { block_start_no: 3 },
+};
+
 async function seedCourseWithStory(t: ReturnType<typeof convexTest>) {
   return await t.run(async (ctx) => {
     const learningLanguageId = await ctx.db.insert("languages", {
@@ -100,7 +113,7 @@ async function seedCourseWithStory(t: ReturnType<typeof convexTest>) {
     await ctx.db.insert("story_content", {
       storyId,
       text: "[Story]\nHola",
-      json: { elements: [parsedLineElement] },
+      json: { elements: [parsedHeaderElement, parsedLineElement] },
       lastUpdated: 1,
     });
     return { courseId, storyId };
@@ -323,6 +336,29 @@ describe("submitStoryFeedback", () => {
       expect(report.line).toBe(12);
       expect(report.lineText).toBe("Hola");
       expect(report.lineElement).toEqual(parsedLineElement);
+    });
+  });
+
+  test("derives the canonical editor line for a story header", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await t.mutation(
+      api.storyFeedback.submitStoryFeedback,
+      feedbackArgs({
+        source: "android",
+        lineIndex: 0,
+        lineText: "Spoofed title",
+      }),
+    );
+
+    await t.run(async (ctx) => {
+      const report = await ctx.db.query("story_feedback_reports").unique();
+      expect(report).not.toBeNull();
+      if (!report) return;
+      expect(report.line).toBe(3);
+      expect(report.lineText).toBe("Amanecer");
+      expect(report.lineElement).toEqual(parsedHeaderElement);
     });
   });
 

@@ -125,6 +125,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function getLineTextFromElement(element: Record<string, unknown>) {
+  if (element.type === "HEADER") {
+    const titleContent = element.learningLanguageTitleContent;
+    return isRecord(titleContent) && typeof titleContent.text === "string"
+      ? titleContent.text
+      : undefined;
+  }
+
   const line = element.line;
   if (!isRecord(line)) return undefined;
   const content = line.content;
@@ -189,7 +196,7 @@ function getLineSnapshotFromStoryJson(
   const element = storyJson.elements.find(
     (candidate) =>
       isRecord(candidate) &&
-      candidate.type === "LINE" &&
+      (candidate.type === "LINE" || candidate.type === "HEADER") &&
       (lineNumber !== undefined
         ? editorLineMatches(candidate, lineNumber)
         : lineIndex !== undefined && trackingLineMatches(candidate, lineIndex)),
