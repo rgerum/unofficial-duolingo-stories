@@ -427,6 +427,7 @@ function speaker_text_trans(
       data.audio ?? "",
       content.text,
       speaker_name,
+      meta.voiceKind,
       meta.story_id,
       hide ? hideRanges : [],
       meta.transcribe_data,
@@ -474,6 +475,7 @@ function line_to_audio(
   line: string,
   text: string,
   speaker: string,
+  voiceKind: Audio["ssml"]["voiceKind"],
   story_id: number,
   hideRanges: HideRange[],
   transcribe_data: TranscribeData,
@@ -489,6 +491,7 @@ function line_to_audio(
     ssml: {
       text: text,
       speaker: speaker,
+      voiceKind,
     },
     url: undefined,
     keypoints: undefined,
@@ -504,6 +507,7 @@ function line_to_audio(
       ipa_replacements,
     ),
     id: story_id,
+    voiceKind,
     ...ssml_payload,
   };
   if (line) {
@@ -1273,6 +1277,7 @@ type Meta = {
     }
   >;
   transcribe_data: TranscribeData;
+  voiceKind: Audio["ssml"]["voiceKind"];
   todo_count: number;
   from_language_name?: string | undefined;
   fromLanguageName: string;
@@ -1341,6 +1346,7 @@ export function processStoryFile(
   avatar_names: Record<number, Avatar>,
   story_languages: StoryLanguages,
   transcribe_data: TranscribeData,
+  options: { voiceKind?: Audio["ssml"]["voiceKind"] } = {},
 ) {
   // reset those line as they may have changed
   //window.audio_insert_lines = []
@@ -1360,6 +1366,7 @@ export function processStoryFile(
       set_id: 0,
       set_index: 0,
       transcribe_data: transcribe_data,
+      voiceKind: options.voiceKind ?? "tts",
       todo_count: 0,
       icon: "",
     },

@@ -95,7 +95,7 @@ export default function EditorSSMLDisplay({
             }}
           />
         )
-      ) : (
+      ) : ssml.voiceKind === "human" ? null : (
         <span>
           <img
             title="no speaker defined"
