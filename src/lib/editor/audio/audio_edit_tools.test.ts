@@ -134,6 +134,22 @@ test("get_audio_insert_line targets the next syntax line", () => {
   assert.equal(line.text, "+ Δεν ξέρω");
 });
 
+test("get_audio_insert_line places audio before a blank block separator", () => {
+  const doc = Text.of([
+    "[LINE]",
+    "Speaker560: Vikram... chayqa mana p'anqap tukukuyninchu.",
+    "~ Vikram~ese no~del libro final es",
+    "",
+    "[LINE]",
+    "Speaker593: ¿¡Imata?!",
+  ]);
+
+  const line = get_audio_insert_line(doc, 5);
+
+  assert.equal(line.number, 4);
+  assert.equal(line.text, "");
+});
+
 test("generate_audio_line reports Azure marks that move backward in the source text", async () => {
   const originalRequest = globalThis.Request;
   const originalFetch = globalThis.fetch;
