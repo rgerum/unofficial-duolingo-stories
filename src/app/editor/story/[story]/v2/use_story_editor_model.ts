@@ -160,6 +160,11 @@ export function useStoryEditorModel({
           from_language: fromLanguage?.short ?? "",
         },
         learningLanguage?.tts_replace ?? "",
+        {
+          voiceKind: hasHumanAudioCourseTag(storyData.course_tags)
+            ? "human"
+            : "tts",
+        },
       ),
     [
       avatarNames,
@@ -167,6 +172,7 @@ export function useStoryEditorModel({
       fromLanguage?.short,
       learningLanguage?.short,
       learningLanguage?.tts_replace,
+      storyData.course_tags,
       storyData.id,
     ],
   );

@@ -2,6 +2,7 @@ export type Audio = {
   ssml: {
     text: string;
     speaker: string;
+    voiceKind: "tts" | "human";
     id: number;
     inser_index: number;
     plan_text?: string | undefined;

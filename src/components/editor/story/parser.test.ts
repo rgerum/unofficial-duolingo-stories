@@ -562,3 +562,22 @@ Speaker0: foo{bar}`,
     /<voice name="en-US-Test">bar<\/voice>/,
   );
 });
+
+test("resolves human audio through the parsed voice metadata", () => {
+  const [story] = processStoryFile(
+    `[LINE]
+Speaker414: こんにちは`,
+    0,
+    testAvatars,
+    { learning_language: "ja", from_language: "en" },
+    "",
+    { voiceKind: "human" },
+  );
+
+  const line = story.elements[0];
+  assert.equal(line?.type, "LINE");
+  if (line?.type !== "LINE") return;
+
+  assert.equal(line.line.content.audio?.ssml.voiceKind, "human");
+  assert.equal(line.line.content.audio?.ssml.speaker, testAvatars[414].speaker);
+});
