@@ -137,6 +137,52 @@ describe("getStoryCrossLinks", () => {
     expect(result?.next).toEqual({ id: 15, name: "Visible" });
   });
 
+  test("only considers the current and immediately adjacent numbered sets", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourse(t, [
+      { legacyId: 10, name: "Far previous", set_id: 1, set_index: 1 },
+      {
+        legacyId: 11,
+        name: "Hidden previous",
+        set_id: 2,
+        set_index: 1,
+        public: false,
+      },
+      { legacyId: 12, name: "Current", set_id: 3, set_index: 1 },
+      {
+        legacyId: 13,
+        name: "Hidden next",
+        set_id: 4,
+        set_index: 1,
+        public: false,
+      },
+      { legacyId: 14, name: "Far next", set_id: 5, set_index: 1 },
+    ]);
+
+    const result = await t.query(api.storyCrossLinks.getStoryCrossLinks, {
+      storyId: 12,
+    });
+
+    expect(result?.previous).toBeNull();
+    expect(result?.next).toBeNull();
+  });
+
+  test("finds adjacent sets when their numbers are not consecutive", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourse(t, [
+      { legacyId: 10, name: "Previous", set_id: 2, set_index: 1 },
+      { legacyId: 11, name: "Current", set_id: 5, set_index: 1 },
+      { legacyId: 12, name: "Next", set_id: 9, set_index: 1 },
+    ]);
+
+    const result = await t.query(api.storyCrossLinks.getStoryCrossLinks, {
+      storyId: 11,
+    });
+
+    expect(result?.previous).toEqual({ id: 10, name: "Previous" });
+    expect(result?.next).toEqual({ id: 12, name: "Next" });
+  });
+
   test("returns null for a story in a non-public course", async () => {
     const t = convexTest(schema, modules);
     await seedCourse(t, linearCourse, { coursePublic: false });
