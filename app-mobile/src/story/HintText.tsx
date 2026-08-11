@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  type GestureResponderEvent,
   Platform,
   Pressable,
   StyleSheet,
@@ -18,6 +19,7 @@ import {
   PLAY_AUDIO_ICON_SIZE,
 } from "./elements/PlayAudioButton";
 import { HintLookupContext, HintPopupContext } from "./HintPopup";
+import { findHintAtPoint, type HintFragment } from "./HintHitTargets";
 import { buildHintTextTokens, type Token } from "./HintTextTokens";
 import type { ContentWithHints, HideRange } from "./types";
 
@@ -1090,58 +1092,52 @@ function NativeHintText({
     [computedSegments],
   );
 
-  const showMeasuredHint = React.useCallback(
-    (
-      token: Token,
-      tokenKey: string,
-      event: { nativeEvent: { pageX: number; pageY: number } },
-    ) => {
-      if (!token.hint) return;
+  const hintTokens = React.useMemo(
+    () =>
+      new Map<string, Token>(
+        tokens
+          .filter((token) => token.hint && !token.hidden)
+          .map((token) => [`${token.start}:${token.text}`, token] as const),
+      ),
+    [tokens],
+  );
+  const hintFragments = React.useMemo(
+    () =>
+      Array.from(tokenFragments.entries()).flatMap(([tokenKey, fragments]) =>
+        hintTokens.has(tokenKey)
+          ? fragments.map<HintFragment>((fragment) => ({
+              tokenKey,
+              ...fragment,
+            }))
+          : [],
+      ),
+    [hintTokens, tokenFragments],
+  );
 
-      const fallbackX = event.nativeEvent.pageX;
-      const fallbackY = event.nativeEvent.pageY;
-      const fragments = tokenFragments.get(tokenKey);
-
-      const showAt = (x: number, y: number) => {
-        onHintLookup();
-        popup.show({
-          translation: token.hint!.translation,
-          pronunciation: token.hint!.pronunciation,
-          x,
-          y,
-        });
-      };
-
-      if (!fragments?.length || !containerRef.current?.measureInWindow) {
-        showAt(fallbackX, fallbackY);
-        return;
-      }
+  const handleTextPress = React.useCallback(
+    (event: GestureResponderEvent) => {
+      if (!containerRef.current?.measureInWindow) return;
+      const { pageX, pageY } = event.nativeEvent;
 
       containerRef.current.measureInWindow((pageLeft, pageTop) => {
-        const localPageY = fallbackY - pageTop;
-        const fragment =
-          fragments.find(
-            (candidate) =>
-              localPageY >= candidate.y &&
-              localPageY <= candidate.y + candidate.height,
-          ) ??
-          fragments.reduce((best, candidate) => {
-            const bestDistance = Math.abs(
-              localPageY - (best.y + best.height / 2),
-            );
-            const candidateDistance = Math.abs(
-              localPageY - (candidate.y + candidate.height / 2),
-            );
-            return candidateDistance < bestDistance ? candidate : best;
-          });
-
-        showAt(
-          pageLeft + (fragment.x1 + fragment.x2) / 2,
-          pageTop + fragment.y,
+        const fragment = findHintAtPoint(
+          hintFragments,
+          pageX - pageLeft,
+          pageY - pageTop,
         );
+        const token = fragment ? hintTokens.get(fragment.tokenKey) : undefined;
+        if (!fragment || !token?.hint) return;
+
+        onHintLookup();
+        popup.show({
+          translation: token.hint.translation,
+          pronunciation: token.hint.pronunciation,
+          x: pageLeft + (fragment.x1 + fragment.x2) / 2,
+          y: pageTop + fragment.y,
+        });
       });
     },
-    [onHintLookup, popup, tokenFragments],
+    [hintFragments, hintTokens, onHintLookup, popup],
   );
 
   const underlineSegments = React.useMemo(
@@ -1172,6 +1168,8 @@ function NativeHintText({
       ]}
     >
       <Text
+        onPress={hintFragments.length > 0 ? handleTextPress : undefined}
+        suppressHighlighting
         onLayout={(event) => {
           setTextLayout(event.nativeEvent.layout);
         }}
@@ -1203,7 +1201,10 @@ function NativeHintText({
         {inlineAudio && (
           <Text
             suppressHighlighting
-            onPress={inlineAudio.onPress}
+            onPress={(event) => {
+              event.stopPropagation();
+              inlineAudio.onPress();
+            }}
             style={{
               fontFamily: PLAY_AUDIO_ICON_FONT_FAMILY,
               fontSize: PLAY_AUDIO_ICON_SIZE,
@@ -1215,7 +1216,6 @@ function NativeHintText({
         )}
         {inlineAudio && <Text>{INLINE_AUDIO_SPACE}</Text>}
         {tokens.map((token) => {
-          const interactive = Boolean(token.hint) && !token.hidden;
           const color = token.hidden
             ? "transparent"
             : token.dimmed
@@ -1226,14 +1226,6 @@ function NativeHintText({
           return (
             <Text
               key={`display:${tokenKey}`}
-              suppressHighlighting
-              onPress={
-                interactive
-                  ? (event) => {
-                      showMeasuredHint(token, tokenKey, event);
-                    }
-                  : undefined
-              }
               style={[
                 flatStyle,
                 {
