@@ -1,6 +1,6 @@
 import React from "react";
 import { notFound, redirect } from "next/navigation";
-import { fetchQuery } from "convex/nextjs";
+import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 
 interface LanguageType {
@@ -25,7 +25,7 @@ function getCanonicalLocalizationPath(courseShort: string) {
 }
 
 async function get_language(id: string) {
-  const resolved = await fetchQuery(api.editorRead.resolveEditorLanguage, {
+  const resolved = await fetchAuthQuery(api.editorRead.resolveEditorLanguage, {
     identifier: id,
   });
   if (!resolved?.language) return [undefined, undefined, undefined] as const;

@@ -1,7 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { fetchQuery } from "convex/nextjs";
+import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 import StoryEditorPageClient from "@/app/editor/story/[story]/page_client";
 
@@ -16,7 +16,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const resolvedParams = await params;
   const storyId = Number(resolvedParams.story);
-  const story = await fetchQuery(api.editorRead.getEditorStoryPageData, {
+  const story = await fetchAuthQuery(api.editorRead.getEditorStoryPageData, {
     storyId,
   });
 

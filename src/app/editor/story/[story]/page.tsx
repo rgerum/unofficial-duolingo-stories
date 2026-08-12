@@ -1,7 +1,7 @@
 import React from "react";
 import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
-import { fetchQuery } from "convex/nextjs";
+import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 
 function getCanonicalStoryEditorPath(courseShort: string, storyId: number) {
@@ -14,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ story: number }>;
 }): Promise<Metadata> {
   const storyId = Number((await params).story);
-  const story = await fetchQuery(api.editorRead.getEditorStoryPageData, {
+  const story = await fetchAuthQuery(api.editorRead.getEditorStoryPageData, {
     storyId,
   });
 
@@ -39,7 +39,7 @@ export default async function Page({
   searchParams?: Promise<{ line?: string | string[] }>;
 }) {
   const storyId = Number((await params).story);
-  const story = await fetchQuery(api.editorRead.getEditorStoryPageData, {
+  const story = await fetchAuthQuery(api.editorRead.getEditorStoryPageData, {
     storyId,
   });
 
