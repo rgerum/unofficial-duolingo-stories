@@ -1,8 +1,8 @@
-import { action } from "./_generated/server";
+import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
 
-export const setBetterAuthRolesBatch = action({
+export const setBetterAuthRolesBatch = internalAction({
   args: {
     users: v.array(
       v.object({

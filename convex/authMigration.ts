@@ -1,10 +1,10 @@
-import { action, query } from "./_generated/server";
+import { internalAction, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
-import { api, components } from "./_generated/api";
+import { components, internal } from "./_generated/api";
 
 const PAGE_SIZE = 200;
 
-export const listLegacyUsersForRoleSync = query({
+export const listLegacyUsersForRoleSync = internalQuery({
   args: {
     cursor: v.optional(v.string()),
     limit: v.optional(v.number()),
@@ -19,7 +19,7 @@ export const listLegacyUsersForRoleSync = query({
   },
 });
 
-export const syncBetterAuthRoles = action({
+export const syncBetterAuthRoles = internalAction({
   args: {
     dryRun: v.optional(v.boolean()),
     limit: v.optional(v.number()),
@@ -36,7 +36,7 @@ export const syncBetterAuthRoles = action({
 
     while (true) {
       const pageResult = (await ctx.runQuery(
-        api.authMigration.listLegacyUsersForRoleSync,
+        internal.authMigration.listLegacyUsersForRoleSync,
         { cursor: cursor ?? undefined, limit },
       )) as {
         page: Array<{ email?: string; admin?: boolean; role?: boolean }>;
@@ -133,7 +133,7 @@ function normalizeUsername(input: string): string {
   return `${cleaned || "user"}_${Math.random().toString(36).slice(2, 6)}`;
 }
 
-export const migrateLegacyUsersToBetterAuth = action({
+export const migrateLegacyUsersToBetterAuth = internalAction({
   args: {
     dryRun: v.optional(v.boolean()),
     limit: v.optional(v.number()),
@@ -158,7 +158,7 @@ export const migrateLegacyUsersToBetterAuth = action({
     }> = [];
 
     const pageResult = (await ctx.runQuery(
-      api.authMigration.listLegacyUsersForRoleSync,
+      internal.authMigration.listLegacyUsersForRoleSync,
       { cursor, limit },
     )) as {
       page: Array<{
@@ -335,7 +335,7 @@ const betterAuthAccountInput = v.object({
   accountType: v.optional(v.string()),
 });
 
-export const importBetterAuthUsersBatch = action({
+export const importBetterAuthUsersBatch = internalAction({
   args: {
     users: v.array(betterAuthUserInput),
     verbose: v.optional(v.boolean()),
@@ -563,7 +563,7 @@ export const importBetterAuthUsersBatch = action({
   },
 });
 
-export const importBetterAuthAccountsBatch = action({
+export const importBetterAuthAccountsBatch = internalAction({
   args: {
     accounts: v.array(betterAuthAccountInput),
     verbose: v.optional(v.boolean()),
@@ -682,7 +682,7 @@ export const importBetterAuthAccountsBatch = action({
   },
 });
 
-export const clearBetterAuthData = action({
+export const clearBetterAuthData = internalAction({
   args: {
     confirm: v.boolean(),
   },
@@ -717,7 +717,7 @@ export const clearBetterAuthData = action({
   },
 });
 
-export const debugBetterAuthAccount = action({
+export const debugBetterAuthAccount = internalAction({
   args: {
     email: v.string(),
   },
