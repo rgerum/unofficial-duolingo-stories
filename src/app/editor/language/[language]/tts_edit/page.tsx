@@ -2,7 +2,7 @@ import React from "react";
 import { notFound, redirect } from "next/navigation";
 import { getUser } from "@/lib/userInterface";
 import { Metadata } from "next";
-import { fetchQuery } from "convex/nextjs";
+import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 
 function getCanonicalVoicesEditPath(courseShort: string) {
@@ -14,7 +14,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ language: string }>;
 }): Promise<Metadata> {
-  const resolved = await fetchQuery(api.editorRead.resolveEditorLanguage, {
+  const resolved = await fetchAuthQuery(api.editorRead.resolveEditorLanguage, {
     identifier: (await params).language,
   });
   const language = resolved?.language;
@@ -49,7 +49,7 @@ export default async function Page({
 }) {
   const user = await getUser();
   void user;
-  const resolved = await fetchQuery(api.editorRead.resolveEditorLanguage, {
+  const resolved = await fetchAuthQuery(api.editorRead.resolveEditorLanguage, {
     identifier: (await params).language,
   });
   const language = resolved?.language;

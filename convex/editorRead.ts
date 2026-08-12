@@ -432,6 +432,8 @@ export const getEditorCourseImport = query({
     fromLegacyId: v.number(),
   },
   handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return [];
+
     const [toCourse, fromCourse] = await Promise.all([
       ctx.db
         .query("courses")
@@ -506,6 +508,8 @@ export const getEditorCourseImport = query({
 export const resolveEditorLanguage = query({
   args: { identifier: v.string() },
   handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return null;
+
     const numeric = toNumber(args.identifier);
 
     if (numeric !== undefined) {
@@ -560,6 +564,8 @@ export const resolveEditorLanguage = query({
 export const getEditorSpeakersByLanguageLegacyId = query({
   args: { languageLegacyId: v.number() },
   handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return [];
+
     const language = await ctx.db
       .query("languages")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.languageLegacyId))
@@ -587,6 +593,8 @@ export const getEditorSpeakersByLanguageLegacyId = query({
 export const getEditorAvatarNamesByLanguageLegacyId = query({
   args: { languageLegacyId: v.number() },
   handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return [];
+
     const language = await ctx.db
       .query("languages")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.languageLegacyId))
@@ -600,6 +608,8 @@ export const getEditorAvatarNamesByLanguageLegacyId = query({
 export const getEditorLocalizationRowsByLanguageLegacyId = query({
   args: { languageLegacyId: v.number() },
   handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return [];
+
     const [englishLanguage, targetLanguage] = await Promise.all([
       ctx.db
         .query("languages")
@@ -651,6 +661,8 @@ export const getEditorLocalizationRowsByLanguageLegacyId = query({
 export const getEditorStoryPageData = query({
   args: { storyId: v.number() },
   handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return null;
+
     const identity = (await ctx.auth.getUserIdentity()) as {
       role?: string | null;
     } | null;
@@ -700,6 +712,8 @@ export const getEditorStoryPageData = query({
 export const getEditorImageByLegacyId = query({
   args: { legacyImageId: v.string() },
   handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return null;
+
     const image = await ctx.db
       .query("images")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyImageId))
@@ -720,6 +734,8 @@ export const getEditorImageByLegacyId = query({
 export const getEditorLanguageByLegacyId = query({
   args: { legacyLanguageId: v.number() },
   handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return null;
+
     const language = await ctx.db
       .query("languages")
       .withIndex("by_id_value", (q) => q.eq("legacyId", args.legacyLanguageId))
