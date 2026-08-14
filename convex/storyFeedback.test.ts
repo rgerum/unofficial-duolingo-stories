@@ -659,4 +659,47 @@ describe("listStoryFeedbackReports", () => {
       "es-en report 100",
     ]);
   });
+
+  test("hides reporter email and token id from contributors but not admins", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t);
+
+    await t.run(async (ctx) => {
+      await ctx.db.insert("story_feedback_reports", {
+        storyId: 10,
+        storyTitle: "Story",
+        courseShort: "es-en",
+        category: "Text",
+        comment: "Identified report",
+        userId: "token-without-separator",
+        userName: "Reporter",
+        userEmail: "reporter@example.com",
+        status: "open",
+        createdAt: 100,
+      });
+    });
+
+    const contributorPage = await t
+      .withIdentity({ role: "contributor", userId: "5" })
+      .query(api.storyFeedback.listStoryFeedbackReports, {
+        status: "open",
+        paginationOpts: { numItems: 10, cursor: null },
+      });
+    expect(contributorPage.page).toHaveLength(1);
+    for (const report of contributorPage.page) {
+      expect(report.userEmail).toBeNull();
+      expect(report.userId).toBeNull();
+    }
+    expect(contributorPage.page[0]?.userName).toBe("Reporter");
+
+    const adminPage = await t
+      .withIdentity({ role: "admin", userId: "1" })
+      .query(api.storyFeedback.listStoryFeedbackReports, {
+        status: "open",
+        paginationOpts: { numItems: 10, cursor: null },
+      });
+    expect(adminPage.page).toHaveLength(1);
+    expect(adminPage.page[0]?.userEmail).toBe("reporter@example.com");
+    expect(adminPage.page[0]?.userId).toBe("token-without-separator");
+  });
 });

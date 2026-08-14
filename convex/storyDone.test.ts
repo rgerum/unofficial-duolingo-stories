@@ -110,6 +110,25 @@ describe("recordStoryDone", () => {
     });
   });
 
+  test("non-finite time rejects and inserts no completion", async () => {
+    const t = createConvexTest();
+    await seedCourseWithStory(t);
+
+    for (const time of [
+      Number.NaN,
+      Number.POSITIVE_INFINITY,
+      Number.NEGATIVE_INFINITY,
+    ]) {
+      await expect(
+        t.mutation(api.storyDone.recordStoryDone, { legacyStoryId: 10, time }),
+      ).rejects.toThrow("Invalid completion time");
+    }
+
+    await t.run(async (ctx) => {
+      expect(await ctx.db.query("story_done").collect()).toHaveLength(0);
+    });
+  });
+
   test("unknown legacyStoryId rejects with Missing story", async () => {
     const t = createConvexTest();
     await seedCourseWithStory(t);

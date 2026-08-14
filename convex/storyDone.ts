@@ -56,6 +56,9 @@ export const recordStoryDone = mutation({
       throw new Error(`Missing story for legacy id ${args.legacyStoryId}`);
     }
 
+    if (args.time !== undefined && !Number.isFinite(args.time)) {
+      throw new Error("Invalid completion time");
+    }
     // Client clocks can lie; Story Completions can never be in the future.
     const doneAt = Math.min(args.time ?? Date.now(), Date.now());
     let docId: Id<"story_done">;

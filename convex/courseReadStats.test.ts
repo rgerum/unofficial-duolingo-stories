@@ -126,6 +126,27 @@ describe("course read stats", () => {
     expect(stats?.points).toHaveLength(180);
   });
 
+  test("falls back to the default window when days is not finite", async () => {
+    const t = createConvexTest();
+    await seedCourse(t);
+    const contributor = t.withIdentity({ role: "contributor" });
+
+    const nanStats = await contributor.query(api.courseReadStats.getForEditor, {
+      courseIdentifier: "es-en",
+      days: Number.NaN,
+    });
+    expect(nanStats?.points).toHaveLength(90);
+
+    const infiniteStats = await contributor.query(
+      api.courseReadStats.getForEditor,
+      {
+        courseIdentifier: "es-en",
+        days: Number.POSITIVE_INFINITY,
+      },
+    );
+    expect(infiniteStats?.points).toHaveLength(90);
+  });
+
   test("reports completions whose story no longer exists", async () => {
     const t = createConvexTest();
     const { storyId } = await seedCourse(t);
