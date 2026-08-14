@@ -115,10 +115,10 @@ export const getForEditor = query({
           .unique();
     if (!course) return null;
 
-    const days = Math.max(
-      1,
-      Math.min(MAX_DAYS, Math.floor(args.days ?? DEFAULT_DAYS)),
-    );
+    const requested = args.days ?? DEFAULT_DAYS;
+    const days = Number.isFinite(requested)
+      ? Math.max(1, Math.min(MAX_DAYS, Math.floor(requested)))
+      : DEFAULT_DAYS;
     const todayStart = Math.floor(Date.now() / DAY_MS) * DAY_MS;
     const start = todayStart - (days - 1) * DAY_MS;
     const buckets = Array.from({ length: days }, (_, index) => {

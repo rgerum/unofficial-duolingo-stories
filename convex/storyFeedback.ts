@@ -450,7 +450,18 @@ export const listStoryFeedbackReports = query({
             .order("desc")
             .paginate(args.paginationOpts);
 
-    if ((await getRole(ctx)) !== "admin") return reports;
+    if ((await getRole(ctx)) !== "admin") {
+      // Reporter identity (email + token id) is admin-only; contributors
+      // see only the display name (or "Anonymous" in the UI).
+      return {
+        ...reports,
+        page: reports.page.map((report) => ({
+          ...report,
+          userId: null,
+          userEmail: null,
+        })),
+      };
+    }
 
     const authUserIds = Array.from(
       new Set(
