@@ -117,7 +117,11 @@ export default function StoryEditorPageClient({
 
   const avatarNames: Record<number, Avatar> = {};
   for (const avatar of (avatarRows ?? []) as Avatar[]) {
-    avatarNames[avatar.avatar_id] = avatar;
+    // Per-story character name (keyed by duo_id) wins over the canonical
+    // avatar name, matching what storyRead serves to readers.
+    const storyName = avatar.storyNames?.[data.story_data.duo_id];
+    avatarNames[avatar.avatar_id] =
+      storyName === undefined ? avatar : { ...avatar, name: storyName };
   }
   const coursePathId = course.short ?? effectiveCourseId;
 

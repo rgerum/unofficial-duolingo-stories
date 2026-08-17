@@ -159,6 +159,9 @@ export const upsertAvatar = mutation({
 
     const doc = {
       ...args.avatar,
+      // Legacy mirror upserts don't know about these fields; keep them.
+      name: args.avatar.name ?? existing?.name,
+      gender: existing?.gender,
       mirrorUpdatedAt: Date.now(),
       lastOperationKey: args.operationKey,
     };

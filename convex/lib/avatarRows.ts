@@ -33,6 +33,8 @@ export async function buildAvatarRows(
         avatar_id: avatar.legacyId,
         language_id: language.legacyId,
         name: mapping?.name ?? avatar.name ?? "",
+        storyNames: mapping?.storyNames ?? null,
+        gender: avatar.gender ?? null,
         link: avatar.link,
         speaker: mapping?.speaker ?? "",
       };

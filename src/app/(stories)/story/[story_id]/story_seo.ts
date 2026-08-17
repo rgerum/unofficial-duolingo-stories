@@ -53,7 +53,7 @@ function getTranscriptText(element: StoryElement) {
 
 export function getStoryTranscript(story: StoryData): StoryTranscriptLine[] {
   return story.elements
-    .map((element: StoryElement, index: number) => {
+    .map((element: StoryElement, index: number): StoryTranscriptLine | null => {
       const text = getTranscriptText(element);
       if (!text) return null;
 

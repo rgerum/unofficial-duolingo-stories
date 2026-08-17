@@ -136,3 +136,195 @@ describe("getStoryMetaByLegacyId", () => {
     expect(meta).toBeNull();
   });
 });
+
+describe("getStoryByLegacyId per-story character names", () => {
+  async function seedStoryWithCharacters(t: ReturnType<typeof convexTest>) {
+    return await t.run(async (ctx) => {
+      const learningLanguageId = await ctx.db.insert("languages", {
+        legacyId: 1,
+        name: "Spanish",
+        short: "es",
+        public: true,
+        rtl: false,
+      });
+      const fromLanguageId = await ctx.db.insert("languages", {
+        legacyId: 2,
+        name: "English",
+        short: "en",
+        public: true,
+        rtl: false,
+      });
+      const courseId = await ctx.db.insert("courses", {
+        legacyId: 100,
+        short: "es-en",
+        learningLanguageId,
+        fromLanguageId,
+        public: true,
+        official: false,
+      });
+      const storyId = await ctx.db.insert("stories", {
+        legacyId: 10,
+        duo_id: "es-en-la-cena",
+        name: "Dinner with the Director",
+        set_id: 1,
+        set_index: 1,
+        public: true,
+        courseId,
+        status: "finished",
+        deleted: false,
+        todo_count: 0,
+      });
+      await ctx.db.insert("story_public_content", {
+        storyId,
+        json: {
+          elements: [
+            { type: "HEADER", learningLanguageTitleContent: { text: "t" } },
+            {
+              type: "LINE",
+              line: {
+                type: "CHARACTER",
+                characterId: 988,
+                characterName: "La Madre de Juan",
+                content: { text: "hola" },
+              },
+            },
+            {
+              type: "LINE",
+              line: {
+                type: "CHARACTER",
+                characterId: 6,
+                characterName: "Álex",
+                content: { text: "buenos días" },
+              },
+            },
+            {
+              type: "LINE",
+              line: { type: "PROSE", content: { text: "narración" } },
+            },
+          ],
+        },
+        lastUpdated: 0,
+      });
+      const overriddenAvatarId = await ctx.db.insert("avatars", {
+        legacyId: 988,
+        link: "avatar-988.svg",
+      });
+      const fallbackAvatarId = await ctx.db.insert("avatars", {
+        legacyId: 6,
+        link: "avatar-6.svg",
+      });
+      await ctx.db.insert("avatar_mappings", {
+        avatarId: overriddenAvatarId,
+        languageId: learningLanguageId,
+        name: "La Madre de Juan",
+        speaker: "",
+        storyNames: {
+          "es-en-la-cena": "Paula",
+          "es-en-otra-historia": "Elsa",
+        },
+      });
+      await ctx.db.insert("avatar_mappings", {
+        avatarId: fallbackAvatarId,
+        languageId: learningLanguageId,
+        name: "Álex",
+        speaker: "",
+      });
+    });
+  }
+
+  test("replaces characterName from storyNames matching the story duo_id", async () => {
+    const t = convexTest(schema, modules);
+    await seedStoryWithCharacters(t);
+
+    const story = await t.query(api.storyRead.getStoryByLegacyId, {
+      storyId: 10,
+    });
+
+    const characterNames = story?.elements
+      .filter((element: { type: string }) => element.type === "LINE")
+      .map(
+        (element: { line: { characterName?: string } }) =>
+          element.line.characterName ?? null,
+      );
+    // 988 gets its per-story name for this duo_id, 6 keeps the canonical
+    // name baked into the JSON, prose lines stay untouched.
+    expect(characterNames).toEqual(["Paula", "Álex", null]);
+  });
+
+  test("setAvatarStoryName updates and removes entries seen by readers", async () => {
+    const t = convexTest(schema, modules);
+    await seedStoryWithCharacters(t);
+    const contributor = t.withIdentity({ role: "contributor" });
+
+    await contributor.mutation(api.languageWrite.setAvatarStoryName, {
+      legacyLanguageId: 1,
+      legacyAvatarId: 6,
+      duoId: "es-en-la-cena",
+      name: "Leonardo",
+    });
+    let story = await t.query(api.storyRead.getStoryByLegacyId, {
+      storyId: 10,
+    });
+    expect(story?.elements[2].line.characterName).toBe("Leonardo");
+
+    await contributor.mutation(api.languageWrite.setAvatarStoryName, {
+      legacyLanguageId: 1,
+      legacyAvatarId: 6,
+      duoId: "es-en-la-cena",
+      name: null,
+    });
+    story = await t.query(api.storyRead.getStoryByLegacyId, { storyId: 10 });
+    expect(story?.elements[2].line.characterName).toBe("Álex");
+  });
+
+  test("setAvatarStoryName rejects anonymous callers", async () => {
+    const t = convexTest(schema, modules);
+    await seedStoryWithCharacters(t);
+
+    await expect(
+      t.mutation(api.languageWrite.setAvatarStoryName, {
+        legacyLanguageId: 1,
+        legacyAvatarId: 6,
+        duoId: "es-en-la-cena",
+        name: "Leonardo",
+      }),
+    ).rejects.toThrow("Unauthorized");
+  });
+});
+
+describe("setAvatarDetails", () => {
+  test("sets and clears canonical name and gender", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("avatars", { legacyId: 988, link: "avatar.svg" });
+    });
+    const contributor = t.withIdentity({ role: "contributor" });
+
+    const result = await contributor.mutation(
+      api.languageWrite.setAvatarDetails,
+      { legacyAvatarId: 988, name: "Paula", gender: "female" },
+    );
+    expect(result).toEqual({ avatar_id: 988, name: "Paula", gender: "female" });
+
+    // Omitted fields stay untouched, null clears.
+    const cleared = await contributor.mutation(
+      api.languageWrite.setAvatarDetails,
+      { legacyAvatarId: 988, gender: null },
+    );
+    expect(cleared).toEqual({ avatar_id: 988, name: "Paula", gender: null });
+  });
+
+  test("rejects anonymous callers", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("avatars", { legacyId: 988, link: "avatar.svg" });
+    });
+
+    await expect(
+      t.mutation(api.languageWrite.setAvatarDetails, {
+        legacyAvatarId: 988,
+        gender: "female",
+      }),
+    ).rejects.toThrow("Unauthorized");
+  });
+});

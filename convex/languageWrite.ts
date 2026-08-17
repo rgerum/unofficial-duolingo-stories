@@ -213,6 +213,132 @@ export const setAvatarSpeaker = mutation({
   },
 });
 
+const avatarGenderValidator = v.union(v.literal("male"), v.literal("female"));
+
+// Character-level facts on the global avatar: canonical English reference
+// name and gender. Per-language display names stay in avatar_mappings.
+export const setAvatarDetails = mutation({
+  args: {
+    legacyAvatarId: v.number(),
+    // undefined leaves the field untouched, null clears it.
+    name: v.optional(v.union(v.string(), v.null())),
+    gender: v.optional(v.union(avatarGenderValidator, v.null())),
+    operationKey: v.optional(v.string()),
+  },
+  returns: v.object({
+    avatar_id: v.number(),
+    name: v.union(v.string(), v.null()),
+    gender: v.union(avatarGenderValidator, v.null()),
+  }),
+  handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
+    const avatar = await getAvatarByLegacyId(ctx, args.legacyAvatarId);
+    if (!avatar) {
+      throw new Error(`Avatar ${args.legacyAvatarId} not found`);
+    }
+
+    const patch: {
+      name?: string | undefined;
+      gender?: "male" | "female" | undefined;
+      mirrorUpdatedAt: number;
+      lastOperationKey: string;
+    } = {
+      mirrorUpdatedAt: Date.now(),
+      lastOperationKey:
+        args.operationKey ??
+        `avatar_details:${args.legacyAvatarId}:${Date.now()}`,
+    };
+    if (args.name !== undefined) patch.name = args.name ?? undefined;
+    if (args.gender !== undefined) patch.gender = args.gender ?? undefined;
+
+    await ctx.db.patch(avatar._id, patch);
+    const updated = await ctx.db.get(avatar._id);
+
+    return {
+      avatar_id: args.legacyAvatarId,
+      name: updated?.name ?? null,
+      gender: updated?.gender ?? null,
+    };
+  },
+});
+
+export const setAvatarStoryName = mutation({
+  args: {
+    legacyLanguageId: v.number(),
+    legacyAvatarId: v.number(),
+    duoId: v.string(),
+    // null removes the entry so the canonical name applies again.
+    name: v.union(v.string(), v.null()),
+    operationKey: v.optional(v.string()),
+  },
+  returns: v.object({
+    avatar_id: v.number(),
+    language_id: v.number(),
+    duo_id: v.string(),
+    storyNames: v.record(v.string(), v.string()),
+  }),
+  handler: async (ctx, args) => {
+    await requireContributorOrAdmin(ctx);
+    if (!args.duoId.trim()) {
+      throw new Error("duoId must not be empty");
+    }
+    const [language, avatar] = await Promise.all([
+      getLanguageByLegacyId(ctx, args.legacyLanguageId),
+      getAvatarByLegacyId(ctx, args.legacyAvatarId),
+    ]);
+
+    if (!language) {
+      throw new Error(`Language ${args.legacyLanguageId} not found`);
+    }
+    if (!avatar) {
+      throw new Error(`Avatar ${args.legacyAvatarId} not found`);
+    }
+
+    const operationKey =
+      args.operationKey ??
+      `avatar_story_name:${args.legacyLanguageId}:${args.legacyAvatarId}:${Date.now()}`;
+
+    const existing = await ctx.db
+      .query("avatar_mappings")
+      .withIndex("by_avatar_id_and_language_id", (q) =>
+        q.eq("avatarId", avatar._id).eq("languageId", language._id),
+      )
+      .unique();
+
+    const storyNames = { ...(existing?.storyNames ?? {}) };
+    if (args.name === null) {
+      delete storyNames[args.duoId];
+    } else {
+      storyNames[args.duoId] = args.name;
+    }
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        storyNames,
+        mirrorUpdatedAt: Date.now(),
+        lastOperationKey: operationKey,
+      });
+    } else {
+      await ctx.db.insert("avatar_mappings", {
+        avatarId: avatar._id,
+        languageId: language._id,
+        name: "",
+        speaker: "",
+        storyNames,
+        mirrorUpdatedAt: Date.now(),
+        lastOperationKey: operationKey,
+      });
+    }
+
+    return {
+      avatar_id: args.legacyAvatarId,
+      language_id: args.legacyLanguageId,
+      duo_id: args.duoId,
+      storyNames,
+    };
+  },
+});
+
 export const upsertSpeakerFromVoice = mutation({
   args: {
     localeShort: v.optional(v.string()),
