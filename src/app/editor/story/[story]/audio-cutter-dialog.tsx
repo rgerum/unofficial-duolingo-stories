@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { AudioMark } from "@/app/audio/_lib/audio/types";
+import { renderTranscriptContent } from "@/app/editor/story/[story]/audio-cutter-transcript-text";
 import type {
   AudioCutterPreparedSegment,
   AudioCutterTranscriptItem,
@@ -42,17 +43,14 @@ import {
 import {
   areSegmentsEqual,
   type AudioSilenceAnalysis,
-  clampTimeToKeepRanges,
   createSegmentId,
   detectSpeechSegmentsFromAnalysis,
-  getKeepRangeEnd,
   getKeepRanges,
   getJoinedSegmentSkipRanges,
   moveRangeWithinBounds,
   normalizeRanges,
   resizeRangeWithinBounds,
   getSegmentSkipRangesFromAnalysis,
-  getTotalRangeDuration,
   type Segment,
   type SegmentDraft,
   sortSegments,
@@ -63,7 +61,6 @@ import {
   getActiveWordMarkIndex,
   getApproximateWordMarks,
   getApproximateWordPlaybackRange,
-  MIN_WORD_MARK_GAP_MS,
 } from "@/lib/editor/audio/word_marks";
 
 const DEFAULT_WAVEFORM_ZOOM = 180;
@@ -213,49 +210,6 @@ function isEditableTarget(target: EventTarget | null) {
     tagName === "SELECT" ||
     Boolean(target.closest("[contenteditable='true']"))
   );
-}
-
-function renderTextWithHighlightedWord(
-  text: string,
-  marks: AudioMark[],
-  activeWordIndex: number,
-  onPlayWord?: (markIndex: number) => void,
-) {
-  if (marks.length === 0) return text;
-
-  const parts: React.ReactNode[] = [];
-  let cursor = 0;
-
-  marks.forEach((mark, index) => {
-    if (mark.start > cursor) {
-      parts.push(text.slice(cursor, mark.start));
-    }
-
-    parts.push(
-      <button
-        key={`${mark.start}-${mark.end}-${index}`}
-        type="button"
-        className={
-          index === activeWordIndex
-            ? "rounded-[8px] bg-[#0f5f83] px-1 py-0.5 font-semibold text-white ring-2 ring-[#d7e34f] shadow-[0_1px_0_rgba(255,255,255,0.2)]"
-            : "rounded-[8px] px-1 py-0.5 transition-colors hover:bg-[rgba(28,176,246,0.12)]"
-        }
-        onClick={(event) => {
-          event.stopPropagation();
-          onPlayWord?.(index);
-        }}
-      >
-        {text.slice(mark.start, mark.end)}
-      </button>,
-    );
-    cursor = mark.end;
-  });
-
-  if (cursor < text.length) {
-    parts.push(text.slice(cursor));
-  }
-
-  return parts;
 }
 
 function getSegmentsFromPlugin(plugin: RegionsPlugin) {
@@ -1135,9 +1089,6 @@ export default function AudioCutterDialog({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
   const transcriptScrollRef = React.useRef<HTMLDivElement | null>(null);
-  const wordTimelineRefs = React.useRef<Record<string, HTMLDivElement | null>>(
-    {},
-  );
   const transcriptRowRefs = React.useRef<Record<number, HTMLDivElement | null>>(
     {},
   );
@@ -1216,14 +1167,6 @@ export default function AudioCutterDialog({
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<
     string | null
   >(null);
-  const [
-    wordMarkTimeOverridesBySegmentId,
-    setWordMarkTimeOverridesBySegmentId,
-  ] = React.useState<Record<string, number[]>>({});
-  const [draggingWordMarker, setDraggingWordMarker] = React.useState<{
-    markIndex: number;
-    segmentId: string;
-  } | null>(null);
   const [regionsPlugin, setRegionsPlugin] = React.useState<ReturnType<
     typeof Regions.create
   > | null>(null);
@@ -1248,16 +1191,12 @@ export default function AudioCutterDialog({
     sortedSegments.forEach((segment) => {
       next[segment.id] = applyWordMarkTimeOverrides(
         approximateWordMarksBySegmentId[segment.id] ?? [],
-        wordMarkTimeOverridesBySegmentId[segment.id],
+        undefined,
         segment,
       );
     });
     return next;
-  }, [
-    approximateWordMarksBySegmentId,
-    sortedSegments,
-    wordMarkTimeOverridesBySegmentId,
-  ]);
+  }, [approximateWordMarksBySegmentId, sortedSegments]);
   const activeWordIndexBySegmentId = React.useMemo(() => {
     const next: Record<string, number> = {};
     sortedSegments.forEach((segment) => {
@@ -1316,12 +1255,6 @@ export default function AudioCutterDialog({
     setHoveredSegmentId((currentId) =>
       currentId && nextSegments.some((segment) => segment.id === currentId)
         ? currentId
-        : null,
-    );
-    setDraggingWordMarker((current) =>
-      current &&
-      nextSegments.some((segment) => segment.id === current.segmentId)
-        ? current
         : null,
     );
   }, []);
@@ -1582,8 +1515,6 @@ export default function AudioCutterDialog({
     setHoveredSegmentId(null);
     setPlaybackTimeSeconds(0);
     setIsSkipRangeInteractionActive(false);
-    setWordMarkTimeOverridesBySegmentId({});
-    setDraggingWordMarker(null);
     setZoomPxPerSec(DEFAULT_WAVEFORM_ZOOM);
     setSelectedSegmentId(null);
     autoDetectRequestRef.current = 0;
@@ -1618,8 +1549,6 @@ export default function AudioCutterDialog({
     setLabelsById({});
     setMergePreview(null);
     setHoveredSegmentId(null);
-    setWordMarkTimeOverridesBySegmentId({});
-    setDraggingWordMarker(null);
     setSelectedSegmentId(null);
   }, [open, resetSegmentHistory, transcriptItemsKey, typedRegionsPlugin]);
 
@@ -1692,15 +1621,6 @@ export default function AudioCutterDialog({
         }
         return current;
       });
-      setWordMarkTimeOverridesBySegmentId((current) => {
-        if (!(segmentId in current)) return current;
-        const next = { ...current };
-        delete next[segmentId];
-        return next;
-      });
-      setDraggingWordMarker((current) =>
-        current?.segmentId === segmentId ? null : current,
-      );
     },
     [commitSegments],
   );
@@ -1810,12 +1730,6 @@ export default function AudioCutterDialog({
         ...current,
         [rightId]: current[segmentId] ?? segment.label ?? "",
       }));
-      setWordMarkTimeOverridesBySegmentId((current) => {
-        if (!(segmentId in current)) return current;
-        const next = { ...current };
-        delete next[segmentId];
-        return next;
-      });
       setHoveredSegmentId(rightId);
       setSelectedSegmentId(rightId);
       setMergePreview(null);
@@ -2000,15 +1914,6 @@ export default function AudioCutterDialog({
         delete next[removedId];
         return next;
       });
-      setWordMarkTimeOverridesBySegmentId((current) => {
-        if (!(removedId in current)) return current;
-        const next = { ...current };
-        delete next[removedId];
-        return next;
-      });
-      setDraggingWordMarker((current) =>
-        current?.segmentId === removedId ? null : current,
-      );
       commitSegments((current) =>
         sortSegments([
           ...current.filter(
@@ -2747,8 +2652,6 @@ export default function AudioCutterDialog({
       setLabelsById({});
       setMergePreview(null);
       setPlaybackTimeSeconds(0);
-      setWordMarkTimeOverridesBySegmentId({});
-      setDraggingWordMarker(null);
       setDuration(0);
       typedRegionsPlugin.clearRegions();
 
@@ -2980,126 +2883,6 @@ export default function AudioCutterDialog({
     [cancelSegmentedPlayback, scrollWaveformToSegment, wavesurfer],
   );
 
-  const updateWordMarkTimeOverride = React.useCallback(
-    (
-      segment: Segment,
-      marks: AudioMark[],
-      markIndex: number,
-      nextTimeMs: number,
-    ) => {
-      const keepRanges = getKeepRanges(
-        {
-          start: segment.start,
-          end: segment.end,
-        },
-        segment.skipRanges,
-      );
-      if (keepRanges.length === 0) return;
-
-      const keepStartMs = Math.round(
-        (keepRanges[0]?.start ?? segment.start) * 1000,
-      );
-      const keepEndMs = Math.round(
-        getKeepRangeEnd(
-          {
-            start: segment.start,
-            end: segment.end,
-          },
-          segment.skipRanges,
-        ) * 1000,
-      );
-      const previousTimeMs =
-        markIndex > 0
-          ? (marks[markIndex - 1]?.time ?? keepStartMs)
-          : keepStartMs;
-      const nextMarkTimeMs =
-        markIndex < marks.length - 1
-          ? (marks[markIndex + 1]?.time ?? keepEndMs)
-          : keepEndMs;
-      const minTimeMs =
-        markIndex === 0 ? keepStartMs : previousTimeMs + MIN_WORD_MARK_GAP_MS;
-      const maxTimeMs =
-        markIndex === marks.length - 1
-          ? keepEndMs
-          : nextMarkTimeMs - MIN_WORD_MARK_GAP_MS;
-      const boundedTimeSeconds = clampTimeToKeepRanges(
-        clamp(nextTimeMs, minTimeMs, Math.max(minTimeMs, maxTimeMs)) / 1000,
-        keepRanges,
-      );
-
-      setWordMarkTimeOverridesBySegmentId((current) => {
-        const segmentOverrides = [...(current[segment.id] ?? [])];
-        segmentOverrides[markIndex] = Math.round(boundedTimeSeconds * 1000);
-        return {
-          ...current,
-          [segment.id]: segmentOverrides,
-        };
-      });
-    },
-    [],
-  );
-
-  const updateDraggedWordMarker = React.useCallback(
-    (segmentId: string, markIndex: number, clientX: number) => {
-      const segment = sortedSegments.find(
-        (candidate) => candidate.id === segmentId,
-      );
-      const marks = wordMarksBySegmentId[segmentId] ?? [];
-      const timeline = wordTimelineRefs.current[segmentId];
-      if (!segment || !timeline || marks.length === 0) return;
-
-      const rect = timeline.getBoundingClientRect();
-      if (rect.width <= 0) return;
-
-      const ratio = clamp((clientX - rect.left) / rect.width, 0, 1);
-      const rawTimeMs = Math.round(
-        (segment.start + (segment.end - segment.start) * ratio) * 1000,
-      );
-      updateWordMarkTimeOverride(segment, marks, markIndex, rawTimeMs);
-    },
-    [sortedSegments, updateWordMarkTimeOverride, wordMarksBySegmentId],
-  );
-
-  const onStartWordMarkerDrag = React.useCallback(
-    (
-      event: React.PointerEvent<HTMLButtonElement>,
-      segmentId: string,
-      markIndex: number,
-    ) => {
-      if (event.button !== 0) return;
-      event.preventDefault();
-      event.stopPropagation();
-      setHoveredSegmentId(segmentId);
-      setSelectedSegmentId(segmentId);
-      setDraggingWordMarker({ markIndex, segmentId });
-      updateDraggedWordMarker(segmentId, markIndex, event.clientX);
-    },
-    [updateDraggedWordMarker],
-  );
-
-  React.useEffect(() => {
-    if (!draggingWordMarker) return;
-
-    const onPointerMove = (event: PointerEvent) => {
-      updateDraggedWordMarker(
-        draggingWordMarker.segmentId,
-        draggingWordMarker.markIndex,
-        event.clientX,
-      );
-    };
-    const onPointerUp = () => {
-      setDraggingWordMarker(null);
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-
-    return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-    };
-  }, [draggingWordMarker, updateDraggedWordMarker]);
-
   const onPlaySegment = React.useCallback(
     (segment: Segment) => {
       setSelectedSegmentId(segment.id);
@@ -3234,8 +3017,6 @@ export default function AudioCutterDialog({
     commitSegments([]);
     setLabelsById({});
     setMergePreview(null);
-    setWordMarkTimeOverridesBySegmentId({});
-    setDraggingWordMarker(null);
     setSelectedSegmentId(null);
   }, [commitSegments, typedRegionsPlugin]);
 
@@ -3842,15 +3623,6 @@ export default function AudioCutterDialog({
                     const activeWordIndex = matchedSegment
                       ? (activeWordIndexBySegmentId[matchedSegment.id] ?? -1)
                       : -1;
-                    const skippedDuration = matchedSegment
-                      ? getTotalRangeDuration(matchedSegment.skipRanges)
-                      : 0;
-                    const segmentDuration = matchedSegment
-                      ? Math.max(
-                          matchedSegment.end - matchedSegment.start,
-                          0.001,
-                        )
-                      : 0.001;
                     const cardClassName = `rounded-[20px] border px-4 py-3 text-left transition-colors ${
                       isSelected
                         ? "border-[#1cb0f6] bg-[rgba(28,176,246,0.1)] shadow-[0_0_0_1px_rgba(28,176,246,0.22),0_8px_22px_rgba(15,95,131,0.1)]"
@@ -3902,8 +3674,8 @@ export default function AudioCutterDialog({
                                   {item.speaker || "Narrator"}:
                                 </span>
                                 <span className="text-[1.05rem] leading-8 text-[var(--text-color)]">
-                                  {renderTextWithHighlightedWord(
-                                    item.content.text,
+                                  {renderTranscriptContent(
+                                    item.content,
                                     wordMarks,
                                     activeWordIndex,
                                     matchedSegment
@@ -3918,107 +3690,17 @@ export default function AudioCutterDialog({
                                   )}
                                 </span>
                               </div>
-                              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--text-color-dim)]">
-                                <span>Story line {item.lineIndex}</span>
-                                {matchedSegment ? (
-                                  <span>
-                                    {formatSeconds(matchedSegment.start)} to{" "}
-                                    {formatSeconds(matchedSegment.end)}
-                                  </span>
-                                ) : (
-                                  <span>No matching segment yet</span>
-                                )}
-                                {matchedSegment && skippedDuration > 0 ? (
-                                  <span>
-                                    trims {formatSeconds(skippedDuration)}{" "}
-                                    across {matchedSegment.skipRanges.length}{" "}
-                                    audio cut
-                                    {matchedSegment.skipRanges.length === 1
-                                      ? ""
-                                      : "s"}
-                                  </span>
-                                ) : null}
-                              </div>
+                              {matchedSegment ? null : (
+                                <div className="mt-1 text-xs text-[var(--text-color-dim)]">
+                                  No matching segment yet
+                                </div>
+                              )}
                             </div>
                             <div className="shrink-0 text-right font-mono text-sm font-bold text-[var(--text-color)]">
                               #{index + 1}
                             </div>
                           </div>
                         </div>
-                        {matchedSegment && wordMarks.length > 0 ? (
-                          <>
-                            <div className="mt-3 flex items-center justify-between gap-3 text-[11px] text-[var(--text-color-dim)]">
-                              <span>Word timing</span>
-                              <span>
-                                Drag markers or click a word above to play it.
-                              </span>
-                            </div>
-                            <div
-                              ref={(node) => {
-                                wordTimelineRefs.current[matchedSegment.id] =
-                                  node;
-                              }}
-                              className="relative mt-2 h-9 rounded-full border border-[var(--color_base_border)] bg-[var(--body-background)]"
-                            >
-                              {matchedSegment.skipRanges.map(
-                                (skipRange, skipIndex) => {
-                                  const leftPercent =
-                                    ((skipRange.start - matchedSegment.start) /
-                                      segmentDuration) *
-                                    100;
-                                  const widthPercent =
-                                    ((skipRange.end - skipRange.start) /
-                                      segmentDuration) *
-                                    100;
-
-                                  return (
-                                    <div
-                                      key={`${matchedSegment.id}-skip-${skipIndex}`}
-                                      className="pointer-events-none absolute top-0 bottom-0 rounded-full border-x border-dashed border-[rgba(15,95,131,0.65)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.08)_0_6px,rgba(15,95,131,0.18)_6px_12px)]"
-                                      style={{
-                                        left: `${leftPercent}%`,
-                                        width: `${widthPercent}%`,
-                                      }}
-                                    />
-                                  );
-                                },
-                              )}
-                              {wordMarks.map((mark, markIndex) => {
-                                const leftPercent =
-                                  ((mark.time / 1000 - matchedSegment.start) /
-                                    segmentDuration) *
-                                  100;
-
-                                return (
-                                  <button
-                                    key={`${matchedSegment.id}-marker-${mark.start}-${mark.time}`}
-                                    type="button"
-                                    className="absolute top-1/2 h-full w-4 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none"
-                                    style={{
-                                      left: `${leftPercent}%`,
-                                    }}
-                                    onPointerDown={(event) => {
-                                      onStartWordMarkerDrag(
-                                        event,
-                                        matchedSegment.id,
-                                        markIndex,
-                                      );
-                                    }}
-                                    title={`Drag timing marker for "${mark.value}"`}
-                                  >
-                                    <span
-                                      className={`absolute top-[15%] bottom-[15%] left-1/2 -translate-x-1/2 rounded-full ${
-                                        markIndex === activeWordIndex
-                                          ? "w-1 bg-[#d7e34f] shadow-[0_0_0_1px_rgba(70,81,0,0.28)]"
-                                          : "w-px bg-[rgba(15,95,131,0.45)] shadow-[0_0_0_1px_rgba(255,255,255,0.18)]"
-                                      }`}
-                                    />
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </>
-                        ) : null}
                       </div>
                     );
                   })}
