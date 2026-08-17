@@ -51,6 +51,13 @@ function renderTextRangeWithHighlightedWord(
           event.stopPropagation();
           onPlayWord?.(index);
         }}
+        onKeyDown={(event) => {
+          // The transcript row around this button treats Enter/Space as "play
+          // the whole segment" and preventDefaults it, which would swallow the
+          // button's own activation.
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.stopPropagation();
+        }}
       >
         {text.slice(markStart, markEnd)}
       </button>,

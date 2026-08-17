@@ -1167,10 +1167,6 @@ export default function AudioCutterDialog({
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<
     string | null
   >(null);
-  const [
-    wordMarkTimeOverridesBySegmentId,
-    setWordMarkTimeOverridesBySegmentId,
-  ] = React.useState<Record<string, number[]>>({});
   const [regionsPlugin, setRegionsPlugin] = React.useState<ReturnType<
     typeof Regions.create
   > | null>(null);
@@ -1195,16 +1191,12 @@ export default function AudioCutterDialog({
     sortedSegments.forEach((segment) => {
       next[segment.id] = applyWordMarkTimeOverrides(
         approximateWordMarksBySegmentId[segment.id] ?? [],
-        wordMarkTimeOverridesBySegmentId[segment.id],
+        undefined,
         segment,
       );
     });
     return next;
-  }, [
-    approximateWordMarksBySegmentId,
-    sortedSegments,
-    wordMarkTimeOverridesBySegmentId,
-  ]);
+  }, [approximateWordMarksBySegmentId, sortedSegments]);
   const activeWordIndexBySegmentId = React.useMemo(() => {
     const next: Record<string, number> = {};
     sortedSegments.forEach((segment) => {
@@ -1523,7 +1515,6 @@ export default function AudioCutterDialog({
     setHoveredSegmentId(null);
     setPlaybackTimeSeconds(0);
     setIsSkipRangeInteractionActive(false);
-    setWordMarkTimeOverridesBySegmentId({});
     setZoomPxPerSec(DEFAULT_WAVEFORM_ZOOM);
     setSelectedSegmentId(null);
     autoDetectRequestRef.current = 0;
@@ -1558,7 +1549,6 @@ export default function AudioCutterDialog({
     setLabelsById({});
     setMergePreview(null);
     setHoveredSegmentId(null);
-    setWordMarkTimeOverridesBySegmentId({});
     setSelectedSegmentId(null);
   }, [open, resetSegmentHistory, transcriptItemsKey, typedRegionsPlugin]);
 
@@ -1630,12 +1620,6 @@ export default function AudioCutterDialog({
           return null;
         }
         return current;
-      });
-      setWordMarkTimeOverridesBySegmentId((current) => {
-        if (!(segmentId in current)) return current;
-        const next = { ...current };
-        delete next[segmentId];
-        return next;
       });
     },
     [commitSegments],
@@ -1746,12 +1730,6 @@ export default function AudioCutterDialog({
         ...current,
         [rightId]: current[segmentId] ?? segment.label ?? "",
       }));
-      setWordMarkTimeOverridesBySegmentId((current) => {
-        if (!(segmentId in current)) return current;
-        const next = { ...current };
-        delete next[segmentId];
-        return next;
-      });
       setHoveredSegmentId(rightId);
       setSelectedSegmentId(rightId);
       setMergePreview(null);
@@ -1933,12 +1911,6 @@ export default function AudioCutterDialog({
       setLabelsById((current) => {
         const next = { ...current };
         next[survivingId] = preservedLabel;
-        delete next[removedId];
-        return next;
-      });
-      setWordMarkTimeOverridesBySegmentId((current) => {
-        if (!(removedId in current)) return current;
-        const next = { ...current };
         delete next[removedId];
         return next;
       });
@@ -2680,7 +2652,6 @@ export default function AudioCutterDialog({
       setLabelsById({});
       setMergePreview(null);
       setPlaybackTimeSeconds(0);
-      setWordMarkTimeOverridesBySegmentId({});
       setDuration(0);
       typedRegionsPlugin.clearRegions();
 
@@ -3046,7 +3017,6 @@ export default function AudioCutterDialog({
     commitSegments([]);
     setLabelsById({});
     setMergePreview(null);
-    setWordMarkTimeOverridesBySegmentId({});
     setSelectedSegmentId(null);
   }, [commitSegments, typedRegionsPlugin]);
 

@@ -24,6 +24,33 @@ function mark(start: number, end: number, time: number): AudioMark {
   return { start, end, time, type: "word", value: "" } as AudioMark;
 }
 
+type WordButton = {
+  text: string;
+  click: () => void;
+};
+
+/** Collects the rendered word buttons in document order. */
+function collectWordButtons(node: React.ReactNode): WordButton[] {
+  if (Array.isArray(node)) return node.flatMap(collectWordButtons);
+  if (!React.isValidElement(node)) return [];
+
+  const props = node.props as {
+    children?: React.ReactNode;
+    onClick?: (event: { stopPropagation: () => void }) => void;
+  };
+  const children = collectWordButtons(props.children);
+
+  if (node.type !== "button") return children;
+
+  return [
+    {
+      text: typeof props.children === "string" ? props.children : "",
+      click: () => props.onClick?.({ stopPropagation: () => {} }),
+    },
+    ...children,
+  ];
+}
+
 test("renders the plain text when the line has no hints", () => {
   const html = render({ text: "Hej med dig", hintMap: [] });
 
@@ -100,4 +127,36 @@ test("does not duplicate text when a word mark crosses a hint boundary", () => {
   // The source text stays intact and in order; only the hint is appended after
   // the words it belongs to.
   assert.equal(textOnly, "Hej med digwith you");
+});
+
+test("plays the word belonging to the clicked button, hinted or not", () => {
+  const played: number[] = [];
+  const buttons = collectWordButtons(
+    renderTranscriptContent(
+      {
+        text: "Hej med dig",
+        hintMap: [{ hintIndex: 0, rangeFrom: 4, rangeTo: 10 }],
+        hints: ["with you"],
+      },
+      [mark(0, 3, 0), mark(4, 7, 500), mark(8, 11, 900)],
+      -1,
+      (markIndex) => played.push(markIndex),
+    ),
+  );
+
+  assert.deepEqual(
+    buttons.map((button) => button.text),
+    ["Hej", "med", "dig"],
+    "words render in reading order across the hint boundary",
+  );
+
+  buttons[2]?.click();
+  buttons[0]?.click();
+  buttons[1]?.click();
+
+  assert.deepEqual(
+    played,
+    [2, 0, 1],
+    "each button reports its own mark index, not its position in the hint",
+  );
 });
