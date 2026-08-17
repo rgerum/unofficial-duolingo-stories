@@ -328,3 +328,59 @@ describe("setAvatarDetails", () => {
     ).rejects.toThrow("Unauthorized");
   });
 });
+
+describe("setAvatarStoryName without an existing mapping", () => {
+  test("creates the mapping, keeps canonical name visible, trims duoId", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("languages", {
+        legacyId: 1,
+        name: "Spanish",
+        short: "es",
+        public: true,
+        rtl: false,
+      });
+      await ctx.db.insert("avatars", {
+        legacyId: 526,
+        link: "avatar-526.svg",
+        name: "waiter",
+        gender: "male",
+      });
+    });
+    const contributor = t.withIdentity({ role: "contributor" });
+
+    const result = await contributor.mutation(
+      api.languageWrite.setAvatarStoryName,
+      {
+        legacyLanguageId: 1,
+        legacyAvatarId: 526,
+        duoId: " es-en-la-cena ",
+        name: "Federico",
+      },
+    );
+    expect(result.duo_id).toBe("es-en-la-cena");
+    expect(result.storyNames).toEqual({ "es-en-la-cena": "Federico" });
+
+    // The mapping created to hold storyNames must not blank the editor
+    // display: the canonical avatar name stays the fallback.
+    const rows = await contributor.query(
+      api.editorRead.getEditorAvatarNamesByLanguageLegacyId,
+      { languageLegacyId: 1 },
+    );
+    const row = rows.find((r: { avatar_id: number }) => r.avatar_id === 526);
+    expect(row?.name).toBe("waiter");
+    expect(row?.storyNames).toEqual({ "es-en-la-cena": "Federico" });
+    expect(row?.gender).toBe("male");
+
+    const removed = await contributor.mutation(
+      api.languageWrite.setAvatarStoryName,
+      {
+        legacyLanguageId: 1,
+        legacyAvatarId: 526,
+        duoId: "es-en-la-cena",
+        name: null,
+      },
+    );
+    expect(removed.storyNames).toEqual({});
+  });
+});

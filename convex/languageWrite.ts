@@ -279,7 +279,8 @@ export const setAvatarStoryName = mutation({
   }),
   handler: async (ctx, args) => {
     await requireContributorOrAdmin(ctx);
-    if (!args.duoId.trim()) {
+    const duoId = args.duoId.trim();
+    if (!duoId) {
       throw new Error("duoId must not be empty");
     }
     const [language, avatar] = await Promise.all([
@@ -307,9 +308,9 @@ export const setAvatarStoryName = mutation({
 
     const storyNames = { ...(existing?.storyNames ?? {}) };
     if (args.name === null) {
-      delete storyNames[args.duoId];
+      delete storyNames[duoId];
     } else {
-      storyNames[args.duoId] = args.name;
+      storyNames[duoId] = args.name;
     }
 
     if (existing) {
@@ -333,7 +334,7 @@ export const setAvatarStoryName = mutation({
     return {
       avatar_id: args.legacyAvatarId,
       language_id: args.legacyLanguageId,
-      duo_id: args.duoId,
+      duo_id: duoId,
       storyNames,
     };
   },
