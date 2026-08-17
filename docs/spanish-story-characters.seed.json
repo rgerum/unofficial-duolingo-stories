@@ -1,0 +1,1269 @@
+{
+ "comment": "Apply after deploy: avatars via languageWrite:setAvatarDetails (canonical English name + gender), storyNames via languageWrite:setAvatarStoryName (per-story Spanish display names keyed by duo_id, language 12 = Spanish).",
+ "avatars": [
+  {
+   "avatarLegacyId": 6,
+   "appearances": 10,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 7,
+   "appearances": 3,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 15,
+   "appearances": 1,
+   "name": "José",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 40,
+   "appearances": 1,
+   "name": "bear",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 44,
+   "appearances": 3,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 57,
+   "appearances": 4,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 58,
+   "appearances": 1,
+   "name": "Lily's dog",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 100,
+   "appearances": 2,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 101,
+   "appearances": 1,
+   "name": "Gabriela",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 113,
+   "appearances": 6,
+   "name": "Juan",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 125,
+   "appearances": 4,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 127,
+   "appearances": 3,
+   "name": "Roberto",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 129,
+   "appearances": 1,
+   "name": "Vikram's grandma",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 175,
+   "appearances": 3,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 258,
+   "appearances": 1,
+   "name": "Leo",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 260,
+   "appearances": 2,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 274,
+   "appearances": 1,
+   "name": "Héctor",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 292,
+   "appearances": 6,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 295,
+   "appearances": 2,
+   "name": "Sergio's dad",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 300,
+   "appearances": 2,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 307,
+   "appearances": 2,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 321,
+   "appearances": 1,
+   "name": "office worker"
+  },
+  {
+   "avatarLegacyId": 336,
+   "appearances": 1,
+   "name": "Emilia",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 338,
+   "appearances": 4,
+   "name": "Anita",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 341,
+   "appearances": 5,
+   "name": "Ana's mom",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 342,
+   "appearances": 2,
+   "name": "Salma",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 343,
+   "appearances": 2,
+   "name": "Ana",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 366,
+   "appearances": 3,
+   "name": "Sergio",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 385,
+   "appearances": 5,
+   "name": "Bruce",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 386,
+   "appearances": 2,
+   "name": "Beatriz",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 395,
+   "appearances": 1,
+   "name": "Mrs. Pérez",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 414,
+   "appearances": 91,
+   "name": "Eddy",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 415,
+   "appearances": 69,
+   "name": "Junior",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 416,
+   "appearances": 51,
+   "name": "Lily",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 418,
+   "appearances": 49,
+   "name": "Zari",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 419,
+   "appearances": 1,
+   "name": "guy at the party",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 438,
+   "appearances": 6,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 439,
+   "appearances": 1,
+   "name": "Ángela",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 440,
+   "appearances": 3,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 504,
+   "appearances": 1,
+   "name": "Eddy",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 507,
+   "appearances": 66,
+   "name": "Bea",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 508,
+   "appearances": 62,
+   "name": "Lin",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 509,
+   "appearances": 48,
+   "name": "Lucy",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 511,
+   "appearances": 2,
+   "name": "Zari's mom",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 526,
+   "appearances": 5,
+   "name": "waiter",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 528,
+   "appearances": 2,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 559,
+   "appearances": 3,
+   "name": "Lily's mom",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 560,
+   "appearances": 16,
+   "name": "Priti",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 561,
+   "appearances": 2,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 592,
+   "appearances": 37,
+   "name": "Oscar",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 593,
+   "appearances": 33,
+   "name": "Vikram",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 625,
+   "appearances": 2,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 658,
+   "appearances": 4,
+   "name": "Penélope",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 659,
+   "appearances": 4,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 724,
+   "appearances": 2,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 790,
+   "appearances": 2,
+   "name": "Miguel",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 823,
+   "appearances": 3,
+   "name": "Lucas",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 856,
+   "appearances": 3,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 889,
+   "appearances": 3,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 922,
+   "appearances": 1,
+   "name": "the bride",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 988,
+   "appearances": 6,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 1087,
+   "appearances": 3,
+   "name": "Martín",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 1088,
+   "appearances": 3,
+   "name": "security guard",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 1186,
+   "appearances": 3,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 1187,
+   "appearances": 3,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 1319,
+   "appearances": 1,
+   "name": "Clara",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 1320,
+   "appearances": 1,
+   "name": "Laura",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 1321,
+   "appearances": 5,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 1386,
+   "appearances": 2,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 1551,
+   "appearances": 1,
+   "name": "male customer",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 1616,
+   "appearances": 2,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 1649,
+   "appearances": 3,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 1682,
+   "appearances": 1,
+   "name": "park ranger",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 1715,
+   "appearances": 3,
+   "name": "Juliana",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 1814,
+   "appearances": 1,
+   "name": "zookeeper",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 1847,
+   "appearances": 2,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 1848,
+   "appearances": 3,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 2144,
+   "appearances": 1,
+   "name": "Bea's boss",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 2210,
+   "appearances": 2,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 2243,
+   "appearances": 2,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 2276,
+   "appearances": 2,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 2474,
+   "appearances": 1,
+   "name": "Carmen's grandpa",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 2540,
+   "appearances": 3,
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 2573,
+   "appearances": 2,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 2606,
+   "appearances": 1,
+   "name": "reporter",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 2705,
+   "appearances": 1,
+   "name": "baker",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 2837,
+   "appearances": 1,
+   "name": "Mei",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 2905,
+   "appearances": 1,
+   "name": "café owner",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 3107,
+   "appearances": 3,
+   "name": "Osman",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 3134,
+   "appearances": 1,
+   "name": "woman giving directions",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 3135,
+   "appearances": 1,
+   "name": "Jorge",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 3145,
+   "appearances": 2,
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 3153,
+   "appearances": 1,
+   "name": "pilot",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 3160,
+   "appearances": 1,
+   "name": "Junior's school friend (boy)",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 3162,
+   "appearances": 1,
+   "name": "pharmacist",
+   "gender": "male"
+  },
+  {
+   "avatarLegacyId": 3163,
+   "appearances": 1,
+   "name": "Diana",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 3173,
+   "appearances": 1,
+   "name": "Sara",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 3233,
+   "appearances": 1,
+   "name": "Gabriela",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 3299,
+   "appearances": 1,
+   "name": "the hotel manager",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 3300,
+   "appearances": 1,
+   "name": "Janet",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 3302,
+   "appearances": 1,
+   "name": "Rosa",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 3303,
+   "appearances": 1,
+   "name": "Lorena",
+   "gender": "female"
+  },
+  {
+   "avatarLegacyId": 3304,
+   "appearances": 1,
+   "name": "boat owner",
+   "gender": "male"
+  }
+ ],
+ "storyNames": [
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 125,
+   "duoId": "es-en-la-clase-de-baile",
+   "name": "Eliana",
+   "story": "The Dance Class",
+   "storyLegacyId": 1381
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 175,
+   "duoId": "es-en-un-apartamento-muy-sucio",
+   "name": "Marina",
+   "story": "A Very Dirty Apartment",
+   "storyLegacyId": 1396
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 440,
+   "duoId": "es-en-el-camarero-tiene-razon",
+   "name": "Federico",
+   "story": "The Waiter Is Right",
+   "storyLegacyId": 1399
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 258,
+   "duoId": "es-en-una-conversacion-interesante",
+   "name": "Leo",
+   "story": "An Interesting Conversation",
+   "storyLegacyId": 1408
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 260,
+   "duoId": "es-en-una-conversacion-interesante",
+   "name": "Gloria",
+   "story": "An Interesting Conversation",
+   "storyLegacyId": 1408
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1321,
+   "duoId": "es-en-dibujando-en-el-parque",
+   "name": "Gustavo",
+   "story": "Drawing in the Park",
+   "storyLegacyId": 1411
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 295,
+   "duoId": "es-en-el-gran-partido",
+   "name": "Julio",
+   "story": "The Big Game",
+   "storyLegacyId": 1414
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 44,
+   "duoId": "es-en-la-cancion",
+   "name": "Bruno",
+   "story": "The Song",
+   "storyLegacyId": 1424
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 274,
+   "duoId": "es-en-la-cancion",
+   "name": "Héctor",
+   "story": "The Song",
+   "storyLegacyId": 1424
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 307,
+   "duoId": "es-en-mandame-un-correo-electronico",
+   "name": "Marco",
+   "story": "Send Me an Email",
+   "storyLegacyId": 1425
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 856,
+   "duoId": "es-en-una-excelente-maestra",
+   "name": "Jennifer",
+   "story": "An Excellent Teacher",
+   "storyLegacyId": 1426
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 292,
+   "duoId": "es-en-pizza-gratis",
+   "name": "Señora Sánchez",
+   "story": "Free Pizza",
+   "storyLegacyId": 1430
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 438,
+   "duoId": "es-en-la-primera-noche",
+   "name": "Álvaro",
+   "story": "A Weekend at Bea's House",
+   "storyLegacyId": 1439
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1649,
+   "duoId": "es-en-la-pelicula-de-terror",
+   "name": "Ben",
+   "story": "Two Tickets",
+   "storyLegacyId": 1440
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 15,
+   "duoId": "es-la-peor-cita-de-mi-vida-V2-EN-challenges",
+   "name": "José",
+   "story": "The Second Date",
+   "storyLegacyId": 1444
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 3233,
+   "duoId": "es-la-carta-perdida-V2-EN-challenges",
+   "name": "Gabriela",
+   "story": "The Letter",
+   "storyLegacyId": 1446
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 439,
+   "duoId": "es-en-tengo-una-cana",
+   "name": "Ángela",
+   "story": "I Have a White Hair!",
+   "storyLegacyId": 1448
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 440,
+   "duoId": "es-en-tengo-una-cana",
+   "name": "Rubén",
+   "story": "I Have a White Hair!",
+   "storyLegacyId": 1448
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 559,
+   "duoId": "es-en-el-vestido-rosado",
+   "name": "La madre de Lily",
+   "story": "The Pink Dress",
+   "storyLegacyId": 1449
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 125,
+   "duoId": "es-en-alguien-se-robo-mi-sandwich",
+   "name": "Elena",
+   "story": "Someone Stole My Sandwich",
+   "storyLegacyId": 1456
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 2573,
+   "duoId": "es-en-quieres-terminar-conmigo",
+   "name": "Samuel",
+   "story": "Do You Want to Break up with Me?",
+   "storyLegacyId": 1457
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 338,
+   "duoId": "es-en-es-amor",
+   "name": "Rosa",
+   "story": "Is It Love?",
+   "storyLegacyId": 1461
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 3107,
+   "duoId": "es-en-el-estreno-de-la-pelicula",
+   "name": "Osman",
+   "story": "The Movie Premiere",
+   "storyLegacyId": 1465
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1715,
+   "duoId": "es-en-el-pato-azul",
+   "name": "Juliana",
+   "story": "The Blue Duck",
+   "storyLegacyId": 1468
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 6,
+   "duoId": "es-en-la-cena-con-la-directora",
+   "name": "Álex",
+   "story": "Dinner with the Director",
+   "storyLegacyId": 1474
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 988,
+   "duoId": "es-en-la-cena-con-la-directora",
+   "name": "Paula",
+   "story": "Dinner with the Director",
+   "storyLegacyId": 1474
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 3107,
+   "duoId": "es-en-oscar-en-los-angeles",
+   "name": "Osman",
+   "story": "Óscar in Los Angeles",
+   "storyLegacyId": 1475
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 113,
+   "duoId": "es-en-quien-viene-a-cenar",
+   "name": "Francisco",
+   "story": "Who's Coming to Dinner?",
+   "storyLegacyId": 1478
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 2243,
+   "duoId": "es-en-perfecto-para-el-trabajo",
+   "name": "Felipe",
+   "story": "Perfect for the Job",
+   "storyLegacyId": 1479
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 988,
+   "duoId": "es-en-trabajo-desde-casa",
+   "name": "Paula",
+   "story": "Work from Home",
+   "storyLegacyId": 1484
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 175,
+   "duoId": "es-en-el-momento-perfecto",
+   "name": "Jessica",
+   "story": "The Perfect Moment",
+   "storyLegacyId": 1486
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 6,
+   "duoId": "es-en-la-panaderia",
+   "name": "Leonardo",
+   "story": "The Bakery",
+   "storyLegacyId": 1487
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1187,
+   "duoId": "es-en-la-panaderia",
+   "name": "Juana",
+   "story": "The Bakery",
+   "storyLegacyId": 1487
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 559,
+   "duoId": "es-en-un-nuevo-hobby",
+   "name": "La madre de Lily",
+   "story": "A New Hobby",
+   "storyLegacyId": 1488
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 7,
+   "duoId": "es-cuidando-un-pajaro-V2-EN-challenges",
+   "name": "Gerardo",
+   "story": "Bird Sitting",
+   "storyLegacyId": 1493
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1616,
+   "duoId": "es-en-me-encanta-tu-corte-de-pelo",
+   "name": "Emilia",
+   "story": "I Love Your Haircut!",
+   "storyLegacyId": 1496
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 3173,
+   "duoId": "es-en-me-encanta-tu-corte-de-pelo",
+   "name": "Sara",
+   "story": "I Love Your Haircut!",
+   "storyLegacyId": 1496
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 3163,
+   "duoId": "es-en-la-nueva-companera-de-apartamento",
+   "name": "Diana",
+   "story": "The New Roommate",
+   "storyLegacyId": 1499
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 823,
+   "duoId": "es-en-en-el-gimnasio",
+   "name": "Alberto",
+   "story": "At the Gym",
+   "storyLegacyId": 1501
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 125,
+   "duoId": "es-en-un-vuelo-muy-largo",
+   "name": "Gabriela",
+   "story": "A Very Long Flight",
+   "storyLegacyId": 1502
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 338,
+   "duoId": "es-en-un-vuelo-muy-largo",
+   "name": "María",
+   "story": "A Very Long Flight",
+   "storyLegacyId": 1502
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 659,
+   "duoId": "es-en-la-obra-de-janet",
+   "name": "Janet",
+   "story": "Janet's Play",
+   "storyLegacyId": 1503
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1848,
+   "duoId": "es-en-esto-no-esta-funcionando",
+   "name": "Laura",
+   "story": "This Isn't Working",
+   "storyLegacyId": 1506
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1186,
+   "duoId": "es-en-tortugas-del-espacio",
+   "name": "Pamela",
+   "story": "Space Turtles",
+   "storyLegacyId": 1507
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1715,
+   "duoId": "es-en-en-la-farmacia",
+   "name": "Juliana",
+   "story": "At the Pharmacy",
+   "storyLegacyId": 1514
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 3107,
+   "duoId": "es-en-un-dia-en-la-playa",
+   "name": "Osman",
+   "story": "One Day at the Beach",
+   "storyLegacyId": 1515
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 2540,
+   "duoId": "es-en-la-rana",
+   "name": "Beatriz",
+   "story": "The Frog",
+   "storyLegacyId": 1517
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 7,
+   "duoId": "es-en-la-entrevista",
+   "name": "Víctor",
+   "story": "The Interview",
+   "storyLegacyId": 1518
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 113,
+   "duoId": "es-en-un-viejo-amigo",
+   "name": "Jorge",
+   "story": "An Old Friend",
+   "storyLegacyId": 1520
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1321,
+   "duoId": "es-en-me-encantan-los-piratas",
+   "name": "Abel",
+   "story": "I Love Pirates",
+   "storyLegacyId": 1525
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 3302,
+   "duoId": "es-en-un-crucero-al-atardecer",
+   "name": "Rosa",
+   "story": "A Cruise at Sunset",
+   "storyLegacyId": 1532
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 6,
+   "duoId": "es-en-el-hijo-del-jefe",
+   "name": "Álex",
+   "story": "The Boss's Son",
+   "storyLegacyId": 1536
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 366,
+   "duoId": "es-en-el-hijo-del-jefe",
+   "name": "Miguel",
+   "story": "The Boss's Son",
+   "storyLegacyId": 1536
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1848,
+   "duoId": "es-en-eddy-la-princesa",
+   "name": "Sonia",
+   "story": "Eddy the Princess",
+   "storyLegacyId": 1538
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 856,
+   "duoId": "es-en-el-club-de-lectura",
+   "name": "Érica",
+   "story": "The Book Club",
+   "storyLegacyId": 1540
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 3300,
+   "duoId": "es-en-el-club-de-lectura",
+   "name": "Janet",
+   "story": "The Book Club",
+   "storyLegacyId": 1540
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 659,
+   "duoId": "es-en-la-cita-de-bea",
+   "name": "Nadia",
+   "story": "Bea's Date",
+   "storyLegacyId": 1552
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 988,
+   "duoId": "es-en-esperando-a-jorge",
+   "name": "Elsa",
+   "story": "Waiting for Jorge",
+   "storyLegacyId": 1553
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1186,
+   "duoId": "es-en-voy-a-correr-un-maraton",
+   "name": "Mimi",
+   "story": "I'm Going to Run a Marathon!",
+   "storyLegacyId": 1554
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1187,
+   "duoId": "es-en-voy-a-correr-un-maraton",
+   "name": "Lizet",
+   "story": "I'm Going to Run a Marathon!",
+   "storyLegacyId": 1554
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 113,
+   "duoId": "es-en-donde-esta-el-perro",
+   "name": "Édgar",
+   "story": "Where Is the Dog?",
+   "storyLegacyId": 1560
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 6,
+   "duoId": "es-en-recuerdos-del-pasado",
+   "name": "Roberto",
+   "story": "Memories from the Past",
+   "storyLegacyId": 1563
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 336,
+   "duoId": "es-en-perdon-por-llegar-tarde",
+   "name": "Emilia",
+   "story": "Sorry I'm Late",
+   "storyLegacyId": 1571
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 175,
+   "duoId": "es-en-la-pelicula-ya-va-a-comenzar",
+   "name": "Victoria",
+   "story": "The Movie Is About to Begin",
+   "storyLegacyId": 1574
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 889,
+   "duoId": "es-en-la-pelicula-ya-va-a-comenzar",
+   "name": "Lorenzo",
+   "story": "The Movie Is About to Begin",
+   "storyLegacyId": 1574
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 659,
+   "duoId": "es-en-mira-esa-ballena",
+   "name": "Sofía",
+   "story": "Look at That Whale!",
+   "storyLegacyId": 1577
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1319,
+   "duoId": "es-en-la-fiesta-de-clara",
+   "name": "Clara",
+   "story": "Clara's Party",
+   "storyLegacyId": 1579
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1320,
+   "duoId": "es-en-la-fiesta-de-clara",
+   "name": "Laura",
+   "story": "Clara's Party",
+   "storyLegacyId": 1579
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 57,
+   "duoId": "es-en-el-gran-concurso-de-pasteleria",
+   "name": "TV show director",
+   "story": "The Great Baking Show",
+   "storyLegacyId": 1586
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1616,
+   "duoId": "es-en-el-disfraz-perdido",
+   "name": "Julieta",
+   "story": "The Lost Costume",
+   "storyLegacyId": 1589
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 559,
+   "duoId": "es-en-las-primas",
+   "name": "La madre de Lily",
+   "story": "Cousins",
+   "storyLegacyId": 1598
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1847,
+   "duoId": "es-en-las-primas",
+   "name": "Jessica",
+   "story": "Cousins",
+   "storyLegacyId": 1598
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1848,
+   "duoId": "es-en-las-primas",
+   "name": "Aunt Gladys",
+   "story": "Cousins",
+   "storyLegacyId": 1598
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 658,
+   "duoId": "es-en-en-la-primera-fila",
+   "name": "Yanira",
+   "story": "In the Front Row",
+   "storyLegacyId": 1600
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 724,
+   "duoId": "es-en-en-la-primera-fila",
+   "name": "Mariana Flores",
+   "story": "In the Front Row",
+   "storyLegacyId": 1600
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 100,
+   "duoId": "es-en-rescatemos-a-los-animales",
+   "name": "Gonzalo",
+   "story": "Let's Save the Animals!",
+   "storyLegacyId": 1606
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 2837,
+   "duoId": "es-en-demasiadas-cosas",
+   "name": "Mei",
+   "story": "Too Many Things",
+   "storyLegacyId": 1608
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 438,
+   "duoId": "es-en-estoy-bien",
+   "name": "Gilberto",
+   "story": "I'm Fine!",
+   "storyLegacyId": 1611
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 988,
+   "duoId": "es-en-la-oficina-de-la-directora",
+   "name": "Principal Fernández",
+   "story": "The Principal's Office",
+   "storyLegacyId": 1613
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1847,
+   "duoId": "es-en-esta-enojada-conmigo",
+   "name": "Amanda",
+   "story": "Is She Mad at Me?",
+   "storyLegacyId": 1614
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 561,
+   "duoId": "es-en-que-llevas-puesto",
+   "name": "Mimi Ma",
+   "story": "What Are You Wearing?",
+   "storyLegacyId": 1620
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 44,
+   "duoId": "es-en-una-persona-dificil",
+   "name": "Andrés",
+   "story": "A Difficult Person",
+   "storyLegacyId": 1622
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 1321,
+   "duoId": "es-en-mundo-pirata",
+   "name": "Abel",
+   "story": "Pirate World",
+   "storyLegacyId": 1623
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 6,
+   "duoId": "es-en-fuera-de-aqui",
+   "name": "Pierre",
+   "story": "Get Out of Here!",
+   "storyLegacyId": 1626
+  },
+  {
+   "languageLegacyId": 12,
+   "avatarLegacyId": 440,
+   "duoId": "es-en-fuera-de-aqui",
+   "name": "Raúl",
+   "story": "Get Out of Here!",
+   "storyLegacyId": 1626
+  }
+ ]
+}

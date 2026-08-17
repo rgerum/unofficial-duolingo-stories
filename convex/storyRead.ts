@@ -1,6 +1,50 @@
 import { query } from "./_generated/server";
+import type { QueryCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { getPublicStoryJson } from "./lib/publicStoryContent";
+
+// Avatars are reused for different characters across stories, so a mapping can
+// carry per-story names keyed by duo_id (canonical `name` is the fallback that
+// is already baked into the published JSON). Resolving at read time means one
+// entry covers the canonical course and every translated copy sharing the
+// duo_id, without republishing stories.
+async function applyStoryCharacterNames(
+  ctx: QueryCtx,
+  elements: any[],
+  duoId: string | undefined,
+  learningLanguageId: Id<"languages">,
+): Promise<any[]> {
+  if (!duoId) return elements;
+  const mappings = await ctx.db
+    .query("avatar_mappings")
+    .withIndex("by_language_id", (q) => q.eq("languageId", learningLanguageId))
+    .collect();
+  const withEntry = mappings.filter(
+    (mapping) => mapping.storyNames?.[duoId] !== undefined,
+  );
+  if (withEntry.length === 0) return elements;
+
+  const nameByCharacterId = new Map<number, string>();
+  await Promise.all(
+    withEntry.map(async (mapping) => {
+      const avatar = await ctx.db.get(mapping.avatarId);
+      const name = mapping.storyNames?.[duoId];
+      if (avatar && name !== undefined) {
+        nameByCharacterId.set(avatar.legacyId, name);
+      }
+    }),
+  );
+
+  return elements.map((element) => {
+    if (typeof element !== "object" || element === null) return element;
+    const line = (element as { line?: { characterId?: unknown } }).line;
+    if (typeof line?.characterId !== "number") return element;
+    const name = nameByCharacterId.get(line.characterId);
+    if (name === undefined) return element;
+    return { ...element, line: { ...line, characterName: name } };
+  });
+}
 
 const storyReadResultValidator = v.union(
   v.object({
@@ -94,9 +138,12 @@ export const getStoryByLegacyId = query({
       }
     }
 
-    const elements = Array.isArray(parsedJson?.elements)
-      ? parsedJson.elements
-      : [];
+    const elements = await applyStoryCharacterNames(
+      ctx,
+      Array.isArray(parsedJson?.elements) ? parsedJson.elements : [],
+      story.duo_id,
+      course.learningLanguageId,
+    );
     const illustrations = parsedJson?.illustrations ?? {};
     const active =
       nonEmptyString(illustrations.active) || (image?.active ?? "");

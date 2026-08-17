@@ -24,6 +24,8 @@ export type Avatar = {
   avatar_id: number;
   language_id: number;
   name: string;
+  storyNames?: Record<string, string> | null;
+  gender?: "male" | "female" | null;
   link: string;
   speaker: string;
 };

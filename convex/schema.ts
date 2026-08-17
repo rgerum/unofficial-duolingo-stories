@@ -50,7 +50,13 @@ export default defineSchema({
   avatars: defineTable({
     legacyId: v.number(),
     link: v.string(),
+    // Canonical character reference name in English; per-language display
+    // names live in avatar_mappings (name/storyNames) and fall back to this.
     name: v.optional(v.string()),
+    // Character gender (from the artwork/story usage), e.g. for
+    // gender-agreement checks in story review tooling. Absent when unknown
+    // or ambiguous.
+    gender: v.optional(v.union(v.literal("male"), v.literal("female"))),
     mirrorUpdatedAt: v.optional(v.number()),
     lastOperationKey: v.optional(v.string()),
     // Backward compatibility for previously mirrored docs.
@@ -124,6 +130,10 @@ export default defineSchema({
     avatarId: v.id("avatars"),
     languageId: v.id("languages"),
     name: v.optional(v.string()),
+    // Per-story display names keyed by the story's duo_id. Avatars are reused
+    // for different characters across stories; `name` is the canonical
+    // fallback when a story has no entry here.
+    storyNames: v.optional(v.record(v.string(), v.string())),
     speaker: v.optional(v.string()),
     mirrorUpdatedAt: v.optional(v.number()),
     lastOperationKey: v.optional(v.string()),

@@ -32,7 +32,11 @@ export async function buildAvatarRows(
         id: mapping?.legacyId ?? null,
         avatar_id: avatar.legacyId,
         language_id: language.legacyId,
-        name: mapping?.name ?? avatar.name ?? "",
+        // Empty mapping names fall through to the canonical avatar name so a
+        // mapping created only to hold storyNames doesn't blank the display.
+        name: mapping?.name || avatar.name || "",
+        storyNames: mapping?.storyNames ?? null,
+        gender: avatar.gender ?? null,
         link: avatar.link,
         speaker: mapping?.speaker ?? "",
       };
