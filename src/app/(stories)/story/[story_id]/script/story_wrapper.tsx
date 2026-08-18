@@ -15,21 +15,29 @@ export default function StoryWrapper({
   show_title_page: boolean;
 }) {
   const searchParams = useSearchParams();
-  const [highlight_name, setHighlightName] = React.useState<string[]>(() =>
-    searchParams.getAll("highlight"),
+  const [highlight_name, setHighlightName] = React.useState<string[]>(
+    () => searchParams.get("highlight")?.split(",").filter(Boolean) ?? [],
   );
   const [hideNonHighlighted, setHideNonHighlighted] = React.useState(
     searchParams.get("hide") === "1",
   );
 
   // Mirror the selection into the URL so the current view can be shared.
+  // Built by hand instead of via URLSearchParams so the commas separating
+  // names stay literal instead of being escaped to %2C.
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     params.delete("highlight");
-    for (const name of highlight_name) params.append("highlight", name);
-    if (hideNonHighlighted) params.set("hide", "1");
-    else params.delete("hide");
-    const query = params.toString();
+    params.delete("hide");
+    const parts = [];
+    if (highlight_name.length > 0)
+      parts.push(
+        "highlight=" + highlight_name.map(encodeURIComponent).join(","),
+      );
+    if (hideNonHighlighted) parts.push("hide=1");
+    const rest = params.toString();
+    if (rest) parts.push(rest);
+    const query = parts.join("&");
     window.history.replaceState(
       null,
       "",
