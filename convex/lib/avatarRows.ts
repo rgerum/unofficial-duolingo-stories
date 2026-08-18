@@ -34,6 +34,7 @@ export async function buildAvatarRows(
     if (!mapping.storyNames) continue;
     const seen = storyNamesByAvatar.get(mapping.avatarId) ?? [];
     for (const name of Object.values(mapping.storyNames)) {
+      if (seen.length >= MAX_STORY_NAME_SUGGESTIONS) break;
       if (name && !seen.includes(name)) seen.push(name);
     }
     storyNamesByAvatar.set(mapping.avatarId, seen);

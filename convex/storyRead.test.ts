@@ -389,3 +389,67 @@ describe("setAvatarStoryName without an existing mapping", () => {
     expect(removed.storyNames).toEqual({});
   });
 });
+
+describe("story name suggestions", () => {
+  test("dedupes across languages and caps at four", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      const spanishId = await ctx.db.insert("languages", {
+        legacyId: 1,
+        name: "Spanish",
+        short: "es",
+        public: true,
+        rtl: false,
+      });
+      const portugueseId = await ctx.db.insert("languages", {
+        legacyId: 2,
+        name: "Portuguese",
+        short: "pt",
+        public: true,
+        rtl: false,
+      });
+      const avatarId = await ctx.db.insert("avatars", {
+        legacyId: 988,
+        link: "avatar-988.svg",
+      });
+      // First mapping contributes one name; the second holds a duplicate of
+      // it plus four more (five unique names in total across languages).
+      await ctx.db.insert("avatar_mappings", {
+        avatarId,
+        languageId: spanishId,
+        name: "",
+        speaker: "",
+        storyNames: { "duo-x": "Federico" },
+      });
+      await ctx.db.insert("avatar_mappings", {
+        avatarId,
+        languageId: portugueseId,
+        name: "",
+        speaker: "",
+        storyNames: {
+          "duo-a": "Paula",
+          "duo-b": "Federico",
+          "duo-c": "Elsa",
+          "duo-d": "Janet",
+          "duo-e": "Nadia",
+        },
+      });
+    });
+    const contributor = t.withIdentity({ role: "contributor" });
+
+    const rows = await contributor.query(
+      api.editorRead.getEditorAvatarNamesByLanguageLegacyId,
+      { languageLegacyId: 1 },
+    );
+    const row = rows.find((r: { avatar_id: number }) => r.avatar_id === 988);
+
+    const suggestions = row?.story_name_suggestions ?? [];
+    // Duplicates removed, capped at four of the five unique names.
+    expect(suggestions).toHaveLength(4);
+    expect(new Set(suggestions).size).toBe(4);
+    expect(suggestions).toContain("Federico");
+    for (const name of suggestions) {
+      expect(["Federico", "Paula", "Elsa", "Janet", "Nadia"]).toContain(name);
+    }
+  });
+});

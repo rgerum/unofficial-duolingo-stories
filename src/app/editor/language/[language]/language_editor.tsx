@@ -174,19 +174,11 @@ export function Layout({
   );
 } //                 <Login page={"editor"}/>
 
-interface AvatarData {
-  name: string | null;
-  language_name?: string | null;
-  canonical_name?: string | null;
-  story_name_suggestions?: string[];
-  gender?: "male" | "female" | null;
-  speaker: string | null;
-  language_id: number | null;
-  avatar_id: number;
-  link: string;
-}
+// The card renders rows from buildAvatarRows verbatim; reuse the shared row
+// type so the editor stays in sync with backend changes.
+type AvatarData = AvatarNamesType;
 
-function GenderMark({ gender }: { gender?: "male" | "female" | null }) {
+function GenderMark({ gender }: { gender: "male" | "female" | null }) {
   if (!gender) return null;
   return (
     <span className="ml-1 opacity-60" title={gender}>
@@ -200,7 +192,7 @@ function GenderMark({ gender }: { gender?: "male" | "female" | null }) {
 // specific stories (it is reused for different characters across stories).
 function namePlaceholder(avatar: AvatarData) {
   if (avatar.canonical_name) return avatar.canonical_name;
-  const suggestions = avatar.story_name_suggestions ?? [];
+  const suggestions = avatar.story_name_suggestions;
   if (suggestions.length === 0) return "Name";
   const shown = suggestions.slice(0, 2).join("/");
   return suggestions.length > 2 ? `${shown}/…` : shown;
@@ -213,10 +205,8 @@ function Avatar(props: {
 }) {
   const avatar = props.avatar;
   // Only the name set for this language is the input's value; canonical and
-  // per-story names are shown as placeholder suggestions instead. (Merged
-  // `name` is only used if the row predates the language_name field.)
-  const languageName =
-    avatar.language_name !== undefined ? avatar.language_name : avatar.name;
+  // per-story names are shown as placeholder suggestions instead.
+  const languageName = avatar.language_name;
   const [savedName, setSavedName] = useState(languageName || "");
   const [savedSpeaker, setSavedSpeaker] = useState(avatar.speaker || "");
   const [inputName, inputNameSetValue] = useState(savedName);
