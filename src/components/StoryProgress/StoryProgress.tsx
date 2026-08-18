@@ -670,6 +670,7 @@ function StoryProgress({
                 character_list={character_list}
                 highlight_name={settings.highlight_name}
                 setHighlightName={settings.setHighlightName}
+                hideNonHighlighted={settings.hideNonHighlighted}
                 setHideNonHighlighted={settings.setHideNonHighlighted}
               />
               <h1>{story.from_language_name}</h1>
@@ -739,19 +740,30 @@ function NameButtons({
   character_list,
   highlight_name,
   setHighlightName,
+  hideNonHighlighted,
   setHideNonHighlighted,
 }: {
   character_list: string[];
   highlight_name: string[];
   setHighlightName: (name: string[]) => void;
+  hideNonHighlighted: boolean;
   setHideNonHighlighted: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const chipClass = (active: boolean) =>
+    cn(
+      "cursor-pointer rounded-full border-2 px-3 py-1 text-sm font-bold transition-colors",
+      active
+        ? "border-[#c3d353] bg-[#e6f484] text-black"
+        : "border-[var(--overview-hr)] bg-transparent text-[var(--text-color-dim)] hover:bg-[var(--body-background-faint)]",
+    );
   return (
     <>
-      <div className="print:hidden">
+      <div className="flex flex-wrap justify-center gap-2 print:hidden">
         {character_list.map((character) => (
           <button
             key={character}
+            className={chipClass(highlight_name.includes(character))}
+            aria-pressed={highlight_name.includes(character)}
             onClick={() => {
               if (highlight_name.includes(character)) {
                 const newList = highlight_name.filter((v) => v != character);
@@ -765,7 +777,11 @@ function NameButtons({
             {character}
           </button>
         ))}
-        <button onClick={() => setHideNonHighlighted((i) => !i)}>
+        <button
+          className={chipClass(hideNonHighlighted)}
+          aria-pressed={hideNonHighlighted}
+          onClick={() => setHideNonHighlighted((i) => !i)}
+        >
           Hide Others
         </button>
       </div>
