@@ -220,15 +220,6 @@ Speaker414: Grrrr!
   assert.equal(byRule(findings, "missing-hints").length, 1);
 });
 
-test("flags an unknown speaker", () => {
-  const findings = lint(`[LINE]
-Speaker999: Bonjour.
-~ hello`);
-  const unknown = byRule(findings, "unknown-speaker");
-  assert.equal(unknown.length, 1);
-  assert.match(unknown[0].message, /Speaker999/);
-});
-
 test("flags a SELECT_PHRASE without a hidden range", () => {
   const findings = lint(`[SELECT_PHRASE]
 > Choose the phrase

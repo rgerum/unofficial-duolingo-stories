@@ -601,13 +601,6 @@ function lintCast(
 ) {
   const cast = input.meta.cast ?? {};
   for (const [id, member] of Object.entries(cast)) {
-    if (id !== "0" && !member.name) {
-      findings.push({
-        rule: "unknown-speaker",
-        severity: "warning",
-        message: `Speaker${id} is not a character of this course. Add it to the course characters, or set icon_${id}= and speaker_${id}= in [DATA].`,
-      });
-    }
     if (
       !input.noAudio &&
       !input.humanAudio &&
