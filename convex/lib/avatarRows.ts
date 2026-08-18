@@ -5,6 +5,8 @@ type LanguageDoc = Doc<"languages">;
 type AvatarDoc = Doc<"avatars">;
 type AvatarMappingDoc = Doc<"avatar_mappings">;
 
+const MAX_STORY_NAME_SUGGESTIONS = 4;
+
 export async function buildAvatarRows(
   ctx: QueryCtx,
   language: LanguageDoc,
@@ -24,6 +26,19 @@ export async function buildAvatarRows(
     mappingByAvatar.set(mapping.avatarId, mapping);
   }
 
+  // Per-story names an avatar has anywhere (any language): proper names are
+  // language-neutral, so they make good suggestions for unnamed avatars.
+  const allMappings = await ctx.db.query("avatar_mappings").collect();
+  const storyNamesByAvatar = new Map<Id<"avatars">, string[]>();
+  for (const mapping of allMappings) {
+    if (!mapping.storyNames) continue;
+    const seen = storyNamesByAvatar.get(mapping.avatarId) ?? [];
+    for (const name of Object.values(mapping.storyNames)) {
+      if (name && !seen.includes(name)) seen.push(name);
+    }
+    storyNamesByAvatar.set(mapping.avatarId, seen);
+  }
+
   return avatarRows
     .filter((avatar: AvatarDoc) => avatar.link !== "[object Object]")
     .map((avatar: AvatarDoc) => {
@@ -35,6 +50,13 @@ export async function buildAvatarRows(
         // Empty mapping names fall through to the canonical avatar name so a
         // mapping created only to hold storyNames doesn't blank the display.
         name: mapping?.name || avatar.name || "",
+        // Unmerged variants so the language editor can distinguish "set for
+        // this language" (value) from canonical/suggested names (placeholder).
+        language_name: mapping?.name || null,
+        canonical_name: avatar.name || null,
+        story_name_suggestions: (
+          storyNamesByAvatar.get(avatar._id) ?? []
+        ).slice(0, MAX_STORY_NAME_SUGGESTIONS),
         storyNames: mapping?.storyNames ?? null,
         gender: avatar.gender ?? null,
         link: avatar.link,

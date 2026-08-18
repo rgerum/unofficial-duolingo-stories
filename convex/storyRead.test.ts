@@ -371,6 +371,11 @@ describe("setAvatarStoryName without an existing mapping", () => {
     expect(row?.name).toBe("waiter");
     expect(row?.storyNames).toEqual({ "es-en-la-cena": "Federico" });
     expect(row?.gender).toBe("male");
+    // Unmerged variants: nothing set for this language, canonical name and
+    // per-story names (any language) surface separately for the editor UI.
+    expect(row?.language_name).toBeNull();
+    expect(row?.canonical_name).toBe("waiter");
+    expect(row?.story_name_suggestions).toEqual(["Federico"]);
 
     const removed = await contributor.mutation(
       api.languageWrite.setAvatarStoryName,

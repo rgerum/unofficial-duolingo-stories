@@ -3,6 +3,10 @@ export type AvatarNamesType = {
   avatar_id: number;
   language_id: number;
   name: string | null;
+  language_name: string | null;
+  canonical_name: string | null;
+  story_name_suggestions: string[];
+  gender: "male" | "female" | null;
   link: string;
   speaker: string | null;
 };
