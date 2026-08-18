@@ -174,12 +174,28 @@ export function Layout({
   );
 } //                 <Login page={"editor"}/>
 
-interface AvatarData {
-  name: string | null;
-  speaker: string | null;
-  language_id: number | null;
-  avatar_id: number;
-  link: string;
+// The card renders rows from buildAvatarRows verbatim; reuse the shared row
+// type so the editor stays in sync with backend changes.
+type AvatarData = AvatarNamesType;
+
+function GenderMark({ gender }: { gender: "male" | "female" | null }) {
+  if (!gender) return null;
+  return (
+    <span className="ml-1 opacity-60" title={gender}>
+      {gender === "female" ? "♀" : "♂"}
+    </span>
+  );
+}
+
+// Placeholder for the name input when this language has no name set yet:
+// suggest the canonical (English) name, or the names this avatar has in
+// specific stories (it is reused for different characters across stories).
+function namePlaceholder(avatar: AvatarData) {
+  if (avatar.canonical_name) return avatar.canonical_name;
+  const suggestions = avatar.story_name_suggestions;
+  if (suggestions.length === 0) return "Name";
+  const shown = suggestions.slice(0, 2).join("/");
+  return suggestions.length > 2 ? `${shown}/…` : shown;
 }
 
 function Avatar(props: {
@@ -188,7 +204,10 @@ function Avatar(props: {
   play: PlayFn;
 }) {
   const avatar = props.avatar;
-  const [savedName, setSavedName] = useState(avatar.name || "");
+  // Only the name set for this language is the input's value; canonical and
+  // per-story names are shown as placeholder suggestions instead.
+  const languageName = avatar.language_name;
+  const [savedName, setSavedName] = useState(languageName || "");
   const [savedSpeaker, setSavedSpeaker] = useState(avatar.speaker || "");
   const [inputName, inputNameSetValue] = useState(savedName);
   const [inputSpeaker, inputSpeakerSetValue] = useState(savedSpeaker);
@@ -199,13 +218,13 @@ function Avatar(props: {
   React.useEffect(() => {
     // Keep UI in sync with reactive Convex updates while preserving local edits.
     if (unsavedChanged) return;
-    const nextSavedName = avatar.name || "";
+    const nextSavedName = languageName || "";
     const nextSavedSpeaker = avatar.speaker || "";
     setSavedName(nextSavedName);
     setSavedSpeaker(nextSavedSpeaker);
     inputNameSetValue(nextSavedName);
     inputSpeakerSetValue(nextSavedSpeaker);
-  }, [avatar.name, avatar.speaker, unsavedChanged]);
+  }, [languageName, avatar.speaker, unsavedChanged]);
 
   const language_id = props.language_id;
   const saveAvatarSpeakerMutation = useMutation(
@@ -235,6 +254,7 @@ function Avatar(props: {
       <div className="m-[10px] flex flex-col items-center rounded-[5px] border border-[var(--header-border)] p-[5px] max-[600px]:m-0">
         <p className="m-0">
           {avatar.avatar_id}
+          <GenderMark gender={avatar.gender} />
           <span>{unsavedChanged ? "*" : ""}</span>
         </p>
         <p className="m-0 h-[50px]">
@@ -278,6 +298,7 @@ function Avatar(props: {
     <div className="m-[10px] flex flex-col items-center rounded-[5px] border border-[var(--header-border)] p-[5px] max-[600px]:m-0">
       <p className="m-0">
         {avatar.avatar_id}
+        <GenderMark gender={avatar.gender} />
         <span>{unsavedChanged ? "*" : ""}</span>
       </p>
       <p className="m-0">
@@ -291,7 +312,12 @@ function Avatar(props: {
           disabled={avatar.avatar_id === 0}
           onChange={(e) => inputNameSetValue(e.target.value)}
           type="text"
-          placeholder="Name"
+          placeholder={namePlaceholder(avatar)}
+          title={
+            inputName
+              ? undefined
+              : "Not set for this language — placeholder shows the canonical name or names used in stories"
+          }
         />
       </p>
       <p className="m-0">
@@ -307,7 +333,11 @@ function Avatar(props: {
       <PlayButton
         play={props.play}
         speaker={inputSpeaker}
-        name={avatar.avatar_id === 0 ? "Duo" : inputName}
+        name={
+          avatar.avatar_id === 0
+            ? "Duo"
+            : inputName || avatar.canonical_name || ""
+        }
       />
       <p className="m-0">
         <input
