@@ -66,7 +66,7 @@ export default function CourseList({
   return (
     <div
       className="group relative [grid-area:nav] min-h-0 min-w-0 border-r border-[var(--header-border)] max-[1250px]:w-0"
-      data-show={!course_id ? true : showList}
+      data-show={showList}
     >
       <div
         className="pointer-events-none hidden bg-black opacity-0 transition-opacity duration-500 ease-[ease] max-[1250px]:absolute max-[1250px]:inset-0 max-[1250px]:block max-[1250px]:h-full max-[1250px]:w-screen max-[1250px]:group-data-[show=true]:pointer-events-auto max-[1250px]:group-data-[show=true]:opacity-50"

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import CourseList from "./course_list";
 import { useSelectedLayoutSegments } from "next/navigation";
+import { getCourseSegment, shouldShowCourseList } from "./swipe_state";
 
 interface SwiperSideBarProps {
   children: React.ReactNode;
@@ -12,7 +13,8 @@ interface SwiperSideBarProps {
 
 export default function SwiperSideBar({ children }: SwiperSideBarProps) {
   const segments = useSelectedLayoutSegments();
-  const courseSegment = segments[1];
+  const routeKey = segments.join("/");
+  const courseSegment = getCourseSegment(segments);
   const nestedRoute = segments[2];
   const showSidebar =
     nestedRoute !== "story" &&
@@ -20,18 +22,16 @@ export default function SwiperSideBar({ children }: SwiperSideBarProps) {
     nestedRoute !== "localization";
 
   // Render data...
-  let [showList, setShowList] = useState(courseSegment === null);
-  useEffect(() => {
-    setShowList(courseSegment === null);
-  }, [courseSegment]);
+  const [openRoute, setOpenRoute] = useState<string | null>(null);
+  const showList = openRoute === routeKey;
 
   let toggleShow = React.useCallback(() => {
-    setShowList((value) => !value);
-  }, []);
+    setOpenRoute((value) => (value === routeKey ? null : routeKey));
+  }, [routeKey]);
 
   const handlers = useSwipeable({
-    onSwipedRight: () => setShowList(true),
-    onSwipedLeft: () => setShowList(false),
+    onSwipedRight: () => setOpenRoute(routeKey),
+    onSwipedLeft: () => setOpenRoute(null),
   });
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function SwiperSideBar({ children }: SwiperSideBarProps) {
         {showSidebar ? (
           <CourseList
             course_id={courseSegment}
-            showList={showList}
+            showList={shouldShowCourseList(segments, showList)}
             toggleShow={toggleShow}
           />
         ) : null}
