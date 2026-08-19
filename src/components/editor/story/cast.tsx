@@ -94,7 +94,10 @@ function Character(props: { character: StoryCastCharacter }) {
       <td className="py-1 pr-2 text-right align-middle leading-[1.2]">
         {character.id}
         {character.gender ? (
-          <span className="ml-1 opacity-60" title={character.gender}>
+          <span
+            className="ml-1 inline-block text-[1.35em] leading-none opacity-60 align-[-0.08em]"
+            title={character.gender}
+          >
             {character.gender === "female" ? "♀" : "♂"}
           </span>
         ) : null}
