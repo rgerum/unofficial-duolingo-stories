@@ -1,12 +1,10 @@
 import React from "react";
 import Link from "next/link";
+import type { StoryCastCharacter } from "./syntax_parser_types";
 
 export default function Cast(props: {
   id: number;
-  cast: Record<
-    string,
-    { id: string; link: string; speaker: string; name: string }
-  >;
+  cast: Record<string, StoryCastCharacter>;
   short: string;
 }) {
   let cast = [];
@@ -89,14 +87,17 @@ export default function Cast(props: {
   );
 }
 
-function Character(props: {
-  character: { id: string; link: string; name: string; speaker: string };
-}) {
+function Character(props: { character: StoryCastCharacter }) {
   let character = props.character;
   return (
     <tr className="align-middle">
       <td className="py-1 pr-2 text-right align-middle leading-[1.2]">
         {character.id}
+        {character.gender ? (
+          <span className="ml-1 opacity-60" title={character.gender}>
+            {character.gender === "female" ? "♀" : "♂"}
+          </span>
+        ) : null}
       </td>
       <td className="py-1 pr-3 align-middle">
         <img
