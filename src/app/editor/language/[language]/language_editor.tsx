@@ -204,6 +204,7 @@ function Avatar(props: {
   play: PlayFn;
 }) {
   const avatar = props.avatar;
+  const placeholderName = namePlaceholder(avatar);
   // Only the name set for this language is the input's value; canonical and
   // per-story names are shown as placeholder suggestions instead.
   const languageName = avatar.language_name;
@@ -258,7 +259,12 @@ function Avatar(props: {
           <span>{unsavedChanged ? "*" : ""}</span>
         </p>
         <p className="m-0 h-[50px]">
-          <img alt="avatar" src={avatar.link} style={{ height: "50px" }} />
+          <img
+            alt="avatar"
+            src={avatar.link}
+            style={{ height: "50px" }}
+            title={placeholderName}
+          />
         </p>
 
         <p className="m-0">{inputName}</p>
@@ -302,7 +308,12 @@ function Avatar(props: {
         <span>{unsavedChanged ? "*" : ""}</span>
       </p>
       <p className="m-0">
-        <img alt="avatar" src={avatar.link} style={{ height: "50px" }} />
+        <img
+          alt="avatar"
+          src={avatar.link}
+          style={{ height: "50px" }}
+          title={placeholderName}
+        />
       </p>
 
       <p className="m-0">
@@ -312,11 +323,11 @@ function Avatar(props: {
           disabled={avatar.avatar_id === 0}
           onChange={(e) => inputNameSetValue(e.target.value)}
           type="text"
-          placeholder={namePlaceholder(avatar)}
+          placeholder={placeholderName}
           title={
             inputName
               ? undefined
-              : "Not set for this language — placeholder shows the canonical name or names used in stories"
+              : `Not set for this language — placeholder shows the canonical name or names used in stories: ${placeholderName}`
           }
         />
       </p>

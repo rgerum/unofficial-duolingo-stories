@@ -19,6 +19,7 @@ import {
   StoryElementMultipleChoice,
   StoryElementPointToPhrase,
   StoryElementSelectPhrase,
+  StoryCastCharacter,
 } from "@/components/editor/story/syntax_parser_types";
 import {
   formatInlineTtsError,
@@ -410,6 +411,7 @@ function speaker_text_trans(
       name:
         meta.avatar_overwrites[speaker_id]?.name ||
         meta.avatar_names[speaker_id]?.name,
+      gender: meta.avatar_names[speaker_id]?.gender,
       id: speaker_id,
     };
   }
@@ -1267,15 +1269,7 @@ type Meta = {
   story_id: number;
   avatar_names: Record<string, Avatar>;
   avatar_overwrites: Record<string, AvatarOverwrites>;
-  cast: Record<
-    string,
-    {
-      id: string;
-      link: string;
-      speaker: string;
-      name: string;
-    }
-  >;
+  cast: Record<string, StoryCastCharacter>;
   transcribe_data: TranscribeData;
   voiceKind: Audio["ssml"]["voiceKind"];
   todo_count: number;

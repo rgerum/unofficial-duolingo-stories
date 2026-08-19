@@ -461,6 +461,7 @@ Speaker6: Waarom niet?`,
         name: "Rob",
         link: avatarLink,
         speaker: "nl-NL-FennaNeural",
+        gender: "male",
       },
     },
     {
@@ -481,6 +482,7 @@ Speaker6: Waarom niet?`,
   assert.equal(line.line.characterName, "Rob");
   assert.equal(meta.cast["6"]?.link, avatarLink);
   assert.equal(meta.cast["6"]?.speaker, "nl-BE-Wavenet-B");
+  assert.equal(meta.cast["6"]?.gender, "male");
 });
 
 test("LINE names unmapped explicit speakers by speaker id", () => {

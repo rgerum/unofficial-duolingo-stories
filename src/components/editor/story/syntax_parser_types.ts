@@ -13,6 +13,14 @@ export type Audio = {
   keypoints: undefined | { rangeEnd: number; audioStart: number }[];
 };
 
+export type StoryCastCharacter = {
+  id: string;
+  link: string;
+  speaker: string;
+  name: string;
+  gender?: "male" | "female" | null;
+};
+
 // Core Types
 interface HintMapItem {
   hintIndex: number;
