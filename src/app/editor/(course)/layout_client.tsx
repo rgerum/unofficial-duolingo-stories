@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import SwiperSideBar from "./swipe";
+import EditorSidebarLayout from "./sidebar";
 import LayoutFlag from "./layout_flag";
 import EditorHeaderShell from "../_components/header_shell";
 
@@ -11,7 +11,7 @@ export default function EditorLayoutClient({
   children: React.ReactNode;
 }) {
   return (
-    <SwiperSideBar>
+    <EditorSidebarLayout>
       <div className="[grid-area:header] min-w-0">
         <EditorHeaderShell />
         <LayoutFlag />
@@ -24,6 +24,6 @@ export default function EditorLayoutClient({
       >
         {children}
       </div>
-    </SwiperSideBar>
+    </EditorSidebarLayout>
   );
 }

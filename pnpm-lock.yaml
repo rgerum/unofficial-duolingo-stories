@@ -107,9 +107,6 @@ importers:
       react-dom:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
-      react-swipeable:
-        specifier: ^7.0.2
-        version: 7.0.2(react@19.2.8)
       rehype-katex:
         specifier: ^7.0.1
         version: 7.0.1
@@ -4291,11 +4288,6 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
-
-  react-swipeable@7.0.2:
-    resolution: {integrity: sha512-v1Qx1l+aC2fdxKa9aKJiaU/ZxmJ5o98RMoFwUqAAzVWUcxgfHFXDDruCKXhw6zIYXm6V64JiHgP9f6mlME5l8w==}
-    peerDependencies:
-      react: ^16.8.3 || ^17 || ^18 || ^19.0.0 || ^19.0.0-rc
 
   react@19.2.8:
     resolution: {integrity: sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw==}
@@ -9204,10 +9196,6 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.2.18
-
-  react-swipeable@7.0.2(react@19.2.8):
-    dependencies:
-      react: 19.2.8
 
   react@19.2.8: {}
 

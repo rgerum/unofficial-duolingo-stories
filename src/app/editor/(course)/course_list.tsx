@@ -4,39 +4,31 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LanguageFlag from "@/components/ui/language-flag";
 import { useInput } from "@/lib/hooks";
-import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { CountBadge } from "./CountBadge";
 import type { CourseProps } from "./types";
 
 interface CourseListProps {
   course_id: string | undefined;
-  showList: boolean;
-  toggleShow: () => void;
 }
 
-export default function CourseList({
-  course_id,
-  showList,
-  toggleShow,
-}: CourseListProps) {
+export default function CourseList({ course_id }: CourseListProps) {
   const data = useQuery(api.editorRead.getEditorSidebarData, {});
   const courses = data?.courses as CourseProps[] | undefined;
   const pinnedCourseIds = useQuery(api.coursePins.listCurrentUserPins, {});
 
   const [search, setSearch] = useInput("");
-  const router = useRouter();
 
   if (courses === undefined)
     return (
-      <div className="[grid-area:nav] border-r border-[var(--header-border)] max-[1250px]:relative max-[1250px]:w-0">
+      <div className="[grid-area:nav] overflow-hidden border-r border-[var(--header-border)]">
         <Spinner />
       </div>
     );
   // Error loading courses
   if (courses.length === 0) {
     return (
-      <div className="[grid-area:nav] border-r border-[var(--header-border)] max-[1250px]:relative max-[1250px]:w-0">
+      <div className="[grid-area:nav] overflow-hidden border-r border-[var(--header-border)]">
         Error loading courses
       </div>
     );
@@ -64,15 +56,8 @@ export default function CourseList({
   }
 
   return (
-    <div
-      className="group relative [grid-area:nav] min-h-0 min-w-0 border-r border-[var(--header-border)] max-[1250px]:w-0"
-      data-show={showList}
-    >
-      <div
-        className="pointer-events-none hidden bg-black opacity-0 transition-opacity duration-500 ease-[ease] max-[1250px]:absolute max-[1250px]:inset-0 max-[1250px]:block max-[1250px]:h-full max-[1250px]:w-screen max-[1250px]:group-data-[show=true]:pointer-events-auto max-[1250px]:group-data-[show=true]:opacity-50"
-        onClick={() => toggleShow()}
-      ></div>
-      <div className="h-full min-h-0 overflow-auto max-[1250px]:absolute max-[1250px]:top-0 max-[1250px]:left-0 max-[1250px]:h-full max-[1250px]:w-[min(100vw,400px)] max-[1250px]:translate-x-[calc(-100%-10px)] max-[1250px]:bg-[var(--body-background)] max-[1250px]:shadow-[2px_19px_10px_hsl(20deg_10%_10%_/_0.5)] max-[1250px]:transition-transform max-[1250px]:duration-500 max-[1250px]:ease-in max-[1250px]:group-data-[show=true]:translate-x-0 max-[1250px]:group-data-[show=true]:duration-700 max-[1250px]:group-data-[show=true]:ease-out">
+    <div className="[grid-area:nav] min-h-0 min-w-0 overflow-hidden border-r border-[var(--header-border)]">
+      <div className="h-full min-h-0 overflow-auto">
         <div className="sticky top-0 flex h-10 items-center border-b border-[var(--header-border)] bg-[var(--body-background)] pr-[10px]">
           <span className="px-[10px]">Search</span>
           <input
@@ -90,10 +75,6 @@ export default function CourseList({
                   (course_id === course.short ? "brightness-90" : "")
                 }
                 href={`/editor/course/${course.short}`}
-                onClick={() => {
-                  router.push(`/editor/course/${course.short}`);
-                  toggleShow();
-                }}
               >
                 <span className="w-[45px] text-right text-[var(--text-color-dim)]">
                   {course.count}

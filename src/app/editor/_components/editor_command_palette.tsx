@@ -1229,7 +1229,7 @@ export default function EditorCommandPalette({
       {showTrigger ? (
         <button
           type="button"
-          className="inline-flex h-11 min-w-0 items-center gap-3 rounded-[16px] border border-[var(--header-border)] bg-[color:color-mix(in_srgb,var(--body-background)_80%,white_20%)] px-3 text-[var(--text-color-dim)] shadow-[inset_0_1px_0_rgba(255,255,255,0.3)] transition-colors hover:bg-[color:color-mix(in_srgb,var(--body-background)_55%,white_45%)] hover:text-[var(--text-color)]"
+          className="hidden h-11 min-w-0 items-center gap-3 rounded-[16px] min-[780px]:inline-flex border border-[var(--header-border)] bg-[color:color-mix(in_srgb,var(--body-background)_80%,white_20%)] px-3 text-[var(--text-color-dim)] shadow-[inset_0_1px_0_rgba(255,255,255,0.3)] transition-colors hover:bg-[color:color-mix(in_srgb,var(--body-background)_55%,white_45%)] hover:text-[var(--text-color)]"
           onClick={() =>
             openPaletteInstant(
               canAdmin,
@@ -1250,7 +1250,7 @@ export default function EditorCommandPalette({
           aria-label="Open navigation palette"
         >
           <SearchIcon className="size-4 shrink-0" />
-          <span className="hidden min-[780px]:inline">Go to…</span>
+          <span>Go to…</span>
           <KbdGroup>
             <Kbd className="min-w-7 px-2">{shortcutLabel}</Kbd>
             <Kbd className="px-2">K</Kbd>
