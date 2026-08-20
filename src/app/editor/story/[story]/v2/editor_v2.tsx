@@ -799,7 +799,7 @@ function MobilePaneSwitch({
 }) {
   return (
     <div
-      className="absolute right-2 top-2 z-30 inline-flex rounded-full border border-[var(--header-border)] bg-[color:color-mix(in_srgb,var(--body-background)_90%,transparent)] p-1 shadow-lg backdrop-blur-sm min-[976px]:hidden"
+      className="fixed right-4 top-[68px] z-30 inline-flex rounded-full border border-[var(--header-border)] bg-[color:color-mix(in_srgb,var(--body-background)_90%,transparent)] p-1 shadow-lg backdrop-blur-sm min-[976px]:hidden"
       aria-label="Story editor view"
       role="group"
     >
@@ -812,7 +812,7 @@ function MobilePaneSwitch({
             title={label}
             aria-label={label}
             aria-pressed={value === pane}
-            className={`mobile-pane-switch-button grid size-11 place-items-center rounded-full transition-colors ${
+            className={`grid size-11 place-items-center rounded-full transition-colors ${
               value === pane
                 ? "bg-[var(--button-background)] text-white shadow-sm"
                 : "text-[var(--text-color-dim)] hover:bg-[var(--overview-hr)]"
@@ -824,14 +824,14 @@ function MobilePaneSwitch({
                 aria-hidden="true"
                 width={28}
                 height={28}
-                className="mobile-pane-switch-icon size-7 shrink-0"
+                className="size-7 shrink-0"
               />
             ) : (
               <EyeIcon
                 aria-hidden="true"
                 width={28}
                 height={28}
-                className="mobile-pane-switch-icon size-7 shrink-0"
+                className="size-7 shrink-0"
               />
             )}
           </button>
