@@ -8,6 +8,7 @@ import { betterAuth } from "better-auth";
 import { admin, username } from "better-auth/plugins";
 import { defaultRoles, userAc } from "better-auth/plugins/admin/access";
 import { components, internal } from "../_generated/api";
+import { env } from "../_generated/server";
 import authConfig from "../auth.config";
 import { getSocialProviders } from "../authProviderConfig";
 import { syncDiscordAvatarFromAccount } from "../lib/discordAvatarSync";
@@ -161,6 +162,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       const allowed = [
         "http://localhost:3000",
         authBaseUrl,
+        env.AUTH_TRUSTED_ORIGIN,
         "https://appleid.apple.com",
         "https://*-duostories-team.vercel.app",
         "duostories://",
