@@ -3,7 +3,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 
-type EditorHeaderSlotName = "breadcrumbs" | "actions";
+type EditorHeaderSlotName = "breadcrumbs" | "actions" | "mobileHeader";
 
 type EditorHeaderContextValue = {
   slots: Record<EditorHeaderSlotName, HTMLDivElement | null>;
@@ -23,6 +23,7 @@ export function EditorHeaderProvider({
   >({
     breadcrumbs: null,
     actions: null,
+    mobileHeader: null,
   });
 
   const setSlot = React.useCallback(
@@ -98,4 +99,14 @@ export function EditorHeaderActions({
   children: React.ReactNode;
 }) {
   return <EditorHeaderPortal slot="actions">{children}</EditorHeaderPortal>;
+}
+
+export function EditorMobileHeader({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <EditorHeaderPortal slot="mobileHeader">{children}</EditorHeaderPortal>
+  );
 }

@@ -8,9 +8,10 @@ import { useEditorHeaderSlotRef } from "./header_context";
 export default function EditorHeaderShell() {
   const breadcrumbsRef = useEditorHeaderSlotRef("breadcrumbs");
   const actionsRef = useEditorHeaderSlotRef("actions");
+  const mobileHeaderRef = useEditorHeaderSlotRef("mobileHeader");
 
   return (
-    <nav className="flex h-[60px] min-w-0 items-center gap-4 border-b-2 border-[var(--header-border)] bg-[var(--body-background)] px-5">
+    <nav className="relative flex h-[60px] min-w-0 items-center gap-4 border-b-2 border-[var(--header-border)] bg-[var(--body-background)] px-5">
       <div
         ref={breadcrumbsRef}
         className="flex min-w-0 flex-1 items-center overflow-hidden"
@@ -23,6 +24,7 @@ export default function EditorHeaderShell() {
         />
         <LoggedInButtonWrappedClient page={"editor"} course_id={"segment"} />
       </div>
+      <div ref={mobileHeaderRef} className="contents" />
     </nav>
   );
 }

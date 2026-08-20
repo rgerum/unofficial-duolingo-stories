@@ -1,7 +1,26 @@
 import React from "react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EllipsisIcon,
+  SaveIcon,
+  Trash2Icon,
+} from "lucide-react";
 import Link from "next/link";
+import Switch from "@/components/ui/switch";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import EditorButton from "../../editor_button";
-import { EditorHeaderActions } from "../../_components/header_context";
+import {
+  EditorHeaderActions,
+  EditorMobileHeader,
+} from "../../_components/header_context";
 import type { StoryData } from "./types";
 
 type StoryNavigationTarget = {
@@ -51,6 +70,8 @@ export function StoryEditorHeader({
   previous_story,
   next_story,
 }: HeaderProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
   function do_set_show_trans() {
     let value = !show_trans;
     const event = new CustomEvent("editorShowTranslations", {
@@ -103,121 +124,334 @@ export function StoryEditorHeader({
   }
 
   return (
-    <EditorHeaderActions>
-      <div className="flex items-center">
-        <StoryNavButton
-          href={previous_story?.href}
-          label="Previous"
-          title={previous_story?.name}
-          compactIconDirection="left"
-        />
-        <StoryNavButton
-          href={next_story?.href}
-          label="Next"
-          title={next_story?.name}
-          compactIconDirection="right"
-        />
-        <EditorButton
-          style={{ marginLeft: "auto" }}
-          id="button_delete"
-          onClick={Delete}
-          img={"delete.svg"}
-          text={is_deleting ? "Deleting..." : "Delete"}
-          disabled={is_saving || is_deleting}
-        />
-        <EditorButton
-          onClick={do_set_show_trans}
-          checked={show_trans}
-          text={"Hints"}
-        />
-        <div className="ml-2 flex shrink-0 flex-col items-center gap-0.5">
-          <EditorButton
-            onClick={do_set_show_ssml}
-            checked={show_ssml}
-            text={"Audio"}
+    <>
+      <EditorHeaderActions>
+        <div className="hidden items-center min-[976px]:flex">
+          <StoryNavButton
+            href={previous_story?.href}
+            label="Previous"
+            title={previous_story?.name}
+            compactIconDirection="left"
           />
+          <StoryNavButton
+            href={next_story?.href}
+            label="Next"
+            title={next_story?.name}
+            compactIconDirection="right"
+          />
+          <EditorButton
+            style={{ marginLeft: "auto" }}
+            id="button_delete"
+            onClick={Delete}
+            img={"delete.svg"}
+            text={is_deleting ? "Deleting..." : "Delete"}
+            disabled={is_saving || is_deleting}
+          />
+          <EditorButton
+            onClick={do_set_show_trans}
+            checked={show_trans}
+            text={"Hints"}
+          />
+          <div className="ml-2 flex shrink-0 flex-col items-center gap-0.5">
+            <EditorButton
+              onClick={do_set_show_ssml}
+              checked={show_ssml}
+              text={"Audio"}
+            />
+            <button
+              type="button"
+              className="inline-flex h-5 max-w-full items-center rounded-full border border-slate-300 bg-white px-1.5 text-[10px] font-semibold leading-none text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              onClick={open_bulk_audio}
+            >
+              Bulk audio
+            </button>
+          </div>
+          <div className="relative">
+            <EditorButton
+              id="button_save"
+              onClick={Save}
+              img={"save.svg"}
+              text={
+                (is_saving ? "Saving..." : "Save") +
+                (unsaved_changes ? "*" : "")
+              }
+              disabled={is_saving || is_deleting}
+              title={
+                story_data.official && !isAdmin
+                  ? "Only admins can overwrite official stories."
+                  : undefined
+              }
+            />
+            {last_saved_at ? <SaveStatus lastSavedAt={last_saved_at} /> : null}
+          </div>
+        </div>
+      </EditorHeaderActions>
+      <EditorMobileHeader>
+        <div className="absolute inset-0 z-20 flex items-center gap-1.5 bg-[var(--body-background)] px-2 min-[976px]:hidden">
+          <Link
+            href={`/editor/course/${story_data.short}`}
+            aria-label="Back to course"
+            className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--text-color)] no-underline transition-colors hover:bg-[var(--header-border)]"
+          >
+            <ChevronLeftIcon className="size-6" />
+          </Link>
+          <div className="min-w-0 flex-1 leading-tight">
+            <div className="truncate text-sm font-semibold text-[var(--text-color)]">
+              {story_data.name}
+            </div>
+            <MobileSaveStatus
+              isSaving={is_saving}
+              unsavedChanges={unsaved_changes}
+              lastSavedAt={last_saved_at}
+            />
+          </div>
           <button
             type="button"
-            className="inline-flex h-5 max-w-full items-center rounded-full border border-slate-300 bg-white px-1.5 text-[10px] font-semibold leading-none text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-            onClick={open_bulk_audio}
-          >
-            Bulk audio
-          </button>
-        </div>
-        <div className="relative">
-          <EditorButton
-            id="button_save"
-            onClick={Save}
-            img={"save.svg"}
-            text={
-              (is_saving ? "Saving..." : "Save") + (unsaved_changes ? "*" : "")
-            }
+            onClick={() => void Save()}
             disabled={is_saving || is_deleting}
-            title={
-              story_data.official && !isAdmin
-                ? "Only admins can overwrite official stories."
-                : undefined
-            }
-          />
-          {last_saved_at ? <SaveStatus lastSavedAt={last_saved_at} /> : null}
+            className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-xl px-2.5 text-sm font-semibold text-[var(--text-color)] transition-colors hover:bg-[var(--header-border)] disabled:opacity-50"
+          >
+            <SaveIcon className="size-5" />
+            <span>{is_saving ? "Saving" : "Save"}</span>
+          </button>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                aria-label="More editor options"
+                className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--text-color)] transition-colors hover:bg-[var(--header-border)]"
+              >
+                <EllipsisIcon className="size-6" />
+              </button>
+            </SheetTrigger>
+            <SheetContent
+              side="bottom"
+              aria-describedby={undefined}
+              className="max-h-[min(82dvh,38rem)] overflow-y-auto rounded-t-3xl border-[var(--header-border)] bg-[var(--body-background)] p-0 pb-[env(safe-area-inset-bottom)] text-[var(--text-color)]"
+            >
+              <SheetHeader className="border-b border-[var(--header-border)]">
+                <SheetTitle>Editor options</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col px-4 pb-4">
+                <MobileToggleRow
+                  label="Hints"
+                  description="Show translations in the editor"
+                  checked={show_trans}
+                  onClick={do_set_show_trans}
+                />
+                <MobileToggleRow
+                  label="Audio details"
+                  description="Show SSML and audio timing"
+                  checked={show_ssml}
+                  onClick={do_set_show_ssml}
+                />
+                <button
+                  type="button"
+                  className={mobileMenuItemClassName}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    open_bulk_audio();
+                  }}
+                >
+                  Bulk audio
+                </button>
+                <div className="my-2 border-t border-[var(--header-border)]" />
+                <MobileNavigationLink
+                  target={previous_story}
+                  label="Previous story"
+                  direction="left"
+                />
+                <MobileNavigationLink
+                  target={next_story}
+                  label="Next story"
+                  direction="right"
+                />
+                <SheetClose asChild>
+                  <Link href="/profile" className={mobileMenuItemClassName}>
+                    Account
+                  </Link>
+                </SheetClose>
+                <div className="my-2 border-t border-[var(--header-border)]" />
+                <button
+                  type="button"
+                  disabled={is_saving || is_deleting}
+                  className={`${mobileMenuItemClassName} text-red-600 disabled:opacity-50`}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    void Delete();
+                  }}
+                >
+                  <Trash2Icon className="size-5" />
+                  {is_deleting ? "Deleting story…" : "Delete story"}
+                </button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
-      </div>
-    </EditorHeaderActions>
+      </EditorMobileHeader>
+    </>
   );
 }
 
 export function StoryEditorHeaderLoading() {
   return (
-    <EditorHeaderActions>
-      <div className="flex items-center">
-        <StoryNavButton
-          label="Previous"
-          compactIconDirection="left"
-          disabled={true}
-        />
-        <StoryNavButton
-          label="Next"
-          compactIconDirection="right"
-          disabled={true}
-        />
-        <EditorButton
-          style={{ marginLeft: "auto" }}
-          id="button_delete_loading"
-          onClick={() => {}}
-          img={"delete.svg"}
-          text={"Delete"}
-          disabled={true}
-        />
-        <EditorButton
-          onClick={() => {}}
-          checked={false}
-          text={"Hints"}
-          disabled={true}
-        />
-        <div className="ml-2 flex shrink-0 flex-col items-center gap-0.5">
+    <>
+      <EditorHeaderActions>
+        <div className="hidden items-center min-[976px]:flex">
+          <StoryNavButton
+            label="Previous"
+            compactIconDirection="left"
+            disabled={true}
+          />
+          <StoryNavButton
+            label="Next"
+            compactIconDirection="right"
+            disabled={true}
+          />
+          <EditorButton
+            style={{ marginLeft: "auto" }}
+            id="button_delete_loading"
+            onClick={() => {}}
+            img={"delete.svg"}
+            text={"Delete"}
+            disabled={true}
+          />
           <EditorButton
             onClick={() => {}}
             checked={false}
-            text={"Audio"}
+            text={"Hints"}
             disabled={true}
           />
-          <button
-            type="button"
-            className="inline-flex h-5 max-w-full items-center rounded-full border border-slate-200 bg-slate-100 px-1.5 text-[10px] font-semibold leading-none text-slate-400"
+          <div className="ml-2 flex shrink-0 flex-col items-center gap-0.5">
+            <EditorButton
+              onClick={() => {}}
+              checked={false}
+              text={"Audio"}
+              disabled={true}
+            />
+            <button
+              type="button"
+              className="inline-flex h-5 max-w-full items-center rounded-full border border-slate-200 bg-slate-100 px-1.5 text-[10px] font-semibold leading-none text-slate-400"
+              disabled={true}
+            >
+              Bulk audio
+            </button>
+          </div>
+          <EditorButton
+            id="button_save_loading"
+            onClick={() => {}}
+            img={"save.svg"}
+            text={"Save"}
             disabled={true}
-          >
-            Bulk audio
-          </button>
+          />
         </div>
-        <EditorButton
-          id="button_save_loading"
-          onClick={() => {}}
-          img={"save.svg"}
-          text={"Save"}
-          disabled={true}
-        />
-      </div>
-    </EditorHeaderActions>
+      </EditorHeaderActions>
+      <EditorMobileHeader>
+        <div className="absolute inset-0 z-20 flex items-center gap-2 bg-[var(--body-background)] px-2 min-[976px]:hidden">
+          <div className="size-11 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <div className="h-4 w-32 animate-pulse rounded bg-[var(--header-border)]" />
+          </div>
+          <div className="h-8 w-16 animate-pulse rounded-lg bg-[var(--header-border)]" />
+          <div className="size-11" />
+        </div>
+      </EditorMobileHeader>
+    </>
+  );
+}
+
+const mobileMenuItemClassName =
+  "flex min-h-12 items-center gap-3 rounded-xl px-3 text-left text-base font-medium text-[var(--text-color)] no-underline transition-colors hover:bg-[var(--header-border)]";
+
+function MobileSaveStatus({
+  isSaving,
+  unsavedChanges,
+  lastSavedAt,
+}: {
+  isSaving: boolean;
+  unsavedChanges: boolean;
+  lastSavedAt: number | null;
+}) {
+  let text = "No unsaved changes";
+  if (isSaving) text = "Saving changes…";
+  else if (unsavedChanges) text = "Unsaved changes";
+  else if (lastSavedAt) text = "Saved";
+
+  return (
+    <div className="truncate text-xs text-[var(--text-color-dim)]">{text}</div>
+  );
+}
+
+function MobileToggleRow({
+  label,
+  description,
+  checked,
+  onClick,
+}: {
+  label: string;
+  description: string;
+  checked: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <div className="flex min-h-16 items-center gap-4 px-3">
+      <button
+        type="button"
+        className="min-w-0 flex-1 text-left"
+        onClick={onClick}
+      >
+        <span className="block font-medium">{label}</span>
+        <span className="block text-xs text-[var(--text-color-dim)]">
+          {description}
+        </span>
+      </button>
+      <Switch checked={checked} onClick={onClick} ariaLabel={label} />
+    </div>
+  );
+}
+
+function MobileNavigationLink({
+  target,
+  label,
+  direction,
+}: {
+  target: StoryNavigationTarget | null;
+  label: string;
+  direction: "left" | "right";
+}) {
+  const icon =
+    direction === "left" ? (
+      <ChevronLeftIcon className="size-5" />
+    ) : (
+      <ChevronRightIcon className="size-5" />
+    );
+
+  if (!target) {
+    return (
+      <span
+        aria-disabled="true"
+        className={`${mobileMenuItemClassName} opacity-40`}
+      >
+        {icon}
+        {label}
+      </span>
+    );
+  }
+
+  return (
+    <SheetClose asChild>
+      <Link
+        href={target.href}
+        title={target.name}
+        className={mobileMenuItemClassName}
+      >
+        {icon}
+        <span className="min-w-0 flex-1 truncate">{label}</span>
+        <span className="max-w-[45%] truncate text-sm font-normal text-[var(--text-color-dim)]">
+          {target.name}
+        </span>
+      </Link>
+    </SheetClose>
   );
 }
 
