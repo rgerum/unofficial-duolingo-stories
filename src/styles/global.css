@@ -690,6 +690,18 @@ body[data-theme="dark"] {
   height: 100%;
 }
 
+@media (max-width: 975px) and (hover: none) and (pointer: coarse) {
+  .mobile-pane-switch-button {
+    width: 52px;
+    height: 52px;
+  }
+
+  .mobile-pane-switch-icon {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 /*
   6. Remove built-in form typography styles
 */
