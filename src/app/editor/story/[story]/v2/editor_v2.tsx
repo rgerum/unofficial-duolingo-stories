@@ -1,45 +1,45 @@
 "use client";
 
-import React from "react";
-import { basicSetup, EditorView } from "codemirror";
 import { Compartment, EditorSelection, EditorState } from "@codemirror/state";
+import { api } from "@convex/_generated/api";
+import { basicSetup, EditorView } from "codemirror";
 import { useQuery } from "convex/react";
+import { ShieldIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShieldIcon } from "lucide-react";
-import { api } from "@convex/_generated/api";
-import { example, highlightStyle } from "@/components/editor/story/parser";
-import useScrollLinking from "@/components/editor/story/scroll_linking";
-import useResizeEditor from "@/components/editor/story/editor-resize";
-import StoryEditorPreview from "@/components/StoryEditorPreview";
-import { LintPanel } from "./lint_panel";
-import Cast from "@/components/editor/story/cast";
-import { StoryEditorHeader } from "@/app/editor/story/[story]/header";
-import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
-import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
+import React from "react";
+import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
 import BulkAudioEditor, {
   type BulkAudioEditorItem,
   type BulkAudioEditorUpdate,
 } from "@/app/editor/story/[story]/bulk-audio-editor";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
+import { StoryEditorHeader } from "@/app/editor/story/[story]/header";
 import SoundRecorder from "@/app/editor/story/[story]/sound-recorder";
-import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
-import VisuallyHidden from "@/components/VisuallyHidden";
-import {
-  create_audio_insert_anchor,
-  insert_audio_at_anchor,
-  map_audio_insert_anchor,
-  insert_audio_lines,
-  timings_to_text,
-  type AudioInsertAnchor,
-} from "@/lib/editor/audio/audio_edit_tools";
-import { fix_audio_line_order } from "@/lib/editor/audio/fix_audio_line_order";
+import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
+import Cast from "@/components/editor/story/cast";
+import useResizeEditor from "@/components/editor/story/editor-resize";
+import { example, highlightStyle } from "@/components/editor/story/parser";
+import useScrollLinking from "@/components/editor/story/scroll_linking";
 import type {
   Audio,
   StoryElement,
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
+import StoryEditorPreview from "@/components/StoryEditorPreview";
+import VisuallyHidden from "@/components/VisuallyHidden";
+import {
+  type AudioInsertAnchor,
+  create_audio_insert_anchor,
+  insert_audio_at_anchor,
+  insert_audio_lines,
+  map_audio_insert_anchor,
+  timings_to_text,
+} from "@/lib/editor/audio/audio_edit_tools";
+import { fix_audio_line_order } from "@/lib/editor/audio/fix_audio_line_order";
 import AdminControls from "./admin_controls";
+import { LintPanel } from "./lint_panel";
 import { useStoryEditorModel } from "./use_story_editor_model";
 
 type StoryNavigation = {
@@ -56,6 +56,18 @@ type StoryNavigation = {
 type MobilePane = "edit" | "preview";
 
 const desktopEditorMediaQuery = "(min-width: 976px)";
+const mobileEditorPresentation = [
+  EditorView.lineWrapping,
+  EditorView.theme({
+    ".cm-scroller": {
+      fontSize: "16px",
+    },
+    ".cm-lineNumbers .cm-gutterElement": {
+      fontSize: "12px",
+      padding: "0 2px",
+    },
+  }),
+];
 
 function subscribeToDesktopEditor(callback: () => void) {
   const mediaQuery = window.matchMedia(desktopEditorMediaQuery);
@@ -209,7 +221,7 @@ export default function EditorV2({
   const previousStoryIdRef = React.useRef<number | null>(null);
   const previousMobilePaneRef = React.useRef<MobilePane>("edit");
   const skipNextMobilePaneSyncRef = React.useRef(false);
-  const lineWrappingCompartmentRef = React.useRef(new Compartment());
+  const mobilePresentationCompartmentRef = React.useRef(new Compartment());
   const trackedAudioAnchorsRef = React.useRef<Set<AudioInsertAnchor>>(
     new Set(),
   );
@@ -385,8 +397,8 @@ export default function EditorV2({
         sync,
         example(),
         highlightStyle,
-        lineWrappingCompartmentRef.current.of(
-          isDesktopEditor() ? [] : EditorView.lineWrapping,
+        mobilePresentationCompartmentRef.current.of(
+          isDesktopEditor() ? [] : mobileEditorPresentation,
         ),
       ],
     });
@@ -408,8 +420,8 @@ export default function EditorV2({
   React.useEffect(() => {
     if (!view) return;
     view.dispatch({
-      effects: lineWrappingCompartmentRef.current.reconfigure(
-        desktopLayout ? [] : EditorView.lineWrapping,
+      effects: mobilePresentationCompartmentRef.current.reconfigure(
+        desktopLayout ? [] : mobileEditorPresentation,
       ),
     });
   }, [desktopLayout, view]);
