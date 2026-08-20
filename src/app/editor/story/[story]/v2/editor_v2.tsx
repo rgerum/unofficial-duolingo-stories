@@ -4,7 +4,7 @@ import { Compartment, EditorSelection, EditorState } from "@codemirror/state";
 import { api } from "@convex/_generated/api";
 import { basicSetup, EditorView } from "codemirror";
 import { useQuery } from "convex/react";
-import { ShieldIcon } from "lucide-react";
+import { EyeIcon, PencilIcon, ShieldIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -701,7 +701,6 @@ export default function EditorV2({
         previous_story={story_navigation.previousStory}
         next_story={story_navigation.nextStory}
       />
-      <MobilePaneSwitch value={mobilePane} onChange={setMobilePane} />
       <BulkAudioEditor
         open={bulkAudioOpen}
         onOpenChange={setBulkAudioOpen}
@@ -736,6 +735,7 @@ export default function EditorV2({
         )}
 
       <div className="relative flex min-h-0 flex-1">
+        <MobilePaneSwitch value={mobilePane} onChange={setMobilePane} />
         <svg
           className="pointer-events-none fixed z-[-1] h-full w-full float-left max-[975px]:hidden"
           ref={svgParentRef}
@@ -763,7 +763,7 @@ export default function EditorV2({
           {isAdmin ? (
             <Link
               href={`/admin/story/${story_data.id}`}
-              className="sticky top-3 right-3 z-10 float-right inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-[var(--header-border)] bg-[var(--body-background)] text-[var(--text-color-dim)] transition-colors duration-100 hover:border-[color:color-mix(in_srgb,var(--link-blue)_22%,var(--header-border))] hover:bg-[color:color-mix(in_srgb,var(--overview-hr)_35%,var(--body-background))] hover:text-[var(--text-color)] active:bg-[color:color-mix(in_srgb,var(--overview-hr)_55%,var(--body-background))]"
+              className="sticky top-3 right-3 z-10 float-right inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-[var(--header-border)] bg-[var(--body-background)] text-[var(--text-color-dim)] transition-colors duration-100 hover:border-[color:color-mix(in_srgb,var(--link-blue)_22%,var(--header-border))] hover:bg-[color:color-mix(in_srgb,var(--overview-hr)_35%,var(--body-background))] hover:text-[var(--text-color)] active:bg-[color:color-mix(in_srgb,var(--overview-hr)_55%,var(--body-background))] max-[975px]:top-14"
             >
               <ShieldIcon aria-hidden="true" className="h-6 w-6" />
               <VisuallyHidden>Open story in admin panel</VisuallyHidden>
@@ -798,28 +798,35 @@ function MobilePaneSwitch({
   onChange: (value: MobilePane) => void;
 }) {
   return (
-    <div className="shrink-0 border-b border-[var(--header-border)] bg-[var(--body-background)] p-2 min-[976px]:hidden">
-      <div
-        className="mx-auto grid max-w-sm grid-cols-2 rounded-xl bg-[var(--overview-hr)] p-1"
-        aria-label="Story editor view"
-        role="group"
-      >
-        {(["edit", "preview"] as const).map((pane) => (
+    <div
+      className="absolute right-2 top-2 z-30 inline-flex rounded-full border border-[var(--header-border)] bg-[color:color-mix(in_srgb,var(--body-background)_90%,transparent)] p-1 shadow-lg backdrop-blur-sm min-[976px]:hidden"
+      aria-label="Story editor view"
+      role="group"
+    >
+      {(["edit", "preview"] as const).map((pane) => {
+        const label = pane === "edit" ? "Edit" : "Preview";
+        return (
           <button
             key={pane}
             type="button"
+            title={label}
+            aria-label={label}
             aria-pressed={value === pane}
-            className={`min-h-11 rounded-lg px-4 text-sm font-semibold capitalize transition-colors ${
+            className={`grid size-10 place-items-center rounded-full transition-colors ${
               value === pane
-                ? "bg-[var(--body-background)] text-[var(--text-color)] shadow-sm"
-                : "text-[var(--text-color-dim)]"
+                ? "bg-[var(--button-background)] text-white shadow-sm"
+                : "text-[var(--text-color-dim)] hover:bg-[var(--overview-hr)]"
             }`}
             onClick={() => onChange(pane)}
           >
-            {pane}
+            {pane === "edit" ? (
+              <PencilIcon aria-hidden="true" className="size-[18px]" />
+            ) : (
+              <EyeIcon aria-hidden="true" className="size-5" />
+            )}
           </button>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

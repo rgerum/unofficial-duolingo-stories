@@ -195,15 +195,28 @@ export function StoryEditorHeader({
           >
             <ChevronLeftIcon className="size-6" />
           </Link>
-          <div className="min-w-0 flex-1 leading-tight">
-            <div className="truncate text-sm font-semibold text-[var(--text-color)]">
-              {story_data.name}
-            </div>
-            <MobileSaveStatus
-              isSaving={is_saving}
-              unsavedChanges={unsaved_changes}
-              lastSavedAt={last_saved_at}
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+            <img
+              src={
+                story_data.image
+                  ? `https://stories-cdn.duolingo.com/image/${story_data.image}.svg`
+                  : "/editor/icons/empty_title.svg"
+              }
+              alt=""
+              width={24}
+              height={24}
+              className="size-6 shrink-0 object-contain"
             />
+            <div className="min-w-0 leading-tight">
+              <div className="truncate text-sm font-semibold text-[var(--text-color)]">
+                {story_data.name}
+              </div>
+              <MobileSaveStatus
+                isSaving={is_saving}
+                unsavedChanges={unsaved_changes}
+                lastSavedAt={last_saved_at}
+              />
+            </div>
           </div>
           <button
             type="button"
