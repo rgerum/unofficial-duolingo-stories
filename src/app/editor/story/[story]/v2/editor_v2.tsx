@@ -62,9 +62,15 @@ const mobileEditorPresentation = [
     ".cm-scroller": {
       fontSize: "16px",
     },
-    ".cm-lineNumbers .cm-gutterElement": {
-      fontSize: "12px",
+    ".cm-line": {
       padding: "0 2px",
+    },
+    ".cm-lineNumbers": {
+      fontSize: "12px",
+    },
+    ".cm-lineNumbers .cm-gutterElement": {
+      minWidth: "0",
+      padding: "0 0 0 2px",
     },
   }),
 ];
