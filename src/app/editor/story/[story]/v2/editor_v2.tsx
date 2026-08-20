@@ -812,7 +812,7 @@ function MobilePaneSwitch({
             title={label}
             aria-label={label}
             aria-pressed={value === pane}
-            className={`grid size-10 place-items-center rounded-full transition-colors ${
+            className={`grid size-11 place-items-center rounded-full transition-colors ${
               value === pane
                 ? "bg-[var(--button-background)] text-white shadow-sm"
                 : "text-[var(--text-color-dim)] hover:bg-[var(--overview-hr)]"
@@ -820,9 +820,21 @@ function MobilePaneSwitch({
             onClick={() => onChange(pane)}
           >
             {pane === "edit" ? (
-              <PencilIcon aria-hidden="true" className="size-[18px]" />
+              <PencilIcon
+                aria-hidden="true"
+                width={28}
+                height={28}
+                className="shrink-0"
+                style={{ width: 28, height: 28 }}
+              />
             ) : (
-              <EyeIcon aria-hidden="true" className="size-5" />
+              <EyeIcon
+                aria-hidden="true"
+                width={28}
+                height={28}
+                className="shrink-0"
+                style={{ width: 28, height: 28 }}
+              />
             )}
           </button>
         );
