@@ -53,6 +53,20 @@ type StoryNavigation = {
   } | null;
 };
 
+type MobilePane = "edit" | "preview";
+
+const desktopEditorMediaQuery = "(min-width: 976px)";
+
+function subscribeToDesktopEditor(callback: () => void) {
+  const mediaQuery = window.matchMedia(desktopEditorMediaQuery);
+  mediaQuery.addEventListener("change", callback);
+  return () => mediaQuery.removeEventListener("change", callback);
+}
+
+function isDesktopEditor() {
+  return window.matchMedia(desktopEditorMediaQuery).matches;
+}
+
 type LanguageData = {
   languageId: string;
   id: number;
@@ -193,6 +207,8 @@ export default function EditorV2({
   const viewRef = React.useRef<EditorView | null>(null);
   const hasAppliedInitialFocusRef = React.useRef(false);
   const previousStoryIdRef = React.useRef<number | null>(null);
+  const previousMobilePaneRef = React.useRef<MobilePane>("edit");
+  const skipNextMobilePaneSyncRef = React.useRef(false);
   const trackedAudioAnchorsRef = React.useRef<Set<AudioInsertAnchor>>(
     new Set(),
   );
@@ -223,6 +239,12 @@ export default function EditorV2({
   >(undefined);
   const [bulkAudioOpen, setBulkAudioOpen] =
     React.useState(initialBulkAudioOpen);
+  const [mobilePane, setMobilePane] = React.useState<MobilePane>("edit");
+  const desktopLayout = React.useSyncExternalStore(
+    subscribeToDesktopEditor,
+    isDesktopEditor,
+    () => false,
+  );
   const storyId = story_data.id;
   const model = useStoryEditorModel({
     isAdmin,
@@ -309,7 +331,32 @@ export default function EditorV2({
   );
 
   useResizeEditor(editorRef.current, previewRef.current, marginRef.current);
-  useScrollLinking(view, previewRef, svgParentRef);
+  useScrollLinking(view, previewRef, svgParentRef, desktopLayout);
+
+  React.useEffect(() => {
+    if (desktopLayout) {
+      previousMobilePaneRef.current = mobilePane;
+      return;
+    }
+    if (previousMobilePaneRef.current === mobilePane) return;
+    previousMobilePaneRef.current = mobilePane;
+    if (skipNextMobilePaneSyncRef.current) {
+      skipNextMobilePaneSyncRef.current = false;
+      return;
+    }
+    const frame = window.requestAnimationFrame(() => {
+      if (mobilePane === "preview") {
+        viewRef.current?.scrollDOM.dispatchEvent(
+          new CustomEvent("story-editor-sync-preview"),
+        );
+      } else {
+        previewRef.current?.dispatchEvent(
+          new CustomEvent("story-editor-sync-editor"),
+        );
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [desktopLayout, mobilePane]);
 
   React.useEffect(() => {
     const initialStory = getInitialText();
@@ -508,6 +555,14 @@ export default function EditorV2({
           const lineNumber = Number.parseInt(line, 10);
           if (!Number.isFinite(lineNumber) || lineNumber <= 0) return;
           if (scroll) {
+            if (!desktopLayout && mobilePane === "preview") {
+              skipNextMobilePaneSyncRef.current = true;
+              setMobilePane("edit");
+              window.requestAnimationFrame(() => {
+                scrollEditorLineIntoView(view, lineNumber);
+              });
+              return;
+            }
             scrollEditorLineIntoView(view, lineNumber);
             return;
           }
@@ -535,7 +590,14 @@ export default function EditorV2({
           insert_audio_at_anchor(text, view, anchor),
         show_audio_editor: (data) => openAudioEditor(data),
       };
-    }, [audioInsertLines, lineNo, openAudioEditor, view]);
+    }, [
+      audioInsertLines,
+      desktopLayout,
+      lineNo,
+      mobilePane,
+      openAudioEditor,
+      view,
+    ]);
 
   const audioEditorDataContent =
     (audioEditorData?.type === "LINE" && audioEditorData.line.content) ||
@@ -599,6 +661,7 @@ export default function EditorV2({
         previous_story={story_navigation.previousStory}
         next_story={story_navigation.nextStory}
       />
+      <MobilePaneSwitch value={mobilePane} onChange={setMobilePane} />
       <BulkAudioEditor
         open={bulkAudioOpen}
         onOpenChange={setBulkAudioOpen}
@@ -632,9 +695,9 @@ export default function EditorV2({
           />
         )}
 
-      <div className="flex min-h-0 flex-1">
+      <div className="relative flex min-h-0 flex-1">
         <svg
-          className="pointer-events-none fixed z-[-1] h-full w-full float-left"
+          className="pointer-events-none fixed z-[-1] h-full w-full float-left max-[975px]:hidden"
           ref={svgParentRef}
         >
           <path
@@ -642,14 +705,20 @@ export default function EditorV2({
             d=""
           />
         </svg>
-        <RtlContainer ref={editorRef} rtl={Boolean(language_data?.rtl)} />
+        <RtlContainer
+          ref={editorRef}
+          rtl={Boolean(language_data?.rtl)}
+          mobileVisible={mobilePane === "edit"}
+        />
         <svg
-          className="h-full w-[2%] cursor-col-resize overflow-scroll float-left"
+          className="h-full w-[2%] cursor-col-resize overflow-scroll float-left max-[975px]:hidden"
           ref={marginRef}
         />
         <div
           ref={previewRef}
-          className="relative min-h-0 w-[100px] grow overflow-scroll p-3 [scroll-behavior:auto] max-[975px]:absolute max-[975px]:top-[calc((100vh-64px)/2+64px)] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full"
+          className={`relative min-h-0 w-[100px] grow overflow-auto p-3 [scroll-behavior:auto] max-[975px]:h-full max-[975px]:w-full ${
+            mobilePane === "preview" ? "" : "max-[975px]:hidden"
+          }`}
         >
           {isAdmin ? (
             <Link
@@ -681,14 +750,51 @@ export default function EditorV2({
   );
 }
 
-const RtlContainer = React.forwardRef<HTMLDivElement, { rtl: boolean }>(
-  function RtlContainer({ rtl }, ref) {
-    return (
+function MobilePaneSwitch({
+  value,
+  onChange,
+}: {
+  value: MobilePane;
+  onChange: (value: MobilePane) => void;
+}) {
+  return (
+    <div className="shrink-0 border-b border-[var(--header-border)] bg-[var(--body-background)] p-2 min-[976px]:hidden">
       <div
-        ref={ref}
-        className="min-h-0 w-[100px] grow [scroll-behavior:auto] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full"
-        dir={rtl ? "rtl" : undefined}
-      />
-    );
-  },
-);
+        className="mx-auto grid max-w-sm grid-cols-2 rounded-xl bg-[var(--overview-hr)] p-1"
+        aria-label="Story editor view"
+        role="group"
+      >
+        {(["edit", "preview"] as const).map((pane) => (
+          <button
+            key={pane}
+            type="button"
+            aria-pressed={value === pane}
+            className={`min-h-11 rounded-lg px-4 text-sm font-semibold capitalize transition-colors ${
+              value === pane
+                ? "bg-[var(--body-background)] text-[var(--text-color)] shadow-sm"
+                : "text-[var(--text-color-dim)]"
+            }`}
+            onClick={() => onChange(pane)}
+          >
+            {pane}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const RtlContainer = React.forwardRef<
+  HTMLDivElement,
+  { rtl: boolean; mobileVisible: boolean }
+>(function RtlContainer({ rtl, mobileVisible }, ref) {
+  return (
+    <div
+      ref={ref}
+      className={`min-h-0 w-[100px] grow [scroll-behavior:auto] max-[975px]:h-full max-[975px]:w-full ${
+        mobileVisible ? "" : "max-[975px]:hidden"
+      }`}
+      dir={rtl ? "rtl" : undefined}
+    />
+  );
+});
