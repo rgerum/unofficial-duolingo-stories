@@ -2,7 +2,7 @@
 
 import React from "react";
 import { basicSetup, EditorView } from "codemirror";
-import { EditorSelection, EditorState } from "@codemirror/state";
+import { Compartment, EditorSelection, EditorState } from "@codemirror/state";
 import { useQuery } from "convex/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -209,6 +209,7 @@ export default function EditorV2({
   const previousStoryIdRef = React.useRef<number | null>(null);
   const previousMobilePaneRef = React.useRef<MobilePane>("edit");
   const skipNextMobilePaneSyncRef = React.useRef(false);
+  const lineWrappingCompartmentRef = React.useRef(new Compartment());
   const trackedAudioAnchorsRef = React.useRef<Set<AudioInsertAnchor>>(
     new Set(),
   );
@@ -379,7 +380,15 @@ export default function EditorV2({
 
     const state = EditorState.create({
       doc: normalizeDocText(initialStory.text),
-      extensions: [basicSetup, sync, example(), highlightStyle],
+      extensions: [
+        basicSetup,
+        sync,
+        example(),
+        highlightStyle,
+        lineWrappingCompartmentRef.current.of(
+          isDesktopEditor() ? [] : EditorView.lineWrapping,
+        ),
+      ],
     });
 
     const view = new EditorView({
@@ -395,6 +404,15 @@ export default function EditorV2({
       setView(undefined);
     };
   }, [getInitialText, storyId]);
+
+  React.useEffect(() => {
+    if (!view) return;
+    view.dispatch({
+      effects: lineWrappingCompartmentRef.current.reconfigure(
+        desktopLayout ? [] : EditorView.lineWrapping,
+      ),
+    });
+  }, [desktopLayout, view]);
 
   React.useEffect(() => {
     const editorView = viewRef.current ?? view;
