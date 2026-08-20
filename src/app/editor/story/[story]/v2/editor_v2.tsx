@@ -812,7 +812,7 @@ function MobilePaneSwitch({
             title={label}
             aria-label={label}
             aria-pressed={value === pane}
-            className={`grid size-11 place-items-center rounded-full transition-colors ${
+            className={`grid size-11 place-items-center rounded-full transition-colors [@media_(hover:none)_and_(pointer:coarse)]:size-[52px] ${
               value === pane
                 ? "bg-[var(--button-background)] text-white shadow-sm"
                 : "text-[var(--text-color-dim)] hover:bg-[var(--overview-hr)]"
@@ -824,16 +824,14 @@ function MobilePaneSwitch({
                 aria-hidden="true"
                 width={28}
                 height={28}
-                className="shrink-0"
-                style={{ width: 28, height: 28 }}
+                className="size-7 shrink-0 [@media_(hover:none)_and_(pointer:coarse)]:size-9"
               />
             ) : (
               <EyeIcon
                 aria-hidden="true"
                 width={28}
                 height={28}
-                className="shrink-0"
-                style={{ width: 28, height: 28 }}
+                className="size-7 shrink-0 [@media_(hover:none)_and_(pointer:coarse)]:size-9"
               />
             )}
           </button>
