@@ -72,6 +72,9 @@ const mobileEditorPresentation = [
       minWidth: "0",
       padding: "0 0 0 2px",
     },
+    ".cm-foldGutter": {
+      display: "none !important",
+    },
   }),
 ];
 
