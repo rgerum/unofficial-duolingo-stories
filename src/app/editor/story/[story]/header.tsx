@@ -8,6 +8,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Switch from "@/components/ui/switch";
+import MobileEditorHeader, {
+  MobileEditorMenuLink,
+  mobileEditorMenuItemClassName,
+} from "@/app/editor/_components/mobile_editor_header";
 import {
   Sheet,
   SheetClose,
@@ -17,10 +21,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import EditorButton from "../../editor_button";
-import {
-  EditorHeaderActions,
-  EditorMobileHeader,
-} from "../../_components/header_context";
+import { EditorHeaderActions } from "../../_components/header_context";
 import type { StoryData } from "./types";
 
 type StoryNavigationTarget = {
@@ -186,16 +187,11 @@ export function StoryEditorHeader({
           </div>
         </div>
       </EditorHeaderActions>
-      <EditorMobileHeader>
-        <div className="absolute inset-0 z-20 flex items-center gap-1.5 bg-[var(--body-background)] px-2 min-[976px]:hidden">
-          <Link
-            href={`/editor/course/${story_data.short}`}
-            aria-label="Back to course"
-            className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--text-color)] no-underline transition-colors hover:bg-[var(--header-border)]"
-          >
-            <ChevronLeftIcon className="size-6" />
-          </Link>
-          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+      <MobileEditorHeader
+        backHref={`/editor/course/${story_data.short}`}
+        backLabel="Back to course"
+        icon={
+          <div className="shrink-0">
             <img
               src={
                 story_data.image
@@ -207,101 +203,98 @@ export function StoryEditorHeader({
               height={24}
               className="size-6 shrink-0 object-contain"
             />
-            <div className="min-w-0 leading-tight">
-              <div className="truncate text-sm font-semibold text-[var(--text-color)]">
-                {story_data.name}
-              </div>
-              <MobileSaveStatus
-                isSaving={is_saving}
-                unsavedChanges={unsaved_changes}
-                lastSavedAt={last_saved_at}
-              />
-            </div>
           </div>
-          <button
-            type="button"
-            onClick={() => void Save()}
-            disabled={is_saving || is_deleting}
-            className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-xl px-2.5 text-sm font-semibold text-[var(--text-color)] transition-colors hover:bg-[var(--header-border)] disabled:opacity-50"
+        }
+        title={story_data.name}
+        subtitle={
+          <MobileSaveStatus
+            isSaving={is_saving}
+            unsavedChanges={unsaved_changes}
+            lastSavedAt={last_saved_at}
+          />
+        }
+      >
+        <button
+          type="button"
+          onClick={() => void Save()}
+          disabled={is_saving || is_deleting}
+          className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-xl px-2.5 text-sm font-semibold text-[var(--text-color)] transition-colors hover:bg-[var(--header-border)] disabled:opacity-50"
+        >
+          <SaveIcon className="size-5" />
+          <span>{is_saving ? "Saving" : "Save"}</span>
+        </button>
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <button
+              type="button"
+              aria-label="More editor options"
+              className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--text-color)] transition-colors hover:bg-[var(--header-border)]"
+            >
+              <EllipsisIcon className="size-6" />
+            </button>
+          </SheetTrigger>
+          <SheetContent
+            side="bottom"
+            aria-describedby={undefined}
+            className="max-h-[min(82dvh,38rem)] overflow-y-auto rounded-t-3xl border-[var(--header-border)] bg-[var(--body-background)] p-0 pb-[env(safe-area-inset-bottom)] text-[var(--text-color)]"
           >
-            <SaveIcon className="size-5" />
-            <span>{is_saving ? "Saving" : "Save"}</span>
-          </button>
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
+            <SheetHeader className="border-b border-[var(--header-border)]">
+              <SheetTitle>Editor options</SheetTitle>
+            </SheetHeader>
+            <div className="flex flex-col px-4 pb-4">
+              <MobileToggleRow
+                label="Hints"
+                description="Show translations in the editor"
+                checked={show_trans}
+                onClick={do_set_show_trans}
+              />
+              <MobileToggleRow
+                label="Audio details"
+                description="Show SSML and audio timing"
+                checked={show_ssml}
+                onClick={do_set_show_ssml}
+              />
               <button
                 type="button"
-                aria-label="More editor options"
-                className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--text-color)] transition-colors hover:bg-[var(--header-border)]"
+                className={mobileEditorMenuItemClassName}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  open_bulk_audio();
+                }}
               >
-                <EllipsisIcon className="size-6" />
+                Bulk audio
               </button>
-            </SheetTrigger>
-            <SheetContent
-              side="bottom"
-              aria-describedby={undefined}
-              className="max-h-[min(82dvh,38rem)] overflow-y-auto rounded-t-3xl border-[var(--header-border)] bg-[var(--body-background)] p-0 pb-[env(safe-area-inset-bottom)] text-[var(--text-color)]"
-            >
-              <SheetHeader className="border-b border-[var(--header-border)]">
-                <SheetTitle>Editor options</SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col px-4 pb-4">
-                <MobileToggleRow
-                  label="Hints"
-                  description="Show translations in the editor"
-                  checked={show_trans}
-                  onClick={do_set_show_trans}
-                />
-                <MobileToggleRow
-                  label="Audio details"
-                  description="Show SSML and audio timing"
-                  checked={show_ssml}
-                  onClick={do_set_show_ssml}
-                />
-                <button
-                  type="button"
-                  className={mobileMenuItemClassName}
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    open_bulk_audio();
-                  }}
-                >
-                  Bulk audio
-                </button>
-                <div className="my-2 border-t border-[var(--header-border)]" />
-                <MobileNavigationLink
-                  target={previous_story}
-                  label="Previous story"
-                  direction="left"
-                />
-                <MobileNavigationLink
-                  target={next_story}
-                  label="Next story"
-                  direction="right"
-                />
-                <SheetClose asChild>
-                  <Link href="/profile" className={mobileMenuItemClassName}>
-                    Account
-                  </Link>
-                </SheetClose>
-                <div className="my-2 border-t border-[var(--header-border)]" />
-                <button
-                  type="button"
-                  disabled={is_saving || is_deleting}
-                  className={`${mobileMenuItemClassName} text-red-600 disabled:opacity-50`}
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    void Delete();
-                  }}
-                >
-                  <Trash2Icon className="size-5" />
-                  {is_deleting ? "Deleting story…" : "Delete story"}
-                </button>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </EditorMobileHeader>
+              <div className="my-2 border-t border-[var(--header-border)]" />
+              <MobileNavigationLink
+                target={previous_story}
+                label="Previous story"
+                direction="left"
+              />
+              <MobileNavigationLink
+                target={next_story}
+                label="Next story"
+                direction="right"
+              />
+              <MobileEditorMenuLink href="/profile">
+                Account
+              </MobileEditorMenuLink>
+              <div className="my-2 border-t border-[var(--header-border)]" />
+              <button
+                type="button"
+                disabled={is_saving || is_deleting}
+                className={`${mobileEditorMenuItemClassName} text-red-600 disabled:opacity-50`}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  void Delete();
+                }}
+              >
+                <Trash2Icon className="size-5" />
+                {is_deleting ? "Deleting story…" : "Delete story"}
+              </button>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </MobileEditorHeader>
     </>
   );
 }
@@ -359,22 +352,17 @@ export function StoryEditorHeaderLoading() {
           />
         </div>
       </EditorHeaderActions>
-      <EditorMobileHeader>
-        <div className="absolute inset-0 z-20 flex items-center gap-2 bg-[var(--body-background)] px-2 min-[976px]:hidden">
-          <div className="size-11 shrink-0" />
-          <div className="min-w-0 flex-1">
-            <div className="h-4 w-32 animate-pulse rounded bg-[var(--header-border)]" />
-          </div>
-          <div className="h-8 w-16 animate-pulse rounded-lg bg-[var(--header-border)]" />
-          <div className="size-11" />
-        </div>
-      </EditorMobileHeader>
+      <MobileEditorHeader
+        title={
+          <div className="h-4 w-32 animate-pulse rounded bg-[var(--header-border)]" />
+        }
+      >
+        <div className="h-8 w-16 animate-pulse rounded-lg bg-[var(--header-border)]" />
+        <div className="size-11" />
+      </MobileEditorHeader>
     </>
   );
 }
-
-const mobileMenuItemClassName =
-  "flex min-h-12 items-center gap-3 rounded-xl px-3 text-left text-base font-medium text-[var(--text-color)] no-underline transition-colors hover:bg-[var(--header-border)]";
 
 function MobileSaveStatus({
   isSaving,
@@ -443,7 +431,7 @@ function MobileNavigationLink({
     return (
       <span
         aria-disabled="true"
-        className={`${mobileMenuItemClassName} opacity-40`}
+        className={`${mobileEditorMenuItemClassName} opacity-40`}
       >
         {icon}
         {label}
@@ -456,7 +444,7 @@ function MobileNavigationLink({
       <Link
         href={target.href}
         title={target.name}
-        className={mobileMenuItemClassName}
+        className={mobileEditorMenuItemClassName}
       >
         {icon}
         <span className="min-w-0 flex-1 truncate">{label}</span>

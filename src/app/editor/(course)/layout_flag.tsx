@@ -1,15 +1,28 @@
 "use client";
+import { EllipsisIcon } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import EditorButton from "../editor_button";
+import MobileEditorHeader, {
+  MobileEditorMenuLink,
+} from "../_components/mobile_editor_header";
 import { Breadcrumbs } from "../_components/breadcrumbs";
 import {
   EditorHeaderActions,
   EditorHeaderBreadcrumbs,
 } from "../_components/header_context";
 import type { CourseProps } from "./types";
+import LanguageFlag from "@/components/ui/language-flag";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 interface BreadcrumbPath {
   type: string;
@@ -141,6 +154,106 @@ export default function LayoutFlag() {
           />
         )}
       </EditorHeaderActions>
+      {!import_id && segment[0] === "course" ? (
+        course ? (
+          <CourseMobileHeader course={course} />
+        ) : (
+          <CourseMobileHeaderLoading />
+        )
+      ) : null}
     </>
+  );
+}
+
+function CourseMobileHeader({ course }: { course: CourseProps }) {
+  return (
+    <MobileEditorHeader
+      backHref="/editor"
+      backLabel="Back to editor"
+      icon={
+        <span className="relative h-7 w-8 shrink-0">
+          <LanguageFlag
+            languageId={course.learningLanguageId}
+            width={24}
+            className="absolute left-0 top-0"
+          />
+          <LanguageFlag
+            languageId={course.fromLanguageId}
+            width={21}
+            className="absolute bottom-0 right-0"
+          />
+        </span>
+      }
+      title={course.learning_language_name}
+      subtitle={`from ${course.from_language_name}`}
+    >
+      <Sheet>
+        <SheetTrigger asChild>
+          <button
+            type="button"
+            aria-label="More course options"
+            className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--text-color)] transition-colors hover:bg-[var(--header-border)]"
+          >
+            <EllipsisIcon className="size-6" />
+          </button>
+        </SheetTrigger>
+        <SheetContent
+          side="bottom"
+          aria-describedby={undefined}
+          className="max-h-[min(82dvh,38rem)] overflow-y-auto rounded-t-3xl border-[var(--header-border)] bg-[var(--body-background)] p-0 pb-[env(safe-area-inset-bottom)] text-[var(--text-color)]"
+        >
+          <SheetHeader className="border-b border-[var(--header-border)]">
+            <SheetTitle>Course options</SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col px-4 pb-4">
+            {!course.official ? (
+              <MobileEditorMenuLink
+                href={`/editor/course/${course.short}/import/es-en`}
+              >
+                Import stories
+              </MobileEditorMenuLink>
+            ) : null}
+            <MobileEditorMenuLink
+              href={`/editor/course/${course.short}/feedback`}
+            >
+              Feedback
+            </MobileEditorMenuLink>
+            <MobileEditorMenuLink
+              href={`/editor/course/${course.short}/voices`}
+            >
+              Character voices
+            </MobileEditorMenuLink>
+            {course.from_language_name !== "English" ? (
+              <MobileEditorMenuLink
+                href={`/editor/course/${course.short}/localization`}
+              >
+                Localization
+              </MobileEditorMenuLink>
+            ) : null}
+            <MobileEditorMenuLink href="/profile">Account</MobileEditorMenuLink>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </MobileEditorHeader>
+  );
+}
+
+function CourseMobileHeaderLoading() {
+  return (
+    <MobileEditorHeader
+      backHref="/editor"
+      backLabel="Back to editor"
+      icon={
+        <div className="size-7 animate-pulse rounded-full bg-[var(--header-border)]" />
+      }
+      title={
+        <div className="h-4 w-28 animate-pulse rounded bg-[var(--header-border)]" />
+      }
+      subtitle={
+        <div className="mt-1 h-3 w-20 animate-pulse rounded bg-[var(--header-border)]" />
+      }
+    >
+      <div className="size-11" />
+    </MobileEditorHeader>
   );
 }

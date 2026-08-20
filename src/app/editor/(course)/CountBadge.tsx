@@ -19,7 +19,7 @@ export function CountBadge({
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-[8px] py-[5px] text-[14px] leading-none font-bold ${className}`}
+      className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-[8px] py-[5px] text-[14px] leading-none font-bold max-[975px]:text-[16px] ${className}`}
       role="img"
       title={title}
       aria-label={label}

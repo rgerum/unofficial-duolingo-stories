@@ -158,103 +158,105 @@ export default function EditList({
   }
 
   return (
-    <>
-      <div>
-        {!course.public && story_published_count ? (
-          <div className="mx-[10px] my-[10px] rounded-[10px] border-2 bg-[var(--button-inactive-background)] p-[10px]">
-            {`⚠ This course is not public, but has ${story_published_count} stories set to "public".`}
-            <br />
-            Please ask a moderator on discord to check the course and make it
-            public.
-          </div>
-        ) : null}
-        <ul className="my-4 list-disc pl-10">
-          <li>
-            To create a new story click the &quot;Import&quot; button. The story
-            starts as &quot;✍️ draft&quot;.
-          </li>
-          <li>
-            When you have finished working on the story, click the
-            &quot;👍&quot; icon to approve it and change the status to &quot;🗨
-            feedback&quot;.
-          </li>
-          <li>
-            Now tell contributors on Discord to check the story. When one or
-            more people have checked the story and also gave their approval
-            &quot;👍&quot; the status changes to &quot;✅ finished&quot;.
-          </li>
-          <li>
-            When one complete set is finished it will switch to &quot;📢
-            published&quot;.
-          </li>
-        </ul>
-      </div>
-      <p className="my-4">
-        To set character voices, go to the{" "}
-        <Link
-          className="underline"
-          href={`/editor/course/${course.short}/voices`}
-        >
-          Character Editor
-        </Link>
-        .
-      </p>
-      {course.from_language_name !== "English" && (
+    <div className="max-[975px]:px-3 max-[975px]:pt-3 max-[975px]:text-[16px]">
+      <div className="max-[975px]:hidden">
+        <div>
+          {!course.public && story_published_count ? (
+            <div className="mx-[10px] my-[10px] rounded-[10px] border-2 bg-[var(--button-inactive-background)] p-[10px]">
+              {`⚠ This course is not public, but has ${story_published_count} stories set to "public".`}
+              <br />
+              Please ask a moderator on discord to check the course and make it
+              public.
+            </div>
+          ) : null}
+          <ul className="my-4 list-disc pl-10">
+            <li>
+              To create a new story click the &quot;Import&quot; button. The
+              story starts as &quot;✍️ draft&quot;.
+            </li>
+            <li>
+              When you have finished working on the story, click the
+              &quot;👍&quot; icon to approve it and change the status to &quot;🗨
+              feedback&quot;.
+            </li>
+            <li>
+              Now tell contributors on Discord to check the story. When one or
+              more people have checked the story and also gave their approval
+              &quot;👍&quot; the status changes to &quot;✅ finished&quot;.
+            </li>
+            <li>
+              When one complete set is finished it will switch to &quot;📢
+              published&quot;.
+            </li>
+          </ul>
+        </div>
         <p className="my-4">
-          For language localization settings (for the base language of this
-          course), head to the{" "}
+          To set character voices, go to the{" "}
           <Link
             className="underline"
-            href={`/editor/course/${course.short}/localization`}
+            href={`/editor/course/${course.short}/voices`}
           >
-            Localization Editor
+            Character Editor
           </Link>
           .
         </p>
-      )}
-      <div className="my-6 space-y-4">
-        <div>
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <h2 className="font-bold">Active Contributors</h2>
-            <button
-              type="button"
-              className={
-                "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 " +
-                (isCoursePinned
-                  ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
-                  : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
-              }
-              aria-pressed={isCoursePinned}
-              disabled={pinnedCourseIds === undefined || isUpdatingPin}
-              onClick={() => void toggleCoursePin()}
+        {course.from_language_name !== "English" && (
+          <p className="my-4">
+            For language localization settings (for the base language of this
+            course), head to the{" "}
+            <Link
+              className="underline"
+              href={`/editor/course/${course.short}/localization`}
             >
-              <Pin
-                className="size-4"
-                fill={isCoursePinned ? "currentColor" : "none"}
-              />
-              {isCoursePinned ? "Unpin course" : "Pin course"}
-            </button>
+              Localization Editor
+            </Link>
+            .
+          </p>
+        )}
+        <div className="my-6 space-y-4">
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h2 className="font-bold">Active Contributors</h2>
+              <button
+                type="button"
+                className={
+                  "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 " +
+                  (isCoursePinned
+                    ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
+                    : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
+                }
+                aria-pressed={isCoursePinned}
+                disabled={pinnedCourseIds === undefined || isUpdatingPin}
+                onClick={() => void toggleCoursePin()}
+              >
+                <Pin
+                  className="size-4"
+                  fill={isCoursePinned ? "currentColor" : "none"}
+                />
+                {isCoursePinned ? "Unpin course" : "Pin course"}
+              </button>
+            </div>
+            <ContributorList
+              contributors={course.contributors}
+              emptyLabel="No contributors"
+              size="sm"
+            />
           </div>
-          <ContributorList
-            contributors={course.contributors}
-            emptyLabel="No contributors"
-            size="sm"
-          />
+          <div>
+            <h2 className="mb-2 font-bold">Past Contributors</h2>
+            <ContributorList
+              contributors={course.contributors_past}
+              emptyLabel="No past contributors"
+              muted
+              size="sm"
+            />
+          </div>
         </div>
-        <div>
-          <h2 className="mb-2 font-bold">Past Contributors</h2>
-          <ContributorList
-            contributors={course.contributors_past}
-            emptyLabel="No past contributors"
-            muted
-            size="sm"
-          />
-        </div>
+        <CourseInterestSummary courseIdentifier={course.short} />
+        {course.short ? (
+          <CourseActivityChart courseIdentifier={course.short} />
+        ) : null}
       </div>
-      <CourseInterestSummary courseIdentifier={course.short} />
-      {course.short ? (
-        <CourseActivityChart courseIdentifier={course.short} />
-      ) : null}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="w-full min-w-[220px] flex-1 min-[860px]:max-w-[360px]">
           <Input
@@ -267,7 +269,7 @@ export default function EditList({
             onChange={(event) => setStorySearch(event.target.value)}
           />
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2 max-[975px]:w-full max-[975px]:flex-nowrap max-[975px]:justify-start max-[975px]:overflow-x-auto max-[975px]:pb-1">
           {STORY_FILTER_ORDER.map((filter) => {
             const isActive = activeFilter === filter;
             return (
@@ -275,7 +277,7 @@ export default function EditList({
                 key={filter}
                 type="button"
                 className={
-                  "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 " +
+                  "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 max-[975px]:text-[16px] " +
                   (isActive
                     ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
                     : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
@@ -286,7 +288,7 @@ export default function EditList({
                 <span>{getFilterLabel(filter)}</span>
                 <span
                   className={
-                    "rounded-full px-2 py-[3px] text-[12px] font-bold " +
+                    "rounded-full px-2 py-[3px] text-[12px] font-bold max-[975px]:text-[16px] " +
                     (isActive
                       ? "bg-[color:rgba(255,255,255,0.18)] text-[var(--button-color)]"
                       : "bg-[var(--body-background)] text-[var(--text-color-dim)]")
@@ -428,7 +430,7 @@ export default function EditList({
           ) : null}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

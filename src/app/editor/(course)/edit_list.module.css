@@ -90,6 +90,12 @@
   font-size: 12px;
 }
 
+@media (max-width: 975px) {
+  .metadataCell {
+    font-size: 16px;
+  }
+}
+
 .metadataAuthor,
 .metadataTime {
   display: block;
