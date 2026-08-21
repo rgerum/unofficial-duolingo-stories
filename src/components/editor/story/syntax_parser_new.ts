@@ -11,6 +11,7 @@ import {
   LineElementCharacter,
   LineElementProse,
   StoryElement,
+  StoryElementAnswerEditorPosition,
   StoryElementArrange,
   StoryElementChallengePrompt,
   StoryElementHeader,
@@ -665,12 +666,15 @@ function getAnswers(
   lang_hints?: string | undefined,
 ) {
   const answers = [];
+  const answer_positions: StoryElementAnswerEditorPosition[] = [];
   let correct_answer = undefined;
   while (line_iter.get()) {
     let line = line_iter.get();
     if (!line) break;
     if (line.startsWith("+") || line.startsWith("-")) {
       if (line.startsWith("+")) correct_answer = answers.length;
+      const answer_index = answers.length;
+      const answer_start_no = line_iter.get_lineno();
       const answer = {
         text: line,
         trans: undefined as string | undefined,
@@ -692,11 +696,14 @@ function getAnswers(
         data_text.content.lang_hints = lang_hints;
         answers.push(data_text.content);
       } else answers.push(answer.text.substring(1).trim());
+      if (answer_start_no !== undefined) {
+        answer_positions.push({ answer_index, start_no: answer_start_no });
+      }
       continue;
     }
     break;
   }
-  return [answers, correct_answer] as const;
+  return [answers, correct_answer, answer_positions] as const;
 }
 
 function pointToPhraseButtons(line: string) {
@@ -961,7 +968,7 @@ function processBlockContinuation(
   data_text.line.content.lang_hints = story_languages.from_language;
 
   const start_no3 = line_iter.get_lineno();
-  const [answers, correct_answer] = getAnswers(
+  const [answers, correct_answer, answer_positions] = getAnswers(
     line_iter,
     true,
     story_languages.from_language,
@@ -1002,7 +1009,11 @@ function processBlockContinuation(
       challenge_type: "continuation",
     },
     lang: story_languages.learning_language,
-    editor: { start_no: start_no3, end_no: line_iter.get_lineno() },
+    editor: {
+      start_no: start_no3,
+      end_no: line_iter.get_lineno(),
+      answer_positions,
+    },
   } as StoryElementMultipleChoice);
   story.meta.line_index += 1;
 }

@@ -108,6 +108,11 @@ export type StoryElementLine = {
   };
 };
 
+export type StoryElementAnswerEditorPosition = {
+  answer_index: number;
+  start_no: number;
+};
+
 export type StoryElementMultipleChoice = {
   type: "MULTIPLE_CHOICE";
   answers: (string | HintMapResult)[];
@@ -122,6 +127,7 @@ export type StoryElementMultipleChoice = {
     start_no?: number;
     end_no?: number;
     active_no?: number;
+    answer_positions?: StoryElementAnswerEditorPosition[];
   };
 };
 

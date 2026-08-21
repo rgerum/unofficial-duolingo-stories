@@ -7,6 +7,7 @@ import StoryQuestionArrange from "../StoryQuestionArrange";
 import StoryQuestionPointToPhrase from "../StoryQuestionPointToPhrase";
 import StoryQuestionSelectPhrase from "../StoryQuestionSelectPhrase";
 import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
+import type { SingleAnswerControl } from "../StoryQuestionMultipleChoice/StoryQuestionMultipleChoice";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
@@ -92,6 +93,7 @@ interface StoryEditorPreviewPartProps {
     element: StoryElementLine | StoryElementHeader,
   ) => void | Promise<void>;
   compact?: boolean;
+  singleAnswerControl?: SingleAnswerControl;
 }
 
 export function StoryEditorPreviewPart({
@@ -102,6 +104,7 @@ export function StoryEditorPreviewPart({
   showAudio,
   onOpenAudioEditor,
   compact = false,
+  singleAnswerControl,
 }: StoryEditorPreviewPartProps) {
   const lastElement = part[part.length - 1];
   const trackingProps = lastElement.trackingProperties as {
@@ -122,6 +125,7 @@ export function StoryEditorPreviewPart({
           showAudio={showAudio}
           onOpenAudioEditor={onOpenAudioEditor}
           compact={compact}
+          singleAnswerControl={singleAnswerControl}
         />
       ))}
     </div>
@@ -138,6 +142,7 @@ interface EditorElementProps {
     element: StoryElementLine | StoryElementHeader,
   ) => void | Promise<void>;
   compact: boolean;
+  singleAnswerControl?: SingleAnswerControl;
 }
 
 function EditorElement({
@@ -148,6 +153,7 @@ function EditorElement({
   showAudio,
   onOpenAudioEditor,
   compact,
+  singleAnswerControl,
 }: EditorElementProps) {
   // Keep the underlying story rendering aligned with the live experience.
   // Editor toggles are passed separately as overrides below so they only affect
@@ -208,6 +214,7 @@ function EditorElement({
           advance={() => {}}
           showTranslationsInline={showHints}
           compact={compact}
+          singleAnswerControl={singleAnswerControl}
         />
       </EditorQuestionWrapper>
     );

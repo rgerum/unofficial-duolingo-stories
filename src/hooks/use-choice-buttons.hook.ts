@@ -1,6 +1,10 @@
 import React from "react";
 import useKeypress from "./use-keypress.hook";
 import { playSoundEffect } from "@/lib/sound-effects";
+import {
+  createChoiceButtonStates,
+  selectChoiceButton,
+} from "@/lib/story/choice_button_state";
 
 export function useChoiceButtons(
   count: number,
@@ -10,11 +14,11 @@ export function useChoiceButtons(
   active: boolean,
 ) {
   // create a list with one state for each button
-  let [buttonState, setButtonState] = React.useState<string[]>([
-    ...new Array(count),
-  ]);
+  const [buttonState, setButtonState] = React.useState(() =>
+    createChoiceButtonStates(count),
+  );
 
-  let click = React.useCallback(
+  const click = React.useCallback(
     (index: number) => {
       // when the button was already clicked, do nothing
       if (buttonState[index] !== undefined) return;
@@ -22,16 +26,14 @@ export function useChoiceButtons(
       if (index === rightIndex) {
         // update all button states
         setButtonState((buttonState) =>
-          buttonState.map((v, i) =>
-            i === index ? "right" : v === "false" ? "false" : "done",
-          ),
+          selectChoiceButton(buttonState, rightIndex, index),
         );
         // callback for clicking the right button
         callRight();
       } else {
         // set the state of the current button to display that the answer was wrong
         setButtonState((buttonState) =>
-          buttonState.map((v, i) => (i === index ? "false" : v)),
+          selectChoiceButton(buttonState, rightIndex, index),
         );
         // callback for clicking the wrong button
         playSoundEffect("wrong");

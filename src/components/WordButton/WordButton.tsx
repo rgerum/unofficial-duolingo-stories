@@ -9,7 +9,7 @@ function WordButton({
   compact = false,
   ...delegated
 }: {
-  status: string;
+  status: string | undefined;
   children: React.ReactNode;
   innerClassName?: string;
   compact?: boolean;

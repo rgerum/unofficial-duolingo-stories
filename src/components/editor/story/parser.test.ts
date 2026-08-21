@@ -418,6 +418,31 @@ $8275/8e8657d3.mp3;5,50;2,550;1,438;7,162;0,525`);
   });
 });
 
+test("CONTINUATION associates each answer with its editor position", () => {
+  const story = parseStory(`[CONTINUATION]
+> Complete the sentence
+Speaker414: Marian was tired.
+~           Marian was tired.
+- first answer
+~ first hint
++ second answer
+~ second hint
+- third answer
+~ third hint`);
+
+  const answers = story.elements.find(
+    (element) => element.type === "MULTIPLE_CHOICE",
+  );
+  assert.equal(answers?.type, "MULTIPLE_CHOICE");
+  if (answers?.type !== "MULTIPLE_CHOICE") return;
+
+  assert.deepEqual(answers.editor.answer_positions, [
+    { answer_index: 0, start_no: 5 },
+    { answer_index: 1, start_no: 7 },
+    { answer_index: 2, start_no: 9 },
+  ]);
+});
+
 test("SELECT_PHRASE audio insert anchor stays after the hidden phrase translation", () => {
   const [, , audioInsertLines] = processStoryFile(
     `[SELECT_PHRASE]

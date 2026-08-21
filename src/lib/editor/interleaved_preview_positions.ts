@@ -15,20 +15,57 @@ function isContinuationIntroLine(part: StoryElement[], index: number) {
   );
 }
 
+function splitContinuationAnswers(element: StoryElement): StoryElement[] {
+  const answerPositions =
+    element.type === "MULTIPLE_CHOICE"
+      ? element.editor.answer_positions
+      : undefined;
+  if (
+    element.type !== "MULTIPLE_CHOICE" ||
+    element.trackingProperties.challenge_type !== "continuation" ||
+    element.answers.length < 2 ||
+    answerPositions?.length !== element.answers.length ||
+    answerPositions.some((position, index) => position.answer_index !== index)
+  ) {
+    return [element];
+  }
+
+  return element.answers.map((answer, index) => {
+    const position = answerPositions[index];
+    const start_no = position.start_no;
+    const end_no =
+      answerPositions[index + 1]?.start_no ?? element.editor.end_no;
+
+    return {
+      ...element,
+      answers: [answer],
+      correctAnswerIndex: element.correctAnswerIndex === index ? 0 : -1,
+      editor: {
+        ...element.editor,
+        start_no,
+        end_no,
+        active_no: start_no,
+        answer_positions: [position],
+      },
+    };
+  });
+}
+
 export function splitInterleavedPreviewPart(
   part: StoryElement[],
 ): StoryElement[][] {
   const groups: StoryElement[][] = [];
+  const positionedElements = part.flatMap(splitContinuationAnswers);
   let currentSourceBlock: number | undefined;
 
-  for (const [index, element] of part.entries()) {
+  for (const [index, element] of positionedElements.entries()) {
     const sourceBlock = getInterleavedSourceLine(element);
     if (
       groups.length > 0 &&
       sourceBlock !== undefined &&
       currentSourceBlock !== undefined &&
       sourceBlock !== currentSourceBlock &&
-      !isContinuationIntroLine(part, index)
+      !isContinuationIntroLine(positionedElements, index)
     ) {
       groups.push([]);
     }

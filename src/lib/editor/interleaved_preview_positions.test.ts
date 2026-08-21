@@ -169,7 +169,7 @@ test("keeps compound challenge elements sharing a parser position together", () 
   ]);
 });
 
-test("keeps a CONTINUATION prompt with its Line and splits its answers", () => {
+test("keeps a CONTINUATION prompt with its Line and splits each answer", () => {
   const prompt = {
     type: "CHALLENGE_PROMPT",
     prompt: { text: "Complete the sentence", hintMap: [], hints: [] },
@@ -190,11 +190,29 @@ test("keeps a CONTINUATION prompt with its Line and splits its answers", () => {
       challenge_type: "continuation",
     },
     lang: "nl",
-    editor: { start_no: 136, end_no: 142 },
+    editor: {
+      start_no: 136,
+      end_no: 142,
+      answer_positions: [
+        { answer_index: 0, start_no: 136 },
+        { answer_index: 1, start_no: 138 },
+        { answer_index: 2, start_no: 140 },
+      ],
+    },
   } satisfies StoryElement;
 
-  assert.deepEqual(splitInterleavedPreviewPart([prompt, storyLine, answers]), [
-    [prompt, storyLine],
-    [answers],
-  ]);
+  const groups = splitInterleavedPreviewPart([prompt, storyLine, answers]);
+
+  assert.equal(groups.length, 4);
+  assert.deepEqual(groups[0], [prompt, storyLine]);
+  for (const [index, group] of groups.slice(1).entries()) {
+    const answer = group?.[0];
+    assert.equal(answer?.type, "MULTIPLE_CHOICE");
+    if (answer?.type !== "MULTIPLE_CHOICE") continue;
+    assert.deepEqual(answer.answers, [answers.answers[index]]);
+    assert.equal(
+      getInterleavedPreviewLineNumber(group ?? [], 200),
+      [136, 138, 140][index],
+    );
+  }
 });

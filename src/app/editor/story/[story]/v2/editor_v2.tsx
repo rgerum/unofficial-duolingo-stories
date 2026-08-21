@@ -44,6 +44,7 @@ import {
   setInterleavedPreview,
 } from "./interleaved_preview";
 import { LintPanel } from "./lint_panel";
+import { mobileEditorPresentation } from "./mobile_editor_presentation";
 import { useStoryEditorModel } from "./use_story_editor_model";
 
 type StoryNavigation = {
@@ -60,33 +61,6 @@ type StoryNavigation = {
 type MobilePane = "edit" | "preview";
 
 const desktopEditorMediaQuery = "(min-width: 976px)";
-const mobileEditorPresentation = [
-  EditorView.lineWrapping,
-  EditorView.theme({
-    ".cm-scroller": {
-      fontSize: "16px",
-      overflowX: "hidden",
-    },
-    ".cm-content": {
-      minWidth: "0",
-    },
-    ".cm-line": {
-      padding: "0 2px 0 4px",
-    },
-    ".cm-lineNumbers": {
-      fontSize: "12px",
-      lineHeight: "22.4px",
-    },
-    ".cm-lineNumbers .cm-gutterElement": {
-      minWidth: "0",
-      padding: "0 3px 0 2px",
-    },
-    ".cm-foldGutter": {
-      display: "none !important",
-    },
-  }),
-];
-
 function subscribeToDesktopEditor(callback: () => void) {
   const mediaQuery = window.matchMedia(desktopEditorMediaQuery);
   mediaQuery.addEventListener("change", callback);
@@ -250,6 +224,7 @@ export default function EditorV2({
     release: () => void;
   } | null>(null);
   const [view, setView] = React.useState<EditorView | undefined>(undefined);
+  const [editorFocused, setEditorFocused] = React.useState(false);
 
   const language_data = (useQuery(api.editorRead.getEditorLanguageByLegacyId, {
     legacyLanguageId: story_data.learning_language,
@@ -398,6 +373,7 @@ export default function EditorV2({
     if (initialStory.id !== storyId) return;
 
     const sync = EditorView.updateListener.of((update) => {
+      if (update.focusChanged) setEditorFocused(update.view.hasFocus);
       const currentLine = update.state.doc.lineAt(
         update.state.selection.main.from,
       ).number;
@@ -876,6 +852,7 @@ export default function EditorV2({
       <LintPanel
         findings={model.lintFindings}
         editorState={editorStateForPreview}
+        mobileEditing={!desktopLayout && editorFocused}
       />
     </div>
   );

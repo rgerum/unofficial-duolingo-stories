@@ -5,6 +5,7 @@ import {
   WidgetType,
   type DecorationSet,
 } from "@codemirror/view";
+import { useSyncExternalStore } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import {
@@ -16,6 +17,7 @@ import type {
   StoryElement,
   StoryElementHeader,
   StoryElementLine,
+  StoryElementMultipleChoice,
 } from "@/components/editor/story/syntax_parser_types";
 import {
   getInterleavedPreviewInteractionKey,
@@ -23,6 +25,12 @@ import {
   getInterleavedPreviewRenderKey,
   splitInterleavedPreviewPart,
 } from "@/lib/editor/interleaved_preview_positions";
+import { playSoundEffect } from "@/lib/sound-effects";
+import {
+  createChoiceButtonStates,
+  selectChoiceButton,
+  type ChoiceButtonState,
+} from "@/lib/story/choice_button_state";
 
 type InterleavedPreviewConfig = {
   story: StoryType & { learning_language_rtl?: boolean };
@@ -38,6 +46,43 @@ type WidgetRoot = {
   root: Root;
   measureFrame: number | null;
 };
+
+type InterleavedAnswerControl = {
+  controller: InterleavedChoiceController;
+  answerIndex: number;
+};
+
+class InterleavedChoiceController {
+  private states: ChoiceButtonState[];
+  private readonly listeners = new Set<() => void>();
+
+  constructor(
+    answerCount: number,
+    private readonly rightIndex: number,
+  ) {
+    this.states = createChoiceButtonStates(answerCount);
+  }
+
+  subscribe = (listener: () => void) => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
+
+  getAnswerState = (answerIndex: number) => this.states[answerIndex];
+
+  select = (answerIndex: number) => {
+    const nextStates = selectChoiceButton(
+      this.states,
+      this.rightIndex,
+      answerIndex,
+    );
+    if (nextStates === this.states) return;
+
+    this.states = nextStates;
+    if (answerIndex !== this.rightIndex) playSoundEffect("wrong");
+    for (const listener of this.listeners) listener();
+  };
+}
 
 const widgetRoots = new WeakMap<HTMLElement, WidgetRoot>();
 
@@ -96,31 +141,89 @@ function buildInterleavedPreviewDecorations(
   state: EditorState,
   config: InterleavedPreviewConfig,
 ) {
+  const settings = {
+    rtl: config.story.learning_language_rtl ?? false,
+    showHints: config.showHints,
+    showAudio: config.showAudio,
+  };
   const parts = getStoryEditorPreviewParts(config.story).flatMap(
-    splitInterleavedPreviewPart,
-  );
-  const ranges = parts.flatMap((part) => {
-    const lineNumber = getInterleavedPreviewLineNumber(part, state.doc.lines);
-    if (lineNumber === null) return [];
+    (sourcePart) => {
+      const continuation = sourcePart.find(
+        (element): element is StoryElementMultipleChoice =>
+          element.type === "MULTIPLE_CHOICE" &&
+          element.trackingProperties.challenge_type === "continuation",
+      );
+      const splitParts = splitInterleavedPreviewPart(sourcePart);
+      const choiceController = continuation
+        ? new InterleavedChoiceController(
+            continuation.answers.length,
+            continuation.correctAnswerIndex,
+          )
+        : undefined;
+      const choiceGroupRenderKey = continuation
+        ? getInterleavedPreviewRenderKey([continuation], settings)
+        : undefined;
+      const choiceGroupInteractionKey = continuation
+        ? getInterleavedPreviewInteractionKey([continuation])
+        : undefined;
 
-    const renderKey = getInterleavedPreviewRenderKey(part, {
-      rtl: config.story.learning_language_rtl ?? false,
-      showHints: config.showHints,
-      showAudio: config.showAudio,
-    });
-    const interactionKey = getInterleavedPreviewInteractionKey(part);
-    const widget = new InterleavedPreviewWidget(
+      return splitParts.map((part) => {
+        const answer = part.find(
+          (element) =>
+            element.type === "MULTIPLE_CHOICE" &&
+            element.trackingProperties.challenge_type === "continuation" &&
+            element.answers.length === 1 &&
+            element.editor.answer_positions?.length === 1,
+        );
+        const answerIndex =
+          answer?.type === "MULTIPLE_CHOICE"
+            ? answer.editor.answer_positions?.[0]?.answer_index
+            : undefined;
+
+        return {
+          part,
+          answerControl:
+            choiceController && answerIndex !== undefined
+              ? { controller: choiceController, answerIndex }
+              : undefined,
+          choiceGroupRenderKey,
+          choiceGroupInteractionKey,
+        };
+      });
+    },
+  );
+  const ranges = parts.flatMap(
+    ({
       part,
-      config,
-      renderKey,
-      interactionKey,
-    );
-    return [
-      Decoration.widget({ widget, block: true, side: -1 }).range(
-        state.doc.line(lineNumber).from,
-      ),
-    ];
-  });
+      answerControl,
+      choiceGroupRenderKey,
+      choiceGroupInteractionKey,
+    }) => {
+      const lineNumber = getInterleavedPreviewLineNumber(part, state.doc.lines);
+      if (lineNumber === null) return [];
+
+      const renderKey = JSON.stringify({
+        part: getInterleavedPreviewRenderKey(part, settings),
+        choiceGroup: choiceGroupRenderKey,
+      });
+      const interactionKey = JSON.stringify({
+        part: getInterleavedPreviewInteractionKey(part),
+        choiceGroup: choiceGroupInteractionKey,
+      });
+      const widget = new InterleavedPreviewWidget(
+        part,
+        config,
+        renderKey,
+        interactionKey,
+        answerControl,
+      );
+      return [
+        Decoration.widget({ widget, block: true, side: -1 }).range(
+          state.doc.line(lineNumber).from,
+        ),
+      ];
+    },
+  );
 
   return Decoration.set(ranges, true);
 }
@@ -131,6 +234,7 @@ class InterleavedPreviewWidget extends WidgetType {
     private readonly config: InterleavedPreviewConfig,
     private readonly renderKey: string,
     private readonly interactionKey: string,
+    private readonly answerControl?: InterleavedAnswerControl,
   ) {
     super();
   }
@@ -147,7 +251,14 @@ class InterleavedPreviewWidget extends WidgetType {
     const container = document.createElement("div");
     container.className = "cm-interleaved-preview";
     container.contentEditable = "false";
-    renderPreviewWidget(container, view, this.part, this.config, true);
+    renderPreviewWidget(
+      container,
+      view,
+      this.part,
+      this.config,
+      this.answerControl,
+      true,
+    );
     return container;
   }
 
@@ -157,6 +268,7 @@ class InterleavedPreviewWidget extends WidgetType {
       view,
       this.part,
       this.config,
+      this.answerControl,
       previousWidget.renderKey !== this.renderKey,
     );
     return true;
@@ -178,6 +290,7 @@ function renderPreviewWidget(
   view: EditorView,
   part: StoryElement[],
   config: InterleavedPreviewConfig,
+  answerControl: InterleavedAnswerControl | undefined,
   measureAfterRender: boolean,
 ) {
   let widgetRoot = widgetRoots.get(container);
@@ -191,14 +304,10 @@ function renderPreviewWidget(
       dir={config.story.learning_language_rtl ? "rtl" : "ltr"}
       className="select-none"
     >
-      <StoryEditorPreviewPart
+      <InterleavedPreviewPart
         part={part}
-        editorState={config.editorState}
-        rtl={config.story.learning_language_rtl ?? false}
-        showHints={config.showHints}
-        showAudio={config.showAudio}
-        onOpenAudioEditor={config.onOpenAudioEditor}
-        compact
+        config={config}
+        answerControl={answerControl}
       />
     </div>,
   );
@@ -212,4 +321,79 @@ function renderPreviewWidget(
     widgetRoot!.measureFrame = null;
     if (view.dom.isConnected) view.requestMeasure();
   });
+}
+
+function InterleavedPreviewPart({
+  part,
+  config,
+  answerControl,
+}: {
+  part: StoryElement[];
+  config: InterleavedPreviewConfig;
+  answerControl: InterleavedAnswerControl | undefined;
+}) {
+  if (answerControl) {
+    return (
+      <ControlledInterleavedPreviewPart
+        part={part}
+        config={config}
+        answerControl={answerControl}
+      />
+    );
+  }
+
+  return <PreviewPart part={part} config={config} />;
+}
+
+function ControlledInterleavedPreviewPart({
+  part,
+  config,
+  answerControl,
+}: {
+  part: StoryElement[];
+  config: InterleavedPreviewConfig;
+  answerControl: InterleavedAnswerControl;
+}) {
+  const state = useSyncExternalStore(
+    answerControl.controller.subscribe,
+    () => answerControl.controller.getAnswerState(answerControl.answerIndex),
+    () => undefined,
+  );
+
+  return (
+    <PreviewPart
+      part={part}
+      config={config}
+      singleAnswerControl={{
+        state,
+        select: () =>
+          answerControl.controller.select(answerControl.answerIndex),
+      }}
+    />
+  );
+}
+
+function PreviewPart({
+  part,
+  config,
+  singleAnswerControl,
+}: {
+  part: StoryElement[];
+  config: InterleavedPreviewConfig;
+  singleAnswerControl?: Parameters<
+    typeof StoryEditorPreviewPart
+  >[0]["singleAnswerControl"];
+}) {
+  return (
+    <StoryEditorPreviewPart
+      part={part}
+      editorState={config.editorState}
+      rtl={config.story.learning_language_rtl ?? false}
+      showHints={config.showHints}
+      showAudio={config.showAudio}
+      onOpenAudioEditor={config.onOpenAudioEditor}
+      singleAnswerControl={singleAnswerControl}
+      compact
+    />
+  );
 }

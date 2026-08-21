@@ -1,11 +1,12 @@
 import React from "react";
+import type { ChoiceButtonState } from "@/lib/story/choice_button_state";
 import { cn } from "@/lib/utils";
 
 function CheckButton({
   type,
   compact = false,
 }: {
-  type: string;
+  type: ChoiceButtonState;
   compact?: boolean;
 }) {
   const className = cn(
