@@ -745,10 +745,10 @@ function DropDownStatus(props: {
         <button
           type="button"
           className={
-            "ml-[4px] inline-flex min-w-[54px] items-center justify-center gap-[4px] whitespace-nowrap rounded-[10px] px-[5px] py-[2px] align-baseline hover:brightness-90 disabled:cursor-wait " +
+            "ml-[4px] inline-flex min-w-[54px] items-center justify-center gap-[4px] whitespace-nowrap rounded-[10px] px-[5px] py-[2px] align-baseline hover:brightness-90 disabled:cursor-wait max-[975px]:ml-2 max-[975px]:rounded-full max-[975px]:px-3 max-[975px]:shadow-sm max-[975px]:transition-[filter,transform] max-[975px]:active:scale-95 " +
             (approvedByCurrentUser
               ? "bg-[#0089e5] font-bold text-white"
-              : "bg-[var(--editor-ssml)] max-[975px]:bg-transparent max-[975px]:ring-1 max-[975px]:ring-[var(--text-color-dim)] max-[975px]:ring-inset")
+              : "bg-[var(--editor-ssml)]")
           }
           aria-pressed={approvedByCurrentUser}
           aria-label={
