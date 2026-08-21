@@ -54,7 +54,7 @@ export default function MobileEditorHeader({
 }
 
 export const mobileEditorMenuItemClassName =
-  "flex min-h-12 items-center gap-3 rounded-xl px-3 text-left text-base font-medium text-[var(--text-color)] no-underline transition-colors hover:bg-[var(--header-border)]";
+  "flex min-h-12 items-center gap-3 rounded-xl px-3 text-left !text-base font-medium text-[var(--text-color)] no-underline transition-colors hover:bg-[var(--header-border)]";
 
 export function MobileEditorMenuLink({
   href,
