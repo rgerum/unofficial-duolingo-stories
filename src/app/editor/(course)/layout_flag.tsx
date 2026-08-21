@@ -178,7 +178,7 @@ function EditorRootMobileHeader() {
     <MobileEditorHeader
       backHref="/"
       backLabel="Back to stories"
-      icon={<BookOpenIcon className="size-5 shrink-0" />}
+      icon={<BookOpenIcon className="mr-1.5 size-5 shrink-0" />}
       title="Courses"
       subtitle="Editor"
     >

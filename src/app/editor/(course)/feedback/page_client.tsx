@@ -161,7 +161,7 @@ export default function StoryFeedbackPageClient({
       <MobileEditorHeader
         backHref={courseHref ?? "/editor"}
         backLabel={courseHref ? "Back to course" : "Back to editor"}
-        icon={<MessageSquareTextIcon className="size-5 shrink-0" />}
+        icon={<MessageSquareTextIcon className="mr-1.5 size-5 shrink-0" />}
         title="Feedback"
         subtitle={selectedCourseShort}
       />

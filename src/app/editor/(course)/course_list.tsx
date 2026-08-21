@@ -1,10 +1,11 @@
 "use client";
 
-import { PinIcon, SearchIcon, XIcon } from "lucide-react";
+import { PinIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
+import Input from "@/components/ui/input";
 import LanguageFlag from "@/components/ui/language-flag";
 import { CountBadge } from "./CountBadge";
 import {
@@ -110,30 +111,16 @@ function CourseSearch({
       >
         Search
       </label>
-      <div className="relative min-w-0 flex-1">
-        <SearchIcon
-          aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 left-3 hidden size-4 -translate-y-1/2 text-[var(--text-color-dim)] max-[975px]:block"
-        />
-        <input
+      <div className="min-w-0 flex-1">
+        <Input
           id="editor-course-search"
           type="search"
           value={value}
           placeholder="Search courses"
           autoComplete="off"
-          className="mr-[10px] w-full rounded-2xl border-2 border-[var(--input-border)] bg-[var(--input-background)] py-[1px] pr-11 pl-[6px] text-[19px] text-[var(--text-color)] [&::-webkit-search-cancel-button]:appearance-none max-[975px]:m-0 max-[975px]:h-11 max-[975px]:rounded-xl max-[975px]:pl-10 max-[975px]:text-base"
+          className="min-[976px]:mr-[10px] min-[976px]:rounded-2xl min-[976px]:px-[6px] min-[976px]:py-[1px] min-[976px]:text-[19px]"
           onChange={(event) => onChange(event.target.value)}
         />
-        {value ? (
-          <button
-            type="button"
-            aria-label="Clear course search"
-            className="absolute top-1/2 right-0 grid size-10 -translate-y-1/2 place-items-center rounded-xl text-[var(--text-color-dim)] hover:text-[var(--text-color)] max-[975px]:right-0.5"
-            onClick={() => onChange("")}
-          >
-            <XIcon className="size-4" />
-          </button>
-        ) : null}
       </div>
     </div>
   );
