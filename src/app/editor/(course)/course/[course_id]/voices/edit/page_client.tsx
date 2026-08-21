@@ -6,8 +6,10 @@ import { api } from "@convex/_generated/api";
 import { Spinner } from "@/components/ui/spinner";
 import { Breadcrumbs } from "@/app/editor/_components/breadcrumbs";
 import { EditorHeaderBreadcrumbs } from "@/app/editor/_components/header_context";
+import MobileEditorHeader from "@/app/editor/_components/mobile_editor_header";
 import TtsEdit from "@/app/editor/language/[language]/tts_edit/tts_edit";
 import type { DetailedCourseProps } from "@/app/editor/(course)/types";
+import LanguageFlag from "@/components/ui/language-flag";
 import type {
   CourseStudType,
   LanguageType,
@@ -35,7 +37,30 @@ export default function CourseVoicesEditPageClient({
     learningLanguage ? { languageLegacyId: learningLanguage.id } : "skip",
   ) as SpeakersType[] | undefined;
 
-  if (course === undefined) return <Spinner />;
+  if (course === undefined) {
+    return (
+      <>
+        <CourseVoicesEditMobileHeaderLoading courseId={courseId} />
+        <Spinner />
+      </>
+    );
+  }
+  if (course === null) {
+    return (
+      <>
+        <CourseVoicesEditMobileHeaderLoading courseId={courseId} />
+        <p>Course not found.</p>
+      </>
+    );
+  }
+  if (learningLanguage === null || fromLanguage === null) {
+    return (
+      <>
+        <CourseVoicesEditHeaders course={course} />
+        <p>Language not found.</p>
+      </>
+    );
+  }
   if (
     learningLanguage === undefined ||
     fromLanguage === undefined ||
@@ -43,44 +68,34 @@ export default function CourseVoicesEditPageClient({
   ) {
     return (
       <>
-        {course ? (
-          <EditorHeaderBreadcrumbs>
-            <Breadcrumbs
-              path={[
-                { type: "Editor", href: `/editor` },
-                { type: "sep" },
-                {
-                  type: "course",
-                  lang1: {
-                    languageId: course.learningLanguageId,
-                    name: course.learning_language_name,
-                  },
-                  lang2: {
-                    languageId: course.fromLanguageId,
-                    name: course.from_language_name,
-                  },
-                  href: `/editor/course/${course.short}`,
-                },
-                { type: "sep" },
-                {
-                  type: "Voices",
-                  href: `/editor/course/${course.short}/voices`,
-                },
-                { type: "sep" },
-                { type: "Edit" },
-              ]}
-            />
-          </EditorHeaderBreadcrumbs>
-        ) : null}
+        <CourseVoicesEditHeaders course={course} />
         <Spinner />
       </>
     );
   }
 
-  if (!course || !learningLanguage) {
-    return <p>Course not found.</p>;
-  }
+  return (
+    <>
+      <CourseVoicesEditHeaders course={course} />
+      <TtsEdit
+        language={learningLanguage}
+        language2={fromLanguage ?? undefined}
+        speakers={speakers ?? []}
+        course={
+          {
+            learning_language: course.learning_language,
+            from_language: course.from_language,
+            short: course.short ?? courseId,
+          } as CourseStudType
+        }
+        renderHeader={false}
+        mobileCourseLayout
+      />
+    </>
+  );
+}
 
+function CourseVoicesEditHeaders({ course }: { course: DetailedCourseProps }) {
   return (
     <>
       <EditorHeaderBreadcrumbs>
@@ -107,19 +122,42 @@ export default function CourseVoicesEditPageClient({
           ]}
         />
       </EditorHeaderBreadcrumbs>
-      <TtsEdit
-        language={learningLanguage}
-        language2={fromLanguage ?? undefined}
-        speakers={speakers ?? []}
-        course={
-          {
-            learning_language: course.learning_language,
-            from_language: course.from_language,
-            short: course.short ?? courseId,
-          } as CourseStudType
+      <MobileEditorHeader
+        backHref={`/editor/course/${course.short}/voices`}
+        backLabel="Back to character voices"
+        icon={
+          <span className="relative h-7 w-8 shrink-0">
+            <LanguageFlag
+              languageId={course.learningLanguageId}
+              width={24}
+              className="absolute top-0 left-0"
+            />
+            <LanguageFlag
+              languageId={course.fromLanguageId}
+              width={21}
+              className="absolute right-0 bottom-0"
+            />
+          </span>
         }
-        renderHeader={false}
+        title="Pronunciation rules"
+        subtitle={course.learning_language_name}
       />
     </>
+  );
+}
+
+function CourseVoicesEditMobileHeaderLoading({
+  courseId,
+}: {
+  courseId: string;
+}) {
+  return (
+    <MobileEditorHeader
+      backHref={`/editor/course/${courseId}/voices`}
+      backLabel="Back to character voices"
+      icon={<span className="w-8 shrink-0" />}
+      title="Pronunciation rules"
+      subtitle="Loading course…"
+    />
   );
 }

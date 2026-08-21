@@ -9,13 +9,13 @@ import {
   SaveIcon,
   Volume2Icon,
 } from "lucide-react";
+import MobileEditorSectionSwitch from "@/app/editor/_components/mobile_editor_section_switch";
+import { useEditorMobileTabScroll } from "@/app/editor/_components/use_editor_mobile_tab_scroll";
 import PlayAudio from "@/components/PlayAudio";
 import {
   getCourseVoiceLayoutClassNames,
   type MobileVoiceSection,
 } from "./course_voice_layout_classes";
-import { getEditorMainScrollContainer } from "@/app/editor/_components/editor_scroll_container";
-import { createCourseVoiceSectionScrollMemory } from "./course_voice_scroll_memory";
 import type { SpeakersType } from "./types";
 
 export type { MobileVoiceSection } from "./course_voice_layout_classes";
@@ -72,6 +72,11 @@ type CastModel = {
   onToggleSecondary: () => void;
 };
 
+const MOBILE_VOICE_SECTIONS = [
+  { value: "cast", label: "Cast" },
+  { value: "voices", label: "Voices" },
+] as const;
+
 export function CourseVoiceLayout({
   mobileCourseLayout: enabled,
   selectedSection,
@@ -87,49 +92,22 @@ export function CourseVoiceLayout({
   voices: VoiceListModel;
   cast: CastModel;
 }) {
-  const [scrollMemory] = React.useState(() =>
-    createCourseVoiceSectionScrollMemory(selectedSection),
-  );
+  const selectSection = useEditorMobileTabScroll({
+    enabled,
+    selectedSection,
+    onSectionSelect,
+  });
   const classNames = getCourseVoiceLayoutClassNames({
     mobileCourseLayout: enabled,
     selectedSection,
   });
 
-  React.useLayoutEffect(() => {
-    if (!enabled || !window.matchMedia("(max-width: 975px)").matches) {
-      return;
-    }
-
-    const scrollTarget = getEditorMainScrollContainer();
-    if (
-      !scrollTarget ||
-      !scrollMemory.restorePending(selectedSection, scrollTarget)
-    ) {
-      return;
-    }
-
-    const animationFrame = window.requestAnimationFrame(() => {
-      scrollMemory.restore(selectedSection, scrollTarget);
-    });
-
-    return () => window.cancelAnimationFrame(animationFrame);
-  }, [enabled, scrollMemory, selectedSection]);
-
-  function selectSection(section: MobileVoiceSection) {
-    if (section === selectedSection) return;
-
-    const scrollTarget = getEditorMainScrollContainer();
-    if (scrollTarget) {
-      scrollMemory.remember(selectedSection, scrollTarget);
-    }
-    scrollMemory.requestRestore(section);
-    onSectionSelect(section);
-  }
-
   return (
     <div>
       {enabled ? (
-        <MobileVoiceSectionSwitch
+        <MobileEditorSectionSwitch
+          label="Character voice sections"
+          options={MOBILE_VOICE_SECTIONS}
           selected={selectedSection}
           onSelect={selectSection}
         />
@@ -331,41 +309,6 @@ export function CourseVoiceLayout({
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-export function MobileVoiceSectionSwitch({
-  selected,
-  onSelect,
-}: {
-  selected: MobileVoiceSection;
-  onSelect: (section: MobileVoiceSection) => void;
-}) {
-  return (
-    <div
-      className="sticky top-0 z-10 grid grid-cols-2 border-b border-[var(--header-border)] bg-[var(--body-background)] p-2 min-[976px]:hidden"
-      role="group"
-      aria-label="Character voice sections"
-    >
-      {(["cast", "voices"] as const).map((section) => {
-        const isSelected = selected === section;
-        return (
-          <button
-            key={section}
-            type="button"
-            aria-pressed={isSelected}
-            className={`min-h-11 rounded-xl !text-base font-bold ${
-              isSelected
-                ? "bg-[var(--button-background)] text-[var(--button-color)]"
-                : "text-[var(--text-color-dim)]"
-            }`}
-            onClick={() => onSelect(section)}
-          >
-            {section === "cast" ? "Cast" : "Voices"}
-          </button>
-        );
-      })}
     </div>
   );
 }
