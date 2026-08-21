@@ -267,7 +267,7 @@ export default function EditList({
           <CourseActivityChart courseIdentifier={course.short} />
         ) : null}
       </div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 max-[975px]:mb-1 max-[975px]:gap-1">
         <div className="w-full min-w-[220px] flex-1 min-[860px]:max-w-[360px]">
           <Input
             id="story-search"
@@ -279,7 +279,7 @@ export default function EditList({
             onChange={(event) => setStorySearch(event.target.value)}
           />
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2 max-[975px]:-mx-3 max-[975px]:w-[calc(100%+1.5rem)] max-[975px]:flex-none max-[975px]:flex-nowrap max-[975px]:justify-start max-[975px]:gap-0 max-[975px]:overflow-x-auto max-[975px]:px-3 max-[975px]:pb-1">
+        <div className="flex flex-wrap items-center justify-end gap-2 max-[975px]:-mx-3 max-[975px]:w-[calc(100%+1.5rem)] max-[975px]:flex-none max-[975px]:flex-nowrap max-[975px]:justify-start max-[975px]:gap-0 max-[975px]:overflow-x-auto max-[975px]:px-3">
           {STORY_FILTER_ORDER.map((filter) => {
             const isActive = activeFilter === filter;
             return (
