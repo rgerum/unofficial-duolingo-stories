@@ -1,5 +1,10 @@
 "use client";
-import { BookOpenIcon, HeartIcon, PinIcon } from "lucide-react";
+import {
+  BookOpenIcon,
+  HeartIcon,
+  MessageSquareTextIcon,
+  PinIcon,
+} from "lucide-react";
 import React from "react";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { useQuery } from "convex/react";
@@ -17,6 +22,7 @@ import MobileEditorHeader, {
 import MobileEditorOptionsSheet from "@/app/editor/_components/mobile_editor_options_sheet";
 import { useCoursePin } from "@/app/editor/_components/use_course_pin";
 import EditorButton from "@/app/editor/editor_button";
+import { getFeedbackMobileHeaderRoute } from "./layout_flag_state";
 import type { CourseProps } from "./types";
 
 interface BreadcrumbPath {
@@ -36,6 +42,7 @@ interface BreadcrumbPath {
 export default function LayoutFlag() {
   const segment = useSelectedLayoutSegments();
   const nestedRoute = segment[2];
+  const feedbackHeaderRoute = getFeedbackMobileHeaderRoute(segment);
   const import_id = nestedRoute === "import" ? segment[3] : undefined;
   const suppressLayoutHeader =
     segment[0] === "feedback" ||
@@ -49,6 +56,10 @@ export default function LayoutFlag() {
     suppressLayoutHeader ? "skip" : {},
   );
   const courses = (data?.courses ?? []) as CourseProps[];
+
+  if (feedbackHeaderRoute) {
+    return <FeedbackMobileHeader courseId={feedbackHeaderRoute.courseId} />;
+  }
 
   if (suppressLayoutHeader) {
     return null;
@@ -167,6 +178,31 @@ export default function LayoutFlag() {
         )
       ) : null}
     </>
+  );
+}
+
+function FeedbackMobileHeader({ courseId }: { courseId?: string }) {
+  const course = useQuery(
+    api.editorRead.getEditorCourseByIdentifier,
+    courseId ? { identifier: courseId } : "skip",
+  ) as CourseProps | null | undefined;
+  const courseIdentifier = course?.short ?? courseId;
+  const courseHref = courseIdentifier
+    ? `/editor/course/${courseIdentifier}`
+    : undefined;
+
+  return (
+    <MobileEditorHeader
+      backHref={courseHref ?? "/editor"}
+      backLabel={courseHref ? "Back to course" : "Back to editor"}
+      icon={
+        <span className="grid w-8 shrink-0 place-items-center">
+          <MessageSquareTextIcon className="size-5" />
+        </span>
+      }
+      title="Feedback"
+      subtitle={courseIdentifier}
+    />
   );
 }
 

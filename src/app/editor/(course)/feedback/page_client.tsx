@@ -1,6 +1,5 @@
 "use client";
 
-import { MessageSquareTextIcon } from "lucide-react";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -11,7 +10,6 @@ import {
   EditorHeaderActions,
   EditorHeaderBreadcrumbs,
 } from "@/app/editor/_components/header_context";
-import MobileEditorHeader from "@/app/editor/_components/mobile_editor_header";
 import { createFeedbackReturnHref } from "@/app/editor/feedback/feedback_return_navigation";
 import {
   readPendingFeedbackView,
@@ -158,18 +156,6 @@ export default function StoryFeedbackPageClient({
           text={courseHref ? "Back" : "Editor"}
         />
       </EditorHeaderActions>
-      <MobileEditorHeader
-        backHref={courseHref ?? "/editor"}
-        backLabel={courseHref ? "Back to course" : "Back to editor"}
-        icon={
-          <span className="grid w-8 shrink-0 place-items-center">
-            <MessageSquareTextIcon className="size-5" />
-          </span>
-        }
-        title="Feedback"
-        subtitle={selectedCourseShort}
-      />
-
       <FeedbackReviewView
         status={status}
         reports={
