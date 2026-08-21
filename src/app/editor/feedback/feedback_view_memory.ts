@@ -1,19 +1,14 @@
 "use client";
 
+import { getEditorMainScrollContainer } from "@/app/editor/_components/editor_scroll_container";
+
 const FEEDBACK_VIEW_KEY_PREFIX = "editor-feedback-view:";
 const PENDING_FEEDBACK_RETURN_KEY = "editor-feedback-return-pending";
-const EDITOR_SCROLL_CONTAINER_SELECTOR =
-  '[data-editor-scroll-container="course-main"]';
 
 type FeedbackViewState = {
   scrollTop: number;
   loadedReportCount: number;
 };
-
-function getScrollContainer() {
-  if (typeof document === "undefined") return null;
-  return document.querySelector<HTMLElement>(EDITOR_SCROLL_CONTAINER_SELECTOR);
-}
 
 function getViewKey(returnHref: string) {
   return `${FEEDBACK_VIEW_KEY_PREFIX}${returnHref}`;
@@ -25,7 +20,7 @@ export function rememberFeedbackView(
 ) {
   if (typeof window === "undefined") return;
 
-  const scrollContainer = getScrollContainer();
+  const scrollContainer = getEditorMainScrollContainer();
   const state: FeedbackViewState = {
     scrollTop: scrollContainer?.scrollTop ?? window.scrollY,
     loadedReportCount,
@@ -70,7 +65,7 @@ export function restorePendingFeedbackView(returnHref: string, frameCount = 8) {
   window.sessionStorage.removeItem(PENDING_FEEDBACK_RETURN_KEY);
 
   const applyScroll = () => {
-    const scrollContainer = getScrollContainer();
+    const scrollContainer = getEditorMainScrollContainer();
     if (scrollContainer) {
       scrollContainer.scrollTop = state.scrollTop;
     } else {

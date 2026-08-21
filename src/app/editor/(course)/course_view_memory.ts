@@ -1,9 +1,9 @@
 "use client";
 
+import { getEditorMainScrollContainer } from "@/app/editor/_components/editor_scroll_container";
+
 const COURSE_SCROLL_KEY_PREFIX = "editor-course-scroll:";
 const COURSE_FILTER_KEY_PREFIX = "editor-course-filter:";
-const COURSE_SCROLL_CONTAINER_SELECTOR =
-  '[data-editor-scroll-container="course-main"]';
 const COURSE_FILTER_VALUES = [
   "all",
   "draft",
@@ -22,16 +22,10 @@ function getCourseFilterKey(courseIdentifier: string) {
   return `${COURSE_FILTER_KEY_PREFIX}${courseIdentifier}`;
 }
 
-function getCourseScrollContainer() {
-  if (typeof document === "undefined") return null;
-
-  return document.querySelector<HTMLElement>(COURSE_SCROLL_CONTAINER_SELECTOR);
-}
-
 export function rememberCourseScrollPosition(courseIdentifier: string) {
   if (typeof window === "undefined") return;
 
-  const scrollContainer = getCourseScrollContainer();
+  const scrollContainer = getEditorMainScrollContainer();
   const scrollTop = scrollContainer?.scrollTop ?? window.scrollY;
 
   window.sessionStorage.setItem(
@@ -83,7 +77,7 @@ export function restoreCourseScrollPosition(
   if (storedScrollPosition === null) return () => {};
 
   const applyScroll = () => {
-    const scrollContainer = getCourseScrollContainer();
+    const scrollContainer = getEditorMainScrollContainer();
     if (scrollContainer) {
       scrollContainer.scrollTop = storedScrollPosition;
     } else {

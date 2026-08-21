@@ -14,6 +14,8 @@ import {
   getCourseVoiceLayoutClassNames,
   type MobileVoiceSection,
 } from "./course_voice_layout_classes";
+import { getEditorMainScrollContainer } from "@/app/editor/_components/editor_scroll_container";
+import { createCourseVoiceSectionScrollMemory } from "./course_voice_scroll_memory";
 import type { SpeakersType } from "./types";
 
 export type { MobileVoiceSection } from "./course_voice_layout_classes";
@@ -85,17 +87,51 @@ export function CourseVoiceLayout({
   voices: VoiceListModel;
   cast: CastModel;
 }) {
+  const [scrollMemory] = React.useState(() =>
+    createCourseVoiceSectionScrollMemory(selectedSection),
+  );
   const classNames = getCourseVoiceLayoutClassNames({
     mobileCourseLayout: enabled,
     selectedSection,
   });
+
+  React.useLayoutEffect(() => {
+    if (!enabled || !window.matchMedia("(max-width: 975px)").matches) {
+      return;
+    }
+
+    const scrollTarget = getEditorMainScrollContainer();
+    if (
+      !scrollTarget ||
+      !scrollMemory.restorePending(selectedSection, scrollTarget)
+    ) {
+      return;
+    }
+
+    const animationFrame = window.requestAnimationFrame(() => {
+      scrollMemory.restore(selectedSection, scrollTarget);
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [enabled, scrollMemory, selectedSection]);
+
+  function selectSection(section: MobileVoiceSection) {
+    if (section === selectedSection) return;
+
+    const scrollTarget = getEditorMainScrollContainer();
+    if (scrollTarget) {
+      scrollMemory.remember(selectedSection, scrollTarget);
+    }
+    scrollMemory.requestRestore(section);
+    onSectionSelect(section);
+  }
 
   return (
     <div>
       {enabled ? (
         <MobileVoiceSectionSwitch
           selected={selectedSection}
-          onSelect={onSectionSelect}
+          onSelect={selectSection}
         />
       ) : null}
       <div className={enabled ? "min-[976px]:flex" : "contents"}>
