@@ -224,19 +224,27 @@ function StoryQuestionMatch({
         question={element.prompt}
         lang={element.lang_question}
       />
-      <div className={cn("flex gap-5", compact && "gap-2")}>
+      <div
+        className={cn(
+          "flex gap-5",
+          compact && "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2",
+        )}
+      >
         {state.lists.map((list, listIndex) => (
           <div
             key={listIndex}
-            className={cn("flex flex-col gap-[10px]", compact && "gap-1")}
+            className={cn(
+              "flex flex-col gap-[10px]",
+              compact && "min-w-0 gap-1",
+            )}
           >
             {list.map((word, wordIndex) => (
               <WordButton
                 key={word.key}
-                className="m-0 w-full"
+                className={cn("m-0 w-full", compact && "min-w-0")}
                 innerClassName={cn(
                   "w-full px-[15px] py-2",
-                  compact && "px-2.5 py-1",
+                  compact && "min-w-0 px-2.5 py-1 [overflow-wrap:anywhere]",
                 )}
                 status={word.state}
                 onClick={() => selectWord(listIndex, wordIndex)}

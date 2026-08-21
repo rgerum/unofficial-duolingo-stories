@@ -1,6 +1,9 @@
 "use client";
 
-import { getEditorMainScrollContainer } from "@/app/editor/_components/editor_scroll_container";
+import {
+  getEditorMainScrollContainer,
+  restoreEditorScrollPosition,
+} from "@/app/editor/_components/editor_scroll_container";
 
 const COURSE_SCROLL_KEY_PREFIX = "editor-course-scroll:";
 const COURSE_FILTER_KEY_PREFIX = "editor-course-filter:";
@@ -76,44 +79,7 @@ export function restoreCourseScrollPosition(
   const storedScrollPosition = readCourseScrollPosition(courseIdentifier);
   if (storedScrollPosition === null) return () => {};
 
-  const applyScroll = () => {
-    const scrollContainer = getEditorMainScrollContainer();
-    if (scrollContainer) {
-      scrollContainer.scrollTop = storedScrollPosition;
-    } else {
-      window.scrollTo({
-        top: storedScrollPosition,
-        behavior: "auto",
-      });
-    }
-  };
-
-  // Apply immediately so a layout effect can restore before the first paint.
-  applyScroll();
-
-  let isCancelled = false;
-  let animationFrameId: number | null = null;
-  let remainingFrames = frameCount - 1;
-  const keepScrollApplied = () => {
-    if (isCancelled) return;
-
-    applyScroll();
-    remainingFrames -= 1;
-    if (remainingFrames > 0) {
-      animationFrameId = window.requestAnimationFrame(keepScrollApplied);
-    }
-  };
-
-  if (remainingFrames > 0) {
-    animationFrameId = window.requestAnimationFrame(keepScrollApplied);
-  }
-
-  return () => {
-    isCancelled = true;
-    if (animationFrameId !== null) {
-      window.cancelAnimationFrame(animationFrameId);
-    }
-  };
+  return restoreEditorScrollPosition(storedScrollPosition, frameCount);
 }
 
 function isCourseFilterValue(value: string): value is CourseFilterValue {

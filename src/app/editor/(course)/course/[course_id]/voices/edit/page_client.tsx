@@ -7,9 +7,9 @@ import { Spinner } from "@/components/ui/spinner";
 import { Breadcrumbs } from "@/app/editor/_components/breadcrumbs";
 import { EditorHeaderBreadcrumbs } from "@/app/editor/_components/header_context";
 import MobileEditorHeader from "@/app/editor/_components/mobile_editor_header";
+import CourseMobileHeaderIllustration from "@/app/editor/_components/course_mobile_header_illustration";
 import TtsEdit from "@/app/editor/language/[language]/tts_edit/tts_edit";
 import type { DetailedCourseProps } from "@/app/editor/(course)/types";
-import LanguageFlag from "@/components/ui/language-flag";
 import type {
   CourseStudType,
   LanguageType,
@@ -126,18 +126,10 @@ function CourseVoicesEditHeaders({ course }: { course: DetailedCourseProps }) {
         backHref={`/editor/course/${course.short}/voices`}
         backLabel="Back to character voices"
         icon={
-          <span className="relative h-7 w-8 shrink-0">
-            <LanguageFlag
-              languageId={course.learningLanguageId}
-              width={24}
-              className="absolute top-0 left-0"
-            />
-            <LanguageFlag
-              languageId={course.fromLanguageId}
-              width={21}
-              className="absolute right-0 bottom-0"
-            />
-          </span>
+          <CourseMobileHeaderIllustration
+            learningLanguageId={course.learningLanguageId}
+            fromLanguageId={course.fromLanguageId}
+          />
         }
         title="Pronunciation rules"
         subtitle={course.learning_language_name}

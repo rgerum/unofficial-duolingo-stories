@@ -26,7 +26,7 @@ import {
   type CopyFeedbackStatus,
   CourseVoiceLayout,
   MobileAvatarEditor,
-  MobileSpeakerRow,
+  MobileVoiceRow,
   type MobileVoiceSection,
 } from "./course_voice_layout";
 type PlayFn = (
@@ -278,7 +278,7 @@ function Avatar(props: {
       displayName={inputName || placeholderName}
       placeholderName={placeholderName}
       inputName={inputName}
-      inputSpeaker={inputSpeaker}
+      inputVoice={inputSpeaker}
       unsaved={unsavedChanged}
       nameMode={
         avatar.avatar_id === -1
@@ -300,7 +300,7 @@ function Avatar(props: {
         />
       }
       onNameChange={inputNameSetValue}
-      onSpeakerChange={inputSpeakerSetValue}
+      onVoiceChange={inputSpeakerSetValue}
       onSave={() => void save()}
     />
   ) : null;
@@ -495,8 +495,8 @@ export function SpeakerEntry(props: {
   return (
     <>
       {mobileLayout ? (
-        <MobileSpeakerRow
-          speaker={speaker}
+        <MobileVoiceRow
+          voice={speaker}
           playControl={
             <PlayButton
               play={props.play}

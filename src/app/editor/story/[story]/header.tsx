@@ -2,7 +2,6 @@ import React from "react";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  EllipsisIcon,
   SaveIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -12,14 +11,8 @@ import MobileEditorHeader, {
   mobileEditorMenuItemClassName,
 } from "@/app/editor/_components/mobile_editor_header";
 import StoryMobileHeaderIllustration from "@/app/editor/_components/story_mobile_header_illustration";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import MobileEditorOptionsSheet from "@/app/editor/_components/mobile_editor_options_sheet";
+import { SheetClose } from "@/components/ui/sheet";
 import EditorButton from "../../editor_button";
 import { EditorHeaderActions } from "../../_components/header_context";
 import type { StoryData } from "./types";
@@ -219,80 +212,65 @@ export function StoryEditorHeader({
           <SaveIcon className="size-5" />
           <span>{is_saving ? "Saving" : "Save"}</span>
         </button>
-        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <SheetTrigger asChild>
-            <button
-              type="button"
-              aria-label="More editor options"
-              className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--text-color)] transition-colors hover:bg-[var(--header-border)]"
-            >
-              <EllipsisIcon className="size-6" />
-            </button>
-          </SheetTrigger>
-          <SheetContent
-            side="bottom"
-            aria-describedby={undefined}
-            className="max-h-[min(82dvh,38rem)] overflow-y-auto rounded-t-3xl border-[var(--header-border)] bg-[var(--body-background)] p-0 pb-[env(safe-area-inset-bottom)] text-[var(--text-color)]"
+        <MobileEditorOptionsSheet
+          title="Editor options"
+          triggerLabel="More editor options"
+          open={mobileMenuOpen}
+          onOpenChange={setMobileMenuOpen}
+        >
+          <MobileToggleRow
+            label="Hints"
+            description="Show translations in the editor"
+            checked={show_trans}
+            onClick={do_set_show_trans}
+          />
+          <MobileToggleRow
+            label="Audio details"
+            description="Show SSML and audio timing"
+            checked={show_ssml}
+            onClick={do_set_show_ssml}
+          />
+          <MobileToggleRow
+            label="Interleaved preview"
+            description="Show each Story element above its source block"
+            checked={interleaved_preview}
+            onClick={() => set_interleaved_preview(!interleaved_preview)}
+          />
+          <button
+            type="button"
+            className={mobileEditorMenuItemClassName}
+            onClick={() => {
+              setMobileMenuOpen(false);
+              open_bulk_audio();
+            }}
           >
-            <SheetHeader className="border-b border-[var(--header-border)]">
-              <SheetTitle>Editor options</SheetTitle>
-            </SheetHeader>
-            <div className="flex flex-col px-4 pb-4">
-              <MobileToggleRow
-                label="Hints"
-                description="Show translations in the editor"
-                checked={show_trans}
-                onClick={do_set_show_trans}
-              />
-              <MobileToggleRow
-                label="Audio details"
-                description="Show SSML and audio timing"
-                checked={show_ssml}
-                onClick={do_set_show_ssml}
-              />
-              <MobileToggleRow
-                label="Interleaved preview"
-                description="Show each Story element above its source block"
-                checked={interleaved_preview}
-                onClick={() => set_interleaved_preview(!interleaved_preview)}
-              />
-              <button
-                type="button"
-                className={mobileEditorMenuItemClassName}
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  open_bulk_audio();
-                }}
-              >
-                Bulk audio
-              </button>
-              <div className="my-2 border-t border-[var(--header-border)]" />
-              <MobileNavigationLink
-                target={previous_story}
-                label="Previous story"
-                direction="left"
-              />
-              <MobileNavigationLink
-                target={next_story}
-                label="Next story"
-                direction="right"
-              />
-              <div className="my-2 border-t border-[var(--header-border)]" />
-              <button
-                type="button"
-                disabled={is_saving || is_deleting}
-                className={`${mobileEditorMenuItemClassName} text-red-600 disabled:opacity-50`}
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  void Delete();
-                }}
-              >
-                <Trash2Icon className="size-5" />
-                {is_deleting ? "Deleting story…" : "Delete story"}
-              </button>
-            </div>
-          </SheetContent>
-        </Sheet>
+            Bulk audio
+          </button>
+          <div className="my-2 border-t border-[var(--header-border)]" />
+          <MobileNavigationLink
+            target={previous_story}
+            label="Previous story"
+            direction="left"
+          />
+          <MobileNavigationLink
+            target={next_story}
+            label="Next story"
+            direction="right"
+          />
+          <div className="my-2 border-t border-[var(--header-border)]" />
+          <button
+            type="button"
+            disabled={is_saving || is_deleting}
+            className={`${mobileEditorMenuItemClassName} text-red-600 disabled:opacity-50`}
+            onClick={() => {
+              setMobileMenuOpen(false);
+              void Delete();
+            }}
+          >
+            <Trash2Icon className="size-5" />
+            {is_deleting ? "Deleting story…" : "Delete story"}
+          </button>
+        </MobileEditorOptionsSheet>
       </MobileEditorHeader>
     </>
   );

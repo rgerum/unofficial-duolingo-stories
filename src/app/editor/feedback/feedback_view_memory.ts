@@ -1,6 +1,9 @@
 "use client";
 
-import { getEditorMainScrollContainer } from "@/app/editor/_components/editor_scroll_container";
+import {
+  getEditorMainScrollContainer,
+  restoreEditorScrollPosition,
+} from "@/app/editor/_components/editor_scroll_container";
 
 const FEEDBACK_VIEW_KEY_PREFIX = "editor-feedback-view:";
 const PENDING_FEEDBACK_RETURN_KEY = "editor-feedback-return-pending";
@@ -64,37 +67,5 @@ export function restorePendingFeedbackView(returnHref: string, frameCount = 8) {
 
   window.sessionStorage.removeItem(PENDING_FEEDBACK_RETURN_KEY);
 
-  const applyScroll = () => {
-    const scrollContainer = getEditorMainScrollContainer();
-    if (scrollContainer) {
-      scrollContainer.scrollTop = state.scrollTop;
-    } else {
-      window.scrollTo({ top: state.scrollTop, behavior: "auto" });
-    }
-  };
-
-  applyScroll();
-
-  let isCancelled = false;
-  let animationFrameId: number | null = null;
-  let remainingFrames = frameCount - 1;
-  const keepScrollApplied = () => {
-    if (isCancelled) return;
-    applyScroll();
-    remainingFrames -= 1;
-    if (remainingFrames > 0) {
-      animationFrameId = window.requestAnimationFrame(keepScrollApplied);
-    }
-  };
-
-  if (remainingFrames > 0) {
-    animationFrameId = window.requestAnimationFrame(keepScrollApplied);
-  }
-
-  return () => {
-    isCancelled = true;
-    if (animationFrameId !== null) {
-      window.cancelAnimationFrame(animationFrameId);
-    }
-  };
+  return restoreEditorScrollPosition(state.scrollTop, frameCount);
 }

@@ -1,6 +1,5 @@
 "use client";
-import { BookOpenIcon, EllipsisIcon, HeartIcon, PinIcon } from "lucide-react";
-import Link from "next/link";
+import { BookOpenIcon, HeartIcon, PinIcon } from "lucide-react";
 import React from "react";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { useQuery } from "convex/react";
@@ -11,20 +10,14 @@ import MobileEditorHeader, {
   mobileEditorMenuItemClassName,
 } from "../_components/mobile_editor_header";
 import { useCoursePin } from "../_components/use_course_pin";
+import CourseMobileHeaderIllustration from "../_components/course_mobile_header_illustration";
+import MobileEditorOptionsSheet from "../_components/mobile_editor_options_sheet";
 import { Breadcrumbs } from "../_components/breadcrumbs";
 import {
   EditorHeaderActions,
   EditorHeaderBreadcrumbs,
 } from "../_components/header_context";
 import type { CourseProps } from "./types";
-import LanguageFlag from "@/components/ui/language-flag";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 interface BreadcrumbPath {
   type: string;
@@ -41,24 +34,23 @@ interface BreadcrumbPath {
 }
 
 export default function LayoutFlag() {
-  const data = useQuery(api.editorRead.getEditorSidebarData, {});
-  const courses = (data?.courses ?? []) as CourseProps[];
-
   const segment = useSelectedLayoutSegments();
   const nestedRoute = segment[2];
   const import_id = nestedRoute === "import" ? segment[3] : undefined;
-
-  if (segment[0] === "feedback") {
-    return null;
-  }
-
-  if (
+  const suppressLayoutHeader =
+    segment[0] === "feedback" ||
     nestedRoute === "story" ||
     nestedRoute === "feedback" ||
     nestedRoute === "voices" ||
     nestedRoute === "localization" ||
-    nestedRoute === "stats"
-  ) {
+    nestedRoute === "stats";
+  const data = useQuery(
+    api.editorRead.getEditorSidebarData,
+    suppressLayoutHeader ? "skip" : {},
+  );
+  const courses = (data?.courses ?? []) as CourseProps[];
+
+  if (suppressLayoutHeader) {
     return null;
   }
 
@@ -210,34 +202,17 @@ function EditorRootMobileHeader() {
       title="Courses"
       subtitle="Editor"
     >
-      <Sheet>
-        <SheetTrigger asChild>
-          <button
-            type="button"
-            aria-label="More editor options"
-            className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--text-color)] transition-colors hover:bg-[var(--header-border)]"
-          >
-            <EllipsisIcon className="size-6" />
-          </button>
-        </SheetTrigger>
-        <SheetContent
-          side="bottom"
-          aria-describedby={undefined}
-          className="max-h-[min(82dvh,38rem)] overflow-y-auto rounded-t-3xl border-[var(--header-border)] bg-[var(--body-background)] p-0 pb-[env(safe-area-inset-bottom)] text-[var(--text-color)]"
-        >
-          <SheetHeader className="border-b border-[var(--header-border)]">
-            <SheetTitle>Editor options</SheetTitle>
-          </SheetHeader>
-          <div className="flex flex-col px-4 pb-4">
-            <MobileEditorMenuLink href="/editor/feedback">
-              Feedback
-            </MobileEditorMenuLink>
-            <MobileEditorMenuLink href="/editor/interest">
-              Courses ranked by learner interest
-            </MobileEditorMenuLink>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <MobileEditorOptionsSheet
+        title="Editor options"
+        triggerLabel="More editor options"
+      >
+        <MobileEditorMenuLink href="/editor/feedback">
+          Feedback
+        </MobileEditorMenuLink>
+        <MobileEditorMenuLink href="/editor/interest">
+          Courses ranked by learner interest
+        </MobileEditorMenuLink>
+      </MobileEditorOptionsSheet>
     </MobileEditorHeader>
   );
 }
@@ -257,18 +232,10 @@ function ImportMobileHeader({
       backLabel="Back to course"
       icon={
         sourceCourse ? (
-          <span className="relative h-7 w-8 shrink-0">
-            <LanguageFlag
-              languageId={sourceCourse.learningLanguageId}
-              width={24}
-              className="absolute left-0 top-0"
-            />
-            <LanguageFlag
-              languageId={sourceCourse.fromLanguageId}
-              width={21}
-              className="absolute right-0 bottom-0"
-            />
-          </span>
+          <CourseMobileHeaderIllustration
+            learningLanguageId={sourceCourse.learningLanguageId}
+            fromLanguageId={sourceCourse.fromLanguageId}
+          />
         ) : undefined
       }
       title="Import stories"
@@ -285,84 +252,55 @@ function CourseMobileHeader({ course }: { course: CourseProps }) {
       backHref="/editor"
       backLabel="Back to editor"
       icon={
-        <span className="relative h-7 w-8 shrink-0">
-          <LanguageFlag
-            languageId={course.learningLanguageId}
-            width={24}
-            className="absolute left-0 top-0"
-          />
-          <LanguageFlag
-            languageId={course.fromLanguageId}
-            width={21}
-            className="absolute bottom-0 right-0"
-          />
-        </span>
+        <CourseMobileHeaderIllustration
+          learningLanguageId={course.learningLanguageId}
+          fromLanguageId={course.fromLanguageId}
+        />
       }
       title={course.learning_language_name}
       subtitle={`from ${course.from_language_name}`}
     >
-      <Sheet>
-        <SheetTrigger asChild>
-          <button
-            type="button"
-            aria-label="More course options"
-            className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--text-color)] transition-colors hover:bg-[var(--header-border)]"
-          >
-            <EllipsisIcon className="size-6" />
-          </button>
-        </SheetTrigger>
-        <SheetContent
-          side="bottom"
-          aria-describedby={undefined}
-          className="max-h-[min(82dvh,38rem)] overflow-y-auto rounded-t-3xl border-[var(--header-border)] bg-[var(--body-background)] p-0 pb-[env(safe-area-inset-bottom)] text-[var(--text-color)]"
+      <MobileEditorOptionsSheet
+        title="Course options"
+        triggerLabel="More course options"
+      >
+        <button
+          type="button"
+          aria-pressed={isPinned}
+          disabled={isLoading || isUpdating}
+          className={`${mobileEditorMenuItemClassName} disabled:cursor-wait disabled:opacity-50`}
+          onClick={() => void toggle()}
         >
-          <SheetHeader className="border-b border-[var(--header-border)]">
-            <SheetTitle>Course options</SheetTitle>
-          </SheetHeader>
-          <div className="flex flex-col px-4 pb-4">
-            <button
-              type="button"
-              aria-pressed={isPinned}
-              disabled={isLoading || isUpdating}
-              className={`${mobileEditorMenuItemClassName} disabled:cursor-wait disabled:opacity-50`}
-              onClick={() => void toggle()}
-            >
-              <PinIcon
-                className="size-5"
-                fill={isPinned ? "currentColor" : "none"}
-              />
-              {isPinned ? "Unpin course" : "Pin course"}
-            </button>
-            {!course.official ? (
-              <MobileEditorMenuLink
-                href={`/editor/course/${course.short}/import/es-en`}
-              >
-                Import stories
-              </MobileEditorMenuLink>
-            ) : null}
-            <MobileEditorMenuLink
-              href={`/editor/course/${course.short}/feedback`}
-            >
-              Feedback
-            </MobileEditorMenuLink>
-            <MobileEditorMenuLink href={`/editor/course/${course.short}/stats`}>
-              Course stats
-            </MobileEditorMenuLink>
-            <MobileEditorMenuLink
-              href={`/editor/course/${course.short}/voices`}
-            >
-              Character voices
-            </MobileEditorMenuLink>
-            {course.from_language_name !== "English" ? (
-              <MobileEditorMenuLink
-                href={`/editor/course/${course.short}/localization`}
-              >
-                Localization
-              </MobileEditorMenuLink>
-            ) : null}
-          </div>
-        </SheetContent>
-      </Sheet>
+          <PinIcon
+            className="size-5"
+            fill={isPinned ? "currentColor" : "none"}
+          />
+          {isPinned ? "Unpin course" : "Pin course"}
+        </button>
+        {!course.official ? (
+          <MobileEditorMenuLink
+            href={`/editor/course/${course.short}/import/es-en`}
+          >
+            Import stories
+          </MobileEditorMenuLink>
+        ) : null}
+        <MobileEditorMenuLink href={`/editor/course/${course.short}/feedback`}>
+          Feedback
+        </MobileEditorMenuLink>
+        <MobileEditorMenuLink href={`/editor/course/${course.short}/stats`}>
+          Course stats
+        </MobileEditorMenuLink>
+        <MobileEditorMenuLink href={`/editor/course/${course.short}/voices`}>
+          Character voices
+        </MobileEditorMenuLink>
+        {course.from_language_name !== "English" ? (
+          <MobileEditorMenuLink
+            href={`/editor/course/${course.short}/localization`}
+          >
+            Localization
+          </MobileEditorMenuLink>
+        ) : null}
+      </MobileEditorOptionsSheet>
     </MobileEditorHeader>
   );
 }

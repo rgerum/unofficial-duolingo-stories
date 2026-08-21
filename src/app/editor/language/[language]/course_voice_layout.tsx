@@ -23,24 +23,24 @@ export type CopyFeedbackStatus = "idle" | "copied" | "error";
 
 const COPY_FEEDBACK_PRESENTATION = {
   idle: {
-    getLabel: (speaker: string) => `Copy ${speaker}`,
+    getLabel: (voice: string) => `Copy ${voice}`,
     className: "text-[var(--text-color-dim)]",
     Icon: CopyIcon,
   },
   copied: {
-    getLabel: (speaker: string) => `Voice copied: ${speaker}`,
+    getLabel: (voice: string) => `Voice copied: ${voice}`,
     className: "bg-green-100 text-green-700",
     Icon: CheckIcon,
   },
   error: {
-    getLabel: (speaker: string) => `Could not copy voice: ${speaker}`,
+    getLabel: (voice: string) => `Could not copy voice: ${voice}`,
     className: "bg-red-100 text-red-700",
     Icon: CircleXIcon,
   },
 } satisfies Record<
   CopyFeedbackStatus,
   {
-    getLabel: (speaker: string) => string;
+    getLabel: (voice: string) => string;
     className: string;
     Icon: typeof CopyIcon;
   }
@@ -319,12 +319,12 @@ export function MobileAvatarEditor({
   displayName,
   placeholderName,
   inputName,
-  inputSpeaker,
+  inputVoice,
   unsaved,
   nameMode,
   playControl,
   onNameChange,
-  onSpeakerChange,
+  onVoiceChange,
   onSave,
 }: {
   avatarId: number;
@@ -332,12 +332,12 @@ export function MobileAvatarEditor({
   displayName: string;
   placeholderName: string;
   inputName: string;
-  inputSpeaker: string;
+  inputVoice: string;
   unsaved: boolean;
   nameMode: "read-only" | "editable" | "disabled";
   playControl: React.ReactNode;
   onNameChange: (value: string) => void;
-  onSpeakerChange: (value: string) => void;
+  onVoiceChange: (value: string) => void;
   onSave: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -369,7 +369,7 @@ export function MobileAvatarEditor({
             ) : null}
           </span>
           <span className="block truncate text-sm text-[var(--text-color-dim)]">
-            {inputSpeaker || "No voice selected"} · #{avatarId}
+            {inputVoice || "No voice selected"} · #{avatarId}
           </span>
         </span>
         <ChevronDownIcon
@@ -400,8 +400,8 @@ export function MobileAvatarEditor({
             Voice
             <input
               className="h-11 min-w-0 rounded-xl border-2 border-[var(--input-border)] bg-[var(--input-background)] px-3 !text-base font-normal text-[var(--text-color)]"
-              value={inputSpeaker}
-              onChange={(event) => onSpeakerChange(event.target.value)}
+              value={inputVoice}
+              onChange={(event) => onVoiceChange(event.target.value)}
               type="text"
               placeholder="Voice name"
             />
@@ -427,19 +427,19 @@ export function MobileAvatarEditor({
   );
 }
 
-export function MobileSpeakerRow({
-  speaker,
+export function MobileVoiceRow({
+  voice,
   playControl,
   onCopy,
   copyStatus,
 }: {
-  speaker: SpeakersType;
+  voice: SpeakersType;
   playControl: React.ReactNode;
   onCopy: (event: React.MouseEvent<HTMLButtonElement>) => void;
   copyStatus: CopyFeedbackStatus;
 }) {
   const copyPresentation = COPY_FEEDBACK_PRESENTATION[copyStatus];
-  const copyLabel = copyPresentation.getLabel(speaker.speaker);
+  const copyLabel = copyPresentation.getLabel(voice.speaker);
   const CopyStatusIcon = copyPresentation.Icon;
 
   return (
@@ -449,10 +449,10 @@ export function MobileSpeakerRow({
           <span className="grid size-11 place-items-center">{playControl}</span>
           <span className="min-w-0">
             <span className="block truncate text-base font-semibold">
-              {speaker.speaker}
+              {voice.speaker}
             </span>
             <span className="block truncate text-sm text-[var(--text-color-dim)]">
-              {speaker.gender} · {speaker.type}
+              {voice.gender} · {voice.type}
             </span>
           </span>
           <button

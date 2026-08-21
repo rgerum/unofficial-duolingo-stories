@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SlidersHorizontalIcon } from "lucide-react";
+import { AudioLinesIcon, SlidersHorizontalIcon } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -13,8 +13,8 @@ import {
 } from "@/app/editor/_components/header_context";
 import EditorButton from "@/app/editor/editor_button";
 import MobileEditorHeader from "@/app/editor/_components/mobile_editor_header";
+import CourseMobileHeaderIllustration from "@/app/editor/_components/course_mobile_header_illustration";
 import LanguageEditor from "@/app/editor/language/[language]/language_editor";
-import LanguageFlag from "@/components/ui/language-flag";
 import type { DetailedCourseProps } from "@/app/editor/(course)/types";
 
 export default function CourseVoicesPageClient({
@@ -26,8 +26,38 @@ export default function CourseVoicesPageClient({
     identifier: courseId,
   }) as DetailedCourseProps | null | undefined;
 
-  if (course === undefined) return <Spinner />;
-  if (!course) return <p>Course not found.</p>;
+  if (course === undefined) {
+    return (
+      <>
+        <MobileEditorHeader
+          backHref={`/editor/course/${courseId}`}
+          backLabel="Back to course"
+          icon={
+            <span className="grid w-8 shrink-0 place-items-center">
+              <span className="size-6 animate-pulse rounded-full bg-[var(--header-border)]" />
+            </span>
+          }
+          title="Character voices"
+          subtitle="Loading course…"
+        />
+        <Spinner />
+      </>
+    );
+  }
+  if (!course) {
+    return (
+      <>
+        <MobileEditorHeader
+          backHref="/editor"
+          backLabel="Back to editor"
+          icon={<CourseVoicesIcon />}
+          title="Character voices"
+          subtitle="Course not found"
+        />
+        <p className="max-[975px]:p-4">Course not found.</p>
+      </>
+    );
+  }
 
   return (
     <>
@@ -66,18 +96,10 @@ export default function CourseVoicesPageClient({
         backHref={`/editor/course/${course.short}`}
         backLabel="Back to course"
         icon={
-          <span className="relative h-7 w-8 shrink-0">
-            <LanguageFlag
-              languageId={course.learningLanguageId}
-              width={24}
-              className="absolute top-0 left-0"
-            />
-            <LanguageFlag
-              languageId={course.fromLanguageId}
-              width={21}
-              className="absolute right-0 bottom-0"
-            />
-          </span>
+          <CourseMobileHeaderIllustration
+            learningLanguageId={course.learningLanguageId}
+            fromLanguageId={course.fromLanguageId}
+          />
         }
         title="Character voices"
         subtitle={course.learning_language_name}
@@ -96,5 +118,13 @@ export default function CourseVoicesPageClient({
         mobileCourseLayout
       />
     </>
+  );
+}
+
+function CourseVoicesIcon() {
+  return (
+    <span className="grid w-8 shrink-0 place-items-center">
+      <AudioLinesIcon className="size-5" aria-hidden="true" />
+    </span>
   );
 }

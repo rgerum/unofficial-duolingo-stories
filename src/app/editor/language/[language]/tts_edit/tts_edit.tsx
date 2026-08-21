@@ -21,7 +21,7 @@ import {
   type StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
 import MobileTtsEditor, { type RulesSaveStatus } from "./mobile_tts_editor";
-import { formatTestSpeaker } from "./tts_edit_model";
+import { formatTestVoice } from "./tts_edit_model";
 
 const DEFAULT_TTS_RULES = `
 # line with # are comments and are ignored
@@ -104,7 +104,7 @@ export default function Tts_edit({
   }
   const [text, setText] = React.useState("Enter a text to be spoken");
   const [text2, setText2] = React.useState("");
-  const [customSpeaker, setCustomSpeaker] = React.useState("");
+  const [customVoice, setCustomVoice] = React.useState("");
   const [pitch, setPitch] = React.useState(2);
   const [speed, setSpeed] = React.useState(2);
 
@@ -139,12 +139,12 @@ export default function Tts_edit({
     }
   }
 
-  async function play2(e: React.MouseEvent, speaker: string, _name: string) {
-    const testSpeaker = formatTestSpeaker(speaker, pitch, speed);
+  async function play2(e: React.MouseEvent, voice: string, _name: string) {
+    const testVoice = formatTestVoice(voice, pitch, speed);
     const [story] = processStoryFile(
       `[DATA]
         icon_0=https://design.duolingo.com/ee58f22644428b8182ae.svg
-        speaker_0=${testSpeaker}
+        speaker_0=${testVoice}
         
         [LINE]
         Speaker0: ${text}
@@ -219,8 +219,8 @@ export default function Tts_edit({
               text,
               pitch,
               speed,
-              speakers,
-              customSpeaker,
+              voices: speakers,
+              customVoice,
               transcribedText: text2,
               finalText: (
                 <TtsFinalText
@@ -231,7 +231,7 @@ export default function Tts_edit({
               onTextChange: setText,
               onPitchChange: setPitch,
               onSpeedChange: setSpeed,
-              onCustomSpeakerChange: setCustomSpeaker,
+              onCustomVoiceChange: setCustomVoice,
               onPlay: play2,
             }}
           />
@@ -310,15 +310,13 @@ export default function Tts_edit({
                     <td className="px-[6px] py-[6px] leading-[1.25]">
                       <PlayButton
                         play={play2}
-                        speaker={customSpeaker}
+                        speaker={customVoice}
                         name="Duo"
                       />
                       <input
                         className="ml-2 rounded-md border border-[var(--input-border)] bg-[var(--input-background)] px-2 py-1 text-[var(--text-color)]"
-                        value={customSpeaker}
-                        onChange={(event) =>
-                          setCustomSpeaker(event.target.value)
-                        }
+                        value={customVoice}
+                        onChange={(event) => setCustomVoice(event.target.value)}
                       />
                     </td>
                     <td className="px-[6px] py-[6px] leading-[1.25]"></td>

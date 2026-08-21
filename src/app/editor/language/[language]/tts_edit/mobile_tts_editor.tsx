@@ -22,17 +22,17 @@ type TestModel = {
   text: string;
   pitch: number;
   speed: number;
-  speakers: SpeakersType[];
-  customSpeaker: string;
+  voices: SpeakersType[];
+  customVoice: string;
   transcribedText: string;
   finalText: React.ReactNode;
   onTextChange: (value: string) => void;
   onPitchChange: (value: number) => void;
   onSpeedChange: (value: number) => void;
-  onCustomSpeakerChange: (value: string) => void;
+  onCustomVoiceChange: (value: string) => void;
   onPlay: (
     event: React.MouseEvent,
-    speaker: string,
+    voice: string,
     name: string,
   ) => Promise<void>;
 };
@@ -175,24 +175,24 @@ function MobileTestPanel({
       </div>
       <h2 className="mt-5 mb-1 text-lg font-bold">Available voices</h2>
       <div role="list" aria-label="Available voices">
-        {test.speakers.map((speaker) => (
+        {test.voices.map((voice) => (
           <div
             role="listitem"
-            key={speaker.id}
+            key={voice.id}
             className="grid min-h-14 grid-cols-[44px_minmax(0,1fr)] items-center gap-2 border-b border-[var(--header-border)]"
           >
             <PlayButton
               play={test.onPlay}
-              speaker={speaker.speaker}
+              speaker={voice.speaker}
               name="Duo"
               largeTouchTarget
             />
             <span className="min-w-0">
               <span className="block truncate text-base font-semibold">
-                {speaker.speaker}
+                {voice.speaker}
               </span>
               <span className="block truncate text-sm text-[var(--text-color-dim)]">
-                {speaker.gender} · {speaker.type}
+                {voice.gender} · {voice.type}
               </span>
             </span>
           </div>
@@ -205,7 +205,7 @@ function MobileTestPanel({
         <div className="mt-2 flex items-center gap-2">
           <PlayButton
             play={test.onPlay}
-            speaker={test.customSpeaker}
+            speaker={test.customVoice}
             name="Duo"
             largeTouchTarget
           />
@@ -213,10 +213,8 @@ function MobileTestPanel({
             <span className="sr-only">Custom voice name</span>
             <input
               className="h-11 w-full rounded-xl border-2 border-[var(--input-border)] bg-[var(--input-background)] px-3 !text-base font-normal text-[var(--text-color)]"
-              value={test.customSpeaker}
-              onChange={(event) =>
-                test.onCustomSpeakerChange(event.target.value)
-              }
+              value={test.customVoice}
+              onChange={(event) => test.onCustomVoiceChange(event.target.value)}
               placeholder="Voice name"
               type="text"
             />

@@ -9,10 +9,10 @@ import {
   EditorHeaderBreadcrumbs,
 } from "@/app/editor/_components/header_context";
 import MobileEditorHeader from "@/app/editor/_components/mobile_editor_header";
+import CourseMobileHeaderIllustration from "@/app/editor/_components/course_mobile_header_illustration";
 import CourseStats from "@/app/editor/(course)/course_stats";
 import type { DetailedCourseProps } from "@/app/editor/(course)/types";
 import { Spinner } from "@/components/ui/spinner";
-import LanguageFlag from "@/components/ui/language-flag";
 
 export default function CourseStatsPageClient({
   courseId,
@@ -82,18 +82,10 @@ export default function CourseStatsPageClient({
         backHref={`/editor/course/${course.short ?? courseId}`}
         backLabel="Back to course"
         icon={
-          <span className="relative h-7 w-8 shrink-0">
-            <LanguageFlag
-              languageId={course.learningLanguageId}
-              width={24}
-              className="absolute top-0 left-0"
-            />
-            <LanguageFlag
-              languageId={course.fromLanguageId}
-              width={21}
-              className="absolute right-0 bottom-0"
-            />
-          </span>
+          <CourseMobileHeaderIllustration
+            learningLanguageId={course.learningLanguageId}
+            fromLanguageId={course.fromLanguageId}
+          />
         }
         title="Course stats"
         subtitle={course.learning_language_name}

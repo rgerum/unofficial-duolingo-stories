@@ -195,14 +195,14 @@ export default function EditList({
             className="underline"
             href={`/editor/course/${course.short}/voices`}
           >
-            Character Editor
+            Character Voice Editor
           </Link>
           .
         </p>
         {course.from_language_name !== "English" && (
           <p className="my-4">
-            For language localization settings (for the base language of this
-            course), head to the{" "}
+            For localization settings in this course&apos;s From Language, head
+            to the{" "}
             <Link
               className="underline"
               href={`/editor/course/${course.short}/localization`}
