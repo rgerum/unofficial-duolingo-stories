@@ -11,6 +11,7 @@ import Switch from "@/components/ui/switch";
 import MobileEditorHeader, {
   mobileEditorMenuItemClassName,
 } from "@/app/editor/_components/mobile_editor_header";
+import StoryMobileHeaderIllustration from "@/app/editor/_components/story_mobile_header_illustration";
 import {
   Sheet,
   SheetClose,
@@ -192,19 +193,9 @@ export function StoryEditorHeader({
         backHref={feedbackReturnHref ?? `/editor/course/${story_data.short}`}
         backLabel={feedbackReturnHref ? "Back to feedback" : "Back to course"}
         icon={
-          <div className="shrink-0">
-            <img
-              src={
-                story_data.image
-                  ? `https://stories-cdn.duolingo.com/image/${story_data.image}.svg`
-                  : "/editor/icons/empty_title.svg"
-              }
-              alt=""
-              width={24}
-              height={24}
-              className="size-6 shrink-0 object-contain"
-            />
-          </div>
+          <StoryMobileHeaderIllustration
+            storyIllustrationId={story_data.image}
+          />
         }
         title={story_data.name}
         subtitle={

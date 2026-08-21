@@ -22,6 +22,8 @@ import type {
   StoryEditorPageData,
 } from "@/app/editor/story/[story]/types";
 import { Breadcrumbs } from "@/app/editor/_components/breadcrumbs";
+import MobileEditorHeader from "@/app/editor/_components/mobile_editor_header";
+import StoryMobileHeaderIllustration from "@/app/editor/_components/story_mobile_header_illustration";
 import {
   EditorHeaderActions,
   EditorHeaderBreadcrumbs,
@@ -238,6 +240,21 @@ export default function AudioCutterPageClient({
     );
   }, [courseId, coursePathId, nextStory, nextStoryTranscriptItems, router]);
 
+  if (data === null) {
+    return (
+      <>
+        <MobileEditorHeader
+          backHref={`/editor/course/${coursePathId ?? courseId}`}
+          backLabel="Back to course"
+          icon={<StoryMobileHeaderIllustration />}
+          title="Audio cutter"
+          subtitle="Story not found"
+        />
+        <p className="p-4">Story not found.</p>
+      </>
+    );
+  }
+
   return (
     <>
       {course && data ? (
@@ -298,6 +315,17 @@ export default function AudioCutterPageClient({
           />
         </div>
       </EditorHeaderActions>
+      <MobileEditorHeader
+        backHref={`/editor/course/${coursePathId ?? courseId}/story/${storyId}`}
+        backLabel="Back to story"
+        icon={
+          <StoryMobileHeaderIllustration
+            storyIllustrationId={data?.story_data.image}
+          />
+        }
+        title="Audio cutter"
+        subtitle={data?.story_data.name ?? "Loading story…"}
+      />
       <AudioCutterDialog
         open={true}
         renderInDialog={false}
