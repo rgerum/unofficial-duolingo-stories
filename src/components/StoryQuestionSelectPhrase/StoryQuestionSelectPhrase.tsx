@@ -3,6 +3,7 @@ import React from "react";
 import WordButton from "../WordButton";
 import { useChoiceButtons } from "@/hooks/use-choice-buttons.hook";
 import { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import { cn } from "@/lib/utils";
 
 /*
 The SELECT_PHRASE question.
@@ -22,10 +23,12 @@ function StoryQuestionSelectPhrase({
   element,
   active,
   advance,
+  compact = false,
 }: {
   element: StoryElement;
   active: boolean;
   advance: () => void;
+  compact?: boolean;
 }) {
   if (element.type !== "SELECT_PHRASE")
     throw new Error("not the right element");
@@ -58,11 +61,18 @@ function StoryQuestionSelectPhrase({
           /* one answer button */
           <WordButton
             key={index}
-            className="mb-[10px] ml-0 block w-full select-none"
-            innerClassName="px-6 pt-[14px] pb-[11px] max-[480px]:px-[15px] max-[480px]:py-2"
+            className={cn(
+              "mb-[10px] ml-0 block w-full select-none",
+              compact && "mb-1",
+            )}
+            innerClassName={cn(
+              "px-6 pt-[14px] pb-[11px] max-[480px]:px-[15px] max-[480px]:py-2",
+              compact && "px-2.5 py-1 max-[480px]:px-2.5 max-[480px]:py-1",
+            )}
             status={getState(index)}
             data-cy="select-button"
             onClick={() => click(index)}
+            compact={compact}
           >
             {typeof answer != "string"
               ? answer.text.replace(/\{.*?}/g, "")

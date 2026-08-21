@@ -207,6 +207,7 @@ function EditorElement({
           active={false}
           advance={() => {}}
           showTranslationsInline={showHints}
+          compact={compact}
         />
       </EditorQuestionWrapper>
     );
@@ -219,6 +220,7 @@ function EditorElement({
           element={element}
           active={false}
           advance={() => {}}
+          compact={compact}
         />
       </EditorQuestionWrapper>
     );
@@ -231,6 +233,7 @@ function EditorElement({
           element={element}
           active={false}
           advance={() => {}}
+          compact={compact}
         />
       </EditorQuestionWrapper>
     );
@@ -243,6 +246,7 @@ function EditorElement({
           element={element}
           active={false}
           advance={() => {}}
+          compact={compact}
         />
       </EditorQuestionWrapper>
     );
@@ -255,6 +259,7 @@ function EditorElement({
           active={false}
           element={element}
           setDone={() => {}}
+          compact={compact}
         />
       </EditorQuestionWrapper>
     );

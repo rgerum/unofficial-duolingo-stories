@@ -8,6 +8,7 @@ import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import CheckButton from "../CheckButton";
 import { useChoiceButtons } from "@/hooks/use-choice-buttons.hook";
 import { StoryElementMultipleChoice } from "@/components/editor/story/syntax_parser_types";
+import { cn } from "@/lib/utils";
 
 /*
 The MULTIPLE_CHOICE question.
@@ -29,11 +30,13 @@ function StoryQuestionMultipleChoice({
   active,
   advance,
   showTranslationsInline,
+  compact = false,
 }: {
   element: StoryElementMultipleChoice;
   active: boolean;
   advance: () => void;
   showTranslationsInline?: boolean;
+  compact?: boolean;
 }) {
   //const [done, setDone] = React.useState(false);
 
@@ -50,9 +53,12 @@ function StoryQuestionMultipleChoice({
   );
 
   function getColorText(state: string) {
-    if (state === "false" || state === "done")
-      return "my-5 flex items-center gap-[18px] text-[var(--color_disabled_color)]";
-    return "my-5 flex items-center gap-[18px]";
+    return cn(
+      "flex items-center",
+      compact ? "my-1.5 gap-2" : "my-5 gap-[18px]",
+      (state === "false" || state === "done") &&
+        "text-[var(--color_disabled_color)]",
+    );
   }
 
   return (
@@ -74,7 +80,7 @@ function StoryQuestionMultipleChoice({
             onClick={() => click(index)}
           >
             {/* with a button and a text */}
-            <CheckButton type={buttonState[index]} />
+            <CheckButton type={buttonState[index]} compact={compact} />
             <div>
               {typeof answer == "string" ? (
                 answer

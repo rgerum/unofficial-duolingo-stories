@@ -6,6 +6,7 @@ import { isTypingTarget } from "@/lib/is-typing-target";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import WordButton from "../WordButton";
 import { StoryElement } from "@/components/editor/story/syntax_parser_types";
+import { cn } from "@/lib/utils";
 
 type WordState = "idle" | "selected" | "right" | "wrong";
 
@@ -135,10 +136,12 @@ function StoryQuestionMatch({
   /*progress,*/ element,
   active,
   setDone,
+  compact = false,
 }: {
   element: StoryElement;
   active: boolean;
   setDone: () => void;
+  compact?: boolean;
 }) {
   if (element.type !== "MATCH") throw new Error("not the right element");
   const animationKeyRef = React.useRef(0);
@@ -221,16 +224,23 @@ function StoryQuestionMatch({
         question={element.prompt}
         lang={element.lang_question}
       />
-      <div className="flex gap-5">
+      <div className={cn("flex gap-5", compact && "gap-2")}>
         {state.lists.map((list, listIndex) => (
-          <div key={listIndex} className="flex flex-col gap-[10px]">
+          <div
+            key={listIndex}
+            className={cn("flex flex-col gap-[10px]", compact && "gap-1")}
+          >
             {list.map((word, wordIndex) => (
               <WordButton
                 key={word.key}
                 className="m-0 w-full"
-                innerClassName="w-full px-[15px] py-2"
+                innerClassName={cn(
+                  "w-full px-[15px] py-2",
+                  compact && "px-2.5 py-1",
+                )}
                 status={word.state}
                 onClick={() => selectWord(listIndex, wordIndex)}
+                compact={compact}
               >
                 {word.value}
               </WordButton>

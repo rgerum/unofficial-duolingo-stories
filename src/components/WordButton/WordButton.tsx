@@ -6,11 +6,13 @@ function WordButton({
   children,
   className,
   innerClassName,
+  compact = false,
   ...delegated
 }: {
   status: string;
   children: React.ReactNode;
   innerClassName?: string;
+  compact?: boolean;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const isOff = status === "off";
   const outerClassName = cn(
@@ -28,6 +30,7 @@ function WordButton({
       "bg-[var(--color_disabled_border-color)] text-[var(--color_disabled_color)]",
     status === "right-stay" &&
       "bg-[var(--color_right_border-color)] text-[var(--color_right_color)]",
+    compact && "m-0.5 text-sm",
     className,
   );
   const innerSpanClassName = cn(
@@ -45,6 +48,7 @@ function WordButton({
       "border-[var(--color_disabled_border-color)] bg-[var(--color_disabled_background)]",
     status === "right-stay" &&
       "border-[var(--color_right_border-color)] bg-[var(--color_right_background)]",
+    compact && "px-2.5 py-1",
     innerClassName,
   );
 

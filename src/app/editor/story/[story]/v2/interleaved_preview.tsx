@@ -21,6 +21,7 @@ import {
   getInterleavedPreviewInteractionKey,
   getInterleavedPreviewLineNumber,
   getInterleavedPreviewRenderKey,
+  splitInterleavedPreviewPart,
 } from "@/lib/editor/interleaved_preview_positions";
 
 type InterleavedPreviewConfig = {
@@ -82,9 +83,6 @@ export const interleavedPreviewExtension = [
       fontSize: "14px",
       lineHeight: "1.4",
     },
-    ".cm-interleaved-preview .part button": {
-      fontSize: "14px",
-    },
     ".cm-interleaved-preview .part > :first-child": {
       marginTop: "4px",
     },
@@ -98,7 +96,10 @@ function buildInterleavedPreviewDecorations(
   state: EditorState,
   config: InterleavedPreviewConfig,
 ) {
-  const ranges = getStoryEditorPreviewParts(config.story).flatMap((part) => {
+  const parts = getStoryEditorPreviewParts(config.story).flatMap(
+    splitInterleavedPreviewPart,
+  );
+  const ranges = parts.flatMap((part) => {
     const lineNumber = getInterleavedPreviewLineNumber(part, state.doc.lines);
     if (lineNumber === null) return [];
 
