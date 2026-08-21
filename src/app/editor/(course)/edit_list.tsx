@@ -45,6 +45,16 @@ const STORY_FILTER_ORDER: StoryFilter[] = [
   "finished",
   "published",
 ];
+const STORY_FILTER_PRESENTATION: Record<
+  StoryFilter,
+  { label: string; icon: string }
+> = {
+  all: { label: "All", icon: "📚" },
+  draft: { label: "✍️ Draft", icon: "✍️" },
+  feedback: { label: "🗨️ Feedback", icon: "🗨️" },
+  finished: { label: "✅ Finished", icon: "✅" },
+  published: { label: "📢 Published", icon: "📢" },
+};
 export default function EditList({
   stories,
   course,
@@ -158,7 +168,7 @@ export default function EditList({
   }
 
   return (
-    <div className="max-[975px]:px-3 max-[975px]:pt-3 max-[975px]:text-[16px]">
+    <div className="max-[975px]:px-3 max-[975px]:pt-3 max-[975px]:text-[14px]">
       <div className="max-[975px]:hidden">
         <div>
           {!course.public && story_published_count ? (
@@ -277,18 +287,27 @@ export default function EditList({
                 key={filter}
                 type="button"
                 className={
-                  "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 max-[975px]:text-[16px] " +
+                  "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 max-[975px]:min-h-11 max-[975px]:gap-1.5 max-[975px]:px-2.5 " +
                   (isActive
                     ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
                     : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
                 }
                 onClick={() => setActiveFilter(filter)}
                 aria-pressed={isActive}
+                aria-label={`${getFilterLabel(filter)}: ${counts[filter]}`}
               >
-                <span>{getFilterLabel(filter)}</span>
+                <span className="max-[975px]:sr-only">
+                  {getFilterLabel(filter)}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="hidden text-[18px] max-[975px]:inline"
+                >
+                  {getFilterIcon(filter)}
+                </span>
                 <span
                   className={
-                    "rounded-full px-2 py-[3px] text-[12px] font-bold max-[975px]:text-[16px] " +
+                    "rounded-full px-2 py-[3px] text-[12px] font-bold max-[975px]:text-[14px] " +
                     (isActive
                       ? "bg-[color:rgba(255,255,255,0.18)] text-[var(--button-color)]"
                       : "bg-[var(--body-background)] text-[var(--text-color-dim)]")
@@ -442,11 +461,11 @@ function getStoryState(story: Pick<StoryListDataProps, "status" | "public">) {
 }
 
 function getFilterLabel(filter: StoryFilter) {
-  if (filter === "all") return "All";
-  if (filter === "draft") return "✍️ Draft";
-  if (filter === "feedback") return "🗨️ Feedback";
-  if (filter === "finished") return "✅ Finished";
-  return "📢 Published";
+  return STORY_FILTER_PRESENTATION[filter].label;
+}
+
+function getFilterIcon(filter: StoryFilter) {
+  return STORY_FILTER_PRESENTATION[filter].icon;
 }
 
 function getEmptyStateMessage(filter: StoryFilter, searchQuery: string) {
