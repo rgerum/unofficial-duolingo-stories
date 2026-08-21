@@ -273,32 +273,59 @@ function FeedbackReportRow({
   return (
     <article className="grid gap-4 rounded-[8px] border-2 border-[var(--overview-hr)] bg-[var(--body-background)] p-4 max-[975px]:gap-3 max-[975px]:p-3 min-[976px]:grid-cols-[minmax(0,1fr)_220px]">
       <div className="min-w-0">
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          <span
-            className={cn(
-              "rounded-full px-3 py-1 text-[0.78rem] font-bold",
-              getCategoryClassName(report.category),
-            )}
-          >
-            {report.category === "Translation hints"
-              ? "Translation"
-              : report.category}
-          </span>
-          <span className="rounded-full bg-[var(--body-background-faint)] px-3 py-1 text-[0.78rem] font-bold text-[var(--text-color-dim)] max-[975px]:hidden">
-            {getStatusLabel(report.status)}
-          </span>
-          <time
-            dateTime={new Date(report.createdAt).toISOString()}
-            title={formatDateTime(report.createdAt)}
-            className="text-[0.82rem] text-[var(--text-color-dim)]"
-          >
-            <span className="min-[976px]:hidden" suppressHydrationWarning>
-              {formatRelativeDate(report.createdAt)}
+        <div className="mb-2 flex items-center gap-2 max-[975px]:grid max-[975px]:grid-cols-[minmax(0,1fr)_auto] max-[975px]:items-start max-[975px]:gap-1.5">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 max-[975px]:gap-1.5">
+            <span
+              className={cn(
+                "shrink-0 rounded-full px-3 py-1 text-[0.78rem] font-bold",
+                getCategoryClassName(report.category),
+              )}
+            >
+              {report.category === "Translation hints"
+                ? "Translation"
+                : report.category}
             </span>
-            <span className="max-[975px]:hidden">
-              {formatDateTime(report.createdAt)}
+            <span className="rounded-full bg-[var(--body-background-faint)] px-3 py-1 text-[0.78rem] font-bold text-[var(--text-color-dim)] max-[975px]:hidden">
+              {getStatusLabel(report.status)}
             </span>
-          </time>
+            <time
+              dateTime={new Date(report.createdAt).toISOString()}
+              title={formatDateTime(report.createdAt)}
+              className="shrink-0 text-[0.82rem] text-[var(--text-color-dim)]"
+            >
+              <span className="min-[976px]:hidden" suppressHydrationWarning>
+                {formatRelativeDate(report.createdAt)}
+              </span>
+              <span className="max-[975px]:hidden">
+                {formatDateTime(report.createdAt)}
+              </span>
+            </time>
+            <span className="shrink-0 text-[13px] text-[var(--text-color-dim)] min-[976px]:hidden">
+              {getFeedbackSourceLabel(report)}
+            </span>
+            {showCourse ? (
+              <span className="shrink-0 text-[13px] text-[var(--text-color-dim)] min-[976px]:hidden">
+                {report.courseShort}
+              </span>
+            ) : null}
+          </div>
+          <select
+            aria-label={`Status for ${report.storyTitle}`}
+            value={report.status}
+            disabled={updating}
+            onChange={(event) =>
+              onSetStatus(event.target.value as FeedbackStatus)
+            }
+            className="min-h-11 max-w-[7.5rem] shrink-0 rounded-full border border-[var(--header-border)] bg-[var(--body-background-faint)] px-2.5 text-[13px] font-bold text-[var(--text-color)] min-[976px]:hidden"
+          >
+            {statusOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {updating && option.value === report.status
+                  ? "Updating"
+                  : option.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <h2 className="m-0 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-[1.15rem] font-bold">
@@ -313,10 +340,8 @@ function FeedbackReportRow({
           </Link>
           <span className="max-[975px]:hidden">{report.storyTitle}</span>
         </h2>
-        <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.9rem] text-[var(--text-color-dim)] max-[975px]:mb-2 max-[975px]:gap-x-2 max-[975px]:text-[13px]">
-          <span className={showCourse ? undefined : "max-[975px]:hidden"}>
-            {report.courseShort}
-          </span>
+        <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.9rem] text-[var(--text-color-dim)] max-[975px]:hidden">
+          <span>{report.courseShort}</span>
           <span>Story {report.storyId}</span>
           {report.line !== undefined ? <span>Line {report.line}</span> : null}
           <span>{getFeedbackSourceLabel(report)}</span>
@@ -359,7 +384,7 @@ function FeedbackReportRow({
         </p>
       </div>
 
-      <div className="flex flex-col gap-3 min-[976px]:items-stretch">
+      <div className="flex flex-col gap-3 max-[975px]:hidden min-[976px]:items-stretch">
         <Link
           href={editorHref}
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[12px] border-2 border-[var(--button-blue-border)] bg-[var(--button-blue-background)] px-4 text-center font-bold text-[var(--button-blue-color)] max-[975px]:hidden"
@@ -381,23 +406,6 @@ function FeedbackReportRow({
             ),
           )}
         </div>
-        <select
-          aria-label={`Status for ${report.storyTitle}`}
-          value={report.status}
-          disabled={updating}
-          onChange={(event) =>
-            onSetStatus(event.target.value as FeedbackStatus)
-          }
-          className="min-h-11 rounded-[10px] border border-[var(--header-border)] bg-[var(--body-background-faint)] px-3 text-base text-[var(--text-color)] min-[976px]:hidden"
-        >
-          {statusOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {updating && option.value === report.status
-                ? "Updating"
-                : option.label}
-            </option>
-          ))}
-        </select>
       </div>
     </article>
   );
