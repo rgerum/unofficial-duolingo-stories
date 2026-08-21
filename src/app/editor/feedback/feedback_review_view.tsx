@@ -292,9 +292,42 @@ function FeedbackReportRow({
 
   return (
     <article className="grid gap-4 rounded-[8px] border-2 border-[var(--overview-hr)] bg-[var(--body-background)] p-4 max-[975px]:rounded-none max-[975px]:border-0 max-[975px]:border-b max-[975px]:border-solid max-[975px]:border-[var(--overview-hr)] max-[975px]:px-0 max-[975px]:py-4 max-[975px]:last:border-b-0 min-[976px]:grid-cols-[minmax(0,1fr)_220px]">
-      <div className="min-w-0">
-        <div className="mb-2 flex items-center gap-2 max-[975px]:grid max-[975px]:grid-cols-[minmax(0,1fr)_auto] max-[975px]:items-start max-[975px]:gap-1.5">
-          <div className="flex min-w-0 flex-wrap items-center gap-2 max-[975px]:gap-1.5">
+      <div className="flex min-w-0 flex-col">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-2 min-[976px]:contents">
+          <h2 className="m-0 mb-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[1.15rem] font-bold">
+            <Link
+              href={editorHref}
+              onClick={rememberView}
+              className="flex min-w-0 max-w-full items-center gap-1.5 overflow-hidden text-[var(--text-color)] no-underline min-[976px]:hidden"
+            >
+              <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
+                {report.storyTitle}
+              </span>
+              <ExternalLinkIcon className="size-4 shrink-0" />
+            </Link>
+            <span className="max-[975px]:hidden">{report.storyTitle}</span>
+          </h2>
+          <select
+            aria-label={`Status for ${report.storyTitle}`}
+            value={report.status}
+            disabled={updating}
+            onChange={(event) =>
+              onSetStatus(event.target.value as FeedbackStatus)
+            }
+            className="min-h-11 max-w-[7.5rem] shrink-0 rounded-full border border-[var(--header-border)] bg-[var(--body-background-faint)] px-2.5 text-[13px] font-bold text-[var(--text-color)] min-[976px]:hidden"
+          >
+            {statusOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {updating && option.value === report.status
+                  ? "Updating"
+                  : option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-2 flex items-center gap-2 min-w-0 min-[976px]:order-first">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 max-[975px]:flex-nowrap max-[975px]:gap-1.5 max-[975px]:overflow-x-auto max-[975px]:whitespace-nowrap">
             <span
               className={cn(
                 "shrink-0 rounded-full px-3 py-1 text-[0.78rem] font-bold",
@@ -329,38 +362,8 @@ function FeedbackReportRow({
               </span>
             ) : null}
           </div>
-          <select
-            aria-label={`Status for ${report.storyTitle}`}
-            value={report.status}
-            disabled={updating}
-            onChange={(event) =>
-              onSetStatus(event.target.value as FeedbackStatus)
-            }
-            className="min-h-11 max-w-[7.5rem] shrink-0 rounded-full border border-[var(--header-border)] bg-[var(--body-background-faint)] px-2.5 text-[13px] font-bold text-[var(--text-color)] min-[976px]:hidden"
-          >
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {updating && option.value === report.status
-                  ? "Updating"
-                  : option.label}
-              </option>
-            ))}
-          </select>
         </div>
 
-        <h2 className="m-0 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-[1.15rem] font-bold">
-          <Link
-            href={editorHref}
-            onClick={rememberView}
-            className="inline-flex max-w-full items-center gap-1.5 overflow-hidden text-[var(--text-color)] no-underline min-[976px]:hidden"
-          >
-            <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-              {report.storyTitle}
-            </span>
-            <ExternalLinkIcon className="size-4 shrink-0" />
-          </Link>
-          <span className="max-[975px]:hidden">{report.storyTitle}</span>
-        </h2>
         <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.9rem] text-[var(--text-color-dim)] max-[975px]:hidden">
           <span>{report.courseShort}</span>
           <span>Story {report.storyId}</span>
