@@ -56,7 +56,8 @@ export default function LayoutFlag() {
     nestedRoute === "story" ||
     nestedRoute === "feedback" ||
     nestedRoute === "voices" ||
-    nestedRoute === "localization"
+    nestedRoute === "localization" ||
+    nestedRoute === "stats"
   ) {
     return null;
   }
@@ -343,6 +344,9 @@ function CourseMobileHeader({ course }: { course: CourseProps }) {
               href={`/editor/course/${course.short}/feedback`}
             >
               Feedback
+            </MobileEditorMenuLink>
+            <MobileEditorMenuLink href={`/editor/course/${course.short}/stats`}>
+              Course stats
             </MobileEditorMenuLink>
             <MobileEditorMenuLink
               href={`/editor/course/${course.short}/voices`}

@@ -31,7 +31,7 @@ export default function CourseActivityChart({
 
   if (data === undefined) {
     return (
-      <div className="my-6 h-[350px] animate-pulse rounded-2xl bg-black/5" />
+      <div className="my-6 h-[350px] animate-pulse rounded-2xl bg-black/5 max-[975px]:my-3" />
     );
   }
   if (!data) return null;
@@ -46,8 +46,8 @@ export default function CourseActivityChart({
   );
 
   return (
-    <section className="my-6 overflow-hidden rounded-2xl border-2 border-[#9cc7de] bg-[#f4fbff] dark:border-[#31576d] dark:bg-[#172a35]">
-      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-[#cce2ed] px-5 py-4 dark:border-[#294858]">
+    <section className="my-6 overflow-hidden rounded-2xl border-2 border-[#9cc7de] bg-[#f4fbff] max-[975px]:my-3 dark:border-[#31576d] dark:bg-[#172a35]">
+      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-[#cce2ed] px-5 py-4 max-[975px]:px-4 dark:border-[#294858]">
         <div className="flex gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#d8f1ff] text-[#1680b5] dark:bg-[#244b60] dark:text-[#75c9f2]">
             <Activity className="h-5 w-5" aria-hidden="true" />
@@ -63,7 +63,7 @@ export default function CourseActivityChart({
           </div>
         </div>
         <div
-          className="flex rounded-xl bg-[#dceef7] p-1 dark:bg-[#203f50]"
+          className="flex rounded-xl bg-[#dceef7] p-1 max-[975px]:w-full dark:bg-[#203f50]"
           aria-label="Chart period"
           role="group"
         >
@@ -71,7 +71,7 @@ export default function CourseActivityChart({
             <button
               key={period}
               type="button"
-              className={`rounded-lg px-3 py-1.5 text-sm font-bold transition ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-bold transition max-[975px]:min-h-11 max-[975px]:flex-1 ${
                 days === period
                   ? "bg-white text-[#126f9c] shadow-sm dark:bg-[#315d72] dark:text-white"
                   : "text-[var(--text-color-dim)] hover:text-[var(--text-color)]"
@@ -85,7 +85,7 @@ export default function CourseActivityChart({
         </div>
       </header>
 
-      <div className="grid gap-5 p-5 min-[760px]:grid-cols-2">
+      <div className="grid gap-5 p-5 max-[975px]:gap-4 max-[975px]:p-4 min-[760px]:grid-cols-2">
         <MetricChart
           icon={<BookOpen className="h-4 w-4" aria-hidden="true" />}
           label="Stories read"

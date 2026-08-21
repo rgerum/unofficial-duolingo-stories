@@ -32,8 +32,7 @@ import type {
   DetailedCourseProps,
   StoryListDataProps,
 } from "@/app/editor/(course)/types";
-import CourseInterestSummary from "./course_interest_summary";
-import CourseActivityChart from "./course_activity_chart";
+import CourseStats from "./course_stats";
 import { Pin } from "lucide-react";
 
 type StoryState = "draft" | "feedback" | "finished" | "published";
@@ -252,10 +251,7 @@ export default function EditList({
             />
           </div>
         </div>
-        <CourseInterestSummary courseIdentifier={course.short} />
-        {course.short ? (
-          <CourseActivityChart courseIdentifier={course.short} />
-        ) : null}
+        <CourseStats courseIdentifier={course.short} />
       </div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 max-[975px]:mb-1 max-[975px]:gap-1">
         <div className="w-full min-w-[220px] flex-1 min-[860px]:max-w-[360px]">
