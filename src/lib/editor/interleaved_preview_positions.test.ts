@@ -168,3 +168,33 @@ test("keeps compound challenge elements sharing a parser position together", () 
     [storyLine, arrange],
   ]);
 });
+
+test("keeps a CONTINUATION prompt with its Line and splits its answers", () => {
+  const prompt = {
+    type: "CHALLENGE_PROMPT",
+    prompt: { text: "Complete the sentence", hintMap: [], hints: [] },
+    trackingProperties: {
+      line_index: 12,
+      challenge_type: "continuation",
+    },
+    lang: "en",
+    editor: { block_start_no: 131, start_no: 131 },
+  } satisfies StoryElement;
+  const storyLine = storyElement({ start_no: 133, end_no: 136 });
+  const answers = {
+    type: "MULTIPLE_CHOICE",
+    answers: ["first", "second", "third"],
+    correctAnswerIndex: 1,
+    trackingProperties: {
+      line_index: 12,
+      challenge_type: "continuation",
+    },
+    lang: "nl",
+    editor: { start_no: 136, end_no: 142 },
+  } satisfies StoryElement;
+
+  assert.deepEqual(splitInterleavedPreviewPart([prompt, storyLine, answers]), [
+    [prompt, storyLine],
+    [answers],
+  ]);
+});
