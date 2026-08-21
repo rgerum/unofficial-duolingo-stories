@@ -279,41 +279,45 @@ export default function EditList({
             onChange={(event) => setStorySearch(event.target.value)}
           />
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2 max-[975px]:w-full max-[975px]:flex-nowrap max-[975px]:justify-start max-[975px]:overflow-x-auto max-[975px]:pb-1">
+        <div className="flex flex-wrap items-center justify-end gap-2 max-[975px]:-mx-3 max-[975px]:w-auto max-[975px]:flex-nowrap max-[975px]:justify-start max-[975px]:gap-0 max-[975px]:overflow-x-auto max-[975px]:px-3 max-[975px]:pb-1">
           {STORY_FILTER_ORDER.map((filter) => {
             const isActive = activeFilter === filter;
             return (
               <button
                 key={filter}
                 type="button"
-                className={
-                  "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 max-[975px]:min-h-11 max-[975px]:gap-1.5 max-[975px]:px-2.5 " +
-                  (isActive
-                    ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
-                    : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
-                }
+                className="group inline-flex shrink-0 items-center justify-center max-[975px]:min-h-11 max-[975px]:px-1"
                 onClick={() => setActiveFilter(filter)}
                 aria-pressed={isActive}
                 aria-label={`${getFilterLabel(filter)}: ${counts[filter]}`}
               >
-                <span className="max-[975px]:sr-only">
-                  {getFilterLabel(filter)}
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="hidden text-[18px] max-[975px]:inline"
-                >
-                  {getFilterIcon(filter)}
-                </span>
                 <span
                   className={
-                    "rounded-full px-2 py-[3px] text-[12px] font-bold max-[975px]:text-[14px] " +
+                    "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 max-[975px]:gap-1.5 max-[975px]:px-2 max-[975px]:py-1.5 max-[975px]:text-[13px] " +
                     (isActive
-                      ? "bg-[color:rgba(255,255,255,0.18)] text-[var(--button-color)]"
-                      : "bg-[var(--body-background)] text-[var(--text-color-dim)]")
+                      ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
+                      : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] group-hover:bg-[var(--body-background)]")
                   }
                 >
-                  {counts[filter]}
+                  <span className="max-[975px]:sr-only">
+                    {getFilterLabel(filter)}
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="hidden text-[18px] max-[975px]:inline max-[975px]:text-[16px]"
+                  >
+                    {getFilterIcon(filter)}
+                  </span>
+                  <span
+                    className={
+                      "rounded-full px-2 py-[3px] text-[12px] font-bold max-[975px]:px-1.5 max-[975px]:py-0.5 " +
+                      (isActive
+                        ? "bg-[color:rgba(255,255,255,0.18)] text-[var(--button-color)]"
+                        : "bg-[var(--body-background)] text-[var(--text-color-dim)]")
+                    }
+                  >
+                    {counts[filter]}
+                  </span>
                 </span>
               </button>
             );
