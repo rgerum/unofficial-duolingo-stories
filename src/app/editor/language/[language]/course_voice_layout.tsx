@@ -10,9 +10,13 @@ import {
   Volume2Icon,
 } from "lucide-react";
 import PlayAudio from "@/components/PlayAudio";
+import {
+  getCourseVoiceLayoutClassNames,
+  type MobileVoiceSection,
+} from "./course_voice_layout_classes";
 import type { SpeakersType } from "./types";
 
-export type MobileVoiceSection = "cast" | "voices";
+export type { MobileVoiceSection } from "./course_voice_layout_classes";
 export type CopyFeedbackStatus = "idle" | "copied" | "error";
 
 const COPY_FEEDBACK_PRESENTATION = {
@@ -81,6 +85,11 @@ export function CourseVoiceLayout({
   voices: VoiceListModel;
   cast: CastModel;
 }) {
+  const classNames = getCourseVoiceLayoutClassNames({
+    mobileCourseLayout: enabled,
+    selectedSection,
+  });
+
   return (
     <div>
       {enabled ? (
@@ -90,15 +99,7 @@ export function CourseVoiceLayout({
         />
       ) : null}
       <div className={enabled ? "min-[976px]:flex" : "contents"}>
-        <div
-          className={`h-[calc(100vh-64px)] w-full overflow-y-scroll max-[600px]:h-auto min-[560px]:w-[400px] ${
-            enabled
-              ? `max-[975px]:!w-full max-[975px]:h-auto max-[975px]:overflow-visible ${
-                  selectedSection === "voices" ? "" : "max-[975px]:hidden"
-                }`
-              : ""
-          }`}
-        >
+        <div className={classNames.voices}>
           {test.audioElement}
           {enabled ? (
             <h2 className="m-0 px-3 pt-4 text-lg font-bold min-[976px]:hidden">
@@ -210,11 +211,7 @@ export function CourseVoiceLayout({
               Available voices
             </h2>
           ) : null}
-          <div
-            className={`h-[calc(100%-110px)] overflow-y-scroll max-[600px]:h-[calc(50vh-140px)] ${
-              enabled ? "max-[975px]:h-auto max-[975px]:overflow-visible" : ""
-            }`}
-          >
+          <div className={classNames.voiceList}>
             <table
               className={`mt-4 w-full border-collapse [&_td]:px-[6px] [&_td]:py-[6px] [&_td]:leading-[1.25] [&_th]:sticky [&_th]:top-0 [&_th]:bg-[var(--button-background)] [&_th]:px-2 [&_th]:py-[5px] [&_th]:text-left [&_th]:font-bold [&_th]:leading-[1.25] [&_th]:text-[var(--button-color)] [&_tr:nth-child(2n)]:bg-[var(--body-background-faint)] ${
                 enabled
@@ -245,15 +242,7 @@ export function CourseVoiceLayout({
             </table>
           </div>
         </div>
-        <div
-          className={`ml-2 h-[calc(100vh-64px)] w-full overflow-y-scroll max-[600px]:m-0 max-[600px]:h-[calc(50vh-30px)] min-[560px]:w-[calc(100vw-400px)] ${
-            enabled
-              ? `max-[975px]:!m-0 max-[975px]:!w-full max-[975px]:h-auto max-[975px]:overflow-visible ${
-                  selectedSection === "cast" ? "" : "max-[975px]:hidden"
-                }`
-              : ""
-          }`}
-        >
+        <div className={classNames.cast}>
           {enabled ? (
             <h2 className="m-0 px-3 pt-4 pb-2 text-lg font-bold min-[976px]:hidden">
               Main cast
