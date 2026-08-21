@@ -474,13 +474,14 @@ export function PlayButton(props: PlayButtonProps) {
   }
 
   return (
-    <span
+    <button
+      type="button"
       className="inline-flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center"
       title="play audio"
       onClick={(event) => do_play(event, speaker || "", name)}
     >
       {content}
-    </span>
+    </button>
   );
 }
 

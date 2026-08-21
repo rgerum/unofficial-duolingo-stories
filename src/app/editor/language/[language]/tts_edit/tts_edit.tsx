@@ -92,7 +92,9 @@ export default function Tts_edit({
   const [validData, setValidData] = React.useState(initialRules);
   const [savedData, setSavedData] = React.useState(initialRules);
   const [saveStatus, setSaveStatus] = React.useState<RulesSaveStatus>("idle");
+  const dataEditVersionRef = React.useRef(0);
   function setDataValidated(value: string) {
+    dataEditVersionRef.current += 1;
     setData(value);
     setSaveStatus((current) => (current === "saving" ? current : "idle"));
     try {
@@ -116,14 +118,9 @@ export default function Tts_edit({
   const previousRemoteRulesRef = React.useRef(remoteRules);
   React.useEffect(() => {
     const remoteRulesChanged = previousRemoteRulesRef.current !== remoteRules;
+    if (!remoteRulesChanged || data !== savedData) return;
     previousRemoteRulesRef.current = remoteRules;
-    if (
-      !remoteRulesChanged ||
-      data !== savedData ||
-      remoteRules === savedData
-    ) {
-      return;
-    }
+    if (remoteRules === savedData) return;
     setData(remoteRules);
     setValidData(remoteRules);
     setSavedData(remoteRules);
@@ -135,6 +132,7 @@ export default function Tts_edit({
 
   async function save() {
     if (yamlError || saveStatus === "saving") return;
+    const editVersionToSave = dataEditVersionRef.current;
     try {
       parseYaml(data);
     } catch {
@@ -149,6 +147,10 @@ export default function Tts_edit({
         tts_replace: rulesToSave,
         operationKey: `language:${language.id}:tts_replace:client`,
       });
+      if (dataEditVersionRef.current !== editVersionToSave) {
+        setSaveStatus("idle");
+        return;
+      }
       setSavedData(rulesToSave);
       setSaveStatus("saved");
     } catch (error) {
