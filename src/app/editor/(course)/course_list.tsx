@@ -118,7 +118,7 @@ function CourseSearch({
           value={value}
           placeholder="Search courses"
           autoComplete="off"
-          className="min-[976px]:mr-[10px] min-[976px]:rounded-2xl min-[976px]:px-[6px] min-[976px]:py-[1px] min-[976px]:text-[19px]"
+          className="max-[975px]:pt-2 max-[975px]:pb-3 min-[976px]:mr-[10px] min-[976px]:rounded-2xl min-[976px]:px-[6px] min-[976px]:py-[1px] min-[976px]:text-[19px]"
           onChange={(event) => onChange(event.target.value)}
         />
       </div>
