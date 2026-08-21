@@ -10,7 +10,7 @@ export default React.forwardRef<
     <Input
       ref={ref}
       className={cn(
-        "max-[975px]:h-12 max-[975px]:text-[16px] max-[975px]:leading-6",
+        "max-[975px]:h-12 max-[975px]:text-[16px] max-[975px]:leading-6 max-[975px]:placeholder:text-[16px] max-[975px]:placeholder:leading-6",
         className,
       )}
       style={{ WebkitTextSizeAdjust: "100%", ...style }}
