@@ -6,6 +6,7 @@ import { api } from "@convex/_generated/api";
 import { Spinner, SpinnerBlue } from "@/components/ui/spinner";
 import { fetch_post } from "@/lib/fetch_post";
 import { copyToClipboard } from "@/lib/copy_to_clipboard";
+import { formatTestVoice } from "@/app/editor/language/[language]/tts_edit/tts_edit_model";
 
 import StoryLineHints from "@/components/StoryLineHints";
 import useAudio from "@/components/StoryTextLine/use-audio.hook";
@@ -519,13 +520,16 @@ export function SpeakerEntry(props: {
             className="inline-flex cursor-pointer items-center justify-center"
             title="copy to clipboard"
             onClick={(event) => {
-              void Promise.resolve(copyText(event, speaker.speaker)).then(
-                (status) => {
+              void Promise.resolve(copyText(event, speaker.speaker))
+                .then((status) => {
                   if (status === "error") {
                     window.alert("Could not copy the voice name.");
                   }
-                },
-              );
+                })
+                .catch((error) => {
+                  console.error("Could not copy voice name", error);
+                  window.alert("Could not copy the voice name.");
+                });
             }}
           >
             <img className="w-5" alt="copy" src="/editor/icons/copy.svg" />
@@ -627,16 +631,12 @@ function AvatarNames({
   async function copyText(e: React.MouseEvent, text: string) {
     const speaker = text;
     const attempt = ++copyAttempt.current;
-    let p = ["x-low", "low", "medium", "high", "x-high"][pitch];
-    let s = ["x-slow", "slow", "medium", "fast", "x-fast"][speed];
-    if (pitch !== 2 && speed !== 2) text = `${text}(pitch=${p}, rate=${s})`;
-    else if (pitch !== 2 && speed === 2) text = `${text}(pitch=${p})`;
-    else if (pitch === 2 && speed !== 2) text = `${text}(rate=${s})`;
+    const formattedVoice = formatTestVoice(text, pitch, speed);
 
     e.preventDefault();
     setCopyFeedback(null);
     try {
-      await copyToClipboard(text);
+      await copyToClipboard(formattedVoice);
       if (attempt === copyAttempt.current) {
         showCopyFeedback(speaker, "copied");
       }

@@ -216,3 +216,41 @@ test("keeps a CONTINUATION prompt with its Line and splits each answer", () => {
     );
   }
 });
+
+test("keeps malformed CONTINUATION answer positions in one widget", () => {
+  const answers = {
+    type: "MULTIPLE_CHOICE",
+    answers: ["first", "second", "third"],
+    correctAnswerIndex: 1,
+    trackingProperties: {
+      line_index: 12,
+      challenge_type: "continuation",
+    },
+    lang: "nl",
+    editor: {
+      start_no: 136,
+      end_no: 142,
+      answer_positions: [
+        { answer_index: 1, start_no: 136 },
+        { answer_index: 0, start_no: 138 },
+      ],
+    },
+  } satisfies StoryElement;
+
+  assert.deepEqual(splitInterleavedPreviewPart([answers]), [[answers]]);
+
+  const outOfOrderAnswers = {
+    ...answers,
+    editor: {
+      ...answers.editor,
+      answer_positions: [
+        { answer_index: 1, start_no: 136 },
+        { answer_index: 0, start_no: 138 },
+        { answer_index: 2, start_no: 140 },
+      ],
+    },
+  } satisfies StoryElement;
+  assert.deepEqual(splitInterleavedPreviewPart([outOfOrderAnswers]), [
+    [outOfOrderAnswers],
+  ]);
+});

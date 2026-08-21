@@ -6,6 +6,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 dotenv.config({ path: ".env.local" });
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL;
+const CONVEX_AUTH_TOKEN = process.env.CONVEX_AUTH_TOKEN;
 const CONCURRENCY = Number(process.env.STORY_IMAGE_AUDIT_CONCURRENCY ?? "20");
 const PUBLISHED_ONLY = parseBooleanEnv(
   process.env.STORY_IMAGE_AUDIT_PUBLISHED_ONLY,
@@ -17,12 +18,18 @@ if (!CONVEX_URL) {
   process.exit(1);
 }
 
+if (!CONVEX_AUTH_TOKEN) {
+  console.error("Error: CONVEX_AUTH_TOKEN is required for the image audit.");
+  process.exit(1);
+}
+
 if (!Number.isFinite(CONCURRENCY) || CONCURRENCY <= 0) {
   console.error("Error: STORY_IMAGE_AUDIT_CONCURRENCY must be a positive number.");
   process.exit(1);
 }
 
 const client = new ConvexHttpClient(CONVEX_URL);
+client.setAuth(CONVEX_AUTH_TOKEN);
 
 type StorySummary = {
   id: number;
@@ -76,6 +83,11 @@ function parseBooleanEnv(value: string | undefined, defaultValue: boolean) {
 
 async function getAllStories(): Promise<StorySummary[]> {
   const sidebar = await client.query(api.editorRead.getEditorSidebarData, {});
+  if (!sidebar.hasAccess) {
+    throw new Error(
+      "The configured CONVEX_AUTH_TOKEN does not grant Editor Course access.",
+    );
+  }
   const courses = sidebar.courses ?? [];
 
   const storiesByCourse = await mapWithConcurrency(

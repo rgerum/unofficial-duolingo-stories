@@ -56,7 +56,7 @@ export default function CourseVoicesEditPageClient({
   if (learningLanguage === null || fromLanguage === null) {
     return (
       <>
-        <CourseVoicesEditHeaders course={course} />
+        <CourseVoicesEditHeaders course={course} courseId={courseId} />
         <p>Language not found.</p>
       </>
     );
@@ -68,7 +68,7 @@ export default function CourseVoicesEditPageClient({
   ) {
     return (
       <>
-        <CourseVoicesEditHeaders course={course} />
+        <CourseVoicesEditHeaders course={course} courseId={courseId} />
         <Spinner />
       </>
     );
@@ -76,7 +76,7 @@ export default function CourseVoicesEditPageClient({
 
   return (
     <>
-      <CourseVoicesEditHeaders course={course} />
+      <CourseVoicesEditHeaders course={course} courseId={courseId} />
       <TtsEdit
         language={learningLanguage}
         language2={fromLanguage ?? undefined}
@@ -95,7 +95,14 @@ export default function CourseVoicesEditPageClient({
   );
 }
 
-function CourseVoicesEditHeaders({ course }: { course: DetailedCourseProps }) {
+function CourseVoicesEditHeaders({
+  course,
+  courseId,
+}: {
+  course: DetailedCourseProps;
+  courseId: string;
+}) {
+  const courseIdentifier = course.short ?? courseId;
   return (
     <>
       <EditorHeaderBreadcrumbs>
@@ -113,17 +120,20 @@ function CourseVoicesEditHeaders({ course }: { course: DetailedCourseProps }) {
                 languageId: course.fromLanguageId,
                 name: course.from_language_name,
               },
-              href: `/editor/course/${course.short}`,
+              href: `/editor/course/${courseIdentifier}`,
             },
             { type: "sep" },
-            { type: "Voices", href: `/editor/course/${course.short}/voices` },
+            {
+              type: "Voices",
+              href: `/editor/course/${courseIdentifier}/voices`,
+            },
             { type: "sep" },
             { type: "Edit" },
           ]}
         />
       </EditorHeaderBreadcrumbs>
       <MobileEditorHeader
-        backHref={`/editor/course/${course.short}/voices`}
+        backHref={`/editor/course/${courseIdentifier}/voices`}
         backLabel="Back to character voices"
         icon={
           <CourseMobileHeaderIllustration

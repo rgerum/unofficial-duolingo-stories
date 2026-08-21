@@ -4,19 +4,19 @@ import React from "react";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import EditorButton from "../editor_button";
-import MobileEditorHeader, {
-  MobileEditorMenuLink,
-  mobileEditorMenuItemClassName,
-} from "../_components/mobile_editor_header";
-import { useCoursePin } from "../_components/use_course_pin";
-import CourseMobileHeaderIllustration from "../_components/course_mobile_header_illustration";
-import MobileEditorOptionsSheet from "../_components/mobile_editor_options_sheet";
-import { Breadcrumbs } from "../_components/breadcrumbs";
+import { Breadcrumbs } from "@/app/editor/_components/breadcrumbs";
+import CourseMobileHeaderIllustration from "@/app/editor/_components/course_mobile_header_illustration";
 import {
   EditorHeaderActions,
   EditorHeaderBreadcrumbs,
-} from "../_components/header_context";
+} from "@/app/editor/_components/header_context";
+import MobileEditorHeader, {
+  MobileEditorMenuLink,
+  mobileEditorMenuItemClassName,
+} from "@/app/editor/_components/mobile_editor_header";
+import MobileEditorOptionsSheet from "@/app/editor/_components/mobile_editor_options_sheet";
+import { useCoursePin } from "@/app/editor/_components/use_course_pin";
+import EditorButton from "@/app/editor/editor_button";
 import type { CourseProps } from "./types";
 
 interface BreadcrumbPath {
@@ -84,7 +84,7 @@ export default function LayoutFlag() {
     ];
   }
   if (import_id && course && course_import) {
-    path[path.length - 1].href = `/editor/course/${course.short}`;
+    path[path.length - 1].href = `/editor/course/${course.short ?? course.id}`;
     path.push({ type: "sep" });
     path.push({
       type: "course",
@@ -114,7 +114,7 @@ export default function LayoutFlag() {
             ) : !import_id ? (
               <EditorButton
                 id="button_import"
-                href={`/editor/course/${course.short}/import/es-en`}
+                href={`/editor/course/${course.short ?? course.id}/import/es-en`}
                 data-cy="button_import"
                 img={"import.svg"}
                 text={"Import"}
@@ -122,7 +122,7 @@ export default function LayoutFlag() {
             ) : (
               <EditorButton
                 id="button_back"
-                href={`/editor/course/${course.short}`}
+                href={`/editor/course/${course.short ?? course.id}`}
                 data-cy="button_back"
                 img={"back.svg"}
                 text={"Back"}
@@ -131,7 +131,7 @@ export default function LayoutFlag() {
             {!import_id ? (
               <EditorButton
                 id="button_feedback"
-                href={`/editor/course/${course.short}/feedback`}
+                href={`/editor/course/${course.short ?? course.id}/feedback`}
                 data-cy="button_feedback"
                 img="stories.png"
                 text="Feedback"
@@ -246,6 +246,7 @@ function ImportMobileHeader({
 
 function CourseMobileHeader({ course }: { course: CourseProps }) {
   const { isPinned, isUpdating, isLoading, toggle } = useCoursePin(course.id);
+  const courseIdentifier = course.short ?? course.id;
 
   return (
     <MobileEditorHeader
@@ -279,23 +280,27 @@ function CourseMobileHeader({ course }: { course: CourseProps }) {
         </button>
         {!course.official ? (
           <MobileEditorMenuLink
-            href={`/editor/course/${course.short}/import/es-en`}
+            href={`/editor/course/${courseIdentifier}/import/es-en`}
           >
             Import stories
           </MobileEditorMenuLink>
         ) : null}
-        <MobileEditorMenuLink href={`/editor/course/${course.short}/feedback`}>
+        <MobileEditorMenuLink
+          href={`/editor/course/${courseIdentifier}/feedback`}
+        >
           Feedback
         </MobileEditorMenuLink>
-        <MobileEditorMenuLink href={`/editor/course/${course.short}/stats`}>
+        <MobileEditorMenuLink href={`/editor/course/${courseIdentifier}/stats`}>
           Course stats
         </MobileEditorMenuLink>
-        <MobileEditorMenuLink href={`/editor/course/${course.short}/voices`}>
+        <MobileEditorMenuLink
+          href={`/editor/course/${courseIdentifier}/voices`}
+        >
           Character voices
         </MobileEditorMenuLink>
         {course.from_language_name !== "English" ? (
           <MobileEditorMenuLink
-            href={`/editor/course/${course.short}/localization`}
+            href={`/editor/course/${courseIdentifier}/localization`}
           >
             Localization
           </MobileEditorMenuLink>

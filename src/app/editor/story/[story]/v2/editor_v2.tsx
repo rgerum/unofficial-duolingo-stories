@@ -630,7 +630,6 @@ export default function EditorV2({
   const latestEditorStateForPreviewRef = React.useRef<
     EditorStateType | undefined
   >(undefined);
-  latestEditorStateForPreviewRef.current = editorStateForPreview;
 
   const editorStateForInterleavedPreview = React.useMemo<
     EditorStateType | undefined
@@ -663,6 +662,10 @@ export default function EditorV2({
         latestEditorStateForPreviewRef.current?.show_audio_editor(data),
     };
   }, [view]);
+
+  React.useEffect(() => {
+    latestEditorStateForPreviewRef.current = editorStateForPreview;
+  }, [editorStateForPreview]);
 
   React.useEffect(() => {
     if (!view) return;

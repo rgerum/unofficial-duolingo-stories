@@ -71,5 +71,6 @@ test("compacts answer spacing only when requested by an embedded preview", () =>
   assert.match(regularHtml, /h-\[42px\]/);
   assert.doesNotMatch(regularHtml, /my-1\.5/);
   assert.match(compactHtml, /my-1\.5/);
-  assert.match(compactHtml, /h-8/);
+  assert.doesNotMatch(compactHtml, /\bmy-5\b/);
+  assert.match(compactHtml, /\bh-8\b/);
 });

@@ -6,13 +6,13 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import Link from "next/link";
-import Switch from "@/components/ui/switch";
 import MobileEditorHeader, {
   mobileEditorMenuItemClassName,
 } from "@/app/editor/_components/mobile_editor_header";
 import StoryMobileHeaderIllustration from "@/app/editor/_components/story_mobile_header_illustration";
 import MobileEditorOptionsSheet from "@/app/editor/_components/mobile_editor_options_sheet";
 import { SheetClose } from "@/components/ui/sheet";
+import { SwitchVisual } from "@/components/ui/switch";
 import EditorButton from "../../editor_button";
 import { EditorHeaderActions } from "../../_components/header_context";
 import type { StoryData } from "./types";
@@ -374,19 +374,21 @@ function MobileToggleRow({
   onClick: () => void;
 }) {
   return (
-    <div className="flex min-h-16 items-center gap-4 px-3">
-      <button
-        type="button"
-        className="min-w-0 flex-1 text-left !text-base"
-        onClick={onClick}
-      >
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      className="flex min-h-16 w-full items-center gap-4 px-3 text-left text-base!"
+      onClick={onClick}
+    >
+      <span className="min-w-0 flex-1">
         <span className="block font-medium">{label}</span>
         <span className="block text-xs text-[var(--text-color-dim)]">
           {description}
         </span>
-      </button>
-      <Switch checked={checked} onClick={onClick} ariaLabel={label} />
-    </div>
+      </span>
+      <SwitchVisual checked={checked} />
+    </button>
   );
 }
 

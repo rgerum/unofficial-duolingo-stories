@@ -38,7 +38,7 @@ export default function CourseList({ course_id }: CourseListProps) {
     );
   }
 
-  const courses = data.courses as CourseProps[];
+  const courses = data.courses;
 
   if (courses.length === 0) {
     return (
@@ -168,6 +168,7 @@ function CourseRow({
             </span>
             {pinned ? (
               <PinIcon
+                role="img"
                 aria-label="Pinned course"
                 className="size-3.5 shrink-0 fill-current text-[var(--button-background)]"
               />
@@ -286,7 +287,7 @@ function CourseListLoading() {
   return (
     <CourseListFrame>
       <div className="sticky top-0 h-10 animate-pulse border-b border-[var(--header-border)] bg-[var(--body-background-faint)] max-[975px]:m-3 max-[975px]:h-11 max-[975px]:rounded-xl max-[975px]:border" />
-      <div aria-label="Loading courses" role="status">
+      <div role="status">
         {Array.from({ length: 7 }, (_, index) => (
           <div
             key={index}

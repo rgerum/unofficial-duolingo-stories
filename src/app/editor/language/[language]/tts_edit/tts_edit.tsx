@@ -87,6 +87,7 @@ export default function Tts_edit({
 }) {
   // Render data...                <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
   const initialRules = language.tts_replace || DEFAULT_TTS_RULES;
+  const remoteRules = language.tts_replace || DEFAULT_TTS_RULES;
   const [data, setData] = React.useState(initialRules);
   const [validData, setValidData] = React.useState(initialRules);
   const [savedData, setSavedData] = React.useState(initialRules);
@@ -112,6 +113,14 @@ export default function Tts_edit({
   const saveTtsReplaceMutation = useMutation(api.languageWrite.setTtsReplace);
 
   const [yamlError, setYamlError] = React.useState(false);
+  React.useEffect(() => {
+    if (data !== savedData || remoteRules === savedData) return;
+    setData(remoteRules);
+    setValidData(remoteRules);
+    setSavedData(remoteRules);
+    setYamlError(false);
+    setSaveStatus("idle");
+  }, [data, remoteRules, savedData]);
   const hasVoices = (speakers?.length ?? 0) > 0;
   const rulesChanged = data !== savedData;
 

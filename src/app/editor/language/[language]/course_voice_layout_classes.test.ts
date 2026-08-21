@@ -37,6 +37,15 @@ test("course mobile layout delegates scrolling to the outer route container", ()
     tokens(classNames.cast).has("min-[976px]:h-[calc(100vh-64px)]"),
     true,
   );
+  assert.equal(tokens(classNames.voices).has("max-[975px]:hidden"), true);
+  assert.equal(tokens(classNames.cast).has("max-[975px]:hidden"), false);
+
+  const voicesSelected = getCourseVoiceLayoutClassNames({
+    mobileCourseLayout: true,
+    selectedSection: "voices",
+  });
+  assert.equal(tokens(voicesSelected.voices).has("max-[975px]:hidden"), false);
+  assert.equal(tokens(voicesSelected.cast).has("max-[975px]:hidden"), true);
 });
 
 test("generic language layout keeps its legacy inner scrolling", () => {

@@ -59,6 +59,8 @@ export default function CourseVoicesPageClient({
     );
   }
 
+  const courseIdentifier = course.short ?? courseId;
+
   return (
     <>
       <EditorHeaderBreadcrumbs>
@@ -76,7 +78,7 @@ export default function CourseVoicesPageClient({
                 languageId: course.fromLanguageId,
                 name: course.from_language_name,
               },
-              href: `/editor/course/${course.short}`,
+              href: `/editor/course/${courseIdentifier}`,
             },
             { type: "sep" },
             { type: "Voices" },
@@ -86,14 +88,14 @@ export default function CourseVoicesPageClient({
       <EditorHeaderActions>
         <EditorButton
           id="button_edit"
-          href={`/editor/course/${course.short}/voices/edit`}
+          href={`/editor/course/${courseIdentifier}/voices/edit`}
           data-cy="button_edit"
           img={"import.svg"}
           text={"Edit"}
         />
       </EditorHeaderActions>
       <MobileEditorHeader
-        backHref={`/editor/course/${course.short}`}
+        backHref={`/editor/course/${courseIdentifier}`}
         backLabel="Back to course"
         icon={
           <CourseMobileHeaderIllustration
@@ -105,7 +107,7 @@ export default function CourseVoicesPageClient({
         subtitle={course.learning_language_name}
       >
         <Link
-          href={`/editor/course/${course.short}/voices/edit`}
+          href={`/editor/course/${courseIdentifier}/voices/edit`}
           aria-label="Pronunciation rules"
           className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--text-color)] no-underline transition-colors hover:bg-[var(--header-border)]"
         >

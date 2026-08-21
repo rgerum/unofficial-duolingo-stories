@@ -280,8 +280,9 @@ class InterleavedPreviewWidget extends WidgetType {
     if (widgetRoot.measureFrame !== null) {
       window.cancelAnimationFrame(widgetRoot.measureFrame);
     }
-    widgetRoot.root.unmount();
     widgetRoots.delete(container);
+    const root = widgetRoot.root;
+    queueMicrotask(() => root.unmount());
   }
 }
 

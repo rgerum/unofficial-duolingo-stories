@@ -123,6 +123,15 @@ export default function FeedbackReviewView({
     status: FeedbackStatus,
   ) => void | Promise<void>;
 }) {
+  const [relativeNow, setRelativeNow] = React.useState(() => Date.now());
+  React.useEffect(() => {
+    const interval = window.setInterval(
+      () => setRelativeNow(Date.now()),
+      60_000,
+    );
+    return () => window.clearInterval(interval);
+  }, []);
+
   return (
     <main className="mx-auto w-full max-w-[1120px] px-5 py-6 max-[975px]:px-3 max-[975px]:py-3">
       <div className="mb-5 flex flex-col gap-4 max-[975px]:mb-1 max-[975px]:gap-1 min-[976px]:flex-row min-[976px]:items-end min-[976px]:justify-between">
@@ -200,6 +209,7 @@ export default function FeedbackReviewView({
               <FeedbackReportRow
                 key={report._id}
                 report={report}
+                relativeNow={relativeNow}
                 returnHref={returnHref}
                 loadedReportCount={reports.length}
                 showCourse={selectedCourseShort === undefined}
@@ -268,6 +278,7 @@ function CourseFilterLink({
 
 function FeedbackReportRow({
   report,
+  relativeNow,
   returnHref,
   loadedReportCount,
   showCourse,
@@ -275,6 +286,7 @@ function FeedbackReportRow({
   onSetStatus,
 }: {
   report: FeedbackReport;
+  relativeNow: number;
   returnHref: string;
   loadedReportCount: number;
   showCourse: boolean;
@@ -330,7 +342,7 @@ function FeedbackReportRow({
                   className="shrink-0 text-[0.82rem] text-[var(--text-color-dim)]"
                 >
                   <span className="min-[976px]:hidden" suppressHydrationWarning>
-                    {formatRelativeDate(report.createdAt)}
+                    {formatRelativeDate(report.createdAt, relativeNow)}
                   </span>
                   <span className="max-[975px]:hidden">
                     {formatDateTime(report.createdAt)}
@@ -375,7 +387,7 @@ function FeedbackReportRow({
             report.userName || report.userEmail ? (
               <span>{report.userName || report.userEmail}</span>
             ) : (
-              <span className="max-[975px]:hidden">Anonymous</span>
+              <span>Anonymous</span>
             )
           ) : (
             <Link
@@ -582,11 +594,8 @@ function formatDateTime(timestamp: number) {
   }).format(new Date(timestamp));
 }
 
-function formatRelativeDate(timestamp: number) {
-  const elapsedMinutes = Math.max(
-    0,
-    Math.floor((Date.now() - timestamp) / 60_000),
-  );
+function formatRelativeDate(timestamp: number, now: number) {
+  const elapsedMinutes = Math.max(0, Math.floor((now - timestamp) / 60_000));
   if (elapsedMinutes < 1) return "now";
   if (elapsedMinutes < 60) return `${elapsedMinutes}m`;
 
