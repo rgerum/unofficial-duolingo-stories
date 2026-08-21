@@ -49,6 +49,8 @@ type HeaderProps = {
   set_show_trans: (show: boolean) => void;
   show_ssml: boolean;
   set_show_ssml: (show: boolean) => void;
+  interleaved_preview: boolean;
+  set_interleaved_preview: (show: boolean) => void;
   open_bulk_audio: () => void;
   previous_story: StoryNavigationTarget | null;
   next_story: StoryNavigationTarget | null;
@@ -68,6 +70,8 @@ export function StoryEditorHeader({
   set_show_trans,
   show_ssml,
   set_show_ssml,
+  interleaved_preview,
+  set_interleaved_preview,
   open_bulk_audio,
   previous_story,
   next_story,
@@ -245,6 +249,12 @@ export function StoryEditorHeader({
                 description="Show SSML and audio timing"
                 checked={show_ssml}
                 onClick={do_set_show_ssml}
+              />
+              <MobileToggleRow
+                label="Interleaved preview"
+                description="Show each Story element above its source block"
+                checked={interleaved_preview}
+                onClick={() => set_interleaved_preview(!interleaved_preview)}
               />
               <button
                 type="button"

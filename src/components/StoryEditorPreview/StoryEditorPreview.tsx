@@ -33,7 +33,7 @@ interface StoryEditorPreviewProps {
   ) => void | Promise<void>;
 }
 
-function GetParts(story: StoryType) {
+export function getStoryEditorPreviewParts(story: StoryType) {
   const parts: StoryElement[][] = [];
   let last_id = -1;
   for (const element of story.elements) {
@@ -54,7 +54,7 @@ export default function StoryEditorPreview({
   editorState,
   onOpenAudioEditor,
 }: StoryEditorPreviewProps) {
-  const parts = GetParts(story);
+  const parts = getStoryEditorPreviewParts(story);
   // In the editor these toggles control editor-only overlays:
   // `showHints` reveals inline translations and `showAudio` reveals SSML tools.
   // The base preview should still look like the live story when they are off.
@@ -68,7 +68,7 @@ export default function StoryEditorPreview({
       )}
     >
       {parts.map((part, i) => (
-        <EditorPart
+        <StoryEditorPreviewPart
           key={i}
           part={part}
           editorState={editorState}
@@ -82,7 +82,7 @@ export default function StoryEditorPreview({
   );
 }
 
-interface EditorPartProps {
+interface StoryEditorPreviewPartProps {
   part: StoryElement[];
   editorState?: EditorStateType;
   rtl: boolean;
@@ -91,16 +91,18 @@ interface EditorPartProps {
   onOpenAudioEditor?: (
     element: StoryElementLine | StoryElementHeader,
   ) => void | Promise<void>;
+  compact?: boolean;
 }
 
-function EditorPart({
+export function StoryEditorPreviewPart({
   part,
   editorState,
   rtl,
   showHints,
   showAudio,
   onOpenAudioEditor,
-}: EditorPartProps) {
+  compact = false,
+}: StoryEditorPreviewPartProps) {
   const lastElement = part[part.length - 1];
   const trackingProps = lastElement.trackingProperties as {
     challenge_type?: string;
@@ -119,6 +121,7 @@ function EditorPart({
           showHints={showHints}
           showAudio={showAudio}
           onOpenAudioEditor={onOpenAudioEditor}
+          compact={compact}
         />
       ))}
     </div>
@@ -134,6 +137,7 @@ interface EditorElementProps {
   onOpenAudioEditor?: (
     element: StoryElementLine | StoryElementHeader,
   ) => void | Promise<void>;
+  compact: boolean;
 }
 
 function EditorElement({
@@ -143,6 +147,7 @@ function EditorElement({
   showHints,
   showAudio,
   onOpenAudioEditor,
+  compact,
 }: EditorElementProps) {
   // Keep the underlying story rendering aligned with the live experience.
   // Editor toggles are passed separately as overrides below so they only affect
@@ -174,6 +179,7 @@ function EditorElement({
         editorShowTranslationsOverride={showHints}
         editorShowAudioDetailsOverride={showAudio}
         onOpenAudioEditor={onOpenAudioEditor}
+        compact={compact}
       />
     );
   }
@@ -188,6 +194,7 @@ function EditorElement({
         editorShowTranslationsOverride={showHints}
         editorShowAudioDetailsOverride={showAudio}
         onOpenAudioEditor={onOpenAudioEditor}
+        compact={compact}
       />
     );
   }

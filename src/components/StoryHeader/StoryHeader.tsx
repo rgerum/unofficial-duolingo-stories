@@ -14,6 +14,7 @@ import {
   getEditorHandlers,
   type EditorProps,
 } from "@/lib/editor/editorHandlers";
+import { cn } from "@/lib/utils";
 
 function StoryHeader({
   active,
@@ -25,6 +26,7 @@ function StoryHeader({
   onOpenAudioEditor,
   audioRangeOverride,
   hideAudioButton = false,
+  compact = false,
 }: {
   active: boolean;
   element: StoryElementHeader;
@@ -37,6 +39,7 @@ function StoryHeader({
   ) => void | Promise<void>;
   audioRangeOverride?: number;
   hideAudioButton?: boolean;
+  compact?: boolean;
 }) {
   const editorProps: EditorProps = {
     editorState,
@@ -80,11 +83,19 @@ function StoryHeader({
       <div>
         <img
           alt="title image"
-          className="mx-auto block h-[175px] w-[175px]"
+          className={cn(
+            "mx-auto block h-[175px] w-[175px]",
+            compact && "h-24 w-24",
+          )}
           src={element.illustrationUrl}
         />
       </div>
-      <h1 className="m-0 text-[25px] leading-[34px] font-bold">
+      <h1
+        className={cn(
+          "m-0 text-[25px] leading-[34px] font-bold",
+          compact && "text-xl leading-7",
+        )}
+      >
         {url && (
           <audio ref={ref}>
             <source src={url} type="audio/mp3" />

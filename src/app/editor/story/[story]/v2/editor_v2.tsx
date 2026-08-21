@@ -39,6 +39,10 @@ import {
 } from "@/lib/editor/audio/audio_edit_tools";
 import { fix_audio_line_order } from "@/lib/editor/audio/fix_audio_line_order";
 import AdminControls from "./admin_controls";
+import {
+  interleavedPreviewExtension,
+  setInterleavedPreview,
+} from "./interleaved_preview";
 import { LintPanel } from "./lint_panel";
 import { useStoryEditorModel } from "./use_story_editor_model";
 
@@ -258,6 +262,8 @@ export default function EditorV2({
     setShowHints: set_show_trans,
     showAudio: show_ssml,
     setShowAudio: set_show_ssml,
+    interleavedPreview,
+    setInterleavedPreview: setInterleavedPreviewPreference,
   } = useStoryEditorPreferences();
   const [audioEditorData, setAudioEditorData] = React.useState<
     StoryElementLine | StoryElementHeader | undefined
@@ -409,6 +415,7 @@ export default function EditorV2({
         sync,
         example(),
         highlightStyle,
+        interleavedPreviewExtension,
         mobilePresentationCompartmentRef.current.of(
           isDesktopEditor() ? [] : mobileEditorPresentation,
         ),
@@ -640,6 +647,77 @@ export default function EditorV2({
       openAudioEditor,
       view,
     ]);
+  const latestEditorStateForPreviewRef = React.useRef<
+    EditorStateType | undefined
+  >(undefined);
+  latestEditorStateForPreviewRef.current = editorStateForPreview;
+
+  const editorStateForInterleavedPreview = React.useMemo<
+    EditorStateType | undefined
+  >(() => {
+    if (!view) return undefined;
+    return {
+      get line_no() {
+        return latestEditorStateForPreviewRef.current?.line_no ?? 1;
+      },
+      view,
+      select: (line, scroll) =>
+        latestEditorStateForPreviewRef.current?.select(line, scroll),
+      get audio_insert_lines() {
+        return latestEditorStateForPreviewRef.current?.audio_insert_lines;
+      },
+      create_audio_insert_anchor: (ssml) =>
+        latestEditorStateForPreviewRef.current?.create_audio_insert_anchor(
+          ssml,
+        ),
+      track_audio_insert_anchor: (anchor) =>
+        latestEditorStateForPreviewRef.current?.track_audio_insert_anchor(
+          anchor,
+        ) ?? (() => {}),
+      insert_audio_at_anchor: (text, anchor) =>
+        latestEditorStateForPreviewRef.current?.insert_audio_at_anchor(
+          text,
+          anchor,
+        ),
+      show_audio_editor: (data) =>
+        latestEditorStateForPreviewRef.current?.show_audio_editor(data),
+    };
+  }, [view]);
+
+  React.useEffect(() => {
+    if (!view) return;
+    const enabled = !desktopLayout && interleavedPreview;
+    view.dispatch({
+      effects: setInterleavedPreview.of(
+        enabled
+          ? {
+              story: model.parsedStory,
+              editorState: editorStateForInterleavedPreview,
+              showHints: show_trans,
+              showAudio: show_ssml,
+              onOpenAudioEditor:
+                editorStateForInterleavedPreview?.show_audio_editor,
+            }
+          : null,
+      ),
+    });
+  }, [
+    desktopLayout,
+    editorStateForInterleavedPreview,
+    interleavedPreview,
+    model.parsedStory,
+    show_ssml,
+    show_trans,
+    view,
+  ]);
+
+  const setInterleavedPreviewMode = React.useCallback(
+    (show: boolean) => {
+      setInterleavedPreviewPreference(show);
+      if (show) setMobilePane("edit");
+    },
+    [setInterleavedPreviewPreference],
+  );
 
   const audioEditorDataContent =
     (audioEditorData?.type === "LINE" && audioEditorData.line.content) ||
@@ -696,6 +774,8 @@ export default function EditorV2({
         set_show_trans={set_show_trans}
         show_ssml={show_ssml}
         set_show_ssml={set_show_ssml}
+        interleaved_preview={interleavedPreview}
+        set_interleaved_preview={setInterleavedPreviewMode}
         open_bulk_audio={() => {
           setAudioEditorData(undefined);
           setBulkAudioOpen(true);
@@ -738,7 +818,9 @@ export default function EditorV2({
         )}
 
       <div className="relative flex min-h-0 flex-1">
-        <MobilePaneSwitch value={mobilePane} onChange={setMobilePane} />
+        {!interleavedPreview ? (
+          <MobilePaneSwitch value={mobilePane} onChange={setMobilePane} />
+        ) : null}
         <svg
           className="pointer-events-none fixed z-[-1] h-full w-full float-left max-[975px]:hidden"
           ref={svgParentRef}
@@ -751,7 +833,7 @@ export default function EditorV2({
         <RtlContainer
           ref={editorRef}
           rtl={Boolean(language_data?.rtl)}
-          mobileVisible={mobilePane === "edit"}
+          mobileVisible={interleavedPreview || mobilePane === "edit"}
         />
         <svg
           className="h-full w-[2%] cursor-col-resize overflow-scroll float-left max-[975px]:hidden"
@@ -760,7 +842,9 @@ export default function EditorV2({
         <div
           ref={previewRef}
           className={`relative min-h-0 w-[100px] grow overflow-auto p-3 [scroll-behavior:auto] max-[975px]:h-full max-[975px]:w-full ${
-            mobilePane === "preview" ? "" : "max-[975px]:hidden"
+            !interleavedPreview && mobilePane === "preview"
+              ? ""
+              : "max-[975px]:hidden"
           }`}
         >
           {isAdmin ? (

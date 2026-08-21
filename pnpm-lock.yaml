@@ -20,6 +20,9 @@ importers:
       '@codemirror/state':
         specifier: ^6.7.1
         version: 6.7.1
+      '@codemirror/view':
+        specifier: ^6.43.8
+        version: 6.43.8
       '@convex-dev/aggregate':
         specifier: ^0.2.2
         version: 0.2.2(convex@1.43.0(bufferutil@4.1.0)(react@19.2.8))
