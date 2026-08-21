@@ -5,8 +5,8 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Spinner, SpinnerBlue } from "@/components/ui/spinner";
 import { fetch_post } from "@/lib/fetch_post";
+import { copyToClipboard } from "@/lib/copy_to_clipboard";
 
-import PlayAudio from "@/components/PlayAudio";
 import StoryLineHints from "@/components/StoryLineHints";
 import useAudio from "@/components/StoryTextLine/use-audio.hook";
 import { Breadcrumbs } from "../../_components/breadcrumbs";
@@ -22,6 +22,12 @@ import {
   CourseStudType,
 } from "@/app/editor/language/[language]/types";
 import type { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
+import {
+  CourseVoiceLayout,
+  MobileAvatarEditor,
+  MobileSpeakerRow,
+  type MobileVoiceSection,
+} from "./course_voice_layout";
 type PlayFn = (
   e: React.MouseEvent,
   text: string,
@@ -31,9 +37,11 @@ type PlayFn = (
 export default function LanguageEditor({
   identifier,
   renderHeader = true,
+  mobileCourseLayout = false,
 }: {
   identifier: string;
   renderHeader?: boolean;
+  mobileCourseLayout?: boolean;
 }) {
   const resolved = useQuery(api.editorRead.resolveEditorLanguage, {
     identifier,
@@ -77,11 +85,18 @@ export default function LanguageEditor({
         use_edit={false}
         renderHeader={renderHeader}
       >
-        <div className="flex flex-col leading-normal min-[560px]:flex-row max-[600px]:block">
+        <div
+          className={
+            mobileCourseLayout
+              ? "leading-normal"
+              : "flex flex-col leading-normal min-[560px]:flex-row max-[600px]:block"
+          }
+        >
           <AvatarNames
             language={language}
             speakers={(speakers ?? []) as SpeakersType[]}
             avatar_names={(avatarNames ?? []) as AvatarNamesType[]}
+            mobileCourseLayout={mobileCourseLayout}
           />
         </div>
       </Layout>
@@ -202,6 +217,7 @@ function Avatar(props: {
   avatar: AvatarData;
   language_id: LanguageType;
   play: PlayFn;
+  mobileCourseLayout: boolean;
 }) {
   const avatar = props.avatar;
   const placeholderName = namePlaceholder(avatar);
@@ -250,15 +266,107 @@ function Avatar(props: {
     setSavedName(name);
     setSavedSpeaker(speaker);
   }
+
+  const desktopCardClassName =
+    "m-[10px] flex flex-col items-center rounded-[5px] border border-[var(--header-border)] p-[5px] max-[600px]:m-0" +
+    (props.mobileCourseLayout ? " max-[975px]:hidden" : "");
+  const mobileCard = props.mobileCourseLayout ? (
+    <MobileAvatarEditor
+      avatarId={avatar.avatar_id}
+      avatarUrl={avatar.link}
+      displayName={inputName || placeholderName}
+      placeholderName={placeholderName}
+      inputName={inputName}
+      inputSpeaker={inputSpeaker}
+      unsaved={unsavedChanged}
+      nameMode={
+        avatar.avatar_id === -1
+          ? "read-only"
+          : avatar.avatar_id === 0
+            ? "disabled"
+            : "editable"
+      }
+      playControl={
+        <PlayButton
+          play={props.play}
+          speaker={inputSpeaker}
+          largeTouchTarget
+          name={
+            avatar.avatar_id === 0
+              ? "Duo"
+              : inputName || avatar.canonical_name || ""
+          }
+        />
+      }
+      onNameChange={inputNameSetValue}
+      onSpeakerChange={inputSpeakerSetValue}
+      onSave={() => void save()}
+    />
+  ) : null;
+
   if (avatar.avatar_id === -1) {
     return (
-      <div className="m-[10px] flex flex-col items-center rounded-[5px] border border-[var(--header-border)] p-[5px] max-[600px]:m-0">
+      <>
+        {mobileCard}
+        <div className={desktopCardClassName}>
+          <p className="m-0">
+            {avatar.avatar_id}
+            <GenderMark gender={avatar.gender} />
+            <span>{unsavedChanged ? "*" : ""}</span>
+          </p>
+          <p className="m-0 h-[50px]">
+            <img
+              alt="avatar"
+              src={avatar.link}
+              style={{ height: "50px" }}
+              title={placeholderName}
+            />
+          </p>
+
+          <p className="m-0">{inputName}</p>
+          <p className="m-0">
+            <input
+              className="w-[102px] rounded-[5px] border border-[var(--input-border)] bg-[var(--input-background)] p-[5px] text-[var(--text-color)]"
+              value={inputSpeaker}
+              onChange={(e) => inputSpeakerSetValue(e.target.value)}
+              type="text"
+              placeholder="Speaker"
+            />
+          </p>
+          <span
+            className="inline-flex cursor-pointer items-center justify-center pr-[5px]"
+            title="play audio"
+            onClick={(e) => props.play(e, inputSpeaker, "Duo")}
+          >
+            <img
+              className="w-5"
+              alt="play"
+              src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
+            />
+          </span>
+          <p className="m-0">
+            <input
+              className="mt-[6px] cursor-pointer rounded-[8px] border border-[var(--input-border)] bg-[var(--input-background)] px-[10px] py-[4px] text-[var(--text-color)] disabled:cursor-default disabled:opacity-70"
+              value="save"
+              onClick={save}
+              disabled={!unsavedChanged}
+              type="button"
+            />
+          </p>
+        </div>
+      </>
+    );
+  }
+  return (
+    <>
+      {mobileCard}
+      <div className={desktopCardClassName}>
         <p className="m-0">
           {avatar.avatar_id}
           <GenderMark gender={avatar.gender} />
           <span>{unsavedChanged ? "*" : ""}</span>
         </p>
-        <p className="m-0 h-[50px]">
+        <p className="m-0">
           <img
             alt="avatar"
             src={avatar.link}
@@ -277,89 +385,27 @@ function Avatar(props: {
             placeholder="Speaker"
           />
         </p>
-        <span
-          className="inline-flex cursor-pointer items-center justify-center pr-[5px]"
-          title="play audio"
-          onClick={(e) => props.play(e, inputSpeaker, "Duo")}
-        >
-          <img
-            className="w-5"
-            alt="play"
-            src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
-          />
-        </span>
+
+        <PlayButton
+          play={props.play}
+          speaker={inputSpeaker}
+          name={
+            avatar.avatar_id === 0
+              ? "Duo"
+              : inputName || avatar.canonical_name || ""
+          }
+        />
         <p className="m-0">
           <input
-            className="mt-[6px] cursor-pointer rounded-[8px] border border-[var(--input-border)] bg-[var(--input-background)] px-[10px] py-[4px] text-[var(--text-color)] disabled:cursor-default disabled:opacity-70"
             value="save"
+            className="mt-[6px] cursor-pointer rounded-[8px] border border-[var(--input-border)] bg-[var(--input-background)] px-[10px] py-[4px] text-[var(--text-color)] disabled:cursor-default disabled:opacity-70"
             onClick={save}
             disabled={!unsavedChanged}
             type="button"
           />
         </p>
       </div>
-    );
-  }
-  return (
-    <div className="m-[10px] flex flex-col items-center rounded-[5px] border border-[var(--header-border)] p-[5px] max-[600px]:m-0">
-      <p className="m-0">
-        {avatar.avatar_id}
-        <GenderMark gender={avatar.gender} />
-        <span>{unsavedChanged ? "*" : ""}</span>
-      </p>
-      <p className="m-0">
-        <img
-          alt="avatar"
-          src={avatar.link}
-          style={{ height: "50px" }}
-          title={placeholderName}
-        />
-      </p>
-
-      <p className="m-0">
-        <input
-          className="w-[102px] rounded-[5px] border border-[var(--input-border)] bg-[var(--input-background)] p-[5px] text-[var(--text-color)]"
-          value={inputName}
-          disabled={avatar.avatar_id === 0}
-          onChange={(e) => inputNameSetValue(e.target.value)}
-          type="text"
-          placeholder={placeholderName}
-          title={
-            inputName
-              ? undefined
-              : `Not set for this language — placeholder shows the canonical name or names used in stories: ${placeholderName}`
-          }
-        />
-      </p>
-      <p className="m-0">
-        <input
-          className="w-[102px] rounded-[5px] border border-[var(--input-border)] bg-[var(--input-background)] p-[5px] text-[var(--text-color)]"
-          value={inputSpeaker}
-          onChange={(e) => inputSpeakerSetValue(e.target.value)}
-          type="text"
-          placeholder="Speaker"
-        />
-      </p>
-
-      <PlayButton
-        play={props.play}
-        speaker={inputSpeaker}
-        name={
-          avatar.avatar_id === 0
-            ? "Duo"
-            : inputName || avatar.canonical_name || ""
-        }
-      />
-      <p className="m-0">
-        <input
-          value="save"
-          className="mt-[6px] cursor-pointer rounded-[8px] border border-[var(--input-border)] bg-[var(--input-background)] px-[10px] py-[4px] text-[var(--text-color)] disabled:cursor-default disabled:opacity-70"
-          onClick={save}
-          disabled={!unsavedChanged}
-          type="button"
-        />
-      </p>
-    </div>
+    </>
   );
 }
 
@@ -367,6 +413,7 @@ interface PlayButtonProps {
   play: PlayFn;
   speaker: string | null;
   name: string;
+  largeTouchTarget?: boolean;
 }
 
 export function PlayButton(props: PlayButtonProps) {
@@ -388,29 +435,44 @@ export function PlayButton(props: PlayButtonProps) {
     setLoading(0);
   }
 
+  const content =
+    loading === 0 ? (
+      <img
+        className="h-5 w-5"
+        alt="play"
+        src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
+      />
+    ) : loading === 1 ? (
+      <SpinnerBlue />
+    ) : loading === -1 ? (
+      <img
+        title="an error occurred"
+        alt="error"
+        src="/editor/icons/error.svg"
+      />
+    ) : null;
+
+  if (props.largeTouchTarget) {
+    return (
+      <button
+        type="button"
+        aria-label="Play voice sample"
+        className="inline-flex size-11 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0"
+        title="play audio"
+        onClick={(event) => do_play(event, speaker || "", name)}
+      >
+        {content}
+      </button>
+    );
+  }
+
   return (
     <span
       className="inline-flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center"
       title="play audio"
-      onClick={(e) => do_play(e, speaker || "", name)}
+      onClick={(event) => do_play(event, speaker || "", name)}
     >
-      {loading === 0 ? (
-        <img
-          className="h-5 w-5"
-          alt="play"
-          src="https://d35aaqx5ub95lt.cloudfront.net/images/d636e9502812dfbb94a84e9dfa4e642d.svg"
-        />
-      ) : loading === 1 ? (
-        <SpinnerBlue />
-      ) : loading === -1 ? (
-        <img
-          title="an error occurred"
-          alt="error"
-          src="/editor/icons/error.svg"
-        />
-      ) : (
-        <></>
-      )}
+      {content}
     </span>
   );
 }
@@ -419,28 +481,46 @@ export function SpeakerEntry(props: {
   speaker: SpeakersType;
   copyText: (e: React.MouseEvent, text: string) => void;
   play: PlayFn;
+  mobileLayout?: boolean;
 }) {
   const speaker = props.speaker;
   const copyText = props.copyText;
+  const mobileLayout = props.mobileLayout ?? false;
 
   return (
-    <tr>
-      <td className="flex items-center gap-1.5 whitespace-nowrap">
-        <PlayButton play={props.play} speaker={speaker.speaker} name="Duo" />
-        <span className="mr-[3px] rounded bg-[var(--editor-ssml)] px-[5px] py-[2px] text-[0.8em]">
-          {speaker.speaker}
-        </span>
-        <span
-          className="inline-flex cursor-pointer items-center justify-center"
-          title="copy to clipboard"
-          onClick={(e) => copyText(e, speaker.speaker)}
-        >
-          <img className="w-5" alt="copy" src="/editor/icons/copy.svg" />
-        </span>
-      </td>
-      <td>{speaker.gender}</td>
-      <td>{speaker.type}</td>
-    </tr>
+    <>
+      {mobileLayout ? (
+        <MobileSpeakerRow
+          speaker={speaker}
+          playControl={
+            <PlayButton
+              play={props.play}
+              speaker={speaker.speaker}
+              name="Duo"
+              largeTouchTarget
+            />
+          }
+          onCopy={(event) => copyText(event, speaker.speaker)}
+        />
+      ) : null}
+      <tr className={mobileLayout ? "max-[975px]:hidden" : undefined}>
+        <td className="flex items-center gap-1.5 whitespace-nowrap">
+          <PlayButton play={props.play} speaker={speaker.speaker} name="Duo" />
+          <span className="mr-[3px] rounded bg-[var(--editor-ssml)] px-[5px] py-[2px] text-[0.8em]">
+            {speaker.speaker}
+          </span>
+          <span
+            className="inline-flex cursor-pointer items-center justify-center"
+            title="copy to clipboard"
+            onClick={(e) => copyText(e, speaker.speaker)}
+          >
+            <img className="w-5" alt="copy" src="/editor/icons/copy.svg" />
+          </span>
+        </td>
+        <td>{speaker.gender}</td>
+        <td>{speaker.type}</td>
+      </tr>
+    </>
   );
 }
 
@@ -476,10 +556,12 @@ function AvatarNames({
   language,
   speakers,
   avatar_names,
+  mobileCourseLayout,
 }: {
   language: LanguageType;
   speakers: SpeakersType[];
   avatar_names: AvatarNamesType[];
+  mobileCourseLayout: boolean;
 }) {
   let [speakText, setSpeakText] = useState("");
   const [speakTextDefault, setSpeakTextDefault] = useState(
@@ -489,6 +571,9 @@ function AvatarNames({
 
   const [pitch, setPitch] = useState(2);
   const [speed, setSpeed] = useState(2);
+  const [mobileSection, setMobileSection] =
+    useState<MobileVoiceSection>("cast");
+  const [showSecondaryCast, setShowSecondaryCast] = useState(false);
   const saveDefaultTextMutation = useMutation(api.languageWrite.setDefaultText);
 
   let [element, setElement] = useState(element_init);
@@ -501,7 +586,10 @@ function AvatarNames({
     else if (pitch === 2 && speed !== 2) text = `${text}(rate=${s})`;
 
     e.preventDefault();
-    return navigator.clipboard.writeText(text);
+    void copyToClipboard(text).catch((error) => {
+      console.error("Could not copy voice name", error);
+      window.alert("Could not copy the voice name.");
+    });
   }
 
   async function saveText() {
@@ -520,9 +608,9 @@ function AvatarNames({
   if (speakText === "")
     speakText = language?.default_text || "My name is $name.";
 
-  function doSetSpeakText(event: React.ChangeEvent<HTMLTextAreaElement>) {
+  function setTestPhrase(value: string) {
     setStored({});
-    setSpeakText(event.target.value);
+    setSpeakText(value);
   }
 
   let images = [];
@@ -627,126 +715,67 @@ function AvatarNames({
 
   let [audioRange, playAudio, ref, url] = useAudio(element, true);
 
-  //if(avatars === undefined || speakers === undefined || language === undefined)
-  //    return <Spinner/>
   return (
-    <>
-      <div className="h-[calc(100vh-64px)] w-full overflow-y-scroll max-[600px]:h-auto min-[560px]:w-[400px]">
-        <audio ref={ref}>
-          <source src={url} type="audio/mp3" />
-        </audio>
-        <PlayAudio onClick={playAudio} />
-        <StoryLineHints
-          audioRange={audioRange}
-          content={element.line.content}
-        />
-        <div>
-          <textarea
-            className="w-full rounded-[5px] border border-[var(--input-border)] bg-[var(--input-background)] text-[var(--text-color)]"
-            value={speakText}
-            onChange={doSetSpeakText}
+    <CourseVoiceLayout
+      mobileCourseLayout={mobileCourseLayout}
+      selectedSection={mobileSection}
+      onSectionSelect={setMobileSection}
+      test={{
+        audioElement: (
+          <audio ref={ref}>
+            <source src={url} type="audio/mp3" />
+          </audio>
+        ),
+        hints: (
+          <StoryLineHints
+            audioRange={audioRange}
+            content={element.line.content}
           />
-          <input
-            className="mt-[6px] cursor-pointer rounded-[8px] border border-[var(--input-border)] bg-[var(--input-background)] px-[10px] py-[4px] text-[var(--text-color)] disabled:cursor-default disabled:opacity-70"
-            value={"save" + (speakText !== speakTextDefault ? "*" : "")}
-            onClick={saveText}
-            disabled={speakText === speakTextDefault}
-            type="button"
+        ),
+        phrase: speakText,
+        phraseChanged: speakText !== speakTextDefault,
+        pitch,
+        speed,
+        onPhraseChange: setTestPhrase,
+        onSavePhrase: () => void saveText(),
+        onPitchChange: setPitch,
+        onSpeedChange: setSpeed,
+        onReplay: playAudio,
+      }}
+      voices={{
+        rows: speakers.map((speaker) => (
+          <SpeakerEntry
+            key={speaker.id}
+            copyText={copyText}
+            speaker={speaker}
+            play={play2}
+            mobileLayout={mobileCourseLayout}
           />
-        </div>
-        <div className="mt-2">
-          Pitch:{" "}
-          <input
-            type="range"
-            min="0"
-            max="4"
-            value={pitch}
-            id="pitch"
-            onChange={(e) => setPitch(parseInt(e.target.value))}
+        )),
+      }}
+      cast={{
+        mainRows: avatars_new_important.map((avatar) => (
+          <Avatar
+            key={avatar.avatar_id}
+            play={play3}
+            language_id={language}
+            avatar={avatar}
+            mobileCourseLayout={mobileCourseLayout}
           />
-        </div>
-        <div className="mt-2">
-          Speed:{" "}
-          <input
-            type="range"
-            min="0"
-            max="4"
-            value={speed}
-            id="speed"
-            onChange={(e) => setSpeed(parseInt(e.target.value))}
+        )),
+        secondaryRows: avatars_new.map((avatar) => (
+          <Avatar
+            key={avatar.avatar_id}
+            play={play3}
+            language_id={language}
+            avatar={avatar}
+            mobileCourseLayout={mobileCourseLayout}
           />
-        </div>
-        <div className="h-[calc(100%-110px)] overflow-y-scroll max-[600px]:h-[calc(50vh-140px)]">
-          <table
-            className="mt-4 w-full border-collapse [&_td]:px-[6px] [&_td]:py-[6px] [&_td]:leading-[1.25] [&_th]:sticky [&_th]:top-0 [&_th]:bg-[var(--button-background)] [&_th]:px-2 [&_th]:py-[5px] [&_th]:text-left [&_th]:font-bold [&_th]:leading-[1.25] [&_th]:text-[var(--button-color)] [&_tr:nth-child(2n)]:bg-[var(--body-background-faint)]"
-            data-cy="voice_list"
-            data-js-sort-table="true"
-          >
-            <thead>
-              <tr>
-                <th
-                  style={{ borderRadius: "10px 0 0 0" }}
-                  data-js-sort-colnum="0"
-                >
-                  Name
-                </th>
-                <th data-js-sort-colnum="1">Gender</th>
-                <th
-                  style={{ borderRadius: "0 10px 0 0" }}
-                  data-js-sort-colnum="2"
-                >
-                  Type
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {speakers.map((speaker, index) => (
-                <SpeakerEntry
-                  key={index}
-                  copyText={copyText}
-                  speaker={speaker}
-                  play={play2}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div className="ml-2 h-[calc(100vh-64px)] w-full overflow-y-scroll max-[600px]:m-0 max-[600px]:h-[calc(50vh-30px)] min-[560px]:w-[calc(100vw-400px)]">
-        <p className="my-4">
-          These characters are the default cast of duolingo. Their names should
-          be kept as close to the original as possible.
-        </p>
-        <div
-          className="flex flex-wrap gap-[5px] p-[5px] min-[601px]:gap-0 min-[601px]:p-0"
-          data-cy="avatar_list1"
-        >
-          {avatars_new_important.map((avatar, index) => (
-            <Avatar
-              key={index}
-              play={play3}
-              language_id={language}
-              avatar={avatar}
-            />
-          ))}
-        </div>
-        <p className="my-4">
-          These characters just appear in a couple of stories.
-        </p>
-        <div
-          className="flex flex-wrap gap-[5px] p-[5px] min-[601px]:gap-0 min-[601px]:p-0"
-          data-cy="avatar_list2"
-        >
-          {avatars_new.map((avatar, index) => (
-            <Avatar
-              key={index}
-              play={play3}
-              language_id={language}
-              avatar={avatar}
-            />
-          ))}
-        </div>
-      </div>
-    </>
+        )),
+        secondaryCount: avatars_new.length,
+        secondaryExpanded: showSecondaryCast,
+        onToggleSecondary: () => setShowSecondaryCast((visible) => !visible),
+      }}
+    />
   );
 }
