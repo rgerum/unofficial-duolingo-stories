@@ -402,6 +402,16 @@ export default function EditList({
                     className="bg-sky-100 text-sky-950"
                   />
                 </div>
+                <div
+                  className={styles.mobileMetadata}
+                  title={`Updated: ${story.author_change || "-"}, ${formatFullDateTime(story.change_date)}`}
+                >
+                  <span>{`${story.set_id}–${story.set_index}`}</span>
+                  <span aria-hidden="true"> · </span>
+                  <time dateTime={getDateTimeAttribute(story.change_date)}>
+                    {`updated ${formatRelativeDate(story.change_date)}`}
+                  </time>
+                </div>
               </div>
               <div className={styles.secondaryCell}>
                 <div className={styles.statusCell}>
@@ -563,6 +573,26 @@ function formatCompactDate(datetime: string | number | Date | undefined) {
   }
 
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function formatRelativeDate(datetime: string | number | Date | undefined) {
+  const date = getDate(datetime);
+  if (!date) return "-";
+
+  const elapsedMinutes = Math.max(
+    0,
+    Math.floor((Date.now() - date.getTime()) / 60_000),
+  );
+  if (elapsedMinutes < 1) return "now";
+  if (elapsedMinutes < 60) return `${elapsedMinutes}m ago`;
+
+  const elapsedHours = Math.floor(elapsedMinutes / 60);
+  if (elapsedHours < 24) return `${elapsedHours}h ago`;
+
+  const elapsedDays = Math.floor(elapsedHours / 24);
+  if (elapsedDays < 30) return `${elapsedDays}d ago`;
+  if (elapsedDays < 365) return `${Math.floor(elapsedDays / 30)}mo ago`;
+  return `${Math.floor(elapsedDays / 365)}y ago`;
 }
 
 function DropDownStatus(props: {

@@ -22,13 +22,11 @@
 }
 
 .row {
-  grid-template-columns: 60px 52px minmax(0, 1fr) 104px;
-  grid-template-areas:
-    "set image title status"
-    "metadata metadata metadata metadata";
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  grid-template-areas: "image title status";
   align-items: center;
-  row-gap: 6px;
-  padding: 8px 0;
+  column-gap: 6px;
+  padding: 8px 4px;
   transition:
     filter 100ms ease-in,
     color 100ms ease-in,
@@ -50,6 +48,7 @@
 }
 
 .setCell {
+  display: none;
   grid-area: set;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -63,7 +62,16 @@
 
 .titleCell {
   grid-area: title;
-  padding-left: 5px;
+}
+
+.mobileMetadata {
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--text-color-dim);
+  font-size: 12px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .secondaryCell {
@@ -79,7 +87,7 @@
 
 .metadataGroup {
   grid-area: metadata;
-  display: grid;
+  display: none;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   min-width: 0;
 }
@@ -88,12 +96,6 @@
   padding: 0 5px;
   color: var(--text-color-dim);
   font-size: 12px;
-}
-
-@media (max-width: 975px) {
-  .metadataCell {
-    font-size: 14px;
-  }
 }
 
 .metadataAuthor,
@@ -109,11 +111,20 @@
   color: var(--text-color-dim);
 }
 
-@media (min-width: 760px) and (max-width: 999px) {
+@media (min-width: 976px) and (max-width: 999px) {
   .row {
     grid-template-columns: 64px 56px minmax(110px, 1fr) minmax(440px, 56%);
     grid-template-areas: "set image title secondary";
     row-gap: 0;
+    padding: 8px 0;
+  }
+
+  .setCell {
+    display: block;
+  }
+
+  .mobileMetadata {
+    display: none;
   }
 
   .secondaryCell {
@@ -126,6 +137,10 @@
   .statusCell,
   .metadataGroup {
     grid-area: auto;
+  }
+
+  .metadataGroup {
+    display: grid;
   }
 
   .metadataCell {
@@ -152,6 +167,14 @@
     min-width: 810px;
     grid-template-areas: "set image title status created updated";
     align-items: center;
+  }
+
+  .setCell {
+    display: block;
+  }
+
+  .mobileMetadata {
+    display: none;
   }
 
   .row {
