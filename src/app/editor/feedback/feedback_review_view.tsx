@@ -117,9 +117,9 @@ export default function FeedbackReviewView({
   ) => void | Promise<void>;
 }) {
   return (
-    <main className="mx-auto w-full max-w-[1120px] px-5 py-6">
-      <div className="mb-5 flex flex-col gap-4 min-[760px]:flex-row min-[760px]:items-end min-[760px]:justify-between">
-        <div>
+    <main className="mx-auto w-full max-w-[1120px] px-5 py-6 max-[975px]:px-3 max-[975px]:py-3">
+      <div className="mb-5 flex flex-col gap-4 max-[975px]:mb-1 max-[975px]:gap-1 min-[976px]:flex-row min-[976px]:items-end min-[976px]:justify-between">
+        <div className="max-[975px]:hidden">
           <div className="mb-2 flex items-center gap-2 text-[0.82rem] font-bold tracking-[0.08em] text-[var(--title-color-dim)] uppercase">
             <MessageSquareTextIcon className="h-4 w-4" />
             Story reports
@@ -131,7 +131,7 @@ export default function FeedbackReviewView({
           </h1>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 max-[975px]:-mx-3 max-[975px]:w-[calc(100%+1.5rem)] max-[975px]:flex-none max-[975px]:flex-nowrap max-[975px]:gap-0 max-[975px]:overflow-x-auto max-[975px]:px-3">
           {statusOptions.map((option) => {
             const Icon = option.icon;
             const selected = status === option.value;
@@ -142,15 +142,19 @@ export default function FeedbackReviewView({
                 type="button"
                 aria-pressed={selected}
                 onClick={() => onStatusChange(option.value)}
-                className={cn(
-                  "inline-flex min-h-10 items-center gap-2 rounded-full border px-4 text-[0.92rem] font-bold transition-colors",
-                  selected
-                    ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
-                    : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]",
-                )}
+                className="group inline-flex shrink-0 items-center justify-center max-[975px]:min-h-11 max-[975px]:px-1"
               >
-                <Icon className="h-4 w-4" />
-                {option.label}
+                <span
+                  className={cn(
+                    "inline-flex min-h-10 items-center gap-2 rounded-full border px-4 text-[0.92rem] font-bold transition-colors max-[975px]:min-h-0 max-[975px]:gap-1.5 max-[975px]:px-2.5 max-[975px]:py-1.5 max-[975px]:text-[13px]",
+                    selected
+                      ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
+                      : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] group-hover:bg-[var(--body-background)]",
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {option.label}
+                </span>
               </button>
             );
           })}
@@ -158,7 +162,7 @@ export default function FeedbackReviewView({
       </div>
 
       {courses && courses.length > 0 ? (
-        <nav className="mb-5 flex gap-2 overflow-x-auto pb-1">
+        <nav className="mb-5 flex gap-2 overflow-x-auto pb-1 max-[975px]:-mx-3 max-[975px]:mb-2 max-[975px]:w-[calc(100%+1.5rem)] max-[975px]:gap-0 max-[975px]:px-3 max-[975px]:pb-0">
           <CourseFilterLink
             href="/editor/feedback"
             selected={selectedCourseShort === undefined}
@@ -230,19 +234,24 @@ function CourseFilterLink({
     <Link
       href={href}
       aria-current={selected ? "page" : undefined}
-      className={cn(
-        "inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-[0.9rem] font-bold no-underline transition-colors",
-        selected
-          ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
-          : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]",
-      )}
+      aria-label={count && count > 0 ? `${label}: ${count}` : label}
+      className="group inline-flex shrink-0 items-center justify-center no-underline max-[975px]:min-h-11 max-[975px]:px-1"
     >
-      <span>{label}</span>
-      {count && count > 0 ? (
-        <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,var(--body-background)_85%,transparent)] px-1.5 text-[0.72rem]">
-          {count}
-        </span>
-      ) : null}
+      <span
+        className={cn(
+          "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-[0.9rem] font-bold transition-colors max-[975px]:h-auto max-[975px]:gap-1.5 max-[975px]:px-2.5 max-[975px]:py-1.5 max-[975px]:text-[13px]",
+          selected
+            ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
+            : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] group-hover:bg-[var(--body-background)]",
+        )}
+      >
+        <span>{label}</span>
+        {count && count > 0 ? (
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,var(--body-background)_85%,transparent)] px-1.5 text-[0.72rem]">
+            {count}
+          </span>
+        ) : null}
+      </span>
     </Link>
   );
 }
@@ -259,7 +268,7 @@ function FeedbackReportRow({
   const editorHref = getEditorHref(report);
 
   return (
-    <article className="grid gap-4 rounded-[8px] border-2 border-[var(--overview-hr)] bg-[var(--body-background)] p-4 min-[900px]:grid-cols-[minmax(0,1fr)_220px]">
+    <article className="grid gap-4 rounded-[8px] border-2 border-[var(--overview-hr)] bg-[var(--body-background)] p-4 max-[975px]:gap-3 max-[975px]:p-3 min-[976px]:grid-cols-[minmax(0,1fr)_220px]">
       <div className="min-w-0">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <span
@@ -323,7 +332,7 @@ function FeedbackReportRow({
         </p>
       </div>
 
-      <div className="flex flex-col gap-3 min-[900px]:items-stretch">
+      <div className="flex flex-col gap-3 min-[976px]:items-stretch">
         <Link
           href={editorHref}
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[12px] border-2 border-[var(--button-blue-border)] bg-[var(--button-blue-background)] px-4 text-center font-bold text-[var(--button-blue-color)]"
@@ -332,7 +341,7 @@ function FeedbackReportRow({
           Open in editor
         </Link>
 
-        <div className="grid grid-cols-2 gap-2 min-[900px]:grid-cols-1">
+        <div className="grid grid-cols-2 gap-2 max-[975px]:hidden min-[976px]:grid-cols-1">
           {statusOptions.map((option) =>
             report.status === option.value ? null : (
               <StatusButton
@@ -345,6 +354,23 @@ function FeedbackReportRow({
             ),
           )}
         </div>
+        <select
+          aria-label={`Status for ${report.storyTitle}`}
+          value={report.status}
+          disabled={updating}
+          onChange={(event) =>
+            onSetStatus(event.target.value as FeedbackStatus)
+          }
+          className="min-h-11 rounded-[10px] border border-[var(--header-border)] bg-[var(--body-background-faint)] px-3 text-base text-[var(--text-color)] min-[976px]:hidden"
+        >
+          {statusOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {updating && option.value === report.status
+                ? "Updating"
+                : option.label}
+            </option>
+          ))}
+        </select>
       </div>
     </article>
   );
