@@ -9,7 +9,6 @@ import {
 import Link from "next/link";
 import Switch from "@/components/ui/switch";
 import MobileEditorHeader, {
-  MobileEditorMenuLink,
   mobileEditorMenuItemClassName,
 } from "@/app/editor/_components/mobile_editor_header";
 import {
@@ -277,9 +276,6 @@ export function StoryEditorHeader({
                 label="Next story"
                 direction="right"
               />
-              <MobileEditorMenuLink href="/profile">
-                Account
-              </MobileEditorMenuLink>
               <div className="my-2 border-t border-[var(--header-border)]" />
               <button
                 type="button"

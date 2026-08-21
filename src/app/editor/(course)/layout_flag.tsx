@@ -1,5 +1,5 @@
 "use client";
-import { BookOpenIcon, EllipsisIcon, PinIcon } from "lucide-react";
+import { BookOpenIcon, EllipsisIcon, HeartIcon, PinIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { useSelectedLayoutSegments } from "next/navigation";
@@ -158,6 +158,8 @@ export default function LayoutFlag() {
       </EditorHeaderActions>
       {segment.length === 0 ? (
         <EditorRootMobileHeader />
+      ) : segment[0] === "interest" ? (
+        <InterestMobileHeader />
       ) : segment[0] === "course" ? (
         import_id ? (
           <ImportMobileHeader
@@ -172,6 +174,25 @@ export default function LayoutFlag() {
         )
       ) : null}
     </>
+  );
+}
+
+function InterestMobileHeader() {
+  return (
+    <MobileEditorHeader
+      backHref="/editor"
+      backLabel="Back to editor"
+      icon={
+        <span className="grid w-8 shrink-0 place-items-center">
+          <HeartIcon
+            className="size-5 fill-current text-[#58a700] dark:text-[#9be66e]"
+            aria-hidden="true"
+          />
+        </span>
+      }
+      title="Learner interest"
+      subtitle="Courses ranked by demand"
+    />
   );
 }
 
@@ -213,7 +234,6 @@ function EditorRootMobileHeader() {
             <MobileEditorMenuLink href="/editor/interest">
               Courses ranked by learner interest
             </MobileEditorMenuLink>
-            <MobileEditorMenuLink href="/profile">Account</MobileEditorMenuLink>
           </div>
         </SheetContent>
       </Sheet>
@@ -336,7 +356,6 @@ function CourseMobileHeader({ course }: { course: CourseProps }) {
                 Localization
               </MobileEditorMenuLink>
             ) : null}
-            <MobileEditorMenuLink href="/profile">Account</MobileEditorMenuLink>
           </div>
         </SheetContent>
       </Sheet>
