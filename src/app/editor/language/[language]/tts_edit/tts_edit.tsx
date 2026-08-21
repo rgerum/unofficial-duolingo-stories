@@ -113,8 +113,17 @@ export default function Tts_edit({
   const saveTtsReplaceMutation = useMutation(api.languageWrite.setTtsReplace);
 
   const [yamlError, setYamlError] = React.useState(false);
+  const previousRemoteRulesRef = React.useRef(remoteRules);
   React.useEffect(() => {
-    if (data !== savedData || remoteRules === savedData) return;
+    const remoteRulesChanged = previousRemoteRulesRef.current !== remoteRules;
+    previousRemoteRulesRef.current = remoteRules;
+    if (
+      !remoteRulesChanged ||
+      data !== savedData ||
+      remoteRules === savedData
+    ) {
+      return;
+    }
     setData(remoteRules);
     setValidData(remoteRules);
     setSavedData(remoteRules);

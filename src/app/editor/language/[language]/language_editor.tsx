@@ -258,15 +258,20 @@ function Avatar(props: {
       language_id: language_id.id,
       avatar_id: avatar.avatar_id,
     };
-    await saveAvatarSpeakerMutation({
-      legacyLanguageId: data.language_id,
-      legacyAvatarId: data.avatar_id,
-      name: data.name,
-      speaker: data.speaker,
-      operationKey: `avatar_mapping:${data.language_id}:${data.avatar_id}:client`,
-    });
-    setSavedName(name);
-    setSavedSpeaker(speaker);
+    try {
+      await saveAvatarSpeakerMutation({
+        legacyLanguageId: data.language_id,
+        legacyAvatarId: data.avatar_id,
+        name: data.name,
+        speaker: data.speaker,
+        operationKey: `avatar_mapping:${data.language_id}:${data.avatar_id}:client`,
+      });
+      setSavedName(name);
+      setSavedSpeaker(speaker);
+    } catch (error) {
+      console.error("Could not save character voice", error);
+      window.alert("Could not save the character voice.");
+    }
   }
 
   const desktopCardClassName =

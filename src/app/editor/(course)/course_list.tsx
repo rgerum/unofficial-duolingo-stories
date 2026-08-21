@@ -78,7 +78,7 @@ export default function CourseList({ course_id }: CourseListProps) {
             <CourseRow
               key={course.id}
               course={course}
-              selected={course_id === course.short}
+              selected={course_id === (course.short ?? course.id)}
               pinned={pinnedCourseIdSet.has(course.id)}
             />
           ))}
