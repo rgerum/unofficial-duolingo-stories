@@ -786,7 +786,7 @@ function DropDownStatus(props: {
         onOpenChange={setIsConfirmingApproval}
       >
         <DialogContent
-          className="max-w-[420px] rounded-[8px] bg-[var(--body-background)] text-left whitespace-normal"
+          className="max-w-[420px] rounded-[8px] bg-[var(--body-background)] text-left whitespace-normal max-[639px]:inset-auto max-[639px]:top-1/2 max-[639px]:left-1/2 max-[639px]:max-h-[calc(100dvh-2rem)] max-[639px]:translate-x-[-50%] max-[639px]:translate-y-[-50%]"
           onOpenAutoFocus={(event) => {
             event.preventDefault();
             approveButtonRef.current?.focus();
