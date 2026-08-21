@@ -1,5 +1,5 @@
 "use client";
-import { EllipsisIcon } from "lucide-react";
+import { BookOpenIcon, EllipsisIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { useSelectedLayoutSegments } from "next/navigation";
@@ -154,7 +154,9 @@ export default function LayoutFlag() {
           />
         )}
       </EditorHeaderActions>
-      {segment[0] === "course" ? (
+      {segment.length === 0 ? (
+        <EditorRootMobileHeader />
+      ) : segment[0] === "course" ? (
         import_id ? (
           <ImportMobileHeader
             courseId={segment[1] ?? ""}
@@ -168,6 +170,48 @@ export default function LayoutFlag() {
         )
       ) : null}
     </>
+  );
+}
+
+function EditorRootMobileHeader() {
+  return (
+    <MobileEditorHeader
+      backHref="/"
+      backLabel="Back to stories"
+      icon={<BookOpenIcon className="size-5 shrink-0" />}
+      title="Courses"
+      subtitle="Editor"
+    >
+      <Sheet>
+        <SheetTrigger asChild>
+          <button
+            type="button"
+            aria-label="More editor options"
+            className="grid size-11 shrink-0 place-items-center rounded-xl text-[var(--text-color)] transition-colors hover:bg-[var(--header-border)]"
+          >
+            <EllipsisIcon className="size-6" />
+          </button>
+        </SheetTrigger>
+        <SheetContent
+          side="bottom"
+          aria-describedby={undefined}
+          className="max-h-[min(82dvh,38rem)] overflow-y-auto rounded-t-3xl border-[var(--header-border)] bg-[var(--body-background)] p-0 pb-[env(safe-area-inset-bottom)] text-[var(--text-color)]"
+        >
+          <SheetHeader className="border-b border-[var(--header-border)]">
+            <SheetTitle>Editor options</SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col px-4 pb-4">
+            <MobileEditorMenuLink href="/editor/feedback">
+              Feedback
+            </MobileEditorMenuLink>
+            <MobileEditorMenuLink href="/editor/interest">
+              Courses ranked by learner interest
+            </MobileEditorMenuLink>
+            <MobileEditorMenuLink href="/profile">Account</MobileEditorMenuLink>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </MobileEditorHeader>
   );
 }
 

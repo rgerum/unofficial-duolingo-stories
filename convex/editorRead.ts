@@ -202,7 +202,9 @@ async function getUserNameByAuthDocId(ctx: QueryCtx, authDocIds: string[]) {
 export const getEditorSidebarData = query({
   args: {},
   handler: async (ctx) => {
-    if (!(await isContributorOrAdmin(ctx))) return { courses: [] };
+    if (!(await isContributorOrAdmin(ctx))) {
+      return { courses: [], hasAccess: false };
+    }
 
     const courseRows = await ctx.db.query("courses").collect();
 
@@ -237,7 +239,7 @@ export const getEditorSidebarData = query({
       )
       .sort((a, b) => b.count - a.count);
 
-    return { courses };
+    return { courses, hasAccess: true };
   },
 });
 
