@@ -402,7 +402,7 @@ function MobileToggleRow({
     <div className="flex min-h-16 items-center gap-4 px-3">
       <button
         type="button"
-        className="min-w-0 flex-1 text-left"
+        className="min-w-0 flex-1 text-left !text-base"
         onClick={onClick}
       >
         <span className="block font-medium">{label}</span>
