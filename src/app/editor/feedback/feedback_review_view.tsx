@@ -195,7 +195,7 @@ export default function FeedbackReviewView({
         </div>
       ) : (
         <>
-          <div className="grid gap-3">
+          <div className="grid gap-3 max-[975px]:gap-0">
             {reports.map((report) => (
               <FeedbackReportRow
                 key={report._id}
@@ -291,7 +291,7 @@ function FeedbackReportRow({
     rememberFeedbackView(returnHref, loadedReportCount);
 
   return (
-    <article className="grid gap-4 rounded-[8px] border-2 border-[var(--overview-hr)] bg-[var(--body-background)] p-4 max-[975px]:gap-3 max-[975px]:p-3 min-[976px]:grid-cols-[minmax(0,1fr)_220px]">
+    <article className="grid gap-4 rounded-[8px] border-2 border-[var(--overview-hr)] bg-[var(--body-background)] p-4 max-[975px]:rounded-none max-[975px]:border-0 max-[975px]:border-b max-[975px]:border-solid max-[975px]:border-[var(--overview-hr)] max-[975px]:px-0 max-[975px]:py-4 max-[975px]:last:border-b-0 min-[976px]:grid-cols-[minmax(0,1fr)_220px]">
       <div className="min-w-0">
         <div className="mb-2 flex items-center gap-2 max-[975px]:grid max-[975px]:grid-cols-[minmax(0,1fr)_auto] max-[975px]:items-start max-[975px]:gap-1.5">
           <div className="flex min-w-0 flex-wrap items-center gap-2 max-[975px]:gap-1.5">
