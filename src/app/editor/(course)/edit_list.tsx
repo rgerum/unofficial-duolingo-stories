@@ -728,7 +728,7 @@ function DropDownStatus(props: {
   }
 
   return (
-    <div className="inline-flex whitespace-nowrap">
+    <div className="inline-flex whitespace-nowrap max-[975px]:items-center">
       {
         <span className="whitespace-nowrap rounded-[10px] bg-[var(--editor-ssml)] px-[5px] py-[2px] max-[975px]:bg-transparent max-[975px]:p-0 max-[975px]:opacity-60">
           <span className="min-[1000px]:hidden" aria-hidden="true">
