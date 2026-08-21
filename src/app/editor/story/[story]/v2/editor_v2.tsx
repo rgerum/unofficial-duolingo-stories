@@ -211,6 +211,7 @@ export default function EditorV2({
   avatar_names,
   initialFocusLine,
   initialBulkAudioOpen = false,
+  feedbackReturnHref,
   story_navigation,
 }: {
   isAdmin: boolean;
@@ -218,6 +219,7 @@ export default function EditorV2({
   avatar_names: Record<number, Avatar>;
   initialFocusLine?: number;
   initialBulkAudioOpen?: boolean;
+  feedbackReturnHref?: string;
   story_navigation: StoryNavigation;
 }) {
   const router = useRouter();
@@ -700,6 +702,7 @@ export default function EditorV2({
         }}
         previous_story={story_navigation.previousStory}
         next_story={story_navigation.nextStory}
+        feedbackReturnHref={feedbackReturnHref}
       />
       <BulkAudioEditor
         open={bulkAudioOpen}

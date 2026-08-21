@@ -18,6 +18,11 @@ import type { StoryElementLine } from "@/components/editor/story/syntax_parser_t
 import Button from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import {
+  createFeedbackReturnHref,
+  createFeedbackStoryHref,
+} from "./feedback_return_navigation";
+import { rememberFeedbackView } from "./feedback_view_memory";
 
 export type FeedbackStatus = Doc<"story_feedback_reports">["status"];
 
@@ -94,6 +99,7 @@ export default function FeedbackReviewView({
   paginationStatus,
   courses,
   selectedCourseShort,
+  returnHref,
   updatingId,
   onStatusChange,
   onLoadMore,
@@ -108,6 +114,7 @@ export default function FeedbackReviewView({
     | "Exhausted";
   courses?: FeedbackCourseFilter[];
   selectedCourseShort?: string;
+  returnHref: string;
   updatingId: Id<"story_feedback_reports"> | null;
   onStatusChange: (status: FeedbackStatus) => void;
   onLoadMore?: () => void;
@@ -164,14 +171,14 @@ export default function FeedbackReviewView({
       {courses && courses.length > 0 ? (
         <nav className="mb-5 flex gap-2 overflow-x-auto pb-1 max-[975px]:-mx-3 max-[975px]:mb-2 max-[975px]:w-[calc(100%+1.5rem)] max-[975px]:gap-0 max-[975px]:px-3 max-[975px]:pb-0">
           <CourseFilterLink
-            href="/editor/feedback"
+            href={createFeedbackReturnHref(undefined, status)}
             selected={selectedCourseShort === undefined}
             label="All"
           />
           {courses.map((course) => (
             <CourseFilterLink
               key={course.short}
-              href={`/editor/course/${course.short}/feedback`}
+              href={createFeedbackReturnHref(course.short, status)}
               selected={selectedCourseShort === course.short}
               label={course.name}
               count={course.unresolvedFeedbackCount}
@@ -193,6 +200,8 @@ export default function FeedbackReviewView({
               <FeedbackReportRow
                 key={report._id}
                 report={report}
+                returnHref={returnHref}
+                loadedReportCount={reports.length}
                 showCourse={selectedCourseShort === undefined}
                 updating={updatingId === report._id}
                 onSetStatus={(nextStatus) =>
@@ -259,16 +268,27 @@ function CourseFilterLink({
 
 function FeedbackReportRow({
   report,
+  returnHref,
+  loadedReportCount,
   showCourse,
   updating,
   onSetStatus,
 }: {
   report: FeedbackReport;
+  returnHref: string;
+  loadedReportCount: number;
   showCourse: boolean;
   updating: boolean;
   onSetStatus: (status: FeedbackStatus) => void | Promise<void>;
 }) {
-  const editorHref = getEditorHref(report);
+  const editorHref = createFeedbackStoryHref({
+    courseShort: report.courseShort,
+    storyId: report.storyId,
+    line: report.line,
+    returnTo: returnHref,
+  });
+  const rememberView = () =>
+    rememberFeedbackView(returnHref, loadedReportCount);
 
   return (
     <article className="grid gap-4 rounded-[8px] border-2 border-[var(--overview-hr)] bg-[var(--body-background)] p-4 max-[975px]:gap-3 max-[975px]:p-3 min-[976px]:grid-cols-[minmax(0,1fr)_220px]">
@@ -331,6 +351,7 @@ function FeedbackReportRow({
         <h2 className="m-0 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-[1.15rem] font-bold">
           <Link
             href={editorHref}
+            onClick={rememberView}
             className="inline-flex max-w-full items-center gap-1.5 overflow-hidden text-[var(--text-color)] no-underline min-[976px]:hidden"
           >
             <span className="overflow-hidden text-ellipsis whitespace-nowrap">
@@ -387,6 +408,7 @@ function FeedbackReportRow({
       <div className="flex flex-col gap-3 max-[975px]:hidden min-[976px]:items-stretch">
         <Link
           href={editorHref}
+          onClick={rememberView}
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[12px] border-2 border-[var(--button-blue-border)] bg-[var(--button-blue-background)] px-4 text-center font-bold text-[var(--button-blue-color)] max-[975px]:hidden"
         >
           <ExternalLinkIcon className="h-4 w-4" />
@@ -545,11 +567,6 @@ function getStatusLabel(status: FeedbackStatus) {
   return (
     statusOptions.find((option) => option.value === status)?.label ?? status
   );
-}
-
-function getEditorHref(report: FeedbackReport) {
-  const lineSearch = report.line ? `?line=${report.line}` : "";
-  return `/editor/course/${report.courseShort}/story/${report.storyId}${lineSearch}`;
 }
 
 function formatDateTime(timestamp: number) {

@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
+import { parseFeedbackReturnHref } from "@/app/editor/feedback/feedback_return_navigation";
 
 function getCanonicalStoryEditorPath(courseShort: string, storyId: number) {
   return `/editor/course/${courseShort}/story/${storyId}`;
@@ -36,7 +37,10 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ story: number }>;
-  searchParams?: Promise<{ line?: string | string[] }>;
+  searchParams?: Promise<{
+    line?: string | string[];
+    returnTo?: string | string[];
+  }>;
 }) {
   const storyId = Number((await params).story);
   const story = await fetchAuthQuery(api.editorRead.getEditorStoryPageData, {
@@ -47,14 +51,16 @@ export default async function Page({
 
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const lineParam = resolvedSearchParams?.line;
-  const line =
-    typeof lineParam === "string"
-      ? `?line=${encodeURIComponent(lineParam)}`
-      : Array.isArray(lineParam) && typeof lineParam[0] === "string"
-        ? `?line=${encodeURIComponent(lineParam[0])}`
-        : "";
+  const line = Array.isArray(lineParam) ? lineParam[0] : lineParam;
+  const returnTo = parseFeedbackReturnHref(resolvedSearchParams?.returnTo);
+  const canonicalSearchParams = new URLSearchParams();
+  if (line) canonicalSearchParams.set("line", line);
+  if (returnTo) canonicalSearchParams.set("returnTo", returnTo);
+  const search = canonicalSearchParams.size
+    ? `?${canonicalSearchParams.toString()}`
+    : "";
 
   redirect(
-    `${getCanonicalStoryEditorPath(story.story_data.short, story.story_data.id)}${line}`,
+    `${getCanonicalStoryEditorPath(story.story_data.short, story.story_data.id)}${search}`,
   );
 }

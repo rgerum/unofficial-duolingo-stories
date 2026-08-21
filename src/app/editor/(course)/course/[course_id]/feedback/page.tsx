@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { api } from "@convex/_generated/api";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import StoryFeedbackPageClient from "../../../feedback/page_client";
+import { parseFeedbackStatus } from "@/app/editor/feedback/feedback_return_navigation";
 
 export async function generateMetadata({
   params,
@@ -26,8 +27,16 @@ export async function generateMetadata({
 
 export default async function CourseFeedbackPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ course_id: string }>;
+  searchParams?: Promise<{ status?: string | string[] }>;
 }) {
-  return <StoryFeedbackPageClient courseId={(await params).course_id} />;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  return (
+    <StoryFeedbackPageClient
+      courseId={(await params).course_id}
+      initialStatus={parseFeedbackStatus(resolvedSearchParams?.status)}
+    />
+  );
 }

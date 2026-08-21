@@ -52,6 +52,7 @@ type HeaderProps = {
   open_bulk_audio: () => void;
   previous_story: StoryNavigationTarget | null;
   next_story: StoryNavigationTarget | null;
+  feedbackReturnHref?: string;
 };
 
 export function StoryEditorHeader({
@@ -70,6 +71,7 @@ export function StoryEditorHeader({
   open_bulk_audio,
   previous_story,
   next_story,
+  feedbackReturnHref,
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
@@ -188,8 +190,8 @@ export function StoryEditorHeader({
         </div>
       </EditorHeaderActions>
       <MobileEditorHeader
-        backHref={`/editor/course/${story_data.short}`}
-        backLabel="Back to course"
+        backHref={feedbackReturnHref ?? `/editor/course/${story_data.short}`}
+        backLabel={feedbackReturnHref ? "Back to feedback" : "Back to course"}
         icon={
           <div className="shrink-0">
             <img
@@ -299,7 +301,7 @@ export function StoryEditorHeader({
   );
 }
 
-export function StoryEditorHeaderLoading() {
+export function StoryEditorHeaderLoading({ backHref }: { backHref?: string }) {
   return (
     <>
       <EditorHeaderActions>
@@ -353,6 +355,8 @@ export function StoryEditorHeaderLoading() {
         </div>
       </EditorHeaderActions>
       <MobileEditorHeader
+        backHref={backHref}
+        backLabel={backHref ? "Back to feedback" : undefined}
         title={
           <div className="h-4 w-32 animate-pulse rounded bg-[var(--header-border)]" />
         }
