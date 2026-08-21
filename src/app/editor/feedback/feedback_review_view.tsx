@@ -193,6 +193,7 @@ export default function FeedbackReviewView({
               <FeedbackReportRow
                 key={report._id}
                 report={report}
+                showCourse={selectedCourseShort === undefined}
                 updating={updatingId === report._id}
                 onSetStatus={(nextStatus) =>
                   onSetReportStatus(report._id, nextStatus)
@@ -258,10 +259,12 @@ function CourseFilterLink({
 
 function FeedbackReportRow({
   report,
+  showCourse,
   updating,
   onSetStatus,
 }: {
   report: FeedbackReport;
+  showCourse: boolean;
   updating: boolean;
   onSetStatus: (status: FeedbackStatus) => void | Promise<void>;
 }) {
@@ -281,24 +284,48 @@ function FeedbackReportRow({
               ? "Translation"
               : report.category}
           </span>
-          <span className="rounded-full bg-[var(--body-background-faint)] px-3 py-1 text-[0.78rem] font-bold text-[var(--text-color-dim)]">
+          <span className="rounded-full bg-[var(--body-background-faint)] px-3 py-1 text-[0.78rem] font-bold text-[var(--text-color-dim)] max-[975px]:hidden">
             {getStatusLabel(report.status)}
           </span>
-          <time className="text-[0.82rem] text-[var(--text-color-dim)]">
-            {formatDateTime(report.createdAt)}
+          <time
+            dateTime={new Date(report.createdAt).toISOString()}
+            title={formatDateTime(report.createdAt)}
+            className="text-[0.82rem] text-[var(--text-color-dim)]"
+          >
+            <span className="min-[976px]:hidden" suppressHydrationWarning>
+              {formatRelativeDate(report.createdAt)}
+            </span>
+            <span className="max-[975px]:hidden">
+              {formatDateTime(report.createdAt)}
+            </span>
           </time>
         </div>
 
         <h2 className="m-0 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-[1.15rem] font-bold">
-          {report.storyTitle}
+          <Link
+            href={editorHref}
+            className="inline-flex max-w-full items-center gap-1.5 overflow-hidden text-[var(--text-color)] no-underline min-[976px]:hidden"
+          >
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+              {report.storyTitle}
+            </span>
+            <ExternalLinkIcon className="size-4 shrink-0" />
+          </Link>
+          <span className="max-[975px]:hidden">{report.storyTitle}</span>
         </h2>
-        <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.9rem] text-[var(--text-color-dim)]">
-          <span>{report.courseShort}</span>
+        <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.9rem] text-[var(--text-color-dim)] max-[975px]:mb-2 max-[975px]:gap-x-2 max-[975px]:text-[13px]">
+          <span className={showCourse ? undefined : "max-[975px]:hidden"}>
+            {report.courseShort}
+          </span>
           <span>Story {report.storyId}</span>
           {report.line !== undefined ? <span>Line {report.line}</span> : null}
           <span>{getFeedbackSourceLabel(report)}</span>
           {report.legacyUserId === undefined ? (
-            <span>{report.userName || report.userEmail || "Anonymous"}</span>
+            report.userName || report.userEmail ? (
+              <span>{report.userName || report.userEmail}</span>
+            ) : (
+              <span className="max-[975px]:hidden">Anonymous</span>
+            )
           ) : (
             <Link
               href={`/admin/users/${report.legacyUserId}`}
@@ -311,7 +338,7 @@ function FeedbackReportRow({
         </div>
 
         {isStoryElementLine(report.lineElement) ? (
-          <div className="mb-3 min-w-0 overflow-hidden rounded-[8px] border-l-4 border-[var(--overview-hr)] bg-[var(--body-background-faint)] px-4 py-1">
+          <div className="mb-3 min-w-0 overflow-hidden rounded-[8px] border-l-4 border-[var(--overview-hr)] bg-[var(--body-background-faint)] px-4 py-1 max-[975px]:mb-2 max-[975px]:px-3">
             <StoryTextLine
               active={false}
               element={report.lineElement}
@@ -322,7 +349,7 @@ function FeedbackReportRow({
             />
           </div>
         ) : report.lineText ? (
-          <blockquote className="m-0 mb-3 rounded-[8px] border-l-4 border-[var(--overview-hr)] bg-[var(--body-background-faint)] px-4 py-3 text-[0.95rem] leading-6">
+          <blockquote className="m-0 mb-3 rounded-[8px] border-l-4 border-[var(--overview-hr)] bg-[var(--body-background-faint)] px-4 py-3 text-[0.95rem] leading-6 max-[975px]:mb-2 max-[975px]:px-3 max-[975px]:py-2 max-[975px]:text-[14px] max-[975px]:leading-5">
             {report.lineText}
           </blockquote>
         ) : null}
@@ -335,7 +362,7 @@ function FeedbackReportRow({
       <div className="flex flex-col gap-3 min-[976px]:items-stretch">
         <Link
           href={editorHref}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[12px] border-2 border-[var(--button-blue-border)] bg-[var(--button-blue-background)] px-4 text-center font-bold text-[var(--button-blue-color)]"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[12px] border-2 border-[var(--button-blue-border)] bg-[var(--button-blue-background)] px-4 text-center font-bold text-[var(--button-blue-color)] max-[975px]:hidden"
         >
           <ExternalLinkIcon className="h-4 w-4" />
           Open in editor
@@ -523,6 +550,23 @@ function formatDateTime(timestamp: number) {
     timeStyle: "short",
     timeZone: "UTC",
   }).format(new Date(timestamp));
+}
+
+function formatRelativeDate(timestamp: number) {
+  const elapsedMinutes = Math.max(
+    0,
+    Math.floor((Date.now() - timestamp) / 60_000),
+  );
+  if (elapsedMinutes < 1) return "now";
+  if (elapsedMinutes < 60) return `${elapsedMinutes}m`;
+
+  const elapsedHours = Math.floor(elapsedMinutes / 60);
+  if (elapsedHours < 24) return `${elapsedHours}h`;
+
+  const elapsedDays = Math.floor(elapsedHours / 24);
+  if (elapsedDays < 30) return `${elapsedDays}d`;
+  if (elapsedDays < 365) return `${Math.floor(elapsedDays / 30)}mo`;
+  return `${Math.floor(elapsedDays / 365)}y`;
 }
 
 function getCategoryClassName(category: FeedbackReport["category"]) {
