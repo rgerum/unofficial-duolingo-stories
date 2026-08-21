@@ -17,7 +17,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import Input from "@/components/ui/input";
+import EditorSearchInput from "@/app/editor/_components/editor_search_input";
 import { matchesStorySearch, parseStorySearch } from "@/lib/story-search";
 import {
   readCourseFilter,
@@ -269,7 +269,7 @@ export default function EditList({
       </div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 max-[975px]:mb-1 max-[975px]:gap-1">
         <div className="w-full min-w-[220px] flex-1 min-[860px]:max-w-[360px]">
-          <Input
+          <EditorSearchInput
             id="story-search"
             type="search"
             value={storySearch}

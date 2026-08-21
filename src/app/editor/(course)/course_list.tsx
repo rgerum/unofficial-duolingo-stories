@@ -5,7 +5,7 @@ import Link from "next/link";
 import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import Input from "@/components/ui/input";
+import EditorSearchInput from "@/app/editor/_components/editor_search_input";
 import LanguageFlag from "@/components/ui/language-flag";
 import { CountBadge } from "./CountBadge";
 import {
@@ -112,7 +112,7 @@ function CourseSearch({
         Search
       </label>
       <div className="min-w-0 flex-1">
-        <Input
+        <EditorSearchInput
           id="editor-course-search"
           type="search"
           value={value}

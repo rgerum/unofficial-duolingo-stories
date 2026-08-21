@@ -178,7 +178,11 @@ function EditorRootMobileHeader() {
     <MobileEditorHeader
       backHref="/"
       backLabel="Back to stories"
-      icon={<BookOpenIcon className="mr-1.5 size-5 shrink-0" />}
+      icon={
+        <span className="grid w-8 shrink-0 place-items-center">
+          <BookOpenIcon className="size-5" />
+        </span>
+      }
       title="Courses"
       subtitle="Editor"
     >
