@@ -65,6 +65,10 @@ const mobileEditorPresentation = [
   EditorView.theme({
     ".cm-scroller": {
       fontSize: "16px",
+      overflowX: "hidden",
+    },
+    ".cm-content": {
+      minWidth: "0",
     },
     ".cm-line": {
       padding: "0 2px 0 4px",

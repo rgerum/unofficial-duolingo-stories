@@ -65,6 +65,8 @@ export const interleavedPreviewExtension = [
     ".cm-interleaved-preview": {
       boxSizing: "border-box",
       width: "100%",
+      minWidth: "0",
+      maxWidth: "100%",
       overflow: "hidden",
       padding: "10px 12px",
       borderTop: "1px solid var(--header-border)",
@@ -72,6 +74,16 @@ export const interleavedPreviewExtension = [
       background:
         "color-mix(in srgb, var(--body-background-faint) 72%, var(--body-background))",
       color: "var(--text-color)",
+    },
+    ".cm-interleaved-preview .part": {
+      minWidth: "0",
+      maxWidth: "100%",
+      overflow: "hidden",
+      fontSize: "14px",
+      lineHeight: "1.4",
+    },
+    ".cm-interleaved-preview .part button": {
+      fontSize: "14px",
     },
     ".cm-interleaved-preview .part > :first-child": {
       marginTop: "4px",

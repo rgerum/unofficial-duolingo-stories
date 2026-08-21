@@ -93,7 +93,7 @@ function StoryHeader({
       <h1
         className={cn(
           "m-0 text-[25px] leading-[34px] font-bold",
-          compact && "text-xl leading-7",
+          compact && "text-base leading-6",
         )}
       >
         {url && (
