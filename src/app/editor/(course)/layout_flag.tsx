@@ -1,5 +1,5 @@
 "use client";
-import { BookOpenIcon, EllipsisIcon } from "lucide-react";
+import { BookOpenIcon, EllipsisIcon, PinIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { useSelectedLayoutSegments } from "next/navigation";
@@ -8,7 +8,9 @@ import { api } from "@convex/_generated/api";
 import EditorButton from "../editor_button";
 import MobileEditorHeader, {
   MobileEditorMenuLink,
+  mobileEditorMenuItemClassName,
 } from "../_components/mobile_editor_header";
+import { useCoursePin } from "../_components/use_course_pin";
 import { Breadcrumbs } from "../_components/breadcrumbs";
 import {
   EditorHeaderActions,
@@ -255,6 +257,8 @@ function ImportMobileHeader({
 }
 
 function CourseMobileHeader({ course }: { course: CourseProps }) {
+  const { isPinned, isUpdating, isLoading, toggle } = useCoursePin(course.id);
+
   return (
     <MobileEditorHeader
       backHref="/editor"
@@ -295,6 +299,19 @@ function CourseMobileHeader({ course }: { course: CourseProps }) {
             <SheetTitle>Course options</SheetTitle>
           </SheetHeader>
           <div className="flex flex-col px-4 pb-4">
+            <button
+              type="button"
+              aria-pressed={isPinned}
+              disabled={isLoading || isUpdating}
+              className={`${mobileEditorMenuItemClassName} disabled:cursor-wait disabled:opacity-50`}
+              onClick={() => void toggle()}
+            >
+              <PinIcon
+                className="size-5"
+                fill={isPinned ? "currentColor" : "none"}
+              />
+              {isPinned ? "Unpin course" : "Pin course"}
+            </button>
             {!course.official ? (
               <MobileEditorMenuLink
                 href={`/editor/course/${course.short}/import/es-en`}

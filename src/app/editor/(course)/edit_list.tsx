@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import EditorSearchInput from "@/app/editor/_components/editor_search_input";
+import { useCoursePin } from "@/app/editor/_components/use_course_pin";
 import { matchesStorySearch, parseStorySearch } from "@/lib/story-search";
 import {
   readCourseFilter,
@@ -74,23 +75,12 @@ export default function EditList({
   const storyPreferences = useQuery(
     api.userPreferences.getCurrentStoryPreferences,
   );
-  const pinnedCourseIds = useQuery(api.coursePins.listCurrentUserPins, {});
-  const setCoursePin = useMutation(api.coursePins.setCurrentUserCoursePin);
-  const [isUpdatingPin, setIsUpdatingPin] = useState(false);
-  const isCoursePinned = pinnedCourseIds?.includes(course.id) ?? false;
-
-  async function toggleCoursePin() {
-    if (isUpdatingPin) return;
-    setIsUpdatingPin(true);
-    try {
-      await setCoursePin({
-        courseLegacyId: course.id,
-        pinned: !isCoursePinned,
-      });
-    } finally {
-      setIsUpdatingPin(false);
-    }
-  }
+  const {
+    isPinned: isCoursePinned,
+    isUpdating: isUpdatingPin,
+    isLoading: isLoadingPin,
+    toggle: toggleCoursePin,
+  } = useCoursePin(course.id);
 
   useEffect(() => {
     setStoryList(stories ?? []);
@@ -236,7 +226,7 @@ export default function EditList({
                     : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
                 }
                 aria-pressed={isCoursePinned}
-                disabled={pinnedCourseIds === undefined || isUpdatingPin}
+                disabled={isLoadingPin || isUpdatingPin}
                 onClick={() => void toggleCoursePin()}
               >
                 <Pin
