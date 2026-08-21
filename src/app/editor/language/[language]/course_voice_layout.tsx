@@ -1,11 +1,44 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDownIcon, CopyIcon, SaveIcon, Volume2Icon } from "lucide-react";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  CircleXIcon,
+  CopyIcon,
+  SaveIcon,
+  Volume2Icon,
+} from "lucide-react";
 import PlayAudio from "@/components/PlayAudio";
 import type { SpeakersType } from "./types";
 
 export type MobileVoiceSection = "cast" | "voices";
+export type CopyFeedbackStatus = "idle" | "copied" | "error";
+
+const COPY_FEEDBACK_PRESENTATION = {
+  idle: {
+    getLabel: (speaker: string) => `Copy ${speaker}`,
+    className: "text-[var(--text-color-dim)]",
+    Icon: CopyIcon,
+  },
+  copied: {
+    getLabel: (speaker: string) => `Voice copied: ${speaker}`,
+    className: "bg-green-100 text-green-700",
+    Icon: CheckIcon,
+  },
+  error: {
+    getLabel: (speaker: string) => `Could not copy voice: ${speaker}`,
+    className: "bg-red-100 text-red-700",
+    Icon: CircleXIcon,
+  },
+} satisfies Record<
+  CopyFeedbackStatus,
+  {
+    getLabel: (speaker: string) => string;
+    className: string;
+    Icon: typeof CopyIcon;
+  }
+>;
 
 type VoiceTestModel = {
   audioElement: React.ReactNode;
@@ -430,11 +463,17 @@ export function MobileSpeakerRow({
   speaker,
   playControl,
   onCopy,
+  copyStatus,
 }: {
   speaker: SpeakersType;
   playControl: React.ReactNode;
   onCopy: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  copyStatus: CopyFeedbackStatus;
 }) {
+  const copyPresentation = COPY_FEEDBACK_PRESENTATION[copyStatus];
+  const copyLabel = copyPresentation.getLabel(speaker.speaker);
+  const CopyStatusIcon = copyPresentation.Icon;
+
   return (
     <tr className="hidden max-[975px]:block">
       <td className="block !p-0">
@@ -450,12 +489,15 @@ export function MobileSpeakerRow({
           </span>
           <button
             type="button"
-            aria-label={`Copy ${speaker.speaker}`}
-            className="grid size-11 place-items-center rounded-xl text-[var(--text-color-dim)]"
+            aria-label={copyLabel}
+            className={`grid size-11 place-items-center rounded-xl transition-colors ${copyPresentation.className}`}
             onClick={onCopy}
           >
-            <CopyIcon className="size-5" />
+            <CopyStatusIcon aria-hidden="true" className="size-5" />
           </button>
+          <span aria-live="polite" className="sr-only">
+            {copyStatus === "idle" ? "" : copyLabel}
+          </span>
         </div>
       </td>
     </tr>

@@ -23,6 +23,7 @@ import {
 } from "@/app/editor/language/[language]/types";
 import type { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
 import {
+  type CopyFeedbackStatus,
   CourseVoiceLayout,
   MobileAvatarEditor,
   MobileSpeakerRow,
@@ -479,7 +480,11 @@ export function PlayButton(props: PlayButtonProps) {
 
 export function SpeakerEntry(props: {
   speaker: SpeakersType;
-  copyText: (e: React.MouseEvent, text: string) => void;
+  copyText: (
+    e: React.MouseEvent,
+    text: string,
+  ) => void | Promise<Exclude<CopyFeedbackStatus, "idle">>;
+  copyStatus?: CopyFeedbackStatus;
   play: PlayFn;
   mobileLayout?: boolean;
 }) {
@@ -501,6 +506,7 @@ export function SpeakerEntry(props: {
             />
           }
           onCopy={(event) => copyText(event, speaker.speaker)}
+          copyStatus={props.copyStatus ?? "idle"}
         />
       ) : null}
       <tr className={mobileLayout ? "max-[975px]:hidden" : undefined}>
@@ -512,7 +518,15 @@ export function SpeakerEntry(props: {
           <span
             className="inline-flex cursor-pointer items-center justify-center"
             title="copy to clipboard"
-            onClick={(e) => copyText(e, speaker.speaker)}
+            onClick={(event) => {
+              void Promise.resolve(copyText(event, speaker.speaker)).then(
+                (status) => {
+                  if (status === "error") {
+                    window.alert("Could not copy the voice name.");
+                  }
+                },
+              );
+            }}
           >
             <img className="w-5" alt="copy" src="/editor/icons/copy.svg" />
           </span>
@@ -574,11 +588,45 @@ function AvatarNames({
   const [mobileSection, setMobileSection] =
     useState<MobileVoiceSection>("cast");
   const [showSecondaryCast, setShowSecondaryCast] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState<{
+    speaker: string;
+    status: Exclude<CopyFeedbackStatus, "idle">;
+  } | null>(null);
+  const copyFeedbackTimer = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const copyAttempt = React.useRef(0);
   const saveDefaultTextMutation = useMutation(api.languageWrite.setDefaultText);
 
   let [element, setElement] = useState(element_init);
 
-  function copyText(e: React.MouseEvent, text: string) {
+  React.useEffect(
+    () => () => {
+      copyAttempt.current += 1;
+      if (copyFeedbackTimer.current !== null) {
+        clearTimeout(copyFeedbackTimer.current);
+      }
+    },
+    [],
+  );
+
+  function showCopyFeedback(
+    speaker: string,
+    status: Exclude<CopyFeedbackStatus, "idle">,
+  ) {
+    if (copyFeedbackTimer.current !== null) {
+      clearTimeout(copyFeedbackTimer.current);
+    }
+    setCopyFeedback({ speaker, status });
+    copyFeedbackTimer.current = setTimeout(() => {
+      setCopyFeedback(null);
+      copyFeedbackTimer.current = null;
+    }, 1500);
+  }
+
+  async function copyText(e: React.MouseEvent, text: string) {
+    const speaker = text;
+    const attempt = ++copyAttempt.current;
     let p = ["x-low", "low", "medium", "high", "x-high"][pitch];
     let s = ["x-slow", "slow", "medium", "fast", "x-fast"][speed];
     if (pitch !== 2 && speed !== 2) text = `${text}(pitch=${p}, rate=${s})`;
@@ -586,10 +634,20 @@ function AvatarNames({
     else if (pitch === 2 && speed !== 2) text = `${text}(rate=${s})`;
 
     e.preventDefault();
-    void copyToClipboard(text).catch((error) => {
+    setCopyFeedback(null);
+    try {
+      await copyToClipboard(text);
+      if (attempt === copyAttempt.current) {
+        showCopyFeedback(speaker, "copied");
+      }
+      return "copied" as const;
+    } catch (error) {
       console.error("Could not copy voice name", error);
-      window.alert("Could not copy the voice name.");
-    });
+      if (attempt === copyAttempt.current) {
+        showCopyFeedback(speaker, "error");
+      }
+      return "error" as const;
+    }
   }
 
   async function saveText() {
@@ -750,6 +808,11 @@ function AvatarNames({
             speaker={speaker}
             play={play2}
             mobileLayout={mobileCourseLayout}
+            copyStatus={
+              copyFeedback?.speaker === speaker.speaker
+                ? copyFeedback.status
+                : "idle"
+            }
           />
         )),
       }}
