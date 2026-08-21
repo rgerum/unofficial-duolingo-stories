@@ -6,6 +6,7 @@ import { SpinnerBlue } from "@/components/ui/spinner";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import { CourseImportProps } from "@/app/editor/(course)/types";
+import styles from "./import_list.module.css";
 
 export default function ImportList({
   courseId,
@@ -67,12 +68,15 @@ export default function ImportList({
 
   return (
     <>
-      <div>
-        Importing from {courseFrom.learning_language_name} (from{" "}
-        {courseFrom.from_language_name}).
+      <div className="px-3 py-2 text-base min-[976px]:px-0 min-[976px]:py-0">
+        <span className="min-[976px]:hidden">Import from {fromId}</span>
+        <span className="max-[975px]:hidden">
+          Importing from {courseFrom.learning_language_name} (from{" "}
+          {courseFrom.from_language_name}).
+        </span>
       </div>
       <table
-        className="story_list js-sort-table js-sort-5 js-sort-desc mb-[100px] w-full border-collapse [&_a]:font-bold [&_a]:text-[var(--text-color)] [&_th]:bg-[var(--button-background)] [&_th]:px-[5px] [&_th]:pb-[5px] [&_th]:pt-[5px] [&_th]:text-left [&_th]:text-[var(--button-color)] [&_td]:px-[5px] [&_td]:py-[5px] [&_td:nth-child(2)]:w-[44px] [&_td:nth-child(2)]:min-w-[44px] [&_td:nth-child(2)]:max-w-[44px] [&_td:nth-child(2)_img]:h-[40px] [&_td:nth-child(2)_img]:w-[44px] [&_td:nth-child(2)_img]:max-w-none [&_tr:nth-child(2n)]:bg-[var(--body-background-faint)]"
+        className={`story_list js-sort-table js-sort-5 js-sort-desc mb-[100px] w-full border-collapse [&_a]:font-bold [&_a]:text-[var(--text-color)] [&_th]:bg-[var(--button-background)] [&_th]:px-[5px] [&_th]:pb-[5px] [&_th]:pt-[5px] [&_th]:text-left [&_th]:text-[var(--button-color)] [&_td]:px-[5px] [&_td]:py-[5px] [&_td:nth-child(2)]:w-[44px] [&_td:nth-child(2)]:min-w-[44px] [&_td:nth-child(2)]:max-w-[44px] [&_td:nth-child(2)_img]:h-[40px] [&_td:nth-child(2)_img]:w-[44px] [&_td:nth-child(2)_img]:max-w-none [&_tr:nth-child(2n)]:bg-[var(--body-background-faint)] ${styles.importTable}`}
         data-cy="story_list"
         data-js-sort-table="true"
       >
@@ -123,6 +127,9 @@ export default function ImportList({
                     {story.name}
                   </a>
                 )}
+                <span className={styles.mobileMetadata}>
+                  {story.set_id}–{story.set_index}
+                </span>
               </td>
               <td>{story.copies}x</td>
             </tr>

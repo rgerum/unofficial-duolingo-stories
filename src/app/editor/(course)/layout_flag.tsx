@@ -154,14 +154,55 @@ export default function LayoutFlag() {
           />
         )}
       </EditorHeaderActions>
-      {!import_id && segment[0] === "course" ? (
-        course ? (
+      {segment[0] === "course" ? (
+        import_id ? (
+          <ImportMobileHeader
+            courseId={segment[1] ?? ""}
+            fromId={import_id}
+            sourceCourse={course_import}
+          />
+        ) : course ? (
           <CourseMobileHeader course={course} />
         ) : (
           <CourseMobileHeaderLoading />
         )
       ) : null}
     </>
+  );
+}
+
+function ImportMobileHeader({
+  courseId,
+  fromId,
+  sourceCourse,
+}: {
+  courseId: string;
+  fromId: string;
+  sourceCourse?: CourseProps;
+}) {
+  return (
+    <MobileEditorHeader
+      backHref={`/editor/course/${courseId}`}
+      backLabel="Back to course"
+      icon={
+        sourceCourse ? (
+          <span className="relative h-7 w-8 shrink-0">
+            <LanguageFlag
+              languageId={sourceCourse.learningLanguageId}
+              width={24}
+              className="absolute left-0 top-0"
+            />
+            <LanguageFlag
+              languageId={sourceCourse.fromLanguageId}
+              width={21}
+              className="absolute right-0 bottom-0"
+            />
+          </span>
+        ) : undefined
+      }
+      title="Import stories"
+      subtitle={`from ${fromId}`}
+    />
   );
 }
 
