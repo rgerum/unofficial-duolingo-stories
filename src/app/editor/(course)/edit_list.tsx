@@ -363,22 +363,28 @@ export default function EditList({
                 </span>
               </div>
               <div className={styles.imageCell}>
-                <img
-                  alt={"story title"}
-                  src={
-                    "https://stories-cdn.duolingo.com/image/" +
-                    story.image +
-                    ".svg"
-                  }
-                  width="44px"
-                  height={"40px"}
-                  className="block min-w-[44px]"
-                />
+                <Link
+                  aria-label={`Edit ${story.name}`}
+                  href={`/editor/course/${course.short}/story/${story.id}`}
+                  onClick={() => rememberCourseScrollPosition(courseStorageKey)}
+                >
+                  <img
+                    alt=""
+                    src={
+                      "https://stories-cdn.duolingo.com/image/" +
+                      story.image +
+                      ".svg"
+                    }
+                    width="44px"
+                    height={"40px"}
+                    className="block min-w-[44px]"
+                  />
+                </Link>
               </div>
               <div className={styles.titleCell}>
                 <div className="flex min-w-0 items-center gap-[6px]">
                   <Link
-                    className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap underline underline-offset-2"
+                    className="block min-w-0 overflow-hidden text-ellipsis font-bold whitespace-nowrap no-underline min-[976px]:font-normal min-[976px]:underline min-[976px]:underline-offset-2"
                     href={`/editor/course/${course.short}/story/${story.id}`}
                     title={story.name}
                     onClick={() =>
@@ -724,7 +730,7 @@ function DropDownStatus(props: {
   return (
     <div className="inline-flex whitespace-nowrap">
       {
-        <span className="whitespace-nowrap rounded-[10px] bg-[var(--editor-ssml)] px-[5px] py-[2px]">
+        <span className="whitespace-nowrap rounded-[10px] bg-[var(--editor-ssml)] px-[5px] py-[2px] max-[975px]:bg-transparent max-[975px]:p-0 max-[975px]:opacity-60">
           <span className="min-[1000px]:hidden" aria-hidden="true">
             {status_icon(status, isPublic)}
           </span>
@@ -742,7 +748,7 @@ function DropDownStatus(props: {
             "ml-[4px] inline-flex min-w-[54px] items-center justify-center gap-[4px] whitespace-nowrap rounded-[10px] px-[5px] py-[2px] align-baseline hover:brightness-90 disabled:cursor-wait " +
             (approvedByCurrentUser
               ? "bg-[#0089e5] font-bold text-white"
-              : "bg-[var(--editor-ssml)]")
+              : "bg-[var(--editor-ssml)] max-[975px]:bg-transparent max-[975px]:ring-1 max-[975px]:ring-[var(--text-color-dim)] max-[975px]:ring-inset")
           }
           aria-pressed={approvedByCurrentUser}
           aria-label={
