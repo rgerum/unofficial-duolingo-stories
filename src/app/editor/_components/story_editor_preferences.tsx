@@ -9,6 +9,8 @@ type StoryEditorPreferencesValue = {
   setShowHints: React.Dispatch<React.SetStateAction<boolean>>;
   showAudio: boolean;
   setShowAudio: React.Dispatch<React.SetStateAction<boolean>>;
+  interleavedPreview: boolean;
+  setInterleavedPreview: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const StoryEditorPreferencesContext =
@@ -19,6 +21,7 @@ function readInitialPreferences() {
     return {
       showHints: false,
       showAudio: false,
+      interleavedPreview: false,
     };
   }
 
@@ -27,6 +30,7 @@ function readInitialPreferences() {
     return {
       showHints: false,
       showAudio: false,
+      interleavedPreview: false,
     };
   }
 
@@ -34,17 +38,20 @@ function readInitialPreferences() {
     const parsed = JSON.parse(raw) as {
       showHints?: boolean;
       showAudio?: boolean;
+      interleavedPreview?: boolean;
     };
 
     return {
       showHints: parsed.showHints === true,
       showAudio: parsed.showAudio === true,
+      interleavedPreview: parsed.interleavedPreview === true,
     };
   } catch {
     window.localStorage.removeItem(EDITOR_STORY_PREFERENCES_STORAGE_KEY);
     return {
       showHints: false,
       showAudio: false,
+      interleavedPreview: false,
     };
   }
 }
@@ -61,17 +68,20 @@ export function StoryEditorPreferencesProvider({
   const [showAudio, setShowAudio] = React.useState(
     initialPreferences.current.showAudio,
   );
+  const [interleavedPreview, setInterleavedPreview] = React.useState(
+    initialPreferences.current.interleavedPreview,
+  );
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
     window.localStorage.setItem(
       EDITOR_STORY_PREFERENCES_STORAGE_KEY,
-      JSON.stringify({ showHints, showAudio }),
+      JSON.stringify({ showHints, showAudio, interleavedPreview }),
     );
     window.editorShowTranslations = showHints;
     window.editorShowSsml = showAudio;
-  }, [showAudio, showHints]);
+  }, [interleavedPreview, showAudio, showHints]);
 
   const value = React.useMemo(
     () => ({
@@ -79,8 +89,10 @@ export function StoryEditorPreferencesProvider({
       setShowHints,
       showAudio,
       setShowAudio,
+      interleavedPreview,
+      setInterleavedPreview,
     }),
-    [showAudio, showHints],
+    [interleavedPreview, showAudio, showHints],
   );
 
   return (

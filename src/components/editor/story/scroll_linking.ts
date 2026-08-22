@@ -124,6 +124,7 @@ export default function useScrollLinking(
   view: EditorView | undefined,
   previewRef: React.RefObject<HTMLElement | null>,
   svgParentRef: React.RefObject<SVGElement | null>,
+  continuous = true,
 ) {
   const editor = view?.scrollDOM;
   const [last_scrolled_element, setLastScrolledElement] = useAutoResetRef<
@@ -150,11 +151,11 @@ export default function useScrollLinking(
     });
     update_lines(editor, svg_parent);
   });
-  const syncPreviewScroll = React.useEffectEvent(() => {
+  const syncPreviewScroll = React.useEffectEvent((force = false) => {
     const preview = previewRef.current;
     const svg_parent = svgParentRef.current;
     if (!editor || !preview) return;
-    if (last_scrolled_element.current === "editor") return;
+    if (!force && last_scrolled_element.current === "editor") return;
     setLastScrolledElement("preview");
 
     const new_pos = map_side(
@@ -193,6 +194,7 @@ export default function useScrollLinking(
 
   React.useEffect(() => {
     if (!editor) return;
+    const preview = previewRef.current;
 
     function editor_scroll() {
       requestAnimationFrame(() => syncEditorScroll());
@@ -200,37 +202,45 @@ export default function useScrollLinking(
     function syncPreview() {
       requestAnimationFrame(() => syncResize());
     }
-    editor.addEventListener("scroll", editor_scroll);
+    function syncEditor() {
+      requestAnimationFrame(() => syncPreviewScroll(true));
+    }
     editor.addEventListener("story-editor-sync-preview", syncPreview);
+    preview?.addEventListener("story-editor-sync-editor", syncEditor);
+    if (continuous) editor.addEventListener("scroll", editor_scroll);
     return () => {
       editor.removeEventListener("scroll", editor_scroll);
       editor.removeEventListener("story-editor-sync-preview", syncPreview);
+      preview?.removeEventListener("story-editor-sync-editor", syncEditor);
     };
-  }, [editor]);
+  }, [continuous, editor, previewRef]);
 
   React.useEffect(() => {
     const preview = previewRef.current;
     const svg_parent = svgParentRef.current;
     if (!preview || !editor) return;
-    update_lines(editor, svg_parent);
-    requestAnimationFrame(() => {
-      syncResize();
-    });
+    if (continuous) {
+      update_lines(editor, svg_parent);
+      requestAnimationFrame(() => {
+        syncResize();
+      });
+    }
 
     function preview_scroll() {
       requestAnimationFrame(() => syncPreviewScroll());
     }
 
-    preview.addEventListener("scroll", preview_scroll);
+    if (continuous) preview.addEventListener("scroll", preview_scroll);
     return () => preview.removeEventListener("scroll", preview_scroll);
-  }, [editor, previewRef, svgParentRef]);
+  }, [continuous, editor, previewRef, svgParentRef]);
 
   React.useEffect(() => {
+    if (!continuous) return;
     // `syncResize` is a useEffectEvent, so it reads the latest editor refs.
     function windowResize() {
       syncResize();
     }
     window.addEventListener("resize", windowResize);
     return () => window.removeEventListener("resize", windowResize);
-  }, []);
+  }, [continuous]);
 }

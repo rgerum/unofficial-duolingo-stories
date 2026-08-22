@@ -8,6 +8,7 @@ import { betterAuth } from "better-auth";
 import { admin, username } from "better-auth/plugins";
 import { defaultRoles, userAc } from "better-auth/plugins/admin/access";
 import { components, internal } from "../_generated/api";
+import { env } from "../_generated/server";
 import authConfig from "../auth.config";
 import { getSocialProviders } from "../authProviderConfig";
 import { syncDiscordAvatarFromAccount } from "../lib/discordAvatarSync";
@@ -147,6 +148,41 @@ const authBaseUrl =
   process.env.BETTER_AUTH_URL ??
   process.env.NEXTAUTH_URL;
 
+function getConfiguredTrustedOrigin(value: string | undefined) {
+  if (!value) return undefined;
+
+  const candidate = value.trim();
+  if (candidate.includes("*") || candidate.includes("?")) {
+    throw new Error("AUTH_TRUSTED_ORIGIN must be a concrete origin.");
+  }
+
+  let url: URL;
+  try {
+    url = new URL(candidate);
+  } catch {
+    throw new Error("AUTH_TRUSTED_ORIGIN must be a valid URL origin.");
+  }
+
+  if (
+    (url.protocol !== "http:" && url.protocol !== "https:") ||
+    url.username ||
+    url.password ||
+    url.pathname !== "/" ||
+    url.search ||
+    url.hash
+  ) {
+    throw new Error(
+      "AUTH_TRUSTED_ORIGIN must contain only an http(s) scheme, host, and optional port.",
+    );
+  }
+
+  return url.origin;
+}
+
+const configuredTrustedOrigin = getConfiguredTrustedOrigin(
+  env.AUTH_TRUSTED_ORIGIN,
+);
+
 // Better Auth Options
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
   return {
@@ -161,6 +197,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       const allowed = [
         "http://localhost:3000",
         authBaseUrl,
+        configuredTrustedOrigin,
         "https://appleid.apple.com",
         "https://*-duostories-team.vercel.app",
         "duostories://",

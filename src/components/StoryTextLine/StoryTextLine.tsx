@@ -61,7 +61,10 @@ function StoryTextLine({
   });
   const showEditorAudioDetails =
     editorShowAudioDetailsOverride ?? settings.show_audio;
-  const titleClassName = "m-0 text-[25px] leading-[34px] font-bold";
+  const titleClassName = cn(
+    "m-0 text-[25px] leading-[34px] font-bold",
+    compact && "text-base leading-6",
+  );
   const phraseClassName = "my-5 flex flex-nowrap items-start";
   const bubbleClassName = cn(
     "relative inline-block w-max max-w-[80%] rounded-[0_14px_14px_14px] border-2 border-[var(--color_base_border)] bg-[var(--color_base_background)] px-3 py-[10px]",

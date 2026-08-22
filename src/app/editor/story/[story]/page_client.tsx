@@ -19,11 +19,13 @@ export default function StoryEditorPageClient({
   courseId,
   initialFocusLine,
   initialBulkAudioOpen,
+  feedbackReturnHref,
 }: {
   storyId: number;
   courseId?: string;
   initialFocusLine?: number;
   initialBulkAudioOpen?: boolean;
+  feedbackReturnHref?: string;
 }) {
   const convex = useConvex();
   const data = useQuery(api.editorRead.getEditorStoryPageData, {
@@ -107,7 +109,7 @@ export default function StoryEditorPageClient({
             />
           </EditorHeaderBreadcrumbs>
         ) : null}
-        <StoryEditorHeaderLoading />
+        <StoryEditorHeaderLoading backHref={feedbackReturnHref} />
         <Spinner />
       </>
     );
@@ -155,16 +157,23 @@ export default function StoryEditorPageClient({
         avatar_names={avatarNames}
         initialFocusLine={initialFocusLine}
         initialBulkAudioOpen={initialBulkAudioOpen}
+        feedbackReturnHref={feedbackReturnHref}
         story_navigation={{
           previousStory: previousStory
             ? {
-                href: `/editor/course/${coursePathId}/story/${previousStory.id}`,
+                href: addFeedbackReturnHref(
+                  `/editor/course/${coursePathId}/story/${previousStory.id}`,
+                  feedbackReturnHref,
+                ),
                 name: previousStory.name,
               }
             : null,
           nextStory: nextStory
             ? {
-                href: `/editor/course/${coursePathId}/story/${nextStory.id}`,
+                href: addFeedbackReturnHref(
+                  `/editor/course/${coursePathId}/story/${nextStory.id}`,
+                  feedbackReturnHref,
+                ),
                 name: nextStory.name,
               }
             : null,
@@ -172,4 +181,9 @@ export default function StoryEditorPageClient({
       />
     </>
   );
+}
+
+function addFeedbackReturnHref(pathname: string, returnHref?: string) {
+  if (!returnHref) return pathname;
+  return `${pathname}?returnTo=${encodeURIComponent(returnHref)}`;
 }

@@ -1,7 +1,14 @@
 import React from "react";
+import type { ChoiceButtonState } from "@/lib/story/choice_button_state";
 import { cn } from "@/lib/utils";
 
-function CheckButton({ type }: { type: string }) {
+function CheckButton({
+  type,
+  compact = false,
+}: {
+  type: ChoiceButtonState;
+  compact?: boolean;
+}) {
   const className = cn(
     "relative h-[42px] min-w-10 select-none rounded-[9px] border-2 border-b-4 border-[var(--color_base_border)] bg-[var(--color_base_background)] text-[var(--color_base_color)]",
     type === "done" &&
@@ -10,6 +17,7 @@ function CheckButton({ type }: { type: string }) {
       "border-[var(--color_right_border-color)] bg-[var(--color_right_background)] text-[var(--color_right_color)]",
     type === "false" &&
       "animate-[story-checkbutton-false-to-disabled_1.5s] border-[var(--color_disabled_border-color)] border-b-2 bg-[var(--color_disabled_background)] text-[var(--color_disabled_color)]",
+    compact && "h-8 min-w-8 rounded-[7px] border-b-2",
   );
 
   return (

@@ -20,10 +20,12 @@ function StoryQuestionPointToPhrase({
   element,
   active,
   advance,
+  compact = false,
 }: {
   element: StoryElement;
   active: boolean;
   advance: () => void;
+  compact?: boolean;
 }) {
   if (element.type !== "POINT_TO_PHRASE")
     throw new Error("not the right element");
@@ -90,6 +92,7 @@ function StoryQuestionPointToPhrase({
                   status={buttonState[button_indices[index]]}
                   data-cy="point-button"
                   onClick={() => click(button_indices[index])}
+                  compact={compact}
                 >
                   {part.text.replace(/\{.*?}/g, "")}
                 </WordButton>

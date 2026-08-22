@@ -6,6 +6,13 @@ import { cn } from "@/lib/utils";
 
 const SEVERITY_ORDER: LintSeverity[] = ["error", "warning", "info"];
 
+const lintPanelClassName =
+  "fixed right-4 bottom-4 z-40 flex flex-col items-end";
+
+export function getLintPanelClassName(mobileEditing: boolean) {
+  return cn(lintPanelClassName, mobileEditing && "max-[975px]:hidden");
+}
+
 const SEVERITY_STYLES: Record<
   LintSeverity,
   { label: string; chip: string; dot: string }
@@ -30,11 +37,17 @@ const SEVERITY_STYLES: Record<
 export function LintPanel({
   findings,
   editorState,
+  mobileEditing = false,
 }: {
   findings: LintFinding[];
   editorState?: EditorStateType;
+  mobileEditing?: boolean;
 }) {
   const [expanded, setExpanded] = React.useState(false);
+
+  React.useEffect(() => {
+    if (mobileEditing) setExpanded(false);
+  }, [mobileEditing]);
 
   const counts = SEVERITY_ORDER.map((severity) => ({
     severity,
@@ -50,7 +63,7 @@ export function LintPanel({
   };
 
   return (
-    <div className="fixed right-4 bottom-4 z-40 flex flex-col items-end">
+    <div className={getLintPanelClassName(mobileEditing)}>
       {expanded && findings.length > 0 ? (
         <div className="mb-2 flex max-h-[50vh] w-[420px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-[10px] border border-[var(--header-border)] bg-[var(--body-background)] shadow-lg">
           <div className="flex items-center gap-2 border-b border-[var(--header-border)] px-3 py-2">

@@ -47,6 +47,7 @@ GITHUB_REPO_TOKEN=<optional_for_side_effect_sync>
 POSTHOG_KEY=<optional_for_server_tracking>
 POSTHOG_HOST=<optional_for_server_tracking>
 RESEND_API_KEY=<optional_for_email_flows>
+AUTH_TRUSTED_ORIGIN=<optional_extra_origin_for_local_or_preview_auth>
 SITE_URL=http://localhost:3000
 BETTER_AUTH_SECRET=<must_match_auth_setup>
 ```

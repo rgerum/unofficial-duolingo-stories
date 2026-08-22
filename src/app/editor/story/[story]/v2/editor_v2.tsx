@@ -1,45 +1,50 @@
 "use client";
 
-import React from "react";
+import { Compartment, EditorSelection, EditorState } from "@codemirror/state";
+import { api } from "@convex/_generated/api";
 import { basicSetup, EditorView } from "codemirror";
-import { EditorSelection, EditorState } from "@codemirror/state";
 import { useQuery } from "convex/react";
+import { EyeIcon, PencilIcon, ShieldIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShieldIcon } from "lucide-react";
-import { api } from "@convex/_generated/api";
-import { example, highlightStyle } from "@/components/editor/story/parser";
-import useScrollLinking from "@/components/editor/story/scroll_linking";
-import useResizeEditor from "@/components/editor/story/editor-resize";
-import StoryEditorPreview from "@/components/StoryEditorPreview";
-import { LintPanel } from "./lint_panel";
-import Cast from "@/components/editor/story/cast";
-import { StoryEditorHeader } from "@/app/editor/story/[story]/header";
-import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
-import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
+import React from "react";
+import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
 import BulkAudioEditor, {
   type BulkAudioEditorItem,
   type BulkAudioEditorUpdate,
 } from "@/app/editor/story/[story]/bulk-audio-editor";
+import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
+import { StoryEditorHeader } from "@/app/editor/story/[story]/header";
 import SoundRecorder from "@/app/editor/story/[story]/sound-recorder";
-import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
-import VisuallyHidden from "@/components/VisuallyHidden";
-import {
-  create_audio_insert_anchor,
-  insert_audio_at_anchor,
-  map_audio_insert_anchor,
-  insert_audio_lines,
-  timings_to_text,
-  type AudioInsertAnchor,
-} from "@/lib/editor/audio/audio_edit_tools";
-import { fix_audio_line_order } from "@/lib/editor/audio/fix_audio_line_order";
+import type { Avatar, StoryData } from "@/app/editor/story/[story]/types";
+import Cast from "@/components/editor/story/cast";
+import useResizeEditor from "@/components/editor/story/editor-resize";
+import { example, highlightStyle } from "@/components/editor/story/parser";
+import useScrollLinking from "@/components/editor/story/scroll_linking";
 import type {
   Audio,
   StoryElement,
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
+import StoryEditorPreview from "@/components/StoryEditorPreview";
+import VisuallyHidden from "@/components/VisuallyHidden";
+import {
+  type AudioInsertAnchor,
+  create_audio_insert_anchor,
+  insert_audio_at_anchor,
+  insert_audio_lines,
+  map_audio_insert_anchor,
+  timings_to_text,
+} from "@/lib/editor/audio/audio_edit_tools";
+import { fix_audio_line_order } from "@/lib/editor/audio/fix_audio_line_order";
 import AdminControls from "./admin_controls";
+import {
+  interleavedPreviewExtension,
+  setInterleavedPreview,
+} from "./interleaved_preview";
+import { LintPanel } from "./lint_panel";
+import { mobileEditorPresentation } from "./mobile_editor_presentation";
 import { useStoryEditorModel } from "./use_story_editor_model";
 
 type StoryNavigation = {
@@ -52,6 +57,19 @@ type StoryNavigation = {
     name: string;
   } | null;
 };
+
+type MobilePane = "edit" | "preview";
+
+const desktopEditorMediaQuery = "(min-width: 976px)";
+function subscribeToDesktopEditor(callback: () => void) {
+  const mediaQuery = window.matchMedia(desktopEditorMediaQuery);
+  mediaQuery.addEventListener("change", callback);
+  return () => mediaQuery.removeEventListener("change", callback);
+}
+
+function isDesktopEditor() {
+  return window.matchMedia(desktopEditorMediaQuery).matches;
+}
 
 type LanguageData = {
   languageId: string;
@@ -175,6 +193,7 @@ export default function EditorV2({
   avatar_names,
   initialFocusLine,
   initialBulkAudioOpen = false,
+  feedbackReturnHref,
   story_navigation,
 }: {
   isAdmin: boolean;
@@ -182,6 +201,7 @@ export default function EditorV2({
   avatar_names: Record<number, Avatar>;
   initialFocusLine?: number;
   initialBulkAudioOpen?: boolean;
+  feedbackReturnHref?: string;
   story_navigation: StoryNavigation;
 }) {
   const router = useRouter();
@@ -193,6 +213,9 @@ export default function EditorV2({
   const viewRef = React.useRef<EditorView | null>(null);
   const hasAppliedInitialFocusRef = React.useRef(false);
   const previousStoryIdRef = React.useRef<number | null>(null);
+  const previousMobilePaneRef = React.useRef<MobilePane>("edit");
+  const skipNextMobilePaneSyncRef = React.useRef(false);
+  const mobilePresentationCompartmentRef = React.useRef(new Compartment());
   const trackedAudioAnchorsRef = React.useRef<Set<AudioInsertAnchor>>(
     new Set(),
   );
@@ -201,6 +224,7 @@ export default function EditorV2({
     release: () => void;
   } | null>(null);
   const [view, setView] = React.useState<EditorView | undefined>(undefined);
+  const [editorFocused, setEditorFocused] = React.useState(false);
 
   const language_data = (useQuery(api.editorRead.getEditorLanguageByLegacyId, {
     legacyLanguageId: story_data.learning_language,
@@ -217,12 +241,20 @@ export default function EditorV2({
     setShowHints: set_show_trans,
     showAudio: show_ssml,
     setShowAudio: set_show_ssml,
+    interleavedPreview,
+    setInterleavedPreview: setInterleavedPreviewPreference,
   } = useStoryEditorPreferences();
   const [audioEditorData, setAudioEditorData] = React.useState<
     StoryElementLine | StoryElementHeader | undefined
   >(undefined);
   const [bulkAudioOpen, setBulkAudioOpen] =
     React.useState(initialBulkAudioOpen);
+  const [mobilePane, setMobilePane] = React.useState<MobilePane>("edit");
+  const desktopLayout = React.useSyncExternalStore(
+    subscribeToDesktopEditor,
+    isDesktopEditor,
+    () => false,
+  );
   const storyId = story_data.id;
   const model = useStoryEditorModel({
     isAdmin,
@@ -309,13 +341,39 @@ export default function EditorV2({
   );
 
   useResizeEditor(editorRef.current, previewRef.current, marginRef.current);
-  useScrollLinking(view, previewRef, svgParentRef);
+  useScrollLinking(view, previewRef, svgParentRef, desktopLayout);
+
+  React.useEffect(() => {
+    if (desktopLayout) {
+      previousMobilePaneRef.current = mobilePane;
+      return;
+    }
+    if (previousMobilePaneRef.current === mobilePane) return;
+    previousMobilePaneRef.current = mobilePane;
+    if (skipNextMobilePaneSyncRef.current) {
+      skipNextMobilePaneSyncRef.current = false;
+      return;
+    }
+    const frame = window.requestAnimationFrame(() => {
+      if (mobilePane === "preview") {
+        viewRef.current?.scrollDOM.dispatchEvent(
+          new CustomEvent("story-editor-sync-preview"),
+        );
+      } else {
+        previewRef.current?.dispatchEvent(
+          new CustomEvent("story-editor-sync-editor"),
+        );
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [desktopLayout, mobilePane]);
 
   React.useEffect(() => {
     const initialStory = getInitialText();
     if (initialStory.id !== storyId) return;
 
     const sync = EditorView.updateListener.of((update) => {
+      if (update.focusChanged) setEditorFocused(update.view.hasFocus);
       const currentLine = update.state.doc.lineAt(
         update.state.selection.main.from,
       ).number;
@@ -332,7 +390,16 @@ export default function EditorV2({
 
     const state = EditorState.create({
       doc: normalizeDocText(initialStory.text),
-      extensions: [basicSetup, sync, example(), highlightStyle],
+      extensions: [
+        basicSetup,
+        sync,
+        example(),
+        highlightStyle,
+        interleavedPreviewExtension,
+        mobilePresentationCompartmentRef.current.of(
+          isDesktopEditor() ? [] : mobileEditorPresentation,
+        ),
+      ],
     });
 
     const view = new EditorView({
@@ -348,6 +415,15 @@ export default function EditorV2({
       setView(undefined);
     };
   }, [getInitialText, storyId]);
+
+  React.useEffect(() => {
+    if (!view) return;
+    view.dispatch({
+      effects: mobilePresentationCompartmentRef.current.reconfigure(
+        desktopLayout ? [] : mobileEditorPresentation,
+      ),
+    });
+  }, [desktopLayout, view]);
 
   React.useEffect(() => {
     const editorView = viewRef.current ?? view;
@@ -508,6 +584,14 @@ export default function EditorV2({
           const lineNumber = Number.parseInt(line, 10);
           if (!Number.isFinite(lineNumber) || lineNumber <= 0) return;
           if (scroll) {
+            if (!desktopLayout && mobilePane === "preview") {
+              skipNextMobilePaneSyncRef.current = true;
+              setMobilePane("edit");
+              window.requestAnimationFrame(() => {
+                scrollEditorLineIntoView(view, lineNumber);
+              });
+              return;
+            }
             scrollEditorLineIntoView(view, lineNumber);
             return;
           }
@@ -535,7 +619,88 @@ export default function EditorV2({
           insert_audio_at_anchor(text, view, anchor),
         show_audio_editor: (data) => openAudioEditor(data),
       };
-    }, [audioInsertLines, lineNo, openAudioEditor, view]);
+    }, [
+      audioInsertLines,
+      desktopLayout,
+      lineNo,
+      mobilePane,
+      openAudioEditor,
+      view,
+    ]);
+  const latestEditorStateForPreviewRef = React.useRef<
+    EditorStateType | undefined
+  >(undefined);
+
+  const editorStateForInterleavedPreview = React.useMemo<
+    EditorStateType | undefined
+  >(() => {
+    if (!view) return undefined;
+    return {
+      get line_no() {
+        return latestEditorStateForPreviewRef.current?.line_no ?? 1;
+      },
+      view,
+      select: (line, scroll) =>
+        latestEditorStateForPreviewRef.current?.select(line, scroll),
+      get audio_insert_lines() {
+        return latestEditorStateForPreviewRef.current?.audio_insert_lines;
+      },
+      create_audio_insert_anchor: (ssml) =>
+        latestEditorStateForPreviewRef.current?.create_audio_insert_anchor(
+          ssml,
+        ),
+      track_audio_insert_anchor: (anchor) =>
+        latestEditorStateForPreviewRef.current?.track_audio_insert_anchor(
+          anchor,
+        ) ?? (() => {}),
+      insert_audio_at_anchor: (text, anchor) =>
+        latestEditorStateForPreviewRef.current?.insert_audio_at_anchor(
+          text,
+          anchor,
+        ),
+      show_audio_editor: (data) =>
+        latestEditorStateForPreviewRef.current?.show_audio_editor(data),
+    };
+  }, [view]);
+
+  React.useEffect(() => {
+    latestEditorStateForPreviewRef.current = editorStateForPreview;
+  }, [editorStateForPreview]);
+
+  React.useEffect(() => {
+    if (!view) return;
+    const enabled = !desktopLayout && interleavedPreview;
+    view.dispatch({
+      effects: setInterleavedPreview.of(
+        enabled
+          ? {
+              story: model.parsedStory,
+              editorState: editorStateForInterleavedPreview,
+              showHints: show_trans,
+              showAudio: show_ssml,
+              onOpenAudioEditor:
+                editorStateForInterleavedPreview?.show_audio_editor,
+            }
+          : null,
+      ),
+    });
+  }, [
+    desktopLayout,
+    editorStateForInterleavedPreview,
+    interleavedPreview,
+    model.parsedStory,
+    show_ssml,
+    show_trans,
+    view,
+  ]);
+
+  const setInterleavedPreviewMode = React.useCallback(
+    (show: boolean) => {
+      setInterleavedPreviewPreference(show);
+      if (show) setMobilePane("edit");
+    },
+    [setInterleavedPreviewPreference],
+  );
 
   const audioEditorDataContent =
     (audioEditorData?.type === "LINE" && audioEditorData.line.content) ||
@@ -592,12 +757,15 @@ export default function EditorV2({
         set_show_trans={set_show_trans}
         show_ssml={show_ssml}
         set_show_ssml={set_show_ssml}
+        interleaved_preview={interleavedPreview}
+        set_interleaved_preview={setInterleavedPreviewMode}
         open_bulk_audio={() => {
           setAudioEditorData(undefined);
           setBulkAudioOpen(true);
         }}
         previous_story={story_navigation.previousStory}
         next_story={story_navigation.nextStory}
+        feedbackReturnHref={feedbackReturnHref}
       />
       <BulkAudioEditor
         open={bulkAudioOpen}
@@ -632,9 +800,12 @@ export default function EditorV2({
           />
         )}
 
-      <div className="flex min-h-0 flex-1">
+      <div className="relative flex min-h-0 flex-1">
+        {!interleavedPreview ? (
+          <MobilePaneSwitch value={mobilePane} onChange={setMobilePane} />
+        ) : null}
         <svg
-          className="pointer-events-none fixed z-[-1] h-full w-full float-left"
+          className="pointer-events-none fixed z-[-1] h-full w-full float-left max-[975px]:hidden"
           ref={svgParentRef}
         >
           <path
@@ -642,19 +813,27 @@ export default function EditorV2({
             d=""
           />
         </svg>
-        <RtlContainer ref={editorRef} rtl={Boolean(language_data?.rtl)} />
+        <RtlContainer
+          ref={editorRef}
+          rtl={Boolean(language_data?.rtl)}
+          mobileVisible={interleavedPreview || mobilePane === "edit"}
+        />
         <svg
-          className="h-full w-[2%] cursor-col-resize overflow-scroll float-left"
+          className="h-full w-[2%] cursor-col-resize overflow-scroll float-left max-[975px]:hidden"
           ref={marginRef}
         />
         <div
           ref={previewRef}
-          className="relative min-h-0 w-[100px] grow overflow-scroll p-3 [scroll-behavior:auto] max-[975px]:absolute max-[975px]:top-[calc((100vh-64px)/2+64px)] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full"
+          className={`relative min-h-0 w-[100px] grow overflow-auto p-3 [scroll-behavior:auto] max-[975px]:h-full max-[975px]:w-full ${
+            !interleavedPreview && mobilePane === "preview"
+              ? ""
+              : "max-[975px]:hidden"
+          }`}
         >
           {isAdmin ? (
             <Link
               href={`/admin/story/${story_data.id}`}
-              className="sticky top-3 right-3 z-10 float-right inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-[var(--header-border)] bg-[var(--body-background)] text-[var(--text-color-dim)] transition-colors duration-100 hover:border-[color:color-mix(in_srgb,var(--link-blue)_22%,var(--header-border))] hover:bg-[color:color-mix(in_srgb,var(--overview-hr)_35%,var(--body-background))] hover:text-[var(--text-color)] active:bg-[color:color-mix(in_srgb,var(--overview-hr)_55%,var(--body-background))]"
+              className="sticky top-3 right-3 z-10 float-right inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-[var(--header-border)] bg-[var(--body-background)] text-[var(--text-color-dim)] transition-colors duration-100 hover:border-[color:color-mix(in_srgb,var(--link-blue)_22%,var(--header-border))] hover:bg-[color:color-mix(in_srgb,var(--overview-hr)_35%,var(--body-background))] hover:text-[var(--text-color)] active:bg-[color:color-mix(in_srgb,var(--overview-hr)_55%,var(--body-background))] max-[975px]:top-14"
             >
               <ShieldIcon aria-hidden="true" className="h-6 w-6" />
               <VisuallyHidden>Open story in admin panel</VisuallyHidden>
@@ -676,19 +855,74 @@ export default function EditorV2({
       <LintPanel
         findings={model.lintFindings}
         editorState={editorStateForPreview}
+        mobileEditing={!desktopLayout && editorFocused}
       />
     </div>
   );
 }
 
-const RtlContainer = React.forwardRef<HTMLDivElement, { rtl: boolean }>(
-  function RtlContainer({ rtl }, ref) {
-    return (
-      <div
-        ref={ref}
-        className="min-h-0 w-[100px] grow [scroll-behavior:auto] max-[975px]:h-[calc((100vh-64px)/2)] max-[975px]:w-full"
-        dir={rtl ? "rtl" : undefined}
-      />
-    );
-  },
-);
+function MobilePaneSwitch({
+  value,
+  onChange,
+}: {
+  value: MobilePane;
+  onChange: (value: MobilePane) => void;
+}) {
+  return (
+    <div
+      className="fixed right-4 top-[68px] z-30 inline-flex rounded-full border border-[var(--header-border)] bg-[color:color-mix(in_srgb,var(--body-background)_90%,transparent)] p-1 shadow-lg backdrop-blur-sm min-[976px]:hidden"
+      aria-label="Story editor view"
+      role="group"
+    >
+      {(["edit", "preview"] as const).map((pane) => {
+        const label = pane === "edit" ? "Edit" : "Preview";
+        return (
+          <button
+            key={pane}
+            type="button"
+            title={label}
+            aria-label={label}
+            aria-pressed={value === pane}
+            className={`grid size-11 place-items-center rounded-full transition-colors ${
+              value === pane
+                ? "bg-[var(--button-background)] text-white shadow-sm"
+                : "text-[var(--text-color-dim)] hover:bg-[var(--overview-hr)]"
+            }`}
+            onClick={() => onChange(pane)}
+          >
+            {pane === "edit" ? (
+              <PencilIcon
+                aria-hidden="true"
+                width={28}
+                height={28}
+                className="size-7 shrink-0"
+              />
+            ) : (
+              <EyeIcon
+                aria-hidden="true"
+                width={28}
+                height={28}
+                className="size-7 shrink-0"
+              />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+const RtlContainer = React.forwardRef<
+  HTMLDivElement,
+  { rtl: boolean; mobileVisible: boolean }
+>(function RtlContainer({ rtl, mobileVisible }, ref) {
+  return (
+    <div
+      ref={ref}
+      className={`min-h-0 w-[100px] grow [scroll-behavior:auto] max-[975px]:h-full max-[975px]:w-full ${
+        mobileVisible ? "" : "max-[975px]:hidden"
+      }`}
+      dir={rtl ? "rtl" : undefined}
+    />
+  );
+});

@@ -1,5 +1,9 @@
 "use client";
+import { api } from "@convex/_generated/api";
+import { useMutation, useQuery } from "convex/react";
+import { Pin } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useDeferredValue,
   useEffect,
@@ -7,9 +11,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
+import { useCoursePin } from "@/app/editor/_components/use_course_pin";
+import type {
+  DetailedCourseProps,
+  StoryListDataProps,
+} from "@/app/editor/(course)/types";
 import ContributorList from "@/components/ContributorList";
 import {
   Dialog,
@@ -17,8 +23,9 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import Input from "@/components/ui/input";
 import { matchesStorySearch, parseStorySearch } from "@/lib/story-search";
+import { CountBadge } from "./CountBadge";
+import CourseStats from "./course_stats";
 import {
   readCourseFilter,
   rememberCourseFilter,
@@ -26,25 +33,11 @@ import {
   restoreCourseScrollPosition,
 } from "./course_view_memory";
 import styles from "./edit_list.module.css";
-import { CountBadge } from "./CountBadge";
-import type {
-  DetailedCourseProps,
-  StoryListDataProps,
-} from "@/app/editor/(course)/types";
-import CourseInterestSummary from "./course_interest_summary";
-import CourseActivityChart from "./course_activity_chart";
-import { Pin } from "lucide-react";
-
-type StoryState = "draft" | "feedback" | "finished" | "published";
-type StoryFilter = "all" | StoryState;
-
-const STORY_FILTER_ORDER: StoryFilter[] = [
-  "all",
-  "draft",
-  "feedback",
-  "finished",
-  "published",
-];
+import { STORY_LIST_ILLUSTRATION_SIZE } from "./story_list_layout";
+import StoryListToolbar, {
+  type StoryFilter,
+  type StoryFilterCounts,
+} from "./story_list_toolbar";
 export default function EditList({
   stories,
   course,
@@ -64,23 +57,12 @@ export default function EditList({
   const storyPreferences = useQuery(
     api.userPreferences.getCurrentStoryPreferences,
   );
-  const pinnedCourseIds = useQuery(api.coursePins.listCurrentUserPins, {});
-  const setCoursePin = useMutation(api.coursePins.setCurrentUserCoursePin);
-  const [isUpdatingPin, setIsUpdatingPin] = useState(false);
-  const isCoursePinned = pinnedCourseIds?.includes(course.id) ?? false;
-
-  async function toggleCoursePin() {
-    if (isUpdatingPin) return;
-    setIsUpdatingPin(true);
-    try {
-      await setCoursePin({
-        courseLegacyId: course.id,
-        pinned: !isCoursePinned,
-      });
-    } finally {
-      setIsUpdatingPin(false);
-    }
-  }
+  const {
+    isPinned: isCoursePinned,
+    isUpdating: isUpdatingPin,
+    isLoading: isLoadingPin,
+    toggle: toggleCoursePin,
+  } = useCoursePin(course.id);
 
   useEffect(() => {
     setStoryList(stories ?? []);
@@ -110,7 +92,7 @@ export default function EditList({
     return restoreCourseScrollPosition(courseStorageKey);
   }, [activeFilter, courseStorageKey, isStoredFilterApplied]);
 
-  const counts = storyList.reduce<Record<StoryFilter, number>>(
+  const counts = storyList.reduce<StoryFilterCounts>(
     (acc, story) => {
       acc.all += 1;
       acc[getStoryState(story)] += 1;
@@ -158,147 +140,109 @@ export default function EditList({
   }
 
   return (
-    <>
-      <div>
-        {!course.public && story_published_count ? (
-          <div className="mx-[10px] my-[10px] rounded-[10px] border-2 bg-[var(--button-inactive-background)] p-[10px]">
-            {`⚠ This course is not public, but has ${story_published_count} stories set to "public".`}
-            <br />
-            Please ask a moderator on discord to check the course and make it
-            public.
-          </div>
-        ) : null}
-        <ul className="my-4 list-disc pl-10">
-          <li>
-            To create a new story click the &quot;Import&quot; button. The story
-            starts as &quot;✍️ draft&quot;.
-          </li>
-          <li>
-            When you have finished working on the story, click the
-            &quot;👍&quot; icon to approve it and change the status to &quot;🗨
-            feedback&quot;.
-          </li>
-          <li>
-            Now tell contributors on Discord to check the story. When one or
-            more people have checked the story and also gave their approval
-            &quot;👍&quot; the status changes to &quot;✅ finished&quot;.
-          </li>
-          <li>
-            When one complete set is finished it will switch to &quot;📢
-            published&quot;.
-          </li>
-        </ul>
-      </div>
-      <p className="my-4">
-        To set character voices, go to the{" "}
-        <Link
-          className="underline"
-          href={`/editor/course/${course.short}/voices`}
-        >
-          Character Editor
-        </Link>
-        .
-      </p>
-      {course.from_language_name !== "English" && (
+    <div className="max-[975px]:px-3 max-[975px]:pt-3 max-[975px]:text-[14px]">
+      <div className="max-[975px]:hidden">
+        <div>
+          {!course.public && story_published_count ? (
+            <div className="mx-[10px] my-[10px] rounded-[10px] border-2 bg-[var(--button-inactive-background)] p-[10px]">
+              {`⚠ This course is not public, but has ${story_published_count} stories set to "public".`}
+              <br />
+              Please ask a moderator on discord to check the course and make it
+              public.
+            </div>
+          ) : null}
+          <ul className="my-4 list-disc pl-10">
+            <li>
+              To create a new story click the &quot;Import&quot; button. The
+              story starts as &quot;✍️ draft&quot;.
+            </li>
+            <li>
+              When you have finished working on the story, click the
+              &quot;👍&quot; icon to approve it and change the status to &quot;🗨
+              feedback&quot;.
+            </li>
+            <li>
+              Now tell contributors on Discord to check the story. When one or
+              more people have checked the story and also gave their approval
+              &quot;👍&quot; the status changes to &quot;✅ finished&quot;.
+            </li>
+            <li>
+              When one complete set is finished it will switch to &quot;📢
+              published&quot;.
+            </li>
+          </ul>
+        </div>
         <p className="my-4">
-          For language localization settings (for the base language of this
-          course), head to the{" "}
+          To set character voices, go to the{" "}
           <Link
             className="underline"
-            href={`/editor/course/${course.short}/localization`}
+            href={`/editor/course/${course.short}/voices`}
           >
-            Localization Editor
+            Character Voice Editor
           </Link>
           .
         </p>
-      )}
-      <div className="my-6 space-y-4">
-        <div>
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <h2 className="font-bold">Active Contributors</h2>
-            <button
-              type="button"
-              className={
-                "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 " +
-                (isCoursePinned
-                  ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
-                  : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
-              }
-              aria-pressed={isCoursePinned}
-              disabled={pinnedCourseIds === undefined || isUpdatingPin}
-              onClick={() => void toggleCoursePin()}
+        {course.from_language_name !== "English" && (
+          <p className="my-4">
+            For localization settings in this course&apos;s From Language, head
+            to the{" "}
+            <Link
+              className="underline"
+              href={`/editor/course/${course.short}/localization`}
             >
-              <Pin
-                className="size-4"
-                fill={isCoursePinned ? "currentColor" : "none"}
-              />
-              {isCoursePinned ? "Unpin course" : "Pin course"}
-            </button>
-          </div>
-          <ContributorList
-            contributors={course.contributors}
-            emptyLabel="No contributors"
-            size="sm"
-          />
-        </div>
-        <div>
-          <h2 className="mb-2 font-bold">Past Contributors</h2>
-          <ContributorList
-            contributors={course.contributors_past}
-            emptyLabel="No past contributors"
-            muted
-            size="sm"
-          />
-        </div>
-      </div>
-      <CourseInterestSummary courseIdentifier={course.short} />
-      {course.short ? (
-        <CourseActivityChart courseIdentifier={course.short} />
-      ) : null}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="w-full min-w-[220px] flex-1 min-[860px]:max-w-[360px]">
-          <Input
-            id="story-search"
-            type="search"
-            value={storySearch}
-            placeholder="Search story names or status"
-            aria-label="Search story names or status"
-            autoComplete="off"
-            onChange={(event) => setStorySearch(event.target.value)}
-          />
-        </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          {STORY_FILTER_ORDER.map((filter) => {
-            const isActive = activeFilter === filter;
-            return (
+              Localization Editor
+            </Link>
+            .
+          </p>
+        )}
+        <div className="my-6 space-y-4">
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h2 className="font-bold">Active Contributors</h2>
               <button
-                key={filter}
                 type="button"
                 className={
-                  "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 " +
-                  (isActive
+                  "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 " +
+                  (isCoursePinned
                     ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
                     : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] hover:bg-[var(--body-background)]")
                 }
-                onClick={() => setActiveFilter(filter)}
-                aria-pressed={isActive}
+                aria-pressed={isCoursePinned}
+                disabled={isLoadingPin || isUpdatingPin}
+                onClick={() => void toggleCoursePin()}
               >
-                <span>{getFilterLabel(filter)}</span>
-                <span
-                  className={
-                    "rounded-full px-2 py-[3px] text-[12px] font-bold " +
-                    (isActive
-                      ? "bg-[color:rgba(255,255,255,0.18)] text-[var(--button-color)]"
-                      : "bg-[var(--body-background)] text-[var(--text-color-dim)]")
-                  }
-                >
-                  {counts[filter]}
-                </span>
+                <Pin
+                  className="size-4"
+                  fill={isCoursePinned ? "currentColor" : "none"}
+                />
+                {isCoursePinned ? "Unpin course" : "Pin course"}
               </button>
-            );
-          })}
+            </div>
+            <ContributorList
+              contributors={course.contributors}
+              emptyLabel="No contributors"
+              size="sm"
+            />
+          </div>
+          <div>
+            <h2 className="mb-2 font-bold">Past Contributors</h2>
+            <ContributorList
+              contributors={course.contributors_past}
+              emptyLabel="No past contributors"
+              muted
+              size="sm"
+            />
+          </div>
         </div>
+        <CourseStats courseIdentifier={course.short} />
       </div>
+      <StoryListToolbar
+        activeFilter={activeFilter}
+        counts={counts}
+        storySearch={storySearch}
+        onFilterChange={setActiveFilter}
+        onSearchChange={setStorySearch}
+      />
       <div className={styles.storyList}>
         <div className={styles.header}>
           <div className={styles.headerRow}>
@@ -342,22 +286,28 @@ export default function EditList({
                 </span>
               </div>
               <div className={styles.imageCell}>
-                <img
-                  alt={"story title"}
-                  src={
-                    "https://stories-cdn.duolingo.com/image/" +
-                    story.image +
-                    ".svg"
-                  }
-                  width="44px"
-                  height={"40px"}
-                  className="block min-w-[44px]"
-                />
+                <Link
+                  aria-label={`Edit ${story.name}`}
+                  href={`/editor/course/${course.short}/story/${story.id}`}
+                  onClick={() => rememberCourseScrollPosition(courseStorageKey)}
+                >
+                  <img
+                    alt=""
+                    src={
+                      "https://stories-cdn.duolingo.com/image/" +
+                      story.image +
+                      ".svg"
+                    }
+                    width={STORY_LIST_ILLUSTRATION_SIZE.width}
+                    height={STORY_LIST_ILLUSTRATION_SIZE.height}
+                    className="block min-w-[44px]"
+                  />
+                </Link>
               </div>
               <div className={styles.titleCell}>
                 <div className="flex min-w-0 items-center gap-[6px]">
                   <Link
-                    className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap underline underline-offset-2"
+                    className="block min-w-0 overflow-hidden text-ellipsis font-bold whitespace-nowrap no-underline min-[976px]:font-normal min-[976px]:underline min-[976px]:underline-offset-2"
                     href={`/editor/course/${course.short}/story/${story.id}`}
                     title={story.name}
                     onClick={() =>
@@ -380,6 +330,16 @@ export default function EditList({
                     label={`${story.audio_problem_count} audio problems`}
                     className="bg-sky-100 text-sky-950"
                   />
+                </div>
+                <div
+                  className={styles.mobileMetadata}
+                  title={`Updated: ${story.author_change || "-"}, ${formatFullDateTime(story.change_date)}`}
+                >
+                  <span>{`${story.set_id}–${story.set_index}`}</span>
+                  <span aria-hidden="true"> · </span>
+                  <time dateTime={getDateTimeAttribute(story.change_date)}>
+                    {`updated ${formatRelativeDate(story.change_date)}`}
+                  </time>
                 </div>
               </div>
               <div className={styles.secondaryCell}>
@@ -428,7 +388,7 @@ export default function EditList({
           ) : null}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -437,14 +397,6 @@ function getStoryState(story: Pick<StoryListDataProps, "status" | "public">) {
   if (story.status === "feedback") return "feedback";
   if (story.status === "finished") return "finished";
   return "draft";
-}
-
-function getFilterLabel(filter: StoryFilter) {
-  if (filter === "all") return "All";
-  if (filter === "draft") return "✍️ Draft";
-  if (filter === "feedback") return "🗨️ Feedback";
-  if (filter === "finished") return "✅ Finished";
-  return "📢 Published";
 }
 
 function getEmptyStateMessage(filter: StoryFilter, searchQuery: string) {
@@ -542,6 +494,26 @@ function formatCompactDate(datetime: string | number | Date | undefined) {
   }
 
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function formatRelativeDate(datetime: string | number | Date | undefined) {
+  const date = getDate(datetime);
+  if (!date) return "-";
+
+  const elapsedMinutes = Math.max(
+    0,
+    Math.floor((Date.now() - date.getTime()) / 60_000),
+  );
+  if (elapsedMinutes < 1) return "now";
+  if (elapsedMinutes < 60) return `${elapsedMinutes}m ago`;
+
+  const elapsedHours = Math.floor(elapsedMinutes / 60);
+  if (elapsedHours < 24) return `${elapsedHours}h ago`;
+
+  const elapsedDays = Math.floor(elapsedHours / 24);
+  if (elapsedDays < 30) return `${elapsedDays}d ago`;
+  if (elapsedDays < 365) return `${Math.floor(elapsedDays / 30)}mo ago`;
+  return `${Math.floor(elapsedDays / 365)}y ago`;
 }
 
 function DropDownStatus(props: {
@@ -671,9 +643,9 @@ function DropDownStatus(props: {
   }
 
   return (
-    <div className="inline-flex whitespace-nowrap">
+    <div className="inline-flex whitespace-nowrap max-[975px]:items-center">
       {
-        <span className="whitespace-nowrap rounded-[10px] bg-[var(--editor-ssml)] px-[5px] py-[2px]">
+        <span className="whitespace-nowrap rounded-[10px] bg-[var(--editor-ssml)] px-[5px] py-[2px] max-[975px]:bg-transparent max-[975px]:p-0 max-[975px]:opacity-60">
           <span className="min-[1000px]:hidden" aria-hidden="true">
             {status_icon(status, isPublic)}
           </span>
@@ -688,7 +660,7 @@ function DropDownStatus(props: {
         <button
           type="button"
           className={
-            "ml-[4px] inline-flex min-w-[54px] items-center justify-center gap-[4px] whitespace-nowrap rounded-[10px] px-[5px] py-[2px] align-baseline hover:brightness-90 disabled:cursor-wait " +
+            "ml-[4px] inline-flex min-w-[54px] items-center justify-center gap-[4px] whitespace-nowrap rounded-[10px] px-[5px] py-[2px] align-baseline hover:brightness-90 disabled:cursor-wait max-[975px]:ml-2 max-[975px]:rounded-full max-[975px]:px-3 max-[975px]:shadow-sm max-[975px]:transition-[filter,transform] max-[975px]:active:scale-95 " +
             (approvedByCurrentUser
               ? "bg-[#0089e5] font-bold text-white"
               : "bg-[var(--editor-ssml)]")
@@ -725,7 +697,7 @@ function DropDownStatus(props: {
         onOpenChange={setIsConfirmingApproval}
       >
         <DialogContent
-          className="max-w-[420px] rounded-[8px] bg-[var(--body-background)] text-left whitespace-normal"
+          className="max-w-[420px] rounded-[8px] bg-[var(--body-background)] text-left whitespace-normal max-[639px]:inset-auto max-[639px]:top-1/2 max-[639px]:left-1/2 max-[639px]:max-h-[calc(100dvh-2rem)] max-[639px]:translate-x-[-50%] max-[639px]:translate-y-[-50%]"
           onOpenAutoFocus={(event) => {
             event.preventDefault();
             approveButtonRef.current?.focus();

@@ -20,7 +20,7 @@ export default function CourseInterestSummary({
     (stats?.authenticatedCount ?? 0) + (stats?.browserCount ?? 0);
 
   return (
-    <section className="my-6 rounded-2xl border-2 border-[#8fd55c] bg-[#f6ffef] p-5 dark:border-[#416f31] dark:bg-[#20301d]">
+    <section className="my-6 rounded-2xl border-2 border-[#8fd55c] bg-[#f6ffef] p-5 max-[975px]:my-3 max-[975px]:p-4 dark:border-[#416f31] dark:bg-[#20301d]">
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#d9ffc2] text-[#58a700] dark:bg-[#315d24] dark:text-[#9be66e]">
           <Heart className="h-5 w-5 fill-current" aria-hidden="true" />

@@ -8,6 +8,7 @@ const app = defineApp({
     DISCORD_TOKEN: v.optional(v.string()),
     DISCORD_BOT_TOKEN: v.optional(v.string()),
     DISCORD_ANNOUNCEMENTS_CHANNEL_ID: v.optional(v.string()),
+    AUTH_TRUSTED_ORIGIN: v.optional(v.string()),
   },
 });
 

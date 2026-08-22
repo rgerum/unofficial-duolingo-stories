@@ -236,7 +236,13 @@ async function getClient() {
   if (!url) {
     throw new Error("NEXT_PUBLIC_CONVEX_URL/CONVEX_URL is not set.");
   }
-  return new ConvexHttpClient(url);
+  const authToken = process.env.CONVEX_AUTH_TOKEN;
+  if (!authToken) {
+    throw new Error("CONVEX_AUTH_TOKEN is required to load Editor Courses.");
+  }
+  const client = new ConvexHttpClient(url);
+  client.setAuth(authToken);
+  return client;
 }
 
 async function syncContentRepo(options: CliOptions) {
@@ -265,6 +271,11 @@ async function syncContentRepo(options: CliOptions) {
 
 async function getCourseStories(client: ConvexHttpClient, courseShort: string) {
   const sidebar = await client.query(api.editorRead.getEditorSidebarData, {});
+  if (!sidebar.hasAccess) {
+    throw new Error(
+      "The configured CONVEX_AUTH_TOKEN does not grant Editor Course access.",
+    );
+  }
   const course = (sidebar.courses ?? []).find(
     (candidate) => candidate.short === courseShort,
   ) as CourseSummary | undefined;

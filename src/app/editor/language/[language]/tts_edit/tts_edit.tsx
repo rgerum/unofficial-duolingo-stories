@@ -2,7 +2,6 @@
 import React from "react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useInput } from "@/lib/hooks";
 import { PlayButton, SpeakerEntry } from "../language_editor";
 import { Layout } from "../language_editor";
 import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
@@ -13,14 +12,33 @@ import {
 import StoryTextLine from "@/components/StoryTextLine";
 import { parse as parseYaml } from "yaml";
 import {
-  LanguageType,
-  SpeakersType,
-  CourseStudType,
+  type LanguageType,
+  type SpeakersType,
+  type CourseStudType,
 } from "@/app/editor/language/[language]/types";
 import {
-  StoryElement,
-  StoryElementLine,
+  type StoryElement,
+  type StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
+import MobileTtsEditor, { type RulesSaveStatus } from "./mobile_tts_editor";
+import { formatTestVoice } from "./tts_edit_model";
+
+const DEFAULT_TTS_RULES = `
+# line with # are comments and are ignored
+
+# here you can add single letters that should be replaced
+#LETTERS:
+#    o: u
+#    e: i
+# here you can add parts of words to be replaced. You can use valid regular expressions (regex) here
+FRAGMENTS:
+#    ion\\b: flug
+#    sem: dem
+# whole words that should be replaced
+#WORDS:
+#    oh: uuuh
+#    Worcester: WOO-STER
+`;
 
 const element_init: StoryElementLine = {
   trackingProperties: {
@@ -58,46 +76,38 @@ export default function Tts_edit({
   speakers,
   course,
   renderHeader = true,
+  mobileCourseLayout = false,
 }: {
   language: LanguageType;
   language2: LanguageType | undefined;
   speakers: SpeakersType[];
   course: CourseStudType | undefined;
   renderHeader?: boolean;
+  mobileCourseLayout?: boolean;
 }) {
   // Render data...                <AvatarNames language={language} speakers={speakers} avatar_names={avatar_names}/>
-  const [data, setData] = React.useState(
-    language.tts_replace ||
-      `
-# line with # are comments and are ignored
-      
-# here you can add single letters that should be replaced    
-#LETTERS:
-#    o: u
-#    e: i
-# here you can add parts of words to be replaced. You can use valid regular expressions (regex) here
-FRAGMENTS:
-#    ion\\b: flug
-#    sem: dem
-# whole words that should be replaced
-#WORDS:
-#    oh: uuuh
-#    Worcester: WOO-STER
-`,
-  );
-  function setDataValidated(e: React.ChangeEvent<HTMLTextAreaElement>) {
-    const v = e.target.value;
+  const initialRules = language.tts_replace || DEFAULT_TTS_RULES;
+  const remoteRules = language.tts_replace || DEFAULT_TTS_RULES;
+  const [data, setData] = React.useState(initialRules);
+  const [validData, setValidData] = React.useState(initialRules);
+  const [savedData, setSavedData] = React.useState(initialRules);
+  const [saveStatus, setSaveStatus] = React.useState<RulesSaveStatus>("idle");
+  const dataEditVersionRef = React.useRef(0);
+  function setDataValidated(value: string) {
+    dataEditVersionRef.current += 1;
+    setData(value);
+    setSaveStatus((current) => (current === "saving" ? current : "idle"));
     try {
-      parseYaml(v);
-      setData(v);
+      parseYaml(value);
+      setValidData(value);
       setYamlError(false);
-    } catch (err) {
+    } catch {
       setYamlError(true);
     }
   }
-  const [text, setText] = useInput("Enter a text to be spoken");
+  const [text, setText] = React.useState("Enter a text to be spoken");
   const [text2, setText2] = React.useState("");
-  const [customSpeaker, setCustomSpeaker] = useInput("");
+  const [customVoice, setCustomVoice] = React.useState("");
   const [pitch, setPitch] = React.useState(2);
   const [speed, setSpeed] = React.useState(2);
 
@@ -105,33 +115,56 @@ FRAGMENTS:
   const saveTtsReplaceMutation = useMutation(api.languageWrite.setTtsReplace);
 
   const [yamlError, setYamlError] = React.useState(false);
+  const previousRemoteRulesRef = React.useRef(remoteRules);
+  React.useEffect(() => {
+    const remoteRulesChanged = previousRemoteRulesRef.current !== remoteRules;
+    if (!remoteRulesChanged || data !== savedData) return;
+    previousRemoteRulesRef.current = remoteRules;
+    if (remoteRules === savedData) return;
+    setData(remoteRules);
+    setValidData(remoteRules);
+    setSavedData(remoteRules);
+    setYamlError(false);
+    setSaveStatus("idle");
+  }, [data, remoteRules, savedData]);
   const hasVoices = (speakers?.length ?? 0) > 0;
+  const rulesChanged = data !== savedData;
 
   async function save() {
-    const d = {
-      id: language.id,
-      tts_replace: data,
-    };
-    // test to process the yaml content
+    if (yamlError || saveStatus === "saving") return;
+    const editVersionToSave = dataEditVersionRef.current;
     try {
       parseYaml(data);
-    } catch (e) {
+    } catch {
+      setYamlError(true);
       return;
     }
-    return await saveTtsReplaceMutation({
-      legacyLanguageId: d.id,
-      tts_replace: d.tts_replace,
-      operationKey: `language:${d.id}:tts_replace:client`,
-    });
+    setSaveStatus("saving");
+    const rulesToSave = data;
+    try {
+      await saveTtsReplaceMutation({
+        legacyLanguageId: language.id,
+        tts_replace: rulesToSave,
+        operationKey: `language:${language.id}:tts_replace:client`,
+      });
+      if (dataEditVersionRef.current !== editVersionToSave) {
+        setSaveStatus("idle");
+        return;
+      }
+      setSavedData(rulesToSave);
+      setSaveStatus("saved");
+    } catch (error) {
+      console.error("Could not save pronunciation rules", error);
+      setSaveStatus("error");
+    }
   }
 
-  async function play2(e: React.MouseEvent, speaker: string, name: string) {
-    //speaker = `${speaker}(pitch=${["x-low", "low", "medium", "high", "x-high"][pitch]},rate=${["x-slow", "slow", "medium", "fast", "x-fast"][speed]})`;
-
-    let [story, story_meta, audio_insert_lines] = processStoryFile(
+  async function play2(e: React.MouseEvent, voice: string, _name: string) {
+    const testVoice = formatTestVoice(voice, pitch, speed);
+    const [story] = processStoryFile(
       `[DATA]
         icon_0=https://design.duolingo.com/ee58f22644428b8182ae.svg
-        speaker_0=${speaker}
+        speaker_0=${testVoice}
         
         [LINE]
         Speaker0: ${text}
@@ -139,21 +172,11 @@ FRAGMENTS:
       0,
       {},
       {
-        learning_language: "en",
-        from_language: "tok2",
+        learning_language: language.short,
+        from_language: language2?.short ?? "en",
       },
-      data,
+      validData,
     );
-    // nl-NL-FennaNeural(pitch=x-low)
-    /*
-    let speakText2 = `<prosody pitch="${
-        ["x-low", "low", "medium", "high", "x-high"][pitch]
-    }" rate="${
-        ["x-slow", "slow", "medium", "fast", "x-fast"][speed]
-    }">${text2}</prosody>`;
-    */
-    //let [new_element, mapping, text_clear] = await process();
-    //let id = speaker + pitch + speed + name;
     return play(story.elements[0]);
   }
 
@@ -189,15 +212,8 @@ FRAGMENTS:
     //element.line.content.audio.url = url
     // {audioStart: 50, rangeEnd: 3}
     setElement(element);
-
-    //audio.play();
-
-    //e.preventDefault();
+    await audio.play();
   }
-  async function process() {
-    await save();
-  }
-
   //let [audioRange, playAudio, ref, url] = useAudio(element, 1);
 
   return (
@@ -209,7 +225,42 @@ FRAGMENTS:
         use_edit={true}
         renderHeader={renderHeader}
       >
-        <div className="flex leading-normal max-[600px]:block">
+        {mobileCourseLayout ? (
+          <MobileTtsEditor
+            rules={{
+              value: data,
+              hasError: yamlError,
+              isDirty: rulesChanged,
+              saveStatus,
+              onChange: setDataValidated,
+              onSave: () => void save(),
+            }}
+            test={{
+              text,
+              pitch,
+              speed,
+              voices: speakers,
+              customVoice,
+              transcribedText: text2,
+              finalText: (
+                <TtsFinalText
+                  languageShort={language.short}
+                  element={element}
+                />
+              ),
+              onTextChange: setText,
+              onPitchChange: setPitch,
+              onSpeedChange: setSpeed,
+              onCustomVoiceChange: setCustomVoice,
+              onPlay: play2,
+            }}
+          />
+        ) : null}
+        <div
+          className={`flex leading-normal max-[600px]:block ${
+            mobileCourseLayout ? "max-[975px]:!hidden" : ""
+          }`}
+        >
           <div
             className={
               "h-[calc(100vh-64px)] w-full overflow-y-auto max-[600px]:h-auto sm:w-[400px] " +
@@ -279,13 +330,13 @@ FRAGMENTS:
                     <td className="px-[6px] py-[6px] leading-[1.25]">
                       <PlayButton
                         play={play2}
-                        speaker={customSpeaker}
+                        speaker={customVoice}
                         name="Duo"
                       />
                       <input
                         className="ml-2 rounded-md border border-[var(--input-border)] bg-[var(--input-background)] px-2 py-1 text-[var(--text-color)]"
-                        value={customSpeaker}
-                        onChange={setCustomSpeaker}
+                        value={customVoice}
+                        onChange={(event) => setCustomVoice(event.target.value)}
                       />
                     </td>
                     <td className="px-[6px] py-[6px] leading-[1.25]"></td>
@@ -304,47 +355,21 @@ FRAGMENTS:
             <h2 className="mb-4 text-[1.5em] font-bold">Input Text</h2>
             <textarea
               className="min-h-[110px] w-full rounded border border-[var(--input-border)] bg-[var(--input-background)] p-1 text-[var(--text-color)]"
-              defaultValue={text}
-              onChange={(e) =>
-                setText({
-                  target: { value: e.target.value },
-                } as React.ChangeEvent<HTMLInputElement>)
-              }
+              value={text}
+              onChange={(e) => setText(e.target.value)}
             />
             <h2 className="mb-4 mt-8 text-[1.5em] font-bold">
               Transcribed Text
             </h2>
             <span className="block">{text2}</span>
             <h2 className="mb-4 mt-8 text-[1.5em] font-bold">Final Text</h2>
-            <span className={language.short}>
-              <StoryTextLine
-                active={true}
-                unhide={999999}
-                element={element}
-                settings={{
-                  hide_questions: false,
-                  show_all: true,
-                  show_names: false,
-                  rtl: false,
-                  highlight_name: [],
-                  hideNonHighlighted: false,
-                  setHighlightName: () => {},
-                  setHideNonHighlighted: () => {},
-                  show_hints: true,
-                  setShowHints: () => {},
-                  show_audio: true,
-                  setShowAudio: () => {},
-                  id: 0,
-                  show_title_page: false,
-                }}
-              />
-            </span>
+            <TtsFinalText languageShort={language.short} element={element} />
 
             <div className="h-6" />
             <textarea
               className="w-full rounded border border-[var(--input-border)] p-1"
-              defaultValue={data}
-              onChange={setDataValidated}
+              value={data}
+              onChange={(event) => setDataValidated(event.target.value)}
               rows={20}
               cols={40}
               style={{
@@ -353,16 +378,21 @@ FRAGMENTS:
             />
             <div className="mt-4">
               <button
+                type="button"
                 className="rounded-lg border border-[var(--input-border)] bg-[var(--input-background)] px-[10px] py-1 text-[var(--text-color)] disabled:cursor-default disabled:opacity-70"
-                onClick={process}
-                disabled={yamlError}
+                onClick={() => void save()}
+                disabled={yamlError || saveStatus === "saving"}
               >
-                save
+                {saveStatus === "saving" ? "saving…" : "save"}
               </button>
             </div>
             {yamlError ? (
               <span className="mt-2 inline-block text-red-700">
                 The text box does not contain valid yaml syntax.
+              </span>
+            ) : saveStatus === "error" ? (
+              <span className="mt-2 inline-block text-red-700">
+                The pronunciation rules could not be saved.
               </span>
             ) : (
               <></>
@@ -371,5 +401,39 @@ FRAGMENTS:
         </div>
       </Layout>
     </>
+  );
+}
+
+function TtsFinalText({
+  languageShort,
+  element,
+}: {
+  languageShort: string;
+  element: StoryElementLine;
+}) {
+  return (
+    <span className={languageShort}>
+      <StoryTextLine
+        active={true}
+        unhide={999999}
+        element={element}
+        settings={{
+          hide_questions: false,
+          show_all: true,
+          show_names: false,
+          rtl: false,
+          highlight_name: [],
+          hideNonHighlighted: false,
+          setHighlightName: () => {},
+          setHideNonHighlighted: () => {},
+          show_hints: true,
+          setShowHints: () => {},
+          show_audio: true,
+          setShowAudio: () => {},
+          id: 0,
+          show_title_page: false,
+        }}
+      />
+    </span>
   );
 }

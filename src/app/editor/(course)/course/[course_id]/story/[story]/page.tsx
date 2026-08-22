@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 import StoryEditorPageClient from "@/app/editor/story/[story]/page_client";
+import { parseFeedbackReturnHref } from "@/app/editor/feedback/feedback_return_navigation";
 
 function getCanonicalStoryEditorPath(courseShort: string, storyId: number) {
   return `/editor/course/${courseShort}/story/${storyId}`;
@@ -41,6 +42,7 @@ export default async function Page({
   searchParams?: Promise<{
     line?: string | string[];
     bulkAudio?: string | string[];
+    returnTo?: string | string[];
   }>;
 }) {
   const resolvedParams = await params;
@@ -48,6 +50,9 @@ export default async function Page({
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const rawLine = resolvedSearchParams?.line;
   const rawBulkAudio = resolvedSearchParams?.bulkAudio;
+  const feedbackReturnHref = parseFeedbackReturnHref(
+    resolvedSearchParams?.returnTo,
+  );
   const initialFocusLine =
     typeof rawLine === "string"
       ? Number(rawLine)
@@ -70,6 +75,7 @@ export default async function Page({
       courseId={resolvedParams.course_id}
       initialFocusLine={validatedInitialFocusLine}
       initialBulkAudioOpen={initialBulkAudioOpen}
+      feedbackReturnHref={feedbackReturnHref}
     />
   );
 }

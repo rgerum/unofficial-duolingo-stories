@@ -18,8 +18,21 @@ export default function Switch({
       onClick={onClick}
       disabled={disabled}
       className={[
-        "relative inline-flex h-[32px] w-[56px] items-center rounded-full border border-transparent transition-colors",
+        "inline-flex",
         disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+      ].join(" ")}
+    >
+      <SwitchVisual checked={checked} />
+    </button>
+  );
+}
+
+export function SwitchVisual({ checked }: { checked: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={[
+        "relative inline-flex h-[32px] w-[56px] shrink-0 items-center rounded-full border border-transparent transition-colors",
         checked
           ? "bg-[var(--button-background)]"
           : "bg-[var(--button-inactive-background)]",
@@ -31,6 +44,6 @@ export default function Switch({
           checked ? "translate-x-[26px]" : "translate-x-[3px]",
         ].join(" ")}
       />
-    </button>
+    </span>
   );
 }

@@ -8,6 +8,13 @@ import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import CheckButton from "../CheckButton";
 import { useChoiceButtons } from "@/hooks/use-choice-buttons.hook";
 import { StoryElementMultipleChoice } from "@/components/editor/story/syntax_parser_types";
+import type { ChoiceButtonState } from "@/lib/story/choice_button_state";
+import { cn } from "@/lib/utils";
+
+export type SingleAnswerControl = {
+  state: ChoiceButtonState;
+  select: () => void;
+};
 
 /*
 The MULTIPLE_CHOICE question.
@@ -29,16 +36,20 @@ function StoryQuestionMultipleChoice({
   active,
   advance,
   showTranslationsInline,
+  compact = false,
+  singleAnswerControl,
 }: {
   element: StoryElementMultipleChoice;
   active: boolean;
   advance: () => void;
   showTranslationsInline?: boolean;
+  compact?: boolean;
+  singleAnswerControl?: SingleAnswerControl;
 }) {
   //const [done, setDone] = React.useState(false);
 
   // get button states and a click function
-  let [buttonState, click] = useChoiceButtons(
+  const [buttonState, click] = useChoiceButtons(
     element.answers.length,
     element.correctAnswerIndex,
     () => {
@@ -49,10 +60,13 @@ function StoryQuestionMultipleChoice({
     active,
   );
 
-  function getColorText(state: string) {
-    if (state === "false" || state === "done")
-      return "my-5 flex items-center gap-[18px] text-[var(--color_disabled_color)]";
-    return "my-5 flex items-center gap-[18px]";
+  function getColorText(state: ChoiceButtonState) {
+    return cn(
+      "flex items-center",
+      compact ? "my-1.5 gap-2" : "my-5 gap-[18px]",
+      (state === "false" || state === "done") &&
+        "text-[var(--color_disabled_color)]",
+    );
   }
 
   return (
@@ -70,11 +84,18 @@ function StoryQuestionMultipleChoice({
           /* on answer field */
           <li
             key={index}
-            className={getColorText(buttonState[index])}
-            onClick={() => click(index)}
+            className={getColorText(
+              singleAnswerControl?.state ?? buttonState[index],
+            )}
+            onClick={() =>
+              singleAnswerControl ? singleAnswerControl.select() : click(index)
+            }
           >
             {/* with a button and a text */}
-            <CheckButton type={buttonState[index]} />
+            <CheckButton
+              type={singleAnswerControl?.state ?? buttonState[index]}
+              compact={compact}
+            />
             <div>
               {typeof answer == "string" ? (
                 answer

@@ -1,1 +1,5 @@
-export { default } from "./StoryEditorPreview";
+export {
+  default,
+  getStoryEditorPreviewParts,
+  StoryEditorPreviewPart,
+} from "./StoryEditorPreview";

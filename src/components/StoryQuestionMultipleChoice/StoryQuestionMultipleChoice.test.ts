@@ -37,3 +37,40 @@ test("expands question answer hints when inline translations are enabled", () =>
   assert.doesNotMatch(html, /data-hint-tooltip/);
   assert.equal(html.match(/group\/editorhint/g)?.length, 2);
 });
+
+test("compacts answer spacing only when requested by an embedded preview", () => {
+  const element: StoryElementMultipleChoice = {
+    type: "MULTIPLE_CHOICE",
+    answers: ["fries", "chicken"],
+    correctAnswerIndex: 0,
+    question: { text: "What did they order?", hintMap: [], hints: [] },
+    trackingProperties: {
+      line_index: 0,
+      challenge_type: "multiple-choice",
+    },
+    lang: "en",
+    editor: {},
+  };
+  const props = {
+    element,
+    active: false,
+    advance: () => {},
+  };
+
+  const regularHtml = renderToStaticMarkup(
+    React.createElement(StoryQuestionMultipleChoice, props),
+  );
+  const compactHtml = renderToStaticMarkup(
+    React.createElement(StoryQuestionMultipleChoice, {
+      ...props,
+      compact: true,
+    }),
+  );
+
+  assert.match(regularHtml, /my-5/);
+  assert.match(regularHtml, /h-\[42px\]/);
+  assert.doesNotMatch(regularHtml, /my-1\.5/);
+  assert.match(compactHtml, /my-1\.5/);
+  assert.doesNotMatch(compactHtml, /\bmy-5\b/);
+  assert.match(compactHtml, /\bh-8\b/);
+});

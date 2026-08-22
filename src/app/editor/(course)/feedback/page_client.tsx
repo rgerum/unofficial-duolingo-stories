@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
@@ -9,6 +10,11 @@ import {
   EditorHeaderActions,
   EditorHeaderBreadcrumbs,
 } from "@/app/editor/_components/header_context";
+import { createFeedbackReturnHref } from "@/app/editor/feedback/feedback_return_navigation";
+import {
+  readPendingFeedbackView,
+  restorePendingFeedbackView,
+} from "@/app/editor/feedback/feedback_view_memory";
 import EditorButton from "../../editor_button";
 import type { CourseProps } from "../types";
 import FeedbackReviewView, {
@@ -19,10 +25,13 @@ import FeedbackReviewView, {
 
 export default function StoryFeedbackPageClient({
   courseId,
+  initialStatus = "open",
 }: {
   courseId?: string;
+  initialStatus?: FeedbackStatus;
 }) {
-  const [status, setStatus] = React.useState<FeedbackStatus>("open");
+  const router = useRouter();
+  const [status, setStatus] = React.useState<FeedbackStatus>(initialStatus);
   const sidebarData = useQuery(api.editorRead.getEditorSidebarData, {});
   const course = useQuery(
     api.editorRead.getEditorCourseByIdentifier,
@@ -52,6 +61,48 @@ export default function StoryFeedbackPageClient({
     courseId !== undefined && course
       ? `/editor/course/${course.short ?? course.id}`
       : undefined;
+  const feedbackReturnHref = createFeedbackReturnHref(courseId, status);
+  const restoreRequestSizeRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    setStatus(initialStatus);
+  }, [initialStatus]);
+
+  React.useLayoutEffect(() => {
+    if (paginationStatus === "LoadingFirstPage" || shouldSkipReports) return;
+
+    const pendingView = readPendingFeedbackView(feedbackReturnHref);
+    if (!pendingView) return;
+
+    if (
+      results.length < pendingView.loadedReportCount &&
+      paginationStatus !== "Exhausted"
+    ) {
+      if (
+        paginationStatus === "CanLoadMore" &&
+        restoreRequestSizeRef.current !== results.length
+      ) {
+        restoreRequestSizeRef.current = results.length;
+        loadMore(Math.max(50, pendingView.loadedReportCount - results.length));
+      }
+      return;
+    }
+
+    restoreRequestSizeRef.current = null;
+    return restorePendingFeedbackView(feedbackReturnHref);
+  }, [
+    feedbackReturnHref,
+    loadMore,
+    paginationStatus,
+    results.length,
+    shouldSkipReports,
+  ]);
+
+  function changeStatus(nextStatus: FeedbackStatus) {
+    const nextHref = createFeedbackReturnHref(courseId, nextStatus);
+    setStatus(nextStatus);
+    router.replace(nextHref, { scroll: false });
+  }
 
   async function setReportStatus(
     reportId: Id<"story_feedback_reports">,
@@ -105,7 +156,6 @@ export default function StoryFeedbackPageClient({
           text={courseHref ? "Back" : "Editor"}
         />
       </EditorHeaderActions>
-
       <FeedbackReviewView
         status={status}
         reports={
@@ -118,8 +168,9 @@ export default function StoryFeedbackPageClient({
           (sidebarData?.courses ?? []) as CourseProps[],
         )}
         selectedCourseShort={selectedCourseShort}
+        returnHref={feedbackReturnHref}
         updatingId={updatingId}
-        onStatusChange={setStatus}
+        onStatusChange={changeStatus}
         onLoadMore={() => loadMore(50)}
         onSetReportStatus={setReportStatus}
       />

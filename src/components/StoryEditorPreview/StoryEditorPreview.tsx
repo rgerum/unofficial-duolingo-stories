@@ -6,7 +6,8 @@ import StoryQuestionMatch from "../StoryQuestionMatch";
 import StoryQuestionArrange from "../StoryQuestionArrange";
 import StoryQuestionPointToPhrase from "../StoryQuestionPointToPhrase";
 import StoryQuestionSelectPhrase from "../StoryQuestionSelectPhrase";
-import StoryQuestionMultipleChoice from "../StoryQuestionMultipleChoice";
+import StoryQuestionMultipleChoice from "@/components/StoryQuestionMultipleChoice";
+import type { SingleAnswerControl } from "@/components/StoryQuestionMultipleChoice/StoryQuestionMultipleChoice";
 import StoryQuestionPrompt from "../StoryQuestionPrompt";
 import { useStoryEditorPreferences } from "@/app/editor/_components/story_editor_preferences";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
@@ -33,7 +34,7 @@ interface StoryEditorPreviewProps {
   ) => void | Promise<void>;
 }
 
-function GetParts(story: StoryType) {
+export function getStoryEditorPreviewParts(story: StoryType) {
   const parts: StoryElement[][] = [];
   let last_id = -1;
   for (const element of story.elements) {
@@ -54,7 +55,7 @@ export default function StoryEditorPreview({
   editorState,
   onOpenAudioEditor,
 }: StoryEditorPreviewProps) {
-  const parts = GetParts(story);
+  const parts = getStoryEditorPreviewParts(story);
   // In the editor these toggles control editor-only overlays:
   // `showHints` reveals inline translations and `showAudio` reveals SSML tools.
   // The base preview should still look like the live story when they are off.
@@ -68,7 +69,7 @@ export default function StoryEditorPreview({
       )}
     >
       {parts.map((part, i) => (
-        <EditorPart
+        <StoryEditorPreviewPart
           key={i}
           part={part}
           editorState={editorState}
@@ -82,7 +83,7 @@ export default function StoryEditorPreview({
   );
 }
 
-interface EditorPartProps {
+interface StoryEditorPreviewPartProps {
   part: StoryElement[];
   editorState?: EditorStateType;
   rtl: boolean;
@@ -91,16 +92,20 @@ interface EditorPartProps {
   onOpenAudioEditor?: (
     element: StoryElementLine | StoryElementHeader,
   ) => void | Promise<void>;
+  compact?: boolean;
+  singleAnswerControl?: SingleAnswerControl;
 }
 
-function EditorPart({
+export function StoryEditorPreviewPart({
   part,
   editorState,
   rtl,
   showHints,
   showAudio,
   onOpenAudioEditor,
-}: EditorPartProps) {
+  compact = false,
+  singleAnswerControl,
+}: StoryEditorPreviewPartProps) {
   const lastElement = part[part.length - 1];
   const trackingProps = lastElement.trackingProperties as {
     challenge_type?: string;
@@ -119,6 +124,8 @@ function EditorPart({
           showHints={showHints}
           showAudio={showAudio}
           onOpenAudioEditor={onOpenAudioEditor}
+          compact={compact}
+          singleAnswerControl={singleAnswerControl}
         />
       ))}
     </div>
@@ -134,6 +141,8 @@ interface EditorElementProps {
   onOpenAudioEditor?: (
     element: StoryElementLine | StoryElementHeader,
   ) => void | Promise<void>;
+  compact: boolean;
+  singleAnswerControl?: SingleAnswerControl;
 }
 
 function EditorElement({
@@ -143,6 +152,8 @@ function EditorElement({
   showHints,
   showAudio,
   onOpenAudioEditor,
+  compact,
+  singleAnswerControl,
 }: EditorElementProps) {
   // Keep the underlying story rendering aligned with the live experience.
   // Editor toggles are passed separately as overrides below so they only affect
@@ -174,6 +185,7 @@ function EditorElement({
         editorShowTranslationsOverride={showHints}
         editorShowAudioDetailsOverride={showAudio}
         onOpenAudioEditor={onOpenAudioEditor}
+        compact={compact}
       />
     );
   }
@@ -188,6 +200,7 @@ function EditorElement({
         editorShowTranslationsOverride={showHints}
         editorShowAudioDetailsOverride={showAudio}
         onOpenAudioEditor={onOpenAudioEditor}
+        compact={compact}
       />
     );
   }
@@ -200,6 +213,8 @@ function EditorElement({
           active={false}
           advance={() => {}}
           showTranslationsInline={showHints}
+          compact={compact}
+          singleAnswerControl={singleAnswerControl}
         />
       </EditorQuestionWrapper>
     );
@@ -212,6 +227,7 @@ function EditorElement({
           element={element}
           active={false}
           advance={() => {}}
+          compact={compact}
         />
       </EditorQuestionWrapper>
     );
@@ -224,6 +240,7 @@ function EditorElement({
           element={element}
           active={false}
           advance={() => {}}
+          compact={compact}
         />
       </EditorQuestionWrapper>
     );
@@ -236,6 +253,7 @@ function EditorElement({
           element={element}
           active={false}
           advance={() => {}}
+          compact={compact}
         />
       </EditorQuestionWrapper>
     );
@@ -248,6 +266,7 @@ function EditorElement({
           active={false}
           element={element}
           setDone={() => {}}
+          compact={compact}
         />
       </EditorQuestionWrapper>
     );

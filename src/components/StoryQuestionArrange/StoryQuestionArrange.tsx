@@ -17,10 +17,12 @@ function StoryQuestionArrange({
   element,
   active,
   advance,
+  compact = false,
 }: {
   element: StoryElement;
   active: boolean;
   advance: (i: number, done: boolean) => void;
+  compact?: boolean;
 }) {
   if (element.type !== "ARRANGE") throw new Error("not the right element");
   const characterPositions = element.characterPositions;
@@ -49,6 +51,7 @@ function StoryQuestionArrange({
             data-index={element.phraseOrder[index]}
             status={["undefined", "off", "wrong"][buttonState[index]]}
             onClick={() => click(index)}
+            compact={compact}
           >
             {phrase}
           </WordButton>

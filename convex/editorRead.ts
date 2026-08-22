@@ -16,31 +16,38 @@ type StoryDoc = Doc<"stories">;
 type AvatarDoc = Doc<"avatars">;
 type AvatarMappingDoc = Doc<"avatar_mappings">;
 
-const editorCourseValidator = v.union(
-  v.object({
-    id: v.number(),
-    short: v.union(v.string(), v.null()),
-    about: v.union(v.string(), v.null()),
-    official: v.boolean(),
-    count: v.number(),
-    public: v.boolean(),
-    fromLanguageId: v.id("languages"),
-    from_language: v.number(),
-    from_language_short: v.string(),
-    from_language_name: v.string(),
-    learningLanguageId: v.id("languages"),
-    learning_language: v.number(),
-    learning_language_short: v.string(),
-    learning_language_name: v.string(),
-    contributors: v.array(courseContributorValidator),
-    contributors_past: v.array(courseContributorValidator),
-    todo_count: v.number(),
-    audio_problem_count: v.number(),
-    unresolved_feedback_count: v.number(),
-    tags: v.array(v.string()),
-  }),
-  v.null(),
-);
+const editorCourseBaseValidator = v.object({
+  id: v.number(),
+  short: v.union(v.string(), v.null()),
+  about: v.union(v.string(), v.null()),
+  official: v.boolean(),
+  count: v.number(),
+  public: v.boolean(),
+  fromLanguageId: v.id("languages"),
+  from_language: v.number(),
+  from_language_short: v.string(),
+  from_language_name: v.string(),
+  learningLanguageId: v.id("languages"),
+  learning_language: v.number(),
+  learning_language_short: v.string(),
+  learning_language_name: v.string(),
+  todo_count: v.number(),
+  audio_problem_count: v.number(),
+  unresolved_feedback_count: v.number(),
+  tags: v.array(v.string()),
+});
+
+const editorSidebarCourseValidator = editorCourseBaseValidator.extend({
+  contributors: v.array(v.string()),
+  contributors_past: v.array(v.string()),
+});
+
+const editorCourseDataValidator = editorCourseBaseValidator.extend({
+  contributors: v.array(courseContributorValidator),
+  contributors_past: v.array(courseContributorValidator),
+});
+
+const editorCourseValidator = v.union(editorCourseDataValidator, v.null());
 
 function toNumber(value: unknown): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -201,8 +208,14 @@ async function getUserNameByAuthDocId(ctx: QueryCtx, authDocIds: string[]) {
 
 export const getEditorSidebarData = query({
   args: {},
+  returns: v.object({
+    courses: v.array(editorSidebarCourseValidator),
+    hasAccess: v.boolean(),
+  }),
   handler: async (ctx) => {
-    if (!(await isContributorOrAdmin(ctx))) return { courses: [] };
+    if (!(await isContributorOrAdmin(ctx))) {
+      return { courses: [], hasAccess: false };
+    }
 
     const courseRows = await ctx.db.query("courses").collect();
 
@@ -237,7 +250,7 @@ export const getEditorSidebarData = query({
       )
       .sort((a, b) => b.count - a.count);
 
-    return { courses };
+    return { courses, hasAccess: true };
   },
 });
 

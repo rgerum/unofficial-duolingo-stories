@@ -46,7 +46,7 @@ export default function ImportPageClient({
 
   return (
     <>
-      <div className="flex gap-3 overflow-scroll whitespace-nowrap p-1">
+      <div className="flex gap-3 overflow-scroll whitespace-nowrap p-1 max-[975px]:hidden">
         {courseSelection.map((item, index) => (
           <Link
             key={index}
