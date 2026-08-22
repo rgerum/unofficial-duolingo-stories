@@ -1,5 +1,9 @@
 "use client";
+import { api } from "@convex/_generated/api";
+import { useMutation, useQuery } from "convex/react";
+import { Pin } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useDeferredValue,
   useEffect,
@@ -7,9 +11,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
+import { useCoursePin } from "@/app/editor/_components/use_course_pin";
+import type {
+  DetailedCourseProps,
+  StoryListDataProps,
+} from "@/app/editor/(course)/types";
 import ContributorList from "@/components/ContributorList";
 import {
   Dialog,
@@ -17,9 +23,9 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import EditorSearchInput from "@/app/editor/_components/editor_search_input";
-import { useCoursePin } from "@/app/editor/_components/use_course_pin";
 import { matchesStorySearch, parseStorySearch } from "@/lib/story-search";
+import { CountBadge } from "./CountBadge";
+import CourseStats from "./course_stats";
 import {
   readCourseFilter,
   rememberCourseFilter,
@@ -27,34 +33,11 @@ import {
   restoreCourseScrollPosition,
 } from "./course_view_memory";
 import styles from "./edit_list.module.css";
-import { CountBadge } from "./CountBadge";
-import type {
-  DetailedCourseProps,
-  StoryListDataProps,
-} from "@/app/editor/(course)/types";
-import CourseStats from "./course_stats";
-import { Pin } from "lucide-react";
-
-type StoryState = "draft" | "feedback" | "finished" | "published";
-type StoryFilter = "all" | StoryState;
-
-const STORY_FILTER_ORDER: StoryFilter[] = [
-  "all",
-  "draft",
-  "feedback",
-  "finished",
-  "published",
-];
-const STORY_FILTER_PRESENTATION: Record<
-  StoryFilter,
-  { label: string; icon: string }
-> = {
-  all: { label: "All", icon: "📚" },
-  draft: { label: "✍️ Draft", icon: "✍️" },
-  feedback: { label: "🗨️ Feedback", icon: "🗨️" },
-  finished: { label: "✅ Finished", icon: "✅" },
-  published: { label: "📢 Published", icon: "📢" },
-};
+import { STORY_LIST_ILLUSTRATION_SIZE } from "./story_list_layout";
+import StoryListToolbar, {
+  type StoryFilter,
+  type StoryFilterCounts,
+} from "./story_list_toolbar";
 export default function EditList({
   stories,
   course,
@@ -109,7 +92,7 @@ export default function EditList({
     return restoreCourseScrollPosition(courseStorageKey);
   }, [activeFilter, courseStorageKey, isStoredFilterApplied]);
 
-  const counts = storyList.reduce<Record<StoryFilter, number>>(
+  const counts = storyList.reduce<StoryFilterCounts>(
     (acc, story) => {
       acc.all += 1;
       acc[getStoryState(story)] += 1;
@@ -253,63 +236,13 @@ export default function EditList({
         </div>
         <CourseStats courseIdentifier={course.short} />
       </div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 max-[975px]:mb-1 max-[975px]:gap-1">
-        <div className="w-full min-w-[220px] flex-1 min-[860px]:max-w-[360px]">
-          <EditorSearchInput
-            id="story-search"
-            type="search"
-            value={storySearch}
-            placeholder="Search story names or status"
-            aria-label="Search story names or status"
-            autoComplete="off"
-            onChange={(event) => setStorySearch(event.target.value)}
-          />
-        </div>
-        <div className="flex flex-wrap items-center justify-end gap-2 max-[975px]:-mx-3 max-[975px]:w-[calc(100%+1.5rem)] max-[975px]:flex-none max-[975px]:flex-nowrap max-[975px]:justify-start max-[975px]:gap-0 max-[975px]:overflow-x-auto max-[975px]:px-3">
-          {STORY_FILTER_ORDER.map((filter) => {
-            const isActive = activeFilter === filter;
-            return (
-              <button
-                key={filter}
-                type="button"
-                className="group inline-flex shrink-0 items-center justify-center max-[975px]:min-h-11 max-[975px]:px-1"
-                onClick={() => setActiveFilter(filter)}
-                aria-pressed={isActive}
-                aria-label={`${getFilterLabel(filter)}: ${counts[filter]}`}
-              >
-                <span
-                  className={
-                    "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[14px] leading-none transition-colors duration-150 max-[975px]:gap-1.5 max-[975px]:px-2 max-[975px]:py-1.5 max-[975px]:text-[13px] " +
-                    (isActive
-                      ? "border-[var(--button-background)] bg-[var(--button-background)] text-[var(--button-color)]"
-                      : "border-[var(--header-border)] bg-[var(--body-background-faint)] text-[var(--text-color)] group-hover:bg-[var(--body-background)]")
-                  }
-                >
-                  <span className="max-[975px]:sr-only">
-                    {getFilterLabel(filter)}
-                  </span>
-                  <span
-                    aria-hidden="true"
-                    className="hidden text-[18px] max-[975px]:inline max-[975px]:text-[16px]"
-                  >
-                    {getFilterIcon(filter)}
-                  </span>
-                  <span
-                    className={
-                      "rounded-full px-2 py-[3px] text-[12px] font-bold max-[975px]:px-1.5 max-[975px]:py-0.5 " +
-                      (isActive
-                        ? "bg-[color:rgba(255,255,255,0.18)] text-[var(--button-color)]"
-                        : "bg-[var(--body-background)] text-[var(--text-color-dim)]")
-                    }
-                  >
-                    {counts[filter]}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <StoryListToolbar
+        activeFilter={activeFilter}
+        counts={counts}
+        storySearch={storySearch}
+        onFilterChange={setActiveFilter}
+        onSearchChange={setStorySearch}
+      />
       <div className={styles.storyList}>
         <div className={styles.header}>
           <div className={styles.headerRow}>
@@ -365,8 +298,8 @@ export default function EditList({
                       story.image +
                       ".svg"
                     }
-                    width="44px"
-                    height={"40px"}
+                    width={STORY_LIST_ILLUSTRATION_SIZE.width}
+                    height={STORY_LIST_ILLUSTRATION_SIZE.height}
                     className="block min-w-[44px]"
                   />
                 </Link>
@@ -464,14 +397,6 @@ function getStoryState(story: Pick<StoryListDataProps, "status" | "public">) {
   if (story.status === "feedback") return "feedback";
   if (story.status === "finished") return "finished";
   return "draft";
-}
-
-function getFilterLabel(filter: StoryFilter) {
-  return STORY_FILTER_PRESENTATION[filter].label;
-}
-
-function getFilterIcon(filter: StoryFilter) {
-  return STORY_FILTER_PRESENTATION[filter].icon;
 }
 
 function getEmptyStateMessage(filter: StoryFilter, searchQuery: string) {

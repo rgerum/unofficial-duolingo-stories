@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import EditList from "../../edit_list";
-import { Spinner } from "@/components/ui/spinner";
+import { useMutation, useQuery } from "convex/react";
+import React, { useEffect, useRef } from "react";
 import type {
   DetailedCourseProps,
   StoryListDataProps,
 } from "@/app/editor/(course)/types";
+import { Spinner } from "@/components/ui/spinner";
+import EditList from "../../edit_list";
+import StoryListLoading from "../../story_list_loading";
 
 export default function CourseEditorPageClient({
   courseId,
@@ -50,7 +51,16 @@ export default function CourseEditorPageClient({
   }, [course, recomputePublishedCount, stories]);
 
   if (course === undefined || stories === undefined) {
-    return <Spinner />;
+    return (
+      <>
+        <div className="min-[976px]:hidden">
+          <StoryListLoading />
+        </div>
+        <div className="hidden min-[976px]:block">
+          <Spinner />
+        </div>
+      </>
+    );
   }
 
   if (!course) {
