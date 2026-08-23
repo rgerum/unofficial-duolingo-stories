@@ -24,6 +24,31 @@ Analytics are optional; set `EXPO_PUBLIC_POSTHOG_KEY` and
 pnpm run typecheck  # tsc --noEmit
 ```
 
+## Over-the-air updates
+
+Development, preview, and production builds use matching EAS Update channels
+with an `appVersion` runtime policy. A new native build is required whenever
+native dependencies, permissions, Expo SDK versions, or other native
+configuration changes. Changes limited to JavaScript, styling, or bundled
+assets can be published over the air to an existing compatible build.
+
+Publish to preview first:
+
+```bash
+npx eas-cli@latest update --channel preview --environment preview \
+  --message "Describe the update"
+```
+
+After verifying the preview update, publish the same commit to production:
+
+```bash
+npx eas-cli@latest update --channel production --environment production \
+  --message "Describe the update"
+```
+
+Users receive an update after the app downloads it and restarts. Increment the
+app version and ship a new store build when the native runtime changes.
+
 ## What's implemented (milestones M1 + M2, plus account entry)
 
 - **Welcome screen** mirroring the PWA's `/learn` page: Sign in / Register /
