@@ -46,18 +46,24 @@ async function applyStoryCharacterNames(
   });
 }
 
+const storyMetadataValidator = v.object({
+  from_language_name: v.string(),
+  image: v.string(),
+  from_language_long: v.string(),
+  learning_language_long: v.string(),
+  public: v.boolean(),
+});
+
 const storyReadResultValidator = v.union(
   v.object({
+    ...storyMetadataValidator.fields,
     id: v.number(),
     set_id: v.number(),
     course_id: v.number(),
     from_language: v.string(),
     from_language_id: v.number(),
-    from_language_long: v.string(),
     from_language_rtl: v.boolean(),
-    from_language_name: v.string(),
     learning_language: v.string(),
-    learning_language_long: v.string(),
     learning_language_rtl: v.boolean(),
     course_short: v.string(),
     course_tags: v.array(v.string()),
@@ -72,13 +78,7 @@ const storyReadResultValidator = v.union(
 );
 
 const storyMetaResultValidator = v.union(
-  v.object({
-    from_language_name: v.string(),
-    image: v.string(),
-    from_language_long: v.string(),
-    learning_language_long: v.string(),
-    public: v.boolean(),
-  }),
+  storyMetadataValidator,
   // Deleted stories resolve to their course so the page can 308 there
   // instead of 404ing; never-existing ids stay null.
   v.object({
@@ -161,9 +161,11 @@ export const getStoryByLegacyId = query({
       from_language_long: fromLanguage.name,
       from_language_rtl: fromLanguage.rtl,
       from_language_name: story.name,
+      image: image?.legacyId ?? "",
       learning_language: learningLanguage.short,
       learning_language_long: learningLanguage.name,
       learning_language_rtl: learningLanguage.rtl,
+      public: story.public,
       course_short: `${learningLanguage.short}-${fromLanguage.short}`,
       course_tags: course.tags ?? [],
       elements,

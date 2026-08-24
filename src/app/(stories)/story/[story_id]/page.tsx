@@ -47,17 +47,16 @@ export async function generateMetadata({
   params: Promise<{ story_id: string }>;
 }) {
   const story_id = parseStoryId((await params).story_id);
-  const [story, storyMeta] = await Promise.all([
-    get_story(story_id),
-    resolveStoryMeta(story_id),
-  ]);
+  const story = await get_story(story_id);
+  if (!story) {
+    await resolveStoryMeta(story_id); // redirects deleted stories, else 404s
+    notFound();
+  }
 
-  if (!story) notFound();
-
-  const title = getStoryTitle(storyMeta);
+  const title = getStoryTitle(story);
   const description = getStoryDescription(story);
 
-  if (!storyMeta.public) {
+  if (!story.public) {
     return {
       title,
       description,
@@ -65,13 +64,10 @@ export async function generateMetadata({
       // Explicit null: otherwise the story layout's site-root canonical is
       // inherited, and noindex pages would claim the homepage as canonical.
       alternates: { canonical: null },
-      keywords: [
-        storyMeta.learning_language_long,
-        storyMeta.from_language_long,
-      ],
+      keywords: [story.learning_language_long, story.from_language_long],
       openGraph: {
         images: [
-          `/api/og-story?title=${storyMeta.from_language_name}&image=${storyMeta.image}&name=${storyMeta.learning_language_long}`,
+          `/api/og-story?title=${story.from_language_name}&image=${story.image}&name=${story.learning_language_long}`,
         ],
         type: "article",
         title,
@@ -91,10 +87,10 @@ export async function generateMetadata({
     alternates: {
       canonical: `https://duostories.org/story/${story_id}`,
     },
-    keywords: [storyMeta.learning_language_long, storyMeta.from_language_long],
+    keywords: [story.learning_language_long, story.from_language_long],
     openGraph: {
       images: [
-        `/api/og-story?title=${storyMeta.from_language_name}&image=${storyMeta.image}&name=${storyMeta.learning_language_long}`,
+        `/api/og-story?title=${story.from_language_name}&image=${story.image}&name=${story.learning_language_long}`,
       ],
       url: `https://duostories.org/story/${story_id}`,
       type: "article",
