@@ -36,8 +36,17 @@ export default function StoryWrapper({
     React.useState(hideStoryQuestions);
   const trackedStoryStart = React.useRef(false);
   const completionInFlight = React.useRef(false);
-  const { data: session } = authClient.useSession();
+  const {
+    data: session,
+    error: sessionError,
+    isPending: isSessionPending,
+  } = authClient.useSession();
   const sessionUser = (session?.user ?? null) as PostHogUser | null;
+  const completionAuthReady =
+    !convexAuth.isLoading &&
+    !isSessionPending &&
+    !sessionError &&
+    convexAuth.isAuthenticated === Boolean(sessionUser?.id);
   const role = typeof sessionUser?.role === "string" ? sessionUser.role : null;
   const editHrefBase =
     role === "contributor" || role === "admin"
@@ -119,7 +128,7 @@ export default function StoryWrapper({
       : undefined;
 
   async function completeStoryOnce() {
-    if (convexAuth.isLoading) return false;
+    if (!completionAuthReady) return false;
     if (completionInFlight.current) return false;
     completionInFlight.current = true;
     let succeeded = false;
@@ -169,7 +178,7 @@ export default function StoryWrapper({
   const shouldShowDefaultFinishedButton =
     !sessionUser?.id || nextStep === undefined || nextStep === null;
   const showFinishedPrimaryAction =
-    !convexAuth.isLoading &&
+    completionAuthReady &&
     (shouldShowDefaultFinishedButton || Boolean(finishedLabel));
 
   return (
