@@ -1,8 +1,6 @@
 import React, { Suspense } from "react";
 import { cookies } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
-import { fetchAuthQuery } from "@/lib/auth-server";
-import getUserId from "@/lib/getUserId";
 import {
   HIDE_STORY_QUESTIONS_COOKIE,
   isStoryQuestionsDisabled,
@@ -13,19 +11,8 @@ import { get_story_cross_links } from "./getStoryCrossLinks";
 import StoryTranscript from "./StoryTranscript";
 import { getStoryDescription, getStoryTitle } from "./story_seo";
 import LocalisationProvider from "@/components/LocalisationProvider";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
 import { fetchQuery } from "convex/nextjs";
-import { fetchAuthMutation } from "@/lib/auth-server";
-
-const convexUrl =
-  process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? "";
-
-if (!convexUrl) {
-  throw new Error("Missing NEXT_PUBLIC_CONVEX_URL/CONVEX_URL");
-}
-
-const convex = new ConvexHttpClient(convexUrl);
 
 // parseInt would accept alias slugs like "1abc" and serve story 1's content
 // at infinitely many crawlable URLs; only pure integer slugs may resolve.
@@ -138,47 +125,9 @@ export default async function Page({
     await resolveStoryMeta(story_id); // redirects deleted stories, else 404s
     notFound();
   }
-  const course_id = story.course_id;
-
-  const user_id = await getUserId();
-  const cookieHideStoryQuestions = isStoryQuestionsDisabled(
+  const hideStoryQuestions = isStoryQuestionsDisabled(
     cookieStore.get(HIDE_STORY_QUESTIONS_COOKIE)?.value,
   );
-  const savedStoryPreferences = user_id
-    ? ((await fetchAuthQuery(
-        api.userPreferences.getCurrentStoryPreferences,
-        {},
-      )) as {
-        hasSavedPreference: boolean;
-        hideStoryQuestions: boolean;
-      })
-    : null;
-  const hideStoryQuestions =
-    savedStoryPreferences?.hasSavedPreference === true
-      ? savedStoryPreferences.hideStoryQuestions
-      : cookieHideStoryQuestions;
-  async function setStoryDoneAction() {
-    "use server";
-    if (!user_id) {
-      await convex.mutation(api.storyDone.recordStoryDone, {
-        legacyStoryId: story_id,
-        time: Date.now(),
-      });
-      return {
-        message: "done",
-        story_id: story_id,
-      };
-    }
-    await fetchAuthMutation(api.storyDone.recordStoryDone, {
-      legacyStoryId: story_id,
-      time: Date.now(),
-    });
-    return {
-      message: "done",
-      story_id: story_id,
-      course_id: course_id,
-    };
-  }
 
   // Home > Course > Story, so crawlers see where this page sits in the site
   // hierarchy. Only emitted for public courses (crossLinks is null otherwise).
@@ -241,7 +190,6 @@ export default async function Page({
               story={story}
               crossLinks={crossLinks}
               hideStoryQuestions={hideStoryQuestions}
-              storyFinishedIndexUpdate={setStoryDoneAction}
               //localization={localization}
             />
           </Suspense>
