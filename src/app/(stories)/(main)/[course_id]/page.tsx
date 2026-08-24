@@ -1,12 +1,11 @@
-import React from "react";
 import { notFound } from "next/navigation";
 
 import CoursePageClient from "./course_page_client";
-import { get_localisation_by_convex_language_id } from "@/lib/get_localisation";
-import { get_course_data, get_course } from "../get_course_data";
+import { preload_course_page_data } from "./get_course_page_data";
+import get_localisation_func from "@/lib/get_localisation_func";
+import { get_course_data } from "../get_course_data";
 import { ResolvingMetadata } from "next";
-import { preloadQuery, preloadedQueryResult } from "convex/nextjs";
-import { api } from "@convex/_generated/api";
+import { preloadedQueryResult } from "convex/nextjs";
 
 // Every public course targets a language pair that official Duolingo Stories
 // does not cover (official pairs are never public here), so the metadata can
@@ -41,11 +40,16 @@ export async function generateMetadata(
   ) {
     return notFound();
   }
-  const course = await get_course(params0.course_id);
-  if (!course) notFound();
-  const localization = await get_localisation_by_convex_language_id(
-    course.fromLanguageId,
-  );
+  const preloadedCourse = await preload_course_page_data(params0.course_id);
+  const course = preloadedQueryResult(preloadedCourse);
+  if (!course) {
+    notFound();
+  }
+  const localizationMap: Record<string, string> = {};
+  for (const row of course.localization) {
+    localizationMap[row.tag] = row.text;
+  }
+  const localization = get_localisation_func(localizationMap);
 
   const meta = await parent;
   const languageName = displayLanguageName(course);
@@ -99,12 +103,7 @@ export default async function Page({
     return notFound();
   }
 
-  const preloadedCourse = await preloadQuery(
-    api.landing.getPublicCoursePageData,
-    {
-      short: course_id,
-    },
-  );
+  const preloadedCourse = await preload_course_page_data(course_id);
   // Unknown slugs must produce a real 404. Without this check the route
   // resolved with HTTP 200 (a soft 404) and only generateMetadata noindexed it.
   const courseData = preloadedQueryResult(preloadedCourse);
