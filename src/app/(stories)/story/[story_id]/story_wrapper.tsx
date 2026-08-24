@@ -2,7 +2,7 @@
 import React from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import StoryProgress from "@/components/StoryProgress";
 import { useNavigationMode } from "@/components/NavigationModeProvider";
 import { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
@@ -20,29 +20,20 @@ export default function StoryWrapper({
   story,
   crossLinks,
   hideStoryQuestions,
-  storyFinishedIndexUpdate,
 }: {
   story: StoryData;
   crossLinks?: StoryCrossLinksData | null;
   hideStoryQuestions: boolean;
-  storyFinishedIndexUpdate: () => Promise<
-    | {
-        message: string;
-        story_id: number;
-        course_id?: undefined;
-      }
-    | {
-        message: string;
-        story_id: number;
-        course_id: number;
-      }
-  >;
 }) {
   const mode = useNavigationMode();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const convexAuth = useConvexAuth();
+  const recordStoryDone = useMutation(api.storyDone.recordStoryDone);
   const [highlight_name, setHighlightName] = React.useState<string[]>([]);
   const [hideNonHighlighted, setHideNonHighlighted] = React.useState(false);
+  const [effectiveHideStoryQuestions, setEffectiveHideStoryQuestions] =
+    React.useState(hideStoryQuestions);
   const trackedStoryStart = React.useRef(false);
   const completionInFlight = React.useRef(false);
   const { data: session } = authClient.useSession();
@@ -67,6 +58,22 @@ export default function StoryWrapper({
         }
       : "skip",
   );
+  const savedStoryPreferences = useQuery(
+    api.userPreferences.getCurrentStoryPreferences,
+    convexAuth.isAuthenticated ? {} : "skip",
+  );
+  React.useEffect(() => {
+    if (!convexAuth.isAuthenticated) {
+      setEffectiveHideStoryQuestions(hideStoryQuestions);
+      return;
+    }
+    if (savedStoryPreferences === undefined) return;
+    if (savedStoryPreferences?.hasSavedPreference) {
+      setEffectiveHideStoryQuestions(savedStoryPreferences.hideStoryQuestions);
+      return;
+    }
+    setEffectiveHideStoryQuestions(hideStoryQuestions);
+  }, [convexAuth.isAuthenticated, hideStoryQuestions, savedStoryPreferences]);
   const showNextStoryAction = Boolean(nextStep?.nextStoryId);
   const nextStoryPreview = useQuery(
     api.storyRead.getStoryPreviewByLegacyId,
@@ -112,13 +119,17 @@ export default function StoryWrapper({
       : undefined;
 
   async function completeStoryOnce() {
+    if (convexAuth.isLoading) return false;
     if (completionInFlight.current) return false;
     completionInFlight.current = true;
     let succeeded = false;
 
     try {
       await captureStoryEvent("story_completed");
-      await storyFinishedIndexUpdate();
+      await recordStoryDone({
+        legacyStoryId: story.id,
+        time: Date.now(),
+      });
       succeeded = true;
       return true;
     } finally {
@@ -158,7 +169,8 @@ export default function StoryWrapper({
   const shouldShowDefaultFinishedButton =
     !sessionUser?.id || nextStep === undefined || nextStep === null;
   const showFinishedPrimaryAction =
-    shouldShowDefaultFinishedButton || Boolean(finishedLabel);
+    !convexAuth.isLoading &&
+    (shouldShowDefaultFinishedButton || Boolean(finishedLabel));
 
   return (
     <>
@@ -169,7 +181,7 @@ export default function StoryWrapper({
         editHrefBase={editHrefBase}
         initialFocusLine={initialFocusLine}
         settings={{
-          hide_questions: hideStoryQuestions,
+          hide_questions: effectiveHideStoryQuestions,
           show_all: false,
           show_names: false,
           rtl: story.learning_language_rtl,

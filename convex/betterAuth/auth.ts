@@ -217,6 +217,12 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       return allowed;
     },
     secret: process.env.BETTER_AUTH_SECRET,
+    session: {
+      cookieCache: {
+        enabled: true,
+        maxAge: 60,
+      },
+    },
     socialProviders: getSocialProviders(),
     account: {
       accountLinking: {
