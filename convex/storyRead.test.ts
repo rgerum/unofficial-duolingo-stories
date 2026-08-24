@@ -42,7 +42,7 @@ async function seedCourseWithStory(
       public: opts.coursePublic ?? true,
       official: false,
     });
-    await ctx.db.insert("stories", {
+    const storyId = await ctx.db.insert("stories", {
       legacyId: isPublic ? 10 : 11,
       duo_id: "story-duo-" + (isPublic ? 10 : 11),
       name: isPublic ? "Public Story" : "Draft Story",
@@ -55,8 +55,39 @@ async function seedCourseWithStory(
       deleted: opts.deleted ?? false,
       todo_count: 0,
     });
+    await ctx.db.insert("story_public_content", {
+      storyId,
+      json: { elements: [] },
+      lastUpdated: 0,
+    });
   });
 }
+
+describe("getStoryByLegacyId metadata", () => {
+  test("returns publication visibility and illustration id for public stories", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t, true);
+
+    const story = await t.query(api.storyRead.getStoryByLegacyId, {
+      storyId: 10,
+    });
+
+    expect(story?.public).toBe(true);
+    expect(story?.image).toBe("story-image");
+  });
+
+  test("returns publication visibility and illustration id for draft stories", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourseWithStory(t, false);
+
+    const story = await t.query(api.storyRead.getStoryByLegacyId, {
+      storyId: 11,
+    });
+
+    expect(story?.public).toBe(false);
+    expect(story?.image).toBe("story-image");
+  });
+});
 
 describe("getStoryMetaByLegacyId", () => {
   test("returns public true for public stories", async () => {
