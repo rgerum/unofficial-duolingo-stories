@@ -2,7 +2,10 @@ import React, { CSSProperties } from "react";
 import { ContentWithHints } from "@/components/editor/story/syntax_parser_types";
 import type { EditorStateType } from "@/app/editor/story/[story]/editor_state";
 import { splitDisplayText } from "@/lib/text/tokenization";
+import type { PlayingWordRange } from "@/components/StoryTextLine/use-audio.hook";
 import { cn } from "@/lib/utils";
+
+const WORD_CHARACTER = /[\p{L}\p{N}]/u;
 
 const underlineBaseStyle: CSSProperties = {
   backgroundPosition: "0 100%",
@@ -144,6 +147,8 @@ function StoryLineHints({
   hideRangesForChallenge,
   unhide,
   editorState,
+  onWordClick,
+  playingWordRange,
 }: {
   content: ContentWithHints;
   showHints?: boolean;
@@ -152,6 +157,8 @@ function StoryLineHints({
   hideRangesForChallenge?: { start: number; end: number }[];
   unhide?: number;
   editorState?: EditorStateType;
+  onWordClick?: (start: number, end: number) => void;
+  playingWordRange?: PlayingWordRange | null;
 }) {
   if (!content) return <>Empty</>;
   const visibleContent = showHints
@@ -191,6 +198,7 @@ function StoryLineHints({
   }
 
   function addWord2(start: number, end: number) {
+    const word_text = visibleContent.text.substring(start, end);
     const was_hidden_for_challenge = hideRangesForChallenge?.some((range) =>
       getOverlap(start, end, range.start, range.end),
     );
@@ -217,10 +225,21 @@ function StoryLineHints({
       Object.assign(style, hiddenUnderlineStyle);
     }
 
+    const is_clickable =
+      onWordClick !== undefined && !is_hidden && WORD_CHARACTER.test(word_text);
+    if (
+      playingWordRange &&
+      !is_hidden &&
+      getOverlap(start, end, playingWordRange.start, playingWordRange.end)
+    ) {
+      style.color = "var(--link-blue)";
+    }
+
     const returns = [
       <span
         className={cn(
           "select-text",
+          is_clickable && "cursor-pointer",
           is_hidden === true && "select-none text-[var(--body-background)]",
           is_hidden === "editor" && "opacity-70",
         )}
@@ -234,11 +253,12 @@ function StoryLineHints({
         data-revealed={
           was_hidden_for_challenge && !is_hidden ? true : undefined
         }
+        onClick={is_clickable ? () => onWordClick(start, end) : undefined}
       >
-        {visibleContent.text.substring(start, end)}
+        {word_text}
       </span>,
     ];
-    if (visibleContent.text.substring(start, end).indexOf("\n") !== -1)
+    if (word_text.indexOf("\n") !== -1)
       returns.push(<br key={start + " " + end + " br"} />);
     // add the span and optionally add a line break
     return returns;
