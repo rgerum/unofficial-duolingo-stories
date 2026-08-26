@@ -2,3 +2,5 @@ mysql-connector-python
 pandas
 numpy
 discord
+aiohttp
+certifi

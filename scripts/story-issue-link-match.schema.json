@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "matchFound": {
+      "type": "boolean"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "storyId": {
+      "type": ["integer", "null"]
+    },
+    "courseShort": {
+      "type": ["string", "null"]
+    },
+    "storyTitle": {
+      "type": ["string", "null"]
+    },
+    "editorLine": {
+      "type": ["integer", "null"]
+    },
+    "editorLines": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "editorLink": {
+      "type": ["string", "null"]
+    },
+    "editorLinks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "storyLink": {
+      "type": ["string", "null"]
+    },
+    "storyLinks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "storyFile": {
+      "type": ["string", "null"]
+    },
+    "issueSummary": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "draftMessage": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "matchFound",
+    "confidence",
+    "storyId",
+    "courseShort",
+    "storyTitle",
+    "editorLine",
+    "editorLines",
+    "editorLink",
+    "editorLinks",
+    "storyLink",
+    "storyLinks",
+    "storyFile",
+    "issueSummary",
+    "evidence",
+    "notes",
+    "draftMessage"
+  ]
+}
