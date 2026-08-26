@@ -7,7 +7,9 @@ with patch("pathlib.Path.read_text", return_value=""):
     from discord_review_bot import (
         ReviewClient,
         build_ai_prompt,
+        has_story_issue_permission,
         format_story_for_ai_review,
+        normalize_story_issue_min_confidence,
     )
 
 
@@ -99,6 +101,26 @@ class FakeChannel:
 
 class FakeUser:
     id = 20
+    roles = []
+
+    class guild_permissions:
+        administrator = False
+        manage_guild = False
+
+
+class FakeRole:
+    def __init__(self, name, role_id=1):
+        self.name = name
+        self.id = role_id
+
+
+class FakeContributorUser:
+    id = 21
+    roles = [FakeRole("Contributor")]
+
+    class guild_permissions:
+        administrator = False
+        manage_guild = False
 
 
 class FakeInteraction:
@@ -222,6 +244,52 @@ class ReviewCommandTest(unittest.IsolatedAsyncioTestCase):
 
         client.run_review.assert_awaited_once_with(
             interaction.channel, {"courseShort": "nhe-en", "sets": [7]}
+        )
+
+
+class StoryIssueLinkTest(unittest.TestCase):
+    def test_unknown_auto_post_confidence_threshold_falls_back_to_high(self):
+        self.assertEqual(normalize_story_issue_min_confidence("none"), "high")
+        self.assertEqual(normalize_story_issue_min_confidence("off"), "high")
+        self.assertEqual(normalize_story_issue_min_confidence("medium"), "medium")
+
+    def test_contributor_role_can_use_link_commands(self):
+        self.assertTrue(has_story_issue_permission(FakeContributorUser()))
+
+    def test_auto_post_requires_story_id_course_and_min_confidence(self):
+        client = ReviewClient(intents=discord.Intents.none())
+        valid_match = {
+            "matchFound": True,
+            "confidence": "high",
+            "storyId": 9486,
+            "courseShort": "eu-en",
+        }
+
+        self.assertTrue(client.should_auto_post_story_issue_match(valid_match))
+        self.assertFalse(
+            client.should_auto_post_story_issue_match(
+                {
+                    "matchFound": True,
+                    "confidence": "low",
+                    "storyId": 9486,
+                    "courseShort": "eu-en",
+                }
+            )
+        )
+        self.assertFalse(
+            client.should_auto_post_story_issue_match(
+                {**valid_match, "matchFound": False}
+            )
+        )
+        self.assertFalse(
+            client.should_auto_post_story_issue_match(
+                {**valid_match, "storyId": None}
+            )
+        )
+        self.assertFalse(
+            client.should_auto_post_story_issue_match(
+                {**valid_match, "courseShort": None}
+            )
         )
 
 
