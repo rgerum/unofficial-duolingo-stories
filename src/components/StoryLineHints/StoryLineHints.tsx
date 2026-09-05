@@ -20,16 +20,24 @@ const hiddenUnderlineStyle: CSSProperties = {
     "linear-gradient(to right, var(--underline-solid) 60%, var(--underline-solid) 60%)",
 };
 const editorHintContainerStyle: CSSProperties = {
+  maxWidth: "100%",
   borderInlineStart: "1px solid #bfbfbf",
   paddingInlineStart: "5px",
 };
 const editorHintTextStyle: CSSProperties = {
+  maxWidth: "320px",
+  whiteSpace: "normal",
+  overflowWrap: "anywhere",
   marginInlineStart: "-4px",
   paddingInlineStart: "6px",
   backgroundColor: "var(--editor-hints-background)",
   fontSize: "0.9em",
 };
 const tooltipContentStyle: CSSProperties = {
+  width: "max-content",
+  maxWidth: "min(320px, calc(100vw - 16px))",
+  whiteSpace: "normal",
+  overflowWrap: "anywhere",
   bottom: "100%",
   left: "50%",
   zIndex: 10,
@@ -342,7 +350,7 @@ function StoryLineHints({
     const hintTextClassName = showTrans
       ? cn("italic opacity-50", visibleContent.lang_hints)
       : cn(
-          "pointer-events-none invisible absolute block w-auto whitespace-nowrap text-center font-normal not-italic opacity-0 transition-opacity duration-300 group-hover/tooltip:visible group-hover/tooltip:opacity-100 group-focus-within/tooltip:visible group-focus-within/tooltip:opacity-100",
+          "pointer-events-none invisible absolute block text-center font-normal not-italic opacity-0 transition-opacity duration-300 group-hover/tooltip:visible group-hover/tooltip:opacity-100 group-focus-within/tooltip:visible group-focus-within/tooltip:opacity-100",
           visibleContent.lang_hints,
         );
     const hintContainerStyle =
