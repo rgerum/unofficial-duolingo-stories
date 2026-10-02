@@ -16,20 +16,21 @@ import { serializeTimingKeypoints, type TimingKeypoint } from "./timing_text";
 // dependencies so the story parser (and everything importing it, like the
 // server-side lint) can be bundled outside the editor, e.g. in Convex actions.
 
-// SSML forbids <phoneme> inside <phoneme>. Nesting can happen when a
-// pronunciation hint (foo{bar:ipa}) spans several words and the language's
+// SSML forbids <phoneme> and <sub> inside another <phoneme> or <sub> (both
+// may only contain text). Nesting happens when a pronunciation hint
+// (foo{bar:ipa} or foo{bar}) spans one or more words and the language's
 // transcription data then wraps the individual words again. Keep the outer
 // element (the explicit, more specific hint) and drop the inner ones.
 export function remove_nested_phonemes(mapped_text: {
   text: string;
   mapping: number[];
 }) {
-  const tagPattern = /<phoneme\b[^>]*>|<\/phoneme>/g;
+  const tagPattern = /<(?:phoneme|sub)\b[^>]*>|<\/(?:phoneme|sub)>/g;
   const removals: { start: number; end: number }[] = [];
   const openTags: { start: number; end: number }[] = [];
   let match: RegExpExecArray | null;
   while ((match = tagPattern.exec(mapped_text.text)) !== null) {
-    if (match[0] === "</phoneme>") {
+    if (match[0].startsWith("</")) {
       const open = openTags.pop();
       if (open && openTags.length > 0) {
         removals.push(open, {

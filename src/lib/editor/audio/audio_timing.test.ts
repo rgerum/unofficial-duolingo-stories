@@ -26,6 +26,18 @@ test("remove_nested_phonemes leaves non-nested phonemes untouched", () => {
   assert.equal(result.text, text);
 });
 
+test("remove_nested_phonemes drops phonemes inside a sub alias", () => {
+  const result = remove_nested_phonemes(
+    init_mapping(
+      '<sub alias="toqui"><phoneme alphabet="ipa" ph="toki">toki</phoneme></sub>, <phoneme alphabet="ipa" ph="mi">mi</phoneme>',
+    ),
+  );
+  assert.equal(
+    result.text,
+    '<sub alias="toqui">toki</sub>, <phoneme alphabet="ipa" ph="mi">mi</phoneme>',
+  );
+});
+
 test("remove_nested_phonemes handles doubly nested phonemes", () => {
   const result = remove_nested_phonemes(
     init_mapping(

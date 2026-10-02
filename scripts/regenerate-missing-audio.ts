@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
-import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { ConvexHttpClient } from "convex/browser";
 import type { Avatar } from "@/app/editor/story/[story]/types";
 import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 import type {
@@ -28,6 +31,7 @@ type CliOptions = {
   prod: boolean;
   apply: boolean;
   identity: string | null;
+  voiceMap: Record<string, string>;
 };
 
 function usage(exitCode: 0 | 1): never {
@@ -42,10 +46,15 @@ Usage:
   pnpm exec tsx scripts/regenerate-missing-audio.ts --stories 7611,7215 [--prod] [--apply --identity '{"role":"admin","userId":11,"name":"..."}']
 
 Options:
-  --stories <ids>    Comma-separated legacy story ids (or repeat --story <id>)
-  --prod             Target the production Convex deployment
-  --apply            Actually synthesize, upload, and save (default: dry run)
-  --identity <json>  Convex run identity, e.g. '{"role":"admin","userId":11,"name":"..."}'
+  --stories <ids>      Comma-separated legacy story ids (or repeat --story <id>)
+  --prod               Target the production Convex deployment (required)
+  --apply              Actually synthesize, upload, and save (default: dry run)
+  --identity <json>    Acting identity, e.g. '{"role":"admin","userId":11,"name":"..."}'
+  --voice-map <pairs>  Substitute retired TTS voices, e.g.
+                       'zh-HK-TracyRUS=zh-HK-HiuGaaiNeural,zh-HK-Danny=zh-HK-WanLungNeural'
+
+Authenticates with the deployment admin key obtained through the logged-in
+Convex CLI account (~/.convex/config.json), acting as --identity.
 `);
   process.exit(exitCode);
 }
@@ -56,6 +65,7 @@ function parseOptions(argv: string[]): CliOptions {
     prod: false,
     apply: false,
     identity: null,
+    voiceMap: {},
   };
   for (let index = 0; index < argv.length; index++) {
     const arg = argv[index];
@@ -68,6 +78,15 @@ function parseOptions(argv: string[]): CliOptions {
     } else if (arg === "--stories") {
       for (const part of (argv[++index] ?? "").split(",")) {
         if (part.trim()) options.storyIds.push(Number.parseInt(part, 10));
+      }
+    } else if (arg === "--voice-map") {
+      for (const pair of (argv[++index] ?? "").split(",")) {
+        const [from, to] = pair.split("=").map((value) => value.trim());
+        if (!from || !to) {
+          console.error(`Invalid --voice-map entry: ${pair}`);
+          usage(1);
+        }
+        options.voiceMap[from] = to;
       }
     } else {
       console.error(`Unknown argument: ${arg}`);
@@ -87,20 +106,83 @@ function parseOptions(argv: string[]): CliOptions {
     );
     usage(1);
   }
+  if (!options.prod) {
+    console.error("Only --prod is supported (admin key is fetched per prod deployment).");
+    usage(1);
+  }
   return options;
 }
 
 const options = parseOptions(process.argv.slice(2));
-const convexUrl = options.prod
-  ? PROD_CONVEX_URL
-  : (process.env.NEXT_PUBLIC_CONVEX_URL ?? "");
-if (!convexUrl) {
-  console.error("No Convex URL (set NEXT_PUBLIC_CONVEX_URL or pass --prod).");
-  process.exit(1);
-}
 // The Polly engine resolves voices through NEXT_PUBLIC_CONVEX_URL at module
 // load, so pin it to the target deployment before the engines are imported.
-process.env.NEXT_PUBLIC_CONVEX_URL = convexUrl;
+process.env.NEXT_PUBLIC_CONVEX_URL = PROD_CONVEX_URL;
+
+// Authenticate like `convex run --prod --identity ...` does, but in-process:
+// trade the CLI account token for the prod deployment admin key and act as
+// the given identity. (The CLI itself cannot be used for saves — story JSON
+// payloads can exceed the OS per-argument size limit.)
+async function createAdminClient() {
+  const configPath = path.join(os.homedir(), ".convex", "config.json");
+  const { accessToken } = JSON.parse(await readFile(configPath, "utf8")) as {
+    accessToken: string;
+  };
+  const deploymentName = (process.env.CONVEX_DEPLOYMENT ?? "").replace(
+    /^[a-z]+:/,
+    "",
+  );
+  if (!deploymentName) throw new Error("CONVEX_DEPLOYMENT is not set.");
+  const response = await fetch(
+    "https://api.convex.dev/api/deployment/authorize_prod",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        "Convex-Client": "npm-cli-1.0.0",
+      },
+      body: JSON.stringify({ deploymentName }),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`authorize_prod failed (${response.status}).`);
+  }
+  const { url, adminKey } = (await response.json()) as {
+    url: string;
+    adminKey: string;
+  };
+  const identityBase = JSON.parse(options.identity!) as Record<string, unknown>;
+  const issuer = String(identityBase.issuer ?? "https://convex.test");
+  const subject = String(identityBase.subject ?? "regenerate-missing-audio");
+  const identity = {
+    ...identityBase,
+    issuer,
+    subject,
+    tokenIdentifier: `${issuer}|${subject}`,
+  };
+  const client = new ConvexHttpClient(url);
+  (
+    client as unknown as {
+      setAdminAuth: (token: string, actingAs: unknown) => void;
+    }
+  ).setAdminAuth(adminKey, identity);
+  return client;
+}
+
+let adminClient: ConvexHttpClient;
+
+// biome-ignore lint/suspicious/noExplicitAny: untyped by-name function calls
+function fn(name: string): any {
+  return name;
+}
+
+function runConvexQuery<T>(functionName: string, payload: unknown): Promise<T> {
+  return adminClient.query(fn(functionName), payload as never) as Promise<T>;
+}
+
+function runConvexMutation(functionName: string, payload: unknown) {
+  return adminClient.mutation(fn(functionName), payload as never);
+}
 
 type RegenTarget = {
   element: StoryElementLine | StoryElementHeader;
@@ -140,34 +222,6 @@ async function urlExists(url: string) {
   }
 }
 
-function runConvexRun(functionName: string, payload: unknown) {
-  const args = ["convex", "run"];
-  if (options.prod) args.push("--prod");
-  args.push(functionName, JSON.stringify(payload), "--identity", options.identity!);
-  return new Promise<string>((resolve, reject) => {
-    const child = spawn("pnpm", args, { stdio: ["ignore", "pipe", "inherit"] });
-    let stdout = "";
-    child.stdout.on("data", (chunk) => {
-      stdout += String(chunk);
-    });
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code === 0) resolve(stdout);
-      else reject(new Error(`convex run ${functionName} failed with ${code}`));
-    });
-  });
-}
-
-async function runConvexQuery<T>(
-  functionName: string,
-  payload: unknown,
-): Promise<T> {
-  const stdout = await runConvexRun(functionName, payload);
-  const trimmed = stdout.trim();
-  if (!trimmed) throw new Error(`convex run ${functionName} printed no JSON.`);
-  return JSON.parse(trimmed) as T;
-}
-
 async function getParseContext(
   learningLanguageId: number,
   fromLanguageId: number,
@@ -188,7 +242,16 @@ async function getParseContext(
   ]);
   const avatarNames: Record<number, Avatar> = {};
   for (const avatar of avatars) {
-    avatarNames[avatar.avatar_id] = avatar;
+    let speaker = avatar.speaker ?? "";
+    for (const [from, to] of Object.entries(options.voiceMap)) {
+      if (speaker.includes(from)) {
+        speaker = speaker.split(from).join(to);
+        console.log(
+          `  voice-map: avatar ${avatar.avatar_id} (${avatar.name}) ${avatar.speaker} -> ${speaker}`,
+        );
+      }
+    }
+    avatarNames[avatar.avatar_id] = { ...avatar, speaker };
   }
   return { learningLanguage, fromLanguage, avatarNames };
 }
@@ -369,7 +432,7 @@ async function processStory(
   );
   const audioCheck = await checkStoryLineAudio(newParsedStory);
 
-  await runConvexRun("storyWrite:setStory", {
+  await runConvexMutation("storyWrite:setStory", {
     legacyStoryId: storyData.id,
     duo_id: storyData.duo_id ?? "",
     name: newMeta.fromLanguageName,
@@ -396,6 +459,7 @@ async function processStory(
 }
 
 async function main() {
+  adminClient = await createAdminClient();
   const { audio_engines } = await import("@/app/audio/_lib/audio");
   const results = [];
   for (const storyId of options.storyIds) {

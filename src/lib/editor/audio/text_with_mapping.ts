@@ -242,7 +242,13 @@ export function add_word_marks_replacements(mapped_text: {
   mapped_text = iter_word_replacements(
     mapped_text,
     (mapped_text, word, word_start, i, bracket_start) => {
-      let insert = `<mark name="${mapped_text.mapping[i]}"/>`;
+      // The mapping can be sparse (inserted tags, end of text); fall back to
+      // the closest earlier plain-text position so the mark name stays numeric.
+      let name = mapped_text.mapping[i];
+      for (let j = i; name === undefined && j >= 0; j--) {
+        name = mapped_text.mapping[j];
+      }
+      let insert = `<mark name="${name}"/>`;
       mapped_text = replace_with_mapping(mapped_text, insert, word_start);
       i += insert.length;
       return [mapped_text, i];
