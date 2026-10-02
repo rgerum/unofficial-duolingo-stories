@@ -2,7 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  text_to_keypoints,
+  timings_to_text,
+} from "@/lib/editor/audio/audio_timing";
+import {
   buildTimingText,
+  serializeTimingKeypoints,
+  serializeTimingKeypointsUnchecked,
   type TimingPart,
   type TimingRegion,
 } from "@/lib/editor/audio/timing_text";
@@ -56,5 +62,34 @@ test("buildTimingText reports non-finite region starts", () => {
       name: "RangeError",
       message: "Invalid audio keypoint at index 0: rangeEnd=4, audioStart=NaN",
     },
+  );
+});
+
+// Regression: a stored negative delta ("$.../b1d5e3c7.mp3;1,50;-1,975;...")
+// crashed the editor because timings_to_text throws during render.
+const corruptLine = "$9783/b1d5e3c7.mp3;1,50;-1,975;0,800;0,225;0,575";
+
+test("serializeTimingKeypoints rejects non-monotonic keypoints", () => {
+  const [filename, keypoints] = text_to_keypoints(corruptLine.slice(1));
+  assert.equal(filename, "9783/b1d5e3c7.mp3");
+  assert.throws(
+    () => timings_to_text({ filename, keypoints }),
+    /Non-monotonic audio keypoint/,
+  );
+});
+
+test("serializeTimingKeypointsUnchecked round-trips corrupt timings", () => {
+  const [, keypoints] = text_to_keypoints(corruptLine.slice(1));
+  assert.equal(
+    serializeTimingKeypointsUnchecked(keypoints),
+    ";1,50;-1,975;0,800;0,225;0,575",
+  );
+});
+
+test("serializers agree on valid timings", () => {
+  const [, keypoints] = text_to_keypoints("file.mp3;5,100;3,200;4,50");
+  assert.equal(
+    serializeTimingKeypointsUnchecked(keypoints),
+    serializeTimingKeypoints(keypoints),
   );
 });
