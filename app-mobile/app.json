@@ -101,7 +101,9 @@
             }
           ]
         }
-      ]
+      ],
+      "expo-font",
+      "expo-asset"
     ],
     "extra": {
       "router": {},
