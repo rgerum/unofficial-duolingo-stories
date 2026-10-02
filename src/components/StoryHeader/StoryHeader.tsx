@@ -90,7 +90,7 @@ function StoryHeader({
             <source src={url} type="audio/mp3" />
           </audio>
         )}
-        {!hideAudioButton && settings.show_audio && (
+        {!hideAudioButton && settings.show_audio && url && (
           <PlayAudio onClick={playAudio} rtl={isRtl} />
         )}
         <StoryLineHints

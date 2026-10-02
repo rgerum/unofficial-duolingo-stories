@@ -4,10 +4,12 @@ import { EditorView } from "codemirror";
 
 export {
   generate_ssml_line,
+  synthesis_response_to_keypoints,
   text_to_keypoints,
   timing_text_without_filename,
   timings_to_text,
 } from "./audio_timing";
+import { synthesis_response_to_keypoints } from "./audio_timing";
 
 export async function generate_audio_line(ssml: {
   text: string;
@@ -60,63 +62,7 @@ export async function generate_audio_line(ssml: {
     text: speak_text,
   });
   let ssml_response = await response2.json();
-  let keypoints = [];
-  if (ssml_response.timepoints) {
-    for (let mark of ssml_response.timepoints) {
-      keypoints.push({
-        rangeEnd: parseInt(mark.markName),
-        audioStart: Math.round(mark.timeSeconds * 1000),
-      });
-    }
-  } else if (ssml_response.marks2) {
-    let last_time = 0;
-    let last_time_delta = 0;
-    let last_end = 0;
-    for (let mark of ssml_response.marks2) {
-      if (mark.timeSeconds === undefined) {
-        last_end = parseInt(mark.markName);
-        continue;
-      }
-      keypoints.push({
-        rangeEnd: parseInt(mark.markName),
-        audioStart: last_time_delta,
-      });
-      //timings.push([parseInt(mark.markName) - last_end, last_time_delta])
-      last_end = parseInt(mark.markName);
-      last_time_delta = Math.round(mark.timeSeconds * 1000); // - last_time;
-      last_time = Math.round(mark.timeSeconds * 1000);
-    }
-  } else {
-    let last_time = 0;
-    let last_end = 0;
-    for (const [index, mark] of ssml_response.marks.entries()) {
-      if (mark.time === undefined) continue;
-      if (!Number.isFinite(mark.end) || !Number.isFinite(mark.time)) {
-        throw new RangeError(
-          `Invalid speech mark at index ${index}: end=${mark.end}, time=${mark.time}`,
-        );
-      }
-      const rangeEnd = mapping[Math.round(mark.end)];
-      const audioStart = Math.round(mark.time);
-      if (
-        !Number.isFinite(rangeEnd) ||
-        !Number.isFinite(audioStart) ||
-        rangeEnd < last_end ||
-        audioStart < last_time
-      ) {
-        throw new RangeError(
-          `Invalid speech mark at index ${index}: rangeEnd=${rangeEnd} after ${last_end}, audioStart=${audioStart} after ${last_time}`,
-        );
-      }
-
-      keypoints.push({
-        rangeEnd,
-        audioStart,
-      });
-      last_end = rangeEnd;
-      last_time = audioStart;
-    }
-  }
+  const keypoints = synthesis_response_to_keypoints(ssml_response, mapping);
 
   return {
     filename: ssml_response["output_file"],

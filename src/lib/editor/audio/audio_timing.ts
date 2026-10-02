@@ -16,6 +16,43 @@ import { serializeTimingKeypoints, type TimingKeypoint } from "./timing_text";
 // dependencies so the story parser (and everything importing it, like the
 // server-side lint) can be bundled outside the editor, e.g. in Convex actions.
 
+// SSML forbids <phoneme> inside <phoneme>. Nesting can happen when a
+// pronunciation hint (foo{bar:ipa}) spans several words and the language's
+// transcription data then wraps the individual words again. Keep the outer
+// element (the explicit, more specific hint) and drop the inner ones.
+export function remove_nested_phonemes(mapped_text: {
+  text: string;
+  mapping: number[];
+}) {
+  const tagPattern = /<phoneme\b[^>]*>|<\/phoneme>/g;
+  const removals: { start: number; end: number }[] = [];
+  const openTags: { start: number; end: number }[] = [];
+  let match: RegExpExecArray | null;
+  while ((match = tagPattern.exec(mapped_text.text)) !== null) {
+    if (match[0] === "</phoneme>") {
+      const open = openTags.pop();
+      if (open && openTags.length > 0) {
+        removals.push(open, {
+          start: match.index,
+          end: match.index + match[0].length,
+        });
+      }
+    } else {
+      openTags.push({ start: match.index, end: match.index + match[0].length });
+    }
+  }
+  removals.sort((left, right) => right.start - left.start);
+  for (const removal of removals) {
+    mapped_text = replace_with_mapping(
+      mapped_text,
+      "",
+      removal.start,
+      removal.end,
+    );
+  }
+  return mapped_text;
+}
+
 export function generate_ssml_line(
   ssml: { speaker: string; text: string },
   transcribe_data: TranscribeData,
@@ -142,6 +179,8 @@ export function generate_ssml_line(
     );
   }
 
+  speak_text = remove_nested_phonemes(speak_text);
+
   const normalizedMapping: number[] = [];
   let lastValid = 0;
   for (let i = 0; i < speak_text.mapping.length; i++) {
@@ -171,6 +210,70 @@ export function timings_to_text({
 }) {
   const prefix = filename ? "$" + filename : "";
   return prefix + serializeTimingKeypoints(keypoints);
+}
+
+export type SynthesisKeypointResponse = {
+  timepoints?: { markName: string; timeSeconds: number }[];
+  marks2?: { markName: string; timeSeconds?: number }[];
+  marks?: { time?: number; end?: number }[];
+};
+
+export function synthesis_response_to_keypoints(
+  ssml_response: SynthesisKeypointResponse,
+  mapping: Record<number, number> | number[] = {},
+): TimingKeypoint[] {
+  const keypoints: TimingKeypoint[] = [];
+  if (ssml_response.timepoints) {
+    for (const mark of ssml_response.timepoints) {
+      keypoints.push({
+        rangeEnd: parseInt(mark.markName),
+        audioStart: Math.round(mark.timeSeconds * 1000),
+      });
+    }
+  } else if (ssml_response.marks2) {
+    let last_time_delta = 0;
+    for (const mark of ssml_response.marks2) {
+      if (mark.timeSeconds === undefined) continue;
+      keypoints.push({
+        rangeEnd: parseInt(mark.markName),
+        audioStart: last_time_delta,
+      });
+      last_time_delta = Math.round(mark.timeSeconds * 1000);
+    }
+  } else if (ssml_response.marks) {
+    let last_time = 0;
+    let last_end = 0;
+    for (const [index, mark] of ssml_response.marks.entries()) {
+      if (mark.time === undefined) continue;
+      if (!Number.isFinite(mark.end) || !Number.isFinite(mark.time)) {
+        throw new RangeError(
+          `Invalid speech mark at index ${index}: end=${mark.end}, time=${mark.time}`,
+        );
+      }
+      const rangeEnd = mapping[Math.round(mark.end!)];
+      const audioStart = Math.round(mark.time);
+      if (
+        !Number.isFinite(rangeEnd) ||
+        !Number.isFinite(audioStart) ||
+        rangeEnd < last_end ||
+        audioStart < last_time
+      ) {
+        throw new RangeError(
+          `Invalid speech mark at index ${index}: rangeEnd=${rangeEnd} after ${last_end}, audioStart=${audioStart} after ${last_time}`,
+        );
+      }
+
+      keypoints.push({
+        rangeEnd,
+        audioStart,
+      });
+      last_end = rangeEnd;
+      last_time = audioStart;
+    }
+  } else {
+    throw new Error("Synthesis response contains no timing marks.");
+  }
+  return keypoints;
 }
 
 export function timing_text_without_filename(text: string) {
