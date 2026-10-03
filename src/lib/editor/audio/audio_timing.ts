@@ -226,8 +226,14 @@ export function synthesis_response_to_keypoints(
   const keypoints: TimingKeypoint[] = [];
   if (ssml_response.timepoints) {
     for (const mark of ssml_response.timepoints) {
+      const rangeEnd = parseInt(mark.markName);
+      if (!Number.isFinite(rangeEnd) || !Number.isFinite(mark.timeSeconds)) {
+        throw new RangeError(
+          `Invalid timepoint: markName=${mark.markName}, timeSeconds=${mark.timeSeconds}`,
+        );
+      }
       keypoints.push({
-        rangeEnd: parseInt(mark.markName),
+        rangeEnd,
         audioStart: Math.round(mark.timeSeconds * 1000),
       });
     }
@@ -235,8 +241,12 @@ export function synthesis_response_to_keypoints(
     let last_time_delta = 0;
     for (const mark of ssml_response.marks2) {
       if (mark.timeSeconds === undefined) continue;
+      const rangeEnd = parseInt(mark.markName);
+      if (!Number.isFinite(rangeEnd)) {
+        throw new RangeError(`Invalid mark name: ${mark.markName}`);
+      }
       keypoints.push({
-        rangeEnd: parseInt(mark.markName),
+        rangeEnd,
         audioStart: last_time_delta,
       });
       last_time_delta = Math.round(mark.timeSeconds * 1000);

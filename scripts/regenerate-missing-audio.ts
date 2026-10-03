@@ -213,12 +213,16 @@ function toConvexValue(value: unknown): unknown {
   return value;
 }
 
-async function urlExists(url: string) {
+// Only a confirmed 404 may trigger regeneration — a rate limit, 5xx, or
+// network error must not cause an existing file to be replaced.
+async function checkUrl(url: string): Promise<"exists" | "missing" | "unknown"> {
   try {
     const response = await fetch(url, { method: "HEAD" });
-    return response.ok;
+    if (response.ok) return "exists";
+    if (response.status === 404) return "missing";
+    return "unknown";
   } catch {
-    return false;
+    return "unknown";
   }
 }
 
@@ -353,13 +357,22 @@ async function processStory(
   );
 
   const targets: RegenTarget[] = [];
+  const checkFailures: string[] = [];
   for (const element of parsedStory.elements) {
     if (element.type !== "LINE" && element.type !== "HEADER") continue;
     const content = getAudioContent(element);
     const audio = content?.audio;
     if (!audio?.url || !audio.ssml) continue;
     if (/^(https?:|blob:)/.test(audio.url)) continue;
-    if (await urlExists(`${AUDIO_BASE_URL}${audio.url.replace(/^\/+/, "")}`)) {
+    const status = await checkUrl(
+      `${AUDIO_BASE_URL}${audio.url.replace(/^\/+/, "")}`,
+    );
+    if (status === "exists") continue;
+    if (status === "unknown") {
+      console.error(
+        `[${storyId}] could not verify ${audio.url} (not a 404), skipping that line.`,
+      );
+      checkFailures.push(`${audio.url}: existence check inconclusive`);
       continue;
     }
     const inserIndex = (audio.ssml as { inser_index?: number }).inser_index;
@@ -382,7 +395,12 @@ async function processStory(
   }
 
   if (!targets.length) {
-    console.log(`[${storyId}] all referenced audio files exist, nothing to do.`);
+    if (checkFailures.length) {
+      return { storyId, status: "failed" as const, failures: checkFailures };
+    }
+    console.log(
+      `[${storyId}] all referenced audio files exist, nothing to do.`,
+    );
     return { storyId, status: "ok" as const, regenerated: 0 };
   }
 
@@ -393,15 +411,20 @@ async function processStory(
     );
   }
   if (!options.apply) {
-    return { storyId, status: "dry_run" as const, regenerated: targets.length };
+    return {
+      storyId,
+      status: "dry_run" as const,
+      regenerated: targets.length,
+      failures: checkFailures,
+    };
   }
 
   const updates: { lineNo: number; serializedText: string }[] = [];
-  const failures: string[] = [];
+  const failures: string[] = [...checkFailures];
   for (const target of targets) {
     try {
       const result = await synthesizeLine(engines, storyData.id, target.ssml);
-      if (!(await urlExists(`${AUDIO_BASE_URL}${result.blobPath}`))) {
+      if ((await checkUrl(`${AUDIO_BASE_URL}${result.blobPath}`)) !== "exists") {
         throw new Error(`Upload verification failed for ${result.blobPath}.`);
       }
       updates.push({
@@ -441,6 +464,7 @@ async function processStory(
     set_index: newMeta.set_index,
     legacyCourseId: storyData.course_id,
     text: newText,
+    expectedText: storyData.text,
     json: toConvexValue(newParsedStory),
     todo_count: newMeta.todo_count,
     audioProblemCount: audioCheck.audioProblemCount,
@@ -484,7 +508,9 @@ async function main() {
     );
   }
   const bad = results.filter(
-    (result) => result.status !== "ok" && result.status !== "dry_run",
+    (result) =>
+      (result.status !== "ok" && result.status !== "dry_run") ||
+      ("failures" in result && (result.failures?.length ?? 0) > 0),
   );
   process.exit(bad.length ? 1 : 0);
 }

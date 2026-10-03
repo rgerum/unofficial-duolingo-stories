@@ -131,6 +131,37 @@ describe("setStory", () => {
     });
   });
 
+  test("matching expectedText saves; stale expectedText aborts without writing", async () => {
+    const t = convexTest(schema, modules);
+    const { storyId } = await seedCourseWithStory(t);
+    const asContributor = t.withIdentity(contributor);
+
+    const result = await asContributor.mutation(
+      api.storyWrite.setStory,
+      setStoryArgs({ legacyStoryId: 10, expectedText: "old text" }),
+    );
+    expect(result?.text).toBe("new text");
+
+    await expect(
+      asContributor.mutation(
+        api.storyWrite.setStory,
+        setStoryArgs({
+          legacyStoryId: 10,
+          text: "conflicting text",
+          expectedText: "old text",
+        }),
+      ),
+    ).rejects.toThrow("Story text changed");
+
+    await t.run(async (ctx) => {
+      const content = await ctx.db
+        .query("story_content")
+        .withIndex("by_story", (q) => q.eq("storyId", storyId))
+        .unique();
+      expect(content?.text).toBe("new text");
+    });
+  });
+
   test("unknown legacyStoryId with no matching duo_id returns null and writes nothing", async () => {
     const t = convexTest(schema, modules);
     const { courseId } = await seedCourseWithStory(t);

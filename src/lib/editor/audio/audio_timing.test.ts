@@ -62,6 +62,16 @@ test("synthesis_response_to_keypoints converts google timepoints", () => {
   );
 });
 
+test("synthesis_response_to_keypoints rejects non-numeric timepoint names", () => {
+  assert.throws(
+    () =>
+      synthesis_response_to_keypoints({
+        timepoints: [{ markName: "undefined", timeSeconds: 0.1 }],
+      }),
+    RangeError,
+  );
+});
+
 test("synthesis_response_to_keypoints converts marks through the mapping", () => {
   assert.deepEqual(
     synthesis_response_to_keypoints(

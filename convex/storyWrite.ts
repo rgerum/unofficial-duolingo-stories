@@ -24,6 +24,9 @@ export const setStory = mutation({
     set_index: v.number(),
     legacyCourseId: v.number(),
     text: v.string(),
+    // Optimistic concurrency: when set, the save aborts if the stored text
+    // no longer matches (e.g. an editor saved while a script was running).
+    expectedText: v.optional(v.string()),
     json: v.any(),
     todo_count: v.number(),
     audioProblemCount: v.optional(v.number()),
@@ -120,6 +123,17 @@ export const setStory = mutation({
           ? args.audioProblemCount
           : 0;
 
+    const existingContent = await ctx.db
+      .query("story_content")
+      .withIndex("by_story", (q) => q.eq("storyId", story._id))
+      .unique();
+    if (
+      args.expectedText !== undefined &&
+      existingContent?.text !== args.expectedText
+    ) {
+      throw new Error("Story text changed while this save was prepared.");
+    }
+
     await ctx.db.patch(story._id, {
       duo_id: args.duo_id,
       name: args.name,
@@ -134,11 +148,6 @@ export const setStory = mutation({
       todo_count: args.todo_count,
       audio_problem_count: nextAudioProblemCount,
     });
-
-    const existingContent = await ctx.db
-      .query("story_content")
-      .withIndex("by_story", (q) => q.eq("storyId", story._id))
-      .unique();
 
     const lastUpdated = Date.now();
 
