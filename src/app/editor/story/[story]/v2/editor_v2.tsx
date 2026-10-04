@@ -38,6 +38,7 @@ import {
   timings_to_text,
 } from "@/lib/editor/audio/audio_edit_tools";
 import { fix_audio_line_order } from "@/lib/editor/audio/fix_audio_line_order";
+import { serializeTimingKeypointsUnchecked } from "@/lib/editor/audio/timing_text";
 import AdminControls from "./admin_controls";
 import {
   interleavedPreviewExtension,
@@ -707,6 +708,22 @@ export default function EditorV2({
     (audioEditorData?.type === "HEADER" &&
       audioEditorData.learningLanguageTitleContent);
   const audioEditorAudio = getElementAudio(audioEditorData);
+  const audioEditorInitialTimingText = React.useMemo(() => {
+    if (!audioEditorAudio) return "";
+    const filename = audioEditorAudio.url ?? "";
+    const keypoints = audioEditorAudio.keypoints ?? [];
+    try {
+      return timings_to_text({ filename, keypoints });
+    } catch {
+      // Stored timings can be corrupt (e.g. negative deltas like ";-1,975").
+      // Serialize them unvalidated so SoundRecorder can open and flag them
+      // instead of the throw crashing the whole editor at render time.
+      return (
+        (filename ? "$" + filename : "") +
+        serializeTimingKeypointsUnchecked(keypoints)
+      );
+    }
+  }, [audioEditorAudio]);
   const bulkAudioItems = React.useMemo(
     () => getBulkAudioEditorItems(model.parsedStory.elements),
     [model.parsedStory.elements],
@@ -782,10 +799,7 @@ export default function EditorV2({
           <SoundRecorder
             key={audioEditorData.trackingProperties.line_index}
             content={audioEditorDataContent}
-            initialTimingText={timings_to_text({
-              filename: audioEditorAudio.url ?? "",
-              keypoints: audioEditorAudio.keypoints ?? [],
-            })}
+            initialTimingText={audioEditorInitialTimingText}
             url={`https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com/${audioEditorAudio.url}`}
             story_id={story_data.id}
             onClose={() => openAudioEditor(undefined)}

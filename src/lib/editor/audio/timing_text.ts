@@ -29,6 +29,23 @@ export function serializeTimingKeypoints(
   return text;
 }
 
+/** Like serializeTimingKeypoints, but without monotonicity/integer validation.
+ *  Only for round-tripping already-stored (possibly corrupt) timings so the
+ *  editor can display and flag them instead of crashing. */
+export function serializeTimingKeypointsUnchecked(
+  keypoints: readonly TimingKeypoint[],
+): string {
+  let text = "";
+  let lastEnd = 0;
+  let lastTime = 0;
+  for (const point of keypoints) {
+    text += `;${Math.round(point.rangeEnd - lastEnd)},${Math.round(point.audioStart - lastTime)}`;
+    lastEnd = point.rangeEnd;
+    lastTime = point.audioStart;
+  }
+  return text;
+}
+
 /** Builds the ";chars,ms" timing string for aligned (part, region) pairs.
  *  Pairs beyond the shorter of the two arrays are ignored. */
 export function buildTimingText(
