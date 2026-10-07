@@ -186,6 +186,9 @@ export const setStory = mutation({
       );
     }
 
+    await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
+      tags: [`story-${story.legacyId}`],
+    });
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStorySaved, {
       operationKey,
       storyId: story.legacyId,
@@ -273,6 +276,9 @@ export const applyForcedAlignment = mutation({
     });
     await upsertPublicStoryContent(ctx, story._id, args.json, lastUpdated);
 
+    await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
+      tags: [`story-${story.legacyId}`],
+    });
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStorySaved, {
       operationKey:
         args.operationKey ??
@@ -344,6 +350,9 @@ export const deleteStory = mutation({
 
     const operationKey =
       args.operationKey ?? `story:${story.legacyId}:delete:${Date.now()}`;
+    await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
+      tags: [`story-${story.legacyId}`],
+    });
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStoryDeleted, {
       operationKey,
       storyId: story.legacyId,

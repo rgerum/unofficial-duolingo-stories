@@ -49,6 +49,7 @@ import type * as localizationWrite from "../localizationWrite.js";
 import type * as lookupTables from "../lookupTables.js";
 import type * as recentStories from "../recentStories.js";
 import type * as roles from "../roles.js";
+import type * as siteCache from "../siteCache.js";
 import type * as storyApproval from "../storyApproval.js";
 import type * as storyCrossLinks from "../storyCrossLinks.js";
 import type * as storyDone from "../storyDone.js";
@@ -111,6 +112,7 @@ declare const fullApi: ApiFromModules<{
   lookupTables: typeof lookupTables;
   recentStories: typeof recentStories;
   roles: typeof roles;
+  siteCache: typeof siteCache;
   storyApproval: typeof storyApproval;
   storyCrossLinks: typeof storyCrossLinks;
   storyDone: typeof storyDone;
