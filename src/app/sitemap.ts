@@ -31,7 +31,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 // Crawlers fetch this often and it fans out to one Convex query per course.
 async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
   "use cache";
-  cacheLife("hours");
   let courses: Array<{ short: string }> = [];
   let docsData = EMPTY_DOCS_DATA;
 
@@ -42,6 +41,7 @@ async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
     ]);
     courses = fetchedCourses.filter(hasCourseShort);
     docsData = fetchedDocsData;
+    cacheLife("hours");
   } catch (error) {
     console.error("Failed to load sitemap data:", error);
     // Retry soon rather than serving a near-empty sitemap for hours.

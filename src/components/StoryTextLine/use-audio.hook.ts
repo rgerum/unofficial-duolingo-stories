@@ -146,7 +146,13 @@ export default function useAudio(
   // Activity), so stop playback explicitly when effects are cleaned up.
   React.useEffect(() => {
     const audioObject = ref.current;
-    return () => audioObject?.pause();
+    return () => {
+      if (window.playing_audio?.length) {
+        window.playing_audio.forEach((cancel) => cancel());
+        window.playing_audio = [];
+      }
+      audioObject?.pause();
+    };
   }, []);
 
   if (!audio?.url) {

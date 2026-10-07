@@ -44,7 +44,11 @@ export default function StoryWrapper(props: StoryWrapperProps) {
 }
 
 function StoryReader({ story, crossLinks }: StoryWrapperProps) {
-  const mode = useNavigationMode();
+  // Frozen at mount: the context flips to "soft" on later navigations, which
+  // would otherwise remount StoryProgress (keyed on it) while this page is
+  // hidden and lose the reader's place on browser Back.
+  const navigationMode = useNavigationMode();
+  const [mode] = React.useState(navigationMode);
   const router = useRouter();
   const searchParams = useSearchParams();
   const convexAuth = useConvexAuth();

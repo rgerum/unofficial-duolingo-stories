@@ -1,3 +1,4 @@
+import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireContributorOrAdmin } from "./lib/authorization";
@@ -52,6 +53,10 @@ export const setLocalization = mutation({
         lastOperationKey: operationKey,
       });
     }
+
+    await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
+      tags: ["localization"],
+    });
 
     return {
       id: existing?.legacyId ?? null,

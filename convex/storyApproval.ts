@@ -267,8 +267,13 @@ export const toggleStoryApproval = mutation({
     // Publishing flips stories public, which changes their pages (noindex,
     // canonical) and the recent-activity list.
     if (published.length > 0) {
+      const course = await ctx.db.get(story.courseId);
       await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
-        tags: [...published.map((id) => `story-${id}`), "recent"],
+        tags: [
+          ...published.map((id) => `story-${id}`),
+          ...(course?.short ? [`course-${course.short}`] : []),
+          "recent",
+        ],
       });
     }
     await ctx.scheduler.runAfter(

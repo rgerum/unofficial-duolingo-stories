@@ -85,16 +85,13 @@ export async function generateMetadata(
 // App Shell first, so notFound() and redirects keep their real status codes.
 export const ensureStatic = "navigation";
 
+// No fallback on failure: with ensureStatic an empty list fails the build
+// anyway, and a deploy that can't reach Convex shouldn't ship.
 export async function generateStaticParams() {
-  try {
-    const courses = await get_course_data();
-    return courses.map((course) => ({
-      course_id: course.short,
-    }));
-  } catch (error) {
-    console.error("generateStaticParams failed for /[course_id]:", error);
-    return [];
-  }
+  const courses = await get_course_data();
+  return courses.map((course) => ({
+    course_id: course.short,
+  }));
 }
 
 export default async function Page({
