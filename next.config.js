@@ -5,6 +5,9 @@ module.exports = {
     "*.tailed9e74.ts.net",
   ],
   reactCompiler: true,
+  experimental: {
+    agentUpgrade: "latest",
+  },
   compiler: {
     styledComponents: true,
   },

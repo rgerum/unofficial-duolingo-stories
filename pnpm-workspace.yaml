@@ -33,20 +33,25 @@ minimumReleaseAgeExclude:
   - '@biomejs/cli-linux-x64@2.5.10'
   - '@biomejs/cli-win32-arm64@2.5.10'
   - '@biomejs/cli-win32-x64@2.5.10'
-  - '@next/env@16.3.2'
-  - '@next/swc-darwin-arm64@16.3.2'
-  - '@next/swc-darwin-x64@16.3.2'
-  - '@next/swc-linux-arm64-gnu@16.3.2'
-  - '@next/swc-linux-arm64-musl@16.3.2'
-  - '@next/swc-linux-x64-gnu@16.3.2'
-  - '@next/swc-linux-x64-musl@16.3.2'
-  - '@next/swc-win32-arm64-msvc@16.3.2'
-  - '@next/swc-win32-x64-msvc@16.3.2'
+  - '@next/env@16.3.2 || 16.4.0'
+  - '@next/swc-darwin-arm64@16.3.2 || 16.4.0'
+  - '@next/swc-darwin-x64@16.3.2 || 16.4.0'
+  - '@next/swc-linux-arm64-gnu@16.3.2 || 16.4.0'
+  - '@next/swc-linux-arm64-musl@16.3.2 || 16.4.0'
+  - '@next/swc-linux-x64-gnu@16.3.2 || 16.4.0'
+  - '@next/swc-linux-x64-musl@16.3.2 || 16.4.0'
+  - '@next/swc-win32-arm64-msvc@16.3.2 || 16.4.0'
+  - '@next/swc-win32-x64-msvc@16.3.2 || 16.4.0'
   - '@posthog/core@1.48.8'
   - '@posthog/types@1.405.1'
   - convex@1.45.0
   - jose@6.2.10
-  - next@16.3.2
+  - next@16.3.2 || 16.4.0
   - posthog-js@1.418.10
   - posthog-node@5.50.0
   - shadcn@4.19.0
+overrides:
+  # @better-auth/expo's peer on @better-auth/core otherwise auto-installs the
+  # latest (1.7.x); keep it on better-auth's version (@convex-dev/better-auth
+  # requires better-auth <1.7).
+  "@better-auth/expo>@better-auth/core": 1.6.33
