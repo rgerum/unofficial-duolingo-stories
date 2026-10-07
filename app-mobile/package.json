@@ -10,7 +10,7 @@
     "@expo/vector-icons": "^15.1.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "better-auth": "^1.6.26",
-    "convex": "^1.45.0",
+    "convex": "^1.46.0",
     "expo": "~57.0.26",
     "expo-application": "~57.0.3",
     "expo-asset": "~57.0.18",

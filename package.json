@@ -50,7 +50,7 @@
     "better-auth": "1.6.26",
     "clsx": "^2.1.1",
     "codemirror": "^6.0.2",
-    "convex": "^1.45.0",
+    "convex": "^1.46.0",
     "fflate": "^0.8.3",
     "framer-motion": "^13.1.1",
     "immer": "^11.1.18",
