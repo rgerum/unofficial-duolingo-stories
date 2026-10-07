@@ -464,7 +464,12 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     };
   }, [mergedSrc]);
 
+  // Bumped by pause() (also run when the page is hidden) so a play request
+  // still loading audio doesn't start playback afterwards.
+  const playRequestRef = React.useRef(0);
+
   const ensureAudioAndPlay = React.useCallback(async () => {
+    const request = ++playRequestRef.current;
     let src = mergedSrc;
     if (!src) {
       setMergeState("building");
@@ -472,9 +477,11 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
       try {
         src = await loadStitchedAudio();
       } catch {
+        if (request !== playRequestRef.current) return;
         src = await buildMergedAudio();
       }
     }
+    if (request !== playRequestRef.current) return;
     if (!src || !audioRef.current) return;
 
     if (audioRef.current.src !== src) {
@@ -484,6 +491,10 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
 
     try {
       await audioRef.current.play();
+      if (request !== playRequestRef.current) {
+        audioRef.current?.pause();
+        return;
+      }
       setIsPlaying(true);
     } catch (error) {
       setIsPlaying(false);
@@ -491,6 +502,7 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   }, [buildMergedAudio, loadStitchedAudio, mergedSrc]);
 
   const pause = React.useCallback(() => {
+    playRequestRef.current++;
     audioRef.current?.pause();
     setIsPlaying(false);
   }, []);

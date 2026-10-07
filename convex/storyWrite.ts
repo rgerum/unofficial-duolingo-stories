@@ -186,8 +186,19 @@ export const setStory = mutation({
       );
     }
 
+    // Published stories also appear in their course's story list; a move
+    // changes both the old and the new course page.
+    const revalidateTags = [`story-${story.legacyId}`];
+    if (story.public && !story.deleted) {
+      const previousCourse = movedPublishedStory
+        ? await ctx.db.get(previousCourseId)
+        : null;
+      for (const short of [course.short, previousCourse?.short]) {
+        if (short) revalidateTags.push(`course-${short}`);
+      }
+    }
     await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
-      tags: [`story-${story.legacyId}`],
+      tags: revalidateTags,
     });
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStorySaved, {
       operationKey,
@@ -351,7 +362,12 @@ export const deleteStory = mutation({
     const operationKey =
       args.operationKey ?? `story:${story.legacyId}:delete:${Date.now()}`;
     await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
-      tags: [`story-${story.legacyId}`],
+      tags: [
+        `story-${story.legacyId}`,
+        ...(story.public && course.short
+          ? [`course-${course.short}`, "recent"]
+          : []),
+      ],
     });
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStoryDeleted, {
       operationKey,

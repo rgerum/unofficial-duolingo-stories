@@ -43,13 +43,16 @@ async function resolveStoryMeta(story_id: number) {
 export const ensureStatic = "navigation";
 
 export async function generateStaticParams() {
-  const [course] = await get_course_data();
-  const coursePage = course
-    ? preloadedQueryResult(await preload_course_page_data(course.short))
-    : null;
-  const story = coursePage?.stories[0];
-  if (!story) throw new Error("No public story found to prerender");
-  return [{ story_id: String(story.id) }];
+  // Some public courses have no listed stories yet, so take the first one
+  // that does. Usually that's the first course.
+  for (const course of await get_course_data()) {
+    const coursePage = preloadedQueryResult(
+      await preload_course_page_data(course.short),
+    );
+    const story = coursePage?.stories[0];
+    if (story) return [{ story_id: String(story.id) }];
+  }
+  throw new Error("No public story found to prerender");
 }
 
 export async function generateMetadata({

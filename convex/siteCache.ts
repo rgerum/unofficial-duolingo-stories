@@ -6,6 +6,7 @@ import { env, internalAction } from "./_generated/server";
 // failure only means readers see the old version until the hourly refresh.
 export const revalidate = internalAction({
   args: { tags: v.array(v.string()) },
+  returns: v.null(),
   handler: async (_ctx, { tags }) => {
     const siteUrl = env.SITE_URL;
     const secret = env.SITE_REVALIDATE_SECRET;
