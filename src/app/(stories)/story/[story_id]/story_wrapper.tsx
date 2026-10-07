@@ -15,17 +15,40 @@ import {
   identifyPostHogUser,
   type PostHogUser,
 } from "@/lib/posthog-user";
+import {
+  HIDE_STORY_QUESTIONS_COOKIE,
+  isStoryQuestionsDisabled,
+} from "@/lib/story-preferences";
 
-export default function StoryWrapper({
-  story,
-  crossLinks,
-  hideStoryQuestions,
-}: {
+// Read on the client so the server-rendered story page stays cacheable.
+function readHideStoryQuestionsCookie() {
+  const prefix = `${HIDE_STORY_QUESTIONS_COOKIE}=`;
+  const value = document.cookie
+    .split("; ")
+    .find((entry) => entry.startsWith(prefix))
+    ?.slice(prefix.length);
+  return isStoryQuestionsDisabled(value);
+}
+
+type StoryWrapperProps = {
   story: StoryData;
   crossLinks?: StoryCrossLinksData | null;
-  hideStoryQuestions: boolean;
-}) {
-  const mode = useNavigationMode();
+};
+
+// Cache Components keeps visited pages mounted (React Activity). Keying on
+// bfcacheId restarts the story when it is opened via a link, while browser
+// back/forward still returns to where the reader left off.
+export default function StoryWrapper(props: StoryWrapperProps) {
+  const { bfcacheId } = useRouter();
+  return <StoryReader key={bfcacheId} {...props} />;
+}
+
+function StoryReader({ story, crossLinks }: StoryWrapperProps) {
+  // Frozen at mount: the context flips to "soft" on later navigations, which
+  // would otherwise remount StoryProgress (keyed on it) while this page is
+  // hidden and lose the reader's place on browser Back.
+  const navigationMode = useNavigationMode();
+  const [mode] = React.useState(navigationMode);
   const router = useRouter();
   const searchParams = useSearchParams();
   const convexAuth = useConvexAuth();
@@ -33,7 +56,7 @@ export default function StoryWrapper({
   const [highlight_name, setHighlightName] = React.useState<string[]>([]);
   const [hideNonHighlighted, setHideNonHighlighted] = React.useState(false);
   const [effectiveHideStoryQuestions, setEffectiveHideStoryQuestions] =
-    React.useState(hideStoryQuestions);
+    React.useState(false);
   const trackedStoryStart = React.useRef(false);
   const completionInFlight = React.useRef(false);
   const {
@@ -73,7 +96,7 @@ export default function StoryWrapper({
   );
   React.useEffect(() => {
     if (!convexAuth.isAuthenticated) {
-      setEffectiveHideStoryQuestions(hideStoryQuestions);
+      setEffectiveHideStoryQuestions(readHideStoryQuestionsCookie());
       return;
     }
     if (savedStoryPreferences === undefined) return;
@@ -81,8 +104,8 @@ export default function StoryWrapper({
       setEffectiveHideStoryQuestions(savedStoryPreferences.hideStoryQuestions);
       return;
     }
-    setEffectiveHideStoryQuestions(hideStoryQuestions);
-  }, [convexAuth.isAuthenticated, hideStoryQuestions, savedStoryPreferences]);
+    setEffectiveHideStoryQuestions(readHideStoryQuestionsCookie());
+  }, [convexAuth.isAuthenticated, savedStoryPreferences]);
   const showNextStoryAction = Boolean(nextStep?.nextStoryId);
   const nextStoryPreview = useQuery(
     api.storyRead.getStoryPreviewByLegacyId,

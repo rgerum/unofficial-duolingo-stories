@@ -9,6 +9,9 @@ const app = defineApp({
     DISCORD_BOT_TOKEN: v.optional(v.string()),
     DISCORD_ANNOUNCEMENTS_CHANNEL_ID: v.optional(v.string()),
     AUTH_TRUSTED_ORIGIN: v.optional(v.string()),
+    SITE_URL: v.optional(v.string()),
+    // Shared with the Next.js app to authorize POST /api/revalidate.
+    SITE_REVALIDATE_SECRET: v.optional(v.string()),
   },
 });
 

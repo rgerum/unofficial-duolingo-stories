@@ -1,11 +1,10 @@
 import type { MetadataRoute } from "next";
 import { fetchQuery } from "convex/nextjs";
+import { cacheLife } from "next/cache";
 import { api } from "@convex/_generated/api";
 import { getDocsData } from "./docs/[[...slug]]/doc_data";
 
 const SITE_URL = "https://duostories.org";
-
-export const dynamic = "force-dynamic";
 
 const EMPTY_DOCS_DATA: Awaited<ReturnType<typeof getDocsData>> = {
   navigation: [],
@@ -26,6 +25,12 @@ function hasCourseShort(course: unknown): course is { short: string } {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  return await buildSitemap();
+}
+
+// Crawlers fetch this often and it fans out to one Convex query per course.
+async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
+  "use cache";
   let courses: Array<{ short: string }> = [];
   let docsData = EMPTY_DOCS_DATA;
 
@@ -36,8 +41,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ]);
     courses = fetchedCourses.filter(hasCourseShort);
     docsData = fetchedDocsData;
+    cacheLife("hours");
   } catch (error) {
     console.error("Failed to load sitemap data:", error);
+    // Retry soon rather than serving a near-empty sitemap for hours.
+    cacheLife("minutes");
   }
 
   const docsEntries: MetadataRoute.Sitemap = [

@@ -34,6 +34,8 @@ type Env = {
   readonly DISCORD_ANNOUNCEMENTS_CHANNEL_ID: string | undefined;
   readonly DISCORD_BOT_TOKEN: string | undefined;
   readonly DISCORD_TOKEN: string | undefined;
+  readonly SITE_REVALIDATE_SECRET: string | undefined;
+  readonly SITE_URL: string | undefined;
 };
 
 /**

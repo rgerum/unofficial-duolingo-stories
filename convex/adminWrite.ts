@@ -271,6 +271,15 @@ export const updateAdminCourse = mutation({
     if (nextPublic && !course.public) patchData.publicSince = Date.now();
 
     await ctx.db.patch(course._id, patchData);
+    // Course pages (including a cached 404 for a not-yet-public course), the
+    // course list and the landing page all show course fields.
+    await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
+      tags: [
+        ...new Set([short, course.short ?? short].map((s) => `course-${s}`)),
+        "courses",
+        "landing",
+      ],
+    });
     if (nextPublic && !course.public) {
       const totalStoryCount = await recomputeCoursePublishedCount(
         ctx,
@@ -422,6 +431,9 @@ export const createAdminCourse = mutation({
       from_language_name: fromLanguage.name,
       mirrorUpdatedAt: Date.now(),
       lastOperationKey: operationKey,
+    });
+    await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
+      tags: [`course-${short}`, "courses", "landing"],
     });
     if (nextPublic) {
       await schedulePublicationAnnouncement(ctx, {

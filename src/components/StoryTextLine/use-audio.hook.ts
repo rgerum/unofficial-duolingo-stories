@@ -42,6 +42,7 @@ export default function useAudio(
       ? element.line?.content?.audio
       : element.learningLanguageTitleContent?.audio;
   const ref = React.useRef<HTMLAudioElement>(null);
+  const cancelPlaybackRef = React.useRef<(() => void) | null>(null);
 
   const playAudio = React.useCallback(async () => {
     if (!enabled || !audio?.url || !ref.current) return;
@@ -114,6 +115,7 @@ export default function useAudio(
     };
 
     window.playing_audio?.push(cancel);
+    cancelPlaybackRef.current = cancel;
 
     return cancel;
   }, [audio, enabled]);
@@ -141,6 +143,24 @@ export default function useAudio(
       }
     };
   }, [active, element.type, enabled, playAudio]);
+
+  // Navigating away keeps the page mounted but hidden (Cache Components
+  // Activity), so stop playback explicitly when effects are cleaned up.
+  React.useEffect(() => {
+    const audioObject = ref.current;
+    return () => {
+      // Only this line's playback; other lines may still be playing.
+      const cancel = cancelPlaybackRef.current;
+      if (cancel) {
+        cancel();
+        window.playing_audio = window.playing_audio?.filter(
+          (entry) => entry !== cancel,
+        );
+        cancelPlaybackRef.current = null;
+      }
+      audioObject?.pause();
+    };
+  }, []);
 
   if (!audio?.url) {
     return [audioRange, undefined, ref, undefined] as const;

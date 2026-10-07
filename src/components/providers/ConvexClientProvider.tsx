@@ -13,17 +13,16 @@ import { authClient } from "@/lib/auth-client";
 // ConvexBetterAuthProvider uses, but the library type currently rejects it.
 const convexAuthClient = authClient as unknown as AuthClient;
 
+// Module scope rather than render: the constructor calls Math.random(), which
+// Cache Components rejects during prerendering.
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
+
 export default function ConvexClientProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  const convex = React.useMemo(
-    () => (convexUrl ? new ConvexReactClient(convexUrl) : null),
-    [convexUrl],
-  );
-
   if (!convex) {
     if (process.env.NODE_ENV !== "production") {
       console.warn(

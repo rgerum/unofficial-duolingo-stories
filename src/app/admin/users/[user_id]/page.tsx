@@ -4,6 +4,11 @@ import { UserSchema } from "./schema";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@convex/_generated/api";
 
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 async function user_properties(id: string) {
   const parsedId = Number.parseInt(id, 10);
   if (!Number.isFinite(parsedId)) return undefined;

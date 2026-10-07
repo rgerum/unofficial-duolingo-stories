@@ -3,6 +3,11 @@ import { redirect } from "next/navigation";
 import { LoginOptions } from "./login_options";
 import { isAuthenticated } from "@/lib/auth-server";
 
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export interface ProviderProps {
   id: string;
   name: string;

@@ -22,9 +22,6 @@ import {
   docsWarningBoxClass,
 } from "@/components/Docs/docsClasses";
 
-export const dynamic = "force-static";
-export const dynamicParams = true;
-
 export async function generateStaticParams() {
   const data = await getDocsData();
 

@@ -1,9 +1,12 @@
 import fs from "node:fs/promises";
-import React from "react";
+import { cacheLife } from "next/cache";
 
 const basefolder = "public/docs";
 
+// Docs are files in the deployment, so they can only change on deploy.
 export async function getPageData(path: string) {
+  "use cache";
+  cacheLife("max");
   try {
     const res = await fs.readFile(basefolder + "/" + path + ".mdx", "utf8");
     const data = res.split("---");
@@ -29,7 +32,9 @@ interface DocData {
   }[];
 }
 
-export const getDocsData = React.cache(async () => {
+export async function getDocsData() {
+  "use cache";
+  cacheLife("max");
   const data = JSON.parse(await fs.readFile(basefolder + "/docs.json", "utf8"));
 
   for (const group of data["navigation"]) {
@@ -41,4 +46,4 @@ export const getDocsData = React.cache(async () => {
     group.pages = pages_new;
   }
   return data as DocData;
-});
+}
