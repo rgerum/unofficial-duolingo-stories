@@ -1,8 +1,12 @@
 import React from "react";
 import StoryWrapper from "./story_wrapper";
 import { notFound } from "next/navigation";
-import { fetchQuery } from "convex/nextjs";
-import { api } from "@convex/_generated/api";
+import { get_story_meta } from "../getStory";
+
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 export async function generateMetadata({
   params,
@@ -10,9 +14,7 @@ export async function generateMetadata({
   params: { story_id: string };
 }) {
   const story_id = parseInt((await params).story_id);
-  const story = await fetchQuery(api.storyRead.getStoryMetaByLegacyId, {
-    storyId: story_id,
-  });
+  const story = await get_story_meta(story_id);
 
   if (!story || "deleted" in story) notFound();
 

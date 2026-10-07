@@ -1,5 +1,6 @@
 import { api } from "@convex/_generated/api";
 import { fetchQuery } from "convex/nextjs";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -15,11 +16,15 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
   timeZone: "UTC",
 });
 
+async function getRecentPublishedStorySets() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("recent");
+  return await fetchQuery(api.recentStories.getRecentPublishedStorySets, {});
+}
+
 export default async function RecentStoriesPage() {
-  const publishedSets = await fetchQuery(
-    api.recentStories.getRecentPublishedStorySets,
-    {},
-  );
+  const publishedSets = await getRecentPublishedStorySets();
 
   return (
     <div className="mx-auto w-full max-w-[760px] py-8 sm:py-12">

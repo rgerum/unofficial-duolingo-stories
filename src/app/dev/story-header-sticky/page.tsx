@@ -1,9 +1,15 @@
+import { Suspense } from "react";
 import StoryHeaderStickyFixture from "./story_header_sticky_fixture";
 import type { StoryData } from "@/app/(stories)/story/[story_id]/getStory";
 import type {
   ContentWithHints,
   StoryElement,
 } from "@/components/editor/story/syntax_parser_types";
+
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 export const metadata = {
   title: "Story Header Sticky Fixture",
@@ -166,5 +172,9 @@ const story = {
 } as StoryData;
 
 export default function Page() {
-  return <StoryHeaderStickyFixture story={story} />;
+  return (
+    <Suspense fallback={null}>
+      <StoryHeaderStickyFixture story={story} />
+    </Suspense>
+  );
 }

@@ -4,6 +4,7 @@ import CourseList from "./course_list";
 import React from "react";
 import { preloadQuery } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
+import { cacheLife, cacheTag } from "next/cache";
 import LandingStatsClient from "./landing_stats_client";
 import StoreBadges from "./store_badges";
 
@@ -17,11 +18,17 @@ const structuredData = {
     "Community-translated interactive stories with audio for learning languages, in the style of Duolingo Stories.",
 };
 
+// The client subscribes to the live query after hydration, so a cached
+// snapshot only affects the first paint.
+async function preloadLandingData() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("landing");
+  return await preloadQuery(api.landing.getPublicLandingPageData, {});
+}
+
 export default async function Page({}) {
-  const preloadedLandingData = await preloadQuery(
-    api.landing.getPublicLandingPageData,
-    {},
-  );
+  const preloadedLandingData = await preloadLandingData();
 
   return (
     <>

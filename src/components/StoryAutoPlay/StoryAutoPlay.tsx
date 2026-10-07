@@ -457,6 +457,10 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
   React.useEffect(() => {
     return () => {
       revokeObjectUrl(mergedSrc);
+      // Cleanup also runs when navigating away hides the page (Cache
+      // Components Activity); drop the revoked URL so playback rebuilds it
+      // when the page is shown again. Keep a newer src if one replaced it.
+      setMergedSrc((current) => (current === mergedSrc ? null : current));
     };
   }, [mergedSrc]);
 
@@ -490,6 +494,9 @@ export default function StoryAutoPlay({ story }: StoryAutoPlayProps) {
     audioRef.current?.pause();
     setIsPlaying(false);
   }, []);
+
+  // Stop playback when the page is hidden by a navigation.
+  React.useEffect(() => pause, [pause]);
 
   const togglePlayPause = React.useCallback(async () => {
     if (isPlaying) {

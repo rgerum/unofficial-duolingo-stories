@@ -1,18 +1,14 @@
 import React, { Suspense } from "react";
-import { cookies } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
-import {
-  HIDE_STORY_QUESTIONS_COOKIE,
-  isStoryQuestionsDisabled,
-} from "@/lib/story-preferences";
 import StoryWrapper from "./story_wrapper";
-import { get_story } from "./getStory";
+import { get_story, get_story_meta } from "./getStory";
 import { get_story_cross_links } from "./getStoryCrossLinks";
 import StoryTranscript from "./StoryTranscript";
 import { getStoryDescription, getStoryTitle } from "./story_seo";
 import LocalisationProvider from "@/components/LocalisationProvider";
-import { api } from "@convex/_generated/api";
-import { fetchQuery } from "convex/nextjs";
+import { get_course_data } from "../../(main)/get_course_data";
+import { preload_course_page_data } from "../../(main)/[course_id]/get_course_page_data";
+import { preloadedQueryResult } from "convex/nextjs";
 
 // parseInt would accept alias slugs like "1abc" and serve story 1's content
 // at infinitely many crawlable URLs; only pure integer slugs may resolve.
@@ -28,9 +24,7 @@ function parseStoryId(slug: string) {
 // and Page — generateMetadata runs first, so it must redirect too or the
 // notFound there would win before Page gets a chance.
 async function resolveStoryMeta(story_id: number) {
-  const storyMeta = await fetchQuery(api.storyRead.getStoryMetaByLegacyId, {
-    storyId: story_id,
-  });
+  const storyMeta = await get_story_meta(story_id);
   if (storyMeta && "deleted" in storyMeta) {
     if (storyMeta.coursePublic && storyMeta.courseShort) {
       permanentRedirect(`/${storyMeta.courseShort}`);
@@ -39,6 +33,23 @@ async function resolveStoryMeta(story_id: number) {
   }
   if (!storyMeta) notFound();
   return storyMeta;
+}
+
+// Cache Components needs at least one real param to prerender the route.
+// Every other story is rendered on its first visit and then served from the
+// ISR cache.
+// Unlisted params wait for the full static render instead of streaming the
+// App Shell first, so notFound() and redirects keep their real status codes.
+export const ensureStatic = "navigation";
+
+export async function generateStaticParams() {
+  const [course] = await get_course_data();
+  const coursePage = course
+    ? preloadedQueryResult(await preload_course_page_data(course.short))
+    : null;
+  const story = coursePage?.stories[0];
+  if (!story) throw new Error("No public story found to prerender");
+  return [{ story_id: String(story.id) }];
 }
 
 export async function generateMetadata({
@@ -110,7 +121,6 @@ export default async function Page({
 }: {
   params: Promise<{ story_id: string }>;
 }) {
-  const cookieStore = await cookies();
   const story_id = parseStoryId((await params).story_id);
 
   const [story, crossLinks] = await Promise.all([
@@ -121,9 +131,6 @@ export default async function Page({
     await resolveStoryMeta(story_id); // redirects deleted stories, else 404s
     notFound();
   }
-  const hideStoryQuestions = isStoryQuestionsDisabled(
-    cookieStore.get(HIDE_STORY_QUESTIONS_COOKIE)?.value,
-  );
 
   // Home > Course > Story, so crawlers see where this page sits in the site
   // hierarchy. Only emitted for public courses (crossLinks is null otherwise).
@@ -185,7 +192,6 @@ export default async function Page({
             <StoryWrapper
               story={story}
               crossLinks={crossLinks}
-              hideStoryQuestions={hideStoryQuestions}
               //localization={localization}
             />
           </Suspense>

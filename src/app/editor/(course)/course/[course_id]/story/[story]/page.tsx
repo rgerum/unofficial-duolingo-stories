@@ -6,6 +6,11 @@ import { api } from "@convex/_generated/api";
 import StoryEditorPageClient from "@/app/editor/story/[story]/page_client";
 import { parseFeedbackReturnHref } from "@/app/editor/feedback/feedback_return_navigation";
 
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 function getCanonicalStoryEditorPath(courseShort: string, storyId: number) {
   return `/editor/course/${courseShort}/story/${storyId}`;
 }

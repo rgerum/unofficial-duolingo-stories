@@ -5,6 +5,8 @@ module.exports = {
     "*.tailed9e74.ts.net",
   ],
   reactCompiler: true,
+  cacheComponents: true,
+  partialPrefetching: true,
   experimental: {
     agentUpgrade: "latest",
   },

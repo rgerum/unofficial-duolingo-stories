@@ -142,6 +142,13 @@ export default function useAudio(
     };
   }, [active, element.type, enabled, playAudio]);
 
+  // Navigating away keeps the page mounted but hidden (Cache Components
+  // Activity), so stop playback explicitly when effects are cleaned up.
+  React.useEffect(() => {
+    const audioObject = ref.current;
+    return () => audioObject?.pause();
+  }, []);
+
   if (!audio?.url) {
     return [audioRange, undefined, ref, undefined] as const;
   }

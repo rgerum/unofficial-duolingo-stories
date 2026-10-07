@@ -1,6 +1,7 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { fetchQuery } from "convex/nextjs";
+import { cacheLife, cacheTag } from "next/cache";
 
 export interface CourseData {
   id: number;
@@ -18,6 +19,9 @@ export interface CourseData {
 }
 
 export async function get_course_data() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("courses");
   return await fetchQuery(api.landing.getPublicCourseList, {});
 }
 

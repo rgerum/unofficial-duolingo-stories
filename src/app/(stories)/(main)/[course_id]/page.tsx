@@ -81,6 +81,10 @@ export async function generateMetadata(
   };
 }
 
+// Unlisted params wait for the full static render instead of streaming the
+// App Shell first, so notFound() and redirects keep their real status codes.
+export const ensureStatic = "navigation";
+
 export async function generateStaticParams() {
   try {
     const courses = await get_course_data();

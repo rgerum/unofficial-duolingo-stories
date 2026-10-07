@@ -2,6 +2,7 @@ import get_localisation_func from "@/lib/get_localisation_func";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
+import { cacheLife, cacheTag } from "next/cache";
 
 export const get_localisation_dict = async (lang: number) => {
   if (!lang) return {};
@@ -21,6 +22,9 @@ const convex = new ConvexHttpClient(convexUrl);
 async function get_localisation_entries_by_convex_language_id(
   langId: Id<"languages">,
 ) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("localization");
   return await convex.query(
     api.localization.getLocalizationWithEnglishFallback,
     {
@@ -32,6 +36,9 @@ async function get_localisation_entries_by_convex_language_id(
 async function get_localisation_entries_by_legacy_language_id(
   legacyLanguageId: number,
 ) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("localization");
   return await convex.query(
     api.localization.getLocalizationByLegacyLanguageId,
     {
