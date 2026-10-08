@@ -1,10 +1,12 @@
 import unittest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import discord
 
 with patch("pathlib.Path.read_text", return_value=""):
     from discord_review_bot import (
+        ROLE_CONTRIBUTOR,
+        ROLE_MODERATOR,
         ReviewClient,
         build_ai_prompt,
         format_story_for_ai_review,
@@ -97,14 +99,23 @@ class FakeChannel:
         self.id = channel_id
 
 
-class FakeUser:
-    id = 20
+class FakeRole:
+    def __init__(self, role_id):
+        self.id = role_id
+
+
+def make_member(*role_ids):
+    """A guild member mock; passes isinstance(user, discord.Member)."""
+    member = MagicMock(spec=discord.Member)
+    member.id = 20
+    member.roles = [FakeRole(role_id) for role_id in role_ids]
+    return member
 
 
 class FakeInteraction:
-    def __init__(self, channel=None):
+    def __init__(self, channel=None, user=None):
         self.channel = channel or FakeChannel()
-        self.user = FakeUser()
+        self.user = user if user is not None else make_member(ROLE_CONTRIBUTOR)
         self.response = FakeResponse()
         self.followup = FakeFollowup()
 
@@ -163,8 +174,8 @@ class ReviewCommandTest(unittest.IsolatedAsyncioTestCase):
         await client.review_command(interaction)
 
         client.run_review.assert_not_awaited()
-        interaction.response.send_message.assert_awaited_once()
-        args, kwargs = interaction.response.send_message.await_args
+        interaction.followup.send.assert_awaited_once()
+        args, kwargs = interaction.followup.send.await_args
         self.assertIn("Which course", args[0])
         self.assertTrue(kwargs["ephemeral"])
         options = kwargs["view"].children[0].options
@@ -201,7 +212,9 @@ class ReviewCommandTest(unittest.IsolatedAsyncioTestCase):
         )
 
         client.run_review.assert_not_awaited()
-        interaction.response.send_message.assert_awaited_once()
+        interaction.followup.send.assert_awaited_once()
+        _, kwargs = interaction.followup.send.await_args
+        self.assertTrue(kwargs["ephemeral"])
 
     async def test_explicit_set_overrides_next_unpublished_default(self):
         client = ReviewClient(intents=discord.Intents.none())
@@ -223,6 +236,91 @@ class ReviewCommandTest(unittest.IsolatedAsyncioTestCase):
         client.run_review.assert_awaited_once_with(
             interaction.channel, {"courseShort": "nhe-en", "sets": [7]}
         )
+
+    async def test_dm_user_is_refused_without_starting_anything(self):
+        client = ReviewClient(intents=discord.Intents.none())
+        client.get_course_list = AsyncMock()
+        client.start_slash_payload = AsyncMock()
+        interaction = FakeInteraction(user=MagicMock(spec=discord.User))
+
+        await client.review_command(
+            interaction, "https://duostories.org/editor/story/123"
+        )
+
+        interaction.response.send_message.assert_awaited_once()
+        args, kwargs = interaction.response.send_message.await_args
+        self.assertIn("Contributor role", args[0])
+        self.assertTrue(kwargs["ephemeral"])
+        interaction.response.defer.assert_not_awaited()
+        client.get_course_list.assert_not_awaited()
+        client.start_slash_payload.assert_not_awaited()
+
+    async def test_member_without_contributor_role_is_refused(self):
+        client = ReviewClient(intents=discord.Intents.none())
+        client.get_course_list = AsyncMock()
+        client.start_slash_payload = AsyncMock()
+        interaction = FakeInteraction(user=make_member(111, 222))
+
+        await client.review_command(
+            interaction, "https://duostories.org/editor/story/123"
+        )
+
+        interaction.response.send_message.assert_awaited_once()
+        args, kwargs = interaction.response.send_message.await_args
+        self.assertIn("Contributor role", args[0])
+        self.assertTrue(kwargs["ephemeral"])
+        interaction.response.defer.assert_not_awaited()
+        client.get_course_list.assert_not_awaited()
+        client.start_slash_payload.assert_not_awaited()
+
+    async def test_moderator_role_is_allowed(self):
+        client = ReviewClient(intents=discord.Intents.none())
+        client.run_review = AsyncMock()
+        interaction = FakeInteraction(user=make_member(ROLE_MODERATOR))
+
+        await client.review_command(
+            interaction, "https://duostories.org/editor/story/123"
+        )
+
+        client.run_review.assert_awaited_once_with(
+            interaction.channel, {"storyIds": [123]}
+        )
+
+    async def test_contributor_interaction_is_deferred_before_course_fetch(self):
+        client = ReviewClient(intents=discord.Intents.none())
+        events = []
+        courses = [
+            {
+                "short": "nhe-en",
+                "name": "Nahuatl from English",
+                "learningLanguage": "Nahuatl",
+                "learningLanguageShort": "nhe",
+            }
+        ]
+
+        async def fake_defer(**kwargs):
+            events.append("defer")
+
+        async def fake_course_list():
+            events.append("get_course_list")
+            return courses
+
+        client.get_course_list = AsyncMock(side_effect=fake_course_list)
+        client.run_review = AsyncMock()
+        interaction = FakeInteraction()
+        interaction.response.defer = AsyncMock(side_effect=fake_defer)
+
+        await client.review_command(interaction)
+
+        # the interaction must be acknowledged BEFORE the (potentially slow)
+        # course-list network call, or Discord's 3s ACK window is missed
+        self.assertEqual(events, ["defer", "get_course_list"])
+        client.run_review.assert_awaited_once()
+
+    def test_review_command_is_registered_guild_only(self):
+        client = ReviewClient(intents=discord.Intents.none())
+
+        self.assertTrue(client.tree.get_command("review").guild_only)
 
 
 if __name__ == "__main__":
