@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Input from "@/components/ui/input";
@@ -36,9 +37,17 @@ export default function Page() {
               />
             </div>
           </div>
-          <Button onClick={go} disabled={!id.trim()}>
-            Open Story
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              className="underline underline-offset-2"
+              href="/admin/story/repair"
+            >
+              Open Repair View
+            </Link>
+            <Button onClick={go} disabled={!id.trim()}>
+              Open Story
+            </Button>
+          </div>
         </div>
       </div>
     </div>
