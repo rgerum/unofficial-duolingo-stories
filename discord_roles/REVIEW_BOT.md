@@ -25,6 +25,20 @@ languages, the bot replies with a private course picker. An optional target can
 be a set number (`/review target:7`) or one or more Duostories story links; these
 explicit targets take precedence over the next-unpublished default.
 
+The same process also watches the `story-issues` forum. When a new thread is
+opened there, it tries to resolve the report to a story/editor link and posts a
+short link reply when the match is high-confidence. For ambiguous reports it can
+use older story-issue reports by the same Discord author as weak language
+context; explicit language hints in the current report still win.
+
+Two global commands help moderators and contributors:
+
+- `/link hint:<optional>` can be run inside a story-issues thread to post a link
+  lookup result. The hint can be a language/course clue such as `Danish`,
+  `Danish from English`, or `da`.
+- `/link-backfill limit:<optional>` scans recent unanswered story-issues threads
+  and posts high-confidence link replies.
+
 It is a separate process from `discord_reacting_bot.py` on purpose: a crash or
 hang here must never affect role syncing.
 
@@ -43,6 +57,13 @@ AI_REVIEW_TIMEOUT_SECONDS=900    # optional
 AI_REVIEW_CONCURRENCY=1          # optional, simultaneous codex processes
 REVIEW_COOLDOWN_SECONDS=60       # optional, per-user trigger cooldown
 INTENT_TIMEOUT_SECONDS=180       # optional, intent-classification timeout
+STORY_ISSUES_CHANNEL_ID=1130203140751380571 # optional
+STORY_ISSUE_LINK_TIMEOUT_SECONDS=180        # optional
+STORY_ISSUE_AUTHOR_CONTEXT_LIMIT=50         # optional
+STORY_ISSUE_BACKFILL_LIMIT=5                # optional
+STORY_ISSUE_AUTO_MIN_CONFIDENCE=high        # optional: high|medium|low
+STORY_ISSUE_ALLOWED_ROLE_NAMES=admin administrator contributor contributors # optional
+STORY_ISSUE_ALLOWED_ROLE_IDS=...            # optional comma/space-separated role IDs
 ```
 
 Set the matching secret on the Convex prod deployment:
@@ -60,6 +81,11 @@ the service restarts.
 
 For the AI review, the `codex` CLI must be installed and authenticated for the
 user running the bot.
+
+The story-issues link matcher runs Codex through the pinned npm package
+`@openai/codex@0.150.1` via `pnpm dlx`. Keep this version in sync with
+`CODEX_CLI_PACKAGE` in `scripts/find-story-link-with-codex.ts` when upgrading
+the matcher.
 
 ## Security notes
 

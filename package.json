@@ -19,6 +19,8 @@
     "optimize:flags": "pnpm dlx svgo -f flags --multipass",
     "audit:missing-story-images": "pnpm exec tsx scripts/find-missing-story-images.ts",
     "audit:audio-keypoints": "pnpm exec tsx scripts/audit-audio-keypoints.ts",
+    "find:story-link": "pnpm exec tsx scripts/find-story-link-with-codex.ts",
+    "discord:story-links": "python3 discord_roles/list_forum_threads.py --resolve-links",
     "mobile:screenshot": "scripts/mobile-screenshot.sh",
     "backfill:discord-avatars": "pnpm exec tsx scripts/backfill-discord-avatars.ts",
     "backfill:course-contributors": "pnpm exec tsx scripts/backfill-course-contributors.ts",

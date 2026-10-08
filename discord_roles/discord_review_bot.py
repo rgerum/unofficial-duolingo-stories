@@ -17,6 +17,7 @@ import asyncio
 import json
 import os
 import re
+import subprocess
 import tempfile
 import time
 from pathlib import Path
@@ -40,9 +41,31 @@ AI_REVIEW_TIMEOUT_SECONDS = int(params.get("AI_REVIEW_TIMEOUT_SECONDS", "900"))
 AI_REVIEW_CONCURRENCY = int(params.get("AI_REVIEW_CONCURRENCY", "1"))
 REVIEW_COOLDOWN_SECONDS = int(params.get("REVIEW_COOLDOWN_SECONDS", "60"))
 INTENT_TIMEOUT_SECONDS = int(params.get("INTENT_TIMEOUT_SECONDS", "180"))
+SUPPORTED_CONFIDENCES = {"low", "medium", "high"}
+STORY_ISSUE_LINK_TIMEOUT_SECONDS = int(
+    params.get("STORY_ISSUE_LINK_TIMEOUT_SECONDS", "180")
+)
+STORY_ISSUE_AUTHOR_CONTEXT_LIMIT = int(
+    params.get("STORY_ISSUE_AUTHOR_CONTEXT_LIMIT", "50")
+)
+STORY_ISSUE_BACKFILL_LIMIT = int(params.get("STORY_ISSUE_BACKFILL_LIMIT", "5"))
+def normalize_story_issue_min_confidence(value):
+    normalized = (value or "high").lower()
+    return normalized if normalized in SUPPORTED_CONFIDENCES else "high"
+
+
+STORY_ISSUE_AUTO_MIN_CONFIDENCE = normalize_story_issue_min_confidence(
+    params.get("STORY_ISSUE_AUTO_MIN_CONFIDENCE", "high")
+)
+STORY_ISSUE_ALLOWED_ROLE_IDS = {
+    int(value)
+    for value in re.split(r"[\s,]+", params.get("STORY_ISSUE_ALLOWED_ROLE_IDS", ""))
+    if value.isdigit()
+}
 
 CHANNEL_REVIEW_REQUEST = 1114267302825824368  # "review-request" forum
 # CHANNEL_REVIEW_REQUEST = 1133167220109877280  # test channel
+CHANNEL_STORY_ISSUES = int(params.get("STORY_ISSUES_CHANNEL_ID", "1130203140751380571"))
 CHANNEL_BOT_LOG = 1133529323396145172
 
 # Stay clearly below Discord's 2000-char limit.
@@ -68,6 +91,20 @@ SECRET_VALUES = [
     for key, value in params.items()
     if value and len(value) >= 16 and SECRET_KEY_RE.search(key)
 ]
+STORY_ISSUE_ALLOWED_ROLE_NAMES = {
+    name
+    for name in (
+        re.sub(r"[^a-z0-9]+", "-", value.casefold()).strip("-")
+        for value in re.split(
+            r"[\s,]+",
+            params.get(
+                "STORY_ISSUE_ALLOWED_ROLE_NAMES",
+                "admin administrator contributor contributors",
+            ),
+        )
+    )
+    if name
+}
 
 HELP_MESSAGE = (
     "🤖 I could not work out which stories this thread is about. "
@@ -98,6 +135,83 @@ def redact(text):
 def escape_discord(text):
     """Escape markdown and link syntax in user-controlled text."""
     return re.sub(r"([\\*_~`|\[\]()<>@])", r"\\\1", text)
+
+
+def normalize_role_name(value):
+    return re.sub(r"[^a-z0-9]+", "-", (value or "").casefold()).strip("-")
+
+
+def has_story_issue_permission(user):
+    permissions = getattr(user, "guild_permissions", None)
+    if permissions and (
+        getattr(permissions, "administrator", False)
+        or getattr(permissions, "manage_guild", False)
+    ):
+        return True
+
+    for role in getattr(user, "roles", []):
+        if getattr(role, "id", None) in STORY_ISSUE_ALLOWED_ROLE_IDS:
+            return True
+        if normalize_role_name(getattr(role, "name", "")) in STORY_ISSUE_ALLOWED_ROLE_NAMES:
+            return True
+    return False
+
+
+def confidence_rank(value):
+    return {"low": 0, "medium": 1, "high": 2}.get((value or "").lower(), 0)
+
+
+def render_discord_message_summary(message):
+    if message is None:
+        return ""
+
+    parts = []
+    if message.content:
+        parts.append(message.content)
+    if message.attachments:
+        attachment_names = [
+            attachment.filename for attachment in message.attachments if attachment.filename
+        ]
+        if attachment_names:
+            parts.append(f"[attachments: {', '.join(attachment_names)}]")
+    if message.embeds:
+        embed_bits = []
+        for embed in message.embeds:
+            if getattr(embed, "title", None):
+                embed_bits.append(embed.title)
+            elif getattr(embed, "description", None):
+                embed_bits.append(embed.description)
+        if embed_bits:
+            parts.append(f"[embeds: {' | '.join(embed_bits)}]")
+    return " ".join(" ".join(parts).split())[:2000]
+
+
+def format_story_issue_link_post(match, *, automatic):
+    label = "🤖 Possible story" if automatic else "🤖 Link lookup"
+    title = escape_discord(match.get("storyTitle") or "Unknown")
+    course = escape_discord(match.get("courseShort") or "unknown")
+    story_id = match.get("storyId")
+    editor_lines = match.get("editorLines") or []
+
+    if len(editor_lines) > 1:
+        line_label = "lines " + ", ".join(str(line) for line in editor_lines)
+    elif match.get("editorLine"):
+        line_label = f"line {match['editorLine']}"
+    else:
+        line_label = "line unclear"
+
+    lines = [f"{label}: **{title}** [{course}, id {story_id}, {line_label}]"]
+    editor_links = match.get("editorLinks") or []
+    story_links = match.get("storyLinks") or []
+    if editor_links:
+        lines.append("Editor: " + " | ".join(f"<{link}>" for link in editor_links))
+    elif match.get("editorLink"):
+        lines.append(f"Editor: <{match['editorLink']}>")
+    if story_links:
+        lines.append("Story: " + " | ".join(f"<{link}>" for link in story_links))
+    elif match.get("storyLink"):
+        lines.append(f"Story: <{match['storyLink']}>")
+    return "\n".join(lines)
 
 
 def extract_story_ids(*texts):
@@ -400,6 +514,41 @@ async def run_codex(prompt, timeout, schema=None):
             return output
 
 
+def run_story_issue_link_lookup(title, body, *, hint="", context=""):
+    """Blocking link lookup. Run in a thread."""
+    command = [
+        "pnpm",
+        "exec",
+        "tsx",
+        "scripts/find-story-link-with-codex.ts",
+        "--title",
+        title,
+        "--body",
+        body,
+    ]
+    if hint:
+        command.extend(["--hint", hint])
+    if context:
+        command.extend(["--context", context])
+
+    env = {**os.environ, **params}
+    result = subprocess.run(
+        command,
+        cwd=str(Path(__file__).resolve().parent.parent),
+        text=True,
+        capture_output=True,
+        check=False,
+        timeout=STORY_ISSUE_LINK_TIMEOUT_SECONDS,
+        env=env,
+    )
+    if result.returncode != 0:
+        details = result.stderr.strip() or result.stdout.strip()
+        raise RuntimeError(
+            f"story issue link lookup failed ({result.returncode}): {details[-800:]}"
+        )
+    return json.loads(result.stdout)
+
+
 class ReviewClient(discord.Client):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -408,6 +557,14 @@ class ReviewClient(discord.Client):
             name="review",
             description="Review stories for the course in this contributor channel",
         )(self.review_command)
+        self.tree.command(
+            name="link",
+            description="Find the matching Duostories story link for this story issue",
+        )(self.link_command)
+        self.tree.command(
+            name="link-backfill",
+            description="Post story links for recent unanswered story issues",
+        )(self.link_backfill_command)
         self.active_threads = set()
         self.last_trigger_by_user = {}
         self.course_list = None
@@ -424,6 +581,126 @@ class ReviewClient(discord.Client):
             return channel.parent.id == CHANNEL_REVIEW_REQUEST
         except AttributeError:
             return False
+
+    def _is_story_issue_thread(self, channel):
+        try:
+            return channel.parent.id == CHANNEL_STORY_ISSUES
+        except AttributeError:
+            return False
+
+    async def fetch_thread_starter(self, thread):
+        try:
+            return await thread.fetch_message(thread.id)
+        except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+            try:
+                async for message in thread.history(limit=1, oldest_first=True):
+                    return message
+            except (discord.Forbidden, discord.HTTPException):
+                return None
+        return None
+
+    async def collect_story_issue_threads(self, limit):
+        channel = self.get_channel(CHANNEL_STORY_ISSUES)
+        if channel is None:
+            channel = await self.fetch_channel(CHANNEL_STORY_ISSUES)
+        if not isinstance(channel, discord.ForumChannel):
+            return []
+
+        threads = []
+        seen_ids = set()
+        for thread in sorted(
+            channel.threads,
+            key=lambda item: item.created_at or discord.utils.utcnow(),
+            reverse=True,
+        ):
+            if thread.id in seen_ids:
+                continue
+            seen_ids.add(thread.id)
+            threads.append(thread)
+            if len(threads) >= limit:
+                return threads
+
+        async for thread in channel.archived_threads(limit=max(limit - len(threads), 0)):
+            if thread.id in seen_ids:
+                continue
+            seen_ids.add(thread.id)
+            threads.append(thread)
+            if len(threads) >= limit:
+                break
+        return threads
+
+    async def build_story_issue_author_context(
+        self, current_thread, starter, *, context_threads=None
+    ):
+        if starter is None:
+            return ""
+        threads = (
+            context_threads
+            if context_threads is not None
+            else await self.collect_story_issue_threads(STORY_ISSUE_AUTHOR_CONTEXT_LIMIT)
+        )
+        reports = []
+        for thread in threads:
+            if thread.id == current_thread.id:
+                continue
+            if (
+                current_thread.created_at
+                and thread.created_at
+                and thread.created_at >= current_thread.created_at
+            ):
+                continue
+            other_starter = await self.fetch_thread_starter(thread)
+            if other_starter is None or other_starter.author.id != starter.author.id:
+                continue
+            reports.append(
+                f"- {thread.name}: {render_discord_message_summary(other_starter)}"
+            )
+            if len(reports) >= 5:
+                break
+        if not reports:
+            return ""
+        return (
+            f"Previous story-issues reports by same Discord author {starter.author}:\n"
+            + "\n".join(reports)
+        )
+
+    async def has_story_issue_link_response(self, thread):
+        try:
+            async for message in thread.history(limit=50, oldest_first=False):
+                if message.author == self.user and (
+                    "Possible story:" in message.content
+                    or "Link lookup:" in message.content
+                ):
+                    return True
+        except (discord.Forbidden, discord.HTTPException):
+            return True
+        return False
+
+    async def lookup_story_issue_thread(self, thread, *, hint="", context_threads=None):
+        starter = await self.fetch_thread_starter(thread)
+        if starter is None:
+            return None
+        body = render_discord_message_summary(starter)
+        context = await self.build_story_issue_author_context(
+            thread, starter, context_threads=context_threads
+        )
+        async with thread.typing():
+            return await asyncio.to_thread(
+                run_story_issue_link_lookup,
+                thread.name,
+                body,
+                hint=hint,
+                context=context,
+            )
+
+    def should_auto_post_story_issue_match(self, match):
+        return (
+            bool(match.get("matchFound"))
+            and isinstance(match.get("storyId"), int)
+            and bool(match.get("courseShort"))
+            and confidence_rank(match.get("confidence"))
+            >= confidence_rank(STORY_ISSUE_AUTO_MIN_CONFIDENCE)
+        )
 
     def _on_cooldown(self, user_id):
         now = time.monotonic()
@@ -449,6 +726,107 @@ class ReviewClient(discord.Client):
             self.course_list = result.get("courses", [])
             self.course_list_fetched_at = now
         return self.course_list
+
+    @app_commands.describe(hint="Optional course/language hint, e.g. Danish, Danish from English, or da")
+    async def link_command(
+        self, interaction: discord.Interaction, hint: str | None = None
+    ):
+        """Find and post a story link for the current story-issues thread."""
+        if not has_story_issue_permission(interaction.user):
+            await interaction.response.send_message(
+                "🤖 You need an admin or contributor role to use this command.",
+                ephemeral=True,
+            )
+            return
+        if not self._is_story_issue_thread(interaction.channel):
+            await interaction.response.send_message(
+                "🤖 Use `/link` inside a story-issues thread.",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        try:
+            match = await self.lookup_story_issue_thread(
+                interaction.channel, hint=hint or ""
+            )
+        except Exception as err:
+            print(err)
+            await self.log(
+                f"⚠️ story issue link lookup failed in {interaction.channel.jump_url}.\n```{redact(str(err))[:800]}```"
+            )
+            await interaction.followup.send(
+                "🤖 Link lookup failed. A moderator has been notified.",
+                ephemeral=True,
+            )
+            return
+
+        if not match or not match.get("storyId") or not match.get("courseShort"):
+            await interaction.followup.send(
+                "🤖 I could not find a defensible story link for this thread.",
+                ephemeral=True,
+            )
+            return
+        await interaction.channel.send(
+            format_story_issue_link_post(match, automatic=False),
+            suppress_embeds=True,
+        )
+        await interaction.followup.send("🤖 Link lookup posted.", ephemeral=True)
+
+    @app_commands.describe(limit="Maximum recent unanswered story-issues threads to process")
+    async def link_backfill_command(
+        self, interaction: discord.Interaction, limit: int | None = None
+    ):
+        """Post story links for recent unanswered story-issues threads."""
+        if not has_story_issue_permission(interaction.user):
+            await interaction.response.send_message(
+                "🤖 You need an admin or contributor role to use this command.",
+                ephemeral=True,
+            )
+            return
+
+        limit = max(1, min(limit or STORY_ISSUE_BACKFILL_LIMIT, 20))
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        context_window = max(limit * 4, STORY_ISSUE_AUTHOR_CONTEXT_LIMIT)
+        threads = await self.collect_story_issue_threads(context_window)
+        deadline = time.monotonic() + min(
+            840, max(30, STORY_ISSUE_LINK_TIMEOUT_SECONDS * limit + 10)
+        )
+        posted = 0
+        skipped = 0
+        failed = 0
+
+        for thread in threads:
+            if posted >= limit:
+                break
+            if time.monotonic() >= deadline:
+                break
+            if await self.has_story_issue_link_response(thread):
+                skipped += 1
+                continue
+            try:
+                match = await self.lookup_story_issue_thread(
+                    thread, context_threads=threads
+                )
+            except Exception as err:
+                failed += 1
+                print(err)
+                await self.log(
+                    f"⚠️ story issue backfill lookup failed in {thread.jump_url}.\n```{redact(str(err))[:800]}```"
+                )
+                continue
+            if not match or not self.should_auto_post_story_issue_match(match):
+                skipped += 1
+                continue
+            if await self.safe_send(
+                thread, format_story_issue_link_post(match, automatic=True)
+            ):
+                posted += 1
+
+        await interaction.followup.send(
+            f"🤖 Backfill complete: posted {posted}, skipped {skipped}, failed {failed}.",
+            ephemeral=True,
+        )
 
     @app_commands.describe(
         target="Optional set number or one or more Duostories story links"
@@ -529,6 +907,9 @@ class ReviewClient(discord.Client):
     async def on_message(self, message):
         if message.author.bot:
             return
+        if self._is_story_issue_thread(message.channel):
+            await self.handle_story_issue_message(message)
+            return
         if not self._is_review_thread(message.channel):
             return
 
@@ -566,6 +947,36 @@ class ReviewClient(discord.Client):
                 except discord.NotFound:
                     pass
             await self.handle_request(message.channel, texts, is_starter)
+        finally:
+            self.active_threads.discard(message.channel.id)
+
+    async def handle_story_issue_message(self, message):
+        is_starter = message.id == message.channel.id
+        if not is_starter:
+            return
+        if message.channel.id in self.active_threads:
+            return
+        if await self.has_story_issue_link_response(message.channel):
+            return
+
+        self.active_threads.add(message.channel.id)
+        try:
+            try:
+                match = await self.lookup_story_issue_thread(message.channel)
+            except Exception as err:
+                print(err)
+                await self.log(
+                    f"⚠️ story issue auto-link failed in {message.channel.jump_url}.\n```{redact(str(err))[:800]}```"
+                )
+                return
+            if not match or not self.should_auto_post_story_issue_match(match):
+                await self.log(
+                    f"ℹ️ no story issue auto-link for {message.channel.jump_url}: {redact(json.dumps(match or {}))[:500]}"
+                )
+                return
+            await self.safe_send(
+                message.channel, format_story_issue_link_post(match, automatic=True)
+            )
         finally:
             self.active_threads.discard(message.channel.id)
 
