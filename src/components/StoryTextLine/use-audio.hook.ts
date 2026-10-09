@@ -43,6 +43,10 @@ export default function useAudio(
       : element.learningLanguageTitleContent?.audio;
   const ref = React.useRef<HTMLAudioElement>(null);
   const cancelPlaybackRef = React.useRef<(() => void) | null>(null);
+  // Autoplay request timestamp. Kept until playback actually starts (or the
+  // request expires), so an effect cleanup that aborts the pending play()
+  // (StrictMode, hidden Activity) can retry.
+  const autoplayRequestRef = React.useRef<number | null>(null);
 
   const playAudio = React.useCallback(async () => {
     if (!enabled || !audio?.url || !ref.current) return;
@@ -65,9 +69,11 @@ export default function useAudio(
       if (e instanceof DOMException && e.name === "AbortError") {
         return;
       }
+      autoplayRequestRef.current = null;
       console.error("Failed to play audio:", e);
       return;
     }
+    autoplayRequestRef.current = null;
 
     const timeouts: number[] = [];
     let completionTimeout: number | undefined;
@@ -128,12 +134,18 @@ export default function useAudio(
     if (element.type !== "HEADER" && element.type !== "LINE") return;
 
     const raw = window.sessionStorage.getItem("story_autoplay_ts");
-    if (!raw) return;
-    const ts = Number(raw);
-    if (!Number.isFinite(ts)) return;
-    if (Date.now() - ts > 10_000) return;
+    if (raw) {
+      window.sessionStorage.removeItem("story_autoplay_ts");
+      const ts = Number(raw);
+      if (Number.isFinite(ts)) autoplayRequestRef.current = ts;
+    }
+    const requestedAt = autoplayRequestRef.current;
+    if (requestedAt === null) return;
+    if (Date.now() - requestedAt > 10_000) {
+      autoplayRequestRef.current = null;
+      return;
+    }
 
-    window.sessionStorage.removeItem("story_autoplay_ts");
     playAudio();
 
     return () => {
