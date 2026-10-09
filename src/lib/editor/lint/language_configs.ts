@@ -26,6 +26,26 @@ export type LanguageLintConfig = {
   customRules?: LintRegexRule[];
 };
 
+function chineseFullwidthRule(short: string): LintRegexRule {
+  return {
+    id: `${short}-halfwidth-punctuation`,
+    // digit-grouping commas (1,000) are fine
+    pattern: /[?!]|(?<!\d),(?!\d)/,
+    message:
+      "Chinese text usually uses the full-width punctuation ？, ！ and ，.",
+    severity: "info",
+  };
+}
+
+function arabicPunctuationRule(short: string): LintRegexRule {
+  return {
+    id: `${short}-latin-punctuation`,
+    pattern: /[?,;]/,
+    message: "Arabic script uses ؟ ، ؛ instead of the Latin ? , ;.",
+    severity: "info",
+  };
+}
+
 export const languageLintConfigs: Record<string, LanguageLintConfig> = {
   es: {
     customRules: [
@@ -71,6 +91,32 @@ export const languageLintConfigs: Record<string, LanguageLintConfig> = {
       },
     ],
   },
+  // Thai marks sentence boundaries with spaces, not punctuation.
+  th: {
+    requireTerminalPunctuation: false,
+  },
+  // sitelen pona is conventionally written without punctuation.
+  tok2: {
+    requireTerminalPunctuation: false,
+  },
+  el: {
+    customRules: [
+      {
+        id: "el-question-mark",
+        pattern: /\?/,
+        message: "Greek uses ';' as the question mark, not '?'.",
+        severity: "warning",
+      },
+    ],
+  },
+  zh: { customRules: [chineseFullwidthRule("zh")] },
+  "zh-HK": { customRules: [chineseFullwidthRule("zh-HK")] },
+  "zh-TW": { customRules: [chineseFullwidthRule("zh-TW")] },
+  ar: { customRules: [arabicPunctuationRule("ar")] },
+  apc: { customRules: [arabicPunctuationRule("apc")] },
+  arz: { customRules: [arabicPunctuationRule("arz")] },
+  fas: { customRules: [arabicPunctuationRule("fas")] },
+  prs: { customRules: [arabicPunctuationRule("prs")] },
 };
 
 export type ResolvedLintConfig = {

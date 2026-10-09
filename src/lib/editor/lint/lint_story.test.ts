@@ -394,6 +394,34 @@ Speaker414: ଲୁସି ପହଞ୍ଚିଛି।
   assert.equal(byRule(findings, "no-terminal-punctuation").length, 0);
 });
 
+test("does not require terminal punctuation for Thai", () => {
+  const findings = lint(
+    `[LINE]
+Speaker414: ลูซี่มาถึงแล้ว
+~ Lucy arrives`,
+    { learningLanguage: "th" },
+  );
+  assert.equal(byRule(findings, "no-terminal-punctuation").length, 0);
+});
+
+test("flags language-specific punctuation for Greek, Chinese and Arabic", () => {
+  const cases: [string, string, string][] = [
+    ["el", "Τι κάνεις?", "el-question-mark"],
+    ["zh", "你好吗?", "zh-halfwidth-punctuation"],
+    ["ar", "كيف حالك?", "ar-latin-punctuation"],
+  ];
+  for (const [language, line, rule] of cases) {
+    const findings = lint(`[LINE]\nSpeaker414: ${line}\n~ How are you`, {
+      learningLanguage: language,
+    });
+    assert.equal(byRule(findings, rule).length, 1, rule);
+  }
+  const ok = lint("[LINE]\nSpeaker414: Τι κάνεις;\n~ How are you", {
+    learningLanguage: "el",
+  });
+  assert.equal(byRule(ok, "el-question-mark").length, 0);
+});
+
 test("reports TODO comments and missing metadata", () => {
   const findings = lint(`# TODO record audio
 [LINE]
