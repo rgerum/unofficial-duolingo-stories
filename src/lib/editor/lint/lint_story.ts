@@ -512,12 +512,15 @@ function lintElements(
     if (element.type !== "LINE") continue;
 
     // [LINE]<en> marks a line written in another language (e.g. the base
-    // language), so learning-language rules don't apply to it
+    // language): it needs no hints and follows that language's rules
     const isOtherLanguage = Boolean(
       input.learningLanguage &&
         element.lang &&
         element.lang !== input.learningLanguage,
     );
+    const lineConfig = isOtherLanguage
+      ? resolveLanguageConfig(element.lang)
+      : config;
 
     const text = content.text;
     if (text.includes('"')) hasStraightQuotes = true;
@@ -539,7 +542,7 @@ function lintElements(
 
     const trimmed = text.trimEnd();
     if (
-      config.requireTerminalPunctuation &&
+      lineConfig.requireTerminalPunctuation &&
       trimmed.length > 0 &&
       // any Unicode punctuation or symbol counts, so scripts with their own
       // sentence marks (danda, CJK, Arabic, ...) work without configuration
@@ -566,9 +569,7 @@ function lintElements(
       });
     }
 
-    if (isOtherLanguage) continue;
-
-    for (const rule of config.customRules) {
+    for (const rule of lineConfig.customRules) {
       if (rule.pattern.test(text)) {
         findings.push({
           rule: rule.id,

@@ -422,14 +422,23 @@ test("flags language-specific punctuation for Greek, Chinese and Arabic", () => 
   assert.equal(byRule(ok, "el-question-mark").length, 0);
 });
 
-test("skips learning-language rules for lines marked with another language", () => {
+test("lines marked with another language follow that language's rules", () => {
   const findings = lint(
     `[LINE]<en>
-Speaker414: These stories are for English speakers?`,
-    { learningLanguage: "el" },
+Speaker414: These stories are for English speakers?
+
+[LINE]<en>
+Speaker414: Read on below`,
+    { learningLanguage: "th" },
   );
   assert.equal(byRule(findings, "missing-hints").length, 0);
-  assert.equal(byRule(findings, "el-question-mark").length, 0);
+  // Thai skips the check, but English lines still need final punctuation
+  assert.equal(byRule(findings, "no-terminal-punctuation").length, 1);
+
+  const greek = lint("[LINE]<en>\nSpeaker414: Is this English?", {
+    learningLanguage: "el",
+  });
+  assert.equal(byRule(greek, "el-question-mark").length, 0);
 });
 
 test("reports TODO comments and missing metadata", () => {
