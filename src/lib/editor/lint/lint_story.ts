@@ -636,7 +636,9 @@ function lintMeta(input: LintInput, findings: LintFinding[]) {
       message: "No story image set in [DATA] (icon=...).",
     });
   }
-  if (!input.meta.set_id) {
+  // set 0 is valid (introductory stories) and also the parser default, so
+  // look for the key itself
+  if (!/^\s*set(_id)?\s*=\s*\d/m.test(input.text)) {
     findings.push({
       rule: "missing-set",
       severity: "warning",

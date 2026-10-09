@@ -452,6 +452,12 @@ Speaker414: Bonjour.
   assert.equal(byRule(findings, "missing-header").length, 1);
 });
 
+test("accepts set 0 for introductory stories", () => {
+  const findings = lint(`[DATA]
+set=0|1`);
+  assert.equal(byRule(findings, "missing-set").length, 0);
+});
+
 test("a complete story passes without warnings or errors", () => {
   const findings = lint(`[DATA]
 fromLanguageName = The Story
