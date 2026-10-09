@@ -138,17 +138,16 @@ export function scanInlineTts(text: string) {
       continue;
     }
 
+    // An empty replacement (`foo{}`) silences the word, e.g. Greek elision
+    // `σ{}' ένα{σένα}`, so the merged pronunciation can sit on one word.
     const replacementRaw = segment.substring(openIndex + 1, closeIndex);
     if (!replacementRaw) {
-      errors.push(
-        createInlineTtsError(
-          "Inline TTS replacement needs spoken text inside braces",
-          segment,
-          segmentStart,
-          i,
-        ),
-      );
-      normalizedText += segment;
+      replacements.push({
+        index: normalizedText.length,
+        word: word.replace(/~/g, " "),
+        alias: "",
+      });
+      normalizedText += word + segment.substring(closeIndex + 1);
       continue;
     }
 
