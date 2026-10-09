@@ -41,7 +41,7 @@ export function generate_ssml_line(
     offset += insert.length;
   }
   for (let match of ipa_replacements) {
-    if (!match.word || !match.alias) continue;
+    if (!match.word) continue;
     if (!match.alphabet && useLiteralAliases) {
       const start = offset + match.index;
       const end = start + match.word.length;
@@ -54,7 +54,8 @@ export function generate_ssml_line(
       offset += lengthDelta;
       continue;
     }
-    let new_words = [`<sub alias="${match.alias}">`, `</sub>`];
+    // Empty alias silences the word; SSML needs a non-empty alias.
+    let new_words = [`<sub alias="${match.alias || " "}">`, `</sub>`];
     if (match.alphabet) {
       new_words = [
         `<phoneme alphabet="${match.alphabet}" ph="${match.alias}">`,

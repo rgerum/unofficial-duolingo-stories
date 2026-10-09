@@ -108,11 +108,11 @@ Speaker414: [(Nej)… (Du~har) (mange)]`);
 });
 test("LINE syntax highlighting marks invalid inline TTS replacements", () => {
   const lines = __testTokenizeLines(`[LINE]
-Speaker414: foo{} bar`);
+Speaker414: foo{bar bar`);
 
   const speakerLineTokens = lines[1] ?? [];
   const invalidToken = speakerLineTokens.find(
-    (token) => token.text === "foo{}",
+    (token) => token.text === "foo{bar",
   );
 
   assert.ok(invalidToken);
@@ -237,19 +237,12 @@ Speaker414: {bar}
   );
 });
 
-test("LINE rejects inline TTS replacements with an empty alias", () => {
+test("LINE accepts empty inline TTS replacements to silence a word", () => {
   const element = parseLine(`[LINE]
-Speaker414: foo{}
-~            bar`);
+> είναι σ{}' ένα{σένα} μαγαζί
+~ is     in   a      store`);
 
-  assert.equal(element?.type, "ERROR");
-  assert.equal(element?.errorKind, "parse");
-  assert.equal(element?.lineNumber, 2);
-  assert.equal(element?.sourceLine, "Speaker414: foo{}");
-  assert.match(
-    element?.text ?? "",
-    /Inline TTS replacement needs spoken text inside braces: "foo\{\}"/,
-  );
+  assert.notEqual(element?.type, "ERROR");
 });
 
 test("unknown blocks expose structured editor error metadata", () => {
