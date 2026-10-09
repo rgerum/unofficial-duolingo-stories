@@ -1,4 +1,3 @@
-"use no memo";
 import React from "react";
 import { Fragment } from "react/jsx-runtime";
 
@@ -177,7 +176,7 @@ function MdxTree({
   name,
   value,
   children,
-  properties,
+  properties: propertiesProp,
   position,
   attributes,
   in_editor,
@@ -195,6 +194,8 @@ function MdxTree({
   Code: any;
 }) {
   const my_components = components;
+  // copy so the normalization below doesn't mutate the parsed MDX tree
+  let properties = propertiesProp ? { ...propertiesProp } : undefined;
 
   if (type === "text") return value;
   let Element: any = my_components[tagName];

@@ -1,4 +1,3 @@
-"use no memo";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import StoryLineHints from "@/components/StoryLineHints";
@@ -82,6 +81,21 @@ async function uploadAudio(
   return res;
 }
 
+function getInitialTimingError(initialTimingText: string): string | null {
+  if (!initialTimingText) return null;
+  try {
+    const [, keypoints] = text_to_keypoints(initialTimingText);
+    return serializeTimingKeypoints(keypoints) ===
+      timing_text_without_filename(initialTimingText)
+      ? null
+      : "Existing audio timings are not canonical.";
+  } catch (cause) {
+    return cause instanceof Error && cause.message
+      ? cause.message
+      : "Existing audio timings are invalid.";
+  }
+}
+
 export default function SoundRecorder({
   content,
   initialTimingText,
@@ -111,23 +125,9 @@ export default function SoundRecorder({
   const [timingText, setTimingText] = useState(() =>
     timing_text_without_filename(initialTimingText),
   );
-  const [timingError, setTimingError] = useState<string | null>(() => {
-    if (!initialTimingText) return null;
-    try {
-      const [, keypoints] = text_to_keypoints(initialTimingText);
-      if (
-        serializeTimingKeypoints(keypoints) !==
-        timing_text_without_filename(initialTimingText)
-      ) {
-        throw new RangeError("Existing audio timings are not canonical.");
-      }
-      return null;
-    } catch (cause) {
-      return cause instanceof Error && cause.message
-        ? cause.message
-        : "Existing audio timings are invalid.";
-    }
-  });
+  const [timingError, setTimingError] = useState<string | null>(() =>
+    getInitialTimingError(initialTimingText),
+  );
 
   const parts2 = useMemo(() => {
     const parts = splitTextTokens(content.text);

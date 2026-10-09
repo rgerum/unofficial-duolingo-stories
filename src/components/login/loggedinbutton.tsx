@@ -1,5 +1,4 @@
 "use client";
-"use no memo";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";

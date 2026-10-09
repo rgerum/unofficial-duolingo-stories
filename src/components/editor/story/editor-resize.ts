@@ -1,4 +1,3 @@
-"use no memo";
 import React from "react";
 
 export default function useResizeEditor(
@@ -53,7 +52,6 @@ export default function useResizeEditor(
   React.useEffect(() => {
     if (!p) return;
 
-    p.style.cursor = "col-resize";
     p.addEventListener("mousedown", initDrag);
 
     return () => p.removeEventListener("mousedown", initDrag);

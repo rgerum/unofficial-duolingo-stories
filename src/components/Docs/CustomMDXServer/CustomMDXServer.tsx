@@ -1,4 +1,3 @@
-"use no memo";
 import React from "react";
 //import { Code } from "bright";
 import process_mdx from "./process_mdx";
