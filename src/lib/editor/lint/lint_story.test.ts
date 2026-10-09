@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 import { lintStory } from "./lint_story";
@@ -420,6 +420,16 @@ test("flags language-specific punctuation for Greek, Chinese and Arabic", () => 
     learningLanguage: "el",
   });
   assert.equal(byRule(ok, "el-question-mark").length, 0);
+});
+
+test("skips learning-language rules for lines marked with another language", () => {
+  const findings = lint(
+    `[LINE]<en>
+Speaker414: These stories are for English speakers?`,
+    { learningLanguage: "el" },
+  );
+  assert.equal(byRule(findings, "missing-hints").length, 0);
+  assert.equal(byRule(findings, "el-question-mark").length, 0);
 });
 
 test("reports TODO comments and missing metadata", () => {

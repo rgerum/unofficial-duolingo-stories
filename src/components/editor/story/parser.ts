@@ -59,8 +59,8 @@ const chalky = "#e5c07b",
 const color_even = "#009623",
   color_odd = "#00389d";
 
-import { tags } from "@lezer/highlight";
 import { HighlightStyle } from "@codemirror/language";
+import { tags } from "@lezer/highlight";
 
 let myHighlightStyle = HighlightStyle.define([
   // STATE_TRANS_EVEN
@@ -745,8 +745,13 @@ const BLOCK_FUNCS: Record<
 
 function parseBlockDef(stream: StringStream, state: State) {
   if (stream.eat("]")) {
-    state.func = BLOCK_FUNCS[state?.block?.name];
+    // an optional language override follows, e.g. [LINE]<en>
+    if (stream.peek() !== "<") state.func = BLOCK_FUNCS[state?.block?.name];
     return STATE_DEFAULT;
+  }
+  if (stream.match(/<[^>\s]+>\s*$/)) {
+    state.func = BLOCK_FUNCS[state?.block?.name];
+    return STATE_DATA_VALUE;
   }
   const match = stream.match(/[^\]]+/);
   const name =

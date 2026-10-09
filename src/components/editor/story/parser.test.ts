@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 import { __testTokenizeLines } from "./parser";
 import { processStoryFile } from "./syntax_parser_new";
@@ -607,4 +607,15 @@ Speaker414: こんにちは`,
 
   assert.equal(line.line.content.audio?.ssml.voiceKind, "human");
   assert.equal(line.line.content.audio?.ssml.speaker, testAvatars[414].speaker);
+});
+
+test("block headers accept a language override like [LINE]<en>", () => {
+  const lines = __testTokenizeLines(`[LINE]<en>
+Speaker414: Hello.`);
+
+  for (const line of lines) {
+    for (const token of line) {
+      assert.notEqual(token.style, "deleted", token.text);
+    }
+  }
 });

@@ -1,15 +1,15 @@
+import { scanInlineTts } from "@/components/editor/story/inline_tts";
 import {
   splitTextTokens,
   splitTextTokens2,
 } from "@/components/editor/story/syntax_parser_new";
-import { scanInlineTts } from "@/components/editor/story/inline_tts";
 import type {
   StoryElementHeader,
   StoryElementLine,
 } from "@/components/editor/story/syntax_parser_types";
 import {
-  resolveLanguageConfig,
   type ResolvedLintConfig,
+  resolveLanguageConfig,
 } from "./language_configs";
 import type { LintFinding, LintInput } from "./types";
 
@@ -511,11 +511,20 @@ function lintElements(
     if (audioEnabled) lintAudio(element, content, findings, missingAudioLines);
     if (element.type !== "LINE") continue;
 
+    // [LINE]<en> marks a line written in another language (e.g. the base
+    // language), so learning-language rules don't apply to it
+    const isOtherLanguage = Boolean(
+      input.learningLanguage &&
+        element.lang &&
+        element.lang !== input.learningLanguage,
+    );
+
     const text = content.text;
     if (text.includes('"')) hasStraightQuotes = true;
     if (/[“”„]/.test(text)) hasCurlyQuotes = true;
 
     if (
+      !isOtherLanguage &&
       !content.hasTranslationLine &&
       content.hintMap.length === 0 &&
       countWords(splitTextTokens(text)) > 0
@@ -556,6 +565,8 @@ function lintElements(
         lineNumber,
       });
     }
+
+    if (isOtherLanguage) continue;
 
     for (const rule of config.customRules) {
       if (rule.pattern.test(text)) {
