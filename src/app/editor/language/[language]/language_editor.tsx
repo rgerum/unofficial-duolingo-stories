@@ -1,5 +1,4 @@
 "use client";
-"use no memo";
 import React, { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -591,7 +590,7 @@ function AvatarNames({
   const [speakTextDefault, setSpeakTextDefault] = useState(
     language.default_text,
   );
-  const [stored, setStored] = useState<Record<string, HTMLAudioElement>>({});
+  const storedRef = React.useRef<Record<string, HTMLAudioElement>>({});
 
   const [pitch, setPitch] = useState(2);
   const [speed, setSpeed] = useState(2);
@@ -673,7 +672,7 @@ function AvatarNames({
     speakText = language?.default_text || "My name is $name.";
 
   function setTestPhrase(value: string) {
-    setStored({});
+    storedRef.current = {};
     setSpeakText(value);
   }
 
@@ -728,6 +727,7 @@ function AvatarNames({
     name: string,
     speakText: string,
   ) {
+    const stored = storedRef.current;
     if (stored[id] === undefined) {
       //let response2 = await fetch_post(`https://carex.uber.space/stories/audio/set_audio2.php`,
       //    {"id": 0, "speaker": text, "text": speakText.replace("$name", name)});
@@ -750,26 +750,32 @@ function AvatarNames({
       stored[id] = audio;
 
       let tt = speakText.replace("$name", name).replace(/<.*?>/g, "");
-      element = { ...element };
-      element.line.content = { ...element.line.content };
-      element.line.content.text = tt;
-      element.line.content.audio.keypoints = [];
       let audioObject = ref.current;
       if (audioObject) audioObject.src = url;
       //element.line.content.audio.url = url
       // {audioStart: 50, rangeEnd: 3}
       let last_pos = 0;
+      const keypoints = [];
       for (let marks of ssml_response.marks || []) {
         last_pos += tt.substring(last_pos).indexOf(marks.value);
-        element.line.content.audio.keypoints.push({
+        keypoints.push({
           audioStart: marks.time,
           rangeEnd: last_pos,
         });
       }
-      setElement(element);
+      setElement({
+        ...element,
+        line: {
+          ...element.line,
+          content: {
+            ...element.line.content,
+            text: tt,
+            audio: { ...element.line.content.audio, keypoints },
+          },
+        },
+      });
 
       //stored[id] = new Audio("https://carex.uber.space/stories/audio/" + ssml_response["output_file"] + "?"+Math.random());
-      setStored(stored);
     }
     let audio = stored[id];
     audio.play();
