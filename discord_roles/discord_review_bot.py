@@ -45,6 +45,10 @@ CHANNEL_REVIEW_REQUEST = 1114267302825824368  # "review-request" forum
 # CHANNEL_REVIEW_REQUEST = 1133167220109877280  # test channel
 CHANNEL_BOT_LOG = 1133529323396145172
 
+# keep in sync with discord_reacting_bot.py
+ROLE_MODERATOR = 735581436903424120
+ROLE_CONTRIBUTOR = 941815741143977994
+
 # Stay clearly below Discord's 2000-char limit.
 MESSAGE_CHUNK_LIMIT = 1900
 AI_REVIEW_MAX_CHARS = 3600
@@ -145,6 +149,10 @@ class CourseSelect(discord.ui.Select):
         )
 
     async def callback(self, interaction):
+        # This is a FRESH interaction from the select menu (not the original
+        # slash-command interaction), so it must be acknowledged itself:
+        # start_slash_payload expects an already-deferred interaction.
+        await interaction.response.defer(thinking=True)
         course = self.courses[self.values[0]]
         await self.review_client.start_slash_review(
             interaction, course, self.sets
@@ -453,10 +461,34 @@ class ReviewClient(discord.Client):
     @app_commands.describe(
         target="Optional set number or one or more Duostories story links"
     )
+    @app_commands.guild_only()
     async def review_command(
         self, interaction: discord.Interaction, target: str | None = None
     ):
         """Handle the global /review command in a contributor channel."""
+        # Only guild members with the Contributor (or Moderator) role may run
+        # reviews. In a DM interaction.user is a plain User (no roles), so the
+        # check refuses there too, even before guild_only propagates.
+        member = (
+            interaction.user
+            if isinstance(interaction.user, discord.Member)
+            else None
+        )
+        allowed = member is not None and any(
+            discord.utils.get(member.roles, id=rid)
+            for rid in (ROLE_CONTRIBUTOR, ROLE_MODERATOR)
+        )
+        if not allowed:
+            await interaction.response.send_message(
+                "You need the Contributor role to run reviews.", ephemeral=True
+            )
+            return
+
+        # Acknowledge within Discord's 3-second window BEFORE any network
+        # call: get_course_list can block for up to 120s on a cold cache.
+        # Every later reply on this interaction must use followup.send.
+        await interaction.response.defer(thinking=True)
+
         story_ids = extract_story_ids(target or "")
         if story_ids:
             await self.start_slash_payload(
@@ -470,7 +502,7 @@ class ReviewClient(discord.Client):
         if target:
             match = SET_TARGET_RE.fullmatch(target.strip())
             if not match:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "Please provide a set number (for example `7`) or Duostories story links.",
                     ephemeral=True,
                 )
@@ -481,13 +513,13 @@ class ReviewClient(discord.Client):
             getattr(interaction.channel, "name", ""), await self.get_course_list()
         )
         if not courses:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "🤖 I could not match this channel to a course. Please include story links, or use `/review` in a language contributor channel.",
                 ephemeral=True,
             )
             return
         if len(courses) > 1:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "🤖 Which course should I review?",
                 view=CourseSelectView(self, courses, sets),
                 ephemeral=True,
@@ -508,11 +540,16 @@ class ReviewClient(discord.Client):
         )
 
     async def start_slash_payload(self, interaction, payload, announcement):
+        """Run a review for an ALREADY-DEFERRED interaction.
+
+        Both callers (review_command and CourseSelect.callback) defer their
+        interaction first, so every reply here must be a followup.
+        """
         channel = interaction.channel
         if channel.id in self.active_threads or self._on_cooldown(
             interaction.user.id
         ):
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "🤖 A review is already running here, or you just started one. Please try again shortly.",
                 ephemeral=True,
             )
@@ -520,7 +557,6 @@ class ReviewClient(discord.Client):
 
         self.active_threads.add(channel.id)
         try:
-            await interaction.response.defer(thinking=True)
             await interaction.followup.send(announcement)
             await self.run_review(channel, payload)
         finally:
