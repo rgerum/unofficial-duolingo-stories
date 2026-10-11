@@ -39,7 +39,8 @@ export function scanInlineTts(text: string) {
 
   while (i < text.length) {
     const char = text[i];
-    if (isInlineTtsBoundary(char)) {
+    // `~` only reaches here when it ended a segment after a replacement.
+    if (isInlineTtsBoundary(char) || char === "~") {
       normalizedText += char;
       i += 1;
       continue;
@@ -60,6 +61,15 @@ export function scanInlineTts(text: string) {
         continue;
       }
       if (braceDepth === 0 && isInlineTtsBoundary(currentChar)) {
+        break;
+      }
+      // After a closed replacement, `~` starts a new segment so joined
+      // phrases like `jan{…}~Junjo{…}` can carry one replacement per word.
+      if (
+        braceDepth === 0 &&
+        currentChar === "~" &&
+        text.substring(segmentStart, i).includes("}")
+      ) {
         break;
       }
       i += 1;

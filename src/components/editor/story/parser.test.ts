@@ -161,6 +161,15 @@ Speaker414: ジュニア! 今日{ちゅー}|や  何{ぬー} 食{か}み欲{ぶ}
   );
 });
 
+test('LINE allows one inline TTS replacement per "~"-joined word', () => {
+  const element = parseLine(`[LINE]
+> tawa la jan{jan:ipa}~Junjo{junjo:ipa} li alasa.
+~ (context) Junior looks~for`);
+
+  assert.equal(element?.type, "LINE");
+  assert.equal(element?.line.content.text, "tawa la jan Junjo li alasa.");
+});
+
 test('LINE keeps a valid inline TTS replacement before "|"', () => {
   const element = parseLine(`[LINE]
 Speaker414: ジュニア! 今日{ちゅー}|や?
