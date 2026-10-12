@@ -525,6 +525,8 @@ def run_story_issue_link_lookup(title, body, *, hint="", context=""):
         title,
         "--body",
         body,
+        "--model",
+        CODEX_MODEL,
     ]
     if hint:
         command.extend(["--hint", hint])
