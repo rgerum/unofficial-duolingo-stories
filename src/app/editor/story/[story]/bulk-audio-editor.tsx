@@ -435,6 +435,7 @@ function BulkAudioRow({
   const [audioRange, setAudioRange] = React.useState(99999);
   const [zoomPxPerSec, setZoomPxPerSec] = React.useState(DEFAULT_WAVEFORM_ZOOM);
   const [waveformReady, setWaveformReady] = React.useState(false);
+  const [loadFailed, setLoadFailed] = React.useState(false);
   const [audioDurationMs, setAudioDurationMs] = React.useState(0);
   const [wordPlaybackHost, setWordPlaybackHost] =
     React.useState<HTMLDivElement | null>(null);
@@ -581,6 +582,7 @@ function BulkAudioRow({
 
   React.useEffect(() => {
     setWaveformReady(false);
+    setLoadFailed(false);
     if (!audioUrl) {
       setZoomPxPerSec(DEFAULT_WAVEFORM_ZOOM);
       setAudioDurationMs(0);
@@ -612,9 +614,12 @@ function BulkAudioRow({
       setAudioDurationMs(Math.round(wavesurfer.getDuration() * 1000));
     };
 
+    const onErrorEvent = () => setLoadFailed(true);
+
     wavesurfer.on("decode", onDecodeEvent);
     wavesurfer.on("timeupdate", onTimeUpdateEvent);
     wavesurfer.on("ready", onReadyEvent);
+    wavesurfer.on("error", onErrorEvent);
 
     const plugin = (wavesurfer as unknown as { plugins: RegionsPlugin[] })
       .plugins[0];
@@ -627,6 +632,7 @@ function BulkAudioRow({
       wavesurfer.un("decode", onDecodeEvent);
       wavesurfer.un("timeupdate", onTimeUpdateEvent);
       wavesurfer.un("ready", onReadyEvent);
+      wavesurfer.un("error", onErrorEvent);
       plugin?.un("region-updated", onRegionUpdatedEvent);
     };
   }, [onDecode, onRegionUpdated, onTimeUpdate, wavesurfer]);
@@ -947,6 +953,9 @@ function BulkAudioRow({
                 )
               : null}
           </div>
+          {loadFailed ? (
+            <p className="mt-2 text-xs text-[#b33b3b]">Audio failed to load.</p>
+          ) : null}
           {draft.error ? (
             <p className="mt-2 text-xs text-[#b33b3b]">{draft.error}</p>
           ) : null}
@@ -1003,12 +1012,25 @@ export default function BulkAudioEditor({
   const [copiedFlags, setCopiedFlags] = React.useState(false);
   // `seq` lets "previous" on the first line restart it from the beginning.
   const [review, setReview] = React.useState<{
-    index: number;
+    itemId: string;
     seq: number;
   } | null>(null);
   const [reviewPlaying, setReviewPlaying] = React.useState(false);
   const [reviewDone, setReviewDone] = React.useState(false);
-  const playersRef = React.useRef(new Map<string, WaveSurfer>());
+  const playersRef = React.useRef(
+    new Map<
+      string,
+      { wavesurfer: WaveSurfer; loadFailed: boolean; unsubscribe: () => void }
+    >(),
+  );
+  // Rows recreate their WaveSurfer when their audio changes; bumping this
+  // re-attaches the review listeners to the new instance.
+  const [playersVersion, setPlayersVersion] = React.useState(0);
+  const startedReviewRef = React.useRef<{
+    seq: number;
+    wavesurfer: WaveSurfer;
+  } | null>(null);
+  const playbackRateRef = React.useRef(playbackRate);
   const advanceReviewRef = React.useRef<() => void>(() => {});
 
   React.useEffect(() => {
@@ -1033,14 +1055,22 @@ export default function BulkAudioEditor({
     setAutoAllRequest(0);
     setIsPreparingFiles(false);
     setPlaybackRate(readStoredPlaybackRate());
-    setFlaggedIds(new Set());
     setReview(null);
     setReviewDone(false);
   }, [items, open]);
 
   React.useEffect(() => {
-    if (!open) setReview(null);
+    if (open) return;
+    for (const { wavesurfer } of playersRef.current.values()) {
+      wavesurfer.pause();
+    }
+    setReview(null);
+    setReviewPlaying(false);
   }, [open]);
+
+  React.useEffect(() => {
+    playbackRateRef.current = playbackRate;
+  }, [playbackRate]);
 
   const changePlaybackRate = React.useCallback((rate: number) => {
     setPlaybackRate(rate);
@@ -1062,8 +1092,29 @@ export default function BulkAudioEditor({
 
   const registerPlayer = React.useCallback(
     (itemId: string, wavesurfer: WaveSurfer | null) => {
-      if (wavesurfer) playersRef.current.set(itemId, wavesurfer);
-      else playersRef.current.delete(itemId);
+      const players = playersRef.current;
+      players.get(itemId)?.unsubscribe();
+      players.delete(itemId);
+      if (wavesurfer) {
+        const player = { wavesurfer, loadFailed: false, unsubscribe: () => {} };
+        const unsubscribers = [
+          // Only one row plays at a time, e.g. a word clicked during review.
+          wavesurfer.on("play", () => {
+            for (const [id, other] of players) {
+              if (id !== itemId) other.wavesurfer.pause();
+            }
+          }),
+          // Errors can fire before the review reaches this row.
+          wavesurfer.on("error", () => {
+            player.loadFailed = true;
+          }),
+        ];
+        player.unsubscribe = () => {
+          for (const unsubscribe of unsubscribers) unsubscribe();
+        };
+        players.set(itemId, player);
+      }
+      setPlayersVersion((current) => current + 1);
     },
     [],
   );
@@ -1253,46 +1304,60 @@ export default function BulkAudioEditor({
     [drafts, items],
   );
 
-  const reviewItem = review ? items[review.index] : undefined;
+  const reviewIndex = review
+    ? items.findIndex((item) => item.id === review.itemId)
+    : -1;
+  const reviewItem = items[reviewIndex];
 
   const startReview = React.useCallback(
     (fromIndex = 0) => {
       const first = reviewableIndices.find((index) => index >= fromIndex);
-      if (first === undefined) return;
+      const item = first === undefined ? undefined : items[first];
+      if (!item) return;
+      // Keep Space from also activating the focused "Review all" button.
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
       setReviewDone(false);
-      setReview((current) => ({ index: first, seq: (current?.seq ?? 0) + 1 }));
+      setReview((current) => ({
+        itemId: item.id,
+        seq: (current?.seq ?? 0) + 1,
+      }));
     },
-    [reviewableIndices],
+    [items, reviewableIndices],
   );
 
   const stopReview = React.useCallback(() => {
-    if (reviewItem) playersRef.current.get(reviewItem.id)?.pause();
+    if (reviewItem) playersRef.current.get(reviewItem.id)?.wavesurfer.pause();
     setReview(null);
     setReviewPlaying(false);
   }, [reviewItem]);
 
   const nextReviewLine = React.useCallback(() => {
     if (!review) return;
-    const next = reviewableIndices.find((index) => index > review.index);
-    if (next === undefined) {
+    const next = reviewableIndices.find((index) => index > reviewIndex);
+    const item = next === undefined ? undefined : items[next];
+    if (!item) {
       stopReview();
       setReviewDone(true);
       return;
     }
-    setReview({ index: next, seq: review.seq + 1 });
-  }, [review, reviewableIndices, stopReview]);
+    setReview({ itemId: item.id, seq: review.seq + 1 });
+  }, [items, review, reviewIndex, reviewableIndices, stopReview]);
 
   const previousReviewLine = React.useCallback(() => {
     if (!review) return;
-    const previous = reviewableIndices.findLast(
-      (index) => index < review.index,
-    );
-    setReview({ index: previous ?? review.index, seq: review.seq + 1 });
-  }, [review, reviewableIndices]);
+    const previous = reviewableIndices.findLast((index) => index < reviewIndex);
+    const item = previous === undefined ? undefined : items[previous];
+    setReview({ itemId: item?.id ?? review.itemId, seq: review.seq + 1 });
+  }, [items, review, reviewIndex, reviewableIndices]);
 
   const toggleReviewPlayback = React.useCallback(() => {
     if (!reviewItem) return;
-    void playersRef.current.get(reviewItem.id)?.playPause();
+    playersRef.current
+      .get(reviewItem.id)
+      ?.wavesurfer.playPause()
+      .catch(() => setReviewPlaying(false));
   }, [reviewItem]);
 
   React.useEffect(() => {
@@ -1300,16 +1365,32 @@ export default function BulkAudioEditor({
   }, [nextReviewLine]);
 
   // Play the current review line from the start and advance when it ends.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: playersVersion signals playersRef changes.
   React.useEffect(() => {
-    if (!review) return;
-    const itemId = items[review.index]?.id;
-    for (const [id, player] of playersRef.current) {
-      if (id !== itemId) player.pause();
+    if (!review) {
+      startedReviewRef.current = null;
+      return;
     }
-    const wavesurfer = itemId ? playersRef.current.get(itemId) : undefined;
-    if (!wavesurfer) return;
+    const player = playersRef.current.get(review.itemId);
+    if (!player) return;
+    const { wavesurfer } = player;
+    if (player.loadFailed) {
+      advanceReviewRef.current();
+      return;
+    }
+    // Re-running for an unrelated row's player change must not restart the line.
+    const started = startedReviewRef.current;
+    const alreadyStarted =
+      started?.seq === review.seq && started.wavesurfer === wavesurfer;
 
     const start = () => {
+      startedReviewRef.current = { seq: review.seq, wavesurfer };
+      for (const [id, player] of playersRef.current) {
+        if (id !== review.itemId) player.wavesurfer.pause();
+      }
+      // Set the rate here: a freshly loaded file starts at 1× until the row's
+      // own rate effect runs.
+      wavesurfer.setPlaybackRate(playbackRateRef.current, true);
       wavesurfer.setTime(0);
       wavesurfer.play().catch(() => setReviewPlaying(false));
     };
@@ -1317,14 +1398,18 @@ export default function BulkAudioEditor({
       wavesurfer.on("play", () => setReviewPlaying(true)),
       wavesurfer.on("pause", () => setReviewPlaying(false)),
       wavesurfer.on("finish", () => advanceReviewRef.current()),
+      // A missing or undecodable file never becomes ready; skip it.
+      wavesurfer.on("error", () => advanceReviewRef.current()),
     ];
-    if (wavesurfer.getDuration() > 0) start();
-    else unsubscribers.push(wavesurfer.once("ready", start));
+    if (!alreadyStarted) {
+      if (wavesurfer.getDuration() > 0) start();
+      else unsubscribers.push(wavesurfer.once("ready", start));
+    }
 
     return () => {
       for (const unsubscribe of unsubscribers) unsubscribe();
     };
-  }, [items, review]);
+  }, [playersVersion, review]);
 
   const flaggedItems = React.useMemo(
     () => items.filter((item) => flaggedIds.has(item.id)),
@@ -1349,8 +1434,21 @@ export default function BulkAudioEditor({
   React.useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
-      if (isTypingTarget(event.target)) return;
+      if (isTypingTarget(event.target) || event.metaKey) return;
+      const isSpeedKey = event.key === "[" || event.key === "]";
+      // Many layouts type brackets with AltGr (reported as Ctrl+Alt) or Option.
+      const hasModifier = isSpeedKey
+        ? event.ctrlKey && !event.getModifierState("AltGraph")
+        : event.ctrlKey || event.altKey;
+      if (hasModifier) return;
+      if (
+        event.repeat &&
+        event.key !== "ArrowLeft" &&
+        event.key !== "ArrowRight"
+      ) {
+        event.preventDefault();
+        return;
+      }
 
       if (event.key === "[") stepPlaybackRate(-1);
       else if (event.key === "]") stepPlaybackRate(1);
@@ -1364,8 +1462,18 @@ export default function BulkAudioEditor({
 
       event.preventDefault();
     };
+    const onKeyUp = (event: KeyboardEvent) => {
+      // Firefox activates a focused button on Space keyup.
+      if (review && event.key === " " && !isTypingTarget(event.target)) {
+        event.preventDefault();
+      }
+    };
     window.addEventListener("keydown", onKeyDown, true);
-    return () => window.removeEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
+    };
   }, [
     nextReviewLine,
     open,
@@ -1628,7 +1736,7 @@ export default function BulkAudioEditor({
                   {reviewItem.speaker ? ` · ${reviewItem.speaker}` : ""}
                 </span>
                 <span className="text-sm tabular-nums text-[var(--text-color-dim)]">
-                  {reviewableIndices.indexOf(review.index) + 1} of{" "}
+                  {reviewableIndices.indexOf(reviewIndex) + 1} of{" "}
                   {reviewableIndices.length}
                 </span>
               </div>
