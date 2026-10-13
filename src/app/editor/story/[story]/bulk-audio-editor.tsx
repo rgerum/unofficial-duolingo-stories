@@ -7,7 +7,20 @@ import WaveSurfer from "wavesurfer.js";
 import { useWavesurfer } from "@wavesurfer/react";
 import Regions from "wavesurfer.js/dist/plugins/regions.js";
 import { unzipSync } from "fflate";
-import { Volume2Icon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CheckIcon,
+  CopyIcon,
+  FlagIcon,
+  PauseIcon,
+  PlayIcon,
+  SkipBackIcon,
+  SkipForwardIcon,
+  SquareIcon,
+  Volume2Icon,
+  XIcon,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import PlayAudio from "@/components/PlayAudio";
+import { cn } from "@/lib/utils";
 import StoryLineHints from "@/components/StoryLineHints";
 import type {
   Audio,
@@ -49,6 +63,10 @@ const ZIP_MIME_TYPES = new Set([
   "multipart/x-zip",
 ]);
 const AUDIO_EXTENSIONS = new Set([".mp3", ".wav", ".m4a", ".ogg", ".aac"]);
+const PLAYBACK_RATES = [1, 1.25, 1.5, 1.75, 2] as const;
+const PLAYBACK_RATE_STORAGE_KEY = "bulk-audio-editor-playback-rate";
+const BUTTON_CLASS =
+  "inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-[var(--color_base_border)] bg-[var(--body-background-faint)] px-3 text-sm font-medium leading-none transition-colors hover:bg-[var(--color_base_background)] disabled:cursor-default disabled:opacity-60";
 
 type BulkAudioEditorDraft = {
   file: File | null;
@@ -280,6 +298,45 @@ function statusLabel(item: BulkAudioEditorItem, draft: BulkAudioEditorDraft) {
   return "Missing audio";
 }
 
+function hasAudio(item: BulkAudioEditorItem, draft?: BulkAudioEditorDraft) {
+  return Boolean(
+    draft?.localUrl || draft?.uploadedFilename || item.existingFilename,
+  );
+}
+
+function formatPlaybackRate(rate: number) {
+  return `${rate}×`;
+}
+
+function readStoredPlaybackRate() {
+  try {
+    const stored = Number(
+      window.localStorage.getItem(PLAYBACK_RATE_STORAGE_KEY),
+    );
+    return PLAYBACK_RATES.find((rate) => rate === stored) ?? 1;
+  } catch {
+    return 1;
+  }
+}
+
+function isTypingTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  return (
+    target.isContentEditable ||
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.tagName === "SELECT"
+  );
+}
+
+function Kbd({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-[var(--color_base_border)] bg-[var(--body-background)] px-1 font-sans text-[11px] font-semibold leading-none text-[var(--text-color)]">
+      {children}
+    </kbd>
+  );
+}
+
 function getParts(text: string) {
   const parts = splitTextTokens(text);
   const words: Part[] = [];
@@ -347,6 +404,12 @@ function BulkAudioRow({
   draft,
   onChange,
   autoAllRequest,
+  playbackRate,
+  isReviewing,
+  isFlagged,
+  onToggleFlag,
+  onRegisterPlayer,
+  onPlayRequest,
 }: {
   item: BulkAudioEditorItem;
   draft: BulkAudioEditorDraft;
@@ -354,7 +417,14 @@ function BulkAudioRow({
     updater: (draft: BulkAudioEditorDraft) => BulkAudioEditorDraft,
   ) => void;
   autoAllRequest: number;
+  playbackRate: number;
+  isReviewing: boolean;
+  isFlagged: boolean;
+  onToggleFlag: () => void;
+  onRegisterPlayer: (itemId: string, wavesurfer: WaveSurfer | null) => void;
+  onPlayRequest: (() => boolean) | null;
 }) {
+  const rowRef = React.useRef<HTMLDivElement | null>(null);
   const fileInputId = React.useId();
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -365,6 +435,7 @@ function BulkAudioRow({
   const [audioRange, setAudioRange] = React.useState(99999);
   const [zoomPxPerSec, setZoomPxPerSec] = React.useState(DEFAULT_WAVEFORM_ZOOM);
   const [waveformReady, setWaveformReady] = React.useState(false);
+  const [loadFailed, setLoadFailed] = React.useState(false);
   const [audioDurationMs, setAudioDurationMs] = React.useState(0);
   const [wordPlaybackHost, setWordPlaybackHost] =
     React.useState<HTMLDivElement | null>(null);
@@ -486,9 +557,34 @@ function BulkAudioRow({
   });
 
   React.useEffect(() => {
+    onRegisterPlayer(item.id, wavesurfer);
+    return () => onRegisterPlayer(item.id, null);
+  }, [item.id, onRegisterPlayer, wavesurfer]);
+
+  React.useEffect(() => {
+    // Loading a new file resets the media element's rate, so reapply once ready.
+    if (!wavesurfer || !waveformReady) return;
+    wavesurfer.setPlaybackRate(playbackRate, true);
+  }, [playbackRate, waveformReady, wavesurfer]);
+
+  React.useEffect(() => {
+    const row = rowRef.current;
+    const list = row?.closest<HTMLElement>("[data-bulk-audio-list]");
+    if (!isReviewing || !row || !list) return;
+    // scrollIntoView would also scroll the dialog's overflow-hidden wrapper.
+    const rowRect = row.getBoundingClientRect();
+    const listRect = list.getBoundingClientRect();
+    list.scrollBy({
+      top: rowRect.top - listRect.top - (listRect.height - rowRect.height) / 2,
+      behavior: "smooth",
+    });
+  }, [isReviewing]);
+
+  React.useEffect(() => {
+    setWaveformReady(false);
+    setLoadFailed(false);
     if (!audioUrl) {
       setZoomPxPerSec(DEFAULT_WAVEFORM_ZOOM);
-      setWaveformReady(false);
       setAudioDurationMs(0);
     }
   }, [audioUrl]);
@@ -505,7 +601,6 @@ function BulkAudioRow({
 
   React.useEffect(() => {
     if (!wavesurfer) return;
-    setWaveformReady(false);
 
     const onDecodeEvent = (duration: number) => {
       setWaveformReady(true);
@@ -519,9 +614,12 @@ function BulkAudioRow({
       setAudioDurationMs(Math.round(wavesurfer.getDuration() * 1000));
     };
 
+    const onErrorEvent = () => setLoadFailed(true);
+
     wavesurfer.on("decode", onDecodeEvent);
     wavesurfer.on("timeupdate", onTimeUpdateEvent);
     wavesurfer.on("ready", onReadyEvent);
+    wavesurfer.on("error", onErrorEvent);
 
     const plugin = (wavesurfer as unknown as { plugins: RegionsPlugin[] })
       .plugins[0];
@@ -534,6 +632,7 @@ function BulkAudioRow({
       wavesurfer.un("decode", onDecodeEvent);
       wavesurfer.un("timeupdate", onTimeUpdateEvent);
       wavesurfer.un("ready", onReadyEvent);
+      wavesurfer.un("error", onErrorEvent);
       plugin?.un("region-updated", onRegionUpdatedEvent);
     };
   }, [onDecode, onRegionUpdated, onTimeUpdate, wavesurfer]);
@@ -604,8 +703,9 @@ function BulkAudioRow({
   ]);
 
   const onPlayPause = React.useCallback(() => {
+    if (onPlayRequest?.()) return;
     wavesurfer?.playPause();
-  }, [wavesurfer]);
+  }, [onPlayRequest, wavesurfer]);
 
   const onZoomIn = React.useCallback(() => {
     setZoomPxPerSec((current) =>
@@ -700,7 +800,16 @@ function BulkAudioRow({
   );
 
   return (
-    <div className="border-b border-[var(--color_base_border)] px-4 py-4">
+    <div
+      ref={rowRef}
+      className={`border-b border-[var(--color_base_border)] px-4 py-4 transition-colors ${
+        isReviewing
+          ? "bg-[rgba(28,176,246,0.08)] shadow-[inset_4px_0_0_#1cb0f6]"
+          : isFlagged
+            ? "bg-[rgba(255,150,0,0.07)] shadow-[inset_4px_0_0_#ff9600]"
+            : ""
+      }`}
+    >
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-4">
           <div className="min-w-0">
@@ -711,6 +820,9 @@ function BulkAudioRow({
             <div className="text-xs text-[var(--text-color-dim)]">
               {statusLabel(item, draft)}
               {draft.matchSource ? ` · ${draft.matchSource}` : ""}
+              {isFlagged ? (
+                <span className="font-semibold text-[#c26a00]"> · Flagged</span>
+              ) : null}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-3">
@@ -758,6 +870,24 @@ function BulkAudioRow({
                 onClick={onZoomFit}
               >
                 Fit
+              </button>
+              <button
+                type="button"
+                className={`inline-flex h-7 items-center justify-center gap-1 rounded-md border px-2 leading-none transition-colors ${
+                  isFlagged
+                    ? "border-[#ff9600] bg-[#ff9600] font-semibold text-white hover:bg-[#e58700]"
+                    : "border-[var(--color_base_border)] bg-[var(--body-background-faint)] hover:bg-[var(--color_base_background)]"
+                }`}
+                onClick={onToggleFlag}
+                aria-pressed={isFlagged}
+                title={
+                  isFlagged
+                    ? "Remove flag"
+                    : "Flag this line as needing new audio"
+                }
+              >
+                <FlagIcon className="h-3.5 w-3.5" />
+                {isFlagged ? "Flagged" : "Flag"}
               </button>
             </div>
           </div>
@@ -823,6 +953,9 @@ function BulkAudioRow({
                 )
               : null}
           </div>
+          {loadFailed ? (
+            <p className="mt-2 text-xs text-[#b33b3b]">Audio failed to load.</p>
+          ) : null}
           {draft.error ? (
             <p className="mt-2 text-xs text-[#b33b3b]">{draft.error}</p>
           ) : null}
@@ -872,6 +1005,33 @@ export default function BulkAudioEditor({
   const [isApplying, setIsApplying] = React.useState(false);
   const [isPreparingFiles, setIsPreparingFiles] = React.useState(false);
   const [autoAllRequest, setAutoAllRequest] = React.useState(0);
+  const [playbackRate, setPlaybackRate] = React.useState(1);
+  const [flaggedIds, setFlaggedIds] = React.useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  const [copiedFlags, setCopiedFlags] = React.useState(false);
+  // `seq` lets "previous" on the first line restart it from the beginning.
+  const [review, setReview] = React.useState<{
+    itemId: string;
+    seq: number;
+  } | null>(null);
+  const [reviewPlaying, setReviewPlaying] = React.useState(false);
+  const [reviewDone, setReviewDone] = React.useState(false);
+  const playersRef = React.useRef(
+    new Map<
+      string,
+      { wavesurfer: WaveSurfer; loadFailed: boolean; unsubscribe: () => void }
+    >(),
+  );
+  // Rows recreate their WaveSurfer when their audio changes; bumping this
+  // re-attaches the review listeners to the new instance.
+  const [playersVersion, setPlayersVersion] = React.useState(0);
+  const startedReviewRef = React.useRef<{
+    seq: number;
+    wavesurfer: WaveSurfer;
+  } | null>(null);
+  const playbackRateRef = React.useRef(playbackRate);
+  const advanceReviewRef = React.useRef<() => void>(() => {});
 
   React.useEffect(() => {
     draftsRef.current = drafts;
@@ -894,7 +1054,80 @@ export default function BulkAudioEditor({
     setApplyError(null);
     setAutoAllRequest(0);
     setIsPreparingFiles(false);
+    setPlaybackRate(readStoredPlaybackRate());
+    setReview(null);
+    setReviewDone(false);
   }, [items, open]);
+
+  React.useEffect(() => {
+    if (open) return;
+    for (const { wavesurfer } of playersRef.current.values()) {
+      wavesurfer.pause();
+    }
+    setReview(null);
+    setReviewPlaying(false);
+  }, [open]);
+
+  React.useEffect(() => {
+    playbackRateRef.current = playbackRate;
+  }, [playbackRate]);
+
+  const changePlaybackRate = React.useCallback((rate: number) => {
+    setPlaybackRate(rate);
+    try {
+      window.localStorage.setItem(PLAYBACK_RATE_STORAGE_KEY, String(rate));
+    } catch {
+      // Storage can be unavailable (private mode); the rate still applies.
+    }
+  }, []);
+
+  const stepPlaybackRate = React.useCallback(
+    (direction: 1 | -1) => {
+      const index = PLAYBACK_RATES.findIndex((rate) => rate === playbackRate);
+      const next = PLAYBACK_RATES[index + direction];
+      if (next !== undefined) changePlaybackRate(next);
+    },
+    [changePlaybackRate, playbackRate],
+  );
+
+  const registerPlayer = React.useCallback(
+    (itemId: string, wavesurfer: WaveSurfer | null) => {
+      const players = playersRef.current;
+      players.get(itemId)?.unsubscribe();
+      players.delete(itemId);
+      if (wavesurfer) {
+        const player = { wavesurfer, loadFailed: false, unsubscribe: () => {} };
+        const unsubscribers = [
+          // Only one row plays at a time, e.g. a word clicked during review.
+          wavesurfer.on("play", () => {
+            for (const [id, other] of players) {
+              if (id !== itemId) other.wavesurfer.pause();
+            }
+          }),
+          // Errors can fire before the review reaches this row.
+          wavesurfer.on("error", () => {
+            player.loadFailed = true;
+          }),
+        ];
+        player.unsubscribe = () => {
+          for (const unsubscribe of unsubscribers) unsubscribe();
+        };
+        players.set(itemId, player);
+      }
+      setPlayersVersion((current) => current + 1);
+    },
+    [],
+  );
+
+  const toggleFlag = React.useCallback((itemId: string) => {
+    setCopiedFlags(false);
+    setFlaggedIds((current) => {
+      const next = new Set(current);
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
+      return next;
+    });
+  }, []);
 
   const updateDraft = React.useCallback(
     (
@@ -1063,6 +1296,197 @@ export default function BulkAudioEditor({
     [drafts, items],
   );
 
+  const reviewableIndices = React.useMemo(
+    () =>
+      items.flatMap((item, index) =>
+        hasAudio(item, drafts[item.id]) ? [index] : [],
+      ),
+    [drafts, items],
+  );
+
+  const reviewIndex = review
+    ? items.findIndex((item) => item.id === review.itemId)
+    : -1;
+  const reviewItem = items[reviewIndex];
+
+  const startReview = React.useCallback(
+    (fromIndex = 0) => {
+      const first = reviewableIndices.find((index) => index >= fromIndex);
+      const item = first === undefined ? undefined : items[first];
+      if (!item) return;
+      // Keep Space from also activating the focused "Review all" button.
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      setReviewDone(false);
+      setReview((current) => ({
+        itemId: item.id,
+        seq: (current?.seq ?? 0) + 1,
+      }));
+    },
+    [items, reviewableIndices],
+  );
+
+  const stopReview = React.useCallback(() => {
+    if (reviewItem) playersRef.current.get(reviewItem.id)?.wavesurfer.pause();
+    setReview(null);
+    setReviewPlaying(false);
+  }, [reviewItem]);
+
+  const nextReviewLine = React.useCallback(() => {
+    if (!review) return;
+    const next = reviewableIndices.find((index) => index > reviewIndex);
+    const item = next === undefined ? undefined : items[next];
+    if (!item) {
+      stopReview();
+      setReviewDone(true);
+      return;
+    }
+    setReview({ itemId: item.id, seq: review.seq + 1 });
+  }, [items, review, reviewIndex, reviewableIndices, stopReview]);
+
+  const previousReviewLine = React.useCallback(() => {
+    if (!review) return;
+    const previous = reviewableIndices.findLast((index) => index < reviewIndex);
+    const item = previous === undefined ? undefined : items[previous];
+    setReview({ itemId: item?.id ?? review.itemId, seq: review.seq + 1 });
+  }, [items, review, reviewIndex, reviewableIndices]);
+
+  const toggleReviewPlayback = React.useCallback(() => {
+    if (!reviewItem) return;
+    playersRef.current
+      .get(reviewItem.id)
+      ?.wavesurfer.playPause()
+      .catch(() => setReviewPlaying(false));
+  }, [reviewItem]);
+
+  React.useEffect(() => {
+    advanceReviewRef.current = nextReviewLine;
+  }, [nextReviewLine]);
+
+  // Play the current review line from the start and advance when it ends.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: playersVersion signals playersRef changes.
+  React.useEffect(() => {
+    if (!review) {
+      startedReviewRef.current = null;
+      return;
+    }
+    const player = playersRef.current.get(review.itemId);
+    if (!player) return;
+    const { wavesurfer } = player;
+    if (player.loadFailed) {
+      advanceReviewRef.current();
+      return;
+    }
+    // Re-running for an unrelated row's player change must not restart the line.
+    const started = startedReviewRef.current;
+    const alreadyStarted =
+      started?.seq === review.seq && started.wavesurfer === wavesurfer;
+
+    const start = () => {
+      startedReviewRef.current = { seq: review.seq, wavesurfer };
+      for (const [id, player] of playersRef.current) {
+        if (id !== review.itemId) player.wavesurfer.pause();
+      }
+      // Set the rate here: a freshly loaded file starts at 1× until the row's
+      // own rate effect runs.
+      wavesurfer.setPlaybackRate(playbackRateRef.current, true);
+      wavesurfer.setTime(0);
+      wavesurfer.play().catch(() => setReviewPlaying(false));
+    };
+    const unsubscribers = [
+      wavesurfer.on("play", () => setReviewPlaying(true)),
+      wavesurfer.on("pause", () => setReviewPlaying(false)),
+      wavesurfer.on("finish", () => advanceReviewRef.current()),
+      // A missing or undecodable file never becomes ready; skip it.
+      wavesurfer.on("error", () => advanceReviewRef.current()),
+    ];
+    if (!alreadyStarted) {
+      // The previous line's pause event fired after its listeners were removed.
+      setReviewPlaying(false);
+      if (wavesurfer.getDuration() > 0) start();
+      else unsubscribers.push(wavesurfer.once("ready", start));
+    }
+
+    return () => {
+      for (const unsubscribe of unsubscribers) unsubscribe();
+    };
+  }, [playersVersion, review]);
+
+  const flaggedItems = React.useMemo(
+    () => items.filter((item) => flaggedIds.has(item.id)),
+    [flaggedIds, items],
+  );
+
+  const copyFlaggedLines = React.useCallback(async () => {
+    const text = flaggedItems
+      .map(
+        (item) =>
+          `${rowLabel(item)}${item.speaker ? ` (${item.speaker})` : ""}: ${item.content.text}`,
+      )
+      .join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedFlags(true);
+    } catch {
+      setApplyError("Could not copy to the clipboard.");
+    }
+  }, [flaggedItems]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (isTypingTarget(event.target) || event.metaKey) return;
+      const isSpeedKey = event.key === "[" || event.key === "]";
+      // Many layouts type brackets with AltGr (reported as Ctrl+Alt) or Option.
+      const hasModifier = isSpeedKey
+        ? event.ctrlKey && !event.getModifierState("AltGraph")
+        : event.ctrlKey || event.altKey;
+      if (hasModifier) return;
+      if (
+        event.repeat &&
+        event.key !== "ArrowLeft" &&
+        event.key !== "ArrowRight"
+      ) {
+        event.preventDefault();
+        return;
+      }
+
+      if (event.key === "[") stepPlaybackRate(-1);
+      else if (event.key === "]") stepPlaybackRate(1);
+      else if (!review) return;
+      else if (event.key === " ") toggleReviewPlayback();
+      else if (event.key === "ArrowRight") nextReviewLine();
+      else if (event.key === "ArrowLeft") previousReviewLine();
+      else if (event.key === "f" || event.key === "F") {
+        if (reviewItem) toggleFlag(reviewItem.id);
+      } else return;
+
+      event.preventDefault();
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      // Firefox activates a focused button on Space keyup.
+      if (review && event.key === " " && !isTypingTarget(event.target)) {
+        event.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
+    };
+  }, [
+    nextReviewLine,
+    open,
+    previousReviewLine,
+    review,
+    reviewItem,
+    stepPlaybackRate,
+    toggleFlag,
+    toggleReviewPlayback,
+  ]);
+
   const uploadPendingFiles = React.useCallback(async () => {
     const pendingItems = items.filter((item) => {
       const draft = draftsRef.current[item.id];
@@ -1164,6 +1588,11 @@ export default function BulkAudioEditor({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={true}
+        onEscapeKeyDown={(event) => {
+          if (!review) return;
+          event.preventDefault();
+          stopReview();
+        }}
         className="inset-2 h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-w-none translate-x-0 translate-y-0 overflow-hidden p-0 sm:top-2 sm:left-2 sm:max-w-none sm:translate-x-0 sm:translate-y-0"
       >
         <div className="flex min-h-full min-w-[1100px] flex-col bg-[var(--body-background)]">
@@ -1231,10 +1660,193 @@ export default function BulkAudioEditor({
                 Unmatched: {unmatchedFiles.join(", ")}
               </div>
             ) : null}
+            {flaggedItems.length > 0 ? (
+              <div className="flex items-center gap-2 text-sm font-medium text-[#c26a00]">
+                <FlagIcon className="h-3.5 w-3.5" />
+                {flaggedItems.length} flagged
+                <button
+                  type="button"
+                  className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 text-xs font-medium text-[var(--text-color-dim)] transition-colors hover:bg-[var(--color_base_background)] hover:text-[var(--text-color)]"
+                  onClick={() => {
+                    void copyFlaggedLines();
+                  }}
+                  title="Copy the flagged lines to send to the speaker"
+                >
+                  {copiedFlags ? (
+                    <CheckIcon className="h-3.5 w-3.5" />
+                  ) : (
+                    <CopyIcon className="h-3.5 w-3.5" />
+                  )}
+                  {copiedFlags ? "Copied" : "Copy list"}
+                </button>
+              </div>
+            ) : null}
+            <div className="ml-auto flex items-center gap-3">
+              <div
+                role="group"
+                aria-label="Playback speed"
+                className="flex items-center gap-2"
+                title="Playback speed (shortcuts: [ and ])"
+              >
+                <span className="text-sm text-[var(--text-color-dim)]">
+                  Speed
+                </span>
+                <div className="inline-flex h-9 overflow-hidden rounded-md border border-[var(--color_base_border)]">
+                  {PLAYBACK_RATES.map((rate) => (
+                    <button
+                      key={rate}
+                      type="button"
+                      aria-pressed={rate === playbackRate}
+                      className={`border-l border-[var(--color_base_border)] px-2.5 text-sm tabular-nums leading-none transition-colors first:border-l-0 ${
+                        rate === playbackRate
+                          ? "bg-[#1cb0f6] font-semibold text-white"
+                          : "bg-[var(--body-background-faint)] hover:bg-[var(--color_base_background)]"
+                      }`}
+                      onClick={() => changePlaybackRate(rate)}
+                    >
+                      {formatPlaybackRate(rate)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button
+                type="button"
+                className={BUTTON_CLASS}
+                onClick={() => (review ? stopReview() : startReview())}
+                disabled={!review && reviewableIndices.length === 0}
+                title={
+                  review
+                    ? "Stop the review"
+                    : "Play every line in order to listen through the story"
+                }
+              >
+                {review ? (
+                  <SquareIcon className="h-3.5 w-3.5" />
+                ) : (
+                  <PlayIcon className="h-4 w-4" />
+                )}
+                {review ? "Stop review" : "Review all"}
+              </button>
+            </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-auto">
-            {items.map((item) => {
+          {review && reviewItem ? (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[var(--color_base_border)] bg-[rgba(28,176,246,0.08)] px-4 py-2.5">
+              <div className="flex items-baseline gap-2">
+                <span className="text-sm font-semibold text-[var(--text-color)]">
+                  {rowLabel(reviewItem)}
+                  {reviewItem.speaker ? ` · ${reviewItem.speaker}` : ""}
+                </span>
+                <span className="text-sm tabular-nums text-[var(--text-color-dim)]">
+                  {reviewableIndices.indexOf(reviewIndex) + 1} of{" "}
+                  {reviewableIndices.length}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  className={cn(BUTTON_CLASS, "h-8 w-8 px-0")}
+                  onClick={previousReviewLine}
+                  title="Previous line (←)"
+                  aria-label="Previous line"
+                >
+                  <SkipBackIcon className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#0f5f83] bg-[#1cb0f6] text-white transition-colors hover:bg-[#1598d7]"
+                  onClick={toggleReviewPlayback}
+                  title={reviewPlaying ? "Pause (Space)" : "Play (Space)"}
+                  aria-label={reviewPlaying ? "Pause" : "Play"}
+                >
+                  {reviewPlaying ? (
+                    <PauseIcon className="h-4 w-4" />
+                  ) : (
+                    <PlayIcon className="h-4 w-4" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className={cn(BUTTON_CLASS, "h-8 w-8 px-0")}
+                  onClick={nextReviewLine}
+                  title="Next line (→)"
+                  aria-label="Next line"
+                >
+                  <SkipForwardIcon className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  className={`ml-1.5 inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-sm font-medium leading-none transition-colors ${
+                    flaggedIds.has(reviewItem.id)
+                      ? "border-[#ff9600] bg-[#ff9600] text-white hover:bg-[#e58700]"
+                      : "border-[var(--color_base_border)] bg-[var(--body-background-faint)] hover:bg-[var(--color_base_background)]"
+                  }`}
+                  onClick={() => toggleFlag(reviewItem.id)}
+                  aria-pressed={flaggedIds.has(reviewItem.id)}
+                  title="Flag this line as needing new audio (F)"
+                >
+                  <FlagIcon className="h-3.5 w-3.5" />
+                  {flaggedIds.has(reviewItem.id) ? "Flagged" : "Flag line"}
+                </button>
+              </div>
+              <div className="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--text-color-dim)]">
+                <span className="flex items-center gap-1">
+                  <Kbd>Space</Kbd> pause
+                </span>
+                <span className="flex items-center gap-1">
+                  <Kbd>
+                    <ArrowLeftIcon className="h-3 w-3" />
+                  </Kbd>
+                  <Kbd>
+                    <ArrowRightIcon className="h-3 w-3" />
+                  </Kbd>{" "}
+                  previous / next
+                </span>
+                <span className="flex items-center gap-1">
+                  <Kbd>F</Kbd> flag
+                </span>
+                <span className="flex items-center gap-1">
+                  <Kbd>[</Kbd>
+                  <Kbd>]</Kbd> speed
+                </span>
+                <span className="flex items-center gap-1">
+                  <Kbd>Esc</Kbd> stop
+                </span>
+              </div>
+            </div>
+          ) : reviewDone ? (
+            <div className="flex flex-wrap items-center gap-3 border-b border-[var(--color_base_border)] bg-[rgba(88,204,2,0.1)] px-4 py-2.5">
+              <CheckIcon className="h-4 w-4 text-[#58a700]" />
+              <span className="text-sm font-semibold text-[var(--text-color)]">
+                Review finished
+              </span>
+              <span className="text-sm text-[var(--text-color-dim)]">
+                {flaggedItems.length === 0
+                  ? "No lines flagged."
+                  : `${flaggedItems.length} line${flaggedItems.length === 1 ? "" : "s"} flagged.`}
+              </span>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  type="button"
+                  className={cn(BUTTON_CLASS, "h-8")}
+                  onClick={() => startReview()}
+                >
+                  Review again
+                </button>
+                <button
+                  type="button"
+                  className={cn(BUTTON_CLASS, "h-8 w-8 px-0")}
+                  onClick={() => setReviewDone(false)}
+                  aria-label="Dismiss"
+                >
+                  <XIcon className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          <div data-bulk-audio-list className="min-h-0 flex-1 overflow-auto">
+            {items.map((item, index) => {
               const draft = drafts[item.id];
               if (!draft) return null;
               return (
@@ -1244,6 +1856,19 @@ export default function BulkAudioEditor({
                   draft={draft}
                   autoAllRequest={autoAllRequest}
                   onChange={(updater) => updateDraft(item.id, updater)}
+                  playbackRate={playbackRate}
+                  isReviewing={reviewItem?.id === item.id}
+                  isFlagged={flaggedIds.has(item.id)}
+                  onToggleFlag={() => toggleFlag(item.id)}
+                  onRegisterPlayer={registerPlayer}
+                  onPlayRequest={
+                    review && reviewItem?.id !== item.id
+                      ? () => {
+                          startReview(index);
+                          return true;
+                        }
+                      : null
+                  }
                 />
               );
             })}
