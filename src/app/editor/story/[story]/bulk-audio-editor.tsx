@@ -1402,6 +1402,8 @@ export default function BulkAudioEditor({
       wavesurfer.on("error", () => advanceReviewRef.current()),
     ];
     if (!alreadyStarted) {
+      // The previous line's pause event fired after its listeners were removed.
+      setReviewPlaying(false);
       if (wavesurfer.getDuration() > 0) start();
       else unsubscribers.push(wavesurfer.once("ready", start));
     }
