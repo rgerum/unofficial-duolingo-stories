@@ -6,7 +6,7 @@ import { join, resolve } from "node:path";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { api } from "../convex/_generated/api";
 
-const CODEX_CLI_PACKAGE = "@openai/codex@0.150.1";
+const CODEX_CLI_PACKAGE = "@openai/codex@0.162.1";
 const REVIEW_ENDPOINT_TIMEOUT_MS = 30_000;
 
 type Confidence = "high" | "medium" | "low";

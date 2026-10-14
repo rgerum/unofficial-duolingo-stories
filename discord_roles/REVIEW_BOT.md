@@ -51,7 +51,7 @@ DISCORD_TOKEN=...                # bot token (may be the same bot user)
 CONVEX_REVIEW_URL=https://posh-caribou-319.convex.site/discord/review-stories
 DISCORD_REVIEW_SECRET=...        # must match the Convex env var of the same name
 ENABLE_AI_REVIEW=0               # set to 1 once the Codex CLI is set up
-CODEX_MODEL=gpt-5.5              # optional
+CODEX_MODEL=gpt-6.1-sol          # optional
 AI_REVIEW_MAX_STORIES=3          # optional, AI reviews per thread
 AI_REVIEW_TIMEOUT_SECONDS=900    # optional
 AI_REVIEW_CONCURRENCY=1          # optional, simultaneous codex processes
@@ -83,7 +83,7 @@ For the AI review, the `codex` CLI must be installed and authenticated for the
 user running the bot.
 
 The story-issues link matcher runs Codex through the pinned npm package
-`@openai/codex@0.150.1` via `pnpm dlx`. Keep this version in sync with
+`@openai/codex@0.162.1` via `pnpm dlx`. Keep this version in sync with
 `CODEX_CLI_PACKAGE` in `scripts/find-story-link-with-codex.ts` when upgrading
 the matcher.
 
