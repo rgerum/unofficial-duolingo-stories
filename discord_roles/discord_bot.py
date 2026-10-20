@@ -104,17 +104,17 @@ def set_user_roles(sync_rows):
                 channel = bot.get_channel(CHANNEL_BOT_LOG)
                 await channel.send(message)
 
-        # Event triggered when the bot is ready
-        @bot.event
-        async def on_ready():
+        # Returns True when every role was handled and the snapshots reached
+        # Convex. Failed role operations are still uploaded (as "error"
+        # snapshots) but count as a failed run, so the next tick retries.
+        async def assign_roles():
             print(f'Logged in as {bot.user.name}')
 
             # Fetch the server (guild) from its ID
             guild = bot.get_guild(GUILD_ID)
             if guild is None:
                 print('Guild not found')
-                await bot.close()
-                return
+                return False
 
             # Fetch the role from its ID
             roles = {k: guild.get_role(v) for k, v in ROLE_ID.items()}
@@ -194,10 +194,21 @@ def set_user_roles(sync_rows):
                         )
                     )
 
+            if snapshots:
+                await asyncio.to_thread(sync_stories_role_status, snapshots)
+            return not any(
+                snapshot["syncStatus"] == "error" for snapshot in snapshots
+            )
+
+        # Event triggered when the bot is ready. discord.py swallows exceptions
+        # raised in event handlers, so catch them here and always disconnect:
+        # otherwise bot.run() keeps the run alive until RuntimeMaxSec.
+        @bot.event
+        async def on_ready():
             try:
-                if snapshots:
-                    await asyncio.to_thread(sync_stories_role_status, snapshots)
-                result["synced"] = True
+                result["synced"] = await assign_roles()
+            except Exception as err:
+                print(f"role sync failed: {err}")
             finally:
                 await bot.close()
 

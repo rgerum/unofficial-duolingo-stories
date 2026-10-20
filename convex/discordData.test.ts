@@ -7,7 +7,7 @@ import schema from "./schema";
 const modules = import.meta.glob("./**/*.ts");
 
 describe("getRoleSyncChangeMarker", () => {
-  test("tracks the newest approval, including revokes", async () => {
+  test("tracks the newest approval by insertion, including revokes", async () => {
     const t = convexTest(schema, modules);
     expect(
       await t.query(internal.discordData.getRoleSyncChangeMarker, {}),
@@ -38,26 +38,31 @@ describe("getRoleSyncChangeMarker", () => {
         status: "finished",
         todo_count: 0,
       });
+      // Future-dated: must not mask the approval inserted after it.
       const olderId = await ctx.db.insert("story_approval", {
         storyId,
         legacyUserId: 1,
-        date: 1000,
+        date: 9_999_999_999_999,
       });
       const newerId = await ctx.db.insert("story_approval", {
         storyId,
         legacyUserId: 2,
-        date: 2000,
+        date: 1000,
       });
       return { olderId, newerId };
     });
 
-    expect(
-      await t.query(internal.discordData.getRoleSyncChangeMarker, {}),
-    ).toBe(`${newerId}:2000`);
+    const marker = await t.query(
+      internal.discordData.getRoleSyncChangeMarker,
+      {},
+    );
+    expect(marker.startsWith(`${newerId}:`)).toBe(true);
 
     await t.run(async (ctx) => ctx.db.delete(newerId));
-    expect(
-      await t.query(internal.discordData.getRoleSyncChangeMarker, {}),
-    ).toBe(`${olderId}:1000`);
+    const afterRevoke = await t.query(
+      internal.discordData.getRoleSyncChangeMarker,
+      {},
+    );
+    expect(afterRevoke.startsWith(`${olderId}:`)).toBe(true);
   });
 });

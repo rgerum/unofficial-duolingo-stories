@@ -192,8 +192,10 @@ export const getPublicStoryIdsPage = internalQuery({
  *
  * Story sets are published by approvals (storyApproval.toggleStoryApproval),
  * and approvals themselves count towards the roles, so the newest approval is
- * the signal. Revoking the newest approval deletes it, which changes the
- * marker too. Rarer changes (admin publish toggles, story edits that shift
+ * the signal. "Newest" by `_creationTime`, not the approval `date`: callers
+ * can set `date` (upsertStoryApproval), so a future-dated row would otherwise
+ * mask every later approval. Revoking the newest approval deletes it, which
+ * changes the marker too. Rarer changes (admin publish toggles, story edits that shift
  * authorship, newly linked Discord accounts) are left to the bot's daily
  * full sync.
  */
@@ -201,12 +203,8 @@ export const getRoleSyncChangeMarker = internalQuery({
   args: {},
   returns: v.string(),
   handler: async (ctx) => {
-    const latest = await ctx.db
-      .query("story_approval")
-      .withIndex("by_date")
-      .order("desc")
-      .first();
-    return latest ? `${latest._id}:${latest.date}` : "none";
+    const latest = await ctx.db.query("story_approval").order("desc").first();
+    return latest ? `${latest._id}:${latest._creationTime}` : "none";
   },
 });
 
