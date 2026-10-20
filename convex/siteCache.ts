@@ -1,9 +1,11 @@
 import { v } from "convex/values";
 import { env, internalAction } from "./_generated/server";
 
-// Story pages on the Next.js site are cached (Cache Components) and otherwise
-// refresh hourly. This clears them right away after an edit. Best-effort: a
-// failure only means readers see the old version until the hourly refresh.
+// Pages on the Next.js site are cached (Cache Components) and otherwise only
+// refresh on a slow fallback schedule (weekly for story pages, hourly for
+// course pages and lists). This clears them right away after an edit.
+// Best-effort: a failure means readers see the old version until that
+// fallback refresh.
 export const revalidate = internalAction({
   args: { tags: v.array(v.string()) },
   returns: v.null(),

@@ -1,8 +1,12 @@
+import { cache } from "react";
 import { fetchQuery } from "convex/nextjs";
 import { cacheLife, cacheTag } from "next/cache";
 import { api } from "@convex/_generated/api";
 
-export async function get_story_cross_links(story_id: number) {
+// Neighbouring stories change when a story of the same course is published,
+// renamed, reordered or deleted; those writes revalidate
+// `course-links-<short>` (see getStory.ts for the caching rationale).
+async function get_story_cross_links_cached(story_id: number) {
   "use cache";
   cacheTag(`story-${story_id}`);
   try {
@@ -10,7 +14,14 @@ export async function get_story_cross_links(story_id: number) {
       api.storyCrossLinks.getStoryCrossLinks,
       { storyId: story_id },
     );
-    cacheLife("hours");
+    if (crossLinks) {
+      cacheTag(`course-links-${crossLinks.course.short}`);
+      cacheLife("weeks");
+    } else {
+      // No course short to tag (e.g. the course isn't public yet), so fall
+      // back to a shorter refresh. Only affects noindexed private stories.
+      cacheLife("days");
+    }
     return crossLinks;
   } catch (error) {
     // The block is an enhancement — never let it take down the story page.
@@ -22,6 +33,8 @@ export async function get_story_cross_links(story_id: number) {
     return null;
   }
 }
+
+export const get_story_cross_links = cache(get_story_cross_links_cached);
 
 export type StoryCrossLinksData = NonNullable<
   Awaited<ReturnType<typeof get_story_cross_links>>

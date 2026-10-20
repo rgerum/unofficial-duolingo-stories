@@ -271,7 +271,9 @@ export const toggleStoryApproval = mutation({
       await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
         tags: [
           ...published.map((id) => `story-${id}`),
-          ...(course?.short ? [`course-${course.short}`] : []),
+          ...(course?.short
+            ? [`course-${course.short}`, `course-links-${course.short}`]
+            : []),
           "recent",
         ],
       });

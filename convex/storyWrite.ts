@@ -187,14 +187,23 @@ export const setStory = mutation({
     }
 
     // Published stories also appear in their course's story list; a move
-    // changes both the old and the new course page.
+    // changes both the old and the new course page. The neighbouring story
+    // pages link to this one by name and position, so they only need a
+    // refresh when one of those changes.
     const revalidateTags = [`story-${story.legacyId}`];
     if (story.public && !story.deleted) {
       const previousCourse = movedPublishedStory
         ? await ctx.db.get(previousCourseId)
         : null;
+      const changedCrossLinks =
+        movedPublishedStory ||
+        story.name !== args.name ||
+        story.set_id !== args.set_id ||
+        story.set_index !== args.set_index;
       for (const short of [course.short, previousCourse?.short]) {
-        if (short) revalidateTags.push(`course-${short}`);
+        if (!short) continue;
+        revalidateTags.push(`course-${short}`);
+        if (changedCrossLinks) revalidateTags.push(`course-links-${short}`);
       }
     }
     await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
@@ -365,7 +374,7 @@ export const deleteStory = mutation({
       tags: [
         `story-${story.legacyId}`,
         ...(story.public && course.short
-          ? [`course-${course.short}`, "recent"]
+          ? [`course-${course.short}`, `course-links-${course.short}`, "recent"]
           : []),
       ],
     });
