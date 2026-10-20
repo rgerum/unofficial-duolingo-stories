@@ -43,7 +43,7 @@ async function requireDiscordSyncSecret(req: Request) {
   return { ok: true, body } as const;
 }
 
-type CombineKind = "users" | "publicStories" | "approvals";
+type CombineKind = "users" | "publicStories" | "approvals" | "changeMarker";
 type StoriesRoleSyncStatus =
   | "assigned"
   | "up_to_date"
@@ -74,7 +74,12 @@ function parseNumItems(value: unknown) {
 }
 
 function parseKind(value: unknown): CombineKind | null {
-  if (value === "users" || value === "publicStories" || value === "approvals") {
+  if (
+    value === "users" ||
+    value === "publicStories" ||
+    value === "approvals" ||
+    value === "changeMarker"
+  ) {
     return value;
   }
   return null;
@@ -189,7 +194,8 @@ export const getDiscordCombineData = httpAction(async (ctx, req) => {
     return json(
       {
         ok: false,
-        error: "kind must be one of users, publicStories, or approvals",
+        error:
+          "kind must be one of users, publicStories, approvals, or changeMarker",
       },
       400,
     );
@@ -199,6 +205,14 @@ export const getDiscordCombineData = httpAction(async (ctx, req) => {
     cursor: typeof body.cursor === "string" ? body.cursor : null,
     numItems: parseNumItems(body.numItems),
   };
+
+  if (kind === "changeMarker") {
+    const marker = await ctx.runQuery(
+      internal.discordData.getRoleSyncChangeMarker,
+      {},
+    );
+    return json({ ok: true, marker });
+  }
 
   if (kind === "users") {
     const users = await ctx.runQuery(

@@ -51,6 +51,17 @@ def fetch_combine_resource(kind, *, cursor=None, num_items=200, since_date=None)
     return body
 
 
+def fetch_change_marker():
+    """Newest-approval marker, or None if it can't be fetched (e.g. Convex
+    hasn't deployed the changeMarker kind yet)."""
+    try:
+        marker = fetch_combine_resource("changeMarker").get("marker")
+    except RuntimeError as err:
+        print(f"change marker unavailable: {err}")
+        return None
+    return marker if isinstance(marker, str) else None
+
+
 def fetch_contributor_users():
     global _contributor_users_cache
     if isinstance(_contributor_users_cache, list):

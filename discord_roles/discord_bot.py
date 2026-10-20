@@ -1,6 +1,7 @@
 import asyncio
 import discord
 import json
+import sys
 import time
 from urllib import error, request
 from pathlib import Path
@@ -67,6 +68,8 @@ def get_snapshot_row(row, *, sync_status, assigned_stories_count=None, last_erro
 
 
 def set_user_roles(sync_rows):
+    """Assigns the roles; returns True once the snapshots reached Convex."""
+    result = {"synced": False}
     try:
         global params
 
@@ -191,21 +194,41 @@ def set_user_roles(sync_rows):
                         )
                     )
 
-            if snapshots:
-                await asyncio.to_thread(sync_stories_role_status, snapshots)
-
-            await bot.close()
+            try:
+                if snapshots:
+                    await asyncio.to_thread(sync_stories_role_status, snapshots)
+                result["synced"] = True
+            finally:
+                await bot.close()
 
         # Start the bot
         bot.run(TOKEN)
-        exit()
-    except:
-        return
+    except Exception as err:
+        print(f"role sync failed: {err}")
+    return result["synced"]
 
 
 if __name__ == "__main__":
 
-    from combine import get_stories_role_sync_rows
+    from combine import CACHE_DIR, fetch_change_marker, get_stories_role_sync_rows
+    from role_sync_schedule import load_state, needs_full_sync, save_state
+
+    # Started every 10 minutes by discord-story-count.timer; see
+    # role_sync_schedule.py for when a full sync actually runs.
+    state_file = CACHE_DIR / "role_sync_state.json"
+    started_at = time.time()
+    marker = fetch_change_marker()
+    run, reason = needs_full_sync(load_state(state_file), marker, started_at)
+    if "--force" in sys.argv[1:]:
+        run, reason = True, "forced"
+    print(f"role sync: {'full sync' if run else 'skipped'} ({reason})")
+    if not run:
+        sys.exit(0)
 
     sync_rows = get_stories_role_sync_rows()
-    set_user_roles(sync_rows)
+    if set_user_roles(sync_rows):
+        # Only remember the marker once the sync succeeded, so a failed run is
+        # retried on the next tick.
+        save_state(state_file, marker=marker, synced_at=started_at)
+    else:
+        sys.exit(1)
