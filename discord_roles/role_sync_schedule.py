@@ -12,6 +12,9 @@ import json
 from pathlib import Path
 
 FULL_SYNC_INTERVAL_SECONDS = 24 * 60 * 60
+# After a failed full sync (e.g. a Discord permission error for one member),
+# retry at most this often while nothing changes, instead of on every tick.
+FAILED_SYNC_RETRY_SECONDS = 60 * 60
 
 
 def load_state(path: Path) -> dict:
@@ -22,15 +25,35 @@ def load_state(path: Path) -> dict:
     return state if isinstance(state, dict) else {}
 
 
-def save_state(path: Path, *, marker, synced_at: float) -> None:
+def _write_state(path: Path, state: dict) -> None:
     path.parent.mkdir(exist_ok=True)
     tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps({"marker": marker, "lastFullSyncAt": synced_at}))
+    tmp.write_text(json.dumps(state))
     tmp.replace(path)
+
+
+def save_state(path: Path, *, marker, synced_at: float) -> None:
+    """Records a successful full sync (and clears any failed attempt)."""
+    _write_state(path, {"marker": marker, "lastFullSyncAt": synced_at})
+
+
+def record_failed_attempt(path: Path, state: dict, *, marker, failed_at: float):
+    """Keeps the last successful sync but remembers the failed attempt."""
+    _write_state(
+        path,
+        {**state, "failedMarker": marker, "lastFailedAt": failed_at},
+    )
 
 
 def needs_full_sync(state: dict, marker, now: float) -> tuple[bool, str]:
     """Returns (run?, reason). A marker of None means it couldn't be fetched."""
+    last_failed_at = state.get("lastFailedAt")
+    if (
+        isinstance(last_failed_at, (int, float))
+        and state.get("failedMarker") == marker
+        and now - last_failed_at < FAILED_SYNC_RETRY_SECONDS
+    ):
+        return False, "retrying a failed sync later"
     if marker is None:
         return True, "change marker unavailable"
     last_full_sync_at = state.get("lastFullSyncAt")

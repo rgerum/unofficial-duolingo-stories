@@ -174,6 +174,16 @@ def set_user_roles(sync_rows):
                             )
                         )
                     else:
+                        # Clean up lower milestone roles left behind, e.g. by
+                        # a promotion whose removal step failed earlier.
+                        stale_roles = [
+                            role
+                            for k, role in roles.items()
+                            if k < role_max and role in member.roles
+                        ]
+                        if stale_roles:
+                            await member.remove_roles(*stale_roles)
+                            print(f'Roles {[role.name for role in stale_roles]} removed from {member.name}')
                         snapshots.append(
                             get_snapshot_row(
                                 row,
@@ -222,7 +232,12 @@ def set_user_roles(sync_rows):
 if __name__ == "__main__":
 
     from combine import CACHE_DIR, fetch_change_marker, get_stories_role_sync_rows
-    from role_sync_schedule import load_state, needs_full_sync, save_state
+    from role_sync_schedule import (
+        load_state,
+        needs_full_sync,
+        record_failed_attempt,
+        save_state,
+    )
 
     # Started every 10 minutes by discord-story-count.timer; see
     # role_sync_schedule.py for when a full sync actually runs.
@@ -236,10 +251,12 @@ if __name__ == "__main__":
     if not run:
         sys.exit(0)
 
+    state = load_state(state_file)
     sync_rows = get_stories_role_sync_rows()
     if set_user_roles(sync_rows):
         # Only remember the marker once the sync succeeded, so a failed run is
-        # retried on the next tick.
+        # retried (with backoff, see role_sync_schedule.py).
         save_state(state_file, marker=marker, synced_at=started_at)
     else:
+        record_failed_attempt(state_file, state, marker=marker, failed_at=started_at)
         sys.exit(1)
