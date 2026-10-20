@@ -3,6 +3,10 @@ import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./lib/authorization";
 import { recomputeCoursePublishedCount } from "./lib/courseCounts";
+import {
+  crossLinkNeighbourTags,
+  scheduleSiteRevalidation,
+} from "./lib/siteRevalidation";
 
 export const togglePublished = mutation({
   args: {
@@ -29,13 +33,12 @@ export const togglePublished = mutation({
     const nextPublic = !story.public;
     await ctx.db.patch(story._id, { public: nextPublic });
     await recomputeCoursePublishedCount(ctx, course._id);
-    await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
-      tags: [
-        `story-${story.legacyId}`,
-        ...(course.short ? [`course-${course.short}`] : []),
-        "recent",
-      ],
-    });
+    await scheduleSiteRevalidation(ctx, [
+      `story-${story.legacyId}`,
+      ...(await crossLinkNeighbourTags(ctx, story)),
+      ...(course.short ? [`course-${course.short}`] : []),
+      "recent",
+    ]);
 
     return null;
   },

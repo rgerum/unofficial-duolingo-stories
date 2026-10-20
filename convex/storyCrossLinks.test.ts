@@ -2,9 +2,11 @@
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { api } from "./_generated/api";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
+import type { MutationCtx } from "./_generated/server";
 import schema from "./schema";
 import { selectStoryCrossLinks } from "./lib/storyCrossLinks";
+import { crossLinkNeighbourTags } from "./lib/siteRevalidation";
 
 const modules = import.meta.glob("./**/*.ts");
 
@@ -255,5 +257,42 @@ describe("selectStoryCrossLinks", () => {
       previous: null,
       next: null,
     });
+  });
+});
+
+describe("crossLinkNeighbourTags", () => {
+  async function neighbourTags(
+    t: ReturnType<typeof convexTest>,
+    legacyId: number,
+  ) {
+    return await t.run(async (ctx) => {
+      const stories = (await ctx.db
+        .query("stories")
+        .collect()) as Doc<"stories">[];
+      const story = stories.find((row) => row.legacyId === legacyId);
+      if (!story) throw new Error("missing story");
+      return await crossLinkNeighbourTags(ctx as unknown as MutationCtx, story);
+    });
+  }
+
+  test("returns the pages linking to a story, across set boundaries", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourse(t, linearCourse);
+
+    expect(await neighbourTags(t, 12)).toEqual(["story-11", "story-13"]);
+    expect(await neighbourTags(t, 10)).toEqual(["story-11"]);
+  });
+
+  test("finds the neighbours an unlisted story would sit between", async () => {
+    const t = convexTest(schema, modules);
+    await seedCourse(
+      t,
+      linearCourse.map((story) =>
+        story.legacyId === 12 ? { ...story, public: false } : story,
+      ),
+    );
+
+    // Publishing or unpublishing 12 changes the links of 11 and 13.
+    expect(await neighbourTags(t, 12)).toEqual(["story-11", "story-13"]);
   });
 });

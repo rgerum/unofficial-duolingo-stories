@@ -13,6 +13,10 @@ import {
 } from "./lib/courseCounts";
 import { hasNoAudioCourseTag } from "./lib/courseTags";
 import { upsertPublicStoryContent } from "./lib/publicStoryContent";
+import {
+  crossLinkNeighbourTags,
+  scheduleSiteRevalidation,
+} from "./lib/siteRevalidation";
 
 export const setStory = mutation({
   args: {
@@ -120,6 +124,20 @@ export const setStory = mutation({
           ? args.audioProblemCount
           : 0;
 
+    // Neighbouring story pages link to this one by name, position and (via
+    // eligibility) illustration; capture the old neighbours before the move.
+    const changesCrossLinks =
+      story.public &&
+      !story.deleted &&
+      (movedPublishedStory ||
+        story.name !== args.name ||
+        story.set_id !== args.set_id ||
+        story.set_index !== args.set_index ||
+        story.imageId !== image?._id);
+    const previousNeighbourTags = changesCrossLinks
+      ? await crossLinkNeighbourTags(ctx, story)
+      : [];
+
     await ctx.db.patch(story._id, {
       duo_id: args.duo_id,
       name: args.name,
@@ -197,9 +215,16 @@ export const setStory = mutation({
         if (short) revalidateTags.push(`course-${short}`);
       }
     }
-    await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
-      tags: revalidateTags,
-    });
+    if (changesCrossLinks) {
+      const updatedStory = await ctx.db.get(story._id);
+      revalidateTags.push(
+        ...previousNeighbourTags,
+        ...(updatedStory
+          ? await crossLinkNeighbourTags(ctx, updatedStory)
+          : []),
+      );
+    }
+    await scheduleSiteRevalidation(ctx, revalidateTags);
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStorySaved, {
       operationKey,
       storyId: story.legacyId,
@@ -367,6 +392,7 @@ export const deleteStory = mutation({
         ...(story.public && course.short
           ? [`course-${course.short}`, "recent"]
           : []),
+        ...(story.public ? await crossLinkNeighbourTags(ctx, story) : []),
       ],
     });
     await ctx.scheduler.runAfter(0, internal.editorSideEffects.onStoryDeleted, {
@@ -478,6 +504,10 @@ export const importStory = mutation({
     const operationKey =
       args.operationKey ??
       `story:${newLegacyId}:import:${args.targetLegacyCourseId}:${Date.now()}`;
+    // A visit to the not-yet-allocated id may have cached a 404.
+    await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
+      tags: [`story-${newLegacyId}`],
+    });
 
     await ctx.scheduler.runAfter(
       0,

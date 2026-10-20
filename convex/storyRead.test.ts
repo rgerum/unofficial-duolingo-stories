@@ -101,6 +101,7 @@ describe("getStoryMetaByLegacyId", () => {
     if (!meta || "deleted" in meta) throw new Error("expected story meta");
     expect(meta.public).toBe(true);
     expect(meta).toMatchObject({
+      course_id: 100,
       from_language_name: "Public Story",
       image: "story-image",
       from_language_long: "English",
@@ -136,6 +137,7 @@ describe("getStoryMetaByLegacyId", () => {
 
     expect(meta).toEqual({
       deleted: true,
+      course_id: 100,
       courseShort: "es-en",
       coursePublic: true,
     });
@@ -151,6 +153,7 @@ describe("getStoryMetaByLegacyId", () => {
 
     expect(meta).toEqual({
       deleted: true,
+      course_id: 100,
       courseShort: "es-en",
       coursePublic: false,
     });

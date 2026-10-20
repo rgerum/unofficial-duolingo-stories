@@ -18,8 +18,10 @@ export interface CourseData {
   learning_language_name: string;
 }
 
+// Remote cache: a single key shared by every page that lists courses, and
+// plain `use cache` entries don't survive across serverless invocations.
 export async function get_course_data() {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("courses");
   return await fetchQuery(api.landing.getPublicCourseList, {});

@@ -126,14 +126,13 @@ export default async function Page({
 }) {
   const story_id = parseStoryId((await params).story_id);
 
-  const [story, crossLinks] = await Promise.all([
-    get_story(story_id),
-    get_story_cross_links(story_id),
-  ]);
+  const story = await get_story(story_id);
   if (!story) {
     await resolveStoryMeta(story_id); // redirects deleted stories, else 404s
     notFound();
   }
+  // Needs the course id to tag its cache entry, so it runs after the story.
+  const crossLinks = await get_story_cross_links(story_id, story.course_id);
 
   // Home > Course > Story, so crawlers see where this page sits in the site
   // hierarchy. Only emitted for public courses (crossLinks is null otherwise).

@@ -19,11 +19,16 @@ if (!convexUrl) {
 }
 const convex = new ConvexHttpClient(convexUrl);
 
+// Remote cache: there are only a few dozen languages, but every story page
+// render needs one, and plain `use cache` entries don't survive across
+// serverless invocations. Writes revalidate the "localization" tag
+// (convex/localizationWrite.ts), so the lifetime is only a fallback - and it
+// must be long, because it caps how long the story pages using it stay cached.
 async function get_localisation_entries_by_convex_language_id(
   langId: Id<"languages">,
 ) {
-  "use cache";
-  cacheLife("hours");
+  "use cache: remote";
+  cacheLife("weeks");
   cacheTag("localization");
   return await convex.query(
     api.localization.getLocalizationWithEnglishFallback,
@@ -36,8 +41,8 @@ async function get_localisation_entries_by_convex_language_id(
 async function get_localisation_entries_by_legacy_language_id(
   legacyLanguageId: number,
 ) {
-  "use cache";
-  cacheLife("hours");
+  "use cache: remote";
+  cacheLife("weeks");
   cacheTag("localization");
   return await convex.query(
     api.localization.getLocalizationByLegacyLanguageId,

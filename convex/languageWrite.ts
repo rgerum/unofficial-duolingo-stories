@@ -2,6 +2,7 @@ import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import type { MutationCtx } from "./_generated/server";
 import { requireAdmin, requireContributorOrAdmin } from "./lib/authorization";
+import { scheduleSiteRevalidation } from "./lib/siteRevalidation";
 
 function toLegacyLanguageResponse(row: {
   legacyId: number;
@@ -330,6 +331,32 @@ export const setAvatarStoryName = mutation({
         lastOperationKey: operationKey,
       });
     }
+
+    // Story pages resolve these names at read time (storyRead), so refresh
+    // the cached pages of every story with this duo_id in this language.
+    const courses = (await ctx.db.query("courses").collect()).filter(
+      (course) => course.learningLanguageId === language._id,
+    );
+    const affectedStories = (
+      await Promise.all(
+        courses.map((course) =>
+          ctx.db
+            .query("stories")
+            .withIndex("by_duo_id_course", (q) =>
+              q.eq("duo_id", duoId).eq("courseId", course._id),
+            )
+            .collect(),
+        ),
+      )
+    ).flat();
+    await scheduleSiteRevalidation(
+      ctx,
+      affectedStories.flatMap((story) =>
+        !story.deleted && typeof story.legacyId === "number"
+          ? [`story-${story.legacyId}`]
+          : [],
+      ),
+    );
 
     return {
       avatar_id: args.legacyAvatarId,
