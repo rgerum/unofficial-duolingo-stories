@@ -78,11 +78,13 @@ const storyReadResultValidator = v.union(
 );
 
 const storyMetaResultValidator = v.union(
-  storyMetadataValidator,
+  // course_id lets the site tag its cache with the course (siteRevalidation).
+  storyMetadataValidator.extend({ course_id: v.number() }),
   // Deleted stories resolve to their course so the page can 308 there
   // instead of 404ing; never-existing ids stay null.
   v.object({
     deleted: v.literal(true),
+    course_id: v.number(),
     courseShort: v.string(),
     coursePublic: v.boolean(),
   }),
@@ -196,6 +198,7 @@ export const getStoryMetaByLegacyId = query({
     if (story.deleted) {
       return {
         deleted: true as const,
+        course_id: course.legacyId,
         courseShort: course.short ?? "",
         coursePublic: course.public,
       };
@@ -210,6 +213,7 @@ export const getStoryMetaByLegacyId = query({
     if (!fromLanguage || !learningLanguage) return null;
 
     return {
+      course_id: course.legacyId,
       from_language_name: story.name,
       image: image?.legacyId ?? "",
       from_language_long: fromLanguage.name,

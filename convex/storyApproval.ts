@@ -12,6 +12,10 @@ import {
   partitionCourseContributors,
 } from "./lib/courseContributors";
 import { schedulePublicationAnnouncement } from "./lib/discordAnnouncements";
+import {
+  crossLinkNeighbourTags,
+  scheduleSiteRevalidation,
+} from "./lib/siteRevalidation";
 
 const storyApprovalInputValidator = {
   legacyStoryId: v.number(),
@@ -268,15 +272,21 @@ export const toggleStoryApproval = mutation({
     // canonical) and the recent-activity list.
     if (published.length > 0) {
       const course = await ctx.db.get(story.courseId);
-      await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
-        tags: [
-          ...published.map((id) => `story-${id}`),
-          ...(course?.short
-            ? [`course-${course.short}`, `course-links-${course.short}`]
-            : []),
-          "recent",
-        ],
-      });
+      const publishedRows = finishedStoriesInSet.filter(
+        (row) =>
+          typeof row.legacyId === "number" && published.includes(row.legacyId),
+      );
+      const neighbourTags = (
+        await Promise.all(
+          publishedRows.map((row) => crossLinkNeighbourTags(ctx, row)),
+        )
+      ).flat();
+      await scheduleSiteRevalidation(ctx, [
+        ...published.map((id) => `story-${id}`),
+        ...neighbourTags,
+        ...(course?.short ? [`course-${course.short}`] : []),
+        "recent",
+      ]);
     }
     await ctx.scheduler.runAfter(
       0,

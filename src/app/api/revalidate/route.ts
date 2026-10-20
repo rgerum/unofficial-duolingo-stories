@@ -3,7 +3,7 @@ import { revalidateTag } from "next/cache";
 
 // Called by Convex (convex/siteCache.ts) after story edits so cached pages
 // update immediately instead of at their fallback refresh. `course-…` also
-// covers `course-links-<short>`, the course-level data shown on story pages.
+// covers `course-data-<courseId>`, the course-level data shown on story pages.
 const ALLOWED_TAG =
   /^(story-\d+|course-[a-zA-Z0-9-]+|courses|landing|recent|localization)$/;
 

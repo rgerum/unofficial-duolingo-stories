@@ -6,7 +6,10 @@ import { requireAdmin } from "./lib/authorization";
 import { hasNoAudioCourseTag } from "./lib/courseTags";
 import { schedulePublicationAnnouncement } from "./lib/discordAnnouncements";
 import { recomputeCoursePublishedCount } from "./lib/courseCounts";
-import { scheduleSiteRevalidation } from "./lib/siteRevalidation";
+import {
+  courseDataTag,
+  scheduleSiteRevalidation,
+} from "./lib/siteRevalidation";
 
 const CLEAR_NO_AUDIO_STORY_AUDIO_PROBLEM_BATCH_SIZE = 100;
 
@@ -122,19 +125,17 @@ export const updateAdminLanguage = mutation({
     });
     // Language names and text direction show on the course list, course
     // pages and the story pages of every course using this language.
-    const affectedCourseShorts = (await ctx.db.query("courses").collect())
-      .filter(
-        (course) =>
-          course.learningLanguageId === language._id ||
-          course.fromLanguageId === language._id,
-      )
-      .flatMap((course) => (course.short ? [course.short] : []));
+    const affectedCourses = (await ctx.db.query("courses").collect()).filter(
+      (course) =>
+        course.learningLanguageId === language._id ||
+        course.fromLanguageId === language._id,
+    );
     await scheduleSiteRevalidation(ctx, [
       "courses",
       "landing",
-      ...affectedCourseShorts.flatMap((short) => [
-        `course-${short}`,
-        `course-links-${short}`,
+      ...affectedCourses.flatMap((course) => [
+        courseDataTag(course.legacyId),
+        ...(course.short ? [`course-${course.short}`] : []),
       ]),
     ]);
 
@@ -292,10 +293,10 @@ export const updateAdminCourse = mutation({
     // Course pages (including a cached 404 for a not-yet-public course), the
     // course list and the landing page all show course fields; story pages
     // show the course name, tags and public state.
-    const shorts = [...new Set([short, course.short ?? short])];
     await ctx.scheduler.runAfter(0, internal.siteCache.revalidate, {
       tags: [
-        ...shorts.flatMap((s) => [`course-${s}`, `course-links-${s}`]),
+        ...new Set([short, course.short ?? short].map((s) => `course-${s}`)),
+        courseDataTag(course.legacyId),
         "courses",
         "landing",
       ],
