@@ -32,7 +32,7 @@ export async function buildAvatarRows(
   // names. Only these two languages are read - scanning every language's
   // mappings made each editor query (and each re-run after any avatar edit
   // anywhere) read the whole table.
-  const suggestionSources = [mappingRows];
+  const suggestionSources: Array<AvatarMappingDoc[]> = [mappingRows];
   if (language.short !== SUGGESTION_LANGUAGE_SHORT) {
     const spanish = await ctx.db
       .query("languages")
