@@ -2,6 +2,7 @@
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { api } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
@@ -406,7 +407,7 @@ describe("setAvatarStoryName without an existing mapping", () => {
     expect(row?.storyNames).toEqual({ "es-en-la-cena": "Federico" });
     expect(row?.gender).toBe("male");
     // Unmerged variants: nothing set for this language, canonical name and
-    // per-story names (any language) surface separately for the editor UI.
+    // per-story names (own language, then Spanish) surface separately.
     expect(row?.language_name).toBeNull();
     expect(row?.canonical_name).toBe("waiter");
     expect(row?.story_name_suggestions).toEqual(["Federico"]);
@@ -425,65 +426,84 @@ describe("setAvatarStoryName without an existing mapping", () => {
 });
 
 describe("story name suggestions", () => {
-  test("dedupes across languages and caps at four", async () => {
-    const t = convexTest(schema, modules);
+  async function seed(t: ReturnType<typeof convexTest>) {
     await t.run(async (ctx) => {
-      const spanishId = await ctx.db.insert("languages", {
-        legacyId: 1,
-        name: "Spanish",
-        short: "es",
-        public: true,
-        rtl: false,
-      });
-      const portugueseId = await ctx.db.insert("languages", {
-        legacyId: 2,
-        name: "Portuguese",
-        short: "pt",
-        public: true,
-        rtl: false,
-      });
+      const languageIds: Record<string, Id<"languages">> = {};
+      for (const [legacyId, short, name] of [
+        [1, "es", "Spanish"],
+        [2, "pt", "Portuguese"],
+        [3, "de", "German"],
+      ] as const) {
+        languageIds[short] = await ctx.db.insert("languages", {
+          legacyId,
+          name,
+          short,
+          public: true,
+          rtl: false,
+        });
+      }
       const avatarId = await ctx.db.insert("avatars", {
         legacyId: 988,
         link: "avatar-988.svg",
       });
-      // First mapping contributes one name; the second holds a duplicate of
-      // it plus four more (five unique names in total across languages).
-      await ctx.db.insert("avatar_mappings", {
-        avatarId,
-        languageId: spanishId,
-        name: "",
-        speaker: "",
-        storyNames: { "duo-x": "Federico" },
-      });
-      await ctx.db.insert("avatar_mappings", {
-        avatarId,
-        languageId: portugueseId,
-        name: "",
-        speaker: "",
-        storyNames: {
-          "duo-a": "Paula",
+      const storyNames: Record<string, Record<string, string>> = {
+        es: { "duo-x": "Federico", "duo-y": "Paula", "duo-zz": "Nadia" },
+        pt: { "duo-z": "Joaquim" },
+        de: {
+          "duo-a": "Hans",
           "duo-b": "Federico",
           "duo-c": "Elsa",
-          "duo-d": "Janet",
-          "duo-e": "Nadia",
         },
-      });
+      };
+      for (const [short, names] of Object.entries(storyNames)) {
+        await ctx.db.insert("avatar_mappings", {
+          avatarId,
+          languageId: languageIds[short],
+          name: "",
+          speaker: "",
+          storyNames: names,
+        });
+      }
     });
-    const contributor = t.withIdentity({ role: "contributor" });
+  }
 
-    const rows = await contributor.query(
-      api.editorRead.getEditorAvatarNamesByLanguageLegacyId,
-      { languageLegacyId: 1 },
+  async function suggestionsFor(
+    t: ReturnType<typeof convexTest>,
+    languageLegacyId: number,
+  ) {
+    const rows = await t
+      .withIdentity({ role: "contributor" })
+      .query(api.editorRead.getEditorAvatarNamesByLanguageLegacyId, {
+        languageLegacyId,
+      });
+    return (
+      rows.find((r: { avatar_id: number }) => r.avatar_id === 988)
+        ?.story_name_suggestions ?? []
     );
-    const row = rows.find((r: { avatar_id: number }) => r.avatar_id === 988);
+  }
 
-    const suggestions = row?.story_name_suggestions ?? [];
-    // Duplicates removed, capped at four of the five unique names.
-    expect(suggestions).toHaveLength(4);
-    expect(new Set(suggestions).size).toBe(4);
-    expect(suggestions).toContain("Federico");
-    for (const name of suggestions) {
-      expect(["Federico", "Paula", "Elsa", "Janet", "Nadia"]).toContain(name);
-    }
+  test("own language first, then Spanish, deduped and capped at four", async () => {
+    const t = convexTest(schema, modules);
+    await seed(t);
+    // German names first, Spanish fills up; Federico appears once and the
+    // fifth unique name (Nadia) is cut by the cap.
+    expect(await suggestionsFor(t, 3)).toEqual([
+      "Hans",
+      "Federico",
+      "Elsa",
+      "Paula",
+    ]);
+  });
+
+  test("ignores languages other than its own and Spanish", async () => {
+    const t = convexTest(schema, modules);
+    await seed(t);
+    expect(await suggestionsFor(t, 2)).toEqual([
+      "Joaquim",
+      "Federico",
+      "Paula",
+      "Nadia",
+    ]);
+    expect(await suggestionsFor(t, 1)).toEqual(["Federico", "Paula", "Nadia"]);
   });
 });
