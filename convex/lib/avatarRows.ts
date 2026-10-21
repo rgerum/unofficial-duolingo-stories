@@ -37,7 +37,8 @@ export async function buildAvatarRows(
     const spanish = await ctx.db
       .query("languages")
       .withIndex("by_short", (q) => q.eq("short", SUGGESTION_LANGUAGE_SHORT))
-      .unique();
+      // Language shorts aren't enforced unique; never fail the editor on it.
+      .first();
     if (spanish) {
       suggestionSources.push(
         await ctx.db

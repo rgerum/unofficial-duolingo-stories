@@ -447,7 +447,7 @@ describe("story name suggestions", () => {
         link: "avatar-988.svg",
       });
       const storyNames: Record<string, Record<string, string>> = {
-        es: { "duo-x": "Federico", "duo-y": "Paula" },
+        es: { "duo-x": "Federico", "duo-y": "Paula", "duo-zz": "Nadia" },
         pt: { "duo-z": "Joaquim" },
         de: {
           "duo-a": "Hans",
@@ -485,7 +485,8 @@ describe("story name suggestions", () => {
   test("own language first, then Spanish, deduped and capped at four", async () => {
     const t = convexTest(schema, modules);
     await seed(t);
-    // German names first, Spanish fills up; Federico appears once.
+    // German names first, Spanish fills up; Federico appears once and the
+    // fifth unique name (Nadia) is cut by the cap.
     expect(await suggestionsFor(t, 3)).toEqual([
       "Hans",
       "Federico",
@@ -501,7 +502,8 @@ describe("story name suggestions", () => {
       "Joaquim",
       "Federico",
       "Paula",
+      "Nadia",
     ]);
-    expect(await suggestionsFor(t, 1)).toEqual(["Federico", "Paula"]);
+    expect(await suggestionsFor(t, 1)).toEqual(["Federico", "Paula", "Nadia"]);
   });
 });
