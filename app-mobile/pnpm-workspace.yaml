@@ -15,3 +15,8 @@ minimumReleaseAgeExclude:
   - '@biomejs/cli-win32-arm64@2.5.10'
   - '@biomejs/cli-win32-x64@2.5.10'
   - convex@1.45.0
+overrides:
+  # @better-auth/expo's peer on @better-auth/core otherwise auto-installs the
+  # latest (1.7.x); keep it on better-auth's version (@convex-dev/better-auth
+  # requires better-auth <1.7).
+  "@better-auth/expo>@better-auth/core": 1.6.33

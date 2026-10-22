@@ -43,6 +43,7 @@ import type * as lib_discordAvatarSync from "../lib/discordAvatarSync.js";
 import type * as lib_phpbb from "../lib/phpbb.js";
 import type * as lib_publicCourseStories from "../lib/publicCourseStories.js";
 import type * as lib_publicStoryContent from "../lib/publicStoryContent.js";
+import type * as lib_siteRevalidation from "../lib/siteRevalidation.js";
 import type * as lib_storyCrossLinks from "../lib/storyCrossLinks.js";
 import type * as localization from "../localization.js";
 import type * as localizationWrite from "../localizationWrite.js";
@@ -106,6 +107,7 @@ declare const fullApi: ApiFromModules<{
   "lib/phpbb": typeof lib_phpbb;
   "lib/publicCourseStories": typeof lib_publicCourseStories;
   "lib/publicStoryContent": typeof lib_publicStoryContent;
+  "lib/siteRevalidation": typeof lib_siteRevalidation;
   "lib/storyCrossLinks": typeof lib_storyCrossLinks;
   localization: typeof localization;
   localizationWrite: typeof localizationWrite;
