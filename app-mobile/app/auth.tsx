@@ -346,7 +346,10 @@ export default function AuthScreen() {
               onChangeText={setPassword}
               placeholder="Password"
               placeholderTextColor={colors.disabled}
+              autoCapitalize="none"
+              autoCorrect={false}
               secureTextEntry
+              spellCheck={false}
               textContentType={isRegister ? "newPassword" : "password"}
               returnKeyType="done"
               onSubmitEditing={() => void submit()}
