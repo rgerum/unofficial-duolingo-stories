@@ -6,7 +6,7 @@ import {
   StyleSheet,
   type StyleProp,
   type TextStyle,
-  type View as NativeView,
+  type ViewInstance,
   View,
   type ViewStyle,
 } from "react-native";
@@ -1024,7 +1024,7 @@ function NativeHintText({
   const { colors } = useTheme();
   const popup = React.useContext(HintPopupContext);
   const onHintLookup = React.useContext(HintLookupContext);
-  const containerRef = React.useRef<NativeView>(null);
+  const containerRef = React.useRef<ViewInstance>(null);
   const measurementSegments = React.useMemo(() => {
     const segments = buildNativeSegments(tokens);
     if (!inlineAudio) return segments;

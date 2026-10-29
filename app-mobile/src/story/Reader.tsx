@@ -1,5 +1,11 @@
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  type ScrollViewInstance,
+  StyleSheet,
+  View,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { type ThemeColors, useTheme } from "../theme";
@@ -80,7 +86,7 @@ export function Reader({
   });
   const [listeningPaused, setListeningPaused] = React.useState(false);
   const [audioReplayKey, setAudioReplayKey] = React.useState(0);
-  const scrollRef = React.useRef<ScrollView>(null);
+  const scrollRef = React.useRef<ScrollViewInstance>(null);
   const scrollOnNextLayoutRef = React.useRef(false);
 
   const isFinished = storyProgress >= partsList.length;

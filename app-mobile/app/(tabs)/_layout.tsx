@@ -1,5 +1,5 @@
 import React from "react";
-import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { NativeTabs } from "expo-router/native-tabs";
 import { DynamicColorIOS, Platform } from "react-native";
 import { NUNITO_BOLD_FONT_FAMILY } from "../../src/components/Text";
 import { useTheme } from "../../src/theme";
