@@ -1,9 +1,38 @@
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
+import type { AudioPlayer } from "expo-audio";
 import type { AudioInfo } from "./types";
 
 const BLOB_BASE = "https://ptoqrnbx8ghuucmt.public.blob.vercel-storage.com";
 const AUDIO_STATUS_UPDATE_INTERVAL_MS = 50;
 const IDLE_AUDIO_RANGE = 99999;
+
+export const PLAYBACK_RATES = [0.6, 0.75, 0.9, 1] as const;
+export const DEFAULT_PLAYBACK_RATE = 1;
+
+// Global story-audio speed, synced from the app settings. Keypoint
+// highlighting follows the native playback clock, so it stays in sync at any
+// rate without rescaling.
+let playbackRate = DEFAULT_PLAYBACK_RATE;
+
+export function normalizePlaybackRate(value: unknown): number {
+  const rate = Number(value);
+  return (
+    PLAYBACK_RATES.find((option) => option === rate) ?? DEFAULT_PLAYBACK_RATE
+  );
+}
+
+export function setAudioPlaybackRate(rate: number): void {
+  playbackRate = normalizePlaybackRate(rate);
+}
+
+export function applyPlaybackRate(player: AudioPlayer): void {
+  if (playbackRate === 1) return;
+  try {
+    player.setPlaybackRate(playbackRate, "high");
+  } catch {
+    // non-fatal: fall back to normal speed
+  }
+}
 
 function getPlaybackRange(
   keypoints: AudioInfo["keypoints"],
@@ -91,7 +120,7 @@ export function playAudio(
     const timeout = setTimeout(() => {
       handlers.onDone?.();
       emitDone();
-    }, 1200);
+    }, 1200 / playbackRate);
     const cancel = () => clearTimeout(timeout);
     cancelCurrent = cancel;
     return cancel;
@@ -142,6 +171,7 @@ export function playAudio(
     }
   });
 
+  applyPlaybackRate(player);
   player.play();
   syncRangeToPlaybackTime(0);
   cancelCurrent = cancel;

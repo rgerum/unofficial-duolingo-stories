@@ -9,6 +9,11 @@ import {
   setString,
   setStringArray,
 } from "./storage";
+import {
+  DEFAULT_PLAYBACK_RATE,
+  normalizePlaybackRate,
+  setAudioPlaybackRate,
+} from "./story/audio";
 
 type AppState = {
   ready: boolean;
@@ -22,6 +27,8 @@ type AppState = {
   removeCourseShort: (short: string) => Promise<void>;
   hideStoryQuestions: boolean;
   setHideStoryQuestions: (value: boolean) => Promise<void>;
+  playbackRate: number;
+  setPlaybackRate: (value: number) => Promise<void>;
   resetToFirstRun: () => Promise<void>;
 };
 
@@ -37,6 +44,8 @@ const AppStateContext = React.createContext<AppState>({
   removeCourseShort: () => Promise.resolve(),
   hideStoryQuestions: false,
   setHideStoryQuestions: () => Promise.resolve(),
+  playbackRate: DEFAULT_PLAYBACK_RATE,
+  setPlaybackRate: () => Promise.resolve(),
   resetToFirstRun: () => Promise.resolve(),
 });
 
@@ -53,6 +62,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   >([]);
   const [hideStoryQuestions, setHideStoryQuestionsState] =
     React.useState(false);
+  const [playbackRate, setPlaybackRateState] = React.useState(
+    DEFAULT_PLAYBACK_RATE,
+  );
 
   React.useEffect(() => {
     let cancelled = false;
@@ -63,12 +75,14 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         course,
         activeCourses,
         hideQuestions,
+        storedPlaybackRate,
       ] = await Promise.all([
         getBool(STORAGE_KEYS.hasSeenWelcome),
         getBool(STORAGE_KEYS.hasAcceptedDisclaimer),
         getString(STORAGE_KEYS.currentCourse),
         getStringArray(STORAGE_KEYS.activeCourses),
         getBool(STORAGE_KEYS.hideStoryQuestions),
+        getString(STORAGE_KEYS.playbackRate),
       ]);
       if (cancelled) return;
       setHasSeenWelcomeState(welcome);
@@ -80,6 +94,11 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           : activeCourses,
       );
       setHideStoryQuestionsState(hideQuestions);
+      const rate = normalizePlaybackRate(
+        storedPlaybackRate ?? DEFAULT_PLAYBACK_RATE,
+      );
+      setAudioPlaybackRate(rate);
+      setPlaybackRateState(rate);
       setReady(true);
     })();
     return () => {
@@ -134,12 +153,21 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     return setBool(STORAGE_KEYS.hideStoryQuestions, value);
   }, []);
 
+  const setPlaybackRate = React.useCallback((value: number) => {
+    const rate = normalizePlaybackRate(value);
+    setAudioPlaybackRate(rate);
+    setPlaybackRateState(rate);
+    return setString(STORAGE_KEYS.playbackRate, String(rate));
+  }, []);
+
   const resetToFirstRun = React.useCallback(async () => {
     setHasSeenWelcomeState(false);
     setHasAcceptedDisclaimerState(false);
     setCourseShortState(null);
     setActiveCourseShortsState([]);
     setHideStoryQuestionsState(false);
+    setAudioPlaybackRate(DEFAULT_PLAYBACK_RATE);
+    setPlaybackRateState(DEFAULT_PLAYBACK_RATE);
 
     await removeKeys([
       STORAGE_KEYS.hasSeenWelcome,
@@ -147,6 +175,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       STORAGE_KEYS.currentCourse,
       STORAGE_KEYS.activeCourses,
       STORAGE_KEYS.hideStoryQuestions,
+      STORAGE_KEYS.playbackRate,
     ]);
   }, []);
 
@@ -163,6 +192,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       removeCourseShort,
       hideStoryQuestions,
       setHideStoryQuestions,
+      playbackRate,
+      setPlaybackRate,
       resetToFirstRun,
     }),
     [
@@ -177,6 +208,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       removeCourseShort,
       hideStoryQuestions,
       setHideStoryQuestions,
+      playbackRate,
+      setPlaybackRate,
       resetToFirstRun,
     ],
   );
