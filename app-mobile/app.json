@@ -103,7 +103,8 @@
         }
       ],
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      "./plugins/withOkHttpVersion"
     ],
     "extra": {
       "router": {},

@@ -377,7 +377,7 @@ export default function CoursesTab() {
           ListHeaderComponent={
             isOffline ? (
               <OfflineNotice detail="Connect to the internet to switch or add courses." />
-            ) : null
+            ) : undefined
           }
           initialNumToRender={6}
           maxToRenderPerBatch={4}

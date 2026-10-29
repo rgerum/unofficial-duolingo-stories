@@ -315,7 +315,7 @@ export default function LearnTab() {
             <View style={styles.offlineWrap}>
               <OfflineNotice detail="Connect to the internet to open stories." />
             </View>
-          ) : null
+          ) : undefined
         }
         initialNumToRender={3}
         maxToRenderPerBatch={3}
