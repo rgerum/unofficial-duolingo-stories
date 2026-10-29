@@ -1,7 +1,7 @@
 import React from "react";
 import { createAudioPlayer } from "expo-audio";
 import type { AudioPlayer } from "expo-audio";
-import { stopAudio } from "./audio";
+import { applyPlaybackRate, stopAudio } from "./audio";
 import type { StoryData } from "./types";
 
 const STATUS_UPDATE_INTERVAL_MS = 50;
@@ -220,6 +220,7 @@ export function useStitchedListeningAudio({
           { uri: resolved.audioUrl },
           { updateInterval: STATUS_UPDATE_INTERVAL_MS },
         );
+        applyPlaybackRate(player);
         playerRef.current = player;
         let activated = false;
         const startupTimeout = setTimeout(() => {

@@ -21,6 +21,7 @@ import {
 import { useAppState } from "../../src/app-state";
 import { clearAllProgress, getAllProgress } from "../../src/storage";
 import { Button } from "../../src/components/Button";
+import { PLAYBACK_RATES } from "../../src/story/audio";
 import { Text } from "../../src/components/Text";
 import {
   type ThemeColors,
@@ -39,8 +40,13 @@ export default function ProfileTab() {
   } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const tabContentInsets = useTabContentInsets();
-  const { hideStoryQuestions, resetToFirstRun, setHideStoryQuestions } =
-    useAppState();
+  const {
+    hideStoryQuestions,
+    playbackRate,
+    resetToFirstRun,
+    setHideStoryQuestions,
+    setPlaybackRate,
+  } = useAppState();
   const { data: session, isPending: isSessionPending } = useAuthSession();
   const [progress, setProgress] = React.useState<Record<string, number>>({});
   const [isDeletingAccount, setIsDeletingAccount] = React.useState(false);
@@ -237,6 +243,41 @@ export default function ProfileTab() {
                 </Pressable>
               ),
             )}
+          </View>
+        </View>
+        <View style={styles.settingBlock}>
+          <View style={styles.settingText}>
+            <Text style={styles.settingLabel}>Audio speed</Text>
+            <Text style={styles.settingHint}>
+              Slow down story audio to follow along more easily.
+            </Text>
+          </View>
+          <View accessibilityRole="radiogroup" style={styles.themeOptions}>
+            {PLAYBACK_RATES.map((option) => (
+              <Pressable
+                key={option}
+                accessibilityRole="radio"
+                accessibilityLabel={`${option} times speed`}
+                accessibilityState={{ checked: playbackRate === option }}
+                onPress={() => {
+                  void setPlaybackRate(option);
+                }}
+                style={({ pressed }) => [
+                  styles.themeOption,
+                  playbackRate === option && styles.themeOptionSelected,
+                  pressed && { opacity: 0.7 },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.themeOptionText,
+                    playbackRate === option && styles.themeOptionTextSelected,
+                  ]}
+                >
+                  {`${option}×`}
+                </Text>
+              </Pressable>
+            ))}
           </View>
         </View>
         <View style={styles.settingRow}>
