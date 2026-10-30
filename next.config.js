@@ -41,6 +41,15 @@ module.exports = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/docs/become-contributor/colang",
+        destination: "/docs/become-contributor/conlang",
+        permanent: true,
+      },
+    ];
+  },
   // PostHog reverse proxy to avoid ad blockers
   async rewrites() {
     return [
