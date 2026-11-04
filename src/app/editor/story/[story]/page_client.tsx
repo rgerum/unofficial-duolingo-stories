@@ -14,19 +14,37 @@ import type {
 import { Breadcrumbs } from "../../_components/breadcrumbs";
 import { EditorHeaderBreadcrumbs } from "../../_components/header_context";
 
-export default function StoryEditorPageClient({
-  storyId,
-  courseId,
-  initialFocusLine,
-  initialBulkAudioOpen,
-  feedbackReturnHref,
-}: {
+type StoryEditorPageProps = {
   storyId: number;
   courseId?: string;
   initialFocusLine?: number;
   initialBulkAudioOpen?: boolean;
   feedbackReturnHref?: string;
-}) {
+};
+
+// Next keeps visited routes alive in a hidden <Activity>, which tears down and
+// re-runs effects without resetting state. The editor must not survive that:
+// it would rebuild CodeMirror from the text it first mounted with, and the next
+// save would overwrite newer edits. Unmounting while hidden means coming back
+// always starts a fresh editor from the current story text.
+export default function StoryEditorPageClient(props: StoryEditorPageProps) {
+  const [hidden, setHidden] = React.useState(false);
+  React.useLayoutEffect(() => {
+    setHidden(false);
+    return () => setHidden(true);
+  }, []);
+
+  if (hidden) return null;
+  return <StoryEditorPage {...props} />;
+}
+
+function StoryEditorPage({
+  storyId,
+  courseId,
+  initialFocusLine,
+  initialBulkAudioOpen,
+  feedbackReturnHref,
+}: StoryEditorPageProps) {
   const convex = useConvex();
   const data = useQuery(api.editorRead.getEditorStoryPageData, {
     storyId,
