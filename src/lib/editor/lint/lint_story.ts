@@ -49,6 +49,7 @@ const BRACKET_BLOCKS = new Set([
   "HEADER",
   "SELECT_PHRASE",
   "CONTINUATION",
+  "ARRANGE",
 ]);
 
 function splitBlocks(text: string): { blocks: Block[]; todoLines: RawLine[] } {
@@ -197,9 +198,12 @@ function lintBlock(
       if (open !== close) {
         findings.push({
           rule: "unmatched-bracket",
-          // in SELECT_PHRASE/CONTINUATION a broken bracket means nothing gets
-          // hidden, so the answer is visible to the learner
-          severity: HIDE_RANGE_BLOCKS.has(block.type) ? "error" : "warning",
+          // in SELECT_PHRASE/CONTINUATION/ARRANGE a broken bracket means nothing
+          // gets hidden, so the answer is visible to the learner
+          severity:
+            HIDE_RANGE_BLOCKS.has(block.type) || block.type === "ARRANGE"
+              ? "error"
+              : "warning",
           message:
             "Unmatched hidden-range bracket. A hidden range needs both '[' and ']'; write '[[' or ']]' for a literal bracket.",
           lineNumber: unit.main.lineno,

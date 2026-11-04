@@ -261,6 +261,28 @@ Speaker414: Bonjour [le monde.
   assert.equal(byRule(findings, "unmatched-bracket").length, 1);
 });
 
+test("flags an unmatched hidden-range bracket in an ARRANGE line as an error", () => {
+  const findings = lint(
+    `[ARRANGE]
+> Tap what you hear
+Speaker414: [(हे) (रुग्णालय) (आहे).
+~ this the~hospital is`,
+    { learningLanguage: "mr" },
+  );
+  const unmatched = byRule(findings, "unmatched-bracket");
+  assert.equal(unmatched.length, 1);
+  assert.equal(unmatched[0].severity, "error");
+  assert.equal(unmatched[0].lineNumber, 3);
+});
+
+test("accepts a closed hidden range in an ARRANGE line", () => {
+  const findings = lint(`[ARRANGE]
+> Tap what you hear
+Speaker414: [(Nej) (du har) (mange)].
+~ no you~have many`);
+  assert.equal(byRule(findings, "unmatched-bracket").length, 0);
+});
+
 test("flags POINT_TO_PHRASE without a (+...) correct option", () => {
   const findings = lint(`[POINT_TO_PHRASE]
 > Which word?
