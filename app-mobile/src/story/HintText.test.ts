@@ -1,5 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { buildHintTextTokens } from "./HintTextTokens";
+import {
+  buildUnderlineSegments,
+  getDottedUnderlineDotCenters,
+  splitNativeTokenParts,
+  UNDERLINE_DOT_GAP,
+  UNDERLINE_HINT_EDGE_INSET,
+} from "./HintTextUnderline";
 
 const content = {
   text: "alpha beta gamma",
@@ -39,3 +46,164 @@ describe("buildHintTextTokens", () => {
     ]);
   });
 });
+
+describe("native hint underlines", () => {
+  test("splits hinted native text at word-joiner boundaries", () => {
+    const parts = splitNativeTokenParts({
+      token: {
+        text: "wasi\u2060pim",
+        start: 0,
+        hidden: false,
+        revealed: false,
+        dimmed: false,
+        hint: { translation: "restaurant" },
+        hintGroupKey: "hint:0:7:0",
+      },
+      displayText: "wasi\u2060pim",
+      shouldSplitIntoGraphemes: false,
+      splitIntoGraphemes: (text) => [text],
+    });
+
+    expect(
+      parts.map((part) => ({
+        text: part.text,
+        hint: Boolean(part.hint),
+        group: part.underlineGroupKey,
+      })),
+    ).toEqual([
+      { text: "wasi", hint: true, group: "hint:0:7:0:0" },
+      { text: "\u2060", hint: false, group: undefined },
+      { text: "pim", hint: true, group: "hint:0:7:0:1" },
+    ]);
+  });
+
+  test("keeps a one-dot gap between adjacent hinted native underline pieces", () => {
+    const underlines = buildUnderlineSegments({
+      computedSegments: [
+        hintedSegment({ key: "wasi", x: 100, width: 80, group: "hint:0" }),
+        {
+          ...hintedSegment({
+            key: "joiner",
+            x: 180,
+            width: 4.5,
+            group: undefined,
+          }),
+          text: "\u2060",
+          hint: undefined,
+        },
+        hintedSegment({ key: "pim", x: 184.5, width: 60, group: "hint:1" }),
+      ],
+      colors: { border: "#ccd6dd", hiddenUnderline: "#ccd6dd" },
+    });
+
+    expect(underlines).toHaveLength(2);
+    expect(underlines[0]!.dotAnchor).toBe("end");
+    expect(underlines[1]!.dotAnchor).toBe("start");
+    expect(underlines[0]!.dotAnchorBoundary).toBe(180);
+    expect(underlines[1]!.dotAnchorBoundary).toBe(180);
+    expect(underlines[1]!.x1 - underlines[0]!.x2).toBeGreaterThan(
+      UNDERLINE_DOT_GAP,
+    );
+    expect(UNDERLINE_HINT_EDGE_INSET * 2).toBe(UNDERLINE_DOT_GAP);
+  });
+
+  test("keeps one skipped dot position between split dotted underlines", () => {
+    const left = getDottedUnderlineDotCenters({
+      x1: 103.5,
+      x2: 176.5,
+      dotGap: UNDERLINE_DOT_GAP,
+      edgeInset: UNDERLINE_HINT_EDGE_INSET,
+      anchor: "end",
+      anchorBoundary: 180,
+    });
+    const right = getDottedUnderlineDotCenters({
+      x1: 188,
+      x2: 241,
+      dotGap: UNDERLINE_DOT_GAP,
+      edgeInset: UNDERLINE_HINT_EDGE_INSET,
+      anchor: "start",
+      anchorBoundary: 180,
+    });
+
+    expect(left.at(-1)).toBeCloseTo(173);
+    expect(right[0]).toBeCloseTo(187);
+    expect(right[0]! - left.at(-1)!).toBeCloseTo(UNDERLINE_DOT_GAP * 2);
+  });
+
+  test("centers dotted underlines within their drawable span", () => {
+    const dots = getDottedUnderlineDotCenters({
+      x1: 100,
+      x2: 180,
+      dotGap: UNDERLINE_DOT_GAP,
+      edgeInset: UNDERLINE_HINT_EDGE_INSET,
+    });
+
+    expect(dots).toHaveLength(11);
+    expect(dots[0]).toBeCloseTo(105);
+    expect(dots.at(-1)).toBeCloseTo(175);
+    expect(dots[0]! - 100).toBeCloseTo(180 - dots.at(-1)!);
+    expect(dots[0]).toBeGreaterThan(100 + UNDERLINE_HINT_EDGE_INSET);
+  });
+
+  test("keeps hidden challenge native underline pieces continuous", () => {
+    const underlines = buildUnderlineSegments({
+      computedSegments: [
+        hiddenSegment({ key: "first", x: 100, width: 80 }),
+        hiddenSegment({ key: "second", x: 180, width: 60 }),
+      ],
+      colors: { border: "#ccd6dd", hiddenUnderline: "#ccd6dd" },
+    });
+
+    expect(underlines).toHaveLength(1);
+    expect(underlines[0]).toMatchObject({
+      x1: 102,
+      x2: 238,
+      dotted: false,
+    });
+  });
+});
+
+function hintedSegment({
+  key,
+  x,
+  width,
+  group,
+}: {
+  key: string;
+  x: number;
+  width: number;
+  group?: string;
+}) {
+  return {
+    key,
+    start: 0,
+    x,
+    y: 0,
+    width,
+    height: 40,
+    ascender: 30,
+    descender: 10,
+    text: key,
+    hidden: false,
+    revealed: false,
+    hint: { translation: "restaurant" },
+    tokenKey: key,
+    underlineGroupKey: group,
+  };
+}
+
+function hiddenSegment({
+  key,
+  x,
+  width,
+}: {
+  key: string;
+  x: number;
+  width: number;
+}) {
+  return {
+    ...hintedSegment({ key, x, width, group: "hidden:0:10" }),
+    hidden: true,
+    hint: undefined,
+  };
+}
