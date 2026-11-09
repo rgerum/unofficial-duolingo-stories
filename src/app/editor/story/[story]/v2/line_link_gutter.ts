@@ -1,7 +1,9 @@
-import { EditorView, lineNumbers } from "@codemirror/view";
+import { EditorView, keymap, lineNumbers } from "@codemirror/view";
 import { copyToClipboard } from "@/lib/copy_to_clipboard";
 
-const COPY_HINT = "Click to copy a link to this line";
+const COPY_SHORTCUT = "Mod-Shift-y";
+const COPY_HINT =
+  "Click to copy a link to this line (or press Ctrl/Cmd+Shift+Y to copy a link to the cursor line)";
 const FEEDBACK_DURATION_MS = 1500;
 
 /**
@@ -17,14 +19,16 @@ export function buildStoryLineLink(currentHref: string, line: number) {
   return url.toString();
 }
 
-function showCopyFeedback(event: MouseEvent, message: string) {
+type FeedbackPosition = { x: number; y: number };
+
+function showCopyFeedback(position: FeedbackPosition, message: string) {
   const badge = document.createElement("div");
   badge.textContent = message;
   badge.setAttribute("role", "status");
   Object.assign(badge.style, {
     position: "fixed",
-    left: `${event.clientX + 12}px`,
-    top: `${event.clientY - 12}px`,
+    left: `${position.x + 12}px`,
+    top: `${position.y - 12}px`,
     zIndex: "1000",
     padding: "4px 8px",
     borderRadius: "6px",
@@ -38,10 +42,33 @@ function showCopyFeedback(event: MouseEvent, message: string) {
   window.setTimeout(() => badge.remove(), FEEDBACK_DURATION_MS);
 }
 
+function copyLineLink(lineNumber: number, position: FeedbackPosition) {
+  const link = buildStoryLineLink(window.location.href, lineNumber);
+  copyToClipboard(link).then(
+    () => showCopyFeedback(position, `Link to line ${lineNumber} copied`),
+    () => showCopyFeedback(position, "Could not copy link"),
+  );
+}
+
+/** Keyboard equivalent of clicking a line number: copies the cursor's line. */
+function copyCursorLineLink(view: EditorView) {
+  const head = view.state.selection.main.head;
+  const lineNumber = view.state.doc.lineAt(head).number;
+  const coords = view.coordsAtPos(head);
+  const rect = view.contentDOM.getBoundingClientRect();
+  copyLineLink(lineNumber, {
+    x: coords?.left ?? rect.left,
+    y: coords?.top ?? rect.top,
+  });
+  return true;
+}
+
 /**
  * Makes the line-number gutter clickable: clicking a number copies a link that
  * opens the story editor focused on that line (`?line=N`). Merges with the
- * line-number gutter from `basicSetup`, so no second gutter is added.
+ * line-number gutter from `basicSetup`, so no second gutter is added. Since
+ * gutter numbers cannot be focused, Ctrl/Cmd+Shift+Y does the same for the
+ * line the cursor is on.
  */
 export const lineLinkGutter = [
   lineNumbers({
@@ -56,17 +83,15 @@ export const lineLinkGutter = [
       },
       click(view, line, event) {
         const lineNumber = view.state.doc.lineAt(line.from).number;
-        const link = buildStoryLineLink(window.location.href, lineNumber);
-        const mouseEvent = event as MouseEvent;
-        copyToClipboard(link).then(
-          () =>
-            showCopyFeedback(mouseEvent, `Link to line ${lineNumber} copied`),
-          () => showCopyFeedback(mouseEvent, "Could not copy link"),
-        );
+        const { clientX, clientY } = event as MouseEvent;
+        copyLineLink(lineNumber, { x: clientX, y: clientY });
         return true;
       },
     },
   }),
+  keymap.of([
+    { key: COPY_SHORTCUT, run: copyCursorLineLink, preventDefault: true },
+  ]),
   EditorView.theme({
     ".cm-lineNumbers .cm-gutterElement": {
       cursor: "pointer",
