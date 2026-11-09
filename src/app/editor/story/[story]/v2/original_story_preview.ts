@@ -11,6 +11,7 @@ import {
   keymap,
   showTooltip,
   type TooltipView,
+  ViewPlugin,
   type ViewUpdate,
   WidgetType,
 } from "@codemirror/view";
@@ -404,14 +405,79 @@ function buildMarkers(state: EditorState, onRequestText: () => void) {
 }
 
 /**
+ * Closes the popup on Escape anywhere on the page, and on clicks outside of
+ * it. Clicks into the block being compared keep it open, so that block can be
+ * edited next to its original.
+ */
+const closeOnOutsideInteraction = ViewPlugin.define((view) => {
+  const isOpen = () => view.state.field(previewField).openPos !== null;
+  const close = () => {
+    if (isOpen()) view.dispatch({ effects: setOpenPos.of(null) });
+  };
+
+  const insideOpenBlock = (event: PointerEvent) => {
+    const target = event.target;
+    if (!(target instanceof Node) || !view.contentDOM.contains(target)) {
+      return false;
+    }
+    const { openPos } = view.state.field(previewField);
+    if (openPos === null) return false;
+    const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
+    if (pos === null) return false;
+    const { doc } = view.state;
+    const block = findOriginalBlock(
+      doc.toString(),
+      null,
+      doc.lineAt(openPos).number,
+    );
+    if (!block) return false;
+    const line = doc.lineAt(pos).number;
+    return (
+      line >= block.translated.startLine && line <= block.translated.endLine
+    );
+  };
+
+  const onPointerDown = (event: PointerEvent) => {
+    if (!isOpen()) return;
+    const target = event.target;
+    // The marker toggles the popup itself; clicks in the popup keep it.
+    if (
+      target instanceof Element &&
+      target.closest(".cm-original-marker, .cm-original-preview")
+    ) {
+      return;
+    }
+    if (insideOpenBlock(event)) return;
+    close();
+  };
+  const onKeyDown = (event: KeyboardEvent) => {
+    // The editor's keymap and the popup handle Escape themselves.
+    if (event.key !== "Escape" || event.defaultPrevented || !isOpen()) return;
+    close();
+  };
+
+  const doc = view.dom.ownerDocument;
+  doc.addEventListener("pointerdown", onPointerDown, true);
+  doc.addEventListener("keydown", onKeyDown);
+  return {
+    destroy() {
+      doc.removeEventListener("pointerdown", onPointerDown, true);
+      doc.removeEventListener("keydown", onKeyDown);
+    },
+  };
+});
+
+/**
  * Adds a marker right after every block header ([LINE], [HEADER], ...) of a
  * translated story. Clicking it shows the matching block of the original
- * Spanish story in a popup that stays open while editing, so the original can
- * be compared with the translation. `onRequestText` is called the first time
- * the popup opens, so the original's text is only loaded when needed.
+ * Spanish story in a popup that stays open while that block is edited, so the
+ * original can be compared with the translation; clicking elsewhere or Escape
+ * closes it. `onRequestText` is called the first time the popup opens, so the
+ * original's text is only loaded when needed.
  */
 export const originalStoryPreview = (onRequestText: () => void) => [
   previewField,
+  closeOnOutsideInteraction,
   EditorView.decorations.compute([previewField, "doc"], (state) =>
     buildMarkers(state, onRequestText),
   ),
