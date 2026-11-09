@@ -44,6 +44,7 @@ import {
   interleavedPreviewExtension,
   setInterleavedPreview,
 } from "./interleaved_preview";
+import { lineLinkGutter } from "./line_link_gutter";
 import { LintPanel } from "./lint_panel";
 import { mobileEditorPresentation } from "./mobile_editor_presentation";
 import { useStoryEditorModel } from "./use_story_editor_model";
@@ -275,6 +276,9 @@ export default function EditorV2({
     parsedStory,
     save,
   } = model;
+  // Read by the line-link gutter, which is created once per editor view.
+  const dirtyRef = React.useRef(dirty);
+  dirtyRef.current = dirty;
 
   const releaseTrackedAudioEditorAnchor = React.useCallback(() => {
     audioEditorAnchorRef.current?.release();
@@ -393,6 +397,7 @@ export default function EditorV2({
       doc: normalizeDocText(initialStory.text),
       extensions: [
         basicSetup,
+        lineLinkGutter(() => dirtyRef.current),
         sync,
         example(),
         highlightStyle,
