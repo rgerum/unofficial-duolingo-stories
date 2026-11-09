@@ -44,6 +44,7 @@ import {
   interleavedPreviewExtension,
   setInterleavedPreview,
 } from "./interleaved_preview";
+import { lineLinkGutter } from "./line_link_gutter";
 import { LintPanel } from "./lint_panel";
 import { mobileEditorPresentation } from "./mobile_editor_presentation";
 import { useStoryEditorModel } from "./use_story_editor_model";
@@ -393,6 +394,7 @@ export default function EditorV2({
       doc: normalizeDocText(initialStory.text),
       extensions: [
         basicSetup,
+        lineLinkGutter,
         sync,
         example(),
         highlightStyle,
