@@ -276,6 +276,9 @@ export default function EditorV2({
     parsedStory,
     save,
   } = model;
+  // Read by the line-link gutter, which is created once per editor view.
+  const dirtyRef = React.useRef(dirty);
+  dirtyRef.current = dirty;
 
   const releaseTrackedAudioEditorAnchor = React.useCallback(() => {
     audioEditorAnchorRef.current?.release();
@@ -394,7 +397,7 @@ export default function EditorV2({
       doc: normalizeDocText(initialStory.text),
       extensions: [
         basicSetup,
-        lineLinkGutter,
+        lineLinkGutter(() => dirtyRef.current),
         sync,
         example(),
         highlightStyle,

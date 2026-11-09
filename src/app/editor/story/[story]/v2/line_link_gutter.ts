@@ -21,7 +21,11 @@ export function buildStoryLineLink(currentHref: string, line: number) {
 
 type FeedbackPosition = { x: number; y: number };
 
-function showCopyFeedback(position: FeedbackPosition, message: string) {
+function showCopyFeedback(
+  position: FeedbackPosition,
+  message: string,
+  durationMs = FEEDBACK_DURATION_MS,
+) {
   const badge = document.createElement("div");
   badge.textContent = message;
   badge.setAttribute("role", "status");
@@ -39,27 +43,50 @@ function showCopyFeedback(position: FeedbackPosition, message: string) {
     whiteSpace: "nowrap",
   });
   document.body.appendChild(badge);
-  window.setTimeout(() => badge.remove(), FEEDBACK_DURATION_MS);
+  window.setTimeout(() => badge.remove(), durationMs);
 }
 
-function copyLineLink(lineNumber: number, position: FeedbackPosition) {
+type HasUnsavedChanges = () => boolean;
+
+function copyLineLink(
+  lineNumber: number,
+  position: FeedbackPosition,
+  hasUnsavedChanges: HasUnsavedChanges,
+) {
   const link = buildStoryLineLink(window.location.href, lineNumber);
+  // Recipients open the saved story, so with unsaved edits the number may
+  // point at a different line for them.
+  const unsaved = hasUnsavedChanges();
   copyToClipboard(link).then(
-    () => showCopyFeedback(position, `Link to line ${lineNumber} copied`),
+    () =>
+      unsaved
+        ? showCopyFeedback(
+            position,
+            `Link to line ${lineNumber} copied, but save first: it may point elsewhere for others`,
+            FEEDBACK_DURATION_MS * 2,
+          )
+        : showCopyFeedback(position, `Link to line ${lineNumber} copied`),
     () => showCopyFeedback(position, "Could not copy link"),
   );
 }
 
 /** Keyboard equivalent of clicking a line number: copies the cursor's line. */
-function copyCursorLineLink(view: EditorView) {
+function copyCursorLineLink(
+  view: EditorView,
+  hasUnsavedChanges: HasUnsavedChanges,
+) {
   const head = view.state.selection.main.head;
   const lineNumber = view.state.doc.lineAt(head).number;
   const coords = view.coordsAtPos(head);
   const rect = view.contentDOM.getBoundingClientRect();
-  copyLineLink(lineNumber, {
-    x: coords?.left ?? rect.left,
-    y: coords?.top ?? rect.top,
-  });
+  copyLineLink(
+    lineNumber,
+    {
+      x: coords?.left ?? rect.left,
+      y: coords?.top ?? rect.top,
+    },
+    hasUnsavedChanges,
+  );
   return true;
 }
 
@@ -70,7 +97,7 @@ function copyCursorLineLink(view: EditorView) {
  * gutter numbers cannot be focused, Ctrl/Cmd+Shift+Y does the same for the
  * line the cursor is on.
  */
-export const lineLinkGutter = [
+export const lineLinkGutter = (hasUnsavedChanges: HasUnsavedChanges) => [
   lineNumbers({
     domEventHandlers: {
       mouseover(_view, _line, event) {
@@ -84,13 +111,17 @@ export const lineLinkGutter = [
       click(view, line, event) {
         const lineNumber = view.state.doc.lineAt(line.from).number;
         const { clientX, clientY } = event as MouseEvent;
-        copyLineLink(lineNumber, { x: clientX, y: clientY });
+        copyLineLink(lineNumber, { x: clientX, y: clientY }, hasUnsavedChanges);
         return true;
       },
     },
   }),
   keymap.of([
-    { key: COPY_SHORTCUT, run: copyCursorLineLink, preventDefault: true },
+    {
+      key: COPY_SHORTCUT,
+      run: (view) => copyCursorLineLink(view, hasUnsavedChanges),
+      preventDefault: true,
+    },
   ]),
   EditorView.theme({
     ".cm-lineNumbers .cm-gutterElement": {
