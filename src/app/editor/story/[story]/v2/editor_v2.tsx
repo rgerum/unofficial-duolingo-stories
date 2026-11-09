@@ -47,6 +47,11 @@ import {
 import { lineLinkGutter } from "./line_link_gutter";
 import { LintPanel } from "./lint_panel";
 import { mobileEditorPresentation } from "./mobile_editor_presentation";
+import {
+  type OriginalStorySource,
+  originalStoryPreview,
+  setOriginalStorySource,
+} from "./original_story_preview";
 import { useStoryEditorModel } from "./use_story_editor_model";
 
 type StoryNavigation = {
@@ -235,6 +240,45 @@ export default function EditorV2({
     legacyLanguageId: story_data.from_language,
   }) ?? undefined) as LanguageData | undefined;
 
+  // The official Spanish story this one was translated from. Its text is only
+  // loaded once an editor opens an original-block preview.
+  const [originalTextRequested, setOriginalTextRequested] =
+    React.useState(false);
+  const originalStoryRef = useQuery(
+    api.editorRead.getEditorOriginalStory,
+    story_data.duo_id ? { duoId: story_data.duo_id } : "skip",
+  );
+  // An es-en story is its own original: no preview there.
+  const originalStory =
+    originalStoryRef && originalStoryRef.id !== story_data.id
+      ? originalStoryRef
+      : null;
+  const originalStoryText = useQuery(
+    api.editorRead.getEditorOriginalStoryText,
+    originalTextRequested && originalStory
+      ? { storyId: originalStory.id }
+      : "skip",
+  );
+  // null while loading; "" when the original has no saved text.
+  const originalText =
+    originalStoryText === undefined ? null : (originalStoryText?.text ?? "");
+  const originalStorySource = React.useMemo<OriginalStorySource | null>(
+    () =>
+      originalStory
+        ? {
+            id: originalStory.id,
+            name: originalStory.name,
+            courseShort: originalStory.course_short,
+            text: originalText,
+          }
+        : null,
+    [originalStory, originalText],
+  );
+  const requestOriginalText = React.useCallback(
+    () => setOriginalTextRequested(true),
+    [],
+  );
+
   const [docText, setDocText] = React.useState(story_data.text ?? "");
   const [revision, setRevision] = React.useState(0);
   const [lineNo, setLineNo] = React.useState(1);
@@ -329,6 +373,7 @@ export default function EditorV2({
     setDocText(normalizeDocText(getInitialText().text));
     setRevision(0);
     setLineNo(1);
+    setOriginalTextRequested(false);
     hasAppliedInitialFocusRef.current = false;
     releaseTrackedAudioEditorAnchor();
     setAudioEditorData(undefined);
@@ -398,6 +443,7 @@ export default function EditorV2({
       extensions: [
         basicSetup,
         lineLinkGutter(() => dirtyRef.current),
+        originalStoryPreview(requestOriginalText),
         sync,
         example(),
         highlightStyle,
@@ -420,7 +466,12 @@ export default function EditorV2({
       viewRef.current = null;
       setView(undefined);
     };
-  }, [getInitialText, storyId]);
+  }, [getInitialText, requestOriginalText, storyId]);
+
+  React.useEffect(() => {
+    if (!view) return;
+    view.dispatch({ effects: setOriginalStorySource.of(originalStorySource) });
+  }, [originalStorySource, view]);
 
   React.useEffect(() => {
     if (!view) return;

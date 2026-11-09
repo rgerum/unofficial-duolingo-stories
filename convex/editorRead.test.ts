@@ -154,3 +154,117 @@ describe("getEditorCourseImport guard", () => {
     expect(result[0]).toMatchObject({ id: 30, name: "Importable Story" });
   });
 });
+
+async function seedOriginalStory(t: ReturnType<typeof convexTest>) {
+  await t.run(async (ctx) => {
+    const spanish = await ctx.db.insert("languages", {
+      legacyId: 1,
+      name: "Spanish",
+      short: "es",
+      public: true,
+      rtl: false,
+    });
+    const english = await ctx.db.insert("languages", {
+      legacyId: 2,
+      name: "English",
+      short: "en",
+      public: true,
+      rtl: false,
+    });
+    const swedish = await ctx.db.insert("languages", {
+      legacyId: 3,
+      name: "Swedish",
+      short: "sv",
+      public: true,
+      rtl: false,
+    });
+    const originalCourseId = await ctx.db.insert("courses", {
+      legacyId: 12,
+      short: "es-en",
+      learningLanguageId: spanish,
+      fromLanguageId: english,
+      public: false,
+      official: true,
+    });
+    const translatedCourseId = await ctx.db.insert("courses", {
+      legacyId: 4,
+      short: "sv-en",
+      learningLanguageId: swedish,
+      fromLanguageId: english,
+      public: true,
+      official: false,
+    });
+    const story = (legacyId: number, courseId: typeof originalCourseId) =>
+      ctx.db.insert("stories", {
+        legacyId,
+        duo_id: "es-en-una-cita",
+        name: legacyId === 50 ? "Una cita" : "En date",
+        public: true,
+        courseId,
+        status: "finished",
+        deleted: false,
+        todo_count: 0,
+      });
+    const originalId = await story(50, originalCourseId);
+    await story(51, translatedCourseId);
+    await ctx.db.insert("story_content", {
+      storyId: originalId,
+      text: "[LINE]\n> Hola.",
+      json: {},
+      lastUpdated: Date.now(),
+    });
+  });
+}
+
+describe("getEditorOriginalStory", () => {
+  test("unauthenticated caller gets null", async () => {
+    const t = convexTest(schema, modules);
+    await seedOriginalStory(t);
+
+    expect(
+      await t.query(api.editorRead.getEditorOriginalStory, {
+        duoId: "es-en-una-cita",
+      }),
+    ).toBeNull();
+    expect(
+      await t.query(api.editorRead.getEditorOriginalStoryText, {
+        storyId: 50,
+      }),
+    ).toBeNull();
+  });
+
+  test("finds the es-en story with the duo_id", async () => {
+    const t = convexTest(schema, modules);
+    await seedOriginalStory(t);
+    const contributor = t.withIdentity(contributorIdentity);
+
+    expect(
+      await contributor.query(api.editorRead.getEditorOriginalStory, {
+        duoId: "es-en-una-cita",
+      }),
+    ).toEqual({ id: 50, name: "Una cita", course_short: "es-en" });
+    expect(
+      await contributor.query(api.editorRead.getEditorOriginalStory, {
+        duoId: "unknown",
+      }),
+    ).toBeNull();
+  });
+
+  test("returns the text of es-en stories only", async () => {
+    const t = convexTest(schema, modules);
+    await seedOriginalStory(t);
+    const contributor = t.withIdentity(contributorIdentity);
+
+    expect(
+      await contributor.query(api.editorRead.getEditorOriginalStoryText, {
+        storyId: 50,
+      }),
+    ).toEqual({ text: "[LINE]\n> Hola." });
+    // The translated sv-en story is not an original.
+    expect(
+      await contributor.query(api.editorRead.getEditorOriginalStoryText, {
+        storyId: 51,
+      }),
+    ).toBeNull();
+  });
+});
