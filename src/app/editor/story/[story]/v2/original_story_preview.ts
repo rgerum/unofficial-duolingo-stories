@@ -1,4 +1,5 @@
 import {
+  EditorSelection,
   type EditorState,
   RangeSetBuilder,
   StateEffect,
@@ -315,13 +316,23 @@ function toggleOriginalPreview(
   const block = findOriginalBlock(doc.toString(), null, line.number);
   if (!block) return false;
   if (source.text === null) onRequestText();
-  // The popup is anchored below the block's last line, which CodeMirror hides
-  // while it is scrolled out of view, so bring that line into view.
+  // The popup hangs below the block's last line, starting at its left edge,
+  // and CodeMirror hides it while that point is scrolled out of view. Scroll
+  // the whole last line into view with its start as the end that must stay
+  // visible: a wrapped line (mobile) shows down to its last row, while a long
+  // unwrapped line (like `$...mp3;...` audio) doesn't scroll sideways.
   const endLine = doc.line(Math.min(block.translated.endLine, doc.lines));
   view.dispatch({
     effects: [
       setOpenPos.of(line.from),
-      EditorView.scrollIntoView(endLine.to, { y: "nearest", yMargin: 120 }),
+      EditorView.scrollIntoView(
+        EditorSelection.range(endLine.to, endLine.from),
+        {
+          x: "nearest",
+          y: "nearest",
+          yMargin: 120,
+        },
+      ),
     ],
   });
   return true;
