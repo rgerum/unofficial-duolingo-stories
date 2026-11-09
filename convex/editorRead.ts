@@ -722,6 +722,83 @@ export const getEditorStoryPageData = query({
   },
 });
 
+// The "Spanish for English speakers" course holds the official Duolingo
+// stories every other course was translated from; imports keep the duo_id.
+const ORIGINAL_STORY_COURSE_SHORT = "es-en";
+
+/**
+ * The official story with this duo_id: the one other courses' stories were
+ * translated from. Takes the duo_id rather than the edited story's id so this
+ * subscription doesn't re-run on every save of the edited story. For an es-en
+ * story this returns the story itself; the editor skips that case.
+ */
+export const getEditorOriginalStory = query({
+  args: { duoId: v.string() },
+  returns: v.union(
+    v.null(),
+    v.object({
+      id: v.number(),
+      name: v.string(),
+      course_short: v.string(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return null;
+    if (!args.duoId) return null;
+
+    const originalCourse = await ctx.db
+      .query("courses")
+      .withIndex("by_short", (q) => q.eq("short", ORIGINAL_STORY_COURSE_SHORT))
+      .first();
+    if (!originalCourse) return null;
+
+    const candidates = await ctx.db
+      .query("stories")
+      .withIndex("by_duo_id_course", (q) =>
+        q.eq("duo_id", args.duoId).eq("courseId", originalCourse._id),
+      )
+      .take(10);
+    const original = candidates.find(
+      (candidate) => !candidate.deleted && candidate.legacyId !== undefined,
+    );
+    if (!original || original.legacyId === undefined) return null;
+
+    return {
+      id: original.legacyId,
+      name: original.name,
+      course_short: ORIGINAL_STORY_COURSE_SHORT,
+    };
+  },
+});
+
+/**
+ * Source text of an official es-en story, loaded only once an editor opens an
+ * original-block preview. Reads only that story's rows, so it re-runs only
+ * when the original changes. Limited to the es-en course so it doesn't become
+ * a general text reader.
+ */
+export const getEditorOriginalStoryText = query({
+  args: { storyId: v.number() },
+  returns: v.union(v.null(), v.object({ text: v.string() })),
+  handler: async (ctx, args) => {
+    if (!(await isContributorOrAdmin(ctx))) return null;
+
+    const story = await ctx.db
+      .query("stories")
+      .withIndex("by_legacy_id", (q) => q.eq("legacyId", args.storyId))
+      .unique();
+    if (!story || story.deleted) return null;
+    const course = await ctx.db.get(story.courseId);
+    if (course?.short !== ORIGINAL_STORY_COURSE_SHORT) return null;
+
+    const content = await ctx.db
+      .query("story_content")
+      .withIndex("by_story", (q) => q.eq("storyId", story._id))
+      .unique();
+    return { text: content?.text ?? "" };
+  },
+});
+
 export const getEditorImageByLegacyId = query({
   args: { legacyImageId: v.string() },
   handler: async (ctx, args) => {
