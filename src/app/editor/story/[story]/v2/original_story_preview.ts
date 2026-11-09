@@ -315,13 +315,19 @@ function toggleOriginalPreview(
   const block = findOriginalBlock(doc.toString(), null, line.number);
   if (!block) return false;
   if (source.text === null) onRequestText();
-  // The popup is anchored below the block's last line, which CodeMirror hides
-  // while it is scrolled out of view, so bring that line into view.
+  // The popup is anchored at the start of the block's last line, which
+  // CodeMirror hides while it is scrolled out of view, so bring that line
+  // start into view. Scrolling to the line's end instead would scroll long
+  // lines (like `$...mp3;...` audio lines) sideways and hide the anchor.
   const endLine = doc.line(Math.min(block.translated.endLine, doc.lines));
   view.dispatch({
     effects: [
       setOpenPos.of(line.from),
-      EditorView.scrollIntoView(endLine.to, { y: "nearest", yMargin: 120 }),
+      EditorView.scrollIntoView(endLine.from, {
+        x: "nearest",
+        y: "nearest",
+        yMargin: 120,
+      }),
     ],
   });
   return true;
