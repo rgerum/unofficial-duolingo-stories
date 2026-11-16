@@ -108,7 +108,9 @@ function Line({
       </FadeGlideIn>
     );
   }
-  return <div>error</div>;
+  // Not a renderable line (e.g. a malformed block): show nothing rather than
+  // leaking placeholder text that stays visible even while the part is hidden.
+  return null;
 }
 
 function getCharacter(parts: StoryElement[]) {

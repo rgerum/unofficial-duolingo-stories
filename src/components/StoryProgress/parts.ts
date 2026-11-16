@@ -5,6 +5,9 @@ export function getParts(elements: StoryElement[]): StoryElement[][] {
   let lastId = -1;
   for (const element of elements) {
     if (element.trackingProperties === undefined) continue;
+    // Parse errors are stored in the story data so the editor can flag them,
+    // but readers can't do anything with them.
+    if (element.type === "ERROR") continue;
     if (lastId !== element.trackingProperties.line_index) {
       parts.push([]);
       lastId = element.trackingProperties.line_index;
