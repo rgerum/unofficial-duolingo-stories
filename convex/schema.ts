@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { courseInterestSource } from "./courseInterestSource";
 import { feedbackStatusValidator } from "./storyFeedbackStatus";
 
 const courseContributorDetailsValidator = v.object({
@@ -244,6 +245,7 @@ export default defineSchema({
   course_interest_signals: defineTable({
     courseId: v.id("courses"),
     supporterKey: v.string(),
+    source: v.optional(courseInterestSource),
     supporterKind: v.union(v.literal("browser"), v.literal("account")),
     completedAllAvailableStoriesAt: v.optional(v.number()),
     createdAt: v.number(),
