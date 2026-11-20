@@ -194,8 +194,17 @@ function LinkedAccountRow({
       return;
     }
 
+    const linkedAccount = authMethods.find(
+      (account) => account.providerId === provider,
+    );
+    if (!linkedAccount) {
+      setLinkError("This account is no longer linked.");
+      setIsUpdatingLink(false);
+      return;
+    }
+
     const { error } = await authClient.unlinkAccount({
-      providerId: provider,
+      accountId: linkedAccount.id,
     });
 
     if (error) {
@@ -372,6 +381,28 @@ export default function Profile({ providers }: { providers: ProfileData }) {
     const storedPendingEmail = window.localStorage.getItem(
       "profile_pending_email_change",
     );
+    const callbackUrl = new URL(window.location.href);
+    const callbackError = callbackUrl.searchParams.get("error");
+    if (
+      callbackError === "INVALID_TOKEN" ||
+      callbackError === "TOKEN_EXPIRED"
+    ) {
+      callbackUrl.searchParams.delete("error");
+      window.history.replaceState(window.history.state, "", callbackUrl);
+      window.localStorage.removeItem("profile_pending_email_change");
+      setPendingEmailChange("");
+      setNewEmail(
+        storedPendingEmail?.toLowerCase() === providers.email.toLowerCase()
+          ? ""
+          : (storedPendingEmail ?? ""),
+      );
+      setEmailState("error");
+      setEmailError(
+        "This confirmation link is invalid or expired. Request a new email change to try again.",
+      );
+      setIsEditingEmail(true);
+      return;
+    }
     if (!storedPendingEmail) return;
 
     if (storedPendingEmail.toLowerCase() === providers.email.toLowerCase()) {
