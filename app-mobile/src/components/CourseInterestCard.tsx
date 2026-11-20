@@ -1,8 +1,8 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, useQuery } from "convex/react";
 import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { api } from "../api";
-import { getString, setString } from "../storage";
 import { useTheme } from "../theme";
 import { Button } from "./Button";
 import { Text } from "./Text";
@@ -10,22 +10,25 @@ import { Text } from "./Text";
 const source =
   Platform.OS === "ios" || Platform.OS === "android" ? Platform.OS : "web";
 
-const pendingIds = new Map<string, Promise<string>>();
+const anonymousIds = new Map<string, Promise<string>>();
 
 function getAnonymousId(courseShort: string) {
-  const pending = pendingIds.get(courseShort);
-  if (pending) return pending;
+  const cached = anonymousIds.get(courseShort);
+  if (cached) return cached;
 
   const key = `courseInterestSupporter:${courseShort}`;
-  const load = getString(key)
+  const load = AsyncStorage.getItem(key)
     .then(async (existing) => {
       if (existing) return existing;
       const id = `mobile_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
-      await setString(key, id);
+      await AsyncStorage.setItem(key, id);
       return id;
     })
-    .finally(() => pendingIds.delete(courseShort));
-  pendingIds.set(courseShort, load);
+    .catch((error: unknown) => {
+      anonymousIds.delete(courseShort);
+      throw error;
+    });
+  anonymousIds.set(courseShort, load);
   return load;
 }
 
@@ -38,6 +41,7 @@ export function CourseInterestCard({
 }) {
   const { colors } = useTheme();
   const [anonymousId, setAnonymousId] = React.useState<string>();
+  const [idLoadFailed, setIdLoadFailed] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState(false);
   const setInterest = useMutation(api.courseInterest.setForLearner);
@@ -46,9 +50,33 @@ export function CourseInterestCard({
     anonymousId ? { courseShort, anonymousId } : "skip",
   );
 
-  React.useEffect(() => {
-    void getAnonymousId(courseShort).then(setAnonymousId);
+  const loadAnonymousId = React.useCallback(async () => {
+    setIdLoadFailed(false);
+    try {
+      setAnonymousId(await getAnonymousId(courseShort));
+    } catch {
+      setIdLoadFailed(true);
+    }
   }, [courseShort]);
+
+  React.useEffect(() => {
+    void loadAnonymousId();
+  }, [loadAnonymousId]);
+
+  const cardStyle = [
+    styles.card,
+    { backgroundColor: colors.surface, borderColor: colors.green },
+  ];
+  if (idLoadFailed) {
+    return (
+      <View style={cardStyle}>
+        <Text accessibilityRole="alert" style={styles.body}>
+          Couldn’t load your story request.
+        </Text>
+        <Button title="Try again" onPress={loadAnonymousId} />
+      </View>
+    );
+  }
 
   if (!interest || !anonymousId) return null;
 
@@ -71,12 +99,7 @@ export function CourseInterestCard({
   }
 
   return (
-    <View
-      style={[
-        styles.card,
-        { backgroundColor: colors.surface, borderColor: colors.green },
-      ]}
-    >
+    <View style={cardStyle}>
       <Text accessibilityRole="header" style={styles.title}>
         {interest.interested
           ? "Thanks for showing your interest!"
