@@ -163,10 +163,6 @@ export default function ProfileTab() {
                 {user.name ?? user.username ?? "Signed in"}
               </Text>
               {user.email && <Text style={styles.cardBody}>{user.email}</Text>}
-              <Text style={styles.cardBody}>
-                You're signed in on this device. Cloud progress sync is coming
-                next; local progress is still shown below.
-              </Text>
               <View style={styles.cardActions}>
                 <Button
                   title="Sign out"
@@ -296,7 +292,9 @@ export default function ProfileTab() {
           />
         </View>
 
-        <Text style={styles.sectionTitle}>Progress on this device</Text>
+        <Text style={styles.sectionTitle}>
+          {serverProgress ? "Account progress" : "Progress on this device"}
+        </Text>
         {progressEntries.length === 0 ? (
           <Text style={styles.cardBody}>No stories completed yet.</Text>
         ) : (
