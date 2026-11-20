@@ -28,6 +28,7 @@ import {
   type StoryListItem,
 } from "../../src/components/StoryButton";
 import { Button } from "../../src/components/Button";
+import { CourseInterestCard } from "../../src/components/CourseInterestCard";
 import { OfflineNotice } from "../../src/components/OfflineNotice";
 import { Text } from "../../src/components/Text";
 import { type ThemeColors, useTheme } from "../../src/theme";
@@ -315,6 +316,15 @@ export default function LearnTab() {
             <View style={styles.offlineWrap}>
               <OfflineNotice detail="Connect to the internet to open stories." />
             </View>
+          ) : undefined
+        }
+        ListFooterComponent={
+          courseShort && !isOffline ? (
+            <CourseInterestCard
+              key={courseShort}
+              courseShort={courseShort}
+              languageName={course.name}
+            />
           ) : undefined
         }
         initialNumToRender={3}

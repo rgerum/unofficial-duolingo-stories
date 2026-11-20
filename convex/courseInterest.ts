@@ -6,6 +6,7 @@ import {
   type QueryCtx,
   query,
 } from "./_generated/server";
+import { courseInterestSource } from "./courseInterestSource";
 import {
   getSessionLegacyUserId,
   requireContributorOrAdmin,
@@ -282,6 +283,7 @@ export const setForLearner = mutation({
     courseShort: v.string(),
     anonymousId: v.string(),
     interested: v.boolean(),
+    source: v.optional(courseInterestSource),
   },
   returns: v.object({
     interested: v.boolean(),
@@ -371,6 +373,7 @@ export const setForLearner = mutation({
         completedAllAvailableStoriesAt: completedAllAvailableStories
           ? now
           : undefined,
+        source: args.source ?? "web",
         createdAt: now,
       });
     }

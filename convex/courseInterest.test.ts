@@ -263,7 +263,7 @@ describe("course interest", () => {
     ).toMatchObject({ completedAllCount: 1 });
   });
 
-  test("merges a browser signal into the signed-in learner", async () => {
+  test("preserves the mobile source when merging into the signed-in learner", async () => {
     const t = createConvexTest();
     await seedCourse(t);
     const args = {
@@ -271,7 +271,10 @@ describe("course interest", () => {
       anonymousId: "browser_supporter_123456",
       interested: true,
     };
-    await t.mutation(api.courseInterest.setForLearner, args);
+    await t.mutation(api.courseInterest.setForLearner, {
+      ...args,
+      source: "ios",
+    });
 
     const learner = t.withIdentity({ userId: "7", role: "user" });
     expect(
@@ -285,7 +288,7 @@ describe("course interest", () => {
       return await ctx.db.query("course_interest_signals").collect();
     });
     expect(signals).toHaveLength(1);
-    expect(signals[0]?.supporterKey).toBe("user:7");
+    expect(signals[0]).toMatchObject({ supporterKey: "user:7", source: "ios" });
   });
 
   test("separates browser and authenticated evidence", async () => {
