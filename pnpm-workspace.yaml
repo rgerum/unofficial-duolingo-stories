@@ -50,8 +50,13 @@ minimumReleaseAgeExclude:
   - posthog-js@1.418.10
   - posthog-node@5.50.0
   - shadcn@4.19.0
-overrides:
-  # @better-auth/expo's peer on @better-auth/core otherwise auto-installs the
-  # latest (1.7.x); keep it on better-auth's version (@convex-dev/better-auth
-  # requires better-auth <1.7).
-  "@better-auth/expo>@better-auth/core": 1.6.33
+  - '@convex-dev/better-auth@0.13.1'
+  - '@better-auth/core@1.7.27'
+  - '@better-auth/drizzle-adapter@1.7.27'
+  - '@better-auth/expo@1.7.27'
+  - '@better-auth/kysely-adapter@1.7.27'
+  - '@better-auth/memory-adapter@1.7.27'
+  - '@better-auth/mongo-adapter@1.7.27'
+  - '@better-auth/prisma-adapter@1.7.27'
+  - '@better-auth/telemetry@1.7.27'
+  - better-auth@1.7.27
