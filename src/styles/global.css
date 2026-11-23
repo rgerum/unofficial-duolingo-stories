@@ -532,64 +532,42 @@ body[data-theme="light"] {
   --ring: var(--button-blue-background);
 }
 
-body[data-theme="dark"] .ͼ2 .cm-gutters {
+body[data-theme="dark"] .cm-story-editor {
+  --story-syntax-blue: #a3ccff;
+  --story-syntax-green: #00ff3c;
+  --story-syntax-purple: #d18be8;
+  --story-syntax-coral: #f08a92;
+  --story-syntax-muted: #a3adbb;
+  --story-syntax-choice-blue: #00389d;
+  --story-syntax-choice-green: #005020;
+  --story-syntax-emphasis-opacity: 1;
+  --story-syntax-underline: white;
+  --story-syntax-todo-text: #131f22;
+  --story-syntax-comment-background: transparent;
+  --story-syntax-comment-underline: none;
+}
+
+body[data-theme="dark"] .cm-story-editor .cm-gutters {
   border-right: 1px solid #253b41;
   background-color: #334046;
 }
 
-body[data-theme="dark"] .ͼ2 .cm-activeLineGutter {
-  background-color: #44575d;
+body[data-theme="dark"] .cm-story-editor .cm-activeLine {
+  /* Composites to #243238 over the editor background and leaves selections visible. */
+  background-color: rgb(87 107 122 / 25%);
 }
 
-body[data-theme="dark"] .ͼq {
-  color: #00ff3c;
+body[data-theme="dark"] .cm-story-editor .cm-activeLineGutter {
+  background-color: #243238;
 }
 
-body[data-theme="dark"] .ͼo {
-  color: #00ff3c;
-  opacity: 0.7;
-}
-
-body[data-theme="dark"] .ͼs {
-  color: #00ff3c;
-  opacity: 0.6;
-  border-bottom: 2px solid white;
-}
-
-body[data-theme="dark"] .ͼx {
-  color: #007b1d;
-  border-bottom: 2px solid white;
-  background: #c8c8c8;
-  border-radius: 10px;
-  opacity: 0.6;
-}
-
-body[data-theme="dark"] .ͼu {
-  opacity: 0.6;
-  border-bottom: 2px solid white;
-}
-
-body[data-theme="dark"] .ͼr {
-  color: #015cff;
-}
-
-body[data-theme="dark"] .ͼp {
-  color: #015cff;
-  opacity: 0.7;
-}
-
-body[data-theme="dark"] .ͼt {
-  color: #005bff;
-  opacity: 0.6;
-  border-bottom: 2px solid white;
-}
-
-body[data-theme="dark"] .ͼy {
-  color: #005cff;
-  border-bottom: 2px solid white;
-  background: #c1c1c1;
-  border-radius: 10px;
-  opacity: 0.6;
+body[data-theme="dark"] .cm-story-editor .cm-selectionBackground,
+body[data-theme="dark"]
+  .cm-story-editor.cm-focused
+  > .cm-scroller
+  > .cm-selectionLayer
+  .cm-selectionBackground {
+  background-color: #3a4b5e;
 }
 
 body[data-theme="dark"] {

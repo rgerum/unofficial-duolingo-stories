@@ -447,6 +447,7 @@ export default function EditorV2({
         sync,
         example(),
         highlightStyle,
+        EditorView.editorAttributes.of({ class: "cm-story-editor" }),
         interleavedPreviewExtension,
         mobilePresentationCompartmentRef.current.of(
           isDesktopEditor() ? [] : mobileEditorPresentation,
