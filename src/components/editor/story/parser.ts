@@ -35,7 +35,7 @@ const STATE_ERROR = "deleted";
 const STATE_TODO = "annotation";
 
 const STATE_AUDIO = "color";
-const STATE_COMMENT = "comment"; //"t.strong";
+const STATE_COMMENT = "lineComment";
 
 const chalky = "#e5c07b",
   coral = "#e06c75",
@@ -56,8 +56,11 @@ const chalky = "#e5c07b",
     cursor = "#528bff"
  */
 
-const color_even = "#009623",
-  color_odd = "#00389d";
+const color_even = "var(--story-syntax-green, #009623)",
+  color_odd = "var(--story-syntax-blue, #00389d)",
+  choice_even = "var(--story-syntax-choice-green, #009623)",
+  choice_odd = "var(--story-syntax-choice-blue, #00389d)",
+  underline = "2px solid var(--story-syntax-underline, black)";
 
 import { HighlightStyle } from "@codemirror/language";
 import { tags } from "@lezer/highlight";
@@ -68,10 +71,15 @@ let myHighlightStyle = HighlightStyle.define([
     tag: tags.propertyName,
     color: color_even,
     fontStyle: "italic",
-    opacity: 0.5,
+    opacity: "var(--story-syntax-emphasis-opacity, 0.5)",
   },
   // STATE_TRANS_ODD
-  { tag: tags.macroName, color: color_odd, fontStyle: "italic", opacity: 0.5 },
+  {
+    tag: tags.macroName,
+    color: color_odd,
+    fontStyle: "italic",
+    opacity: "var(--story-syntax-emphasis-opacity, 0.5)",
+  },
   // STATE_TEXT_EVEN
   { tag: tags.tagName, color: color_even },
   // STATE_TEXT_ODD
@@ -81,30 +89,34 @@ let myHighlightStyle = HighlightStyle.define([
   {
     tag: tags.className,
     color: color_even,
-    opacity: 0.4,
-    borderBottom: "2px solid black",
-  }, // textDecoration: "underline",
+    opacity: "var(--story-syntax-emphasis-opacity, 0.4)",
+    borderBottom: underline,
+  },
   // STATE_TEXT_HIDE_ODD
   {
     tag: tags.typeName,
     color: color_odd,
-    opacity: 0.4,
-    borderBottom: "2px solid black",
+    opacity: "var(--story-syntax-emphasis-opacity, 0.4)",
+    borderBottom: underline,
   },
   // STATE_TEXT_HIDE_NEUTRAL
-  { tag: tags.changed, opacity: 0.4, borderBottom: "2px solid black" },
+  {
+    tag: tags.changed,
+    opacity: "var(--story-syntax-emphasis-opacity, 0.4)",
+    borderBottom: underline,
+  },
 
   // STATE_TEXT_BUTTON_EVEN
   {
     tag: tags.number,
-    color: color_even,
+    color: choice_even,
     background: "#c8c8c8",
     borderRadius: "10px",
   },
   // STATE_TEXT_BUTTON_ODD
   {
     tag: tags.labelName,
-    color: color_odd,
+    color: choice_odd,
     background: "#c8c8c8",
     borderRadius: "10px",
   },
@@ -112,20 +124,20 @@ let myHighlightStyle = HighlightStyle.define([
   // STATE_TEXT_HIDE_BUTTON_EVEN
   {
     tag: tags.meta,
-    color: color_even,
-    borderBottom: "2px solid black",
+    color: choice_even,
+    borderBottom: underline,
     background: "#c8c8c8",
     borderRadius: "10px",
-    opacity: 0.4,
+    opacity: "var(--story-syntax-emphasis-opacity, 0.4)",
   },
   // STATE_TEXT_HIDE_BUTTON_ODD
   {
     tag: tags.comment,
-    color: color_odd,
-    borderBottom: "2px solid black",
+    color: choice_odd,
+    borderBottom: underline,
     background: "#c8c8c8",
     borderRadius: "10px",
-    opacity: 0.4,
+    opacity: "var(--story-syntax-emphasis-opacity, 0.4)",
   },
   // STATE_TEXT_BUTTON_RIGHT_EVEN
   {
@@ -135,12 +147,22 @@ let myHighlightStyle = HighlightStyle.define([
     borderRadius: "10px",
   },
 
+  // STATE_COMMENT
+  {
+    tag: tags.lineComment,
+    color: `var(--story-syntax-muted, ${choice_odd})`,
+    borderBottom: `var(--story-syntax-comment-underline, ${underline})`,
+    background: "var(--story-syntax-comment-background, #c8c8c8)",
+    borderRadius: "10px",
+    opacity: "var(--story-syntax-emphasis-opacity, 0.4)",
+  },
+
   // STATE_BLOCK_TYPE
-  { tag: tags.keyword, color: violet },
+  { tag: tags.keyword, color: `var(--story-syntax-purple, ${violet})` },
   // STATE_ERROR
   {
     tag: [tags.deleted, tags.character],
-    color: coral,
+    color: `var(--story-syntax-coral, ${coral})`,
     textDecoration: "line-through",
   },
   {
@@ -160,7 +182,7 @@ let myHighlightStyle = HighlightStyle.define([
   {
     tag: [tags.annotation, tags.self, tags.namespace],
     background: coral,
-    color: ivory,
+    color: `var(--story-syntax-todo-text, ${ivory})`,
   },
   {
     tag: [
@@ -177,7 +199,7 @@ let myHighlightStyle = HighlightStyle.define([
 
   {
     tag: tags.strong,
-    color: stone,
+    color: `var(--story-syntax-muted, ${stone})`,
   },
   {
     tag: tags.emphasis,
@@ -189,13 +211,13 @@ let myHighlightStyle = HighlightStyle.define([
   },
   {
     tag: tags.link,
-    color: stone,
+    color: `var(--story-syntax-muted, ${stone})`,
     textDecoration: "underline",
   },
   {
     tag: tags.heading,
     fontWeight: "bold",
-    color: coral,
+    color: `var(--story-syntax-coral, ${coral})`,
   },
   {
     tag: tags.atom,
