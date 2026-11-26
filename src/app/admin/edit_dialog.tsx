@@ -147,7 +147,7 @@ export function InputText({
   name: string;
   label: string;
   value: string;
-  setValue: (x: string) => void;
+  setValue?: (x: string) => void;
 }) {
   return (
     <Fieldset>
@@ -155,7 +155,8 @@ export function InputText({
       <Input
         id={label}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        readOnly={!setValue}
+        onChange={(e) => setValue?.(e.target.value)}
       />
     </Fieldset>
   );

@@ -5,6 +5,7 @@ import { Spinner } from "@/components/ui/spinner";
 import Flag from "@/components/ui/flag";
 import Input from "@/components/ui/input";
 import React, { useState } from "react";
+import { ConvexError } from "convex/values";
 import { useMutation } from "convex/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { api } from "@convex/_generated/api";
@@ -110,8 +111,12 @@ function EditLanguage({
         onShortcutClose?.();
       }
       updateLanguage(newData);
-    } catch {
-      setError("An error occurred. Please report in Discord.");
+    } catch (error) {
+      setError(
+        error instanceof ConvexError && typeof error.data === "string"
+          ? error.data
+          : "An error occurred. Please report in Discord.",
+      );
     }
   }
 
@@ -169,7 +174,7 @@ function EditLanguage({
         <div className="mt-6 flex flex-wrap justify-between gap-2">
           {error ? (
             <div className="rounded-lg bg-[var(--error-red)] p-2.5 text-white">
-              An error occurred.
+              {error}
             </div>
           ) : (
             <div></div>

@@ -14,6 +14,7 @@ import {
   adminTableContainerClass,
   adminTableHeadCellClass,
 } from "../adminTableStyles";
+import { ConvexError } from "convex/values";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 
@@ -161,7 +162,6 @@ function EditCourse({
   const createCourseMutation = useMutation(api.adminWrite.createAdminCourse);
   const updateCourseMutation = useMutation(api.adminWrite.updateAdminCourse);
 
-  const [short, setShort] = useState(obj.short || "");
   const [fromLanguage, setFromLanguage] = useState(obj.from_language || 0);
   const [learningLanguage, setLearningLanguage] = useState(
     obj.learning_language || 0,
@@ -234,9 +234,12 @@ function EditCourse({
         onShortcutClose?.();
       }
       updateCourse(new_data);
-    } catch (e) {
-      //console.log("error", e);
-      setError("An error occurred. Please report in Discord.");
+    } catch (error) {
+      setError(
+        error instanceof ConvexError && typeof error.data === "string"
+          ? error.data
+          : "An error occurred. Please report in Discord.",
+      );
     }
   }
 
@@ -265,8 +268,11 @@ function EditCourse({
           <EditDialog.InputText
             name={"Short"}
             label={"short"}
-            value={short}
-            setValue={setShort}
+            value={
+              languages[learningLanguage] && languages[fromLanguage]
+                ? `${languages[learningLanguage].short.trim()}-${languages[fromLanguage].short.trim()}`
+                : ""
+            }
           />
           <InputLanguage
             name={"From language"}
