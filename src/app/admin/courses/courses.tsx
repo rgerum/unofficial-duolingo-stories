@@ -315,7 +315,7 @@ function EditCourse({
           <div className="mt-6 flex flex-wrap justify-between gap-2">
             {error ? (
               <div className="rounded-lg bg-[var(--error-red)] p-2.5 text-white">
-                An error occurred.
+                {error}
               </div>
             ) : (
               <div></div>
