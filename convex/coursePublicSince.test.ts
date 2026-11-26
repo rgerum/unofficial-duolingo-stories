@@ -173,7 +173,7 @@ describe("createAdminCourse publicSince", () => {
 
     const createdPrivate = await asAdmin(t).mutation(
       api.adminWrite.createAdminCourse,
-      { learning_language: 1, from_language: 2 },
+      { learning_language: 2, from_language: 1 },
     );
     expect(createdPrivate.publicSince).toBeUndefined();
     expect((await getCourse(t, createdPrivate.id)).publicSince).toBeUndefined();

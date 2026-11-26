@@ -1,7 +1,8 @@
+import type { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { internalMutation, type MutationCtx } from "./_generated/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { requireAdmin } from "./lib/authorization";
 import { hasNoAudioCourseTag } from "./lib/courseTags";
 import { schedulePublicationAnnouncement } from "./lib/discordAnnouncements";
@@ -12,6 +13,30 @@ import {
 } from "./lib/siteRevalidation";
 
 const CLEAR_NO_AUDIO_STORY_AUDIO_PROBLEM_BATCH_SIZE = 100;
+
+function normalizeLanguageShort(value: string) {
+  const short = value.trim();
+  if (!/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(short)) {
+    throw new ConvexError(
+      "Language Short must contain only ASCII letters and digits, with hyphens between parts.",
+    );
+  }
+  return short;
+}
+
+async function requireAvailableCourseShort(
+  ctx: MutationCtx,
+  short: string,
+  courseId?: Id<"courses">,
+) {
+  const matches = await ctx.db
+    .query("courses")
+    .withIndex("by_short", (q) => q.eq("short", short))
+    .take(2);
+  if (matches.some((course) => course._id !== courseId)) {
+    throw new ConvexError(`Course Short "${short}" is already in use.`);
+  }
+}
 
 function toLegacyLanguageResponse(row: {
   legacyId: number;
@@ -104,6 +129,7 @@ export const updateAdminLanguage = mutation({
   }),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    const short = normalizeLanguageShort(args.short);
     const language = await getLanguageByLegacyId(ctx, args.id);
 
     if (!language) {
@@ -114,11 +140,11 @@ export const updateAdminLanguage = mutation({
       args.operationKey ?? `language:${args.id}:admin_set:${Date.now()}`;
 
     await ctx.db.patch(language._id, {
-      name: args.name,
-      short: args.short,
+      name: args.name.trim(),
+      short,
       flag: args.flag,
-      flag_file: args.flag_file,
-      speaker: args.speaker,
+      flag_file: args.flag_file.trim(),
+      speaker: args.speaker.trim(),
       rtl: args.rtl,
       mirrorUpdatedAt: Date.now(),
       lastOperationKey: operationKey,
@@ -141,11 +167,11 @@ export const updateAdminLanguage = mutation({
 
     return toLegacyLanguageResponse({
       ...language,
-      name: args.name,
-      short: args.short,
+      name: args.name.trim(),
+      short,
       flag: args.flag,
-      flag_file: args.flag_file,
-      speaker: args.speaker,
+      flag_file: args.flag_file.trim(),
+      speaker: args.speaker.trim(),
       rtl: args.rtl,
     });
   },
@@ -175,17 +201,18 @@ export const createAdminLanguage = mutation({
   }),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    const short = normalizeLanguageShort(args.short);
     const legacyId = await getNextUnusedLegacyId(ctx, "languages");
     const operationKey =
       args.operationKey ?? `language:${legacyId}:admin_create:${Date.now()}`;
 
     await ctx.db.insert("languages", {
       legacyId,
-      name: args.name,
-      short: args.short,
+      name: args.name.trim(),
+      short,
       flag: args.flag,
-      flag_file: args.flag_file,
-      speaker: args.speaker,
+      flag_file: args.flag_file.trim(),
+      speaker: args.speaker.trim(),
       default_text: "",
       tts_replace: "",
       public: false,
@@ -196,11 +223,11 @@ export const createAdminLanguage = mutation({
 
     return {
       id: legacyId,
-      name: args.name,
-      short: args.short,
+      name: args.name.trim(),
+      short,
       flag: args.flag,
-      flag_file: args.flag_file,
-      speaker: args.speaker,
+      flag_file: args.flag_file.trim(),
+      speaker: args.speaker.trim(),
       default_text: "",
       tts_replace: "",
       public: false,
@@ -250,14 +277,15 @@ export const updateAdminCourse = mutation({
       throw new Error("Course languages not found");
     }
 
-    const short = `${learningLanguage.short}-${fromLanguage.short}`;
+    const short = `${normalizeLanguageShort(learningLanguage.short)}-${normalizeLanguageShort(fromLanguage.short)}`;
+    await requireAvailableCourseShort(ctx, short, course._id);
     const operationKey =
       args.operationKey ?? `course:${args.id}:admin_set:${Date.now()}`;
     const nextPublic = args.public ?? course.public;
-    const nextName = args.name ?? course.name ?? null;
+    const nextName = args.name?.trim() ?? course.name ?? null;
     const nextConlang = args.conlang ?? course.conlang ?? false;
     const nextTags = args.tags ?? course.tags ?? [];
-    const nextAbout = args.about ?? course.about ?? null;
+    const nextAbout = args.about?.trim() ?? course.about ?? null;
 
     const patchData: {
       learningLanguageId: typeof learningLanguage._id;
@@ -425,13 +453,14 @@ export const createAdminCourse = mutation({
     }
 
     const legacyId = await getNextUnusedLegacyId(ctx, "courses");
-    const short = `${learningLanguage.short}-${fromLanguage.short}`;
+    const short = `${normalizeLanguageShort(learningLanguage.short)}-${normalizeLanguageShort(fromLanguage.short)}`;
+    await requireAvailableCourseShort(ctx, short);
     const nextPublic = args.public ?? false;
     const nextOfficial = args.official ?? 0;
-    const nextName = args.name ?? null;
+    const nextName = args.name?.trim() ?? null;
     const nextConlang = args.conlang ?? false;
     const nextTags = args.tags ?? [];
-    const nextAbout = args.about ?? null;
+    const nextAbout = args.about?.trim() ?? null;
     const operationKey =
       args.operationKey ?? `course:${legacyId}:admin_create:${Date.now()}`;
 
