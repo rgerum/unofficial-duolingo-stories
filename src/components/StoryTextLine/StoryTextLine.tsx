@@ -49,12 +49,11 @@ function StoryTextLine({
     editorBlock: element.editor,
   };
   const { onClick } = getEditorHandlers(editorProps);
-  const [audioRange, playAudio, ref, url] = useAudio(
-    element,
-    active,
-    settings.show_audio,
-  );
+  const [audioRange, playAudio, ref, url, playWordAudio, playingWordRange] =
+    useAudio(element, active, settings.show_audio);
   const effectiveAudioRange = audioRangeOverride ?? audioRange;
+  const onWordClick =
+    !hideAudioButton && settings.show_audio ? playWordAudio : undefined;
   const isRtl = getStoryLineDirection({
     storyRtl: settings.rtl,
     lineLang: element.lang,
@@ -124,6 +123,8 @@ function StoryTextLine({
             hideRangesForChallenge={hideRangesForChallenge}
             content={element.line.content}
             editorState={editorState}
+            onWordClick={onWordClick}
+            playingWordRange={playingWordRange}
           />
         </span>
       </div>
@@ -165,6 +166,8 @@ function StoryTextLine({
             unhide={unhide}
             content={element.line.content}
             editorState={editorState}
+            onWordClick={onWordClick}
+            playingWordRange={playingWordRange}
           />
           {showEditorAudioDetails &&
             element.line.content.audio &&
@@ -204,6 +207,8 @@ function StoryTextLine({
             unhide={unhide}
             content={element.line.content}
             editorState={editorState}
+            onWordClick={onWordClick}
+            playingWordRange={playingWordRange}
           />
           {showEditorAudioDetails &&
             element.line.content.audio &&
