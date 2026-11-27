@@ -53,8 +53,8 @@ export default function ResetPassword() {
 
   async function resetPassword() {
     if (!token) return;
-    if (passwordInput.length < 6) {
-      setError("Password must be at least 6 characters long.");
+    if (passwordInput.length < 8) {
+      setError("Password must be at least 8 characters long.");
       setState(-1);
       return;
     }
@@ -71,16 +71,6 @@ export default function ResetPassword() {
     setState(2);
     setMessage("Your password has been changed. You can now log in.");
   }
-  const handleKeypressSignup = (e: React.KeyboardEvent) => {
-    // listens for enter key
-    if (e.keyCode === 13) {
-      if (token) {
-        resetPassword();
-      } else {
-        requestReset();
-      }
-    }
-  };
 
   return (
     <>
@@ -112,17 +102,15 @@ export default function ResetPassword() {
               data-cy="password"
               value={passwordInput}
               onChange={passwordInputSetValue}
-              onKeyDown={handleKeypressSignup}
               type="password"
               placeholder="Password"
-              minLength={6}
+              minLength={8}
             />
           ) : (
             <Input
               data-cy="email"
               value={emailInput}
               onChange={emailInputSetValue}
-              onKeyDown={handleKeypressSignup}
               type="email"
               name="email"
               placeholder="Email"

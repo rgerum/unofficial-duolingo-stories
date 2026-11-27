@@ -40,8 +40,8 @@ export default function Register() {
       return false;
     }
 
-    if (passwordInput.length < 6) {
-      setError("Password must be at least 6 characters long.");
+    if (passwordInput.length < 8) {
+      setError("Password must be at least 8 characters long.");
       return false;
     }
 
@@ -128,8 +128,8 @@ export default function Register() {
             type="password"
             placeholder="Password"
             required
-            minLength={6}
-            title="Password must be at least 6 characters long."
+            minLength={8}
+            title="Password must be at least 8 characters long."
           />
           <Button data-cy="submit" variant="primary">
             {state !== 1 ? "Sign up" : "..."}
