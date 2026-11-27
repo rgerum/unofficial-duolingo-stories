@@ -4,7 +4,10 @@ import React from "react";
 import { useMutation } from "convex/react";
 import { MessageCircle } from "lucide-react";
 import StoryTextLine from "@/components/StoryTextLine";
-import Button from "@/components/ui/button";
+import Button, {
+  buttonInnerClassName,
+  buttonRootClassName,
+} from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -15,6 +18,12 @@ import {
 } from "@/components/ui/dialog";
 import type { StorySettings } from "@/components/StoryProgress";
 import type { StoryElementLine } from "@/components/editor/story/syntax_parser_types";
+import { Field, FieldLabel } from "@ui-sdk/react/field";
+import {
+  SegmentedControl,
+  SegmentedControlItem,
+} from "@ui-sdk/react/segmented-control";
+import { Textarea } from "@ui-sdk/react/textarea";
 import { api } from "@convex/_generated/api";
 import { cn } from "@/lib/utils";
 import {
@@ -36,7 +45,7 @@ type StoryFeedbackProps = {
 
 const feedbackCategories = [
   { label: "Text", value: "Text" },
-  { label: "Translation", value: "Translation hints" },
+  { label: "Translation hints", value: "Translation hints" },
   { label: "Audio", value: "Audio" },
   { label: "Other", value: "Other" },
 ] as const;
@@ -85,20 +94,17 @@ export default function StoryFeedback({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "inline-flex h-12 items-center gap-2 rounded-full border-2 border-[color:color-mix(in_srgb,var(--link-blue)_34%,var(--overview-hr))] bg-[var(--body-background)] px-4 text-[0.92rem] font-bold text-[var(--text-color)] no-underline shadow-[0_4px_12px_color-mix(in_srgb,#000_12%,transparent)] transition-[background-color,border-color,color,transform,opacity] duration-100 hover:-translate-y-0.5 hover:border-[color:color-mix(in_srgb,var(--link-blue)_58%,var(--overview-hr))] hover:bg-[color:color-mix(in_srgb,var(--link-blue)_10%,var(--body-background))] hover:text-[var(--text-color)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[color:color-mix(in_srgb,var(--ring)_35%,transparent)]",
-            hidden && "pointer-events-none opacity-0",
-            className,
-          )}
-          aria-label="Give feedback about this story"
-          title="Give feedback"
-        >
-          <MessageCircle aria-hidden="true" className="h-6 w-6" />
-          <span>Feedback</span>
-        </button>
+      <DialogTrigger
+        className={cn(
+          "inline-flex h-12 items-center gap-2 rounded-full border-2 border-[color:color-mix(in_srgb,var(--link-blue)_34%,var(--overview-hr))] bg-[var(--body-background)] px-4 text-[0.92rem] font-bold text-[var(--text-color)] no-underline shadow-[0_4px_12px_color-mix(in_srgb,#000_12%,transparent)] transition-[background-color,border-color,color,transform,opacity] duration-100 hover:-translate-y-0.5 hover:border-[color:color-mix(in_srgb,var(--link-blue)_58%,var(--overview-hr))] hover:bg-[color:color-mix(in_srgb,var(--link-blue)_10%,var(--body-background))] hover:text-[var(--text-color)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[color:color-mix(in_srgb,var(--ring)_35%,transparent)]",
+          hidden && "pointer-events-none opacity-0",
+          className,
+        )}
+        aria-label="Give feedback about this story"
+        title="Give feedback"
+      >
+        <MessageCircle aria-hidden="true" className="h-6 w-6" />
+        <span>Feedback</span>
       </DialogTrigger>
       <DialogContent className="max-w-[640px] overflow-x-hidden rounded-[18px] bg-[var(--body-background)] text-[var(--text-color)] sm:max-w-[640px]">
         <DialogTitle className="text-[1.2rem] font-bold">
@@ -156,46 +162,43 @@ export default function StoryFeedback({
             }
           }}
         >
-          <div className="grid gap-2">
-            <div className="text-[0.92rem] font-bold">Category</div>
-            <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4">
-              {feedbackCategories.map((option) => {
-                const selected = category === option.value;
+          <Field className="grid gap-2" disabled={formLocked}>
+            <FieldLabel className="text-[0.92rem] font-bold">
+              Category
+            </FieldLabel>
+            <SegmentedControl
+              value={category}
+              onValueChange={(value) => {
+                if (value) setCategory(value as FeedbackCategory);
+              }}
+              className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4"
+            >
+              {feedbackCategories.map((option) => (
+                <SegmentedControlItem
+                  key={option.value}
+                  value={option.value}
+                  className="min-h-11 min-w-0 rounded-[13px] border-2 border-[var(--overview-hr)] bg-[var(--body-background)] px-2 py-2 text-[0.82rem] font-bold whitespace-nowrap text-[var(--text-color)] transition-[background-color,border-color,color] duration-100 hover:border-[color:color-mix(in_srgb,var(--link-blue)_35%,var(--overview-hr))] hover:bg-[color:color-mix(in_srgb,var(--link-blue)_8%,var(--body-background))] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[color:color-mix(in_srgb,var(--ring)_35%,transparent)] disabled:cursor-not-allowed disabled:opacity-60 data-checked:border-[var(--button-blue-border)] data-checked:bg-[var(--button-blue-background)] data-checked:text-[var(--button-blue-color)] sm:px-3 sm:text-[0.86rem]"
+                >
+                  {option.label}
+                </SegmentedControlItem>
+              ))}
+            </SegmentedControl>
+          </Field>
 
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    aria-pressed={selected}
-                    disabled={formLocked}
-                    onClick={() => setCategory(option.value)}
-                    className={cn(
-                      "min-h-11 min-w-0 rounded-[13px] border-2 px-2 py-2 text-[0.82rem] font-bold whitespace-nowrap transition-[background-color,border-color,color,transform] duration-100 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[color:color-mix(in_srgb,var(--ring)_35%,transparent)] sm:px-3 sm:text-[0.86rem]",
-                      selected
-                        ? "border-[var(--button-blue-border)] bg-[var(--button-blue-background)] text-[var(--button-blue-color)]"
-                        : "border-[var(--overview-hr)] bg-[var(--body-background)] text-[var(--text-color)] hover:border-[color:color-mix(in_srgb,var(--link-blue)_35%,var(--overview-hr))] hover:bg-[color:color-mix(in_srgb,var(--link-blue)_8%,var(--body-background))]",
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <label className="grid gap-2 text-[0.92rem] font-bold">
-            Comment
-            <textarea
+          <Field className="grid gap-2" disabled={formLocked}>
+            <FieldLabel className="text-[0.92rem] font-bold">
+              Comment
+            </FieldLabel>
+            <Textarea
               value={comment}
-              onChange={(event) => setComment(event.target.value)}
+              onValueChange={(value) => setComment(value)}
               rows={5}
               maxLength={2000}
               required
-              disabled={formLocked}
               className="w-full resize-y rounded-[14px] border-2 border-[var(--input-border)] bg-[var(--input-background)] px-4 py-3 text-[1rem] font-normal leading-6 text-[var(--text-color)] outline-none focus:border-[color:color-mix(in_srgb,var(--link-blue)_45%,var(--input-border))]"
               placeholder="What should be fixed?"
             />
-          </label>
+          </Field>
 
           {submitError ? (
             <div
@@ -212,10 +215,21 @@ export default function StoryFeedback({
           ) : null}
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <DialogClose asChild>
-              <Button type="button" variant="secondary" disabled={isSubmitting}>
+            <DialogClose
+              disabled={isSubmitting}
+              className={buttonRootClassName({
+                disabled: isSubmitting,
+                variant: "secondary",
+              })}
+            >
+              <span
+                className={buttonInnerClassName({
+                  disabled: isSubmitting,
+                  variant: "secondary",
+                })}
+              >
                 {isSubmitted ? "Done" : terminalRejection ? "Close" : "Cancel"}
-              </Button>
+              </span>
             </DialogClose>
             {!isSubmitted && !terminalRejection ? (
               <Button

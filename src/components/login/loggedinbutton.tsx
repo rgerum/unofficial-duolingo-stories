@@ -8,12 +8,12 @@ import { authClient } from "@/lib/auth-client";
 import { isAdmin, isContributor } from "@/lib/userInterface";
 import { resetPostHogUser } from "@/lib/posthog-user";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/shadcn";
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuSeparator,
+  MenuTrigger,
+} from "@/components/ui/menu";
 
 function themeToLightOrDark(
   theme: string | null,
@@ -127,21 +127,16 @@ export function LoggedInButton({
     "w-full overflow-hidden text-left text-[var(--text-color)] no-underline [text-overflow:ellipsis] whitespace-nowrap";
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="flex h-[50px] w-[50px] min-w-[50px] items-center justify-center rounded-[30px] bg-[var(--profile-background)] p-0 text-center text-[28px] leading-none uppercase text-[var(--profile-text)] outline-none transition hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[var(--button-background)] focus-visible:ring-offset-2"
-          data-cy="user-button"
-          aria-label="Open user menu"
-          style={
-            user?.image ? { backgroundImage: `url('${user?.image}')` } : {}
-          }
-        >
-          {(user.name ?? "").substring(0, 1)}
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
+    <Menu>
+      <MenuTrigger
+        className="flex h-[50px] w-[50px] min-w-[50px] items-center justify-center rounded-[30px] bg-[var(--profile-background)] p-0 text-center text-[28px] leading-none uppercase text-[var(--profile-text)] outline-none transition hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[var(--button-background)] focus-visible:ring-offset-2"
+        data-cy="user-button"
+        aria-label="Open user menu"
+        style={user?.image ? { backgroundImage: `url('${user?.image}')` } : {}}
+      >
+        {(user.name ?? "").substring(0, 1)}
+      </MenuTrigger>
+      <MenuContent
         align="end"
         className="w-[180px] overflow-visible"
         sideOffset={10}
@@ -165,16 +160,18 @@ export function LoggedInButton({
             />
           </svg>
         </div>
-        <DropdownMenuItem asChild>
-          <Link
-            className={dropdownButtonClass}
-            href={"/profile"}
-            data-cy="user-profile"
-          >
-            Profile
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem
+        <MenuItem
+          render={
+            <Link
+              className={dropdownButtonClass}
+              href={"/profile"}
+              data-cy="user-profile"
+            />
+          }
+        >
+          Profile
+        </MenuItem>
+        <MenuItem
           className="button_dark_mode"
           data-cy="user-lightdark"
           onSelect={() => {
@@ -186,53 +183,61 @@ export function LoggedInButton({
             : controls.value === "dark"
               ? "Light Mode"
               : "Light/Dark"}
-        </DropdownMenuItem>
+        </MenuItem>
         {canContribute && page !== "stories" ? (
-          <DropdownMenuItem asChild>
-            <Link
-              className={dropdownButtonClass}
-              href={stories_link}
-              data-cy="user-stories"
-            >
-              Stories
-            </Link>
-          </DropdownMenuItem>
+          <MenuItem
+            render={
+              <Link
+                className={dropdownButtonClass}
+                href={stories_link}
+                data-cy="user-stories"
+              />
+            }
+          >
+            Stories
+          </MenuItem>
         ) : null}
         {canContribute && page !== "editor" ? (
-          <DropdownMenuItem asChild>
-            <Link
-              className={dropdownButtonClass}
-              href={editor_link}
-              data-cy="user-editor"
-            >
-              Editor
-            </Link>
-          </DropdownMenuItem>
+          <MenuItem
+            render={
+              <Link
+                className={dropdownButtonClass}
+                href={editor_link}
+                data-cy="user-editor"
+              />
+            }
+          >
+            Editor
+          </MenuItem>
         ) : null}
         {canContribute && page !== "docs" ? (
-          <DropdownMenuItem asChild>
-            <Link
-              className={dropdownButtonClass}
-              href={"/docs"}
-              data-cy="user-docs"
-            >
-              Docs
-            </Link>
-          </DropdownMenuItem>
+          <MenuItem
+            render={
+              <Link
+                className={dropdownButtonClass}
+                href={"/docs"}
+                data-cy="user-docs"
+              />
+            }
+          >
+            Docs
+          </MenuItem>
         ) : null}
         {isAdminUser && page !== "admin" ? (
-          <DropdownMenuItem asChild>
-            <Link
-              className={dropdownButtonClass}
-              href={"/admin"}
-              data-cy="user-admin"
-            >
-              Admin
-            </Link>
-          </DropdownMenuItem>
+          <MenuItem
+            render={
+              <Link
+                className={dropdownButtonClass}
+                href={"/admin"}
+                data-cy="user-admin"
+              />
+            }
+          >
+            Admin
+          </MenuItem>
         ) : null}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
+        <MenuSeparator />
+        <MenuItem
           data-cy="user-logout"
           onSelect={async () => {
             await authClient.signOut();
@@ -241,8 +246,8 @@ export function LoggedInButton({
           }}
         >
           Log out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </MenuItem>
+      </MenuContent>
+    </Menu>
   );
 }

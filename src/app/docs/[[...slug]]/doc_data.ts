@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import { cacheLife } from "next/cache";
+import { buildDocsSearchIndex } from "@/components/DocsSearch/docs_search_index";
 
 const basefolder = "public/docs";
 
@@ -46,4 +47,24 @@ export async function getDocsData() {
     group.pages = pages_new;
   }
   return data as DocData;
+}
+
+export async function getDocsSearchIndex() {
+  "use cache";
+  cacheLife("max");
+  const data = await getDocsData();
+  const pages = [];
+  for (const group of data.navigation) {
+    for (const page of group.pages) {
+      const d = await getPageData(page.slug);
+      pages.push({
+        slug: page.slug,
+        title: d.title,
+        description: d.description,
+        group: group.group,
+        body: d.body,
+      });
+    }
+  }
+  return buildDocsSearchIndex(pages);
 }

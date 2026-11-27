@@ -2,7 +2,11 @@ import DocsHeader from "@/components/DocsHeader";
 import DocsBreadCrumbNav from "@/components/DocsBreadCrumbNav";
 import DocsNavigation from "@/components/DocsNavigation";
 import React from "react";
-import { getDocsData, getPageData } from "./[[...slug]]/doc_data";
+import {
+  getDocsData,
+  getDocsSearchIndex,
+  getPageData,
+} from "./[[...slug]]/doc_data";
 import DocsNavigationBackdrop from "@/components/DocsNavigationBackdrop";
 import {
   docsMainContainerClass,
@@ -15,6 +19,7 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const data = await getDocsData();
+  const searchIndex = await getDocsSearchIndex();
 
   const path_titles: Record<string, { group: string; title: string }> = {};
   for (let group of data.navigation) {
@@ -30,7 +35,7 @@ export default async function Layout({
   return (
     <div className={docsRootClass} id="container">
       <DocsNavigationBackdrop>
-        <DocsHeader />
+        <DocsHeader searchIndex={searchIndex} />
         <DocsBreadCrumbNav path_titles={path_titles} />
 
         <div className={docsMainContainerClass}>

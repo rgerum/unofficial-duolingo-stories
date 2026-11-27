@@ -11,7 +11,7 @@ import MobileEditorHeader, {
 } from "@/app/editor/_components/mobile_editor_header";
 import StoryMobileHeaderIllustration from "@/app/editor/_components/story_mobile_header_illustration";
 import MobileEditorOptionsSheet from "@/app/editor/_components/mobile_editor_options_sheet";
-import { SheetClose } from "@/components/ui/sheet";
+import { SheetClose } from "@/app/editor/_components/radix_sheet";
 import { SwitchVisual } from "@/components/ui/switch";
 import EditorButton from "../../editor_button";
 import { EditorHeaderActions } from "../../_components/header_context";

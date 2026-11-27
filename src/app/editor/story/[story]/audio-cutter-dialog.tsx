@@ -26,7 +26,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/app/editor/_components/radix_dialog";
 import type { AudioMark } from "@/app/audio/_lib/audio/types";
 import { renderTranscriptContent } from "@/app/editor/story/[story]/audio-cutter-transcript-text";
 import type {

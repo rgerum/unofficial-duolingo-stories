@@ -26,7 +26,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/app/editor/_components/radix_dialog";
 import PlayAudio from "@/components/PlayAudio";
 import { cn } from "@/lib/utils";
 import StoryLineHints from "@/components/StoryLineHints";
