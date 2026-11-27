@@ -18,21 +18,19 @@ export function Content({ children }: { children: React.ReactNode }) {
     <DialogContent showCloseButton={false}>
       <div className="relative overflow-x-hidden p-6 max-[700px]:p-4">
         {children}
-        <DialogClose asChild>
-          <button
-            aria-label="Close"
-            className="absolute right-0 top-0 m-2 grid place-content-center rounded-full bg-transparent p-2"
-          >
-            <span
-              aria-hidden="true"
-              className="inline-block h-[18px] w-[18px] align-middle"
-              style={{
-                backgroundImage:
-                  "url(//d35aaqx5ub95lt.cloudfront.net/images/icon-sprite8.svg)",
-                backgroundPosition: "-373px -154px",
-              }}
-            />
-          </button>
+        <DialogClose
+          aria-label="Close"
+          className="absolute right-0 top-0 m-2 grid place-content-center rounded-full bg-transparent p-2"
+        >
+          <span
+            aria-hidden="true"
+            className="inline-block h-[18px] w-[18px] align-middle"
+            style={{
+              backgroundImage:
+                "url(//d35aaqx5ub95lt.cloudfront.net/images/icon-sprite8.svg)",
+              backgroundPosition: "-373px -154px",
+            }}
+          />
         </DialogClose>
       </div>
     </DialogContent>

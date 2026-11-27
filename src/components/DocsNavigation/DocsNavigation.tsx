@@ -4,11 +4,11 @@ import Link from "next/link";
 import { showNavContext } from "../DocsNavigationBackdrop";
 import { useSelectedLayoutSegment } from "next/navigation";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import {
   docsDesktopNavigationClass,
   docsDesktopNavigationInnerClass,
@@ -38,15 +38,16 @@ function DocsNavigation({
         </div>
       </div>
 
-      <Sheet open={show} onOpenChange={setShow}>
-        <SheetContent
-          side="left"
-          className="w-[min(18rem,calc(100vw-1.5rem))] p-0"
-          aria-describedby={undefined}
-        >
-          <SheetHeader>
-            <SheetTitle>Documentation navigation</SheetTitle>
-          </SheetHeader>
+      <Drawer
+        side="left"
+        open={show}
+        onOpenChange={(open) => setShow(open)}
+        preventEdgeSwipe
+      >
+        <DrawerContent className="gap-0 p-0 data-[side=left]:w-[min(18rem,calc(100vw-1.5rem))]">
+          <DrawerHeader>
+            <DrawerTitle>Documentation navigation</DrawerTitle>
+          </DrawerHeader>
           <div className={docsMobileNavigationInnerClass}>
             <NavigationContent
               data={data}
@@ -54,8 +55,8 @@ function DocsNavigation({
               setShow={setShow}
             />
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }

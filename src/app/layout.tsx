@@ -1,3 +1,4 @@
+import UiAgentBridge from "@/components/providers/UiAgentBridge";
 import React from "react";
 import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
@@ -41,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={nunito.variable}>
+    <html lang="en" className={nunito.variable} suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1cb0f6" />
@@ -53,6 +54,7 @@ export default function RootLayout({
       <body>
         <ConvexClientProvider>
           <PostHogUserIdentifier />
+          <UiAgentBridge />
           <NavigationModeProvider>{children}</NavigationModeProvider>
           {/*<AnalyticsTracker />*/}
         </ConvexClientProvider>

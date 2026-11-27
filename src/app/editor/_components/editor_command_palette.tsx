@@ -28,7 +28,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/app/editor/_components/radix_dialog";
 import Flag from "@/components/ui/flag";
 import Input from "@/components/ui/input";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";

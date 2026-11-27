@@ -3,7 +3,7 @@
 import { ChevronLeftIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { SheetClose } from "@/components/ui/sheet";
+import { SheetClose } from "@/app/editor/_components/radix_sheet";
 import { cn } from "@/lib/utils";
 import { EditorMobileHeader } from "@/app/editor/_components/header_context";
 

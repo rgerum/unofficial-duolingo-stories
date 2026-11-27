@@ -1,3 +1,5 @@
+/* UI SDK injects its behavior CSS into this layer; declaring it first lets our styles win. */
+@layer ui-sdk;
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";

@@ -22,15 +22,12 @@ export default function AdminDialogTrigger({
 }: AdminDialogTriggerProps) {
   return (
     <EditDialog.Root open={open} onOpenChange={onOpenChange}>
-      <EditDialog.Trigger asChild>
-        <button
-          className={buttonRootClassName({ className: "ml-auto" })}
-          type="button"
-        >
-          <span className={buttonInnerClassName({})}>
-            {isNew ? "Add" : "Edit"}
-          </span>
-        </button>
+      <EditDialog.Trigger
+        className={buttonRootClassName({ className: "ml-auto" })}
+      >
+        <span className={buttonInnerClassName({})}>
+          {isNew ? "Add" : "Edit"}
+        </span>
       </EditDialog.Trigger>
       {children}
     </EditDialog.Root>

@@ -33,7 +33,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/app/editor/_components/radix_dialog";
 import { processStoryFile } from "@/components/editor/story/syntax_parser_new";
 import type {
   StoryElement,

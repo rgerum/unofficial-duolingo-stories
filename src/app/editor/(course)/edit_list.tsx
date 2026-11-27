@@ -698,19 +698,14 @@ function DropDownStatus(props: {
       >
         <DialogContent
           className="max-w-[420px] rounded-[8px] bg-[var(--body-background)] text-left whitespace-normal max-[639px]:inset-auto max-[639px]:top-1/2 max-[639px]:left-1/2 max-[639px]:max-h-[calc(100dvh-2rem)] max-[639px]:translate-x-[-50%] max-[639px]:translate-y-[-50%]"
-          onOpenAutoFocus={(event) => {
-            event.preventDefault();
-            approveButtonRef.current?.focus();
-          }}
+          initialFocus={() => approveButtonRef.current}
         >
           <DialogTitle className="text-lg font-bold text-[var(--text-color)]">
             Approve story?
           </DialogTitle>
-          <DialogDescription asChild>
-            <p className="text-base leading-relaxed text-[var(--text-color)]">
-              Did you check the story &quot;{props.name}&quot; and think it is
-              ready to be published?
-            </p>
+          <DialogDescription className="text-base leading-relaxed text-[var(--text-color)]">
+            Did you check the story &quot;{props.name}&quot; and think it is
+            ready to be published?
           </DialogDescription>
           <label className="flex cursor-pointer items-center gap-2 text-sm text-[var(--text-color)]">
             <input

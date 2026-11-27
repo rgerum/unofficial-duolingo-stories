@@ -1,7 +1,11 @@
 "use client";
 
+// Radix-based overlay kept for the story editor and its tools (CodeMirror,
+// audio cutter, command palette). The rest of the web app uses the UI SDK
+// wrappers in `@/components/ui`.
+
 import * as React from "react";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { Dialog as DialogPrimitive } from "radix-ui";
 import { XIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";

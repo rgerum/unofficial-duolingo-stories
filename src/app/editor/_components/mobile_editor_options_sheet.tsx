@@ -8,7 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
+} from "@/app/editor/_components/radix_sheet";
 
 export default function MobileEditorOptionsSheet({
   title,

@@ -69,22 +69,3 @@ export const docsAlertBoxClass = cn(
 export const docsChannelLinkClass =
   "rounded-[5px] bg-[#b5d9ff] px-1 py-0.5 font-mono no-underline hover:bg-[#89c3ff]";
 export const docsImageWrapperClass = "mx-[-32px] overflow-auto px-8 [&_p]:m-0";
-
-export const docsSearchOverlayClass =
-  "fixed inset-0 z-[16] hidden [backdrop-filter:blur(4px)_brightness(0.9)] data-[state=open]:block max-[640px]:bg-black/50 max-[640px]:[backdrop-filter:none]";
-export const docsSearchModalClass =
-  "[--docs-background:white] [--docs-border:#fbfbfb] [--docs-toc-hover:#f6f6f6] [--docs-toc-active:#eae9eb] fixed top-[15%] left-1/2 z-[100] hidden w-[640px] -translate-x-1/2 overflow-hidden rounded-[12px] bg-[var(--docs-background)] text-[16px] leading-[1.6] shadow-[0_0_0_1px_rgba(0,0,0,0.08),0px_1px_1px_rgba(0,0,0,0.02),0px_8px_16px_-4px_rgba(0,0,0,0.04),0px_24px_32px_-8px_rgba(0,0,0,0.06)] outline-none data-[state=open]:block max-[640px]:top-auto max-[640px]:bottom-0 max-[640px]:h-[80%] max-[640px]:w-full max-[640px]:translate-x-[-50%] max-[640px]:rounded-none";
-export const docsSearchTopRowClass =
-  "flex border-b-2 border-[var(--docs-border)] p-[10px]";
-export const docsSearchInputClass =
-  "w-full border-0 bg-transparent outline-none";
-export const docsSearchCloseButtonClass =
-  "rounded-[5px] border border-[var(--docs-border)] bg-[var(--docs-background)] px-[5px] py-[5px]";
-export const docsSearchResultsClass = "max-h-[400px] overflow-y-auto p-[10px]";
-export function docsSearchResultClass(type: "main" | "sub") {
-  return cn(
-    "block overflow-hidden rounded-[5px] px-[5px] py-[5px] text-ellipsis whitespace-nowrap no-underline hover:bg-[#f6f6f6]",
-    type === "main" && "font-bold",
-    type === "sub" && "pl-10",
-  );
-}
