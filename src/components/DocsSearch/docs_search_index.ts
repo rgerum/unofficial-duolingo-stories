@@ -39,8 +39,9 @@ export function markdownToText(markdown: string) {
       .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
       // JSX components like <Info> or <Image src=… />.
       .replace(/<\/?[A-Za-z][^>]*>/g, " ")
-      // Emphasis and inline code markers.
-      .replace(/[*_`~]+/g, "")
+      // Emphasis and inline code markers. Underscores stay: the docs use them
+      // in identifiers like POINT_TO_PHRASE, not for emphasis.
+      .replace(/[*`~]+/g, "")
       .replace(/\s+/g, " ")
       .trim()
   );

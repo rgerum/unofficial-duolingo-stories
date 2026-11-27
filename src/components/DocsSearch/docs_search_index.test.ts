@@ -102,3 +102,10 @@ test("matches words split between the page title and a heading", () => {
   const [result] = searchDocs(engines, "speech azure");
   assert.equal(result?.hits[0]?.section.heading, "Azure TTS");
 });
+
+test("keeps underscores in identifiers searchable", () => {
+  assert.equal(
+    markdownToText("Use `POINT_TO_PHRASE` here."),
+    "Use POINT_TO_PHRASE here.",
+  );
+});
