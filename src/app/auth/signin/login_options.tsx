@@ -80,11 +80,18 @@ export function LoginOptions(props: {
       );
     }
 
-    const { error } = await authClient.signIn.username({
-      username: usernameInput,
-      password: passwordInput,
-      callbackURL: callbackUrl,
-    });
+    const identifier = usernameInput.trim();
+    const { error } = identifier.includes("@")
+      ? await authClient.signIn.email({
+          email: identifier,
+          password: passwordInput,
+          callbackURL: callbackUrl,
+        })
+      : await authClient.signIn.username({
+          username: identifier,
+          password: passwordInput,
+          callbackURL: callbackUrl,
+        });
 
     if (error) {
       if (typeof window !== "undefined") {
@@ -118,7 +125,7 @@ export function LoginOptions(props: {
           onChange={usernameInputSetValue}
           type="text"
           name="username"
-          placeholder="Username"
+          placeholder="Username or email"
         />
         <Input
           data-cy="password"

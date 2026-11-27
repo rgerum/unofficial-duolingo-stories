@@ -49,6 +49,15 @@ const sendEmail = async ({
   }
 };
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function normalizeExpiresAt(value: number | Date | null | undefined) {
   if (typeof value === "number") return value;
   if (value instanceof Date) return value.getTime();
@@ -241,14 +250,17 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     emailAndPassword: {
       enabled: true,
       sendResetPassword: async ({ user, url }) => {
+        const username = (user as { username?: string | null }).username;
         await sendEmail({
           to: user.email,
           subject: "[Unofficial Duolingo Stories] Reset Password",
-          html: `Hey ${user.name ?? "there"},<br/>
+          html: `Hey ${escapeHtml(user.name ?? "there")},<br/>
             <br/>
             You have requested to reset your password for 'Unofficial Duolingo Stories'.<br/>
             Use the following link to reset your password.<br/>
             <a href='${url}'>Reset Password</a>
+            <br/><br/>
+            ${username ? `Your username is <b>${escapeHtml(username)}</b>. You can log in with your username or your email address.` : "You can log in with your email address."}
             <br/><br/>
             Happy learning.`,
         });
